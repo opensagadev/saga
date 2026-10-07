@@ -439,27 +439,31 @@ void Collection_CreateCustom(char *name, i16 *id_list, COLLECTION_s *collection,
     collection->count_y = 0;
 
     if (use_all_characters == 0) {
-        for (i32 index = 0; index < CollectCount; ++index) {
-            COLLECTID &source = CollectList[index];
-            const i32 id = source.id;
-            if (id < 0) {
-                continue;
+        if (CollectCount > 0) {
+            COLLECTID *const end = CollectList + CollectCount;
+            for (COLLECTID *current = CollectList; current != end; ++current) {
+                COLLECTID &source = *current;
+                const i32 id = source.id;
+                if (id < 0) {
+                    continue;
+                }
+                if (excluded_model_flags != 0 && (apicharsys->char_data[id].model_flags & excluded_model_flags) != 0) {
+                    continue;
+                }
+                if (require_buyable != 0 && source.can_buy == 0) {
+                    continue;
+                }
+                if (required_game_flags != 0 &&
+                    (GCDataList[id].flags_090 & required_game_flags) != required_game_flags) {
+                    continue;
+                }
+                if (required_model_flags != 0 &&
+                    (CDataList[id].model_flags & required_model_flags) != required_model_flags) {
+                    continue;
+                }
+                collection->list[collection->count_y] = source;
+                ++collection->count_y;
             }
-            if (excluded_model_flags != 0 && (apicharsys->char_data[id].model_flags & excluded_model_flags) != 0) {
-                continue;
-            }
-            if (require_buyable != 0 && source.can_buy == 0) {
-                continue;
-            }
-            if (required_game_flags != 0 && (GCDataList[id].flags_090 & required_game_flags) != required_game_flags) {
-                continue;
-            }
-            if (required_model_flags != 0 &&
-                (CDataList[id].model_flags & required_model_flags) != required_model_flags) {
-                continue;
-            }
-            collection->list[collection->count_y] = source;
-            ++collection->count_y;
         }
     } else {
         for (i32 id = 0; id < CHARCOUNT; ++id) {

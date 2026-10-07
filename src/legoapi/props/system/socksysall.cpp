@@ -561,15 +561,21 @@ static void SockMidpointAt(const SOCK *sock, i32 point, NUVEC *midpoint) {
 
 static SOCKROT *SockRailAngles(SOCK *sock, NUGSPLINE *spline, SOCKROT *rotations) {
     for (i32 point = 0; point < sock->cam->length; ++point, ++rotations) {
-        i32 previous = point - 1;
-        if (previous < 0)
-            previous = sock->cam->length - 1;
-        i32 next = point + 1;
-        if (next >= sock->cam->length)
-            next = 0;
+        i32 samples[3];
+        samples[0] = point - 1;
+        if (samples[0] < 0)
+            samples[0] = sock->cam->length - 1;
+        samples[1] = point;
+        samples[2] = point + 1;
+        if (samples[2] >= sock->cam->length)
+            samples[2] = 0;
         NUVEC previous_pos, position, next_pos;
         f32 midpoint_scale;
-        if (spline == NULL) {
+        if (spline != NULL) {
+            previous_pos = spline->pts[samples[0]];
+            position = spline->pts[samples[1]];
+            next_pos = spline->pts[samples[2]];
+        } else {
             // These three fixed samples are the reference's corner-average path,
             // not a lookup of sock->mid (the explicit spline argument selects that).
 #define SOCK_RAIL_CORNER_SAMPLE(out, index)                                                                            \
@@ -581,35 +587,33 @@ static SOCKROT *SockRailAngles(SOCK *sock, NUGSPLINE *spline, SOCKROT *rotations
     } else                                                                                                             \
         midpoint_scale = 0.5f;                                                                                         \
     NuVecScale(&(out), &(out), midpoint_scale)
-            SOCK_RAIL_CORNER_SAMPLE(previous_pos, previous);
-            SOCK_RAIL_CORNER_SAMPLE(position, point);
-            SOCK_RAIL_CORNER_SAMPLE(next_pos, next);
+            SOCK_RAIL_CORNER_SAMPLE(previous_pos, samples[0]);
+            SOCK_RAIL_CORNER_SAMPLE(position, samples[1]);
+            SOCK_RAIL_CORNER_SAMPLE(next_pos, samples[2]);
 #undef SOCK_RAIL_CORNER_SAMPLE
-        } else {
-            previous_pos = spline->pts[previous];
-            position = spline->pts[point];
-            next_pos = spline->pts[next];
         }
-        u16 x1 = 0, x0 = 0, y1 = 0, y0 = 0;
+        u16 x[2], y[2];
+        x[0] = x[1] = 0;
+        y[0] = y[1] = 0;
         i32 edge_count = 2;
         if (point == 0) {
             if (sock->looping == 0) {
-                SockEdgeAnglesXY(&position, &next_pos, &x0, &y0);
+                SockEdgeAnglesXY(&position, &next_pos, &x[0], &y[0]);
                 edge_count = 1;
             }
         } else if (point == sock->cam->length - 1 && sock->looping == 0) {
-            SockEdgeAnglesXY(&previous_pos, &position, &x0, &y0);
+            SockEdgeAnglesXY(&previous_pos, &position, &x[0], &y[0]);
             edge_count = 1;
         }
         if (edge_count == 2) {
-            SockEdgeAnglesXY(&previous_pos, &position, &x0, &y0);
-            SockEdgeAnglesXY(&position, &next_pos, &x1, &y1);
+            SockEdgeAnglesXY(&previous_pos, &position, &x[0], &y[0]);
+            SockEdgeAnglesXY(&position, &next_pos, &x[1], &y[1]);
         }
-        rotations->x = x0;
-        rotations->y = y0;
+        rotations->x = x[0];
+        rotations->y = y[0];
         if (edge_count > 1) {
-            rotations->x += RotDiff(x0, x1) / 2;
-            rotations->y += RotDiff(y0, y1) / 2;
+            rotations->x += RotDiff(x[0], x[1]) / 2;
+            rotations->y += RotDiff(y[0], y[1]) / 2;
         }
     }
     return rotations;
@@ -619,11 +623,24 @@ static f32 SplineLength(NUGSPLINE *spline, i32 closed) {
     if (spline == NULL || spline->length < 2) {
         return 0.0f;
     }
-    i32 segment_count = closed == 0 ? spline->length - 1 : spline->length;
+    i32 segment_count;
+    if (closed != 0)
+        segment_count = spline->length;
+    else
+        segment_count = spline->length - 1;
     f32 length = 0.0f;
+    NUVEC *previous = spline->pts;
     for (i32 segment = 0; segment < segment_count; ++segment) {
-        i32 next = segment == spline->length - 1 ? 0 : segment + 1;
-        length += NuVecDist(&spline->pts[segment], &spline->pts[next], NULL);
+        i32 next;
+        if (segment == spline->length - 1)
+            next = 0;
+        else
+            next = segment + 1;
+        NUVEC *point = &spline->pts[next];
+        NUVEC difference;
+        NuVecSub(&difference, point, previous);
+        length += NuVecMag(&difference);
+        previous = point;
     }
     return length;
 }
@@ -722,19 +739,21 @@ static void FillSockPosition(SOCKSYS *sock_sys, SOCKPOSITION *position) {
     i32 next = position->next_segment;
     SockSysPointAlongSpline(&temp_sockcampos, sock->cam, segment, next, position->ratio);
 
-    SOCKROT *cam_from = &sock->cam_rotations[segment];
-    SOCKROT *cam_to = &sock->cam_rotations[next];
-    position->camera_rotation.x = (u16)(cam_from->x + (f32)RotDiff(cam_from->x, cam_to->x) * position->ratio);
-    position->camera_rotation.y = (u16)(cam_from->y + (f32)RotDiff(cam_from->y, cam_to->y) * position->ratio);
+    position->camera_rotation.x =
+        (u16)(sock->cam_rotations[segment].x +
+              (f32)RotDiff(sock->cam_rotations[segment].x, sock->cam_rotations[next].x) * position->ratio);
+    position->camera_rotation.y =
+        (u16)(sock->cam_rotations[segment].y +
+              (f32)RotDiff(sock->cam_rotations[segment].y, sock->cam_rotations[next].y) * position->ratio);
+    position->midpoint_rotation.x =
+        (u16)(sock->mid_rotations[segment].x +
+              (f32)RotDiff(sock->mid_rotations[segment].x, sock->mid_rotations[next].x) * position->ratio);
+    position->midpoint_rotation.y =
+        (u16)(sock->mid_rotations[segment].y +
+              (f32)RotDiff(sock->mid_rotations[segment].y, sock->mid_rotations[next].y) * position->ratio);
 
-    SOCKROT *mid_from = &sock->mid_rotations[segment];
-    SOCKROT *mid_to = &sock->mid_rotations[next];
-    position->midpoint_rotation.x = (u16)(mid_from->x + (f32)RotDiff(mid_from->x, mid_to->x) * position->ratio);
-    position->midpoint_rotation.y = (u16)(mid_from->y + (f32)RotDiff(mid_from->y, mid_to->y) * position->ratio);
-
-    position->distance = (f32)segment + position->ratio;
-    i32 divisor = sock->length + (sock->unknown_33 != 0 ? 1 : 0);
-    position->normalized_distance = position->distance / (f32)divisor;
+    position->distance = position->ratio + (f32)position->location.segment;
+    position->normalized_distance = position->distance / (f32)(sock->unknown_33 != 0 ? sock->length + 1 : sock->length);
 }
 
 static f32 BestSockPosition(SOCKSYS *sock_sys, NUVEC *point, SOCKPOSITION *result, i32 sock_index, i32 prior_segment) {

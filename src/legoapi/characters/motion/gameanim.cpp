@@ -324,7 +324,6 @@ void Animate_ATAT(GameObject_s *object) {
 
 void Animate_JEDI(GameObject_s *object) {
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
-    bool check_movement_animation = false;
 
     if ((object->field_0xe23 & GAMEOBJECT_E23_FLAG_FORCE_WEAPON_IDLE) != 0) {
         if (((object->field_0xe22 & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) != 0 || object->field_0xe32 == 1) &&
@@ -404,8 +403,7 @@ void Animate_JEDI(GameObject_s *object) {
             }
         }
 
-        if (UsingExtraActionsFn != NULL && UsingExtraActionsFn(object) != 0 &&
-            packet.requested_animation <= CHARACTER_ANIMATION_FALL) {
+        if (UsingExtraActionsFn != NULL && UsingExtraActionsFn(object) != 0) {
             switch (packet.requested_animation) {
                 case CHARACTER_ANIMATION_WALK:
                     packet.requested_animation = CHARACTER_ANIMATION_EXTRA_WALK;
@@ -426,10 +424,6 @@ void Animate_JEDI(GameObject_s *object) {
                     break;
             }
         }
-        check_movement_animation = true;
-    }
-
-    if (check_movement_animation) {
         MoveAnim_Check(object);
     }
     UpdateCharacterIdle(object);

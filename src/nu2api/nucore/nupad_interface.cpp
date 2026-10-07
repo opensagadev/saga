@@ -229,8 +229,9 @@ void NuTouchInputStick::Update(NuInputTouchData const *data) {
     stick_x = 0.0f;
     stick_y = 0.0f;
     u32 count = data->touch_count;
-    for (u32 i = 0; i < count; ++i) {
-        const NuInputTouch &touch = data->touch_events[i];
+    const NuInputTouch *touch_ptr = data->touch_events;
+    for (; count != 0; --count, ++touch_ptr) {
+        const NuInputTouch &touch = *touch_ptr;
         u8 active = touch.unknown_00;
         u8 released = touch.unknown_01;
         u8 started = touch.unknown_02;

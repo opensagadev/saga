@@ -135,8 +135,9 @@ void CharShadows_Update() {
             }
 
             NUVEC query_position = joint_position;
-            shadow.position.y = GameShadow(object, &query_position, 5.0f, -1);
-            if (shadow.position.y == kInvalidShadowHeight) {
+            const f32 shadow_height = GameShadow(object, &query_position, 5.0f, -1);
+            shadow.position.y = shadow_height;
+            if (shadow_height == kInvalidShadowHeight) {
                 ++shadow_index;
                 continue;
             }
@@ -144,7 +145,7 @@ void CharShadows_Update() {
             const i32 layer_index = EShadowInfo();
             if (layer_index >= 0 && EShadY != kInvalidShadowHeight && layer_index <= 16 &&
                 (TerLayer[layer_index].flags & TERRAIN_LAYER_FLAG_REJECT_CHARACTER_SHADOW) != 0 &&
-                (EShadY > shadow.position.y || shadow.position.y > joint_position.y + 0.075f)) {
+                (EShadY > shadow_height || shadow_height > 0.075f + joint_position.y)) {
                 shadow.position.y = kInvalidShadowHeight;
                 ++shadow_index;
                 continue;

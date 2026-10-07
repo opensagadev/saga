@@ -151,11 +151,28 @@ void ShaderMtlDescFilter::internalInit(nushadermtldesc_s const *material_desc, n
     texture_id_threshold = texture_threshold;
 
     const u8 *vertex_descriptor = reinterpret_cast<const u8 *>(&desc->vtx_desc);
-    const bool special_vertex_path = (vertex_descriptor[2] & 4) != 0 || (material_bytes[0x41] & 0x40) != 0;
+    if (variant == 0) {
+        if ((flags & 0x10) == 0) {
+            field_0x10 = 0;
+            goto clear_secondary;
+        }
+        if ((vertex_descriptor[2] & 4) == 0 && (material_bytes[0x41] & 0x40) == 0) {
+            field_0x10 = 1;
+        } else {
+            field_0x10 = 0;
+        }
+    } else {
+        field_0x10 = 0;
+    }
+    if ((vertex_descriptor[2] & 4) == 0 && (material_bytes[0x41] & 0x40) == 0) {
+        field_0x18 = 1;
+    } else {
+    clear_secondary:
+        field_0x18 = 0;
+    }
+    field_0x14 =
+        variant == 0 && (flags & 0x20) != 0 && (vertex_descriptor[2] & 4) == 0 && (material_bytes[0x41] & 0x40) == 0;
     const bool base_variant = variant == 0;
-    field_0x10 = base_variant && (flags & 0x10) != 0 && !special_vertex_path;
-    field_0x18 = !special_vertex_path;
-    field_0x14 = base_variant && (flags & 0x20) != 0 && !special_vertex_path;
 
     layer_count = 0;
     if (base_variant) {

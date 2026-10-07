@@ -981,7 +981,7 @@ void Grapple_MoveCode(GameObject_s *object) {
                     object->apiobj.movement_facing_angle +=
                         static_cast<i32>(static_cast<u16>(Grapple_RopeSwingRotate) * FRAMETIME);
             }
-            if (object->field_0x768 > 0.0f || GRAPPLE_CURRENT->has_terrain_platform != 0 ||
+            if (!(object->field_0x768 <= 0.0f) || GRAPPLE_CURRENT->has_terrain_platform != 0 ||
                 (GRAPPLE_CURRENT->flags & GRAPPLE_FLAG_DISABLED) != 0)
                 object->airborne_action_duration = 0.0f;
             else {
@@ -1013,7 +1013,7 @@ void Grapple_MoveCode(GameObject_s *object) {
                 }
                 f32 maximum_length;
                 GRAPPLE_MAXIMUM_LENGTH(maximum_length);
-                if (maximum_length <= object->field_0x768) {
+                if (!(maximum_length > object->field_0x768)) {
                     object->field_0xe24 |= 0x80;
                     object->context_animation = LEGOACT_GRAPPLE_IDLE;
                 } else {
@@ -1074,8 +1074,8 @@ void Grapple_MoveCode(GameObject_s *object) {
                 angle = NuAtan2D(object->apiobj.velocity.x, object->apiobj.velocity.z);
             if (GrappleSwingMode == 1)
                 GRAPPLE_QUANTIZE(angle);
-            if ((GrappleSwingMode == 0 && abs(RotDiff(angle, input_angle)) < 0x4000) ||
-                (GrappleSwingMode != 0 && swing)) {
+            const i32 swing_mode = GrappleSwingMode;
+            if ((swing_mode == 0 && abs(RotDiff(angle, input_angle)) < 0x4000) || (swing_mode != 0 && swing)) {
                 const u8 increased_degrees = static_cast<u8>(object->grapple_swing_degrees + 10);
                 object->grapple_swing_degrees = increased_degrees <= 60 ? increased_degrees : 60;
                 return;

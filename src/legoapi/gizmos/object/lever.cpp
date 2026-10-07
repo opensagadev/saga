@@ -227,7 +227,9 @@ static void Levers_Update(void *world_ptr, void *, float) {
             continue;
         }
 
-        lever.flags |= LEVER_FLAG_BEING_PULLED;
+        if ((lever.flags & LEVER_FLAG_BEING_PULLED) == 0) {
+            lever.flags |= LEVER_FLAG_BEING_PULLED;
+        }
         if (lever.auto_reset_timer > 0.0f) {
             lever.auto_reset_timer -= FRAMETIME;
             if (lever.auto_reset_timer <= 0.0f) {
@@ -254,7 +256,9 @@ static void Levers_Update(void *world_ptr, void *, float) {
                 }
             }
         } else {
-            lever.flags |= LEVER_FLAG_RETURNING;
+            if ((lever.flags & LEVER_FLAG_RETURNING) == 0) {
+                lever.flags |= LEVER_FLAG_RETURNING;
+            }
             lever.pull_progress -= FRAMETIME;
             if (lever.pull_progress <= 0.0f) {
                 lever.pull_progress = 0.0f;

@@ -865,7 +865,7 @@ static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *po
 #define RTL_RADIUS_FRACTION ((distance - light->inner_radius) / (light->outer_radius - light->inner_radius))
 #define RTL_FALLOFF                                                                                                    \
     do {                                                                                                               \
-        if (light->inner_radius < light->outer_radius) {                                                               \
+        if (!(light->inner_radius >= light->outer_radius)) {                                                           \
             distance = NuFsqrt(distance_sq);                                                                           \
             strength = 1.0f - ((RTL_RADIUS_FRACTION > 1.0f ? 1.0f : RTL_RADIUS_FRACTION) < 0.0f                        \
                                    ? 0.0f                                                                              \
@@ -925,7 +925,7 @@ static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *po
                             distance_sq = RTL_DISTANCE_SQ;
                         else
                             distance_sq = 0.0f;
-                        if (light->outer_radius * light->outer_radius <= distance_sq) {
+                        if (!(distance_sq < light->outer_radius * light->outer_radius)) {
                             if (lighting_data->cached_light == light)
                                 lighting_data->cached_value = 0.0000001f;
                         } else {

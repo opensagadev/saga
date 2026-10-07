@@ -240,8 +240,6 @@ void NuDDSGetMipLevel(i32 width, i32 height, i32 depth, NUTEXFORMAT format, i32 
     out_height = 0;
     i32 total_size = 0;
     i32 previous_size = 0;
-    i32 mip_width = width;
-    i32 mip_height = height;
 
     for (i32 mip = 0; mip <= mip_count; ++mip) {
         if (previous_size * 8 != bpp) {
@@ -253,29 +251,29 @@ void NuDDSGetMipLevel(i32 width, i32 height, i32 depth, NUTEXFORMAT format, i32 
         i32 level_width;
         i32 level_height;
         if (!compressed) {
-            if (mip_width > 0) {
-                level_width = mip_width;
-                mip_width >>= 1;
+            if (width > 0) {
+                level_width = width;
+                width >>= 1;
             } else {
                 level_width = 1;
-                mip_width = 0;
+                width = 0;
             }
-            if (mip_height > 0) {
-                level_height = mip_height;
-                mip_height >>= 1;
+            if (height > 0) {
+                level_height = height;
+                height >>= 1;
             } else {
                 level_height = 1;
-                mip_height = 0;
+                height = 0;
             }
         } else {
             i32 minimum_width = minimum_blocks * block_width;
             i32 minimum_height = minimum_blocks * 4;
-            mip_width = mip_width >= minimum_width ? mip_width : minimum_width;
-            mip_height = mip_height >= minimum_height ? mip_height : minimum_height;
-            level_width = mip_width;
-            level_height = mip_height;
-            mip_width >>= 1;
-            mip_height >>= 1;
+            width = width >= minimum_width ? width : minimum_width;
+            height = height >= minimum_height ? height : minimum_height;
+            level_width = width;
+            level_height = height;
+            width >>= 1;
+            height >>= 1;
         }
 
         previous_size = bpp * level_width * level_height * mip_depth / 8;

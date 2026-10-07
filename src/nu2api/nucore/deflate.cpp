@@ -167,37 +167,46 @@ static void FillBits(DEFLATECONTEXT *ctx) {
         bits;                                                                                                          \
     })
 
+#define READHUFFMANSYMBOL(ctx, tree)                                                                                   \
+    ({                                                                                                                 \
+        i32 symbol;                                                                                                    \
+                                                                                                                       \
+        if (ctx->num_bits_available < 0x10) {                                                                          \
+            FillBits(ctx);                                                                                             \
+        }                                                                                                              \
+                                                                                                                       \
+        u32 bits = ctx->bit_buffer & ((1 << 0x10) - 1);                                                                \
+                                                                                                                       \
+        u32 lookupIndex = (tree).fast_lookup[bits & 0x1ff];                                                            \
+                                                                                                                       \
+        if (lookupIndex != 0xffff) {                                                                                   \
+            /* fast path: 9-bit lookup */                                                                              \
+            i32 symbolLength = (tree).symbols[lookupIndex];                                                            \
+            i32 symbolIndex = (tree).symbol_index[lookupIndex];                                                        \
+                                                                                                                       \
+            DROPBITS(ctx, symbolLength);                                                                               \
+                                                                                                                       \
+            symbol = symbolIndex;                                                                                      \
+        } else {                                                                                                       \
+                                                                                                                       \
+            /* slow path: bit-by-bit traversal */                                                                      \
+            i32 rev = ReverseBits(bits);                                                                               \
+                                                                                                                       \
+            i32 len = 10;                                                                                              \
+            while (rev >= (tree).base_code[len]) {                                                                     \
+                len++;                                                                                                 \
+            }                                                                                                          \
+                                                                                                                       \
+            i32 index = (rev >> (16 - len)) - (tree).first_code[len] + (tree).num_codes[len];                          \
+                                                                                                                       \
+            DROPBITS(ctx, len);                                                                                        \
+            symbol = (tree).symbol_index[index];                                                                       \
+        }                                                                                                              \
+        symbol;                                                                                                        \
+    })
+
 static inline i32 CtxReadHuffmanSymbol(DEFLATECONTEXT *ctx, DEFHUFFMAN *tree) {
-    if (ctx->num_bits_available < 0x10) {
-        FillBits(ctx);
-    }
-
-    u32 bits = ctx->bit_buffer & ((1 << 0x10) - 1);
-
-    u32 lookupIndex = tree->fast_lookup[bits & 0x1ff];
-
-    if (lookupIndex != 0xffff) {
-        // fast path: 9-bit lookup
-        i32 symbolLength = tree->symbols[lookupIndex];
-        i32 symbolIndex = tree->symbol_index[lookupIndex];
-
-        DROPBITS(ctx, symbolLength);
-
-        return symbolIndex;
-    }
-
-    // slow path: bit-by-bit traversal
-    i32 rev = ReverseBits(bits);
-
-    i32 len = 10;
-    while (rev >= tree->base_code[len]) {
-        len++;
-    }
-
-    i32 index = (rev >> (16 - len)) - tree->first_code[len] + tree->num_codes[len];
-
-    DROPBITS(ctx, len);
-    return tree->symbol_index[index];
+    return READHUFFMANSYMBOL(ctx, *tree);
 }
 
 static i32 LengthBase[31] = {3,  4,  5,  6,  7,  8,  9,  10,  11,  13,  15,  17,  19,  23, 27, 31,
@@ -353,7 +362,7 @@ i32 DecompressHuffmanTrees(DEFLATECONTEXT *ctx) {
 
     i32 i = 0;
     while (i < hlit + hdist) {
-        i32 symbol = CtxReadHuffmanSymbol(ctx, &ctx->temp_code_length);
+        i32 symbol = READHUFFMANSYMBOL(ctx, ctx->temp_code_length);
 
         if (symbol < 16) {
             allCodeLengths[i++] = symbol;

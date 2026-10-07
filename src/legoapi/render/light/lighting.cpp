@@ -299,12 +299,12 @@ __attribute__((force_align_arg_pointer)) void SetCreatureLights(APIOBJECT_s *obj
     intensity[2] = owner->lighting_state.intensity[2];
     direction[2] = owner->lighting_state.direction[2];
     f32 red = 1.0f, green = 1.0f, blue = 1.0f;
-    GAMECHARACTERDATA *character = static_cast<GAMECHARACTERDATA *>(owner->apiobj.character_data->field11_0x24);
+    GAMECHARACTERDATA *character;
     if (owner->field_0x1024 > 0.0f) {
         const f32 flash = owner->field_0x1024 / 0.4f;
         red = 1.0f + flash;
         green = blue = 1.0f - flash;
-    } else if (Lighting_HighlightFlash != 0 && owner->apiobj.player_controlled && !(owner->timer_d5c <= 0.0f) &&
+    } else if (Lighting_HighlightFlash != 0 && owner->apiobj.player_controlled && owner->timer_d5c > 0.0f &&
                (owner->timer_d5c >= 2.0f || NuFmod(owner->timer_d5c, 0.4f) >= 0.2f)) {
         if (owner->apiobj.field_0x27c != 1) {
             red = 1.4f;
@@ -315,7 +315,9 @@ __attribute__((force_align_arg_pointer)) void SetCreatureLights(APIOBJECT_s *obj
             green = 2.0f;
             blue = 1.4f;
         }
-    } else if ((character->flags_090 & 0x8000) != 0 && !owner->apiobj.player_controlled) {
+    } else if ((static_cast<GAMECHARACTERDATA *>(owner->apiobj.character_data->field11_0x24)->flags_090 & 0x8000) !=
+                   0 &&
+               !owner->apiobj.player_controlled) {
         red = 1.4f;
         green = 1.85f;
         blue = 2.0f;
@@ -333,7 +335,7 @@ __attribute__((force_align_arg_pointer)) void SetCreatureLights(APIOBJECT_s *obj
             red = blue;
         else
             red *= 0.0f;
-    } else if (!(owner->interaction_arrow_blend <= 0.0f)) {
+    } else if (owner->interaction_arrow_blend > 0.0f) {
         const f32 phase = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f;
         const f32 scale = owner->interaction_arrow_blend * 0.5f * NU_SIN_LUT(static_cast<i32>(phase * 65536.0f)) + 1.0f;
         red = green = blue = scale;
@@ -359,7 +361,7 @@ __attribute__((force_align_arg_pointer)) void SetCreatureLights(APIOBJECT_s *obj
         red *= GhostLightMul;
         green *= GhostLightMul;
         blue *= GhostLightMul;
-        if (!(red <= 2.0f))
+        if (red > 2.0f)
             red = 2.0f;
         if (green > 2.0f)
             green = 2.0f;

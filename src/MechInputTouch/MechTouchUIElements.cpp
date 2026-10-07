@@ -431,22 +431,23 @@ void MechTouchUITagButton::Process(float dt) {
     }
 
     if (second_fade.IsActive()) {
-        timer = GiveUpTime - dt;
-        if (timer <= 0.0f) {
-            FadeOut();
-        }
-        if (on_click != NULL) {
-            field_0xbc -= dt;
-            if (field_0xbc < 0.0f) {
-                --tag_state;
-                field_0xbc = 0.75f;
-                timer_animation.from = 0.0f;
-                timer_animation.to = 32768.0f;
-                timer_animation.elapsed = 0.0f;
-                timer_animation.duration = 0.5f;
-                timer_animation.delay = 0.0f;
-                *timer_animation.target = 0.0f;
-            }
+        timer = GiveUpTime;
+    }
+    timer -= dt;
+    if (timer <= 0.0f) {
+        FadeOut();
+    }
+    if (on_click != NULL) {
+        field_0xbc -= dt;
+        if (field_0xbc < 0.0f) {
+            --tag_state;
+            field_0xbc = 0.75f;
+            timer_animation.from = 0.0f;
+            timer_animation.to = 32768.0f;
+            timer_animation.elapsed = 0.0f;
+            timer_animation.duration = 0.5f;
+            timer_animation.delay = 0.0f;
+            *timer_animation.target = 0.0f;
         }
     }
 
@@ -473,8 +474,10 @@ void MechTouchUITagButton::Process(float dt) {
 
     const f32 lower = TagButtonSize - 1.0f;
     const f32 upper = 1.0f - TagButtonSize;
-    position.x = screen_position.x < lower ? lower : (screen_position.x > upper ? upper : screen_position.x);
-    position.y = screen_position.y < lower ? lower : (screen_position.y > upper ? upper : screen_position.y);
+    const f32 clipped_x = upper > screen_position.x ? screen_position.x : upper;
+    const f32 clipped_y = upper > screen_position.y ? screen_position.y : upper;
+    position.x = lower > clipped_x ? lower : clipped_x;
+    position.y = lower > clipped_y ? lower : clipped_y;
 }
 
 void MechTouchUITagButton::Render() {
@@ -721,7 +724,7 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
     i32 target_count = 0;
     for (i32 i = 0; i < 8; ++i) {
         GameObject_s *player = Player[i];
-        if (player != NULL && (static_cast<u16>(player->apiobj.object_flags) & 0x1001) == 0x1001) {
+        if (player != NULL && (static_cast<u16>(player->apiobj.field_0x1f8) & 0x1001) == 0x1001) {
             target_ids[target_count++] = player->id;
         }
     }

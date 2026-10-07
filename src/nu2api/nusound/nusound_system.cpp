@@ -733,7 +733,8 @@ NuSoundVoice *NuSoundSystem::GetQuietestVoice(NuSoundSample *sample, float &quie
     quietest_volume = -1.0f;
     NuSoundVoice *quietest = NULL;
 
-    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+    NuSoundVoice *end = voice_list.End();
+    for (NuSoundVoice *voice = voice_list.Front(); voice != end; voice = voice->field_0x28) {
         if (voice->GetState() != NuSoundVoice::PLAYSTATE_PLAYING ||
             voice->sound_source->GetName() != sample->GetName()) {
             continue;

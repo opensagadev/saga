@@ -593,11 +593,11 @@ bool MechInputTouchGestureBasedController::PerformCloseMechanic(GameObject_s &ob
     VuVec position(holder.down_position.x, holder.down_position.y, 0.0f, 1.0f);
     if (TouchHacks::CanUseTeleport(object)) {
         VuVec teleport_position;
-        if (Teleport_Find(&object, 0.0025f, &teleport_position) != NULL) {
+        if (Teleport_Find(&object, 0.05f * 0.05f, &teleport_position) != NULL) {
             f32 dx = teleport_position.x - object.apiobj.position.x;
             f32 dy = teleport_position.y - object.apiobj.position.y;
             f32 dz = teleport_position.z - object.apiobj.position.z;
-            if (__builtin_fabsf(dy) < object.apiobj.scaled_height && dx * dx + dz * dz < 0.1225f) {
+            if (__builtin_fabsf(dy) < object.apiobj.scaled_height && dx * dx + dz * dz < 0.35f * 0.35f) {
                 StartNewTask(new MechTouchTaskUseTeleport(*this, NULL, position), holder, true, true);
                 return true;
             }
@@ -939,8 +939,8 @@ void MechInputTouchGestureBasedController::StartNewTask(MechTouchTask *task, Tou
 bool MechInputTouchGestureBasedController::TriggerJumpTask(JumpTriggerPacket const &packet, bool disable_autopilot,
                                                            bool use_velocity, bool try_ai_path) {
     GameObject_s *object = packet.player;
-    TouchHolder *holder = packet.touch_holder;
-    const i32 context = object->character_context;
+    GameObject_s *original_object = object;
+    i32 context = object->character_context;
     if (context == LEGOCONTEXT_JUMP) {
         return false;
     }
@@ -948,26 +948,35 @@ bool MechInputTouchGestureBasedController::TriggerJumpTask(JumpTriggerPacket con
         if (VehicleArea == 0 && object->field_0xcc0 == NULL) {
             return false;
         }
-    } else if (VehicleArea == 0 && object->field_0xcc0 == NULL && !TouchHacks::CanJump(*object)) {
-        return false;
+    } else if (VehicleArea == 0 && object->field_0xcc0 == NULL) {
+        if (!TouchHacks::CanJump(*object))
+            return false;
+        object = packet.player;
+        context = object->character_context;
     }
     if (context != -1 && context != LEGOCONTEXT_COMBO && context != LEGOCONTEXT_PUNCH && context != LEGOCONTEXT_BLOCK &&
         context != LEGOCONTEXT_HOLD) {
         return true;
     }
-    if (object->apiobj.field_0x27d == 0 && !ObjLandReady(object) && VehicleArea == 0) {
-        return true;
+    if (object->apiobj.field_0x27d == 0) {
+        if (!ObjLandReady(object) && VehicleArea == 0)
+            return true;
+        object = packet.player;
     }
 
     const i32 model_flags = object->apiobj.character_data->model_flags;
-    if ((model_flags & 0x40) != 0 || object->id == id_WATTO) {
-        StartNewTask(new MechTouchTaskAstroJetPack(*this), *holder, false, false);
-        return true;
+    TouchHolder *holder;
+    MechTouchTask *task;
+    if ((model_flags & 0x40) != 0 || original_object->id == id_WATTO) {
+        holder = packet.touch_holder;
+        task = new MechTouchTaskAstroJetPack(*this);
+    } else {
+        if (try_ai_path && StartJumpUsingAIPath(packet, object->apiobj.facing_angle))
+            return true;
+        holder = packet.touch_holder;
+        task = new MechTouchTaskJump(*this, packet, disable_autopilot, use_velocity);
     }
-    if (try_ai_path && StartJumpUsingAIPath(packet, object->apiobj.facing_angle)) {
-        return true;
-    }
-    StartNewTask(new MechTouchTaskJump(*this, packet, disable_autopilot, use_velocity), *holder, false, false);
+    StartNewTask(task, *holder, false, false);
     return true;
 }
 

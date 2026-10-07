@@ -1289,7 +1289,7 @@ static void AISysLoadCreatures(AISYS *system, i32 version) {
         }
         creature->count = static_cast<u8>(EdFileReadChar());
         creature->count_across = static_cast<u8>(EdFileReadChar());
-        creature->active_mask = EdFileReadUnsignedInt();
+        creature->active_mask = static_cast<u32>(EdFileReadInt());
         creature->x_spacing = EdFileReadFloat();
         creature->z_spacing = EdFileReadFloat();
         creature->flags = EdFileReadInt();
@@ -1345,24 +1345,23 @@ static void AISysLoadCreatures(AISYS *system, i32 version) {
             creature->max_view_height = EdFileReadFloat();
             creature->min_view_height = EdFileReadFloat();
             EdFileReadInt();
+            if (GetViewRangeFn != NULL && creature->view_distance == 0.0f) {
+                creature->view_distance = GetViewRangeFn(creature->type);
+            }
+            if (GetHearDistanceFn != NULL && creature->hear_distance == 0.0f) {
+                creature->hear_distance = GetHearDistanceFn(creature->type);
+            }
+            if (GetMaxViewHeightFn != NULL && creature->max_view_height == 0.0f) {
+                creature->max_view_height = GetMaxViewHeightFn(creature->type);
+            }
+            if (GetMinViewHeightFn != NULL && creature->min_view_height == 0.0f) {
+                creature->min_view_height = GetMinViewHeightFn(creature->type);
+            }
         } else {
             creature->view_distance = GetViewRangeFn == NULL ? 1.0f : GetViewRangeFn(creature->type);
             creature->hear_distance = GetHearDistanceFn == NULL ? 1.0f : GetHearDistanceFn(creature->type);
             creature->max_view_height = GetMaxViewHeightFn == NULL ? 1.0f : GetMaxViewHeightFn(creature->type);
             creature->min_view_height = GetMinViewHeightFn == NULL ? 1.0f : GetMinViewHeightFn(creature->type);
-        }
-
-        if (version > 10 && creature->view_distance == 0.0f && GetViewRangeFn != NULL) {
-            creature->view_distance = GetViewRangeFn(creature->type);
-        }
-        if (version > 10 && creature->hear_distance == 0.0f && GetHearDistanceFn != NULL) {
-            creature->hear_distance = GetHearDistanceFn(creature->type);
-        }
-        if (version > 10 && creature->max_view_height == 0.0f && GetMaxViewHeightFn != NULL) {
-            creature->max_view_height = GetMaxViewHeightFn(creature->type);
-        }
-        if (version > 10 && creature->min_view_height == 0.0f && GetMinViewHeightFn != NULL) {
-            creature->min_view_height = GetMinViewHeightFn(creature->type);
         }
     }
 }
