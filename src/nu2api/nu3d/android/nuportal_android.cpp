@@ -28,9 +28,8 @@ extern "C" void clipRoomAgainstFrustrum(NUGSCN *scene, NUROOM *room, NUFRUSTRUM 
     i32 clip_result;
     u32 i;
 
-    // The original routine exits before selecting the bounds path when a
-    // display list is unavailable; the sphere path also needs its flags
-    // and override tables below.
+    // Retain the null display-list guard: unseen sphere instances require
+    // the display list's visibility and override tables below.
     if (scene->display_list != NULL) {
         if ((scene->display_list->render_buffer & NUDL_SCENE_RENDER_FLAG_CENTER_EXTENT_BOUNDS) != 0) {
             for (i = 0; i < static_cast<u32>(static_cast<i32>(room->instance_count)); ++i) {
@@ -67,20 +66,25 @@ extern "C" void clipRoomAgainstFrustrum(NUGSCN *scene, NUROOM *room, NUFRUSTRUM 
                     if ((((u8)scene->display_list->portal_visibility_overrides[instance_index >> 3] >>
                           (instance_index & 7)) &
                          1) == 0) {
-                        if ((scene->display_list->visibility_flags[instance_index] & NUDL_INSTANCE_FLAG_VISIBLE) != 0) {
-                            if ((scene->display_list->visibility_flags[instance_index] &
-                                 NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) == 0) {
-                                clip_result = clipTestSphere(&scene->portal_spheres[instance_index], frustum);
-                                if (clip_result == 1) {
+                        if ((scene->display_list->visibility_flags[instance_index] &
+                             NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) != 0) {
+                            PortalVisiFlags[instance_index >> 3] |= 1 << (instance_index & 7);
+                        } else {
+                            clip_result = clipTestSphere(&scene->portal_spheres[instance_index], frustum);
+                            switch (clip_result) {
+                                case 1:
                                     PortalVisiFlags[instance_index >> 3] |= 1 << (instance_index & 7);
-                                } else if (clip_result == 2 &&
-                                           clipTestBox(&scene->portal_boxes[instance_index].first,
-                                                       &scene->portal_boxes[instance_index].second, frustum->planes,
-                                                       static_cast<i32>(frustum->plane_count)) != 0) {
-                                    PortalVisiFlags[instance_index >> 3] |= 1 << (instance_index & 7);
-                                }
-                            } else {
-                                PortalVisiFlags[instance_index >> 3] |= 1 << (instance_index & 7);
+                                    break;
+                                case 2:
+                                    clip_result = clipTestBox(&scene->portal_boxes[instance_index].first,
+                                                              &scene->portal_boxes[instance_index].second,
+                                                              frustum->planes, static_cast<i32>(frustum->plane_count));
+                                    if (clip_result != 0) {
+                                        PortalVisiFlags[instance_index >> 3] |= 1 << (instance_index & 7);
+                                    }
+                                    break;
+                                default:
+                                    break;
                             }
                         }
                     } else {

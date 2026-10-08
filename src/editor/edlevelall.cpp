@@ -2275,8 +2275,9 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
         if (edLevelActiveMenu != NULL) {
             eduiMenuDestroy(edLevelActiveMenu);
         }
-        edLevelActiveMenu = edLevelNextMenu;
+        eduimenu_s *next_menu = edLevelNextMenu;
         edLevelNextMenu = NULL;
+        edLevelActiveMenu = next_menu;
     }
     nucamera_s *camera = &global_camera;
     if (field_0x28 != 0) {

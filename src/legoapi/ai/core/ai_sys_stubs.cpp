@@ -627,11 +627,9 @@ static char *AISysLoadString(AISYS *system, i32 length) {
 
 static void AISysLoadPathRoutes(AISYS *system, AIPATH *path, i32 version, char *name_buffer) {
     path->route_matrix = static_cast<u8 **>(AISysLoadAlloc(system, path->node_count * sizeof(u8 *)));
-    if (path->node_count != 0) {
-        for (i32 i = 0; i < path->node_count; ++i) {
-            path->route_matrix[i] = static_cast<u8 *>(AISysLoadAlloc(system, path->node_count));
-            EdFileRead(path->route_matrix[i], path->node_count);
-        }
+    for (i32 i = 0; i < path->node_count; ++i) {
+        path->route_matrix[i] = static_cast<u8 *>(AISysLoadAlloc(system, path->node_count));
+        EdFileRead(path->route_matrix[i], path->node_count);
     }
 
     if (version <= 4)

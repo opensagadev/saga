@@ -142,7 +142,12 @@ void NuSoundStreamer::ThreadFunc(void *self) {
     do {
         streamer->semaphore.Wait();
 
-        QueueElement element{};
+        QueueElement element;
+        element.sample = NULL;
+        element.loop = false;
+        element.start_offset = 0.0f;
+        element.buffer = NULL;
+        element.weak_flag = false;
         if (!streamer->queue2.Empty()) {
             element = streamer->queue2.Pop();
         } else {
@@ -267,22 +272,26 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
         context.size3 = 0;
 
         context = this->file_loader->FillStreamBuffer(this->sound_buffer1, loop);
-        if (context.size2 != 0) {
+        if (context.size2 == 0) {
+            if (this->some_count == 0) {
+                this->file_loader->CloseStream();
+                status = 4;
+            }
+        } else {
             this->some_count++;
-        } else if (this->some_count == 0) {
-            this->file_loader->CloseStream();
-            status = 4;
         }
         this->sound_buffer1->SetCurrentContext(context);
 
         context.flags &= ~1u;
         if (status == 1 && (context.flags & 2) == 0) {
             context = this->file_loader->FillStreamBuffer(this->sound_buffer2, loop);
-            if (context.size2 != 0) {
+            if (context.size2 == 0) {
+                if (this->some_count == 0) {
+                    this->file_loader->CloseStream();
+                    status = 4;
+                }
+            } else {
                 this->some_count++;
-            } else if (this->some_count == 0) {
-                this->file_loader->CloseStream();
-                status = 4;
             }
             this->sound_buffer2->SetCurrentContext(context);
         }

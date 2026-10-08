@@ -1279,7 +1279,7 @@ void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float) {
 
                 f32 push_radius_x = (blowup->bounds_max.x - blowup->bounds_min.x) * 0.5f;
                 f32 push_radius_z = (blowup->bounds_max.z - blowup->bounds_min.z) * 0.5f;
-                f32 push_radius = push_radius_x > push_radius_z ? push_radius_x : push_radius_z;
+                f32 push_radius = push_radius_z > push_radius_x ? push_radius_z : push_radius_x;
                 PushAway(&blowup->mid_position, push_radius, &blowup->bounds_min, &blowup->bounds_max, NULL, NULL, 1.0f,
                          4);
             }

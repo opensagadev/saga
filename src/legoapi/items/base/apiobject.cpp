@@ -884,6 +884,7 @@ extern "C" {
 
     void APILoadCharacterModels(APICHARACTERMODELLIST_s *list, i32 area_animation, VARIPTR *buf, VARIPTR buf_end,
                                 i32 area_models) {
+        char legacy_animation_extension[] = ".ani";
         char animation_extension[] = ".an3";
         char deformation_extension[] = ".bsa";
         char animation_path[0x200];
@@ -920,22 +921,26 @@ extern "C" {
 
             char directory_pack_path[0x100];
             char model_pack_path[0x100];
-            NuStrCpy(directory_pack_path, directory);
-            NuStrCat(directory_pack_path, character.dir);
-            NuStrCat(directory_pack_path, ".fpk");
-            NuStrCpy(model_pack_path, directory);
-            NuStrCat(model_pack_path, character.file);
-            NuStrCat(model_pack_path, ".fpk");
-
             i32 model_loaded = 0;
             if (apicharsys->playermodelids[model_id] != -1) {
+                NuStrCpy(directory_pack_path, directory);
+                NuStrCat(directory_pack_path, character.dir);
+                NuStrCat(directory_pack_path, ".fpk");
+                NuStrCpy(model_pack_path, directory);
+                NuStrCat(model_pack_path, character.file);
+                NuStrCat(model_pack_path, ".fpk");
                 model = &apicharsys->models[apicharsys->playermodelids[model_id]];
             } else {
                 model = &apicharsys->models[apicharsys->loaded_model_count];
                 APICharacterModelReset(model);
 
                 NuStrCpy(animation_path, directory);
+                NuStrCpy(directory_pack_path, directory);
                 NuStrCat(animation_path, character.file);
+                NuStrCat(directory_pack_path, character.dir);
+                NuStrCpy(model_pack_path, animation_path);
+                NuStrCat(model_pack_path, ".fpk");
+                NuStrCat(directory_pack_path, ".fpk");
                 NuStrCat(animation_path, ".ghg");
 
                 model->hierarchy = NuGHGRead(animation_path, buf, buf_end);
@@ -949,11 +954,14 @@ extern "C" {
                 model_loaded = 1;
             }
 
-            CHARACTERANIM_s *animations = area_models != 0 && list->count != 0 ? character.animations : NULL;
+            CHARACTERANIM_s *animations =
+                area_models != 0 && list->count != 0 ? apicharsys->char_data[model_id].animations : NULL;
             void *pak = NULL;
             if (apiloadcharactermodels_nopakfile == 0) {
-                pak = NuFilePakLoad(directory_pack_path, buf, buf_end, 0x10);
+                NuStrCpy(animation_path, directory_pack_path);
+                pak = NuFilePakLoad(animation_path, buf, buf_end, 0x10);
                 if (pak == NULL) {
+                    NuStrCpy(animation_path, model_pack_path);
                     pak = NuFilePakLoad(model_pack_path, buf, buf_end, 0x10);
                 }
             }

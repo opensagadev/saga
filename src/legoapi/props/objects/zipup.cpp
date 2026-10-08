@@ -635,7 +635,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
         NuVecAdd(&zipup->rider_target_position, hook, &zipup->rider_target_position);
         f32 old_time = object->context_animation_timer;
         object->context_animation_timer += FRAMETIME;
-        if (!(old_time >= 0.55f) && !(object->context_animation_timer < 0.55f))
+        if (old_time < 0.55f && object->context_animation_timer >= 0.55f)
             PlaySfx("GrapSwing", &api.collision_position);
         return;
     }
