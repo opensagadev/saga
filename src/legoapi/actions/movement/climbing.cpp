@@ -23,15 +23,20 @@ void Climb_MoveCode(GameObject_s *object) {
     if (LEGOCONTEXT_CLIMB == -1)
         return;
     if (object->character_context != LEGOCONTEXT_CLIMB) {
-        bool can_enter = object->character_context == -1 ||
-                         (LEGOCONTEXT_WALLSHUFFLE != -1 && object->character_context == LEGOCONTEXT_WALLSHUFFLE);
-        if (!can_enter && LEGOCONTEXT_JUMP != -1 && object->character_context == LEGOCONTEXT_JUMP) {
-            can_enter = object->context_animation_timer >= 1.0f ||
-                        (object->context_animation_timer >= 0.1f && object->apiobj.velocity.y <= 0.0f);
+        if (object->character_context == -1)
+            goto enter_climb;
+        if (LEGOCONTEXT_WALLSHUFFLE != -1 && object->character_context == LEGOCONTEXT_WALLSHUFFLE)
+            goto enter_climb;
+        if (LEGOCONTEXT_JUMP != -1 && object->character_context == LEGOCONTEXT_JUMP) {
+            if (object->context_animation_timer >= 1.0f ||
+                (object->context_animation_timer >= 0.1f && object->apiobj.velocity.y <= 0.0f))
+                goto enter_climb;
         }
-        if (!can_enter && LEGOCONTEXT_GLIDE != -1 && object->character_context == LEGOCONTEXT_GLIDE)
-            can_enter = object->field_0x788 == NULL;
-        if (!can_enter || !(object->pad_gamepad->input_magnitude > 0.0f) || object->field_0x1084 == 0 ||
+        if (LEGOCONTEXT_GLIDE != -1 && object->character_context == LEGOCONTEXT_GLIDE && object->field_0x788 == NULL)
+            goto enter_climb;
+        return;
+    enter_climb:
+        if (!(object->pad_gamepad->input_magnitude > 0.0f) || object->field_0x1084 == 0 ||
             !(fabsf(object->contact_normal.y) < NuTrigTable[0x3000]) ||
             CanClimbSurface(object, static_cast<i8>(object->field_0x6b0)) == 0)
             return;

@@ -113,8 +113,8 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
     if (CurTerr == NULL || group_index < 0)
         return;
     TERRAIN_GROUP *group = &CurTerr->groups[group_index];
-    NUVEC minimum = {123456792.0f, 123456792.0f, 123456792.0f};
-    NUVEC maximum = {-123456792.0f, -123456792.0f, -123456792.0f};
+    f32 min_x = 123456792.0f, min_y = 123456792.0f, min_z = 123456792.0f;
+    f32 max_x = -123456792.0f, max_y = -123456792.0f, max_z = -123456792.0f;
     f32 radius_squared = 0.0f;
     i32 bytes = 0;
     if (static_cast<u32>(group->chunk_type) <= 1) {
@@ -125,7 +125,8 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
             output->shape_count = input->shape_count;
             TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(input + 1);
             TERRAIN_SHAPE *destination = reinterpret_cast<TERRAIN_SHAPE *>(output + 1);
-            for (i32 i = 0; i < input->shape_count; ++i, ++source, ++destination) {
+            const i32 shape_count = input->shape_count;
+            for (i32 i = 0; i < shape_count; ++i, ++source, ++destination) {
                 i32 last_vertex = source->normals[1].y > 65535.0f ? 2 : 3;
                 memcpy(destination, source, sizeof(TERRAIN_SHAPE));
                 for (i32 vertex = last_vertex; vertex >= 0; --vertex) {
@@ -135,32 +136,45 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
                     v.x -= info->matrix->m30;
                     v.y -= info->matrix->m31;
                     v.z -= info->matrix->m32;
-                    minimum.x = MIN(v.x, minimum.x);
-                    minimum.y = MIN(v.y, minimum.y);
-                    minimum.z = MIN(v.z, minimum.z);
-                    maximum.x = MAX(v.x, maximum.x);
-                    maximum.y = MAX(v.y, maximum.y);
-                    maximum.z = MAX(v.z, maximum.z);
+                    min_x = MIN(v.x, min_x);
+                    min_y = MIN(v.y, min_y);
+                    min_z = MIN(v.z, min_z);
+                    max_x = MAX(v.x, max_x);
+                    max_y = MAX(v.y, max_y);
+                    max_z = MAX(v.z, max_z);
                     radius_squared = MAX((v.x * v.x + v.y * v.y) + v.z * v.z, radius_squared);
                 }
-                for (i32 normal = source->normals[1].y < 65535.0f ? 1 : 0; normal >= 0; --normal) {
-                    i32 origin = normal != 0 ? 3 : 0;
-                    i32 first = normal != 0 ? 1 : 2;
-                    i32 second = normal != 0 ? 2 : 1;
+                if (source->normals[1].y < 65535.0f) {
                     NUVEC a, b;
-                    a.x = destination->vectors[first].x - destination->vectors[origin].x;
-                    a.y = destination->vectors[first].y - destination->vectors[origin].y;
-                    a.z = destination->vectors[first].z - destination->vectors[origin].z;
-                    b.x = destination->vectors[second].x - destination->vectors[origin].x;
-                    b.y = destination->vectors[second].y - destination->vectors[origin].y;
-                    b.z = destination->vectors[second].z - destination->vectors[origin].z;
-                    NUVEC &n = destination->normals[normal];
+                    a.x = destination->vectors[1].x - destination->vectors[3].x;
+                    a.y = destination->vectors[1].y - destination->vectors[3].y;
+                    a.z = destination->vectors[1].z - destination->vectors[3].z;
+                    b.x = destination->vectors[2].x - destination->vectors[3].x;
+                    b.y = destination->vectors[2].y - destination->vectors[3].y;
+                    b.z = destination->vectors[2].z - destination->vectors[3].z;
+                    NUVEC &n = destination->normals[1];
                     n = TerCrossProduct(&a, &b);
                     f32 squared = (n.x * n.x + n.y * n.y) + n.z * n.z;
                     f32 inverse = squared == 0.0f ? 0.0f : 1.0f / NuFsqrt(squared);
                     n.x *= inverse;
                     n.y *= inverse;
                     n.z *= inverse;
+                }
+                {
+                    NUVEC a, b;
+                    a.x = destination->vectors[2].x - destination->vectors[0].x;
+                    a.y = destination->vectors[2].y - destination->vectors[0].y;
+                    a.z = destination->vectors[2].z - destination->vectors[0].z;
+                    b.x = destination->vectors[1].x - destination->vectors[0].x;
+                    b.y = destination->vectors[1].y - destination->vectors[0].y;
+                    b.z = destination->vectors[1].z - destination->vectors[0].z;
+                    NUVEC &n = destination->normals[0];
+                    n = TerCrossProduct(&a, &b);
+                    f32 squared = (n.x * n.x + n.y * n.y) + n.z * n.z;
+                    f32 inverse = squared == 0.0f ? 0.0f : 1.0f / NuFsqrt(squared);
+                    n.x *= inverse;
+                    n.y *= inverse;
+                    n.z = inverse * n.z;
                 }
             }
             input = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(source);
@@ -173,12 +187,12 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
     group->origin.x = info->matrix->m30;
     group->origin.y = info->matrix->m31;
     group->origin.z = info->matrix->m32;
-    group->bounds_min.x = (minimum.x - 0.1f) + info->matrix->m30;
-    group->bounds_min.y = (minimum.y - 0.1f) + info->matrix->m31;
-    group->bounds_min.z = (minimum.z - 0.1f) + info->matrix->m32;
-    group->bounds_max.x = (maximum.x + 0.1f) + info->matrix->m30;
-    group->bounds_max.y = (maximum.y + 0.1f) + info->matrix->m31;
-    group->bounds_max.z = (maximum.z + 0.1f) + info->matrix->m32;
+    group->bounds_min.x = (min_x - 0.1f) + info->matrix->m30;
+    group->bounds_min.y = (min_y - 0.1f) + info->matrix->m31;
+    group->bounds_min.z = (min_z - 0.1f) + info->matrix->m32;
+    group->bounds_max.x = (max_x + 0.1f) + info->matrix->m30;
+    group->bounds_max.y = (max_y + 0.1f) + info->matrix->m31;
+    group->bounds_max.z = (max_z + 0.1f) + info->matrix->m32;
     group->radius = NuFsqrt(radius_squared);
     if (bytes > PlatSkinMaxSize)
         PlatSkinMaxSize = bytes;

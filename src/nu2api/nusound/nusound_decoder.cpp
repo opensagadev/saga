@@ -72,10 +72,10 @@ bool NuSoundDecoder::OpenStream(bool loop) {
     this->decode_pos = 0;
     this->consumed_pos = 0;
 
-    for (u32 i = 0; decoded < total; i++) {
+    for (i32 i = 0; decoded < total && i < 2; i++) {
         NuSoundBuffer &buffer = this->buffers[i];
 
-        if (buffer.Allocate(this->buffer_size, NuSoundSystem::MemoryDiscipline::DECODER) != 1) {
+        if (buffer.Allocate((i64)(i32)this->buffer_size, NuSoundSystem::MemoryDiscipline::DECODER) != 1) {
             this->CloseStream();
             return false;
         }
@@ -85,10 +85,6 @@ bool NuSoundDecoder::OpenStream(bool loop) {
         this->ring_count++;
         this->decode_pos++;
         this->buffers_started++;
-
-        if (i >= 1) {
-            break;
-        }
     }
 
     this->stream_open = true;
@@ -272,7 +268,7 @@ void NuSoundDecodeThread::RequestDecode(NuSoundDecoder &decoder, NuSoundBuffer &
     __sync_fetch_and_add(&decoder.field_0xd4, 1);
 
     Loader request{&decoder, &buffer, callback, loop};
-    LoaderSlot &slot = this->loaders[this->tail_index % 128];
+    LoaderSlot &slot = this->loaders[(i32)this->tail_index % 128];
     new (&slot) Loader(request);
     __sync_fetch_and_add(&this->tail_index, 1);
 
