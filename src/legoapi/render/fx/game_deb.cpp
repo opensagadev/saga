@@ -1117,14 +1117,15 @@ extern "C" void DebrisStartOffsetEx(debkeydatatype_s *key, f32 offset) {
     }
     const i16 effect_index = key->effect_index;
     debinftype *effect = debtab[effect_index];
+    // This routine uses the emission fields at offsets 0x1c, 0x20, 0x24 and 0x28.
     f32 now = effect->time_group == 4 ? panelglobaltime : globaltime;
     f32 start;
     f32 period;
-    if (effect->emission_period_random == 0.0f && effect->emission_pause_random == 0.0f) {
-        const f32 interval = effect->emission_period + effect->emission_pause;
+    if (effect->emission_pause == 0.0f && effect->start_offset_random == 0.0f) {
+        const f32 interval = effect->emission_period_random + effect->emission_pause_random;
         start = static_cast<f32>(static_cast<i32>(now / interval)) * interval;
-        if (effect->generator_type == 7 && effect->emission_pause == 0.0f) {
-            const f32 frames = offset * 60.0f;
+        if (effect->generator_type == 7 && effect->emission_pause_random == 0.0f) {
+            const f32 frames = static_cast<f32>(static_cast<i32>(offset * 60.0f));
             key->emitter_rotation_x = static_cast<i16>(static_cast<i32>(effect->field_050 * frames));
             key->emitter_rotation_y = static_cast<i16>(static_cast<i32>(effect->field_054 * frames));
         } else {
@@ -1135,13 +1136,15 @@ extern "C" void DebrisStartOffsetEx(debkeydatatype_s *key, f32 offset) {
         while (now < start) {
             start -= interval;
         }
+        key->emission_time = start;
     } else {
         start = now;
         key->emission_time = start;
     }
-    period = effect->emission_period;
+    period = start + effect->emission_period_random;
+    const f32 random = NuRandFloatSeeded(&debrisseed);
     key->previous_emission_time = -10.0f;
-    key->field_1e4 = NuRandFloatSeeded(&debrisseed) * effect->emission_period_random + start + period;
+    key->field_1e4 = random * effect->emission_pause + period;
 }
 
 void DebrisProcessGeneration() {

@@ -136,11 +136,25 @@ SAGA_HOST_WEAK void InitStillRender(variptr_u *, variptr_u) {
 
     pause_rt = NuTexGenTexture(&nativePauseTex);
     nativePauseTex.ref_count = 1;
-    memset(nativePauseTex.checksum, 0, sizeof(nativePauseTex.checksum));
+    // Retail writes each checksum byte (48c587..48c60c); image_data and size retain their initialized state.
+    nativePauseTex.checksum[0] = 0;
+    nativePauseTex.checksum[1] = 0;
+    nativePauseTex.checksum[2] = 0;
+    nativePauseTex.checksum[3] = 0;
+    nativePauseTex.checksum[4] = 0;
+    nativePauseTex.checksum[5] = 0;
+    nativePauseTex.checksum[6] = 0;
+    nativePauseTex.checksum[7] = 0;
+    nativePauseTex.checksum[8] = 0;
+    nativePauseTex.checksum[9] = 0;
+    nativePauseTex.checksum[10] = 0;
+    nativePauseTex.checksum[11] = 0;
+    nativePauseTex.checksum[12] = 0;
+    nativePauseTex.checksum[13] = 0;
+    nativePauseTex.checksum[14] = 0;
+    nativePauseTex.checksum[15] = 0;
     nativePauseTex.width = g_backingWidth;
     nativePauseTex.height = g_backingHeight;
-    nativePauseTex.image_data = NULL;
-    nativePauseTex.size = 0;
 
     BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/legoapi.saga/screen.cpp", 0x561);
     glGenTextures(1, &nativePauseTex.platform.gl_tex);
@@ -166,7 +180,7 @@ SAGA_HOST_WEAK void InitStillRender(variptr_u *, variptr_u) {
     pause_rndr_mtl->tex_id = static_cast<i16>(pause_rt);
     pause_rndr_mtl->shader_desc.diffuse_color[0] = -1;
     pause_rndr_mtl->shader_desc.unknown_a8 = 1;
-    pause_rndr_mtl->shader_desc.vtx_desc.flags |= 0x40800;
+    pause_rndr_mtl->shader_desc.vtx_desc.flags = (pause_rndr_mtl->shader_desc.vtx_desc.flags & ~0x3800u) | 0x40800u;
     NuMtlUpdate(pause_rndr_mtl);
     pause_rndr_on = 0;
 }

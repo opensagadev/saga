@@ -835,7 +835,7 @@ static __used__ void creatureEditor_cbSelectTriggerArea(eduimenu_s *parent, edui
     i32 index = 0;
     NULISTHDR *list = creatureEditor_AreaList();
     for (NULISTLNK *link = NuLinkedListGetHead(list); link != nullptr;
-         link = NuLinkedListGetNext(list, link), ++index) {
+         link = NuLinkedListGetNext(creatureEditor_AreaList(), link), ++index) {
         if (creatureEditor_Current()->trigger_area == link) {
             eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 1, 1, creatureEditor_cbSetTriggerArea,
                                                       reinterpret_cast<char *>(link) + 8));

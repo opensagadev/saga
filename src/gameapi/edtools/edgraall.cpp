@@ -729,12 +729,12 @@ void edgraDoInput(nupad_s *pad) {
                 edgraDetermineNearestInstance(-1.0f);
             } else if (edgra_nearest != -1) {
                 const i32 count = GrassClumps[edgra_nearest].element_count;
-                if (pressed & 8) {
+                if (pad->digital_buttons_pressed & 8) {
                     ++edgra_nearest_instance;
                     if (edgra_nearest_instance == count)
                         edgra_nearest_instance = 0;
                 }
-                if (pressed & 2) {
+                if (pad->digital_buttons_pressed & 2) {
                     --edgra_nearest_instance;
                     if (edgra_nearest_instance == -1)
                         edgra_nearest_instance = count - 1;
@@ -853,15 +853,18 @@ void edgraDoInput(nupad_s *pad) {
                 edgra_clump_size = 256;
         } else {
             if (edgra_nearest != -1 && edgra_nearest_instance != -1) {
-                edgra_clump_s &clump = GrassClumps[edgra_nearest];
-                GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->field_0c +=
+                GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, edgra_nearest_instance)->field_0c +=
                     static_cast<f32>(pad->analog_left_pad_up) / 5000.0f;
-                GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->field_0c -=
+                GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, edgra_nearest_instance)->field_0c -=
                     static_cast<f32>(pad->analog_left_pad_down) / 5000.0f;
-                if (GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->field_0c > 1.0f)
-                    GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->field_0c = 1.0f;
-                if (GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->field_0c < 0.1f)
-                    GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->field_0c = 0.1f;
+                if (GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, edgra_nearest_instance)->field_0c >
+                    1.0f)
+                    GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, edgra_nearest_instance)->field_0c =
+                        1.0f;
+                if (GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, edgra_nearest_instance)->field_0c <
+                    0.1f)
+                    GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, edgra_nearest_instance)->field_0c =
+                        0.1f;
             }
             if (pad->analog_left_pad_up || pad->analog_left_pad_down)
                 edgraInitAllClumps();

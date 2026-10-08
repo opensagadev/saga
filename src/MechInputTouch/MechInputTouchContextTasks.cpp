@@ -530,8 +530,8 @@ bool MechTouchTaskBuildIt::Update() {
     room = buildit->built_object_count;
     VuVec position;
     target.Get()->GetPos(position, buildit->built_object_count);
-    position.x -= player->apiobj.position.x;
     position.y -= player->apiobj.position.y;
+    position.x -= player->apiobj.position.x;
     position.z -= player->apiobj.position.z;
     const f32 distance_squared = position.x * position.x + position.y * position.y + position.z * position.z;
     if (distance_squared < 4.0f) {

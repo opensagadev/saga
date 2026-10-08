@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 73.75593,
+    "fuzzy_match_percent": 73.7722,
     "total_code": "4722419",
     "matched_code": "572433",
     "matched_code_percent": 12.121605,
@@ -15732,7 +15732,7 @@
           "address": 4469936,
           "offset": 3579968,
           "size": 359,
-          "match_percent": 93.505615
+          "match_percent": 93.865166
         },
         {
           "name": "_ZN24MechTouchTaskUseTeleport6UpdateEv",
@@ -18011,7 +18011,7 @@
           "address": 4497120,
           "offset": 3607152,
           "size": 307,
-          "match_percent": 61.272728
+          "match_percent": 77.90909
         },
         {
           "name": "_ZN22MechJumpAutoPilotAddon21AnalyseJumpTrajectoryEv",
@@ -19587,7 +19587,7 @@
           "address": 4023248,
           "offset": 3133280,
           "size": 608,
-          "match_percent": 59.581562
+          "match_percent": 60.446808
         },
         {
           "name": "_ZL27creatureEditor_cbSelectTypeP10eduimenu_sP10eduiitem_sj",
@@ -19667,7 +19667,7 @@
           "address": 4222448,
           "offset": 3332480,
           "size": 1704,
-          "match_percent": 81.61858
+          "match_percent": 81.05868
         },
         {
           "name": "creatureEditor_GetNearest",
@@ -26743,7 +26743,7 @@
           "address": 3612000,
           "offset": 2722032,
           "size": 3387,
-          "match_percent": 68.444725
+          "match_percent": 73.983665
         },
         {
           "name": "_ZL15edgracbFileLoadP10eduimenu_sP10eduiitem_sj",
@@ -42575,7 +42575,7 @@
           "address": 2305648,
           "offset": 1415680,
           "size": 1715,
-          "match_percent": 44.303104
+          "match_percent": 53.88544
         }
       ]
     },
@@ -47358,7 +47358,7 @@
           "address": 1507680,
           "offset": 617712,
           "size": 533,
-          "match_percent": 38.029198
+          "match_percent": 41.12409
         },
         {
           "name": "_Z23Animate_REPUBLICGUNSHIPP12GameObject_s",
@@ -56290,7 +56290,7 @@
           "address": 5024544,
           "offset": 4134576,
           "size": 3087,
-          "match_percent": 32.95224
+          "match_percent": 32.98209
         },
         {
           "name": "_ZL19GizSpinner_ResetAllPvS_S_",
@@ -77450,7 +77450,7 @@
           "address": 4769088,
           "offset": 3879120,
           "size": 663,
-          "match_percent": 60.444443
+          "match_percent": 68.9127
         },
         {
           "name": "_Z19DrawPauseScreenWipev",
@@ -77569,7 +77569,7 @@
           "address": 3183712,
           "offset": 2293744,
           "size": 125,
-          "match_percent": 33.627453
+          "match_percent": 33.333332
         },
         {
           "name": "_ZNK19ShaderMtlDescFilter14getVertexFlagsEv",
@@ -77577,7 +77577,7 @@
           "address": 3183840,
           "offset": 2293872,
           "size": 318,
-          "match_percent": 39.132652
+          "match_percent": 79.32653
         },
         {
           "name": "_ZN19ShaderManagerOpenGL12createShaderER19ShaderMtlDescFilterbP14NuShaderObjecti",
@@ -79821,7 +79821,7 @@
           "address": 3473200,
           "offset": 2583232,
           "size": 386,
-          "match_percent": 77.29885
+          "match_percent": 87.666664
         },
         {
           "name": "_Z28DebrisDrawCalculateClipBoxesP10debinftypeP16debkeydatatype_s",
@@ -82002,7 +82002,7 @@
           "address": 1213776,
           "offset": 323808,
           "size": 5414,
-          "match_percent": 49.63011
+          "match_percent": 51.59944
         },
         {
           "name": "_Z10FixUpAreasv",
@@ -90835,7 +90835,7 @@
           "address": 2753552,
           "offset": 1863584,
           "size": 583,
-          "match_percent": 56.330708
+          "match_percent": 59.76378
         }
       ]
     },

@@ -67,25 +67,20 @@ ShaderManagerOpenGL::~ShaderManagerOpenGL() {
 
 u32 ShaderMtlDescFilter::getVertexFlags() const {
     const u8 *vertex_descriptor = reinterpret_cast<const u8 *>(&desc->vtx_desc);
-    const u8 texture_flags = vertex_descriptor[1];
     const u8 attribute_flags = vertex_descriptor[2];
-    const u8 extra_attribute_flags = vertex_descriptor[3];
-    const bool extended = variant == 0 || desc->unknown_1b4 != 0;
-
     u32 flags = (attribute_flags >> 2) & 1;
     if ((attribute_flags & 3) != 0 && (attribute_flags & 0x40) == 0) {
         flags |= 2;
     }
-
-    const u8 texture_count = (texture_flags >> 1) & 3;
-    if (extended) {
+    if (variant == 0 || desc->unknown_1b4 != 0) {
+        const u8 texture_count = (vertex_descriptor[1] >> 1) & 3;
         if (texture_count != 0) {
             flags |= 4;
         }
-        if (texture_count >= 2) {
+        if ((variant == 0 || desc->unknown_1b4 != 0) && texture_count >= 2) {
             flags |= 8;
         }
-        if (texture_count == 3) {
+        if ((variant == 0 || desc->unknown_1b4 != 0) && texture_count == 3) {
             flags |= 0x10;
         }
     }
@@ -95,19 +90,18 @@ u32 ShaderMtlDescFilter::getVertexFlags() const {
     if ((attribute_flags & 8) != 0) {
         flags |= 0x80;
     }
+    const u8 extra_attribute_flags = vertex_descriptor[3];
     if ((extra_attribute_flags & 1) != 0) {
         flags |= 0x100;
     }
     if ((extra_attribute_flags & 2) != 0) {
         flags |= 0x400;
     }
-    if (extended) {
-        if (static_cast<i8>(desc->flagsbits_1bb) < 0) {
-            flags |= 0x800;
-        }
-        if ((texture_flags & 1) != 0) {
-            flags |= 0x1000;
-        }
+    if (variant == 0 && static_cast<i8>(desc->flagsbits_1bb) < 0) {
+        flags |= 0x800;
+    }
+    if ((variant == 0 || desc->unknown_1b4 != 0) && (vertex_descriptor[1] & 1) != 0) {
+        flags |= 0x1000;
     }
     return flags;
 }

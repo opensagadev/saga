@@ -119,26 +119,40 @@ void PlayRadio(char *special_name, char *blowup_name, i32 play) {
         if (blowup_name == NULL) {
             return;
         }
-        for (i32 i = 0; i < 8; i++) {
-            RadioEntry *radio = &radios[i];
-            bool match = radio->blowup != NULL && NuStrICmp(radio->blowup->name, blowup_name) == 0;
-            if (!match && special_name != NULL) {
+        RadioEntry *radio = NULL;
+        if (special_name != NULL) {
+            for (i32 i = 0; i < 8; i++) {
+                radio = &radios[i];
+                if (radio->blowup != NULL && NuStrICmp(radio->blowup->name, blowup_name) == 0) {
+                    goto stop_blowup;
+                }
                 char *name = NuSpecialGetName(&radio->special);
-                match = name != NULL && NuStrICmp(name, special_name) == 0;
+                if (name != NULL && NuStrICmp(name, special_name) == 0) {
+                    goto stop_special;
+                }
             }
-            if (!match) {
-                continue;
+        } else {
+            for (i32 i = 0; i < 8; i++) {
+                radio = &radios[i];
+                if (radio->blowup != NULL && NuStrICmp(radio->blowup->name, blowup_name) == 0) {
+                    goto stop_blowup;
+                }
             }
+        }
+        return;
 
-            if (radio->blowup != NULL) {
-                GizmoBlowupUpdateMatrix(radio->blowup);
-                radio->blowup->state_flags |= 1;
-            } else {
-                *NuSpecialGetInstanceMtx(&radio->special) = *NuSpecialGetMtx(&radio->special);
-                NuSpecialUpdate(&radio->special);
-            }
+    stop_blowup:
+        if (radio->blowup != NULL) {
+            GizmoBlowupUpdateMatrix(radio->blowup);
+            radio->blowup->state_flags |= 1;
             memset(radio, 0, sizeof(*radio));
             return;
         }
+    stop_special:
+        NUMTX *source = NuSpecialGetMtx(&radio->special);
+        NUMTX *instance = NuSpecialGetInstanceMtx(&radio->special);
+        *instance = *source;
+        NuSpecialUpdate(&radio->special);
+        memset(radio, 0, sizeof(*radio));
     }
 }

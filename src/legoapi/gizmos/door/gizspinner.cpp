@@ -966,9 +966,8 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
             if ((spinner->flags & GIZSPINNER_FLAG_HIDE_BASE) == 0 && qrand() < 0x800 && WORLD != NULL &&
                 WORLD->debris_sys != NULL && WORLD->debris_sys->entries != NULL) {
                 NUVEC position = {spinner->position.x, spinner->position.y + 0.3f, spinner->position.z};
-                const i32 effects[2] = {GizSpinnerGDeb_Fail[0], GizSpinnerGDeb_Fail[2]};
                 for (i32 effect = 0; effect < 2; ++effect) {
-                    const i32 id = effects[effect];
+                    const i32 id = GizSpinnerGDeb_Fail[effect == 0 ? 0 : 2];
                     if (id >= 0 && id < WORLD->debris_sys->named_count)
                         AddVariableShotDebrisEffect(WORLD->debris_sys->entries[id].effect, &position, 2, 0, 0);
                 }

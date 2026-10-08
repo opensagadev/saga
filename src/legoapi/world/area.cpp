@@ -511,8 +511,8 @@ load_type_done:
     f32 icon_time = 0.0f;
     bool character_load_active = true;
     bool fade_scene_active = false;
-    i32 skip_text_scroll = 0;
-    i32 draw_touch_prompt = 0;
+    bool skip_text_scroll = false;
+    bool draw_touch_prompt = false;
     f32 touch_prompt_time = 0.0f;
 
     const f32 icon_end_time = 3.1f + 0.6f;

@@ -715,6 +715,7 @@ load_android_texture:
 GLuint NuIOS_CreateGLTexFromHash(u32 hash) {
     char filename[0x10c];
     GLuint texture = 0;
+    const char *extension;
 
     g_textureHash = hash;
     comeFromHash = 1;
@@ -737,8 +738,11 @@ GLuint NuIOS_CreateGLTexFromHash(u32 hash) {
             }
             break;
         case ANDROID_S3TC_PLATFORM:
+            extension = "S3TC";
+            goto load_dds_format;
         case ANDROID_ETC1_PLATFORM: {
-            const char *extension = NuPlatform::Get()->GetCurrentPlatform() == ANDROID_S3TC_PLATFORM ? "S3TC" : "ETC1";
+            extension = "ETC1";
+        load_dds_format:
             snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.%s", hash, extension);
             texture = NuIOS_CreateGLTexFromPlatfomSpecificFile(filename);
             if (texture == 0) {
