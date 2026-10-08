@@ -312,19 +312,18 @@ uv1deb *GenDebIndexBounceXZ(debkeydatatype_s *key, debinftype *effect, float tim
         DebrisGetControlStackLock();
         if (freechunkcontrolsptr < debrischunks + debrischunksglass) {
             f32 collision_time = (0.0f - start_distance) / (end_distance - start_distance) * lifetime;
-            debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr];
-            control->particle_chunk = chunk;
-            control->expiry_time = time + collision_time;
-            control->owner = NULL;
-            control->active = 6;
-            control->effect_index = key->effect_index;
-            control->rotation_y = key->reflection_y;
-            control->field_01e = 0;
-            control->collision_plane = key->collision_plane;
-            control->restitution = key->reflection_scale;
-            control->collision_time = collision_time;
-            control->particle_index = key->field_18a % 32;
-            AddChunkControlToStack(control, &debris_chunk_control_stack[0]);
+            freechunkcontrols[freechunkcontrolsptr]->particle_chunk = chunk;
+            freechunkcontrols[freechunkcontrolsptr]->expiry_time = time + collision_time;
+            freechunkcontrols[freechunkcontrolsptr]->owner = NULL;
+            freechunkcontrols[freechunkcontrolsptr]->active = 6;
+            freechunkcontrols[freechunkcontrolsptr]->effect_index = key->effect_index;
+            freechunkcontrols[freechunkcontrolsptr]->rotation_y = key->reflection_y;
+            freechunkcontrols[freechunkcontrolsptr]->field_01e = 0;
+            freechunkcontrols[freechunkcontrolsptr]->collision_plane = key->collision_plane;
+            freechunkcontrols[freechunkcontrolsptr]->restitution = key->reflection_scale;
+            freechunkcontrols[freechunkcontrolsptr]->collision_time = collision_time;
+            freechunkcontrols[freechunkcontrolsptr]->particle_index = key->field_18a % 32;
+            AddChunkControlToStack(freechunkcontrols[freechunkcontrolsptr], &debris_chunk_control_stack[0]);
             ++freechunkcontrolsptr;
         }
         DebrisReleaseControlStackLock();

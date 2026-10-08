@@ -194,21 +194,23 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
 
     const u8 column = object->ai.group_column;
     const u8 row = object->ai.group_row;
-    NUVEC offset = {
-        static_cast<f32>((column + 1) / 2) * creature.x_spacing * ((column & 1) != 0 ? -1.0f : 1.0f),
-        0.0f,
-        -static_cast<f32>(row) * creature.z_spacing,
-    };
+    NUVEC offset;
+    offset.x = static_cast<f32>((column + 1) / 2) * creature.x_spacing;
+    if ((column & 1) != 0) {
+        offset.x = -offset.x;
+    }
+    offset.y = 0.0f;
+    offset.z = -creature.z_spacing * static_cast<f32>(row);
 
     i32 angle;
     AIPATHINFO *path_info;
     if (object->ai_respawn_count != 0 && object->ai.respawn_locator != NULL) {
-        AILOCATOR *locator = object->ai.respawn_locator;
-        angle = locator->flags;
+        angle = object->ai.respawn_locator->flags;
         NuVecRotateY(&offset, &offset, angle);
-        NuVecAdd(&object->apiobj.position, &offset, &locator->position);
-        path_info = &locator->path_info;
+        NuVecAdd(&object->apiobj.position, &offset, &object->ai.respawn_locator->position);
+        AILOCATOR *locator = object->ai.respawn_locator;
         object->ai.respawn_locator = NULL;
+        path_info = &locator->path_info;
     } else {
         angle = creature.y_rot;
         NuVecRotateY(&offset, &offset, angle);
@@ -339,11 +341,14 @@ void ResetAICreatures(AISYS_s *system) {
             object.ai.reset_mode = AI_CREATURE_RESET_DISABLED;
             continue;
         }
-        if (creature.count > 1 && creature.start_stagger > 0.0f && object.ai.group_member_index != 0) {
-            object.ai.reset_mode = AI_CREATURE_RESET_STAGGERED;
-            object.ai_spawn_delay =
-                static_cast<f32>(static_cast<u32>(object.ai.group_member_index)) * creature.start_stagger;
-            continue;
+        if (creature.count > 1) {
+            const f32 start_stagger = creature.start_stagger;
+            if (start_stagger > 0.0f && object.ai.group_member_index != 0) {
+                object.ai.reset_mode = AI_CREATURE_RESET_STAGGERED;
+                object.ai_spawn_delay =
+                    static_cast<f32>(static_cast<u32>(object.ai.group_member_index)) * start_stagger;
+                continue;
+            }
         }
 
         ResetAICreature(&object, system);

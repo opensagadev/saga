@@ -125,13 +125,13 @@ void NetStats::Draw(float x, float y, float width, float height, volatile NetSma
     NuPrim2DEnd();
 
     NuPrim2DBegin(3, 5, NULL);
+    float sample_y;
     i32 sample = sample_index + 1;
     for (i32 i = 0; i < 30; ++i) {
         if (sample > 29) {
             sample = 0;
         }
         const float sample_x = x + static_cast<float>(i) * x_step;
-        float sample_y;
         if (info == static_cast<NetSmallStats::eInfo>(0)) {
             sample_y = graph_bottom + static_cast<float>(samples[sample].values[0]) * byte_scale;
         } else if (info == static_cast<NetSmallStats::eInfo>(1)) {
@@ -150,7 +150,6 @@ void NetStats::Draw(float x, float y, float width, float height, volatile NetSma
             sample = 0;
         }
         const float sample_x = x + static_cast<float>(i) * x_step;
-        float sample_y;
         if (info == static_cast<NetSmallStats::eInfo>(0)) {
             sample_y = graph_bottom + static_cast<float>(samples[sample].values[1]) * byte_scale;
         } else if (info == static_cast<NetSmallStats::eInfo>(1)) {

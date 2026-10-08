@@ -620,7 +620,11 @@ static void GizForces_Draw(void *world_ptr, void *data, float) {
             continue;
         }
 
-        NUMTX *draw_matrix = NuSpecialGetDrawMtx(&force->anim_set->objects->special);
+        GAMEANIMOBJ_s *anim_object = force->anim_set->objects;
+        if (anim_object == NULL) {
+            continue;
+        }
+        NUMTX *draw_matrix = NuSpecialGetDrawMtx(&anim_object->special);
         NuSpecialDrawAt(&force->along_socket, draw_matrix);
         if ((force->config_flags & GIZFORCE_CONFIG_DRAW_REFLECTION) != 0) {
             NUMTX reflection_matrix;

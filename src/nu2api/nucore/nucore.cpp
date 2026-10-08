@@ -773,18 +773,20 @@ void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
         if (set.scene_first[0]) {
             NUDISPLAYLIST *list = &set.display_lists[0];
             NuDisplayListLinkItems(list, 1);
+            NUMTL *material = scene->mtls[0];
             list->items->type = 0x80;
             list->items->id = 3;
-            list->items->next = scene->mtls[0];
+            list->items->next = material;
             ++list->items;
             NuDisplayListLinkList(list, set.scene_first[0], set.scene_cursor[0]);
         }
         if (set.scene_first[1]) {
             NUDISPLAYLIST *list = &set.display_lists[1];
             NuDisplayListLinkItems(list, 1);
+            NUMTL *material = scene->mtls[0];
             list->items->type = 0x80;
             list->items->id = 3;
-            list->items->next = scene->mtls[0];
+            list->items->next = material;
             ++list->items;
             NuDisplayListLinkList(list, set.scene_first[1], set.scene_cursor[1]);
         }

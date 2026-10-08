@@ -200,7 +200,9 @@ static inline u32 Collection_NeighbourFlags(i32 col, i32 row, i32 sx, i32 sy) {
 
 void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, APICHARACTERMODELLIST_s *models,
                      float alpha, i32 hide_selected) {
+    const f32 base_dx = COLLECTION_DX;
     const f32 base_dy = COLLECTION_DY;
+    const f32 base_size = COLLECTION_ICONSIZE;
     nuhspecial_s *special = collection_draw_hspecial;
     i32 (*valid)(COLLECTION_s *, i32) = collection_draw_IsValidFn;
     collection_draw_hspecial = NULL;
@@ -211,8 +213,8 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
     const i32 columns = collection->count_x;
     if (count == 0 || columns == 0)
         return;
-    f32 dx = COLLECTION_DX * scale;
-    f32 size = COLLECTION_ICONSIZE * scale;
+    f32 dx = base_dx * scale;
+    f32 size = base_size * scale;
     const i32 rows = count / columns + (count % columns != 0);
     if (Game_OptionsSave != NULL && Game_OptionsSave->field11_0xb != 0) {
         dx *= 0.75f;
@@ -334,10 +336,12 @@ i32 Collection_GetIDList(COLLECTION_s *collection, u32 model_flag_mask, u32 requ
         ++result_count;
 
         if (first_id != NULL) {
-            if (*first_id == -1) {
-                *first_id = id;
-            } else if (second_id != NULL && *second_id == -1) {
-                *second_id = id;
+            i32 *selection = first_id;
+            if (*selection != -1) {
+                selection = second_id;
+            }
+            if (selection != NULL && *selection == -1) {
+                *selection = id;
             }
         }
     }
