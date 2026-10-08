@@ -1800,10 +1800,14 @@ extern "C" {
             TERRAIN_GROUP &group = groups[i];
             if (group.chunk_type != 0)
                 continue;
-            group_min_x[i] = MIN(group.bounds_min.x, 200000000.0f);
-            group_min_z[i] = MIN(group.bounds_min.z, 200000000.0f);
-            group_max_x[i] = MAX(group.bounds_max.x, -200000000.0f);
-            group_max_z[i] = MAX(group.bounds_max.z, -200000000.0f);
+            group_min_x[i] = 200000000.0f;
+            group_min_z[i] = 200000000.0f;
+            group_max_x[i] = -200000000.0f;
+            group_max_z[i] = -200000000.0f;
+            group_min_x[i] = MIN(group.bounds_min.x, group_min_x[i]);
+            group_min_z[i] = MIN(group.bounds_min.z, group_min_z[i]);
+            group_max_x[i] = MAX(group.bounds_max.x, group_max_x[i]);
+            group_max_z[i] = MAX(group.bounds_max.z, group_max_z[i]);
             i32 x_distance = static_cast<i32>((group_min_x[i] + group_max_x[i]) * 0.5f - minimum_x);
             i32 x_cell = static_cast<i32>(static_cast<f32>(x_distance * 7) / (maximum_x - minimum_x));
             if (x_cell < 0)
