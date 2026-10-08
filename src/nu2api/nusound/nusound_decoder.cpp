@@ -288,7 +288,7 @@ void NuSoundDecodeThread::ThreadFunc(void *self_) {
     while (true) {
         self->semaphore.Wait();
 
-        Loader &entry = *reinterpret_cast<Loader *>(&self->loaders[self->head_index % 128]);
+        Loader &entry = *reinterpret_cast<Loader *>(&self->loaders[(i32)self->head_index % 128]);
         Loader request(entry);
         entry.~Loader();
         __sync_fetch_and_add(&self->head_index, 1);

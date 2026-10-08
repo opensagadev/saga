@@ -1427,7 +1427,8 @@ extern "C" {
         text3d_width = width;
         f32 height = NuQFntHeight(SmartTextFont != NULL ? SmartTextFont : QFont2D);
         text3d_height = height;
-        f32 draw_y = y + NuQFntBaseline(SmartTextFont != NULL ? SmartTextFont : QFont2D) - height * 0.5f;
+        y += NuQFntBaseline(SmartTextFont != NULL ? SmartTextFont : QFont2D);
+        f32 draw_y = y - height * 0.5f;
         f32 button_scale = draw_x_scale;
         if (draw_x_scale != draw_y_scale) {
             if (ButtonScaleMode == 1)

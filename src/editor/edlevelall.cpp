@@ -1893,20 +1893,19 @@ void LevelEditor::DrawInfoText(char **lines, i32 count, i32 x, i32 y, i32 availa
                                i32 background) {
     NuQFntPushPrintMode(2);
     NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
-    NUQFNT *font = system_qfont;
-    NuQFntSet(font);
-    const f32 line_height = NuQFntHeight(font) * 0.15625f;
-    const f32 font_height = NuQFntHeight(font);
-    const f32 baseline = NuQFntBaseline(font);
+    NuQFntSet(system_qfont);
+    const i32 line_height = static_cast<i32>(NuQFntHeight(system_qfont) * 0.15625f);
+    const f32 font_height = NuQFntHeight(system_qfont);
+    const f32 baseline = NuQFntBaseline(system_qfont);
     i32 width = 0;
     i32 height = 0;
     for (i32 index = 0; index < count; ++index) {
         if (lines[index] != NULL) {
-            const i32 line_width = static_cast<i32>(NuQFntPrintLenU(font, lines[index])) >> 4;
+            const i32 line_width = static_cast<i32>(NuQFntPrintLenU(system_qfont, lines[index])) >> 4;
             if (line_width > width) {
                 width = line_width;
             }
-            height += static_cast<i32>(line_height);
+            height += line_height;
         }
     }
     NuQFntPopCoordinateSystem();
@@ -1923,12 +1922,13 @@ void LevelEditor::DrawInfoText(char **lines, i32 count, i32 x, i32 y, i32 availa
     NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, background, edLevel2dMtl);
     NuQFntPushPrintMode(2);
     NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
-    NuQFntSet(font);
-    NuQFntSetColour(font, text_colour);
+    NuQFntSet(system_qfont);
+    NuQFntSetColour(system_qfont, text_colour);
     for (i32 index = 0; index < count; ++index) {
         if (lines[index] != NULL) {
-            NuQFntPrintEx(font, x << 4, static_cast<i32>(font_height * 0.125f + baseline) + y * 8, 0x10, lines[index]);
-            y += static_cast<i32>(line_height);
+            NuQFntPrintEx(system_qfont, x << 4, static_cast<i32>(0.125f * font_height + baseline) + y * 8, 0x10,
+                          lines[index]);
+            y += line_height;
         }
     }
     NuQFntPopCoordinateSystem();

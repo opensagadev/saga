@@ -83,10 +83,10 @@ static void Attractos_Draw(void *context, void *, float) {
     GameObject_s *nearest_player = NULL;
     if (world->lev_objs[72].active == 0 || world->attractos == NULL)
         return;
+    ATTRACTO *attracto = static_cast<ATTRACTO *>(world->attractos);
     u16 spin = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 5.0f) / 5.0f * 65536.0f);
     f32 phase = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f;
     f32 pulse = 0.2f * NU_SIN_LUT(phase) + 0.8f;
-    ATTRACTO *attracto = static_cast<ATTRACTO *>(world->attractos);
     for (i32 i = 0; i < world->attracto_count; ++i, ++attracto) {
         attracto->drawn = 0;
         if (!attracto->visible)

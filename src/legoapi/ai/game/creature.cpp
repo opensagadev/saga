@@ -107,7 +107,7 @@ void InitAICreatures(AISYS_s *system) {
             continue;
         }
 
-        i32 count = creature.count;
+        u8 count = creature.count;
         if (count == 0) {
             continue;
         }
