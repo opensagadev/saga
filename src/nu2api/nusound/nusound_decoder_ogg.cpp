@@ -150,8 +150,8 @@ u64 NuSoundDecoderOGG::Decode(NuSoundSource &source, NuSoundBuffer &buffer, bool
         __sync_fetch_and_add(&this->ring_read_pos, 1);
     }
 
-    NuSoundStreamDesc *desc = source.GetStreamDesc();
     NuSoundBuffer::Context &context = buffer.GetCurrentContext();
+    NuSoundStreamDesc *desc = source.GetStreamDesc();
 
     if (this->locked_buffer != NULL) {
         this->locked_buffer->Lock();

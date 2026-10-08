@@ -410,11 +410,12 @@ i32 NuSoundStreamingSample::ReCue(f32 start_offset, bool loop) {
     this->sound_buffer1->Lock();
     context = this->file_loader->FillStreamBuffer(this->sound_buffer1, loop);
 
-    if (context.size2 != 0) {
+    if (context.size2 == 0) {
+        if ((context.flags & 2) == 0) {
+            goto stream_error;
+        }
+    } else {
         this->some_count++;
-    } else if ((context.flags & 2) == 0) {
-        this->file_loader->CloseStream();
-        return 2;
     }
     this->sound_buffer1->SetCurrentContext(context);
     context.flags &= ~1;
@@ -424,11 +425,12 @@ i32 NuSoundStreamingSample::ReCue(f32 start_offset, bool loop) {
         this->sound_buffer2->Lock();
         context = this->file_loader->FillStreamBuffer(this->sound_buffer2, loop);
 
-        if (context.size2 != 0) {
+        if (context.size2 == 0) {
+            if ((context.flags & 2) == 0) {
+                goto stream_error;
+            }
+        } else {
             this->some_count++;
-        } else if ((context.flags & 2) == 0) {
-            this->file_loader->CloseStream();
-            return 2;
         }
         this->sound_buffer2->SetCurrentContext(context);
         context.flags &= ~1;
@@ -436,6 +438,10 @@ i32 NuSoundStreamingSample::ReCue(f32 start_offset, bool loop) {
     }
 
     return 0;
+
+stream_error:
+    this->file_loader->CloseStream();
+    return 2;
 }
 
 bool NuSoundStreamingSample::IsLocked() const {

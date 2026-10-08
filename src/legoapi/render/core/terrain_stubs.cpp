@@ -77,8 +77,8 @@ void TerrainSkinAllocate(terrsitu_s *terrain_group) {
     if (skin_index >= PlatSkinCnt)
         return;
     ++TerrainUpadteCnt;
-    PLATSKININFO *info = &PlatSkinInfo[skin_index];
     if (group->data != NULL) {
+        PLATSKININFO *info = &PlatSkinInfo[skin_index];
         SkinMemInfo[info->cache_slot].last_used = TerrainUpadteCnt;
         return;
     }
@@ -102,6 +102,7 @@ void TerrainSkinAllocate(terrsitu_s *terrain_group) {
         for (i32 i = 0; i < 16; ++i)
             CurTerr->index_levels[i].entry_count = 0;
     }
+    PLATSKININFO *info = &PlatSkinInfo[skin_index];
     group->data = info->terrain_data;
     info->cache_slot = slot;
     cache->skin_index = skin_index;

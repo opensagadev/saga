@@ -3273,8 +3273,8 @@ static i32 edrtlProcFog(float delta_time, nupad_s *pad) {
     edcamMoveEx(pad, delta_time);
     edcamGetPosAng(&pcpos, &peax, &peay);
     f32 camera_step = camscale_factor * NuFabs(edcamGetDist());
-    if (camera_step < min_r)
-        camera_step = min_r;
+    if (camera_step < 1.0f)
+        camera_step = 1.0f;
 
     if (menu_cancelled != 0 && pad->digital_buttons != 0)
         return 0;
@@ -3402,8 +3402,10 @@ static i32 edrtlProcBurn(float delta_time, nupad_s *pad) {
             if (set != NULL && set->selected_index != -1) {
                 burnout_s *burnout = &set->burnouts[set->selected_index];
                 edcamSetPos(&burnout->position);
-                set->field_558 = burnout->field_1c;
-                set->field_55c = burnout->field_20;
+                edrtl_edit_burnset->field_558 =
+                    edrtl_edit_burnset->burnouts[edrtl_edit_burnset->selected_index].field_1c;
+                edrtl_edit_burnset->field_55c =
+                    edrtl_edit_burnset->burnouts[edrtl_edit_burnset->selected_index].field_20;
             }
         }
 
