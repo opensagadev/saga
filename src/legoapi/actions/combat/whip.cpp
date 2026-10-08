@@ -134,19 +134,19 @@ void Whip_MoveCode(GameObject_s *object) {
 
     f32 *frame = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
     if (frame != NULL) {
-        bool activate = false;
+        i32 activate = 0;
         object->context_animation_timer += FRAMETIME;
         if ((object->context_flags & 0x40) == 0) {
             f32 action_frame = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
             if (action_frame >= 1.0f && *frame >= action_frame) {
                 object->context_flags |= 0x40;
-                activate = true;
+                activate = 1;
             }
         }
         if (object->context_animation_timer >= object->airborne_action_duration) {
             object->character_context = -1;
             if ((object->context_flags & 0x40) == 0) {
-                activate = true;
+                activate = 1;
             }
         }
 

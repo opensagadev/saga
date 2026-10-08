@@ -285,7 +285,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
             NuQFntSetScale(QFont3DZ, x_scale, y_scale);
         }
         Text3DStringEncode(episode_name, encoded);
-        NuQFntMove(QFont3DZ, NuQFntPrintLenW(QFont3DZ, encoded) * -0.5f, y, 0.0f);
+        NuQFntMove(QFont3DZ, -NuQFntPrintLenW(QFont3DZ, encoded) * 0.5f, y, 0.0f);
         NuQFntPrintW(QFont3DZ, encoded);
         y += NuQFntHeight(QFont3DZ) * 1.5f;
     }
@@ -293,7 +293,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
     if (episode_text != NULL) {
         NuQFntSetScale(QFont3DZ, x_scale, y_scale * 2.0f);
         Text3DStringEncode(episode_text, encoded);
-        NuQFntMove(QFont3DZ, NuQFntPrintLenW(QFont3DZ, encoded) * -0.5f, y, 0.0f);
+        NuQFntMove(QFont3DZ, -NuQFntPrintLenW(QFont3DZ, encoded) * 0.5f, y, 0.0f);
         NuQFntPrintW(QFont3DZ, encoded);
         y += NuQFntHeight(QFont3DZ) * 1.5f;
     }
@@ -301,7 +301,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
     if (chapter_text != NULL) {
         NuQFntSetScale(QFont3DZ, x_scale, y_scale);
         Text3DStringEncode(chapter_text, encoded);
-        NuQFntMove(QFont3DZ, NuQFntPrintLenW(QFont3DZ, encoded) * -0.5f, y, 0.0f);
+        NuQFntMove(QFont3DZ, -NuQFntPrintLenW(QFont3DZ, encoded) * 0.5f, y, 0.0f);
         NuQFntPrintW(QFont3DZ, encoded);
         y += NuQFntHeight(QFont3DZ) * 1.5f;
     }
@@ -309,7 +309,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
     if (area_name != NULL) {
         NuQFntSetScale(QFont3DZ, x_scale, y_scale * 2.0f);
         Text3DStringEncode(area_name, encoded);
-        NuQFntMove(QFont3DZ, NuQFntPrintLenW(QFont3DZ, encoded) * -0.5f, y, 0.0f);
+        NuQFntMove(QFont3DZ, -NuQFntPrintLenW(QFont3DZ, encoded) * 0.5f, y, 0.0f);
         NuQFntPrintW(QFont3DZ, encoded);
         y += NuQFntHeight(QFont3DZ) * 1.5f;
     }
@@ -819,7 +819,7 @@ void Text_InsertCommasIntoNumber(char *number, char *text, i32 length) {
     char separator;
     if (Text_Language == 2) {
         separator = ' ';
-    } else if (Text_Language == 0 || Text_Language == 1 || Text_Language == 18) {
+    } else if (Text_Language == 18 || Text_Language == 1 || Text_Language == 0) {
         separator = ',';
     } else {
         separator = '.';

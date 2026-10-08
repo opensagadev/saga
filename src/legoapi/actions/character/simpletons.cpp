@@ -178,33 +178,35 @@ void oneAtOnce_MaintainArray() {
     }
 
     for (i32 player = 0; player < 8; ++player) {
+        if (Player[player] == NULL) {
+            continue;
+        }
         const i32 count = attacker_count[player];
-        for (i32 slot = 0; slot < count; ++slot) {
-            for (i32 previous = 0; previous < previous_count[player]; ++previous) {
-                if (AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][previous]) {
+        for (i32 slot = 0; slot < count && AtOnce_attackingPlayer[player][slot].object != NULL; ++slot) {
+            for (i32 previous = 0; previous < 4; ++previous) {
+                if (previous < previous_count[player] &&
+                    AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][previous]) {
                     AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
-                    break;
                 }
             }
-        }
-
-        for (i32 remaining = count; remaining > 1; --remaining) {
-            for (i32 slot = 1; slot < remaining; ++slot) {
-                if (AtOnce_attackingPlayer[player][slot].distance < AtOnce_attackingPlayer[player][slot - 1].distance &&
-                    AtOnce_attackingPlayer[player][slot].distance !=
-                        AtOnce_attackingPlayer[player][slot - 1].distance) {
-                    GameObject_s *object = AtOnce_attackingPlayer[player][slot - 1].object;
-                    const f32 distance = AtOnce_attackingPlayer[player][slot - 1].distance;
-                    AtOnce_attackingPlayer[player][slot - 1] = AtOnce_attackingPlayer[player][slot];
-                    AtOnce_attackingPlayer[player][slot].object = object;
-                    AtOnce_attackingPlayer[player][slot].distance = distance;
+            for (i32 adjacent = 1; adjacent <= count - slot; ++adjacent) {
+                if (AtOnce_attackingPlayer[player][adjacent].distance <
+                    AtOnce_attackingPlayer[player][adjacent - 1].distance) {
+                    GameObject_s *object = AtOnce_attackingPlayer[player][adjacent - 1].object;
+                    const f32 distance = AtOnce_attackingPlayer[player][adjacent - 1].distance;
+                    AtOnce_attackingPlayer[player][adjacent - 1].object =
+                        AtOnce_attackingPlayer[player][adjacent].object;
+                    AtOnce_attackingPlayer[player][adjacent - 1].distance =
+                        AtOnce_attackingPlayer[player][adjacent].distance;
+                    AtOnce_attackingPlayer[player][adjacent].object = object;
+                    AtOnce_attackingPlayer[player][adjacent].distance = distance;
                 }
             }
         }
 
         if (Player[player] != NULL) {
             const i32 attack_limit = AtOnce_maxAttackers < count ? AtOnce_maxAttackers : count;
-            for (i32 slot = 0; slot < attack_limit; ++slot) {
+            for (i32 slot = 0; slot < attack_limit && AtOnce_attackingPlayer[player][slot].object != NULL; ++slot) {
                 AtOnce_attackingPlayer[player][slot].object->one_at_once_player = static_cast<u8>(player);
             }
         }
@@ -227,7 +229,14 @@ void NarrowSockExceptions_Init(NARROWSOCKEXCEPTION *exceptions) {
 }
 
 void oneAtOnce_SetNumAttackers(i32 attackers) {
-    AtOnce_maxAttackers = MAX(0, MIN(attackers, 4));
+    if (attackers < 0) {
+        AtOnce_maxAttackers = 0;
+        return;
+    }
+    if (attackers >= 5) {
+        attackers = 4;
+    }
+    AtOnce_maxAttackers = attackers;
 }
 
 void oneAtOnce_SetInitDistPerRow(float distance) {

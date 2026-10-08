@@ -318,7 +318,7 @@ void NuMemoryManager::ConvertToUsedBlock(FreeHeader *header, u32 alignment, u32 
         debug->category = category;
         debug->flags.alloc_flags = flags;
         debug->flags.ctx_id = static_cast<u16>(this->cur_ctx->id);
-        debug->flags.unknown = debug->flags.ctx_id;
+        debug->flags.unknown = 0;
 
         this->stats.bytes_alloc_by_category[category] += BLOCK_SIZE(header->block_header.value);
 
@@ -1834,7 +1834,7 @@ void NuMemoryManager::ValidateBlockDeferredContent(NuMemoryManager::Header *head
         --tag;
     u32 count = tag > 29 ? payload_size - 6 : payload_size - 5;
     count >>= 2;
-    if (tag == 29)
+    if (count == 0)
         return;
 
     u32 i = 0;

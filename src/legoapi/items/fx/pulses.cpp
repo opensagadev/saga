@@ -205,7 +205,10 @@ void Pulses_Configure(WORLDINFO_s *world, char *config) {
     pulse_sys.radial_hit_direction = 1;
 
     while (NuFParGetLine(parser) != 0) {
-        if (!(NuFParGetWord(parser) == 0 || NuStrICmp(parser->word_buf, "pulses_start") != 0)) {
+        if (NuFParGetWord(parser) == 0) {
+            break;
+        }
+        if (NuStrICmp(parser->word_buf, "pulses_start") == 0) {
             while (NuFParGetLine(parser) != 0) {
                 memset(pulse, 0, sizeof(*pulse));
                 if (NuFParGetWord(parser) == 0) {
@@ -213,7 +216,7 @@ void Pulses_Configure(WORLDINFO_s *world, char *config) {
                 }
 
                 if (NuStrICmp(parser->word_buf, "pulses_end") == 0) {
-                    break;
+                    goto parsing_done;
                 }
 
                 if (NuStrICmp(parser->word_buf, "sfx_onloop") == 0) {
@@ -285,10 +288,10 @@ void Pulses_Configure(WORLDINFO_s *world, char *config) {
                     }
                 }
             }
-            break;
         }
     }
 
+parsing_done:
     NuFParDestroy(parser);
     if (pulse_sys.pulse_count == 0) {
         return;

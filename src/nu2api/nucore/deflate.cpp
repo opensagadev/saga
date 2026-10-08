@@ -172,7 +172,7 @@ static void FillBits(DEFLATECONTEXT *ctx) {
         i32 symbol;                                                                                                    \
                                                                                                                        \
         if (ctx->num_bits_available < 0x10) {                                                                          \
-            FillBits(ctx);                                                                                             \
+            PEEKBITS(ctx, 0x10);                                                                                       \
         }                                                                                                              \
                                                                                                                        \
         u32 bits = ctx->bit_buffer & ((1 << 0x10) - 1);                                                                \

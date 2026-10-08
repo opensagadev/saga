@@ -1375,18 +1375,18 @@ extern "C" {
             NUMTX matrix;
             NUVEC position;
             if (key != NULL) {
-                bool assigned = (effect->particle_keys[0] != -1 && &debkeydata[effect->particle_keys[0]] == key) ||
-                                (effect->particle_keys[1] != -1 && &debkeydata[effect->particle_keys[1]] == key) ||
-                                (effect->particle_keys[2] != -1 && &debkeydata[effect->particle_keys[2]] == key) ||
-                                (effect->particle_keys[3] != -1 && &debkeydata[effect->particle_keys[3]] == key) ||
-                                (effect->particle_keys[4] != -1 && &debkeydata[effect->particle_keys[4]] == key) ||
-                                (effect->particle_keys[5] != -1 && &debkeydata[effect->particle_keys[5]] == key) ||
-                                (effect->particle_keys[6] != -1 && &debkeydata[effect->particle_keys[6]] == key) ||
-                                (effect->particle_keys[7] != -1 && &debkeydata[effect->particle_keys[7]] == key);
-                bool visible = true;
+                i32 assigned = (effect->particle_keys[0] != -1 && &debkeydata[effect->particle_keys[0]] == key) ||
+                               (effect->particle_keys[1] != -1 && &debkeydata[effect->particle_keys[1]] == key) ||
+                               (effect->particle_keys[2] != -1 && &debkeydata[effect->particle_keys[2]] == key) ||
+                               (effect->particle_keys[3] != -1 && &debkeydata[effect->particle_keys[3]] == key) ||
+                               (effect->particle_keys[4] != -1 && &debkeydata[effect->particle_keys[4]] == key) ||
+                               (effect->particle_keys[5] != -1 && &debkeydata[effect->particle_keys[5]] == key) ||
+                               (effect->particle_keys[6] != -1 && &debkeydata[effect->particle_keys[6]] == key) ||
+                               (effect->particle_keys[7] != -1 && &debkeydata[effect->particle_keys[7]] == key);
+                i32 visible = 1;
                 if (!assigned && effect->sound_range > 0.0f && effect->use_explicit_clip_box == 0 &&
                     key->cutoff_distance > effect->sound_range)
-                    visible = false;
+                    visible = 0;
                 if (key->field_2f7 == 0)
                     continue;
                 if (visible && pass != 4 && effect->generator_type == 0 && effect->use_explicit_clip_box == 0 &&

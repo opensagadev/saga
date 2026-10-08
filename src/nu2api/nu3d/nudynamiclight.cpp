@@ -491,8 +491,16 @@ void NuDynamicLight::computeWarpEffect(NuDynamicLight::RenderSet &set) {
     points[9].w = 0.0f;
     VuVec transformed[10];
     f32 min_z = FLT_MAX, min_y = FLT_MAX, max_z = -FLT_MAX, max_y = -FLT_MAX;
-    for (i32 i = 0; i < 10; ++i)
-        WarpAccumulatePoint(points[i], light_space, transformed[i], min_z, min_y, max_z, max_y);
+    WarpAccumulatePoint(points[0], light_space, transformed[0], min_z, min_y, max_z, max_y);
+    WarpAccumulatePoint(points[1], light_space, transformed[1], min_z, min_y, max_z, max_y);
+    WarpAccumulatePoint(points[2], light_space, transformed[2], min_z, min_y, max_z, max_y);
+    WarpAccumulatePoint(points[3], light_space, transformed[3], min_z, min_y, max_z, max_y);
+    WarpAccumulatePoint(points[4], light_space, transformed[4], min_z, min_y, max_z, max_y);
+    WarpAccumulatePoint(points[5], light_space, transformed[5], min_z, min_y, max_z, max_y);
+    WarpAccumulatePoint(points[6], light_space, transformed[6], min_z, min_y, max_z, max_y);
+    WarpAccumulatePoint(points[7], light_space, transformed[7], min_z, min_y, max_z, max_y);
+    WarpAccumulatePoint(points[8], light_space, transformed[8], min_z, min_y, max_z, max_y);
+    WarpAccumulatePoint(points[9], light_space, transformed[9], min_z, min_y, max_z, max_y);
     f32 fovy, aspect, camera_near, camera_far;
     NuMtxGetPerspectiveD3D(&cacheCameraProj, &fovy, &aspect, &camera_near, &camera_far);
     f32 depth = max_z - min_z;
@@ -505,8 +513,16 @@ void NuDynamicLight::computeWarpEffect(NuDynamicLight::RenderSet &set) {
     NuVecMtxTransformH(&camera_light, &camera_position, &light_space);
     NUVEC translation = {-camera_light.x, -((max_y + min_y) * 0.5f), -(min_z - near_plane)};
     f32 left = FLT_MAX, bottom = FLT_MAX, right = -FLT_MAX, top = -FLT_MAX;
-    for (i32 i = 0; i < 10; ++i)
-        WarpProjectBounds(transformed[i], translation, near_plane, left, bottom, right, top);
+    WarpProjectBounds(transformed[0], translation, near_plane, left, bottom, right, top);
+    WarpProjectBounds(transformed[1], translation, near_plane, left, bottom, right, top);
+    WarpProjectBounds(transformed[2], translation, near_plane, left, bottom, right, top);
+    WarpProjectBounds(transformed[3], translation, near_plane, left, bottom, right, top);
+    WarpProjectBounds(transformed[4], translation, near_plane, left, bottom, right, top);
+    WarpProjectBounds(transformed[5], translation, near_plane, left, bottom, right, top);
+    WarpProjectBounds(transformed[6], translation, near_plane, left, bottom, right, top);
+    WarpProjectBounds(transformed[7], translation, near_plane, left, bottom, right, top);
+    WarpProjectBounds(transformed[8], translation, near_plane, left, bottom, right, top);
+    WarpProjectBounds(transformed[9], translation, near_plane, left, bottom, right, top);
     NUMTX offset, frustum;
     NuMtxSetTranslation(&offset, &translation);
     NuMtxSetFrustumBlend(&frustum, left, right, bottom, top, near_plane, depth + near_plane);

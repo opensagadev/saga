@@ -287,7 +287,7 @@ void MechAutoJumpManager::ProcessJumpConnections() {
     while (jump != NULL) {
         MechAutoJumpConnection *next = reinterpret_cast<MechAutoJumpConnection *>(
             NuLinkedListGetNext(&jump_connections, reinterpret_cast<NULISTLNK *>(jump)));
-        if (jump->active == 0 && jump->is_using == 0 && jump->cooldown <= 0.005f) {
+        if (jump->active == 0 && jump->is_using == 0 && !(jump->cooldown > 0.0f)) {
             DeleteJumpConnection(jump);
         } else {
             const u32 colour = jump->colour;

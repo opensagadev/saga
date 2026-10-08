@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 73.69151,
+    "fuzzy_match_percent": 73.7097,
     "total_code": "4722419",
     "matched_code": "571557",
     "matched_code_percent": 12.103055,
@@ -14443,7 +14443,7 @@
           "address": 4492880,
           "offset": 3602912,
           "size": 469,
-          "match_percent": 96.163795
+          "match_percent": 96.86207
         },
         {
           "name": "_ZN19MechAutoJumpManager7ProcessEv",
@@ -39273,7 +39273,7 @@
           "address": 1559616,
           "offset": 669648,
           "size": 49,
-          "match_percent": 35.57143
+          "match_percent": 83.78571
         },
         {
           "name": "_Z28oneAtOnce_SetAttackersPerRowi",
@@ -39305,7 +39305,7 @@
           "address": 1559776,
           "offset": 669808,
           "size": 1215,
-          "match_percent": 46.62238
+          "match_percent": 45.374126
         },
         {
           "name": "_Z14GetGenericGooni",
@@ -40340,7 +40340,7 @@
           "address": 5163904,
           "offset": 4273936,
           "size": 1854,
-          "match_percent": 52.66482
+          "match_percent": 52.789474
         },
         {
           "name": "_Z12Whip_ReleaseP12GameObject_s",
@@ -47366,7 +47366,7 @@
           "address": 1493632,
           "offset": 603664,
           "size": 549,
-          "match_percent": 33.44853
+          "match_percent": 38.40441
         },
         {
           "name": "_Z16Animate_PROTOCOLP12GameObject_s",
@@ -47710,7 +47710,7 @@
           "address": 4885536,
           "offset": 3995568,
           "size": 850,
-          "match_percent": 84.02913
+          "match_percent": 85.85922
         },
         {
           "name": "_Z28GameAnimSet_IsAnimationResetP13GAMEANIMSET_s",
@@ -56306,7 +56306,7 @@
           "address": 5021920,
           "offset": 4131952,
           "size": 2623,
-          "match_percent": 59.78776
+          "match_percent": 65.839386
         },
         {
           "name": "_Z18GizSpinners_UpdatePvS_f",
@@ -56314,7 +56314,7 @@
           "address": 5024544,
           "offset": 4134576,
           "size": 3087,
-          "match_percent": 27.971642
+          "match_percent": 32.95224
         },
         {
           "name": "_ZL19GizSpinner_ResetAllPvS_S_",
@@ -63548,7 +63548,7 @@
           "address": 5131280,
           "offset": 4241312,
           "size": 1586,
-          "match_percent": 55.601604
+          "match_percent": 58.058823
         },
         {
           "name": "_Z12Pulses_ResetP10PULSESYS_s",
@@ -68614,7 +68614,7 @@
           "address": 4776672,
           "offset": 3886704,
           "size": 241,
-          "match_percent": 45.363636
+          "match_percent": 53.025974
         },
         {
           "name": "_Z14Text_MakeScorejPc",
@@ -68670,7 +68670,7 @@
           "address": 4778720,
           "offset": 3888752,
           "size": 3008,
-          "match_percent": 74.53858
+          "match_percent": 79.191315
         },
         {
           "name": "_Z25MenuUpdateViewTextStringsP6MENU_s",
@@ -77275,7 +77275,7 @@
           "address": 3906621,
           "offset": 3016653,
           "size": 2171,
-          "match_percent": 54.582905
+          "match_percent": 55.19829
         },
         {
           "name": "_ZL15edrtlDrawLightsv",
@@ -79917,7 +79917,7 @@
           "address": 3502656,
           "offset": 2612688,
           "size": 2266,
-          "match_percent": 61.721073
+          "match_percent": 70.69628
         },
         {
           "name": "DebrisGlassParticlesActive",
@@ -91934,7 +91934,7 @@
           "address": 2837520,
           "offset": 1947552,
           "size": 8465,
-          "match_percent": 76.32698
+          "match_percent": 76.46646
         },
         {
           "name": "_ZN14NuDynamicLight22refreshShadowTransformERNS_9RenderSetE",
@@ -96093,7 +96093,7 @@
           "address": 992816,
           "offset": 102848,
           "size": 526,
-          "match_percent": 56.406452
+          "match_percent": 52.219357
         },
         {
           "name": "_ZN15NuMemoryManager14ClearUsedBlockEPNS_6HeaderEj",
@@ -96365,7 +96365,7 @@
           "address": 1001664,
           "offset": 111696,
           "size": 304,
-          "match_percent": 60.1625
+          "match_percent": 66.8375
         },
         {
           "name": "_ZN15NuMemoryManager13ValidateBlockEPv",
@@ -98325,7 +98325,7 @@
           "address": 3234576,
           "offset": 2344608,
           "size": 1059,
-          "match_percent": 46.351974
+          "match_percent": 49.64145
         },
         {
           "name": "_Z22DecompressHuffmanTreesP14DEFLATECONTEXT",
@@ -98333,7 +98333,7 @@
           "address": 3235648,
           "offset": 2345680,
           "size": 1488,
-          "match_percent": 24.233707
+          "match_percent": 26.269663
         },
         {
           "name": "_Z23DecodeUncompressedBlockP14DEFLATECONTEXT",
