@@ -147,8 +147,8 @@ void DoInput(WORLDINFO_s *world) {
         if (Paused == 0) {
             if (GameMenu[GameMenuLevel].menu == -1 && CutSceneWaiting == 0) {
                 if ((CUTSTOPGAME == 0 || CutScene_IsSkippable(static_cast<CUTINFO *>(CutStopInfo))) &&
-                    MiniCutCam == 0 && memcard_autosavestarted == 0 && memcard_autosavepostdelay <= 0.0f &&
-                    memcard_autosavepredelay <= 0.0f && GameTimer.update_count != 0) {
+                    MiniCutCam == 0 && memcard_autosavestarted == 0 && !(memcard_autosavepostdelay > 0.0f) &&
+                    !(memcard_autosavepredelay > 0.0f) && GameTimer.update_count != 0) {
                     PauseGame(static_cast<i32>(player->pad_gamepad - GamePad));
                     player_state_changed = 1;
                     continue;

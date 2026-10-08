@@ -281,7 +281,7 @@ void Animate_ATAT(GameObject_s *object) {
         packet.requested_animation = object->context_animation;
     } else {
         packet.requested_animation = CHARACTER_ANIMATION_IDLE;
-        if (static_cast<i16>(object->apiobj.field_0x1f8) < 0 &&
+        if (static_cast<i8>(object->apiobj.field_0x1f8) < 0 &&
             object->apiobj.character_model->model_data_b[15] != NULL) {
             packet.requested_animation = 15;
         }
@@ -1129,7 +1129,7 @@ void Animate_CHARACTER(GameObject_s *object) {
         packet.requested_animation = CHARACTER_ANIMATION_IDLE;
         if (object->pad_gamepad->input_magnitude > 0.0f && object->apiobj.character_model->model_data_b[0] != NULL) {
             packet.requested_animation = CHARACTER_ANIMATION_WALK;
-        } else if (object->apiobj.character_model->model_data_b[15] != NULL && !(hub_jabbaawake <= 0.0f)) {
+        } else if (object->apiobj.character_model->model_data_b[15] != NULL && hub_jabbaawake > 0.0f) {
             packet.requested_animation = 15;
         }
         return;

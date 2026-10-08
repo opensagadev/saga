@@ -303,12 +303,15 @@ void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_e
     this->tracks = tracksPtr;
     if (0 < count) {
         const isize track_rebase = reinterpret_cast<char *>(tracksPtr) - reinterpret_cast<char *>(pTVar3);
-        for (Album *album = this->albums; album < &this->albums[count]; album++) {
+        Album *album = this->albums;
+        Album *end = album + count;
+        do {
             if (album->tracks_source != NULL) {
                 album->tracks_source =
                     reinterpret_cast<Track *>(reinterpret_cast<char *>(album->tracks_source) + track_rebase);
             }
-        }
+            ++album;
+        } while (album != end);
         tracksPtr = this->tracks;
     }
 

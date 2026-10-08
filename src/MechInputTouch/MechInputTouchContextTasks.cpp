@@ -412,12 +412,14 @@ bool MechTouchTaskAttack::Update() {
     GameObject_s *object = Player[controller->player_id];
     if (object != NULL && target.Get() != NULL) {
         MechObjectInterface *opponent = target.Get();
-        const NUVEC origin = object->apiobj.position;
+        const f32 origin_z = object->apiobj.position.z;
+        const f32 origin_y = object->apiobj.position.y;
+        const f32 origin_x = object->apiobj.position.x;
         VuVec delta;
         opponent->GetPos(delta, -1);
-        delta.x -= origin.x;
-        delta.y -= origin.y;
-        delta.z -= origin.z;
+        delta.y -= origin_y;
+        delta.x -= origin_x;
+        delta.z -= origin_z;
         const f32 distance_squared = delta.x * delta.x + delta.z * delta.z;
         const f32 radius = opponent->GetRadius();
         bool nearby = false;

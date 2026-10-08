@@ -135,7 +135,8 @@ i32 SpecialSfxLoad(char *path, WORLDINFO_s *world) {
         NuSpecialFind(world->current_gscn, &entry->special, name, 1);
         entry->event_count = EdFileReadChar();
         if (version == 2) {
-            entry->flags = (entry->flags & 0xf0) | (EdFileReadChar() & 0xf);
+            const i32 flags = EdFileReadChar();
+            entry->flags = (entry->flags & 0xf0) | (flags & 0xf);
         }
         world->special_sfx_count++;
     }
@@ -149,7 +150,8 @@ i32 SpecialSfxLoad(char *path, WORLDINFO_s *world) {
             name[length] = '\0';
             event->sfx_id = static_cast<i16>(GetSfxId(name));
             event->flags = static_cast<u8>(EdFileReadChar());
-            event->flags = (event->flags & ~2u) | ((IsSfxLooping(event->sfx_id) & 1) << 1);
+            const i32 looping = IsSfxLooping(event->sfx_id);
+            event->flags = (event->flags & ~2u) | ((looping & 1) << 1);
             event->trigger_frame = EdFileReadFloat();
             event->previous_frame = EdFileReadFloat();
             world->special_sfx_event_count++;
@@ -157,11 +159,33 @@ i32 SpecialSfxLoad(char *path, WORLDINFO_s *world) {
     }
 
     event = world->special_sfx_events;
-    for (i32 i = 0; i < world->special_sfx_count; i++) {
-        specialsfx_s *entry = &world->special_sfx[i];
-        entry->events = event;
-        for (i32 j = 0; j < entry->event_count; j++, event++) {
-            event->next = (j + 1 < entry->event_count) ? event + 1 : NULL;
+    if (world->special_sfx_count > 0) {
+        SPECIALSFXEVENT_s *event_end = event + world->special_sfx_event_count;
+        specialsfx_s *entry = world->special_sfx;
+        specialsfx_s *entry_end = entry + world->special_sfx_count;
+        while (entry < entry_end) {
+            SPECIALSFXEVENT_s *next = event == event_end
+                                          ? NULL
+                                          : reinterpret_cast<SPECIALSFXEVENT_s *>(reinterpret_cast<uintptr_t>(event) +
+                                                                                  sizeof(SPECIALSFXEVENT_s));
+            entry->events = event;
+            if (entry->event_count > 1) {
+                SPECIALSFXEVENT_s *previous = event;
+                for (i32 j = 0; j < entry->event_count - 1; ++j) {
+                    previous->next = next;
+                    event = reinterpret_cast<SPECIALSFXEVENT_s *>(reinterpret_cast<uintptr_t>(next) +
+                                                                  sizeof(SPECIALSFXEVENT_s));
+                    previous = next;
+                    next = event;
+                }
+                if (previous != NULL)
+                    previous->next = NULL;
+            } else {
+                if (event != NULL)
+                    event->next = NULL;
+                event = next;
+            }
+            ++entry;
         }
     }
 
@@ -286,7 +310,7 @@ void UpdateSpecialSfx(WORLDINFO_s *world) {
                     if (trigger <= frame && frame <= previous) {
                         play = true;
                     }
-                } else if (direction == 1 && (flags & 8) != 0 && frame <= trigger && trigger <= previous) {
+                } else if (direction == 1 && (flags & 8) != 0 && frame <= trigger && frame >= previous) {
                     play = true;
                 }
             } else if ((flags & 0xc) == 0xc) {

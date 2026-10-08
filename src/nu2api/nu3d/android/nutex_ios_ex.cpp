@@ -770,8 +770,6 @@ i32 GetMipOffset(i32 width, i32 height, NUTEXFORMAT format, i32 depth, bool isCu
                  i32 targetSlice) {
     i32 totalOffset = 0;
     i32 currentSlice = 0;
-    i32 mipLimit;
-    i32 sliceLimit;
     bool isAuto;
 
     if (depth == 0) {
@@ -781,14 +779,8 @@ i32 GetMipOffset(i32 width, i32 height, NUTEXFORMAT format, i32 depth, bool isCu
     isAuto = targetMip < 0 && targetSlice < 0;
 
     if (isAuto != 0) {
-        sliceLimit = 5;
-        mipLimit = mips;
-        if (!isCubemap) {
-            sliceLimit = depth;
-        }
-    } else {
-        mipLimit = targetMip;
-        sliceLimit = targetSlice;
+        targetSlice = isCubemap ? 5 : depth;
+        targetMip = mips;
     }
 
     bool isCompressed;
@@ -810,7 +802,7 @@ i32 GetMipOffset(i32 width, i32 height, NUTEXFORMAT format, i32 depth, bool isCu
     }
 
     while (true) {
-        i32 innerMipLimit = mipLimit;
+        i32 innerMipLimit = targetMip;
 
         if (isCubemap && (currentSlice < targetSlice)) {
             innerMipLimit = mips;
@@ -858,7 +850,7 @@ i32 GetMipOffset(i32 width, i32 height, NUTEXFORMAT format, i32 depth, bool isCu
             m++;
         }
 
-        if (!isCubemap || (currentSlice == sliceLimit)) {
+        if (!isCubemap || (currentSlice == targetSlice)) {
             break;
         }
 

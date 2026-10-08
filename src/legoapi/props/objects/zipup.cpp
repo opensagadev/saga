@@ -388,27 +388,30 @@ static i32 ZipUps_Load(void *world_ptr, void *) {
         world->zipups[index].hook_x_rotation = EdFileReadUnsignedShort();
         world->zipups[index].hook_y_rotation = EdFileReadUnsignedShort();
 
+        ZIPUP *config_zipup_0 = &world->zipups[index];
         const u8 config_0 = EdFileReadUnsignedChar() != 0;
-        world->zipups[index].flags = static_cast<u8>((world->zipups[index].flags & ~ZIPUP_FLAG_CONFIG_0) | config_0);
+        config_zipup_0->flags = static_cast<u8>((config_zipup_0->flags & ~ZIPUP_FLAG_CONFIG_0) | config_0);
+        ZIPUP *config_zipup_1 = &world->zipups[index];
         const u8 config_1 = EdFileReadUnsignedChar() != 0;
-        world->zipups[index].flags =
-            static_cast<u8>((world->zipups[index].flags & ~ZIPUP_FLAG_CONFIG_1) | (config_1 << 1));
+        config_zipup_1->flags = static_cast<u8>((config_zipup_1->flags & ~ZIPUP_FLAG_CONFIG_1) | (config_1 << 1));
+        ZIPUP *config_zipup_3 = &world->zipups[index];
         const u8 config_3 = EdFileReadUnsignedChar() != 0;
-        world->zipups[index].flags =
-            static_cast<u8>((world->zipups[index].flags & ~ZIPUP_FLAG_CONFIG_3) | (config_3 << 3));
+        config_zipup_3->flags = static_cast<u8>((config_zipup_3->flags & ~ZIPUP_FLAG_CONFIG_3) | (config_3 << 3));
 
         if (!(version <= 1)) {
+            ZIPUP *config_zipup_4 = &world->zipups[index];
             const u8 config_4 = EdFileReadUnsignedChar() != 0;
-            world->zipups[index].flags =
-                static_cast<u8>((world->zipups[index].flags & ~ZIPUP_FLAG_CONFIG_4) | (config_4 << 4));
+            config_zipup_4->flags = static_cast<u8>((config_zipup_4->flags & ~ZIPUP_FLAG_CONFIG_4) | (config_4 << 4));
             if (version != 2) {
+                ZIPUP *config_zipup_5 = &world->zipups[index];
                 const u8 config_5 = EdFileReadUnsignedChar() != 0;
-                world->zipups[index].flags =
-                    static_cast<u8>((world->zipups[index].flags & ~ZIPUP_FLAG_CONFIG_5) | (config_5 << 5));
+                config_zipup_5->flags =
+                    static_cast<u8>((config_zipup_5->flags & ~ZIPUP_FLAG_CONFIG_5) | (config_5 << 5));
                 if (version != 3) {
+                    ZIPUP *config_zipup_2 = &world->zipups[index];
                     const u8 config_2 = EdFileReadUnsignedChar() != 0;
-                    world->zipups[index].flags =
-                        static_cast<u8>((world->zipups[index].flags & ~ZIPUP_FLAG_CONFIG_2) | (config_2 << 2));
+                    config_zipup_2->flags =
+                        static_cast<u8>((config_zipup_2->flags & ~ZIPUP_FLAG_CONFIG_2) | (config_2 << 2));
                 } else {
                     world->zipups[index].flags |= ZIPUP_FLAG_CONFIG_2;
                 }

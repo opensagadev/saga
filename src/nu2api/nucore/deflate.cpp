@@ -365,7 +365,7 @@ i32 DecompressHuffmanTrees(DEFLATECONTEXT *ctx) {
     u8 allCodeLengths[288 + 32 + 137];
 
     i32 i = 0;
-    while (i < hlit + hdist) {
+    do {
         i32 symbol = READHUFFMANSYMBOL(ctx, ctx->temp_code_length);
 
         if (symbol < 16) {
@@ -383,7 +383,7 @@ i32 DecompressHuffmanTrees(DEFLATECONTEXT *ctx) {
             memset(allCodeLengths + i, 0, symbol);
             i += symbol;
         }
-    }
+    } while (i < hlit + hdist);
 
     if (!BuildHuffmanTree(&ctx->length_tree, allCodeLengths, hlit)) {
         LOG_WARN("failed to build length huffman tree");

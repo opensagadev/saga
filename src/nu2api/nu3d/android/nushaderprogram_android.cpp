@@ -52,8 +52,9 @@ static i32 GetHLSLRegisterIndex(const char *source, const char *uniform_name, bo
     }
     const char *number = match + NuStrLen(search_name);
     if (texture) {
-        if (NuStrNICmp(number, "TEXUNIT", NuStrLen("TEXUNIT")) == 0) {
-            number += NuStrLen("TEXUNIT");
+        const i32 token_length = NuStrLen("TEXUNIT");
+        if (NuStrNICmp(number, "TEXUNIT", token_length) == 0) {
+            number += token_length;
         }
     } else if (NuToUpper(static_cast<u8>(*number)) == 'C') {
         ++number;
@@ -184,16 +185,27 @@ extern "C" NUSHADERPROGRAM *NuShaderProgramCreateIOS(const char *vertex_source, 
     NuShaderObjectBindAttributeLocationsGLSL(program);
     NUSHADERPROGRAM *result = NULL;
     const i32 start = programPool.next;
-    for (i32 pass = 0; pass < 2 && result == NULL; ++pass) {
-        const i32 end = pass == 0 ? 64 : start;
-        for (i32 slot = pass == 0 ? start : 0; slot < end; ++slot) {
-            if ((programPool.occupied[slot / 8] & (1 << (slot & 7))) != 0)
-                continue;
-            programPool.occupied[slot / 8] |= 1 << (slot & 7);
-            programPool.next = (slot + 1) % 64;
-            result = &programPool.programs[slot];
-            break;
-        }
+    if (start <= 63) {
+        i32 slot = start;
+        do {
+            if ((programPool.occupied[slot / 8] & (1 << (slot & 7))) == 0) {
+                programPool.occupied[slot / 8] |= 1 << (slot & 7);
+                programPool.next = (slot + 1) % 64;
+                result = &programPool.programs[slot];
+                break;
+            }
+        } while (++slot != 64);
+    }
+    if (result == NULL && start > 0) {
+        i32 slot = 0;
+        do {
+            if ((programPool.occupied[slot / 8] & (1 << (slot & 7))) == 0) {
+                programPool.occupied[slot / 8] |= 1 << (slot & 7);
+                programPool.next = (slot + 1) % 64;
+                result = &programPool.programs[slot];
+                break;
+            }
+        } while (++slot != start);
     }
     result->vertex_shader = vertex_shader;
     result->fragment_shader = fragment_shader;

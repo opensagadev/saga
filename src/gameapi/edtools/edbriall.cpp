@@ -438,11 +438,11 @@ void edbriDoInput(nupad_s *pad) {
             }
             edbri_active_menu = edbri_options_menu;
         }
-        if ((pressed & 0x40) && edbri_plank_instance_type != -1)
+        if ((pad->digital_buttons_pressed & 0x40) && edbri_plank_instance_type != -1)
             edbriBridgeCreate(&edbri_cam_pos);
         if ((pad->digital_buttons & 0x20) && edbri_nearest != -1)
             edbriBridgePlace(edbri_nearest, &edbri_cam_pos);
-        if (pressed & 0x10) {
+        if (pad->digital_buttons_pressed & 0x10) {
             if (edbri_nearest != -1)
                 edbriBridgeDestroy(edbri_nearest);
             edbri_nearest = -1;

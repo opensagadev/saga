@@ -592,6 +592,8 @@ NUQFNT *NuQFntReadBuffer(VARIPTR *font, VARIPTR *buf, VARIPTR buf_end) {
     texture.addr = ((usize *)base.void_ptr)[2];
     texture_size = relocation_table.addr - texture.addr;
     relocation_table_end = relocation_entry.addr - base.addr;
+    const i32 texture_offset = texture.addr - base.addr;
+    const i32 relocation_offset = relocation_table.addr - base.addr;
     gl_texture = NuIOS_CreateGLTexFromPlatformInMemory(texture.void_ptr, &width, &height, false);
     if (g_buttonsFont != 0) {
         width /= 2;
@@ -599,8 +601,13 @@ NUQFNT *NuQFntReadBuffer(VARIPTR *font, VARIPTR *buf, VARIPTR buf_end) {
     }
 
     g_buttonsFont = 0;
-    memmove(texture.void_ptr, relocation_table.void_ptr, relocation_table_end - (relocation_table.addr - base.addr));
-    *(i32 *)base.void_ptr = texture.addr - base.addr;
+    base = *font;
+    texture.addr = base.addr + texture_offset;
+    relocation_table.addr = base.addr + relocation_offset;
+    memmove(texture.void_ptr, relocation_table.void_ptr, relocation_table_end - relocation_offset);
+    base = *font;
+    *(i32 *)base.void_ptr = texture_offset;
+    texture.addr = base.addr + texture_offset;
 
     if (relocation_count != 0) {
         relocation_table.addr = texture.addr;
@@ -618,7 +625,7 @@ NUQFNT *NuQFntReadBuffer(VARIPTR *font, VARIPTR *buf, VARIPTR buf_end) {
 
     buf->addr -= texture_size;
     memset(buf->void_ptr, 0, texture_size);
-    result = *(VUFNT **)NuPtrBlockFix(base.void_ptr);
+    result = *(VUFNT **)NuPtrBlockFix(font->void_ptr);
 
     native_texture = (NUNATIVETEX *)ALIGN(buf->addr, 4);
     buf->addr = (usize)(native_texture + 1);

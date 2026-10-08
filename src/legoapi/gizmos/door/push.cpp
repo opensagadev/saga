@@ -198,24 +198,18 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
             continue;
         if (!NuSpecialGetVisibilityFn(&p->special) || !(p->runtime_flags_0c8 & 0x4d))
             continue;
-        NUVEC corners[4];
         f32 left = fabsf(p->bounds_min.x) - 0.006f, right = fabsf(p->bounds_max.x) - 0.006f;
         f32 back = fabsf(p->bounds_min.z) - 0.006f, front = fabsf(p->bounds_max.z) - 0.006f;
-        for (i32 i = 0; i < 4; ++i)
-            corners[i] = *p->position;
-        f32 y = (corners[0].y - fabsf(p->bounds_min.y) + 0.001f) + 0.025f;
-        corners[0].x -= left;
-        corners[0].z -= back;
-        corners[1].x += right;
-        corners[1].z -= back;
-        corners[2].x += right;
-        corners[2].z += front;
-        corners[3].x -= left;
-        corners[3].z += front;
+        NUVEC *position = p->position;
+        f32 y = (position->y - fabsf(p->bounds_min.y) + 0.001f) + 0.025f;
         if (p->ground_height > y)
             y = p->ground_height + 0.25f;
-        for (i32 i = 0; i < 4; ++i)
-            corners[i].y = y;
+        NUVEC corners[4] = {
+            {position->x - left, y, position->z - back},
+            {position->x + right, y, position->z - back},
+            {position->x + right, y, position->z + front},
+            {position->x - left, y, position->z + front},
+        };
         PlatOnOff(p->platform_id, 0);
         bool platforms_off = p->supporting_block || p->previous_supporting_block;
         f32 heights[4];

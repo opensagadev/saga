@@ -255,19 +255,21 @@ void AIPathCnxControlSysUpdate(AIPATHCNXCONTROLSYS_s *system) {
         if (on) {
             controller->flags |= 0x20;
             controller->connection->open = (controller->flags >> 3) & 1;
-            controller->connection->traversal_flags[controller->flags & 1] &= ~controller->off_flags;
-            controller->connection->traversal_flags[controller->flags & 1] |= controller->on_flags;
+            AIPATHCNX *connection = controller->connection;
+            connection->traversal_flags[controller->flags & 1] &= ~controller->off_flags;
+            connection->traversal_flags[controller->flags & 1] |= controller->on_flags;
             if ((controller->flags & 2) != 0) {
-                controller->connection->traversal_flags[(~controller->flags) & 1] &= ~controller->off_flags;
-                controller->connection->traversal_flags[(~controller->flags) & 1] |= controller->on_flags;
+                connection->traversal_flags[(~controller->flags) & 1] &= ~controller->off_flags;
+                connection->traversal_flags[(~controller->flags) & 1] |= controller->on_flags;
             }
         } else {
             controller->connection->open = (controller->flags >> 4) & 1;
-            controller->connection->traversal_flags[controller->flags & 1] &= ~controller->on_flags;
-            controller->connection->traversal_flags[controller->flags & 1] |= controller->off_flags;
+            AIPATHCNX *connection = controller->connection;
+            connection->traversal_flags[controller->flags & 1] &= ~controller->on_flags;
+            connection->traversal_flags[controller->flags & 1] |= controller->off_flags;
             if ((controller->flags & 2) != 0) {
-                controller->connection->traversal_flags[(~controller->flags) & 1] &= ~controller->on_flags;
-                controller->connection->traversal_flags[(~controller->flags) & 1] |= controller->off_flags;
+                connection->traversal_flags[(~controller->flags) & 1] &= ~controller->on_flags;
+                connection->traversal_flags[(~controller->flags) & 1] |= controller->off_flags;
             }
         }
     }
