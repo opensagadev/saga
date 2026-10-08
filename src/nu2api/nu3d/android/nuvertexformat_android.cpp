@@ -148,11 +148,11 @@ NuVertexFormatPS *NuGetVertexDeclaration(NUVERTEXDESCRIPTOR vtx_desc) {
     }
     i32 extra_stride = 0;
     if (instanced) {
-        format->attribs[12].type = 0x1406;
-        format->attribs[12].size = 3;
         format->attribs[12].normalized = 0;
         format->attribs[12].unknown_0c = 1;
         format->attribs[12].offset = 0;
+        format->attribs[12].type = 0x1406;
+        format->attribs[12].size = 3;
         format->attrib_mask |= 0x1000;
         extra_stride = 12;
     }

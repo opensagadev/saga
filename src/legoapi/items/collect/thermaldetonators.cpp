@@ -404,7 +404,8 @@ void PartUpdate_ThermalDetonator(PART_s *part) {
     if (part == NULL) {
         return;
     }
-    if ((part->active & 2) != 0 && (part->render_flags & 0x40) == 0) {
+    const u16 flags = static_cast<u16>(part->active) | (static_cast<u16>(part->render_flags) << 8);
+    if ((flags & 0x4002) == 2) {
         if (part->field_100 > 0.0f && part->field_100 < 1.0f) {
             PlaySfx(const_cast<char *>("ThermalDet_Beep"), &part->position);
             part->render_flags |= 0x40;
