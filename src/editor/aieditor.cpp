@@ -369,7 +369,7 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
             eduiMenuAddItem(menu, eduiItemToggleCreate(0x80, &attr, selected->game_flags >> 7, 4,
                                                        antinodeEditor_cbAntiNodeFlagsToggle,
                                                        const_cast<char *>("Never On A Platform")));
-            eduiMenuAddItem(menu, eduiItemToggleCreate(2, &attr, (selected->game_flags >> 1) & 1, 5,
+            eduiMenuAddItem(menu, eduiItemToggleCreate(2, &attr, (antinode_selected()->game_flags >> 1) & 1, 5,
                                                        antinodeEditor_cbAntiNodeFlagsToggle,
                                                        const_cast<char *>("Disbale direction memory")));
         }

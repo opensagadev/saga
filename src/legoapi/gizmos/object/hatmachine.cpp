@@ -127,9 +127,10 @@ static i32 HatMachine_Load(void *world_ptr, void *) {
                 EdFileReadNuVec(&system->machines[index].target_offset);
                 system->machines[index].scale = EdFileReadFloat();
                 if (version != 4) {
+                    HATMACHINE *machine = &system->machines[index];
                     const u8 hidden = static_cast<u8>(EdFileReadChar()) & 1;
-                    system->machines[index].flags = static_cast<HATMACHINE_FLAGS>(
-                        (system->machines[index].flags & ~HATMACHINE_FLAG_HIDE_MACHINE) | (hidden << 5));
+                    machine->flags =
+                        static_cast<HATMACHINE_FLAGS>((machine->flags & ~HATMACHINE_FLAG_HIDE_MACHINE) | (hidden << 5));
                 }
             }
             system->machines[index].platform_id = -1;

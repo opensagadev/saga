@@ -305,7 +305,8 @@ void EndScoreMessage(GAMEMESSAGE_s *message) {
             goto play_counter_sound;
         }
 
-        COINPACKET *packet = Player[player_index]->coinpacket;
+        GameObject_s *object = Player[player_index];
+        COINPACKET *packet = object->coinpacket;
         const u32 old_coins = packet->coins;
         if (static_cast<i16>(data->icon) != -1) {
             packet->lastcoin = data->icon;
@@ -313,13 +314,14 @@ void EndScoreMessage(GAMEMESSAGE_s *message) {
 
         if (BonusWinner == -1) {
             IncreaseScore(&packet->coins, data->score, 1);
+            packet = object->coinpacket;
             packet->scale = 1.5f;
         }
         if (BuildUpDone == 0) {
             BuildUpScale = 1.5f;
         }
         if (Arcade != 0) {
-            Arcade_CoinCollected(player_index, &packet->coins, old_coins);
+            Arcade_CoinCollected(static_cast<i8>(data->field_0xfd), &packet->coins, old_coins);
             goto play_counter_sound;
         }
         if (BonusArea == 0 || BonusWinner != -1 || packet->coins <= 999999) {
@@ -327,7 +329,7 @@ void EndScoreMessage(GAMEMESSAGE_s *message) {
         }
 
         packet->coins = 1000000;
-        SetBonusWinner(player_index);
+        SetBonusWinner(static_cast<i8>(data->field_0xfd));
         BonusWinFlag = 0;
         NewMenu(31, -1, -1);
         PlaySfx("MK-Panel", NULL);
