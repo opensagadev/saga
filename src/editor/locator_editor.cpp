@@ -1040,19 +1040,25 @@ process_buttons:
                     }
                 }
             } else if ((pad->digital_buttons_pressed & 0x08) != 0) {
-                next = aieditor->current_locator == nullptr
-                           ? (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators)
-                           : (EDLOCATOR_s *)NuLinkedListGetNext(&aieditor->locators, &aieditor->current_locator->link);
-                if (next == nullptr) {
-                    next = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
+                if (aieditor->current_locator != nullptr) {
+                    EDLOCATOR_s *&selection = aieditor->current_locator;
+                    selection = (EDLOCATOR_s *)NuLinkedListGetNext(&aieditor->locators, &selection->link);
                 }
+                if (aieditor->current_locator == nullptr) {
+                    EDLOCATOR_s *&selection = aieditor->current_locator;
+                    selection = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
+                }
+                next = aieditor->current_locator;
             } else {
-                next = aieditor->current_locator == nullptr
-                           ? (EDLOCATOR_s *)NuLinkedListGetTail(&aieditor->locators)
-                           : (EDLOCATOR_s *)NuLinkedListGetPrev(&aieditor->locators, &aieditor->current_locator->link);
-                if (next == nullptr) {
-                    next = (EDLOCATOR_s *)NuLinkedListGetTail(&aieditor->locators);
+                if (aieditor->current_locator != nullptr) {
+                    EDLOCATOR_s *&selection = aieditor->current_locator;
+                    selection = (EDLOCATOR_s *)NuLinkedListGetPrev(&aieditor->locators, &selection->link);
                 }
+                if (aieditor->current_locator == nullptr) {
+                    EDLOCATOR_s *&selection = aieditor->current_locator;
+                    selection = (EDLOCATOR_s *)NuLinkedListGetTail(&aieditor->locators);
+                }
+                next = aieditor->current_locator;
             }
         }
         aieditor->current_locator = next;

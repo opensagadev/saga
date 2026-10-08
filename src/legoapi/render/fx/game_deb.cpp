@@ -670,10 +670,13 @@ void DebrisDrawCalculateClipBoxes(debinftype *effect, debkeydatatype_s *key) {
     extent.y = (extent.y + padding) + 0.2f;
     extent.z = (extent.z + padding) + 0.2f;
     NUVEC minimum = {-extent.x, -extent.y, -extent.z};
-    if (effect->field_0a0 > 0.0f)
-        extent.y += (effect->field_0a0 * lifetime) * lifetime;
-    else if (effect->field_0a0 < 0.0f)
-        minimum.y = (effect->field_0a0 * lifetime) * lifetime - extent.y;
+    if (effect->field_0a0 > 0.0f) {
+        f32 gravity_lifetime = effect->particle_lifetime;
+        extent.y += (effect->field_0a0 * gravity_lifetime) * gravity_lifetime;
+    } else if (effect->field_0a0 < 0.0f) {
+        f32 gravity_lifetime = effect->particle_lifetime;
+        minimum.y = (effect->field_0a0 * gravity_lifetime) * gravity_lifetime - extent.y;
+    }
     f32 horizontal = extent.x > extent.z ? extent.x : extent.z;
     f32 radius;
     if (extent.y > -minimum.y)

@@ -85,18 +85,22 @@ static i32 TightRope_GetNumOutputs(GIZMO *gizmo) {
 }
 
 static i32 TightRope_MoveUpdate(GameObject_s *object, i32 jumping) {
-    if (!(object->pad_gamepad->input_magnitude > 0.0f) || object->context_animation == 0x8f) {
-        if (jumping == 0) {
-            object->context_animation = 0x88;
-        }
-        return 1;
-    }
-    NUVEC previous = object->context_destination;
-    TIGHTROPE *rope = static_cast<TIGHTROPE *>(object->field_0x788);
-    u16 rotation = rope->rotation;
-    f32 input = PushingTowardsAngle(GamePad_InputAngle(object, object->pad_gamepad), rotation);
+    NUVEC previous;
+    TIGHTROPE *rope;
+    u16 rotation;
+    f32 input;
     f32 direction;
     f32 speed;
+    NUVEC movement;
+    f32 margin;
+    i32 result;
+    if (!(object->pad_gamepad->input_magnitude > 0.0f) || object->context_animation == 0x8f) {
+        goto idle;
+    }
+    previous = object->context_destination;
+    rope = static_cast<TIGHTROPE *>(object->field_0x788);
+    rotation = rope->rotation;
+    input = PushingTowardsAngle(GamePad_InputAngle(object, object->pad_gamepad), rotation);
     if (input > NuTrigTable[0x3000]) {
         if (jumping != 0) {
             speed = 0.6f;
@@ -118,22 +122,17 @@ static i32 TightRope_MoveUpdate(GameObject_s *object, i32 jumping) {
         }
         direction = -1.0f;
     } else {
-        if (jumping == 0) {
-            object->context_animation = 0x88;
-        }
-        return 1;
+        goto idle;
     }
-    NUVEC movement;
     rope = static_cast<TIGHTROPE *>(object->field_0x788);
     NuVecScale(&movement, &rope->direction, speed * direction * FRAMETIME);
     NuVecAdd(&object->context_destination, &object->context_destination, &movement);
     rope = static_cast<TIGHTROPE *>(object->field_0x788);
     NuVecSub(&object->context_destination, &object->context_destination, &rope->start);
     object->context_destination.z = NuVecDot(&object->context_destination, &rope->direction);
-    f32 margin = (object->apiobj.character_data->game_character->flags_090 & 0x10000000) != 0
-                     ? object->apiobj.field_0x1e0
-                     : object->apiobj.field_0x1dc;
-    i32 result = 1;
+    margin = (object->apiobj.character_data->game_character->flags_090 & 0x10000000) != 0 ? object->apiobj.field_0x1e0
+                                                                                          : object->apiobj.field_0x1dc;
+    result = 1;
     if (object->context_destination.z > rope->horizontal_length - margin) {
         object->context_destination.z = rope->horizontal_length - margin;
         result = 0;
@@ -148,6 +147,11 @@ static i32 TightRope_MoveUpdate(GameObject_s *object, i32 jumping) {
         object->context_animation = 0x88;
     }
     return result;
+idle:
+    if (jumping == 0) {
+        object->context_animation = 0x88;
+    }
+    return 1;
 }
 
 static void TightRopes_Reset(void *world_info, void *, void *progress_data) {
@@ -253,8 +257,9 @@ static void TightRopes_Draw(void *world_info, void *, float) {
         }
 
         vertices[0].position = rope->start;
-        for (i32 point = 0; point < count; ++point) {
-            vertices[point + 1].position = *positions[point];
+        NURND_VERTEX3D *vertex = &vertices[1];
+        for (NUVEC **position = positions; position != positions + count; ++position, ++vertex) {
+            vertex->position = **position;
         }
         vertices[count + 1].position = rope->end;
         for (i32 point = 0; point <= count; ++point) {

@@ -39,6 +39,7 @@ extern "C" void NuShaderObjectBaseUpdateWaterTable(NUSHADEROBJECT *shader, numtl
     static i32 lastintsame = -1;
     static numtl_s *prev_mtl;
     static f32 theta = 0.7f;
+    NUVEC scale = {0.5f, 0.5f, 0.5f};
     i32 frame;
     memcpy(&frame, &nuapi.frame_count, sizeof(frame));
     const f32 *material = reinterpret_cast<const f32 *>(mtl);
@@ -46,11 +47,10 @@ extern "C" void NuShaderObjectBaseUpdateWaterTable(NUSHADEROBJECT *shader, numtl
         theta = material[0x60 / 4] * water_theta_step + theta;
     if (frame != lastintsame || mtl != prev_mtl) {
         NUMTX inverse;
-        NUVEC scale = {0.5f, 0.5f, 0.5f};
         NuMtxInvR(&inverse, &global_camera.mtx);
         NuMtxScale(&inverse, &scale);
-        inverse.m03 = inverse.m13 = inverse.m23 = 0.0f;
         const f32 amplitude = 0.1f * material[0x6c / 4];
+        inverse.m03 = inverse.m13 = inverse.m23 = 0.0f;
         u32 seed = 17;
         NuRandFloatSeeded(&seed);
         for (i32 i = 0; i < 32; ++i) {

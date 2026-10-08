@@ -353,9 +353,12 @@ void AddStreakPoints(nuvec_s *points, float duration, u32 colour, void **handle,
 
     STREAK_s *older = streak->next;
     NuVecSub(&streak->start_tangent, &older->position, &streak->position);
-    NuVecSub(&streak->end_tangent, &older->previous_position, &streak->previous_position);
-    NuVecScale(&streak->start_tangent, &streak->start_tangent, 1.0f / 3.0f);
-    NuVecScale(&streak->end_tangent, &streak->end_tangent, 1.0f / 3.0f);
+    NuVecSub(&header->streaks->end_tangent, &header->streaks->next->previous_position,
+             &header->streaks->previous_position);
+    NuVecScale(&header->streaks->start_tangent, &header->streaks->start_tangent, 1.0f / 3.0f);
+    NuVecScale(&header->streaks->end_tangent, &header->streaks->end_tangent, 1.0f / 3.0f);
+    streak = header->streaks;
+    older = streak->next;
 
     if (older->next == NULL) {
         NuVecSub(&older->start_tangent, &older->position, &streak->position);

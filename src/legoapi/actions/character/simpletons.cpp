@@ -183,11 +183,21 @@ void oneAtOnce_MaintainArray() {
         }
         const i32 count = attacker_count[player];
         for (i32 slot = 0; slot < count && AtOnce_attackingPlayer[player][slot].object != NULL; ++slot) {
-            for (i32 previous = 0; previous < 4; ++previous) {
-                if (previous < previous_count[player] &&
-                    AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][previous]) {
-                    AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
-                }
+            if (previous_count[player] > 0 &&
+                AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][0]) {
+                AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
+            }
+            if (previous_count[player] > 1 &&
+                AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][1]) {
+                AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
+            }
+            if (previous_count[player] > 2 &&
+                AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][2]) {
+                AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
+            }
+            if (previous_count[player] > 3 &&
+                AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][3]) {
+                AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
             }
             for (i32 adjacent = 1; adjacent <= count - slot; ++adjacent) {
                 if (AtOnce_attackingPlayer[player][adjacent].distance <

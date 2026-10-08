@@ -177,11 +177,14 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
             GameObject_s *source;
             if (explosion->object != NULL && !(Arcade_GetMode(NULL) == 99 && (explosion->field_0x24 & 0x10010) != 0)) {
                 source = explosion->object;
-                const bool target_player = object->field_0x27c != -1;
-                const bool source_player = source->apiobj.field_0x27c != -1;
-                if (target_player == source_player && (!target_player || target->field_0xd24 != 1.0f) &&
-                    ((object->field_0x1f4 ^ source->apiobj.field_0x1f4) & 1) == 0)
+                if (object->field_0x27c == -1) {
+                    if (source->apiobj.field_0x27c == -1 &&
+                        ((object->field_0x1f4 ^ source->apiobj.field_0x1f4) & 1) == 0)
+                        continue;
+                } else if (source->apiobj.field_0x27c != -1 && target->field_0xd24 != 1.0f &&
+                           ((object->field_0x1f4 ^ source->apiobj.field_0x1f4) & 1) == 0) {
                     continue;
+                }
             }
             explosion->field_0x00 |= object->field_0x1e4;
             explosion->field_0x04 |= object->field_0x1e8;

@@ -98,6 +98,7 @@ void LoopCode(GameObject_s *object, i32 jump_pressed, i32, GAMEPAD_s *pad, i32 a
         return;
     }
 
+    bool turn = false;
     GameObject_s *other = GetOtherActivePlayer(object);
     if (allow_loop != 0 && object->in_narrow_socket != 0 && other != NULL && other->in_narrow_socket != 0 &&
         other->character_context == 0x36 && other->context_animation_timer < other->airborne_action_duration - 0.2f &&
@@ -147,21 +148,7 @@ void LoopCode(GameObject_s *object, i32 jump_pressed, i32, GAMEPAD_s *pad, i32 a
         }
 
         const i32 absolute_difference = angle_difference < 0 ? -angle_difference : angle_difference;
-        if (absolute_difference > 0x3fff) {
-            if (allow_loop == 0 || jump_pressed == 0) {
-                return;
-            }
-            if (object->in_narrow_socket != 0 && other != NULL &&
-                (other->character_context == 0x36 || other->character_context == 0x2a ||
-                 other->character_context == 0x3a)) {
-                return;
-            }
-            StartTurn(object);
-            if (object->apiobj.player_controlled) {
-                Hint_SetComplete(0x617);
-            }
-            return;
-        }
+        turn = absolute_difference > 0x3fff;
     }
 
     if (allow_loop == 0 || jump_pressed == 0) {
@@ -169,6 +156,14 @@ void LoopCode(GameObject_s *object, i32 jump_pressed, i32, GAMEPAD_s *pad, i32 a
     }
     if (object->in_narrow_socket != 0 && other != NULL &&
         (other->character_context == 0x36 || other->character_context == 0x2a || other->character_context == 0x3a)) {
+        return;
+    }
+
+    if (turn) {
+        StartTurn(object);
+        if (object->apiobj.player_controlled) {
+            Hint_SetComplete(0x617);
+        }
         return;
     }
 

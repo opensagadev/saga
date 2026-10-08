@@ -80,8 +80,8 @@ pushblock_s *NearestPushBlock(WORLDINFO_s *world, nuvec_s *position, float range
     const NUVEC maximum = {position->x + range, position->y + range, position->z + range};
     pushblock_s *nearest = NULL;
     f32 nearest_distance = 1000000000.0f;
-    for (i32 i = 0; i < world->push_block_count; ++i) {
-        pushblock_s *block = &world->push_blocks[i];
+    pushblock_s *block = world->push_blocks;
+    for (i32 i = 0; i < world->push_block_count; ++i, ++block) {
         if ((block->packed_state_flags & 0x1040100) != 0x1040000)
             continue;
         NUVEC *candidate = block->position;
@@ -234,7 +234,7 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
     if (world->push_block_count <= 0)
         return nearest;
     f32 nearest_dist = 1000000000.0f;
-    for (i32 i = 0; i < world->push_block_count; ++i) {
+    for (i32 i = 0; i < world->push_block_count; ++i, blocks = world->push_blocks) {
         pushblock_s *block = &blocks[i];
         if (NuSpecialExistsFn(&block->special) != 0) {
             if (NuSpecialGetOnScreenFn(&block->special) == 0)
@@ -414,12 +414,16 @@ void GizmoPushBlockInitAndReset(WORLDINFO_s *world, void *progress) {
         const f32 back = fabsf(block->bounds_min.z) - 0.006f;
         const f32 front = fabsf(block->bounds_max.z) - 0.006f;
         const f32 y = centre.y - fabsf(block->bounds_min.y) + 0.001f + 0.025f;
-        NUVEC corners[4] = {
-            {centre.x - left, y, centre.z - back},
-            {centre.x + right, y, centre.z - back},
-            {centre.x + right, y, centre.z + front},
-            {centre.x - left, y, centre.z + front},
-        };
+        NUVEC corners[4] = {centre, centre, centre, centre};
+        corners[0].y = corners[1].y = corners[2].y = corners[3].y = y;
+        corners[0].x -= left;
+        corners[0].z -= back;
+        corners[1].x += right;
+        corners[1].z -= back;
+        corners[2].x += right;
+        corners[2].z += front;
+        corners[3].x -= left;
+        corners[3].z += front;
         PlatOnOff(block->platform_id, 0);
         NewTerrPlatformsOff();
         const f32 height0 = GameShadow(NULL, &corners[0], 0.1f, -1);

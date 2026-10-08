@@ -188,7 +188,13 @@ void MechHintUIButton::Process(float elapsed) {
     }
     HINT_s *next_hint = pending_hint;
     const u8 was_pulsing = pulse_active;
-    scale = scale_to = hovered ? 0.6f : 0.5f;
+    if (hovered) {
+        scale_to = 0.6f;
+        scale = scale_to;
+    } else {
+        scale_to = 0.5f;
+        scale = scale_to;
+    }
     scale_elapsed = scale_duration;
     if (!(slide_duration < 0.0f) && !(slide_elapsed >= slide_duration + slide_delay)) {
         slide_elapsed += elapsed;

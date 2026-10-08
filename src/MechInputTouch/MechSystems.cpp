@@ -407,7 +407,15 @@ void MechSystems::UnhookClickToPressStart() {
 }
 
 MechSystems::~MechSystems() {
-    PauseButton().~MechTouchUIPauseButton();
-    PlayerButton().~MechTouchUIPlayerButton();
+    NuMtlDestroy(location_ping_material);
+    location_ping_material = NULL;
+    NuMtlDestroy(swipe_material);
+    swipe_material = NULL;
+    NuMtlDestroy(tag_hold_background_material);
+    tag_hold_background_material = NULL;
+    NuMtlDestroy(radar_pulse_material);
+    radar_pulse_material = NULL;
+    PauseButton().MechTouchUIPauseButton::~MechTouchUIPauseButton();
+    PlayerButton().MechTouchUIPlayerButton::~MechTouchUIPlayerButton();
     TouchUI().~MechTouchUI();
 }

@@ -56,13 +56,7 @@ i32 AndroidOBBUtils::LookupPackagePath(char *output, NuFileDeviceAndroidOBBType:
         FILE *file = fopen(filename, "rb");
         if (file != NULL) {
             fclose(file);
-            strcpy(ms_packageName[type], filename);
-            ms_initializedPackage[type] = true;
-            ms_initializedPackageIsAsset[type] = false;
-            if (output != NULL) {
-                strcpy(output, filename);
-            }
-            return 1;
+            goto disk_found;
         }
     }
     if ((type == NuFileDeviceAndroidOBBType::MAIN && g_obbMainSize > 0) ||
@@ -78,16 +72,19 @@ i32 AndroidOBBUtils::LookupPackagePath(char *output, NuFileDeviceAndroidOBBType:
         FILE *file = fopen(filename, "rb");
         if (file != NULL) {
             fclose(file);
-            strcpy(ms_packageName[type], filename);
-            ms_initializedPackage[type] = true;
-            ms_initializedPackageIsAsset[type] = false;
-            if (output != NULL) {
-                strcpy(output, filename);
-            }
-            return 1;
+            goto disk_found;
         }
     }
     return 0;
+
+disk_found:
+    strcpy(ms_packageName[type], filename);
+    ms_initializedPackage[type] = true;
+    ms_initializedPackageIsAsset[type] = false;
+    if (output != NULL) {
+        strcpy(output, filename);
+    }
+    return 1;
 }
 
 i32 AndroidOBBUtils::OpenFile(char const *name) {
