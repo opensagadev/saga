@@ -917,7 +917,8 @@ void NuSoundSystem::SetMainThreadID(NuThread *) {
 
 void NuSoundSystem::Shutdown() {
     NuSoundVoice *voice = this->voice_list.Front();
-    while (voice != this->voice_list.End()) {
+    NuSoundVoice *voice_end = this->voice_list.End();
+    while (voice != voice_end) {
         NuSoundVoice *next = voice->field_0x28;
         voice->Stop(false);
         this->ReleaseVoice(voice);

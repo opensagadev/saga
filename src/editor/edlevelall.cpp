@@ -1317,7 +1317,7 @@ void ClassEditor::cbEdClassRemoveDuplicates(eduimenu_s *, eduiitem_s *, u32) {
             if (reinterpret_cast<i32 *>(interface)[2] == object->scene_id)
                 break;
         }
-        if (NuVecMag(&first_position) <= 0.1f)
+        if (!(NuVecMag(&first_position) > 0.1f))
             continue;
         for (i32 second = first + 1; second < count; ++second) {
             Placeable *other = objects[second];
@@ -1325,16 +1325,17 @@ void ClassEditor::cbEdClassRemoveDuplicates(eduimenu_s *, eduiitem_s *, u32) {
                 continue;
             char const *other_name = other->GetName();
             VuVec const *other_position = other->GetInitialPosition();
+            NUVEC second_position = {other_position->x, other_position->y, other_position->z};
             i32 other_type = 0;
             for (; other_type < thePlaceableHelper.object_type_count; ++other_type) {
                 void *interface = thePlaceableHelper.object_types[other_type].interface;
                 if (reinterpret_cast<i32 *>(interface)[2] == other->scene_id)
                     break;
             }
-            if (NuVecMag(&first_position) <= 0.1f)
+            if (!(NuVecMag(&first_position) > 0.1f))
                 continue;
-            NUVEC separation = {first_position.x - other_position->x, first_position.y - other_position->y,
-                                first_position.z - other_position->z};
+            NUVEC separation = {first_position.x - second_position.x, first_position.y - second_position.y,
+                                first_position.z - second_position.z};
             if (NuVecMag(&separation) < 0.1f && object_type == other_type &&
                 (strstr(name, other_name) != NULL || strstr(other_name, name) != NULL)) {
                 EdClassInterface *interface =

@@ -515,12 +515,12 @@ void TransformGameMessages(nuvec_s *camera_position, nuvec_s *camera_scale, nuve
         const f32 depth = (message->position.x - camera_position->x) * camera_direction->x +
                           (message->position.y - camera_position->y) * camera_direction->y +
                           (message->position.z - camera_position->z) * camera_direction->z;
-        if (depth > 0.0f) {
+        if (!(depth <= 0.0f)) {
             message->field_0xfb = 0;
         } else {
             message->field_0xfb = 1;
         }
-        if (depth > 0.0f && (message->flags & 4) != 0) {
+        if (!(depth <= 0.0f) && (message->flags & 4) != 0) {
             const f32 offset = message->field_0xb4;
             NUVEC target = {message->position.x + offset * camera_scale->x,
                             message->position.y + offset * camera_scale->y,

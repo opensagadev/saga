@@ -188,11 +188,11 @@ u64 NuSoundDecoderOGG::Decode(NuSoundSource &source, NuSoundBuffer &buffer, bool
     u32 got = this->DecodeOggChunk(dest, (u32)chunk);
 
     this->total_decoded_bytes += got;
-    this->decoded_bytes += chunk;
+    u64 decoded_count = (this->decoded_bytes += chunk);
     context.size2 += got;
 
     total = desc->GetDecodedLengthBytes();
-    if (this->decoded_bytes == total) {
+    if (decoded_count == total) {
         context.flags |= 2;
         this->decoded_bytes = 0;
     }

@@ -359,7 +359,7 @@ static void AISysCheckAntinode_Rectangle(APIOBJECT *object, AIANTINODE *antinode
     }
     difference->z = object->ai->movement_position.z - antinode->position.z;
     if (difference->z > radius || difference->z < -radius || object->collision_min.y > antinode->max_y ||
-        !(antinode->min_y <= object->collision_max.y)) {
+        antinode->min_y > object->collision_max.y) {
         return;
     }
     NuVecRotateY(difference, difference, -antinode->flags);
@@ -2433,7 +2433,7 @@ extern "C" {
                             object->collision_min.y > antinode->max_y) {
                             continue;
                         }
-                        if (antinode->min_y <= object->collision_max.y) {
+                        if (!(antinode->min_y > object->collision_max.y)) {
                             checkantinodefns[antinode->type](object, antinode, &difference, radius);
                         }
                     }
