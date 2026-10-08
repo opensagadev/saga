@@ -562,7 +562,9 @@ extern "C" void NuTexAnimEnvProc(nutexanimenv_s *env) {
                 return;
             }
             case 3: {
-                i32 texture = NuRand(&texanim_rand) % (instruction[2] - instruction[1] + 1);
+                i32 range = instruction[2] - instruction[1];
+                i32 random = NuRand(&texanim_rand);
+                i32 texture = random % (range + 1);
                 instruction = program->instructions + env->instruction_index;
                 texture += instruction[1] + env->texture_index;
                 if (texture < instruction[3])

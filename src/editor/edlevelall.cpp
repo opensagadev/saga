@@ -2163,11 +2163,11 @@ i32 LevelEditor::Load(char *filename, variptr_u *buffer, variptr_u *buffer_end, 
     }
 
     i32 result = -1;
-    void *file_data = editor_buffer_cursor.void_ptr;
+    void *file_data = scratch.position->void_ptr;
     i32 file_size = NuFileLoadBuffer(save_filename, file_data, scratch.remaining);
     if (file_size > 0) {
-        if (static_cast<u32>(file_size) < editor_buffer_end.addr - editor_buffer_cursor.addr) {
-            editor_buffer_cursor.addr += file_size;
+        if (static_cast<u32>(file_size) < scratch.end->addr - scratch.position->addr) {
+            scratch.position->addr += file_size;
             scratch.used += file_size;
             scratch.remaining -= file_size;
         }
@@ -2896,9 +2896,9 @@ void PropertyTool::Render() {
 }
 
 void PropertyTool::RenderMenu(PropertyMenu *property_menu) {
+    eduimenu_s *menu = property_menu->menu;
     if (property_menu->order == -1)
         AutoLocateMenu(property_menu);
-    eduimenu_s *menu = property_menu->menu;
     VuVec start __attribute__((aligned(16)));
     VuVec end __attribute__((aligned(16)));
     NuCameraCalcRay((static_cast<f32>(menu->x) + static_cast<f32>(menu->width) * 0.5f) / 640.0f,

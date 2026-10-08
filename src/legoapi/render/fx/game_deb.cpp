@@ -942,10 +942,20 @@ extern "C" {
         DebMat[4] = CreateCopyMat(DebMat[0], 0, 1, 1, 1);
         DebMat[5] = CreateCopyMat(DebMat[0], 0, 2, 1, 1);
         DebMat[6] = CreateCopyMat(DebMat[0], 0, 0, 0, 1);
-        for (i32 i = 0; i <= 6; ++i) {
-            DebMat[i]->shader_desc.vtx_desc.unknown_2_16 = 1;
-            DebMat[i]->tex_id = texture_id;
-        }
+        DebMat[0]->shader_desc.vtx_desc.unknown_2_16 = 1;
+        DebMat[1]->shader_desc.vtx_desc.unknown_2_16 = 1;
+        DebMat[2]->shader_desc.vtx_desc.unknown_2_16 = 1;
+        DebMat[3]->shader_desc.vtx_desc.unknown_2_16 = 1;
+        DebMat[4]->shader_desc.vtx_desc.unknown_2_16 = 1;
+        DebMat[5]->shader_desc.vtx_desc.unknown_2_16 = 1;
+        DebMat[6]->shader_desc.vtx_desc.unknown_2_16 = 1;
+        DebMat[6]->tex_id = texture_id;
+        DebMat[5]->tex_id = texture_id;
+        DebMat[4]->tex_id = texture_id;
+        DebMat[3]->tex_id = texture_id;
+        DebMat[2]->tex_id = texture_id;
+        DebMat[1]->tex_id = texture_id;
+        DebMat[0]->tex_id = texture_id;
 
         DebMat[7] = NuMtlCreateEx3D(1, 2);
         NUMTL *glass = DebMat[7];
@@ -963,8 +973,7 @@ extern "C" {
         glass->attribs.z_mode = 1;
         glass->attribs.unknown_2_1_2 = 2;
         glass->attribs.unknown_2_4 = 1;
-        glass->attribs.alpha_fail |= 2;
-        glass->attribs.uv_mode = 0;
+        glass->attribs.alpha_fail = 1;
         glass->sort_pri = 128;
         glass->particle_type_tag = -105;
         NuMtlUpdate(glass);

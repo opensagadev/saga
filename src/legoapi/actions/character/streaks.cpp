@@ -249,7 +249,7 @@ void UpdateStreaks(float elapsed) {
 
 void DrawStreaks() {
     for (STREAKHDR_s *header = streakhdrs_used; header != NULL; header = header->next) {
-        NURND_VERTEX3D vertices[254];
+        NURND_VERTEX3D vertices[256];
         i32 vertex_count = 0;
         const u32 endpoint_colour = header->colour;
         STREAK_s *streak = header->streaks;
@@ -382,14 +382,14 @@ void AddStreakPoints(nuvec_s *points, float duration, u32 colour, void **handle,
     NUVEC edge_a;
     NUVEC edge_b;
     NuVecSub(&edge_a, &streak->previous_position, &streak->position);
-    NuVecSub(&edge_b, &older->previous_position, &older->position);
+    NuVecSub(&edge_b, &header->streaks->next->previous_position, &header->streaks->next->position);
     NuVecNorm(&edge_a, &edge_a);
     NuVecNorm(&edge_b, &edge_b);
 
-    older->segment_count = static_cast<i32>(60.0f * FRAMETIME + 60.0f * FRAMETIME);
-    if (older->segment_count > 8)
-        older->segment_count = 8;
-    if (older->segment_count < 2)
+    header->streaks->next->segment_count = static_cast<i32>(60.0f * FRAMETIME + 60.0f * FRAMETIME);
+    if (header->streaks->next->segment_count >= 8)
+        header->streaks->next->segment_count = 8;
+    if (header->streaks->next->segment_count < 2)
         return;
-    CalculateStreakSegment(streak, older);
+    CalculateStreakSegment(header->streaks, header->streaks->next);
 }

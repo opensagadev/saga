@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 73.74591,
+    "fuzzy_match_percent": 73.75593,
     "total_code": "4722419",
     "matched_code": "572433",
     "matched_code_percent": 12.121605,
@@ -15676,7 +15676,7 @@
           "address": 4467680,
           "offset": 3577712,
           "size": 237,
-          "match_percent": 49.484848
+          "match_percent": 65.666664
         },
         {
           "name": "_ZN17MechTouchTaskGoToD2Ev",
@@ -15684,7 +15684,7 @@
           "address": 4467680,
           "offset": 3577712,
           "size": 237,
-          "match_percent": 49.484848
+          "match_percent": 65.666664
         },
         {
           "name": "_ZN17MechTouchTaskGoToD0Ev",
@@ -15724,7 +15724,7 @@
           "address": 4469408,
           "offset": 3579440,
           "size": 524,
-          "match_percent": 61.596638
+          "match_percent": 79.31933
         },
         {
           "name": "_ZN20MechTouchTaskBuildIt6UpdateEv",
@@ -21042,7 +21042,7 @@
           "address": 5558624,
           "offset": 4668656,
           "size": 1069,
-          "match_percent": 63.433594
+          "match_percent": 63.375
         },
         {
           "name": "_ZN11ClassObject7GetNameEPci",
@@ -21058,7 +21058,7 @@
           "address": 5560688,
           "offset": 4670720,
           "size": 436,
-          "match_percent": 64.990906
+          "match_percent": 69.55454
         },
         {
           "name": "_ZN12PropertyTool6RenderEv",
@@ -21098,7 +21098,7 @@
           "address": 5562144,
           "offset": 4672176,
           "size": 1029,
-          "match_percent": 60.759617
+          "match_percent": 60.71154
         },
         {
           "name": "_ZN12PropertyTool7ProcessER14EdInputContext",
@@ -21114,7 +21114,7 @@
           "address": 5563280,
           "offset": 4673312,
           "size": 1328,
-          "match_percent": 78.265434
+          "match_percent": 78.21914
         },
         {
           "name": "_ZN11ClassEditor16DrawObjectSphereER11ClassObjecti",
@@ -21226,7 +21226,7 @@
           "address": 5584112,
           "offset": 4694144,
           "size": 802,
-          "match_percent": 69.738464
+          "match_percent": 74.21026
         },
         {
           "name": "_ZN11LevelEditor9SaveStateEP9variptr_uS1_",
@@ -21258,7 +21258,7 @@
           "address": 5589136,
           "offset": 4699168,
           "size": 1968,
-          "match_percent": 80.986725
+          "match_percent": 80.95354
         },
         {
           "name": "_Z13cbEdLevelSaveP10eduimenu_sP10eduiitem_sj",
@@ -39740,7 +39740,7 @@
           "address": 4865920,
           "offset": 3975952,
           "size": 1399,
-          "match_percent": 55.826923
+          "match_percent": 53.826923
         },
         {
           "name": "_Z13UpdateStreaksf",
@@ -39756,7 +39756,7 @@
           "address": 4867696,
           "offset": 3977728,
           "size": 891,
-          "match_percent": 61.74009
+          "match_percent": 61.74449
         },
         {
           "name": "_Z12ResetStreaksv",
@@ -40538,7 +40538,7 @@
           "address": 5187232,
           "offset": 4297264,
           "size": 498,
-          "match_percent": 59.258335
+          "match_percent": 66.125
         },
         {
           "name": "_Z18InitClimbObjectSysP11WORLDINFO_s",
@@ -71647,7 +71647,7 @@
           "address": 3469104,
           "offset": 2579136,
           "size": 430,
-          "match_percent": 55.11712
+          "match_percent": 55.91892
         },
         {
           "name": "DebFreeAllChunksInstantly",
@@ -71655,7 +71655,7 @@
           "address": 3469536,
           "offset": 2579568,
           "size": 127,
-          "match_percent": 79.97619
+          "match_percent": 79.61905
         },
         {
           "name": "DebFreeInstantly",
@@ -71671,7 +71671,7 @@
           "address": 3475568,
           "offset": 2585600,
           "size": 1472,
-          "match_percent": 45.322582
+          "match_percent": 44.545456
         },
         {
           "name": "_ZN13MemoryManager9AllocPoolEji",
@@ -77458,7 +77458,7 @@
           "address": 4769776,
           "offset": 3879808,
           "size": 1103,
-          "match_percent": 45.842857
+          "match_percent": 47.361904
         },
         {
           "name": "_Z15GrabStillScreenv",
@@ -79789,7 +79789,7 @@
           "address": 3456608,
           "offset": 2566640,
           "size": 2413,
-          "match_percent": 74.482635
+          "match_percent": 76.854164
         },
         {
           "name": "DebrisSetup",
@@ -93422,7 +93422,7 @@
           "address": 3119040,
           "offset": 2229072,
           "size": 1833,
-          "match_percent": 44.08959
+          "match_percent": 47.1816
         },
         {
           "name": "NuQFntPrintJustifiedW",
@@ -94274,7 +94274,7 @@
           "address": 3184160,
           "offset": 2294192,
           "size": 1201,
-          "match_percent": 44.0828
+          "match_percent": 49.200638
         },
         {
           "name": "NuShaderObjectKeyGenerate2",
@@ -96253,7 +96253,7 @@
           "address": 997984,
           "offset": 108016,
           "size": 426,
-          "match_percent": 76.14754
+          "match_percent": 83.2459
         },
         {
           "name": "_ZN15NuMemoryManager24ValidateBlockIsAllocatedEPNS_6HeaderEPKc",
@@ -105686,7 +105686,7 @@
           "address": 2932768,
           "offset": 2042800,
           "size": 2235,
-          "match_percent": 47.88632
+          "match_percent": 49.169556
         },
         {
           "name": "NuTexAnimSetSignals",

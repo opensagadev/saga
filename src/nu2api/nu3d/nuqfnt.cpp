@@ -789,9 +789,9 @@ f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font_ptr, u16 *text, f32 x
                             f32 width, f32 line_spacing, u32 colour, NUMTX *mtx) {
     VUFNT *font = static_cast<VUFNT *>(font_ptr);
     f32 saved_space_width = nuqfnt_space_width;
-    f32 space_width = saved_space_width == 0.0f ? font->space_width : saved_space_width;
-    f32 saved_ic_gap = font->ic_gap;
     u16 encoded_space[2] = {0x20, 0};
+    f32 saved_ic_gap = font->ic_gap;
+    f32 space_width = saved_space_width == 0.0f ? font->space_width : saved_space_width;
 
     NuQFntSetColourRS(stream, font, colour);
     NuQFntSetScaleRS(stream, font, sx, sy);

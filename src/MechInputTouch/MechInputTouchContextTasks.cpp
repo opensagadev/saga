@@ -202,6 +202,10 @@ bool MechTouchTaskGoTo::UpdateTarget(MechObjectInterface &object) {
 }
 
 MechTouchTaskGoTo::~MechTouchTaskGoTo() {
+    if (move_to_marker.Get() != NULL) {
+        move_to_marker.Get()->FadeOut();
+        move_to_marker = NuMechPtr<MoveToMarker, 4>();
+    }
 }
 
 MechTouchTaskJump::MechTouchTaskJump(MechInputTouchGestureBasedController &owner, JumpTriggerPacket const &packet,
@@ -641,7 +645,20 @@ bool MechTouchTaskPullLever::Update() {
         f32 nearest_distance;
         if (Lever_FindNearest(WORLD, &player->apiobj.lower_position, player, &nearest_distance) == lever) {
             player->apiobj.movement_facing_angle = NuAtan2D(position.x, position.z);
-            Lever_StartPull(player, lever);
+            player->character_context = 0x4a;
+            player->field_0x788 = lever;
+            player->context_animation = 0x5d;
+            player->context_animation_timer = 0.0f;
+            player->field_0x768 = 0.0f;
+            GameObject_s *animation_object = player;
+            animation_object->airborne_action_duration = AnimDuration(animation_object->id, 0x5d, 0.0f, 0.0f, 1);
+            if (player->airborne_action_duration <= 0.0f)
+                player->airborne_action_duration = 1.0f;
+            player->context_flags &= ~0x40;
+            player->apiobj.movement_facing_angle = static_cast<LEVER_s *>(player->field_0x788)->y_rotation;
+            static_cast<LEVER_s *>(player->field_0x788)->interacting = 1;
+            static_cast<LEVER_s *>(player->field_0x788)->pull_progress = 0.0f;
+            static_cast<LEVER_s *>(player->field_0x788)->auto_reset_timer = 0.0f;
         }
     } else if (MechTouchTaskGoTo::Update()) {
         return true;

@@ -137,8 +137,9 @@ extern "C" {
                 control->active = effect->particle_type == 7 ? 7 : 0;
                 control->owner = NULL;
                 const i32 panel = effect->time_group == 4;
-                control->expiry_time = effect->particle_lifetime + (panel ? panelglobaltime : globaltime) +
-                                       static_cast<i8>(effect->trail_count) * effect->trail_time;
+                debinftype *expiry_effect = debtab[key->effect_index];
+                control->expiry_time = expiry_effect->particle_lifetime + (panel ? panelglobaltime : globaltime) +
+                                       static_cast<i8>(expiry_effect->trail_count) * expiry_effect->trail_time;
                 AddChunkControlToStack(control, &debris_chunk_control_stack[panel]);
                 ++freechunkcontrolsptr;
             }
@@ -240,7 +241,8 @@ extern "C" {
 
     void DebFreeOrphansInstantly(debinftype *effect) {
         DebrisGetControlStackLock();
-        for (i32 i = 0; i < debrischunks + debrischunksglass; ++i) {
+        i32 count = debrischunks + debrischunksglass;
+        for (i32 i = 0; i < count; ++i, count = debrischunks + debrischunksglass) {
             particlechunkrendertype_s *chunk = &ParticleChunkToRender[i];
             if (chunk->key != NULL || chunk->effect != effect)
                 continue;

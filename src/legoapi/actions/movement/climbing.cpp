@@ -118,7 +118,7 @@ void Climb_MoveCode(GameObject_s *object) {
 // Original 0x4f26a0, 498 bytes.
 i32 Climb_SetTargetMom(GameObject_s *object, u16 input_angle) {
     f32 speed = 0.0f;
-    i16 animation = object->context_animation;
+    i32 animation = object->context_animation;
     if (animation != -1 &&
         (animation == LEGOACT_CLIMB_UP || animation == LEGOACT_CLIMB_DOWN || animation == LEGOACT_CLIMB_LEFT ||
          animation == LEGOACT_CLIMB_RIGHT || animation == LEGOACT_MAGNET_WALK_METAL)) {

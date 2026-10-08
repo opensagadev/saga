@@ -736,32 +736,14 @@ namespace nu2api {
         u32 flagsWord = 0;
         u8 nibble = 0;
 
-        if (!pixelStage) {
-            // Vertex path carries the uber-shader identity.
-            block[0x0c] = uberShader2_md5[0];
-            block[0x0d] = uberShader2_md5[1];
-            block[0x0e] = uberShader2_md5[2];
-            block[0x0f] = uberShader2_md5[3];
-            block[0x10] = uberShader2_md5[4];
-            block[0x11] = uberShader2_md5[5];
-            block[0x12] = uberShader2_md5[6];
-            block[0x13] = uberShader2_md5[7];
-
-            if (filter->variant != 0) {
-                flagsWord = 0x1000;
-                nibble = 0;
-            } else {
-                flagsWord = *reinterpret_cast<const u32 *>(descBytes + 0x1b8) & 0xfffffe3fu;
-                nibble = descBytes[0x1bc];
-            }
+        for (i32 i = 0; i < 8; ++i)
+            block[0x0c + i] = pixelStage ? 0 : uberShader2_md5[i];
+        if (filter->variant == 0) {
+            flagsWord = *reinterpret_cast<const u32 *>(descBytes + 0x1b8) & 0xfffffe3fu;
+            nibble = descBytes[0x1bc];
         } else {
-            if (filter->variant == 0) {
-                flagsWord = *reinterpret_cast<const u32 *>(descBytes + 0x1b8) & 0xfffffe3fu;
-                nibble = descBytes[0x1bc];
-            } else {
-                flagsWord = 0x1000;
-                nibble = 0;
-            }
+            flagsWord = 0x1000;
+            nibble = 0;
         }
 
         // Filtered flag word (bytes 0x04..0x07, nibble at 0x08, copy at 0x09..0x0b).

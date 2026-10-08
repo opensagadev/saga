@@ -174,7 +174,6 @@ SAGA_HOST_WEAK void InitStillRender(variptr_u *, variptr_u) {
 void DrawPauseScreenWipe() {
     NuRndrBeginScene(-1);
 
-    const f32 fade = FadeSys.fade;
     i32 x = 0;
     i32 y = 0;
     i32 width = 0x2800;
@@ -187,6 +186,7 @@ void DrawPauseScreenWipe() {
 
     if ((FadeSys.direction & 3) != 0) {
         if ((FadeSys.direction & 1) == 0) {
+            const f32 fade = FadeSys.fade;
             width = static_cast<i32>(fade * 10240.0f);
             colours[0] = 0x80808080u;
             colours[1] = 0x00808080u;
@@ -195,6 +195,7 @@ void DrawPauseScreenWipe() {
             NuRndrGradRectUV2di(width, 0, 0x400, 0xe00, fade, 1.0f, fade + 0.1f, 0.0f, colours, pause_rndr_mtl);
             u1 = fade;
         } else {
+            const f32 fade = FadeSys.fade;
             u0 = 1.0f - fade;
             x = static_cast<i32>(u0 * 10240.0f);
             width = 0x2800 - x;
@@ -206,6 +207,7 @@ void DrawPauseScreenWipe() {
         }
     } else if ((FadeSys.direction & 0xc) != 0) {
         if ((FadeSys.direction & 4) == 0) {
+            const f32 fade = FadeSys.fade;
             height = static_cast<i32>(fade * 3584.0f);
             colours[0] = 0x80808080u;
             colours[1] = 0x80808080u;
@@ -215,6 +217,7 @@ void DrawPauseScreenWipe() {
                                 pause_rndr_mtl);
             v1 = 1.0f - fade;
         } else {
+            const f32 fade = FadeSys.fade;
             const f32 edge = 1.0f - fade;
             y = static_cast<i32>(edge * 3584.0f);
             height = 0xe00 - y;

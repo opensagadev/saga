@@ -1886,8 +1886,8 @@ i32 NuMemoryManager::_MultiBlockAlloc(u32 size, u32 alignment, u32 count, void *
     if (allocation == NULL)
         return 0;
 
-    Header *header = reinterpret_cast<Header *>(reinterpret_cast<u8 *>(allocation) - m_headerSize);
     pthread_mutex_lock(&mutex);
+    Header *header = reinterpret_cast<Header *>(reinterpret_cast<u8 *>(allocation) - m_headerSize);
     u32 remaining = BLOCK_SIZE(header->value);
     for (u32 i = 0; i < count; ++i) {
         u32 block_size;
