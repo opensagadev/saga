@@ -52,11 +52,11 @@ NuVertexFormatPS *NuGetVertexDeclaration(NUVERTEXDESCRIPTOR vtx_desc) {
     const bool instanced = (descriptor >> 22) & 1;
     i16 offset = 0;
 #define VERTEX_ATTRIBUTE(slot, gl_type, components, normalize, bytes)                                                  \
+    format->attribs[slot].unknown_0c = 0;                                                                              \
+    format->attribs[slot].offset = offset;                                                                             \
     format->attribs[slot].type = gl_type;                                                                              \
     format->attribs[slot].size = components;                                                                           \
     format->attribs[slot].normalized = normalize;                                                                      \
-    format->attribs[slot].unknown_0c = 0;                                                                              \
-    format->attribs[slot].offset = offset;                                                                             \
     format->attrib_mask |= 1u << slot;                                                                                 \
     offset += bytes
     VERTEX_ATTRIBUTE(0, 0x1406, 3, 0, 12);

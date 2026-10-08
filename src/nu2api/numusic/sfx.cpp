@@ -153,8 +153,9 @@ static void fnAudioSample(nufpar_s *fpar) {
                     }
                 }
                 if (i == NumSfx) {
-                    NuStrNCpy(sfx_filename[NumSfxNames], fpar->word_buf, 0x40);
-                    g_soundInfo[NumSfxInst].filename = sfx_filename[NumSfxNames++];
+                    u32 filename_index = NumSfxNames++;
+                    NuStrNCpy(sfx_filename[filename_index], fpar->word_buf, 0x40);
+                    g_soundInfo[NumSfxInst].filename = sfx_filename[NumSfxNames - 1];
                 }
             }
         } else if (NuStrICmp(fpar->word_buf, "pitch") == 0) {

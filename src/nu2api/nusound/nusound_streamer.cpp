@@ -221,7 +221,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
     i32 status = 0;
 
     if (this->sound_buffer1 == NULL) {
-        u32 stream_buffer_size = NuSoundSystem::GetStreamBufferSize();
+        u32 half_buffer_size = NuSoundSystem::GetStreamBufferSize() / 2;
 
         NuSoundBuffer *buffer = NU_ALLOC_T(NuSoundBuffer, 1, "", NUMEMORY_CATEGORY_NUSOUND);
         if (buffer != NULL) {
@@ -229,7 +229,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
         }
         this->sound_buffer1 = buffer;
 
-        if (this->sound_buffer1->Allocate(stream_buffer_size / 2, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1) {
+        if (this->sound_buffer1->Allocate(half_buffer_size, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1) {
             goto alloc_error;
         }
 
@@ -239,7 +239,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
         }
         this->sound_buffer2 = buffer;
 
-        if (this->sound_buffer2->Allocate(stream_buffer_size / 2, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1) {
+        if (this->sound_buffer2->Allocate(half_buffer_size, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1) {
             goto alloc_error;
         }
 
