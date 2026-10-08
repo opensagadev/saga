@@ -366,7 +366,10 @@ extern "C" void TerrainPlatformNewUpdate(void) {
     CurTerr->active_platform_count = 0;
     TERRAIN_CELL &cell = CurTerr->cells[TERRAIN_PLATFORM_CELL];
     i16 *group_index = CurTerr->group_indices + cell.first_group;
-    i16 *end = group_index + cell.group_count;
+    const i32 group_count = static_cast<i16>(cell.group_count);
+    if (group_count <= 0)
+        return;
+    i16 *end = group_index + group_count;
     for (; group_index != end; ++group_index) {
         TERRAIN_GROUP &group = CurTerr->groups[*group_index];
         TERRAIN_PLATFORM &platform = CurTerr->platforms[group.scene_index];
@@ -383,16 +386,19 @@ extern "C" void TerrainPlatformNewUpdate(void) {
         NUMTX *matrix = static_cast<NUMTX *>(platform.scene_object);
         if (matrix != NULL) {
             if (platform.bounce_frames != 0) {
-                f32 velocity = platform.bounce_velocity - platform.bounce_damping * platform.bounce_velocity;
+                f32 velocity;
                 if (platform.bounce_frames >= 125)
                     velocity = (platform.bounce_impulse - platform.bounce_damping * platform.bounce_velocity) +
                                platform.bounce_velocity;
+                else
+                    velocity = platform.bounce_velocity - platform.bounce_damping * platform.bounce_velocity;
                 const f32 offset = platform.bounce_offset;
                 --platform.bounce_frames;
-                velocity += -offset * fabsf(offset) * platform.bounce_spring * 0.5f - platform.bounce_spring * offset;
+                velocity = (-offset * fabsf(offset) * platform.bounce_spring * 0.5f - platform.bounce_spring * offset) +
+                           velocity;
                 platform.bounce_velocity = velocity;
                 platform.bounce_offset = velocity + offset;
-                matrix->m31 += platform.bounce_offset;
+                matrix->m31 = platform.bounce_offset + matrix->m31;
             }
             group.origin = *NUMTX_GET_ROW_VEC(matrix, 3);
         }

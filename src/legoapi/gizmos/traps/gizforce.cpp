@@ -1638,7 +1638,7 @@ void GizForce_PlayBackwards(GIZFORCE_s *force) {
     }
     GameAnimSet_SetRepeating(force->anim_set, 0);
     f32 speed = force->animation_speed;
-    if (speed >= 0.0f) {
+    if (!(speed < 0.0f)) {
         GameAnimSet_Play(force->anim_set, speed * force->start_frame, 0);
         return;
     }
@@ -1742,7 +1742,8 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
         ForceTarget *oldest = NULL;
         f32 oldest_time = 1.0e9f;
         for (i32 i = 0; i < count; ++i) {
-            f32 time = static_cast<f32>(los->words[possible_forcetargets[i].index + 12]);
+            const u32 timestamp = los->words[possible_forcetargets[i].index + 12];
+            const f32 time = static_cast<f32>(timestamp >> 16) * 65536.0f + static_cast<f32>(timestamp & 0xffff);
             if (time < oldest_time) {
                 oldest_time = time;
                 oldest = &possible_forcetargets[i];
