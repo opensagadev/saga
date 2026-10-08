@@ -662,10 +662,22 @@ void CheckResetBits() {
     AITriggerSetSysReset(WORLD->ai_trigger_set_sys);
     AITriggerSysAutoSetUp(WORLD, WORLD->ai_trigger_set_sys);
     if ((ResetBits & 0x10) != 0) {
-        for (i32 i = 0; i < 8; ++i) {
-            if (Player[i] != NULL)
-                ResetPlayer(Player[i], 1, NULL, 0);
-        }
+        if (Player[0] != NULL)
+            ResetPlayer(Player[0], 1, NULL, 0);
+        if (Player[1] != NULL)
+            ResetPlayer(Player[1], 1, NULL, 0);
+        if (Player[2] != NULL)
+            ResetPlayer(Player[2], 1, NULL, 0);
+        if (Player[3] != NULL)
+            ResetPlayer(Player[3], 1, NULL, 0);
+        if (Player[4] != NULL)
+            ResetPlayer(Player[4], 1, NULL, 0);
+        if (Player[5] != NULL)
+            ResetPlayer(Player[5], 1, NULL, 0);
+        if (Player[6] != NULL)
+            ResetPlayer(Player[6], 1, NULL, 0);
+        if (Player[7] != NULL)
+            ResetPlayer(Player[7], 1, NULL, 0);
         VehicleAreaRememberSpeed = GetVehicleAreaRememberSpeed();
     }
 

@@ -693,9 +693,10 @@ static void AISysLoadPathRoutes(AISYS *system, AIPATH *path, i32 version, char *
     if (path->special_route_count != 0) {
         path->special_routes =
             static_cast<AIPATHNODELINK *>(AISysLoadAlloc(system, path->special_route_count * sizeof(AIPATHNODELINK)));
-        for (i32 i = 0; i < path->special_route_count; ++i) {
-            path->special_routes[i].node_index = EdFileReadUnsignedChar();
-            path->special_routes[i].special_route_index = EdFileReadShort();
+        AIPATHNODELINK *route = path->special_routes;
+        for (i32 i = 0; i < path->special_route_count; ++i, ++route) {
+            route->node_index = EdFileReadUnsignedChar();
+            route->special_route_index = EdFileReadShort();
         }
     }
 }

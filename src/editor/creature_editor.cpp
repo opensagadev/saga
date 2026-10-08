@@ -1346,7 +1346,7 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
             eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, creatureEditor_cbScriptParams,
                                                     const_cast<char *>("Script Params")));
             eduiMenuAddItem(menu, eduiItemSliderCreateInt(1, attr, 0, creatureEditor_cb_assigntoset, 0,
-                                                          aisys_maxnumcreaturesets, creature->set,
+                                                          aisys_maxnumcreaturesets, creatureEditor_Current()->set,
                                                           const_cast<char *>("Assigned To Set")));
             eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, creatureEditor_cbRenameCreatureMenu,
                                                     const_cast<char *>("Rename Creature")));
@@ -1358,9 +1358,10 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
                 menu, eduiItemSelCreate(1, attr, 0, 0, creatureEditor_cbGroupMenu, const_cast<char *>("Group Values")));
             eduiMenuAddItem(
                 menu, eduiItemSelCreate(1, attr, 0, 0, creatureEditor_cbVisionMenu, const_cast<char *>("Vision")));
-            eduiMenuAddItem(menu, eduiItemToggleCreate(1, attr, creature->flags & 1, 1, creatureEditor_cbFlagsToggle,
+            eduiMenuAddItem(menu, eduiItemToggleCreate(1, attr, creatureEditor_Current()->flags & 1, 1,
+                                                       creatureEditor_cbFlagsToggle,
                                                        const_cast<char *>("Ignore Wall Splines")));
-            eduiMenuAddItem(menu, eduiItemToggleCreate(0x20, attr, (creature->flags >> 5) & 1, 2,
+            eduiMenuAddItem(menu, eduiItemToggleCreate(0x20, attr, (creatureEditor_Current()->flags >> 5) & 1, 2,
                                                        creatureEditor_cbFlagsToggle,
                                                        const_cast<char *>("Not On LowEnd Device")));
         }

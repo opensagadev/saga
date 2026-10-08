@@ -963,9 +963,8 @@ static i32 GizForces_BoltHit(void *world_ptr, void *data, void *object_ptr, NUVE
         }
         const NUVEC &position = force->position;
         const f32 extent = force->radius;
-        if (!(position.x - extent <= maximum->x && minimum->x <= position.x + extent &&
-              position.z - extent <= maximum->z && minimum->z <= position.z + extent &&
-              position.y - extent <= maximum->y && minimum->y <= position.y + extent)) {
+        if (position.x - extent > maximum->x || minimum->x > position.x + extent || position.z - extent > maximum->z ||
+            minimum->z > position.z + extent || position.y - extent > maximum->y || minimum->y > position.y + extent) {
             continue;
         }
         for (i32 point = point_count - 1; point >= 0; --point) {

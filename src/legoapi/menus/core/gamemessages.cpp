@@ -441,7 +441,7 @@ void UpdateGameMessages() {
         }
         if (message->field_0xd0 > 0.0f) {
             message->field_0xd0 -= FRAMETIME;
-            if (message->field_0xd0 > 0.0f) {
+            if (!(message->field_0xd0 <= 0.0f)) {
                 continue;
             }
             MessageFn callback = message->delay_fn;
@@ -451,7 +451,7 @@ void UpdateGameMessages() {
             continue;
         }
 
-        if (message->duration <= message->elapsed) {
+        if (!(message->duration > message->elapsed)) {
             continue;
         }
 
@@ -468,13 +468,13 @@ void UpdateGameMessages() {
         if ((flags & 0x50) != 0) {
             f32 curve = message->elapsed / message->duration;
             if ((flags & 0x100) != 0) {
-                curve = 1.0f - NU_SIN_LUT(static_cast<i32>((curve + 1.0f) * 16384.0f));
+                curve = 1.0f - NU_SIN_LUT(static_cast<i32>(curve * 16384.0f + 16384.0f));
             } else if ((flags & 0x200) != 0) {
                 curve = NU_SIN_LUT(static_cast<i32>(curve * 16384.0f));
             } else if ((flags & 0x400) != 0) {
                 curve = NU_SIN_LUT(static_cast<i32>(curve * 32768.0f));
             } else if ((flags & 0x800) != 0) {
-                curve = NU_SIN_LUT(static_cast<i32>(curve * 32768.0f));
+                curve = 1.0f - NU_SIN_LUT(static_cast<i32>(curve * 32768.0f));
             }
             if ((flags & 0x10) != 0) {
                 message->position.x =
@@ -490,7 +490,7 @@ void UpdateGameMessages() {
         }
         if ((flags & 0x8000) != 0) {
             const f32 alpha_curve =
-                NU_SIN_LUT(static_cast<i32>((message->elapsed / message->duration + 1.0f) * 16384.0f));
+                NU_SIN_LUT(static_cast<i32>(message->elapsed / message->duration * 16384.0f + 16384.0f));
             message->alpha = static_cast<u8>(alpha_curve * 128.0f);
         } else if ((flags & 0x4000) != 0) {
             message->alpha = static_cast<u8>((1.0f - message->elapsed / message->duration) * 128.0f);

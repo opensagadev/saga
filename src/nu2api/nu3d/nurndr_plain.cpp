@@ -719,11 +719,14 @@ extern "C" i32 NuRndrHighResScreenGrab(char *prefix, f32 scale, f32 a, f32 b, f3
                  static_cast<i32>((((full_height - (0.75f * yPos) * h) * w) * scale) * 3.0f) +
                  static_cast<i32>(((0.75f * xPos) * w) * 3.0f) -
                  static_cast<i32>((static_cast<f32>(height * PS2_REZ_W) * scale) * 3.0f);
-    for (i32 y = 0; y < height; ++y) {
-        NuFileSeek(fh, offset, static_cast<NUFILESEEK>(0));
-        offset += static_cast<i32>((static_cast<f32>(PS2_REZ_W) * scale) * 3.0f);
-        NuFileWrite(fh, data, width * 3);
-        data += params.width * 3;
+    if (height > 0) {
+        i32 y = 0;
+        do {
+            NuFileSeek(fh, offset, static_cast<NUFILESEEK>(0));
+            offset += static_cast<i32>((static_cast<f32>(PS2_REZ_W) * scale) * 3.0f);
+            NuFileWrite(fh, data, width * 3);
+            data += params.width * 3;
+        } while (++y != height);
     }
     NuRndrScreenGrabTileEnd(&tile);
     ++dump_state;

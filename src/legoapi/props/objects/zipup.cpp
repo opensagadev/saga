@@ -63,13 +63,13 @@ static void ZipUps_Update(void *world_ptr, void *, float) {
         return;
     }
 
+    ZIPUP *zipup = world->zipups;
     CanDrawZipUpSwirls = 0;
-    if (world->zipups == NULL) {
+    if (zipup == NULL) {
         return;
     }
 
     CanDrawZipUpSwirls = AvailableToPlayer(1u << 20, -1, 0, 0);
-    ZIPUP *zipup = world->zipups;
     for (i32 index = 0; index < world->zipup_count; ++index, ++zipup) {
         GameObject_s *occupant = zipup->occupant;
         if (occupant != NULL && occupant->build_context == -1) {

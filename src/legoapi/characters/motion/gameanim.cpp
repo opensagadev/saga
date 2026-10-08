@@ -296,10 +296,10 @@ void Animate_ATAT(GameObject_s *object) {
     }
 
     const i32 turn = RotDiff(object->previous_movement_angle, object->apiobj.field_0x276);
-    if (turn > 0 && object->apiobj.character_model->model_data_b[79] != NULL) {
-        packet.requested_animation = 79;
-    } else if (turn < 0 && object->apiobj.character_model->model_data_b[38] != NULL) {
+    if (turn < 0 && object->apiobj.character_model->model_data_b[38] != NULL) {
         packet.requested_animation = 38;
+    } else if (turn > 0 && object->apiobj.character_model->model_data_b[79] != NULL) {
+        packet.requested_animation = 79;
     }
 }
 

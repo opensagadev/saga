@@ -175,7 +175,7 @@ static void FillBits(DEFLATECONTEXT *ctx) {
             PEEKBITS(ctx, 0x10);                                                                                       \
         }                                                                                                              \
                                                                                                                        \
-        u32 bits = ctx->bit_buffer & ((1 << 0x10) - 1);                                                                \
+        u32 bits = ctx->bit_buffer;                                                                                    \
                                                                                                                        \
         u32 lookupIndex = (tree).fast_lookup[bits & 0x1ff];                                                            \
                                                                                                                        \

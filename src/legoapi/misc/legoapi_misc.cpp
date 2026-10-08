@@ -51,10 +51,11 @@ void CurrentStart(GameObject_s *object, i32 require_twist_level, i32 use_socket_
     if (object->field_0x661 == 0xff || world->sock_sys == NULL)
         return;
 
-    SOCK &socket = world->sock_sys->sock[static_cast<i8>(object->field_0x661)];
-    if (socket.current_speed == 0.0f || (require_twist_level == 0 && TwistLevel(world->current_level) == 0))
+    if (world->sock_sys->sock[static_cast<i8>(object->field_0x661)].current_speed == 0.0f ||
+        (require_twist_level == 0 && TwistLevel(world->current_level) == 0))
         return;
 
+    SOCK &socket = world->sock_sys->sock[static_cast<i8>(object->field_0x661)];
     NUVEC current = {0.0f, 0.0f, socket.current_speed};
     *reinterpret_cast<f32 *>(&object->field_0xc3c) = socket.current_speed;
     const f32 multiplier =
