@@ -1033,31 +1033,41 @@ extern "C" {
             return -1;
         }
 
+        i32 bound;
         const u8 requested_page = static_cast<u8>(page);
         if (requested_page < 8 && edpp_page_used[requested_page] != 0) {
-            for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
+            bound = EDPP_MAX_TYPES;
+            for (i32 i = 1; i < bound; ++i) {
                 debinftype *effect = debtab[i];
-                if (i != ignore && effect != NULL && effect->page == requested_page &&
-                    NuStrICmp(effect->name, name) == 0) {
-                    return i;
+                if (i != ignore && effect != NULL && effect->page == requested_page) {
+                    if (NuStrICmp(effect->name, name) == 0) {
+                        return i;
+                    }
+                    bound = EDPP_MAX_TYPES;
                 }
             }
+        } else {
+            bound = EDPP_MAX_TYPES;
         }
 
-        for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
+        for (i32 i = 1; i < bound; ++i) {
             debinftype *effect = debtab[i];
             if (i != ignore && effect != NULL &&
-                ((effect->page == 0 && edpp_page_used[0] != 0) || (effect->page == 1 && edpp_page_used[1] != 0)) &&
-                NuStrICmp(effect->name, name) == 0) {
-                return i;
+                ((effect->page == 0 && edpp_page_used[0] != 0) || (effect->page == 1 && edpp_page_used[1] != 0))) {
+                if (NuStrICmp(effect->name, name) == 0) {
+                    return i;
+                }
+                bound = EDPP_MAX_TYPES;
             }
         }
 
-        for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
+        for (i32 i = 1; i < bound; ++i) {
             debinftype *effect = debtab[i];
-            if (i != ignore && effect != NULL && edpp_page_used[static_cast<i8>(effect->page)] != 0 &&
-                NuStrICmp(effect->name, name) == 0) {
-                return i;
+            if (i != ignore && effect != NULL && edpp_page_used[static_cast<i8>(effect->page)] != 0) {
+                if (NuStrICmp(effect->name, name) == 0) {
+                    return i;
+                }
+                bound = EDPP_MAX_TYPES;
             }
         }
         return -1;

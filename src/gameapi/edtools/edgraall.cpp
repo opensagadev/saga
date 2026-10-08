@@ -800,9 +800,8 @@ void edgraDoInput(nupad_s *pad) {
                                                                          "Instance Filter"));
                 eduiMenuAddItem(edgra_options_menu,
                                 eduiItemTextPickCreate(0, edblack, edgraChangeFilterName, "Filter String: "));
-                edui_textpicker_s *filter = static_cast<edui_textpicker_s *>(edui_last_item);
-                strcpy(filter->value, edgra_filter_string);
-                filter->max_length = 15;
+                strcpy(static_cast<edui_textpicker_s *>(edui_last_item)->value, edgra_filter_string);
+                static_cast<edui_textpicker_s *>(edui_last_item)->max_length = 15;
                 eduiMenuAddItem(edgra_options_menu,
                                 eduiItemSelCreate(1, edblack, 0, 0, edgracbGlobalsMenu, "Global Options..."));
             }

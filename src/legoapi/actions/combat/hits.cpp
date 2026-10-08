@@ -841,11 +841,11 @@ impact:
                     if (NuSpecialFind(WORLD->current_gscn, &special, name, 1))
                         NuSpecialSetVisibility(&special, 0);
                 }
-                NewCutScene(NULL, WORLD->cutscene_sys,
-                            attacker && attacker->id == id_OBIWANKENOBIEP3 && target->id == id_ANAKINJEDI
-                                ? const_cast<char *>("ep3_darthvader_outro2")
-                                : const_cast<char *>("ep3_darthvader_outro1"),
-                            1);
+                if (attacker && attacker->id == id_OBIWANKENOBIEP3 && target->id == id_ANAKINJEDI) {
+                    NewCutScene(NULL, WORLD->cutscene_sys, const_cast<char *>("ep3_darthvader_outro2"), 1);
+                } else {
+                    NewCutScene(NULL, WORLD->cutscene_sys, const_cast<char *>("ep3_darthvader_outro1"), 1);
+                }
             }
             return 0;
         }

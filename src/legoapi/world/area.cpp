@@ -603,7 +603,6 @@ load_type_done:
             }
         }
         if (load_type == 2) {
-            f32 backdrop_dt_scale = 1.0f;
             if (AreaDataLoaded != 0 && !character_load_active) {
                 if (!(LoadWait <= 0.0f) && (!(LoadTime < 45.0f) || skip_text_scroll)) {
                     LoadWait -= FRAMETIME;
@@ -611,9 +610,10 @@ load_type_done:
                         LoadWait = 0.0f;
                     }
                 }
-                backdrop_dt_scale = LoadWait / LOADWAITTIME;
             }
             legoSetMusicVolume((LoadWait / LOADWAITTIME) * music_volume);
+            const f32 backdrop_dt_scale =
+                AreaDataLoaded != 0 && !character_load_active ? LoadWait / LOADWAITTIME : 1.0f;
             BackDrop_Update(backdrop_dt_scale * FRAMETIME);
             BackDrop_UpdateColours(1);
         } else if (AreaDataLoaded != 0 && !character_load_active && icon_stage == 2 && !(LoadWait <= 0.0f)) {

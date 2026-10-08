@@ -664,14 +664,14 @@ void Animate_CANNON(GameObject_s *object) {
 }
 
 void Animate_WALKER(GameObject_s *object) {
+    GAMEPAD_s *pad = object->pad_gamepad;
     if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
         object->apiobj.anim_packet.requested_animation = object->context_animation;
         return;
     }
 
     object->apiobj.anim_packet.requested_animation = CHARACTER_ANIMATION_IDLE;
-    if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
-        object->pad_gamepad->input_magnitude > 0.0f) {
+    if ((pad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 && pad->input_magnitude > 0.0f) {
         object->apiobj.anim_packet.requested_animation = CHARACTER_ANIMATION_WALK;
     }
 }

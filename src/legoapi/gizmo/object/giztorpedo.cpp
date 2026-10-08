@@ -115,11 +115,12 @@ static i32 GizTorp_Load(void *world_ptr, void *) {
     system->scale = version > 2 ? EdFileReadFloat() : 1.0f;
 
     for (i32 index = 0; index < system->count; ++index) {
-        GIZTORPMACHINE &machine = system->machines[index];
         const i32 name_length = EdFileReadInt();
-        EdFileRead(machine.name, name_length);
-        EdFileReadNuVec(&machine.position);
-        machine.y_rotation = static_cast<u16>(EdFileReadShort());
+        EdFileRead(system->machines[index].name, name_length);
+        EdFileReadNuVec(&system->machines[index].position);
+        GIZTORPMACHINE &rotation_machine = system->machines[index];
+        rotation_machine.y_rotation = static_cast<u16>(EdFileReadShort());
+        GIZTORPMACHINE &machine = system->machines[index];
         if (version > 1) {
             const u8 alternate_model = EdFileReadUnsignedChar() != 0;
             machine.flags =
