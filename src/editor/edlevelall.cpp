@@ -304,7 +304,7 @@ i32 ClassEditor::CreateObject(ClassObject &source) {
         return 0;
 
     created.object = object;
-    if (ed_class->flags & 0x04000000) {
+    if (source.ed_class->flags & 0x04000000) {
         i32 flags = 0x04000000;
         if (created.reference == NULL || !created.reference->SetAttributeData(object, 1, EdType_Int, &flags, 0)) {
             EdMember member;
@@ -313,10 +313,11 @@ i32 ClassEditor::CreateObject(ClassObject &source) {
         }
     } else {
         ed_class->CopyObject(object, source.object);
+        interface = created.ed_class->interface;
         interface->vtable->construct(interface, object, source.object);
     }
     InitialiseObject(created);
-    theRegistry.NotifyCreateObject(object, ed_class, NULL, 0, 0, 0);
+    theRegistry.NotifyCreateObject(created.object, created.ed_class, NULL, 0, 0, 0);
     SelectObject(created, 0);
     return 1;
 }
@@ -329,7 +330,7 @@ i32 ClassEditor::CreateObject(EdClass *ed_class) {
         return 0;
     ClassObject created = {ed_class, object, NULL};
     InitialiseObject(created);
-    theRegistry.NotifyCreateObject(object, ed_class, NULL, 0, 0, 0);
+    theRegistry.NotifyCreateObject(created.object, created.ed_class, NULL, 0, 0, 0);
     SelectObject(created, 0);
     return 1;
 }

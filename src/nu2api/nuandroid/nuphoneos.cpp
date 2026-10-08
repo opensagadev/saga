@@ -23,10 +23,34 @@ void NuPhoneOSRegisterEventCallback(i32 type, PHONEEVENTCALLBACK *callback_fn) {
 
 extern "C" void NuPhoneOSMessagePost(const NuPhoneOSMessage *message, i32 nonblocking, i32 wait_until_processed) {
     if (nonblocking == 0) {
-        s_phoneOSMessageQueue.Post(*message);
+        s_phoneOSMessageQueue.free_slots.Wait();
+        NuPhoneOSQueue::Record record = {*message, NuPhoneOSQueue::NO_TOKEN};
+        s_phoneOSMessageQueue.records[__atomic_load_n(&s_phoneOSMessageQueue.write_count, __ATOMIC_RELAXED) & 127] =
+            record;
+        if (__atomic_load_n(&s_phoneOSMessageQueue.read_count, __ATOMIC_RELAXED) ==
+            __atomic_load_n(&s_phoneOSMessageQueue.write_count, __ATOMIC_RELAXED)) {
+            s_phoneOSMessageQueue.became_empty.TryWait();
+            s_phoneOSMessageQueue.became_nonempty.TryWait();
+            s_phoneOSMessageQueue.became_nonempty.Signal();
+        }
+        __atomic_store_n(&s_phoneOSMessageQueue.write_count,
+                         __atomic_load_n(&s_phoneOSMessageQueue.write_count, __ATOMIC_RELAXED) + 1U, __ATOMIC_RELAXED);
+        s_phoneOSMessageQueue.queued_items.Signal();
     } else {
-        if (!s_phoneOSMessageQueue.TryPost(*message))
+        if (!s_phoneOSMessageQueue.free_slots.TryWait())
             return;
+        NuPhoneOSQueue::Record record = {*message, NuPhoneOSQueue::NO_TOKEN};
+        s_phoneOSMessageQueue.records[__atomic_load_n(&s_phoneOSMessageQueue.write_count, __ATOMIC_RELAXED) & 127] =
+            record;
+        if (__atomic_load_n(&s_phoneOSMessageQueue.read_count, __ATOMIC_RELAXED) ==
+            __atomic_load_n(&s_phoneOSMessageQueue.write_count, __ATOMIC_RELAXED)) {
+            s_phoneOSMessageQueue.became_empty.TryWait();
+            s_phoneOSMessageQueue.became_nonempty.TryWait();
+            s_phoneOSMessageQueue.became_nonempty.Signal();
+        }
+        __atomic_store_n(&s_phoneOSMessageQueue.write_count,
+                         __atomic_load_n(&s_phoneOSMessageQueue.write_count, __ATOMIC_RELAXED) + 1U, __ATOMIC_RELAXED);
+        s_phoneOSMessageQueue.queued_items.Signal();
     }
     if (wait_until_processed != 0)
         s_phoneOSMessageQueue.WaitUntilEmpty();
@@ -49,8 +73,27 @@ extern "C" void NuPhoneOSMessagePump(void) {
         g_systemDidBecomeActiveReceived = 0;
     }
     NuPhoneOSMessage message;
-    while (s_phoneOSMessageQueue.TryPop(message)) {
-        if (s_phoneOSEventCallbacks[message.type] != NULL)
-            s_phoneOSEventCallbacks[message.type](&message.data);
+    while (s_phoneOSMessageQueue.queued_items.TryWait()) {
+        message =
+            s_phoneOSMessageQueue.records[__atomic_load_n(&s_phoneOSMessageQueue.read_count, __ATOMIC_RELAXED) & 127]
+                .message;
+        u32 token =
+            s_phoneOSMessageQueue.records[__atomic_load_n(&s_phoneOSMessageQueue.read_count, __ATOMIC_RELAXED) & 127]
+                .token;
+        if (token != NuPhoneOSQueue::NO_TOKEN &&
+            token == __atomic_load_n(&s_phoneOSMessageQueue.waiting_token, __ATOMIC_RELAXED))
+            s_phoneOSMessageQueue.token_received.Signal();
+        __atomic_store_n(&s_phoneOSMessageQueue.read_count,
+                         __atomic_load_n(&s_phoneOSMessageQueue.read_count, __ATOMIC_RELAXED) + 1U, __ATOMIC_RELAXED);
+        if (__atomic_load_n(&s_phoneOSMessageQueue.read_count, __ATOMIC_RELAXED) ==
+            __atomic_load_n(&s_phoneOSMessageQueue.write_count, __ATOMIC_RELAXED)) {
+            s_phoneOSMessageQueue.became_nonempty.TryWait();
+            s_phoneOSMessageQueue.became_empty.TryWait();
+            s_phoneOSMessageQueue.became_empty.Signal();
+        }
+        s_phoneOSMessageQueue.free_slots.Signal();
+        if (s_phoneOSEventCallbacks[message.type] == NULL)
+            continue;
+        s_phoneOSEventCallbacks[message.type](&message.data);
     }
 }

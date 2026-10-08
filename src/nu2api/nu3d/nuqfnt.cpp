@@ -1086,7 +1086,8 @@ void NuQFntPrintCharW(NUQFNT *font, u16 *text, u32 flags) {
                 }
                 f32 left = x;
                 if ((flags & 1) != 0 && static_cast<u16>(character - 0x30) <= 9) {
-                    VUFNTCHAR *zero = &vufnt->glyphs[static_cast<i16>(NuQFntEncodeUnicodeChar(font, 0x30))];
+                    const i16 zero_code = static_cast<i16>(NuQFntEncodeUnicodeChar(font, 0x30));
+                    VUFNTCHAR *zero = &vufnt->glyphs[zero_code];
                     f32 digit_width = zero->width * *vufnt->x_scale;
                     left = (digit_width - glyph_width) + x;
                     advance = digit_width;

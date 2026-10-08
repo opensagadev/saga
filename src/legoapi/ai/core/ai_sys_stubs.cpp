@@ -42,6 +42,7 @@ static __used__ i32 RowMoveWander(AIGROUP *group, AIROW *row, AIROW *previous, A
         } else {
             AIPATHNODE *node = &row->path_info.path->nodes[node_index];
             i32 first = NuRandInt() % node->connection_count;
+            connection = row->path_info.connection;
             for (i32 i = 0; i < node->connection_count; ++i) {
                 row->next_connection = node->connections[(first + i) % node->connection_count];
                 AIPATHCNX *next = row->next_connection;

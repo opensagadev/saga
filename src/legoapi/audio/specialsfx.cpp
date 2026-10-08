@@ -431,8 +431,18 @@ void FileLoadSingleEffectType(debinftype *effect, i32 version, char category) {
         effect->emitter_velocity.x = effect->emitter_velocity.y = effect->emitter_velocity.z = 0.0f;
     }
 
-    for (usize i = 0; i < sizeof(effect->fields_070) / sizeof(f32); ++i)
-        reinterpret_cast<f32 *>(effect->fields_070)[i] = EdFileReadFloat();
+    reinterpret_cast<f32 *>(effect->fields_070)[0] = EdFileReadFloat();
+    reinterpret_cast<f32 *>(effect->fields_070)[1] = EdFileReadFloat();
+    reinterpret_cast<f32 *>(effect->fields_070)[2] = EdFileReadFloat();
+    reinterpret_cast<f32 *>(effect->fields_070)[3] = EdFileReadFloat();
+    reinterpret_cast<f32 *>(effect->fields_070)[4] = EdFileReadFloat();
+    reinterpret_cast<f32 *>(effect->fields_070)[5] = EdFileReadFloat();
+    reinterpret_cast<f32 *>(effect->fields_070)[6] = EdFileReadFloat();
+    reinterpret_cast<f32 *>(effect->fields_070)[7] = EdFileReadFloat();
+    reinterpret_cast<f32 *>(effect->fields_070)[8] = EdFileReadFloat();
+    reinterpret_cast<f32 *>(effect->fields_070)[9] = EdFileReadFloat();
+    reinterpret_cast<f32 *>(effect->fields_070)[10] = EdFileReadFloat();
+    reinterpret_cast<f32 *>(effect->fields_070)[11] = EdFileReadFloat();
     effect->field_0a0 = EdFileReadFloat();
     effect->particle_lifetime = EdFileReadFloat();
     effect->field_0a8 = EdFileReadShort();
@@ -573,8 +583,18 @@ void FileLoadSingleEffectType(debinftype *effect, i32 version, char category) {
                 effect->sound_data[i * 3 + 2] = 0;
             }
         } else {
-            for (i32 i = 0; i < 12; ++i)
-                effect->sound_data[i] = EdFileReadInt();
+            effect->sound_data[0] = EdFileReadInt();
+            effect->sound_data[1] = EdFileReadInt();
+            effect->sound_data[2] = EdFileReadInt();
+            effect->sound_data[3] = EdFileReadInt();
+            effect->sound_data[4] = EdFileReadInt();
+            effect->sound_data[5] = EdFileReadInt();
+            effect->sound_data[6] = EdFileReadInt();
+            effect->sound_data[7] = EdFileReadInt();
+            effect->sound_data[8] = EdFileReadInt();
+            effect->sound_data[9] = EdFileReadInt();
+            effect->sound_data[10] = EdFileReadInt();
+            effect->sound_data[11] = EdFileReadInt();
         }
     } else {
         const i32 stored_sound_count = EdFileReadInt();
@@ -582,13 +602,14 @@ void FileLoadSingleEffectType(debinftype *effect, i32 version, char category) {
         for (i32 i = 0; i < sound_count; ++i) {
             char sound_name[16];
             EdFileRead(sound_name, sizeof(sound_name));
-            const i32 sound_id = GetSfxIdN(sound_name, sizeof(sound_name));
-            const i32 first = EdFileReadInt();
-            const i32 second = EdFileReadInt();
             if (i < 4) {
-                effect->sound_data[i * 3] = sound_id;
-                effect->sound_data[i * 3 + 1] = first;
-                effect->sound_data[i * 3 + 2] = second;
+                effect->sound_data[i * 3] = GetSfxIdN(sound_name, sizeof(sound_name));
+                effect->sound_data[i * 3 + 1] = EdFileReadInt();
+                effect->sound_data[i * 3 + 2] = EdFileReadInt();
+            } else {
+                GetSfxIdN(sound_name, sizeof(sound_name));
+                EdFileReadInt();
+                EdFileReadInt();
             }
         }
         for (i32 i = MIN(sound_count, 4); i < 4; ++i)

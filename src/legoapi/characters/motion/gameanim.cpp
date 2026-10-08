@@ -175,36 +175,34 @@ check_hold:
 }
 
 static void JumpAnimCode(GameObject_s *object) {
-    if (object->context_variant_flags >= 0) {
-        ANIMPACKET_s *packet = &object->apiobj.anim_packet;
-        packet->requested_animation = object->context_animation;
-        const u8 state = object->action_movement_state;
-        if (object->context_animation != 0x49 && (state == 6 || state < 2 || state == 7 || state == 9)) {
-            if (packet->blending == 0 && object->context_animation == packet->animation_index &&
-                (packet->flags & 1) != 0) {
-                object->airborne_input_timer += FRAMETIME;
-                if (object->airborne_input_timer >= 0.1f &&
-                    (object->nearby_floor_distance == 2000000.0f || object->nearby_floor_distance > 0.35f)) {
-                    object->context_variant_flags |= 0x80;
-                }
-            } else {
-                object->airborne_input_timer = 0.0f;
-            }
+    if (object->context_variant_flags < 0) {
+        void **animations = object->apiobj.character_model->model_data_b;
+        if (object->action_movement_state == PLAYER_JUMP_MOVEMENT_COMBAT_ROLL &&
+            animations[PLAYER_JUMP_ACTION_COMBAT_ROLL_FALL] != NULL) {
+            object->apiobj.anim_packet.requested_animation = PLAYER_JUMP_ACTION_COMBAT_ROLL_FALL;
+            return;
         }
+        if (animations[PLAYER_JUMP_ACTION_FALL] != NULL) {
+            object->apiobj.anim_packet.requested_animation = PLAYER_JUMP_ACTION_FALL;
+            return;
+        }
+        object->apiobj.anim_packet.requested_animation = object->context_animation;
         return;
     }
-
-    void **animations = object->apiobj.character_model->model_data_b;
-    if (object->action_movement_state == PLAYER_JUMP_MOVEMENT_COMBAT_ROLL &&
-        animations[PLAYER_JUMP_ACTION_COMBAT_ROLL_FALL] != NULL) {
-        object->apiobj.anim_packet.requested_animation = PLAYER_JUMP_ACTION_COMBAT_ROLL_FALL;
-        return;
+    ANIMPACKET_s *packet = &object->apiobj.anim_packet;
+    packet->requested_animation = object->context_animation;
+    const u8 state = object->action_movement_state;
+    if (object->context_animation != 0x49 && (state == 6 || state < 2 || state == 7 || state == 9)) {
+        if (packet->blending == 0 && object->context_animation == packet->animation_index && (packet->flags & 1) != 0) {
+            object->airborne_input_timer += FRAMETIME;
+            if (object->airborne_input_timer >= 0.1f &&
+                (object->nearby_floor_distance == 2000000.0f || object->nearby_floor_distance > 0.35f)) {
+                object->context_variant_flags |= 0x80;
+            }
+        } else {
+            object->airborne_input_timer = 0.0f;
+        }
     }
-    if (animations[PLAYER_JUMP_ACTION_FALL] != NULL) {
-        object->apiobj.anim_packet.requested_animation = PLAYER_JUMP_ACTION_FALL;
-        return;
-    }
-    object->apiobj.anim_packet.requested_animation = object->context_animation;
 }
 
 static CHARACTERANIM_s *GetAnimationInfo(const CHARACTERMODEL_s *model, i32 animation) {

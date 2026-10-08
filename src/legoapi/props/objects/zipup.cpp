@@ -728,12 +728,14 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
     NUVEC end_offset;
     NuVecSub(&end_offset, destination, hook);
     end_offset.y += 0.5f;
+    zipup = static_cast<ZIPUP *>(object->field_0x788);
     f32 rider_height = 0.5f * api.scaled_height;
     zipup->rider_start_offset.x *= 0.9f;
     zipup->rider_start_offset.y *= 0.9f;
     zipup->rider_start_offset.y = rider_height + zipup->rider_start_offset.y;
     zipup->rider_start_offset.z *= 0.9f;
     i32 yaw = -static_cast<u16>(NuAtan2D(zipup->rider_start_offset.x, zipup->rider_start_offset.z));
+    zipup = static_cast<ZIPUP *>(object->field_0x788);
     NUVEC start_offset = zipup->rider_start_offset;
     NuVecRotateY(&start_offset, &start_offset, yaw);
     NuVecRotateY(&end_offset, &end_offset, yaw);

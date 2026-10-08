@@ -273,7 +273,7 @@ void DrawStillScreen(i32 clear) {
     if (clear != 0) {
         NuRndrClear(0x500, 0, 1.0f);
     }
-    if (MainRenderTime >= 1.0f) {
+    if (!(MainRenderTime < 1.0f)) {
         NuRndrRectUV2di(0, 0, 0x2800, 0xe00, 0.0f, 1.0f, 1.0f, 0.0f, 0x80808080u, pause_rndr_mtl);
     } else {
         const u32 colour = (static_cast<i32>(MainRenderTime * 128.0f) << 24) | 0x00808080u;
