@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Serve the generated static site and Bazel WASM output locally."""
+"""Serve the Bazel WASM host shell and optional local OBB for development."""
 
 from __future__ import annotations
 
@@ -11,10 +11,6 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
 
-try:
-    from scripts.plot_binary_match_map import generate_site
-except ModuleNotFoundError:
-    from plot_binary_match_map import generate_site
 
 
 OBB_NAME = "main.1060.com.wb.lego.tcs.obb"
@@ -26,17 +22,6 @@ def default_wasm_directory() -> Path:
         return runfiles_output
     workspace = Path(os.environ.get("BUILD_WORKSPACE_DIRECTORY", Path.cwd()))
     return workspace / "bazel-bin/src"
-
-
-def default_site_directory(wasm_directory: Path) -> Path:
-    workspace = Path(os.environ.get("BUILD_WORKSPACE_DIRECTORY", Path.cwd()))
-    pages = workspace / "doc/pages"
-    report = workspace / "matching.json"
-    if report.is_file():
-        generate_site(report, pages / "index.html", 256 * 512, 512)
-    if (pages / "index.html").is_file():
-        return pages
-    return wasm_directory
 
 
 def default_obb_path() -> Path | None:
@@ -165,7 +150,7 @@ def main() -> None:
     directory = (
         argument_path(args.directory).resolve()
         if args.directory is not None
-        else default_site_directory(wasm_directory).resolve()
+        else wasm_directory
     )
     if not directory.is_dir():
         parser.error(f"build output directory does not exist: {directory}")

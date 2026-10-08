@@ -16,23 +16,6 @@ env:
   BAZEL_VERSION: 9.2.0
 
 jobs:
-  site-styles:
-    name: Site styles
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: scripts/site/package-lock.json
-      - name: Check generated CSS
-        working-directory: scripts/site
-        run: |
-          npm ci
-          npm run build
-          git diff --exit-code -- site.css
-
   checks:
     name: Repository checks
     runs-on: ubuntu-latest

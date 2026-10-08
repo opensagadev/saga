@@ -309,7 +309,7 @@ regenerates the full matching report, and stages the generated `matching.json`
 and README progress badge for the same commit.
 
 Without `res/libTTapp.so`, the binary-dependent steps are skipped. The hook
-does not generate `doc/pages/index.html`.
+does not generate the website; that belongs to opensaga.dev.
 
 Run the same workflow without creating a commit with:
 
@@ -382,7 +382,7 @@ exceptions. Moving a function between files can change its optimization,
 symbol order, and nearby static data, so change either mapping only when the
 original binary provides evidence for it.
 
-### Matching report and Pages
+### Matching report and website
 
 After building `target`, and with `res/libTTapp.so` and `objdiff-cli`
 available, generate the full report:
@@ -399,26 +399,12 @@ by CI and updates the match progress badge in `README.md`.
 Do not edit `matching.json` or the README progress badge by hand. Commit both
 generated files with the target changes that produced them.
 
-Render a local copy of the GitHub Pages site with:
-
-```sh
-bazel run //scripts:plot_binary_match_map
-```
-
-This command only reads `matching.json` and writes the ignored site under
-`doc/pages/`; it does not build or compare either binary. The homepage is at
-`/`, the full progress explorer at `/progress/`, and the browser player at
-`/play/`.
-
-For a site preview without compiling the game:
-
-```sh
-python3 scripts/wasm_server.py --port 8000
-```
-
-Open `http://127.0.0.1:8000/`. Playing the game also requires a WASM build and
-the original assets. Homepage templates, Tailwind build instructions, and
-asset credits are in [`scripts/site/README.md`](scripts/site/README.md).
+The standalone website, progress explorer, shared styling and GitHub Pages
+workflow live in [opensaga.dev](https://github.com/opensagadev/opensaga.dev).
+Its pinned Saga submodule supplies `matching.json` and `//src:saga_wasm`.
+Follow that repository's build instructions to preview the complete site.
+`//scripts:wasm_server` remains a local engine development server for the
+minimal Emscripten host shell; it does not generate or deploy the website.
 
 ### Source conventions
 
@@ -437,9 +423,8 @@ are in the [agent and maintainer reference documentation](doc/main.md).
 
 ## CI 🤖
 
-The repository has two GitHub Actions workflows. Both run for pull requests
-targeting `main` and pushes to `main`. The Pages workflow also supports manual
-dispatch.
+The Bazel build workflow runs for pull requests targeting `main` and pushes
+to `main`. GitHub Pages deployment is owned by the opensaga.dev repository.
 
 ### Bazel build workflow
 
@@ -460,12 +445,6 @@ surface but does not calculate a new matching percentage.
 Each job restores Bazel's download, repository, and build caches.
 Pull-request runs can restore existing entries but do not save new ones. Pushes
 to `main` may update the caches.
-
-### Pages workflow
-
-`.github/workflows/pages.yaml` renders the site from the committed
-`matching.json`, uploads `doc/pages/`, and deploys it to GitHub Pages. It does
-not rebuild `target` or regenerate `matching.json`.
 
 GitHub Actions invokes its checks and builds directly. It does not run the
 local pre-commit hook.
