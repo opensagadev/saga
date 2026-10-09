@@ -395,12 +395,12 @@ i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 dama
         blowup->animation_time = 1.0f;
         if (object == NULL) {
             if ((blowup->draw_flags & 0x208) && blowup->saved_state_0 != 0 &&
-                (blowup->field_0xb4 > 0.0f || blowup->field_0xb8 <= 0.0f)) {
+                (!(blowup->field_0xb4 <= 0.0f) || !(blowup->field_0xb8 > 0.0f))) {
                 const f32 radius_squared = blowup->field_0xb4 * blowup->field_0xb4;
                 for (i32 player = 0; player < 8; ++player) {
                     GameObject_s *target = Player[player];
                     if (target != NULL && (target->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
-                        target->apiobj.field_0x287 == 0 && target->field_0x101c <= 0.0f) {
+                        target->apiobj.field_0x287 == 0 && !(target->field_0x101c > 0.0f)) {
                         const f32 x = blowup->mid_position.x - target->apiobj.collision_position.x;
                         const f32 y = blowup->mid_position.y - target->apiobj.collision_position.y;
                         const f32 z = blowup->mid_position.z - target->apiobj.collision_position.z;

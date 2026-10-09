@@ -1341,13 +1341,13 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
             strcpy(category_text, "        ");
         }
         u8 *data = reinterpret_cast<u8 *>(header) + m_headerSize;
-        const char flag_a = (debug->flags.alloc_flags & 2) != 0 ? 'X' : '-';
-        const char flag_s = (debug->flags.alloc_flags & 4) != 0 ? 'X' : '-';
-        const char flag_c = (debug->flags.alloc_flags & 8) != 0 ? 'X' : '-';
+        const bool flag_a = (debug->flags.alloc_flags & 2) != 0;
+        const bool flag_s = (debug->flags.alloc_flags & 4) != 0;
+        const bool flag_c = (debug->flags.alloc_flags & 8) != 0;
 
         if (count > 1 && (flags & 2) == 0) {
             snprintf(line, sizeof(line), "| %s | %10u | %s | %c%c%c | %s | %s\r\n", address_text, count, size_text,
-                     flag_a, flag_s, flag_c, category_text, debug_name);
+                     flag_a ? 'X' : '-', flag_s ? 'X' : '-', flag_c ? 'X' : '-', category_text, debug_name);
         } else if ((debug->flags.alloc_flags & 4) != 0) {
             char value[257];
             block_size = BLOCK_SIZE(header->value);
@@ -1365,19 +1365,19 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
             }
             value[length] = '\0';
             snprintf(line, sizeof(line), "| %s | %10u | %s | %c%c%c | %s | %s [%s]\r\n", address_text, count, size_text,
-                     flag_a, flag_s, flag_c, category_text, debug_name, value);
+                     flag_a ? 'X' : '-', flag_s ? 'X' : '-', flag_c ? 'X' : '-', category_text, debug_name, value);
         } else {
             snprintf(line, sizeof(line),
                      "| %s | %10u | %s | %c%c%c | %s | %s [%02X %02X %02X %02X %02X %02X %02X %02X ...]\r\n",
-                     address_text, count, size_text, flag_a, flag_s, flag_c, category_text, debug_name, data[0],
-                     data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
+                     address_text, count, size_text, flag_a ? 'X' : '-', flag_s ? 'X' : '-', flag_c ? 'X' : '-',
+                     category_text, debug_name, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
         }
     }
     error_handler->Dump(this, dump_id, line);
     if ((m_flags & MEM_MANAGER_EXTENDED_DEBUG) != 0 && (flags & 0x20) != 0 &&
         reinterpret_cast<ExtendedDebugHeader *>(header)->backtrace_count == 0) {
-        error_handler->Dump(this, dump_id,
-                            "|            |            |               |     |           |   <NO BACKTRACE>\r\n");
+        strcpy(line, "|            |            |               |     |           |   <NO BACKTRACE>\r\n");
+        error_handler->Dump(this, dump_id, line);
     }
     return category;
 }

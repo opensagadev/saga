@@ -1557,37 +1557,42 @@ extern "C" {
     }
 
     i32 NewPlatInst(void *object, i32 instance) {
-        if (CurTerr == NULL || CurTerr->group_index_count >= CurTerr->max_group_indices ||
-            CurTerr->group_count >= CurTerr->max_groups || object == NULL || CurTerr->max_platforms <= 0)
+        TERRSET *terrain = CurTerr;
+        if (terrain == NULL || terrain->group_index_count >= terrain->max_group_indices ||
+            terrain->group_count >= terrain->max_groups || object == NULL || terrain->max_platforms <= 0)
             return -1;
+        const i32 platform_count = terrain->max_platforms;
+        TERRAIN_PLATFORM *platforms = terrain->platforms;
+        const i32 group_index_count = terrain->group_index_count;
+        const i16 group_index = terrain->group_count;
         i32 index = 0;
-        while (CurTerr->platforms[index].scene_object != NULL) {
-            if (++index == CurTerr->max_platforms)
+        while (platforms[index].scene_object != NULL) {
+            if (++index == platform_count)
                 return -1;
         }
-        for (i32 source = 0; source < CurTerr->max_platforms; ++source) {
-            TERRAIN_PLATFORM &original = CurTerr->platforms[source];
+        for (i32 source = 0; source < platform_count; ++source) {
+            TERRAIN_PLATFORM &original = platforms[source];
             if (original.scene_object == NULL || static_cast<i16>(original.scene_object_index) != instance)
                 continue;
-            const i16 group_index = CurTerr->group_count;
-            TERRAIN_GROUP &group = CurTerr->groups[group_index];
-            group = CurTerr->groups[original.terrain_group_index];
+            TERRAIN_GROUP &group = terrain->groups[group_index];
+            group = terrain->groups[original.terrain_group_index];
             group.scene_index = index;
             group.chunk_type = 1;
-            TERRAIN_PLATFORM &platform = CurTerr->platforms[index];
+            TERRAIN_PLATFORM &platform = platforms[index];
             platform.scene_object = object;
             platform.terrain_group_index = group_index;
             platform.scene_object_index = instance;
             platform.scene_transform = NULL;
             platform.flags = (platform.flags & ~1) | (original.flags & 1);
-            CurTerr->group_indices[CurTerr->group_index_count++] = group_index;
+            terrain->group_indices[group_index_count] = group_index;
+            terrain->group_index_count = group_index_count + 1;
             platform.bounce_impulse = 0.0f;
             platform.bounce_offset = 0.0f;
             platform.bounce_velocity = 0.0f;
             platform.bounce_damping = 0.0f;
             platform.bounce_spring = 0.0f;
-            ++CurTerr->group_count;
-            ++CurTerr->cells[TERRAIN_PLATFORM_CELL].group_count;
+            ++terrain->group_count;
+            ++terrain->cells[TERRAIN_PLATFORM_CELL].group_count;
             return index;
         }
         return -1;

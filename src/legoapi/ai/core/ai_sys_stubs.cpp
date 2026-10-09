@@ -755,7 +755,11 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char
             path->nodes = static_cast<AIPATHNODE *>(AISysLoadAlloc(system, path->node_count * sizeof(AIPATHNODE)));
             for (i32 node_index = 0; node_index < path->node_count; ++node_index) {
                 AIPATHNODE *node = &path->nodes[node_index];
-                node->name = AISysLoadString(system, EdFileReadInt());
+                const i32 name_length = EdFileReadInt();
+                if (name_length != 0) {
+                    node->name = static_cast<char *>(AISysLoadAlloc(system, name_length + 1));
+                    EdFileRead(node->name, name_length);
+                }
                 node->position.x = EdFileReadFloat();
                 node->position.y = EdFileReadFloat();
                 node->position.z = EdFileReadFloat();
@@ -775,9 +779,12 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char
                 EdFileReadChar();
                 node->runtime_flags = static_cast<u8>(EdFileReadChar()) & ~6u;
                 node->path_flags = EdFileReadShort();
-                node->special_route_index = static_cast<u8>(EdFileReadChar());
-                if (version < 19)
+                if (version < 19) {
+                    EdFileReadChar();
                     node->special_route_index = 0xff;
+                } else {
+                    node->special_route_index = static_cast<u8>(EdFileReadChar());
+                }
 
                 char *special_name = name_buffer;
                 i32 special_name_length = EdFileReadChar();
@@ -826,7 +833,8 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char
             route->path_count = static_cast<u8>(EdFileReadChar());
             route->paths = static_cast<AIPATH **>(AISysLoadAlloc(system, route->path_count * sizeof(AIPATH *)));
             for (i32 path_index = 0; path_index < route->path_count; ++path_index) {
-                route->paths[path_index] = path_system->paths[EdFileReadChar()];
+                const i32 read_path_index = EdFileReadChar();
+                route->paths[path_index] = path_system->paths[read_path_index];
             }
         }
     }

@@ -728,12 +728,14 @@ void Store_HubDrawFloorTargets(WORLDINFO_s *world) {
             continue;
         }
 
-        NUVEC position = pack.custodian_position;
+        NUVEC position;
+        position.x = pack.custodian_position.x;
         position.x +=
             NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.3f) / 2.3f * 65536.0f) + i * 0x2000) * 0.01f;
-        position.y = CDataList[*pack.id].bounds_max_y * 0.75f + position.y - 0.01f;
+        position.y = CDataList[*pack.id].bounds_max_y * 0.75f + pack.custodian_position.y - 0.01f;
         position.y +=
             NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f) + i * 0x2aaa) * 0.01f;
+        position.z = pack.custodian_position.z;
         position.z +=
             NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.4f) / 2.4f * 65536.0f) + i * 0x2000 + 0x4000) *
             0.01f;
