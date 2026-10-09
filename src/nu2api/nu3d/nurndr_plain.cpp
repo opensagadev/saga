@@ -23,6 +23,7 @@
 #include <string.h>
 #include "nu2api/nu3d/nuprim_internal.h"
 #include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 
@@ -522,6 +523,29 @@ extern "C" i32 NuRndrGlobalFrameCount(void) {
 }
 extern "C" void NuRndrGlobalFrameCountPause(i32 paused) {
     global_frame_count_paused = paused;
+}
+
+// Wind deformation belongs to the renderer with its frame counter and wind state.
+extern "C" void WindShear(NUMTX *output, NUMTX *input, i32 wind_scale, i32 wind_speed) {
+    u32 seed = static_cast<u32>(wind_speed);
+    const f32 speed = (static_cast<f32>(wind_speed) / 65535.0f) * global_windspeed;
+    const f32 amplitude = (static_cast<f32>(wind_scale) / 65535.0f) * global_windscale;
+    const f32 random = NuRandFloatSeeded(&seed);
+    const u32 frame = static_cast<u32>(NuRndrGlobalFrameCount());
+    const f32 phase = random * 3.142f + random * 3.142f + static_cast<f32>(frame) * speed;
+    const f32 shear_x =
+        (NU_SIN_LUT(4.2f * phase * 10430.3779296875f) * 0.25f +
+         (NU_SIN_LUT(2.1f * phase * 10430.3779296875f) * 0.5f + NU_SIN_LUT(phase * 10430.3779296875f))) *
+        amplitude;
+    const f32 shear_z =
+        (0.25f * NU_COS_LUT(4.4f * phase * 10430.3779296875f) +
+         (0.5f * NU_COS_LUT(2.3f * phase * 10430.3779296875f) + NU_COS_LUT(phase * 1.1f * 10430.3779296875f))) *
+        amplitude;
+    *output = *input;
+    output->m10 = input->m00 * shear_x + input->m10 + input->m20 * shear_z;
+    output->m11 = input->m01 * shear_x + input->m11 + input->m21 * shear_z;
+    output->m12 = input->m02 * shear_x + input->m12 + input->m22 * shear_z;
+    output->m13 = shear_x * input->m03 + input->m13 + shear_z * input->m23;
 }
 
 // NuRndrRect2di and NuRndrGradRect2di write the attributes for the current

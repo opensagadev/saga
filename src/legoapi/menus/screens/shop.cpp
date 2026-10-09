@@ -1910,31 +1910,40 @@ void DrawTopShelf(i32) {
             const f32 phase = NuFmod(elapsed_since_touch, 4.0f);
             const i32 angle = static_cast<i32>(phase * 0.25f * 65536.0f);
             const f32 pulse = NuTrigTable[(angle >> 1) & 0x7fff] - 0.8f;
-            alpha_scale = pulse;
-            if (alpha_scale < 0.0f)
-                alpha_scale = 0.0f;
-            alpha_scale += 1.0f;
+            alpha_scale = pulse < 0.0f ? 1.0f : pulse + 1.0f;
         }
     }
 
     Shop_DrawCharacter(&TopShelf[1], &ShelfPos[1], topscale[1] * alpha_scale, toppush[1] + 0.0f, 0, shelfang, 0);
 
-    DrawItem(&TopShelf[2].special, &ShelfPos[2], topscale[2] * alpha_scale, 1.0f, toppush[2] + 0.005f, 0, shelfang, 0);
+    const f32 extra_push = toppush[2];
+    const f32 extra_scale = topscale[2];
+    const u16 extra_angle = shelfang;
+    if (NuSpecialExistsFn(&TopShelf[2].special) != 0) {
+        const f32 scale_value = extra_scale * alpha_scale;
+        NUANGVEC rotation = {0, extra_angle, 0};
+        NUMTX_ALIGNED16 matrix;
+        NuMtxSetRotateXYZVU0(&matrix, &rotation);
+        NUVEC scale = {scale_value, scale_value, scale_value};
+        NuMtxScaleVU0(&matrix, &scale);
+        *NUMTX_GET_ROW_VEC(&matrix, 3) = ShelfPos[2];
+        matrix.m31 += extra_push + 0.005f;
+        NuSpecialDrawAt(&TopShelf[2].special, &matrix);
+    }
 
     if (SHOPGOLDBRICKS > 0) {
-        const f32 ypush = toppush[4];
-        f32 scale_value = topscale[4];
-        const u16 angle = shelfang;
+        const f32 brick_push = toppush[4];
+        const f32 brick_scale = topscale[4];
+        const u16 brick_angle = shelfang;
         if (NuSpecialExistsFn(&TopShelf[4].special) != 0) {
-            scale_value *= alpha_scale;
-            NUVEC scale = {scale_value, scale_value, scale_value};
+            NUVEC scale = {brick_scale * alpha_scale, brick_scale * alpha_scale, brick_scale * alpha_scale};
             NUMTX_ALIGNED16 matrix;
             NuMtxSetScale(&matrix, &scale);
             NuMtxRotateXInline(&matrix, 0);
-            NuMtxRotateYInline(&matrix, static_cast<u16>(angle + 0x2000));
+            NuMtxRotateYInline(&matrix, static_cast<u16>(brick_angle + 0x2000));
             NuMtxRotateZInline(&matrix, 0);
             NuMtxTranslate(&matrix, &ShelfPos[4]);
-            matrix.m31 += ypush - 0.0325f;
+            matrix.m31 += brick_push - 0.0325f;
             NuSpecialDrawAt(&TopShelf[4].special, &matrix);
         }
     }
@@ -1955,13 +1964,13 @@ void DrawTopShelf(i32) {
         world_position.y += toppush[shelf_index];
         const f32 size = topscale[shelf_index] / TopShelfScale[shelf_index] * 0.15f;
         const f32 aspect_ratio = GetAspectRatio();
-        const f32 width = size / aspect_ratio;
+        const f32 height = size / aspect_ratio;
         NUVEC screen_position;
         NuCameraTransformScreenClip(&screen_position, &world_position, 1, NULL);
         menu->item_x[menu_index] = screen_position.x;
         menu->item_y[menu_index] = screen_position.y;
         menu->item_width[menu_index] = size;
-        menu->item_height[menu_index] = width;
+        menu->item_height[menu_index] = height;
         menu->item_column[menu_index] = menu_index;
         menu->item_row[menu_index] = 0;
     }

@@ -732,8 +732,12 @@ void DebrisTimeSlip(i32 group) {
     for (i32 i = 0; i < maxdebkeys; ++i) {
         debkeydatatype_s *key = &debkeydata[i];
         debinftype *effect = debtab[key->effect_index];
-        if (effect->time_group == 4 ? group != 1 : group != 0)
+        if (effect->time_group == 4) {
+            if (group != 1)
+                continue;
+        } else if (group != 0) {
             continue;
+        }
         key->last_update_time -= 800.0f;
         key->emission_epoch -= 800.0f;
         key->emission_time -= 800.0f;
@@ -742,18 +746,35 @@ void DebrisTimeSlip(i32 group) {
         for (i32 chunk = 0; chunk < 32; ++chunk) {
             if (key->particle_chunks[chunk] == NULL)
                 continue;
-            dma_particle_chunk_s *particles = key->particle_chunks[chunk];
-            i32 count = effect->particle_type == 7 ? 12 : 32;
-            for (i32 particle = 0; particle < count; ++particle)
-                particles->particles[particle].start_time -= 800.0f;
+            if (effect->particle_type == 7) {
+                key->particle_chunks[chunk]->particles[0].start_time -= 800.0f;
+                key->particle_chunks[chunk]->particles[1].start_time -= 800.0f;
+                key->particle_chunks[chunk]->particles[2].start_time -= 800.0f;
+                key->particle_chunks[chunk]->particles[3].start_time -= 800.0f;
+                key->particle_chunks[chunk]->particles[4].start_time -= 800.0f;
+                key->particle_chunks[chunk]->particles[5].start_time -= 800.0f;
+                key->particle_chunks[chunk]->particles[6].start_time -= 800.0f;
+                key->particle_chunks[chunk]->particles[7].start_time -= 800.0f;
+                key->particle_chunks[chunk]->particles[8].start_time -= 800.0f;
+                key->particle_chunks[chunk]->particles[9].start_time -= 800.0f;
+                key->particle_chunks[chunk]->particles[10].start_time -= 800.0f;
+                key->particle_chunks[chunk]->particles[11].start_time -= 800.0f;
+            } else {
+                for (i32 particle = 0; particle < 32; ++particle)
+                    key->particle_chunks[chunk]->particles[particle].start_time -= 800.0f;
+            }
         }
     }
     for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
         debinftype *effect = debtab[i];
         if (effect == NULL)
             continue;
-        if (effect->time_group == 4 ? group != 1 : group != 0)
+        if (effect->time_group == 4) {
+            if (group != 1)
+                continue;
+        } else if (group != 0) {
             continue;
+        }
         effect->last_render_time -= 800.0f;
         if (effect->native_data != NULL)
             effect->native_data->last_render_time -= 800.0f;

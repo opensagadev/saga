@@ -1566,42 +1566,47 @@ void DebrisReleaseControlStackLock() {
 void xxxNuDisplayListUpdateSpecial(nuhspecial_s *special) {
     NUDLDLISTSCENE *scene = special->scene->display_list;
     NUDISPLAYSPECIAL *display = special->display_special;
-    NUMTX matrix = *NuSpecialGetDrawMtx(special);
-    NUVEC corners[8] = {
-        {display->bounds_min.x, display->bounds_min.y, display->bounds_min.z},
-        {display->bounds_max.x, display->bounds_max.y, display->bounds_max.z},
-        {display->bounds_min.x, display->bounds_min.y, display->bounds_max.z},
-        {display->bounds_max.x, display->bounds_max.y, display->bounds_min.z},
-        {display->bounds_min.x, display->bounds_max.y, display->bounds_min.z},
-        {display->bounds_min.x, display->bounds_max.y, display->bounds_max.z},
-        {display->bounds_max.x, display->bounds_min.y, display->bounds_min.z},
-        {display->bounds_max.x, display->bounds_min.y, display->bounds_max.z},
+    NUMTX_ALIGNED16 matrix = *NuSpecialGetDrawMtx(special);
+    // Retail's eight corners occupy 16-byte slots (0x100..0x170), with
+    // three-coordinate vector calls operating on each padded position.
+    struct __attribute__((aligned(16))) Corner {
+        NUVEC position;
     };
-    NuVecMtxTransform(&corners[0], &corners[0], &matrix);
-    NuVecMtxTransform(&corners[1], &corners[1], &matrix);
-    NuVecMtxTransform(&corners[2], &corners[2], &matrix);
-    NuVecMtxTransform(&corners[3], &corners[3], &matrix);
-    NuVecMtxTransform(&corners[4], &corners[4], &matrix);
-    NuVecMtxTransform(&corners[5], &corners[5], &matrix);
-    NuVecMtxTransform(&corners[6], &corners[6], &matrix);
-    NuVecMtxTransform(&corners[7], &corners[7], &matrix);
+    Corner corners[8] = {
+        {{display->bounds_min.x, display->bounds_min.y, display->bounds_min.z}},
+        {{display->bounds_max.x, display->bounds_max.y, display->bounds_max.z}},
+        {{display->bounds_min.x, display->bounds_min.y, display->bounds_max.z}},
+        {{display->bounds_max.x, display->bounds_max.y, display->bounds_min.z}},
+        {{display->bounds_min.x, display->bounds_max.y, display->bounds_min.z}},
+        {{display->bounds_min.x, display->bounds_max.y, display->bounds_max.z}},
+        {{display->bounds_max.x, display->bounds_min.y, display->bounds_min.z}},
+        {{display->bounds_max.x, display->bounds_min.y, display->bounds_max.z}},
+    };
+    NuVecMtxTransform(&corners[0].position, &corners[0].position, &matrix);
+    NuVecMtxTransform(&corners[1].position, &corners[1].position, &matrix);
+    NuVecMtxTransform(&corners[2].position, &corners[2].position, &matrix);
+    NuVecMtxTransform(&corners[3].position, &corners[3].position, &matrix);
+    NuVecMtxTransform(&corners[4].position, &corners[4].position, &matrix);
+    NuVecMtxTransform(&corners[5].position, &corners[5].position, &matrix);
+    NuVecMtxTransform(&corners[6].position, &corners[6].position, &matrix);
+    NuVecMtxTransform(&corners[7].position, &corners[7].position, &matrix);
 
-    NUVEC minimum;
-    NUVEC maximum;
-    NuVecMin(&minimum, &corners[0], &corners[1]);
-    NuVecMin(&minimum, &minimum, &corners[2]);
-    NuVecMin(&minimum, &minimum, &corners[3]);
-    NuVecMin(&minimum, &minimum, &corners[4]);
-    NuVecMin(&minimum, &minimum, &corners[5]);
-    NuVecMin(&minimum, &minimum, &corners[6]);
-    NuVecMin(&minimum, &minimum, &corners[7]);
-    NuVecMax(&maximum, &corners[0], &corners[1]);
-    NuVecMax(&maximum, &maximum, &corners[2]);
-    NuVecMax(&maximum, &maximum, &corners[3]);
-    NuVecMax(&maximum, &maximum, &corners[4]);
-    NuVecMax(&maximum, &maximum, &corners[5]);
-    NuVecMax(&maximum, &maximum, &corners[6]);
-    NuVecMax(&maximum, &maximum, &corners[7]);
+    NUVEC_ALIGNED16 minimum;
+    NUVEC_ALIGNED16 maximum;
+    NuVecMin(&minimum, &corners[0].position, &corners[1].position);
+    NuVecMin(&minimum, &minimum, &corners[2].position);
+    NuVecMin(&minimum, &minimum, &corners[3].position);
+    NuVecMin(&minimum, &minimum, &corners[4].position);
+    NuVecMin(&minimum, &minimum, &corners[5].position);
+    NuVecMin(&minimum, &minimum, &corners[6].position);
+    NuVecMin(&minimum, &minimum, &corners[7].position);
+    NuVecMax(&maximum, &corners[0].position, &corners[1].position);
+    NuVecMax(&maximum, &maximum, &corners[2].position);
+    NuVecMax(&maximum, &maximum, &corners[3].position);
+    NuVecMax(&maximum, &maximum, &corners[4].position);
+    NuVecMax(&maximum, &maximum, &corners[5].position);
+    NuVecMax(&maximum, &maximum, &corners[6].position);
+    NuVecMax(&maximum, &maximum, &corners[7].position);
 
     if ((scene->render_buffer & NUDL_SCENE_RENDER_FLAG_CENTER_EXTENT_BOUNDS) != 0) {
         NUVEC extent;

@@ -136,7 +136,7 @@ extern "C" {
 
 // The original local font helpers read the same private draw state as the
 // editor callbacks, so they belong to this translation unit.
-static __used__ void eduiFntPrintEx(void *font, int x, int y, int alignment, char *format, ...) {
+static void eduiFntPrintEx(void *font, int x, int y, int alignment, char *format, ...) {
     if (!edui_donotdraw) {
         char text[1024];
         NuQFntPushPrintMode(2);

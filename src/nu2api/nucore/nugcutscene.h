@@ -234,7 +234,8 @@ struct NUGCUTSCENE_s {
     char *filename;
     NUGCUTSCENE_s *stream_buffer_0;
     NUGCUTSCENE_s *stream_buffer_1;
-    u32 flags;
+    u8 flags; // Original streaming and instance paths access one byte at +0x38.
+    u8 pad_39[3];
     i32 stream_buffer_size;
     union {
         u32 field_40;

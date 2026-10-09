@@ -516,23 +516,23 @@ namespace {
     do {                                                                                                               \
         TerrainScanBounds &scan_bounds = (bounds_arg);                                                                 \
         f32 &bounds_radius = (radius_arg);                                                                             \
-        const TerrainQuery_s &scan_query = *TerI;                                                                      \
-        if (scan_query.scan_result != 1) {                                                                             \
-            const f32 move_length = NuFsqrt(scan_query.movement.x * scan_query.movement.x +                            \
-                                            scan_query.movement.y * scan_query.movement.y +                            \
-                                            scan_query.movement.z * scan_query.movement.z);                            \
-            const TerrainQuery_s &sphere_query = *TerI;                                                                \
-            const f32 reach = (wall_arg) ? 0.1f + sphere_query.collision_radius + move_length                          \
-                                         : move_length + 0.1f + sphere_query.collision_radius;                         \
-            const f32 vertical = reach * sphere_query.object_scale;                                                    \
-            scan_bounds.max_x = sphere_query.position.x + 0.05f + reach;                                               \
-            scan_bounds.max_z = sphere_query.position.z + 0.05f + reach;                                               \
-            scan_bounds.min_x = sphere_query.position.x - 0.05f - reach;                                               \
-            scan_bounds.min_z = sphere_query.position.z - 0.05f - reach;                                               \
-            scan_bounds.min_y = sphere_query.position.y - 0.05f - vertical;                                            \
-            scan_bounds.max_y = sphere_query.position.y + 0.05f + vertical;                                            \
+        const TerrainQuery_s &entry_query = *TerI;                                                                     \
+        if (entry_query.scan_result != 1) {                                                                            \
+            const f32 move_length = NuFsqrt(entry_query.movement.x * entry_query.movement.x +                          \
+                                            entry_query.movement.y * entry_query.movement.y +                          \
+                                            entry_query.movement.z * entry_query.movement.z);                          \
+            const TerrainQuery_s &scan_query = *TerI;                                                                  \
+            const f32 reach = move_length + (0.1f + scan_query.collision_radius);                                      \
+            const f32 vertical = reach * scan_query.object_scale;                                                      \
+            scan_bounds.min_x = scan_query.position.x - 0.05f - reach;                                                 \
+            scan_bounds.max_x = scan_query.position.x + 0.05f + reach;                                                 \
+            scan_bounds.min_y = scan_query.position.y - 0.05f - vertical;                                              \
+            scan_bounds.max_y = scan_query.position.y + 0.05f + vertical;                                              \
+            scan_bounds.min_z = scan_query.position.z - 0.05f - reach;                                                 \
+            scan_bounds.max_z = scan_query.position.z + 0.05f + reach;                                                 \
             bounds_radius = reach;                                                                                     \
         } else {                                                                                                       \
+            const TerrainQuery_s &scan_query = entry_query;                                                            \
             const f32 radius = scan_query.collision_radius;                                                            \
             if (!(scan_query.movement.x > 0.0f)) {                                                                     \
                 scan_bounds.min_x = scan_query.position.x + scan_query.movement.x - 0.02f - radius;                    \
@@ -560,8 +560,9 @@ namespace {
             const f32 dz = scan_bounds.min_z - scan_bounds.max_z;                                                      \
             bounds_radius = NuFsqrt(dx * dx + dy * dy + dz * dz);                                                      \
         }                                                                                                              \
-        if (!(wall_arg) && scan_query.object_scale > 1.0f)                                                             \
-            bounds_radius += (scan_query.object_scale - 1.0f) * scan_query.collision_radius;                           \
+        const TerrainQuery_s &final_query = *TerI;                                                                     \
+        if (!(wall_arg) && final_query.object_scale > 1.0f)                                                            \
+            bounds_radius += (final_query.object_scale - 1.0f) * final_query.collision_radius;                         \
     } while (0)
 
     // These wall-spline traversals are part of all three retail scan bodies.
@@ -2841,8 +2842,10 @@ void TerrainPlayer(GameObject_s *object) {
                         api.field_0x218 = GameShadow(object, &api.collision_position, 5.0f, terrain_mask | 0x1f);
                     }
                     api.supporting_platform_id = static_cast<i16>(NewShadowOnPlatform());
-                    GetSurfaceInfo(object, api.field_0x218 != 2000000.0f ? 1 : 0, api.field_0x218);
-                    if (api.field_0x218 == 2000000.0f) {
+                    if (api.field_0x218 != 2000000.0f) {
+                        GetSurfaceInfo(object, 1, api.field_0x218);
+                    } else {
+                        GetSurfaceInfo(object, 0, 2000000.0f);
                         api.field_0x281 = 0;
                         object->field_0xe41 = 0;
                         object->surface_normal = NUVEC{0.0f, 1.0f, 0.0f};

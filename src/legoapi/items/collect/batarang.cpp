@@ -449,19 +449,14 @@ i32 Batarang_SeekToTarget(BATARANG_s *batarang) {
 }
 
 void Batarangs_Draw() {
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (world == NULL || world->lev_objs == NULL) {
-        return;
-    }
     for (i32 i = 0; i < 8; ++i) {
         BATARANG_s *batarang = &Batarang[i];
-        if (batarang->field_0x7d == 0 || batarang->cooldown >= 0x1000 ||
-            world->lev_objs[batarang->cooldown].active == 0) {
+        if (batarang->field_0x7d == 0 || WORLD->lev_objs[batarang->cooldown].active == 0) {
             continue;
         }
-        NUMTX matrix;
+        NUMTX_ALIGNED16 matrix;
         NuMtxSetTranslation(&matrix, &batarang->position);
-        NuSpecialDrawAt(&world->lev_objs[batarang->cooldown].special, &matrix);
+        NuSpecialDrawAt(&WORLD->lev_objs[batarang->cooldown].special, &matrix);
     }
 }
 
@@ -604,13 +599,10 @@ void Batarang_GetSightInfo(i32 character, i32 *red, i32 *green, i32 *blue, char 
 }
 
 void Batarang_MoveCode(GameObject_s *object) {
-    BATARANG_s *batarang = static_cast<BATARANG_s *>(object->batarang);
-    if (batarang == NULL || batarang->field_0x7d != 0) {
-        return;
-    }
+    BATARANG_s *batarang;
     if (object->character_context == 0x50) {
         object->field_0xe22 |= 0x40;
-        if (!(object->hold_timer < 0.25f)) {
+        if (object->hold_timer >= 0.25f) {
             Batarang_StartTargetting(object);
             return;
         }
@@ -633,15 +625,15 @@ void Batarang_MoveCode(GameObject_s *object) {
         return;
     }
     if (object->character_context != 0x4d) {
-        GAMECHARACTERDATA *runtime = object->apiobj.character_data->game_character;
-        if (!object->apiobj.player_controlled || (runtime->flags_090 & 0x20000000) == 0 ||
-            object->use_model_origin == 0 || (object->field_0xe24 & 8) == 0 || object->apiobj.model_draw_result == 0 ||
-            !(object->field_0xc54 > 0.0f) || !(object->hold_timer >= 0.25f) || object->apiobj.field_0x27d == 0 ||
-            ObjLandReady(object) == 0) {
+        if (!object->apiobj.player_controlled ||
+            (object->apiobj.character_data->game_character->flags_090 & 0x20000000) == 0 || object->batarang == NULL ||
+            static_cast<BATARANG_s *>(object->batarang)->field_0x7d != 0 || object->use_model_origin == 0 ||
+            (object->field_0xe24 & 8) == 0 || object->apiobj.model_draw_result == 0 || !(object->field_0xc54 > 0.0f) ||
+            !(object->hold_timer >= 0.25f) || object->apiobj.field_0x27d == 0 || ObjLandReady(object) == 0) {
             return;
         }
         object->field_0xe22 |= 0x40;
-        if (0.25f <= object->hold_timer - FRAMETIME) {
+        if (!(0.25f > object->hold_timer - FRAMETIME)) {
             return;
         }
         Batarang_StartTargetting(object);
@@ -654,17 +646,16 @@ void Batarang_MoveCode(GameObject_s *object) {
             StartJump(object, 0);
             return;
         }
-        if ((object->pad_gamepad->buttons_held & GAMEPAD_ACTION) != 0 || object->context_animation_timer < 0.3f) {
+        if ((object->pad_gamepad->buttons_held & GAMEPAD_ACTION) != 0 || 0.3f > object->context_animation_timer) {
             if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
                 AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) != NULL) {
                 GAMEPAD_s *pad = object->pad_gamepad;
                 object->context_animation_timer += FRAMETIME;
                 f32 x = pad->input_direction_z * 1.25f;
                 f32 y = 1.25f * pad->input_direction_x;
-                if (object->context_animation_timer < 0.25f) {
-                    const f32 ramp = object->context_animation_timer * 4.0f;
-                    x *= ramp;
-                    y *= ramp;
+                if (0.25f > object->context_animation_timer) {
+                    x = x * object->context_animation_timer * 4.0f;
+                    y = y * object->context_animation_timer * 4.0f;
                 }
                 BATARANG_s *aim = static_cast<BATARANG_s *>(object->batarang);
                 aim->sight_velocity.x = SeekValF(aim->sight_velocity.x, x, 10.0f);
@@ -676,7 +667,7 @@ void Batarang_MoveCode(GameObject_s *object) {
             }
             batarang = static_cast<BATARANG_s *>(object->batarang);
             KeepPointOnScreen(&batarang->sight_position, &batarang->sight_velocity);
-            if (WORLD != NULL && Batarang_FindTarget(WORLD, object, 0) != 0) {
+            if (Batarang_FindTarget(WORLD, object, 0) != 0) {
                 NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
             }
             i32 colour[3];

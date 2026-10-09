@@ -189,97 +189,109 @@ void *NuMemoryManager::_TryBlockAlloc(u32 size, u32 alignment, u32 flags, const 
     alignment = MAX(alignment, 4);
     const u32 requested_size = CalculateBlockSize(size);
     const u32 minimum_fragment_size = m_headerSize + sizeof(FreeHeader);
+    const u32 required_size = requested_size + minimum_fragment_size;
 
     pthread_mutex_lock(&this->mutex);
 
-    FreeHeader *fragment = NULL;
-    Header *allocated = NULL;
-    u32 allocated_size = 0;
-
-    // The original uses the small/large availability maps to reach the same
-    // bins quickly. Scanning the bin chains keeps the allocator semantics
-    // straightforward while those search optimisations are reconstructed.
-    for (u32 bin = 0; bin < 256 && allocated == NULL; ++bin) {
-        for (FreeHeader *candidate = this->small_bins[bin].next; candidate != NULL; candidate = candidate->next) {
-            const usize begin = (usize)candidate;
-            const usize end = begin + BLOCK_SIZE(candidate->block_header.value);
-            usize user = ALIGN(begin + m_headerSize, alignment);
-            usize header_address = user - m_headerSize;
-            u32 prefix_size = header_address - begin;
-            if (prefix_size != 0 && prefix_size < minimum_fragment_size) {
-                user = ALIGN(begin + m_headerSize + minimum_fragment_size, alignment);
-                header_address = user - m_headerSize;
-                prefix_size = header_address - begin;
+    FreeHeader *fragment;
+    u32 tail_size;
+    if (requested_size < 0x400) {
+        u32 bin = GetSmallBinIndex(requested_size);
+        for (fragment = small_bins[bin].next; fragment != NULL; fragment = fragment->next) {
+            if ((((usize)fragment + m_headerSize) & (alignment - 1)) == 0)
+                goto allocate_whole;
+        }
+        ++bin;
+        while (bin < 0x100) {
+            if (small_bin_has_free_map[bin >> 5] == 0) {
+                bin = (bin + 0x20) & ~0x1f;
+                continue;
             }
-            if (header_address + requested_size <= end) {
-                fragment = candidate;
-                allocated = (Header *)header_address;
-                allocated_size = requested_size;
-                break;
+            fragment = small_bins[bin].next;
+            if (fragment != NULL) {
+                u32 fragment_size = BLOCK_SIZE(fragment->block_header.value);
+                tail_size = ((usize)fragment + m_headerSize + fragment_size - requested_size) & (alignment - 1);
+                if (required_size + tail_size <= fragment_size)
+                    goto split_fragment;
+            }
+            ++bin;
+        }
+    }
+    if (large_bin_dirty_map != 0) {
+        for (u32 bin = 0; bin != 22; ++bin) {
+            if ((large_bin_dirty_map & (1 << bin)) != 0)
+                SortLargeBin(bin);
+        }
+        large_bin_dirty_map = 0;
+    }
+    {
+        u32 bin = required_size < 0x400 ? 0 : GetLargeBinIndex(required_size);
+        bin = MAX(bin, CountLeadingZeros(large_bin_has_free_map));
+        for (; bin < 22; ++bin) {
+            for (fragment = large_bins[bin].next; fragment != NULL; fragment = fragment->next) {
+                u32 fragment_size = BLOCK_SIZE(fragment->block_header.value);
+                if (requested_size == fragment_size && (((usize)fragment + m_headerSize) & (alignment - 1)) == 0) {
+                    BinUnlink(fragment);
+                    ConvertToUsedBlock(fragment, alignment, flags, name, category);
+                    pthread_mutex_unlock(&mutex);
+                    return ClearUsedBlock(&fragment->block_header, flags);
+                }
+                tail_size = ((usize)fragment + m_headerSize + fragment_size - requested_size) & (alignment - 1);
+                if (required_size + tail_size <= fragment_size)
+                    goto split_fragment;
             }
         }
     }
-    for (u32 bin = 0; bin < 22 && allocated == NULL; ++bin) {
-        for (FreeHeader *candidate = this->large_bins[bin].next; candidate != NULL; candidate = candidate->next) {
-            const usize begin = (usize)candidate;
-            const usize end = begin + BLOCK_SIZE(candidate->block_header.value);
-            usize user = ALIGN(begin + m_headerSize, alignment);
-            usize header_address = user - m_headerSize;
-            u32 prefix_size = header_address - begin;
-            if (prefix_size != 0 && prefix_size < minimum_fragment_size) {
-                user = ALIGN(begin + m_headerSize + minimum_fragment_size, alignment);
-                header_address = user - m_headerSize;
-            }
-            if (header_address + requested_size <= end) {
-                fragment = candidate;
-                allocated = (Header *)header_address;
-                allocated_size = requested_size;
-                break;
-            }
-        }
-    }
-
-    if (allocated == NULL) {
-        bool page_allocated =
-            this->event_handler != NULL &&
-            this->event_handler->AllocatePage(this, requested_size + minimum_fragment_size + 0x4000, 0x1fffffff);
-        pthread_mutex_unlock(&this->mutex);
-        if (!page_allocated)
+    {
+        bool allocated_page = event_handler->AllocatePage(this, required_size + 0x4000, 0x1fffffff);
+        pthread_mutex_unlock(&mutex);
+        if (!allocated_page)
             return NULL;
         return _TryBlockAlloc(size, alignment, flags, name, category);
     }
 
-    const usize fragment_begin = (usize)fragment;
-    const usize fragment_end = fragment_begin + BLOCK_SIZE(fragment->block_header.value);
-    const usize allocated_begin = (usize)allocated;
-    const u32 prefix_size = allocated_begin - fragment_begin;
-    u32 suffix_size = fragment_end - (allocated_begin + allocated_size);
-
+split_fragment:
     BinUnlink(fragment);
-
-    if (prefix_size != 0) {
-        fragment->block_header.value = prefix_size / 4;
-        *END_TAG(fragment, prefix_size) = fragment->block_header.value;
-        BinLink(fragment, true);
+    // Preserve the free prefix and place the requested block at its end.
+    fragment->block_header.value = ((BLOCK_SIZE(fragment->block_header.value) - requested_size - tail_size) >> 2) |
+                                   (fragment->block_header.value & ALLOC_MASK);
+    {
+        u32 value = fragment->block_header.value;
+        usize *end_tag = END_TAG(fragment, BLOCK_SIZE(value));
+        if ((value & ALLOC_MASK) == 0)
+            *end_tag = value & BLOCK_SIZE_MASK;
+        else if (idx > 0x1d) {
+            *end_tag = value | HEADER_MGR_HI_MASK;
+            *END_TAG_HI(fragment, BLOCK_SIZE(fragment->block_header.value)) = idx;
+        } else
+            *end_tag = ((idx + 1) << 0x1b) | (value & BLOCK_SIZE_MASK);
     }
-
-    if (suffix_size != 0 && suffix_size < minimum_fragment_size) {
-        allocated_size += suffix_size;
-        suffix_size = 0;
+    BinLink(fragment, true);
+    if (tail_size >= minimum_fragment_size) {
+        FreeHeader *tail = (FreeHeader *)((usize)fragment + BLOCK_SIZE(fragment->block_header.value) + requested_size);
+        tail->block_header.value = tail_size >> 2;
+        u32 value = tail->block_header.value;
+        usize *end_tag = END_TAG(tail, BLOCK_SIZE(value));
+        if ((value & ALLOC_MASK) == 0)
+            *end_tag = value & BLOCK_SIZE_MASK;
+        else if (idx > 0x1d) {
+            *end_tag = value | HEADER_MGR_HI_MASK;
+            *END_TAG_HI(tail, BLOCK_SIZE(tail->block_header.value)) = idx;
+        } else
+            *end_tag = ((idx + 1) << 0x1b) | (value & BLOCK_SIZE_MASK);
+        BinLink(tail, true);
+        tail_size = 0;
     }
-    if (suffix_size != 0) {
-        FreeHeader *suffix = (FreeHeader *)(allocated_begin + allocated_size);
-        suffix->block_header.value = suffix_size / 4;
-        *END_TAG(suffix, suffix_size) = suffix->block_header.value;
-        suffix->next = NULL;
-        suffix->prev = NULL;
-        BinLink(suffix, true);
-    }
+    fragment = (FreeHeader *)((usize)fragment + BLOCK_SIZE(fragment->block_header.value));
+    fragment->block_header.value = (requested_size + tail_size) >> 2;
+    goto convert_block;
 
-    allocated->value = allocated_size / 4;
-    ConvertToUsedBlock((FreeHeader *)allocated, alignment, flags, name, category);
+allocate_whole:
+    BinUnlink(fragment);
+convert_block:
+    ConvertToUsedBlock(fragment, alignment, flags, name, category);
     pthread_mutex_unlock(&this->mutex);
-    return ClearUsedBlock(allocated, flags);
+    return ClearUsedBlock(&fragment->block_header, flags);
 }
 
 void NuMemoryManager::ConvertToUsedBlock(FreeHeader *header, u32 alignment, u32 flags, const char *name, u16 category) {

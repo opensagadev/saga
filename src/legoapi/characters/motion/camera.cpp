@@ -1698,41 +1698,60 @@ void KeepOnScreen(GameObject_s *object) {
     if (newgamecam != 0 || (object->field_0xf03 & 0x10) != 0)
         return;
     i32 controlled = 0;
-    for (i32 index = 0; index < 8; ++index) {
-        GameObject_s *player = Player[index];
-        if (player != NULL && player->character_context == 0x51 && player->field_0x788 != NULL &&
-            static_cast<TECHNO *>(player->field_0x788)->controlled_object == object)
-            controlled = 1;
-    }
+    // Each qualifying controller replaces the result, including a false result.
+#define CHECK_SCREEN_CONTROLLER(index)                                                                                 \
+    do {                                                                                                               \
+        GameObject_s *controller = Player[index];                                                                      \
+        if (controller != NULL && controller->character_context == 0x51 && controller->field_0x788 != NULL)            \
+            controlled = static_cast<TECHNO *>(controller->field_0x788)->controlled_object == object;                  \
+    } while (0)
+    CHECK_SCREEN_CONTROLLER(0);
+    CHECK_SCREEN_CONTROLLER(1);
+    CHECK_SCREEN_CONTROLLER(2);
+    CHECK_SCREEN_CONTROLLER(3);
+    CHECK_SCREEN_CONTROLLER(4);
+    CHECK_SCREEN_CONTROLLER(5);
+    CHECK_SCREEN_CONTROLLER(6);
+    CHECK_SCREEN_CONTROLLER(7);
+#undef CHECK_SCREEN_CONTROLLER
     if (static_cast<i8>(object->apiobj.flags_low) >= 0) {
         if (controlled == 0)
             return;
     }
-    if (object->apiobj.field_0x287 != 0 || object->character_context == 0x2b || (object->field_0xefe & 4) == 0 ||
-        object->character_context == 0x47 || object->character_context == 0x0f || object->character_context == 0x1f ||
-        object->character_context == 0x46 || object->character_context == 0x51 || MiniCutCam != 0 ||
-        GetMenuID() != -1) {
+    if (object->apiobj.field_0x287 != 0 || object->character_context == 0x2b || (object->field_0xefe & 4) == 0)
         return;
+    switch (object->character_context) {
+        case 0x47:
+        case 0x0f:
+        case 0x1f:
+        case 0x46:
+        case 0x51:
+            return;
+        default:
+            break;
     }
+    if (MiniCutCam != 0 || GetMenuID() != -1)
+        return;
 
     if (WORLD->current_level == BONUS_GUNSHIPA_LDATA && GameCam->mode == 0x0b) {
         const f32 push_speed = object->apiobj.character_data->game_character->run_speed * 5.0f;
         f32 count = 0.0f;
         NUVEC response;
-        const i32 planes[4] = {3, 2, 1, 4};
-        const i32 rotations[4] = {0x6000, 0xa000, 0x2000, 0xe000};
-        for (i32 index = 0; index < 4; ++index) {
-            PLAYPLANE_s *plane = &PlayPlane[planes[index]];
-            if (OnOrInsidePlane(&object->apiobj.collision_position, &plane->point, &plane->normal, NULL, 0.0f, NULL) !=
-                0) {
-                NUVEC normal;
-                NuVecRotateY(&normal, &GunshipANorm, rotations[index]);
-                Surface_Deflect(&normal, &object->apiobj.velocity, &response, 0);
-                response.x += normal.x * push_speed;
-                response.z += normal.z * push_speed;
-                count += 1.0f;
-            }
-        }
+        NUVEC normal;
+#define DEFLECT_GUNSHIP_PLANE(plane, rotation)                                                                         \
+    if (OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[plane].point, &PlayPlane[plane].normal, NULL,   \
+                        0.0f, NULL) != 0) {                                                                            \
+        NuVecRotateY(&normal, &GunshipANorm, rotation);                                                                \
+        Surface_Deflect(&normal, &object->apiobj.velocity, &response, 0);                                              \
+        response.x += normal.x * push_speed;                                                                           \
+        response.z += normal.z * push_speed;                                                                           \
+        count += 1.0f;                                                                                                 \
+    }
+        DEFLECT_GUNSHIP_PLANE(3, 0x6000);
+        DEFLECT_GUNSHIP_PLANE(2, 0xa000);
+        DEFLECT_GUNSHIP_PLANE(1, 0x2000);
+        DEFLECT_GUNSHIP_PLANE(4, 0xe000);
+#undef DEFLECT_GUNSHIP_PLANE
         if (count > 0.0f) {
             const f32 inverse_count = 1.0f / count;
             // The original retains the last response, then divides by the
@@ -1749,12 +1768,12 @@ void KeepOnScreen(GameObject_s *object) {
             (static_cast<i8>(other_player->apiobj.flags_low) >= 0 || other_player->character_context == 0x2b))
             return;
     }
-    const i32 two_players = Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.flags_low) < 0 &&
-                            Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.flags_low) < 0;
+    const bool two_players = Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.flags_low) < 0 &&
+                             Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.flags_low) < 0;
     GAMECHARACTERDATA *character = object->apiobj.character_data->game_character;
     const f32 push_distance = VehicleArea != 0 ? character->walk_speed : character->run_speed;
     NUVEC constrained_movement = object->apiobj.velocity;
-    i32 constrained = 0;
+    bool constrained = false;
 
     // Near plane has no object-size inset in the original.
     if (OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[0].point, &PlayPlane[0].normal, NULL, 0.0f,
@@ -1762,23 +1781,24 @@ void KeepOnScreen(GameObject_s *object) {
         Surface_Deflect(&PlayPlane[0].normal, &constrained_movement, &constrained_movement, 0);
         constrained_movement.x += PlayPlane[0].normal.x * push_distance;
         constrained_movement.z += PlayPlane[0].normal.z * push_distance;
-        constrained = 1;
+        constrained = true;
     }
 
     // Test the right plane first, then the left plane.  Each response is
     // calculated from the unmodified velocity, exactly as in the target.
+    PLAYPLANE_s *side_plane = NULL;
     if (OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL,
                         -object->apiobj.field_0x1dc, NULL) != 0) {
-        Surface_Deflect(&PlayPlane[2].normal, &object->apiobj.velocity, &constrained_movement, 0);
-        constrained_movement.x += PlayPlane[2].normal.x * push_distance;
-        constrained_movement.z += PlayPlane[2].normal.z * push_distance;
-        constrained = 1;
+        side_plane = &PlayPlane[2];
     } else if (OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL,
                                -object->apiobj.field_0x1dc, NULL) != 0) {
-        Surface_Deflect(&PlayPlane[1].normal, &object->apiobj.velocity, &constrained_movement, 0);
-        constrained_movement.x += PlayPlane[1].normal.x * push_distance;
-        constrained_movement.z += PlayPlane[1].normal.z * push_distance;
-        constrained = 1;
+        side_plane = &PlayPlane[1];
+    }
+    if (side_plane != NULL) {
+        Surface_Deflect(&side_plane->normal, &object->apiobj.velocity, &constrained_movement, 0);
+        constrained_movement.x += side_plane->normal.x * push_distance;
+        constrained_movement.z += side_plane->normal.z * push_distance;
+        constrained = true;
     }
 
     if ((VehicleArea != 0 && (WORLD->area == NULL || WORLD->area != PODSPRINT_ADATA)) || KEEPONSCREEN_SIDESONLY == 0 ||
@@ -1801,7 +1821,7 @@ void KeepOnScreen(GameObject_s *object) {
             Surface_Deflect(&depth_plane->normal, &object->apiobj.velocity, &constrained_movement, 0);
             constrained_movement.x += depth_plane->normal.x * push_distance;
             constrained_movement.z += depth_plane->normal.z * push_distance;
-            constrained = 1;
+            constrained = true;
         }
     }
 

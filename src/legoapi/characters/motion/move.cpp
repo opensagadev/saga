@@ -4679,7 +4679,7 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
         goto finished;
     }
     {
-        NUVEC forward;
+        NUVEC_ALIGNED16 forward;
         if (object->pad_gamepad->input_magnitude > 0.0f) {
             NuVecRotateY(&forward, &v001, GamePad_InputAngle(object, object->pad_gamepad));
         }
@@ -4693,7 +4693,7 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
                 (GetGameCharacterData(target)->flags_090 & 0x8000) != 0 ||
                 (CInfo[target->character_context].flags & 0x8000) != 0 || target == object->field_0xcc0)
                 continue;
-            NUVEC delta;
+            NUVEC_ALIGNED16 delta;
             f32 distance = NuVecDistSqr(&target->apiobj.position, &object->apiobj.position, &delta);
             if (distance >= range * range ||
                 (object->pad_gamepad->input_magnitude > 0.0f && forward.x * delta.x + forward.z * delta.z < 0.0f))
@@ -10462,7 +10462,7 @@ static void DodgeCode(GameObject_s *object, i32 action_pressed, i32 jump_pressed
     }
 
     const i16 previous_animation = object->context_animation;
-    NUVEC dodge_direction = bolt->field_0xac;
+    NUVEC_ALIGNED16 dodge_direction = bolt->field_0xac;
     NuVecRotateY(&dodge_direction, &dodge_direction, 0x4000);
 
     i16 animation;

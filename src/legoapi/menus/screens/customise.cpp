@@ -433,36 +433,53 @@ void Customiser_SetUpCharacterData(CUSTOMISER *customiser) {
 
 void Customiser_Draw3D(CUSTOMISER *customiser) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (customiser == NULL || world == NULL || world->camera_splines == NULL || world->camera_splines[18] == NULL)
+    if (customiser == NULL || world->camera_splines[18] == NULL)
         return;
     i32 active_side, active_count;
     Customiser_GetActiveWeirdoIndex(&active_side, &active_count);
     i32 preview_side = -1;
-    if (active_count == 1 && active_side >= 0 && active_side < 2)
-        preview_side = MenuPacket.customise_other_player[active_side] != 0 ? 1 - active_side : active_side;
-    for (i32 side = 0; side < 2; ++side) {
+    if (active_count == 1)
+        preview_side = MenuPacket.customise_other_player[active_side] != 0 ? !active_side : active_side;
+    const u8 *selection_row = reinterpret_cast<const u8 *>(&Game.customizer);
+    for (i32 side = 0; side < 2; ++side, selection_row += 0x38) {
+        const i16 *selection = reinterpret_cast<const i16 *>(selection_row);
         const i32 character_id = customiser->character_ids[side];
-        if (character_id < 0 || character_id >= CHARCOUNT)
-            continue;
         CHARACTERMODEL_s *model = APICharacterLoaded(character_id);
         if (model == NULL || customiser->animation_state[side] != 0)
             continue;
-        if (GCDataList == NULL)
-            continue;
         GAMECHARACTERDATA *runtime = &GCDataList[character_id];
         i32 helmet = runtime->helmet_locator;
-        if (helmet < 0 || helmet >= 16 || model->points_of_interest[helmet] == NULL)
+        if (helmet != -1 && model->points_of_interest[helmet] == NULL)
             helmet = -1;
         const i32 selected = CustomiseMenuY[side];
         rtldata_s light_data;
         rtlResetEx(&light_data, 1);
         rtlApplySetScale(world->rtl_set, &light_data, &CustomisePos[side], NULL, -1, 1.0f);
         SetLights_RTLDATA(&light_data, 1.0f);
-        const u16 *selection = Customiser_GetSelection(side);
-        u32 layer_mask = Customiser_GetLayerMask(customiser, runtime, selection);
-        if (runtime->cape_layer != -1 && selected == 5 && GetMenuID() == 12 && customiser_quit == 0)
-            layer_mask |= 1u << (static_cast<u8>(runtime->cape_layer) & 31);
-        // The reference's preview matrix lives in a 16-byte-aligned frame.
+        u32 layer_mask = 0;
+#define CUSTOM_DRAW_LAYER(category)                                                                                    \
+    if (customiser->layer_indices[category] != -1)                                                                     \
+        layer_mask |= 1u << static_cast<u8>(customiser->layer_indices[category]);
+        CUSTOM_DRAW_LAYER(0)
+        CUSTOM_DRAW_LAYER(1)
+        CUSTOM_DRAW_LAYER(2)
+        CUSTOM_DRAW_LAYER(3)
+        CUSTOM_DRAW_LAYER(4)
+        CUSTOM_DRAW_LAYER(6)
+        CUSTOM_DRAW_LAYER(7)
+        CUSTOM_DRAW_LAYER(8)
+#undef CUSTOM_DRAW_LAYER
+        if (layer_mask == 0)
+            layer_mask = 1;
+        if (runtime->cape_layer != -1) {
+            layer_mask |= 1u << static_cast<u8>(runtime->cape_layer);
+            const bool preview_cape = selected != -1 && GetMenuID() == 12 && customiser_quit == 0 && selected == 5;
+            if (!preview_cape) {
+                CUSTOMPIECE *cape = &customiser->piece_sets[5][static_cast<u16>(selection[5])];
+                if ((cape->layer_flags & 0x40) != 0)
+                    layer_mask &= ~(1u << static_cast<u8>(runtime->cape_layer));
+            }
+        }
         NUMTX_ALIGNED16 matrix;
         NuMtxSetRotationY(&matrix, CustomiseYRot[side] + 0x8000);
         NuMtxTranslate(&matrix, &CustomisePos[side]);
@@ -471,43 +488,48 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
             continue;
         if (helmet != -1) {
             for (i32 category = 0; category < 9; ++category) {
-                if (customiser->categories[category] == NULL || customiser->categories[category]->uses_special == 0 ||
-                    world->customiser_resources[category] == NULL || customiser->piece_counts[category] <= 0)
+                CUSTOMPIECERESOURCE *resources = world->customiser_resources[category];
+                if (resources == NULL || customiser->piece_counts[category] <= 0 ||
+                    customiser->categories[category]->uses_special == 0)
                     continue;
-                const i32 piece_index = selection[category];
-                if (piece_index < 0 || piece_index >= customiser->piece_counts[category])
+                const u16 piece_index = selection[category];
+                nuhspecial_s *special = &resources[piece_index].special;
+                if (NuSpecialExistsFn(special) == 0)
                     continue;
-                CUSTOMPIECERESOURCE *resource = &world->customiser_resources[category][piece_index];
-                if (NuSpecialExistsFn(&resource->special) == 0)
-                    continue;
+                CUSTOMPIECE *pieces = customiser->piece_sets[category];
                 const bool preview = GetMenuID() == 12 && customiser_quit == 0 && category == selected &&
                                      (active_count == 2 || side == preview_side);
                 if (preview)
                     NuFmod(CustomiseMenuTime[side], 0.3f);
-                if (category == 0 && !preview) {
-                    CUSTOMPIECE *piece = Customiser_GetSelectedPiece(customiser, selection, category);
-                    if (piece != NULL && (piece->layer_flags & 0x20) != 0)
-                        continue;
-                }
+                if (category == 0 && !preview && (pieces[piece_index].layer_flags & 0x20) != 0)
+                    continue;
                 matrix = customiser->joint_matrices[side][helmet];
                 if (category == 0)
                     NuMtxPreTranslate(&matrix, &NoHatPos[side]);
-                NuSpecialDrawAt(&resource->special, &matrix);
+                NuSpecialDrawAt(special, &matrix);
             }
         }
-        const i32 hand = runtime->weapon_joints[0];
-        CUSTOMPIECE *weapon = Customiser_GetSelectedPiece(customiser, selection, 2);
-        if (weapon != NULL && hand >= 0 && hand < 16 && model->points_of_interest[hand] != NULL &&
-            weapon->weapon_model >= 0 && world->lev_objs != NULL) {
-            LEVEL_OBJECT_RUNTIME_s *object = &world->lev_objs[weapon->weapon_model];
-            if (object->active != 0) {
-                matrix = customiser->joint_matrices[side][hand];
-                NuSpecialDrawAt(&object->special, &matrix);
-                i32 blade = -1;
-                if (LightSabre_ColourFromObj(weapon->weapon_model, &blade) != -1) {
-                    if (blade >= 0)
-                        NuSpecialDrawAt(&world->lev_objs[blade].special, &matrix);
-                    NuSpecialDrawAt(&world->lev_objs[17].special, &matrix);
+        if (customiser->piece_counts[2] > 0) {
+            const i32 hand = runtime->weapon_joints[0];
+            if (hand != -1 && model->points_of_interest[hand] != NULL) {
+                CUSTOMPIECE *weapon = &customiser->piece_sets[2][static_cast<u16>(selection[2])];
+                if (weapon->weapon_model != -1) {
+                    LEVEL_OBJECT_RUNTIME_s *object = &world->lev_objs[weapon->weapon_model];
+                    if (object->active != 0) {
+                        matrix = customiser->joint_matrices[side][hand];
+                        NuSpecialDrawAt(&object->special, &matrix);
+                        i32 blade;
+                        if (LightSabre_ColourFromObj(weapon->weapon_model, &blade) != -1) {
+                            if (blade != -1) {
+                                nuhspecial_s *blade_special = &world->lev_objs[blade].special;
+                                if (blade_special != NULL)
+                                    NuSpecialDrawAt(blade_special, &matrix);
+                            }
+                            nuhspecial_s *hilt_special = &world->lev_objs[17].special;
+                            if (hilt_special != NULL)
+                                NuSpecialDrawAt(hilt_special, &matrix);
+                        }
+                    }
                 }
             }
         }
@@ -516,20 +538,22 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
 }
 
 void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
-    const f32 frame_time = FRAMETIME;
+    const f32 rotation_frame_time = FRAMETIME;
     if (customiser == NULL)
         return;
     i32 active_side, active_count;
     Customiser_GetActiveWeirdoIndex(&active_side, &active_count);
     i32 preview_side = -1;
     if (active_count == 1)
-        preview_side = MenuPacket.customise_other_player[active_side] != 0 ? active_side == 0 : active_side;
+        preview_side = MenuPacket.customise_other_player[active_side] != 0 ? !active_side : active_side;
+    const u16 rotation_step = static_cast<u16>(static_cast<i32>(10922.0f * rotation_frame_time));
+    const u16 tilt_x_step = static_cast<u16>(static_cast<i32>(12379.0f * rotation_frame_time));
+    const u16 tilt_z_step = static_cast<u16>(static_cast<i32>(10376.0f * rotation_frame_time));
+    const u16 bob_step = static_cast<u16>(static_cast<i32>(20206.0f * rotation_frame_time));
     const i32 colour = menu_flash == 0 ? 255 : 191;
-    const u16 rotation_step = static_cast<i32>(10922.0f * frame_time);
-    const u16 tilt_x_step = static_cast<i32>(12379.0f * frame_time);
-    const u16 tilt_z_step = static_cast<i32>(10376.0f * frame_time);
-    const u16 bob_step = static_cast<i32>(20206.0f * frame_time);
-    for (i32 side = 0; side < 2; ++side) {
+    const u8 *selection_row = reinterpret_cast<const u8 *>(&Game.customizer);
+    for (i32 side = 0; side < 2; ++side, selection_row += 0x38) {
+        const i16 *selection = reinterpret_cast<const i16 *>(selection_row);
         const i32 control_side = active_count == 2                  ? side
                                  : MenuPacket.active_player[0] != 0 ? 0
                                  : MenuPacket.active_player[1] != 0 ? 1
@@ -541,27 +565,28 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
         UpdateCustomPieceAnim(&HeadAnim[side], 0xd556, 0x2aaa);
         UpdateCustomPieceAnim(&ArmsAnim[side], 0x1555, 0x4000);
         UpdateCustomPieceAnim(&LegsAnim[side], 0xe000, 0x4000);
-        const u16 *selection = Customiser_GetSelection(side);
-        CUSTOMPIECE *head = &customiser->piece_sets[0][static_cast<u16>(selection[0])];
         CUSTOMPIECE *torso = &customiser->piece_sets[1][static_cast<u16>(selection[1])];
+        const u16 torso_flags = torso->availability_flags;
         f32 no_hat = 0.0f;
-        if ((torso->availability_flags & 1) != 0) {
-            if ((torso->availability_flags & 4) != 0)
-                no_hat = (head->availability_flags & 8) != 0 ? 0.21f : 0.168f;
+        if ((torso_flags & 1) != 0) {
+            CUSTOMPIECE *head = &customiser->piece_sets[0][static_cast<u16>(selection[0])];
+            if ((torso_flags & 4) != 0)
+                no_hat = (head->layer_flags & 8) != 0 ? 0.21f : 0.168f;
             else
-                no_hat = (head->availability_flags & 8) != 0 ? 0.168f : 0.126f;
+                no_hat = (head->layer_flags & 8) != 0 ? 0.168f : 0.126f;
         }
         NoHatPos[side].y = SeekValF(NoHatPos[side].y, no_hat, 10.0f);
         CustomiseMenuTime[side] += FRAMETIME;
         CHARACTERMODEL_s *model = APICharacterLoaded(customiser->character_ids[side]);
-        if (model == NULL)
+        if (model == NULL) {
             continue;
+        }
         CUSTOMPIECE *weapon = &customiser->piece_sets[2][static_cast<u16>(selection[2])];
         const i32 saber_colour = LightSabre_ColourFromObj(weapon->weapon_model, NULL);
         if (customiser->animation_state[side] != 0)
             --customiser->animation_state[side];
         ANIMPACKET_s *packet = &customiser->animation_packets[side];
-        const i32 intro = saber_colour == -1 ? 0x62 : 0x61;
+        const i16 intro = saber_colour == -1 ? 0x62 : 0x61;
         if (customiser->animation_active[side] == 0 && model->model_data_b[intro] != NULL) {
             if (customiser->animation_values[side] == 0.0f) {
                 customiser->animation_values[side] = AnimDuration(model->model_id, intro, 0.0f, 0.0f, 1);
@@ -574,18 +599,17 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
             customiser->animation_active[side] = 1;
         }
         packet->previous_animation = packet->animation_index;
-        if (saber_colour == -1)
-            packet->requested_animation = customiser->animation_active[side] == 0 ? 0x62 : 0x63;
-        else
-            packet->requested_animation = customiser->animation_active[side] == 0 ? 0x61 : 0xbe;
+        packet->requested_animation =
+            customiser->animation_active[side] == 0 ? intro : static_cast<i16>(saber_colour == -1 ? 99 : 0xbe);
         UpdateAnimPacket(model, packet, FRAMETIME * 30.0f, 0.0f, FRAMETIME, 0.0f);
         const u16 angle = CustomiseYRot[side] + 0xc000;
         for (i32 category = 0; category < 9; ++category) {
             const i32 selected = CustomiseMenuY[side];
-            const i32 locator = customiser->locator_indices[category];
             if (selected == category && GetMenuID() == 12 && customiser_quit == 0 &&
-                (active_count == 2 || side == preview_side) && control_side != -1 && locator != -1 &&
-                model->points_of_interest[locator] != NULL) {
+                (active_count == 2 || side == preview_side) && control_side != -1 &&
+                customiser->locator_indices[category] != -1 &&
+                model->points_of_interest[customiser->locator_indices[category]] != NULL) {
+                const i32 locator = customiser->locator_indices[category];
                 const NUMTX &joint = customiser->joint_matrices[side][locator];
                 NUVEC position = {joint.m30, joint.m31, joint.m32};
                 const f32 offset = customiser->locator_x_offsets[category];
@@ -639,18 +663,18 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
                     customiser->touch_widths[3] = 0.0f;
                 }
             }
-            CUSTOMPIECECATEGORY *category_data = customiser->categories[category];
             CUSTOMPIECERESOURCE *resources = world->customiser_resources[category];
-            if (resources == NULL || customiser->piece_counts[category] <= 0 || category_data->uses_special != 0 ||
-                category_data->material_tag == -1)
+            if (resources == NULL || customiser->piece_counts[category] <= 0 ||
+                customiser->categories[category]->uses_special != 0 ||
+                customiser->categories[category]->material_tag == -1)
                 continue;
-            const i32 piece_index = static_cast<u16>(selection[category]);
-            if (resources[piece_index].texture_id == 0)
+            CUSTOMPIECERESOURCE *resource = &resources[static_cast<u16>(selection[category])];
+            if (resource->texture_id == 0)
                 continue;
             for (i32 material = 0; material < model->hierarchy->material_count; ++material) {
                 NUMTL *entry = model->hierarchy->materials[material];
-                if (entry->unknown_9a[0] == category_data->material_tag) {
-                    entry->tex_id = resources[piece_index].texture_id;
+                if (entry->unknown_9a[0] == customiser->categories[category]->material_tag) {
+                    entry->tex_id = resource->texture_id;
                     NuMtlUpdate(entry);
                 }
             }

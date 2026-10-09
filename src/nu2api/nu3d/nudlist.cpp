@@ -755,9 +755,9 @@ nudisplaylistitem_s *NuDisplayListCreateMtlDlist(nudisplaylistitem_s * /*item*/,
 // ──────────────────────────────────────────────────────────────────────────────
 
 static i32 MtlSortKey(const NUMTL *mtl) {
-    // Original: ((char)(u16)mtl[0] >> 4) * 0x20000 + sort_pri
-    return static_cast<i32>(static_cast<i8>(((*reinterpret_cast<const u16 *>(mtl) >> 4) & 0xff))) * 0x20000 +
-           mtl->sort_pri;
+    // Retail shifts the unsigned flag word before sign-extending its low byte.
+    return mtl->sort_pri +
+           static_cast<i32>(static_cast<i8>(static_cast<u32>(*reinterpret_cast<const u16 *>(mtl)) >> 4)) * 0x20000;
 }
 
 void DisplayListLinkDynamicMtls(void) {

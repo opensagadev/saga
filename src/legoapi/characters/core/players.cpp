@@ -267,24 +267,37 @@ void Players_InitPositions(WORLDINFO *world) {
     if (A != NULL) {
         NUVEC tmp;
         i32 n = ninit;
-        for (i32 i = 0; i < 8; i++) {
-            PlayerStart[i].pos = (NUVEC *)&A->positions[6 * n];
-            NuVecSub(&tmp, (NUVEC *)&A->positions[3 * (2 * n + 1)], (NUVEC *)&A->positions[6 * n]);
-            PlayerStart[i].angle = NuAtan2D(tmp.x, tmp.z);
-            if (2 * n + 4 > A->count)
-                n = ninit;
-            else
-                n = n + 1;
-        }
+        // Retail emits one pass per player and reloads the spline after calls.
+#define INIT_START_POSITION(i)                                                                                         \
+    do {                                                                                                               \
+        PlayerStart[i].pos = (NUVEC *)&A->positions[6 * n];                                                            \
+        NuVecSub(&tmp, (NUVEC *)&A->positions[6 * n + 3], (NUVEC *)&A->positions[6 * n]);                              \
+        PlayerStart[i].angle = NuAtan2D(tmp.x, tmp.z);                                                                 \
+        if (2 * n + 4 > A->count)                                                                                      \
+            n = ninit;                                                                                                 \
+        else                                                                                                           \
+            n = n + 1;                                                                                                 \
+    } while (0)
+        INIT_START_POSITION(0);
+        INIT_START_POSITION(1);
+        INIT_START_POSITION(2);
+        INIT_START_POSITION(3);
+        INIT_START_POSITION(4);
+        INIT_START_POSITION(5);
+        INIT_START_POSITION(6);
+        INIT_START_POSITION(7);
+#undef INIT_START_POSITION
         if (bonus != 0 && A->count > 3) {
-            i16 nc = A->count >> 2;
+            i32 nc = A->count >> 2;
             i32 r = qrand() / (i32)(0xffff / nc + 1);
             PlayerStart[0].pos = (NUVEC *)&A->positions[12 * r];
-            NUVEC *target = (NUVEC *)&A->positions[12 * r + 3];
-            PlayerStart[0].angle = NuAtan2D(target->x - PlayerStart[0].pos->x, target->z - PlayerStart[0].pos->z);
+            tmp.z = A->positions[12 * r + 5] - PlayerStart[0].pos->z;
+            tmp.x = A->positions[12 * r + 3] - PlayerStart[0].pos->x;
+            PlayerStart[0].angle = NuAtan2D(tmp.x, tmp.z);
             PlayerStart[1].pos = (NUVEC *)&A->positions[12 * r + 6];
-            target = (NUVEC *)&A->positions[12 * r + 9];
-            PlayerStart[1].angle = NuAtan2D(target->x - PlayerStart[0].pos->x, target->z - PlayerStart[1].pos->z);
+            tmp.z = A->positions[12 * r + 11] - PlayerStart[1].pos->z;
+            tmp.x = A->positions[12 * r + 9] - PlayerStart[0].pos->x;
+            PlayerStart[1].angle = NuAtan2D(tmp.x, tmp.z);
         }
     }
 
@@ -359,12 +372,20 @@ void Players_InitPositions(WORLDINFO *world) {
     }
     Door_ExitCameraSplineName[0] = 0;
 
-    for (i32 i = 0; i < 8; i++) {
-        SOCKPOSITION sp;
-        ComplexSockPosition(world->sock_sys, PlayerStart[i].pos, -1, -1, &sp);
-        PlayerStart[i].sock_location = sp.location;
-        PlayerStart[i].sock_ratio = sp.ratio;
-    }
+    SOCKPOSITION sp;
+#define INIT_START_SOCK(i)                                                                                             \
+    ComplexSockPosition(world->sock_sys, PlayerStart[i].pos, -1, -1, &sp);                                             \
+    PlayerStart[i].sock_location = sp.location;                                                                        \
+    PlayerStart[i].sock_ratio = sp.ratio
+    INIT_START_SOCK(0);
+    INIT_START_SOCK(1);
+    INIT_START_SOCK(2);
+    INIT_START_SOCK(3);
+    INIT_START_SOCK(4);
+    INIT_START_SOCK(5);
+    INIT_START_SOCK(6);
+    INIT_START_SOCK(7);
+#undef INIT_START_SOCK
     HubStartDoor = NULL;
 
     if (HUB_ADATA != NULL && HUB_ADATA == world->area) {

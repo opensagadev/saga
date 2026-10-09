@@ -6198,27 +6198,16 @@ void InitExtraList() {
 
 GameObject_s *FindGameObject(i32 character_id, u32 required_flags, i32 alive_only, i32 vehicle_only,
                              i32 non_level_only) {
-    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
-        GameObject_s *object = &Obj[index];
-        if ((object->apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) == 0) {
-            continue;
+    GameObject_s *object = Obj;
+    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
+        if (object->apiobj.in_use != 0 && (vehicle_only == 0 || object->apiobj.character != 0) &&
+            (required_flags == 0 || (object->apiobj.field_0x1f4 & required_flags) == required_flags) &&
+            (character_id == -1 || object->id == character_id) &&
+            (alive_only == 0 ||
+             (object->apiobj.field_0x287 == 0 && (CInfo[object->character_context].flags & 0x8000) == 0)) &&
+            (non_level_only == 0 || object->field_0x107c == -1)) {
+            return object;
         }
-        if (vehicle_only != 0 && (object->apiobj.field_0x1f8 & 0x1000) == 0) {
-            continue;
-        }
-        if (required_flags != 0 && (object->apiobj.field_0x1f4 & required_flags) != required_flags) {
-            continue;
-        }
-        if (character_id != -1 && object->id != character_id) {
-            continue;
-        }
-        if (alive_only != 0 && object->apiobj.field_0x287 != 0) {
-            continue;
-        }
-        if (non_level_only != 0 && object->field_0x107c != -1) {
-            continue;
-        }
-        return object;
     }
     return NULL;
 }

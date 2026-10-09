@@ -933,29 +933,26 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
 
 void GizSpinners_Update(void *world_ptr, void *, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world == NULL || world->spinners == NULL || world->current_level == NULL ||
-        world->current_level->max_spinners == 0)
+    if (world == NULL || world->spinners == NULL || world->current_level->max_spinners == 0)
         return;
     for (i32 index = 0; index < world->current_level->max_spinners; ++index) {
         GIZSPINNER_s *spinner = &world->spinners[index];
         if ((spinner->flags & GIZSPINNER_FLAG_VALID) == 0)
             continue;
-        const NUANG arm_angle = spinner->type == 0 ? 0 : static_cast<u16>(0x10000 / spinner->type);
+        const NUANG arm_angle = spinner->type == 0 ? 0 : static_cast<NUANG>(0x10000 / spinner->type);
         NUMTX matrix;
         NuMtxSetRotationY(&matrix, 0);
         NuMtxRotateY(&matrix, spinner->rotation + spinner->initial_rotation);
         NuMtxTranslate(&matrix, &spinner->position);
         spinner->matrix = matrix;
         i32 angle = 0;
-        i32 arm_count = spinner->type < 8 ? spinner->type : 8;
-        for (i32 arm = 0; arm < arm_count; ++arm) {
+        for (i32 arm = 0; arm < spinner->type; ++arm) {
             NuMtxSetRotationY(&matrix, 0);
             NuMtxRotateY(&matrix, spinner->rotation + spinner->initial_rotation);
             NuMtxRotateY(&matrix, angle);
             NuMtxTranslate(&matrix, &spinner->position);
             spinner->arms[arm].matrix = matrix;
             angle += arm_angle;
-            arm_count = spinner->type < 8 ? spinner->type : 8;
         }
         if (GameAnimSet_GetVisibility(spinner->anim_set) == GAMEANIMSET_VISIBILITY_NONE)
             spinner->flags |= SPINNER_RUNTIME_ANIMATION_HIDDEN;
@@ -963,27 +960,30 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
             spinner->flags &= static_cast<u8>(~SPINNER_RUNTIME_ANIMATION_HIDDEN);
         if ((spinner->flags & (GIZSPINNER_FLAG_HIDE_ARM | SPINNER_RUNTIME_ANIMATION_HIDDEN)) != 0) {
             spinner->state_flags = (spinner->state_flags & ~SPINNER_STATE_ROTATING) | SPINNER_STATE_STOP_ANIMATION;
-            if ((spinner->flags & GIZSPINNER_FLAG_HIDE_BASE) == 0 && qrand() < 0x800 && WORLD != NULL &&
-                WORLD->debris_sys != NULL && WORLD->debris_sys->entries != NULL) {
+            if ((spinner->flags & GIZSPINNER_FLAG_HIDE_BASE) == 0 && qrand() < 0x800) {
                 NUVEC position = {spinner->position.x, spinner->position.y + 0.3f, spinner->position.z};
-                for (i32 effect = 0; effect < 2; ++effect) {
-                    const i32 id = GizSpinnerGDeb_Fail[effect == 0 ? 0 : 2];
-                    if (id >= 0 && id < WORLD->debris_sys->named_count)
-                        AddVariableShotDebrisEffect(WORLD->debris_sys->entries[id].effect, &position, 2, 0, 0);
+                if (GizSpinnerGDeb_Fail[0] != -1) {
+                    AddVariableShotDebrisEffect(WORLD->debris_sys->entries[GizSpinnerGDeb_Fail[0]].effect, &position, 2,
+                                                0, 0);
+                }
+                if (GizSpinnerGDeb_Fail[2] != -1) {
+                    AddVariableShotDebrisEffect(WORLD->debris_sys->entries[GizSpinnerGDeb_Fail[2]].effect, &position, 2,
+                                                0, 0);
                 }
             }
         }
         if ((spinner->flags & SPINNER_RUNTIME_INPUT_DISABLED) != 0 && ShadowMode == 0) {
             spinner->state_flags = (spinner->state_flags & ~SPINNER_STATE_ROTATING) | SPINNER_STATE_STOP_ANIMATION;
-            // The reference indexes Player by spinner index after finding an
-            // owner. Detach the actual owners instead of an unrelated/OOB slot.
+            // The reference uses the spinner index for the detach stores after
+            // finding the first owner in the player array.
             if (LEGOCONTEXT_PUSHSPINNER != -1) {
                 for (i32 player = 0; player < 8; ++player) {
                     GameObject_s *owner = Player[player];
                     if (owner != NULL && owner->character_context == LEGOCONTEXT_PUSHSPINNER &&
                         owner->field_0x788 == spinner) {
-                        owner->character_context = -1;
-                        owner->field_0x788 = NULL;
+                        Player[index]->character_context = -1;
+                        Player[index]->field_0x788 = NULL;
+                        break;
                     }
                 }
             }
@@ -999,13 +999,12 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
         }
         GizSpinner_Update(spinner);
         GAMEANIMOBJ_s *object = spinner->primary_anim_obj;
-        if (spinner->anim_set == NULL || object == NULL || object->instance_animation == NULL ||
-            spinner->output_count == 0 || spinner->output_count > 8) {
+        if (spinner->anim_set == NULL || object == NULL || object->instance_animation == NULL) {
             spinner->flags &= static_cast<u8>(~SPINNER_RUNTIME_AT_OUTPUT);
             continue;
         }
         const f32 frame = object->instance_animation->ltime;
-        f32 length = object->end_frame - object->start_frame + 1.0f;
+        const f32 length = object->end_frame - object->start_frame + 1.0f;
         const f32 margin = length / 40.0f;
         const i32 last = spinner->output_count - 1;
         i32 output = -1;
@@ -1029,7 +1028,7 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
                 for (i32 player = 0; player < 8; ++player) {
                     GameObject_s *owner = Player[player];
                     if (owner != NULL && owner->character_context == LEGOCONTEXT_PUSHSPINNER &&
-                        owner->field_0x788 == spinner && owner->pad_gamepad != NULL) {
+                        owner->field_0x788 == spinner) {
                         NewRumble(owner->pad_gamepad->pad, 0.8f, 0);
                         break;
                     }
@@ -1043,33 +1042,32 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
             ((spinner->state_flags & 0x400) != 0 && spinner->anim_set->state == GAMEANIMSET_STATE_AT_END) ||
             (spinner->state_flags & SPINNER_STATE_ROTATING) != 0)
             continue;
+        const u32 direction_flags = spinner->state_flags & 6;
+        const i32 direction = direction_flags == 2 || direction_flags == 4 ? 1 : -1;
         object = spinner->primary_anim_obj;
         if (object == NULL || object->instance_animation == NULL)
             continue;
-        length = object->end_frame - object->start_frame + 1.0f;
-        const u32 direction_flags = spinner->state_flags & 6;
-        const f32 direction = direction_flags == 2 || direction_flags == 4 ? 1.0f : -1.0f;
+        const f32 rotation_length = object->end_frame - object->start_frame + 1.0f;
         f32 target = 1.0f;
         if (spinner->output_count != 1) {
-            if (length == 1.0f)
-                continue;
-            target = (spinner->animation_points[output + 1] - 1.0f) / (length - 1.0f);
+            target = (spinner->animation_points[output + 1] - 1.0f) / (rotation_length - 1.0f);
         }
         const f32 speed = spinner->animation_speed;
         const f32 rate = object->instance_animation->fparam1;
         const f32 difference = __builtin_fabsf(target - spinner->field_70);
+        const f32 rotation_rate = __builtin_fabsf(60.0f * speed * rate / rotation_length);
         if (difference < 0.001f) {
             GameAnimSet_Stop(spinner->anim_set);
             GameAnimSet_JumpToAnimPos(spinner->anim_set, target);
-            if (length != 0.0f && speed != 0.0f && rate != 0.0f) {
-                const f32 duration = __builtin_fabsf(length / (speed * rate * 60.0f));
-                const f32 rotation =
-                    (((duration * 30.0f) / length) * (length / 100.0f)) * (target * 100.0f) * 65536.0f / 360.0f;
+            {
+                const f32 duration = __builtin_fabsf(rotation_length / (speed * rate * 60.0f));
+                const f32 rotation = (((duration * 30.0f) / rotation_length) * (rotation_length / 100.0f)) *
+                                     (target * 100.0f) * 65536.0f / 360.0f;
                 spinner->rotation =
                     static_cast<u16>(static_cast<i32>(direction * rotation) + spinner->initial_rotation);
             }
-        } else if (length != 0.0f) {
-            const f32 rotation = direction * (__builtin_fabsf(60.0f * speed * rate / length) * difference * 5461.0f);
+        } else {
+            const f32 rotation = direction * (rotation_rate * difference * 5461.0f);
             if (target < spinner->field_70) {
                 GameAnimSet_Play(spinner->anim_set, -0.25f, 1);
                 spinner->rotation = static_cast<u16>(spinner->rotation - static_cast<i32>(rotation));

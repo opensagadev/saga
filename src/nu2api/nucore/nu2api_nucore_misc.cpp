@@ -215,8 +215,8 @@ void NuLgtArcLaserDraw(i32 paused) {
         NuVec4ScaleXYZVU0(&vertices[4], &vertices[4], 1.0f / vertices[4].w);
         NuVec4MtxTransformVU0(&vertices[5], &vertices[7], clip);
         NuVec4ScaleXYZVU0(&vertices[5], &vertices[5], 1.0f / vertices[5].w);
-        NUVEC perpendicular = {(vertices[5].y - vertices[4].y) * ((f32)nurndr_pixel_width / 240.0f),
-                               vertices[4].x - vertices[5].x, 0.0f};
+        NUVEC_ALIGNED16 perpendicular = {(vertices[5].y - vertices[4].y) * ((f32)nurndr_pixel_width / 240.0f),
+                                         vertices[4].x - vertices[5].x, 0.0f};
         NuVecNorm(&perpendicular, &perpendicular);
         perpendicular.x *= (((f32)nurndr_pixel_width * 150.0f) / 240.0f) * laser->width;
         perpendicular.y *= laser->width * 150.0f;

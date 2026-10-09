@@ -73,19 +73,20 @@ static inline void GetAni4SamplePosition(const ani3_animheader_s *anim, f32 fram
         return;
     }
 
-    const f32 last_key = static_cast<f32>(anim->key_count - 1);
+    const i32 last = anim->key_count - 1;
+    const f32 last_key = static_cast<f32>(last);
     f32 key = (frame - anim->first_frame) * last_key / static_cast<f32>(anim->frame_count - 1);
-    if (key < 0.0f) {
-        key = 0.0f;
-    }
+    key = key < 0.0f ? 0.0f : key;
+    i32 whole_key;
     if (last_key <= key) {
-        key = last_key;
+        whole_key = static_cast<i32>(last_key);
+        fraction = last_key - static_cast<f32>(whole_key);
+    } else {
+        whole_key = static_cast<i32>(key);
+        fraction = key - static_cast<f32>(whole_key);
     }
-
-    const i32 whole_key = static_cast<i32>(key);
     quarter = static_cast<u32>(whole_key) & 3;
-    fraction = key - static_cast<f32>(whole_key);
-    key_offset = (whole_key >> 2) * anim->key_stride;
+    key_offset = (whole_key / 4) * anim->key_stride;
 }
 
 static inline f32 DecodeAni4QuaternionScalar(const ani3_animheader_s *anim, u16 type, u32 quarter, f32 fraction,
@@ -545,11 +546,11 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuani
 
     const u8 *node_flags = anim->node_flags;
     buffer->use_quaternions = 1;
-    const i32 key_stride = anim->key_stride;
     u32 quarter;
     f32 fraction;
     i32 key_offset;
     GetAni4SamplePosition(anim, frame, quarter, fraction, key_offset);
+    const i32 key_stride = anim->key_stride;
     u8 *keys = anim->keys + key_offset;
     const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     ani3_scalemin_s *scale_min = anim->scale_min;
@@ -564,10 +565,10 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuani
             i32 components = group == 1 ? 4 : 3;
             if (*node_flags & CurveGroupMasks[group]) {
                 for (i32 component = 0; component < components; ++component) {
-                    SkipAni4V4Curve(*curve_types++, keys, scale_min);
+                    SkipAni4V4Curve(curve_types[component], keys, scale_min);
                 }
-            } else
-                curve_types += components;
+            }
+            curve_types += components;
         }
     }
     const u8 *end_flags = first_flags + count;
