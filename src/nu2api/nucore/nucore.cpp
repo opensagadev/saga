@@ -297,8 +297,7 @@ void NuDeferredFilterGen::render() {
         NUMTX view, projection;
         memcpy(&view, g_renderContext_view, sizeof(view));
         memcpy(&projection, g_renderContext_projection, sizeof(projection));
-        i32 shadow_count = light->active_render_set_count;
-        for (i32 shadow = 0; shadow < shadow_count; ++shadow) {
+        for (i32 shadow = 0; shadow < light->active_render_set_count; ++shadow) {
             // The original selects consecutive texture members beginning at 0x30.
             nueffecttex_s *shadow_texture = textures[shadow + 2];
             NuFramebufferAttachTex2D(shadow_fbos[shadow], 4, shadow_texture, 0);

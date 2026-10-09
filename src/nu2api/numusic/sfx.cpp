@@ -624,12 +624,13 @@ extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pit
 
     if (g_soundInfo[sfx_id].pitch_rnd != 0.0f) {
         f32 pitch_variation = NuRandFloatSeeded(&seed) * g_soundInfo[sfx_id].pitch_rnd;
-        if ((NuRandIntSeeded(&seed) & 1) != 0) {
-            pitch *= 1.0f + pitch_variation;
-        } else {
+        if ((NuRandIntSeeded(&seed) & 1) == 0) {
             pitch_variation *= 0.5f;
-            pitch *= 1.0f - pitch_variation;
+            pitch_variation = 1.0f - pitch_variation;
+        } else {
+            pitch_variation = 1.0f + pitch_variation;
         }
+        pitch = pitch_variation * pitch;
     }
 
     if (g_soundInfo[sfx_id].volume_rnd != 0.0f) {

@@ -2571,9 +2571,15 @@ extern "C" {
             f32 radius = edppInterpolateTorusCurve(effect->torus_keys1, time);
             f32 radial_extent = edppInterpolateTorusCurve(effect->torus_keys2, time);
             f32 vertical_extent = edppInterpolateTorusCurve(effect->torus_keys3, time);
-            NUVEC position = key->position;
-            edbitsDrawTorus(&position, radius * effect->torus_radius1, radial_extent * effect->torus_radius2,
-                            vertical_extent * effect->torus_radius2, 0xffff0000, edpp_mtl);
+            f32 scaled_radius = radius * effect->torus_radius1;
+            f32 scaled_vertical_extent = vertical_extent * effect->torus_radius2;
+            f32 scaled_radial_extent = radial_extent * effect->torus_radius2;
+            NUVEC position;
+            position.x = key->position.x;
+            position.y = key->position.y;
+            position.z = key->position.z;
+            edbitsDrawTorus(&position, scaled_radius, scaled_radial_extent, scaled_vertical_extent, 0xffff0000,
+                            edpp_mtl);
         }
     }
     i32 edppFindAllSounds(i32 page, NUVEC *positions, i32 (*sounds)[4], i32 capacity, i32 skip) {
