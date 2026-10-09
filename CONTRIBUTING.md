@@ -211,6 +211,18 @@ bazel run --config=wasm //scripts:wasm_server -- \
   --obb /absolute/path/to/file.obb
 ```
 
+An asset-free browser regression checks framebuffer presentation against
+non-default shader, texture, vertex, culling, depth, blend and scissor state:
+
+```sh
+bazel build --config=wasm //src:wasm_framebuffer_test
+python3 scripts/wasm_server.py
+```
+
+Open <http://127.0.0.1:8000/wasm_framebuffer_probe.html>. The page prints
+`PASS` after checking 64 complete frame copies and preservation of scene GL
+state. It aborts with the failed assertion otherwise.
+
 ## Development & scripts 🧩
 
 ### Repository layout
