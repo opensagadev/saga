@@ -142,7 +142,12 @@ void NuSoundStreamer::ThreadFunc(void *self) {
     do {
         streamer->semaphore.Wait();
 
-        QueueElement element{};
+        QueueElement element;
+        element.sample = NULL;
+        element.loop = false;
+        element.start_offset = 0.0f;
+        element.buffer = NULL;
+        element.weak_flag = false;
         if (!streamer->queue2.Empty()) {
             element = streamer->queue2.Pop();
         } else {
@@ -221,7 +226,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
     i32 status = 0;
 
     if (this->sound_buffer1 == NULL) {
-        u32 stream_buffer_size = NuSoundSystem::GetStreamBufferSize();
+        u32 half_buffer_size = NuSoundSystem::GetStreamBufferSize() / 2;
 
         NuSoundBuffer *buffer = NU_ALLOC_T(NuSoundBuffer, 1, "", NUMEMORY_CATEGORY_NUSOUND);
         if (buffer != NULL) {
@@ -229,7 +234,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
         }
         this->sound_buffer1 = buffer;
 
-        if (this->sound_buffer1->Allocate(stream_buffer_size / 2, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1) {
+        if (this->sound_buffer1->Allocate(half_buffer_size, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1) {
             goto alloc_error;
         }
 
@@ -239,7 +244,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
         }
         this->sound_buffer2 = buffer;
 
-        if (this->sound_buffer2->Allocate(stream_buffer_size / 2, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1) {
+        if (this->sound_buffer2->Allocate(half_buffer_size, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1) {
             goto alloc_error;
         }
 
@@ -267,22 +272,26 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
         context.size3 = 0;
 
         context = this->file_loader->FillStreamBuffer(this->sound_buffer1, loop);
-        if (context.size2 != 0) {
+        if (context.size2 == 0) {
+            if (this->some_count == 0) {
+                this->file_loader->CloseStream();
+                status = 4;
+            }
+        } else {
             this->some_count++;
-        } else if (this->some_count == 0) {
-            this->file_loader->CloseStream();
-            status = 4;
         }
         this->sound_buffer1->SetCurrentContext(context);
 
         context.flags &= ~1u;
         if (status == 1 && (context.flags & 2) == 0) {
             context = this->file_loader->FillStreamBuffer(this->sound_buffer2, loop);
-            if (context.size2 != 0) {
+            if (context.size2 == 0) {
+                if (this->some_count == 0) {
+                    this->file_loader->CloseStream();
+                    status = 4;
+                }
+            } else {
                 this->some_count++;
-            } else if (this->some_count == 0) {
-                this->file_loader->CloseStream();
-                status = 4;
             }
             this->sound_buffer2->SetCurrentContext(context);
         }
@@ -410,11 +419,12 @@ i32 NuSoundStreamingSample::ReCue(f32 start_offset, bool loop) {
     this->sound_buffer1->Lock();
     context = this->file_loader->FillStreamBuffer(this->sound_buffer1, loop);
 
-    if (context.size2 != 0) {
+    if (context.size2 == 0) {
+        if ((context.flags & 2) == 0) {
+            goto stream_error;
+        }
+    } else {
         this->some_count++;
-    } else if ((context.flags & 2) == 0) {
-        this->file_loader->CloseStream();
-        return 2;
     }
     this->sound_buffer1->SetCurrentContext(context);
     context.flags &= ~1;
@@ -424,11 +434,12 @@ i32 NuSoundStreamingSample::ReCue(f32 start_offset, bool loop) {
         this->sound_buffer2->Lock();
         context = this->file_loader->FillStreamBuffer(this->sound_buffer2, loop);
 
-        if (context.size2 != 0) {
+        if (context.size2 == 0) {
+            if ((context.flags & 2) == 0) {
+                goto stream_error;
+            }
+        } else {
             this->some_count++;
-        } else if ((context.flags & 2) == 0) {
-            this->file_loader->CloseStream();
-            return 2;
         }
         this->sound_buffer2->SetCurrentContext(context);
         context.flags &= ~1;
@@ -436,6 +447,10 @@ i32 NuSoundStreamingSample::ReCue(f32 start_offset, bool loop) {
     }
 
     return 0;
+
+stream_error:
+    this->file_loader->CloseStream();
+    return 2;
 }
 
 bool NuSoundStreamingSample::IsLocked() const {
@@ -465,15 +480,7 @@ void NuSoundStreamingSample::Unlock() {
 }
 
 void NuSoundStreamingSample::RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBufferCallback> callback) {
-    if (this->field8_0x90 < this->some_count) {
-        // A buffer already holds decoded data: hand it to the voice directly.
-        NuSoundBuffer *buffer = (&this->sound_buffer1)[this->field8_0x90 % 2];
-        NuSoundWeakPtrListNode::sPtrAccessLock.Lock();
-        if (callback.obj != NULL) {
-            ((NuSoundBufferCallback *)callback.obj)->SubmitBuffer(buffer);
-        }
-        NuSoundWeakPtrListNode::sPtrAccessLock.Unlock();
-    } else {
+    if (this->some_count <= this->field8_0x90) {
         // The next slot in the ring still has to be filled on the streamer
         // thread; the voice gets it once the fill completes.
         NuSoundBuffer *buffer = (&this->sound_buffer1)[this->some_count % 2];
@@ -481,6 +488,14 @@ void NuSoundStreamingSample::RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBuff
         this->streamer->RequestFill(this, buffer, loop,
                                     NuSoundWeakPtr<NuSoundBufferCallback>((NuSoundBufferCallback *)callback.obj));
         this->some_count++;
+    } else {
+        // A buffer already holds decoded data: hand it to the voice directly.
+        NuSoundBuffer *buffer = (&this->sound_buffer1)[this->field8_0x90 % 2];
+        NuSoundWeakPtrListNode::sPtrAccessLock.Lock();
+        if (callback.obj != NULL) {
+            ((NuSoundBufferCallback *)callback.obj)->SubmitBuffer(buffer);
+        }
+        NuSoundWeakPtrListNode::sPtrAccessLock.Unlock();
     }
 
     this->field8_0x90++;

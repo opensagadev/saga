@@ -701,7 +701,7 @@ void Store_HubInitFloorTargets(WORLDINFO_s *world) {
 
 void Store_HubDrawFloorTargets(WORLDINFO_s *world) {
     (void)NuFmod(GameTimer.time_elapsed, 4.0f);
-    const u16 alpha_angle = static_cast<u16>(NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) * 65536.0f);
+    const u16 alpha_angle = static_cast<u16>(NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f);
     const f32 frame_alpha = NU_SIN_LUT(alpha_angle) * 0.2f + 0.8f;
 
     for (i32 i = 0; i < 11; ++i) {
@@ -728,14 +728,16 @@ void Store_HubDrawFloorTargets(WORLDINFO_s *world) {
             continue;
         }
 
-        NUVEC position = pack.custodian_position;
+        NUVEC position;
+        position.x = pack.custodian_position.x;
         position.x +=
-            NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.3f) / 2.3f * 65536.0f + i * 0x2000)) * 0.01f;
-        position.y += CDataList[*pack.id].bounds_max_y * 0.75f - 0.01f;
+            NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.3f) / 2.3f * 65536.0f) + i * 0x2000) * 0.01f;
+        position.y = CDataList[*pack.id].bounds_max_y * 0.75f + pack.custodian_position.y - 0.01f;
         position.y +=
-            NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f + i * 0x2aaa)) * 0.01f;
+            NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f) + i * 0x2aaa) * 0.01f;
+        position.z = pack.custodian_position.z;
         position.z +=
-            NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.4f) / 2.4f * 65536.0f + i * 0x2000 + 0x4000)) *
+            NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.4f) / 2.4f * 65536.0f) + i * 0x2000 + 0x4000) *
             0.01f;
 
         const u16 facing = NuAtan2D(position.x - GameCam->pos.x, position.z - GameCam->pos.z);

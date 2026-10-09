@@ -279,8 +279,8 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Alloc(u32 size) {
             if (!buf->IsAlloced()) {
                 u32 buf_size = buf->GetSize();
                 if (buf_size >= alloc_size) {
-                    if (best == NULL || best->GetSize() > buf_size) {
-                        if (buf_size == alloc_size) {
+                    if (best == NULL || best->GetSize() > buf->GetSize()) {
+                        if (buf->GetSize() == alloc_size) {
                             best = buf;
                             break;
                         }
@@ -296,7 +296,7 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Alloc(u32 size) {
         }
 
         if (best != NULL) {
-            if (best->GetSize() != alloc_size) {
+            if (alloc_size < best->GetSize()) {
                 best = this->SplitFreeBuffer(best, alloc_size, NULL);
             }
             best->SetAlloced(true);
@@ -641,7 +641,12 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::SwapOrMergeAdjacentBuffers(NuSoundMem
 
 // libTTapp.so 0x321a60.
 bool NuSoundMemoryManager::SwapSimilarBuffers(NuSoundMemoryBuffer *a, NuSoundMemoryBuffer *b) {
-    if (!a->IsAlloced() || a->IsLocked() || b->IsAlloced() || b->IsLocked() || a->GetSize() != b->GetSize()) {
+    if (!a->IsAlloced() || a->IsLocked() || b->IsAlloced() || b->IsLocked()) {
+        return false;
+    }
+
+    u32 copy_size = a->GetSize();
+    if (copy_size != b->GetSize()) {
         return false;
     }
 
@@ -650,7 +655,7 @@ bool NuSoundMemoryManager::SwapSimilarBuffers(NuSoundMemoryBuffer *a, NuSoundMem
 
     void *a_address = a->GetAddress();
     void *b_address = b->GetAddress();
-    memmove(b_address, a_address, a->GetSize());
+    memmove(b_address, a_address, copy_size);
     a->SetAddress(b_address);
     b->SetAddress(a_address);
 

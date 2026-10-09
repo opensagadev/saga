@@ -297,8 +297,7 @@ void NuDeferredFilterGen::render() {
         NUMTX view, projection;
         memcpy(&view, g_renderContext_view, sizeof(view));
         memcpy(&projection, g_renderContext_projection, sizeof(projection));
-        i32 shadow_count = light->active_render_set_count;
-        for (i32 shadow = 0; shadow < shadow_count; ++shadow) {
+        for (i32 shadow = 0; shadow < light->active_render_set_count; ++shadow) {
             // The original selects consecutive texture members beginning at 0x30.
             nueffecttex_s *shadow_texture = textures[shadow + 2];
             NuFramebufferAttachTex2D(shadow_fbos[shadow], 4, shadow_texture, 0);
@@ -773,18 +772,20 @@ void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
         if (set.scene_first[0]) {
             NUDISPLAYLIST *list = &set.display_lists[0];
             NuDisplayListLinkItems(list, 1);
+            NUMTL *material = scene->mtls[0];
             list->items->type = 0x80;
             list->items->id = 3;
-            list->items->next = scene->mtls[0];
+            list->items->next = material;
             ++list->items;
             NuDisplayListLinkList(list, set.scene_first[0], set.scene_cursor[0]);
         }
         if (set.scene_first[1]) {
             NUDISPLAYLIST *list = &set.display_lists[1];
             NuDisplayListLinkItems(list, 1);
+            NUMTL *material = scene->mtls[0];
             list->items->type = 0x80;
             list->items->id = 3;
-            list->items->next = scene->mtls[0];
+            list->items->next = material;
             ++list->items;
             NuDisplayListLinkList(list, set.scene_first[1], set.scene_cursor[1]);
         }

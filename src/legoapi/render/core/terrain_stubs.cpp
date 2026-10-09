@@ -77,8 +77,8 @@ void TerrainSkinAllocate(terrsitu_s *terrain_group) {
     if (skin_index >= PlatSkinCnt)
         return;
     ++TerrainUpadteCnt;
-    PLATSKININFO *info = &PlatSkinInfo[skin_index];
     if (group->data != NULL) {
+        PLATSKININFO *info = &PlatSkinInfo[skin_index];
         SkinMemInfo[info->cache_slot].last_used = TerrainUpadteCnt;
         return;
     }
@@ -102,6 +102,7 @@ void TerrainSkinAllocate(terrsitu_s *terrain_group) {
         for (i32 i = 0; i < 16; ++i)
             CurTerr->index_levels[i].entry_count = 0;
     }
+    PLATSKININFO *info = &PlatSkinInfo[skin_index];
     group->data = info->terrain_data;
     info->cache_slot = slot;
     cache->skin_index = skin_index;
@@ -113,8 +114,8 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
     if (CurTerr == NULL || group_index < 0)
         return;
     TERRAIN_GROUP *group = &CurTerr->groups[group_index];
-    NUVEC minimum = {123456792.0f, 123456792.0f, 123456792.0f};
-    NUVEC maximum = {-123456792.0f, -123456792.0f, -123456792.0f};
+    f32 min_x = 123456792.0f, min_y = 123456792.0f, min_z = 123456792.0f;
+    f32 max_x = -123456792.0f, max_y = -123456792.0f, max_z = -123456792.0f;
     f32 radius_squared = 0.0f;
     i32 bytes = 0;
     if (static_cast<u32>(group->chunk_type) <= 1) {
@@ -125,7 +126,8 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
             output->shape_count = input->shape_count;
             TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(input + 1);
             TERRAIN_SHAPE *destination = reinterpret_cast<TERRAIN_SHAPE *>(output + 1);
-            for (i32 i = 0; i < input->shape_count; ++i, ++source, ++destination) {
+            const i32 shape_count = input->shape_count;
+            for (i32 i = 0; i < shape_count; ++i, ++source, ++destination) {
                 i32 last_vertex = source->normals[1].y > 65535.0f ? 2 : 3;
                 memcpy(destination, source, sizeof(TERRAIN_SHAPE));
                 for (i32 vertex = last_vertex; vertex >= 0; --vertex) {
@@ -135,32 +137,45 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
                     v.x -= info->matrix->m30;
                     v.y -= info->matrix->m31;
                     v.z -= info->matrix->m32;
-                    minimum.x = MIN(v.x, minimum.x);
-                    minimum.y = MIN(v.y, minimum.y);
-                    minimum.z = MIN(v.z, minimum.z);
-                    maximum.x = MAX(v.x, maximum.x);
-                    maximum.y = MAX(v.y, maximum.y);
-                    maximum.z = MAX(v.z, maximum.z);
+                    min_x = MIN(v.x, min_x);
+                    min_y = MIN(v.y, min_y);
+                    min_z = MIN(v.z, min_z);
+                    max_x = MAX(v.x, max_x);
+                    max_y = MAX(v.y, max_y);
+                    max_z = MAX(v.z, max_z);
                     radius_squared = MAX((v.x * v.x + v.y * v.y) + v.z * v.z, radius_squared);
                 }
-                for (i32 normal = source->normals[1].y < 65535.0f ? 1 : 0; normal >= 0; --normal) {
-                    i32 origin = normal != 0 ? 3 : 0;
-                    i32 first = normal != 0 ? 1 : 2;
-                    i32 second = normal != 0 ? 2 : 1;
+                if (source->normals[1].y < 65535.0f) {
                     NUVEC a, b;
-                    a.x = destination->vectors[first].x - destination->vectors[origin].x;
-                    a.y = destination->vectors[first].y - destination->vectors[origin].y;
-                    a.z = destination->vectors[first].z - destination->vectors[origin].z;
-                    b.x = destination->vectors[second].x - destination->vectors[origin].x;
-                    b.y = destination->vectors[second].y - destination->vectors[origin].y;
-                    b.z = destination->vectors[second].z - destination->vectors[origin].z;
-                    NUVEC &n = destination->normals[normal];
+                    a.x = destination->vectors[1].x - destination->vectors[3].x;
+                    a.y = destination->vectors[1].y - destination->vectors[3].y;
+                    a.z = destination->vectors[1].z - destination->vectors[3].z;
+                    b.x = destination->vectors[2].x - destination->vectors[3].x;
+                    b.y = destination->vectors[2].y - destination->vectors[3].y;
+                    b.z = destination->vectors[2].z - destination->vectors[3].z;
+                    NUVEC &n = destination->normals[1];
                     n = TerCrossProduct(&a, &b);
                     f32 squared = (n.x * n.x + n.y * n.y) + n.z * n.z;
                     f32 inverse = squared == 0.0f ? 0.0f : 1.0f / NuFsqrt(squared);
                     n.x *= inverse;
                     n.y *= inverse;
                     n.z *= inverse;
+                }
+                {
+                    NUVEC a, b;
+                    a.x = destination->vectors[2].x - destination->vectors[0].x;
+                    a.y = destination->vectors[2].y - destination->vectors[0].y;
+                    a.z = destination->vectors[2].z - destination->vectors[0].z;
+                    b.x = destination->vectors[1].x - destination->vectors[0].x;
+                    b.y = destination->vectors[1].y - destination->vectors[0].y;
+                    b.z = destination->vectors[1].z - destination->vectors[0].z;
+                    NUVEC &n = destination->normals[0];
+                    n = TerCrossProduct(&a, &b);
+                    f32 squared = (n.x * n.x + n.y * n.y) + n.z * n.z;
+                    f32 inverse = squared == 0.0f ? 0.0f : 1.0f / NuFsqrt(squared);
+                    n.x *= inverse;
+                    n.y *= inverse;
+                    n.z = inverse * n.z;
                 }
             }
             input = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(source);
@@ -173,12 +188,12 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
     group->origin.x = info->matrix->m30;
     group->origin.y = info->matrix->m31;
     group->origin.z = info->matrix->m32;
-    group->bounds_min.x = (minimum.x - 0.1f) + info->matrix->m30;
-    group->bounds_min.y = (minimum.y - 0.1f) + info->matrix->m31;
-    group->bounds_min.z = (minimum.z - 0.1f) + info->matrix->m32;
-    group->bounds_max.x = (maximum.x + 0.1f) + info->matrix->m30;
-    group->bounds_max.y = (maximum.y + 0.1f) + info->matrix->m31;
-    group->bounds_max.z = (maximum.z + 0.1f) + info->matrix->m32;
+    group->bounds_min.x = (min_x - 0.1f) + info->matrix->m30;
+    group->bounds_min.y = (min_y - 0.1f) + info->matrix->m31;
+    group->bounds_min.z = (min_z - 0.1f) + info->matrix->m32;
+    group->bounds_max.x = (max_x + 0.1f) + info->matrix->m30;
+    group->bounds_max.y = (max_y + 0.1f) + info->matrix->m31;
+    group->bounds_max.z = (max_z + 0.1f) + info->matrix->m32;
     group->radius = NuFsqrt(radius_squared);
     if (bytes > PlatSkinMaxSize)
         PlatSkinMaxSize = bytes;
@@ -352,7 +367,10 @@ extern "C" void TerrainPlatformNewUpdate(void) {
     CurTerr->active_platform_count = 0;
     TERRAIN_CELL &cell = CurTerr->cells[TERRAIN_PLATFORM_CELL];
     i16 *group_index = CurTerr->group_indices + cell.first_group;
-    i16 *end = group_index + cell.group_count;
+    const i32 group_count = static_cast<i16>(cell.group_count);
+    if (group_count <= 0)
+        return;
+    i16 *end = group_index + group_count;
     for (; group_index != end; ++group_index) {
         TERRAIN_GROUP &group = CurTerr->groups[*group_index];
         TERRAIN_PLATFORM &platform = CurTerr->platforms[group.scene_index];
@@ -369,16 +387,19 @@ extern "C" void TerrainPlatformNewUpdate(void) {
         NUMTX *matrix = static_cast<NUMTX *>(platform.scene_object);
         if (matrix != NULL) {
             if (platform.bounce_frames != 0) {
-                f32 velocity = platform.bounce_velocity - platform.bounce_damping * platform.bounce_velocity;
+                f32 velocity;
                 if (platform.bounce_frames >= 125)
                     velocity = (platform.bounce_impulse - platform.bounce_damping * platform.bounce_velocity) +
                                platform.bounce_velocity;
+                else
+                    velocity = platform.bounce_velocity - platform.bounce_damping * platform.bounce_velocity;
                 const f32 offset = platform.bounce_offset;
                 --platform.bounce_frames;
-                velocity += -offset * fabsf(offset) * platform.bounce_spring * 0.5f - platform.bounce_spring * offset;
+                velocity = (-offset * fabsf(offset) * platform.bounce_spring * 0.5f - platform.bounce_spring * offset) +
+                           velocity;
                 platform.bounce_velocity = velocity;
                 platform.bounce_offset = velocity + offset;
-                matrix->m31 += platform.bounce_offset;
+                matrix->m31 = platform.bounce_offset + matrix->m31;
             }
             group.origin = *NUMTX_GET_ROW_VEC(matrix, 3);
         }
@@ -1536,37 +1557,42 @@ extern "C" {
     }
 
     i32 NewPlatInst(void *object, i32 instance) {
-        if (CurTerr == NULL || CurTerr->group_index_count >= CurTerr->max_group_indices ||
-            CurTerr->group_count >= CurTerr->max_groups || object == NULL || CurTerr->max_platforms <= 0)
+        TERRSET *terrain = CurTerr;
+        if (terrain == NULL || terrain->group_index_count >= terrain->max_group_indices ||
+            terrain->group_count >= terrain->max_groups || object == NULL || terrain->max_platforms <= 0)
             return -1;
+        const i32 platform_count = terrain->max_platforms;
+        TERRAIN_PLATFORM *platforms = terrain->platforms;
+        const i32 group_index_count = terrain->group_index_count;
+        const i16 group_index = terrain->group_count;
         i32 index = 0;
-        while (CurTerr->platforms[index].scene_object != NULL) {
-            if (++index == CurTerr->max_platforms)
+        while (platforms[index].scene_object != NULL) {
+            if (++index == platform_count)
                 return -1;
         }
-        for (i32 source = 0; source < CurTerr->max_platforms; ++source) {
-            TERRAIN_PLATFORM &original = CurTerr->platforms[source];
+        for (i32 source = 0; source < platform_count; ++source) {
+            TERRAIN_PLATFORM &original = platforms[source];
             if (original.scene_object == NULL || static_cast<i16>(original.scene_object_index) != instance)
                 continue;
-            const i16 group_index = CurTerr->group_count;
-            TERRAIN_GROUP &group = CurTerr->groups[group_index];
-            group = CurTerr->groups[original.terrain_group_index];
+            TERRAIN_GROUP &group = terrain->groups[group_index];
+            group = terrain->groups[original.terrain_group_index];
             group.scene_index = index;
             group.chunk_type = 1;
-            TERRAIN_PLATFORM &platform = CurTerr->platforms[index];
+            TERRAIN_PLATFORM &platform = platforms[index];
             platform.scene_object = object;
             platform.terrain_group_index = group_index;
             platform.scene_object_index = instance;
             platform.scene_transform = NULL;
             platform.flags = (platform.flags & ~1) | (original.flags & 1);
-            CurTerr->group_indices[CurTerr->group_index_count++] = group_index;
+            terrain->group_indices[group_index_count] = group_index;
+            terrain->group_index_count = group_index_count + 1;
             platform.bounce_impulse = 0.0f;
             platform.bounce_offset = 0.0f;
             platform.bounce_velocity = 0.0f;
             platform.bounce_damping = 0.0f;
             platform.bounce_spring = 0.0f;
-            ++CurTerr->group_count;
-            ++CurTerr->cells[TERRAIN_PLATFORM_CELL].group_count;
+            ++terrain->group_count;
+            ++terrain->cells[TERRAIN_PLATFORM_CELL].group_count;
             return index;
         }
         return -1;
@@ -1780,10 +1806,14 @@ extern "C" {
             TERRAIN_GROUP &group = groups[i];
             if (group.chunk_type != 0)
                 continue;
-            group_min_x[i] = MIN(group.bounds_min.x, 200000000.0f);
-            group_min_z[i] = MIN(group.bounds_min.z, 200000000.0f);
-            group_max_x[i] = MAX(group.bounds_max.x, -200000000.0f);
-            group_max_z[i] = MAX(group.bounds_max.z, -200000000.0f);
+            group_min_x[i] = 200000000.0f;
+            group_min_z[i] = 200000000.0f;
+            group_max_x[i] = -200000000.0f;
+            group_max_z[i] = -200000000.0f;
+            group_min_x[i] = MIN(group.bounds_min.x, group_min_x[i]);
+            group_min_z[i] = MIN(group.bounds_min.z, group_min_z[i]);
+            group_max_x[i] = MAX(group.bounds_max.x, group_max_x[i]);
+            group_max_z[i] = MAX(group.bounds_max.z, group_max_z[i]);
             i32 x_distance = static_cast<i32>((group_min_x[i] + group_max_x[i]) * 0.5f - minimum_x);
             i32 x_cell = static_cast<i32>(static_cast<f32>(x_distance * 7) / (maximum_x - minimum_x));
             if (x_cell < 0)

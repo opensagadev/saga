@@ -196,10 +196,7 @@ i32 renderThread_processRenderScenes(void) {
         NuPostEffectAddDynamicLight(dynamicLights_safe[i]);
     }
 
-    g_currentFramebuffer = g_earlyColorFramebuffer;
-    if (NuIOS_ShouldUseMSAA()) {
-        g_currentFramebuffer = g_earlyColorMSAAFramebuffer;
-    }
+    g_currentFramebuffer = NuIOS_ShouldUseMSAA() ? g_earlyColorMSAAFramebuffer : g_earlyColorFramebuffer;
     glBindFramebuffer(GL_FRAMEBUFFER, g_currentFramebuffer);
     glViewport(0, 0, g_backingWidth, g_backingHeight);
 
@@ -228,7 +225,7 @@ i32 renderThread_processRenderScenes(void) {
     }
 
     i64 cpu_ns = _NuTimeBarSlotEnd(-1, 4);
-    f32 cpu_ms = (f32)((f64)(i32)cpu_ns / 1e6);
+    f32 cpu_ms = static_cast<f32>(static_cast<i32>(cpu_ns)) / 1000000.0f;
 
     NuFramebufferSwapBuffers();
     g_boundShader = 0;
@@ -240,18 +237,18 @@ i32 renderThread_processRenderScenes(void) {
     g_renderContext_kTint[3] = nuvec4_one[3];
     NuShaderManagerSetfv(0x44, &nuvec4_one[0]);
 
-    f32 cpu_max_ms = cpu_ms > 0.0f ? cpu_ms : 0.0f;
+    f32 cpu_max_ms = cpu_ms < 0.0f ? 0.0f : cpu_ms;
     NuTimeBarSlotReset(-1, 1);
-    NuTimeBarSlotSet(-1, 1, (i32)(g_renderContext_gpuTime * 1e6));
+    NuTimeBarSlotSet(-1, 1, (i32)(g_renderContext_gpuTime * 1000000.0f));
     NuTimeBarSlotSetName(-1, 1, "GPU(TOTAL)");
     NuTimeBarSlotReset(-1, 3);
-    NuTimeBarSlotSet(-1, 3, (i32)(g_renderContext_postEffectTime * 1e6));
+    NuTimeBarSlotSet(-1, 3, (i32)(g_renderContext_postEffectTime * 1000000.0f));
     NuTimeBarSlotSetName(-1, 3, "GPU(FX)");
     NuTimeBarSlotReset(-1, 2);
-    NuTimeBarSlotSet(-1, 2, (i32)(g_renderContext_3dTime * 1e6));
+    NuTimeBarSlotSet(-1, 2, (i32)(g_renderContext_3dTime * 1000000.0f));
     NuTimeBarSlotSetName(-1, 2, "GPU(3D)");
     NuTimeBarSlotReset(-1, 0);
-    NuTimeBarSlotSet(-1, 0, (i32)(cpu_max_ms * 1e6));
+    NuTimeBarSlotSet(-1, 0, (i32)(cpu_max_ms * 1000000.0f));
     NuTimeBarSlotSetName(-1, 0, "CPUs(max)");
 
     renderThreadIsLocked--;

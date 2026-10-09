@@ -180,7 +180,7 @@ void MechSystems::LoadPerm() {
         raw[0x42] = static_cast<u8>((raw[0x42] & 0x8c) | 0x12);
         material->tex_id = static_cast<i16>(
             NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_RIPPLE"), &permbuffer_ptr, permbuffer_end));
-        NuMtlUpdate(material);
+        NuMtlUpdate(radar_pulse_material);
     }
 }
 

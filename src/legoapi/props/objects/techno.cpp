@@ -126,8 +126,9 @@ static void Technos_Reset(void *world_ptr, void *, void *progress_ptr) {
         return;
     }
 
-    for (i32 index = 0; index < world->ntechnos; ++index) {
-        TECHNO &techno = world->technos[index];
+    TECHNO *cursor = world->technos;
+    for (i32 index = 0; index < world->ntechnos; ++index, ++cursor) {
+        TECHNO &techno = *cursor;
         techno.ground_position.x = 0.0f;
         techno.ground_position.y = 0.0f;
         techno.ground_position.z = TechnoSys.interaction_time;
@@ -288,9 +289,8 @@ static void Technos_LateUpdate(void *world_ptr, void *, float) {
 static void Technos_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     for (i32 index = 0; index < world->ntechnos; ++index) {
-        TECHNO &techno = world->technos[index];
-        if (NuStrLen(techno.name) != 0) {
-            AddGizmo(gizmo_sys, type_id, NULL, &techno);
+        if (NuStrLen(world->technos[index].name) != 0) {
+            AddGizmo(gizmo_sys, type_id, NULL, &world->technos[index]);
         }
     }
 }

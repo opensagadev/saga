@@ -191,8 +191,8 @@ void MechAutoJumpManager::Process() {
             show_autojump_hint = 0;
             for (i32 index = 0; index < path->connection_count; ++index) {
                 AIPATHCNX *connection = &path->connections[index];
-                for (i32 direction = 1; direction >= 0; --direction) {
-                    i32 far_index = direction == 0 ? 1 : 0;
+                for (i32 direction = 0; direction < 2; ++direction) {
+                    i32 far_index = direction;
                     u32 flags = connection->traversal_flags[far_index];
                     if ((flags & (static_cast<u32>(LEGO_AIPATHCNX_DONT_JUMP_NOW) | 0x98000000u)) != 0 ||
                         (flags & static_cast<u32>(mechAutoJumpFlags)) == 0) {

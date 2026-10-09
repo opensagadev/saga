@@ -312,19 +312,18 @@ uv1deb *GenDebIndexBounceXZ(debkeydatatype_s *key, debinftype *effect, float tim
         DebrisGetControlStackLock();
         if (freechunkcontrolsptr < debrischunks + debrischunksglass) {
             f32 collision_time = (0.0f - start_distance) / (end_distance - start_distance) * lifetime;
-            debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr];
-            control->particle_chunk = chunk;
-            control->expiry_time = time + collision_time;
-            control->owner = NULL;
-            control->active = 6;
-            control->effect_index = key->effect_index;
-            control->rotation_y = key->reflection_y;
-            control->field_01e = 0;
-            control->collision_plane = key->collision_plane;
-            control->restitution = key->reflection_scale;
-            control->collision_time = collision_time;
-            control->particle_index = key->field_18a % 32;
-            AddChunkControlToStack(control, &debris_chunk_control_stack[0]);
+            freechunkcontrols[freechunkcontrolsptr]->particle_chunk = chunk;
+            freechunkcontrols[freechunkcontrolsptr]->expiry_time = time + collision_time;
+            freechunkcontrols[freechunkcontrolsptr]->owner = NULL;
+            freechunkcontrols[freechunkcontrolsptr]->active = 6;
+            freechunkcontrols[freechunkcontrolsptr]->effect_index = key->effect_index;
+            freechunkcontrols[freechunkcontrolsptr]->rotation_y = key->reflection_y;
+            freechunkcontrols[freechunkcontrolsptr]->field_01e = 0;
+            freechunkcontrols[freechunkcontrolsptr]->collision_plane = key->collision_plane;
+            freechunkcontrols[freechunkcontrolsptr]->restitution = key->reflection_scale;
+            freechunkcontrols[freechunkcontrolsptr]->collision_time = collision_time;
+            freechunkcontrols[freechunkcontrolsptr]->particle_index = key->field_18a % 32;
+            AddChunkControlToStack(freechunkcontrols[freechunkcontrolsptr], &debris_chunk_control_stack[0]);
             ++freechunkcontrolsptr;
         }
         DebrisReleaseControlStackLock();
@@ -1034,31 +1033,41 @@ extern "C" {
             return -1;
         }
 
+        i32 bound;
         const u8 requested_page = static_cast<u8>(page);
         if (requested_page < 8 && edpp_page_used[requested_page] != 0) {
-            for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
+            bound = EDPP_MAX_TYPES;
+            for (i32 i = 1; i < bound; ++i) {
                 debinftype *effect = debtab[i];
-                if (i != ignore && effect != NULL && effect->page == requested_page &&
-                    NuStrICmp(effect->name, name) == 0) {
-                    return i;
+                if (i != ignore && effect != NULL && effect->page == requested_page) {
+                    if (NuStrICmp(effect->name, name) == 0) {
+                        return i;
+                    }
+                    bound = EDPP_MAX_TYPES;
                 }
             }
+        } else {
+            bound = EDPP_MAX_TYPES;
         }
 
-        for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
+        for (i32 i = 1; i < bound; ++i) {
             debinftype *effect = debtab[i];
             if (i != ignore && effect != NULL &&
-                ((effect->page == 0 && edpp_page_used[0] != 0) || (effect->page == 1 && edpp_page_used[1] != 0)) &&
-                NuStrICmp(effect->name, name) == 0) {
-                return i;
+                ((effect->page == 0 && edpp_page_used[0] != 0) || (effect->page == 1 && edpp_page_used[1] != 0))) {
+                if (NuStrICmp(effect->name, name) == 0) {
+                    return i;
+                }
+                bound = EDPP_MAX_TYPES;
             }
         }
 
-        for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
+        for (i32 i = 1; i < bound; ++i) {
             debinftype *effect = debtab[i];
-            if (i != ignore && effect != NULL && edpp_page_used[static_cast<i8>(effect->page)] != 0 &&
-                NuStrICmp(effect->name, name) == 0) {
-                return i;
+            if (i != ignore && effect != NULL && edpp_page_used[static_cast<i8>(effect->page)] != 0) {
+                if (NuStrICmp(effect->name, name) == 0) {
+                    return i;
+                }
+                bound = EDPP_MAX_TYPES;
             }
         }
         return -1;
@@ -1074,21 +1083,25 @@ extern "C" {
             return -1;
         }
 
+        i32 limit = EDPP_MAX_TYPES;
         if (static_cast<u8>(page) < 8 && edpp_page_used[page] != 0) {
-            for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
+            for (i32 i = 1; i < limit; ++i) {
                 debinftype *effect = debtab[i];
-                if (effect != NULL && effect->page == static_cast<u8>(page) && NuStrICmp(effect->name, name) == 0) {
-                    return i;
+                if (effect != NULL && effect->page == static_cast<u8>(page)) {
+                    if (NuStrICmp(effect->name, name) == 0)
+                        return i;
+                    limit = EDPP_MAX_TYPES;
                 }
             }
         }
 
-        for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
+        for (i32 i = 1; i < limit; ++i) {
             debinftype *effect = debtab[i];
             if (effect != NULL &&
-                ((effect->page == 0 && edpp_page_used[0] != 0) || (effect->page == 1 && edpp_page_used[1] != 0)) &&
-                NuStrICmp(effect->name, name) == 0) {
-                return i;
+                ((effect->page == 0 && edpp_page_used[0] != 0) || (effect->page == 1 && edpp_page_used[1] != 0))) {
+                if (NuStrICmp(effect->name, name) == 0)
+                    return i;
+                limit = EDPP_MAX_TYPES;
             }
         }
         return -1;

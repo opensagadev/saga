@@ -884,6 +884,7 @@ extern "C" {
 
     void APILoadCharacterModels(APICHARACTERMODELLIST_s *list, i32 area_animation, VARIPTR *buf, VARIPTR buf_end,
                                 i32 area_models) {
+        char legacy_animation_extension[] = ".ani";
         char animation_extension[] = ".an3";
         char deformation_extension[] = ".bsa";
         char animation_path[0x200];
@@ -920,22 +921,26 @@ extern "C" {
 
             char directory_pack_path[0x100];
             char model_pack_path[0x100];
-            NuStrCpy(directory_pack_path, directory);
-            NuStrCat(directory_pack_path, character.dir);
-            NuStrCat(directory_pack_path, ".fpk");
-            NuStrCpy(model_pack_path, directory);
-            NuStrCat(model_pack_path, character.file);
-            NuStrCat(model_pack_path, ".fpk");
-
             i32 model_loaded = 0;
             if (apicharsys->playermodelids[model_id] != -1) {
+                NuStrCpy(directory_pack_path, directory);
+                NuStrCat(directory_pack_path, character.dir);
+                NuStrCat(directory_pack_path, ".fpk");
+                NuStrCpy(model_pack_path, directory);
+                NuStrCat(model_pack_path, character.file);
+                NuStrCat(model_pack_path, ".fpk");
                 model = &apicharsys->models[apicharsys->playermodelids[model_id]];
             } else {
                 model = &apicharsys->models[apicharsys->loaded_model_count];
                 APICharacterModelReset(model);
 
                 NuStrCpy(animation_path, directory);
+                NuStrCpy(directory_pack_path, directory);
                 NuStrCat(animation_path, character.file);
+                NuStrCat(directory_pack_path, character.dir);
+                NuStrCpy(model_pack_path, animation_path);
+                NuStrCat(model_pack_path, ".fpk");
+                NuStrCat(directory_pack_path, ".fpk");
                 NuStrCat(animation_path, ".ghg");
 
                 model->hierarchy = NuGHGRead(animation_path, buf, buf_end);
@@ -949,11 +954,14 @@ extern "C" {
                 model_loaded = 1;
             }
 
-            CHARACTERANIM_s *animations = area_models != 0 && list->count != 0 ? character.animations : NULL;
+            CHARACTERANIM_s *animations =
+                area_models != 0 && list->count != 0 ? apicharsys->char_data[model_id].animations : NULL;
             void *pak = NULL;
             if (apiloadcharactermodels_nopakfile == 0) {
-                pak = NuFilePakLoad(directory_pack_path, buf, buf_end, 0x10);
+                NuStrCpy(animation_path, directory_pack_path);
+                pak = NuFilePakLoad(animation_path, buf, buf_end, 0x10);
                 if (pak == NULL) {
+                    NuStrCpy(animation_path, model_pack_path);
                     pak = NuFilePakLoad(model_pack_path, buf, buf_end, 0x10);
                 }
             }
@@ -1527,15 +1535,10 @@ extern "C" {
                     interrupted = 1;
                 }
             } else if (packet->requested_animation == packet->previous_animation) {
-                // Interrupted blends enter the transition directly, even when
-                // returning to their source animation (retail 0x3ce858/0x3ce88a).
-                if (force_restart == 0 || packet->requested_animation != packet->animation_index ||
-                    !(packet->animation_index != -1 && model->model_data_b[packet->animation_index] != NULL)) {
-                    packet->animation_index = packet->requested_animation;
-                    packet->blending = 0;
-                    goto update_timers;
-                }
+                goto check_force_restart;
             }
+
+        begin_transition:
 
             if (packet->previous_animation != -1 && packet->requested_animation != -1 &&
                 model->model_data_b[packet->previous_animation] != NULL &&
@@ -1566,13 +1569,13 @@ extern "C" {
                         NuAnimEndFrame(model->model_data_b[packet->blend_animation_a]) ==
                             NuAnimEndFrame(model->model_data_b[packet->blend_animation_b])) {
                         packet->blend_target_time = packet->blend_source_time;
-                        packet->blend_target_reversed =
-                            backwards != 0 && model->model_data_b[packet->blend_animation_b] != NULL &&
-                                    (static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->blend_animation_b])
-                                         ->flags &
-                                     CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0
-                                ? 1
-                                : 0;
+                        if (backwards != 0 && model->model_data_b[packet->blend_animation_b] != NULL &&
+                            (static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->blend_animation_b])->flags &
+                             CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0) {
+                            packet->blend_target_reversed = 1;
+                        } else {
+                            packet->blend_target_reversed = 0;
+                        }
                     } else if (backwards != 0 && model->model_data_b[packet->blend_animation_b] != NULL &&
                                (static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->blend_animation_b])->flags &
                                 CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0) {
@@ -1611,6 +1614,15 @@ extern "C" {
             packet->blending = 0;
             packet->previous_time = packet->current_time;
             packet->flags |= ANIMPACKET_FLAG_ANIMATION_CHANGED;
+            goto update_timers;
+
+        check_force_restart:
+            if (force_restart != 0 && packet->requested_animation == packet->animation_index &&
+                packet->animation_index != -1 && model->model_data_b[packet->animation_index] != NULL) {
+                goto begin_transition;
+            }
+            packet->animation_index = packet->requested_animation;
+            packet->blending = 0;
         }
 
     update_timers:

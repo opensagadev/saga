@@ -438,10 +438,13 @@ void LoadPerm(void) {
         LoadPerm_LanguageSelect = 0;
     } else {
         i32 language_index = 0;
-        while (language_index < LANGUAGECOUNT && Text_LanguageList[language_index].language != device_language) {
-            language_index++;
+        while (Text_LanguageList[language_index].language != device_language) {
+            ++language_index;
+            if (language_index == LANGUAGECOUNT) {
+                break;
+            }
         }
-        if (!(language_index < LANGUAGECOUNT)) {
+        if (language_index == LANGUAGECOUNT) {
             LoadPerm_LanguageSelect = 0;
         } else {
             NuLanguageSet(device_language);

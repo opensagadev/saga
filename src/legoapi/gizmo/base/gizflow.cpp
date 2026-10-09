@@ -708,12 +708,14 @@ static void ProcessFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8 frame) {
     }
     if (box->type != 0)
         CheckIfParentsFinished(system, box);
-    for (i32 i = 0; i < box->child_count; ++i) {
+    i32 child_count = box->child_count;
+    for (i32 i = 0; i < child_count; ++i) {
         FLOWBOX_s **child = &box->children[i];
         (*child)->state_flags_low |= 1;
         if ((*child)->last_process_frame != frame || box->type == 1) {
             (*child)->last_process_frame = frame;
             ProcessFlowBox(system, *child, frame);
+            child_count = box->child_count;
         }
     }
 }

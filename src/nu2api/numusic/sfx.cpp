@@ -153,8 +153,9 @@ static void fnAudioSample(nufpar_s *fpar) {
                     }
                 }
                 if (i == NumSfx) {
-                    NuStrNCpy(sfx_filename[NumSfxNames], fpar->word_buf, 0x40);
-                    g_soundInfo[NumSfxInst].filename = sfx_filename[NumSfxNames++];
+                    u32 filename_index = NumSfxNames++;
+                    NuStrNCpy(sfx_filename[filename_index], fpar->word_buf, 0x40);
+                    g_soundInfo[NumSfxInst].filename = sfx_filename[NumSfxNames - 1];
                 }
             }
         } else if (NuStrICmp(fpar->word_buf, "pitch") == 0) {
@@ -562,7 +563,7 @@ extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pit
 
     f32 pan = g_soundInfo[sfx_id].pan;
     i16 sample_index = g_soundInfo[sfx_id].index;
-    bool loop = g_soundInfo[sfx_id].loop != 0;
+    u8 loop = static_cast<u8>(g_soundInfo[sfx_id].loop);
     f32 buzz_timer = g_soundInfo[sfx_id].buzz_timer;
     f32 rumble_sustain = g_soundInfo[sfx_id].rumble_sustain;
     f32 rumble_release = g_soundInfo[sfx_id].rumble_release;
@@ -623,12 +624,13 @@ extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pit
 
     if (g_soundInfo[sfx_id].pitch_rnd != 0.0f) {
         f32 pitch_variation = NuRandFloatSeeded(&seed) * g_soundInfo[sfx_id].pitch_rnd;
-        if ((NuRandIntSeeded(&seed) & 1) != 0) {
-            pitch *= 1.0f + pitch_variation;
-        } else {
+        if ((NuRandIntSeeded(&seed) & 1) == 0) {
             pitch_variation *= 0.5f;
-            pitch *= 1.0f - pitch_variation;
+            pitch_variation = 1.0f - pitch_variation;
+        } else {
+            pitch_variation = 1.0f + pitch_variation;
         }
+        pitch = pitch_variation * pitch;
     }
 
     if (g_soundInfo[sfx_id].volume_rnd != 0.0f) {

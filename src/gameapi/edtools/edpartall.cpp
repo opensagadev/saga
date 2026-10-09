@@ -1808,7 +1808,7 @@ static void edpartPartIndexMenu(eduimenu_s *menu, eduiitem_s *, u32) {
                                 current_type ? 0 : 1, current_type ? NULL : edpartChangePartIndex, type->name);
         eduiMenuAddItem(edpart_partindex_menu, item);
         if (index == selected)
-            edpart_partindex_menu->selected = item;
+            edpart_partindex_menu->selected = edui_last_item;
     }
     eduiMenuAttach(menu, edpart_partindex_menu);
     edpart_partindex_menu->x = menu->x + 10;
@@ -1899,7 +1899,8 @@ static void edpartInstanceOrphansMenu(eduimenu_s *parent, eduiitem_s *, u32) {
         NuStrNCpy(effect_name, edpart_nearest_type->object_names[index], 17);                                          \
         sprintf(label, "Remove - %s", effect_name);                                                                    \
         eduiMenuAddItem(edpart_instanceorphans_menu,                                                                   \
-                        eduiItemSelCreate(index, edblack, 0, group++, edpartDeleteInstanceOrphan, label));             \
+                        eduiItemSelCreate(index, edblack, 0, group, edpartDeleteInstanceOrphan, label));               \
+        ++group;                                                                                                       \
     }
     EDPART_ORPHAN_ITEM(0)
     EDPART_ORPHAN_ITEM(1)
@@ -2059,7 +2060,7 @@ static void edpartDebrisIndexMenu(eduimenu_s *menu, eduiitem_s *, u32) {
             eduiItemCheckCreate(index, edblack, index == selected, 1, edpartChangeDebrisIndex, type->name);
         eduiMenuAddItem(edpart_debrisindex_menu, item);
         if (index == selected) {
-            edpart_debrisindex_menu->selected = item;
+            edpart_debrisindex_menu->selected = edui_last_item;
             found_selected = true;
         }
     }

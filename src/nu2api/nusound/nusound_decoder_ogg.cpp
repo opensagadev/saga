@@ -150,8 +150,8 @@ u64 NuSoundDecoderOGG::Decode(NuSoundSource &source, NuSoundBuffer &buffer, bool
         __sync_fetch_and_add(&this->ring_read_pos, 1);
     }
 
-    NuSoundStreamDesc *desc = source.GetStreamDesc();
     NuSoundBuffer::Context &context = buffer.GetCurrentContext();
+    NuSoundStreamDesc *desc = source.GetStreamDesc();
 
     if (this->locked_buffer != NULL) {
         this->locked_buffer->Lock();
@@ -188,11 +188,11 @@ u64 NuSoundDecoderOGG::Decode(NuSoundSource &source, NuSoundBuffer &buffer, bool
     u32 got = this->DecodeOggChunk(dest, (u32)chunk);
 
     this->total_decoded_bytes += got;
-    this->decoded_bytes += chunk;
+    u64 decoded_count = (this->decoded_bytes += chunk);
     context.size2 += got;
 
     total = desc->GetDecodedLengthBytes();
-    if (this->decoded_bytes == total) {
+    if (decoded_count == total) {
         context.flags |= 2;
         this->decoded_bytes = 0;
     }
@@ -229,11 +229,10 @@ u32 NuSoundDecoderOGG::DecodeOggChunk(char *dest, unsigned int size) {
             rounded_bits = bits_per_sample;
         }
         i32 bytes_per_sample = rounded_bits >> 3;
-        char *cursor = dest;
 
         do {
             NuIOS_IsLowEndDevice();
-            int ret = ov_read(ogg, cursor, (int)(size - decoded), 0, bytes_per_sample, 1, &bitstream);
+            int ret = ov_read(ogg, dest + decoded, (int)(size - decoded), 0, bytes_per_sample, 1, &bitstream);
 
             if (ret < 1) {
                 if (ret == 0) {
@@ -245,7 +244,6 @@ u32 NuSoundDecoderOGG::DecodeOggChunk(char *dest, unsigned int size) {
                 }
             } else {
                 decoded += ret;
-                cursor += ret;
             }
 
             if (size <= decoded || size - decoded <= block_size || ogg->ready_state == 0) {

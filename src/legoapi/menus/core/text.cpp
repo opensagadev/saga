@@ -869,8 +869,8 @@ void DrawMessageBoxRGBA(f32 x, f32 y, f32 width, f32 height, u32 blue, u32 green
                                     static_cast<f32>(static_cast<i32>(alpha & 0xffff))) *
                                    pulse);
 
-    const i32 box_width = static_cast<i32>(scaled_width * 10240.0f * QFONTSCALEX);
-    const i32 box_height = static_cast<i32>(scaled_height * 3584.0f * QFONTSCALEY);
+    const i32 box_width = static_cast<i32>(scaled_width * 10240.0f * 0.5f);
+    const i32 box_height = static_cast<i32>(scaled_height * 3584.0f * 0.5f);
     const i32 edge_width = static_cast<i32>(204.79999f * QFONTSCALEX * 0.75f);
     const i32 edge_height = static_cast<i32>(71.68f * QFONTSCALEY);
     const i32 corner_width = static_cast<i32>(40.960003f * QFONTSCALEX * 0.75f);
@@ -887,8 +887,8 @@ void DrawMessageBoxRGBA(f32 x, f32 y, f32 width, f32 height, u32 blue, u32 green
         x -= scaled_width * 0.5f;
     }
 
-    i32 screen_x = static_cast<i32>((x + 1.0f) * 0.5f * 10240.0f * QFONTSCALEX);
-    i32 screen_y = static_cast<i32>((2.0f - (y + 1.0f)) * 0.5f * 3584.0f * QFONTSCALEY);
+    i32 screen_x = static_cast<i32>((x + 1.0f) * 0.5f * 10240.0f);
+    i32 screen_y = static_cast<i32>((2.0f - (y + 1.0f)) * 0.5f * 3584.0f);
     const u32 colour = (static_cast<u32>(opacity) << 24) | ((red & 0xff) << 16) | ((green & 0xff) << 8) | (blue & 0xff);
     const u32 edge_colour = (static_cast<u32>(opacity) << 25) | 0xffffff;
 
@@ -1164,7 +1164,8 @@ extern "C" {
             width = 0.0f;
             if ((alignment & 10) == 0 || constrained) {
                 const i32 count = last_line + 1;
-                for (i32 line = 0; line <= last_line; ++line) {
+                i32 line = 0;
+                do {
                     i32 begin = 0;
                     if (line != 0)
                         begin = FindNearestBreak(decoded, NuStrFindPosU(decoded, (characters / count) * line));
@@ -1190,11 +1191,12 @@ extern "C" {
                         widest_line = line;
                         width = line_width;
                     }
-                }
+                } while (++line <= last_line);
             } else {
                 i32 begin = 0;
                 i32 end = 0;
-                for (i32 line = 0; line <= last_line; ++line) {
+                i32 line = 0;
+                do {
                     while (decoded[begin] == ' ')
                         ++begin;
                     if (line == last_line) {
@@ -1239,7 +1241,7 @@ extern "C" {
                         width = line_width;
                     }
                     begin = end + 1;
-                }
+                } while (++line <= last_line);
             }
             last_line -= lines[last_line][0] == '\0';
         }
@@ -1427,7 +1429,8 @@ extern "C" {
         text3d_width = width;
         f32 height = NuQFntHeight(SmartTextFont != NULL ? SmartTextFont : QFont2D);
         text3d_height = height;
-        f32 draw_y = y + NuQFntBaseline(SmartTextFont != NULL ? SmartTextFont : QFont2D) - height * 0.5f;
+        y += NuQFntBaseline(SmartTextFont != NULL ? SmartTextFont : QFont2D);
+        f32 draw_y = y - height * 0.5f;
         f32 button_scale = draw_x_scale;
         if (draw_x_scale != draw_y_scale) {
             if (ButtonScaleMode == 1)

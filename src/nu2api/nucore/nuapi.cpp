@@ -240,16 +240,19 @@ i32 NuInitHardware(VARIPTR *buf, VARIPTR *buf_end, i32 heap_size, ...) {
             case 0x44:
                 animation_count = va_arg(args, i32);
                 break;
-            case 0x45: {
-                i32 format = va_arg(args, i32);
-                if (format == 2)
-                    framebuffer_format = 1;
-                else if (format == 4)
-                    framebuffer_format = 2;
-                else if (format == 1)
-                    framebuffer_format = 0;
+            case 0x45:
+                switch (va_arg(args, i32)) {
+                    case 1:
+                        framebuffer_format = 0;
+                        break;
+                    case 2:
+                        framebuffer_format = 1;
+                        break;
+                    case 4:
+                        framebuffer_format = 2;
+                        break;
+                }
                 break;
-            }
             case NUAPI_SETUP_0x46:
                 flags |= va_arg(args, i32) != 0 ? 4 : 0;
                 break;
@@ -319,7 +322,9 @@ i32 NuInitHardware(VARIPTR *buf, VARIPTR *buf_end, i32 heap_size, ...) {
     NuVpInit();
     NuTexInitEx(buf, texture_count);
     NuDisplayListInit(buf, buffer_end);
-    u32 framebuffer_flags = (flags & 32) != 0 ? 3 : 1;
+    u32 framebuffer_flags = 1;
+    if ((flags & 32) != 0)
+        framebuffer_flags |= 2;
     if ((flags & 16) != 0)
         framebuffer_flags |= 4;
     if ((flags & 12) != 0)

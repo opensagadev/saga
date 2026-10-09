@@ -239,7 +239,7 @@ __attribute__((optimize("O3"))) void creatureEditor_Enter() {
 
     AISYS *system = aieditor->ai_system;
     if (system != nullptr) {
-        for (i32 i = 0; i < system->creature_count; ++i) {
+        for (i32 i = 0; i < system->creature_count; ++i, system = aieditor->ai_system) {
             AICREATURE *source = &system->creatures[i];
             CreatureEditorRecord *creature =
                 (CreatureEditorRecord *)CreateCreature(source->type, &source->pos, source->y_rot);
@@ -266,7 +266,7 @@ __attribute__((optimize("O3"))) void creatureEditor_Enter() {
             creature->z_spacing = source->z_spacing;
             for (i32 p = 0; p < 4; ++p)
                 creature->script_params[p] = source->script_params[p];
-            AISCRIPT *script = AIScriptFind(system, creature->script_name, 1, 1, 1);
+            AISCRIPT *script = AIScriptFind(aieditor->ai_system, creature->script_name, 1, 1, 1);
             if (script != nullptr) {
                 for (i32 p = 0; p < 4; ++p) {
                     if ((source->flags & (2 << p)) == 0)

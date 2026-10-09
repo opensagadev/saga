@@ -613,22 +613,26 @@ bool MechInputTouchGestureBasedController::PerformCloseMechanic(GameObject_s &ob
     f32 distance = 1000000000.0f;
     if (TouchHacks::CanUseHatMachine(object)) {
         HATMACHINE_s *machine = HatMachine_FindNearest(WORLD, &object.apiobj.position, &object, &distance);
-        f32 range = object.field_0x1008 + 0.2f;
-        if (machine != NULL && distance <= range * range) {
-            StartNewTask(new MechTouchTaskHatMachine(*this, machine->GetMechObjectInterface(), position), holder, true,
-                         true);
-            return true;
+        if (machine != NULL) {
+            f32 range = object.field_0x1008 + 0.2f;
+            if (distance <= range * range) {
+                StartNewTask(new MechTouchTaskHatMachine(*this, machine->GetMechObjectInterface(), position), holder,
+                             true, true);
+                return true;
+            }
         }
     }
 
     distance = 1000000000.0f;
     if (TouchHacks::CanUseLever(object)) {
         LEVER_s *lever = Lever_FindNearest(WORLD, &object.apiobj.position, &object, &distance);
-        f32 range = object.field_0x1008 + 0.2f;
-        if (lever != NULL && distance <= range * range) {
-            StartNewTask(new MechTouchTaskPullLever(*this, lever->GetMechObjectInterface(), position), holder, true,
-                         true);
-            return true;
+        if (lever != NULL) {
+            f32 range = object.field_0x1008 + 0.2f;
+            if (distance <= range * range) {
+                StartNewTask(new MechTouchTaskPullLever(*this, lever->GetMechObjectInterface(), position), holder, true,
+                             true);
+                return true;
+            }
         }
     }
 

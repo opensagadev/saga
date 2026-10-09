@@ -58,8 +58,12 @@ extern "C" {
                 NUMTX matrix;
                 NuMtxSetTranslation(&matrix, &node->position);
                 NuMtxPreRotateY(&matrix, node->flags);
-                NUVEC minimum = {-node->base_radius, solid ? node->lower_height : 0.0f, -node->base_height};
-                NUVEC maximum = {node->base_radius, solid ? node->upper_height : 0.0f, node->base_height};
+                NUVEC minimum = {-node->base_radius, node->lower_height, -node->base_height};
+                NUVEC maximum = {node->base_radius, node->upper_height, node->base_height};
+                if (!solid) {
+                    minimum.y = 0.0f;
+                    maximum.y = 0.0f;
+                }
                 NuRndrBoundingBox(&minimum, &maximum, &matrix, colour);
             }
         }

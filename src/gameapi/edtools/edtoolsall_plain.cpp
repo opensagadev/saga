@@ -1442,23 +1442,29 @@ extern "C" {
                         if (param->field_010 != -1 && object_switches[param->field_010] != 0)
                             animation->playing = 1;
                         break;
-                    case 4:
-                        animation->playing = param->field_014 > edanimPlayerAnimDistance(index);
+                    case 4: {
+                        const f32 distance = edanimPlayerAnimDistance(index);
+                        animation->playing = param->field_014 > distance;
                         break;
-                    case 5:
+                    }
+                    case 5: {
                         animation->repeating = 0;
-                        if (param->field_014 > edanimPlayerAnimDistance(index) && !animation->playing) {
+                        const f32 distance = edanimPlayerAnimDistance(index);
+                        if (param->field_014 > distance && !animation->playing) {
                             animation->playing = 1;
                             animation->backwards = 0;
                             animation->waiting = 0;
                             animation->ltime = 1.0f;
                         }
                         break;
-                    case 6:
+                    }
+                    case 6: {
                         animation->repeating = 1;
-                        if (param->field_014 > edanimPlayerAnimDistance(index))
+                        const f32 distance = edanimPlayerAnimDistance(index);
+                        if (param->field_014 > distance)
                             animation->playing = 1;
                         break;
+                    }
                     case 10:
                         animation->ltime = 1.0f;
                         animation->playing = 0;
@@ -2565,9 +2571,15 @@ extern "C" {
             f32 radius = edppInterpolateTorusCurve(effect->torus_keys1, time);
             f32 radial_extent = edppInterpolateTorusCurve(effect->torus_keys2, time);
             f32 vertical_extent = edppInterpolateTorusCurve(effect->torus_keys3, time);
-            NUVEC position = key->position;
-            edbitsDrawTorus(&position, radius * effect->torus_radius1, radial_extent * effect->torus_radius2,
-                            vertical_extent * effect->torus_radius2, 0xffff0000, edpp_mtl);
+            f32 scaled_radius = radius * effect->torus_radius1;
+            f32 scaled_vertical_extent = vertical_extent * effect->torus_radius2;
+            f32 scaled_radial_extent = radial_extent * effect->torus_radius2;
+            NUVEC position;
+            position.x = key->position.x;
+            position.y = key->position.y;
+            position.z = key->position.z;
+            edbitsDrawTorus(&position, scaled_radius, scaled_radial_extent, scaled_vertical_extent, 0xffff0000,
+                            edpp_mtl);
         }
     }
     i32 edppFindAllSounds(i32 page, NUVEC *positions, i32 (*sounds)[4], i32 capacity, i32 skip) {

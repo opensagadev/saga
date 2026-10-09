@@ -236,10 +236,8 @@ static __used__ void SockParBlend(nufpar_s *parser, void *) {
     i32 value = NuFParGetInt(parser);
     NuFParGetWord(parser);
     i32 edge = GetSockEdgeEnum(parser->word_buf);
-    u32 index = sockpar_sock->blend_count;
-    sockpar_sock->blend_entries[index].edge = static_cast<i8>(edge);
-    sockpar_sock->blend_entries[index].value = static_cast<u8>(value);
-    sockpar_sock->blend_count = index + 1;
+    sockpar_sock->blend_entries[sockpar_sock->blend_count].edge = static_cast<i8>(edge);
+    sockpar_sock->blend_entries[sockpar_sock->blend_count++].value = static_cast<u8>(value);
 }
 
 // The selected socket is captured before parsing, as in the original callbacks.

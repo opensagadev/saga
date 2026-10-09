@@ -1262,11 +1262,11 @@ static void cbPtlSetFacing(eduimenu_s *, eduiitem_s *item, u32) {
 }
 
 static void cbPtlTorusMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
         return;
 
     const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
-    const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     edptl_torus_menu = eduiMenuCreate(70, 70, 250, 250, ed_fnt, cbPtlCancelTorusMenu, "Collision Torus");
     if (edptl_torus_menu == NULL)
         return;

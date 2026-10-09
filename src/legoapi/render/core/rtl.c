@@ -3273,8 +3273,8 @@ static i32 edrtlProcFog(float delta_time, nupad_s *pad) {
     edcamMoveEx(pad, delta_time);
     edcamGetPosAng(&pcpos, &peax, &peay);
     f32 camera_step = camscale_factor * NuFabs(edcamGetDist());
-    if (camera_step < min_r)
-        camera_step = min_r;
+    if (camera_step < 1.0f)
+        camera_step = 1.0f;
 
     if (menu_cancelled != 0 && pad->digital_buttons != 0)
         return 0;
@@ -3402,8 +3402,10 @@ static i32 edrtlProcBurn(float delta_time, nupad_s *pad) {
             if (set != NULL && set->selected_index != -1) {
                 burnout_s *burnout = &set->burnouts[set->selected_index];
                 edcamSetPos(&burnout->position);
-                set->field_558 = burnout->field_1c;
-                set->field_55c = burnout->field_20;
+                edrtl_edit_burnset->field_558 =
+                    edrtl_edit_burnset->burnouts[edrtl_edit_burnset->selected_index].field_1c;
+                edrtl_edit_burnset->field_55c =
+                    edrtl_edit_burnset->burnouts[edrtl_edit_burnset->selected_index].field_20;
             }
         }
 
@@ -3728,19 +3730,32 @@ static void edrtlDrawBurnouts() {
     }
 }
 
+// The original editor keeps a separate help-text start line, initialized to 190.
+static i32 help_line = 190;
+
 static void edrtlDrawHelp() {
     static const char *help_text[2][6] = {
-        {NULL, "SQR=ADD, O=SELECT", "L-UP/DOWN=ADJ FALLOFF, L-LEFT/RIGHT=ADJ INNER RADIUS",
-         "SQR=ADD, TRI=DEL, L-UP=LOCK, X=ADJUST, O=SELECT\n", "X=ADD, TRI=DEL,L-UP=LOCK,O=ADJUST, SELECT=SELECT",
-         "L-LEFT=PREV, L-RIGHT=NEXT"},
-        {NULL, "X=ADD, SELECT=SELECT", "L-UP/DOWN=ADJ FALLOFF, L-LEFT/RIGHT=ADJ INNER RADIUS",
-         "X=ADD, TRI=DEL,L-UP=LOCK,O=ADJUST, SELECT=SELECT", "L-DOWN=FOG EDITOR L-LEFT=EDIT / ADD ALTERNATE SETTINGS",
-         "L1-PREV, R1-NEXT"},
+        {
+            NULL,
+            "SQR=ADD, O=SELECT",
+            "L-UP/DOWN=ADJ FALLOFF, L-LEFT/RIGHT=ADJ INNER RADIUS\nL-STICK=MOVE, R-STICK=ADJ DIR",
+            "SQR=ADD, TRI=DEL, L-UP=LOCK, X=ADJUST, O=SELECT\n",
+            "X=ADD, TRI=DEL,L-UP=LOCK,O=ADJUST, SELECT=SELECT\nL-LEFT=EDIT ALTERNATES",
+            "L-LEFT=PREV, L-RIGHT=NEXT",
+        },
+        {
+            NULL,
+            "X=ADD, SELECT=SELECT",
+            "L-UP/DOWN=ADJ FALLOFF, L-LEFT/RIGHT=ADJ INNER RADIUS\nL-STICK=MOVE, R-STICK=ADJ DIR",
+            "X=ADD, TRI=DEL,L-UP=LOCK,O=ADJUST, SELECT=SELECT\nL-DOWN=FOG EDITOR L-LEFT=EDIT / ADD ALTERNATE SETTINGS",
+            "X=ADD, TRI=DEL,L-UP=LOCK,O=ADJUST, SELECT=SELECT\nL-DOWN=FOG EDITOR L-LEFT=EXIT ALTERNATE SETTINGS MODE",
+            "L1-PREV, R1-NEXT",
+        },
     };
     NuQFntSet(system_qfont);
     NuQFntSetScale(system_qfont, edrtl_text_scale, edrtl_text_scale);
     NuQFntSetColour(system_qfont, 0x80ffffff);
-    i32 y = numsegs * 16;
+    i32 y = help_line * 16;
     const char *source = help_text[ctl_ix][helpmode];
     while (source != NULL && *source != 0) {
         char line[512];
@@ -3760,7 +3775,7 @@ static void edrtlDrawHelp() {
 static i32 rtl_debug;
 
 static void edrtlDrawRTLInfo() {
-    static const char *light_types[10] = {
+    const char *light_types[10] = {
         "INVALID", "AMBIENT",     "POINT",     "POINT FLICKER", "DIRECTIONAL",
         "CAMDIR",  "POINT BLEND", "ANTILIGHT", "JON FLICKER",   "ALSO INVALID",
     };
@@ -3835,7 +3850,7 @@ static void edrtlDrawRTLInfo() {
                           userid_names[curr_rtl->field_68]);
             y += height;
         }
-        if (curr_rtl->field_7a == -1 && curr_rtl->field_79 == -1) {
+        if (curr_rtl->field_7a != -1 || (curr_rtl->field_7a == -1 && curr_rtl->field_79 == -1)) {
             i32 modifier_index = curr_rtl->field_7b;
             if (modifier_index >= modifier_cnt)
                 modifier_index = modifier_cnt - 1;
@@ -3882,7 +3897,7 @@ static void edrtlDrawRTLInfo() {
             y += height;
         }
         if (rtl_locked) {
-            if (lockflash < lockflash_rate * 0.5f)
+            if (lockflash > lockflash_rate * 0.5f)
                 NuQFntPrintEx(system_qfont, x, y, 16, "**LOCKED**");
             y += height;
         }

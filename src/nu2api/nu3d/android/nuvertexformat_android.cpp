@@ -52,11 +52,11 @@ NuVertexFormatPS *NuGetVertexDeclaration(NUVERTEXDESCRIPTOR vtx_desc) {
     const bool instanced = (descriptor >> 22) & 1;
     i16 offset = 0;
 #define VERTEX_ATTRIBUTE(slot, gl_type, components, normalize, bytes)                                                  \
+    format->attribs[slot].unknown_0c = 0;                                                                              \
+    format->attribs[slot].offset = offset;                                                                             \
     format->attribs[slot].type = gl_type;                                                                              \
     format->attribs[slot].size = components;                                                                           \
     format->attribs[slot].normalized = normalize;                                                                      \
-    format->attribs[slot].unknown_0c = 0;                                                                              \
-    format->attribs[slot].offset = offset;                                                                             \
     format->attrib_mask |= 1u << slot;                                                                                 \
     offset += bytes
     VERTEX_ATTRIBUTE(0, 0x1406, 3, 0, 12);
@@ -148,11 +148,11 @@ NuVertexFormatPS *NuGetVertexDeclaration(NUVERTEXDESCRIPTOR vtx_desc) {
     }
     i32 extra_stride = 0;
     if (instanced) {
-        format->attribs[12].type = 0x1406;
-        format->attribs[12].size = 3;
         format->attribs[12].normalized = 0;
         format->attribs[12].unknown_0c = 1;
         format->attribs[12].offset = 0;
+        format->attribs[12].type = 0x1406;
+        format->attribs[12].size = 3;
         format->attrib_mask |= 0x1000;
         extra_stride = 12;
     }

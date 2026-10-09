@@ -41,8 +41,8 @@ void Detonators_Draw() {
         return;
     }
 
-    for (i32 i = 0; i < 10; ++i) {
-        DETONATOR_s &detonator = Detonator[i];
+    for (DETONATOR_s *cursor = Detonator; cursor != Detonator + 10; ++cursor) {
+        DETONATOR_s &detonator = *cursor;
         detonator.draw_result = 0;
         if (!detonator.active) {
             continue;
@@ -52,16 +52,18 @@ void Detonators_Draw() {
         NuMtxSetRotationY(&matrix, detonator.rotation_y);
         NuMtxRotateZ(&matrix, detonator.rotation_z);
         NuMtxRotateX(&matrix, detonator.rotation_x);
-        NuMtxTranslate(&matrix, &detonator.field_0x0c);
+        NuMtxTranslate(&matrix, &detonator.position);
         NuSpecialDrawAt(&WORLD->lev_objs[0xec].special, &matrix);
 
         const bool flicker_on = PickUpFlickerTest <= PickupFlickerFrame % PickUpFlickerFrames;
-        const bool attached =
-            detonator.timer < 0.5f && (detonator.object == NULL || detonator.object->apiobj.field_0x287 != 0 ||
-                                       detonator.object->field_0xde0 < 0.3f);
-        const i32 special_index = flicker_on || attached ? 0xee : 0xef;
-        if (WORLD->lev_objs[special_index].active) {
-            detonator.draw_result = NuSpecialDrawAt(&WORLD->lev_objs[special_index].special, &matrix);
+        if (flicker_on ||
+            (!(detonator.timer >= 10.0f) && (detonator.object == NULL || detonator.object->apiobj.field_0x287 != 0 ||
+                                             !(detonator.object->field_0xde0 >= 0.3f)))) {
+            if (WORLD->lev_objs[0xee].active)
+                detonator.draw_result = NuSpecialDrawAt(&WORLD->lev_objs[0xee].special, &matrix);
+        } else {
+            if (WORLD->lev_objs[0xef].active)
+                detonator.draw_result = NuSpecialDrawAt(&WORLD->lev_objs[0xef].special, &matrix);
         }
     }
 }

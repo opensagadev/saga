@@ -127,9 +127,10 @@ static i32 HatMachine_Load(void *world_ptr, void *) {
                 EdFileReadNuVec(&system->machines[index].target_offset);
                 system->machines[index].scale = EdFileReadFloat();
                 if (version != 4) {
+                    HATMACHINE *machine = &system->machines[index];
                     const u8 hidden = static_cast<u8>(EdFileReadChar()) & 1;
-                    system->machines[index].flags = static_cast<HATMACHINE_FLAGS>(
-                        (system->machines[index].flags & ~HATMACHINE_FLAG_HIDE_MACHINE) | (hidden << 5));
+                    machine->flags =
+                        static_cast<HATMACHINE_FLAGS>((machine->flags & ~HATMACHINE_FLAG_HIDE_MACHINE) | (hidden << 5));
                 }
             }
             system->machines[index].platform_id = -1;
@@ -839,6 +840,7 @@ void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_p
         }
         if (machine->configured_hat == 6) {
             PlaySfx(const_cast<char *>("Hunter_Granted"), &object->apiobj.collision_position);
+            machine = static_cast<HATMACHINE_s *>(object->field_0x788);
         }
         if (machine->configured_hat == 5) {
             PlaySfx(const_cast<char *>("Trooper_Granted"), &object->apiobj.collision_position);
@@ -853,9 +855,11 @@ void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_p
             NewRumble(object->pad_gamepad->pad, 0.5f, 0);
         } else {
             NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
+            machine = static_cast<HATMACHINE_s *>(object->field_0x788);
             machine->hat_delay = 0.6f;
             if (machine->configured_hat == 6) {
                 PlaySfx(const_cast<char *>("Hunter_Granted"), &object->apiobj.collision_position);
+                machine = static_cast<HATMACHINE_s *>(object->field_0x788);
             }
             if (machine->configured_hat == 5) {
                 PlaySfx(const_cast<char *>("Trooper_Granted"), &object->apiobj.collision_position);

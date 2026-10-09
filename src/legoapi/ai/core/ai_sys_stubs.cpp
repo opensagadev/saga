@@ -359,7 +359,7 @@ static void AISysCheckAntinode_Rectangle(APIOBJECT *object, AIANTINODE *antinode
     }
     difference->z = object->ai->movement_position.z - antinode->position.z;
     if (difference->z > radius || difference->z < -radius || object->collision_min.y > antinode->max_y ||
-        !(antinode->min_y <= object->collision_max.y)) {
+        antinode->min_y > object->collision_max.y) {
         return;
     }
     NuVecRotateY(difference, difference, -antinode->flags);
@@ -627,11 +627,9 @@ static char *AISysLoadString(AISYS *system, i32 length) {
 
 static void AISysLoadPathRoutes(AISYS *system, AIPATH *path, i32 version, char *name_buffer) {
     path->route_matrix = static_cast<u8 **>(AISysLoadAlloc(system, path->node_count * sizeof(u8 *)));
-    if (path->node_count != 0) {
-        for (i32 i = 0; i < path->node_count; ++i) {
-            path->route_matrix[i] = static_cast<u8 *>(AISysLoadAlloc(system, path->node_count));
-            EdFileRead(path->route_matrix[i], path->node_count);
-        }
+    for (i32 i = 0; i < path->node_count; ++i) {
+        path->route_matrix[i] = static_cast<u8 *>(AISysLoadAlloc(system, path->node_count));
+        EdFileRead(path->route_matrix[i], path->node_count);
     }
 
     if (version <= 4)
@@ -721,7 +719,11 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char
         path->node_count = static_cast<u8>(EdFileReadChar());
         path->flags = static_cast<u8>(EdFileReadChar());
         path->index = static_cast<u8>(path_index);
-        path->connection_count = version == 1 ? static_cast<i16>(EdFileReadChar()) : EdFileReadShort();
+        if (version == 1) {
+            path->connection_count = static_cast<i16>(EdFileReadChar());
+        } else {
+            path->connection_count = EdFileReadShort();
+        }
 
         if (path->connection_count != 0) {
             path->connections =
@@ -757,7 +759,11 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char
             path->nodes = static_cast<AIPATHNODE *>(AISysLoadAlloc(system, path->node_count * sizeof(AIPATHNODE)));
             for (i32 node_index = 0; node_index < path->node_count; ++node_index) {
                 AIPATHNODE *node = &path->nodes[node_index];
-                node->name = AISysLoadString(system, EdFileReadInt());
+                const i32 name_length = EdFileReadInt();
+                if (name_length != 0) {
+                    node->name = static_cast<char *>(AISysLoadAlloc(system, name_length + 1));
+                    EdFileRead(node->name, name_length);
+                }
                 node->position.x = EdFileReadFloat();
                 node->position.y = EdFileReadFloat();
                 node->position.z = EdFileReadFloat();
@@ -777,9 +783,12 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char
                 EdFileReadChar();
                 node->runtime_flags = static_cast<u8>(EdFileReadChar()) & ~6u;
                 node->path_flags = EdFileReadShort();
-                node->special_route_index = static_cast<u8>(EdFileReadChar());
-                if (version < 19)
+                if (version < 19) {
+                    EdFileReadChar();
                     node->special_route_index = 0xff;
+                } else {
+                    node->special_route_index = static_cast<u8>(EdFileReadChar());
+                }
 
                 char *special_name = name_buffer;
                 i32 special_name_length = EdFileReadChar();
@@ -828,7 +837,8 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char
             route->path_count = static_cast<u8>(EdFileReadChar());
             route->paths = static_cast<AIPATH **>(AISysLoadAlloc(system, route->path_count * sizeof(AIPATH *)));
             for (i32 path_index = 0; path_index < route->path_count; ++path_index) {
-                route->paths[path_index] = path_system->paths[EdFileReadChar()];
+                const i32 read_path_index = EdFileReadChar();
+                route->paths[path_index] = path_system->paths[read_path_index];
             }
         }
     }
@@ -2433,7 +2443,7 @@ extern "C" {
                             object->collision_min.y > antinode->max_y) {
                             continue;
                         }
-                        if (antinode->min_y <= object->collision_max.y) {
+                        if (!(antinode->min_y > object->collision_max.y)) {
                             checkantinodefns[antinode->type](object, antinode, &difference, radius);
                         }
                     }
@@ -3018,8 +3028,143 @@ extern "C" {
             }
         }
 
-        for (i32 index = 0; index < 16; ++index) {
-            AIGROUP *group = &system->groups[index];
+        {
+            AIGROUP *group = &system->groups[0];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[1];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[2];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[3];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[4];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[5];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[6];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[7];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[8];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[9];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[10];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[11];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[12];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[13];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[14];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[15];
             if (group->is_used) {
                 if (group->member_is_alive == 0)
                     group->can_respawn = 1;
@@ -3287,10 +3432,12 @@ extern "C" {
                 }
             }
 
-            path = packet->path_info.path;
-            if (packet->inside_path_node != -1 && path != NULL) {
-                const i16 node_index = packet->inside_path_node;
-                path->inside_node_bits[node_index / 8] |= static_cast<u8>(1u << (node_index % 8));
+            const i16 node_index = packet->inside_path_node;
+            if (node_index != -1) {
+                path = packet->path_info.path;
+                if (path != NULL) {
+                    path->inside_node_bits[node_index / 8] |= static_cast<u8>(1u << (node_index % 8));
+                }
             }
             packet->time_off_path = 0.0f;
             movement_source_flags = packet->field_0x1e7;

@@ -573,9 +573,10 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
                 api.field_0x276 = api.facing_angle = api.movement_facing_angle = angle;
                 f32 speed =
                     NuVecXZDist(&api.position, destination, NULL) / api.character_data->game_character->jump_duration;
+                const u16 velocity_angle = api.movement_facing_angle;
                 object->airborne_action_timer = speed;
-                api.velocity.x = NU_SIN_LUT(angle) * speed;
-                api.velocity.z = NU_COS_LUT(angle) * speed;
+                api.velocity.x = NU_SIN_LUT(velocity_angle) * speed;
+                api.velocity.z = speed * NU_COS_LUT(velocity_angle);
                 object->context_flags &= ~0x20;
                 static_cast<ZIPUP *>(object->field_0x788)->runtime_flags &= ~1;
                 object->field_0x788 = NULL;
@@ -634,7 +635,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
         NuVecAdd(&zipup->rider_target_position, hook, &zipup->rider_target_position);
         f32 old_time = object->context_animation_timer;
         object->context_animation_timer += FRAMETIME;
-        if (!(old_time >= 0.55f) && !(object->context_animation_timer < 0.55f))
+        if (old_time < 0.55f && object->context_animation_timer >= 0.55f)
             PlaySfx("GrapSwing", &api.collision_position);
         return;
     }
