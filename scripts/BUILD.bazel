@@ -1,43 +1,13 @@
-load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
+load("@rules_python//python:defs.bzl", "py_binary")
 
 _PYTHON_ENV = {"PYTHONDONTWRITEBYTECODE": "1"}
-
-filegroup(
-    name = "site_assets",
-    srcs = [
-        "plot_binary_match_map.html",
-        "wasm_player.html",
-        "site/footer.html",
-        "site/head.html",
-        "site/header.html",
-        "site/site.css",
-        "site/home.html",
-    ] + glob(["site/assets/*.svg", "site/assets/*.png"]),
-)
-
-py_test(
-    name = "test_pages",
-    size = "small",
-    srcs = ["test_pages.py"],
-    deps = [":plot_binary_match_map_lib"],
-    env = _PYTHON_ENV,
-    main = "test_pages.py",
-    visibility = ["//scripts/checks:__pkg__"],
-)
 
 py_binary(
     name = "wasm_server",
     srcs = ["wasm_server.py"],
     data = ["//src:saga_wasm"],
-    deps = [":plot_binary_match_map_lib"],
     env = _PYTHON_ENV,
     main = "wasm_server.py",
-)
-
-py_library(
-    name = "plot_binary_match_map_lib",
-    srcs = ["plot_binary_match_map.py"],
-    data = [":site_assets"],
 )
 
 py_binary(
@@ -61,14 +31,6 @@ py_binary(
     srcs = ["matching_diff.py"],
     env = _PYTHON_ENV,
     main = "matching_diff.py",
-)
-
-py_binary(
-    name = "plot_binary_match_map",
-    srcs = ["plot_binary_match_map.py"],
-    data = [":site_assets"],
-    env = _PYTHON_ENV,
-    main = "plot_binary_match_map.py",
 )
 
 py_binary(

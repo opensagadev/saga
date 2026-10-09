@@ -1,0 +1,22 @@
+name: Rebuild standalone website
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger opensaga.dev build
+        env:
+          GH_TOKEN: ${{ secrets.OPENSAGA_PAGES_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::Set OPENSAGA_PAGES_TOKEN to enable standalone website rebuilds."
+            exit 0
+          fi
+          gh workflow run pages.yml --repo opensagadev/opensaga.dev --ref main

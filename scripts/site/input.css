@@ -1,7 +1,0 @@
-@import "tailwindcss" source(none);
-@import "../site.css";
-@import "./header.css";
-@source "./home.html";
-@source "./footer.html";
-@source "../plot_binary_match_map.html";
-@source "../wasm_player.html";

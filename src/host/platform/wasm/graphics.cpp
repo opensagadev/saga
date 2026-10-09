@@ -1,17 +1,57 @@
 #include "host/platform/compressed_texture.hpp"
 #include "host/platform/wasm/graphics.hpp"
 
-#include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 
 #include <cstring>
 #include <vector>
 
 #include "nu2api/nu3d/NuRenderDevice.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
+#include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 
 namespace {
     GLuint host_depth_buffer = 0;
+}
+
+extern "C" void __real_NuGScnFixupPS(NUGSCN *scene);
+extern "C" void __real__Z15NuGScnDestroyPSP8nugscn_s(NUGSCN *scene);
+
+extern "C" void __wrap_NuGScnFixupPS(NUGSCN *scene) {
+    // WASM shares one context across threads. Scene prewarming also writes the
+    // renderer's global material/vertex caches, so protect the whole operation.
+    BeginCriticalSectionGL(__FILE__, __LINE__);
+    __real_NuGScnFixupPS(scene);
+    EndCriticalSectionGL(__FILE__, __LINE__);
+}
+
+extern "C" void __wrap__Z15NuGScnDestroyPSP8nugscn_s(NUGSCN *scene) {
+    // Destruction takes the geometry lifetime mutex and then calls GL. Keep
+    // the GL lock outside that mutex, matching scene fixup's lock order.
+    BeginCriticalSectionGL(__FILE__, __LINE__);
+    __real__Z15NuGScnDestroyPSP8nugscn_s(scene);
+    EndCriticalSectionGL(__FILE__, __LINE__);
+}
+
+void HostPresentWasmFramebuffer(i32 width, i32 height) {
+    // The scene renderer caches texture, shader, depth and vertex state. A
+    // presentation draw must not replace those bindings behind its back.
+    GLint read_framebuffer = 0;
+    GLint draw_framebuffer = 0;
+    glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &read_framebuffer);
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &draw_framebuffer);
+    const GLboolean scissor_enabled = glIsEnabled(GL_SCISSOR_TEST);
+    glDisable(GL_SCISSOR_TEST);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, g_earlyColorFramebuffer);
+    // Emscripten maps framebuffer 0 to its explicit-swap backbuffer.
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glBlitFramebuffer(0, 0, g_backingWidth, g_backingHeight, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, read_framebuffer);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, draw_framebuffer);
+    if (scissor_enabled) {
+        glEnable(GL_SCISSOR_TEST);
+    }
 }
 
 void HostResizeWasmFramebuffer(i32 width, i32 height) {

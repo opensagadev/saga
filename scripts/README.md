@@ -32,13 +32,10 @@ steps are skipped when the locally supplied `res/libTTapp.so` is absent. The
 hook writes and automatically stages `matching.json` and the marked matching
 table in `README.md`. Unsupported clang-tidy modes are omitted: macOS has no
 native mode, and Apple Silicon has no direct target mode.
-`.github/workflows/pages.yaml` builds the WASM target, runs
-`//scripts:plot_binary_match_map` against that committed report, assembles the
-browser assets, and deploys the homepage, progress explorer, and player as
-static files. The player loads game data after selecting an OBB or opening an
-OBB URL and starts when the data is ready. The browser loads remote OBB
-URLs directly, so those origins must permit cross-origin requests; there is no
-deployed proxy or API.
+The standalone website and Pages deployment live in
+[opensaga.dev](https://github.com/opensagadev/opensaga.dev). That repository
+consumes the committed report and builds the WASM target through a pinned
+Saga submodule. Templates, styling, and browser applications are owned there.
 
 ## Current tools
 
@@ -46,9 +43,8 @@ deployed proxy or API.
 |---|---|---|
 | `generate_bazel_objdiff_report.py` | `bazel run //scripts:generate_bazel_objdiff_report` | Generates the custom whole-binary matching data and README progress table. Calls Bazel and external `objdiff-cli`; writes `matching.json` and the marked section of `README.md`. |
 | `generate_objdiff_gui_config.py` | `bazel run //scripts:generate_objdiff_gui_config` | Generates the ignored root `objdiff.json` for the completely optional visual objdiff GUI, with one source/object unit per Bazel compile action. Builds the target and configures GUI rebuilds through Bazel; it is not part of reports, hooks, or CI. |
-| `plot_binary_match_map.py` | `bazel run //scripts:plot_binary_match_map` | Generates the homepage, progress explorer, and player from `matching.json` and the site templates. Standard library only. |
 | `objdiff-cli.py` | `bazel run //scripts:objdiff_cli -- SYMBOL` | Primary compact diff for one symbol. Calls external `objdiff-cli` and resolves the target-config library through Bazel. |
-| `wasm_server.py` | `bazel run --config=wasm //scripts:wasm_server` | Serves only the generated static landing page, WASM build, and optional web-root OBB with local isolation headers. Standard library only. |
+| `wasm_server.py` | `bazel run --config=wasm //scripts:wasm_server` | Serves the minimal Bazel WASM host shell and optional local OBB with isolation headers. Standard library only. |
 
 ## Checks and launchers
 
@@ -67,8 +63,7 @@ deployed proxy or API.
 
 ## Provenance of the current layout
 
-The report generator, Pages copy/rewrite, Pages workflow, Bazel pre-commit
-runner and native run wrapper are new in the current
+The report generator, Bazel pre-commit runner and native run wrapper are new in the current
 Bazel/report work. The checks themselves are existing tools moved under
 `scripts/checks/`; their logic is retained, with Bazel-run path handling added
 where needed. `objdiff-cli.py` and `wasm_server.py` are existing tools extended

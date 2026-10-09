@@ -203,7 +203,7 @@ def main() -> int:
             return status
 
     if not (root / "res/libTTapp.so").is_file():
-        print("gh pages generation skipped: res/libTTapp.so is not present")
+        print("binary-dependent matching checks skipped: res/libTTapp.so is not present")
         return 0
 
     for command in (

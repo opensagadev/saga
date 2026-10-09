@@ -420,6 +420,8 @@ cc_binary(
         "--oformat=html",
         "-Wl,--wrap=_Z8LoadPermv",
         "-Wl,--wrap=_Z7EndPermv",
+        "-Wl,--wrap=NuGScnFixupPS",
+        "-Wl,--wrap=_Z15NuGScnDestroyPSP8nugscn_s",
         "-sPROXY_TO_PTHREAD=1",
         "-sOFFSCREEN_FRAMEBUFFER=1",
         "-sFULL_ES2=1",
@@ -444,6 +446,38 @@ wasm_cc_binary(
         "saga.html",
         "saga.js",
         "saga.wasm",
+    ],
+    threads = "emscripten",
+)
+
+# Browser regression for the platform presentation boundary; no game assets.
+cc_binary(
+    name = "wasm_framebuffer_probe",
+    srcs = [
+        "host/harness/tests/wasm_framebuffer.cpp",
+        "host/platform/wasm/graphics.cpp",
+    ] + _PUBLIC_HEADERS,
+    defines = ["ANDROID", "HOST_BUILD"],
+    features = ["-output_format_js"],
+    includes = ["."],
+    linkopts = [
+        "--oformat=html",
+        "-sPROXY_TO_PTHREAD=1",
+        "-sOFFSCREEN_FRAMEBUFFER=1",
+        "-sFULL_ES2=1",
+        "-sMAX_WEBGL_VERSION=2",
+        "-sASSERTIONS=1",
+    ],
+    tags = ["manual"],
+)
+
+wasm_cc_binary(
+    name = "wasm_framebuffer_test",
+    cc_target = ":wasm_framebuffer_probe",
+    outputs = [
+        "wasm_framebuffer_probe.html",
+        "wasm_framebuffer_probe.js",
+        "wasm_framebuffer_probe.wasm",
     ],
     threads = "emscripten",
 )

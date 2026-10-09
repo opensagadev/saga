@@ -129,6 +129,5 @@ test_suite(
         ":check_duplicate_definitions",
         ":check_host_boundary",
         ":test_forward_declarations",
-        "//scripts:test_pages",
     ],
 )
