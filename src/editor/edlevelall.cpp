@@ -435,10 +435,11 @@ void ClassEditor::Process(EdInputContext &input) {
             ClassObjectListEntry *entry = selected_objects.first;
             EdMember member;
             VuVec position __attribute__((aligned(16)));
+            i32 position_type = EdType_VuVec;
             if (entry->reference == NULL ||
-                !entry->reference->GetAttributeData(entry->object, 8, EdType_VuVec, &position, 0)) {
+                !entry->reference->GetAttributeData(entry->object, 8, position_type, &position, 0)) {
                 if (entry->ed_class->FindMember(&member, entry->object, 8, 1))
-                    member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &position, 0);
+                    member.reference->GetAttributeData(member.object, 8, position_type, &position, 0);
             }
             theLevelEditor.background_colour[0] = position.x;
             theLevelEditor.background_colour[1] = position.y;

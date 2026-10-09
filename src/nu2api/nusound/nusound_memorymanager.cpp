@@ -279,8 +279,8 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Alloc(u32 size) {
             if (!buf->IsAlloced()) {
                 u32 buf_size = buf->GetSize();
                 if (buf_size >= alloc_size) {
-                    if (best == NULL || best->GetSize() > buf_size) {
-                        if (buf_size == alloc_size) {
+                    if (best == NULL || best->GetSize() > buf->GetSize()) {
+                        if (buf->GetSize() == alloc_size) {
                             best = buf;
                             break;
                         }
@@ -296,7 +296,7 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Alloc(u32 size) {
         }
 
         if (best != NULL) {
-            if (best->GetSize() != alloc_size) {
+            if (alloc_size < best->GetSize()) {
                 best = this->SplitFreeBuffer(best, alloc_size, NULL);
             }
             best->SetAlloced(true);

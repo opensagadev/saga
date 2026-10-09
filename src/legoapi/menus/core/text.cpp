@@ -1164,7 +1164,8 @@ extern "C" {
             width = 0.0f;
             if ((alignment & 10) == 0 || constrained) {
                 const i32 count = last_line + 1;
-                for (i32 line = 0; line <= last_line; ++line) {
+                i32 line = 0;
+                do {
                     i32 begin = 0;
                     if (line != 0)
                         begin = FindNearestBreak(decoded, NuStrFindPosU(decoded, (characters / count) * line));
@@ -1190,11 +1191,12 @@ extern "C" {
                         widest_line = line;
                         width = line_width;
                     }
-                }
+                } while (++line <= last_line);
             } else {
                 i32 begin = 0;
                 i32 end = 0;
-                for (i32 line = 0; line <= last_line; ++line) {
+                i32 line = 0;
+                do {
                     while (decoded[begin] == ' ')
                         ++begin;
                     if (line == last_line) {
@@ -1239,7 +1241,7 @@ extern "C" {
                         width = line_width;
                     }
                     begin = end + 1;
-                }
+                } while (++line <= last_line);
             }
             last_line -= lines[last_line][0] == '\0';
         }

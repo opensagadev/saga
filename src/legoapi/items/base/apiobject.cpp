@@ -1535,15 +1535,10 @@ extern "C" {
                     interrupted = 1;
                 }
             } else if (packet->requested_animation == packet->previous_animation) {
-                // Interrupted blends enter the transition directly, even when
-                // returning to their source animation (retail 0x3ce858/0x3ce88a).
-                if (force_restart == 0 || packet->requested_animation != packet->animation_index ||
-                    !(packet->animation_index != -1 && model->model_data_b[packet->animation_index] != NULL)) {
-                    packet->animation_index = packet->requested_animation;
-                    packet->blending = 0;
-                    goto update_timers;
-                }
+                goto check_force_restart;
             }
+
+        begin_transition:
 
             if (packet->previous_animation != -1 && packet->requested_animation != -1 &&
                 model->model_data_b[packet->previous_animation] != NULL &&
@@ -1574,13 +1569,13 @@ extern "C" {
                         NuAnimEndFrame(model->model_data_b[packet->blend_animation_a]) ==
                             NuAnimEndFrame(model->model_data_b[packet->blend_animation_b])) {
                         packet->blend_target_time = packet->blend_source_time;
-                        packet->blend_target_reversed =
-                            backwards != 0 && model->model_data_b[packet->blend_animation_b] != NULL &&
-                                    (static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->blend_animation_b])
-                                         ->flags &
-                                     CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0
-                                ? 1
-                                : 0;
+                        if (backwards != 0 && model->model_data_b[packet->blend_animation_b] != NULL &&
+                            (static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->blend_animation_b])->flags &
+                             CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0) {
+                            packet->blend_target_reversed = 1;
+                        } else {
+                            packet->blend_target_reversed = 0;
+                        }
                     } else if (backwards != 0 && model->model_data_b[packet->blend_animation_b] != NULL &&
                                (static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->blend_animation_b])->flags &
                                 CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0) {
@@ -1619,6 +1614,15 @@ extern "C" {
             packet->blending = 0;
             packet->previous_time = packet->current_time;
             packet->flags |= ANIMPACKET_FLAG_ANIMATION_CHANGED;
+            goto update_timers;
+
+        check_force_restart:
+            if (force_restart != 0 && packet->requested_animation == packet->animation_index &&
+                packet->animation_index != -1 && model->model_data_b[packet->animation_index] != NULL) {
+                goto begin_transition;
+            }
+            packet->animation_index = packet->requested_animation;
+            packet->blending = 0;
         }
 
     update_timers:
