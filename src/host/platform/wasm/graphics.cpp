@@ -8,10 +8,21 @@
 
 #include "nu2api/nu3d/NuRenderDevice.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
+#include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 
 namespace {
     GLuint host_depth_buffer = 0;
+}
+
+extern "C" void __real_NuGScnFixupPS(NUGSCN *scene);
+
+extern "C" void __wrap_NuGScnFixupPS(NUGSCN *scene) {
+    // WASM shares one context across threads. Scene prewarming also writes the
+    // renderer's global material/vertex caches, so protect the whole operation.
+    BeginCriticalSectionGL(__FILE__, __LINE__);
+    __real_NuGScnFixupPS(scene);
+    EndCriticalSectionGL(__FILE__, __LINE__);
 }
 
 void HostPresentWasmFramebuffer(i32 width, i32 height) {

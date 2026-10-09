@@ -420,6 +420,7 @@ cc_binary(
         "--oformat=html",
         "-Wl,--wrap=_Z8LoadPermv",
         "-Wl,--wrap=_Z7EndPermv",
+        "-Wl,--wrap=NuGScnFixupPS",
         "-sPROXY_TO_PTHREAD=1",
         "-sOFFSCREEN_FRAMEBUFFER=1",
         "-sFULL_ES2=1",
