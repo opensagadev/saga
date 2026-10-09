@@ -421,6 +421,7 @@ cc_binary(
         "-Wl,--wrap=_Z8LoadPermv",
         "-Wl,--wrap=_Z7EndPermv",
         "-Wl,--wrap=NuGScnFixupPS",
+        "-Wl,--wrap=_Z15NuGScnDestroyPSP8nugscn_s",
         "-sPROXY_TO_PTHREAD=1",
         "-sOFFSCREEN_FRAMEBUFFER=1",
         "-sFULL_ES2=1",

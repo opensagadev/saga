@@ -16,12 +16,21 @@ namespace {
 }
 
 extern "C" void __real_NuGScnFixupPS(NUGSCN *scene);
+extern "C" void __real__Z15NuGScnDestroyPSP8nugscn_s(NUGSCN *scene);
 
 extern "C" void __wrap_NuGScnFixupPS(NUGSCN *scene) {
     // WASM shares one context across threads. Scene prewarming also writes the
     // renderer's global material/vertex caches, so protect the whole operation.
     BeginCriticalSectionGL(__FILE__, __LINE__);
     __real_NuGScnFixupPS(scene);
+    EndCriticalSectionGL(__FILE__, __LINE__);
+}
+
+extern "C" void __wrap__Z15NuGScnDestroyPSP8nugscn_s(NUGSCN *scene) {
+    // Destruction takes the geometry lifetime mutex and then calls GL. Keep
+    // the GL lock outside that mutex, matching scene fixup's lock order.
+    BeginCriticalSectionGL(__FILE__, __LINE__);
+    __real__Z15NuGScnDestroyPSP8nugscn_s(scene);
     EndCriticalSectionGL(__FILE__, __LINE__);
 }
 
