@@ -1442,23 +1442,29 @@ extern "C" {
                         if (param->field_010 != -1 && object_switches[param->field_010] != 0)
                             animation->playing = 1;
                         break;
-                    case 4:
-                        animation->playing = param->field_014 > edanimPlayerAnimDistance(index);
+                    case 4: {
+                        const f32 distance = edanimPlayerAnimDistance(index);
+                        animation->playing = param->field_014 > distance;
                         break;
-                    case 5:
+                    }
+                    case 5: {
                         animation->repeating = 0;
-                        if (param->field_014 > edanimPlayerAnimDistance(index) && !animation->playing) {
+                        const f32 distance = edanimPlayerAnimDistance(index);
+                        if (param->field_014 > distance && !animation->playing) {
                             animation->playing = 1;
                             animation->backwards = 0;
                             animation->waiting = 0;
                             animation->ltime = 1.0f;
                         }
                         break;
-                    case 6:
+                    }
+                    case 6: {
                         animation->repeating = 1;
-                        if (param->field_014 > edanimPlayerAnimDistance(index))
+                        const f32 distance = edanimPlayerAnimDistance(index);
+                        if (param->field_014 > distance)
                             animation->playing = 1;
                         break;
+                    }
                     case 10:
                         animation->ltime = 1.0f;
                         animation->playing = 0;

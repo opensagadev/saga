@@ -3024,8 +3024,143 @@ extern "C" {
             }
         }
 
-        for (i32 index = 0; index < 16; ++index) {
-            AIGROUP *group = &system->groups[index];
+        {
+            AIGROUP *group = &system->groups[0];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[1];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[2];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[3];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[4];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[5];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[6];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[7];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[8];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[9];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[10];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[11];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[12];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[13];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[14];
+            if (group->is_used) {
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
+            }
+        }
+        {
+            AIGROUP *group = &system->groups[15];
             if (group->is_used) {
                 if (group->member_is_alive == 0)
                     group->can_respawn = 1;
