@@ -719,7 +719,11 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char
         path->node_count = static_cast<u8>(EdFileReadChar());
         path->flags = static_cast<u8>(EdFileReadChar());
         path->index = static_cast<u8>(path_index);
-        path->connection_count = version == 1 ? static_cast<i16>(EdFileReadChar()) : EdFileReadShort();
+        if (version == 1) {
+            path->connection_count = static_cast<i16>(EdFileReadChar());
+        } else {
+            path->connection_count = EdFileReadShort();
+        }
 
         if (path->connection_count != 0) {
             path->connections =
@@ -3428,10 +3432,12 @@ extern "C" {
                 }
             }
 
-            path = packet->path_info.path;
-            if (packet->inside_path_node != -1 && path != NULL) {
-                const i16 node_index = packet->inside_path_node;
-                path->inside_node_bits[node_index / 8] |= static_cast<u8>(1u << (node_index % 8));
+            const i16 node_index = packet->inside_path_node;
+            if (node_index != -1) {
+                path = packet->path_info.path;
+                if (path != NULL) {
+                    path->inside_node_bits[node_index / 8] |= static_cast<u8>(1u << (node_index % 8));
+                }
             }
             packet->time_off_path = 0.0f;
             movement_source_flags = packet->field_0x1e7;

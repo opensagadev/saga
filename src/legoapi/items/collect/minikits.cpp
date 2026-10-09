@@ -189,13 +189,16 @@ void CharMiniKit_Draw(i32 id, numtx_s *matrix, i32 reflection_axis, float reflec
         HUBMINIKITPIECE_s *piece = &kit->pieces[i];
         if (NuSpecialExistsFn(&piece->special) == 0)
             continue;
+        piece = &kit->pieces[i];
         NUMTX draw_matrix = piece->matrix;
         NuMtxMul(&draw_matrix, &draw_matrix, matrix);
+        piece = &kit->pieces[i];
         NuSpecialDrawAt(&piece->special, &draw_matrix);
         if (reflection) {
             NUMTX reflected;
             if (MatrixReflection(&draw_matrix, reflection_axis, reflection_plane, reflection_height, &reflected) != 0) {
                 NuRndrStartReflectionRender(0);
+                piece = &kit->pieces[i];
                 NuSpecialDrawAt(&piece->special, &reflected);
                 NuRndrEndReflectionRender();
             }
