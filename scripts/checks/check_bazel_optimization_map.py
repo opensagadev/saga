@@ -19,6 +19,7 @@ ALLOWED_OPTIONS = {
     "-O3",
     "-fPIE",
     "-fno-ipa-sra",
+    "-ftree-vectorize",
     "-fomit-frame-pointer",
 }
 
