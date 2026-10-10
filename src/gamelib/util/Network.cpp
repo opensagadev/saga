@@ -466,18 +466,20 @@ void NetChangedReplicator::CheckSum(unsigned char const *bytes, u32 size, u32 &c
 void NetChangedReplicator::CheckSumObject(EdClass const *object_class, void const *object, u32 &checksum) const {
     EdRef *member = object_class->members;
     while (member != NULL) {
-        if (member->attributes < 0) {
+        if (!(member->attributes < 0)) {
+            if (static_cast<u16>(member->replication_group) == replication_group) {
+                EdType *type = theRegistry.GetType(member->type_id);
+                i32 size = member->size > 0 ? member->size : type->size;
+                u8 data[256];
+                member->GetMemberData(const_cast<void *>(object), member->type_id, data, sizeof(data));
+                CheckSum(data, static_cast<u32>(size), checksum);
+            }
+        } else {
             EdClass *member_class = theRegistry.GetClass(member->type_id);
             void *member_object = member->GetMemberObject(const_cast<void *>(object));
             if (member_object != NULL) {
                 CheckSumObject(member_class, member_object, checksum);
             }
-        } else if (static_cast<u16>(member->replication_group) == replication_group) {
-            EdType *type = theRegistry.GetType(member->type_id);
-            i32 size = member->size > 0 ? member->size : type->size;
-            u8 data[256];
-            member->GetMemberData(const_cast<void *>(object), member->type_id, data, sizeof(data));
-            CheckSum(data, static_cast<u32>(size), checksum);
         }
         member = member->next;
     }

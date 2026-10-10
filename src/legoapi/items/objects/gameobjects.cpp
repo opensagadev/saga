@@ -5573,10 +5573,10 @@ void ThingManager::EnableActions(i32 id, i32 flags, i32 invert) {
             continue;
         }
         if (thing->field_0x4 == (u32)id) {
-            if (invert == 0) {
-                thing->flags |= (u32)flags;
-            } else {
+            if (invert != 0) {
                 thing->flags &= ~(u32)flags;
+            } else {
+                thing->flags |= (u32)flags;
             }
             return;
         }
@@ -7624,11 +7624,11 @@ void ManageGameObjects() {
                     object->ai.group->is_reversed = 0;
                 } else {
                     object->ai_spawn_delay = 0.0f;
-                    if (object->id == id_PKDROID) {
+                    if (object->id != id_PKDROID) {
+                        ResetAICreature(object, WORLD->ai_sys);
+                    } else {
                         ResetAICreature(object, system);
                         SpawnCreatureFromCrate(object, 3.0f, 0.0f);
-                    } else {
-                        ResetAICreature(object, WORLD->ai_sys);
                     }
                 }
             }
@@ -8022,18 +8022,18 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         }
         if (object->oldpos != NULL)
             *object->oldpos = object->sock_position;
-        if (world->sock_sys != NULL &&
-            ((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0 || VehicleArea != 0)) {
-            ComplexSockPosition(world->sock_sys, &object->apiobj.position, static_cast<i8>(object->field_0x661),
-                                object->sock_segment, &object->sock_position);
-            ComplexSockAngles(&object->sock_angles);
-        } else {
+        if (!(world->sock_sys != NULL &&
+              ((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0 || VehicleArea != 0))) {
             object->sock_segment = -1;
             object->field_0x661 = 0xff;
             if (object->oldpos != NULL) {
                 object->oldpos->location.segment = -1;
                 object->oldpos->location.sock = -1;
             }
+        } else {
+            ComplexSockPosition(world->sock_sys, &object->apiobj.position, static_cast<i8>(object->field_0x661),
+                                object->sock_segment, &object->sock_position);
+            ComplexSockAngles(&object->sock_angles);
         }
         if (object == Player[0]) {
             if (object->field_0x661 != 0xff)
@@ -8318,23 +8318,7 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
     object->ai.antinode_timer = 0.0f;
     InitPlayerAI(object);
 
-    if (spline == NULL) {
-        object->apiobj.position = *position;
-        object->apiobj.facing_angle = static_cast<u16>(angle);
-        object->apiobj.movement_facing_angle = static_cast<u16>(angle);
-        object->apiobj.field_0x276 = static_cast<u16>(angle);
-        if (group != NULL) {
-            AddToAIGroup(group, &object->apiobj);
-            NUVEC offset;
-            offset.x = ((object->ai.group_column + 1) / 2) * group->x_spacing;
-            if (object->ai.group_column & 1)
-                offset.x = -offset.x;
-            offset.y = 0.0f;
-            offset.z = -group->z_spacing * object->ai.group_member;
-            NuVecRotateY(&offset, &offset, angle);
-            NuVecAdd(&object->apiobj.position, &object->apiobj.position, &offset);
-        }
-    } else {
+    if (spline != NULL) {
         SPLINEPOS_s *spline_position = reinterpret_cast<SPLINEPOS_s *>(&object->movement_spline);
         InitSplinePosition(spline_position, spline, 0.0f, spline_mode);
         SPLINEPOSITION_RUNTIME_s *runtime = reinterpret_cast<SPLINEPOSITION_RUNTIME_s *>(spline_position);
@@ -8358,6 +8342,22 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
             }
         }
         object->apiobj.position = spline_point;
+    } else {
+        object->apiobj.position = *position;
+        object->apiobj.facing_angle = static_cast<u16>(angle);
+        object->apiobj.movement_facing_angle = static_cast<u16>(angle);
+        object->apiobj.field_0x276 = static_cast<u16>(angle);
+        if (group != NULL) {
+            AddToAIGroup(group, &object->apiobj);
+            NUVEC offset;
+            offset.x = ((object->ai.group_column + 1) / 2) * group->x_spacing;
+            if (object->ai.group_column & 1)
+                offset.x = -offset.x;
+            offset.y = 0.0f;
+            offset.z = -group->z_spacing * object->ai.group_member;
+            NuVecRotateY(&offset, &offset, angle);
+            NuVecAdd(&object->apiobj.position, &object->apiobj.position, &offset);
+        }
     }
 
     ResetPlayerMoves(object);

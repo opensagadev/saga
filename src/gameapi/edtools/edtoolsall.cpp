@@ -583,7 +583,11 @@ void edanimDoInput(nupad_s *pad) {
         edanim_emitroty += pad->analog_left_pad_right - pad->analog_left_pad_left;
         const i32 raised = edanim_emitrotz + pad->analog_left_pad_up;
         const i32 rotation = (raised < 0 ? raised : 0) - pad->analog_left_pad_down;
-        edanim_emitrotz = rotation > -32768 ? rotation : -32768;
+        if (rotation > -32768) {
+            edanim_emitrotz = rotation;
+        } else {
+            edanim_emitrotz = -32768;
+        }
     }
 }
 

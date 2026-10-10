@@ -2038,150 +2038,158 @@ static __used__ void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paus
     if ((instance->flags_8d & 2) != 0) {
         cutscene_lock_player = 1;
     }
-    if ((instance->flags_88 & 1) == 0) {
+    if ((instance->flags_88 & 1) != 0) {
         if (paused == 0) {
-            instance->flags_88 |= 1;
-        }
-    } else if (paused == 0) {
-        const f32 frame_delta = instance->rate * elapsed;
-        instance->current_frame += frame_delta;
-        if ((instance->flags_8d & 4) != 0) {
-            const u8 last_stream = instNuGCutSceneLastStream(instance);
-            if (instance->stream_index == last_stream) {
-                instance->current_frame = instance->cutscene->duration - 1.0f;
-            }
-            instance->current_frame -= frame_delta;
-            if (cutscene_load_instance == NULL) {
-                if (instance->stream_index == last_stream - 1) {
-                    instNuGCutSceneSwapBuffers(instance, 0);
-                    instNuGCutSceneCopyStreamAnimations(instance);
-                    instance->stream_index = instance->cutscene->last_stream;
-                    instNuGCutSceneStart(instance);
-                    instance->current_frame = instance->cutscene->duration - 1.0f;
-                } else {
-                    instance->stream_index = instance->cutscene->last_stream - 1;
-                    instance->pending_stream_buffer = (instance->flags_8b & 0x10) != 0
-                                                          ? static_cast<void *>(instance->stream_buffer_0)
-                                                          : static_cast<void *>(instance->stream_buffer_1);
-                    cutscene_load_instance = instance;
-                }
-            }
-        }
-        const f32 end_frame = cutscene->duration - 1.0f;
-        if (instance->current_frame < 1.0f) {
-            if ((instance->flags_88 & 0x10) != 0) {
-                if ((instance->flags_88 & 8) != 0) {
-                    if (instance->rate < 0.0f) {
-                        instance->rate = -instance->rate;
-                    }
-                    instance->current_frame = 2.0f - instance->current_frame;
-                } else {
-                    const i32 repeat_count = instance->repeat_count;
-                    if (repeat_count > 0) {
-                        const f32 overflow = 1.0f - instance->current_frame;
-                        --instance->repeat_count;
-                        instNuGCutSceneStart(instance);
-                        instance->flags_88 |= 1;
-                        instance->current_frame += overflow;
-                    } else if (instance->chained_instance != NULL) {
-                        const f32 overflow = 1.0f - instance->current_frame;
-                        instNuGCutSceneEndFirstFrame(instance);
-                        instNuGCutSceneStart(instance->chained_instance);
-                        instance->chained_instance->current_frame += overflow;
-                        instNuGCutSceneClipTest(instance->chained_instance);
-                        instNuGCutSceneUpdate(instance->chained_instance, 0, skip, elapsed);
-                        instance->chained_instance = NULL;
-                        return;
-                    } else {
-                        instNuGCutSceneEndFirstFrame(instance);
-                        return;
-                    }
-                }
-            } else if ((instance->flags_88 & 0x20) != 0) {
-                instance->current_frame = 1.0f;
-            } else {
-                instNuGCutSceneEndFirstFrame(instance);
-            }
-        } else if (instance->current_frame >= end_frame) {
-            if (instance->cutscene->version > 1 && (instance->cutscene->flags & 1) != 0) {
+            const f32 frame_delta = instance->rate * elapsed;
+            instance->current_frame += frame_delta;
+            if ((instance->flags_8d & 4) != 0) {
                 const u8 last_stream = instNuGCutSceneLastStream(instance);
-                if (instance->stream_index < last_stream) {
-                    if ((instance->flags_8b & 8) != 0) {
-                        f32 overflow = instance->current_frame - (instance->cutscene->duration - 1.0f);
-                        if (overflow > instance->cutscene->duration) {
-                            overflow = 0.0f;
+                if (instance->stream_index == last_stream) {
+                    instance->current_frame = instance->cutscene->duration - 1.0f;
+                }
+                instance->current_frame -= frame_delta;
+                if (cutscene_load_instance == NULL) {
+                    if (instance->stream_index == last_stream - 1) {
+                        instNuGCutSceneSwapBuffers(instance, 0);
+                        instNuGCutSceneCopyStreamAnimations(instance);
+                        instance->stream_index = instance->cutscene->last_stream;
+                        instNuGCutSceneStart(instance);
+                        instance->current_frame = instance->cutscene->duration - 1.0f;
+                    } else {
+                        instance->stream_index = instance->cutscene->last_stream - 1;
+                        if ((instance->flags_8b & 0x10) != 0) {
+                            instance->pending_stream_buffer = static_cast<void *>(instance->stream_buffer_0);
+                        } else {
+                            instance->pending_stream_buffer = static_cast<void *>(instance->stream_buffer_1);
                         }
-                        instance->accumulated_stream_duration += instance->cutscene->duration;
-                        ++instance->stream_index;
-                        if (instNuGCutSceneSwapBuffers(instance, 0) != 0) {
-                            instNuGCutSceneCopyStreamAnimations(instance);
-                            instance->flags_8b &= ~8U;
+                        cutscene_load_instance = instance;
+                    }
+                }
+            }
+            const f32 end_frame = cutscene->duration - 1.0f;
+            if (!(instance->current_frame < 1.0f)) {
+                if (instance->current_frame >= end_frame) {
+                    if (!(instance->cutscene->version > 1 && (instance->cutscene->flags & 1) != 0)) {
+                        if ((instance->flags_88 & 0x10) != 0) {
+                            instance->current_frame -= end_frame;
+                            instance->current_frame = end_frame - instance->current_frame;
+                            if (instance->rate > 0.0f) {
+                                instance->rate = -instance->rate;
+                            }
+                        } else if ((instance->flags_8c & 0x40) != 0) {
+                            instance->current_frame = end_frame;
+                            instance->flags_89 |= 0x10;
+                        } else {
+                            if (instance->end_callback != NULL) {
+                                void (*callback)(instNUGCUTSCENE_s *) = instance->end_callback;
+                                instance->end_callback = NULL;
+                                callback(instance);
+                            }
+                            const i32 repeat_count = instance->repeat_count;
+                            if (repeat_count > 0) {
+                                f32 overflow = instance->current_frame - (cutscene->duration - 1.0f);
+                                if (overflow > cutscene->duration) {
+                                    overflow = 0.0f;
+                                }
+                                --instance->repeat_count;
+                                instNuGCutSceneStart(instance);
+                                instance->flags_88 |= 1;
+                                instance->current_frame += overflow;
+                            } else if (instance->chained_instance != NULL) {
+                                f32 overflow = instance->current_frame - (cutscene->duration - 1.0f);
+                                if (overflow > cutscene->duration) {
+                                    overflow = 0.0f;
+                                }
+                                instNuGCutSceneEnd(instance);
+                                instNuGCutSceneStart(instance->chained_instance);
+                                instance->chained_instance->current_frame += overflow;
+                                instNuGCutSceneClipTest(instance->chained_instance);
+                                instNuGCutSceneUpdate(instance->chained_instance, 0, skip, elapsed);
+                                instance->chained_instance = NULL;
+                                return;
+                            } else if ((instance->flags_88 & 8) != 0) {
+                                f32 overflow = instance->current_frame - (cutscene->duration - 1.0f);
+                                if (overflow > cutscene->duration) {
+                                    overflow = 0.0f;
+                                }
+                                instNuGCutSceneStart(instance);
+                                instance->flags_88 |= 1;
+                                instance->current_frame += overflow;
+                            } else {
+                                instNuGCutSceneEnd(instance);
+                            }
+                        }
+                    } else {
+                        const u8 last_stream = instNuGCutSceneLastStream(instance);
+                        if (instance->stream_index < last_stream) {
+                            if ((instance->flags_8b & 8) != 0) {
+                                f32 overflow = instance->current_frame - (instance->cutscene->duration - 1.0f);
+                                if (overflow > instance->cutscene->duration) {
+                                    overflow = 0.0f;
+                                }
+                                instance->accumulated_stream_duration += instance->cutscene->duration;
+                                ++instance->stream_index;
+                                if (instNuGCutSceneSwapBuffers(instance, 0) != 0) {
+                                    instNuGCutSceneCopyStreamAnimations(instance);
+                                    instance->flags_8b &= ~8U;
+                                    instNuGCutSceneStart(instance);
+                                    instance->flags_88 |= 1;
+                                    instance->current_frame += overflow;
+                                } else {
+                                    --instance->stream_index;
+                                    instance->current_frame = instance->cutscene->duration - 1.0f;
+                                }
+                            } else {
+                                instance->current_frame = instance->cutscene->duration - 1.0f;
+                            }
+                        } else if ((instance->flags_8c & 0x40) != 0) {
+                            instance->current_frame = end_frame;
+                            instance->flags_89 |= 0x10;
+                        } else {
+                            instNuGCutSceneEnd(instance);
+                            instance->accumulated_stream_duration = 0.0f;
+                        }
+                    }
+                }
+            } else {
+                if ((instance->flags_88 & 0x10) != 0) {
+                    if ((instance->flags_88 & 8) != 0) {
+                        if (instance->rate < 0.0f) {
+                            instance->rate = -instance->rate;
+                        }
+                        instance->current_frame = 2.0f - instance->current_frame;
+                    } else {
+                        const i32 repeat_count = instance->repeat_count;
+                        if (repeat_count > 0) {
+                            const f32 overflow = 1.0f - instance->current_frame;
+                            --instance->repeat_count;
                             instNuGCutSceneStart(instance);
                             instance->flags_88 |= 1;
                             instance->current_frame += overflow;
+                        } else if (instance->chained_instance != NULL) {
+                            const f32 overflow = 1.0f - instance->current_frame;
+                            instNuGCutSceneEndFirstFrame(instance);
+                            instNuGCutSceneStart(instance->chained_instance);
+                            instance->chained_instance->current_frame += overflow;
+                            instNuGCutSceneClipTest(instance->chained_instance);
+                            instNuGCutSceneUpdate(instance->chained_instance, 0, skip, elapsed);
+                            instance->chained_instance = NULL;
+                            return;
                         } else {
-                            --instance->stream_index;
-                            instance->current_frame = instance->cutscene->duration - 1.0f;
+                            instNuGCutSceneEndFirstFrame(instance);
+                            return;
                         }
-                    } else {
-                        instance->current_frame = instance->cutscene->duration - 1.0f;
                     }
-                } else if ((instance->flags_8c & 0x40) != 0) {
-                    instance->current_frame = end_frame;
-                    instance->flags_89 |= 0x10;
+                } else if ((instance->flags_88 & 0x20) != 0) {
+                    instance->current_frame = 1.0f;
                 } else {
-                    instNuGCutSceneEnd(instance);
-                    instance->accumulated_stream_duration = 0.0f;
-                }
-            } else if ((instance->flags_88 & 0x10) != 0) {
-                instance->current_frame -= end_frame;
-                instance->current_frame = end_frame - instance->current_frame;
-                if (instance->rate > 0.0f) {
-                    instance->rate = -instance->rate;
-                }
-            } else if ((instance->flags_8c & 0x40) != 0) {
-                instance->current_frame = end_frame;
-                instance->flags_89 |= 0x10;
-            } else {
-                if (instance->end_callback != NULL) {
-                    void (*callback)(instNUGCUTSCENE_s *) = instance->end_callback;
-                    instance->end_callback = NULL;
-                    callback(instance);
-                }
-                const i32 repeat_count = instance->repeat_count;
-                if (repeat_count > 0) {
-                    f32 overflow = instance->current_frame - (cutscene->duration - 1.0f);
-                    if (overflow > cutscene->duration) {
-                        overflow = 0.0f;
-                    }
-                    --instance->repeat_count;
-                    instNuGCutSceneStart(instance);
-                    instance->flags_88 |= 1;
-                    instance->current_frame += overflow;
-                } else if (instance->chained_instance != NULL) {
-                    f32 overflow = instance->current_frame - (cutscene->duration - 1.0f);
-                    if (overflow > cutscene->duration) {
-                        overflow = 0.0f;
-                    }
-                    instNuGCutSceneEnd(instance);
-                    instNuGCutSceneStart(instance->chained_instance);
-                    instance->chained_instance->current_frame += overflow;
-                    instNuGCutSceneClipTest(instance->chained_instance);
-                    instNuGCutSceneUpdate(instance->chained_instance, 0, skip, elapsed);
-                    instance->chained_instance = NULL;
-                    return;
-                } else if ((instance->flags_88 & 8) != 0) {
-                    f32 overflow = instance->current_frame - (cutscene->duration - 1.0f);
-                    if (overflow > cutscene->duration) {
-                        overflow = 0.0f;
-                    }
-                    instNuGCutSceneStart(instance);
-                    instance->flags_88 |= 1;
-                    instance->current_frame += overflow;
-                } else {
-                    instNuGCutSceneEnd(instance);
+                    instNuGCutSceneEndFirstFrame(instance);
                 }
             }
+        }
+    } else {
+        if (paused == 0) {
+            instance->flags_88 |= 1;
         }
     }
     if ((instance->flags_88 & 2) == 0) {

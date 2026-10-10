@@ -590,7 +590,24 @@ static void GizAction_ActivateChar(GIZFLOW_s *flow, FLOWBOX_s *, char **params, 
             }
         }
     }
-    if (name != NULL && activate != 0) {
+    if (!(name != NULL && activate != 0)) {
+        if (activate == 0 && name != NULL) {
+            if (Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 0x1000) != 0 &&
+                Player[0]->apiobj.field_0x287 == 0 && Player[0]->ai.field_0x134 != 0xff) {
+                AICREATURE *creature = &world->ai_sys->creatures[Player[0]->ai.field_0x134];
+                if (creature != NULL && NuStrICmp(creature->name, name) == 0)
+                    ReleaseTakeOver(Player[0], 0);
+            }
+            if (Player[1] != NULL && (Player[1]->apiobj.field_0x1f8 & 0x1000) != 0 &&
+                Player[1]->apiobj.field_0x287 == 0 && Player[1]->ai.field_0x134 != 0xff) {
+                // The original second-player branch also reads player zero's creature index.
+                AICREATURE *creature = &world->ai_sys->creatures[Player[0]->ai.field_0x134];
+                if (creature != NULL && NuStrICmp(creature->name, name) == 0)
+                    ReleaseTakeOver(Player[1], 0);
+            }
+            DeactivateCharacter(name);
+        }
+    } else {
         if (buildit != NULL) {
             if (ActivateCharacter(name, &buildit->position, buildit->field_0x7c) == NULL) {
                 GizBuildIt_KillParts(buildit);
@@ -598,21 +615,6 @@ static void GizAction_ActivateChar(GIZFLOW_s *flow, FLOWBOX_s *, char **params, 
         } else {
             ActivateCharacter(name, NULL, 0);
         }
-    } else if (activate == 0 && name != NULL) {
-        if (Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 0x1000) != 0 && Player[0]->apiobj.field_0x287 == 0 &&
-            Player[0]->ai.field_0x134 != 0xff) {
-            AICREATURE *creature = &world->ai_sys->creatures[Player[0]->ai.field_0x134];
-            if (creature != NULL && NuStrICmp(creature->name, name) == 0)
-                ReleaseTakeOver(Player[0], 0);
-        }
-        if (Player[1] != NULL && (Player[1]->apiobj.field_0x1f8 & 0x1000) != 0 && Player[1]->apiobj.field_0x287 == 0 &&
-            Player[1]->ai.field_0x134 != 0xff) {
-            // The original second-player branch also reads player zero's creature index.
-            AICREATURE *creature = &world->ai_sys->creatures[Player[0]->ai.field_0x134];
-            if (creature != NULL && NuStrICmp(creature->name, name) == 0)
-                ReleaseTakeOver(Player[1], 0);
-        }
-        DeactivateCharacter(name);
     }
 }
 

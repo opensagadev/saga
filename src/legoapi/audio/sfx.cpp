@@ -1726,7 +1726,11 @@ void AddLevSfx(WORLDINFO_s *world, nuvec_s *position, char *name, i32 sfx) {
         if (index >= 64) {
             return;
         }
-        world->level_sfx[index].position = position != NULL ? *position : nuvec_zero;
+        if (position != NULL) {
+            world->level_sfx[index].position = *position;
+        } else {
+            world->level_sfx[index].position = nuvec_zero;
+        }
         world->level_sfx[index].id = static_cast<i16>(sfx);
         world->level_sfx[index].references = 1;
         world->level_sfx_count = index + 1;

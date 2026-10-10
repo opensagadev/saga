@@ -177,7 +177,11 @@ void *RndrStateBuildKonstState(nuglobalrndrstate_s *state) {
         konst[1] = state->const_tint.g;
         konst[2] = state->const_tint.b;
     }
-    konst[3] = state->const_alpha_enabled == 0 ? 1.0f : state->const_alpha;
+    if (state->const_alpha_enabled == 0) {
+        konst[3] = 1.0f;
+    } else {
+        konst[3] = state->const_alpha;
+    }
     buffer->addr += sizeof(f32) * 4;
     return result;
 }

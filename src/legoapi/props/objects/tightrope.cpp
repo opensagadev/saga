@@ -584,8 +584,11 @@ void TightRope_MoveCode(GameObject_s *object, i32 jump_pressed) {
         if (TightRope_MoveUpdate(object, 0) == 0 && object->context_animation != 0x8f &&
             object->external_force.y >= 0.5f) {
             StartJump(object, 0);
-            object->apiobj.velocity.y =
-                (object->apiobj.character_data->game_character->flags_090 & 0x80000) != 0 ? 1.2f : 1.8f;
+            if ((object->apiobj.character_data->game_character->flags_090 & 0x80000) != 0) {
+                object->apiobj.velocity.y = 1.2f;
+            } else {
+                object->apiobj.velocity.y = 1.8f;
+            }
         }
     } else {
         f32 *playing = AnimPlaying(&object->apiobj.anim_packet, 0x8f, 1, 0);

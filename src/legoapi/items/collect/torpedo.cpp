@@ -100,7 +100,11 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
 
     if (packet->steal_timer > 0.0f) {
         const f32 timer = packet->steal_timer - FRAMETIME;
-        packet->steal_timer = timer < 0.0f ? 0.0f : timer;
+        if (timer < 0.0f) {
+            packet->steal_timer = 0.0f;
+        } else {
+            packet->steal_timer = timer;
+        }
     }
 
     for (i32 index = 0; index < packet->count; ++index) {
@@ -355,7 +359,11 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
                 object->torpedo_target_timer = 0.0f;
             } else {
                 const f32 timer = object->torpedo_target_timer - 2.0f * FRAMETIME;
-                object->torpedo_target_timer = timer < 0.0f ? 0.0f : timer;
+                if (timer < 0.0f) {
+                    object->torpedo_target_timer = 0.0f;
+                } else {
+                    object->torpedo_target_timer = timer;
+                }
             }
         } else if ((object->torpedo->field_0x1 & 6) == 0) {
             if (object->torpedo_target_timer > 0.0f) {

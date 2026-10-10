@@ -467,7 +467,11 @@ void Bolts_Draw(WORLDINFO_s *world) {
         f32 size = type->scale_callback != NULL ? type->scale_callback(bolt) : bolt->scale;
         NUMTX matrix = bolt->effect_orientation;
         if (bolt->time < type->field_24) {
-            scale.y = (type->field_60 & 0x2000000) != 0 ? size : (bolt->time / type->field_24) * size;
+            if ((type->field_60 & 0x2000000) != 0) {
+                scale.y = size;
+            } else {
+                scale.y = (bolt->time / type->field_24) * size;
+            }
             scale.x = scale.z = (bolt->flags & 0x200) != 0 ? scale.y : size;
             NuMtxPreScale(&matrix, &scale);
         } else if (bolt->scale != 1.0f) {

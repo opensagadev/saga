@@ -786,9 +786,11 @@ static void GizmoPickups_Reset(void *world_ptr, void *, void *progress_ptr) {
         if (type.random_model_count != 0) {
             pickup.model_variant = static_cast<u8>(static_cast<u16>(qrand()) / (0xffff / type.random_model_count + 1));
         }
-        pickup.room_index = world->current_gscn != NULL
-                                ? static_cast<i8>(NuPortalWhichRoom(world->current_gscn, &pickup.position))
-                                : -1;
+        if (world->current_gscn != NULL) {
+            pickup.room_index = static_cast<i8>(NuPortalWhichRoom(world->current_gscn, &pickup.position));
+        } else {
+            pickup.room_index = -1;
+        }
         pickup.draw_rotation = static_cast<u16>(qrand());
         pickup.state_flags |= GIZMOPICKUP_STATE_DRAW_VISIBLE;
         pickup.state_flags &= static_cast<u8>(~GIZMOPICKUP_STATE_ALTERNATE_TYPE);

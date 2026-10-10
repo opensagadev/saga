@@ -2946,14 +2946,16 @@ void PropertyTool::SetDefaultActiveMenu(PropertyMenu *menu) {
 
 void PropertyTool::ToggleActiveMenu() {
     PropertyMenu *menu = GetActiveMenu(active_menu);
-    if (menu != NULL) {
+    if (menu == NULL) {
+        if (GetNextDefaultActiveMenu(eduiGetActiveMenu()) == NULL) {
+            SetDefaultActiveMenu(active_menu);
+        }
+    } else {
         if (menu == last_menu) {
             eduiSetActiveMenu(NULL);
         } else {
             SetDefaultActiveMenu(GetNextActiveMenu());
         }
-    } else if (GetNextDefaultActiveMenu(eduiGetActiveMenu()) == NULL) {
-        SetDefaultActiveMenu(active_menu);
     }
 }
 
@@ -2972,7 +2974,11 @@ void PropertyTool::ediMenuRetrieveMetrics(eduimenu_s *menu) {
 
 void PropertyTool::ediMenuStoreMetrics(eduimenu_s *menu) {
     menu_startmetrics.x = menu->x > 0 ? menu->x : 20;
-    menu_startmetrics.y = menu->y > 0 ? menu->y : 5;
+    if (menu->y > 0) {
+        menu_startmetrics.y = menu->y;
+    } else {
+        menu_startmetrics.y = 5;
+    }
     menu_startmetrics.width = menu->width;
     menu_startmetrics.height = menu->height;
 }
@@ -3154,10 +3160,12 @@ void cbEdLevelDestroy(eduimenu_s *menu, eduimenu_s *) {
     if (menu == edLevelActiveMenu) {
         edLevelActiveMenu = NULL;
     }
-    if (menu == edLevelPinnedMenu) {
+    if (menu != edLevelPinnedMenu) {
+        if (edLevelPinnedMenu != NULL && edLevelActiveMenu == NULL) {
+            edLevelActiveMenu = edLevelPinnedMenu;
+        }
+    } else {
         edLevelPinnedMenu = NULL;
-    } else if (edLevelPinnedMenu != NULL && edLevelActiveMenu == NULL) {
-        edLevelActiveMenu = edLevelPinnedMenu;
     }
 }
 
@@ -3207,10 +3215,7 @@ void EdClass::SerialiseObject(EdStream &stream, void *object) {
         for (EdRef *member = members; member != NULL; member = member->next) {
             if (!((stream.flags & 0x400000) != 0 ? (member->attributes & 0x400000) != 0
                                                  : (member->attributes & 0x10000000) != 0)) {
-                if (member->attributes < 0) {
-                    EdClass *member_class = theRegistry.GetClass(member->type_id);
-                    member_class->SerialiseObject(stream, member->GetMemberObject(object));
-                } else {
+                if (!(member->attributes < 0)) {
                     EdType *type = theRegistry.GetType(member->type_id);
                     i32 size = member->size > 0 ? member->size : type->size;
                     if (stream.mode == 2) {
@@ -3220,6 +3225,9 @@ void EdClass::SerialiseObject(EdStream &stream, void *object) {
                     if (stream.mode == 1) {
                         member->SetMemberData(object, member->type_id, data, sizeof(data), NULL);
                     }
+                } else {
+                    EdClass *member_class = theRegistry.GetClass(member->type_id);
+                    member_class->SerialiseObject(stream, member->GetMemberObject(object));
                 }
             }
         }

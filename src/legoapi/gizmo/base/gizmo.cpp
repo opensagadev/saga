@@ -1201,7 +1201,11 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
                        GAMEANIMSET_STATE_AT_END) {
                 if (paintmixed == painttarget) {
                     ++painttry;
-                    PAINTPUZZLESTAGE = painttry == 3 ? 4 : 0;
+                    if (painttry == 3) {
+                        PAINTPUZZLESTAGE = 4;
+                    } else {
+                        PAINTPUZZLESTAGE = 0;
+                    }
                 } else {
                     randpaints[0] = qrand() / 21846;
                     do {

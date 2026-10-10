@@ -1039,12 +1039,14 @@ static __used__ void MenuDrawPauseMain(MENU *menu) {
         GameDrawMenuEntry(menu, TTab[tDROPOUT]);
     }
 
-    if (WORLD->current_level == HUB_LDATA) {
-        GameDrawMenuEntry(menu, TTab[tQUIT]);
-    } else if (GAMEDEMO != 0) {
-        GameDrawMenuEntry(menu, TTab[tRESTARTDEMO]);
+    if (WORLD->current_level != HUB_LDATA) {
+        if (GAMEDEMO != 0) {
+            GameDrawMenuEntry(menu, TTab[tRESTARTDEMO]);
+        } else {
+            GameDrawMenuEntry(menu, TTab[tMAP]);
+        }
     } else {
-        GameDrawMenuEntry(menu, TTab[tMAP]);
+        GameDrawMenuEntry(menu, TTab[tQUIT]);
     }
 }
 static __used__ void MenuExitHowToPlay(MENU *) {
@@ -1069,30 +1071,32 @@ static __used__ void MenuUpdatePauseCut(MENU *menu) {
         return;
     }
     if (menu->confirm_pressed != 0 && menu->selected_item == 1) {
-        if (CutScenePlayer_Active() != 0) {
+        if (CutScenePlayer_Active() == 0) {
+            if (pausecut_skip_to_level != -1) {
+                NewLData = &LDataList[pausecut_skip_to_level];
+                cutskip_dontplaylevelintro = 1;
+                music_man.StopTrack(0x10, 0);
+            } else if (pausecut_skip_to_gameplay != 0) {
+                CUTINFO *cut = static_cast<CUTINFO *>(CutStopInfo);
+                instNuGCutSceneEnd(static_cast<instNUGCUTSCENE_s *>(cut->instance));
+                if ((cut->flags & 0x400) != 0) {
+                    NewMode = 1;
+                }
+                CutStopInfo = NULL;
+                CUTSTOPGAME = 0;
+                GameCam_Reset(GameCam);
+                const FADETYPE fade = {FADE_TYPE_STILL_WIPE};
+                FadeSys.SetFade(fade, 0);
+                FadeSys.SetStage(1);
+                GameAudio_PlaySfx(0x2d, NULL, 0, 0);
+                ResumeGame(0, 0);
+                music_man.StopTrack(0x10, 0);
+            } else {
+                GameAudio_PlaySfx(0x32, NULL, 0, 0);
+            }
+        } else {
             NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
             hub_from_cutsceneplayer = 1;
-        } else if (pausecut_skip_to_level != -1) {
-            NewLData = &LDataList[pausecut_skip_to_level];
-            cutskip_dontplaylevelintro = 1;
-            music_man.StopTrack(0x10, 0);
-        } else if (pausecut_skip_to_gameplay != 0) {
-            CUTINFO *cut = static_cast<CUTINFO *>(CutStopInfo);
-            instNuGCutSceneEnd(static_cast<instNUGCUTSCENE_s *>(cut->instance));
-            if ((cut->flags & 0x400) != 0) {
-                NewMode = 1;
-            }
-            CutStopInfo = NULL;
-            CUTSTOPGAME = 0;
-            GameCam_Reset(GameCam);
-            const FADETYPE fade = {FADE_TYPE_STILL_WIPE};
-            FadeSys.SetFade(fade, 0);
-            FadeSys.SetStage(1);
-            GameAudio_PlaySfx(0x2d, NULL, 0, 0);
-            ResumeGame(0, 0);
-            music_man.StopTrack(0x10, 0);
-        } else {
-            GameAudio_PlaySfx(0x32, NULL, 0, 0);
         }
     }
 }

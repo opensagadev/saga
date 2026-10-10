@@ -422,10 +422,12 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
             offset.z = qrand() * (1.0f / 65535.0f) * 0.05f - 0.025f;
             GameAnimSet_SetOffset(force->anim_set, &offset);
             force->runtime_flags |= GIZFORCE_RUNTIME_OFFSET_APPLIED;
-            if (force->start_sfx_id == -1) {
+            if (force->start_sfx_id != -1) {
+                if (started_shaking || IsSfxLooping(force->start_sfx_id)) {
+                    GameAudio_PlaySfxById(force->start_sfx_id, &force->position, 0, 0);
+                }
+            } else {
                 PlaySfx("LegShakeL", &force->position);
-            } else if (started_shaking || IsSfxLooping(force->start_sfx_id)) {
-                GameAudio_PlaySfxById(force->start_sfx_id, &force->position, 0, 0);
             }
         }
 
@@ -1568,12 +1570,14 @@ GIZFORCE_s *GizForces_FindForce(WORLDINFO_s *world, char *name) {
 
 i32 GizForce_AnimComplete(GIZFORCE_s *force) {
     if (force != NULL && force->anim_set != NULL) {
-        if ((force->progress_flags & GIZFORCE_PROGRESS_ANIMATION_REVERSED) == 0) {
+        if ((force->progress_flags & GIZFORCE_PROGRESS_ANIMATION_REVERSED) != 0) {
+            if (force->anim_set->state == GAMEANIMSET_STATE_AT_START) {
+                return 1;
+            }
+        } else {
             if (force->anim_set->state == GAMEANIMSET_STATE_AT_END) {
                 return 1;
             }
-        } else if (force->anim_set->state == GAMEANIMSET_STATE_AT_START) {
-            return 1;
         }
         return 0;
     }

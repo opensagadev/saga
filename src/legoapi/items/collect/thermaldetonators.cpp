@@ -234,10 +234,11 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
             ResetAnimPacket(&object->apiobj.anim_packet, -1);
         }
         object->context_flags &= ~0x40;
-        object->context_animation_timer =
-            object->apiobj.character_model->model_data_b[object->context_animation] != NULL
-                ? AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1)
-                : 1.0f;
+        if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
+            object->context_animation_timer = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
+        } else {
+            object->context_animation_timer = 1.0f;
+        }
         return 0;
     }
 

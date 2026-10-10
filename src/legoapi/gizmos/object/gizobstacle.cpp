@@ -732,9 +732,11 @@ static void GizObstacles_Reset(void *world_ptr, void *data, void *progress_ptr) 
                 }
             }
 
-            obstacle.room_id = world->current_gscn != NULL
-                                   ? static_cast<i16>(NuPortalWhichRoom(world->current_gscn, &obstacle.position))
-                                   : -1;
+            if (world->current_gscn != NULL) {
+                obstacle.room_id = static_cast<i16>(NuPortalWhichRoom(world->current_gscn, &obstacle.position));
+            } else {
+                obstacle.room_id = -1;
+            }
             if ((obstacle.config_flags & GIZOBSTACLE_CONFIG_USE_ANIM_AVERAGE_POSITION) != 0) {
                 GameAnimSet_GetAveragePos(anim_set, &obstacle.secondary_position, 0, 1, 1);
             }

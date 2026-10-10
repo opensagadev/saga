@@ -312,17 +312,19 @@ i32 Action_UseTechno(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *
     if (techno == NULL || !techno->active || !techno->visible || techno->complete)
         return 1;
     AIMoveInstruction(packet, &processor->action_pos, 0.0f, &processor->path_info, 1, 0.0f);
-    if (GizTechno_CanUseTechno(object, techno) != 0) {
+    if (GizTechno_CanUseTechno(object, techno) == 0) {
+        if (FreePlay != 0) {
+            processor->action_timer -= elapsed;
+            if (processor->action_timer < 0.0f) {
+                processor->action_timer = 0.5f;
+                object->pad_gamepad->buttons_pressed |= GAMEPAD_TOGGLERIGHT;
+            }
+        }
+    } else {
         f32 distance = NuVecDistSqr(&packet->terrain_origin, &processor->action_pos, NULL);
         if (distance < ai_moveradius * ai_moveradius) {
             packet->movement_look_target = &techno->position;
             GameObjectSetCanUse(object, techno, 2, 1, 0.0f);
-        }
-    } else if (FreePlay != 0) {
-        processor->action_timer -= elapsed;
-        if (processor->action_timer < 0.0f) {
-            processor->action_timer = 0.5f;
-            object->pad_gamepad->buttons_pressed |= GAMEPAD_TOGGLERIGHT;
         }
     }
     return 0;
@@ -1013,7 +1015,20 @@ i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKE
         return 1;
     }
 
-    if (next) {
+    if (!next) {
+        if (!random) {
+            if (furthest) {
+                AILocatorSet_AssignFurthestLocator(sys, locator_set, target, max_range, reference_position,
+                                                   second_position, off_screen_radius, ignore_assigned);
+            } else {
+                AILocatorSet_AssignNearestLocator(sys, locator_set, target, max_range, reference_position,
+                                                  second_position, off_screen_radius, ignore_assigned);
+            }
+        } else {
+            AILocatorSet_AssignRandomLocator(sys, locator_set, target, max_range, reference_position, off_screen_radius,
+                                             ignore_assigned);
+        }
+    } else {
         if (locator_set->locator_count < 2) {
             return 1;
         }
@@ -1078,15 +1093,6 @@ i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKE
         }
         object->apiobj.ai->locator = &sys->locators[locator_set->locator_entries[candidate]];
         locator_set->assigned[candidate] = target->field_0x289;
-    } else if (random) {
-        AILocatorSet_AssignRandomLocator(sys, locator_set, target, max_range, reference_position, off_screen_radius,
-                                         ignore_assigned);
-    } else if (furthest) {
-        AILocatorSet_AssignFurthestLocator(sys, locator_set, target, max_range, reference_position, second_position,
-                                           off_screen_radius, ignore_assigned);
-    } else {
-        AILocatorSet_AssignNearestLocator(sys, locator_set, target, max_range, reference_position, second_position,
-                                          off_screen_radius, ignore_assigned);
     }
     return 1;
 }

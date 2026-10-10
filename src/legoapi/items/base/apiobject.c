@@ -1807,7 +1807,11 @@ void RootFnEx(NUMTX *matrix, void *data, NUVEC *sampled_root, NUVEC *, NUVEC *tr
     }
 
     object->animation_root_delta.x = sampled_root->x - object->previous_animation_root.x;
-    object->animation_root_delta.y = include_y ? sampled_root->y - object->previous_animation_root.y : 0.0f;
+    if (include_y) {
+        object->animation_root_delta.y = sampled_root->y - object->previous_animation_root.y;
+    } else {
+        object->animation_root_delta.y = 0.0f;
+    }
     object->animation_root_delta.z = sampled_root->z - object->previous_animation_root.z;
     NuVecMtxRotate(&object->animation_root_delta, &object->animation_root_delta, &object->field_0xb8);
     if (!include_y) {

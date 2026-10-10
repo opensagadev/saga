@@ -2212,13 +2212,7 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
 NUVEC TerrainSkin(PLATSKININFO *info, nuvec_s *position, float weight, i32 mode) {
     NUVEC4_ALIGNED16 point;
     NUMTX_ALIGNED16 matrix;
-    if (mode == 1) {
-        point.x = position->x;
-        point.y = position->y;
-        point.z = position->z;
-        point.w = 1.0f;
-        NuVec4MtxTransformVU0(&point, &point, info->matrix);
-    } else {
+    if (mode != 1) {
         if (weight < 0.0f)
             weight = position->z / info->scale;
         if (weight < 0.0f)
@@ -2267,6 +2261,12 @@ NUVEC TerrainSkin(PLATSKININFO *info, nuvec_s *position, float weight, i32 mode)
             matrix.m33 = start[15] * inverse_weight + end[15] * weight;
         }
         NuVec4MtxTransformVU0(&point, &point, &matrix);
+    } else {
+        point.x = position->x;
+        point.y = position->y;
+        point.z = position->z;
+        point.w = 1.0f;
+        NuVec4MtxTransformVU0(&point, &point, info->matrix);
     }
     NUVEC result;
     result.x = point.x;
@@ -2410,14 +2410,7 @@ void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags) {
     u8 hit_type = query->hit_type;
     f32 walkable_normal_y = 0.0f;
 
-    if (hit_type == TERRAIN_HIT_TYPE_NONE) {
-        hit_flags[0] = 0;
-        position->x = query->position.x + query->movement.x;
-        position->y = (query->position.y + query->movement.y) * query->object_scale -
-                      query->object_scale * query->collision_radius;
-        position->z = query->position.z + query->movement.z;
-        query->flags &= static_cast<u8>(~TERRAIN_QUERY_FLAG_PREVIOUS_NORMAL);
-    } else {
+    if (hit_type != TERRAIN_HIT_TYPE_NONE) {
         TERRAIN_SHAPE *surface = query->surface;
         f32 surface_alignment = 0.707f;
         if (surface != NULL) {
@@ -2603,6 +2596,13 @@ void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags) {
                 break;
             }
         }
+    } else {
+        hit_flags[0] = 0;
+        position->x = query->position.x + query->movement.x;
+        position->y = (query->position.y + query->movement.y) * query->object_scale -
+                      query->object_scale * query->collision_radius;
+        position->z = query->position.z + query->movement.z;
+        query->flags &= static_cast<u8>(~TERRAIN_QUERY_FLAG_PREVIOUS_NORMAL);
     }
 
     query = TerI;
@@ -2831,14 +2831,14 @@ void TerrainPlayer(GameObject_s *object) {
                     if (object == CarWashHack) {
                         NewTerrPlatformsOff();
                     }
-                    if (testshadowfix != 0) {
+                    if (testshadowfix == 0) {
+                        api.field_0x218 = GameShadow(object, &api.collision_position, 5.0f, terrain_mask | 0x1f);
+                    } else {
                         NUVEC shadow_position = api.collision_position;
                         shadow_position.y = api.initial_position.y > api.collision_position.y
                                                 ? api.initial_position.y
                                                 : api.collision_position.y;
                         api.field_0x218 = GameShadow(object, &shadow_position, 5.0f, terrain_mask | 0x1f);
-                    } else {
-                        api.field_0x218 = GameShadow(object, &api.collision_position, 5.0f, terrain_mask | 0x1f);
                     }
                     api.supporting_platform_id = static_cast<i16>(NewShadowOnPlatform());
                     GetSurfaceInfo(object, api.field_0x218 != 2000000.0f ? 1 : 0, api.field_0x218);
@@ -4586,11 +4586,11 @@ i32 PlatformChecks(i32 count, nuvec_s *movement) {
     if (opposing_contact || clear != 0) {
         TerrPoly = query->surface;
         TerI->position = TerI->platform_position;
-        if (movement->y < 0.0f) {
+        if (!(movement->y < 0.0f)) {
+            TerI->movement.y *= 0.75f;
+        } else {
             FullDeflect(&ShadNorm, &TerI->movement, &TerI->movement);
             FullDeflect(&ShadNorm, movement, movement);
-        } else {
-            TerI->movement.y *= 0.75f;
         }
         TerI->hit_flags[1] = 1;
         PlatformConnect(reinterpret_cast<char *>(old_query->hit_flags), &old_query->movement, movement,
@@ -4712,19 +4712,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
     i32 transformed_count = 0;
     TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group->data);
     if (query->object_scale == 1.0f) {
-        if (!(platform->flags & 1)) {
-            while (batch->marker >= 0) {
-                i32 shape_count = batch->shape_count;
-                TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
-                for (i32 remaining = shape_count; remaining > 0; --remaining, ++source) {
-                    if (source->material[1] != 0)
-                        continue;
-                    *cursor++ = source;
-                    ++count;
-                }
-                batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(source);
-            }
-        } else {
+        if (platform->flags & 1) {
             while (batch->marker >= 0) {
                 i32 shape_count = batch->shape_count;
                 TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
@@ -4811,61 +4799,21 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                 }
                 batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(source);
             }
-        }
-    } else {
-        if (!(platform->flags & 1)) {
+        } else {
             while (batch->marker >= 0) {
                 i32 shape_count = batch->shape_count;
                 TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
                 for (i32 remaining = shape_count; remaining > 0; --remaining, ++source) {
                     if (source->material[1] != 0)
                         continue;
-                    bool quad = source->normals[1].y < 65535.0f;
-                    TERRAIN_SHAPE *surface = &ScaleTerrain[transformed_count];
-                    memcpy(surface->material, source->material, 4);
-                    surface->vectors[0].x = source->vectors[0].x;
-                    surface->vectors[0].y =
-                        (source->vectors[0].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
-                    surface->vectors[0].z = source->vectors[0].z;
-                    surface->vectors[1].x = source->vectors[1].x;
-                    surface->vectors[1].y =
-                        (source->vectors[1].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
-                    surface->vectors[1].z = source->vectors[1].z;
-                    surface->vectors[2].x = source->vectors[2].x;
-                    surface->vectors[2].y =
-                        (source->vectors[2].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
-                    surface->vectors[2].z = source->vectors[2].z;
-                    if (quad) {
-                        surface->vectors[3].x = source->vectors[3].x;
-                        surface->vectors[3].y =
-                            (source->vectors[3].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
-                        surface->vectors[3].z = source->vectors[3].z;
-                    }
-                    if (quad) {
-                        NUVEC *normal = &source->normals[1];
-                        f32 length = NuFsqrt(normal->x * normal->x + (normal->y * normal->y) * query->object_scale_sq +
-                                             normal->z * normal->z);
-                        f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
-                        surface->normals[1].x = normal->x * inverse;
-                        surface->normals[1].y = (normal->y * query->object_scale) * inverse;
-                        surface->normals[1].z = normal->z * inverse;
-                    } else {
-                        surface->normals[1].y = 65536.0f;
-                    }
-                    NUVEC *normal = &source->normals[0];
-                    f32 length = NuFsqrt(normal->x * normal->x + (normal->y * normal->y) * query->object_scale_sq +
-                                         normal->z * normal->z);
-                    f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
-                    surface->normals[0].x = normal->x * inverse;
-                    surface->normals[0].y = (normal->y * query->object_scale) * inverse;
-                    surface->normals[0].z = normal->z * inverse;
-                    *cursor++ = surface;
+                    *cursor++ = source;
                     ++count;
-                    ++transformed_count;
                 }
                 batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(source);
             }
-        } else {
+        }
+    } else {
+        if (platform->flags & 1) {
             while (batch->marker >= 0) {
                 i32 shape_count = batch->shape_count;
                 TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
@@ -4950,6 +4898,58 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                     surface->normals[0].x *= inverse;
                     surface->normals[0].y *= inverse;
                     surface->normals[0].z *= inverse;
+                    *cursor++ = surface;
+                    ++count;
+                    ++transformed_count;
+                }
+                batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(source);
+            }
+        } else {
+            while (batch->marker >= 0) {
+                i32 shape_count = batch->shape_count;
+                TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
+                for (i32 remaining = shape_count; remaining > 0; --remaining, ++source) {
+                    if (source->material[1] != 0)
+                        continue;
+                    bool quad = source->normals[1].y < 65535.0f;
+                    TERRAIN_SHAPE *surface = &ScaleTerrain[transformed_count];
+                    memcpy(surface->material, source->material, 4);
+                    surface->vectors[0].x = source->vectors[0].x;
+                    surface->vectors[0].y =
+                        (source->vectors[0].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
+                    surface->vectors[0].z = source->vectors[0].z;
+                    surface->vectors[1].x = source->vectors[1].x;
+                    surface->vectors[1].y =
+                        (source->vectors[1].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
+                    surface->vectors[1].z = source->vectors[1].z;
+                    surface->vectors[2].x = source->vectors[2].x;
+                    surface->vectors[2].y =
+                        (source->vectors[2].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
+                    surface->vectors[2].z = source->vectors[2].z;
+                    if (quad) {
+                        surface->vectors[3].x = source->vectors[3].x;
+                        surface->vectors[3].y =
+                            (source->vectors[3].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
+                        surface->vectors[3].z = source->vectors[3].z;
+                    }
+                    if (quad) {
+                        NUVEC *normal = &source->normals[1];
+                        f32 length = NuFsqrt(normal->x * normal->x + (normal->y * normal->y) * query->object_scale_sq +
+                                             normal->z * normal->z);
+                        f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
+                        surface->normals[1].x = normal->x * inverse;
+                        surface->normals[1].y = (normal->y * query->object_scale) * inverse;
+                        surface->normals[1].z = normal->z * inverse;
+                    } else {
+                        surface->normals[1].y = 65536.0f;
+                    }
+                    NUVEC *normal = &source->normals[0];
+                    f32 length = NuFsqrt(normal->x * normal->x + (normal->y * normal->y) * query->object_scale_sq +
+                                         normal->z * normal->z);
+                    f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
+                    surface->normals[0].x = normal->x * inverse;
+                    surface->normals[0].y = (normal->y * query->object_scale) * inverse;
+                    surface->normals[0].z = normal->z * inverse;
                     *cursor++ = surface;
                     ++count;
                     ++transformed_count;
@@ -7258,21 +7258,21 @@ i16 *NewScanHandelFull(nuvec_s *position, nuvec_s *movement, f32 radius, i32 sca
     u8 *workspace_storage = reinterpret_cast<u8 *>(address);
     platinrange = 0;
     TerrainScanBounds bounds;
-    if (movement->x > 0.0f) {
-        bounds.min_x = position->x;
-        bounds.min_x -= 0.02f;
-        bounds.min_x -= radius;
-        bounds.max_x = position->x;
-        bounds.max_x += movement->x;
-        bounds.max_x += 0.02f;
-        bounds.max_x += radius;
-    } else {
+    if (!(movement->x > 0.0f)) {
         bounds.min_x = movement->x;
         bounds.min_x += position->x;
         bounds.min_x -= 0.02f;
         bounds.min_x -= radius;
         bounds.max_x = 0.02f;
         bounds.max_x += position->x;
+        bounds.max_x += radius;
+    } else {
+        bounds.min_x = position->x;
+        bounds.min_x -= 0.02f;
+        bounds.min_x -= radius;
+        bounds.max_x = position->x;
+        bounds.max_x += movement->x;
+        bounds.max_x += 0.02f;
         bounds.max_x += radius;
     }
     if (movement->y > 0.0f) {

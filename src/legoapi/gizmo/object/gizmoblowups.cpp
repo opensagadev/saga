@@ -502,10 +502,11 @@ void GizBlowup_Respawn(GIZMOBLOWUP_s *blowup) {
         i32 handle = -1;
         AddFiniteShotDebrisEffect(&handle, blowup->type->particle_types[2], &blowup->mid_position, 1);
     }
-    if (blowup->type->particle_types[3] != -1) {
-        i32 handle = -1;
-        AddFiniteShotDebrisEffect(&handle, blowup->type->particle_types[3], &blowup->mid_position, 1);
+    if (blowup->type->particle_types[3] == -1) {
+        return;
     }
+    i32 handle = -1;
+    AddFiniteShotDebrisEffect(&handle, blowup->type->particle_types[3], &blowup->mid_position, 1);
 }
 
 u32 GizmoBlowups_TotalScore(void *context) {

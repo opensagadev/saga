@@ -566,7 +566,11 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
         return 0;
     if (processor->action_data_1 != static_cast<u8>(set_speedermode)) {
         processor->action_data_1 = set_speedermode;
-        processor->action_timer = set_speedermode == 1 ? 0.25f : 0.0f;
+        if (set_speedermode == 1) {
+            processor->action_timer = 0.25f;
+        } else {
+            processor->action_timer = 0.0f;
+        }
     }
     switch (processor->action_data_1) {
         case 0:

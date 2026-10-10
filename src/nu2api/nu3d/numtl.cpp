@@ -170,14 +170,16 @@ void NuMtlInitEx(VARIPTR *buf, i32 mtl_count) {
         NuDatSet(NuDatOpen(package_path, buf, NULL));
     }
     package = AndroidOBBUtils::LookupPackagePath(package_path, NuFileDeviceAndroidOBBType::PATCH);
-    if (package == 1) {
-        NuDatSet(NuDatOpen(package_path, buf, NULL));
-    } else if (package == 2) {
-        if (g_apkFileDevice == NULL) {
-            NuFile::InitData init = {};
-            g_apkFileDevice = new NuFileDeviceAndroidAPK("apk:", init);
-            NuDatSet(NuDatOpen(package_path, buf, NULL));
+    if (package != 1) {
+        if (package == 2) {
+            if (g_apkFileDevice == NULL) {
+                NuFile::InitData init = {};
+                g_apkFileDevice = new NuFileDeviceAndroidAPK("apk:", init);
+                NuDatSet(NuDatOpen(package_path, buf, NULL));
+            }
         }
+    } else {
+        NuDatSet(NuDatOpen(package_path, buf, NULL));
     }
     BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/numtl_gen.c", 0xd5);
     NuTexInitExPS(buf);
