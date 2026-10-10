@@ -251,10 +251,10 @@ void LightGameObject(GameObject_s *object, void *set) {
         current.direction[2].y = SeekValF(current.direction[2].y, target.direction[2].y, 5.0f);
         current.direction[2].z = SeekValF(current.direction[2].z, target.direction[2].z, 5.0f);
     }
-    if (current.direction[2].x != 0.0f || current.direction[2].y != 0.0f || current.direction[2].z != 0.0f) {
-        NuVecNorm(&current.direction[2], &current.direction[2]);
-    } else {
+    if (current.direction[2].x == 0.0f && current.direction[2].y == 0.0f && current.direction[2].z == 0.0f) {
         current.direction[2] = target.direction[2];
+    } else {
+        NuVecNorm(&current.direction[2], &current.direction[2]);
     }
 
     object->field_0xefc &= 0x7f;

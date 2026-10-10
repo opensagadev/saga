@@ -110,9 +110,7 @@ static __used__ void locatorEditor_cbRenameLocator(eduimenu_s *, eduiitem_s *ite
 }
 static __used__ void locatorEditor_cbSetLocatorSet(eduimenu_s *, eduiitem_s *item, u32) {
     if (item != nullptr) {
-        if (item->data == 0) {
-            aieditor->current_locator_set = nullptr;
-        } else {
+        if (item->data != 0) {
             EDLOCATORSET_s *set = (EDLOCATORSET_s *)NuLinkedListGetHead(&aieditor->locator_sets);
             for (i32 index = 1; set != nullptr && index < item->data; ++index) {
                 set = (EDLOCATORSET_s *)NuLinkedListGetNext(&aieditor->locator_sets, &set->link);
@@ -125,6 +123,8 @@ static __used__ void locatorEditor_cbSetLocatorSet(eduimenu_s *, eduiitem_s *ite
                     edcamSetPos(&aieditor->current_locator->position);
                 }
             }
+        } else {
+            aieditor->current_locator_set = nullptr;
         }
     }
     aieditor_ClearMainMenu();

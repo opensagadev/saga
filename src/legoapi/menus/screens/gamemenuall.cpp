@@ -827,7 +827,11 @@ void MenuDrawMissions(MENU_s *menu) {
     f32 opacity = MenuPacket.active_player[0] ? 1.0f : DROPINALPHA;
     DrawCharIcon(MenuPacket.player_model[0], -ICONX, STATSPOSY, 0.0f, ICONSIZE, 166, opacity, opacity, 1, NULL);
     i32 select[2], cancel[2], status[2];
-    if (MenuPacket.active_player[0] && MenuPacket.active_player[1]) {
+    if (!(MenuPacket.active_player[0] && MenuPacket.active_player[1])) {
+        select[0] = select[1] = tSELECT;
+        cancel[0] = cancel[1] = tEXIT;
+        status[0] = status[1] = tSELECTING;
+    } else {
         // Original 0x2563e2–0x25640a / 0x25661f initializes only player 0.
         // The second player's prompt locals are also uninitialized in the binary.
         if (MenuPacket.reserved_1[0]) {
@@ -839,10 +843,6 @@ void MenuDrawMissions(MENU_s *menu) {
             cancel[0] = tEXIT;
             status[0] = tSELECTING;
         }
-    } else {
-        select[0] = select[1] = tSELECT;
-        cancel[0] = cancel[1] = tEXIT;
-        status[0] = status[1] = tSELECTING;
     }
     DrawPlayerIconPrompts(MenuPacket.active_player[0], select[0], 1.0f, -1, cancel[0], -1, status[0],
                           MenuPacket.active_player[1], select[1], 1.0f, -1, cancel[1], -1, status[1]);

@@ -715,12 +715,12 @@ static f32 RatioBetweenEdgesXZ(NUVEC *point, NUVEC *edge_a0, NUVEC *edge_a1, NUV
 static void SockSysPointAlongMID(SOCK *sock, SOCKPOSITION *position, NUVEC *result) {
     NUVEC *from;
     NUVEC *to;
-    if (sock->mid == NULL) {
-        from = &sock->segments[position->location.segment].midpoint;
-        to = &sock->segments[position->next_segment].midpoint;
-    } else {
+    if (sock->mid != NULL) {
         from = &sock->mid->pts[position->location.segment];
         to = &sock->mid->pts[position->next_segment];
+    } else {
+        from = &sock->segments[position->location.segment].midpoint;
+        to = &sock->segments[position->next_segment].midpoint;
     }
     if (result == NULL) {
         result = &temp_sockmidpos;

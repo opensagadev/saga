@@ -800,12 +800,12 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint(ani3_animheader_s *anim, f32 frame, n
             key = 0.0f;
         }
         i32 whole_key;
-        if (last_key <= key) {
-            whole_key = static_cast<i32>(last_key);
-            fraction = last_key - static_cast<f32>(whole_key);
-        } else {
+        if (!(last_key <= key)) {
             whole_key = static_cast<i32>(key);
             fraction = key - static_cast<f32>(whole_key);
+        } else {
+            whole_key = static_cast<i32>(last_key);
+            fraction = last_key - static_cast<f32>(whole_key);
         }
         quarter = static_cast<u32>(whole_key) & 3;
         key_offset = (whole_key / 4) * anim->key_stride;
@@ -1416,7 +1416,14 @@ extern "C" void ANI_Ani3ExtractAllNodeCurves(ani3_animheader_s *anim, float fram
     float fraction;
     i32 key_offset;
 
-    if (ForcePlayEndFrame == 0 || anim->end_frame == 0) {
+    if (ForcePlayEndFrame != 0 && anim->end_frame != 0) {
+        float key = static_cast<float>(anim->end_frame + anim->key_count - 4);
+        i32 whole_key = static_cast<i32>(key);
+        fraction = key - static_cast<float>(whole_key);
+        quarter = static_cast<u32>(whole_key) & 3;
+        stride = anim->key_stride;
+        key_offset = (whole_key / 4) * stride;
+    } else {
         if (anim->key_count == 1) {
             quarter = 0;
             fraction = 0.0f;
@@ -1429,27 +1436,20 @@ extern "C" void ANI_Ani3ExtractAllNodeCurves(ani3_animheader_s *anim, float fram
             if (key < 0.0f) {
                 key = 0.0f;
             }
-            if (!(last_key <= key)) {
-                i32 whole_key = static_cast<i32>(key);
-                fraction = key - static_cast<float>(whole_key);
-                quarter = static_cast<u32>(whole_key) & 3;
-                stride = anim->key_stride;
-                key_offset = (whole_key / 4) * stride;
-            } else {
+            if (last_key <= key) {
                 i32 whole_key = static_cast<i32>(last_key);
                 fraction = last_key - static_cast<float>(whole_key);
                 quarter = static_cast<u32>(whole_key) & 3;
                 stride = anim->key_stride;
                 key_offset = (whole_key / 4) * stride;
+            } else {
+                i32 whole_key = static_cast<i32>(key);
+                fraction = key - static_cast<float>(whole_key);
+                quarter = static_cast<u32>(whole_key) & 3;
+                stride = anim->key_stride;
+                key_offset = (whole_key / 4) * stride;
             }
         }
-    } else {
-        float key = static_cast<float>(anim->end_frame + anim->key_count - 4);
-        i32 whole_key = static_cast<i32>(key);
-        fraction = key - static_cast<float>(whole_key);
-        quarter = static_cast<u32>(whole_key) & 3;
-        stride = anim->key_stride;
-        key_offset = (whole_key / 4) * stride;
     }
 
     u16 *types = anim->curve_types;

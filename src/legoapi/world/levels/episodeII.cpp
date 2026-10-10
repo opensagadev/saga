@@ -405,16 +405,16 @@ void BountyHunterPursuitC_Update(WORLDINFO_s *world) {
         return;
     }
 
-    if (!(traffic_test_z > player->apiobj.position.z)) {
-        if (traffic->side == 1) {
-            return;
-        }
-        traffic->side = 1;
-    } else {
+    if (traffic_test_z > player->apiobj.position.z) {
         if (traffic->side == -1) {
             return;
         }
         traffic->side = -1;
+    } else {
+        if (traffic->side == 1) {
+            return;
+        }
+        traffic->side = 1;
     }
 
     PURSUIT_TRAFFIC_ENTRY_s *entry = traffic->entries;
@@ -734,13 +734,13 @@ void KaminoC_Update(WORLDINFO_s *world) {
                 kaminodisco.tile_state[kaminodisco.second_tile] = 3;
                 kaminodisco.first_tile = KaminoDiscoChooseTile(-1, 0);
                 kaminodisco.second_tile = KaminoDiscoChooseTile(kaminodisco.first_tile, 0);
-                if (kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1) {
-                    kaminodisco.tile_state[kaminodisco.first_tile] = 1;
-                    kaminodisco.tile_state[kaminodisco.second_tile] = 1;
-                } else {
+                if (!(kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1)) {
                     kaminodisco.phase = 2;
                     for (i32 i = 0; i < kaminodisco.tile_count; ++i)
                         kaminodisco.tile_state[i] = 0;
+                } else {
+                    kaminodisco.tile_state[kaminodisco.first_tile] = 1;
+                    kaminodisco.tile_state[kaminodisco.second_tile] = 1;
                 }
                 break;
             }
@@ -819,7 +819,22 @@ void KaminoC_Update(WORLDINFO_s *world) {
             PlaySfx("Kam_DiscoFloorPanelOn",
                     reinterpret_cast<NUVEC *>(&NuSpecialGetDrawMtx(&kaminodisco.complete[i])->m30));
     }
-    if (kaminoc_netpacket->complete) {
+    if (!kaminoc_netpacket->complete) {
+        for (i32 i = 0; i < 3; ++i) {
+            NuSpecialSetVisibility(&disco_on_spin[i], 0);
+            GizmoSetVisibility(world->gizmo_sys, disco_off_spina[i], 1, 0);
+        }
+        NuSpecialSetVisibility(&walllights_disco[0], 0);
+        NuSpecialSetVisibility(&walllights_disco[1], 0);
+        NuSpecialSetVisibility(&walllights[0], 1);
+        NuSpecialSetVisibility(&walllights[1], 1);
+        NuSpecialSetVisibility(&striplights[0], 1);
+        NuSpecialSetVisibility(&striplights[1], 0);
+        NuSpecialSetVisibility(&discolights[0], 0);
+        NuSpecialSetVisibility(&discolights[1], 0);
+        NuSpecialSetVisibility(&discorm_wall_on, 0);
+        NuSpecialSetVisibility(&discorm_wall_off, 1);
+    } else {
         for (i32 i = 0; i < 3; ++i) {
             NuSpecialSetVisibility(&disco_on_spin[i], 1);
             GizmoSetVisibility(world->gizmo_sys, disco_off_spina[i], 0, 0);
@@ -838,21 +853,6 @@ void KaminoC_Update(WORLDINFO_s *world) {
             PlaySfx("Kam_DiscoFloorPanelDone", NuSpecialGetDrawPos(&kaminodisco.off[3]));
             kaminodisco.completion_sound = 1;
         }
-    } else {
-        for (i32 i = 0; i < 3; ++i) {
-            NuSpecialSetVisibility(&disco_on_spin[i], 0);
-            GizmoSetVisibility(world->gizmo_sys, disco_off_spina[i], 1, 0);
-        }
-        NuSpecialSetVisibility(&walllights_disco[0], 0);
-        NuSpecialSetVisibility(&walllights_disco[1], 0);
-        NuSpecialSetVisibility(&walllights[0], 1);
-        NuSpecialSetVisibility(&walllights[1], 1);
-        NuSpecialSetVisibility(&striplights[0], 1);
-        NuSpecialSetVisibility(&striplights[1], 0);
-        NuSpecialSetVisibility(&discolights[0], 0);
-        NuSpecialSetVisibility(&discolights[1], 0);
-        NuSpecialSetVisibility(&discorm_wall_on, 0);
-        NuSpecialSetVisibility(&discorm_wall_off, 1);
     }
 }
 
@@ -978,16 +978,16 @@ void KaminoE_Update(WORLDINFO_s *world) {
             case 1: {
                 kamino_e.departure_timer += FRAMETIME;
                 f32 ratio, base;
-                if (!(kamino_e.departure_timer < 4.0f)) {
-                    kamino_e.departure_timer = 0.0f;
-                    kamino_e.departing = 2;
-                    ratio = 1.0f;
-                    base = -0.0f;
-                } else {
+                if (kamino_e.departure_timer < 4.0f) {
                     i32 angle =
                         static_cast<i32>(((0.25f * kamino_e.departure_timer) * 180.0f - 90.0f) * 182.04444885253906f);
                     ratio = (NuTrigTable[(angle >> 1) & 0x7fff] + 1.0f) * 0.5f;
                     base = (1.0f - ratio) * -2.8f;
+                } else {
+                    kamino_e.departure_timer = 0.0f;
+                    kamino_e.departing = 2;
+                    ratio = 1.0f;
+                    base = -0.0f;
                 }
                 kamino_e.position.y = ratio * desired.y + base;
                 break;
@@ -1015,14 +1015,14 @@ void KaminoE_Update(WORLDINFO_s *world) {
             case 4: {
                 kamino_e.departure_timer += FRAMETIME;
                 f32 ratio;
-                if (!(kamino_e.departure_timer < 4.0f)) {
-                    kamino_e.departure_timer = 0.0f;
-                    kamino_e.departing = 5;
-                    ratio = 1.0f;
-                } else {
+                if (kamino_e.departure_timer < 4.0f) {
                     i32 angle =
                         static_cast<i32>(((0.25f * kamino_e.departure_timer) * 180.0f - 90.0f) * 182.04444885253906f);
                     ratio = (NuTrigTable[(angle >> 1) & 0x7fff] + 1.0f) * 0.5f;
+                } else {
+                    kamino_e.departure_timer = 0.0f;
+                    kamino_e.departing = 5;
+                    ratio = 1.0f;
                 }
                 kamino_e.position.x = desired.x * ratio + kamino_e_centre.x * (1.0f - ratio);
                 kamino_e.position.z = desired.z * ratio + kamino_e_centre.z * (1.0f - ratio);
@@ -1917,13 +1917,13 @@ void JediB_Update(WORLDINFO_s *world) {
                 case 6: {
                     // The low-end wave is two slots shorter.
                     i32 wave_done;
-                    if (g_lowEndLevelBehaviour != 0) {
-                        wave_done = jedi_b.wave_spawned[0] != 0 && jedi_b.wave_spawned[1] != 0 &&
-                                    jedi_b.wave_spawned[2] != 0 && jedi_b.wave_spawned[3] != 0;
-                    } else {
+                    if (g_lowEndLevelBehaviour == 0) {
                         wave_done = jedi_b.wave_spawned[0] != 0 && jedi_b.wave_spawned[1] != 0 &&
                                     jedi_b.wave_spawned[2] != 0 && jedi_b.wave_spawned[3] != 0 &&
                                     jedi_b.wave_spawned[4] != 0 && jedi_b.wave_spawned[5] != 0;
+                    } else {
+                        wave_done = jedi_b.wave_spawned[0] != 0 && jedi_b.wave_spawned[1] != 0 &&
+                                    jedi_b.wave_spawned[2] != 0 && jedi_b.wave_spawned[3] != 0;
                     }
                     jedi_b.wave_timer += FRAMETIME;
                     if (jedi_b.wave_timer > 5.0f) {
@@ -2234,13 +2234,13 @@ void GunshipA_Update(WORLDINFO_s *world) {
 }
 
 void GunshipA_Draw(WORLDINFO_s *world) {
-    if (TimingBarSet == 5) {
-        TBOPENFN("mini", 5);
-        DrawMiniSnowTroopers(world);
-    } else {
+    if (TimingBarSet != 5) {
         DrawMiniSnowTroopers(world);
         if (TimingBarSet == 5)
             TBCLOSEFN("mini", 5);
+    } else {
+        TBOPENFN("mini", 5);
+        DrawMiniSnowTroopers(world);
     }
 }
 
@@ -2317,13 +2317,13 @@ void BonusGunshipA_Update(WORLDINFO_s *world) {
             found = true;
         }
         if (found) {
-            if (netclient != 0) {
-                LevFlag.progress = GUNSHIP_ACTIVE;
-            } else {
+            if (netclient == 0) {
                 Doors_SetLastDoor((DOOR_s *)Door_FindByName(world, "gunshipa_mid"));
                 bonus_gunship_store_progress_flag = 1;
                 StoreLevelProgress(world);
                 bonus_gunship_store_progress_flag = 0;
+                LevFlag.progress = GUNSHIP_ACTIVE;
+            } else {
                 LevFlag.progress = GUNSHIP_ACTIVE;
             }
         }

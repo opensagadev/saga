@@ -429,10 +429,10 @@ void NuMemoryManager::BlockFree(void *ptr, u32 flags) {
         end_tag = END_TAG(header, BLOCK_SIZE(header->value));
 
         tag_value = *end_tag >> 0x1b;
-        if (tag_value != 0x1f) {
-            manager_idx = tag_value - 1;
-        } else {
+        if (tag_value == 0x1f) {
             manager_idx = end_tag[-1];
+        } else {
+            manager_idx = tag_value - 1;
         }
 
         if (manager->idx == manager_idx) {
@@ -506,10 +506,10 @@ void *NuMemoryManager::_BlockReAlloc(void *ptr, u32 size, u32 alignment, u32 fla
 
     u32 *end_tag = (u32 *)((usize)header + BLOCK_SIZE(header->value) - 4);
     u32 manager_index = *end_tag >> 27;
-    if (manager_index == 31) {
-        manager_index = *(end_tag - 1);
-    } else {
+    if (manager_index != 31) {
         --manager_index;
+    } else {
+        manager_index = *(end_tag - 1);
     }
     if (this->idx != manager_index) {
         return m_memoryManagers[manager_index]->_BlockReAlloc(ptr, size, alignment, flags, name, category);
@@ -640,15 +640,15 @@ void NuMemoryManager::ReleaseUnreferencedPages() {
             !page->is_external) {
             FreeHeader *free_header = reinterpret_cast<FreeHeader *>(header);
             BinUnlink(free_header);
-            if (event_handler->ReleasePage(this, page->original_ptr, page->size)) {
+            if (!(event_handler->ReleasePage(this, page->original_ptr, page->size))) {
+                BinLink(free_header, true);
+            } else {
                 if (next != NULL)
                     next->prev = prev;
                 if (prev != NULL)
                     prev->next = next;
                 else
                     this->pages = next;
-            } else {
-                BinLink(free_header, true);
             }
         }
         page = next;
@@ -1553,10 +1553,10 @@ SAGA_HOST_WEAK u32 NuMemoryManager::GetBlockSize(void *ptr) {
     u32 payload_size = total_size - m_headerSize;
     u32 *end_tag = (u32 *)((usize)header + total_size - 4);
     u32 manager_index = *end_tag >> 27;
-    if (manager_index == 0x1f) {
-        manager_index = *(end_tag - 1);
-    } else {
+    if (manager_index != 0x1f) {
         manager_index--;
+    } else {
+        manager_index = *(end_tag - 1);
     }
 
     u32 block_size = payload_size - 4;

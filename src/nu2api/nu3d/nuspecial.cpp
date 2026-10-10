@@ -259,14 +259,14 @@ extern "C" i32 NuSpecialExistsFn(void *special_ptr) {
 }
 
 extern "C" void NuSpecialMtlMap(i32 count, NUMTL **materials) {
-    if (count != 0) {
+    if (count == 0) {
+        nuspecial_draw_state &= ~NUSPECIAL_DRAW_MATERIAL_MAP;
+        nurndr_forced_mtl_table = NULL;
+        return;
+    } else {
         nurndr_nforced_mtls = count;
         nuspecial_draw_state |= NUSPECIAL_DRAW_MATERIAL_MAP;
         nurndr_forced_mtl_table = materials;
-        return;
-    } else {
-        nuspecial_draw_state &= ~NUSPECIAL_DRAW_MATERIAL_MAP;
-        nurndr_forced_mtl_table = NULL;
         return;
     }
 }

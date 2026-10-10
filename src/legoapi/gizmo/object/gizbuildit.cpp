@@ -241,10 +241,10 @@ static void GizBuildIts_Draw(void *world_ptr, void *data, float) {
             continue;
         }
 
-        if ((buildit.state_flags & GIZBUILDIT_STATE_DISABLE_SHADOW_RENDERING) != 0) {
-            EnableShadowMapRendering(0);
-        } else {
+        if ((buildit.state_flags & GIZBUILDIT_STATE_DISABLE_SHADOW_RENDERING) == 0) {
             ResetShadowMapRendering();
+        } else {
+            EnableShadowMapRendering(0);
         }
 
         if (buildit.linked_buildit == NULL) {
@@ -757,12 +757,7 @@ void GizBuildIt_SetToStart(GIZBUILDIT_s *buildit, i32 emit_debris, i32 keep_buil
         }
     }
 
-    if (buildit->linked_buildit != NULL) {
-        for (i32 index = first_piece_to_reset; index < buildit->anim_object_count; ++index) {
-            GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[index]->object_data);
-            data->draw_mtx = data->start_mtx;
-        }
-    } else {
+    if (buildit->linked_buildit == NULL) {
         GameAnimSet_SetVisibility(buildit->anim_set, 1);
         for (i32 index = first_piece_to_reset; index < buildit->anim_object_count; ++index) {
             GAMEANIMOBJ_s *object = buildit->anim_objects[index];
@@ -770,6 +765,11 @@ void GizBuildIt_SetToStart(GIZBUILDIT_s *buildit, i32 emit_debris, i32 keep_buil
             object->instance_animation->ltime = object->start_frame;
         }
         GizBuildIt_SetStepTime(buildit, NULL);
+    } else {
+        for (i32 index = first_piece_to_reset; index < buildit->anim_object_count; ++index) {
+            GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[index]->object_data);
+            data->draw_mtx = data->start_mtx;
+        }
     }
 
     buildit->builders_active = 0;
@@ -815,7 +815,9 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
         if (buildit.build_state == GIZBUILDIT_BUILD_FINISHING) {
             buildit.step_timer += FRAMETIME;
             f32 finish_progress;
-            if (buildit.step_timer >= BUILDIT_FINISH_DURATION) {
+            if (!(buildit.step_timer >= BUILDIT_FINISH_DURATION)) {
+                finish_progress = buildit.step_timer / BUILDIT_FINISH_DURATION;
+            } else {
                 Hint_SetComplete(LEGOHINT_BUILD);
                 GizBuildIt_Finish(&buildit);
                 NuVecAdd(&finish_position, &buildit.position, &buildit.effect_position);
@@ -837,8 +839,6 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
                     GameAnimSet_SetVisibility(buildit.anim_set, 0);
                 }
                 finish_progress = 1.0f;
-            } else {
-                finish_progress = buildit.step_timer / BUILDIT_FINISH_DURATION;
             }
             for (i32 piece_index = 0; piece_index < buildit.anim_object_count; ++piece_index) {
                 GAMEANIMOBJ_s *piece = buildit.anim_objects[piece_index];
@@ -956,15 +956,15 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
                     if (GizBuildit_AutoBuildPosFn(world, &buildit.start_position, &centre, &facing) != 0) {
                         f32 radius;
                         u16 angle;
-                        if (buildit.step_timer > 4.5f) {
-                            radius = 0.5f;
-                            angle = facing - 0x4000;
-                        } else {
+                        if (!(buildit.step_timer > 4.5f)) {
                             const f32 phase = ((4.5f - buildit.step_timer) / 4.5f) * 16384.0f + 32768.0f;
                             const f32 progress = 1.0f + NU_SIN_LUT(phase + 16384.0f);
                             angle = static_cast<i32>(static_cast<f32>(static_cast<i32>(facing) - 0x4000) +
                                                      (((5.0f * progress) * 360.0f) * 65536.0f) / 360.0f);
                             radius = 0.5f - progress * 0.3f;
+                        } else {
+                            radius = 0.5f;
+                            angle = facing - 0x4000;
                         }
                         const u16 angle_step =
                             static_cast<i32>(NuFdiv(65536.0f, static_cast<f32>(buildit.anim_object_count)));
@@ -1167,10 +1167,10 @@ void GizBuildit_Reset(GIZBUILDIT_s *buildit, void *world_ptr) {
         buildit->bounds_radius = span * NuTrigTable[0x3000];
     }
 
-    if (buildit->field_0x5c == 0) {
-        buildit->state_flags &= static_cast<u16>(~GIZBUILDIT_STATE_ROTATING_WOBBLE);
-    } else {
+    if (buildit->field_0x5c != 0) {
         buildit->state_flags |= GIZBUILDIT_STATE_ROTATING_WOBBLE;
+    } else {
+        buildit->state_flags &= static_cast<u16>(~GIZBUILDIT_STATE_ROTATING_WOBBLE);
     }
     buildit->build_state = GIZBUILDIT_BUILD_IDLE;
     buildit->built_object_count = 0;

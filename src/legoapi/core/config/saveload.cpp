@@ -225,7 +225,24 @@ static inline u32 FS_EncodedDateKey(const char *name) {
 void FS_SortStrings(char *start, char *end, i32 mode) {
     char tmp[256];
 
-    if (static_cast<u32>(mode) > 1) {
+    if (!(static_cast<u32>(mode) > 1)) {
+        const i32 direction = mode == 0 ? 1 : -1;
+        for (char *current = start; current != end;) {
+            i32 current_length = NuStrLen(current);
+            char *candidate = current + NuStrLen(current) + 1;
+            while (candidate != end) {
+                const i32 candidate_length = NuStrLen(candidate);
+                if (NuStrICmp(current + 7, candidate + 7) == direction) {
+                    NuStrCpy(tmp, candidate);
+                    memmove(current + candidate_length + 1, current, candidate - current);
+                    memcpy(current, tmp, candidate_length + 1);
+                    current_length = candidate_length;
+                }
+                candidate += candidate_length + 1;
+            }
+            current += current_length + 1;
+        }
+    } else {
         const i32 direction = mode == 2 ? 1 : -1;
         for (char *current = start; current != end;) {
             u32 current_key = FS_EncodedDateKey(current);
@@ -240,23 +257,6 @@ void FS_SortStrings(char *start, char *end, i32 mode) {
                     memmove(current + candidate_length + 1, current, candidate - current);
                     memcpy(current, tmp, candidate_length + 1);
                     current_key = candidate_key;
-                    current_length = candidate_length;
-                }
-                candidate += candidate_length + 1;
-            }
-            current += current_length + 1;
-        }
-    } else {
-        const i32 direction = mode == 0 ? 1 : -1;
-        for (char *current = start; current != end;) {
-            i32 current_length = NuStrLen(current);
-            char *candidate = current + NuStrLen(current) + 1;
-            while (candidate != end) {
-                const i32 candidate_length = NuStrLen(candidate);
-                if (NuStrICmp(current + 7, candidate + 7) == direction) {
-                    NuStrCpy(tmp, candidate);
-                    memmove(current + candidate_length + 1, current, candidate - current);
-                    memcpy(current, tmp, candidate_length + 1);
                     current_length = candidate_length;
                 }
                 candidate += candidate_length + 1;

@@ -2615,16 +2615,16 @@ void edpartLoadSingleType(part_typedesc_s *type, i32 version, i32 page) {
     type->emission_period_random = EdFileReadFloat();
     type->emission_pause = EdFileReadFloat();
     type->emission_pause_random = EdFileReadFloat();
-    if (version > 12) {
-        for (i32 i = 0; i < 3; ++i)
-            type->rotation[i] = EdFileReadInt();
-        for (i32 i = 0; i < 3; ++i)
-            type->rotation_random[i] = EdFileReadInt();
-    } else {
+    if (!(version > 12)) {
         for (i32 i = 0; i < 3; ++i)
             type->rotation[i] = EdFileReadShort();
         for (i32 i = 0; i < 3; ++i)
             type->rotation_random[i] = EdFileReadShort();
+    } else {
+        for (i32 i = 0; i < 3; ++i)
+            type->rotation[i] = EdFileReadInt();
+        for (i32 i = 0; i < 3; ++i)
+            type->rotation_random[i] = EdFileReadInt();
     }
     type->flags = EdFileReadUnsignedInt();
     if (type->effect_ids[0] == 9999)

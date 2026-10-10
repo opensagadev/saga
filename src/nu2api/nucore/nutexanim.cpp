@@ -636,13 +636,13 @@ extern "C" void NuTexAnimEnvProc(nutexanimenv_s *env) {
                 }
                 continue;
             case 15:
-                if (TextureCondition(instruction[1], env->texture_index, instruction[2]) ||
-                    env->loop_counts[env->loop_depth - 1] == 0) {
-                    --env->loop_depth;
-                    env->instruction_index += 3;
-                } else {
+                if (!(TextureCondition(instruction[1], env->texture_index, instruction[2])) &&
+                    env->loop_counts[env->loop_depth - 1] != 0) {
                     --env->loop_counts[env->loop_depth - 1];
                     env->instruction_index = env->loop_starts[env->loop_depth - 1];
+                } else {
+                    --env->loop_depth;
+                    env->instruction_index += 3;
                 }
                 continue;
             case 16:

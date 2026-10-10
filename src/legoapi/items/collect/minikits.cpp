@@ -543,12 +543,12 @@ void AllMiniKits_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 cur
     i32 angle = 0x2000;
     if (GameTimer.time_elapsed_mod_seconds <= 0.25f)
         angle = (static_cast<i32>(GameTimer.time_elapsed_mod_seconds * 32768.0f + 16384.0f) >> 1) & 0x7fff;
-    if (Game.area_save[packet->area->index].field_0x5[0] == 0) {
-        const f32 size = ((1.0f - fabsf(NuTrigTable[angle])) + 1.0f) * 1.2f;
-        Text3DEx("?", -0.6f, -0.6f, 1.1f, size, size, size, 0, 255, 255, 255, opacity);
-    } else {
+    if (Game.area_save[packet->area->index].field_0x5[0] != 0) {
         DrawStatusMiniKit(-0.6f, -0.5f, 1.1f, NuTrigTable[(static_cast<i32>(alpha * 16384.0f) >> 1) & 0x7fff] * 0.15f,
                           1.0f, Game.area_save[packet->area->index].field_0x5[0], packet, 0.0f);
+    } else {
+        const f32 size = ((1.0f - fabsf(NuTrigTable[angle])) + 1.0f) * 1.2f;
+        Text3DEx("?", -0.6f, -0.6f, 1.1f, size, size, size, 0, 255, 255, 255, opacity);
     }
     if (Game.area_save[packet->area->index].field_0x5[0] == packet->minikit_max) {
         Text3DEx("$", -0.6f, -0.7f, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 0, 127, opacity);

@@ -761,12 +761,12 @@ i32 UnicodeToIndexFast(vucharidx_s *map, i32 count, u16 unicode) {
                 return map[low].index;
             return -1;
         }
-        if (middle_unicode > unicode) {
-            high = middle;
-            middle = (low + middle) >> 1;
-        } else {
+        if (!(middle_unicode > unicode)) {
             low = middle;
             middle = (high + middle) >> 1;
+        } else {
+            high = middle;
+            middle = (low + middle) >> 1;
         }
         middle_unicode = map[middle].unicode;
     }

@@ -322,10 +322,10 @@ NetReplicator::NetReplicator(i32 group, float minimum_seconds, float maximum_sec
     next = 0;
     previous = 0;
     minimum_interval = minimum_seconds < 0.1f ? 100 : static_cast<u32>(minimum_seconds * 1000.0f);
-    if (maximum_seconds > 0.0f && maximum_seconds < 0.1f) {
-        maximum_interval = 100;
-    } else {
+    if (!(maximum_seconds > 0.0f && maximum_seconds < 0.1f)) {
         maximum_interval = static_cast<u32>(maximum_seconds * 1000.0f);
+    } else {
+        maximum_interval = 100;
     }
     data_size = 0;
     message_size = 0;

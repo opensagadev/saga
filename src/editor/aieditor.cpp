@@ -489,15 +489,7 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
         } else if (aieditorsettings.solid_antinode_display && (held & (0x1000 | 0x4000))) {
             aieditor->flags |= 4;
             f32 step = (selected->upper_height - selected->lower_height) * 0.05f;
-            if (!(held & 0x1000)) {
-                if (held & 4)
-                    selected->lower_height += step;
-                else if (held & 1)
-                    selected->lower_height -= step;
-                selected->lower_height = selected->lower_height > selected->upper_height - 0.01f
-                                             ? selected->upper_height - 0.01f
-                                             : selected->lower_height;
-            } else {
+            if (held & 0x1000) {
                 if (held & 4)
                     selected->upper_height += step;
                 else if (held & 1)
@@ -505,6 +497,14 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
                 selected->upper_height = selected->upper_height < selected->lower_height + 0.01f
                                              ? selected->lower_height + 0.01f
                                              : selected->upper_height;
+            } else {
+                if (held & 4)
+                    selected->lower_height += step;
+                else if (held & 1)
+                    selected->lower_height -= step;
+                selected->lower_height = selected->lower_height > selected->upper_height - 0.01f
+                                             ? selected->upper_height - 0.01f
+                                             : selected->lower_height;
             }
         }
     }

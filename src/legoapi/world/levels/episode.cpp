@@ -432,14 +432,7 @@ i32 Episode_CountOpenAreas(i32 episode_index, i32 area_index, AREASAVE_s *saves)
         if (save->minikit_complete != 0)
             ++EpGoldBrickCount;
         EpMiniKitCount += save->field_0x5[0];
-        if (BOTHTRUEJEDIGOLDBRICKS == 0) {
-            ++EpBuildUpTotal;
-            EpGoldBrickTotal += 2;
-            if (save->true_hero_complete[0] != 0 || save->true_hero_complete[1] != 0) {
-                ++EpGoldBrickCount;
-                ++EpBuildUpCount;
-            }
-        } else {
+        if (BOTHTRUEJEDIGOLDBRICKS != 0) {
             if (save->true_hero_complete[0] != 0) {
                 ++EpBuildUpCount;
                 ++EpGoldBrickCount;
@@ -451,6 +444,13 @@ i32 Episode_CountOpenAreas(i32 episode_index, i32 area_index, AREASAVE_s *saves)
                 ++EpBuildUpCount;
                 ++EpGoldBrickCount;
                 ++EpFreePlayBuildUpCount;
+            }
+        } else {
+            ++EpBuildUpTotal;
+            EpGoldBrickTotal += 2;
+            if (save->true_hero_complete[0] != 0 || save->true_hero_complete[1] != 0) {
+                ++EpGoldBrickCount;
+                ++EpBuildUpCount;
             }
         }
         ++EpRedBrickTotal;
@@ -1093,13 +1093,7 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                     if (i == selected && shoot_due != 0)
                         shot = TrooperShoot(world, team, trooper, &shot_angle, team_index);
 
-                    if ((trooper->state_flags & 0x40) != 0) {
-                        ++stopped_count;
-                        trooper->rotation =
-                            SeekRot(trooper->rotation, trooper->target_rotation, MiniTrooperTurnSpeed());
-                        if (static_cast<i32>(trooper->rotation) - static_cast<i32>(trooper->target_rotation) <= 0x16c)
-                            MiniTrooperSetWanderTarget(trooper, shot, &shot_angle);
-                    } else {
+                    if ((trooper->state_flags & 0x40) == 0) {
                         const minisnowtrooper_s *slot = &team->troopers[trooper->formation_index];
                         const f32 target_x = team->origin_x + slot->formation_x;
                         const f32 target_z = team->origin_z + slot->formation_z;
@@ -1109,6 +1103,12 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                             trooper->state_flags |= 0x40;
                             ++stopped_count;
                         }
+                    } else {
+                        ++stopped_count;
+                        trooper->rotation =
+                            SeekRot(trooper->rotation, trooper->target_rotation, MiniTrooperTurnSpeed());
+                        if (static_cast<i32>(trooper->rotation) - static_cast<i32>(trooper->target_rotation) <= 0x16c)
+                            MiniTrooperSetWanderTarget(trooper, shot, &shot_angle);
                     }
                     if ((trooper->state_flags & 0x40) == 0) {
                         const minisnowtrooper_s *slot = &team->troopers[trooper->formation_index];

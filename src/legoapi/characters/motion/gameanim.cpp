@@ -193,14 +193,15 @@ static void JumpAnimCode(GameObject_s *object) {
     packet->requested_animation = object->context_animation;
     const u8 state = object->action_movement_state;
     if (object->context_animation != 0x49 && (state == 6 || state < 2 || state == 7 || state == 9)) {
-        if (packet->blending == 0 && object->context_animation == packet->animation_index && (packet->flags & 1) != 0) {
+        if (!(packet->blending == 0 && object->context_animation == packet->animation_index &&
+              (packet->flags & 1) != 0)) {
+            object->airborne_input_timer = 0.0f;
+        } else {
             object->airborne_input_timer += FRAMETIME;
             if (object->airborne_input_timer >= 0.1f &&
                 (object->nearby_floor_distance == 2000000.0f || object->nearby_floor_distance > 0.35f)) {
                 object->context_variant_flags |= 0x80;
             }
-        } else {
-            object->airborne_input_timer = 0.0f;
         }
     }
 }
@@ -891,13 +892,13 @@ void Animate_DROIDEKA(GameObject_s *object) {
     }
 
     const i16 animation = packet.requested_animation;
-    if (animation == CHARACTER_ANIMATION_FALL ||
-        ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
-         (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
-          animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
-        object->fall_animation_timer += FRAMETIME;
-    } else {
+    if (animation != CHARACTER_ANIMATION_FALL &&
+        !((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
+          (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
+           animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
         object->fall_animation_timer = 0.0f;
+    } else {
+        object->fall_animation_timer += FRAMETIME;
     }
 }
 
@@ -974,13 +975,13 @@ final_animation:
         packet.requested_animation = static_cast<i16>(SetProtocolDroidFallAnim(object));
     UpdateCharacterIdle(object);
     const i16 animation = packet.requested_animation;
-    if (animation == CHARACTER_ANIMATION_FALL ||
-        ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
-         (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
-          animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
-        object->fall_animation_timer += FRAMETIME;
-    } else {
+    if (animation != CHARACTER_ANIMATION_FALL &&
+        !((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
+          (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
+           animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
         object->fall_animation_timer = 0.0f;
+    } else {
+        object->fall_animation_timer += FRAMETIME;
     }
 }
 
@@ -1113,13 +1114,13 @@ void Animate_ASTROMECH(GameObject_s *object) {
 
     UpdateCharacterIdle(object);
     const i16 animation = packet.requested_animation;
-    if (animation == CHARACTER_ANIMATION_FALL ||
-        ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
-         (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
-          animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
-        object->fall_animation_timer += FRAMETIME;
-    } else {
+    if (animation != CHARACTER_ANIMATION_FALL &&
+        !((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
+          (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
+           animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
         object->fall_animation_timer = 0.0f;
+    } else {
+        object->fall_animation_timer += FRAMETIME;
     }
 }
 
@@ -1370,13 +1371,13 @@ void Animate_BATTLEDROID(GameObject_s *object) {
     }
 
     const i16 animation = packet.requested_animation;
-    if (animation == CHARACTER_ANIMATION_FALL ||
-        ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
-         (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
-          animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
-        object->fall_animation_timer += FRAMETIME;
-    } else {
+    if (animation != CHARACTER_ANIMATION_FALL &&
+        !((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
+          (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
+           animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
         object->fall_animation_timer = 0.0f;
+    } else {
+        object->fall_animation_timer += FRAMETIME;
     }
 }
 
@@ -1616,10 +1617,10 @@ void Animate_SUPERBATTLEDROID(GameObject_s *object) {
             if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
                 object->pad_gamepad->input_magnitude > 0.0f) {
                 const f32 run_threshold = (game_character->walk_speed + game_character->run_speed) * 0.5f;
-                if (!(object->pad_gamepad->input_magnitude <= run_threshold)) {
-                    packet.requested_animation = weapon_out ? CHARACTER_ANIMATION_SABER_RUN : CHARACTER_ANIMATION_RUN;
-                } else {
+                if (object->pad_gamepad->input_magnitude <= run_threshold) {
                     packet.requested_animation = weapon_out ? CHARACTER_ANIMATION_SABER_WALK : CHARACTER_ANIMATION_WALK;
+                } else {
+                    packet.requested_animation = weapon_out ? CHARACTER_ANIMATION_SABER_RUN : CHARACTER_ANIMATION_RUN;
                 }
             } else if (object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_ALT_IDLE] != NULL &&
                        object->weapon_scale >= 0.5f) {
@@ -1631,13 +1632,13 @@ void Animate_SUPERBATTLEDROID(GameObject_s *object) {
 
     UpdateCharacterIdle(object);
     const i16 animation = packet.requested_animation;
-    if (animation == CHARACTER_ANIMATION_FALL ||
-        ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
-         (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
-          animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
-        object->fall_animation_timer += FRAMETIME;
-    } else {
+    if (animation != CHARACTER_ANIMATION_FALL &&
+        !((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
+          (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
+           animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
         object->fall_animation_timer = 0.0f;
+    } else {
+        object->fall_animation_timer += FRAMETIME;
     }
 }
 

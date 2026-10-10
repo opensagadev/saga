@@ -153,10 +153,7 @@ AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferE
                         in_area = 1;
                         if (li != -1) {
                             in_area = area->level_count;
-                            if (in_area == 0) {
-                                area->levels[0] = (i16)li;
-                                area->level_count = 1;
-                            } else {
+                            if (in_area != 0) {
                                 i32 k;
                                 if (area->levels[0] != li) {
                                     for (k = 1; k < in_area; k++) {
@@ -168,6 +165,9 @@ AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferE
                                         area->level_count = (u8)(in_area + 1);
                                     }
                                 }
+                            } else {
+                                area->levels[0] = (i16)li;
+                                area->level_count = 1;
                             }
                             in_area = 1;
                         }

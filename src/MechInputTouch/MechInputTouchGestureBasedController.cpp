@@ -463,10 +463,8 @@ bool MechInputTouchGestureBasedController::OnHold(GameObject_s &object, TouchHol
         TouchHacks::CanTagVehicle(object, *character)) {
         StartNewTask(new MechTouchTaskTag(*this, *character), holder, true, true);
     } else if (VehicleArea == 0 && TouchHacks::CanTagTo(object, *character)) {
-        if (InCollectList_Index(character->id, NULL, 0) != -1 &&
-            ((WORLD != NULL && WORLD->area == HUB_ADATA) || TouchHacks::InParty(*character))) {
-            tag_button = MechSystems::Get()->NewTagButton(*character, holder);
-        } else {
+        if (!(InCollectList_Index(character->id, NULL, 0) != -1 &&
+              ((WORLD != NULL && WORLD->area == HUB_ADATA) || TouchHacks::InParty(*character)))) {
             GameAudio_PlaySfx(0x32, &object.apiobj.collision_position, 0, 0);
             if (object.pad_gamepad != NULL) {
                 NewRumble(object.pad_gamepad->pad, 0.5f, 0);
@@ -481,6 +479,8 @@ bool MechInputTouchGestureBasedController::OnHold(GameObject_s &object, TouchHol
                                     elapsed);
                 }
             }
+        } else {
+            tag_button = MechSystems::Get()->NewTagButton(*character, holder);
         }
     } else if (character == object.force_glow_object) {
         target = holder.target_object.Get();
@@ -873,13 +873,13 @@ bool MechInputTouchGestureBasedController::StartJumpUsingAIPath(JumpTriggerPacke
         complete_success_hint = true;
     } else {
         const u32 double_jump = flags & (LEGO_AIPATHCNX_DOUBLE_JUMP | 0x400000);
-        if (double_jump != 0) {
+        if (double_jump == 0) {
+            animation = 1;
+            complete_success_hint = false;
+        } else {
             const bool capable = (object->ai.capabilities & double_jump) != 0;
             animation = capable ? 2 : 1;
             complete_success_hint = capable;
-        } else {
-            animation = 1;
-            complete_success_hint = false;
         }
     }
 
@@ -1025,15 +1025,15 @@ void MechInputTouchGestureBasedController::Update(NuInputTouchData const *data) 
         if (smart_bomb_touch != NULL) {
             MechObjectInterface *touched_object = smart_bomb_touch->target_object.Get();
             VuVec position(smart_bomb_touch->down_position.x, smart_bomb_touch->down_position.y, 0.0f, 1.0f);
-            if (touched_object == MechInputTouchSystem::FindTargetObject(*object, position, 1, touched_object, NULL)) {
+            if (touched_object != MechInputTouchSystem::FindTargetObject(*object, position, 1, touched_object, NULL)) {
+                smart_bomb_touch = NULL;
+            } else {
                 if (smart_bomb_touch->held_time >= 1.0f) {
                     TouchHacks::TriggerVehicleSmartBomb(*player);
                     smart_bomb_touch = NULL;
                 } else {
                     TouchHacks::PlaySmartBombBuildupEffects(*player, smart_bomb_touch->held_time, 1.0f);
                 }
-            } else {
-                smart_bomb_touch = NULL;
             }
         }
         if (tag_button.Get() != NULL && tag_button.Get()->on_click != NULL) {

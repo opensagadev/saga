@@ -1192,15 +1192,7 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
             NUMTL *mtl = sc->mtls[mi];
             nuglobalrndrstate_s *ls = sc->local_state;
 
-            if (!ls || (sc->flags & 4) == 0) {
-                // No local state or no clipping — copy geometry if needed.
-                if (dl->mtl_last != dl->first) {
-                    copyMaterialGeometry(dl, dl->first, sc);
-                } else {
-                    linkSceneGeometry(dl);
-                }
-                last_local = nullptr;
-            } else {
+            if (ls && (sc->flags & 4) != 0) {
                 bool same_as_last = (dl->mtl_last == dl->first && ls == last_local);
                 if (!same_as_last) {
                     DisplayListUpdateRenderState(dl, ls);
@@ -1213,6 +1205,14 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
                 } else {
                     linkSceneGeometry(dl);
                 }
+            } else {
+                // No local state or no clipping — copy geometry if needed.
+                if (dl->mtl_last != dl->first) {
+                    copyMaterialGeometry(dl, dl->first, sc);
+                } else {
+                    linkSceneGeometry(dl);
+                }
+                last_local = nullptr;
             }
 
             RndrStateUpdate(&tmp_state, mtl, dl->mtl_item);
@@ -1342,7 +1342,9 @@ extern "C" void NuDisplayListBurstRndrSpecial(nuhspecial_s *handle, u32 count, N
         return;
     NUDISPLAYSPECIAL *special = handle->display_special;
     u32 visible_count;
-    if (clip != 0) {
+    if (clip == 0) {
+        visible_count = count;
+    } else {
         visible_count = 0;
         for (u32 i = 0; i != count; ++i) {
             i32 result = NuCameraClipTestExtents(reinterpret_cast<NUVEC *>(&special->bounds_min),
@@ -1350,8 +1352,6 @@ extern "C" void NuDisplayListBurstRndrSpecial(nuhspecial_s *handle, u32 count, N
             if (static_cast<u8>(result) != 0)
                 visible[visible_count++] = static_cast<u16>(i | (result << 8));
         }
-    } else {
-        visible_count = count;
     }
     if (visible_count == 0)
         return;

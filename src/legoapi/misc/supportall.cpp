@@ -430,9 +430,7 @@ apply_weights:
     const f32 interpolated_value =
         high_weight * current_character->field_0x5c + low_weight * current_character->field_0x60;
     *reinterpret_cast<f32 *>(state + 0xf50) = interpolated_value;
-    if (interpolated_value == 0.0f) {
-        state[0xf79] = 0;
-    } else {
+    if (interpolated_value != 0.0f) {
         state[0xf79] = 0x21;
         if (current_character->field_0x60 <= current_character->field_0x5c) {
             *reinterpret_cast<i16 *>(state + 0xf70) = static_cast<i16>(current_character->field_0x5c * 32768.0f);
@@ -441,6 +439,8 @@ apply_weights:
             *reinterpret_cast<i16 *>(state + 0xf70) = static_cast<i16>(current_character->field_0x60 * 32768.0f);
             *reinterpret_cast<i16 *>(state + 0xf76) = static_cast<i16>(current_character->field_0x5c * 32768.0f);
         }
+    } else {
+        state[0xf79] = 0;
     }
     object->field_0x1089 = current_index + 1;
 }
@@ -1415,7 +1415,15 @@ void DebrisProcessControlChunks(i32 panel_time) {
             --key->controlled_chunk_count;
             --key->allocated_chunk_count;
 
-            if (key->allocated_chunk_count <= 0) {
+            if (!(key->allocated_chunk_count <= 0)) {
+                const i32 particles_per_chunk = effect->particle_type == 7 ? 12 : 32;
+                key->particle_count -= static_cast<i16>(particles_per_chunk);
+                key->previous_particle_count -= static_cast<i16>(particles_per_chunk);
+                if ((chunk_index + 1) * particles_per_chunk < key->field_18a) {
+                    key->field_18a -= static_cast<i16>(particles_per_chunk);
+                }
+                LinkDmaParticalSets(key->particle_chunks, key->allocated_chunk_count);
+            } else {
                 key->particle_count = 0;
                 key->previous_particle_count = 0;
                 {
@@ -1499,14 +1507,6 @@ void DebrisProcessControlChunks(i32 panel_time) {
                     }
                 }
                 key->particle_chunks[0] = NULL;
-            } else {
-                const i32 particles_per_chunk = effect->particle_type == 7 ? 12 : 32;
-                key->particle_count -= static_cast<i16>(particles_per_chunk);
-                key->previous_particle_count -= static_cast<i16>(particles_per_chunk);
-                if ((chunk_index + 1) * particles_per_chunk < key->field_18a) {
-                    key->field_18a -= static_cast<i16>(particles_per_chunk);
-                }
-                LinkDmaParticalSets(key->particle_chunks, key->allocated_chunk_count);
             }
 
             if (chunk_index == 0) {

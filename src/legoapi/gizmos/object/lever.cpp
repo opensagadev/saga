@@ -244,18 +244,7 @@ static void Levers_Update(void *world_ptr, void *, float) {
             continue;
         }
 
-        if ((lever.flags & (LEVER_FLAG_RETURNING | LEVER_FLAG_PULLED_DOWN)) == 0) {
-            if (lever.pull_progress < 1.0f) {
-                lever.pull_progress += FRAMETIME;
-                if (lever.pull_progress > 1.0f) {
-                    lever.pull_progress = 1.0f;
-                    PlaySfx(const_cast<char *>("SwLever"), &lever.position);
-                    if ((lever.flags & LEVER_FLAG_AUTO_RESET) != 0) {
-                        lever.auto_reset_timer = lever.auto_reset_delay;
-                    }
-                }
-            }
-        } else {
+        if ((lever.flags & (LEVER_FLAG_RETURNING | LEVER_FLAG_PULLED_DOWN)) != 0) {
             if ((lever.flags & LEVER_FLAG_RETURNING) == 0) {
                 lever.flags |= LEVER_FLAG_RETURNING;
             }
@@ -267,6 +256,17 @@ static void Levers_Update(void *world_ptr, void *, float) {
                 lever.idle_animation_timer = 0.0f;
                 lever.animation_frame = 0;
                 continue;
+            }
+        } else {
+            if (lever.pull_progress < 1.0f) {
+                lever.pull_progress += FRAMETIME;
+                if (lever.pull_progress > 1.0f) {
+                    lever.pull_progress = 1.0f;
+                    PlaySfx(const_cast<char *>("SwLever"), &lever.position);
+                    if ((lever.flags & LEVER_FLAG_AUTO_RESET) != 0) {
+                        lever.auto_reset_timer = lever.auto_reset_delay;
+                    }
+                }
             }
         }
 
@@ -334,13 +334,13 @@ static void Levers_Draw(void *world_ptr, void *, float) {
                 if ((lever.flags & LEVER_FLAG_IDLE_STATE_MASK) == LEVER_FLAG_ENABLED) {
                     if (lever.idle_animation_timer > 0.0f) {
                         lever.idle_animation_timer -= FRAMETIME;
-                        if (lever.idle_animation_timer < 0.0f) {
-                            lever.idle_animation_timer = 0.0f;
-                        } else {
+                        if (!(lever.idle_animation_timer < 0.0f)) {
                             const f32 idle_phase = lever.idle_animation_timer / 0.15f * 32768.0f + 16384.0f;
                             animation_frame =
                                 (1.0f - NuFabs(NuTrigTable[(static_cast<i32>(idle_phase) >> 1) & 0x7fff])) * 1.5f +
                                 16.0f;
+                        } else {
+                            lever.idle_animation_timer = 0.0f;
                         }
                     } else if (qrand() < 0x800) {
                         lever.idle_animation_timer = 0.15f;

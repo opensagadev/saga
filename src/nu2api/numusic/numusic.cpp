@@ -450,9 +450,7 @@ bool NuMusic::SelectTrackByHandle(TRACK_CLASS clazz, i32 trackHandle) {
     if (this != NULL && the_music_player != NULL && this->album != NULL) {
         u32 index = (u32)ClassToIX(clazz);
         if (index < 6) {
-            if (trackHandle == -1) {
-                this->album->tracks[index] = NULL;
-            } else {
+            if (trackHandle != -1) {
                 Album *album = this->album;
                 // Validate the album encoded in the handle's high bits against
                 // the album being selected (see header note on handle packing).
@@ -462,6 +460,8 @@ bool NuMusic::SelectTrackByHandle(TRACK_CLASS clazz, i32 trackHandle) {
                     album->tracks[index] = &album->tracks_source[trackHandle & 0x7ff];
                     return true;
                 }
+            } else {
+                this->album->tracks[index] = NULL;
             }
         }
     }
@@ -471,16 +471,7 @@ bool NuMusic::SelectTrackByHandle(TRACK_CLASS clazz, i32 trackHandle) {
 
 i32 NuMusic::GetTrackHandle(TRACK_CLASS clazz, const char *name) {
     if (this != NULL && the_music_player != NULL && this->album != NULL) {
-        if (name == NULL) {
-            i32 index = ClassToIX(clazz);
-            if (index != -1) {
-                Track *track = this->album->tracks[index];
-                if (track != NULL) {
-                    return (((i32)((char *)track - (char *)this->album->tracks_source) >> 2) * (u32)0xEEEEEEEF) |
-                           ((((i32)((char *)this->album - (char *)this->albums) >> 2) * (u32)0x38e38e39) << 11);
-                }
-            }
-        } else {
+        if (name != NULL) {
             LOG_DEBUG("Searching for track name '%s' of class %d, tracks_count=%d", name, clazz,
                       this->album->tracks_count);
             for (i32 i = 0; i < this->album->tracks_count; i++) {
@@ -488,6 +479,15 @@ i32 NuMusic::GetTrackHandle(TRACK_CLASS clazz, const char *name) {
                     if (NuStrICmp(this->album->tracks_source[i].ident, name) == 0) {
                         return ((((i32)((char *)this->album - (char *)this->albums) >> 2) * (u32)0x38e38e39) << 11) | i;
                     }
+                }
+            }
+        } else {
+            i32 index = ClassToIX(clazz);
+            if (index != -1) {
+                Track *track = this->album->tracks[index];
+                if (track != NULL) {
+                    return (((i32)((char *)track - (char *)this->album->tracks_source) >> 2) * (u32)0xEEEEEEEF) |
+                           ((((i32)((char *)this->album - (char *)this->albums) >> 2) * (u32)0x38e38e39) << 11);
                 }
             }
         }

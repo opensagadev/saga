@@ -1650,7 +1650,13 @@ void PodSprintA_Reset(WORLDINFO_s *world) {
     pod_old_pos[1].x = pod_old_pos[1].y = pod_old_pos[1].z = -1.0f;
     ps->flags &= 0xef;
     ps->field_0x88 = 0;
-    if ((ps->flags & 0xc) != 0 || (netclient != 0 && podsprint_netpacket->ai_state > 2)) {
+    if ((ps->flags & 0xc) == 0 && !(netclient != 0 && podsprint_netpacket->ai_state > 2)) {
+        ps->ai_state = 1;
+        ps->ai_index = 0;
+        ps->flags &= 0xfe;
+        ps->speed = 3.0f;
+        podstartracealpha = 0.0f;
+    } else {
         ps->ai_state = 3;
         ps->flags &= 0xf2;
         ps->ai_index = 4;
@@ -1676,12 +1682,6 @@ void PodSprintA_Reset(WORLDINFO_s *world) {
             CutScene_SnapToEnd((CUTINFO *)game_cutscenes.cutscene);
             CutScene_StoppedFn_LSW((CUTINFO *)game_cutscenes.cutscene);
         }
-    } else {
-        ps->ai_state = 1;
-        ps->ai_index = 0;
-        ps->flags &= 0xfe;
-        ps->speed = 3.0f;
-        podstartracealpha = 0.0f;
     }
     PodRaceSnipersReset();
     ps->boulders = AISysFindArea(world->ai_sys, "Boulders");
@@ -1782,13 +1782,13 @@ speed_section:
                             StoreLevelProgress(world);
                             ResetLevel(world, "ep1_podsprint_sebulba", 1);
                         } else if (ps->ai_state > 3) {
-                            if (FreePlay == 0) {
+                            if (FreePlay != 0) {
+                                CompleteLevel(world);
+                            } else {
                                 if (NewCutScene(NULL, WORLD->cutscene_sys, "Ep1_Podrace_Outro1", 1) == 0 &&
                                     NewCutScene(NULL, WORLD->cutscene_sys, "Ep1_Podsprint_Outro1", 1) == 0) {
                                     CompleteLevel(world);
                                 }
-                            } else {
-                                CompleteLevel(world);
                             }
                         }
                     }
@@ -1926,7 +1926,10 @@ void PodSprint_GetIAlongVals(nugspline_s *spline, i16 *out1, i16 *out2) {
     else
         return;
     i32 b = (i8)ps->ai_index;
-    if (b != 0) {
+    if (b == 0) {
+        *out1 = 0;
+        *out2 = ps->ai[idx].vals[0];
+    } else {
         i32 a = b, esi;
         if (b <= 4)
             esi = b - 1;
@@ -1936,9 +1939,6 @@ void PodSprint_GetIAlongVals(nugspline_s *spline, i16 *out1, i16 *out2) {
         }
         *out1 = ps->ai[idx].vals[esi];
         *out2 = ps->ai[idx].vals[a];
-    } else {
-        *out1 = 0;
-        *out2 = ps->ai[idx].vals[0];
     }
 }
 
@@ -2177,12 +2177,12 @@ void RetakeG_Reset(WORLDINFO_s *) {
 
 void RetakeG_Update(WORLDINFO_s *world) {
     (void)world;
-    if (netclient != 0) {
-        RetakeG_GuardsToRescue_msg->value = (float)retakeg_netpacket->guard_b;
-        RetakeG_TotalGuards_msg->value = (float)retakeg_netpacket->guard_a;
-    } else {
+    if (netclient == 0) {
         retakeg_netpacket->guard_b = (i16)RetakeG_GuardsToRescue_msg->value;
         retakeg_netpacket->guard_a = (i16)RetakeG_TotalGuards_msg->value;
+    } else {
+        RetakeG_GuardsToRescue_msg->value = (float)retakeg_netpacket->guard_b;
+        RetakeG_TotalGuards_msg->value = (float)retakeg_netpacket->guard_a;
     }
     GIZFORCE_s *g0 = LevGizForce[0];
     GIZFORCE_s *g1 = LevGizForce[1];

@@ -396,13 +396,13 @@ void NuGCutRigidCalcMtx_3(NUGCUTRIGID_s *rigid, float frame, numtx_s *mtx) {
     NUVEC translation;
     NUANGVEC angles;
     NUVEC scale;
-    if ((flags & 1) == 0) {
-        NuMtxSetIdentity(mtx);
-    } else {
+    if ((flags & 1) != 0) {
         angles.x = static_cast<NUANG>(values[3] * 10430.378f);
         angles.y = static_cast<NUANG>(values[4] * 10430.378f);
         angles.z = static_cast<NUANG>(values[5] * 10430.378f);
         NuMtxSetRotateXYZ(mtx, &angles);
+    } else {
+        NuMtxSetIdentity(mtx);
     }
     if ((flags & 8) != 0) {
         scale.x = values[6];

@@ -856,10 +856,10 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
     obj->apiobj.field_0x27c = -1;
 
     NUVEC *start_position = Player_StartPos(obj);
-    if (param == 0) {
-        obj->apiobj.field_0x1f4 |= 2;
-    } else {
+    if (param != 0) {
         obj->apiobj.field_0x1f4 |= 0x4002;
+    } else {
+        obj->apiobj.field_0x1f4 |= 2;
     }
     if ((WORLD->current_level->flags & 0x40000) == 0) {
         obj->apiobj.field_0x1f4 |= 0x40;

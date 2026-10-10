@@ -1127,14 +1127,14 @@ static void GizSpinner_ResetAll(void *world_ptr, void *, void *progress_ptr) {
                 NuMtxTranslate(&spinner.matrix, &spinner.position);
                 NewTerrPlatformsOff();
 
-                if (NuSpecialGetMtx(&spinner.special) == NULL) {
-                    spinner.ground_height = 2000000.0f;
-                } else {
+                if (NuSpecialGetMtx(&spinner.special) != NULL) {
                     NUMTX *special_matrix = NuSpecialGetMtx(&spinner.special);
                     spinner.ground_height = GameShadow(NULL, NUMTX_GET_ROW_VEC(special_matrix, 3), 5.0f, -1);
                     if (spinner.ground_height != -78.0f && ShadowInfo() == 2) {
                         spinner.state_flags |= GIZSPINNER_STATE_SHADOW_PLATFORM;
                     }
+                } else {
+                    spinner.ground_height = 2000000.0f;
                 }
             }
             ++index;
@@ -1243,10 +1243,10 @@ i32 GizSpinner_Push(GIZSPINNER_s *spinner, i32 context) {
     }
 
 finalize:
-    if (RotDiff(spinner->rotation, spinner->previous_rotation) < 0) {
-        spinner->state_flags |= 1;
-    } else {
+    if (!(RotDiff(spinner->rotation, spinner->previous_rotation) < 0)) {
         spinner->state_flags &= ~1u;
+    } else {
+        spinner->state_flags |= 1;
     }
     spinner->room_index = static_cast<i8>(context);
     spinner->target_rotation = spinner->rotation;

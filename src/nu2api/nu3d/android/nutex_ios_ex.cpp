@@ -407,16 +407,7 @@ GLuint loadDefaultTexture(GLuint texture, GLint level, GLsizei size, GLenum text
     for (i32 i = 0; i < pixel_count; i += 2) {
         i32 row = i / size;
 
-        if (row & 1) {
-            p1[-8] = 0x52;
-            p1[-7] = 0x52;
-            p1[-6] = 0x99;
-            p1[-5] = 0xFF;
-            p2[3] = 0xFF;
-            p2[0] = 0x7A;
-            p2[1] = 0x7A;
-            p2[2] = 0x7A;
-        } else {
+        if (!(row & 1)) {
             p1[-8] = 0x7A;
             p1[-7] = 0x7A;
             p1[-6] = 0x7A;
@@ -425,6 +416,15 @@ GLuint loadDefaultTexture(GLuint texture, GLint level, GLsizei size, GLenum text
             p2[0] = 0x52;
             p2[1] = 0x52;
             p2[2] = 0x99;
+        } else {
+            p1[-8] = 0x52;
+            p1[-7] = 0x52;
+            p1[-6] = 0x99;
+            p1[-5] = 0xFF;
+            p2[3] = 0xFF;
+            p2[0] = 0x7A;
+            p2[1] = 0x7A;
+            p2[2] = 0x7A;
         }
         p1 += 8;
         p2 += 8;

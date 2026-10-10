@@ -235,7 +235,18 @@ i32 UpdateShop(MENU_s *menu) {
     SubBigCharPush = 0.05f;
 
     if (menuptr == NULL) {
-        if (shop_from_cutsceneplayer != 0) {
+        if (shop_from_cutsceneplayer == 0) {
+            menuptr = ItemMenu;
+            ExitMenu = 0;
+            slidetimer = 0.125f;
+            enteredshop = 1;
+            currentmenulevel = 0;
+            currentdrawlevel = 0;
+            menuparent[0] = NULL;
+            drawparent[0] = NULL;
+            picked = oldpicked;
+            drawpanelptr = DrawItemMenu2D;
+        } else {
             shop_from_cutsceneplayer = 0;
             topscale[5] = oldpickedscale;
             menuptr = oldmenuptr;
@@ -251,17 +262,6 @@ i32 UpdateShop(MENU_s *menu) {
             currentmenulevel = oldcurrentmenulevel;
             currentdrawlevel = oldcurrentdrawlevel;
             picked = oldpicked;
-        } else {
-            menuptr = ItemMenu;
-            ExitMenu = 0;
-            slidetimer = 0.125f;
-            enteredshop = 1;
-            currentmenulevel = 0;
-            currentdrawlevel = 0;
-            menuparent[0] = NULL;
-            drawparent[0] = NULL;
-            picked = oldpicked;
-            drawpanelptr = DrawItemMenu2D;
         }
     }
 
@@ -1765,11 +1765,11 @@ void DrawSubItems() {
                         rotation = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f);
                 }
                 const u16 angle = shelfang + (item->unlocked == 1 ? rotation : 0);
-                if (items[shelf_ids[slot]].unlocked == 1) {
-                    DrawItem(&TopShelf[0].special, &position, scale, 1.0f, ypush, 0, angle, 0);
-                } else {
+                if (items[shelf_ids[slot]].unlocked != 1) {
                     DrawItem(&infoblank, &position, scale, 1.0f, ypush, 0, angle, 0);
                     DrawItem(&TopShelf[3].special, &position, scale, 1.0f, ypush, 0, angle, 0);
+                } else {
+                    DrawItem(&TopShelf[0].special, &position, scale, 1.0f, ypush, 0, angle, 0);
                 }
                 break;
             }

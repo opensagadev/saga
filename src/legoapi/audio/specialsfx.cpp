@@ -169,7 +169,11 @@ i32 SpecialSfxLoad(char *path, WORLDINFO_s *world) {
                                           : reinterpret_cast<SPECIALSFXEVENT_s *>(reinterpret_cast<uintptr_t>(event) +
                                                                                   sizeof(SPECIALSFXEVENT_s));
             entry->events = event;
-            if (entry->event_count > 1) {
+            if (!(entry->event_count > 1)) {
+                if (event != NULL)
+                    event->next = NULL;
+                event = next;
+            } else {
                 SPECIALSFXEVENT_s *previous = event;
                 for (i32 j = 0; j < entry->event_count - 1; ++j) {
                     previous->next = next;
@@ -180,10 +184,6 @@ i32 SpecialSfxLoad(char *path, WORLDINFO_s *world) {
                 }
                 if (previous != NULL)
                     previous->next = NULL;
-            } else {
-                if (event != NULL)
-                    event->next = NULL;
-                event = next;
             }
             ++entry;
         }

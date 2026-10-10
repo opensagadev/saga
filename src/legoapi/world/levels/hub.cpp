@@ -1817,13 +1817,7 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
             Episode_CountOpenAreas(static_cast<i8>(area->episode_index), area_index, Game.area_save);
             const f32 icon_phase = NU_SIN_LUT(static_cast<i32>(16384.0f * phase));
 
-            if (BOTHTRUEJEDIGOLDBRICKS == 0) {
-                DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
-                               icon_phase, 1.0f, 1.0f, 0);
-                NuStrCpy(text, (save->true_hero_complete[0] || save->true_hero_complete[1]) ? "$" : "X");
-                Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
-                         PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
-            } else {
+            if (BOTHTRUEJEDIGOLDBRICKS != 0) {
                 DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
                                icon_phase, 1.0f, 1.0f, 0);
                 NuStrCpy(text, save->true_hero_complete[0] ? "$" : "X");
@@ -1839,6 +1833,12 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
                          PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
                 SmartTextEx(TTab[tFREEPLAY], HUB_AREAPANELX[4], HUB_EPISODETITLEY + 0.235f, 1.0f, 0.45f, 0.45f, 0.45f,
                             0, 255, 255, 255, 0.4f, 1, NULL, 0, static_cast<i32>(static_cast<f32>(TJTYPEA) * phase));
+            } else {
+                DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
+                               icon_phase, 1.0f, 1.0f, 0);
+                NuStrCpy(text, (save->true_hero_complete[0] || save->true_hero_complete[1]) ? "$" : "X");
+                Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
+                         PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
             }
 
             if ((area->flags & 0x10) != 0) {
@@ -2618,12 +2618,12 @@ void Hub_UpdateFreePlaySelect() {
                     freeplay_selected[player] = 2;
                 } else if (select && freeplay_time[player] <= 0.0f) {
                     if (freeplay_selected[player] == 0) {
-                        if (Collection_Got(collection->list[freeplay_i[player]].id) == 0) {
-                            GameAudio_PlaySfx(0x32, NULL, 0, 0);
-                        } else {
+                        if (Collection_Got(collection->list[freeplay_i[player]].id) != 0) {
                             freeplay_time[player] = 0.75f;
                             freeplay_selected[player] = 1;
                             GameAudio_PlaySfx(0x30, NULL, 0, 0);
+                        } else {
+                            GameAudio_PlaySfx(0x32, NULL, 0, 0);
                         }
                     } else if (freeplay_selected[player] == 1) {
                         freeplay_selected[player] = 2;

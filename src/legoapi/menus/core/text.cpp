@@ -229,16 +229,16 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
                 episode_text = TTab[EDataList[episode_index].text_id];
             }
             if (area_index != -1) {
-                if ((area->flags & AREAFLAG_BONUS_AREA) == 0) {
-                    if (s_crawlPtr->heading_text != NULL) {
-                        sprintf(chapter_buffer, "%s %i", TTab[*s_crawlPtr->heading_text], area_index + 1);
-                        chapter_text = chapter_buffer;
-                    }
-                } else {
+                if ((area->flags & AREAFLAG_BONUS_AREA) != 0) {
                     i16 *bonus_text = (area->flags & AREAFLAG_VEHICLE_AREA) != 0 ? s_crawlPtr->vehicle_bonus_text
                                                                                  : s_crawlPtr->character_bonus_text;
                     if (bonus_text != NULL) {
                         chapter_text = TTab[*bonus_text];
+                    }
+                } else {
+                    if (s_crawlPtr->heading_text != NULL) {
+                        sprintf(chapter_buffer, "%s %i", TTab[*s_crawlPtr->heading_text], area_index + 1);
+                        chapter_text = chapter_buffer;
                     }
                 }
             }
@@ -1676,7 +1676,17 @@ void MenuDrawViewTextStrings(MENU_s *menu) {
         i32 green;
         i32 blue;
         if (registered) {
-            if (menu->selected_item == i) {
+            if (menu->selected_item != i) {
+                if (menu_pulse > 0.0f) {
+                    red = Text_MenuColourLerp(MENUFLASH0R, MENUNORMALR, menu_pulse);
+                    green = Text_MenuColourLerp(MENUFLASH0G, MENUNORMALG, menu_pulse);
+                    blue = Text_MenuColourLerp(MENUFLASH0B, MENUNORMALB, menu_pulse);
+                } else {
+                    red = MENUENTRYR;
+                    green = MENUENTRYG;
+                    blue = MENUENTRYB;
+                }
+            } else {
                 if (TestForController()) {
                     if (menu_pulsate > 0.0f) {
                         red = Text_MenuColourLerp(MENUFLASH0R, MENUFLASH1R, menu_pulsate);
@@ -1692,16 +1702,6 @@ void MenuDrawViewTextStrings(MENU_s *menu) {
                         blue = MENUFLASH1B;
                     }
                 } else if (menu_pulse > 0.0f) {
-                    red = Text_MenuColourLerp(MENUFLASH0R, MENUNORMALR, menu_pulse);
-                    green = Text_MenuColourLerp(MENUFLASH0G, MENUNORMALG, menu_pulse);
-                    blue = Text_MenuColourLerp(MENUFLASH0B, MENUNORMALB, menu_pulse);
-                } else {
-                    red = MENUENTRYR;
-                    green = MENUENTRYG;
-                    blue = MENUENTRYB;
-                }
-            } else {
-                if (menu_pulse > 0.0f) {
                     red = Text_MenuColourLerp(MENUFLASH0R, MENUNORMALR, menu_pulse);
                     green = Text_MenuColourLerp(MENUFLASH0G, MENUNORMALG, menu_pulse);
                     blue = Text_MenuColourLerp(MENUFLASH0B, MENUNORMALB, menu_pulse);

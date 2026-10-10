@@ -139,15 +139,15 @@ static void GizActions_HitBlowup(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
     if (damage == 0 || name == NULL) {
         return;
     }
-    if (gizmo_type == 1) {
-        GIZMO_s *gizmo = GizmoFindByName(WORLD->gizmo_sys, turret_gizmotype_id, name);
-        if (gizmo != NULL && gizmo->object != NULL) {
-            GizTurrets_Hit(WORLD, static_cast<GIZTURRET_s *>(gizmo->object), NULL, -1, damage);
-        }
-    } else {
+    if (gizmo_type != 1) {
         GIZMO_s *gizmo = GizmoFindByName(WORLD->gizmo_sys, blowup_gizmotype_id, name);
         if (gizmo != NULL && gizmo->object != NULL) {
             GizmoBlowupBlowup(static_cast<GIZMOBLOWUP_s *>(gizmo->object), 1, -1, damage, NULL, 1);
+        }
+    } else {
+        GIZMO_s *gizmo = GizmoFindByName(WORLD->gizmo_sys, turret_gizmotype_id, name);
+        if (gizmo != NULL && gizmo->object != NULL) {
+            GizTurrets_Hit(WORLD, static_cast<GIZTURRET_s *>(gizmo->object), NULL, -1, damage);
         }
     }
 }

@@ -138,12 +138,7 @@ void Players_Init(void) {
                 PLAYERCOUNT = PLAYERCOUNT + 1;
                 g->hitpoints = DEFAULT_PLAYERHITPOINTS;
 
-                if (UsePlayerList == 0) {
-                    slot = g->apiobj.field_0x289;
-                    *(u8 *)&g->apiobj.field_0x1f8 = (u8)((*(u8 *)&g->apiobj.field_0x1f8 & 0x7f) | ((slot == 0) << 7));
-                    PlayerProgress[slot].hitpoints = g->current_hp;
-                    g->field_0x106e = 0;
-                } else {
+                if (UsePlayerList != 0) {
                     char c = g->apiobj.field_0x27c;
                     *(u8 *)&g->apiobj.field_0x1f8 =
                         (u8)((*(u8 *)&g->apiobj.field_0x1f8 & 0x7f) | (PlayerProgress[c].active << 7));
@@ -165,6 +160,11 @@ void Players_Init(void) {
                         g->field_0xe22 &= 0xfe;
                         g->field_0x106e = 0;
                     }
+                } else {
+                    slot = g->apiobj.field_0x289;
+                    *(u8 *)&g->apiobj.field_0x1f8 = (u8)((*(u8 *)&g->apiobj.field_0x1f8 & 0x7f) | ((slot == 0) << 7));
+                    PlayerProgress[slot].hitpoints = g->current_hp;
+                    g->field_0x106e = 0;
                 }
 
                 cd = (GAMECHARACTERDATA *)apicharsys->char_data[g->id].field11_0x24;
@@ -674,14 +674,14 @@ void *CutScenePlayer_Available(void) {
 void ChatterSfx(GameObject_s *g, i32 a, float b) {
     if (chattersfxwait <= 0.0f && ParticlesPerSecond(2.0f, FRAMETIME) > 0 && g->apiobj.field_0x287 == 0 &&
         g->character_context == -1) {
-        if (a != last_chatter_sfx || b <= 0.0f) {
+        if (a == last_chatter_sfx && !(b <= 0.0f)) {
+            chattersfxwait = b;
+            last_chatter_sfx = -1;
+        } else {
             GameAudio_PlaySfxById(a, &g->apiobj.collision_position, 0, 0);
             const i32 random = qrand();
             last_chatter_sfx = a;
             chattersfxwait = static_cast<f32>(random) * (1.0f / 65535.0f) * 2.0f + 3.0f;
-        } else {
-            chattersfxwait = b;
-            last_chatter_sfx = -1;
         }
     }
 }
@@ -1991,16 +1991,7 @@ bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, fl
         }                                                                                                              \
     } while (0)
 
-    if (require_character_flags) {
-        CONSIDER_PLAYER_DISTANCE(0, true);
-        CONSIDER_PLAYER_DISTANCE(1, true);
-        CONSIDER_PLAYER_DISTANCE(2, true);
-        CONSIDER_PLAYER_DISTANCE(3, true);
-        CONSIDER_PLAYER_DISTANCE(4, true);
-        CONSIDER_PLAYER_DISTANCE(5, true);
-        CONSIDER_PLAYER_DISTANCE(6, true);
-        CONSIDER_PLAYER_DISTANCE(7, true);
-    } else {
+    if (!require_character_flags) {
         CONSIDER_PLAYER_DISTANCE(0, false);
         CONSIDER_PLAYER_DISTANCE(1, false);
         CONSIDER_PLAYER_DISTANCE(2, false);
@@ -2009,6 +2000,15 @@ bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, fl
         CONSIDER_PLAYER_DISTANCE(5, false);
         CONSIDER_PLAYER_DISTANCE(6, false);
         CONSIDER_PLAYER_DISTANCE(7, false);
+    } else {
+        CONSIDER_PLAYER_DISTANCE(0, true);
+        CONSIDER_PLAYER_DISTANCE(1, true);
+        CONSIDER_PLAYER_DISTANCE(2, true);
+        CONSIDER_PLAYER_DISTANCE(3, true);
+        CONSIDER_PLAYER_DISTANCE(4, true);
+        CONSIDER_PLAYER_DISTANCE(5, true);
+        CONSIDER_PLAYER_DISTANCE(6, true);
+        CONSIDER_PLAYER_DISTANCE(7, true);
     }
 
 #undef CONSIDER_PLAYER_DISTANCE
@@ -2070,16 +2070,7 @@ bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player
         }                                                                                                              \
     } while (0)
 
-    if (require_character_flags) {
-        CONSIDER_PLAYER_DISTANCE(0, true);
-        CONSIDER_PLAYER_DISTANCE(1, true);
-        CONSIDER_PLAYER_DISTANCE(2, true);
-        CONSIDER_PLAYER_DISTANCE(3, true);
-        CONSIDER_PLAYER_DISTANCE(4, true);
-        CONSIDER_PLAYER_DISTANCE(5, true);
-        CONSIDER_PLAYER_DISTANCE(6, true);
-        CONSIDER_PLAYER_DISTANCE(7, true);
-    } else {
+    if (!require_character_flags) {
         CONSIDER_PLAYER_DISTANCE(0, false);
         CONSIDER_PLAYER_DISTANCE(1, false);
         CONSIDER_PLAYER_DISTANCE(2, false);
@@ -2088,6 +2079,15 @@ bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player
         CONSIDER_PLAYER_DISTANCE(5, false);
         CONSIDER_PLAYER_DISTANCE(6, false);
         CONSIDER_PLAYER_DISTANCE(7, false);
+    } else {
+        CONSIDER_PLAYER_DISTANCE(0, true);
+        CONSIDER_PLAYER_DISTANCE(1, true);
+        CONSIDER_PLAYER_DISTANCE(2, true);
+        CONSIDER_PLAYER_DISTANCE(3, true);
+        CONSIDER_PLAYER_DISTANCE(4, true);
+        CONSIDER_PLAYER_DISTANCE(5, true);
+        CONSIDER_PLAYER_DISTANCE(6, true);
+        CONSIDER_PLAYER_DISTANCE(7, true);
     }
 
 #undef CONSIDER_PLAYER_DISTANCE

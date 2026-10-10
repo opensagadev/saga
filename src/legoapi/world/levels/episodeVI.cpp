@@ -507,29 +507,7 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
                         NUMTX_GET_ROW_VEC(NuSpecialGetDrawMtx(&sarlaccdisco.on[sarlaccdisco.second_panel]), 3);
                     sarlaccb_netpacket->sound_mask |= 1 << sarlaccdisco.second_panel;
                 }
-                if (first_occupied && second_occupied) {
-                    sarlaccdisco.timer = 0.0f;
-                    sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 3;
-                    sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 3;
-                    i32 count = 0;
-                    for (i32 index = 0; index < sarlaccdisco.count; ++index)
-                        if (sarlaccdisco.panel_state[index] == 0)
-                            candidates[count++] = index;
-                    sarlaccdisco.first_panel = count != 0 ? candidates[NuRand(NULL) % count] : -1;
-                    count = 0;
-                    for (i32 index = 0; index < sarlaccdisco.count; ++index)
-                        if (index != sarlaccdisco.first_panel && sarlaccdisco.panel_state[index] == 0)
-                            candidates[count++] = index;
-                    sarlaccdisco.second_panel = count != 0 ? candidates[NuRand(NULL) % count] : -1;
-                    if (sarlaccdisco.first_panel == -1 || sarlaccdisco.second_panel == -1) {
-                        sarlaccdisco.phase = 2;
-                        for (i32 index = 0; index < sarlaccdisco.count; ++index)
-                            sarlaccdisco.panel_state[index] = 4;
-                    } else {
-                        sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 1;
-                        sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 1;
-                    }
-                } else {
+                if (!(first_occupied && second_occupied)) {
                     sarlaccdisco.timer += FRAMETIME;
                     if (sarlaccdisco.timer > 2.5f) {
                         sarlaccdisco.timer = 0.0f;
@@ -559,6 +537,28 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
                                 LevelLocator->position.z = help_position->z;
                             }
                         }
+                    }
+                } else {
+                    sarlaccdisco.timer = 0.0f;
+                    sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 3;
+                    sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 3;
+                    i32 count = 0;
+                    for (i32 index = 0; index < sarlaccdisco.count; ++index)
+                        if (sarlaccdisco.panel_state[index] == 0)
+                            candidates[count++] = index;
+                    sarlaccdisco.first_panel = count != 0 ? candidates[NuRand(NULL) % count] : -1;
+                    count = 0;
+                    for (i32 index = 0; index < sarlaccdisco.count; ++index)
+                        if (index != sarlaccdisco.first_panel && sarlaccdisco.panel_state[index] == 0)
+                            candidates[count++] = index;
+                    sarlaccdisco.second_panel = count != 0 ? candidates[NuRand(NULL) % count] : -1;
+                    if (sarlaccdisco.first_panel == -1 || sarlaccdisco.second_panel == -1) {
+                        sarlaccdisco.phase = 2;
+                        for (i32 index = 0; index < sarlaccdisco.count; ++index)
+                            sarlaccdisco.panel_state[index] = 4;
+                    } else {
+                        sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 1;
+                        sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 1;
                     }
                 }
                 break;

@@ -262,11 +262,11 @@ static void Blowup_Activate(GIZMO *gizmo, i32 enabled) {
 
     nuinstanim_s *animation = NuSpecialGetInstAnim(&blowup->type->animated_special);
     if (animation != NULL) {
-        if (enabled != 0) {
+        if (enabled == 0) {
+            animation->playing = 0;
+        } else {
             if ((blowup->state_flags & GIZMOBLOWUP_STATE_ANIMATION_PLAYING) != 0)
                 animation->playing = 1;
-        } else {
-            animation->playing = 0;
         }
     }
 
@@ -2111,12 +2111,12 @@ i32 GizmoBlowupCheckProximity(WORLDINFO_s *world, GameObject_s *object) {
         if (blowup->field_0xb4 != 0.0f && !(x * x + y * y + z * z < blowup->field_0xb4 * blowup->field_0xb4))
             continue;
         i32 hit_type;
-        if (special) {
-            blowup->output_flags |= 0x10;
-            hit_type = 5;
-        } else {
+        if (!special) {
             blowup->output_flags |= 0x20;
             hit_type = 4;
+        } else {
+            blowup->output_flags |= 0x10;
+            hit_type = 5;
         }
         nuinstanim_s *animation = NuSpecialGetInstAnim(&blowup->type->animated_special);
         if (blowup->field_0xc0 > 0.0f) {

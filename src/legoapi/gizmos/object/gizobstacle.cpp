@@ -158,22 +158,22 @@ static void GizObstacles_Update(void *world_ptr, void *data, float) {
 
         GAMEANIMSET_s *anim_set = obstacle->anim_set;
         if (obstacle->mode == 7) {
-            if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_PUSH_CONTROL) == 0) {
+            if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_PUSH_CONTROL) != 0) {
+                obstacle->triggering_object = previous_triggering_object;
+                if (obstacle->animation_speed != 0.0f) {
+                    GizObstacle_PlayForwards(obstacle);
+                    anim_set = obstacle->anim_set;
+                } else {
+                    GizObstacle_Stop(obstacle);
+                    anim_set = obstacle->anim_set;
+                }
+            } else {
                 if (obstacle->state == 1) {
                     obstacle->animation_speed = -1.0f;
                     GizObstacle_PlayForwards(obstacle);
                     anim_set = obstacle->anim_set;
                 } else {
                     obstacle->animation_speed = 0.0f;
-                    GizObstacle_Stop(obstacle);
-                    anim_set = obstacle->anim_set;
-                }
-            } else {
-                obstacle->triggering_object = previous_triggering_object;
-                if (obstacle->animation_speed != 0.0f) {
-                    GizObstacle_PlayForwards(obstacle);
-                    anim_set = obstacle->anim_set;
-                } else {
                     GizObstacle_Stop(obstacle);
                     anim_set = obstacle->anim_set;
                 }
@@ -1046,9 +1046,7 @@ i32 GizObstacles_Hit(void *context, GIZOBSTACLE_s *obstacle, nuvec_s *, i32 play
         (obstacle->runtime_flags & 0x80) != 0)
         return 0;
 
-    if ((obstacle->config_flags & 0x800) != 0) {
-        obstacle->runtime_flags |= 0x40;
-    } else {
+    if ((obstacle->config_flags & 0x800) == 0) {
         if ((obstacle->config_flags & 0x1000) == 0)
             return 0;
         if (obstacle->blowup_type != -1) {
@@ -1070,6 +1068,8 @@ i32 GizObstacles_Hit(void *context, GIZOBSTACLE_s *obstacle, nuvec_s *, i32 play
         GizObstacle_EvalAveragePosAndRadius(obstacle, 2);
         GameAnimSet_SetVisibility(obstacle->anim_set, 0);
         obstacle->runtime_flags |= 0x80;
+    } else {
+        obstacle->runtime_flags |= 0x40;
     }
     if (player != -1 && static_cast<i8>(Player[player]->apiobj.field_0x1f8) < 0) {
         NewBuzz(Player[player]->pad_gamepad->pad, 0.1f, 0);

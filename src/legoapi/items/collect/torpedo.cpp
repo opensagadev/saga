@@ -471,13 +471,13 @@ void Torpedo_InitRicochet(BOLT_s *bolt, nuvec_s *position) {
     if (bolt != NULL && bolt->owner != NULL && bolt->owner->torpedo != NULL) {
         TORPEDOPACKET *packet = bolt->owner->torpedo;
         if (packet->target != NULL) {
-            if (packet->field_02 < 5) {
+            if (!(packet->field_02 < 5)) {
+                packet->field_0x1 |= 0x10;
+            } else {
                 packet->field_0x1 |= 8;
                 packet->ricochet_position = *position;
                 packet->ricochet_time = 0.0f;
                 ++packet->field_02;
-            } else {
-                packet->field_0x1 |= 0x10;
             }
         }
     }

@@ -93,13 +93,13 @@ static void MakeWingFormation(_vuv_s *start, _vuv_s *target, f32 duration, i32 m
     group->matrix.m31 = start->y;
     group->matrix.m32 = start->z;
     group->matrix.m33 = start->w;
-    if (mode == 0) {
-        group->speed = 200.0f;
-        group->state = 1;
-    } else {
+    if (mode != 0) {
         group->state = 0;
         NuMtxPreRotateY(&group->matrix, 32768);
         group->speed = 35.0f;
+    } else {
+        group->speed = 200.0f;
+        group->state = 1;
     }
     group->velocity.x = target->x - start->x;
     group->velocity.y = target->y - start->y;
@@ -215,13 +215,13 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
             } else {
                 fighter->death_timer = 2.0f;
             }
-            if (fighter->parent != NULL) {
+            if (fighter->parent == NULL) {
+                impulse = v010;
+            } else {
                 impulse.x = fighter->matrix.m30 - fighter->parent->matrix.m30;
                 impulse.y = fighter->matrix.m31 - fighter->parent->matrix.m31;
                 impulse.z = fighter->matrix.m32 - fighter->parent->matrix.m32;
                 fighter->parent->target = *reinterpret_cast<NUVEC4 *>(&fighter->matrix.m30);
-            } else {
-                impulse = v010;
             }
             const f32 magnitude = NuVecMag(&impulse);
             if (magnitude != 0.0f) {
@@ -1497,10 +1497,7 @@ static i32 CollideBoltStarFighter(BOLT_s *bolt, starfighter_s *fighter, _vuv_s *
     const f32 dz = position->z - fighter->matrix.m32;
     const f32 a = vx * vx + vy * vy + vz * vz;
     const f32 c = dx * dx + dy * dy + dz * dz - 2.0f;
-    if (a <= 0.0f) {
-        if (!(c <= 0.0f))
-            return 0;
-    } else {
+    if (!(a <= 0.0f)) {
         const f32 b = 2.0f * (dx * vx + dy * vy + dz * vz);
         const f32 discriminant = b * b - 4.0f * a * c;
         if (!(discriminant >= 0.0f))
@@ -1517,6 +1514,9 @@ static i32 CollideBoltStarFighter(BOLT_s *bolt, starfighter_s *fighter, _vuv_s *
         position->x += vx * time;
         position->y += vy * time;
         position->z += vz * time;
+    } else {
+        if (!(c <= 0.0f))
+            return 0;
     }
     if (fighter->spline == NULL || static_cast<u32>(fighter->spline->id - 84) > 1) {
         BoltSys->debris(bolt, reinterpret_cast<NUVEC *>(position), 0, reinterpret_cast<NUVEC *>(&fighter->velocity), 0);

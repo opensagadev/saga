@@ -712,7 +712,15 @@ void CustomiserMenu_Draw(MENU_s *) {
                     for (i32 column = 0; column != 15; ++column) {
                         f32 scale;
                         i32 letter_red, letter_green, letter_blue;
-                        if (CustomiseNameX[side] == column) {
+                        if (CustomiseNameX[side] != column) {
+                            letter[0] = Game.customizer[side].name[column];
+                            letter_red = red;
+                            letter_green = green;
+                            letter_blue = blue;
+                            scale = 1.0f;
+                            if (CustomiseNameX[side] < column && length <= column && letter[0] == ' ')
+                                letter[0] = '.';
+                        } else {
                             letter[0] = CustomiseLetter[CustomiseNameY[side]];
                             const i32 arrow_colour = menu_flash == 0 ? 255 : 191;
                             Text3D(ASCII_UP, x, -0.75f, 1.0f, 0.6f, 0.6f, 0.6f, 0, arrow_colour, arrow_colour,
@@ -723,14 +731,6 @@ void CustomiserMenu_Draw(MENU_s *) {
                             letter_green = menu_flash == 0 ? 255 : 0;
                             letter_blue = 255;
                             scale = CustomiseNameLetterBlipScale[side];
-                        } else {
-                            letter[0] = Game.customizer[side].name[column];
-                            letter_red = red;
-                            letter_green = green;
-                            letter_blue = blue;
-                            scale = 1.0f;
-                            if (CustomiseNameX[side] < column && length <= column && letter[0] == ' ')
-                                letter[0] = '.';
                         }
                         Text3D(letter, x, -0.85f, 1.0f, scale * 0.5f, scale * 0.5f, 0.5f, 0, letter_red, letter_green,
                                letter_blue);

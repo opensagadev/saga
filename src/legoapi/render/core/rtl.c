@@ -792,16 +792,16 @@ static __used__ void rtlCalcLights(nuvec_s *position, numtx_s *rotation, f32 sca
 
 static __used__ rtl_s *GetNextRTL(void *set, rtl_s *light, char *indices, int *index) {
     if (set != NULL) {
-        if (indices != NULL && index != NULL) {
-            if (*index < static_cast<i32>(*indices)) {
+        if (!(indices != NULL && index != NULL)) {
+            ++light;
+        } else {
+            if (!(*index < static_cast<i32>(*indices))) {
+                light = NULL;
+            } else {
                 ++*index;
                 const i32 light_index = indices[*index];
                 light = light_index < 0 ? NULL : &static_cast<rtlset *>(set)->lights[light_index];
-            } else {
-                light = NULL;
             }
-        } else {
-            ++light;
         }
     } else {
         light = reinterpret_cast<rtl_s *>(NuLstGetNext(rtl_dynamic_pool, reinterpret_cast<NULNKHDR *>(light)));
@@ -925,10 +925,7 @@ static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *po
                             distance_sq = RTL_DISTANCE_SQ;
                         else
                             distance_sq = 0.0f;
-                        if (!(distance_sq < light->outer_radius * light->outer_radius)) {
-                            if (lighting_data->cached_light == light)
-                                lighting_data->cached_value = 0.0000001f;
-                        } else {
+                        if (distance_sq < light->outer_radius * light->outer_radius) {
                             RTL_FALLOFF;
                             if (strength != 0.0f && lighting_data->directional_strengths[2] <= strength &&
                                 (light->ambient.x != 0.0f || light->ambient.y != 0.0f || light->ambient.z != 0.0f))
@@ -971,6 +968,9 @@ static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *po
                                     lighting_data->shadow_blend = 1.0f;
                                 }
                             }
+                        } else {
+                            if (lighting_data->cached_light == light)
+                                lighting_data->cached_value = 0.0000001f;
                         }
                         break;
                     case 5:
@@ -1918,16 +1918,16 @@ static void cbPasteLight(eduimenu_s *, eduiitem_s *, u32) {
         if (curr_rtl == NULL)
             return;
         *curr_rtl = clipboard_light;
-        if (base_rtl == NULL) {
-            curr_rtl->field_79 = -1;
-            curr_rtl->field_7a = -1;
-        } else {
+        if (base_rtl != NULL) {
             curr_rtl->field_79 = base_rtl->field_79;
             i8 current_index = static_cast<i8>(curr_rtl - curr_set->lights);
             if (curr_rtl->field_79 != -1)
                 curr_set->lights[curr_rtl->field_79].field_7a = current_index;
             curr_rtl->field_7a = static_cast<i8>(base_rtl - curr_set->lights);
             base_rtl->field_79 = current_index;
+        } else {
+            curr_rtl->field_79 = -1;
+            curr_rtl->field_7a = -1;
         }
         curr_rtl->position = pcpos;
     }
@@ -1942,16 +1942,16 @@ static void cbPasteIntoLight(eduimenu_s *menu, eduiitem_s *item, u32 flags) {
     }
     NUVEC position = curr_rtl->position;
     *curr_rtl = clipboard_light;
-    if (base_rtl == NULL) {
-        curr_rtl->field_79 = -1;
-        curr_rtl->field_7a = -1;
-    } else {
+    if (base_rtl != NULL) {
         curr_rtl->field_79 = base_rtl->field_79;
         i8 current_index = static_cast<i8>(curr_rtl - curr_set->lights);
         if (curr_rtl->field_79 != -1)
             curr_set->lights[curr_rtl->field_79].field_7a = current_index;
         curr_rtl->field_7a = static_cast<i8>(base_rtl - curr_set->lights);
         base_rtl->field_79 = current_index;
+    } else {
+        curr_rtl->field_79 = -1;
+        curr_rtl->field_7a = -1;
     }
     curr_rtl->position = position;
 }
@@ -3012,14 +3012,14 @@ static i32 edrtlProcRTL(float delta_time, nupad_s *pad) {
     if (ctl[ctl_ix][5] & pad->digital_buttons) {
         helpmode = 5;
         edcamGetPosAng(&pcpos, &peax, &peay);
-        if (!curr_rtl) {
-            curr_rtl = FindNearestRTL(&pcpos, 1);
-        } else {
+        if (curr_rtl) {
             edcamSetPos(&curr_rtl->position);
             if (ctl[ctl_ix][7] & pad->digital_buttons_pressed)
                 SelectNextRTL();
             else if (ctl[ctl_ix][6] & pad->digital_buttons_pressed)
                 SelectPrevRTL();
+        } else {
+            curr_rtl = FindNearestRTL(&pcpos, 1);
         }
         if (rtl_locked)
             rtl_locked = curr_rtl;
@@ -3456,16 +3456,8 @@ extern "C" void edrtlCalculateBurnout(burnset_s *set, f32 *threshold, f32 *inten
     f32 desired_threshold;
     f32 desired_intensity;
     f32 desired_dispersion;
-    if (nearest_index == -1) {
-        desired_threshold = set->parameters.field_24;
-        desired_intensity = set->parameters.field_14;
-        desired_dispersion = set->parameters.field_1c;
-    } else {
-        if (nearest_distance <= set->burnouts[nearest_index].field_1c) {
-            desired_threshold = set->burnouts[nearest_index].field_10;
-            desired_intensity = set->burnouts[nearest_index].field_14;
-            desired_dispersion = set->burnouts[nearest_index].field_18;
-        } else {
+    if (nearest_index != -1) {
+        if (!(nearest_distance <= set->burnouts[nearest_index].field_1c)) {
             f32 fraction =
                 (nearest_distance - set->burnouts[nearest_index].field_1c) / set->burnouts[nearest_index].field_20;
             desired_threshold =
@@ -3474,7 +3466,15 @@ extern "C" void edrtlCalculateBurnout(burnset_s *set, f32 *threshold, f32 *inten
                 set->burnouts[nearest_index].field_14 * (1.0f - fraction) + set->parameters.field_14 * fraction;
             desired_dispersion =
                 set->burnouts[nearest_index].field_18 * (1.0f - fraction) + set->parameters.field_1c * fraction;
+        } else {
+            desired_threshold = set->burnouts[nearest_index].field_10;
+            desired_intensity = set->burnouts[nearest_index].field_14;
+            desired_dispersion = set->burnouts[nearest_index].field_18;
         }
+    } else {
+        desired_threshold = set->parameters.field_24;
+        desired_intensity = set->parameters.field_14;
+        desired_dispersion = set->parameters.field_1c;
     }
 
     if (set->field_b4) {

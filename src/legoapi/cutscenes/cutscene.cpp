@@ -1785,8 +1785,8 @@ void instNuGCutSceneEndFirstFrame(instNUGCUTSCENE_s *instance) {
     instance->flags_8c &= ~0x40U;
 
     f32 frame;
-    if ((instance->flags_8a & 4) != 0) {
-        frame = cutscene->duration - instance->current_frame;
+    if ((instance->flags_8a & 4) == 0) {
+        frame = instance->current_frame;
         if (cutscene->rigid_system != NULL) {
             instNuGCutRigidSysEnd(instance, frame);
         }
@@ -1806,7 +1806,7 @@ void instNuGCutSceneEndFirstFrame(instNUGCUTSCENE_s *instance) {
             }
         }
     } else {
-        frame = instance->current_frame;
+        frame = cutscene->duration - instance->current_frame;
         if (cutscene->rigid_system != NULL) {
             instNuGCutRigidSysEnd(instance, frame);
         }
@@ -1898,8 +1898,8 @@ extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance) {
     ForcePlayEndFrame = 1;
 
     f32 frame;
-    if ((instance->flags_8a & 4) != 0) {
-        frame = cutscene->duration - instance->current_frame;
+    if ((instance->flags_8a & 4) == 0) {
+        frame = instance->current_frame;
         if (cutscene->rigid_system != NULL) {
             instNuGCutRigidSysEnd(instance, frame);
         }
@@ -1919,7 +1919,7 @@ extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance) {
             }
         }
     } else {
-        frame = instance->current_frame;
+        frame = cutscene->duration - instance->current_frame;
         if (cutscene->rigid_system != NULL) {
             instNuGCutRigidSysEnd(instance, frame);
         }
@@ -2323,7 +2323,9 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
                                                   camera->animation_node, instance->render_frame, NULL);
             cutscenecam_fstop = values[2];
             cutscenecam_focalLength = values[0] * 1.3f;
-            if ((camera->field_43 & 2) == 0) {
+            if ((camera->field_43 & 2) != 0) {
+                cutscenecam_focusDistance = values[1];
+            } else {
                 if (system->focus_state_animation != NULL && camera_instance->focus_index >= 0) {
                     NUGCUTLOCATOR_s *focus_locator =
                         &instance->cutscene->locator_system->locators[camera_instance->focus_index];
@@ -2340,8 +2342,6 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
                         cutscenecam_usefocusloc = 1;
                     }
                 }
-            } else {
-                cutscenecam_focusDistance = values[1];
             }
         }
         const u32 animation_magic = *reinterpret_cast<u32 *>(system->animation);
@@ -2547,48 +2547,7 @@ extern "C" void NuGCutSceneSysRender(i32 paused) {
         if ((instance->flags_89 & 8) != 0 || (instance->flags_88 & 2) == 0 || (instance->flags_89 & 4) == 0) {
             continue;
         }
-        if ((instance->flags_8a & 4) != 0) {
-            if (instance->rigid_instance != NULL) {
-                instNuGCutRigidSysRender(instance, instance->cutscene->duration - instance->render_frame, paused);
-            }
-
-            instNUGCUTCHARSYS_s *character_instance = instance->character_instance;
-            if (character_instance != NULL) {
-                NUGCUTSCENE_s *cutscene = instance->cutscene;
-                const f32 frame = cutscene->duration - instance->render_frame;
-                NUGCUTCHARSYS_s *system = cutscene->character_system;
-                if (system != NULL && NuCutSceneCharacterRender != NULL) {
-                    for (i32 i = 0; i < system->character_count; ++i) {
-                        instNUGCUTCHAR_s *character = &character_instance->characters[i];
-                        if (character->character_model != NULL) {
-                            NuCutSceneCharacterRender(instance, cutscene, character, &system->characters[i], frame,
-                                                      paused);
-                        }
-                    }
-                }
-            }
-
-            if ((instance->flags_8c & 0x40) != 0 && instance->current_frame == instance->cutscene->duration - 1.0f) {
-                continue;
-            }
-            if ((instance->flags_8b & 0x40) != 0) {
-                continue;
-            }
-            instNUGCUTLOCATORSYS_s *locator_instance = instance->locator_instance;
-            if (locator_instance != NULL) {
-                NUGCUTSCENE_s *cutscene = instance->cutscene;
-                const f32 frame = cutscene->duration - instance->render_frame;
-                NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
-                for (u32 i = 0; system != NULL && i < system->locator_count; ++i) {
-                    NUGCUTLOCATOR_s *locator = &system->locators[i];
-                    if ((locator->flags & 3) == 0) {
-                        NUMTX *parent_matrix = static_cast<i8>(instance->flags_88) < 0 ? &instance->matrix : NULL;
-                        instNuGCutLocatorUpdate(instance, system, &locator_instance->locators[i], locator, frame,
-                                                parent_matrix, paused);
-                    }
-                }
-            }
-        } else {
+        if ((instance->flags_8a & 4) == 0) {
             if (instance->rigid_instance != NULL) {
                 instNuGCutRigidSysRender(instance, instance->render_frame, paused);
             }
@@ -2619,6 +2578,47 @@ extern "C" void NuGCutSceneSysRender(i32 paused) {
             if (locator_instance != NULL) {
                 NUGCUTSCENE_s *cutscene = instance->cutscene;
                 const f32 frame = instance->render_frame;
+                NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
+                for (u32 i = 0; system != NULL && i < system->locator_count; ++i) {
+                    NUGCUTLOCATOR_s *locator = &system->locators[i];
+                    if ((locator->flags & 3) == 0) {
+                        NUMTX *parent_matrix = static_cast<i8>(instance->flags_88) < 0 ? &instance->matrix : NULL;
+                        instNuGCutLocatorUpdate(instance, system, &locator_instance->locators[i], locator, frame,
+                                                parent_matrix, paused);
+                    }
+                }
+            }
+        } else {
+            if (instance->rigid_instance != NULL) {
+                instNuGCutRigidSysRender(instance, instance->cutscene->duration - instance->render_frame, paused);
+            }
+
+            instNUGCUTCHARSYS_s *character_instance = instance->character_instance;
+            if (character_instance != NULL) {
+                NUGCUTSCENE_s *cutscene = instance->cutscene;
+                const f32 frame = cutscene->duration - instance->render_frame;
+                NUGCUTCHARSYS_s *system = cutscene->character_system;
+                if (system != NULL && NuCutSceneCharacterRender != NULL) {
+                    for (i32 i = 0; i < system->character_count; ++i) {
+                        instNUGCUTCHAR_s *character = &character_instance->characters[i];
+                        if (character->character_model != NULL) {
+                            NuCutSceneCharacterRender(instance, cutscene, character, &system->characters[i], frame,
+                                                      paused);
+                        }
+                    }
+                }
+            }
+
+            if ((instance->flags_8c & 0x40) != 0 && instance->current_frame == instance->cutscene->duration - 1.0f) {
+                continue;
+            }
+            if ((instance->flags_8b & 0x40) != 0) {
+                continue;
+            }
+            instNUGCUTLOCATORSYS_s *locator_instance = instance->locator_instance;
+            if (locator_instance != NULL) {
+                NUGCUTSCENE_s *cutscene = instance->cutscene;
+                const f32 frame = cutscene->duration - instance->render_frame;
                 NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
                 for (u32 i = 0; system != NULL && i < system->locator_count; ++i) {
                     NUGCUTLOCATOR_s *locator = &system->locators[i];

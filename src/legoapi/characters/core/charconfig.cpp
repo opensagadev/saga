@@ -2542,10 +2542,7 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
         }
     }
     if ((charconfig.flags & 2) != 0) {
-        if (charconfig.runtime->layer_count == 0) {
-            charconfig.runtime->layers = NULL;
-            charconfig.runtime->layer_count = 0;
-        } else {
+        if (charconfig.runtime->layer_count != 0) {
             charconfig.arena->addr = ALIGN(charconfig.arena->addr, 4);
             charconfig.runtime->layers = static_cast<GAMECHARACTERLAYER_s *>(charconfig.arena->void_ptr);
             charconfig.arena->addr += charconfig.runtime->layer_count * sizeof(*layers);
@@ -2559,6 +2556,9 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
                         charconfig.runtime->layer_lookup[bit] = static_cast<i8>(layer);
                 }
             }
+        } else {
+            charconfig.runtime->layers = NULL;
+            charconfig.runtime->layer_count = 0;
         }
     }
     SecondCharConfigure = 0;

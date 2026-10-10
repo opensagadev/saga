@@ -101,19 +101,19 @@ static __used__ i32 RowMoveWander(AIGROUP *group, AIROW *row, AIROW *previous, A
                 }
                 group->leader = NULL;
                 group->is_reversed = !group->is_reversed;
-                if (group->is_reversed) {
-                    for (i32 i = group->member_count - 1; i != -1; --i) {
+                if (!group->is_reversed) {
+                    for (i32 i = 0; i < group->member_count; ++i) {
                         APIOBJECT *object = group->members[i];
-                        if (object != NULL && (object->field_0x1f8 & 0x1001) == 0x1001 && object->field_0x287 == 0) {
+                        if (object->objptr != NULL && (object->field_0x1f8 & 0x1001) == 0x1001 &&
+                            object->field_0x287 == 0) {
                             group->leader = object;
                             break;
                         }
                     }
                 } else {
-                    for (i32 i = 0; i < group->member_count; ++i) {
+                    for (i32 i = group->member_count - 1; i != -1; --i) {
                         APIOBJECT *object = group->members[i];
-                        if (object->objptr != NULL && (object->field_0x1f8 & 0x1001) == 0x1001 &&
-                            object->field_0x287 == 0) {
+                        if (object != NULL && (object->field_0x1f8 & 0x1001) == 0x1001 && object->field_0x287 == 0) {
                             group->leader = object;
                             break;
                         }
@@ -961,12 +961,12 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
             AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
             packet->path_info.dist = local.z / connection->horizontal_distance;
             packet->path_info.width = local.x;
-            if (first_radius < distance) {
-                packet->last_path_position.x = first_radius * radial.x / distance + first->position.x;
-                packet->last_path_position.z = first_radius * radial.z / distance + first->position.z;
-            } else {
+            if (!(first_radius < distance)) {
                 packet->last_path_position.x = object->position.x;
                 packet->last_path_position.z = object->position.z;
+            } else {
+                packet->last_path_position.x = first_radius * radial.x / distance + first->position.x;
+                packet->last_path_position.z = first_radius * radial.z / distance + first->position.z;
             }
             packet->last_path_position.y = first->position.y;
             packet->inside_path_node = -1;
@@ -1006,12 +1006,12 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
             AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
             packet->path_info.dist = local.z / connection->horizontal_distance;
             packet->path_info.width = local.x;
-            if (first_radius < distance) {
-                packet->last_path_position.x = first_radius * radial.x / distance + first->position.x;
-                packet->last_path_position.z = first_radius * radial.z / distance + first->position.z;
-            } else {
+            if (!(first_radius < distance)) {
                 packet->last_path_position.x = object->position.x;
                 packet->last_path_position.z = object->position.z;
+            } else {
+                packet->last_path_position.x = first_radius * radial.x / distance + first->position.x;
+                packet->last_path_position.z = first_radius * radial.z / distance + first->position.z;
             }
             packet->last_path_position.y = first->position.y;
             packet->inside_path_node = -1;
@@ -1042,12 +1042,12 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
             AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
             packet->path_info.dist = local.z / connection->horizontal_distance;
             packet->path_info.width = local.x;
-            if (second_radius < distance) {
-                packet->last_path_position.x = second_radius * radial.x / distance + second->position.x;
-                packet->last_path_position.z = second_radius * radial.z / distance + second->position.z;
-            } else {
+            if (!(second_radius < distance)) {
                 packet->last_path_position.x = object->position.x;
                 packet->last_path_position.z = object->position.z;
+            } else {
+                packet->last_path_position.x = second_radius * radial.x / distance + second->position.x;
+                packet->last_path_position.z = second_radius * radial.z / distance + second->position.z;
             }
             packet->last_path_position.y = second->position.y;
             packet->inside_path_node = -1;

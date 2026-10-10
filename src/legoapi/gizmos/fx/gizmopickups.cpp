@@ -261,14 +261,14 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
     NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f);
     f32 maximum_distance = world->gizmo_pickup_sys->draw_distance;
     f32 shadow_distance_squared;
-    if (g_lowEndLevelBehaviour == 0) {
-        const f32 shadow_distance = maximum_distance * 0.5f;
-        shadow_distance_squared = shadow_distance * shadow_distance;
-    } else {
+    if (g_lowEndLevelBehaviour != 0) {
         shadow_distance_squared = 0.0f;
         if (CharClipToBlobShadows != 0 && maximum_distance > world->current_level->blob_shadow_fade_far) {
             maximum_distance = static_cast<f32>(world->current_level->blob_shadow_fade_far);
         }
+    } else {
+        const f32 shadow_distance = maximum_distance * 0.5f;
+        shadow_distance_squared = shadow_distance * shadow_distance;
     }
     const f32 maximum_distance_squared = maximum_distance * maximum_distance;
     for (i32 index = 0; index < count; ++index) {

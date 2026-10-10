@@ -149,11 +149,7 @@ GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message) {
 initialise_slot:
     slot->text = NULL;
     i32 text_index = 0;
-    if (message->special != NULL) {
-        if (NuSpecialExistsFn(message->special) == 0) {
-            return NULL;
-        }
-    } else {
+    if (message->special == NULL) {
         if (message->text == NULL) {
             return NULL;
         }
@@ -168,6 +164,10 @@ initialise_slot:
             for (; text_index < length && text_index <= 0x76; ++text_index) {
                 slot->text_buffer[text_index] = message->text[text_index];
             }
+        }
+    } else {
+        if (NuSpecialExistsFn(message->special) == 0) {
+            return NULL;
         }
     }
     slot->text_buffer[text_index] = '\0';

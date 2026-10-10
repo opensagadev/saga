@@ -1749,9 +1749,7 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
         if (oldest != NULL) {
             i32 index = oldest->index;
             los->words[index + 12] = LevelTimer.update_count;
-            if ((oldest->force->config_flags & 0x800) == 0) {
-                los->words[index >> 5] |= 1u << (index & 31);
-            } else {
+            if ((oldest->force->config_flags & 0x800) != 0) {
                 los->words[index >> 5] &= ~(1u << (index & 31));
                 NUVEC direction;
                 i32 clear = 0;
@@ -1778,6 +1776,8 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
                 }
                 if (clear)
                     object->gizforce_los_info->words[index >> 5] |= 1u << (index & 31);
+            } else {
+                los->words[index >> 5] |= 1u << (index & 31);
             }
         }
     }

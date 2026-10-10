@@ -327,16 +327,11 @@ GIZPANEL_s *GizPanel_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObje
     GIZPANEL_s *nearest = NULL;
     f32 nearest_distance = 1.0e9f;
     if (object != NULL) {
-        if (check_eligibility != 0) {
+        if (check_eligibility == 0) {
             for (i32 index = 0; index < count; ++index) {
                 GIZPANEL_s *panel = &system->panels[index];
                 if ((panel->flags & 0x0f) != 0x0c || panel->floor_position.y == 2000000.0f)
                     continue;
-                if (GizPanel_CanUsePanel(object, panel) == 0) {
-                    system = world->giz_panel_sys;
-                    count = system->count;
-                    continue;
-                }
                 NUVEC target;
                 GizPanel_GetAbsTargetPos(panel, &target, 0);
                 const f32 distance = NuVecDistSqr(position, &target, NULL);
@@ -352,6 +347,11 @@ GIZPANEL_s *GizPanel_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObje
                 GIZPANEL_s *panel = &system->panels[index];
                 if ((panel->flags & 0x0f) != 0x0c || panel->floor_position.y == 2000000.0f)
                     continue;
+                if (GizPanel_CanUsePanel(object, panel) == 0) {
+                    system = world->giz_panel_sys;
+                    count = system->count;
+                    continue;
+                }
                 NUVEC target;
                 GizPanel_GetAbsTargetPos(panel, &target, 0);
                 const f32 distance = NuVecDistSqr(position, &target, NULL);

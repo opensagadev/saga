@@ -232,10 +232,10 @@ void NextStatusStage(STATUSPACKET_s *packet) {
         }
 
         ++packet->current_gold_brick;
-        if (packet->current_gold_brick + 1 < packet->stage_count) {
-            packet->next_stage = FindStatusStage(packet->stage_types[packet->current_gold_brick + 1]);
-        } else {
+        if (!(packet->current_gold_brick + 1 < packet->stage_count)) {
             packet->next_stage = FindStatusStage(10);
+        } else {
+            packet->next_stage = FindStatusStage(packet->stage_types[packet->current_gold_brick + 1]);
         }
     }
 
