@@ -2964,15 +2964,17 @@ void TerrainPlayer(GameObject_s *object) {
                 if (object->field_0x107c != -1) {
                     excluded_platforms[excluded_count++] = object->field_0x107c;
                 }
-                if (object->character_context == 0) {
+                if (object->character_context != 0) {
+                    if (object->character_context == 0x58 && object->field_0x7a3 == 1) {
+                        GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
+                        if (blowup->platform_id != -1) {
+                            excluded_platforms[excluded_count++] = blowup->platform_id;
+                        }
+                    }
+                } else {
                     GameObject_s *target = object->airborne_collision_target;
                     if (target != NULL && target->field_0x107c != -1) {
                         excluded_platforms[excluded_count++] = target->field_0x107c;
-                    }
-                } else if (object->character_context == 0x58 && object->field_0x7a3 == 1) {
-                    GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
-                    if (blowup->platform_id != -1) {
-                        excluded_platforms[excluded_count++] = blowup->platform_id;
                     }
                 }
                 CHARPLATFORMSYS_s *platforms = WORLD->char_platform_sys;
@@ -3120,7 +3122,26 @@ void TerrainPlayer(GameObject_s *object) {
 
         // Original 0x1029e6/0x103cb4 transfers vertical momentum only when
         // leaving or landing on the object's recorded character platform.
-        if (api.field_0x27d == 0) {
+        if (api.field_0x27d != 0) {
+            if (previous_platform == -1 && api.supporting_platform_id != -1 &&
+                api.supporting_platform_id == object->field_0x1078 && entry_vertical_velocity < 0.0f) {
+                const i32 platform_id = api.supporting_platform_id;
+                GRABBER_s *grabber = WORLD->grabber;
+                if (grabber != NULL && grabber->platform_id == platform_id) {
+                    if (grabber->platform_contact_timer <= 0.0f) {
+                        grabber->platform_contact_timer = 0.25f;
+                    }
+                } else {
+                    GameObject_s *platform_owner =
+                        CharPlatform_FindObjFromPlatID(WORLD->char_platform_sys, platform_id);
+                    if (platform_owner != NULL &&
+                        platform_owner->apiobj.character_data->game_character->field_0x28 > 0.0f) {
+                        platform_owner->apiobj.velocity.y =
+                            entry_vertical_velocity * 0.5f + platform_owner->apiobj.velocity.y;
+                    }
+                }
+            }
+        } else {
             if (previous_platform != -1 && api.supporting_platform_id == -1 &&
                 object->field_0x1078 == previous_platform) {
                 const i32 platform_id = previous_platform;
@@ -3136,22 +3157,6 @@ void TerrainPlayer(GameObject_s *object) {
                         platform_owner->apiobj.character_data->game_character->field_0x28 > 0.0f) {
                         platform_owner->apiobj.velocity.y -= entry_vertical_velocity * 0.5f;
                     }
-                }
-            }
-        } else if (previous_platform == -1 && api.supporting_platform_id != -1 &&
-                   api.supporting_platform_id == object->field_0x1078 && entry_vertical_velocity < 0.0f) {
-            const i32 platform_id = api.supporting_platform_id;
-            GRABBER_s *grabber = WORLD->grabber;
-            if (grabber != NULL && grabber->platform_id == platform_id) {
-                if (grabber->platform_contact_timer <= 0.0f) {
-                    grabber->platform_contact_timer = 0.25f;
-                }
-            } else {
-                GameObject_s *platform_owner = CharPlatform_FindObjFromPlatID(WORLD->char_platform_sys, platform_id);
-                if (platform_owner != NULL &&
-                    platform_owner->apiobj.character_data->game_character->field_0x28 > 0.0f) {
-                    platform_owner->apiobj.velocity.y =
-                        entry_vertical_velocity * 0.5f + platform_owner->apiobj.velocity.y;
                 }
             }
         }
@@ -3281,18 +3286,20 @@ void TerrainPlayer(GameObject_s *object) {
                             }
                             object->character_context = 0x2b;
                             object->field_0xe31 = 0;
-                            if ((TerLayer[static_cast<i8>(api.field_0x27f)].flags & 0x20) != 0) {
-                                object->field_0xe36 = 3;
-                            } else if (api.field_0x27f == 6) {
-                                api.velocity.y = -0.25f;
-                                object->field_0xe36 = 2;
-                                NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
-                            } else if (WORLD->current_level == VADERC_LDATA) {
-                                api.velocity.y = -0.5f;
-                                object->field_0xe36 = 4;
-                                NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
+                            if ((TerLayer[static_cast<i8>(api.field_0x27f)].flags & 0x20) == 0) {
+                                if (api.field_0x27f == 6) {
+                                    api.velocity.y = -0.25f;
+                                    object->field_0xe36 = 2;
+                                    NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
+                                } else if (WORLD->current_level == VADERC_LDATA) {
+                                    api.velocity.y = -0.5f;
+                                    object->field_0xe36 = 4;
+                                    NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
+                                } else {
+                                    object->field_0xe36 = 1;
+                                }
                             } else {
-                                object->field_0xe36 = 1;
+                                object->field_0xe36 = 3;
                             }
                             object->turn_braking = 0.0f;
                             PlayDieSfx(object);
@@ -4568,9 +4575,21 @@ i32 PlatformChecks(i32 count, nuvec_s *movement) {
                        old_query->platform_position.y - old_query->position.y,
                        old_query->platform_position.z - old_query->position.z};
     f32 distance = NuFsqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
-    direction.x = distance == 0.0f || direction.x == 0.0f ? 0.0f : direction.x / distance;
-    direction.y = distance == 0.0f || direction.y == 0.0f ? 0.0f : direction.y / distance;
-    direction.z = distance == 0.0f || direction.z == 0.0f ? 0.0f : direction.z / distance;
+    if (distance == 0.0f || direction.x == 0.0f) {
+        direction.x = 0.0f;
+    } else {
+        direction.x = direction.x / distance;
+    }
+    if (distance == 0.0f || direction.y == 0.0f) {
+        direction.y = 0.0f;
+    } else {
+        direction.y = direction.y / distance;
+    }
+    if (distance == 0.0f || direction.z == 0.0f) {
+        direction.z = 0.0f;
+    } else {
+        direction.z = direction.z / distance;
+    }
     NUVEC previous_position = TerI->position;
     i32 clear = TerrainPlatformMoveCheck(&TerI->platform_position, &TerI->platform_normal, platform_index, 1, 0);
     bool opposing_contact = false;
@@ -7119,7 +7138,11 @@ extern "C" i32 TerrainTrackBack(NUVEC *position, NUVEC *direction, f32 radius, f
     TerI->inverse_object_scale = 1.0f;
     TerI->inverse_object_scale_sq = 1.0f;
     TerI->collision_radius = radius;
-    TerI->inverse_collision_radius = radius == 0.0f ? 0.0f : 1.0f / radius;
+    if (radius == 0.0f) {
+        TerI->inverse_collision_radius = 0.0f;
+    } else {
+        TerI->inverse_collision_radius = 1.0f / radius;
+    }
     TerI->collision_radius_sq = radius * radius;
     TerI->position.x = direction->x * (radius + 0.5f) + position->x;
     TerI->position.y = direction->y * (radius + 0.5f) + position->y;

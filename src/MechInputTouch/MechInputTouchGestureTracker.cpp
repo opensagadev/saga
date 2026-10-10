@@ -44,16 +44,18 @@ void MechInputTouchGestureTrackingSystem::LookForClicks(GameObject_s &object) {
         if (first_recent && later_recent) {
             for (i32 priority = 0; priority < 10; ++priority) {
                 MechInputTouchGestureTracker *tracker = entries[priority].tracker;
-                if (tracker != NULL && tracker->OnDoubleClick(object, holder)) {
-                    break;
+                if (!(tracker != NULL && tracker->OnDoubleClick(object, holder))) {
+                    continue;
                 }
+                break;
             }
         } else if (first_recent || later_recent) {
             for (i32 priority = 0; priority < 10; ++priority) {
                 MechInputTouchGestureTracker *tracker = entries[priority].tracker;
-                if (tracker != NULL && tracker->OnClick(object, holder)) {
-                    break;
+                if (!(tracker != NULL && tracker->OnClick(object, holder))) {
+                    continue;
                 }
+                break;
             }
         }
     }

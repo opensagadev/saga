@@ -348,18 +348,20 @@ static void CC_layers_special(NUFPAR *parser) {
     if (charconfig.named_layers != 0) {
         while (NuFParGetWord(parser) != 0) {
             const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
-            if (layer != -1) {
-                ++count;
-                *mask |= 1u << layer;
+            if (layer == -1) {
+                continue;
             }
+            ++count;
+            *mask |= 1u << layer;
         }
     } else {
         while (NuFParGetWord(parser) != 0) {
             const u32 layer = NuAToI(parser->word_buf);
-            if (layer < 32) {
-                ++count;
-                *mask |= 1u << layer;
+            if (!(layer < 32)) {
+                continue;
             }
+            ++count;
+            *mask |= 1u << layer;
         }
     }
     if (count != 0) {
@@ -486,18 +488,20 @@ static void CC_ride_layersoff(NUFPAR *parser) {
     if (charconfig.named_layers == 0) {
         while (NuFParGetWord(parser) != 0) {
             const u32 layer = NuAToI(parser->word_buf);
-            if (layer < 32) {
-                ++count;
-                *mask |= 1u << layer;
+            if (!(layer < 32)) {
+                continue;
             }
+            ++count;
+            *mask |= 1u << layer;
         }
     } else {
         while (NuFParGetWord(parser) != 0) {
             const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
-            if (layer != -1) {
-                ++count;
-                *mask |= 1u << layer;
+            if (layer == -1) {
+                continue;
             }
+            ++count;
+            *mask |= 1u << layer;
         }
     }
 }
@@ -1574,18 +1578,20 @@ static void CC_layers_dead(NUFPAR *parser) {
     if (charconfig.named_layers == 0) {
         while (NuFParGetWord(parser) != 0) {
             const u32 layer = NuAToI(parser->word_buf);
-            if (layer < 32) {
-                ++count;
-                *mask |= 1u << layer;
+            if (!(layer < 32)) {
+                continue;
             }
+            ++count;
+            *mask |= 1u << layer;
         }
     } else {
         while (NuFParGetWord(parser) != 0) {
             const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
-            if (layer != -1) {
-                ++count;
-                *mask |= 1u << layer;
+            if (layer == -1) {
+                continue;
             }
+            ++count;
+            *mask |= 1u << layer;
         }
     }
 }
@@ -1624,18 +1630,20 @@ static void CC_layers_low(NUFPAR *parser) {
     if (charconfig.named_layers == 0) {
         while (NuFParGetWord(parser) != 0) {
             const u32 layer = NuAToI(parser->word_buf);
-            if (layer < 32) {
-                ++count;
-                *mask |= 1u << layer;
+            if (!(layer < 32)) {
+                continue;
             }
+            ++count;
+            *mask |= 1u << layer;
         }
     } else {
         while (NuFParGetWord(parser) != 0) {
             const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
-            if (layer != -1) {
-                ++count;
-                *mask |= 1u << layer;
+            if (layer == -1) {
+                continue;
             }
+            ++count;
+            *mask |= 1u << layer;
         }
     }
 }
@@ -1647,18 +1655,20 @@ static void CC_layers_medium(NUFPAR *parser) {
     if (charconfig.named_layers != 0) {
         while (NuFParGetWord(parser) != 0) {
             const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
-            if (layer != -1) {
-                ++count;
-                *mask |= 1u << layer;
+            if (layer == -1) {
+                continue;
             }
+            ++count;
+            *mask |= 1u << layer;
         }
     } else {
         while (NuFParGetWord(parser) != 0) {
             const u32 layer = NuAToI(parser->word_buf);
-            if (layer < 32) {
-                ++count;
-                *mask |= 1u << layer;
+            if (!(layer < 32)) {
+                continue;
             }
+            ++count;
+            *mask |= 1u << layer;
         }
     }
     if (count != 0) {

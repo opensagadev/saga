@@ -1011,10 +1011,11 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
         i32 output = -1;
         for (i32 candidate = 0; candidate < last; ++candidate) {
             const f32 point = spinner->animation_points[candidate + 1];
-            if (frame < point + margin && point - margin < frame) {
-                output = candidate;
-                break;
+            if (!(frame < point + margin && point - margin < frame)) {
+                continue;
             }
+            output = candidate;
+            break;
         }
         if (output == -1 && frame < length + margin && length - margin < frame)
             output = last;

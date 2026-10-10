@@ -322,9 +322,11 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
         if ((force->runtime_flags & GIZFORCE_RUNTIME_OFFSET_APPLIED) != 0 && force->field_0x50 == 0.0f) {
             NUVEC offset;
             offset.x = 0.0f;
-            offset.y = (force->progress_flags & GIZFORCE_PROGRESS_GROUP_MEMBER) != 0
-                           ? GameAnimSet_GetCompletionRatio(force->anim_set) * force->group->combined_height
-                           : 0.0f;
+            if ((force->progress_flags & GIZFORCE_PROGRESS_GROUP_MEMBER) != 0) {
+                offset.y = GameAnimSet_GetCompletionRatio(force->anim_set) * force->group->combined_height;
+            } else {
+                offset.y = 0.0f;
+            }
             offset.z = 0.0f;
             GameAnimSet_SetOffset(force->anim_set, &offset);
             force->runtime_flags &= static_cast<u8>(~GIZFORCE_RUNTIME_OFFSET_APPLIED);
@@ -451,10 +453,12 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
                     GameAudio_PlaySfxById(force->stop_sfx_id, &force->position, 0, 0);
                 }
             } else if ((force->anim_set->flags & 5) != 0 && force->field_0x50 == 0.0f && playing_forwards) {
-                if (force->start_sfx_id == -1) {
+                if (force->start_sfx_id != -1) {
+                    if (force->anim_set->state == GAMEANIMSET_STATE_AT_START || IsSfxLooping(force->start_sfx_id)) {
+                        GameAudio_PlaySfxById(force->start_sfx_id, &force->position, 0, 0);
+                    }
+                } else {
                     PlaySfx("LegoForm", &force->position);
-                } else if (force->anim_set->state == GAMEANIMSET_STATE_AT_START || IsSfxLooping(force->start_sfx_id)) {
-                    GameAudio_PlaySfxById(force->start_sfx_id, &force->position, 0, 0);
                 }
             }
             if ((force->config_flags & 0x2000) == 0) {
@@ -972,15 +976,16 @@ static i32 GizForces_BoltHit(void *world_ptr, void *data, void *object_ptr, NUVE
             continue;
         }
         for (i32 point = point_count - 1; point >= 0; --point) {
-            if (SphereSphereOverlap(&force->position, extent, &points[point], radius)) {
-                NUVEC *origin = object != NULL ? &object->apiobj.collision_position : &points[point];
-                f32 distance = NuVecDistSqr(origin, &force->position, NULL);
-                if (distance < nearest_distance) {
-                    nearest_distance = distance;
-                    nearest = force;
-                }
-                break;
+            if (!(SphereSphereOverlap(&force->position, extent, &points[point], radius))) {
+                continue;
             }
+            NUVEC *origin = object != NULL ? &object->apiobj.collision_position : &points[point];
+            f32 distance = NuVecDistSqr(origin, &force->position, NULL);
+            if (distance < nearest_distance) {
+                nearest_distance = distance;
+                nearest = force;
+            }
+            break;
         }
     }
     if (nearest == NULL) {
@@ -1396,9 +1401,10 @@ static i32 GizForces_Load(void *world_ptr, void *data) {
                     ++name_pos;
                 }
                 NuStrCat(along_socket_name, const_cast<char *>("AlongSock"));
-                if (NuSpecialFind(object->special.scene, &force.along_socket, along_socket_name, 1) != 0) {
-                    break;
+                if (NuSpecialFind(object->special.scene, &force.along_socket, along_socket_name, 1) == 0) {
+                    continue;
                 }
+                break;
             }
         }
     }

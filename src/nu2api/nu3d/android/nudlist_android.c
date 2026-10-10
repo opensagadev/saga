@@ -354,11 +354,12 @@ extern "C" void *DisplayListCreateSkinTransformPS(VARIPTR *buffer, NUMTX *skin_m
             for (i32 deformer = 0; deformer < deformer_weights->count; ++deformer) {
                 NUVEC *offsets = geometry->deformer_vertex_offsets[deformer];
                 const f32 weight = deformer_weights->weights[deformer];
-                if (offsets != NULL && weight != 0.0f) {
-                    position->x += offsets[vertex].x * weight;
-                    position->y += offsets[vertex].y * weight;
-                    position->z += offsets[vertex].z * weight;
+                if (!(offsets != NULL && weight != 0.0f)) {
+                    continue;
                 }
+                position->x += offsets[vertex].x * weight;
+                position->y += offsets[vertex].y * weight;
+                position->z += offsets[vertex].z * weight;
             }
             destination += geometry->vertex_stride;
             source += geometry->vertex_stride;

@@ -963,45 +963,47 @@ void Hub_Update(WORLDINFO_s *world) {
     } else if (LevTime[4] > 0.0f) {
         LevTime[4] -= FRAMETIME;
     }
-    if (FadeSys.fade != 0.0f) {
+    if (FadeSys.fade == 0.0f) {
+        if (LevLock[4] == 0) {
+            i32 selected_minikit = -1;
+            if (!(hub_episode != -1 && hub_episode_time > 0.0f) &&
+                !(hub_area != -1 && hub_area_time > 0.0f &&
+                  (E1VEHICLE_ADATA == NULL || hub_area != E1VEHICLE_ADATA->index)) &&
+                minikit_candidate != -1) {
+                const auto player_ready = [](GameObject_s *object) {
+                    return object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0 &&
+                           object->pad_gamepad->input_magnitude == 0.0f;
+                };
+                if (player_ready(Player[0]) || player_ready(Player[1])) {
+                    selected_minikit = hub_minikitviewer_area;
+                }
+            }
+            if (hub_minikitarea_time == 0.0f) {
+                if (hub_minikitarea != selected_minikit) {
+                    hub_minikitarea_opentime = 0.0f;
+                }
+                hub_minikitarea = selected_minikit;
+            }
+            f32 target = 0.0f;
+            if (hub_minikitarea != -1 && hub_minikitarea == selected_minikit) {
+                hub_minikitarea_opentime += FRAMETIME;
+                target = 1.0f;
+            }
+            if (GetMenuID() == 14) {
+                target = 1.0f;
+            }
+            hub_minikitarea_time = SeekLinearF(hub_minikitarea_time, target, FRAMETIME * 2.0f);
+            if (hub_minikitarea_opentime >= 1.0f) {
+                MakeMenuPacket();
+                Hint_CancelCurrent();
+                NewMenu(14, -1, -1);
+                PlaySfxAndSetPitch(const_cast<char *>("JForcePush"), NULL, 1.5f);
+            }
+        }
+    } else {
         hub_minikitarea = -1;
         hub_minikitarea_time = 0.0f;
         hub_minikitarea_opentime = 0.0f;
-    } else if (LevLock[4] == 0) {
-        i32 selected_minikit = -1;
-        if (!(hub_episode != -1 && hub_episode_time > 0.0f) &&
-            !(hub_area != -1 && hub_area_time > 0.0f &&
-              (E1VEHICLE_ADATA == NULL || hub_area != E1VEHICLE_ADATA->index)) &&
-            minikit_candidate != -1) {
-            const auto player_ready = [](GameObject_s *object) {
-                return object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0 &&
-                       object->pad_gamepad->input_magnitude == 0.0f;
-            };
-            if (player_ready(Player[0]) || player_ready(Player[1])) {
-                selected_minikit = hub_minikitviewer_area;
-            }
-        }
-        if (hub_minikitarea_time == 0.0f) {
-            if (hub_minikitarea != selected_minikit) {
-                hub_minikitarea_opentime = 0.0f;
-            }
-            hub_minikitarea = selected_minikit;
-        }
-        f32 target = 0.0f;
-        if (hub_minikitarea != -1 && hub_minikitarea == selected_minikit) {
-            hub_minikitarea_opentime += FRAMETIME;
-            target = 1.0f;
-        }
-        if (GetMenuID() == 14) {
-            target = 1.0f;
-        }
-        hub_minikitarea_time = SeekLinearF(hub_minikitarea_time, target, FRAMETIME * 2.0f);
-        if (hub_minikitarea_opentime >= 1.0f) {
-            MakeMenuPacket();
-            Hint_CancelCurrent();
-            NewMenu(14, -1, -1);
-            PlaySfxAndSetPitch(const_cast<char *>("JForcePush"), NULL, 1.5f);
-        }
     }
     Hub_UpdateMiniKits(world);
 
@@ -1880,13 +1882,14 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
     if ((flags & 0x800) != 0) {
         Hub_DrawImportantBrick(251, build_x, HUB_EPISODESUBTITLEY - 0.05f, phase, -1, -1);
     }
-    if ((area->flags & 0x4000) != 0) {
-        DrawBuildUpBar(build_x, HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
-                       NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
-        NuStrCpy(text, (save->true_hero_complete[0] || save->true_hero_complete[1]) ? "$" : "X");
-        Text3DEx(text, build_x, HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE,
-                 PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
+    if ((area->flags & 0x4000) == 0) {
+        return;
     }
+    DrawBuildUpBar(build_x, HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
+                   NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
+    NuStrCpy(text, (save->true_hero_complete[0] || save->true_hero_complete[1]) ? "$" : "X");
+    Text3DEx(text, build_x, HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE,
+             PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
 }
 
 void Hub_DrawStarField() {
@@ -2186,21 +2189,23 @@ void Hub_DrawFreePlaySelect() {
         const f32 alpha = 1.0f - progress;
         if (progress <= 1.0f && alpha > 0.0f) {
             AREADATA *area = &ADataList[last_hub_area];
-            if ((area->flags & 0x100) != 0) {
+            if ((area->flags & 0x100) == 0) {
+                if ((area->flags & AREAFLAG_BONUS_AREA) != 0) {
+                    if (bonusmodearcade != 0) {
+                        Hub_DrawArcadeStats(alpha);
+                    } else {
+                        Hub_DrawBonusStats(alpha, -1, hub_bonusepisode, -1);
+                    }
+                    Hub_DrawBonusModeMenu(0, alpha);
+                } else {
+                    Hub_DrawAreaStats(alpha, last_hub_area, -1);
+                    if (VEHICLES_ADATA == NULL || VEHICLES_ADATA->index != last_hub_area) {
+                        Hub_DrawSelectModeMenu(0, alpha);
+                    }
+                }
+            } else {
                 Hub_DrawSuperBonusStats(area, alpha);
                 Hub_DrawBonusModeMenu(0, alpha);
-            } else if ((area->flags & AREAFLAG_BONUS_AREA) != 0) {
-                if (bonusmodearcade != 0) {
-                    Hub_DrawArcadeStats(alpha);
-                } else {
-                    Hub_DrawBonusStats(alpha, -1, hub_bonusepisode, -1);
-                }
-                Hub_DrawBonusModeMenu(0, alpha);
-            } else {
-                Hub_DrawAreaStats(alpha, last_hub_area, -1);
-                if (VEHICLES_ADATA == NULL || VEHICLES_ADATA->index != last_hub_area) {
-                    Hub_DrawSelectModeMenu(0, alpha);
-                }
             }
         }
     }
@@ -3387,7 +3392,31 @@ void MenuUpdateEpisodes(MENU_s *) {
                 MenuRepeat(&down_held, &down, downrepeattime, downrepeatcount, 0.1f, FRAMETIME);
                 MenuRepeat(&left_held, &left, leftrepeattime, leftrepeatcount, 0.1f, FRAMETIME);
                 MenuRepeat(&right_held, &right, rightrepeattime, rightrepeatcount, 0.1f, FRAMETIME);
-                if (up) {
+                if (!up) {
+                    if (down) {
+                        i32 next = previous + 7;
+                        if (next >= count) {
+                            const i32 rows = count / 7 + 1;
+                            next = (next < rows * 7 ? previous + 14 : next) - rows * 7;
+                        }
+                        i_clip[i_episodes] = next;
+                    } else if (left) {
+                        i32 column = previous % 7 - 1;
+                        if (column < 0)
+                            column += 7;
+                        i32 next = column + previous / 7 * 7;
+                        if (next >= count)
+                            next = count - 1;
+                        i_clip[i_episodes] = next;
+                    } else if (right) {
+                        i32 column = previous % 7 + 1;
+                        if (column == 7)
+                            column -= 7;
+                        const i32 row = previous / 7 * 7;
+                        const i32 next = row + column;
+                        i_clip[i_episodes] = next < count ? next : row;
+                    }
+                } else {
                     i32 next = previous - 7;
                     if (next < 0) {
                         next += (count / 7 + 1) * 7;
@@ -3395,28 +3424,6 @@ void MenuUpdateEpisodes(MENU_s *) {
                             next -= 7;
                     }
                     i_clip[i_episodes] = next;
-                } else if (down) {
-                    i32 next = previous + 7;
-                    if (next >= count) {
-                        const i32 rows = count / 7 + 1;
-                        next = (next < rows * 7 ? previous + 14 : next) - rows * 7;
-                    }
-                    i_clip[i_episodes] = next;
-                } else if (left) {
-                    i32 column = previous % 7 - 1;
-                    if (column < 0)
-                        column += 7;
-                    i32 next = column + previous / 7 * 7;
-                    if (next >= count)
-                        next = count - 1;
-                    i_clip[i_episodes] = next;
-                } else if (right) {
-                    i32 column = previous % 7 + 1;
-                    if (column == 7)
-                        column -= 7;
-                    const i32 row = previous / 7 * 7;
-                    const i32 next = row + column;
-                    i_clip[i_episodes] = next < count ? next : row;
                 }
             }
         }
@@ -3719,7 +3726,12 @@ void MenuUpdateBonusMode(MENU_s *) {
     }
 
     if (menu->input_activity) {
-        if (bonusmodearcade) {
+        if (!bonusmodearcade) {
+            if (menu->confirm_pressed) {
+                hub_bonusmode = menu->selected_item;
+                confirm = 1;
+            }
+        } else {
             const i32 item = menu->selected_item;
             const u8 choices = reinterpret_cast<u8 *>(&ArcadeItem)[item * 8 + 5];
             if (menu->left_pressed && choices >= 2)
@@ -3737,9 +3749,6 @@ void MenuUpdateBonusMode(MENU_s *) {
                     menu->confirm_pressed = 0;
                 }
             }
-        } else if (menu->confirm_pressed) {
-            hub_bonusmode = menu->selected_item;
-            confirm = 1;
         }
         if (menu->cancel_pressed)
             cancel = 1;

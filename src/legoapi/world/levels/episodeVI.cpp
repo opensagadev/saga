@@ -438,12 +438,20 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
                     for (i32 index = 0; index < sarlaccdisco.count; ++index)
                         if (sarlaccdisco.panel_state[index] == 0)
                             candidates[count++] = index;
-                    sarlaccdisco.first_panel = count != 0 ? candidates[NuRand(NULL) % count] : -1;
+                    if (count != 0) {
+                        sarlaccdisco.first_panel = candidates[NuRand(NULL) % count];
+                    } else {
+                        sarlaccdisco.first_panel = -1;
+                    }
                     count = 0;
                     for (i32 index = 0; index < sarlaccdisco.count; ++index)
                         if (index != sarlaccdisco.first_panel && sarlaccdisco.panel_state[index] == 0)
                             candidates[count++] = index;
-                    sarlaccdisco.second_panel = count != 0 ? candidates[NuRand(NULL) % count] : -1;
+                    if (count != 0) {
+                        sarlaccdisco.second_panel = candidates[NuRand(NULL) % count];
+                    } else {
+                        sarlaccdisco.second_panel = -1;
+                    }
                     if (sarlaccdisco.first_panel != -1 && sarlaccdisco.second_panel != -1) {
                         sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 1;
                         sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 1;
@@ -929,21 +937,23 @@ void LegoCity_Update(WORLDINFO_s *world) {
     u8 onTownCar = 0;
     for (i32 index = 0; index < 8; ++index) {
         GameObject_s *object = Player[index];
-        if (object != NULL && (object->apiobj.field_0x1f8 & 0x1000) != 0 && object->apiobj.field_0x287 == 0 &&
-            object->field_0xcc0 != NULL && object->field_0xcc0->character_context == CHARACTER_CONTEXT_LINKED_OBJECT) {
-            if (object->id == id_TRACTOR) {
-                onTractor = 0xff;
-                changedTractor = static_cast<u8>(~previousTractor);
-            } else if (object->id == id_TAUNTAUN) {
-                onTaunTaun = 0xff;
-                changedTaunTaun = static_cast<u8>(~previousTaunTaun);
-            } else if (object->id == id_MOONCAR) {
-                onMoonCar = 0xff;
-                changedMoonCar = static_cast<u8>(~previousMoonCar);
-            } else if (object->id == id_TOWNCAR) {
-                onTownCar = 0xff;
-                changedTownCar = static_cast<u8>(~previousTownCar);
-            }
+        if (!(object != NULL && (object->apiobj.field_0x1f8 & 0x1000) != 0 && object->apiobj.field_0x287 == 0 &&
+              object->field_0xcc0 != NULL &&
+              object->field_0xcc0->character_context == CHARACTER_CONTEXT_LINKED_OBJECT)) {
+            continue;
+        }
+        if (object->id == id_TRACTOR) {
+            onTractor = 0xff;
+            changedTractor = static_cast<u8>(~previousTractor);
+        } else if (object->id == id_TAUNTAUN) {
+            onTaunTaun = 0xff;
+            changedTaunTaun = static_cast<u8>(~previousTaunTaun);
+        } else if (object->id == id_MOONCAR) {
+            onMoonCar = 0xff;
+            changedMoonCar = static_cast<u8>(~previousMoonCar);
+        } else if (object->id == id_TOWNCAR) {
+            onTownCar = 0xff;
+            changedTownCar = static_cast<u8>(~previousTownCar);
         }
     }
     u8 changed = changedTractor | changedTaunTaun | changedMoonCar | changedTownCar;
@@ -1060,15 +1070,17 @@ void NewTown_Update(WORLDINFO_s *world) {
     u8 onLifeBoat = 0;
     for (i32 index = 0; index < 8; ++index) {
         GameObject_s *object = Player[index];
-        if (object != NULL && (object->apiobj.field_0x1f8 & 0x1000) != 0 && object->apiobj.field_0x287 == 0 &&
-            object->field_0xcc0 != NULL && object->field_0xcc0->character_context == CHARACTER_CONTEXT_LINKED_OBJECT) {
-            if (object->id == id_TAUNTAUN) {
-                onTaunTaun = 0xff;
-            } else if (object->id == id_FIRETRUCK) {
-                onFireTruck = 0xff;
-            } else if (object->id == id_LIFEBOAT) {
-                onLifeBoat = 0xff;
-            }
+        if (!(object != NULL && (object->apiobj.field_0x1f8 & 0x1000) != 0 && object->apiobj.field_0x287 == 0 &&
+              object->field_0xcc0 != NULL &&
+              object->field_0xcc0->character_context == CHARACTER_CONTEXT_LINKED_OBJECT)) {
+            continue;
+        }
+        if (object->id == id_TAUNTAUN) {
+            onTaunTaun = 0xff;
+        } else if (object->id == id_FIRETRUCK) {
+            onFireTruck = 0xff;
+        } else if (object->id == id_LIFEBOAT) {
+            onLifeBoat = 0xff;
         }
     }
     u8 changed = (onTaunTaun ^ previousTaunTaun) | (onFireTruck ^ previousFireTruck) | (onLifeBoat ^ previousLifeBoat);
@@ -1550,12 +1562,13 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
         end.x += 0.2f - NuRandFloat() * 0.4f;
         end.z += 0.2f - NuRandFloat() * 0.4f;
         for (i32 i = 0; i < 2; ++i) {
-            if (hands[i].y != 1000000000.0f) {
-                f32 distance = NuVecDist(&end, &hands[i], &delta);
-                NuLgtLaser(lightning_type, lightning_sizew[0], lightning_sizel[0], lightning_sizewab[0], &hands[i],
-                           &delta, lightning_col[0], lightning_endw[0], distance);
-                PlaySfx("ForceLightningLp", &locator->position);
+            if (hands[i].y == 1000000000.0f) {
+                continue;
             }
+            f32 distance = NuVecDist(&end, &hands[i], &delta);
+            NuLgtLaser(lightning_type, lightning_sizew[0], lightning_sizel[0], lightning_sizewab[0], &hands[i], &delta,
+                       lightning_col[0], lightning_endw[0], distance);
+            PlaySfx("ForceLightningLp", &locator->position);
         }
         LevGameObject[0]->ai.movement_look_target = &locator->position;
         packet = emperorfighta_netpacket;

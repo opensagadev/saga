@@ -369,11 +369,12 @@ GIZBUILDIT_s *GizBuildIt_FindNearest(WORLDINFO_s *world, GameObject_s *player, B
                     continue;
                 i32 occupied = 0;
                 for (i32 p = 0; p < 8; ++p) {
-                    if (Player[p] != NULL && Player[p]->build_context == LEGOCONTEXT_BUILDIT &&
-                        Player[p]->field_0x788 == buildit) {
-                        occupied = 1;
-                        break;
+                    if (!(Player[p] != NULL && Player[p]->build_context == LEGOCONTEXT_BUILDIT &&
+                          Player[p]->field_0x788 == buildit)) {
+                        continue;
                     }
+                    occupied = 1;
+                    break;
                 }
                 if (occupied != 0)
                     continue;
@@ -384,10 +385,11 @@ GIZBUILDIT_s *GizBuildIt_FindNearest(WORLDINFO_s *world, GameObject_s *player, B
             continue;
         const f32 radius = buildit->bounds_radius + 0.3f;
         const f32 distance = NuVecXZDistSqr(&buildit->start_position, &position, NULL);
-        if (distance < radius * radius && distance < nearest_distance) {
-            nearest_distance = distance;
-            nearest = buildit;
+        if (!(distance < radius * radius && distance < nearest_distance)) {
+            continue;
         }
+        nearest_distance = distance;
+        nearest = buildit;
     }
     return nearest;
 }

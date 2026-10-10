@@ -256,10 +256,11 @@ void StoreLevelProgressFn(WORLDINFO_s *world, LEVEL_PROGRESS_s *progress, i32 ar
                     progress->scripts[j].params[k] = processor.processor.params[k];
                 break;
             }
-            if (NuStrICmp(progress->scripts[j].name, processor.name) == 0) {
-                memcpy(progress->scripts[j].params, processor.processor.params, 16);
-                break;
+            if (NuStrICmp(progress->scripts[j].name, processor.name) != 0) {
+                continue;
             }
+            memcpy(progress->scripts[j].params, processor.processor.params, 16);
+            break;
         }
     }
 store_flags:
@@ -1187,10 +1188,11 @@ void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 para
             }
             bool imperial = false;
             for (APICHARACTERMODELLIST_s *model = FreePlayModelList; model->model_id != -1; ++model) {
-                if (Collection_Got(model->model_id) != 0 && World_FreePlayImperial(model->model_id)) {
-                    imperial = true;
-                    break;
+                if (!(Collection_Got(model->model_id) != 0 && World_FreePlayImperial(model->model_id))) {
+                    continue;
                 }
+                imperial = true;
+                break;
             }
             if (!imperial) {
                 i32 count = 0;

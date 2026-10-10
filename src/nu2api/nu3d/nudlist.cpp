@@ -777,10 +777,11 @@ void DisplayListLinkDynamicMtls(void) {
             idx = 0;
         } else {
             for (u32 j = 1; j < mgr->dyn_mtl_dlist.nmtls; ++j) {
-                if (mgr->dyn_mtl_dlist.mtls[j] == mtl) {
-                    idx = static_cast<i32>(j);
-                    break;
+                if (mgr->dyn_mtl_dlist.mtls[j] != mtl) {
+                    continue;
                 }
+                idx = static_cast<i32>(j);
+                break;
             }
             if (idx < 0)
                 continue;
@@ -1530,10 +1531,11 @@ void DisplayListPrintItem(nudisplaylistitem_s *item, i32 index, i32 type_count, 
     NuStrCat(text, detail);
     bool selected = type_count == 0;
     for (i32 type_index = 0; type_index < type_count; ++type_index) {
-        if (types[type_index] == item->type) {
-            selected = true;
-            break;
+        if (types[type_index] != item->type) {
+            continue;
         }
+        selected = true;
+        break;
     }
     if (selected && nudlist_debug_level > 0) {
         if (file_handle != 0) {

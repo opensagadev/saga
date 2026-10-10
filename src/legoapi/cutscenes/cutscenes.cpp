@@ -362,10 +362,11 @@ void CutScenes_Reset(WORLDINFO_s *world) {
         }
         if (cut == NULL && cutskip_dontplaylevelintro == 0) {
             for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
-                if ((world->cutscene_sys->cuts[i]->flags & 0x1000) != 0) {
-                    cut = world->cutscene_sys->cuts[i];
-                    break;
+                if ((world->cutscene_sys->cuts[i]->flags & 0x1000) == 0) {
+                    continue;
                 }
+                cut = world->cutscene_sys->cuts[i];
+                break;
             }
         }
         if (cut != NULL) {
@@ -1734,10 +1735,12 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
             cutscene->rigid_system =
                 reinterpret_cast<NUGCUTRIGIDSYS_s *>(reinterpret_cast<isize>(cutscene->rigid_system) + data_delta);
             NUGCUTRIGIDSYS_s *system = cutscene->rigid_system;
-            system->rigids =
-                system->rigids != NULL
-                    ? reinterpret_cast<NUGCUTRIGID_s *>(reinterpret_cast<isize>(system->rigids) + data_delta)
-                    : NULL;
+            if (system->rigids != NULL) {
+                system->rigids =
+                    reinterpret_cast<NUGCUTRIGID_s *>(reinterpret_cast<isize>(system->rigids) + data_delta);
+            } else {
+                system->rigids = NULL;
+            }
             if (system->rigids != NULL) {
                 for (i32 i = 0; i < system->count; ++i) {
                     NUGCUTRIGID_s *rigid = &system->rigids[i];
@@ -1803,10 +1806,12 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
             cutscene->trigger_system =
                 reinterpret_cast<NUGCUTTRIGGERSYS_s *>(reinterpret_cast<isize>(cutscene->trigger_system) + data_delta);
             NUGCUTTRIGGERSYS_s *system = cutscene->trigger_system;
-            system->events =
-                system->events != NULL
-                    ? reinterpret_cast<NUGCUTTRIGGEREVENT_s *>(reinterpret_cast<isize>(system->events) + data_delta)
-                    : NULL;
+            if (system->events != NULL) {
+                system->events =
+                    reinterpret_cast<NUGCUTTRIGGEREVENT_s *>(reinterpret_cast<isize>(system->events) + data_delta);
+            } else {
+                system->events = NULL;
+            }
             if (system->events != NULL) {
                 for (i32 i = 0; i < system->event_count; ++i) {
                     NUGCUTTRIGGEREVENT_s *event = &system->events[i];

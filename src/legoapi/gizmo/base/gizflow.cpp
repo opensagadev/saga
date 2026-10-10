@@ -654,10 +654,11 @@ static void ProcessFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8 frame) {
         bool parents_ready = true;
         for (i32 i = 0; i < box->parent_count; ++i) {
             FLOWBOX_s *parent = box->parents[i];
-            if (!flowboxtypes[parent->type].check_output(system, parent, box->output_indices[0])) {
-                parents_ready = false;
-                break;
+            if (!(!flowboxtypes[parent->type].check_output(system, parent, box->output_indices[0]))) {
+                continue;
             }
+            parents_ready = false;
+            break;
         }
         FLOWBOXGIZMODATA_s *data = box->data;
         if (parents_ready) {

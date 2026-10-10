@@ -744,32 +744,33 @@ static void GizObstacles_Reset(void *world_ptr, void *data, void *progress_ptr) 
             GizObstacle_EvalAveragePosAndRadius(&obstacle, 2);
         }
 
-        if (progress != NULL && index < GIZOBSTACLE_PROGRESS_CAPACITY) {
-            const i32 word = index >> 5;
-            const u32 bit = 1u << (index & 31);
-
-            obstacle.progress_flags =
-                static_cast<u8>((obstacle.progress_flags & ~GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) |
-                                ((progress->progress_flag_1[word] & bit) != 0 ? GIZOBSTACLE_PROGRESS_FLAG_VISIBLE : 0));
-            obstacle.progress_flags =
-                static_cast<u8>((obstacle.progress_flags & ~GIZOBSTACLE_PROGRESS_FLAG_ENABLED) |
-                                ((progress->progress_flag_0[word] & bit) != 0 ? GIZOBSTACLE_PROGRESS_FLAG_ENABLED : 0));
-            obstacle.runtime_flags = static_cast<u8>(
-                (obstacle.runtime_flags & ~GIZOBSTACLE_RUNTIME_FLAG_PICKUPS_SPAWNED) |
-                ((progress->runtime_flag_0[word] & bit) != 0 ? GIZOBSTACLE_RUNTIME_FLAG_PICKUPS_SPAWNED : 0));
-            obstacle.runtime_flags =
-                static_cast<u8>((obstacle.runtime_flags & ~GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE) |
-                                ((progress->runtime_flag_2[word] & bit) != 0 ? GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE : 0));
-            obstacle.runtime_flags =
-                static_cast<u8>((obstacle.runtime_flags & ~GIZOBSTACLE_RUNTIME_FLAG_BLOCKED) |
-                                ((progress->runtime_flag_3[word] & bit) != 0 ? GIZOBSTACLE_RUNTIME_FLAG_BLOCKED : 0));
-            obstacle.runtime_flags = static_cast<u8>(
-                (obstacle.runtime_flags & ~GIZOBSTACLE_RUNTIME_FLAG_TRIGGER_LATCHED) |
-                ((progress->runtime_flag_6[word] & bit) != 0 ? GIZOBSTACLE_RUNTIME_FLAG_TRIGGER_LATCHED : 0));
-            obstacle.runtime_flags =
-                static_cast<u8>((obstacle.runtime_flags & ~GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) |
-                                ((progress->runtime_flag_7[word] & bit) != 0 ? GIZOBSTACLE_RUNTIME_FLAG_DESTROYED : 0));
+        if (!(progress != NULL && index < GIZOBSTACLE_PROGRESS_CAPACITY)) {
+            continue;
         }
+        const i32 word = index >> 5;
+        const u32 bit = 1u << (index & 31);
+
+        obstacle.progress_flags =
+            static_cast<u8>((obstacle.progress_flags & ~GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) |
+                            ((progress->progress_flag_1[word] & bit) != 0 ? GIZOBSTACLE_PROGRESS_FLAG_VISIBLE : 0));
+        obstacle.progress_flags =
+            static_cast<u8>((obstacle.progress_flags & ~GIZOBSTACLE_PROGRESS_FLAG_ENABLED) |
+                            ((progress->progress_flag_0[word] & bit) != 0 ? GIZOBSTACLE_PROGRESS_FLAG_ENABLED : 0));
+        obstacle.runtime_flags = static_cast<u8>(
+            (obstacle.runtime_flags & ~GIZOBSTACLE_RUNTIME_FLAG_PICKUPS_SPAWNED) |
+            ((progress->runtime_flag_0[word] & bit) != 0 ? GIZOBSTACLE_RUNTIME_FLAG_PICKUPS_SPAWNED : 0));
+        obstacle.runtime_flags =
+            static_cast<u8>((obstacle.runtime_flags & ~GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE) |
+                            ((progress->runtime_flag_2[word] & bit) != 0 ? GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE : 0));
+        obstacle.runtime_flags =
+            static_cast<u8>((obstacle.runtime_flags & ~GIZOBSTACLE_RUNTIME_FLAG_BLOCKED) |
+                            ((progress->runtime_flag_3[word] & bit) != 0 ? GIZOBSTACLE_RUNTIME_FLAG_BLOCKED : 0));
+        obstacle.runtime_flags = static_cast<u8>(
+            (obstacle.runtime_flags & ~GIZOBSTACLE_RUNTIME_FLAG_TRIGGER_LATCHED) |
+            ((progress->runtime_flag_6[word] & bit) != 0 ? GIZOBSTACLE_RUNTIME_FLAG_TRIGGER_LATCHED : 0));
+        obstacle.runtime_flags =
+            static_cast<u8>((obstacle.runtime_flags & ~GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) |
+                            ((progress->runtime_flag_7[word] & bit) != 0 ? GIZOBSTACLE_RUNTIME_FLAG_DESTROYED : 0));
     }
     ngizobstacletriggers = 0;
 }
@@ -1123,10 +1124,11 @@ GIZOBSTACLE_s *GizObstacle_FindNearest(GIZOBSTACLESYS_s *system, NUVEC *position
         } else {
             distance = NuVecDistSqr(position, &obstacle->position, NULL);
         }
-        if (distance < best) {
-            best = distance;
-            nearest = obstacle;
+        if (!(distance < best)) {
+            continue;
         }
+        best = distance;
+        nearest = obstacle;
     }
     if (distance_squared != NULL)
         *distance_squared = best;

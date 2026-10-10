@@ -348,17 +348,19 @@ static void Tubes_Update(void *world_ptr, void *, float frame_time) {
                         continue;
                     if (!(DIRECTIONAL_TUBE_ENTRY_RADIUS_SQUARED > horizontal_distance_squared))
                         continue;
-                    if (NuTrigTable[DIRECTIONAL_TUBE_MAX_NORMAL_Y_ANGLE] > NuFabs(object->contact_normal.y)) {
-                        const f32 inverse_distance = 1.0f / NuFsqrt(horizontal_distance_squared);
-                        const f32 entry_alignment = delta_x * inverse_distance * object->contact_normal.x +
-                                                    delta_z * inverse_distance * object->contact_normal.z;
-
-                        if (-NuTrigTable[DIRECTIONAL_TUBE_MIN_ALIGNMENT_ANGLE] > entry_alignment) {
-                            GameAudio_PlaySfx(TUBE_AUDIO_EVENT, &object->apiobj.collision_position,
-                                              GameAudio_GetPlrSfxBits(object), 0);
-                            Tube_SetObjBit(tube, object->apiobj.field_0x289);
-                        }
+                    if (!(NuTrigTable[DIRECTIONAL_TUBE_MAX_NORMAL_Y_ANGLE] > NuFabs(object->contact_normal.y))) {
+                        continue;
                     }
+                    const f32 inverse_distance = 1.0f / NuFsqrt(horizontal_distance_squared);
+                    const f32 entry_alignment = delta_x * inverse_distance * object->contact_normal.x +
+                                                delta_z * inverse_distance * object->contact_normal.z;
+
+                    if (!(-NuTrigTable[DIRECTIONAL_TUBE_MIN_ALIGNMENT_ANGLE] > entry_alignment)) {
+                        continue;
+                    }
+                    GameAudio_PlaySfx(TUBE_AUDIO_EVENT, &object->apiobj.collision_position,
+                                      GameAudio_GetPlrSfxBits(object), 0);
+                    Tube_SetObjBit(tube, object->apiobj.field_0x289);
                 }
             }
         }

@@ -241,9 +241,10 @@ static void TightRopes_Draw(void *world_info, void *, float) {
                                    : &object->apiobj.upper_position;
             distances[count] = NuVecDist(positions[count], &rope->start, NULL);
             ++count;
-            if (count == 64) {
-                break;
+            if (count != 64) {
+                continue;
             }
+            break;
         }
         for (i32 pass = 0; pass < count - 1; ++pass) {
             for (i32 point = 0; point < count - 1; ++point) {

@@ -585,9 +585,10 @@ static __used__ void CutScene_Configure(CUTINFO *cut, char *name, VARIPTR *buf, 
     CS_fadefogcount = 0;
     NuFParPushCom(fp, CutScene_ConfigKeywords);
     while (NuFParGetLine(fp) != 0) {
-        if (NuFParGetWord(fp) != 0) {
-            NuFParInterpretWord(fp);
+        if (NuFParGetWord(fp) == 0) {
+            continue;
         }
+        NuFParInterpretWord(fp);
     }
     NuFParDestroy(fp);
 

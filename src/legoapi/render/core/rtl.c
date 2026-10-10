@@ -654,10 +654,11 @@ static __used__ void InsertAntiLight(rtl_s *light, rtlidata_s *lighting_data, fl
 static __used__ f32 ApplyAntilights(rtl_s *light, rtlidata_s *lighting_data, f32 strength) {
     f32 anti_strength = 0.0f;
     for (i32 index = 0; index < lighting_data->anti_light_count; ++index) {
-        if (lighting_data->anti_lights[index]->field_5e == 0 ||
-            (static_cast<u16>(lighting_data->anti_lights[index]->field_5e) & static_cast<u16>(light->field_5e)) != 0) {
-            anti_strength = MAX(anti_strength, lighting_data->anti_strengths[index]);
+        if (lighting_data->anti_lights[index]->field_5e != 0 &&
+            (static_cast<u16>(lighting_data->anti_lights[index]->field_5e) & static_cast<u16>(light->field_5e)) == 0) {
+            continue;
         }
+        anti_strength = MAX(anti_strength, lighting_data->anti_strengths[index]);
     }
     strength *= 1.0f - anti_strength;
     return strength;
@@ -3086,7 +3087,11 @@ static i32 edrtlProcRTL(float delta_time, nupad_s *pad) {
         return 0;
     }
 
-    curr_rtl = rtl_locked ? rtl_locked : FindNearestRTL(&pcpos, 0);
+    if (rtl_locked) {
+        curr_rtl = rtl_locked;
+    } else {
+        curr_rtl = FindNearestRTL(&pcpos, 0);
+    }
     if (base_rtl && (pad->digital_buttons_pressed & 0x8000)) {
         edcamSetPos(&base_rtl->position);
         base_rtl = NULL;
@@ -3692,9 +3697,10 @@ static void edrtlDrawLights() {
     } else {
         for (i32 index = 0; index < 128; ++index) {
             rtl_s *light = &curr_set->lights[index];
-            if (!hide_types[light->type] && light->field_7a == -1) {
-                edrtlDrawLight(index);
+            if (!(!hide_types[light->type] && light->field_7a == -1)) {
+                continue;
             }
+            edrtlDrawLight(index);
         }
     }
 }
@@ -3986,8 +3992,11 @@ static void edrtlDrawBurnInfo() {
 static void edrtlRender() {
     NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
     NuQFntPushPrintMode(2);
-    usr_cam->near_clip =
-        rtl_near_clip_at_cursor ? NuVecDist(&pcpos, NUMTX_GET_ROW_VEC(&usr_cam->mtx, 3), NULL) - 1.0f : game_nearclip;
+    if (rtl_near_clip_at_cursor) {
+        usr_cam->near_clip = NuVecDist(&pcpos, NUMTX_GET_ROW_VEC(&usr_cam->mtx, 3), NULL) - 1.0f;
+    } else {
+        usr_cam->near_clip = game_nearclip;
+    }
     usr_cam->far_clip = game_farclip;
     edcamSet();
     if (edrtl_mode == 0) {

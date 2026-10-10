@@ -130,9 +130,10 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
         }
         i32 target;
         for (target = 0; target < batarang->active; ++target) {
-            if (batarang->targets[target].object == candidate) {
-                break;
+            if (batarang->targets[target].object != candidate) {
+                continue;
             }
+            break;
         }
         if (target != batarang->active) {
             continue;

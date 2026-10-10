@@ -579,11 +579,12 @@ void GizmoBlowupLateUpdate(void *world_ptr, void *, float) {
 GIZMOBLOWUPTYPE_s *GizmoBlowupTypeAdd(WORLDINFO_s *world, nuhspecial_s *special, i32 flags, i32 *result) {
     for (i32 index = 0; index < world->gizmo_blowup_type_count; ++index) {
         GIZMOBLOWUPTYPE_s *existing = &world->gizmo_blowup_types[index];
-        if (NuSpecialCompare(&existing->animated_special, special) != 0 &&
-            (flags != 0 || (existing->animation_flags & 0x20) != 0)) {
-            *result = 0;
-            return NULL;
+        if (!(NuSpecialCompare(&existing->animated_special, special) != 0 &&
+              (flags != 0 || (existing->animation_flags & 0x20) != 0))) {
+            continue;
         }
+        *result = 0;
+        return NULL;
     }
 
     if (world->gizmo_blowup_type_count >= world->current_level->max_gizmo_blowup_types) {

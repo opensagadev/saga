@@ -620,12 +620,13 @@ CHARACTERDATA *CDataFromName(char *name) {
 i32 RedirectAnim(char *path, ANIMREDIRECT *redirects, ANIMLIST_s *animation_list, char *directory) {
     CHARACTERANIM_s *animation = reinterpret_cast<CHARACTERANIM_s *>(animation_list);
     for (ANIMREDIRECT *redirect = redirects; redirect->name != NULL; ++redirect) {
-        if (redirect->animation_id == animation->animation_id && NuStrICmp(redirect->name, animation->name) == 0) {
-            NuStrCpy(path, directory);
-            NuStrCat(path, animation->name);
-            animation->flags &= ~CHARACTER_ANIMATION_FLAG_BSA;
-            return 1;
+        if (!(redirect->animation_id == animation->animation_id && NuStrICmp(redirect->name, animation->name) == 0)) {
+            continue;
         }
+        NuStrCpy(path, directory);
+        NuStrCat(path, animation->name);
+        animation->flags &= ~CHARACTER_ANIMATION_FLAG_BSA;
+        return 1;
     }
     return 0;
 }

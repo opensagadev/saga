@@ -927,9 +927,10 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
                     }
                     connection = next;
                     next = GetNextConnection(packet, &direction);
-                    if (next == connection || next == NULL) {
-                        break;
+                    if (next != connection && next != NULL) {
+                        continue;
                     }
+                    break;
                 }
             } else {
                 u32 flags = destination_connection->traversal_flags[0] | destination_connection->traversal_flags[1];

@@ -2395,10 +2395,11 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
                 NUVEC delta;
                 AIPATHNODE_s *node = &runtime->nodes[i];
                 f32 distance = NuVecXZDistSqr(&aieditor->cursor_position, &node->position, &delta);
-                if (distance < best && distance < node->radius_squared) {
-                    best = distance;
-                    nearest = i;
+                if (!(distance < best && distance < node->radius_squared)) {
+                    continue;
                 }
+                best = distance;
+                nearest = i;
             }
         }
         path->runtime_nearest = static_cast<i16>(nearest);

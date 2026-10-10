@@ -216,9 +216,10 @@ static NUFRUSTRUM *copyFrustrum(NUFRUSTRUM *source, i16 room_id) {
 static __used__ void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_id, i16 previous_room, i32 depth) {
     if (depth >= 2) {
         for (i32 i = 0; i < depth - 1; ++i) {
-            if (rooms_visited[i] == room_id) {
-                return;
+            if (rooms_visited[i] != room_id) {
+                continue;
             }
+            return;
         }
     }
     if (depth >= 16) {

@@ -1453,9 +1453,10 @@ void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_cou
     // record for menu_id_count - 1.
     for (i32 i = 0; i < menu_ids_used; i++) {
         MenuInfo[RESERVED_MENUS_COUNT + i] = menu_info[i];
-        if (menu_info[i].id >= menu_ids_used - 1) {
-            break;
+        if (!(menu_info[i].id >= menu_ids_used - 1)) {
+            continue;
         }
+        break;
     }
 
     MenusUsed = menu_ids_used + RESERVED_MENUS_COUNT;

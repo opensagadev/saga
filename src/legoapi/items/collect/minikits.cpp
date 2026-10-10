@@ -740,13 +740,14 @@ i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible
     if (name == NULL || progress == NULL || NuStrLen(name) > 15)
         return 0;
     for (i32 i = 0; i < 12; ++i) {
-        if (NuStrICmp(progress->disabled_effect_names[i], name) == 0) {
-            if (visible != 0) {
-                progress->disabled_effect_names[i][0] = '\0';
-                return 2;
-            }
-            return 3;
+        if (NuStrICmp(progress->disabled_effect_names[i], name) != 0) {
+            continue;
         }
+        if (visible != 0) {
+            progress->disabled_effect_names[i][0] = '\0';
+            return 2;
+        }
+        return 3;
     }
     if (visible != 0)
         return 0;

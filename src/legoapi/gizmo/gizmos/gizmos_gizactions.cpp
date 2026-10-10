@@ -1140,10 +1140,11 @@ i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *pac
     }
     const i32 locator_index = locator - sys->locators;
     for (i32 index = 0; index < locator_set->locator_count; ++index) {
-        if (locator_set->locator_entries[index] == locator_index) {
-            locator_set->assigned[index] = assignment;
-            break;
+        if (locator_set->locator_entries[index] != locator_index) {
+            continue;
         }
+        locator_set->assigned[index] = assignment;
+        break;
     }
     return 1;
 }

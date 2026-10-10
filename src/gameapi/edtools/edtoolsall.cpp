@@ -3058,14 +3058,15 @@ i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end) {
             point_cursor[j].z = EdFileReadFloat();
         }
         point_cursor += spline->length;
-        if (point_cursor > data_end) {
-            EdFileClose();
-            splineStore = NULL;
-            EdFileClose();
-            numSplinesLoaded = spline_count;
-            buf->void_ptr = data_end;
-            return 0;
+        if (!(point_cursor > data_end)) {
+            continue;
         }
+        EdFileClose();
+        splineStore = NULL;
+        EdFileClose();
+        numSplinesLoaded = spline_count;
+        buf->void_ptr = data_end;
+        return 0;
     }
 
     EdFileClose();
@@ -3293,22 +3294,23 @@ void edbriDetermineNearest(float distance) {
 
 void edgraSortVectorBuffer(i32 index) {
     NUVEC temporary[256];
-    if (index != -1 && index != edgra_last_clump_in_buffer && GrassClumps[index].vector_buffer) {
-        u8 *buffer = static_cast<u8 *>(GrassClumps[index].vector_buffer);
-        usize bytes = GrassClumps[index].element_count * sizeof(NUVEC);
-        memcpy(temporary, buffer, bytes);
-        memmove(buffer, buffer + bytes, static_cast<u8 *>(edgra_free_vecbuffer) - (buffer + bytes));
-        memcpy(static_cast<u8 *>(edgra_free_vecbuffer) - bytes, temporary, bytes);
-        edgra_last_clump_in_buffer = index;
-        for (i32 i = 0; i < EDGRA_MAX_CLUMPS; ++i) {
-            if (i != index && GrassClumps[i].element_count &&
-                GrassClumps[i].vector_buffer > GrassClumps[index].vector_buffer) {
-                GrassClumps[i].vector_buffer = static_cast<u8 *>(GrassClumps[i].vector_buffer) - bytes;
-            }
-        }
-        GrassClumps[index].vector_buffer = static_cast<u8 *>(edgra_free_vecbuffer) - bytes;
-        edgraInitAllClumps();
+    if (!(index != -1 && index != edgra_last_clump_in_buffer && GrassClumps[index].vector_buffer)) {
+        return;
     }
+    u8 *buffer = static_cast<u8 *>(GrassClumps[index].vector_buffer);
+    usize bytes = GrassClumps[index].element_count * sizeof(NUVEC);
+    memcpy(temporary, buffer, bytes);
+    memmove(buffer, buffer + bytes, static_cast<u8 *>(edgra_free_vecbuffer) - (buffer + bytes));
+    memcpy(static_cast<u8 *>(edgra_free_vecbuffer) - bytes, temporary, bytes);
+    edgra_last_clump_in_buffer = index;
+    for (i32 i = 0; i < EDGRA_MAX_CLUMPS; ++i) {
+        if (i != index && GrassClumps[i].element_count &&
+            GrassClumps[i].vector_buffer > GrassClumps[index].vector_buffer) {
+            GrassClumps[i].vector_buffer = static_cast<u8 *>(GrassClumps[i].vector_buffer) - bytes;
+        }
+    }
+    GrassClumps[index].vector_buffer = static_cast<u8 *>(edgra_free_vecbuffer) - bytes;
+    edgraInitAllClumps();
 }
 
 void edpartDestroyAllPages() {

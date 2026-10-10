@@ -742,10 +742,11 @@ i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject 
     i32 choice = 0;
     if (after.object != NULL) {
         for (i32 index = 0; index < candidate_count; ++index) {
-            if (candidates[index].object == after.object) {
-                choice = (index + 1) % candidate_count;
-                break;
+            if (candidates[index].object != after.object) {
+                continue;
             }
+            choice = (index + 1) % candidate_count;
+            break;
         }
     }
     result = candidates[choice];

@@ -137,22 +137,23 @@ extern "C" {
 // The original local font helpers read the same private draw state as the
 // editor callbacks, so they belong to this translation unit.
 static __used__ void eduiFntPrintEx(void *font, int x, int y, int alignment, char *format, ...) {
-    if (!edui_donotdraw) {
-        char text[1024];
-        NuQFntPushPrintMode(2);
-        va_list arguments;
-        va_start(arguments, format);
-        NuVSPrintf(text, format, arguments);
-        va_end(arguments);
-        i32 width = static_cast<i32>(NuQFntPrintLenU(font, text));
-        if (alignment == 32)
-            x -= width;
-        else if (alignment == 64)
-            x -= width / 2;
-        NuQFntMove(font, x, y, 0.0f);
-        NuQFntPrintU(font, text);
-        NuQFntPopPrintMode();
+    if (edui_donotdraw) {
+        return;
     }
+    char text[1024];
+    NuQFntPushPrintMode(2);
+    va_list arguments;
+    va_start(arguments, format);
+    NuVSPrintf(text, format, arguments);
+    va_end(arguments);
+    i32 width = static_cast<i32>(NuQFntPrintLenU(font, text));
+    if (alignment == 32)
+        x -= width;
+    else if (alignment == 64)
+        x -= width / 2;
+    NuQFntMove(font, x, y, 0.0f);
+    NuQFntPrintU(font, text);
+    NuQFntPopPrintMode();
 }
 
 static __attribute__((noinline)) void eduiFntPrintEx(void *font, float x, float y, int alignment, char *format, ...) {

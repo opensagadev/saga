@@ -2039,16 +2039,18 @@ static u32 AIBigJumpToDestination(APIOBJECT *object, NUVEC *destination) {
     }
 
     GameObject_s *game_object = object->objptr;
-    if (game_object->field_0xcc0 != NULL) {
-        SnapCreaturePos(game_object, destination, 0, NULL, 0);
-    } else if ((object->character_data->model_flags & CHARACTER_AI_MODEL_FLAG_SNAP_ON_BIG_JUMP) != 0) {
-        object->start_position = *destination;
-        object->position = *destination;
-        object->velocity = v000;
-        ResetPlayerMoves(game_object);
-        object->respawn_timer = 0.0f;
+    if (game_object->field_0xcc0 == NULL) {
+        if ((object->character_data->model_flags & CHARACTER_AI_MODEL_FLAG_SNAP_ON_BIG_JUMP) != 0) {
+            object->start_position = *destination;
+            object->position = *destination;
+            object->velocity = v000;
+            ResetPlayerMoves(game_object);
+            object->respawn_timer = 0.0f;
+        } else {
+            StartBigJump(game_object, destination, 0, 0.5f, 1.0f, 0, 0);
+        }
     } else {
-        StartBigJump(game_object, destination, 0, 0.5f, 1.0f, 0, 0);
+        SnapCreaturePos(game_object, destination, 0, NULL, 0);
     }
 
     return 1;
@@ -4023,23 +4025,25 @@ void GameObjectRotation(GameObject_s *object, i32 mode) {
             object->field_0x1060 = SeekRot(object->field_0x1060, z, 8.0f);
         if (object->field_0x1086 != 2)
             return;
-        if (magnet) {
+        if (!magnet) {
+            if (grapple) {
+                NUVEC direction;
+                NuVecSub(&direction, &static_cast<GRAPPLE_s *>(object->field_0x788)->hook_position,
+                         &api.collision_position);
+                FindAnglesZX(&direction, &x, &z);
+            } else if (reflection) {
+                x = object->field_0x1068;
+                z = object->field_0x106a;
+            } else if (alignment != 2 && (alignment == 0 || !(object->surface_normal.y > NuTrigTable[0x3000]))) {
+                x = z = 0;
+            }
+        } else {
             if (static_cast<u16>(object->context_animation - 5) <= 1) {
                 api.pitch_angle = api.roll_angle = x = z = 0;
             } else {
                 x = object->magnet_surface_angle;
                 z = object->grapple_swing_phase;
             }
-        } else if (grapple) {
-            NUVEC direction;
-            NuVecSub(&direction, &static_cast<GRAPPLE_s *>(object->field_0x788)->hook_position,
-                     &api.collision_position);
-            FindAnglesZX(&direction, &x, &z);
-        } else if (reflection) {
-            x = object->field_0x1068;
-            z = object->field_0x106a;
-        } else if (alignment != 2 && (alignment == 0 || !(object->surface_normal.y > NuTrigTable[0x3000]))) {
-            x = z = 0;
         }
         const f32 speed = object->id == id_ATST && VehicleArea == 0 ? 3.0f : 8.0f;
         if (api.pitch_angle != x)
@@ -4769,11 +4773,13 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
             APIOBJECT_s *goody = goodies[i];
             for (i32 j = 0; j < baddy_count; ++j) {
                 APIOBJECT_s *baddy = baddies[j];
-                if ((goody->ai_awareness_mask >> baddy->field_0x289) & 1) {
+                if (!((goody->ai_awareness_mask >> baddy->field_0x289) & 1)) {
+                    if ((goody->objptr->ai_seen_mask >> baddy->field_0x289) & 1) {
+                        goody->objptr->ai_seen_mask &= ~((u64)1 << baddy->field_0x289);
+                    }
+                } else {
                     if ((WORLD->api_object_sys->line_of_sight[goody->field_0x289] >> baddy->field_0x289) & 1)
                         goody->objptr->ai_seen_mask |= (u64)1 << baddy->field_0x289;
-                } else if ((goody->objptr->ai_seen_mask >> baddy->field_0x289) & 1) {
-                    goody->objptr->ai_seen_mask &= ~((u64)1 << baddy->field_0x289);
                 }
                 if ((baddy->ai_awareness_mask >> goody->field_0x289) & 1) {
                     if ((WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >> goody->field_0x289) & 1)

@@ -1881,14 +1881,16 @@ __used__ static i32 Action_SetParam(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
                     }
                 } else {
                     // Expressions use the packet's primary processor, even for a secondary action processor.
-                    if ((value = NuStrIStr(params[i], "inc=")) != NULL) {
+                    if ((value = NuStrIStr(params[i], "inc=")) == NULL) {
+                        if ((value = NuStrIStr(params[i], "dec=")) != NULL) {
+                            processor->params[index] -=
+                                AIParamToFloatEx(packet, &packet->script_process, value + NuStrLen("dec="));
+                        } else {
+                            processor->params[index] = AIParamToFloatEx(packet, &packet->script_process, params[i]);
+                        }
+                    } else {
                         processor->params[index] +=
                             AIParamToFloatEx(packet, &packet->script_process, value + NuStrLen("inc="));
-                    } else if ((value = NuStrIStr(params[i], "dec=")) != NULL) {
-                        processor->params[index] -=
-                            AIParamToFloatEx(packet, &packet->script_process, value + NuStrLen("dec="));
-                    } else {
-                        processor->params[index] = AIParamToFloatEx(packet, &packet->script_process, params[i]);
                     }
                 }
             }
@@ -1981,31 +1983,33 @@ __used__ static i32 Action_UseForce(AISYS *, AISCRIPTPROCESS *processor, AIPACKE
         GIZFORCE_s *candidates[16];
         i32 candidate_count = 0;
         for (i32 index = 0; index < param_count; ++index) {
-            if (NuStrICmp(params[index], "throwable") == 0) {
-                processor->action_data_1 = 1;
-            } else if (NuStrICmp(params[index], "inrange") == 0) {
-                processor->action_data_2 = 1;
-            } else if (NuStrICmp(params[index], "triggered_by_hit") == 0) {
-                triggered_by_hit = 1;
-            } else {
-                char *name = NuStrIStr(params[index], const_cast<char *>("name"));
-                if (name != NULL) {
-                    name += 5;
+            if (NuStrICmp(params[index], "throwable") != 0) {
+                if (NuStrICmp(params[index], "inrange") == 0) {
+                    processor->action_data_2 = 1;
+                } else if (NuStrICmp(params[index], "triggered_by_hit") == 0) {
+                    triggered_by_hit = 1;
                 } else {
-                    name = params[index];
-                }
-                if (name != NULL && candidate_count < 16) {
-                    GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, force_gizmotype_id, name);
-                    if (gizmo != NULL && gizmo->object != NULL) {
-                        force = static_cast<GIZFORCE_s *>(gizmo->object);
-                        candidates[candidate_count] = force;
-                        if ((force->packed_state &
-                             (GIZFORCE_PROGRESS_VISIBLE | (GIZFORCE_STATE_DESTROYED_OR_THROWN << 16))) ==
-                            GIZFORCE_PROGRESS_VISIBLE) {
-                            ++candidate_count;
+                    char *name = NuStrIStr(params[index], const_cast<char *>("name"));
+                    if (name != NULL) {
+                        name += 5;
+                    } else {
+                        name = params[index];
+                    }
+                    if (name != NULL && candidate_count < 16) {
+                        GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, force_gizmotype_id, name);
+                        if (gizmo != NULL && gizmo->object != NULL) {
+                            force = static_cast<GIZFORCE_s *>(gizmo->object);
+                            candidates[candidate_count] = force;
+                            if ((force->packed_state &
+                                 (GIZFORCE_PROGRESS_VISIBLE | (GIZFORCE_STATE_DESTROYED_OR_THROWN << 16))) ==
+                                GIZFORCE_PROGRESS_VISIBLE) {
+                                ++candidate_count;
+                            }
                         }
                     }
                 }
+            } else {
+                processor->action_data_1 = 1;
             }
         }
 
@@ -2875,15 +2879,18 @@ __used__ static i32 Action_SetLocator(AISYS *sys, AISCRIPTPROCESS *processor, AI
     } else if (locator_name != NULL && packet != NULL && packet->owner != NULL) {
         char resolved_name[72];
         GameObject_s *object = packet->owner->apiobj.objptr;
-        if (indexed && object->apiobj.field_0x27c != 0xff) {
+        if (!(indexed && object->apiobj.field_0x27c != 0xff)) {
+            if (personal && object->apiobj.character_data != NULL && object->apiobj.character_data->file != NULL) {
+                snprintf(resolved_name, sizeof(resolved_name), "%s_%s", locator_name,
+                         object->apiobj.character_data->file);
+            } else if (random_count != 0) {
+                snprintf(resolved_name, sizeof(resolved_name), "%s_%d", locator_name, NuRand(0) % random_count);
+            } else {
+                snprintf(resolved_name, sizeof(resolved_name), "%s", locator_name);
+            }
+        } else {
             snprintf(resolved_name, sizeof(resolved_name), "%s_%d", locator_name,
                      static_cast<i8>(object->apiobj.field_0x27c));
-        } else if (personal && object->apiobj.character_data != NULL && object->apiobj.character_data->file != NULL) {
-            snprintf(resolved_name, sizeof(resolved_name), "%s_%s", locator_name, object->apiobj.character_data->file);
-        } else if (random_count != 0) {
-            snprintf(resolved_name, sizeof(resolved_name), "%s_%d", locator_name, NuRand(0) % random_count);
-        } else {
-            snprintf(resolved_name, sizeof(resolved_name), "%s", locator_name);
         }
         locator = AIPathFindLocator(sys, resolved_name);
     }
@@ -3786,12 +3793,14 @@ __used__ static i32 Action_CannotDropIn(AISYS *sys, AISCRIPTPROCESS *processor, 
         i32 enabled = 1;
         for (i32 index = 0; index < param_4; ++index) {
             char *value = NuStrIStr(params[index], "character=");
-            if (value != NULL) {
+            if (value == NULL) {
+                if ((value = NuStrIStr(params[index], "tag_to=")) != NULL) {
+                    GetNamedGameObject(sys, value + 7);
+                } else if (NuStrICmp(params[index], "FALSE") == 0) {
+                    enabled = 0;
+                }
+            } else {
                 object = GetNamedGameObject(sys, value + 10);
-            } else if ((value = NuStrIStr(params[index], "tag_to=")) != NULL) {
-                GetNamedGameObject(sys, value + 7);
-            } else if (NuStrICmp(params[index], "FALSE") == 0) {
-                enabled = 0;
             }
         }
         if (object != NULL) {

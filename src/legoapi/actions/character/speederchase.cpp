@@ -684,12 +684,13 @@ void SpeederChaseA_Update(WORLDINFO_s *world) {
     players_going_forward = 1;
     for (i32 i = 0; i < 2; ++i) {
         GameObject_s *object = Player[i];
-        if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0 &&
-            (object->apiobj.field_0x1f4 & 0x40000) == 0 &&
-            (GoingForwardsAlongNarrowSock(object) == 0 || Player[i]->field_0x7a5 == 0x2a)) {
-            players_going_forward = 0;
-            break;
+        if (!(object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0 &&
+              (object->apiobj.field_0x1f4 & 0x40000) == 0 &&
+              (GoingForwardsAlongNarrowSock(object) == 0 || Player[i]->field_0x7a5 == 0x2a))) {
+            continue;
         }
+        players_going_forward = 0;
+        break;
     }
 
     u8 *sound_flags = reinterpret_cast<u8 *>(LevSfxFlag);

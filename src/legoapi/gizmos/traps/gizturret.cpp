@@ -1033,18 +1033,18 @@ static i32 GizTurrets_Load(void *world_ptr, void *system_ptr) {
             }
         }
         turret->field_0x134 = static_cast<i16>(EdFileReadShort());
-        if (version <= 4 && turret->anim_set != NULL) {
-            i32 object_index = 0;
-            for (GAMEANIMOBJ_s *object = turret->anim_set->objects; object != NULL;
-                 object = object->next, ++object_index) {
-                u8 *object_data = static_cast<u8 *>(object->object_data);
-                if (object_index == 0) {
-                    object_data[1] = 1;
-                } else if (object_index == 1) {
-                    object_data[1] = 2;
-                } else {
-                    object_data[1] = (object_data[0] & 1) != 0 ? 3 : 1;
-                }
+        if (!(version <= 4 && turret->anim_set != NULL)) {
+            continue;
+        }
+        i32 object_index = 0;
+        for (GAMEANIMOBJ_s *object = turret->anim_set->objects; object != NULL; object = object->next, ++object_index) {
+            u8 *object_data = static_cast<u8 *>(object->object_data);
+            if (object_index == 0) {
+                object_data[1] = 1;
+            } else if (object_index == 1) {
+                object_data[1] = 2;
+            } else {
+                object_data[1] = (object_data[0] & 1) != 0 ? 3 : 1;
             }
         }
     }
@@ -1201,18 +1201,19 @@ GameObject_s *GizTurret_GetTgt(GIZTURRET_s *, numtx_s *matrix) {
         NUVEC direction;
         const f32 distance =
             NuVecDistSqr(&object->apiobj.collision_position, reinterpret_cast<NUVEC *>(&matrix->m30), &direction);
-        if (best_distance > distance) {
-            const f32 length = NuFsqrt(distance);
-            const f32 scale = length > 0.0f ? 1.0f / length : 0.0f;
-            direction.x *= scale;
-            direction.y *= scale;
-            direction.z *= scale;
-            if (!(NuVecDot(&direction, &forward) > NU_COS_LUT(gizturret_test_ang))) {
-                continue;
-            }
-            best = object;
-            best_distance = distance;
+        if (!(best_distance > distance)) {
+            continue;
         }
+        const f32 length = NuFsqrt(distance);
+        const f32 scale = length > 0.0f ? 1.0f / length : 0.0f;
+        direction.x *= scale;
+        direction.y *= scale;
+        direction.z *= scale;
+        if (!(NuVecDot(&direction, &forward) > NU_COS_LUT(gizturret_test_ang))) {
+            continue;
+        }
+        best = object;
+        best_distance = distance;
     }
     return best;
 }

@@ -239,8 +239,11 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
                         toward_player.z * toward_player.z >
                     1.0f)
                     NuVecNorm(&toward_player, &toward_player);
-                toward_player.y =
-                    AreaPickupGravity == 0.0f ? 0.0f : static_cast<f32>(qrand()) * (1.0f / 65535.0f) + 1.0f;
+                if (AreaPickupGravity == 0.0f) {
+                    toward_player.y = 0.0f;
+                } else {
+                    toward_player.y = static_cast<f32>(qrand()) * (1.0f / 65535.0f) + 1.0f;
+                }
                 velocity = toward_player;
             } else
                 MakePartVector(&velocity, direction, speed);

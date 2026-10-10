@@ -1179,9 +1179,10 @@ NuMemoryManager::FreeHeader *NuMemoryManager::FindLargestFragment() {
     for (i32 i = 0xff; i >= 0; i--) {
         frag = this->small_bins[i].next;
 
-        if (frag != NULL) {
-            break;
+        if (frag == NULL) {
+            continue;
         }
+        break;
     }
 
 done:

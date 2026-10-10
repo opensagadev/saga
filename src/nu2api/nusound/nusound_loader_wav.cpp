@@ -117,9 +117,10 @@ u32 NuSoundLoaderWAV::FindChunk(i32 file, u32 id, ChunkInfo &info) {
             if (info.id == id) {
                 return 1;
             }
-            if (NuFileSeek(file, info.size, NUFILE_SEEK_CURRENT) == 0) {
-                break;
+            if (NuFileSeek(file, info.size, NUFILE_SEEK_CURRENT) != 0) {
+                continue;
             }
+            break;
         }
     }
     return 0;

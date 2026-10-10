@@ -3761,8 +3761,21 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                     rate *= 0.25f;
                 api.movement_facing_angle = TurnRot(api.movement_facing_angle, desired, (i32)(rate * 65536.0f), NULL);
             }
-            if (object->character_context == -1 && object->field_0x1084 &&
-                fabsf(object->contact_normal.y) < NuTrigTable[0x3aaa]) {
+            if (!(object->character_context == -1 && object->field_0x1084 &&
+                  fabsf(object->contact_normal.y) < NuTrigTable[0x3aaa])) {
+                if ((api.flags_low & 0x80) != 0 && (api.character_data->game_character->flags_090 & 0x10000) == 0 &&
+                    (i8)object->field_0xf03 >= 0) {
+                    i32 outside = OutSideSplineArea(&api.collision_position, WORLD->camera_splines[16], &a, &b, 0);
+                    i32 inside = 0;
+                    if (!outside)
+                        inside = OutSideSplineArea(&api.collision_position, WORLD->camera_splines[17], &a, &b, 1);
+                    if ((api.field_0x1f4 & 0x400) == 0 && (object->field_0xe24 & 2) == 0 && (outside || inside)) {
+                        api.movement_facing_angle = NuAtan2D(-(b.z - a.z), b.x - a.x);
+                        object->field_0xe24 |= 2;
+                        object->field_0xddc = 0.1f;
+                    }
+                }
+            } else {
                 if ((api.flags_low & 0x80) != 0 && (PODSPRINT_ADATA == NULL || WORLD->area != PODSPRINT_ADATA) &&
                     (api.character_data->game_character->flags_090 & 0x10000) == 0 &&
                     WORLD->current_level != SPEEDERCHASEA_LDATA) {
@@ -3786,17 +3799,6 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                             }
                         }
                     }
-                }
-            } else if ((api.flags_low & 0x80) != 0 && (api.character_data->game_character->flags_090 & 0x10000) == 0 &&
-                       (i8)object->field_0xf03 >= 0) {
-                i32 outside = OutSideSplineArea(&api.collision_position, WORLD->camera_splines[16], &a, &b, 0);
-                i32 inside = 0;
-                if (!outside)
-                    inside = OutSideSplineArea(&api.collision_position, WORLD->camera_splines[17], &a, &b, 1);
-                if ((api.field_0x1f4 & 0x400) == 0 && (object->field_0xe24 & 2) == 0 && (outside || inside)) {
-                    api.movement_facing_angle = NuAtan2D(-(b.z - a.z), b.x - a.x);
-                    object->field_0xe24 |= 2;
-                    object->field_0xddc = 0.1f;
                 }
             }
             if ((CInfo[object->character_context].flags & 1) != 0 && (object->id == id_STAP || object->id == id_STAP2))
@@ -4857,7 +4859,27 @@ static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pres
     }
     object->character_context = 0xc;
     object->block_latch = 0;
-    if (object->incoming_bolt != NULL) {
+    if (object->incoming_bolt == NULL) {
+        if (object->incoming_part != NULL) {
+            object->blocked_bolt = NULL;
+            object->block_attacker = NULL;
+            object->blocked_part = object->incoming_part;
+            object->context_animation_timer = 0.3f;
+            object->blocked_attack_stage = 0;
+        } else {
+            object->blocked_bolt = NULL;
+            object->blocked_part = NULL;
+            object->context_animation_timer = 0.1f;
+            if (object->incoming_special != NULL) {
+                object->block_attacker = object->incoming_special;
+                object->blocked_attack_stage = object->incoming_special->context_animation;
+                object->field_0xe23 |= 0x20;
+            } else {
+                object->block_attacker = object->incoming_melee;
+                object->blocked_attack_stage = object->incoming_melee->combo_stage + 1;
+            }
+        }
+    } else {
         object->blocked_bolt = object->incoming_bolt;
         object->block_attacker = NULL;
         object->blocked_part = NULL;
@@ -4865,24 +4887,6 @@ static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pres
         object->blocked_attack_stage = 0;
         if ((object->apiobj.flags_low & 0x80) != 0)
             Hint_SetComplete(0x5dd);
-    } else if (object->incoming_part != NULL) {
-        object->blocked_bolt = NULL;
-        object->block_attacker = NULL;
-        object->blocked_part = object->incoming_part;
-        object->context_animation_timer = 0.3f;
-        object->blocked_attack_stage = 0;
-    } else {
-        object->blocked_bolt = NULL;
-        object->blocked_part = NULL;
-        object->context_animation_timer = 0.1f;
-        if (object->incoming_special != NULL) {
-            object->block_attacker = object->incoming_special;
-            object->blocked_attack_stage = object->incoming_special->context_animation;
-            object->field_0xe23 |= 0x20;
-        } else {
-            object->block_attacker = object->incoming_melee;
-            object->blocked_attack_stage = object->incoming_melee->combo_stage + 1;
-        }
     }
 }
 
@@ -6068,32 +6072,32 @@ static void DrawLightningBolts(GameObject_s *object, GameObject_s *target, i32 l
         }
     }
 
-    if (secondary.y != 1000000000.0f) {
-        target_position.x = target->apiobj.collision_position.x;
-        target_position.z = target->apiobj.collision_position.z;
-        f32 height = target->apiobj.field_0x194 - target->apiobj.lower_position.y;
-        target_position.y =
-            target->apiobj.lower_position.y + height * 0.25f + height * (1.0f / 17.0f) * qrand() * 1.5259022e-05f;
-        f32 distance = NuVecDist(&target_position, &secondary, &delta);
-        NuLgtLaser(lightning_type, lightning_sizew[lightning_index], lightning_sizel[lightning_index],
-                   lightning_sizewab[lightning_index], &secondary, &delta, lightning_col[lightning_index],
-                   lightning_endw[lightning_index], distance);
-        PlaySfx("ForceLightningLp", &target->apiobj.collision_position);
+    if (secondary.y == 1000000000.0f) {
+        return;
+    }
+    target_position.x = target->apiobj.collision_position.x;
+    target_position.z = target->apiobj.collision_position.z;
+    f32 height = target->apiobj.field_0x194 - target->apiobj.lower_position.y;
+    target_position.y =
+        target->apiobj.lower_position.y + height * 0.25f + height * (1.0f / 17.0f) * qrand() * 1.5259022e-05f;
+    f32 distance = NuVecDist(&target_position, &secondary, &delta);
+    NuLgtLaser(lightning_type, lightning_sizew[lightning_index], lightning_sizel[lightning_index],
+               lightning_sizewab[lightning_index], &secondary, &delta, lightning_col[lightning_index],
+               lightning_endw[lightning_index], distance);
+    PlaySfx("ForceLightningLp", &target->apiobj.collision_position);
 
-        if (object->field_0x1088 != 0 && object->field_0x1087 == 2 && NuIOS_IsLowEndDevice() == 0 &&
-            lightning_type != 0) {
-            NUVEC reflected_origin = secondary;
-            NUVEC reflected_target = target_position;
-            f32 plane = WORLD->current_level->unknown_0cc;
-            if (plane == 2000000.0f)
-                plane = object->field_0x1020;
-            reflected_origin.y = plane - (reflected_origin.y - plane);
-            reflected_target.y = plane - (reflected_target.y - plane);
-            distance = NuVecDist(&reflected_target, &reflected_origin, &delta);
-            NuLgtLaser(lightning_type, lightning_sizew[lightning_index], lightning_sizel[lightning_index],
-                       lightning_sizewab[lightning_index], &reflected_origin, &delta, lightning_col[lightning_index],
-                       lightning_endw[lightning_index], distance);
-        }
+    if (object->field_0x1088 != 0 && object->field_0x1087 == 2 && NuIOS_IsLowEndDevice() == 0 && lightning_type != 0) {
+        NUVEC reflected_origin = secondary;
+        NUVEC reflected_target = target_position;
+        f32 plane = WORLD->current_level->unknown_0cc;
+        if (plane == 2000000.0f)
+            plane = object->field_0x1020;
+        reflected_origin.y = plane - (reflected_origin.y - plane);
+        reflected_target.y = plane - (reflected_target.y - plane);
+        distance = NuVecDist(&reflected_target, &reflected_origin, &delta);
+        NuLgtLaser(lightning_type, lightning_sizew[lightning_index], lightning_sizel[lightning_index],
+                   lightning_sizewab[lightning_index], &reflected_origin, &delta, lightning_col[lightning_index],
+                   lightning_endw[lightning_index], distance);
     }
 }
 
@@ -8690,13 +8694,15 @@ void Glide_MoveCode(GameObject_s *object) {
         AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) != NULL) {
         object->context_animation_timer += FRAMETIME;
         if (object->apiobj.field_0x27d == 0) {
-            if ((object->pad_gamepad->buttons_held & GAMEPAD_JUMP) == 0) {
+            if ((object->pad_gamepad->buttons_held & GAMEPAD_JUMP) != 0) {
+                if (object->airborne_action_duration <= 0.1f && object->airborne_action_duration != 0.1f) {
+                    object->airborne_action_duration = 0.1f;
+                }
+            } else {
                 object->airborne_action_duration -= FRAMETIME;
                 if (object->airborne_action_duration <= 0.0f) {
                     StartEndOfJump(object);
                 }
-            } else if (object->airborne_action_duration <= 0.1f && object->airborne_action_duration != 0.1f) {
-                object->airborne_action_duration = 0.1f;
             }
         } else {
             object->character_context = -1;
@@ -9064,7 +9070,20 @@ i32 WallShuffle_SetTargetMom(GameObject_s *object, u16 input_angle) {
     u16 sideways_angle = object->apiobj.movement_facing_angle + 0x4000;
     f32 direction = PushingTowardsAngle(input_angle, sideways_angle);
     f32 speed;
-    if (direction > NuTrigTable[0x3555]) {
+    if (!(direction > NuTrigTable[0x3555])) {
+        if (direction < -NuTrigTable[0x3555]) {
+            if (LEGOACT_WALLSHUFFLE_LEFT != -1 &&
+                object->apiobj.character_model->model_data_b[LEGOACT_WALLSHUFFLE_LEFT] != NULL) {
+                object->context_animation = LEGOACT_WALLSHUFFLE_LEFT;
+                speed = -AnimSpeed(object->apiobj.character_model, LEGOACT_WALLSHUFFLE_LEFT);
+            } else {
+                speed = -0.5f;
+            }
+        } else {
+            object->context_animation = LEGOACT_WALLSHUFFLE_IDLE;
+            return 0;
+        }
+    } else {
         if (LEGOACT_WALLSHUFFLE_RIGHT != -1 &&
             object->apiobj.character_model->model_data_b[LEGOACT_WALLSHUFFLE_RIGHT] != NULL) {
             object->context_animation = LEGOACT_WALLSHUFFLE_RIGHT;
@@ -9072,17 +9091,6 @@ i32 WallShuffle_SetTargetMom(GameObject_s *object, u16 input_angle) {
         } else {
             speed = 0.5f;
         }
-    } else if (direction < -NuTrigTable[0x3555]) {
-        if (LEGOACT_WALLSHUFFLE_LEFT != -1 &&
-            object->apiobj.character_model->model_data_b[LEGOACT_WALLSHUFFLE_LEFT] != NULL) {
-            object->context_animation = LEGOACT_WALLSHUFFLE_LEFT;
-            speed = -AnimSpeed(object->apiobj.character_model, LEGOACT_WALLSHUFFLE_LEFT);
-        } else {
-            speed = -0.5f;
-        }
-    } else {
-        object->context_animation = LEGOACT_WALLSHUFFLE_IDLE;
-        return 0;
     }
     if (speed != 0.0f) {
         object->target_velocity.x += NU_SIN_LUT(sideways_angle) * speed;
@@ -9825,7 +9833,17 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
         }
 
         object->character_context = -1;
-        if (object->field_0x7a7 == -1) {
+        if (object->field_0x7a7 != -1) {
+            if (SpecialMove_GetFlags(object->field_0x7a7, 8) != 0) {
+                if (object->force_target != NULL) {
+                    SetFlicker(object->force_target, 0.4f);
+                    if (static_cast<i8>(object->force_target->apiobj.flags_low) < 0) {
+                        TakeHitRumble(object, 0.7f);
+                    }
+                }
+                HitRumble(object);
+            }
+        } else {
             if ((object->context_flags & 0x40) == 0) {
                 Punch_Hit(object, object->force_target, punch_gap, punch_charge_gap);
             }
@@ -9901,14 +9919,6 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
                        (object->id == id_GAMORREANGUARD || object->id == id_CAPTAINTARPALS)) {
                 StartHold(object);
             }
-        } else if (SpecialMove_GetFlags(object->field_0x7a7, 8) != 0) {
-            if (object->force_target != NULL) {
-                SetFlicker(object->force_target, 0.4f);
-                if (static_cast<i8>(object->force_target->apiobj.flags_low) < 0) {
-                    TakeHitRumble(object, 0.7f);
-                }
-            }
-            HitRumble(object);
         }
 
         if (object->character_context != -1) {
@@ -10265,21 +10275,25 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
                     }
                 }
                 if (target == NULL) {
-                    if (blowup != NULL) {
-                        SetGizmoBlowUpTarget(object, blowup);
-                    } else if (!GizmoSys_SetBestBoltTarget(WORLD->gizmo_sys, WORLD, object, &position, &forward, range,
-                                                           range_squared, 1, 0, bolt_id)) {
-                        blowup = GizmoBlowUp_Target(object, &position, &forward, range, range_squared, 1, 0, bolt_id);
-                        if (blowup != NULL) {
-                            SetGizmoBlowUpTarget(object, blowup);
-                        } else {
-                            PART_s *part = TargetPart(object, &position, &forward, range, range_squared, 1, bolt_id);
-                            if (part != NULL)
-                                SetPartTarget(object, part);
-                            else
-                                target = TargetGameObject(object, &position, &forward, range, range_squared, 0x200, 1,
-                                                          0, bolt_id);
+                    if (blowup == NULL) {
+                        if (!GizmoSys_SetBestBoltTarget(WORLD->gizmo_sys, WORLD, object, &position, &forward, range,
+                                                        range_squared, 1, 0, bolt_id)) {
+                            blowup =
+                                GizmoBlowUp_Target(object, &position, &forward, range, range_squared, 1, 0, bolt_id);
+                            if (blowup != NULL) {
+                                SetGizmoBlowUpTarget(object, blowup);
+                            } else {
+                                PART_s *part =
+                                    TargetPart(object, &position, &forward, range, range_squared, 1, bolt_id);
+                                if (part != NULL)
+                                    SetPartTarget(object, part);
+                                else
+                                    target = TargetGameObject(object, &position, &forward, range, range_squared, 0x200,
+                                                              1, 0, bolt_id);
+                            }
                         }
+                    } else {
+                        SetGizmoBlowUpTarget(object, blowup);
                     }
                 }
             }

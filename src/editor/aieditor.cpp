@@ -505,9 +505,11 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
                     selected->lower_height += step;
                 else if (held & 1)
                     selected->lower_height -= step;
-                selected->lower_height = selected->lower_height > selected->upper_height - 0.01f
-                                             ? selected->upper_height - 0.01f
-                                             : selected->lower_height;
+                if (selected->lower_height > selected->upper_height - 0.01f) {
+                    selected->lower_height = selected->upper_height - 0.01f;
+                } else {
+                    selected->lower_height = selected->lower_height;
+                }
             }
         }
     }

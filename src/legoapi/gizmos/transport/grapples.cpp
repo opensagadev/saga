@@ -742,9 +742,10 @@ ADDGIZMOTYPE *Grapples_RegisterGizmo(i32 type_id) {
 
 GRAPPLE *Grapple_AddDynamic(void *attached_object, i32 retain_attachment) {
     for (i32 index = 0; index < 4; ++index) {
-        if (DynamicGrapple[index].attached_object == attached_object) {
-            return &DynamicGrapple[index];
+        if (DynamicGrapple[index].attached_object != attached_object) {
+            continue;
         }
+        return &DynamicGrapple[index];
     }
 
     for (i32 index = 0; index < 4; ++index) {

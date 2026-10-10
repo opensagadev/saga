@@ -2570,7 +2570,11 @@ void edpartLoadSingleType(part_typedesc_s *type, i32 version, i32 page) {
         for (i32 i = 0; i < 8; ++i)
             type->effect_pages[i] = EdFileReadChar();
     } else {
-        type->effect_pages[0] = version > 1 ? EdFileReadChar() : 0;
+        if (version > 1) {
+            type->effect_pages[0] = EdFileReadChar();
+        } else {
+            type->effect_pages[0] = 0;
+        }
         for (i32 i = 1; i < 8; ++i)
             type->effect_pages[i] = -1;
     }
@@ -2606,7 +2610,11 @@ void edpartLoadSingleType(part_typedesc_s *type, i32 version, i32 page) {
     type->speed = EdFileReadFloat();
     type->gravity = EdFileReadFloat();
     type->emission_rate = EdFileReadFloat();
-    type->bounce = version > 7 ? EdFileReadFloat() : 0.75f;
+    if (version > 7) {
+        type->bounce = EdFileReadFloat();
+    } else {
+        type->bounce = 0.75f;
+    }
     type->position_random.x = EdFileReadFloat();
     type->position_random.y = EdFileReadFloat();
     type->position_random.z = EdFileReadFloat();
@@ -2689,7 +2697,11 @@ void edpartLoadSingleType(part_typedesc_s *type, i32 version, i32 page) {
             type->sound_modes[i] = 0;
     }
     type->maximum_distance = version > 9 ? EdFileReadFloat() : 25.0f;
-    type->field_160 = version > 14 ? EdFileReadFloat() : 1.0f;
+    if (version > 14) {
+        type->field_160 = EdFileReadFloat();
+    } else {
+        type->field_160 = 1.0f;
+    }
     type->field_164 = version > 14 ? EdFileReadFloat() : 1.0f;
     type->field_168 = version > 14 ? EdFileReadFloat() : 1.0f;
     type->scale = 1.0f;

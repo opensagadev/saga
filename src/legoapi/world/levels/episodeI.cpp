@@ -203,15 +203,16 @@ static __used__ void PodRaceSnipersUpdate(void) {
         bool in_range = false;
         for (i32 j = 0; j < 2; ++j) {
             GameObject_s *target = Player[j];
-            if (target != NULL && (target->apiobj.field_0x1f8 & 0x1001) == 0x1001) {
-                float dx = target->apiobj.collision_position.x - s->pos.x;
-                float dz = target->apiobj.collision_position.z - s->pos.z;
-                float dist2 = dx * dx + dz * dz;
-                if (dist2 < PodRace_sniper_start_fire_radius * PodRace_sniper_start_fire_radius) {
-                    in_range = true;
-                    if (dist2 < PodRace_sniper_fire_radius * PodRace_sniper_fire_radius)
-                        s->state = PodRace_sniper_fire_range_time;
-                }
+            if (!(target != NULL && (target->apiobj.field_0x1f8 & 0x1001) == 0x1001)) {
+                continue;
+            }
+            float dx = target->apiobj.collision_position.x - s->pos.x;
+            float dz = target->apiobj.collision_position.z - s->pos.z;
+            float dist2 = dx * dx + dz * dz;
+            if (dist2 < PodRace_sniper_start_fire_radius * PodRace_sniper_start_fire_radius) {
+                in_range = true;
+                if (dist2 < PodRace_sniper_fire_radius * PodRace_sniper_fire_radius)
+                    s->state = PodRace_sniper_fire_range_time;
             }
         }
         s->fire_timer += FRAMETIME;
@@ -1725,7 +1726,11 @@ speed_section:
             Player[0]->field_0xdc8 = 0.0f;
             Player[0]->apiobj.velocity.z = 0.0f;
             Player[0]->apiobj.velocity.x = 0.0f;
-            Player[0]->field_0xee0 = ps->speed <= 0.0f ? 1000000000.0f : 0.0f;
+            if (ps->speed <= 0.0f) {
+                Player[0]->field_0xee0 = 1000000000.0f;
+            } else {
+                Player[0]->field_0xee0 = 0.0f;
+            }
         }
         if (Player[1] != NULL) {
             Player[1]->field_0xdc8 = 0.0f;
