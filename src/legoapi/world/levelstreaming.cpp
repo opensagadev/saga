@@ -17,92 +17,93 @@ extern i32 Players_AveragePos(struct nuvec_s *, struct SOCKPOSITION_s *);
 extern i16 InsideLineXZ(f32, f32, f32, f32, f32, f32);
 
 void LevelStreaming_Update(WORLDINFO_s *world) {
-    if (LOADEROFF != 0 || BGLOAD == 0 || world->area == NULL || (world->area->flags & 8) != 0 || NewLData != NULL ||
-        Mission_Active(NULL) != NULL) {
-        return;
-    }
+    if (LOADEROFF == 0 && BGLOAD != 0 && world->area != NULL && (world->area->flags & 8) == 0 && NewLData == NULL &&
+        Mission_Active(NULL) == NULL) {
 
-    other_level = -1;
-    if (no_more_loads == 0) {
-        CUTINFO *cut;
-        if (other_level_override != -1) {
-            other_level = other_level_override;
-        } else if (CUTSTOPGAME != 0 && (cut = static_cast<CUTINFO *>(CutStopInfo)) != NULL && cut->skip_level != -1 &&
-                   LDataList[cut->skip_level].area_index == LDataList[world->level_idx].area_index) {
-            other_level = cut->skip_level;
-        } else if ((world->current_level->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) == 0) {
-            NUVEC position;
-            if (Players_AveragePos(&position, NULL) != 0) {
-                other_level = -1;
-                f32 best_distance = 1000000000.0f;
-                for (i32 i = 0; i < world->door_count; ++i) {
-                    i32 level = InStory() != 0 || world->doors[i].freeplay_level == -1 ? world->doors[i].level
-                                                                                       : world->doors[i].freeplay_level;
-                    if (level != world->level_idx) {
-                        f32 distance = NuVecDistSqr(&world->doors[i].pos, &position, NULL);
-                        if (distance < best_distance) {
-                            best_distance = distance;
-                            other_level = world->doors[i].level;
+        other_level = -1;
+        if (no_more_loads == 0) {
+            CUTINFO *cut;
+            if (other_level_override != -1) {
+                other_level = other_level_override;
+            } else if (CUTSTOPGAME != 0 && (cut = static_cast<CUTINFO *>(CutStopInfo)) != NULL &&
+                       cut->skip_level != -1 &&
+                       LDataList[cut->skip_level].area_index == LDataList[world->level_idx].area_index) {
+                other_level = cut->skip_level;
+            } else if ((world->current_level->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) == 0) {
+                NUVEC position;
+                if (Players_AveragePos(&position, NULL) != 0) {
+                    other_level = -1;
+                    f32 best_distance = 1000000000.0f;
+                    for (i32 i = 0; i < world->door_count; ++i) {
+                        i32 level = InStory() != 0 || world->doors[i].freeplay_level == -1
+                                        ? world->doors[i].level
+                                        : world->doors[i].freeplay_level;
+                        if (level != world->level_idx) {
+                            f32 distance = NuVecDistSqr(&world->doors[i].pos, &position, NULL);
+                            if (distance < best_distance) {
+                                best_distance = distance;
+                                other_level = world->doors[i].level;
+                            }
                         }
                     }
-                }
 
-                LEVELLOAD_s *load = LevelLoad;
-                i32 i;
-                for (i = 0; i < LevelLoadCount; ++i, ++load) {
-                    if (load->level == world->level_idx &&
-                        (((load->flags & 1) != 0 && InStory() != 0) || ((load->flags & 2) != 0 && InStory() == 0))) {
-                        break;
+                    LEVELLOAD_s *load = LevelLoad;
+                    i32 i;
+                    for (i = 0; i < LevelLoadCount; ++i, ++load) {
+                        if (load->level == world->level_idx && (((load->flags & 1) != 0 && InStory() != 0) ||
+                                                                ((load->flags & 2) != 0 && InStory() == 0))) {
+                            break;
+                        }
                     }
-                }
-                if (i < LevelLoadCount) {
-                    const i16 first_level = load->first_level;
-                    const i16 second_level = load->second_level;
-                    if (first_level == second_level) {
-                        other_level = first_level;
-                    } else if (LEGOSPL_SPLIT != -1 && world->camera_splines[LEGOSPL_SPLIT] != NULL) {
-                        NUVEC *points = world->camera_splines[LEGOSPL_SPLIT]->pts;
-                        if (InsideLineXZ(position.x, position.z, points[0].x, points[0].z, points[1].x, points[1].z) !=
-                            0) {
+                    if (i < LevelLoadCount) {
+                        const i16 first_level = load->first_level;
+                        const i16 second_level = load->second_level;
+                        if (first_level == second_level) {
                             other_level = first_level;
-                        } else {
-                            other_level = second_level;
+                        } else if (LEGOSPL_SPLIT != -1 && world->camera_splines[LEGOSPL_SPLIT] != NULL) {
+                            NUVEC *points = world->camera_splines[LEGOSPL_SPLIT]->pts;
+                            if (InsideLineXZ(position.x, position.z, points[0].x, points[0].z, points[1].x,
+                                             points[1].z) != 0) {
+                                other_level = first_level;
+                            } else {
+                                other_level = second_level;
+                            }
                         }
                     }
-                }
 
-                if (other_level != -1 && InStory() == 0 && (LDataList[other_level].flags & LEVEL_OUTRO) != 0) {
-                    LEVELDATA_s *status_level = Area_FindStatusLevel(world->area, NULL);
-                    if (status_level != NULL) {
-                        other_level = status_level->idx;
+                    if (other_level != -1 && InStory() == 0 && (LDataList[other_level].flags & LEVEL_OUTRO) != 0) {
+                        LEVELDATA_s *status_level = Area_FindStatusLevel(world->area, NULL);
+                        if (status_level != NULL) {
+                            other_level = status_level->idx;
+                        }
                     }
-                }
-                if (other_level != -1 && InStory() == 0 &&
-                    (LDataList[other_level].flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) != 0) {
-                    other_level = -1;
-                }
-                if (other_level != -1 && CutScenePlayer_Active() != NULL &&
-                    (LDataList[other_level].flags & LEVEL_STATUS) != 0) {
-                    other_level = -1;
+                    if (other_level != -1 && InStory() == 0 &&
+                        (LDataList[other_level].flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) != 0) {
+                        other_level = -1;
+                    }
+                    if (other_level != -1 && CutScenePlayer_Active() != NULL &&
+                        (LDataList[other_level].flags & LEVEL_STATUS) != 0) {
+                        other_level = -1;
+                    }
                 }
             }
         }
-    }
 
-    if (waiting_for_level == -1 && bgGetProcActive() == NULL && other_level != -1 &&
-        WorldInfo_OtherLevel(world) != other_level && LDataList[other_level].area_index == world->level_sub_id) {
-        NUTIME time;
-        NuTimeGet(&time);
-        if (NuTimeSeconds(&time) > g_BgLoadDelayHackTimer) {
-            waiting_for_level = other_level;
-            next_level = other_level;
-            abort_load = 0;
-            WaitingForLevelTime = 0.0f;
-            bgPostRequest(WorldInfo_StreamLevel, NULL, NULL, 0);
+        if (waiting_for_level == -1 && bgGetProcActive() == NULL && other_level != -1 &&
+            WorldInfo_OtherLevel(world) != other_level && LDataList[other_level].area_index == world->level_sub_id) {
+            NUTIME time;
+            NuTimeGet(&time);
+            if (NuTimeSeconds(&time) > g_BgLoadDelayHackTimer) {
+                waiting_for_level = other_level;
+                next_level = other_level;
+                abort_load = 0;
+                WaitingForLevelTime = 0.0f;
+                bgPostRequest(WorldInfo_StreamLevel, NULL, NULL, 0);
+            }
+        } else if (waiting_for_level != -1 && bgGetProcActive() != NULL && other_level != -1 &&
+                   other_level != waiting_for_level && LDataList[other_level].area_index == world->level_sub_id) {
+            abort_load = 1;
         }
-    } else if (waiting_for_level != -1 && bgGetProcActive() != NULL && other_level != -1 &&
-               other_level != waiting_for_level && LDataList[other_level].area_index == world->level_sub_id) {
-        abort_load = 1;
     }
 }
 

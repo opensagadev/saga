@@ -925,226 +925,228 @@ void KaminoE_Update(WORLDINFO_s *world) {
         }
         kamino_e.reset_turrets->value = 0.0f;
     }
-    if (netclient)
-        return;
-    GameObject_s *jango = FindGameObject(id_JANGOFETT, 1, 1, 1, 0);
-    GameObject_s *other_jango = FindGameObject(id_JANGOFETT, 4, 1, 1, 0);
-    if (jango != NULL) {
-        if (jango->current_hp <= 0) {
-            if (FreePlay)
-                KillBossCompleteLevel(id_JANGOFETT, 0, 0.0f);
-            else
-                KillBossNewLevel(id_JANGOFETT, 0, 0.0f, KAMINOOUTRO_LDATA->idx);
-        }
-    } else
-        jango = other_jango;
-    i32 connection_direction = 0;
-    if (kamino_e.jango_fight->value == 0.0f && !FreePlay && kamino_e.intro_cutscene != NULL &&
-        instNuGCutSceneIsFinished(static_cast<instNUGCUTSCENE_s *>(kamino_e.intro_cutscene->instance)))
-        kamino_e.jango_fight->value = 1.0f;
-    if (kamino_e.active_turret != NULL && (kamino_e.active_turret->flags & 0x10))
-        kamino_e.active_turret = NULL;
-    NUMTX *matrix = NuSpecialGetDrawMtx(&kamino_e.slave1);
-    NUVEC desired = {0.0f, 0.0f, 6.5f};
-    NuVecRotateX(&desired, &desired, kamino_e.orbit_pitch);
-    NuVecRotateY(&desired, &desired, kamino_e.orbit_yaw);
-    NuVecAdd(&desired, &desired, &kamino_e_centre);
-    kamino_e.elapsed_time += FRAMETIME;
-    f32 degrees = kamino_e.elapsed_time * 360.0f;
-    desired.y +=
-        ((NuTrigTable[(static_cast<i32>((degrees / 3.0f) * 182.04444885253906f) >> 1) & 0x7fff] + 1.0f) * 0.5f) * 0.2f;
-    desired.z +=
-        ((NuTrigTable[(static_cast<i32>((0.25f * degrees) * 182.04444885253906f) >> 1) & 0x7fff] + 1.0f) * 0.5f) * 0.2f;
-    if (kamino_e.minicut_started != NULL && kamino_e.minicut_started->value > 0.0f)
-        NuSpecialSetVisibility(&kamino_e.slave1, 1);
-    if (kamino_e.departing)
-        PlaySfx("Slave1_EngineLp", &kamino_e.position);
-    switch (kamino_e.departing) {
-        case 0:
-            if (kamino_e.jango_fight->value > 0.0f) {
-                kamino_e.departing = 1;
-                kamino_e.departure_timer = 0.0f;
-                GizObstacle_FindByName(world->giz_obstacle_sys, "slave1_debris");
+    if (!netclient) {
+        GameObject_s *jango = FindGameObject(id_JANGOFETT, 1, 1, 1, 0);
+        GameObject_s *other_jango = FindGameObject(id_JANGOFETT, 4, 1, 1, 0);
+        if (jango != NULL) {
+            if (jango->current_hp <= 0) {
+                if (FreePlay)
+                    KillBossCompleteLevel(id_JANGOFETT, 0, 0.0f);
+                else
+                    KillBossNewLevel(id_JANGOFETT, 0, 0.0f, KAMINOOUTRO_LDATA->idx);
             }
-            kamino_e.position.x = kamino_e_centre.x;
-            kamino_e.position.y = -2.8f;
-            kamino_e.position.z = kamino_e_centre.z;
-            kamino_e.pitch = -0x4000;
-            kamino_e.yaw = 0;
-            kamino_e.orbit_pitch = -3640;
-            kamino_e.orbit_yaw = 0x4000;
-            break;
-        case 1: {
-            kamino_e.departure_timer += FRAMETIME;
-            f32 ratio, base;
-            if (!(kamino_e.departure_timer < 4.0f)) {
-                kamino_e.departure_timer = 0.0f;
-                kamino_e.departing = 2;
-                ratio = 1.0f;
-                base = -0.0f;
-            } else {
-                i32 angle =
-                    static_cast<i32>(((0.25f * kamino_e.departure_timer) * 180.0f - 90.0f) * 182.04444885253906f);
-                ratio = (NuTrigTable[(angle >> 1) & 0x7fff] + 1.0f) * 0.5f;
-                base = (1.0f - ratio) * -2.8f;
-            }
-            kamino_e.position.y = ratio * desired.y + base;
-            break;
-        }
-        case 2:
-            kamino_e.departure_timer += FRAMETIME;
-            if (kamino_e.departure_timer < 4.0f)
-                kamino_e.pitch = SeekRot(kamino_e.pitch, 0, kamino_e.departure_timer);
-            else {
-                kamino_e.pitch = SeekRot(kamino_e.pitch, 0, 4.0f);
-                kamino_e.departing = 3;
-                kamino_e.departure_timer = 0.0f;
-            }
-            break;
-        case 3:
-            kamino_e.departure_timer += FRAMETIME;
-            if (!(kamino_e.departure_timer < 4.0f)) {
-                kamino_e.yaw = SeekRot(kamino_e.yaw, 0xc000, 4.0f);
-                kamino_e.departure_timer = 0.0f;
-                kamino_e.departing = 4;
-            } else
-                kamino_e.yaw = SeekRot(kamino_e.yaw, 0xc000, kamino_e.departure_timer);
-            kamino_e.pitch = SeekRot(kamino_e.pitch, 0, 4.0f);
-            break;
-        case 4: {
-            kamino_e.departure_timer += FRAMETIME;
-            f32 ratio;
-            if (!(kamino_e.departure_timer < 4.0f)) {
-                kamino_e.departure_timer = 0.0f;
-                kamino_e.departing = 5;
-                ratio = 1.0f;
-            } else {
-                i32 angle =
-                    static_cast<i32>(((0.25f * kamino_e.departure_timer) * 180.0f - 90.0f) * 182.04444885253906f);
-                ratio = (NuTrigTable[(angle >> 1) & 0x7fff] + 1.0f) * 0.5f;
-            }
-            kamino_e.position.x = desired.x * ratio + kamino_e_centre.x * (1.0f - ratio);
-            kamino_e.position.z = desired.z * ratio + kamino_e_centre.z * (1.0f - ratio);
-            kamino_e.pitch = SeekRot(kamino_e.pitch, 0xb60, 4.0f);
-            kamino_e.yaw = SeekRot(kamino_e.yaw, 0xc000, 4.0f);
-            break;
-        }
-        case 5: {
-            NUVEC aim, delta;
-            bool have_target = false;
-            if (kamino_e.active_turret != NULL) {
-                aim = *NuSpecialGetDrawPos(&kamino_e.active_turret->primary_anim_obj->special);
-                aim.y += 0.5f;
-                have_target = true;
-            } else if (kamino_e.can_fire->value == 1.0f) {
-                GameObject_s *nearest = NULL;
-                f32 best = 1000000000.0f;
-                for (i32 i = 0; i < 8; ++i) {
-                    GameObject_s *object = Player[i];
-                    if (object == NULL || (object->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
-                        (object->apiobj.character_data->model_flags & 0x80000))
-                        continue;
-                    f32 distance = NuVecDistSqr(&object->apiobj.collision_position,
-                                                reinterpret_cast<NUVEC *>(&matrix->m30), &delta);
-                    if (distance < best) {
-                        best = distance;
-                        nearest = Player[i];
-                    }
-                }
-                if (nearest != NULL) {
-                    aim.x = nearest->apiobj.collision_position.x;
-                    aim.y = 0.1f + nearest->apiobj.field_0x218;
-                    aim.z = nearest->apiobj.collision_position.z;
-                    have_target = true;
-                }
-            }
-            i32 target_pitch, target_yaw;
-            if (have_target) {
-                f32 z = aim.z - kamino_e_centre.z;
-                kamino_e.orbit_pitch = -3640;
-                if (z > 2.5f)
-                    z = 2.5f;
-                else if (z < -2.5f)
-                    z = -2.5f;
-                kamino_e.orbit_yaw = static_cast<i32>(((z / 2.5f) * 30.0f) * 182.04444885253906f) + 0x4000;
-                NUVEC offset = {0.0f, -kamino_e_gunoffset[0].y, -kamino_e_gunoffset[0].z};
-                NuVecMtxRotate(&offset, &offset, matrix);
-                NuVecAdd(&offset, &offset, &aim);
-                NuVecSub(&delta, &offset, &kamino_e.position);
-                target_yaw = static_cast<i32>(NuAtan2(delta.x, delta.z) * 10430.3779296875f);
-                f32 horizontal = NuFsqrt(delta.x * delta.x + delta.z * delta.z);
-                target_pitch = static_cast<i32>(NuAtan2(-delta.y, horizontal) * 10430.3779296875f);
-                f32 timer = kamino_e.departure_timer + FRAMETIME;
-                if (timer > 0.15f) {
-                    NUMTX bolt_matrix = *matrix;
-                    NUVEC origin;
+        } else
+            jango = other_jango;
+        i32 connection_direction = 0;
+        if (kamino_e.jango_fight->value == 0.0f && !FreePlay && kamino_e.intro_cutscene != NULL &&
+            instNuGCutSceneIsFinished(static_cast<instNUGCUTSCENE_s *>(kamino_e.intro_cutscene->instance)))
+            kamino_e.jango_fight->value = 1.0f;
+        if (kamino_e.active_turret != NULL && (kamino_e.active_turret->flags & 0x10))
+            kamino_e.active_turret = NULL;
+        NUMTX *matrix = NuSpecialGetDrawMtx(&kamino_e.slave1);
+        NUVEC desired = {0.0f, 0.0f, 6.5f};
+        NuVecRotateX(&desired, &desired, kamino_e.orbit_pitch);
+        NuVecRotateY(&desired, &desired, kamino_e.orbit_yaw);
+        NuVecAdd(&desired, &desired, &kamino_e_centre);
+        kamino_e.elapsed_time += FRAMETIME;
+        f32 degrees = kamino_e.elapsed_time * 360.0f;
+        desired.y +=
+            ((NuTrigTable[(static_cast<i32>((degrees / 3.0f) * 182.04444885253906f) >> 1) & 0x7fff] + 1.0f) * 0.5f) *
+            0.2f;
+        desired.z +=
+            ((NuTrigTable[(static_cast<i32>((0.25f * degrees) * 182.04444885253906f) >> 1) & 0x7fff] + 1.0f) * 0.5f) *
+            0.2f;
+        if (kamino_e.minicut_started != NULL && kamino_e.minicut_started->value > 0.0f)
+            NuSpecialSetVisibility(&kamino_e.slave1, 1);
+        if (kamino_e.departing)
+            PlaySfx("Slave1_EngineLp", &kamino_e.position);
+        switch (kamino_e.departing) {
+            case 0:
+                if (kamino_e.jango_fight->value > 0.0f) {
+                    kamino_e.departing = 1;
                     kamino_e.departure_timer = 0.0f;
-                    NuVecMtxTransform(&origin, &kamino_e_gunoffset[kamino_e.fire_index], matrix);
-                    f32 distance = NuVecDist(&origin, &aim, NULL);
-                    i32 adjustment = static_cast<i32>(NuAtan2(-kamino_e_gunoffset[kamino_e.fire_index].x, distance) *
-                                                      10430.3779296875f);
-                    NuMtxPreRotateY(&bolt_matrix, adjustment);
-                    addbolt_nosfx = 1;
-                    BOLT_s *bolt = Bolt_Add(NULL, &origin, &bolt_matrix, 0x27, 0x800);
-                    if (bolt != NULL)
-                        bolt->flags |= 0x10;
-                    kamino_e.fire_index = !kamino_e.fire_index;
-                    bolt_matrix = *matrix;
-                    NuVecMtxTransform(&origin, &kamino_e_gunoffset[kamino_e.fire_index], matrix);
-                    adjustment = static_cast<i32>(NuAtan2(-kamino_e_gunoffset[kamino_e.fire_index].x, distance) *
-                                                  10430.3779296875f);
-                    NuMtxPreRotateY(&bolt_matrix, adjustment);
-                    addbolt_nosfx = 1;
-                    bolt = Bolt_Add(NULL, &origin, &bolt_matrix, 0x27, 0x800);
-                    if (bolt != NULL)
-                        bolt->flags |= 0x10;
-                    kamino_e.fire_index = !kamino_e.fire_index;
-                    PlaySfx("Kam_Slave1BlasterFire", &origin);
-                } else
-                    kamino_e.departure_timer = timer;
-            } else {
+                    GizObstacle_FindByName(world->giz_obstacle_sys, "slave1_debris");
+                }
+                kamino_e.position.x = kamino_e_centre.x;
+                kamino_e.position.y = -2.8f;
+                kamino_e.position.z = kamino_e_centre.z;
+                kamino_e.pitch = -0x4000;
+                kamino_e.yaw = 0;
                 kamino_e.orbit_pitch = -3640;
                 kamino_e.orbit_yaw = 0x4000;
-                target_pitch = 0xb60;
-                target_yaw = 0xc000;
+                break;
+            case 1: {
+                kamino_e.departure_timer += FRAMETIME;
+                f32 ratio, base;
+                if (!(kamino_e.departure_timer < 4.0f)) {
+                    kamino_e.departure_timer = 0.0f;
+                    kamino_e.departing = 2;
+                    ratio = 1.0f;
+                    base = -0.0f;
+                } else {
+                    i32 angle =
+                        static_cast<i32>(((0.25f * kamino_e.departure_timer) * 180.0f - 90.0f) * 182.04444885253906f);
+                    ratio = (NuTrigTable[(angle >> 1) & 0x7fff] + 1.0f) * 0.5f;
+                    base = (1.0f - ratio) * -2.8f;
+                }
+                kamino_e.position.y = ratio * desired.y + base;
+                break;
             }
-            SeekVec(&kamino_e.position, &kamino_e.position, &desired, 1.0f);
-            kamino_e.pitch = SeekRot(kamino_e.pitch, target_pitch, 1.0f);
-            kamino_e.yaw = SeekRot(kamino_e.yaw, target_yaw, 1.0f);
-            break;
+            case 2:
+                kamino_e.departure_timer += FRAMETIME;
+                if (kamino_e.departure_timer < 4.0f)
+                    kamino_e.pitch = SeekRot(kamino_e.pitch, 0, kamino_e.departure_timer);
+                else {
+                    kamino_e.pitch = SeekRot(kamino_e.pitch, 0, 4.0f);
+                    kamino_e.departing = 3;
+                    kamino_e.departure_timer = 0.0f;
+                }
+                break;
+            case 3:
+                kamino_e.departure_timer += FRAMETIME;
+                if (!(kamino_e.departure_timer < 4.0f)) {
+                    kamino_e.yaw = SeekRot(kamino_e.yaw, 0xc000, 4.0f);
+                    kamino_e.departure_timer = 0.0f;
+                    kamino_e.departing = 4;
+                } else
+                    kamino_e.yaw = SeekRot(kamino_e.yaw, 0xc000, kamino_e.departure_timer);
+                kamino_e.pitch = SeekRot(kamino_e.pitch, 0, 4.0f);
+                break;
+            case 4: {
+                kamino_e.departure_timer += FRAMETIME;
+                f32 ratio;
+                if (!(kamino_e.departure_timer < 4.0f)) {
+                    kamino_e.departure_timer = 0.0f;
+                    kamino_e.departing = 5;
+                    ratio = 1.0f;
+                } else {
+                    i32 angle =
+                        static_cast<i32>(((0.25f * kamino_e.departure_timer) * 180.0f - 90.0f) * 182.04444885253906f);
+                    ratio = (NuTrigTable[(angle >> 1) & 0x7fff] + 1.0f) * 0.5f;
+                }
+                kamino_e.position.x = desired.x * ratio + kamino_e_centre.x * (1.0f - ratio);
+                kamino_e.position.z = desired.z * ratio + kamino_e_centre.z * (1.0f - ratio);
+                kamino_e.pitch = SeekRot(kamino_e.pitch, 0xb60, 4.0f);
+                kamino_e.yaw = SeekRot(kamino_e.yaw, 0xc000, 4.0f);
+                break;
+            }
+            case 5: {
+                NUVEC aim, delta;
+                bool have_target = false;
+                if (kamino_e.active_turret != NULL) {
+                    aim = *NuSpecialGetDrawPos(&kamino_e.active_turret->primary_anim_obj->special);
+                    aim.y += 0.5f;
+                    have_target = true;
+                } else if (kamino_e.can_fire->value == 1.0f) {
+                    GameObject_s *nearest = NULL;
+                    f32 best = 1000000000.0f;
+                    for (i32 i = 0; i < 8; ++i) {
+                        GameObject_s *object = Player[i];
+                        if (object == NULL || (object->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
+                            (object->apiobj.character_data->model_flags & 0x80000))
+                            continue;
+                        f32 distance = NuVecDistSqr(&object->apiobj.collision_position,
+                                                    reinterpret_cast<NUVEC *>(&matrix->m30), &delta);
+                        if (distance < best) {
+                            best = distance;
+                            nearest = Player[i];
+                        }
+                    }
+                    if (nearest != NULL) {
+                        aim.x = nearest->apiobj.collision_position.x;
+                        aim.y = 0.1f + nearest->apiobj.field_0x218;
+                        aim.z = nearest->apiobj.collision_position.z;
+                        have_target = true;
+                    }
+                }
+                i32 target_pitch, target_yaw;
+                if (have_target) {
+                    f32 z = aim.z - kamino_e_centre.z;
+                    kamino_e.orbit_pitch = -3640;
+                    if (z > 2.5f)
+                        z = 2.5f;
+                    else if (z < -2.5f)
+                        z = -2.5f;
+                    kamino_e.orbit_yaw = static_cast<i32>(((z / 2.5f) * 30.0f) * 182.04444885253906f) + 0x4000;
+                    NUVEC offset = {0.0f, -kamino_e_gunoffset[0].y, -kamino_e_gunoffset[0].z};
+                    NuVecMtxRotate(&offset, &offset, matrix);
+                    NuVecAdd(&offset, &offset, &aim);
+                    NuVecSub(&delta, &offset, &kamino_e.position);
+                    target_yaw = static_cast<i32>(NuAtan2(delta.x, delta.z) * 10430.3779296875f);
+                    f32 horizontal = NuFsqrt(delta.x * delta.x + delta.z * delta.z);
+                    target_pitch = static_cast<i32>(NuAtan2(-delta.y, horizontal) * 10430.3779296875f);
+                    f32 timer = kamino_e.departure_timer + FRAMETIME;
+                    if (timer > 0.15f) {
+                        NUMTX bolt_matrix = *matrix;
+                        NUVEC origin;
+                        kamino_e.departure_timer = 0.0f;
+                        NuVecMtxTransform(&origin, &kamino_e_gunoffset[kamino_e.fire_index], matrix);
+                        f32 distance = NuVecDist(&origin, &aim, NULL);
+                        i32 adjustment = static_cast<i32>(
+                            NuAtan2(-kamino_e_gunoffset[kamino_e.fire_index].x, distance) * 10430.3779296875f);
+                        NuMtxPreRotateY(&bolt_matrix, adjustment);
+                        addbolt_nosfx = 1;
+                        BOLT_s *bolt = Bolt_Add(NULL, &origin, &bolt_matrix, 0x27, 0x800);
+                        if (bolt != NULL)
+                            bolt->flags |= 0x10;
+                        kamino_e.fire_index = !kamino_e.fire_index;
+                        bolt_matrix = *matrix;
+                        NuVecMtxTransform(&origin, &kamino_e_gunoffset[kamino_e.fire_index], matrix);
+                        adjustment = static_cast<i32>(NuAtan2(-kamino_e_gunoffset[kamino_e.fire_index].x, distance) *
+                                                      10430.3779296875f);
+                        NuMtxPreRotateY(&bolt_matrix, adjustment);
+                        addbolt_nosfx = 1;
+                        bolt = Bolt_Add(NULL, &origin, &bolt_matrix, 0x27, 0x800);
+                        if (bolt != NULL)
+                            bolt->flags |= 0x10;
+                        kamino_e.fire_index = !kamino_e.fire_index;
+                        PlaySfx("Kam_Slave1BlasterFire", &origin);
+                    } else
+                        kamino_e.departure_timer = timer;
+                } else {
+                    kamino_e.orbit_pitch = -3640;
+                    kamino_e.orbit_yaw = 0x4000;
+                    target_pitch = 0xb60;
+                    target_yaw = 0xc000;
+                }
+                SeekVec(&kamino_e.position, &kamino_e.position, &desired, 1.0f);
+                kamino_e.pitch = SeekRot(kamino_e.pitch, target_pitch, 1.0f);
+                kamino_e.yaw = SeekRot(kamino_e.yaw, target_yaw, 1.0f);
+                break;
+            }
         }
+        NuMtxSetTranslation(matrix, &kamino_e.position);
+        NuMtxPreRotateY(matrix, kamino_e.yaw);
+        NuMtxPreRotateX(matrix, kamino_e.pitch);
+        i32 *connection = static_cast<i32 *>(AIPAthFindPathCnx(world->ai_sys, world->ai_sys->path_sys->active_path,
+                                                               "Bridge1_a", "Bridge1_b", &connection_direction));
+        AIAREA *fight_area = AISysFindArea(WORLD->ai_sys, "Fight");
+        if (connection == NULL || jango == NULL || fight_area == NULL)
+            return;
+        if (connection[connection_direction] >= 0 && connection[!connection_direction] >= 0)
+            return;
+        i32 area_index = static_cast<i32>(fight_area - world->ai_sys->areas);
+        u64 mask = static_cast<u64>(static_cast<i64>(static_cast<i32>(1u << (area_index & 31))));
+        if (jango->apiobj.ai_area_mask & mask)
+            return;
+        AILOCATOR *wait = AIPathFindLocator(world->ai_sys, "WAIT");
+        if (wait == NULL)
+            return;
+        jango->apiobj.position = wait->position;
+        jango->apiobj.field_0x276 = wait->direction;
+        jango->apiobj.facing_angle = wait->direction;
+        jango->apiobj.movement_facing_angle = wait->direction;
+        jango->ai.path_info = wait->path_info;
+        jango->apiobj.initial_position = wait->position;
+        jango->apiobj.collision_position = wait->position;
+        plr_lastpos = wait->position;
+        jango->apiobj.start_position = wait->position;
+        jango->apiobj.respawn_position = wait->position;
+        jango->apiobj.last_safe_position = wait->position;
+        jango->saved_position = wait->position;
+        jango->apiobj.velocity = v000;
+        InitSurfaceInfo(jango);
     }
-    NuMtxSetTranslation(matrix, &kamino_e.position);
-    NuMtxPreRotateY(matrix, kamino_e.yaw);
-    NuMtxPreRotateX(matrix, kamino_e.pitch);
-    i32 *connection = static_cast<i32 *>(AIPAthFindPathCnx(world->ai_sys, world->ai_sys->path_sys->active_path,
-                                                           "Bridge1_a", "Bridge1_b", &connection_direction));
-    AIAREA *fight_area = AISysFindArea(WORLD->ai_sys, "Fight");
-    if (connection == NULL || jango == NULL || fight_area == NULL)
-        return;
-    if (connection[connection_direction] >= 0 && connection[!connection_direction] >= 0)
-        return;
-    i32 area_index = static_cast<i32>(fight_area - world->ai_sys->areas);
-    u64 mask = static_cast<u64>(static_cast<i64>(static_cast<i32>(1u << (area_index & 31))));
-    if (jango->apiobj.ai_area_mask & mask)
-        return;
-    AILOCATOR *wait = AIPathFindLocator(world->ai_sys, "WAIT");
-    if (wait == NULL)
-        return;
-    jango->apiobj.position = wait->position;
-    jango->apiobj.field_0x276 = wait->direction;
-    jango->apiobj.facing_angle = wait->direction;
-    jango->apiobj.movement_facing_angle = wait->direction;
-    jango->ai.path_info = wait->path_info;
-    jango->apiobj.initial_position = wait->position;
-    jango->apiobj.collision_position = wait->position;
-    plr_lastpos = wait->position;
-    jango->apiobj.start_position = wait->position;
-    jango->apiobj.respawn_position = wait->position;
-    jango->apiobj.last_safe_position = wait->position;
-    jango->saved_position = wait->position;
-    jango->apiobj.velocity = v000;
-    InitSurfaceInfo(jango);
 }
 
 void KaminoE_AlwaysUpdate(WORLDINFO_s *) {

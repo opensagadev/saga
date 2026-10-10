@@ -72,36 +72,35 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
 
     GIZMO_PICKUP_TYPE *type = &GizmoPickupType[type_index];
     const i32 model_id = static_cast<i16>(type->first_model_id) + model_variant;
-    if (model_id == -1 || world->lev_objs[model_id].active == 0) {
-        return;
-    }
+    if (model_id != -1 && world->lev_objs[model_id].active != 0) {
 
-    ADDGAMEMSG message = AddGameMsg_Default;
-    message.target_scale = target_scale;
-    u32 score = type->score;
-    if (object != NULL && object->coinpacket != NULL) {
-        if (((DoubleScore >> player_index) & 1) != 0) {
-            score *= 2;
+        ADDGAMEMSG message = AddGameMsg_Default;
+        message.target_scale = target_scale;
+        u32 score = type->score;
+        if (object != NULL && object->coinpacket != NULL) {
+            if (((DoubleScore >> player_index) & 1) != 0) {
+                score *= 2;
+            }
+            if (object->field_0xdec > 0.0f) {
+                score *= 2;
+            }
         }
-        if (object->field_0xdec > 0.0f) {
-            score *= 2;
-        }
-    }
 
-    message.position = position;
-    message.target_position = &target_position;
-    message.scale = PANEL_COINSCALE_START * AreaPickupScale;
-    message.flags = 0x2012d;
-    message.duration = COINMSGTIME;
-    message.icon = static_cast<i16>(model_id);
-    message.extra_position = reinterpret_cast<nuvec_s *>(&world->lev_objs[model_id]);
-    message.score = score;
-    if (main_total) {
-        message.update_fn = GameMsg_DrawAdjustNewPos_CoinToTotal;
+        message.position = position;
+        message.target_position = &target_position;
+        message.scale = PANEL_COINSCALE_START * AreaPickupScale;
+        message.flags = 0x2012d;
+        message.duration = COINMSGTIME;
+        message.icon = static_cast<i16>(model_id);
+        message.extra_position = reinterpret_cast<nuvec_s *>(&world->lev_objs[model_id]);
+        message.score = score;
+        if (main_total) {
+            message.update_fn = GameMsg_DrawAdjustNewPos_CoinToTotal;
+        }
+        message.end_fn = EndScoreMessage;
+        message.player_index = static_cast<i8>(player_index);
+        AddGameMsg(&message);
     }
-    message.end_fn = EndScoreMessage;
-    message.player_index = static_cast<i8>(player_index);
-    AddGameMsg(&message);
 }
 
 static __used__ float GizmoPickups_Collide2D(GameObject_s *object) {

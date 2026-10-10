@@ -112,29 +112,29 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     }
     if (object->apiobj.character_model->model_data_b[0x5d] == NULL || object->apiobj.field_0x27d == 0)
         return;
-    if (!ObjLandReady(object) && !objInNetWaitContext(object, 0x4a))
-        return;
-    LEVER_s *lever = Lever_FindNearest(world, &object->apiobj.lower_position, object, &distance);
-    if (objInNetWaitContext(object, 0x4a)) {
-        object->context_animation_timer -= FRAMETIME;
-        if (object->context_animation_timer <= 0.0f) {
-            object->character_context = -1;
-            object->big_jump_data = NULL;
+    if (!(!ObjLandReady(object) && !objInNetWaitContext(object, 0x4a))) {
+        LEVER_s *lever = Lever_FindNearest(world, &object->apiobj.lower_position, object, &distance);
+        if (objInNetWaitContext(object, 0x4a)) {
+            object->context_animation_timer -= FRAMETIME;
+            if (object->context_animation_timer <= 0.0f) {
+                object->character_context = -1;
+                object->big_jump_data = NULL;
+            }
         }
+        if (lever == NULL)
+            return;
+        if (object == player) {
+            show_lever_hint = 0;
+            if (distance < 1.0f)
+                show_lever_hint = 1;
+        }
+        f32 range = (object->apiobj.field_0x1dc + 0.25f) * lever->target_indicator_scale;
+        if (!(distance < range * range))
+            return;
+        if (!(object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) && !objInNetWaitContext(object, 0x4a))
+            return;
+        Lever_StartPull(object, lever);
     }
-    if (lever == NULL)
-        return;
-    if (object == player) {
-        show_lever_hint = 0;
-        if (distance < 1.0f)
-            show_lever_hint = 1;
-    }
-    f32 range = (object->apiobj.field_0x1dc + 0.25f) * lever->target_indicator_scale;
-    if (!(distance < range * range))
-        return;
-    if (!(object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) && !objInNetWaitContext(object, 0x4a))
-        return;
-    Lever_StartPull(object, lever);
 }
 
 void Lever_GetAbsTargetPos(LEVER_s *lever, nuvec_s *target_position) {

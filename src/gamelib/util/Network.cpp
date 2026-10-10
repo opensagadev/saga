@@ -1228,23 +1228,22 @@ void NetworkObjectManager::ReceiveObjectCallMessage(NetMessage &message, NetPeer
         return;
     }
     i32 call_index = static_cast<i8>(call_id - 1);
-    if (registered_calls[call_index].type != 1) {
-        return;
-    }
+    if (registered_calls[call_index].type == 1) {
 
-    i16 id;
-    i16 class_id;
-    message.Read16(id);
-    message.Read16(class_id);
-    EdClass *object_class = theRegistry.GetClass(class_id);
-    NetworkObject *object = &objects[id];
-    if (object->object == NULL && (registered_calls[call_index].flags & 1) != 0) {
-        void *instance = theRegistry.CreateObject(object_class->interface, NULL, 0, id, 1);
-        object->Initialise(id, instance, object_class, peer, 0);
-    }
-    if (object->object != NULL) {
-        reinterpret_cast<void (*)(void *, NetMessage &)>(registered_calls[call_index].callback)(object->object,
-                                                                                                message);
+        i16 id;
+        i16 class_id;
+        message.Read16(id);
+        message.Read16(class_id);
+        EdClass *object_class = theRegistry.GetClass(class_id);
+        NetworkObject *object = &objects[id];
+        if (object->object == NULL && (registered_calls[call_index].flags & 1) != 0) {
+            void *instance = theRegistry.CreateObject(object_class->interface, NULL, 0, id, 1);
+            object->Initialise(id, instance, object_class, peer, 0);
+        }
+        if (object->object != NULL) {
+            reinterpret_cast<void (*)(void *, NetMessage &)>(registered_calls[call_index].callback)(object->object,
+                                                                                                    message);
+        }
     }
 }
 

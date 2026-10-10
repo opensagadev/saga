@@ -208,20 +208,20 @@ void GizPanel_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 use) {
         }
         return;
     }
-    if (object->character_context != 1 && object->character_context != -1 && object->character_context != 2 &&
-        !objInNetWaitContext(object, 0x0b))
-        return;
-    f32 distance;
-    GIZPANEL_s *panel = GizPanel_FindNearest(WORLD, &object->apiobj.position, object, &distance, 1);
-    if (panel != NULL) {
-        const f32 radius = (0.25f + object->apiobj.field_0x1dc) * panel->target_scale;
-        if (distance < radius * radius &&
-            (use != 0 || (object->panel_use_request == 1 && object->big_jump_data != NULL)))
-            GizPanel_Use(*object, *panel);
-    } else if (use != 0 && object->apiobj.player_controlled &&
-               (object->apiobj.character_data->model_flags & 0x20) != 0 && object->field_0xdb0 <= 0.0f) {
-        GizPanel_PlaySfx("TC14_VLN", &object->apiobj.collision_position, 1 << object->apiobj.field_0x27c);
-        object->field_0xdb0 = 0.5f;
+    if (!(object->character_context != 1 && object->character_context != -1 && object->character_context != 2 &&
+          !objInNetWaitContext(object, 0x0b))) {
+        f32 distance;
+        GIZPANEL_s *panel = GizPanel_FindNearest(WORLD, &object->apiobj.position, object, &distance, 1);
+        if (panel != NULL) {
+            const f32 radius = (0.25f + object->apiobj.field_0x1dc) * panel->target_scale;
+            if (distance < radius * radius &&
+                (use != 0 || (object->panel_use_request == 1 && object->big_jump_data != NULL)))
+                GizPanel_Use(*object, *panel);
+        } else if (use != 0 && object->apiobj.player_controlled &&
+                   (object->apiobj.character_data->model_flags & 0x20) != 0 && object->field_0xdb0 <= 0.0f) {
+            GizPanel_PlaySfx("TC14_VLN", &object->apiobj.collision_position, 1 << object->apiobj.field_0x27c);
+            object->field_0xdb0 = 0.5f;
+        }
     }
 }
 

@@ -1889,11 +1889,10 @@ static void edpartInstanceOrphansMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     edpart_which_scene = 1;
     edpart_instanceorphans_menu =
         eduiMenuCreate(70, 70, 250, 250, ed_fnt, edpartCancelInstanceOrphansMenu, "Instance Orphans/Dupes");
-    if (edpart_instanceorphans_menu == NULL || edpart_nearest_type == NULL)
-        return;
-    i32 group = 1;
-    char effect_name[20];
-    char label[38];
+    if (edpart_instanceorphans_menu != NULL && edpart_nearest_type != NULL) {
+        i32 group = 1;
+        char effect_name[20];
+        char label[38];
 #define EDPART_ORPHAN_ITEM(index)                                                                                      \
     if (edpart_nearest_type->effect_ids[index] == 9998) {                                                              \
         NuStrNCpy(effect_name, edpart_nearest_type->object_names[index], 17);                                          \
@@ -1902,30 +1901,33 @@ static void edpartInstanceOrphansMenu(eduimenu_s *parent, eduiitem_s *, u32) {
                         eduiItemSelCreate(index, edblack, 0, group, edpartDeleteInstanceOrphan, label));               \
         ++group;                                                                                                       \
     }
-    EDPART_ORPHAN_ITEM(0)
-    EDPART_ORPHAN_ITEM(1)
-    EDPART_ORPHAN_ITEM(2)
-    EDPART_ORPHAN_ITEM(3)
-    EDPART_ORPHAN_ITEM(4)
-    EDPART_ORPHAN_ITEM(5)
-    EDPART_ORPHAN_ITEM(6)
-    EDPART_ORPHAN_ITEM(7)
+        EDPART_ORPHAN_ITEM(0)
+        EDPART_ORPHAN_ITEM(1)
+        EDPART_ORPHAN_ITEM(2)
+        EDPART_ORPHAN_ITEM(3)
+        EDPART_ORPHAN_ITEM(4)
+        EDPART_ORPHAN_ITEM(5)
+        EDPART_ORPHAN_ITEM(6)
+        EDPART_ORPHAN_ITEM(7)
 #undef EDPART_ORPHAN_ITEM
-    if (edpart_nearest_orphans) {
-        eduiMenuAddItem(edpart_instanceorphans_menu,
-                        eduiItemSelCreate(8, edblack, 0, 0, edpartDeleteAllInstanceOrphans, "Remove All Orphans"));
-    } else {
-        eduiMenuAddItem(edpart_instanceorphans_menu, eduiItemSelCreate(8, edgrey, 0, 0, NULL, "Remove All Orphans"));
+        if (edpart_nearest_orphans) {
+            eduiMenuAddItem(edpart_instanceorphans_menu,
+                            eduiItemSelCreate(8, edblack, 0, 0, edpartDeleteAllInstanceOrphans, "Remove All Orphans"));
+        } else {
+            eduiMenuAddItem(edpart_instanceorphans_menu,
+                            eduiItemSelCreate(8, edgrey, 0, 0, NULL, "Remove All Orphans"));
+        }
+        if (edpart_nearest_duplicates) {
+            eduiMenuAddItem(
+                edpart_instanceorphans_menu,
+                eduiItemSelCreate(8, edblack, 0, 0, edpartDeleteAllInstanceDuplicates, "Remove Duplicates"));
+        } else {
+            eduiMenuAddItem(edpart_instanceorphans_menu, eduiItemSelCreate(8, edgrey, 0, 0, NULL, "Remove Duplicates"));
+        }
+        eduiMenuAttach(parent, edpart_instanceorphans_menu);
+        edpart_instanceorphans_menu->x = parent->x + 10;
+        edpart_instanceorphans_menu->y = parent->y + 40;
     }
-    if (edpart_nearest_duplicates) {
-        eduiMenuAddItem(edpart_instanceorphans_menu,
-                        eduiItemSelCreate(8, edblack, 0, 0, edpartDeleteAllInstanceDuplicates, "Remove Duplicates"));
-    } else {
-        eduiMenuAddItem(edpart_instanceorphans_menu, eduiItemSelCreate(8, edgrey, 0, 0, NULL, "Remove Duplicates"));
-    }
-    eduiMenuAttach(parent, edpart_instanceorphans_menu);
-    edpart_instanceorphans_menu->x = parent->x + 10;
-    edpart_instanceorphans_menu->y = parent->y + 40;
 }
 
 static void edpartCancelChangeNameMenu(eduimenu_s *, eduimenu_s *) {

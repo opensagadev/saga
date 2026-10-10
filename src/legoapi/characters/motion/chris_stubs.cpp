@@ -15,8 +15,7 @@ anakin_door_s *volatile AnakinC = NULL;
 
 void ChrisUnallocLevelStuff(WORLDINFO_s *world) {
     world->level_specific_data = NULL;
-    if (AnakinC != NULL) {
-        return;
+    if (AnakinC == NULL) {
+        AnakinC = NULL;
     }
-    AnakinC = NULL;
 }

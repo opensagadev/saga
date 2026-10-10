@@ -475,50 +475,49 @@ void NuGCutCharAnimProcess_3(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, 
             }
         }
     }
-    if (*visible == 0) {
-        return;
-    }
-    if (layer_mask != NULL) {
-        if (curve_count > 11) {
-            *layer_mask = GetIntCurveVal(animation, values, 11);
-        } else {
-            *layer_mask = -1;
+    if (*visible != 0) {
+        if (layer_mask != NULL) {
+            if (curve_count > 11) {
+                *layer_mask = GetIntCurveVal(animation, values, 11);
+            } else {
+                *layer_mask = -1;
+            }
         }
-    }
 
-    if ((node_flags & NUANIM_NODE_HAS_ROTATION) != 0) {
-        NUANGVEC rotation = {
-            static_cast<NUANG>(values[3] * 10430.378f),
-            static_cast<NUANG>(values[4] * 10430.378f),
-            static_cast<NUANG>(values[5] * 10430.378f),
-        };
-        NuMtxSetRotateXYZ(matrix, &rotation);
-    } else {
-        NuMtxSetIdentity(matrix);
-    }
-    NuMtxTranslate(matrix, reinterpret_cast<NUVEC *>(values));
-    matrix->m02 = -matrix->m02;
-    matrix->m12 = -matrix->m12;
-    matrix->m20 = -matrix->m20;
-    matrix->m21 = -matrix->m21;
-    matrix->m23 = -matrix->m23;
-    matrix->m32 = -matrix->m32;
-
-    NUVEC scale;
-    scale = NuMtxGetScale(&character->base_matrix);
-    NuMtxPreScale(matrix, &scale);
-    if (animation_rate != NULL) {
-        if (animation->curve_count > 9) {
-            *animation_rate = values[9];
+        if ((node_flags & NUANIM_NODE_HAS_ROTATION) != 0) {
+            NUANGVEC rotation = {
+                static_cast<NUANG>(values[3] * 10430.378f),
+                static_cast<NUANG>(values[4] * 10430.378f),
+                static_cast<NUANG>(values[5] * 10430.378f),
+            };
+            NuMtxSetRotateXYZ(matrix, &rotation);
         } else {
-            *animation_rate = character->animation_rate;
+            NuMtxSetIdentity(matrix);
         }
-    }
-    if (blend_time != NULL) {
-        if (animation->curve_count > 8) {
-            *blend_time = values[8];
-        } else {
-            *blend_time = static_cast<f32>(character->blend_time);
+        NuMtxTranslate(matrix, reinterpret_cast<NUVEC *>(values));
+        matrix->m02 = -matrix->m02;
+        matrix->m12 = -matrix->m12;
+        matrix->m20 = -matrix->m20;
+        matrix->m21 = -matrix->m21;
+        matrix->m23 = -matrix->m23;
+        matrix->m32 = -matrix->m32;
+
+        NUVEC scale;
+        scale = NuMtxGetScale(&character->base_matrix);
+        NuMtxPreScale(matrix, &scale);
+        if (animation_rate != NULL) {
+            if (animation->curve_count > 9) {
+                *animation_rate = values[9];
+            } else {
+                *animation_rate = character->animation_rate;
+            }
+        }
+        if (blend_time != NULL) {
+            if (animation->curve_count > 8) {
+                *blend_time = values[8];
+            } else {
+                *blend_time = static_cast<f32>(character->blend_time);
+            }
         }
     }
 }

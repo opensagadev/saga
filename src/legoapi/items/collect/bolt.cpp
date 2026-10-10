@@ -108,11 +108,11 @@ void GuidedMissile_Move(PART_s *part, float time) {
         NUVEC scale = {part->scale_time / 0.2f, part->scale_time / 0.2f, part->scale_time / 0.2f};
         NuMtxPreScale(&part->transform, &scale);
     }
-    if (!(static_cast<i8>(part->active) < 0))
-        return;
-    i32 count = ParticlesPerFrame(1.0f, FRAMETIME);
-    NUVEC momentum = {-part->velocity.x, -part->velocity.y, -part->velocity.z};
-    AddGameDebrisMom(WORLD->debris_sys, 0xb, &position, count, &momentum);
+    if (static_cast<i8>(part->active) < 0) {
+        i32 count = ParticlesPerFrame(1.0f, FRAMETIME);
+        NUVEC momentum = {-part->velocity.x, -part->velocity.y, -part->velocity.z};
+        AddGameDebrisMom(WORLD->debris_sys, 0xb, &position, count, &momentum);
+    }
 }
 
 void GuidedMissile_Deflect(PART_s *part) {

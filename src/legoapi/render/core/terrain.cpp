@@ -3692,39 +3692,38 @@ void TerrainImpactNorm() {
     const bool rotated_hit = (hit_type_flag & (rotate_and_mark_mask | rotate_mask)) != 0;
     if (rotated_hit) {
         RotateVec(&TerI->movement_normal, &TerI->movement_normal);
-    } else if ((hit_type_flag & direct_normal_mask) == 0) {
-        return;
-    }
+    } else if ((hit_type_flag & direct_normal_mask) != 0) {
 
-    TerrainQuery_s *query = TerI;
-    // Curved hits are produced in collision-height-scaled space and need to
-    // be transformed back. Face normals already come from the terrain in
-    // object space; the target's direct-face branch deliberately bypasses
-    // this scaling before copying the normal below.
-    if (rotated_hit && (query->hit_type & TERRAIN_HIT_TYPE_SECOND_NORMAL) == 0) {
-        query->movement_normal.x *= query->inverse_collision_radius;
-        query->movement_normal.y *= query->inverse_collision_radius;
-        query->movement_normal.z *= query->inverse_collision_radius;
-    }
+        TerrainQuery_s *query = TerI;
+        // Curved hits are produced in collision-height-scaled space and need to
+        // be transformed back. Face normals already come from the terrain in
+        // object space; the target's direct-face branch deliberately bypasses
+        // this scaling before copying the normal below.
+        if (rotated_hit && (query->hit_type & TERRAIN_HIT_TYPE_SECOND_NORMAL) == 0) {
+            query->movement_normal.x *= query->inverse_collision_radius;
+            query->movement_normal.y *= query->inverse_collision_radius;
+            query->movement_normal.z *= query->inverse_collision_radius;
+        }
 
-    if (query->object_scale == 1.0f) {
-        query->impact_normal = query->movement_normal;
-        return;
-    }
+        if (query->object_scale == 1.0f) {
+            query->impact_normal = query->movement_normal;
+            return;
+        }
 
-    const f32 normal_length =
-        NuFsqrt(query->movement_normal.x * query->movement_normal.x +
-                query->movement_normal.y * query->movement_normal.y * query->inverse_object_scale_sq +
-                query->movement_normal.z * query->movement_normal.z);
-    f32 inverse_normal_length = 0.0f;
-    if (normal_length != 0.0f) {
-        inverse_normal_length = 1.0f / normal_length;
-    }
+        const f32 normal_length =
+            NuFsqrt(query->movement_normal.x * query->movement_normal.x +
+                    query->movement_normal.y * query->movement_normal.y * query->inverse_object_scale_sq +
+                    query->movement_normal.z * query->movement_normal.z);
+        f32 inverse_normal_length = 0.0f;
+        if (normal_length != 0.0f) {
+            inverse_normal_length = 1.0f / normal_length;
+        }
 
-    query = TerI;
-    query->impact_normal.x = query->movement_normal.x * inverse_normal_length;
-    query->impact_normal.y = query->movement_normal.y * query->inverse_object_scale * inverse_normal_length;
-    query->impact_normal.z = query->movement_normal.z * inverse_normal_length;
+        query = TerI;
+        query->impact_normal.x = query->movement_normal.x * inverse_normal_length;
+        query->impact_normal.y = query->movement_normal.y * query->inverse_object_scale * inverse_normal_length;
+        query->impact_normal.z = query->movement_normal.z * inverse_normal_length;
+    }
 }
 void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
     void *scratch = NuScratchAlloc32(0xd0);

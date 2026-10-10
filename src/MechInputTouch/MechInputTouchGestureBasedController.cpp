@@ -659,66 +659,65 @@ bool MechInputTouchGestureBasedController::PerformCloseMechanic(GameObject_s &ob
 
 void MechInputTouchGestureBasedController::ProcessAutoJumpOverGap(GameObject_s *object) {
     LEVELDATA *level = WORLD->current_level;
-    if (level == RESCUEE_LDATA || level == GUNGAN_A_LDATA) {
-        return;
-    }
-    if (level == MOSEISLEYA_LDATA && (object->apiobj.character_data->model_flags & 0x40) == 0) {
-        return;
-    }
-    TouchHolder *holder = field_90;
-    if (holder == NULL && object->touch_task != NULL) {
-        holder = object->touch_task->touch_holder;
-    }
-    if (holder == NULL) {
-        return;
-    }
-    JumpTriggerPacket packet = {};
-    packet.type = 1;
-    packet.player = object;
-    packet.touch_holder = holder;
-    packet.velocity = VuVec(object->apiobj.velocity.x, object->apiobj.velocity.y, object->apiobj.velocity.z, 1.0f);
-    if (object->apiobj.field_0x27d == 0 && !ObjLandReady(object)) {
-        return;
-    }
-    if (object->character_context == LEGOCONTEXT_JUMP || object->character_context == LEGOCONTEXT_LAND_JUMP ||
-        (object->touch_task != NULL && !object->touch_task->IsGoToTask()) || (object->field_0xf04 & 0x40) != 0) {
-        return;
-    }
-    bool danger = TouchHacks::CheckForAboutToRunIntoKillTerrain(*object, 0.3f);
-    if (!danger && !TouchHacks::CheckForAboutToRunOffAnEdge(*object, 0.3f)) {
-        return;
-    }
-    if ((object->apiobj.character_data->model_flags & 0x40) == 0 && object->id != id_WATTO &&
-        MechAutoJumpGetBest(packet, object->apiobj.facing_angle) == NULL &&
-        !TouchHacks::CheckJumpForLandingSpot(*object, danger ? 2.0f : 0.05f)) {
-        return;
-    }
-    f32 speed =
-        object->apiobj.character_data->player_config != NULL
-            ? *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(object->apiobj.character_data->player_config) + 0x1c)
-            : 0.0f;
-    VuVec boosted_velocity(object->apiobj.velocity.x, object->apiobj.velocity.y, object->apiobj.velocity.z, 1.0f);
-    f32 magnitude_sq = boosted_velocity.x * boosted_velocity.x + boosted_velocity.y * boosted_velocity.y +
-                       boosted_velocity.z * boosted_velocity.z;
-    if (magnitude_sq < speed * speed) {
-        NuVecNorm(&boosted_velocity.xyz, &boosted_velocity.xyz);
-        speed =
+    if (level != RESCUEE_LDATA && level != GUNGAN_A_LDATA) {
+        if (level == MOSEISLEYA_LDATA && (object->apiobj.character_data->model_flags & 0x40) == 0) {
+            return;
+        }
+        TouchHolder *holder = field_90;
+        if (holder == NULL && object->touch_task != NULL) {
+            holder = object->touch_task->touch_holder;
+        }
+        if (holder == NULL) {
+            return;
+        }
+        JumpTriggerPacket packet = {};
+        packet.type = 1;
+        packet.player = object;
+        packet.touch_holder = holder;
+        packet.velocity = VuVec(object->apiobj.velocity.x, object->apiobj.velocity.y, object->apiobj.velocity.z, 1.0f);
+        if (object->apiobj.field_0x27d == 0 && !ObjLandReady(object)) {
+            return;
+        }
+        if (object->character_context == LEGOCONTEXT_JUMP || object->character_context == LEGOCONTEXT_LAND_JUMP ||
+            (object->touch_task != NULL && !object->touch_task->IsGoToTask()) || (object->field_0xf04 & 0x40) != 0) {
+            return;
+        }
+        bool danger = TouchHacks::CheckForAboutToRunIntoKillTerrain(*object, 0.3f);
+        if (!danger && !TouchHacks::CheckForAboutToRunOffAnEdge(*object, 0.3f)) {
+            return;
+        }
+        if ((object->apiobj.character_data->model_flags & 0x40) == 0 && object->id != id_WATTO &&
+            MechAutoJumpGetBest(packet, object->apiobj.facing_angle) == NULL &&
+            !TouchHacks::CheckJumpForLandingSpot(*object, danger ? 2.0f : 0.05f)) {
+            return;
+        }
+        f32 speed =
             object->apiobj.character_data->player_config != NULL
                 ? *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(object->apiobj.character_data->player_config) + 0x1c)
                 : 0.0f;
-        boosted_velocity.x *= speed;
-        boosted_velocity.y *= speed;
-        boosted_velocity.z *= speed;
-    }
-    GameObject_s *backup_recipient = player != NULL ? player : object;
-    NUVEC previous_velocity = backup_recipient->apiobj.velocity;
-    NUVEC previous_target_velocity = backup_recipient->target_velocity;
-    object->apiobj.velocity = boosted_velocity.xyz;
-    object->target_velocity = boosted_velocity.xyz;
-    if (!TriggerJumpTask(packet, false, true, true)) {
-        GameObject_s *restore_recipient = player != NULL ? player : object;
-        restore_recipient->apiobj.velocity = previous_velocity;
-        restore_recipient->target_velocity = previous_target_velocity;
+        VuVec boosted_velocity(object->apiobj.velocity.x, object->apiobj.velocity.y, object->apiobj.velocity.z, 1.0f);
+        f32 magnitude_sq = boosted_velocity.x * boosted_velocity.x + boosted_velocity.y * boosted_velocity.y +
+                           boosted_velocity.z * boosted_velocity.z;
+        if (magnitude_sq < speed * speed) {
+            NuVecNorm(&boosted_velocity.xyz, &boosted_velocity.xyz);
+            speed = object->apiobj.character_data->player_config != NULL
+                        ? *reinterpret_cast<f32 *>(
+                              reinterpret_cast<u8 *>(object->apiobj.character_data->player_config) + 0x1c)
+                        : 0.0f;
+            boosted_velocity.x *= speed;
+            boosted_velocity.y *= speed;
+            boosted_velocity.z *= speed;
+        }
+        GameObject_s *backup_recipient = player != NULL ? player : object;
+        NUVEC previous_velocity = backup_recipient->apiobj.velocity;
+        NUVEC previous_target_velocity = backup_recipient->target_velocity;
+        object->apiobj.velocity = boosted_velocity.xyz;
+        object->target_velocity = boosted_velocity.xyz;
+        if (!TriggerJumpTask(packet, false, true, true)) {
+            GameObject_s *restore_recipient = player != NULL ? player : object;
+            restore_recipient->apiobj.velocity = previous_velocity;
+            restore_recipient->target_velocity = previous_target_velocity;
+        }
     }
 }
 

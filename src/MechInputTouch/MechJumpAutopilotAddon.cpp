@@ -318,23 +318,23 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
 }
 
 void MechJumpAutoPilotAddon::LookForTerrInt(VuVec const &point) {
-    if (field_9d)
-        return;
-    NUVEC displacement;
-    displacement.x = point.x - field_44.x;
-    displacement.y = point.y - field_44.y;
-    displacement.z = point.z - field_44.z;
-    if (GameRayCast(&field_44.xyz, &displacement, 0.0f, 0) == 0)
-        return;
+    if (!field_9d) {
+        NUVEC displacement;
+        displacement.x = point.x - field_44.x;
+        displacement.y = point.y - field_44.y;
+        displacement.z = point.z - field_44.z;
+        if (GameRayCast(&field_44.xyz, &displacement, 0.0f, 0) == 0)
+            return;
 
-    field_74.w = 0.0f;
-    VuVec normal = VuVec_Zero;
-    field_74.z = field_44.z + displacement.z;
-    field_9d = true;
-    field_74.y = field_44.y + displacement.y;
-    field_74.x = field_44.x + displacement.x;
-    NewRayCastGetImpactNormal(&normal.xyz);
-    state = 2 + (normal.y > 0.8f) * 4;
+        field_74.w = 0.0f;
+        VuVec normal = VuVec_Zero;
+        field_74.z = field_44.z + displacement.z;
+        field_9d = true;
+        field_74.y = field_44.y + displacement.y;
+        field_74.x = field_44.x + displacement.x;
+        NewRayCastGetImpactNormal(&normal.xyz);
+        state = 2 + (normal.y > 0.8f) * 4;
+    }
 }
 
 MechJumpAutoPilotAddon::MechJumpAutoPilotAddon(MechObjectInterface &object)

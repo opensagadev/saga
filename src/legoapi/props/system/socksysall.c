@@ -61,16 +61,15 @@ static __used__ void SockParMidforceYscale(nufpar_s *parser, void *) {
     sockpar_sock->unknown_7c = NuFParGetFloat(parser);
 }
 static __used__ void SockParMidforce(nufpar_s *parser, void *) {
-    if (NuFParGetWord(parser) == 0) {
-        return;
-    }
-    if (NuStrICmp(parser->word_buf, const_cast<char *>("y")) == 0) {
-        sockpar_sock->flags |= 0x02;
-    } else if (NuStrICmp(parser->word_buf, const_cast<char *>("xz")) == 0) {
-        sockpar_sock->flags |= 0x04;
-    } else if (NuStrICmp(parser->word_buf, const_cast<char *>("xyz")) == 0) {
-        sockpar_sock->flags |= 0x04;
-        sockpar_sock->flags ^= 0x04;
+    if (NuFParGetWord(parser) != 0) {
+        if (NuStrICmp(parser->word_buf, const_cast<char *>("y")) == 0) {
+            sockpar_sock->flags |= 0x02;
+        } else if (NuStrICmp(parser->word_buf, const_cast<char *>("xz")) == 0) {
+            sockpar_sock->flags |= 0x04;
+        } else if (NuStrICmp(parser->word_buf, const_cast<char *>("xyz")) == 0) {
+            sockpar_sock->flags |= 0x04;
+            sockpar_sock->flags ^= 0x04;
+        }
     }
 }
 static __used__ void SockParMidForceDown(nufpar_s *, void *) {

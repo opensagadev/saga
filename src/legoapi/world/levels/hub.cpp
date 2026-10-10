@@ -1962,126 +1962,126 @@ void Hub_UpdateMiniKits(WORLDINFO_s *world) {
             }
         }
     }
-    if (world->minikit_pieces_buf == NULL || world->hub_minikits == NULL)
-        return;
-    if (viewer) {
-        if (hub_minikitviewer_alpha < 1.0f) {
-            hub_minikitviewer_alpha += FRAMETIME * 2.0f;
-            if (hub_minikitviewer_alpha > 1.0f)
-                hub_minikitviewer_alpha = 1.0f;
+    if (world->minikit_pieces_buf != NULL && world->hub_minikits != NULL) {
+        if (viewer) {
+            if (hub_minikitviewer_alpha < 1.0f) {
+                hub_minikitviewer_alpha += FRAMETIME * 2.0f;
+                if (hub_minikitviewer_alpha > 1.0f)
+                    hub_minikitviewer_alpha = 1.0f;
+            }
+        } else
+            hub_minikitviewer_alpha = 0.0f;
+        if (hub_minikitviewer_movewait > 0.0f) {
+            hub_minikitviewer_movewait -= FRAMETIME;
+            if (hub_minikitviewer_movewait <= 0.0f)
+                hub_minikitviewer_move = 0.0f;
         }
-    } else
-        hub_minikitviewer_alpha = 0.0f;
-    if (hub_minikitviewer_movewait > 0.0f) {
-        hub_minikitviewer_movewait -= FRAMETIME;
-        if (hub_minikitviewer_movewait <= 0.0f)
-            hub_minikitviewer_move = 0.0f;
-    }
-    PlaySfx("ui_hover_lp", &hub_minikitviewer_pos);
-    HUBMINIKIT_s *kit = world->hub_minikits;
-    for (i32 i = 0; i < AREACOUNT; ++i, ++kit) {
-        HUBMINIKITPIECES_s *pieces = world->minikit_pieces_buf[i];
-        if (pieces == NULL)
-            continue;
-        count[i] = Game.area_save[i].minikit_count;
-        if (count[i] > pieces->piece_count)
-            count[i] = pieces->piece_count;
-        kit->scale = 1.0f;
-        f32 vx = (0.0f - kit->offset_x) * 5.0f;
-        f32 vz = (0.0f - kit->offset_z) * 5.0f;
-        kit->velocity_x = SeekValF(kit->velocity_x, vx, 10.0f);
-        kit->velocity_z = SeekValF(kit->velocity_z, vz, 10.0f);
-        kit->offset_x += kit->velocity_x * FRAMETIME;
-        kit->offset_z += kit->velocity_z * FRAMETIME;
-        u16 old_rotation = kit->rotation;
-        if (i == hub_minikitviewer_area) {
-            if (speed > 0.0f)
-                kit->target_rotation =
-                    TurnRot(kit->target_rotation, angle + 0x8000, (u16)(32768.0f * kit->scale), NULL);
-            kit->target_piece_count = count[i];
-            if (viewer && count[i] >= pieces->piece_count &&
-                ((MenuPacket.active_player[0] && (GamePad[0].buttons_held & GAMEPAD_ACTION)) ||
-                 (MenuPacket.active_player[1] && (GamePad[1].buttons_held & GAMEPAD_ACTION))))
-                kit->target_piece_count = 1;
-        } else if (count[i] != 0)
-            kit->target_piece_count = count[i];
-        else {
-            kit->target_piece_count = 0;
-            kit->displayed_piece_count = 0;
-        }
-        kit->rotation = SeekRot(kit->rotation, kit->target_rotation, 3.0f);
-        i32 rate = (i32)((f32)RotDiff(old_rotation, kit->rotation) / FRAMETIME);
-        rate = (MAX(-65536, (MIN(65536, rate))));
-        rate /= 8;
-        rate = (MAX(-4551, (MIN(4551, rate))));
-        kit->rotation_velocity = SeekRot(kit->rotation_velocity, rate, 8.0f);
-        i32 tilt = 0;
-        if (i == hub_minikitviewer_area && speed > 0.0f) {
-            i32 diff = RotDiff(old_rotation, kit->rotation);
-            f32 angular_speed = (f32)(diff < 0 ? -diff : diff) / FRAMETIME;
-            if (angular_speed < 32768.0f)
-                tilt = -(i32)((1.0f - angular_speed * (1.0f / 32768.0f)) * 4551.0f);
-        }
-        kit->tilt = SeekRot(kit->tilt, tilt, 3.0f);
-        for (i32 j = 0; j < pieces->piece_count; ++j) {
-            pieces->pieces[j].enabled = 0;
-            if (NuSpecialExistsFn(&pieces->pieces[j])) {
-                NuSpecialSetVisibility(&pieces->pieces[j], 0);
-                if (j < count[i])
-                    pieces->pieces[j].enabled = 1;
+        PlaySfx("ui_hover_lp", &hub_minikitviewer_pos);
+        HUBMINIKIT_s *kit = world->hub_minikits;
+        for (i32 i = 0; i < AREACOUNT; ++i, ++kit) {
+            HUBMINIKITPIECES_s *pieces = world->minikit_pieces_buf[i];
+            if (pieces == NULL)
+                continue;
+            count[i] = Game.area_save[i].minikit_count;
+            if (count[i] > pieces->piece_count)
+                count[i] = pieces->piece_count;
+            kit->scale = 1.0f;
+            f32 vx = (0.0f - kit->offset_x) * 5.0f;
+            f32 vz = (0.0f - kit->offset_z) * 5.0f;
+            kit->velocity_x = SeekValF(kit->velocity_x, vx, 10.0f);
+            kit->velocity_z = SeekValF(kit->velocity_z, vz, 10.0f);
+            kit->offset_x += kit->velocity_x * FRAMETIME;
+            kit->offset_z += kit->velocity_z * FRAMETIME;
+            u16 old_rotation = kit->rotation;
+            if (i == hub_minikitviewer_area) {
+                if (speed > 0.0f)
+                    kit->target_rotation =
+                        TurnRot(kit->target_rotation, angle + 0x8000, (u16)(32768.0f * kit->scale), NULL);
+                kit->target_piece_count = count[i];
+                if (viewer && count[i] >= pieces->piece_count &&
+                    ((MenuPacket.active_player[0] && (GamePad[0].buttons_held & GAMEPAD_ACTION)) ||
+                     (MenuPacket.active_player[1] && (GamePad[1].buttons_held & GAMEPAD_ACTION))))
+                    kit->target_piece_count = 1;
+            } else if (count[i] != 0)
+                kit->target_piece_count = count[i];
+            else {
+                kit->target_piece_count = 0;
+                kit->displayed_piece_count = 0;
+            }
+            kit->rotation = SeekRot(kit->rotation, kit->target_rotation, 3.0f);
+            i32 rate = (i32)((f32)RotDiff(old_rotation, kit->rotation) / FRAMETIME);
+            rate = (MAX(-65536, (MIN(65536, rate))));
+            rate /= 8;
+            rate = (MAX(-4551, (MIN(4551, rate))));
+            kit->rotation_velocity = SeekRot(kit->rotation_velocity, rate, 8.0f);
+            i32 tilt = 0;
+            if (i == hub_minikitviewer_area && speed > 0.0f) {
+                i32 diff = RotDiff(old_rotation, kit->rotation);
+                f32 angular_speed = (f32)(diff < 0 ? -diff : diff) / FRAMETIME;
+                if (angular_speed < 32768.0f)
+                    tilt = -(i32)((1.0f - angular_speed * (1.0f / 32768.0f)) * 4551.0f);
+            }
+            kit->tilt = SeekRot(kit->tilt, tilt, 3.0f);
+            for (i32 j = 0; j < pieces->piece_count; ++j) {
+                pieces->pieces[j].enabled = 0;
+                if (NuSpecialExistsFn(&pieces->pieces[j])) {
+                    NuSpecialSetVisibility(&pieces->pieces[j], 0);
+                    if (j < count[i])
+                        pieces->pieces[j].enabled = 1;
+                }
+            }
+            kit->phase_x = (i32)((f32)kit->phase_x + kit->rate_x * FRAMETIME);
+            if (kit->phase_x > 65536)
+                kit->phase_x -= 65536;
+            kit->phase_y = (i32)((f32)kit->phase_y + kit->rate_y * FRAMETIME);
+            if (kit->phase_y > 65536)
+                kit->phase_y -= 65536;
+            kit->phase_z = (i32)((f32)kit->phase_z + kit->rate_z * FRAMETIME);
+            if (kit->phase_z > 65536)
+                kit->phase_z -= 65536;
+            kit->phase_rotation = (i32)((f32)kit->phase_rotation + kit->rate_rotation * FRAMETIME);
+            if (kit->phase_rotation > 65536)
+                kit->phase_rotation -= 65536;
+            i32 model = ADataList[i].minikit_id;
+            if (model != -1 && world->hub_minikits != NULL) {
+                HUBMINIKIT_s *current = &world->hub_minikits[i];
+                HUBAREAINFO_s *info = Hub_FindAreaInfoByIndex(i);
+                CHARACTERDATA *data = &CDataList[model];
+                current->radius = data->collision_radius;
+                current->height_ratio = (data->bounds_max_y - data->bounds_min_y) / (data->collision_radius * 2.0f);
+                current->collision_center.x = current->position.x + current->offset_x;
+                current->collision_center.y = current->position.y + (data->bounds_max_y + data->bounds_min_y) * 0.5f;
+                current->collision_center.z = current->position.z + current->offset_z;
+                current->collision_center.y +=
+                    (1.0f - (NU_SIN_LUT((i32)(32768.0f * current->scale + 16384.0f)) + 1.0f) * 0.5f) * 0.333f;
+                current->collision_center.y += 0.025f * NU_SIN_LUT(current->phase_rotation) * current->scale;
+                current->collision_center.y += info ? info->panel_offset : 0.0f;
+                current->bounds_min.x = current->collision_center.x - current->radius;
+                current->bounds_min.y = current->collision_center.y - current->radius * current->height_ratio;
+                current->bounds_min.z = current->collision_center.z - current->radius;
+                current->bounds_max.x = current->collision_center.x + current->radius;
+                current->bounds_max.y = current->collision_center.y + current->radius * current->height_ratio;
+                current->bounds_max.z = current->collision_center.z + current->radius;
             }
         }
-        kit->phase_x = (i32)((f32)kit->phase_x + kit->rate_x * FRAMETIME);
-        if (kit->phase_x > 65536)
-            kit->phase_x -= 65536;
-        kit->phase_y = (i32)((f32)kit->phase_y + kit->rate_y * FRAMETIME);
-        if (kit->phase_y > 65536)
-            kit->phase_y -= 65536;
-        kit->phase_z = (i32)((f32)kit->phase_z + kit->rate_z * FRAMETIME);
-        if (kit->phase_z > 65536)
-            kit->phase_z -= 65536;
-        kit->phase_rotation = (i32)((f32)kit->phase_rotation + kit->rate_rotation * FRAMETIME);
-        if (kit->phase_rotation > 65536)
-            kit->phase_rotation -= 65536;
-        i32 model = ADataList[i].minikit_id;
-        if (model != -1 && world->hub_minikits != NULL) {
-            HUBMINIKIT_s *current = &world->hub_minikits[i];
-            HUBAREAINFO_s *info = Hub_FindAreaInfoByIndex(i);
-            CHARACTERDATA *data = &CDataList[model];
-            current->radius = data->collision_radius;
-            current->height_ratio = (data->bounds_max_y - data->bounds_min_y) / (data->collision_radius * 2.0f);
-            current->collision_center.x = current->position.x + current->offset_x;
-            current->collision_center.y = current->position.y + (data->bounds_max_y + data->bounds_min_y) * 0.5f;
-            current->collision_center.z = current->position.z + current->offset_z;
-            current->collision_center.y +=
-                (1.0f - (NU_SIN_LUT((i32)(32768.0f * current->scale + 16384.0f)) + 1.0f) * 0.5f) * 0.333f;
-            current->collision_center.y += 0.025f * NU_SIN_LUT(current->phase_rotation) * current->scale;
-            current->collision_center.y += info ? info->panel_offset : 0.0f;
-            current->bounds_min.x = current->collision_center.x - current->radius;
-            current->bounds_min.y = current->collision_center.y - current->radius * current->height_ratio;
-            current->bounds_min.z = current->collision_center.z - current->radius;
-            current->bounds_max.x = current->collision_center.x + current->radius;
-            current->bounds_max.y = current->collision_center.y + current->radius * current->height_ratio;
-            current->bounds_max.z = current->collision_center.z + current->radius;
-        }
-    }
-    kit = world->hub_minikits;
-    for (i32 i = 0; i < AREACOUNT; ++i, ++kit) {
-        if (world->minikit_pieces_buf[i] == NULL)
-            continue;
-        if (kit->displayed_piece_count != kit->target_piece_count &&
-            (i32)(GameTimer.time_elapsed / 0.15f) != (i32)(GameTimer.last_time_elapsed / 0.15f)) {
-            if (kit->displayed_piece_count < kit->target_piece_count)
-                ++kit->displayed_piece_count;
-            else if (kit->displayed_piece_count > kit->target_piece_count)
-                --kit->displayed_piece_count;
-            if (i == hub_minikitarea)
-                PlaySfx("LegoForm", &kit->position);
-            NewRumbleAllPlayers(0.0f, 0.0f, 1, 0);
-        }
-        if (count[i] > 0 && kit->displayed_piece_count != 0) {
-            PushAway(&kit->collision_center, kit->radius, &kit->bounds_min, &kit->bounds_max, NULL, NULL, 2.5f, 5);
-            AIAntinodeCreateSingleFrame(&kit->collision_center, kit->radius);
+        kit = world->hub_minikits;
+        for (i32 i = 0; i < AREACOUNT; ++i, ++kit) {
+            if (world->minikit_pieces_buf[i] == NULL)
+                continue;
+            if (kit->displayed_piece_count != kit->target_piece_count &&
+                (i32)(GameTimer.time_elapsed / 0.15f) != (i32)(GameTimer.last_time_elapsed / 0.15f)) {
+                if (kit->displayed_piece_count < kit->target_piece_count)
+                    ++kit->displayed_piece_count;
+                else if (kit->displayed_piece_count > kit->target_piece_count)
+                    --kit->displayed_piece_count;
+                if (i == hub_minikitarea)
+                    PlaySfx("LegoForm", &kit->position);
+                NewRumbleAllPlayers(0.0f, 0.0f, 1, 0);
+            }
+            if (count[i] > 0 && kit->displayed_piece_count != 0) {
+                PushAway(&kit->collision_center, kit->radius, &kit->bounds_min, &kit->bounds_max, NULL, NULL, 2.5f, 5);
+                AIAntinodeCreateSingleFrame(&kit->collision_center, kit->radius);
+            }
         }
     }
 }

@@ -1311,90 +1311,91 @@ void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOB
     if ((flags & 2) == 0) {
         return;
     }
-    if ((flags & 8) != 0) {
-        return;
-    }
-    if ((flags & 0x30) != 0) {
-        return;
-    }
-
-    APIOBJECT_s **candidates = baddies;
-    i32 candidate_count = baddy_count;
-    if ((turret->behavior_flags & 4) == 0) {
-        candidates = goodies;
-        candidate_count = goody_count;
-    }
-    if (candidates == NULL || candidate_count == 0) {
-        return;
-    }
-    if (candidate_count <= 0) {
-        return;
-    }
-
-    GameObject_s *selected = NULL;
-    f32 selected_distance = 1000000000.0f;
-    for (i32 i = 0; i < candidate_count; ++i) {
-        GameObject_s *candidate = candidates[i]->objptr;
-        if ((turret->behavior_flags & 0x4000) == 0 && (candidate->apiobj.character_data->model_flags & 0x80000) != 0) {
-            continue;
-        }
-        if ((turret->behavior_flags & 0x20) != 0 && candidate->field_0xcc0 == NULL) {
-            continue;
+    if ((flags & 8) == 0) {
+        if ((flags & 0x30) != 0) {
+            return;
         }
 
-        const f32 distance = NuVecDistSqr(&candidate->apiobj.collision_position, &turret->field_0x30, NULL);
-        if (!(distance < turret->field_0xec * turret->field_0xec)) {
-            continue;
+        APIOBJECT_s **candidates = baddies;
+        i32 candidate_count = baddy_count;
+        if ((turret->behavior_flags & 4) == 0) {
+            candidates = goodies;
+            candidate_count = goody_count;
+        }
+        if (candidates == NULL || candidate_count == 0) {
+            return;
+        }
+        if (candidate_count <= 0) {
+            return;
         }
 
-        if ((turret->behavior_flags & 1) != 0) {
-            NUVEC local_position;
-            NuVecSub(&local_position, &candidate->apiobj.collision_position, &turret->field_0x30);
-            NuVecRotateY(&local_position, &local_position, -static_cast<i32>(static_cast<u16>(turret->field_0x134)));
-            if (local_position.x > turret->field_0x48.x || local_position.x < -turret->field_0x48.x ||
-                local_position.y > turret->field_0x48.y || local_position.y < 0.0f ||
-                local_position.z > turret->field_0x48.z || local_position.z < -turret->field_0x48.z) {
+        GameObject_s *selected = NULL;
+        f32 selected_distance = 1000000000.0f;
+        for (i32 i = 0; i < candidate_count; ++i) {
+            GameObject_s *candidate = candidates[i]->objptr;
+            if ((turret->behavior_flags & 0x4000) == 0 &&
+                (candidate->apiobj.character_data->model_flags & 0x80000) != 0) {
                 continue;
             }
-        }
+            if ((turret->behavior_flags & 0x20) != 0 && candidate->field_0xcc0 == NULL) {
+                continue;
+            }
 
-        if ((turret->behavior_flags & 0x10) != 0) {
-            if (selected != NULL) {
-                const u32 candidate_flags = candidate->apiobj.character_data->model_flags;
-                const u32 selected_flags = selected->apiobj.character_data->model_flags;
-                if ((candidate_flags & 0x10) == 0 || (selected_flags & 0x10) != 0) {
-                    if (((candidate_flags ^ selected_flags) & 0x10) != 0) {
-                        continue;
-                    }
-                    if (!(distance < selected_distance)) {
-                        continue;
-                    }
+            const f32 distance = NuVecDistSqr(&candidate->apiobj.collision_position, &turret->field_0x30, NULL);
+            if (!(distance < turret->field_0xec * turret->field_0xec)) {
+                continue;
+            }
+
+            if ((turret->behavior_flags & 1) != 0) {
+                NUVEC local_position;
+                NuVecSub(&local_position, &candidate->apiobj.collision_position, &turret->field_0x30);
+                NuVecRotateY(&local_position, &local_position,
+                             -static_cast<i32>(static_cast<u16>(turret->field_0x134)));
+                if (local_position.x > turret->field_0x48.x || local_position.x < -turret->field_0x48.x ||
+                    local_position.y > turret->field_0x48.y || local_position.y < 0.0f ||
+                    local_position.z > turret->field_0x48.z || local_position.z < -turret->field_0x48.z) {
+                    continue;
                 }
             }
-        } else if ((turret->behavior_flags & 8) != 0) {
-            if (selected != NULL) {
-                const i8 candidate_flags = static_cast<i8>(candidate->apiobj.flags_low);
-                const i8 selected_flags = static_cast<i8>(selected->apiobj.flags_low);
-                if (candidate_flags >= 0 || selected_flags < 0) {
-                    if ((candidate_flags ^ selected_flags) < 0) {
-                        continue;
-                    }
-                    if (!(distance < selected_distance)) {
-                        continue;
+
+            if ((turret->behavior_flags & 0x10) != 0) {
+                if (selected != NULL) {
+                    const u32 candidate_flags = candidate->apiobj.character_data->model_flags;
+                    const u32 selected_flags = selected->apiobj.character_data->model_flags;
+                    if ((candidate_flags & 0x10) == 0 || (selected_flags & 0x10) != 0) {
+                        if (((candidate_flags ^ selected_flags) & 0x10) != 0) {
+                            continue;
+                        }
+                        if (!(distance < selected_distance)) {
+                            continue;
+                        }
                     }
                 }
+            } else if ((turret->behavior_flags & 8) != 0) {
+                if (selected != NULL) {
+                    const i8 candidate_flags = static_cast<i8>(candidate->apiobj.flags_low);
+                    const i8 selected_flags = static_cast<i8>(selected->apiobj.flags_low);
+                    if (candidate_flags >= 0 || selected_flags < 0) {
+                        if ((candidate_flags ^ selected_flags) < 0) {
+                            continue;
+                        }
+                        if (!(distance < selected_distance)) {
+                            continue;
+                        }
+                    }
+                }
+            } else if (!(distance < selected_distance)) {
+                continue;
             }
-        } else if (!(distance < selected_distance)) {
-            continue;
+
+            selected = candidate;
+            selected_distance = distance;
         }
 
-        selected = candidate;
-        selected_distance = distance;
-    }
-
-    if (selected != NULL) {
-        turret->field_0x12c = 0;
-        turret->field_0xe4 = selected;
+        if (selected != NULL) {
+            turret->field_0x12c = 0;
+            turret->field_0xe4 = selected;
+        }
     }
 }
 

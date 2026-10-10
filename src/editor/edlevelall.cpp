@@ -1835,58 +1835,58 @@ void LevelEditor::CreateMenu() {
 void LevelEditor::Display(ThingRenderData *) {
     f32 cursor_x __attribute__((aligned(16))) = 0.1f;
     f32 cursor_y __attribute__((aligned(16))) = 0.9f;
-    if (!editors_entered) {
-        return;
-    }
+    if (editors_entered) {
 
-    if (theLevelEditor.current_led_file != 0xff) {
-        LevelEditorScene *scene = theLevelEditor.GetEdScene(theLevelEditor.current_led_file);
-        if (scene != NULL) {
-            char *name = scene->name;
-            DrawInfoText(&name, 1, static_cast<i32>(640.0f * cursor_x), static_cast<i32>(448.0f * cursor_y), info_width,
-                         info_height, info_colour, info_background);
+        if (theLevelEditor.current_led_file != 0xff) {
+            LevelEditorScene *scene = theLevelEditor.GetEdScene(theLevelEditor.current_led_file);
+            if (scene != NULL) {
+                char *name = scene->name;
+                DrawInfoText(&name, 1, static_cast<i32>(640.0f * cursor_x), static_cast<i32>(448.0f * cursor_y),
+                             info_width, info_height, info_colour, info_background);
+            }
         }
-    }
-    i32 draw_camera;
-    // The original keeps the no-cursor path in the main render sequence.
-    if (__builtin_expect(edmainGetCursorEnabled() == 0, 1)) {
-        draw_camera = field_0x28;
-    } else {
-        eduiFlushInteracts();
-        draw_camera = field_0x28;
-    }
-    if (draw_camera != 0) {
-        NUCAMERA *camera = edmainGetCamera();
-        const f32 distance = edcamGetDist();
-        const f32 far_clip = distance + distance;
-        if (global_camera.far_clip <= far_clip && global_camera.far_clip != far_clip) {
-            camera->far_clip = far_clip;
+        i32 draw_camera;
+        // The original keeps the no-cursor path in the main render sequence.
+        if (__builtin_expect(edmainGetCursorEnabled() == 0, 1)) {
+            draw_camera = field_0x28;
+        } else {
+            eduiFlushInteracts();
+            draw_camera = field_0x28;
         }
-        edcamSet();
-        EdDrawBegin(0);
-        EdDrawLineCross(*reinterpret_cast<VuVec *>(background_colour), 1.0f, 0xff000000);
-        EdDrawEnd();
-    }
-    if (active_editor != NULL) {
-        active_editor->Render();
-    }
-    NuRndrLine3dDbgFlush();
-    eduiGetCursorCoords(&cursor_x, &cursor_y);
-    DrawInfoText(info_text, 32, static_cast<i32>((1.0f + cursor_x) * 640.0f),
-                 static_cast<i32>((cursor_y + 1.0f) * 448.0f), info_width, info_height, info_colour, info_background);
-    if (edLevelActiveMenu != NULL) {
-        NuFntSet(EdLevelFnt);
-        NuFntScale(EdLevelFntScale, EdLevelFntScale);
-        eduiMenuRender(edLevelActiveMenu);
-    }
-    if (edLevelPinnedMenu != NULL) {
-        NuFntSet(EdLevelFnt);
-        NuFntScale(EdLevelFntScale, EdLevelFntScale);
-        eduiMenuRender(edLevelPinnedMenu);
-    }
-    eduiSetCursorColour(static_cast<u32>(field_0x2c));
-    if (edmainGetCursorEnabled()) {
-        eduiRenderCursor();
+        if (draw_camera != 0) {
+            NUCAMERA *camera = edmainGetCamera();
+            const f32 distance = edcamGetDist();
+            const f32 far_clip = distance + distance;
+            if (global_camera.far_clip <= far_clip && global_camera.far_clip != far_clip) {
+                camera->far_clip = far_clip;
+            }
+            edcamSet();
+            EdDrawBegin(0);
+            EdDrawLineCross(*reinterpret_cast<VuVec *>(background_colour), 1.0f, 0xff000000);
+            EdDrawEnd();
+        }
+        if (active_editor != NULL) {
+            active_editor->Render();
+        }
+        NuRndrLine3dDbgFlush();
+        eduiGetCursorCoords(&cursor_x, &cursor_y);
+        DrawInfoText(info_text, 32, static_cast<i32>((1.0f + cursor_x) * 640.0f),
+                     static_cast<i32>((cursor_y + 1.0f) * 448.0f), info_width, info_height, info_colour,
+                     info_background);
+        if (edLevelActiveMenu != NULL) {
+            NuFntSet(EdLevelFnt);
+            NuFntScale(EdLevelFntScale, EdLevelFntScale);
+            eduiMenuRender(edLevelActiveMenu);
+        }
+        if (edLevelPinnedMenu != NULL) {
+            NuFntSet(EdLevelFnt);
+            NuFntScale(EdLevelFntScale, EdLevelFntScale);
+            eduiMenuRender(edLevelPinnedMenu);
+        }
+        eduiSetCursorColour(static_cast<u32>(field_0x2c));
+        if (edmainGetCursorEnabled()) {
+            eduiRenderCursor();
+        }
     }
 }
 

@@ -1234,13 +1234,12 @@ static void GizObstacleUpdate_AutoStart(GIZOBSTACLE_s *obstacle) {
 }
 
 static void GizObstacleUpdate_NoTrigger(GIZOBSTACLE_s *obstacle) {
-    if ((obstacle->config_flags & GIZOBSTACLE_CONFIG_ALWAYS_RUN_PROXIMITY) == 0 &&
-        (obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE) == 0 &&
-        obstacle->anim_set->state == GAMEANIMSET_STATE_AT_START) {
-        return;
+    if (!((obstacle->config_flags & GIZOBSTACLE_CONFIG_ALWAYS_RUN_PROXIMITY) == 0 &&
+          (obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE) == 0 &&
+          obstacle->anim_set->state == GAMEANIMSET_STATE_AT_START)) {
+        obstacle->runtime_flags |= GIZOBSTACLE_RUNTIME_FLAG_BLOCKED;
+        GizObstacleUpdate_Proximity(obstacle);
     }
-    obstacle->runtime_flags |= GIZOBSTACLE_RUNTIME_FLAG_BLOCKED;
-    GizObstacleUpdate_Proximity(obstacle);
 }
 
 static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {

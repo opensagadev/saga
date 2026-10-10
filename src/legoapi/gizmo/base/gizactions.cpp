@@ -459,76 +459,75 @@ static void GizAction_SetAIMessage(GIZFLOW_s *, FLOWBOX_s *, char **params, int 
 }
 
 static void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
-    if (count <= 0) {
-        return;
-    }
-    char *techno_name = NULL;
-    char *target_name = NULL;
-    i32 target_kind = 0;
-    u8 movement = 0xff;
-    for (i32 index = 0; index < count; ++index) {
-        char *value = NuStrIStr(params[index], "techno=");
-        if (value != NULL) {
-            techno_name = value + NuStrLen("techno=");
-        } else if ((value = NuStrIStr(params[index], "target=")) != NULL) {
-            target_name = value + NuStrLen("target=");
-        } else if (NuStrICmp(value, "Move_Waggle") == 0) {
-            movement = 1;
-        } else if (NuStrICmp(value, "Move_Spin") == 0) {
-            movement = 2;
-        } else if (NuStrICmp(value, "Move_Horizontal") == 0) {
-            movement = 8;
-        } else if (NuStrICmp(value, "Move_Vertical") == 0) {
-            movement = 4;
-        } else if (NuStrICmp(params[index], "GIZMO") == 0) {
-            target_kind = 3;
-        } else if (NuStrICmp(params[index], "HSPECIAL") == 0) {
-            target_kind = 2;
-        } else if (NuStrICmp(params[index], "CREATURE") == 0) {
-            target_kind = 1;
-        } else if (NuStrICmp(params[index], "NO_TARGET") == 0) {
-            target_kind = -1;
+    if (!(count <= 0)) {
+        char *techno_name = NULL;
+        char *target_name = NULL;
+        i32 target_kind = 0;
+        u8 movement = 0xff;
+        for (i32 index = 0; index < count; ++index) {
+            char *value = NuStrIStr(params[index], "techno=");
+            if (value != NULL) {
+                techno_name = value + NuStrLen("techno=");
+            } else if ((value = NuStrIStr(params[index], "target=")) != NULL) {
+                target_name = value + NuStrLen("target=");
+            } else if (NuStrICmp(value, "Move_Waggle") == 0) {
+                movement = 1;
+            } else if (NuStrICmp(value, "Move_Spin") == 0) {
+                movement = 2;
+            } else if (NuStrICmp(value, "Move_Horizontal") == 0) {
+                movement = 8;
+            } else if (NuStrICmp(value, "Move_Vertical") == 0) {
+                movement = 4;
+            } else if (NuStrICmp(params[index], "GIZMO") == 0) {
+                target_kind = 3;
+            } else if (NuStrICmp(params[index], "HSPECIAL") == 0) {
+                target_kind = 2;
+            } else if (NuStrICmp(params[index], "CREATURE") == 0) {
+                target_kind = 1;
+            } else if (NuStrICmp(params[index], "NO_TARGET") == 0) {
+                target_kind = -1;
+            }
         }
-    }
-    if (techno_name == NULL || (target_kind != -1 && target_name == NULL)) {
-        return;
-    }
-    i32 type_id = GizmoGetTypeIDByName(WORLD->gizmo_sys, "Techno");
-    GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, type_id, techno_name);
-    TECHNO *techno = gizmo != NULL ? static_cast<TECHNO *>(gizmo->object) : NULL;
-    if (techno == NULL) {
-        return;
-    }
-    if (movement != 0xff) {
-        techno->enabled = movement;
-    }
-    if (target_kind == -1) {
-        GameObject_s *operator_object = NULL;
-        Techno_FindOperator(techno->controlled_object, NULL, &operator_object);
+        if (techno_name == NULL || (target_kind != -1 && target_name == NULL)) {
+            return;
+        }
+        i32 type_id = GizmoGetTypeIDByName(WORLD->gizmo_sys, "Techno");
+        GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, type_id, techno_name);
+        TECHNO *techno = gizmo != NULL ? static_cast<TECHNO *>(gizmo->object) : NULL;
+        if (techno == NULL) {
+            return;
+        }
+        if (movement != 0xff) {
+            techno->enabled = movement;
+        }
+        if (target_kind == -1) {
+            GameObject_s *operator_object = NULL;
+            Techno_FindOperator(techno->controlled_object, NULL, &operator_object);
+            techno->controlled_object = NULL;
+            NuStrCpy(techno->target_name, "");
+            techno->flags &= ~TECHNO_FLAG_COMPLETE;
+            techno->target_mode = 0;
+            if (operator_object != NULL) {
+                operator_object->character_context = -1;
+            }
+        }
+        char old_name[16];
+        NuStrCpy(old_name, techno->target_name);
+        void *old_target = techno->controlled_object;
+        i32 old_complete = (techno->flags & TECHNO_FLAG_COMPLETE) != 0;
         techno->controlled_object = NULL;
-        NuStrCpy(techno->target_name, "");
+        NuStrNCpy(techno->target_name, target_name, 16);
+        techno->target_mode = static_cast<u8>(target_kind);
         techno->flags &= ~TECHNO_FLAG_COMPLETE;
-        techno->target_mode = 0;
-        if (operator_object != NULL) {
-            operator_object->character_context = -1;
-        }
-    }
-    char old_name[16];
-    NuStrCpy(old_name, techno->target_name);
-    void *old_target = techno->controlled_object;
-    i32 old_complete = (techno->flags & TECHNO_FLAG_COMPLETE) != 0;
-    techno->controlled_object = NULL;
-    NuStrNCpy(techno->target_name, target_name, 16);
-    techno->target_mode = static_cast<u8>(target_kind);
-    techno->flags &= ~TECHNO_FLAG_COMPLETE;
-    GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
-    if (Technos_FindTgt(techno) == NULL) {
-        techno->target_mode = 0;
+        GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
         if (Technos_FindTgt(techno) == NULL) {
-            NuStrCpy(techno->target_name, old_name);
-            techno->controlled_object = old_target;
-            techno->target_mode = static_cast<u8>(target_kind);
-            techno->flags = (techno->flags & ~TECHNO_FLAG_COMPLETE) | (old_complete << 3);
+            techno->target_mode = 0;
+            if (Technos_FindTgt(techno) == NULL) {
+                NuStrCpy(techno->target_name, old_name);
+                techno->controlled_object = old_target;
+                techno->target_mode = static_cast<u8>(target_kind);
+                techno->flags = (techno->flags & ~TECHNO_FLAG_COMPLETE) | (old_complete << 3);
+            }
         }
     }
 }
