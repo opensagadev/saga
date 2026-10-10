@@ -19,7 +19,8 @@ typedef struct SECURITYDOOR_s {
             u16 active : 1;
             u16 visible : 1;
             u16 opened : 1;
-            u16 reserved_flags : 5;
+            u16 flag_08 : 1;
+            u16 reserved_flags : 4;
             u16 state : 8;
         };
     };

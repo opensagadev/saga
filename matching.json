@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 75.0657,
+    "fuzzy_match_percent": 75.06725,
     "total_code": "4722419",
     "matched_code": "574465",
     "matched_code_percent": 12.164635,
@@ -72927,7 +72927,7 @@
           "address": 1967712,
           "offset": 1077744,
           "size": 1117,
-          "match_percent": 76.52227
+          "match_percent": 80.327934
         },
         {
           "name": "_ZL23SecurityDoors_AddGizmosP10GIZMOSYS_siPvS1_",
@@ -72959,7 +72959,7 @@
           "address": 1969680,
           "offset": 1079712,
           "size": 897,
-          "match_percent": 58.374332
+          "match_percent": 61.834225
         },
         {
           "name": "_ZL27SecurityDoors_StoreProgressPvS_S_",
