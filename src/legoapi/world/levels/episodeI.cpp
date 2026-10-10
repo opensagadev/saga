@@ -1503,6 +1503,24 @@ void PodRaceAReset(WORLDINFO_s *world) {
         NewCutScene(NULL, world->cutscene_sys, "ep1_podrace_sebulba", 1);
 }
 
+// Clears the mine pools and resolves the mine special and its no-mine areas.
+static void InitPodRaceMines() {
+    memset(&minesys, 0, 0x1d2 * 4);
+    memset(&client_mines, 0, sizeof(client_mines));
+    MINESYS_s *mines = &minesys;
+    if (NuSpecialFind(vehicle_scene, &mines->mine_special, "mine", 1) != 0) {
+        mines->mine_radius = NuSpecialGetOriginRadius(&mines->mine_special);
+        char b2[0x20];
+        for (i32 i = 0; i < 10; i++) {
+            sprintf(b2, "nomine_%d", i);
+            mines->nomine_areas[mines->nomine_count] = AISysFindArea(WORLD->ai_sys, b2);
+            mines->nomine_count++;
+        }
+        mines->mine_debris = FindGameDebris(WORLD->debris_sys, "MINE_POP");
+        mines->mine_part = PARTLookupType("POD_MINE_PART");
+    }
+}
+
 void PodRaceInit(WORLDINFO_s *world) {
     podrace_netpacket = (PODRACENETPACKET_s *)(usize)SetLevelHack(0x14);
     PODRACE_s *podrace = (PODRACE_s *)world->podrace;
@@ -1512,57 +1530,16 @@ void PodRaceInit(WORLDINFO_s *world) {
     }
     PodRace = podrace;
     memset(podrace, 0, sizeof(*podrace)); // 0xaf24 bytes in the original
-    if (netclient != 0) {
-        memset(&minesys, 0, 0x1d2 * 4);
-        memset(&client_mines, 0, sizeof(client_mines));
-        MINESYS_s *mines = &minesys;
-        if (NuSpecialFind(vehicle_scene, &mines->mine_special, "mine", 1) != 0) {
-            mines->mine_radius = NuSpecialGetOriginRadius(&mines->mine_special);
-            char b2[0x20];
-            {
-                sprintf(b2, "nomine_%d", 0);
-                mines->nomine_areas[mines->nomine_count] = AISysFindArea(WORLD->ai_sys, b2);
-                mines->nomine_count++;
-                sprintf(b2, "nomine_%d", 1);
-                mines->nomine_areas[mines->nomine_count] = AISysFindArea(WORLD->ai_sys, b2);
-                mines->nomine_count++;
-                sprintf(b2, "nomine_%d", 2);
-                mines->nomine_areas[mines->nomine_count] = AISysFindArea(WORLD->ai_sys, b2);
-                mines->nomine_count++;
-                sprintf(b2, "nomine_%d", 3);
-                mines->nomine_areas[mines->nomine_count] = AISysFindArea(WORLD->ai_sys, b2);
-                mines->nomine_count++;
-                sprintf(b2, "nomine_%d", 4);
-                mines->nomine_areas[mines->nomine_count] = AISysFindArea(WORLD->ai_sys, b2);
-                mines->nomine_count++;
-                sprintf(b2, "nomine_%d", 5);
-                mines->nomine_areas[mines->nomine_count] = AISysFindArea(WORLD->ai_sys, b2);
-                mines->nomine_count++;
-                sprintf(b2, "nomine_%d", 6);
-                mines->nomine_areas[mines->nomine_count] = AISysFindArea(WORLD->ai_sys, b2);
-                mines->nomine_count++;
-                sprintf(b2, "nomine_%d", 7);
-                mines->nomine_areas[mines->nomine_count] = AISysFindArea(WORLD->ai_sys, b2);
-                mines->nomine_count++;
-                sprintf(b2, "nomine_%d", 8);
-                mines->nomine_areas[mines->nomine_count] = AISysFindArea(WORLD->ai_sys, b2);
-                mines->nomine_count++;
-                sprintf(b2, "nomine_%d", 9);
-                mines->nomine_areas[mines->nomine_count] = AISysFindArea(WORLD->ai_sys, b2);
-                mines->nomine_count++;
-            }
-            mines->mine_debris = FindGameDebris(WORLD->debris_sys, "MINE_POP");
-            mines->mine_part = PARTLookupType("POD_MINE_PART");
-        }
-    } else {
+    if (netclient == 0) {
         FlightSpline_Init(world, podrace->splines, 0x20);
     }
+    InitPodRaceMines();
     PodKeyReset();
     ResetPodStuff();
     i16 id = apicharsys->playermodelids[id_ANAKINSPOD];
     if (id != -1) {
         APICHARACTERMODEL *entry = &apicharsys->models[id];
-        if (entry->model_data_b != NULL && ((PODMODELDATA_s *)entry->model_data_b)->value != NULL)
+        if (((PODMODELDATA_s *)entry->model_data_b)->value != NULL)
             podanimendframe = AnimEndFrame(entry, 1);
     }
 }

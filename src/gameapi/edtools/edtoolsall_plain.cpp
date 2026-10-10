@@ -5363,28 +5363,19 @@ extern "C" {
         f32 upper = stage->next ? stage->next->time : 1.0f;
         u8 right2 = pad->analog_r2;
         u8 left2 = pad->analog_l2;
-        u8 decrease = pad->analog_l1;
-        u8 increase = pad->analog_r1;
-        if (decrease)
-            goto decrease_time;
-        decrease = left2;
-        if (decrease)
-            goto decrease_time;
-        if (!increase)
-            increase = right2;
-        if (!increase)
-            return 0;
-    increase_time:
-        stage->time += static_cast<f32>(static_cast<i32>(increase)) / 15360.0f;
-        if (stage->time > upper)
-            stage->time = upper;
-        gradient->change_timer = 60;
-        return 0;
-    decrease_time:
-        stage->time -= static_cast<f32>(static_cast<i32>(decrease)) / 15360.0f;
-        if (stage->time < lower)
-            stage->time = lower;
-        gradient->change_timer = 60;
+        u8 left1 = pad->analog_l1;
+        u8 right1 = pad->analog_r1;
+        i32 decrease = left1 ? left1 : left2;
+        i32 increase = right1 ? right1 : right2;
+        if (increase && !decrease) {
+            f32 time = static_cast<f32>(increase) / 15360.0f + stage->time;
+            stage->time = upper < time ? upper : time;
+            gradient->change_timer = 60;
+        } else if (decrease) {
+            f32 time = stage->time - static_cast<f32>(decrease) / 15360.0f;
+            stage->time = lower > time ? lower : time;
+            gradient->change_timer = 60;
+        }
         return 0;
     }
     static __used__ i32 eduicbProcessGraph(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad) {
