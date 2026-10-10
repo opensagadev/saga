@@ -5,6 +5,7 @@
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/charconfig.h"
+#include "legoapi/characters/core/playeritems.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/config/cheat.h"
@@ -12,6 +13,8 @@
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/core/input/qrand.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
 #include "legoapi/menus/core/gamemessages.h"
@@ -29,6 +32,7 @@
 #include "nu2api/nufile/nufpar.h"
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 
@@ -38,6 +42,8 @@
 EPISODEDATA *EDataList = NULL;
 
 extern u8 troopercannons_beenReset;
+
+i16 GetGenericGoon(i32);
 
 struct TROOPERCANNON_s {
     GIZMO *base;
@@ -310,6 +316,50 @@ void Episodes_CompleteAllSuperStories() {
         }
         ReCalculateCompletionPoints();
     }
+}
+
+void GizmoBlowupCreateStuff(GIZMOBLOWUP_s *blowup) {
+    char script[32] = "GoonBox";
+    i32 model = GetGenericGoon(0);
+    f32 choice = qrand() * (1.0f / 65535.0f) * 100.0f;
+    if (!(choice < 50.0f)) {
+        choice -= 50.0f;
+        if (choice < 50.0f) {
+            i32 count = static_cast<i32>(NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) * 3.0f);
+            for (i32 i = 0; i <= count; ++i) {
+                i32 angle = static_cast<u16>(NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) * 65536.0f);
+                GameObject_s *object =
+                    AddDynamicCreature(model, &blowup->mid_position, angle, script, NULL, NULL, 1, NULL, NULL, 0, -1);
+                if (object != NULL) {
+                    object->field_0x1038 = 0.0f;
+                    object->field_0x1004 = 0.0f;
+                    object->apiobj.field_0xa8 = 0.0f * object->apiobj.character_data->model_scale;
+                } else {
+                    i32 coins =
+                        (static_cast<i32>(NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) * 1000.0f) / 100) * 100;
+                    if (coins < 100)
+                        coins = 100;
+                    NUVEC direction = v010;
+                    NuVecRotateX(&direction, &direction, static_cast<u16>(blowup->field_0xf6));
+                    NuVecRotateY(&direction, &direction, static_cast<u16>(blowup->field_0xf8));
+                    AddPickups(coins, ReleaseHearts(), 0, 0, &blowup->mid_position, &direction, 0.0f, -1, 1.5f,
+                               2000000.0f, NULL, 1, 1, true);
+                }
+            }
+            return;
+        }
+        choice -= 50.0f;
+        if (choice < 0.0f)
+            return;
+    }
+    i32 coins = (static_cast<i32>(NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) * 1000.0f) / 100) * 100;
+    if (coins < 100)
+        coins = 100;
+    NUVEC direction = v010;
+    NuVecRotateX(&direction, &direction, static_cast<u16>(blowup->field_0xf6));
+    NuVecRotateY(&direction, &direction, static_cast<u16>(blowup->field_0xf8));
+    AddPickups(coins, ReleaseHearts(), 0, 0, &blowup->mid_position, &direction, 0.0f, -1, 1.5f, 2000000.0f, NULL, 1, 1,
+               true);
 }
 
 i32 Episode_FindFromArea(i32 area_id) {
