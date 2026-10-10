@@ -379,24 +379,26 @@ void GizmoPushBlockInitAndReset(WORLDINFO_s *world, void *progress) {
             block->output_count = positions;
             block->runtime_flags_0c9 = (block->runtime_flags_0c9 & 0x8f) | ((positions & 7) << 4);
             const i32 required = world->push_block_position_count + positions;
-            if (required > world->current_level->max_push_block_end_pos) {
+            if (!(required > world->current_level->max_push_block_end_pos)) {
+                if (positions != 0 && runoutofpostabspace == 0) {
+                    block->snap_positions = &world->push_block_positions[world->push_block_position_count];
+                    f32 animation_frame = 1.0f;
+                    for (i32 position = 0; position < ((block->runtime_flags_0c9 >> 4) & 7);
+                         ++position, animation_frame += 1.0f) {
+                        NUMTX evaluated;
+                        EvalAnim(&block->special, animation_frame, &evaluated, 0);
+                        block->snap_positions[position] = *reinterpret_cast<NUVEC *>(&evaluated.m30);
+                        evaluated = *NuSpecialGetMtx(&block->special);
+                        block->snap_positions[position].x += evaluated.m30;
+                        block->snap_positions[position].y += evaluated.m31;
+                        block->snap_positions[position].z += evaluated.m32;
+                        ++world->push_block_position_count;
+                    }
+                }
+            } else {
                 pushposincrease +=
                     runoutofpostabspace == 0 ? required - world->current_level->max_push_block_end_pos : positions;
                 runoutofpostabspace = 1;
-            } else if (positions != 0 && runoutofpostabspace == 0) {
-                block->snap_positions = &world->push_block_positions[world->push_block_position_count];
-                f32 animation_frame = 1.0f;
-                for (i32 position = 0; position < ((block->runtime_flags_0c9 >> 4) & 7);
-                     ++position, animation_frame += 1.0f) {
-                    NUMTX evaluated;
-                    EvalAnim(&block->special, animation_frame, &evaluated, 0);
-                    block->snap_positions[position] = *reinterpret_cast<NUVEC *>(&evaluated.m30);
-                    evaluated = *NuSpecialGetMtx(&block->special);
-                    block->snap_positions[position].x += evaluated.m30;
-                    block->snap_positions[position].y += evaluated.m31;
-                    block->snap_positions[position].z += evaluated.m32;
-                    ++world->push_block_position_count;
-                }
             }
         }
         ResetSinglePushBlock(world, block, index);

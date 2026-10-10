@@ -286,7 +286,29 @@ static EDANTINODE_REGPARM1 EDANTINODE_s *antinodeEditor_GetNearestAntinode(i32 r
         if (!((height >= NuFmin(-0.2f, node->lower_height)) & (upper >= height)))
             continue;
         if (require_inside) {
-            if (node->type == 1) {
+            if (node->type != 1) {
+                if (node->type == 0) {
+                    if (!(node->radius * node->radius > distance))
+                        continue;
+                } else if (node->type == 2) {
+                    f32 diagonal =
+                        NuFsqrt(node->base_radius * node->base_radius + node->base_height * node->base_height);
+                    nuvec_s rectangle_offset;
+                    rectangle_offset.x = aieditor->camera_position.x - node->position.x;
+                    if (rectangle_offset.x > diagonal || rectangle_offset.x < -diagonal)
+                        continue;
+                    rectangle_offset.z = aieditor->camera_position.z - node->position.z;
+                    if (rectangle_offset.z > diagonal || rectangle_offset.z < -diagonal)
+                        continue;
+                    rectangle_offset.y = 0.0f;
+                    NuVecRotateY(&rectangle_offset, &rectangle_offset, -node->flags);
+                    if (!(node->base_radius > NuFabs(rectangle_offset.x)) ||
+                        !(node->base_height > NuFabs(rectangle_offset.z)))
+                        continue;
+                } else {
+                    continue;
+                }
+            } else {
                 f32 extent = node->base_radius > node->base_height ? node->base_radius : node->base_height;
                 nuvec_s ellipse_offset;
                 ellipse_offset.x = aieditor->camera_position.x - node->position.x;
@@ -307,25 +329,6 @@ static EDANTINODE_REGPARM1 EDANTINODE_s *antinodeEditor_GetNearestAntinode(i32 r
                 f32 ellipse_z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * node->base_height;
                 if (!(ellipse_x * ellipse_x + ellipse_z * ellipse_z > ellipse_distance))
                     continue;
-            } else if (node->type == 0) {
-                if (!(node->radius * node->radius > distance))
-                    continue;
-            } else if (node->type == 2) {
-                f32 diagonal = NuFsqrt(node->base_radius * node->base_radius + node->base_height * node->base_height);
-                nuvec_s rectangle_offset;
-                rectangle_offset.x = aieditor->camera_position.x - node->position.x;
-                if (rectangle_offset.x > diagonal || rectangle_offset.x < -diagonal)
-                    continue;
-                rectangle_offset.z = aieditor->camera_position.z - node->position.z;
-                if (rectangle_offset.z > diagonal || rectangle_offset.z < -diagonal)
-                    continue;
-                rectangle_offset.y = 0.0f;
-                NuVecRotateY(&rectangle_offset, &rectangle_offset, -node->flags);
-                if (!(node->base_radius > NuFabs(rectangle_offset.x)) ||
-                    !(node->base_height > NuFabs(rectangle_offset.z)))
-                    continue;
-            } else {
-                continue;
             }
         }
         nearest = node;

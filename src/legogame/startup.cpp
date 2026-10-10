@@ -569,14 +569,16 @@ void LoadPerm(void) {
 
                 if (legal_timer > 0.0f && legal_timer < 5.8f && legal_mtl != nullptr) {
                     f32 alpha;
-                    if (legal_timer < 0.3f) {
-                        alpha = legal_timer / 0.3f;
-                    } else if (legal_timer < 5.3f) {
-                        alpha = 1.0f;
-                    } else if (legal_timer >= 5.6000003814697266f) {
-                        alpha = 0.0f;
+                    if (!(legal_timer < 0.3f)) {
+                        if (legal_timer < 5.3f) {
+                            alpha = 1.0f;
+                        } else if (legal_timer >= 5.6000003814697266f) {
+                            alpha = 0.0f;
+                        } else {
+                            alpha = 1.0f - (legal_timer - 5.3f) / 0.30000019f;
+                        }
                     } else {
-                        alpha = 1.0f - (legal_timer - 5.3f) / 0.30000019f;
+                        alpha = legal_timer / 0.3f;
                     }
 
                     if (alpha > 0.0f) {

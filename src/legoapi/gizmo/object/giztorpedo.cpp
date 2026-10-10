@@ -112,7 +112,11 @@ static i32 GizTorp_Load(void *world_ptr, void *) {
     GIZTORPMACHINESYS *system = world->giz_torp_machine_sys;
     const i32 version = EdFileReadInt();
     system->count = EdFileReadInt();
-    system->scale = version > 2 ? EdFileReadFloat() : 1.0f;
+    if (version > 2) {
+        system->scale = EdFileReadFloat();
+    } else {
+        system->scale = 1.0f;
+    }
 
     for (i32 index = 0; index < system->count; ++index) {
         const i32 name_length = EdFileReadInt();

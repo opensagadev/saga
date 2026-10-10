@@ -112,7 +112,11 @@ void ProcessMusicChanges(LEVELDATA_s *level, OPTIONSSAVE_s *opts) {
                              player_under_attack(Player[1]);
     }
 
-    MusicOther = CheckMusicOtherFn != NULL ? CheckMusicOtherFn() : 0;
+    if (CheckMusicOtherFn != NULL) {
+        MusicOther = CheckMusicOtherFn();
+    } else {
+        MusicOther = 0;
+    }
 
     if (sticky_attack != PlayersUnderAttack) {
         if (Paused == 0) {

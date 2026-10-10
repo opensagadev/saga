@@ -1039,37 +1039,39 @@ void CustomiserMenu_Update(MENU_s *) {
                 char *name = Game.customizer[side].name;
                 // The upper half of each 32-byte name field holds the edit backup.
                 char *backup = name + 16;
-                if (new_mode == 1) {
+                if (new_mode != 1) {
+                    if (old_mode == 1) {
+                        if (cancel_name)
+                            NuStrCpy(name, backup);
+                        else {
+                            name[CustomiseNameX[side]] = CustomiseLetter[CustomiseNameY[side]];
+                            i32 length = 15;
+                            if (name[14] == ' ') {
+                                i32 last = 13;
+                                while (last >= 0 && name[last] == ' ')
+                                    --last;
+                                if (last < 0) {
+                                    NuStrCpy(name, TTab[side == 0 ? tPLAYER1 : tPLAYER2]);
+                                    FinishWeirdoNames(side);
+                                    length = -1;
+                                } else
+                                    length = last + 1;
+                            }
+                            if (length >= 0)
+                                name[length] = 0;
+                            if (NuStringFilterBadWords(
+                                    reinterpret_cast<NUWCHAR8 *>(name), reinterpret_cast<NUWCHAR8 *>(name),
+                                    reinterpret_cast<NUWCHAR8 *>(const_cast<char *>("Stranger"))) != 0)
+                                NuStrCpy(name, backup);
+                        }
+                    }
+                } else {
                     NuStrCpy(backup, name);
                     i32 length = NuStrLen(name);
                     if (length < 15)
                         name[length] = ' ';
                     CustomiseNameY[side] = Customise_FindLetter(name[CustomiseNameX[side]]);
                     CustomiseNameLetterBlipScale[side] = 1.0f;
-                } else if (old_mode == 1) {
-                    if (cancel_name)
-                        NuStrCpy(name, backup);
-                    else {
-                        name[CustomiseNameX[side]] = CustomiseLetter[CustomiseNameY[side]];
-                        i32 length = 15;
-                        if (name[14] == ' ') {
-                            i32 last = 13;
-                            while (last >= 0 && name[last] == ' ')
-                                --last;
-                            if (last < 0) {
-                                NuStrCpy(name, TTab[side == 0 ? tPLAYER1 : tPLAYER2]);
-                                FinishWeirdoNames(side);
-                                length = -1;
-                            } else
-                                length = last + 1;
-                        }
-                        if (length >= 0)
-                            name[length] = 0;
-                        if (NuStringFilterBadWords(reinterpret_cast<NUWCHAR8 *>(name),
-                                                   reinterpret_cast<NUWCHAR8 *>(name),
-                                                   reinterpret_cast<NUWCHAR8 *>(const_cast<char *>("Stranger"))) != 0)
-                            NuStrCpy(name, backup);
-                    }
                 }
                 Game.customizer[side].use_saved_name = 1;
             }

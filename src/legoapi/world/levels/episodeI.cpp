@@ -1048,25 +1048,27 @@ void PodRaceA_AlwaysUpdate(WORLDINFO_s *world) {
 
 void PodRaceADraw(WORLDINFO_s *world) {
     NUMTX mtx;
-    if (netclient != 0) {
+    if (netclient == 0) {
+        if (NuSpecialExistsFn(&minesys) != 0) {
+            MINESYS_s *mines = &minesys;
+            for (MINEENTRY_s *entry = mines->mines; entry != &mines->mines[64]; entry++) {
+                if (entry->active != 0) {
+                    float s = entry->grow_alpha;
+                    NUVEC scale = {s, s, s};
+                    NuMtxSetScale(&mtx, &scale);
+                    NuMtxTranslate(&mtx, &entry->pos);
+                    NuMtxPreRotateX(&mtx, entry->rotx);
+                    NuMtxPreRotateY(&mtx, entry->roty);
+                    NuSpecialDrawAt(&minesys, &mtx);
+                }
+            }
+        }
+    } else {
         for (i32 i = 0; i < 0x40; i++) {
             i64 bit = (i32)(1u << (i & 0x1f));
             if ((client_mines.present_mask & bit) != 0) {
                 NuMtxSetIdentity(&mtx);
                 NuMtxTranslate(&mtx, &client_mines.positions[i]);
-                NuSpecialDrawAt(&minesys, &mtx);
-            }
-        }
-    } else if (NuSpecialExistsFn(&minesys) != 0) {
-        MINESYS_s *mines = &minesys;
-        for (MINEENTRY_s *entry = mines->mines; entry != &mines->mines[64]; entry++) {
-            if (entry->active != 0) {
-                float s = entry->grow_alpha;
-                NUVEC scale = {s, s, s};
-                NuMtxSetScale(&mtx, &scale);
-                NuMtxTranslate(&mtx, &entry->pos);
-                NuMtxPreRotateX(&mtx, entry->rotx);
-                NuMtxPreRotateY(&mtx, entry->roty);
                 NuSpecialDrawAt(&minesys, &mtx);
             }
         }

@@ -146,11 +146,13 @@ i32 DragBomb_UpdateHint(HINT_s *hint) {
         player->force_glow_candidate_kind == 0 || player->force_glow_candidate == NULL || !(player->field_0xd80 > 0.0f))
         return 0;
     const i32 id = static_cast<GameObject_s *>(player->force_glow_candidate)->id;
-    if (hint->control_mode_ids[0] == 0x5ee) {
+    if (hint->control_mode_ids[0] != 0x5ee) {
+        if (hint->control_mode_ids[0] == 0x28e) {
+            if (id != id_DRAGBOMB)
+                return 1;
+        }
+    } else {
         if (id == id_DRAGBOMB)
-            return 1;
-    } else if (hint->control_mode_ids[0] == 0x28e) {
-        if (id != id_DRAGBOMB)
             return 1;
     }
     return 0;
@@ -305,11 +307,13 @@ i32 ShinyMetal_UpdateHint(HINT_s *hint) {
             return 1;
     }
     if (FreePlay == 0) {
-        if (hint->control_mode_ids[0] == 0x2b8) {
+        if (hint->control_mode_ids[0] != 0x2b8) {
+            if (hint->control_mode_ids[0] != 0x283 || AvailableToPlayer(0x1000000, -1, 6, 1) == 0) {
+                return 0;
+            }
+        } else {
             if ((player->apiobj.character_data->model_flags & 0x1000000) == 0 && player->field_0x108e != 6)
                 return 0;
-        } else if (hint->control_mode_ids[0] != 0x283 || AvailableToPlayer(0x1000000, -1, 6, 1) == 0) {
-            return 0;
         }
     }
     GIZMOBLOWUP_s *blowup = WORLD->gizmo_blowups;

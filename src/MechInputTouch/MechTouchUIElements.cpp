@@ -774,12 +774,14 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
         } else if ((CDataList[id].model_flags & 0x2000) == 0 && (GCDataList[id].flags_090 & 0x40) == 0) {
 
             if (BonusArea == 0 || VehicleArea == 0) {
-                if (static_cast<i32>(GCDataList[id].flags_090) < 0) {
+                if (!(static_cast<i32>(GCDataList[id].flags_090) < 0)) {
+                    if ((GCDataList[id].flags_094[3] & 1) == 0 && (collected == -1 || Collection_Got(id) == 0)) {
+                        continue;
+                    }
+                } else {
                     if (Cheats_CheckFlags(0x100) == 0) {
                         continue;
                     }
-                } else if ((GCDataList[id].flags_094[3] & 1) == 0 && (collected == -1 || Collection_Got(id) == 0)) {
-                    continue;
                 }
             }
 

@@ -371,30 +371,30 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
             object->torpedo_target_timer = 0.25f;
     }
 
-    if (static_cast<i8>(object->apiobj.flags_low) < 0 && object->torpedo->target != NULL &&
-        object->torpedo_target_timer > 0.0f) {
-        NUVEC *target_position = NULL;
-        switch (object->torpedo->target_type) {
-            case 0:
-                target_position = &static_cast<GIZMOBLOWUP_s *>(object->torpedo->target)->mid_position;
-                break;
-            case 1:
-                target_position = NuSpecialGetDrawPos(
-                    &static_cast<GIZTURRET_s *>(object->torpedo->target)->primary_anim_obj->special);
-                break;
-            case 2:
-                target_position = &static_cast<GIZOBSTACLE_s *>(object->torpedo->target)->evaluated_position;
-                break;
-        }
-        if (target_position != NULL) {
-            GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
-                AddGameMessage(const_cast<char *>("X"), target_position, 5.0f * AreaPickupScale, NULL, 0.0f, 255, 0,
-                               255, 0x10c7, 0.0f));
-            if (message != NULL) {
-                message->target_type = 4;
-                message->draw_callback = DrawGameMessage_Targets;
-                message->alpha = static_cast<u8>(object->torpedo_target_timer * 4.0f * 128.0f);
-            }
+    if (!(static_cast<i8>(object->apiobj.flags_low) < 0 && object->torpedo->target != NULL &&
+          object->torpedo_target_timer > 0.0f)) {
+        return;
+    }
+    NUVEC *target_position = NULL;
+    switch (object->torpedo->target_type) {
+        case 0:
+            target_position = &static_cast<GIZMOBLOWUP_s *>(object->torpedo->target)->mid_position;
+            break;
+        case 1:
+            target_position =
+                NuSpecialGetDrawPos(&static_cast<GIZTURRET_s *>(object->torpedo->target)->primary_anim_obj->special);
+            break;
+        case 2:
+            target_position = &static_cast<GIZOBSTACLE_s *>(object->torpedo->target)->evaluated_position;
+            break;
+    }
+    if (target_position != NULL) {
+        GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(AddGameMessage(
+            const_cast<char *>("X"), target_position, 5.0f * AreaPickupScale, NULL, 0.0f, 255, 0, 255, 0x10c7, 0.0f));
+        if (message != NULL) {
+            message->target_type = 4;
+            message->draw_callback = DrawGameMessage_Targets;
+            message->alpha = static_cast<u8>(object->torpedo_target_timer * 4.0f * 128.0f);
         }
     }
 }
@@ -437,31 +437,33 @@ void HomeNearestTorpTarget(BOLT_s *bolt, TORPEDOPACKET_s *packet) {
     delta.y = 0.0f;
     f32 distance = NuVecMag(&delta);
     f32 speed = bolt->speed;
-    if (bolt->time == 0.0f) {
+    if (bolt->time != 0.0f) {
+        if ((packet->field_0x1 & 0x10) == 0) {
+            u16 current_x, current_y, target_x, target_y;
+            FindAnglesXY(&bolt->velocity, &current_x, &current_y);
+            bolt->velocity.x = 0.0f;
+            bolt->velocity.y = 0.0f;
+            bolt->velocity.z = bolt->speed;
+            delta.y = height + 0.1f;
+            NuVecNorm(&delta, &delta);
+            FindAnglesXY(&delta, &target_x, &target_y);
+            f32 seek = (1.0f + NU_SIN_LUT(bolt->time / type->field_14 * 16384.0f + 32768.0f + 16384.0f)) * 15.0f;
+            target_x = SeekRot(current_x, target_x, seek);
+            target_y = SeekRot(current_y, target_y, seek);
+            NUMTX_ALIGNED16 matrix;
+            NuMtxSetIdentity(&matrix);
+            NUANGVEC angles;
+            angles.x = target_x;
+            angles.y = target_y;
+            NuMtxSetRotationXYVU0(&matrix, &angles);
+            NuVecMtxRotate(&bolt->velocity, &bolt->velocity, &matrix);
+            NuVecNorm(&bolt->field_0xac, &bolt->velocity);
+            f32 lifetime = distance / speed + 0.05f + bolt->time;
+            if (lifetime > bolt->lifetime && (packet->field_0x1 & 8) == 0)
+                bolt->lifetime = lifetime;
+        }
+    } else {
         bolt->velocity.y += 6.0f;
-    } else if ((packet->field_0x1 & 0x10) == 0) {
-        u16 current_x, current_y, target_x, target_y;
-        FindAnglesXY(&bolt->velocity, &current_x, &current_y);
-        bolt->velocity.x = 0.0f;
-        bolt->velocity.y = 0.0f;
-        bolt->velocity.z = bolt->speed;
-        delta.y = height + 0.1f;
-        NuVecNorm(&delta, &delta);
-        FindAnglesXY(&delta, &target_x, &target_y);
-        f32 seek = (1.0f + NU_SIN_LUT(bolt->time / type->field_14 * 16384.0f + 32768.0f + 16384.0f)) * 15.0f;
-        target_x = SeekRot(current_x, target_x, seek);
-        target_y = SeekRot(current_y, target_y, seek);
-        NUMTX_ALIGNED16 matrix;
-        NuMtxSetIdentity(&matrix);
-        NUANGVEC angles;
-        angles.x = target_x;
-        angles.y = target_y;
-        NuMtxSetRotationXYVU0(&matrix, &angles);
-        NuVecMtxRotate(&bolt->velocity, &bolt->velocity, &matrix);
-        NuVecNorm(&bolt->field_0xac, &bolt->velocity);
-        f32 lifetime = distance / speed + 0.05f + bolt->time;
-        if (lifetime > bolt->lifetime && (packet->field_0x1 & 8) == 0)
-            bolt->lifetime = lifetime;
     }
     packet->field_0x1 |= 4;
     packet->target = target;
@@ -720,7 +722,8 @@ void Torpedo_Shoot(GameObject_s *object) {
     Bolt_Add(object, &position, &matrix, type, 0);
     --object->torpedo->count;
     object->torpedo->field_0x1 |= 2;
-    if (static_cast<i8>(object->apiobj.flags_low) < 0) {
-        Hint_SetComplete(0x289);
+    if (!(static_cast<i8>(object->apiobj.flags_low) < 0)) {
+        return;
     }
+    Hint_SetComplete(0x289);
 }

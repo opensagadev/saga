@@ -451,16 +451,18 @@ void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float ela
             SetDrawGoldBrick(packet, packet->current_gold_brick);
             const f32 previous = stage->field_0x18;
             stage->field_0x18 += elapsed;
-            if (stage->field_0x18 < stage->field_0x1c) {
+            if (!(stage->field_0x18 < stage->field_0x1c)) {
+                if (previous < stage->field_0x1c) {
+                    AddStatusMiniKitParts();
+                    NewStatusRumbleBuzz(-1, 1.0f, 0.1f, 0);
+                    PlaySfx(const_cast<char *>("Explode1"), NULL);
+                } else if (FindGameMsgsWithID(1, 0, -1, NULL) == 0) {
+                    PlaySfx(const_cast<char *>("Shop_BuyCheat"), NULL);
+                    NextStatusStage(packet);
+                }
+            } else {
                 if (static_cast<u32>(GameTimer.update_count) % 6 < 3 && (GameTimer.update_count - 1U) % 6 > 2)
                     NewStatusRumbleBuzz(-1, 0.0f, 0.0f, 2);
-            } else if (previous < stage->field_0x1c) {
-                AddStatusMiniKitParts();
-                NewStatusRumbleBuzz(-1, 1.0f, 0.1f, 0);
-                PlaySfx(const_cast<char *>("Explode1"), NULL);
-            } else if (FindGameMsgsWithID(1, 0, -1, NULL) == 0) {
-                PlaySfx(const_cast<char *>("Shop_BuyCheat"), NULL);
-                NextStatusStage(packet);
             }
             break;
         }

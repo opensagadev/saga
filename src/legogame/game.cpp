@@ -300,16 +300,18 @@ static void GoThroughDoor_ExtraCode(WORLDINFO_s *world, DOOR_s *door) {
         VaderA_GoneThroughDoor(world, door);
     }
     if (PODRACEB_LDATA != NULL && door->level == PODRACEB_LDATA->idx && world->current_level == PODRACEA_LDATA) {
-        if (Lap != 3) {
-            PodRace_IncreaseLap();
-        } else if (FreePlay == 0) {
-            NewLData = PODRACEOUTRO1_LDATA;
-            grab_screen_image = 1;
-            if (waiting_for_level != -1) {
-                waiting_for_new_level = 1;
+        if (Lap == 3) {
+            if (FreePlay == 0) {
+                NewLData = PODRACEOUTRO1_LDATA;
+                grab_screen_image = 1;
+                if (waiting_for_level != -1) {
+                    waiting_for_new_level = 1;
+                }
+            } else {
+                CompleteLevel(world);
             }
         } else {
-            CompleteLevel(world);
+            PodRace_IncreaseLap();
         }
     }
 }

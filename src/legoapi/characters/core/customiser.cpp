@@ -654,7 +654,33 @@ CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32
         if (NuFParGetWord(parser) == 0)
             break;
         i32 category = Customiser_FindSetFromName(parser->word_buf);
-        if (category != -1 && NuFParGetWord(parser) != 0) {
+        if (!(category != -1 && NuFParGetWord(parser) != 0)) {
+            if (NuStrICmp(parser->word_buf, "locator") == 0) {
+                if (NuFParGetWord(parser) != 0) {
+                    category = Customiser_FindSetFromName(parser->word_buf);
+                    if (category != -1) {
+                        i32 locator = NuFParGetInt(parser);
+                        locators[category] = static_cast<u32>(locator) < 16 ? locator : -1;
+                        if (static_cast<u32>(locator) < 16) {
+                            while (NuFParGetWord(parser) != 0) {
+                                if (NuStrICmp(parser->word_buf, "xoffset") == 0)
+                                    x_offsets[category] = NuFParGetFloat(parser);
+                                else if (NuStrICmp(parser->word_buf, "yoffset") == 0)
+                                    y_offsets[category] = NuFParGetFloat(parser);
+                            }
+                        }
+                    }
+                }
+            } else if (NuStrICmp(parser->word_buf, "layer") == 0) {
+                if (NuFParGetWord(parser) != 0) {
+                    category = Customiser_FindSetFromName(parser->word_buf);
+                    if (category != -1) {
+                        i32 layer = NuFParGetInt(parser);
+                        layers[category] = static_cast<u32>(layer) < 32 ? layer : -1;
+                    }
+                }
+            }
+        } else {
             categories[count] = category;
             CUSTOMPIECE *piece = &pieces[count];
             piece->name = names;
@@ -719,30 +745,6 @@ CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32
                 }
             }
             ++count;
-        } else if (NuStrICmp(parser->word_buf, "locator") == 0) {
-            if (NuFParGetWord(parser) != 0) {
-                category = Customiser_FindSetFromName(parser->word_buf);
-                if (category != -1) {
-                    i32 locator = NuFParGetInt(parser);
-                    locators[category] = static_cast<u32>(locator) < 16 ? locator : -1;
-                    if (static_cast<u32>(locator) < 16) {
-                        while (NuFParGetWord(parser) != 0) {
-                            if (NuStrICmp(parser->word_buf, "xoffset") == 0)
-                                x_offsets[category] = NuFParGetFloat(parser);
-                            else if (NuStrICmp(parser->word_buf, "yoffset") == 0)
-                                y_offsets[category] = NuFParGetFloat(parser);
-                        }
-                    }
-                }
-            }
-        } else if (NuStrICmp(parser->word_buf, "layer") == 0) {
-            if (NuFParGetWord(parser) != 0) {
-                category = Customiser_FindSetFromName(parser->word_buf);
-                if (category != -1) {
-                    i32 layer = NuFParGetInt(parser);
-                    layers[category] = static_cast<u32>(layer) < 32 ? layer : -1;
-                }
-            }
         }
         if (count >= 440)
             break;

@@ -1319,7 +1319,11 @@ static i32 GizSpinner_BoltHitPlat(void *, void *spinner_ptr, BOLT *bolt, unsigne
     }
 
     bool active = (spinner->flags & (GIZSPINNER_FLAG_HIDE_ARM | SPINNER_RUNTIME_ANIMATION_HIDDEN)) == 0;
-    if (spinner->platform_id != bolt->hit_platform) {
+    if (spinner->platform_id == bolt->hit_platform) {
+        if (!active) {
+            return 1;
+        }
+    } else {
         const i32 arm_count = spinner->type;
         i32 arm;
         for (arm = 0; arm != arm_count; ++arm) {
@@ -1330,8 +1334,6 @@ static i32 GizSpinner_BoltHitPlat(void *, void *spinner_ptr, BOLT *bolt, unsigne
         if (arm == arm_count) {
             return 0;
         }
-    } else if (!active) {
-        return 1;
     }
 
     GameObject_s *owner = bolt->owner;

@@ -1362,7 +1362,25 @@ void AddFootSteps(GameObject_s *object) {
     const i32 advancing = (packet.flags & ANIMPACKET_FLAG_LOOPED) != 0 ? packet.previous_time > packet.current_time
                                                                        : packet.current_time > packet.previous_time;
     bool crossed = false;
-    if ((config->flags & 0x10000) != 0) {
+    if ((config->flags & 0x10000) == 0) {
+        if (!(packet.previous_time > packet.current_time)) {
+            if (!advancing)
+                return;
+            for (i32 i = 2; i < 4; ++i) {
+                const f32 frame = config->event_frames[i];
+                if (frame >= 1.0f && packet.current_time >= frame && frame > packet.previous_time)
+                    crossed = true;
+            }
+        } else {
+            if (!advancing)
+                return;
+            for (i32 i = 2; i < 4; ++i) {
+                const f32 frame = config->event_frames[i];
+                if (frame >= 1.0f && (packet.current_time >= frame || frame > packet.previous_time))
+                    crossed = true;
+            }
+        }
+    } else {
         if (!advancing)
             return;
         if (!(packet.previous_time > packet.current_time)) {
@@ -1377,22 +1395,6 @@ void AddFootSteps(GameObject_s *object) {
                 if (frame >= 1.0f && (packet.current_time >= frame || frame > packet.previous_time))
                     crossed = true;
             }
-        }
-    } else if (!(packet.previous_time > packet.current_time)) {
-        if (!advancing)
-            return;
-        for (i32 i = 2; i < 4; ++i) {
-            const f32 frame = config->event_frames[i];
-            if (frame >= 1.0f && packet.current_time >= frame && frame > packet.previous_time)
-                crossed = true;
-        }
-    } else {
-        if (!advancing)
-            return;
-        for (i32 i = 2; i < 4; ++i) {
-            const f32 frame = config->event_frames[i];
-            if (frame >= 1.0f && (packet.current_time >= frame || frame > packet.previous_time))
-                crossed = true;
         }
     }
     if (crossed)

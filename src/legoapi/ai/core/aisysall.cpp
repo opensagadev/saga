@@ -211,32 +211,34 @@ static u32 CalculateIntersection(AISYS *system, AIPACKET *packet, APIOBJECT *obj
         AIPATHNODE *after;
         i32 first_angle;
         i32 second_angle;
-        if (current_connection->node_indices[0] == target_connection->node_indices[0]) {
-            before = &path->nodes[current_connection->node_indices[1]];
-            shared = &path->nodes[current_connection->node_indices[0]];
-            after = &path->nodes[target_connection->node_indices[1]];
-            first_angle = NuAngAdd(current_connection->rotation, NUANG_180DEG);
-            second_angle = NuAngAdd(target_connection->rotation, NUANG_180DEG);
-        } else if (current_connection->node_indices[0] == target_connection->node_indices[1]) {
-            before = &path->nodes[current_connection->node_indices[1]];
-            shared = &path->nodes[current_connection->node_indices[0]];
-            after = &path->nodes[target_connection->node_indices[0]];
-            first_angle = NuAngAdd(current_connection->rotation, NUANG_180DEG);
-            second_angle = target_connection->rotation;
-        } else if (current_connection->node_indices[1] == target_connection->node_indices[0]) {
-            before = &path->nodes[current_connection->node_indices[0]];
-            shared = &path->nodes[current_connection->node_indices[1]];
-            after = &path->nodes[target_connection->node_indices[1]];
-            first_angle = current_connection->rotation;
-            second_angle = NuAngAdd(target_connection->rotation, NUANG_180DEG);
-        } else if (current_connection->node_indices[1] == target_connection->node_indices[1]) {
-            before = &path->nodes[current_connection->node_indices[0]];
-            shared = &path->nodes[current_connection->node_indices[1]];
-            after = &path->nodes[target_connection->node_indices[0]];
-            first_angle = current_connection->rotation;
-            second_angle = target_connection->rotation;
+        if (current_connection->node_indices[0] != target_connection->node_indices[0]) {
+            if (current_connection->node_indices[0] == target_connection->node_indices[1]) {
+                before = &path->nodes[current_connection->node_indices[1]];
+                shared = &path->nodes[current_connection->node_indices[0]];
+                after = &path->nodes[target_connection->node_indices[0]];
+                first_angle = NuAngAdd(current_connection->rotation, NUANG_180DEG);
+                second_angle = target_connection->rotation;
+            } else if (current_connection->node_indices[1] == target_connection->node_indices[0]) {
+                before = &path->nodes[current_connection->node_indices[0]];
+                shared = &path->nodes[current_connection->node_indices[1]];
+                after = &path->nodes[target_connection->node_indices[1]];
+                first_angle = current_connection->rotation;
+                second_angle = NuAngAdd(target_connection->rotation, NUANG_180DEG);
+            } else if (current_connection->node_indices[1] == target_connection->node_indices[1]) {
+                before = &path->nodes[current_connection->node_indices[0]];
+                shared = &path->nodes[current_connection->node_indices[1]];
+                after = &path->nodes[target_connection->node_indices[0]];
+                first_angle = current_connection->rotation;
+                second_angle = target_connection->rotation;
+            } else {
+                return 0;
+            }
         } else {
-            return 0;
+            before = &path->nodes[current_connection->node_indices[1]];
+            shared = &path->nodes[current_connection->node_indices[0]];
+            after = &path->nodes[target_connection->node_indices[1]];
+            first_angle = NuAngAdd(current_connection->rotation, NUANG_180DEG);
+            second_angle = NuAngAdd(target_connection->rotation, NUANG_180DEG);
         }
         if (WithinConnection(system, &after->position, path, current_connection, 1, current_connection,
                              packet->current_route, object->field_0x289, NULL, 0.0f, 1) != 0) {

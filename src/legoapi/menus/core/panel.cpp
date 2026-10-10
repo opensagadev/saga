@@ -787,25 +787,27 @@ void DrawMeleeTargetsNumber(i16 *targets, u8 *counts, i32 count, u8 reset, nuhsp
                     meleeTarg_flashTime[i] = 0.01f;
                 meleeTarg_flashTime[i] += FRAMETIME;
 
-                if (meleeTarg_flashTime[i] < 0.375f) {
+                if (!(meleeTarg_flashTime[i] < 0.375f)) {
+                    if (meleeTarg_flashTime[i] < 0.625f) {
+                        meleeTarg_localCount[i] = counts[i];
+                        red = 0;
+                        green = 255;
+                    } else if (meleeTarg_flashTime[i] < 1.0f) {
+                        const f32 phase = (meleeTarg_flashTime[i] - 0.5f) * 2.0f * 255.0f;
+                        red = static_cast<i32>(phase);
+                        green = static_cast<i32>(255.0f - phase);
+                        meleeTarg_scaleSize[i] = SeekLinearF(meleeTarg_scaleSize[i], 0.5f, 0.1f);
+                    } else {
+                        meleeTarg_flashTime[i] = 0.0f;
+                        meleeTarg_scaleSize[i] = SeekLinearF(meleeTarg_scaleSize[i], 0.5f, 0.1f);
+                        red = 255;
+                        green = 0;
+                    }
+                } else {
                     const f32 phase = meleeTarg_flashTime[i] / 0.375f * 255.0f;
                     green = static_cast<i32>(phase);
                     red = static_cast<i32>(255.0f - phase);
                     meleeTarg_scaleSize[i] = SeekLinearF(meleeTarg_scaleSize[i], 0.0f, 0.1f);
-                } else if (meleeTarg_flashTime[i] < 0.625f) {
-                    meleeTarg_localCount[i] = counts[i];
-                    red = 0;
-                    green = 255;
-                } else if (meleeTarg_flashTime[i] < 1.0f) {
-                    const f32 phase = (meleeTarg_flashTime[i] - 0.5f) * 2.0f * 255.0f;
-                    red = static_cast<i32>(phase);
-                    green = static_cast<i32>(255.0f - phase);
-                    meleeTarg_scaleSize[i] = SeekLinearF(meleeTarg_scaleSize[i], 0.5f, 0.1f);
-                } else {
-                    meleeTarg_flashTime[i] = 0.0f;
-                    meleeTarg_scaleSize[i] = SeekLinearF(meleeTarg_scaleSize[i], 0.5f, 0.1f);
-                    red = 255;
-                    green = 0;
                 }
             }
 

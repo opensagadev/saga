@@ -1370,7 +1370,18 @@ static __used__ void Asteroids_Update() {
     ASTEROID_s *asteroid = asteroids;
     for (i32 index = 0; index < nasteroids; ++index, ++asteroid) {
         GIZMOBLOWUP_s *blowup = asteroid->blowup;
-        if (blowup != NULL) {
+        if (blowup == NULL) {
+            if (NuSpecialGetVisibilityFn(&asteroid->special) != 0) {
+                asteroid->activated = 0;
+                NUMTX *matrix = NuSpecialGetDrawMtx(&asteroid->special);
+                if (matrix != NULL) {
+                    NuMtxPreRotateX(matrix, static_cast<i32>(static_cast<f32>(asteroid->rotation_speed_x) * FRAMETIME));
+                    NuMtxPreRotateY(matrix, static_cast<i32>(static_cast<f32>(asteroid->rotation_speed_y) * FRAMETIME));
+                    NuSpecialUpdate(&asteroid->special);
+                    continue;
+                }
+            }
+        } else {
             if ((static_cast<u16>(blowup->status_flags) & 0x4001) == 0x4000) {
                 asteroid->activated = 0;
                 blowup->field_0xf0 += static_cast<i16>(static_cast<f32>(asteroid->rotation_speed_x) * FRAMETIME);
@@ -1378,15 +1389,6 @@ static __used__ void Asteroids_Update() {
                 blowup->state_flags |= 1;
                 blowup->field_0xf4 += static_cast<i16>(static_cast<f32>(asteroid->rotation_speed_z) * FRAMETIME);
                 GizmoBlowupUpdateMatrix(blowup);
-                continue;
-            }
-        } else if (NuSpecialGetVisibilityFn(&asteroid->special) != 0) {
-            asteroid->activated = 0;
-            NUMTX *matrix = NuSpecialGetDrawMtx(&asteroid->special);
-            if (matrix != NULL) {
-                NuMtxPreRotateX(matrix, static_cast<i32>(static_cast<f32>(asteroid->rotation_speed_x) * FRAMETIME));
-                NuMtxPreRotateY(matrix, static_cast<i32>(static_cast<f32>(asteroid->rotation_speed_y) * FRAMETIME));
-                NuSpecialUpdate(&asteroid->special);
                 continue;
             }
         }

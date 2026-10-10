@@ -64,10 +64,12 @@ static i32 GizSpecial_GetOutput(GIZMO *gizmo, i32 output_index, i32 include_inac
     if ((special->anim_set->flags & GAMEANIMSET_FLAG_IN_SYSTEM_LIST) == 0) {
         GameAnimSet_EvaluateState(special->anim_set);
     }
-    if (output_index == 0) {
+    if (output_index != 0) {
+        if (output_index == 1) {
+            return special->anim_set->state != GAMEANIMSET_STATE_AT_START;
+        }
+    } else {
         return special->anim_set->state == GAMEANIMSET_STATE_AT_END;
-    } else if (output_index == 1) {
-        return special->anim_set->state != GAMEANIMSET_STATE_AT_START;
     }
     return 0;
 }

@@ -887,7 +887,13 @@ i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 dama
         blowup->field_0x9f &= ~1;
         blowup->state_flags &= 0x73;
         blowup->animation_time = 1.0f;
-        if (object == NULL) {
+        if (object != NULL) {
+            if (blowup->saved_state_0 != 0 &&
+                (object->id != id_SPEEDERBIKE || (object->apiobj.flags_low & 0x80) == 0 ||
+                 WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks != 0)) {
+                ObjHitObj(NULL, object, blowup->saved_state_0, 1, 0, hit_context);
+            }
+        } else {
             if ((blowup->draw_flags & 0x208) && blowup->saved_state_0 != 0 &&
                 (!(blowup->field_0xb4 <= 0.0f) || !(blowup->field_0xb8 > 0.0f))) {
                 const f32 radius_squared = blowup->field_0xb4 * blowup->field_0xb4;
@@ -904,10 +910,6 @@ i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 dama
                     }
                 }
             }
-        } else if (blowup->saved_state_0 != 0 &&
-                   (object->id != id_SPEEDERBIKE || (object->apiobj.flags_low & 0x80) == 0 ||
-                    WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks != 0)) {
-            ObjHitObj(NULL, object, blowup->saved_state_0, 1, 0, hit_context);
         }
         if (blowup->platform_id != -1) {
             PlatOnOff(blowup->platform_id, 0);
@@ -1254,16 +1256,18 @@ static void Blowups_Reset(void *world_ptr, void *, void *progress_ptr) {
                 u8 visible = (progress->visible[word] & bit) != 0;
                 visible <<= 6;
                 blowup->visibility_flags = (old_visibility & ~GIZMOBLOWUP_VISIBLE) | visible;
-                if ((old_visibility & GIZMOBLOWUP_VISIBLE) == 0) {
+                if ((old_visibility & GIZMOBLOWUP_VISIBLE) != 0) {
+                    if ((blowup->visibility_flags & GIZMOBLOWUP_VISIBLE) == 0) {
+                        GizBlowup_DeleteSingleTerrain(blowup);
+                        state_flags = blowup->state_flags;
+                        output_flags = blowup->output_flags;
+                    }
+                } else {
                     if ((blowup->visibility_flags & GIZMOBLOWUP_VISIBLE) != 0) {
                         GizBlowup_InitSingleTerrain(blowup);
                         state_flags = blowup->state_flags;
                         output_flags = blowup->output_flags;
                     }
-                } else if ((blowup->visibility_flags & GIZMOBLOWUP_VISIBLE) == 0) {
-                    GizBlowup_DeleteSingleTerrain(blowup);
-                    state_flags = blowup->state_flags;
-                    output_flags = blowup->output_flags;
                 }
 
                 u8 activated = (progress->activated[word] & bit) != 0;
@@ -1946,16 +1950,18 @@ GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *object, NUVEC *points, i32 point_co
         }
         cause = hit_type == 3 ? 10 : (hit_type == 0 ? 13 : 3);
     }
-    if (GizmoBlowupBlowup(nearest, 1, cause, damage, NULL, 1) == 0) {
+    if (GizmoBlowupBlowup(nearest, 1, cause, damage, NULL, 1) != 0) {
+        if (object != NULL) {
+            NewRumble(object->pad_gamepad->pad, 0.4f, 0);
+            GameCam_HitJudder();
+        }
+    } else {
         if (bolt != NULL) {
             NUVEC normal;
             NuVecSub(&normal, &nearest->position, &bolt->position);
             NuVecNorm(&normal, &normal);
             Bolt_AddDeflectedBolt(bolt, &bolt->field_0xac, &normal, flags);
         }
-    } else if (object != NULL) {
-        NewRumble(object->pad_gamepad->pad, 0.4f, 0);
-        GameCam_HitJudder();
     }
     if (BoltSys->stop_targeting != NULL) {
         BoltSys->stop_targeting(object, points);
@@ -2119,15 +2125,17 @@ i32 GizmoBlowupCheckProximity(WORLDINFO_s *world, GameObject_s *object) {
             hit_type = 5;
         }
         nuinstanim_s *animation = NuSpecialGetInstAnim(&blowup->type->animated_special);
-        if (blowup->field_0xc0 > 0.0f) {
+        if (!(blowup->field_0xc0 > 0.0f)) {
+            if (animation == NULL || (blowup->state_flags & 8) != 0) {
+                destroy = 1;
+            } else {
+                blowup->state_flags |= 8;
+                blowup->field_0x9f |= 2;
+                blowup->animation_time = 0.0f;
+            }
+        } else {
             blowup->activation_delay = blowup->field_0xc0;
             blowup->state_flags |= 4;
-        } else if (animation == NULL || (blowup->state_flags & 8) != 0) {
-            destroy = 1;
-        } else {
-            blowup->state_flags |= 8;
-            blowup->field_0x9f |= 2;
-            blowup->animation_time = 0.0f;
         }
         if (destroy) {
             GizmoBlowupBlowup(blowup, 1, hit_type, 1, object, 1);

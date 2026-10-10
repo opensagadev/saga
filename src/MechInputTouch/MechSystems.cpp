@@ -245,16 +245,18 @@ void MechSystems::NewRadarPulse(VuVec const &position, bool paused) {
 
 void MechSystems::NewSwipeMarker(TouchHolder &holder, i32 direction, SwipeDecalRenderer::Style style) {
     i32 slot;
-    if (swipe_markers[0] == NULL) {
-        slot = 0;
-    } else if (swipe_markers[1] == NULL) {
-        slot = 1;
-    } else if (swipe_markers[2] == NULL) {
-        slot = 2;
-    } else if (swipe_markers[3] == NULL) {
-        slot = 3;
+    if (swipe_markers[0] != NULL) {
+        if (swipe_markers[1] == NULL) {
+            slot = 1;
+        } else if (swipe_markers[2] == NULL) {
+            slot = 2;
+        } else if (swipe_markers[3] == NULL) {
+            slot = 3;
+        } else {
+            return;
+        }
     } else {
-        return;
+        slot = 0;
     }
     swipe_markers[slot] = new SwipeDecalRenderer(holder, direction, style);
 }

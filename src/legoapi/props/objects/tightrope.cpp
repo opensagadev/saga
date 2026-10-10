@@ -133,11 +133,13 @@ static i32 TightRope_MoveUpdate(GameObject_s *object, i32 jumping) {
     margin = (object->apiobj.character_data->game_character->flags_090 & 0x10000000) != 0 ? object->apiobj.field_0x1e0
                                                                                           : object->apiobj.field_0x1dc;
     result = 1;
-    if (object->context_destination.z > rope->horizontal_length - margin) {
+    if (!(object->context_destination.z > rope->horizontal_length - margin)) {
+        if (margin > object->context_destination.z) {
+            object->context_destination.z = margin;
+            result = 0;
+        }
+    } else {
         object->context_destination.z = rope->horizontal_length - margin;
-        result = 0;
-    } else if (margin > object->context_destination.z) {
-        object->context_destination.z = margin;
         result = 0;
     }
     NuVecScale(&object->context_destination, &rope->direction, object->context_destination.z);

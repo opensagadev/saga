@@ -304,19 +304,21 @@ void TrafficAnimSys_Configure(WORLDINFO_s *world, char *config) {
         if (NuFParGetWord(parser) == 0) {
             continue;
         }
-        if (parsing_traffic != 0) {
+        if (parsing_traffic == 0) {
+            if (NuStrICmp(parser->word_buf, "traffic_start") == 0) {
+                parsing_traffic = 1;
+                memset(&reference_trafficanim, 0, sizeof(reference_trafficanim));
+                reference_trafficanim.frame_interval = 15.0f;
+                reference_trafficanim.random_interval = 5.0f;
+                reference_trafficanim.tfactor = 1.0f;
+            }
+        } else {
             if (NuStrICmp(parser->word_buf, "traffic_end") == 0) {
                 parsing_traffic = 0;
             } else {
                 NuFParInterpretWord(parser);
                 parsing_traffic = 1;
             }
-        } else if (NuStrICmp(parser->word_buf, "traffic_start") == 0) {
-            parsing_traffic = 1;
-            memset(&reference_trafficanim, 0, sizeof(reference_trafficanim));
-            reference_trafficanim.frame_interval = 15.0f;
-            reference_trafficanim.random_interval = 5.0f;
-            reference_trafficanim.tfactor = 1.0f;
         }
     }
 

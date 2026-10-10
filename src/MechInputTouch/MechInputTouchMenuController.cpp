@@ -259,7 +259,11 @@ void MechInputTouchMenuController::Update(NuInputTouchData const *input) {
         i32 *counter = &AnyTouchesThisFrame;
         i32 zero = 0;
         i32 remaining = *counter - 1;
-        *counter = remaining < 0 ? zero : remaining;
+        if (remaining < 0) {
+            *counter = zero;
+        } else {
+            *counter = remaining;
+        }
     }
 }
 

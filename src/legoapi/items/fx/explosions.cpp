@@ -256,22 +256,23 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
             return;
         }
     }
-    if ((explosion->field_0x24 & 0x100) == 0 && (explosion->field_0x24 & 4) != 0) {
-        BOLT_s bolt;
-        NUVEC points[3];
-        bolt.owner = explosion->object;
-        points[1] = explosion->position;
-        bolt.position = explosion->position;
-        bolt.active = 0;
-        bolt.flags = 0x200;
-        bolt.type_id = 1;
-        bolt.type = BoltType_FindByID(1, WORLD);
-        if (Bolt_HitParts(&bolt, points, &minimum, &maximum, radius, 0) != NULL) {
-            if ((explosion->field_0x24 & 0x40) != 0) {
-                NewRumbleAllPlayers(0.5f, 0.1f, 0, 0);
-                GameCam_HitJudder();
-            } else if (explosion->object != NULL)
-                NewBuzz(explosion->object->pad_gamepad->pad, 0.1f, 0);
-        }
+    if (!((explosion->field_0x24 & 0x100) == 0 && (explosion->field_0x24 & 4) != 0)) {
+        return;
+    }
+    BOLT_s bolt;
+    NUVEC points[3];
+    bolt.owner = explosion->object;
+    points[1] = explosion->position;
+    bolt.position = explosion->position;
+    bolt.active = 0;
+    bolt.flags = 0x200;
+    bolt.type_id = 1;
+    bolt.type = BoltType_FindByID(1, WORLD);
+    if (Bolt_HitParts(&bolt, points, &minimum, &maximum, radius, 0) != NULL) {
+        if ((explosion->field_0x24 & 0x40) != 0) {
+            NewRumbleAllPlayers(0.5f, 0.1f, 0, 0);
+            GameCam_HitJudder();
+        } else if (explosion->object != NULL)
+            NewBuzz(explosion->object->pad_gamepad->pad, 0.1f, 0);
     }
 }

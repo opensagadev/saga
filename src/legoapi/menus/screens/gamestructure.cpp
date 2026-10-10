@@ -750,22 +750,24 @@ void Store_HubDrawFloorTargets(WORLDINFO_s *world) {
 }
 
 void MenuUpdateDebugStore(MENU_s *menu) {
-    if (menu->cancel_pressed != 0) {
-        BackupMenu();
-    } else if (menu->confirm_pressed != 0) {
-        if (__builtin_expect(menu->selected_item > 10, 0)) {
-            SuperOptions.store_pack_flags = 0xffff;
-            SuperOptions.store_bundle_flags = 0xff;
-            TriggerExtraDataSave();
-            BackupMenu();
-        } else if (__builtin_expect(Store_IsPackUnlocked(menu->selected_item), 1)) {
-            GameAudio_PlaySfx(0x32, NULL, 0, 0);
-        } else {
-            Store_UnlockPack(menu->selected_item, true);
-            GameAudio_PlaySfx(0x30, NULL, 0, 0);
-            ReCalculateCompletionPoints();
-            BackupMenu();
+    if (menu->cancel_pressed == 0) {
+        if (menu->confirm_pressed != 0) {
+            if (__builtin_expect(menu->selected_item > 10, 0)) {
+                SuperOptions.store_pack_flags = 0xffff;
+                SuperOptions.store_bundle_flags = 0xff;
+                TriggerExtraDataSave();
+                BackupMenu();
+            } else if (__builtin_expect(Store_IsPackUnlocked(menu->selected_item), 1)) {
+                GameAudio_PlaySfx(0x32, NULL, 0, 0);
+            } else {
+                Store_UnlockPack(menu->selected_item, true);
+                GameAudio_PlaySfx(0x30, NULL, 0, 0);
+                ReCalculateCompletionPoints();
+                BackupMenu();
+            }
         }
+    } else {
+        BackupMenu();
     }
 }
 

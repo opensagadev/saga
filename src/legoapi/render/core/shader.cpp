@@ -170,7 +170,11 @@ void ShaderMtlDescFilter::internalInit(nushadermtldesc_s const *material_desc, n
 
     layer_count = 0;
     if (base_variant) {
-        layer_count = field_0x10 == 0 && (desc->flagsbits_1ba & 1) == 0 ? 1 : 2;
+        if (field_0x10 == 0 && (desc->flagsbits_1ba & 1) == 0) {
+            layer_count = 1;
+        } else {
+            layer_count = 2;
+        }
     }
     if (field_0x18 != 0) {
         ++layer_count;

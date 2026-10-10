@@ -370,7 +370,26 @@ void Hint_SetHint(HINT_s *hint, i32 force, i32 allow_completed) {
         if (hint->field_0x20 > 0.0f)
             return;
     }
-    if ((hint->flags & 8) != 0) {
+    if ((hint->flags & 8) == 0) {
+        if (button->field_0x78 != hint) {
+            const f32 blend_time = AlphaBlendTime;
+            button->field_0x7c = hint;
+            const f32 position = *button->field_0x84;
+            f32 *alpha = button->field_0x40;
+            button->field_0x8c = -1.5f;
+            button->field_0x90 = 0.0f;
+            button->field_0x98 = 0.0f;
+            button->field_0x88 = position;
+            button->field_0x94 = blend_time;
+            const f32 alpha_value = *alpha;
+            button->field_0xa0 = 0;
+            button->field_0x48 = 0.0f;
+            button->field_0x4c = 0.0f;
+            button->field_0x54 = 0.0f;
+            button->field_0x44 = alpha_value;
+            button->field_0x50 = blend_time;
+        }
+    } else {
         if (button->field_0x78 != NULL) {
             const f32 blend_time = AlphaBlendTime;
             button->field_0x7c = NULL;
@@ -393,23 +412,6 @@ void Hint_SetHint(HINT_s *hint, i32 force, i32 allow_completed) {
         hintsys.active_hint = hint;
         if (hint->on_display != NULL)
             hint->on_display(hint);
-    } else if (button->field_0x78 != hint) {
-        const f32 blend_time = AlphaBlendTime;
-        button->field_0x7c = hint;
-        const f32 position = *button->field_0x84;
-        f32 *alpha = button->field_0x40;
-        button->field_0x8c = -1.5f;
-        button->field_0x90 = 0.0f;
-        button->field_0x98 = 0.0f;
-        button->field_0x88 = position;
-        button->field_0x94 = blend_time;
-        const f32 alpha_value = *alpha;
-        button->field_0xa0 = 0;
-        button->field_0x48 = 0.0f;
-        button->field_0x4c = 0.0f;
-        button->field_0x54 = 0.0f;
-        button->field_0x44 = alpha_value;
-        button->field_0x50 = blend_time;
     }
     hintsys.current_hint = 0;
     hintsys.field_0x1c = 0;

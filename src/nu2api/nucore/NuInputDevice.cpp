@@ -15,19 +15,21 @@ void NuTouchInputButton::Update(NuInputTouchData const *data) {
         u32 touch_id = data->touch_events[i].unknown_14;
         if (!released && !started && !active)
             continue;
-        if (touch_captured) {
-            if (touch_id == captured_touch_id) {
-                pressed = true;
-                found = true;
+        if (!touch_captured) {
+            if (started) {
+                float dy = ty - y;
+                float dx = tx - x;
+                float ry = height * 0.5f;
+                float rx = width * 0.5f;
+                if (dx * dx / (rx * rx) + dy * dy / (ry * ry) <= 1.0f) {
+                    captured_touch_id = touch_id;
+                    touch_captured = true;
+                    pressed = true;
+                    found = true;
+                }
             }
-        } else if (started) {
-            float dy = ty - y;
-            float dx = tx - x;
-            float ry = height * 0.5f;
-            float rx = width * 0.5f;
-            if (dx * dx / (rx * rx) + dy * dy / (ry * ry) <= 1.0f) {
-                captured_touch_id = touch_id;
-                touch_captured = true;
+        } else {
+            if (touch_id == captured_touch_id) {
                 pressed = true;
                 found = true;
             }

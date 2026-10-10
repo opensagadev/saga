@@ -188,11 +188,13 @@ void MechTouchUIPartySelector_OnRelease_Callback(MechTouchUIElement &element, To
     }
     if (target != NULL) {
         bool tagged = false;
-        if ((target->field_0xf00 & 2) != 0) {
+        if ((target->field_0xf00 & 2) == 0) {
+            if (TagCode(player, target, 0, 0, 1) == 1) {
+                Tag_NewTransfer(player, target);
+                tagged = true;
+            }
+        } else {
             TakeOver2GetIn(target, player);
-            tagged = true;
-        } else if (TagCode(player, target, 0, 0, 1) == 1) {
-            Tag_NewTransfer(player, target);
             tagged = true;
         }
         if (tagged) {
@@ -490,7 +492,11 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
         if ((flags & 0x10) && TouchHacks::CanUseGizForce(object)) {
             bool found = false;
             PART_s *part = static_cast<PART_s *>(object.force_glow_object);
-            if (part != NULL && object.force_glow_kind == 3) {
+            if (!(part != NULL && object.force_glow_kind == 3)) {
+                if (!(flags & 0x2000)) {
+                    FindTargetForce(world, object, start, direction, best_distance, best, found, true);
+                }
+            } else {
                 if (!(flags & 0x2000) || (part->flags & 0x8000)) {
                     f32 radius = part->radius;
                     if (part->flags & 0x8000)
@@ -507,8 +513,6 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                         found = true;
                     }
                 }
-            } else if (!(flags & 0x2000)) {
-                FindTargetForce(world, object, start, direction, best_distance, best, found, true);
             }
             if (found)
                 flags = 0;

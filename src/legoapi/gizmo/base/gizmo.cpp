@@ -700,10 +700,12 @@ GizPanelObjectInterface::~GizPanelObjectInterface() {
 
 void TeleportObjectInterface::GetPos(VuVec &position, i32 direction) const {
     NUVEC *point;
-    if (direction != -1) {
-        point = teleport.path->pts;
-    } else if (index > 0 && (teleport.flags & 1) == 0) {
-        point = &teleport.path->pts[teleport.path->length - 1];
+    if (direction == -1) {
+        if (index > 0 && (teleport.flags & 1) == 0) {
+            point = &teleport.path->pts[teleport.path->length - 1];
+        } else {
+            point = teleport.path->pts;
+        }
     } else {
         point = teleport.path->pts;
     }

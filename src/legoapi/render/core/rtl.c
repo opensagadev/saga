@@ -951,21 +951,23 @@ static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *po
                                 }
                             }
                             if (position != NULL && light->cast_shadow) {
-                                if (lighting_data->cached_light == light) {
+                                if (lighting_data->cached_light != light) {
+                                    if (strength != 0.0f && lighting_data->cached_value < strength) {
+                                        lighting_data->cached_light = light;
+                                        lighting_data->cached_light_uid = light->uid;
+                                        lighting_data->cached_value = strength;
+                                        if (light->type == 4)
+                                            NuVecScale(&lighting_data->shadow_direction, &light->direction, -1.0f);
+                                        else
+                                            NuVecSub(&lighting_data->shadow_direction, position, &light->position);
+                                        lighting_data->shadow_blend = 1.0f;
+                                    }
+                                } else {
                                     lighting_data->cached_value = strength;
                                     if (light->type == 4)
                                         NuVecScale(&lighting_data->shadow_direction, &light->direction, -1.0f);
                                     else
                                         NuVecSub(&lighting_data->shadow_direction, position, &light->position);
-                                } else if (strength != 0.0f && lighting_data->cached_value < strength) {
-                                    lighting_data->cached_light = light;
-                                    lighting_data->cached_light_uid = light->uid;
-                                    lighting_data->cached_value = strength;
-                                    if (light->type == 4)
-                                        NuVecScale(&lighting_data->shadow_direction, &light->direction, -1.0f);
-                                    else
-                                        NuVecSub(&lighting_data->shadow_direction, position, &light->position);
-                                    lighting_data->shadow_blend = 1.0f;
                                 }
                             }
                         } else {

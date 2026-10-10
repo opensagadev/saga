@@ -1687,7 +1687,17 @@ void MenuDrawViewTextStrings(MENU_s *menu) {
                     blue = MENUENTRYB;
                 }
             } else {
-                if (TestForController()) {
+                if (!TestForController()) {
+                    if (menu_pulse > 0.0f) {
+                        red = Text_MenuColourLerp(MENUFLASH0R, MENUNORMALR, menu_pulse);
+                        green = Text_MenuColourLerp(MENUFLASH0G, MENUNORMALG, menu_pulse);
+                        blue = Text_MenuColourLerp(MENUFLASH0B, MENUNORMALB, menu_pulse);
+                    } else {
+                        red = MENUENTRYR;
+                        green = MENUENTRYG;
+                        blue = MENUENTRYB;
+                    }
+                } else {
                     if (menu_pulsate > 0.0f) {
                         red = Text_MenuColourLerp(MENUFLASH0R, MENUFLASH1R, menu_pulsate);
                         green = Text_MenuColourLerp(MENUFLASH0G, MENUFLASH1G, menu_pulsate);
@@ -1701,14 +1711,6 @@ void MenuDrawViewTextStrings(MENU_s *menu) {
                         green = MENUFLASH1G;
                         blue = MENUFLASH1B;
                     }
-                } else if (menu_pulse > 0.0f) {
-                    red = Text_MenuColourLerp(MENUFLASH0R, MENUNORMALR, menu_pulse);
-                    green = Text_MenuColourLerp(MENUFLASH0G, MENUNORMALG, menu_pulse);
-                    blue = Text_MenuColourLerp(MENUFLASH0B, MENUNORMALB, menu_pulse);
-                } else {
-                    red = MENUENTRYR;
-                    green = MENUENTRYG;
-                    blue = MENUENTRYB;
                 }
             }
         } else {

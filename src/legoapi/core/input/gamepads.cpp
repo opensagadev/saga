@@ -562,10 +562,12 @@ i32 ReadPad(i32 port) {
     } else if (right_x > 85.0f) {
         right_directions = GAMEPAD_DRIGHT;
     }
-    if (right_y < -85.0f) {
+    if (!(right_y < -85.0f)) {
+        if (right_y > 85.0f) {
+            right_directions |= GAMEPAD_DDOWN;
+        }
+    } else {
         right_directions |= GAMEPAD_DUP;
-    } else if (right_y > 85.0f) {
-        right_directions |= GAMEPAD_DDOWN;
     }
     gamepad->unknown_18 = right_directions;
     gamepad->unknown_1c = right_directions & ~gamepad->unknown_20;

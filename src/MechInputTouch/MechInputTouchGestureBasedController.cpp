@@ -395,16 +395,18 @@ bool MechInputTouchGestureBasedController::OnDown(GameObject_s &object, TouchHol
         button_was_pressed[0] = 1;
         return true;
     }
-    if (field_90 == NULL) {
+    if (field_90 != NULL) {
+        if (field_94 == NULL) {
+            const f32 dx = holder.touch_position.x - field_90->touch_position.x;
+            const f32 dy = holder.touch_position.y - field_90->touch_position.y;
+            if (dx * dx + dy * dy < 1.0f) {
+                field_94 = &holder;
+            }
+        }
+    } else {
         field_a0 = 0.0f;
         field_90 = &holder;
         field_a5 = 0;
-    } else if (field_94 == NULL) {
-        const f32 dx = holder.touch_position.x - field_90->touch_position.x;
-        const f32 dy = holder.touch_position.y - field_90->touch_position.y;
-        if (dx * dx + dy * dy < 1.0f) {
-            field_94 = &holder;
-        }
     }
     if (smart_bomb_touch == NULL && player != NULL && holder.target_object.Get() == player->GetMechObjectInterface() &&
         TouchHacks::CanUseVehicleSmartBomb(object)) {

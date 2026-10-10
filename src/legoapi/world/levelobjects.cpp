@@ -22,16 +22,18 @@ void LevelObjects_InitForGame(LEVELOBJECT *tab, VARIPTR *buf, VARIPTR *buf_end, 
     LEVELSPLINECOUNT = 0;
 
     for (; tab->kind != 0xff; ++tab, ++LEVELOBJECTCOUNT) {
-        if (tab->reflection == 1) {
+        if (tab->reflection != 1) {
+            if (tab->reflection == 2) {
+                if (LEVOBJREF_FIRSTREFOBJ == -1) {
+                    LEVOBJREF_FIRSTREFOBJ = LEVELOBJECTCOUNT;
+                }
+                LEVOBJREF_LASTREFOBJ = LEVELOBJECTCOUNT;
+            }
+        } else {
             if (LEVOBJREF_FIRSTOBJ == -1) {
                 LEVOBJREF_FIRSTOBJ = LEVELOBJECTCOUNT;
             }
             LEVOBJREF_LASTOBJ = LEVELOBJECTCOUNT;
-        } else if (tab->reflection == 2) {
-            if (LEVOBJREF_FIRSTREFOBJ == -1) {
-                LEVOBJREF_FIRSTREFOBJ = LEVELOBJECTCOUNT;
-            }
-            LEVOBJREF_LASTREFOBJ = LEVELOBJECTCOUNT;
         }
     }
 

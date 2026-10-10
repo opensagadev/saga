@@ -109,29 +109,31 @@ i32 ReadTerrain(unsigned char *base_path, i32 first_group, i16 **buffer, TERRSET
     do {
         u8 *chunk_data = reinterpret_cast<u8 *>(*buffer);
 
-        if (chunk->chunk_type == TERRAIN_CHUNK_SPATIAL_INDEX) {
+        if (chunk->chunk_type != TERRAIN_CHUNK_SPATIAL_INDEX) {
+            if (chunk->chunk_type <= TERRAIN_CHUNK_SPATIAL_INDEX) {
+                if (chunk->chunk_type >= TERRAIN_CHUNK_GROUP_PRIMARY) {
+                    const f32 origin_x = chunk->origin.x;
+                    terrain->groups[first_group].field_0x32 = chunk->field_0x32;
+                    terrain->groups[first_group].chunk_type = chunk->chunk_type;
+                    terrain->groups[first_group].origin.x = origin_x;
+                    terrain->groups[first_group].origin.y = chunk->origin.y;
+                    terrain->groups[first_group].field_0x30 = chunk->field_0x16;
+                    terrain->groups[first_group].origin.z = chunk->origin.z;
+                    terrain->groups[first_group].data = chunk_data;
+                    terrain->groups[first_group].field_0x28 = chunk->field_0x2c;
+                    ++group_count;
+                    ++first_group;
+                }
+            } else if (chunk->chunk_type == TERRAIN_CHUNK_CRASH_DATA) {
+                crashdata = chunk_data;
+            }
+        } else {
             TERRAIN_SPATIAL_NODE **link = reinterpret_cast<TERRAIN_SPATIAL_NODE **>(chunk_data);
             if (*reinterpret_cast<u32 *>(link) == 0x12345678) {
                 *link = terrain->spatial_nodes;
                 terrain->spatial_nodes = reinterpret_cast<TERRAIN_SPATIAL_NODE *>(link + 1);
                 --terrain->spatial_nodes->point_count;
             }
-        } else if (chunk->chunk_type <= TERRAIN_CHUNK_SPATIAL_INDEX) {
-            if (chunk->chunk_type >= TERRAIN_CHUNK_GROUP_PRIMARY) {
-                const f32 origin_x = chunk->origin.x;
-                terrain->groups[first_group].field_0x32 = chunk->field_0x32;
-                terrain->groups[first_group].chunk_type = chunk->chunk_type;
-                terrain->groups[first_group].origin.x = origin_x;
-                terrain->groups[first_group].origin.y = chunk->origin.y;
-                terrain->groups[first_group].field_0x30 = chunk->field_0x16;
-                terrain->groups[first_group].origin.z = chunk->origin.z;
-                terrain->groups[first_group].data = chunk_data;
-                terrain->groups[first_group].field_0x28 = chunk->field_0x2c;
-                ++group_count;
-                ++first_group;
-            }
-        } else if (chunk->chunk_type == TERRAIN_CHUNK_CRASH_DATA) {
-            crashdata = chunk_data;
         }
 
         *buffer = reinterpret_cast<i16 *>(chunk_data + 2 * chunk->data_word_count);

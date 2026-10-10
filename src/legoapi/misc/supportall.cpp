@@ -253,10 +253,12 @@ void CatchUpCode(GameObject_s *object, f32 divisor, f32 maximum, i32 mode) {
         (mode == 0 || static_cast<i8>(other->apiobj.field_0x1f8) < 0)) {
         f32 distance = object->sock_position.normalized_distance - other->sock_position.normalized_distance;
         if (looping) {
-            if (distance >= 0.5f) {
+            if (!(distance >= 0.5f)) {
+                if (-0.5f >= distance) {
+                    distance += 1.0f;
+                }
+            } else {
                 distance -= 1.0f;
-            } else if (-0.5f >= distance) {
-                distance += 1.0f;
             }
         }
         if (distance < 0.0f) {
@@ -1063,9 +1065,10 @@ extern "C" void NuHtmlBitmap(char *filename, i32 width, i32 height, char *captio
         NuHtmlWrite(caption);
     }
     NuHtmlWrite("<BR CLEAR=\"all\"> <P>&nbsp;<P>");
-    if (source != NULL && NuStrCmp(filename, source) != 0) {
-        NuFileCopy(filename, source);
+    if (!(source != NULL && NuStrCmp(filename, source) != 0)) {
+        return;
     }
+    NuFileCopy(filename, source);
 }
 
 void NuHtmlGraphArray(char **strings) {
@@ -1778,19 +1781,21 @@ void TBOPENFN(char *name, i32 type) {
             return;
         }
     }
-    if (*count < 12) {
-        char label[256];
-        NuStrCpy(label, name);
-        i32 length = NuStrLen(label);
-        if (length > 0) {
-            if (length > 10)
-                label[10] = '\0';
-            NuStrCpy(labels[*count].name, label);
-            labels[*count].type = static_cast<u8>(type);
-            TBSTART(*count, type);
-            ++*count;
-        }
+    if (!(*count < 12)) {
+        return;
     }
+    char label[256];
+    NuStrCpy(label, name);
+    i32 length = NuStrLen(label);
+    if (!(length > 0)) {
+        return;
+    }
+    if (length > 10)
+        label[10] = '\0';
+    NuStrCpy(labels[*count].name, label);
+    labels[*count].type = static_cast<u8>(type);
+    TBSTART(*count, type);
+    ++*count;
 }
 
 void RndrArrow(float x, float y, float scale, i32 angle, i32 colour) {

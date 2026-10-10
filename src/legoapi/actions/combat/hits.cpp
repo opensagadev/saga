@@ -118,18 +118,20 @@ static i32 Collide2Objects(APIOBJECT *first, APIOBJECT *second) {
                 static_cast<GAMECHARACTERDATA *>(first_object->apiobj.character_data->field11_0x24);
             GAMECHARACTERDATA *second_data =
                 static_cast<GAMECHARACTERDATA *>(second_object->apiobj.character_data->field11_0x24);
-            if ((first_data->flags_090 & 0x1000) != 0 &&
-                first->horizontal_velocity_magnitude > first_data->movement_speed * 0.5f) {
+            if (!((first_data->flags_090 & 0x1000) != 0 &&
+                  first->horizontal_velocity_magnitude > first_data->movement_speed * 0.5f)) {
+                if ((second_data->flags_090 & 0x1000) != 0 &&
+                    second->horizontal_velocity_magnitude > second_data->movement_speed * 0.5f) {
+                    StartFlatten(second_object, first_object);
+                } else if (second_vertical_velocity < 0.0f && (first_data->flags_090 & 0x40) != 0 &&
+                           first_object->field_0x107c == -1) {
+                    first->velocity.y += second_vertical_velocity * 0.5f;
+                } else if (first_vertical_velocity < 0.0f && (second_data->flags_090 & 0x40) != 0 &&
+                           second_object->field_0x107c == -1) {
+                    second->velocity.y += first_vertical_velocity * 0.5f;
+                }
+            } else {
                 StartFlatten(first_object, second_object);
-            } else if ((second_data->flags_090 & 0x1000) != 0 &&
-                       second->horizontal_velocity_magnitude > second_data->movement_speed * 0.5f) {
-                StartFlatten(second_object, first_object);
-            } else if (second_vertical_velocity < 0.0f && (first_data->flags_090 & 0x40) != 0 &&
-                       first_object->field_0x107c == -1) {
-                first->velocity.y += second_vertical_velocity * 0.5f;
-            } else if (first_vertical_velocity < 0.0f && (second_data->flags_090 & 0x40) != 0 &&
-                       second_object->field_0x107c == -1) {
-                second->velocity.y += first_vertical_velocity * 0.5f;
             }
         }
 

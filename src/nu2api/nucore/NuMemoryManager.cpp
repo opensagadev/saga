@@ -589,13 +589,15 @@ void NuMemoryManager::AddPage(void *ptr, u32 size, bool _unknown) {
     u32 value = free_block->block_header.value;
     u32 manager_index = this->idx;
     u32 *end_tag = (u32 *)END_TAG(free_block, BLOCK_SIZE(value));
-    if ((value & 0x38000000) == 0) {
-        *end_tag = value & BLOCK_SIZE_MASK;
-    } else if (manager_index <= 29) {
-        *end_tag = ((manager_index + 1) << 27) | (value & BLOCK_SIZE_MASK);
+    if ((value & 0x38000000) != 0) {
+        if (manager_index <= 29) {
+            *end_tag = ((manager_index + 1) << 27) | (value & BLOCK_SIZE_MASK);
+        } else {
+            *end_tag = value | HEADER_MGR_HI_MASK;
+            *(end_tag - 1) = manager_index;
+        }
     } else {
-        *end_tag = value | HEADER_MGR_HI_MASK;
-        *(end_tag - 1) = manager_index;
+        *end_tag = value & BLOCK_SIZE_MASK;
     }
 
     this->stats.unknown_00 += BLOCK_SIZE(free_block->block_header.value);

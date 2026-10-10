@@ -85,7 +85,13 @@ void Grabber_Configure(WORLDINFO_s *world, char *config) {
     u8 active = 0;
     while (NuFParGetLine(parser) != 0) {
         if (NuFParGetWord(parser) != 0) {
-            if (NuStrICmp(parser->word_buf, "grabber_start") == 0) {
+            if (NuStrICmp(parser->word_buf, "grabber_start") != 0) {
+                if (NuStrICmp(parser->word_buf, "grabber_end") == 0) {
+                    break;
+                } else if (active != 0) {
+                    NuFParInterpretWord(parser);
+                }
+            } else {
                 grabber->radius = 0.5f;
                 grabber->move_xy = 0;
                 grabber->flags_559 = (grabber->flags_559 & ~0x08) | 0x10;
@@ -94,10 +100,6 @@ void Grabber_Configure(WORLDINFO_s *world, char *config) {
                 grabber->scale = 1.0f;
                 grabber->character_id = id_GRABMACHINE;
                 active = 1;
-            } else if (NuStrICmp(parser->word_buf, "grabber_end") == 0) {
-                break;
-            } else if (active != 0) {
-                NuFParInterpretWord(parser);
             }
         }
     }

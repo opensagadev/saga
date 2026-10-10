@@ -416,7 +416,17 @@ void RippleEffects_Configure(WORLDINFO_s *world, char *config) {
     while (NuFParGetLine(parser)) {
         NuFParGetWord(parser);
         if (parser->word_buf[0] != 0) {
-            if (!active) {
+            if (active) {
+                if (NuStrICmp(parser->word_buf, "rippleeffects_end") == 0) {
+                    active = 0;
+                    if (effect->texture_name[0] != 0) {
+                        ++effect;
+                        ++world->ripple_effect_count;
+                    }
+                } else {
+                    NuFParInterpretWord(parser);
+                }
+            } else {
                 if (world->ripple_effect_count > 1 || NuStrICmp(parser->word_buf, "rippleeffects_start") != 0)
                     continue;
                 RE_worldinfo = world;
@@ -430,14 +440,6 @@ void RippleEffects_Configure(WORLDINFO_s *world, char *config) {
                 effect->material = NULL;
                 RE_rippleeffect = effect;
                 active = 1;
-            } else if (NuStrICmp(parser->word_buf, "rippleeffects_end") == 0) {
-                active = 0;
-                if (effect->texture_name[0] != 0) {
-                    ++effect;
-                    ++world->ripple_effect_count;
-                }
-            } else {
-                NuFParInterpretWord(parser);
             }
         }
     }

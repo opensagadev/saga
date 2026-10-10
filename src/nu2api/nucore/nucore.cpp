@@ -476,22 +476,24 @@ i32 NuNetEmu::SendTo(void *data, i32 size, nunetaddr_s *address, i32) {
         return NuNetSessionSendTo(data, size, address);
     }
 
-    if (field_24 == 1) {
-        f32 random = NuRandFloat();
-        if (field_34 > random) {
-            return size;
-        }
-    } else if (field_24 == 2) {
-        if (field_30 == 0) {
-            f32 random = NuRandFloat();
-            if (field_34 > random) {
-                f32 range = static_cast<f32>(field_2c - field_28);
+    if (field_24 != 1) {
+        if (field_24 == 2) {
+            if (field_30 == 0) {
                 f32 random = NuRandFloat();
-                field_30 = static_cast<i32>(random * range) + field_28;
+                if (field_34 > random) {
+                    f32 range = static_cast<f32>(field_2c - field_28);
+                    f32 random = NuRandFloat();
+                    field_30 = static_cast<i32>(random * range) + field_28;
+                }
+            }
+            if (field_30 > 0) {
+                field_30--;
+                return size;
             }
         }
-        if (field_30 > 0) {
-            field_30--;
+    } else {
+        f32 random = NuRandFloat();
+        if (field_34 > random) {
             return size;
         }
     }

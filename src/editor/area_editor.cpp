@@ -231,32 +231,34 @@ void areaEditor_Render(i32 x, i32 y, f32, f32) {
         NuQFntPrintEx(system_qfont, text_x, y * 8, 16, "\"%s\", xzrng=%.2f", focus->name, static_cast<f64>(range));
     }
     NuQFntPrintEx(system_qfont, text_x, (y + 15) * 8, 16, "SQR - Options");
-    if (area_hovered() == NULL) {
+    if (area_hovered() != NULL) {
+        if (area_hovered() != area_selected()) {
+            NuQFntPrintEx(system_qfont, text_x, (y + 30) * 8, 16, "X - Select area");
+            NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "SELECT - Goto nearest");
+        } else {
+            NuQFntPrintEx(system_qfont, text_x, (y + 30) * 8, 16, "X - Move selected");
+            if ((aieditor->pad_buttons & 0x40) != 0) {
+                if (area_hovered()->flags & 1) {
+                    NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "LRIGHT/LLEFT - Adjust Radius");
+                } else {
+                    NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "LRIGHT/LLEFT - Adjust X size");
+                    NuQFntPrintEx(system_qfont, text_x, (y + 60) * 8, 16, "LUP/LDOWN - Adjust Z size");
+                }
+            } else {
+                i32 next_line = y + 45;
+                NuQFntPrintEx(system_qfont, text_x, next_line * 8, 16, "TRI - Delete selected");
+                next_line += 15;
+                if ((area_hovered()->flags & 1) == 0) {
+                    NuQFntPrintEx(system_qfont, text_x, next_line * 8, 16, "LLEFT/LRIGHT - Rotate");
+                    next_line += 15;
+                }
+                NuQFntPrintEx(system_qfont, text_x, next_line * 8, 16, "LUP - Increase height");
+                NuQFntPrintEx(system_qfont, text_x, (next_line + 15) * 8, 16, "LDOWN - Decrease height");
+            }
+        }
+    } else {
         NuQFntPrintEx(system_qfont, text_x, (y + 30) * 8, 16, "X - Create area");
         NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "SELECT - Select nearest");
-    } else if (area_hovered() != area_selected()) {
-        NuQFntPrintEx(system_qfont, text_x, (y + 30) * 8, 16, "X - Select area");
-        NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "SELECT - Goto nearest");
-    } else {
-        NuQFntPrintEx(system_qfont, text_x, (y + 30) * 8, 16, "X - Move selected");
-        if ((aieditor->pad_buttons & 0x40) != 0) {
-            if (area_hovered()->flags & 1) {
-                NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "LRIGHT/LLEFT - Adjust Radius");
-            } else {
-                NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "LRIGHT/LLEFT - Adjust X size");
-                NuQFntPrintEx(system_qfont, text_x, (y + 60) * 8, 16, "LUP/LDOWN - Adjust Z size");
-            }
-        } else {
-            i32 next_line = y + 45;
-            NuQFntPrintEx(system_qfont, text_x, next_line * 8, 16, "TRI - Delete selected");
-            next_line += 15;
-            if ((area_hovered()->flags & 1) == 0) {
-                NuQFntPrintEx(system_qfont, text_x, next_line * 8, 16, "LLEFT/LRIGHT - Rotate");
-                next_line += 15;
-            }
-            NuQFntPrintEx(system_qfont, text_x, next_line * 8, 16, "LUP - Increase height");
-            NuQFntPrintEx(system_qfont, text_x, (next_line + 15) * 8, 16, "LDOWN - Decrease height");
-        }
     }
     areaEditorDrawAreas();
     pathEditorDrawPaths();
@@ -386,7 +388,11 @@ eduimenu_s *areaEditor_Process(nupad_s *pad) {
     u32 buttons;
     u32 pressed;
     if ((pad->digital_buttons & 0x40) != 0) {
-        if (area_hovered() != NULL) {
+        if (area_hovered() == NULL) {
+            if ((pad->digital_buttons_pressed & 0x40) != 0) {
+                areaEditorCreateArea();
+            }
+        } else {
             if ((pad->digital_buttons_pressed & 0x40) != 0) {
                 area_selected() = area_hovered();
                 aieditorsettings.area_rotation = area_selected()->rotation;
@@ -417,8 +423,6 @@ eduimenu_s *areaEditor_Process(nupad_s *pad) {
                 else if (buttons & 0x4000)
                     selected->size.z *= 0.99f;
             }
-        } else if ((pad->digital_buttons_pressed & 0x40) != 0) {
-            areaEditorCreateArea();
         }
         goto process_done;
     }

@@ -1383,10 +1383,12 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
         return;
     }
 
-    if (obstacle->auto_return_timer <= 0.0f) {
+    if (!(obstacle->auto_return_timer <= 0.0f)) {
+        if (state == GAMEANIMSET_STATE_AT_END) {
+            obstacle->auto_return_timer -= FRAMETIME;
+        }
+    } else {
         GizObstacle_PlayBackwards(obstacle);
-    } else if (state == GAMEANIMSET_STATE_AT_END) {
-        obstacle->auto_return_timer -= FRAMETIME;
     }
 }
 

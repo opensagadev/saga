@@ -168,14 +168,16 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
                 p->target_velocity.x = p->velocity.x = p->target_velocity.z = p->velocity.z = 0;
             p->velocity.x = SeekValF(p->velocity.x, p->target_velocity.x, 1.0f);
             p->velocity.z = SeekValF(p->velocity.z, p->target_velocity.z, 1.0f);
-            if (p->velocity.x != 0) {
+            if (p->velocity.x == 0) {
+                if (fabsf(p->velocity.z) <= 0.0001f) {
+                    p->runtime_flags_0c8 &= 0x3f;
+                    p->velocity.z = p->target_velocity.z = 0;
+                }
+            } else {
                 if (fabsf(p->velocity.x) <= 0.0001f) {
                     p->runtime_flags_0c8 &= 0x3f;
                     p->velocity.x = p->target_velocity.x = 0;
                 }
-            } else if (fabsf(p->velocity.z) <= 0.0001f) {
-                p->runtime_flags_0c8 &= 0x3f;
-                p->velocity.z = p->target_velocity.z = 0;
             }
         }
         if (p->runtime_flags_0c8 & 8) {

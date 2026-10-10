@@ -81,10 +81,12 @@ void ConstantRumble(GameObject_s *object, float strength, float phase) {
         weight = 1.0f - fabsf(NuTrigTable[(angle >> 1) & 0x7fff]);
     }
     strength = weight * strength;
-    if (object == NULL) {
+    if (object != NULL) {
+        if (object->apiobj.player_controlled) {
+            NewRumble(object->pad_gamepad->pad, strength, 0);
+        }
+    } else {
         NewRumbleAllPlayers(strength, 0.0f, 0, 0);
-    } else if (object->apiobj.player_controlled) {
-        NewRumble(object->pad_gamepad->pad, strength, 0);
     }
 }
 
