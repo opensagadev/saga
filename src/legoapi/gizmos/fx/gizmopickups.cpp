@@ -218,17 +218,6 @@ namespace {
     };
     DECOMP_ASSERT(sizeof(GIZMOPICKUPPROGRESS_s) == 0x100, "GIZMOPICKUP progress ABI");
 
-    GIZMO_PICKUP_TYPE *GetPickupType(const GIZMOPICKUP_s &pickup) {
-        i32 type_index = pickup.type_index;
-        if ((pickup.state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 && GizmoPickupSys->alternate_type >= 0) {
-            type_index = GizmoPickupSys->alternate_type;
-        }
-        if (type_index < 0 || type_index >= GizmoPickupSys->type_count) {
-            type_index = 0;
-        }
-        return &GizmoPickupSys->types[type_index];
-    }
-
     i32 FindPickupTypeIndex(char type_code) {
         for (i32 index = 0; index < GizmoPickupSys->type_count; ++index) {
             if (GizmoPickupSys->types[index].type_code == type_code) {
@@ -298,7 +287,14 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
             continue;
         }
 
-        GIZMO_PICKUP_TYPE *type = GetPickupType(pickup);
+        i32 type_index = pickup.type_index;
+        if ((pickup.state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 && GizmoPickupSys->alternate_type >= 0) {
+            type_index = GizmoPickupSys->alternate_type;
+        }
+        if (type_index < 0 || type_index >= GizmoPickupSys->type_count) {
+            type_index = 0;
+        }
+        GIZMO_PICKUP_TYPE *type = &GizmoPickupSys->types[type_index];
         if (type->field_0x0f != 0 && pickups != WorldInfo_CurrentlyActive()->gizmo_pickup_sys->temporary_pickups) {
             continue;
         }
@@ -401,7 +397,14 @@ static void GizmoPickups_UpdateList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i3
 
         pickup.state_flags |= GIZMOPICKUP_STATE_DRAW_VISIBLE;
         pickup.draw_rotation = static_cast<u16>(pickup.draw_rotation + 16384.0f * FRAMETIME);
-        GIZMO_PICKUP_TYPE *type = GetPickupType(pickup);
+        i32 type_index = pickup.type_index;
+        if ((pickup.state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 && GizmoPickupSys->alternate_type >= 0) {
+            type_index = GizmoPickupSys->alternate_type;
+        }
+        if (type_index < 0 || type_index >= GizmoPickupSys->type_count) {
+            type_index = 0;
+        }
+        GIZMO_PICKUP_TYPE *type = &GizmoPickupSys->types[type_index];
 
         const u8 effect_flags = type->flags;
         bool show_pickup_effects = false;

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 74.57071,
+    "fuzzy_match_percent": 74.59035,
     "total_code": "4722419",
     "matched_code": "574124",
     "matched_code_percent": 12.1574135,
@@ -56953,6 +56953,14 @@
           "match_percent": 63.686275
         },
         {
+          "name": "_ZL21GizmoPickups_DrawListP11WORLDINFO_sP13GIZMOPICKUP_si.part.2",
+          "demangled_name": "GizmoPickups_DrawList(WORLDINFO_s*, GIZMOPICKUP_s*, int) [clone .part.2]",
+          "address": 4980768,
+          "offset": 4090800,
+          "size": 2037,
+          "match_percent": 39.20097
+        },
+        {
           "name": "_ZL17GizmoPickups_DrawPvS_f",
           "demangled_name": "GizmoPickups_Draw(void*, void*, float)",
           "address": 4982816,
@@ -57437,6 +57445,14 @@
           "offset": 4004864,
           "size": 129,
           "match_percent": 89.77778
+        },
+        {
+          "name": "_ZL24GizObstacle_PosWithinBoxP13GIZOBSTACLE_sP7nuvec_s.part.1",
+          "demangled_name": "GizObstacle_PosWithinBox(GIZOBSTACLE_s*, nuvec_s*) [clone .part.1]",
+          "address": 4894976,
+          "offset": 4005008,
+          "size": 187,
+          "match_percent": 68.90909
         },
         {
           "name": "_ZL26GizObstacles_StoreProgressPvS_S_",
@@ -125703,22 +125719,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZL24GizObstacle_PosWithinBoxP13GIZOBSTACLE_sP7nuvec_s.part.1",
-      "demangled_name": "GizObstacle_PosWithinBox(GIZOBSTACLE_s*, nuvec_s*) [clone .part.1]",
-      "address": 4894976,
-      "offset": 4005008,
-      "size": 187,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZL21GizmoPickups_DrawListP11WORLDINFO_sP13GIZMOPICKUP_si.part.2",
-      "demangled_name": "GizmoPickups_DrawList(WORLDINFO_s*, GIZMOPICKUP_s*, int) [clone .part.2]",
-      "address": 4980768,
-      "offset": 4090800,
-      "size": 2037,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZL23GizmoPickups_UpdateListP11WORLDINFO_sP13GIZMOPICKUP_sii.part.9",
       "demangled_name": "GizmoPickups_UpdateList(WORLDINFO_s*, GIZMOPICKUP_s*, int, int) [clone .part.9]",
       "address": 4986928,
@@ -128026,8 +128026,8 @@
   "summary": {
     "bazel_units": 453,
     "functions": 13454,
-    "assigned_functions": 12690,
+    "assigned_functions": 12692,
     "ambiguous_functions": 270,
-    "unassigned_functions": 494
+    "unassigned_functions": 492
   }
 }
