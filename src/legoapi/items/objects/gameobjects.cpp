@@ -1840,13 +1840,14 @@ static APIOBJECT *GetNamedAPIObject(AISYS *system, char *name) {
                     return reinterpret_cast<APIOBJECT *>(result_address);
                 }
             }
-            if (NuStrICmp(Obj[index].apiobj.character_data->file, name) == 0) {
-                usize result_address = reinterpret_cast<usize>(Obj) + index * sizeof(*Obj);
-                if (result_address == 0) {
-                    break;
-                }
-                return reinterpret_cast<APIOBJECT *>(result_address);
+            if (NuStrICmp(Obj[index].apiobj.character_data->file, name) != 0) {
+                continue;
             }
+            usize result_address = reinterpret_cast<usize>(Obj) + index * sizeof(*Obj);
+            if (result_address == 0) {
+                break;
+            }
+            return reinterpret_cast<APIOBJECT *>(result_address);
         }
     }
 

@@ -1129,10 +1129,11 @@ i32 CodeMenu(MENU_s *) {
                 codechar = 0;
             else
                 for (i32 i = 0; i < 36; ++i) {
-                    if (usercode[col] == codechars[i]) {
-                        codechar = i;
-                        break;
+                    if (usercode[col] != codechars[i]) {
+                        continue;
                     }
+                    codechar = i;
+                    break;
                 }
             if (lastitem != col) {
                 slidetimer = 0.125f;

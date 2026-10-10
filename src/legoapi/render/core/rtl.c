@@ -793,9 +793,7 @@ static __used__ void rtlCalcLights(nuvec_s *position, numtx_s *rotation, f32 sca
 
 static __used__ rtl_s *GetNextRTL(void *set, rtl_s *light, char *indices, int *index) {
     if (set != NULL) {
-        if (!(indices != NULL && index != NULL)) {
-            ++light;
-        } else {
+        if ((indices != NULL && index != NULL)) {
             if (!(*index < static_cast<i32>(*indices))) {
                 light = NULL;
             } else {
@@ -803,6 +801,8 @@ static __used__ rtl_s *GetNextRTL(void *set, rtl_s *light, char *indices, int *i
                 const i32 light_index = indices[*index];
                 light = light_index < 0 ? NULL : &static_cast<rtlset *>(set)->lights[light_index];
             }
+        } else {
+            ++light;
         }
     } else {
         light = reinterpret_cast<rtl_s *>(NuLstGetNext(rtl_dynamic_pool, reinterpret_cast<NULNKHDR *>(light)));

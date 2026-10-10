@@ -333,10 +333,10 @@ static i32 Technos_Load(void *world_ptr, void *) {
         }
 
         world->technos[index].scale = EdFileReadFloat();
-        if (version == 4) {
-            world->technos[index].output = 0;
-        } else {
+        if (version != 4) {
             world->technos[index].output = EdFileReadInt();
+        } else {
+            world->technos[index].output = 0;
         }
     }
     return 1;

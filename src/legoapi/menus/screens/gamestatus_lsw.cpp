@@ -1823,10 +1823,10 @@ void BonusWin_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 curren
             if (stage->field_0x1c - 0.1f <= time) {
                 iconalphaoverride = 0.0f;
             } else if (time < stage->field_0x1c - 0.6f) {
-                if (time < 0.5f) {
-                    iconalphaoverride = time + time;
-                } else {
+                if (!(time < 0.5f)) {
                     iconalphaoverride = 1.0f;
+                } else {
+                    iconalphaoverride = time + time;
                 }
             } else {
                 const f32 fade = time - (stage->field_0x1c - 0.6f);
@@ -1857,12 +1857,16 @@ void BonusTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 curre
         if (stage->field_0x14 > 0) {
             f32 alpha = stage->field_0x18;
             f32 time;
-            if (alpha >= 0.5f) {
-                time = alpha < 3.0f ? 0.0f : alpha - 3.0f;
-                alpha = 1.0f;
-            } else {
+            if (!(alpha >= 0.5f)) {
                 alpha += alpha;
                 time = 0.0f;
+            } else {
+                if (alpha < 3.0f) {
+                    time = 0.0f;
+                } else {
+                    time = alpha - 3.0f;
+                }
+                alpha = 1.0f;
             }
             DrawBonusTime(packet,
                           1.0f -

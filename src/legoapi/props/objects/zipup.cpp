@@ -710,7 +710,11 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
             NUVEC *hook = &zipup->hook_origin;
             NUVEC *start = endpoint == 0 ? &zipup->lower_position : &zipup->upper_position;
             NUVEC *destination = endpoint == 0 ? &zipup->upper_position : &zipup->lower_position;
-            object->field_0x7a3 = endpoint == 0 ? 0 : 1;
+            if (endpoint == 0) {
+                object->field_0x7a3 = 0;
+            } else {
+                object->field_0x7a3 = 1;
+            }
             NUVEC *heading = start->x == hook->x && start->z == hook->z ? destination : hook;
             api.movement_facing_angle = NuAtan2D(heading->x - start->x, heading->z - start->z);
             api.velocity.y = 0.0f;

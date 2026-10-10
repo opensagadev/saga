@@ -140,10 +140,11 @@ EPISODEDATA *Episodes_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *b
                             found = true;
                         } else {
                             for (i32 k = 1; k < (i32)areaCount; k++) {
-                                if (episode->area_ids[k] == areaIndex) {
-                                    found = true;
-                                    break;
+                                if (episode->area_ids[k] != areaIndex) {
+                                    continue;
                                 }
+                                found = true;
+                                break;
                             }
                         }
                     }
@@ -151,10 +152,11 @@ EPISODEDATA *Episodes_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *b
                         for (i32 j = 0; j < count; j++) {
                             EPISODEDATA *prev = &episodePtr[j];
                             for (i32 byteOff = 0; byteOff < (i32)prev->area_count * 2; byteOff += 2) {
-                                if (*(i16 *)((u8 *)prev->area_ids + byteOff) == areaIndex) {
-                                    found = true;
-                                    break;
+                                if (*(i16 *)((u8 *)prev->area_ids + byteOff) != areaIndex) {
+                                    continue;
                                 }
+                                found = true;
+                                break;
                             }
                             if (found) {
                                 break;
@@ -1093,7 +1095,13 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                     if (i == selected && shoot_due != 0)
                         shot = TrooperShoot(world, team, trooper, &shot_angle, team_index);
 
-                    if ((trooper->state_flags & 0x40) == 0) {
+                    if ((trooper->state_flags & 0x40) != 0) {
+                        ++stopped_count;
+                        trooper->rotation =
+                            SeekRot(trooper->rotation, trooper->target_rotation, MiniTrooperTurnSpeed());
+                        if (static_cast<i32>(trooper->rotation) - static_cast<i32>(trooper->target_rotation) <= 0x16c)
+                            MiniTrooperSetWanderTarget(trooper, shot, &shot_angle);
+                    } else {
                         const minisnowtrooper_s *slot = &team->troopers[trooper->formation_index];
                         const f32 target_x = team->origin_x + slot->formation_x;
                         const f32 target_z = team->origin_z + slot->formation_z;
@@ -1103,12 +1111,6 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                             trooper->state_flags |= 0x40;
                             ++stopped_count;
                         }
-                    } else {
-                        ++stopped_count;
-                        trooper->rotation =
-                            SeekRot(trooper->rotation, trooper->target_rotation, MiniTrooperTurnSpeed());
-                        if (static_cast<i32>(trooper->rotation) - static_cast<i32>(trooper->target_rotation) <= 0x16c)
-                            MiniTrooperSetWanderTarget(trooper, shot, &shot_angle);
                     }
                     if ((trooper->state_flags & 0x40) == 0) {
                         const minisnowtrooper_s *slot = &team->troopers[trooper->formation_index];
@@ -1224,13 +1226,13 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                     trooper->target_rotation =
                         NuAtan2D(target_x - trooper->shot_position.x, target_z - trooper->shot_position.z);
                     trooper->rotation = SeekRot(trooper->rotation, trooper->target_rotation, MiniTrooperTurnSpeed());
-                    if ((trooper->state_flags & 0x40) != 0) {
+                    if ((trooper->state_flags & 0x40) == 0) {
+                        MiniTrooperMove(trooper);
+                    } else {
                         trooper->rotation =
                             SeekRot(trooper->rotation, trooper->target_rotation, MiniTrooperTurnSpeed());
                         if (static_cast<i32>(trooper->rotation) - static_cast<i32>(trooper->target_rotation) <= 0x16c)
                             MiniTrooperSetWanderTarget(trooper, shot, &shot_angle);
-                    } else {
-                        MiniTrooperMove(trooper);
                     }
 
                     total.x += trooper->shot_position.x;

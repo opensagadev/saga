@@ -684,12 +684,14 @@ static void ProcessFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8 frame) {
                 box->state_flags_low |= 0x20;
             } else {
                 FLOWBOXGIZMODATA_s *data = box->data;
-                if (box->state_flags_low & 8) {
+                if (!(box->state_flags_low & 8)) {
+                    if (box->state_flags_low & 0x10) {
+                        for (i32 i = 0; i < data->gizmo_count; ++i)
+                            GizmoActivate(system->gizmo_sys, data->gizmos[i]->gizmo, 0, 1);
+                    }
+                } else {
                     for (i32 i = 0; i < data->gizmo_count; ++i)
                         GizmoSetVisibility(system->gizmo_sys, data->gizmos[i]->gizmo, 0, 1);
-                } else if (box->state_flags_low & 0x10) {
-                    for (i32 i = 0; i < data->gizmo_count; ++i)
-                        GizmoActivate(system->gizmo_sys, data->gizmos[i]->gizmo, 0, 1);
                 }
                 box->state_flags_low &= ~0x20;
             }

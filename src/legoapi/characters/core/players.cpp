@@ -1725,7 +1725,13 @@ i32 AvailableToPlayer(u32 character_flags, i32 weapon_action, i32 context, i32 r
             CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_FLAGS || PLAYER_HAS_WEAPON || context == 0 || PLAYER_HAS_CONTEXT);
         }
     } else {
-        if (character_flags == 0) {
+        if (character_flags != 0) {
+            if (weapon_action != -1) {
+                CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_FLAGS && PLAYER_HAS_WEAPON && (context == 0 || PLAYER_HAS_CONTEXT));
+            } else {
+                CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_FLAGS && (context == 0 || PLAYER_HAS_CONTEXT));
+            }
+        } else {
             if (weapon_action == -1) {
                 if (context == 0) {
                     CHECK_AVAILABLE_PLAYERS(true);
@@ -1737,10 +1743,6 @@ i32 AvailableToPlayer(u32 character_flags, i32 weapon_action, i32 context, i32 r
             } else {
                 CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_WEAPON && PLAYER_HAS_CONTEXT);
             }
-        } else if (weapon_action != -1) {
-            CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_FLAGS && PLAYER_HAS_WEAPON && (context == 0 || PLAYER_HAS_CONTEXT));
-        } else {
-            CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_FLAGS && (context == 0 || PLAYER_HAS_CONTEXT));
         }
     }
 

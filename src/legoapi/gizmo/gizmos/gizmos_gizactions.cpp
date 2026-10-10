@@ -1057,7 +1057,17 @@ i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKE
         // the other end. Keep that slot as the fallback after both legs.
         while (true) {
             candidate += direction;
-            if (!looping) {
+            if (looping) {
+                if (candidate >= locator_set->locator_count) {
+                    if (finish_at_end) {
+                        object->apiobj.ai->locator = NULL;
+                        return 1;
+                    }
+                    candidate = 0;
+                } else if (candidate < 0) {
+                    candidate = locator_set->locator_count - 1;
+                }
+            } else {
                 if (candidate >= locator_set->locator_count) {
                     if (finish_at_end) {
                         object->apiobj.ai->locator = NULL;
@@ -1070,16 +1080,6 @@ i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKE
                     target->field_0x1fa &= static_cast<u8>(~0x10);
                     direction = 1;
                     candidate = 1;
-                }
-            } else {
-                if (candidate >= locator_set->locator_count) {
-                    if (finish_at_end) {
-                        object->apiobj.ai->locator = NULL;
-                        return 1;
-                    }
-                    candidate = 0;
-                } else if (candidate < 0) {
-                    candidate = locator_set->locator_count - 1;
                 }
             }
             if (candidate == current_index) {

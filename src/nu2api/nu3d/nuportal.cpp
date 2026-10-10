@@ -273,7 +273,33 @@ static __used__ void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_
         }
 
         NUFRUSTRUM *next_frustum = NULL;
-        if (inside_tests == frustum->plane_count * portal->vertex_count) {
+        if (inside_tests != frustum->plane_count * portal->vertex_count) {
+            i32 in_front = 0;
+            for (i32 i = 0; i < portal->vertex_count; ++i) {
+                if (planeDistance(cam_plane, portal->vertices[i]) > 0.0f) {
+                    ++in_front;
+                }
+            }
+            if (in_front == 0) {
+                continue;
+            }
+            if (in_front != portal->vertex_count) {
+                next_frustum = copyFrustrum(frustum, next_room);
+            } else {
+                NUVEC portal_minimum;
+                NUVEC portal_maximum;
+                computePortalExtents(portal, &portal_minimum, &portal_maximum);
+                if (frustum->minimum.x >= portal_maximum.x || frustum->minimum.y >= portal_maximum.y ||
+                    portal_minimum.x >= frustum->maximum.x || portal_minimum.y >= frustum->maximum.y) {
+                    continue;
+                }
+                portal_minimum.x = MAX(portal_minimum.x, frustum->minimum.x);
+                portal_minimum.y = MAX(portal_minimum.y, frustum->minimum.y);
+                portal_maximum.x = MIN(portal_maximum.x, frustum->maximum.x);
+                portal_maximum.y = MIN(portal_maximum.y, frustum->maximum.y);
+                next_frustum = buildFrustrum(&portal_minimum, &portal_maximum, next_room);
+            }
+        } else {
             if (draw_portals != 0) {
                 NuCameraUnlock();
                 NUVEC direction;
@@ -304,32 +330,6 @@ static __used__ void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_
                 NuCameraRelock();
             }
             next_frustum = buildPortalFrustrum(portal, next_room);
-        } else {
-            i32 in_front = 0;
-            for (i32 i = 0; i < portal->vertex_count; ++i) {
-                if (planeDistance(cam_plane, portal->vertices[i]) > 0.0f) {
-                    ++in_front;
-                }
-            }
-            if (in_front == 0) {
-                continue;
-            }
-            if (in_front == portal->vertex_count) {
-                NUVEC portal_minimum;
-                NUVEC portal_maximum;
-                computePortalExtents(portal, &portal_minimum, &portal_maximum);
-                if (frustum->minimum.x >= portal_maximum.x || frustum->minimum.y >= portal_maximum.y ||
-                    portal_minimum.x >= frustum->maximum.x || portal_minimum.y >= frustum->maximum.y) {
-                    continue;
-                }
-                portal_minimum.x = MAX(portal_minimum.x, frustum->minimum.x);
-                portal_minimum.y = MAX(portal_minimum.y, frustum->minimum.y);
-                portal_maximum.x = MIN(portal_maximum.x, frustum->maximum.x);
-                portal_maximum.y = MIN(portal_maximum.y, frustum->maximum.y);
-                next_frustum = buildFrustrum(&portal_minimum, &portal_maximum, next_room);
-            } else {
-                next_frustum = copyFrustrum(frustum, next_room);
-            }
         }
         roomRecursive(scene, next_frustum, next_room, room_id, depth + 1);
     }

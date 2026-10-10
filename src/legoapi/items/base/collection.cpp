@@ -405,14 +405,13 @@ void Collection_CreateCustom(char *name, i16 *id_list, COLLECTION_s *collection,
             if (required_game_flags != 0 && (GCDataList[id].flags_090 & required_game_flags) != required_game_flags) {
                 continue;
             }
-            if (required_model_flags != 0 &&
-                (CDataList[id].model_flags & required_model_flags) != required_model_flags) {
-                continue;
+            if (!(required_model_flags != 0 &&
+                  (CDataList[id].model_flags & required_model_flags) != required_model_flags)) {
+                COLLECTID &entry = collection->list[collection->count_y];
+                memset(&entry, 0, sizeof(entry));
+                collection->list[collection->count_y].id = static_cast<i16>(id);
+                ++collection->count_y;
             }
-            COLLECTID &entry = collection->list[collection->count_y];
-            memset(&entry, 0, sizeof(entry));
-            collection->list[collection->count_y].id = static_cast<i16>(id);
-            ++collection->count_y;
         }
     }
 

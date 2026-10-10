@@ -368,7 +368,25 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
             force->animation_speed = SeekValF(force->animation_speed, 1.0f, 5.0f);
             playing_forwards = being_used || (force->runtime_flags & GIZFORCE_RUNTIME_PENDING_COMPLETION) != 0;
         }
-        if (playing_forwards) {
+        if (!playing_forwards) {
+            force->field_0x50 = 0.0f;
+            if (!GizForce_AnimComplete(force)) {
+                GizForce_PlayBackwards(force);
+            } else if ((force->progress_flags & GIZFORCE_PROGRESS_GROUP_MEMBER) == 0 &&
+                       ((force->config_flags & GIZFORCE_CONFIG_WAIT_FOR_FORCE_RANGE) != 0 ||
+                        force->field_0x48 > 0.0f)) {
+                force->field_0x48 -= FRAMETIME;
+                if (force->field_0x48 <= 0.0f) {
+                    force->field_0x48 = 0.0f;
+                    if ((force->config_flags & 0x40) != 0 && (force->runtime_flags & 8) != 0) {
+                        GameAnimSet_SetVisibility(force->anim_set, 1);
+                        force->runtime_flags &= static_cast<u8>(~8);
+                    }
+                    GizForce_PlayBackwards(force);
+                    force->runtime_flags &= static_cast<u8>(~GIZFORCE_RUNTIME_FORCE_RANGE_COMPLETE);
+                }
+            }
+        } else {
             force->runtime_flags &= static_cast<u8>(~GIZFORCE_RUNTIME_COMPLETION_RELEASED);
             GizForce_PlayForwards(force);
             if ((force->progress_flags & GIZFORCE_PROGRESS_ANIMATION_REVERSED) == 0) {
@@ -395,31 +413,15 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
                 force->field_0x48 = 0.0f;
                 force->field_0x50 = 0.0f;
             }
-        } else {
-            force->field_0x50 = 0.0f;
-            if (!GizForce_AnimComplete(force)) {
-                GizForce_PlayBackwards(force);
-            } else if ((force->progress_flags & GIZFORCE_PROGRESS_GROUP_MEMBER) == 0 &&
-                       ((force->config_flags & GIZFORCE_CONFIG_WAIT_FOR_FORCE_RANGE) != 0 ||
-                        force->field_0x48 > 0.0f)) {
-                force->field_0x48 -= FRAMETIME;
-                if (force->field_0x48 <= 0.0f) {
-                    force->field_0x48 = 0.0f;
-                    if ((force->config_flags & 0x40) != 0 && (force->runtime_flags & 8) != 0) {
-                        GameAnimSet_SetVisibility(force->anim_set, 1);
-                        force->runtime_flags &= static_cast<u8>(~8);
-                    }
-                    GizForce_PlayBackwards(force);
-                    force->runtime_flags &= static_cast<u8>(~GIZFORCE_RUNTIME_FORCE_RANGE_COMPLETE);
-                }
-            }
         }
         if (force->field_0x50 > 0.0f) {
             NUVEC offset;
             offset.x = qrand() * (1.0f / 65535.0f) * 0.05f - 0.025f;
-            offset.y = (force->progress_flags & GIZFORCE_PROGRESS_GROUP_MEMBER) != 0
-                           ? GameAnimSet_GetCompletionRatio(force->anim_set) * force->group->combined_height
-                           : 0.0f;
+            if ((force->progress_flags & GIZFORCE_PROGRESS_GROUP_MEMBER) != 0) {
+                offset.y = GameAnimSet_GetCompletionRatio(force->anim_set) * force->group->combined_height;
+            } else {
+                offset.y = 0.0f;
+            }
             offset.y += qrand() * (1.0f / 65535.0f) * 0.05f - 0.025f;
             offset.z = qrand() * (1.0f / 65535.0f) * 0.05f - 0.025f;
             GameAnimSet_SetOffset(force->anim_set, &offset);
@@ -445,20 +447,22 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
             force->radius = 1.0f;
             force->position = force->file_position;
             GameAnimSet_GetCentreAndRadius(force->anim_set, &force->position, &force->radius, 2, 1, 1);
-            if (was_moving) {
+            if (!was_moving) {
+                if ((force->anim_set->flags & 5) != 0 && force->field_0x50 == 0.0f && playing_forwards) {
+                    if (force->start_sfx_id != -1) {
+                        if (force->anim_set->state == GAMEANIMSET_STATE_AT_START || IsSfxLooping(force->start_sfx_id)) {
+                            GameAudio_PlaySfxById(force->start_sfx_id, &force->position, 0, 0);
+                        }
+                    } else {
+                        PlaySfx("LegoForm", &force->position);
+                    }
+                }
+            } else {
                 if (GizForce_AnimComplete(force)) {
                     if (force->loop_sfx_id != -1)
                         GameAudio_PlaySfxById(force->loop_sfx_id, &force->position, 0, 0);
                 } else if (force->anim_set->state != 4 && force->stop_sfx_id != -1) {
                     GameAudio_PlaySfxById(force->stop_sfx_id, &force->position, 0, 0);
-                }
-            } else if ((force->anim_set->flags & 5) != 0 && force->field_0x50 == 0.0f && playing_forwards) {
-                if (force->start_sfx_id != -1) {
-                    if (force->anim_set->state == GAMEANIMSET_STATE_AT_START || IsSfxLooping(force->start_sfx_id)) {
-                        GameAudio_PlaySfxById(force->start_sfx_id, &force->position, 0, 0);
-                    }
-                } else {
-                    PlaySfx("LegoForm", &force->position);
                 }
             }
             if ((force->config_flags & 0x2000) == 0) {

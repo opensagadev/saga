@@ -946,10 +946,7 @@ void Grapple_MoveCode(GameObject_s *object) {
                 }
                 f32 maximum_length;
                 GRAPPLE_MAXIMUM_LENGTH(maximum_length);
-                if (!(maximum_length > object->field_0x768)) {
-                    object->field_0xe24 |= 0x80;
-                    object->context_animation = LEGOACT_GRAPPLE_IDLE;
-                } else {
+                if (maximum_length > object->field_0x768) {
                     object->field_0x768 += speed * FRAMETIME;
                     if (maximum_length < object->field_0x768) {
                         object->field_0x768 = maximum_length;
@@ -959,6 +956,9 @@ void Grapple_MoveCode(GameObject_s *object) {
                     if (Grapple_RopeSwingRotate != 0 && (GRAPPLE_CURRENT->flags & GRAPPLE_FLAG_DISABLED) != 0)
                         object->apiobj.movement_facing_angle +=
                             static_cast<i32>(static_cast<u16>(Grapple_RopeSwingRotate) * FRAMETIME);
+                } else {
+                    object->field_0xe24 |= 0x80;
+                    object->context_animation = LEGOACT_GRAPPLE_IDLE;
                 }
             }
         }

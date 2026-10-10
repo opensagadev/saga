@@ -97,9 +97,7 @@ void legoSetMusicVolume(float v) {
 void ProcessMusicChanges(LEVELDATA_s *level, OPTIONSSAVE_s *opts) {
     (void)opts;
 
-    if (GameAudio_ActionMusicFn != NULL) {
-        PlayersUnderAttack = GameAudio_ActionMusicFn();
-    } else {
+    if (GameAudio_ActionMusicFn == NULL) {
         const auto player_under_attack = [](GameObject_s *player) {
             if (player == NULL)
                 return false;
@@ -110,6 +108,8 @@ void ProcessMusicChanges(LEVELDATA_s *level, OPTIONSSAVE_s *opts) {
         };
         PlayersUnderAttack = DoubleScore != 0 || Cheat_PowerUpActive(-1) != 0 || player_under_attack(Player[0]) ||
                              player_under_attack(Player[1]);
+    } else {
+        PlayersUnderAttack = GameAudio_ActionMusicFn();
     }
 
     if (CheckMusicOtherFn != NULL) {

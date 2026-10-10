@@ -811,9 +811,10 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
                         AIPATHNODE *node = &path->nodes[destination_connection->node_indices[end]];
                         if ((static_cast<u64>(node->route_membership_mask & ~node->route_boundary_mask) >>
                                  packet->current_route &
-                             1) != 0) {
-                            destination_distances[end] = FLT_MAX;
+                             1) == 0) {
+                            continue;
                         }
+                        destination_distances[end] = FLT_MAX;
                     }
                 }
                 if ((connection->traversal_flags[packet->path_info.direction] & 0x40000000) == 0) {

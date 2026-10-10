@@ -1191,30 +1191,32 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
         }
         case 3: {
             GIZOBSTACLE_s *first = static_cast<GIZOBSTACLE_s *>(paintobst[paintsused[0]]->object);
-            if (first->anim_set->state == GAMEANIMSET_STATE_AT_END &&
-                static_cast<GIZOBSTACLE_s *>(paintobst[paintsused[1]]->object)->anim_set->state ==
+            if (!(first->anim_set->state == GAMEANIMSET_STATE_AT_END &&
+                  static_cast<GIZOBSTACLE_s *>(paintobst[paintsused[1]]->object)->anim_set->state ==
+                      GAMEANIMSET_STATE_AT_END)) {
+                if (static_cast<GIZOBSTACLE_s *>(paintobst[paintmixed]->object)->anim_set->state ==
                     GAMEANIMSET_STATE_AT_END) {
+                    if (paintmixed == painttarget) {
+                        ++painttry;
+                        if (painttry == 3) {
+                            PAINTPUZZLESTAGE = 4;
+                        } else {
+                            PAINTPUZZLESTAGE = 0;
+                        }
+                    } else {
+                        randpaints[0] = qrand() / 21846;
+                        do {
+                            randpaints[1] = qrand() / 21846;
+                        } while (randpaints[1] == randpaints[0]);
+                        randpaints[2] = 3 - randpaints[0] - randpaints[1];
+                        PAINTPUZZLESTAGE = 0;
+                        painttry = 0;
+                    }
+                }
+            } else {
                 GizObstacle_PlayBackwards(first);
                 GizObstacle_PlayBackwards(static_cast<GIZOBSTACLE_s *>(paintobst[paintsused[1]]->object));
                 GizObstacle_PlayForwards(static_cast<GIZOBSTACLE_s *>(paintobst[paintmixed]->object));
-            } else if (static_cast<GIZOBSTACLE_s *>(paintobst[paintmixed]->object)->anim_set->state ==
-                       GAMEANIMSET_STATE_AT_END) {
-                if (paintmixed == painttarget) {
-                    ++painttry;
-                    if (painttry == 3) {
-                        PAINTPUZZLESTAGE = 4;
-                    } else {
-                        PAINTPUZZLESTAGE = 0;
-                    }
-                } else {
-                    randpaints[0] = qrand() / 21846;
-                    do {
-                        randpaints[1] = qrand() / 21846;
-                    } while (randpaints[1] == randpaints[0]);
-                    randpaints[2] = 3 - randpaints[0] - randpaints[1];
-                    PAINTPUZZLESTAGE = 0;
-                    painttry = 0;
-                }
             }
             break;
         }

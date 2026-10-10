@@ -307,11 +307,7 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
         --object->torpedo->count;
     }
 
-    if (object->torpedo->field_08 < 0.8f) {
-        object->torpedo->field_08 += FRAMETIME;
-        if (object->torpedo->field_08 >= 0.8f)
-            object->torpedo->field_03 = 0;
-    } else {
+    if (!(object->torpedo->field_08 < 0.8f)) {
         if (Cheat_IsOn(42) != 0 && static_cast<i8>(object->apiobj.flags_low) < 0 &&
             object->torpedo_fire_cooldown <= 0.0f && object->apiobj.field_0x287 == 0 &&
             (object->torpedo->field_0x1 & 2) == 0) {
@@ -336,6 +332,10 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
                 }
             }
         }
+    } else {
+        object->torpedo->field_08 += FRAMETIME;
+        if (object->torpedo->field_08 >= 0.8f)
+            object->torpedo->field_03 = 0;
     }
 
     Torpedo_UpdateJobbies(object);
@@ -379,30 +379,30 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
             object->torpedo_target_timer = 0.25f;
     }
 
-    if (!(static_cast<i8>(object->apiobj.flags_low) < 0 && object->torpedo->target != NULL &&
-          object->torpedo_target_timer > 0.0f)) {
-        return;
-    }
-    NUVEC *target_position = NULL;
-    switch (object->torpedo->target_type) {
-        case 0:
-            target_position = &static_cast<GIZMOBLOWUP_s *>(object->torpedo->target)->mid_position;
-            break;
-        case 1:
-            target_position =
-                NuSpecialGetDrawPos(&static_cast<GIZTURRET_s *>(object->torpedo->target)->primary_anim_obj->special);
-            break;
-        case 2:
-            target_position = &static_cast<GIZOBSTACLE_s *>(object->torpedo->target)->evaluated_position;
-            break;
-    }
-    if (target_position != NULL) {
-        GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(AddGameMessage(
-            const_cast<char *>("X"), target_position, 5.0f * AreaPickupScale, NULL, 0.0f, 255, 0, 255, 0x10c7, 0.0f));
-        if (message != NULL) {
-            message->target_type = 4;
-            message->draw_callback = DrawGameMessage_Targets;
-            message->alpha = static_cast<u8>(object->torpedo_target_timer * 4.0f * 128.0f);
+    if ((static_cast<i8>(object->apiobj.flags_low) < 0 && object->torpedo->target != NULL &&
+         object->torpedo_target_timer > 0.0f)) {
+        NUVEC *target_position = NULL;
+        switch (object->torpedo->target_type) {
+            case 0:
+                target_position = &static_cast<GIZMOBLOWUP_s *>(object->torpedo->target)->mid_position;
+                break;
+            case 1:
+                target_position = NuSpecialGetDrawPos(
+                    &static_cast<GIZTURRET_s *>(object->torpedo->target)->primary_anim_obj->special);
+                break;
+            case 2:
+                target_position = &static_cast<GIZOBSTACLE_s *>(object->torpedo->target)->evaluated_position;
+                break;
+        }
+        if (target_position != NULL) {
+            GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
+                AddGameMessage(const_cast<char *>("X"), target_position, 5.0f * AreaPickupScale, NULL, 0.0f, 255, 0,
+                               255, 0x10c7, 0.0f));
+            if (message != NULL) {
+                message->target_type = 4;
+                message->draw_callback = DrawGameMessage_Targets;
+                message->alpha = static_cast<u8>(object->torpedo_target_timer * 4.0f * 128.0f);
+            }
         }
     }
 }

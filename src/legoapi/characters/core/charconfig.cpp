@@ -1652,10 +1652,10 @@ static void CC_layers_medium(NUFPAR *parser) {
     u32 *mask = &charconfig.runtime->layer_mask_medium;
     *mask = 0;
     i32 count = 0;
-    if (charconfig.named_layers != 0) {
+    if (charconfig.named_layers == 0) {
         while (NuFParGetWord(parser) != 0) {
-            const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
-            if (layer == -1) {
+            const u32 layer = NuAToI(parser->word_buf);
+            if (!(layer < 32)) {
                 continue;
             }
             ++count;
@@ -1663,8 +1663,8 @@ static void CC_layers_medium(NUFPAR *parser) {
         }
     } else {
         while (NuFParGetWord(parser) != 0) {
-            const u32 layer = NuAToI(parser->word_buf);
-            if (!(layer < 32)) {
+            const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
+            if (layer == -1) {
                 continue;
             }
             ++count;

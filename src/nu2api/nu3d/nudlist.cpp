@@ -837,13 +837,13 @@ void DisplayListLinkDynamicMtls(void) {
         {
             if (--sp->nmtls == 0) {
                 // Unlink empty sortpri.
-                if (mgr->sort_list == sp) {
-                    mgr->sort_list = sp->sys_next;
-                } else {
+                if (mgr->sort_list != sp) {
                     nusortpri_s *cur = mgr->sort_list;
                     while (cur->sys_next != sp)
                         cur = cur->sys_next;
                     cur->sys_next = sp->sys_next;
+                } else {
+                    mgr->sort_list = sp->sys_next;
                 }
                 --mgr->nused_sort_pris;
                 for (i32 j = sp_idx; j < mgr->dyn_mtl_dlist.nsort_pris - 1; ++j) {

@@ -2028,11 +2028,11 @@ static __used__ void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paus
                 cutscene_quit_prompt = 1;
             }
         } else if ((instance->flags_8c & 0x10) != 0) {
-            if (skip != 0) {
+            if (skip == 0) {
+                cutscene_quit_prompt = 1;
+            } else {
                 instance->current_frame = cutscene->duration - 1.0f - instance->rate * elapsed;
                 cutscene_has_quit = 1;
-            } else {
-                cutscene_quit_prompt = 1;
             }
         }
     }
@@ -2068,7 +2068,41 @@ static __used__ void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paus
                 }
             }
             const f32 end_frame = cutscene->duration - 1.0f;
-            if (!(instance->current_frame < 1.0f)) {
+            if (instance->current_frame < 1.0f) {
+                if ((instance->flags_88 & 0x10) != 0) {
+                    if ((instance->flags_88 & 8) != 0) {
+                        if (instance->rate < 0.0f) {
+                            instance->rate = -instance->rate;
+                        }
+                        instance->current_frame = 2.0f - instance->current_frame;
+                    } else {
+                        const i32 repeat_count = instance->repeat_count;
+                        if (repeat_count > 0) {
+                            const f32 overflow = 1.0f - instance->current_frame;
+                            --instance->repeat_count;
+                            instNuGCutSceneStart(instance);
+                            instance->flags_88 |= 1;
+                            instance->current_frame += overflow;
+                        } else if (instance->chained_instance != NULL) {
+                            const f32 overflow = 1.0f - instance->current_frame;
+                            instNuGCutSceneEndFirstFrame(instance);
+                            instNuGCutSceneStart(instance->chained_instance);
+                            instance->chained_instance->current_frame += overflow;
+                            instNuGCutSceneClipTest(instance->chained_instance);
+                            instNuGCutSceneUpdate(instance->chained_instance, 0, skip, elapsed);
+                            instance->chained_instance = NULL;
+                            return;
+                        } else {
+                            instNuGCutSceneEndFirstFrame(instance);
+                            return;
+                        }
+                    }
+                } else if ((instance->flags_88 & 0x20) != 0) {
+                    instance->current_frame = 1.0f;
+                } else {
+                    instNuGCutSceneEndFirstFrame(instance);
+                }
+            } else {
                 if (instance->current_frame >= end_frame) {
                     if (!(instance->cutscene->version > 1 && (instance->cutscene->flags & 1) != 0)) {
                         if ((instance->flags_88 & 0x10) != 0) {
@@ -2152,40 +2186,6 @@ static __used__ void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paus
                         }
                     }
                 }
-            } else {
-                if ((instance->flags_88 & 0x10) != 0) {
-                    if ((instance->flags_88 & 8) != 0) {
-                        if (instance->rate < 0.0f) {
-                            instance->rate = -instance->rate;
-                        }
-                        instance->current_frame = 2.0f - instance->current_frame;
-                    } else {
-                        const i32 repeat_count = instance->repeat_count;
-                        if (repeat_count > 0) {
-                            const f32 overflow = 1.0f - instance->current_frame;
-                            --instance->repeat_count;
-                            instNuGCutSceneStart(instance);
-                            instance->flags_88 |= 1;
-                            instance->current_frame += overflow;
-                        } else if (instance->chained_instance != NULL) {
-                            const f32 overflow = 1.0f - instance->current_frame;
-                            instNuGCutSceneEndFirstFrame(instance);
-                            instNuGCutSceneStart(instance->chained_instance);
-                            instance->chained_instance->current_frame += overflow;
-                            instNuGCutSceneClipTest(instance->chained_instance);
-                            instNuGCutSceneUpdate(instance->chained_instance, 0, skip, elapsed);
-                            instance->chained_instance = NULL;
-                            return;
-                        } else {
-                            instNuGCutSceneEndFirstFrame(instance);
-                            return;
-                        }
-                    }
-                } else if ((instance->flags_88 & 0x20) != 0) {
-                    instance->current_frame = 1.0f;
-                } else {
-                    instNuGCutSceneEndFirstFrame(instance);
-                }
             }
         }
     } else {
@@ -2197,32 +2197,7 @@ static __used__ void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paus
         return;
     }
     instance->render_frame = instance->current_frame;
-    if ((instance->flags_8a & 4) == 0) {
-        const f32 render_frame = instance->render_frame;
-        instNUGCUTCHARSYS_s *character_system = instance->character_instance;
-        if (character_system != NULL) {
-            NUGCUTSCENE_s *current_cutscene = instance->cutscene;
-            NUGCUTCHARSYS_s *system = current_cutscene->character_system;
-            if (NuCutSceneCharacterProcess != NULL && system->character_count != 0) {
-                for (i32 i = 0; i < system->character_count; ++i) {
-                    instNUGCUTCHAR_s *character_instance = &character_system->characters[i];
-                    if (character_instance->character_model != NULL) {
-                        NuCutSceneCharacterProcess(instance, current_cutscene, character_instance,
-                                                   &system->characters[i], render_frame, paused);
-                    }
-                }
-            }
-        }
-        if (instance->camera_instance != NULL) {
-            instNuGCutCamSysUpdate(instance, instance->current_frame);
-        }
-        if (instance->trigger_instance != NULL) {
-            instNuGCutTriggerSysUpdate(instance, instance->render_frame);
-        }
-        if (instance->rigid_instance != NULL) {
-            instNuGCutRigidSysUpdate(instance, instance->render_frame, paused);
-        }
-    } else {
+    if ((instance->flags_8a & 4) != 0) {
         const f32 render_frame = cutscene->duration - instance->current_frame;
         instNUGCUTCHARSYS_s *character_system = instance->character_instance;
         if (character_system != NULL) {
@@ -2246,6 +2221,31 @@ static __used__ void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paus
         }
         if (instance->rigid_instance != NULL) {
             instNuGCutRigidSysUpdate(instance, cutscene->duration - instance->render_frame, paused);
+        }
+    } else {
+        const f32 render_frame = instance->render_frame;
+        instNUGCUTCHARSYS_s *character_system = instance->character_instance;
+        if (character_system != NULL) {
+            NUGCUTSCENE_s *current_cutscene = instance->cutscene;
+            NUGCUTCHARSYS_s *system = current_cutscene->character_system;
+            if (NuCutSceneCharacterProcess != NULL && system->character_count != 0) {
+                for (i32 i = 0; i < system->character_count; ++i) {
+                    instNUGCUTCHAR_s *character_instance = &character_system->characters[i];
+                    if (character_instance->character_model != NULL) {
+                        NuCutSceneCharacterProcess(instance, current_cutscene, character_instance,
+                                                   &system->characters[i], render_frame, paused);
+                    }
+                }
+            }
+        }
+        if (instance->camera_instance != NULL) {
+            instNuGCutCamSysUpdate(instance, instance->current_frame);
+        }
+        if (instance->trigger_instance != NULL) {
+            instNuGCutTriggerSysUpdate(instance, instance->render_frame);
+        }
+        if (instance->rigid_instance != NULL) {
+            instNuGCutRigidSysUpdate(instance, instance->render_frame, paused);
         }
     }
 }
