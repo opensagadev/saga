@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 74.29615,
+    "fuzzy_match_percent": 74.3206,
     "total_code": "4722419",
-    "matched_code": "574134",
-    "matched_code_percent": 12.157625,
+    "matched_code": "574190",
+    "matched_code_percent": 12.158812,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6628,
-    "matched_functions_percent": 49.245857,
+    "matched_functions": 6632,
+    "matched_functions_percent": 49.275578,
     "total_units": 1
   },
   "text": {
@@ -14482,7 +14482,15 @@
           "address": 916752,
           "offset": 26784,
           "size": 275,
-          "match_percent": 83.16279
+          "match_percent": 99.4186
+        },
+        {
+          "name": "_ZN24CantPickupBombTimerAddon9OnProcessEN9MechAddon12ProcessStageEf",
+          "demangled_name": "CantPickupBombTimerAddon::OnProcess(MechAddon::ProcessStage, float)",
+          "address": 4579856,
+          "offset": 3689888,
+          "size": 42,
+          "match_percent": 99.888885
         },
         {
           "name": "_ZN17MechAutofireAddon9OnProcessEN9MechAddon12ProcessStageEf",
@@ -14490,6 +14498,30 @@
           "address": 4579904,
           "offset": 3689936,
           "size": 341,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN24CantPickupBombTimerAddonD1Ev",
+          "demangled_name": "CantPickupBombTimerAddon::~CantPickupBombTimerAddon()",
+          "address": 4580256,
+          "offset": 3690288,
+          "size": 133,
+          "match_percent": 91.22222
+        },
+        {
+          "name": "_ZN24CantPickupBombTimerAddonD2Ev",
+          "demangled_name": "CantPickupBombTimerAddon::~CantPickupBombTimerAddon()",
+          "address": 4580256,
+          "offset": 3690288,
+          "size": 133,
+          "match_percent": 91.22222
+        },
+        {
+          "name": "_ZN24CantPickupBombTimerAddonD0Ev",
+          "demangled_name": "CantPickupBombTimerAddon::~CantPickupBombTimerAddon()",
+          "address": 4580400,
+          "offset": 3690432,
+          "size": 81,
           "match_percent": 100.0
         },
         {
@@ -14531,6 +14563,22 @@
           "offset": 3690768,
           "size": 171,
           "match_percent": 74.34042
+        },
+        {
+          "name": "_ZN24CantPickupBombTimerAddonC1ER19MechObjectInterfacef",
+          "demangled_name": "CantPickupBombTimerAddon::CantPickupBombTimerAddon(MechObjectInterface&, float)",
+          "address": 4580912,
+          "offset": 3690944,
+          "size": 211,
+          "match_percent": 64.69643
+        },
+        {
+          "name": "_ZN24CantPickupBombTimerAddonC2ER19MechObjectInterfacef",
+          "demangled_name": "CantPickupBombTimerAddon::CantPickupBombTimerAddon(MechObjectInterface&, float)",
+          "address": 4580912,
+          "offset": 3690944,
+          "size": 211,
+          "match_percent": 64.69643
         }
       ]
     },
@@ -63809,7 +63857,7 @@
           "address": 917712,
           "offset": 27744,
           "size": 93,
-          "match_percent": 0.0
+          "match_percent": 99.35294
         },
         {
           "name": "_Z20DeactivateGameObjectP12GameObject_s",
@@ -66092,54 +66140,6 @@
           "match_percent": 28.5
         },
         {
-          "name": "_ZN24CantPickupBombTimerAddon9OnProcessEN9MechAddon12ProcessStageEf",
-          "demangled_name": "CantPickupBombTimerAddon::OnProcess(MechAddon::ProcessStage, float)",
-          "address": 4579856,
-          "offset": 3689888,
-          "size": 42,
-          "match_percent": 99.888885
-        },
-        {
-          "name": "_ZN24CantPickupBombTimerAddonD1Ev",
-          "demangled_name": "CantPickupBombTimerAddon::~CantPickupBombTimerAddon()",
-          "address": 4580256,
-          "offset": 3690288,
-          "size": 133,
-          "match_percent": 91.22222
-        },
-        {
-          "name": "_ZN24CantPickupBombTimerAddonD2Ev",
-          "demangled_name": "CantPickupBombTimerAddon::~CantPickupBombTimerAddon()",
-          "address": 4580256,
-          "offset": 3690288,
-          "size": 133,
-          "match_percent": 91.22222
-        },
-        {
-          "name": "_ZN24CantPickupBombTimerAddonD0Ev",
-          "demangled_name": "CantPickupBombTimerAddon::~CantPickupBombTimerAddon()",
-          "address": 4580400,
-          "offset": 3690432,
-          "size": 81,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN24CantPickupBombTimerAddonC1ER19MechObjectInterfacef",
-          "demangled_name": "CantPickupBombTimerAddon::CantPickupBombTimerAddon(MechObjectInterface&, float)",
-          "address": 4580912,
-          "offset": 3690944,
-          "size": 211,
-          "match_percent": 64.69643
-        },
-        {
-          "name": "_ZN24CantPickupBombTimerAddonC2ER19MechObjectInterfacef",
-          "demangled_name": "CantPickupBombTimerAddon::CantPickupBombTimerAddon(MechObjectInterface&, float)",
-          "address": 4580912,
-          "offset": 3690944,
-          "size": 211,
-          "match_percent": 64.69643
-        },
-        {
           "name": "_Z23GameLoadCharacterModelsP23APICHARACTERMODELLIST_siP9variptr_uS2_ii",
           "demangled_name": "GameLoadCharacterModels(APICHARACTERMODELLIST_s*, int, variptr_u*, variptr_u*, int, int)",
           "address": 4593520,
@@ -67221,7 +67221,7 @@
           "address": 925184,
           "offset": 35216,
           "size": 93,
-          "match_percent": 29.411764
+          "match_percent": 99.35294
         },
         {
           "name": "_Z18CreateThingManagerv",
@@ -67229,7 +67229,7 @@
           "address": 5147472,
           "offset": 4257504,
           "size": 92,
-          "match_percent": 24.95
+          "match_percent": 45.85
         }
       ]
     },
@@ -71592,7 +71592,7 @@
           "address": 901152,
           "offset": 11184,
           "size": 93,
-          "match_percent": 29.411764
+          "match_percent": 99.35294
         },
         {
           "name": "DEVCDDVDROM_Interrogate",
@@ -71600,7 +71600,7 @@
           "address": 2575408,
           "offset": 1685440,
           "size": 19,
-          "match_percent": 39.0
+          "match_percent": 100.0
         },
         {
           "name": "DEVMEMORYCARD_Interrogate",
@@ -71608,7 +71608,7 @@
           "address": 2575440,
           "offset": 1685472,
           "size": 19,
-          "match_percent": 39.0
+          "match_percent": 100.0
         },
         {
           "name": "DebugLog",
@@ -71616,7 +71616,7 @@
           "address": 2744096,
           "offset": 1854128,
           "size": 9,
-          "match_percent": 24.444445
+          "match_percent": 100.0
         },
         {
           "name": "Debug_Print",
@@ -71624,7 +71624,7 @@
           "address": 4398896,
           "offset": 3508928,
           "size": 9,
-          "match_percent": 24.444445
+          "match_percent": 100.0
         }
       ]
     },
@@ -87773,6 +87773,14 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/NuScreen.o",
       "functions": [
         {
+          "name": "_GLOBAL__sub_I_NuScreen.cpp",
+          "demangled_name": "_GLOBAL__sub_I_NuScreen.cpp",
+          "address": 892496,
+          "offset": 2528,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
           "name": "_ZN8NuScreen6CreateEv",
           "demangled_name": "NuScreen::Create()",
           "address": 978304,
@@ -89389,6 +89397,14 @@
       "source": "src/nu2api/nu3d/android/nurenderthread.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurenderthread.o",
       "functions": [
+        {
+          "name": "_GLOBAL__sub_I_nurenderthread.cpp",
+          "demangled_name": "_GLOBAL__sub_I_nurenderthread.cpp",
+          "address": 903712,
+          "offset": 13744,
+          "size": 93,
+          "match_percent": 99.35294
+        },
         {
           "name": "NuRenderThreadCreate",
           "demangled_name": "NuRenderThreadCreate",
@@ -93528,6 +93544,14 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurendercontext.o",
       "functions": [
         {
+          "name": "_GLOBAL__sub_I_nurendercontext.cpp",
+          "demangled_name": "_GLOBAL__sub_I_nurendercontext.cpp",
+          "address": 903136,
+          "offset": 13168,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
           "name": "NuRenderContextInit",
           "demangled_name": "NuRenderContextInit",
           "address": 2765008,
@@ -94427,6 +94451,14 @@
       "source": "src/nu2api/nu3d/nushaderobjectbase.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nushaderobjectbase.o",
       "functions": [
+        {
+          "name": "_GLOBAL__sub_I_nushaderobjectbase.cpp",
+          "demangled_name": "_GLOBAL__sub_I_nushaderobjectbase.cpp",
+          "address": 908016,
+          "offset": 18048,
+          "size": 93,
+          "match_percent": 99.35294
+        },
         {
           "name": "NuShaderObjectBaseCreate",
           "demangled_name": "NuShaderObjectBaseCreate",
@@ -96024,6 +96056,14 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/NuMemoryManager.o",
       "functions": [
         {
+          "name": "_GLOBAL__sub_I_NuMemoryManager.cpp",
+          "demangled_name": "_GLOBAL__sub_I_NuMemoryManager.cpp",
+          "address": 893552,
+          "offset": 3584,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
           "name": "_ZN15NuMemoryManager13IErrorHandler11HandleErrorEPS_NS_9ErrorCodeEPKc",
           "demangled_name": "NuMemoryManager::IErrorHandler::HandleError(NuMemoryManager*, NuMemoryManager::ErrorCode, char const*)",
           "address": 991296,
@@ -96932,6 +96972,14 @@
       "source": "src/nu2api/nucore/NuVirtualTouchDevice.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/NuVirtualTouchDevice.o",
       "functions": [
+        {
+          "name": "_GLOBAL__sub_I_NuVirtualTouchDevice.cpp",
+          "demangled_name": "_GLOBAL__sub_I_NuVirtualTouchDevice.cpp",
+          "address": 901440,
+          "offset": 11472,
+          "size": 93,
+          "match_percent": 99.35294
+        },
         {
           "name": "_ZN20NuVirtualTouchDeviceC1Ej",
           "demangled_name": "NuVirtualTouchDevice::NuVirtualTouchDevice(unsigned int)",
@@ -104112,6 +104160,14 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nupad_interface.o",
       "functions": [
         {
+          "name": "_GLOBAL__sub_I_nupad_interface.cpp",
+          "demangled_name": "_GLOBAL__sub_I_nupad_interface.cpp",
+          "address": 901344,
+          "offset": 11376,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
           "name": "_ZN15NuInputDevicePS15GetIdentifierPSEj",
           "demangled_name": "NuInputDevicePS::GetIdentifierPS(unsigned int)",
           "address": 976576,
@@ -107609,6 +107665,14 @@
       "source": "src/nu2api/nufile/nufilebase.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nufilebase.o",
       "functions": [
+        {
+          "name": "_GLOBAL__sub_I_nufilebase.cpp",
+          "demangled_name": "_GLOBAL__sub_I_nufilebase.cpp",
+          "address": 909232,
+          "offset": 19264,
+          "size": 93,
+          "match_percent": 99.35294
+        },
         {
           "name": "_ZN10NuFileBaseD1Ev",
           "demangled_name": "NuFileBase::~NuFileBase()",
@@ -112195,6 +112259,14 @@
       "source": "src/nu2api/nuplatform/NuPlatform.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/NuPlatform.o",
       "functions": [
+        {
+          "name": "_GLOBAL__sub_I_NuPlatform.cpp",
+          "demangled_name": "_GLOBAL__sub_I_NuPlatform.cpp",
+          "address": 893264,
+          "offset": 3296,
+          "size": 93,
+          "match_percent": 99.35294
+        },
         {
           "name": "_ZN10NuPlatform6CreateEv",
           "demangled_name": "NuPlatform::Create()",
@@ -119288,9 +119360,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -119339,9 +119409,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -119390,9 +119458,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -119457,9 +119523,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -119544,9 +119608,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -119611,9 +119673,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -119678,9 +119738,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -119745,9 +119803,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -119812,9 +119868,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -119879,9 +119933,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -120156,9 +120208,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -120223,9 +120273,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -120290,9 +120338,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -120406,9 +120452,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -120485,9 +120529,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -120653,9 +120695,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -120772,9 +120812,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -120891,9 +120929,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -120958,9 +120994,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -121025,9 +121059,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -121092,9 +121124,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -121185,9 +121215,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -121252,9 +121280,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -121331,9 +121357,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -121482,9 +121506,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -121562,9 +121584,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -121629,9 +121649,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -121716,9 +121734,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -121783,9 +121799,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -121850,9 +121864,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -121917,9 +121929,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -122047,9 +122057,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -122114,9 +122122,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -122181,9 +122187,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -122620,9 +122624,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -122735,9 +122737,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -122850,9 +122850,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -123173,8 +123171,7 @@
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
-        "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
-        "legoapi/items/objects/gameobjects.cpp.o"
+        "MechInputTouch/MechJumpAutopilotAddon.cpp.o"
       ]
     },
     {
@@ -123187,8 +123184,7 @@
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
-        "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
-        "legoapi/items/objects/gameobjects.cpp.o"
+        "MechInputTouch/MechJumpAutopilotAddon.cpp.o"
       ]
     },
     {
@@ -123201,8 +123197,7 @@
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
-        "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
-        "legoapi/items/objects/gameobjects.cpp.o"
+        "MechInputTouch/MechJumpAutopilotAddon.cpp.o"
       ]
     },
     {
@@ -123215,8 +123210,7 @@
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
-        "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
-        "legoapi/items/objects/gameobjects.cpp.o"
+        "MechInputTouch/MechJumpAutopilotAddon.cpp.o"
       ]
     },
     {
@@ -123229,8 +123223,7 @@
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
-        "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
-        "legoapi/items/objects/gameobjects.cpp.o"
+        "MechInputTouch/MechJumpAutopilotAddon.cpp.o"
       ]
     },
     {
@@ -123243,8 +123236,7 @@
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
-        "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
-        "legoapi/items/objects/gameobjects.cpp.o"
+        "MechInputTouch/MechJumpAutopilotAddon.cpp.o"
       ]
     },
     {
@@ -123257,8 +123249,7 @@
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
-        "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
-        "legoapi/items/objects/gameobjects.cpp.o"
+        "MechInputTouch/MechJumpAutopilotAddon.cpp.o"
       ]
     },
     {
@@ -123554,9 +123545,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -123621,9 +123610,7 @@
         "globals.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
@@ -124132,14 +124119,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_GLOBAL__sub_I_NuScreen.cpp",
-      "demangled_name": "_GLOBAL__sub_I_NuScreen.cpp",
-      "address": 892496,
-      "offset": 2528,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
       "name": "_GLOBAL__sub_I_NuEntryPoint_android.cpp",
       "demangled_name": "_GLOBAL__sub_I_NuEntryPoint_android.cpp",
       "address": 892592,
@@ -124152,22 +124131,6 @@
       "demangled_name": "_GLOBAL__sub_I_nunew_android.cpp",
       "address": 892784,
       "offset": 2816,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_NuPlatform.cpp",
-      "demangled_name": "_GLOBAL__sub_I_NuPlatform.cpp",
-      "address": 893264,
-      "offset": 3296,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_NuMemoryManager.cpp",
-      "demangled_name": "_GLOBAL__sub_I_NuMemoryManager.cpp",
-      "address": 893552,
-      "offset": 3584,
       "size": 93,
       "match_percent": 0.0
     },
@@ -124228,22 +124191,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_GLOBAL__sub_I_nupad_interface.cpp",
-      "demangled_name": "_GLOBAL__sub_I_nupad_interface.cpp",
-      "address": 901344,
-      "offset": 11376,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_NuVirtualTouchDevice.cpp",
-      "demangled_name": "_GLOBAL__sub_I_NuVirtualTouchDevice.cpp",
-      "address": 901440,
-      "offset": 11472,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
       "name": "_GLOBAL__sub_I_NuPhoneOSMessage.cpp",
       "demangled_name": "_GLOBAL__sub_I_NuPhoneOSMessage.cpp",
       "address": 902032,
@@ -124268,26 +124215,10 @@
       "match_percent": 0.0
     },
     {
-      "name": "_GLOBAL__sub_I_nurendercontext.cpp",
-      "demangled_name": "_GLOBAL__sub_I_nurendercontext.cpp",
-      "address": 903136,
-      "offset": 13168,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
       "name": "_GLOBAL__sub_I_nuwater.cpp",
       "demangled_name": "_GLOBAL__sub_I_nuwater.cpp",
       "address": 903616,
       "offset": 13648,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_nurenderthread.cpp",
-      "demangled_name": "_GLOBAL__sub_I_nurenderthread.cpp",
-      "address": 903712,
-      "offset": 13744,
       "size": 93,
       "match_percent": 0.0
     },
@@ -124384,22 +124315,6 @@
       "demangled_name": "_GLOBAL__sub_I_nushadermanagerios.cpp",
       "address": 907664,
       "offset": 17696,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_nushaderobjectbase.cpp",
-      "demangled_name": "_GLOBAL__sub_I_nushaderobjectbase.cpp",
-      "address": 908016,
-      "offset": 18048,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_nufilebase.cpp",
-      "demangled_name": "_GLOBAL__sub_I_nufilebase.cpp",
-      "address": 909232,
-      "offset": 19264,
       "size": 93,
       "match_percent": 0.0
     },
@@ -128111,8 +128026,8 @@
   "summary": {
     "bazel_units": 453,
     "functions": 13454,
-    "assigned_functions": 12681,
+    "assigned_functions": 12690,
     "ambiguous_functions": 270,
-    "unassigned_functions": 503
+    "unassigned_functions": 494
   }
 }

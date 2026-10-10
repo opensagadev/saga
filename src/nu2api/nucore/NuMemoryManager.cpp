@@ -11,6 +11,9 @@
 
 #include "decomp.h"
 
+// The original unit constructs its six homogeneous vectors.
+#include "nu2api/nucore/nuvuvec.hpp"
+
 #define HEADER_MGR_HI_MASK 0xf8000000
 #define ALLOC_MASK 0x78000000
 #define BLOCK_SIZE_MASK ~ALLOC_MASK

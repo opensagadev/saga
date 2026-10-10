@@ -4,6 +4,9 @@
 #include <cstddef>
 #include <cstdlib>
 
+// The original unit constructs its six homogeneous vectors.
+#include "nu2api/nucore/nuvuvec.hpp"
+
 NuScreen *NuScreen::ms_instance = NULL;
 
 bool NuScreen::Exists() {

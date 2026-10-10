@@ -10,6 +10,9 @@
 #include "nu2api/nu3d/nuvport.h"
 #include "nu2api/numath/nuvec.h"
 
+// The original unit constructs its six homogeneous vectors.
+#include "nu2api/nucore/nuvuvec.hpp"
+
 extern "C" {
     // GCC emits these zero-initialized definitions in reverse source order.
     // This is the original context matrix/state order, omitting absent state.

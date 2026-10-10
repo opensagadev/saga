@@ -2,6 +2,7 @@
 #include "MechInputTouch_types.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/legoapi_types.h"
 
 extern "C" {
     extern i16 id_BASKETCANNON;
@@ -15,9 +16,11 @@ extern "C" {
 }
 
 HashedKey MechAutofireAddon::s_hashId("MechAutofireAddon");
+HashedKey CantPickupBombTimerAddon::s_hashId("CantPickupBombTimerAddon");
 
-MechAutofireAddon::MechAutofireAddon(MechObjectInterface &object)
-    : MechAddon(object, s_hashId.value), character(object.GetCharacterObject()) {
+bool CantPickupBombTimerAddon::OnProcess(MechAddon::ProcessStage, float elapsed) {
+    remaining_time -= elapsed;
+    return remaining_time > 0.0f;
 }
 
 bool MechAutofireAddon::OnProcess(MechAddon::ProcessStage stage, float) {
@@ -46,5 +49,21 @@ bool MechAutofireAddon::OnProcess(MechAddon::ProcessStage stage, float) {
     return true;
 }
 
+CantPickupBombTimerAddon::~CantPickupBombTimerAddon() {
+}
+
 MechAutofireAddon::~MechAutofireAddon() {
+}
+
+MechAutofireAddon::MechAutofireAddon(MechObjectInterface &object)
+    : MechAddon(object, s_hashId.value), character(object.GetCharacterObject()) {
+}
+
+CantPickupBombTimerAddon::CantPickupBombTimerAddon(MechObjectInterface &object, float duration)
+    : MechAddon(object, s_hashId.value), remaining_time(duration) {
+    GameObject_s *character = object.GetCharacterObject();
+    if (character != NULL) {
+        character->apiobj.velocity.x += character->apiobj.velocity.x;
+        character->apiobj.velocity.z += character->apiobj.velocity.z;
+    }
 }

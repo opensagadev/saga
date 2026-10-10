@@ -8,6 +8,9 @@
 
 #include <string.h>
 
+// The original unit constructs its six homogeneous vectors.
+#include "nu2api/nucore/nuvuvec.hpp"
+
 static f32 water_theta_step = 0.26666668f;
 
 void NuShaderObjectBaseCreate(NUSHADEROBJECTBASE *shader) {

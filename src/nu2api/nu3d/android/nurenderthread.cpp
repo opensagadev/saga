@@ -26,6 +26,9 @@
 #include "nu2api/nucore/nuapi.h"
 #include "nu2api/nucore/nuthread.h"
 
+// The original unit constructs its six homogeneous vectors.
+#include "nu2api/nucore/nuvuvec.hpp"
+
 static volatile i32 renderThreadCS;
 static i32 renderThreadIsLocked;
 pthread_t g_renderThread;

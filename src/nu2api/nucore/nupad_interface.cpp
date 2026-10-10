@@ -9,6 +9,9 @@
 #include "nu2api/numath/nutrig.h"
 #include "legoapi/misc/supportall.h"
 #include "legoapi/render/core/screen.h"
+
+// The original unit constructs its six homogeneous vectors.
+#include "nu2api/nucore/nuvuvec.hpp"
 extern "C" i32 NuRndrBeginScene(i32 begin_flags);
 extern "C" void NuRndrEndScene(void);
 

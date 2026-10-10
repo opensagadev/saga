@@ -308,6 +308,7 @@ build:target --per_file_copt=^src/nu2api/nu3d/NuRenderDevice\.cpp$@-O2
 build:target --per_file_copt=^src/nu2api/nu3d/android/NuRenderDevice_gles2\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nu3d/android/NuGLES2Extensions\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nu3d/NuScreen\.cpp$@-O2
+build:target --per_file_copt=^src/nu2api/nu3d/NuScreen\.cpp$@-ftree-vectorize
 build:target --per_file_copt=^src/nu2api/nu3d/nugscn\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nu3d/nuspecial\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nu3d/numtl\.cpp$@-O3
@@ -363,6 +364,7 @@ build:target --per_file_copt=^src/nu2api/nucore/android/numemory_android\.cpp$@-
 build:target --per_file_copt=^src/nu2api/nufile/nufile\.c$@-O2
 build:target --per_file_copt=^src/nu2api/nufile/nufile_android\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nufile/nufilebase\.cpp$@-O2
+build:target --per_file_copt=^src/nu2api/nufile/nufilebase\.cpp$@-ftree-vectorize
 build:target --per_file_copt=^src/nu2api/nufile/tmclient\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nufile/android/nufile_android\.cpp$@-O2
 build:target --per_file_copt=^src/nu2api/numusic/numusic\.cpp$@-O2
@@ -509,3 +511,8 @@ build:target --per_file_copt=^src/legoapi/ai/game/lsw_hub_ai_stubs\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/ai/core/legoai\.cpp$@-O3
 build:target --per_file_copt=^src/MechInputTouch/MechObjectInterface\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/misc/legoapi_misc_c\.c$@-O2
+
+# These units' reference VuVec initializers are vectorized, and their functions
+# keep or improve their matches when the whole unit is optimized.
+build:target --per_file_copt=^src/legoapi/misc/legoapi_status\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/items/objects/things\.cpp$@-O3

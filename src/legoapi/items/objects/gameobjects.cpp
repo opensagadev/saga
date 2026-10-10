@@ -5928,25 +5928,6 @@ GameThingManager::~GameThingManager() {
     theGameThings = NULL;
 }
 
-HashedKey CantPickupBombTimerAddon::s_hashId;
-
-CantPickupBombTimerAddon::CantPickupBombTimerAddon(MechObjectInterface &object, float duration)
-    : MechAddon(object, s_hashId.value), remaining_time(duration) {
-    GameObject_s *character = object.GetCharacterObject();
-    if (character != NULL) {
-        character->apiobj.velocity.x += character->apiobj.velocity.x;
-        character->apiobj.velocity.z += character->apiobj.velocity.z;
-    }
-}
-
-bool CantPickupBombTimerAddon::OnProcess(MechAddon::ProcessStage, float elapsed) {
-    remaining_time -= elapsed;
-    return remaining_time > 0.0f;
-}
-
-CantPickupBombTimerAddon::~CantPickupBombTimerAddon() {
-}
-
 // BaseThing::BaseThing @0x425840 zeroes the data fields after the vptr.
 BaseThing::BaseThing() {
     this->field_0x4 = 0;

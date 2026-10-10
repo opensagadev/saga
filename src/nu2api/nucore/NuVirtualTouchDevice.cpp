@@ -5,6 +5,9 @@
 #include "nu2api/nucore/NuTouchInputButton.h"
 #include <string.h>
 
+// The original unit constructs its six homogeneous vectors.
+#include "nu2api/nucore/nuvuvec.hpp"
+
 NuTouchInputButton::NuTouchInputButton(i32 id, u32 index) : NuTouchInputElement(TYPE_BUTTON, id, index) {
     pressed = false;
 }
