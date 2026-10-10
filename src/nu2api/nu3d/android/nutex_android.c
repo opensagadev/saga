@@ -16,6 +16,9 @@
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nuplatform/nuplatform.h"
 
+// The original unit constructs its six homogeneous vectors.
+#include "nu2api/nucore/nuvuvec.hpp"
+
 #define TEX_PATH "mnt/sdcard/TTGames/com.wb.lego.tcs/files/androidTextures/"
 
 i32 NuTexCreate(NUTEX *tex) {

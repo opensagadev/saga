@@ -1,5 +1,8 @@
 #include "decomp.h"
 #include "legoapi/props/system/socksys.h"
+
+// The original unit constructs its six homogeneous vectors.
+#include "nu2api/nucore/nuvuvec.hpp"
 f32 CalculateDistanceToSpecificSideOrEnd(i32, NUVEC *, SOCKPOSITION *, i32, SOCKSYS *);
 void TurnOffAllSocksExcept(SOCKSYS *, i32);
 void RestoreLastSocksTurnoff(SOCKSYS *);

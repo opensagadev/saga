@@ -11,7 +11,7 @@ HOST_ROOTS = (SRC / "host" / "harness", SRC / "host" / "platform")
 HOST_BUILD_ALLOWLIST = {
     SRC / "decomp.h",
     SRC / "decomp.h",
-    SRC / "gameframework/saveload.cpp",
+    SRC / "gameframework/saveload.c",
     SRC / "nu2api/nucore/common.h",
 }
 SOURCE_SUFFIXES = {".c", ".cc", ".cpp", ".h", ".hh", ".hpp"}

@@ -2,6 +2,9 @@
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nuwater.h"
 
+// The original unit constructs its six homogeneous vectors.
+#include "nu2api/nucore/nuvuvec.hpp"
+
 struct nugobj_s;
 struct nugscn_s;
 struct numtx_s;

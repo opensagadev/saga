@@ -1,6 +1,9 @@
 #include "decomp.h"
 #include "nu2api/nucore/common.h"
 
+// The original unit constructs its six homogeneous vectors.
+#include "nu2api/nucore/nuvuvec.hpp"
+
 i32 ScreenDumpAviBegin(i32, char *, i32, i32, i32, i32, f32, f32, i32) {
     STUBBED();
     return 0;

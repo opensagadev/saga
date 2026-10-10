@@ -12,6 +12,9 @@
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nusound/nusound.h"
 
+// The original unit constructs its six homogeneous vectors.
+#include "nu2api/nucore/nuvuvec.hpp"
+
 extern "C" void NuInitDebrisRenderer(VARIPTR *buffer, VARIPTR buffer_end);
 extern "C" void NuIOSMtlInit(void);
 

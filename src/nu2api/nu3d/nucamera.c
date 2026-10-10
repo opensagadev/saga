@@ -7,6 +7,9 @@
 
 #include <string.h>
 
+// The original unit constructs its six homogeneous vectors.
+#include "nu2api/nucore/nuvuvec.hpp"
+
 NUMTX clip_test_mtx;
 
 extern "C" {

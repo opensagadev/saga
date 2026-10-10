@@ -4,6 +4,9 @@
 #include "nu2api/nu3d/nurndrstat.h"
 #include <string.h>
 
+// The original unit constructs its six homogeneous vectors.
+#include "nu2api/nucore/nuvuvec.hpp"
+
 // Shared immediate-mode primitive state (BSS and initialized data).
 VARIPTR *g_NuPrim_StreamBufferPtr;
 i32 g_NuPrim_VertexCount;

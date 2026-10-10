@@ -271,6 +271,20 @@ build --per_file_copt=^src/nu2api/nu3d/android/nuptl_android\.c$@-x,c++,-std=gnu
 build --per_file_copt=^src/nu2api/nu3d/android/nudlist_android\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/nu3d/android/nuhgo_android\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/nu3d/android/nurndrstat_android\.c$@-x,c++,-std=gnu++11
+# These units keep their original .c filenames (their static initializers are
+# _GLOBAL__sub_I_<name>.c) but are compiled as C++ like the units above.
+build --per_file_copt=^src/legoapi/items/base/apiobject\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/nu3d/android/nugscn_android\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/nu3d/android/nuportal_android\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/nucore/android/nuapi_android\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/nufile/numc\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/nucore/android/nupad_android\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/nu3d/android/nutex_android\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/nucore/android/nuvideo_android\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/gameframework/saveload\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/legoapi/props/system/socksysall\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/nucore/android/stubs_android\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/nucore/android/stubvideo\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/nu3d/android/nuobject_android\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/nu3d/android/nurndr_android\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/nu3d/android/nurndr\.c$@-x,c++,-std=gnu++11
@@ -475,7 +489,7 @@ build:target --per_file_copt=^src/gamelib/util/TouchHacks\.cpp$@-O3
 
 # Particle engine: original DebrisSetup2 (0x34be60, 2413 bytes) inlines matrix
 # rotation and unrolls setup loops; its game_deb initializer also matches -O3.
-# The unoptimized game API wrappers live in apiobject.cpp.
+# The unoptimized game API wrappers live in apiobject.c.
 build:target --per_file_copt=^src/legoapi/render/fx/game_deb\.cpp$@-O3
 
 build:target --per_file_copt=^src/nu2api/nuandroid/nuphoneos\.cpp$@-O2

@@ -13,6 +13,9 @@
 
 #include "export.h"
 
+// The original unit constructs its six homogeneous vectors.
+#include "nu2api/nucore/nuvuvec.hpp"
+
 #if defined(HOST_BUILD) && defined(_WIN32)
 #include <io.h>
 #include <sys/stat.h>
