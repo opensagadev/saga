@@ -1999,23 +1999,17 @@ extern "C" {
             return NULL;
         PART_s *result = NULL;
         PART_s *part = Part;
-        if (position != NULL) {
-            f32 nearest = 1000000.0f;
-            for (i32 i = 0; i < MAXPARTS; ++i, ++part) {
-                if ((part->active & 1) != 0 && (player == -1 || part->force_player_mask == player) &&
-                    (owner == NULL || part->owner == owner)) {
-                    f32 distance = NuVecDistSqr(position, &part->position, NULL);
-                    if (distance < nearest) {
-                        nearest = distance;
-                        result = part;
-                    }
-                }
-            }
-        } else {
-            for (i32 i = 0; i < MAXPARTS; ++i, ++part) {
-                if ((part->active & 1) != 0 && (player == -1 || part->force_player_mask == player) &&
-                    (owner == NULL || part->owner == owner))
+        f32 nearest = 1000000.0f;
+        for (i32 i = 0; i < MAXPARTS; ++i, ++part) {
+            if ((part->active & 1) != 0 && (player == -1 || part->force_player_mask == player) &&
+                (owner == NULL || part->owner == owner)) {
+                if (position == NULL)
                     return part;
+                f32 distance = NuVecDistSqr(position, &part->position, NULL);
+                if (distance < nearest) {
+                    nearest = distance;
+                    result = part;
+                }
             }
         }
         return result;

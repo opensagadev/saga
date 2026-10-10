@@ -2030,20 +2030,18 @@ i32 (*LastSafePosExtraFn)(GameObject_s *) = NULL;
 void CheckForPlayersTurnedOff() {
     for (i32 source_index = 0; source_index < 2; ++source_index) {
         GameObject_s *source = Player[source_index];
-        if (source == NULL || (source->apiobj.flags_high & APIOBJECT_HIGH_FLAG_CHARACTER) != 0) {
-            continue;
-        }
+        if (source != NULL && (source->apiobj.flags_high & APIOBJECT_HIGH_FLAG_CHARACTER) == 0) {
+            for (i32 target_index = 2; target_index < 8; ++target_index) {
+                GameObject_s *target = Player[target_index];
+                if (target == NULL || (target->tag_flags & 2) != 0 || (target->field_0xefb & 4) != 0 ||
+                    target->character_context == 0x24 || target->character_context == 0x1f) {
+                    continue;
+                }
 
-        for (i32 target_index = 2; target_index < 8; ++target_index) {
-            GameObject_s *target = Player[target_index];
-            if (target == NULL || (target->tag_flags & 2) != 0 || (target->field_0xefb & 4) != 0 ||
-                target->character_context == 0x24 || target->character_context == 0x1f) {
-                continue;
-            }
-
-            if (target->apiobj.field_0x27d != 0 ||
-                (target->field_0xe31 == 1 && target->apiobj.character_data->game_character->field_0x28 > 0.0f)) {
-                TagCharacter(Player[source_index], target, 1);
+                if (target->apiobj.field_0x27d != 0 ||
+                    (target->field_0xe31 == 1 && target->apiobj.character_data->game_character->field_0x28 > 0.0f)) {
+                    TagCharacter(Player[source_index], target, 1);
+                }
             }
         }
     }

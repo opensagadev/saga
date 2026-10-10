@@ -4106,21 +4106,9 @@ void PodCollisionCode(GameObject_s *object) {
     if (GamePlayTimer.time_elapsed < 1.0f) {
         return;
     }
-    if (object->apiobj.field_0x27c == -1) {
-        return;
-    }
-    if (static_cast<i8>(object->apiobj.flags_low) >= 0) {
-        return;
-    }
-    if (object->field_0x1084 == 0) {
-        return;
-    }
-    if (object->contact_normal.y > 0.574f || object->contact_normal.y < -0.574f) {
-        return;
-    }
-
-    if (PODSPRINT_ADATA != NULL) {
-        if (WORLD->area == PODSPRINT_ADATA) {
+    if (object->apiobj.field_0x27c != -1 && static_cast<i8>(object->apiobj.flags_low) < 0 &&
+        object->field_0x1084 != 0 && object->contact_normal.y <= 0.574f && object->contact_normal.y >= -0.574f) {
+        if (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA) {
             AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[PODSPRINTDEB].effect,
                                               &object->contact_position, 50, FRAMETIME, 0, 0, NULL);
             if (qrand() <= 0x7fff) {
@@ -4128,14 +4116,14 @@ void PodCollisionCode(GameObject_s *object) {
             }
             return;
         }
-    }
 
-    magdif = (1.0f / object->pre_terrain_speed) * object->post_terrain_speed;
-    if (1.0f > magdif) {
-        if (0.999f > magdif) {
-            ObjHitObj(NULL, object, 1, 0, 0, 1);
+        magdif = (1.0f / object->pre_terrain_speed) * object->post_terrain_speed;
+        if (1.0f > magdif) {
+            if (0.999f > magdif) {
+                ObjHitObj(NULL, object, 1, 0, 0, 1);
+            }
+            PodLoseSpeed(object, 0, 0);
         }
-        PodLoseSpeed(object, 0, 0);
     }
 }
 
@@ -6971,10 +6959,11 @@ void MoveToMarker::Process(float frame_time) {
 
 void MoveToMarker::Render() {
     NUVEC draw_position = {position.x, position.y, position.z};
+    NUMTX_ALIGNED16 ping_matrix;
+    NUMTX_ALIGNED16 text_matrix;
     if (temporary_target) {
         MechSystems *systems = MechSystems::Get();
         if (systems->location_ping_material != NULL) {
-            NUMTX_ALIGNED16 ping_matrix;
             NUVEC ping_scale = {radius.value, radius.value, radius.value};
             NuMtxSetRotationY(&ping_matrix, 0);
             NuMtxRotateX(&ping_matrix, 0x4000);
@@ -6986,33 +6975,32 @@ void MoveToMarker::Render() {
             RndrTexQuad3D(reinterpret_cast<VuMtx const &>(ping_matrix), ping_colour, systems->location_ping_material);
         }
     }
-    if (field_108_0) {
-        return;
+    if (!field_108_0) {
+
+        draw_position.y = NuTrigTable[(static_cast<i32>(rotation.value) >> 1) & 0x7fff] * 0.1f + height + position.y +
+                          NuTrigTable[(field_100 >> 1) & 0x7fff] * 0.005f;
+        const f32 marker_scale =
+            (NuTrigTable[(static_cast<i32>(secondary_rotation.value) >> 1) & 0x7fff] * 0.25f + 1.0f) * 0.1f;
+        NUVEC text_scale = {marker_scale, marker_scale, marker_scale};
+        NuMtxSetRotationY(&text_matrix, field_fc);
+        NuMtxScale(&text_matrix, &text_scale);
+        NuMtxTranslate(&text_matrix, &draw_position);
+
+        extern char *ASCII_DOWN;
+        NuQFntPushPrintMode(4);
+        NuQFntSet(QFont3DZ);
+        NuQFntSetMtx(QFont3DZ, &text_matrix);
+        NuQFntSetCoordinateSystem(NUQFNT_CSMODE_ABSOLUTE);
+        const i32 colour = static_cast<u8>(static_cast<i32>(this->colour.value.x)) |
+                           (static_cast<u8>(static_cast<i32>(this->colour.value.y)) << 8) |
+                           (static_cast<u8>(static_cast<i32>(this->colour.value.z)) << 16) |
+                           (static_cast<i32>(scale.value * 255.0f) << 24);
+        NuQFntSetColour(QFont3DZ, colour);
+        NuQFntSetScale(QFont3DZ, 0.0375f, 0.05f);
+        NuQFntMove(QFont3DZ, NuQFntPrintLenU(QFont3DZ, ASCII_DOWN) * -0.5f, 0.0f, 0.0f);
+        NuQFntPrintU(QFont3DZ, ASCII_DOWN);
+        NuQFntPopPrintMode();
     }
-
-    draw_position.y = position.y + height + NuTrigTable[(static_cast<i32>(rotation.value) >> 1) & 0x7fff] * 0.1f +
-                      NuTrigTable[(field_100 >> 1) & 0x7fff] * 0.005f;
-    const f32 marker_scale =
-        (NuTrigTable[(static_cast<i32>(secondary_rotation.value) >> 1) & 0x7fff] * 0.25f + 1.0f) * 0.1f;
-    NUVEC text_scale = {marker_scale, marker_scale, marker_scale};
-    NUMTX_ALIGNED16 text_matrix;
-    NuMtxSetRotationY(&text_matrix, field_fc);
-    NuMtxScale(&text_matrix, &text_scale);
-    NuMtxTranslate(&text_matrix, &draw_position);
-
-    extern char *ASCII_DOWN;
-    NuQFntPushPrintMode(4);
-    NuQFntSet(QFont3DZ);
-    NuQFntSetMtx(QFont3DZ, &text_matrix);
-    NuQFntSetCoordinateSystem(NUQFNT_CSMODE_ABSOLUTE);
-    const i32 colour =
-        (static_cast<i32>(scale.value * 255.0f) << 24) | ((static_cast<i32>(this->colour.value.z) & 0xff) << 16) |
-        ((static_cast<i32>(this->colour.value.y) & 0xff) << 8) | (static_cast<i32>(this->colour.value.x) & 0xff);
-    NuQFntSetColour(QFont3DZ, colour);
-    NuQFntSetScale(QFont3DZ, 0.0375f, 0.05f);
-    NuQFntMove(QFont3DZ, NuQFntPrintLenU(QFont3DZ, ASCII_DOWN) * -0.5f, 0.0f, 0.0f);
-    NuQFntPrintU(QFont3DZ, ASCII_DOWN);
-    NuQFntPopPrintMode();
 }
 
 extern u8 show_lever_hint;
