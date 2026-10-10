@@ -234,10 +234,10 @@ static void GizPanel_Draw(void *world_ptr, void *, float) {
             NuSpecialConstTint(1, &special_tint);
         }
 
-        if ((panel.draw_flags & GIZPANEL_DRAW_FLAG_NO_SHADOW_RESET) != 0) {
-            ResetShadowMapRendering();
-        } else {
+        if ((panel.draw_flags & GIZPANEL_DRAW_FLAG_NO_SHADOW_RESET) == 0) {
             EnableShadowMapRendering(0);
+        } else {
+            ResetShadowMapRendering();
         }
 
         PANEL_MODELS models = {-1, -1, -1, -1, -1, -1, -1, {0.0f, 0.0f, 0.0f}};

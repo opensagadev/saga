@@ -199,16 +199,7 @@ void DrawPauseScreenWipe() {
     u32 colours[4];
 
     if ((FadeSys.direction & 3) != 0) {
-        if ((FadeSys.direction & 1) == 0) {
-            const f32 fade = FadeSys.fade;
-            width = static_cast<i32>(fade * 10240.0f);
-            colours[0] = 0x80808080u;
-            colours[1] = 0x00808080u;
-            colours[2] = 0x80808080u;
-            colours[3] = 0x00808080u;
-            NuRndrGradRectUV2di(width, 0, 0x400, 0xe00, fade, 1.0f, fade + 0.1f, 0.0f, colours, pause_rndr_mtl);
-            u1 = fade;
-        } else {
+        if ((FadeSys.direction & 1) != 0) {
             const f32 fade = FadeSys.fade;
             u0 = 1.0f - fade;
             x = static_cast<i32>(u0 * 10240.0f);
@@ -218,19 +209,18 @@ void DrawPauseScreenWipe() {
             colours[2] = 0x00808080u;
             colours[3] = 0x80808080u;
             NuRndrGradRectUV2di(x - 0x400, 0, 0x400, 0xe00, u0 - 0.1f, 1.0f, u0, 0.0f, colours, pause_rndr_mtl);
+        } else {
+            const f32 fade = FadeSys.fade;
+            width = static_cast<i32>(fade * 10240.0f);
+            colours[0] = 0x80808080u;
+            colours[1] = 0x00808080u;
+            colours[2] = 0x80808080u;
+            colours[3] = 0x00808080u;
+            NuRndrGradRectUV2di(width, 0, 0x400, 0xe00, fade, 1.0f, fade + 0.1f, 0.0f, colours, pause_rndr_mtl);
+            u1 = fade;
         }
     } else if ((FadeSys.direction & 0xc) != 0) {
-        if ((FadeSys.direction & 4) == 0) {
-            const f32 fade = FadeSys.fade;
-            height = static_cast<i32>(fade * 3584.0f);
-            colours[0] = 0x80808080u;
-            colours[1] = 0x80808080u;
-            colours[2] = 0x00808080u;
-            colours[3] = 0x00808080u;
-            NuRndrGradRectUV2di(0, height, 0x2800, 0x166, 0.0f, 1.0f - fade, 1.0f, 1.0f - (fade + 0.1f), colours,
-                                pause_rndr_mtl);
-            v1 = 1.0f - fade;
-        } else {
+        if ((FadeSys.direction & 4) != 0) {
             const f32 fade = FadeSys.fade;
             const f32 edge = 1.0f - fade;
             y = static_cast<i32>(edge * 3584.0f);
@@ -242,6 +232,16 @@ void DrawPauseScreenWipe() {
             NuRndrGradRectUV2di(0, y - 0x166, 0x2800, 0x166, 0.0f, 1.0f - (edge - 0.1f), 1.0f, 1.0f - edge, colours,
                                 pause_rndr_mtl);
             v0 = 1.0f - edge;
+        } else {
+            const f32 fade = FadeSys.fade;
+            height = static_cast<i32>(fade * 3584.0f);
+            colours[0] = 0x80808080u;
+            colours[1] = 0x80808080u;
+            colours[2] = 0x00808080u;
+            colours[3] = 0x00808080u;
+            NuRndrGradRectUV2di(0, height, 0x2800, 0x166, 0.0f, 1.0f - fade, 1.0f, 1.0f - (fade + 0.1f), colours,
+                                pause_rndr_mtl);
+            v1 = 1.0f - fade;
         }
     }
 
@@ -273,12 +273,12 @@ void DrawStillScreen(i32 clear) {
     if (clear != 0) {
         NuRndrClear(0x500, 0, 1.0f);
     }
-    if (!(MainRenderTime < 1.0f)) {
-        NuRndrRectUV2di(0, 0, 0x2800, 0xe00, 0.0f, 1.0f, 1.0f, 0.0f, 0x80808080u, pause_rndr_mtl);
-    } else {
+    if (MainRenderTime < 1.0f) {
         const u32 colour = (static_cast<i32>(MainRenderTime * 128.0f) << 24) | 0x00808080u;
         u32 colours[4] = {colour, colour, colour, colour};
         NuRndrGradRectUV2di(0, 0, 0x2800, 0xe00, 0.0f, 1.0f, 1.0f, 0.0f, colours, pause_rndr_mtl);
+    } else {
+        NuRndrRectUV2di(0, 0, 0x2800, 0xe00, 0.0f, 1.0f, 1.0f, 0.0f, 0x80808080u, pause_rndr_mtl);
     }
     NuRndrEndScene();
 }

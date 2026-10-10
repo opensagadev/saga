@@ -145,15 +145,15 @@ void Cheats_TurnOff(i32 cheat) {
     i32 count = CheatSystem.cheats_count;
     if (count > 0) {
         CHEAT *cheats = CheatSystem.cheats;
-        if (cheat != 0) {
+        if (cheat == 0) {
+            for (i32 i = 0; i < count; i++) {
+                cheats[i].enabled = 0;
+            }
+        } else {
             for (i32 i = 0; i < count; i++) {
                 if (cheats[i].flag & 0x200000) {
                     cheats[i].enabled = 0;
                 }
-            }
-        } else {
-            for (i32 i = 0; i < count; i++) {
-                cheats[i].enabled = 0;
             }
         }
     }

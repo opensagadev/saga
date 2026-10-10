@@ -63,10 +63,10 @@ void LevelStreaming_Update(WORLDINFO_s *world) {
                         } else if (LEGOSPL_SPLIT != -1 && world->camera_splines[LEGOSPL_SPLIT] != NULL) {
                             NUVEC *points = world->camera_splines[LEGOSPL_SPLIT]->pts;
                             if (InsideLineXZ(position.x, position.z, points[0].x, points[0].z, points[1].x,
-                                             points[1].z) != 0) {
-                                other_level = first_level;
-                            } else {
+                                             points[1].z) == 0) {
                                 other_level = second_level;
+                            } else {
+                                other_level = first_level;
                             }
                         }
                     }

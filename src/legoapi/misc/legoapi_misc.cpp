@@ -61,11 +61,11 @@ void CurrentStart(GameObject_s *object, i32 require_twist_level, i32 use_socket_
     const f32 multiplier =
         (object->field_0xf02 & 0x20) == 0 ? object->current_speed_mul : object->current_speed_multiplier;
     current.z *= multiplier;
-    if (use_socket_rotation == 0) {
-        NuVecRotateY(&object->apiobj.velocity, &object->apiobj.velocity, object->apiobj.field_0x276);
-    } else {
+    if (use_socket_rotation != 0) {
         NuVecRotateX(&object->apiobj.velocity, &current, object->sock_position.midpoint_rotation.x);
         NuVecRotateY(&object->apiobj.velocity, &object->apiobj.velocity, object->sock_position.midpoint_rotation.y);
+    } else {
+        NuVecRotateY(&object->apiobj.velocity, &object->apiobj.velocity, object->apiobj.field_0x276);
     }
     reinterpret_cast<u8 *>(object)[0x4a6] &= static_cast<u8>(~4u);
     object->target_velocity = object->apiobj.velocity;

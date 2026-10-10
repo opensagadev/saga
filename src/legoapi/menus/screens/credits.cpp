@@ -216,30 +216,7 @@ void Credits_DrawPanel(WORLDINFO_s *) {
 void Credits_UpdateMenu(MENU_s *menu) {
     f32 volume = Game_OptionsSave != NULL ? GameSetMusicVolume(Game_OptionsSave) : 1.0f;
     f32 previous_time = CreditsTime;
-    if (CreditsFlag == 0) {
-        if (FadeSys.fade == 0.0f) {
-            CreditsTime += FRAMETIME;
-        }
-        if (CreditsFinishedTime > 0.0f) {
-            CreditsFinishedTime += FRAMETIME;
-            if (CreditsFinishedTime >= 1.1f) {
-                CreditsFlag = 1;
-                CreditsAlpha = 0.0f;
-                CreditsTime = 0.0f;
-            }
-            if (CreditsAlpha > 0.0f) {
-                CreditsAlpha -= FRAMETIME;
-                if (CreditsAlpha < 0.0f) {
-                    CreditsAlpha = 0.0f;
-                }
-            }
-        } else if ((menu->buttons_pressed & GAMEPAD_SKIP) != 0 || CreditsTime >= Credits_Duration ||
-                   MechSystems::SkipTextScroll != 0) {
-            CreditsFinishedTime = 0.001f;
-            MechSystems::Get()->UnhookClickToPressStart();
-        }
-        legoSetMusicVolume(CreditsAlpha * volume);
-    } else {
+    if (CreditsFlag != 0) {
         legoSetMusicVolume(0.0f);
         CreditsTime += FRAMETIME;
         f32 progress;
@@ -274,5 +251,28 @@ void Credits_UpdateMenu(MENU_s *menu) {
             }
         }
         CreditsAlpha = NuTrigTable[(static_cast<i32>(progress * 16384.0f) >> 1) & 0x7fff];
+    } else {
+        if (FadeSys.fade == 0.0f) {
+            CreditsTime += FRAMETIME;
+        }
+        if (CreditsFinishedTime > 0.0f) {
+            CreditsFinishedTime += FRAMETIME;
+            if (CreditsFinishedTime >= 1.1f) {
+                CreditsFlag = 1;
+                CreditsAlpha = 0.0f;
+                CreditsTime = 0.0f;
+            }
+            if (CreditsAlpha > 0.0f) {
+                CreditsAlpha -= FRAMETIME;
+                if (CreditsAlpha < 0.0f) {
+                    CreditsAlpha = 0.0f;
+                }
+            }
+        } else if ((menu->buttons_pressed & GAMEPAD_SKIP) != 0 || CreditsTime >= Credits_Duration ||
+                   MechSystems::SkipTextScroll != 0) {
+            CreditsFinishedTime = 0.001f;
+            MechSystems::Get()->UnhookClickToPressStart();
+        }
+        legoSetMusicVolume(CreditsAlpha * volume);
     }
 }

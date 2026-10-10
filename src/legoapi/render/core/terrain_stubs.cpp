@@ -408,13 +408,13 @@ extern "C" void TerrainPlatformNewUpdate(void) {
             platform.bounce_frames = 128;
         platform.field_0x44 = 0;
         platform.flags &= ~TERRAIN_PLATFORM_FLAG_COLLIDED;
-        if ((flags & TERRAIN_PLATFORM_FLAG_ROTATING) == 0) {
-            if (group.bounds_min.x + group.origin.x > max_x || group.origin.x + group.bounds_max.x < min_x ||
-                group.bounds_min.z + group.origin.z > max_z || group.origin.z + group.bounds_max.z < min_z)
-                continue;
-        } else {
+        if ((flags & TERRAIN_PLATFORM_FLAG_ROTATING) != 0) {
             if (group.origin.x - group.radius > max_x || group.origin.x + group.radius < min_x ||
                 group.origin.z - group.radius > max_z || group.origin.z + group.radius < min_z)
+                continue;
+        } else {
+            if (group.bounds_min.x + group.origin.x > max_x || group.origin.x + group.bounds_max.x < min_x ||
+                group.bounds_min.z + group.origin.z > max_z || group.origin.z + group.bounds_max.z < min_z)
                 continue;
         }
         if (CurTerr->active_platform_count < 96)

@@ -99,7 +99,10 @@ void CheckMissionEnd(MISSIONSYS *ms) {
         return;
     }
 
-    if (obj == NULL) {
+    if (obj != NULL) {
+        lo = obj->apiobj.field_0x1e4;
+        hi = obj->apiobj.field_0x1e8;
+    } else {
         lo = 0;
         hi = 0;
         for (i = 0; i < HIGHGAMEOBJECT; i++) {
@@ -110,9 +113,6 @@ void CheckMissionEnd(MISSIONSYS *ms) {
                 hi |= candidate->apiobj.field_0x1e8;
             }
         }
-    } else {
-        lo = obj->apiobj.field_0x1e4;
-        hi = obj->apiobj.field_0x1e8;
     }
 
     for (i = 0; i < 8; i++) {

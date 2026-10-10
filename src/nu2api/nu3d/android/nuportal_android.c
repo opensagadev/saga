@@ -39,7 +39,9 @@ extern "C" void clipRoomAgainstFrustrum(NUGSCN *scene, NUROOM *room, NUFRUSTRUM 
                 if ((((u8)PortalVisiFlags[instance_index >> 3] >> (instance_index & 7)) & 1) == 0) {
                     if ((((u8)scene->display_list->portal_visibility_overrides[instance_index >> 3] >>
                           (instance_index & 7)) &
-                         1) == 0) {
+                         1) != 0) {
+                        PortalVisiFlags[instance_index >> 3] |= 1 << (instance_index & 7);
+                    } else {
                         if ((scene->display_list->visibility_flags[instance_index] & NUDL_INSTANCE_FLAG_VISIBLE) != 0) {
                             if ((scene->display_list->visibility_flags[instance_index] &
                                  NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) != 0) {
@@ -52,8 +54,6 @@ extern "C" void clipRoomAgainstFrustrum(NUGSCN *scene, NUROOM *room, NUFRUSTRUM 
                                 }
                             }
                         }
-                    } else {
-                        PortalVisiFlags[instance_index >> 3] |= 1 << (instance_index & 7);
                     }
                 }
             }
@@ -65,7 +65,9 @@ extern "C" void clipRoomAgainstFrustrum(NUGSCN *scene, NUROOM *room, NUFRUSTRUM 
                 if ((((u8)PortalVisiFlags[instance_index >> 3] >> (instance_index & 7)) & 1) == 0) {
                     if ((((u8)scene->display_list->portal_visibility_overrides[instance_index >> 3] >>
                           (instance_index & 7)) &
-                         1) == 0) {
+                         1) != 0) {
+                        PortalVisiFlags[instance_index >> 3] |= 1 << (instance_index & 7);
+                    } else {
                         if ((scene->display_list->visibility_flags[instance_index] &
                              NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) != 0) {
                             PortalVisiFlags[instance_index >> 3] |= 1 << (instance_index & 7);
@@ -87,8 +89,6 @@ extern "C" void clipRoomAgainstFrustrum(NUGSCN *scene, NUROOM *room, NUFRUSTRUM 
                                     break;
                             }
                         }
-                    } else {
-                        PortalVisiFlags[instance_index >> 3] |= 1 << (instance_index & 7);
                     }
                 }
             }

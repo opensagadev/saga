@@ -480,15 +480,7 @@ void NuSoundStreamingSample::Unlock() {
 }
 
 void NuSoundStreamingSample::RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBufferCallback> callback) {
-    if (this->some_count <= this->field8_0x90) {
-        // The next slot in the ring still has to be filled on the streamer
-        // thread; the voice gets it once the fill completes.
-        NuSoundBuffer *buffer = (&this->sound_buffer1)[this->some_count % 2];
-
-        this->streamer->RequestFill(this, buffer, loop,
-                                    NuSoundWeakPtr<NuSoundBufferCallback>((NuSoundBufferCallback *)callback.obj));
-        this->some_count++;
-    } else {
+    if (!(this->some_count <= this->field8_0x90)) {
         // A buffer already holds decoded data: hand it to the voice directly.
         NuSoundBuffer *buffer = (&this->sound_buffer1)[this->field8_0x90 % 2];
         NuSoundWeakPtrListNode::sPtrAccessLock.Lock();
@@ -496,6 +488,14 @@ void NuSoundStreamingSample::RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBuff
             ((NuSoundBufferCallback *)callback.obj)->SubmitBuffer(buffer);
         }
         NuSoundWeakPtrListNode::sPtrAccessLock.Unlock();
+    } else {
+        // The next slot in the ring still has to be filled on the streamer
+        // thread; the voice gets it once the fill completes.
+        NuSoundBuffer *buffer = (&this->sound_buffer1)[this->some_count % 2];
+
+        this->streamer->RequestFill(this, buffer, loop,
+                                    NuSoundWeakPtr<NuSoundBufferCallback>((NuSoundBufferCallback *)callback.obj));
+        this->some_count++;
     }
 
     this->field8_0x90++;

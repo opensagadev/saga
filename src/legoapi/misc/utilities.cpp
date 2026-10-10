@@ -304,11 +304,11 @@ void MakeThrowVector(NUVEC *result, NUVEC *origin, NUVEC *target, NUVEC *target_
 i32 OnOrInsidePlane(nuvec_s *point, nuvec_s *plane_point, nuvec_s *plane_normal, nuvec_s *corrected_point,
                     float normal_offset, float *distance_out) {
     NUVEC test_point;
-    if (normal_offset != 0.0f) {
+    if (normal_offset == 0.0f) {
+        test_point = *point;
+    } else {
         NuVecScale(&test_point, plane_normal, normal_offset);
         NuVecAdd(&test_point, &test_point, point);
-    } else {
-        test_point = *point;
     }
 
     const f32 distance = (test_point.x - plane_point->x) * plane_normal->x +
@@ -513,14 +513,14 @@ f32 LineToPointDistance(VuVec &origin, VuVec &direction, VuVec &point, VuVec *cl
 
     VuVec on_segment = origin;
     if (projection > 0.0f) {
-        if (projection >= length) {
-            on_segment.x += direction.x;
-            on_segment.y += direction.y;
-            on_segment.z += direction.z;
-        } else {
+        if (!(projection >= length)) {
             on_segment.x += nx * projection;
             on_segment.y += ny * projection;
             on_segment.z += nz * projection;
+        } else {
+            on_segment.x += direction.x;
+            on_segment.y += direction.y;
+            on_segment.z += direction.z;
         }
         on_segment.w = 0.0f;
     }

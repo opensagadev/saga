@@ -217,7 +217,13 @@ void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s 
             NuStrCat(path, "\\");
             NuStrCat(path, piece_name);
 
-            if (category->uses_special == 0) {
+            if (category->uses_special != 0) {
+                NuStrCat(path, ".gsc");
+                resource->scene = NuGScnRead(&characterbuffer_ptr, characterbuffer_end, path);
+                if (resource->scene != NULL) {
+                    NuSpecialFind(resource->scene, &resource->special, piece_name, 1);
+                }
+            } else {
                 if (category->material_tag == -1) {
                     continue;
                 }
@@ -237,12 +243,6 @@ void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s 
                     resource->original_texture_id = material->tex_id;
                     material->tex_id = static_cast<i16>(resource->texture_id);
                     NuMtlUpdate(material);
-                }
-            } else {
-                NuStrCat(path, ".gsc");
-                resource->scene = NuGScnRead(&characterbuffer_ptr, characterbuffer_end, path);
-                if (resource->scene != NULL) {
-                    NuSpecialFind(resource->scene, &resource->special, piece_name, 1);
                 }
             }
         }

@@ -738,10 +738,10 @@ i32 Action_GameFollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET
                 if (player != NULL && player2 != NULL) {
                     f32 first = NuVecDist(&packet->owner->apiobj.position, &player->apiobj.position, NULL);
                     f32 second = NuVecDist(&packet->owner->apiobj.position, &player2->apiobj.position, NULL);
-                    if (second < first) {
-                        processor->action_data_3 = player2;
-                    } else {
+                    if (!(second < first)) {
                         processor->action_data_3 = player;
+                    } else {
+                        processor->action_data_3 = player2;
                     }
                 } else {
                     processor->action_data_3 = player;
@@ -1042,17 +1042,7 @@ i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKE
         // the other end. Keep that slot as the fallback after both legs.
         while (true) {
             candidate += direction;
-            if (looping) {
-                if (candidate >= locator_set->locator_count) {
-                    if (finish_at_end) {
-                        object->apiobj.ai->locator = NULL;
-                        return 1;
-                    }
-                    candidate = 0;
-                } else if (candidate < 0) {
-                    candidate = locator_set->locator_count - 1;
-                }
-            } else {
+            if (!looping) {
                 if (candidate >= locator_set->locator_count) {
                     if (finish_at_end) {
                         object->apiobj.ai->locator = NULL;
@@ -1065,6 +1055,16 @@ i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKE
                     target->field_0x1fa &= static_cast<u8>(~0x10);
                     direction = 1;
                     candidate = 1;
+                }
+            } else {
+                if (candidate >= locator_set->locator_count) {
+                    if (finish_at_end) {
+                        object->apiobj.ai->locator = NULL;
+                        return 1;
+                    }
+                    candidate = 0;
+                } else if (candidate < 0) {
+                    candidate = locator_set->locator_count - 1;
                 }
             }
             if (candidate == current_index) {

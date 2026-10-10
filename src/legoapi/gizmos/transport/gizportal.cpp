@@ -283,10 +283,10 @@ void PortalDoors_Update(WORLDINFO_s *world) {
             const f32 end_frame = NuAnimEndFrameOld(door->special.scene->instance_animation_data[animation->anim_ix]);
             const u16 flags = door->flags;
             bool closed = false;
-            if ((flags & PORTALDOOR_TRIGGER_AT_END) == 0) {
-                closed = !(animation->ltime > 1.0f);
-            } else {
+            if ((flags & PORTALDOOR_TRIGGER_AT_END) != 0) {
                 closed = !(animation->ltime >= end_frame);
+            } else {
+                closed = !(animation->ltime > 1.0f);
             }
 
             if (closed) {

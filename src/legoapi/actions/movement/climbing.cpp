@@ -96,15 +96,7 @@ void Climb_MoveCode(GameObject_s *object) {
     }
     if (object->character_context != LEGOCONTEXT_CLIMB)
         return;
-    if (object->field_0x7a6 == 5) {
-        Climb_SetMagnetAction(object);
-        Climb_SetMagnetDrawOffsetTarget(object, &object->zipup_swing_position);
-        object->movement_runtime_flags |= 0x20;
-        if (object->pad_gamepad->input_magnitude > 0.0f)
-            object->tertiary_lean_angle =
-                SeekRot(object->tertiary_lean_angle,
-                        static_cast<u16>(RotDiff(object->apiobj.movement_facing_angle, input_angle)), 9.0f);
-    } else {
+    if (object->field_0x7a6 != 5) {
         if (object->pad_gamepad->input_magnitude > 0.0f) {
             i32 difference =
                 RotDiff(object->apiobj.movement_facing_angle, GamePad_InputAngle(object, object->pad_gamepad));
@@ -115,6 +107,14 @@ void Climb_MoveCode(GameObject_s *object) {
                 return;
         }
         object->context_animation = LEGOACT_CLIMB_IDLE;
+    } else {
+        Climb_SetMagnetAction(object);
+        Climb_SetMagnetDrawOffsetTarget(object, &object->zipup_swing_position);
+        object->movement_runtime_flags |= 0x20;
+        if (object->pad_gamepad->input_magnitude > 0.0f)
+            object->tertiary_lean_angle =
+                SeekRot(object->tertiary_lean_angle,
+                        static_cast<u16>(RotDiff(object->apiobj.movement_facing_angle, input_angle)), 9.0f);
     }
 }
 

@@ -56,14 +56,14 @@ void Detonators_Draw() {
         NuSpecialDrawAt(&WORLD->lev_objs[0xec].special, &matrix);
 
         const bool flicker_on = PickUpFlickerTest <= PickupFlickerFrame % PickUpFlickerFrames;
-        if (flicker_on ||
-            (!(detonator.timer >= 10.0f) && (detonator.object == NULL || detonator.object->apiobj.field_0x287 != 0 ||
-                                             !(detonator.object->field_0xde0 >= 0.3f)))) {
-            if (WORLD->lev_objs[0xee].active)
-                detonator.draw_result = NuSpecialDrawAt(&WORLD->lev_objs[0xee].special, &matrix);
-        } else {
+        if (!flicker_on &&
+            !(!(detonator.timer >= 10.0f) && (detonator.object == NULL || detonator.object->apiobj.field_0x287 != 0 ||
+                                              !(detonator.object->field_0xde0 >= 0.3f)))) {
             if (WORLD->lev_objs[0xef].active)
                 detonator.draw_result = NuSpecialDrawAt(&WORLD->lev_objs[0xef].special, &matrix);
+        } else {
+            if (WORLD->lev_objs[0xee].active)
+                detonator.draw_result = NuSpecialDrawAt(&WORLD->lev_objs[0xee].special, &matrix);
         }
     }
 }
