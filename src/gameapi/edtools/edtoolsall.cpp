@@ -446,10 +446,7 @@ void edanimDoInput(nupad_s *pad) {
             }
         }
         if (edanim_particle_mode != 0) {
-            if (edanim_nearest_particle == -1) {
-                if (!particle_selection_started)
-                    edanimDetermineNearestParticle(-1.0f);
-            } else {
+            if (edanim_nearest_particle != -1) {
                 auto &param = AnimParams[edanim_nearest_param_id];
                 if (pressed & 0x8) {
                     if (++edanim_nearest_particle == param.effect_count)
@@ -459,6 +456,9 @@ void edanimDoInput(nupad_s *pad) {
                     if (--edanim_nearest_particle == -1)
                         edanim_nearest_particle = param.effect_count - 1;
                 }
+            } else {
+                if (!particle_selection_started)
+                    edanimDetermineNearestParticle(-1.0f);
             }
             if (edanim_nearest_particle != -1) {
                 nuhspecial_s special;
@@ -498,9 +498,7 @@ void edanimDoInput(nupad_s *pad) {
                 edanim_sound_type = param.sound_ids[edanim_nearest_sound];
             }
         } else {
-            if (edanim_nearest == -1) {
-                edanimDetermineNearestAnim(-1.0f);
-            } else {
+            if (edanim_nearest != -1) {
                 if (pressed & 0x8) {
                     if (++edanim_nearest == NuGScnNumSpecials(edbits_base_scene))
                         edanim_nearest = 0;
@@ -509,6 +507,8 @@ void edanimDoInput(nupad_s *pad) {
                     if (--edanim_nearest == -1)
                         edanim_nearest = NuGScnNumSpecials(edbits_base_scene) - 1;
                 }
+            } else {
+                edanimDetermineNearestAnim(-1.0f);
             }
             if (edanim_nearest != -1) {
                 nuhspecial_s special;
@@ -1994,11 +1994,11 @@ void edanimDrawCursor() {
             }
         } else if (edanim_sound_mode != 0) {
             NuQFntPrintEx(system_qfont, 0x1810, 0xc30, 0x10, "Sounds: %d (Max %d)", param.sound_count, 8);
-            if (edanim_sound_type != -1) {
+            if (edanim_sound_type == -1) {
+                NuQFntPrintEx(system_qfont, 0x1810, 0xcd0, 0x10, "Select Type: <none>");
+            } else {
                 NuQFntPrintEx(system_qfont, 0x1810, 0xcd0, 0x10, "Select Type: %s",
                               edbitsGetSoundName(edanim_sound_type));
-            } else {
-                NuQFntPrintEx(system_qfont, 0x1810, 0xcd0, 0x10, "Select Type: <none>");
             }
         }
     }
@@ -4263,17 +4263,7 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
     }
 
     if (stream.mode == 1) {
-        if (stream.version <= 3) {
-            for (i32 index = 0; index < source_registry->class_count; ++index) {
-                EdClass *source_class = source_registry->GetClass(index);
-                EdClass *object_class = GetClass(MapName(source_class->name));
-                if (object_class != NULL && object_class->interface != NULL) {
-                    if (stream.BeginBlock("ObjectList") != NULL)
-                        read_objects(object_class, source_class);
-                    stream.EndBlock();
-                }
-            }
-        } else {
+        if (!(stream.version <= 3)) {
             i32 count;
             stream.SerialiseBuffer(&count, sizeof(count), 1);
             for (i32 index = 0; index < count; ++index) {
@@ -4286,6 +4276,16 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
                         read_objects(object_class, source_class);
                 }
                 stream.EndBlock();
+            }
+        } else {
+            for (i32 index = 0; index < source_registry->class_count; ++index) {
+                EdClass *source_class = source_registry->GetClass(index);
+                EdClass *object_class = GetClass(MapName(source_class->name));
+                if (object_class != NULL && object_class->interface != NULL) {
+                    if (stream.BeginBlock("ObjectList") != NULL)
+                        read_objects(object_class, source_class);
+                    stream.EndBlock();
+                }
             }
         }
     }

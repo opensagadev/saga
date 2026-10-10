@@ -205,10 +205,10 @@ initialise_slot:
     slot->active = 1;
     slot->field_0xfc = message->field_0x4f;
     slot->icon = static_cast<u16>(message->icon);
-    if (message->special != NULL) {
-        slot->special = *message->special;
-    } else {
+    if (message->special == NULL) {
         slot->special = nuhspecial_s();
+    } else {
+        slot->special = *message->special;
     }
 
     slot->field_0xfd = static_cast<u8>(message->player_index);

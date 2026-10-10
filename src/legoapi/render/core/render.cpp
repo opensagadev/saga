@@ -856,7 +856,22 @@ void DrawCables() {
         }
 
         f32 distance_along = 0.0f;
-        if (cable.slack != 0.0f) {
+        if (cable.slack == 0.0f) {
+            for (i32 segment = 0; segment < cable.point_count - 1; ++segment) {
+                const f32 start_fraction = NuFdiv(distance_along, cable.total_length);
+                start = cable.points[segment];
+                start.y = start_fraction * y_span + cable.points[0].y;
+                distance_along += cable.segment_lengths[segment];
+                const f32 end_fraction = NuFdiv(distance_along, cable.total_length);
+                end = cable.points[segment + 1];
+                end.y = y_span * end_fraction + cable.points[0].y;
+                if (solid_cable != 0) {
+                    DrawRopeSingle(&start, &end, 1.0f, ropemtl, end_fraction, end_fraction, 10.0f, 5.0f);
+                } else {
+                    NuRndrLine3d(vertices, SolidMtl3D, NULL);
+                }
+            }
+        } else {
             const f32 subdivision_scale = cable.total_length * nsegments_per_unit;
             NUVEC endpoint = cable.points[0];
             endpoint.y = y_span * 0.0f + cable.points[0].y;
@@ -904,30 +919,15 @@ void DrawCables() {
                     if (end.y < end_floor) {
                         end.y = end_floor;
                     }
-                    if (solid_cable == 0) {
-                        NuRndrLine3d(vertices, SolidMtl3D, NULL);
-                    } else {
+                    if (solid_cable != 0) {
                         DrawRopeSingle(&start, &end, 1.0f, ropemtl, end_sag, end_sag, 10.0f, 5.0f);
+                    } else {
+                        NuRndrLine3d(vertices, SolidMtl3D, NULL);
                     }
                     ++nsegments_drawn;
                 }
                 distance_along += cable.segment_lengths[segment];
                 ground_start = ground_end;
-            }
-        } else {
-            for (i32 segment = 0; segment < cable.point_count - 1; ++segment) {
-                const f32 start_fraction = NuFdiv(distance_along, cable.total_length);
-                start = cable.points[segment];
-                start.y = start_fraction * y_span + cable.points[0].y;
-                distance_along += cable.segment_lengths[segment];
-                const f32 end_fraction = NuFdiv(distance_along, cable.total_length);
-                end = cable.points[segment + 1];
-                end.y = y_span * end_fraction + cable.points[0].y;
-                if (solid_cable == 0) {
-                    NuRndrLine3d(vertices, SolidMtl3D, NULL);
-                } else {
-                    DrawRopeSingle(&start, &end, 1.0f, ropemtl, end_fraction, end_fraction, 10.0f, 5.0f);
-                }
             }
         }
     }

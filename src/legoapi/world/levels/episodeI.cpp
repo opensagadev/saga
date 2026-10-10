@@ -1806,13 +1806,13 @@ speed_section:
                             StoreLevelProgress(world);
                             ResetLevel(world, "ep1_podsprint_sebulba", 1);
                         } else if (ps->ai_state > 3) {
-                            if (FreePlay == 0) {
+                            if (FreePlay != 0) {
+                                CompleteLevel(world);
+                            } else {
                                 if (NewCutScene(NULL, WORLD->cutscene_sys, "Ep1_Podrace_Outro1", 1) == 0 &&
                                     NewCutScene(NULL, WORLD->cutscene_sys, "Ep1_Podsprint_Outro1", 1) == 0) {
                                     CompleteLevel(world);
                                 }
-                            } else {
-                                CompleteLevel(world);
                             }
                         }
                     }

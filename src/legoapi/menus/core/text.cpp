@@ -1712,7 +1712,11 @@ void MenuDrawViewTextStrings(MENU_s *menu) {
                 }
             }
         } else {
-            if (menu->selected_item == i) {
+            if (menu->selected_item != i) {
+                red = 255;
+                green = 0;
+                blue = 0;
+            } else {
                 red = 255;
                 if (menu_flash < 1) {
                     green = 191;
@@ -1721,10 +1725,6 @@ void MenuDrawViewTextStrings(MENU_s *menu) {
                     green = 255;
                     blue = 255;
                 }
-            } else {
-                red = 255;
-                green = 0;
-                blue = 0;
             }
         }
 

@@ -1388,9 +1388,9 @@ extern "C" void NuDisplayListBurstRndrSpecial(nuhspecial_s *handle, u32 count, N
             }
         } else {
             void *geometry_data = geometry->next;
-            if (clip != 0) {
+            if (clip == 0) {
                 for (u32 i = 0; i != visible_count; ++i) {
-                    NUMTX *matrix = &matrices[static_cast<u8>(visible[i])];
+                    NUMTX *matrix = &matrices[i];
                     void *transform = DisplayListCreateGeomTransformPS(buffer, matrix, scene->mtls[list->mtl_id],
                                                                        geometry_data, NULL);
                     list->items->type = 0x8c;
@@ -1405,7 +1405,7 @@ extern "C" void NuDisplayListBurstRndrSpecial(nuhspecial_s *handle, u32 count, N
                 }
             } else {
                 for (u32 i = 0; i != visible_count; ++i) {
-                    NUMTX *matrix = &matrices[i];
+                    NUMTX *matrix = &matrices[static_cast<u8>(visible[i])];
                     void *transform = DisplayListCreateGeomTransformPS(buffer, matrix, scene->mtls[list->mtl_id],
                                                                        geometry_data, NULL);
                     list->items->type = 0x8c;
