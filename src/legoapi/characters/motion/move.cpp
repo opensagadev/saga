@@ -5235,79 +5235,82 @@ combo_finished:
 }
 
 static void JediLightCode(GameObject_s *object) {
-    if (object->dynamic_light_id == -1)
-        return;
-    NUVEC colour;
-    NUVEC position;
-    if (object->character_context == 0x1b && (object->field_0xe21 & 5) == 1 && object->force_target != NULL) {
-        rtlDynamicEnable(object->dynamic_light_id, 1);
-        NUVEC delta;
-        f32 distance =
-            NuVecDist(&object->force_target->apiobj.collision_position, &object->apiobj.collision_position, &delta);
-        rtlDynamicSetRadii(object->dynamic_light_id, distance * 0.5f, distance * 0.5f + 0.5f);
-        colour.x = 0.0f;
-        colour.y = qrand() < 0x8000 ? 2.0f : 0.25f;
-        colour.z = colour.y;
-        rtlDynamicSetColours(object->dynamic_light_id, &colour, NULL);
-        position.x = delta.x * 0.5f + object->apiobj.pos_x;
-        position.y = delta.y * 0.5f + object->apiobj.pos_y;
-        position.z = delta.z * 0.5f + object->apiobj.pos_z;
-        rtlDynamicSetPos(object->dynamic_light_id, &position);
-        return;
-    }
-    if (!(object->weapon_scale > 0.0f) || object->sabre_flags == 0)
-        return;
-    position = v000;
-    if (object->apiobj.field_0x288 == 0)
-        return;
-    i32 point_count = 0;
-    for (i32 blade = 0; blade < 4; ++blade) {
+    if (object->dynamic_light_id != -1) {
+        NUVEC colour;
+        NUVEC position;
+        if (object->character_context == 0x1b && (object->field_0xe21 & 5) == 1 && object->force_target != NULL) {
+            rtlDynamicEnable(object->dynamic_light_id, 1);
+            NUVEC delta;
+            f32 distance =
+                NuVecDist(&object->force_target->apiobj.collision_position, &object->apiobj.collision_position, &delta);
+            rtlDynamicSetRadii(object->dynamic_light_id, distance * 0.5f, distance * 0.5f + 0.5f);
+            colour.x = 0.0f;
+            colour.y = qrand() < 0x8000 ? 2.0f : 0.25f;
+            colour.z = colour.y;
+            rtlDynamicSetColours(object->dynamic_light_id, &colour, NULL);
+            position.x = delta.x * 0.5f + object->apiobj.pos_x;
+            position.y = delta.y * 0.5f + object->apiobj.pos_y;
+            position.z = delta.z * 0.5f + object->apiobj.pos_z;
+            rtlDynamicSetPos(object->dynamic_light_id, &position);
+            return;
+        }
+        if (!(object->weapon_scale > 0.0f) || object->sabre_flags == 0)
+            return;
+        position = v000;
         if (object->apiobj.field_0x288 == 0)
-            break;
-        if ((object->field_0xe23 & 8) == 0)
-            continue;
-        GAMECHARACTERDATA *data = GetGameCharacterData(object);
-        i32 first = data->streak_joints[blade][0];
-        if (first == -1 || object->apiobj.character_model->points_of_interest[first] == NULL)
-            continue;
-        i32 second = data->streak_joints[blade][1];
-        if (second == -1 || object->apiobj.character_model->points_of_interest[second] == NULL)
-            continue;
-        NuVecAdd(&position, &position, reinterpret_cast<NUVEC *>(&object->joint_matrices[first].m30));
-        NuVecAdd(&position, &position, reinterpret_cast<NUVEC *>(&object->joint_matrices[second].m30));
-        point_count += 2;
+            return;
+        i32 point_count = 0;
+        for (i32 blade = 0; blade < 4; ++blade) {
+            if (object->apiobj.field_0x288 == 0)
+                break;
+            if ((object->field_0xe23 & 8) == 0)
+                continue;
+            GAMECHARACTERDATA *data = GetGameCharacterData(object);
+            i32 first = data->streak_joints[blade][0];
+            if (first == -1 || object->apiobj.character_model->points_of_interest[first] == NULL)
+                continue;
+            i32 second = data->streak_joints[blade][1];
+            if (second == -1 || object->apiobj.character_model->points_of_interest[second] == NULL)
+                continue;
+            NuVecAdd(&position, &position, reinterpret_cast<NUVEC *>(&object->joint_matrices[first].m30));
+            NuVecAdd(&position, &position, reinterpret_cast<NUVEC *>(&object->joint_matrices[second].m30));
+            point_count += 2;
+        }
+        if (point_count == 0)
+            return;
+        NuVecScale(&position, &position, 1.0f / point_count);
+        rtlDynamicEnable(object->dynamic_light_id, 1);
+        f32 radius = object->sabre_collision_radius * 3.0f * object->weapon_scale * object->apiobj.field_0xa8;
+        rtlDynamicSetRadii(object->dynamic_light_id, radius + 0.25f, radius + 0.5f);
+        f32 brightness = qrand() < 0x8000 ? 0.003921569f : 0.007843138f;
+        i32 blade = -1;
+        if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(0x19))
+            blade = 0;
+        else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object))
+            blade = 3;
+        else if (object->id == id_GRIEVOUS) {
+            f32 phase =
+                (NU_SIN_LUT(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f)) + 1.0f) * 0.5f;
+            colour.x =
+                ((BladeTab[2].colour[0] - static_cast<f32>(BladeTab[1].colour[0])) * phase + BladeTab[1].colour[0]) *
+                brightness;
+            colour.y =
+                ((BladeTab[2].colour[1] - static_cast<f32>(BladeTab[1].colour[1])) * phase + BladeTab[1].colour[1]) *
+                brightness;
+            colour.z =
+                ((BladeTab[2].colour[2] - static_cast<f32>(BladeTab[1].colour[2])) * phase + BladeTab[1].colour[2]) *
+                brightness;
+        } else
+            blade = static_cast<i8>(GetGameCharacterData(object)->field_0x117);
+        if (blade != -1) {
+            colour.x = BladeTab[blade].colour[0] * brightness;
+            colour.y = BladeTab[blade].colour[1] * brightness;
+            colour.z = BladeTab[blade].colour[2] * brightness;
+        }
+        rtlDynamicSetColours(object->dynamic_light_id, &colour, NULL);
+        rtlDynamicSetColours(object->dynamic_light_id, &colour, NULL);
+        rtlDynamicSetPos(object->dynamic_light_id, &position);
     }
-    if (point_count == 0)
-        return;
-    NuVecScale(&position, &position, 1.0f / point_count);
-    rtlDynamicEnable(object->dynamic_light_id, 1);
-    f32 radius = object->sabre_collision_radius * 3.0f * object->weapon_scale * object->apiobj.field_0xa8;
-    rtlDynamicSetRadii(object->dynamic_light_id, radius + 0.25f, radius + 0.5f);
-    f32 brightness = qrand() < 0x8000 ? 0.003921569f : 0.007843138f;
-    i32 blade = -1;
-    if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(0x19))
-        blade = 0;
-    else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object))
-        blade = 3;
-    else if (object->id == id_GRIEVOUS) {
-        f32 phase =
-            (NU_SIN_LUT(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f)) + 1.0f) * 0.5f;
-        colour.x = ((BladeTab[2].colour[0] - static_cast<f32>(BladeTab[1].colour[0])) * phase + BladeTab[1].colour[0]) *
-                   brightness;
-        colour.y = ((BladeTab[2].colour[1] - static_cast<f32>(BladeTab[1].colour[1])) * phase + BladeTab[1].colour[1]) *
-                   brightness;
-        colour.z = ((BladeTab[2].colour[2] - static_cast<f32>(BladeTab[1].colour[2])) * phase + BladeTab[1].colour[2]) *
-                   brightness;
-    } else
-        blade = static_cast<i8>(GetGameCharacterData(object)->field_0x117);
-    if (blade != -1) {
-        colour.x = BladeTab[blade].colour[0] * brightness;
-        colour.y = BladeTab[blade].colour[1] * brightness;
-        colour.z = BladeTab[blade].colour[2] * brightness;
-    }
-    rtlDynamicSetColours(object->dynamic_light_id, &colour, NULL);
-    rtlDynamicSetColours(object->dynamic_light_id, &colour, NULL);
-    rtlDynamicSetPos(object->dynamic_light_id, &position);
 }
 
 static void ForceGlowCode(GameObject_s *object, i32 model) {
@@ -7700,51 +7703,50 @@ void StartFlatten(GameObject_s *source, GameObject_s *target) {
     if (target->character_context == 0x33) {
         return;
     }
-    if (target->character_context == 0x3d) {
-        return;
-    }
-    GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24);
-    if ((data->flags_090 & 0x40) != 0) {
-        return;
-    }
-    if (data->field_0x28 != 0.0f && target->field_0xe31 == 1) {
-        return;
-    }
-    if ((source->apiobj.field_0x1f8 & 4) != 0) {
-        return;
-    }
-    if (target->apiobj.field_0x27d == 0) {
-        return;
-    }
+    if (target->character_context != 0x3d) {
+        GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24);
+        if ((data->flags_090 & 0x40) != 0) {
+            return;
+        }
+        if (data->field_0x28 != 0.0f && target->field_0xe31 == 1) {
+            return;
+        }
+        if ((source->apiobj.field_0x1f8 & 4) != 0) {
+            return;
+        }
+        if (target->apiobj.field_0x27d == 0) {
+            return;
+        }
 
-    Player_ClearContext(target, 0);
-    Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(target->player_packet));
-    target->character_context = 0x3d;
-    target->context_animation_timer = 0.0f;
-    target->apiobj.velocity.x *= 0.5f;
-    target->apiobj.velocity.z *= 0.5f;
-    target->context_animation = target->apiobj.character_model->model_data_b[0x85] != NULL ? 0x85 : 5;
-    target->airborne_action_duration = static_cast<f32>(qrand()) * (1.0f / 65535.0f) + 1.0f;
+        Player_ClearContext(target, 0);
+        Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(target->player_packet));
+        target->character_context = 0x3d;
+        target->context_animation_timer = 0.0f;
+        target->apiobj.velocity.x *= 0.5f;
+        target->apiobj.velocity.z *= 0.5f;
+        target->context_animation = target->apiobj.character_model->model_data_b[0x85] != NULL ? 0x85 : 5;
+        target->airborne_action_duration = static_cast<f32>(qrand()) * (1.0f / 65535.0f) + 1.0f;
 
-    NUVEC direction;
-    NuVecSub(&direction, &target->apiobj.collision_position, &source->apiobj.collision_position);
-    u16 angle = static_cast<u16>(NuAtan2D(direction.x, direction.z));
-    i32 reverse = 0;
-    if (direction.x * target->facing_direction.x + direction.z * target->facing_direction.z < 0.0f) {
-        angle += 0x8000;
-        reverse = 1;
+        NUVEC direction;
+        NuVecSub(&direction, &target->apiobj.collision_position, &source->apiobj.collision_position);
+        u16 angle = static_cast<u16>(NuAtan2D(direction.x, direction.z));
+        i32 reverse = 0;
+        if (direction.x * target->facing_direction.x + direction.z * target->facing_direction.z < 0.0f) {
+            angle += 0x8000;
+            reverse = 1;
+        }
+        target->field_0x7a3 = reverse;
+        if (target->context_animation != 0x85) {
+            target->apiobj.field_0x276 = angle;
+            target->apiobj.facing_angle = angle;
+            target->apiobj.movement_facing_angle = angle;
+        }
+        target->delayed_turn_timer = 0.0f;
+        NewBuzzFrames(source->pad_gamepad->pad, 1, 0);
+        data = static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24);
+        GameAudio_PlaySfxById(data->sfx_hurt, &target->apiobj.collision_position, 0, 0);
+        NewBuzz(target->pad_gamepad->pad, 0.1f, 0);
     }
-    target->field_0x7a3 = reverse;
-    if (target->context_animation != 0x85) {
-        target->apiobj.field_0x276 = angle;
-        target->apiobj.facing_angle = angle;
-        target->apiobj.movement_facing_angle = angle;
-    }
-    target->delayed_turn_timer = 0.0f;
-    NewBuzzFrames(source->pad_gamepad->pad, 1, 0);
-    data = static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24);
-    GameAudio_PlaySfxById(data->sfx_hurt, &target->apiobj.collision_position, 0, 0);
-    NewBuzz(target->pad_gamepad->pad, 0.1f, 0);
 }
 
 void Hang_MoveCode(GameObject_s *object) {
@@ -10668,135 +10670,135 @@ extern "C" PART_s *FindPart(NUVEC *, i32, GameObject_s *);
 static NUVEC poopos[2];
 
 static __used__ void PooCode(GameObject_s *object) {
-    if (WORLD->lev_objs[0x18].active == 0)
-        return;
+    if (WORLD->lev_objs[0x18].active != 0) {
 
-    NUVEC position;
-    i32 locator = object->apiobj.character_data->game_character->poo_locator;
-    if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
-        position.x = object->joint_matrices[locator].m30;
-        position.y = object->joint_matrices[locator].m31;
-        position.z = object->joint_matrices[locator].m32;
-    } else {
-        u16 angle = object->apiobj.field_0x276;
-        position.x = object->apiobj.collision_position.x - NU_SIN_LUT(angle) * object->apiobj.field_0x1dc;
-        position.y = object->apiobj.collision_position.y;
-        position.z = object->apiobj.collision_position.z - NU_COS_LUT(angle) * object->apiobj.field_0x1dc;
-    }
+        NUVEC position;
+        i32 locator = object->apiobj.character_data->game_character->poo_locator;
+        if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
+            position.x = object->joint_matrices[locator].m30;
+            position.y = object->joint_matrices[locator].m31;
+            position.z = object->joint_matrices[locator].m32;
+        } else {
+            u16 angle = object->apiobj.field_0x276;
+            position.x = object->apiobj.collision_position.x - NU_SIN_LUT(angle) * object->apiobj.field_0x1dc;
+            position.y = object->apiobj.collision_position.y;
+            position.z = object->apiobj.collision_position.z - NU_COS_LUT(angle) * object->apiobj.field_0x1dc;
+        }
 
-    if (object->character_context == 0x37) {
-        f32 previous = object->context_animation_timer;
-        object->context_animation_timer = previous + FRAMETIME;
-        if (object->context_animation_timer >= object->airborne_action_duration) {
-            object->character_context = -1;
-        } else if (previous < object->airborne_action_duration * 0.5f &&
-                   object->context_animation_timer >= object->airborne_action_duration * 0.5f) {
-            PlaySfx("Lego_Poo", &position);
-            NUVEC velocity;
-            velocity.x = (f32)qrand() * (1.0f / 65536.0f) - 0.5f - NU_SIN_LUT(object->apiobj.field_0x276);
-            velocity.y = (f32)qrand() * (1.0f / 65536.0f) - 0.5f;
-            velocity.z = (f32)qrand() * (1.0f / 65536.0f) - 0.5f - NU_COS_LUT(object->apiobj.field_0x276);
-            if (Cheat_IsOn(9)) {
-                NUVEC direction;
-                NuVecNorm(&direction, &velocity);
-                f32 random = (f32)qrand() * (1.0f / 65536.0f);
-                i32 count = random < 0.2f ? 1000 : random < 0.8f ? 100 : 10;
-                AddPickups(count, 0, 0, 0, &position, &direction, 1.0f, -1, 2000000.0f, 0.0f, object, 0, 0, true);
-            }
-            if (Cheat_IsOn(1)) {
-                ADDPART_ALIGNED16 params = Default_ADDPART;
-                NUMTX_ALIGNED16 matrix;
-                i32 angle_x = qrand();
-                f32 sinx = NU_SIN_LUT(angle_x);
-                f32 cosx = NU_COS_LUT(angle_x);
-                matrix.m00 = 1.0f;
-                matrix.m01 = 0.0f;
-                matrix.m02 = 0.0f;
-                matrix.m03 = 0.0f;
-                matrix.m10 = 0.0f;
-                matrix.m11 = cosx;
-                matrix.m12 = sinx;
-                matrix.m13 = 0.0f;
-                matrix.m20 = 0.0f;
-                matrix.m21 = -sinx;
-                matrix.m22 = cosx;
-                matrix.m23 = 0.0f;
-                matrix.m30 = 0.0f;
-                matrix.m31 = 0.0f;
-                matrix.m32 = 0.0f;
-                matrix.m33 = 1.0f;
+        if (object->character_context == 0x37) {
+            f32 previous = object->context_animation_timer;
+            object->context_animation_timer = previous + FRAMETIME;
+            if (object->context_animation_timer >= object->airborne_action_duration) {
+                object->character_context = -1;
+            } else if (previous < object->airborne_action_duration * 0.5f &&
+                       object->context_animation_timer >= object->airborne_action_duration * 0.5f) {
+                PlaySfx("Lego_Poo", &position);
+                NUVEC velocity;
+                velocity.x = (f32)qrand() * (1.0f / 65536.0f) - 0.5f - NU_SIN_LUT(object->apiobj.field_0x276);
+                velocity.y = (f32)qrand() * (1.0f / 65536.0f) - 0.5f;
+                velocity.z = (f32)qrand() * (1.0f / 65536.0f) - 0.5f - NU_COS_LUT(object->apiobj.field_0x276);
+                if (Cheat_IsOn(9)) {
+                    NUVEC direction;
+                    NuVecNorm(&direction, &velocity);
+                    f32 random = (f32)qrand() * (1.0f / 65536.0f);
+                    i32 count = random < 0.2f ? 1000 : random < 0.8f ? 100 : 10;
+                    AddPickups(count, 0, 0, 0, &position, &direction, 1.0f, -1, 2000000.0f, 0.0f, object, 0, 0, true);
+                }
+                if (Cheat_IsOn(1)) {
+                    ADDPART_ALIGNED16 params = Default_ADDPART;
+                    NUMTX_ALIGNED16 matrix;
+                    i32 angle_x = qrand();
+                    f32 sinx = NU_SIN_LUT(angle_x);
+                    f32 cosx = NU_COS_LUT(angle_x);
+                    matrix.m00 = 1.0f;
+                    matrix.m01 = 0.0f;
+                    matrix.m02 = 0.0f;
+                    matrix.m03 = 0.0f;
+                    matrix.m10 = 0.0f;
+                    matrix.m11 = cosx;
+                    matrix.m12 = sinx;
+                    matrix.m13 = 0.0f;
+                    matrix.m20 = 0.0f;
+                    matrix.m21 = -sinx;
+                    matrix.m22 = cosx;
+                    matrix.m23 = 0.0f;
+                    matrix.m30 = 0.0f;
+                    matrix.m31 = 0.0f;
+                    matrix.m32 = 0.0f;
+                    matrix.m33 = 1.0f;
 
-                i32 angle_y = qrand();
-                f32 siny = NU_SIN_LUT(angle_y);
-                f32 cosy = NU_COS_LUT(angle_y);
-                f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20, m30 = matrix.m30;
-                matrix.m00 = m00 * cosy + matrix.m02 * siny;
-                matrix.m02 = matrix.m02 * cosy - m00 * siny;
-                matrix.m10 = m10 * cosy + matrix.m12 * siny;
-                matrix.m12 = matrix.m12 * cosy - m10 * siny;
-                matrix.m20 = m20 * cosy + matrix.m22 * siny;
-                matrix.m22 = matrix.m22 * cosy - m20 * siny;
-                matrix.m30 = m30 * cosy + matrix.m32 * siny;
-                matrix.m32 = matrix.m32 * cosy - m30 * siny;
+                    i32 angle_y = qrand();
+                    f32 siny = NU_SIN_LUT(angle_y);
+                    f32 cosy = NU_COS_LUT(angle_y);
+                    f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20, m30 = matrix.m30;
+                    matrix.m00 = m00 * cosy + matrix.m02 * siny;
+                    matrix.m02 = matrix.m02 * cosy - m00 * siny;
+                    matrix.m10 = m10 * cosy + matrix.m12 * siny;
+                    matrix.m12 = matrix.m12 * cosy - m10 * siny;
+                    matrix.m20 = m20 * cosy + matrix.m22 * siny;
+                    matrix.m22 = matrix.m22 * cosy - m20 * siny;
+                    matrix.m30 = m30 * cosy + matrix.m32 * siny;
+                    matrix.m32 = matrix.m32 * cosy - m30 * siny;
 
-                i32 angle_z = qrand();
-                f32 sinz = NU_SIN_LUT(angle_z);
-                f32 cosz = NU_COS_LUT(angle_z);
-                m00 = matrix.m00;
-                m10 = matrix.m10;
-                m20 = matrix.m20;
-                m30 = matrix.m30;
-                matrix.m00 = m00 * cosz - matrix.m01 * sinz;
-                matrix.m01 = m00 * sinz + matrix.m01 * cosz;
-                matrix.m10 = m10 * cosz - matrix.m11 * sinz;
-                matrix.m11 = m10 * sinz + matrix.m11 * cosz;
-                matrix.m20 = m20 * cosz - matrix.m21 * sinz;
-                matrix.m21 = m20 * sinz + matrix.m21 * cosz;
-                matrix.m30 = m30 * cosz - matrix.m31 * sinz;
-                matrix.m31 = m30 * sinz + matrix.m31 * cosz;
+                    i32 angle_z = qrand();
+                    f32 sinz = NU_SIN_LUT(angle_z);
+                    f32 cosz = NU_COS_LUT(angle_z);
+                    m00 = matrix.m00;
+                    m10 = matrix.m10;
+                    m20 = matrix.m20;
+                    m30 = matrix.m30;
+                    matrix.m00 = m00 * cosz - matrix.m01 * sinz;
+                    matrix.m01 = m00 * sinz + matrix.m01 * cosz;
+                    matrix.m10 = m10 * cosz - matrix.m11 * sinz;
+                    matrix.m11 = m10 * sinz + matrix.m11 * cosz;
+                    matrix.m20 = m20 * cosz - matrix.m21 * sinz;
+                    matrix.m21 = m20 * sinz + matrix.m21 * cosz;
+                    matrix.m30 = m30 * cosz - matrix.m31 * sinz;
+                    matrix.m31 = m30 * sinz + matrix.m31 * cosz;
 
-                NuMtxTranslate(&matrix, &position);
-                NUVEC radius_position;
-                NuSpecialGetRadius(&WORLD->lev_objs[0x18].special, &radius_position, &params.field_14);
-                params.matrix = &matrix;
-                params.velocity = &velocity;
-                params.owner = object;
-                params.field_18 = params.field_14;
-                params.gravity = -6.0f;
-                params.special = &WORLD->lev_objs[0x18].special;
-                params.field_28 = 0x18;
-                params.flags = 0x390;
-                params.stop_fn = PartStop_Flickerer;
-                params.draw_fn = PartDraw_Flickerer;
-                params.time_step = FRAMETIME;
-                params.field_a4 = 5.0f;
-                PART_s *part = AddPart(&params);
-                if (part != NULL) {
-                    part->owner = object;
-                    part->force_flags = static_cast<u16>(ObjHitObj_Flags(object));
+                    NuMtxTranslate(&matrix, &position);
+                    NUVEC radius_position;
+                    NuSpecialGetRadius(&WORLD->lev_objs[0x18].special, &radius_position, &params.field_14);
+                    params.matrix = &matrix;
+                    params.velocity = &velocity;
+                    params.owner = object;
+                    params.field_18 = params.field_14;
+                    params.gravity = -6.0f;
+                    params.special = &WORLD->lev_objs[0x18].special;
+                    params.field_28 = 0x18;
+                    params.flags = 0x390;
+                    params.stop_fn = PartStop_Flickerer;
+                    params.draw_fn = PartDraw_Flickerer;
+                    params.time_step = FRAMETIME;
+                    params.field_a4 = 5.0f;
+                    PART_s *part = AddPart(&params);
+                    if (part != NULL) {
+                        part->owner = object;
+                        part->force_flags = static_cast<u16>(ObjHitObj_Flags(object));
+                    }
                 }
             }
+        } else if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0 &&
+                   static_cast<i8>(object->apiobj.character_data->game_character->flags_094[3]) < 0 &&
+                   static_cast<i8>(object->apiobj.flags_low) < 0 && object->character_context == -1 &&
+                   object->apiobj.field_0x27d != 0 && (Cheat[1].enabled != 0 || Cheat[9].enabled != 0)) {
+            object->character_context = 0x37;
+            object->context_animation = 1;
+            object->context_animation_timer = 0.0f;
+            object->airborne_action_duration = 0.6f;
         }
-    } else if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0 &&
-               static_cast<i8>(object->apiobj.character_data->game_character->flags_094[3]) < 0 &&
-               static_cast<i8>(object->apiobj.flags_low) < 0 && object->character_context == -1 &&
-               object->apiobj.field_0x27d != 0 && (Cheat[1].enabled != 0 || Cheat[9].enabled != 0)) {
-        object->character_context = 0x37;
-        object->context_animation = 1;
-        object->context_animation_timer = 0.0f;
-        object->airborne_action_duration = 0.6f;
-    }
 
-    if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0 ||
-        ((object->field_0xf00 & 0x10) == 0 || static_cast<u8>(object->apiobj.field_0x27c) > 1)) {
-        object->force_use_volume = 0.0f;
-        return;
-    }
-    PART_s *part = FindPart(NULL, -1, object);
-    object->force_use_volume = SeekLinearF(object->force_use_volume, part != NULL ? 1.0f : 0.0f, FRAMETIME);
-    if (object->force_use_volume > 0.0f) {
-        poopos[object->apiobj.field_0x27c] = position;
-        PlaySfxAndSetVolume("Lego_PLOP", &poopos[object->apiobj.field_0x27c], object->force_use_volume);
+        if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0 ||
+            ((object->field_0xf00 & 0x10) == 0 || static_cast<u8>(object->apiobj.field_0x27c) > 1)) {
+            object->force_use_volume = 0.0f;
+            return;
+        }
+        PART_s *part = FindPart(NULL, -1, object);
+        object->force_use_volume = SeekLinearF(object->force_use_volume, part != NULL ? 1.0f : 0.0f, FRAMETIME);
+        if (object->force_use_volume > 0.0f) {
+            poopos[object->apiobj.field_0x27c] = position;
+            PlaySfxAndSetVolume("Lego_PLOP", &poopos[object->apiobj.field_0x27c], object->force_use_volume);
+        }
     }
 }
 

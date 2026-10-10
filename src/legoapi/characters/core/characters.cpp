@@ -1299,20 +1299,19 @@ void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_
     for (i32 i = 0; i < apicharsys->loaded_model_count; ++i) {
         const i32 model_id = apicharsys->models[i].model_id;
         CHARSCENE_s &entry = CharScene_Area[model_id];
-        if (entry.scene != NULL || (CDataList[model_id].flags & 1) == 0) {
-            continue;
-        }
+        if (entry.scene == NULL && (CDataList[model_id].flags & 1) != 0) {
 
-        i32 list_index;
-        if (InModelList(list, model_id, &list_index) == 0 || list[list_index].count == 0) {
-            continue;
-        }
+            i32 list_index;
+            if (InModelList(list, model_id, &list_index) == 0 || list[list_index].count == 0) {
+                continue;
+            }
 
-        char path[128];
-        sprintf(path, "chars\\%s\\%s.gsc", CDataList[model_id].dir, CDataList[model_id].file);
-        entry.scene = NuGScnRead(buf, buf_end, path);
-        if (entry.scene != NULL) {
-            NuSpecialFind(entry.scene, &entry.special_scene, CDataList[model_id].file, 1);
+            char path[128];
+            sprintf(path, "chars\\%s\\%s.gsc", CDataList[model_id].dir, CDataList[model_id].file);
+            entry.scene = NuGScnRead(buf, buf_end, path);
+            if (entry.scene != NULL) {
+                NuSpecialFind(entry.scene, &entry.special_scene, CDataList[model_id].file, 1);
+            }
         }
     }
 }
@@ -1755,17 +1754,16 @@ i32 newCharactersCollected(STATUSPACKET_s *) {
         while (previous < count && StatusCollectList.ids[previous] != id) {
             ++previous;
         }
-        if (previous != count) {
-            continue;
-        }
-        if (Game_CharacterSave != NULL && (Game_CharacterSave[id] & 1) != 0) {
-            continue;
-        }
-        const i32 index = InCollectList_Index(id, MasterCollection.list, MasterCollection.count_y);
-        if (index != -1 && MasterCollection.list[index].can_buy == 0) {
-            StatusCollectList.ids[count++] = *player_id;
-            if (MasterCollection.list[index].field5_0x9 != 0) {
-                AddToCompletionPoints(POINTS_PER_CHARACTER);
+        if (previous == count) {
+            if (Game_CharacterSave != NULL && (Game_CharacterSave[id] & 1) != 0) {
+                continue;
+            }
+            const i32 index = InCollectList_Index(id, MasterCollection.list, MasterCollection.count_y);
+            if (index != -1 && MasterCollection.list[index].can_buy == 0) {
+                StatusCollectList.ids[count++] = *player_id;
+                if (MasterCollection.list[index].field5_0x9 != 0) {
+                    AddToCompletionPoints(POINTS_PER_CHARACTER);
+                }
             }
         }
     }

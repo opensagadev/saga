@@ -456,21 +456,21 @@ void SplineHelper::DestroyObject(void *object, i32) {
     theLevelEditor.destroying_objects = 1;
     SplineObject *spline = static_cast<SplineObject *>(object);
     for (SplineObject *current = first_object; current != NULL; current = current->next) {
-        if (current != spline || current->knots.count != 0)
-            continue;
-        if (current->previous != NULL)
-            current->previous->next = current->next;
-        else
-            first_object = current->next;
-        if (current->next != NULL)
-            current->next->previous = current->previous;
-        else
-            last_object = current->previous;
-        current->next = NULL;
-        current->previous = NULL;
-        --object_count;
-        delete current;
-        return;
+        if (current == spline && current->knots.count == 0) {
+            if (current->previous != NULL)
+                current->previous->next = current->next;
+            else
+                first_object = current->next;
+            if (current->next != NULL)
+                current->next->previous = current->previous;
+            else
+                last_object = current->previous;
+            current->next = NULL;
+            current->previous = NULL;
+            --object_count;
+            delete current;
+            return;
+        }
     }
 }
 

@@ -454,21 +454,20 @@ MechObjectInterface *TouchHacks::FindBombTarget(GameObject_s &object) {
     GIZMOBLOWUP_s *blowup = WORLD->gizmo_blowups;
     if (blowup != NULL) {
         for (i32 i = 0; i < WORLD->gizmo_blowup_count; ++i, ++blowup) {
-            if ((blowup->state_flags & 0x80) == 0 || blowup->type == NULL || (blowup->output_flags & 1) != 0 ||
-                (blowup->type->type_flags & 0x02000000) == 0) {
-                continue;
-            }
-            VuVec direction(blowup->mid_position.x - object.apiobj.position.x,
-                            blowup->mid_position.y - object.apiobj.position.y,
-                            blowup->mid_position.z - object.apiobj.position.z, 1.0f);
-            const f32 squared_distance =
-                direction.x * direction.x + direction.y * direction.y + direction.z * direction.z;
-            if (squared_distance < 90000.0f) {
-                NuVecNorm(&direction.xyz, &direction.xyz);
-                const f32 alignment = direction.x * forward.x + direction.y * forward.y + direction.z * forward.z;
-                if (alignment > best_alignment) {
-                    result = blowup->GetMechObjectInterface();
-                    best_alignment = alignment;
+            if ((blowup->state_flags & 0x80) != 0 && blowup->type != NULL && (blowup->output_flags & 1) == 0 &&
+                (blowup->type->type_flags & 0x02000000) != 0) {
+                VuVec direction(blowup->mid_position.x - object.apiobj.position.x,
+                                blowup->mid_position.y - object.apiobj.position.y,
+                                blowup->mid_position.z - object.apiobj.position.z, 1.0f);
+                const f32 squared_distance =
+                    direction.x * direction.x + direction.y * direction.y + direction.z * direction.z;
+                if (squared_distance < 90000.0f) {
+                    NuVecNorm(&direction.xyz, &direction.xyz);
+                    const f32 alignment = direction.x * forward.x + direction.y * forward.y + direction.z * forward.z;
+                    if (alignment > best_alignment) {
+                        result = blowup->GetMechObjectInterface();
+                        best_alignment = alignment;
+                    }
                 }
             }
         }

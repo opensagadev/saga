@@ -84,20 +84,20 @@ void GameAntinode_Update(GAMEANTINODESYS_s *system) {
         }
         for (i32 x = 0; x <= node->grid_max_x - node->grid_min_x; ++x) {
             for (i32 z = 0; z <= node->grid_max_z - node->grid_min_z; ++z) {
-                if (((GameAntinode_grid[node->grid_min_x + x] >> (node->grid_min_z + z)) & 1) == 0)
-                    continue;
-                AIANTINODE_s *active = AIAntinodeCreateSingleFrame(&node->position, node->radius);
-                if (active != NULL) {
-                    active->base_radius = node->extent_x;
-                    active->base_height = node->extent_z;
-                    active->type = node->shape;
-                    active->height = node->min_y;
-                    active->max_height = node->max_y;
-                    active->flags = node->angle;
-                    active->user_data[0] = node->user_data[0];
-                    active->user_data[1] = node->user_data[1];
+                if (((GameAntinode_grid[node->grid_min_x + x] >> (node->grid_min_z + z)) & 1) != 0) {
+                    AIANTINODE_s *active = AIAntinodeCreateSingleFrame(&node->position, node->radius);
+                    if (active != NULL) {
+                        active->base_radius = node->extent_x;
+                        active->base_height = node->extent_z;
+                        active->type = node->shape;
+                        active->height = node->min_y;
+                        active->max_height = node->max_y;
+                        active->flags = node->angle;
+                        active->user_data[0] = node->user_data[0];
+                        active->user_data[1] = node->user_data[1];
+                    }
+                    goto next_node;
                 }
-                goto next_node;
             }
         }
     next_node:;

@@ -102,70 +102,70 @@ void Collection_Configure(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd) 
     COLLECTION_COMPLETIONCOUNT = 0;
     while (NuFParGetLine(fp) != 0) {
     read_word:
-        if (NuFParGetWord(fp) == 0 || NuStrICmp(fp->word_buf, "collect") != 0 || NuFParGetWord(fp) == 0)
-            continue;
-        const i16 id = CharIDFromName(fp->word_buf);
-        LOG_DEBUG("Collection_Configure: Found collect id %s -> %d", fp->word_buf, id);
-        collect->id = id;
-        if (id == -1 || InCollectList_Index(id, CollectList, CollectCount) != -1)
-            continue;
-        collect->type = 0;
-        collect->field2_0x3 = 0xff;
-        collect->can_buy = 0;
-        collect->field3_0x4 = 0;
-        collect->field6_0xa = 0;
-        collect->field5_0x9 = 0;
-        collect->cheat_code[0] = '\0';
-        while (NuFParGetWord(fp) != 0) {
-            if (NuStrICmp(fp->word_buf, "story") == 0) {
-                collect->type = 1;
-            } else if (NuStrICmp(fp->word_buf, "area_complete") == 0) {
-                i32 area;
-                if (NuFParGetWord(fp) != 0 && Area_FindByName(fp->word_buf, &area) != NULL) {
-                    collect->type = 2;
-                    collect->field2_0x3 = static_cast<u8>(area);
-                }
-            } else if (NuStrICmp(fp->word_buf, "all_episodes_complete") == 0) {
-                collect->type = 3;
-            } else if (NuStrICmp(fp->word_buf, "in_pack") == 0) {
-                if (NuFParGetWord(fp) != 0) {
-                    i32 pack = Store_FindPack(-1, fp->word_buf);
-                    if (pack != -1) {
-                        collect->type = 8;
-                        collect->field2_0x3 = static_cast<u8>(pack);
+        if (NuFParGetWord(fp) != 0 && NuStrICmp(fp->word_buf, "collect") == 0 && NuFParGetWord(fp) != 0) {
+            const i16 id = CharIDFromName(fp->word_buf);
+            LOG_DEBUG("Collection_Configure: Found collect id %s -> %d", fp->word_buf, id);
+            collect->id = id;
+            if (id == -1 || InCollectList_Index(id, CollectList, CollectCount) != -1)
+                continue;
+            collect->type = 0;
+            collect->field2_0x3 = 0xff;
+            collect->can_buy = 0;
+            collect->field3_0x4 = 0;
+            collect->field6_0xa = 0;
+            collect->field5_0x9 = 0;
+            collect->cheat_code[0] = '\0';
+            while (NuFParGetWord(fp) != 0) {
+                if (NuStrICmp(fp->word_buf, "story") == 0) {
+                    collect->type = 1;
+                } else if (NuStrICmp(fp->word_buf, "area_complete") == 0) {
+                    i32 area;
+                    if (NuFParGetWord(fp) != 0 && Area_FindByName(fp->word_buf, &area) != NULL) {
+                        collect->type = 2;
+                        collect->field2_0x3 = static_cast<u8>(area);
                     }
+                } else if (NuStrICmp(fp->word_buf, "all_episodes_complete") == 0) {
+                    collect->type = 3;
+                } else if (NuStrICmp(fp->word_buf, "in_pack") == 0) {
+                    if (NuFParGetWord(fp) != 0) {
+                        i32 pack = Store_FindPack(-1, fp->word_buf);
+                        if (pack != -1) {
+                            collect->type = 8;
+                            collect->field2_0x3 = static_cast<u8>(pack);
+                        }
+                    }
+                } else if (NuStrICmp(fp->word_buf, "100_percent") == 0) {
+                    collect->type = 7;
+                } else if (NuStrICmp(fp->word_buf, "gold_bricks") == 0) {
+                    collect->type = 6;
+                    const i32 value = NuFParGetInt(fp);
+                    const u32 sign = static_cast<u32>(value >> 31);
+                    collect->field6_0xa = static_cast<u16>((static_cast<u32>(value) ^ sign) - sign);
+                } else if (NuStrICmp(fp->word_buf, "all_minikits_complete") == 0) {
+                    collect->type = 4;
+                } else if (NuStrICmp(fp->word_buf, "minikit") == 0) {
+                    collect->type = 5;
+                } else if (NuStrICmp(fp->word_buf, "buy_in_shop") == 0) {
+                    collect->can_buy = 1;
+                    collect->field3_0x4 = NuFParGetInt(fp);
+                } else if (NuStrICmp(fp->word_buf, "cheat_code") == 0 && NuFParGetWord(fp) != 0 &&
+                           NuStrLen(fp->word_buf) == 6) {
+                    char *code = collect->cheat_code;
+                    NuStrCpy(code, fp->word_buf);
+                    NuStrUpr(code, code);
                 }
-            } else if (NuStrICmp(fp->word_buf, "100_percent") == 0) {
-                collect->type = 7;
-            } else if (NuStrICmp(fp->word_buf, "gold_bricks") == 0) {
-                collect->type = 6;
-                const i32 value = NuFParGetInt(fp);
-                const u32 sign = static_cast<u32>(value >> 31);
-                collect->field6_0xa = static_cast<u16>((static_cast<u32>(value) ^ sign) - sign);
-            } else if (NuStrICmp(fp->word_buf, "all_minikits_complete") == 0) {
-                collect->type = 4;
-            } else if (NuStrICmp(fp->word_buf, "minikit") == 0) {
-                collect->type = 5;
-            } else if (NuStrICmp(fp->word_buf, "buy_in_shop") == 0) {
-                collect->can_buy = 1;
-                collect->field3_0x4 = NuFParGetInt(fp);
-            } else if (NuStrICmp(fp->word_buf, "cheat_code") == 0 && NuFParGetWord(fp) != 0 &&
-                       NuStrLen(fp->word_buf) == 6) {
-                char *code = collect->cheat_code;
-                NuStrCpy(code, fp->word_buf);
-                NuStrUpr(code, code);
             }
+            if (collect->type == 0 ? collect->can_buy != 0 : collect->type != 8 && collect->type != 7) {
+                collect->field5_0x9 = 1;
+                ++COLLECTION_COMPLETIONCOUNT;
+            }
+            ++CollectCount;
+            const i32 next_line = NuFParGetLine(fp);
+            ++collect;
+            if (next_line == 0)
+                break;
+            goto read_word;
         }
-        if (collect->type == 0 ? collect->can_buy != 0 : collect->type != 8 && collect->type != 7) {
-            collect->field5_0x9 = 1;
-            ++COLLECTION_COMPLETIONCOUNT;
-        }
-        ++CollectCount;
-        const i32 next_line = NuFParGetLine(fp);
-        ++collect;
-        if (next_line == 0)
-            break;
-        goto read_word;
     }
     NuFParDestroy(fp);
     if (CollectCount < 1)
@@ -390,12 +390,11 @@ void Collection_CreateCustom(char *name, i16 *id_list, COLLECTION_s *collection,
                     (GCDataList[id].flags_090 & required_game_flags) != required_game_flags) {
                     continue;
                 }
-                if (required_model_flags != 0 &&
-                    (CDataList[id].model_flags & required_model_flags) != required_model_flags) {
-                    continue;
+                if (!(required_model_flags != 0 &&
+                      (CDataList[id].model_flags & required_model_flags) != required_model_flags)) {
+                    collection->list[collection->count_y] = source;
+                    ++collection->count_y;
                 }
-                collection->list[collection->count_y] = source;
-                ++collection->count_y;
             }
         }
     } else {

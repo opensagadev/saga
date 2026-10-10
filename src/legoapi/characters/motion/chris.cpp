@@ -493,21 +493,21 @@ fire: {
         spacelevel_s *space = WORLD->space_level;
         for (i32 i = 0; i != 96; ++i) {
             starfighter_s *missile = &space->queued_fighters[i];
-            if (missile->active != 0)
-                continue;
-            --fighter->missile_count;
-            *missile = *fighter;
-            missile->model_id = -307;
-            missile->speed += 10.0f;
-            missile->matrix.m31 += missile->matrix.m11 * MissileDist;
-            missile->matrix.m30 += missile->matrix.m10 * MissileDist;
-            missile->matrix.m32 += missile->matrix.m12 * MissileDist;
-            const f32 dx = missile->matrix.m30 - global_camera.mtx.m30;
-            const f32 dy = missile->matrix.m31 - global_camera.mtx.m31;
-            const f32 dz = missile->matrix.m32 - global_camera.mtx.m32;
-            if (dx * dx + dy * dy + dz * dz < 40000.0f)
-                PlaySfx("Ep3_1_ProtoXWingMissile", reinterpret_cast<NUVEC *>(&missile->matrix.m30));
-            break;
+            if (missile->active == 0) {
+                --fighter->missile_count;
+                *missile = *fighter;
+                missile->model_id = -307;
+                missile->speed += 10.0f;
+                missile->matrix.m31 += missile->matrix.m11 * MissileDist;
+                missile->matrix.m30 += missile->matrix.m10 * MissileDist;
+                missile->matrix.m32 += missile->matrix.m12 * MissileDist;
+                const f32 dx = missile->matrix.m30 - global_camera.mtx.m30;
+                const f32 dy = missile->matrix.m31 - global_camera.mtx.m31;
+                const f32 dz = missile->matrix.m32 - global_camera.mtx.m32;
+                if (dx * dx + dy * dy + dz * dz < 40000.0f)
+                    PlaySfx("Ep3_1_ProtoXWingMissile", reinterpret_cast<NUVEC *>(&missile->matrix.m30));
+                break;
+            }
         }
     }
     const i32 type = fighter->model_id == -300;

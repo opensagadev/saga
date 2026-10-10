@@ -391,23 +391,22 @@ void Tube_MoveCode(GameObject_s *object, WORLDINFO_s *world) {
             (TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE)) {
             continue;
         }
-        if (Tube_InCylinder(object, tube, NULL, 0) == 0 &&
-            (object->tube_entry_state != 5 || object->tube_entry_data == NULL)) {
-            continue;
-        }
+        if (!(Tube_InCylinder(object, tube, NULL, 0) == 0 &&
+              (object->tube_entry_state != 5 || object->tube_entry_data == NULL))) {
 
-        if (LEGOCONTEXT_GLIDE != -1 && object->character_context == LEGOCONTEXT_GLIDE) {
+            if (LEGOCONTEXT_GLIDE != -1 && object->character_context == LEGOCONTEXT_GLIDE) {
+                object->field_0x788 = tube;
+                return;
+            }
             object->field_0x788 = tube;
+            object->field_0xe31 = 0;
+            object->character_context = LEGOCONTEXT_TUBE;
+            if (static_cast<i8>(object->apiobj.flags_low) < 0 && tube->audio_cooldown == 0.0f) {
+                tube->audio_cooldown = 4.0f;
+                GameAudio_PlaySfx(6, &object->apiobj.collision_position, 0, 0);
+            }
             return;
         }
-        object->field_0x788 = tube;
-        object->field_0xe31 = 0;
-        object->character_context = LEGOCONTEXT_TUBE;
-        if (static_cast<i8>(object->apiobj.flags_low) < 0 && tube->audio_cooldown == 0.0f) {
-            tube->audio_cooldown = 4.0f;
-            GameAudio_PlaySfx(6, &object->apiobj.collision_position, 0, 0);
-        }
-        return;
     }
 }
 

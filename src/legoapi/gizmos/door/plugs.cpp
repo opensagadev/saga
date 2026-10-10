@@ -168,17 +168,16 @@ static void Plugs_Reset(void *world_ptr, void *, void *progress_ptr) {
     for (i32 index = 0; index < world->plug_sys->count; ++index) {
         PLUG &plug = world->plug_sys->plugs[index];
         plug.flags = static_cast<u8>((plug.flags | PLUG_FLAG_ACTIVE | PLUG_FLAG_VISIBLE) & ~PLUG_FLAG_PLUGGED);
-        if (progress == NULL || index > 31) {
-            continue;
-        }
+        if (progress != NULL && !(index > 31)) {
 
-        const u32 bit = 1u << index;
-        plug.flags = static_cast<u8>((plug.flags & ~(PLUG_FLAG_VISIBLE | PLUG_FLAG_PLUGGED)) |
-                                     ((progress->visible_mask & bit) != 0 ? PLUG_FLAG_VISIBLE : 0));
-        plug.flags = static_cast<u8>((plug.flags & ~PLUG_FLAG_ACTIVE) |
-                                     ((progress->active_mask & bit) != 0 ? PLUG_FLAG_ACTIVE : 0));
-        if ((progress->plugged_mask & bit) != 0) {
-            plug.flags |= PLUG_FLAG_PLUGGED;
+            const u32 bit = 1u << index;
+            plug.flags = static_cast<u8>((plug.flags & ~(PLUG_FLAG_VISIBLE | PLUG_FLAG_PLUGGED)) |
+                                         ((progress->visible_mask & bit) != 0 ? PLUG_FLAG_VISIBLE : 0));
+            plug.flags = static_cast<u8>((plug.flags & ~PLUG_FLAG_ACTIVE) |
+                                         ((progress->active_mask & bit) != 0 ? PLUG_FLAG_ACTIVE : 0));
+            if ((progress->plugged_mask & bit) != 0) {
+                plug.flags |= PLUG_FLAG_PLUGGED;
+            }
         }
     }
 }

@@ -584,25 +584,24 @@ static void Levers_Reset(void *world_ptr, void *, void *progress_ptr) {
     for (i32 index = 0; index < world->nlevers; ++index) {
         LEVER_s &lever = world->levers[index];
         Lever_Reset(&lever);
-        if (progress == NULL || index >= 32) {
-            continue;
-        }
+        if (progress != NULL && !(index >= 32)) {
 
-        const u32 bit = 1u << index;
-        if ((progress->pulled_down[0] & bit) != 0) {
-            lever.pull_progress = 1.0f;
-            lever.flags |= LEVER_FLAG_BEING_PULLED;
-            lever.animation_frame = 0x8000;
-        }
-        if ((progress->visible[0] & bit) != 0) {
-            lever.flags |= LEVER_FLAG_VISIBLE;
-        } else {
-            lever.flags &= ~LEVER_FLAG_VISIBLE;
-        }
-        if ((progress->enabled[0] & bit) != 0) {
-            lever.flags |= LEVER_FLAG_ENABLED;
-        } else {
-            lever.flags &= ~LEVER_FLAG_ENABLED;
+            const u32 bit = 1u << index;
+            if ((progress->pulled_down[0] & bit) != 0) {
+                lever.pull_progress = 1.0f;
+                lever.flags |= LEVER_FLAG_BEING_PULLED;
+                lever.animation_frame = 0x8000;
+            }
+            if ((progress->visible[0] & bit) != 0) {
+                lever.flags |= LEVER_FLAG_VISIBLE;
+            } else {
+                lever.flags &= ~LEVER_FLAG_VISIBLE;
+            }
+            if ((progress->enabled[0] & bit) != 0) {
+                lever.flags |= LEVER_FLAG_ENABLED;
+            } else {
+                lever.flags &= ~LEVER_FLAG_ENABLED;
+            }
         }
     }
 }

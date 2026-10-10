@@ -733,33 +733,33 @@ void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
                 maximum.x = box.first.x + box.second.x;
                 maximum.y = box.first.y + box.second.y;
                 maximum.z = box.first.z + box.second.z;
-                if (!testShadowExtrusion(minimum, maximum, i))
-                    continue;
-                for (i32 j = 0; j < object->nmaterials; ++j) {
-                    NUMTL *material = scene->mtls[object->material_ids[j]];
-                    i32 channel = material->shader_desc.unknown_1b4 != 0;
-                    if ((usize)set.scene_cursor[channel] >= (usize)set.scene_end[channel]) {
-                        NUDISPLAYLISTITEM *cursor =
-                            (NUDISPLAYLISTITEM *)((display_list_buffer->addr + 15) & ~(usize)15);
-                        set.scene_cursor[channel] = cursor;
-                        display_list_buffer->addr = (usize)(cursor + 49);
-                        if (set.scene_end[channel]) {
-                            set.scene_end[channel]->next = cursor;
-                            set.scene_end[channel]->type = 0x8d;
-                            set.scene_end[channel]->id = 1;
-                        } else
-                            set.scene_first[channel] = cursor;
-                        set.scene_end[channel] = cursor + 48;
-                        material = scene->mtls[object->material_ids[j]];
+                if (!!testShadowExtrusion(minimum, maximum, i)) {
+                    for (i32 j = 0; j < object->nmaterials; ++j) {
+                        NUMTL *material = scene->mtls[object->material_ids[j]];
+                        i32 channel = material->shader_desc.unknown_1b4 != 0;
+                        if ((usize)set.scene_cursor[channel] >= (usize)set.scene_end[channel]) {
+                            NUDISPLAYLISTITEM *cursor =
+                                (NUDISPLAYLISTITEM *)((display_list_buffer->addr + 15) & ~(usize)15);
+                            set.scene_cursor[channel] = cursor;
+                            display_list_buffer->addr = (usize)(cursor + 49);
+                            if (set.scene_end[channel]) {
+                                set.scene_end[channel]->next = cursor;
+                                set.scene_end[channel]->type = 0x8d;
+                                set.scene_end[channel]->id = 1;
+                            } else
+                                set.scene_first[channel] = cursor;
+                            set.scene_end[channel] = cursor + 48;
+                            material = scene->mtls[object->material_ids[j]];
+                        }
+                        set.scene_cursor[channel][0].id = 3;
+                        set.scene_cursor[channel][0].type = 0x80;
+                        set.scene_cursor[channel][0].next = material;
+                        set.scene_cursor[channel][1] = dl->items[object->indices[j] - 1];
+                        set.scene_cursor[channel][2] = dl->items[object->indices[j]];
+                        set.scene_cursor[channel][1].id = 3;
+                        set.scene_cursor[channel][2].id = 3;
+                        set.scene_cursor[channel] += 3;
                     }
-                    set.scene_cursor[channel][0].id = 3;
-                    set.scene_cursor[channel][0].type = 0x80;
-                    set.scene_cursor[channel][0].next = material;
-                    set.scene_cursor[channel][1] = dl->items[object->indices[j] - 1];
-                    set.scene_cursor[channel][2] = dl->items[object->indices[j]];
-                    set.scene_cursor[channel][1].id = 3;
-                    set.scene_cursor[channel][2].id = 3;
-                    set.scene_cursor[channel] += 3;
                 }
             }
         }

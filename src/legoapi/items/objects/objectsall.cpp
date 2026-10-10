@@ -439,22 +439,22 @@ void EquivalentObjects_Configure(WORLDINFO_s *world, char *config) {
     u8 *cursor = reinterpret_cast<u8 *>(world->giz_buffer.addr);
     world->equivalent_groups = reinterpret_cast<EQUIVALENTOBJECTGROUP_s *>(cursor);
     while (NuFParGetLine(parser) != 0) {
-        if (NuFParGetWord(parser) == 0 || NuStrICmp(parser->word_buf, const_cast<char *>("equivalentobjects")) != 0)
-            continue;
+        if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, const_cast<char *>("equivalentobjects")) == 0) {
 
-        EQUIVALENTOBJECTGROUP_s *group = reinterpret_cast<EQUIVALENTOBJECTGROUP_s *>(cursor);
-        group->object_count = 0;
-        group->byte_size = 4;
-        while (NuFParGetWord(parser) != 0) {
-            nuhspecial_s *handle = &group->objects[group->object_count];
-            if (NuSpecialFind(world->current_gscn, handle, parser->word_buf, 1) == 0)
-                break;
-            ++group->object_count;
-            group->byte_size += sizeof(nuhspecial_s);
-        }
-        if (group->object_count > 0) {
-            ++world->equivalent_group_count;
-            cursor += group->byte_size;
+            EQUIVALENTOBJECTGROUP_s *group = reinterpret_cast<EQUIVALENTOBJECTGROUP_s *>(cursor);
+            group->object_count = 0;
+            group->byte_size = 4;
+            while (NuFParGetWord(parser) != 0) {
+                nuhspecial_s *handle = &group->objects[group->object_count];
+                if (NuSpecialFind(world->current_gscn, handle, parser->word_buf, 1) == 0)
+                    break;
+                ++group->object_count;
+                group->byte_size += sizeof(nuhspecial_s);
+            }
+            if (group->object_count > 0) {
+                ++world->equivalent_group_count;
+                cursor += group->byte_size;
+            }
         }
     }
     NuFParDestroy(parser);

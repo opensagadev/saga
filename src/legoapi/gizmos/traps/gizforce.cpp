@@ -613,26 +613,25 @@ static void GizForces_Draw(void *world_ptr, void *data, float) {
         if ((force->config_flags & GIZFORCE_CONFIG_CAST_SHADOW) == 0) {
             EnableShadowMapRendering(0);
         }
-        if ((force->config_flags & GIZFORCE_CONFIG_ALONG_SOCKET) == 0) {
-            continue;
-        }
-        if ((force->runtime_flags & GIZFORCE_RUNTIME_ALONG_SOCKET_HIDDEN) == 0) {
-            continue;
-        }
+        if ((force->config_flags & GIZFORCE_CONFIG_ALONG_SOCKET) != 0) {
+            if ((force->runtime_flags & GIZFORCE_RUNTIME_ALONG_SOCKET_HIDDEN) == 0) {
+                continue;
+            }
 
-        GAMEANIMOBJ_s *anim_object = force->anim_set->objects;
-        if (anim_object == NULL) {
-            continue;
-        }
-        NUMTX *draw_matrix = NuSpecialGetDrawMtx(&anim_object->special);
-        NuSpecialDrawAt(&force->along_socket, draw_matrix);
-        if ((force->config_flags & GIZFORCE_CONFIG_DRAW_REFLECTION) != 0) {
-            NUMTX reflection_matrix;
-            if (MatrixReflection(draw_matrix, 2, draw_matrix->m31 + force->vertical_range,
-                                 WORLD->current_level->unknown_0cc, &reflection_matrix) != 0) {
-                NuRndrStartReflectionRender(0);
-                NuSpecialDrawAt(&force->along_socket, &reflection_matrix);
-                NuRndrEndReflectionRender();
+            GAMEANIMOBJ_s *anim_object = force->anim_set->objects;
+            if (anim_object == NULL) {
+                continue;
+            }
+            NUMTX *draw_matrix = NuSpecialGetDrawMtx(&anim_object->special);
+            NuSpecialDrawAt(&force->along_socket, draw_matrix);
+            if ((force->config_flags & GIZFORCE_CONFIG_DRAW_REFLECTION) != 0) {
+                NUMTX reflection_matrix;
+                if (MatrixReflection(draw_matrix, 2, draw_matrix->m31 + force->vertical_range,
+                                     WORLD->current_level->unknown_0cc, &reflection_matrix) != 0) {
+                    NuRndrStartReflectionRender(0);
+                    NuSpecialDrawAt(&force->along_socket, &reflection_matrix);
+                    NuRndrEndReflectionRender();
+                }
             }
         }
     }
@@ -832,13 +831,12 @@ static i32 GizForces_BoltHitPlat(void *world_ptr, void *data, BOLT *bolt, unsign
         }
         for (GAMEANIMOBJ_s *object = force->anim_set->objects; object != NULL; object = object->next) {
             GIZFORCEANIMDATA_s *object_data = static_cast<GIZFORCEANIMDATA_s *>(object->object_data);
-            if (object_data->platform_id != bolt->hit_platform) {
-                continue;
+            if (object_data->platform_id == bolt->hit_platform) {
+                i32 damage = BoltType_FindByID(bolt->type_id, static_cast<WORLDINFO_s *>(world_ptr))->field_3c;
+                i32 player_index = bolt->owner != NULL ? static_cast<i8>(bolt->owner->apiobj.field_0x27c) : -1;
+                GizForces_Hit(world_ptr, force, &bolt->position, damage, player_index);
+                return 1;
             }
-            i32 damage = BoltType_FindByID(bolt->type_id, static_cast<WORLDINFO_s *>(world_ptr))->field_3c;
-            i32 player_index = bolt->owner != NULL ? static_cast<i8>(bolt->owner->apiobj.field_0x27c) : -1;
-            GizForces_Hit(world_ptr, force, &bolt->position, damage, player_index);
-            return 1;
         }
     }
     return 0;

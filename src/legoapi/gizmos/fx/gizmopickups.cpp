@@ -1126,22 +1126,21 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
             NuMtxPreScale(&matrix, &scale);
         }
 
-        if (item->pickup_gizmo == NULL) {
-            continue;
-        }
-        GIZMOPICKUP_s *pickup = static_cast<GIZMOPICKUP_s *>(item->pickup_gizmo->object);
-        i32 type_index = pickup->type_index;
-        if ((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 && GizmoPickupSys->alternate_type != -1) {
-            type_index = GizmoPickupSys->alternate_type;
-        }
-        GIZMO_PICKUP_TYPE *type = &GizmoPickupSys->types[type_index];
+        if (item->pickup_gizmo != NULL) {
+            GIZMOPICKUP_s *pickup = static_cast<GIZMOPICKUP_s *>(item->pickup_gizmo->object);
+            i32 type_index = pickup->type_index;
+            if ((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 && GizmoPickupSys->alternate_type != -1) {
+                type_index = GizmoPickupSys->alternate_type;
+            }
+            GIZMO_PICKUP_TYPE *type = &GizmoPickupSys->types[type_index];
 
-        if ((item->flags & 0x10) == 0) {
-            NuMtxSetScale(&matrix, &scale);
-            NuMtxRotateY(&matrix, y_rotation);
-            NuMtxRotateX(&matrix, x_rotation);
-            NuMtxTranslate(&matrix, position);
+            if ((item->flags & 0x10) == 0) {
+                NuMtxSetScale(&matrix, &scale);
+                NuMtxRotateY(&matrix, y_rotation);
+                NuMtxRotateX(&matrix, x_rotation);
+                NuMtxTranslate(&matrix, position);
+            }
+            NuSpecialDrawAt(&world->lev_objs[static_cast<i16>(type->first_model_id)].special, &matrix);
         }
-        NuSpecialDrawAt(&world->lev_objs[static_cast<i16>(type->first_model_id)].special, &matrix);
     }
 }

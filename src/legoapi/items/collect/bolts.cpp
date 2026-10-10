@@ -1207,17 +1207,17 @@ BOLT_s *Bolt_Find(i32 type_id, NUVEC *position, GameObject_s *owner) {
         BOLT_s *bolt = &Bolt[index];
         if (bolt->active == 0)
             continue;
-        if (type_id != -1 && bolt->type_id != type_id)
-            continue;
-        if (owner != NULL && bolt->owner != owner)
-            continue;
-        if (position == NULL)
-            return bolt;
+        if (!(type_id != -1 && bolt->type_id != type_id)) {
+            if (owner != NULL && bolt->owner != owner)
+                continue;
+            if (position == NULL)
+                return bolt;
 
-        const f32 distance = NuVecDistSqr(&bolt->position, position, NULL);
-        if (distance < nearest_distance) {
-            nearest_distance = distance;
-            nearest = bolt;
+            const f32 distance = NuVecDistSqr(&bolt->position, position, NULL);
+            if (distance < nearest_distance) {
+                nearest_distance = distance;
+                nearest = bolt;
+            }
         }
     }
     return nearest;
@@ -1756,26 +1756,26 @@ void Bolts_Update(WORLDINFO_s *world) {
                     if ((CInfo[object->character_context].flags & 0x8080) != 0 ||
                         (object->movement_runtime_flags & 0x80) != 0)
                         continue;
-                    if (VehicleArea != 0 && BonusArea == 0 && owner != NULL && owner->apiobj.field_0x27c != -1 &&
-                        object->apiobj.field_0x27c != -1)
-                        continue;
-                    if ((object->apiobj.character_data->game_character->flags_090 & 0x8000) != 0)
-                        continue;
-                    if (bolt->bounds_min.x > object->apiobj.collision_max.x ||
-                        object->apiobj.collision_min.x > bolt->bounds_max.x ||
-                        bolt->bounds_min.z > object->apiobj.collision_max.z ||
-                        object->apiobj.collision_min.z > bolt->bounds_max.z)
-                        continue;
-                    if ((flags & 0x8000000) == 0 && (bolt->bounds_min.y > object->apiobj.collision_max.y ||
-                                                     object->apiobj.collision_min.y > bolt->bounds_max.y))
-                        continue;
-                    if (Bolt_HitGameObject(bolt, object, points, &bolt->bounds_min, &bolt->bounds_max,
-                                           bolt->collision_radius, processed)) {
-                        character_hit = true;
-                        break;
+                    if (!(VehicleArea != 0 && BonusArea == 0 && owner != NULL && owner->apiobj.field_0x27c != -1 &&
+                          object->apiobj.field_0x27c != -1)) {
+                        if ((object->apiobj.character_data->game_character->flags_090 & 0x8000) != 0)
+                            continue;
+                        if (bolt->bounds_min.x > object->apiobj.collision_max.x ||
+                            object->apiobj.collision_min.x > bolt->bounds_max.x ||
+                            bolt->bounds_min.z > object->apiobj.collision_max.z ||
+                            object->apiobj.collision_min.z > bolt->bounds_max.z)
+                            continue;
+                        if ((flags & 0x8000000) == 0 && (bolt->bounds_min.y > object->apiobj.collision_max.y ||
+                                                         object->apiobj.collision_min.y > bolt->bounds_max.y))
+                            continue;
+                        if (Bolt_HitGameObject(bolt, object, points, &bolt->bounds_min, &bolt->bounds_max,
+                                               bolt->collision_radius, processed)) {
+                            character_hit = true;
+                            break;
+                        }
+                        flags = bolt->flags;
+                        count = HIGHGAMEOBJECT;
                     }
-                    flags = bolt->flags;
-                    count = HIGHGAMEOBJECT;
                 }
             }
             if (character_hit)

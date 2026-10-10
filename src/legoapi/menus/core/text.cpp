@@ -689,17 +689,17 @@ void Text_LoadAndFixUpStrings(unsigned char *filename, unsigned char **buffer, c
         if (parser->is_utf16 != 0) {
             while (NuFParGetLineW(parser) != 0) {
                 i32 index = NuFParGetInt(parser);
-                if (index <= 0 || index >= count)
-                    continue;
-                NuFParGetWordW(parser);
-                u16 *wide = reinterpret_cast<u16 *>(parser->word_buf);
-                i32 length = NuStrLenW(wide);
-                if (length <= 0)
-                    continue;
-                table[index] = reinterpret_cast<char *>(out);
-                for (i32 i = 0; i < length; i++)
-                    out = NuUTF8CharFromUnicode(out, wide[i]);
-                *out++ = 0;
+                if (!(index <= 0) && !(index >= count)) {
+                    NuFParGetWordW(parser);
+                    u16 *wide = reinterpret_cast<u16 *>(parser->word_buf);
+                    i32 length = NuStrLenW(wide);
+                    if (length <= 0)
+                        continue;
+                    table[index] = reinterpret_cast<char *>(out);
+                    for (i32 i = 0; i < length; i++)
+                        out = NuUTF8CharFromUnicode(out, wide[i]);
+                    *out++ = 0;
+                }
             }
         } else if (parser->is_utf8 != 0) {
             while (NuFParGetLine(parser) != 0) {

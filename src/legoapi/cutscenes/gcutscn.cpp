@@ -228,34 +228,34 @@ void CutScenePlayer_Configure(char *file, VARIPTR *buffer, VARIPTR *, i16 *clip_
     player.outro_text = outro;
     player.ending_text = ending;
     while (NuFParGetLine(fp)) {
-        if (!NuFParGetWord(fp) || NuStrICmp(fp->word_buf, "clip"))
-            continue;
-        CUTSCENEPLAYERCLIP *clip = &player.clips[player.clip_count];
-        clip->level_id = -1;
-        clip->type = CLIP_INTRO;
-        clip->name[0] = 0;
-        clip->guest_episode = -1;
-        while (NuFParGetWord(fp)) {
-            if (NuStrICmp(fp->word_buf, "in_level") == 0) {
-                i32 level;
-                if (NuFParGetWord(fp) && Level_FindByName(fp->word_buf, &level))
-                    clip->level_id = level;
-            } else if (NuStrICmp(fp->word_buf, "name") == 0) {
-                if (NuFParGetWord(fp) && NuStrLen(fp->word_buf) <= 63)
-                    NuStrCpy(clip->name, fp->word_buf);
-            } else if (NuStrICmp(fp->word_buf, "intro") == 0)
-                clip->type = CLIP_INTRO;
-            else if (NuStrICmp(fp->word_buf, "midtro") == 0)
-                clip->type = CLIP_MIDTRO;
-            else if (NuStrICmp(fp->word_buf, "outro") == 0)
-                clip->type = CLIP_OUTRO;
-            else if (NuStrICmp(fp->word_buf, "ending") == 0)
-                clip->type = CLIP_ENDING;
-            else if (NuStrICmp(fp->word_buf, "guest_in_episode") == 0 && NuFParGetWord(fp))
-                clip->guest_episode = NuAToI(fp->word_buf);
+        if (NuFParGetWord(fp) && !(NuStrICmp(fp->word_buf, "clip"))) {
+            CUTSCENEPLAYERCLIP *clip = &player.clips[player.clip_count];
+            clip->level_id = -1;
+            clip->type = CLIP_INTRO;
+            clip->name[0] = 0;
+            clip->guest_episode = -1;
+            while (NuFParGetWord(fp)) {
+                if (NuStrICmp(fp->word_buf, "in_level") == 0) {
+                    i32 level;
+                    if (NuFParGetWord(fp) && Level_FindByName(fp->word_buf, &level))
+                        clip->level_id = level;
+                } else if (NuStrICmp(fp->word_buf, "name") == 0) {
+                    if (NuFParGetWord(fp) && NuStrLen(fp->word_buf) <= 63)
+                        NuStrCpy(clip->name, fp->word_buf);
+                } else if (NuStrICmp(fp->word_buf, "intro") == 0)
+                    clip->type = CLIP_INTRO;
+                else if (NuStrICmp(fp->word_buf, "midtro") == 0)
+                    clip->type = CLIP_MIDTRO;
+                else if (NuStrICmp(fp->word_buf, "outro") == 0)
+                    clip->type = CLIP_OUTRO;
+                else if (NuStrICmp(fp->word_buf, "ending") == 0)
+                    clip->type = CLIP_ENDING;
+                else if (NuStrICmp(fp->word_buf, "guest_in_episode") == 0 && NuFParGetWord(fp))
+                    clip->guest_episode = NuAToI(fp->word_buf);
+            }
+            if (clip->level_id != -1 && (CutScenePlayer_AcceptFn == NULL || CutScenePlayer_AcceptFn(clip)))
+                ++player.clip_count;
         }
-        if (clip->level_id != -1 && (CutScenePlayer_AcceptFn == NULL || CutScenePlayer_AcceptFn(clip)))
-            ++player.clip_count;
     }
     NuFParDestroy(fp);
     if (player.clip_count != 0) {

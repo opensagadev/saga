@@ -3000,143 +3000,143 @@ i32 DrawGameObjectsProcess() {
             TELEPORT_s *teleport = static_cast<TELEPORT_s *>(object->field_0x788);
             if (object->field_0x7a3 == 1 && teleport != NULL && (teleport->flags & 4) == 0)
                 continue;
-        } else if (object->character_context == 0x39 || object->character_context == 0x3b) {
-            continue;
-        }
-        if (CharClipToBlobShadows != 0 && WORLD->area != KAMINO_ADATA && WORLD->area != HOTHBATTLE_ADATA &&
-            WORLD->area != DEATHSTARBATTLE2_ADATA && static_cast<i8>(object->field_0xf04) < 0 &&
-            object->apiobj.field_0x27c == -1 && (object->field_0xefb & 8) == 0 &&
-            object->ai_update_distance > static_cast<u8>(WORLD->current_level->blob_shadow_fade_far))
-            continue;
+        } else if (object->character_context != 0x39 && object->character_context != 0x3b) {
+            if (CharClipToBlobShadows != 0 && WORLD->area != KAMINO_ADATA && WORLD->area != HOTHBATTLE_ADATA &&
+                WORLD->area != DEATHSTARBATTLE2_ADATA && static_cast<i8>(object->field_0xf04) < 0 &&
+                object->apiobj.field_0x27c == -1 && (object->field_0xefb & 8) == 0 &&
+                object->ai_update_distance > static_cast<u8>(WORLD->current_level->blob_shadow_fade_far))
+                continue;
 
-        NUVEC scale;
-        NUVEC position;
-        position.x = object->apiobj.position.x;
-        position.y = object->apiobj.position.y;
-        if ((object->apiobj.field_0x1f4 & 0x100) != 0)
-            position.y += object->character_bottom * object->apiobj.field_0xa8;
-        position.z = object->apiobj.position.z;
-        NuVecAdd(&position, &position, &object->render_offset);
-        object->field_0xf01 = (object->field_0xf01 & ~1) | (object->apiobj.model_draw_result & 1);
-        object->apiobj.model_draw_result = 1;
-        scale.x = object->apiobj.field_0xa8;
-        const f32 drop_scale = DropInOutScale(object);
-        scale.x *= drop_scale;
-        scale.y = scale.z = scale.x;
-        NUMTX matrix __attribute__((aligned(16)));
-        NUMTX shadow __attribute__((aligned(16)));
-        NUMTX reflected __attribute__((aligned(16)));
-        NUMTX orientation __attribute__((aligned(16)));
-        NuMtxSetScale(&matrix, &scale);
-        switch (object->field_0x1086) {
-            case 0:
-                DrawSetRotationY(&orientation, NUANG_180DEG);
-                if (object->apiobj.pitch_angle != 0)
-                    ShopRotateX(&orientation, object->apiobj.pitch_angle);
-                if (object->apiobj.field_0x276 != 0)
-                    ShopRotateY(&orientation, object->apiobj.field_0x276);
-                if (object->apiobj.roll_angle != 0)
-                    ShopRotateZ(&orientation, object->apiobj.roll_angle);
-                NuMtxMulVU0(&matrix, &matrix, &orientation);
-                NuMtxTranslate(&matrix, &position);
-                break;
-            case 1:
-                DrawSetRotationY(&orientation, object->apiobj.field_0x276 + NUANG_180DEG);
-                if (object->apiobj.pitch_angle != 0)
-                    ShopRotateX(&orientation, object->apiobj.pitch_angle);
-                if (object->apiobj.roll_angle != 0)
-                    ShopRotateZ(&orientation, object->apiobj.roll_angle);
-                NuMtxMulVU0(&matrix, &matrix, &orientation);
-                NuMtxTranslate(&matrix, &position);
-                break;
-            default:
-            case 2:
-                DrawSetRotationY(&orientation, object->apiobj.field_0x276 + NUANG_180DEG);
-                if (object->apiobj.roll_angle != 0)
-                    ShopRotateZ(&orientation, object->apiobj.roll_angle);
-                if (object->apiobj.pitch_angle != 0)
-                    ShopRotateX(&orientation, object->apiobj.pitch_angle);
-                NuMtxMulVU0(&matrix, &matrix, &orientation);
-                NuMtxTranslate(&matrix, &position);
-                break;
-            case 3:
-                DrawSetRotationY(&orientation, NUANG_180DEG);
-                if (object->apiobj.roll_angle != 0)
-                    ShopRotateZ(&orientation, object->apiobj.roll_angle);
-                if (object->apiobj.pitch_angle != 0)
-                    ShopRotateX(&orientation, object->apiobj.pitch_angle);
-                if (object->apiobj.field_0x276 != 0)
-                    ShopRotateY(&orientation, object->apiobj.field_0x276);
-                NuMtxMulVU0(&matrix, &matrix, &orientation);
-                NuMtxTranslate(&matrix, &position);
-                break;
-            case 4:
-                matrix = object->vehicle_orientation;
-                NuMtxPreScale(&matrix, &scale);
-                NuMtxPreRotateY(&matrix, NUANG_180DEG);
-                NuMtxTranslate(&matrix, &position);
-                break;
-            case 5:
-                matrix = object->vehicle_orientation;
-                NuMtxPreScale(&matrix, &scale);
-                NuMtxPreRotateY(&matrix, NUANG_180DEG);
-                break;
-        }
-        if (object->movement_lean_angle != 0) {
-            i32 angle = object->movement_lean_angle;
-            if (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA)
-                angle = static_cast<i32>(angle * PodSprint_RollMul(object));
-            NuMtxPreRotateZ(&matrix, angle);
-        }
-        if (object->secondary_lean_angle != 0)
-            NuMtxPreRotateX(&matrix, object->secondary_lean_angle);
-        if (object->tertiary_lean_angle != 0)
-            NuMtxPreRotateY(&matrix, object->tertiary_lean_angle);
-        ApplyExtraRotation(object, &matrix);
-        if (object->field_0x1086 != 4 && (object->character_context == 0x23 || object->character_context == 0x24)) {
-            const f32 distance =
-                object->apiobj.character_data->collision_radius * object->apiobj.character_data->model_scale * 7.5f;
-            f32 offset = 1.0f - drop_scale;
-            if (object->character_context != 0x23)
-                offset = -offset;
-            offset *= distance;
-            NUVEC displacement;
-            NuVecMtxTransformVU0(&displacement, &v001, &orientation);
-            NuVecScale(&displacement, &displacement, offset);
-            NuVecAdd(reinterpret_cast<NUVEC *>(&matrix.m30), reinterpret_cast<NUVEC *>(&matrix.m30), &displacement);
-        }
-        if (object->use_model_origin <= 1 &&
-            (object->id == id_ATST || object->id == id_ATST_LOWRES || object->id == id_ATAT))
-            matrix.m31 += object->character_bottom * object->apiobj.field_0xa8;
-        object->apiobj.field_0xb8 = matrix;
-        if (((object->field_0xefa & 0x40) != 0 && WORLD->rooms_visible_ptr[object->room_id] == 0) ||
-            (scale.x == 0.0f && scale.y == 0.0f && scale.z == 0.0f)) {
-            object->apiobj.model_draw_result = 0;
-            continue;
-        }
-        object->apiobj.field_0x1f4 ^= 0x800;
-        object->field_0xefe &= ~2;
-        object->field_0x1088 = 0;
-        if (object->field_0x1087 != 0 && object->field_0x1020 != 2000000.0f &&
-            static_cast<u32>(static_cast<u8>(WORLD->current_level->reflection_range)) > object->ai_update_distance) {
-            object->field_0x1088 = MatrixReflection(&matrix, object->field_0x1087, object->field_0x1020,
-                                                    WORLD->current_level->unknown_0cc, &reflected);
-            object->apiobj.field_0x138 = reflected;
-        }
-        if (object->apiobj.field_0x287 == 0 && object->apiobj.field_0x218 != 2000000.0f &&
-            (object->apiobj.field_0x1f4 & 0x40) != 0 &&
-            object->apiobj.character_data->game_character->shadow_locators == 0) {
-            NuMtxSetIdentity(&shadow);
-            ShopRotateY(&shadow, object->apiobj.field_0x276 + NUANG_180DEG);
-            if (object->field_0x1060 != 0)
-                ShopRotateZ(&shadow, object->field_0x1060);
-            if (object->field_0x105e != 0)
-                ShopRotateX(&shadow, object->field_0x105e);
-            shadow.m30 = object->apiobj.position.x;
-            shadow.m31 = object->apiobj.field_0x218 + 0.005f;
-            shadow.m32 = object->apiobj.position.z;
-            object->apiobj.field_0xf8 = shadow;
-            object->field_0xefe |= 2;
+            NUVEC scale;
+            NUVEC position;
+            position.x = object->apiobj.position.x;
+            position.y = object->apiobj.position.y;
+            if ((object->apiobj.field_0x1f4 & 0x100) != 0)
+                position.y += object->character_bottom * object->apiobj.field_0xa8;
+            position.z = object->apiobj.position.z;
+            NuVecAdd(&position, &position, &object->render_offset);
+            object->field_0xf01 = (object->field_0xf01 & ~1) | (object->apiobj.model_draw_result & 1);
+            object->apiobj.model_draw_result = 1;
+            scale.x = object->apiobj.field_0xa8;
+            const f32 drop_scale = DropInOutScale(object);
+            scale.x *= drop_scale;
+            scale.y = scale.z = scale.x;
+            NUMTX matrix __attribute__((aligned(16)));
+            NUMTX shadow __attribute__((aligned(16)));
+            NUMTX reflected __attribute__((aligned(16)));
+            NUMTX orientation __attribute__((aligned(16)));
+            NuMtxSetScale(&matrix, &scale);
+            switch (object->field_0x1086) {
+                case 0:
+                    DrawSetRotationY(&orientation, NUANG_180DEG);
+                    if (object->apiobj.pitch_angle != 0)
+                        ShopRotateX(&orientation, object->apiobj.pitch_angle);
+                    if (object->apiobj.field_0x276 != 0)
+                        ShopRotateY(&orientation, object->apiobj.field_0x276);
+                    if (object->apiobj.roll_angle != 0)
+                        ShopRotateZ(&orientation, object->apiobj.roll_angle);
+                    NuMtxMulVU0(&matrix, &matrix, &orientation);
+                    NuMtxTranslate(&matrix, &position);
+                    break;
+                case 1:
+                    DrawSetRotationY(&orientation, object->apiobj.field_0x276 + NUANG_180DEG);
+                    if (object->apiobj.pitch_angle != 0)
+                        ShopRotateX(&orientation, object->apiobj.pitch_angle);
+                    if (object->apiobj.roll_angle != 0)
+                        ShopRotateZ(&orientation, object->apiobj.roll_angle);
+                    NuMtxMulVU0(&matrix, &matrix, &orientation);
+                    NuMtxTranslate(&matrix, &position);
+                    break;
+                default:
+                case 2:
+                    DrawSetRotationY(&orientation, object->apiobj.field_0x276 + NUANG_180DEG);
+                    if (object->apiobj.roll_angle != 0)
+                        ShopRotateZ(&orientation, object->apiobj.roll_angle);
+                    if (object->apiobj.pitch_angle != 0)
+                        ShopRotateX(&orientation, object->apiobj.pitch_angle);
+                    NuMtxMulVU0(&matrix, &matrix, &orientation);
+                    NuMtxTranslate(&matrix, &position);
+                    break;
+                case 3:
+                    DrawSetRotationY(&orientation, NUANG_180DEG);
+                    if (object->apiobj.roll_angle != 0)
+                        ShopRotateZ(&orientation, object->apiobj.roll_angle);
+                    if (object->apiobj.pitch_angle != 0)
+                        ShopRotateX(&orientation, object->apiobj.pitch_angle);
+                    if (object->apiobj.field_0x276 != 0)
+                        ShopRotateY(&orientation, object->apiobj.field_0x276);
+                    NuMtxMulVU0(&matrix, &matrix, &orientation);
+                    NuMtxTranslate(&matrix, &position);
+                    break;
+                case 4:
+                    matrix = object->vehicle_orientation;
+                    NuMtxPreScale(&matrix, &scale);
+                    NuMtxPreRotateY(&matrix, NUANG_180DEG);
+                    NuMtxTranslate(&matrix, &position);
+                    break;
+                case 5:
+                    matrix = object->vehicle_orientation;
+                    NuMtxPreScale(&matrix, &scale);
+                    NuMtxPreRotateY(&matrix, NUANG_180DEG);
+                    break;
+            }
+            if (object->movement_lean_angle != 0) {
+                i32 angle = object->movement_lean_angle;
+                if (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA)
+                    angle = static_cast<i32>(angle * PodSprint_RollMul(object));
+                NuMtxPreRotateZ(&matrix, angle);
+            }
+            if (object->secondary_lean_angle != 0)
+                NuMtxPreRotateX(&matrix, object->secondary_lean_angle);
+            if (object->tertiary_lean_angle != 0)
+                NuMtxPreRotateY(&matrix, object->tertiary_lean_angle);
+            ApplyExtraRotation(object, &matrix);
+            if (object->field_0x1086 != 4 && (object->character_context == 0x23 || object->character_context == 0x24)) {
+                const f32 distance =
+                    object->apiobj.character_data->collision_radius * object->apiobj.character_data->model_scale * 7.5f;
+                f32 offset = 1.0f - drop_scale;
+                if (object->character_context != 0x23)
+                    offset = -offset;
+                offset *= distance;
+                NUVEC displacement;
+                NuVecMtxTransformVU0(&displacement, &v001, &orientation);
+                NuVecScale(&displacement, &displacement, offset);
+                NuVecAdd(reinterpret_cast<NUVEC *>(&matrix.m30), reinterpret_cast<NUVEC *>(&matrix.m30), &displacement);
+            }
+            if (object->use_model_origin <= 1 &&
+                (object->id == id_ATST || object->id == id_ATST_LOWRES || object->id == id_ATAT))
+                matrix.m31 += object->character_bottom * object->apiobj.field_0xa8;
+            object->apiobj.field_0xb8 = matrix;
+            if (((object->field_0xefa & 0x40) != 0 && WORLD->rooms_visible_ptr[object->room_id] == 0) ||
+                (scale.x == 0.0f && scale.y == 0.0f && scale.z == 0.0f)) {
+                object->apiobj.model_draw_result = 0;
+                continue;
+            }
+            object->apiobj.field_0x1f4 ^= 0x800;
+            object->field_0xefe &= ~2;
+            object->field_0x1088 = 0;
+            if (object->field_0x1087 != 0 && object->field_0x1020 != 2000000.0f &&
+                static_cast<u32>(static_cast<u8>(WORLD->current_level->reflection_range)) >
+                    object->ai_update_distance) {
+                object->field_0x1088 = MatrixReflection(&matrix, object->field_0x1087, object->field_0x1020,
+                                                        WORLD->current_level->unknown_0cc, &reflected);
+                object->apiobj.field_0x138 = reflected;
+            }
+            if (object->apiobj.field_0x287 == 0 && object->apiobj.field_0x218 != 2000000.0f &&
+                (object->apiobj.field_0x1f4 & 0x40) != 0 &&
+                object->apiobj.character_data->game_character->shadow_locators == 0) {
+                NuMtxSetIdentity(&shadow);
+                ShopRotateY(&shadow, object->apiobj.field_0x276 + NUANG_180DEG);
+                if (object->field_0x1060 != 0)
+                    ShopRotateZ(&shadow, object->field_0x1060);
+                if (object->field_0x105e != 0)
+                    ShopRotateX(&shadow, object->field_0x105e);
+                shadow.m30 = object->apiobj.position.x;
+                shadow.m31 = object->apiobj.field_0x218 + 0.005f;
+                shadow.m32 = object->apiobj.position.z;
+                object->apiobj.field_0xf8 = shadow;
+                object->field_0xefe |= 2;
+            }
         }
     }
     return 0;

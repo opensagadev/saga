@@ -415,30 +415,30 @@ void RippleEffects_Configure(WORLDINFO_s *world, char *config) {
     NuFParPushCom(parser, RippleEffect_ConfigKeywords);
     while (NuFParGetLine(parser)) {
         NuFParGetWord(parser);
-        if (parser->word_buf[0] == 0)
-            continue;
-        if (!active) {
-            if (world->ripple_effect_count > 1 || NuStrICmp(parser->word_buf, "rippleeffects_start") != 0)
-                continue;
-            RE_worldinfo = world;
-            effect->lifetime = 2.0f;
-            effect->initial_size = 0.0f;
-            effect->end_size = 1.0f;
-            effect->texture_name[0] = 0;
-            effect->start_color.r = effect->start_color.g = effect->start_color.b = 64;
-            effect->start_color.a = 255;
-            effect->end_color.value = 0;
-            effect->material = NULL;
-            RE_rippleeffect = effect;
-            active = 1;
-        } else if (NuStrICmp(parser->word_buf, "rippleeffects_end") == 0) {
-            active = 0;
-            if (effect->texture_name[0] != 0) {
-                ++effect;
-                ++world->ripple_effect_count;
+        if (parser->word_buf[0] != 0) {
+            if (!active) {
+                if (world->ripple_effect_count > 1 || NuStrICmp(parser->word_buf, "rippleeffects_start") != 0)
+                    continue;
+                RE_worldinfo = world;
+                effect->lifetime = 2.0f;
+                effect->initial_size = 0.0f;
+                effect->end_size = 1.0f;
+                effect->texture_name[0] = 0;
+                effect->start_color.r = effect->start_color.g = effect->start_color.b = 64;
+                effect->start_color.a = 255;
+                effect->end_color.value = 0;
+                effect->material = NULL;
+                RE_rippleeffect = effect;
+                active = 1;
+            } else if (NuStrICmp(parser->word_buf, "rippleeffects_end") == 0) {
+                active = 0;
+                if (effect->texture_name[0] != 0) {
+                    ++effect;
+                    ++world->ripple_effect_count;
+                }
+            } else {
+                NuFParInterpretWord(parser);
             }
-        } else {
-            NuFParInterpretWord(parser);
         }
     }
     NuFParDestroy(parser);

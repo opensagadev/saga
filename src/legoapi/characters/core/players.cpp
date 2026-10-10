@@ -722,23 +722,24 @@ void DrawOffsetCode(GameObject_s *obj, i32 param) {
 float GetHoverPosY(GameObject_s *obj) {
     if ((obj->apiobj.character_data->model_flags & 0x2000) == 0 ||
         (WorldInfo_CurrentlyActive()->current_level->flags & LEVEL_IN_SPACE) != 0) {
-        return 0.0f;
+        return 2000000.0f;
     }
 
     const f32 vehicle_offset = VehicleTurnOrLoopOffset(obj);
     if (obj->apiobj.field_0x27f == 7 || obj->apiobj.field_0x27f == 0x10)
-        return obj->apiobj.water_height + vehicle_offset;
+        return vehicle_offset + obj->apiobj.water_height;
 
     f32 height = obj->apiobj.field_0x218;
-    if (height == 0.0f)
-        return 0.0f;
-    if (obj->apiobj.water_height != 0.0f)
+    if (height == 2000000.0f)
+        return 2000000.0f;
+    if (obj->apiobj.water_height != 2000000.0f)
         height = MAX(obj->apiobj.water_height, height);
 
     f32 hover_height = WORLD->current_level->hover_height;
-    if (hover_height == 2000000.0f)
-        hover_height = static_cast<GAMECHARACTERDATA *>(obj->apiobj.character_data->field11_0x24)->field_0x28;
-    return height + hover_height + vehicle_offset;
+    if (hover_height != 0.0f)
+        return hover_height + height + vehicle_offset;
+    return height + static_cast<GAMECHARACTERDATA *>(obj->apiobj.character_data->field11_0x24)->field_0x28 +
+           vehicle_offset;
 }
 
 void PlayerTakeHit(GameObject_s *object, GameObject_s *attacker) {

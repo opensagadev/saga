@@ -634,56 +634,58 @@ void GizBuildItPushAwayFromEnd(GameObject_s *player) {
     i32 nearest = 0;
     for (i32 i = 0; i < WORLD->giz_buildit_sys->count; ++i, ++buildit) {
         NUVEC centre = v000;
-        if (!(buildit->state_flags & 8) || !(buildit->availability_flags & 2) || buildit->built_object_count == 0)
-            continue;
-        NUVEC end_position = buildit->position;
-        NUVEC minimum, maximum;
-        minimum.x = minimum.z = 1000000000.0f;
-        maximum.x = maximum.z = -1000000000.0f;
-        f32 radius;
-        if (buildit->state_flags & 0x10) {
-            f32 nearest_distance = 1000000000.0f;
-            for (i32 j = 0; j < buildit->built_object_count; ++j) {
-                GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[j]->object_data);
-                f32 dx = data->end_mtx.m30 - player_x;
-                f32 dz = data->end_mtx.m32 - player_z;
-                f32 distance = dx * dx + dz * dz;
-                if (distance < nearest_distance) {
-                    nearest_distance = distance;
-                    nearest = j;
-                    centre = *NUMTX_GET_ROW_VEC(&data->end_mtx, 3);
+        if (buildit->state_flags & 8 && buildit->availability_flags & 2 && buildit->built_object_count != 0) {
+            NUVEC end_position = buildit->position;
+            NUVEC minimum, maximum;
+            minimum.x = minimum.z = 1000000000.0f;
+            maximum.x = maximum.z = -1000000000.0f;
+            f32 radius;
+            if (buildit->state_flags & 0x10) {
+                f32 nearest_distance = 1000000000.0f;
+                for (i32 j = 0; j < buildit->built_object_count; ++j) {
+                    GIZBUILDITANIMDATA_s *data =
+                        static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[j]->object_data);
+                    f32 dx = data->end_mtx.m30 - player_x;
+                    f32 dz = data->end_mtx.m32 - player_z;
+                    f32 distance = dx * dx + dz * dz;
+                    if (distance < nearest_distance) {
+                        nearest_distance = distance;
+                        nearest = j;
+                        centre = *NUMTX_GET_ROW_VEC(&data->end_mtx, 3);
+                    }
                 }
+                NUVEC radius_centre;
+                NuSpecialGetBounds(&buildit->anim_objects[nearest]->special, &minimum, &maximum);
+                NuSpecialGetRadius(&buildit->anim_objects[nearest]->special, &radius_centre, &radius);
+            } else {
+                centre.y = end_position.y;
+                for (i32 j = 0; j < buildit->built_object_count; ++j) {
+                    GIZBUILDITANIMDATA_s *data =
+                        static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[j]->object_data);
+                    centre.x += data->end_mtx.m30;
+                    centre.z += data->end_mtx.m32;
+                    f32 dx = data->end_mtx.m30 - end_position.x;
+                    f32 dz = data->end_mtx.m32 - end_position.z;
+                    maximum.x = NuFmax(maximum.x, dx);
+                    maximum.z = NuFmax(maximum.z, dz);
+                    minimum.x = NuFmin(minimum.x, dx);
+                    minimum.z = NuFmin(minimum.z, dz);
+                    f32 distance = dx * dx + dz * dz;
+                    if (distance > radius_squared)
+                        radius_squared = distance;
+                }
+                centre.x /= buildit->built_object_count;
+                centre.z /= buildit->built_object_count;
+                radius = NuFsqrt(radius_squared);
             }
-            NUVEC radius_centre;
-            NuSpecialGetBounds(&buildit->anim_objects[nearest]->special, &minimum, &maximum);
-            NuSpecialGetRadius(&buildit->anim_objects[nearest]->special, &radius_centre, &radius);
-        } else {
-            centre.y = end_position.y;
-            for (i32 j = 0; j < buildit->built_object_count; ++j) {
-                GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[j]->object_data);
-                centre.x += data->end_mtx.m30;
-                centre.z += data->end_mtx.m32;
-                f32 dx = data->end_mtx.m30 - end_position.x;
-                f32 dz = data->end_mtx.m32 - end_position.z;
-                maximum.x = NuFmax(maximum.x, dx);
-                maximum.z = NuFmax(maximum.z, dz);
-                minimum.x = NuFmin(minimum.x, dx);
-                minimum.z = NuFmin(minimum.z, dz);
-                f32 distance = dx * dx + dz * dz;
-                if (distance > radius_squared)
-                    radius_squared = distance;
-            }
-            centre.x /= buildit->built_object_count;
-            centre.z /= buildit->built_object_count;
-            radius = NuFsqrt(radius_squared);
+            maximum.x += centre.x;
+            maximum.y = centre.y + 0.01f;
+            maximum.z += centre.z;
+            minimum.x += centre.x;
+            minimum.y = centre.y;
+            minimum.z += centre.z;
+            PushAway(&centre, radius, &minimum, &maximum, player, NULL, 1.0f, 0);
         }
-        maximum.x += centre.x;
-        maximum.y = centre.y + 0.01f;
-        maximum.z += centre.z;
-        minimum.x += centre.x;
-        minimum.y = centre.y;
-        minimum.z += centre.z;
-        PushAway(&centre, radius, &minimum, &maximum, player, NULL, 1.0f, 0);
     }
 }
 
@@ -1290,22 +1292,21 @@ static void GizBuildIts_Reset(void *world_ptr, void *data, void *progress_ptr) {
         GIZBUILDIT_s &buildit = buildit_sys->buildits[index];
         GizBuildit_Reset(&buildit, world_ptr);
 
-        if (index >= GIZBUILDIT_PROGRESS_CAPACITY || progress == NULL) {
-            continue;
-        }
+        if (!(index >= GIZBUILDIT_PROGRESS_CAPACITY) && progress != NULL) {
 
-        const i32 word = index >> 5;
-        const u32 bit = 1u << (index & 31);
-        buildit.build_state =
-            (progress->completed[word] & bit) != 0 ? GIZBUILDIT_BUILD_COMPLETE : GIZBUILDIT_BUILD_IDLE;
-        buildit.availability_flags =
-            static_cast<u8>((buildit.availability_flags & ~GIZBUILDIT_AVAILABILITY_LINKED) |
-                            ((progress->active[word] & bit) != 0 ? GIZBUILDIT_AVAILABILITY_ACTIVE : 0) |
-                            ((progress->visible[word] & bit) != 0 ? GIZBUILDIT_AVAILABILITY_VISIBLE : 0));
-        buildit.field_0x83 =
-            static_cast<u8>((buildit.field_0x83 & ~GIZBUILDIT_RUNTIME_REWARD_RELEASED) |
-                            ((progress->reward_released[word] & bit) != 0 ? GIZBUILDIT_RUNTIME_REWARD_RELEASED : 0));
-        buildit.built_object_count = progress->built_object_count[index];
+            const i32 word = index >> 5;
+            const u32 bit = 1u << (index & 31);
+            buildit.build_state =
+                (progress->completed[word] & bit) != 0 ? GIZBUILDIT_BUILD_COMPLETE : GIZBUILDIT_BUILD_IDLE;
+            buildit.availability_flags =
+                static_cast<u8>((buildit.availability_flags & ~GIZBUILDIT_AVAILABILITY_LINKED) |
+                                ((progress->active[word] & bit) != 0 ? GIZBUILDIT_AVAILABILITY_ACTIVE : 0) |
+                                ((progress->visible[word] & bit) != 0 ? GIZBUILDIT_AVAILABILITY_VISIBLE : 0));
+            buildit.field_0x83 = static_cast<u8>(
+                (buildit.field_0x83 & ~GIZBUILDIT_RUNTIME_REWARD_RELEASED) |
+                ((progress->reward_released[word] & bit) != 0 ? GIZBUILDIT_RUNTIME_REWARD_RELEASED : 0));
+            buildit.built_object_count = progress->built_object_count[index];
+        }
     }
 }
 

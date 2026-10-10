@@ -2083,21 +2083,20 @@ f32 GameAnimSet_GetCompletionRatio(GAMEANIMSET_s *set) {
         return 0.0f;
     }
     for (GAMEANIMOBJ_s *object = set->objects; object != NULL; object = object->next) {
-        if (object->instance_animation == NULL) {
-            continue;
+        if (object->instance_animation != NULL) {
+            if (object->start_frame == object->end_frame) {
+                return 1.0f;
+            }
+            f32 ratio =
+                (object->instance_animation->ltime - object->start_frame) / (object->end_frame - object->start_frame);
+            if (ratio > 1.0f) {
+                ratio = 1.0f;
+            }
+            if (ratio < 0.0f) {
+                ratio = 0.0f;
+            }
+            return ratio;
         }
-        if (object->start_frame == object->end_frame) {
-            return 1.0f;
-        }
-        f32 ratio =
-            (object->instance_animation->ltime - object->start_frame) / (object->end_frame - object->start_frame);
-        if (ratio > 1.0f) {
-            ratio = 1.0f;
-        }
-        if (ratio < 0.0f) {
-            ratio = 0.0f;
-        }
-        return ratio;
     }
     return 0.0f;
 }

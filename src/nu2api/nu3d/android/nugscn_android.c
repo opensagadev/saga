@@ -268,22 +268,21 @@ static void PreWarmGeomsAndBakeVAOs(nudisplayscene_s *scene, nunativegscene_s *)
         i32 *items = *reinterpret_cast<i32 **>(clip + 8);
         for (u32 item_index = 0; item_index < nitems; ++item_index) {
             NUDISPLAYLISTITEM *item = &scene->items[items[item_index]];
-            if (item->type == 0x8f) {
-                continue;
-            }
-            g_boundMaterial = scene->mtls[materials[item_index]];
-            g_LastMtl = g_boundMaterial;
-            u8 vertex_flags = reinterpret_cast<u8 *>(&g_boundMaterial->shader_desc.vtx_desc)[2];
-            if ((vertex_flags & 0x10) == 0) {
-                if ((vertex_flags & 0x20) == 0) {
-                    NuIOS_SetVertexFormat(reinterpret_cast<usize>(g_boundMaterial->vertex_decl));
+            if (item->type != 0x8f) {
+                g_boundMaterial = scene->mtls[materials[item_index]];
+                g_LastMtl = g_boundMaterial;
+                u8 vertex_flags = reinterpret_cast<u8 *>(&g_boundMaterial->shader_desc.vtx_desc)[2];
+                if ((vertex_flags & 0x10) == 0) {
+                    if ((vertex_flags & 0x20) == 0) {
+                        NuIOS_SetVertexFormat(reinterpret_cast<usize>(g_boundMaterial->vertex_decl));
+                    } else {
+                        g_boundVertexFormat = reinterpret_cast<usize>(g_nuFaceOnVertexFormat);
+                    }
                 } else {
-                    g_boundVertexFormat = reinterpret_cast<usize>(g_nuFaceOnVertexFormat);
+                    g_boundVertexFormat = reinterpret_cast<usize>(g_nuDebrisVertexFormat);
                 }
-            } else {
-                g_boundVertexFormat = reinterpret_cast<usize>(g_nuDebrisVertexFormat);
+                NuIOSDLPreWarmGeomCallback(item->next);
             }
-            NuIOSDLPreWarmGeomCallback(item->next);
         }
     }
 }

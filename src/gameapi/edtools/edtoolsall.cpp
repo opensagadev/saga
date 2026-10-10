@@ -6424,14 +6424,14 @@ void EdSpecialObjectControl::Process(EdInputContext &) {
 }
 
 void EdSpecialObjectControl::Render() {
-    if (menu == NULL)
-        return;
-    Placeable *object = reinterpret_cast<Placeable *>(menu);
-    VuVec center = *object->GetCurrentPosition();
-    f32 radius = object->GetRadius();
-    EdDrawBegin(0);
-    EdDrawLineSphere(center, radius, 1.0f, static_cast<i32>(0x80808080));
-    EdDrawEnd();
+    if (menu != NULL) {
+        Placeable *object = reinterpret_cast<Placeable *>(menu);
+        VuVec center = *object->GetCurrentPosition();
+        f32 radius = object->GetRadius();
+        EdDrawBegin(0);
+        EdDrawLineSphere(center, radius, 1.0f, static_cast<i32>(0x80808080));
+        EdDrawEnd();
+    }
 }
 
 static EdClassObjectNameControl *edClassObjectNameControl;

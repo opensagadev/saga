@@ -920,17 +920,17 @@ extern "C" void NuTexAnimProgWrite(char *path, nutexanimprog_s *program) {
 extern "C" void NuTexAnimRemoveList(void *anim) {
     NuThreadCriticalSectionBegin(g_texAnimCriticalSection);
     for (nutexanimlist_s *node = ntal_first; node != NULL; node = node->next) {
-        if (node->first != anim)
-            continue;
-        if (node->next != NULL)
-            node->next->previous = node->previous;
-        if (node->previous != NULL)
-            node->previous->next = node->next;
-        else
-            ntal_first = node->next;
-        node->next = ntal_free;
-        ntal_free = node;
-        break;
+        if (node->first == anim) {
+            if (node->next != NULL)
+                node->next->previous = node->previous;
+            if (node->previous != NULL)
+                node->previous->next = node->next;
+            else
+                ntal_first = node->next;
+            node->next = ntal_free;
+            ntal_free = node;
+            break;
+        }
     }
     NuThreadCriticalSectionEnd(g_texAnimCriticalSection);
 }

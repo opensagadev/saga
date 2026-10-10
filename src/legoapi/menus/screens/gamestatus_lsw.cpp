@@ -291,6 +291,9 @@ void Save_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapse
             }
             NextStatusStage(packet);
         }
+    } else if (packet->save_state == 2) {
+        if (MenuInMemoryCard() == 0)
+            packet->save_state = 3;
     } else if (packet->save_state == 0) {
         packet->save_state = 1;
         Text_FillInExtendedSaveInfo();
@@ -298,7 +301,7 @@ void Save_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapse
             packet->save_state = 2;
             NewMenu(1000, -1, -1);
         }
-    } else if ((packet->save_state == 2 ? MenuInMemoryCard() : memcard_autosaveinprogress) == 0) {
+    } else if (memcard_autosaveinprogress == 0) {
         packet->save_state = 3;
     }
 }

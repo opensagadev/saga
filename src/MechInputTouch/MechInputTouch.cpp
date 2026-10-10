@@ -753,33 +753,33 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
         if (system != NULL && system->obstacles != NULL) {
             GIZOBSTACLE_s *item = system->obstacles;
             for (i32 index = 0; index < system->count; ++index, ++item) {
-                if (item == NULL || (item->field_a1_0xa1 & 1))
-                    continue;
-                if (!(item->config_flags & 0x1800) && item->mode != 2)
-                    continue;
-                LEVELDATA_s *level = WORLD->current_level;
-                if ((level == ENDORBATTLEA_LDATA && index == 3) ||
-                    (level == GUNGAN_B_LDATA && (index == 0 || index == 2 || index == 3)) ||
-                    (level == ENDORBATTLED_LDATA && index == 5) ||
-                    (level == FACTORYD_LDATA && (index == 4 || index == 2)) ||
-                    (level == DEATHSTARRESCUEB_LDATA && (index == 2 || index == 6 || index == 12)) ||
-                    (level == HOTHESCAPEC_LDATA && (u32)(index - 18) <= 4) || (level == CRUISERB_LDATA && index == 0) ||
-                    (level == CRUISERD_LDATA && index == 19) || (level == JEDI_B_LDATA && index == 50) ||
-                    (level == TATOOINEB_LDATA && index == 37))
-                    continue;
-                if ((item->progress_flags & 3) != 3 || (i8)item->runtime_flags < 0 || item->anim_set == NULL ||
-                    item->anim_set->state == 2 || item->proximity_output != 0 || item->mode == 1 || item->mode == 3)
-                    continue;
-                VuVec center;
-                center.z = item->evaluated_position.z;
-                center.y = item->evaluated_position.y;
-                center.x = item->evaluated_position.x;
-                center.w = 1.0f;
-                f32 distance =
-                    CalcCapsuleIntersectDistance(start, direction, best_distance, center, item->field_0x58) * 1.5f;
-                if (best_distance > distance) {
-                    best_distance = distance;
-                    best = item->GetMechObjectInterface();
+                if (item != NULL && !(item->field_a1_0xa1 & 1)) {
+                    if (!(item->config_flags & 0x1800) && item->mode != 2)
+                        continue;
+                    LEVELDATA_s *level = WORLD->current_level;
+                    if ((level == ENDORBATTLEA_LDATA && index == 3) ||
+                        (level == GUNGAN_B_LDATA && (index == 0 || index == 2 || index == 3)) ||
+                        (level == ENDORBATTLED_LDATA && index == 5) ||
+                        (level == FACTORYD_LDATA && (index == 4 || index == 2)) ||
+                        (level == DEATHSTARRESCUEB_LDATA && (index == 2 || index == 6 || index == 12)) ||
+                        (level == HOTHESCAPEC_LDATA && (u32)(index - 18) <= 4) ||
+                        (level == CRUISERB_LDATA && index == 0) || (level == CRUISERD_LDATA && index == 19) ||
+                        (level == JEDI_B_LDATA && index == 50) || (level == TATOOINEB_LDATA && index == 37))
+                        continue;
+                    if ((item->progress_flags & 3) != 3 || (i8)item->runtime_flags < 0 || item->anim_set == NULL ||
+                        item->anim_set->state == 2 || item->proximity_output != 0 || item->mode == 1 || item->mode == 3)
+                        continue;
+                    VuVec center;
+                    center.z = item->evaluated_position.z;
+                    center.y = item->evaluated_position.y;
+                    center.x = item->evaluated_position.x;
+                    center.w = 1.0f;
+                    f32 distance =
+                        CalcCapsuleIntersectDistance(start, direction, best_distance, center, item->field_0x58) * 1.5f;
+                    if (best_distance > distance) {
+                        best_distance = distance;
+                        best = item->GetMechObjectInterface();
+                    }
                 }
             }
         }

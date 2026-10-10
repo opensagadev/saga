@@ -29,54 +29,53 @@ void CharShadows_Draw() {
             continue;
         }
 
-        if ((object->field_0xe20 & GAMEOBJECT_E20_FLAG_MOVEMENT_DISABLED) != 0 &&
-            (CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_ALLOW_DISABLED_MOVEMENT_SHADOW) ==
-                0) {
-            continue;
-        }
-        if ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_DISABLE_BLOB_SHADOW) != 0 ||
-            !(object->shadow_opacity > 0.0f) || object->apiobj.model_draw_result == 0 ||
-            object->shadow_joint_mask == 0 || (object->field_0xeff & 4) != 0 ||
-            (CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_DISABLE_BLOB_SHADOW) != 0) {
-            continue;
-        }
-
-        PLAYERCHARACTERCONFIG_s *config = object->apiobj.character_data->player_config;
-        i32 alpha = config->blob_shadow_alpha;
-        if (alpha == 0xff) {
-            alpha = static_cast<u8>(WORLD->current_level->blob_shadow_alpha);
-        }
-        if (alpha <= 0 || !(object->shadow_radius > 0.0f)) {
-            continue;
-        }
-
-        const f32 opacity_scale = object->shadow_opacity * static_cast<f32>(alpha);
-        const f32 scaled_radius = object->shadow_radius * object->apiobj.field_0xa8;
-        const f32 radius = DropInOutScale(object) * scaled_radius;
-        i32 shadow_index = 0;
-        CHARACTER_SHADOW_s *shadow_cursor = object->character_shadows;
-        NUMTX *joint_matrix = object->joint_matrices;
-        for (i32 joint_index = 0; joint_index < kMaxShadowJoints && shadow_index < kMaxCharacterShadows;
-             ++joint_index, ++joint_matrix) {
-            if ((object->shadow_joint_mask & (1u << joint_index)) == 0 ||
-                object->apiobj.character_model->points_of_interest[joint_index] == NULL) {
+        if (!((object->field_0xe20 & GAMEOBJECT_E20_FLAG_MOVEMENT_DISABLED) != 0 &&
+              (CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_ALLOW_DISABLED_MOVEMENT_SHADOW) ==
+                  0)) {
+            if ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_DISABLE_BLOB_SHADOW) != 0 ||
+                !(object->shadow_opacity > 0.0f) || object->apiobj.model_draw_result == 0 ||
+                object->shadow_joint_mask == 0 || (object->field_0xeff & 4) != 0 ||
+                (CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_DISABLE_BLOB_SHADOW) != 0) {
                 continue;
             }
 
-            CHARACTER_SHADOW_s &shadow = *shadow_cursor;
-            if (shadow.position.y != kInvalidShadowHeight && shadow.opacity > 0.0f &&
-                shadow.position.y <= 0.025f + joint_matrix->m31) {
-                NUVEC position;
-                position.y = shadow.position.y + 0.005f;
-                position.x = shadow.position.x;
-                position.z = shadow.position.z;
-                NuRndrAddShadow(&position, radius, static_cast<i32>(shadow.opacity * opacity_scale), shadow.x_rotation,
-                                0, shadow.z_rotation);
+            PLAYERCHARACTERCONFIG_s *config = object->apiobj.character_data->player_config;
+            i32 alpha = config->blob_shadow_alpha;
+            if (alpha == 0xff) {
+                alpha = static_cast<u8>(WORLD->current_level->blob_shadow_alpha);
             }
-            ++shadow_index;
-            ++shadow_cursor;
+            if (alpha <= 0 || !(object->shadow_radius > 0.0f)) {
+                continue;
+            }
+
+            const f32 opacity_scale = object->shadow_opacity * static_cast<f32>(alpha);
+            const f32 scaled_radius = object->shadow_radius * object->apiobj.field_0xa8;
+            const f32 radius = DropInOutScale(object) * scaled_radius;
+            i32 shadow_index = 0;
+            CHARACTER_SHADOW_s *shadow_cursor = object->character_shadows;
+            NUMTX *joint_matrix = object->joint_matrices;
+            for (i32 joint_index = 0; joint_index < kMaxShadowJoints && shadow_index < kMaxCharacterShadows;
+                 ++joint_index, ++joint_matrix) {
+                if ((object->shadow_joint_mask & (1u << joint_index)) == 0 ||
+                    object->apiobj.character_model->points_of_interest[joint_index] == NULL) {
+                    continue;
+                }
+
+                CHARACTER_SHADOW_s &shadow = *shadow_cursor;
+                if (shadow.position.y != kInvalidShadowHeight && shadow.opacity > 0.0f &&
+                    shadow.position.y <= 0.025f + joint_matrix->m31) {
+                    NUVEC position;
+                    position.y = shadow.position.y + 0.005f;
+                    position.x = shadow.position.x;
+                    position.z = shadow.position.z;
+                    NuRndrAddShadow(&position, radius, static_cast<i32>(shadow.opacity * opacity_scale),
+                                    shadow.x_rotation, 0, shadow.z_rotation);
+                }
+                ++shadow_index;
+                ++shadow_cursor;
+            }
+            object_count = HIGHGAMEOBJECT;
         }
-        object_count = HIGHGAMEOBJECT;
     }
 }
 

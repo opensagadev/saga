@@ -1322,27 +1322,27 @@ void ClassEditor::cbEdClassRemoveDuplicates(eduimenu_s *, eduiitem_s *, u32) {
             continue;
         for (i32 second = first + 1; second < count; ++second) {
             Placeable *other = objects[second];
-            if (other == NULL)
-                continue;
-            char const *other_name = other->GetName();
-            VuVec const *other_position = other->GetInitialPosition();
-            NUVEC second_position = {other_position->x, other_position->y, other_position->z};
-            i32 other_type = 0;
-            for (; other_type < thePlaceableHelper.object_type_count; ++other_type) {
-                void *interface = thePlaceableHelper.object_types[other_type].interface;
-                if (reinterpret_cast<i32 *>(interface)[2] == other->scene_id)
-                    break;
-            }
-            if (!(NuVecMag(&first_position) > 0.1f))
-                continue;
-            NUVEC separation = {first_position.x - second_position.x, first_position.y - second_position.y,
-                                first_position.z - second_position.z};
-            if (NuVecMag(&separation) < 0.1f && object_type == other_type &&
-                (strstr(name, other_name) != NULL || strstr(other_name, name) != NULL)) {
-                EdClassInterface *interface =
-                    reinterpret_cast<EdClassInterface *>(thePlaceableHelper.object_types[object_type].interface);
-                interface->vtable->destroy_object(interface, other, 0);
-                objects[second] = NULL;
+            if (other != NULL) {
+                char const *other_name = other->GetName();
+                VuVec const *other_position = other->GetInitialPosition();
+                NUVEC second_position = {other_position->x, other_position->y, other_position->z};
+                i32 other_type = 0;
+                for (; other_type < thePlaceableHelper.object_type_count; ++other_type) {
+                    void *interface = thePlaceableHelper.object_types[other_type].interface;
+                    if (reinterpret_cast<i32 *>(interface)[2] == other->scene_id)
+                        break;
+                }
+                if (!(NuVecMag(&first_position) > 0.1f))
+                    continue;
+                NUVEC separation = {first_position.x - second_position.x, first_position.y - second_position.y,
+                                    first_position.z - second_position.z};
+                if (NuVecMag(&separation) < 0.1f && object_type == other_type &&
+                    (strstr(name, other_name) != NULL || strstr(other_name, name) != NULL)) {
+                    EdClassInterface *interface =
+                        reinterpret_cast<EdClassInterface *>(thePlaceableHelper.object_types[object_type].interface);
+                    interface->vtable->destroy_object(interface, other, 0);
+                    objects[second] = NULL;
+                }
             }
         }
     }
@@ -3205,22 +3205,21 @@ void EdClass::SerialiseObject(EdStream &stream, void *object) {
     if (object != NULL) {
         u8 data[256];
         for (EdRef *member = members; member != NULL; member = member->next) {
-            if ((stream.flags & 0x400000) != 0 ? (member->attributes & 0x400000) != 0
-                                               : (member->attributes & 0x10000000) != 0) {
-                continue;
-            }
-            if (member->attributes < 0) {
-                EdClass *member_class = theRegistry.GetClass(member->type_id);
-                member_class->SerialiseObject(stream, member->GetMemberObject(object));
-            } else {
-                EdType *type = theRegistry.GetType(member->type_id);
-                i32 size = member->size > 0 ? member->size : type->size;
-                if (stream.mode == 2) {
-                    member->GetMemberData(object, member->type_id, data, sizeof(data));
-                }
-                type->serialise(stream, data, size);
-                if (stream.mode == 1) {
-                    member->SetMemberData(object, member->type_id, data, sizeof(data), NULL);
+            if (!((stream.flags & 0x400000) != 0 ? (member->attributes & 0x400000) != 0
+                                                 : (member->attributes & 0x10000000) != 0)) {
+                if (member->attributes < 0) {
+                    EdClass *member_class = theRegistry.GetClass(member->type_id);
+                    member_class->SerialiseObject(stream, member->GetMemberObject(object));
+                } else {
+                    EdType *type = theRegistry.GetType(member->type_id);
+                    i32 size = member->size > 0 ? member->size : type->size;
+                    if (stream.mode == 2) {
+                        member->GetMemberData(object, member->type_id, data, sizeof(data));
+                    }
+                    type->serialise(stream, data, size);
+                    if (stream.mode == 1) {
+                        member->SetMemberData(object, member->type_id, data, sizeof(data), NULL);
+                    }
                 }
             }
         }

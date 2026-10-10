@@ -771,23 +771,22 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
                     continue;
                 }
             }
-        } else if ((CDataList[id].model_flags & 0x2000) != 0 || (GCDataList[id].flags_090 & 0x40) != 0) {
-            continue;
-        }
+        } else if ((CDataList[id].model_flags & 0x2000) == 0 && (GCDataList[id].flags_090 & 0x40) == 0) {
 
-        if (BonusArea == 0 || VehicleArea == 0) {
-            if (static_cast<i32>(GCDataList[id].flags_090) < 0) {
-                if (Cheats_CheckFlags(0x100) == 0) {
+            if (BonusArea == 0 || VehicleArea == 0) {
+                if (static_cast<i32>(GCDataList[id].flags_090) < 0) {
+                    if (Cheats_CheckFlags(0x100) == 0) {
+                        continue;
+                    }
+                } else if ((GCDataList[id].flags_094[3] & 1) == 0 && (collected == -1 || Collection_Got(id) == 0)) {
                     continue;
                 }
-            } else if ((GCDataList[id].flags_094[3] & 1) == 0 && (collected == -1 || Collection_Got(id) == 0)) {
-                continue;
             }
-        }
 
-        free_play_target_ids[free_play_count++] = id;
-        if (free_play_count == 32) {
-            return;
+            free_play_target_ids[free_play_count++] = id;
+            if (free_play_count == 32) {
+                return;
+            }
         }
     }
 }
@@ -838,14 +837,13 @@ void MechTouchUIPlayerButton::TriggerTagNext() {
         if (target_ids[index] >= 0) {
             for (i32 slot = 0; slot < 8; ++slot) {
                 GameObject_s *target = Player[slot];
-                if (target == NULL || target->id != target_ids[index] || !TouchHacks::CanTagTo(*player, *target)) {
-                    continue;
+                if (target != NULL && target->id == target_ids[index] && !(!TouchHacks::CanTagTo(*player, *target))) {
+                    if (TagCode(player, target, 0, 0, 1) == 1) {
+                        GameAudio_PlaySfx(0x21, NULL, 0, 0);
+                        Tag_NewTransfer(source, target);
+                    }
+                    return;
                 }
-                if (TagCode(player, target, 0, 0, 1) == 1) {
-                    GameAudio_PlaySfx(0x21, NULL, 0, 0);
-                    Tag_NewTransfer(source, target);
-                }
-                return;
             }
         }
         if (index == current_index) {
