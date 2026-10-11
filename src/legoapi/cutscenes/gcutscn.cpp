@@ -456,10 +456,10 @@ void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance) {
 }
 
 void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance) {
-    instance->flags_88 &= ~2U;
     instance->current_frame = instance->cutscene->duration;
-    instance->flags_89 |= 0x10;
+    instance->flags_88 &= ~2U;
     instance->render_frame = instance->cutscene->duration;
+    instance->flags_89 |= 0x10;
     instance->flags_8c &= ~0x40U;
     instNuGCutSceneResetCamLock(instance);
 }

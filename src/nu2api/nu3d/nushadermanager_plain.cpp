@@ -1142,8 +1142,8 @@ void ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion(NUSHADERMTLDESC *d
 
     if ((original_vtx_flags3 & 4) != 0) {
         mobile_flags3 |= 0x80;
-        desc->flags |= 0x200000;
         desc->flagsbits_1bb = mobile_flags3;
+        desc->flags |= 0x200000;
     }
 
     const u8 original_flags1 = desc->byte4;

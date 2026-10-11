@@ -153,8 +153,8 @@ SAGA_HOST_WEAK void InitStillRender(variptr_u *, variptr_u) {
     nativePauseTex.checksum[13] = 0;
     nativePauseTex.checksum[14] = 0;
     nativePauseTex.checksum[15] = 0;
-    nativePauseTex.width = g_backingWidth;
     nativePauseTex.height = g_backingHeight;
+    nativePauseTex.width = g_backingWidth;
 
     BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/legoapi.saga/screen.cpp", 0x561);
     glGenTextures(1, &nativePauseTex.platform.gl_tex);

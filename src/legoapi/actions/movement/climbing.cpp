@@ -206,9 +206,9 @@ static __used__ void ClimbObject_FindNormal(CLIMBOBJECT_s *object) {
     return;
 found_normal:
     object->flags |= 1;
-    object->normal = ShadNorm;
     object->impact_x = origin.x + displacement.x;
     object->impact_z = origin.z + displacement.z;
+    object->normal = ShadNorm;
 }
 
 i32 CanClimbSurface(GameObject_s *object, i32 surface) {

@@ -41,8 +41,8 @@ void Buck_Start(GameObject_s *object, GameObject_s *rider) {
         return;
     if (rider != NULL)
         NewRumble(rider->pad_gamepad->pad, 0.6f, 0);
-    object->context_animation = LEGOACT_BUCK;
     object->character_context = LEGOCONTEXT_BUCK;
+    object->context_animation = LEGOACT_BUCK;
     object->context_animation_timer = AnimDuration(object->id, LEGOACT_BUCK, 0.0f, 0.0f, 1);
     if (BuckStartExtraFn != NULL)
         BuckStartExtraFn(object);
@@ -312,8 +312,8 @@ void Buck_StartRiderJump(GameObject_s *rider, GameObject_s *mount) {
     rider->apiobj.velocity.x = NuTrigTable[angle >> 1] * speed;
     rider->apiobj.velocity.z = speed * NuTrigTable[((i32)angle + 0x4000) >> 1 & 0x7fff];
     StartJump(rider, 0);
-    rider->tag_flags |= 1;
     rider->airborne_collision_target = mount;
+    rider->tag_flags |= 1;
     rider->apiobj.velocity.x = 0.0f;
     rider->apiobj.velocity.z = 0.0f;
     rider->pad_gamepad->buttons_held = 0;

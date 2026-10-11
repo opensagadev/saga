@@ -309,8 +309,8 @@ extern "C" NUMTL *NuMtlCreate3D(i32 count) {
         DefaultMtl(mtl);
 
         mtl->is_used = true;
-        mtl->unknown_0_4 = true;
         mtl->renderplane = numtl_renderplane;
+        mtl->unknown_0_4 = true;
         // NB: no unknown_6_128 here — original Create3D leaves byte6 clear.
 
         mtl->next = next;

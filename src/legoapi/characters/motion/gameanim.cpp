@@ -1297,8 +1297,8 @@ i32 GameAnimSet_Reset(GAMEANIMSET_s *set) {
             if (animation != NULL) {
                 animation->playing = 0;
                 animation->waiting = 0;
-                animation->tfactor = 1.0f;
                 animation->ltime = object->start_frame;
+                animation->tfactor = 1.0f;
             }
             GameAnimSet_RemoveFromSystemList(set);
         }
@@ -1938,8 +1938,8 @@ GAMEANIMOBJPOOL_s *GameAnimSet_CreateObjectPool(variptr_u *buf, variptr_u *buf_e
     if (capacity != 0) {
         pool = static_cast<GAMEANIMOBJPOOL_s *>(GameBufferAlloc(buf, buf_end, sizeof(GAMEANIMOBJPOOL_s)));
         if (pool != NULL) {
-            pool->capacity = static_cast<u16>(capacity);
             pool->object_data_size = static_cast<u16>(object_data_size);
+            pool->capacity = static_cast<u16>(capacity);
             pool->objects = static_cast<GAMEANIMOBJ_s *>(
                 GameBufferAlloc(buf, buf_end, static_cast<u16>(capacity) * sizeof(GAMEANIMOBJ_s)));
             if (object_data_size != 0) {

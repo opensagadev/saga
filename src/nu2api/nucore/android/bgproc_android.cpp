@@ -127,8 +127,8 @@ BGPROCINFO *bgPostRequest(bgprocdofn *do_fn, bgprocackfn *ack_fn, void *data, i3
         info->work_started = false;
         info->unknown_flag_2 = false;
 
-        info->do_fn = do_fn;
         info->ack_fn = ack_fn;
+        info->do_fn = do_fn;
 
         info->vars = NULL;
         info->var_count = 0;
@@ -154,8 +154,8 @@ BGPROCINFO *bgPostRequestV(bgprocdofn *do_fn, bgprocackfn *ack_fn, i32 first_typ
         info->ack_fn = ack_fn;
         info->work_started = false;
         info->unknown_flag_2 = false;
-        info->vars = reinterpret_cast<BGVAR *>(info->data);
         info->var_count = 0;
+        info->vars = reinterpret_cast<BGVAR *>(info->data);
 
         BGVAR *var = info->vars;
         char *string_end = reinterpret_cast<char *>(&info->vars);

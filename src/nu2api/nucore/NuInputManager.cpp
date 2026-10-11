@@ -17,9 +17,9 @@ NuInputManager::NuInputManager() {
 
     this->devices = (NuInputDevice **)NU_ALLOC(max_devices * sizeof(NuInputDevice *), 0x4,
                                                NuMemoryManager::MEM_ALLOC_SET_TO_ZERO, "", NUMEMORY_CATEGORY_NONE);
-    this->max_devices = max_devices;
-
     this->unknown_08 = 0;
+
+    this->max_devices = max_devices;
 
     for (i = 0; i < this->max_devices; i++) {
         this->devices[i] = (NuInputDevice *)NU_ALLOC_T(NuInputDevice, NuMemoryManager::MEM_ALLOC_SET_TO_ZERO, "",

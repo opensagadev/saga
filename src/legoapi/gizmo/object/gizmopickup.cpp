@@ -24,8 +24,8 @@ static void Pup_CollectCharKit(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameOb
     NUVEC target = {KITPOSX, KITPOSY + PANEL_MINIKITY, 1.0f};
     ADDGAMEMSG message = AddGameMsg_Default;
     message.position = &pickup->position;
-    message.target_position = &target;
     message.scale = AreaPickupScale;
+    message.target_position = &target;
     message.target_scale = PANEL_MINIKITSCALE;
     message.flags = 0x2112d;
     message.duration = 1.0f;
@@ -65,8 +65,8 @@ static void Pup_CollectRedBrick(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameO
         message.duration = 1.0f;
         message.icon = 0xd2;
         message.special = &WORLD->lev_objs[0xd2].special;
-        message.tick_fn = MiniKit_GameMsg_Update;
         message.end_fn = EndRedBrickMessage;
+        message.tick_fn = MiniKit_GameMsg_Update;
         message.field_0x4d = 1;
         AddGameMsg(&message);
         DrawRedBrickTime = 2.0f;

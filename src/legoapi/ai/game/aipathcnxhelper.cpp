@@ -352,8 +352,8 @@ AIPATHCNXCONTROLLER_s *AIPathCnxControllerCreate(AIPATHCNXCONTROLSYS_s *control_
             break;
         }
     }
-    controller->connection = connection;
     controller->flags = static_cast<u8>((controller->flags & ~1) | (direction & 1));
+    controller->connection = connection;
     controller->gizmo_output = gizmo_output;
     if (target != NULL) {
         controller->target = target;
@@ -429,8 +429,8 @@ AIPATHCNXHELPER_s *AIPathCnxHelperSys_AddHelper(AIPATHCNXHELPERSYS_s *system, AI
     ++helper_count;
     system->helper_count = helper_count;
     helper->connection = connection;
-    helper->target = target;
     helper->direction = direction;
+    helper->target = target;
     helper->type = type;
     return helper;
 }

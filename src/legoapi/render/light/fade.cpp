@@ -47,8 +47,8 @@ void FadeStillWipe::DrawFade() {
 void FadeStillWipe::InitFade() {
     const u32 old_direction = info->direction;
     if ((info->stage & 1) != 0) {
-        info->fade = 1.0f;
         info->rate = -1.3333334f;
+        info->fade = 1.0f;
     } else {
         info->fade = 1.0f;
         info->rate = 2.0f;
@@ -229,8 +229,8 @@ i32 FadeSystem::AddFade(FadeBase *o) {
 i32 FadeSystem::SetFade(FADETYPE const &t, u32 frames) {
     FADETYPE_VALUE type = t.type;
     if (type != FADE_TYPE_NONE && fades[type] != NULL) {
-        pending_type = type;
         direction = frames;
+        pending_type = type;
         return 1;
     }
     pending_type = FADE_TYPE_NONE;

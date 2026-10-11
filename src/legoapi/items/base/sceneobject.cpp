@@ -420,8 +420,8 @@ void SceneObjectHelper::PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *) {
             const i32 count = *count_slot;
             for (i32 index = 0; index < count; ++index) {
                 NuGScnGetSpecial(&object->special, scene, index);
-                object->attributes = 0x12400000;
                 object->led_file = level;
+                object->attributes = 0x12400000;
                 char *name = NuSpecialGetName(&object->special);
                 if (name != NULL)
                     NuStrICmp(name, "reflectport");

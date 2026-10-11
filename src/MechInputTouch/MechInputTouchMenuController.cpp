@@ -184,8 +184,8 @@ bool MechInputTouchMenuController::OnRelease(GameObject_s &, TouchHolder &holder
     }
 
     if (GameMenuLevel <= 0) {
-        field_70 = NULL;
         field_74 = NULL;
+        field_70 = NULL;
         return false;
     }
     bool same_menu = field_74 == &menu;

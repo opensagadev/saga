@@ -30,9 +30,9 @@ NuThread *NuThreadManager::CreateThread(void (*thread_fn)(void *), void *fn_arg,
 
     params.priority = ThreadPriorityMap[priority + 2];
 
-    params.name = name;
-
     params.stack_size = stack_size;
+
+    params.name = name;
 
     params.is_suspended = false;
 

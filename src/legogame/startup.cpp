@@ -307,8 +307,8 @@ static void LoadPermData(BGPROCINFO *proc) {
         manager.end = aligned_base + kSmallHeapSize;
         permbuffer_ptr.addr = aligned_base + kSmallHeapSize;
         manager.remaining = kSmallHeapSize;
-        manager.high_water = 0;
         manager.end_cell = &manager.end;
+        manager.high_water = 0;
         memset(manager.free_lists, 0, sizeof(manager.free_lists));
     }
 

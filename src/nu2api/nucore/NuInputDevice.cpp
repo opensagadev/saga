@@ -320,8 +320,8 @@ void NuInputDevice::ConvertToEmulatedTouchFromMouse(void) {
     touch_data.touch_count = 0;
     if (mouse_data.buttons[0].active != 0) {
         NuInputTouch &touch = touch_data.touch_events[0];
-        touch.unknown_00 = 1;
         touch.unknown_01 = mouse_data.buttons[0].released;
+        touch.unknown_00 = 1;
         touch.unknown_02 = mouse_data.buttons[0].pressed;
         touch.unknown_04 = mouse_data.x;
         touch.unknown_08 = mouse_data.y;

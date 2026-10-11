@@ -141,8 +141,8 @@ void ShaderMtlDescFilter::internalInit(nushadermtldesc_s const *material_desc, n
     desc = material_desc;
     mtl = material;
     flags_in = flags;
-    variant = flags & 3;
     texture_id_threshold = texture_threshold;
+    variant = flags & 3;
 
     const u8 *vertex_descriptor = reinterpret_cast<const u8 *>(&desc->vtx_desc);
     if (variant == 0) {

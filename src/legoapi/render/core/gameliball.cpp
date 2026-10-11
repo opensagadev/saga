@@ -181,8 +181,8 @@ i32 ReadTerrainPickup(unsigned char *base_path, i16 **buffer, TERRPICKUPSET *ter
                 group->field_0x32 = chunk->field_0x32;
                 if (group->field_0x32 < 128)
                     terrain->group_for_type[group->field_0x32] = group_count;
-                group->chunk_type = chunk->chunk_type;
                 group->origin = chunk->origin;
+                group->chunk_type = chunk->chunk_type;
                 group->scene_index = chunk->field_0x16;
                 group->platform_flags = chunk->field_0x2c;
                 group->data = chunk_data;

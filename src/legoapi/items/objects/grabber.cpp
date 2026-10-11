@@ -97,8 +97,8 @@ void Grabber_Configure(WORLDINFO_s *world, char *config) {
                 grabber->flags_559 = (grabber->flags_559 & ~0x08) | 0x10;
                 grabber->invert_x = 0;
                 grabber->speed = 1.0f;
-                grabber->scale = 1.0f;
                 grabber->character_id = id_GRABMACHINE;
+                grabber->scale = 1.0f;
                 active = 1;
             }
         }

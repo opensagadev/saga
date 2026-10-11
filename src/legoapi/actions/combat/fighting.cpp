@@ -440,8 +440,8 @@ void StartQuickShoot(GameObject_s *object, i32 action) {
         nextShootTarget = NuMechPtr<MechObjectInterface, 4>();
     if ((object->apiobj.field_0x1f4 & 0x40000) == 0 || object->apiobj.field_0x27c == -1) {
         NewBuzzFrames(object->pad_gamepad->pad, (object->apiobj.character_data->model_flags & 0x2000) != 0 ? 1 : 2, 0);
-        object->quick_shoot_bolt_id = bolt_id;
         object->quick_shoot_flags = flags;
+        object->quick_shoot_bolt_id = bolt_id;
         object->field_0xef9 |= 8;
         if ((object->apiobj.character_data->game_character->flags_098[0] & 2) != 0)
             SetWeaponIn(object);
@@ -551,8 +551,8 @@ void Punch_Hit(GameObject_s *attacker, GameObject_s *target, float, float gap) {
             if (static_cast<i8>(attacker->context_flags) < 0) {
                 angle -= 0x8000;
             }
-            target->apiobj.velocity.x += NuTrigTable[angle >> 1] * impulse;
             target->apiobj.velocity.z += NuTrigTable[((static_cast<u32>(angle) + 0x4000) >> 1) & 0x7fff] * impulse;
+            target->apiobj.velocity.x += NuTrigTable[angle >> 1] * impulse;
         }
     } else {
         GIZMOBLOWUP_s *blowup = attacker->blowup_target;

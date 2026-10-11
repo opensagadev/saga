@@ -264,11 +264,11 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
                     continue;
                 opacity = 0.25f;
                 if (model_index == 0 || model_index == 1) {
-                    frame = model_index == 0 ? LEGOOBJ_ICON_FRAME_BLUE : LEGOOBJ_ICON_FRAME_GREEN;
                     opacity =
                         NuTrigTable[(static_cast<i32>(GlobalTimer.time_elapsed_mod_seconds * 65536.0f) >> 1) & 0x7fff] *
                             0.125f +
                         0.375f;
+                    frame = model_index == 0 ? LEGOOBJ_ICON_FRAME_BLUE : LEGOOBJ_ICON_FRAME_GREEN;
                 }
             }
             const i32 unlocked = valid != NULL ? valid(collection, index) : Collection_Got(id);

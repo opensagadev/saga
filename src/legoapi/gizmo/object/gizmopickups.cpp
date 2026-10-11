@@ -103,8 +103,8 @@ void AddCoinsToPanel(i32 coins, nuvec_s *position, i32 player, float, GameObject
                 message.target_scale = target_scale;
                 message.icon = model;
                 message.extra_position = reinterpret_cast<NUVEC *>(&world->lev_objs[message.icon]);
-                message.score = type->score;
                 message.end_fn = EndScoreMessage;
+                message.score = type->score;
                 message.player_index = player;
                 message.field_0x4d = 1;
                 message.field_0x20 = AddCoinDelay[player];

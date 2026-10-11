@@ -615,8 +615,8 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::SwapOrMergeAdjacentBuffers(NuSoundMem
     while (remaining != 0) {
         u32 amount = remaining < buffer_size ? remaining : buffer_size;
         memmove(dest, source, amount);
-        dest += amount;
         source += amount;
+        dest += amount;
         remaining -= amount;
     }
 

@@ -312,8 +312,8 @@ void CalculateWorldSize(WORLDINFO *world) {
         if (scene->display_list != NULL &&
             (scene->display_list->render_buffer & NUDL_SCENE_RENDER_FLAG_CENTER_EXTENT_BOUNDS) != 0) {
             box_minimum.x = box->first.x - box->second.x;
-            box_minimum.y = box->first.y - box->second.y;
             box_minimum.z = box->first.z - box->second.z;
+            box_minimum.y = box->first.y - box->second.y;
             box_maximum.x = box->first.x + box->second.x;
             box_maximum.y = box->first.y + box->second.y;
             box_maximum.z = box->first.z + box->second.z;
@@ -449,8 +449,8 @@ void WorldInfo_Init(WORLDINFO *world) {
     // Level progress copy
     LEVEL_PROGRESS_s *progress = (LEVEL_PROGRESS_s *)world->level_progress;
     if (NOSOUND == 0 && progress != NULL && (progress->flags & 1) == 0) {
-        progress->data = world->progress_data;
         progress->flags |= 1;
+        progress->data = world->progress_data;
     }
 
     Doors_Init(world);

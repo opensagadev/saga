@@ -363,8 +363,8 @@ void NuMemoryPool::ReleaseUnreferencedPages() {
             ++released_count;
         } else {
             page->allocation_count = 0;
-            page->offset = 0;
             page->next = recycled;
+            page->offset = 0;
             recycled = page;
             ++recycled_count;
         }

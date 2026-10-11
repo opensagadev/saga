@@ -166,9 +166,9 @@ void MechInputTouchGestureTrackingSystem::ReadData(GameObject_s &object, NuInput
     for (i32 index = 0; index < 10; ++index) {
         TouchHolder &holder = holders[index];
         holder.held_time += FRAMETIME;
-        holder.sample_countdown += FRAMETIME;
         holder.field_0x6 = holder.is_down;
         holder.is_down = 0;
+        holder.sample_countdown += FRAMETIME;
     }
 
     for (u32 index = 0; index < data.touch_count; ++index) {

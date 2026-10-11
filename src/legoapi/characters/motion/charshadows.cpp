@@ -66,8 +66,8 @@ void CharShadows_Draw() {
                 if (shadow.position.y != kInvalidShadowHeight && shadow.opacity > 0.0f &&
                     shadow.position.y <= 0.025f + joint_matrix->m31) {
 
-                    position.y = shadow.position.y + 0.005f;
                     position.x = shadow.position.x;
+                    position.y = shadow.position.y + 0.005f;
                     position.z = shadow.position.z;
                     NuRndrAddShadow(&position, radius, static_cast<i32>(shadow.opacity * opacity_scale),
                                     shadow.x_rotation, 0, shadow.z_rotation);

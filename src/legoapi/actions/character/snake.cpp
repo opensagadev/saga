@@ -163,8 +163,8 @@ void DrawSnakeBody(GameObject_s *object) {
             scale.x = object->snake_body->scale;
             NuMtxPreScale(&matrix, &scale);
         }
-        matrix.m30 += object->snake_body->segments[segment_index].position.x;
         matrix.m31 += object->snake_body->segments[segment_index].position.y + object->snake_body->scale * 0.02f;
+        matrix.m30 += object->snake_body->segments[segment_index].position.x;
         matrix.m32 += object->snake_body->segments[segment_index].position.z;
         i32 special_index = segment_index == object->snake_body->segment_count - 1 ? 2 : segment_index % 2;
         nuhspecial_s *special = &snake_hspecials[special_index];

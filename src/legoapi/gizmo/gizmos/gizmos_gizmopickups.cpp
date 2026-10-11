@@ -86,8 +86,8 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
             }
         }
 
-        message.position = position;
         message.target_position = &target_position;
+        message.position = position;
         message.scale = PANEL_COINSCALE_START * AreaPickupScale;
         message.flags = 0x2012d;
         message.duration = COINMSGTIME;
