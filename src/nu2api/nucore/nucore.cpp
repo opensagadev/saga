@@ -279,8 +279,8 @@ void NuPostFilterGen::GetSampleOffsets_GaussBlur5x5(i32 width, i32 height, VuVec
 
 void NuDeferredFilterGen::render() {
     nuframebuffer_s *output = static_cast<nuframebuffer_s *>(portOutFramebuffer.get());
-    NuProxyBuffer *color = static_cast<NuProxyBuffer *>(portColorBuffer.get());
     NuProxyBuffer *normal = static_cast<NuProxyBuffer *>(portNormalBuffer.get());
+    NuProxyBuffer *color = static_cast<NuProxyBuffer *>(portColorBuffer.get());
     NuProxyBuffer *depth_rt = static_cast<NuProxyBuffer *>(portDepthRTBuffer.get());
     NuProxyBuffer *depth = static_cast<NuProxyBuffer *>(portDepthBuffer.get());
     NuPostResolve(color);
@@ -843,26 +843,26 @@ NuDynamicLight *NuDynamicLight::clone(variptr_u *arena, variptr_u) {
         destination.display_lists[0] = source.display_lists[0];
         destination.display_lists[1] = source.display_lists[1];
         {
-            nurndrstate_s *first = source.render_states[0];
             nurndrstate_s *second = source.render_states[1];
+            nurndrstate_s *first = source.render_states[0];
             destination.render_states[1] = second;
             destination.render_states[0] = first;
         }
         {
-            NUDISPLAYLISTITEM *first = source.list_items[0];
             NUDISPLAYLISTITEM *second = source.list_items[1];
+            NUDISPLAYLISTITEM *first = source.list_items[0];
             destination.list_items[1] = second;
             destination.list_items[0] = first;
         }
         {
-            NUDISPLAYLISTITEM *first = source.scene_cursor[0];
             NUDISPLAYLISTITEM *second = source.scene_cursor[1];
+            NUDISPLAYLISTITEM *first = source.scene_cursor[0];
             destination.scene_cursor[1] = second;
             destination.scene_cursor[0] = first;
         }
         {
-            NUDISPLAYLISTITEM *first = source.scene_first[0];
             NUDISPLAYLISTITEM *second = source.scene_first[1];
+            NUDISPLAYLISTITEM *first = source.scene_first[0];
             destination.scene_first[1] = second;
             destination.scene_first[0] = first;
         }
@@ -963,8 +963,8 @@ void NuDynamicLight::renderShadowMap(i32 index, nuframebuffer_s *) {
         return;
     refreshShadowTransform(set);
     NuDisplayListSetItemTable(1);
-    NUMTX bias = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0.5f, 0, 0, 0, 0.5f, 1};
     NUMTX matrix;
+    NUMTX bias = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0.5f, 0, 0, 0, 0.5f, 1};
     NuMtxMulH(&matrix, &set.warp, &bias);
     NuRenderContextSetViewProj(&matrix, &numtx_identity);
     if (set.display_lists[0].mtl_last != set.display_lists[0].first) {

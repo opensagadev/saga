@@ -903,16 +903,16 @@ MechTouchUIPartySelector::MechTouchUIPartySelector(MechTouchUIPlayerButton &butt
     const VuVec button_position = button.position;
     const f32 button_bottom = button.position.y - button.radius_y;
     const bool small_screen = NuIOS_IsSmallScreen() != 0;
-    const f32 gap = small_screen ? 0.11f : 0.06f;
     const f32 scale = small_screen ? 0.16f : 0.15f;
+    const f32 gap = small_screen ? 0.11f : 0.06f;
     const i32 icons_per_row = small_screen ? 5 : 7;
     const f32 first_y = (button_bottom - gap) - gap;
     f32 x = button_position.x;
     f32 y = first_y;
     f32 delay = 0.0f;
     f32 delay_step = 0.03f;
-    i32 column = 0;
     i32 icon_index = 0;
+    i32 column = 0;
 
     for (i32 target_index = 0; target_index < 32; ++target_index) {
         if (target_ids[target_index] < 0 || player == NULL) {

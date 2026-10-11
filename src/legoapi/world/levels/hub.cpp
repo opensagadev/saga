@@ -3420,7 +3420,11 @@ void MenuUpdateEpisodes(MENU_s *) {
                             column -= 7;
                         const i32 row = previous / 7 * 7;
                         const i32 next = row + column;
-                        i_clip[i_episodes] = next < count ? next : row;
+                        if (next < count) {
+                            i_clip[i_episodes] = next;
+                        } else {
+                            i_clip[i_episodes] = row;
+                        }
                     }
                 } else {
                     i32 next = previous - 7;

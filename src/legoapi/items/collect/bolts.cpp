@@ -473,7 +473,11 @@ void Bolts_Draw(WORLDINFO_s *world) {
             } else {
                 scale.y = (bolt->time / type->field_24) * size;
             }
-            scale.x = scale.z = (bolt->flags & 0x200) != 0 ? scale.y : size;
+            if ((bolt->flags & 0x200) != 0) {
+                scale.x = scale.z = scale.y;
+            } else {
+                scale.x = scale.z = size;
+            }
             NuMtxPreScale(&matrix, &scale);
         } else if (bolt->scale != 1.0f) {
             scale.x = scale.y = scale.z = size;

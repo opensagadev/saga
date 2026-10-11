@@ -13,10 +13,10 @@ MINICAM_s MiniCam = {};
 
 void Minicam_Update() {
     f32 distance = MiniCam.distance;
-    i32 pitch = MiniCam.pitch;
     i32 yaw = MiniCam.yaw;
-    i32 roll = MiniCam.roll;
+    i32 pitch = MiniCam.pitch;
     NUVEC *focus = MiniCam.focus;
+    i32 roll = MiniCam.roll;
     NUVEC position = MiniCam.position;
     i32 pitch_rate = 0, yaw_rate = 0, roll_rate = 0;
     f32 command_duration;

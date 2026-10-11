@@ -168,8 +168,8 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
     pushblock_s *nearest = NULL;
     if (world == NULL)
         return nearest;
-    i32 count = world->push_block_count;
     pushblock_s *blocks = world->push_blocks;
+    i32 count = world->push_block_count;
     if (blocks == NULL)
         return nearest;
     if (count == 0)
@@ -250,9 +250,9 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
         NUVEC *pos = block->position;
         f32 top = pos->y + fabsf(block->bounds_max.y);
         f32 bottom = pos->y - fabsf(block->bounds_min.y);
-        f32 min_x = block->bounds_min.x;
         f32 min_z = block->bounds_min.z;
         f32 max_z = block->bounds_max.z;
+        f32 min_x = block->bounds_min.x;
         if (top > max_y && bottom > max_y)
             continue;
         if (min_y > top) {

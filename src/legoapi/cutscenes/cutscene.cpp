@@ -1154,7 +1154,11 @@ extern "C" {
                 if (NuSpecialFind(scene, &special, rigid->name, 1) != 0) {
                     rigid->flags |= 4;
                     rigid->scene = special.scene;
-                    rigid->special_object = special.display_special != NULL ? special.display_special : special.special;
+                    if (special.display_special != NULL) {
+                        rigid->special_object = special.display_special;
+                    } else {
+                        rigid->special_object = special.special;
+                    }
                 }
                 if (rigid->locator_count != 0 && cutscene->locator_system != NULL && rigid->locator < 0xff) {
                     rigid->locator_index = static_cast<u8>(rigid->locator);

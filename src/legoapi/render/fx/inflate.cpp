@@ -88,8 +88,8 @@ i32 refpack(unsigned char *source, abi_long source_size, unsigned char *destinat
             continue;
         }
         u32 match_length = 2;
-        u32 match_offset = 0;
         u32 command_size = 2;
+        u32 match_offset = 0;
 
         do {
             unsigned char *candidate = input_start + candidate_index;

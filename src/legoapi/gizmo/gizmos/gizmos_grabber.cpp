@@ -190,8 +190,11 @@ void Grabber_Update(WORLDINFO_s *world) {
             } else {
                 g->target_velocity.y = pad->input_direction_x * g->speed;
                 g->target_velocity.x = 0.0f;
-                g->target_velocity.z =
-                    Grab_grabber->invert_x ? -(g->speed * pad->input_direction_z) : g->speed * pad->input_direction_z;
+                if (Grab_grabber->invert_x) {
+                    g->target_velocity.z = -(g->speed * pad->input_direction_z);
+                } else {
+                    g->target_velocity.z = g->speed * pad->input_direction_z;
+                }
             }
         }
     } else {

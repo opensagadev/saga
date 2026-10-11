@@ -42,8 +42,8 @@ static void transposeClipPlanes(NUFRUSTRUM *frustum) {
     f32 cam_a = cam_plane.a;
     frustum->transposed_planes[3] = cam_a;
     f32 cam_d = cam_plane.d;
-    f32 cam_b = cam_plane.b;
     f32 cam_c = cam_plane.c;
+    f32 cam_b = cam_plane.b;
     NUPLANE *planes = frustum->planes;
     frustum->transposed_planes[7] = cam_b;
     frustum->transposed_planes[11] = cam_c;

@@ -127,8 +127,8 @@ extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour) {
     matrix.m32 = centre->z;
     for (i32 remaining = 4; remaining > 0; --remaining) {
         const i32 i = 4 - remaining;
-        NUVEC start;
         NUVEC end;
+        NUVEC start;
         if (i == 0) {
             start = NUVEC{-radius, -radius, 0.0f};
             end = NUVEC{radius, -radius, 0.0f};
@@ -563,8 +563,8 @@ void SetCameraZoom(f32 zoom) {
 }
 
 extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
-    NUDLDLISTSCENE *display_list = gscn->display_list;
     NUMTX *animation_matrix = gscn->instance_animation_matrices;
+    NUDLDLISTSCENE *display_list = gscn->display_list;
     if (gscn->instance_animation_data == NULL) {
         return;
     }
@@ -1599,8 +1599,8 @@ static inline u16 AlphaImageFloatToHalf(f32 value) {
     u32 bits;
     memcpy(&bits, &value, sizeof(bits));
     i32 mantissa = bits & 0x7fffff;
-    i32 sign = bits >> 31;
     i32 exponent = static_cast<i32>((bits >> 23) & 0xff) - 0x70;
+    i32 sign = bits >> 31;
     i32 half_exponent = 0;
     if (exponent >= 0) {
         half_exponent = 0x7c00;
@@ -1634,8 +1634,8 @@ void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets
     f32 far_scale = parameters->far_scale * 128.0f;
     f32 near_angle = parameters->near_angle / 180.0f;
     f32 far_angle = parameters->far_angle / 180.0f;
-    f32 angle_delta = far_angle - near_angle;
     f32 scale_delta = far_scale - near_scale;
+    f32 angle_delta = far_angle - near_angle;
     NUVPREGION saved_region = g_NuVpRegion;
     NuVpResetRegions();
 
@@ -1783,8 +1783,8 @@ void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets
 void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_control, numtl_s *material, i32 colour) {
     static i32 bezier_draw_depth;
 
-    const f32 camera_x = global_camera.mtx.m30;
     const f32 camera_y = global_camera.mtx.m31;
+    const f32 camera_x = global_camera.mtx.m30;
     const f32 camera_z = global_camera.mtx.m32;
     const f32 start_y = start.y - camera_y;
     const f32 start_z = start.z - camera_z;
@@ -3818,8 +3818,8 @@ static void DrawParaphernalia(GameObject_s *object) {
     }
     if (object->field_0xd24 > 0.0f || object->timer_d28 > 0.0f) {
         ResetShadowMapRendering();
-        const u8 render_reflection = object->field_0x1088;
         GAMECHARACTERDATA_s *shield_config = object->apiobj.character_data->game_character;
+        const u8 render_reflection = object->field_0x1088;
         f32 scale;
         bool show;
         if (object->field_0xe37 != 0 || shield_config->field_0xf5 == 0 || !(object->timer_d28 > 0.0f)) {
@@ -4060,8 +4060,8 @@ static void DrawParaphernalia(GameObject_s *object) {
     }
     if (object->field_0xe22 & 0x40) {
         dco_prerotatez = 0x4000;
-        const u8 render_reflection = object->field_0x1088;
         const u32 layers = object->field_0x1054;
+        const u8 render_reflection = object->field_0x1088;
         const i32 locator = object->apiobj.character_data->game_character->throw_locator;
         const i32 model_id = Batarang_GetObjectFromCharID(object->id);
         DrawObjectOnCharacter(WORLD, object, model_id, NULL, locator, -1, joints, render_reflection, layers, NULL, NULL,

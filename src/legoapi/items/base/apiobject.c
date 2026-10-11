@@ -222,13 +222,21 @@ extern "C" {
             NuVecNorm(&normal, &normal);
             first_speed = NuFsqrt(first->velocity.x * first->velocity.x + first->velocity.y * first->velocity.y +
                                   first->velocity.z * first->velocity.z);
-            value = first_speed == 0.0f ? 0.0f : 1.0f / first_speed;
+            if (first_speed == 0.0f) {
+                value = 0.0f;
+            } else {
+                value = 1.0f / first_speed;
+            }
             first_component.x = first->velocity.x * value;
             first_component.y = first->velocity.y * value;
             first_component.z = first->velocity.z * value;
             second_speed = NuFsqrt(second->velocity.x * second->velocity.x + second->velocity.y * second->velocity.y +
                                    second->velocity.z * second->velocity.z);
-            value = second_speed == 0.0f ? 0.0f : 1.0f / second_speed;
+            if (second_speed == 0.0f) {
+                value = 0.0f;
+            } else {
+                value = 1.0f / second_speed;
+            }
             second_component.x = second->velocity.x * value;
             second_component.y = second->velocity.y * value;
             second_component.z = second->velocity.z * value;
@@ -998,7 +1006,11 @@ extern "C" {
                 }
 
                 buf->addr -= NuFilePakCondense(pak);
-                animations = area_models != 0 && list->count != 0 ? apicharsys->char_data[model_id].animations : NULL;
+                if (area_models != 0 && list->count != 0) {
+                    animations = apicharsys->char_data[model_id].animations;
+                } else {
+                    animations = NULL;
+                }
                 for (; animations != NULL && animations->name != NULL; ++animations) {
                     if ((animations->flags & 0x8000) == 0 && ((area_animation != 0 && (animations->flags & 1) != 0) ||
                                                               (area_animation == 0 && (animations->flags & 1) == 0))) {
@@ -2459,8 +2471,8 @@ extern "C" {
 
     void APITransparentCharDraw(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,
                                 NUMTX *joint_matrices, void **dwa, i32 render_flags) {
-        i32 layer_six = 0;
         i32 layer_zero = 0;
+        i32 layer_six = 0;
         if (notransparentchardraw == 1 || APITrans_Mtl[0] == NULL) {
             return;
         }

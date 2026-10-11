@@ -280,8 +280,8 @@ static __used__ void LoadAreaData(bgprocinfo_s *) {
     i32 saved_max_fps;
     i32 area;
     NUGSCN *scene;
-    APICHARACTERMODELLIST_s *list;
     APICHARACTERMODELLIST_s *story_list;
+    APICHARACTERMODELLIST_s *list;
 
     area = Area;
     saved_max_fps = nuapi.max_fps;
@@ -669,8 +669,8 @@ load_type_done:
                     icon_time < icons_end_time) {
                     const f32 wobble = NuTrigTable[(wobble_angle >> 1) & 0x7fff] * 0.15f;
                     const bool widescreen = Game_OptionsSave != NULL && Game_OptionsSave->field11_0xb != 0;
-                    const f32 icon_x = widescreen ? 0.106875f : 0.1425f;
                     const f32 icon_travel = widescreen ? 0.406875f : 0.4425f;
+                    const f32 icon_x = widescreen ? 0.106875f : 0.1425f;
                     const f32 icon_scale = widescreen ? 0.35f : 0.4f;
 
                     if (icon_time < icon_end_time) {

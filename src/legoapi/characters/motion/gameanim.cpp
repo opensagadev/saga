@@ -432,12 +432,13 @@ static void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_
 
     CHARACTER_ANIMATION animation;
     if (allow_tiptoe != 0 && movement_speed <= (game_character->tiptoe_speed + game_character->walk_speed) * 0.5f) {
-        object->apiobj.anim_packet.requested_animation = animation =
-            weapon_variant != 0 &&
-                    (object->weapon_scale == 1.0f || object->weapon_scale_state == WEAPON_SCALE_EXTENDING) &&
-                    object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_SABER_TIPTOE] != NULL
-                ? CHARACTER_ANIMATION_SABER_TIPTOE
-                : CHARACTER_ANIMATION_TIPTOE;
+        if (weapon_variant != 0 &&
+            (object->weapon_scale == 1.0f || object->weapon_scale_state == WEAPON_SCALE_EXTENDING) &&
+            object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_SABER_TIPTOE] != NULL) {
+            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_SABER_TIPTOE;
+        } else {
+            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_TIPTOE;
+        }
     } else if (movement_speed <= (game_character->walk_speed + game_character->run_speed) * 0.5f) {
         if (weapon_variant != 0 &&
             (object->weapon_scale == 1.0f || object->weapon_scale_state == WEAPON_SCALE_EXTENDING) &&
@@ -616,9 +617,11 @@ void Animate_BEAST(GameObject_s *object) {
                 const GAMECHARACTERDATA *character =
                     static_cast<const GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
                 const f32 threshold = (character->walk_speed + character->run_speed) * 0.5f;
-                packet.requested_animation = threshold >= object->pad_gamepad->input_magnitude
-                                                 ? CHARACTER_ANIMATION_WALK
-                                                 : CHARACTER_ANIMATION_RUN;
+                if (threshold >= object->pad_gamepad->input_magnitude) {
+                    packet.requested_animation = CHARACTER_ANIMATION_WALK;
+                } else {
+                    packet.requested_animation = CHARACTER_ANIMATION_RUN;
+                }
             }
             if (packet.requested_animation == CHARACTER_ANIMATION_WALK && (object->field_0xe24 & 1) != 0) {
                 packet.requested_animation = CHARACTER_ANIMATION_SABER_WALK;
@@ -1343,9 +1346,11 @@ void Animate_BATTLEDROID(GameObject_s *object) {
         if (object->apiobj.character_model->model_data_b[43] != NULL) {
             packet.requested_animation = 43;
         } else {
-            packet.requested_animation = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL
-                                             ? CHARACTER_ANIMATION_IDLE
-                                             : CHARACTER_ANIMATION_FALL;
+            if (object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL) {
+                packet.requested_animation = CHARACTER_ANIMATION_IDLE;
+            } else {
+                packet.requested_animation = CHARACTER_ANIMATION_FALL;
+            }
         }
     } else {
         packet.requested_animation = CHARACTER_ANIMATION_FALL;

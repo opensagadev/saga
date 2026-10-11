@@ -735,7 +735,11 @@ void CheckResetBits() {
     } else {
         Tag_SetMode(1);
     }
-    WeaponInOut_NoAIJediSfx = WORLD->area != NULL && WORLD->area == JEDI_ADATA ? 1 : 0;
+    if (WORLD->area != NULL && WORLD->area == JEDI_ADATA) {
+        WeaponInOut_NoAIJediSfx = 1;
+    } else {
+        WeaponInOut_NoAIJediSfx = 0;
+    }
     bonusmodearcade = 0;
     if (WORLD->area != NULL && (WORLD->area->flags & 0x10) != 0) {
         if (AreaGlobals.values.field_0x14 < AreaGlobals.values.field_0x0c) {
@@ -1170,7 +1174,11 @@ void DebFreeChunksInstantly(i32 *handle) {
         control->active = effect->particle_type == 7 ? 9 : 2;
         control->owner = NULL;
         const bool panel_time = effect->time_group == 4;
-        control->expiry_time = panel_time ? panelglobaltime : globaltime;
+        if (panel_time) {
+            control->expiry_time = panelglobaltime;
+        } else {
+            control->expiry_time = globaltime;
+        }
         AddChunkControlToStack(control, &debris_chunk_control_stack[panel_time ? 1 : 0]);
         ++freechunkcontrolsptr;
     }

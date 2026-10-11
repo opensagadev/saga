@@ -24,14 +24,14 @@
 // alias, is encoded in the symbol name.
 void __attribute__((weak)) GLSLParameter::setElementsMatrix(i32 first_element, i32 count, const f32 *values) {
     NUMTX transposed[32];
-    NUMTX *destination = transposed;
     const NUMTX *source = reinterpret_cast<const NUMTX *>(values);
+    NUMTX *destination = transposed;
     for (i32 i = 0; i < count; ++i) {
         NuMtxTranspose(destination++, const_cast<NUMTX *>(source++));
     }
 
-    i32 vector_count = count * 4;
     const i32 vectors_remaining = element_count - first_element * 4;
+    i32 vector_count = count * 4;
     if (vector_count > vectors_remaining) {
         vector_count = vectors_remaining;
     }
@@ -958,8 +958,8 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
             GLSLParameter &parameter = shader->parameters[semantic];
 
             const nu2api::ShaderUniformRecord &uniform = nu2api::g_shaderUniforms[semantic];
-            const i32 count = static_cast<i32>(uniform.data.metadata[0]);
             const f32 *values = reinterpret_cast<const f32 *>(uniform.data.values);
+            const i32 count = static_cast<i32>(uniform.data.metadata[0]);
 
             switch (parameter.type_and_flags & 0x0f) {
                 case 1:

@@ -18,8 +18,8 @@ void MechJumpAutoPilotAddon::AnalyseJumpTrajectory() {
 
     {
         float vy = field_54.y;
-        float x = field_44.x;
         float z = field_44.z;
+        float x = field_44.x;
         for (int count = 50; count != 0; --count) {
             if (state == 2)
                 break;

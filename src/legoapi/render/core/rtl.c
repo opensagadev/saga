@@ -413,10 +413,10 @@ extern "C" {
         buffer->addr += sizeof(rtlindex_s);
         memset(grid, 0, sizeof(*grid));
 
-        f32 minimum_x = FLT_MAX;
         f32 maximum_x = -FLT_MAX;
-        f32 minimum_z = FLT_MAX;
+        f32 minimum_x = FLT_MAX;
         f32 maximum_z = -FLT_MAX;
+        f32 minimum_z = FLT_MAX;
         rtl_s *light;
         for (light = set->lights; light < set->lights + 128 && light->type != 0; ++light) {
             minimum_x = MIN(minimum_x, light->position.x - light->outer_radius);
@@ -457,9 +457,9 @@ extern "C" {
                 u8 *indices = reinterpret_cast<u8 *>(grid->cells[row * grid->width + column]);
                 *indices = 0;
                 const f32 minimum_cell_x = static_cast<f32>(column) / grid->scale - grid->offset_x;
-                const f32 maximum_cell_x = static_cast<f32>(column + 1) / grid->scale - grid->offset_x;
-
                 i32 index = 0;
+
+                const f32 maximum_cell_x = static_cast<f32>(column + 1) / grid->scale - grid->offset_x;
                 light = set->lights;
                 while (light < set->lights + 128 && light->type != 0) {
                     // Original JBE overlap branches accept unordered comparisons.
@@ -2900,8 +2900,8 @@ static void edrtlLeave() {
 
 static __used__ rtl_s *FindNearestRTL(nuvec_s *position, int ignore_radius) {
     i32 nearest = -1;
-    f32 nearest_distance = FLT_MAX;
     i32 i;
+    f32 nearest_distance = FLT_MAX;
     f32 distance;
     if (base_rtl != NULL) {
         i = base_rtl->field_79;
@@ -3163,8 +3163,8 @@ static i32 edrtlProcRTL(float delta_time, nupad_s *pad) {
 
 static __used__ EDRTLFOG_s *FindNearestFog(nuvec_s *position) {
     i32 nearest = -1;
-    f32 nearest_distance = FLT_MAX;
     i32 i;
+    f32 nearest_distance = FLT_MAX;
     f32 distance;
     for (i = 0; i < 32; ++i) {
         if (hide_types[curr_set->lights[i].type])
@@ -3567,8 +3567,8 @@ extern "C" void edrtlCalculateBurnoutEx(burnset_s *set, NuBloomParameters *param
 }
 
 struct edrtl_line_vertex_s {
-    NUVEC position;
     u8 unused_0c[0x0c];
+    NUVEC position;
     i32 colour;
     u8 unused_1c[0x08];
 };

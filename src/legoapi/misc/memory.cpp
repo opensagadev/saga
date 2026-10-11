@@ -136,8 +136,8 @@ extern "C" {
                 control->particle_chunk = key->particle_chunks[i];
                 control->owner = NULL;
                 control->active = effect->particle_type == 7 ? 7 : 0;
-                const i32 panel = effect->time_group == 4;
                 debinftype *expiry_effect = debtab[key->effect_index];
+                const i32 panel = effect->time_group == 4;
                 control->expiry_time = expiry_effect->particle_lifetime + (panel ? panelglobaltime : globaltime) +
                                        static_cast<i8>(expiry_effect->trail_count) * expiry_effect->trail_time;
                 AddChunkControlToStack(control, &debris_chunk_control_stack[panel]);
@@ -285,9 +285,9 @@ extern "C" {
     extern "C++" void AddChunkToRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
 
     void DebReAlloc2(debkeydatatype_s *key) {
-        debinftype *effect = debtab[key->effect_index];
         const i32 old_chunk_count = key->allocated_chunk_count;
         const i32 requested_chunk_count = key->previous_allocated_chunk_count;
+        debinftype *effect = debtab[key->effect_index];
         const i32 additional_chunks = requested_chunk_count - old_chunk_count;
         if (additional_chunks == 0) {
             return;

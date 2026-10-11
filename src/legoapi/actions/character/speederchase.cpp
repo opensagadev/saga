@@ -126,8 +126,8 @@ GameObject_s *ObjOpponent(GameObject_s *object, f32 range, f32 extra_radius, i32
         if ((player_filter == 1 && target->apiobj.field_0x27c != -1) ||
             (player_filter == 2 && target->apiobj.field_0x27c == -1))
             continue;
-        i8 context = target->character_context;
         GAMECHARACTERDATA *runtime = static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24);
+        i8 context = target->character_context;
         if ((context == 0x17 && (target->current_hp == 0 || (runtime->flags_090 & 0x40) != 0)) ||
             (CInfo[context].flags & 0x8000) != 0 || (context & 0xfd) == 0x39 || context == 0x3c)
             continue;

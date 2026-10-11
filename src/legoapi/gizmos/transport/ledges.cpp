@@ -205,8 +205,8 @@ static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *boun
         return NULL;
     LEDGE *nearest_segment = NULL;
     LEDGE *nearest_endpoint = NULL;
-    f32 segment_distance = 100000.0f;
     f32 endpoint_distance = 100000.0f;
+    f32 segment_distance = 100000.0f;
     NUVEC segment_position, endpoint_position;
     u16 segment_angle = 0, endpoint_angle = 0;
     i32 count = world->ledge_count;
@@ -467,8 +467,8 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         } else
             speed = 0.5f;
     }
-    f32 radius = object->apiobj.field_0x1dc;
     NUVEC previous = object->external_force;
+    f32 radius = object->apiobj.field_0x1dc;
     NUVEC maximum = {object->apiobj.collision_position.x + radius, object->apiobj.upper_position.y,
                      object->apiobj.collision_position.z + radius};
     NUVEC minimum = {object->apiobj.collision_position.x - radius, object->apiobj.collision_position.y,

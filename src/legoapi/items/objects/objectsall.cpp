@@ -95,9 +95,9 @@ pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, 
             continue;
         f32 x = position->x - other->position->x, y = position->y - other->position->y,
             z = position->z - other->position->z;
-        f32 ymax = other->bounds_max.y - block->bounds_min.y;
         bool overlapx = x > (other->bounds_min.x - block->bounds_max.x) + 0.01f &&
                         x < (other->bounds_max.x - block->bounds_min.x) - 0.01f;
+        f32 ymax = other->bounds_max.y - block->bounds_min.y;
         bool overlapz = z > (other->bounds_min.z - block->bounds_max.z) + 0.01f &&
                         z < (other->bounds_max.z - block->bounds_min.z) - 0.01f;
         bool overlapy = y > other->bounds_min.y - block->bounds_max.y && y < ymax;

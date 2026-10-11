@@ -237,15 +237,15 @@ bool TouchHacks::CanJumpToPoint(GameObject_s &object, AIPATHNODE_s const &node) 
 
 bool TouchHacks::CanJumpToPoint(GameObject_s &object, VuVec const &target) {
     const GAMECHARACTERDATA *character = object.apiobj.character_data->game_character;
-    f32 first_time;
     f32 second_time;
+    f32 first_time;
     if (!SolveRoot(character->gravity * 0.5f, character->jump_speed, object.apiobj.position.y - target.y, first_time,
                    second_time)) {
         return false;
     }
 
-    const f32 dx = target.x - object.apiobj.position.x;
     const f32 dz = target.z - object.apiobj.position.z;
+    const f32 dx = target.x - object.apiobj.position.x;
     const f32 range = first_time * 1.4f;
     return range * range > dx * dx + dz * dz;
 }

@@ -133,8 +133,8 @@ void MechInputTouchGestureTrackingSystem::LookForSwipe(GameObject_s &object) {
                 previous_index = sample_index - 1;
                 TouchSwipeSample &previous = holder.swipe_samples[previous_index];
                 elapsed += previous.time - sample.time;
-                f32 dx = sample.position.x - previous.position.x;
                 f32 dy = sample.position.y - previous.position.y;
+                f32 dx = sample.position.x - previous.position.x;
                 squared_path += dx * dx + dy * dy;
             }
         }

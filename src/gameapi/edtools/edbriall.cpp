@@ -451,7 +451,11 @@ extern "C" i32 edbriLoadPage(char *path, void *gscn) {
         else
             bridge.special_20 = -1;
         EdFileRead(name, 20);
-        bridge.special_24 = name[0] ? edbitsLookupInstance(name, static_cast<NUGSCN *>(gscn)) : -1;
+        if (name[0]) {
+            bridge.special_24 = edbitsLookupInstance(name, static_cast<NUGSCN *>(gscn));
+        } else {
+            bridge.special_24 = -1;
+        }
         bridge.field_28 = EdFileReadFloat();
         bridge.field_2c = EdFileReadFloat();
         bridge.field_30 = EdFileReadFloat();

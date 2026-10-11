@@ -189,8 +189,8 @@ void DrawPauseScreenWipe() {
     NuRndrBeginScene(-1);
 
     i32 x = 0;
-    i32 y = 0;
     i32 width = 0x2800;
+    i32 y = 0;
     i32 height = 0xe00;
     f32 u0 = 0.0f;
     f32 u1 = 1.0f;

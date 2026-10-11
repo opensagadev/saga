@@ -352,8 +352,8 @@ void NuSoundVoice::CalculatePositionalMix() {
         }
 
         f32 real_distance = real_listener->GetHeadDistance(CopySoundPosition(this->position));
-        NuSoundListener *second_real_listener = NULL;
         f32 second_real_distance = 0.0f;
+        NuSoundListener *second_real_listener = NULL;
         NuSoundListener *listener = this->listeners->Front();
         NuSoundListener *end = this->listeners->End();
         while (listener != end) {

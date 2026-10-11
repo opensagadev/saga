@@ -561,16 +561,16 @@ extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pit
         }
     }
 
-    f32 pan = g_soundInfo[sfx_id].pan;
     i16 sample_index = g_soundInfo[sfx_id].index;
-    u8 loop = static_cast<u8>(g_soundInfo[sfx_id].loop);
+    f32 pan = g_soundInfo[sfx_id].pan;
     f32 buzz_timer = g_soundInfo[sfx_id].buzz_timer;
+    u8 loop = static_cast<u8>(g_soundInfo[sfx_id].loop);
     f32 rumble_sustain = g_soundInfo[sfx_id].rumble_sustain;
     i32 rumble_strength = g_soundInfo[sfx_id].rumble_strength;
     f32 rumble_release = g_soundInfo[sfx_id].rumble_release;
 
-    f32 falloff_near = g_soundInfo[sfx_id].falloff_near;
     f32 falloff_far = g_soundInfo[sfx_id].falloff_far;
+    f32 falloff_near = g_soundInfo[sfx_id].falloff_near;
     f32 saved_fade_start = 0.0f;
     f32 saved_fade_end = 0.0f;
     if (!(g_soundInfo[sfx_id].falloff_near != 0.0f || g_soundInfo[sfx_id].falloff_far != 0.0f)) {

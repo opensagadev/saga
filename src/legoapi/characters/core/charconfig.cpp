@@ -1064,11 +1064,12 @@ static void CC_anim_start(NUFPAR *parser) {
                                 continue;
                             if (NuStrICmp(parser->word_buf, "deb_name") == 0) {
                                 if (NuFParGetWord(parser) != 0) {
-                                    effect->debris_id =
-                                        perm_debrissys == NULL
-                                            ? -1
-                                            : static_cast<i16>(FindGameDebris(
-                                                  static_cast<APIDEBRISSYS_s *>(perm_debrissys), parser->word_buf));
+                                    if (perm_debrissys == NULL) {
+                                        effect->debris_id = -1;
+                                    } else {
+                                        effect->debris_id = static_cast<i16>(FindGameDebris(
+                                            static_cast<APIDEBRISSYS_s *>(perm_debrissys), parser->word_buf));
+                                    }
                                 }
                             } else if (NuStrICmp(parser->word_buf, "condition") == 0) {
                                 if (NuFParGetWord(parser) != 0) {

@@ -243,8 +243,8 @@ GIZPANEL_s *GizPanel_FindByName(WORLDINFO_s *world, char *name) {
 i32 GizPanel_UpdateHint(HINT_s *hint) {
     bool storm = false;
     bool droid = false;
-    bool bountyhunter = false;
     i32 droid_type = -1;
+    bool bountyhunter = false;
     for (i32 index = 0; index < 8; ++index) {
         if (Player[index] == NULL)
             continue;

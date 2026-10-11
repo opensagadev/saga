@@ -786,7 +786,11 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
                 if (PodRace->prev_lap_display < PodRace->max_lap_time && PodRace->lap_attempts_per_increment != 0 &&
                     PodRace->lap_attempts % PodRace->lap_attempts_per_increment == 0) {
                     float time = PodRace->prev_lap_display + PodRace->lap_time_increment;
-                    PodRace->prev_lap_display = time < PodRace->max_lap_time ? time : PodRace->max_lap_time;
+                    if (time < PodRace->max_lap_time) {
+                        PodRace->prev_lap_display = time;
+                    } else {
+                        PodRace->prev_lap_display = PodRace->max_lap_time;
+                    }
                 }
             }
         }

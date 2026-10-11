@@ -241,8 +241,8 @@ f32 SplineLength(nugspline_s *spline, i32 closed) {
 }
 
 void *KnotHelper::CreateObject(void *, i32, i32) {
-    SplineObject *spline = NULL;
     SplineKnot *selected_knot = NULL;
+    SplineObject *spline = NULL;
     for (ClassObjectListEntry *selected = theClassEditor.selected_objects.first; selected != NULL;
          selected = selected->next) {
         if (spline == NULL && selected->ed_class == theSplineHelper.object_class)
@@ -830,8 +830,8 @@ void SplineObject::GenPoints() {
 }
 
 void SplineObject::ReverseKnots() {
-    SplineKnot *knot = knots.last;
     SplineKnot *old_first = knots.first;
+    SplineKnot *knot = knots.last;
     knots.last = NULL;
     knots.first = NULL;
     knots.count = 0;

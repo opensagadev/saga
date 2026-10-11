@@ -484,8 +484,11 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
                 else
                     antinode_rotation_repeat() =
                         antinode_rotation_repeat() + 20 < 601 ? antinode_rotation_repeat() + 20 : 600;
-                selected->flags = (held & 0x8000) ? NuAngSub(selected->flags, antinode_rotation_repeat())
-                                                  : NuAngAdd(selected->flags, antinode_rotation_repeat());
+                if ((held & 0x8000)) {
+                    selected->flags = NuAngSub(selected->flags, antinode_rotation_repeat());
+                } else {
+                    selected->flags = NuAngAdd(selected->flags, antinode_rotation_repeat());
+                }
                 aieditorsettings.area_rotation = selected->flags;
                 antinodeEditor_AntinodeMoved(selected);
             }

@@ -962,7 +962,7 @@ NUDATHDR *NuDatOpenEx(char *filepath, VARIPTR *buf, i32 *_unused, i16 mode) {
     i32 _unused4;
     i32 read_buf[2];
     i32 total_read;
-    i32 n;
+
     NUDATHDR *hdr;
     NUDFNODE_V1 *old_ver;
     VARIPTR hash;
@@ -982,6 +982,7 @@ NUDATHDR *NuDatOpenEx(char *filepath, VARIPTR *buf, i32 *_unused, i16 mode) {
 
     file = NuFileOpenDF(filepath, (NUFILEMODE)mode, NULL, 0);
     if (file != 0) {
+        i32 n;
         bytes_read = 0;
 
         file_len = NuFileOpenSize(file);

@@ -881,8 +881,8 @@ extern "C" {
         complexsockposition_forcesock = -1;
         SOCKPOSITION *positions = TempSPosList;
         memset(positions, 0, sizeof(TempSPosList));
-        i32 candidate_count = 0;
         SOCKPOSITION *best = NULL;
+        i32 candidate_count = 0;
         f32 best_distance = 1000000.0f;
         temp_pos = *position;
 
@@ -967,9 +967,9 @@ extern "C" {
                 NUVEC midpoint = positions[0].midpoint;
                 for (i32 i = 1; i < count; ++i) {
                     NUVEC from = midpoint;
-                    NUVEC to = positions[i].midpoint;
                     NUVEC direction;
                     NUVEC offset;
+                    NUVEC to = positions[i].midpoint;
                     NuVecSub(&direction, &to, &from);
                     f32 distance =
                         NuFsqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
@@ -1394,10 +1394,10 @@ extern "C" {
             *separation_scale = 0.0f;
         }
 
-        i32 contributing_sockets = 0;
         f32 single_player_pullback = 0.0f;
         f32 two_player_pullback = 0.0f;
         f32 camera_height_above_ground = 0.0f;
+        i32 contributing_sockets = 0;
         for (i = 0; i < TempSPosCount; ++i) {
             SOCKPOSITION *candidate = &TempSPosList[i];
             bool include =
@@ -1460,7 +1460,11 @@ extern "C" {
                     displacement.z = scratch.z - candidate->midpoint.z;
                     half_width += NuFsqrt(displacement.x * displacement.x + displacement.z * displacement.z);
                     half_width *= 0.5f;
-                    lateral_ratio = half_width > 0.0f ? magnitude / half_width * working_scale : 0.0f;
+                    if (half_width > 0.0f) {
+                        lateral_ratio = magnitude / half_width * working_scale;
+                    } else {
+                        lateral_ratio = 0.0f;
+                    }
                 } else {
                     lateral_ratio = sock->camera_lateral_ratio;
                 }

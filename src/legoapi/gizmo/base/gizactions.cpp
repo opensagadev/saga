@@ -84,8 +84,8 @@ static void GizActions_ActivateBelt(GIZFLOW_s *, FLOWBOX_s *, char **params, int
 }
 
 static void GizActions_ChangeObstTriggerType(GIZFLOW_s *flow, FLOWBOX_s *, char **params, int count) {
-    char *name = NULL;
     i32 mode = -1;
+    char *name = NULL;
     for (i32 index = 0; index < count; ++index) {
         char *value = NuStrIStr(params[index], "name=");
         if (value != NULL) {
@@ -460,8 +460,8 @@ static void GizAction_SetAIMessage(GIZFLOW_s *, FLOWBOX_s *, char **params, int 
 
 static void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
     if (!(count <= 0)) {
-        char *techno_name = NULL;
         char *target_name = NULL;
+        char *techno_name = NULL;
         i32 target_kind = 0;
         u8 movement = 0xff;
         for (i32 index = 0; index < count; ++index) {

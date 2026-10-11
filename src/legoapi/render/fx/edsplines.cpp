@@ -41,8 +41,8 @@ extern "C" {
 f32 BezierLineLength(VuVec &, VuVec &, VuVec &, VuVec &);
 
 i32 BezierLinePos(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, f32 distance) {
-    f32 step = 0.25f;
     f32 t = 0.5f;
+    f32 step = 0.25f;
     for (i32 count = 256; count != 0; --count) {
         f32 complement = 1.0f - t;
         VuVec middle{second_control.x * complement + first_control.x * t,
@@ -364,8 +364,8 @@ void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle,
     fixed &= 0xffff;
     if (fixed == 0)
         return;
-    f32 fraction = fixed * (1.0f / 65536.0f);
     NUVEC *next = &spline->pts[index];
+    f32 fraction = fixed * (1.0f / 65536.0f);
     position->x += (next->x - current->x) * fraction;
     position->y += (next->y - current->y) * fraction;
     position->z += (next->z - current->z) * fraction;
@@ -421,8 +421,8 @@ i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end,
     NUVEC before = spline->pts[previous];
     NUVEC after = spline->pts[next];
     f32 ax = after.x - position->x;
-    f32 az = after.z - position->z;
     f32 bx = before.x - position->x;
+    f32 az = after.z - position->z;
     f32 bz = before.z - position->z;
     if (bx * bx + bz * bz > ax * ax + az * az) {
         if (edge_end != NULL)

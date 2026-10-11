@@ -369,8 +369,8 @@ void BuildDebrisVerts(PartHeader *header, uv1debdata *chunk_data, NUMTL *materia
             NuVecMtxTransform(&corners[corner].xyz, &corners[corner].xyz, &NuRndr_DebrisMtx);
         }
 
-        debris_vertex_s *vertices = static_cast<debris_vertex_s *>(g_pVBData) + g_CurrentVBVertexCount + emitted;
         const u32 colour = first.colour;
+        debris_vertex_s *vertices = static_cast<debris_vertex_s *>(g_pVBData) + g_CurrentVBVertexCount + emitted;
         vertices[0] = {corners[0].xyz, colour, u0, v1};
         vertices[1] = {corners[2].xyz, colour, u1, v1};
         vertices[2] = {corners[1].xyz, colour, u1, v0};

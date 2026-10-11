@@ -117,8 +117,8 @@ AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferE
         return NULL;
     }
 
-    i32 area_count = 0;
     i32 in_area = 0;
+    i32 area_count = 0;
     AREADATA *area = (AREADATA *)ALIGN((usize)bufferStart->void_ptr, 4);
     bufferStart->void_ptr = area;
     AREADATA *area_base = area;
@@ -676,8 +676,8 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
 
     SUPERCOUNTER counters[10];
     SUPERCOUNTER *counter = NULL;
-    i32 counter_count = 0;
     bool in_counter = false;
+    i32 counter_count = 0;
     while (NuFParGetLine(fp) != 0) {
         NuFParGetWord(fp);
         if (fp->word_buf[0] != '\0') {

@@ -817,7 +817,11 @@ namespace nu2api {
             block[0x24] = v24;
 
             const u8 b2 = descBytes[0x1ba];
-            block[0x25] = (b2 & 0x10) ? static_cast<u8>((filter->texture_id_threshold < thresholdA) + 1) : 0;
+            if ((b2 & 0x10)) {
+                block[0x25] = static_cast<u8>((filter->texture_id_threshold < thresholdA) + 1);
+            } else {
+                block[0x25] = 0;
+            }
         }
 
         block[0x26] = *reinterpret_cast<const i32 *>(descBytes + 0x1e4) > 0;

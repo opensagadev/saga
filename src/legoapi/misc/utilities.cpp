@@ -131,8 +131,8 @@ void VecRotateAxis(nuvec_s *vector, u16 angle, nuvec_s *axis) {
     const f32 tz = complement * z;
     const f32 xy = tx * y;
     const f32 yz = ty * z;
-    const f32 xz = tx * z;
     const f32 sx = sine * x;
+    const f32 xz = tx * z;
     const f32 sz = z * sine;
     const f32 sy = sine * y;
     vector->x = ((tx * x + cosine) * source.x + 0.0f) + (xy - sz) * source.y + (xz + sy) * source.z;

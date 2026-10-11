@@ -198,8 +198,8 @@ void Tag_DrawIcon_Batman(GameObject_s *object) {
         return;
     }
 
-    const f32 pulse_alpha = (game_pulse * 0.2f + 0.8f) * 128.0f;
     ADDGAMEMSG_ALIGNED16 message = AddGameMsg_Default;
+    const f32 pulse_alpha = (game_pulse * 0.2f + 0.8f) * 128.0f;
     const u8 index = static_cast<u8>(object->apiobj.field_0x27c);
     const u8 third_color = index < 1 ? 255 : 0;
     const u8 first_color = index < 1 ? 127 : 255;
@@ -302,8 +302,8 @@ void Tag_UpdateTransfers(i32 effect0, i32 effect1, i32 count) {
     {
         f32 phase = Tag_Transfer[0].time + Tag_Transfer[0].time;
         {
-            GameObject_s *source = Tag_Transfer[0].source;
             GameObject_s *target = Player[0];
+            GameObject_s *source = Tag_Transfer[0].source;
             const f32 height = Tag_Transfer[0].height[0];
             NUVEC from = source->apiobj.collision_position;
             NUVEC to = target->apiobj.collision_position;

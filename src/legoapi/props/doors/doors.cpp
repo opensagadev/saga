@@ -589,8 +589,8 @@ void Doors_Check(WORLDINFO_s *world, GameObject_s *object) {
 
         DOOR_s *door = doors;
         i32 door_count = WORLD->door_count;
-        const f32 centre_height = (object->character_bottom + object->character_top) * object->apiobj.field_0xa8 * 0.5f;
         NUVEC previous_position = object->apiobj.start_position;
+        const f32 centre_height = (object->character_bottom + object->character_top) * object->apiobj.field_0xa8 * 0.5f;
         previous_position.y += centre_height;
         NUVEC current_position = object->apiobj.position;
         current_position.y += centre_height;

@@ -273,8 +273,8 @@ i32 GetMipOffset(NuHardwareTexture *tex, i32 targetMip, i32 targetSlice, NUTEXFO
         currentSliceLimit = (tex->flags & 1) ? 5 : tex->depth;
     }
 
-    i32 totalOffset = 0;
     i32 currentSlice = 0;
+    i32 totalOffset = 0;
 
     while (true) {
         i32 innerMipLimit = currentMipLimit;
@@ -531,8 +531,8 @@ GLuint NuIOS_CreateGLTexFromMemoryDDS(void *ddsPointer, i32 *out_width, i32 *out
     unsigned char *pixelData = nullptr;
 
     NUTEXFORMAT format;
-    i32 depth = 0;
     i32 mipCount = 0;
+    i32 depth = 0;
     bool isCubemap = false;
     bool hasFourCC = false;
 
@@ -784,9 +784,9 @@ i32 GetMipOffset(i32 width, i32 height, NUTEXFORMAT format, i32 depth, bool isCu
     }
 
     bool isCompressed;
-    i32 minBlocks;
     i32 bytesPerBlockOrPixel;
     i32 blockWidth;
+    i32 minBlocks;
 
     if (format > 0 && format < 119) {
         const i32 formatIndex = format - 1;

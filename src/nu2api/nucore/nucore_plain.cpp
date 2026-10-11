@@ -480,9 +480,9 @@ extern "C" {
             NuMtxInv(&vmtx, &global_camera.mtx);
             NuMtxScale(&vmtx, &global_camera.scale);
         } else {
-            NUMTX mirror;
             NUMTX camera_inverse;
             NUMTX reflect_inverse;
+            NUMTX mirror;
             NuMtxSetIdentity(&mirror);
             mirror.m11 = -1.0f;
             NuMtxInv(&camera_inverse, &global_camera.mtx);
@@ -1021,8 +1021,8 @@ extern "C" {
 
         f32 distance_alpha = 1.0f;
         if (scene->fade_ranges != NULL && (scene->visibility_flags[special->instance_ix] & 0x40) != 0) {
-            const f32 fade_start = scene->fade_ranges[special->instance_ix * 2];
             const f32 fade_end = scene->fade_ranges[special->instance_ix * 2 + 1];
+            const f32 fade_start = scene->fade_ranges[special->instance_ix * 2];
             if (fade_end <= fade_start) {
                 if (distance_sqr <= fade_end * fade_end)
                     return 0;
@@ -1507,8 +1507,8 @@ extern "C" {
         NUVEC root_values = {0.0f, 0.0f, 0.0f};
         for (i32 joint_index = 0; joint_index < evaluated_count; ++joint_index) {
             const nuanimbuffjoint_s &joint = buffer->joints[joint_index];
-            const u8 flags = buffer->joint_flags[joint_index];
             const u8 parent_index = object->joints[joint_index].parent_index;
+            const u8 flags = buffer->joint_flags[joint_index];
 
             NUMTX &local_matrix = matrices[joint_index];
             if ((flags & NUANIMBUFF_JOINT_ROTATION) != 0) {
@@ -1633,8 +1633,11 @@ extern "C" {
                 for (i32 axis = 0; axis < 3; ++axis) {
                     if ((flags & limit_flags[axis]) != 0) {
                         const u32 wrapped = static_cast<u32>(angles[axis]) & 0xffff;
-                        angles[axis] =
-                            wrapped >= 0x8000 ? static_cast<i32>(wrapped) - 0x10000 : static_cast<i32>(wrapped);
+                        if (wrapped >= 0x8000) {
+                            angles[axis] = static_cast<i32>(wrapped) - 0x10000;
+                        } else {
+                            angles[axis] = static_cast<i32>(wrapped);
+                        }
                         if (angles[axis] > joint_override.rotation_limit_start[axis]) {
                             angles[axis] = joint_override.rotation_limit_start[axis];
                         } else if (angles[axis] < joint_override.rotation_limit_end[axis]) {
@@ -2105,8 +2108,8 @@ extern "C" {
             return;
         }
 
-        i32 chunk;
         f32 clamped_frame;
+        i32 chunk;
         if (anim->duration <= frame) {
             if (anim->duration == 1.0f) {
                 time->time = 1.0f;
@@ -2142,8 +2145,8 @@ extern "C" {
     void NuAnimDataCalcTime(void *animation, f32 frame, nuanimtime_s *time) {
         u8 *data = static_cast<u8 *>(animation);
         const f32 duration = *reinterpret_cast<f32 *>(data);
-        i32 chunk;
         f32 clamped_frame;
+        i32 chunk;
         if (duration <= frame) {
             if (duration == 1.0f) {
                 time->time = 1.0f;
@@ -2762,9 +2765,9 @@ extern "C" {
             NuLgtLaserOldCnt = 0;
             return;
         }
-        f32 v0 = NuLgtArcMtl[0].v0;
         f32 v1 = NuLgtArcMtl[0].v1;
         u32 saved_seed = NuLgtSeed;
+        f32 v0 = NuLgtArcMtl[0].v0;
         // Four strip corners, two projected endpoints, and two clipped world endpoints.
         NUVEC4 *vertices = (NUVEC4 *)NuScratchAlloc32(0x80);
         NUMTX clip_matrix;
@@ -2784,8 +2787,8 @@ extern "C" {
             NuVec4MtxTransformVU0(&vertices[5], &vertices[5], &clip_matrix);
             if (!(vertices[4].w >= 0.5f) && !(vertices[5].w >= 0.5f))
                 continue;
-            i32 red = laser->colour & 0xff;
             i32 green = (laser->colour >> 8) & 0xff;
+            i32 red = laser->colour & 0xff;
             i32 blue = (laser->colour >> 16) & 0xff;
             i32 alpha = laser->colour >> 24;
             if (vertices[4].w < 0.5f) {
@@ -3408,10 +3411,10 @@ extern "C" {
             if (override_count != 0) {
                 override_anim = joint_overrides[i];
             }
-            nuanimcurve2_s *curves = &legacy->curves[i * static_cast<i16>(legacy->curve_count)];
             i8 *types = reinterpret_cast<i8 *>(legacy->curve_types) + i * static_cast<i16>(legacy->curve_count);
-            u8 flags = legacy->node_flags[i];
+            nuanimcurve2_s *curves = &legacy->curves[i * static_cast<i16>(legacy->curve_count)];
             NUVEC *scale = &scales[i];
+            u8 flags = legacy->node_flags[i];
             if (i == 0) {
                 NuAnimCurve2SetApplyToJointTransLoc(curves, types, static_cast<i8>(flags), &anim_time,
                                                     &object->joints[i], scale, &scales[object->joints[i].parent_index],
@@ -3490,8 +3493,8 @@ extern "C" {
         for (u8 index = 0; index < object->joint_count; ++index) {
             NUMTX *output = &matrices[index];
             NUJOINTANIM_s *joint_override = override_count != 0 ? joint_overrides[index] : NULL;
-            nuanimcurveset_s *first = chunk_a->curve_sets[index];
             nuanimcurveset_s *second = chunk_b->curve_sets[index];
+            nuanimcurveset_s *first = chunk_a->curve_sets[index];
             NUMTX *local = &local_matrix;
             if (first != NULL && second != NULL) {
                 nuhgobjjoint_s *joint = &object->joints[index];
@@ -3720,8 +3723,8 @@ extern "C" {
                 continue;
             }
 
-            i32 count_a = 0;
             nuanimcurve2_s *curves_a = NULL;
+            i32 count_a = 0;
             u8 *types_a = NULL;
             if (has_a && node < NuAnimNumNodes(animation_a)) {
                 count_a = static_cast<i16>(animation_a->curve_count);
@@ -4080,8 +4083,8 @@ extern "C" {
     void NuGHGPostRelocateFixupPS(NUGSCN *scene, i32 delta);
     NUGSCN *NuGHGRelocate(NUGSCN *scene, VARIPTR *destination) {
         u8 *old_base = *reinterpret_cast<u8 **>(reinterpret_cast<u8 *>(scene) + 0x1d4);
-        u32 size = *reinterpret_cast<u32 *>(reinterpret_cast<u8 *>(scene) + 0x1d8);
         u8 *new_base = destination->u8_ptr;
+        u32 size = *reinterpret_cast<u32 *>(reinterpret_cast<u8 *>(scene) + 0x1d8);
         i32 delta = new_base - old_base;
         if (delta == 0) {
             return scene;
@@ -4099,8 +4102,8 @@ extern "C" {
         u32 remaining = size;
         if (delta > 0) {
             u32 count = static_cast<u32>(delta) < remaining ? static_cast<u32>(delta) : remaining;
-            u8 *source = old_base + remaining - count;
             u8 *target = new_base + remaining - count;
+            u8 *source = old_base + remaining - count;
             do {
                 count = static_cast<u32>(delta) < remaining ? static_cast<u32>(delta) : remaining;
                 memcpy(target, source, count);

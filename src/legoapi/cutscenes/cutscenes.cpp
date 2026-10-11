@@ -1706,10 +1706,12 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
             cutscene->locator_system =
                 reinterpret_cast<NUGCUTLOCATORSYS_s *>(reinterpret_cast<isize>(cutscene->locator_system) + data_delta);
             NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
-            system->locators =
-                system->locators != NULL
-                    ? reinterpret_cast<NUGCUTLOCATOR_s *>(reinterpret_cast<isize>(system->locators) + data_delta)
-                    : NULL;
+            if (system->locators != NULL) {
+                system->locators =
+                    reinterpret_cast<NUGCUTLOCATOR_s *>(reinterpret_cast<isize>(system->locators) + data_delta);
+            } else {
+                system->locators = NULL;
+            }
             if (system->locators != NULL) {
                 for (i32 i = 0; i < system->locator_count; ++i) {
                     NUGCUTLOCATOR_s *locator = &system->locators[i];

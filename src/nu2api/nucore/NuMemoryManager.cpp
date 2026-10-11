@@ -635,8 +635,8 @@ void NuMemoryManager::ReleaseUnreferencedPages() {
     Page *page = this->pages;
     while (page != NULL) {
         Header *header = page->first_header;
-        Page *next = page->next;
         Page *prev = page->prev;
+        Page *next = page->next;
         if ((header->value & ALLOC_MASK) == 0 &&
             reinterpret_cast<u8 *>(header) + BLOCK_SIZE(header->value) == reinterpret_cast<u8 *>(page->end) &&
             !page->is_external) {
@@ -783,7 +783,7 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
     u32 stranded_block_count;
     u32 stranded_bytes_count;
     u32 leak_count;
-    u32 _unknown;
+
     Header *largest_stranded;
     Context *top_ctx;
 
@@ -808,6 +808,7 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
             strcpy(ctx_name, this->cur_ctx->name);
         }
     } else {
+        u32 _unknown;
         leak_count = 0;
         _unknown = 0;
         largest_stranded = NULL;
@@ -1470,12 +1471,12 @@ u32 NuMemoryManager::FindAndTouchMatchingBlocks(DebugHeader *reference, u32 *tot
             if (header != &reference->block_header && (header->value & ALLOC_MASK) != 0) {
                 DebugHeader *candidate = reinterpret_cast<DebugHeader *>(header);
                 u32 block_size = BLOCK_SIZE(header->value);
-                u32 candidate_context = candidate->flags.ctx_id;
                 u32 reference_context = reference->flags.ctx_id;
                 u32 candidate_flags = candidate->flags.alloc_flags;
+                u32 candidate_context = candidate->flags.ctx_id;
                 u32 reference_flags = reference->flags.alloc_flags;
-                u16 candidate_category = candidate->category;
                 u16 reference_category = reference->category;
+                u16 candidate_category = candidate->category;
                 if (candidate->name != NULL && reference->name != NULL &&
                     strcmp(candidate->name, reference->name) == 0 && candidate_context == reference_context &&
                     candidate_flags == reference_flags && candidate_category == reference_category) {

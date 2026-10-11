@@ -537,8 +537,8 @@ i32 ReadPad(i32 port) {
         return 3;
     }
 
-    const f32 left_x = static_cast<f32>(pad->analog_left_x) - 127.5f;
     const f32 left_y = static_cast<f32>(pad->analog_left_y) - 127.5f;
+    const f32 left_x = static_cast<f32>(pad->analog_left_x) - 127.5f;
     u32 left_directions = 0;
     if (left_x < -85.0f) {
         left_directions = GAMEPAD_DLEFT;

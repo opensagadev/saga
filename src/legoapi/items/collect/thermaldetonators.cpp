@@ -457,8 +457,8 @@ EXPLOSION *Detonate(nuvec_s *position, u16 flags) {
     AddPartDebris(WORLD->part_debris_sys, 2, position);
     NewRumbleAllPlayers(1.0f, 0.1f, 0, 0);
     PlaySfx((char *)"exp_thermalDet", position);
-    f32 amount_a;
     f32 amount_b;
+    f32 amount_a;
     if ((flags & 0x1000) != 0) {
         f32 amount = qrand() < 0x8000 ? -2.0f : 2.0f;
         GameCam_Judder(GameCam, amount, 2, position);

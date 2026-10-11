@@ -79,8 +79,8 @@ int NuSoundDecoderOGG::OGGReadCallbacksDecoder::Read(void *dest, unsigned int si
         return 0;
     }
 
-    u8 *cursor = (u8 *)dest;
     u32 remaining = size;
+    u8 *cursor = (u8 *)dest;
     u32 copied = 0;
     while (remaining != 0) {
         if (this->decoder->locked_buffer == NULL) {

@@ -29,7 +29,11 @@ static inline void Teleport_GetSegment(GameObject_s *object, TELEPORT_s *telepor
         *start = forwards ? 0 : 3;
         *end = forwards ? 3 : 0;
     } else if (forwards) {
-        *start = object->field_0x7a4 == 0 ? 0 : 2;
+        if (object->field_0x7a4 == 0) {
+            *start = 0;
+        } else {
+            *start = 2;
+        }
         *end = object->field_0x7a4 == 0 ? 1 : 3;
     } else {
         *start = object->field_0x7a4 == 0 ? 3 : 1;

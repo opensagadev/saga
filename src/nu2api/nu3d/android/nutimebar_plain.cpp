@@ -393,8 +393,8 @@ extern "C" void NuTimeBarSetRender(i32 set) {
                 const f32 left = static_cast<f32>(column_index) * 0.025f * 3.0f;
                 const f32 top = 0.05f;
                 const f32 bottom = top + timebar_unsigned_float(recent_peak) * 60.0f / 1000000.0f * vertical_scale;
-                const i32 x = static_cast<i32>(left * (PS2_VREZ_W << 4));
                 const i32 y = static_cast<i32>(top * (PS2_VREZ_H << 4));
+                const i32 x = static_cast<i32>(left * (PS2_VREZ_W << 4));
                 const i32 width = static_cast<i32>((left + 0.025f - left) * (PS2_VREZ_W << 4));
                 const i32 height = static_cast<i32>((bottom - top) * (PS2_VREZ_H << 4));
                 NuRndrRect2di(x, y, width, height, timebar->colours[slot], NULL);

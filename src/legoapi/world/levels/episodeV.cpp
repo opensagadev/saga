@@ -1189,8 +1189,8 @@ void HothBattle_ManageBackgroundCreatures() {
             wave_types |= 8;
         }
     }
-    i32 atst_count = g_lowEndLevelBehaviour != 0 ? 2 : 6;
     i32 probe_count = g_lowEndLevelBehaviour != 0 ? 2 : 5;
+    i32 atst_count = g_lowEndLevelBehaviour != 0 ? 2 : 6;
     f32 radius = apicharsys->char_data[id_PROBEDROID].collision_radius;
     while (probe_count > aicreature_sets_alive[0] && (wave_types & 1) == 0) {
         AILOCATOR_s *spawn = getSpawnLocator(radius, "spawn");
@@ -1354,7 +1354,11 @@ static void Asteroid_AddParts(GIZMOBLOWUP_s *blowup) {
         params.field_18 = params.field_14;
         params.gravity = 0.0f;
         params.special = special;
-        params.flags = index == 0 ? 0x800019b : 0x8000193;
+        if (index == 0) {
+            params.flags = 0x800019b;
+        } else {
+            params.flags = 0x8000193;
+        }
         params.time_step = FRAMETIME;
         params.field_40 = PartCollide_3D;
         params.field_44 = Asteroid_PartKill;

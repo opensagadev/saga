@@ -2443,8 +2443,8 @@ void edpartDoInput(nupad_s *pad) {
     if (edpart_nearest_emit->effect_id != -1)
         edpart_nearest_type = &part_types[edpart_nearest_emit->effect_id];
     edpart_nearest_duplicates = 0;
-    i32 orphans = 0;
     i32 duplicates = 0;
+    i32 orphans = 0;
     for (i32 variant = 0; variant < 8; ++variant) {
         i16 effect = edpart_nearest_type->effect_ids[variant];
         if (effect == 9999 || effect == -1)
