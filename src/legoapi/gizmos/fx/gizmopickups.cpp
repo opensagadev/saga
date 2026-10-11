@@ -684,11 +684,11 @@ static GIZMOPICKUP_s *GizmoPickups_CollideList(GameObject_s *object, GIZMOPICKUP
             f32 dx = pickup->position.x - object->apiobj.collision_position.x;
             f32 dz = pickup->position.z - object->apiobj.collision_position.z;
             f32 radius = radius_x + object->apiobj.field_0x1dc;
-            if (dx * dx + dz * dz < radius * radius) {
+            if (!(dx * dx + dz * dz >= radius * radius)) {
                 return pickup;
             }
-        } else if (object->apiobj.collision_min.y <= pickup->position.y + radius_y &&
-                   pickup->position.y - radius_y <= object->apiobj.collision_max.y) {
+        } else if (!(object->apiobj.collision_min.y > pickup->position.y + radius_y) &&
+                   !(pickup->position.y - radius_y > object->apiobj.collision_max.y)) {
             if (object->field_0xcc0 == NULL) {
                 if (SphereSphereOverlapScaleY(&pickup->position, radius_x, radius_y, &object->apiobj.collision_position,
                                               object->apiobj.collision_radius, object->apiobj.field_0x1e0)) {
@@ -698,7 +698,7 @@ static GIZMOPICKUP_s *GizmoPickups_CollideList(GameObject_s *object, GIZMOPICKUP
                 f32 dx = pickup->position.x - object->apiobj.collision_position.x;
                 f32 dz = pickup->position.z - object->apiobj.collision_position.z;
                 f32 radius = radius_x + object->apiobj.field_0x1dc;
-                if (dx * dx + dz * dz < radius * radius) {
+                if (!(dx * dx + dz * dz >= radius * radius)) {
                     return pickup;
                 }
             }

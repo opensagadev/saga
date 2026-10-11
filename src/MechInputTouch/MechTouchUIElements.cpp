@@ -178,22 +178,20 @@ MechTouchUIElement *MechTouchUI::PickElement(NuVec2 &point) {
             continue;
         }
 
+        bool inside;
         if (element->rectangular == 0) {
             const float x = point.x - element->position.x;
             const float y = point.y - element->position.y;
-            if (1.0f <
-                x * x / (element->radius_x * element->radius_x) + y * y / (element->radius_y * element->radius_y)) {
-                continue;
-            }
+            inside =
+                x * x / (element->radius_x * element->radius_x) + y * y / (element->radius_y * element->radius_y) <=
+                1.0f;
         } else {
             const float half_x = element->radius_x * 0.5f;
             const float half_y = element->radius_y * 0.5f;
-            if (point.x < element->position.x - half_x || point.x > element->position.x + half_x ||
-                point.y < element->position.y - half_y || point.y > element->position.y + half_y) {
-                continue;
-            }
+            inside = element->position.x - half_x <= point.x && point.x <= element->position.x + half_x &&
+                     element->position.y - half_y <= point.y && point.y <= element->position.y + half_y;
         }
-        if (element->position.z > picked_depth) {
+        if (inside && element->position.z > picked_depth) {
             picked = element;
             picked_depth = element->position.z;
         }

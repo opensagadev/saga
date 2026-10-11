@@ -661,9 +661,10 @@ NuSoundListener *NuSoundSystem::GetNearestRealListener(NuEList<NuSoundListener, 
                                                        VuVec const &position) {
     f32 nearest_distance = FLT_MAX;
     NuSoundListener *nearest = NULL;
+    NuSoundListener *end = listeners.end;
     NuSoundListener *listener = static_cast<NuSoundListener *>(listeners.begin->field_0x4);
 
-    while (listener != listeners.end) {
+    while (listener != end) {
         if (listener->IsEnabled() && listener->GetSensitivity() > 0.0f) {
             f32 distance = listener->GetHeadDistance(position) / listener->GetSensitivity();
             if (nearest_distance > distance || nearest == NULL) {
@@ -681,9 +682,10 @@ NuSoundListener *NuSoundSystem::GetNearestFocusListener(NuEList<NuSoundListener,
                                                         VuVec const &position, f32 &nearest_distance) {
     nearest_distance = FLT_MAX;
     NuSoundListener *nearest = NULL;
+    NuSoundListener *end = listeners.end;
     NuSoundListener *listener = static_cast<NuSoundListener *>(listeners.begin->field_0x4);
 
-    while (listener != listeners.end) {
+    while (listener != end) {
         if (listener->IsEnabled() && listener->GetSensitivity() > 0.0f) {
             f32 distance = listener->GetAttenuationDistance(position) / listener->GetSensitivity();
             if (nearest_distance > distance || nearest == NULL) {
