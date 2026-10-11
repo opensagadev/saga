@@ -1234,29 +1234,33 @@ static void CutScene_FindCharacters(NUGCUTSCENE_s *cutscene) {
     NUGCUTCHARSYS_s *system = cutscene->character_system;
     for (i32 i = 0; i < system->character_count; ++i) {
         NUGCUTCHAR_s *character = &system->characters[i];
+        CUTSYS *cutscene_system = CS_cutsys;
+        NUGCUTLOCATORSYS_s *locator_system = cutscene->locator_system;
         character->flags |= 2;
+        char *name = character->name;
 
         i32 model_index;
         for (model_index = 0; model_index < apicharsys->loaded_model_count; ++model_index) {
             i32 character_id = apicharsys->models[model_index].model_id;
-            if (NuStrICmp(character->name, CDataList[character_id].file) == 0) {
-                character->character_model = &apicharsys->models[model_index];
-                character_id = static_cast<CHARACTERMODEL_s *>(character->character_model)->model_id;
+            if (NuStrICmp(name, CDataList[character_id].file) == 0) {
+                CHARACTERMODEL_s *model = &apicharsys->models[model_index];
+                character_id = model->model_id;
+                character->character_model = model;
                 if (character_id != -1) {
-                    CS_cutsys->character_bits[character_id / 32] |= 1U << (character_id & 0x1f);
+                    cutscene_system->character_bits[character_id / 32] |= 1U << (character_id & 0x1f);
                 }
-                break;
+                goto resolve_locators;
             }
         }
-        if (model_index == apicharsys->loaded_model_count) {
-            character->character_model = NULL;
-        }
+        character->character_model = NULL;
 
-        if (character->has_locator != 0 && reinterpret_cast<isize>(character->locator) <= 0xfe) {
-            character->locator_index = static_cast<u8>(reinterpret_cast<usize>(character->locator));
-            character->locator = &cutscene->locator_system->locators[character->locator_index];
-        } else {
+    resolve_locators:
+        if (character->has_locator == 0 || reinterpret_cast<isize>(character->locator) > 0xfe) {
             character->locator_index = 0xff;
+        } else {
+            isize locator_index = reinterpret_cast<isize>(character->locator);
+            character->locator_index = static_cast<u8>(reinterpret_cast<usize>(character->locator));
+            character->locator = &locator_system->locators[locator_index];
         }
     }
 }

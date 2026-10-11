@@ -2,8 +2,10 @@
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nu3d/nuocclusion.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/nu3d/android/nutimebar_plain.h"
 #include "gamelib/nuwind/nuwind.h"
+#include <string.h>
 void bgSuspendMain(i32);
 void NuPadRecordEndFrame();
 
@@ -32,6 +34,12 @@ i32 NuFrameEndBgLoadPS(i32 minimum_delay) {
 
 extern "C" {
     i32 NuHasError();
+    void NuClearError();
+    void NuErrorSleep();
+    char *NuGetErrN(i32);
+    void NuQFntPushCoordinateSystem(NUQFNT_CSMODE);
+    void NuQFntPopCoordinateSystem();
+    extern NUQFNT *system_qfont;
     void NuMtlAnimate(f32);
     void NuTexAnimProcess(f32);
     void NuPad_Interface_Render();
@@ -106,8 +114,8 @@ extern "C" {
 
         if (ShowingError == 0 && has_error != 0) {
             ShowingError = 1;
-            // Original shows an error dialog here.
-        } else if (ShowingError != 0) {
+            NuErrorSleep();
+            NuClearError();
             ShowingError = 0;
         }
 
@@ -116,5 +124,47 @@ extern "C" {
     }
     void NuFrameSetMinDelay(i32 delay) {
         min_delay = delay;
+    }
+
+    void NuErrorSleep(void) {
+        f32 milliseconds = 0.0f;
+        i32 waiting = 1;
+        NUPAD pad;
+        memset(&pad, 0, sizeof(pad));
+        NUTIME start;
+        NuTimeGet(&start);
+        while (milliseconds < 5000.0f && waiting != 0) {
+            f32 y = 500.0f;
+            i32 index = 0;
+            NUTIME now;
+            NUTIME elapsed;
+            NuTimeGet(&now);
+            NuTimeSub(&elapsed, &now, &start);
+            milliseconds = NuTimeMilliSeconds(&elapsed);
+            NuFrameBegin();
+            NuRndrBeginScene(0);
+            NuRndrClear(0xb00, 0xff00ffff, 1.0f);
+            NuQFntSet(system_qfont);
+            NuQFntPushPrintMode(2);
+            NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
+            NuQFntSet(system_qfont);
+            char *message;
+            while (*(message = NuGetErrN(index++)) != '\0') {
+                NuQFntSetColour(system_qfont, 0xff000000);
+                NuQFntMove(system_qfont, 500.0f, y, 0.0f);
+                // Error entries are already formatted. Retail passed an uninitialized
+                // va_list to NuQFntPrintV here; print the text directly instead.
+                NuQFntPrintU(system_qfont, message);
+                y += 150.0f;
+            }
+            NuQFntPopCoordinateSystem();
+            NuQFntPopPrintMode();
+            NuRndrEndScene();
+            NuPadRead(&pad);
+            if ((pad.digital_buttons & 0x40) != 0 && milliseconds > 1000.0f) {
+                waiting = 0;
+            }
+            NuFrameEnd();
+        }
     }
 }

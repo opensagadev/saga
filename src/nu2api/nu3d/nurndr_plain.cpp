@@ -192,9 +192,6 @@ NUGSCNVIDEOMEMFN video_mem_to_gscene;
 extern "C" void NuGScnFromVideoMem(NUGSCNVIDEOMEMFN callback) {
     video_mem_to_gscene = callback;
 }
-extern "C" void NuGScnReadForMultiRender(void) {
-    STUBBED();
-}
 extern "C" void NuGScnRndr(NUGSCN *scene) {
     if (scene->additional_scenes != NULL && scene->rendered_additional_scene_count > 0) {
         NuDisplaySceneRndr(scene->additional_scenes[scene->rendered_additional_scene_count - 1]->display_list);
@@ -797,36 +794,28 @@ extern "C" void NuRndrLine2di(i32 x0, i32 y0, i32 x1, i32 y1, i32 colour, NUMTL 
 extern "C" i32 NuRndrLine3d(NURND_VERTEX3D *vertices, NUMTL *material, NUMTX *matrix) {
     NuPrim3DBegin(2, 7, material, matrix);
     {
-        if (!g_NuPrim_NeedsOverbrightening)
-            ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->color =
-                ((vertices[0].colour >> 1) & 0x007f7f7f) | (vertices[0].colour & 0xff000000);
-        else
-            ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->color = vertices[0].colour;
+        NuRndrPrimSetColour(vertices[0].colour);
         NuRndrPrimUV(vertices[0].u, vertices[0].v);
         f32 x = vertices[0].position.x;
         f32 y = vertices[0].position.y;
         f32 z = vertices[0].position.z;
         PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
-        vertex->y = y;
         vertex->x = x;
+        vertex->y = y;
         vertex->z = z;
         g_NuPrim_StreamBufferPtr->u8_ptr += sizeof(PrimVertexRaw);
         ++g_NuPrim_VertexCount;
     }
     {
-        if (!g_NuPrim_NeedsOverbrightening)
-            ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->color =
-                ((vertices[1].colour >> 1) & 0x007f7f7f) | (vertices[1].colour & 0xff000000);
-        else
-            ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->color = vertices[1].colour;
+        NuRndrPrimSetColour(vertices[1].colour);
         NuRndrPrimUV(vertices[1].u, vertices[1].v);
         f32 x = vertices[1].position.x;
         f32 y = vertices[1].position.y;
         f32 z = vertices[1].position.z;
         PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
         vertex->x = x;
-        vertex->z = z;
         vertex->y = y;
+        vertex->z = z;
         g_NuPrim_StreamBufferPtr->u8_ptr += sizeof(PrimVertexRaw);
         ++g_NuPrim_VertexCount;
     }
@@ -911,16 +900,7 @@ extern "C" void NuRndrLineStrip2di(i32 *positions, f32 *uvs, i32 count, i32 colo
         for (i32 i = 0; i != end; i += 2) {
             NuRndrPrimSetColour(colour);
             if (uvs) {
-                f32 u = uvs[i];
-                u8 *vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-                f32 v = uvs[i + 1];
-                if (!g_NuPrim_NeedsHalfUVs) {
-                    *(f32 *)(vertex + 0x10) = u;
-                    *(f32 *)(vertex + 0x14) = v;
-                } else {
-                    *(u16 *)(vertex + 0x10) = NuRndrFloatToHalf(u);
-                    *(u16 *)(vertex + 0x12) = NuRndrFloatToHalf(v);
-                }
+                NuRndrPrimUV(uvs[i], uvs[i + 1]);
             }
             NuPrim2DAddXYZ((f32)positions[i] * 0.0625f, (f32)positions[i + 1] * 0.0625f, 0.0f);
         }
@@ -1307,10 +1287,9 @@ extern "C" i32 NuRndrStrip3d(NURND_VERTEX3D *vertices, numtl_s *material, NUMTX 
         vertex->x = x;
         vertex->y = y;
         vertex->z = z;
-        g_NuPrim_StreamBufferPtr->addr += 0x18;
+        g_NuPrim_StreamBufferPtr->u8_ptr += sizeof(PrimVertexRaw);
+        ++g_NuPrim_VertexCount;
     }
-    if (count > 0)
-        g_NuPrim_VertexCount += count;
     NuPrim3DEnd();
     return 1;
 }
@@ -1321,16 +1300,7 @@ extern "C" void NuRndrTriStrip2di(i32 *positions, f32 *uvs, i32 count, i32 colou
         for (i32 i = 0; i != end; i += 2) {
             NuRndrPrimSetColour(colour);
             if (uvs) {
-                f32 u = uvs[i];
-                u8 *vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-                f32 v = uvs[i + 1];
-                if (!g_NuPrim_NeedsHalfUVs) {
-                    *(f32 *)(vertex + 0x10) = u;
-                    *(f32 *)(vertex + 0x14) = v;
-                } else {
-                    *(u16 *)(vertex + 0x10) = NuRndrFloatToHalf(u);
-                    *(u16 *)(vertex + 0x12) = NuRndrFloatToHalf(v);
-                }
+                NuRndrPrimUV(uvs[i], uvs[i + 1]);
             }
             NuPrim2DAddXYZ((f32)positions[i] * 0.0625f, (f32)positions[i + 1] * 0.0625f, 0.0f);
         }
@@ -1351,10 +1321,9 @@ extern "C" i32 NuRndrTri3dClip(NURND_VERTEX3D *vertices, i32 count, NUMTX *matri
         vertex->x = x;
         vertex->y = y;
         vertex->z = z;
-        g_NuPrim_StreamBufferPtr->addr += 24;
+        g_NuPrim_StreamBufferPtr->u8_ptr += sizeof(PrimVertexRaw);
+        ++g_NuPrim_VertexCount;
     }
-    if (count > 0)
-        g_NuPrim_VertexCount += count;
     NuPrim3DEnd();
     return 1;
 }

@@ -48,8 +48,8 @@ void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 struct MechHintUIButton : MechTouchUITexButton {
     HINT_s *active_hint;
-    f32 display_elapsed;
     HINT_s *pending_hint;
+    f32 display_elapsed;
     f32 *slide_target;
     f32 slide_from, slide_to, slide_elapsed, slide_duration, slide_delay, slide;
     u8 pulse_active;
@@ -77,6 +77,8 @@ struct MechHintUIButton : MechTouchUITexButton {
     }
 };
 DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
+DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
+DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
 void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &) {
     MechHintUIButton &button = static_cast<MechHintUIButton &>(element);

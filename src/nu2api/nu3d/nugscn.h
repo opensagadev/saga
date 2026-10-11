@@ -357,8 +357,11 @@ typedef struct nugscn_s {
     undefined field471_0x1f5;
     undefined field472_0x1f6;
     undefined field473_0x1f7;
+    // NuGScnReadForMultiRender copies the complete 0x20c-byte scene record.
+    undefined pad_1f8[0x14];
 } NUGSCN;
 
+DECOMP_ASSERT(sizeof(NUGSCN) == 0x20c, "NUGSCN scene record size");
 DECOMP_ASSERT(offsetof(NUGSCN, instance_animations) == 0x4c, "NUGSCN instance animation array offset");
 DECOMP_ASSERT(offsetof(NUGSCN, num_instance_animations) == 0x48, "NUGSCN instance animation count offset");
 DECOMP_ASSERT(offsetof(NUGSCN, num_instance_animation_data) == 0x4a, "NUGSCN instance animation-data count offset");
@@ -400,6 +403,7 @@ extern "C" {
 
     void NuGScnRndr3(NUGSCN *scene);
     NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
+    NUGSCN *NuGScnReadForMultiRender(VARIPTR *buf, VARIPTR buf_end, char *path, i32 render_count);
     void NuGScnRemove(NUGSCN *scene);
     void NuGScnFixupPS(NUGSCN *scene);
     void NuGScnFixupTIDsPS(NUGSCN *scene);

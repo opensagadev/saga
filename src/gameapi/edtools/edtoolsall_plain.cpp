@@ -134,6 +134,48 @@ extern "C" {
     void NuRndrTriStrip2di(i32 *points, f32 *uvs, i32 count, i32 colour, numtl_s *material);
 }
 
+// The editor's draw helpers evaluate their arguments even during layout-only
+// passes; only the renderer call is suppressed by edui_donotdraw.
+static inline void eduiDrawRect(i32 x, i32 y, i32 width, i32 height, i32 colour, NUMTL *material) {
+    if (!edui_donotdraw)
+        NuRndrRect2di(x, y, width, height, colour, material);
+}
+
+static inline void eduiDrawLineRect(i32 x, i32 y, i32 width, i32 height, i32 colour, NUMTL *material) {
+    if (!edui_donotdraw)
+        NuRndrLineRect2di(x, y, width, height, colour, material);
+}
+
+static inline void eduiDrawGradRect(i32 x, i32 y, i32 width, i32 height, i32 *colours, NUMTL *material) {
+    if (!edui_donotdraw)
+        NuRndrGradRect2di(x, y, width, height, colours, material);
+}
+
+static inline void eduiDrawLine(i32 x0, i32 y0, i32 x1, i32 y1, i32 colour, NUMTL *material) {
+    if (!edui_donotdraw)
+        NuRndrLine2di(x0, y0, x1, y1, colour, material);
+}
+
+static inline void eduiDrawLineStrip(i32 *points, f32 *uvs, i32 count, i32 colour, NUMTL *material) {
+    if (!edui_donotdraw)
+        NuRndrLineStrip2di(points, uvs, count, colour, material);
+}
+
+static inline void eduiDrawTriStrip(i32 *points, f32 *uvs, i32 count, i32 colour, NUMTL *material) {
+    if (!edui_donotdraw)
+        NuRndrTriStrip2di(points, uvs, count, colour, material);
+}
+
+static inline void eduiDrawFontSet(NUQFNT *font) {
+    if (!edui_donotdraw)
+        NuQFntSet(font);
+}
+
+static inline void eduiSetFontColour(NUQFNT *font, u32 colour) {
+    if (!edui_donotdraw)
+        NuQFntSetColour(font, colour);
+}
+
 // The original local font helpers read the same private draw state as the
 // editor callbacks, so they belong to this translation unit.
 static __used__ void eduiFntPrintEx(void *font, int x, int y, int alignment, char *format, ...) {
@@ -3607,23 +3649,17 @@ extern "C" {
         i32 height = item->render(menu, item, x, y, width, selected);
         if (selected) {
             u32 colour = (item->flags & 4) ? eduiitem_context_outline_colour : eduiitem_selected_outline_colour;
-            if (!edui_donotdraw)
-                NuRndrLineRect2di(x << 4, (y << 3) + 8, item_width << 4, (height << 3) - 16, colour, uimtls[ui_outmtl]);
+            eduiDrawLineRect(x << 4, (y << 3) + 8, item_width << 4, (height << 3) - 16, colour, uimtls[ui_outmtl]);
         }
         if (item->disabled) {
             i32 left = x << 4;
             i32 top = y << 3;
             i32 right = left + (width << 4);
             i32 bottom = top + (height << 3);
-            if (!edui_donotdraw)
-                NuRndrLine2di(left, top, left + (width << 2), bottom, item->colours[0], uimtls[ui_bgmtl]);
-            if (!edui_donotdraw)
-                NuRndrLine2di(left + (width << 2), top, left + (width << 3), bottom, item->colours[0],
-                              uimtls[ui_bgmtl]);
-            if (!edui_donotdraw)
-                NuRndrLine2di(left + (width << 3), top, left + width * 12, bottom, item->colours[0], uimtls[ui_bgmtl]);
-            if (!edui_donotdraw)
-                NuRndrLine2di(left + width * 12, top, right, bottom, item->colours[0], uimtls[ui_bgmtl]);
+            eduiDrawLine(left, top, left + (width << 2), bottom, item->colours[0], uimtls[ui_bgmtl]);
+            eduiDrawLine(left + (width << 2), top, left + (width << 3), bottom, item->colours[0], uimtls[ui_bgmtl]);
+            eduiDrawLine(left + (width << 3), top, left + width * 12, bottom, item->colours[0], uimtls[ui_bgmtl]);
+            eduiDrawLine(left + width * 12, top, right, bottom, item->colours[0], uimtls[ui_bgmtl]);
         }
         return height;
     }
@@ -4288,25 +4324,16 @@ extern "C" {
         item->previous = NULL;
     }
     void eduiMenuRender(eduimenu_s *menu) {
-        const auto font_set = [](void *font) {
-            if (!edui_donotdraw)
-                NuQFntSet(font);
-        };
-        const auto font_colour = [](void *font, u32 colour) {
-            if (!edui_donotdraw)
-                NuQFntSetColour(font, colour);
-        };
+        const auto font_set = [](void *font) { eduiDrawFontSet(font); };
+        const auto font_colour = [](void *font, u32 colour) { eduiSetFontColour(font, colour); };
         const auto rect = [](i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material) {
-            if (!edui_donotdraw)
-                NuRndrRect2di(x, y, width, height, colour, material);
+            eduiDrawRect(x, y, width, height, colour, material);
         };
         const auto line = [](i32 x0, i32 y0, i32 x1, i32 y1, i32 colour, numtl_s *material) {
-            if (!edui_donotdraw)
-                NuRndrLine2di(x0, y0, x1, y1, colour, material);
+            eduiDrawLine(x0, y0, x1, y1, colour, material);
         };
         const auto outline_rect = [](i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material) {
-            if (!edui_donotdraw)
-                NuRndrLineRect2di(x, y, width, height, colour, material);
+            eduiDrawLineRect(x, y, width, height, colour, material);
         };
         const auto interact = [](i32 x, i32 y, i32 width, i32 height, eduimenu_s *menu, eduiitem_s *item,
                                  i32 (*callback)(edui_interact_s *), u32 buttons, i32 field_20) {
@@ -4829,9 +4856,8 @@ extern "C" {
             i32 current_y =
                 height -
                 static_cast<i32>(height * nugraphGetYatX(graph, fraction * graph->x_extent * graph->x_scale, 2));
-            if (!edui_donotdraw)
-                NuRndrLine2di((x + previous_x) << 4, (y + previous_y) << 3, (x + current_x) << 4, (y + current_y) << 3,
-                              colour, uimtls[0]);
+            eduiDrawLine((x + previous_x) << 4, (y + previous_y) << 3, (x + current_x) << 4, (y + current_y) << 3,
+                         colour, uimtls[0]);
             previous_x = current_x;
             previous_y = current_y;
             fraction += 0.01f;
@@ -5717,24 +5743,25 @@ extern "C" {
         NuStrLen(picker->value);
 
         auto delete_previous = [&]() {
-            if (picker->cursor <= 0)
+            if (picker->cursor == 0)
                 return;
-            --picker->cursor;
-            if (picker->value[picker->cursor + 1]) {
-                if (picker->cursor > 0xfe)
-                    return;
-                memmove(picker->value + picker->cursor, picker->value + picker->cursor + 1,
-                        sizeof(picker->value) - picker->cursor - 1);
+            if (picker->value[picker->cursor]) {
+                --picker->cursor;
+                for (i32 index = picker->cursor; index < 0xff; ++index)
+                    picker->value[index] = picker->value[index + 1];
             } else {
-                picker->value[picker->cursor] = '\0';
+                picker->value[--picker->cursor] = '\0';
             }
         };
         auto insert_character = [&](char character) {
             if (NuStrLen(picker->value) >= picker->max_length)
                 return;
-            if (picker->cursor < static_cast<i32>(sizeof(picker->value)))
-                memmove(picker->value + picker->cursor + 1, picker->value + picker->cursor,
-                        sizeof(picker->value) - picker->cursor - 1);
+            // The original includes the cursor slot in the shift before
+            // overwriting it. Read the enclosing object's bytes so cursor zero
+            // accesses the preceding object byte rather than value[-1].
+            const char *picker_bytes = reinterpret_cast<const char *>(picker);
+            for (i32 index = 0xff; index >= picker->cursor; --index)
+                picker->value[index] = picker_bytes[offsetof(edui_textpicker_s, value) + index - 1];
             picker->value[picker->cursor++] = character;
         };
         auto next_row = [&]() {
@@ -5758,38 +5785,38 @@ extern "C" {
                 picker->keyboard_column = NuStrLen(textrow[picker->keyboard_row]) - 1;
         };
 
-        switch (key) {
-            case 0xc8:
-                previous_row();
-                break;
-            case 0xd0:
-                next_row();
-                break;
-            case 0xcb:
-                previous_column();
-                break;
-            case 0xcd:
-                next_column();
-                break;
-            case 0x0e:
-            case 0xd3:
-                delete_previous();
-                break;
-            case 0x1c:
-            case 1:
-                if (picker->callback)
-                    picker->callback(menu, item, pad->digital_buttons);
-                break;
-            default:
-                if (key != -1) {
+        if (key != -1) {
+            switch (key) {
+                case 0xc8:
+                    previous_row();
+                    break;
+                case 0xd0:
+                    next_row();
+                    break;
+                case 0xcb:
+                    previous_column();
+                    break;
+                case 0xcd:
+                    next_column();
+                    break;
+                case 0x0e:
+                case 0xd3:
+                    delete_previous();
+                    break;
+                case 0x1c:
+                case 1:
+                    if (picker->callback)
+                        picker->callback(menu, item, pad->digital_buttons);
+                    break;
+                default: {
                     char character = NuKeyToAscii(key, modifiers & 1);
                     if (character)
                         insert_character(character);
-                }
-                break;
+                } break;
+            }
         }
 
-        if (!picker->editing) {
+        if (!picker || !picker->editing) {
             if (pad->digital_buttons_pressed & 0x40)
                 eduiAddTextPickEnt(menu, item);
             return 0;
@@ -5908,12 +5935,9 @@ extern "C" {
         i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
         item->x = x;
         item->y = y;
-        if (!edui_donotdraw)
-            NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2], uimtls[ui_bgmtl]);
-        if (!edui_donotdraw)
-            NuQFntSet(edui_font);
-        if (!edui_donotdraw)
-            NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+        eduiDrawRect(x << 4, y << 3, width << 4, height << 3, item->colours[2], uimtls[ui_bgmtl]);
+        eduiDrawFontSet(edui_font);
+        eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         eduiFntPrintEx(edui_font, x << 4, (y << 3) + baseline, 16, item->text);
 
         i32 top = (y << 3) + 16;
@@ -5925,12 +5949,10 @@ extern "C" {
         i32 lower_y = (bottom + middle_y) >> 1;
         if (item->highlighted) {
             i32 points[8] = {left, middle_y, quarter_x, lower_y, quarter_x, bottom, right, top};
-            if (!edui_donotdraw)
-                NuRndrTriStrip2di(points, NULL, 4, item->colours[0], uimtls[0]);
+            eduiDrawTriStrip(points, NULL, 4, item->colours[0], uimtls[0]);
         } else {
             i32 points[10] = {left, middle_y, quarter_x, lower_y, right, top, quarter_x, bottom, left, middle_y};
-            if (!edui_donotdraw)
-                NuRndrLineStrip2di(points, NULL, 5, item->colours[0], uimtls[0]);
+            eduiDrawLineStrip(points, NULL, 5, item->colours[0], uimtls[0]);
         }
         return height;
     }
@@ -5941,8 +5963,7 @@ extern "C" {
         i32 strip_height = (height << 3) / 8;
         i32 colours[4] = {static_cast<i32>(0x80000000u), static_cast<i32>(0x80000000u), static_cast<i32>(0x80000000u),
                           static_cast<i32>(0x80000000u)};
-        if (!edui_donotdraw)
-            NuRndrGradRect2di(left, y << 3, band_width, strip_height, colours, uimtls[ui_bgmtl]);
+        eduiDrawGradRect(left, y << 3, band_width, strip_height, colours, uimtls[ui_bgmtl]);
 #define EDUI_DRAW_VALUE_STRIP(strip)                                                                                   \
     {                                                                                                                  \
         colours[0] = colours[2];                                                                                       \
@@ -6030,12 +6051,9 @@ extern "C" {
         i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 3;
         item->y = y;
         item->x = x;
-        if (!edui_donotdraw)
-            NuRndrRect2di(x << 4, y << 3, width << 4, height << 4, item->colours[2 + item->highlighted], uimtls[0]);
-        if (!edui_donotdraw)
-            NuQFntSet(edui_font);
-        if (!edui_donotdraw)
-            NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+        eduiDrawRect(x << 4, y << 3, width << 4, height << 4, item->colours[2 + item->highlighted], uimtls[0]);
+        eduiDrawFontSet(edui_font);
+        eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         eduiFntPrintEx(edui_font, (x + 64) << 4, (y << 3) + baseline, 64, item->text);
         eduiFntPrintEx(edui_font, (x + 116) << 4, (y << 3) + baseline, 64, slider->format,
                        static_cast<i32>(slider->value));
@@ -6043,23 +6061,23 @@ extern "C" {
         i32 colour = slider->red + (slider->green << 8) + (slider->blue << 16);
         i32 colours[4] = {static_cast<i32>(0xff000000), colour, static_cast<i32>(0xff000000), colour};
         i32 top = (y + height) << 3;
-        if (!edui_donotdraw) {
+        {
             i32 left = static_cast<i32>(0.0f * (width << 4));
             i32 right = static_cast<i32>(1.0f * (width << 4));
-            NuRndrGradRect2di((x << 4) + left, top, right - left, height << 3, colours, uimtls[ui_bgmtl]);
+            eduiDrawGradRect((x << 4) + left, top, right - left, height << 3, colours, uimtls[ui_bgmtl]);
         }
         i32 bottom = (y + height * 2 - 1) << 3;
-        if (!edui_donotdraw) {
+        {
             i32 marker = static_cast<i32>((x + 1) + slider->normalized_value * width) << 4;
-            NuRndrLine2di(marker, top, marker, bottom, item->colours[item->highlighted], uimtls[0]);
+            eduiDrawLine(marker, top, marker, bottom, item->colours[item->highlighted], uimtls[0]);
         }
-        if (!edui_donotdraw) {
+        {
             i32 marker = static_cast<i32>(x + slider->normalized_value * width) << 4;
-            NuRndrLine2di(marker, top, marker, bottom, item->colours[item->highlighted], uimtls[0]);
+            eduiDrawLine(marker, top, marker, bottom, item->colours[item->highlighted], uimtls[0]);
         }
-        if (!edui_donotdraw) {
+        {
             i32 marker = static_cast<i32>((x - 1) + slider->normalized_value * width) << 4;
-            NuRndrLine2di(marker, top, marker, bottom, item->colours[item->highlighted], uimtls[0]);
+            eduiDrawLine(marker, top, marker, bottom, item->colours[item->highlighted], uimtls[0]);
         }
         return height * 2;
     }
@@ -6075,28 +6093,27 @@ extern "C" {
         u8 *hover_flags = reinterpret_cast<u8 *>(expander) + 0x54;
         *hover_flags = (*hover_flags & ~2u) | static_cast<u8>(over_button) << 1;
 
-        if (!edui_donotdraw) {
-            NuQFntSet(edui_font);
-            NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+        {
+            eduiDrawFontSet(edui_font);
+            eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         }
         const f32 row_height = NuQFntHeight(edui_font) * 1.25f * 0.125f;
         const i32 height = static_cast<i32>(row_height);
         const f32 baseline = (NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font)) * 0.125f;
         for (eduimenu_s *ancestor = menu; ancestor; ancestor = ancestor->parent) {
             if (ancestor == eduiGetActiveMenu()) {
-                if (!edui_donotdraw)
-                    NuRndrRect2di(x << 4, y << 3, width << 4, static_cast<i32>(row_height * 8.0f),
-                                  item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
+                eduiDrawRect(x << 4, y << 3, width << 4, static_cast<i32>(row_height * 8.0f),
+                             item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
                 break;
             }
         }
         const f32 button_size = row_height - 2.0f;
         for (i32 depth = 0; depth < expander->depth; ++depth) {
-            if (!edui_donotdraw) {
+            {
                 const i32 guide_x =
                     static_cast<i32>((static_cast<f32>(x) + (static_cast<f32>(depth) + 0.5f) * button_size) * 16.0f);
-                NuRndrLine2di(guide_x, y << 3, guide_x, static_cast<i32>((static_cast<f32>(y) + row_height) * 8.0f),
-                              0xff000000, uimtls[0]);
+                eduiDrawLine(guide_x, y << 3, guide_x, static_cast<i32>((static_cast<f32>(y) + row_height) * 8.0f),
+                             0xff000000, uimtls[0]);
             }
         }
         const f32 button_x = static_cast<f32>(x) + static_cast<f32>(expander->depth) * button_size + 1.0f;
@@ -6130,23 +6147,22 @@ extern "C" {
         i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 3;
         i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
         if (!picker->reserved_54) {
-            if (!edui_donotdraw)
-                NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
-                              uimtls[ui_bgmtl]);
+            eduiDrawRect(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
+                         uimtls[ui_bgmtl]);
             char formatted[264];
             sprintf(formatted, picker->format, picker->name);
-            if (!edui_donotdraw) {
-                NuQFntSet(edui_font);
-                NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+            {
+                eduiDrawFontSet(edui_font);
+                eduiSetFontColour(edui_font, item->colours[item->highlighted]);
             }
             eduiFntPrintEx(edui_font, (x * 2 + width) << 3, (y << 3) + baseline, 64, "%s %s", item->text, formatted);
             return height;
         }
-        if (!edui_donotdraw) {
-            NuRndrRect2di(x << 4, y << 3, width << 4, height << 4, item->colours[2 + item->highlighted],
-                          uimtls[ui_bgmtl]);
-            NuQFntSet(edui_font);
-            NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+        {
+            eduiDrawRect(x << 4, y << 3, width << 4, height << 4, item->colours[2 + item->highlighted],
+                         uimtls[ui_bgmtl]);
+            eduiDrawFontSet(edui_font);
+            eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         }
         i32 centre = (x * 2 + width) << 3;
         eduiFntPrintEx(edui_font, centre, (y << 3) + baseline, 64, item->text);
@@ -6155,17 +6171,13 @@ extern "C" {
     }
     static __used__ i32 eduicbRenderGradPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
         edui_gradient_pick_s *gradient = static_cast<edui_gradient_pick_s *>(item);
-        i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
         i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 2;
-        item->y = y;
+        i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
         item->x = x;
-        if (!edui_donotdraw)
-            NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
-                          uimtls[ui_bgmtl]);
-        if (!edui_donotdraw)
-            NuQFntSet(edui_font);
-        if (!edui_donotdraw)
-            NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+        item->y = y;
+        eduiDrawRect(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
+        eduiDrawFontSet(edui_font);
+        eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         if (gradient->change_timer && gradient->selected_stage) {
             eduiFntPrintEx(edui_font, (width + x * 2) << 3, (y << 3) + baseline, 64, "%1.03f",
                            gradient->selected_stage->time);
@@ -6183,25 +6195,21 @@ extern "C" {
         while (next) {
             i32 colours[4] = {static_cast<i32>(stage_colour), static_cast<i32>(next->colour),
                               static_cast<i32>(stage_colour), static_cast<i32>(next->colour)};
-            if (!edui_donotdraw) {
-                i32 left = static_cast<i32>((width << 4) * stage_time);
-                i32 right = static_cast<i32>((width << 4) * next->time);
-                NuRndrGradRect2di((x << 4) + left, (y + half_height) << 3, right - left, half_height << 3, colours,
-                                  uimtls[ui_bgmtl]);
-            }
+            i32 left = static_cast<i32>(stage_time * (width << 4));
+            i32 right = static_cast<i32>(next->time * (width << 4));
+            eduiDrawGradRect((x << 4) + left, (y + half_height) << 3, right - left, half_height << 3, colours,
+                             uimtls[ui_bgmtl]);
             stage_time = next->time;
             stage_colour = next->colour;
             next = next->next;
         }
         for (edui_gradient_node_s *stage = gradient->first_stage; stage; stage = stage->next) {
-            i32 marker_x = (x + static_cast<i32>(width * stage->time) - 2) << 4;
+            i32 marker_x = (x - 2 + static_cast<i32>(stage->time * width)) << 4;
             i32 marker_y = ((y + half_height) << 3) - 16;
             i32 marker_height = (half_height << 3) + 16;
-            if (!edui_donotdraw)
-                NuRndrRect2di(marker_x, marker_y, 80, marker_height, stage->colour, uimtls[0]);
+            eduiDrawRect(marker_x, marker_y, 80, marker_height, stage->colour, uimtls[0]);
             u32 outline = gradient->selected_stage == stage ? 0x80ffffff : 0x80000000;
-            if (!edui_donotdraw)
-                NuRndrLineRect2di(marker_x, marker_y, 80, marker_height, outline, uimtls[ui_outmtl]);
+            eduiDrawLineRect(marker_x, marker_y, 80, marker_height, outline, uimtls[ui_outmtl]);
         }
         return height;
     }
@@ -6219,22 +6227,16 @@ extern "C" {
         i32 plot_x = x + 30;
         i32 plot_y = y + 30;
         i32 plot_bottom = plot_y + graph_height;
-        if (!edui_donotdraw)
-            NuRndrRect2di(x << 4, y << 3, total_width << 4, total_height << 3, 0x80000000, uimtls[0]);
-        if (!edui_donotdraw)
-            NuRndrRect2di(plot_x << 4, plot_y << 3, graph_width << 4, graph_height << 3, 0x80100000, uimtls[0]);
+        eduiDrawRect(x << 4, y << 3, total_width << 4, total_height << 3, 0x80000000, uimtls[0]);
+        eduiDrawRect(plot_x << 4, plot_y << 3, graph_width << 4, graph_height << 3, 0x80100000, uimtls[0]);
         if (!picker->graph) {
-            if (!edui_donotdraw)
-                NuQFntSet(edui_font);
-            if (!edui_donotdraw)
-                NuQFntSetColour(edui_font, 0x80000080);
+            eduiDrawFontSet(edui_font);
+            eduiSetFontColour(edui_font, 0x80000080);
             eduiFntPrintEx(edui_font, (x + total_width) << 3, (y + total_height) << 2, 64, "Invalid Graph Pointer");
             return total_height;
         }
-        if (!edui_donotdraw)
-            NuQFntSet(edui_font);
-        if (!edui_donotdraw)
-            NuQFntSetColour(edui_font, 0x80808080);
+        eduiDrawFontSet(edui_font);
+        eduiSetFontColour(edui_font, 0x80808080);
         if (picker->x_scale > 0.0f) {
             f32 tick_count = picker->graph->x_extent * picker->graph->x_scale / picker->x_scale;
             i32 label_interval = static_cast<i32>(tick_count / 10.0f) + 1;
@@ -6242,16 +6244,14 @@ extern "C" {
                 f32 tick_offset = static_cast<f32>(graph_width * tick) / tick_count;
                 u32 colour = 0x80260000;
                 if (tick % label_interval == 0) {
-                    if (!edui_donotdraw)
-                        NuQFntSet(edui_font);
+                    eduiDrawFontSet(edui_font);
                     eduiFntPrintEx(edui_font, static_cast<i32>(plot_x + tick_offset) << 4,
                                    (plot_bottom << 3) - 48 + static_cast<i32>(NuQFntHeight(edui_font)), 64, "%1.01f",
                                    static_cast<f32>(tick) * picker->x_scale);
                     colour = 0x80340000;
                 }
                 i32 line_x = static_cast<i32>(plot_x + tick_offset) << 4;
-                if (!edui_donotdraw)
-                    NuRndrLine2di(line_x, plot_y << 3, line_x, (plot_bottom << 3) - 8, colour, uimtls[0]);
+                eduiDrawLine(line_x, plot_y << 3, line_x, (plot_bottom << 3) - 8, colour, uimtls[0]);
             }
         }
         if (picker->y_scale > 0.0f) {
@@ -6261,8 +6261,7 @@ extern "C" {
                 f32 tick_offset = static_cast<f32>(graph_height * tick) / tick_count;
                 u32 colour = 0x80260000;
                 if (tick % label_interval == 0) {
-                    if (!edui_donotdraw)
-                        NuQFntSet(edui_font);
+                    eduiDrawFontSet(edui_font);
                     eduiFntPrintEx(edui_font, (x + 28) << 4,
                                    (static_cast<i32>(plot_bottom - tick_offset) << 3) +
                                        (static_cast<i32>(NuQFntHeight(edui_font)) >> 1),
@@ -6270,12 +6269,10 @@ extern "C" {
                     colour = 0x80340000;
                 }
                 i32 line_y = static_cast<i32>(plot_bottom - tick_offset) << 3;
-                if (!edui_donotdraw)
-                    NuRndrLine2di(plot_x << 4, line_y, (plot_x + graph_width - 1) << 4, line_y, colour, uimtls[0]);
+                eduiDrawLine(plot_x << 4, line_y, (plot_x + graph_width - 1) << 4, line_y, colour, uimtls[0]);
             }
         }
-        if (!edui_donotdraw)
-            NuQFntSet(edui_font);
+        eduiDrawFontSet(edui_font);
         eduiFntPrintEx(edui_font, (plot_x + graph_width) << 4, (y << 3) + static_cast<i32>(NuQFntHeight(edui_font)), 32,
                        picker->x_label);
         eduiFntPrintEx(edui_font, (x + total_width - 3) << 4, (y + total_height) << 3, 32, picker->y_label);
@@ -6284,21 +6281,17 @@ extern "C" {
                        32, "0.0");
         u32 cursor_colour = selected ? 0x80707070 : 0x80303030;
         i32 cursor_line_y = static_cast<i32>(plot_y + (1.0f - cursor_y) * graph_height) << 3;
-        if (!edui_donotdraw)
-            NuRndrLine2di(plot_x << 4, cursor_line_y, (plot_x + graph_width - 1) << 4, cursor_line_y, cursor_colour,
-                          uimtls[0]);
+        eduiDrawLine(plot_x << 4, cursor_line_y, (plot_x + graph_width - 1) << 4, cursor_line_y, cursor_colour,
+                     uimtls[0]);
         i32 cursor_line_x = static_cast<i32>(plot_x + cursor_x * graph_width) << 4;
-        if (!edui_donotdraw)
-            NuRndrLine2di(cursor_line_x, plot_y << 3, cursor_line_x, (plot_bottom << 3) - 8, cursor_colour, uimtls[0]);
+        eduiDrawLine(cursor_line_x, plot_y << 3, cursor_line_x, (plot_bottom << 3) - 8, cursor_colour, uimtls[0]);
         picker->selected_point = -1;
         f32 closest = 1.0f;
         for (i32 point = 0; point < picker->graph->point_count; ++point) {
             i32 px = plot_x + static_cast<i32>(picker->graph->x[point] * graph_width);
             i32 py = plot_bottom - static_cast<i32>(picker->graph->y[point] * graph_height);
-            if (!edui_donotdraw)
-                NuRndrLine2di((px - 10) << 4, py << 3, (px + 10) << 4, py << 3, 0x80505050, uimtls[0]);
-            if (!edui_donotdraw)
-                NuRndrLine2di(px << 4, (py << 3) - 80, px << 4, (py << 3) + 80, 0x80505050, uimtls[0]);
+            eduiDrawLine((px - 10) << 4, py << 3, (px + 10) << 4, py << 3, 0x80505050, uimtls[0]);
+            eduiDrawLine(px << 4, (py << 3) - 80, px << 4, (py << 3) + 80, 0x80505050, uimtls[0]);
             f32 distance =
                 fabsf(picker->cursor_x - picker->graph->x[point]) + fabsf(picker->cursor_y - picker->graph->y[point]);
             if (distance < closest && distance < 0.05f) {
@@ -6330,13 +6323,11 @@ extern "C" {
                               96, 0x80ffffff, uimtls[ui_outmtl]);
         }
         if (show_x_scale_help || show_y_scale_help) {
-            if (!edui_donotdraw)
-                NuQFntSet(edui_font);
+            eduiDrawFontSet(edui_font);
             i32 help_x = (plot_x + (graph_width >> 1)) << 4;
             i32 help_y = plot_y << 3;
             help_y += static_cast<i32>(NuQFntHeight(edui_font));
-            if (!edui_donotdraw)
-                NuQFntSetColour(edui_font, 0x80808080);
+            eduiSetFontColour(edui_font, 0x80808080);
             eduiFntPrintEx(edui_font, help_x, help_y, 64, "Scaling %c Axis", show_x_scale_help ? 'X' : 'Y');
             help_y += static_cast<i32>(NuQFntHeight(edui_font));
             eduiFntPrintEx(edui_font, help_x, help_y, 64, "%1.03f",
@@ -6348,13 +6339,10 @@ extern "C" {
         f32 label_font_height = NuQFntHeight(edui_font);
         i32 label_baseline = static_cast<i32>(NuQFntBaseline(edui_font)) +
                              (((label_height << 3) - static_cast<i32>(label_font_height)) >> 1);
-        if (!edui_donotdraw)
-            NuRndrRect2di(x << 4, label_y, total_width << 4, label_height << 3, item->colours[2 + item->highlighted],
-                          uimtls[ui_bgmtl]);
-        if (!edui_donotdraw)
-            NuQFntSet(edui_font);
-        if (!edui_donotdraw)
-            NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+        eduiDrawRect(x << 4, label_y, total_width << 4, label_height << 3, item->colours[2 + item->highlighted],
+                     uimtls[ui_bgmtl]);
+        eduiDrawFontSet(edui_font);
+        eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         if (picker->selected_point >= 0) {
             i32 point = picker->selected_point;
             eduiFntPrintEx(edui_font, (x + 2) << 4, label_y + label_baseline, 16, "Point %d = %1.02f, %1.02f", point,
@@ -6374,29 +6362,23 @@ extern "C" {
         i32 height = width / 4;
         item->x = x;
         item->y = y;
-        if (!edui_donotdraw) {
+        {
             i32 left = static_cast<i32>(0.0f * (width << 4));
             i32 right = static_cast<i32>(1.0f * (width << 4));
-            NuRndrGradRect2di((x << 4) + left, y << 3, right - left, height << 3, colours, uimtls[ui_bgmtl]);
+            eduiDrawGradRect((x << 4) + left, y << 3, right - left, height << 3, colours, uimtls[ui_bgmtl]);
         }
         i32 cursor_x = static_cast<i32>(x + 1 + (width - 2) * pick->value) << 4;
-        if (!edui_donotdraw)
-            NuRndrLine2di(cursor_x, y << 3, cursor_x, (y + (height >> 1) - 1) << 3, 0x80ffffff, uimtls[0]);
+        eduiDrawLine(cursor_x, y << 3, cursor_x, (y + (height >> 1) - 1) << 3, 0x80ffffff, uimtls[0]);
         cursor_x = static_cast<i32>(x + (width - 2) * pick->value) << 4;
-        if (!edui_donotdraw)
-            NuRndrLine2di(cursor_x, y << 3, cursor_x, (y + (height >> 1) - 1) << 3, 0x80ffffff, uimtls[0]);
+        eduiDrawLine(cursor_x, y << 3, cursor_x, (y + (height >> 1) - 1) << 3, 0x80ffffff, uimtls[0]);
         cursor_x = static_cast<i32>(x - 1 + (width - 2) * pick->value) << 4;
-        if (!edui_donotdraw)
-            NuRndrLine2di(cursor_x, y << 3, cursor_x, (y + (height >> 1) - 1) << 3, 0x80ffffff, uimtls[0]);
+        eduiDrawLine(cursor_x, y << 3, cursor_x, (y + (height >> 1) - 1) << 3, 0x80ffffff, uimtls[0]);
         cursor_x = static_cast<i32>(x + 1 + (width - 2) * pick->value) << 4;
-        if (!edui_donotdraw)
-            NuRndrLine2di(cursor_x, (y + (height >> 1)) << 3, cursor_x, (y + height - 1) << 3, 0x80000000, uimtls[0]);
+        eduiDrawLine(cursor_x, (y + (height >> 1)) << 3, cursor_x, (y + height - 1) << 3, 0x80000000, uimtls[0]);
         cursor_x = static_cast<i32>(x + (width - 2) * pick->value) << 4;
-        if (!edui_donotdraw)
-            NuRndrLine2di(cursor_x, (y + (height >> 1)) << 3, cursor_x, (y + height - 1) << 3, 0x80000000, uimtls[0]);
+        eduiDrawLine(cursor_x, (y + (height >> 1)) << 3, cursor_x, (y + height - 1) << 3, 0x80000000, uimtls[0]);
         cursor_x = static_cast<i32>(x - 1 + (width - 2) * pick->value) << 4;
-        if (!edui_donotdraw)
-            NuRndrLine2di(cursor_x, (y + (height >> 1)) << 3, cursor_x, (y + height - 1) << 3, 0x80000000, uimtls[0]);
+        eduiDrawLine(cursor_x, (y + (height >> 1)) << 3, cursor_x, (y + height - 1) << 3, 0x80000000, uimtls[0]);
         return height;
     }
     static __used__ i32 eduicbRenderNumber(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
@@ -6405,13 +6387,9 @@ extern "C" {
         i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
         item->y = y;
         item->x = x;
-        if (!edui_donotdraw)
-            NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
-                          uimtls[ui_bgmtl]);
-        if (!edui_donotdraw)
-            NuQFntSet(edui_font);
-        if (!edui_donotdraw)
-            NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+        eduiDrawRect(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
+        eduiDrawFontSet(edui_font);
+        eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         char format[512];
         NuStrCpy(format, item->text);
         NuStrCat(format, number->format);
@@ -6583,13 +6561,9 @@ extern "C" {
         i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
         item->x = x;
         item->y = y;
-        if (!edui_donotdraw)
-            NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
-                          uimtls[ui_bgmtl]);
-        if (!edui_donotdraw)
-            NuQFntSet(edui_font);
-        if (!edui_donotdraw)
-            NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+        eduiDrawRect(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
+        eduiDrawFontSet(edui_font);
+        eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         if (item->text_alignment == 16)
             eduiFntPrintEx(edui_font, x << 4, (y << 3) + baseline, 16, item->text);
         else if (item->text_alignment == 32)
@@ -6605,11 +6579,11 @@ extern "C" {
         i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
         item->x = x;
         item->y = y;
-        if (!edui_donotdraw) {
-            NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
-                          uimtls[ui_bgmtl]);
-            NuQFntSet(edui_font);
-            NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+        {
+            eduiDrawRect(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
+                         uimtls[ui_bgmtl]);
+            eduiDrawFontSet(edui_font);
+            eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         }
         eduiFntPrintEx(edui_font, (x * 2 + width) << 3, (y << 3) + baseline, 64, item->text);
         f32 green = clipg;
@@ -6621,8 +6595,7 @@ extern "C" {
                      static_cast<i32>(red * 255.0f);
         i32 colours[4] = {static_cast<i32>(colour), static_cast<i32>(colour), static_cast<i32>(colour),
                           static_cast<i32>(colour)};
-        if (!edui_donotdraw)
-            NuRndrGradRect2di((x + width - 45) << 4, y << 3, 40 << 4, height << 3, colours, uimtls[ui_bgmtl]);
+        eduiDrawGradRect((x + width - 45) << 4, y << 3, 40 << 4, height << 3, colours, uimtls[ui_bgmtl]);
         return height;
     }
     static __used__ i32 eduicbRenderSeparator(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
@@ -6631,11 +6604,8 @@ extern "C" {
         numtl_s *background_material = uimtls[ui_bgmtl];
         item->y = y;
         item->x = x;
-        if (!edui_donotdraw)
-            NuRndrRect2di(x << 4, y << 3, width << 4, 64, item->colours[2 + item->highlighted], background_material);
-        if (!edui_donotdraw)
-            NuRndrLine2di((x + 4) << 4, (y << 3) + 32, ((x + width) << 4) - 64, (y << 3) + 32, 0xff000000,
-                          uimtls[ui_bgmtl]);
+        eduiDrawRect(x << 4, y << 3, width << 4, 64, item->colours[2 + item->highlighted], background_material);
+        eduiDrawLine((x + 4) << 4, (y << 3) + 32, ((x + width) << 4) - 64, (y << 3) + 32, 0xff000000, uimtls[ui_bgmtl]);
         return 8;
     }
     static __used__ i32 eduicbRenderSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
@@ -6644,13 +6614,9 @@ extern "C" {
         i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
         item->x = x;
         item->y = y;
-        if (!edui_donotdraw)
-            NuRndrRect2di(x << 4, y << 3, width << 4, height << 4, item->colours[2 + item->highlighted],
-                          uimtls[ui_bgmtl]);
-        if (!edui_donotdraw)
-            NuQFntSet(edui_font);
-        if (!edui_donotdraw)
-            NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+        eduiDrawRect(x << 4, y << 3, width << 4, height << 4, item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
+        eduiDrawFontSet(edui_font);
+        eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         char format[512];
         NuStrCpy(format, item->text);
         NuStrCat(format, slider->format);
@@ -6660,14 +6626,11 @@ extern "C" {
             i32 bottom = (y + height * 2 - 1) << 3;
             f32 span = width - 2;
             i32 marker_x = static_cast<i32>(x + 1 + slider->normalized_value * span) << 4;
-            if (!edui_donotdraw)
-                NuRndrLine2di(marker_x, top, marker_x, bottom, item->colours[item->highlighted], uimtls[0]);
+            eduiDrawLine(marker_x, top, marker_x, bottom, item->colours[item->highlighted], uimtls[0]);
             marker_x = static_cast<i32>(x + slider->normalized_value * span) << 4;
-            if (!edui_donotdraw)
-                NuRndrLine2di(marker_x, top, marker_x, bottom, item->colours[item->highlighted], uimtls[0]);
+            eduiDrawLine(marker_x, top, marker_x, bottom, item->colours[item->highlighted], uimtls[0]);
             marker_x = static_cast<i32>(x - 1 + slider->normalized_value * span) << 4;
-            if (!edui_donotdraw)
-                NuRndrLine2di(marker_x, top, marker_x, bottom, item->colours[item->highlighted], uimtls[0]);
+            eduiDrawLine(marker_x, top, marker_x, bottom, item->colours[item->highlighted], uimtls[0]);
         }
         return height * 2;
     }
@@ -6677,12 +6640,9 @@ extern "C" {
         i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
         item->x = x;
         item->y = y;
-        if (!edui_donotdraw)
-            NuRndrRect2di(x << 4, y << 3, width << 4, height << 4, item->colours[2 + item->highlighted], uimtls[0]);
-        if (!edui_donotdraw)
-            NuQFntSet(edui_font);
-        if (!edui_donotdraw)
-            NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+        eduiDrawRect(x << 4, y << 3, width << 4, height << 4, item->colours[2 + item->highlighted], uimtls[0]);
+        eduiDrawFontSet(edui_font);
+        eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         char format[512];
         NuStrCpy(format, item->text);
         NuStrCat(format, slider->format);
@@ -6692,14 +6652,11 @@ extern "C" {
         i32 top = (y + height) << 3;
         f32 span = width;
         i32 marker_x = static_cast<i32>(x + 1 + slider->normalized_value * span) << 4;
-        if (!edui_donotdraw)
-            NuRndrLine2di(marker_x, top, marker_x, bottom, item->colours[item->highlighted], uimtls[0]);
+        eduiDrawLine(marker_x, top, marker_x, bottom, item->colours[item->highlighted], uimtls[0]);
         marker_x = static_cast<i32>(x + slider->normalized_value * span) << 4;
-        if (!edui_donotdraw)
-            NuRndrLine2di(marker_x, top, marker_x, bottom, item->colours[item->highlighted], uimtls[0]);
+        eduiDrawLine(marker_x, top, marker_x, bottom, item->colours[item->highlighted], uimtls[0]);
         marker_x = static_cast<i32>(x - 1 + slider->normalized_value * span) << 4;
-        if (!edui_donotdraw)
-            NuRndrLine2di(marker_x, top, marker_x, bottom, item->colours[item->highlighted], uimtls[0]);
+        eduiDrawLine(marker_x, top, marker_x, bottom, item->colours[item->highlighted], uimtls[0]);
         return height * 2;
     }
     static __used__ i32 eduicbRenderTextPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
@@ -6713,20 +6670,15 @@ extern "C" {
         if (picker->editing) {
             item_width = width > height * 10 ? width : height * 10;
             i32 total_height = (picker->keyboard_flags & 2) ? height * 6 : height * 5;
-            if (!edui_donotdraw)
-                NuRndrRect2di(x << 4, y << 3, item_width << 4, total_height << 3, item->colours[2], uimtls[ui_bgmtl]);
+            eduiDrawRect(x << 4, y << 3, item_width << 4, total_height << 3, item->colours[2], uimtls[ui_bgmtl]);
             for (i32 row = 0; row < 4; ++row) {
                 auto draw_key = [&](i32 column) {
                     if (!(row == picker->keyboard_row && column == picker->keyboard_column)) {
-                        if (!edui_donotdraw)
-                            NuQFntSet(edui_font);
-                        if (!edui_donotdraw)
-                            NuQFntSetColour(edui_font, item->colours[0]);
+                        eduiDrawFontSet(edui_font);
+                        eduiSetFontColour(edui_font, item->colours[0]);
                     } else {
-                        if (!edui_donotdraw)
-                            NuQFntSet(edui_font);
-                        if (!edui_donotdraw)
-                            NuQFntSetColour(edui_font, item->colours[1]);
+                        eduiDrawFontSet(edui_font);
+                        eduiSetFontColour(edui_font, item->colours[1]);
                     }
                     letter[0] = textrow[row][column];
                     eduiFntPrintEx(edui_font, (x + height * column) << 4, ((y + row * height) << 3) + baseline, 16,
@@ -6743,10 +6695,8 @@ extern "C" {
                 draw_key(8);
                 draw_key(9);
             }
-            if (!edui_donotdraw)
-                NuQFntSet(edui_font);
-            if (!edui_donotdraw)
-                NuQFntSetColour(edui_font, item->colours[1]);
+            eduiDrawFontSet(edui_font);
+            eduiSetFontColour(edui_font, item->colours[1]);
             i32 value_y = ((y + height * 4) << 3) + baseline;
             eduiFntPrintEx(edui_font, x << 4, value_y, 16, picker->value);
             if (--cursor_flash < 1)
@@ -6765,10 +6715,8 @@ extern "C" {
                               static_cast<i32>(NuQFntHeight(edui_font)), item->colours[1] ^ 0xffffff, NULL);
             }
             if (picker->keyboard_flags & 2) {
-                if (!edui_donotdraw)
-                    NuQFntSet(edui_font);
-                if (!edui_donotdraw)
-                    NuQFntSetColour(edui_font, item->colours[0]);
+                eduiDrawFontSet(edui_font);
+                eduiSetFontColour(edui_font, item->colours[0]);
                 eduiFntPrintEx(edui_font, x << 4, ((y + height * 5) << 3) + baseline, 16,
                                TextPickCopyBuffer[0] ? TextPickCopyBuffer
                                                      : const_cast<char *>("Copy L2+R2 Paste L1+R1"));
@@ -6776,27 +6724,22 @@ extern "C" {
             return total_height;
         } else {
             if (!(picker->keyboard_flags & 1)) {
-                if (!edui_donotdraw)
-                    NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
-                                  uimtls[ui_bgmtl]);
+                eduiDrawRect(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
+                             uimtls[ui_bgmtl]);
                 char formatted[256];
                 sprintf(formatted, picker->format, picker->value);
-                if (!edui_donotdraw)
-                    NuQFntSet(edui_font);
-                if (!edui_donotdraw)
-                    NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+                eduiDrawFontSet(edui_font);
+                eduiSetFontColour(edui_font, item->colours[item->highlighted]);
                 eduiFntPrintEx(edui_font, x << 4, (y << 3) + baseline, 16, const_cast<char *>("%s %s"), item->text,
                                formatted);
                 return height;
             }
-            if (!edui_donotdraw) {
-                NuRndrRect2di(x << 4, y << 3, width << 4, height << 4, item->colours[2 + item->highlighted],
-                              uimtls[ui_bgmtl]);
+            {
+                eduiDrawRect(x << 4, y << 3, width << 4, height << 4, item->colours[2 + item->highlighted],
+                             uimtls[ui_bgmtl]);
             }
-            if (!edui_donotdraw)
-                NuQFntSet(edui_font);
-            if (!edui_donotdraw)
-                NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+            eduiDrawFontSet(edui_font);
+            eduiSetFontColour(edui_font, item->colours[item->highlighted]);
             i32 centre = (x * 2 + width) << 3;
             eduiFntPrintEx(edui_font, centre, (y << 3) + baseline, 64, item->text);
             eduiFntPrintEx(edui_font, centre, ((y + height) << 3) + baseline, 64, picker->format, picker->value);
@@ -6809,13 +6752,9 @@ extern "C" {
         i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
         item->x = x;
         item->y = y;
-        if (!edui_donotdraw)
-            NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
-                          uimtls[ui_bgmtl]);
-        if (!edui_donotdraw)
-            NuQFntSet(edui_font);
-        if (!edui_donotdraw)
-            NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+        eduiDrawRect(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
+        eduiDrawFontSet(edui_font);
+        eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         char format[512];
         NuStrCpy(format, item->text);
         NuStrCat(format, ": %s");

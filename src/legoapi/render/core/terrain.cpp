@@ -5430,7 +5430,7 @@ namespace {
 
     static bool ShadowBoundsOverlap(f32 min_x, f32 min_z, f32 max_x, f32 max_z, const NUVEC &minimum,
                                     const NUVEC &maximum) {
-        return max_x >= minimum.x && maximum.x >= min_x && max_z >= minimum.z && maximum.z > min_z;
+        return max_x >= minimum.x && max_z >= minimum.z && maximum.x >= min_x && maximum.z > min_z;
     }
 
     static void ShadowFinishGroup(ShadowScanWriter *writer, i32 group_index) {
@@ -5500,15 +5500,17 @@ namespace {
 } // namespace
 
 void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
+    const f32 position_x = position->x;
+    const f32 position_z = position->z;
     i32 cache_index = 0;
     i32 oldest_age = CurTerr->index_levels[0].cache_age;
     bool cache_hit = false;
     for (i32 i = 0; i < 16; ++i) {
         TERRAIN_INDEX_LEVEL &candidate = CurTerr->index_levels[i];
         if (candidate.cache_age > 0) {
-            const f32 dx = (position->x + 1.0f) - candidate.center_x;
-            const f32 dz = (position->z + 1.0f) - candidate.center_z;
-            if (dx > 0.0f && dx < 2.0f && dz > 0.0f && dz < 2.0f) {
+            const f32 dx = (position_x + 1.0f) - candidate.center_x;
+            const f32 dz = (position_z + 1.0f) - candidate.center_z;
+            if (dx < 2.0f && dz < 2.0f && dx > 0.0f && dz > 0.0f) {
                 cache_index = i;
                 cache_hit = true;
                 break;
@@ -5529,15 +5531,15 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
     writer.shape_count = 0;
 
     const f32 extent = fill_cache ? 1.0f : SHADOW_SCAN_HALF_EXTENT;
-    f32 min_x = position->x - extent;
-    f32 max_x = position->x + extent;
-    f32 min_z = position->z - extent;
-    f32 max_z = position->z + extent;
+    f32 min_x = position_x - extent;
+    f32 max_x = position_x + extent;
+    f32 min_z = position_z - extent;
+    f32 max_z = position_z + extent;
 
     if (!cache_hit) {
         for (i32 cell_index = 0; cell_index < CurTerr->used_cell_count; ++cell_index) {
             const TERRAIN_CELL &cell = CurTerr->cells[cell_index];
-            if (max_x < cell.min_x || cell.max_x < min_x || max_z < cell.min_z || cell.max_z < min_z) {
+            if (!(max_x >= cell.min_x && max_z >= cell.min_z && cell.max_x >= min_x && cell.max_z >= min_z)) {
                 continue;
             }
             const i16 *group_indices = CurTerr->group_indices + cell.first_group;
@@ -5545,8 +5547,9 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
                 // Cache geometry independently of the requesting material mask.
                 const i32 group_index = group_indices[cell_group];
                 TERRAIN_GROUP &group = CurTerr->groups[group_index];
-                if (group.chunk_type == -1 ||
-                    !ShadowBoundsOverlap(min_x, min_z, max_x, max_z, group.bounds_min, group.bounds_max))
+                if (!(max_x >= group.bounds_min.x && max_z >= group.bounds_min.z && group.bounds_max.x >= min_x &&
+                      group.bounds_max.z > min_z) ||
+                    group.chunk_type == -1)
                     continue;
                 const f32 local_max_x = max_x - group.origin.x;
                 const f32 local_min_x = min_x - group.origin.x;
@@ -5564,7 +5567,7 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
                         while (remaining > 0) {
                             if (local_max_x >= shape->min_x && shape->max_x > local_min_x &&
                                 local_max_z >= shape->min_z && shape->max_z > local_min_z &&
-                                reinterpret_cast<u8 *>(writer.cursor + 1) <= writer.limit) {
+                                reinterpret_cast<u8 *>(writer.cursor) < writer.limit) {
                                 *writer.cursor++ = shape;
                                 ++writer.shape_count;
                             }
@@ -5594,10 +5597,10 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
         writer.cursor = reinterpret_cast<TERRAIN_SHAPE **>(writer.group_header + sizeof(TERRAIN_SHAPE *));
         writer.limit = writer.group_header + 0x7f4;
         writer.shape_count = 0;
-        min_x = position->x - SHADOW_SCAN_HALF_EXTENT;
-        min_z = position->z - SHADOW_SCAN_HALF_EXTENT;
-        max_x = position->x + SHADOW_SCAN_HALF_EXTENT;
-        max_z = position->z + SHADOW_SCAN_HALF_EXTENT;
+        min_x = position_x - SHADOW_SCAN_HALF_EXTENT;
+        min_z = position_z - SHADOW_SCAN_HALF_EXTENT;
+        max_x = position_x + SHADOW_SCAN_HALF_EXTENT;
+        max_z = position_z + SHADOW_SCAN_HALF_EXTENT;
 
         u8 *entry = cache.scan_list;
         for (;;) {
@@ -5609,7 +5612,8 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
             TERRAIN_SHAPE **shapes = reinterpret_cast<TERRAIN_SHAPE **>(entry + sizeof(TERRAIN_SHAPE *));
             entry = reinterpret_cast<u8 *>(shapes + count);
             TERRAIN_GROUP &group = CurTerr->groups[group_index];
-            if (!ShadowBoundsOverlap(min_x, min_z, max_x, max_z, group.bounds_min, group.bounds_max) ||
+            if (!(max_x >= group.bounds_min.x && max_z >= group.bounds_min.z && group.bounds_max.x >= min_x &&
+                  group.bounds_max.z > min_z) ||
                 group.chunk_type == -1) {
                 continue;
             }
@@ -5621,8 +5625,8 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
             TERRAIN_SHAPE **shape_entry = shapes;
             for (i32 remaining = count; remaining > 0; --remaining, ++shape_entry) {
                 TERRAIN_SHAPE *shape = *shape_entry;
-                if (local_max_x < shape->min_x || shape->max_x <= local_min_x || local_max_z < shape->min_z ||
-                    shape->max_z <= local_min_z) {
+                if (!(local_max_x >= shape->min_x && shape->max_x > local_min_x && local_max_z >= shape->min_z &&
+                      shape->max_z > local_min_z)) {
                     continue;
                 }
                 if (shape->material[1] != 0 && (shape->material[1] & terrain_mask) == 0) {
@@ -5687,8 +5691,8 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
                     batch->max_z > local_min_z) {
                     TERRAIN_SHAPE *shape = shapes;
                     for (i32 remaining = batch->shape_count; remaining > 0; --remaining, ++shape) {
-                        if (local_max_x < shape->min_x || shape->max_x <= local_min_x || local_max_z < shape->min_z ||
-                            shape->max_z <= local_min_z) {
+                        if (!(local_max_x >= shape->min_x && shape->max_x > local_min_x &&
+                              local_max_z >= shape->min_z && shape->max_z > local_min_z)) {
                             continue;
                         }
                         if (reinterpret_cast<u8 *>(writer.cursor) >= writer.limit) {

@@ -343,7 +343,8 @@ i32 SelectShopItem(shopitem_s *items, i32 index) {
             AddToCompletionPoints(POINTS_PER_HINT);
             if (HINT_s *hint = Hint_FindHint(HintTab[id]))
                 hint->flags |= HINT_SHOP_PURCHASED;
-            return BuyShopItem(items, index, 1);
+            BuyShopItem(items, index, 1);
+            return 1;
         }
         case 1: {
             const i32 id = static_cast<u16>(item->item_id);
@@ -358,11 +359,12 @@ i32 SelectShopItem(shopitem_s *items, i32 index) {
             AddToCompletionPoints(POINTS_PER_CHARACTER);
             sprintf(event, "hubshop_buychar_%s", CDataList[id].file);
             NuIOS_RecordFlurryEvent(event);
-            return BuyShopItem(items, index, 1);
+            BuyShopItem(items, index, 1);
+            return 1;
         }
         case 2: {
             const i32 id = static_cast<u16>(item->item_id);
-            if (item->unlocked == 1 || (Game.extra_purchased_bits[id >> 5] & (1U << (id & 31))))
+            if (item->unlocked == 1 || ((Game.extra_purchased_bits[id >> 5] >> (id & 31)) & 1))
                 return 0;
             const i32 area = static_cast<i8>(Cheat[id].area);
             if (area != -1 && !Game.area_save[area].red_brick_collected)
@@ -373,7 +375,8 @@ i32 SelectShopItem(shopitem_s *items, i32 index) {
             AddToCompletionPoints(POINTS_PER_CHEAT);
             sprintf(event, "hubshop_buyextra_%s", Cheat[id].name);
             NuIOS_RecordFlurryEvent(event);
-            return BuyShopItem(items, index, 1);
+            BuyShopItem(items, index, 1);
+            return 1;
         }
         case 4:
             if (item->unlocked == 1 || item->price == 0)
@@ -386,7 +389,8 @@ i32 SelectShopItem(shopitem_s *items, i32 index) {
             AddToGoldBricks();
             sprintf(event, "hubshop_buygoldbrick_%i", index + 1);
             NuIOS_RecordFlurryEvent(event);
-            return BuyShopItem(items, index, 1);
+            BuyShopItem(items, index, 1);
+            return 1;
         case 5:
             if (!CutScenePlayer_CanStart(index)) {
                 PlaySfx("MenuNoEntry", 0);
@@ -448,22 +452,20 @@ i32 Shop_UpdateHint(HINT_s *hint) {
         }
     } else if (hint->control_mode_ids[0] == 0x5eb) {
         for (i32 i = 0; i < 44; ++i) {
-            const i8 area = static_cast<i8>(Cheat[i].area);
             if (!(Game.extra_purchased_bits[i >> 5] >> (i & 31) & 1) &&
-                (area == -1 || Game.area_save[area].red_brick_collected) &&
+                (static_cast<i8>(Cheat[i].area) == -1 ||
+                 Game.area_save[static_cast<i8>(Cheat[i].area)].red_brick_collected) &&
                 Game.coins >= static_cast<u32>(Cheat[i].extra_price))
                 return 1;
         }
     } else if (hint->control_mode_ids[0] == 0x5ec) {
-        const i32 count = SHOPGOLDBRICKS;
-        if (count > 0) {
-            const u32 coins = Game.coins;
+        if (SHOPGOLDBRICKS > 0) {
             shopitem_s *item = BrickItems;
-            const f32 elapsed = Game.field30_0x7c2c;
             i32 time_required = 0;
-            for (i32 i = 0; i != count; ++i, time_required += 3600, ++item) {
+            for (i32 i = 0; i != SHOPGOLDBRICKS; ++i, time_required += 3600, ++item) {
                 if (!(static_cast<u64>((&Game.shop_gold_brick_purchased_bits)[i >> 5]) >> (i & 31) & 1) &&
-                    static_cast<f32>(time_required) <= elapsed && coins >= static_cast<u32>(item->price))
+                    static_cast<f32>(time_required) <= Game.field30_0x7c2c &&
+                    Game.coins >= static_cast<u32>(item->price))
                     return 1;
             }
         }
@@ -1908,6 +1910,8 @@ static void Shop_DrawCharacter(shopitem_s *item, NUVEC *position, f32 scale_valu
 }
 
 void DrawTopShelf(i32) {
+    NUMTX_ALIGNED16 item_matrix;
+    NUMTX_ALIGNED16 brick_matrix;
     f32 alpha_scale = 1.0f;
     if (GetMenuID() == 13 && subitemselected == 0 && TestForController() == 0) {
         const f32 elapsed_since_touch = GlobalTimer.time_elapsed - (LastTouchTime + 1.32f);
@@ -1924,7 +1928,21 @@ void DrawTopShelf(i32) {
 
     Shop_DrawCharacter(&TopShelf[1], &ShelfPos[1], topscale[1] * alpha_scale, toppush[1] + 0.0f, 0, shelfang, 0);
 
-    DrawItem(&TopShelf[2].special, &ShelfPos[2], topscale[2] * alpha_scale, 1.0f, toppush[2] + 0.005f, 0, shelfang, 0);
+    const f32 item_push = toppush[2];
+    const f32 item_scale = topscale[2];
+    const u16 item_angle = shelfang;
+    if (NuSpecialExistsFn(&TopShelf[2].special) != 0) {
+        NUMTX &matrix = item_matrix;
+        NUANGVEC rotation = {0, item_angle, 0};
+        NuMtxSetRotateXYZVU0(&matrix, &rotation);
+        const f32 scale_value = item_scale * alpha_scale;
+        NUVEC scale = {scale_value, scale_value, scale_value};
+        NuMtxScaleVU0(&matrix, &scale);
+        matrix.m30 = ShelfPos[2].x;
+        matrix.m31 = item_push + 0.005f + ShelfPos[2].y;
+        matrix.m32 = ShelfPos[2].z;
+        NuSpecialDrawAt(&TopShelf[2].special, &matrix);
+    }
 
     if (SHOPGOLDBRICKS > 0) {
         const f32 ypush = toppush[4];
@@ -1933,7 +1951,7 @@ void DrawTopShelf(i32) {
         if (NuSpecialExistsFn(&TopShelf[4].special) != 0) {
             scale_value *= alpha_scale;
             NUVEC scale = {scale_value, scale_value, scale_value};
-            NUMTX_ALIGNED16 matrix;
+            NUMTX &matrix = brick_matrix;
             NuMtxSetScale(&matrix, &scale);
             NuMtxRotateXInline(&matrix, 0);
             NuMtxRotateYInline(&matrix, static_cast<u16>(angle + 0x2000));

@@ -1528,50 +1528,21 @@ extern "C" {
         debkeydatatype_s *key = NULL;
         i32 new_key_index;
 
-#define TRY_EXISTING_DEBRIS_KEY(slot)                                                                                  \
-    if (effect->particle_keys[slot] != -1) {                                                                           \
-        key = &debkeydata[effect->particle_keys[slot]];                                                                \
-        if (effect->particle_type == 7 ? key->particle_count + particle_count <= 0x180                                 \
-                                       : key->particle_count + particle_count <= 0x400) {                              \
-            particle_key_slot = slot;                                                                                  \
-            goto debris_key_found;                                                                                     \
-        }                                                                                                              \
-    } else {                                                                                                           \
-        key = NULL;                                                                                                    \
-    }
-
-#define TRY_OR_ALLOCATE_DEBRIS_KEY(slot)                                                                               \
-    if (effect->particle_keys[slot] == -1) {                                                                           \
-        particle_key_slot = slot;                                                                                      \
-        goto allocate_debris_key;                                                                                      \
-    }                                                                                                                  \
-    key = &debkeydata[effect->particle_keys[slot]];                                                                    \
-    if (effect->particle_type == 7 ? key->particle_count + particle_count <= 0x180                                     \
-                                   : key->particle_count + particle_count <= 0x400) {                                  \
-        particle_key_slot = slot;                                                                                      \
-        goto debris_key_found;                                                                                         \
-    }
-
-        if (freedebkeyptr >= maxdebkeys) {
-            TRY_EXISTING_DEBRIS_KEY(0);
-            TRY_EXISTING_DEBRIS_KEY(1);
-            TRY_EXISTING_DEBRIS_KEY(2);
-            TRY_EXISTING_DEBRIS_KEY(3);
-            TRY_EXISTING_DEBRIS_KEY(4);
-            TRY_EXISTING_DEBRIS_KEY(5);
-            TRY_EXISTING_DEBRIS_KEY(6);
-            TRY_EXISTING_DEBRIS_KEY(7);
-            goto debris_keys_searched;
+        for (i32 slot = 0; slot < 8; ++slot) {
+            if (effect->particle_keys[slot] == -1) {
+                if (freedebkeyptr < maxdebkeys) {
+                    particle_key_slot = slot;
+                    goto allocate_debris_key;
+                }
+            } else {
+                key = &debkeydata[effect->particle_keys[slot]];
+                if (effect->particle_type == 7 ? key->particle_count + particle_count <= 0x180
+                                               : key->particle_count + particle_count <= 0x400) {
+                    particle_key_slot = slot;
+                    goto debris_key_found;
+                }
+            }
         }
-
-        TRY_OR_ALLOCATE_DEBRIS_KEY(0);
-        TRY_OR_ALLOCATE_DEBRIS_KEY(1);
-        TRY_OR_ALLOCATE_DEBRIS_KEY(2);
-        TRY_OR_ALLOCATE_DEBRIS_KEY(3);
-        TRY_OR_ALLOCATE_DEBRIS_KEY(4);
-        TRY_OR_ALLOCATE_DEBRIS_KEY(5);
-        TRY_OR_ALLOCATE_DEBRIS_KEY(6);
-        TRY_OR_ALLOCATE_DEBRIS_KEY(7);
         goto debris_keys_searched;
 
     allocate_debris_key:
@@ -1596,8 +1567,6 @@ extern "C" {
         }
 
     debris_key_found:
-#undef TRY_OR_ALLOCATE_DEBRIS_KEY
-#undef TRY_EXISTING_DEBRIS_KEY
 
         const i32 required_particles = key->particle_count + particle_count;
 

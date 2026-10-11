@@ -49,22 +49,37 @@ extern i32 MenuSFX;
 static u32 buttons_store[15];
 
 void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
-    if (pad == NULL || GameMenuLevel < 0 || GameMenuLevel >= 10)
-        return;
     const i32 menu_id = GetMenuID();
     if (a2 != 0 && WORLD != NULL) {
-        if (Paused != 0 || GetMenuID() != -1) {
+        const i32 active_menu = GetMenuID();
+        if (Paused != 0 || active_menu != -1) {
             memset(buttons_store, 0, sizeof(buttons_store));
-        } else if (GamePad[0].buttons_down_08 != 0) {
-            for (i32 index = 14; index > 0; --index)
-                buttons_store[index] = buttons_store[index - 1];
-            buttons_store[0] = GamePad[0].buttons_down_08;
+        } else {
+            const u32 buttons = GamePad[0].buttons_down_08;
+            u32 special_button;
+            if ((GamePad[0].unknown_04 & GAMEPAD_R3) != 0) {
+                if ((buttons & GAMEPAD_SPECIAL) != 0)
+                    special_button = 1;
+                else if ((buttons & GAMEPAD_ACTION) != 0)
+                    special_button = 2;
+                else if ((buttons & GAMEPAD_TAG) != 0)
+                    special_button = 3;
+                else
+                    special_button = 0;
+            } else {
+                special_button = 0;
+            }
+            if ((special_button | buttons) != 0 && buttons != 0) {
+                for (i32 index = 14; index > 0; --index)
+                    buttons_store[index] = buttons_store[index - 1];
+                buttons_store[0] = buttons;
+            }
         }
     }
     MENU *menu = &GameMenu[GameMenuLevel];
     const i16 previous_menu = menu->menu;
-    bool both_pads = false;
-    if ((Paused != 0 || NetPaused != 0) && pause_i_pad >= 0 && pause_i_pad < 64) {
+    i32 both_pads = false;
+    if ((Paused != 0 || NetPaused != 0) && pause_i_pad != -1) {
         pad = &GamePad[pause_i_pad];
     } else if (WORLD == NULL) {
         both_pads = true;
@@ -78,9 +93,7 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
     } else if (pad == &GamePad[0]) {
         if (WORLD->current_level == CREDITS_LDATA) {
             if (PlayerProgress[1].active != 0) {
-                if (PlayerProgress[0].active != 0)
-                    both_pads = true;
-                else
+                if (PlayerProgress[0].active == 0)
                     pad = &GamePad[1];
             } else if (PlayerProgress[0].active == 0) {
                 readpads_always = 1;
@@ -89,11 +102,10 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
         } else if (Player[0] != NULL && Player[1] != NULL) {
             const bool first_active =
                 (Player[0]->apiobj.field_0x1f4 & 0x40000) == 0 && static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0;
-            const bool second_active =
-                (Player[1]->apiobj.field_0x1f4 & 0x40000) == 0 && static_cast<i8>(Player[1]->apiobj.field_0x1f8) < 0;
-            if (second_active && !first_active && Player[1]->pad_gamepad != NULL)
-                pad = Player[1]->pad_gamepad;
-            else if (!first_active && !second_active) {
+            if ((Player[1]->apiobj.field_0x1f4 & 0x40000) == 0 && static_cast<i8>(Player[1]->apiobj.field_0x1f8) < 0) {
+                if (!first_active)
+                    pad = Player[1]->pad_gamepad;
+            } else if (!first_active) {
                 readpads_always = 1;
                 both_pads = true;
             }
@@ -109,9 +121,9 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
     }
     // Pending transitions must not re-enter menu callbacks (e.g. NewGame)
     // after the save loader has selected the destination level.
-    if (FadeSys.fade <= 0.0f && NewMode == 0 && NewLData == NULL && editor_active == 0) {
+    if (!(FadeSys.fade > 0.0f) && NewMode == 0 && NewLData == NULL && editor_active == 0) {
         u32 held = 0, pressed = 0, alternate_held = 0, alternate_pressed = 0;
-        if (menu_id != 1 || GameTimer.time_elapsed >= 4.0f) {
+        if (menu_id != 1 || !(GameTimer.time_elapsed < 4.0f)) {
             if (both_pads) {
                 held = GamePad[0].unknown_04 | GamePad[1].unknown_04;
                 pressed = GamePad[0].buttons_down_08 | GamePad[1].buttons_down_08;
@@ -128,8 +140,8 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
         const i32 previous_column = menu->selected_item_column;
         const i32 result = UpdateMenu(held, pressed, alternate_held, alternate_pressed, FRAMETIME, GAMEPAD_MENUSELECT,
                                       GAMEPAD_MENUCANCEL, GAMEPAD_START, GAMEPAD_SELECT);
-        if (MenuSFX == -1 && menu->selected_item != -1 && menu->selected_item_column != -1 && previous_item != -1 &&
-            previous_column != -1 &&
+        if (MenuSFX == -1 && menu->selected_item != -1 && menu->selected_item_column != -1 && previous_column != -1 &&
+            previous_item != -1 &&
             (previous_item != menu->selected_item || previous_column != menu->selected_item_column) &&
             GetMenuID() == menu_id)
             GameAudio_PlaySfx(0x2f, NULL, 0, 0);
@@ -143,9 +155,8 @@ eduimenu_s *GetMenuActiveChild(eduimenu_s *menu) {
     if (menu == NULL) {
         return NULL;
     }
-    while (menu->child != NULL) {
-        menu = menu->child;
-    }
+    if (menu->child != NULL)
+        return GetMenuActiveChild(menu->child);
     return menu;
 }
 void ResizePauseScreenTexture(i32, i32) {
@@ -202,34 +213,34 @@ extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3) {
     menu->field_50 = 0;
 
     MenuStopDraw = 1;
-    if (MenuInfo[menu_index].draw_fn != NULL) {
-        MenuInfo[menu_index].draw_fn(menu);
+    if (MenuInfo[menu->menu].id != -1 && MenuInfo[menu->menu].draw_fn != NULL) {
+        MenuInfo[menu->menu].draw_fn(menu);
     }
     MenuStopDraw = 0;
     menu->last_row = static_cast<i16>(menu->draw_item - 1);
     menu->selected_row = (menu_y >= menu->first_row && menu_y <= menu->last_row) ? static_cast<i16>(menu_y) : 0;
     menu->selected_column = 0;
 
-    if (MenuInfo[menu_index].enter_fn != NULL) {
-        MenuInfo[menu_index].enter_fn(menu);
+    if (MenuInfo[menu->menu].enter_fn != NULL) {
+        MenuInfo[menu->menu].enter_fn(menu);
     }
 
-    if (MenuInfo[menu_index].memory_x != -1) {
-        menu->selected_column = MenuInfo[menu_index].memory_x;
-        if (menu->selected_column < menu->first_column) {
-            menu->selected_column = menu->first_column;
-        } else if (menu->selected_column > menu->last_column) {
-            menu->selected_column = menu->last_column;
-        }
+    if (MenuInfo[menu->menu].memory_x != -1) {
+        menu->selected_column = MenuInfo[menu->menu].memory_x;
+    }
+    if (menu->selected_column < menu->first_column) {
+        menu->selected_column = menu->first_column;
+    } else if (menu->selected_column > menu->last_column) {
+        menu->selected_column = menu->last_column;
     }
     if (menu_y < menu->first_row || menu_y > menu->last_row) {
-        if (MenuInfo[menu_index].memory_y != -1) {
-            menu->selected_row = MenuInfo[menu_index].memory_y;
-            if (menu->selected_row < menu->first_row) {
-                menu->selected_row = menu->first_row;
-            } else if (menu->selected_row > menu->last_row) {
-                menu->selected_row = menu->last_row;
-            }
+        if (MenuInfo[menu->menu].memory_y != -1) {
+            menu->selected_row = MenuInfo[menu->menu].memory_y;
+        }
+        if (menu->selected_row < menu->first_row) {
+            menu->selected_row = menu->first_row;
+        } else if (menu->selected_row > menu->last_row) {
+            menu->selected_row = menu->last_row;
         }
     } else {
         menu->selected_row = static_cast<i16>(menu_y);

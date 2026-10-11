@@ -24,14 +24,15 @@ static inline u16 NuRndrFloatToHalf(f32 value) {
         f32 value;
         u32 bits;
     } conversion = {value};
-    i32 mantissa = conversion.bits & 0x7fffff;
     i32 sign = conversion.bits >> 31;
-    i32 exponent = static_cast<i32>((conversion.bits >> 23) & 0xff) - 0x70;
-    i16 result = (mantissa >> 13) | (sign << 15);
-    if (exponent >= 0) {
-        const i16 candidate = static_cast<i16>(exponent * 0x400);
-        result |= exponent > 31 ? static_cast<i16>(0x7c00) : candidate;
-    }
+    i32 exponent = (conversion.bits >> 23) & 0xff;
+    i32 mantissa = conversion.bits & 0x7fffff;
+    exponent -= 112;
+    if (exponent < 0)
+        exponent = 0;
+    if (exponent > 31)
+        exponent = 31;
+    i16 result = (sign << 15) | ((exponent & 31) << 10) | (mantissa >> 13);
     return *reinterpret_cast<const u16 *>(&result);
 }
 
