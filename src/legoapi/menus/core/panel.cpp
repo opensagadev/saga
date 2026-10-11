@@ -877,6 +877,7 @@ void InitPanel(i32) {
 }
 
 void DrawPanel() {
+    NUVEC target_point;
     NUVEC coordinate_positions[8];
     const i32 menu = GetMenuID();
     SetQFont2D();
@@ -1243,7 +1244,7 @@ void DrawPanel() {
                         f32 alpha =
                             0.8f + 0.2f * NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) *
                                                                       2.0f * 65536.0f));
-                        NUVEC target_point = v000;
+                        target_point = v000;
                         NUVEC *position = &target->apiobj.collision_position;
                         bool hide_target = false;
                         if (target->id == id_QUIGONJINN &&

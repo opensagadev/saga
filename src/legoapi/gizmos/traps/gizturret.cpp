@@ -95,6 +95,7 @@ static void GizTurrets_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *, void 
 }
 
 static void GizTurrets_Update(void *context, void *system_ptr, float frame_time) {
+    NUVEC direction;
     bool should_fire;
     GIZTURRETSYS_s *system = static_cast<GIZTURRETSYS_s *>(system_ptr);
     if (system != NULL) {
@@ -393,7 +394,7 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                                         NuMtxPreRotateY(&direction_matrix, scatter_yaw);
                                     }
                                     if (autoaim_target != NULL) {
-                                        NUVEC direction;
+
                                         GizTurret_CalculateInterceptVector(
                                             reinterpret_cast<NUVEC *>(&muzzle_matrix.m30), primary_draw,
                                             &autoaim_target->apiobj.collision_position,
@@ -1363,8 +1364,8 @@ void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOB
             if ((turret->behavior_flags & 0x10) == 0) {
                 if ((turret->behavior_flags & 8) != 0) {
                     if (selected != NULL) {
-                        const i8 candidate_flags = static_cast<i8>(candidate->apiobj.flags_low);
                         const i8 selected_flags = static_cast<i8>(selected->apiobj.flags_low);
+                        const i8 candidate_flags = static_cast<i8>(candidate->apiobj.flags_low);
                         if (candidate_flags >= 0 || selected_flags < 0) {
                             if ((candidate_flags ^ selected_flags) < 0) {
                                 continue;

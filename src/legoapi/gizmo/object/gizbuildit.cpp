@@ -526,6 +526,55 @@ void GizDrawBuildItPiece(GameObject_s *player, i32 draw_reflection) {
     }
 }
 
+void GizBuildItPushAwayFromStart(GameObject_s *player, GIZBUILDIT_s *buildit) {
+    NUVEC minimum = v000, maximum = v000;
+    if (buildit == NULL || player == NULL || buildit->anim_set == NULL || buildit->anim_object_count == 0)
+        return;
+    i32 count = buildit->anim_object_count;
+    NUVEC start_position = buildit->start_position;
+    f32 player_z = player->apiobj.collision_position.z;
+    f32 player_x = player->apiobj.collision_position.x;
+    NUVEC centre;
+    f32 radius;
+    minimum.x = minimum.z = 1000000000.0f;
+    maximum.x = maximum.z = -1000000000.0f;
+    if (buildit->state_flags & 0x10) {
+        f32 nearest_distance = 1000000000.0f;
+        i32 nearest = 0;
+        for (i32 i = 0; i < count; ++i) {
+            GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[i]->object_data);
+            f32 dx = data->start_mtx.m30 - player_x;
+            f32 dz = data->start_mtx.m32 - player_z;
+            f32 distance = dx * dx + dz * dz;
+            if (distance < nearest_distance) {
+                nearest_distance = distance;
+                nearest = i;
+                centre = *NUMTX_GET_ROW_VEC(&data->start_mtx, 3);
+            }
+        }
+        NUVEC radius_centre;
+        NuSpecialGetBounds(&buildit->anim_objects[nearest]->special, &minimum, &maximum);
+        NuSpecialGetRadius(&buildit->anim_objects[nearest]->special, &radius_centre, &radius);
+    } else {
+        centre = start_position;
+        for (i32 i = 0; i < count; ++i) {
+            GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[i]->object_data);
+            f32 dx = data->start_mtx.m30 - start_position.x;
+            f32 dz = data->start_mtx.m32 - start_position.z;
+            maximum.x = NuFmax(maximum.x, dx);
+            maximum.z = NuFmax(maximum.z, dz);
+            minimum.x = NuFmin(minimum.x, dx);
+            minimum.z = NuFmin(minimum.z, dz);
+        }
+        radius = NuFsqrt(maximum.x * maximum.x + maximum.z * maximum.z);
+    }
+    maximum.x += centre.x;
+    maximum.z += centre.z;
+    minimum.x += centre.x;
+    minimum.z += centre.z;
+    PushAway(&centre, radius, &minimum, &maximum, player, NULL, 1.0f, 0);
+}
+
 void GizGetBuildItPlayerPos(GameObject_s *player, nuvec_s *position, nuvec_s *target) {
     GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(player->field_0x788);
     if (buildit == NULL || buildit->anim_set == NULL || buildit->anim_object_count == 0) {
@@ -577,55 +626,6 @@ void GizGetBuildItPlayerPos(GameObject_s *player, nuvec_s *position, nuvec_s *ta
     }
 }
 
-void GizBuildItPushAwayFromStart(GameObject_s *player, GIZBUILDIT_s *buildit) {
-    NUVEC minimum = v000, maximum = v000;
-    if (buildit == NULL || player == NULL || buildit->anim_set == NULL || buildit->anim_object_count == 0)
-        return;
-    i32 count = buildit->anim_object_count;
-    NUVEC start_position = buildit->start_position;
-    f32 player_z = player->apiobj.collision_position.z;
-    f32 player_x = player->apiobj.collision_position.x;
-    NUVEC centre;
-    f32 radius;
-    minimum.x = minimum.z = 1000000000.0f;
-    maximum.x = maximum.z = -1000000000.0f;
-    if (buildit->state_flags & 0x10) {
-        f32 nearest_distance = 1000000000.0f;
-        i32 nearest = 0;
-        for (i32 i = 0; i < count; ++i) {
-            GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[i]->object_data);
-            f32 dx = data->start_mtx.m30 - player_x;
-            f32 dz = data->start_mtx.m32 - player_z;
-            f32 distance = dx * dx + dz * dz;
-            if (distance < nearest_distance) {
-                nearest_distance = distance;
-                nearest = i;
-                centre = *NUMTX_GET_ROW_VEC(&data->start_mtx, 3);
-            }
-        }
-        NUVEC radius_centre;
-        NuSpecialGetBounds(&buildit->anim_objects[nearest]->special, &minimum, &maximum);
-        NuSpecialGetRadius(&buildit->anim_objects[nearest]->special, &radius_centre, &radius);
-    } else {
-        centre = start_position;
-        for (i32 i = 0; i < count; ++i) {
-            GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[i]->object_data);
-            f32 dx = data->start_mtx.m30 - start_position.x;
-            f32 dz = data->start_mtx.m32 - start_position.z;
-            maximum.x = NuFmax(maximum.x, dx);
-            maximum.z = NuFmax(maximum.z, dz);
-            minimum.x = NuFmin(minimum.x, dx);
-            minimum.z = NuFmin(minimum.z, dz);
-        }
-        radius = NuFsqrt(maximum.x * maximum.x + maximum.z * maximum.z);
-    }
-    maximum.x += centre.x;
-    maximum.z += centre.z;
-    minimum.x += centre.x;
-    minimum.z += centre.z;
-    PushAway(&centre, radius, &minimum, &maximum, player, NULL, 1.0f, 0);
-}
-
 void GizBuildItPushAwayFromEnd(GameObject_s *player) {
 
     if (WORLD->giz_buildit_sys == NULL)
@@ -649,8 +649,8 @@ void GizBuildItPushAwayFromEnd(GameObject_s *player) {
                 for (i32 j = 0; j < buildit->built_object_count; ++j) {
                     GIZBUILDITANIMDATA_s *data =
                         static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[j]->object_data);
-                    f32 dz = data->end_mtx.m32 - player_z;
                     f32 dx = data->end_mtx.m30 - player_x;
+                    f32 dz = data->end_mtx.m32 - player_z;
                     f32 distance = dx * dx + dz * dz;
                     if (distance < nearest_distance) {
                         nearest_distance = distance;
@@ -668,8 +668,8 @@ void GizBuildItPushAwayFromEnd(GameObject_s *player) {
                         static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[j]->object_data);
                     centre.z += data->end_mtx.m32;
                     centre.x += data->end_mtx.m30;
-                    f32 dx = data->end_mtx.m30 - end_position.x;
                     f32 dz = data->end_mtx.m32 - end_position.z;
+                    f32 dx = data->end_mtx.m30 - end_position.x;
                     maximum.x = NuFmax(maximum.x, dx);
                     maximum.z = NuFmax(maximum.z, dz);
                     minimum.x = NuFmin(minimum.x, dx);

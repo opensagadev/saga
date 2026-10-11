@@ -192,6 +192,7 @@ static struct {
 // ===========================================================================
 
 static __used__ void PodRaceSnipersUpdate(void) {
+    NUVEC direction;
     static i32 player_ix;
     i32 bolttype = (WORLD->current_level == PODSPRINTA_LDATA) ? 0x29 : 0x28;
     BOLTTYPE_s *type = BoltType_FindByID(bolttype, WORLD);
@@ -244,7 +245,7 @@ static __used__ void PodRaceSnipersUpdate(void) {
                     NuVecRotateY(&aim, &aim, NuRandInt());
                     NuVecAdd(&aim, &aim, &s->pos);
                 }
-                NUVEC direction;
+
                 float distance = NuVecDist(&aim, &s->prev, &direction);
                 temp_yrot = NuAtan2D(direction.x, direction.z);
                 temp_xrot = NuAtan2D(-direction.y, distance);

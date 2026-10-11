@@ -878,18 +878,18 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
     obj->apiobj.field_0x200 = v000.y;
     obj->apiobj.field_0x204 = v000.z;
     obj->field_0xe38 = 4;
-    obj->id = static_cast<i16>(id);
     obj->field_0xe37 = game_character_data->field_0xf5;
+    obj->id = static_cast<i16>(id);
     obj->apiobj.character_model = &apicharsys->models[apicharsys->playermodelids[id]];
     obj->suit = Suit_GetDefault(id);
     obj->ai.field_0x134 = 0xff;
     SetGameObjectCharacterData(obj);
 
     obj->apiobj.start_position = *start_position;
-    obj->apiobj.pos_x = start_position->x;
     obj->apiobj.pos_y = start_position->y;
-    obj->apiobj.position = *start_position;
+    obj->apiobj.pos_x = start_position->x;
     obj->apiobj.pos_z = start_position->z;
+    obj->apiobj.position = *start_position;
     obj->apiobj.initial_position = *start_position;
     obj->field_0x1018 = 0.5f;
 
@@ -1364,6 +1364,23 @@ void LoadSingleCharacter(bgprocinfo_s *) {
     g_loadingCharacterInHub = 0;
 }
 
+void CharScenes_LevelDump(WORLDINFO_s *world) {
+    CHARSCENE_s *scenes = world->minikit.character_scenes;
+    if (scenes != NULL && CHARCOUNT > 0) {
+        i32 i = 0;
+        do {
+            CHARSCENE_s *entry = &scenes[i];
+            if (entry->scene != NULL) {
+                NuGScnRemove(entry->scene);
+                scenes = world->minikit.character_scenes;
+                entry = &scenes[i];
+            }
+            ++i;
+            entry->scene = NULL;
+        } while (CHARCOUNT > i);
+    }
+}
+
 void UpdateCharacterLoad() {
     const i32 menu_id = GetMenuID();
     if (menu_id == 13 || (menu_id >= 15 && menu_id <= 19)) {
@@ -1473,23 +1490,6 @@ queue_character:
     bgPostRequest(LoadSingleCharacter, NULL, NULL, 0);
 }
 
-void CharScenes_LevelDump(WORLDINFO_s *world) {
-    CHARSCENE_s *scenes = world->minikit.character_scenes;
-    if (scenes != NULL && CHARCOUNT > 0) {
-        i32 i = 0;
-        do {
-            CHARSCENE_s *entry = &scenes[i];
-            if (entry->scene != NULL) {
-                NuGScnRemove(entry->scene);
-                scenes = world->minikit.character_scenes;
-                entry = &scenes[i];
-            }
-            ++i;
-            entry->scene = NULL;
-        } while (CHARCOUNT > i);
-    }
-}
-
 extern VARIPTR characterbuffer_base;
 extern i32 CHARACTERBUFFERSIZE;
 extern i32 Area;
@@ -1589,6 +1589,22 @@ void CollectCharcters_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
     NextStatusStage(packet);
 }
 
+nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id) {
+    CHARSCENE_s *scene;
+    if (CharScene_Area != NULL && CharScene_Area[character_id].scene != NULL) {
+        scene = &CharScene_Area[character_id];
+    } else {
+        scene = &world->minikit.character_scenes[character_id];
+        if (scene->scene == NULL) {
+            scene = NULL;
+        }
+    }
+    if (scene != NULL && NuSpecialExistsFn(&scene->special_scene) == 0) {
+        scene = NULL;
+    }
+    return scene == NULL ? NULL : &scene->special_scene;
+}
+
 void PostAnimate_ASTROMECH(GameObject_s *object) {
     const i8 context = object->character_context;
     if (object->apiobj.field_0x287 == 0 && context == 0 && object->apiobj.model_draw_result != 0 &&
@@ -1630,22 +1646,6 @@ void PostAnimate_ASTROMECH(GameObject_s *object) {
             }
         }
     }
-}
-
-nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id) {
-    CHARSCENE_s *scene;
-    if (CharScene_Area != NULL && CharScene_Area[character_id].scene != NULL) {
-        scene = &CharScene_Area[character_id];
-    } else {
-        scene = &world->minikit.character_scenes[character_id];
-        if (scene->scene == NULL) {
-            scene = NULL;
-        }
-    }
-    if (scene != NULL && NuSpecialExistsFn(&scene->special_scene) == 0) {
-        scene = NULL;
-    }
-    return scene == NULL ? NULL : &scene->special_scene;
 }
 
 AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,

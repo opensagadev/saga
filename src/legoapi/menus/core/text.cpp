@@ -1015,10 +1015,10 @@ extern "C" {
         }
 
         if ((alignment & 2) == 0) {
-            if ((alignment & 8) == 0) {
-                x -= width * 0.5f;
-            } else {
+            if ((alignment & 8) != 0) {
                 x -= width;
+            } else {
+                x -= width * 0.5f;
             }
         }
 
@@ -1168,7 +1168,9 @@ extern "C" {
                     do {
                         while (decoded[begin] == ' ')
                             ++begin;
-                        if (line != last_line) {
+                        if (line == last_line) {
+                            end = bytes - 1;
+                        } else {
                             i32 next = begin;
                             if (available_width > 0.0f) {
                                 do {
@@ -1195,8 +1197,6 @@ extern "C" {
                                 } while (NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded) <
                                          available_width);
                             }
-                        } else {
-                            end = bytes - 1;
                         }
                         i32 length = end - begin + 1;
                         if (length > 511)
@@ -1290,10 +1290,7 @@ extern "C" {
             }
             followon_line = 0;
             if (suppress_draw == 0) {
-                if (last_line == 0) {
-                    Text3DEx(reinterpret_cast<char *>(decoded), x, y, z, draw_x_scale, y_scale, z_scale, alignment, red,
-                             green, blue, alpha & 0xff);
-                } else {
+                if (last_line != 0) {
                     f32 first_y;
                     if ((alignment & 1) != 0)
                         first_y = y;
@@ -1308,6 +1305,9 @@ extern "C" {
                                  static_cast<f32>(line) * line_height + first_y, z, draw_x_scale, y_scale, z_scale,
                                  alignment, red, green, blue, alpha & 0xff);
                     }
+                } else {
+                    Text3DEx(reinterpret_cast<char *>(decoded), x, y, z, draw_x_scale, y_scale, z_scale, alignment, red,
+                             green, blue, alpha & 0xff);
                 }
             }
             followon_line = 0;

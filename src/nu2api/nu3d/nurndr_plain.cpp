@@ -1066,8 +1066,8 @@ extern "C" void NuRndrSetDebBox(NUVEC *range) {
         (((size.x * cammtx.m00) * 0.2f + cammtx.m30) + (size.y * cammtx.m10) * -0.2f) + (size.z * cammtx.m20) * -0.05f,
         (((size.x * cammtx.m01) * 0.2f + cammtx.m31) + (size.y * cammtx.m11) * -0.2f) + (size.z * cammtx.m21) * -0.05f,
         (((size.x * cammtx.m02) * 0.2f + cammtx.m32) + (size.y * cammtx.m12) * -0.2f) + (size.z * cammtx.m22) * -0.05f};
-    minimum.y = corner1.y < minimum.y ? corner1.y : minimum.y;
     minimum.x = corner1.x < minimum.x ? corner1.x : minimum.x;
+    minimum.y = corner1.y < minimum.y ? corner1.y : minimum.y;
     minimum.z = corner1.z < minimum.z ? corner1.z : minimum.z;
     maximum.y = corner1.y > maximum.y ? corner1.y : maximum.y;
     maximum.x = corner1.x > maximum.x ? corner1.x : maximum.x;
@@ -1087,8 +1087,8 @@ extern "C" void NuRndrSetDebBox(NUVEC *range) {
         (((size.x * cammtx.m01) * 0.2f + cammtx.m31) + (size.y * cammtx.m11) * 0.2f) + (size.z * cammtx.m21) * -0.05f,
         (((size.x * cammtx.m02) * 0.2f + cammtx.m32) + (size.y * cammtx.m12) * 0.2f) + (size.z * cammtx.m22) * -0.05f};
     minimum.x = corner3.x < minimum.x ? corner3.x : minimum.x;
-    minimum.z = corner3.z < minimum.z ? corner3.z : minimum.z;
     minimum.y = corner3.y < minimum.y ? corner3.y : minimum.y;
+    minimum.z = corner3.z < minimum.z ? corner3.z : minimum.z;
     maximum.x = corner3.x > maximum.x ? corner3.x : maximum.x;
     maximum.y = corner3.y > maximum.y ? corner3.y : maximum.y;
     maximum.z = corner3.z > maximum.z ? corner3.z : maximum.z;
@@ -1106,8 +1106,8 @@ extern "C" void NuRndrSetDebBox(NUVEC *range) {
         (((size.x * cammtx.m00) * 0.5f + cammtx.m30) + (size.y * cammtx.m10) * -0.5f) + (size.z * cammtx.m20) * 0.8f,
         (((size.x * cammtx.m01) * 0.5f + cammtx.m31) + (size.y * cammtx.m11) * -0.5f) + (size.z * cammtx.m21) * 0.8f,
         (((size.x * cammtx.m02) * 0.5f + cammtx.m32) + (size.y * cammtx.m12) * -0.5f) + (size.z * cammtx.m22) * 0.8f};
-    minimum.x = corner5.x < minimum.x ? corner5.x : minimum.x;
     minimum.y = corner5.y < minimum.y ? corner5.y : minimum.y;
+    minimum.x = corner5.x < minimum.x ? corner5.x : minimum.x;
     minimum.z = corner5.z < minimum.z ? corner5.z : minimum.z;
     maximum.x = corner5.x > maximum.x ? corner5.x : maximum.x;
     maximum.y = corner5.y > maximum.y ? corner5.y : maximum.y;
@@ -1117,8 +1117,8 @@ extern "C" void NuRndrSetDebBox(NUVEC *range) {
         (((size.x * cammtx.m01) * -0.5f + cammtx.m31) + (size.y * cammtx.m11) * 0.5f) + (size.z * cammtx.m21) * 0.8f,
         (((size.x * cammtx.m02) * -0.5f + cammtx.m32) + (size.y * cammtx.m12) * 0.5f) + (size.z * cammtx.m22) * 0.8f};
     minimum.x = corner6.x < minimum.x ? corner6.x : minimum.x;
-    minimum.y = corner6.y < minimum.y ? corner6.y : minimum.y;
     minimum.z = corner6.z < minimum.z ? corner6.z : minimum.z;
+    minimum.y = corner6.y < minimum.y ? corner6.y : minimum.y;
     maximum.x = corner6.x > maximum.x ? corner6.x : maximum.x;
     maximum.y = corner6.y > maximum.y ? corner6.y : maximum.y;
     maximum.z = corner6.z > maximum.z ? corner6.z : maximum.z;
@@ -1314,27 +1314,6 @@ extern "C" i32 NuRndrStrip3d(NURND_VERTEX3D *vertices, numtl_s *material, NUMTX 
     NuPrim3DEnd();
     return 1;
 }
-extern "C" i32 NuRndrTri3dClip(NURND_VERTEX3D *vertices, i32 count, NUMTX *matrix, numtl_s *material) {
-    if (count == 0)
-        return 1;
-    NuPrim3DBegin(0, 7, material, matrix);
-    for (i32 i = 0; i < count; ++i) {
-        NuRndrPrimSetColour(vertices[i].colour);
-        NuRndrPrimUV(vertices[i].u, vertices[i].v);
-        f32 z = vertices[i].position.z;
-        f32 y = vertices[i].position.y;
-        f32 x = vertices[i].position.x;
-        PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
-        vertex->x = x;
-        vertex->y = y;
-        vertex->z = z;
-        g_NuPrim_StreamBufferPtr->addr += 24;
-    }
-    if (count > 0)
-        g_NuPrim_VertexCount += count;
-    NuPrim3DEnd();
-    return 1;
-}
 extern "C" void NuRndrTriStrip2di(i32 *positions, f32 *uvs, i32 count, i32 colour, NUMTL *material) {
     NuPrim2DBegin(1, 7, material);
     if (count > 0) {
@@ -1357,6 +1336,27 @@ extern "C" void NuRndrTriStrip2di(i32 *positions, f32 *uvs, i32 count, i32 colou
         }
     }
     NuPrim2DEnd();
+}
+extern "C" i32 NuRndrTri3dClip(NURND_VERTEX3D *vertices, i32 count, NUMTX *matrix, numtl_s *material) {
+    if (count == 0)
+        return 1;
+    NuPrim3DBegin(0, 7, material, matrix);
+    for (i32 i = 0; i < count; ++i) {
+        NuRndrPrimSetColour(vertices[i].colour);
+        NuRndrPrimUV(vertices[i].u, vertices[i].v);
+        f32 z = vertices[i].position.z;
+        f32 y = vertices[i].position.y;
+        f32 x = vertices[i].position.x;
+        PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
+        vertex->x = x;
+        vertex->y = y;
+        vertex->z = z;
+        g_NuPrim_StreamBufferPtr->addr += 24;
+    }
+    if (count > 0)
+        g_NuPrim_VertexCount += count;
+    NuPrim3DEnd();
+    return 1;
 }
 extern "C" i32 NuRndrTriStrip3dClip(NURND_VERTEX3D *vertices, i32 count, NUMTX *matrix, numtl_s *material) {
     return NuRndrStrip3d(vertices, material, matrix, count);

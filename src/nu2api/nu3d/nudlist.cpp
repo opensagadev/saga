@@ -1262,6 +1262,93 @@ void NuDisplayListEndScene(void) {
 extern "C" void *DisplayListCreateFaceonTransformPS(VARIPTR *, NUMTX *, NUMTL *, void *);
 extern "C" void *DisplayListCreateGeomTransformPS(VARIPTR *, NUMTX *, NUMTL *, void *, void *);
 
+extern "C" void NuDisplayListBurstRndrSpecial(nuhspecial_s *handle, u32 count, NUMTX *matrices, i32 clip) {
+    u16 visible[1024];
+    if (handle == NULL)
+        return;
+    NUDISPLAYSPECIAL *special = handle->display_special;
+    u32 visible_count;
+    if (clip == 0) {
+        visible_count = count;
+    } else {
+        visible_count = 0;
+        for (u32 i = 0; i != count; ++i) {
+            i32 result = NuCameraClipTestExtents(reinterpret_cast<NUVEC *>(&special->bounds_min),
+                                                 reinterpret_cast<NUVEC *>(&special->bounds_max), &matrices[i], 0, 0);
+            if (static_cast<u8>(result) != 0)
+                visible[visible_count++] = static_cast<u16>(i | (result << 8));
+        }
+    }
+    if (visible_count == 0)
+        return;
+    NUCLIPOBJECT *object = special->clip_objects;
+    f32 *range = special->clip_range;
+    while (*range > 0 && object->nmaterials == 0) {
+        ++range;
+        ++object;
+    }
+    NUDLDLISTSCENE *scene = handle->scene->display_list;
+    scene->flags |= 2;
+    for (u32 material = 0; material < static_cast<u32>(object->nmaterials); ++material) {
+        NUDISPLAYLIST *list = scene->mtls[object->material_ids[material]]->display_list;
+        scene->mtl_used[scene->render_buffer >> 7][list->mtl_id / 8] |= 1 << (list->mtl_id % 8);
+        DisplayListUpdateRenderState(list, &render_state);
+        VARIPTR *buffer = NuDisplayListLinkItems(list, visible_count * 2);
+        NUDISPLAYLISTITEM *geometry = &scene->items[object->indices[material]];
+        if (geometry->type != 0x8f) {
+            void *geometry_data = geometry->next;
+            if (clip == 0) {
+                for (u32 i = 0; i != visible_count; ++i) {
+                    NUMTX *matrix = &matrices[i];
+                    void *transform = DisplayListCreateGeomTransformPS(buffer, matrix, scene->mtls[list->mtl_id],
+                                                                       geometry_data, NULL);
+                    list->items->id = 3;
+                    list->items->next = transform;
+                    list->items->type = 0x8c;
+                    NUDISPLAYLISTITEM *first = list->items++;
+                    list->items->next = geometry_data;
+                    list->items->id = 3;
+                    list->items->type = 0x82;
+                    NUDISPLAYLISTITEM *last = list->items++;
+                    DisplayListSetAlphaPS(first, last, 1);
+                }
+            } else {
+                for (u32 i = 0; i != visible_count; ++i) {
+                    NUMTX *matrix = &matrices[static_cast<u8>(visible[i])];
+                    void *transform = DisplayListCreateGeomTransformPS(buffer, matrix, scene->mtls[list->mtl_id],
+                                                                       geometry_data, NULL);
+                    list->items->next = transform;
+                    list->items->type = 0x8c;
+                    list->items->id = 3;
+                    NUDISPLAYLISTITEM *first = list->items++;
+                    list->items->next = geometry_data;
+                    list->items->id = 3;
+                    list->items->type = 0x82;
+                    NUDISPLAYLISTITEM *last = list->items++;
+                    DisplayListSetAlphaPS(first, last, 1);
+                }
+            }
+        } else {
+            for (u32 i = 0; i != visible_count; ++i) {
+                NUMTX *matrix = &matrices[clip != 0 ? static_cast<u8>(visible[i]) : i];
+                void *transform = DisplayListCreateFaceonTransformPS(buffer, matrix, scene->mtls[list->mtl_id],
+                                                                     scene->items[object->indices[material]].next);
+                void *faceon =
+                    NuDisplayListPrepareFaceonPS(buffer, scene->items[object->indices[material]].next, matrix);
+                list->items->next = transform;
+                list->items->id = 3;
+                list->items->type = 0x90;
+                NUDISPLAYLISTITEM *first = list->items++;
+                list->items->type = 0x8f;
+                list->items->next = faceon;
+                list->items->id = 3;
+                NUDISPLAYLISTITEM *last = list->items++;
+                DisplayListSetAlphaPS(first, last, 1);
+            }
+        }
+    }
+}
+
 void NuDisplayListCreate(nudisplayscene_s *raw_scene, variptr_u *buffer, variptr_u, i32 item_count, i32 material_count,
                          i32, i32, i32 sort_priority_count, i32, i32 allocate_materials) {
     NUDLDLISTSCENE *scene = raw_scene;
@@ -1337,93 +1424,6 @@ void NuDisplayListCreate(nudisplayscene_s *raw_scene, variptr_u *buffer, variptr
         display_list->scene_next = display_list->scene_first[0];
     }
     scene->flags &= 0xf1;
-}
-
-extern "C" void NuDisplayListBurstRndrSpecial(nuhspecial_s *handle, u32 count, NUMTX *matrices, i32 clip) {
-    u16 visible[1024];
-    if (handle == NULL)
-        return;
-    NUDISPLAYSPECIAL *special = handle->display_special;
-    u32 visible_count;
-    if (clip == 0) {
-        visible_count = count;
-    } else {
-        visible_count = 0;
-        for (u32 i = 0; i != count; ++i) {
-            i32 result = NuCameraClipTestExtents(reinterpret_cast<NUVEC *>(&special->bounds_min),
-                                                 reinterpret_cast<NUVEC *>(&special->bounds_max), &matrices[i], 0, 0);
-            if (static_cast<u8>(result) != 0)
-                visible[visible_count++] = static_cast<u16>(i | (result << 8));
-        }
-    }
-    if (visible_count == 0)
-        return;
-    NUCLIPOBJECT *object = special->clip_objects;
-    f32 *range = special->clip_range;
-    while (*range > 0 && object->nmaterials == 0) {
-        ++range;
-        ++object;
-    }
-    NUDLDLISTSCENE *scene = handle->scene->display_list;
-    scene->flags |= 2;
-    for (u32 material = 0; material < static_cast<u32>(object->nmaterials); ++material) {
-        NUDISPLAYLIST *list = scene->mtls[object->material_ids[material]]->display_list;
-        scene->mtl_used[scene->render_buffer >> 7][list->mtl_id / 8] |= 1 << (list->mtl_id % 8);
-        DisplayListUpdateRenderState(list, &render_state);
-        VARIPTR *buffer = NuDisplayListLinkItems(list, visible_count * 2);
-        NUDISPLAYLISTITEM *geometry = &scene->items[object->indices[material]];
-        if (geometry->type != 0x8f) {
-            void *geometry_data = geometry->next;
-            if (clip == 0) {
-                for (u32 i = 0; i != visible_count; ++i) {
-                    NUMTX *matrix = &matrices[i];
-                    void *transform = DisplayListCreateGeomTransformPS(buffer, matrix, scene->mtls[list->mtl_id],
-                                                                       geometry_data, NULL);
-                    list->items->next = transform;
-                    list->items->id = 3;
-                    list->items->type = 0x8c;
-                    NUDISPLAYLISTITEM *first = list->items++;
-                    list->items->id = 3;
-                    list->items->next = geometry_data;
-                    list->items->type = 0x82;
-                    NUDISPLAYLISTITEM *last = list->items++;
-                    DisplayListSetAlphaPS(first, last, 1);
-                }
-            } else {
-                for (u32 i = 0; i != visible_count; ++i) {
-                    NUMTX *matrix = &matrices[static_cast<u8>(visible[i])];
-                    void *transform = DisplayListCreateGeomTransformPS(buffer, matrix, scene->mtls[list->mtl_id],
-                                                                       geometry_data, NULL);
-                    list->items->next = transform;
-                    list->items->id = 3;
-                    list->items->type = 0x8c;
-                    NUDISPLAYLISTITEM *first = list->items++;
-                    list->items->next = geometry_data;
-                    list->items->id = 3;
-                    list->items->type = 0x82;
-                    NUDISPLAYLISTITEM *last = list->items++;
-                    DisplayListSetAlphaPS(first, last, 1);
-                }
-            }
-        } else {
-            for (u32 i = 0; i != visible_count; ++i) {
-                NUMTX *matrix = &matrices[clip != 0 ? static_cast<u8>(visible[i]) : i];
-                void *transform = DisplayListCreateFaceonTransformPS(buffer, matrix, scene->mtls[list->mtl_id],
-                                                                     scene->items[object->indices[material]].next);
-                void *faceon =
-                    NuDisplayListPrepareFaceonPS(buffer, scene->items[object->indices[material]].next, matrix);
-                list->items->next = transform;
-                list->items->id = 3;
-                list->items->type = 0x90;
-                NUDISPLAYLISTITEM *first = list->items++;
-                list->items->next = faceon;
-                list->items->type = 0x8f;
-                list->items->id = 3;
-                NUDISPLAYLISTITEM *last = list->items++;
-                DisplayListSetAlphaPS(first, last, 1);
-            }
-        }
-    }
 }
 
 void DisplayListPrintItem(nudisplaylistitem_s *item, i32 index, i32 type_count, i32 *types, i32 file_handle) {
