@@ -198,7 +198,7 @@ static __used__ void eduiFntPrintEx(void *font, int x, int y, int alignment, cha
     NuQFntPopPrintMode();
 }
 
-static __attribute__((noinline)) void eduiFntPrintEx(void *font, float x, float y, int alignment, char *format, ...) {
+static void eduiFntPrintEx(void *font, float x, float y, int alignment, char *format, ...) {
     va_list arguments;
     va_start(arguments, format);
     eduiFntPrintEx(font, static_cast<i32>(x * 16.0f), static_cast<i32>(y * 8.0f), alignment, format, arguments);
@@ -2596,7 +2596,6 @@ extern "C" {
     extern f32 globaltime;
 
     void edppDrawSpheres(debinftype *effect, i32 key_index) {
-        NUVEC position;
         if (effect->process_spheres == 0)
             return;
         for (i32 sphere_index = 0; sphere_index < static_cast<i8>(effect->process_spheres); ++sphere_index) {
@@ -2604,14 +2603,39 @@ extern "C" {
             f32 time = globaltime - sphere->time;
             if (time >= 0.0f && time <= effect->particle_lifetime) {
 
-                position.y = sphere->momentum.y * time + time * time * effect->field_0a0 + sphere->position.y;
-                position.x = sphere->momentum.x * time + sphere->position.x;
-                position.z = sphere->momentum.z * time + sphere->position.z;
+                NUVEC position = {sphere->momentum.x * time + sphere->position.x,
+                                  sphere->momentum.y * time + time * time * effect->field_0a0 + sphere->position.y,
+                                  sphere->momentum.z * time + sphere->position.z};
                 time /= effect->particle_lifetime;
-                i32 first = edppCurveSegment(effect->collision_keys, time);
+                i32 first, next;
+                if (time >= effect->collision_keys[0].time && time <= effect->collision_keys[1].time) {
+                    first = 0;
+                    next = 1;
+                } else if (time >= effect->collision_keys[1].time && time <= effect->collision_keys[2].time) {
+                    first = 1;
+                    next = 2;
+                } else if (time >= effect->collision_keys[2].time && time <= effect->collision_keys[3].time) {
+                    first = 2;
+                    next = 3;
+                } else if (time >= effect->collision_keys[3].time && time <= effect->collision_keys[4].time) {
+                    first = 3;
+                    next = 4;
+                } else if (time >= effect->collision_keys[4].time && time <= effect->collision_keys[5].time) {
+                    first = 4;
+                    next = 5;
+                } else if (time >= effect->collision_keys[5].time && time <= effect->collision_keys[6].time) {
+                    first = 5;
+                    next = 6;
+                } else if (time >= effect->collision_keys[6].time && time <= effect->collision_keys[7].time) {
+                    first = 6;
+                    next = 7;
+                } else {
+                    first = 7;
+                    next = 8;
+                }
                 f32 radius = ((time - effect->collision_keys[first].time) /
-                              (effect->collision_keys[first + 1].time - effect->collision_keys[first].time)) *
-                                 (effect->collision_keys[first + 1].value - effect->collision_keys[first].value) +
+                              (effect->collision_keys[next].time - effect->collision_keys[first].time)) *
+                                 (effect->collision_keys[next].value - effect->collision_keys[first].value) +
                              effect->collision_keys[first].value;
                 edbitsDrawSphere(&position, radius, 0xffff0000, edpp_mtl);
             }
@@ -3335,9 +3359,32 @@ extern "C" {
         item->cursor_y = value;
     }
     void eduiItemColourPickSetRGB(edui_colour_pick_s *item, f32 red, f32 green, f32 blue) {
-        eduiRGBToHSV(red, green, blue, item->hue, item->saturation, item->value);
-        item->cursor_x = item->hue / 360.0f;
-        item->cursor_y = item->value;
+        f32 maximum = MAX(red, MAX(green, blue));
+        f32 minimum = MIN(red, MIN(green, blue));
+        item->value = maximum;
+        item->saturation = maximum != 0.0f ? (maximum - minimum) / maximum : 0.0f;
+        if (item->saturation != 0.0f) {
+            f32 delta = maximum - minimum;
+            f32 hue;
+            if (red == maximum)
+                hue = (green - blue) / delta;
+            else if (green == maximum)
+                hue = 2.0f + (blue - red) / delta;
+            else if (blue == maximum)
+                hue = 4.0f + (red - green) / delta;
+            else
+                hue = item->hue;
+            hue *= 60.0f;
+            if (hue < 0.0f)
+                hue += 360.0f;
+            item->hue = hue;
+            item->cursor_y = maximum;
+            item->cursor_x = hue / 360.0f;
+        } else {
+            item->hue = 0.0f;
+            item->cursor_x = 0.0f;
+            item->cursor_y = maximum;
+        }
     }
     eduiitem_s *eduiItemColourSliderCreate(usize data, const void *colours, i32 group, EdUiItemCallback callback,
                                            f32 minimum, f32 range, f32 value, u8 red, u8 green, u8 blue, char *text) {
@@ -5120,7 +5167,7 @@ extern "C" {
         eduiMenuDestroy(menu);
     }
 
-    static __attribute__((always_inline)) inline i32 eduiPickerDeadZone32(i32 raw_value) {
+    static inline i32 eduiPickerDeadZone32(i32 raw_value) {
         i32 value = raw_value - 128;
         if (value > 0) {
             if (value < 32)
@@ -6021,10 +6068,10 @@ extern "C" {
     }
     static __used__ i32 eduicbRenderColourSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
         edui_colour_slider_s *slider = static_cast<edui_colour_slider_s *>(item);
-        i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
         i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 3;
-        item->y = y;
+        i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
         item->x = x;
+        item->y = y;
         eduiDrawRect(x << 4, y << 3, width << 4, height << 4, item->colours[2 + item->highlighted], uimtls[0]);
         eduiDrawFontSet(edui_font);
         eduiSetFontColour(edui_font, item->colours[item->highlighted]);
@@ -6120,28 +6167,23 @@ extern "C" {
         edui_file_pick_s *picker = static_cast<edui_file_pick_s *>(item);
         i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 3;
         i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
-        if (!picker->reserved_54) {
-            eduiDrawRect(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
-                         uimtls[ui_bgmtl]);
-            char formatted[264];
-            sprintf(formatted, picker->format, picker->name);
-            {
-                eduiDrawFontSet(edui_font);
-                eduiSetFontColour(edui_font, item->colours[item->highlighted]);
-            }
-            eduiFntPrintEx(edui_font, (x * 2 + width) << 3, (y << 3) + baseline, 64, "%s %s", item->text, formatted);
-            return height;
-        }
-        {
+        if (picker->reserved_54) {
             eduiDrawRect(x << 4, y << 3, width << 4, height << 4, item->colours[2 + item->highlighted],
                          uimtls[ui_bgmtl]);
             eduiDrawFontSet(edui_font);
             eduiSetFontColour(edui_font, item->colours[item->highlighted]);
+            i32 centre = (x * 2 + width) << 3;
+            eduiFntPrintEx(edui_font, centre, (y << 3) + baseline, 64, item->text);
+            eduiFntPrintEx(edui_font, centre, ((y + height) << 3) + baseline, 64, picker->format, picker->name);
+            return height * 2;
         }
-        i32 centre = (x * 2 + width) << 3;
-        eduiFntPrintEx(edui_font, centre, (y << 3) + baseline, 64, item->text);
-        eduiFntPrintEx(edui_font, centre, ((y + height) << 3) + baseline, 64, picker->format, picker->name);
-        return height * 2;
+        eduiDrawRect(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
+        char formatted[264];
+        sprintf(formatted, picker->format, picker->name);
+        eduiDrawFontSet(edui_font);
+        eduiSetFontColour(edui_font, item->colours[item->highlighted]);
+        eduiFntPrintEx(edui_font, (x * 2 + width) << 3, (y << 3) + baseline, 64, "%s %s", item->text, formatted);
+        return height;
     }
     static __used__ i32 eduicbRenderGradPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
         edui_gradient_pick_s *gradient = static_cast<edui_gradient_pick_s *>(item);

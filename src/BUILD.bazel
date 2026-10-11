@@ -107,6 +107,7 @@ _NATIVE_PLATFORM_SRCS = ["host/platform/native_render_device.cpp"] + select({
 })
 
 _WASM_PLATFORM_SRCS = [
+    "host/platform/wasm/gl_context_state.cpp",
     "host/platform/wasm/graphics.cpp",
     "host/platform/wasm/input.cpp",
     "host/platform/wasm/render_device.cpp",
@@ -425,6 +426,18 @@ cc_binary(
         "res/SavedGames@/res/SavedGames",
         "-Wl,--wrap=NuGScnFixupPS",
         "-Wl,--wrap=_Z15NuGScnDestroyPSP8nugscn_s",
+        # Per-context GL bindings; see host/platform/wasm/gl_context_state.cpp.
+        "-Wl,--wrap=glActiveTexture",
+        "-Wl,--wrap=glBindTexture",
+        "-Wl,--wrap=glDeleteTextures",
+        "-Wl,--wrap=glBindBuffer",
+        "-Wl,--wrap=glDeleteBuffers",
+        "-Wl,--wrap=glUseProgram",
+        "-Wl,--wrap=glBindFramebuffer",
+        "-Wl,--wrap=glBindRenderbuffer",
+        "-Wl,--wrap=glPixelStorei",
+        "-Wl,--wrap=glEnableVertexAttribArray",
+        "-Wl,--wrap=glDisableVertexAttribArray",
         "-sPROXY_TO_PTHREAD=1",
         "-sOFFSCREEN_FRAMEBUFFER=1",
         "-sFULL_ES2=1",

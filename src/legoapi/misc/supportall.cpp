@@ -1638,35 +1638,14 @@ void DebrisReleaseControlStackLock() {
     control_stack_lock = 0;
 }
 
-static inline __attribute__((always_inline)) f32 DebrisInterpolateFloatKeys(const debris_float_key_s *keys, f32 time) {
-    i32 first;
-    i32 second;
-    if (time >= keys[0].time && time <= keys[1].time) {
-        first = 0;
-        second = 1;
-    } else if (time >= keys[1].time && time <= keys[2].time) {
-        first = 1;
-        second = 2;
-    } else if (time >= keys[2].time && time <= keys[3].time) {
-        first = 2;
-        second = 3;
-    } else if (time >= keys[3].time && time <= keys[4].time) {
-        first = 3;
-        second = 4;
-    } else if (time >= keys[4].time && time <= keys[5].time) {
-        first = 4;
-        second = 5;
-    } else if (time >= keys[5].time && time <= keys[6].time) {
-        first = 5;
-        second = 6;
-    } else if (time >= keys[6].time && time <= keys[7].time) {
-        first = 6;
-        second = 7;
-    } else {
-        return 0.0f;
+static inline f32 DebrisInterpolateFloatKeys(const debris_float_key_s *keys, f32 time) {
+    for (i32 first = 0; first < 7; ++first) {
+        if (time >= keys[first].time && time <= keys[first + 1].time) {
+            return keys[first].value + ((time - keys[first].time) / (keys[first + 1].time - keys[first].time)) *
+                                           (keys[first + 1].value - keys[first].value);
+        }
     }
-    return keys[first].value + ((time - keys[first].time) / (keys[second].time - keys[first].time)) *
-                                   (keys[second].value - keys[first].value);
+    return 0.0f;
 }
 
 extern "C" {
@@ -1685,34 +1664,52 @@ i32 DebrisSingleCollisionCheckScaleYFlag(i32 key_index, NUVEC *position, f32 rad
     if (effect == NULL || (effect->field_2f2 & flags) == 0)
         return 0;
     const i32 sphere_count = static_cast<i8>(effect->process_spheres);
-    if (sphere_count <= 0)
+    if (sphere_count == 0 || sphere_count < 0)
         return 0;
 
-    for (i32 i = 0; i < sphere_count; ++i) {
-        debris_process_sphere_s *sphere = &key->process_spheres[i];
-        f32 age = globaltime - sphere->time;
-        if (age < 0.0f || age > effect->particle_lifetime)
-            continue;
+    debris_process_sphere_s *sphere = key->process_spheres;
+    i32 index = 1;
+    do {
+        {
+            f32 age = globaltime - sphere->time;
+            if (!(age >= 0.0f && age <= effect->particle_lifetime))
+                goto next_sphere;
 
-        debris_collide_pt.x = sphere->position.x + sphere->momentum.x * age;
-        f32 acceleration = age * age;
-        acceleration *= effect->field_0a0;
-        debris_collide_pt.y = sphere->position.y + sphere->momentum.y * age + acceleration;
-        debris_collide_pt.z = sphere->position.z + sphere->momentum.z * age;
+            const f32 x = sphere->momentum.x * age + sphere->position.x;
+            const f32 y = sphere->momentum.y * age + age * age * effect->field_0a0 + sphere->position.y;
+            const f32 z = sphere->momentum.z * age + sphere->position.z;
+            debris_collide_pt.x = x;
+            debris_collide_pt.y = y;
+            debris_collide_pt.z = z;
 
-        f32 effect_radius = DebrisInterpolateFloatKeys(effect->collision_keys, age / effect->particle_lifetime);
-        if (effect_radius <= 0.0f)
-            continue;
+            const debris_float_key_s *keys = effect->collision_keys;
+            const f32 time = age / effect->particle_lifetime;
+            i32 first;
+            for (first = 0; first < 7; ++first) {
+                if (time >= keys[first].time && time <= keys[first + 1].time)
+                    break;
+            }
+            if (first == 7)
+                goto next_sphere;
+            const f32 effect_radius =
+                keys[first].value + ((time - keys[first].time) / (keys[first + 1].time - keys[first].time)) *
+                                        (keys[first + 1].value - keys[first].value);
+            if (effect_radius <= 0.0f)
+                goto next_sphere;
 
-        f32 dx = position->x - debris_collide_pt.x;
-        f32 dy = position->y - debris_collide_pt.y;
-        f32 dz = position->z - debris_collide_pt.z;
-        f32 combined_radius = radius + effect_radius;
-        if (y_scale != 1.0f)
-            dy *= combined_radius / (radius * y_scale + effect_radius);
-        if (combined_radius * combined_radius > dx * dx + dy * dy + dz * dz)
-            return 1;
-    }
+            f32 dx = position->x - x;
+            f32 dy = position->y - y;
+            f32 dz = position->z - z;
+            f32 combined_radius = radius + effect_radius;
+            if (y_scale != 1.0f)
+                dy *= combined_radius / (radius * y_scale + effect_radius);
+            if (combined_radius * combined_radius > dx * dx + dy * dy + dz * dz)
+                return 1;
+        }
+    next_sphere:
+        ++sphere;
+        ++index;
+    } while (index != sphere_count + 1);
     return 0;
 }
 

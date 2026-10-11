@@ -10121,16 +10121,14 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
     }
 
     SelectOpponent(object, 1.25f, punch_charge_gap, 1, object->use_action == 5);
-    i16 animation;
     if (object->force_target != NULL) {
         if (static_cast<i8>(object->apiobj.flags_low) < 0 && object->force_target->character_context != 0x30) {
             i32 special_move = SpecialMove_Check(object, object->force_target);
             if (special_move != -1) {
                 object->field_0x7a7 = special_move;
                 object->context_variant_flags |= 2;
-                animation = SpecialMove_GetAttackerAction(object->field_0x7a7);
+                object->context_animation = SpecialMove_GetAttackerAction(object->field_0x7a7);
                 object->combo_stage = 2;
-                object->context_animation = animation;
                 object->context_flags &= ~0x80;
                 goto start_attack;
             }
@@ -10153,28 +10151,24 @@ check_blowup_target:
     object->field_0x7a7 = -1;
     switch (object->attack_override) {
         case 1:
-            animation = 0x51;
+            object->context_animation = 0x51;
             object->combo_stage = 2;
-            object->context_animation = animation;
             object->context_flags &= ~0x80;
             break;
         case 2:
-            animation = 0x55;
+            object->context_animation = 0x55;
             object->combo_stage = 2;
-            object->context_animation = animation;
             object->context_flags &= ~0x80;
             break;
         case 3:
-            animation = 0x56;
+            object->context_animation = 0x56;
             object->combo_stage = 2;
-            object->context_animation = animation;
             object->context_flags &= ~0x80;
             break;
         case 4:
             goto behind_attack;
         case 5:
-            animation = 0x64;
-            object->context_animation = animation;
+            object->context_animation = 0x64;
             break;
         case 6:
             StartHold(object);
@@ -10182,8 +10176,7 @@ check_blowup_target:
         case 7:
             return;
         default:
-            animation = 0x51;
-            object->context_animation = animation;
+            object->context_animation = 0x51;
             object->combo_stage = 0;
             object->context_flags &= ~0x80;
             break;
@@ -10192,9 +10185,8 @@ check_blowup_target:
 
 behind_attack:
     object->field_0x7a7 = -1;
-    animation = 0x94;
+    object->context_animation = 0x94;
     object->combo_stage = 0;
-    object->context_animation = animation;
     object->context_flags |= 0x80;
 
 start_attack:
@@ -10202,14 +10194,14 @@ start_attack:
     if (require_target == 2 && object->force_target == NULL && object->blowup_target != NULL) {
         return;
     }
-    if (object->apiobj.character_model->model_data_b[animation] == NULL) {
+    if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL) {
         return;
     }
     if (require_target != 0 && object->force_target == NULL && object->blowup_target == NULL) {
         return;
     }
 
-    f32 duration = AnimDuration(object->id, animation, 0.0f, 0.0f, 0);
+    f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 0);
     if (duration > 0.0f) {
         u8 context_flags = object->context_flags;
         object->character_context = 0x26;

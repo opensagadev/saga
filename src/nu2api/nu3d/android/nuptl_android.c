@@ -293,7 +293,7 @@ void BuildDebrisVerts(PartHeader *header, uv1debdata *chunk_data, NUMTL *materia
         const dma_particle_s &particle = chunk->particles[particle_index];
         const f32 age = time - particle.start_time;
         const f32 frame_position = particle.inverse_lifetime * age;
-        const u32 frame_index = static_cast<u32>(frame_position);
+        const u32 frame_index = SAGA_X86_F32_TO_U32(frame_position);
         if (frame_index >= 63) {
             continue;
         }
@@ -486,7 +486,7 @@ void NuRndrParticleDraw(variptr_u *, PartHeader *header, uv1debdata *data, float
     f32 half_gravity = header->gravity / 2.0f;
     for (i32 index = 0; index != 32; ++index, ++particle) {
         f32 age = time - particle->start_time;
-        u32 frame = static_cast<u32>(particle->inverse_lifetime * age);
+        u32 frame = SAGA_X86_F32_TO_U32(particle->inverse_lifetime * age);
         if (!(frame > 62)) {
             u32 next_frame = frame + 1;
             f32 fraction = particle->inverse_lifetime * age - static_cast<f32>(frame);

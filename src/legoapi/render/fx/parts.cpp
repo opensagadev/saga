@@ -1542,8 +1542,12 @@ extern "C" {
                 }
             } else {
                 key = &debkeydata[effect->particle_keys[slot]];
-                if (effect->particle_type == 7 ? key->particle_count + particle_count <= 0x180
-                                               : key->particle_count + particle_count <= 0x400) {
+                if (effect->particle_type == 7) {
+                    if (key->particle_count + particle_count <= 0x180) {
+                        particle_key_slot = slot;
+                        goto debris_key_found;
+                    }
+                } else if (key->particle_count + particle_count <= 0x400) {
                     particle_key_slot = slot;
                     goto debris_key_found;
                 }
@@ -1555,11 +1559,11 @@ extern "C" {
         new_key_index = DebAlloc();
         effect->particle_keys[particle_key_slot] = static_cast<i16>(new_key_index);
         key = &debkeydata[effect->particle_keys[particle_key_slot]];
-        key->generator = gensorttab[static_cast<i8>(effect->generator_type)];
         key->effect_index = static_cast<i16>(effect_index);
-        key->effect_orientation = *particle_orientation;
-        key->momentum_adjuster = gencodetab[static_cast<i8>(effect->momentum_adjustment_type)];
         key->field_1d4 = 0;
+        key->generator = gensorttab[static_cast<i8>(effect->generator_type)];
+        key->momentum_adjuster = gencodetab[static_cast<i8>(effect->momentum_adjustment_type)];
+        key->effect_orientation = *particle_orientation;
         key->effect_orientation.m30 = 0.0f;
         key->effect_orientation.m31 = 0.0f;
         key->effect_orientation.m32 = 0.0f;
@@ -1669,9 +1673,9 @@ extern "C" {
                 continue;
             }
             debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr];
-            control->active = 1;
             control->particle_chunk = key->particle_chunks[chunk_index];
             control->owner = key;
+            control->active = 1;
             control->expiry_time =
                 now + effect->particle_lifetime + static_cast<f32>(effect->trail_count) * effect->trail_time;
             AddChunkControlToStack(control, &debris_chunk_control_stack[control_stack_index]);

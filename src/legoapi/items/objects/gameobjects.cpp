@@ -7488,16 +7488,12 @@ void ManageGameObjects() {
                     if (WORLD->current_level == PODSPRINTA_LDATA)
                         other = GetOtherActivePlayer(object);
                     if (other != NULL) {
-                        object->apiobj.start_position = other->apiobj.position;
-                        object->apiobj.position = other->apiobj.position;
-                        object->field_0x10c8 = other->apiobj.position.x;
-                        object->field_0x10cc = other->apiobj.position.y;
-                        object->field_0x10d0 = other->apiobj.position.z;
+                        object->ai_update_position = object->apiobj.position = object->apiobj.start_position =
+                            other->apiobj.position;
                         GameObjectOrigin(object);
                         object->apiobj.velocity = other->apiobj.velocity;
-                        object->apiobj.movement_facing_angle = other->apiobj.field_0x276;
-                        object->apiobj.facing_angle = other->apiobj.field_0x276;
-                        object->apiobj.field_0x276 = other->apiobj.field_0x276;
+                        object->apiobj.field_0x276 = object->apiobj.facing_angle =
+                            object->apiobj.movement_facing_angle = other->apiobj.field_0x276;
                     } else {
                         SetToLastSafePos(object);
                         GameObjectOrigin(object);

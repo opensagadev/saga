@@ -331,38 +331,40 @@ i32 DisplayListCreateGeomItemPS(variptr_u *, void *, numtl_s *) {
 // of immediate geometry before the ordinary geometry callback runs.
 extern "C" void *DisplayListCreateSkinTransformPS(VARIPTR *buffer, NUMTX *skin_matrices,
                                                   DEFORMERWEIGHTSARRAY *deformer_weights, NUDISPLAYLISTGEOM *geometry,
-                                                  NUDISPLAYLISTGEOM **render_geometry) {
+                                                  NUDISPLAYLISTGEOM **render_geometry, NUDISPLAYLISTITEM **skin_item) {
+    // The shared platform API supplies this output; Android does not write it.
+    (void)skin_item;
     if (deformer_weights != NULL && geometry->immediate != 0) {
+        *render_geometry = reinterpret_cast<NUDISPLAYLISTGEOM *>(ALIGN(buffer->addr, 0x20));
         buffer->addr = ALIGN(buffer->addr, 0x20);
-        NUDISPLAYLISTGEOM *copy = static_cast<NUDISPLAYLISTGEOM *>(buffer->void_ptr);
-        *render_geometry = copy;
-        buffer->addr += sizeof(*copy);
+        buffer->addr += sizeof(NUDISPLAYLISTGEOM);
+        NUDISPLAYLISTGEOM *copy = *render_geometry;
         *copy = *geometry;
 
+        copy->dynamic_vertex_data = reinterpret_cast<void *>(ALIGN(buffer->addr, 0x20));
         buffer->addr = ALIGN(buffer->addr, 0x20);
-        copy->dynamic_vertex_data = buffer->void_ptr;
         const usize vertex_data_size = static_cast<usize>(geometry->vertex_stride) * geometry->vertex_count;
         buffer->addr += vertex_data_size;
 
         u8 *destination = static_cast<u8 *>(copy->dynamic_vertex_data);
         u8 *source = reinterpret_cast<u8 *>(static_cast<usize>(geometry->vertex_buffer)) +
                      static_cast<usize>(geometry->vertex_stride) * geometry->base_vertex;
+        // Both copies are present in the reference platform routine.
+        memmove(destination, source, vertex_data_size);
         memmove(destination, source, vertex_data_size);
 
-        for (i32 vertex = 0; vertex < geometry->vertex_count; ++vertex) {
-            NUVEC *position = reinterpret_cast<NUVEC *>(destination);
-            for (i32 deformer = 0; deformer < deformer_weights->count; ++deformer) {
+        NUVEC *position = reinterpret_cast<NUVEC *>(destination);
+        for (i32 vertex = 0; vertex != geometry->vertex_count; ++vertex) {
+            for (i32 deformer = 0; deformer != geometry->immediate; ++deformer) {
                 const f32 weight = deformer_weights->weights[deformer];
-                NUVEC *offsets = geometry->deformer_vertex_offsets[deformer];
-                if (!(offsets != NULL && weight != 0.0f)) {
+                if (!(geometry->deformer_vertex_offsets[deformer] != NULL && weight != 0.0f)) {
                     continue;
                 }
-                position->x += offsets[vertex].x * weight;
-                position->y += offsets[vertex].y * weight;
-                position->z += offsets[vertex].z * weight;
+                position->x += geometry->deformer_vertex_offsets[deformer][vertex].x * weight;
+                position->y += geometry->deformer_vertex_offsets[deformer][vertex].y * weight;
+                position->z += geometry->deformer_vertex_offsets[deformer][vertex].z * weight;
             }
-            destination += geometry->vertex_stride;
-            source += geometry->vertex_stride;
+            position = reinterpret_cast<NUVEC *>(reinterpret_cast<u8 *>(position) + geometry->vertex_stride);
         }
     } else {
         geometry->dynamic_vertex_data = NULL;
@@ -371,8 +373,8 @@ extern "C" void *DisplayListCreateSkinTransformPS(VARIPTR *buffer, NUMTX *skin_m
 
     i32 *matrix_count = static_cast<i32 *>(buffer->void_ptr);
     void *packet = matrix_count;
-    *matrix_count = 0;
     buffer->addr += sizeof(*matrix_count);
+    *matrix_count = 0;
     for (i32 i = 0; i < 8 && geometry->joint_indices[i] != 0xff; ++i) {
         NUMTX *packet_matrix = static_cast<NUMTX *>(buffer->void_ptr);
         *packet_matrix = skin_matrices[geometry->joint_indices[i]];

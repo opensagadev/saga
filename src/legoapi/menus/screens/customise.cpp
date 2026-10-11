@@ -348,8 +348,8 @@ static u32 Customiser_GetLayerMask(CUSTOMISER *customiser, GAMECHARACTERDATA *ru
 
 #define CUSTOM_SETUP_PIECE(category)                                                                                   \
     {                                                                                                                  \
-        CUSTOMPIECE *piece = Customiser_GetSelectedPiece(customiser, selection, category);                             \
-        if (piece != NULL) {                                                                                           \
+        if (customiser->piece_counts[category] > 0) {                                                                  \
+            CUSTOMPIECE *piece = &customiser->piece_sets[category][selection[category]];                               \
             character->model_flags |= piece->model_flags;                                                              \
             if ((character->model_flags & CHARACTER_MODEL_FLAG_ALTERNATE_WEAPON) != 0)                                 \
                 character->model_flags |= 0x10000000;                                                                  \
@@ -360,12 +360,8 @@ static u32 Customiser_GetLayerMask(CUSTOMISER *customiser, GAMECHARACTERDATA *ru
 #define CUSTOM_SETUP_SIDE(side, saved_selection)                                                                       \
     do {                                                                                                               \
         const i32 character_id = customiser->character_ids[side];                                                      \
-        if (character_id < 0 || character_id >= CHARCOUNT)                                                             \
-            break;                                                                                                     \
         CHARACTERDATA *character = &CDataList[character_id];                                                           \
         GAMECHARACTERDATA *runtime = character->game_character;                                                        \
-        if (runtime == NULL)                                                                                           \
-            break;                                                                                                     \
         runtime->flags_090 = 0;                                                                                        \
         const u16 *selection = saved_selection;                                                                        \
         u32 layer_mask = 0;                                                                                            \
@@ -382,8 +378,8 @@ static u32 Customiser_GetLayerMask(CUSTOMISER *customiser, GAMECHARACTERDATA *ru
         if (runtime->cape_layer != -1) {                                                                               \
             const u32 cape_mask = 1u << (static_cast<u8>(runtime->cape_layer) & 31);                                   \
             layer_mask |= cape_mask;                                                                                   \
-            CUSTOMPIECE *cape = Customiser_GetSelectedPiece(customiser, selection, 5);                                 \
-            if (cape != NULL && (cape->layer_flags & 0x40) != 0)                                                       \
+            CUSTOMPIECE *cape = &customiser->piece_sets[5][selection[5]];                                              \
+            if ((cape->layer_flags & 0x40) != 0)                                                                       \
                 layer_mask &= ~cape_mask;                                                                              \
         }                                                                                                              \
         runtime->layer_mask_special = layer_mask;                                                                      \
@@ -392,10 +388,10 @@ static u32 Customiser_GetLayerMask(CUSTOMISER *customiser, GAMECHARACTERDATA *ru
         runtime->layer_mask_low = layer_mask;                                                                          \
         runtime->layer_mask_dead = layer_mask;                                                                         \
         character->model_flags &= 3;                                                                                   \
-        CUSTOMPIECE *torso = Customiser_GetSelectedPiece(customiser, selection, 1);                                    \
-        const bool torso_replaces_base = torso != NULL && (torso->layer_flags & 1) != 0;                               \
-        CUSTOMPIECE *head = Customiser_GetSelectedPiece(customiser, selection, 0);                                     \
-        if (head != NULL) {                                                                                            \
+        CUSTOMPIECE *torso = &customiser->piece_sets[1][selection[1]];                                                 \
+        const u16 torso_replaces_base = torso->layer_flags & 1;                                                        \
+        if (customiser->piece_counts[0] > 0) {                                                                         \
+            CUSTOMPIECE *head = &customiser->piece_sets[0][selection[0]];                                              \
             if (!torso_replaces_base)                                                                                  \
                 character->model_flags |= head->model_flags;                                                           \
             if ((character->model_flags & CHARACTER_MODEL_FLAG_ALTERNATE_WEAPON) != 0)                                 \
@@ -412,11 +408,9 @@ static u32 Customiser_GetLayerMask(CUSTOMISER *customiser, GAMECHARACTERDATA *ru
         CUSTOM_SETUP_PIECE(8)                                                                                          \
         if (torso_replaces_base)                                                                                       \
             runtime->flags_090 |= 0x10;                                                                                \
-        CUSTOMPIECE *weapon = Customiser_GetSelectedPiece(customiser, selection, 2);                                   \
-        if (weapon != NULL) {                                                                                          \
-            runtime->weapon_model = weapon->weapon_model;                                                              \
-            runtime->field_0x117 = static_cast<u8>(LightSabre_ColourFromObj(runtime->weapon_model, NULL));             \
-        }                                                                                                              \
+        CUSTOMPIECE *weapon = &customiser->piece_sets[2][selection[2]];                                                \
+        runtime->weapon_model = weapon->weapon_model;                                                                  \
+        runtime->field_0x117 = static_cast<u8>(LightSabre_ColourFromObj(runtime->weapon_model, NULL));                 \
     } while (0)
 
 void Customiser_SetUpCharacterData(CUSTOMISER *customiser) {

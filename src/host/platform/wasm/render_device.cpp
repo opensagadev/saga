@@ -8,6 +8,7 @@
 
 #include "decomp.h"
 #include "host/platform/graphics.hpp"
+#include "host/platform/wasm/gl_context_state.hpp"
 #include "host/platform/wasm/graphics.hpp"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -63,6 +64,7 @@ void NuRenderDevice::BeginCriticalSection(const char *, i32) {
             g_nextGLContextIndex = (g_nextGLContextIndex + 1) % 4;
         }
         emscripten_webgl_make_context_current(reinterpret_cast<uintptr_t>(this->contexts[gt_glContextIndex]));
+        HostGLActivateThreadContext();
     }
 }
 

@@ -273,6 +273,7 @@ build --per_file_copt=^src/nu2api/nu3d/android/nuhgo_android\.c$@-x,c++,-std=gnu
 build --per_file_copt=^src/nu2api/nu3d/android/nurndrstat_android\.c$@-x,c++,-std=gnu++11
 # These units keep their original .c filenames (their static initializers are
 # _GLOBAL__sub_I_<name>.c) but are compiled as C++ like the units above.
+build --per_file_copt=^src/nu2api/nu3d/android/nuspecial_android\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/legoapi/items/base/apiobject\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/nu3d/android/nugscn_android\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/nu3d/android/nuportal_android\.c$@-x,c++,-std=gnu++11

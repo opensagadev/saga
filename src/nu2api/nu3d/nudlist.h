@@ -53,7 +53,7 @@ typedef struct nudisplaylistgeom_s {
     i32 first_index;                 // 0x1c
     u32 index_buffer;                // 0x20
     usize vertex_buffer;             // GL buffer handle or immediate-data pointer
-    i32 immediate;                   // 0x28
+    i32 immediate;                   // 0x28, deformer count; nonzero uses immediate vertices
     NUVEC **deformer_vertex_offsets; // 0x2c, one xyz delta array per shape
     usize vertex_format;             // vertex declaration pointer
     void *dynamic_vertex_data;       // 0x34
@@ -353,9 +353,11 @@ extern "C" {
     void DisplayListSwapBuffersPS(void);
     void DisplayListSetAlphaPS(nudisplaylistitem_s *prev_item, nudisplaylistitem_s *item, f32 alpha);
     void DisplayListSetShadowCasterFlagPS(nudisplaylistitem_s *first_item, nudisplaylistitem_s *last_item, i32 enabled);
+    i32 NuDisplayListRndrSpecial(nuhspecial_s *special, NUMTX *matrix, i32 skinned, NUMTX *skin_matrices,
+                                 DEFORMERWEIGHTSARRAY *blend_values);
     void *DisplayListCreateSkinTransformPS(VARIPTR *buffer, NUMTX *skin_matrices,
                                            DEFORMERWEIGHTSARRAY *deformer_weights, NUDISPLAYLISTGEOM *geometry,
-                                           NUDISPLAYLISTGEOM **render_geometry);
+                                           NUDISPLAYLISTGEOM **render_geometry, NUDISPLAYLISTITEM **skin_item);
     void NuDisplayListAddClut(nudisplaylistitem_s *item, i32 clut_id);
     void NuDisplayListAddTexture(nudisplaylistitem_s *item, i32 tex_id);
     void NuDisplayListAddMaterialState(nudisplaylistitem_s *item, void *mtl);

@@ -889,80 +889,73 @@ extern "C" {
     void *DisplayListCreateFaceonTransformPS(VARIPTR *buffer, NUMTX *transform, NUMTL *mtl, void *faceon);
     void *DisplayListCreateGeomTransformPS(VARIPTR *buffer, NUMTX *transform, NUMTL *mtl, void *next, void *tx);
 
-    // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
-    // It appends the world transform, skin palette, and geometry calls as one
-    // contiguous run in the material display list.
-    static void DisplayListProcessSkin(NUMTL *, NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
-                                       NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix, void **transform_packet,
-                                       NUMTX *skin_matrices, DEFORMERWEIGHTSARRAY *deformer_weights,
-                                       i32 shadow_caster) {
-        display_list_buffer->addr = ALIGN(display_list_buffer->addr, 0x10);
-        VARIPTR *buffer = NuDisplayListLinkItems(list, 3);
+    extern "C++" {
+        // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
+        // It appends the world transform, skin palette, and geometry calls as one
+        // contiguous run in the material display list.
+        static void DisplayListProcessSkin(NUMTL *, NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
+                                           NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix,
+                                           void **transform_packet, NUMTX *skin_matrices,
+                                           DEFORMERWEIGHTSARRAY *deformer_weights, i32 shadow_caster) {
+            display_list_buffer->addr = ALIGN(display_list_buffer->addr, 0x10);
+            VARIPTR *buffer = NuDisplayListLinkItems(list, 3);
 
-        *transform_packet = DisplayListCreateGeomTransformPS(buffer, world_matrix, list->dlist->mtls[list->mtl_id],
-                                                             geometry->next, *transform_packet);
-        NUDISPLAYLISTITEM *item = list->items;
-        item->type = 0x8c;
-        item->id = 3;
-        item->next = *transform_packet;
-        list->items = item + 1;
-        first_and_last[0] = item;
+            void *geometry_packet = geometry->next;
+            *transform_packet = DisplayListCreateGeomTransformPS(buffer, world_matrix, list->dlist->mtls[list->mtl_id],
+                                                                 geometry_packet, *transform_packet);
+            list->items->type = 0x8c;
+            list->items->id = 3;
+            list->items->next = *transform_packet;
+            first_and_last[0] = list->items++;
 
-        NUDISPLAYLISTGEOM *render_geometry;
-        void *skin_packet =
-            DisplayListCreateSkinTransformPS(buffer, skin_matrices, deformer_weights,
-                                             static_cast<NUDISPLAYLISTGEOM *>(geometry->next), &render_geometry);
-        item = list->items;
-        item->next = skin_packet;
-        item->type = 0x99;
-        item->id = 3;
-        list->items = item + 1;
+            NUDISPLAYLISTGEOM *render_geometry;
+            void *skin_packet = DisplayListCreateSkinTransformPS(buffer, skin_matrices, deformer_weights,
+                                                                 static_cast<NUDISPLAYLISTGEOM *>(geometry_packet),
+                                                                 &render_geometry, &first_and_last[2]);
+            list->items->type = 0x99;
+            list->items->id = 3;
+            list->items->next = skin_packet;
+            first_and_last[1] = list->items++;
 
-        item = list->items;
-        item->id = 3;
-        item->type = 0x98;
-        item->next = render_geometry;
-        list->items = item + 1;
-        first_and_last[1] = item;
+            list->items->type = 0x98;
+            list->items->id = 3;
+            list->items->next = render_geometry;
+            first_and_last[1] = list->items++;
 
-        DisplayListSetAlphaPS(first_and_last[0], first_and_last[1], 1.0f);
-        DisplayListSetShadowCasterFlagPS(first_and_last[0], first_and_last[1], shadow_caster);
-    }
+            DisplayListSetAlphaPS(first_and_last[0], first_and_last[1], 1.0f);
+            DisplayListSetShadowCasterFlagPS(first_and_last[0], first_and_last[1], shadow_caster);
+        }
 
-    // Original local helper cloned as DisplayListProcessLightmapped.isra.34.
-    // Lightmapped geometry carries an AE/AF/B0 setup command two entries before
-    // its geometry command. Keep that setup command adjacent to the dynamic
-    // transform and geometry entries when the special is submitted.
-    static void DisplayListProcessLightmapped(NUMTL *, NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
-                                              NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix,
-                                              void **transform_packet, f32 alpha) {
-        display_list_buffer->addr = ALIGN(display_list_buffer->addr, 0x10);
-        VARIPTR *buffer = NuDisplayListLinkItems(list, 3);
+        // Original local helper cloned as DisplayListProcessLightmapped.isra.34.
+        // Lightmapped geometry carries an AE/AF/B0 setup command two entries before
+        // its geometry command. Keep that setup command adjacent to the dynamic
+        // transform and geometry entries when the special is submitted.
+        static void DisplayListProcessLightmapped(NUMTL *, NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
+                                                  NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix,
+                                                  void **transform_packet, f32 alpha) {
+            display_list_buffer->addr = ALIGN(display_list_buffer->addr, 0x10);
+            VARIPTR *buffer = NuDisplayListLinkItems(list, 3);
 
-        NUDISPLAYLISTITEM *item = list->items;
-        item->next = geometry[-2].next;
-        item->type = geometry[-2].type;
-        item->id = 3;
-        list->items = item + 1;
-        first_and_last[0] = item;
+            void *geometry_packet = geometry->next;
+            void *lighting_packet = geometry[-2].next;
+            list->items->type = geometry[-2].type;
+            list->items->id = 3;
+            list->items->next = lighting_packet;
+            first_and_last[0] = list->items++;
+            *transform_packet = DisplayListCreateGeomTransformPS(buffer, world_matrix, list->dlist->mtls[list->mtl_id],
+                                                                 geometry_packet, *transform_packet);
+            list->items->type = 0x8c;
+            list->items->id = 3;
+            list->items->next = *transform_packet;
+            first_and_last[1] = list->items++;
 
-        *transform_packet = DisplayListCreateGeomTransformPS(buffer, world_matrix, list->dlist->mtls[list->mtl_id],
-                                                             geometry->next, *transform_packet);
-        item = list->items;
-        item->id = 3;
-        item->type = 0x8c;
-        item->next = *transform_packet;
-        list->items = item + 1;
-        first_and_last[1] = item;
+            list->items->type = 0x82;
+            list->items->id = 3;
+            list->items->next = geometry_packet;
+            first_and_last[2] = list->items++;
 
-        item = list->items;
-        item->type = 0x82;
-        item->next = geometry->next;
-        item->id = 3;
-        list->items = item + 1;
-        first_and_last[2] = item;
-
-        DisplayListSetAlphaPS(first_and_last[1], first_and_last[2], alpha);
+            DisplayListSetAlphaPS(first_and_last[1], first_and_last[2], alpha);
+        }
     }
 
     i32 NuDynamicLightGetActiveRenderSetCount(NuDynamicLight *light);
@@ -1084,7 +1077,7 @@ extern "C" {
                         list->items = last + 1;
                         DisplayListSetAlphaPS(first, last, distance_alpha);
                     } else if (skin_matrices != NULL) {
-                        NUDISPLAYLISTITEM *first_and_last[2];
+                        NUDISPLAYLISTITEM *first_and_last[3];
                         DisplayListProcessSkin(material, list, geometry, first_and_last, mtx, &transform_packet,
                                                skin_matrices, blend_values, shadow_caster);
                     } else if (static_cast<i32>(material->shader_desc.flags) < 0 && clip_object->indices[i] > 1 &&
@@ -1147,7 +1140,7 @@ extern "C" {
                                 shadow_list->items = last + 1;
                                 DisplayListSetAlphaPS(first, last, distance_alpha);
                             } else if (skin_matrices != NULL) {
-                                NUDISPLAYLISTITEM *first_and_last[2];
+                                NUDISPLAYLISTITEM *first_and_last[3];
                                 DisplayListProcessSkin(material, shadow_list, geometry, first_and_last, mtx,
                                                        &transform_packet, skin_matrices, blend_values, 1);
                             } else if (static_cast<i32>(material->shader_desc.flags) < 0 &&
@@ -2980,19 +2973,6 @@ extern "C" {
         NuSpecialHandleLayout *handle = reinterpret_cast<NuSpecialHandleLayout *>(special);
         if (handle == NULL || handle->scene == NULL || handle->display_special == NULL) {
             return 0;
-        }
-        return NuDisplayListRndrSpecial(reinterpret_cast<nuhspecial_s *>(special), mtx, 0, NULL, NULL);
-    }
-    i32 NuSpecialDrawAtAlpha(void *special, NUMTX *mtx, f32 alpha) {
-        NuSpecialHandleLayout *handle = reinterpret_cast<NuSpecialHandleLayout *>(special);
-        if (handle->scene == NULL || alpha <= 0.0f) {
-            return 0;
-        }
-        if (alpha < 1.0f) {
-            NuSpecialConstAlpha(1, alpha);
-            i32 result = NuDisplayListRndrSpecial(reinterpret_cast<nuhspecial_s *>(special), mtx, 0, NULL, NULL);
-            NuSpecialConstAlpha(0, 0.0f);
-            return result;
         }
         return NuDisplayListRndrSpecial(reinterpret_cast<nuhspecial_s *>(special), mtx, 0, NULL, NULL);
     }

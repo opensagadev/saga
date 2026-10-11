@@ -3470,38 +3470,52 @@ void TerrDrawPlatCol(tertype *terrain, i16 index, i32 colour) {
     }
 
     NUVEC4 points[4];
-    for (i32 i = 0; i < 4; ++i) {
+    for (i32 i = 0; i < 3; ++i) {
         points[i].x = record->vertices[i].x;
         points[i].y = record->vertices[i].y;
         points[i].z = record->vertices[i].z;
         points[i].w = 0.0f;
     }
     NUVEC4 normals[2];
-    for (i32 i = 0; i < 2; ++i) {
-        normals[i].x = record->normals[i].x * 0.4f;
-        normals[i].y = record->normals[i].y * 0.4f;
-        normals[i].z = record->normals[i].z * 0.4f;
-        normals[i].w = 0.0f;
-    }
-
-    const bool quad = record->normals[1].y <= 65535.0f;
+    normals[0].x = record->normals[0].x * 0.4f;
+    normals[0].y = record->normals[0].y * 0.4f;
+    normals[0].z = record->normals[0].z * 0.4f;
+    normals[0].w = 0.0f;
     if ((platform.flags & TERRAIN_PLATFORM_FLAG_ROTATING) != 0) {
-        NUMTX *matrix = static_cast<NUMTX *>(platform.scene_object);
-        NuVec4MtxTransformVU0(&points[0], &points[0], matrix);
-        NuVec4MtxTransformVU0(&points[1], &points[1], matrix);
-        NuVec4MtxTransformVU0(&points[2], &points[2], matrix);
-        NuVec4MtxTransformVU0(&normals[0], &normals[0], matrix);
+        NuVec4MtxTransformVU0(&points[0], &points[0], static_cast<NUMTX *>(platform.scene_object));
+        NuVec4MtxTransformVU0(
+            &points[1], &points[1],
+            static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
+        NuVec4MtxTransformVU0(
+            &points[2], &points[2],
+            static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
+        NuVec4MtxTransformVU0(
+            &normals[0], &normals[0],
+            static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
     }
-    if (quad && platform.scene_object != NULL) {
-        NUMTX *matrix = static_cast<NUMTX *>(platform.scene_object);
-        NuVec4MtxTransformVU0(&points[3], &points[3], matrix);
-        NuVec4MtxTransformVU0(&normals[0], &normals[0], matrix);
+    const bool quad = !(record->normals[1].y > 65535.0f);
+    if (quad) {
+        points[3].x = record->vertices[3].x;
+        points[3].y = record->vertices[3].y;
+        points[3].z = record->vertices[3].z;
+        points[3].w = 0.0f;
+        NuVec4MtxTransformVU0(
+            &points[3], &points[3],
+            static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
+        normals[1].x = record->normals[1].x * 0.4f;
+        normals[1].y = record->normals[1].y * 0.4f;
+        normals[1].z = record->normals[1].z * 0.4f;
+        normals[1].w = 0.0f;
+        // Retail transforms the first normal again here, leaving the second in local space.
+        NuVec4MtxTransformVU0(
+            &normals[0], &normals[0],
+            static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
     }
 
-    const NUVEC &origin = group.origin;
     if (!quad) {
         for (i32 i = 0; i < 2; ++i) {
             const f32 t = static_cast<f32>(i);
+            const NUVEC &origin = CurTerr->groups[index].origin;
             NuRndrLine3dDbg(origin.x + points[0].x, origin.y + points[0].y, origin.z + points[0].z,
                             origin.x + points[1].x + (points[2].x - points[1].x) * t,
                             origin.y + points[1].y + (points[2].y - points[1].y) * t,
@@ -3509,6 +3523,7 @@ void TerrDrawPlatCol(tertype *terrain, i16 index, i32 colour) {
         }
         for (i32 i = 0; i < 2; ++i) {
             const f32 t = static_cast<f32>(i);
+            const NUVEC &origin = CurTerr->groups[index].origin;
             NuRndrLine3dDbg(origin.x + points[1].x, origin.y + points[1].y, origin.z + points[1].z,
                             origin.x + points[0].x + (points[2].x - points[0].x) * t,
                             origin.y + points[0].y + (points[2].y - points[0].y) * t,
@@ -3517,6 +3532,7 @@ void TerrDrawPlatCol(tertype *terrain, i16 index, i32 colour) {
     } else {
         for (i32 i = 0; i < 2; ++i) {
             const f32 t = static_cast<f32>(i);
+            const NUVEC &origin = CurTerr->groups[index].origin;
             NuRndrLine3dDbg(origin.x + points[0].x + (points[1].x - points[0].x) * t,
                             origin.y + points[0].y + (points[1].y - points[0].y) * t,
                             origin.z + points[0].z + (points[1].z - points[0].z) * t,
@@ -3526,6 +3542,7 @@ void TerrDrawPlatCol(tertype *terrain, i16 index, i32 colour) {
         }
         for (i32 i = 0; i < 2; ++i) {
             const f32 t = static_cast<f32>(i);
+            const NUVEC &origin = CurTerr->groups[index].origin;
             NuRndrLine3dDbg(origin.x + points[0].x + (points[2].x - points[0].x) * t,
                             origin.y + points[0].y + (points[2].y - points[0].y) * t,
                             origin.z + points[0].z + (points[2].z - points[0].z) * t,
@@ -3533,10 +3550,12 @@ void TerrDrawPlatCol(tertype *terrain, i16 index, i32 colour) {
                             origin.y + points[1].y + (points[3].y - points[1].y) * t,
                             origin.z + points[1].z + (points[3].z - points[1].z) * t, colour);
         }
+        const NUVEC &origin = CurTerr->groups[index].origin;
         NuRndrLine3dDbg(origin.x + points[3].x, origin.y + points[3].y, origin.z + points[3].z,
                         origin.x + points[3].x + normals[1].x, origin.y + points[3].y + normals[1].y,
                         origin.z + points[3].z + normals[1].z, 0xff);
     }
+    const NUVEC &origin = CurTerr->groups[index].origin;
     NuRndrLine3dDbg(origin.x + points[0].x, origin.y + points[0].y, origin.z + points[0].z,
                     origin.x + points[0].x + normals[0].x, origin.y + points[0].y + normals[0].y,
                     origin.z + points[0].z + normals[0].z, 0xff);

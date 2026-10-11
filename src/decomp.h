@@ -67,6 +67,26 @@ enum AREA_FLAGS {
 #define SAGA_HOST_PACKED_ALIGN4
 #endif
 
+// Float to u32 conversion with the original x86 result. GCC converts through
+// signed cvttps2dq, offsetting values from 2^31 upwards: negative values wrap
+// (-1.5f gives 0xffffffff) and NaN or other out-of-range values give
+// 0x80000000 or 0. WebAssembly instead saturates negative values to 0.
+#ifdef HOST_BUILD
+static inline u32 SagaHostX86F32ToU32(f32 value) {
+    if (value >= 2147483648.0f) {
+        const f32 offset = value - 2147483648.0f;
+        return (offset < 2147483648.0f ? (u32)(i32)offset : 0x80000000u) ^ 0x80000000u;
+    }
+    if (value >= -2147483648.0f) {
+        return (u32)(i32)value;
+    }
+    return 0x80000000u;
+}
+#define SAGA_X86_F32_TO_U32(value) SagaHostX86F32ToU32(value)
+#else
+#define SAGA_X86_F32_TO_U32(value) ((u32)(value))
+#endif
+
 // Port hooks that do not exist in the Android target: the host harness can
 // override them, while the target build keeps them local so call sites inline
 // the original code.
