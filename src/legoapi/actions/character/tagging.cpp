@@ -311,8 +311,8 @@ void Tag_UpdateTransfers(i32 effect0, i32 effect1, i32 count) {
                      source->apiobj.collision_min.y;
             to.y = (target->apiobj.collision_max.y - target->apiobj.collision_min.y) * height +
                    target->apiobj.collision_min.y;
-            position.y = (to.y - from.y) * phase + from.y;
             position.x = (to.x - from.x) * phase + from.x;
+            position.y = (to.y - from.y) * phase + from.y;
             position.z = (to.z - from.z) * phase + from.z;
             AddVariableShotDebrisEffectTimed1(effect0, &position, count, FRAMETIME, 0, 0, NULL);
             Tag_Transfer[0].position[0] = position;
@@ -404,8 +404,8 @@ second_player:
         }
         {
             phase = 1.0f - NU_SIN_LUT(static_cast<i32>(phase * 16384.0f + 16384.0f));
-            GameObject_s *source = Tag_Transfer[1].source;
             GameObject_s *target = Player[1];
+            GameObject_s *source = Tag_Transfer[1].source;
             const f32 height = Tag_Transfer[1].height[2];
             NUVEC from = source->apiobj.collision_position;
             NUVEC to = target->apiobj.collision_position;

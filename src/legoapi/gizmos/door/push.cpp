@@ -525,10 +525,10 @@ static void Push_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
 
         NUMTX *matrix =
             NuSpecialExistsFn(&push_block->special) != 0 ? NuSpecialGetInstanceMtx(&push_block->special) : NULL;
-        if (matrix != NULL) {
-            progress->positions[index] = *reinterpret_cast<NUVEC *>(&matrix->m30);
-        } else {
+        if (matrix == NULL) {
             progress->positions[index] = v000;
+        } else {
+            progress->positions[index] = *reinterpret_cast<NUVEC *>(&matrix->m30);
         }
 
         for (i32 end_index = 0; end_index < push_block->end_position_count; ++end_index) {

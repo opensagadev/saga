@@ -1105,8 +1105,8 @@ void NuQFntPrintCharW(NUQFNT *font, u16 *text, u32 flags) {
                     if (is_3d) {
                         const f32 u0 = inverse_texture_width * glyph->x;
                         const f32 v0 = inverse_texture_height * glyph->y;
-                        const f32 v1 = (glyph->y + vufnt->height) * inverse_texture_height;
                         const f32 u1 = (glyph->width + glyph->x) * inverse_texture_width;
+                        const f32 v1 = (glyph->y + vufnt->height) * inverse_texture_height;
                         NuRndrPrimSetColour(colour);
                         NuRndrPrimUV(u0, v1);
                         NuRndrPrimPosition(left, top, z);
@@ -1127,13 +1127,13 @@ void NuQFntPrintCharW(NUQFNT *font, u16 *text, u32 flags) {
                         NuRndrPrimPosition(left, top, z);
                     } else {
                         NuRndrPrimSetColour(colour);
-                        const f32 u0 = inverse_texture_width * glyph->x;
                         const f32 v0 = inverse_texture_height * glyph->y;
+                        const f32 u0 = inverse_texture_width * glyph->x;
                         NuRndrPrimUV(u0, v0);
                         NuPrim2DAddXYZ(left, top, 0.0f);
                         NuRndrPrimSetColour(colour);
-                        const f32 u1 = (glyph->x + glyph->width) * inverse_texture_width;
                         const f32 v1 = (glyph->y + vufnt->height) * inverse_texture_height;
+                        const f32 u1 = (glyph->x + glyph->width) * inverse_texture_width;
                         NuRndrPrimUV(u1, v1);
                         NuPrim2DAddXYZ(right, bottom, 0.0f);
                     }

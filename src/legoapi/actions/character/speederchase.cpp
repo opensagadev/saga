@@ -98,6 +98,7 @@ u32 SpecialMove_GetFlags(i32, u32);
 
 GameObject_s *ObjOpponent(GameObject_s *object, f32 range, f32 extra_radius, i32 allow_untargeted, i32 mode,
                           i32 player_filter) {
+    NUVEC delta;
     i32 ignore_ai = objopponent_ignoreaiopponent;
     if (forceNextAttackOpponent.Get() != NULL && (object->apiobj.flags_low & 0x80) != 0) {
         return forceNextAttackOpponent->GetCharacterObject();
@@ -176,7 +177,7 @@ GameObject_s *ObjOpponent(GameObject_s *object, f32 range, f32 extra_radius, i32
         if (!(allow_untargeted != 0 && (ignore_ai != 0 || object->ai.action_target_ref == NULL || mode != 0)) &&
             (target_flags & 1) == 0)
             continue;
-        NUVEC delta;
+
         f32 distance = NuVecDistSqr(&target->apiobj.position, &object->apiobj.position, &delta);
         if (!(distance < range * range))
             continue;
@@ -826,8 +827,8 @@ void PodDust(WORLDINFO_s *world, GameObject_s *object) {
             else
                 continue;
             NUMTX matrix;
-            matrix.m01 = joint->m01;
             matrix.m02 = joint->m02;
+            matrix.m01 = joint->m01;
             matrix.m00 = joint->m00;
             matrix.m03 = joint->m03;
             matrix.m10 = joint->m20;

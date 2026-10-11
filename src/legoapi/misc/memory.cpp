@@ -429,14 +429,7 @@ extern "C" {
         DebrisReleaseControlStackLock();
 
         particlechunkrendertype_s *render_chunk = NULL;
-        if (removed_chunk_count == key->allocated_chunk_count) {
-            for (i32 i = 0; i < debrischunks + debrischunksglass; ++i) {
-                if (ParticleChunkToRender[i].particle_chunk == key->particle_chunks[0]) {
-                    render_chunk = &ParticleChunkToRender[i];
-                    break;
-                }
-            }
-        } else {
+        if (removed_chunk_count != key->allocated_chunk_count) {
             LinkDmaParticalSets(&key->particle_chunks[key->allocated_chunk_count + additional_chunks],
                                 removed_chunk_count);
             for (i32 i = 0; i < debrischunks + debrischunksglass; ++i) {
@@ -449,21 +442,28 @@ extern "C" {
                 render_chunk->effect = debtab[key->effect_index];
                 render_chunk->particle_chunk = key->particle_chunks[key->allocated_chunk_count + additional_chunks];
                 render_chunk->key = NULL;
-                render_chunk->position = key->position;
                 render_chunk->effect_orientation = key->effect_orientation;
                 render_chunk->render_priority = key->render_priority;
+                render_chunk->position = key->position;
                 if (key->field_2f6 != 0) {
                     AddChunkToRenderStack(render_chunk, &ParticleChunkRenderStack[render_chunk->effect->time_group]);
                 }
             }
             render_chunk = NULL;
+        } else {
+            for (i32 i = 0; i < debrischunks + debrischunksglass; ++i) {
+                if (ParticleChunkToRender[i].particle_chunk == key->particle_chunks[0]) {
+                    render_chunk = &ParticleChunkToRender[i];
+                    break;
+                }
+            }
         }
 
         if (render_chunk != NULL) {
             render_chunk->effect = debtab[key->effect_index];
             render_chunk->key = NULL;
-            render_chunk->position = key->position;
             render_chunk->effect_orientation = key->effect_orientation;
+            render_chunk->position = key->position;
             render_chunk->render_priority = key->render_priority;
         }
 

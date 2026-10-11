@@ -164,6 +164,7 @@ void SuperCarry_GetObjectPos(GameObject_s *object, NUVEC *position, NUVEC *secon
 
 // Original 0x4fb1e0, 2147 bytes.
 void SuperCarry_Throw(GameObject_s *object, i32 mode) {
+    NUVEC offset;
     PLAYERCHARACTERCONFIG_s *config = object->apiobj.character_data->player_config;
     const i32 first = config->hand_joints[0];
     if (first == -1 || object->apiobj.character_model->points_of_interest[first] == NULL)
@@ -206,7 +207,7 @@ void SuperCarry_Throw(GameObject_s *object, i32 mode) {
         NuMtxMulR(&matrix, &basis, &matrix);
         *NUMTX_GET_ROW_VEC(&matrix, 3) = position;
     } else if (SuperCarry_AlignObject != 0) {
-        NUVEC offset;
+
         NuVecRotateY(&offset, &object->carried_object_basis[0], object->apiobj.field_0x276);
         NuMtxTranslate(&matrix, &offset);
     }

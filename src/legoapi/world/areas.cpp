@@ -598,6 +598,7 @@ void SuperCounters_ResetProcessed(WORLDINFO_s *world) {
 }
 
 void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
+    i16 mission_characters[64];
     Area_PlayerModelCount = 0;
     Area_StoryModelCount = 0;
     Area_PlayerModelList[0] = -1;
@@ -618,7 +619,7 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
     AreaMusic = area_music;
 
     if (Mission_Active(MissionSys) != NULL && MissionSys->character_count != 0) {
-        i16 mission_characters[64];
+
         const i32 count = MissionSys->character_count;
         memmove(mission_characters, MissionSys->character_ids, count * sizeof(i16));
         if (count > 2) {

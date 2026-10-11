@@ -141,45 +141,6 @@ i32 Customiser_NextPieceLeft(CUSTOMISER *customiser, i32 index, i32 count, i32 u
     return index;
 }
 
-i32 Customiser_NextPieceRight(CUSTOMISER *customiser, i32 index, i32 count, i32 unused, i32 category) {
-    i32 found = 0;
-    i32 attempts = 0;
-    if (customiser) {
-        while (attempts < count && !found) {
-            ++index;
-            if (index >= count)
-                index -= count;
-            i32 available = 1;
-            if (category != 2) {
-                WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-                if (world && HUB_ADATA && world->area == HUB_ADATA) {
-                    CUSTOMPIECERESOURCE *resources = world->customiser_resources[category];
-                    if (resources) {
-                        CUSTOMPIECERESOURCE *resource = &resources[index];
-                        if (customiser->categories[category]->uses_special)
-                            available = NuSpecialExistsFn(&resource->special) != 0;
-                        else
-                            available = resource->model != NULL;
-                    } else
-                        available = 0;
-                }
-            }
-            if (available) {
-                if (!(customiser->piece_sets[category][index].availability_flags & 0x180) ||
-                    Game_100PercentComplete()) {
-                    if (customiser->piece_available(&customiser->piece_sets[category][index]))
-                        found = 1;
-                    else
-                        ++attempts;
-                } else
-                    ++attempts;
-            } else
-                ++attempts;
-        }
-    }
-    return index;
-}
-
 void Customiser_DrawAccessories(CUSTOMISER *customiser, GameObject_s *object, numtx_s *matrices) {
     NUMTX_ALIGNED16 reflection;
     NUMTX_ALIGNED16 matrix;
@@ -221,6 +182,45 @@ void Customiser_DrawAccessories(CUSTOMISER *customiser, GameObject_s *object, nu
             NuRndrEndReflectionRender();
         }
     } while (next_category != 9);
+}
+
+i32 Customiser_NextPieceRight(CUSTOMISER *customiser, i32 index, i32 count, i32 unused, i32 category) {
+    i32 found = 0;
+    i32 attempts = 0;
+    if (customiser) {
+        while (attempts < count && !found) {
+            ++index;
+            if (index >= count)
+                index -= count;
+            i32 available = 1;
+            if (category != 2) {
+                WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+                if (world && HUB_ADATA && world->area == HUB_ADATA) {
+                    CUSTOMPIECERESOURCE *resources = world->customiser_resources[category];
+                    if (resources) {
+                        CUSTOMPIECERESOURCE *resource = &resources[index];
+                        if (customiser->categories[category]->uses_special)
+                            available = NuSpecialExistsFn(&resource->special) != 0;
+                        else
+                            available = resource->model != NULL;
+                    } else
+                        available = 0;
+                }
+            }
+            if (available) {
+                if (!(customiser->piece_sets[category][index].availability_flags & 0x180) ||
+                    Game_100PercentComplete()) {
+                    if (customiser->piece_available(&customiser->piece_sets[category][index]))
+                        found = 1;
+                    else
+                        ++attempts;
+                } else
+                    ++attempts;
+            } else
+                ++attempts;
+        }
+    }
+    return index;
 }
 
 void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s *models) {
