@@ -431,8 +431,8 @@ void BountyHunterPursuitD_Update(WORLDINFO_s *) {
     if (LevGameObject[0] == NULL || LevGameObject[0]->field_0xe37 == 0)
         return;
 
-    GIZMOBLOWUP_s *nearest = NULL;
     f32 nearest_distance_sq = 1000000000.0f;
+    GIZMOBLOWUP_s *nearest = NULL;
 
 #define CHECK_PURSUIT_GENERATOR(index)                                                                                 \
     if (LevGizmo[index] != NULL) {                                                                                     \
@@ -2272,8 +2272,8 @@ f32 SeekValF(f32 current, f32 target, f32 rate);
 void GunShip_DragBombSeekBlowUp(GameObject_s *object) {
     if (object->character_context != 0x34)
         return;
-    f32 nearest_distance = gunshipb_seekrange * gunshipb_seekrange;
     GIZMOBLOWUP_s *nearest = NULL;
+    f32 nearest_distance = gunshipb_seekrange * gunshipb_seekrange;
     NUVEC offset, nearest_offset, direction;
     for (i32 i = 0; i < 8; ++i) {
         if (LevGizmo[i] == NULL)

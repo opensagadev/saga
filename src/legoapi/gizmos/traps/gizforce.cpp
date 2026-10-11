@@ -1161,8 +1161,8 @@ static void GizForces_Reset(void *world_ptr, void *data, void *progress_ptr) {
         }
 
         if (progress != NULL && index < GIZFORCE_PROGRESS_CAPACITY) {
-            const u32 word = static_cast<u32>(index) >> 5;
             const u32 bit = 1u << (index & 31);
+            const u32 word = static_cast<u32>(index) >> 5;
             force->progress_flags =
                 static_cast<u8>((force->progress_flags & ~GIZFORCE_PROGRESS_VISIBLE) |
                                 ((progress->progress_flag_1[word] & bit) != 0 ? GIZFORCE_PROGRESS_VISIBLE : 0));

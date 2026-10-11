@@ -271,8 +271,8 @@ static void GizBombGens_StoreProgress(void *, void *system_ptr, void *progress_p
     progress->visible_masks[2] = ~0u;
 
     for (i32 index = 0; index < system->count && index < 96; ++index) {
-        const u32 mask = 1u << (index & 31);
         const i32 word_index = index >> 5;
+        const u32 mask = 1u << (index & 31);
         if ((system->bomb_generators[index].flags & GIZBOMBGEN_FLAG_VISIBLE) == 0) {
             progress->visible_masks[word_index] &= ~mask;
         }
@@ -318,8 +318,8 @@ static i32 GizBombGens_Load(void *world_ptr, void *system_ptr) {
     GIZBOMBGENSYS *system = static_cast<GIZBOMBGENSYS *>(system_ptr);
     system->count = static_cast<u16>(EdFileReadShort());
     if (system->count != 0) {
-        GIZBOMBGEN *bomb_generator = system->bomb_generators;
         i32 index = 0;
+        GIZBOMBGEN *bomb_generator = system->bomb_generators;
         do {
             EdFileRead(bomb_generator->name, sizeof(bomb_generator->name));
             EdFileReadNuVec(&bomb_generator->position);

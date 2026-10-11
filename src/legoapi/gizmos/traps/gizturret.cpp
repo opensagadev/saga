@@ -1276,8 +1276,8 @@ i32 GizTurrets_UpdateHint(HINT_s *) {
 
 GIZTURRET_s *GizTurret_FindByController(GIZTURRETSYS_s *system, GameObject_s &controller) {
     if (system != NULL) {
-        const i32 count = system->count;
         GIZTURRET_s *turret = system->turrets;
+        const i32 count = system->count;
         if (count != 0) {
             for (i32 i = 0; i < count; ++i, ++turret) {
                 if (turret->controller == &controller) {
@@ -1362,8 +1362,8 @@ void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOB
 
             if ((turret->behavior_flags & 0x10) != 0) {
                 if (selected != NULL) {
-                    const u32 candidate_flags = candidate->apiobj.character_data->model_flags;
                     const u32 selected_flags = selected->apiobj.character_data->model_flags;
+                    const u32 candidate_flags = candidate->apiobj.character_data->model_flags;
                     if ((candidate_flags & 0x10) == 0 || (selected_flags & 0x10) != 0) {
                         if (((candidate_flags ^ selected_flags) & 0x10) != 0) {
                             continue;

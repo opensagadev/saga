@@ -1274,8 +1274,8 @@ void NetworkObjectManager::ReceiveRemoteCallMessage(NetMessage &message, NetPeer
 }
 
 void NetworkObjectManager::ReceiveReplicaMessage(NetMessage &message, NetPeer const &peer) {
-    NetInputStream stream;
     i16 id;
+    NetInputStream stream;
     i16 class_id;
     i16 replicator_id;
     i16 flags;

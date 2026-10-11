@@ -722,8 +722,8 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
     i32 direction = 0;
     NUVEC saved_destination = packet->fallback_destination;
     f32 saved_stopping_distance = packet->fallback_stopping_distance;
-    f32 saved_parameter = packet->movement_parameter;
     AIPATHINFO saved_path_info = packet->fallback_path_info;
+    f32 saved_parameter = packet->movement_parameter;
     AIPATH *path = packet->path_info.path;
     i32 diverted = 0;
     if (path != packet->fallback_path_info.path || packet->fallback_path_info.connection == NULL) {
@@ -1146,8 +1146,8 @@ void AIRetreatFromDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *
             }
         }
 
-        f32 best_distance = 0.0f;
         u8 direction = 0;
+        f32 best_distance = 0.0f;
         if ((connection->traversal_flags[1] & 0x40000000u) == 0) {
             f32 partial_distance = fabsf(parameter * length);
             f32 candidate =

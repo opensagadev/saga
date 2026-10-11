@@ -816,8 +816,8 @@ static __used__ void pathEditor_cbCnxFlagsToggle(eduimenu_s *, eduiitem_s *item,
         return;
     AIPATHCNXTYPE_s *type = &aipathcnxtypes[type_index];
     EDAIPATHCNX_s *connection = &node->connections[i];
-    u32 mask = type->connection_flag;
     u32 flags = connection->flags;
+    u32 mask = type->connection_flag;
     u32 updated_flags = flags | mask;
     if (flags & mask)
         updated_flags = flags & ~mask;
@@ -2388,8 +2388,8 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
         aieditorsettings.path_flags &= ~1;
     if (aieditorsettings.path_flags & 1) {
         AIPATH_s *runtime = aieditor->runtime_path;
-        i32 nearest = -1;
         f32 best = 3.402823466e38f;
+        i32 nearest = -1;
         if (runtime && runtime->node_count) {
             for (i32 i = 0; i < runtime->node_count; ++i) {
                 NUVEC delta;

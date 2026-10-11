@@ -566,8 +566,8 @@ extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pit
     u8 loop = static_cast<u8>(g_soundInfo[sfx_id].loop);
     f32 buzz_timer = g_soundInfo[sfx_id].buzz_timer;
     f32 rumble_sustain = g_soundInfo[sfx_id].rumble_sustain;
-    f32 rumble_release = g_soundInfo[sfx_id].rumble_release;
     i32 rumble_strength = g_soundInfo[sfx_id].rumble_strength;
+    f32 rumble_release = g_soundInfo[sfx_id].rumble_release;
 
     f32 falloff_near = g_soundInfo[sfx_id].falloff_near;
     f32 falloff_far = g_soundInfo[sfx_id].falloff_far;

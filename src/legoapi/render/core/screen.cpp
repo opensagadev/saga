@@ -193,9 +193,9 @@ void DrawPauseScreenWipe() {
     i32 width = 0x2800;
     i32 height = 0xe00;
     f32 u0 = 0.0f;
-    f32 v0 = 1.0f;
     f32 u1 = 1.0f;
     f32 v1 = 0.0f;
+    f32 v0 = 1.0f;
     u32 colours[4];
 
     if ((FadeSys.direction & 3) != 0) {

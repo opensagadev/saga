@@ -406,8 +406,8 @@ struct NuNetEmuSegment {
 };
 
 static i32 cbSortSeg(void const *left, void const *right) {
-    u16 left_size = static_cast<NuNetEmuSegment const *>(left)->size;
     u16 right_size = static_cast<NuNetEmuSegment const *>(right)->size;
+    u16 left_size = static_cast<NuNetEmuSegment const *>(left)->size;
     if (left_size < right_size) {
         return 1;
     }
@@ -716,8 +716,8 @@ void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
                 f32 sx = set.capsule_end.x - set.capsule_center.x;
                 f32 sy = set.capsule_end.y - set.capsule_center.y;
                 f32 sz = set.capsule_end.z - set.capsule_center.z;
-                f32 length = sy * sy + sx * sx + sz * sz;
                 f32 radius = set.capsule_radius + box.first_w;
+                f32 length = sy * sy + sx * sx + sz * sz;
                 f32 ox = box.first.x - set.capsule_center.x;
                 f32 oy = box.first.y - set.capsule_center.y;
                 f32 oz = box.first.z - set.capsule_center.z;

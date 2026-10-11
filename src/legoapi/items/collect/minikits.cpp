@@ -109,8 +109,8 @@ void Hint_SetHintFromId(i32, i32, i32);
 
 void CollectMinikit(nuvec_s *position, char *name, i32) {
     if (WORLD->lev_objs[0xce].active != 0) {
-        const i32 area_id = WORLD->level_sub_id;
         NUVEC target_position = {KITPOSX, KITPOSY + PANEL_MINIKITY, 1.0f};
+        const i32 area_id = WORLD->level_sub_id;
         ADDGAMEMSG message = AddGameMsg_Default;
         message.position = position;
         message.target_position = &target_position;

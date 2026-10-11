@@ -473,8 +473,8 @@ extern "C" i32 NuRndrCircle(f32 x, f32 y, f32 radius, f32 aspect, i32 count, f32
     radius *= circle_scale_radius;
     u1 -= u0;
     v1 -= v0;
-    f32 previous_x = radius * 0.0f * aspect + x;
     f32 previous_y = radius + y;
+    f32 previous_x = radius * 0.0f * aspect + x;
     f32 previous_u = 0.0f + u0;
     f32 previous_v = v1 + v0;
     f32 step = 6.284f / static_cast<f32>(count - 1);
@@ -912,8 +912,8 @@ extern "C" void NuRndrLineStrip2di(i32 *positions, f32 *uvs, i32 count, i32 colo
             NuRndrPrimSetColour(colour);
             if (uvs) {
                 f32 u = uvs[i];
-                f32 v = uvs[i + 1];
                 u8 *vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
+                f32 v = uvs[i + 1];
                 if (!g_NuPrim_NeedsHalfUVs) {
                     *(f32 *)(vertex + 0x10) = u;
                     *(f32 *)(vertex + 0x14) = v;
@@ -1343,8 +1343,8 @@ extern "C" void NuRndrTriStrip2di(i32 *positions, f32 *uvs, i32 count, i32 colou
             NuRndrPrimSetColour(colour);
             if (uvs) {
                 f32 u = uvs[i];
-                f32 v = uvs[i + 1];
                 u8 *vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
+                f32 v = uvs[i + 1];
                 if (!g_NuPrim_NeedsHalfUVs) {
                     *(f32 *)(vertex + 0x10) = u;
                     *(f32 *)(vertex + 0x14) = v;

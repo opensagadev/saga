@@ -496,8 +496,8 @@ i32 ReadPad(i32 port) {
     NUPAD *pad = gamepad->pad;
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
 
-    i32 result;
     i32 input_mode;
+    i32 result;
     if (GamePads_IgnoreInputFn != NULL && GamePads_IgnoreInputFn() != 0) {
         result = 1;
         input_mode = 1;
@@ -554,8 +554,8 @@ i32 ReadPad(i32 port) {
     gamepad->unknown_10 = left_directions & ~gamepad->unknown_14;
     gamepad->unknown_14 = left_directions;
 
-    const f32 right_x = static_cast<f32>(pad->analog_right_x) - 127.5f;
     const f32 right_y = static_cast<f32>(pad->analog_right_y) - 127.5f;
+    const f32 right_x = static_cast<f32>(pad->analog_right_x) - 127.5f;
     u32 right_directions = 0;
     if (right_x < -85.0f) {
         right_directions = GAMEPAD_DLEFT;

@@ -179,8 +179,8 @@ MechTouchUIElement *MechTouchUI::PickElement(NuVec2 &point) {
         }
 
         if (element->rectangular == 0) {
-            const float x = point.x - element->position.x;
             const float y = point.y - element->position.y;
+            const float x = point.x - element->position.x;
             if (1.0f <
                 x * x / (element->radius_x * element->radius_x) + y * y / (element->radius_y * element->radius_y)) {
                 continue;

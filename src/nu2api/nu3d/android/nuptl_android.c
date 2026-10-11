@@ -245,9 +245,9 @@ extern "C" void NuRndrParticleGroup(uv1debdata *chunks, PartHeader *header, NUMT
             g_lastPartEffect = header;
         }
 
-        dma_particle_chunk_s *chunk = reinterpret_cast<dma_particle_chunk_s *>(chunks);
         i32 done = 0;
         i32 count = 0;
+        dma_particle_chunk_s *chunk = reinterpret_cast<dma_particle_chunk_s *>(chunks);
         while (done == 0) {
             i32 command = static_cast<i8>(chunk->command);
             dma_particle_chunk_s *next = chunk->next;

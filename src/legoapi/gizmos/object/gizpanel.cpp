@@ -200,8 +200,8 @@ static void GizPanel_Update(void *world_ptr, void *, float delta_time) {
 static void GizPanel_Draw(void *world_ptr, void *, float) {
     struct PANEL_MODELS {
         i32 base;
-        i32 animated;
         i32 animated_transition;
+        i32 animated;
         i32 state_off;
         i32 state_on;
         i32 target;

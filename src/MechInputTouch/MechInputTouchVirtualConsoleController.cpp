@@ -109,8 +109,7 @@ void MechInputTouchVirtualConsoleController::Deactivate() {
         MechSystems::Get()->TouchUI().RemoveUIElement(*buttons[3]);
     }
 
-    MechTouchUIAnimation *animations =
-        reinterpret_cast<MechTouchUIAnimation *>(reinterpret_cast<u8 *>(dpad) + 0x40);
+    MechTouchUIAnimation *animations = reinterpret_cast<MechTouchUIAnimation *>(reinterpret_cast<u8 *>(dpad) + 0x40);
     animations[1].value = 0.0f;
     animations[1].to = 0.0f;
     animations[1].elapsed = animations[1].duration;
@@ -133,30 +132,30 @@ void MechInputTouchVirtualConsoleController::Deactivate() {
 }
 
 void MechInputTouchVirtualConsoleController::LoadPerm() {
-    s_textures[2] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_INTERACTBUTTON"),
-                                             &permbuffer_ptr, permbuffer_end));
-    s_textures[3] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_TAGBUTTON"),
-                                             &permbuffer_ptr, permbuffer_end));
-    s_textures[0] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_JUMPBUTTON"),
-                                             &permbuffer_ptr, permbuffer_end));
-    s_textures[1] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_FIGHTBUTTON"),
-                                             &permbuffer_ptr, permbuffer_end));
-    s_textures[4] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_MOVEMENTWHEEL"),
-                                             &permbuffer_ptr, permbuffer_end));
-    s_textures[5] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_MOVEARROW"),
-                                             &permbuffer_ptr, permbuffer_end));
-    s_textures[6] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_LOCK_LOCKED"),
-                                             &permbuffer_ptr, permbuffer_end));
-    s_textures[7] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_LOCK_UNLOCKED"),
-                                             &permbuffer_ptr, permbuffer_end));
-    s_textures[8] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_CROSSHAIR"),
-                                             &permbuffer_ptr, permbuffer_end));
+    s_textures[2] = static_cast<i16>(
+        NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_INTERACTBUTTON"), &permbuffer_ptr, permbuffer_end));
+    s_textures[3] = static_cast<i16>(
+        NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_TAGBUTTON"), &permbuffer_ptr, permbuffer_end));
+    s_textures[0] = static_cast<i16>(
+        NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_JUMPBUTTON"), &permbuffer_ptr, permbuffer_end));
+    s_textures[1] = static_cast<i16>(
+        NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_FIGHTBUTTON"), &permbuffer_ptr, permbuffer_end));
+    s_textures[4] = static_cast<i16>(
+        NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_MOVEMENTWHEEL"), &permbuffer_ptr, permbuffer_end));
+    s_textures[5] = static_cast<i16>(
+        NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_MOVEARROW"), &permbuffer_ptr, permbuffer_end));
+    s_textures[6] = static_cast<i16>(
+        NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_LOCK_LOCKED"), &permbuffer_ptr, permbuffer_end));
+    s_textures[7] = static_cast<i16>(
+        NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_LOCK_UNLOCKED"), &permbuffer_ptr, permbuffer_end));
+    s_textures[8] = static_cast<i16>(
+        NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_CROSSHAIR"), &permbuffer_ptr, permbuffer_end));
     hasDoneLoadPerm = 1;
 }
 
 MechInputTouchVirtualConsoleController::MechInputTouchVirtualConsoleController(i32 player)
-    : MechInputTouchMainController(player), active(0), dpad_touch(NULL), drag_touch(NULL),
-      lock_button(NULL), button_mover(NULL) {
+    : MechInputTouchMainController(player), active(0), dpad_touch(NULL), drag_touch(NULL), lock_button(NULL),
+      button_mover(NULL) {
     for (i32 i = 0; i < 4; ++i) {
         buttons[i] = NULL;
     }
@@ -202,8 +201,7 @@ bool MechInputTouchVirtualConsoleController::OnRelease(GameObject_s &, TouchHold
         return false;
     }
 
-    MechTouchUIAnimation *animations =
-        reinterpret_cast<MechTouchUIAnimation *>(reinterpret_cast<u8 *>(dpad) + 0x40);
+    MechTouchUIAnimation *animations = reinterpret_cast<MechTouchUIAnimation *>(reinterpret_cast<u8 *>(dpad) + 0x40);
     animations[0].Start(*animations[0].target, 0.0f, 0.15f);
     animations[1].Start(*animations[1].target, 0.0f, 0.15f);
     drag_touch = NULL;
@@ -228,8 +226,8 @@ void MechInputTouchVirtualConsoleController::ProcessDragMovement(GameObject_s &)
             const f32 sine = NU_SIN_LUT(angle);
             const f32 cosine = NU_COS_LUT(angle);
             const f32 strength = MAX(0.0f, MIN((distance - 0.05f) * 4.0f, 1.0f)) * 1.4;
-            const f32 stick_y = strength * cosine;
             const f32 stick_x = -(strength * sine);
+            const f32 stick_y = strength * cosine;
             stick_values[2] = MAX(-1.0f, MIN(stick_x, 1.0f));
             stick_values[3] = MAX(-1.0f, MIN(stick_y, 1.0f));
         }
@@ -317,19 +315,19 @@ void MechInputTouchVirtualConsoleController::Update(NuInputTouchData const *) {
         const f32 y = SuperOptions.right_control_y;
         const f32 dy = radius * 1.3f;
         const NuVec2 button_down = {x + zero_x, y - dy};
-        buttons[0] = reinterpret_cast<MechTouchUIElement *>(new VirtualControlButton(
-            button_down, radius, static_cast<MechInputTouchMainController::eButtonTypes>(2)));
+        buttons[0] = reinterpret_cast<MechTouchUIElement *>(
+            new VirtualControlButton(button_down, radius, static_cast<MechInputTouchMainController::eButtonTypes>(2)));
         const f32 dx = aspect_radius * 1.3f;
         const f32 zero_y = 0.0f * radius;
         const NuVec2 button_right = {x + dx, y + zero_y};
-        buttons[1] = reinterpret_cast<MechTouchUIElement *>(new VirtualControlButton(
-            button_right, radius, static_cast<MechInputTouchMainController::eButtonTypes>(3)));
+        buttons[1] = reinterpret_cast<MechTouchUIElement *>(
+            new VirtualControlButton(button_right, radius, static_cast<MechInputTouchMainController::eButtonTypes>(3)));
         const NuVec2 button_up = {x - zero_x, y + dy};
-        buttons[2] = reinterpret_cast<MechTouchUIElement *>(new VirtualControlButton(
-            button_up, radius, static_cast<MechInputTouchMainController::eButtonTypes>(1)));
+        buttons[2] = reinterpret_cast<MechTouchUIElement *>(
+            new VirtualControlButton(button_up, radius, static_cast<MechInputTouchMainController::eButtonTypes>(1)));
         const NuVec2 button_left = {x - dx, y - zero_y};
-        buttons[3] = reinterpret_cast<MechTouchUIElement *>(new VirtualControlButton(
-            button_left, radius, static_cast<MechInputTouchMainController::eButtonTypes>(0)));
+        buttons[3] = reinterpret_cast<MechTouchUIElement *>(
+            new VirtualControlButton(button_left, radius, static_cast<MechInputTouchMainController::eButtonTypes>(0)));
         UpdateButtonPositions();
         Activate();
     }

@@ -348,8 +348,8 @@ static void Blowup_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
     }
     for (i32 index = 0; index < count; ++index) {
         GIZMOBLOWUP_s *blowup = &world->gizmo_blowups[index];
-        const u32 bit = 1u << (index & 31);
         const i32 word = index >> 5;
+        const u32 bit = 1u << (index & 31);
         if ((blowup->output_flags & GIZMOBLOWUP_OUTPUT_BLOWN_UP) != 0) {
             progress->blown_up[word] |= bit;
         }
@@ -642,8 +642,8 @@ void GizmoBlowupTypeRemove(GIZMOBLOWUPTYPE_s *type, WORLDINFO_s *world) {
     if (capacity < world->gizmo_blowup_type_count) {
         capacity = world->gizmo_blowup_type_count;
     }
-    GIZMOBLOWUPTYPE_s *last_allocated_type = types + capacity - 1;
     GIZMOBLOWUPTYPE_s *last_type = active_end - 1;
+    GIZMOBLOWUPTYPE_s *last_allocated_type = types + capacity - 1;
     if (type < last_allocated_type) {
         for (GIZMOBLOWUPTYPE_s *moved_type = type + 1; moved_type <= last_allocated_type; ++moved_type) {
             if (world->gizmo_blowup_count <= 0) {

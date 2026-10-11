@@ -992,8 +992,8 @@ static __used__ void MenuDrawPauseExit(MENU *menu) {
             const u16 angle = static_cast<u16>(NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f);
             const f32 blend = NuTrigTable[angle >> 1] * 0.5f + 0.5f;
             const u8 r = static_cast<u8>(MENULOSTR1 + (MENULOSTR2 - MENULOSTR1) * blend);
-            const u8 g = static_cast<u8>(MENULOSTG1 + (MENULOSTG2 - MENULOSTG1) * blend);
             const u8 b = static_cast<u8>(MENULOSTB1 + (MENULOSTB2 - MENULOSTB1) * blend);
+            const u8 g = static_cast<u8>(MENULOSTG1 + (MENULOSTG2 - MENULOSTG1) * blend);
             const i32 a = static_cast<i32>(static_cast<i32>(MENULOSTA1 + (MENULOSTA2 - MENULOSTA1) * blend) *
                                            (static_cast<f32>(MenuA) * 0.0078125f));
             SmartTextEx(warning, PauseMenus_X,

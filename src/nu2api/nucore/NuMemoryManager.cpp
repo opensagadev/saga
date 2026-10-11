@@ -255,8 +255,8 @@ void *NuMemoryManager::_TryBlockAlloc(u32 size, u32 alignment, u32 flags, const 
     const usize fragment_begin = (usize)fragment;
     const usize fragment_end = fragment_begin + BLOCK_SIZE(fragment->block_header.value);
     const usize allocated_begin = (usize)allocated;
-    const u32 prefix_size = allocated_begin - fragment_begin;
     u32 suffix_size = fragment_end - (allocated_begin + allocated_size);
+    const u32 prefix_size = allocated_begin - fragment_begin;
 
     BinUnlink(fragment);
 

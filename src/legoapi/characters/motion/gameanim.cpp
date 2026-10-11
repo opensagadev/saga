@@ -1962,8 +1962,8 @@ i32 GameAnimSet_IsAnimationReset(GAMEANIMSET_s *set) {
         return 1;
     }
 
-    i32 repeating_count = 0;
     i32 animated_count = 0;
+    i32 repeating_count = 0;
     for (GAMEANIMOBJ_s *object = set->objects; object != NULL; object = object->next) {
         nuinstanim_s *animation = object->instance_animation;
         if (animation == NULL) {
@@ -2005,8 +2005,8 @@ i32 GameAnimSet_GetCentreAndRadius(GAMEANIMSET_s *set, NUVEC *centre, f32 *radiu
         return 0;
     }
 
-    NUVEC minimum = {1.0e9f, 1.0e9f, 1.0e9f};
     NUVEC maximum = {-1.0e9f, -1.0e9f, -1.0e9f};
+    NUVEC minimum = {1.0e9f, 1.0e9f, 1.0e9f};
     bool found_object = false;
 
     for (GAMEANIMOBJ_s *object = set->objects; object != NULL; object = object->next) {

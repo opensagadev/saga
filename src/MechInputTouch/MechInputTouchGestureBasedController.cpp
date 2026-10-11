@@ -397,8 +397,8 @@ bool MechInputTouchGestureBasedController::OnDown(GameObject_s &object, TouchHol
     }
     if (field_90 != NULL) {
         if (field_94 == NULL) {
-            const f32 dx = holder.touch_position.x - field_90->touch_position.x;
             const f32 dy = holder.touch_position.y - field_90->touch_position.y;
+            const f32 dx = holder.touch_position.x - field_90->touch_position.x;
             if (dx * dx + dy * dy < 1.0f) {
                 field_94 = &holder;
             }
@@ -760,9 +760,9 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpWhenStuck(GameObject_s
         return;
     }
     NUVEC previous_velocity = player->apiobj.velocity;
-    NUVEC previous_target_velocity = player->target_velocity;
     f32 speed = *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(player->apiobj.character_data->player_config) + 0x18);
     NUVEC velocity = {intended.x * speed, intended.y * speed, intended.z * speed};
+    NUVEC previous_target_velocity = player->target_velocity;
     player->apiobj.velocity = velocity;
     player->target_velocity = velocity;
     JumpTriggerPacket packet = {};
@@ -862,8 +862,8 @@ bool MechInputTouchGestureBasedController::StartJumpUsingAIPath(JumpTriggerPacke
         return false;
     }
 
-    AIPATHCNX *connection = jump->connection;
     const i32 direction = jump->direction;
+    AIPATHCNX *connection = jump->connection;
     AIPATHNODE &node = jump->path->nodes[connection->node_indices[direction == 0]];
     GameObject_s *object = Player[player_id];
     const u32 flags = connection->traversal_flags[direction];
@@ -894,8 +894,8 @@ bool MechInputTouchGestureBasedController::StartJumpUsingAIPath(JumpTriggerPacke
         }
     }
 
-    MechTouchTaskBigJump *task = new MechTouchTaskBigJump(*this, node.position, static_cast<i8>(animation));
     TouchHolder *holder = packet.touch_holder;
+    MechTouchTaskBigJump *task = new MechTouchTaskBigJump(*this, node.position, static_cast<i8>(animation));
     StartNewTask(task, *holder, false, false);
     MechAutoJumpSetIsUsing(*object, *jump);
     if (complete_success_hint) {

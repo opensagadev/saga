@@ -759,8 +759,8 @@ i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject 
 i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject &result, i32 filter) {
     EdClass *nearest_class = NULL;
     void *nearest_object = NULL;
-    EdRef *nearest_reference = NULL;
     f32 nearest_distance = FLT_MAX;
+    EdRef *nearest_reference = NULL;
     for (i32 class_index = 0; class_index < theRegistry.class_count; ++class_index) {
         EdClass *ed_class = &theRegistry.classes[class_index];
         EdClassInterface *interface = ed_class->interface;

@@ -315,8 +315,8 @@ void CutScenes_Reset(WORLDINFO_s *world) {
             instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
             if (instance == NULL)
                 continue;
-            instNUGCUTCHARSYS_s *runtime = instance->character_instance;
             NUGCUTCHARSYS_s *characters = static_cast<NUGCUTSCENE_s *>(cut->scene)->character_system;
+            instNUGCUTCHARSYS_s *runtime = instance->character_instance;
             if (runtime == NULL || characters == NULL)
                 continue;
             for (i32 j = 0; j < characters->character_count; ++j) {
@@ -1215,8 +1215,8 @@ static void CutScene_EvalCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     if ((character->flags & 2) == 0) {
         object = static_cast<GameObject_s *>(instance->character_model);
     }
-    NUMTX matrix;
     i32 visible;
+    NUMTX matrix;
     NuGCutCharAnimProcess(character, frame, &matrix, &visible, NULL, NULL, NULL, NULL, NULL);
     if (static_cast<i8>(cutscene_instance->flags_88) < 0) {
         NuMtxMul(&matrix, &matrix, &cutscene_instance->matrix);
@@ -1260,8 +1260,8 @@ static void CutScene_FindCharacters(NUGCUTSCENE_s *cutscene) {
 
 static void CutScene_ResetCharacters(instNUGCUTSCENE_s *instance) {
     NUGCUTSCENE_s *cutscene = instance->cutscene;
-    instNUGCUTCHARSYS_s *character_instance = instance->character_instance;
     NUGCUTCHARSYS_s *character_system = cutscene->character_system;
+    instNUGCUTCHARSYS_s *character_instance = instance->character_instance;
 
     i32 i = 0;
     while (i < character_system->character_count) {

@@ -309,8 +309,8 @@ void AddRipple(ripple_set_s *set, numtx_s *matrix, float size, float growth, flo
     if (set == NULL)
         return;
     u16 active_count = set->active_count;
-    u16 capacity = set->count;
     ripple_node_s *newest = set->newest;
+    u16 capacity = set->count;
     ripple_node_s *node = set->free_head;
     if (!(active_count < capacity)) {
         node = set->oldest;

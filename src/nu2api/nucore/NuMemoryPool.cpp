@@ -299,10 +299,10 @@ void NuMemoryPool::ReleaseUnreferencedPages() {
     memcpy(cursors, free_lists, sizeof(cursors));
 
     Page *previous = NULL;
-    Page *recycled = NULL;
     u32 visited_count = 0;
     u32 released_count = 0;
     u32 recycled_count = 0;
+    Page *recycled = NULL;
     for (Page *page = pages; page != NULL;) {
         ++visited_count;
         u32 free_block_count = 0;

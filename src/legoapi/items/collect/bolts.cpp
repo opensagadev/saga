@@ -87,8 +87,8 @@ static __used__ void BT_debris_moving(nufpar_s *parser) {
 
     BT_bolttype->moving_debris[BT_gdeb_moving_count] =
         static_cast<i16>(FindGameDebris(BT_worldinfo->debris_sys, parser->word_buf));
-    i32 count = static_cast<i32>(NuFParGetFloat(parser));
     i32 index = BT_gdeb_moving_count++;
+    i32 count = static_cast<i32>(NuFParGetFloat(parser));
     if (count < 0) {
         count = -count;
     }

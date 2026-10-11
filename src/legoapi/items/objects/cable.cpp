@@ -408,8 +408,8 @@ void UpdateCables() {
 }
 
 GameObject_s *CableTargetGameObject(GameObject_s *source, nuvec_s *position, f32 radius) {
-    GameObject_s *nearest = NULL;
     f32 nearest_distance = 100000000.0f;
+    GameObject_s *nearest = NULL;
     const f32 radius_squared = radius * radius;
     const f32 minimum_x = position->x - radius;
     const f32 minimum_z = position->z - radius;

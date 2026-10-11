@@ -1101,8 +1101,8 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
                         if (obj >= nclip)
                             break;
                         u32 code = (byte_val >> shift) & 3;
-                        NUCLIPOBJECT *co = &sc->clip_objects[obj];
                         u16 cnt = sc->clip_counts[obj];
+                        NUCLIPOBJECT *co = &sc->clip_objects[obj];
                         u8 new_id = (code == 0) ? kItemId_Cnt : kItemId_Call;
                         for (u16 j = 0; j < cnt; ++j) {
                             i32 idx = co->indices[j];

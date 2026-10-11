@@ -375,9 +375,9 @@ extern TERRSET *CurTerr;
 
 static i32 StarWars_MidSpecialMove_Default(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object) {
     GameObject_s *owner = object->objptr;
+    AIPATHNODE *nodes = packet->path_info.path->nodes;
     u32 capabilities =
         packet->path_info.connection->traversal_flags[packet->path_info.direction] & packet->capabilities;
-    AIPATHNODE *nodes = packet->path_info.path->nodes;
     AIPATHNODE *source = &nodes[packet->path_info.connection->node_indices[packet->path_info.direction]];
     AIPATHNODE *destination = &nodes[packet->path_info.connection->node_indices[packet->path_info.direction == 0]];
     NuVecSub(&owner->special_move_look_position, &destination->position, &source->position);
@@ -470,17 +470,17 @@ i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
         packet->path_connection_state = 0;
         return 0;
     }
-    AIPATHNODE *nodes = packet->path_info.path->nodes;
     u8 source_index = packet->path_info.connection->node_indices[packet->path_info.direction];
     i32 destination_index = packet->path_info.connection->node_indices[packet->path_info.direction == 0];
+    AIPATHNODE *nodes = packet->path_info.path->nodes;
     AIPATHNODE *destination = &nodes[destination_index];
     NUVEC offset;
     if (NuVecXZDistSqr(&object->position, &destination->position, &offset) < destination->radius_squared) {
         packet->path_connection_state = 0;
         return 0;
     }
-    AIPATHNODE *source = &nodes[source_index];
     AIPATHCNX *connection = packet->path_info.connection;
+    AIPATHNODE *source = &nodes[source_index];
     if ((connection->traversal_flags[packet->path_info.direction] & 0x200) == 0 &&
         packet->inside_path_node != destination_index &&
         ((packet->path_info.path->previous_inside_node_bits[destination_index >> 3] >> (destination_index & 7)) & 1) !=

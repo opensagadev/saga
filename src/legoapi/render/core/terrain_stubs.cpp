@@ -337,10 +337,10 @@ extern "C" void TerrainPlatformNewUpdate(void) {
     const NUMTX &camera = global_camera.mtx;
     const f32 negative_distance = -TerrPlatScanDist;
     const f32 back_x = negative_distance * camera.m20 * 0.25f;
-    const f32 back_z = negative_distance * camera.m22 * 0.25f;
     f32 min_x = camera.m00 * negative_distance * 0.25f + back_x;
-    f32 min_z = camera.m02 * negative_distance * 0.25f + back_z;
+    const f32 back_z = negative_distance * camera.m22 * 0.25f;
     f32 max_x = camera.m00 * negative_distance * 0.35f + camera.m20 * TerrPlatScanDist;
+    f32 min_z = camera.m02 * negative_distance * 0.25f + back_z;
     f32 max_z = camera.m02 * negative_distance * 0.35f + camera.m22 * TerrPlatScanDist;
     f32 x = min_x;
     f32 z = min_z;

@@ -392,8 +392,8 @@ void CloakMovement(GameObject_s *object) {
     u8 *state = reinterpret_cast<u8 *>(object) + index * 0x34;
     f32 &value = *reinterpret_cast<f32 *>(state + 0xf50);
     f32 phase = NuFsqrt((value - character->field_0x60) / (character->field_0x5c - character->field_0x60));
-    f32 high_weight;
     f32 low_weight;
+    f32 high_weight;
     if (LEGOACT_FALL != -1) {
         i16 animation;
         if (object->apiobj.anim_packet.blending == 0) {
@@ -783,8 +783,8 @@ void AddSurfaceDebris(GameObject_s *object) {
     }
     i32 effect;
     f32 rate;
-    f32 minimum_rate;
     f32 height;
+    f32 minimum_rate;
     if (object->id == id_LANDSPEEDER) {
         effect = 102;
         rate = 20.0f;

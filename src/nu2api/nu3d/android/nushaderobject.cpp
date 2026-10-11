@@ -144,8 +144,8 @@ extern "C" void NuShaderObjectSetElementsfv_transpose(NUSHADEROBJECT *shader, i3
             glUniform4fv(parameter.location + first_element, count, values);
             break;
         case 3: {
-            i32 vector_count = count * 4;
             const i32 vectors_remaining = parameter.element_count - first_element * 4;
+            i32 vector_count = count * 4;
             if (vector_count > vectors_remaining) {
                 vector_count = vectors_remaining;
             }

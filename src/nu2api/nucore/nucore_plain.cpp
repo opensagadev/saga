@@ -4753,10 +4753,10 @@ void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *bend, f32 width,
     laser->segment_length = segment_length;
     laser->wobble = wobble;
     laser->bend_amount = bend_amount;
-    u32 red = ((u32)colour & 0xff) * 2;
     u32 green = ((u32)colour & 0xff00) * 2;
-    u32 blue = ((u32)colour & 0xff0000) >> 15;
+    u32 red = ((u32)colour & 0xff) * 2;
     u32 alpha = ((u32)colour >> 24) * 2;
+    u32 blue = ((u32)colour & 0xff0000) >> 15;
     if (red > 255)
         red = 255;
     if (green > 0xff00)

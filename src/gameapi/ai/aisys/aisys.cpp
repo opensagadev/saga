@@ -515,6 +515,7 @@ __used__ static i32 Action_AddPart(AISYS *, AISCRIPTPROCESS *processor, AIPACKET
 
 __used__ static i32 Action_BigJump(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params, i32 param_4,
                                    i32 param_5, f32 param_6) {
+    f32 jump_factor;
     (void)param_6;
     NUVEC destination = {1.0e9f, 1.0e9f, 1.0e9f};
     if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL) {
@@ -526,7 +527,7 @@ __used__ static i32 Action_BigJump(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
         GameObject_s *target = NULL;
         i32 to_origin = 0;
         i32 check_terrain = 0;
-        f32 jump_factor = 1.0f;
+        jump_factor = 1.0f;
         i32 slam = 0;
 
         for (i32 index = 0; index < param_4; ++index) {

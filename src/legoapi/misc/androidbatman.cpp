@@ -63,8 +63,8 @@ static void SystemDidBecomeActiveCallback(const NuPhoneOSMessageData *) {
 static void SystemPauseCallback(const NuPhoneOSMessageData *) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     const i32 dropin_context = LEGOCONTEXT_DROPIN;
-    LEVELDATA_s *title_level = TITLES_LDATA;
     const f32 autosave_post_delay = memcard_autosavepostdelay;
+    LEVELDATA_s *title_level = TITLES_LDATA;
     const f32 autosave_pre_delay = memcard_autosavepredelay;
     const i32 new_mode = NewMode;
     const i32 menu_level = GameMenuLevel;

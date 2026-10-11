@@ -464,12 +464,12 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         object->context_animation = 0x9d;
         return;
     }
-    NUVEC previous = object->external_force;
     f32 radius = object->apiobj.field_0x1dc;
-    NUVEC minimum = {object->apiobj.collision_position.x - radius, object->apiobj.collision_position.y,
-                     object->apiobj.collision_position.z - radius};
+    NUVEC previous = object->external_force;
     NUVEC maximum = {object->apiobj.collision_position.x + radius, object->apiobj.upper_position.y,
                      object->apiobj.collision_position.z + radius};
+    NUVEC minimum = {object->apiobj.collision_position.x - radius, object->apiobj.collision_position.y,
+                     object->apiobj.collision_position.z - radius};
     f32 distance = speed * FRAMETIME;
     NUVEC offset = {NU_SIN_LUT(angle) * distance, 0.0f, NU_COS_LUT(angle) * distance};
     NUVEC position;

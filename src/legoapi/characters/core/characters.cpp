@@ -977,8 +977,8 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     LoseHelmet(object, 0, 1);
     DestroySnakeBody(object);
     object->id = id;
-    NUVEC velocity = object->apiobj.velocity;
     u8 health = object->current_hp;
+    NUVEC velocity = object->apiobj.velocity;
     u8 hitpoints = object->hitpoints;
     u8 saved_flags = (object->apiobj.flags_high >> 5) & 1;
     object->apiobj.character_model = &apicharsys->models[apicharsys->playermodelids[id]];
@@ -1189,8 +1189,8 @@ static void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
     object->idle_animation = static_cast<i16>(animation);
 
     CHARACTERANIM_s *info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
-    i32 repetitions = static_cast<u8>(info->minimum_repetitions);
     const u8 maximum = static_cast<u8>(info->maximum_repetitions);
+    i32 repetitions = static_cast<u8>(info->minimum_repetitions);
     if (repetitions == 0) {
         repetitions = 1;
     } else if (maximum > repetitions) {

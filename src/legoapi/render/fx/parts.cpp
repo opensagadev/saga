@@ -3384,8 +3384,8 @@ void UpdatePartEmits(f32 time) {
 i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 
 PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f32 range) {
-    PART_s *nearest = NULL;
     f32 nearest_distance = range > 0.0f ? range : 100.0f;
+    PART_s *nearest = NULL;
     for (i32 i = 0; i < MAXPARTS; ++i) {
         PART_s *part = &Part[i];
         if ((part->active & 1) == 0 || part->owner == owner || (part->flags & flags) != flags)

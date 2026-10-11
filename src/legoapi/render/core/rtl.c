@@ -3729,9 +3729,9 @@ static void edrtlDrawBurnouts() {
         return;
     }
     for (i32 index = 0; index < 32; ++index) {
-        burnout_s *burnout = &edrtl_edit_burnset->burnouts[index];
         const bool selected = index == edrtl_edit_burnset->selected_index;
         const i32 colour = selected ? 0xf0f0f0f0 : 0x60606060;
+        burnout_s *burnout = &edrtl_edit_burnset->burnouts[index];
         const i32 segments = selected ? 48 : 16;
         if (burnout->active) {
             RndrOSphere(&burnout->position, burnout->field_1c, colour, segments, 0);

@@ -202,12 +202,12 @@ VuVec TouchHacks::CalculateJumpVelToHitPoint(GameObject_s &object, VuVec const &
 }
 
 VuVec TouchHacks::CalculateJumpVelToHitPointDblJump(GameObject_s &object, VuVec const &target) {
-    const GAMECHARACTERDATA *character = object.apiobj.character_data->game_character;
     const GAMECHARACTERDATA *player_character = player->apiobj.character_data->game_character;
+    const GAMECHARACTERDATA *character = object.apiobj.character_data->game_character;
     const f32 player_jump_height = -(player_character->jump_speed * player_character->jump_speed) /
                                    (player_character->gravity + player_character->gravity);
-    const f32 height = -(player_jump_height * 0.7f);
     const f32 half_gravity = character->gravity * 0.5f;
+    const f32 height = -(player_jump_height * 0.7f);
     f32 first_time;
     f32 unused_time;
     if (!SolveRoot(half_gravity, character->jump_speed, height, first_time, unused_time)) {

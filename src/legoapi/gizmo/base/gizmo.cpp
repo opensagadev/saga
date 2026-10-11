@@ -1260,8 +1260,8 @@ i32 GizmoIsNameUnique(GIZMOSYS *gizmo_sys, char *name) {
         return 1;
     }
 
-    GIZMOSET *set = gizmo_sys->sets;
     GIZMOTYPE *type = gizmotypes->types;
+    GIZMOSET *set = gizmo_sys->sets;
     for (i32 type_index = 0; type_index < gizmotypes->count; ++type_index, ++type, ++set) {
         if (type->fns.get_gizmo_name_fn == NULL) {
             continue;

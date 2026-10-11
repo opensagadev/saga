@@ -657,8 +657,8 @@ DOOR_s *Door_FindByIndex(WORLDINFO_s *world, i32 area, i32 level, NUVEC *positio
     DOOR_s *door = world->doors;
     if (door == NULL || world->door_count <= 0)
         return NULL;
-    f32 best_distance = 1000000.0f;
     DOOR_s *best = NULL;
+    f32 best_distance = 1000000.0f;
     for (i32 i = 0; i < world->door_count; ++i, ++door) {
         if ((door->flags & 4) != 0 || door->level == -1)
             continue;

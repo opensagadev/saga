@@ -2257,8 +2257,8 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
     cutscenecam_usefocusloc = 0;
     cutscenecam_fstop = 0.0f;
 
-    NUGCUTCAMERASYS_s *system = instance->cutscene->camera_system;
     instNUGCUTSCENECAMERA_s *camera_instance = instance->camera_instance;
+    NUGCUTCAMERASYS_s *system = instance->cutscene->camera_system;
     u8 focus_index;
     u8 next_camera_index;
     if (static_cast<u8>(instance->cutscene->version) > 4 && system->focus_state_animation != NULL) {
@@ -2685,8 +2685,8 @@ void NewCopyAnims(instNUGCUTSCENE_s *instance) {
         destination_locators->types = source_locators->types;
     }
 
-    NUGCUTRIGIDSYS_s *destination_rigids = destination->rigid_system;
     NUGCUTRIGIDSYS_s *source_rigids = source->rigid_system;
+    NUGCUTRIGIDSYS_s *destination_rigids = destination->rigid_system;
     if (destination_rigids != NULL && destination_rigids->rigids != NULL && destination_rigids->count != 0) {
         for (i32 i = 0; i < destination_rigids->count; ++i) {
             nuanimdata2_s *animation = destination_rigids->rigids[i].animation;
@@ -2731,8 +2731,8 @@ void NewCopyAnims(instNUGCUTSCENE_s *instance) {
 }
 
 static __used__ void copyAnims(NUGCUTSCENE_s *destination, NUGCUTSCENE_s *source) {
-    NUGCUTCAMERASYS_s *destination_camera = destination->camera_system;
     NUGCUTCAMERASYS_s *source_camera = source->camera_system;
+    NUGCUTCAMERASYS_s *destination_camera = destination->camera_system;
     if (destination->version > 4) {
         destination_camera->focus_animation = source_camera->focus_animation;
         destination_camera->focus_state_animation = source_camera->focus_state_animation;

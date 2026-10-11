@@ -87,10 +87,10 @@ void BezierLineEval(VuVec &result, VuVec &start, VuVec &first_control, VuVec &en
     const f32 first_weight = (along * 3.0f) * complement_squared;
     const f32 second_weight = (3.0f * squared) * complement;
     const f32 end_weight = along * squared;
-    const f32 y = end.y * end_weight +
-                  (second_control.y * second_weight + (first_control.y * first_weight + start.y * start_weight));
     const f32 z = end.z * end_weight +
                   ((first_control.z * first_weight + start.z * start_weight) + second_control.z * second_weight);
+    const f32 y = end.y * end_weight +
+                  (second_control.y * second_weight + (first_control.y * first_weight + start.y * start_weight));
     const f32 x = end_weight * end.x +
                   (second_weight * second_control.x + (first_weight * first_control.x + start_weight * start.x));
     result.w = 0.0f;
@@ -551,8 +551,8 @@ void EvaluateSplineXZIntersection(nugspline_s *first, i32 first_looping, SPLINEP
     second_position->spline = second;
     second_position->looping = static_cast<i8>(second_looping);
     if (!(second == NULL || first == NULL || first->length == 0 || second->length == 0)) {
-        const i32 first_count = first_looping != 0 ? first->length + 1 : first->length;
         const i32 second_count = second_looping != 0 ? second->length + 1 : second->length;
+        const i32 first_count = first_looping != 0 ? first->length + 1 : first->length;
         f32 closest = 1000000000.0f;
         f32 first_fraction, second_fraction;
         for (i32 i = 0; i < first_count - 1; ++i) {

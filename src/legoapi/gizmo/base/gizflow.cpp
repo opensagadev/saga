@@ -382,8 +382,8 @@ static void xAction(nufpar_s *parser) {
             if (action->parameters != NULL) {
                 action->parameter_count = count;
                 for (i32 i = 0; i < count; ++i) {
-                    char **destination = &action->parameters[i];
                     VARIPTR *end = load_endbuff;
+                    char **destination = &action->parameters[i];
                     VARIPTR *buffer = load_buff;
                     i32 length = NuStrLen(parameters[i]);
                     char *parameter = NULL;
@@ -756,8 +756,8 @@ static i32 ProcessGizmoFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
 }
 
 static i32 ProcessActionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
-    FLOWBOX_s **parents = box->parents;
     u8 *outputs = box->output_indices;
+    FLOWBOX_s **parents = box->parents;
     for (i32 i = 0; i < box->parent_count; ++i) {
         FLOWBOX_s *parent = parents[i];
         if (!flowboxtypes[parent->type].check_output(system, parent, outputs[i]))
@@ -824,8 +824,8 @@ void *LoadGizFlow(void *, GIZMOSYS_s *system, char *path, VARIPTR *buffer, VARIP
 static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {
     u8 *condition = reinterpret_cast<u8 *>(box->data);
     if (condition == NULL) {
-        FLOWBOX_s **parents = box->parents;
         u8 *outputs = box->output_indices;
+        FLOWBOX_s **parents = box->parents;
         for (i32 i = 0; i < box->parent_count; ++i) {
             FLOWBOX_s *parent = parents[i];
             if (flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) == 0) {

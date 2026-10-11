@@ -236,8 +236,8 @@ static i32 *GizSpinner_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *result_posi
         return NULL;
     }
     const float min_x = position->x - radius;
-    const float max_x = position->x + radius;
     const float min_z = position->z - radius;
+    const float max_x = position->x + radius;
     const float max_z = position->z + radius;
     float best_alignment = 0.0f;
     GIZMO *result = NULL;
@@ -255,8 +255,8 @@ static i32 *GizSpinner_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *result_posi
         if (spinner->type == 0) {
             continue;
         }
-        u16 angle = spinner->rotation + spinner->initial_rotation + spinner->field_0x08c;
         const u16 angle_step = static_cast<u16>(0x10000 / spinner->type);
+        u16 angle = spinner->rotation + spinner->initial_rotation + spinner->field_0x08c;
         for (i32 arm = 0; arm < spinner->type; ++arm, angle += angle_step) {
             target_position.x = spinner->position.x + NuTrigTable[angle >> 1] * spinner->field_0x094;
             target_position.z =
@@ -1172,8 +1172,8 @@ i32 GizSpinner_Push(GIZSPINNER_s *spinner, i32 context) {
     {
         i32 rotation_step = static_cast<i32>(frame_time * 5461.0f);
         i32 at_start = GameAnimSet_IsAnimationReset(spinner->anim_set);
-        bool at_end = spinner->anim_set->state == GAMEANIMSET_STATE_AT_END;
         u32 flags = spinner->state_flags;
+        bool at_end = spinner->anim_set->state == GAMEANIMSET_STATE_AT_END;
         i32 clear_context = 0;
 
         if (context != 0x1e) {

@@ -125,8 +125,8 @@ void TakeHitCode(GameObject_s *object) {
     i32 animation_active;
     i32 kill_parts_mode;
     i32 hearts;
-    i32 first_flag;
     i32 second_flag;
+    i32 first_flag;
     u32 coins;
     bool has_coins;
 

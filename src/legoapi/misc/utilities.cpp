@@ -119,22 +119,22 @@ i32 LineCrossedXZ(f32 ax, f32 az, f32 bx, f32 bz, f32 cx, f32 cz, f32 dx, f32 dz
 
 void VecRotateAxis(nuvec_s *vector, u16 angle, nuvec_s *axis) {
     NuVecNorm(axis, axis);
-    const f32 cosine = NuTrigTable[((static_cast<u32>(angle) + 0x4000) >> 1) & 0x7fff];
     const f32 sine = NuTrigTable[angle >> 1];
+    const f32 cosine = NuTrigTable[((static_cast<u32>(angle) + 0x4000) >> 1) & 0x7fff];
     const f32 complement = 1.0f - cosine;
     const f32 x = axis->x;
     const f32 y = axis->y;
     const f32 z = axis->z;
     const NUVEC source = *vector;
-    const f32 tx = complement * x;
     const f32 ty = complement * y;
+    const f32 tx = complement * x;
     const f32 tz = complement * z;
     const f32 xy = tx * y;
-    const f32 xz = tx * z;
     const f32 yz = ty * z;
+    const f32 xz = tx * z;
     const f32 sx = sine * x;
-    const f32 sy = sine * y;
     const f32 sz = z * sine;
+    const f32 sy = sine * y;
     vector->x = ((tx * x + cosine) * source.x + 0.0f) + (xy - sz) * source.y + (xz + sy) * source.z;
     vector->y = ((xy + sz) * source.x + 0.0f) + (y * ty + cosine) * source.y + (yz - sx) * source.z;
     vector->z = ((xz - sy) * source.x + 0.0f) + (sx + yz) * source.y + (tz * z + cosine) * source.z;
@@ -658,8 +658,8 @@ i32 MatrixReflectionVU0_AXISY(numtx_s *matrix, f32 plane, f32 override_plane, nu
 i32 SphereSphereOverlapScaleY(nuvec_s *position_a, float radius_a, float y_radius_a, nuvec_s *position_b,
                               float radius_b, float y_radius_b) {
     f32 dx = position_b->x - position_a->x;
-    f32 dy = position_b->y - position_a->y;
     f32 dz = position_b->z - position_a->z;
+    f32 dy = position_b->y - position_a->y;
     if (radius_b != y_radius_b || radius_a != y_radius_a) {
         dy *= (radius_b + radius_a) / (y_radius_b + y_radius_a);
     }

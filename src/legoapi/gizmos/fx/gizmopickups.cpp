@@ -1085,8 +1085,8 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
         return;
     }
 
-    NUVEC scale = {AreaPickupScale, AreaPickupScale, AreaPickupScale};
     const u16 y_rotation = static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f));
+    NUVEC scale = {AreaPickupScale, AreaPickupScale, AreaPickupScale};
     const u16 x_rotation =
         static_cast<u16>(static_cast<i32>(NuTrigTable[static_cast<i32>(y_rotation) & 0x7fff] * 1820.0f));
 

@@ -1620,9 +1620,9 @@ void SuperStoryTime_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, fl
                 if (stage->field_0x18 >= 4.5f)
                     *packet->score = packet->time_reward_score;
                 else if (stage->field_0x18 >= 0.5f && stage->field_0x18 < 4.0f) {
+                    const u32 difference = packet->time_reward_score - packet->original_score;
                     const f32 blend =
                         NuTrigTable[(static_cast<i32>(((stage->field_0x18 - 0.5f) / 3.5f) * 16384.0f) >> 1) & 0x7fff];
-                    const u32 difference = packet->time_reward_score - packet->original_score;
                     *packet->score = packet->original_score;
                     IncreaseScore(packet->score,
                                   static_cast<i64>(static_cast<i32>(static_cast<f32>(difference) * blend)), 0);

@@ -149,8 +149,8 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
     bool found = false;
     f32 best_score = -1000000000.0f;
     const f32 sweep_height = field_94 * 3.0f + 1.0f;
-    const f32 ray_offset = sweep_height - 1.0f;
     const f32 ray_length = -sweep_height;
+    const f32 ray_offset = sweep_height - 1.0f;
 
     {
         VuVec ray(0.0f, ray_length, 0.0f, 1.0f);
