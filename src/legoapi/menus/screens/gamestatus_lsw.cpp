@@ -1137,8 +1137,8 @@ void DrawStatusScreen(WORLDINFO_s *) {
     if (GAMEDEMO != 0) {
         if (GAMEDEMO != 1 || FadeSys.fade != 0.0f)
             return;
-        char *freeplay_text = TTab[tFREEPLAY];
         char *exit_text = TTab[tEXIT];
+        char *freeplay_text = TTab[tFREEPLAY];
         f32 y = -0.75f - 0.5f * MENUDY;
         {
             const i32 option = 0;
@@ -1146,16 +1146,16 @@ void DrawStatusScreen(WORLDINFO_s *) {
             i32 red, green, blue;
             if (gamedemo_option == option && TestForController() != 0) {
                 if (menu_pulsate > 0.0f) {
-                    green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
-                                             static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
                     red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
                                            static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
+                    green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
+                                             static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
                     blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
                                             static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
                 } else if (menu_flash != 0) {
                     green = MENUFLASH0G;
-                    blue = MENUFLASH0B;
                     red = MENUFLASH0R;
+                    blue = MENUFLASH0B;
                 } else {
                     blue = MENUFLASH1B;
                     green = MENUFLASH1G;
@@ -1183,10 +1183,10 @@ void DrawStatusScreen(WORLDINFO_s *) {
             i32 red, green, blue;
             if (gamedemo_option == option && TestForController() != 0) {
                 if (menu_pulsate > 0.0f) {
-                    red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
-                                           static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
                     green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
                                              static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
+                    red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
+                                           static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
                     blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
                                             static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
                 } else if (menu_flash != 0) {
@@ -1194,8 +1194,8 @@ void DrawStatusScreen(WORLDINFO_s *) {
                     green = MENUFLASH0G;
                     blue = MENUFLASH0B;
                 } else {
-                    red = MENUFLASH1R;
                     green = MENUFLASH1G;
+                    red = MENUFLASH1R;
                     blue = MENUFLASH1B;
                 }
             } else if (menu_pulse > 0.0f) {
@@ -1297,15 +1297,15 @@ void TrueHero_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float el
     switch (stage->field_0x14) {
         case 0:
             stage->field_0x14 = 1;
-            stage->field_0x1c = 1.0f;
             stage->field_0x18 = 0.0f;
+            stage->field_0x1c = 1.0f;
             break;
         case 1:
             stage->field_0x18 += elapsed;
             if (stage->field_0x18 >= stage->field_0x1c) {
                 stage->field_0x14 = 2;
-                stage->field_0x18 = 0.0f;
                 stage->field_0x1c = 3.0f;
+                stage->field_0x18 = 0.0f;
                 nextsoundpercent = 5.0f;
                 packet->true_hero_percent = 0.0f;
             }

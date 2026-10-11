@@ -1289,8 +1289,8 @@ extern "C" {
                 buf->void_ptr = rigid_instance->rigids + rigid_system->count;
                 memset(rigid_instance->rigids, 0, rigid_system->count * sizeof(instNUGCUTRIGID_s));
                 for (i32 i = 0; i < rigid_system->count; ++i) {
-                    instNUGCUTRIGID_s *inst_rigid = &rigid_instance->rigids[i];
                     NUGCUTRIGID_s *rigid = &rigid_system->rigids[i];
+                    instNUGCUTRIGID_s *inst_rigid = &rigid_instance->rigids[i];
                     if (scene == NULL || scene == rigid->scene) {
                         inst_rigid->scene = scene == NULL ? rigid->scene : scene;
                         if (inst_rigid->scene != NULL && inst_rigid->scene->display_list != NULL) {
@@ -1532,8 +1532,8 @@ extern "C" {
         }
         if (instance->rigid_instance != NULL && instance->cutscene->rigid_system != NULL) {
             for (u32 i = 0; i < instance->cutscene->rigid_system->count; ++i) {
-                NUGCUTRIGID_s *rigid = &instance->cutscene->rigid_system->rigids[i];
                 instNUGCUTRIGID_s *inst_rigid = &instance->rigid_instance->rigids[i];
+                NUGCUTRIGID_s *rigid = &instance->cutscene->rigid_system->rigids[i];
                 inst_rigid->state_index = 0;
                 if ((rigid->flags & 6) == 6) {
                     inst_rigid->visible = rigid->flags & 1;

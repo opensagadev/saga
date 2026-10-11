@@ -700,9 +700,9 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
         curve_types += 9;
     }
     node_flags += first_joint;
-    u8 *joint_flags = buffer->joint_flags + first_joint;
     nuanimbuffjoint_s *joint = buffer->joints + first_joint;
     const u8 *end_flags = node_flags + count;
+    u8 *joint_flags = buffer->joint_flags + first_joint;
     for (; node_flags < end_flags; ++node_flags, ++joint) {
         const u8 flags = *node_flags;
         *joint_flags++ = flags;
@@ -772,19 +772,19 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
 i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
                                             i32 joint_count, i32 first_joint, NUVEC *root_translation) {
     nuanimbuffjoint_s *joint = buffer->joints;
-    const u8 *node_flags = anim->node_flags;
     f32 key =
         (frame - anim->first_frame) * static_cast<f32>(anim->key_count - 1) / static_cast<f32>(anim->frame_count - 1);
+    const u8 *node_flags = anim->node_flags;
     const f32 inverse_blend = 1.0f - blend;
     key = key < 0.0f ? 0.0f : key;
     if (static_cast<f32>(static_cast<i32>(anim->key_count)) <= key)
         key = static_cast<f32>(anim->key_count - 1);
     const i32 whole = static_cast<i32>(key);
     const f32 fraction = key - static_cast<f32>(whole);
-    const u32 quarter = static_cast<u32>(whole) & 3;
     const i32 key_stride = anim->key_stride;
-    ani3_scalemin_s *scale_min = anim->scale_min;
+    const u32 quarter = static_cast<u32>(whole) & 3;
     const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
+    ani3_scalemin_s *scale_min = anim->scale_min;
     u8 *keys = anim->keys + (whole / 4) * key_stride;
     const i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
     const u16 *curve_types = anim->curve_types;
@@ -1044,8 +1044,8 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend_EulerQuat(ani3_animheader_s *an
     u8 *keys = anim->keys + key_offset;
     i32 key_stride = anim->key_stride;
     const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
-    ani3_scalemin_s *scale_min = anim->scale_min;
     i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
+    ani3_scalemin_s *scale_min = anim->scale_min;
     const u16 *curve_types = anim->curve_types;
     const u8 *first_flags = node_flags + first_joint;
     for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
@@ -1156,126 +1156,6 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend_EulerQuat(ani3_animheader_s *an
                 result.y *= inverse_length;
                 result.z *= inverse_length;
                 VuQuatSlerpFast(reinterpret_cast<NUQUAT *>(output), reinterpret_cast<NUQUAT *>(output), &result, blend);
-            }
-        }
-    }
-    return 0;
-}
-
-i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
-                                             i32 joint_count, i32 first_joint, NUVEC *root_translation) {
-    const u8 *node_flags = anim->node_flags;
-    const f32 inverse_blend = 1.0f - blend;
-    f32 key =
-        (frame - anim->first_frame) * static_cast<f32>(anim->key_count - 1) / static_cast<f32>(anim->frame_count - 1);
-    key = key < 0.0f ? 0.0f : key;
-    // Preserve the fractional interval after the last integer key.
-    if (static_cast<f32>(static_cast<i32>(anim->key_count)) <= key)
-        key = static_cast<f32>(anim->key_count - 1);
-    const i32 whole = static_cast<i32>(key);
-    const u32 quarter = static_cast<u32>(whole) & 3;
-    const f32 fraction = key - static_cast<f32>(whole);
-    ani3_scalemin_s *scale_min = anim->scale_min;
-    const i32 key_stride = anim->key_stride;
-    u8 *keys = anim->keys + (whole / 4) * key_stride;
-    const u16 *curve_types = anim->curve_types;
-    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
-    const i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
-    if (first_joint != 0)
-        root_translation = NULL;
-    const u8 *first_flags = node_flags + first_joint;
-    for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
-        for (i32 group = 0; group < 3; ++group) {
-            i32 components = group == 1 ? 4 : 3;
-            if (*skip_flags & CurveGroupMasks[group]) {
-                for (i32 component = 0; component < components; ++component) {
-                    SkipAni4V4Curve(*curve_types++, keys, scale_min);
-                }
-            } else
-                curve_types += components;
-        }
-    }
-    node_flags += first_joint;
-    const u8 *end_flags = node_flags + count;
-    u8 *joint_flags = buffer->joint_flags + first_joint;
-    nuanimbuffjoint_s *joint = buffer->joints + first_joint;
-    for (; node_flags < end_flags; ++node_flags, ++joint) {
-        const u8 flags = *node_flags;
-        *joint_flags++ |= flags;
-        f32 *output = &joint->translation.x;
-        for (i32 group = 0; group < 3; ++group, output += 4) {
-            if (!(flags & CurveGroupMasks[group])) {
-                if (group == 0) {
-                    output[0] *= inverse_blend;
-                    output[1] *= inverse_blend;
-                    output[2] *= inverse_blend;
-                    if (root_translation) {
-                        root_translation->x = root_translation->y = root_translation->z = 0.0f;
-                        root_translation = NULL;
-                    }
-                } else if (group == 1) {
-                    output[3] = output[3] * inverse_blend + blend;
-                    output[0] *= inverse_blend;
-                    output[1] *= inverse_blend;
-                    output[2] *= inverse_blend;
-                    f32 length = NuFsqrt(output[3] * output[3] + output[0] * output[0] + output[1] * output[1] +
-                                         output[2] * output[2]);
-                    f32 inverse_length = length == 0.0f ? 0.0f : 1.0f / length;
-                    output[3] *= inverse_length;
-                    output[0] *= inverse_length;
-                    output[1] *= inverse_length;
-                    output[2] *= inverse_length;
-                } else {
-                    output[0] = output[0] * inverse_blend + blend;
-                    output[1] = output[1] * inverse_blend + blend;
-                    output[2] = output[2] * inverse_blend + blend;
-                }
-                curve_types += group == 1 ? 4 : 3;
-            } else if (group != 1) {
-                f32 sampled = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[0], quarter, fraction,
-                                                    keys, scale_min);
-                f32 delta_x = sampled - output[0];
-                if (root_translation)
-                    root_translation->x = sampled;
-                output[0] += delta_x * blend;
-                sampled = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[1], quarter, fraction, keys,
-                                                scale_min);
-                f32 delta_y = sampled - output[1];
-                if (root_translation)
-                    root_translation->y = sampled;
-                output[1] += delta_y * blend;
-                sampled = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[2], quarter, fraction, keys,
-                                                scale_min);
-                f32 delta_z = sampled - output[2];
-                if (root_translation)
-                    root_translation->z = -sampled;
-                output[2] += delta_z * blend;
-                root_translation = NULL;
-                curve_types += 3;
-            } else {
-                NUQUAT first, second, result;
-                DecodeAni4BlendQuat3WPair(anim, key_stride, constants, curve_types[0], quarter, keys, scale_min,
-                                          first.x, second.x);
-                DecodeAni4BlendQuat3WPair(anim, key_stride, constants, curve_types[1], quarter, keys, scale_min,
-                                          first.y, second.y);
-                DecodeAni4BlendQuat3WPair(anim, key_stride, constants, curve_types[2], quarter, keys, scale_min,
-                                          first.z, second.z);
-                DecodeAni4BlendQuat3WPair(anim, key_stride, constants, curve_types[3], quarter, keys, scale_min,
-                                          first.w, second.w);
-                curve_types += 4;
-                result.x = first.x * (1.0f - fraction) + second.x * fraction;
-                result.z = first.z * (1.0f - fraction) + second.z * fraction;
-                result.y = first.y * (1.0f - fraction) + second.y * fraction;
-                result.w = first.w * (1.0f - fraction) + second.w * fraction;
-                f32 length =
-                    NuFsqrt(result.w * result.w + result.x * result.x + result.y * result.y + result.z * result.z);
-                f32 inverse_length = length == 0.0f ? 0.0f : 1.0f / length;
-                result.w *= inverse_length;
-                result.x *= inverse_length;
-                result.y *= inverse_length;
-                result.z *= inverse_length;
-                // Original W blending writes this local result and discards it.
-                VuQuatSlerpFast(&result, reinterpret_cast<NUQUAT *>(output), &result, blend);
             }
         }
     }
@@ -1434,6 +1314,126 @@ extern "C" void ANI_Ani3ExtractAllNodeCurves(ani3_animheader_s *anim, float fram
                 break;
         }
     }
+}
+
+i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
+                                             i32 joint_count, i32 first_joint, NUVEC *root_translation) {
+    const u8 *node_flags = anim->node_flags;
+    const f32 inverse_blend = 1.0f - blend;
+    f32 key =
+        (frame - anim->first_frame) * static_cast<f32>(anim->key_count - 1) / static_cast<f32>(anim->frame_count - 1);
+    key = key < 0.0f ? 0.0f : key;
+    // Preserve the fractional interval after the last integer key.
+    if (static_cast<f32>(static_cast<i32>(anim->key_count)) <= key)
+        key = static_cast<f32>(anim->key_count - 1);
+    const i32 whole = static_cast<i32>(key);
+    const u32 quarter = static_cast<u32>(whole) & 3;
+    const f32 fraction = key - static_cast<f32>(whole);
+    ani3_scalemin_s *scale_min = anim->scale_min;
+    const u16 *curve_types = anim->curve_types;
+    const i32 key_stride = anim->key_stride;
+    u8 *keys = anim->keys + (whole / 4) * key_stride;
+    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
+    const i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
+    if (first_joint != 0)
+        root_translation = NULL;
+    const u8 *first_flags = node_flags + first_joint;
+    for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
+        for (i32 group = 0; group < 3; ++group) {
+            i32 components = group == 1 ? 4 : 3;
+            if (*skip_flags & CurveGroupMasks[group]) {
+                for (i32 component = 0; component < components; ++component) {
+                    SkipAni4V4Curve(*curve_types++, keys, scale_min);
+                }
+            } else
+                curve_types += components;
+        }
+    }
+    node_flags += first_joint;
+    const u8 *end_flags = node_flags + count;
+    u8 *joint_flags = buffer->joint_flags + first_joint;
+    nuanimbuffjoint_s *joint = buffer->joints + first_joint;
+    for (; node_flags < end_flags; ++node_flags, ++joint) {
+        const u8 flags = *node_flags;
+        *joint_flags++ |= flags;
+        f32 *output = &joint->translation.x;
+        for (i32 group = 0; group < 3; ++group, output += 4) {
+            if (!(flags & CurveGroupMasks[group])) {
+                if (group == 0) {
+                    output[0] *= inverse_blend;
+                    output[1] *= inverse_blend;
+                    output[2] *= inverse_blend;
+                    if (root_translation) {
+                        root_translation->x = root_translation->y = root_translation->z = 0.0f;
+                        root_translation = NULL;
+                    }
+                } else if (group == 1) {
+                    output[3] = output[3] * inverse_blend + blend;
+                    output[0] *= inverse_blend;
+                    output[1] *= inverse_blend;
+                    output[2] *= inverse_blend;
+                    f32 length = NuFsqrt(output[3] * output[3] + output[0] * output[0] + output[1] * output[1] +
+                                         output[2] * output[2]);
+                    f32 inverse_length = length == 0.0f ? 0.0f : 1.0f / length;
+                    output[3] *= inverse_length;
+                    output[0] *= inverse_length;
+                    output[1] *= inverse_length;
+                    output[2] *= inverse_length;
+                } else {
+                    output[0] = output[0] * inverse_blend + blend;
+                    output[1] = output[1] * inverse_blend + blend;
+                    output[2] = output[2] * inverse_blend + blend;
+                }
+                curve_types += group == 1 ? 4 : 3;
+            } else if (group != 1) {
+                f32 sampled = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[0], quarter, fraction,
+                                                    keys, scale_min);
+                f32 delta_x = sampled - output[0];
+                if (root_translation)
+                    root_translation->x = sampled;
+                output[0] += delta_x * blend;
+                sampled = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[1], quarter, fraction, keys,
+                                                scale_min);
+                f32 delta_y = sampled - output[1];
+                if (root_translation)
+                    root_translation->y = sampled;
+                output[1] += delta_y * blend;
+                sampled = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[2], quarter, fraction, keys,
+                                                scale_min);
+                f32 delta_z = sampled - output[2];
+                if (root_translation)
+                    root_translation->z = -sampled;
+                output[2] += delta_z * blend;
+                root_translation = NULL;
+                curve_types += 3;
+            } else {
+                NUQUAT first, second, result;
+                DecodeAni4BlendQuat3WPair(anim, key_stride, constants, curve_types[0], quarter, keys, scale_min,
+                                          first.x, second.x);
+                DecodeAni4BlendQuat3WPair(anim, key_stride, constants, curve_types[1], quarter, keys, scale_min,
+                                          first.y, second.y);
+                DecodeAni4BlendQuat3WPair(anim, key_stride, constants, curve_types[2], quarter, keys, scale_min,
+                                          first.z, second.z);
+                DecodeAni4BlendQuat3WPair(anim, key_stride, constants, curve_types[3], quarter, keys, scale_min,
+                                          first.w, second.w);
+                curve_types += 4;
+                result.x = first.x * (1.0f - fraction) + second.x * fraction;
+                result.z = first.z * (1.0f - fraction) + second.z * fraction;
+                result.y = first.y * (1.0f - fraction) + second.y * fraction;
+                result.w = first.w * (1.0f - fraction) + second.w * fraction;
+                f32 length =
+                    NuFsqrt(result.w * result.w + result.x * result.x + result.y * result.y + result.z * result.z);
+                f32 inverse_length = length == 0.0f ? 0.0f : 1.0f / length;
+                result.w *= inverse_length;
+                result.x *= inverse_length;
+                result.y *= inverse_length;
+                result.z *= inverse_length;
+                // Original W blending writes this local result and discards it.
+                VuQuatSlerpFast(&result, reinterpret_cast<NUQUAT *>(output), &result, blend);
+            }
+        }
+    }
+    return 0;
 }
 
 extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,

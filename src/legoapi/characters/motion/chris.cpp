@@ -218,13 +218,13 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
             } else {
                 fighter->death_timer = 2.0f;
             }
-            if (fighter->parent != NULL) {
-                impulse.x = fighter->matrix.m30 - fighter->parent->matrix.m30;
-                impulse.z = fighter->matrix.m32 - fighter->parent->matrix.m32;
-                impulse.y = fighter->matrix.m31 - fighter->parent->matrix.m31;
-                fighter->parent->target = *reinterpret_cast<NUVEC4 *>(&fighter->matrix.m30);
-            } else {
+            if (fighter->parent == NULL) {
                 impulse = v010;
+            } else {
+                impulse.x = fighter->matrix.m30 - fighter->parent->matrix.m30;
+                impulse.y = fighter->matrix.m31 - fighter->parent->matrix.m31;
+                impulse.z = fighter->matrix.m32 - fighter->parent->matrix.m32;
+                fighter->parent->target = *reinterpret_cast<NUVEC4 *>(&fighter->matrix.m30);
             }
             const f32 magnitude = NuVecMag(&impulse);
             if (magnitude != 0.0f) {
@@ -965,12 +965,12 @@ static inline void DrawSpaceJet(i32 player_index, i32 key_index, bool left) {
                     player->apiobj.field_0xb8.m30,  player->apiobj.field_0xb8.m31,  player->apiobj.field_0xb8.m32,
                     player->apiobj.field_0xb8.m33};
                 if (left) {
-                    matrix.m31 += (matrix.m21 * Jetpos.y - matrix.m01 * Jetpos.x) + matrix.m11 * Jetpos.z;
                     matrix.m30 += (matrix.m20 * Jetpos.y - matrix.m00 * Jetpos.x) + matrix.m10 * Jetpos.z;
+                    matrix.m31 += (matrix.m21 * Jetpos.y - matrix.m01 * Jetpos.x) + matrix.m11 * Jetpos.z;
                     matrix.m32 += (matrix.m22 * Jetpos.y - matrix.m02 * Jetpos.x) + matrix.m12 * Jetpos.z;
                 } else {
-                    matrix.m30 += matrix.m00 * Jetpos.x + matrix.m20 * Jetpos.y + matrix.m10 * Jetpos.z;
                     matrix.m31 += matrix.m01 * Jetpos.x + matrix.m21 * Jetpos.y + matrix.m11 * Jetpos.z;
+                    matrix.m30 += matrix.m00 * Jetpos.x + matrix.m20 * Jetpos.y + matrix.m10 * Jetpos.z;
                     matrix.m32 += matrix.m02 * Jetpos.x + matrix.m22 * Jetpos.y + matrix.m12 * Jetpos.z;
                 }
                 DebrisPosOrientationMtx(DogDebKey[key_index], &matrix);
