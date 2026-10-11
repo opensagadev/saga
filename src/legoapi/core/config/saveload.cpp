@@ -865,8 +865,8 @@ extern "C" {
                 i32 stored_checksum;
                 memcpy(&stored_checksum, static_cast<u8 *>(memcard_savedatabuffer) + memcard_savedatasize, 4);
                 if (ChecksumSaveData(memcard_savedatabuffer, memcard_savedatasize) != stored_checksum) {
-                    memcard_loadcorrupt = 1;
                     saveload_autosave = -1;
+                    memcard_loadcorrupt = 1;
                 }
                 if (memcard_extra_savedata != NULL && memcard_extra_savedatabuffer != NULL &&
                     memcard_extra_savedatasize >= 0) {
@@ -904,8 +904,8 @@ extern "C" {
             }
         } else if (memcard_autosavestarted != 0 && memcard_saveneeded == 0 && memcard_savestarted == 0 &&
                    !(memcard_autosavepredelay > 0.0f)) {
-            memcard_saveneeded = 1;
             memcard_slot = saveload_autosave;
+            memcard_saveneeded = 1;
         }
 
         if (memcard_saveneeded != 0) {
@@ -944,16 +944,16 @@ extern "C" {
                 if (savesuccessfn != NULL)
                     savesuccessfn();
                 if (memcard_autosavestarted != 0) {
-                    memcard_autosavestarted = 0;
                     memcard_autosavepostdelay = 1.0f;
+                    memcard_autosavestarted = 0;
                 }
             } else {
                 memcard_savefailed = 1;
                 if (saveload_autosave != -1) {
-                    saveload_autosave = -1;
                     memcard_saveresult_delay = 1.5f;
-                    saveload_autosavedisabled = 1;
+                    saveload_autosave = -1;
                     memcard_autosavedisabled = 1;
+                    saveload_autosavedisabled = 1;
                 }
                 memcard_autosavestarted = 0;
                 memcard_autosaveinprogress = 0;
@@ -975,8 +975,8 @@ extern "C" {
         if (memcard_formatme != 0) {
             if (saveload_status == 1 && saveload_cardtype == 2) {
                 saveloadASFormat();
-                memcard_formatme = 0;
                 memcard_formatmessage_delay = 1.5f;
+                memcard_formatme = 0;
                 memcard_formatting = 1;
                 memcard_formatfailed = 0;
                 memcard_justformatted = 0;

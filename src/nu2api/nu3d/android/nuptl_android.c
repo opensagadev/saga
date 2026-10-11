@@ -278,8 +278,8 @@ void BuildDebrisVerts(PartHeader *header, uv1debdata *chunk_data, NUMTL *materia
     f32 v1;
     if (material->particle_type_tag == -105) {
         u0 = 0.0f;
-        v0 = 0.0f;
         u1 = 1.0f;
+        v0 = 0.0f;
         v1 = 1.0f;
     } else {
         u0 = header->texture_u0;
@@ -416,8 +416,8 @@ extern "C" {
     dma_particle_chunk_s *CreateDmaParticleSet(void *memory, i32 *size) {
         dma_particle_chunk_s *chunk = static_cast<dma_particle_chunk_s *>(memory);
         u8 *cursor = static_cast<u8 *>(memory);
-        chunk->command = 0x52;
         chunk->next = NULL;
+        chunk->command = 0x52;
         cursor += 0x10;
         reinterpret_cast<u32 *>(cursor)[1] = 0;
         reinterpret_cast<u32 *>(cursor)[2] = 0;

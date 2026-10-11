@@ -320,8 +320,8 @@ void APIMenuDrawMemCardSlots(MENU *menu, f32 y) {
             green = MENUFLASH0G;
         } else {
             red = MENUFLASH1R;
-            green = MENUFLASH1G;
             blue = MENUFLASH1B;
+            green = MENUFLASH1G;
         }
     } else if (menu_pulse > 0.0f) {
         red = MenuSlotColourLerp(MENUFLASH0R, MENUNORMALR, menu_pulse);

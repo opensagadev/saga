@@ -1413,11 +1413,11 @@ extern "C" void NuDisplayListBurstRndrSpecial(nuhspecial_s *handle, u32 count, N
                 void *faceon =
                     NuDisplayListPrepareFaceonPS(buffer, scene->items[object->indices[material]].next, matrix);
                 list->items->next = transform;
-                list->items->type = 0x90;
                 list->items->id = 3;
+                list->items->type = 0x90;
                 NUDISPLAYLISTITEM *first = list->items++;
-                list->items->type = 0x8f;
                 list->items->next = faceon;
+                list->items->type = 0x8f;
                 list->items->id = 3;
                 NUDISPLAYLISTITEM *last = list->items++;
                 DisplayListSetAlphaPS(first, last, 1);

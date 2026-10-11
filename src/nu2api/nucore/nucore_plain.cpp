@@ -949,16 +949,16 @@ extern "C" {
         *transform_packet = DisplayListCreateGeomTransformPS(buffer, world_matrix, list->dlist->mtls[list->mtl_id],
                                                              geometry->next, *transform_packet);
         item = list->items;
-        item->type = 0x8c;
         item->id = 3;
+        item->type = 0x8c;
         item->next = *transform_packet;
         list->items = item + 1;
         first_and_last[1] = item;
 
         item = list->items;
         item->type = 0x82;
-        item->id = 3;
         item->next = geometry->next;
+        item->id = 3;
         list->items = item + 1;
         first_and_last[2] = item;
 
@@ -1234,7 +1234,13 @@ extern "C" {
             }
             const i32 terminator = (flags & 2) ? 0x84 : 0x8e;
             i32 item_index = 0;
-            if (flags & 1) {
+            if (!(flags & 1)) {
+                do {
+                    DisplayListPrintItem(item, item_index, depth, state, 0);
+                    ++item;
+                    ++item_index;
+                } while (item->type != terminator);
+            } else {
                 do {
                     DisplayListPrintItem(item, item_index, depth, state, 0);
                     if (item->id == 1) {
@@ -1242,12 +1248,6 @@ extern "C" {
                     } else {
                         ++item;
                     }
-                    ++item_index;
-                } while (item->type != terminator);
-            } else {
-                do {
-                    DisplayListPrintItem(item, item_index, depth, state, 0);
-                    ++item;
                     ++item_index;
                 } while (item->type != terminator);
             }
@@ -1904,8 +1904,8 @@ extern "C" {
                 }
             } else {
                 angles.x = static_cast<i32>(r0.x * 10430.3779296875f);
-                angles.y = static_cast<i32>(r0.y * 10430.3779296875f);
                 angles.z = static_cast<i32>(r0.z * 10430.3779296875f);
+                angles.y = static_cast<i32>(r0.y * 10430.3779296875f);
             }
             NuMtxSetRotateXYZVU0(matrix, &angles);
         } else
@@ -4480,14 +4480,13 @@ extern "C" {
         for (i32 first_portal = 0; first_portal < first.portal_count; ++first_portal) {
             const i16 portal_index = first.portal_indices[first_portal];
             for (i32 second_portal = 0; second_portal < second.portal_count; ++second_portal) {
-                if (second.portal_indices[second_portal] != portal_index) {
-                    continue;
-                }
+                if (second.portal_indices[second_portal] == portal_index) {
 
-                const NUPORTAL &portal = scene->portals[portal_index];
-                const f32 side = portal.plane.a * position->x + portal.plane.b * position->y +
-                                 portal.plane.c * position->z + portal.plane.d;
-                return side < 0.0f ? portal.front_room : portal.back_room;
+                    const NUPORTAL &portal = scene->portals[portal_index];
+                    const f32 side = portal.plane.a * position->x + portal.plane.b * position->y +
+                                     portal.plane.c * position->z + portal.plane.d;
+                    return side < 0.0f ? portal.front_room : portal.back_room;
+                }
             }
         }
         return -1;

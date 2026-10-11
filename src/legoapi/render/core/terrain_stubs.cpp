@@ -773,11 +773,11 @@ void DebrisTimeSlip(i32 group) {
         debinftype *effect = debtab[i];
         if (effect == NULL)
             continue;
-        if (effect->time_group == 4 ? group != 1 : group != 0)
-            continue;
-        effect->last_render_time -= 800.0f;
-        if (effect->native_data != NULL)
-            effect->native_data->last_render_time -= 800.0f;
+        if (!(effect->time_group == 4 ? group != 1 : group != 0)) {
+            effect->last_render_time -= 800.0f;
+            if (effect->native_data != NULL)
+                effect->native_data->last_render_time -= 800.0f;
+        }
     }
 }
 

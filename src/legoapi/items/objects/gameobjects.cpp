@@ -3623,8 +3623,8 @@ void GameObjectOrigin(GameObject_s *object) {
     api.field_0x1f4 ^= 0x100u;
     predicted_vertical_displacement = api.previous_velocity.y * FRAMETIME;
     api.collision_position.x = api.position.x + api.previous_velocity.x * FRAMETIME;
-    api.collision_position.y = api.position.y + predicted_vertical_displacement;
     api.collision_position.z = api.position.z + api.previous_velocity.z * FRAMETIME;
+    api.collision_position.y = api.position.y + predicted_vertical_displacement;
     api.collision_position.y += (object->character_bottom + object->character_top) * api.field_0xa8 * 0.5f;
     origin_x = api.collision_position.x;
     origin_z = api.collision_position.z;
