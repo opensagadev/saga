@@ -11,14 +11,6 @@
 
 #include <unistd.h>
 
-#if defined(__SANITIZE_ADDRESS__)
-// Original game code can trip ASan during normal play. Keep diagnostics visible
-// without terminating the game thread; ASAN_OPTIONS can override this default.
-extern "C" const char *__asan_default_options() {
-    return "halt_on_error=0";
-}
-#endif
-
 namespace saga::host::harness {
     namespace {
 
