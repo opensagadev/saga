@@ -9,6 +9,8 @@ struct SDL_Window;
 // Common host entry points have weak fallbacks in runtime.cpp. A selected
 // platform directory may replace any of them with a strong definition.
 const char *HostPlatformVideoDriver();
+// Sets platform SDL hints before SDL_Init.
+void HostPlatformConfigureSDL();
 bool HostPlatformAudioOutputEnabled();
 u64 HostPlatformWindowFlags();
 ANativeWindow *HostPlatformNativeWindow(SDL_Window *window);

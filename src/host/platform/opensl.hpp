@@ -23,4 +23,7 @@ namespace hostsl { // Host OpenSL adapter diagnostics.
 
     HostStats HostGetStats();
 
+    // Scales the final device mix; 1 is the game's own output level.
+    void HostSetMasterGain(f32 gain);
+
 } // namespace hostsl
