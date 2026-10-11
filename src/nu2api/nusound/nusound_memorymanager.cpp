@@ -204,7 +204,7 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Defragment(u32 size) {
                 if (!next->IsAlloced()) {
                     buffer = this->MergeFreeBuffer(buffer);
                     if (size != 0 && buffer->GetSize() >= size) {
-                        break;
+                        goto done;
                     }
                     continue;
                 }
@@ -215,7 +215,7 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Defragment(u32 size) {
 
                 if (size != 0 && merged != NULL && merged->GetSize() >= size) {
                     buffer = merged;
-                    break;
+                    goto done;
                 }
 
                 if (moved == buffer) {
@@ -234,7 +234,7 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Defragment(u32 size) {
                     }
                     buffer = scan;
                     if (size != 0 && buffer->GetSize() >= size) {
-                        break;
+                        goto done;
                     }
                     continue;
                 }
@@ -248,6 +248,7 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Defragment(u32 size) {
     }
 
     this->free_count = 0;
+done:
     NuSoundMemoryBuffer::EndCriticalSection();
     pthread_mutex_unlock(&this->mutex);
 

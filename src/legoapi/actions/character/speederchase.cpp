@@ -531,15 +531,16 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
     }
     // Retail has four tuning rows and only resets state bytes greater than 4.
     // State 4 therefore remains an invalid-input table overrun, not a fifth mode.
-    SPEEDERCHASEVALUES *values = &speedervals[processor->action_data_1];
     f32 ratio, speed, seek;
     if (error > 0.0f) {
+        SPEEDERCHASEVALUES *values = &speedervals[processor->action_data_1];
         ratio = error / values->behind_range;
         if (ratio > 1.0f)
             ratio = 1.0f;
         speed = values->behind_speed * ratio + (1.0f - ratio);
         seek = values->behind_seek;
     } else {
+        SPEEDERCHASEVALUES *values = &speedervals[processor->action_data_1];
         ratio = error / values->ahead_range;
         if (ratio > 1.0f)
             ratio = 1.0f;

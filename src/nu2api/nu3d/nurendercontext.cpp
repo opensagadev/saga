@@ -32,10 +32,17 @@ i32 g_renderContext_zFunc = 3;
 extern "C" {
 
     void NuRenderContextInit(void) {
-        memcpy(g_renderContext_viewProj, &numtx_identity, sizeof(numtx_identity));
         memcpy(g_renderContext_view, &numtx_identity, sizeof(numtx_identity));
         memcpy(g_renderContext_projection, &numtx_identity, sizeof(numtx_identity));
         memcpy(g_renderContect_worldView, &numtx_identity, sizeof(numtx_identity));
+        memcpy(g_renderContext_viewProj, &numtx_identity, sizeof(numtx_identity));
+        memcpy(g_renderContext_viewProjInverse, &numtx_identity, sizeof(numtx_identity));
+        g_renderContext_position[0] = 0.0f;
+        g_renderContext_position[1] = 0.0f;
+        g_renderContext_position[2] = 0.0f;
+        g_renderContext_position[3] = 0.0f;
+        g_renderContext_3dTime = 0.0f;
+        g_renderContext_postEffectTime = 0.0f;
     }
 
     // Original 0x2a33d0, 9 bytes: this platform deliberately does nothing.
