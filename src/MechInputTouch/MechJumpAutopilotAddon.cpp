@@ -318,8 +318,9 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
 }
 
 void MechJumpAutoPilotAddon::LookForTerrInt(VuVec const &point) {
+    NUVEC displacement;
     if (!field_9d) {
-        NUVEC displacement;
+
         displacement.x = point.x - field_44.x;
         displacement.y = point.y - field_44.y;
         displacement.z = point.z - field_44.z;

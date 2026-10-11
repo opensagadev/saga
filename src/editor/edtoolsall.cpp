@@ -303,6 +303,7 @@ void antinodeEditor_Render(i32 x, i32 y, float xscale, float yscale) {
 }
 
 void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
+    nuvec_s displacement;
     if (GlobalCharacterRenderFn == nullptr)
         return;
     i32 count = NuLinkedListCheck(&aieditor->creatures);
@@ -315,7 +316,7 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
     if (display == nullptr)
         display = *reinterpret_cast<u8 **>(aieditor->unknown_3692c);
     if (display != nullptr) {
-        nuvec_s displacement;
+
         f32 distance =
             NuVecXZDist(reinterpret_cast<nuvec_s *>(display + 0x28), &aieditor->camera_position, &displacement);
         if (*reinterpret_cast<u32 *>(display + 0x68) & 0x20) {

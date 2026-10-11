@@ -315,6 +315,8 @@ void DrawStreaks() {
 }
 
 void AddStreakPoints(nuvec_s *points, float duration, u32 colour, void **handle, i32 mode, void *) {
+    NUVEC outgoing;
+    NUVEC incoming;
     STREAKHDR_s *header = static_cast<STREAKHDR_s *>(*handle);
     if (header == NULL) {
         if (streakhdrs_free == NULL)
@@ -372,8 +374,7 @@ void AddStreakPoints(nuvec_s *points, float duration, u32 colour, void **handle,
         NuVecScale(&header->streaks->next->start_tangent, &header->streaks->next->start_tangent, 1.0f / 3.0f);
         NuVecScale(&header->streaks->next->end_tangent, &header->streaks->next->end_tangent, 1.0f / 3.0f);
     } else {
-        NUVEC incoming;
-        NUVEC outgoing;
+
         NuVecSub(&incoming, &older->position, &streak->position);
         NuVecSub(&outgoing, &older->next->position, &older->position);
         NuVecAddScale(&older->start_tangent, &incoming, &outgoing, 0.5f);

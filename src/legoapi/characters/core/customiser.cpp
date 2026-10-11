@@ -250,6 +250,8 @@ void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s 
 }
 
 void Customiser_DrawAccessories(CUSTOMISER *customiser, GameObject_s *object, numtx_s *matrices) {
+    NUMTX_ALIGNED16 reflection;
+    NUMTX_ALIGNED16 matrix;
     const i32 joint = object->apiobj.character_data->player_config->helmet_locator;
     if (customiser == NULL || joint == -1 || object->apiobj.character_model->points_of_interest[joint] == NULL)
         return;
@@ -275,8 +277,7 @@ void Customiser_DrawAccessories(CUSTOMISER *customiser, GameObject_s *object, nu
             continue;
 
         // Retail keeps both draw matrices on a 16-byte-aligned stack.
-        NUMTX_ALIGNED16 matrix;
-        NUMTX_ALIGNED16 reflection;
+
         if (matrices != NULL)
             matrix = matrices[joint];
         else
@@ -384,6 +385,7 @@ void Customiser_DumpAccessories(CUSTOMISER *customiser) {
 }
 
 void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
+    char converted_path[0x88];
     if (customiser == NULL) {
         return;
     }
@@ -469,7 +471,7 @@ void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
             }
 
             if (texture_pack != NULL) {
-                char converted_path[0x88];
+
                 NuFileExtConvert(converted_path, path);
                 i32 item = NuFilePakGetItem(texture_pack, converted_path);
                 void *texture_data;

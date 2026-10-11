@@ -107,6 +107,7 @@ void ReleaseCable(CABLE_s *cable, i32 snapped) {
     }
 }
 void UpdateCables() {
+    NUVEC closest;
     for (CABLE_s *cable = cables; cable != cables + 8; ++cable) {
         if ((cable->flags_1e9 & 1) != 0) {
             NUVEC delta;
@@ -281,7 +282,7 @@ void UpdateCables() {
                     (object->cable->target == cable->target || object->cable->target == cable->source))
                     continue;
                 if (!(object == cable->source || object == cable->target)) {
-                    NUVEC closest;
+
                     f32 line_distance =
                         NuLineToPointDistSqrEx(&path[0], &path[1], &object->apiobj.collision_position, &closest);
                     f32 radius = object->apiobj.field_0x1dc;

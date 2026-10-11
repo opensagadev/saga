@@ -3398,11 +3398,7 @@ void EdClass::SerialiseObject(EdStream &stream, void *object, EdClass *schema, E
                         continue;
                     }
                 }
-                if (member->attributes < 0) {
-                    EdClass *source_class = registry->GetClass(source->type_id);
-                    EdClass *member_class = theRegistry.GetClass(member->type_id);
-                    member_class->SerialiseObject(stream, member->GetMemberObject(object), source_class, registry);
-                } else {
+                if (!(member->attributes < 0)) {
                     registry->GetType(source->type_id);
                     EdType *type = theRegistry.GetType(member->type_id);
                     i32 size = member->size > 0 ? member->size : type->size;
@@ -3413,6 +3409,10 @@ void EdClass::SerialiseObject(EdStream &stream, void *object, EdClass *schema, E
                     if (stream.mode == 1) {
                         member->SetMemberData(object, member->type_id, data, sizeof(data), NULL);
                     }
+                } else {
+                    EdClass *source_class = registry->GetClass(source->type_id);
+                    EdClass *member_class = theRegistry.GetClass(member->type_id);
+                    member_class->SerialiseObject(stream, member->GetMemberObject(object), source_class, registry);
                 }
             } else {
                 EdType *type = registry->GetType(source->type_id);

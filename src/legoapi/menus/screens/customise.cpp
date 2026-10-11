@@ -680,6 +680,7 @@ void CustomiserMenu_End() {
 }
 
 void CustomiserMenu_Draw(MENU_s *) {
+    char name[64];
     if (MenuStopDraw == 0 && customiser_quit == 0 && CharacterCustomiser != NULL) {
         CUSTOMISER *customiser = CharacterCustomiser;
         i32 side, active_count;
@@ -692,7 +693,7 @@ void CustomiserMenu_Draw(MENU_s *) {
                 const i32 blue = side == 0 ? 255 : 0;
                 const i32 red = side == 0 ? 0 : 127;
                 if (CustomiseMode[side] != 1) {
-                    char name[64];
+
                     GameObj_GetName(customiser->character_ids[side], NULL, name);
                     SmartTextEx(name, CustomiseScreenPos[side].x, -0.85f, 1.0f, 0.5f, 0.5f, 0.5f, 0, red, green, blue,
                                 0.75f, 2, NULL, 0, static_cast<i32>(128.0f * Customise_NameAlpha));

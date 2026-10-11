@@ -2570,10 +2570,10 @@ void edpartLoadSingleType(part_typedesc_s *type, i32 version, i32 page) {
         for (i32 i = 0; i < 8; ++i)
             type->effect_pages[i] = EdFileReadChar();
     } else {
-        if (version > 1) {
-            type->effect_pages[0] = EdFileReadChar();
-        } else {
+        if (!(version > 1)) {
             type->effect_pages[0] = 0;
+        } else {
+            type->effect_pages[0] = EdFileReadChar();
         }
         for (i32 i = 1; i < 8; ++i)
             type->effect_pages[i] = -1;
@@ -2703,7 +2703,11 @@ void edpartLoadSingleType(part_typedesc_s *type, i32 version, i32 page) {
         type->field_160 = 1.0f;
     }
     type->field_164 = version > 14 ? EdFileReadFloat() : 1.0f;
-    type->field_168 = version > 14 ? EdFileReadFloat() : 1.0f;
+    if (version > 14) {
+        type->field_168 = EdFileReadFloat();
+    } else {
+        type->field_168 = 1.0f;
+    }
     type->scale = 1.0f;
     type->field_174 = 0;
 }

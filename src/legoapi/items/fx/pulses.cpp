@@ -68,6 +68,7 @@ void Pulses_AddSfx(PULSESYS_s *pulse_sys, i32 *sfx_ids, i32 *sfx_count, i32 max_
 }
 
 void Pulses_Update(PULSESYS_s *pulse_sys) {
+    NUVEC offset;
     if (pulse_sys != NULL) {
         WORLDINFO_s *world = WorldInfo_CurrentlyActive();
         if (pulse_sys->pulse_count == 0) {
@@ -138,7 +139,6 @@ void Pulses_Update(PULSESYS_s *pulse_sys) {
                     continue;
                 }
 
-                NUVEC offset;
                 NuVecSub(&offset, &player->apiobj.collision_position, pulse_position);
                 f32 distance = direction.x * offset.x + direction.z * offset.z;
                 if (pulse_sys->radial_hit_direction == 1) {

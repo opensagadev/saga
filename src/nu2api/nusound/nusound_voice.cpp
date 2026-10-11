@@ -320,6 +320,7 @@ static inline VuVec CopySoundPosition(const VuVec &position) {
 }
 
 void NuSoundVoice::CalculatePositionalMix() {
+    NUMTX identity;
     memset(this->mix_gains, 0, sizeof(this->mix_gains));
 
     this->field67_0xa8 = 0.0f;
@@ -369,7 +370,7 @@ void NuSoundVoice::CalculatePositionalMix() {
         f32 field_angle = 0.0f;
         f32 listener_mix[2][8] = {};
         if (real_listener->Get2DScreenPosition() != NULL) {
-            NUMTX identity;
+
             NuMtxSetIdentity(&identity);
             VuVec screen_position(real_listener->Get2DScreenPosition()->x, 0.0f,
                                   1.0f - real_listener->Get2DScreenPosition()->y, 1.0f);

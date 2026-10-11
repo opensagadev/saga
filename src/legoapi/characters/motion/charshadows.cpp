@@ -17,6 +17,7 @@ namespace {
 } // namespace
 
 void CharShadows_Draw() {
+    NUVEC position;
     if (CHARSHADOWS_ON == 0) {
         return;
     }
@@ -64,7 +65,7 @@ void CharShadows_Draw() {
                 CHARACTER_SHADOW_s &shadow = *shadow_cursor;
                 if (shadow.position.y != kInvalidShadowHeight && shadow.opacity > 0.0f &&
                     shadow.position.y <= 0.025f + joint_matrix->m31) {
-                    NUVEC position;
+
                     position.y = shadow.position.y + 0.005f;
                     position.x = shadow.position.x;
                     position.z = shadow.position.z;

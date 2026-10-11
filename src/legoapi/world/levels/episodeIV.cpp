@@ -880,8 +880,9 @@ void DeathStarEscapeB_Init(WORLDINFO_s *world) {
 }
 
 void DeathStarEscapeB_Draw(WORLDINFO_s *) {
+    NUMTX matrix;
     if (LevGameObject[0] != NULL && *static_cast<u8 *>(deathstarescapeb_netpacket) == 0) {
-        NUMTX matrix = LevGameObject[0]->joint_matrices[1];
+        matrix = LevGameObject[0]->joint_matrices[1];
         NuSpecialDrawAt(&LevHSpecial[2], &matrix);
     }
     if (LevGameObject[1] != NULL && *static_cast<u8 *>(deathstarescapeb_netpacket) == 0) {

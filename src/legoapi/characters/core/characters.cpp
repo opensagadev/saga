@@ -1293,6 +1293,7 @@ void CharScenes_AreaDump() {
 }
 
 void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_u buf_end) {
+    char path[128];
     if (CharScene_Area == NULL || apicharsys->loaded_model_count == 0) {
         return;
     }
@@ -1307,7 +1308,6 @@ void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_
                 continue;
             }
 
-            char path[128];
             sprintf(path, "chars\\%s\\%s.gsc", CDataList[model_id].dir, CDataList[model_id].file);
             entry.scene = NuGScnRead(buf, buf_end, path);
             if (entry.scene != NULL) {

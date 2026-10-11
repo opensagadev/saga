@@ -374,6 +374,7 @@ i32 Teleport_UpdateHints(HINT_s *hint) {
 }
 
 void Teleports_UpdateAfterGameObjects(WORLDINFO_s *world) {
+    NUMTX matrix;
     if (world->teleports == NULL || WORLD->teleport_count <= 0)
         return;
 
@@ -381,7 +382,7 @@ void Teleports_UpdateAfterGameObjects(WORLDINFO_s *world) {
     for (i32 i = 0; i < WORLD->teleport_count; ++i, ++teleport) {
         teleport->field_74 = SeekRot(teleport->field_74, teleport->field_78, 5.0f);
         if (NuSpecialExistsFn(&teleport->flap1_special)) {
-            NUMTX matrix = teleport->flap1_matrix;
+            matrix = teleport->flap1_matrix;
             if ((teleport->flags & 8) != 0)
                 NuMtxPreRotateX(&matrix, -teleport->field_74);
             else

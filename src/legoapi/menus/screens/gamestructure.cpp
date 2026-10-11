@@ -882,6 +882,7 @@ void MenuInitStore(MENU_s *) {
 }
 
 void MenuUpdateStore(MENU_s *menu) {
+    char event[128];
     if (__builtin_expect(menu->cancel_pressed != 0 || StoreIAP[0].text[0] == 'x', 0)) {
         GameAudio_PlaySfx(0x31, NULL, 0, 0);
         GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
@@ -944,7 +945,7 @@ store_touch_selected:
         menu_storepurchase_iap_name = StoreIAP[hit].text;
         menu_i_bundle = StoreBundle_FindByName(menu_storepurchase_iap_name);
         NewMenu(LEGOMENU_STORE_PURCHASE, -1, -1);
-        char event[128];
+
         if (menu_i_bundle != -1) {
             sprintf(event, "bundle_%s_bought", StoreBundle[menu_i_bundle].name);
         } else if (menu_i_pack != -1) {

@@ -210,6 +210,7 @@ extern AREADATA *EMPERORFIGHT_ADATA;
 extern i16 id_GAMORREANGUARD;
 
 void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) {
+    NUVEC delta;
     if (object->character_context == 0x1b || (object->field_0xe22 & 2) != 0 ||
         (object->apiobj.field_0x27c != -1 && MiniCutCam != 0) || (object->field_0xe23 & 1) != 0) {
         return;
@@ -360,7 +361,6 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
                     goto reload_object_count;
                 }
 
-                NUVEC delta;
                 f32 distance =
                     NuVecDistSqr(&object->apiobj.collision_position, &candidate->apiobj.collision_position, &delta);
                 if (candidate->id == id_ATST) {

@@ -592,6 +592,7 @@ extern "C" void NuRndrScreenGrabTileEnd(void **);
 extern "C" i32 NuRndrDoingScreenGrab;
 extern "C" void NuVpResetRegions();
 extern "C" i32 NuRndrHighResScreenGrab(char *prefix, f32 scale, f32 a, f32 b, f32 c, i32 number) {
+    char path[256];
     static f32 yTiles, xTiles, yPos, xPos;
     static ScreenGrabTileParams params;
     static NUFILE fh;
@@ -619,7 +620,7 @@ extern "C" i32 NuRndrHighResScreenGrab(char *prefix, f32 scale, f32 a, f32 b, f3
     if (dump_state == -1) {
         NuRndrDoingScreenGrab = 1;
         NuRndrScreenGrabTileInit(&params, static_cast<i32>(tiles * tiles), b, a, c);
-        char path[256];
+
         if (number >= 0)
             sprintf(path, "%s%d.bmp", prefix, number);
         else {

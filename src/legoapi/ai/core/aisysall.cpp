@@ -450,6 +450,7 @@ extern "C" void AISysFindRoute(AIPACKET *packet) {
 }
 
 extern "C" void AISysCharacterSetPathCnx(AIPACKET *packet, NUVEC *position, AIPATHCNX *connection, i32 direction) {
+    NUVEC rotated;
     if (connection == NULL || packet->owner == NULL) {
         packet->path_info.connection = connection;
         packet->current_route = 0xff;
@@ -480,7 +481,7 @@ extern "C" void AISysCharacterSetPathCnx(AIPACKET *packet, NUVEC *position, AIPA
         packet->path_info.connection = connection;
 
         AIPATHNODE &node = packet->path_info.path->nodes[connection->node_indices[0]];
-        NUVEC rotated;
+
         NUVEC delta;
         delta.x = position->x - node.position.x;
         delta.z = position->z - node.position.z;

@@ -1586,6 +1586,7 @@ static void JediBKilledCallback(GameObject_s *object) {
 }
 
 void JediB_Init(WORLDINFO_s *world) {
+    nuvec_s position;
     if (Mission_Active(MissionSys) != NULL) {
         return;
     }
@@ -1599,7 +1600,7 @@ void JediB_Init(WORLDINFO_s *world) {
         }
         for (f32 x = -jedib_outer_r; x <= jedib_outer_r; x += step) {
             for (f32 z = -jedib_outer_r; z <= jedib_outer_r; z += step) {
-                nuvec_s position;
+
                 AILOCATOR locator;
                 position.x = jedib_offset - jedib_offset * 2.0f * NuRandFloatSeeded(&jedi_b.seed) + x;
                 position.y = 0.0f;
@@ -1709,6 +1710,7 @@ void JediB_Reset(WORLDINFO_s *world) {
 }
 
 void JediB_Update(WORLDINFO_s *world) {
+    char name[0x10];
     if (Mission_Active(MissionSys) != NULL) {
         return;
     }
@@ -1848,7 +1850,7 @@ void JediB_Update(WORLDINFO_s *world) {
                         if (g_lowEndLevelBehaviour != 0 && jedi_b.goody_count == 5) {
                             break;
                         }
-                        char name[0x10];
+
                         sprintf(name, "phase%d_%d", jedi_b.phase, jedi_b.goody_count + 1);
                         AILOCATOR *locator = AIPathFindLocator(world->ai_sys, name);
                         if (locator == NULL) {

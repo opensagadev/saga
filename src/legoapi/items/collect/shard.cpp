@@ -97,6 +97,7 @@ static void *Shards_AllocateProgressData(VARIPTR *start, VARIPTR *end) {
 }
 
 static void Shards_Draw(void *context, void *, float) {
+    NUMTX_ALIGNED16 matrix;
     WORLDINFO *world = static_cast<WORLDINFO *>(context);
     SHARD *shard = static_cast<SHARD *>(world->shards);
     if (shard == NULL)
@@ -105,7 +106,7 @@ static void Shards_Draw(void *context, void *, float) {
         shard->drawn = 0;
         if ((shard->state_flags & 0x0a) != 2)
             continue;
-        NUMTX_ALIGNED16 matrix;
+
         if (shard->state_flags & 4) {
             u16 spin = (u16)((f32)(i32)shard->spin_angle + 98304.0f * shard->collection_time);
             NuMtxSetRotationY(&matrix, spin);

@@ -52,6 +52,7 @@ extern i32 TERRAINMASK_NONWEAPON;
 extern f32 brickimpactwait;
 
 void ThermalDetonator_Throw(GameObject_s *object) {
+    NUVEC movement;
     ADDPART_s params = Default_ADDPART;
     if (!(object == NULL || WORLD == NULL || WORLD->lev_objs == NULL || WORLD->lev_objs[0xe9].active == 0)) {
         if (object->apiobj.player_controlled) {
@@ -86,7 +87,7 @@ void ThermalDetonator_Throw(GameObject_s *object) {
                     object->apiobj.collision_min.y,
                 object->apiobj.collision_position.z,
             };
-            NUVEC movement;
+
             NuVecSub(&movement, NUMTX_GET_ROW_VEC(&matrix, 3), &origin);
             blocked = GameRayCast(&origin, &movement, 0.0f, TERRAINMASK_NONWEAPON | 0x1f) != 0;
         }

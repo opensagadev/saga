@@ -178,6 +178,7 @@ void MiniKitDetector(nuvec_s *position) {
 
 i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
 void CharMiniKit_Draw(i32 id, numtx_s *matrix, i32 reflection_axis, float reflection_plane, float reflection_height) {
+    NUMTX draw_matrix;
     if (Char_MiniKit == NULL)
         return;
     HUBMINIKITPIECES_s *kit = Char_MiniKit[id];
@@ -189,7 +190,7 @@ void CharMiniKit_Draw(i32 id, numtx_s *matrix, i32 reflection_axis, float reflec
         if (NuSpecialExistsFn(&piece->special) == 0)
             continue;
         piece = &kit->pieces[i];
-        NUMTX draw_matrix = piece->matrix;
+        draw_matrix = piece->matrix;
         NuMtxMul(&draw_matrix, &draw_matrix, matrix);
         piece = &kit->pieces[i];
         NuSpecialDrawAt(&piece->special, &draw_matrix);

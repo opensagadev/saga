@@ -157,6 +157,7 @@ void Levers_InitTerrain(WORLDINFO_s *world) {
 }
 
 LEVER_s *Lever_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *object, f32 *distance_squared) {
+    NUVEC target_position;
     LEVER_s *nearest = NULL;
     f32 nearest_distance = 1.0e9f;
     LEVER_s *lever = world->levers;
@@ -167,7 +168,7 @@ LEVER_s *Lever_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *
                                  LEVER_FLAG_ENABLED)) != (LEVER_FLAG_VISIBLE | LEVER_FLAG_ENABLED) ||
                 lever->pull_progress != 0.0f || lever->floor_position.y == 2000000.0f)
                 continue;
-            NUVEC target_position;
+
             Lever_GetAbsTargetPos(lever, &target_position);
             candidate_distance = NuVecDistSqr(position, &target_position, NULL);
         } else {

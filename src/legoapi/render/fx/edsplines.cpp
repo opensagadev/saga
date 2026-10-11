@@ -464,6 +464,7 @@ void InitSplinePosition(SPLINEPOS_s *position, nugspline_s *spline, float distan
 
 void GetNearestSplinePos(NUVEC *origin, SPLINEPOS_s *result, NUGSPLINE *spline, i32 looping, i16 first_point,
                          i16 last_point) {
+    NUVEC offset;
     if (result == NULL)
         return;
     memset(result, 0, sizeof(*result));
@@ -482,7 +483,7 @@ void GetNearestSplinePos(NUVEC *origin, SPLINEPOS_s *result, NUGSPLINE *spline, 
             end = last_point;
         NUVEC *point = (NUVEC *)((u8 *)spline->pts + index * (i16)spline->pt_size);
         f32 nearest = 1000000000.0f;
-        NUVEC offset;
+
         do {
             f32 distance = NuVecDistSqr(origin, point, &offset);
             if (distance < nearest) {
@@ -590,6 +591,7 @@ void EvaluateSplineXZIntersection(nugspline_s *first, i32 first_looping, SPLINEP
 }
 
 void LevelSplines_InitForLevel(WORLDINFO_s *world) {
+    char name[64];
     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
     world->portal_places = reinterpret_cast<PORTALPOS **>(world->giz_buffer.void_ptr);
     world->giz_buffer.addr += LEVELSPLINECOUNT * sizeof(*world->portal_places);
@@ -625,7 +627,7 @@ void LevelSplines_InitForLevel(WORLDINFO_s *world) {
         }
 
         if (levspl_i_start >= 0 && levspl_i_start < LEVELSPLINECOUNT) {
-            char name[64];
+
             name[0] = '\0';
             if (Mission_Active(NULL) != NULL) {
                 NuStrCpy(name, "bounty_start");

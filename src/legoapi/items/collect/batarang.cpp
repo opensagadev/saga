@@ -105,6 +105,7 @@ static unsigned int Batarang_GetTargetPos(BATARANG_s *batarang, int index, nuvec
 }
 
 static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 automatic) {
+    NUVEC delta;
     BATARANG_s *batarang = static_cast<BATARANG_s *>(object->batarang);
     if (batarang == NULL || batarang->active > 5) {
         return 0;
@@ -138,7 +139,7 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
         if (target != batarang->active) {
             continue;
         }
-        NUVEC delta;
+
         if (automatic == 0) {
             if (fabsf(candidate->camera_screen_position.x - batarang->sight_position.x) < 0.1f &&
                 fabsf(candidate->camera_screen_position.y - batarang->sight_position.y) < 0.2f &&
@@ -605,6 +606,7 @@ void Batarang_GetSightInfo(i32 character, i32 *red, i32 *green, i32 *blue, char 
 }
 
 void Batarang_MoveCode(GameObject_s *object) {
+    i32 colour[3];
     BATARANG_s *batarang = static_cast<BATARANG_s *>(object->batarang);
     if (batarang == NULL || batarang->field_0x7d != 0) {
         return;
@@ -680,7 +682,7 @@ void Batarang_MoveCode(GameObject_s *object) {
             if (WORLD != NULL && Batarang_FindTarget(WORLD, object, 0) != 0) {
                 NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
             }
-            i32 colour[3];
+
             char text[32];
             Batarang_GetSightInfo(object->id, &colour[0], &colour[1], &colour[2], text);
             ADDGAMEMSG message;

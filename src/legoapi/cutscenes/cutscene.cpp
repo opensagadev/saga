@@ -2251,6 +2251,7 @@ static __used__ void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paus
 }
 
 static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
+    NUMTX focus_matrix;
     cutscenecam_focusDistance = 0.0f;
     cutscenecam_focalLength = 0.0f;
     cutscenecam_usefocusloc = 0;
@@ -2339,7 +2340,7 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
                     NUGCUTLOCATOR_s *focus_locator =
                         &instance->cutscene->locator_system->locators[camera_instance->focus_index];
                     if (focus_locator->animation != NULL) {
-                        NUMTX focus_matrix;
+
                         NuGCutLocatorCalcMtx(focus_locator, frame, &focus_matrix, NULL);
                         if ((focus_locator->flags & 4) != 0) {
                             NuMtxPreTranslate(&focus_matrix, &focus_locator->pivot);

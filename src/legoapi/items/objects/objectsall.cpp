@@ -53,6 +53,7 @@ f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
 i32 DoBuckStart(GameObject_s *object) {
+    NUVEC delta;
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     if (world->current_level != HOTHESCAPEB_LDATA || object->id != id_SNOWMOB)
         return 0;
@@ -63,7 +64,7 @@ i32 DoBuckStart(GameObject_s *object) {
         if (player == NULL || (player->apiobj.field_0x1f8 & 0x1001) != 0x1001 || player->apiobj.field_0x287 != 0 ||
             player->field_0xcc0 != NULL)
             continue;
-        NUVEC delta;
+
         NuVecSub(&delta, &player->apiobj.lower_position, reinterpret_cast<NUVEC *>(&object->joint_matrices[1].m30));
         if (delta.y > -0.01f && delta.y < 0.1f && delta.x * delta.x + delta.z * delta.z < 0.04000000283122063f) {
             NUVEC destination;

@@ -514,11 +514,12 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbV
 }
 
 static __used__ void creatureEditor_cbScriptParams(eduimenu_s *parent, eduiitem_s *, unsigned int) {
+    char label[64];
     if (creatureEditor_Current() == nullptr)
         return;
     eduimenu_s *menu = eduiMenuCreate(220, 70, 240, 250, ed_fnt, creatureEditor_cbCancelMenu, "Script Params");
     if (menu != nullptr) {
-        char label[64];
+
         if (NuLinkedListGetHead(creatureEditor_AreaList()) != nullptr) {
             if (creatureEditor_Current()->trigger_area != nullptr) {
                 sprintf(label, "Trigger Area \"%s\"",

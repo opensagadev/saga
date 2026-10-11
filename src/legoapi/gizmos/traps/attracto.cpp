@@ -57,6 +57,7 @@ static void Attractos_AddGizmos(GIZMOSYS *gizmo_sys, i32 type, void *context, vo
 }
 
 static void Attractos_Update(void *context, void *, float) {
+    char text[32];
     WORLDINFO_s *world = static_cast<WORLDINFO_s *>(context);
     if (world == NULL || world->attractos == NULL)
         return;
@@ -65,7 +66,7 @@ static void Attractos_Update(void *context, void *, float) {
     for (i32 i = 0; i < world->attracto_count; ++i, ++attracto) {
         if ((attracto->state_flags & 7) != 3)
             continue;
-        char text[32];
+
         sprintf(text, "%i/%i", attracto->collected_count, attracto->capacity);
         NUVEC position;
         position.x = attracto->position.x;
@@ -308,12 +309,14 @@ ADDGIZMOTYPE *Attractos_RegisterGizmo(i32 type_id) {
 }
 
 void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
+    NUVEC position;
+    char text[32];
     bool available = false;
     if ((object->apiobj.flags_low & 0x80) != 0 && object->suit != NULL &&
         (static_cast<SUIT_s *>(object->suit)->flags & 0x80) != 0) {
-        char text[32];
+
         sprintf(text, "%i", object->field_0x106e);
-        NUVEC position;
+
         NuVecMtxRotate(&position, &AttractoBackPackCountPos, &object->apiobj.field_0xb8);
         NuVecAdd(&position, &position, &object->apiobj.position);
         GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
