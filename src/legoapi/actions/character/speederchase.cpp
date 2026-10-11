@@ -434,7 +434,7 @@ void SpeederChaseA_Panel(WORLDINFO_s *) {
     }
 
     if (LevAIMessage[0] == NULL || LevAIMessage[1] == NULL || LevAIMessage[3] == NULL ||
-        LevAIMessage[3]->value != 0.0f || !(0.0f < LevAIMessage[0]->value)) {
+        LevAIMessage[3]->value != 1.0f || !(0.0f < LevAIMessage[0]->value)) {
         return;
     }
 
@@ -749,7 +749,7 @@ f32 SpeederChaseATATInOutMul(nuvec_s *start, nuvec_s *end) {
 }
 
 f32 GetVehicleAreaRememberSpeed() {
-    if (bonusmodearcade == 0) {
+    if (VehicleArea == 0) {
         return 0.0f;
     }
 
@@ -761,7 +761,7 @@ f32 GetVehicleAreaRememberSpeed() {
     }
     if (Player[1] != NULL && Player[1]->apiobj.player_controlled) {
         speed += Player[1]->field_0xdc8;
-        player_count = 2.0f;
+        player_count += 1.0f;
     }
     if (player_count > 1.0f) {
         speed /= player_count;

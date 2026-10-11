@@ -1557,7 +1557,7 @@ extern "C" {
     }
 
     void DebrisSetThinningLevel(f32 level) {
-        debris_thinning_level = level < 1.0f ? 1.0f : level;
+        debris_thinning_level = level > 1.0f ? level : 1.0f;
     }
 
     void DebrisSetDetailLevel(i32 level) {
