@@ -482,8 +482,8 @@ extern "C" void NuTexAnimEnvProc(nutexanimenv_s *env) {
     if (signals != 0) {
         for (i32 i = 0; i < 32; ++i) {
             if ((signals & (1u << i)) != 0) {
-                env->wait_remaining = 0;
                 env->instruction_index = program->off_signal[i];
+                env->wait_remaining = 0;
                 env->call_depth = 0;
                 env->loop_depth = 0;
                 break;
@@ -494,8 +494,8 @@ extern "C" void NuTexAnimEnvProc(nutexanimenv_s *env) {
     if (signals != 0) {
         for (i32 i = 0; i < 32; ++i) {
             if ((signals & (1u << i)) != 0) {
-                env->wait_remaining = 0;
                 env->instruction_index = program->on_signal[i];
+                env->wait_remaining = 0;
                 env->call_depth = 0;
                 env->loop_depth = 0;
                 break;

@@ -431,8 +431,8 @@ static void AIScriptCopyConditions(NULISTHDR *src, NULISTHDR *dst, VARIPTR *buf,
             memset(dst_cond, 0, sizeof(AICONDITION));
             memmove(dst_cond, src_cond, sizeof(AICONDITION));
 
-            dst_cond->list_node.next = NULL;
             dst_cond->list_node.prev = NULL;
+            dst_cond->list_node.next = NULL;
 
             dst_cond->arg = AIScriptCopyString(src_cond->arg, buf, buf_end);
             dst_cond->next_state_name = AIScriptCopyString(src_cond->next_state_name, buf, buf_end);
@@ -613,53 +613,52 @@ static void xRefScript(NUFPAR *parser) {
     orig_buf = *load_buff;
 
     ref_script = (AIREFSCRIPT *)AIScriptBufferAlloc(load_buff, load_endbuff, sizeof(AIREFSCRIPT));
-    if (ref_script == NULL) {
-        return;
-    }
+    if (ref_script != NULL) {
 
-    memset(ref_script, 0, sizeof(AIREFSCRIPT));
+        memset(ref_script, 0, sizeof(AIREFSCRIPT));
 
-    is_done = false;
-    while (!is_done && NuFParGetLine(parser) != 0) {
-        while (!is_done && NuFParGetWord(parser) != 0) {
-            char *cursor;
+        is_done = false;
+        while (!is_done && NuFParGetLine(parser) != 0) {
+            while (!is_done && NuFParGetWord(parser) != 0) {
+                char *cursor;
 
-            if (NuStrICmp(parser->word_buf, "}") != 0) {
-                if ((cursor = NuStrIStr(parser->word_buf, "Script")) != NULL) {
-                    ref_script->name = AIScriptCopyString(cursor + strlen("Script") + 1, load_buff, load_endbuff);
-                } else if ((cursor = NuStrIStr(parser->word_buf, "ReturnState")) != NULL) {
-                    ref_script->return_state_name =
-                        AIScriptCopyString(cursor + strlen("ReturnState") + 1, load_buff, load_endbuff);
-                } else if (NuStrICmp(parser->word_buf, "CONDITIONS") == 0) {
-                    load_conditionshdr = &ref_script->conditions;
-                    condition_has_no_goto = 1;
+                if (NuStrICmp(parser->word_buf, "}") != 0) {
+                    if ((cursor = NuStrIStr(parser->word_buf, "Script")) != NULL) {
+                        ref_script->name = AIScriptCopyString(cursor + strlen("Script") + 1, load_buff, load_endbuff);
+                    } else if ((cursor = NuStrIStr(parser->word_buf, "ReturnState")) != NULL) {
+                        ref_script->return_state_name =
+                            AIScriptCopyString(cursor + strlen("ReturnState") + 1, load_buff, load_endbuff);
+                    } else if (NuStrICmp(parser->word_buf, "CONDITIONS") == 0) {
+                        load_conditionshdr = &ref_script->conditions;
+                        condition_has_no_goto = 1;
 
-                    xConditions(parser);
+                        xConditions(parser);
 
-                    load_conditionshdr = NULL;
-                    condition_has_no_goto = 0;
-                } else if (NuStrIStr(parser->word_buf, "Source") != NULL) {
-                    if (NuStrIStr(parser->word_buf, "Global") != NULL) {
-                        ref_script->check_global_scripts = 1;
-                    } else if (NuStrIStr(parser->word_buf, "Level") != NULL) {
-                        ref_script->check_level_scripts = 1;
+                        load_conditionshdr = NULL;
+                        condition_has_no_goto = 0;
+                    } else if (NuStrIStr(parser->word_buf, "Source") != NULL) {
+                        if (NuStrIStr(parser->word_buf, "Global") != NULL) {
+                            ref_script->check_global_scripts = 1;
+                        } else if (NuStrIStr(parser->word_buf, "Level") != NULL) {
+                            ref_script->check_level_scripts = 1;
+                        }
                     }
+                } else {
+                    is_done = true;
                 }
-            } else {
-                is_done = true;
             }
         }
-    }
 
-    if (ref_script->name != NULL) {
-        if (!ref_script->check_global_scripts && !ref_script->check_level_scripts) {
-            ref_script->check_global_scripts = 1;
-            ref_script->check_level_scripts = 1;
+        if (ref_script->name != NULL) {
+            if (!ref_script->check_global_scripts && !ref_script->check_level_scripts) {
+                ref_script->check_global_scripts = 1;
+                ref_script->check_level_scripts = 1;
+            }
+
+            NuLinkedListAppend(load_refscripthdr, &ref_script->list_node);
+        } else {
+            *load_buff = orig_buf;
         }
-
-        NuLinkedListAppend(load_refscripthdr, &ref_script->list_node);
-    } else {
-        *load_buff = orig_buf;
     }
 }
 
@@ -1218,8 +1217,8 @@ void AIScriptOpenPakFileParse(AISCRIPT **script_ref, void *pak, char *filename, 
 
     script = *script_ref;
 
-    load_endbuff = buf_end;
     load_buff = buf;
+    load_endbuff = buf_end;
     load_aiscript = script;
     aiscript_const_curr = 0;
 

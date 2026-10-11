@@ -559,8 +559,8 @@ void FileLoadSingleEffectType(debinftype *effect, i32 version, char category) {
         effect->repeat_box.z = EdFileReadFloat();
     } else {
         effect->use_explicit_clip_box = 0;
-        effect->repeat_box.x = 1.0f;
         effect->repeat_box.y = 1.0f;
+        effect->repeat_box.x = 1.0f;
         effect->repeat_box.z = 1.0f;
     }
     if (version >= 36)

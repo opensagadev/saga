@@ -383,82 +383,81 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
             object_count = HIGHGAMEOBJECT;
         }
     }
-    if (best == NULL || best->character_context == 0x0f) {
-        return;
-    }
+    if (best != NULL && best->character_context != 0x0f) {
 
-    object->field_0xe22 |= 2;
-    object->force_glow_candidate = best;
-    object->force_glow_candidate_kind = 2;
-    SetObjAsHeadTarget(object, best, 2, 1.0f, 0.0f, 0.0f);
-    if (activate == 0 && !objInNetWaitContext(object, 0x1b)) {
-        return;
-    }
-
-    if (object->id == id_LUKESKYWALKERDAGOBAH && dagobah_training != 0 && object->field_0xcc0 == NULL &&
-        FreePlay == 0) {
-        if (AnimPlaying(&object->apiobj.anim_packet, 0x0b, 1, 1) == NULL &&
-            AnimPlaying(&object->apiobj.anim_packet, 0x27, 1, 1) == NULL) {
-            PlaySfx(const_cast<char *>("JForcePush"), &object->apiobj.collision_position);
-            PlayGruntSfx(object);
+        object->field_0xe22 |= 2;
+        object->force_glow_candidate = best;
+        object->force_glow_candidate_kind = 2;
+        SetObjAsHeadTarget(object, best, 2, 1.0f, 0.0f, 0.0f);
+        if (activate == 0 && !objInNetWaitContext(object, 0x1b)) {
+            return;
         }
-        NewBuzzFrames(object->pad_gamepad->pad, 2, 0);
-        object->apiobj.movement_facing_angle =
-            NuAtan2D(best->apiobj.collision_position.x - object->apiobj.collision_position.x,
-                     best->apiobj.collision_position.z - object->apiobj.collision_position.z);
-        object->field_0xe23 |= 1;
-        GameCam_HitRoll();
-        return;
-    }
 
-    object->character_context = 0x1b;
-    object->force_target = best;
-    object->field_0x7a3 = 0;
-    object->context_animation_timer = 0.0f;
-    object->airborne_action_duration = 0.3f;
-    GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
-    object->field_0xe21 &= ~3;
-    object->field_0xe20 &= ~0x80;
-    if (selected_direct != 0) {
-        object->field_0xe21 |= 2;
-    } else if (selected_choke != 0 || selected_second != 0) {
-        object->field_0xe20 |= 0x80;
-        if (selected_second != 0) {
-            object->field_0xe21 |= 1;
-        }
-    }
-
-    if ((object->field_0xe21 & 4) == 0) {
-        FaceOpponent(object, NULL);
-        if ((object->field_0xe21 & 2) != 0) {
-            PlaySfx(const_cast<char *>("ForceMindTrick"), &object->apiobj.collision_position);
-        } else {
-            Player_ClearContext(best, 1);
-            Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(best->player_packet));
-            if ((object->field_0xe21 & 1) != 0) {
-                best->context_animation = 0x54;
-                best->action_movement_state = 2;
-            } else if ((object->field_0xe20 & 0x80) != 0) {
-                PlaySfx(const_cast<char *>("ForceChokeCrunch"), &best->apiobj.collision_position);
-                best->context_animation = 0x53;
-                best->action_movement_state = 3;
-            } else {
-                best->context_animation = best->apiobj.character_model->model_data_b[0x2b] != NULL
-                                              ? 0x2b
-                                              : (best->apiobj.character_model->model_data_b[5] != NULL ? 5 : 0x2b);
-                best->action_movement_state = 0;
-                if (object->apiobj.player_controlled && Cheat_IsOn(0x13)) {
-                    best->action_movement_state = 4;
-                }
+        if (object->id == id_LUKESKYWALKERDAGOBAH && dagobah_training != 0 && object->field_0xcc0 == NULL &&
+            FreePlay == 0) {
+            if (AnimPlaying(&object->apiobj.anim_packet, 0x0b, 1, 1) == NULL &&
+                AnimPlaying(&object->apiobj.anim_packet, 0x27, 1, 1) == NULL) {
+                PlaySfx(const_cast<char *>("JForcePush"), &object->apiobj.collision_position);
+                PlayGruntSfx(object);
             }
-            best->force_target = object;
-            best->character_context = 0x1c;
-            FastWeaponIn(best, 0);
-            FaceOpponent(best, NULL);
+            NewBuzzFrames(object->pad_gamepad->pad, 2, 0);
+            object->apiobj.movement_facing_angle =
+                NuAtan2D(best->apiobj.collision_position.x - object->apiobj.collision_position.x,
+                         best->apiobj.collision_position.z - object->apiobj.collision_position.z);
+            object->field_0xe23 |= 1;
+            GameCam_HitRoll();
+            return;
         }
+
+        object->character_context = 0x1b;
+        object->force_target = best;
+        object->field_0x7a3 = 0;
+        object->context_animation_timer = 0.0f;
+        object->airborne_action_duration = 0.3f;
+        GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
+        object->field_0xe21 &= ~3;
+        object->field_0xe20 &= ~0x80;
+        if (selected_direct != 0) {
+            object->field_0xe21 |= 2;
+        } else if (selected_choke != 0 || selected_second != 0) {
+            object->field_0xe20 |= 0x80;
+            if (selected_second != 0) {
+                object->field_0xe21 |= 1;
+            }
+        }
+
+        if ((object->field_0xe21 & 4) == 0) {
+            FaceOpponent(object, NULL);
+            if ((object->field_0xe21 & 2) != 0) {
+                PlaySfx(const_cast<char *>("ForceMindTrick"), &object->apiobj.collision_position);
+            } else {
+                Player_ClearContext(best, 1);
+                Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(best->player_packet));
+                if ((object->field_0xe21 & 1) != 0) {
+                    best->context_animation = 0x54;
+                    best->action_movement_state = 2;
+                } else if ((object->field_0xe20 & 0x80) != 0) {
+                    PlaySfx(const_cast<char *>("ForceChokeCrunch"), &best->apiobj.collision_position);
+                    best->context_animation = 0x53;
+                    best->action_movement_state = 3;
+                } else {
+                    best->context_animation = best->apiobj.character_model->model_data_b[0x2b] != NULL
+                                                  ? 0x2b
+                                                  : (best->apiobj.character_model->model_data_b[5] != NULL ? 5 : 0x2b);
+                    best->action_movement_state = 0;
+                    if (object->apiobj.player_controlled && Cheat_IsOn(0x13)) {
+                        best->action_movement_state = 4;
+                    }
+                }
+                best->force_target = object;
+                best->character_context = 0x1c;
+                FastWeaponIn(best, 0);
+                FaceOpponent(best, NULL);
+            }
+        }
+        PlaySfx(const_cast<char *>("JForcePush"), &object->apiobj.collision_position);
+        PlayGruntSfx(best);
     }
-    PlaySfx(const_cast<char *>("JForcePush"), &object->apiobj.collision_position);
-    PlayGruntSfx(best);
 }
 
 f32 PushingTowardsAngle(u16 input_angle, u16 direction) {

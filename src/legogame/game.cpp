@@ -821,8 +821,8 @@ void InitGameAfterConfig(void) {
                             local_28 = local_28 + POINTS_PER_TRUEJEDI;
                             iVar4 = GOLDBRICKPOINTS + 3;
                         }
-                        GOLDBRICKPOINTS = iVar4;
                         COMPLETIONPOINTS = POINTS_PER_REDBRICK + local_24 + POINTS_PER_CHALLENGE;
+                        GOLDBRICKPOINTS = iVar4;
                         CompletionPointInfo[1] = POINTS_PER_REDBRICK + POINTS_PER_CHALLENGE + local_28;
                         if (GOLDBRICKFORCHALLENGE != 0) {
                             GOLDBRICKPOINTS = GOLDBRICKPOINTS + 1;
@@ -985,8 +985,8 @@ void InitGameAfterConfig(void) {
     //  ExtraHurtSfxFn = ExtraHurtSfx_LSW;
     //  ExtraDieSfxFn = ExtraDieSfx_LSW;
     BuckStartExtraFn = BuckStartExtra_LSW;
-    BoltInitSfxFn = BoltInitSfx_LSW;
     REDBRICKPOSX = 0.0f;
+    BoltInitSfxFn = BoltInitSfx_LSW;
     REDBRICKPOSY = -0.5f;
     REDBRICKPOS2X = 1.25f;
     REDBRICKPOS2Y = 0.0f;
@@ -1212,8 +1212,8 @@ void InitGameAfterConfig(void) {
     extern i32 Grass_Available;
     Grass_Available = 1;
     //  PauseGame_ExtraCodeFn = PauseGame_ExtraCode;
-    Hub_PanelBusyFn = Hub_PanelBusy;
     CheckMusicOtherFn = CheckMusicOther;
+    Hub_PanelBusyFn = Hub_PanelBusy;
     GizBuildIt_CanStartBuildingFn = GizBuildIt_CanStartBuildingFn_Game;
     GizBuildIt_FinishFn = GizBuildIt_FinishFn_Game;
     extern i16 tPOWERUP;
@@ -1229,14 +1229,14 @@ void InitGameAfterConfig(void) {
     //  MatrixReflection_CanOverrideFn = MatrixReflection_CanOverride;
     Jump_PreventJumpFn = Jump_PreventJump;
     //  SurfaceInfo_ExtraReflectFn = SurfaceInfo_ExtraReflect;
-    Hint_AlphaTargetFn = Hint_AlphaTarget;
+    LEGOOBJ_DEFAULTLASTCOIN = 0xb7;
     //  Arcade_TextCrawlID = 0x1f1;
     //  Arcade_TextCrawlParagraphs = 2;
     //  GizmoPickups_Collide2DFn = GizmoPickups_Collide2D;
-    LEGOOBJ_DEFAULTLASTCOIN = 0xb7;
-    Tag_NoHiddenIconFn = Tag_NoHiddenIcon;
-    //  Collection_GetSelectingPlayerIDsFn = Collection_GetSelectingPlayerIDs;
+    Hint_AlphaTargetFn = Hint_AlphaTarget;
     GizmoBlowUp_SfxFn = GizmoBlowUp_Sfx;
+    //  Collection_GetSelectingPlayerIDsFn = Collection_GetSelectingPlayerIDs;
+    Tag_NoHiddenIconFn = Tag_NoHiddenIcon;
     APIObjResetShadowMapRenderingFn = ResetShadowMapRenderingFn;
     APIObjEnableShadowMapRenderingFn = EnableShadowMapRenderingFn;
     //  GameMsg_GetExtraObjFn = GameMsg_GetExtraObj;

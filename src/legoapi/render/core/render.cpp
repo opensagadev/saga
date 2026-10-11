@@ -2453,9 +2453,9 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
             matrix.m31 = x3 * cx - matrix.m32 * sx;
             matrix.m32 = x3 * sx + matrix.m32 * cx;
 
-            matrix.m30 += x * PANEL3DMULX;
             matrix.m31 += y * PANEL3DMULY;
             matrix.m32 += z;
+            matrix.m30 += x * PANEL3DMULX;
 
             if (i < 10) {
                 KitPart[i].matrix = matrix;
@@ -3585,27 +3585,26 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                 memcpy(saved_matrix, &blade_matrix, sizeof(blade_matrix));
                 for (i32 side = 0;; ++side) {
                     for (i32 part = 0; part < 4; ++part) {
-                        if ((side && models[part] == hilt) || models[part] == -1) {
-                            continue;
-                        }
-                        if (part == 3) {
-                            blade_matrix.m30 += object->weapon_trail_offset.x;
-                            blade_matrix.m31 += object->weapon_trail_offset.y;
-                            blade_matrix.m32 += object->weapon_trail_offset.z;
-                        }
-                        NUMTX *matrix = models[part] == hilt ? &hilt_matrix : &blade_matrix;
-                        Draw3DObjectMtx(NULL, models[part], matrix);
-                        if (reflection) {
-                            i32 model = reflected_models[part];
-                            if (model == -1 || !WORLD->lev_objs[model].active) {
-                                model = models[part];
+                        if (!(side && models[part] == hilt) && models[part] != -1) {
+                            if (part == 3) {
+                                blade_matrix.m30 += object->weapon_trail_offset.x;
+                                blade_matrix.m31 += object->weapon_trail_offset.y;
+                                blade_matrix.m32 += object->weapon_trail_offset.z;
                             }
-                            NUMTX reflected;
-                            if (MatrixReflection(matrix, object->field_0x1087, object->field_0x1020,
-                                                 WORLD->current_level->unknown_0cc, &reflected)) {
-                                NuRndrStartReflectionRender(0);
-                                Draw3DObjectMtx(NULL, model, &reflected);
-                                NuRndrEndReflectionRender();
+                            NUMTX *matrix = models[part] == hilt ? &hilt_matrix : &blade_matrix;
+                            Draw3DObjectMtx(NULL, models[part], matrix);
+                            if (reflection) {
+                                i32 model = reflected_models[part];
+                                if (model == -1 || !WORLD->lev_objs[model].active) {
+                                    model = models[part];
+                                }
+                                NUMTX reflected;
+                                if (MatrixReflection(matrix, object->field_0x1087, object->field_0x1020,
+                                                     WORLD->current_level->unknown_0cc, &reflected)) {
+                                    NuRndrStartReflectionRender(0);
+                                    Draw3DObjectMtx(NULL, model, &reflected);
+                                    NuRndrEndReflectionRender();
+                                }
                             }
                         }
                     }

@@ -726,8 +726,8 @@ void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_p
         if (distance < (0.25f + object->apiobj.field_0x1dc) * machine->scale &&
             (special_pressed != 0 || (object->panel_use_request == 2 && object->big_jump_data != NULL))) {
             object->field_0x788 = machine;
-            object->field_0x768 = 0.0f;
             object->delayed_turn_timer = 0.0f;
+            object->field_0x768 = 0.0f;
             object->apiobj.movement_facing_angle = machine->yaw;
             object->field_0xe21 &= ~0x10;
             object->character_context = 0x61;

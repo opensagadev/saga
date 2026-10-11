@@ -2365,43 +2365,42 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
         NuMtxMul(&cutscenecammtx, &cutscenecammtx, &instance->matrix);
     }
     set_cutscenecammtx = 1;
-    if ((camera_state->flags & 2) == 0) {
-        return;
-    }
+    if ((camera_state->flags & 2) != 0) {
 
-    instNUGCUTCAMTGT_s *target = &camera_instance->targets[camera_state->event_index];
-    f32 duration = fabsf(target->duration);
-    i32 reverse = 0;
-    if (NuFsign(target->duration) < 0.0f) {
-        if (duration + target->start_frame <= frame) {
-            camera_state->flags &= ~2U;
-            return;
+        instNUGCUTCAMTGT_s *target = &camera_instance->targets[camera_state->event_index];
+        f32 duration = fabsf(target->duration);
+        i32 reverse = 0;
+        if (NuFsign(target->duration) < 0.0f) {
+            if (duration + target->start_frame <= frame) {
+                camera_state->flags &= ~2U;
+                return;
+            }
+            reverse = 1;
         }
-        reverse = 1;
-    }
 
-    const NUVEC translation = *NUMTX_GET_ROW_VEC(&cutscenecammtx, 3);
-    NUMTX look_at_matrix = cutscenecammtx;
-    NuMtxLookAtZ(&look_at_matrix, target->target);
+        const NUVEC translation = *NUMTX_GET_ROW_VEC(&cutscenecammtx, 3);
+        NUMTX look_at_matrix = cutscenecammtx;
+        NuMtxLookAtZ(&look_at_matrix, target->target);
 
-    f32 blend = 1.0f;
-    if (duration > 0.01f) {
-        blend = (frame - target->start_frame) / duration;
-    }
-    if (blend > 1.0f) {
-        blend = 1.0f - blend;
-    } else if (!(blend < 0.0f) && reverse != 0) {
-        blend = 1.0f - blend;
-    }
+        f32 blend = 1.0f;
+        if (duration > 0.01f) {
+            blend = (frame - target->start_frame) / duration;
+        }
+        if (blend > 1.0f) {
+            blend = 1.0f - blend;
+        } else if (!(blend < 0.0f) && reverse != 0) {
+            blend = 1.0f - blend;
+        }
 
-    NUQUAT look_at_rotation;
-    NUQUAT camera_rotation;
-    NUQUAT blended_rotation;
-    NuMtxToQuat(&look_at_matrix, &look_at_rotation);
-    NuMtxToQuat(&cutscenecammtx, &camera_rotation);
-    NuQuatSlerp(&blended_rotation, &camera_rotation, &look_at_rotation, blend);
-    NuQuatToMtx(&blended_rotation, &cutscenecammtx);
-    *NUMTX_GET_ROW_VEC(&cutscenecammtx, 3) = translation;
+        NUQUAT look_at_rotation;
+        NUQUAT camera_rotation;
+        NUQUAT blended_rotation;
+        NuMtxToQuat(&look_at_matrix, &look_at_rotation);
+        NuMtxToQuat(&cutscenecammtx, &camera_rotation);
+        NuQuatSlerp(&blended_rotation, &camera_rotation, &look_at_rotation, blend);
+        NuQuatToMtx(&blended_rotation, &cutscenecammtx);
+        *NUMTX_GET_ROW_VEC(&cutscenecammtx, 3) = translation;
+    }
 }
 
 static void instNuGCutSceneClipTest(instNUGCUTSCENE_s *instance) {

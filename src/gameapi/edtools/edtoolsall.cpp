@@ -747,8 +747,8 @@ i32 edppPtlCreate(NUVEC *position, i32 effect_index) {
     particle->emitter_rotation_x = edpp_emitrotx;
     particle->start_offset = edpp_offset;
     particle->switch_type = 0;
-    particle->switch_id = -1;
     particle->switch_variable = 0.0f;
+    particle->switch_id = -1;
     particle->reflection_offset = 0.0f;
     particle->reflection_bounce = 0.9f;
     particle->render_group = 0;
@@ -912,8 +912,8 @@ void edpartInitType(i32 index) {
         type->effect_ids[variant] = -1;
         type->effect_pages[variant] = 1;
     }
-    type->variant_count = 0;
     type->lifetime = 0.0f;
+    type->variant_count = 0;
     type->speed = 1.0f;
     type->gravity = 0.0f;
     type->emission_rate = 1.0f;
@@ -931,8 +931,8 @@ void edpartInitType(i32 index) {
     type->kill_effect = -1;
     type->impact_effect = -1;
     type->impact_part = -1;
-    type->last_used_time = 0.0f;
     type->field_174 = -1;
+    type->last_used_time = 0.0f;
     type->scale = 1.0f;
     for (i32 sound = 0; sound < 4; ++sound) {
         type->sounds[sound] = -1;
@@ -2589,10 +2589,10 @@ i32 edppPtlCreateCopy(NUVEC *position, i32 source_index) {
     if (particle->instance_id == -1)
         return -1;
     debkeydata[particle->instance_id].field_2f9 = 0;
-    particle->position = *position;
     particle->effect_index = source->effect_index;
     particle->rotation_z = source->rotation_z;
     particle->rotation_y = source->rotation_y;
+    particle->position = *position;
     particle->emitter_rotation_z = source->emitter_rotation_z;
     particle->emitter_rotation_y = source->emitter_rotation_y;
     particle->start_offset = source->start_offset;
@@ -2601,8 +2601,8 @@ i32 edppPtlCreateCopy(NUVEC *position, i32 source_index) {
     particle->switch_variable = source->switch_variable;
     particle->reflection_offset = source->reflection_offset;
     particle->reflection_bounce = source->reflection_bounce;
-    particle->render_group = source->render_group;
     particle->page = source->page;
+    particle->render_group = source->render_group;
     particle->detail_levels = source->detail_levels;
     particle->facing_mode = source->facing_mode;
     particle->facing_rotation_x = source->facing_rotation_x;

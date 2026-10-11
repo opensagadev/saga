@@ -87,89 +87,88 @@ void Credits_Load(WORLDINFO_s *, VARIPTR *buffer, VARIPTR *buffer_end) {
     NuStrCat(filename, "_credits.txt");
     CreditList = static_cast<CREDIT_s *>(GameBufferAlloc(buffer, buffer_end, 1000 * sizeof(CREDIT_s)));
     CreditCount = 0;
-    if (CreditList == NULL) {
-        return;
-    }
-    NUFPAR *parser = NuFParCreate(filename);
-    if (parser == NULL) {
-        return;
-    }
-    CREDIT_s *credit = CreditList;
-    f32 y = 0.2f;
-    while (NuFParGetLine(parser)) {
-        if (NuFParGetWord(parser)) {
-            if (NuStrICmp(parser->word_buf, "duration") == 0) {
-                if (NuFParGetWord(parser) && Credits_Duration == 120.0f) {
-                    f32 duration = NuAToF(parser->word_buf);
-                    if (duration > 0.0f) {
-                        Credits_Duration = duration;
+    if (CreditList != NULL) {
+        NUFPAR *parser = NuFParCreate(filename);
+        if (parser == NULL) {
+            return;
+        }
+        CREDIT_s *credit = CreditList;
+        f32 y = 0.2f;
+        while (NuFParGetLine(parser)) {
+            if (NuFParGetWord(parser)) {
+                if (NuStrICmp(parser->word_buf, "duration") == 0) {
+                    if (NuFParGetWord(parser) && Credits_Duration == 120.0f) {
+                        f32 duration = NuAToF(parser->word_buf);
+                        if (duration > 0.0f) {
+                            Credits_Duration = duration;
+                        }
                     }
-                }
-            } else {
-                const char *style_word = parser->word_buf;
-                i32 style_index;
-                if (NuStrICmp(CreditType[0].name, style_word) == 0)
-                    style_index = 0;
-                else if (NuStrICmp(CreditType[1].name, style_word) == 0)
-                    style_index = 1;
-                else if (NuStrICmp(CreditType[2].name, style_word) == 0)
-                    style_index = 2;
-                else if (NuStrICmp(CreditType[3].name, style_word) == 0)
-                    style_index = 3;
-                else if (NuStrICmp(CreditType[4].name, style_word) == 0)
-                    style_index = 4;
-                else
-                    style_index = -1;
-                CREDIT_TYPE_s *type = style_index == -1 ? NULL : &CreditType[style_index];
-                if (type != NULL) {
-                    char *text = NuFParGetWord(parser) ? parser->word_buf : NULL;
-                    if (text != NULL && NuStrICmp(text, "colour") == 0) {
-                        for (i32 component = 0; component < 4; ++component) {
-                            if (NuFParGetWord(parser)) {
-                                f32 value = NuAToF(parser->word_buf);
-                                i32 maximum = component == 3 ? 128 : 255;
-                                type->colour[component] = value > 1.0f   ? maximum
-                                                          : value < 0.0f ? 0
-                                                                         : static_cast<i32>(value * maximum);
+                } else {
+                    const char *style_word = parser->word_buf;
+                    i32 style_index;
+                    if (NuStrICmp(CreditType[0].name, style_word) == 0)
+                        style_index = 0;
+                    else if (NuStrICmp(CreditType[1].name, style_word) == 0)
+                        style_index = 1;
+                    else if (NuStrICmp(CreditType[2].name, style_word) == 0)
+                        style_index = 2;
+                    else if (NuStrICmp(CreditType[3].name, style_word) == 0)
+                        style_index = 3;
+                    else if (NuStrICmp(CreditType[4].name, style_word) == 0)
+                        style_index = 4;
+                    else
+                        style_index = -1;
+                    CREDIT_TYPE_s *type = style_index == -1 ? NULL : &CreditType[style_index];
+                    if (type != NULL) {
+                        char *text = NuFParGetWord(parser) ? parser->word_buf : NULL;
+                        if (text != NULL && NuStrICmp(text, "colour") == 0) {
+                            for (i32 component = 0; component < 4; ++component) {
+                                if (NuFParGetWord(parser)) {
+                                    f32 value = NuAToF(parser->word_buf);
+                                    i32 maximum = component == 3 ? 128 : 255;
+                                    type->colour[component] = value > 1.0f   ? maximum
+                                                              : value < 0.0f ? 0
+                                                                             : static_cast<i32>(value * maximum);
+                                }
                             }
+                        } else if (CreditCount < 1000) {
+                            credit->type = type->type;
+                            switch (type->type) {
+                                case 0:
+                                    InitCredit(credit, text, 0.0f, y, type->scale, type->colour[0], type->colour[1],
+                                               type->colour[2], type->colour[3], 0, buffer, buffer_end);
+                                    y += CreditType[0].scale / CreditType[1].scale * 0.2f;
+                                    break;
+                                case 1:
+                                    InitCredit(credit, text, 0.0f, y, type->scale, type->colour[0], type->colour[1],
+                                               type->colour[2], type->colour[3], 0, buffer, buffer_end);
+                                    y += CreditType[1].scale / CreditType[1].scale * 0.2f;
+                                    break;
+                                case 4:
+                                    InitCredit(credit, text, 0.0f, y, type->scale, type->colour[0], type->colour[1],
+                                               type->colour[2], type->colour[3], 0, buffer, buffer_end);
+                                    y += CreditType[4].scale / CreditType[1].scale * 0.2f;
+                                    break;
+                                case 2:
+                                    InitCredit(credit, text, -0.015f, y, type->scale, type->colour[0], type->colour[1],
+                                               type->colour[2], type->colour[3], 8, buffer, buffer_end);
+                                    break;
+                                case 3:
+                                    InitCredit(credit, text, 0.015f, y, type->scale, type->colour[0], type->colour[1],
+                                               type->colour[2], type->colour[3], 2, buffer, buffer_end);
+                                    y += CreditType[3].scale / CreditType[1].scale * 0.2f;
+                                    break;
+                            }
+                            ++CreditCount;
+                            ++credit;
                         }
-                    } else if (CreditCount < 1000) {
-                        credit->type = type->type;
-                        switch (type->type) {
-                            case 0:
-                                InitCredit(credit, text, 0.0f, y, type->scale, type->colour[0], type->colour[1],
-                                           type->colour[2], type->colour[3], 0, buffer, buffer_end);
-                                y += CreditType[0].scale / CreditType[1].scale * 0.2f;
-                                break;
-                            case 1:
-                                InitCredit(credit, text, 0.0f, y, type->scale, type->colour[0], type->colour[1],
-                                           type->colour[2], type->colour[3], 0, buffer, buffer_end);
-                                y += CreditType[1].scale / CreditType[1].scale * 0.2f;
-                                break;
-                            case 4:
-                                InitCredit(credit, text, 0.0f, y, type->scale, type->colour[0], type->colour[1],
-                                           type->colour[2], type->colour[3], 0, buffer, buffer_end);
-                                y += CreditType[4].scale / CreditType[1].scale * 0.2f;
-                                break;
-                            case 2:
-                                InitCredit(credit, text, -0.015f, y, type->scale, type->colour[0], type->colour[1],
-                                           type->colour[2], type->colour[3], 8, buffer, buffer_end);
-                                break;
-                            case 3:
-                                InitCredit(credit, text, 0.015f, y, type->scale, type->colour[0], type->colour[1],
-                                           type->colour[2], type->colour[3], 2, buffer, buffer_end);
-                                y += CreditType[3].scale / CreditType[1].scale * 0.2f;
-                                break;
-                        }
-                        ++CreditCount;
-                        ++credit;
                     }
                 }
             }
+            CreditsSize = y + 2.2f;
         }
-        CreditsSize = y + 2.2f;
+        NuFParDestroy(parser);
     }
-    NuFParDestroy(parser);
 }
 
 void Credits_GetInfo(float *duration, i32 *flag, float *alpha) {

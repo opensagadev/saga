@@ -1354,8 +1354,8 @@ static void Asteroid_AddParts(GIZMOBLOWUP_s *blowup) {
         params.gravity = 0.0f;
         params.special = special;
         params.flags = index == 0 ? 0x800019b : 0x8000193;
-        params.field_40 = PartCollide_3D;
         params.time_step = FRAMETIME;
+        params.field_40 = PartCollide_3D;
         params.field_44 = Asteroid_PartKill;
         params.field_a4 = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 3.0f + 7.0f;
 

@@ -224,19 +224,19 @@ extern "C" void NuMtlSetRenderStatesPS(numtl_s *mtl) {
 
     if (isDebris) {
         // Debris materials force a minimal alpha-test.
-        g_alphaFunc = 6;
         g_alphaTestEnabled = 1;
+        g_alphaFunc = 6;
         g_alphaRef = 2;
     } else {
         u32 alphaSel = (u32)(mtl->attribs.alpha_test & 7); // (bytes[0x42]>>4)&7
         if (alphaSel > 1) {
             if (alphaSel != 5) {
-                g_alphaFunc = 6; // GREATER
-                g_alphaTestEnabled = 1;
+                g_alphaTestEnabled = 1; // GREATER
+                g_alphaFunc = 6;
                 g_alphaRef = 0;
             } else {
-                g_alphaFunc = 5; // GEQUAL
-                g_alphaTestEnabled = 1;
+                g_alphaTestEnabled = 1; // GEQUAL
+                g_alphaFunc = 5;
                 g_alphaRef = mtl->attribs.alpha_ref;
             }
         } else if (g_alphaTestEnabled != 0) {

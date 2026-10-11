@@ -93,9 +93,9 @@ void GizPanel_Use(GameObject_s &object, GIZPANEL_s &panel) {
 
 void GizPanel_Reset(GIZPANEL_s *panel) {
     NUVEC *floor_position = &panel->floor_position;
-    floor_position->y = 0.0f;
     floor_position->x = 0.0f;
     floor_position->z = 0.4f;
+    floor_position->y = 0.0f;
     NuVecRotateY(floor_position, floor_position, panel->y_rotation + 0x8000);
     NuVecAdd(floor_position, floor_position, &panel->position);
 

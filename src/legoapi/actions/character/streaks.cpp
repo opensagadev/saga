@@ -363,9 +363,9 @@ void DrawStreaks() {
             vertices[vertex_count + 1].position = streak->previous_position;
             vertices[vertex_count + 1].colour = colour;
             vertices[vertex_count + 1].u = 0.99f;
-            vertex_count += 2;
-
             streak = streak->next;
+
+            vertex_count += 2;
             if (streak == NULL)
                 break;
 

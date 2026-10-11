@@ -538,8 +538,8 @@ static void edgraInit() {
         edgra_vecbuffer = static_cast<NUVEC *>(NU_ALLOC(0x24000, 4, 1, "", 0));
     } else {
         usize aligned = (gra_ptr.addr + 15) & ~usize(15);
-        edgra_mtxbuffer = reinterpret_cast<NUMTX *>(aligned);
         edgra_vecbuffer = reinterpret_cast<NUVEC *>(aligned + 0xc0080);
+        edgra_mtxbuffer = reinterpret_cast<NUMTX *>(aligned);
         gra_ptr.addr = aligned + 0xe4080;
     }
     for (i32 index = 0; index < EDGRA_MAX_CLUMPS; ++index)

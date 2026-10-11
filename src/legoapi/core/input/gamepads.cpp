@@ -525,8 +525,8 @@ i32 ReadPad(i32 port) {
     gamepad->unknown_10 = 0;
     gamepad->unknown_18 = 0;
     gamepad->unknown_1c = 0;
-    gamepad->unknown_04 = 0;
     gamepad->buttons_down_08 = 0;
+    gamepad->unknown_04 = 0;
 
     if (pad == NULL || NuPadRead(pad) == 0 || input_mode == 1) {
         return result;
@@ -574,8 +574,8 @@ i32 ReadPad(i32 port) {
     gamepad->unknown_20 = right_directions;
     gamepad->input_state = 1;
 
-    gamepad->unknown_04 = pad->digital_buttons;
     gamepad->buttons_down_08 = pad->digital_buttons_pressed;
+    gamepad->unknown_04 = pad->digital_buttons;
     pActivePad = gamepad->pad;
     return 2;
 }

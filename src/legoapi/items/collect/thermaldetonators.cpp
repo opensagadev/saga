@@ -128,8 +128,8 @@ void ThermalDetonator_Throw(GameObject_s *object) {
         params.special = &WORLD->lev_objs[0xe9].special;
         params.flags = 0x08000292;
         params.field_40 = PartCollide_3D;
-        params.field_3c = PartImpact_ThermalDetonator;
         params.field_44 = PartKill_ThermalDetonator;
+        params.field_3c = PartImpact_ThermalDetonator;
         params.stop_fn = PartStop_Flickerer;
         params.draw_fn = PartDraw_ThermalDetonator;
         params.time_step = FRAMETIME;
@@ -332,8 +332,8 @@ void ThermalDetonator_ThrowMom(GameObject_s *object, nuvec_s *velocity) {
             part->force_player_mask = 0;
             part->field_1c4 = PartUpdate_ThermalDetonator;
             part->reflection_height = 2000000.0f;
-            part->render_flags &= ~0x80;
             part->reflection_flags &= ~3;
+            part->render_flags &= ~0x80;
         }
         PlaySfx(const_cast<char *>("ThrowDet"), &object->apiobj.collision_position);
         if (object->pad_gamepad != NULL) {

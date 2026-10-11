@@ -319,8 +319,8 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
         return;
     }
 
-    object->field_0x7a4 = 1;
     object->field_0x7a5 = 15;
+    object->field_0x7a4 = 1;
     object->field_0x7a3 = 1;
     object->context_animation_timer = 2.0f;
     NUVEC *points = teleport->path->pts;

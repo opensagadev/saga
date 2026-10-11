@@ -1073,8 +1073,8 @@ static __used__ void MenuUpdatePauseCut(MENU *menu) {
     if (menu->confirm_pressed != 0 && menu->selected_item == 1) {
         if (CutScenePlayer_Active() == 0) {
             if (pausecut_skip_to_level != -1) {
-                NewLData = &LDataList[pausecut_skip_to_level];
                 cutskip_dontplaylevelintro = 1;
+                NewLData = &LDataList[pausecut_skip_to_level];
                 music_man.StopTrack(0x10, 0);
             } else if (pausecut_skip_to_gameplay != 0) {
                 CUTINFO *cut = static_cast<CUTINFO *>(CutStopInfo);

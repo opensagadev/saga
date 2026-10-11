@@ -2287,17 +2287,18 @@ extern "C" {
             return;
         }
         animation->ltime = frame;
-        if ((animation->end_frame_lookup_bits & NUINSTANIM_END_FRAME_LOOKUP_MASK) != 0 &&
-            scene->animation_end_frames != NULL) {
-            StateAnim *state =
-                reinterpret_cast<StateAnim *>(&scene->animation_end_frames[animation->end_frame_lookup_index - 1]);
-            u8 index = static_cast<u8>(static_cast<u32>(animation->flags) >> NUINSTANIM_STATE_INDEX_SHIFT);
-            char value;
-            StateAnimEvaluate2(state, &index, &value, frame);
-            animation->flags =
-                static_cast<NUINSTANIM_FLAGS>((static_cast<u32>(animation->flags) & ~NUINSTANIM_STATE_INDEX_MASK) |
-                                              (static_cast<u32>(index) << NUINSTANIM_STATE_INDEX_SHIFT));
+        if (!((animation->end_frame_lookup_bits & NUINSTANIM_END_FRAME_LOOKUP_MASK) != 0 &&
+              scene->animation_end_frames != NULL)) {
+            return;
         }
+        StateAnim *state =
+            reinterpret_cast<StateAnim *>(&scene->animation_end_frames[animation->end_frame_lookup_index - 1]);
+        u8 index = static_cast<u8>(static_cast<u32>(animation->flags) >> NUINSTANIM_STATE_INDEX_SHIFT);
+        char value;
+        StateAnimEvaluate2(state, &index, &value, frame);
+        animation->flags =
+            static_cast<NUINSTANIM_FLAGS>((static_cast<u32>(animation->flags) & ~NUINSTANIM_STATE_INDEX_MASK) |
+                                          (static_cast<u32>(index) << NUINSTANIM_STATE_INDEX_SHIFT));
     }
 
     StateAnim *StateAnimFixPtrs(StateAnim *state, isize delta) {

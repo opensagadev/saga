@@ -616,8 +616,8 @@ extern "C" {
         overlay_material->diffuse_color.r = 0.5f;
         overlay_material->diffuse_color.g = 0.5f;
         overlay_material->diffuse_color.b = 0.5f;
-        overlay_material->attribs.alpha_mode = 0;
         overlay_material->attribs.cull_mode = 2;
+        overlay_material->attribs.alpha_mode = 0;
         overlay_material->attribs.z_mode = 3;
         overlay_material->opacity = 1.0f;
         NuMtlUpdate(overlay_material);

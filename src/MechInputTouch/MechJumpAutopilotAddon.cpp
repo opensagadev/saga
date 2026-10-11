@@ -155,9 +155,9 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
     {
         VuVec ray(0.0f, ray_length, 0.0f, 1.0f);
         VuVec origin;
-        origin.x = point.x + offsets[0].x;
         origin.y = field_24.y + ray_offset;
         origin.z = point.z + offsets[0].z;
+        origin.x = point.x + offsets[0].x;
         if (GameRayCast(&origin.xyz, &ray.xyz, 0.0f, 0)) {
             const VuVec hit(origin.x + ray.x, origin.y + ray.y, origin.z + ray.z, 0.0f);
             const f32 dx = hit.x - field_24.x;
@@ -173,9 +173,9 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
     {
         VuVec ray(0.0f, ray_length, 0.0f, 1.0f);
         VuVec origin;
-        origin.x = point.x + offsets[1].x;
         origin.y = field_24.y + ray_offset;
         origin.z = point.z + offsets[1].z;
+        origin.x = point.x + offsets[1].x;
         if (GameRayCast(&origin.xyz, &ray.xyz, 0.0f, 0)) {
             const VuVec hit(origin.x + ray.x, origin.y + ray.y, origin.z + ray.z, 0.0f);
             const f32 dx = hit.x - field_24.x;
@@ -390,17 +390,17 @@ bool MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time
 
     elapsed_time += delta_time;
     if (__builtin_expect(character->character_context == LEGOCONTEXT_JUMP && !started, 0)) {
-        field_24.x = character->apiobj.position.x;
         field_24.y = character->apiobj.position.y;
-        field_24.z = character->apiobj.position.z;
+        field_24.x = character->apiobj.position.x;
         field_24.w = 1.0f;
-        field_34.x = character->apiobj.velocity.x;
+        field_24.z = character->apiobj.position.z;
         field_34.y = character->apiobj.velocity.y;
+        field_34.x = character->apiobj.velocity.x;
         field_34.z = character->apiobj.velocity.z;
         field_34.w = 1.0f;
         field_44.x = field_24.x;
-        field_44.y = field_24.y;
         field_44.z = field_24.z;
+        field_44.y = field_24.y;
         field_44.w = 1.0f;
         field_54.x = field_34.x;
         field_54.y = field_34.y;

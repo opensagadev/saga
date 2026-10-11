@@ -320,8 +320,8 @@ extern "C" {
             if (forward != 0) {
                 return;
             }
-            instance->flags_88 |= 2;
             instance->flags_89 &= ~0x10;
+            instance->flags_88 |= 2;
             instance->current_frame = instance->cutscene->duration - 1.0f;
             if (instance->rate > 0.0f) {
                 instance->rate = -instance->rate;
@@ -413,8 +413,8 @@ extern "C" {
     }
 
     void instNuGCutSceneStop(instNUGCUTSCENE_s *instance) {
-        instance->flags_88 &= ~6;
         instance->flags_89 &= ~0x10;
+        instance->flags_88 &= ~6;
         if ((instance->flags_8a & 4) == 0) {
             instNUGCUTCHARSYS_s *runtime = instance->character_instance;
             if (runtime != NULL) {

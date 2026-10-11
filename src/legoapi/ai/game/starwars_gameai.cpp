@@ -710,8 +710,8 @@ i32 StarWars_PrepareR2D2Glide(AIPACKET_s *packet, APIOBJECT_s *object, i32) {
     if (owner->id != id_GEONOSIAN || owner->field_0xe31 == 3 || owner->field_0xe31 == 0) {
         owner->pad_gamepad->buttons_pressed |= GAMEPAD_JUMP;
     }
-    packet->movement_destination = packet->special_move_node->position;
     packet->movement_stopping_distance = 0.0f;
+    packet->movement_destination = packet->special_move_node->position;
     object->collision_priority |= 0x2000;
     return 1;
 }

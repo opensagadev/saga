@@ -166,8 +166,8 @@ __attribute__((optimize("no-tree-loop-optimize"))) void areaEditor_Enter() {
             NuLinkedListAppend(area_list(), &area->link);
             area->position = source->position;
             memcpy(&area->size, &source->half_width, sizeof(area->size));
-            area->rotation = rotation;
             area->flags = flags;
+            area->rotation = rotation;
         }
         NuStrNCpy(area->name, source->name, 16);
     }

@@ -123,8 +123,8 @@ i32 refpack(unsigned char *source, abi_long source_size, unsigned char *destinat
                 const u32 count = MIN(literal_count & ~3u, 0x70u);
                 *output++ = (count >> 2) - 0x21;
                 memmove(output, literal_start, count);
-                output += count;
                 literal_start += count;
+                output += count;
                 literal_count -= count;
             }
 
@@ -165,8 +165,8 @@ i32 refpack(unsigned char *source, abi_long source_size, unsigned char *destinat
         const u32 count = MIN(literal_count & ~3u, 0x70u);
         *output++ = (count >> 2) - 0x21;
         memmove(output, literal_start, count);
-        output += count;
         literal_start += count;
+        output += count;
         literal_count -= count;
     }
     *output++ = literal_count - 4;

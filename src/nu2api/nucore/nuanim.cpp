@@ -685,8 +685,8 @@ void NuAnimBuffEvaluate_3_QuatB(numtx_s *base, nuanimbuff_s *buffer, nugscn_s *s
     }
     for (i32 index = count; index < object->joint_count; ++index)
         NuMtxSetIdentity(&matrices[index]);
-    AnimBuffEvalCB = NULL;
     AnimBuffEvalData = NULL;
+    AnimBuffEvalCB = NULL;
     AnimBuffEvalJoint = NULL;
     NuScratchRelease();
     NuScratchRelease();

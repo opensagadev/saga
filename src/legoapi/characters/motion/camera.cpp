@@ -2167,70 +2167,70 @@ extern "C" {
                              ? 1.0f
                              : NuFabs(camera->distance) * camera->auto_zoom_dist_scale + camera->auto_zoom_base;
         NUVEC movement = {0.0f, 0.0f, 0.0f};
-        if (NuKeyboard(0x38) == 0)
-            return;
+        if (NuKeyboard(0x38) != 0) {
 
-        const f32 mouse_x = NuMouseReadXVel() * camera->mouse_pitch_speed;
-        const f32 mouse_y = NuMouseReadYVel() * camera->mouse_yaw_speed;
-        const f32 mouse_z = NuMouseReadZVel() * camera->mouse_move_speed;
-        const u32 buttons = NuMouseReadButtons();
+            const f32 mouse_x = NuMouseReadXVel() * camera->mouse_pitch_speed;
+            const f32 mouse_y = NuMouseReadYVel() * camera->mouse_yaw_speed;
+            const f32 mouse_z = NuMouseReadZVel() * camera->mouse_move_speed;
+            const u32 buttons = NuMouseReadButtons();
 
-        if (buttons == 2 || buttons == 5) {
-            if (camera->freedoms & EDCAM_FREEDOM_DISTANCE) {
-                if (mouse_y != 0.0f || mouse_x != 0.0f)
-                    TargetAng = static_cast<i16>(NuAtan2D(-mouse_x, -mouse_y));
-                u16 angle = static_cast<u16>(TargetAng);
-                i32 difference = static_cast<u16>(angle - MouseOldAng);
-                if (difference > 0x7fff)
-                    difference -= 0x10000;
-                if (abs(difference) > 20000)
-                    angle = static_cast<u16>(TargetAng);
-                else
-                    angle = static_cast<u16>(MouseOldAng + difference / 4);
-                MouseOldAng = angle;
-
-                f32 sine = NU_SIN_LUT(static_cast<u16>(angle) + 0x2000);
-                if (NuFabs(sine) > 0.1f) {
-                    if (sine > 0.0f)
-                        sine -= 0.1f;
+            if (buttons == 2 || buttons == 5) {
+                if (camera->freedoms & EDCAM_FREEDOM_DISTANCE) {
+                    if (mouse_y != 0.0f || mouse_x != 0.0f)
+                        TargetAng = static_cast<i16>(NuAtan2D(-mouse_x, -mouse_y));
+                    u16 angle = static_cast<u16>(TargetAng);
+                    i32 difference = static_cast<u16>(angle - MouseOldAng);
+                    if (difference > 0x7fff)
+                        difference -= 0x10000;
+                    if (abs(difference) > 20000)
+                        angle = static_cast<u16>(TargetAng);
                     else
-                        sine += 0.1f;
-                    f32 distance = NuFsqrt(mouse_x * mouse_x + mouse_y * mouse_y) * sine *
-                                       (zoom_scale * camera->distance_speed) * camera->mouse_move_speed +
-                                   camera->distance;
-                    const f32 minimum = -camera->minimum_distance;
-                    camera->distance = MIN(minimum, distance);
+                        angle = static_cast<u16>(MouseOldAng + difference / 4);
+                    MouseOldAng = angle;
+
+                    f32 sine = NU_SIN_LUT(static_cast<u16>(angle) + 0x2000);
+                    if (NuFabs(sine) > 0.1f) {
+                        if (sine > 0.0f)
+                            sine -= 0.1f;
+                        else
+                            sine += 0.1f;
+                        f32 distance = NuFsqrt(mouse_x * mouse_x + mouse_y * mouse_y) * sine *
+                                           (zoom_scale * camera->distance_speed) * camera->mouse_move_speed +
+                                       camera->distance;
+                        const f32 minimum = -camera->minimum_distance;
+                        camera->distance = MIN(minimum, distance);
+                    }
                 }
+            } else if (buttons == 3 || buttons == 4) {
+                movement.x += mouse_x * 0.0078125f;
+                movement.y -= mouse_y * 0.0078125f;
+            } else if (buttons == 1) {
+                if (camera->freedoms & EDCAM_FREEDOM_PITCH) {
+                    camera->pitch -= static_cast<i32>(mouse_y * 16.0f);
+                    if (camera->pitch > 0x4000)
+                        camera->pitch = 0x4000;
+                    if (camera->pitch < -0x4000)
+                        camera->pitch = -0x4000;
+                }
+                if (camera->freedoms & EDCAM_FREEDOM_YAW)
+                    camera->yaw -= static_cast<i32>(mouse_x * 16.0f);
             }
-        } else if (buttons == 3 || buttons == 4) {
-            movement.x += mouse_x * 0.0078125f;
-            movement.y -= mouse_y * 0.0078125f;
-        } else if (buttons == 1) {
-            if (camera->freedoms & EDCAM_FREEDOM_PITCH) {
-                camera->pitch -= static_cast<i32>(mouse_y * 16.0f);
-                if (camera->pitch > 0x4000)
-                    camera->pitch = 0x4000;
-                if (camera->pitch < -0x4000)
-                    camera->pitch = -0x4000;
-            }
-            if (camera->freedoms & EDCAM_FREEDOM_YAW)
-                camera->yaw -= static_cast<i32>(mouse_x * 16.0f);
+
+            const f32 minimum = -camera->minimum_distance;
+            const f32 distance = camera->distance - zoom_scale * camera->distance_speed * mouse_z;
+            camera->distance = MIN(minimum, distance);
+
+            NUMTX rotation = numtx_identity;
+            NuMtxRotateX(&rotation, camera->pitch);
+            NuMtxRotateY(&rotation, camera->yaw);
+            NuVecMtxRotate(&movement, &movement, &rotation);
+            if (camera->freedoms & EDCAM_FREEDOM_POSITION_X)
+                camera->position.x += movement.x;
+            if (camera->freedoms & EDCAM_FREEDOM_POSITION_Y)
+                camera->position.y += movement.y;
+            if (camera->freedoms & EDCAM_FREEDOM_POSITION_Z)
+                camera->position.z += movement.z;
         }
-
-        const f32 minimum = -camera->minimum_distance;
-        const f32 distance = camera->distance - zoom_scale * camera->distance_speed * mouse_z;
-        camera->distance = MIN(minimum, distance);
-
-        NUMTX rotation = numtx_identity;
-        NuMtxRotateX(&rotation, camera->pitch);
-        NuMtxRotateY(&rotation, camera->yaw);
-        NuVecMtxRotate(&movement, &movement, &rotation);
-        if (camera->freedoms & EDCAM_FREEDOM_POSITION_X)
-            camera->position.x += movement.x;
-        if (camera->freedoms & EDCAM_FREEDOM_POSITION_Y)
-            camera->position.y += movement.y;
-        if (camera->freedoms & EDCAM_FREEDOM_POSITION_Z)
-            camera->position.z += movement.z;
     }
 
     void do_mouse_flymode_camera(edcam_s *camera, f32 delta_time) {

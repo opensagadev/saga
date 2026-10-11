@@ -194,8 +194,8 @@ extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3) {
     menu->last_column = 0;
     menu->last_row = 0;
     menu->state = 0;
-    menu->draw_item = 0;
     menu->field_b8 = 1;
+    menu->draw_item = 0;
     menu->field_b4 = 1;
     menu->field_b0 = 0;
     menu->field_c0 = 0;

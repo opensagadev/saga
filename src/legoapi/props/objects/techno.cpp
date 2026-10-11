@@ -129,8 +129,8 @@ static void Technos_Reset(void *world_ptr, void *, void *progress_ptr) {
     TECHNO *cursor = world->technos;
     for (i32 index = 0; index < world->ntechnos; ++index, ++cursor) {
         TECHNO &techno = *cursor;
-        techno.ground_position.x = 0.0f;
         techno.ground_position.y = 0.0f;
+        techno.ground_position.x = 0.0f;
         techno.ground_position.z = TechnoSys.interaction_time;
         NuVecRotateY(&techno.ground_position, &techno.ground_position, techno.y_rotation);
         NuVecAdd(&techno.ground_position, &techno.ground_position, &techno.position);

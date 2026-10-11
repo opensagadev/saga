@@ -187,10 +187,10 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
     object->ai.field_0x1e6 &= ~4u;
     object->ai.field_0x1e4 = static_cast<u8>((object->ai.field_0x1e4 & 0x7f) |
                                              ((creature.flags & AI_CREATURE_FLAG_FORMATION_REVERSED) << 7));
-    object->apiobj.viewdistance = creature.view_distance;
     object->apiobj.heardistance = creature.hear_distance;
     object->apiobj.maxviewheight = creature.max_view_height;
     object->apiobj.minviewheight = creature.min_view_height;
+    object->apiobj.viewdistance = creature.view_distance;
 
     const u8 column = object->ai.group_column;
     const u8 row = object->ai.group_row;
@@ -242,8 +242,8 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
     AISCRIPTPROCESS *processor = &object->ai.script_process;
     AIScriptProcessorInit(WORLD->ai_sys, packet, processor, &creature, creature.script_name, NULL, 1, NULL, NULL);
     object->ai.field_0x138 = 0xff;
-    object->ai.field_0x139 = 0;
     object->ai.field_0x124 = -1;
+    object->ai.field_0x139 = 0;
     AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, packet, 0xff, static_cast<i8>(object->apiobj.field_0x27d));
 
     ResetAnimPacket(&object->apiobj.anim_packet, 1);

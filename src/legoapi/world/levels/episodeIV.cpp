@@ -1019,9 +1019,9 @@ void KillParts_TIEFIGHTER(ADDPART_s *params, i32 part_index, i32 variant, GameOb
         }
         params->flags = 0x111;
         params->field_a4 = 2.0f;
-        params->velocity = &spin_velocity;
         params->field_44 = TiePart_Kill;
         params->field_3c = TiePart_Impact;
+        params->velocity = &spin_velocity;
         PlaySfx("Tie_Spins", &object->apiobj.collision_position);
         AddPart(params);
         return;

@@ -103,8 +103,8 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
             }
         }
         if (source != first_shape) {
-            min_x -= 0.05f;
             min_z -= 0.05f;
+            min_x -= 0.05f;
             max_x += 0.05f;
             max_z += 0.05f;
         }
@@ -208,8 +208,8 @@ void CharPlatforms_Configure(WORLDINFO_s *world, char *config) {
             }
 
             system = world->char_platform_sys;
-            platform->platform_id = -1;
             platform->object = NULL;
+            platform->platform_id = -1;
             ++system->platform_count;
         }
     }

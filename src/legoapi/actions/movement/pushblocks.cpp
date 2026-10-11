@@ -143,8 +143,8 @@ void ResetSinglePushBlock(WORLDINFO_s *, pushblock_s *block, i32) {
     block->platform_id = FindPlatInst(NuSpecialGetInstanceix(&block->special));
     SetAnimFrame(&block->special, 1.0f);
     block->runtime_flags_0c8 &= 0xf2;
-    block->flags_0cb &= ~2u;
     block->runtime_flags_0c9 &= 0xf0;
+    block->flags_0cb &= ~2u;
     block->completion_flags &= 0xf807;
     block->packed_state_flags &= 0xfffc7fff;
     block->pushing_object = NULL;

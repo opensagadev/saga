@@ -260,8 +260,8 @@ void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_e
     i32 count = this->album_count;
     if (count == 0 || (track_count = this->track_count, track_count == 0)) {
         *buffer_start = buffer_original;
-        this->albums = NULL;
         this->album_count = 0;
+        this->albums = NULL;
         this->tracks = NULL;
         this->track_count = 0;
         return;

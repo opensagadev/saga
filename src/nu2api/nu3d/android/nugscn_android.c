@@ -353,8 +353,8 @@ SAGA_HOST_WEAK void NuGScnCreatePS(nugscn_s *scene, variptr_u *, variptr_u *) {
     if (g_VideoResHeader.texture_hashes == 0) {
         for (i32 i = 0; i < scene->ntextures; ++i) {
             NUNATIVETEX *texture = textures[i];
-            texture->image_data = nullptr;
             texture->size = 0;
+            texture->image_data = nullptr;
             texture->platform.gl_tex = g_VideoResHeader.textures[i];
         }
     } else {
@@ -364,8 +364,8 @@ SAGA_HOST_WEAK void NuGScnCreatePS(nugscn_s *scene, variptr_u *, variptr_u *) {
                 g_VideoResHeader.textures[i] = NuIOS_CreateGLTexFromHash(hash);
             }
             NUNATIVETEX *texture = textures[i];
-            texture->image_data = nullptr;
             texture->size = hash;
+            texture->image_data = nullptr;
             texture->platform.gl_tex = g_VideoResHeader.textures[i];
         }
     }

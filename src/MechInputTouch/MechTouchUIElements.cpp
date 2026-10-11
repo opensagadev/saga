@@ -292,9 +292,9 @@ void MechTouchUICharIcon::Process(float) {
     if (field_0x45 == 0 && was_disabled != disabled) {
         const f32 destination = disabled != 0 ? 0.3f : 1.0f;
         if (alpha_duration < 0.0f || alpha_elapsed >= alpha_duration + alpha_delay) {
-            alpha_start = *alpha_target;
             alpha_elapsed = 0.0f;
             alpha_duration = 0.4f;
+            alpha_start = *alpha_target;
             alpha_delay = 0.0f;
         }
         alpha_end = destination;
@@ -359,11 +359,11 @@ MechTouchUITagButton::MechTouchUITagButton(GameObject_s &object, TouchHolder &ho
                          TagButtonSize),
       target_object(object.GetMechObjectInterface()), touch_holder(&holder) {
     position.z = 0.0f;
-    rectangular = 0;
     tag_state = 2;
     fading_out = 0;
     touched = 0;
     enabled = 1;
+    rectangular = 0;
 
     first_fade.target = &first_fade.value;
     first_fade.from = 0.0f;
@@ -384,14 +384,14 @@ MechTouchUITagButton::MechTouchUITagButton(GameObject_s &object, TouchHolder &ho
     size_animation.to = 1.0f;
     size_animation.elapsed = -1.0f;
     size_animation.duration = -1.0f;
-    size_animation.delay = 0.0f;
     size_animation.value = 1.0f;
+    size_animation.delay = 0.0f;
 
     second_fade.target = &second_fade.value;
     second_fade.from = 0.0f;
     second_fade.to = 1.0f;
-    second_fade.elapsed = 0.0f;
     second_fade.duration = 0.8f;
+    second_fade.elapsed = 0.0f;
     second_fade.delay = 0.0f;
     second_fade.value = 0.0f;
     field_0xbc = 0.0f;
@@ -477,8 +477,8 @@ void MechTouchUITagButton::Process(float dt) {
     const f32 upper = 1.0f - TagButtonSize;
     const f32 clipped_x = upper > screen_position.x ? screen_position.x : upper;
     const f32 clipped_y = upper > screen_position.y ? screen_position.y : upper;
-    position.x = lower > clipped_x ? lower : clipped_x;
     position.y = lower > clipped_y ? lower : clipped_y;
+    position.x = lower > clipped_x ? lower : clipped_x;
 }
 
 void MechTouchUITagButton::Render() {
@@ -743,51 +743,50 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
 
         const i32 id = model.model_id;
         const i32 collected = InCollectList_Index(id, NULL, 0);
-        if (collected == -1 && static_cast<i32>(GCDataList[id].flags_090) >= 0 &&
-            (GCDataList[id].flags_094[3] & 1) == 0 &&
-            !(VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
-              (GCDataList[id].flags_094[3] & 2) != 0)) {
-            continue;
-        }
+        if (!(collected == -1 && static_cast<i32>(GCDataList[id].flags_090) >= 0 &&
+              (GCDataList[id].flags_094[3] & 1) == 0 &&
+              !(VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
+                (GCDataList[id].flags_094[3] & 2) != 0))) {
 
-        if (VehicleArea != 0) {
-            const u32 model_flags = CDataList[id].model_flags;
-            if ((model_flags & 0x2000) == 0 && !(BonusArea != 0 && (model_flags & 0x4000000) != 0) &&
-                static_cast<i32>(GCDataList[id].flags_090) >= 0 &&
-                !(VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
-                  (GCDataList[id].flags_094[3] & 2) != 0)) {
-                continue;
-            }
-
-            if (BonusArea != 0) {
-                const i32 area = AreaFromMiniKitID(id);
-                if (area != -1) {
-                    if (Game_AreaSave == NULL || Game_AreaSave[area].minikit_complete == 0) {
-                        continue;
-                    }
-                } else if (static_cast<i32>(GCDataList[id].flags_090) >= 0 &&
-                           !(VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
-                             (GCDataList[id].flags_094[3] & 2) != 0)) {
+            if (VehicleArea != 0) {
+                const u32 model_flags = CDataList[id].model_flags;
+                if ((model_flags & 0x2000) == 0 && !(BonusArea != 0 && (model_flags & 0x4000000) != 0) &&
+                    static_cast<i32>(GCDataList[id].flags_090) >= 0 &&
+                    !(VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
+                      (GCDataList[id].flags_094[3] & 2) != 0)) {
                     continue;
                 }
-            }
-        } else if ((CDataList[id].model_flags & 0x2000) == 0 && (GCDataList[id].flags_090 & 0x40) == 0) {
 
-            if (BonusArea == 0 || VehicleArea == 0) {
-                if (!(static_cast<i32>(GCDataList[id].flags_090) < 0)) {
-                    if ((GCDataList[id].flags_094[3] & 1) == 0 && (collected == -1 || Collection_Got(id) == 0)) {
-                        continue;
-                    }
-                } else {
-                    if (Cheats_CheckFlags(0x100) == 0) {
+                if (BonusArea != 0) {
+                    const i32 area = AreaFromMiniKitID(id);
+                    if (area != -1) {
+                        if (Game_AreaSave == NULL || Game_AreaSave[area].minikit_complete == 0) {
+                            continue;
+                        }
+                    } else if (static_cast<i32>(GCDataList[id].flags_090) >= 0 &&
+                               !(VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
+                                 (GCDataList[id].flags_094[3] & 2) != 0)) {
                         continue;
                     }
                 }
-            }
+            } else if ((CDataList[id].model_flags & 0x2000) == 0 && (GCDataList[id].flags_090 & 0x40) == 0) {
 
-            free_play_target_ids[free_play_count++] = id;
-            if (free_play_count == 32) {
-                return;
+                if (BonusArea == 0 || VehicleArea == 0) {
+                    if (!(static_cast<i32>(GCDataList[id].flags_090) < 0)) {
+                        if ((GCDataList[id].flags_094[3] & 1) == 0 && (collected == -1 || Collection_Got(id) == 0)) {
+                            continue;
+                        }
+                    } else {
+                        if (Cheats_CheckFlags(0x100) == 0) {
+                            continue;
+                        }
+                    }
+                }
+
+                free_play_target_ids[free_play_count++] = id;
+                if (free_play_count == 32) {
+                    return;
+                }
             }
         }
     }

@@ -1803,406 +1803,407 @@ void JediB_DrawPanel(WORLDINFO_s *) {
 
 void JediB_Update(WORLDINFO_s *world) {
     char name[0x10];
-    if (Mission_Active(MissionSys) != NULL) {
-        return;
-    }
-    if (netclient != 0) {
-        return;
-    }
+    if (Mission_Active(MissionSys) == NULL) {
+        if (netclient != 0) {
+            return;
+        }
 
-    for (i32 hero = 0; hero < 3; hero++) {
-        if (FreePlay != 0 && jedi_b.heroes[hero] == NULL) {
-            for (i32 spawn = 0; spawn < 4; spawn++) {
-                if (NuSpecialGetVisibilityFn(&jedi_b.hero_spawns[hero][spawn]) != 0) {
-                    jedi_b.heroes[hero] = AddDynamicCreature(*JediB_playerids[hero],
-                                                             NuSpecialGetDrawPos(&jedi_b.hero_spawns[hero][spawn]), 0,
-                                                             "Party", NULL, NULL, 1, NULL, NULL, 0, 0);
+        for (i32 hero = 0; hero < 3; hero++) {
+            if (FreePlay != 0 && jedi_b.heroes[hero] == NULL) {
+                for (i32 spawn = 0; spawn < 4; spawn++) {
+                    if (NuSpecialGetVisibilityFn(&jedi_b.hero_spawns[hero][spawn]) != 0) {
+                        jedi_b.heroes[hero] = AddDynamicCreature(*JediB_playerids[hero],
+                                                                 NuSpecialGetDrawPos(&jedi_b.hero_spawns[hero][spawn]),
+                                                                 0, "Party", NULL, NULL, 1, NULL, NULL, 0, 0);
+                    }
                 }
             }
-        }
-        if (jedi_b.heroes[hero] == NULL || jedi_b.msg_restrain[hero]->value != 1.0f) {
-            continue;
-        }
-        for (i32 spawn = 0; spawn < 4; spawn++) {
-            if (NuSpecialGetVisibilityFn(&jedi_b.hero_spawns[hero][spawn]) == 0) {
+            if (jedi_b.heroes[hero] == NULL || jedi_b.msg_restrain[hero]->value != 1.0f) {
                 continue;
             }
-            jedi_b.heroes[hero]->apiobj.position = *NuSpecialGetDrawPos(&jedi_b.hero_spawns[hero][spawn]);
-            NuVecAdd(&jedi_b.heroes[hero]->apiobj.position, &jedi_b.heroes[hero]->apiobj.position,
-                     &jedib_offsets[hero]);
-            jedi_b.heroes[hero]->apiobj.velocity.x = 0.0f;
-            jedi_b.heroes[hero]->saved_position = jedi_b.heroes[hero]->apiobj.position;
-            jedi_b.heroes[hero]->apiobj.velocity.y = 0.0f;
-            jedi_b.heroes[hero]->apiobj.field_0x276 = static_cast<u16>(jedib_yrot[hero]);
-            jedi_b.heroes[hero]->apiobj.velocity.z = 0.0f;
-            jedi_b.heroes[hero]->apiobj.respawn_timer = 0.0f;
-        }
-    }
-
-    jedi_b.exclusion_mask = 0;
-    // Not `timer >= 4.0f`: that form compares the other way round and is not
-    // equivalent for NaN, and the original tests `4.0f > timer`.
-    if (jedi_b.timer < 4.0f) {
-        if (player != NULL) {
-            jedi_b.exclusion_mask = 1ULL << player->apiobj.field_0x289;
-        }
-        if (player2 != NULL) {
-            jedi_b.exclusion_mask |= 1ULL << player2->apiobj.field_0x289;
-        }
-    } else {
-        if (jedi_b.phase != 7) {
-            if (player->apiobj.pos_x * player->apiobj.pos_x + player->apiobj.pos_z * player->apiobj.pos_z >
-                jedib_safe_r * jedib_safe_r) {
-                jedi_b.exclusion_mask = 1ULL << player->apiobj.field_0x289;
-            }
-            if (player2 != NULL &&
-                player2->apiobj.pos_x * player2->apiobj.pos_x + player2->apiobj.pos_z * player2->apiobj.pos_z >
-                    jedib_safe_r * jedib_safe_r) {
-                jedi_b.exclusion_mask |= 1ULL << player2->apiobj.field_0x289;
-            }
-        } else if (jedi_b.boss != NULL) {
-            GameObject_s *target = player2 != NULL && jedi_b.boss->ai.opponent == player2 ? player2 : player;
-            jedi_b.exclusion_mask = 1ULL << target->apiobj.field_0x289;
-        }
-    }
-
-    GameObject_s *boss = jedi_b.boss;
-    for (i32 slot = 0; slot < 8; slot++) {
-        if (Player[slot] == NULL) {
-            continue;
-        }
-        Player[slot]->ai_opponent_exclusion_mask = 0;
-        if (jedi_b.phase == 7 && boss != NULL && static_cast<i8>(Player[slot]->apiobj.flags_low) >= 0) {
-            Player[slot]->ai_opponent_exclusion_mask = 1ULL << boss->apiobj.field_0x289;
-        }
-    }
-
-    switch (jedi_b.state) {
-        case 0: {
-            JEDIB_PHASE_s *phase_lists[3] = {jedi_b_phase1, jedi_b_phase2, jedi_b_phase3};
-            if (netclient != 0) {
-                break;
-            }
-            if (jedi_b.phase > 2 && jedi_b.timer < 3.0f) {
-                jedi_b.timer += FRAMETIME;
-                break;
-            }
-            jedi_b.phase = static_cast<i16>(jedi_b.phase + 1);
-            if (jedi_b.phase == 6) {
-                jedi_b.phase = 7;
-            }
-            switch (jedi_b.phase) {
-                case 4:
-                case 5:
-                case 6: {
-                    memset(jedi_b.wave_spawned, 0, sizeof(jedi_b.wave_spawned));
-                    for (i32 i = 0; i < jedi_b.baddie_count; i++) {
-                        jedi_b.baddies[i].in_wave = 0;
-                        jedi_b.baddies[i].released = 0;
-                    }
-                    i32 chosen = 0;
-                    while (chosen < (g_lowEndLevelBehaviour != 0 ? 4 : 6)) {
-                        i32 index = NuRand(NULL) % jedi_b.baddie_count;
-                        i32 id;
-                        if (jedi_b.phase == 4) {
-                            id = id_BATTLEDROIDSECURITY;
-                        } else if (jedi_b.phase == 5) {
-                            id = (chosen & 1) != 0 ? id_BATTLEDROIDSECURITY : id_SUPERBATTLEDROID;
-                        } else {
-                            id = (chosen & 1) != 0 ? id_DROIDEKA : id_SUPERBATTLEDROID;
-                        }
-                        for (;;) {
-                            if (jedi_b.baddies[index].in_wave == 0 && jedi_b.baddies[index].random_type != 0 &&
-                                jedi_b.baddies[index].id != id) {
-                                break;
-                            }
-                            index++;
-                            if (index >= jedi_b.baddie_count) {
-                                index = 0;
-                            }
-                        }
-                        if (jedi_b.baddies[index].object != NULL) {
-                            RemoveGameObject(jedi_b.baddies[index].object, 1);
-                            jedi_b.baddies[index].object = NULL;
-                            jedi_b.baddies[index].spawned_behind = 0;
-                        }
-                        jedi_b.baddies[index].id = id;
-                        jedi_b.wave_ids[chosen] = static_cast<i16>(id);
-                        jedi_b.baddies[index].in_wave = 1;
-                        chosen++;
-                    }
-                    jedi_b.wave_timer = 0.0f;
-                    break;
-                }
-                case 1:
-                case 2:
-                case 3:
-                    for (JEDIB_PHASE_s *entry = phase_lists[jedi_b.phase - 1];
-                         entry != NULL && entry->id != NULL && jedi_b.goody_count <= 7; entry++) {
-                        if (g_lowEndLevelBehaviour != 0 && jedi_b.goody_count == 5) {
-                            break;
-                        }
-
-                        sprintf(name, "phase%d_%d", jedi_b.phase, jedi_b.goody_count + 1);
-                        AILOCATOR *locator = AIPathFindLocator(world->ai_sys, name);
-                        if (locator == NULL) {
-                            continue;
-                        }
-                        JEDIB_CREATURE_s *goody = &jedi_b.goodies[jedi_b.goody_count];
-                        goody->locator = *locator;
-                        goody->object =
-                            AddDynamicCreature(*entry->id, &locator->position, locator->direction, entry->script,
-                                               &locator->path_info, NULL, 1, NULL, NULL, 0, 0);
-                        if (jedi_b.goodies[jedi_b.goody_count].object == NULL) {
-                            continue;
-                        }
-                        GameObject_s *object = jedi_b.goodies[jedi_b.goody_count].object;
-                        jedi_b.goodies[jedi_b.goody_count].id = *entry->id;
-                        object->field_0xefb |= 1;
-                        object->ai.locator = locator;
-                        object->field_0xeb4 = JediBKilledCallback;
-                        jedi_b.goody_count = static_cast<i16>(jedi_b.goody_count + 1);
-                    }
-                    break;
-                default:
-                    break;
-            }
-
-            if (jedi_b.msg_phase == NULL) {
-                jedi_b.msg_phase = CheckGizAIMessage(gizaimessagesys, "Phase", NULL);
-            }
-            if (jedi_b.msg_phase_complete == NULL) {
-                jedi_b.msg_phase_complete = CheckGizAIMessage(gizaimessagesys, "PhaseComplete", NULL);
-            }
-            if (jedi_b.msg_objectives_left == NULL) {
-                jedi_b.msg_objectives_left = CheckGizAIMessage(gizaimessagesys, "ObjectivesLeft", NULL);
-            }
-            if (jedi_b.msg_restrain[0] == NULL) {
-                jedi_b.msg_restrain[0] = CheckGizAIMessage(gizaimessagesys, "RestrainPadme", NULL);
-            }
-            if (jedi_b.msg_restrain[1] == NULL) {
-                jedi_b.msg_restrain[1] = CheckGizAIMessage(gizaimessagesys, "RestrainAnakin", NULL);
-            }
-            if (jedi_b.msg_restrain[2] == NULL) {
-                jedi_b.msg_restrain[2] = CheckGizAIMessage(gizaimessagesys, "RestrainObiWan", NULL);
-            }
-            jedi_b.msg_phase->value = static_cast<f32>(jedi_b.phase);
-            jedi_b.msg_objectives_left->value = static_cast<f32>(jedi_b.goody_count);
-            jedi_b.msg_phase_complete->value = 0.0f;
-            jedi_b.timer = 0.0f;
-            jedi_b.state = 1;
-            break;
-        }
-
-        case 1:
-            jedi_b.timer += FRAMETIME;
-            switch (jedi_b.phase) {
-                case 1:
-                case 2:
-                case 3:
-                    jedi_b.msg_objectives_left->value = static_cast<f32>(jedi_b.goody_count);
-                    if (jedi_b.msg_phase_complete->value == 1.0f) {
-                        jedi_b.timer = 0.0f;
-                        jedi_b.state = 2;
-                    }
-                    break;
-                case 4:
-                case 5:
-                case 6: {
-                    // The low-end wave is two slots shorter.
-                    i32 wave_done;
-                    if (g_lowEndLevelBehaviour != 0) {
-                        wave_done = jedi_b.wave_spawned[0] != 0 && jedi_b.wave_spawned[1] != 0 &&
-                                    jedi_b.wave_spawned[2] != 0 && jedi_b.wave_spawned[3] != 0;
-                    } else {
-                        wave_done = jedi_b.wave_spawned[0] != 0 && jedi_b.wave_spawned[1] != 0 &&
-                                    jedi_b.wave_spawned[2] != 0 && jedi_b.wave_spawned[3] != 0 &&
-                                    jedi_b.wave_spawned[4] != 0 && jedi_b.wave_spawned[5] != 0;
-                    }
-                    jedi_b.wave_timer += FRAMETIME;
-                    if (jedi_b.wave_timer > 5.0f) {
-                        i32 release = -1;
-                        for (i32 i = 0; i < jedi_b.baddie_count; i++) {
-                            if (jedi_b.baddies[i].released != 0) {
-                                release = -1;
-                                break;
-                            }
-                            if (jedi_b.baddies[i].in_wave != 0) {
-                                release = i;
-                            }
-                        }
-                        if (release != -1) {
-                            jedi_b.baddies[release].released = 1;
-                        }
-                        jedi_b.wave_timer = 0.0f;
-                    }
-                    if (wave_done != 0) {
-                        jedi_b.timer = 0.0f;
-                        jedi_b.state = 2;
-                    }
-                    break;
-                }
-                case 7:
-                    if (boss == NULL) {
-                        boss = FindGameObject(id_JANGOFETT, 1, 1, 0, 0);
-                        jedi_b.boss = boss;
-                        if (boss == NULL) {
-                            break;
-                        }
-                    }
-                    if (boss->apiobj.field_0x287 != 0 || boss->current_hp == 0) {
-                        jedi_b.timer = 0.0f;
-                        jedi_b.state = 2;
-                    }
-                    break;
-                default:
-                    break;
-            }
-            break;
-
-        case 2:
-            if (jedi_b.timer < 0.1f) {
-                jedi_b.timer += FRAMETIME;
-                break;
-            }
-            if (jedi_b.phase > 6) {
-                if (FreePlay == 0) {
-                    NewLData = JEDI_OUTRO_LDATA;
-                }
-                CompleteLevel(world);
-            }
-            jedi_b.timer = 0.0f;
-            jedi_b.state = 0;
-            break;
-
-        default:
-            break;
-    }
-
-    jedib_n_active = 0;
-    for (i32 i = 0; i < jedi_b.baddie_count; i++) {
-        JEDIB_CREATURE_s *baddie = &jedi_b.baddies[i];
-        GameObject_s *object = baddie->object;
-        if (object != NULL) {
-            if (baddie->released != 0) {
-                object->ai.locator = NULL;
-                if (!((player->apiobj.character_data->model_flags & 0x80000) == 0 &&
-                      (player->apiobj.objptr->id != id_JARJAR || static_cast<i8>(player->apiobj.flags_low) < 0) &&
-                      (player->apiobj.character_data->game_character->uses_weapon_action != 4 ||
-                       object->apiobj.character_data->game_character->uses_weapon_action != 4))) {
-                    if (object->ai.opponent == player) {
-                        object->ai.opponent = NULL;
-                    }
-                    if (player2 != NULL) {
-                        if ((player2->apiobj.character_data->model_flags & 0x80000) == 0 &&
-                            (player->apiobj.objptr->id != id_JARJAR || static_cast<i8>(player->apiobj.flags_low) < 0) &&
-                            (player->apiobj.character_data->game_character->uses_weapon_action != 4 ||
-                             object->apiobj.character_data->game_character->uses_weapon_action != 4)) {
-                            object->ai.opponent = player2;
-                        } else if (object->ai.opponent == player2) {
-                            object->ai.opponent = NULL;
-                        }
-                    }
-                } else {
-                    object->ai.opponent = player;
-                }
-            } else {
-                if ((OnOrInsidePlane(&object->apiobj.position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL, 2.0f,
-                                     NULL) == 0 &&
-                     OnOrInsidePlane(&baddie->object->apiobj.position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL,
-                                     2.0f, NULL) == 0) ||
-                    (OnOrInsidePlane(&baddie->locator.position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL, 2.0f,
-                                     NULL) == 0 &&
-                     OnOrInsidePlane(&baddie->locator.position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL, 2.0f,
-                                     NULL) == 0)) {
-                    object = baddie->object;
-                    if (object == NULL) {
-                        continue;
-                    }
-                    if (object->apiobj.ai->opponent == NULL && baddie->partner != NULL &&
-                        baddie->partner->object != NULL) {
-                        object->apiobj.ai->opponent = baddie->partner->object;
-                    }
-                } else {
-                    baddie->position = baddie->object->apiobj.position;
-                    baddie->angle = baddie->object->apiobj.field_0x276;
-                    RemoveGameObject(baddie->object, 1);
-                    baddie->object = NULL;
+            for (i32 spawn = 0; spawn < 4; spawn++) {
+                if (NuSpecialGetVisibilityFn(&jedi_b.hero_spawns[hero][spawn]) == 0) {
                     continue;
                 }
+                jedi_b.heroes[hero]->apiobj.position = *NuSpecialGetDrawPos(&jedi_b.hero_spawns[hero][spawn]);
+                NuVecAdd(&jedi_b.heroes[hero]->apiobj.position, &jedi_b.heroes[hero]->apiobj.position,
+                         &jedib_offsets[hero]);
+                jedi_b.heroes[hero]->apiobj.velocity.x = 0.0f;
+                jedi_b.heroes[hero]->saved_position = jedi_b.heroes[hero]->apiobj.position;
+                jedi_b.heroes[hero]->apiobj.velocity.y = 0.0f;
+                jedi_b.heroes[hero]->apiobj.field_0x276 = static_cast<u16>(jedib_yrot[hero]);
+                jedi_b.heroes[hero]->apiobj.velocity.z = 0.0f;
+                jedi_b.heroes[hero]->apiobj.respawn_timer = 0.0f;
             }
-        } else if (baddie->released == 0 && (OnOrInsidePlane(&baddie->position, &PlayPlane[1].point,
-                                                             &PlayPlane[1].normal, NULL, 1.5f, NULL) != 0 ||
-                                             OnOrInsidePlane(&baddie->position, &PlayPlane[2].point,
-                                                             &PlayPlane[2].normal, NULL, 1.5f, NULL) != 0)) {
-            object = baddie->object;
+        }
+
+        jedi_b.exclusion_mask = 0;
+        // Not `timer >= 4.0f`: that form compares the other way round and is not
+        // equivalent for NaN, and the original tests `4.0f > timer`.
+        if (jedi_b.timer < 4.0f) {
+            if (player != NULL) {
+                jedi_b.exclusion_mask = 1ULL << player->apiobj.field_0x289;
+            }
+            if (player2 != NULL) {
+                jedi_b.exclusion_mask |= 1ULL << player2->apiobj.field_0x289;
+            }
         } else {
-            // OnOrInsidePlane takes the slot position by non-const pointer, so
-            // the copy below cannot be hoisted above these calls without
-            // changing the emitted code.
-            const i32 spawn_behind =
-                baddie->spawned_behind != 0 &&
-                OnOrInsidePlane(&baddie->position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL, 0.5f, NULL) == 0 &&
-                OnOrInsidePlane(&baddie->position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL, 0.5f, NULL) == 0;
-            nuvec_s spawn_position = baddie->position;
-            if (spawn_behind != 0) {
-                NuVecRotateY(&spawn_position, &spawn_position, 0x8000);
+            if (jedi_b.phase != 7) {
+                if (player->apiobj.pos_x * player->apiobj.pos_x + player->apiobj.pos_z * player->apiobj.pos_z >
+                    jedib_safe_r * jedib_safe_r) {
+                    jedi_b.exclusion_mask = 1ULL << player->apiobj.field_0x289;
+                }
+                if (player2 != NULL &&
+                    player2->apiobj.pos_x * player2->apiobj.pos_x + player2->apiobj.pos_z * player2->apiobj.pos_z >
+                        jedib_safe_r * jedib_safe_r) {
+                    jedi_b.exclusion_mask |= 1ULL << player2->apiobj.field_0x289;
+                }
+            } else if (jedi_b.boss != NULL) {
+                GameObject_s *target = player2 != NULL && jedi_b.boss->ai.opponent == player2 ? player2 : player;
+                jedi_b.exclusion_mask = 1ULL << target->apiobj.field_0x289;
             }
-            if (baddie->id == -1) {
-                if (baddie->random_type == 0) {
-                    baddie->id = id_BOB;
-                } else {
-                    if (FreePlay == 0 && (jedi_b.unique_spawned & 1) == 0) {
-                        baddie->id = id_LUMINARA;
-                        jedi_b.unique_spawned |= 1;
-                    } else if (FreePlay == 0 && (jedi_b.unique_spawned & 2) == 0) {
-                        baddie->id = id_SHAAKTI;
-                        jedi_b.unique_spawned |= 2;
-                    } else if (NuRandFloat() < 0.5f) {
-                        baddie->id = id_BATTLEDROIDGEONOSIAN;
+        }
+
+        GameObject_s *boss = jedi_b.boss;
+        for (i32 slot = 0; slot < 8; slot++) {
+            if (Player[slot] == NULL) {
+                continue;
+            }
+            Player[slot]->ai_opponent_exclusion_mask = 0;
+            if (jedi_b.phase == 7 && boss != NULL && static_cast<i8>(Player[slot]->apiobj.flags_low) >= 0) {
+                Player[slot]->ai_opponent_exclusion_mask = 1ULL << boss->apiobj.field_0x289;
+            }
+        }
+
+        switch (jedi_b.state) {
+            case 0: {
+                JEDIB_PHASE_s *phase_lists[3] = {jedi_b_phase1, jedi_b_phase2, jedi_b_phase3};
+                if (netclient != 0) {
+                    break;
+                }
+                if (jedi_b.phase > 2 && jedi_b.timer < 3.0f) {
+                    jedi_b.timer += FRAMETIME;
+                    break;
+                }
+                jedi_b.phase = static_cast<i16>(jedi_b.phase + 1);
+                if (jedi_b.phase == 6) {
+                    jedi_b.phase = 7;
+                }
+                switch (jedi_b.phase) {
+                    case 4:
+                    case 5:
+                    case 6: {
+                        memset(jedi_b.wave_spawned, 0, sizeof(jedi_b.wave_spawned));
+                        for (i32 i = 0; i < jedi_b.baddie_count; i++) {
+                            jedi_b.baddies[i].in_wave = 0;
+                            jedi_b.baddies[i].released = 0;
+                        }
+                        i32 chosen = 0;
+                        while (chosen < (g_lowEndLevelBehaviour != 0 ? 4 : 6)) {
+                            i32 index = NuRand(NULL) % jedi_b.baddie_count;
+                            i32 id;
+                            if (jedi_b.phase == 4) {
+                                id = id_BATTLEDROIDSECURITY;
+                            } else if (jedi_b.phase == 5) {
+                                id = (chosen & 1) != 0 ? id_BATTLEDROIDSECURITY : id_SUPERBATTLEDROID;
+                            } else {
+                                id = (chosen & 1) != 0 ? id_DROIDEKA : id_SUPERBATTLEDROID;
+                            }
+                            for (;;) {
+                                if (jedi_b.baddies[index].in_wave == 0 && jedi_b.baddies[index].random_type != 0 &&
+                                    jedi_b.baddies[index].id != id) {
+                                    break;
+                                }
+                                index++;
+                                if (index >= jedi_b.baddie_count) {
+                                    index = 0;
+                                }
+                            }
+                            if (jedi_b.baddies[index].object != NULL) {
+                                RemoveGameObject(jedi_b.baddies[index].object, 1);
+                                jedi_b.baddies[index].object = NULL;
+                                jedi_b.baddies[index].spawned_behind = 0;
+                            }
+                            jedi_b.baddies[index].id = id;
+                            jedi_b.wave_ids[chosen] = static_cast<i16>(id);
+                            jedi_b.baddies[index].in_wave = 1;
+                            chosen++;
+                        }
+                        jedi_b.wave_timer = 0.0f;
+                        break;
+                    }
+                    case 1:
+                    case 2:
+                    case 3:
+                        for (JEDIB_PHASE_s *entry = phase_lists[jedi_b.phase - 1];
+                             entry != NULL && entry->id != NULL && jedi_b.goody_count <= 7; entry++) {
+                            if (g_lowEndLevelBehaviour != 0 && jedi_b.goody_count == 5) {
+                                break;
+                            }
+
+                            sprintf(name, "phase%d_%d", jedi_b.phase, jedi_b.goody_count + 1);
+                            AILOCATOR *locator = AIPathFindLocator(world->ai_sys, name);
+                            if (locator == NULL) {
+                                continue;
+                            }
+                            JEDIB_CREATURE_s *goody = &jedi_b.goodies[jedi_b.goody_count];
+                            goody->locator = *locator;
+                            goody->object =
+                                AddDynamicCreature(*entry->id, &locator->position, locator->direction, entry->script,
+                                                   &locator->path_info, NULL, 1, NULL, NULL, 0, 0);
+                            if (jedi_b.goodies[jedi_b.goody_count].object == NULL) {
+                                continue;
+                            }
+                            GameObject_s *object = jedi_b.goodies[jedi_b.goody_count].object;
+                            jedi_b.goodies[jedi_b.goody_count].id = *entry->id;
+                            object->field_0xefb |= 1;
+                            object->ai.locator = locator;
+                            object->field_0xeb4 = JediBKilledCallback;
+                            jedi_b.goody_count = static_cast<i16>(jedi_b.goody_count + 1);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+                if (jedi_b.msg_phase == NULL) {
+                    jedi_b.msg_phase = CheckGizAIMessage(gizaimessagesys, "Phase", NULL);
+                }
+                if (jedi_b.msg_phase_complete == NULL) {
+                    jedi_b.msg_phase_complete = CheckGizAIMessage(gizaimessagesys, "PhaseComplete", NULL);
+                }
+                if (jedi_b.msg_objectives_left == NULL) {
+                    jedi_b.msg_objectives_left = CheckGizAIMessage(gizaimessagesys, "ObjectivesLeft", NULL);
+                }
+                if (jedi_b.msg_restrain[0] == NULL) {
+                    jedi_b.msg_restrain[0] = CheckGizAIMessage(gizaimessagesys, "RestrainPadme", NULL);
+                }
+                if (jedi_b.msg_restrain[1] == NULL) {
+                    jedi_b.msg_restrain[1] = CheckGizAIMessage(gizaimessagesys, "RestrainAnakin", NULL);
+                }
+                if (jedi_b.msg_restrain[2] == NULL) {
+                    jedi_b.msg_restrain[2] = CheckGizAIMessage(gizaimessagesys, "RestrainObiWan", NULL);
+                }
+                jedi_b.msg_phase->value = static_cast<f32>(jedi_b.phase);
+                jedi_b.msg_objectives_left->value = static_cast<f32>(jedi_b.goody_count);
+                jedi_b.msg_phase_complete->value = 0.0f;
+                jedi_b.timer = 0.0f;
+                jedi_b.state = 1;
+                break;
+            }
+
+            case 1:
+                jedi_b.timer += FRAMETIME;
+                switch (jedi_b.phase) {
+                    case 1:
+                    case 2:
+                    case 3:
+                        jedi_b.msg_objectives_left->value = static_cast<f32>(jedi_b.goody_count);
+                        if (jedi_b.msg_phase_complete->value == 1.0f) {
+                            jedi_b.timer = 0.0f;
+                            jedi_b.state = 2;
+                        }
+                        break;
+                    case 4:
+                    case 5:
+                    case 6: {
+                        // The low-end wave is two slots shorter.
+                        i32 wave_done;
+                        if (g_lowEndLevelBehaviour != 0) {
+                            wave_done = jedi_b.wave_spawned[0] != 0 && jedi_b.wave_spawned[1] != 0 &&
+                                        jedi_b.wave_spawned[2] != 0 && jedi_b.wave_spawned[3] != 0;
+                        } else {
+                            wave_done = jedi_b.wave_spawned[0] != 0 && jedi_b.wave_spawned[1] != 0 &&
+                                        jedi_b.wave_spawned[2] != 0 && jedi_b.wave_spawned[3] != 0 &&
+                                        jedi_b.wave_spawned[4] != 0 && jedi_b.wave_spawned[5] != 0;
+                        }
+                        jedi_b.wave_timer += FRAMETIME;
+                        if (jedi_b.wave_timer > 5.0f) {
+                            i32 release = -1;
+                            for (i32 i = 0; i < jedi_b.baddie_count; i++) {
+                                if (jedi_b.baddies[i].released != 0) {
+                                    release = -1;
+                                    break;
+                                }
+                                if (jedi_b.baddies[i].in_wave != 0) {
+                                    release = i;
+                                }
+                            }
+                            if (release != -1) {
+                                jedi_b.baddies[release].released = 1;
+                            }
+                            jedi_b.wave_timer = 0.0f;
+                        }
+                        if (wave_done != 0) {
+                            jedi_b.timer = 0.0f;
+                            jedi_b.state = 2;
+                        }
+                        break;
+                    }
+                    case 7:
+                        if (boss == NULL) {
+                            boss = FindGameObject(id_JANGOFETT, 1, 1, 0, 0);
+                            jedi_b.boss = boss;
+                            if (boss == NULL) {
+                                break;
+                            }
+                        }
+                        if (boss->apiobj.field_0x287 != 0 || boss->current_hp == 0) {
+                            jedi_b.timer = 0.0f;
+                            jedi_b.state = 2;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                break;
+
+            case 2:
+                if (jedi_b.timer < 0.1f) {
+                    jedi_b.timer += FRAMETIME;
+                    break;
+                }
+                if (jedi_b.phase > 6) {
+                    if (FreePlay == 0) {
+                        NewLData = JEDI_OUTRO_LDATA;
+                    }
+                    CompleteLevel(world);
+                }
+                jedi_b.timer = 0.0f;
+                jedi_b.state = 0;
+                break;
+
+            default:
+                break;
+        }
+
+        jedib_n_active = 0;
+        for (i32 i = 0; i < jedi_b.baddie_count; i++) {
+            JEDIB_CREATURE_s *baddie = &jedi_b.baddies[i];
+            GameObject_s *object = baddie->object;
+            if (object != NULL) {
+                if (baddie->released != 0) {
+                    object->ai.locator = NULL;
+                    if (!((player->apiobj.character_data->model_flags & 0x80000) == 0 &&
+                          (player->apiobj.objptr->id != id_JARJAR || static_cast<i8>(player->apiobj.flags_low) < 0) &&
+                          (player->apiobj.character_data->game_character->uses_weapon_action != 4 ||
+                           object->apiobj.character_data->game_character->uses_weapon_action != 4))) {
+                        if (object->ai.opponent == player) {
+                            object->ai.opponent = NULL;
+                        }
+                        if (player2 != NULL) {
+                            if ((player2->apiobj.character_data->model_flags & 0x80000) == 0 &&
+                                (player->apiobj.objptr->id != id_JARJAR ||
+                                 static_cast<i8>(player->apiobj.flags_low) < 0) &&
+                                (player->apiobj.character_data->game_character->uses_weapon_action != 4 ||
+                                 object->apiobj.character_data->game_character->uses_weapon_action != 4)) {
+                                object->ai.opponent = player2;
+                            } else if (object->ai.opponent == player2) {
+                                object->ai.opponent = NULL;
+                            }
+                        }
                     } else {
-                        baddie->id = id_GEONOSIAN;
+                        object->ai.opponent = player;
+                    }
+                } else {
+                    if ((OnOrInsidePlane(&object->apiobj.position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL,
+                                         2.0f, NULL) == 0 &&
+                         OnOrInsidePlane(&baddie->object->apiobj.position, &PlayPlane[2].point, &PlayPlane[2].normal,
+                                         NULL, 2.0f, NULL) == 0) ||
+                        (OnOrInsidePlane(&baddie->locator.position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL,
+                                         2.0f, NULL) == 0 &&
+                         OnOrInsidePlane(&baddie->locator.position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL,
+                                         2.0f, NULL) == 0)) {
+                        object = baddie->object;
+                        if (object == NULL) {
+                            continue;
+                        }
+                        if (object->apiobj.ai->opponent == NULL && baddie->partner != NULL &&
+                            baddie->partner->object != NULL) {
+                            object->apiobj.ai->opponent = baddie->partner->object;
+                        }
+                    } else {
+                        baddie->position = baddie->object->apiobj.position;
+                        baddie->angle = baddie->object->apiobj.field_0x276;
+                        RemoveGameObject(baddie->object, 1);
+                        baddie->object = NULL;
+                        continue;
                     }
                 }
-                baddie->two_row_hp = 0;
-                baddie->in_wave = 0;
-                baddie->released = 0;
-                baddie->field_0x58 = 0;
+            } else if (baddie->released == 0 && (OnOrInsidePlane(&baddie->position, &PlayPlane[1].point,
+                                                                 &PlayPlane[1].normal, NULL, 1.5f, NULL) != 0 ||
+                                                 OnOrInsidePlane(&baddie->position, &PlayPlane[2].point,
+                                                                 &PlayPlane[2].normal, NULL, 1.5f, NULL) != 0)) {
+                object = baddie->object;
+            } else {
+                // OnOrInsidePlane takes the slot position by non-const pointer, so
+                // the copy below cannot be hoisted above these calls without
+                // changing the emitted code.
+                const i32 spawn_behind = baddie->spawned_behind != 0 &&
+                                         OnOrInsidePlane(&baddie->position, &PlayPlane[1].point, &PlayPlane[1].normal,
+                                                         NULL, 0.5f, NULL) == 0 &&
+                                         OnOrInsidePlane(&baddie->position, &PlayPlane[2].point, &PlayPlane[2].normal,
+                                                         NULL, 0.5f, NULL) == 0;
+                nuvec_s spawn_position = baddie->position;
+                if (spawn_behind != 0) {
+                    NuVecRotateY(&spawn_position, &spawn_position, 0x8000);
+                }
+                if (baddie->id == -1) {
+                    if (baddie->random_type == 0) {
+                        baddie->id = id_BOB;
+                    } else {
+                        if (FreePlay == 0 && (jedi_b.unique_spawned & 1) == 0) {
+                            baddie->id = id_LUMINARA;
+                            jedi_b.unique_spawned |= 1;
+                        } else if (FreePlay == 0 && (jedi_b.unique_spawned & 2) == 0) {
+                            baddie->id = id_SHAAKTI;
+                            jedi_b.unique_spawned |= 2;
+                        } else if (NuRandFloat() < 0.5f) {
+                            baddie->id = id_BATTLEDROIDGEONOSIAN;
+                        } else {
+                            baddie->id = id_GEONOSIAN;
+                        }
+                    }
+                    baddie->two_row_hp = 0;
+                    baddie->in_wave = 0;
+                    baddie->released = 0;
+                    baddie->field_0x58 = 0;
+                }
+                object = AddDynamicCreature(baddie->id, &spawn_position, baddie->angle, "gen_bdroids",
+                                            &baddie->locator.path_info, NULL, 1, NULL, NULL, 0, 0);
+                baddie->object = object;
+                if (object == NULL) {
+                    continue;
+                }
+                object->ai.locator = &baddie->locator;
+                object->field_0xeb4 = JediBKilledCallback;
+                if (baddie->id == id_BOB) {
+                    if (baddie->field_0x58 == 0) {
+                        baddie->field_0x58 = object->field_0x1054;
+                        if ((object->field_0xefd & 2) != 0) {
+                            baddie->two_row_hp = 1;
+                        } else {
+                            baddie->two_row_hp = 0;
+                        }
+                    } else {
+                        object->field_0x1054 = baddie->field_0x58;
+                        if (baddie->two_row_hp == 0) {
+                            object->field_0xefd &= static_cast<u8>(~2);
+                        } else {
+                            object->field_0xefd |= 2;
+                        }
+                        object = baddie->object;
+                    }
+                }
             }
-            object = AddDynamicCreature(baddie->id, &spawn_position, baddie->angle, "gen_bdroids",
-                                        &baddie->locator.path_info, NULL, 1, NULL, NULL, 0, 0);
-            baddie->object = object;
+
             if (object == NULL) {
                 continue;
             }
-            object->ai.locator = &baddie->locator;
-            object->field_0xeb4 = JediBKilledCallback;
-            if (baddie->id == id_BOB) {
-                if (baddie->field_0x58 == 0) {
-                    baddie->field_0x58 = object->field_0x1054;
-                    if ((object->field_0xefd & 2) != 0) {
-                        baddie->two_row_hp = 1;
-                    } else {
-                        baddie->two_row_hp = 0;
-                    }
-                } else {
-                    object->field_0x1054 = baddie->field_0x58;
-                    if (baddie->two_row_hp == 0) {
-                        object->field_0xefd &= static_cast<u8>(~2);
-                    } else {
-                        object->field_0xefd |= 2;
-                    }
-                    object = baddie->object;
-                }
+            jedib_n_active++;
+            if (baddie->released == 0) {
+                object->ai_opponent_exclusion_mask |= jedi_b.exclusion_mask;
             }
-        }
-
-        if (object == NULL) {
-            continue;
-        }
-        jedib_n_active++;
-        if (baddie->released == 0) {
-            object->ai_opponent_exclusion_mask |= jedi_b.exclusion_mask;
         }
     }
 }

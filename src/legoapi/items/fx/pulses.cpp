@@ -90,8 +90,8 @@ void Pulses_Configure(WORLDINFO_s *world, char *config) {
     pulse_sys.sfx_off_loop = -1;
     pulse_sys.sfx_hit_player = -1;
     pulse_sys.collide_radius = 1.0f;
-    pulse_sys.debris_hit_player = -1;
     pulse_sys.radial_hit_direction = 1;
+    pulse_sys.debris_hit_player = -1;
 
     while (NuFParGetLine(parser) != 0) {
         if (NuFParGetWord(parser) == 0) {

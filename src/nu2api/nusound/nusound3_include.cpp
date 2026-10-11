@@ -174,17 +174,18 @@ namespace {
     void StreamListRemove(NuEList<NuSound3Voice> *list, NuSound3Voice *voice) {
         NuSound3Voice *previous = voice->intrusive_prev;
         NuSound3Voice *next = voice->intrusive_next;
-        if (next != NULL || previous != NULL) {
-            list->length--;
-            if (previous != NULL) {
-                previous->intrusive_next = next;
-            }
-            if (next != NULL) {
-                next->intrusive_prev = previous;
-            }
-            voice->intrusive_next = NULL;
-            voice->intrusive_prev = NULL;
+        if (next == NULL && previous == NULL) {
+            return;
         }
+        list->length--;
+        if (previous != NULL) {
+            previous->intrusive_next = next;
+        }
+        if (next != NULL) {
+            next->intrusive_prev = previous;
+        }
+        voice->intrusive_next = NULL;
+        voice->intrusive_prev = NULL;
     }
 
 } // namespace

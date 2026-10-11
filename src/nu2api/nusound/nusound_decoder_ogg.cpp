@@ -18,8 +18,8 @@ NuSoundDecoderOGG::NuSoundDecoderOGG(char const *name, NuSoundSource *wrapped) :
 
     new (&this->read_callbacks) OGGReadCallbacksDecoder();
 
-    this->ring_read_pos = 0;
     this->ring_write_pos = 0;
+    this->ring_read_pos = 0;
     for (u32 i = 0; i < 4; i++) {
         this->encoded_buffers[i] = NULL;
     }

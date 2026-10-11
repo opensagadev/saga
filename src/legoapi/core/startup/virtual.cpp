@@ -19,14 +19,14 @@ void VirtualControlDPad::Process(float elapsed) {
     const f32 timer = MechInputTouchVirtualConsoleController::s_noInputTimer;
     if (timer >= 0.0f && owner != NULL) {
         alpha = 0.75f;
-        alpha_to = 0.75f;
         alpha_elapsed = alpha_duration;
+        alpha_to = 0.75f;
         disabled = 0;
     } else {
         if (timer >= 0.0f && (SuperOptions.dpad_locked == 0 || GetMenuID() == 25)) {
             alpha = 0.4f;
-            alpha_to = 0.4f;
             alpha_elapsed = alpha_duration;
+            alpha_to = 0.4f;
         }
         disabled = SuperOptions.dpad_locked != 0 && GetMenuID() != 25;
     }

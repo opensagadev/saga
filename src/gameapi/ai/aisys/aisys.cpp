@@ -8084,8 +8084,8 @@ __used__ static i32 Action_GoToOriginalPath(AISYS *sys, AISCRIPTPROCESS *process
         AIPATHINFO &move_path = processor->path_info;
         AIPATHNODE *target_node = &move_path.path->nodes[connection->node_indices[0]];
         move_path.connection = connection;
-        move_path.direction = 0;
         move_path.flags |= AIPATHINFO_FLAG_ON_PATH;
+        move_path.direction = 0;
 
         difference.x = node->position.x - target_node->position.x;
         difference.z = node->position.z - target_node->position.z;

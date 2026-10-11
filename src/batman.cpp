@@ -133,8 +133,8 @@ extern "C" i32 NuMain(i32 argc, char **argv) {
     } else {
         i = Level * sizeof(LEVELDATA_s);
     }
-    last_area = -1;
     Area = reinterpret_cast<LEVELDATA_s *>(reinterpret_cast<char *>(LDataList) + i)->area_index;
+    last_area = -1;
     LastAData = NULL;
 
     if (Area == -1) {
@@ -160,8 +160,8 @@ continue_init:
         Hub_MakeModelList();
     } else {
         if (FreePlay != 0) {
-            FreePlay = 0;
             NextArea_FreePlay = 0;
+            FreePlay = 0;
         }
     }
 

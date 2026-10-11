@@ -1708,14 +1708,13 @@ extern "C" {
             if (*stack != NULL) {
                 const dma_particle_chunk_s *last_chunk = key->particle_chunks[key->controlled_chunk_count - 1];
                 for (debris_chunk_control_s *control = *stack; control != NULL; control = control->next) {
-                    if (control->particle_chunk != last_chunk) {
-                        continue;
+                    if (control->particle_chunk == last_chunk) {
+                        RemoveChunkControlFromStack(control, stack);
+                        control->expiry_time = now + effect->particle_lifetime +
+                                               static_cast<f32>(effect->trail_count) * effect->trail_time;
+                        AddChunkControlToStack(control, stack);
+                        break;
                     }
-                    RemoveChunkControlFromStack(control, stack);
-                    control->expiry_time =
-                        now + effect->particle_lifetime + static_cast<f32>(effect->trail_count) * effect->trail_time;
-                    AddChunkControlToStack(control, stack);
-                    break;
                 }
             }
         }
@@ -3708,8 +3707,8 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
                         momentum.z += object->apiobj.velocity.z * 0.75f;
                     } else if (use_vehicle_velocity != 0) {
                         momentum.x += object->reset_velocity.x * 0.75f;
-                        momentum.y += object->reset_velocity.y * 0.75f;
                         momentum.z += object->reset_velocity.z * 0.75f;
+                        momentum.y += object->reset_velocity.y * 0.75f;
                     } else if (angle_override != NULL) {
                         momentum.x += NuTrigTable[(*angle_override >> 1) & 0x7fff] * 2.0f;
                         momentum.z += NuTrigTable[((static_cast<u16>(*angle_override + 0x4000)) >> 1) & 0x7fff] * 2.0f;
@@ -3756,8 +3755,8 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
             NUVEC momentum;
             SetKillPartMom(&momentum);
             NuVecScale(&momentum, &momentum, 4.0f);
-            momentum.x += object->apiobj.velocity.x * 0.75f;
             momentum.y = 6.0f + momentum.y + object->apiobj.velocity.y * 0.75f;
+            momentum.x += object->apiobj.velocity.x * 0.75f;
             momentum.z += object->apiobj.velocity.z * 0.75f;
             ADDPART_s params = Default_ADDPART;
             params.matrix = &matrix;

@@ -850,53 +850,53 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
         if (stage->field_0x18 >= 0.5f) {
             GAMEPAD_s *pad = GamePad;
             for (i32 player = 0; player < 2; ++player, ++pad) {
-                if ((player == 0 ? packet->player0_active : packet->player1_active) == 0) {
-                    continue;
-                }
-                bool selected = false;
-                if (menu_level > 0 && GameMenu[menu_level].queued_item != -1) {
-                    status_prompt = GameMenu[menu_level].queued_item;
-                    GameMenu[menu_level].queued_item = -1;
-                    selected = true;
-                }
-                const u32 buttons = pad->buttons_pressed;
-                if ((buttons & GAMEPAD_MENUSELECT) != 0) {
-                    selected = true;
-                }
-                bool moved = false;
-                if ((buttons & GAMEPAD_MENUSELECT) == 0 &&
-                    (((packet->field_0xb0 & 0x48) == 8 && (packet->next_area == -1 || (packet->area->flags & 2) != 0 ||
-                                                           Game.area_save[packet->next_area].complete != 0)) ||
-                     (packet->mode_flags & 1) != 0 || packet->challenge_state != 0 || packet->mission_state != 0)) {
-                    const u32 navigation = buttons | pad->left_directions;
-                    if (status_prompt < 1) {
-                        if ((navigation & GAMEPAD_DDOWN) != 0) {
+                if ((player == 0 ? packet->player0_active : packet->player1_active) != 0) {
+                    bool selected = false;
+                    if (menu_level > 0 && GameMenu[menu_level].queued_item != -1) {
+                        status_prompt = GameMenu[menu_level].queued_item;
+                        GameMenu[menu_level].queued_item = -1;
+                        selected = true;
+                    }
+                    const u32 buttons = pad->buttons_pressed;
+                    if ((buttons & GAMEPAD_MENUSELECT) != 0) {
+                        selected = true;
+                    }
+                    bool moved = false;
+                    if ((buttons & GAMEPAD_MENUSELECT) == 0 &&
+                        (((packet->field_0xb0 & 0x48) == 8 &&
+                          (packet->next_area == -1 || (packet->area->flags & 2) != 0 ||
+                           Game.area_save[packet->next_area].complete != 0)) ||
+                         (packet->mode_flags & 1) != 0 || packet->challenge_state != 0 || packet->mission_state != 0)) {
+                        const u32 navigation = buttons | pad->left_directions;
+                        if (status_prompt < 1) {
+                            if ((navigation & GAMEPAD_DDOWN) != 0) {
+                                GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+                                ++status_prompt;
+                                moved = true;
+                            }
+                        } else if ((navigation & GAMEPAD_DUP) != 0) {
                             GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-                            ++status_prompt;
+                            --status_prompt;
                             moved = true;
                         }
-                    } else if ((navigation & GAMEPAD_DUP) != 0) {
-                        GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-                        --status_prompt;
-                        moved = true;
                     }
-                }
-                if (selected) {
-                    packet->prompt_choice = (packet->field_0xb0 & 8) != 0 && packet->next_area != -1 &&
-                                                    (packet->area->flags & 2) == 0 &&
-                                                    Game.area_save[packet->next_area].complete == 0
-                                                ? 1
-                                                : static_cast<u8>(status_prompt);
-                    GameAudio_PlaySfx(0x30, NULL, 0, 0);
-                    stage->field_0x14 = 1;
-                    stage->field_0x18 = 0.0f;
-                    stage->field_0x1c = 0.5f;
+                    if (selected) {
+                        packet->prompt_choice = (packet->field_0xb0 & 8) != 0 && packet->next_area != -1 &&
+                                                        (packet->area->flags & 2) == 0 &&
+                                                        Game.area_save[packet->next_area].complete == 0
+                                                    ? 1
+                                                    : static_cast<u8>(status_prompt);
+                        GameAudio_PlaySfx(0x30, NULL, 0, 0);
+                        stage->field_0x14 = 1;
+                        stage->field_0x18 = 0.0f;
+                        stage->field_0x1c = 0.5f;
+                        return;
+                    }
+                    if (!moved) {
+                        continue;
+                    }
                     return;
                 }
-                if (!moved) {
-                    continue;
-                }
-                return;
             }
         }
     } else if (stage->field_0x14 == 1) {

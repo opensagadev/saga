@@ -1194,8 +1194,8 @@ void ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion(NUSHADERMTLDESC *d
     desc->flagsbits_1b8 = mobile_flags0 & 0xfb;
     const u8 mobile_flags2 = original_flags2 & 0x48;
     desc->flagsbits_1ba = mobile_flags2;
-    desc->flags = filtered_shader_flags & 0xf916fffb;
     desc->flagsbits_1bb = mobile_flags3 & 0x27;
+    desc->flags = filtered_shader_flags & 0xf916fffb;
 
     if (::RemoveNormalMaps != 0 && ::RemoveDirectionalMaps != 0) {
         vtx_desc[3] = original_vtx_flags3 & 0xfc;

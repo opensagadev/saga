@@ -426,34 +426,35 @@ void ClassEditor::Process(EdInputContext &input) {
         if (manipulator->Process(input, selected_objects) == 0 && active_tool != NULL)
             active_tool->Process(input);
     }
-    if (selected_objects.count > 0) {
-        if (input.GetPress(9) != 0.0f)
-            FocusSelected();
-        if (input.GetPress(10) != 0.0f)
-            ViewSelected();
-        for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next)
-            theRegistry.ClassIFaceProcess(entry->ed_class, entry->object, input);
-        if (input.GetPress(39) != 0.0f) {
-            ClassObjectListEntry *entry = selected_objects.first;
+    if (!(selected_objects.count > 0)) {
+        return;
+    }
+    if (input.GetPress(9) != 0.0f)
+        FocusSelected();
+    if (input.GetPress(10) != 0.0f)
+        ViewSelected();
+    for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next)
+        theRegistry.ClassIFaceProcess(entry->ed_class, entry->object, input);
+    if (input.GetPress(39) != 0.0f) {
+        ClassObjectListEntry *entry = selected_objects.first;
 
-            VuVec position __attribute__((aligned(16)));
-            i32 position_type = EdType_VuVec;
-            if (entry->reference == NULL ||
-                !entry->reference->GetAttributeData(entry->object, 8, position_type, &position, 0)) {
-                if (entry->ed_class->FindMember(&member, entry->object, 8, 1))
-                    member.reference->GetAttributeData(member.object, 8, position_type, &position, 0);
-            }
-            theLevelEditor.background_colour[0] = position.x;
-            theLevelEditor.background_colour[1] = position.y;
-            theLevelEditor.background_colour[2] = position.z;
-            theLevelEditor.background_colour[3] = position.w;
-            edcamSetPos(reinterpret_cast<NUVEC *>(theLevelEditor.background_colour));
-            thePropertyTool.Process(input);
-            if (mode == 0)
-                mode = 3;
-            SetMode(mode);
-            thePropertyTool.SetDefaultActiveMenu(NULL);
+        VuVec position __attribute__((aligned(16)));
+        i32 position_type = EdType_VuVec;
+        if (entry->reference == NULL ||
+            !entry->reference->GetAttributeData(entry->object, 8, position_type, &position, 0)) {
+            if (entry->ed_class->FindMember(&member, entry->object, 8, 1))
+                member.reference->GetAttributeData(member.object, 8, position_type, &position, 0);
         }
+        theLevelEditor.background_colour[0] = position.x;
+        theLevelEditor.background_colour[1] = position.y;
+        theLevelEditor.background_colour[2] = position.z;
+        theLevelEditor.background_colour[3] = position.w;
+        edcamSetPos(reinterpret_cast<NUVEC *>(theLevelEditor.background_colour));
+        thePropertyTool.Process(input);
+        if (mode == 0)
+            mode = 3;
+        SetMode(mode);
+        thePropertyTool.SetDefaultActiveMenu(NULL);
     }
 }
 
@@ -2574,8 +2575,8 @@ void PropertyTool::AutoLocateMenu(PropertyMenu *property_menu) {
             if (menu->x + menu->width >= other->menu->x && other->menu->x + other->menu->width >= menu->x) {
                 menu->x += 10;
                 if (static_cast<float>(menu->x + menu->width) > 590.0f) {
-                    menu->x = 20;
                     menu->y = 5;
+                    menu->x = 20;
                     return;
                 }
                 use_stored_metrics = false;
@@ -2626,8 +2627,8 @@ void PropertyTool::BringToFront(PropertyMenu *menu) {
             active_menu = menu;
         }
     } else {
-        menu->next = position;
         menu->previous = position->previous;
+        menu->next = position;
         if (position->previous != NULL) {
             position->previous->next = menu;
         } else {

@@ -392,68 +392,68 @@ void CollideGameObjects(WORLDINFO_s *world) {
             context == 0x39) {
             continue;
         }
-        if (context == 0x26 && object->field_0x7a7 != -1 && (object->context_variant_flags & 2) != 0) {
-            continue;
-        }
-        if (context == 0x1f && object->field_0x7a3 == 1) {
-            continue;
-        }
-
-        GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
-        if ((data->flags_090 & 0x8000) != 0 || (object->action_flags & 0x20) != 0 ||
-            (context == 0x47 && object->field_0x788 != NULL &&
-             (*reinterpret_cast<u8 *>(static_cast<u8 *>(object->field_0x788) + 0x68) & 1) != 0)) {
-            continue;
-        }
-
-        ++collision_count;
-        *minimum_cursor++ = object->apiobj.collision_min;
-        *maximum_cursor++ = object->apiobj.collision_max;
-        *object_cursor++ = &object->apiobj;
-
-        object->apiobj.collision_mask_low = 0;
-        object->apiobj.collision_mask_high = 0;
-        if ((data->flags_090 & 0x1000) != 0) {
-            object->apiobj.collision_mask_low = flattened_mask;
-        }
-
-        if (object->field_0x107c != -1) {
-            object->apiobj.collision_mask_low |= player_collision_mask;
-            for (i32 player_index = 0; player_index < 8; ++player_index) {
-                GameObject_s *player = Player[player_index];
-                if (player == NULL || (player->apiobj.field_0x1f8 & 0x1001) != 0x1001 || player == object ||
-                    !(player->field_0xdc4 > 0.0f) || player->apiobj.supporting_platform_id != object->field_0x107c ||
-                    (object->field_0x107c == player->field_0x1078 &&
-                     (player->apiobj.field_0x27d != 0 || GameObjectNearFloor(player, 3.0f, NULL) != 0))) {
-                    continue;
-                }
-                NUVEC direction = {object->apiobj.collision_position.x - player->apiobj.collision_position.x, 0.0f,
-                                   object->apiobj.collision_position.z - player->apiobj.collision_position.z};
-                NuVecNorm(&direction, &direction);
-                object->apiobj.movement_direction.x = direction.x;
-                object->apiobj.movement_direction.z = direction.z;
+        if (!(context == 0x26 && object->field_0x7a7 != -1 && (object->context_variant_flags & 2) != 0)) {
+            if (context == 0x1f && object->field_0x7a3 == 1) {
+                continue;
             }
-        }
 
-        if (object->character_context == CHARACTER_CONTEXT_JUMP && object->airborne_collision_target != NULL) {
-            const u64 bit = static_cast<u64>(1) << object->airborne_collision_target->apiobj.field_0x289;
-            object->apiobj.collision_exclusion_mask |= bit;
-        }
-        if (WORLD->current_level == SPEEDERCHASEA_LDATA && disable_narrow_socks == 0 && object->id == id_SPEEDERBIKE &&
-            object->apiobj.field_0x27c != -1) {
-            object->apiobj.collision_mask_low |= narrow_speeder_mask;
-        }
+            GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
+            if ((data->flags_090 & 0x8000) != 0 || (object->action_flags & 0x20) != 0 ||
+                (context == 0x47 && object->field_0x788 != NULL &&
+                 (*reinterpret_cast<u8 *>(static_cast<u8 *>(object->field_0x788) + 0x68) & 1) != 0)) {
+                continue;
+            }
 
-        if (VehicleArea != 0 && WORLD->current_level != BOUNTYHUNTERPURSUITA_LDATA &&
-            WORLD->current_level != DOGFIGHTA_LDATA) {
-            data = object->apiobj.character_data->game_character;
-            if (object->apiobj.field_0x27c == -1 && data->field_0x28 != 0.0f) {
-                object->apiobj.collision_mask_low |=
-                    (vertical_movement_mask & player_slot_mask) | no_vertical_movement_mask;
-            } else if (data->field_0x28 == 0.0f) {
-                object->apiobj.collision_mask_low |= (~player_slot_mask) & vertical_movement_mask;
-            } else {
-                object->apiobj.collision_mask_low |= vertical_movement_mask;
+            ++collision_count;
+            *minimum_cursor++ = object->apiobj.collision_min;
+            *maximum_cursor++ = object->apiobj.collision_max;
+            *object_cursor++ = &object->apiobj;
+
+            object->apiobj.collision_mask_low = 0;
+            object->apiobj.collision_mask_high = 0;
+            if ((data->flags_090 & 0x1000) != 0) {
+                object->apiobj.collision_mask_low = flattened_mask;
+            }
+
+            if (object->field_0x107c != -1) {
+                object->apiobj.collision_mask_low |= player_collision_mask;
+                for (i32 player_index = 0; player_index < 8; ++player_index) {
+                    GameObject_s *player = Player[player_index];
+                    if (player == NULL || (player->apiobj.field_0x1f8 & 0x1001) != 0x1001 || player == object ||
+                        !(player->field_0xdc4 > 0.0f) ||
+                        player->apiobj.supporting_platform_id != object->field_0x107c ||
+                        (object->field_0x107c == player->field_0x1078 &&
+                         (player->apiobj.field_0x27d != 0 || GameObjectNearFloor(player, 3.0f, NULL) != 0))) {
+                        continue;
+                    }
+                    NUVEC direction = {object->apiobj.collision_position.x - player->apiobj.collision_position.x, 0.0f,
+                                       object->apiobj.collision_position.z - player->apiobj.collision_position.z};
+                    NuVecNorm(&direction, &direction);
+                    object->apiobj.movement_direction.x = direction.x;
+                    object->apiobj.movement_direction.z = direction.z;
+                }
+            }
+
+            if (object->character_context == CHARACTER_CONTEXT_JUMP && object->airborne_collision_target != NULL) {
+                const u64 bit = static_cast<u64>(1) << object->airborne_collision_target->apiobj.field_0x289;
+                object->apiobj.collision_exclusion_mask |= bit;
+            }
+            if (WORLD->current_level == SPEEDERCHASEA_LDATA && disable_narrow_socks == 0 &&
+                object->id == id_SPEEDERBIKE && object->apiobj.field_0x27c != -1) {
+                object->apiobj.collision_mask_low |= narrow_speeder_mask;
+            }
+
+            if (VehicleArea != 0 && WORLD->current_level != BOUNTYHUNTERPURSUITA_LDATA &&
+                WORLD->current_level != DOGFIGHTA_LDATA) {
+                data = object->apiobj.character_data->game_character;
+                if (object->apiobj.field_0x27c == -1 && data->field_0x28 != 0.0f) {
+                    object->apiobj.collision_mask_low |=
+                        (vertical_movement_mask & player_slot_mask) | no_vertical_movement_mask;
+                } else if (data->field_0x28 == 0.0f) {
+                    object->apiobj.collision_mask_low |= (~player_slot_mask) & vertical_movement_mask;
+                } else {
+                    object->apiobj.collision_mask_low |= vertical_movement_mask;
+                }
             }
         }
     }

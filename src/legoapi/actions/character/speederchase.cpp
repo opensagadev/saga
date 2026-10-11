@@ -433,23 +433,22 @@ void SpeederChaseA_Panel(WORLDINFO_s *) {
         return;
     }
 
-    if (LevAIMessage[0] == NULL || LevAIMessage[1] == NULL || LevAIMessage[3] == NULL ||
-        LevAIMessage[3]->value != 0.0f || !(0.0f < LevAIMessage[0]->value)) {
-        return;
-    }
+    if (LevAIMessage[0] != NULL && LevAIMessage[1] != NULL && LevAIMessage[3] != NULL &&
+        LevAIMessage[3]->value == 0.0f && 0.0f < LevAIMessage[0]->value) {
 
-    i32 count = static_cast<i32>(LevAIMessage[0]->value);
-    if (count > 10) {
-        count = 10;
-    }
-    i32 killed = static_cast<i32>(LevAIMessage[1]->value);
-    for (i32 i = 0; i < count; ++i) {
-        character_ids[i] = id_SPEEDERBIKE;
-        if (count - killed <= i) {
-            dimmed[i] = 1;
+        i32 count = static_cast<i32>(LevAIMessage[0]->value);
+        if (count > 10) {
+            count = 10;
         }
+        i32 killed = static_cast<i32>(LevAIMessage[1]->value);
+        for (i32 i = 0; i < count; ++i) {
+            character_ids[i] = id_SPEEDERBIKE;
+            if (count - killed <= i) {
+                dimmed[i] = 1;
+            }
+        }
+        SpeederChase_DrawMeleeTargets(character_ids, dimmed, count);
     }
-    SpeederChase_DrawMeleeTargets(character_ids, dimmed, count);
 }
 
 void SpeederChaseA_Reset(WORLDINFO_s *) {

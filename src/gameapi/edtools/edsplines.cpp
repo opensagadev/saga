@@ -197,8 +197,8 @@ static EdFloatControl *make_spline_float_control(f32 minimum, f32 maximum) {
     EdFloatControl *control = new (theMemoryManager.AllocPool(sizeof(EdFloatControl), 1)) EdFloatControl;
     control->value_type = EdType_Float;
     control->format = const_cast<char *>("%.2f");
-    control->minimum = minimum;
     control->maximum = maximum;
+    control->minimum = minimum;
     return control;
 }
 
@@ -579,8 +579,8 @@ void SplineHelper::SerialiseObject(EdStream &stream, void *object) {
             knot->led_file = Placeable::CurrentLedFile;
             theKnotHelper.object_class->SerialiseObject(stream, knot);
             knot->spline = spline;
-            knot->next = NULL;
             knot->previous = spline->knots.last;
+            knot->next = NULL;
             if (spline->knots.last != NULL)
                 spline->knots.last->next = knot;
             const bool had_first = spline->knots.first != NULL;
@@ -724,8 +724,8 @@ SplineObject *SplineObject::Clone() {
         knot->in_tangent.w = source->in_tangent.w;
         knot->out_tangent.x = source->out_tangent.x;
         knot->out_tangent.y = source->out_tangent.y;
-        knot->out_tangent.z = source->out_tangent.z;
         knot->out_tangent.w = source->out_tangent.w;
+        knot->out_tangent.z = source->out_tangent.z;
         source = source->next;
     }
     clone->step = step;
