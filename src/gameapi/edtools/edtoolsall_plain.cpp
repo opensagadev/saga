@@ -342,13 +342,13 @@ extern "C" {
                              NULL, NULL, 0x64697262,      edbriProc, edbriRender, NULL};
     ed_module_s edanimdesc = {NULL, NULL, "Anim Editor", edanimInit, edanimClose, edanimEnter,  NULL,
                               NULL, NULL, NULL,          0x6d696e61, edanimProc,  edanimRender, NULL};
-    ed_module_s edgradesc = {NULL, NULL, "Grass Editor", edgraInit,  edgraClose, edgraEnter,  NULL,
-                             NULL, NULL, NULL,           0x73617267, edgraProc,  edgraRender, NULL};
     ed_module_s edptldesc = {NULL,       NULL,       "Particle Positioner",
                              edppInit,   edppClose,  edppEnter,
                              NULL,       edppApply,  NULL,
                              NULL,       0x706c7470, edppProc,
                              edppRender, NULL};
+    ed_module_s edgradesc = {NULL, NULL, "Grass Editor", edgraInit,  edgraClose, edgraEnter,  NULL,
+                             NULL, NULL, NULL,           0x73617267, edgraProc,  edgraRender, NULL};
     i32 edpp_create_type = -1;
     f32 edpp_copy_size = 0.2f;
     f32 edpp_scale_factor = 1.0f;
@@ -1413,6 +1413,7 @@ extern "C" {
         edanim_page_on[page] = 0;
     }
     void edanimUpdateObjects(float elapsed) {
+        NUMTX matrix;
         NUVEC position;
         static i32 localframecount;
         float seconds;
@@ -1544,7 +1545,7 @@ extern "C" {
                             play = sound;
                     }
                     if (play != -1) {
-                        NUMTX matrix;
+
                         NuMtxInvRSS(&matrix, NuSpecialGetMtx(&special));
                         NuMtxMul(&matrix, &matrix, NuSpecialGetDrawMtx(&special));
                         // The original uses the completed particle-loop index here (0x35d332).
@@ -2067,10 +2068,7 @@ extern "C" {
 
             i32 skipped_individuals = 0;
             if (clump->kind == 3) {
-                if (edgra_ind_clumps_used == EDGRA_MAX_INDIVIDUAL_CLUMPS) {
-                    skipped_individuals = clump->element_count;
-                    clump->element_count = 0;
-                } else {
+                if (edgra_ind_clumps_used != EDGRA_MAX_INDIVIDUAL_CLUMPS) {
                     i32 individual = 0;
                     while (IndGrassClumpsUsed[individual] != 0) {
                         ++individual;
@@ -2089,6 +2087,9 @@ extern "C" {
                         GetIndGrassClump(individual, element)->field_10 = EdFileReadShort();
                         GetIndGrassClump(individual, element)->field_12 = EdFileReadShort();
                     }
+                } else {
+                    skipped_individuals = clump->element_count;
+                    clump->element_count = 0;
                 }
                 for (i32 element = 0; element < skipped_individuals; ++element) {
                     EdFileReadFloat();
@@ -2594,8 +2595,8 @@ extern "C" {
         f32 scaled_vertical_extent = vertical_extent * effect->torus_radius2;
         f32 scaled_radial_extent = radial_extent * effect->torus_radius2;
         NUVEC position;
-        position.y = key->position.y;
         position.x = key->position.x;
+        position.y = key->position.y;
         position.z = key->position.z;
         edbitsDrawTorus(&position, scaled_radius, scaled_radial_extent, scaled_vertical_extent, 0xffff0000, edpp_mtl);
     }
@@ -3307,8 +3308,8 @@ extern "C" {
         item->data = data;
         memcpy(item->colours, colours, sizeof(item->colours));
         item->process = eduicbProcessColourSlider;
-        item->render = eduicbRenderColourSlider;
         item->selection_group = group;
+        item->render = eduicbRenderColourSlider;
         item->text_alignment = 0x40;
         item->destroy = eduicbItemSliderDestroy;
         eduiItemSetText(item, text);
@@ -3571,8 +3572,8 @@ extern "C" {
         memcpy(item->colours, colours, sizeof(item->colours));
         item->process = eduicbProcessProp;
         item->render = eduicbRenderProp;
-        item->interact = eduicbInteractProp;
         item->destroy = eduicbItemDestroyProp;
+        item->interact = eduicbInteractProp;
         item->highlighted = 0;
         item->text_alignment = 0x40;
         item->selection_group = 0;
@@ -3610,8 +3611,8 @@ extern "C" {
                 NuRndrLineRect2di(x << 4, (y << 3) + 8, item_width << 4, (height << 3) - 16, colour, uimtls[ui_outmtl]);
         }
         if (item->disabled) {
-            i32 top = y << 3;
             i32 left = x << 4;
+            i32 top = y << 3;
             i32 right = left + (width << 4);
             i32 bottom = top + (height << 3);
             if (!edui_donotdraw)
@@ -3637,8 +3638,8 @@ extern "C" {
         memcpy(item->colours, colours, sizeof(item->colours));
         item->process = eduicbProcessSel;
         item->render = eduicbRenderSel;
-        item->interact = eduicbInteractSel;
         item->destroy = eduicbItemDestroy;
+        item->interact = eduicbInteractSel;
         item->highlighted = selected;
         item->selection_group = group;
         item->text = NULL;
@@ -3664,9 +3665,9 @@ extern "C" {
             memcpy(item->colours, colours, sizeof(item->colours));
             item->process = eduicbProcessSeparator;
             item->render = eduicbRenderSeparator;
-            item->destroy = eduicbItemDestroy;
             item->text_alignment = 0x40;
             item->highlighted = 0;
+            item->destroy = eduicbItemDestroy;
             item->selection_group = 0;
         }
         return item;
@@ -3696,8 +3697,8 @@ extern "C" {
         item->data = data;
         memcpy(item->colours, colours, sizeof(item->colours));
         item->process = eduicbProcessSlider;
-        item->render = eduicbRenderSlider;
         item->interact = eduicbInteractSlider;
+        item->render = eduicbRenderSlider;
         item->destroy = eduicbItemSliderDestroy;
         item->selection_group = group;
         item->text_alignment = 0x40;
@@ -3795,8 +3796,8 @@ extern "C" {
         item->data = data;
         memcpy(item->colours, colours, sizeof(item->colours));
         item->process = eduicbProcessSlider;
-        item->render = eduicbRenderTextSelector;
         item->interact = eduicbInteractSlider;
+        item->render = eduicbRenderTextSelector;
         item->destroy = eduicbItemSliderDestroy;
         item->selection_group = group;
         item->text_alignment = 0x40;
@@ -3852,8 +3853,8 @@ extern "C" {
             menu->first = item;
         item->previous = menu->last;
         item->next = NULL;
-        menu->field_10 = 0;
         menu->field_0c = menu->first;
+        menu->field_10 = 0;
         menu->last = item;
         edui_last_item = item;
         return item;
@@ -3895,8 +3896,8 @@ extern "C" {
         item->next = menu->first;
         item->previous = NULL;
         menu->first = item;
-        menu->field_0c = item;
         menu->field_10 = 0;
+        menu->field_0c = item;
         edui_last_item = item;
     }
     void eduiMenuAddItemLast(eduimenu_s *menu, eduiitem_s *item) {
@@ -3906,9 +3907,9 @@ extern "C" {
             menu->first = item;
         item->previous = menu->last;
         item->next = NULL;
-        menu->field_0c = item;
         menu->field_10 = 0;
         menu->last = item;
+        menu->field_0c = item;
         edui_last_item = item;
     }
     i32 eduiMenuAttach(eduimenu_s *menu, eduimenu_s *child) {
@@ -4359,8 +4360,8 @@ extern "C" {
                     interact(x, y, menu->width, scroll_height, menu, NULL, cbInteractMenuScrollUp, 0x40, 0);
                 rect(x << 4, y << 3, menu->width << 4, scroll_height << 3, 0x80000000, uimtls[ui_bgmtl]);
                 const i32 top = (y << 3) + 8;
-                i32 centre = (x * 2 + menu->width) << 3;
                 const i32 bottom = ((y + scroll_height) << 3) - 16;
+                i32 centre = (x * 2 + menu->width) << 3;
                 line(centre, top, centre - ((scroll_height - 2) << 4), bottom, 0x80ffffff, uimtls[0]);
                 centre = (x * 2 + menu->width) << 3;
                 line(centre, top, centre + ((scroll_height - 2) << 4), bottom, 0x80ffffff, uimtls[0]);
@@ -4403,8 +4404,8 @@ extern "C" {
                 if (!menu->child)
                     interact(x, y, menu->width, scroll_height, menu, NULL, cbInteractMenuScrollDown, 0x40, 0);
                 rect(x << 4, y << 3, menu->width << 4, scroll_height << 3, 0x80000000, uimtls[ui_bgmtl]);
-                i32 centre = (x * 2 + menu->width) << 3;
                 const i32 bottom = ((y + scroll_height - 2) << 3);
+                i32 centre = (x * 2 + menu->width) << 3;
                 const i32 top = (y << 3) + 8;
                 line(centre, bottom, centre - ((scroll_height - 2) << 4), top, 0x80ffffff, uimtls[0]);
                 centre = (x * 2 + menu->width) << 3;
@@ -4420,8 +4421,8 @@ extern "C" {
             x = menu->x + menu->width;
         else
             y += max_item_height;
-        menu->field_24 = x - menu->x;
         menu->field_28 = y - menu->y;
+        menu->field_24 = x - menu->x;
 
         const u32 outline = eduiGetActiveMenu() == menu ? eduimenu_selected_outline_colour : eduimenu_outline_colour;
         outline_rect((menu->x - 1) << 4, (menu->y << 3) - 8, (menu->field_24 + 2) << 4, (menu->field_28 << 3) + 16,
@@ -5119,8 +5120,8 @@ extern "C" {
         }
         f32 dx = eduiPickerDeadZone32(pad->analog_left_x) * 0.001f;
         f32 dy = eduiPickerDeadZone32(pad->analog_left_y) * 0.001f;
-        pick->cursor_y += dy;
         pick->cursor_x += dx;
+        pick->cursor_y += dy;
         if (pick->cursor_x < 0.0f)
             pick->cursor_x = 0.0f;
         else if (pick->cursor_x > 1.0f)
@@ -5483,8 +5484,8 @@ extern "C" {
             return 1;
         }
         if ((pressed & 0x40) && graph_item->selected_point >= 0) {
-            graph_item->cursor_y = graph_item->graph->y[graph_item->selected_point];
             graph_item->cursor_x = graph_item->graph->x[graph_item->selected_point];
+            graph_item->cursor_y = graph_item->graph->y[graph_item->selected_point];
         }
         if ((pad->digital_buttons & 0x40) && graph_item->selected_point >= 0) {
             i32 index = graph_item->selected_point;
@@ -5879,10 +5880,10 @@ extern "C" {
         i32 right = pad->analog_r1 ? pad->analog_r1 : pad->analog_r2;
         if (left) {
             f32 zoom = pick->zoom - left / 4192.0f;
-            if (zoom < 1.0f) {
-                pick->zoom = 1.0f;
-            } else {
+            if (!(zoom < 1.0f)) {
                 pick->zoom = zoom;
+            } else {
+                pick->zoom = 1.0f;
             }
             return 1;
         }
@@ -5903,10 +5904,10 @@ extern "C" {
     }
     __attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(eduimenu_s *, eduiitem_s *item,
                                                                                    i32 x, i32 y, i32 width, i32) {
-        i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
         i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 3;
-        item->y = y;
+        i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
         item->x = x;
+        item->y = y;
         if (!edui_donotdraw)
             NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2], uimtls[ui_bgmtl]);
         if (!edui_donotdraw)
@@ -5915,21 +5916,21 @@ extern "C" {
             NuQFntSetColour(edui_font, item->colours[item->highlighted]);
         eduiFntPrintEx(edui_font, x << 4, (y << 3) + baseline, 16, item->text);
 
-        i32 left = ((x - height + width - 2) << 4) + 16;
         i32 top = (y << 3) + 16;
+        i32 left = ((x - height + width - 2) << 4) + 16;
         i32 right = left + ((height - 2) << 4) - 16;
         i32 bottom = top + ((height - 2) << 3) - 8;
         i32 middle_y = (top + bottom) >> 1;
         i32 quarter_x = (left + ((left + right) >> 1)) >> 1;
         i32 lower_y = (bottom + middle_y) >> 1;
-        if (!item->highlighted) {
-            i32 points[10] = {left, middle_y, quarter_x, lower_y, right, top, quarter_x, bottom, left, middle_y};
-            if (!edui_donotdraw)
-                NuRndrLineStrip2di(points, NULL, 5, item->colours[0], uimtls[0]);
-        } else {
+        if (item->highlighted) {
             i32 points[8] = {left, middle_y, quarter_x, lower_y, quarter_x, bottom, right, top};
             if (!edui_donotdraw)
                 NuRndrTriStrip2di(points, NULL, 4, item->colours[0], uimtls[0]);
+        } else {
+            i32 points[10] = {left, middle_y, quarter_x, lower_y, right, top, quarter_x, bottom, left, middle_y};
+            if (!edui_donotdraw)
+                NuRndrLineStrip2di(points, NULL, 5, item->colours[0], uimtls[0]);
         }
         return height;
     }
@@ -6154,8 +6155,8 @@ extern "C" {
     }
     static __used__ i32 eduicbRenderGradPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
         edui_gradient_pick_s *gradient = static_cast<edui_gradient_pick_s *>(item);
-        i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 2;
         i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
+        i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 2;
         item->y = y;
         item->x = x;
         if (!edui_donotdraw)
@@ -6207,10 +6208,10 @@ extern "C" {
     static __used__ i32 eduicbRenderGraph(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32 selected) {
         (void)menu;
         edui_graph_s *picker = static_cast<edui_graph_s *>(item);
-        f32 cursor_x = picker->cursor_x;
         f32 cursor_y = picker->cursor_y;
-        item->y = y;
+        f32 cursor_x = picker->cursor_x;
         item->x = x;
+        item->y = y;
         i32 total_width = picker->width;
         i32 graph_width = total_width - 60;
         i32 total_height = picker->height;
@@ -6402,8 +6403,8 @@ extern "C" {
         edui_slider_s *number = static_cast<edui_slider_s *>(item);
         i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 3;
         i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
-        item->x = x;
         item->y = y;
+        item->x = x;
         if (!edui_donotdraw)
             NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
                           uimtls[ui_bgmtl]);
@@ -6418,6 +6419,7 @@ extern "C" {
         return height;
     }
     static __used__ i32 eduicbRenderProp(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
+        char prefix[256];
         edui_prop_s *property = static_cast<edui_prop_s *>(item);
         f32 draw_x = x;
         f32 draw_y = y;
@@ -6482,7 +6484,7 @@ extern "C" {
             eduiFntPrintClipEx(edui_font, draw_x + indentation, draw_y + baseline, 16, draw_x - indentation,
                                property->label_width, item->text);
             eduiFntPrintEx(edui_font, draw_x + property->label_width + 2.0f, draw_y + baseline, 16, eduiPropTextEdit);
-            char prefix[256];
+
             NuStrNCpy(prefix, eduiPropTextEdit, eduiPropTextPos + 1);
             prefix[eduiPropTextPos + 1] = '\0';
             f32 caret_width = NuQFntPrintLenU(edui_font, prefix) * 0.0625f;
@@ -6686,8 +6688,8 @@ extern "C" {
         NuStrCat(format, slider->format);
         eduiFntPrintEx(edui_font, (x * 2 + width) << 3, (y << 3) + baseline, 64, format,
                        static_cast<i32>(slider->value));
-        i32 top = (y + height) << 3;
         i32 bottom = (y + height * 2 - 1) << 3;
+        i32 top = (y + height) << 3;
         f32 span = width;
         i32 marker_x = static_cast<i32>(x + 1 + slider->normalized_value * span) << 4;
         if (!edui_donotdraw)
@@ -6704,8 +6706,8 @@ extern "C" {
         auto *picker = static_cast<edui_textpicker_s *>(item);
         i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 3;
         i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
-        item->x = x;
         item->y = y;
+        item->x = x;
 
         char letter[2] = {'0', '\0'};
         if (picker->editing) {

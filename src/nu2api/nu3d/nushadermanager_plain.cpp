@@ -773,8 +773,11 @@ namespace nu2api {
         if (filter->variant == 0) {
             const u8 baseFlag = descBytes[0x1b8];
             block[0x15] = ((baseFlag & 1) || (baseFlag & 2)) ? descBytes[0xa9] : 0;
-            block[0x16] =
-                filter->texture_id_threshold < *reinterpret_cast<const i32 *>(descBytes + 0x48) ? descBytes[0xaa] : 0;
+            if (filter->texture_id_threshold < *reinterpret_cast<const i32 *>(descBytes + 0x48)) {
+                block[0x16] = descBytes[0xaa];
+            } else {
+                block[0x16] = 0;
+            }
         }
 
         // Diffuse-map presence + ids

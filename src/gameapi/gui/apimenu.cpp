@@ -973,7 +973,9 @@ static __used__ void MenuDrawPauseExit(MENU *menu) {
                 warning = TTab[tGAMEPROGRESSWILLBELOST];
             } else {
                 title = TTab[tEXITTOMAP];
-                if (Arcade == 0) {
+                if (Arcade != 0) {
+                    warning = pause_i_pad != -1 ? TTab[tARCADE_NOWIN] : NULL;
+                } else {
                     if (SuperStory != 0) {
                         warning = TTab[tALLSUPERSTORYPROGRESSWILLBELOST];
                     } else {
@@ -981,8 +983,6 @@ static __used__ void MenuDrawPauseExit(MENU *menu) {
                                       ? NULL
                                       : TTab[tALLLEVELPROGRESSWILLBELOST];
                     }
-                } else {
-                    warning = pause_i_pad != -1 ? TTab[tARCADE_NOWIN] : NULL;
                 }
             }
         } else {

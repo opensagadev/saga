@@ -173,8 +173,8 @@ GAMEANTINODE_s *GameAntinode_RegisterAntiNode(GAMEANTINODESYS_s *system, NUVEC *
     if (position == NULL)
         position = &v000;
     node->position = *position;
-    node->radius = radius;
     node->extent_x = extent_x;
+    node->radius = radius;
     node->extent_z = extent_z;
     node->angle = angle;
     node->shape = shape;
@@ -236,11 +236,11 @@ GAMEANTINODE_s *GameAntinode_UpdateAntiNodeUsingData(GAMEANTINODESYS_s *system, 
             const f32 extent_x = data->extent_x;
             const f32 extent_z = data->extent_z;
             const u16 node_angle = data->flags + angle;
-            node->min_y = min_y;
             node->max_y = max_y;
+            node->min_y = min_y;
             node->radius = base_radius;
-            node->extent_x = extent_x;
             node->extent_z = extent_z;
+            node->extent_x = extent_x;
             node->angle = node_angle;
             node->shape = data->use_largest_extent;
             node->remaining_time = duration;

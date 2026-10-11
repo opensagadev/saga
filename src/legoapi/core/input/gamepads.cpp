@@ -574,8 +574,8 @@ i32 ReadPad(i32 port) {
     gamepad->unknown_20 = right_directions;
     gamepad->input_state = 1;
 
-    gamepad->unknown_04 = pad->digital_buttons;
     gamepad->buttons_down_08 = pad->digital_buttons_pressed;
+    gamepad->unknown_04 = pad->digital_buttons;
     pActivePad = gamepad->pad;
     return 2;
 }

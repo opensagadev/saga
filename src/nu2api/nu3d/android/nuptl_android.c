@@ -283,8 +283,8 @@ void BuildDebrisVerts(PartHeader *header, uv1debdata *chunk_data, NUMTL *materia
         v1 = 1.0f;
     } else {
         u0 = header->texture_u0;
-        v0 = header->texture_v0;
         u1 = header->texture_u1;
+        v0 = header->texture_v0;
         v1 = header->texture_v1;
     }
     dma_particle_chunk_s *chunk = reinterpret_cast<dma_particle_chunk_s *>(chunk_data);
