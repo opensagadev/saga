@@ -818,7 +818,9 @@ giz_freeplay:
             }
 
             if ((pause_rndr_on == 0) || (FadeSys.pending_type == FADE_TYPE_WIPE)) {
-                if (MainRenderTime > 0.0f) {
+                if (!(MainRenderTime > 0.0f)) {
+                    NoRender();
+                } else {
                     world = WORLD;
                     GameFog_Update(WORLD);
                     GameFog_Set();
@@ -979,8 +981,6 @@ giz_freeplay:
                     if (screendump == 0) {
                         ViewCamDraw();
                     }
-                } else {
-                    NoRender();
                 }
             }
 

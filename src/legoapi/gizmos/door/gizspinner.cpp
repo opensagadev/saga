@@ -687,8 +687,8 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
             spinner->field_0x08c = 0;
             spinner->state_flags |= 8;
             spinner->field_0x098 = 0.0f;
-            spinner->field_0x09c = extent * 0.5f;
             spinner->field_0x094 = extent * 0.4f;
+            spinner->field_0x09c = extent * 0.5f;
         }
 
         spinner->type = spinner_type;
@@ -1098,10 +1098,10 @@ static void GizSpinner_ResetAll(void *world_ptr, void *, void *progress_ptr) {
             if ((spinner.flags & GIZSPINNER_FLAG_VALID) != 0) {
                 if (entry != NULL && (entry->flags & SPINNER_PROGRESS_VALID) != 0) {
                     spinner.rotation = entry->rotation;
-                    if (entry->animation_position == 0.0f) {
-                        GameAnimSet_JumpToEnd(spinner.anim_set);
-                    } else {
+                    if (entry->animation_position != 0.0f) {
                         GameAnimSet_JumpToAnimPos(spinner.anim_set, entry->animation_position);
+                    } else {
+                        GameAnimSet_JumpToEnd(spinner.anim_set);
                     }
 
                     if ((entry->flags & SPINNER_PROGRESS_ARM_VISIBLE) != 0) {

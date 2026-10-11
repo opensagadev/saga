@@ -291,6 +291,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
     minimum.z -= radius;
     maximum.z += radius;
     GameObject_s *object = Obj;
+    i8 force_player_mask = part->force_player_mask;
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
         APIOBJECT_s *api = &object->apiobj;
         if ((api->field_0x1f8 & 0x1001) != 0x1001 || api->field_0x287 != 0)
@@ -298,7 +299,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
         i8 context = static_cast<i8>(object->character_context);
         if ((CInfo[context].flags & 0x8000) != 0 || (object->field_0xe20 & 0x20) != 0)
             continue;
-        if (part->force_player_mask == 0) {
+        if (force_player_mask == 0) {
             if (part->owner == object) {
                 if (part->scale_time < 0.5f)
                     continue;
@@ -321,7 +322,58 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
             if (minimum.y > api->collision_max.y || api->collision_min.y > maximum.y)
                 continue;
         }
-        if ((part->flags & 0x40) != 0) {
+        if ((part->flags & 0x40) == 0) {
+            GAMECHARACTERDATA_s *character = static_cast<GAMECHARACTERDATA_s *>(api->character_data->field11_0x24);
+            if ((character->flags_090 & 0x8000) != 0)
+                continue;
+            if (!SphereSphereOverlapScaleY(&part->position, part->field_0e4, part->field_0e4, &api->collision_position,
+                                           api->collision_radius, api->field_0x1e0))
+                continue;
+            if (!((part->active & 2) != 0 && (part->flags & 0x1000008) == 0x1000008))
+                KillPart(part, 1);
+            if ((part->flags & 8) != 0 && !((part->flags & 0x1000000) != 0 && (part->active & 2) != 0) &&
+                ((api->flags_low & 0x80) != 0 || (part->flags & 0x800000) == 0)) {
+                u32 flags = CInfo[static_cast<i8>(object->character_context)].flags;
+                if ((flags & 0x4000000) != 0 || ((flags & 0x8000000) != 0 && (object->jump_flags & 2) != 0)) {
+                    i32 effect = -1;
+                    if (object->id == id_BOB)
+                        effect = (object->field_0xefd & 2) != 0 ? 2 : 3;
+                    else if (object->blade_index != -1)
+                        effect = BladeTab[object->blade_index].hit_effect;
+                    DeflectPart(part, object, ForceThrowSpeed, ForceThrowGravity, 0, effect);
+                } else {
+                    GameCam_Judder(GameCam, 0.2f, 0, NULL);
+                    ReleaseBuildIt(object, 0);
+                    ReleasePush(object);
+                    if (object->field_0xd24 >= 1.0f)
+                        ObjHitShield(part->owner, object, object->field_0xe37, NULL);
+                    else if (!CannotKill(object)) {
+                        ObjHitObj((part->flags & 0x10000) != 0 ? NULL : part->owner, object, part->field_204,
+                                  static_cast<u16>(part->force_flags), 0, 1);
+                    } else if (part->owner != NULL) {
+                        NewRumble(part->owner->pad_gamepad->pad, 0.5f, 0);
+                        NewRumble(object->pad_gamepad->pad, 0.5f, 0);
+                    }
+                }
+            }
+            if (api->field_0x287 != 0 || (api->flags_low & 2) != 0)
+                continue;
+            if ((part->active & 1) == 0) {
+                f32 speed = static_cast<GAMECHARACTERDATA_s *>(api->character_data->field11_0x24)->run_speed;
+                if (api->scaled_radius > 1.0f)
+                    speed /= api->scaled_radius;
+                NUVEC direction;
+                NuVecNorm(&direction, &part->velocity);
+                api->velocity.x += direction.x * speed;
+                api->velocity.z += direction.z * speed;
+            }
+            if ((part->flags & 0x2000000) != 0 && ((part->flags & 0x4000000) == 0 || (part->active & 2) != 0)) {
+                u16 angle = NuAtan2D(api->position.x - part->position.x, api->position.z - part->position.z);
+                f32 speed = static_cast<GAMECHARACTERDATA_s *>(api->character_data->field11_0x24)->run_speed;
+                api->field_0x1fc = NU_SIN_LUT(angle) * speed;
+                api->field_0x204 = NU_COS_LUT(angle) * speed;
+            }
+        } else {
         collect_pickup:
             if ((part->active & 2) == 0) {
                 if (part->pickup_type == 0xcb) {
@@ -341,7 +393,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
                 if (part->pickup_type == 0xd0) {
                     CollectPowerUp(object, &part->position, part->rotation_y, 1);
                     KillPart(part, 2);
-                } else if (part->force_player_mask == 3) {
+                } else if (force_player_mask == 3) {
                     if ((api->character_data->model_flags & 0x2000) == 0 || object->torpedo == NULL)
                         continue;
                     if (object->torpedo->count < getMaxTorpedos(object)) {
@@ -364,57 +416,6 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
                 CollectHitPoint(object, &part->position, 1);
                 KillPart(part, 2);
             }
-            continue;
-        }
-        GAMECHARACTERDATA_s *character = static_cast<GAMECHARACTERDATA_s *>(api->character_data->field11_0x24);
-        if ((character->flags_090 & 0x8000) != 0)
-            continue;
-        if (!SphereSphereOverlapScaleY(&part->position, part->field_0e4, part->field_0e4, &api->collision_position,
-                                       api->collision_radius, api->field_0x1e0))
-            continue;
-        if (!((part->active & 2) != 0 && (part->flags & 0x1000008) == 0x1000008))
-            KillPart(part, 1);
-        if ((part->flags & 8) != 0 && !((part->flags & 0x1000000) != 0 && (part->active & 2) != 0) &&
-            ((api->flags_low & 0x80) != 0 || (part->flags & 0x800000) == 0)) {
-            u32 flags = CInfo[static_cast<i8>(object->character_context)].flags;
-            if ((flags & 0x4000000) != 0 || ((flags & 0x8000000) != 0 && (object->jump_flags & 2) != 0)) {
-                i32 effect = -1;
-                if (object->id == id_BOB)
-                    effect = (object->field_0xefd & 2) != 0 ? 2 : 3;
-                else if (object->blade_index != -1)
-                    effect = BladeTab[object->blade_index].hit_effect;
-                DeflectPart(part, object, ForceThrowSpeed, ForceThrowGravity, 0, effect);
-            } else {
-                GameCam_Judder(GameCam, 0.2f, 0, NULL);
-                ReleaseBuildIt(object, 0);
-                ReleasePush(object);
-                if (object->field_0xd24 >= 1.0f)
-                    ObjHitShield(part->owner, object, object->field_0xe37, NULL);
-                else if (!CannotKill(object)) {
-                    ObjHitObj((part->flags & 0x10000) != 0 ? NULL : part->owner, object, part->field_204,
-                              static_cast<u16>(part->force_flags), 0, 1);
-                } else if (part->owner != NULL) {
-                    NewRumble(part->owner->pad_gamepad->pad, 0.5f, 0);
-                    NewRumble(object->pad_gamepad->pad, 0.5f, 0);
-                }
-            }
-        }
-        if (api->field_0x287 != 0 || (api->flags_low & 2) != 0)
-            continue;
-        if ((part->active & 1) == 0) {
-            f32 speed = static_cast<GAMECHARACTERDATA_s *>(api->character_data->field11_0x24)->run_speed;
-            if (api->scaled_radius > 1.0f)
-                speed /= api->scaled_radius;
-            NUVEC direction;
-            NuVecNorm(&direction, &part->velocity);
-            api->velocity.x += direction.x * speed;
-            api->velocity.z += direction.z * speed;
-        }
-        if ((part->flags & 0x2000000) != 0 && ((part->flags & 0x4000000) == 0 || (part->active & 2) != 0)) {
-            u16 angle = NuAtan2D(api->position.x - part->position.x, api->position.z - part->position.z);
-            f32 speed = static_cast<GAMECHARACTERDATA_s *>(api->character_data->field11_0x24)->run_speed;
-            api->field_0x1fc = NU_SIN_LUT(angle) * speed;
-            api->field_0x204 = NU_COS_LUT(angle) * speed;
         }
     }
 }

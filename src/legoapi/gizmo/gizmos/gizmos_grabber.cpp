@@ -305,10 +305,7 @@ void Grabber_Update(WORLDINFO_s *world) {
     NuSpecialUpdate(&g->special);
     switch (g->state) {
         case 0:
-            if (pad != NULL) {
-                if (!(pad->buttons_pressed & (GAMEPAD_SPECIAL | GAMEPAD_ACTION)))
-                    break;
-            } else {
+            if (pad == NULL) {
                 if ((g->flags_559 & 4) && g->action_switch && (g->action_switch->progress_flags & 2) &&
                     GameAnimSet_IsAnimationReset(g->action_switch->anim_set))
                     g->flags_559 &= ~4;
@@ -316,6 +313,9 @@ void Grabber_Update(WORLDINFO_s *world) {
                     break;
                 if (!g->action_switch || !(g->action_switch->progress_flags & 2) ||
                     (g->action_switch->anim_set->flags & 1))
+                    break;
+            } else {
+                if (!(pad->buttons_pressed & (GAMEPAD_SPECIAL | GAMEPAD_ACTION)))
                     break;
             }
             if (!(g->character_model && g->character_model->model_data_b[102])) {

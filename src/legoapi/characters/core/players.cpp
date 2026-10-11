@@ -355,8 +355,8 @@ void Players_InitPositions(WORLDINFO *world) {
         if (spl == NULL) {
             Door_UseCutCam = 0;
         } else {
-            Door_CutCamPos0 = spl->pts[0];
             Door_CutCamPos1 = spl->pts[1];
+            Door_CutCamPos0 = spl->pts[0];
         }
     }
     Door_ExitCameraSplineName[0] = 0;
@@ -1471,9 +1471,9 @@ void InitPlayerAI(GameObject_s *object) {
     b[0xf04] &= 0xfc;
     object->walk_speed_override = 1000000000.0f;
     object->run_speed_override = 1000000000.0f;
-    object->hover_height_override = 1000000000.0f;
-    // The original scale-override sentinel; zero would hide the character.
     object->field_0x1038 = 1000000000.0f;
+    // The original scale-override sentinel; zero would hide the character.
+    object->hover_height_override = 1000000000.0f;
     *reinterpret_cast<f32 *>(b + 0x4ac) = DEFAULT_MOVE_RANGE;
     b[0x4a7] = (b[0x4a7] & 0xe3) | ((DEFAULT_MOVE_RANGE > 0.0f) << 2);
     b[0x7b5] &= 0xfd;

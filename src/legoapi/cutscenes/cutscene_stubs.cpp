@@ -599,7 +599,12 @@ extern "C" {
             if (locator->animation != NULL) {
                 NuAnimData2CalcTime(locator->animation, frame, &time);
             }
-            if (NuGCutLocatorIsVisble(locator, frame, &time, &opacity, NULL) != 0 && !(opacity <= 0.1f)) {
+            if (!(NuGCutLocatorIsVisble(locator, frame, &time, &opacity, NULL) != 0 && !(opacity <= 0.1f))) {
+                if (inst_locator->effect_handle >= 0) {
+                    ReleaseLocatorVfxFn(inst_locator->effect_handle);
+                }
+                inst_locator->effect_handle = -1;
+            } else {
                 VuMtx matrix;
                 NuGCutLocatorCalcMtx(locator, frame, &matrix.matrix, &time);
                 if ((locator->flags & 4) != 0) {
@@ -613,11 +618,6 @@ extern "C" {
                 } else {
                     UpdateLocatorVfxFn(inst_locator->effect_handle, &matrix);
                 }
-            } else {
-                if (inst_locator->effect_handle >= 0) {
-                    ReleaseLocatorVfxFn(inst_locator->effect_handle);
-                }
-                inst_locator->effect_handle = -1;
             }
         } else if ((type->flags & 4) != 0 && NuCutSceneSFXUpdate != NULL) {
             NuCutSceneSFXUpdate(system, inst_locator, locator, frame, parent_mtx, paused);

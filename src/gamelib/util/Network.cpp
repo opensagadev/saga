@@ -844,8 +844,8 @@ void NetworkObjectManager::NotifyDestroyObject(void *object, EdClass *object_cla
 static inline NetMessage MakeObjectCallMessage(NetMessage const &message, i32 call_id, NetworkObject const *object) {
     NetMessage outgoing(message);
     if (outgoing.data != NULL) {
-        i16 class_id = static_cast<i16>(theRegistry.GetClassId(object->object_class));
         i16 object_id = object->id;
+        i16 class_id = static_cast<i16>(theRegistry.GetClassId(object->object_class));
         outgoing.read_offset -= 2;
         memcpy(outgoing.data->bytes + outgoing.read_offset, &class_id, sizeof(class_id));
         if (outgoing.swap_endianness != 0) {
