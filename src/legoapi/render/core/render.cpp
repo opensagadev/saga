@@ -827,6 +827,7 @@ extern f32 tow_length;
 extern NUMTL *SolidMtl3D;
 
 void DrawCables() {
+    NUVEC step;
     NURND_VERTEX3D vertices[2];
     NUVEC &start = vertices[0].position;
     NUVEC &end = vertices[1].position;
@@ -890,7 +891,7 @@ void DrawCables() {
                 if (ground_end == 2000000.0f) {
                     ground_end = endpoint.y;
                 }
-                NUVEC step;
+
                 NuVecSub(&step, &endpoint, &previous);
                 const f32 segment_length = cable.segment_lengths[segment];
                 const f32 subdivisions = static_cast<f32>(
@@ -2431,8 +2432,8 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
             matrix.m10 = z1 * cz - matrix.m11 * sz;
             matrix.m11 = z1 * sz + matrix.m11 * cz;
             matrix.m20 = z2 * cz - matrix.m21 * sz;
-            matrix.m30 = z3 * cz - matrix.m31 * sz;
             matrix.m21 = z2 * sz + matrix.m21 * cz;
+            matrix.m30 = z3 * cz - matrix.m31 * sz;
             matrix.m31 = z3 * sz + matrix.m31 * cz;
 
             const u16 x_phase =
@@ -2453,8 +2454,8 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
             matrix.m31 = x3 * cx - matrix.m32 * sx;
             matrix.m32 = x3 * sx + matrix.m32 * cx;
 
-            matrix.m32 += z;
             matrix.m31 += y * PANEL3DMULY;
+            matrix.m32 += z;
             matrix.m30 += x * PANEL3DMULX;
 
             if (i < 10) {
@@ -3469,6 +3470,7 @@ static void DrawWeapon_SetSabreObjects(GameObject_s *object, i32 red, i32 green,
 }
 
 static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) {
+    NUVEC hilt_scale_vec;
     i32 models[4] = {-1, -1, -1, -1};
     i32 hilt = -1;
     i32 reflected_models[4] = {-1, -1, -1, -1};
@@ -3567,7 +3569,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                 NUMTX hilt_matrix;
                 NUVEC scale = {weapon_scale, weapon_scale, weapon_scale};
                 if (hilt != -1) {
-                    NUVEC hilt_scale_vec;
+
                     hilt_scale_vec.x = weapon_scale + weapon_scale;
                     hilt_matrix = blade_matrix;
                     if (hilt_scale_vec.x > 1.0f) {

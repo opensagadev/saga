@@ -665,17 +665,6 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
     }
 }
 
-void *CutScene_FindInst(CUTSYS *system, char *name) {
-    if (system != NULL) {
-        for (i32 i = 0; i < system->count; ++i) {
-            if (NuStrICmp(system->cuts[i]->name, name) == 0) {
-                return system->cuts[i]->instance;
-            }
-        }
-    }
-    return NULL;
-}
-
 CUTINFO *CutScene_Find(CUTSYS *cutscene_system, char *name) {
     if (name == NULL || cutscene_system == NULL) {
         return NULL;
@@ -705,6 +694,17 @@ void CutScenes_Destroy(CUTSYS *system) {
             system->cuts[i]->scene = NULL;
         }
     }
+}
+
+void *CutScene_FindInst(CUTSYS *system, char *name) {
+    if (system != NULL) {
+        for (i32 i = 0; i < system->count; ++i) {
+            if (NuStrICmp(system->cuts[i]->name, name) == 0) {
+                return system->cuts[i]->instance;
+            }
+        }
+    }
+    return NULL;
 }
 
 i32 CutScene_HasPlayed(CUTINFO *cut) {
@@ -907,12 +907,12 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
             instance->field_16 = requested_animation;
         } else {
             if ((instance->field_14 & 1) == 0) {
-                if (instance->field_15 == 0) {
-                    instance->field_16 = requested_animation;
-                    instance->animation_frame_a = frame;
-                } else {
+                if (instance->field_15 != 0) {
                     instance->field_16 = instance->field_15;
                     animation_index = instance->field_15;
+                } else {
+                    instance->field_16 = requested_animation;
+                    instance->animation_frame_a = frame;
                 }
             } else {
                 instance->field_16 = instance->field_17;
@@ -938,8 +938,8 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
         if (blend_time <= 0.0f) {
             instance->blend_progress = 0;
             animation_a_index = instance->field_17;
-            instance->field_16 = instance->field_17;
             instance->field_14 ^= 1;
+            instance->field_16 = instance->field_17;
             instance->animation_frame_a = instance->animation_frame_b;
             blending = false;
         } else {
@@ -947,8 +947,8 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
             if (instance->blend_progress >= 1.0f) {
                 instance->blend_progress = 0;
                 animation_a_index = instance->field_17;
-                instance->field_14 ^= 1;
                 instance->field_16 = instance->field_17;
+                instance->field_14 ^= 1;
                 instance->animation_frame_a = instance->animation_frame_b;
                 blending = false;
             }
@@ -1012,10 +1012,10 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
             if (instance->animation_frame_b > end_frame) {
                 CHARACTERANIM_s *animation_info =
                     static_cast<CHARACTERANIM_s *>(model->model_data_a[current_animation]);
-                if ((animation_info->flags & 2) != 0) {
-                    instance->animation_frame_b = instance->animation_frame_b - end_frame + 1.0f;
-                } else {
+                if ((animation_info->flags & 2) == 0) {
                     instance->animation_frame_b = end_frame;
+                } else {
+                    instance->animation_frame_b = instance->animation_frame_b - end_frame + 1.0f;
                 }
             }
         }
@@ -1071,8 +1071,8 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     }
     ResetShadowMapRendering();
 
-    f32 ground_height = 2000000.0f;
     i32 surface = -1;
+    f32 ground_height = 2000000.0f;
     bool shadow_sampled = false;
     i32 platform = -1;
     if ((character->flags & 0x10) != 0 && CutBlobShadowAlpha != 0 && (character_data->model_flags & 0x10000) == 0 &&
@@ -1570,6 +1570,21 @@ i32 CutScene_ReplaceCharacterModelFn_LSW(CUTINFO *cut, NUGCUTCHAR_s *character) 
     return -1;
 }
 
+CUTINFO *NewCutScene(CUTINFO *cut, CUTSYS *system, char *name, i32) {
+    if (cut == NULL) {
+        if (name == NULL || system == NULL)
+            return NULL;
+        cut = CutScene_Find(system, name);
+    }
+    if (cut != NULL) {
+        if (NewCutInfoCount < 8) {
+            NewCutInfo[NewCutInfoCount++] = cut;
+            return cut;
+        }
+    }
+    return NULL;
+}
+
 void ResetScene(nugscn_s *scene, SCENEPROGRESS_s *progress) {
     if (progress == NULL || scene == NULL)
         return;
@@ -1608,21 +1623,6 @@ void ResetScene(nugscn_s *scene, SCENEPROGRESS_s *progress) {
         translation->y += base_translation->y;
         translation->z += base_translation->z;
     }
-}
-
-CUTINFO *NewCutScene(CUTINFO *cut, CUTSYS *system, char *name, i32) {
-    if (cut == NULL) {
-        if (name == NULL || system == NULL)
-            return NULL;
-        cut = CutScene_Find(system, name);
-    }
-    if (cut != NULL) {
-        if (NewCutInfoCount < 8) {
-            NewCutInfo[NewCutInfoCount++] = cut;
-            return cut;
-        }
-    }
-    return NULL;
 }
 
 void NextStatusStage(STATUSPACKET_s *);

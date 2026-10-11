@@ -2566,8 +2566,8 @@ void PropertyTool::AddPropertyMenuItems(eduimenu_s *menu, EdClass *ed_class, voi
 
 void PropertyTool::AutoLocateMenu(PropertyMenu *property_menu) {
     eduimenu_s *menu = property_menu->menu;
-    menu->y = 30;
     menu->x = 70;
+    menu->y = 30;
     bool use_stored_metrics = true;
     PropertyMenu *other = active_menu;
     while (other != NULL) {
@@ -2591,8 +2591,8 @@ void PropertyTool::AutoLocateMenu(PropertyMenu *property_menu) {
         ediMenuRetrieveMetrics(menu);
     }
     if (static_cast<float>(menu->x + menu->width) > 590.0f) {
-        menu->x = 20;
         menu->y = 5;
+        menu->x = 20;
     }
 }
 
@@ -3405,11 +3405,7 @@ void EdClass::SerialiseObject(EdStream &stream, void *object, EdClass *schema, E
                         continue;
                     }
                 }
-                if (member->attributes < 0) {
-                    EdClass *source_class = registry->GetClass(source->type_id);
-                    EdClass *member_class = theRegistry.GetClass(member->type_id);
-                    member_class->SerialiseObject(stream, member->GetMemberObject(object), source_class, registry);
-                } else {
+                if (!(member->attributes < 0)) {
                     registry->GetType(source->type_id);
                     EdType *type = theRegistry.GetType(member->type_id);
                     i32 size = member->size > 0 ? member->size : type->size;
@@ -3420,6 +3416,10 @@ void EdClass::SerialiseObject(EdStream &stream, void *object, EdClass *schema, E
                     if (stream.mode == 1) {
                         member->SetMemberData(object, member->type_id, data, sizeof(data), NULL);
                     }
+                } else {
+                    EdClass *source_class = registry->GetClass(source->type_id);
+                    EdClass *member_class = theRegistry.GetClass(member->type_id);
+                    member_class->SerialiseObject(stream, member->GetMemberObject(object), source_class, registry);
                 }
             } else {
                 EdType *type = registry->GetType(source->type_id);

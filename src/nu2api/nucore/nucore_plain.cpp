@@ -902,8 +902,8 @@ extern "C" {
         *transform_packet = DisplayListCreateGeomTransformPS(buffer, world_matrix, list->dlist->mtls[list->mtl_id],
                                                              geometry->next, *transform_packet);
         NUDISPLAYLISTITEM *item = list->items;
-        item->id = 3;
         item->type = 0x8c;
+        item->id = 3;
         item->next = *transform_packet;
         list->items = item + 1;
         first_and_last[0] = item;
@@ -913,8 +913,8 @@ extern "C" {
             DisplayListCreateSkinTransformPS(buffer, skin_matrices, deformer_weights,
                                              static_cast<NUDISPLAYLISTGEOM *>(geometry->next), &render_geometry);
         item = list->items;
-        item->type = 0x99;
         item->next = skin_packet;
+        item->type = 0x99;
         item->id = 3;
         list->items = item + 1;
 
@@ -940,8 +940,8 @@ extern "C" {
         VARIPTR *buffer = NuDisplayListLinkItems(list, 3);
 
         NUDISPLAYLISTITEM *item = list->items;
-        item->type = geometry[-2].type;
         item->next = geometry[-2].next;
+        item->type = geometry[-2].type;
         item->id = 3;
         list->items = item + 1;
         first_and_last[0] = item;
@@ -981,8 +981,8 @@ extern "C" {
             WindShear(&wind_matrix, mtx, special->wind_scale, special->wind_speed);
             mtx = &wind_matrix;
         }
-        NUDLDLISTSCENE *scene = reinterpret_cast<NUDLDLISTSCENE *>(handle->scene->display_list);
         i32 clip_state = nuspecial_clip_state;
+        NUDLDLISTSCENE *scene = reinterpret_cast<NUDLDLISTSCENE *>(handle->scene->display_list);
         if (clip_state == -1)
             clip_state = NuCameraClipTestExtents(&special->min, &special->max, mtx, 0.0f, 0);
 
@@ -1135,8 +1135,8 @@ extern "C" {
                                 void *faceon = DisplayListCreateFaceonTransformPS(
                                     buffer, mtx, shadow_list->dlist->mtls[shadow_list->mtl_id], geometry->next);
                                 NUDISPLAYLISTITEM *first = shadow_list->items;
-                                first->id = 3;
                                 first->type = 0x90;
+                                first->id = 3;
                                 first->next = faceon;
                                 shadow_list->items = first + 1;
                                 void *packet = NuDisplayListPrepareFaceonPS(buffer, geometry->next, mtx);
@@ -1201,7 +1201,32 @@ extern "C" {
             return;
         }
 
-        if ((flags & 3) != 0) {
+        if ((flags & 3) == 0) {
+            NUDISPLAYLISTITEM *item = scene->items;
+            if (item == NULL) {
+                return;
+            }
+            const i32 terminator = (flags & 2) ? 0x84 : 0x8e;
+            i32 item_index = 0;
+            if (!(flags & 1)) {
+                do {
+                    DisplayListPrintItem(item, item_index, depth, state, 0);
+                    ++item;
+                    ++item_index;
+                } while (item->type != terminator);
+            } else {
+                do {
+                    DisplayListPrintItem(item, item_index, depth, state, 0);
+                    if (item->id == 1) {
+                        item = static_cast<NUDISPLAYLISTITEM *>(item->next);
+                    } else {
+                        ++item;
+                    }
+                    ++item_index;
+                } while (item->type != terminator);
+            }
+            DisplayListPrintItem(item, item_index, depth, state, 0);
+        } else {
             for (i32 sort_index = 0; sort_index < scene->nsort_pris; ++sort_index) {
                 NUDISPLAYLISTITEM *item = scene->sort_pris[sort_index].items;
                 if (item == NULL) {
@@ -1227,31 +1252,6 @@ extern "C" {
                 }
                 DisplayListPrintItem(item, item_index, depth, state, 0);
             }
-        } else {
-            NUDISPLAYLISTITEM *item = scene->items;
-            if (item == NULL) {
-                return;
-            }
-            const i32 terminator = (flags & 2) ? 0x84 : 0x8e;
-            i32 item_index = 0;
-            if (!(flags & 1)) {
-                do {
-                    DisplayListPrintItem(item, item_index, depth, state, 0);
-                    ++item;
-                    ++item_index;
-                } while (item->type != terminator);
-            } else {
-                do {
-                    DisplayListPrintItem(item, item_index, depth, state, 0);
-                    if (item->id == 1) {
-                        item = static_cast<NUDISPLAYLISTITEM *>(item->next);
-                    } else {
-                        ++item;
-                    }
-                    ++item_index;
-                } while (item->type != terminator);
-            }
-            DisplayListPrintItem(item, item_index, depth, state, 0);
         }
     }
 
@@ -1467,8 +1467,8 @@ extern "C" {
         buffer->joint_flags = NULL;
     }
     void NuAnimBuffEvaluateCallback(NUANIMBUFFEVALUATECB callback, void **data, i32 *joints) {
-        AnimBuffEvalData = data;
         AnimBuffEvalCB = callback;
+        AnimBuffEvalData = data;
         AnimBuffEvalJoint = joints;
     }
     // Original @0x2bd180.  Evaluate the decompressed per-joint samples into
@@ -1507,8 +1507,8 @@ extern "C" {
         NUVEC root_values = {0.0f, 0.0f, 0.0f};
         for (i32 joint_index = 0; joint_index < evaluated_count; ++joint_index) {
             const nuanimbuffjoint_s &joint = buffer->joints[joint_index];
-            const u8 parent_index = object->joints[joint_index].parent_index;
             const u8 flags = buffer->joint_flags[joint_index];
+            const u8 parent_index = object->joints[joint_index].parent_index;
 
             NUMTX &local_matrix = matrices[joint_index];
             if ((flags & NUANIMBUFF_JOINT_ROTATION) != 0) {
@@ -1691,11 +1691,11 @@ extern "C" {
             }
             if (rotate) {
                 rotation.x += override_anim->rotation.x;
-                rotation.y += override_anim->rotation.y;
                 rotation.z += override_anim->rotation.z;
+                rotation.y += override_anim->rotation.y;
             }
-            angles.x = static_cast<i32>(rotation.x * 10430.3779296875f);
             angles.z = static_cast<i32>(rotation.z * 10430.3779296875f);
+            angles.x = static_cast<i32>(rotation.x * 10430.3779296875f);
             angles.y = static_cast<i32>(rotation.y * 10430.3779296875f);
             if (rotate) {
                 if (override_flags & 8) {
@@ -1869,12 +1869,12 @@ extern "C" {
             r0.z -= r0.z - r1.z > 3.1415927410125732f ? 6.2831854820251465f : 0.0f;
             r1.z -= r1.z - r0.z > 3.1415927410125732f ? 6.2831854820251465f : 0.0f;
             r0.x = r0.x * inverse_blend + r1.x * blend;
-            r0.y = r0.y * inverse_blend + r1.y * blend;
             r0.z = r0.z * inverse_blend + r1.z * blend;
+            r0.y = r0.y * inverse_blend + r1.y * blend;
             if (rotate) {
-                angles.x = static_cast<i32>((r0.x + override_anim->rotation.x) * 10430.3779296875f);
                 angles.z = static_cast<i32>((r0.z + override_anim->rotation.z) * 10430.3779296875f);
                 angles.y = static_cast<i32>((r0.y + override_anim->rotation.y) * 10430.3779296875f);
+                angles.x = static_cast<i32>((r0.x + override_anim->rotation.x) * 10430.3779296875f);
                 if (flags & 8) {
                     angles.x &= 0xffff;
                     if (angles.x > 32767)
@@ -2335,8 +2335,8 @@ extern "C" {
         result->height = font->height;
         result->baseline = font->baseline;
         result->ic_gap = font->ic_gap;
-        result->legacy_font = font;
         result->hdr = static_cast<VUFNTHDR *>(buf->void_ptr);
+        result->legacy_font = font;
 
         result->space_width = font->glyphs[0].u1 * texture_width - font->glyphs[0].u0 * texture_width;
         *buf->f32_ptr++ = result->ic_gap;
@@ -2765,8 +2765,8 @@ extern "C" {
             NuLgtLaserOldCnt = 0;
             return;
         }
-        f32 v1 = NuLgtArcMtl[0].v1;
         u32 saved_seed = NuLgtSeed;
+        f32 v1 = NuLgtArcMtl[0].v1;
         f32 v0 = NuLgtArcMtl[0].v0;
         // Four strip corners, two projected endpoints, and two clipped world endpoints.
         NUVEC4 *vertices = (NUVEC4 *)NuScratchAlloc32(0x80);
@@ -3411,8 +3411,8 @@ extern "C" {
             if (override_count != 0) {
                 override_anim = joint_overrides[i];
             }
-            i8 *types = reinterpret_cast<i8 *>(legacy->curve_types) + i * static_cast<i16>(legacy->curve_count);
             nuanimcurve2_s *curves = &legacy->curves[i * static_cast<i16>(legacy->curve_count)];
+            i8 *types = reinterpret_cast<i8 *>(legacy->curve_types) + i * static_cast<i16>(legacy->curve_count);
             NUVEC *scale = &scales[i];
             u8 flags = legacy->node_flags[i];
             if (i == 0) {
@@ -3610,8 +3610,8 @@ extern "C" {
             i32 curve_count = static_cast<i16>(animation->curve_count);
             f32 *weights = NuRndrCreateBlendShapeDeformerWeightsArray(curve_count);
             weights_by_render[render] = weights;
-            nuanimcurve2_s *curves = animation->curves + curve_count * node;
             u8 *types = animation->curve_types + curve_count * node;
+            nuanimcurve2_s *curves = animation->curves + curve_count * node;
             if (weights == NULL || curve_count <= 0) {
                 continue;
             }
@@ -3790,6 +3790,7 @@ extern "C" {
     // matrices, then build skin matrices for the smooth hierarchy pieces.
     i32 NuHGobjRndrMtxDwa(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,
                           NUMTX *joint_matrices, void **blend_values, i32) {
+        NUMTX draw_matrix;
         i32 clip_state = nuspecial_clip_state;
         if (clip_state == -1) {
             clip_state = NuCameraClipHGobj(reinterpret_cast<nugscn_s *>(object), world_matrix, joint_matrices);
@@ -3830,7 +3831,7 @@ extern "C" {
             if (part.rigid_specials != NULL) {
                 for (i32 joint_index = 0; joint_index < object->joint_count; ++joint_index) {
                     if (part.rigid_specials[joint_index] != NULL) {
-                        NUMTX draw_matrix;
+
                         NuMtxMulVU0(&draw_matrix, &joint_matrices[joint_index], world_matrix);
                         drawn |= NuSpecialDrawAt(part.rigid_specials[joint_index], &draw_matrix);
                     }
@@ -4082,8 +4083,8 @@ extern "C" {
     void NuGHGPreRelocateFixupPS(NUGSCN *scene);
     void NuGHGPostRelocateFixupPS(NUGSCN *scene, i32 delta);
     NUGSCN *NuGHGRelocate(NUGSCN *scene, VARIPTR *destination) {
-        u8 *old_base = *reinterpret_cast<u8 **>(reinterpret_cast<u8 *>(scene) + 0x1d4);
         u8 *new_base = destination->u8_ptr;
+        u8 *old_base = *reinterpret_cast<u8 **>(reinterpret_cast<u8 *>(scene) + 0x1d4);
         u32 size = *reinterpret_cast<u32 *>(reinterpret_cast<u8 *>(scene) + 0x1d8);
         i32 delta = new_base - old_base;
         if (delta == 0) {
@@ -4102,8 +4103,8 @@ extern "C" {
         u32 remaining = size;
         if (delta > 0) {
             u32 count = static_cast<u32>(delta) < remaining ? static_cast<u32>(delta) : remaining;
-            u8 *target = new_base + remaining - count;
             u8 *source = old_base + remaining - count;
+            u8 *target = new_base + remaining - count;
             do {
                 count = static_cast<u32>(delta) < remaining ? static_cast<u32>(delta) : remaining;
                 memcpy(target, source, count);
@@ -4254,8 +4255,8 @@ extern "C" {
                         source_x += sizeof(NuInputTouch);
                     }
                     NuInputTouch *last = &data->touch_events[--data->touch_count];
-                    last->unknown_01 = 0;
                     last->unknown_00 = 0;
+                    last->unknown_01 = 0;
                     last->unknown_02 = 0;
                     last->unknown_04 = 0.0f;
                     last->unknown_08 = 0.0f;
@@ -4462,10 +4463,9 @@ extern "C" {
                 continue;
             }
 
-            if ((first.flags & NUROOM_FLAG_OVERLAPPING) != 0 || (second.flags & NUROOM_FLAG_OVERLAPPING) != 0) {
-                continue;
+            if ((first.flags & NUROOM_FLAG_OVERLAPPING) == 0 && (second.flags & NUROOM_FLAG_OVERLAPPING) == 0) {
+                break;
             }
-            break;
         }
 
         if (candidate_count == 1) {

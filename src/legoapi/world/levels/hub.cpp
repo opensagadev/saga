@@ -806,7 +806,11 @@ void Hub_Update(WORLDINFO_s *world) {
             gizmo = HubAreaInfo[i].bonus_gizmo;
             if (output == 0) {
                 GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(gizmo->object);
-                if (gold_bricks < buildit->anim_object_count) {
+                if (!(gold_bricks < buildit->anim_object_count)) {
+                    if ((buildit->availability_flags & GIZBUILDIT_AVAILABILITY_ACTIVE) == 0) {
+                        GizmoActivate(world->gizmo_sys, gizmo, 1, 0);
+                    }
+                } else {
                     GizmoSetVisibility(world->gizmo_sys, gizmo, 0, 0);
                     if (buildit->linked_buildit != NULL) {
                         buildit = buildit->linked_buildit;
@@ -816,8 +820,6 @@ void Hub_Update(WORLDINFO_s *world) {
                             NuSpecialSetVisibility(&buildit->anim_objects[piece]->special, piece < gold_bricks);
                         }
                     }
-                } else if ((buildit->availability_flags & GIZBUILDIT_AVAILABILITY_ACTIVE) == 0) {
-                    GizmoActivate(world->gizmo_sys, gizmo, 1, 0);
                 }
             }
             if (GizmoGetOutput(world->gizmo_sys, HubAreaInfo[i].bonus_gizmo, 0, 0) != 0) {
@@ -1641,6 +1643,7 @@ static inline HUBAREAINFO_s *Hub_FindAreaInfoByIndex(i32 area) {
 }
 
 void Hub_DrawMiniKits(WORLDINFO_s *world) {
+    NUMTX piece_matrix;
     if (world->minikit_pieces_buf == NULL || world->hub_minikits == NULL)
         return;
     i32 areas[72];
@@ -1701,7 +1704,7 @@ void Hub_DrawMiniKits(WORLDINFO_s *world) {
         for (i32 piece = 0; piece < pieces->piece_count; ++piece) {
             if (pieces->pieces[piece].enabled && NuSpecialExistsFn(&pieces->pieces[piece].special) &&
                 piece < kit->displayed_piece_count) {
-                NUMTX piece_matrix = pieces->pieces[piece].matrix;
+                piece_matrix = pieces->pieces[piece].matrix;
                 NuMtxMulVU0(&piece_matrix, &piece_matrix, &matrix);
                 NUMTX reflected;
                 const i32 drawn = NuSpecialDrawAt(&pieces->pieces[piece].special, &piece_matrix);
@@ -2567,8 +2570,8 @@ void Hub_UpdateFreePlaySelect() {
                         MenuRepeat(&right_held, &right, &rightrepeattime[player], &rightrepeatcount[player], 0.1f,
                                    FRAMETIME);
                         if (up) {
-                            const i32 count = collection->count_y;
                             const i32 columns = collection->count_x;
+                            const i32 count = collection->count_y;
                             const i32 span = (count / columns + 1) * columns;
                             index = previous;
                             do {
@@ -2593,8 +2596,8 @@ void Hub_UpdateFreePlaySelect() {
                                 }
                             } while (collection->list[index].id == MenuPacket.player_model[other]);
                         } else if (left) {
-                            const i32 columns = collection->count_x;
                             const i32 count = collection->count_y;
+                            const i32 columns = collection->count_x;
                             index = previous;
                             do {
                                 i32 column = index % columns - 1;
@@ -3040,6 +3043,7 @@ static void Hub_MakeFreePlayList(i32 first_model, i32 second_model) {
 extern f32 MainRenderTime;
 
 static __used__ void Hub_UpdateSelectMode() {
+    i16 ids[HUB_VEHICLE_ID_CAPACITY];
     if (FadeSys.fade > 0.0f || MainRenderTime > 0.0f) {
         return;
     }
@@ -3142,7 +3146,7 @@ static __used__ void Hub_UpdateSelectMode() {
                         freeplay_unlocked) {
                         i32 first = -1, second = -1;
                         if ((ADataList[area].flags & 1) != 0) {
-                            i16 ids[HUB_VEHICLE_ID_CAPACITY];
+
                             const i32 count =
                                 Collection_GetIDList(&VehicleCollection, HUB_VEHICLE_COLLECTION_ALLOWED,
                                                      HUB_VEHICLE_COLLECTION_REQUIRED, ids, &first, &second, 0);
@@ -3933,9 +3937,9 @@ static void Hub_DrawBonusModeMenu(int selected, float alpha) {
                          (1u << (static_cast<i8>(ArcadeItem.field_c_0xc) & 31))) != 0)
                         NuStrCat(text[0], " ~2$");
                     if ((reinterpret_cast<LEVELSAVE_s *>(Game_LevelSave)[level].arcade_flags & 7) == 7) {
+                        const f32 scale = NU_SIN_LUT(static_cast<i32>(alpha * 16384.0f)) * PANEL_REDBRICKSCALE;
                         const i32 rotation =
                             static_cast<i32>((NuFmod(GlobalTimer.time_elapsed, 4.0f) * 0.25f) * 65536.0f) & 0xffff;
-                        const f32 scale = NU_SIN_LUT(static_cast<i32>(alpha * 16384.0f)) * PANEL_REDBRICKSCALE;
                         const u16 tilt = static_cast<i32>(1820.0f * NuTrigTable[rotation & 0x7fff]) - 0x1555;
                         DrawPanel3DObjectNoAlpha(0.0f, y + 0.35f, 1.0f, scale, scale, scale, tilt, rotation, 0,
                                                  &WORLD->lev_objs[211].special, 2);
@@ -3948,13 +3952,13 @@ static void Hub_DrawBonusModeMenu(int selected, float alpha) {
                 if (menu_pulsate > 0.0f) {
                     red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
                                            static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
-                    blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
-                                            static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
                     green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
                                              static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
+                    blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
+                                            static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
                 } else {
-                    green = menu_flash ? MENUFLASH0G : MENUFLASH1G;
                     red = menu_flash ? MENUFLASH0R : MENUFLASH1R;
+                    green = menu_flash ? MENUFLASH0G : MENUFLASH1G;
                     blue = menu_flash ? MENUFLASH0B : MENUFLASH1B;
                 }
             } else if (menu_pulse > 0.0f) {
@@ -3966,8 +3970,8 @@ static void Hub_DrawBonusModeMenu(int selected, float alpha) {
                                         static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse));
             } else {
                 red = MENUENTRYR;
-                green = MENUENTRYG;
                 blue = MENUENTRYB;
+                green = MENUENTRYG;
             }
 
             smarttextex_drawmessagebox = 1;
@@ -4032,10 +4036,10 @@ static void Hub_DrawBonusModeMenu(int selected, float alpha) {
                 blue = menu_flash ? MENUFLASH0B : MENUFLASH1B;
             }
         } else if (menu_pulse > 0.0f) {
-            red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
-                                   static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
             green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
                                      static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse));
+            red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
+                                   static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
             blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
                                     static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse));
         } else {

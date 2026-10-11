@@ -1301,8 +1301,8 @@ void Bolt_Init(void *storage, NetMessage &message) {
         bolt->speed = type->field_10;
         bolt->lifetime = type->field_14;
     }
-    bolt->radius = type->field_1c;
     bolt->acceleration_y = type->field_18;
+    bolt->radius = type->field_1c;
     bolt->hit_part_debris = type->field_38;
     bolt->scale = type->field_20;
     bolt->hit_debris = static_cast<i16>(static_cast<u32>(type->field_2c) >> 16);
@@ -1608,6 +1608,8 @@ static inline i32 Bolt_HitScenery(BOLT_s *bolt, NUVEC *points, u8 *processed, WO
 }
 
 void Bolts_Update(WORLDINFO_s *world) {
+    NUVEC reflection;
+    NUVEC points[3];
     NUVEC normal = v010;
     u8 processed[32] = {};
     u8 *processed_bolt = processed;
@@ -1671,7 +1673,7 @@ void Bolts_Update(WORLDINFO_s *world) {
         bolt->position.x += bolt->velocity.x * FRAMETIME;
         bolt->position.y += bolt->velocity.y * FRAMETIME;
         bolt->position.z += bolt->velocity.z * FRAMETIME;
-        NUVEC points[3];
+
         points[1] = bolt->position;
         if ((bolt->flags & 0x200) == 0) {
             NUVEC offset = {0.0f, 0.0f, bolt->collision_radius + bolt->collision_radius};
@@ -1691,7 +1693,7 @@ void Bolts_Update(WORLDINFO_s *world) {
                 BoltSys->debris(bolt, points, -1, NULL, 0);
                 surface_hit = 0;
             } else {
-                NUVEC reflection;
+
                 Bolt_Reflect(&bolt->hit_normal, &bolt->velocity, &reflection);
                 NuVecScale(&reflection, &reflection, 0.2f);
                 if (bolt->hit_platform != -1 && bolt->field_0x104 != -1 &&
