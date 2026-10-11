@@ -329,9 +329,10 @@ void AddRipple(ripple_set_s *set, numtx_s *matrix, float size, float growth, flo
             node->next = node;
             node->previous = node;
         } else {
-            node->next = newest->next;
+            ripple_node_s *next = newest->next;
+            node->next = next;
             newest->next = node;
-            newest->next->previous = node;
+            next->previous = node;
             node->previous = newest;
         }
         set->free_head = next_free;

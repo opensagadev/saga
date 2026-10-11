@@ -648,14 +648,13 @@ void *CutScenes_Load(char *config, NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VAR
     CS_cutsys = sys;
     buf->void_ptr = reinterpret_cast<char *>(sys->character_bits) + ((CHARCOUNT + 0x1f) / 32) * 4;
 
-    auto buf_addr = buf->addr;
     while (NuFParGetLine(fp) != 0) {
         if (NuFParGetWord(fp) == 0 || NuStrICmp(fp->word_buf, "cutscene") != 0 || sys->count > 0x1f ||
             NuFParGetWord(fp) == 0) {
             continue;
         }
 
-        cut = (CUTINFO *)ALIGN(buf_addr, 4);
+        cut = (CUTINFO *)ALIGN(buf->addr, 4);
         entries[sys->count] = cut;
         buf->void_ptr = cut + 1;
         NuStrLwr(name, fp->word_buf);
@@ -687,7 +686,7 @@ void *CutScenes_Load(char *config, NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VAR
             buf->void_ptr = cut;
             continue;
         }
-        buf->void_ptr = (char *)ALIGN(buf_addr, 0x40);
+        buf->void_ptr = (char *)ALIGN(buf->addr, 0x40);
         NuStrCpy(full_path, "cut\\");
         NuStrCat(full_path, name);
         NuStrCat(full_path, ".cu2");
@@ -714,7 +713,7 @@ void *CutScenes_Load(char *config, NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VAR
         cut->instance = instNuGCutSceneCreate(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), NULL, NULL, name, buf, 0);
         if (cut->instance != NULL) {
             reinterpret_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = cut->frames_per_second * DEFAULTFRAMETIME;
-            buf->void_ptr = (char *)ALIGN(buf_addr, 0x10);
+            buf->void_ptr = (char *)ALIGN(buf->addr, 0x10);
         }
         sys->count++;
     }
@@ -2636,8 +2635,7 @@ extern "C" void NuGCutSceneSysRender(i32 paused) {
                 NUGCUTSCENE_s *cutscene = instance->cutscene;
                 const f32 frame = cutscene->duration - instance->render_frame;
                 NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
-                auto system_locator_count = system->locator_count;
-                for (u32 i = 0; system != NULL && i < system_locator_count; ++i) {
+                for (u32 i = 0; system != NULL && i < system->locator_count; ++i) {
                     NUGCUTLOCATOR_s *locator = &system->locators[i];
                     if ((locator->flags & 3) == 0) {
                         NUMTX *parent_matrix = static_cast<i8>(instance->flags_88) < 0 ? &instance->matrix : NULL;

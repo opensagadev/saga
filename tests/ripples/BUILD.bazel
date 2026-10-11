@@ -1,0 +1,27 @@
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
+cc_test(
+    name = "ripple_list_test",
+    size = "small",
+    srcs = [
+        "ripple_list_test.cpp",
+        "//src:legoapi/items/fx/ripples.cpp",
+    ],
+    additional_compiler_inputs = ["//src:all_source_files"],
+    defines = ["ANDROID"],
+    copts = [
+        "-Isrc",
+        "-std=gnu++17",
+        "-m32",
+        "-march=i686",
+        "-msse2",
+        "-mfpmath=sse",
+        "-ffunction-sections",
+        "-fdata-sections",
+    ],
+    linkopts = [
+        "-m32",
+        "-Wl,--gc-sections",
+    ],
+    target_compatible_with = ["@platforms//os:linux"],
+)
