@@ -113,7 +113,8 @@ static void BuildRegisterIndexToUniformLocationMapping(NUSHADERPROGRAM *result, 
         result->parameters = NULL;
     }
     i32 removed = 0;
-    for (i32 i = 0; i < result->parameter_count; ++i) {
+    auto result_parameter_count = result->parameter_count;
+    for (i32 i = 0; i < result_parameter_count; ++i) {
         GLint count;
         GLenum type;
         glGetActiveUniform(result->program, i, sizeof(uniformName), NULL, &count, &type, uniformName);

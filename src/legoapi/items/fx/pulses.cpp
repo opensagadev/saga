@@ -203,6 +203,7 @@ void Pulses_Update(PULSESYS_s *pulse_sys) {
         NUVEC hit_direction = {pulse_sys->hit_direction_line, 0.0f, pulse_sys->hit_direction_radius_origin};
         NuVecRotateY(&hit_direction, &hit_direction, 0x4000);
 
+        auto pulse_sys_radial_hit_direction = pulse_sys->radial_hit_direction;
         for (i32 i = 0; i < pulse_sys->pulse_count; ++i) {
             PULSE_s *pulse = &pulse_sys->pulses[i];
             if (pulse->gizmo != NULL) {
@@ -249,7 +250,7 @@ void Pulses_Update(PULSESYS_s *pulse_sys) {
 
             f32 collide_radius = pulse_sys->collide_radius;
             NUVEC direction = {hit_direction.x, 0.0f, hit_direction.z};
-            if (pulse_sys->radial_hit_direction != 0) {
+            if (pulse_sys_radial_hit_direction != 0) {
                 direction.x = pulse_position->x - hit_direction.x;
                 direction.z = pulse_position->z - hit_direction.z;
                 NuVecNorm(&direction, &direction);
@@ -266,7 +267,7 @@ void Pulses_Update(PULSESYS_s *pulse_sys) {
 
                 NuVecSub(&offset, &player->apiobj.collision_position, pulse_position);
                 f32 distance = direction.x * offset.x + direction.z * offset.z;
-                if (pulse_sys->radial_hit_direction == 1) {
+                if (pulse_sys_radial_hit_direction == 1) {
                     if (distance < 0.0f) {
                         continue;
                     }
@@ -277,7 +278,7 @@ void Pulses_Update(PULSESYS_s *pulse_sys) {
                 if (!(NuFabs(distance) < collide_radius)) {
                     continue;
                 }
-                if (pulse_sys->radial_hit_direction == 0 &&
+                if (pulse_sys_radial_hit_direction == 0 &&
                     offset.x * pulse_sys->hit_direction_line + offset.z * pulse_sys->hit_direction_radius_origin <
                         0.0f) {
                     continue;

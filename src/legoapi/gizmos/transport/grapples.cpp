@@ -452,7 +452,8 @@ static void Grapples_StoreProgress(void *world_ptr, void *, void *progress_ptr) 
         return;
     }
 
-    for (i32 index = 0; index < world->grapple_count && index < 32; ++index) {
+    auto world_grapple_count = world->grapple_count;
+    for (i32 index = 0; index < world_grapple_count && index < 32; ++index) {
         const u32 mask = 1u << index;
         if ((world->grapples[index].flags & GRAPPLE_FLAG_VISIBLE) == 0) {
             progress->visible_mask &= ~mask;

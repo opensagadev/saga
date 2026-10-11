@@ -495,8 +495,9 @@ static void CC_ride_layersoff(NUFPAR *parser) {
             *mask |= 1u << layer;
         }
     } else {
+        auto parser_word_buf = parser->word_buf;
         while (NuFParGetWord(parser) != 0) {
-            const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
+            const i32 layer = LayerFromName(charconfig.runtime, parser_word_buf);
             if (layer == -1) {
                 continue;
             }
@@ -1590,8 +1591,9 @@ static void CC_layers_dead(NUFPAR *parser) {
             *mask |= 1u << layer;
         }
     } else {
+        auto parser_word_buf = parser->word_buf;
         while (NuFParGetWord(parser) != 0) {
-            const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
+            const i32 layer = LayerFromName(charconfig.runtime, parser_word_buf);
             if (layer == -1) {
                 continue;
             }

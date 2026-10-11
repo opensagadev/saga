@@ -891,6 +891,7 @@ void InitGameAfterConfig(void) {
                 do {
                     if (area->level_count != 0) {
                         i32 iVar4 = 0;
+                        auto area_level_count = area->level_count;
                         do {
                             if (area->levels[iVar4] == i) {
                                 level->area_level_index = (byte)iVar4;
@@ -914,7 +915,7 @@ void InitGameAfterConfig(void) {
                                 goto LAB_0012cb40;
                             }
                             iVar4 = iVar4 + 1;
-                        } while (iVar4 < (i32)(u32)area->level_count);
+                        } while (iVar4 < (i32)(u32)area_level_count);
                     }
                     areaIndex = areaIndex + 1;
                     area = area + 1;

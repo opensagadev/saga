@@ -309,7 +309,8 @@ static void Levers_Draw(void *world_ptr, void *, float) {
         }
     }
 
-    for (i32 index = 0; index < world->nlevers; ++index) {
+    auto world_nlevers = world->nlevers;
+    for (i32 index = 0; index < world_nlevers; ++index) {
         LEVER_s &lever = world->levers[index];
         if ((lever.flags & LEVER_FLAG_VISIBLE) == 0) {
             continue;

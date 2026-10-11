@@ -1038,7 +1038,8 @@ void NewTown_Reset(WORLDINFO_s *world) {
         return;
     if (world->pickup_sys->pickup_count <= 0)
         return;
-    for (i32 i = 0; pickup != NULL && i < world->pickup_sys->pickup_count; ++i, ++pickup) {
+    auto world_pickup_sys = world->pickup_sys;
+    for (i32 i = 0; pickup != NULL && i < world_pickup_sys->pickup_count; ++i, ++pickup) {
         if (!(pickup->runtime_flags & 8)) {
             switch (pickup->type_id) {
                 case 2:
@@ -1582,6 +1583,7 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
                 continue;
             NUVEC *floor_position = NuSpecialGetDrawPos(&hspecial_efloor[floor]);
             floor_active = true;
+            auto floor_position_z = floor_position->z;
             for (i32 i = 0; i < 2; ++i) {
                 GameObject_s *player = Player[i];
                 if (player->apiobj.field_0x287 || !(player->field_0x101c <= 0.0f) ||
@@ -1595,7 +1597,7 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
                 f32 dx = player->apiobj.position.x - floor_position->x;
                 if (!(dx < 0.35f && dx > -0.35f))
                     continue;
-                f32 dz = player->apiobj.position.z - floor_position->z;
+                f32 dz = player->apiobj.position.z - floor_position_z;
                 if (!(dz < 0.35f && dz > -0.35f))
                     continue;
                 player->character_context = 0x42;
@@ -1622,10 +1624,10 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
                 floor_end.z = Player[i]->apiobj.collision_position.z;
                 random = NuRandFloat();
                 floor_end.z = (0.2f - (random + random) * 0.2f) + floor_end.z;
-                if (floor_end.z > floor_position->z + 0.35f)
-                    floor_end.z = floor_position->z + 0.35f;
-                else if (floor_position->z - 0.35f > floor_end.z)
-                    floor_end.z = floor_position->z - 0.35f;
+                if (floor_end.z > floor_position_z + 0.35f)
+                    floor_end.z = floor_position_z + 0.35f;
+                else if (floor_position_z - 0.35f > floor_end.z)
+                    floor_end.z = floor_position_z - 0.35f;
                 player = Player[i];
                 player_end.x = player->apiobj.collision_position.x;
                 f32 height = player->apiobj.upper_position.y - player->apiobj.lower_position.y;

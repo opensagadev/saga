@@ -505,7 +505,8 @@ static void GenerateTrooperTeamShape(minitrooperteam_s *team, i32 initialize_rot
         case 4: {
             const u16 angle = static_cast<u16>(team->facing_angle + 0x8000);
             depth.y = 0.0f;
-            for (i32 i = 0; i < team->trooper_count; ++i, ++trooper) {
+            auto team_trooper_count = team->trooper_count;
+            for (i32 i = 0; i < team_trooper_count; ++i, ++trooper) {
                 depth.x = trooper->formation_x;
                 depth.z = trooper->formation_z;
                 NuVecRotateY(&position, &depth, angle);
@@ -788,6 +789,7 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
 
         shadow_position.y = team->reserved_02c;
         minisnowtrooper_s *troopers = team->troopers;
+        auto team_reserved_02c = team->reserved_02c;
         for (i32 i = 0; i < team->trooper_count; ++i) {
             const i32 random_state = qrand() / (0xffff / 3 + 1) + 1;
             troopers[i].state_flags = (troopers[i].state_flags & 0xcf) | ((random_state & 3) << 4);
@@ -806,7 +808,7 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
 
             shadow_position.x = trooper->shot_position.x;
             shadow_position.z = trooper->shot_position.z;
-            if (team->reserved_02c == 2000000.0f) {
+            if (team_reserved_02c == 2000000.0f) {
                 shadow_position.y = 10.0f;
                 shadow_position.y = GameShadow(NULL, &shadow_position, 5.0f, -1);
             }
@@ -1308,6 +1310,7 @@ void DrawMiniSnowTroopers(WORLDINFO_s *world) {
         }
 
         team->height = 0.0f;
+        auto team_reserved_02c = team->reserved_02c;
         for (i32 i = 0; i < team->trooper_count; ++i) {
             minisnowtrooper_s *trooper = &team->troopers[i];
 
@@ -1316,7 +1319,7 @@ void DrawMiniSnowTroopers(WORLDINFO_s *world) {
 
             f32 ground;
             if (((i + GameTimer.update_count) & 0xf) == 0) {
-                ground = team->reserved_02c;
+                ground = team_reserved_02c;
                 if (ground == 2000000.0f) {
                     position.y = 10.0f;
                     ground = GameShadow(NULL, &position, 5.0f, -1);

@@ -349,7 +349,8 @@ static void xAction(nufpar_s *parser) {
         GIZACTIONDEFN_s *definition = gizactiondefs;
         if (definition == NULL)
             continue;
-        while (definition->name != NULL && NuStrICmp(parser->word_buf, definition->name) != 0)
+        auto parser_word_buf = parser->word_buf;
+        while (definition->name != NULL && NuStrICmp(parser_word_buf, definition->name) != 0)
             ++definition;
         if (definition->name == NULL)
             continue;
@@ -690,7 +691,8 @@ static void ProcessFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8 frame) {
                             GizmoActivate(system->gizmo_sys, data->gizmos[i]->gizmo, 0, 1);
                     }
                 } else {
-                    for (i32 i = 0; i < data->gizmo_count; ++i)
+                    auto data_gizmo_count = data->gizmo_count;
+                    for (i32 i = 0; i < data_gizmo_count; ++i)
                         GizmoSetVisibility(system->gizmo_sys, data->gizmos[i]->gizmo, 0, 1);
                 }
                 box->state_flags_low &= ~0x20;

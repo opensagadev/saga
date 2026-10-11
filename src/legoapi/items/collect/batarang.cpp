@@ -200,7 +200,8 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
     GIZMOBLOWUP_s *blowup = NULL;
     nearest_distance = 16.0f;
     GIZMOBLOWUP_s *candidate_blowup = world->gizmo_blowups;
-    for (i32 i = 0; i < world->gizmo_blowup_count; ++i, ++candidate_blowup) {
+    auto world_gizmo_blowup_count = world->gizmo_blowup_count;
+    for (i32 i = 0; i < world_gizmo_blowup_count; ++i, ++candidate_blowup) {
         GIZMOBLOWUP_s *candidate = candidate_blowup;
         if ((candidate->status_flags & 0x80c001) != 0x80c000 || (candidate->draw_flags & 1) == 0 ||
             ((candidate->draw_flags & 0x20) != 0 && ShadowMode == 0)) {

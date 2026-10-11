@@ -1292,7 +1292,8 @@ static void GizBuildIts_Reset(void *world_ptr, void *data, void *progress_ptr) {
     GIZBUILDITSYS_s *buildit_sys = static_cast<GIZBUILDITSYS_s *>(data);
     GIZBUILDITPROGRESS_s *progress = static_cast<GIZBUILDITPROGRESS_s *>(progress_ptr);
 
-    for (i32 index = 0; index < buildit_sys->count; ++index) {
+    auto buildit_sys_count = buildit_sys->count;
+    for (i32 index = 0; index < buildit_sys_count; ++index) {
         GIZBUILDIT_s &buildit = buildit_sys->buildits[index];
         GizBuildit_Reset(&buildit, world_ptr);
 

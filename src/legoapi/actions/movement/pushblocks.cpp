@@ -405,7 +405,8 @@ void GizmoPushBlockInitAndReset(WORLDINFO_s *world, void *progress) {
     }
 
     block = world->push_blocks;
-    for (i32 index = 0; index < world->push_block_count; ++index, ++block) {
+    auto world_push_block_count = world->push_block_count;
+    for (i32 index = 0; index < world_push_block_count; ++index, ++block) {
         NUVEC centre = *block->position;
         block->velocity = v000;
         block->target_velocity = v000;

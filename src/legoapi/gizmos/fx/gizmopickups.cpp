@@ -272,6 +272,7 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
         shadow_distance_squared = shadow_distance * shadow_distance;
     }
     const f32 maximum_distance_squared = maximum_distance * maximum_distance;
+    auto world_current_level = world->current_level;
     for (i32 index = 0; index < count; ++index) {
         GIZMOPICKUP_s &pickup = pickups[index];
         if ((pickup.state_flags & GIZMOPICKUP_STATE_ACTIVE) == 0) {
@@ -370,7 +371,7 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
             NUVEC shadow_position = pickup.position;
             shadow_position.y = pickup.floor_height + 0.005f;
             const i32 opacity = static_cast<i32>(
-                (1.0f - distance_ratio) * static_cast<f32>(static_cast<u8>(world->current_level->blob_shadow_alpha)));
+                (1.0f - distance_ratio) * static_cast<f32>(static_cast<u8>(world_current_level->blob_shadow_alpha)));
             NuRndrAddShadow(&shadow_position, type->shadow_radius_x, opacity, pickup.shadow_x_rotation, 0,
                             pickup.shadow_z_rotation);
         }

@@ -200,8 +200,9 @@ void CruiserCUpdate(WORLDINFO_s *) {
 
 void CruiserDInit(WORLDINFO_s *world) {
     if (world->area->level_count != 0) {
-        for (i32 i = 0; i < world->area->level_count; i++) {
-            if (static_cast<u16>(world->area->levels[i]) == static_cast<u16>(CRUISERE_LDATA->idx))
+        auto world_area = world->area;
+        for (i32 i = 0; i < world_area->level_count; i++) {
+            if (static_cast<u16>(world_area->levels[i]) == static_cast<u16>(CRUISERE_LDATA->idx))
                 CruiserE_ix = i;
         }
     }

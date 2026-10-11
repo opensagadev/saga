@@ -272,7 +272,8 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
         i32 player_count = player2 != NULL ? 2 : 1;
         if ((set->field_0x20e != 0 || (set->flags & 2)) && !complete) {
             if (has_assignments && set->field_0x20e == 0) {
-                for (i32 index = 0; index < set->trigger_count; ++index) {
+                auto set_trigger_count = set->trigger_count;
+                for (i32 index = 0; index < set_trigger_count; ++index) {
                     i32 assigned = set->trigger_indices[index];
                     if (assigned != -1 && Obj[assigned].trigger_set != set) {
                         system->field_0x4280[assigned] = -1;
@@ -282,9 +283,10 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                 }
             }
             i32 assigned_count = 0;
+            auto f0x20e = set->field_0x20e;
             for (i32 index = 0; index < set->trigger_count && assigned_count + player_count < set->trigger_count;
                  ++index) {
-                if (!((set->field_0x20e >> index) & 1) && set->trigger_indices[index] == -1) {
+                if (!((f0x20e >> index) & 1) && set->trigger_indices[index] == -1) {
                     GIZMO_s *gizmo = set->gizmos[index];
                     bool available = false;
                     if (gizmo->type_id == lever_gizmotype_id) {
@@ -318,7 +320,7 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                                 (object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
                                 (object->apiobj.flags_low & 0x80) || (object->field_0xeff & 1) ||
                                 (character_mask && !(character_mask & object->ai.character_type_mask)) ||
-                                !(object->field_0xf02 & 4) || (!set->field_0x20e && object->trigger_set != set))
+                                !(object->field_0xf02 & 4) || (!f0x20e && object->trigger_set != set))
                                 continue;
                             if (!FreePlay) {
                                 GIZMO_s *target = set->gizmos[index];

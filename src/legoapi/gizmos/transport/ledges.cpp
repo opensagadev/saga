@@ -337,7 +337,8 @@ static void Ledges_StoreProgress(void *world_info, void *, void *progress_data) 
     if (world == NULL || world->ledges == NULL)
         return;
     LEDGE *ledge = static_cast<LEDGE *>(world->ledges);
-    for (i32 i = 0; i < world->ledge_count && i < 128; ++i, ++ledge) {
+    auto world_ledge_count = world->ledge_count;
+    for (i32 i = 0; i < world_ledge_count && i < 128; ++i, ++ledge) {
         u32 mask = 1u << (i & 31);
         if (!(ledge->state_flags & 2))
             progress->state[4 + (i >> 5)] &= ~mask;

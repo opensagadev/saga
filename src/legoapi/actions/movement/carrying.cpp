@@ -738,10 +738,10 @@ i32 ObjLandReady(GameObject_s *object) {
     if (object == NULL) {
         return 0;
     }
-    const i32 context = object->character_context;
-    if ((CInfo[context].flags & 0x1004) != 0 &&
-        (LEGOCONTEXT_LAND_COMBATROLL == -1 || LEGOCONTEXT_LAND_COMBATROLL != context || object->field_0x7a3 != 0)) {
-        if (LEGOCONTEXT_WALLSHUFFLE != -1 && LEGOCONTEXT_WALLSHUFFLE == context) {
+    if ((CInfo[object->character_context].flags & 0x1004) != 0 &&
+        (LEGOCONTEXT_LAND_COMBATROLL == -1 || LEGOCONTEXT_LAND_COMBATROLL != object->character_context ||
+         object->field_0x7a3 != 0)) {
+        if (LEGOCONTEXT_WALLSHUFFLE != -1 && LEGOCONTEXT_WALLSHUFFLE == object->character_context) {
             return 0;
         }
         return 1;
@@ -792,7 +792,6 @@ i32 MovingBackwards(GameObject_s *object) {
         return 0;
     }
 
-    const u16 camera_yaw = GameCam->input_yaw;
-    const i32 difference = RotDiff(static_cast<u16>(pad->input_angle + camera_yaw), object->apiobj.field_0x276);
+    const i32 difference = RotDiff(static_cast<u16>(pad->input_angle + GameCam->input_yaw), object->apiobj.field_0x276);
     return static_cast<u32>(difference + 0x4000) > 0x8000;
 }

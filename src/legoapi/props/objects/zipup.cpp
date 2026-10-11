@@ -294,7 +294,8 @@ static void ZipUps_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
         return;
     }
 
-    for (i32 index = 0; index < world->zipup_count && index < 32; ++index) {
+    auto world_zipup_count = world->zipup_count;
+    for (i32 index = 0; index < world_zipup_count && index < 32; ++index) {
         const u32 mask = 1u << index;
         if ((world->zipups[index].flags & ZIPUP_FLAG_VISIBLE) == 0) {
             progress->visible_mask &= ~mask;

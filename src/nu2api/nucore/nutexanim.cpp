@@ -837,12 +837,13 @@ extern "C" void NuTexAnimProgReadCFG(char *path, VARIPTR *buffer, VARIPTR end) {
                 nufpar_s *parser = NuFParOpen(file);
                 if (parser != NULL) {
                     *--list.char_ptr = '\0';
+                    auto parser_word_buf = parser->word_buf;
                     while (NuFParGetLine(parser)) {
                         NuFParGetWord(parser);
-                        name = NuStrRChr(parser->word_buf, '/');
+                        name = NuStrRChr(parser_word_buf, '/');
                         if (name == NULL)
-                            name = NuStrRChr(parser->word_buf, '\\');
-                        name = name != NULL ? name + 1 : parser->word_buf;
+                            name = NuStrRChr(parser_word_buf, '\\');
+                        name = name != NULL ? name + 1 : parser_word_buf;
                         list.char_ptr -= NuStrLen(name) + 1;
                         NuStrCpy(list.char_ptr, name);
                     }

@@ -552,12 +552,14 @@ void TouchHacks::CleanupAllMechObjectInterfaces(WORLDINFO_s *world) {
     }
 
     GIZMOBLOWUP_s *blowup = world->gizmo_blowups;
-    for (i32 i = 0; i < world->gizmo_blowup_count; ++i, ++blowup) {
+    auto world_gizmo_blowup_count = world->gizmo_blowup_count;
+    for (i32 i = 0; i < world_gizmo_blowup_count; ++i, ++blowup) {
         blowup->ClearMechObjectInterface();
     }
     if (world->giz_buildit_sys != NULL) {
         GIZBUILDIT_s *buildit = world->giz_buildit_sys->buildits;
-        for (i32 i = 0; i < world->giz_buildit_sys->count; ++i, ++buildit) {
+        auto world_giz_buildit_sys = world->giz_buildit_sys;
+        for (i32 i = 0; i < world_giz_buildit_sys->count; ++i, ++buildit) {
             buildit->ClearMechObjectInterface();
         }
     }
@@ -567,7 +569,8 @@ void TouchHacks::CleanupAllMechObjectInterfaces(WORLDINFO_s *world) {
     }
     if (world->hat_machine_sys != NULL) {
         HATMACHINE_s *machine = world->hat_machine_sys->machines;
-        for (i32 i = 0; i < world->hat_machine_sys->count; ++i, ++machine) {
+        auto world_hat_machine_sys = world->hat_machine_sys;
+        for (i32 i = 0; i < world_hat_machine_sys->count; ++i, ++machine) {
             machine->ClearMechObjectInterface();
         }
     }
@@ -583,7 +586,8 @@ void TouchHacks::CleanupAllMechObjectInterfaces(WORLDINFO_s *world) {
     }
     if (world->giz_turret_sys != NULL) {
         GIZTURRET_s *turret = world->giz_turret_sys->turrets;
-        for (i32 i = 0; i < world->giz_turret_sys->count; ++i, ++turret) {
+        auto world_giz_turret_sys = world->giz_turret_sys;
+        for (i32 i = 0; i < world_giz_turret_sys->count; ++i, ++turret) {
             turret->ClearMechObjectInterface();
         }
     }

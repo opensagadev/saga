@@ -222,7 +222,8 @@ void *FindNearestTorpTarget(WORLDINFO_s *world, NUVEC *position, f32 distance_sq
     if (WORLD->area != NULL && WORLD->area == BOUNTYHUNTERPURSUIT_ADATA) {
         if (world->giz_turret_sys != NULL) {
             GIZTURRET_s *turret = world->giz_turret_sys->turrets;
-            for (i32 i = 0; i < world->giz_turret_sys->count; ++i, ++turret) {
+            auto world_giz_turret_sys = world->giz_turret_sys;
+            for (i32 i = 0; i < world_giz_turret_sys->count; ++i, ++turret) {
                 if ((turret->flags & 4) != 0 && (turret->flags & 2) != 0 && (turret->flags & 0x30) == 0 &&
                     turret->primary_anim_obj != NULL) {
                     NUVEC *draw_position = NuSpecialGetDrawPos(&turret->primary_anim_obj->special);

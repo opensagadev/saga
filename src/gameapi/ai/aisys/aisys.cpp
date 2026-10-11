@@ -738,6 +738,7 @@ __used__ static i32 Action_SetPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
     AIPATHSYS *path_system = sys->path_sys;
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
     AIPATH *path = NULL;
+    auto path_system_path_count = path_system->path_count;
     for (i32 index = 0; index < param_4; ++index) {
         char *value = NuStrIStr(params[index], "character=");
         if (value != NULL) {
@@ -750,7 +751,7 @@ __used__ static i32 Action_SetPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
         }
         value = NuStrIStr(params[index], "path");
         if (value != NULL) {
-            for (i32 path_index = 0; path_index < path_system->path_count; ++path_index) {
+            for (i32 path_index = 0; path_index < path_system_path_count; ++path_index) {
                 AIPATH *candidate = path_system->paths[path_index];
                 if (candidate != NULL && NuStrICmp(candidate->name, value + 5) == 0) {
                     path = path_system->paths[path_index];
@@ -3160,9 +3161,10 @@ static i32 Action_FlatTerrain(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char
                               i32 first_time, f32) {
     if (packet != NULL && packet->owner != NULL && first_time != 0) {
         packet->owner->apiobj.flags_low |= 0x10;
+        auto packet_owner = packet->owner;
         for (i32 i = 0; i < param_count; i++) {
             if (NuStrICmp(params[i], "false") == 0) {
-                packet->owner->apiobj.flags_low &= ~0x10;
+                packet_owner->apiobj.flags_low &= ~0x10;
             }
         }
     }
@@ -10314,7 +10316,8 @@ extern "C" void ResetAIMessageSys(AIMESSAGESYS_s *sys) {
         sys->active_list.head = NULL;
         sys->active_list.tail = NULL;
         memset(sys->messages, 0, sys->count * sizeof(AIMESSAGE_s));
-        for (i32 index = 0; index < sys->count; ++index) {
+        auto sys_count = sys->count;
+        for (i32 index = 0; index < sys_count; ++index) {
             NuLinkedListAppend(free_list, &sys->messages[index].links);
         }
     }

@@ -1160,7 +1160,8 @@ i32 isHothBattleWaveCreature(GameObject_s *object) {
 }
 
 static inline void HothBattle_AssignSpawnLocator(GameObject_s *object, AILOCATOR_s *locator, AILOCATORSET_s *set) {
-    for (i32 index = 0; index < set->locator_count; ++index) {
+    auto set_locator_count = set->locator_count;
+    for (i32 index = 0; index < set_locator_count; ++index) {
         AILOCATOR_s *entry = &WORLD->ai_sys->locators[set->locator_entries[index]];
         if (entry != locator) {
             continue;

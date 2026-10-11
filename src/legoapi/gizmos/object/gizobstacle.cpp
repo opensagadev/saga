@@ -594,6 +594,7 @@ static i32 GizObstacles_BoltHit(void *world, void *data, void *attacker_ptr, NUV
     GameObject_s *attacker = static_cast<GameObject_s *>(attacker_ptr);
     GIZOBSTACLE_s *nearest = NULL;
     f32 nearest_distance = 1000000000.0f;
+    auto maximum_z = maximum->z;
     for (i32 index = 0; index < system->active_gizmo_count; ++index) {
         GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(system->active_gizmos[index]->object);
         if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) == 0 ||
@@ -604,7 +605,7 @@ static i32 GizObstacles_BoltHit(void *world, void *data, void *attacker_ptr, NUV
         const NUVEC &position = obstacle->evaluated_position;
         const f32 obstacle_radius = obstacle->field_0x58;
         if (!(position.x - obstacle_radius <= maximum->x && minimum->x <= position.x + obstacle_radius &&
-              position.z - obstacle_radius <= maximum->z && minimum->z <= position.z + obstacle_radius &&
+              position.z - obstacle_radius <= maximum_z && minimum->z <= position.z + obstacle_radius &&
               position.y - obstacle_radius <= maximum->y && minimum->y <= position.y + obstacle_radius)) {
             continue;
         }
@@ -709,6 +710,7 @@ static void GizObstacles_Reset(void *world_ptr, void *data, void *progress_ptr) 
     GIZOBSTACLESYS_s *obstacle_sys = static_cast<GIZOBSTACLESYS_s *>(data);
     GIZOBSTACLEPROGRESS_s *progress = static_cast<GIZOBSTACLEPROGRESS_s *>(progress_ptr);
     GIZOBSTACLE_s *obstacle_entry = obstacle_sys->obstacles;
+    auto world_terrain = world->terrain;
     for (i32 index = 0; index < obstacle_sys->count; ++index, ++obstacle_entry) {
         GIZOBSTACLE_s &obstacle = *obstacle_entry;
         obstacle.progress_flags = static_cast<u8>(
@@ -720,10 +722,11 @@ static void GizObstacles_Reset(void *world_ptr, void *data, void *progress_ptr) 
 
         GAMEANIMSET_s *anim_set = obstacle.anim_set;
         if (anim_set != NULL) {
-            for (GAMEANIMOBJ_s *object = anim_set->objects; object != NULL; object = object->next) {
+            auto anim_set_objects = anim_set->objects;
+            for (GAMEANIMOBJ_s *object = anim_set_objects; object != NULL; object = object->next) {
                 i16 *object_data = static_cast<i16 *>(object->object_data);
                 object_data[1] = -1;
-                if (world->terrain != NULL && (object_data[0] & 1) == 0 && NuSpecialExistsFn(&object->special) != 0) {
+                if (world_terrain != NULL && (object_data[0] & 1) == 0 && NuSpecialExistsFn(&object->special) != 0) {
                     object_data[1] = FindPlatInst(NuSpecialGetInstanceix(&object->special));
                 }
                 if (object_data[1] != -1) {
@@ -1057,10 +1060,11 @@ i32 GizObstacles_Hit(void *context, GIZOBSTACLE_s *obstacle, nuvec_s *, i32 play
         if (obstacle->blowup_type != -1) {
             if ((obstacle->config_flags & 0x200) != 0) {
                 if (obstacle->anim_set != NULL) {
+                    auto obstacle_blowup_type = obstacle->blowup_type;
                     for (GAMEANIMOBJ_s *object = obstacle->anim_set->objects; object != NULL; object = object->next) {
                         NUVEC *position = NuSpecialGetDrawPos(&object->special);
                         if (position != NULL) {
-                            GizmoBlowUpTypeBlowUp(static_cast<WORLDINFO_s *>(context), obstacle->blowup_type, position);
+                            GizmoBlowUpTypeBlowUp(static_cast<WORLDINFO_s *>(context), obstacle_blowup_type, position);
                         }
                     }
                 }

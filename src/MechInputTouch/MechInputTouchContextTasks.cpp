@@ -589,7 +589,6 @@ bool MechTouchTaskUseForce::Update() {
     GIZFORCE_s *force = object->GetGizForce();
     bool within_range = false;
     if (force != NULL) {
-        const f32 dx = position.x;
         const f32 dz = position.z;
         const f32 radius = force->interaction_radius;
         if (TouchHacks::CanUseGizForce(*player, *force)) {
@@ -598,7 +597,7 @@ bool MechTouchTaskUseForce::Update() {
                 return true;
             }
             const f32 range = radius * 0.9f;
-            within_range = dx * dx + dz * dz < range * range;
+            within_range = position.x * position.x + dz * dz < range * range;
         } else {
             return false;
         }

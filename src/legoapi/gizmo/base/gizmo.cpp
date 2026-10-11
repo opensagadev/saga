@@ -288,13 +288,14 @@ void RegisterGizmoTypes(VARIPTR *buffer, VARIPTR *buffer_end, REGISTERGIZMOTYPEF
             gizmo->buffer = pvVar3;
             if (pvVar3 != NULL && gizmotypes->unknown > 0) {
                 i = 0;
+                auto gizmo_buffer = gizmo->buffer;
                 while (1) {
                     void *pvVar5 = gizmo->fns.allocate_progress_data_fn(buffer, buffer_end);
                     pvVar3[i].void_ptr = pvVar5;
                     i = i + 1;
                     if (gizmotypes->unknown <= i)
                         break;
-                    pvVar3 = gizmo->buffer;
+                    pvVar3 = gizmo_buffer;
                 }
             }
         }

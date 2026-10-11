@@ -255,7 +255,8 @@ void TrafficAnimSys_Update(TRAFFICANIMSYS_s *system) {
     }
 
     TRAFFICANIM_s *animation = system->animations;
-    for (i32 animation_index = 0; animation_index < system->animation_count; ++animation_index, ++animation) {
+    auto system_animation_count = system->animation_count;
+    for (i32 animation_index = 0; animation_index < system_animation_count; ++animation_index, ++animation) {
         animation->next_spawn_time -= animation->tfactor * FRAMETIME * 60.0f;
         if (animation->next_spawn_time <= 0.0f) {
             if (animation->vehicle_count != 0) {
@@ -339,10 +340,11 @@ void TrafficAnimSys_Configure(WORLDINFO_s *world, char *config) {
             }
             animation->end_frame = NuAnimEndFrameOld(animation->animation);
             animation->room_frame_interval = (animation->end_frame - 1.0f) * (1.0f / 256.0f);
+            auto animation_y_offset = animation->y_offset;
             for (i32 frame_index = 0; frame_index < 256; ++frame_index) {
                 NUMTX matrix;
                 EvalAnim(&animation->special, frame_index * animation->room_frame_interval + 1.0f, &matrix, 1);
-                matrix.m31 += animation->y_offset;
+                matrix.m31 += animation_y_offset;
                 animation->rooms[frame_index] = 0xff;
                 i16 room =
                     static_cast<i16>(NuPortalWhichRoom(world->current_gscn, reinterpret_cast<NUVEC *>(&matrix.m30)));

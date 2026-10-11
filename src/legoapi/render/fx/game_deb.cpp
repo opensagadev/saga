@@ -473,8 +473,9 @@ uv1deb *GenDebIndexRadialStar(debkeydatatype_s *key, debinftype *effect, float t
     particle->momentum.x += key->momentum.x;
     particle->momentum.y += key->momentum.y;
     particle->momentum.z += key->momentum.z;
+    auto key_particle_count = key->particle_count;
     for (i32 trail = 0; trail < static_cast<i8>(effect->trail_count); ++trail) {
-        if (key->field_18a >= key->particle_count)
+        if (key->field_18a >= key_particle_count)
             key->field_18a = 0;
         dma_particle_s *copy = DebrisParticleAt(key, key->field_18a++, 0);
         *copy = *particle;

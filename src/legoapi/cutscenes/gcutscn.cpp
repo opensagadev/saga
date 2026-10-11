@@ -180,11 +180,12 @@ void CutScenePlayer_DrawGrid(COLLECTION_s *collection, i16 *ids, float x, float 
     i32 previous_area = -1, colour = -1;
     static const u8 colours[8][3] = {{255, 63, 0},  {255, 127, 0},  {255, 223, 0},  {0, 255, 63},
                                      {0, 127, 255}, {191, 31, 255}, {255, 31, 191}, {255, 255, 255}};
+    auto collection_count_y = collection->count_y;
     for (i32 row = 0; row <= rows; ++row, y += dy) {
         x = first_x;
         for (i32 column = 0; column < collection->count_x; ++column, x += dx) {
             const i32 i = row * collection->count_x + column;
-            if (i >= collection->count_y)
+            if (i >= collection_count_y)
                 continue;
             collection->list[i].grid_x = x;
             collection->list[i].grid_y = y;

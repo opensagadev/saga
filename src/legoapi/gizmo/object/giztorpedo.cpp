@@ -166,6 +166,7 @@ static void GizTorp_Draw(void *world_ptr, void *, float) {
 
     GIZTORPMACHINESYS *system = world->giz_torp_machine_sys;
     EnableShadowMapRendering(0);
+    auto system_scale = system->scale;
     for (i32 index = 0; index < system->count; ++index) {
         GIZTORPMACHINE &machine = system->machines[index];
         if ((machine.flags & GIZTORPMACHINE_FLAG_VISIBLE) == 0 && editor_active == 0) {
@@ -175,7 +176,7 @@ static void GizTorp_Draw(void *world_ptr, void *, float) {
         NUMTX matrix;
         NuMtxSetRotationY(&matrix, machine.y_rotation);
         NuMtxTranslate(&matrix, &machine.position);
-        NuMtxPreScaleU(&matrix, system->scale);
+        NuMtxPreScaleU(&matrix, system_scale);
 
         const i32 model_index = (machine.flags & GIZTORPMACHINE_FLAG_ALTERNATE_MODEL) != 0
                                     ? GIZTORP_LEVEL_OBJECT_ALTERNATE

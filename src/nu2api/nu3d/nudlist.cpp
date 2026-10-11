@@ -378,7 +378,8 @@ extern "C" NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *
         scene->sort_pris[i].items = scene->items + (source->sort_pris[i].items - source->items);
         scene->sort_pris[i].dlist_next = &scene->sort_pris[i];
     }
-    for (i32 i = 0; i < source->nitems; ++i) {
+    auto source_nitems = source->nitems;
+    for (i32 i = 0; i < source_nitems; ++i) {
         NUDISPLAYLISTITEM *item = &scene->items[i];
         if (item->type != 0x80) {
             if (item->type == 0x85) {
@@ -458,7 +459,8 @@ extern "C" void NuDisplaySceneAdd(NUDLDLISTSCENE *scene) {
 
             NUSORTPRI *previous = nullptr;
             NUSORTPRI *current = sort_list;
-            while (current != nullptr && current->sort_pri < sort_pri->sort_pri) {
+            auto sort_pri_sort_pri = sort_pri->sort_pri;
+            while (current != nullptr && current->sort_pri < sort_pri_sort_pri) {
                 previous = current;
                 current = current->sys_next;
             }
@@ -1186,6 +1188,7 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
         if ((sc->flags & 6) == 0 || sp->nmtls == 0)
             continue;
 
+        auto sc_render_buffer = sc->render_buffer;
         for (u32 m = 0; m < sp->nmtls; ++m) {
             i32 mi = static_cast<i32>(static_cast<u32>(sp->mtl_first) + m);
             NUDISPLAYLIST *dl = sc->dlist_mtls[mi];
@@ -1228,13 +1231,14 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
                 i32 mid = dl->mtl_id;
                 i32 word = (mid >= 0) ? mid >> 3 : (mid + 7) >> 3;
                 i32 bit = mid & 7;
-                u8 *mu = sc->mtl_used[static_cast<u32>(static_cast<u8>(sc->render_buffer >> 7))];
+                u8 *mu = sc->mtl_used[static_cast<u32>(static_cast<u8>(sc_render_buffer >> 7))];
                 mu[word] &= static_cast<u8>((static_cast<u32>(-2) << bit) | (0xfffffffeu >> (32 - bit)));
             }
         }
     }
 
-    for (i32 i = 0; i < mgr->ndisplay_lists; ++i) {
+    auto mgr_ndisplay_lists = mgr->ndisplay_lists;
+    for (i32 i = 0; i < mgr_ndisplay_lists; ++i) {
         nudisplayscene_s *sc = mgr->dlists[i];
         if (sc->local_state) {
             RndrStateResetGlobalState(sc->local_state);
@@ -1532,8 +1536,9 @@ void DisplayListPrintItem(nudisplaylistitem_s *item, i32 index, i32 type_count, 
     sprintf(detail, "(%x)", static_cast<u32>(reinterpret_cast<usize>(item->next)));
     NuStrCat(text, detail);
     bool selected = type_count == 0;
+    auto item_type = item->type;
     for (i32 type_index = 0; type_index < type_count; ++type_index) {
-        if (types[type_index] != item->type) {
+        if (types[type_index] != item_type) {
             continue;
         }
         selected = true;

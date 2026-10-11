@@ -822,8 +822,9 @@ i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s 
                 GameObject_s *other = Player[i];
                 if (other == NULL || other->character_context != 0x46)
                     continue;
+                auto f0x788 = other->field_0x788;
                 for (i32 j = 0; j < set->trigger_count; ++j) {
-                    if (set->triggers[j] != NULL && set->triggers[j]->object == other->field_0x788) {
+                    if (set->triggers[j] != NULL && set->triggers[j]->object == f0x788) {
                         if (player->apiobj.position.y > object->apiobj.position.y + 0.05f)
                             object->field_0x107e = 1;
                         else if (object->apiobj.position.y - 0.05f > player->apiobj.position.y)

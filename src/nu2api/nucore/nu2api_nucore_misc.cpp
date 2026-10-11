@@ -252,6 +252,7 @@ void NuLgtArcLaserDraw(i32 paused) {
         vertices[1].y = vertices[3].y = vertices[4].y;
         vertices[1].z = vertices[3].z = vertices[4].z;
         f32 progress = 0.0f;
+        auto laser_wobble = laser->wobble;
         do {
             f32 next = progress + step;
             if (!(next >= 1.0f)) {
@@ -272,8 +273,8 @@ void NuLgtArcLaserDraw(i32 paused) {
             f32 jitter_x = 0.0f, jitter_y = 0.0f;
             if (1.0f - 1.5f * step > progress && NuLgtSeed != 0) {
                 f32 random = (f32)((NuLgtRand() & 0xff) - 128);
-                jitter_x = perpendicular.x * random * laser->wobble * reciprocal;
-                jitter_y = perpendicular.y * random * laser->wobble * reciprocal;
+                jitter_x = perpendicular.x * random * laser_wobble * reciprocal;
+                jitter_y = perpendicular.y * random * laser_wobble * reciprocal;
             }
             vertices[0].x = vertices[5].x - perpendicular.x * reciprocal + jitter_x;
             vertices[0].y = vertices[5].y - perpendicular.y * reciprocal + jitter_y;

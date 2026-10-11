@@ -53,7 +53,8 @@ static void GizBombGens_Update(void *world_ptr, void *system_ptr, float) {
 
     update_generators: {
         GIZBOMBGEN *bomb_generator = system->bomb_generators;
-        for (i32 index = 0; index < system->count; ++index, ++bomb_generator) {
+        auto system_count = system->count;
+        for (i32 index = 0; index < system_count; ++index, ++bomb_generator) {
             if ((bomb_generator->flags & GIZBOMBGEN_FLAG_VISIBLE) == 0) {
                 continue;
             }

@@ -1040,8 +1040,9 @@ i32 NetworkObjectManager::PushObject(NetworkObject *object, NetworkObjectManager
         if (replicator != NULL) {
             i32 data_offset = 0;
             i32 permit_push = 1;
+            auto object_flags = object->flags;
             do {
-                if ((object->flags & 2) != 0) {
+                if ((object_flags & 2) != 0) {
                     replicator->replication_group |= 8;
                 }
 

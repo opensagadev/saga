@@ -145,7 +145,8 @@ void AIPathCnxControlSysReset(AIPATHCNXCONTROLSYS_s *system) {
     system->active_controllers.head = NULL;
     system->active_controllers.tail = NULL;
     memset(system->controllers, 0, system->controller_count * sizeof(*system->controllers));
-    for (i32 i = 0; i < system->controller_count; ++i) {
+    auto system_controller_count = system->controller_count;
+    for (i32 i = 0; i < system_controller_count; ++i) {
         NuLinkedListAppend(&system->available_controllers, &system->controllers[i].links);
     }
 }

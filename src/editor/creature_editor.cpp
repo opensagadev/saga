@@ -251,9 +251,10 @@ __attribute__((optimize("O3"))) void creatureEditor_Enter() {
                 continue;
             EDAIPATH_s *path = pathEditor_GetPath(reinterpret_cast<const char *>(source->path_info.path));
             f32 tolerance = 0.0f;
+            auto creature_path_check = creature->path_check;
             for (;;) {
-                pathEditor_OnPathCheck(&creature->position, (EDAIPATHCHECK_s *)creature->path_check, path, tolerance);
-                if (*reinterpret_cast<i32 *>(creature->path_check) != 0)
+                pathEditor_OnPathCheck(&creature->position, (EDAIPATHCHECK_s *)creature_path_check, path, tolerance);
+                if (*reinterpret_cast<i32 *>(creature_path_check) != 0)
                     break;
                 tolerance += 0.01f;
             }
@@ -272,8 +273,9 @@ __attribute__((optimize("O3"))) void creatureEditor_Enter() {
                 creature->script_params[p] = source->script_params[p];
             AISCRIPT *script = AIScriptFind(aieditor->ai_system, creature->script_name, 1, 1, 1);
             if (script != nullptr) {
+                auto source_flags = source->flags;
                 for (i32 p = 0; p < 4; ++p) {
-                    if ((source->flags & (2 << p)) == 0)
+                    if ((source_flags & (2 << p)) == 0)
                         creature->script_params[p] = script->params[p].default_val;
                 }
             }

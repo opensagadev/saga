@@ -453,6 +453,7 @@ static void GizPanels_StoreProgress(void *world_ptr, void *, void *progress_ptr)
     if (world != NULL && (panel_sys = world->giz_panel_sys) != NULL && (panel = panel_sys->panels) != NULL &&
         panel_sys->count > 0) {
         i32 index = 0;
+        auto panel_sys_count = panel_sys->count;
         do {
             const i32 word_index = index >> 5;
             const u32 bit = 1u << (index & 31);
@@ -470,7 +471,7 @@ static void GizPanels_StoreProgress(void *world_ptr, void *, void *progress_ptr)
             }
             ++index;
             ++panel;
-        } while (index != panel_sys->count && index != 32);
+        } while (index != panel_sys_count && index != 32);
     }
 }
 

@@ -192,7 +192,8 @@ static void Tubes_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
         return;
     }
 
-    for (i32 index = 0; index < world->tube_count && index < 32; ++index) {
+    auto world_tube_count = world->tube_count;
+    for (i32 index = 0; index < world_tube_count && index < 32; ++index) {
         const u32 tube_bit = 1U << index;
         if ((world->tubes[index].flags & TUBE_FLAG_VISIBLE) == 0) {
             progress->visible_mask &= ~tube_bit;

@@ -31,9 +31,8 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void ReleasePush(GameObject_s *object) {
-    const i32 context = object->character_context;
-    if ((CInfo[context].flags & 0x2000) != 0) {
-        if (LEGOCONTEXT_PUSHOBSTACLE != -1 && LEGOCONTEXT_PUSHOBSTACLE == context) {
+    if ((CInfo[object->character_context].flags & 0x2000) != 0) {
+        if (LEGOCONTEXT_PUSHOBSTACLE != -1 && LEGOCONTEXT_PUSHOBSTACLE == object->character_context) {
             GameCam_Blend(NULL, 0.5f, 0.0f, 1);
         }
         object->field_0xdc4 = 0.0f;

@@ -238,6 +238,7 @@ static __used__ void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_
         return;
     }
 
+    auto room_priority = room->priority;
     for (i32 portal_index = 0; portal_index < room->portal_count; ++portal_index) {
         NUPORTAL *portal = &scene->portals[room->portal_indices[portal_index]];
         i16 next_room = portal->front_room == room_id ? portal->back_room : portal->front_room;
@@ -247,8 +248,8 @@ static __used__ void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_
 
         NUROOM *next = &scene->rooms[next_room];
         const f32 camera_side = planeDistance(portal->plane, world_campos);
-        if (next->priority > room->priority && ((room_id == portal->back_room && camera_side < 0.0f) ||
-                                                (room_id == portal->front_room && camera_side > 0.0f))) {
+        if (next->priority > room_priority && ((room_id == portal->back_room && camera_side < 0.0f) ||
+                                               (room_id == portal->front_room && camera_side > 0.0f))) {
             continue;
         }
 

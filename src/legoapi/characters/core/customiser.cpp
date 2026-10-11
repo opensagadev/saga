@@ -277,7 +277,8 @@ void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s 
                 }
 
                 nuhgobj_s *hierarchy = character_model->hierarchy;
-                for (i32 material_index = 0; material_index < hierarchy->material_count; ++material_index) {
+                auto hierarchy_material_count = hierarchy->material_count;
+                for (i32 material_index = 0; material_index < hierarchy_material_count; ++material_index) {
                     NUMTL *material = hierarchy->materials[material_index];
                     if (material->unknown_9a[0] != category->material_tag) {
                         continue;

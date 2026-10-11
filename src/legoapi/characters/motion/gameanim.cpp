@@ -402,11 +402,11 @@ void Animate_JEDI(GameObject_s *object) {
     }
     UpdateCharacterIdle(object);
 
-    const i16 animation = packet.requested_animation;
-    if (animation == CHARACTER_ANIMATION_FALL ||
+    if (packet.requested_animation == CHARACTER_ANIMATION_FALL ||
         ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
-         (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
-          animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
+         (packet.requested_animation == CHARACTER_ANIMATION_FALL_VARIANT_75 ||
+          packet.requested_animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
+          packet.requested_animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
         object->fall_animation_timer += FRAMETIME;
     } else {
         object->fall_animation_timer = 0.0f;
@@ -517,15 +517,14 @@ void AnimatePlayer(GameObject_s *object) {
     packet.previous_animation = packet.animation_index;
     object->mini_animation.previous_animation = object->mini_animation.animation_index;
     CHARACTERMODEL_s *model = object->apiobj.character_model;
-    GAMEPAD_s *pad = object->pad_gamepad;
 
     if ((object->apiobj.field_0x1f4 & APIOBJECT_STATE_FLAG_IGNORE_DOORS) == 0) {
         object->apiobj.character_data->animate_fn(object);
     }
 
-    const i16 override_from = object->ai.animation_override_from;
-    if (override_from != -1 &&
-        ((override_from == 0xe9 && object->character_context != 0x1c) || override_from == packet.requested_animation)) {
+    if (object->ai.animation_override_from != -1 &&
+        ((object->ai.animation_override_from == 0xe9 && object->character_context != 0x1c) ||
+         object->ai.animation_override_from == packet.requested_animation)) {
         packet.requested_animation = object->ai.animation_override_to;
     }
 
@@ -537,7 +536,7 @@ void AnimatePlayer(GameObject_s *object) {
     const f32 direction = (object->field_0xefd & GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS) != 0 ? -1.0f : 1.0f;
     f32 movement_speed;
     if (object->apiobj.character_model->model_data_b[1] != NULL) {
-        movement_speed = pad->animation_input_magnitude;
+        movement_speed = object->pad_gamepad->animation_input_magnitude;
         if (movement_speed > 0.0f && object->id == id_GONKDROID && Cheat_IsOn(8) == 0)
             movement_speed = object->apiobj.character_data->game_character->walk_speed;
     } else if ((object->apiobj.character_data->game_character->flags_090 &
@@ -546,7 +545,7 @@ void AnimatePlayer(GameObject_s *object) {
                                   object->apiobj.velocity.z * object->facing_direction.z;
         movement_speed = forward_speed < 0.0f ? 0.0f : forward_speed;
     } else {
-        movement_speed = pad->input_magnitude;
+        movement_speed = object->pad_gamepad->input_magnitude;
     }
 
     // The original passes signed movement into UpdateAnimPacket.  Clips with
@@ -797,11 +796,11 @@ void Animate_WEIRDO(GameObject_s *object) {
     }
     UpdateCharacterIdle(object);
 
-    const i16 animation = packet.requested_animation;
-    if (animation == CHARACTER_ANIMATION_FALL ||
+    if (packet.requested_animation == CHARACTER_ANIMATION_FALL ||
         ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
-         (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
-          animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
+         (packet.requested_animation == CHARACTER_ANIMATION_FALL_VARIANT_75 ||
+          packet.requested_animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
+          packet.requested_animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
         object->fall_animation_timer += FRAMETIME;
     } else {
         object->fall_animation_timer = 0.0f;
@@ -979,11 +978,11 @@ void Animate_DROIDEKA(GameObject_s *object) {
         MoveAnim_Check(object);
     }
 
-    const i16 animation = packet.requested_animation;
-    if (animation != CHARACTER_ANIMATION_FALL &&
+    if (packet.requested_animation != CHARACTER_ANIMATION_FALL &&
         !((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
-          (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
-           animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
+          (packet.requested_animation == CHARACTER_ANIMATION_FALL_VARIANT_75 ||
+           packet.requested_animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
+           packet.requested_animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
         object->fall_animation_timer = 0.0f;
     } else {
         object->fall_animation_timer += FRAMETIME;

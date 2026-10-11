@@ -558,6 +558,7 @@ static i32 GizTurrets_BoltHitPlat(void *world_ptr, void *system_ptr, BOLT *bolt,
     }
 
     GIZTURRET_s *turret = system->turrets;
+    auto bolt_hit_platform = bolt->hit_platform;
     for (i32 index = 0; index < system->count; ++index, ++turret) {
         if ((turret->flags & GIZTURRET_FLAG_VISIBLE) == 0 || (turret->flags & GIZTURRET_FLAG_ACTIVE) == 0 ||
             (turret->flags & 0x30) != 0 || (turret->runtime_flags & 2) == 0) {
@@ -567,7 +568,7 @@ static i32 GizTurrets_BoltHitPlat(void *world_ptr, void *system_ptr, BOLT *bolt,
         GAMEANIMOBJ_s *object = turret->anim_set->objects;
         while (object != NULL) {
             GizTurretAnimObjectData *data = static_cast<GizTurretAnimObjectData *>(object->object_data);
-            if (data->platform_id == bolt->hit_platform) {
+            if (data->platform_id == bolt_hit_platform) {
                 BOLTTYPE_s *bolt_type = BoltType_FindByID(bolt->type_id, static_cast<WORLDINFO_s *>(world_ptr));
                 i32 player_index;
                 i32 damage;

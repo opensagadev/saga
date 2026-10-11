@@ -1180,11 +1180,12 @@ static void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
     if (candidate_count == 1) {
         animation = candidates[0];
     } else {
+        auto object_previous_idle_animation = object->previous_idle_animation;
         do {
             const i32 bucket_size = 0xffff / candidate_count + 1;
             animation = candidates[qrand() / bucket_size];
             object->idle_animation = static_cast<i16>(animation);
-        } while (animation == object->previous_idle_animation);
+        } while (animation == object_previous_idle_animation);
     }
     object->idle_animation = static_cast<i16>(animation);
 

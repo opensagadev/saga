@@ -584,23 +584,24 @@ void CheckResetBits() {
         ReStoreStatusTakeOverObjectSys(1);
         AIScriptInitConditions(WORLD->ai_sys);
 
+        auto WORLD_ai_sys = WORLD->ai_sys;
         for (i32 player_index = 0; player_index < 8; ++player_index) {
             if (Player[player_index] == NULL)
                 continue;
             InitPlayerAI(Player[player_index]);
             char script_name[32];
             if (FreePlay != 0) {
-                if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("Freeplay"), 0, 1, 0) != NULL)
+                if (AIScriptFind(WORLD_ai_sys, const_cast<char *>("Freeplay"), 0, 1, 0) != NULL)
                     strcpy(script_name, "Freeplay");
                 else
                     goto party_script;
             } else if (Mission_Active(NULL) != NULL) {
-                if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("Mission"), 0, 1, 0) != NULL)
+                if (AIScriptFind(WORLD_ai_sys, const_cast<char *>("Mission"), 0, 1, 0) != NULL)
                     strcpy(script_name, "Mission");
                 else
                     goto party_script;
             } else {
-                if (AIScriptFind(WORLD->ai_sys, Player[player_index]->apiobj.character_data->file, 0, 1, 0) != NULL) {
+                if (AIScriptFind(WORLD_ai_sys, Player[player_index]->apiobj.character_data->file, 0, 1, 0) != NULL) {
                     sprintf(script_name, Player[player_index]->apiobj.character_data->file);
                 } else {
                     if ((Player[player_index]->apiobj.character_data->model_flags & 8) != 0)
@@ -609,16 +610,16 @@ void CheckResetBits() {
                         strcpy(script_name, "Blaster");
                     else
                         strcpy(script_name, "NoWeapon");
-                    if (AIScriptFind(WORLD->ai_sys, script_name, 0, 1, 0) == NULL) {
+                    if (AIScriptFind(WORLD_ai_sys, script_name, 0, 1, 0) == NULL) {
                     party_script:
-                        if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("party"), 0, 1, 0) != NULL)
+                        if (AIScriptFind(WORLD_ai_sys, const_cast<char *>("party"), 0, 1, 0) != NULL)
                             strcpy(script_name, "party");
                         else
                             strcpy(script_name, "GeneralParty");
                     }
                 }
             }
-            AIScriptProcessorInit(WORLD->ai_sys, &Player[player_index]->ai,
+            AIScriptProcessorInit(WORLD_ai_sys, &Player[player_index]->ai,
                                   reinterpret_cast<AISCRIPTPROCESS *>(&Player[player_index]->ai), NULL, script_name,
                                   NULL, 1, NULL, NULL);
             if (FreePlay == 0 && Mission_Active(NULL) == NULL && Player[player_index]->field_0xcc0 == NULL &&

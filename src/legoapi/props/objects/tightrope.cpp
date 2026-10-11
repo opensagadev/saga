@@ -313,7 +313,8 @@ static void TightRopes_StoreProgress(void *world_info, void *, void *progress_da
     WORLDINFO *world = static_cast<WORLDINFO *>(world_info);
     if (world == NULL || world->tightropes == NULL)
         return;
-    for (i32 i = 0; i < world->tightrope_count && i < 32; ++i) {
+    auto world_tightrope_count = world->tightrope_count;
+    for (i32 i = 0; i < world_tightrope_count && i < 32; ++i) {
         u32 mask = 1u << i;
         if (!world->tightropes[i].visible)
             progress->state[1] &= ~mask;

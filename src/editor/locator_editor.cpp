@@ -1019,8 +1019,9 @@ process_buttons:
             EDLOCATORSET_s *set = aieditor->current_locator_set;
             if (set != nullptr) {
                 i32 index = -1;
+                auto aieditor_current_locator = aieditor->current_locator;
                 for (i32 i = 0; i < 64; ++i) {
-                    if (set->locators[i] == aieditor->current_locator) {
+                    if (set->locators[i] == aieditor_current_locator) {
                         index = i;
                         break;
                     }

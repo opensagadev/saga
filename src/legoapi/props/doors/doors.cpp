@@ -328,7 +328,8 @@ void Doors_Init(WORLDINFO_s *world) {
     world->start_door = NULL;
 
     DOOR_s *door = world->doors;
-    for (i32 i = 0; door != NULL && i < world->door_count; i++, door++) {
+    auto world_door_count = world->door_count;
+    for (i32 i = 0; door != NULL && i < world_door_count; i++, door++) {
         NUVEC *points = door->spline->pts;
 
         NuVecAdd(&door->pos, &points[0], &points[1]);

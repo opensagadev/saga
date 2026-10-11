@@ -3910,6 +3910,7 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
             x * x + y * y + z * z < (scan_radius + group->radius) * (scan_radius + group->radius)) {
             NUVEC4 *vertices = reinterpret_cast<NUVEC4 *>((reinterpret_cast<uintptr_t>(scratch) + 31) & ~uintptr_t(15));
             TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group->data);
+            auto TerI_inverse_object_scale = TerI->inverse_object_scale;
             while (batch->marker >= 0) {
                 i32 shape_count = batch->shape_count;
                 TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
@@ -3957,7 +3958,7 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
                     TERRAIN_SHAPE *surface = &ScaleTerrain[scaled_count];
                     memcpy(surface->material, source->material, 4);
                     const f32 origin_y = group->origin.y;
-                    const f32 inverse_scale = TerI->inverse_object_scale;
+                    const f32 inverse_scale = TerI_inverse_object_scale;
                     surface->vectors[0].x = vertices[0].x;
                     surface->vectors[0].z = vertices[0].z;
                     surface->vectors[1].x = vertices[1].x;
@@ -4207,8 +4208,9 @@ void ScanWallSplineTerrain(i32, i32 terrain_mask, i32) {
         if (mask != 0 && (mask & wall_mask) == 0)
             continue;
         const u8 material = static_cast<u8>(node->field_0x02);
+        auto node_points = node->points;
         for (i32 first = 0; first < node->point_count; first += 16) {
-            NUVEC *points = node->points + first;
+            NUVEC *points = node_points + first;
             i32 end = node->point_count;
             if (points[0].y != 2147483648.0f) {
                 if (points[1].y >= wall_bounds.min_x && wall_bounds.max_x >= points[0].y &&
@@ -4930,6 +4932,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                 batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(source);
             }
         } else {
+            auto query_object_scale = query->object_scale;
             while (batch->marker >= 0) {
                 i32 shape_count = batch->shape_count;
                 TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
@@ -4963,7 +4966,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                                              normal->z * normal->z);
                         f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
                         surface->normals[1].x = normal->x * inverse;
-                        surface->normals[1].y = (normal->y * query->object_scale) * inverse;
+                        surface->normals[1].y = (normal->y * query_object_scale) * inverse;
                         surface->normals[1].z = normal->z * inverse;
                     } else {
                         surface->normals[1].y = 65536.0f;
@@ -4973,7 +4976,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                                          normal->z * normal->z);
                     f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
                     surface->normals[0].x = normal->x * inverse;
-                    surface->normals[0].y = (normal->y * query->object_scale) * inverse;
+                    surface->normals[0].y = (normal->y * query_object_scale) * inverse;
                     surface->normals[0].z = normal->z * inverse;
                     *cursor++ = surface;
                     ++count;
@@ -5350,7 +5353,8 @@ extern "C" void terrainpickupinit(char *path, void **buffer) {
         TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group.data);
         while (batch->marker >= 0) {
             TERRAIN_SHAPE *shape = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
-            for (i32 j = 0; j < batch->shape_count; ++j, ++shape) {
+            auto batch_shape_count = batch->shape_count;
+            for (i32 j = 0; j < batch_shape_count; ++j, ++shape) {
                 if (shape->material[0] == 0xff) {
                     shape->material[0] = shape->material[1];
                     shape->material[1] = 0;
@@ -7046,8 +7050,9 @@ extern "C" i32 AddMSituExtraTerrRot(i32 source_index, NUMTX *matrix, NUMTX *prev
         source->group_count <= source_index || terrain->max_platforms <= 0)
         return -1;
     i32 index = 0;
+    auto terrain_max_platforms = terrain->max_platforms;
     while (terrain->platforms[index].scene_object != NULL) {
-        if (++index == terrain->max_platforms)
+        if (++index == terrain_max_platforms)
             return -1;
     }
     return InstallExtraTerrainPlatform(terrain, &source->groups[source_index], matrix, previous, rotating, index);

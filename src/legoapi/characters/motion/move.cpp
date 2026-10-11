@@ -5279,10 +5279,11 @@ static void JediLightCode(GameObject_s *object) {
         if (object->apiobj.field_0x288 == 0)
             return;
         i32 point_count = 0;
+        auto f0xe23 = object->field_0xe23;
         for (i32 blade = 0; blade < 4; ++blade) {
             if (object->apiobj.field_0x288 == 0)
                 break;
-            if ((object->field_0xe23 & 8) == 0)
+            if ((f0xe23 & 8) == 0)
                 continue;
             GAMECHARACTERDATA *data = GetGameCharacterData(object);
             i32 first = data->streak_joints[blade][0];
@@ -5525,9 +5526,11 @@ void LightSabreDebris(GameObject_s *object) {
     i32 blade_count = 4;
     if (object->id != id_GRIEVOUS)
         blade_count = object->id == id_DARTHMAUL ? 2 : 1;
+    auto object_id = object->id;
+    auto object_field_0xe23 = object->field_0xe23;
     for (i32 blade = 0; blade < blade_count; ++blade) {
         i32 effect = hit_effect;
-        if (object->id == id_GRIEVOUS && !(object->apiobj.field_0x27c != -1 && Cheat_IsOn(0x19)) &&
+        if (object_id == id_GRIEVOUS && !(object->apiobj.field_0x27c != -1 && Cheat_IsOn(0x19)) &&
             !(object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object))) {
             if (blade == 3 || blade == 0) {
                 effect = 3;
@@ -5535,7 +5538,7 @@ void LightSabreDebris(GameObject_s *object) {
                 effect = 2;
             }
         }
-        if (effect == -1 || object->apiobj.field_0x288 == 0 || (object->field_0xe23 & 8) == 0)
+        if (effect == -1 || object->apiobj.field_0x288 == 0 || (object_field_0xe23 & 8) == 0)
             continue;
         GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
         i32 first = data->streak_joints[blade][0];
@@ -8164,13 +8167,14 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
             NUVEC start, end;
             FindSlamOrigin(object, &start, &end);
             AddGameDebrisRot(world->debris_sys, hit_effect, &start, ParticlesPerSecond(20.0f, FRAMETIME), 0, 0);
+            auto world_debris_sys = world->debris_sys;
             while (count > 0) {
                 const f32 t = qrand() * 1.5259022e-05f;
                 NUVEC position;
                 position.x = (end.x - start.x) * t + start.x;
                 position.y = (end.y - start.y) * t + start.y;
                 position.z = (end.z - start.z) * t + start.z;
-                AddGameDebrisRot(world->debris_sys, hit_effect, &position, 1, 0, 0);
+                AddGameDebrisRot(world_debris_sys, hit_effect, &position, 1, 0, 0);
                 --count;
             }
         }

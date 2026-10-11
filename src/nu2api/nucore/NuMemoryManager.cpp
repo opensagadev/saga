@@ -1411,6 +1411,7 @@ void NuMemoryManager::DumpBlocksForContext(u32 dump_id, NuSymbolQuery *query, Co
     u32 total_bytes = 0;
     u32 total_blocks = 0;
 
+    auto context_id = context->id;
     for (Page *page = pages; page != NULL; page = page->next) {
         Header *end = reinterpret_cast<Header *>(page->end);
         for (Header *header = page->first_header; header != end;) {
@@ -1424,7 +1425,7 @@ void NuMemoryManager::DumpBlocksForContext(u32 dump_id, NuSymbolQuery *query, Co
                     ++total_blocks;
                 } else {
                     DebugHeader *debug = reinterpret_cast<DebugHeader *>(header);
-                    if ((debug->flags.unknown & 1) == 0 && debug->flags.ctx_id == context->id &&
+                    if ((debug->flags.unknown & 1) == 0 && debug->flags.ctx_id == context_id &&
                         ((flags & 2) == 0 || (debug->flags.alloc_flags & 4) != 0)) {
                         u32 count = 1;
                         if ((flags & 0x10) != 0)
@@ -1467,7 +1468,8 @@ u32 NuMemoryManager::FindAndTouchMatchingBlocks(DebugHeader *reference, u32 *tot
     u32 match_count = 0;
     for (Page *page = pages; page != NULL; page = page->next) {
         Header *end = reinterpret_cast<Header *>(page->end);
-        for (Header *header = page->first_header; header != end;) {
+        auto page_first_header = page->first_header;
+        for (Header *header = page_first_header; header != end;) {
             if (header != &reference->block_header && (header->value & ALLOC_MASK) != 0) {
                 DebugHeader *candidate = reinterpret_cast<DebugHeader *>(header);
                 u32 block_size = BLOCK_SIZE(header->value);

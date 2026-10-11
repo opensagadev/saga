@@ -600,6 +600,7 @@ i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
             connection = packet->path_info.connection;
             if ((connection->traversal_flags[packet->path_info.direction] & 0x200) == 0) {
                 GameObject_s *other = Obj;
+                auto packet_mover_height = packet->mover_height;
                 for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++other) {
                     if ((other->apiobj.object_flags & 1) == 0 || other == owner ||
                         (other->apiobj.object_flags & 0x1000) == 0 || other->apiobj.field_0x287 != 0) {
@@ -620,7 +621,7 @@ i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
                                height - tolerance > other->apiobj.collision_min.y) {
                         continue;
                     }
-                    f32 clearance = other->ai.mover_height + other->ai.mover_height + packet->mover_height;
+                    f32 clearance = other->ai.mover_height + other->ai.mover_height + packet_mover_height;
                     offset.x = other->apiobj.position.x - destination->position.x;
                     if (!(clearance > offset.x && offset.x > -clearance)) {
                         continue;
