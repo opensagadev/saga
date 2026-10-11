@@ -989,8 +989,8 @@ void KillParts_TIEFIGHTER(ADDPART_s *params, i32 part_index, i32 variant, GameOb
         params->flags = 0x90;
         params->stop_fn = PartStop_Flickerer;
         params->draw_fn = PartDraw_Flickerer;
-        params->field_3c = PartImpact_Brick;
         params->gravity = -8.0f;
+        params->field_3c = PartImpact_Brick;
         params->velocity = velocity;
         AddPart(params);
         return;

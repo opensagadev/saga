@@ -188,8 +188,8 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
     const i8 crawl_area = reinterpret_cast<i8 *>(s_crawlPtr)[0x0d];
     if (crawl_area != -1) {
         area = &ADataList[crawl_area];
-        body_text_id = area->text_id;
         episode_index = static_cast<i8>(area->episode_index);
+        body_text_id = area->text_id;
         area_index = static_cast<i8>(area->area_index);
     }
 
@@ -1733,8 +1733,8 @@ void MenuDrawViewTextStrings(MENU_s *menu) {
 
         dme_r = static_cast<u8>(red);
         dme_g = static_cast<u8>(green);
-        dme_b = static_cast<u8>(blue);
         dme_rgb = 1;
+        dme_b = static_cast<u8>(blue);
         sprintf(text, "%i", i);
         SmartTextEx(text, -0.76f, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 8, static_cast<u8>(red),
                     static_cast<u8>(green), static_cast<u8>(blue), 0.09000003f, 1, nullptr, 0, MenuA);

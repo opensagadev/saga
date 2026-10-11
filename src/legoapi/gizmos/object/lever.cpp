@@ -589,8 +589,8 @@ static void Levers_Reset(void *world_ptr, void *, void *progress_ptr) {
 
             const u32 bit = 1u << index;
             if ((progress->pulled_down[0] & bit) != 0) {
-                lever.pull_progress = 1.0f;
                 lever.flags |= LEVER_FLAG_BEING_PULLED;
+                lever.pull_progress = 1.0f;
                 lever.animation_frame = 0x8000;
             }
             if ((progress->visible[0] & bit) != 0) {

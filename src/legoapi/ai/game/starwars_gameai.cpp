@@ -97,8 +97,8 @@ static i32 StarWars_PrepareObstacle(AIPACKET_s *packet, APIOBJECT_s *object, i32
     AIPATHNODE *far_node = &packet->path_info.path->nodes[connection->node_indices[far_index]];
     NUVEC offset;
     offset.z = far_node->position.z - near_node->position.z;
-    offset.x = far_node->position.x - near_node->position.x;
     offset.y = 0.0f;
+    offset.x = far_node->position.x - near_node->position.x;
     f32 radius = near_node->radius - packet->mover_height;
     if (radius < 0.0f) {
         radius = 0.0f;
@@ -682,8 +682,8 @@ i32 StarWars_PrepareR2D2Glide(AIPACKET_s *packet, APIOBJECT_s *object, i32) {
     NUVEC offset;
     if ((connection->traversal_flags[packet->path_info.direction] & 0x800) != 0) {
         offset.z = destination->position.z - source->position.z;
-        offset.x = destination->position.x - source->position.x;
         offset.y = 0.0f;
+        offset.x = destination->position.x - source->position.x;
         f32 radius = source->radius - packet->mover_height;
         if (radius < 0.0f) {
             radius = 0.0f;

@@ -170,8 +170,8 @@ extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3) {
         menu->field_bc = 0;
         MenuRememberCursor(menu);
         menu->menu = -1;
-        MenuAlpha = 0.0f;
         MenuA = 0;
+        MenuAlpha = 0.0f;
         MenuValidated = 0;
         return;
     }

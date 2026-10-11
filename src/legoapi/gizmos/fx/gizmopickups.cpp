@@ -320,12 +320,12 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
                 matrix.m01 = 0.0f;
                 matrix.m02 = cos_y * 0.0f - sin_y;
                 matrix.m03 = 0.0f;
-                matrix.m10 = sin_x * sin_y + cos_y * 0.0f;
                 matrix.m11 = cos_x;
+                matrix.m10 = sin_x * sin_y + cos_y * 0.0f;
                 matrix.m12 = sin_x * cos_y - sin_y * 0.0f;
                 matrix.m13 = 0.0f;
-                matrix.m20 = sin_y * cos_x + cos_y * 0.0f;
                 matrix.m21 = -sin_x;
+                matrix.m20 = sin_y * cos_x + cos_y * 0.0f;
                 matrix.m22 = cos_y * cos_x - sin_y * 0.0f;
                 matrix.m23 = 0.0f;
                 matrix.m30 = sin_y * 0.0f + cos_y * 0.0f;

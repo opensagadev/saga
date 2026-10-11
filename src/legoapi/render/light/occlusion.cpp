@@ -94,8 +94,8 @@ bool OccluderSet::IsOccludedOBB(nuvec_s const *minimum, nuvec_s const *maximum, 
         min_x = v.x < min_x ? v.x : min_x;
         min_y = v.y < min_y ? v.y : min_y;
         max_x = v.x > max_x ? v.x : max_x;
-        max_y = v.y > max_y ? v.y : max_y;
         min_depth = v.w < min_depth ? v.w : min_depth;
+        max_y = v.y > max_y ? v.y : max_y;
     }
     i32 limit = static_cast<i32>(count) < 100 ? static_cast<i32>(count) : 100;
     for (i32 i = 0; i != limit; ++i) {
@@ -218,8 +218,8 @@ void OccluderSet::PrepareForQueries(numtx_s const *query, numtx_s const *project
             v.x /= v.w;
             v.y /= v.w;
             v.z /= v.w;
-            record.min_x = v.x < record.min_x ? v.x : record.min_x;
             record.max_x = v.x > record.max_x ? v.x : record.max_x;
+            record.min_x = v.x < record.min_x ? v.x : record.min_x;
             record.min_y = v.y < record.min_y ? v.y : record.min_y;
             record.max_y = v.y > record.max_y ? v.y : record.max_y;
             record.min_depth = v.w < record.min_depth ? v.w : record.min_depth;

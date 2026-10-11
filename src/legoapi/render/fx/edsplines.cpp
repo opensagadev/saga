@@ -164,11 +164,11 @@ void CalcSplinePoint(flightspline_s *spline, _vuv_s *result, float along) {
                  ((before.y * 2.0f - current->y * 5.0f + next->y * 4.0f - after.y) * squared +
                   (current->y * 2.0f + (next->y - before.y) * fraction))) *
                 0.5f;
+    result->w = current->w + (next->w - current->w) * fraction;
     result->z = (((current->z - next->z) * 3.0f - before.z + after.z) * cubed +
                  ((before.z * 2.0f - current->z * 5.0f + next->z * 4.0f - after.z) * squared +
                   (current->z * 2.0f + (next->z - before.z) * fraction))) *
                 0.5f;
-    result->w = current->w + (next->w - current->w) * fraction;
 }
 
 f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control) {

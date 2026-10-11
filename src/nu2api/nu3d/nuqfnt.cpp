@@ -656,8 +656,8 @@ NUQFNT *NuQFntLoadPtr(char *path, char *texture_path, i32, i32, VARIPTR *buf, VA
         buf->addr = ALIGN(buf->addr + size, 16);
         loaded_font->platform_data = static_cast<VUFNT_ANDROID *>(buf->void_ptr);
         buf->addr += sizeof(VUFNT_ANDROID);
-        loaded_font->color_abgr = &loaded_font->platform_data->colour;
         loaded_font->x_scale = &loaded_font->platform_data->x_scale;
+        loaded_font->color_abgr = &loaded_font->platform_data->colour;
         loaded_font->y_scale = &loaded_font->platform_data->y_scale;
 
         if (texture_path != NULL)

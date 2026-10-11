@@ -1084,8 +1084,8 @@ void NewTown_Update(WORLDINFO_s *world) {
         }
     }
     u8 changed = (onTaunTaun ^ previousTaunTaun) | (onFireTruck ^ previousFireTruck) | (onLifeBoat ^ previousLifeBoat);
-    prevOnTaunTaun = onTaunTaun;
     prevOnFireTruck = onFireTruck;
+    prevOnTaunTaun = onTaunTaun;
     prevOnLifeBoat = onLifeBoat;
     if (changed == 0) {
         return;

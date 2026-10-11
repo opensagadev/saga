@@ -33,8 +33,8 @@ extern "C" void NuTexAnimSetMask(i32 mask) {
 
 extern "C" void NuTexAnimSetSignals(u32 signals) {
     const u32 previous_signals = nta_sig_old;
-    nta_sig_off = (previous_signals | signals) ^ signals;
     nta_sig_on = ~previous_signals & signals;
+    nta_sig_off = (previous_signals | signals) ^ signals;
     nta_sig_old = signals;
 }
 
@@ -401,8 +401,8 @@ extern "C" void NuTexAnimAddList(nutexanim_s *anim) {
             NuSevereWarning("Ran out of texture anim slots!");
         ntal_free = node->next;
         node->previous = NULL;
-        node->first = anim;
         node->next = ntal_first;
+        node->first = anim;
         if (ntal_first != NULL)
             ntal_first->previous = node;
         ntal_first = node;
@@ -422,8 +422,8 @@ extern "C" nutexanim_s *NuTexAnimCreate(VARIPTR *buffer, nutexanimprog_s *progra
     }
     animation->texture_count = texture_count;
     animation->material = material;
-    animation->previous = NULL;
     animation->next = NULL;
+    animation->previous = NULL;
     animation->name = NULL;
     animation->texture_ids = reinterpret_cast<u16 *>(animation + 1);
     memcpy(animation->texture_ids, texture_ids, texture_count * sizeof(u16));

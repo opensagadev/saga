@@ -21,7 +21,7 @@ struct SHOPINPUT;
 f32 LEDGETERRAINLOOKAHEAD = 0.02f;
 i32 LedgeTerrain_CheckAnims = 1;
 
-static i32 LedgeTerrain_Attach(GameObject_s *object, u16 facing, NUVEC *position, u16 *wall_angle) {
+static inline i32 LedgeTerrain_Attach(GameObject_s *object, u16 facing, NUVEC *position, u16 *wall_angle) {
     if (!object->field_0x1084)
         return 0;
     u8 surface = object->field_0x6b0;

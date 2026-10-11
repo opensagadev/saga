@@ -342,9 +342,9 @@ void DecompressTextureToRGBA(unsigned char *ddsData, u32 size, unsigned char *&o
         squishFlags = CSWTCH_249[format - 4];
     }
 
-    tex.format = format;
     tex.width = width;
     tex.height = height;
+    tex.format = format;
     tex.depth = depth;
 
     tex.flags = (tex.flags & 0x80) | (isCubemap & 1);

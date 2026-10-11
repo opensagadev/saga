@@ -31,8 +31,8 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
     TERRAIN_SHAPE_BATCH *input = static_cast<TERRAIN_SHAPE_BATCH *>(group->data);
     TERRAIN_SHAPE_BATCH *output = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(buffer);
     while (input->marker >= 0) {
-        output->marker = input->marker;
         output->shape_count = input->shape_count;
+        output->marker = input->marker;
         TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(input + 1);
         TERRAIN_SHAPE *destination = reinterpret_cast<TERRAIN_SHAPE *>(output + 1);
         f32 min_x = 123456792.0f, min_z = 123456792.0f;
@@ -67,8 +67,8 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
             destination->min_y = shape_min_y - 0.05f;
             destination->min_z = shape_min_z - 0.05f;
             destination->max_x = shape_max_x + 0.05f;
-            destination->max_y = shape_max_y + 0.05f;
             destination->max_z = shape_max_z + 0.05f;
+            destination->max_y = shape_max_y + 0.05f;
             if (source->normals[1].y < 65535.0f) {
                 NUVEC a, b;
                 a.x = destination->vectors[1].x - destination->vectors[3].x;

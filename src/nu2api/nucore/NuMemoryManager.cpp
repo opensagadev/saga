@@ -1682,8 +1682,8 @@ void NuMemoryManager::PushContext(const char *name) {
         _BlockAlloc(strlen(name) + sizeof(Context) + 1, 4, 0,
                     "i:/SagaTouch-Android_9176564/nu2api.2013/numemory/NuMemoryManager.cpp:1627", 0));
     context->used_block_count = stats.used_block_count;
-    context->next = cur_ctx;
     context->id = cur_ctx->id + 1;
+    context->next = cur_ctx;
     context->name = reinterpret_cast<char *>(context + 1);
     strcpy(context->name, name);
     cur_ctx = context;

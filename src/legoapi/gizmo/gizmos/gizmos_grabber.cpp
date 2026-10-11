@@ -642,8 +642,8 @@ void Grabber_Draw(WORLDINFO_s *world) {
                 f32 sz = NU_SIN_LUT(g->shadow_z_angle), cz = NU_SIN_LUT(g->shadow_z_angle + 0x4000);
                 f32 zero_s = sz * 0.0f, zero_c = 0.0f * cz;
                 reflection.m00 = cx;
-                reflection.m01 = sx * cz - zero_s;
                 reflection.m02 = sx * sz + zero_c;
+                reflection.m01 = sx * cz - zero_s;
                 reflection.m03 = 0;
                 reflection.m10 = -sx;
                 reflection.m11 = cx * cz - zero_s;

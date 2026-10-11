@@ -216,10 +216,10 @@ static void Shards_Reset(void *context, void *, void *data) {
         current->model_index += 65;
         current->spin_angle = qrand();
         current->current_position = current->position;
-        current->collector = NULL;
         current->collecting = 0;
-        current->random_offset = 0;
+        current->collector = NULL;
         current->collection_time = 0.0f;
+        current->random_offset = 0;
         if (i < 128 && progress != NULL) {
             i32 word = i >> 5;
             u32 mask = 1u << (i & 31);
@@ -346,8 +346,8 @@ void Shards_HandleLostObj(WORLDINFO_s *world, GameObject_s *object) {
     for (i32 i = 0; i < world->shard_count; ++i, ++shard) {
         if ((shard->state_flags & 0x0c) == 4 && shard->collector == object) {
             shard->collector = NULL;
-            shard->collection_time = 0.0f;
             shard->collecting = 0;
+            shard->collection_time = 0.0f;
         }
     }
 }

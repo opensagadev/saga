@@ -97,9 +97,9 @@ void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *) {
     packet->field_0x794 = 0;
     packet->field_0x688 = 0;
     packet->field_0x771 &= static_cast<u8>(~0x0c);
-    packet->reset_up_direction = v010;
     packet->field_0x604 = NULL;
     packet->surface_type = -1;
+    packet->reset_up_direction = v010;
 }
 
 void FinishLoop_Network() {

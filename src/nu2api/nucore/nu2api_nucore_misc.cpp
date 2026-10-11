@@ -124,7 +124,7 @@ i32 NuCameraClipHGobj(nugscn_s *scene, numtx_s *world_matrix, numtx_s *root_matr
 
 // NuIOS_SetCullMode is transcribed in android/nuiosdl_gl.cpp (original 0x29c110).
 
-static inline u16 NuLgtArcHalf(f32 value) {
+static u16 NuLgtArcHalf(f32 value) {
     union {
         f32 value;
         u32 bits;
@@ -630,8 +630,8 @@ void NuCameraTransformScissorClip(nuvec_s *screen, nuvec_s *world, i32 count, nu
 // NuDebrisRendererFlushBuffers is transcribed in android/nuptl_android.c (original 0x296f35).
 
 void NuIOS_CopyBackbufferToTexture(nunativetex_s *texture, bool) {
-    texture->width = g_backingWidth;
     texture->height = g_backingHeight;
+    texture->width = g_backingWidth;
     BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nurenderthread.cpp", 0x128);
     glActiveTexture(GL_TEXTURE0);
     g_currentTexUnit = 0;

@@ -962,14 +962,14 @@ static __used__ void MenuDrawPauseExit(MENU *menu) {
     char *title;
     f32 spacing;
     if (save_level != NULL) {
-        warning = TTab[tALLLEVELPROGRESSWILLBELOST];
         title = TTab[tEXITTOMAP];
+        warning = TTab[tALLLEVELPROGRESSWILLBELOST];
         spacing = 2.0f;
     } else {
         spacing = 1.5f;
         if (GAMEDEMO != 0) {
-            warning = TTab[tALLLEVELPROGRESSWILLBELOST];
             title = TTab[tRESTARTDEMO2];
+            warning = TTab[tALLLEVELPROGRESSWILLBELOST];
         } else if (WORLD->current_level == HUB_LDATA) {
             warning = TTab[tGAMEPROGRESSWILLBELOST];
             title = TTab[tQUITGAME];
@@ -1257,8 +1257,8 @@ static __used__ void MenuUpdatePauseRestart(MENU *menu) {
         Door_Reset();
         Players_InitPositions(WORLD);
         NewGameMode();
-        reset_restart = 1;
         ResetBits |= 0x21;
+        reset_restart = 1;
         MenuSFX = GameAudio_GetSfxId(0x30);
     } else if (menu->cancel_pressed != 0 || menu->confirm_pressed != 0) {
         BackupMenu();

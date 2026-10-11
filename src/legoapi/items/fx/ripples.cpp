@@ -344,8 +344,8 @@ void AddRipple(ripple_set_s *set, numtx_s *matrix, float size, float growth, flo
         if (set->oldest == NULL)
             set->oldest = node;
     }
-    node->matrix = *matrix;
     node->material = material;
+    node->matrix = *matrix;
     node->initial_size = size;
     node->size = size;
     node->flags = static_cast<u16>(flags);

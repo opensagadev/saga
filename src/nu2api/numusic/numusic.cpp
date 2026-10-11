@@ -291,8 +291,8 @@ void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_e
         count = this->album_count;
         this->albums = album;
         track_count = this->track_count;
-        tracksPtr = (Track *)(album + count);
         pTVar3 = this->tracks;
+        tracksPtr = (Track *)(album + count);
         if (pTVar3 == tracksPtr)
             goto LAB_003203e6;
         alloced = tracksPtr;
@@ -963,8 +963,8 @@ void NuMusic::SetFader(f32 target, f32 fade_seconds) {
         return;
     }
     if (fade_seconds != 0.0f) {
-        this->fader_target = target;
         this->fader_rate = 1.0f / fade_seconds;
+        this->fader_target = target;
         return;
     }
     // Zero fade time snaps both ends of the fader.
@@ -1309,9 +1309,9 @@ void NuMusic::ParseTrack(u32 category, nufpar_s *fpar) {
     track = this->current_track;
 
     // Entry times carve sequential slices out of the shared INDEX pool.
-    track->entry_times = this->indexes + this->index_count;
-
     track->clazz = category;
+
+    track->entry_times = this->indexes + this->index_count;
     track->pitch = this->pitch_default;
     track->duck_volume = 1.0f;
     track->duck_fade = 1.0f;

@@ -577,8 +577,8 @@ void FS_SetCursorToLastFileName() {
         if (NuStrICmp(entry + 7, last_name) == 0) {
             FS_CurrentCursorPos = entry;
             FS_CurrentPos = entry;
-            FS_CurrentPosFileNum = index;
             FS_CursorLine = 0;
+            FS_CurrentPosFileNum = index;
             if (index == 0 || index + 13 < FS_NumFiles) {
                 return;
             }

@@ -733,12 +733,12 @@ void VaderA_Update(WORLDINFO_s *) {
     VADERANETPACKET_s *packet = static_cast<VADERANETPACKET_s *>(vadera_netpacket);
     if (netclient == 0) {
         packet->count = vader_a.count;
-        packet->subtitle = vader_a.subtitle;
         packet->timer = vader_a.timer;
+        packet->subtitle = vader_a.subtitle;
     } else {
         vader_a.count = packet->count;
-        vader_a.subtitle = packet->subtitle;
         vader_a.timer = packet->timer;
+        vader_a.subtitle = packet->subtitle;
     }
 }
 

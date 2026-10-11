@@ -574,8 +574,8 @@ void SplineHelper::SerialiseObject(EdStream &stream, void *object) {
         stream.SerialiseBuffer(&knot_count, sizeof(knot_count), 1);
         for (i32 index = 0; index < knot_count; ++index) {
             SplineKnot *knot = static_cast<SplineKnot *>(theMemoryManager.AllocPool(sizeof(SplineKnot), 1));
-            knot->next = NULL;
             knot->previous = NULL;
+            knot->next = NULL;
             knot->led_file = Placeable::CurrentLedFile;
             theKnotHelper.object_class->SerialiseObject(stream, knot);
             knot->spline = spline;

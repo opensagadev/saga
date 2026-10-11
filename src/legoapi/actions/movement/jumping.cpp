@@ -436,8 +436,8 @@ void StartJump(GameObject_s *object, i32 movement_state) {
         object->character_context = LEGOCONTEXT_JUMP;
         object->action_movement_state = static_cast<u8>(movement_state);
         object->jump_sequence = 1;
-        object->jump_start_height = object->apiobj.collision_min.y;
         object->context_animation_timer = 0.0f;
+        object->jump_start_height = object->apiobj.collision_min.y;
         object->context_animation = LEGOACT_JUMP;
         object->jump_flags =
             static_cast<u8>((object->jump_flags & ~PLAYER_JUMP_FLAG_SPECIAL_TAKEOFF) |

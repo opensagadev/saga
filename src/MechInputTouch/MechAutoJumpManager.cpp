@@ -67,8 +67,8 @@ MechAutoJumpConnection *MechAutoJumpManager::AddAutoJumpConnection(AIPATH_s *pat
             jump->is_using = false;
             jump->link.prev = NULL;
             jump->link.next = NULL;
-            jump->base_colour_components.x = colour & 0xff;
             jump->base_colour_components.y = (colour >> 8) & 0xff;
+            jump->base_colour_components.x = colour & 0xff;
             jump->streak_handle = NULL;
             jump->cooldown = 0.0f;
             jump->streak_alpha = 0.0f;

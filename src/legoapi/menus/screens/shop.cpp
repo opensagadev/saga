@@ -881,7 +881,7 @@ static void Shop_GetInput(SHOPINPUT *input) {
     }
 }
 
-static i32 SubItemMenu(MENU_s *menu) {
+static inline i32 SubItemMenu(MENU_s *menu) {
     static i32 movesfxlock;
     SHOPINPUT input;
     Shop_GetInput(&input);

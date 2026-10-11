@@ -185,8 +185,8 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
             target = NULL;
         }
     }
-    holder.target_object = target;
     holder.previous_target_object = target;
+    holder.target_object = target;
     if (target == NULL) {
         return false;
     }
@@ -405,8 +405,8 @@ bool MechInputTouchGestureBasedController::OnDown(GameObject_s &object, TouchHol
         }
     } else {
         field_a0 = 0.0f;
-        field_90 = &holder;
         field_a5 = 0;
+        field_90 = &holder;
     }
     if (smart_bomb_touch == NULL && player != NULL && holder.target_object.Get() == player->GetMechObjectInterface() &&
         TouchHacks::CanUseVehicleSmartBomb(object)) {
@@ -579,8 +579,8 @@ bool MechInputTouchGestureBasedController::OnSwipe(GameObject_s &object, TouchHo
     packet.type = 3;
     packet.player = &object;
     packet.touch_holder = &holder;
-    packet.velocity = VuVec_Zero;
     packet.start = holder.swipe_samples[index].position;
+    packet.velocity = VuVec_Zero;
     packet.end = holder.touch_position;
     isBucking = (reinterpret_cast<u8 *>(object.apiobj.character_data->player_config)[0x96] & 2) != 0;
     TriggerJumpTask(packet, true, false, true);
@@ -733,8 +733,8 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpWhenStuck(GameObject_s
     }
     if (object.character_context != -1 || object.pad_gamepad == NULL ||
         (object.apiobj.character_data->model_flags & 0x2000) != 0) {
-        field_98 = 0.0f;
         field_a6 = 0;
+        field_98 = 0.0f;
         return;
     }
     NUVEC movement = {object.apiobj.velocity.x, 0.0f, object.apiobj.velocity.z};
