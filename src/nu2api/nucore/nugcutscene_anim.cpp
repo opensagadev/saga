@@ -46,10 +46,13 @@ extern "C" i32 NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMTX
     if ((*animation->node_flags & 1) == 0) {
         NuMtxSetIdentity(mtx);
     } else {
+        const f32 rotation_x = evaluate(3);
+        const f32 rotation_y = evaluate(4);
+        const f32 rotation_z = evaluate(5);
         NUANGVEC angles = {
-            static_cast<NUANG>(evaluate(3) * 10430.378f),
-            static_cast<NUANG>(evaluate(4) * 10430.378f),
-            static_cast<NUANG>(evaluate(5) * 10430.378f),
+            static_cast<NUANG>(rotation_x * 10430.378f),
+            static_cast<NUANG>(rotation_y * 10430.378f),
+            static_cast<NUANG>(rotation_z * 10430.378f),
         };
         NuMtxSetRotateXYZ(mtx, &angles);
     }
