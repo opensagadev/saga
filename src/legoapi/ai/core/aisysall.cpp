@@ -829,8 +829,8 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
                                                   destination_connection->node_indices[0], packet->current_route, 0)
                                             : FLT_MAX;
                         if (candidate != FLT_MAX) {
-                            candidate +=
-                                endpoint_distances[packet->path_info.direction == 0] + destination_distances[0];
+                            candidate = candidate + endpoint_distances[packet->path_info.direction == 0] +
+                                        destination_distances[0];
                         }
                         if (candidate < best_distance) {
                             best_distance = candidate;
@@ -848,8 +848,8 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
                                                   destination_connection->node_indices[1], packet->current_route, 0)
                                             : FLT_MAX;
                         if (candidate != FLT_MAX) {
-                            candidate +=
-                                endpoint_distances[packet->path_info.direction == 0] + destination_distances[1];
+                            candidate = candidate + endpoint_distances[packet->path_info.direction == 0] +
+                                        destination_distances[1];
                         }
                         if (candidate < best_distance) {
                             best_distance = candidate;
@@ -869,7 +869,8 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
                                       destination_connection->node_indices[0], packet->current_route, 0)
                                 : FLT_MAX;
                         if (candidate != FLT_MAX) {
-                            candidate += destination_distances[0] + endpoint_distances[packet->path_info.direction];
+                            candidate =
+                                candidate + destination_distances[0] + endpoint_distances[packet->path_info.direction];
                         }
                         if (candidate < best_distance) {
                             best_distance = candidate;
@@ -887,7 +888,8 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
                                       destination_connection->node_indices[1], packet->current_route, 0)
                                 : FLT_MAX;
                         if (candidate != FLT_MAX) {
-                            candidate += destination_distances[1] + endpoint_distances[packet->path_info.direction];
+                            candidate =
+                                candidate + destination_distances[1] + endpoint_distances[packet->path_info.direction];
                         }
                         if (candidate < best_distance) {
                             best_distance = candidate;
@@ -901,10 +903,10 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
                     break;
                 }
                 if (packet->current_route != 0xff) {
-                    attempted_routes |= 1u << packet->current_route;
+                    attempted_routes |= 1u << (packet->current_route & 31);
                 }
                 AISysFindRoute(packet);
-                if (((attempted_routes >> packet->current_route) & 1) == 0) {
+                if (((attempted_routes >> (packet->current_route & 31)) & 1) == 0) {
                     destination_distances[0] =
                         fabsf(packet->fallback_path_info.dist * destination_connection->distance);
                     destination_distances[1] =
@@ -917,9 +919,8 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
             AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
             AIPATHCNX *next = GetNextConnection(packet, &direction);
             if (next != NULL) {
-                auto packet_current_route = packet->current_route;
                 while (WithinConnection(system, &packet->terrain_origin, packet->path_info.path, next, checks,
-                                        packet->path_info.connection, packet_current_route, object->field_0x289, NULL,
+                                        packet->path_info.connection, packet->current_route, object->field_0x289, NULL,
                                         object->collision_radius, 0) != 0) {
                     if (connection == destination_connection) {
                         break;

@@ -1360,31 +1360,24 @@ mode_selected:
             offset.z = 0.0f;
             offset.x = 0.0f;
             offset.y = 0.0f;
-            i32 player_count = 0;
-            for (i32 index = 0; index < 2; ++index) {
-                if (Player[index] != NULL) {
-                    f32 projection = (Player[index]->apiobj.pos_x - target.x) * lateral.x +
-                                     (Player[index]->apiobj.pos_z - target.z) * lateral.z;
-                    const f32 contribution_x = lateral.x * projection;
-                    const f32 contribution_z = lateral.z * projection;
-                    offset.x = contribution_x + offset.x;
-                    offset.z = contribution_z + offset.z;
-                    // Preserve the new contribution's NaN payload without an FP comparison.
-                    static_assert(sizeof(f32) == sizeof(u32), "binary32 contribution storage");
-                    u32 contribution_x_bits;
-                    u32 contribution_z_bits;
-                    memcpy(&contribution_x_bits, &contribution_x, sizeof(contribution_x_bits));
-                    memcpy(&contribution_z_bits, &contribution_z, sizeof(contribution_z_bits));
-                    if ((contribution_x_bits & 0x7fffffffu) > 0x7f800000u)
-                        offset.x = contribution_x;
-                    if ((contribution_z_bits & 0x7fffffffu) > 0x7f800000u)
-                        offset.z = contribution_z;
-                    ++player_count;
-                }
+            shared_count = 0;
+            if (Player[0] != NULL) {
+                f32 projection =
+                    (Player[0]->apiobj.pos_x - target.x) * lateral.x + (Player[0]->apiobj.pos_z - target.z) * lateral.z;
+                offset.x = lateral.x * projection + offset.x;
+                offset.z = projection * lateral.z + offset.z;
+                shared_count = 1;
             }
-            if (player_count == 2) {
-                offset.x *= 0.5f;
-                offset.z *= 0.5f;
+            if (Player[1] != NULL) {
+                f32 projection =
+                    (Player[1]->apiobj.pos_x - target.x) * lateral.x + (Player[1]->apiobj.pos_z - target.z) * lateral.z;
+                offset.x = lateral.x * projection + offset.x;
+                offset.z = projection * lateral.z + offset.z;
+                ++shared_count;
+                if (shared_count == 2) {
+                    offset.x *= 0.5f;
+                    offset.z *= 0.5f;
+                }
             }
             NuVecAdd(&position, &target, &GunshipAOffset);
             position.x += offset.x;

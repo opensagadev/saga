@@ -150,3 +150,15 @@ and the object emitted for each source file.
 Do not maintain a hand-written 320-row TU map in this document. The current
 source list and compile actions come directly from Bazel. A copied table becomes
 misleading as soon as the domain hierarchy changes.
+
+`LevelComplete_LSW_Draw` belongs with the status-screen callbacks in
+`gamestatus_lsw.cpp`: the reference's compiler-generated body at `0x1f2000`
+follows `TrueHero_LSW_Draw`, and its exported wrapper at `0x1f3400` is between
+`BonusTime_LSW_Draw` and `Coins_LSW_Draw`. The reference also has distinct
+`_GLOBAL__sub_I_gamestatus_lsw.cpp` and `_GLOBAL__sub_I_cutscenes.cpp`
+constructors. The relocation preserves the destination's existing `-O2
+-ftree-vectorize` configuration; the former catch-all placement used
+`cutscenes.cpp`'s `-O3`. The 256-byte text buffer occupies reference stack
+offsets `0xb0` through `0x1af`; retaining its full extent lets GCC generate the
+split body naturally. Its compiler-assigned clone ordinal remains different
+until the rest of the original translation unit is reconstructed.

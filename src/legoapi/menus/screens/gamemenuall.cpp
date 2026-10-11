@@ -835,8 +835,10 @@ void MenuDrawMissions(MENU_s *menu) {
         cancel[0] = cancel[1] = tEXIT;
         status[0] = status[1] = tSELECTING;
     } else {
-        // Original 0x2563e2–0x25640a / 0x25661f initializes only player 0.
-        // The second player's prompt locals are also uninitialized in the binary.
+        // Keep the second player's defaults: the reference leaves those locals unset.
+        select[1] = tSELECT;
+        cancel[1] = tEXIT;
+        status[1] = tSELECTING;
         if (MenuPacket.reserved_1[0]) {
             select[0] = -1;
             cancel[0] = tCANCEL;

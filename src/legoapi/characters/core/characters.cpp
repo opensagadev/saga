@@ -1319,6 +1319,29 @@ void CharScenes_AreaDump() {
     }
 }
 
+// Original characters.cpp cluster: SetMoveAndAnimateFunctions (ELF 0x460dc0)
+// follows the scene/category helpers and precedes character model loading.
+void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 game_flag_mask, u32 game_flag_value,
+                                i32 movement_type, void *move_function, void *animate_function, void *draw_function) {
+    const i32 count = CHARCOUNT;
+    CHARACTERDATA *character = CDataList;
+    GAMECHARACTERDATA *game_character = GCDataList;
+    for (i32 i = 0; i < count; ++i, ++character, ++game_character) {
+        if (model_flag_mask != 0 && (character->model_flags & model_flag_mask) != model_flag_value)
+            continue;
+        if (game_flag_mask != 0 && (game_character->flags_090 & game_flag_mask) != game_flag_value)
+            continue;
+        if (movement_type != -1 && static_cast<i8>(game_character->uses_weapon_action) != movement_type)
+            continue;
+        if (move_function != NULL)
+            character->move_fn = reinterpret_cast<CHARACTERUPDATEFN>(move_function);
+        if (animate_function != NULL)
+            character->animate_fn = reinterpret_cast<CHARACTERUPDATEFN>(animate_function);
+        if (draw_function != NULL)
+            character->draw_fn = reinterpret_cast<CHARACTERUPDATEFN>(draw_function);
+    }
+}
+
 void DeactivateGameObject(GameObject_s *);
 
 void DeactivateCharacter(char *name) {

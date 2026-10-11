@@ -180,7 +180,7 @@ void Grabber_Update(WORLDINFO_s *world) {
     } else
         pad = control->pad_gamepad;
     if (control != NULL && control->field_0xcc0 != NULL && (control->apiobj.player_controlled)) {
-        if (!(pad->input_magnitude <= 0.0f)) {
+        if (pad->input_magnitude > 0.0f) {
             if (!Grab_grabber->move_xy) {
                 u16 angle = GamePad_InputAngle(control, pad);
                 g->target_velocity.x = NU_SIN_LUT(angle) * g->speed;
@@ -242,11 +242,11 @@ void Grabber_Update(WORLDINFO_s *world) {
         if (next.z >= 11.84f) {
             next.z = 11.84f;
             g->target_velocity.z = g->velocity.z = 0.0f;
-        } else if (!(next.z >= 10.125f)) {
+        } else if (next.z < 10.125f) {
             next.z = 10.125f;
             g->target_velocity.z = g->velocity.z = 0.0f;
         }
-        if (!(next.y >= -4.85f)) {
+        if (next.y < -4.85f) {
             next.y = -4.85f;
             g->target_velocity.y = g->velocity.y = 0.0f;
         } else if (next.y > -3.9f) {
@@ -325,7 +325,9 @@ void Grabber_Update(WORLDINFO_s *world) {
                     if (g->victim) {
                         GameObject_s *v = g->victim;
                         v->character_context = 47;
-                        v->context_animation = v->apiobj.character_model->model_data_b[104] ? 104 : 5;
+                        v->context_animation = 104;
+                        if (!v->apiobj.character_model->model_data_b[104])
+                            v->context_animation = 5;
                         NewRumbleAllPlayers(0, 0.1f, 0, 0);
                         v->airborne_action_duration = 0.75f;
                         v->context_animation_timer = 0;
@@ -385,7 +387,9 @@ void Grabber_Update(WORLDINFO_s *world) {
                 if (g->victim) {
                     GameObject_s *v = g->victim;
                     v->character_context = 47;
-                    v->context_animation = v->apiobj.character_model->model_data_b[104] ? 104 : 5;
+                    v->context_animation = 104;
+                    if (!v->apiobj.character_model->model_data_b[104])
+                        v->context_animation = 5;
                     NewRumbleAllPlayers(0, 0.1f, 0, 0);
                     v->context_animation_timer = 0;
                     v->airborne_action_duration = 0.75f;

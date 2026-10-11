@@ -106,67 +106,64 @@ static i32 Collide2Objects(APIOBJECT *first, APIOBJECT *second) {
     GameObject_s *first_object = first->objptr;
     GameObject_s *second_object = second->objptr;
     i32 collision_result = ForcePushed_SuperPush_Occurring(first_object, second_object);
-    if (collision_result == 0) {
-        if (WORLD->current_level == DOGFIGHTA_LDATA) {
-            collision_result = APIObjectCollision(first, second);
-        } else {
-            collision_result = APIObjectCollision2D(first, second);
-        }
-
-        if (collision_result == 2 && VehicleArea == 0) {
-            GAMECHARACTERDATA *second_data =
-                static_cast<GAMECHARACTERDATA *>(second_object->apiobj.character_data->field11_0x24);
-            GAMECHARACTERDATA *first_data =
-                static_cast<GAMECHARACTERDATA *>(first_object->apiobj.character_data->field11_0x24);
-            if (!((first_data->flags_090 & 0x1000) != 0 &&
-                  first->horizontal_velocity_magnitude > first_data->movement_speed * 0.5f)) {
-                if ((second_data->flags_090 & 0x1000) != 0 &&
-                    second->horizontal_velocity_magnitude > second_data->movement_speed * 0.5f) {
-                    StartFlatten(second_object, first_object);
-                } else if (second_vertical_velocity < 0.0f && (first_data->flags_090 & 0x40) != 0 &&
-                           first_object->field_0x107c == -1) {
-                    first->velocity.y += second_vertical_velocity * 0.5f;
-                } else if (first_vertical_velocity < 0.0f && (second_data->flags_090 & 0x40) != 0 &&
-                           second_object->field_0x107c == -1) {
-                    second->velocity.y += first_vertical_velocity * 0.5f;
-                }
-            } else {
-                StartFlatten(first_object, second_object);
-            }
-        }
-
-        f32 maximum_velocity = first->character_data->game_character->movement_speed * 1.25f;
-        if (maximum_velocity < 1.0f) {
-            maximum_velocity = 1.0f;
-        }
-        f32 velocity_squared = first->velocity.x * first->velocity.x + first->velocity.z * first->velocity.z;
-        if (velocity_squared > maximum_velocity * maximum_velocity) {
-            const f32 scale = maximum_velocity / NuFsqrt(velocity_squared);
-            first->velocity.x *= scale;
-            first->velocity.z *= scale;
-        }
-
-        maximum_velocity = second->character_data->game_character->movement_speed * 1.25f;
-        if (maximum_velocity < 1.0f) {
-            maximum_velocity = 1.0f;
-        }
-        velocity_squared = second->velocity.x * second->velocity.x + second->velocity.z * second->velocity.z;
-        if (velocity_squared > maximum_velocity * maximum_velocity) {
-            const f32 scale = maximum_velocity / NuFsqrt(velocity_squared);
-            second->velocity.x *= scale;
-            second->velocity.z *= scale;
-        }
+    if (collision_result != 0) {
+        collision_result =
+            (second_object->apiobj.collision_identity_mask & first_object->apiobj.collision_contact_mask) != 0 ||
+                    (first_object->apiobj.collision_identity_mask & second_object->apiobj.collision_contact_mask) != 0
+                ? 1
+                : 2;
+        first->collision_contact_mask |= second->collision_identity_mask;
+        second->collision_contact_mask |= first->collision_identity_mask;
+        return collision_result;
+    }
+    if (WORLD->current_level == DOGFIGHTA_LDATA) {
+        collision_result = APIObjectCollision(first, second);
     } else {
-        collision_result = (second_object->apiobj.field_0x1e8 & first_object->apiobj.field_0x1f0) != 0 ||
-                                   (second_object->apiobj.field_0x1e4 & first_object->apiobj.field_0x1ec) != 0 ||
-                                   (first_object->apiobj.field_0x1e8 & second_object->apiobj.field_0x1f0) != 0 ||
-                                   (first_object->apiobj.field_0x1e4 & second_object->apiobj.field_0x1ec) != 0
-                               ? 1
-                               : 2;
-        first->field_0x1ec |= second->field_0x1e4;
-        first->field_0x1f0 |= second->field_0x1e8;
-        second->field_0x1ec |= first->field_0x1e4;
-        second->field_0x1f0 |= first->field_0x1e8;
+        collision_result = APIObjectCollision2D(first, second);
+    }
+
+    if (collision_result == 2 && VehicleArea == 0) {
+        GAMECHARACTERDATA *second_data =
+            static_cast<GAMECHARACTERDATA *>(second_object->apiobj.character_data->field11_0x24);
+        GAMECHARACTERDATA *first_data =
+            static_cast<GAMECHARACTERDATA *>(first_object->apiobj.character_data->field11_0x24);
+        if (!((first_data->flags_090 & 0x1000) != 0 &&
+              first->horizontal_velocity_magnitude > first_data->movement_speed * 0.5f)) {
+            if ((second_data->flags_090 & 0x1000) != 0 &&
+                second->horizontal_velocity_magnitude > second_data->movement_speed * 0.5f) {
+                StartFlatten(second_object, first_object);
+            } else if (second_vertical_velocity < 0.0f && (first_data->flags_090 & 0x40) != 0 &&
+                       first_object->field_0x107c == -1) {
+                first->velocity.y += second_vertical_velocity * 0.5f;
+            } else if (first_vertical_velocity < 0.0f && (second_data->flags_090 & 0x40) != 0 &&
+                       second_object->field_0x107c == -1) {
+                second->velocity.y += first_vertical_velocity * 0.5f;
+            }
+        } else {
+            StartFlatten(first_object, second_object);
+        }
+    }
+
+    f32 maximum_velocity = first->character_data->game_character->movement_speed * 1.25f;
+    if (maximum_velocity < 1.0f) {
+        maximum_velocity = 1.0f;
+    }
+    f32 velocity_squared = first->velocity.x * first->velocity.x + first->velocity.z * first->velocity.z;
+    if (velocity_squared > maximum_velocity * maximum_velocity) {
+        const f32 scale = maximum_velocity / NuFsqrt(velocity_squared);
+        first->velocity.x *= scale;
+        first->velocity.z *= scale;
+    }
+
+    maximum_velocity = second->character_data->game_character->movement_speed * 1.25f;
+    if (maximum_velocity < 1.0f) {
+        maximum_velocity = 1.0f;
+    }
+    velocity_squared = second->velocity.x * second->velocity.x + second->velocity.z * second->velocity.z;
+    if (velocity_squared > maximum_velocity * maximum_velocity) {
+        const f32 scale = maximum_velocity / NuFsqrt(velocity_squared);
+        second->velocity.x *= scale;
+        second->velocity.z *= scale;
     }
     return collision_result;
 }
@@ -238,13 +235,13 @@ void ObjHitShield(GameObject_s *attacker, GameObject_s *target, i32 damage, BOLT
             f32 first_rumble;
             f32 second_rumble;
             if (shield > 0) {
-                PlaySfx("DDEkaHit", &target->apiobj.collision_position);
+                PlaySfx("DDekaHit", &target->apiobj.collision_position);
                 target->field_0xe37 = shield;
                 target->timer_d28 = SHIELDFLICKERTIME;
                 first_rumble = 0.5f;
                 second_rumble = 0.0f;
             } else {
-                PlaySfx("DDEkaFlicker", &target->apiobj.collision_position);
+                PlaySfx("DDekaFlicker", &target->apiobj.collision_position);
                 target->timer_d28 = 0.5f;
                 target->field_0xe37 = 0;
                 target->field_0xd24 = 0.0f;

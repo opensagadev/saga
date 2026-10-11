@@ -56,7 +56,7 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
             memset(buttons_store, 0, sizeof(buttons_store));
         } else {
             const u32 buttons = GamePad[0].buttons_down_08;
-            u32 special_button;
+            u8 special_button;
             if ((GamePad[0].unknown_04 & GAMEPAD_R3) != 0) {
                 if ((buttons & GAMEPAD_SPECIAL) != 0)
                     special_button = 1;
@@ -69,7 +69,7 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
             } else {
                 special_button = 0;
             }
-            if ((special_button | buttons) != 0 && buttons != 0) {
+            if ((special_button != 0 || buttons != 0) && buttons != 0) {
                 for (i32 index = 14; index > 0; --index)
                     buttons_store[index] = buttons_store[index - 1];
                 buttons_store[0] = buttons;

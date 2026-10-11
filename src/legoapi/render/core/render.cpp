@@ -355,30 +355,6 @@ f32 GetAspectRatio();
 void Hint_Draw(i32 player_index);
 extern i32 CutScenePlayer_CanStart(i32 cutscene_id);
 
-namespace {
-    struct NuDisplaySpecialLayout {
-        NUMTX mtx;
-        NUMTX draw_mtx;
-        NUVEC min;
-        f32 min_w;
-        NUVEC max;
-        f32 max_w;
-        u8 pad_a0[0x10];
-        NUCLIPOBJECT *clip_objects;
-        char *name;
-        u32 flags;
-        f32 *clip_range;
-        i32 instance_ix;
-        NUMTX *draw_mtx_ptr;
-        i16 wind_speed;
-        i16 wind_scale;
-        u32 pad_cc;
-    };
-
-} // namespace
-
-DECOMP_ASSERT(sizeof(NuDisplaySpecialLayout) == 0xd0, "display special size");
-
 // Camera zoom state
 f32 CameraZoom = 1.0f;
 
@@ -392,170 +368,6 @@ extern "C" {
     i32 NuDisplayListRndrSpecial(nuhspecial_s *special, NUMTX *mtx, i32 skinned, NUMTX *skin_mtx,
                                  DEFORMERWEIGHTSARRAY *blend_values);
     void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
-
-    static void DisplaySceneSetClipResult(NUDLDLISTSCENE *scene, i32 clip_index, i32 clip_result) {
-        const u32 buffer = scene->render_buffer >> 7;
-        u8 *clip_bits = scene->clip_used[buffer];
-        const u32 shift = static_cast<u32>(clip_index & 3) * 2;
-        clip_bits[clip_index >> 2] |= static_cast<u8>(clip_result << shift);
-
-        if (clip_result == 0) {
-            return;
-        }
-
-        NUCLIPOBJECT &clip = scene->clip_objects[clip_index];
-        u8 *material_bits = scene->mtl_used[buffer];
-        for (i32 i = 0; i < clip.nmaterials; ++i) {
-            const i32 material_id = clip.material_ids[i];
-            material_bits[material_id >> 3] |= static_cast<u8>(1u << (material_id & 7));
-        }
-    }
-
-    static f32 DisplaySceneDistanceSqrToCamera(const NUCLIPBOUNDS &bounds) {
-        const f32 x = global_camera.mtx.m30 - bounds.center.x;
-        const f32 y = global_camera.mtx.m31 - bounds.center.y;
-        const f32 z = global_camera.mtx.m32 - bounds.center.z;
-        return x * x + y * y + z * z;
-    }
-
-    // A scene has one bound/visibility record per instance, but one or more
-    // clip-object records per instance.  lod_ranges terminates every instance
-    // group with zero; preceding values select progressively nearer LODs.
-    static i32 DisplaySceneSelectLod(const NUDLDLISTSCENE *scene, i32 first_clip, f32 distance_sqr) {
-        i32 selected_clip = first_clip;
-        if (scene->lod_ranges[selected_clip] != 0.0f && distance_sqr < scene->lod_ranges[selected_clip]) {
-            do {
-                ++selected_clip;
-            } while (distance_sqr < scene->lod_ranges[selected_clip]);
-        }
-        return selected_clip;
-    }
-
-    static i32 DisplaySceneNextInstance(const NUDLDLISTSCENE *scene, i32 clip_index) {
-        while (scene->lod_ranges[clip_index] != 0.0f) {
-            ++clip_index;
-        }
-        return clip_index + 1;
-    }
-
-    static f32 DisplaySceneFarClip(const NUDLDLISTSCENE *scene, i32 instance_index, i32 clip_index) {
-        f32 far_clip = scene->far_clip_ranges[clip_index];
-        if (scene->fade_ranges == NULL ||
-            (scene->visibility_flags[instance_index] & NUDL_INSTANCE_FLAG_DISTANCE_FADE) == 0) {
-            return far_clip;
-        }
-
-        const f32 fade_start = scene->fade_ranges[instance_index * 2];
-        const f32 fade_end = scene->fade_ranges[instance_index * 2 + 1];
-        if (fade_end > fade_start) {
-            return fade_end;
-        }
-        return far_clip;
-    }
-
-    static f32 DisplaySceneDistanceFade(const NUDLDLISTSCENE *scene, i32 instance_index, f32 distance_sqr) {
-        if (scene->fade_ranges == NULL ||
-            (scene->visibility_flags[instance_index] & NUDL_INSTANCE_FLAG_DISTANCE_FADE) == 0) {
-            return 1.0f;
-        }
-
-        const f32 fade_start = scene->fade_ranges[instance_index * 2];
-        const f32 fade_end = scene->fade_ranges[instance_index * 2 + 1];
-        if (fade_end <= fade_start) {
-            if (fade_end * fade_end < distance_sqr) {
-                const f32 alpha = (NuFsqrt(distance_sqr) - fade_end) / (fade_start - fade_end);
-                return alpha < 1.0f ? alpha : 1.0f;
-            }
-            return 0.0f;
-        }
-
-        if (fade_start * fade_start < distance_sqr) {
-            const f32 alpha = (fade_end - NuFsqrt(distance_sqr)) / (fade_end - fade_start);
-            return alpha > 0.0f ? alpha : 0.0f;
-        }
-        return 1.0f;
-    }
-
-    static void DisplaySceneEvaluateClipFallback(NUDLDLISTSCENE *scene) {
-        u8 visibility_context[0x2800];
-        NuVisibilityResult *visibility =
-            static_cast<NuVisibilityResult *>(NuVisiEvaluate(scene->gscene, visibility_context));
-        const bool portal_filter = visibility != NULL && visibility->portal_marker != NULL && portals_enabled != 0;
-        scene->alpha_values = NULL;
-        if (scene->nclip_objects <= 0) {
-            return;
-        }
-
-        if (scene->fade_ranges != NULL) {
-            VARIPTR *buffer = NuDisplayListGetBuffer();
-            scene->alpha_values = static_cast<f32 *>(buffer->void_ptr);
-            buffer->addr += static_cast<usize>(scene->nclip_objects) * sizeof(f32);
-        }
-
-        i32 clip_index = 0;
-        i32 instance_index = 0;
-        while (clip_index < scene->nclip_objects) {
-            const u8 flags = static_cast<u8>(scene->visibility_flags[instance_index]);
-            bool visibility_bit =
-                visibility == NULL || visibility->instance_tree_bits == NULL ||
-                (visibility->instance_tree_bits[instance_index >> 3] & (1U << (instance_index & 7))) != 0;
-            if (portal_filter && (flags & NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) == 0) {
-                visibility_bit = (visibility->portal_bits[instance_index >> 3] & (1U << (instance_index & 7))) != 0;
-            }
-            if (visibility_bit && (flags & NUDL_INSTANCE_FLAG_VISIBLE) != 0) {
-                NUCLIPBOUNDS &bounds = scene->clip_bounds[instance_index];
-                const f32 distance_sqr = DisplaySceneDistanceSqrToCamera(bounds);
-                const i32 selected_clip = DisplaySceneSelectLod(scene, clip_index, distance_sqr);
-                const f32 far_clip = DisplaySceneFarClip(scene, instance_index, selected_clip);
-                const i32 clip_result = NuCameraClipTestExtentsAxisAligned(&bounds.center, &bounds.extent, far_clip);
-
-                if (clip_result != 0 && scene->alpha_values != NULL) {
-                    scene->alpha_values[selected_clip] = DisplaySceneDistanceFade(scene, instance_index, distance_sqr);
-                }
-                DisplaySceneSetClipResult(scene, selected_clip, clip_result);
-            }
-
-            clip_index = DisplaySceneNextInstance(scene, clip_index);
-            ++instance_index;
-        }
-    }
-
-    void NuDisplaySceneRndr(void *display_scene) {
-        NUDLDLISTSCENE *scene = static_cast<NUDLDLISTSCENE *>(display_scene);
-        if ((scene->flags & NUDL_SCENE_FLAG_CLIPPING) != 0) {
-            return;
-        }
-
-        RndrStateCopyGlobalState(scene->local_state);
-        if (scene->nclip_objects != 0) {
-            scene->flags |= NUDL_SCENE_FLAG_CLIPPING;
-            DisplaySceneEvaluateClipFallback(scene);
-        }
-        DisplayListGenerateTransforms(scene);
-
-        if ((scene->instance_visibility_enabled & NUDL_SCENE_INSTANCE_VISIBILITY_ENABLED) == 0 &&
-            noscenespecials == 0 && scene->nspecials > 0) {
-            NUGSCN temporary_scene = {};
-            NUGSCN *gscene = scene->gscene;
-            if (gscene == NULL) {
-                temporary_scene.display_list = scene;
-                gscene = &temporary_scene;
-            }
-
-            nuhspecial_s handle = {gscene, NULL, NULL};
-            NuDisplaySpecialLayout *special = static_cast<NuDisplaySpecialLayout *>(scene->specials);
-            for (i32 i = 0; i < scene->nspecials; ++i, ++special) {
-                if ((special->flags & 2) != 0) {
-                    handle.display_special = reinterpret_cast<NUDISPLAYSPECIAL_s *>(special);
-                    NUMTX *draw_mtx = special->draw_mtx_ptr;
-                    if (draw_mtx == NULL || draw_mtx == reinterpret_cast<NUMTX *>(-1)) {
-                        draw_mtx = &special->draw_mtx;
-                    }
-                    NuDisplayListRndrSpecial(reinterpret_cast<nuhspecial_s *>(&handle), draw_mtx, 0, NULL, NULL);
-                }
-            }
-        }
-    }
 }
 
 void SetCameraZoom(f32 zoom) {
@@ -3021,11 +2833,10 @@ i32 DrawGameObjectsProcess() {
             continue;
         if ((object->field_0xe20 & 0x20) != 0 && object->character_context != 0x23 && object->character_context != 0x24)
             continue;
-        if (object->character_context == 0x0f) {
-            TELEPORT_s *teleport = static_cast<TELEPORT_s *>(object->field_0x788);
-            if (object->field_0x7a3 == 1 && teleport != NULL && (teleport->flags & 4) == 0)
-                continue;
-        } else if (object->character_context != 0x39 && object->character_context != 0x3b) {
+        if (object->character_context == 0x0f && object->field_0x7a3 == 1 && object->field_0x788 != NULL &&
+            (static_cast<TELEPORT_s *>(object->field_0x788)->flags & 4) == 0)
+            continue;
+        if (object->character_context != 0x39 && object->character_context != 0x3b) {
             if (CharClipToBlobShadows != 0 && WORLD->area != KAMINO_ADATA && WORLD->area != HOTHBATTLE_ADATA &&
                 WORLD->area != DEATHSTARBATTLE2_ADATA && static_cast<i8>(object->field_0xf04) < 0 &&
                 object->apiobj.field_0x27c == -1 && (object->field_0xefb & 8) == 0 &&

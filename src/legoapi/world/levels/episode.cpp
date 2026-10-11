@@ -35,6 +35,7 @@
 #include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/numtx_inline.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -606,21 +607,20 @@ i32 TrooperShoot(WORLDINFO_s *world, minitrooperteam_s *team, minisnowtrooper_s 
     NUVEC direction;
 
     if (droid_hack != 0) {
-        f32 player_distances[2] = {10000.0f, 10000.0f};
-        for (i32 i = 0; i < 2; ++i) {
-            if (static_cast<i8>(Player[i]->apiobj.flags_low) < 0)
-                player_distances[i] = NuVecDist(&Player[i]->apiobj.position, &shot_position, NULL);
-        }
+        f32 first_distance = 9999.0f;
+        if (static_cast<i8>(Player[0]->apiobj.flags_low) < 0)
+            first_distance = NuVecDist(&Player[0]->apiobj.position, &shot_position, NULL);
+        f32 second_distance = 9999.0f;
+        if (static_cast<i8>(Player[1]->apiobj.flags_low) < 0)
+            second_distance = NuVecDist(&Player[1]->apiobj.position, &shot_position, NULL);
 
         GameObject_s *target;
-        if (player_distances[1] > player_distances[0]) {
-            if (player_distances[0] >= 60.0f)
-                return 0;
+        if (second_distance > first_distance && first_distance < 60.0f) {
             target = Player[0];
-        } else {
-            if (player_distances[1] >= 60.0f)
-                return 0;
+        } else if (second_distance < 60.0f) {
             target = Player[1];
+        } else {
+            return 0;
         }
         NuVecSub(&direction, &target->apiobj.position, &shot_position);
     } else {
@@ -654,26 +654,14 @@ i32 TrooperShoot(WORLDINFO_s *world, minitrooperteam_s *team, minisnowtrooper_s 
     FindAnglesXY(&direction, &pitch, shot_angle);
 
     NUMTX matrix;
-    const f32 sin_x = NU_SIN_LUT(pitch);
-    const f32 cos_x = NU_COS_LUT(pitch);
-    const f32 sin_y = NU_SIN_LUT(*shot_angle);
-    const f32 cos_y = NU_COS_LUT(*shot_angle);
-    matrix.m00 = cos_y;
-    matrix.m01 = 0.0f;
-    matrix.m02 = -sin_y;
-    matrix.m03 = 0.0f;
-    matrix.m10 = sin_x * sin_y;
-    matrix.m12 = sin_x * cos_y;
-    matrix.m11 = cos_x;
-    matrix.m13 = 0.0f;
-    matrix.m20 = cos_x * sin_y;
-    matrix.m21 = -sin_x;
-    matrix.m22 = cos_x * cos_y;
-    matrix.m23 = 0.0f;
-    matrix.m30 = 0.0f;
-    matrix.m31 = 0.0f;
-    matrix.m32 = 0.0f;
+    matrix.m11 = matrix.m22 = NU_COS_LUT(pitch);
+    matrix.m12 = NU_SIN_LUT(pitch);
+    matrix.m21 = -matrix.m12;
+    matrix.m00 = 1.0f;
+    matrix.m01 = matrix.m02 = matrix.m03 = matrix.m23 = matrix.m10 = matrix.m20 = matrix.m13 = matrix.m30 = matrix.m31 =
+        matrix.m32 = 0.0f;
     matrix.m33 = 1.0f;
+    NuMtxRotateYInline(&matrix, *shot_angle);
 
     BOLT_s *bolt = Bolt_Add(NULL, &shot_position, &matrix, team->bolt_type, 0);
     if (bolt != NULL)
@@ -789,7 +777,6 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
 
         shadow_position.y = team->reserved_02c;
         minisnowtrooper_s *troopers = team->troopers;
-        auto team_reserved_02c = team->reserved_02c;
         for (i32 i = 0; i < team->trooper_count; ++i) {
             const i32 random_state = qrand() / (0xffff / 3 + 1) + 1;
             troopers[i].state_flags = (troopers[i].state_flags & 0xcf) | ((random_state & 3) << 4);
@@ -808,7 +795,7 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
 
             shadow_position.x = trooper->shot_position.x;
             shadow_position.z = trooper->shot_position.z;
-            if (team_reserved_02c == 2000000.0f) {
+            if (team->reserved_02c == 2000000.0f) {
                 shadow_position.y = 10.0f;
                 shadow_position.y = GameShadow(NULL, &shadow_position, 5.0f, -1);
             }
@@ -1301,7 +1288,7 @@ void DrawMiniSnowTroopers(WORLDINFO_s *world) {
     i32 first_side_counts[3] = {0, 0, 0};
 
     for (i32 team_index = 0; team_index < trooperteamcount; ++team_index) {
-        minitrooperteam_s *team = &teams[team_index];
+        minitrooperteam_s *team = &static_cast<minitrooperteam_s *>(world->mini_trooper_teams)[team_index];
         if ((team->state_flags & 4) == 0) {
             continue;
         }
@@ -1310,16 +1297,15 @@ void DrawMiniSnowTroopers(WORLDINFO_s *world) {
         }
 
         team->height = 0.0f;
-        auto team_reserved_02c = team->reserved_02c;
-        for (i32 i = 0; i < team->trooper_count; ++i) {
-            minisnowtrooper_s *trooper = &team->troopers[i];
+        minisnowtrooper_s *trooper = team->troopers;
+        for (i32 i = 0; i < team->trooper_count; ++i, ++trooper) {
 
             position.x = trooper->shot_position.x;
             position.z = trooper->shot_position.z;
 
             f32 ground;
             if (((i + GameTimer.update_count) & 0xf) == 0) {
-                ground = team_reserved_02c;
+                ground = team->reserved_02c;
                 if (ground == 2000000.0f) {
                     position.y = 10.0f;
                     ground = GameShadow(NULL, &position, 5.0f, -1);
@@ -1341,9 +1327,10 @@ void DrawMiniSnowTroopers(WORLDINFO_s *world) {
 
             const f32 step_time = 1.0f / static_cast<f32>(trooper->speed_divisor);
             const f32 step =
-                1.0f - (NU_SIN_LUT(static_cast<i32>(trooper->timer / step_time * 32768.0f + 65536.0f)) + 1.0f) * 0.5f;
+                1.0f -
+                (NU_SIN_LUT(static_cast<i32>(trooper->timer * (1.0f / step_time) * 32768.0f + 16384.0f)) + 1.0f) * 0.5f;
             const u16 frame_phase = static_cast<u16>((trooper->state_flags >> 2) << 14);
-            const i32 phase = static_cast<i32>(static_cast<f32>(frame_phase) + step * 65536.0f);
+            const i32 phase = static_cast<i32>(static_cast<f32>(frame_phase) + step * 16384.0f);
             position.y = ground + fabsf(NU_SIN_LUT(phase)) * 0.04f;
             NuMtxTranslate(matrix, &position);
 

@@ -837,11 +837,14 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
                 const i32 semantic = 20 - leading;
 
                 GLSLParameter &parameter = shader->parameters[semantic];
+                i32 texture_id = 0;
 #define BIND_MATERIAL_2D(field)                                                                                        \
     glActiveTexture(GL_TEXTURE0 + (static_cast<u16>(parameter.location) & 0x7ff));                                     \
     g_currentTexUnit = static_cast<u16>(parameter.location) & 0x7ff;                                                   \
-    glBindTexture(GL_TEXTURE_2D, (field) != 0 ? NuTexGetNative(field)->platform.gl_tex : 0)
+    texture_id = (field)
                 switch (semantic) {
+                    default:
+                        goto next_texture;
                     case 0:
                         BIND_MATERIAL_2D(mtl->shader_desc.diffuse_map_tex_id[0]);
                         break;
@@ -886,7 +889,7 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
                             const u32 texture_unit = static_cast<u16>(parameter.location) & 0x7ff;
                             NuTexSetTextureWithStagePS(NuTexGetNative(NuWindCurrent(nuapi.wind)), texture_unit);
                         }
-                        break;
+                        goto next_texture;
                     case 13: {
                         if (g_currentTexUnit != (static_cast<u16>(parameter.location) & 0x7ff)) {
                             glActiveTexture(GL_TEXTURE0 + (static_cast<u16>(parameter.location) & 0x7ff));
@@ -902,7 +905,7 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
                             g_lastBoundCubeTexIds[texture_unit] = CUBE_TEXTURE_NAME();
                         }
 #undef CUBE_TEXTURE_NAME
-                        break;
+                        goto next_texture;
                     }
                     case 14: {
                         if (g_currentTexUnit != (static_cast<u16>(parameter.location) & 0x7ff)) {
@@ -922,10 +925,12 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
                             g_lastBoundCubeTexIds[texture_unit] = CUBE_TEXTURE_NAME();
                         }
 #undef CUBE_TEXTURE_NAME
-                        break;
+                        goto next_texture;
                     }
                 }
 #undef BIND_MATERIAL_2D
+                glBindTexture(GL_TEXTURE_2D, texture_id != 0 ? NuTexGetNative(texture_id)->platform.gl_tex : 0);
+            next_texture:
                 textures &= ~(1u << (31 - leading));
             }
 

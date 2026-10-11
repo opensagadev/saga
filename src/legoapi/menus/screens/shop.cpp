@@ -1633,9 +1633,7 @@ void DrawSubItems() {
             const f32 phase = NuFmod(since_touch, 4.0f);
             const i32 angle = static_cast<i32>(phase * 0.25f * 65536.0f);
             const f32 pulse = NuTrigTable[(angle >> 1) & 0x7fff] - 0.8f;
-            if (pulse >= 0.0f) {
-                alpha = pulse + 1.0f;
-            }
+            alpha = pulse < 0.0f ? 1.0f : pulse + 1.0f;
         }
     }
 
@@ -1919,10 +1917,7 @@ void DrawTopShelf(i32) {
             const f32 phase = NuFmod(elapsed_since_touch, 4.0f);
             const i32 angle = static_cast<i32>(phase * 0.25f * 65536.0f);
             const f32 pulse = NuTrigTable[(angle >> 1) & 0x7fff] - 0.8f;
-            alpha_scale = pulse;
-            if (alpha_scale < 0.0f)
-                alpha_scale = 0.0f;
-            alpha_scale += 1.0f;
+            alpha_scale = pulse < 0.0f ? 1.0f : pulse + 1.0f;
         }
     }
 

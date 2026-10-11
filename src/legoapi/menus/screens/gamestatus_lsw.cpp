@@ -1685,11 +1685,163 @@ void SuperStoryScore_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, f
     }
 }
 
+extern i16 tFREEPLAYUNLOCKED, tEPISODEVUNLOCKED, tEPISODEVIUNLOCKED, tBONUSUNLOCKED;
+extern i16 tOUTOFTIME, tYOUDIDNTCOLLECTALL10CANISTERS, tSTORYCLIPSUNLOCKED;
+extern i16 tEPISODEICOMPLETE, tEPISODEIICOMPLETE, tEPISODEIIICOMPLETE;
+extern i16 tEPISODEIVCOMPLETE, tEPISODEVCOMPLETE, tEPISODEVICOMPLETE;
+
+void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
+    if (active != 0) {
+        char text[256];
+        if (stage->field_0x14 > 0) {
+            f32 alpha = 1.0f;
+            if (stage->field_0x18 < 0.5f)
+                alpha = stage->field_0x18 + stage->field_0x18;
+            else if (!(stage->field_0x18 < 3.5f))
+                alpha = 1.0f - ((stage->field_0x18 - 3.5f) + (stage->field_0x18 - 3.5f));
+            if (alpha > 0.0f) {
+                const i32 opacity = alpha * 128.0f;
+                if (stage->type == 14) {
+                    strcpy(text, TTab[EDataList[packet->episode_id].text_id]);
+                    SmartTextEx(text, 0.0f, 0.1f, 1.0f, 0.525f, 0.525f, 0.525f, 0, STATUS_R, STATUS_G, STATUS_B, 1.7f,
+                                1, NULL, 0, opacity);
+                    SmartTextEx(TTab[tSUPERSTORYCOMPLETE], 0.0f, -0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                                STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                } else if (stage->type == 13) {
+                    if ((PODRACE_ADATA != NULL && packet->area == PODRACE_ADATA) ||
+                        (BONUS_GUNSHIP_ADATA != NULL && packet->area == BONUS_GUNSHIP_ADATA)) {
+                        SmartTextEx(TTab[tLEVELCOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                                    STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                    } else if (FreePlayUnlocked()) {
+                        SmartTextEx(TTab[tLEVELCOMPLETE], 0.0f, 0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                                    STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                        SmartTextEx(TTab[tFREEPLAYUNLOCKED], 0.0f, -0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                                    STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                    } else {
+                        SmartTextEx(TTab[tLEVELCOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                                    STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                    }
+                } else if (stage->type == 8) {
+                    SmartTextEx(TTab[tEPISODEVUNLOCKED], 0.0f, 0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                                STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                    SmartTextEx(TTab[tEPISODEVIUNLOCKED], 0.0f, -0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                                STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                } else if (stage->type == 28) {
+                    SmartTextEx(TTab[tBONUSUNLOCKED], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                                STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                } else if (stage->type == 23) {
+                    if (packet->challenge_state == 2) {
+                        SmartTextEx(TTab[tCHALLENGECOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255,
+                                    1.7f, 1, NULL, 0, opacity);
+                    } else if (packet->challenge_state == 3) {
+                        SmartTextEx(TTab[tOUTOFTIME], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                                    STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                    } else {
+                        SmartTextEx(TTab[tYOUDIDNTCOLLECTALL10CANISTERS], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0,
+                                    STATUS_R, STATUS_G, STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                    }
+                } else if (stage->type == 26) {
+                    if (packet->mission_state == 2) {
+                        SmartTextEx(TTab[tMISSIONCOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, 1.7f,
+                                    1, NULL, 0, opacity);
+                    } else {
+                        SmartTextEx(TTab[tOUTOFTIME], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                                    STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                    }
+                } else {
+                    i16 label;
+                    if (stage->type == 29)
+                        label = tEPISODEICOMPLETE;
+                    else if (stage->type == 30)
+                        label = tEPISODEIICOMPLETE;
+                    else if (stage->type == 31)
+                        label = tEPISODEIIICOMPLETE;
+                    else if (stage->type == 32)
+                        label = tEPISODEIVCOMPLETE;
+                    else if (stage->type == 33)
+                        label = tEPISODEVCOMPLETE;
+                    else
+                        label = tEPISODEVICOMPLETE;
+                    SmartTextEx(TTab[label], 0.0f, 0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G, STATUS_B, 1.7f,
+                                1, NULL, 0, opacity);
+                    SmartTextEx(TTab[tSTORYCLIPSUNLOCKED], 0.0f, -0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                                STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                }
+            }
+        }
+        if (stage->type != 23 && stage->type != 26)
+            return;
+        if (stage->field_0x14 == 0 || stage->field_0x18 < stage->field_0x1c - 0.5f)
+            iconalphaoverride = 0.0f;
+        else
+            iconalphaoverride = (stage->field_0x18 - (stage->field_0x1c - 0.5f)) * 2.0f;
+        if (stage->type == 26) {
+            if (packet->mission_state != 2)
+                return;
+            if (packet->previous_gold_bricks < Game.field_0x7c26[0])
+                iconalphaoverride = 0.0f;
+        } else if (packet->challenge_state != 2)
+            return;
+        f32 progress, slide;
+        if (stage->field_0x18 < 0.75f) {
+            progress = 0.0f;
+            slide = stage->field_0x18 / 0.7f;
+        } else if (!(stage->field_0x18 < stage->field_0x1c - 0.75f)) {
+            progress = 1.0f;
+            slide = 1.0f - (stage->field_0x18 - (stage->field_0x1c - 0.75f)) / 0.75f;
+        } else {
+            progress = (stage->field_0x18 - 0.75f) / (stage->field_0x1c - 0.75f - 0.75f);
+            slide = 1.0f;
+        }
+        f32 coin_slide = slide;
+        if (stage->field_0x18 >= 0.75f)
+            coin_slide = 1.0f;
+        u32 score = packet->original_score;
+        IncreaseScore(&score,
+                      static_cast<i64>(static_cast<i32>(static_cast<f32>(packet->reward_score - score) * progress)), 0);
+        CoinTotal_Draw(score,
+                       (STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(coin_slide * 16384.0f) >> 1) & 0x7fff] +
+                           STATSPOS2Y,
+                       CoinTotalScale, 1, 1.0f, 255, 191, 0);
+        if (stage->type == 26) {
+            f32 remaining = static_cast<u16>(packet->mission->time) - packet->elapsed_time;
+            if (remaining < 0.0f)
+                remaining = 0.0f;
+            Text_MakeTime((1.0f - progress) * remaining, 0, 1, 1, text);
+            Text3D(text, 0.0f,
+                   -((STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(slide * 16384.0f) >> 1) & 0x7fff] +
+                     STATSPOS2Y),
+                   1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 191, 0);
+        }
+        if (stage->type == 23) {
+            f32 remaining = packet->area->challenge_trial_time - packet->elapsed_time;
+            if (remaining < 0.0f)
+                remaining = 0.0f;
+            Text_MakeTime((1.0f - progress) * remaining, 0, 1, 1, text);
+            Text3D(text, 0.0f,
+                   -((STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(slide * 16384.0f) >> 1) & 0x7fff] +
+                     STATSPOS2Y),
+                   1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 191, 0);
+        }
+    } else {
+        if (stage->field_0x12 != 0) {
+            const f32 alpha = getFinishedStatusAlpha(packet);
+            if ((stage->type == 26 && packet->mission_state == 2) ||
+                (stage->type == 23 && packet->challenge_state == 2)) {
+                CoinTotal_Draw(*packet->score, STATSPOSY, CoinTotalScale, 1, alpha, 255, 191, 0);
+            }
+        }
+    }
+}
+
 void Coins_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
     if (active == 0) {
         if (stage->field_0x12 != 0) {
             const f32 alpha = getFinishedStatusAlpha(packet);
-            CoinTotal_Draw(*packet->score, StatusIconsOnOff(alpha), CoinTotalScale, 1, 1.0f, 255, 191, 0);
+            CoinTotal_Draw(*packet->score,
+                           (STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(alpha * 16384.0f) >> 1) & 0x7fff] +
+                               STATSPOS2Y,
+                           CoinTotalScale, 1, 1.0f, 255, 191, 0);
         }
         return;
     }
