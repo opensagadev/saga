@@ -383,8 +383,8 @@ MechTouchUITagButton::MechTouchUITagButton(GameObject_s &object, TouchHolder &ho
     size_animation.target = &size_animation.value;
     size_animation.to = 1.0f;
     size_animation.elapsed = -1.0f;
-    size_animation.duration = -1.0f;
     size_animation.value = 1.0f;
+    size_animation.duration = -1.0f;
     size_animation.delay = 0.0f;
 
     second_fade.target = &second_fade.value;

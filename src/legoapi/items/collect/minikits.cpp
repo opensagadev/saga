@@ -182,25 +182,26 @@ void CharMiniKit_Draw(i32 id, numtx_s *matrix, i32 reflection_axis, float reflec
     if (Char_MiniKit == NULL)
         return;
     HUBMINIKITPIECES_s *kit = Char_MiniKit[id];
-    if (kit == NULL || kit->piece_count == 0)
-        return;
-    bool reflection = reflection_axis != 0 && reflection_plane != 2000000.0f;
-    for (i32 i = 0; i < kit->piece_count; ++i) {
-        HUBMINIKITPIECE_s *piece = &kit->pieces[i];
-        if (NuSpecialExistsFn(&piece->special) == 0)
-            continue;
-        piece = &kit->pieces[i];
-        draw_matrix = piece->matrix;
-        NuMtxMul(&draw_matrix, &draw_matrix, matrix);
-        piece = &kit->pieces[i];
-        NuSpecialDrawAt(&piece->special, &draw_matrix);
-        if (reflection) {
-            NUMTX reflected;
-            if (MatrixReflection(&draw_matrix, reflection_axis, reflection_plane, reflection_height, &reflected) != 0) {
-                NuRndrStartReflectionRender(0);
-                piece = &kit->pieces[i];
-                NuSpecialDrawAt(&piece->special, &reflected);
-                NuRndrEndReflectionRender();
+    if (kit != NULL && kit->piece_count != 0) {
+        bool reflection = reflection_axis != 0 && reflection_plane != 2000000.0f;
+        for (i32 i = 0; i < kit->piece_count; ++i) {
+            HUBMINIKITPIECE_s *piece = &kit->pieces[i];
+            if (NuSpecialExistsFn(&piece->special) == 0)
+                continue;
+            piece = &kit->pieces[i];
+            draw_matrix = piece->matrix;
+            NuMtxMul(&draw_matrix, &draw_matrix, matrix);
+            piece = &kit->pieces[i];
+            NuSpecialDrawAt(&piece->special, &draw_matrix);
+            if (reflection) {
+                NUMTX reflected;
+                if (MatrixReflection(&draw_matrix, reflection_axis, reflection_plane, reflection_height, &reflected) !=
+                    0) {
+                    NuRndrStartReflectionRender(0);
+                    piece = &kit->pieces[i];
+                    NuSpecialDrawAt(&piece->special, &reflected);
+                    NuRndrEndReflectionRender();
+                }
             }
         }
     }
@@ -225,7 +226,31 @@ extern i16 tMINIKIT;
 
 void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {
 
-    if (current != 0) {
+    if (current == 0) {
+        if (stage->field_0x12 == 0)
+            return;
+        const f32 alpha = getFinishedStatusAlpha(packet);
+        const i32 opacity = static_cast<i32>(alpha * 128.0f);
+        i32 angle = 0x2000;
+        if (!(GameTimer.time_elapsed_mod_seconds > 0.25f)) {
+            angle = (static_cast<i32>(GameTimer.time_elapsed_mod_seconds * 32768.0f + 16384.0f) >> 1) & 0x7fff;
+        }
+        if (Game.area_save[packet->area->index].field_0x5[0] == 0) {
+            const f32 size = ((1.0f - fabsf(NuTrigTable[angle])) + 1.0f) * 1.2f;
+            Text3DEx("?", -0.6f, -0.6f, 1.1f, size, size, size, 0, 255, 255, 255, static_cast<u8>(opacity));
+        } else if (alpha > 0.0f) {
+            DrawStatusMiniKit(-0.6f, -0.5f, 1.1f,
+                              NuTrigTable[(static_cast<i32>(alpha * 16384.0f) >> 1) & 0x7fff] * 0.15f, 1.0f,
+                              Game.area_save[packet->area->index].field_0x5[0], packet, 0.0f);
+        }
+        if (packet->minikit_max == Game.area_save[packet->area->index].field_0x5[0]) {
+            Text3DEx("$", -0.6f, -0.7f, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 0, 127, static_cast<u8>(opacity));
+        } else {
+            char text[60];
+            sprintf(text, "%i/%i", Game.area_save[packet->area->index].field_0x5[0], packet->minikit_max);
+            Text3DEx(text, -0.6f, -0.8f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 0, 127, static_cast<u8>(opacity));
+        }
+    } else {
         f32 title_alpha = 1.0f;
         switch (stage->field_0x14) {
             case 0:
@@ -318,30 +343,6 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
         title_alpha = title_alpha < 0.0f ? 0.0f : title_alpha > 1.0f ? 1.0f : title_alpha;
         Text3DEx(TTab[tMINIKIT], 0.0f, STATUS_TITLE_Y, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 255, 255,
                  static_cast<u8>(static_cast<i32>(title_alpha * 128.0f)));
-    } else {
-        if (stage->field_0x12 == 0)
-            return;
-        const f32 alpha = getFinishedStatusAlpha(packet);
-        const i32 opacity = static_cast<i32>(alpha * 128.0f);
-        i32 angle = 0x2000;
-        if (!(GameTimer.time_elapsed_mod_seconds > 0.25f)) {
-            angle = (static_cast<i32>(GameTimer.time_elapsed_mod_seconds * 32768.0f + 16384.0f) >> 1) & 0x7fff;
-        }
-        if (Game.area_save[packet->area->index].field_0x5[0] == 0) {
-            const f32 size = ((1.0f - fabsf(NuTrigTable[angle])) + 1.0f) * 1.2f;
-            Text3DEx("?", -0.6f, -0.6f, 1.1f, size, size, size, 0, 255, 255, 255, static_cast<u8>(opacity));
-        } else if (alpha > 0.0f) {
-            DrawStatusMiniKit(-0.6f, -0.5f, 1.1f,
-                              NuTrigTable[(static_cast<i32>(alpha * 16384.0f) >> 1) & 0x7fff] * 0.15f, 1.0f,
-                              Game.area_save[packet->area->index].field_0x5[0], packet, 0.0f);
-        }
-        if (packet->minikit_max == Game.area_save[packet->area->index].field_0x5[0]) {
-            Text3DEx("$", -0.6f, -0.7f, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 0, 127, static_cast<u8>(opacity));
-        } else {
-            char text[60];
-            sprintf(text, "%i/%i", Game.area_save[packet->area->index].field_0x5[0], packet->minikit_max);
-            Text3DEx(text, -0.6f, -0.8f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 0, 127, static_cast<u8>(opacity));
-        }
     }
 }
 
@@ -554,12 +555,12 @@ void AllMiniKits_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 cur
             const f32 size = ((1.0f - fabsf(NuTrigTable[angle])) + 1.0f) * 1.2f;
             Text3DEx("?", -0.6f, -0.6f, 1.1f, size, size, size, 0, 255, 255, 255, opacity);
         }
-        if (Game.area_save[packet->area->index].field_0x5[0] == packet->minikit_max) {
-            Text3DEx("$", -0.6f, -0.7f, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 0, 127, opacity);
-        } else {
+        if (Game.area_save[packet->area->index].field_0x5[0] != packet->minikit_max) {
             char text[60];
             sprintf(text, "%i/%i", Game.area_save[packet->area->index].field_0x5[0], packet->minikit_max);
             Text3DEx(text, -0.6f, -0.8f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 0, 127, opacity);
+        } else {
+            Text3DEx("$", -0.6f, -0.7f, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 0, 127, opacity);
         }
     }
 }

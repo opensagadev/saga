@@ -1106,12 +1106,12 @@ process_buttons:
         i32 difference = NuAngSub(aieditorsettings.area_rotation, path_angle);
         i32 quadrant = difference < 0 ? (difference + 0x3fff) >> 14 : difference >> 14;
         i32 remainder = difference % 0x4000;
-        if (!(remainder > 0x2000)) {
+        if (remainder > 0x2000) {
+            ++quadrant;
+        } else {
             if (remainder < -0x2000) {
                 --quadrant;
             }
-        } else {
-            ++quadrant;
         }
         aieditorsettings.area_rotation =
             NuAngAdd(quadrant << 14, *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x60));

@@ -613,27 +613,7 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
         }
     }
 
-    if (stop_cut->skip_level == -1) {
-        CUTINFO *next = NewCutScene(NULL, world->cutscene_sys, stop_cut->next_cutscene, 0);
-        if (CutScenePlayer_Active() != 0 && next == NULL) {
-            NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
-            hub_from_cutsceneplayer = 1;
-        } else if ((stop_cut->flags & 0x400) != 0) {
-            NewMode = 1;
-        } else if (stop_cut->door_name[0] != '\0') {
-            DOOR_s *door = Door_FindByName(world, stop_cut->door_name);
-            if (door != NULL) {
-                Door_GoThrough(world, door, 1);
-            }
-        } else if ((stop_cut->flags & 0x100) != 0) {
-            FADETYPE fade_type;
-            fade_type.type = FADE_TYPE_STILL_WIPE;
-            FadeSys.SetFade(fade_type, 0);
-            NeedScreenGrab(1);
-            FadeSys.SetStage(1);
-            GameAudio_PlaySfx(0x2d, NULL, 0, 0);
-        }
-    } else {
+    if (stop_cut->skip_level != -1) {
         NewLData = &LDataList[stop_cut->skip_level];
         if (HUB_LDATA != NULL && NewLData == HUB_LDATA) {
             if (CutScenePlayer_Active() != 0) {
@@ -653,6 +633,26 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
             PauseGameCut();
             music_man.PauseTrack(TRACK_CLASS_CUTSCENE);
             newlevel_resumecutaudio = 1;
+        }
+    } else {
+        CUTINFO *next = NewCutScene(NULL, world->cutscene_sys, stop_cut->next_cutscene, 0);
+        if (CutScenePlayer_Active() != 0 && next == NULL) {
+            NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
+            hub_from_cutsceneplayer = 1;
+        } else if ((stop_cut->flags & 0x400) != 0) {
+            NewMode = 1;
+        } else if (stop_cut->door_name[0] != '\0') {
+            DOOR_s *door = Door_FindByName(world, stop_cut->door_name);
+            if (door != NULL) {
+                Door_GoThrough(world, door, 1);
+            }
+        } else if ((stop_cut->flags & 0x100) != 0) {
+            FADETYPE fade_type;
+            fade_type.type = FADE_TYPE_STILL_WIPE;
+            FadeSys.SetFade(fade_type, 0);
+            NeedScreenGrab(1);
+            FadeSys.SetStage(1);
+            GameAudio_PlaySfx(0x2d, NULL, 0, 0);
         }
     }
     CUTNOFOG = 0;
@@ -1012,10 +1012,10 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
             if (instance->animation_frame_b > end_frame) {
                 CHARACTERANIM_s *animation_info =
                     static_cast<CHARACTERANIM_s *>(model->model_data_a[current_animation]);
-                if ((animation_info->flags & 2) == 0) {
-                    instance->animation_frame_b = end_frame;
-                } else {
+                if ((animation_info->flags & 2) != 0) {
                     instance->animation_frame_b = instance->animation_frame_b - end_frame + 1.0f;
+                } else {
+                    instance->animation_frame_b = end_frame;
                 }
             }
         }
@@ -1032,19 +1032,19 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
         instance->animation_frame_a += FRAMETIME * 60.0f * animation_rate;
         if (instance->animation_frame_a > end_frame) {
             CHARACTERANIM_s *animation_info = static_cast<CHARACTERANIM_s *>(model->model_data_a[current_animation]);
-            if ((animation_info->flags & 2) == 0) {
-                instance->animation_frame_a = end_frame;
-            } else {
+            if ((animation_info->flags & 2) != 0) {
                 instance->animation_frame_a = instance->animation_frame_a - end_frame + 1.0f;
+            } else {
+                instance->animation_frame_a = end_frame;
             }
         }
     }
 
     EnableShadowMapRendering(0);
-    if (Cheats_CheckFlags(1) == 0) {
-        FindAndSetLights(reinterpret_cast<NUVEC *>(&world_matrix.m30), 1.0f, world->rtl_set);
-    } else {
+    if (Cheats_CheckFlags(1) != 0) {
         SetZeroLights();
+    } else {
+        FindAndSetLights(reinterpret_cast<NUVEC *>(&world_matrix.m30), 1.0f, world->rtl_set);
     }
 
     u8 render_character = 1;
@@ -1290,32 +1290,31 @@ static void CutScene_RigidPostRender(NUGCUTRIGID_s *rigid, instNUGCUTRIGID_s *in
         return;
     }
     i32 surface = ShadowInfo();
-    if (static_cast<u32>(surface) > 0x20 || (TerSurface[surface].flags & 2) == 0) {
-        return;
-    }
+    if (!(static_cast<u32>(surface) > 0x20) && (TerSurface[surface].flags & 2) != 0) {
 
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    NUMTX reflection = *matrix;
-    reflection.m01 = -reflection.m01;
-    reflection.m11 = -reflection.m11;
-    reflection.m21 = -reflection.m21;
-    reflection.m31 = ground - (reflection.m31 - ground);
+        WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+        NUMTX reflection = *matrix;
+        reflection.m01 = -reflection.m01;
+        reflection.m11 = -reflection.m11;
+        reflection.m21 = -reflection.m21;
+        reflection.m31 = ground - (reflection.m31 - ground);
 
-    nuhspecial_s *special = reinterpret_cast<nuhspecial_s *>(instance);
-    i32 object_index = LevelObject_FindIndexFromName_RefOnly(NuSpecialGetName(special));
-    if (object_index != -1) {
-        i32 reflection_index = LevelObject_GetReflection(object_index);
-        if (reflection_index != -1) {
-            nuhspecial_s *reflection_special = &world->lev_objs[reflection_index].special;
-            if (reflection_special != NULL) {
-                special = reflection_special;
+        nuhspecial_s *special = reinterpret_cast<nuhspecial_s *>(instance);
+        i32 object_index = LevelObject_FindIndexFromName_RefOnly(NuSpecialGetName(special));
+        if (object_index != -1) {
+            i32 reflection_index = LevelObject_GetReflection(object_index);
+            if (reflection_index != -1) {
+                nuhspecial_s *reflection_special = &world->lev_objs[reflection_index].special;
+                if (reflection_special != NULL) {
+                    special = reflection_special;
+                }
             }
         }
-    }
 
-    NuRndrStartReflectionRender(0);
-    NuSpecialDrawAt(special, &reflection);
-    NuRndrEndReflectionRender();
+        NuRndrStartReflectionRender(0);
+        NuSpecialDrawAt(special, &reflection);
+        NuRndrEndReflectionRender();
+    }
 }
 
 static void CutScene_CreateCharacterInstance(NUGCUTCHAR_s *character, instNUGCUTCHAR_s *instance, variptr_u *) {

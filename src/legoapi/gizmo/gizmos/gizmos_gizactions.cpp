@@ -1015,20 +1015,7 @@ i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKE
         return 1;
     }
 
-    if (!next) {
-        if (!random) {
-            if (furthest) {
-                AILocatorSet_AssignFurthestLocator(sys, locator_set, target, max_range, reference_position,
-                                                   second_position, off_screen_radius, ignore_assigned);
-            } else {
-                AILocatorSet_AssignNearestLocator(sys, locator_set, target, max_range, reference_position,
-                                                  second_position, off_screen_radius, ignore_assigned);
-            }
-        } else {
-            AILocatorSet_AssignRandomLocator(sys, locator_set, target, max_range, reference_position, off_screen_radius,
-                                             ignore_assigned);
-        }
-    } else {
+    if (next) {
         if (locator_set->locator_count < 2) {
             return 1;
         }
@@ -1094,6 +1081,19 @@ i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKE
         }
         object->apiobj.ai->locator = &sys->locators[locator_set->locator_entries[candidate]];
         locator_set->assigned[candidate] = target->field_0x289;
+    } else {
+        if (!random) {
+            if (furthest) {
+                AILocatorSet_AssignFurthestLocator(sys, locator_set, target, max_range, reference_position,
+                                                   second_position, off_screen_radius, ignore_assigned);
+            } else {
+                AILocatorSet_AssignNearestLocator(sys, locator_set, target, max_range, reference_position,
+                                                  second_position, off_screen_radius, ignore_assigned);
+            }
+        } else {
+            AILocatorSet_AssignRandomLocator(sys, locator_set, target, max_range, reference_position, off_screen_radius,
+                                             ignore_assigned);
+        }
     }
     return 1;
 }

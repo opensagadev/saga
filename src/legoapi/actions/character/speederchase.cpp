@@ -826,9 +826,9 @@ void PodDust(WORLDINFO_s *world, GameObject_s *object) {
             else
                 continue;
             NUMTX matrix;
-            matrix.m00 = joint->m00;
             matrix.m01 = joint->m01;
             matrix.m02 = joint->m02;
+            matrix.m00 = joint->m00;
             matrix.m03 = joint->m03;
             matrix.m10 = joint->m20;
             matrix.m11 = joint->m21;
@@ -854,10 +854,10 @@ void PodDust(WORLDINFO_s *world, GameObject_s *object) {
                 u16 angle = object->apiobj.field_0x276;
                 f32 sine = NuTrigTable[angle >> 1];
                 f32 cosine = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff];
-                matrix.m00 = -cosine;
                 matrix.m01 = 0.0f;
                 matrix.m02 = sine;
                 matrix.m10 = -sine;
+                matrix.m00 = -cosine;
                 matrix.m11 = 0.0f;
                 matrix.m12 = -cosine;
                 matrix.m20 = 0.0f;

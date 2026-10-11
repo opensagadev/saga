@@ -2505,14 +2505,14 @@ void DookuC_Update(WORLDINFO_s *world) {
                         }
                     } else if (LevGizForce[2] == group->forces[0]) {
                         node0->position = {4.28f, 0.01f, -0.41f};
-                        if (LevGizForce[0] == group->forces[1]) {
-                            node1->position = {4.66f, 0.56f, -0.98f};
-                            node2->position = {4.50f, 1.12f, -1.35f};
-                            node3->position = {4.38f, 1.69f, -1.08f};
-                        } else {
+                        if (LevGizForce[0] != group->forces[1]) {
                             node1->position = {4.53f, 0.56f, -0.77f};
                             node2->position = {4.20f, 1.12f, -0.91f};
                             node3->position = {4.43f, 1.69f, -1.28f};
+                        } else {
+                            node1->position = {4.66f, 0.56f, -0.98f};
+                            node2->position = {4.50f, 1.12f, -1.35f};
+                            node3->position = {4.38f, 1.69f, -1.08f};
                         }
                     }
                     if (world->ai_sys->path_sys != NULL && world->ai_sys->path_sys->active_path != NULL) {

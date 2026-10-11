@@ -133,8 +133,8 @@ extern "C" {
             for (i32 i = 0; i < key->allocated_chunk_count; ++i) {
                 RemoveAnyChunkControls(reinterpret_cast<i32 *>(key->particle_chunks[i]));
                 debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr];
-                control->particle_chunk = key->particle_chunks[i];
                 control->owner = NULL;
+                control->particle_chunk = key->particle_chunks[i];
                 control->active = effect->particle_type == 7 ? 7 : 0;
                 debinftype *expiry_effect = debtab[key->effect_index];
                 const i32 panel = effect->time_group == 4;
@@ -446,8 +446,8 @@ extern "C" {
                 }
             }
             if (render_chunk != NULL) {
-                render_chunk->particle_chunk = key->particle_chunks[key->allocated_chunk_count + additional_chunks];
                 render_chunk->effect = debtab[key->effect_index];
+                render_chunk->particle_chunk = key->particle_chunks[key->allocated_chunk_count + additional_chunks];
                 render_chunk->key = NULL;
                 render_chunk->position = key->position;
                 render_chunk->effect_orientation = key->effect_orientation;
@@ -462,8 +462,8 @@ extern "C" {
         if (render_chunk != NULL) {
             render_chunk->effect = debtab[key->effect_index];
             render_chunk->key = NULL;
-            render_chunk->effect_orientation = key->effect_orientation;
             render_chunk->position = key->position;
+            render_chunk->effect_orientation = key->effect_orientation;
             render_chunk->render_priority = key->render_priority;
         }
 

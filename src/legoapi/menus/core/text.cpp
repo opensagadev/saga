@@ -188,8 +188,8 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
     const i8 crawl_area = reinterpret_cast<i8 *>(s_crawlPtr)[0x0d];
     if (crawl_area != -1) {
         area = &ADataList[crawl_area];
-        episode_index = static_cast<i8>(area->episode_index);
         area_index = static_cast<i8>(area->area_index);
+        episode_index = static_cast<i8>(area->episode_index);
         body_text_id = area->text_id;
     }
 
@@ -1015,10 +1015,10 @@ extern "C" {
         }
 
         if ((alignment & 2) == 0) {
-            if ((alignment & 8) != 0) {
-                x -= width;
-            } else {
+            if ((alignment & 8) == 0) {
                 x -= width * 0.5f;
+            } else {
+                x -= width;
             }
         }
 
@@ -1161,7 +1161,58 @@ extern "C" {
                 last_line -= lines[last_line][0] == '\0';
             } else if (last_line != 0) {
                 width = 0.0f;
-                if ((alignment & 10) == 0 || constrained) {
+                if ((alignment & 10) != 0 && !constrained) {
+                    i32 end = 0;
+                    i32 begin = 0;
+                    i32 line = 0;
+                    do {
+                        while (decoded[begin] == ' ')
+                            ++begin;
+                        if (line != last_line) {
+                            i32 next = begin;
+                            if (available_width > 0.0f) {
+                                do {
+                                    end = next;
+                                    next = end + 1;
+                                    while (decoded[next] == ' ')
+                                        ++next;
+                                    if (next == bytes) {
+                                        end = bytes - 1;
+                                        break;
+                                    }
+                                    next = FindNextBreak(decoded, next);
+                                    if (static_cast<u8>(decoded[next] - ',') > 2) {
+                                        --next;
+                                        while (decoded[next] == ' ')
+                                            --next;
+                                    }
+                                    i32 length = next - begin + 1;
+                                    if (length > 511)
+                                        length = 511;
+                                    memcpy(candidate, decoded + begin, length);
+                                    candidate[length] = '\0';
+                                    Text3DStringEncode(reinterpret_cast<char *>(candidate), encoded);
+                                } while (NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded) <
+                                         available_width);
+                            }
+                        } else {
+                            end = bytes - 1;
+                        }
+                        i32 length = end - begin + 1;
+                        if (length > 511)
+                            length = 511;
+                        memcpy(lines[line], decoded + begin, length);
+                        lines[line][length] = '\0';
+                        Text3DStringEncode(reinterpret_cast<char *>(lines[line]), encoded);
+                        const f32 line_width =
+                            NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded);
+                        if (width < line_width) {
+                            widest_line = line;
+                            width = line_width;
+                        }
+                        begin = end + 1;
+                    } while (++line <= last_line);
+                } else {
                     const i32 count = last_line + 1;
                     i32 line = 0;
                     do {
@@ -1191,57 +1242,6 @@ extern "C" {
                             widest_line = line;
                             width = line_width;
                         }
-                    } while (++line <= last_line);
-                } else {
-                    i32 end = 0;
-                    i32 begin = 0;
-                    i32 line = 0;
-                    do {
-                        while (decoded[begin] == ' ')
-                            ++begin;
-                        if (line == last_line) {
-                            end = bytes - 1;
-                        } else {
-                            i32 next = begin;
-                            if (available_width > 0.0f) {
-                                do {
-                                    end = next;
-                                    next = end + 1;
-                                    while (decoded[next] == ' ')
-                                        ++next;
-                                    if (next == bytes) {
-                                        end = bytes - 1;
-                                        break;
-                                    }
-                                    next = FindNextBreak(decoded, next);
-                                    if (static_cast<u8>(decoded[next] - ',') > 2) {
-                                        --next;
-                                        while (decoded[next] == ' ')
-                                            --next;
-                                    }
-                                    i32 length = next - begin + 1;
-                                    if (length > 511)
-                                        length = 511;
-                                    memcpy(candidate, decoded + begin, length);
-                                    candidate[length] = '\0';
-                                    Text3DStringEncode(reinterpret_cast<char *>(candidate), encoded);
-                                } while (NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded) <
-                                         available_width);
-                            }
-                        }
-                        i32 length = end - begin + 1;
-                        if (length > 511)
-                            length = 511;
-                        memcpy(lines[line], decoded + begin, length);
-                        lines[line][length] = '\0';
-                        Text3DStringEncode(reinterpret_cast<char *>(lines[line]), encoded);
-                        const f32 line_width =
-                            NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded);
-                        if (width < line_width) {
-                            widest_line = line;
-                            width = line_width;
-                        }
-                        begin = end + 1;
                     } while (++line <= last_line);
                 }
                 last_line -= lines[last_line][0] == '\0';
@@ -1467,14 +1467,14 @@ extern "C" {
                                draw_y_scale * QFONTSCALEY);
                 normal_width = NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, normal_encoded);
             }
-            if (normal_width != 0.0f) {
-                draw_x_scale = (width - button_width) / normal_width * draw_x_scale;
-            } else {
+            if (normal_width == 0.0f) {
                 button_scale = draw_x_scale;
                 if (ButtonScaleMode == 2) {
                     width = draw_y_scale * width / draw_x_scale;
                     button_scale = draw_y_scale;
                 }
+            } else {
+                draw_x_scale = (width - button_width) / normal_width * draw_x_scale;
             }
         }
         if ((alignment & 4) != 0)
@@ -1661,8 +1661,8 @@ void MenuDrawViewTextStrings(MENU_s *menu) {
 
     char text[2048];
     for (i32 i = 0; i < Text_MaxStrings_Overall; ++i) {
-        dme_sx = 0.6f;
         dme_sy = menu->item_scale;
+        dme_sx = 0.6f;
         dme_align = 0;
         GameDrawMenuEntry(menu, const_cast<char *>(" "));
 

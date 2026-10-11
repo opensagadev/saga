@@ -777,8 +777,8 @@ void GizmoBlowUp_AddEffects(nuvec_s *position, GIZMOBLOWUP_s *blowup, i32 offset
                     velocity.z += 0.75f * object->apiobj.velocity.z;
                 }
                 ADDPART_s part = Default_ADDPART;
-                part.velocity = &velocity;
                 part.matrix = &matrix;
+                part.velocity = &velocity;
                 part.special = &type->alternate_specials[i];
                 part.gravity = type->field_0x94;
                 part.flags |= 0x80;
@@ -1092,10 +1092,10 @@ void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float) {
                     }
                 }
             } else if ((blowup->state_flags & GIZMOBLOWUP_STATE_DELAY_ACTIVE) != 0) {
-                if (!(blowup->animation_time > 0.0f)) {
-                    blowup->state_flags &= ~GIZMOBLOWUP_STATE_DELAY_ACTIVE;
-                } else {
+                if (blowup->animation_time > 0.0f) {
                     blowup->animation_time -= FRAMETIME;
+                } else {
+                    blowup->state_flags &= ~GIZMOBLOWUP_STATE_DELAY_ACTIVE;
                 }
             }
             if ((blowup->field_0x9f & 1) != 0) {

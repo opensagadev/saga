@@ -346,10 +346,10 @@ void NuDeferredFilterGen::render() {
     f32 params[4] = {parameters[1], last_sample, parameters[2], parameters[3]};
     PostBlurSetVertexParam(programs[2], 0x80a0, params, 4);
     PostBlurDrawQuad();
-    color->texture = destination;
     color->kind = 0;
-    color->enabled = true;
+    color->texture = destination;
     color->resolved = false;
+    color->enabled = true;
     portColorBuffer.set(color);
 }
 
@@ -730,8 +730,8 @@ void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
                     continue;
                 VuVec minimum, maximum;
                 minimum.x = box.first.x - box.second.x;
-                minimum.y = box.first.y - box.second.y;
                 minimum.z = box.first.z - box.second.z;
+                minimum.y = box.first.y - box.second.y;
                 maximum.x = box.first.x + box.second.x;
                 maximum.y = box.first.y + box.second.y;
                 maximum.z = box.first.z + box.second.z;
@@ -777,8 +777,8 @@ void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
             NuDisplayListLinkItems(list, 1);
             NUMTL *material = scene->mtls[0];
             list->items->type = 0x80;
-            list->items->id = 3;
             list->items->next = material;
+            list->items->id = 3;
             ++list->items;
             NuDisplayListLinkList(list, set.scene_first[0], set.scene_cursor[0]);
         }
@@ -787,8 +787,8 @@ void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
             NuDisplayListLinkItems(list, 1);
             NUMTL *material = scene->mtls[0];
             list->items->type = 0x80;
-            list->items->id = 3;
             list->items->next = material;
+            list->items->id = 3;
             ++list->items;
             NuDisplayListLinkList(list, set.scene_first[1], set.scene_cursor[1]);
         }

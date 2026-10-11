@@ -525,8 +525,8 @@ __used__ static i32 Action_BigJump(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
     GameObject_s *object = packet->owner->apiobj.objptr;
     if (param_5 != 0) {
         GameObject_s *target = NULL;
-        i32 to_origin = 0;
         i32 check_terrain = 0;
+        i32 to_origin = 0;
         jump_factor = 1.0f;
         i32 slam = 0;
 
@@ -1401,6 +1401,7 @@ static i32 Action_SetAIOverrideControl(AISYS *system, AISCRIPTPROCESS *processor
 
 static i32 Action_SetDoomedEscapeLocator(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                          i32 param_count, i32 first_time, f32) {
+    char locator_name[64];
     if (first_time) {
         GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
         if (param_count != 0) {
@@ -1425,7 +1426,7 @@ static i32 Action_SetDoomedEscapeLocator(AISYS *system, AISCRIPTPROCESS *process
                 object->field_0xefd &= ~8u;
                 object->doomed_escape_locator = NULL;
                 if (name != NULL) {
-                    char locator_name[64];
+
                     if (indexed && static_cast<i8>(object->apiobj.field_0x27c) != -1)
                         sprintf(locator_name, "%s_%d", name, static_cast<i8>(object->apiobj.field_0x27c));
                     else if (personal && object->apiobj.character_data != NULL)
@@ -1883,11 +1884,11 @@ __used__ static i32 Action_SetParam(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
                 } else {
                     // Expressions use the packet's primary processor, even for a secondary action processor.
                     if ((value = NuStrIStr(params[i], "inc=")) == NULL) {
-                        if ((value = NuStrIStr(params[i], "dec=")) != NULL) {
+                        if ((value = NuStrIStr(params[i], "dec=")) == NULL) {
+                            processor->params[index] = AIParamToFloatEx(packet, &packet->script_process, params[i]);
+                        } else {
                             processor->params[index] -=
                                 AIParamToFloatEx(packet, &packet->script_process, value + NuStrLen("dec="));
-                        } else {
-                            processor->params[index] = AIParamToFloatEx(packet, &packet->script_process, params[i]);
                         }
                     } else {
                         processor->params[index] +=
@@ -2514,10 +2515,10 @@ __used__ static i32 Action_EnableSock(AISYS *sys, AISCRIPTPROCESS *processor, AI
                 enabled = 0;
             }
         }
-        if (enabled != 0) {
-            SockOn(WORLD->sock_sys, sock_index);
-        } else {
+        if (enabled == 0) {
             SockOff(WORLD->sock_sys, sock_index);
+        } else {
+            SockOn(WORLD->sock_sys, sock_index);
         }
     }
     return 1;
@@ -2946,7 +2947,9 @@ __used__ static i32 Action_SpinOnSpot(AISYS *sys, AISCRIPTPROCESS *processor, AI
     GameObject_s *object = packet->owner->apiobj.objptr;
     f32 zero = 0.0f;
     u16 angle;
-    if (param_5 != 0) {
+    if (param_5 == 0) {
+        angle = processor->action_data_6;
+    } else {
         f32 min_time = 0.0f;
         f32 max_time = 0.0f;
         for (i32 index = 0; index < param_4; ++index) {
@@ -2975,8 +2978,6 @@ __used__ static i32 Action_SpinOnSpot(AISYS *sys, AISCRIPTPROCESS *processor, AI
             processor->action_timer = NuRandFloat() * (max_time - min_time) + min_time;
         }
         angle = object->apiobj.field_0x276;
-    } else {
-        angle = processor->action_data_6;
     }
 
     angle += static_cast<i32>(param_6 * processor->action_data_4);
@@ -3170,6 +3171,7 @@ static i32 Action_FlatTerrain(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char
 
 __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                        i32 param_count, i32 is_first_time, f32 elapsed) {
+    NUVEC distance_vector;
     enum GO_TO_LOCATOR_FLAGS : u8 {
         GO_TO_LOCATOR_ON_GROUND = 1 << 0,
         GO_TO_LOCATOR_XZ_RANGE_CHECK = 1 << 1,
@@ -3204,7 +3206,6 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
             return 0;
         }
 
-        NUVEC distance_vector;
         const f32 distance_squared = (processor->action_data_1 & GO_TO_LOCATOR_XZ_RANGE_CHECK) != 0
                                          ? NuVecXZDistSqr(&packet->terrain_origin, &locator->position, &distance_vector)
                                          : NuVecDistSqr(&packet->terrain_origin, &locator->position, &distance_vector);
@@ -3339,16 +3340,16 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
         return 1;
     }
 
-    if ((processor->action_data_1 & GO_TO_LOCATOR_IGNORE_PATH) != 0) {
-        AIMoveInstruction(packet, &locator->position, 0.0f, &locator->path_info, AIPACKET_MOVEMENT_DIRECT,
+    if ((processor->action_data_1 & GO_TO_LOCATOR_IGNORE_PATH) == 0) {
+        AIMoveInstruction(packet, &locator->position, 0.0f, &locator->path_info, AIPACKET_MOVEMENT_TO_DESTINATION,
                           packet->movement_instruction_parameter);
     } else {
-        AIMoveInstruction(packet, &locator->position, 0.0f, &locator->path_info, AIPACKET_MOVEMENT_TO_DESTINATION,
+        AIMoveInstruction(packet, &locator->position, 0.0f, &locator->path_info, AIPACKET_MOVEMENT_DIRECT,
                           packet->movement_instruction_parameter);
     }
 
-    processor->action_pos.x = 0.0f;
     processor->action_pos.y = 0.0f;
+    processor->action_pos.x = 0.0f;
     processor->action_pos.z = 1.0f;
     NuVecRotateY(&processor->action_pos, &processor->action_pos, locator->flags);
     NuVecAdd(&processor->action_pos, &processor->action_pos, &locator->position);
@@ -3953,9 +3954,9 @@ __used__ static i32 Action_GoToNewLevel(AISYS *sys, AISCRIPTPROCESS *processor, 
 
     if (param_5 != 0 && param_4 > 0) {
         LEVELDATA *level = NULL;
-        char *cutscene_name = NULL;
-
         i32 param_index = 0;
+
+        char *cutscene_name = NULL;
         do {
             char *value = NuStrIStr(params[param_index], "level=");
             if (value != NULL) {
@@ -4245,6 +4246,7 @@ __used__ static i32 Action_SetLevelPath(AISYS *sys, AISCRIPTPROCESS *processor, 
 
 __used__ static i32 Action_SetStateArea(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                         i32 param_4, i32 param_5, f32 param_6) {
+    NUVEC difference;
     (void)sys;
     (void)param_6;
     if (param_5 == 0) {
@@ -4293,7 +4295,6 @@ __used__ static i32 Action_SetStateArea(AISYS *sys, AISCRIPTPROCESS *processor, 
             continue;
         }
 
-        NUVEC difference;
         NuVecSub(&difference, &origin, &object->apiobj.position);
         const f32 distance_squared =
             difference.x * difference.x + difference.y * difference.y + difference.z * difference.z;
@@ -4309,11 +4310,10 @@ __used__ static i32 Action_SetStateArea(AISYS *sys, AISCRIPTPROCESS *processor, 
                 continue;
             }
         }
-        if (!(range_squared > distance_squared)) {
-            continue;
+        if (range_squared > distance_squared) {
+            AIPACKET *object_packet = object->apiobj.ai;
+            object_packet->script_process.next_state = AIStateFind(state_name, object_packet->script_process.script);
         }
-        AIPACKET *object_packet = object->apiobj.ai;
-        object_packet->script_process.next_state = AIStateFind(state_name, object_packet->script_process.script);
     }
     return 1;
 }
@@ -4361,11 +4361,11 @@ __used__ static i32 Action_SnapToOrigin(AISYS *sys, AISCRIPTPROCESS *processor, 
     object->apiobj.facing_angle = rotation;
     object->apiobj.movement_facing_angle = rotation;
     object->ai.path_info.on_path = 0;
-    object->apiobj.initial_position = object->apiobj.position;
     object->apiobj.collision_position = object->apiobj.position;
+    object->apiobj.initial_position = object->apiobj.position;
     plr_lastpos = object->apiobj.position;
-    object->apiobj.start_position = object->apiobj.position;
     object->apiobj.respawn_position = object->apiobj.position;
+    object->apiobj.start_position = object->apiobj.position;
     object->apiobj.last_safe_position = object->apiobj.position;
     object->saved_position = object->apiobj.position;
     object->apiobj.velocity = v000;
@@ -4720,10 +4720,10 @@ __used__ static i32 Action_CompleteLevel(AISYS *sys, AISCRIPTPROCESS *processor,
         if (FreePlay != 0 && level != NULL && (level->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) != 0) {
             level = Area_FindStatusLevel(WORLD->area, NULL);
         }
-        if (level != NULL) {
-            GoToNewLevel(level->idx);
-        } else {
+        if (level == NULL) {
             CompleteLevel(WORLD);
+        } else {
+            GoToNewLevel(level->idx);
         }
     }
     return 1;
@@ -5625,9 +5625,11 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
         }
         processor->action_timer = initial_fire_fraction * processor->action_data_5;
         if (!explicit_fire_range) {
-            processor->action_data_4 = packet->movement_instruction_parameter == 0.0f
-                                           ? 9999.9f
-                                           : packet->movement_instruction_parameter + aitol;
+            if (packet->movement_instruction_parameter == 0.0f) {
+                processor->action_data_4 = 9999.9f;
+            } else {
+                processor->action_data_4 = packet->movement_instruction_parameter + aitol;
+            }
         }
     }
 
@@ -5656,12 +5658,12 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
     const f32 distance_squared = NuVecDistSqr(&opponent->apiobj.position, &packet->owner->apiobj.position, &difference);
     f32 goal_range;
     if ((object->field_0xf01 & 0x20) != 0) {
-        if (oneAtOnce_CanAttack(object, static_cast<APIOBJECT *>(object->ai.opponent)->objptr)) {
-            goal_range = 0.1f;
-            processor->action_data_1 &= static_cast<u8>(~2u);
-        } else {
+        if (!(oneAtOnce_CanAttack(object, static_cast<APIOBJECT *>(object->ai.opponent)->objptr))) {
             goal_range = oneAtOnce_GetHoldRange(object);
             processor->action_data_1 |= 2;
+        } else {
+            goal_range = 0.1f;
+            processor->action_data_1 &= static_cast<u8>(~2u);
         }
     } else {
         goal_range = packet->movement_instruction_parameter;
@@ -6189,8 +6191,8 @@ __used__ static i32 Action_SnapToPosition(AISYS *sys, AISCRIPTPROCESS *processor
         object = packet->owner->apiobj.objptr;
     }
 
-    i32 rotation = 0;
     i32 check_terrain = 1;
+    i32 rotation = 0;
     f32 x = 0.0f;
     f32 y = 0.0f;
     f32 z = 0.0f;
@@ -6249,8 +6251,8 @@ __used__ static i32 Action_SnapToPosition(AISYS *sys, AISCRIPTPROCESS *processor
     object->apiobj.initial_position = object->apiobj.position;
     object->apiobj.collision_position = object->apiobj.position;
     plr_lastpos = object->apiobj.position;
-    object->apiobj.start_position = object->apiobj.position;
     object->apiobj.respawn_position = object->apiobj.position;
+    object->apiobj.start_position = object->apiobj.position;
     object->apiobj.last_safe_position = object->apiobj.position;
     object->saved_position = object->apiobj.position;
     object->apiobj.velocity = v000;
@@ -6303,8 +6305,8 @@ __used__ static i32 Action_AddGameMsgCount(AISYS *sys, AISCRIPTPROCESS *processo
         }
         if (param_4 > 0) {
             NUVEC *position = NULL;
-            i32 count = 0;
             i32 total = 0;
+            i32 count = 0;
             u8 red = 0;
             u8 green = 0;
             u8 blue = 0;
@@ -6700,8 +6702,8 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
                     object->context_x_rotation = rotation;
                 } else if (zipdown != 0 && !(fall_chance > 0.0f && fall_chance > NuRandFloat())) {
                     object->field_0x7a5 = 0x35;
-                    object->zipup_entry_position = object->apiobj.upper_position;
                     object->context_animation = 0x2a;
+                    object->zipup_entry_position = object->apiobj.upper_position;
                     SetWeaponOut(object);
                 }
                 if (cheap != 0) {
@@ -6830,8 +6832,8 @@ static i32 Action_SnapToSockPosition(AISYS *, AISCRIPTPROCESS *processor, AIPACK
             if (index > 1) {
                 NUVEC spread = {1.0f, 0.0f, 0.0f};
                 NuVecRotateZ(&spread, &spread, NuAngAdd(random_angle, (index << 16) / 3));
-                x += spread.x;
                 y += spread.y;
+                x += spread.x;
             }
             if (y != offset_scale || x != offset_scale) {
                 position.x = x;
@@ -7317,6 +7319,7 @@ extern "C" {
 
 static i32 Action_FollowDirection(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                   i32 param_count, i32 first_time, f32 delta_time) {
+    NUVEC difference;
     if (packet == NULL || packet->owner == NULL)
         return 1;
     GameObject_s *object = packet->owner->apiobj.objptr;
@@ -7353,7 +7356,7 @@ static i32 Action_FollowDirection(AISYS *sys, AISCRIPTPROCESS *processor, AIPACK
     AIMoveInstruction(packet, &destination, 0.0f, NULL, AIPACKET_MOVEMENT_TO_DESTINATION, 0.0f);
     APIOBJECT *opponent = packet->opponent_object;
     if (processor->follow_direction_fire_range > 0.0f && opponent != NULL && opponent->ai != NULL) {
-        NUVEC difference;
+
         f32 distance_squared = NuVecDistSqr(&packet->owner->apiobj.position, &opponent->position, &difference);
         if (((WORLD->api_object_sys->line_of_sight[object->apiobj.field_0x289] >> opponent->field_0x289) & 1) &&
             object->apiobj.model_draw_result != 0 &&
@@ -8045,8 +8048,8 @@ __used__ static i32 Action_GoToOriginalPath(AISYS *sys, AISCRIPTPROCESS *process
         return 0;
     }
 
-    AIPATH *original_path = sys->creatures[packet->field_0x134].path_info.path;
     AIPATH *current_path = packet->path_info.path;
+    AIPATH *original_path = sys->creatures[packet->field_0x134].path_info.path;
     if (param_5 != 0) {
         if (current_path == original_path) {
             return 1;
@@ -10068,12 +10071,12 @@ i32 Action_Circle(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char
     NUVEC *position = NULL;
     AIPATHINFO *path = NULL;
     if ((processor->action_data_1 & 8) != 0) {
-        position = &processor->action_pos;
         path = &packet->path_info;
+        position = &processor->action_pos;
     } else if ((processor->action_data_1 & 0x10) != 0) {
         AILOCATOR *locator = static_cast<AILOCATOR *>(processor->action_data_3);
-        position = &locator->position;
         path = &locator->path_info;
+        position = &locator->position;
     } else if ((processor->action_data_1 & 0x20) != 0) {
         AICREATURE *creature = &sys->creatures[packet->field_0x134];
         path = &creature->path_info;
@@ -10582,26 +10585,25 @@ extern "C" void AILocatorSet_AssignNearestLocator(AISYS *system, AILOCATORSET *l
 
         i32 nearest_index = -1;
         for (i32 index = 0; index < locator_set->locator_count; ++index) {
-            if (ignore_assigned != 0 && locator_set->assigned[index] != 0xff) {
-                continue;
-            }
+            if (!(ignore_assigned != 0 && locator_set->assigned[index] != 0xff)) {
 
-            AILOCATOR *locator = &system->locators[locator_set->locator_entries[index]];
-            if (off_screen_radius != 0.0f &&
-                NuCameraClipTestSphere(&locator->position, off_screen_radius, &numtx_identity) == 0) {
-                continue;
-            }
+                AILOCATOR *locator = &system->locators[locator_set->locator_entries[index]];
+                if (off_screen_radius != 0.0f &&
+                    NuCameraClipTestSphere(&locator->position, off_screen_radius, &numtx_identity) == 0) {
+                    continue;
+                }
 
-            const f32 first_distance = NuVecDistSqr(position, &locator->position, &difference);
-            if (first_distance < nearest_distance) {
-                nearest_distance = first_distance;
-                nearest_index = index;
-            }
-            if (second_position != NULL) {
-                const f32 second_distance = NuVecDistSqr(second_position, &locator->position, &difference);
-                if (second_distance < nearest_distance) {
-                    nearest_distance = second_distance;
+                const f32 first_distance = NuVecDistSqr(position, &locator->position, &difference);
+                if (first_distance < nearest_distance) {
+                    nearest_distance = first_distance;
                     nearest_index = index;
+                }
+                if (second_position != NULL) {
+                    const f32 second_distance = NuVecDistSqr(second_position, &locator->position, &difference);
+                    if (second_distance < nearest_distance) {
+                        nearest_distance = second_distance;
+                        nearest_index = index;
+                    }
                 }
             }
         }
@@ -10622,33 +10624,32 @@ extern "C" void AILocatorSet_AssignFurthestLocator(AISYS *system, AILOCATORSET *
         }
 
         NUVEC difference;
-        f32 furthest_distance = 0.0f;
         i32 furthest_index = -1;
+        f32 furthest_distance = 0.0f;
         for (i32 index = 0; index < locator_set->locator_count; ++index) {
             if (ignore_assigned != 0 && locator_set->assigned[index] != 0xff) {
                 continue;
             }
 
             AILOCATOR *locator = &system->locators[locator_set->locator_entries[index]];
-            if (off_screen_radius != 0.0f &&
-                NuCameraClipTestSphere(&locator->position, off_screen_radius, &numtx_identity) == 0) {
-                continue;
-            }
+            if (!(off_screen_radius != 0.0f &&
+                  NuCameraClipTestSphere(&locator->position, off_screen_radius, &numtx_identity) == 0)) {
 
-            f32 distance = NuVecDistSqr(position, &locator->position, &difference);
-            if (distance > furthest_distance) {
-                if (second_position != NULL) {
-                    const f32 second_distance = NuVecDistSqr(second_position, &locator->position, &difference);
-                    if (!(second_distance > furthest_distance)) {
-                        continue;
+                f32 distance = NuVecDistSqr(position, &locator->position, &difference);
+                if (distance > furthest_distance) {
+                    if (second_position != NULL) {
+                        const f32 second_distance = NuVecDistSqr(second_position, &locator->position, &difference);
+                        if (!(second_distance > furthest_distance)) {
+                            continue;
+                        }
+                        if (second_distance < distance) {
+                            distance = second_distance;
+                        }
                     }
-                    if (second_distance < distance) {
-                        distance = second_distance;
+                    if (max_range == 0.0f || max_range * max_range > distance) {
+                        furthest_distance = distance;
+                        furthest_index = index;
                     }
-                }
-                if (max_range == 0.0f || max_range * max_range > distance) {
-                    furthest_distance = distance;
-                    furthest_index = index;
                 }
             }
         }
@@ -10674,17 +10675,16 @@ extern "C" void AILocatorSet_AssignRandomLocator(AISYS *system, AILOCATORSET *lo
     }
     i32 candidate_count = 0;
     for (i32 index = 0; index < locator_set->locator_count; ++index) {
-        if (ignore_assigned != 0 && locator_set->assigned[index] != 0xff) {
-            continue;
-        }
+        if (!(ignore_assigned != 0 && locator_set->assigned[index] != 0xff)) {
 
-        AILOCATOR *locator = &system->locators[locator_set->locator_entries[index]];
-        if (off_screen_radius != 0.0f &&
-            NuCameraClipTestSphere(&locator->position, off_screen_radius, &numtx_identity) == 0) {
-            continue;
-        }
-        if (NuVecDistSqr(position, &locator->position, &difference) <= max_distance) {
-            ++candidate_count;
+            AILOCATOR *locator = &system->locators[locator_set->locator_entries[index]];
+            if (off_screen_radius != 0.0f &&
+                NuCameraClipTestSphere(&locator->position, off_screen_radius, &numtx_identity) == 0) {
+                continue;
+            }
+            if (NuVecDistSqr(position, &locator->position, &difference) <= max_distance) {
+                ++candidate_count;
+            }
         }
     }
 
@@ -10695,18 +10695,17 @@ extern "C" void AILocatorSet_AssignRandomLocator(AISYS *system, AILOCATORSET *lo
     const i32 selected_candidate = NuRandInt() % candidate_count;
     i32 candidate_index = 0;
     for (i32 index = 0; index < locator_set->locator_count; ++index) {
-        if (ignore_assigned != 0 && locator_set->assigned[index] != 0xff) {
-            continue;
-        }
+        if (!(ignore_assigned != 0 && locator_set->assigned[index] != 0xff)) {
 
-        AILOCATOR *locator = &system->locators[locator_set->locator_entries[index]];
-        if (NuVecDistSqr(&object->position, &locator->position, &difference) <= max_distance) {
-            if (candidate_index == selected_candidate) {
-                object->ai->locator = locator;
-                locator_set->assigned[index] = object->field_0x289;
-                break;
+            AILOCATOR *locator = &system->locators[locator_set->locator_entries[index]];
+            if (NuVecDistSqr(&object->position, &locator->position, &difference) <= max_distance) {
+                if (candidate_index == selected_candidate) {
+                    object->ai->locator = locator;
+                    locator_set->assigned[index] = object->field_0x289;
+                    break;
+                }
+                ++candidate_index;
             }
-            ++candidate_index;
         }
     }
 }

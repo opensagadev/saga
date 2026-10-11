@@ -753,20 +753,20 @@ void DebrisTimeSlip(i32 group) {
     for (i32 i = 0; i < maxdebkeys; ++i) {
         debkeydatatype_s *key = &debkeydata[i];
         debinftype *effect = debtab[key->effect_index];
-        if (effect->time_group == 4 ? group != 1 : group != 0)
-            continue;
-        key->last_update_time -= 800.0f;
-        key->emission_time -= 800.0f;
-        key->previous_emission_time -= 800.0f;
-        key->field_1e4 -= 800.0f;
-        key->emission_epoch -= 800.0f;
-        for (i32 chunk = 0; chunk < 32; ++chunk) {
-            if (key->particle_chunks[chunk] == NULL)
-                continue;
-            dma_particle_chunk_s *particles = key->particle_chunks[chunk];
-            i32 count = effect->particle_type == 7 ? 12 : 32;
-            for (i32 particle = 0; particle < count; ++particle)
-                particles->particles[particle].start_time -= 800.0f;
+        if (!(effect->time_group == 4 ? group != 1 : group != 0)) {
+            key->last_update_time -= 800.0f;
+            key->emission_time -= 800.0f;
+            key->previous_emission_time -= 800.0f;
+            key->field_1e4 -= 800.0f;
+            key->emission_epoch -= 800.0f;
+            for (i32 chunk = 0; chunk < 32; ++chunk) {
+                if (key->particle_chunks[chunk] == NULL)
+                    continue;
+                dma_particle_chunk_s *particles = key->particle_chunks[chunk];
+                i32 count = effect->particle_type == 7 ? 12 : 32;
+                for (i32 particle = 0; particle < count; ++particle)
+                    particles->particles[particle].start_time -= 800.0f;
+            }
         }
     }
     for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
@@ -848,8 +848,8 @@ extern "C" {
             debkeydatatype_s &key = debkeydata[handle];
             NUMTX *mtx = &key.emitter_orientation;
             memcpy(mtx, source, sizeof(NUMTX));
-            mtx->m30 = 0.0f;
             mtx->m31 = 0.0f;
+            mtx->m30 = 0.0f;
             mtx->m32 = 0.0f;
             key.orientation_dirty = 0.0f;
         }
@@ -1005,8 +1005,8 @@ extern "C" {
             debkeydatatype_s &key = debkeydata[handle];
             NUMTX *mtx = &key.effect_orientation;
             memcpy(mtx, source, sizeof(NUMTX));
-            mtx->m30 = 0.0f;
             mtx->m31 = 0.0f;
+            mtx->m30 = 0.0f;
             mtx->m32 = 0.0f;
             key.orientation_dirty = 0.0f;
         }
@@ -1071,8 +1071,8 @@ extern "C" {
             key.position.x = source->m30;
             key.position.y = source->m31;
             key.position.z = source->m32;
-            mtx->m30 = 0.0f;
             mtx->m31 = 0.0f;
+            mtx->m30 = 0.0f;
             mtx->m32 = 0.0f;
             key.orientation_dirty = 0.0f;
         }

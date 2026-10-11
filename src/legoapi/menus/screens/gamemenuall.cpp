@@ -276,9 +276,7 @@ void APIMenuDrawMemCardSlots(MENU *menu, f32 y) {
         if (slot < 0 || slot > menu->last_column) {
             continue;
         }
-        if (slot < count) {
-            drawslotinfofn(x, y, highlight, slot);
-        } else {
+        if (!(slot < count)) {
             i32 red, green, blue;
             if (menu->selected_column == count && menu->selected_row == 0 && TestForController()) {
                 if (menu_pulsate > 0.0f) {
@@ -300,11 +298,13 @@ void APIMenuDrawMemCardSlots(MENU *menu, f32 y) {
                 blue = MenuSlotColourLerp(MENUFLASH0B, MENUNORMALB, menu_pulse);
             } else {
                 red = MENUENTRYR;
-                green = MENUENTRYG;
                 blue = MENUENTRYB;
+                green = MENUENTRYG;
             }
             MenuText3DEx(apitxt_NEWSAVE, x, y, 1.0f, MENUTEXTSCALE * 0.85f, MENUTEXTSCALE * 0.85f, MENUTEXTSCALE, 0,
                          red, green, blue, static_cast<u8>(MenuA));
+        } else {
+            drawslotinfofn(x, y, highlight, slot);
         }
     }
 
@@ -316,8 +316,8 @@ void APIMenuDrawMemCardSlots(MENU *menu, f32 y) {
             blue = MenuSlotColourLerp(MENUFLASH0B, MENUFLASH1B, menu_pulsate);
         } else if (menu_flash != 0) {
             red = MENUFLASH0R;
-            green = MENUFLASH0G;
             blue = MENUFLASH0B;
+            green = MENUFLASH0G;
         } else {
             red = MENUFLASH1R;
             green = MENUFLASH1G;
@@ -2506,12 +2506,12 @@ extern "C" {
                         menu->selected_row = first_row;
                 }
             } else if (up_pressed != 0 && (wrap || menu->selected_row > first_row)) {
-                if (wrap) {
+                if (!wrap) {
+                    --menu->selected_row;
+                } else {
                     --menu->selected_row;
                     if (menu->selected_row < first_row)
                         menu->selected_row = last_row;
-                } else {
-                    --menu->selected_row;
                 }
             }
             if (menu->selected_row != old_row) {

@@ -807,20 +807,20 @@ namespace nu2api {
             const u8 baseFlag = descBytes[0x1b8];
 
             u8 v24 = 0;
-            if ((baseFlag & 1) != 0 && !(filter->texture_id_threshold >= thresholdB)) {
-                v24 = 2;
-            } else {
+            if (!((baseFlag & 1) != 0 && !(filter->texture_id_threshold >= thresholdB))) {
                 if ((baseFlag & 2) != 0) {
                     v24 = filter->texture_id_threshold < thresholdB;
                 }
+            } else {
+                v24 = 2;
             }
             block[0x24] = v24;
 
             const u8 b2 = descBytes[0x1ba];
-            if ((b2 & 0x10)) {
-                block[0x25] = static_cast<u8>((filter->texture_id_threshold < thresholdA) + 1);
-            } else {
+            if (!(b2 & 0x10)) {
                 block[0x25] = 0;
+            } else {
+                block[0x25] = static_cast<u8>((filter->texture_id_threshold < thresholdA) + 1);
             }
         }
 

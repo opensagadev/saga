@@ -822,12 +822,12 @@ extern "C" {
             cursor.void_ptr = DefragInstBaseMem;
         }
         for (CutSceneCleanUpEntry *entry = begin; entry < end; ++entry) {
-            if (entry->flags != 0) {
+            if (entry->flags == 0) {
+                DefragInstDestroyedFn(entry->handle);
+            } else {
                 instNUGCUTSCENE_s *instance =
                     static_cast<instNUGCUTSCENE_s *>(DefragCreateInstFn(entry->handle, entry->cutscene, &cursor));
                 instance->accumulated_stream_duration = entry->accumulated_duration;
-            } else {
-                DefragInstDestroyedFn(entry->handle);
             }
         }
         if (background_cutscene_instances != NULL) {
@@ -1035,21 +1035,21 @@ extern "C" {
             cutscene->string_delta = reinterpret_cast<isize>(cutscene) - cutscene->string_delta;
             cutscene->loaded_size = bytes;
             cutscene->relocation_delta = anim_delta;
-            if ((cutscene->flags & 8) != 0) {
-                NuGCutSceneFixPtrs_Title(cutscene, 0);
-            } else {
+            if ((cutscene->flags & 8) == 0) {
                 NuGCutSceneFixPtrs_Title(cutscene, anim_delta);
+            } else {
+                NuGCutSceneFixPtrs_Title(cutscene, 0);
             }
             if ((cutscene->flags & 1) != 0 && flags == 0) {
                 usize stream_buffer = ALIGN(buf->addr + cutscene->field_4c, 0x10);
                 cutscene->stream_buffer_0 = reinterpret_cast<NUGCUTSCENE_s *>(stream_buffer);
                 stream_buffer += cutscene->stream_buffer_size;
-                if (NumCommonStreamingBuffers == 0) {
+                if (NumCommonStreamingBuffers != 0) {
+                    stream_buffer += 0x400;
+                } else {
                     stream_buffer = ALIGN(stream_buffer + 0x400, 0x10);
                     cutscene->stream_buffer_1 = reinterpret_cast<NUGCUTSCENE_s *>(stream_buffer);
                     stream_buffer += cutscene->stream_buffer_size + 0x400;
-                } else {
-                    stream_buffer += 0x400;
                 }
                 buf->addr = stream_buffer;
                 char *filename = reinterpret_cast<char *>(buf->void_ptr);
@@ -1069,10 +1069,10 @@ extern "C" {
             anim_delta = reinterpret_cast<isize>(cutscene) - cutscene->relocation_delta;
             cutscene->relocation_delta = anim_delta;
         }
-        if ((cutscene->flags & 8) != 0) {
-            NuGCutSceneFixPtrs_Title(cutscene, 0);
-        } else {
+        if ((cutscene->flags & 8) == 0) {
             NuGCutSceneFixPtrs_Title(cutscene, anim_delta);
+        } else {
+            NuGCutSceneFixPtrs_Title(cutscene, 0);
         }
         if (cutscene->version > 1 && (cutscene->flags & 1) != 0 && flags == 0) {
             usize stream_buffer;
@@ -1095,12 +1095,12 @@ extern "C" {
             stream_buffer = ALIGN(stream_buffer, 0x10);
             cutscene->stream_buffer_0 = reinterpret_cast<NUGCUTSCENE_s *>(stream_buffer);
             stream_buffer += cutscene->stream_buffer_size;
-            if (NumCommonStreamingBuffers == 0) {
+            if (NumCommonStreamingBuffers != 0) {
+                stream_buffer += 0x400;
+            } else {
                 stream_buffer = ALIGN(stream_buffer + 0x400, 0x10);
                 cutscene->stream_buffer_1 = reinterpret_cast<NUGCUTSCENE_s *>(stream_buffer);
                 stream_buffer += cutscene->stream_buffer_size + 0x400;
-            } else {
-                stream_buffer += 0x400;
             }
             buf->addr = stream_buffer;
             char *filename = reinterpret_cast<char *>(buf->void_ptr);
@@ -1123,10 +1123,10 @@ extern "C" {
         isize anim_delta = reinterpret_cast<isize>(cutscene) - cutscene->relocation_delta;
         cutscene->string_delta = reinterpret_cast<isize>(cutscene) - cutscene->string_delta;
         cutscene->relocation_delta = anim_delta;
-        if ((cutscene->flags & 8) != 0) {
-            NuGCutSceneFixPtrs_Title(cutscene, 0);
-        } else {
+        if ((cutscene->flags & 8) == 0) {
             NuGCutSceneFixPtrs_Title(cutscene, anim_delta);
+        } else {
+            NuGCutSceneFixPtrs_Title(cutscene, 0);
         }
         NuGCutSceneRemapFocusIdToLocaterNum(cutscene, buffer);
         cutscene->string_delta = 0;

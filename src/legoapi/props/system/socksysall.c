@@ -1610,8 +1610,8 @@ extern "C" {
                 if (camera_shake != NULL) {
                     *camera_shake += sock->camera_shake;
                 }
-                single_player_pullback += sock->single_player_pullback;
                 two_player_pullback += sock->two_player_pullback;
+                single_player_pullback += sock->single_player_pullback;
                 camera_height_above_ground += sock->camera_height_above_ground;
                 ++contributing_sockets;
             }
@@ -1632,8 +1632,8 @@ extern "C" {
             if (camera_shake != NULL) {
                 *camera_shake *= working_scale;
             }
-            single_player_pullback *= working_scale;
             two_player_pullback *= working_scale;
+            single_player_pullback *= working_scale;
             if (separation_scale != NULL) {
                 *separation_scale = two_player_pullback * working_scale;
             }

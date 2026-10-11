@@ -1210,10 +1210,10 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
                 }
             } else {
                 // No local state or no clipping — copy geometry if needed.
-                if (dl->mtl_last != dl->first) {
-                    copyMaterialGeometry(dl, dl->first, sc);
-                } else {
+                if (dl->mtl_last == dl->first) {
                     linkSceneGeometry(dl);
+                } else {
+                    copyMaterialGeometry(dl, dl->first, sc);
                 }
                 last_local = nullptr;
             }
@@ -1380,12 +1380,12 @@ extern "C" void NuDisplayListBurstRndrSpecial(nuhspecial_s *handle, u32 count, N
                     void *transform = DisplayListCreateGeomTransformPS(buffer, matrix, scene->mtls[list->mtl_id],
                                                                        geometry_data, NULL);
                     list->items->next = transform;
+                    list->items->id = 3;
                     list->items->type = 0x8c;
-                    list->items->id = 3;
                     NUDISPLAYLISTITEM *first = list->items++;
-                    list->items->type = 0x82;
-                    list->items->next = geometry_data;
                     list->items->id = 3;
+                    list->items->next = geometry_data;
+                    list->items->type = 0x82;
                     NUDISPLAYLISTITEM *last = list->items++;
                     DisplayListSetAlphaPS(first, last, 1);
                 }
@@ -1394,13 +1394,13 @@ extern "C" void NuDisplayListBurstRndrSpecial(nuhspecial_s *handle, u32 count, N
                     NUMTX *matrix = &matrices[static_cast<u8>(visible[i])];
                     void *transform = DisplayListCreateGeomTransformPS(buffer, matrix, scene->mtls[list->mtl_id],
                                                                        geometry_data, NULL);
+                    list->items->next = transform;
                     list->items->id = 3;
                     list->items->type = 0x8c;
-                    list->items->next = transform;
                     NUDISPLAYLISTITEM *first = list->items++;
-                    list->items->type = 0x82;
-                    list->items->id = 3;
                     list->items->next = geometry_data;
+                    list->items->id = 3;
+                    list->items->type = 0x82;
                     NUDISPLAYLISTITEM *last = list->items++;
                     DisplayListSetAlphaPS(first, last, 1);
                 }
@@ -1412,8 +1412,8 @@ extern "C" void NuDisplayListBurstRndrSpecial(nuhspecial_s *handle, u32 count, N
                                                                      scene->items[object->indices[material]].next);
                 void *faceon =
                     NuDisplayListPrepareFaceonPS(buffer, scene->items[object->indices[material]].next, matrix);
-                list->items->type = 0x90;
                 list->items->next = transform;
+                list->items->type = 0x90;
                 list->items->id = 3;
                 NUDISPLAYLISTITEM *first = list->items++;
                 list->items->type = 0x8f;

@@ -570,8 +570,8 @@ void NuMemoryManager::AddPage(void *ptr, u32 size, bool _unknown) {
     memset(page, 0, sizeof(Page));
 
     page->original_ptr = ptr;
-    page->size = size;
     page->end = (u32 *)(allocation_end - 4);
+    page->size = size;
     page->first_header = (Header *)((usize)page + 0x20);
     page->is_external = _unknown;
 
@@ -800,14 +800,7 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
 
     stranded_bytes_count = 0;
 
-    if ((m_flags & MEM_MANAGER_DEBUG) == 0) {
-        leak_count = 0;
-
-        if (this->stats.used_block_count > this->cur_ctx->used_block_count) {
-            leak_count = this->stats.used_block_count - this->cur_ctx->used_block_count;
-            strcpy(ctx_name, this->cur_ctx->name);
-        }
-    } else {
+    if ((m_flags & MEM_MANAGER_DEBUG) != 0) {
         u32 _unknown;
         leak_count = 0;
         _unknown = 0;
@@ -854,10 +847,10 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
             largest_stranded_dbg = (DebugHeader *)largest_stranded;
 
             block_name = largest_stranded_dbg->name;
-            if (block_name == NULL) {
-                block_name = "UNKNOWN";
-            } else {
+            if (block_name != NULL) {
                 block_name = NuStrStripPath(block_name);
+            } else {
+                block_name = "UNKNOWN";
             }
 
             strcpy(largest_leak, block_name);
@@ -884,6 +877,13 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
             }
 
             leak_count = 0;
+        }
+    } else {
+        leak_count = 0;
+
+        if (this->stats.used_block_count > this->cur_ctx->used_block_count) {
+            leak_count = this->stats.used_block_count - this->cur_ctx->used_block_count;
+            strcpy(ctx_name, this->cur_ctx->name);
         }
     }
 

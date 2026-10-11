@@ -535,19 +535,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                                   (world->current_level == CLOUDCITYESCAPEA_LDATA && index == 0) || VehicleArea;
                     f32 distance;
                     bool hit;
-                    if (!__builtin_expect(sphere, 0)) {
-                        // bounds preserve the original special's fourth lanes.
-                        VuVec minimum, maximum;
-                        minimum.x = special->display_special->bounds_min.x + mid_z[-2];
-                        minimum.y = special->display_special->bounds_min.y + mid_z[-1];
-                        minimum.z = special->display_special->bounds_min.z + mid_z[0];
-                        minimum.w = special->display_special->bounds_min.w;
-                        maximum.y = special->display_special->bounds_max.y + mid_z[-1];
-                        maximum.x = special->display_special->bounds_max.x + mid_z[-2];
-                        maximum.w = special->display_special->bounds_max.w;
-                        maximum.z = special->display_special->bounds_max.z + mid_z[0];
-                        hit = CalculateRayBoxIntersection(minimum, maximum, start, direction, 30.0f, distance);
-                    } else {
+                    if (!!__builtin_expect(sphere, 0)) {
                         NUVEC *position = item->field_0x120 ? static_cast<NUVEC *>(item->field_0x120)
                                                             : reinterpret_cast<NUVEC *>(mid_z - 2);
                         VuVec center;
@@ -561,6 +549,18 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                         distance = CalcCapsuleIntersectDistance(start, direction, best_distance + best_distance, center,
                                                                 radius);
                         hit = distance != 1000000000.0f;
+                    } else {
+                        // bounds preserve the original special's fourth lanes.
+                        VuVec minimum, maximum;
+                        minimum.x = special->display_special->bounds_min.x + mid_z[-2];
+                        minimum.y = special->display_special->bounds_min.y + mid_z[-1];
+                        minimum.z = special->display_special->bounds_min.z + mid_z[0];
+                        minimum.w = special->display_special->bounds_min.w;
+                        maximum.y = special->display_special->bounds_max.y + mid_z[-1];
+                        maximum.w = special->display_special->bounds_max.w;
+                        maximum.z = special->display_special->bounds_max.z + mid_z[0];
+                        maximum.x = special->display_special->bounds_max.x + mid_z[-2];
+                        hit = CalculateRayBoxIntersection(minimum, maximum, start, direction, 30.0f, distance);
                     }
                     if (hit && best_distance + best_distance > distance) {
                         best_distance = distance;
@@ -616,8 +616,8 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                 VuVec center;
                 const NUVEC *position = reinterpret_cast<const NUVEC *>(position_z - offsetof(NUVEC, z));
                 center.z = position->z;
-                center.y = position->y;
                 center.x = position->x;
+                center.y = position->y;
                 center.w = 1.0f;
                 f32 distance = CalcCapsuleIntersectDistance(start, direction, best_distance, center, 0.2f);
                 if (best_distance > distance) {
@@ -634,8 +634,8 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                 NUVEC *point = &item->path->pts[0];
                 VuVec center;
                 center.z = point->z;
-                center.y = point->y + object.apiobj.scaled_height * 0.5f;
                 center.x = point->x;
+                center.y = point->y + object.apiobj.scaled_height * 0.5f;
                 center.w = 1.0f;
                 f32 distance = CalcCapsuleIntersectDistance(start, direction, best_distance, center, 0.4f);
                 if (best_distance > distance) {
@@ -663,8 +663,8 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                     continue;
                 VuVec center;
                 center.z = item->position.z;
-                center.y = item->position.y;
                 center.x = item->position.x;
+                center.y = item->position.y;
                 center.w = 1.0f;
                 f32 distance = CalcCapsuleIntersectDistance(start, direction, best_distance, center, 0.2f);
                 if (best_distance > distance) {
@@ -681,8 +681,8 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                     continue;
                 VuVec center;
                 center.z = item->field_0x3c.z;
-                center.y = item->field_0x3c.y;
                 center.x = item->field_0x3c.x;
+                center.y = item->field_0x3c.y;
                 center.w = 1.0f;
                 f32 distance = CalcCapsuleIntersectDistance(start, direction, best_distance, center, item->field_0x140);
                 if (best_distance > distance) {
@@ -775,8 +775,8 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                         continue;
                     VuVec center;
                     center.z = item->evaluated_position.z;
-                    center.y = item->evaluated_position.y;
                     center.x = item->evaluated_position.x;
+                    center.y = item->evaluated_position.y;
                     center.w = 1.0f;
                     f32 distance =
                         CalcCapsuleIntersectDistance(start, direction, best_distance, center, item->field_0x58) * 1.5f;
@@ -816,8 +816,8 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                     }
                 }
                 position.y = delta.y * 1.1f + position.y;
-                position.z = delta.z * 1.1f + position.z;
                 position.x = delta.x * 1.1f + position.x;
+                position.z = delta.z * 1.1f + position.z;
             } while (remaining > 0.0f && best == NULL);
         }
     }

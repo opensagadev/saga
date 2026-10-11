@@ -1303,9 +1303,9 @@ void Bolt_Init(void *storage, NetMessage &message) {
     }
     bolt->radius = type->field_1c;
     bolt->acceleration_y = type->field_18;
-    bolt->hit_debris = static_cast<i16>(static_cast<u32>(type->field_2c) >> 16);
     bolt->hit_part_debris = type->field_38;
     bolt->scale = type->field_20;
+    bolt->hit_debris = static_cast<i16>(static_cast<u32>(type->field_2c) >> 16);
     bolt->index = bolt - Bolt;
     if (hit_flags == 0)
         hit_flags = ObjHitObj_Flags(owner);

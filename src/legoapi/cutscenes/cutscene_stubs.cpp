@@ -320,8 +320,8 @@ extern "C" {
             if (forward != 0) {
                 return;
             }
-            instance->flags_89 &= ~0x10;
             instance->flags_88 |= 2;
+            instance->flags_89 &= ~0x10;
             instance->current_frame = instance->cutscene->duration - 1.0f;
             if (instance->rate > 0.0f) {
                 instance->rate = -instance->rate;
@@ -413,8 +413,8 @@ extern "C" {
     }
 
     void instNuGCutSceneStop(instNUGCUTSCENE_s *instance) {
-        instance->flags_89 &= ~0x10;
         instance->flags_88 &= ~6;
+        instance->flags_89 &= ~0x10;
         if ((instance->flags_8a & 4) == 0) {
             instNUGCUTCHARSYS_s *runtime = instance->character_instance;
             if (runtime != NULL) {
@@ -598,12 +598,7 @@ extern "C" {
             if (locator->animation != NULL) {
                 NuAnimData2CalcTime(locator->animation, frame, &time);
             }
-            if (NuGCutLocatorIsVisble(locator, frame, &time, &opacity, NULL) == 0 || opacity <= 0.1f) {
-                if (inst_locator->effect_handle >= 0) {
-                    ReleaseLocatorVfxFn(inst_locator->effect_handle);
-                }
-                inst_locator->effect_handle = -1;
-            } else {
+            if (NuGCutLocatorIsVisble(locator, frame, &time, &opacity, NULL) != 0 && !(opacity <= 0.1f)) {
                 VuMtx matrix;
                 NuGCutLocatorCalcMtx(locator, frame, &matrix.matrix, &time);
                 if ((locator->flags & 4) != 0) {
@@ -617,6 +612,11 @@ extern "C" {
                 } else {
                     UpdateLocatorVfxFn(inst_locator->effect_handle, &matrix);
                 }
+            } else {
+                if (inst_locator->effect_handle >= 0) {
+                    ReleaseLocatorVfxFn(inst_locator->effect_handle);
+                }
+                inst_locator->effect_handle = -1;
             }
         } else if ((type->flags & 4) != 0 && NuCutSceneSFXUpdate != NULL) {
             NuCutSceneSFXUpdate(system, inst_locator, locator, frame, parent_mtx, paused);

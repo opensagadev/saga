@@ -264,8 +264,8 @@ void Tag_DrawIcon_Batman(GameObject_s *object) {
     message.green = first_color;
     message.blue = third_color;
     message.alpha = alpha;
-    message.field_0x4e = 2;
     message.field_0x34 = index == 1 ? 0.002f : 0.0f;
+    message.field_0x4e = 2;
     message.text = ASCII_DOWN;
     message.flags = 0x1087;
     message.scale = 2.0f;
@@ -311,8 +311,8 @@ void Tag_UpdateTransfers(i32 effect0, i32 effect1, i32 count) {
                      source->apiobj.collision_min.y;
             to.y = (target->apiobj.collision_max.y - target->apiobj.collision_min.y) * height +
                    target->apiobj.collision_min.y;
-            position.x = (to.x - from.x) * phase + from.x;
             position.y = (to.y - from.y) * phase + from.y;
+            position.x = (to.x - from.x) * phase + from.x;
             position.z = (to.z - from.z) * phase + from.z;
             AddVariableShotDebrisEffectTimed1(effect0, &position, count, FRAMETIME, 0, 0, NULL);
             Tag_Transfer[0].position[0] = position;
@@ -328,8 +328,8 @@ void Tag_UpdateTransfers(i32 effect0, i32 effect1, i32 count) {
                      source->apiobj.collision_min.y;
             to.y = (target->apiobj.collision_max.y - target->apiobj.collision_min.y) * height +
                    target->apiobj.collision_min.y;
-            position.x = (to.x - from.x) * phase + from.x;
             position.y = (to.y - from.y) * phase + from.y;
+            position.x = (to.x - from.x) * phase + from.x;
             position.z = (to.z - from.z) * phase + from.z;
             position.y += 0.005f * NU_SIN_LUT(static_cast<i32>(phase * 65536.0f));
             AddVariableShotDebrisEffectTimed1(effect0, &position, count, FRAMETIME, 0, 0, NULL);

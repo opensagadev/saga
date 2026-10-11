@@ -617,10 +617,10 @@ void Animate_BEAST(GameObject_s *object) {
                 const GAMECHARACTERDATA *character =
                     static_cast<const GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
                 const f32 threshold = (character->walk_speed + character->run_speed) * 0.5f;
-                if (threshold >= object->pad_gamepad->input_magnitude) {
-                    packet.requested_animation = CHARACTER_ANIMATION_WALK;
-                } else {
+                if (!(threshold >= object->pad_gamepad->input_magnitude)) {
                     packet.requested_animation = CHARACTER_ANIMATION_RUN;
+                } else {
+                    packet.requested_animation = CHARACTER_ANIMATION_WALK;
                 }
             }
             if (packet.requested_animation == CHARACTER_ANIMATION_WALK && (object->field_0xe24 & 1) != 0) {
@@ -2290,22 +2290,21 @@ extern "C" {
             return;
         }
         nuinstanim_s *animation = NuSpecialGetInstAnim(special);
-        if (animation == NULL) {
-            return;
+        if (animation != NULL) {
+            animation->ltime = frame;
+            if (!((animation->end_frame_lookup_bits & NUINSTANIM_END_FRAME_LOOKUP_MASK) != 0 &&
+                  scene->animation_end_frames != NULL)) {
+                return;
+            }
+            StateAnim *state =
+                reinterpret_cast<StateAnim *>(&scene->animation_end_frames[animation->end_frame_lookup_index - 1]);
+            char value;
+            u8 index = static_cast<u8>(static_cast<u32>(animation->flags) >> NUINSTANIM_STATE_INDEX_SHIFT);
+            StateAnimEvaluate2(state, &index, &value, frame);
+            animation->flags =
+                static_cast<NUINSTANIM_FLAGS>((static_cast<u32>(animation->flags) & ~NUINSTANIM_STATE_INDEX_MASK) |
+                                              (static_cast<u32>(index) << NUINSTANIM_STATE_INDEX_SHIFT));
         }
-        animation->ltime = frame;
-        if (!((animation->end_frame_lookup_bits & NUINSTANIM_END_FRAME_LOOKUP_MASK) != 0 &&
-              scene->animation_end_frames != NULL)) {
-            return;
-        }
-        StateAnim *state =
-            reinterpret_cast<StateAnim *>(&scene->animation_end_frames[animation->end_frame_lookup_index - 1]);
-        char value;
-        u8 index = static_cast<u8>(static_cast<u32>(animation->flags) >> NUINSTANIM_STATE_INDEX_SHIFT);
-        StateAnimEvaluate2(state, &index, &value, frame);
-        animation->flags =
-            static_cast<NUINSTANIM_FLAGS>((static_cast<u32>(animation->flags) & ~NUINSTANIM_STATE_INDEX_MASK) |
-                                          (static_cast<u32>(index) << NUINSTANIM_STATE_INDEX_SHIFT));
     }
 
     StateAnim *StateAnimFixPtrs(StateAnim *state, isize delta) {

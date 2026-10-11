@@ -302,7 +302,10 @@ void Grabber_Update(WORLDINFO_s *world) {
     NuSpecialUpdate(&g->special);
     switch (g->state) {
         case 0:
-            if (pad == NULL) {
+            if (pad != NULL) {
+                if (!(pad->buttons_pressed & (GAMEPAD_SPECIAL | GAMEPAD_ACTION)))
+                    break;
+            } else {
                 if ((g->flags_559 & 4) && g->action_switch && (g->action_switch->progress_flags & 2) &&
                     GameAnimSet_IsAnimationReset(g->action_switch->anim_set))
                     g->flags_559 &= ~4;
@@ -310,9 +313,6 @@ void Grabber_Update(WORLDINFO_s *world) {
                     break;
                 if (!g->action_switch || !(g->action_switch->progress_flags & 2) ||
                     (g->action_switch->anim_set->flags & 1))
-                    break;
-            } else {
-                if (!(pad->buttons_pressed & (GAMEPAD_SPECIAL | GAMEPAD_ACTION)))
                     break;
             }
             if (g->character_model && g->character_model->model_data_b[102]) {
@@ -382,10 +382,10 @@ void Grabber_Update(WORLDINFO_s *world) {
                     v->character_context = 47;
                     v->context_animation = v->apiobj.character_model->model_data_b[104] ? 104 : 5;
                     NewRumbleAllPlayers(0, 0.1f, 0, 0);
-                    v->context_animation_timer = 0;
                     v->airborne_action_duration = 0.75f;
-                    v->field_0x7a3 = 0;
+                    v->context_animation_timer = 0;
                     v->external_force = v->apiobj.start_position;
+                    v->field_0x7a3 = 0;
                     Hint_SetComplete(651);
                     PlaySfx("env_grabber_down", pos);
                 } else {
@@ -648,8 +648,8 @@ void Grabber_Draw(WORLDINFO_s *world) {
                 reflection.m02 = sx * sz + zero_c;
                 reflection.m01 = sx * cz - zero_s;
                 reflection.m03 = 0;
-                reflection.m10 = -sx;
                 reflection.m11 = cx * cz - zero_s;
+                reflection.m10 = -sx;
                 reflection.m12 = cx * sz + zero_c;
                 reflection.m13 = 0;
                 reflection.m20 = 0;

@@ -313,13 +313,13 @@ void BuckStartExtra_LSW(GameObject_s *object) {
 void Buck_StartRiderJump(GameObject_s *rider, GameObject_s *mount) {
     u16 angle = qrand();
     f32 speed = static_cast<f32>(qrand()) * 1.5259021893143654e-05f * 0.09f + 0.01f;
-    rider->apiobj.velocity.x = NuTrigTable[angle >> 1] * speed;
     rider->apiobj.velocity.z = speed * NuTrigTable[((i32)angle + 0x4000) >> 1 & 0x7fff];
+    rider->apiobj.velocity.x = NuTrigTable[angle >> 1] * speed;
     StartJump(rider, 0);
     rider->airborne_collision_target = mount;
     rider->tag_flags |= 1;
-    rider->apiobj.velocity.x = 0.0f;
     rider->apiobj.velocity.z = 0.0f;
+    rider->apiobj.velocity.x = 0.0f;
     rider->pad_gamepad->buttons_held = 0;
     rider->pad_gamepad->buttons_pressed = 0;
     f32 clearance = mount->apiobj.upper_position.y;

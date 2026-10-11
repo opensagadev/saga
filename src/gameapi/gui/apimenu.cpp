@@ -969,8 +969,8 @@ static __used__ void MenuDrawPauseExit(MENU *menu) {
         spacing = 1.5f;
         if (GAMEDEMO == 0) {
             if (WORLD->current_level == HUB_LDATA) {
-                warning = TTab[tGAMEPROGRESSWILLBELOST];
                 title = TTab[tQUITGAME];
+                warning = TTab[tGAMEPROGRESSWILLBELOST];
             } else {
                 title = TTab[tEXITTOMAP];
                 if (Arcade == 0) {

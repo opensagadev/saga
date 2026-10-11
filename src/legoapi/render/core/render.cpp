@@ -682,11 +682,11 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
                         if (instance_animation->instance_ix != 0xffff) {
                             display_special = &static_cast<NUDISPLAYSPECIAL *>(
                                 display_list->specials)[instance_animation->instance_ix];
-                            if (state_value != 0) {
-                                display_special->flags |= NUDISPLAYSPECIAL_FLAG_VISIBLE;
-                            } else {
+                            if (state_value == 0) {
                                 display_special->flags &= ~NUDISPLAYSPECIAL_FLAG_VISIBLE;
                                 animation = NULL;
+                            } else {
+                                display_special->flags |= NUDISPLAYSPECIAL_FLAG_VISIBLE;
                             }
                         } else if (state_value == 0) {
                             animation = NULL;
@@ -1691,10 +1691,7 @@ void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets
 
             f32 brightness = direction.y;
             u32 colour;
-            if (cache_row > 0) {
-                colour = (static_cast<u32>(cacheValues[col]) << 24) | 0x808080;
-                NuRndrPrimSetColour(colour);
-            } else {
+            if (!(cache_row > 0)) {
                 brightness = brightness * 0.5f + 0.5f;
                 if (brightness <= near_angle)
                     brightness = near_scale * parameters->intensity;
@@ -1723,6 +1720,9 @@ void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets
                     }
                 }
                 colour = (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 24) | 0x808080;
+                NuRndrPrimSetColour(colour);
+            } else {
+                colour = (static_cast<u32>(cacheValues[col]) << 24) | 0x808080;
                 NuRndrPrimSetColour(colour);
             }
             AlphaImagePrimUV(static_cast<f32>(row) * inv_row + pixelOffsetX,
@@ -2395,8 +2395,8 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
                 NuMtxScale(&matrix, &built_size);
             }
             if (i <= currentminikit) {
-                matrix.m31 += offset.y;
                 matrix.m32 += offset.z;
+                matrix.m31 += offset.y;
                 matrix.m30 += offset.x;
             }
 
@@ -2453,8 +2453,8 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
             matrix.m31 = x3 * cx - matrix.m32 * sx;
             matrix.m32 = x3 * sx + matrix.m32 * cx;
 
-            matrix.m31 += y * PANEL3DMULY;
             matrix.m32 += z;
+            matrix.m31 += y * PANEL3DMULY;
             matrix.m30 += x * PANEL3DMULX;
 
             if (i < 10) {
@@ -3960,7 +3960,49 @@ static void DrawParaphernalia(GameObject_s *object) {
     }
     if (object->field_0x7a5 == 0x2d)
         GizDrawBuildItPiece(object, object->field_0x1088);
-    if (object->field_0x7a5 != 0x48) {
+    if (object->field_0x7a5 == 0x48) {
+        if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL &&
+            object->field_0x7a3 == 0) {
+            const u8 render_reflection = object->field_0x1088;
+            const i32 locator = object->apiobj.character_data->game_character->place_locator;
+            f32 *placement_time;
+            if (WORLD->lev_objs[0xec].active && locator != -1 &&
+                object->apiobj.character_model->points_of_interest[locator] != NULL &&
+                (placement_time = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0)) != NULL) {
+                f32 animation_end =
+                    NuAnimEndFrame(object->apiobj.character_model->model_data_b[object->context_animation]);
+                f32 start = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
+                if (!(start >= animation_end)) {
+                    if (start < 1.0f)
+                        start = 1.0f;
+                    if (!(start > *placement_time)) {
+                        f32 finish = AnimListFrame(object->apiobj.character_model, object->context_animation, 1);
+                        if (!(start >= finish)) {
+                            f32 scale = 1.0f;
+                            if (!(animation_end < finish))
+                                animation_end = finish;
+                            if (animation_end > *placement_time)
+                                scale = (*placement_time - start) / (animation_end - start);
+                            NUVEC scaling = {scale, scale, scale};
+                            placement_matrix = joints[locator];
+                            NuMtxPreRotateY(&placement_matrix, object->takeover_start_angle);
+                            NuMtxPreScale(&placement_matrix, &scaling);
+                            NuSpecialDrawAt(&WORLD->lev_objs[0xec].special, &placement_matrix);
+                            if (WORLD->lev_objs[0xed].active)
+                                NuSpecialDrawAt(&WORLD->lev_objs[0xed].special, &placement_matrix);
+                            if (render_reflection &&
+                                MatrixReflection(&placement_matrix, object->field_0x1087, object->field_0x1020,
+                                                 WORLD->current_level->unknown_0cc, &placement_reflected)) {
+                                NuSpecialDrawAt(&WORLD->lev_objs[0xec].special, &placement_reflected);
+                                if (WORLD->lev_objs[0xed].active)
+                                    NuSpecialDrawAt(&WORLD->lev_objs[0xed].special, &placement_matrix);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else {
         if (object->field_0x7a5 == 0x49) {
             if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL &&
                 object->field_0x7a3 != 0) {
@@ -4009,48 +4051,6 @@ static void DrawParaphernalia(GameObject_s *object) {
                                             NuSpecialDrawAt(&WORLD->lev_objs[0xed].special, &removal_matrix);
                                     }
                                 }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    } else {
-        if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL &&
-            object->field_0x7a3 == 0) {
-            const u8 render_reflection = object->field_0x1088;
-            const i32 locator = object->apiobj.character_data->game_character->place_locator;
-            f32 *placement_time;
-            if (WORLD->lev_objs[0xec].active && locator != -1 &&
-                object->apiobj.character_model->points_of_interest[locator] != NULL &&
-                (placement_time = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0)) != NULL) {
-                f32 animation_end =
-                    NuAnimEndFrame(object->apiobj.character_model->model_data_b[object->context_animation]);
-                f32 start = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
-                if (!(start >= animation_end)) {
-                    if (start < 1.0f)
-                        start = 1.0f;
-                    if (!(start > *placement_time)) {
-                        f32 finish = AnimListFrame(object->apiobj.character_model, object->context_animation, 1);
-                        if (!(start >= finish)) {
-                            f32 scale = 1.0f;
-                            if (!(animation_end < finish))
-                                animation_end = finish;
-                            if (animation_end > *placement_time)
-                                scale = (*placement_time - start) / (animation_end - start);
-                            NUVEC scaling = {scale, scale, scale};
-                            placement_matrix = joints[locator];
-                            NuMtxPreRotateY(&placement_matrix, object->takeover_start_angle);
-                            NuMtxPreScale(&placement_matrix, &scaling);
-                            NuSpecialDrawAt(&WORLD->lev_objs[0xec].special, &placement_matrix);
-                            if (WORLD->lev_objs[0xed].active)
-                                NuSpecialDrawAt(&WORLD->lev_objs[0xed].special, &placement_matrix);
-                            if (render_reflection &&
-                                MatrixReflection(&placement_matrix, object->field_0x1087, object->field_0x1020,
-                                                 WORLD->current_level->unknown_0cc, &placement_reflected)) {
-                                NuSpecialDrawAt(&WORLD->lev_objs[0xec].special, &placement_reflected);
-                                if (WORLD->lev_objs[0xed].active)
-                                    NuSpecialDrawAt(&WORLD->lev_objs[0xed].special, &placement_matrix);
                             }
                         }
                     }

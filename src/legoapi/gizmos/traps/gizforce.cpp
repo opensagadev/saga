@@ -322,10 +322,10 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
         if ((force->runtime_flags & GIZFORCE_RUNTIME_OFFSET_APPLIED) != 0 && force->field_0x50 == 0.0f) {
             NUVEC offset;
             offset.x = 0.0f;
-            if ((force->progress_flags & GIZFORCE_PROGRESS_GROUP_MEMBER) != 0) {
-                offset.y = GameAnimSet_GetCompletionRatio(force->anim_set) * force->group->combined_height;
-            } else {
+            if ((force->progress_flags & GIZFORCE_PROGRESS_GROUP_MEMBER) == 0) {
                 offset.y = 0.0f;
+            } else {
+                offset.y = GameAnimSet_GetCompletionRatio(force->anim_set) * force->group->combined_height;
             }
             offset.z = 0.0f;
             GameAnimSet_SetOffset(force->anim_set, &offset);
@@ -417,21 +417,21 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
         if (force->field_0x50 > 0.0f) {
             NUVEC offset;
             offset.x = qrand() * (1.0f / 65535.0f) * 0.05f - 0.025f;
-            if ((force->progress_flags & GIZFORCE_PROGRESS_GROUP_MEMBER) != 0) {
-                offset.y = GameAnimSet_GetCompletionRatio(force->anim_set) * force->group->combined_height;
-            } else {
+            if ((force->progress_flags & GIZFORCE_PROGRESS_GROUP_MEMBER) == 0) {
                 offset.y = 0.0f;
+            } else {
+                offset.y = GameAnimSet_GetCompletionRatio(force->anim_set) * force->group->combined_height;
             }
             offset.y += qrand() * (1.0f / 65535.0f) * 0.05f - 0.025f;
             offset.z = qrand() * (1.0f / 65535.0f) * 0.05f - 0.025f;
             GameAnimSet_SetOffset(force->anim_set, &offset);
             force->runtime_flags |= GIZFORCE_RUNTIME_OFFSET_APPLIED;
-            if (force->start_sfx_id != -1) {
+            if (force->start_sfx_id == -1) {
+                PlaySfx("LegShakeL", &force->position);
+            } else {
                 if (started_shaking || IsSfxLooping(force->start_sfx_id)) {
                     GameAudio_PlaySfxById(force->start_sfx_id, &force->position, 0, 0);
                 }
-            } else {
-                PlaySfx("LegShakeL", &force->position);
             }
         }
 
@@ -449,12 +449,12 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
             GameAnimSet_GetCentreAndRadius(force->anim_set, &force->position, &force->radius, 2, 1, 1);
             if (!was_moving) {
                 if ((force->anim_set->flags & 5) != 0 && force->field_0x50 == 0.0f && playing_forwards) {
-                    if (force->start_sfx_id != -1) {
+                    if (force->start_sfx_id == -1) {
+                        PlaySfx("LegoForm", &force->position);
+                    } else {
                         if (force->anim_set->state == GAMEANIMSET_STATE_AT_START || IsSfxLooping(force->start_sfx_id)) {
                             GameAudio_PlaySfxById(force->start_sfx_id, &force->position, 0, 0);
                         }
-                    } else {
-                        PlaySfx("LegoForm", &force->position);
                     }
                 }
             } else {
@@ -493,14 +493,14 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
                         (force->config_flags & 0x40) != 0) &&
                        (force->runtime_flags & GIZFORCE_RUNTIME_COMPLETION_RELEASED) == 0) {
                 if (force->blowup_type != -1) {
-                    if ((force->config_flags & 0x20) != 0) {
+                    if ((force->config_flags & 0x20) == 0) {
+                        GizmoBlowUpTypeBlowUp(world, force->blowup_type, &force->position);
+                    } else {
                         for (GAMEANIMOBJ_s *object = force->anim_set->objects; object != NULL; object = object->next) {
                             NUVEC *position = NuSpecialGetDrawPos(&object->special);
                             if (position != NULL)
                                 GizmoBlowUpTypeBlowUp(world, force->blowup_type, position);
                         }
-                    } else {
-                        GizmoBlowUpTypeBlowUp(world, force->blowup_type, &force->position);
                     }
                     GameAnimSet_SetVisibility(force->anim_set, 0);
                     force->field_0xaa |= GIZFORCE_STATE_DESTROYED_OR_THROWN;
@@ -1360,11 +1360,11 @@ static i32 GizForces_Load(void *world_ptr, void *data) {
             EdFileReadNuVec(&force.effect_position);
         }
 
-        if (version > 9) {
-            force.activation_radius = EdFileReadFloat();
-        } else {
+        if (!(version > 9)) {
             force.activation_radius =
                 world->area != NULL && (world->area->flags & AREAFLAG_VEHICLE_AREA) != 0 ? 12.0f : 1.75f;
+        } else {
+            force.activation_radius = EdFileReadFloat();
         }
 
         force.start_sfx_id = -1;

@@ -841,10 +841,10 @@ static __used__ void pathEditor_cbCnxFlagsToggle(eduimenu_s *, eduiitem_s *item,
             j = 7;
         else
             return;
-        if (connection->flags & mask) {
-            other->connections[j].flags |= mask;
-        } else {
+        if (!(connection->flags & mask)) {
             other->connections[j].flags &= ~mask;
+        } else {
+            other->connections[j].flags |= mask;
         }
     }
 }

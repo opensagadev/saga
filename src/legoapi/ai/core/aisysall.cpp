@@ -730,8 +730,8 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
         AIMoveFindDivertNode(system, path, packet, &packet->fallback_destination);
         if (packet->divert_node_index >= packet->path_info.path->node_count ||
             packet->path_info.path->nodes[packet->divert_node_index].connection_count == 0) {
-            packet->movement_destination = packet->owner->apiobj.position;
             packet->movement_stopping_distance = 0.0f;
+            packet->movement_destination = packet->owner->apiobj.position;
             return;
         }
         AIPATHNODE *node = &packet->path_info.path->nodes[packet->divert_node_index];
@@ -756,15 +756,15 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
         packet->movement_parameter != 0.0f && difference.y < 0.5f && difference.y > -0.5f &&
         distance_squared < packet->movement_parameter * packet->movement_parameter) {
         if (diverted == 0) {
-            packet->movement_destination = object->position;
             packet->movement_stopping_distance = 0.0f;
+            packet->movement_destination = object->position;
             return;
         }
         if ((packet->navigation_flags & 4) != 0) {
             packet->fallback_destination = saved_destination;
-            packet->fallback_stopping_distance = saved_stopping_distance;
             packet->movement_parameter = saved_parameter;
             packet->fallback_path_info = saved_path_info;
+            packet->fallback_stopping_distance = saved_stopping_distance;
             AIMoveChooseExitNodePath(system, packet);
             AIMoveAdjustDestinationPath(system, packet);
             path = packet->path_info.path;
@@ -982,9 +982,9 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
             }
             if ((packet->navigation_flags & 4) != 0) {
                 packet->fallback_destination = saved_destination;
-                packet->fallback_stopping_distance = saved_stopping_distance;
                 packet->movement_parameter = saved_parameter;
                 packet->fallback_path_info = saved_path_info;
+                packet->fallback_stopping_distance = saved_stopping_distance;
                 AIMoveChooseExitNodePath(system, packet);
                 AIMoveAdjustDestinationPath(system, packet);
             }
@@ -1030,8 +1030,8 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
                 return;
             }
             if ((packet->capabilities & flags) == 0) {
-                packet->runtime_flags |= 0x60;
                 packet->frame_state = next->traversal_flags[direction];
+                packet->runtime_flags |= 0x60;
                 next = NULL;
             } else {
                 packet->navigation_flags |= 1;

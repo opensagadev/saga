@@ -421,10 +421,10 @@ void LoadAreaCharacters() {
         } else {
             VehicleArea = 1;
         }
-        if ((area_flags & AREAFLAG_BONUS_AREA) != 0) {
-            BonusArea = 1;
-        } else {
+        if ((area_flags & AREAFLAG_BONUS_AREA) == 0) {
             BonusArea = 0;
+        } else {
+            BonusArea = 1;
         }
     }
     AreaGlobals.values.field_0x04 = VehicleArea != 0 && BonusArea == 0;

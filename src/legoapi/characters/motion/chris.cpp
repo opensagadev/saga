@@ -193,9 +193,7 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
     if (Player[0] != NULL && Player[0]->sock_position.distance > 435.0f)
         MissileDist = 2.0f;
     if (fighter->hit_count != 0) {
-        if (fighter->spline == NULL) {
-            --fighter->health;
-        } else {
+        if (fighter->spline != NULL) {
             switch (fighter->spline->id) {
                 case 84:
                 case 85:
@@ -205,6 +203,8 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
                     --fighter->health;
                     break;
             }
+        } else {
+            --fighter->health;
         }
         --fighter->hit_count;
         if (fighter->health == 0) {
@@ -218,20 +218,20 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
             } else {
                 fighter->death_timer = 2.0f;
             }
-            if (fighter->parent == NULL) {
-                impulse = v010;
-            } else {
+            if (fighter->parent != NULL) {
                 impulse.x = fighter->matrix.m30 - fighter->parent->matrix.m30;
-                impulse.y = fighter->matrix.m31 - fighter->parent->matrix.m31;
                 impulse.z = fighter->matrix.m32 - fighter->parent->matrix.m32;
+                impulse.y = fighter->matrix.m31 - fighter->parent->matrix.m31;
                 fighter->parent->target = *reinterpret_cast<NUVEC4 *>(&fighter->matrix.m30);
+            } else {
+                impulse = v010;
             }
             const f32 magnitude = NuVecMag(&impulse);
             if (magnitude != 0.0f) {
                 const f32 scale = (qrand() * (11.0f / 65535.0f)) / magnitude;
                 impulse.x *= scale;
-                impulse.y *= scale;
                 impulse.z *= scale;
+                impulse.y *= scale;
             }
             fighter->velocity.x += impulse.x;
             fighter->velocity.z += impulse.z;
@@ -281,8 +281,8 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
     }
     if (fighter->spline == NULL)
         return 0;
-    direction.y = fighter->target_position.y - fighter->matrix.m31;
     direction.x = fighter->target_position.x - fighter->matrix.m30;
+    direction.y = fighter->target_position.y - fighter->matrix.m31;
     direction.z = fighter->target_position.z - fighter->matrix.m32;
     f32 distance_squared = direction.x * direction.x + direction.y * direction.y + direction.z * direction.z;
     if (fighter->death_timer >= 0.0f)
@@ -419,8 +419,8 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
                     memcpy(&PlayerPos, &player->apiobj.collision_position, sizeof(NUVEC));
                     memcpy(&PlayerVel, &player->apiobj.velocity, sizeof(NUVEC));
                 }
-                target_position = reinterpret_cast<NUVEC *>(&PlayerPos);
                 target_velocity = reinterpret_cast<NUVEC *>(&PlayerVel);
+                target_position = reinterpret_cast<NUVEC *>(&PlayerPos);
                 break;
             }
             case -3:
@@ -429,9 +429,9 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
             default:
                 if (fighter->target == NULL || fighter->target->active == 0)
                     goto lost_target;
-                target_position = reinterpret_cast<NUVEC *>(&fighter->target->matrix.m30);
-                // The retail code predicts this target using the firing ship's velocity.
                 target_velocity = reinterpret_cast<NUVEC *>(&fighter->velocity);
+                // The retail code predicts this target using the firing ship's velocity.
+                target_position = reinterpret_cast<NUVEC *>(&fighter->target->matrix.m30);
                 break;
         }
         offset.x = target_position->x - fighter->matrix.m30;

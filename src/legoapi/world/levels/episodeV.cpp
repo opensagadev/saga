@@ -1354,10 +1354,10 @@ static void Asteroid_AddParts(GIZMOBLOWUP_s *blowup) {
         params.field_18 = params.field_14;
         params.gravity = 0.0f;
         params.special = special;
-        if (index == 0) {
-            params.flags = 0x800019b;
-        } else {
+        if (index != 0) {
             params.flags = 0x8000193;
+        } else {
+            params.flags = 0x800019b;
         }
         params.time_step = FRAMETIME;
         params.field_40 = PartCollide_3D;

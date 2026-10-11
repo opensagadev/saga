@@ -908,8 +908,8 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
         NUMTX matrix;
         matrix.m00 = matrix.m22 = NU_COS_LUT(spinner->rotation);
         matrix.m20 = NU_SIN_LUT(spinner->rotation);
-        matrix.m02 = -matrix.m20;
         matrix.m11 = 1.0f;
+        matrix.m02 = -matrix.m20;
         matrix.m01 = matrix.m10 = matrix.m03 = matrix.m23 = matrix.m12 = matrix.m21 = matrix.m13 = matrix.m30 =
             matrix.m31 = matrix.m32 = 0.0f;
         matrix.m33 = 1.0f;

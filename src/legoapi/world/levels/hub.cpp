@@ -764,7 +764,10 @@ void Hub_Update(WORLDINFO_s *world) {
     }
     Hub_UpdatePackObstacle(5);
     Hub_UpdatePackObstacle(6);
-    if (FadeSys.fade == 0.0f) {
+    if (FadeSys.fade != 0.0f) {
+        hub_episode_time = 0.0f;
+        hub_episode = -1;
+    } else {
         i32 selected_episode = -1;
         for (i32 i = 0; static_cast<u16>(HubEpisodeInfo[i].episode) <= 8; ++i) {
             HUBEPISODEINFO_s &episode = HubEpisodeInfo[i];
@@ -831,9 +834,6 @@ void Hub_Update(WORLDINFO_s *world) {
         }
         const f32 target = hub_episode != -1 && hub_episode == selected_episode ? 1.0f : 0.0f;
         hub_episode_time = SeekLinearF(hub_episode_time, target, FRAMETIME * 2.0f);
-    } else {
-        hub_episode_time = 0.0f;
-        hub_episode = -1;
     }
     if (GameCam->sock_position.location.sock == 0) {
         NuSpecialSetVisibility(&LevHSpecial[16], Store_IsPackUnlocked(6));
@@ -1197,7 +1197,14 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                     }
                 }
             }
-            if (buildup_total) {
+            if (!buildup_total) {
+                f32 x = 0.0f;
+                if (Game.indy_unlocked) {
+                    Hub_DrawImportantBrick(251, 0.1f, HUB_EPISODETITLEY - 0.225f, hub_episode_time, -1, -1);
+                    x = -0.1f;
+                }
+                Hub_DrawImportantBrick(211, x, HUB_EPISODETITLEY, hub_episode_time, gold_count, gold_total);
+            } else {
                 Hub_DrawImportantBrick(211, -0.20100002f, HUB_EPISODETITLEY, hub_episode_time, gold_count, gold_total);
                 DrawBuildUpBar(0.20100002f, HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
                                NU_SIN_LUT(static_cast<i32>(16384.0f * hub_episode_time)), 1.0f, 1.0f, 0);
@@ -1205,13 +1212,6 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                 Text3DEx(text, 0.20100002f, HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE,
                          PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127,
                          static_cast<u8>(static_cast<i32>(128.0f * hub_episode_time)));
-            } else {
-                f32 x = 0.0f;
-                if (Game.indy_unlocked) {
-                    Hub_DrawImportantBrick(251, 0.1f, HUB_EPISODETITLEY - 0.225f, hub_episode_time, -1, -1);
-                    x = -0.1f;
-                }
-                Hub_DrawImportantBrick(211, x, HUB_EPISODETITLEY, hub_episode_time, gold_count, gold_total);
             }
             SmartTextEx(TTab[tBONUS2], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, HUB_EPISODESUBTITLESIZE,
                         HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB,
@@ -2625,12 +2625,12 @@ void Hub_UpdateFreePlaySelect() {
                     freeplay_selected[player] = 2;
                 } else if (select && freeplay_time[player] <= 0.0f) {
                     if (freeplay_selected[player] == 0) {
-                        if (Collection_Got(collection->list[freeplay_i[player]].id) != 0) {
+                        if (Collection_Got(collection->list[freeplay_i[player]].id) == 0) {
+                            GameAudio_PlaySfx(0x32, NULL, 0, 0);
+                        } else {
                             freeplay_time[player] = 0.75f;
                             freeplay_selected[player] = 1;
                             GameAudio_PlaySfx(0x30, NULL, 0, 0);
-                        } else {
-                            GameAudio_PlaySfx(0x32, NULL, 0, 0);
                         }
                     } else if (freeplay_selected[player] == 1) {
                         freeplay_selected[player] = 2;
@@ -2850,10 +2850,10 @@ void Hub_Load(WORLDINFO_s *world, variptr_u *, variptr_u *) {
 static void Hub_SetDoorState(GIZMO *door, nuhspecial_s *lock, i32 open) {
     if (door != NULL && door->object != NULL) {
         GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(door->object);
-        if (open != 0) {
-            obstacle->runtime_flags &= static_cast<u8>(~GIZOBSTACLE_RUNTIME_FLAG_BLOCKED);
-        } else {
+        if (open == 0) {
             obstacle->runtime_flags |= GIZOBSTACLE_RUNTIME_FLAG_BLOCKED;
+        } else {
+            obstacle->runtime_flags &= static_cast<u8>(~GIZOBSTACLE_RUNTIME_FLAG_BLOCKED);
         }
     }
     NuSpecialSetVisibility(lock, open != 0);
@@ -3953,15 +3953,15 @@ static void Hub_DrawBonusModeMenu(int selected, float alpha) {
                     green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
                                              static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
                 } else {
+                    green = menu_flash ? MENUFLASH0G : MENUFLASH1G;
                     red = menu_flash ? MENUFLASH0R : MENUFLASH1R;
                     blue = menu_flash ? MENUFLASH0B : MENUFLASH1B;
-                    green = menu_flash ? MENUFLASH0G : MENUFLASH1G;
                 }
             } else if (menu_pulse > 0.0f) {
-                green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
-                                         static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse));
                 red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
                                        static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
+                green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
+                                         static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse));
                 blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
                                         static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse));
             } else {

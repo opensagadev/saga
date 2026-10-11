@@ -428,9 +428,7 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
 
         if ((object->field_0xe21 & 4) == 0) {
             FaceOpponent(object, NULL);
-            if ((object->field_0xe21 & 2) != 0) {
-                PlaySfx(const_cast<char *>("ForceMindTrick"), &object->apiobj.collision_position);
-            } else {
+            if ((object->field_0xe21 & 2) == 0) {
                 Player_ClearContext(best, 1);
                 Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(best->player_packet));
                 if ((object->field_0xe21 & 1) != 0) {
@@ -453,6 +451,8 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
                 best->character_context = 0x1c;
                 FastWeaponIn(best, 0);
                 FaceOpponent(best, NULL);
+            } else {
+                PlaySfx(const_cast<char *>("ForceMindTrick"), &object->apiobj.collision_position);
             }
         }
         PlaySfx(const_cast<char *>("JForcePush"), &object->apiobj.collision_position);

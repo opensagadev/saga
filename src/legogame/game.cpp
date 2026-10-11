@@ -881,8 +881,8 @@ void InitGameAfterConfig(void) {
             if (static_cast<u16>(level->unknown_060) > 799) {
                 level->unknown_060 = tUNKNOWN;
             }
-            level->area_index = 0xff;
             level->area_level_index = 0xff;
+            level->area_index = 0xff;
             if (iVar3 < 1) {
                 areaIndex = 0;
             } else {
@@ -893,8 +893,8 @@ void InitGameAfterConfig(void) {
                         i32 iVar4 = 0;
                         do {
                             if (area->levels[iVar4] == i) {
-                                level->area_index = (byte)areaIndex;
                                 level->area_level_index = (byte)iVar4;
+                                level->area_index = (byte)areaIndex;
                                 episode = (byte)areaIndex;
                             } else {
                                 episode = level->area_index;
@@ -984,8 +984,8 @@ void InitGameAfterConfig(void) {
     CanPunchGirls = 0;
     //  ExtraHurtSfxFn = ExtraHurtSfx_LSW;
     //  ExtraDieSfxFn = ExtraDieSfx_LSW;
-    BuckStartExtraFn = BuckStartExtra_LSW;
     REDBRICKPOSX = 0.0f;
+    BuckStartExtraFn = BuckStartExtra_LSW;
     BoltInitSfxFn = BoltInitSfx_LSW;
     REDBRICKPOSY = -0.5f;
     REDBRICKPOS2X = 1.25f;
@@ -1002,8 +1002,8 @@ void InitGameAfterConfig(void) {
     extern f32 SUPERCARRY_RELEASESPEED_XZ;
     extern i32 SuperCarry_UseActionButton;
     SUPERCARRY_THROWSPEED_XZ = 2.0f;
-    SUPERCARRY_THROWSPEED_Y = 1.5f;
     SUPERCARRY_RELEASESPEED_XZ = 1.0f;
+    SUPERCARRY_THROWSPEED_Y = 1.5f;
     SuperCarry_UseActionButton = 1;
     //  CutScene_OverrideConfigFileNameFn = CutScene_OverrideConfigFileName_LSW;
     CharPivot_Init(CharPivot_LSW);
@@ -1229,12 +1229,12 @@ void InitGameAfterConfig(void) {
     //  MatrixReflection_CanOverrideFn = MatrixReflection_CanOverride;
     Jump_PreventJumpFn = Jump_PreventJump;
     //  SurfaceInfo_ExtraReflectFn = SurfaceInfo_ExtraReflect;
-    LEGOOBJ_DEFAULTLASTCOIN = 0xb7;
+    Hint_AlphaTargetFn = Hint_AlphaTarget;
     //  Arcade_TextCrawlID = 0x1f1;
     //  Arcade_TextCrawlParagraphs = 2;
     //  GizmoPickups_Collide2DFn = GizmoPickups_Collide2D;
-    Hint_AlphaTargetFn = Hint_AlphaTarget;
     GizmoBlowUp_SfxFn = GizmoBlowUp_Sfx;
+    LEGOOBJ_DEFAULTLASTCOIN = 0xb7;
     //  Collection_GetSelectingPlayerIDsFn = Collection_GetSelectingPlayerIDs;
     Tag_NoHiddenIconFn = Tag_NoHiddenIcon;
     APIObjResetShadowMapRenderingFn = ResetShadowMapRenderingFn;

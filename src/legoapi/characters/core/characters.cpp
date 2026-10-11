@@ -878,19 +878,19 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
     obj->apiobj.field_0x200 = v000.y;
     obj->apiobj.field_0x204 = v000.z;
     obj->field_0xe38 = 4;
-    obj->field_0xe37 = game_character_data->field_0xf5;
     obj->id = static_cast<i16>(id);
+    obj->field_0xe37 = game_character_data->field_0xf5;
     obj->apiobj.character_model = &apicharsys->models[apicharsys->playermodelids[id]];
     obj->suit = Suit_GetDefault(id);
     obj->ai.field_0x134 = 0xff;
     SetGameObjectCharacterData(obj);
 
     obj->apiobj.start_position = *start_position;
-    obj->apiobj.initial_position = *start_position;
     obj->apiobj.pos_x = start_position->x;
     obj->apiobj.pos_y = start_position->y;
     obj->apiobj.position = *start_position;
     obj->apiobj.pos_z = start_position->z;
+    obj->apiobj.initial_position = *start_position;
     obj->field_0x1018 = 0.5f;
 
     GetTopBot(obj);

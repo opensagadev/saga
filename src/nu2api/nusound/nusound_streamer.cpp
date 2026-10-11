@@ -144,8 +144,8 @@ void NuSoundStreamer::ThreadFunc(void *self) {
 
         QueueElement element;
         element.sample = NULL;
-        element.loop = false;
         element.buffer = NULL;
+        element.loop = false;
         element.start_offset = 0.0f;
         element.weak_flag = false;
         if (!streamer->queue2.Empty()) {

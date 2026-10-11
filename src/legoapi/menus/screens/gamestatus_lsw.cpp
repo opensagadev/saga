@@ -421,8 +421,8 @@ void InitStatusScreen(WORLDINFO_s *world) {
             EPISODESAVE_s &save = Game.episode_save[episode];
             p.previous_best_time = save.superstory_time_limit;
             p.superstory_time = SuperStoryTimer.time_elapsed;
-            p.previous_best_score = save.superstory_score_target;
             p.superstory_score = SuperStoryScore;
+            p.previous_best_score = save.superstory_score_target;
             i32 gold = 0;
             if (episode == -1) {
                 p.new_best_score = 0;
@@ -1154,12 +1154,12 @@ void DrawStatusScreen(WORLDINFO_s *) {
                                             static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
                 } else if (menu_flash != 0) {
                     green = MENUFLASH0G;
-                    red = MENUFLASH0R;
                     blue = MENUFLASH0B;
+                    red = MENUFLASH0R;
                 } else {
-                    red = MENUFLASH1R;
                     blue = MENUFLASH1B;
                     green = MENUFLASH1G;
+                    red = MENUFLASH1R;
                 }
             } else if (menu_pulse > 0.0f) {
                 green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
@@ -1169,8 +1169,8 @@ void DrawStatusScreen(WORLDINFO_s *) {
                 blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
                                         static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse));
             } else {
-                red = MENUENTRYR;
                 green = MENUENTRYG;
+                red = MENUENTRYR;
                 blue = MENUENTRYB;
             }
             Text3D(text, 0.0f, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, red & 255, green & 255,
@@ -1958,9 +1958,9 @@ void ChallangeCash_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float e
             f32 previous = stage->field_0x18;
             stage->field_0x18 += elapsed;
             if (stage->field_0x18 >= 1.5f && FindGameMsgsWithID(1, 0, -1, NULL) == 0) {
-                stage->field_0x18 = 0.0f;
                 stage->field_0x14 = 2;
                 stage->field_0x1c = 1.0f;
+                stage->field_0x18 = 0.0f;
                 break;
             }
             if (previous < 1.0f && stage->field_0x18 >= 1.0f) {
