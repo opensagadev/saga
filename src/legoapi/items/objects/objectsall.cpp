@@ -245,15 +245,17 @@ i32 FindNearestBreak(unsigned char *text, i32 index) {
         --index;
 
     u8 ch = text[index];
-    if (ch == ' ') {
+    if (ch != ' ') {
+        if (ch == '.') {
+            if (text[index + 1] != '.')
+                return index;
+        } else if (static_cast<u8>(ch - ',') <= 1) {
+            return index;
+        }
+    } else {
         u8 next = text[index + 1];
         if (next != '?' && next != '!' && next != ';' && next != ':')
             return index;
-    } else if (ch == '.') {
-        if (text[index + 1] != '.')
-            return index;
-    } else if (static_cast<u8>(ch - ',') <= 1) {
-        return index;
     }
 
     i32 length = NuStrLen(reinterpret_cast<char *>(text)) - 1;
@@ -269,15 +271,17 @@ i32 FindNearestBreak(unsigned char *text, i32 index) {
             --backward;
 
         ch = text[forward];
-        if (ch == ' ') {
+        if (ch != ' ') {
+            if (ch == '.') {
+                if (text[forward + 1] != '.')
+                    return forward;
+            } else if (static_cast<u8>(ch - ',') <= 1) {
+                return forward;
+            }
+        } else {
             u8 next = text[forward + 1];
             if (next != '?' && next != '!' && next != ';' && next != ':')
                 return forward;
-        } else if (ch == '.') {
-            if (text[forward + 1] != '.')
-                return forward;
-        } else if (static_cast<u8>(ch - ',') <= 1) {
-            return forward;
         }
 
         ch = text[backward];

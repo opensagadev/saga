@@ -515,8 +515,8 @@ void AnimatePlayer(GameObject_s *object) {
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
     packet.previous_animation = packet.animation_index;
     object->mini_animation.previous_animation = object->mini_animation.animation_index;
-    GAMEPAD_s *pad = object->pad_gamepad;
     CHARACTERMODEL_s *model = object->apiobj.character_model;
+    GAMEPAD_s *pad = object->pad_gamepad;
 
     if ((object->apiobj.field_0x1f4 & APIOBJECT_STATE_FLAG_IGNORE_DOORS) == 0) {
         object->apiobj.character_data->animate_fn(object);
@@ -1366,13 +1366,15 @@ void Animate_BATTLEDROID(GameObject_s *object) {
         packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
     choose_movement:
 
-        if (UseFallAnim(object)) {
+        if (!UseFallAnim(object)) {
+            if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+                object->pad_gamepad->input_magnitude > 0.0f) {
+                const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
+                MoveAnim_Manage(object, object->pad_gamepad->input_magnitude,
+                                (game_character->flags_090 & GAMECHARACTER_FLAG_DISABLE_TIPTOE) == 0 ? 1 : 0, 0);
+            }
+        } else {
             packet.requested_animation = CHARACTER_ANIMATION_FALL;
-        } else if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
-                   object->pad_gamepad->input_magnitude > 0.0f) {
-            const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
-            MoveAnim_Manage(object, object->pad_gamepad->input_magnitude,
-                            (game_character->flags_090 & GAMECHARACTER_FLAG_DISABLE_TIPTOE) == 0 ? 1 : 0, 0);
         }
         MoveAnim_Check(object);
     }
@@ -2293,8 +2295,8 @@ extern "C" {
         }
         StateAnim *state =
             reinterpret_cast<StateAnim *>(&scene->animation_end_frames[animation->end_frame_lookup_index - 1]);
-        u8 index = static_cast<u8>(static_cast<u32>(animation->flags) >> NUINSTANIM_STATE_INDEX_SHIFT);
         char value;
+        u8 index = static_cast<u8>(static_cast<u32>(animation->flags) >> NUINSTANIM_STATE_INDEX_SHIFT);
         StateAnimEvaluate2(state, &index, &value, frame);
         animation->flags =
             static_cast<NUINSTANIM_FLAGS>((static_cast<u32>(animation->flags) & ~NUINSTANIM_STATE_INDEX_MASK) |

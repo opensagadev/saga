@@ -109,8 +109,8 @@ bool MechTouchTaskGoTo::Update() {
             const f32 object_z = object->apiobj.collision_position.z;
             VuVec position;
             target.Get()->GetPos(position, room);
-            const f32 target_y = position.y;
             const f32 dx = position.x - object_x;
+            const f32 target_y = position.y;
             const f32 dz = position.z - object_z;
             field_40 = NuFsqrt(dx * dx + dz * dz);
             VuVec direction;
@@ -778,8 +778,8 @@ void MechTouchTaskPlannedGoTo::GenerateWaypoints() {
             waypoints[waypoint_index].active = 1;
             const f32 previous_point_x = path_points[current - 1].x;
             const f32 previous_point_y = path_points[current - 1].y;
-            const f32 previous_point_z = path_points[current - 1].z;
             const f32 previous_point_w = path_points[current - 1].w;
+            const f32 previous_point_z = path_points[current - 1].z;
             waypoints[waypoint_index].position.x = previous_point_x;
             waypoints[waypoint_index].position.y = previous_point_y;
             waypoints[waypoint_index].position.z = previous_point_z;
@@ -996,9 +996,9 @@ bool MechTouchTaskPlannedGoTo::Update() {
     }
     GameObject_s *angle_player = player;
     const f32 previous_z = player->apiobj.velocity.z;
-    const f32 previous_target_z = player->target_velocity.z;
     const f32 previous_y = player->apiobj.velocity.y;
     const f32 previous_target_y = player->target_velocity.y;
+    const f32 previous_target_z = player->target_velocity.z;
     const f32 previous_x = player->apiobj.velocity.x;
     const f32 previous_target_x = player->target_velocity.x;
     const i32 angle = NuAtan2D(velocity_x, velocity_z);
@@ -1144,9 +1144,9 @@ void MechTouchTaskPlannedDoubleClickGoTo::OnResume() {
     }
 
     const f32 previous_z = player->apiobj.velocity.z;
-    const f32 previous_target_z = player->target_velocity.z;
     const f32 previous_y = player->apiobj.velocity.y;
     const f32 previous_target_y = player->target_velocity.y;
+    const f32 previous_target_z = player->target_velocity.z;
     const f32 previous_x = player->apiobj.velocity.x;
     const f32 previous_target_x = player->target_velocity.x;
     GameObject_s *angle_player = player;

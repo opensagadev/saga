@@ -422,10 +422,10 @@ void OcclusionManager::AddOccluder(nuvec_s const *a, nuvec_s const *b, nuvec_s c
         NuVec4MtxTransform(&projected[1], const_cast<NUVEC *>(b), NuCameraGetVPMtx());
         NuVec4MtxTransform(&projected[2], const_cast<NUVEC *>(c), NuCameraGetVPMtx());
         if (unknown_158 > 0.0f) {
-            NUVEC ab = {projected[1].x - projected[0].x, projected[1].y - projected[0].y,
-                        projected[1].z - projected[0].z};
             NUVEC ac = {projected[2].x - projected[0].x, projected[2].y - projected[0].y,
                         projected[2].z - projected[0].z};
+            NUVEC ab = {projected[1].x - projected[0].x, projected[1].y - projected[0].y,
+                        projected[1].z - projected[0].z};
             NUVEC normal = {ac.z * ab.y - ac.y * ab.z, ab.z * ac.x - ac.z * ab.x, ab.x * ac.y - ab.y * ac.x};
             NuVecNorm(&normal, &normal);
             if (unknown_158 > fabsf(normal.z))

@@ -220,30 +220,34 @@ f32 XZLinesClosest(nuvec_s *a, nuvec_s *b, nuvec_s *c, nuvec_s *d, f32 *first, f
         *second = 1.0f;
         closest = distance;
     }
-    if (ac.z < 0.0f) {
+    if (!(ac.z < 0.0f)) {
+        if (ac.z > cd_length) {
+            distance = NuVecXZDist(d, &ac, NULL);
+            fraction = 1.0f;
+        } else {
+            fraction = ac.z / cd_length;
+            distance = NuFabs(ac.x);
+        }
+    } else {
         distance = NuVecXZDist(c, &ac, NULL);
         fraction = 0.0f;
-    } else if (ac.z > cd_length) {
-        distance = NuVecXZDist(d, &ac, NULL);
-        fraction = 1.0f;
-    } else {
-        fraction = ac.z / cd_length;
-        distance = NuFabs(ac.x);
     }
     if (distance < closest) {
         *second = fraction;
         *first = 0.0f;
         closest = distance;
     }
-    if (bc.z < 0.0f) {
+    if (!(bc.z < 0.0f)) {
+        if (bc.z > cd_length) {
+            distance = NuVecXZDist(d, &bc, NULL);
+            fraction = 1.0f;
+        } else {
+            fraction = bc.z / cd_length;
+            distance = NuFabs(bc.x);
+        }
+    } else {
         distance = NuVecXZDist(c, &bc, NULL);
         fraction = 0.0f;
-    } else if (bc.z > cd_length) {
-        distance = NuVecXZDist(d, &bc, NULL);
-        fraction = 1.0f;
-    } else {
-        fraction = bc.z / cd_length;
-        distance = NuFabs(bc.x);
     }
     if (distance < closest) {
         *second = fraction;

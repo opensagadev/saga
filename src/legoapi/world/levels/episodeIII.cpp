@@ -808,8 +808,8 @@ void VaderC_Update(WORLDINFO_s *world) {
     }
 
     if (vader_c.field_0x95 == 0) {
-        GameObject_s *first_player = Player[0];
         GameObject_s *second_player = Player[1];
+        GameObject_s *first_player = Player[0];
         if (((first_player != NULL && (first_player->apiobj.field_0x1f8 & 0x80) != 0 &&
               first_player->apiobj.field_0x287 != 0 && (first_player->apiobj.field_0x1f4 & 0x40000) == 0) ||
              (second_player != NULL && (second_player->apiobj.field_0x1f8 & 0x80) != 0 &&

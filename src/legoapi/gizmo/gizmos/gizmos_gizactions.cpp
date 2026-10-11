@@ -1041,10 +1041,11 @@ i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKE
         AILOCATOR *current_locator = object->apiobj.ai->locator;
         if (current_locator != NULL) {
             for (current_index = 0; current_index < locator_set->locator_count; ++current_index) {
-                if (current_locator == &sys->locators[locator_set->locator_entries[current_index]]) {
-                    locator_set->assigned[current_index] = 0xff;
-                    break;
+                if (current_locator != &sys->locators[locator_set->locator_entries[current_index]]) {
+                    continue;
                 }
+                locator_set->assigned[current_index] = 0xff;
+                break;
             }
         }
         if (current_locator == NULL || current_index == locator_set->locator_count) {

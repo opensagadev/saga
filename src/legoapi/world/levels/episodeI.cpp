@@ -206,8 +206,8 @@ static __used__ void PodRaceSnipersUpdate(void) {
             if (!(target != NULL && (target->apiobj.field_0x1f8 & 0x1001) == 0x1001)) {
                 continue;
             }
-            float dx = target->apiobj.collision_position.x - s->pos.x;
             float dz = target->apiobj.collision_position.z - s->pos.z;
+            float dx = target->apiobj.collision_position.x - s->pos.x;
             float dist2 = dx * dx + dz * dz;
             if (dist2 < PodRace_sniper_start_fire_radius * PodRace_sniper_start_fire_radius) {
                 in_range = true;

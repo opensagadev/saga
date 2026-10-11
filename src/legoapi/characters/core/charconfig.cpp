@@ -1038,158 +1038,160 @@ static void CC_anim_start(NUFPAR *parser) {
             } else if (NuStrICmp(parser->word_buf, "extra_character_off") == 0) {
                 CC_SetAnimMiscFlags(parser, &animation, 8);
             } else if (NuStrICmp(parser->word_buf, "effect_start") == 0) {
-                if ((charconfig.flags & 0x60) != 0x60) {
+                if ((charconfig.flags & 0x60) == 0x60) {
+                    if (charconfig.effect_count < 32 && animation.action_id != -1) {
+                        CHARACTER_EFFECT_s *effect = &charconfig.effect_scratch[charconfig.effect_count];
+                        effect->frame_1 = 1.0f;
+                        effect->frame_2 = 1.0f;
+                        effect->rumble = 0.0f;
+                        effect->shake = 0.0f;
+                        effect->judder = 0.0f;
+                        effect->minimum = 0.0f;
+                        effect->maximum = 0.0f;
+                        effect->character_id = charconfig.character_id;
+                        effect->debris_id = -1;
+                        effect->action_id = animation.action_id;
+                        effect->flags = 0x8000;
+                        effect->locators = 0;
+                        effect->random = 0;
+                        effect->particle_count = 0;
+                        effect->sound_id = -1;
+                        effect->surfaces = 0xffff;
+                        effect->bits_on = 0;
+                        effect->bits_off = 0;
+                        while (NuFParGetLine(parser) != 0) {
+                            if (NuFParGetWord(parser) == 0)
+                                continue;
+                            if (NuStrICmp(parser->word_buf, "deb_name") == 0) {
+                                if (NuFParGetWord(parser) != 0) {
+                                    effect->debris_id =
+                                        perm_debrissys == NULL
+                                            ? -1
+                                            : static_cast<i16>(FindGameDebris(
+                                                  static_cast<APIDEBRISSYS_s *>(perm_debrissys), parser->word_buf));
+                                }
+                            } else if (NuStrICmp(parser->word_buf, "condition") == 0) {
+                                if (NuFParGetWord(parser) != 0) {
+                                    if (NuStrICmp(parser->word_buf, "on_ground") == 0)
+                                        effect->flags |= 0x10;
+                                    else if (NuStrICmp(parser->word_buf, "under_water") == 0)
+                                        effect->flags |= 0x20;
+                                    else if (NuStrICmp(parser->word_buf, "above_water") == 0)
+                                        effect->flags |= 0x40;
+                                    else if (NuStrICmp(parser->word_buf, "intersect_water") == 0)
+                                        effect->flags |= 0x80;
+                                }
+                            } else if (NuStrICmp(parser->word_buf, "in_only") == 0)
+                                effect->flags |= 0x100;
+                            else if (NuStrICmp(parser->word_buf, "not_in") == 0)
+                                effect->flags |= 0x200;
+                            else if (NuStrICmp(parser->word_buf, "player_only") == 0)
+                                effect->flags |= 0x400;
+                            else if (NuStrICmp(parser->word_buf, "num_particles") == 0) {
+                                const i32 count = NuFParGetInt(parser);
+                                if (count > 0) {
+                                    effect->particle_count = static_cast<u8>(count);
+                                    effect->flags |= 1;
+                                }
+                            } else if (NuStrICmp(parser->word_buf, "frame") == 0 ||
+                                       NuStrICmp(parser->word_buf, "frame1") == 0) {
+                                effect->frame_1 = NuFParGetFloat(parser);
+                            } else if (NuStrICmp(parser->word_buf, "frame2") == 0)
+                                effect->frame_2 = NuFParGetFloat(parser);
+                            else if (NuStrICmp(parser->word_buf, "random") == 0)
+                                effect->random = static_cast<u8>(NuFParGetFloat(parser) * 255.0f);
+                            else if (NuStrICmp(parser->word_buf, "rumble") == 0)
+                                effect->rumble = fabsf(NuFParGetFloat(parser));
+                            else if (NuStrICmp(parser->word_buf, "buzz") == 0)
+                                effect->shake = fabsf(NuFParGetFloat(parser));
+                            else if (NuStrICmp(parser->word_buf, "judder") == 0)
+                                effect->judder = NuFParGetFloat(parser);
+                            else if (NuStrICmp(parser->word_buf, "timing") == 0) {
+                                if (NuFParGetWord(parser) != 0) {
+                                    if (NuStrICmp(parser->word_buf, "constant") == 0)
+                                        effect->flags |= 4;
+                                    else if (NuStrICmp(parser->word_buf, "between") == 0)
+                                        effect->flags |= 8;
+                                }
+                            } else if (NuStrICmp(parser->word_buf, "particles_per_frame") == 0) {
+                                effect->particle_rate = fabsf(NuFParGetFloat(parser));
+                                effect->flags |= 1;
+                            } else if (NuStrICmp(parser->word_buf, "particles_per_second") == 0) {
+                                effect->particle_rate = fabsf(NuFParGetFloat(parser));
+                                effect->flags |= 0x800001;
+                            } else if (NuStrICmp(parser->word_buf, "locators") == 0) {
+                                while (NuFParGetWord(parser) != 0) {
+                                    const u32 locator = NuAToI(parser->word_buf);
+                                    if (locator < 16)
+                                        effect->locators |= 1u << locator;
+                                }
+                            } else if (NuStrICmp(parser->word_buf, "sfx") == 0) {
+                                if (NuFParGetWord(parser) != 0)
+                                    effect->sound_id = static_cast<i16>(GetSfxId(parser->word_buf));
+                            } else if (NuStrICmp(parser->word_buf, "sfx_2d") == 0)
+                                effect->flags &= ~0x8000u;
+                            else if (NuStrICmp(parser->word_buf, "volume") == 0) {
+                                effect->minimum = fabsf(NuFParGetFloat(parser));
+                                effect->flags |= 0x10000;
+                            } else if (NuStrICmp(parser->word_buf, "surfaces") == 0) {
+                                if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "non_solid") == 0)
+                                    effect->surfaces = ~SURFACEBITS_DUST;
+                            } else if (NuStrICmp(parser->word_buf, "at_ter_surface") == 0)
+                                effect->flags |= 0x2000;
+                            else if (NuStrICmp(parser->word_buf, "at_obj_bottom") == 0)
+                                effect->flags |= 0x1000;
+                            else if (NuStrICmp(parser->word_buf, "at_locator_average") == 0)
+                                effect->flags |= 0x800;
+                            else if (NuStrICmp(parser->word_buf, "at_ter_layer") == 0)
+                                effect->flags |= 0x4000;
+                            else if (NuStrICmp(parser->word_buf, "min_mode") == 0) {
+                                if (NuFParGetWord(parser) != 0) {
+                                    if (NuStrICmp(parser->word_buf, "xz_speed") == 0)
+                                        effect->flags |= 0x40000;
+                                    else if (NuStrICmp(parser->word_buf, "xyz_speed") == 0)
+                                        effect->flags |= 0x100000;
+                                }
+                            } else if (NuStrICmp(parser->word_buf, "max_mode") == 0) {
+                                if (NuFParGetWord(parser) != 0) {
+                                    if (NuStrICmp(parser->word_buf, "xz_speed") == 0)
+                                        effect->flags |= 0x80000;
+                                    else if (NuStrICmp(parser->word_buf, "xyz_speed") == 0)
+                                        effect->flags |= 0x200000;
+                                }
+                            } else if (NuStrICmp(parser->word_buf, "min_val") == 0)
+                                effect->minimum = NuFParGetFloat(parser);
+                            else if (NuStrICmp(parser->word_buf, "max_val") == 0)
+                                effect->maximum = NuFParGetFloat(parser);
+                            else if (NuStrICmp(parser->word_buf, "at_obj_speed") == 0)
+                                effect->flags |= 0x400000;
+                            else if (NuStrICmp(parser->word_buf, "left_footprint") == 0)
+                                effect->flags |= 0x1000000;
+                            else if (NuStrICmp(parser->word_buf, "right_footprint") == 0)
+                                effect->flags |= 0x2000000;
+                            else if (NuStrICmp(parser->word_buf, "use_locator_matrix") == 0)
+                                effect->flags |= 0x4000000;
+                            else if (NuStrICmp(parser->word_buf, "bits_on") == 0) {
+                                while (NuFParGetWord(parser) != 0) {
+                                    const u32 bit = NuAToI(parser->word_buf);
+                                    if (bit < 8)
+                                        effect->bits_on |= 1u << bit;
+                                }
+                            } else if (NuStrICmp(parser->word_buf, "bits_off") == 0) {
+                                while (NuFParGetWord(parser) != 0) {
+                                    const u32 bit = NuAToI(parser->word_buf);
+                                    if (bit < 8)
+                                        effect->bits_off |= 1u << bit;
+                                }
+                            } else if (NuStrICmp(parser->word_buf, "effect_end") == 0) {
+                                ++charconfig.effect_count;
+                                break;
+                            }
+                        }
+                    }
+                } else {
                     while (NuFParGetLine(parser) != 0) {
                         if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "effect_end") == 0)
                             break;
-                    }
-                } else if (charconfig.effect_count < 32 && animation.action_id != -1) {
-                    CHARACTER_EFFECT_s *effect = &charconfig.effect_scratch[charconfig.effect_count];
-                    effect->frame_1 = 1.0f;
-                    effect->frame_2 = 1.0f;
-                    effect->rumble = 0.0f;
-                    effect->shake = 0.0f;
-                    effect->judder = 0.0f;
-                    effect->minimum = 0.0f;
-                    effect->maximum = 0.0f;
-                    effect->character_id = charconfig.character_id;
-                    effect->debris_id = -1;
-                    effect->action_id = animation.action_id;
-                    effect->flags = 0x8000;
-                    effect->locators = 0;
-                    effect->random = 0;
-                    effect->particle_count = 0;
-                    effect->sound_id = -1;
-                    effect->surfaces = 0xffff;
-                    effect->bits_on = 0;
-                    effect->bits_off = 0;
-                    while (NuFParGetLine(parser) != 0) {
-                        if (NuFParGetWord(parser) == 0)
-                            continue;
-                        if (NuStrICmp(parser->word_buf, "deb_name") == 0) {
-                            if (NuFParGetWord(parser) != 0) {
-                                effect->debris_id =
-                                    perm_debrissys == NULL
-                                        ? -1
-                                        : static_cast<i16>(FindGameDebris(static_cast<APIDEBRISSYS_s *>(perm_debrissys),
-                                                                          parser->word_buf));
-                            }
-                        } else if (NuStrICmp(parser->word_buf, "condition") == 0) {
-                            if (NuFParGetWord(parser) != 0) {
-                                if (NuStrICmp(parser->word_buf, "on_ground") == 0)
-                                    effect->flags |= 0x10;
-                                else if (NuStrICmp(parser->word_buf, "under_water") == 0)
-                                    effect->flags |= 0x20;
-                                else if (NuStrICmp(parser->word_buf, "above_water") == 0)
-                                    effect->flags |= 0x40;
-                                else if (NuStrICmp(parser->word_buf, "intersect_water") == 0)
-                                    effect->flags |= 0x80;
-                            }
-                        } else if (NuStrICmp(parser->word_buf, "in_only") == 0)
-                            effect->flags |= 0x100;
-                        else if (NuStrICmp(parser->word_buf, "not_in") == 0)
-                            effect->flags |= 0x200;
-                        else if (NuStrICmp(parser->word_buf, "player_only") == 0)
-                            effect->flags |= 0x400;
-                        else if (NuStrICmp(parser->word_buf, "num_particles") == 0) {
-                            const i32 count = NuFParGetInt(parser);
-                            if (count > 0) {
-                                effect->particle_count = static_cast<u8>(count);
-                                effect->flags |= 1;
-                            }
-                        } else if (NuStrICmp(parser->word_buf, "frame") == 0 ||
-                                   NuStrICmp(parser->word_buf, "frame1") == 0) {
-                            effect->frame_1 = NuFParGetFloat(parser);
-                        } else if (NuStrICmp(parser->word_buf, "frame2") == 0)
-                            effect->frame_2 = NuFParGetFloat(parser);
-                        else if (NuStrICmp(parser->word_buf, "random") == 0)
-                            effect->random = static_cast<u8>(NuFParGetFloat(parser) * 255.0f);
-                        else if (NuStrICmp(parser->word_buf, "rumble") == 0)
-                            effect->rumble = fabsf(NuFParGetFloat(parser));
-                        else if (NuStrICmp(parser->word_buf, "buzz") == 0)
-                            effect->shake = fabsf(NuFParGetFloat(parser));
-                        else if (NuStrICmp(parser->word_buf, "judder") == 0)
-                            effect->judder = NuFParGetFloat(parser);
-                        else if (NuStrICmp(parser->word_buf, "timing") == 0) {
-                            if (NuFParGetWord(parser) != 0) {
-                                if (NuStrICmp(parser->word_buf, "constant") == 0)
-                                    effect->flags |= 4;
-                                else if (NuStrICmp(parser->word_buf, "between") == 0)
-                                    effect->flags |= 8;
-                            }
-                        } else if (NuStrICmp(parser->word_buf, "particles_per_frame") == 0) {
-                            effect->particle_rate = fabsf(NuFParGetFloat(parser));
-                            effect->flags |= 1;
-                        } else if (NuStrICmp(parser->word_buf, "particles_per_second") == 0) {
-                            effect->particle_rate = fabsf(NuFParGetFloat(parser));
-                            effect->flags |= 0x800001;
-                        } else if (NuStrICmp(parser->word_buf, "locators") == 0) {
-                            while (NuFParGetWord(parser) != 0) {
-                                const u32 locator = NuAToI(parser->word_buf);
-                                if (locator < 16)
-                                    effect->locators |= 1u << locator;
-                            }
-                        } else if (NuStrICmp(parser->word_buf, "sfx") == 0) {
-                            if (NuFParGetWord(parser) != 0)
-                                effect->sound_id = static_cast<i16>(GetSfxId(parser->word_buf));
-                        } else if (NuStrICmp(parser->word_buf, "sfx_2d") == 0)
-                            effect->flags &= ~0x8000u;
-                        else if (NuStrICmp(parser->word_buf, "volume") == 0) {
-                            effect->minimum = fabsf(NuFParGetFloat(parser));
-                            effect->flags |= 0x10000;
-                        } else if (NuStrICmp(parser->word_buf, "surfaces") == 0) {
-                            if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "non_solid") == 0)
-                                effect->surfaces = ~SURFACEBITS_DUST;
-                        } else if (NuStrICmp(parser->word_buf, "at_ter_surface") == 0)
-                            effect->flags |= 0x2000;
-                        else if (NuStrICmp(parser->word_buf, "at_obj_bottom") == 0)
-                            effect->flags |= 0x1000;
-                        else if (NuStrICmp(parser->word_buf, "at_locator_average") == 0)
-                            effect->flags |= 0x800;
-                        else if (NuStrICmp(parser->word_buf, "at_ter_layer") == 0)
-                            effect->flags |= 0x4000;
-                        else if (NuStrICmp(parser->word_buf, "min_mode") == 0) {
-                            if (NuFParGetWord(parser) != 0) {
-                                if (NuStrICmp(parser->word_buf, "xz_speed") == 0)
-                                    effect->flags |= 0x40000;
-                                else if (NuStrICmp(parser->word_buf, "xyz_speed") == 0)
-                                    effect->flags |= 0x100000;
-                            }
-                        } else if (NuStrICmp(parser->word_buf, "max_mode") == 0) {
-                            if (NuFParGetWord(parser) != 0) {
-                                if (NuStrICmp(parser->word_buf, "xz_speed") == 0)
-                                    effect->flags |= 0x80000;
-                                else if (NuStrICmp(parser->word_buf, "xyz_speed") == 0)
-                                    effect->flags |= 0x200000;
-                            }
-                        } else if (NuStrICmp(parser->word_buf, "min_val") == 0)
-                            effect->minimum = NuFParGetFloat(parser);
-                        else if (NuStrICmp(parser->word_buf, "max_val") == 0)
-                            effect->maximum = NuFParGetFloat(parser);
-                        else if (NuStrICmp(parser->word_buf, "at_obj_speed") == 0)
-                            effect->flags |= 0x400000;
-                        else if (NuStrICmp(parser->word_buf, "left_footprint") == 0)
-                            effect->flags |= 0x1000000;
-                        else if (NuStrICmp(parser->word_buf, "right_footprint") == 0)
-                            effect->flags |= 0x2000000;
-                        else if (NuStrICmp(parser->word_buf, "use_locator_matrix") == 0)
-                            effect->flags |= 0x4000000;
-                        else if (NuStrICmp(parser->word_buf, "bits_on") == 0) {
-                            while (NuFParGetWord(parser) != 0) {
-                                const u32 bit = NuAToI(parser->word_buf);
-                                if (bit < 8)
-                                    effect->bits_on |= 1u << bit;
-                            }
-                        } else if (NuStrICmp(parser->word_buf, "bits_off") == 0) {
-                            while (NuFParGetWord(parser) != 0) {
-                                const u32 bit = NuAToI(parser->word_buf);
-                                if (bit < 8)
-                                    effect->bits_off |= 1u << bit;
-                            }
-                        } else if (NuStrICmp(parser->word_buf, "effect_end") == 0) {
-                            ++charconfig.effect_count;
-                            break;
-                        }
                     }
                 }
             } else if (NuStrICmp(parser->word_buf, "anim_end") == 0) {

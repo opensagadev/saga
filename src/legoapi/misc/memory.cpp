@@ -176,10 +176,11 @@ extern "C" {
 
     void DebFreeAllChunksInstantly(void) {
         for (i32 i = 0; i < maxdebkeys; ++i) {
-            if (debkeydata[i].effect_index != 0) {
-                i32 handle = i;
-                DebFreeChunksInstantly(&handle);
+            if (debkeydata[i].effect_index == 0) {
+                continue;
             }
+            i32 handle = i;
+            DebFreeChunksInstantly(&handle);
         }
     }
 

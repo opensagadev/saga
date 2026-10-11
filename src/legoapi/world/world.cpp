@@ -307,8 +307,8 @@ void CalculateWorldSize(WORLDINFO *world) {
     NUGSCN *scene = world->current_gscn;
     for (i32 i = 0; i < scene->portal_instance_count; ++i) {
         NUPORTALBOX *box = &scene->portal_boxes[i];
-        NUVEC box_minimum = box->first;
         NUVEC box_maximum = box->second;
+        NUVEC box_minimum = box->first;
         if (scene->display_list != NULL &&
             (scene->display_list->render_buffer & NUDL_SCENE_RENDER_FLAG_CENTER_EXTENT_BOUNDS) != 0) {
             box_minimum.z = box->first.z - box->second.z;
@@ -1166,7 +1166,25 @@ void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 para
             ++FreePlayResidentCount;
         }
     }
-    if (data == NULL || (data->flags & 1) == 0) {
+    if (data != NULL && (data->flags & 1) != 0) {
+        if ((data->flags & 4) == 0) {
+            const i32 second = PlayerList[1];
+            if (second == -1 || (CDataList[second].model_flags & 0x2000) == 0 || Collection_Got(second) == 0)
+                PlayerList[1] = PlayerList[0];
+            const i32 count = VehicleCollection.count_y < 340 ? VehicleCollection.count_y : 340;
+            for (i32 i = 0; i < count; ++i)
+                ids[i] = VehicleCollection.list[i].id;
+            ids[count] = -1;
+            for (i16 *id = ids; *id != -1; ++id) {
+                if (World_AddFreePlayModel(*id) != 0)
+                    ++FreePlayBonusCount;
+            }
+        } else {
+            const i32 second = PlayerList[1];
+            if (second == -1 || (CDataList[second].model_flags & 0x4000000) == 0 || Collection_Got(second) == 0)
+                PlayerList[1] = PlayerList[0];
+        }
+    } else {
         i32 hats = InModelListDataFlags(FreePlayModelList, 0, 0, 1, 0);
         if (CharCategory != NULL) {
             for (i32 i = 0; i < CHARCATEGORYCOUNT; ++i) {
@@ -1212,22 +1230,6 @@ void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 para
                 }
             }
         }
-    } else if ((data->flags & 4) == 0) {
-        const i32 second = PlayerList[1];
-        if (second == -1 || (CDataList[second].model_flags & 0x2000) == 0 || Collection_Got(second) == 0)
-            PlayerList[1] = PlayerList[0];
-        const i32 count = VehicleCollection.count_y < 340 ? VehicleCollection.count_y : 340;
-        for (i32 i = 0; i < count; ++i)
-            ids[i] = VehicleCollection.list[i].id;
-        ids[count] = -1;
-        for (i16 *id = ids; *id != -1; ++id) {
-            if (World_AddFreePlayModel(*id) != 0)
-                ++FreePlayBonusCount;
-        }
-    } else {
-        const i32 second = PlayerList[1];
-        if (second == -1 || (CDataList[second].model_flags & 0x4000000) == 0 || Collection_Got(second) == 0)
-            PlayerList[1] = PlayerList[0];
     }
     for (EXTRAMODEL *extra = ExtraModelList; extra->model_list != NULL; ++extra) {
         const i32 source = *extra->model_list;

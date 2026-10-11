@@ -114,10 +114,10 @@ static i32 Collide2Objects(APIOBJECT *first, APIOBJECT *second) {
         }
 
         if (collision_result == 2 && VehicleArea == 0) {
-            GAMECHARACTERDATA *first_data =
-                static_cast<GAMECHARACTERDATA *>(first_object->apiobj.character_data->field11_0x24);
             GAMECHARACTERDATA *second_data =
                 static_cast<GAMECHARACTERDATA *>(second_object->apiobj.character_data->field11_0x24);
+            GAMECHARACTERDATA *first_data =
+                static_cast<GAMECHARACTERDATA *>(first_object->apiobj.character_data->field11_0x24);
             if (!((first_data->flags_090 & 0x1000) != 0 &&
                   first->horizontal_velocity_magnitude > first_data->movement_speed * 0.5f)) {
                 if ((second_data->flags_090 & 0x1000) != 0 &&
@@ -374,8 +374,8 @@ void CollideGameObjects(WORLDINFO_s *world) {
     }
 
     APIOBJECT *collision_objects[64];
-    NUVEC collision_minimums[64];
     NUVEC collision_maximums[64];
+    NUVEC collision_minimums[64];
     APIOBJECT **object_cursor = collision_objects;
     NUVEC *minimum_cursor = collision_minimums;
     NUVEC *maximum_cursor = collision_maximums;

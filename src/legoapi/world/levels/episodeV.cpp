@@ -1162,11 +1162,12 @@ i32 isHothBattleWaveCreature(GameObject_s *object) {
 static inline void HothBattle_AssignSpawnLocator(GameObject_s *object, AILOCATOR_s *locator, AILOCATORSET_s *set) {
     for (i32 index = 0; index < set->locator_count; ++index) {
         AILOCATOR_s *entry = &WORLD->ai_sys->locators[set->locator_entries[index]];
-        if (entry == locator) {
-            object->ai.locator = entry;
-            set->assigned[index] = object->apiobj.field_0x289;
-            break;
+        if (entry != locator) {
+            continue;
         }
+        object->ai.locator = entry;
+        set->assigned[index] = object->apiobj.field_0x289;
+        break;
     }
 }
 
@@ -1360,9 +1361,10 @@ static void Asteroid_AddParts(GIZMOBLOWUP_s *blowup) {
         params.field_a4 = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 3.0f + 7.0f;
 
         PART_s *part = AddPart(&params);
-        if (part != NULL) {
-            part->force_player_mask = index == 0 ? 1 : 2;
+        if (part == NULL) {
+            continue;
         }
+        part->force_player_mask = index == 0 ? 1 : 2;
     }
 }
 

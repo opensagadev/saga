@@ -345,14 +345,16 @@ static inline void Customiser_DumpAccessory(CUSTOMISER *customiser, i32 side, i3
         return;
 
     CUSTOMPIECERESOURCE *resource = &Accessory[side][category];
-    if (resource->scene != NULL) {
+    if (resource->scene == NULL) {
+        if (resource->texture_id != 0) {
+            NUMTL *material = resource->character_model->hierarchy->materials[resource->material_index];
+            material->tex_id = static_cast<i16>(resource->original_texture_id);
+            NuMtlUpdate(material);
+            NuTexDestroy(resource->texture_id);
+        }
+    } else {
         NuGScnRemove(resource->scene);
         resource->scene = NULL;
-    } else if (resource->texture_id != 0) {
-        NUMTL *material = resource->character_model->hierarchy->materials[resource->material_index];
-        material->tex_id = static_cast<i16>(resource->original_texture_id);
-        NuMtlUpdate(material);
-        NuTexDestroy(resource->texture_id);
     }
 }
 
@@ -799,10 +801,11 @@ CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32
                 customiser->default_pieces[0][category] = index;
                 first_found = 1;
             }
-            if ((flags & 0x400) != 0) {
-                customiser->default_pieces[1][category] = index;
-                second_found = 1;
+            if ((flags & 0x400) == 0) {
+                continue;
             }
+            customiser->default_pieces[1][category] = index;
+            second_found = 1;
         }
     }
     Customiser_CopyDefaultPiecesToSave(customiser, NULL);

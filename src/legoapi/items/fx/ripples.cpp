@@ -224,8 +224,9 @@ void VecRotateAxis(NUVEC *, u16, NUVEC *);
 void AddRipple(ripple_set_s *, NUMTX *, float, float, float, float, RGBA, RGBA, i32, numtl_s *, NUVEC *);
 
 void AddSurfaceRipples(GameObject_s *object) {
-    NUVEC position;
+
     if (!(WORLD->ripple_effects == NULL || object->apiobj.field_0x287 != 0)) {
+        NUVEC position;
         if (object->field_0x1084 != 1) {
             if (!object->apiobj.intersects_water || !object->apiobj.model_draw_result)
                 return;

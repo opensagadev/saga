@@ -804,8 +804,8 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
             if (packet->current_route != 0xff) {
                 packet->runtime_flags |= 0x10;
             }
-            f32 best_distance = FLT_MAX;
             u32 attempted_routes = 0;
+            f32 best_distance = FLT_MAX;
             for (;;) {
                 if (packet->current_route != 0xff &&
                     ((static_cast<u64>(destination_connection->route_mask) >> packet->current_route) & 1) == 0) {

@@ -834,9 +834,10 @@ static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {
         }
         return 1;
     }
-    i32 required;
+
     i32 count;
     switch (condition[0]) {
+        i32 required;
         case 0: {
             FLOWBOX_s **parents = box->parents;
             u8 *outputs = box->output_indices;

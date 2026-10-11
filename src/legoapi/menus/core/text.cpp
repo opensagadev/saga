@@ -182,8 +182,8 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
     }
 
     AREADATA *area = NULL;
-    i32 body_text_id = -1;
     i32 episode_index = -1;
+    i32 body_text_id = -1;
     i32 area_index = -1;
     const i8 crawl_area = reinterpret_cast<i8 *>(s_crawlPtr)[0x0d];
     if (crawl_area != -1) {
@@ -193,8 +193,8 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
         body_text_id = area->text_id;
     }
 
-    char *episode_name = NULL;
     char *episode_text = NULL;
+    char *episode_name = NULL;
     char *chapter_text = NULL;
     char *area_name = NULL;
     i32 paragraph_count = 0;
@@ -538,8 +538,8 @@ f32 TextPrintSubstring(unsigned char *text, f32 x, f32 y, f32 z, f32 x_scale, f3
                        i32 button_font) {
     VUFNT *base_font = SmartTextFont != nullptr ? SmartTextFont : QFont2D;
     VUFNT *font;
-    f32 pulse;
     f32 relative_scale;
+    f32 pulse;
     if (button_font == 0 || QFont2DButtons == nullptr) {
         font = base_font;
         pulse = 1.0f;
@@ -950,14 +950,14 @@ extern "C" {
             f32 scale = game_font->height / button_font->height;
             for (i32 i = 0; i < button_font->glyph_count; i++) {
                 for (i32 j = 0; j < game_font->glyph_count; j++) {
-                    if (button_font->unicode_map[i].unicode == game_font->unicode_map[j].unicode) {
-                        if (button_font->unicode_map[i].unicode >= 0x531 &&
-                            button_font->unicode_map[i].unicode <= 0x53f) {
-                            game_font->glyphs[game_font->unicode_map[j].index].width =
-                                button_font->glyphs[button_font->unicode_map[i].index].width * scale;
-                        }
-                        break;
+                    if (button_font->unicode_map[i].unicode != game_font->unicode_map[j].unicode) {
+                        continue;
                     }
+                    if (button_font->unicode_map[i].unicode >= 0x531 && button_font->unicode_map[i].unicode <= 0x53f) {
+                        game_font->glyphs[game_font->unicode_map[j].index].width =
+                            button_font->glyphs[button_font->unicode_map[i].index].width * scale;
+                    }
+                    break;
                 }
             }
         }
@@ -1132,8 +1132,8 @@ extern "C" {
             i32 widest_line = -1;
             if (explicit_breaks != 0) {
                 width = 0.0f;
-                i32 begin = 0;
                 i32 line = 0;
+                i32 begin = 0;
                 do {
                     while (decoded[begin] == ' ')
                         ++begin;
@@ -1193,8 +1193,8 @@ extern "C" {
                         }
                     } while (++line <= last_line);
                 } else {
-                    i32 begin = 0;
                     i32 end = 0;
+                    i32 begin = 0;
                     i32 line = 0;
                     do {
                         while (decoded[begin] == ' ')
@@ -1269,8 +1269,8 @@ extern "C" {
                 const f32 box_height = -static_cast<f32>(last_line + 1) * line_height;
                 box->height = box_height;
                 const i32 mode = smarttextex_drawmessagebox;
-                f32 box_x = x;
                 f32 box_y = y;
+                f32 box_x = x;
                 if (mode == 1) {
                     if ((alignment & 2) != 0)
                         box_x = box->x = x + 0.5f * box_width;

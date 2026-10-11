@@ -583,8 +583,8 @@ void GizBuildItPushAwayFromStart(GameObject_s *player, GIZBUILDIT_s *buildit) {
         return;
     i32 count = buildit->anim_object_count;
     NUVEC start_position = buildit->start_position;
-    f32 player_x = player->apiobj.collision_position.x;
     f32 player_z = player->apiobj.collision_position.z;
+    f32 player_x = player->apiobj.collision_position.x;
     NUVEC centre;
     f32 radius;
     minimum.x = minimum.z = 1000000000.0f;
@@ -627,7 +627,7 @@ void GizBuildItPushAwayFromStart(GameObject_s *player, GIZBUILDIT_s *buildit) {
 }
 
 void GizBuildItPushAwayFromEnd(GameObject_s *player) {
-    f32 nearest_distance;
+
     if (WORLD->giz_buildit_sys == NULL)
         return;
     GIZBUILDIT_s *buildit = WORLD->giz_buildit_sys->buildits;
@@ -644,12 +644,13 @@ void GizBuildItPushAwayFromEnd(GameObject_s *player) {
             maximum.x = maximum.z = -1000000000.0f;
             f32 radius;
             if (buildit->state_flags & 0x10) {
+                f32 nearest_distance;
                 nearest_distance = 1000000000.0f;
                 for (i32 j = 0; j < buildit->built_object_count; ++j) {
                     GIZBUILDITANIMDATA_s *data =
                         static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[j]->object_data);
-                    f32 dx = data->end_mtx.m30 - player_x;
                     f32 dz = data->end_mtx.m32 - player_z;
+                    f32 dx = data->end_mtx.m30 - player_x;
                     f32 distance = dx * dx + dz * dz;
                     if (distance < nearest_distance) {
                         nearest_distance = distance;
@@ -1092,8 +1093,8 @@ void GizBuildit_Reset(GIZBUILDIT_s *buildit, void *world_ptr) {
     buildit->bounds_radius = NuTrigTable[0x3000];
 
     if (buildit->anim_set != NULL && buildit->anim_set->objects != NULL) {
-        NUVEC start_min = {1000000000.0f, 1000000000.0f, 1000000000.0f};
         NUVEC start_max = {-1000000000.0f, -1000000000.0f, -1000000000.0f};
+        NUVEC start_min = {1000000000.0f, 1000000000.0f, 1000000000.0f};
         NUVEC end_min = start_min;
         NUVEC end_max = start_max;
 

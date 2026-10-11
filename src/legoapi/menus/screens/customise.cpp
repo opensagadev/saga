@@ -689,8 +689,8 @@ void CustomiserMenu_Draw(MENU_s *) {
             if (active_count == 1 && MenuPacket.customise_other_player[side] != 0)
                 side = side == 0;
             for (i32 index = 0; index < active_count; ++index, ++side) {
-                const i32 green = side == 0 ? 191 : 255;
                 const i32 blue = side == 0 ? 255 : 0;
+                const i32 green = side == 0 ? 191 : 255;
                 const i32 red = side == 0 ? 0 : 127;
                 if (CustomiseMode[side] != 1) {
 
@@ -701,8 +701,8 @@ void CustomiserMenu_Draw(MENU_s *) {
                     char letter[2];
                     letter[0] = 0;
                     letter[1] = 0;
-                    const f32 gap = Game.options_save.widescreen == 0 ? 0.05249999836087227f : 0.041999999433755875f;
                     const f32 half_width = Game.options_save.widescreen == 0 ? 0.367499977350235f : 0.2939999997615814f;
+                    const f32 gap = Game.options_save.widescreen == 0 ? 0.05249999836087227f : 0.041999999433755875f;
                     i32 length;
                     for (length = 15; length != 0; --length)
                         if (Game.customizer[side].name[length - 1] != ' ')
@@ -756,8 +756,8 @@ void CustomiserMenu_Draw(MENU_s *) {
                             pulse = 1.0f + excess;
                     }
                 }
-                const f32 x = CustomiseScreenPos[side].x;
                 const f32 size = pulse * 0.1f * icon_size;
+                const f32 x = CustomiseScreenPos[side].x;
                 const f32 alpha = (1.0f - CustomiseNameBoardMul[side]) * Customise_NameAlpha;
                 DrawPanel3DObject(x, -0.6f, 1.0f, size, size, size, 0, 0, 0, &WORLD->lev_objs[167].special, 0, alpha);
                 CUSTOMISESAVE_s *save = &Game.customizer[side];

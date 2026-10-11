@@ -310,8 +310,8 @@ void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
     }
     if ((object->field_0xefc & 8) != 0)
         flags |= 0x40;
-    NUVEC adjusted_position;
     NUVEC aimed_position = object->attack_target_position;
+    NUVEC adjusted_position;
     NUVEC delta, target_velocity, origin, direction;
     BoltSys->shoot_origin(object, &origin);
     u16 heading = BoltSys->shoot_direction(object, &direction);

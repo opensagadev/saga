@@ -404,7 +404,7 @@ void SarlaccPitB_Reset(WORLDINFO_s *world) {
 }
 
 void SarlaccPitB_Update(WORLDINFO_s *world) {
-    i32 candidates[16];
+
     static NUVEC lumppos;
     static f32 enginetimer;
     if (netclient == 0) {
@@ -424,6 +424,7 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
         }
 
         switch (sarlaccdisco.phase) {
+            i32 candidates[16];
             case 0:
                 sarlaccb_netpacket->disco_active = 0;
                 if (NuSpecialExistsFn(&LevSpecial[0]) && ready &&

@@ -1570,12 +1570,12 @@ extern "C" {
                 root_fn(&local_matrix, root_data, &root_values, &root_values, root_translation, 0.0f);
             }
 
-            if (parent_index != 0xff) {
+            if (parent_index == 0xff) {
+                if ((flags & 0x40) != 0) {
+                    scale_array[joint_index] = {1.0f, 1.0f, 1.0f};
+                }
+            } else {
                 NuMtxMulVU0(&matrices[joint_index], &local_matrix, &matrices[parent_index]);
-            }
-
-            else if ((flags & 0x40) != 0) {
-                scale_array[joint_index] = {1.0f, 1.0f, 1.0f};
             }
             if (AnimBuffEvalCB != NULL && callback_data[joint_index] != NULL) {
                 AnimBuffEvalCB(&matrices[joint_index], callback_data[joint_index], 0);
@@ -2093,12 +2093,14 @@ extern "C" {
         u32 magic = *reinterpret_cast<u32 *>(anim);
         if (magic + 0xbeb1b6ccU < 2) {
             ani3_animheader_s *ani3 = reinterpret_cast<ani3_animheader_s *>(anim);
-            if (frame < 1.0f) {
-                time->time = 1.0f;
-            } else if (frame < static_cast<f32>(ani3->frame_count)) {
-                time->time = frame;
+            if (!(frame < 1.0f)) {
+                if (frame < static_cast<f32>(ani3->frame_count)) {
+                    time->time = frame;
+                } else {
+                    time->time = static_cast<f32>(ani3->frame_count) - 0.01f;
+                }
             } else {
-                time->time = static_cast<f32>(ani3->frame_count) - 0.01f;
+                time->time = 1.0f;
             }
             return;
         }
@@ -4325,11 +4327,12 @@ extern "C" {
             i32 selected = 10;
             for (i32 i = 0; i < 10; ++i) {
                 volatile NuInputTouch *touch = &data->touch_events[i];
-                if ((touch->unknown_00 || touch->unknown_02) && touch->unknown_04 == old_x &&
-                    touch->unknown_08 == old_y) {
-                    selected = i;
-                    break;
+                if (!((touch->unknown_00 || touch->unknown_02) && touch->unknown_04 == old_x &&
+                      touch->unknown_08 == old_y)) {
+                    continue;
                 }
+                selected = i;
+                break;
             }
             NuInputTouch *touch = &data->touch_events[selected];
             touch->unknown_00 = 1;

@@ -570,10 +570,12 @@ extern "C" {
                 }
                 return;
             }
-            if ((locator->flags & 0x20) == 0) {
+            if ((locator->flags & 0x20) != 0) {
+                if (inst_locator->effect_handle >= 0) {
+                    DebFreeInstantly(&inst_locator->effect_handle);
+                }
+            } else {
                 inst_locator->effect_handle = 0;
-            } else if (inst_locator->effect_handle >= 0) {
-                DebFreeInstantly(&inst_locator->effect_handle);
             }
             inst_locator->field_00 = 0;
             return;

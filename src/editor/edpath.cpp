@@ -231,8 +231,8 @@ static void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
         for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes); node != nullptr;
              node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&path->nodes, &node->link)) {
             i32 first_index = node->index;
-            u32 node_colour;
             i32 segments;
+            u32 node_colour;
             if (path == aieditor->current_path) {
                 if (node == path->current_node) {
                     node_colour = 0xff0000ff;
@@ -646,8 +646,8 @@ static __used__ void pathEditor_cbSetShareNode(eduimenu_s *, eduiitem_s *item, u
     EDAIPATHNODE_s *current = current_path->current_node;
     EDAISHAREDPATHNODE_s *shared = current->shared_node;
     EDAIPATHNODE_s *matches[16];
-    i32 match_count = 0;
     i32 path_number = 1;
+    i32 match_count = 0;
     for (EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths); path != nullptr;
          path = (EDAIPATH_s *)NuLinkedListGetNext(&aieditor->paths, &path->link)) {
         if (path == current_path) {
@@ -784,8 +784,8 @@ static __used__ void pathEditor_cbShareNodeMenu(eduimenu_s *parent, eduiitem_s *
 }
 
 static __used__ void pathEditor_cbCnxFlagsToggle(eduimenu_s *, eduiitem_s *item, u32) {
-    i32 type_index = item->data;
     EDAIPATH_s *path = aieditor->current_path;
+    i32 type_index = item->data;
     if (path == nullptr) {
         return;
     }
@@ -1682,8 +1682,8 @@ void pathEditor_Enter(void) {
                 }
             }
             for (i32 node_index = 0; node_index < runtime_path->node_count; ++node_index) {
-                AIPATHNODE_s *source = &runtime_path->nodes[node_index];
                 EDAIPATHNODE_s *node = &aieditor->node_storage[node_storage_start + node_index];
+                AIPATHNODE_s *source = &runtime_path->nodes[node_index];
                 for (i32 edge_index = 0; edge_index < source->connection_count; ++edge_index) {
                     AIPATHCNX_s *connection = source->connections[edge_index];
                     i32 direction = connection->node_indices[0] != node_index;
@@ -2539,8 +2539,8 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
     }
     if (pad->digital_buttons_pressed & 0x100) {
         if (aieditorsettings.path_flags & 2) {
-            EDAIPATH_s *nearest_path = NULL;
             EDAIPATHNODE_s *nearest_node = NULL;
+            EDAIPATH_s *nearest_path = NULL;
             f32 best = 3.402823466e38f;
             for (path = reinterpret_cast<EDAIPATH_s *>(NuLinkedListGetHead(&aieditor->paths)); path;
                  path = reinterpret_cast<EDAIPATH_s *>(NuLinkedListGetNext(&aieditor->paths, &path->link))) {

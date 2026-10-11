@@ -2295,9 +2295,10 @@ extern "C" {
                 } else if (footprint_callback != NULL && position_count > 0 && (effects->flags & 0x03000000) != 0) {
                     for (i32 i = 0; i < locator_count; ++i) {
                         const i32 locator = locator_indices[i];
-                        if (object->apiobj.character_model->points_of_interest[locator] != NULL) {
-                            footprint_callback(&locator_matrices[locator], object, effects->flags & 0x01000000, 0);
+                        if (object->apiobj.character_model->points_of_interest[locator] == NULL) {
+                            continue;
                         }
+                        footprint_callback(&locator_matrices[locator], object, effects->flags & 0x01000000, 0);
                     }
                 }
 

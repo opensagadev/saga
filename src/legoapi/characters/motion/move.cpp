@@ -7466,7 +7466,6 @@ void ApplyGravity(GameObject_s *object, float *gravity, float hover_height, floa
         return;
     }
 
-    float target_ground_height;
     if (context == 0x1e || context == 0x22 || context == 0x42) {
         hover_height = 0.2f;
         seek_rate = 8.0f;
@@ -7479,6 +7478,7 @@ void ApplyGravity(GameObject_s *object, float *gravity, float hover_height, floa
             if ((target->field_0xe21 & 4) == 0 &&
                 ((target->field_0xe21 & 1) == 0 ||
                  (static_cast<GAMECHARACTERDATA *>(character->field11_0x24)->flags_090 & 0x4000) == 0)) {
+                float target_ground_height;
                 target_ground_height = target->apiobj.lower_position.y;
                 ground_height = &target_ground_height;
                 hover_height = (target->apiobj.upper_position.y - target_ground_height) * 0.75f;

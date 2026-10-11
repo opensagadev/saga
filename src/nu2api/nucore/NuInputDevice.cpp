@@ -115,7 +115,7 @@ NuInputDevice::NuInputDevice(u32 port) {
 
 void NuInputDevice::Update(f32 delta_time, bool emulate_touch) {
     u32 i;
-    f32 raw_analog_values[12];
+
     f32 raw_motion_values[20];
     NuInputTouchData raw_touch_data;
     NuInputMouseData raw_mouse_data;
@@ -135,6 +135,7 @@ void NuInputDevice::Update(f32 delta_time, bool emulate_touch) {
     this->is_intercepted = NuInputDevicePS::IsInterceptedPS(this->port);
 
     if (!this->is_intercepted) {
+        f32 raw_analog_values[12];
         NuInputDevicePS::ReadButtonsPS(this->port, &this->button_states);
         NuInputDevicePS::ReadAnalogValuesPS(this->port, this->analog_values);
         NuInputDevicePS::ReadMotionValuesPS(this->port, this->motion_values);

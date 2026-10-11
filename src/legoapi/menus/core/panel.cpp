@@ -93,8 +93,8 @@ static void DrawCoinTotal(i32 source, i32 hide_super_story_target) {
 
         if (Game.episode_save[SuperStoryEpisode].superstory_score_target != 0) {
             if (hide_super_story_target == 0) {
-                char target[64];
                 char text[64];
+                char target[64];
                 Text_MakeScore(static_cast<u32>(Game.episode_save[SuperStoryEpisode].superstory_score_target), target);
                 NuStrCpy(text, const_cast<char *>("("));
                 NuStrCat(text, target);
@@ -143,8 +143,8 @@ i32 Tag_UpdateHint(HINT_s *hint) {
             }
             if (VehicleArea != 0 || WORLD->current_level == HUB_LDATA)
                 return 0;
-            GameObject_s *first = player;
             GameObject_s *second = player2;
+            GameObject_s *first = player;
             if (first != NULL && static_cast<i8>(first->apiobj.flags_low) < 0 && first->field_0xcc0 != NULL)
                 return 0;
             if (second != NULL && static_cast<i8>(second->apiobj.flags_low) < 0 && second->field_0xcc0 != NULL)
@@ -1027,8 +1027,8 @@ void DrawPanel() {
                                 (object->field_0xdec >= 3.0f ||
                                  PickupFlickerFrame % PickUpFlickerFrames < PickUpFlickerTest)) {
                                 nuhspecial_s *special = &WORLD->lev_objs[0xd0].special;
-                                u16 angle = PowerUp_PanelYRot[0];
                                 f32 scale = POWERUPOBJSIZE;
+                                u16 angle = PowerUp_PanelYRot[0];
                                 f32 y = PowerUp_GetPanelY(0);
                                 DrawPanel3DObject(-ICONX, y + status_y, 1.0f, scale, scale, scale, 0, angle, 0, special,
                                                   0, 1.0f);

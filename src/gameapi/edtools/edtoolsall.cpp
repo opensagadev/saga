@@ -4160,10 +4160,11 @@ void EdRegistry::Serialise(EdStream &stream) {
 
 void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry) {
     char object_name[256];
-    EdMember member;
+
     i32 filter_flags;
     i16 group;
     auto get_attribute = [&](EdClass *object_class, void *object, i32 attribute, i32 type, void *data, i32 size) {
+        EdMember member;
         if (object_class->FindMember(&member, object, attribute, 1))
             member.reference->GetAttributeData(member.object, attribute, type, data, size);
     };

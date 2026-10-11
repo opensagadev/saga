@@ -1121,12 +1121,13 @@ static void edpartFileLoadEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     }
     u32 colours[4] = {0x8000c000, 0x80ff0000, 0x80808080, 0x80404040};
     edpart_message_menu = eduiMenuCreate(70, 70, 300, 250, ed_fnt, edpartCancelMessageMenu, "Message");
-    if (edpart_message_menu != NULL) {
-        eduiMenuAddItem(edpart_message_menu, eduiItemSelCreate(1, colours, 0, 0, NULL, "Loaded OK"));
-        eduiMenuAttach(parent, edpart_message_menu);
-        edpart_message_menu->x = parent->x + 10;
-        edpart_message_menu->y = parent->y + 40;
+    if (edpart_message_menu == NULL) {
+        return;
     }
+    eduiMenuAddItem(edpart_message_menu, eduiItemSelCreate(1, colours, 0, 0, NULL, "Loaded OK"));
+    eduiMenuAttach(parent, edpart_message_menu);
+    edpart_message_menu->x = parent->x + 10;
+    edpart_message_menu->y = parent->y + 40;
 }
 static inline void edpartSavePath(char *path, char *backup, bool level) {
     char directory[256], name[256], extension[256];
@@ -2452,10 +2453,11 @@ void edpartDoInput(nupad_s *pad) {
             ++orphans;
         else {
             for (i32 previous = 0; previous < variant; ++previous) {
-                if (effect == edpart_nearest_type->effect_ids[previous]) {
-                    ++duplicates;
-                    break;
+                if (effect != edpart_nearest_type->effect_ids[previous]) {
+                    continue;
                 }
+                ++duplicates;
+                break;
             }
         }
     }

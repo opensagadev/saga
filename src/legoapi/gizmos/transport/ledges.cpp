@@ -445,7 +445,20 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     u16 angle = object->apiobj.movement_facing_angle + 0x4000;
     f32 push = PushingTowardsAngle(input, angle);
     f32 speed;
-    if (push > NuTrigTable[0x3555]) {
+    if (!(push > NuTrigTable[0x3555])) {
+        if (push < -NuTrigTable[0x3555]) {
+            if (object->apiobj.character_model->model_data_b[0x9e] != NULL) {
+                object->context_animation = 0x9e;
+                speed = -AnimSpeed(object->apiobj.character_model, 0x9e);
+                if (speed == 0.0f)
+                    return;
+            } else
+                speed = -0.5f;
+        } else {
+            object->context_animation = 0x9d;
+            return;
+        }
+    } else {
         if (object->apiobj.character_model->model_data_b[0x9f] != NULL) {
             object->context_animation = 0x9f;
             speed = AnimSpeed(object->apiobj.character_model, 0x9f);
@@ -453,17 +466,6 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 return;
         } else
             speed = 0.5f;
-    } else if (push < -NuTrigTable[0x3555]) {
-        if (object->apiobj.character_model->model_data_b[0x9e] != NULL) {
-            object->context_animation = 0x9e;
-            speed = -AnimSpeed(object->apiobj.character_model, 0x9e);
-            if (speed == 0.0f)
-                return;
-        } else
-            speed = -0.5f;
-    } else {
-        object->context_animation = 0x9d;
-        return;
     }
     f32 radius = object->apiobj.field_0x1dc;
     NUVEC previous = object->external_force;

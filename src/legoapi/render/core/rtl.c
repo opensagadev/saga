@@ -270,12 +270,13 @@ extern "C" {
     }
 
     void rtlDynamicFree(i32 id) {
-        if (rtl_dynamic_pool != NULL && id >= 0 && id < rtl_dynamic_max) {
-            NULNKHDR *light = NuLstGetByIdx(rtl_dynamic_pool, id);
-            if (light != NULL) {
-                NuLstFree(light);
-                --rtl_dynamic_cnt;
-            }
+        if (!(rtl_dynamic_pool != NULL && id >= 0 && id < rtl_dynamic_max)) {
+            return;
+        }
+        NULNKHDR *light = NuLstGetByIdx(rtl_dynamic_pool, id);
+        if (light != NULL) {
+            NuLstFree(light);
+            --rtl_dynamic_cnt;
         }
     }
 

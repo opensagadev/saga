@@ -128,11 +128,13 @@ static inline void DetonatorConsiderOldest(DETONATOR_s *detonator, f32 &oldest_t
 }
 
 static inline void DetonatorConsiderPlacementSlot(i32 index, GameObject_s *object, i32 &count, i32 &available) {
-    if (Detonator[index].active != 0 && Detonator[index].object == object) {
+    if (!(Detonator[index].active != 0 && Detonator[index].object == object)) {
+        if (available == -1) {
+            // Retail also permits replacing a detonator owned by another object.
+            available = index;
+        }
+    } else {
         ++count;
-    } else if (available == -1) {
-        // Retail also permits replacing a detonator owned by another object.
-        available = index;
     }
 }
 

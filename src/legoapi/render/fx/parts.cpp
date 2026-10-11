@@ -1735,8 +1735,8 @@ extern "C" {
             orientation = &numtx_identity;
         }
 
-        f32 interval;
         f32 emission_time;
+        f32 interval;
         const f32 end_time = partglobaltime + duration;
         if (effective_rate == 0.0f) {
             interval = 0.0f;
@@ -2271,8 +2271,8 @@ extern "C" {
     void UpdateParts(f32 time) {
         i32 key;
         NUVEC direction;
-        NUMTX_ALIGNED16 impact_orientation;
         NUMTX_ALIGNED16 movement_orientation;
+        NUMTX_ALIGNED16 impact_orientation;
         NUMTX_ALIGNED16 emitter_orientation;
         partglobaltime += time;
         if (partglobaltime > 900.0f)
@@ -2884,8 +2884,8 @@ extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f3
         for (i32 j = count - 1; j >= 0; --j) {
             NUVEC difference;
             NuVecSub(&difference, &positions[j], &part->position);
-            f32 distance = difference.x * difference.x + difference.y * difference.y + difference.z * difference.z;
             f32 combined_radius = radius + part->target_radius;
+            f32 distance = difference.x * difference.x + difference.y * difference.y + difference.z * difference.z;
             if (distance <= combined_radius * combined_radius)
                 return part;
         }
@@ -3673,39 +3673,38 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
     i32 part_index = 0;
     for (i32 render_index = 0; render_index < render_count; ++render_index) {
         const i32 layer = render_indices[render_index];
-        if (layer != -1 && !(animation != -1 && layer != animation) &&
-            !(excluded_layer != -1 && layer == excluded_layer)) {
-            nuhgobjrender_s *render = &object->apiobj.character_model->hierarchy->render_parts[layer];
-            if (render->rigid_specials == NULL)
+        if (!(layer != -1 && !(animation != -1 && layer != animation) &&
+              !(excluded_layer != -1 && layer == excluded_layer))) {
+            continue;
+        }
+        nuhgobjrender_s *render = &object->apiobj.character_model->hierarchy->render_parts[layer];
+        if (render->rigid_specials == NULL)
+            continue;
+        for (i32 joint = 0; joint < object->apiobj.character_model->hierarchy->joint_count; ++joint, ++part_index) {
+            nuhspecial_s *special = static_cast<nuhspecial_s *>(render->rigid_specials[joint]);
+            if (special == NULL)
                 continue;
-            for (i32 joint = 0; joint < object->apiobj.character_model->hierarchy->joint_count; ++joint, ++part_index) {
-                nuhspecial_s *special = static_cast<nuhspecial_s *>(render->rigid_specials[joint]);
-                if (special == NULL)
-                    continue;
-                NUMTX matrix;
-                NUVEC momentum;
-                ADDPART_s params;
-                if (VehicleArea != 0 && (object->apiobj.character_data->model_flags & 0x2000) != 0 &&
-                    object->apiobj.character_data->game_character->field_0x28 > 0.0f) {
-                    NuMtxMul(&matrix, &joint_matrices[joint], &object->apiobj.field_0xb8);
-                    SetKillPartMom(&momentum);
-                    NuVecScale(&momentum, &momentum, 4.0f);
-                    momentum.y = 6.0f + momentum.y + object->apiobj.velocity.y * 0.75f;
-                    momentum.x += object->apiobj.velocity.x * 0.75f;
-                    momentum.z += object->apiobj.velocity.z * 0.75f;
-                    params = Default_ADDPART;
-                    params.field_14 = params.field_18 = 0.4f;
-                    params.gravity = -10.0f;
-                } else {
-                    SetKillPartMom(&momentum);
-                    momentum.y += vertical_scale;
-                    if (animation != -1)
-                        momentum.y += 1.0f;
-                    if ((object->apiobj.character_data->model_flags & 0x2000) != 0) {
-                        momentum.y += object->apiobj.velocity.y * 0.75f;
-                        momentum.x += object->apiobj.velocity.x * 0.75f;
-                        momentum.z += object->apiobj.velocity.z * 0.75f;
-                    } else if (use_vehicle_velocity != 0) {
+            NUMTX matrix;
+            NUVEC momentum;
+            ADDPART_s params;
+            if (VehicleArea != 0 && (object->apiobj.character_data->model_flags & 0x2000) != 0 &&
+                object->apiobj.character_data->game_character->field_0x28 > 0.0f) {
+                NuMtxMul(&matrix, &joint_matrices[joint], &object->apiobj.field_0xb8);
+                SetKillPartMom(&momentum);
+                NuVecScale(&momentum, &momentum, 4.0f);
+                momentum.y = 6.0f + momentum.y + object->apiobj.velocity.y * 0.75f;
+                momentum.x += object->apiobj.velocity.x * 0.75f;
+                momentum.z += object->apiobj.velocity.z * 0.75f;
+                params = Default_ADDPART;
+                params.field_14 = params.field_18 = 0.4f;
+                params.gravity = -10.0f;
+            } else {
+                SetKillPartMom(&momentum);
+                momentum.y += vertical_scale;
+                if (animation != -1)
+                    momentum.y += 1.0f;
+                if ((object->apiobj.character_data->model_flags & 0x2000) == 0) {
+                    if (use_vehicle_velocity != 0) {
                         momentum.x += object->reset_velocity.x * 0.75f;
                         momentum.z += object->reset_velocity.z * 0.75f;
                         momentum.y += object->reset_velocity.y * 0.75f;
@@ -3713,34 +3712,38 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
                         momentum.x += NuTrigTable[(*angle_override >> 1) & 0x7fff] * 2.0f;
                         momentum.z += NuTrigTable[((static_cast<u16>(*angle_override + 0x4000)) >> 1) & 0x7fff] * 2.0f;
                     }
-                    NuMtxMul(&matrix, &joint_matrices[joint], &object->apiobj.field_0xb8);
-                    params = Default_ADDPART;
-                    params.field_14 = params.field_18 = 0.1f;
-                    params.gravity = -5.0f;
-                }
-                params.matrix = &matrix;
-                params.velocity = &momentum;
-                params.special = special;
-                params.lighting = Cheats_CheckFlags(1) ? reinterpret_cast<PARTLIGHTSOURCE_s *>(ZeroRTL)
-                                                       : reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);
-                if (object->id == id_TIEFIGHTER) {
-                    KillParts_TIEFIGHTER(&params, part_index, mode, object, random_variant, random_rotation_a,
-                                         random_rotation_b, &momentum);
-                } else if (object->id == id_ATAT) {
-                    KillParts_ATAT(&params, part_index, mode, object);
-                } else if (object->id == id_SPEEDERBIKE) {
-                    KillParts_SpeederBike(&params, part_index, mode, object);
                 } else {
-                    params.flags = mode == 0 ? 0x480 : 0x90;
-                    params.field_3c = PartImpact_Brick;
-                    params.stop_fn = PartStop_Flickerer;
-                    params.draw_fn = PartDraw_Flickerer;
-                    params.time_step = FRAMETIME;
-                    params.field_c4 = 1;
-                    PART_s *part = AddPart(&params);
-                    if (part != NULL)
-                        part->field_100 = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 2.0f + 7.0f;
+                    momentum.y += object->apiobj.velocity.y * 0.75f;
+                    momentum.x += object->apiobj.velocity.x * 0.75f;
+                    momentum.z += object->apiobj.velocity.z * 0.75f;
                 }
+                NuMtxMul(&matrix, &joint_matrices[joint], &object->apiobj.field_0xb8);
+                params = Default_ADDPART;
+                params.field_14 = params.field_18 = 0.1f;
+                params.gravity = -5.0f;
+            }
+            params.matrix = &matrix;
+            params.velocity = &momentum;
+            params.special = special;
+            params.lighting = Cheats_CheckFlags(1) ? reinterpret_cast<PARTLIGHTSOURCE_s *>(ZeroRTL)
+                                                   : reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);
+            if (object->id == id_TIEFIGHTER) {
+                KillParts_TIEFIGHTER(&params, part_index, mode, object, random_variant, random_rotation_a,
+                                     random_rotation_b, &momentum);
+            } else if (object->id == id_ATAT) {
+                KillParts_ATAT(&params, part_index, mode, object);
+            } else if (object->id == id_SPEEDERBIKE) {
+                KillParts_SpeederBike(&params, part_index, mode, object);
+            } else {
+                params.flags = mode == 0 ? 0x480 : 0x90;
+                params.field_3c = PartImpact_Brick;
+                params.stop_fn = PartStop_Flickerer;
+                params.draw_fn = PartDraw_Flickerer;
+                params.time_step = FRAMETIME;
+                params.field_c4 = 1;
+                PART_s *part = AddPart(&params);
+                if (part != NULL)
+                    part->field_100 = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 2.0f + 7.0f;
             }
         }
     }

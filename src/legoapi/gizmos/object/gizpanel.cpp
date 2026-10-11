@@ -203,9 +203,9 @@ static void GizPanel_Draw(void *world_ptr, void *, float) {
         i32 animated_transition;
         i32 animated;
         i32 state_off;
-        i32 state_on;
         i32 target;
         i32 arm;
+        i32 state_on;
         NUVEC arm_offset;
     };
 
@@ -454,8 +454,8 @@ static void GizPanels_StoreProgress(void *world_ptr, void *, void *progress_ptr)
         panel_sys->count > 0) {
         i32 index = 0;
         do {
-            const u32 bit = 1u << (index & 31);
             const i32 word_index = index >> 5;
+            const u32 bit = 1u << (index & 31);
             u8 flags = panel->flags;
             if ((flags & GIZPANEL_FLAG_STATE) != 0) {
                 reinterpret_cast<u32 *>(&progress->state)[word_index] |= bit;

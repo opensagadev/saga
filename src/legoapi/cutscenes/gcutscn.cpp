@@ -258,12 +258,13 @@ void CutScenePlayer_Configure(char *file, VARIPTR *buffer, VARIPTR *, i16 *clip_
         }
     }
     NuFParDestroy(fp);
-    if (player.clip_count != 0) {
-        buffer->void_ptr = &player.clips[player.clip_count];
-        memmove(buffer->void_ptr, &player, sizeof(player));
-        CutScenePlayer = reinterpret_cast<CUTSCENEPLAYER_s *>(buffer->void_ptr);
-        buffer->addr += sizeof(player);
+    if (player.clip_count == 0) {
+        return;
     }
+    buffer->void_ptr = &player.clips[player.clip_count];
+    memmove(buffer->void_ptr, &player, sizeof(player));
+    CutScenePlayer = reinterpret_cast<CUTSCENEPLAYER_s *>(buffer->void_ptr);
+    buffer->addr += sizeof(player);
 }
 
 void CutScenePlayer_SetObjects(CUTINFO *cut) {

@@ -225,8 +225,8 @@ static i32 *GizSpinner_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *result_posi
                                          NUVEC *position, NUVEC *direction, float radius, float range_squared,
                                          i32 directional, i32, i32) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    NUVEC aim = *direction;
     NUVEC target_position = v000;
+    NUVEC aim = *direction;
     if (world->spinners == NULL) {
         return NULL;
     }
@@ -663,8 +663,8 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
             continue;
         }
 
-        NUVEC minimum;
         NUVEC maximum;
+        NUVEC minimum;
         NuSpecialGetBounds(&spinner->special, &minimum, &maximum);
         if (NuSpecialCompare(&thingsSceneBase, &spinner->special) != 0) {
             NUVEC arm_minimum;
@@ -788,8 +788,8 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
 
     if ((spinner->state_flags & SPINNER_STATE_NO_CHARACTER_DEFLECTION) == 0) {
         const f32 collision_x = spinner->position.x;
-        const f32 collision_z = spinner->position.z;
         const f32 collision_radius = spinner->field_0x09c;
+        const f32 collision_z = spinner->position.z;
         GameObject_s *object = Obj;
         for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
             APIOBJECT_s *api = &object->apiobj;
@@ -847,12 +847,14 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
             } else {
                 const f32 blend = NU_SIN_LUT(static_cast<u16>((1.0f - spinner->field_0x090 * 4.0f) * 16384.0f));
                 i32 difference = RotDiff(spinner->previous_rotation, spinner->target_rotation);
-                if ((spinner->state_flags & SPINNER_STATE_ROTATE_POSITIVE) == 0) {
+                if ((spinner->state_flags & SPINNER_STATE_ROTATE_POSITIVE) != 0) {
+                    if (difference < 0) {
+                        difference += 0x10000;
+                    }
+                } else {
                     if (difference > 0) {
                         difference -= 0x10000;
                     }
-                } else if (difference < 0) {
-                    difference += 0x10000;
                 }
                 spinner->rotation = static_cast<u16>(static_cast<f32>(spinner->previous_rotation) +
                                                      static_cast<f32>(difference) * blend);

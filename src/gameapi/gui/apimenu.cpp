@@ -967,22 +967,27 @@ static __used__ void MenuDrawPauseExit(MENU *menu) {
         spacing = 2.0f;
     } else {
         spacing = 1.5f;
-        if (GAMEDEMO != 0) {
+        if (GAMEDEMO == 0) {
+            if (WORLD->current_level == HUB_LDATA) {
+                warning = TTab[tGAMEPROGRESSWILLBELOST];
+                title = TTab[tQUITGAME];
+            } else {
+                title = TTab[tEXITTOMAP];
+                if (Arcade == 0) {
+                    if (SuperStory != 0) {
+                        warning = TTab[tALLSUPERSTORYPROGRESSWILLBELOST];
+                    } else {
+                        warning = WORLD->area != NULL && WORLD->area == VEHICLES_ADATA
+                                      ? NULL
+                                      : TTab[tALLLEVELPROGRESSWILLBELOST];
+                    }
+                } else {
+                    warning = pause_i_pad != -1 ? TTab[tARCADE_NOWIN] : NULL;
+                }
+            }
+        } else {
             title = TTab[tRESTARTDEMO2];
             warning = TTab[tALLLEVELPROGRESSWILLBELOST];
-        } else if (WORLD->current_level == HUB_LDATA) {
-            warning = TTab[tGAMEPROGRESSWILLBELOST];
-            title = TTab[tQUITGAME];
-        } else {
-            title = TTab[tEXITTOMAP];
-            if (Arcade != 0) {
-                warning = pause_i_pad != -1 ? TTab[tARCADE_NOWIN] : NULL;
-            } else if (SuperStory != 0) {
-                warning = TTab[tALLSUPERSTORYPROGRESSWILLBELOST];
-            } else {
-                warning =
-                    WORLD->area != NULL && WORLD->area == VEHICLES_ADATA ? NULL : TTab[tALLLEVELPROGRESSWILLBELOST];
-            }
         }
     }
     if (MenuStopDraw == 0) {

@@ -79,13 +79,15 @@ i32 NetPredictor::AllowPush(EdClass const *object_class, void const *object, Rep
         allowed = 1;
     } else if (now - *last_push > minimum_interval) {
         ReplicatorData prediction_data = data;
-        if (DoPrediction(object_class, const_cast<void *>(object), prediction_data, 1) != 0) {
+        if (DoPrediction(object_class, const_cast<void *>(object), prediction_data, 1) == 0) {
+            if (*failed_predictions <= 2) {
+                ++*failed_predictions;
+                replication_group &= ~1;
+                allowed = 1;
+            }
+        } else {
             *failed_predictions = 0;
             replication_group |= 1;
-            allowed = 1;
-        } else if (*failed_predictions <= 2) {
-            ++*failed_predictions;
-            replication_group &= ~1;
             allowed = 1;
         }
     }
@@ -337,7 +339,26 @@ i32 NetReplicator::SerialiseObject(EdStream &stream, NetPeer *peer, EdClass cons
                                    ReplicatorData &data, i16 *class_mapping) {
     u8 member_data[256] = {};
     for (EdRef *member = object_class->members; member != NULL; member = member->next) {
-        if (member->attributes < 0) {
+        if (!(member->attributes < 0)) {
+            if (member->replication_group == id) {
+                EdType *type = theRegistry.GetType(member->type_id);
+                i32 size = member->size;
+                if (size <= 0) {
+                    size = type->size;
+                }
+                if (object != NULL) {
+                    if (stream.mode == 2) {
+                        member->GetMemberData(object, member->type_id, member_data, sizeof(member_data));
+                    }
+                    type->serialise(stream, member_data, size);
+                    if (stream.mode == 1) {
+                        member->SetMemberData(object, member->type_id, member_data, sizeof(member_data), class_mapping);
+                    }
+                } else {
+                    stream.Eat(size, 1);
+                }
+            }
+        } else {
             EdClass *member_class = theRegistry.GetClass(member->type_id);
             void *member_object = member->GetMemberObject(object);
             if (ForceDummySerialise && member_object == NULL) {
@@ -345,23 +366,6 @@ i32 NetReplicator::SerialiseObject(EdStream &stream, NetPeer *peer, EdClass cons
             }
             if (member_class->SerialiseObjectHeader(stream, member_object)) {
                 SerialiseObject(stream, peer, member_class, member_object, data, NULL);
-            }
-        } else if (member->replication_group == id) {
-            EdType *type = theRegistry.GetType(member->type_id);
-            i32 size = member->size;
-            if (size <= 0) {
-                size = type->size;
-            }
-            if (object != NULL) {
-                if (stream.mode == 2) {
-                    member->GetMemberData(object, member->type_id, member_data, sizeof(member_data));
-                }
-                type->serialise(stream, member_data, size);
-                if (stream.mode == 1) {
-                    member->SetMemberData(object, member->type_id, member_data, sizeof(member_data), class_mapping);
-                }
-            } else {
-                stream.Eat(size, 1);
             }
         }
     }
@@ -1232,8 +1236,8 @@ void NetworkObjectManager::ReceiveObjectCallMessage(NetMessage &message, NetPeer
     i32 call_index = static_cast<i8>(call_id - 1);
     if (registered_calls[call_index].type == 1) {
 
-        i16 id;
         i16 class_id;
+        i16 id;
         message.Read16(id);
         message.Read16(class_id);
         EdClass *object_class = theRegistry.GetClass(class_id);

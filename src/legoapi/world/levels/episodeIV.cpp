@@ -631,21 +631,23 @@ void MosEisleyB_Update(WORLDINFO_s *world) {
     } while (0)
 
         GIZFORCE_s *selected = group->forces[0];
-        if (selected == first) {
+        if (selected != first) {
+            if (selected == second) {
+                if (group->forces[1] == first)
+                    SET_STACK_NODE_POSITIONS(22.75f, -15.12f, 23.27f, -14.93f, 23.72f, -14.78f, 23.32f, -14.61f);
+                else
+                    SET_STACK_NODE_POSITIONS(22.75f, -15.12f, 23.27f, -14.93f, 23.27f, -14.62f, 23.66f, -14.73f);
+            } else if (selected == third) {
+                if (group->forces[1] == first)
+                    SET_STACK_NODE_POSITIONS(22.79f, -14.62f, 23.29f, -14.58f, 23.73f, -14.70f, 23.34f, -14.87f);
+                else
+                    SET_STACK_NODE_POSITIONS(22.79f, -14.62f, 23.29f, -14.58f, 23.27f, -14.85f, 23.63f, -14.76f);
+            }
+        } else {
             if (group->forces[1] == second)
                 SET_STACK_NODE_POSITIONS(24.12f, -14.69f, 23.75f, -14.78f, 23.32f, -14.91f, 23.32f, -14.63f);
             else
                 SET_STACK_NODE_POSITIONS(24.12f, -14.69f, 23.75f, -14.78f, 23.34f, -14.57f, 23.34f, -14.84f);
-        } else if (selected == second) {
-            if (group->forces[1] == first)
-                SET_STACK_NODE_POSITIONS(22.75f, -15.12f, 23.27f, -14.93f, 23.72f, -14.78f, 23.32f, -14.61f);
-            else
-                SET_STACK_NODE_POSITIONS(22.75f, -15.12f, 23.27f, -14.93f, 23.27f, -14.62f, 23.66f, -14.73f);
-        } else if (selected == third) {
-            if (group->forces[1] == first)
-                SET_STACK_NODE_POSITIONS(22.79f, -14.62f, 23.29f, -14.58f, 23.73f, -14.70f, 23.34f, -14.87f);
-            else
-                SET_STACK_NODE_POSITIONS(22.79f, -14.62f, 23.29f, -14.58f, 23.27f, -14.85f, 23.63f, -14.76f);
         }
 #undef SET_STACK_NODE_POSITIONS
 

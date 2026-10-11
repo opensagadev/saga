@@ -367,8 +367,8 @@ void AddSlamDebris(GameObject_s *object) {
     FindSlamOrigin(object, &position, NULL);
     f32 radius = 0.6f;
     f32 strength = 0.3f;
-    i32 flags = 0x17;
     i32 damage = 1;
+    i32 flags = 0x17;
     if ((object->apiobj.flags_low & 0x80) != 0 && Cheat_IsOn(0x16)) {
         radius = 1.0f;
         strength = 0.5f;
@@ -789,8 +789,8 @@ void AddSurfaceDebris(GameObject_s *object) {
         return;
     }
     i32 effect;
-    f32 rate;
     f32 height;
+    f32 rate;
     f32 minimum_rate;
     if (object->id == id_LANDSPEEDER) {
         effect = 102;

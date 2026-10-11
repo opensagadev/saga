@@ -78,8 +78,8 @@ struct STOREIAP_s {
 };
 DECOMP_ASSERT(sizeof(STOREIAP_s) == 0x114, "STOREIAP_s size");
 struct STORE_PRODUCT_s {
-    char name[256];
     char description[256];
+    char name[256];
     char price_text[256];
     f32 price;
 };

@@ -582,8 +582,8 @@ extern "C" void NuRndrGradRectUV2di(i32 x, i32 y, i32 w, i32 h, f32 u0, f32 v0, 
 }
 static i32 dump_state = -1;
 struct ScreenGrabTileParams {
-    i8 channels[4];
     u16 width;
+    i8 channels[4];
 };
 extern "C" void NuRndrScreenGrabTileInit(void *, i32, f32, f32, f32);
 extern "C" void NuRndrScreenGrabTileDeInit(void *);

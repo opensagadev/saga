@@ -184,10 +184,10 @@ f32 MissileDist = -3.0f;
 static NUVEC4 PlayerPos, PlayerVel;
 
 static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
-    NUVEC_ALIGNED16 impulse;
+
     NUVEC4_ALIGNED16 parent_position;
     NUVEC4_ALIGNED16 direction;
-    NUVEC_ALIGNED16 offset;
+
     NUVEC_ALIGNED16 local;
     NUMTX_ALIGNED16 aim_matrix;
     if (Player[0] != NULL && Player[0]->sock_position.distance > 435.0f)
@@ -208,10 +208,13 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
         }
         --fighter->hit_count;
         if (fighter->health == 0) {
-            if (fighter->spline == NULL) {
-                fighter->death_timer = 2.0f;
-            } else if (static_cast<u32>(fighter->spline->id - 84) < 2) {
-                fighter->death_timer = 1.0f;
+            NUVEC_ALIGNED16 impulse;
+            if (fighter->spline != NULL) {
+                if (static_cast<u32>(fighter->spline->id - 84) < 2) {
+                    fighter->death_timer = 1.0f;
+                } else {
+                    fighter->death_timer = 2.0f;
+                }
             } else {
                 fighter->death_timer = 2.0f;
             }
@@ -401,6 +404,7 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
     if (info == NULL)
         return 1;
     {
+        NUVEC_ALIGNED16 offset;
         NUVEC *target_position, *target_velocity;
         switch (fighter->target_id) {
             case -1:
@@ -511,8 +515,8 @@ fire: {
         }
     }
     const i32 type = fighter->model_id == -300;
-    quickbolt_s *bolt = info->bolts + info->used;
     quickbolt_s *end = info->bolts + info->count;
+    quickbolt_s *bolt = info->bolts + info->used;
     quickbolt_s *slot = bolt;
     for (; slot < end; ++slot) {
         if (slot->duration == 0.0f)
@@ -793,7 +797,24 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
     i32 door_index = -1;
 #define DOOR_REACHED(player_index, door_index)                                                                         \
     (Player[player_index]->field_0x68c > DogFightDoors.doors[door_index].distance)
-    if (Player[0] != NULL) {
+    if (Player[0] == NULL) {
+        if (Player[1] != NULL) {
+            if (DOOR_REACHED(1, 6))
+                door_index = 6;
+            else if (DOOR_REACHED(1, 5))
+                door_index = 5;
+            else if (DOOR_REACHED(1, 4))
+                door_index = 4;
+            else if (DOOR_REACHED(1, 3))
+                door_index = 3;
+            else if (DOOR_REACHED(1, 2))
+                door_index = 2;
+            else if (DOOR_REACHED(1, 1))
+                door_index = 1;
+            else if (DOOR_REACHED(1, 0))
+                door_index = 0;
+        }
+    } else {
         if (DOOR_REACHED(0, 6) || (Player[1] != NULL && DOOR_REACHED(1, 6)))
             door_index = 6;
         else if (DOOR_REACHED(0, 5) || (Player[1] != NULL && DOOR_REACHED(1, 5)))
@@ -807,21 +828,6 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
         else if (DOOR_REACHED(0, 1) || (Player[1] != NULL && DOOR_REACHED(1, 1)))
             door_index = 1;
         else if (DOOR_REACHED(0, 0) || (Player[1] != NULL && DOOR_REACHED(1, 0)))
-            door_index = 0;
-    } else if (Player[1] != NULL) {
-        if (DOOR_REACHED(1, 6))
-            door_index = 6;
-        else if (DOOR_REACHED(1, 5))
-            door_index = 5;
-        else if (DOOR_REACHED(1, 4))
-            door_index = 4;
-        else if (DOOR_REACHED(1, 3))
-            door_index = 3;
-        else if (DOOR_REACHED(1, 2))
-            door_index = 2;
-        else if (DOOR_REACHED(1, 1))
-            door_index = 1;
-        else if (DOOR_REACHED(1, 0))
             door_index = 0;
     }
 #undef DOOR_REACHED

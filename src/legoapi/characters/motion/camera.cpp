@@ -632,7 +632,7 @@ static void PlayerCamPos(GameObject_s *object, NUVEC *position, NUVEC *reference
 // Function prefix and mode selection. MainRenderTime guard precedes cutscenes.
 void MoveGameCamera(GAMECAMERA_s *camera) {
     i32 shared_count = 0;
-    i32 index;
+
     NUVEC player_focus[2], player_positions[2];
     GameObject_s *camera_players[2];
     i32 player_roll[2], vehicle_player[2];
@@ -798,10 +798,11 @@ mode_selected:
     f32 right_x = static_cast<f32>(static_cast<i32>(selected_pad->pad->analog_right_x)) - 127.5f;
     right_x = NuFabs(right_x) < 34.0f ? 0.0f : right_x / 127.5f;
     i32 pitch_override = -1, yaw_override = -1, roll_override = 0;
-    i32 roll_hint_valid = 0;
     u16 roll_hint = 0;
+    i32 roll_hint_valid = 0;
     f32 roll_seek_override = 0.0f, stop_blend_rate = 0.1f;
     switch (camera->mode) {
+        i32 index;
 
         case 1: {
             // Case 1 prefix. Original 0x111314..0x1129bf and its child branches.
@@ -2216,8 +2217,8 @@ extern "C" {
                     camera->yaw -= static_cast<i32>(mouse_x * 16.0f);
             }
 
-            const f32 minimum = -camera->minimum_distance;
             const f32 distance = camera->distance - zoom_scale * camera->distance_speed * mouse_z;
+            const f32 minimum = -camera->minimum_distance;
             camera->distance = MIN(minimum, distance);
 
             NUMTX rotation = numtx_identity;

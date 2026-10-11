@@ -2668,12 +2668,13 @@ void TerrainPlayer(GameObject_s *object) {
     const u8 entry_intersects_water = object->apiobj.intersects_water;
     const i32 entry_menu_id = GetMenuID();
     const i16 entry_platform = object->apiobj.supporting_platform_id;
-    TERRAIN_IMPACT_RECORD impact_records[8];
+
     i32 impact_count = -1;
     // Original 0x102720 skips integration and callbacks for inactive objects.
     if (object->apiobj.field_0x287 == 0 && object->field_0xcc0 != NULL && object->character_context == 0x3b) {
         TakeOverCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_TAG);
     } else if (object->apiobj.field_0x287 == 0) {
+        TERRAIN_IMPACT_RECORD impact_records[8];
 
         APIOBJECT &api = object->apiobj;
         i32 terrain_mask = TERRAINMASK_NONWEAPON;

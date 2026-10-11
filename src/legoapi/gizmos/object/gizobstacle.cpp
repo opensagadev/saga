@@ -633,14 +633,16 @@ static i32 GizObstacles_BoltHit(void *world, void *data, void *attacker_ptr, NUV
     }
     BOLTTYPE_s *type = BoltType_FindByID(bolt->type_id, static_cast<WORLDINFO_s *>(world));
     const i32 player_index = bolt->owner != NULL ? static_cast<i8>(bolt->owner->apiobj.field_0x27c) : -1;
-    if (GizObstacles_Hit(world, nearest, &bolt->position, player_index, type->field_3c) == 0) {
+    if (GizObstacles_Hit(world, nearest, &bolt->position, player_index, type->field_3c) != 0) {
+        if (attacker != NULL) {
+            NewRumble(attacker->pad_gamepad->pad, 0.4f, 0);
+            GameCam_HitJudder();
+        }
+    } else {
         NUVEC normal;
         NuVecSub(&normal, &nearest->evaluated_position, &bolt->position);
         NuVecNorm(&normal, &normal);
         Bolt_AddDeflectedBolt(bolt, &bolt->field_0xac, &normal, hit_flags);
-    } else if (attacker != NULL) {
-        NewRumble(attacker->pad_gamepad->pad, 0.4f, 0);
-        GameCam_HitJudder();
     }
     if (BoltSys->stop_targeting != NULL) {
         BoltSys->stop_targeting(attacker, points);

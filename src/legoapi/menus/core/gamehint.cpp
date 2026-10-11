@@ -48,8 +48,8 @@ void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 struct MechHintUIButton : MechTouchUITexButton {
     HINT_s *active_hint;
-    HINT_s *pending_hint;
     f32 display_elapsed;
+    HINT_s *pending_hint;
     f32 *slide_target;
     f32 slide_from, slide_to, slide_elapsed, slide_duration, slide_delay, slide;
     u8 pulse_active;

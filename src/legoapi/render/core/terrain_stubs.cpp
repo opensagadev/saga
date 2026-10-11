@@ -125,8 +125,8 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
             output->marker = input->marker;
             output->shape_count = input->shape_count;
             TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(input + 1);
-            TERRAIN_SHAPE *destination = reinterpret_cast<TERRAIN_SHAPE *>(output + 1);
             const i32 shape_count = input->shape_count;
+            TERRAIN_SHAPE *destination = reinterpret_cast<TERRAIN_SHAPE *>(output + 1);
             for (i32 i = 0; i < shape_count; ++i, ++source, ++destination) {
                 i32 last_vertex = source->normals[1].y > 65535.0f ? 2 : 3;
                 memcpy(destination, source, sizeof(TERRAIN_SHAPE));
@@ -340,8 +340,8 @@ extern "C" void TerrainPlatformNewUpdate(void) {
     f32 min_x = camera.m00 * negative_distance * 0.25f + back_x;
     const f32 back_z = negative_distance * camera.m22 * 0.25f;
     f32 max_x = camera.m00 * negative_distance * 0.35f + camera.m20 * TerrPlatScanDist;
-    f32 min_z = camera.m02 * negative_distance * 0.25f + back_z;
     f32 max_z = camera.m02 * negative_distance * 0.35f + camera.m22 * TerrPlatScanDist;
+    f32 min_z = camera.m02 * negative_distance * 0.25f + back_z;
     f32 x = min_x;
     f32 z = min_z;
     min_x = MIN(min_x, max_x);
@@ -1329,11 +1329,12 @@ extern "C" {
                     for (i32 chunk = 0; chunk < key->controlled_chunk_count; ++chunk) {
                         for (debris_chunk_control_s *control = debris_chunk_control_stack[group]; control != NULL;
                              control = control->next) {
-                            if (control->particle_chunk == key->particle_chunks[chunk]) {
-                                RemoveChunkControlFromStack(control, &debris_chunk_control_stack[group]);
-                                freechunkcontrols[--freechunkcontrolsptr] = control;
-                                break;
+                            if (control->particle_chunk != key->particle_chunks[chunk]) {
+                                continue;
                             }
+                            RemoveChunkControlFromStack(control, &debris_chunk_control_stack[group]);
+                            freechunkcontrols[--freechunkcontrolsptr] = control;
+                            break;
                         }
                     }
                     key->controlled_chunk_count = 0;
@@ -1779,8 +1780,8 @@ extern "C" {
         group_min_x -= terrain->max_groups;
         f32 *group_max_x = group_min_x - terrain->max_groups;
         f32 *group_min_z = group_max_x - terrain->max_groups;
-        f32 *group_max_z = group_min_z - terrain->max_groups;
         TERRAIN_GROUP *groups = terrain->groups;
+        f32 *group_max_z = group_min_z - terrain->max_groups;
         f32 minimum_x = 200000000.0f, minimum_z = 200000000.0f;
         f32 maximum_x = -200000000.0f, maximum_z = -200000000.0f;
         for (i32 i = 0; i < terrain->group_count; ++i) {
@@ -1918,8 +1919,8 @@ extern "C" {
         particlechunkrendertype_s *chunk = ParticleChunkRenderStack[stack_index];
         while (chunk->next != NULL) {
             particlechunkrendertype_s *next = chunk->next;
-            const u16 priority = static_cast<u16>(chunk->render_priority);
             const u16 next_priority = static_cast<u16>(next->render_priority);
+            const u16 priority = static_cast<u16>(chunk->render_priority);
             if (priority < next_priority ||
                 (priority == next_priority && chunk->effect->particle_type > next->effect->particle_type)) {
                 RemoveChunkFromRenderStack(next, &ParticleChunkRenderStack[stack_index]);

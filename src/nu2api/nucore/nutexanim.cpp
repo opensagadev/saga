@@ -801,9 +801,10 @@ extern "C" nutexanimprog_s *NuTexAnimProgRead(VARIPTR *buffer, char *path) {
 }
 
 extern "C" void NuTexAnimProgReadCFG(char *path, VARIPTR *buffer, VARIPTR end) {
-    char filename[128];
+
     VARIPTR cursor;
     if (nutexanim_usepakfile != 0) {
+        char filename[128];
         NuStrCpy(filename, path);
         char *extension = NuStrRChr(filename, '.');
         if (extension != NULL)

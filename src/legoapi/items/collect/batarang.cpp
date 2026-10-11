@@ -657,7 +657,26 @@ void Batarang_MoveCode(GameObject_s *object) {
             StartJump(object, 0);
             return;
         }
-        if ((object->pad_gamepad->buttons_held & GAMEPAD_ACTION) != 0 || object->context_animation_timer < 0.3f) {
+        if ((object->pad_gamepad->buttons_held & GAMEPAD_ACTION) == 0 && !(object->context_animation_timer < 0.3f)) {
+            if (static_cast<BATARANG_s *>(object->batarang)->active != 0) {
+                object->jump_flags &= ~2U;
+                object->field_0x7a3 = 1;
+                object->context_animation = 0x65;
+                f32 duration = AnimDuration(object->id, 0x65, 0.0f, 0.0f, 1);
+                object->context_animation_timer = 0.0f;
+                object->context_flags &= ~0x40U;
+                object->airborne_action_duration = duration <= 0.0f ? 0.5f : duration;
+                if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
+                    AnimListFrame(object->apiobj.character_model, object->context_animation, 0) != 0.0f) {
+                    object->pad_e3c[0] = 1;
+                    object->context_flags |= 0x40;
+                    return;
+                }
+                object->context_flags &= ~0x40U;
+            } else {
+                object->character_context = -1;
+            }
+        } else {
             if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
                 AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) != NULL) {
                 GAMEPAD_s *pad = object->pad_gamepad;
@@ -710,23 +729,6 @@ void Batarang_MoveCode(GameObject_s *object) {
                 }
                 batarang = static_cast<BATARANG_s *>(object->batarang);
             }
-        } else if (static_cast<BATARANG_s *>(object->batarang)->active != 0) {
-            object->jump_flags &= ~2U;
-            object->field_0x7a3 = 1;
-            object->context_animation = 0x65;
-            f32 duration = AnimDuration(object->id, 0x65, 0.0f, 0.0f, 1);
-            object->context_animation_timer = 0.0f;
-            object->context_flags &= ~0x40U;
-            object->airborne_action_duration = duration <= 0.0f ? 0.5f : duration;
-            if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
-                AnimListFrame(object->apiobj.character_model, object->context_animation, 0) != 0.0f) {
-                object->pad_e3c[0] = 1;
-                object->context_flags |= 0x40;
-                return;
-            }
-            object->context_flags &= ~0x40U;
-        } else {
-            object->character_context = -1;
         }
     } else if (object->field_0x7a3 == 1) {
         object->jump_flags &= ~2U;

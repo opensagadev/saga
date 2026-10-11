@@ -378,8 +378,8 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                                     sound_muzzle = qrand() / (65535 / turret->field_0x130 + 1);
                                 turret->fired_this_frame = 1;
                                 for (i32 muzzle = 0; muzzle < turret->field_0x130; ++muzzle) {
-                                    NUMTX muzzle_matrix = *primary_draw;
                                     NUVEC *offset = &turret->field_0x74[muzzle];
+                                    NUMTX muzzle_matrix = *primary_draw;
                                     if (offset->x != 0.0f || offset->y != 0.0f || offset->z != 0.0f) {
                                         NuMtxPreRotateY(&muzzle_matrix, 0x8000);
                                         NuMtxPreTranslate(&muzzle_matrix, offset);
@@ -606,9 +606,9 @@ static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *set, float *result_distance, 
     }
 
     NUVEC aim = *direction;
-    const float min_x = position->x - radius;
     const float max_x = position->x + radius;
     const float min_z = position->z - radius;
+    const float min_x = position->x - radius;
     const float max_z = position->z + radius;
     if (directional != 0 && (bolt_type->field_60 & 0x20000) != 0) {
         aim.y = 0.0f;
@@ -1360,7 +1360,24 @@ void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOB
                 }
             }
 
-            if ((turret->behavior_flags & 0x10) != 0) {
+            if ((turret->behavior_flags & 0x10) == 0) {
+                if ((turret->behavior_flags & 8) != 0) {
+                    if (selected != NULL) {
+                        const i8 candidate_flags = static_cast<i8>(candidate->apiobj.flags_low);
+                        const i8 selected_flags = static_cast<i8>(selected->apiobj.flags_low);
+                        if (candidate_flags >= 0 || selected_flags < 0) {
+                            if ((candidate_flags ^ selected_flags) < 0) {
+                                continue;
+                            }
+                            if (!(distance < selected_distance)) {
+                                continue;
+                            }
+                        }
+                    }
+                } else if (!(distance < selected_distance)) {
+                    continue;
+                }
+            } else {
                 if (selected != NULL) {
                     const u32 selected_flags = selected->apiobj.character_data->model_flags;
                     const u32 candidate_flags = candidate->apiobj.character_data->model_flags;
@@ -1373,21 +1390,6 @@ void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOB
                         }
                     }
                 }
-            } else if ((turret->behavior_flags & 8) != 0) {
-                if (selected != NULL) {
-                    const i8 candidate_flags = static_cast<i8>(candidate->apiobj.flags_low);
-                    const i8 selected_flags = static_cast<i8>(selected->apiobj.flags_low);
-                    if (candidate_flags >= 0 || selected_flags < 0) {
-                        if ((candidate_flags ^ selected_flags) < 0) {
-                            continue;
-                        }
-                        if (!(distance < selected_distance)) {
-                            continue;
-                        }
-                    }
-                }
-            } else if (!(distance < selected_distance)) {
-                continue;
             }
 
             selected = candidate;

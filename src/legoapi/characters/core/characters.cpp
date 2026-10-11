@@ -1735,10 +1735,11 @@ AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_
         if (max_delta_y != 1000000000.0f && delta.y > max_delta_y) {
             continue;
         }
-        if (nearest_distance > distance) {
-            nearest_distance = distance;
-            nearest = i;
+        if (!(nearest_distance > distance)) {
+            continue;
         }
+        nearest_distance = distance;
+        nearest = i;
     }
     if (nearest == -1) {
         return NULL;

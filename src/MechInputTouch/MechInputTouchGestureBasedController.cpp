@@ -896,8 +896,8 @@ bool MechInputTouchGestureBasedController::StartJumpUsingAIPath(JumpTriggerPacke
     AIPATHNODE &node = jump->path->nodes[connection->node_indices[direction == 0]];
     GameObject_s *object = Player[player_id];
     const u32 flags = connection->traversal_flags[direction];
-    i32 animation;
     bool complete_success_hint;
+    i32 animation;
     const u32 high_jump = flags & (LEGO_AIPATHCNX_HIGH_JUMP | 0x800000);
     if (high_jump != 0 && (object->ai.capabilities & high_jump) != 0) {
         animation = 3;

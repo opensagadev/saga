@@ -458,12 +458,12 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *anim, f32 frame, nuanim
         quarter = static_cast<u32>(whole) & 3;
         key_offset = (whole / 4) * key_stride;
     }
-    u8 *keys = anim->keys + key_offset;
     const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
+    u8 *keys = anim->keys + key_offset;
     ani3_scalemin_s *scale_min = anim->scale_min;
     const u16 *curve_types = anim->curve_types;
-    nuanimbuffjoint_s *joint = buffer->joints;
     i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
+    nuanimbuffjoint_s *joint = buffer->joints;
     u8 *joint_flags = buffer->joint_flags + first_joint;
     const u8 *first_flags = node_flags + first_joint;
     for (; node_flags < first_flags; ++node_flags, ++joint) {
@@ -544,15 +544,15 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuani
     const u8 *node_flags = anim->node_flags;
     buffer->use_quaternions = 1;
     const i32 key_stride = anim->key_stride;
-    u32 quarter;
     f32 fraction;
+    u32 quarter;
     i32 key_offset;
     GetAni4SamplePosition(anim, frame, quarter, fraction, key_offset);
-    u8 *keys = anim->keys + key_offset;
     const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     ani3_scalemin_s *scale_min = anim->scale_min;
-    const u16 *curve_types = anim->curve_types;
+    u8 *keys = anim->keys + key_offset;
     nuanimbuffjoint_s *joint = buffer->joints;
+    const u16 *curve_types = anim->curve_types;
     // The original clamps the count before applying first_joint.
     i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
     const u8 *first_flags = node_flags + first_joint;
@@ -678,8 +678,8 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
     i32 key_stride = anim->key_stride;
     const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     ani3_scalemin_s *scale_min = anim->scale_min;
-    i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
     const u16 *curve_types = anim->curve_types;
+    i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
     const u8 *first_flags = node_flags + first_joint;
     for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
         if (*skip_flags & 2) {
@@ -701,8 +701,8 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
     }
     node_flags += first_joint;
     u8 *joint_flags = buffer->joint_flags + first_joint;
-    const u8 *end_flags = node_flags + count;
     nuanimbuffjoint_s *joint = buffer->joints + first_joint;
+    const u8 *end_flags = node_flags + count;
     for (; node_flags < end_flags; ++node_flags, ++joint) {
         const u8 flags = *node_flags;
         *joint_flags++ = flags;
@@ -771,23 +771,23 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
 
 i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
                                             i32 joint_count, i32 first_joint, NUVEC *root_translation) {
-    const u8 *node_flags = anim->node_flags;
     nuanimbuffjoint_s *joint = buffer->joints;
-    const f32 inverse_blend = 1.0f - blend;
+    const u8 *node_flags = anim->node_flags;
     f32 key =
         (frame - anim->first_frame) * static_cast<f32>(anim->key_count - 1) / static_cast<f32>(anim->frame_count - 1);
+    const f32 inverse_blend = 1.0f - blend;
     key = key < 0.0f ? 0.0f : key;
     if (static_cast<f32>(static_cast<i32>(anim->key_count)) <= key)
         key = static_cast<f32>(anim->key_count - 1);
     const i32 whole = static_cast<i32>(key);
-    const u32 quarter = static_cast<u32>(whole) & 3;
     const f32 fraction = key - static_cast<f32>(whole);
+    const u32 quarter = static_cast<u32>(whole) & 3;
     const i32 key_stride = anim->key_stride;
-    u8 *keys = anim->keys + (whole / 4) * key_stride;
     ani3_scalemin_s *scale_min = anim->scale_min;
     const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
-    const u16 *curve_types = anim->curve_types;
+    u8 *keys = anim->keys + (whole / 4) * key_stride;
     const i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
+    const u16 *curve_types = anim->curve_types;
     if (first_joint != 0)
         root_translation = NULL;
     const u8 *first_flags = node_flags + first_joint;
@@ -1045,8 +1045,8 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend_EulerQuat(ani3_animheader_s *an
     i32 key_stride = anim->key_stride;
     const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     ani3_scalemin_s *scale_min = anim->scale_min;
-    const u16 *curve_types = anim->curve_types;
     i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
+    const u16 *curve_types = anim->curve_types;
     const u8 *first_flags = node_flags + first_joint;
     for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
         if (*skip_flags & 2) {
@@ -1175,11 +1175,11 @@ i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s *anim, f32 frame,
     const i32 whole = static_cast<i32>(key);
     const u32 quarter = static_cast<u32>(whole) & 3;
     const f32 fraction = key - static_cast<f32>(whole);
-    const i32 key_stride = anim->key_stride;
     ani3_scalemin_s *scale_min = anim->scale_min;
+    const i32 key_stride = anim->key_stride;
     u8 *keys = anim->keys + (whole / 4) * key_stride;
-    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     const u16 *curve_types = anim->curve_types;
+    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     const i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
     if (first_joint != 0)
         root_translation = NULL;

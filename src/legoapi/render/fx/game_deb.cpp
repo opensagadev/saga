@@ -1052,13 +1052,14 @@ extern "C" {
 
         for (i32 i = 1; i < bound; ++i) {
             debinftype *effect = debtab[i];
-            if (i != ignore && effect != NULL &&
-                ((effect->page == 0 && edpp_page_used[0] != 0) || (effect->page == 1 && edpp_page_used[1] != 0))) {
-                if (NuStrICmp(effect->name, name) == 0) {
-                    return i;
-                }
-                bound = EDPP_MAX_TYPES;
+            if (!(i != ignore && effect != NULL &&
+                  ((effect->page == 0 && edpp_page_used[0] != 0) || (effect->page == 1 && edpp_page_used[1] != 0)))) {
+                continue;
             }
+            if (NuStrICmp(effect->name, name) == 0) {
+                return i;
+            }
+            bound = EDPP_MAX_TYPES;
         }
 
         for (i32 i = 1; i < bound; ++i) {
@@ -1097,12 +1098,13 @@ extern "C" {
 
         for (i32 i = 1; i < limit; ++i) {
             debinftype *effect = debtab[i];
-            if (effect != NULL &&
-                ((effect->page == 0 && edpp_page_used[0] != 0) || (effect->page == 1 && edpp_page_used[1] != 0))) {
-                if (NuStrICmp(effect->name, name) == 0)
-                    return i;
-                limit = EDPP_MAX_TYPES;
+            if (!(effect != NULL &&
+                  ((effect->page == 0 && edpp_page_used[0] != 0) || (effect->page == 1 && edpp_page_used[1] != 0)))) {
+                continue;
             }
+            if (NuStrICmp(effect->name, name) == 0)
+                return i;
+            limit = EDPP_MAX_TYPES;
         }
         return -1;
     }

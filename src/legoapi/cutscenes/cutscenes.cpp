@@ -860,12 +860,14 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
         animation_rate = 0.0f;
     }
     if (layer_mask == -1) {
-        if (use_low_detail) {
-            layer_mask = static_cast<i32>(game_data->layer_mask_low);
-        } else if (reinterpret_cast<u8 *>(CutSceneSys)[7] == 0) {
-            layer_mask = static_cast<i32>(game_data->layer_mask_special);
+        if (!use_low_detail) {
+            if (reinterpret_cast<u8 *>(CutSceneSys)[7] == 0) {
+                layer_mask = static_cast<i32>(game_data->layer_mask_special);
+            } else {
+                layer_mask = static_cast<i32>(game_data->layer_mask);
+            }
         } else {
-            layer_mask = static_cast<i32>(game_data->layer_mask);
+            layer_mask = static_cast<i32>(game_data->layer_mask_low);
         }
     }
     if (static_cast<i8>(cutscene_instance->flags_88) < 0) {
@@ -1070,9 +1072,9 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     ResetShadowMapRendering();
 
     f32 ground_height = 2000000.0f;
-    i32 platform = -1;
     i32 surface = -1;
     bool shadow_sampled = false;
+    i32 platform = -1;
     if ((character->flags & 0x10) != 0 && CutBlobShadowAlpha != 0 && (character_data->model_flags & 0x10000) == 0 &&
         g_isLowEndDevice == 0) {
         u8 shadow_alpha = CutBlobShadowAlpha;

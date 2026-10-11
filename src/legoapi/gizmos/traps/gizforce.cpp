@@ -507,8 +507,8 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
                 }
                 if (force->pickup_count != 0 && (force->runtime_flags & 2) == 0) {
                     i32 hearts = ReleaseHearts();
-                    NUVEC position;
                     NUVEC direction;
+                    NUVEC position;
                     NuVecAdd(&position, &force->position, &force->effect_position);
                     NuVecRotateX(&direction, &v010, force->pickup_rotation_x);
                     NuVecRotateY(&direction, &direction, force->pickup_rotation_y);
@@ -871,9 +871,9 @@ static i32 *GizForces_GetBestBoltTarget(GIZMOSET *set, float *result_distance, N
 
     NUVEC aim = *direction;
     const float min_x = position->x - radius;
-    const float max_x = position->x + radius;
     const float min_z = position->z - radius;
     const float max_z = position->z + radius;
+    const float max_x = position->x + radius;
     if (directional != 0 && (bolt_type->field_60 & 0x20000) != 0) {
         aim.y = 0.0f;
         NuVecNorm(&aim, &aim);

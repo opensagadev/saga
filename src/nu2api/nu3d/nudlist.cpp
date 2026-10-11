@@ -380,15 +380,17 @@ extern "C" NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *
     }
     for (i32 i = 0; i < source->nitems; ++i) {
         NUDISPLAYLISTITEM *item = &scene->items[i];
-        if (item->type == 0x80) {
+        if (item->type != 0x80) {
+            if (item->type == 0x85) {
+                item->next = scene->items + (static_cast<NUDISPLAYLISTITEM *>(source->items[i].next) - source->items);
+            }
+        } else {
             for (i32 j = 0; j < static_cast<i32>(source->nmtls); ++j) {
                 if (source->items[i].next == source->mtls[j]) {
                     item->next = scene->mtls[j];
                     break;
                 }
             }
-        } else if (item->type == 0x85) {
-            item->next = scene->items + (static_cast<NUDISPLAYLISTITEM *>(source->items[i].next) - source->items);
         }
     }
     if (source->material_animations != NULL) {
@@ -1084,8 +1086,8 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
         if ((flags & 4) != 0) {
             // Clip-word diff: 2 bits per object, 16 objects per u32 word.
             u32 buf = static_cast<u32>(static_cast<u8>(sc->render_buffer >> 7));
-            const u8 *cur_words = sc->clip_used[buf];
             const u8 *other_words = sc->clip_used[buf ^ 1];
+            const u8 *cur_words = sc->clip_used[buf];
             i32 nclip = sc->nclip_objects;
             i32 words = (nclip + 15) >> 4; // ceil(nclip/16)
 
@@ -1116,8 +1118,8 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
             // Alpha fade — patch alpha into every 0x82 geom item.
             if (sc->alpha_values && nclip > 0) {
                 for (i32 o = 0; o < nclip; ++o) {
-                    u16 cnt = sc->clip_counts[o];
                     i32 *indices = sc->clip_objects[o].indices;
+                    u16 cnt = sc->clip_counts[o];
                     for (u16 j = 0; j < cnt; ++j) {
                         auto *item = &sc->items[indices[j]];
                         if (item->id != kItemId_Cnt && item->type == 0x82) {

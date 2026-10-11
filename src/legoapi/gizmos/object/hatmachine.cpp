@@ -451,12 +451,14 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
             NuSpecialDrawAt(&world->lev_objs[283].special, &machine->transform);
         }
 
-        if ((machine->flags & HATMACHINE_FLAG_ENABLED) == 0) {
+        if ((machine->flags & HATMACHINE_FLAG_ENABLED) != 0) {
+            if (world->lev_objs[286].active != 0) {
+                NuSpecialDrawAt(&world->lev_objs[286].special, &machine->transform);
+            }
+        } else {
             if (world->lev_objs[287].active != 0) {
                 NuSpecialDrawAt(&world->lev_objs[287].special, &machine->transform);
             }
-        } else if (world->lev_objs[286].active != 0) {
-            NuSpecialDrawAt(&world->lev_objs[286].special, &machine->transform);
         }
 
         if ((machine->flags & HATMACHINE_FLAG_HIDE_MACHINE) == 0 && machine->target_offset.y != 2000000.0f &&

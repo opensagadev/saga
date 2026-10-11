@@ -177,8 +177,8 @@ i32 CursorTool::Process(EdInputContext &input) {
     if (theLevelEditor.field_0x30 == 0)
         return 0;
 
-    ClassObject hover = {NULL, NULL, NULL};
     ClassObject after = {NULL, NULL, NULL};
+    ClassObject hover = {NULL, NULL, NULL};
     if (theClassEditor.selected_objects.first != NULL) {
         ClassObjectListEntry *first = theClassEditor.selected_objects.first;
         after = {first->ed_class, first->object, first->reference};
@@ -2644,10 +2644,11 @@ PropertyMenu *PropertyTool::CreatePropertyMenu(ClassObject &object) {
     PropertyMenuMetrics metrics __attribute__((aligned(16))) = ediGetMenuStartMetrics();
     char name[64];
     char title[128];
-    EdMember member;
+
     i32 name_type = EdType_String;
     if (object.reference == NULL ||
         !object.reference->GetAttributeData(object.object, 2, name_type, name, sizeof(name))) {
+        EdMember member;
         if (!object.ed_class->FindMember(&member, object.object, 2, 1) ||
             !member.reference->GetAttributeData(member.object, 2, name_type, name, sizeof(name)))
             NuStrCpy(name, const_cast<char *>("no name"));
@@ -3298,7 +3299,24 @@ void EdClass::Serialise(EdStream &stream, i32 *class_mapping) {
     if (stream.version == 0) {
         stream.SerialiseBuffer(&count, sizeof(count), 1);
     }
-    if (stream.mode == 2) {
+    if (stream.mode != 2) {
+        if (stream.mode == 1) {
+            if (stream.version <= 2) {
+                stream.SerialiseBuffer(&count, sizeof(count), 1);
+                for (i32 i = 0; i < count; ++i) {
+                    EdRef *member = new (stream.secondary_buffer->Allocate(sizeof(EdRef))) EdRef;
+                    member->Serialise(stream, NULL);
+                    AddType(member);
+                }
+            }
+            stream.SerialiseBuffer(&count, sizeof(count), 1);
+            for (i32 i = 0; i < count; ++i) {
+                EdRef *member = new (stream.secondary_buffer->Allocate(sizeof(EdRef))) EdRef;
+                member->Serialise(stream, NULL);
+                AddType(member);
+            }
+        }
+    } else {
         count = 0;
         for (EdRef *member = members; member != NULL; member = member->next) {
             if ((stream.flags & 0x400000) != 0) {
@@ -3326,21 +3344,6 @@ void EdClass::Serialise(EdStream &stream, i32 *class_mapping) {
                 }
             }
             member->Serialise(stream, class_mapping);
-        }
-    } else if (stream.mode == 1) {
-        if (stream.version <= 2) {
-            stream.SerialiseBuffer(&count, sizeof(count), 1);
-            for (i32 i = 0; i < count; ++i) {
-                EdRef *member = new (stream.secondary_buffer->Allocate(sizeof(EdRef))) EdRef;
-                member->Serialise(stream, NULL);
-                AddType(member);
-            }
-        }
-        stream.SerialiseBuffer(&count, sizeof(count), 1);
-        for (i32 i = 0; i < count; ++i) {
-            EdRef *member = new (stream.secondary_buffer->Allocate(sizeof(EdRef))) EdRef;
-            member->Serialise(stream, NULL);
-            AddType(member);
         }
     }
     stream.EndBlock();

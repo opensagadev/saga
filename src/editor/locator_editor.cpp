@@ -810,15 +810,17 @@ void locatorEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
                       static_cast<f64>(distance));
     }
     NuQFntPrintEx(system_qfont, text_x, (y + 30) * 8, 16, "SQR - Options");
-    if (aieditor->nearest_locator == nullptr) {
-        NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "X - Create locator");
-    } else if (aieditor->nearest_locator != aieditor->current_locator) {
-        NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "X - Select locator");
+    if (aieditor->nearest_locator != nullptr) {
+        if (aieditor->nearest_locator != aieditor->current_locator) {
+            NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "X - Select locator");
+        } else {
+            NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "X - Move selected");
+            NuQFntPrintEx(system_qfont, text_x, (y + 60) * 8, 16, "TRI - Delete selected");
+            NuQFntPrintEx(system_qfont, text_x, (y + 75) * 8, 16, "LLEFT - Rotate left");
+            NuQFntPrintEx(system_qfont, text_x, (y + 90) * 8, 16, "LRIGHT - Rotate right");
+        }
     } else {
-        NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "X - Move selected");
-        NuQFntPrintEx(system_qfont, text_x, (y + 60) * 8, 16, "TRI - Delete selected");
-        NuQFntPrintEx(system_qfont, text_x, (y + 75) * 8, 16, "LLEFT - Rotate left");
-        NuQFntPrintEx(system_qfont, text_x, (y + 90) * 8, 16, "LRIGHT - Rotate right");
+        NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "X - Create locator");
     }
     if (aieditor->nearest_locator == nullptr &&
         *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x48) != 0 &&
@@ -1029,10 +1031,11 @@ process_buttons:
                         next = set->locators[index - 1];
                     } else {
                         for (i32 i = 63; i >= 0; --i) {
-                            if (set->locators[i] != nullptr) {
-                                next = set->locators[i];
-                                break;
+                            if (set->locators[i] == nullptr) {
+                                continue;
                             }
+                            next = set->locators[i];
+                            break;
                         }
                     }
                 } else {
@@ -1103,10 +1106,12 @@ process_buttons:
         i32 difference = NuAngSub(aieditorsettings.area_rotation, path_angle);
         i32 quadrant = difference < 0 ? (difference + 0x3fff) >> 14 : difference >> 14;
         i32 remainder = difference % 0x4000;
-        if (remainder > 0x2000) {
+        if (!(remainder > 0x2000)) {
+            if (remainder < -0x2000) {
+                --quadrant;
+            }
+        } else {
             ++quadrant;
-        } else if (remainder < -0x2000) {
-            --quadrant;
         }
         aieditorsettings.area_rotation =
             NuAngAdd(quadrant << 14, *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x60));

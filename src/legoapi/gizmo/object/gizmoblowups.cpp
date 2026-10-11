@@ -724,10 +724,11 @@ void GizmoBlowUp_AddEffects(nuvec_s *position, GIZMOBLOWUP_s *blowup, i32 offset
     }
     if ((flags & 1) != 0) {
         for (i32 i = 4; i < 7; ++i) {
-            if (type->particle_types[i] != -1) {
-                i32 key = -1;
-                AddFiniteShotDebrisEffect(&key, type->particle_types[i], &effect_position, 1);
+            if (type->particle_types[i] == -1) {
+                continue;
             }
+            i32 key = -1;
+            AddFiniteShotDebrisEffect(&key, type->particle_types[i], &effect_position, 1);
         }
     }
     if ((flags & 2) != 0) {
@@ -1018,8 +1019,8 @@ void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float) {
                     blowup->visibility_flags &= ~GIZMOBLOWUP_VISIBLE;
                 }
 
-                f32 push_radius_x = (blowup->bounds_max.x - blowup->bounds_min.x) * 0.5f;
                 f32 push_radius_z = (blowup->bounds_max.z - blowup->bounds_min.z) * 0.5f;
+                f32 push_radius_x = (blowup->bounds_max.x - blowup->bounds_min.x) * 0.5f;
                 f32 push_radius = push_radius_z > push_radius_x ? push_radius_z : push_radius_x;
                 PushAway(&blowup->mid_position, push_radius, &blowup->bounds_min, &blowup->bounds_max, NULL, NULL, 1.0f,
                          4);

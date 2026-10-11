@@ -298,8 +298,8 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
         if (type->field_0x0f != 0 && pickups != WorldInfo_CurrentlyActive()->gizmo_pickup_sys->temporary_pickups) {
             continue;
         }
-        const f32 camera_x = pickup.position.x - GameCam->pos.x;
         const f32 camera_z = pickup.position.z - GameCam->pos.z;
+        const f32 camera_x = pickup.position.x - GameCam->pos.x;
         if (camera_x * camera_x + camera_z * camera_z > maximum_distance_squared) {
             continue;
         }
@@ -1086,9 +1086,9 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
     }
 
     const u16 y_rotation = static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f));
-    NUVEC scale = {AreaPickupScale, AreaPickupScale, AreaPickupScale};
     const u16 x_rotation =
         static_cast<u16>(static_cast<i32>(NuTrigTable[static_cast<i32>(y_rotation) & 0x7fff] * 1820.0f));
+    NUVEC scale = {AreaPickupScale, AreaPickupScale, AreaPickupScale};
 
     SPECIALMINIKIT_s *item = world->special_minikits->items;
     for (i32 index = 0; index < world->special_minikits->count; ++index, ++item) {

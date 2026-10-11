@@ -224,7 +224,7 @@ extern f32 STATUS_TITLE_Y;
 extern i16 tMINIKIT;
 
 void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {
-    char text[60];
+
     if (current != 0) {
         f32 title_alpha = 1.0f;
         switch (stage->field_0x14) {
@@ -338,6 +338,7 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
         if (packet->minikit_max == Game.area_save[packet->area->index].field_0x5[0]) {
             Text3DEx("$", -0.6f, -0.7f, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 0, 127, static_cast<u8>(opacity));
         } else {
+            char text[60];
             sprintf(text, "%i/%i", Game.area_save[packet->area->index].field_0x5[0], packet->minikit_max);
             Text3DEx(text, -0.6f, -0.8f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 0, 127, static_cast<u8>(opacity));
         }
@@ -501,7 +502,7 @@ extern i16 id_SLAVE1, tALLMINIKITSBUILT;
 extern i32 STATUS_R, STATUS_G, STATUS_B;
 
 void AllMiniKits_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {
-    char text[60];
+
     if (current != 0) {
         if (stage->field_0x14 < 1)
             return;
@@ -556,6 +557,7 @@ void AllMiniKits_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 cur
         if (Game.area_save[packet->area->index].field_0x5[0] == packet->minikit_max) {
             Text3DEx("$", -0.6f, -0.7f, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 0, 127, opacity);
         } else {
+            char text[60];
             sprintf(text, "%i/%i", Game.area_save[packet->area->index].field_0x5[0], packet->minikit_max);
             Text3DEx(text, -0.6f, -0.8f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 0, 127, opacity);
         }
@@ -656,7 +658,19 @@ void CharacterMiniKits_Dump(WORLDINFO_s *world) {
         return;
     }
 
-    if (world->area == NULL || (world->area->flags & 5) != 5) {
+    if (world->area != NULL && (world->area->flags & 5) == 5) {
+        if (Char_MiniKit != NULL) {
+            for (i32 i = 0; i < CHARCOUNT; ++i) {
+                HUBMINIKITPIECES_s *entry = world->minikit_pieces_buf[i];
+                if (entry != NULL && entry->scene != NULL) {
+                    NuGScnRemove(entry->scene);
+                    world->minikit_pieces_buf[i]->scene = NULL;
+                }
+                Char_MiniKit[i] = 0;
+            }
+            characterbuffer_ptr = minikits_savecharacterbufferptr;
+        }
+    } else {
         for (i32 i = 0; i < AREACOUNT; ++i) {
             HUBMINIKITPIECES_s *entry = world->minikit_pieces_buf[i];
             if (entry != NULL && entry->scene != NULL) {
@@ -664,16 +678,6 @@ void CharacterMiniKits_Dump(WORLDINFO_s *world) {
                 world->minikit_pieces_buf[i]->scene = NULL;
             }
         }
-    } else if (Char_MiniKit != NULL) {
-        for (i32 i = 0; i < CHARCOUNT; ++i) {
-            HUBMINIKITPIECES_s *entry = world->minikit_pieces_buf[i];
-            if (entry != NULL && entry->scene != NULL) {
-                NuGScnRemove(entry->scene);
-                world->minikit_pieces_buf[i]->scene = NULL;
-            }
-            Char_MiniKit[i] = 0;
-        }
-        characterbuffer_ptr = minikits_savecharacterbufferptr;
     }
 }
 
@@ -754,10 +758,11 @@ i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible
     if (visible != 0)
         return 0;
     for (i32 i = 0; i < 12; ++i) {
-        if (progress->disabled_effect_names[i][0] == '\0') {
-            NuStrCpy(progress->disabled_effect_names[i], name);
-            break;
+        if (progress->disabled_effect_names[i][0] != '\0') {
+            continue;
         }
+        NuStrCpy(progress->disabled_effect_names[i], name);
+        break;
     }
     return 1;
 }

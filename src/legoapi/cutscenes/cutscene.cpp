@@ -1183,10 +1183,11 @@ extern "C" {
                 i32 function_index = -1;
                 if (locatorfns != NULL && type->name != NULL && locatorfns[0].name != NULL) {
                     for (i32 j = 0; locatorfns[j].name != NULL; ++j) {
-                        if (NuStrICmp(type->name, locatorfns[j].name) == 0) {
-                            function_index = j;
-                            break;
+                        if (NuStrICmp(type->name, locatorfns[j].name) != 0) {
+                            continue;
                         }
+                        function_index = j;
+                        break;
                     }
                 }
                 type->function_index = static_cast<u16>(function_index);
@@ -1284,8 +1285,8 @@ extern "C" {
                 buf->void_ptr = rigid_instance->rigids + rigid_system->count;
                 memset(rigid_instance->rigids, 0, rigid_system->count * sizeof(instNUGCUTRIGID_s));
                 for (i32 i = 0; i < rigid_system->count; ++i) {
-                    NUGCUTRIGID_s *rigid = &rigid_system->rigids[i];
                     instNUGCUTRIGID_s *inst_rigid = &rigid_instance->rigids[i];
+                    NUGCUTRIGID_s *rigid = &rigid_system->rigids[i];
                     if (scene == NULL || scene == rigid->scene) {
                         inst_rigid->scene = scene == NULL ? rigid->scene : scene;
                         if (inst_rigid->scene != NULL && inst_rigid->scene->display_list != NULL) {
@@ -2510,8 +2511,8 @@ static __used__ void instNuGCutRigidSysUpdate(instNUGCUTSCENE_s *instance, float
 }
 
 static __used__ void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
-    instNUGCUTTRIGGERSYS_s *trigger_instance = instance->trigger_instance;
     NUGCUTTRIGGERSYS_s *system = instance->cutscene->trigger_system;
+    instNUGCUTTRIGGERSYS_s *trigger_instance = instance->trigger_instance;
     for (i32 i = 0; i < system->event_count; ++i) {
         NUGCUTTRIGGEREVENT_s *event = &system->events[i];
         if (event->state_animation == NULL) {
@@ -2563,8 +2564,8 @@ extern "C" void NuGCutSceneSysRender(i32 paused) {
 
             instNUGCUTCHARSYS_s *character_instance = instance->character_instance;
             if (character_instance != NULL) {
-                NUGCUTSCENE_s *cutscene = instance->cutscene;
                 const f32 frame = instance->render_frame;
+                NUGCUTSCENE_s *cutscene = instance->cutscene;
                 NUGCUTCHARSYS_s *system = cutscene->character_system;
                 if (system != NULL && NuCutSceneCharacterRender != NULL) {
                     for (i32 i = 0; i < system->character_count; ++i) {
@@ -2700,8 +2701,8 @@ void NewCopyAnims(instNUGCUTSCENE_s *instance) {
         }
     }
 
-    NUGCUTCHARSYS_s *destination_characters = destination->character_system;
     NUGCUTCHARSYS_s *source_characters = source->character_system;
+    NUGCUTCHARSYS_s *destination_characters = destination->character_system;
     if (destination_characters != NULL && destination_characters->character_count != 0) {
         for (i32 i = 0; i < destination_characters->character_count; ++i) {
             NUGCUTCHAR_s *character = &destination_characters->characters[i];

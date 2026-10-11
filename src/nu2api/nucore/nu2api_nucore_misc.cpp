@@ -184,8 +184,8 @@ void NuLgtArcLaserDraw(i32 paused) {
         if (!(vertices[4].w >= 0.5f) && !(vertices[5].w >= 0.5f))
             continue;
         if (vertices[4].w < 0.5f) {
-            f32 numerator = vertices[5].w - 0.5f;
             f32 denominator = vertices[5].w - vertices[4].w;
+            f32 numerator = vertices[5].w - 0.5f;
             vertices[6].x = (laser->start.x - laser->end.x) * numerator / denominator + laser->end.x;
             vertices[6].y = (laser->start.y - laser->end.y) * numerator / denominator + laser->end.y;
             vertices[6].z = (laser->start.z - laser->end.z) * numerator / denominator + laser->end.z;
@@ -686,8 +686,8 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
     *reinterpret_cast<u8 *>(&comeFromHash) = 0;
 
     u8 *header = (u8 *)data;
-    u8 *pixels = header + 0x34 + *(u32 *)(header + 0x30);
     const u32 pixel_format = *(u32 *)(header + 0x08);
+    u8 *pixels = header + 0x34 + *(u32 *)(header + 0x30);
     const u32 channel_bits = *(u32 *)(header + 0x0c);
     const i32 &height = *(i32 *)(header + 0x18);
     const i32 &width = *(i32 *)(header + 0x1c);
@@ -917,8 +917,8 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
 
     usize offset = 0;
     for (u32 mip = 0; mip < mip_count; ++mip) {
-        const i32 mip_width = width >> mip;
         const i32 mip_height = height >> mip;
+        const i32 mip_width = width >> mip;
         usize mip_size = (usize)mip_width * (usize)mip_height * (usize)bits_per_pixel / 8;
         if (mip_size < 0x20) {
             mip_size = 0x20;
