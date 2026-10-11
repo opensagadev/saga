@@ -20,6 +20,7 @@
 
 #include <SDL3/SDL.h>
 
+#include <atomic>
 #include <math.h>
 #include <pthread.h>
 #include <stddef.h>
@@ -52,6 +53,7 @@ namespace hostsl {
         // The device sink: everything is converted to 16-bit stereo.
         SDL_AudioSpec host_device_spec = {SDL_AUDIO_S16LE, 2, 48000};
         SDL_AudioStream *host_device_stream = NULL;
+        std::atomic<f32> host_master_gain{1.0f};
 
         struct HostStats host_stats = {};
 
@@ -832,9 +834,10 @@ namespace hostsl {
                 }
 
                 i16 *out16 = (i16 *)host_pull_buffer;
+                const f32 master_gain = host_master_gain.load(std::memory_order_relaxed);
                 f64 sum = 0;
                 for (u32 f = 0; f < frames * 2; f++) {
-                    f32 sample = host_mix_acc[f];
+                    f32 sample = host_mix_acc[f] * master_gain;
                     if (sample > 32767.0f) {
                         sample = 32767.0f;
                     } else if (sample < -32768.0f) {
@@ -899,6 +902,10 @@ namespace hostsl {
         }
         pthread_mutex_unlock(&host_lock);
         return stats;
+    }
+
+    void HostSetMasterGain(f32 gain) {
+        host_master_gain.store(gain, std::memory_order_relaxed);
     }
 
 } // namespace hostsl

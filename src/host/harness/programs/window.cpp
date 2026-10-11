@@ -662,6 +662,7 @@ namespace {
     static void host_sdl_init(bool offscreen, bool mute, bool msaa) {
         const char *video_driver = HostPlatformVideoDriver();
         SDL_SetHint(SDL_HINT_VIDEO_DRIVER, video_driver);
+        HostPlatformConfigureSDL();
         if (mute) {
             SDL_SetHint(SDL_HINT_AUDIO_DRIVER, "dummy");
         }

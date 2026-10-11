@@ -4,10 +4,11 @@
 #include <emscripten.h>
 
 #include "host/platform/input.hpp"
+#include "host/platform/opensl.hpp"
 #include "legoapi/characters/core/players.h"
 
 namespace {
-    char *host_wasm_arguments[4];
+    char *host_wasm_arguments[3];
 }
 
 const char *HostPlatformVideoDriver() {
@@ -26,7 +27,14 @@ ANativeWindow *HostPlatformNativeWindow(SDL_Window *) {
     return nullptr;
 }
 
+void HostPlatformConfigureSDL() {
+    // The game is embedded in a page: only take keys while the canvas has focus,
+    // so the rest of the page keeps normal keyboard scrolling and form input.
+    SDL_SetHint(SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT, "#canvas");
+}
+
 void HostPlatformPrepareArguments(i32 *argc, char ***argv) {
+    // The page may pass harness arguments to callMain; otherwise run the game.
     if (*argc >= 2) {
         return;
     }
@@ -36,16 +44,6 @@ void HostPlatformPrepareArguments(i32 *argc, char ***argv) {
     host_wasm_arguments[2] = nullptr;
     *argc = 2;
     *argv = host_wasm_arguments;
-    // This macro contains JavaScript, whose strict equality operator is not C++ syntax.
-    // clang-format off
-    if (MAIN_THREAD_EM_ASM_INT({
-            return (location.hostname === '127.0.0.1' || location.hostname === 'localhost') &&
-                   new URLSearchParams(location.search).get('movement-trace') === '1';
-        })) {
-        // clang-format on
-        host_wasm_arguments[(*argc)++] = const_cast<char *>("--trace-movement");
-        host_wasm_arguments[*argc] = nullptr;
-    }
 }
 
 void HostPlatformHandleInputEvent(const SDL_Event &event, i32 width, i32 height) {
@@ -62,4 +60,9 @@ void HostPlatformHandleInputEvent(const SDL_Event &event, i32 width, i32 height)
         HostInputTouch(static_cast<i32>(event.tfinger.x * width), static_cast<i32>(event.tfinger.y * height), width,
                        height);
     }
+}
+
+// Called by the web page's volume control from the browser main thread.
+extern "C" EMSCRIPTEN_KEEPALIVE void saga_set_volume(f32 volume) {
+    hostsl::HostSetMasterGain(volume < 0.0f ? 0.0f : volume > 1.0f ? 1.0f : volume);
 }

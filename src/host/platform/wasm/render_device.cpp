@@ -1,6 +1,10 @@
 #include "nu2api/nu3d/NuRenderDevice.h"
 
+#include <emscripten/em_macros.h>
+#include <emscripten/html5.h>
 #include <emscripten/html5_webgl.h>
+
+#include <atomic>
 
 #include "decomp.h"
 #include "host/platform/graphics.hpp"
@@ -13,7 +17,34 @@
 
 namespace {
     bool host_msaa_enabled = true;
+
+    // Drawing-buffer size requested by the page, packed as width << 16 | height.
+    // The page owns the canvas layout (windowed or fullscreen); the render
+    // thread applies a new request between frames.
+    std::atomic<u32> host_requested_canvas_size{0};
+    u32 host_applied_canvas_size = 0;
+
+    void HostApplyRequestedCanvasSize() {
+        const u32 requested = host_requested_canvas_size.load(std::memory_order_relaxed);
+        if (requested == 0 || requested == host_applied_canvas_size) {
+            return;
+        }
+        host_applied_canvas_size = requested;
+        // Unlike setting canvas.width from JavaScript, this also resizes
+        // Emscripten's offscreen back buffer.
+        emscripten_set_canvas_element_size("#canvas", static_cast<i32>(requested >> 16),
+                                           static_cast<i32>(requested & 0xffff));
+    }
 } // namespace
+
+// Called by the page, from the browser main thread, when the canvas box changes.
+extern "C" EMSCRIPTEN_KEEPALIVE void saga_set_canvas_size(i32 width, i32 height) {
+    if (width <= 0 || height <= 0 || width > 0xffff || height > 0xffff) {
+        return;
+    }
+    host_requested_canvas_size.store(static_cast<u32>(width) << 16 | static_cast<u32>(height),
+                                     std::memory_order_relaxed);
+}
 
 void HostSetMsaaEnabled(bool enabled) {
     host_msaa_enabled = enabled;
@@ -47,6 +78,7 @@ void NuRenderDevice::SwapBuffers() {
 
     const EMSCRIPTEN_WEBGL_CONTEXT_HANDLE context = reinterpret_cast<uintptr_t>(this->contexts[3]);
     if (context != 0 && emscripten_webgl_make_context_current(context) == EMSCRIPTEN_RESULT_SUCCESS) {
+        HostApplyRequestedCanvasSize();
         i32 width = static_cast<i32>(this->width);
         i32 height = static_cast<i32>(this->height);
         emscripten_webgl_get_drawing_buffer_size(context, &width, &height);

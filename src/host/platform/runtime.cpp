@@ -40,6 +40,9 @@ __attribute__((weak)) const char *HostPlatformVideoDriver() {
     return "dummy";
 }
 
+__attribute__((weak)) void HostPlatformConfigureSDL() {
+}
+
 __attribute__((weak)) bool HostPlatformAudioOutputEnabled() {
     return true;
 }

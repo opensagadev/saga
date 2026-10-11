@@ -183,22 +183,86 @@
       }
 
       #game {
+        width: min(72rem, calc(100% - 2rem));
+        margin: 0 auto;
+        padding: 1.5rem 0 2rem;
+      }
+
+      #game[hidden] {
         display: none;
-        position: fixed;
-        inset: 0;
+      }
+
+      #game-frame {
+        width: min(100%, calc((100svh - 8rem) * 16 / 9));
+        aspect-ratio: 16 / 9;
+        margin: 0 auto;
         background: #000;
       }
 
-      #game.running {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+      #game-frame:fullscreen {
+        width: 100%;
+        height: 100%;
+        aspect-ratio: auto;
       }
 
       #canvas {
+        display: block;
         width: 100%;
         height: 100%;
         outline: 0;
+      }
+
+      .game-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+      }
+
+      .game-toolbar button {
+        padding: 0.45rem 0.8rem;
+      }
+
+      .volume {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #a8afb9;
+      }
+
+      .key-map {
+        margin-top: 1.5rem;
+        color: #a8afb9;
+      }
+
+      .key-map h2 {
+        margin: 0 0 0.6rem;
+        color: #f2f3f5;
+        font-size: 1rem;
+      }
+
+      .key-map dl {
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        gap: 0.35rem 1.25rem;
+        margin: 0;
+      }
+
+      .key-map dt {
+        color: #f2f3f5;
+      }
+
+      .key-map dd {
+        margin: 0;
+      }
+
+      kbd {
+        border: 1px solid #535c6c;
+        border-radius: 0.3rem;
+        background: #272c35;
+        padding: 0.05rem 0.35rem;
+        font: 0.85em ui-monospace, monospace;
       }
 
       #runtime-error {
@@ -266,15 +330,41 @@
       </section>
     </main>
 
-    <div id="game" aria-label="Game viewport">
-      <canvas id="canvas" tabindex="-1" aria-label="SAGA game" oncontextmenu="event.preventDefault()"></canvas>
-    </div>
+    <main id="game" aria-label="Game" hidden>
+      <div id="game-frame">
+        <canvas id="canvas" tabindex="0" aria-label="SAGA game" oncontextmenu="event.preventDefault()"></canvas>
+      </div>
+      <div class="game-toolbar">
+        <button id="fullscreen-toggle" type="button">Fullscreen</button>
+        <button id="mute-toggle" type="button" aria-pressed="false">Mute</button>
+        <label class="volume">Volume <input id="volume" type="range" min="0" max="100" step="1" value="100"></label>
+      </div>
+      <!-- Keep in sync with host/platform/keyboard_mapping.hpp and the window harness. -->
+      <section class="key-map" aria-labelledby="key-map-title">
+        <h2 id="key-map-title">Controls</h2>
+        <dl>
+          <dt><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> / arrows</dt><dd>Move</dd>
+          <dt><kbd>Space</kbd> / <kbd>U</kbd></dt><dd>Jump</dd>
+          <dt><kbd>E</kbd> / <kbd>H</kbd></dt><dd>Action</dd>
+          <dt><kbd>F</kbd> / <kbd>J</kbd></dt><dd>Special</dd>
+          <dt><kbd>K</kbd></dt><dd>Swap character</dd>
+          <dt><kbd>Left Ctrl</kbd></dt><dd>Toggle right</dd>
+          <dt><kbd>Enter</kbd></dt><dd>Start / confirm</dd>
+          <dt><kbd>Esc</kbd></dt><dd>Pause / back</dd>
+          <dt>Mouse click</dt><dd>Select menu items</dd>
+        </dl>
+      </section>
+    </main>
     <div id="runtime-error" role="alert" hidden></div>
 
     <script>
       const launcher = document.getElementById("launcher");
       const game = document.getElementById("game");
+      const gameFrame = document.getElementById("game-frame");
       const canvas = document.getElementById("canvas");
+      const fullscreenToggle = document.getElementById("fullscreen-toggle");
+      const muteToggle = document.getElementById("mute-toggle");
+      const volumeInput = document.getElementById("volume");
       const fileInput = document.getElementById("obb-file");
       const urlForm = document.getElementById("url-form");
       const urlInput = document.getElementById("obb-url");
@@ -287,6 +377,7 @@
       const obbName = "main.1060.com.wb.lego.tcs.obb";
       let resolveRuntime;
       let started = false;
+      let sagaRuntimeReady = false;
       let loadedObb = null;
       let detectedObbUrl = null;
       const runtimeReady = new Promise((resolve) => {
@@ -393,11 +484,19 @@
             { canOwn: true },
           );
           launcher.hidden = true;
-          game.classList.add("running");
+          // SDL reads the canvas CSS size when it creates the window.
+          game.hidden = false;
           canvas.focus();
-          Module.callMain([]);
+          applyCanvasSize();
+          applyVolume();
+          const args = new URLSearchParams(location.search).get("movement-trace") === "1"
+            ? ["window", "--trace-movement"]
+            : [];
+          Module.callMain(args);
         } catch (error) {
           started = false;
+          launcher.hidden = false;
+          game.hidden = true;
           setBusy(false);
           setStatus(error instanceof Error ? error.message : String(error), true);
           throw error;
@@ -490,6 +589,64 @@
 
       playButton.addEventListener("click", startGame);
 
+      // The page owns the canvas layout; the engine resizes its drawing buffer to match.
+      let canvasSize = null;
+      function applyCanvasSize() {
+        if (canvasSize !== null && sagaRuntimeReady) {
+          Module._saga_set_canvas_size(canvasSize[0], canvasSize[1]);
+        }
+      }
+      const canvasObserver = new ResizeObserver(([entry]) => {
+        const box = entry.devicePixelContentBoxSize?.[0];
+        const width = box ? box.inlineSize : Math.round(entry.contentRect.width * devicePixelRatio);
+        const height = box ? box.blockSize : Math.round(entry.contentRect.height * devicePixelRatio);
+        if (width > 0 && height > 0) {
+          canvasSize = [width, height];
+          applyCanvasSize();
+        }
+      });
+      try {
+        canvasObserver.observe(canvas, { box: "device-pixel-content-box" });
+      } catch {
+        canvasObserver.observe(canvas);
+      }
+
+      function applyVolume() {
+        const muted = muteToggle.getAttribute("aria-pressed") === "true";
+        muteToggle.textContent = muted ? "Unmute" : "Mute";
+        if (sagaRuntimeReady) {
+          Module._saga_set_volume(muted ? 0 : Number(volumeInput.value) / 100);
+        }
+      }
+      volumeInput.addEventListener("input", applyVolume);
+      muteToggle.addEventListener("click", () => {
+        muteToggle.setAttribute("aria-pressed", String(muteToggle.getAttribute("aria-pressed") !== "true"));
+        applyVolume();
+      });
+
+      fullscreenToggle.addEventListener("click", () => {
+        if (document.fullscreenElement) {
+          void document.exitFullscreen();
+        } else {
+          gameFrame.requestFullscreen().catch((error) => console.error(error));
+        }
+      });
+      document.addEventListener("fullscreenchange", () => {
+        fullscreenToggle.textContent = document.fullscreenElement ? "Exit fullscreen" : "Fullscreen";
+        canvas.focus();
+      });
+      canvas.addEventListener("pointerdown", () => canvas.focus());
+
+      // SDL handles keys on the game thread, too late to cancel the browser's
+      // default action, so stop keys the page would otherwise scroll with.
+      const scrollKeys = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space",
+        "PageUp", "PageDown", "Home", "End", "Backspace"]);
+      canvas.addEventListener("keydown", (event) => {
+        if (scrollKeys.has(event.code)) {
+          event.preventDefault();
+        }
+      });
+
       var Module = {
         canvas,
         noInitialRun: true,
@@ -501,6 +658,7 @@
           }
         },
         onRuntimeInitialized() {
+          sagaRuntimeReady = true;
           resolveRuntime();
         },
         onAbort: showRuntimeError,
