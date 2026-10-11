@@ -377,7 +377,7 @@
       const obbName = "main.1060.com.wb.lego.tcs.obb";
       let resolveRuntime;
       let started = false;
-      let runtimeInitialized = false;
+      let sagaRuntimeReady = false;
       let loadedObb = null;
       let detectedObbUrl = null;
       const runtimeReady = new Promise((resolve) => {
@@ -592,7 +592,7 @@
       // The page owns the canvas layout; the engine resizes its drawing buffer to match.
       let canvasSize = null;
       function applyCanvasSize() {
-        if (canvasSize !== null && runtimeInitialized) {
+        if (canvasSize !== null && sagaRuntimeReady) {
           Module._saga_set_canvas_size(canvasSize[0], canvasSize[1]);
         }
       }
@@ -614,7 +614,7 @@
       function applyVolume() {
         const muted = muteToggle.getAttribute("aria-pressed") === "true";
         muteToggle.textContent = muted ? "Unmute" : "Mute";
-        if (runtimeInitialized) {
+        if (sagaRuntimeReady) {
           Module._saga_set_volume(muted ? 0 : Number(volumeInput.value) / 100);
         }
       }
@@ -648,7 +648,7 @@
           }
         },
         onRuntimeInitialized() {
-          runtimeInitialized = true;
+          sagaRuntimeReady = true;
           resolveRuntime();
         },
         onAbort: showRuntimeError,
