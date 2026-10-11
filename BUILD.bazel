@@ -2,3 +2,9 @@ exports_files([
     ".clang-format",
     ".clang-tidy",
 ])
+
+filegroup(
+    name = "saved_games",
+    srcs = glob(["res/SavedGames/*"]),
+    visibility = ["//src:__pkg__"],
+)

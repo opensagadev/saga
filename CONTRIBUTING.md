@@ -192,9 +192,9 @@ bazel build --config=wasm_release //src:saga_wasm
 
 The outputs are `bazel-bin/src/saga.html`, `saga.js`, and `saga.wasm`. Build
 this variant when changing browser support or portable host behavior.
-After loading the OBB, the browser build starts a new game in the cantina.
-Startup overrides live in `src/host/platform/wasm/startup.cpp` and use the
-same host helpers as the native smoke test.
+After loading the OBB, the browser build runs the regular startup sequence.
+The saves in `res/SavedGames/` are embedded at the same path in the browser
+filesystem, so they can be loaded from the in-game menu.
 
 With the OBB under `res/`, build and serve the browser version with:
 

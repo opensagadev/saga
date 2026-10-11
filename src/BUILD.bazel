@@ -111,7 +111,6 @@ _WASM_PLATFORM_SRCS = [
     "host/platform/wasm/input.cpp",
     "host/platform/wasm/render_device.cpp",
     "host/platform/wasm/runtime.cpp",
-    "host/platform/wasm/startup.cpp",
 ]
 
 _PUBLIC_HEADERS = glob(
@@ -413,13 +412,17 @@ clang_tidy_wasm_check(
 
 cc_binary(
     name = "saga",
-    additional_linker_inputs = ["host-wasm-shell.html"],
+    additional_linker_inputs = [
+        "host-wasm-shell.html",
+        "//:saved_games",
+    ],
     features = ["-output_format_js"],
     linkopts = [
         "--use-port=sdl3",
         "--oformat=html",
-        "-Wl,--wrap=_Z8LoadPermv",
-        "-Wl,--wrap=_Z7EndPermv",
+        # Bundle the repository saves at the documents path used by the game.
+        "--embed-file",
+        "res/SavedGames@/res/SavedGames",
         "-Wl,--wrap=NuGScnFixupPS",
         "-Wl,--wrap=_Z15NuGScnDestroyPSP8nugscn_s",
         "-sPROXY_TO_PTHREAD=1",
