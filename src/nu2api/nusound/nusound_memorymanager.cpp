@@ -204,7 +204,7 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Defragment(u32 size) {
                 if (!next->IsAlloced()) {
                     buffer = this->MergeFreeBuffer(buffer);
                     if (size != 0 && buffer->GetSize() >= size) {
-                        break;
+                        goto done;
                     }
                     continue;
                 }
@@ -215,7 +215,7 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Defragment(u32 size) {
 
                 if (size != 0 && merged != NULL && merged->GetSize() >= size) {
                     buffer = merged;
-                    break;
+                    goto done;
                 }
 
                 if (moved == buffer) {
@@ -234,7 +234,7 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Defragment(u32 size) {
                     }
                     buffer = scan;
                     if (size != 0 && buffer->GetSize() >= size) {
-                        break;
+                        goto done;
                     }
                     continue;
                 }
@@ -248,6 +248,7 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Defragment(u32 size) {
     }
 
     this->free_count = 0;
+done:
     NuSoundMemoryBuffer::EndCriticalSection();
     pthread_mutex_unlock(&this->mutex);
 
@@ -611,15 +612,19 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::SwapOrMergeAdjacentBuffers(NuSoundMem
     buffer->SetAddress(buffer_address + next_size);
     next->SetAddress(buffer_address);
 
-    u32 remaining = next_size;
-    char *source = next_address;
-    char *dest = buffer_address;
-    while (remaining != 0) {
-        u32 amount = remaining < buffer_size ? remaining : buffer_size;
-        memmove(dest, source, amount);
-        source += amount;
-        dest += amount;
-        remaining -= amount;
+    if (buffer_size >= next_size) {
+        memmove(buffer_address, next_address, next_size);
+    } else {
+        i32 remaining = next_size;
+        char *source = next_address;
+        char *dest = buffer_address;
+        while (remaining != 0) {
+            i32 amount = remaining < (i32)buffer_size ? remaining : (i32)buffer_size;
+            memmove(dest, source, amount);
+            source += amount;
+            dest += amount;
+            remaining -= amount;
+        }
     }
 
     next->Unlock();

@@ -692,7 +692,8 @@ void ReCalculateCompletionPoints() {
 
         if ((area->flags & AREAFLAG_BONUS_AREA) != 0) {
             CompletionPointInfo_ReCalculate[1] += POINTS_PER_TIMETRIAL;
-            if (save->area_complete != 0 || save->challenge_trial_time < static_cast<f32>(area->challenge_trial_time)) {
+            if (save->area_complete != 0 ||
+                save->challenge_trial_time < static_cast<f32>(static_cast<i32>(area->challenge_trial_time))) {
                 AddToCompletionPoints(POINTS_PER_TIMETRIAL);
                 AddToGoldBricks();
             }

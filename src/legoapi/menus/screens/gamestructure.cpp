@@ -588,7 +588,7 @@ bool Store_IsPackAvailable(i32, char *reason) {
     if (memcard_autosavestarted != 0 || memcard_autosavepostdelay > 0.0f) {
         return false;
     }
-    return memcard_autosavepredelay <= 0.0f;
+    return !(memcard_autosavepredelay > 0.0f);
 }
 
 i32 Store_FindPack(i32 id, char *name) {

@@ -1066,16 +1066,16 @@ void ClassEditor::SetViewMenuHilight(eduimenu_s *menu) {
 void ClassEditor::SnapPoint(VuVec &point) {
     if (static_cast<u32>(snap_mode - 1) > 1)
         return;
+    VuVec candidate = point;
     VuVec ray = snap_ray;
     NuVecNorm(reinterpret_cast<NUVEC *>(&ray), reinterpret_cast<NUVEC *>(&ray));
     ray.y *= -snap_distance;
     ray.x *= -snap_distance;
-    ray.z *= -snap_distance;
-    ray.w = 0.0f;
-    VuVec candidate = point;
-    candidate.x += ray.x;
-    candidate.y += ray.y;
-    candidate.z += ray.z;
+    ray.z = -snap_distance * ray.z;
+    candidate.w = 0.0f;
+    candidate.x = ray.x + point.x;
+    candidate.y = ray.y + point.y;
+    candidate.z = ray.z + point.z;
     if (EdTerrRay(candidate, snap_ray))
         point = candidate;
 }
@@ -1651,9 +1651,10 @@ __attribute__((force_align_arg_pointer)) void ClassObject::GetName(char *destina
 
     char name[128];
     EdMember member;
-    if ((reference == NULL || !reference->GetAttributeData(object, 2, EdType_String, name, sizeof(name))) &&
+    i32 string_type = EdType_String;
+    if ((reference == NULL || !reference->GetAttributeData(object, 2, string_type, name, sizeof(name))) &&
         (!ed_class->FindMember(&member, object, 2, 1) ||
-         !member.reference->GetAttributeData(member.object, 2, EdType_String, name, sizeof(name)))) {
+         !member.reference->GetAttributeData(member.object, 2, string_type, name, sizeof(name)))) {
         NuStrCpy(name, "NoName");
     }
     sprintf(destination, "%s.%s", ed_class->name, name);

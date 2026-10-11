@@ -1618,7 +1618,7 @@ void GizForce_PlayForwards(GIZFORCE_s *force) {
     }
     GameAnimSet_SetRepeating(force->anim_set, 0);
     f32 speed = -force->animation_speed;
-    if (force->animation_speed >= 0.0f) {
+    if (!(force->animation_speed < 0.0f)) {
         GameAnimSet_Play(force->anim_set, speed * force->end_frame, 0);
         return;
     }

@@ -2596,29 +2596,43 @@ static void edrtlCancelBurnDefaultsMenu(eduimenu_s *, eduimenu_s *) {
 static void edrtlBurnDefaultsMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     edrtl_burn_defaults_menu = eduiMenuCreate(70, 70, 220, 300, ed_fnt, edrtlCancelBurnDefaultsMenu, "Level Defaults");
     if (edrtl_edit_burnset != NULL && edrtl_burn_defaults_menu != NULL) {
-        burn_parameters_s &p = edrtl_edit_burnset->parameters;
 #define BURN_DEFAULT_SLIDER(callback, minimum, maximum, value, label)                                                  \
     eduiMenuAddItem(edrtl_burn_defaults_menu,                                                                          \
                     eduiItemSliderCreate(0, edblack, 0, callback, minimum, maximum, value, label))
-        BURN_DEFAULT_SLIDER(edrtlSetBurnoutGlobalScale, 0.0f, 4.0f, p.field_14, "Global Scale/Intensity");
-        BURN_DEFAULT_SLIDER(edrtlSetBurnoutStartAngle, 0.0f, 180.0f, p.field_04, "Start Angle");
-        BURN_DEFAULT_SLIDER(edrtlSetBurnoutMinIntensity, 0.0f, 1.0f, p.field_08, "Min Intensity");
-        BURN_DEFAULT_SLIDER(edrtlSetBurnoutEndAngle, 0.0f, 180.0f, p.field_0c, "End Angle");
-        BURN_DEFAULT_SLIDER(edrtlSetBurnoutMaxIntensity, 0.0f, 1.0f, p.field_10, "Max Intensity");
-        BURN_DEFAULT_SLIDER(edrtlSetBurnoutDispersion, 0.0f, 4.0f, p.field_1c, "Flare/Dispersion");
-        BURN_DEFAULT_SLIDER(edrtlSetBurnoutFragmentGlowFactor, 0.0f, 10.0f, p.field_20, "Fragment Glow Factor");
-        BURN_DEFAULT_SLIDER(edrtlSetBurnoutThreshold, 0.0f, 2.0f, p.field_24, "Threshold");
-        eduiMenuAddItem(
-            edrtl_burn_defaults_menu,
-            eduiItemToggleCreate(0, edblack, p.field_28 != 0, 1, edrtlSetBurnoutSourceAvailable, "Source Available"));
-        BURN_DEFAULT_SLIDER(edrtlSetBurnoutSourceDirectionX, -1.0f, 2.0f, p.field_2c, "Source Direction X");
-        BURN_DEFAULT_SLIDER(edrtlSetBurnoutSourceDirectionY, -1.0f, 2.0f, p.field_30, "Source Direction Y");
-        BURN_DEFAULT_SLIDER(edrtlSetBurnoutSourceDirectionZ, -1.0f, 2.0f, p.field_34, "Source Direction Z");
-        BURN_DEFAULT_SLIDER(edrtlSetBurnoutSourceInnerRadius, 0.0f, 2.0f, p.field_38, "Source Inner Radius");
-        BURN_DEFAULT_SLIDER(edrtlSetBurnoutSourceInnerIntensity, 0.0f, 1.0f, p.field_3c, "Source Inner Intensity");
-        BURN_DEFAULT_SLIDER(edrtlSetBurnoutSourceOuterRadius, 0.0f, 180.0f, p.field_40, "Source Outer Radius");
-        BURN_DEFAULT_SLIDER(edrtlSetBurnoutSourceOuterIntensity, 0.0f, 1.0f, p.field_44, "Source Outer Intensity");
-        BURN_DEFAULT_SLIDER(edrtlSetBurnoutSourceFallOffPower, 0.0f, 10.0f, p.field_48, "Source FallOff Power");
+        BURN_DEFAULT_SLIDER(edrtlSetBurnoutGlobalScale, 0.0f, 4.0f, edrtl_edit_burnset->parameters.field_14,
+                            "Global Scale/Intensity");
+        BURN_DEFAULT_SLIDER(edrtlSetBurnoutStartAngle, 0.0f, 180.0f, edrtl_edit_burnset->parameters.field_04,
+                            "Start Angle");
+        BURN_DEFAULT_SLIDER(edrtlSetBurnoutMinIntensity, 0.0f, 1.0f, edrtl_edit_burnset->parameters.field_08,
+                            "Min Intensity");
+        BURN_DEFAULT_SLIDER(edrtlSetBurnoutEndAngle, 0.0f, 180.0f, edrtl_edit_burnset->parameters.field_0c,
+                            "End Angle");
+        BURN_DEFAULT_SLIDER(edrtlSetBurnoutMaxIntensity, 0.0f, 1.0f, edrtl_edit_burnset->parameters.field_10,
+                            "Max Intensity");
+        BURN_DEFAULT_SLIDER(edrtlSetBurnoutDispersion, 0.0f, 4.0f, edrtl_edit_burnset->parameters.field_1c,
+                            "Flare/Dispersion");
+        BURN_DEFAULT_SLIDER(edrtlSetBurnoutFragmentGlowFactor, 0.0f, 10.0f, edrtl_edit_burnset->parameters.field_20,
+                            "Fragment Glow Factor");
+        BURN_DEFAULT_SLIDER(edrtlSetBurnoutThreshold, 0.0f, 2.0f, edrtl_edit_burnset->parameters.field_24, "Threshold");
+        eduiMenuAddItem(edrtl_burn_defaults_menu,
+                        eduiItemToggleCreate(0, edblack, edrtl_edit_burnset->parameters.field_28 != 0, 1,
+                                             edrtlSetBurnoutSourceAvailable, "Source Available"));
+        BURN_DEFAULT_SLIDER(edrtlSetBurnoutSourceDirectionX, -1.0f, 2.0f, edrtl_edit_burnset->parameters.field_2c,
+                            "Source Direction X");
+        BURN_DEFAULT_SLIDER(edrtlSetBurnoutSourceDirectionY, -1.0f, 2.0f, edrtl_edit_burnset->parameters.field_30,
+                            "Source Direction Y");
+        BURN_DEFAULT_SLIDER(edrtlSetBurnoutSourceDirectionZ, -1.0f, 2.0f, edrtl_edit_burnset->parameters.field_34,
+                            "Source Direction Z");
+        BURN_DEFAULT_SLIDER(edrtlSetBurnoutSourceInnerRadius, 0.0f, 180.0f, edrtl_edit_burnset->parameters.field_38,
+                            "Source Inner Radius");
+        BURN_DEFAULT_SLIDER(edrtlSetBurnoutSourceInnerIntensity, 0.0f, 1.0f, edrtl_edit_burnset->parameters.field_3c,
+                            "Source Inner Intensity");
+        BURN_DEFAULT_SLIDER(edrtlSetBurnoutSourceOuterRadius, 0.0f, 180.0f, edrtl_edit_burnset->parameters.field_40,
+                            "Source Outer Radius");
+        BURN_DEFAULT_SLIDER(edrtlSetBurnoutSourceOuterIntensity, 0.0f, 1.0f, edrtl_edit_burnset->parameters.field_44,
+                            "Source Outer Intensity");
+        BURN_DEFAULT_SLIDER(edrtlSetBurnoutSourceFallOffPower, 0.0f, 10.0f, edrtl_edit_burnset->parameters.field_48,
+                            "Source FallOff Power");
 #undef BURN_DEFAULT_SLIDER
         eduiMenuAttach(parent, edrtl_burn_defaults_menu);
         edrtl_burn_defaults_menu->x = parent->x + 10;
@@ -2767,14 +2781,18 @@ static void edrtlCancelBurnSetMenu(eduimenu_s *, eduimenu_s *) {
 static void edrtlBurnSetMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     edrtl_burn_set_menu = eduiMenuCreate(70, 70, 220, 300, ed_fnt, edrtlCancelBurnSetMenu, "Burnset Properties");
     if (edrtl_edit_burnset != NULL && edrtl_burn_set_menu != NULL) {
-        burnout_s &burnout = edrtl_edit_burnset->burnouts[edrtl_edit_burnset->selected_index];
 #define BURN_SET_SLIDER(callback, minimum, maximum, value, label)                                                      \
     eduiMenuAddItem(edrtl_burn_set_menu, eduiItemSliderCreate(0, edblack, 0, callback, minimum, maximum, value, label))
-        BURN_SET_SLIDER(edrtlSetBurnsetThreshold, 0.0f, 2.0f, burnout.field_10, "Threshold");
-        BURN_SET_SLIDER(edrtlSetBurnsetIntensity, 0.0f, 2.0f, burnout.field_14, "Intensity");
-        BURN_SET_SLIDER(edrtlSetBurnsetFlare, 0.0f, 2.0f, burnout.field_18, "Flare");
-        BURN_SET_SLIDER(edrtlSetBurnsetRadius, 0.2f, 19.8f, burnout.field_1c, "Radius");
-        BURN_SET_SLIDER(edrtlSetBurnsetFalloff, 0.0f, 10.0f, burnout.field_20, "Falloff");
+        BURN_SET_SLIDER(edrtlSetBurnsetThreshold, 0.0f, 2.0f,
+                        edrtl_edit_burnset->burnouts[edrtl_edit_burnset->selected_index].field_10, "Threshold");
+        BURN_SET_SLIDER(edrtlSetBurnsetIntensity, 0.0f, 2.0f,
+                        edrtl_edit_burnset->burnouts[edrtl_edit_burnset->selected_index].field_14, "Intensity");
+        BURN_SET_SLIDER(edrtlSetBurnsetFlare, 0.0f, 2.0f,
+                        edrtl_edit_burnset->burnouts[edrtl_edit_burnset->selected_index].field_18, "Flare");
+        BURN_SET_SLIDER(edrtlSetBurnsetRadius, 0.2f, 19.8f,
+                        edrtl_edit_burnset->burnouts[edrtl_edit_burnset->selected_index].field_1c, "Radius");
+        BURN_SET_SLIDER(edrtlSetBurnsetFalloff, 0.0f, 10.0f,
+                        edrtl_edit_burnset->burnouts[edrtl_edit_burnset->selected_index].field_20, "Falloff");
 #undef BURN_SET_SLIDER
         eduiMenuAttach(parent, edrtl_burn_set_menu);
         edrtl_burn_set_menu->x = parent->x + 10;

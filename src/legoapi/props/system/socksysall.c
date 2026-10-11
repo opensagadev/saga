@@ -758,7 +758,7 @@ static void FillSockPosition(SOCKSYS *sock_sys, SOCKPOSITION *position) {
 }
 
 static f32 BestSockPosition(SOCKSYS *sock_sys, NUVEC *point, SOCKPOSITION *result, i32 sock_index, i32 prior_segment) {
-    NUVEC *a0 = NULL, *b0 = NULL, *a1 = NULL, *b1 = NULL, *c1 = NULL, *d1 = NULL;
+    NUVEC *a0 = NULL, *b0 = NULL, *c0 = NULL, *d0 = NULL, *a1 = NULL, *b1 = NULL, *c1 = NULL, *d1 = NULL;
     i32 segment = 0, next = 0, initial_segment = 0;
     i32 ascending_segment = 0, descending_segment = 0;
     i32 direction = 0, exhausted_directions = 0, segment_count = 0;
@@ -816,6 +816,8 @@ static f32 BestSockPosition(SOCKSYS *sock_sys, NUVEC *point, SOCKPOSITION *resul
             segment_data = &sock->segments[segment];
             i32 inside = 0;
             if ((sock->flags & 1) == 0) {
+                c0 = &sock->c->pts[segment];
+                d0 = &sock->d->pts[segment];
                 c1 = &sock->c->pts[next];
                 d1 = &sock->d->pts[next];
                 if (point->x >= segment_data->min.x && point->x <= segment_data->max.x &&

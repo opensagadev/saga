@@ -435,7 +435,7 @@ void SpeederChaseA_Panel(WORLDINFO_s *) {
     }
 
     if (LevAIMessage[0] != NULL && LevAIMessage[1] != NULL && LevAIMessage[3] != NULL &&
-        LevAIMessage[3]->value == 0.0f && 0.0f < LevAIMessage[0]->value) {
+        LevAIMessage[3]->value == 1.0f && 0.0f < LevAIMessage[0]->value) {
 
         i32 count = static_cast<i32>(LevAIMessage[0]->value);
         if (count > 10) {
@@ -531,15 +531,16 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
     }
     // Retail has four tuning rows and only resets state bytes greater than 4.
     // State 4 therefore remains an invalid-input table overrun, not a fifth mode.
-    SPEEDERCHASEVALUES *values = &speedervals[processor->action_data_1];
     f32 ratio, speed, seek;
     if (error > 0.0f) {
+        SPEEDERCHASEVALUES *values = &speedervals[processor->action_data_1];
         ratio = error / values->behind_range;
         if (ratio > 1.0f)
             ratio = 1.0f;
         speed = values->behind_speed * ratio + (1.0f - ratio);
         seek = values->behind_seek;
     } else {
+        SPEEDERCHASEVALUES *values = &speedervals[processor->action_data_1];
         ratio = error / values->ahead_range;
         if (ratio > 1.0f)
             ratio = 1.0f;
@@ -753,7 +754,7 @@ f32 SpeederChaseATATInOutMul(nuvec_s *start, nuvec_s *end) {
 }
 
 f32 GetVehicleAreaRememberSpeed() {
-    if (bonusmodearcade == 0) {
+    if (VehicleArea == 0) {
         return 0.0f;
     }
 
@@ -765,7 +766,7 @@ f32 GetVehicleAreaRememberSpeed() {
     }
     if (Player[1] != NULL && Player[1]->apiobj.player_controlled) {
         speed += Player[1]->field_0xdc8;
-        player_count = 2.0f;
+        player_count += 1.0f;
     }
     if (player_count > 1.0f) {
         speed /= player_count;
