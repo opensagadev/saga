@@ -4392,3 +4392,46 @@ void BackDrop_Draw(float alpha, i32 flags) {
         }
     }
 }
+
+extern "C" {
+    extern nurenderscene_s currentScene;
+    void DisplaySceneRndrSpecials(NUDLDLISTSCENE *scene, i32, void *visibility_context) {
+        NuVisibilityResult *visibility =
+            static_cast<NuVisibilityResult *>(NuVisiEvaluate(scene->gscene, &visibility_context));
+        i32 portal_filter = 0;
+        if (visibility != NULL && portal_special_objects != 0 && visibility->portal_marker != NULL)
+            portal_filter = portals_enabled != 0;
+        void *shadow_pass = currentScene.unknown_3c;
+
+        if ((scene->instance_visibility_enabled & NUDL_SCENE_INSTANCE_VISIBILITY_ENABLED) != 0 ||
+            noscenespecials != 0) {
+            return;
+        }
+
+        NUGSCN temporary_scene;
+        NUGSCN *gscene = scene->gscene;
+        if (gscene == NULL) {
+            temporary_scene.display_list = scene;
+            gscene = &temporary_scene;
+        }
+
+        nuhspecial_s special_handle;
+        special_handle.scene = gscene;
+        for (i32 index = 0; index < scene->nspecials; ++index) {
+            NUDISPLAYSPECIAL *special = &static_cast<NUDISPLAYSPECIAL *>(scene->specials)[index];
+            if ((special->flags & NUDISPLAYSPECIAL_FLAG_VISIBLE) != 0) {
+                special_handle.display_special = special;
+                if ((!shadow_pass ||
+                     (scene->visibility_flags[special->instance_ix] & NUDL_INSTANCE_FLAG_CASTS_SHADOW)) &&
+                    (!portal_filter ||
+                     (scene->visibility_flags[special->instance_ix] & NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) ||
+                     (visibility->portal_bits[special->instance_ix >> 3] & (1U << (special->instance_ix & 7))))) {
+                    if (special->draw_mtx_ptr != reinterpret_cast<NUMTX *>(-1) && special->draw_mtx_ptr != NULL)
+                        NuDisplayListRndrSpecial(&special_handle, special->draw_mtx_ptr, 0, NULL, NULL);
+                    else
+                        NuDisplayListRndrSpecial(&special_handle, &special->draw_mtx, 0, NULL, NULL);
+                }
+            }
+        }
+    }
+}

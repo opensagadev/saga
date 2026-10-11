@@ -53,13 +53,13 @@ template <typename K, typename V> class NuMap {
 
     ~NuMap() {
         if (root != NULL) {
-            if (root->links[0] != NULL) {
-                Node *left = root->links[0];
+            Node *left = root->links[0];
+            Node *right = root->links[1];
+            if (left != NULL) {
                 DeleteNodeLinks(left);
                 NuMemoryGet()->GetThreadMem()->BlockFree(left, 0);
             }
-            if (root->links[1] != NULL) {
-                Node *right = root->links[1];
+            if (right != NULL) {
                 DeleteNodeLinks(right);
                 NuMemoryGet()->GetThreadMem()->BlockFree(right, 0);
             }
@@ -205,13 +205,13 @@ template <typename K, typename V> class NuMap {
     }
 
     void DeleteNodeLinks(Node *node) {
-        if (node->links[0] != NULL) {
-            Node *left = node->links[0];
+        Node *left = node->links[0];
+        Node *right = node->links[1];
+        if (left != NULL) {
             DeleteNodeLinks(left);
             NuMemoryGet()->GetThreadMem()->BlockFree(left, 0);
         }
-        if (node->links[1] != NULL) {
-            Node *right = node->links[1];
+        if (right != NULL) {
             DeleteNodeLinks(right);
             NuMemoryGet()->GetThreadMem()->BlockFree(right, 0);
         }

@@ -1118,14 +1118,15 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
             }
 
             // Alpha fade — patch alpha into every 0x82 geom item.
-            if (sc->alpha_values && nclip > 0) {
-                for (i32 o = 0; o < nclip; ++o) {
+            if (sc->alpha_values && sc->nclip_objects > 0) {
+                for (i32 o = 0; o < sc->nclip_objects; ++o) {
                     i32 *indices = sc->clip_objects[o].indices;
                     u16 cnt = sc->clip_counts[o];
-                    for (u16 j = 0; j < cnt; ++j) {
+                    for (i32 j = 0; j < cnt; ++j) {
                         auto *item = &sc->items[indices[j]];
                         if (item->id != kItemId_Cnt && item->type == 0x82) {
                             DisplayListSetAlphaPS(item - 1, item, sc->alpha_values[o]);
+                            cnt = sc->clip_counts[o];
                         }
                     }
                 }
@@ -1144,7 +1145,9 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
     }
 
     // Per-sortpri render-state walk.
-    nurndrstate_s tmp_state{};
+    // The display-list walk invalidates the cached IDs; other cache fields
+    // are populated when their corresponding state is first emitted.
+    nurndrstate_s tmp_state;
     tmp_state.mtl = nullptr;
     tmp_state.tex_id = -1;
     tmp_state.konst_id = -1;
@@ -1188,7 +1191,6 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
         if ((sc->flags & 6) == 0 || sp->nmtls == 0)
             continue;
 
-        auto sc_render_buffer = sc->render_buffer;
         for (u32 m = 0; m < sp->nmtls; ++m) {
             i32 mi = static_cast<i32>(static_cast<u32>(sp->mtl_first) + m);
             NUDISPLAYLIST *dl = sc->dlist_mtls[mi];
@@ -1230,15 +1232,14 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
                 dl->mtl_item->id = kItemId_Next;
                 i32 mid = dl->mtl_id;
                 i32 word = (mid >= 0) ? mid >> 3 : (mid + 7) >> 3;
-                i32 bit = mid & 7;
-                u8 *mu = sc->mtl_used[static_cast<u32>(static_cast<u8>(sc_render_buffer >> 7))];
-                mu[word] &= static_cast<u8>((static_cast<u32>(-2) << bit) | (0xfffffffeu >> (32 - bit)));
+                i32 bit = mid % 8;
+                u8 *mu = sc->mtl_used[static_cast<u32>(static_cast<u8>(sc->render_buffer >> 7))];
+                mu[word] &= static_cast<u8>(~(1U << (static_cast<u32>(bit) & 31)));
             }
         }
     }
 
-    auto mgr_ndisplay_lists = mgr->ndisplay_lists;
-    for (i32 i = 0; i < mgr_ndisplay_lists; ++i) {
+    for (i32 i = 0; i < mgr->ndisplay_lists; ++i) {
         nudisplayscene_s *sc = mgr->dlists[i];
         if (sc->local_state) {
             RndrStateResetGlobalState(sc->local_state);

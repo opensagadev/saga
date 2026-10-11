@@ -1053,12 +1053,12 @@ void DrawPanel() {
                         }
                     }
                     if (object->apiobj.player_controlled) {
-                        DrawHitPoints(object, -PANEL_HITPOINTSX, status_y + (raised_hearts ? 0.0f : PANEL_HEARTY),
+                        DrawHitPoints(object, -PANEL_HITPOINTSX, raised_hearts ? status_y : status_y + PANEL_HEARTY,
                                       0.195f, alpha, 2, 0.0f, 0);
                     } else if (!paused && !CUTSTOPGAME) {
                         i32 dropin_alpha = static_cast<i32>(DROPINALPHA * 128.0f);
                         if (dropin_alpha > 0) {
-                            f32 y = status_y + (raised_hearts ? 0.0f : PANEL_HEARTY);
+                            f32 y = raised_hearts ? status_y : status_y + PANEL_HEARTY;
                             char *prompt = NoPad(0, 0) ? TTab[tDROPIN_INSERTCONTROLLER] : apitxt_PRESSSTART;
                             SmartTextEx(prompt, -0.685f, y, 1.0f, 0.35f, 0.35f, 0.35f, 2, 255, 255, 255, 0.3f, 2, 0, 0,
                                         dropin_alpha);

@@ -7633,60 +7633,89 @@ i16 *NewScanHandelSubset(i16 *subset, nuvec_s *position, nuvec_s *movement, f32 
     const f32 dx = bounds.min_x - bounds.max_x;
     const f32 dy = bounds.min_y - bounds.max_y;
     const f32 dz = bounds.min_z - bounds.max_z;
-    const f32 scan_radius_sq = dx * dx + dy * dy + dz * dz + 0.05f;
-    while (subset[0] > 0) {
-        const i32 count = subset[0];
+    const f32 scan_radius_sq = dz * dz + (dy * dy + dx * dx) + 0.05f;
+    TerrainQuery_s *query = TerI;
+    i32 count = 0;
+    TERRAIN_SHAPE **shapes = NULL;
+    for (; subset[0] > 0; subset = reinterpret_cast<i16 *>(shapes + count)) {
+        count = subset[0];
         const i32 index = subset[1];
-        TERRAIN_SHAPE **shapes = reinterpret_cast<TERRAIN_SHAPE **>(reinterpret_cast<u8 *>(subset) + sizeof(void *));
-        subset = reinterpret_cast<i16 *>(shapes + count);
+        shapes = reinterpret_cast<TERRAIN_SHAPE **>(reinterpret_cast<u8 *>(subset) + sizeof(void *));
         const TERRAIN_GROUP &group = CurTerr->groups[index];
-        TerrainScanBounds local = bounds;
-        NUMTX *matrix = NULL;
-        const TERRAIN_PLATFORM *platform = NULL;
-        if (group.chunk_type == 1) {
-            platform = &CurTerr->platforms[group.scene_index];
-            matrix = static_cast<NUMTX *>(platform->scene_object);
-        }
-        if (matrix == NULL) {
-            if (!TerrainBoundsOverlap(bounds, group.bounds_min, group.bounds_max)) {
-                continue;
+        const TERRAIN_PLATFORM *platform = group.chunk_type == 1 ? &CurTerr->platforms[group.scene_index] : NULL;
+        NUMTX *matrix = platform != NULL ? static_cast<NUMTX *>(platform->scene_object) : NULL;
+        if (matrix != NULL) {
+            TerrainScanBounds local;
+            if (matrix->m30 > platform->previous_matrix.m30) {
+                local.max_x = (matrix->m30 - platform->previous_matrix.m30) * 1.5f + bounds.max_x - group.origin.x;
+                local.min_x = bounds.min_x - group.origin.x;
+            } else {
+                local.min_x = (matrix->m30 - platform->previous_matrix.m30) * 1.5f + bounds.min_x - group.origin.x;
+                local.max_x = bounds.max_x - group.origin.x;
+            }
+            if (matrix->m31 > platform->previous_matrix.m31) {
+                local.max_y = (matrix->m31 - platform->previous_matrix.m31) * 1.5f + bounds.max_y - group.origin.y;
+                local.min_y = bounds.min_y - group.origin.y;
+            } else {
+                local.min_y = (matrix->m31 - platform->previous_matrix.m31) * 1.5f + bounds.min_y - group.origin.y;
+                local.max_y = bounds.max_y - group.origin.y;
+            }
+            if (matrix->m32 > platform->previous_matrix.m32) {
+                local.max_z = (matrix->m32 - platform->previous_matrix.m32) * 1.5f + bounds.max_z - group.origin.z;
+                local.min_z = bounds.min_z - group.origin.z;
+            } else {
+                local.min_z = (matrix->m32 - platform->previous_matrix.m32) * 1.5f + bounds.min_z - group.origin.z;
+                local.max_z = bounds.max_z - group.origin.z;
+            }
+            if ((platform->flags & TERRAIN_PLATFORM_FLAG_ROTATING) == 0) {
+                if (!TerrainBoundsOverlap(local, group.bounds_min, group.bounds_max))
+                    continue;
+                for (i32 i = 0; i < count; ++i) {
+                    TERRAIN_SHAPE *shape = shapes[i];
+                    if (local.max_x >= shape->min_x && shape->max_x > local.min_x && local.max_z >= shape->min_z &&
+                        shape->max_z > local.min_z && local.max_y >= shape->min_y && shape->max_y > local.min_y &&
+                        reinterpret_cast<u8 *>(writer.cursor) < writer.limit &&
+                        (shape->material[1] == 0 || (shape->material[1] & terrain_mask) != 0)) {
+                        ++writer.group_shape_count;
+                        *writer.cursor++ = shape;
+                    }
+                }
+            } else {
+                // Rotating groups still emit their accepted shapes after the sphere test.
+                const f32 x = (bounds.min_x + bounds.max_x) * 0.5f - group.origin.x;
+                const f32 y = ((bounds.min_y + bounds.max_y) * 0.5f - group.origin.y) * query->inverse_object_scale;
+                const f32 z = (bounds.min_z + bounds.max_z) * 0.5f - group.origin.z;
+                const f32 reach = scan_radius_sq + group.radius;
+                if (!(reach * reach > x * x + y * y + z * z))
+                    continue;
+                for (i32 i = 0; i < count; ++i) {
+                    if (reinterpret_cast<u8 *>(writer.cursor) < writer.limit) {
+                        TERRAIN_SHAPE *shape = shapes[i];
+                        if ((shape->material[1] == 0 || (shape->material[1] & terrain_mask) != 0) &&
+                            TerrainHandleVerticesOverlap(local, *shape)) {
+                            ++writer.group_shape_count;
+                            *writer.cursor++ = shape;
+                        }
+                    }
+                }
             }
         } else {
-            const f32 x = (matrix->m30 - platform->previous_matrix.m30) * 1.5f;
-            const f32 y = (matrix->m31 - platform->previous_matrix.m31) * 1.5f;
-            const f32 z = (matrix->m32 - platform->previous_matrix.m32) * 1.5f;
-            if (x > 0.0f)
-                local.max_x += x;
-            else
-                local.min_x += x;
-            if (y > 0.0f)
-                local.max_y += y;
-            else
-                local.min_y += y;
-            if (z > 0.0f)
-                local.max_z += z;
-            else
-                local.min_z += z;
-        }
-        local.min_x -= group.origin.x;
-        local.max_x -= group.origin.x;
-        local.max_y -= group.origin.y;
-        local.min_y -= group.origin.y;
-        local.min_z -= group.origin.z;
-        local.max_z -= group.origin.z;
-        const bool rotating = matrix != NULL && (platform->flags & TERRAIN_PLATFORM_FLAG_ROTATING) != 0;
-        if (rotating) {
-            const f32 x = (bounds.min_x + bounds.max_x) * 0.5f - group.origin.x;
-            const f32 y = ((bounds.min_y + bounds.max_y) * 0.5f - group.origin.y) * TerI->inverse_object_scale;
-            const f32 z = (bounds.min_z + bounds.max_z) * 0.5f - group.origin.z;
-            // The subset path uses the squared scan diagonal directly, not its square root.
-            const f32 reach = scan_radius_sq + group.radius;
-            if (!(x * x + y * y + z * z < reach * reach))
+            if (!TerrainBoundsOverlap(bounds, group.bounds_min, group.bounds_max))
                 continue;
-        } else if (!(matrix != NULL && !TerrainBoundsOverlap(local, group.bounds_min, group.bounds_max))) {
-            TerrainHandleFilterShapes(&writer, shapes, count, local, terrain_mask, rotating);
-            TerrainFinishScanGroup(&writer, index);
+            const NUVEC origin = group.origin;
+            for (i32 i = 0; i < count; ++i) {
+                TERRAIN_SHAPE *shape = shapes[i];
+                if (bounds.max_x - origin.x >= shape->min_x && shape->max_x > bounds.min_x - origin.x &&
+                    bounds.max_z - origin.z >= shape->min_z && shape->max_z > bounds.min_z - origin.z &&
+                    bounds.max_y - origin.y >= shape->min_y && shape->max_y > bounds.min_y - origin.y &&
+                    reinterpret_cast<u8 *>(writer.cursor) < writer.limit &&
+                    (shape->material[1] == 0 || (shape->material[1] & terrain_mask) != 0)) {
+                    ++writer.group_shape_count;
+                    *writer.cursor++ = shape;
+                }
+            }
         }
+        TerrainFinishScanGroup(&writer, index);
     }
     i16 *terminator = reinterpret_cast<i16 *>(writer.group_header);
     terminator[0] = terminator[1] = 0;
@@ -7838,69 +7867,90 @@ void ScanTerrainHandel(i32 terrain_mask, i16 *handle) {
         scan_radius_sq = reach + 1.0f;
     }
     f32 scan_radius = NuFsqrt(scan_radius_sq);
-    i32 disabled_platform = TerrPlatDis;
     TerrainQuery_s *query = TerI;
-    while (handle[0] > 0) {
-        i32 count = handle[0];
-        TERRAIN_SHAPE **shapes =
-            reinterpret_cast<TERRAIN_SHAPE **>(reinterpret_cast<u8 *>(handle) + sizeof(TERRAIN_SHAPE *));
-        i32 group_index = handle[1];
-        handle = reinterpret_cast<i16 *>(shapes + count);
-        TERRAIN_GROUP &group = CurTerr->groups[group_index];
-        TerrainScanBounds local = bounds;
-        TERRAIN_PLATFORM *platform = group.chunk_type == 1 ? &CurTerr->platforms[group.scene_index] : NULL;
+    i32 count = 0;
+    TERRAIN_SHAPE **shapes = NULL;
+    for (; handle[0] > 0; handle = reinterpret_cast<i16 *>(shapes + count)) {
+        count = handle[0];
+        const i32 index = handle[1];
+        shapes = reinterpret_cast<TERRAIN_SHAPE **>(reinterpret_cast<u8 *>(handle) + sizeof(void *));
+        const TERRAIN_GROUP &group = CurTerr->groups[index];
+        const TERRAIN_PLATFORM *platform = group.chunk_type == 1 ? &CurTerr->platforms[group.scene_index] : NULL;
         NUMTX *matrix = platform != NULL ? static_cast<NUMTX *>(platform->scene_object) : NULL;
-        if (matrix == NULL) {
+        if (matrix != NULL) {
+            TerrainScanBounds local;
+            if (matrix->m30 > platform->previous_matrix.m30) {
+                local.max_x = (matrix->m30 - platform->previous_matrix.m30) * 1.5f + bounds.max_x - group.origin.x;
+                local.min_x = bounds.min_x - group.origin.x;
+            } else {
+                local.min_x = (matrix->m30 - platform->previous_matrix.m30) * 1.5f + bounds.min_x - group.origin.x;
+                local.max_x = bounds.max_x - group.origin.x;
+            }
+            if (matrix->m31 > platform->previous_matrix.m31) {
+                local.max_y = (matrix->m31 - platform->previous_matrix.m31) * 1.5f + bounds.max_y - group.origin.y;
+                local.min_y = bounds.min_y - group.origin.y;
+            } else {
+                local.min_y = (matrix->m31 - platform->previous_matrix.m31) * 1.5f + bounds.min_y - group.origin.y;
+                local.max_y = bounds.max_y - group.origin.y;
+            }
+            if (matrix->m32 > platform->previous_matrix.m32) {
+                local.max_z = (matrix->m32 - platform->previous_matrix.m32) * 1.5f + bounds.max_z - group.origin.z;
+                local.min_z = bounds.min_z - group.origin.z;
+            } else {
+                local.min_z = (matrix->m32 - platform->previous_matrix.m32) * 1.5f + bounds.min_z - group.origin.z;
+                local.max_z = bounds.max_z - group.origin.z;
+            }
+            if (group.scene_index == TerrPlatDis)
+                continue;
+            if ((platform->flags & TERRAIN_PLATFORM_FLAG_ROTATING) == 0) {
+                if (!TerrainBoundsOverlap(local, group.bounds_min, group.bounds_max))
+                    continue;
+                for (i32 i = 0; i < count; ++i) {
+                    TERRAIN_SHAPE *shape = shapes[i];
+                    if (local.max_x >= shape->min_x && shape->max_x > local.min_x && local.max_z >= shape->min_z &&
+                        shape->max_z > local.min_z && local.max_y >= shape->min_y && shape->max_y > local.min_y &&
+                        reinterpret_cast<u8 *>(writer.cursor) < writer.limit &&
+                        (shape->material[1] == 0 || (shape->material[1] & terrain_mask) != 0)) {
+                        ++writer.group_shape_count;
+                        *writer.cursor++ = shape;
+                    }
+                }
+            } else {
+                // Rotating groups still emit their accepted shapes after the sphere test.
+                const f32 x = (bounds.min_x + bounds.max_x) * 0.5f - group.origin.x;
+                const f32 y = ((bounds.min_y + bounds.max_y) * 0.5f - group.origin.y) * query->inverse_object_scale;
+                const f32 z = (bounds.min_z + bounds.max_z) * 0.5f - group.origin.z;
+                const f32 reach = scan_radius + group.radius;
+                if (!(reach * reach > x * x + y * y + z * z))
+                    continue;
+                for (i32 i = 0; i < count; ++i) {
+                    if (reinterpret_cast<u8 *>(writer.cursor) < writer.limit) {
+                        TERRAIN_SHAPE *shape = shapes[i];
+                        if ((shape->material[1] == 0 || (shape->material[1] & terrain_mask) != 0) &&
+                            TerrainHandleVerticesOverlap(local, *shape)) {
+                            ++writer.group_shape_count;
+                            *writer.cursor++ = shape;
+                        }
+                    }
+                }
+            }
+        } else {
             if (!TerrainBoundsOverlap(bounds, group.bounds_min, group.bounds_max))
                 continue;
-            local.max_x -= group.origin.x;
-            local.min_x -= group.origin.x;
-            local.max_y -= group.origin.y;
-            local.min_y -= group.origin.y;
-            local.max_z -= group.origin.z;
-            local.min_z -= group.origin.z;
-            TerrainHandleFilterShapes(&writer, shapes, count, local, terrain_mask, false);
-            TerrainFinishScanGroup(&writer, group_index);
-            continue;
+            const NUVEC origin = group.origin;
+            for (i32 i = 0; i < count; ++i) {
+                TERRAIN_SHAPE *shape = shapes[i];
+                if (bounds.max_x - origin.x >= shape->min_x && shape->max_x > bounds.min_x - origin.x &&
+                    bounds.max_z - origin.z >= shape->min_z && shape->max_z > bounds.min_z - origin.z &&
+                    bounds.max_y - origin.y >= shape->min_y && shape->max_y > bounds.min_y - origin.y &&
+                    reinterpret_cast<u8 *>(writer.cursor) < writer.limit &&
+                    (shape->material[1] == 0 || (shape->material[1] & terrain_mask) != 0)) {
+                    ++writer.group_shape_count;
+                    *writer.cursor++ = shape;
+                }
+            }
         }
-        if (matrix->m30 > platform->previous_matrix.m30) {
-            local.max_x = (matrix->m30 - platform->previous_matrix.m30) * 1.5f + bounds.max_x - group.origin.x;
-            local.min_x = bounds.min_x - group.origin.x;
-        } else {
-            local.min_x = (matrix->m30 - platform->previous_matrix.m30) * 1.5f + bounds.min_x - group.origin.x;
-            local.max_x = bounds.max_x - group.origin.x;
-        }
-        if (matrix->m31 > platform->previous_matrix.m31) {
-            local.max_y = (matrix->m31 - platform->previous_matrix.m31) * 1.5f + bounds.max_y - group.origin.y;
-            local.min_y = bounds.min_y - group.origin.y;
-        } else {
-            local.min_y = (matrix->m31 - platform->previous_matrix.m31) * 1.5f + bounds.min_y - group.origin.y;
-            local.max_y = bounds.max_y - group.origin.y;
-        }
-        if (!(matrix->m32 > platform->previous_matrix.m32)) {
-            local.max_z = bounds.max_z - group.origin.z;
-            local.min_z = (matrix->m32 - platform->previous_matrix.m32) * 1.5f + bounds.min_z - group.origin.z;
-        } else {
-            local.min_z = bounds.min_z - group.origin.z;
-            local.max_z = (matrix->m32 - platform->previous_matrix.m32) * 1.5f + bounds.max_z - group.origin.z;
-        }
-        if (group.scene_index == disabled_platform)
-            continue;
-        if ((platform->flags & TERRAIN_PLATFORM_FLAG_ROTATING) == 0) {
-            if (!TerrainBoundsOverlap(local, group.bounds_min, group.bounds_max))
-                continue;
-            TerrainHandleFilterShapes(&writer, shapes, count, local, terrain_mask, false);
-            TerrainFinishScanGroup(&writer, group_index);
-            continue;
-        }
-        f32 dx = (bounds.min_x + bounds.max_x) * 0.5f - group.origin.x;
-        f32 radius = scan_radius + group.radius;
-        f32 dy = ((bounds.min_y + bounds.max_y) * 0.5f - group.origin.y) * query->inverse_object_scale;
-        f32 dz = (bounds.min_z + bounds.max_z) * 0.5f - group.origin.z;
-        if (!(radius * radius > dx * dx + dy * dy + dz * dz))
-            continue;
-        TerrainHandleFilterShapes(&writer, shapes, count, local, terrain_mask, true);
-        TerrainFinishScanGroup(&writer, group_index);
+        TerrainFinishScanGroup(&writer, index);
     }
     i16 *terminator = reinterpret_cast<i16 *>(writer.group_header);
     terminator[0] = 0;

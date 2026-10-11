@@ -5670,9 +5670,12 @@ void EdMatrixControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
     control->reference->GetMemberData(control->object, EdType_VuMtx, &source, 0);
     f32 changed_value = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
     NUMTX &matrix = source.matrix;
-    for (i32 index = 0; index < 3; ++index)
-        if (item == control->components[index])
-            (&matrix.m30)[index] = changed_value;
+    if (item == control->components[0])
+        matrix.m30 = changed_value;
+    if (item == control->components[1])
+        matrix.m31 = changed_value;
+    if (item == control->components[2])
+        matrix.m32 = changed_value;
     if (control->components[3] || control->components[4] || control->components[5] || control->components[6] ||
         control->components[7] || control->components[8]) {
 
@@ -5725,10 +5728,18 @@ void EdMatrixControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
             rebuilt.m20 = saved * cosine - rebuilt.m21 * sine;
             rebuilt.m21 = saved * sine + rebuilt.m21 * cosine;
         }
-        rebuilt.m30 = matrix.m30;
-        rebuilt.m31 = matrix.m31;
-        rebuilt.m32 = matrix.m32;
-        matrix = rebuilt;
+        matrix.m00 = rebuilt.m00;
+        matrix.m01 = rebuilt.m01;
+        matrix.m02 = rebuilt.m02;
+        matrix.m03 = rebuilt.m03;
+        matrix.m10 = rebuilt.m10;
+        matrix.m11 = rebuilt.m11;
+        matrix.m12 = rebuilt.m12;
+        matrix.m13 = rebuilt.m13;
+        matrix.m20 = rebuilt.m20;
+        matrix.m21 = rebuilt.m21;
+        matrix.m22 = rebuilt.m22;
+        matrix.m23 = rebuilt.m23;
     }
     matrix.m33 = 1.0f;
     control->reference->SetMemberData(control->object, EdType_VuMtx, &source, 0, nullptr);
@@ -5859,38 +5870,42 @@ template <> void EdValueControl<f32>::cbChanged(eduimenu_s *, eduiitem_s *item, 
 template <>
 __attribute__((force_align_arg_pointer)) void EdValueControl<f32>::cbButton(eduimenu_s *, eduiitem_s *item, u32) {
     EdValueControl<f32> *control = static_cast<EdValueControl<f32> *>(item->data_ptr);
+    nupad_s *pad = EdControl::Input->pad;
     f32 sensitivity = control->maximum - control->minimum < 5.0f ? 0.001f : 0.01f;
     static_cast<edui_prop_s *>(item)->unknown_property_flags |= 0x20;
-    f32 value = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
-    nupad_s *pad = EdControl::Input->pad;
+    f32 initial_value = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
     f32 change = 0.0f;
     if (pad && (pad->digital_buttons & EDUI_CURSOR_PRIMARY)) {
-        if (pad->analog_left_y > 128)
-            change = 10.0f * sensitivity * (pad->analog_left_y - 128.0f);
-        else if (pad->analog_left_y < 128)
-            change = -10.0f * sensitivity * (128.0f - pad->analog_left_y);
-        if (pad->analog_right_y > 128)
-            change = 0.1f * sensitivity * (pad->analog_right_y - 128.0f);
-        else if (pad->analog_right_y < 128)
-            change = -0.1f * sensitivity * (128.0f - pad->analog_right_y);
+        f32 left_y = pad->analog_left_y;
+        if (left_y > 128.0f)
+            change = 10.0f * sensitivity * (left_y - 128.0f);
+        if (left_y < 128.0f)
+            change = -10.0f * sensitivity * (128.0f - left_y);
+        f32 right_y = pad->analog_right_y;
+        if (right_y > 128.0f)
+            change = 0.1f * sensitivity * (right_y - 128.0f);
+        if (right_y < 128.0f)
+            change = -0.1f * sensitivity * (128.0f - right_y);
     } else {
         f32 dx = 0.0f;
         f32 dy = 0.0f;
         eduiGetCursorDelta(&dx, &dy);
         change = dy * MouseScale;
     }
-    value -= change;
+    initial_value -= change;
     char text[128];
-    sprintf(text, control->format, value);
+    sprintf(text, control->format, initial_value);
     eduiItemPropSetText(static_cast<edui_prop_s *>(item), text);
-    value = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
+    control = static_cast<EdValueControl<f32> *>(item->data_ptr);
+    f32 value = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
     if (value < control->minimum)
         value = control->minimum;
     if (value > control->maximum)
         value = control->maximum;
     control->reference->SetMemberData(control->object, control->value_type, &value, 0, NULL);
-    sprintf(text, control->format, value);
-    eduiItemPropSetText(static_cast<edui_prop_s *>(item), text);
+    char updated_text[128];
+    sprintf(updated_text, control->format, value);
+    eduiItemPropSetText(static_cast<edui_prop_s *>(item), updated_text);
 }
 
 void EdVectorControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target) {

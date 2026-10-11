@@ -1925,12 +1925,11 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
             NuQFntSetColour(system_qfont, 0x80000000);
             NuQFntSetScale(system_qfont, x_scale, y_scale);
             path = aieditor->current_path;
-            if (path != nullptr)
-                NuQFntPrintEx(system_qfont, screen_x, screen_y + 120, 16, "\"%s\"", path->name);
+            NuQFntPrintEx(system_qfont, screen_x, screen_y + 120, 16, "\"%s\"", path->name);
             NuQFntPrintEx(system_qfont, screen_x, screen_y + 240, 16, "SQR - Sub menu");
             NuQFntPrintEx(system_qfont, screen_x, screen_y + 360, 16, "SELECT - Goto nearest");
             path = aieditor->current_path;
-            if (path != nullptr && path->runtime_nearest >= 0) {
+            if (path->runtime_nearest >= 0) {
                 NuQFntPrintEx(system_qfont, screen_x, screen_y + 480, 16, "TRI - Set as start of route");
                 NuQFntPrintEx(system_qfont, screen_x, screen_y + 600, 16, "X - Set as end of route");
             }
@@ -1939,7 +1938,7 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
             NuQFntSetColour(system_qfont, 0x80000000);
             NuQFntSetScale(system_qfont, x_scale, y_scale);
             path = aieditor->current_path;
-            if (path != nullptr && path->current_node != nullptr) {
+            if (path->current_node != nullptr) {
                 if (path->current_node->name[0] != '\0') {
                     NuQFntPrintEx(system_qfont, screen_x, screen_y + 120, 16, "\"%s\" %d nodes",
                                   path->current_node->name, path->node_count);
@@ -1947,7 +1946,7 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
                     NuQFntPrintEx(system_qfont, screen_x, screen_y + 120, 16, "ix=%d, %d nodes",
                                   path->current_node->index, path->node_count);
                 }
-            } else if (path != nullptr) {
+            } else {
                 NuQFntPrintEx(system_qfont, screen_x, screen_y + 120, 16, "%d nodes", path->node_count);
             }
             NuQFntPrintEx(system_qfont, screen_x, screen_y + 240, 16, "SQR - Sub menu");
@@ -1964,24 +1963,38 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
                     NuQFntPrintEx(system_qfont, screen_x, screen_y + 840, 16, "LRIGHT - Increase radius");
                 }
                 NuQFntPrintEx(system_qfont, screen_x, screen_y + 960, 16, "LLEFT - Decrease radius");
-            } else if (path != nullptr && path->nearest_node != nullptr) {
+            } else if (path->nearest_node != nullptr) {
                 NuQFntPrintEx(system_qfont, screen_x, screen_y + 480, 16, "X - Select");
                 NuQFntPrintEx(system_qfont, screen_x, screen_y + 720, 16, "O - Link/unlink to selected");
                 if (EdGetCnxFlagNames != nullptr) {
                     path = aieditor->current_path;
-                    if (path != nullptr && path->nearest_node != nullptr && path->current_node != nullptr) {
+                    if (path->nearest_node != nullptr && path->current_node != nullptr) {
                         EDAIPATHNODE_s *nearest = path->nearest_node;
                         EDAIPATHNODE_s *current = path->current_node;
-                        for (i32 index = 0; index < 8; ++index) {
-                            if (current->connections[index].node != nearest)
-                                continue;
+                        i32 index = -1;
+                        if (current->connections[0].node == nearest)
+                            index = 0;
+                        else if (current->connections[1].node == nearest)
+                            index = 1;
+                        else if (current->connections[2].node == nearest)
+                            index = 2;
+                        else if (current->connections[3].node == nearest)
+                            index = 3;
+                        else if (current->connections[4].node == nearest)
+                            index = 4;
+                        else if (current->connections[5].node == nearest)
+                            index = 5;
+                        else if (current->connections[6].node == nearest)
+                            index = 6;
+                        else if (current->connections[7].node == nearest)
+                            index = 7;
+                        if (index >= 0) {
                             char *names = EdGetCnxFlagNames(current->connections[index].flags);
                             if (names != nullptr && NuStrLen(names) != 0) {
                                 NuQFntSetColour(system_qfont, 0x80808080);
                                 NuQFntPrintEx(system_qfont, 5120, 160, 64, names);
                                 NuQFntSetColour(system_qfont, 0x80808080);
                             }
-                            break;
                         }
                     }
                 }

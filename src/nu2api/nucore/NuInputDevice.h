@@ -8,9 +8,9 @@ extern "C" void NuPad_Interface_ResetAllTouches(void);
 void NuPad_UpdateTouchScreenData(void);
 
 struct NuInputMouseButton {
-    u8 active;
-    u8 pressed;
-    u8 released;
+    bool active;
+    bool pressed;
+    bool released;
 };
 
 struct NuInputMouseData {
@@ -25,9 +25,9 @@ static_assert(offsetof(NuInputMouseData, x) == 8, "Mouse x offset");
 static_assert(offsetof(NuInputMouseData, y) == 0xc, "Mouse y offset");
 
 struct NuInputTouch {
-    u8 unknown_00;
-    u8 unknown_01;
-    u8 unknown_02;
+    bool unknown_00;
+    bool unknown_01;
+    bool unknown_02;
 
     f32 unknown_04;
     f32 unknown_08;
@@ -36,6 +36,9 @@ struct NuInputTouch {
 
     u32 unknown_14;
 };
+static_assert(sizeof(NuInputTouch) == 0x18, "Touch state size");
+static_assert(offsetof(NuInputTouch, unknown_04) == 4, "Touch x offset");
+static_assert(offsetof(NuInputTouch, unknown_14) == 0x14, "Touch ID offset");
 
 struct NuInputTouchData {
     // Type uncertain.

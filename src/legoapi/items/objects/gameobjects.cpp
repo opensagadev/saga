@@ -8311,6 +8311,8 @@ void UpdateGameObjects(WORLDINFO_s *world) {
 GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *script_name, AIPATHINFO_s *path_info,
                                  AIGROUP_s *group, i32 set_on_surface, nugspline_s *spline, nuvec_s *spline_offset,
                                  i32 spline_mode, i32 creature_set) {
+    u16 yaw, pitch;
+    NUVEC offset, spline_point;
     const bool has_no_spline = spline == NULL;
     if (position == NULL && spline == NULL) {
         return NULL;
@@ -8336,34 +8338,36 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
     }
 
     object->apiobj.field_0x1f4 |= APIOBJECT_MOTION_FLAG_AI_CONTROLLED;
-    const u32 model_flags = apicharsys->char_data[model].model_flags;
+    CHARACTERDATA *character = &apicharsys->char_data[model];
+    const u32 model_flags = character->model_flags;
     if ((model_flags & 0x200) != 0) {
         object->apiobj.field_0x1f4 |= 0x404;
     } else if ((model_flags & 0x400) != 0) {
         object->apiobj.field_0x1f4 |= 0x401;
     }
-    object->field_0x1050 |= (model_flags & 0x1000) != 0 ? 5 : 1;
+    if ((model_flags & 0x1000) != 0)
+        object->field_0x1050 |= 5;
+    else
+        object->field_0x1050 |= 1;
 
-    GAMECHARACTERDATA &game_character = *(GAMECHARACTERDATA *)apicharsys->char_data[model].field11_0x24;
+    GAMECHARACTERDATA &game_character = *(GAMECHARACTERDATA *)character->field11_0x24;
     object->apiobj.viewdistance = game_character.viewdistance;
     object->apiobj.heardistance = game_character.heardistance;
     object->apiobj.maxviewheight = game_character.maxviewheight;
     object->apiobj.minviewheight = game_character.minviewheight;
     object->field_0xef9 &= static_cast<u8>(~8u);
-    object->ai.field_0xe0 = 0x4e6e6b28;
-    object->ai.field_0xf0 = 0x4e6e6b28;
+    object->ai.pending_nearest_metric = 1000000000.0f;
+    object->ai.pending_opponent_metric = 1000000000.0f;
     object->field_0xef8 &= static_cast<u8>(~1u);
     object->ai.field_0x1e5 &= static_cast<u8>(~0x50u);
-    object->apiobj.field387_0x2a0 = 0;
-    object->apiobj.field388_0x2a4 = 0;
-    object->field_0xebc = 0;
-    object->field_0xec0 = 0;
+    object->apiobj.ai_awareness_mask = 0;
+    object->ai_seen_mask = 0;
     object->field_0xecc = 0;
     object->field_0xed0 = 0;
     object->field_0xed8 = 0;
     object->ai.nearest_opponent = NULL;
-    object->ai.field_0xdc = 0;
-    object->ai.field_0xec = 0;
+    object->ai.pending_nearest_opponent = NULL;
+    object->ai.pending_opponent = NULL;
     object->ai.opponent = NULL;
     object->ai.antinode_timer = 0.0f;
     InitPlayerAI(object);
@@ -8372,9 +8376,6 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
         SPLINEPOS_s *spline_position = reinterpret_cast<SPLINEPOS_s *>(&object->movement_spline);
         InitSplinePosition(spline_position, spline, 0.0f, spline_mode);
         SPLINEPOSITION_RUNTIME_s *runtime = reinterpret_cast<SPLINEPOSITION_RUNTIME_s *>(spline_position);
-        NUVEC spline_point;
-        u16 yaw = 0;
-        u16 pitch = 0;
         PointAlongSpline(runtime->spline, runtime->normalized_position, &spline_point, &yaw, &pitch, runtime->looping);
         object->apiobj.movement_facing_angle = yaw;
         object->apiobj.facing_angle = yaw;
@@ -8385,10 +8386,9 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
             NUVEC *stored_offset = &object->movement_spline_offset;
             *stored_offset = *spline_offset;
             if (spline_offset->x != 0.0f || spline_offset->y != 0.0f || spline_offset->z != 0.0f) {
-                NUVEC rotated;
-                NuVecRotateX(&rotated, spline_offset, static_cast<u16>(-pitch));
-                NuVecRotateY(&rotated, &rotated, yaw);
-                NuVecAdd(&spline_point, &spline_point, &rotated);
+                NuVecRotateX(&offset, spline_offset, static_cast<u16>(-pitch));
+                NuVecRotateY(&offset, &offset, yaw);
+                NuVecAdd(&spline_point, &spline_point, &offset);
             }
         }
         object->apiobj.position = spline_point;
@@ -8399,7 +8399,6 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
         object->apiobj.field_0x276 = static_cast<u16>(angle);
         if (group != NULL) {
             AddToAIGroup(group, &object->apiobj);
-            NUVEC offset;
             offset.x = ((object->ai.group_column + 1) / 2) * group->x_spacing;
             if (object->ai.group_column & 1)
                 offset.x = -offset.x;
@@ -8411,12 +8410,8 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
     }
 
     ResetPlayerMoves(object);
-    object->apiobj.pos_x = object->apiobj.position.x;
-    object->apiobj.pos_y = object->apiobj.position.y;
-    object->apiobj.pos_z = object->apiobj.position.z;
-    object->apiobj.start_position = object->apiobj.position;
-    object->apiobj.initial_position = object->apiobj.position;
-    plr_lastpos = object->apiobj.position;
+    plr_lastpos = object->apiobj.start_position = object->apiobj.collision_position = object->apiobj.initial_position =
+        object->apiobj.position;
     object->apiobj.velocity = v000;
 
     GetTopBot(object);
@@ -8481,10 +8476,10 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
     if (object->ai.group != NULL) {
         AIGROUP *active_group = object->ai.group;
         u32 member = object->ai.group_member_index;
-        active_group->member_is_alive |= (member & 32) ? 0 : (1u << (member & 31));
+        active_group->member_is_alive |= 1ULL << member;
         AIROW *row = &active_group->rows[object->ai.group_row];
         u32 column = object->ai.group_member_index - object->ai.group_row * active_group->count_across;
-        row->is_alive |= (column & 32) ? 0 : (1u << (column & 31));
+        row->is_alive |= 1ULL << column;
         if (object->ai.group_column == 0) {
             row->pos = object->apiobj.position;
             row->path_info = object->ai.path_info;
@@ -8496,12 +8491,7 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
     PreResetCode(object);
     PostResetCode(object);
     GameObjectOrigin(object);
-    object->apiobj.previous_position[0] = object->apiobj.position.x;
-    object->apiobj.previous_position[1] = object->apiobj.position.y;
-    object->apiobj.previous_position[2] = object->apiobj.position.z;
-    object->field_0x10c8 = object->apiobj.position.x;
-    object->field_0x10cc = object->apiobj.position.y;
-    object->field_0x10d0 = object->apiobj.position.z;
+    object->ai_update_position = object->apiobj.last_safe_position = object->apiobj.position;
     if (static_cast<u32>(creature_set - 1) < 16) {
         object->ai.creature_set = static_cast<u8>(creature_set);
         ++aicreature_sets_alive[creature_set - 1];

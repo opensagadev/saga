@@ -4644,19 +4644,140 @@ static bool JediHasAction(const GameObject_s *object, JEDI_ACTION action) {
            object->apiobj.character_model->model_data_b[action] != NULL;
 }
 
+static i32 ComboOpponent_Behind;
+static f32 ComboOpponent_Range2;
+static f32 PlayerOpponent_Range2;
+extern i32 objopponent_ignoreaiopponent;
+extern i32 test_ai_combo;
+extern i32 CanPunchGirls;
+
+GameObject_s *ObjOpponent(GameObject_s *object, f32 range, f32 extra_radius, i32 allow_untargeted, i32 mode,
+                          i32 player_filter) {
+    NUVEC delta;
+    if (forceNextAttackOpponent.Get() != NULL && (object->apiobj.flags_low & 0x80) != 0) {
+        return forceNextAttackOpponent->GetCharacterObject();
+    }
+    i32 ignore_ai = objopponent_ignoreaiopponent;
+    objopponent_ignoreaiopponent = 0;
+    GAMEPAD_s *pad = object->pad_gamepad;
+    u16 heading = pad->input_magnitude > 0.0f ? GamePad_InputAngle(object, pad) : object->apiobj.movement_facing_angle;
+    NUVEC forward;
+    NuVecRotateY(&forward, &v001, heading);
+    ComboOpponent_Behind = 0;
+    GameObject_s *nearest = NULL;
+    f32 nearest_distance = 1.0e8f;
+    GameObject_s *target = Obj;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
+        if (test_ai_combo != 0 && (object->apiobj.flags_low & 0x80) == 0 && object->ai.action_target_ref != NULL &&
+            *object->ai.action_target_ref != NULL) {
+            target = *object->ai.action_target_ref;
+            i = HIGHGAMEOBJECT;
+        }
+        if ((object->apiobj.flags_low & 0x80) != 0 && nextShootTarget.Get() != NULL &&
+            nextShootTarget->GetCharacterObject() != target)
+            continue;
+        if (target == object || (target->apiobj.field_0x1f8 & 0x1001) != 0x1001 || target->apiobj.field_0x287 != 0 ||
+            target->apiobj.collision_min.y > object->apiobj.collision_max.y)
+            continue;
+        if ((player_filter == 1 && target->apiobj.field_0x27c != -1) ||
+            (player_filter == 2 && target->apiobj.field_0x27c == -1))
+            continue;
+        GAMECHARACTERDATA *runtime = static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24);
+        i8 context = target->character_context;
+        if ((context == 0x17 && (target->current_hp == 0 || (runtime->flags_090 & 0x40) != 0)) ||
+            (CInfo[context].flags & 0x8000) != 0 || (context & 0xfd) == 0x39 || context == 0x3c)
+            continue;
+        if (context == 0) {
+            if (static_cast<u8>(target->action_movement_state - 3) < 2)
+                continue;
+        } else if (static_cast<u8>(context - 0xd) < 2 || context == 0x35 || context == 0x47 || context == 0x46)
+            continue;
+        if ((runtime->flags_090 & 0x8000) != 0 || target == object->field_0xcc0)
+            continue;
+        u32 object_flags = object->apiobj.field_0x1f4;
+        u32 target_flags = target->apiobj.field_0x1f4;
+        if ((object_flags & 0x10000) == 0 && (target_flags & 0x10000) == 0 && (object->apiobj.flags_low & 0x80) == 0 &&
+            ((object_flags ^ target_flags) & 5) == 0)
+            continue;
+        if (mode != 0) {
+            if (static_cast<u8>(context + 0xa1) < 2 ||
+                (context == 0x5a && (target->field_0x7a3 == 0 || (object->apiobj.flags_low & 0x80) == 0)) ||
+                (context == 0x17 && target->hitpoints == 0))
+                continue;
+            if (object->apiobj.field_0x27c != -1) {
+                if ((object->apiobj.flags_low & 0x80) != 0) {
+                    if (target->apiobj.field_0x27c == -1) {
+                        if (WORLD->current_level != HUB_LDATA && (target_flags & 0x10005) == 0)
+                            continue;
+                    } else {
+                        if (((object_flags ^ target_flags) & 1) == 0 &&
+                            (object->ai.action_target_ref != NULL || target->ai.action_target_ref != NULL))
+                            continue;
+                        if (CanPunchGirls == 0 && (object->field_0xf01 & 8) == 0 && (target->field_0xf01 & 8) != 0 &&
+                            object->id != id_GAMORREANGUARD) {
+                            i32 move = SpecialMove_Check(object, target);
+                            if (move == -1 || SpecialMove_GetFlags(move, 1) == 0)
+                                continue;
+                        }
+                    }
+                } else if (target->apiobj.field_0x27c != -1 ||
+                           (WORLD->current_level != HUB_LDATA && (target_flags & 0x10005) == 0))
+                    continue;
+            }
+            if ((target->apiobj.character_data->model_flags & 0x2000) != 0 ||
+                ((((GAMECHARACTERDATA_s *)target->apiobj.character_data->field11_0x24)->flags_090 & 0x40) != 0 &&
+                 (target->apiobj.flags_low & 0x80) == 0))
+                continue;
+        }
+        if (!(allow_untargeted != 0 && (ignore_ai != 0 || object->ai.action_target_ref == NULL || mode != 0)) &&
+            (target_flags & 1) == 0)
+            continue;
+
+        f32 distance = NuVecDistSqr(&target->apiobj.position, &object->apiobj.position, &delta);
+        if (!(distance < range * range))
+            continue;
+        i32 behind = 0;
+        if (mode == 1) {
+            if (object->combo_stage == 0 && forward.x * delta.x + forward.z * delta.z < 0.0f) {
+                if (object->apiobj.character_model->model_data_b[0x94] == NULL)
+                    continue;
+                behind = 1;
+            }
+        } else if (forward.x * delta.x + forward.z * delta.z < 0.0f) {
+            continue;
+        }
+        if (extra_radius > 0.0f) {
+            f32 radius = object->apiobj.field_0x1dc + target->apiobj.field_0x1dc + extra_radius;
+            if (distance >= radius * radius)
+                continue;
+        }
+        if (distance < nearest_distance) {
+            nearest = target;
+            nearest_distance = distance;
+            ComboOpponent_Behind = behind;
+        }
+    }
+    ComboOpponent_Range2 = nearest_distance;
+    return nearest;
+}
+
 static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, i32 mode) {
     NUVEC delta;
     object->force_target = NULL;
     object->blowup_target = NULL;
-    bool searched = false;
-    u8 result = 0;
+    bool searched;
+    u8 result;
     if ((object->apiobj.flags_low & 0x80) != 0 && mode == 0 && object->pad_gamepad->input_magnitude > 0.0f) {
         object->force_target = ObjOpponent(object, range, 0.0f, 0, 0, 1);
         searched = true;
         if (object->force_target != NULL) {
             result = 1;
-            goto finished;
+            if ((object->apiobj.flags_low & 0x80) != 0)
+                goto finished;
+            goto nonplayer_target;
         }
+    } else {
+        searched = false;
     }
     if (object->ai.primary_target_ref != NULL && object->ai.nearest_opponent_metric < range) {
         ComboOpponent_Range2 = object->ai.nearest_opponent_metric;
@@ -4665,6 +4786,8 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
         goto finished;
     }
     if ((object->apiobj.flags_low & 0x80) == 0) {
+        result = 0;
+    nonplayer_target:
         if ((object->field_0xef8 & 0x40) != 0 || object->use_action == 5) {
             object->blowup_target = GizmoBlowUpOpponent(object, range, 0.0f, 0.0f, mode, 0, 0, 0);
             if (object->blowup_target != NULL) {
@@ -4694,8 +4817,8 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
         }
         f32 nearest_distance = 1.0e8f;
         GameObject_s *nearest = NULL;
-        for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-            GameObject_s *target = &Obj[i];
+        GameObject_s *target = Obj;
+        for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
             if (target == object || (target->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
                 target->apiobj.field_0x287 != 0 || (target->apiobj.field_0x1f4 & 1) != 0 ||
                 (target->character_context & 0xfd) == 0x39 || target->character_context == 0x3c ||
@@ -4704,7 +4827,7 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
                 continue;
 
             f32 distance = NuVecDistSqr(&target->apiobj.position, &object->apiobj.position, &delta);
-            if (distance >= range * range ||
+            if (!(distance < range * range) ||
                 (object->pad_gamepad->input_magnitude > 0.0f && forward.x * delta.x + forward.z * delta.z < 0.0f))
                 continue;
             u16 angle = NuAtan2D(target->apiobj.position.x - object->apiobj.position.x,
@@ -4723,6 +4846,7 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
             goto finished;
         }
     }
+    result = 0;
     if (!searched) {
         object->force_target = ObjOpponent(object, range, 0.0f, 0, 0, 1);
         result = object->force_target != NULL;
@@ -9819,9 +9943,8 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
                       f32 cooldown) {
     const f32 punch_gap = PUNCHGAP;
     const f32 punch_charge_gap = PUNCHCHARGAP;
-    i32 target_requirement = 0;
     if (require_target != 0) {
-        target_requirement = (object->use_action != 5) + 1;
+        require_target = (object->use_action != 5) + 1;
     }
     if (object->attack_override == 7) {
         return;
@@ -9898,7 +10021,7 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
             if (suppress_combo == 0 && static_cast<i8>(object->context_flags) >= 0 && object->combo_stage < 2 &&
                 object->combo_input_latched != 0 && object->attack_override != 6) {
                 SelectOpponent(object, 1.25f, punch_charge_gap, 1, 0);
-                if (target_requirement == 0 || object->force_target != NULL || object->blowup_target != NULL) {
+                if (require_target == 0 || object->force_target != NULL || object->blowup_target != NULL) {
                     i32 alternate_animations[4];
                     u8 combo_stage = object->combo_stage++;
                     if ((object->context_flags & 1) != 0) {
@@ -10012,7 +10135,7 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
                 goto start_attack;
             }
             if (object->force_target == NULL) {
-                goto choose_attack;
+                goto check_blowup_target;
             }
         }
         if (ComboOpponent_Behind != 0) {
@@ -10022,12 +10145,11 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
         if (static_cast<i8>(object->apiobj.flags_low) >= 0 && object->attack_override == 0 && object->use_action != 5) {
             return;
         }
-        if (object->blowup_target != NULL && GizmoBlowUpOpponent_Behind != 0) {
-            goto behind_attack;
-        }
     }
 
-choose_attack:
+check_blowup_target:
+    if (object->blowup_target != NULL && GizmoBlowUpOpponent_Behind != 0)
+        goto behind_attack;
     object->field_0x7a7 = -1;
     switch (object->attack_override) {
         case 1:
@@ -10077,13 +10199,13 @@ behind_attack:
 
 start_attack:
     object->context_flags &= ~1;
-    if (target_requirement == 2 && object->force_target == NULL && object->blowup_target != NULL) {
+    if (require_target == 2 && object->force_target == NULL && object->blowup_target != NULL) {
         return;
     }
     if (object->apiobj.character_model->model_data_b[animation] == NULL) {
         return;
     }
-    if (target_requirement != 0 && object->force_target == NULL && object->blowup_target == NULL) {
+    if (require_target != 0 && object->force_target == NULL && object->blowup_target == NULL) {
         return;
     }
 

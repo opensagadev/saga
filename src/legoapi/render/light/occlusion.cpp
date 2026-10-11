@@ -5,6 +5,7 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/numath/numtx.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -553,6 +554,73 @@ void OcclusionManager::SetEnabled(bool value) {
 OcclusionManager::~OcclusionManager() {
 }
 
-static __used__ void BoxTreeRndrRec(nuvisiboxtree_s *, unsigned char *, nuvisiboxtreenode_s *, int, float, nugscn_s *) {
-    STUBBED();
+struct nuvisiboxtreenode_s {
+    NUVEC minimum;
+    NUVEC maximum;
+    u16 children[2];
+    u16 instance_count;
+    u16 first_instance;
+};
+
+struct nuvisiboxtree_s {
+    u32 reserved_00;
+    u32 root_count;
+    i32 *roots;
+    f32 *far_clip;
+    u16 *instances;
+    u32 reserved_14;
+    nuvisiboxtreenode_s *nodes;
+};
+
+struct NuBoxTreeVisibility {
+    i32 instance_count;
+    u32 reserved_04;
+    nuvisiboxtree_s *tree;
+    u32 reserved_0c[5];
+    u8 *clip_results;
+    u32 reserved_24;
+    u8 state;
+};
+
+DECOMP_ASSERT(sizeof(nuvisiboxtreenode_s) == 0x20, "visibility box node size");
+DECOMP_ASSERT(offsetof(nuvisiboxtree_s, nodes) == 0x18, "visibility box nodes offset");
+DECOMP_ASSERT(offsetof(NuBoxTreeVisibility, state) == 0x28, "box visibility state offset");
+
+extern "C" {
+    i32 do_boxtree;
+}
+
+static void BoxTreeRndrRec(nuvisiboxtree_s *tree, unsigned char *results, nuvisiboxtreenode_s *node, int instance_count,
+                           float far_clip, nugscn_s *scene) {
+    if (node->children[0] == 0xffff) {
+        i32 clip = NuCameraClipTestExtents(&node->minimum, &node->maximum, &numtx_identity, far_clip, 0);
+        i32 instance = tree->instances[node->first_instance];
+        results[instance >> 2] |= clip << ((instance & 3) * 2);
+    } else {
+        i32 clip = NuCameraClipTestExtents(&node->minimum, &node->maximum, &numtx_identity, far_clip, 1);
+        if (clip == 0)
+            return;
+        if (clip == 1) {
+            for (i32 i = 0; i < node->instance_count; ++i) {
+                i32 instance = tree->instances[node->first_instance + i];
+                results[instance >> 2] |= 1 << ((instance & 3) * 2);
+            }
+        } else {
+            BoxTreeRndrRec(tree, results, &tree->nodes[node->children[0]], instance_count, far_clip, scene);
+            BoxTreeRndrRec(tree, results, &tree->nodes[node->children[1]], instance_count, far_clip, scene);
+        }
+    }
+}
+
+extern "C" void NuVisiBoxTree(NuBoxTreeVisibility *visibility, nugscn_s *scene) {
+    if (visibility->tree != NULL && do_boxtree != 0) {
+        for (u32 i = 0; i < visibility->tree->root_count; ++i) {
+            nuvisiboxtree_s *tree = visibility->tree;
+            BoxTreeRndrRec(tree, visibility->clip_results, &tree->nodes[tree->roots[i]], visibility->instance_count,
+                           tree->far_clip[i], scene);
+        }
+        visibility->state |= 8;
+    } else {
+        visibility->state &= ~8;
+    }
 }

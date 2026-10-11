@@ -323,7 +323,7 @@ extern "C" {
     static i32 eduicbProcessTexturePick(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessColourSlider(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessExpander(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
-    static void eduicbItemExpanderClose(edui_expander_s *);
+    static inline void eduicbItemExpanderClose(edui_expander_s *);
     static i32 eduicbProcessFilter(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessFilePick(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static void eduicbAttachDirectoryList(eduimenu_s *, edui_file_pick_s *);
@@ -4932,18 +4932,18 @@ extern "C" {
 
     static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact) {
         edui_colour_pick_s *pick = static_cast<edui_colour_pick_s *>(interact->item);
-        if ((!(edui_cursor_x < interact->x || edui_cursor_y < interact->y ||
-               edui_cursor_x >= interact->x + interact->width ||
-               edui_cursor_y >= interact->y + interact->height * 0.75f) ||
+        if (((edui_cursor_x >= interact->x && edui_cursor_y >= interact->y &&
+              edui_cursor_x < interact->x + interact->width &&
+              edui_cursor_y < interact->y + interact->height * 0.75f) ||
              pick->dragging_colour) &&
             !pick->dragging_saturation) {
             pick->cursor_y = (edui_cursor_y - interact->y) / (interact->height * 0.75f);
             pick->cursor_x = (edui_cursor_x - interact->x) / interact->width;
             pick->dragging_colour = (edui_cursor_buttons & EDUI_CURSOR_PRIMARY) != 0;
         }
-        if ((!(edui_cursor_x < interact->x || edui_cursor_y < interact->y + interact->height * 0.75f ||
-               edui_cursor_x >= interact->x + interact->width ||
-               edui_cursor_y >= interact->y + interact->height * 0.75f + interact->height * 0.125f) ||
+        if (((edui_cursor_x >= interact->x && edui_cursor_y >= interact->y + interact->height * 0.75f &&
+              edui_cursor_x < interact->x + interact->width &&
+              edui_cursor_y < interact->y + interact->height * 0.75f + interact->height * 0.125f) ||
              pick->dragging_saturation) &&
             !pick->dragging_colour) {
             pick->saturation = (edui_cursor_x - interact->x) / interact->width;
@@ -4965,7 +4965,7 @@ extern "C" {
         }
         return pick->dragging_colour || pick->dragging_saturation;
     }
-    static void eduicbItemExpanderClose(edui_expander_s *expander) {
+    static inline void eduicbItemExpanderClose(edui_expander_s *expander) {
         for (eduiitem_s *child = expander->first_child; child; child = child->next) {
             if (child->type == EDUI_ITEM_EXPANDER)
                 eduicbItemExpanderClose(static_cast<edui_expander_s *>(child));
@@ -5040,9 +5040,9 @@ extern "C" {
                     NuStrCpy(eduiPropTextEdit, property->property_text);
                     eduiPropTextPos = NuStrLen(property->property_text);
                 }
-                if ((!(edui_cursor_x < property->button_x || edui_cursor_y < property->button_y * 0.5f ||
-                       edui_cursor_x >= property->button_x + property->button_size ||
-                       edui_cursor_y >= (property->button_y + property->button_size) * 0.5f) ||
+                if (((edui_cursor_x >= property->button_x && edui_cursor_y >= property->button_y * 0.5f &&
+                      edui_cursor_x < property->button_x + property->button_size &&
+                      edui_cursor_y < (property->button_y + property->button_size) * 0.5f) ||
                      eduiInteractLocked) &&
                     property->button) {
                     property->button(menu, property, 0);
@@ -6410,12 +6410,11 @@ extern "C" {
         if (property->unknown_property_flags & 1) {
             f32 text_width = NuQFntPrintLenU(edui_font, eduiPropTextEdit) * 0.0625f;
             f32 edit_width = draw_width - property->label_width - 4.0f;
-            if (edit_width < text_width)
-                edit_width = text_width;
+            edit_width = MAX(edit_width, text_width);
             if (!edui_donotdraw)
                 NuRndrRect2di(static_cast<i32>(draw_x * 16.0f), static_cast<i32>(draw_y * 8.0f),
                               static_cast<i32>(draw_width * 16.0f), static_cast<i32>(height * 8.0f),
-                              item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
+                              item->colours[2 + item->highlighted], uimtls[0]);
             if (!edui_donotdraw)
                 NuRndrRect2di(static_cast<i32>((draw_x + property->label_width + 2.0f) * 16.0f),
                               static_cast<i32>((draw_y + 2.0f) * 8.0f), static_cast<i32>(edit_width * 16.0f),

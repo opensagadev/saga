@@ -1445,12 +1445,15 @@ extern "C" {
             unsigned char buttons[512], normal[512];
             i32 button_count = 0, normal_count = 0;
             for (i32 i = 0; decoded[i] != 0;) {
-                const bool is_button = decoded[i] == 0xd4 && decoded[i + 1] >= 0xb1 && decoded[i + 1] <= 0xbf;
-                unsigned char *output = is_button ? buttons : normal;
-                i32 &count = is_button ? button_count : normal_count;
-                output[count++] = decoded[i++];
-                while (static_cast<u8>(decoded[i] - 0x80) <= 0x3f)
-                    output[count++] = decoded[i++];
+                if (decoded[i] == 0xd4 && decoded[i + 1] >= 0xb1 && decoded[i + 1] <= 0xbf) {
+                    buttons[button_count++] = decoded[i++];
+                    while (static_cast<u8>(decoded[i] - 0x80) <= 0x3f)
+                        buttons[button_count++] = decoded[i++];
+                } else {
+                    normal[normal_count++] = decoded[i++];
+                    while (static_cast<u8>(decoded[i] - 0x80) <= 0x3f)
+                        normal[normal_count++] = decoded[i++];
+                }
             }
             buttons[button_count] = normal[normal_count] = 0;
             f32 button_width = 0.0f, normal_width = 0.0f;
@@ -1494,7 +1497,10 @@ extern "C" {
         unsigned char fragment[1024];
         i32 count = 0;
         bool button_font = false;
-        for (i32 i = 0; decoded[i] != 0 && count < 509;) {
+        i32 i = 0;
+        do {
+            if (decoded[i] == 0)
+                break;
             if (decoded[i] == '~' && (decoded[i + 1] == '~' || (decoded[i + 1] >= '0' && decoded[i + 1] <= '9'))) {
                 u32 colour;
                 if (decoded[i + 1] != '~') {
@@ -1532,6 +1538,9 @@ extern "C" {
                     x += TextPrintSubstring(fragment, x, draw_y, z, draw_x_scale, draw_y_scale, current_rgba, 0);
                     count = 0;
                 }
+                fragment[count++] = decoded[i++];
+                while (static_cast<u8>(decoded[i] - 0x80) <= 0x3f)
+                    fragment[count++] = decoded[i++];
                 button_font = true;
             } else {
                 if (button_font && count != 0) {
@@ -1539,12 +1548,12 @@ extern "C" {
                     x += TextPrintSubstring(fragment, x, draw_y, z, button_scale, button_scale, current_rgba, 1);
                     count = 0;
                 }
+                fragment[count++] = decoded[i++];
+                while (static_cast<u8>(decoded[i] - 0x80) <= 0x3f)
+                    fragment[count++] = decoded[i++];
                 button_font = false;
             }
-            fragment[count++] = decoded[i++];
-            while (static_cast<u8>(decoded[i] - 0x80) <= 0x3f)
-                fragment[count++] = decoded[i++];
-        }
+        } while (count < 509);
         if (count != 0) {
             fragment[count] = 0;
             TextPrintSubstring(fragment, x, draw_y, z, button_font ? button_scale : draw_x_scale,

@@ -995,6 +995,9 @@ template <typename T> void NuSoundMemory::PushNuListNode(NuList<T> &list, T cons
 
 template void NuSoundMemory::PushNuListNode<NuSoundEffect *>(NuList<NuSoundEffect *> &, NuSoundEffect *const &);
 
+// The reference exports this weak template member at 0x31d650.
+template void NuMap<u32, NuSoundSystem::CurveData>::DeleteNodeLinks(NuMapNode<u32, NuSoundSystem::CurveData> *);
+
 void NuSoundSystem::StopAllVoices() {
     NuSoundVoice *end = voice_list.End();
     for (NuSoundVoice *voice = voice_list.Front(); voice != end; voice = voice->field_0x28) {
