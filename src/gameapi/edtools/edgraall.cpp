@@ -742,7 +742,20 @@ void edgraDoInput(nupad_s *pad) {
             }
         }
 
-        if (edgra_editormode == 1) {
+        if (edgra_editormode != 1) {
+            if (edgra_nearest != -1) {
+                edcamSetPos(&GrassClumps[edgra_nearest].position);
+                const i32 kind = static_cast<i8>(GrassClumps[edgra_nearest].kind);
+                edgra_mode = kind;
+                edgra_instance_type = GrassClumps[edgra_nearest].special_index;
+                if (kind != 3) {
+                    edgra_size = GrassClumps[edgra_nearest].size;
+                    edgra_clump_size = GrassClumps[edgra_nearest].element_count;
+                    edgra_rotz = GrassClumps[edgra_nearest].rotation_z;
+                    edgra_roty = GrassClumps[edgra_nearest].rotation_y;
+                }
+            }
+        } else {
             if (edgra_nearest != -1 && edgra_nearest_instance != -1) {
                 const i32 individual_index = GrassClumps[edgra_nearest].individual_index;
                 NUVEC *instance_position = &GetIndGrassClump(individual_index, edgra_nearest_instance)->position;
@@ -751,17 +764,6 @@ void edgraDoInput(nupad_s *pad) {
                 edcamSetPos(&position);
                 edgra_rotz = GetIndGrassClump(individual_index, edgra_nearest_instance)->field_10;
                 edgra_roty = GetIndGrassClump(individual_index, edgra_nearest_instance)->field_12;
-            }
-        } else if (edgra_nearest != -1) {
-            edcamSetPos(&GrassClumps[edgra_nearest].position);
-            const i32 kind = static_cast<i8>(GrassClumps[edgra_nearest].kind);
-            edgra_mode = kind;
-            edgra_instance_type = GrassClumps[edgra_nearest].special_index;
-            if (kind != 3) {
-                edgra_size = GrassClumps[edgra_nearest].size;
-                edgra_clump_size = GrassClumps[edgra_nearest].element_count;
-                edgra_rotz = GrassClumps[edgra_nearest].rotation_z;
-                edgra_roty = GrassClumps[edgra_nearest].rotation_y;
             }
         }
     }

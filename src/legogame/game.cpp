@@ -973,8 +973,8 @@ void InitGameAfterConfig(void) {
     troopers_gdeb[3] = 0x4b;
     LEGOHINT_SHOOTCAMERAS = 0x266;
     extern i32 LEGOHINT_PUSHBLOCKS;
-    LEGOHINT_PUSHBLOCKS = 0x267;
     LEGOHINT_BUILD = 0x25c;
+    LEGOHINT_PUSHBLOCKS = 0x267;
     LEGOHINT_FREEPLAYTOGGLE = 600;
     PUNCHGAP = 0.3f;
     PUNCHCHARGAP = 0.3f;

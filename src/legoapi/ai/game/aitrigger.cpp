@@ -310,8 +310,8 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                                 if ((routes >> (route & 63)) & 1)
                                     character_mask |= path->routes[route].character_masks[0];
                         }
-                        i32 best = -1;
                         f32 best_distance = 1000000000.0f;
+                        i32 best = -1;
                         GameObject_s *object = Obj;
                         for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index, ++object) {
                             if (system->field_0x42c0[object_index] != -1 ||
@@ -324,7 +324,16 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                                 GIZMO_s *target = set->gizmos[index];
                                 if (target->type_id == lever_gizmotype_id && !(object->field_0xefe & 0x80))
                                     continue;
-                                if (target->type_id == force_gizmotype_id) {
+                                if (target->type_id != force_gizmotype_id) {
+                                    if (target->type_id != obstacle_gizmotype_id) {
+                                        if (target->type_id == grapple_gizmotype_id && !(object->ai.capabilities & 8)) {
+                                            continue;
+                                        }
+                                    } else {
+                                        if (static_cast<GIZOBSTACLE_s *>(target->object)->mode == 7)
+                                            continue;
+                                    }
+                                } else {
                                     GIZFORCE_s *force = static_cast<GIZFORCE_s *>(target->object);
                                     if (force->config_flags & 0x10) {
                                         if (!CharCategory_IsCategory(object, 1))
@@ -334,11 +343,6 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                                     } else if (!CharCategory_IsCategory(object, 0)) {
                                         continue;
                                     }
-                                } else if (target->type_id == obstacle_gizmotype_id) {
-                                    if (static_cast<GIZOBSTACLE_s *>(target->object)->mode == 7)
-                                        continue;
-                                } else if (target->type_id == grapple_gizmotype_id && !(object->ai.capabilities & 8)) {
-                                    continue;
                                 }
                             }
                             NUVEC difference;

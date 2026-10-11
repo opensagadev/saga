@@ -1038,7 +1038,12 @@ static void CC_anim_start(NUFPAR *parser) {
                 } else if (NuStrICmp(parser->word_buf, "extra_character_off") == 0) {
                     CC_SetAnimMiscFlags(parser, &animation, 8);
                 } else if (NuStrICmp(parser->word_buf, "effect_start") == 0) {
-                    if ((charconfig.flags & 0x60) == 0x60) {
+                    if ((charconfig.flags & 0x60) != 0x60) {
+                        while (NuFParGetLine(parser) != 0) {
+                            if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "effect_end") == 0)
+                                break;
+                        }
+                    } else {
                         if (charconfig.effect_count < 32 && animation.action_id != -1) {
                             CHARACTER_EFFECT_s *effect = &charconfig.effect_scratch[charconfig.effect_count];
                             effect->frame_1 = 1.0f;
@@ -1189,11 +1194,6 @@ static void CC_anim_start(NUFPAR *parser) {
                                 }
                             }
                         }
-                    } else {
-                        while (NuFParGetLine(parser) != 0) {
-                            if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "effect_end") == 0)
-                                break;
-                        }
                     }
                 } else if (NuStrICmp(parser->word_buf, "anim_end") == 0) {
                     if (animation.action_id == -1)
@@ -1223,13 +1223,13 @@ static void CC_anim_start(NUFPAR *parser) {
                         existing->event_frame_2 = animation.event_frame_2;
                         existing->priority = animation.priority;
                         existing->event_frame_3 = animation.event_frame_3;
-                        existing->minimum_repetitions = animation.minimum_repetitions;
                         existing->flags = animation.flags;
+                        existing->minimum_repetitions = animation.minimum_repetitions;
                         existing->event_frame_4 = animation.event_frame_4;
                         existing->maximum_repetitions = animation.maximum_repetitions;
                         existing->stop_frame = animation.stop_frame;
-                        existing->locator = animation.locator;
                         existing->misc_flags = animation.misc_flags;
+                        existing->locator = animation.locator;
                     }
                     return;
                 }

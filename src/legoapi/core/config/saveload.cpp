@@ -908,7 +908,30 @@ extern "C" {
             memcard_saveneeded = 1;
         }
 
-        if (memcard_saveneeded != 0) {
+        if (memcard_saveneeded == 0) {
+            if (memcard_savestarted != 0 && saveload_status == 1) {
+                memcard_savestarted = 0;
+                if (saveload_error == 0) {
+                    MenuSaveOccurred = 1;
+                    if (savesuccessfn != NULL)
+                        savesuccessfn();
+                    if (memcard_autosavestarted != 0) {
+                        memcard_autosavepostdelay = 1.0f;
+                        memcard_autosavestarted = 0;
+                    }
+                } else {
+                    memcard_savefailed = 1;
+                    if (saveload_autosave != -1) {
+                        memcard_saveresult_delay = 1.5f;
+                        saveload_autosave = -1;
+                        memcard_autosavedisabled = 1;
+                        saveload_autosavedisabled = 1;
+                    }
+                    memcard_autosavestarted = 0;
+                    memcard_autosaveinprogress = 0;
+                }
+            }
+        } else {
             if (saveload_status == 1 && saveload_cardtype == 2 && saveload_cardformatted != 0) {
                 memcard_savemessage_delay = 1.5f;
                 if (memcard_savedatabuffer == NULL || memcard_savedata == NULL || memcard_savedatasize <= 0) {
@@ -936,27 +959,6 @@ extern "C" {
                 memcard_savestarted = 1;
                 memcard_savefailed = 0;
                 memcard_justformatted = 0;
-            }
-        } else if (memcard_savestarted != 0 && saveload_status == 1) {
-            memcard_savestarted = 0;
-            if (saveload_error == 0) {
-                MenuSaveOccurred = 1;
-                if (savesuccessfn != NULL)
-                    savesuccessfn();
-                if (memcard_autosavestarted != 0) {
-                    memcard_autosavepostdelay = 1.0f;
-                    memcard_autosavestarted = 0;
-                }
-            } else {
-                memcard_savefailed = 1;
-                if (saveload_autosave != -1) {
-                    memcard_saveresult_delay = 1.5f;
-                    saveload_autosave = -1;
-                    memcard_autosavedisabled = 1;
-                    saveload_autosavedisabled = 1;
-                }
-                memcard_autosavestarted = 0;
-                memcard_autosaveinprogress = 0;
             }
         }
 

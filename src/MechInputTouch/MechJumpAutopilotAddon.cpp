@@ -26,8 +26,8 @@ void MechJumpAutoPilotAddon::AnalyseJumpTrajectory() {
 
             VuVec next;
             next.x = x + field_54.x * 0.1f;
-            next.y = y + vy * 0.1f;
             next.z = z + field_54.z * 0.1f;
+            next.y = y + vy * 0.1f;
             LookForBottomInt(next);
             LookForTerrInt(next);
 
@@ -174,8 +174,8 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
         VuVec ray(0.0f, ray_length, 0.0f, 1.0f);
         VuVec origin;
         origin.y = field_24.y + ray_offset;
-        origin.z = point.z + offsets[1].z;
         origin.x = point.x + offsets[1].x;
+        origin.z = point.z + offsets[1].z;
         if (GameRayCast(&origin.xyz, &ray.xyz, 0.0f, 0)) {
             const VuVec hit(origin.x + ray.x, origin.y + ray.y, origin.z + ray.z, 0.0f);
             const f32 dx = hit.x - field_24.x;

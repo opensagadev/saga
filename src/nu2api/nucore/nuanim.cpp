@@ -227,8 +227,8 @@ extern "C" {
                 f32 first_time = static_cast<f32>(static_cast<u32>(first[3]));
                 f32 span = static_cast<f32>(static_cast<u32>(first[7])) - first_time;
                 f32 inverse_span = span == 0.0f ? 0.0f : 1.0f / span;
-                f32 tangent0 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 2)) * header[0] * span;
                 f32 tangent1 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 6)) * header[0] * span;
+                f32 tangent0 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 2)) * header[0] * span;
                 f32 value0 = static_cast<f32>(*reinterpret_cast<i16 *>(first)) * header[1];
                 f32 value_delta = value0 - static_cast<f32>(*reinterpret_cast<i16 *>(first + 4)) * header[1];
                 f32 t = ((time->time - 1.0f) - first_time) * inverse_span;
@@ -248,10 +248,10 @@ extern "C" {
                 f32 *header = reinterpret_cast<f32 *>(key_data);
                 f32 header_3 = header[3];
                 f32 header_2 = header[2];
-                f32 header_0 = header[0];
                 f32 header_1 = header[1];
                 u8 *first = key_data + (key + key_offset + 3) * 4;
                 f32 first_time = static_cast<f32>(static_cast<u32>(first[3])) * header_3;
+                f32 header_0 = header[0];
                 f32 next_time = static_cast<f32>(static_cast<u32>(first[7])) * header_3;
                 if (next_time == first_time) {
                     next_time = first_time + 1.0f;
@@ -277,13 +277,13 @@ extern "C" {
                 f32 *header = reinterpret_cast<f32 *>(key_data);
                 f32 header_0 = header[0];
                 f32 header_1 = header[1];
-                f32 header_2 = header[2];
                 i16 *first = reinterpret_cast<i16 *>(key_data + (key + key_offset) * 6 + 0x0c);
+                f32 header_2 = header[2];
                 f32 first_time = static_cast<f32>(static_cast<u32>(static_cast<u16>(first[2])));
                 f32 span = static_cast<f32>(static_cast<u32>(static_cast<u16>(first[5]))) - first_time;
                 f32 tangent0 = static_cast<f32>(static_cast<i8>(first[1])) * header_0 * span;
-                f32 tangent1 = static_cast<f32>(static_cast<i8>(first[4])) * header_0 * span;
                 f32 value0 = static_cast<f32>(first[0]) * header_1 + header_2;
+                f32 tangent1 = static_cast<f32>(static_cast<i8>(first[4])) * header_0 * span;
                 f32 value_delta = value0 - (static_cast<f32>(first[3]) * header_1 + header_2);
                 f32 inverse_span = 1.0f / span;
                 f32 t = ((time->time - 1.0f) - first_time) * inverse_span;
@@ -406,8 +406,8 @@ extern "C" {
 
         for (i32 chunk_index = 0; chunk_index < *reinterpret_cast<i32 *>(animation + 8); ++chunk_index) {
             const i32 curve_set_count = NuFileReadInt(file);
-            void **chunk_slot = *reinterpret_cast<void ***>(animation + 0xc) + chunk_index;
             u8 *chunk = reinterpret_cast<u8 *>(NuAnimDataChunkCreate(curve_set_count));
+            void **chunk_slot = *reinterpret_cast<void ***>(animation + 0xc) + chunk_index;
             *chunk_slot = chunk;
             *reinterpret_cast<i32 *>(chunk) = curve_set_count;
 
@@ -606,15 +606,15 @@ void NuAnimBuffEvaluate_3_QuatB(numtx_s *base, nuanimbuff_s *buffer, nugscn_s *s
         root_scale.x = root_scale.y = root_scale.z = 1.0f;
         quaternions[255] = NUQUAT{0, 0, 0, 1};
     }
-    NUVEC root_values = {0, 0, 0};
     nuanimbuffjoint_s *joint = buffer->joints;
+    NUVEC root_values = {0, 0, 0};
     NUQUAT *rotation = quaternions;
     NUMTX *matrix = matrices;
     NUVEC *scale = scales;
     const u8 *joint_flags = buffer->joint_flags;
     for (i32 index = 0; index < count; ++index, ++joint, ++rotation, ++matrix, ++scale) {
-        u8 parent = object->joints[index].parent_index;
         u8 flags = *joint_flags++;
+        u8 parent = object->joints[index].parent_index;
         if (flags & 1)
             *rotation = *reinterpret_cast<NUQUAT *>(&joint->rotation);
         else

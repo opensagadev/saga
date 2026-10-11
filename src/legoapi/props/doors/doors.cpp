@@ -579,6 +579,7 @@ void Door_GoThrough(WORLDINFO_s *world, DOOR_s *door, i32 player_triggered) {
 }
 
 void Doors_Check(WORLDINFO_s *world, GameObject_s *object) {
+    NUVEC intersection;
     if (object->apiobj.field_0x287 == 0 &&
         !(LEGOCONTEXT_DOOMED != -1 && LEGOCONTEXT_DOOMED == static_cast<i8>(object->field_0x7a5)) && NewLData == NULL) {
 
@@ -616,7 +617,7 @@ void Doors_Check(WORLDINFO_s *world, GameObject_s *object) {
                     if (crossing_direction != 0) {
                         const f32 interpolation =
                             NuFabs(previous_distance) / (NuFabs(current_distance) + NuFabs(previous_distance));
-                        NUVEC intersection;
+
                         intersection.x =
                             previous_position.x + (current_position.x - previous_position.x) * interpolation;
                         intersection.y =
