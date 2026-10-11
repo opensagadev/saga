@@ -256,14 +256,13 @@ void Players_InitPositions(WORLDINFO *world) {
 
     PORTALPOS *A = NULL;
     i32 ninit = 2;
-    DOOR_s *start_door = world->start_door;
-    if (!(start_door != NULL && bonus == 0)) {
+    if (!(world->start_door != NULL && bonus == 0)) {
         if (LEGOSPL_START != -1) {
             A = world->portal_places[LEGOSPL_START];
             ninit = 0;
         }
     } else {
-        A = reinterpret_cast<PORTALPOS *>(start_door->spline);
+        A = reinterpret_cast<PORTALPOS *>(world->start_door->spline);
     }
 
     if (A != NULL) {

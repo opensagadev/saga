@@ -298,9 +298,9 @@ i32 ClassEditor::CreateObject(ClassObject &source) {
         return 1;
     }
     Placeable::CurrentLedFile = theLevelEditor.current_led_file;
-    EdClass *ed_class = created.ed_class;
-    EdClassInterface *interface = ed_class->interface;
-    void *object = theRegistry.CreateObject(interface, (ed_class->flags & 0x04000000) ? source.object : NULL, 4, 0, 2);
+    EdClassInterface *interface = created.ed_class->interface;
+    void *object =
+        theRegistry.CreateObject(interface, (created.ed_class->flags & 0x04000000) ? source.object : NULL, 4, 0, 2);
     if (object == NULL)
         return 0;
 
@@ -309,11 +309,11 @@ i32 ClassEditor::CreateObject(ClassObject &source) {
         i32 flags = 0x04000000;
         if (created.reference == NULL || !created.reference->SetAttributeData(object, 1, EdType_Int, &flags, 0)) {
             EdMember member;
-            if (ed_class->FindMember(&member, object, 1, 1))
+            if (created.ed_class->FindMember(&member, object, 1, 1))
                 member.reference->SetAttributeData(member.object, 1, EdType_Int, &flags, 0);
         }
     } else {
-        ed_class->CopyObject(object, source.object);
+        created.ed_class->CopyObject(object, source.object);
         interface = created.ed_class->interface;
         interface->vtable->construct(interface, object, source.object);
     }
@@ -679,11 +679,10 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, ClassObjec
     i32 candidate_count = 0;
     for (i32 class_index = 0; class_index < theRegistry.class_count; ++class_index) {
         EdClass *ed_class = &theRegistry.classes[class_index];
-        EdClassInterface *interface = ed_class->interface;
-        if (!Editable(NULL, ed_class, class_index) || interface == NULL || (ed_class->flags & 8) == 0 ||
-            interface->vtable->get_next_object == NULL)
+        if (!Editable(NULL, ed_class, class_index) || ed_class->interface == NULL || (ed_class->flags & 8) == 0 ||
+            ed_class->interface->vtable->get_next_object == NULL)
             continue;
-        for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
+        for (void *object = ed_class->interface->vtable->get_next_object(ed_class->interface, NULL); object != NULL;
              object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
             if (!Editable(object, ed_class, -1))
                 continue;
@@ -729,15 +728,15 @@ i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject 
     EdRef *nearest_reference = NULL;
     for (i32 class_index = 0; class_index < theRegistry.class_count; ++class_index) {
         EdClass *ed_class = &theRegistry.classes[class_index];
-        EdClassInterface *interface = ed_class->interface;
-        if (!Editable(NULL, ed_class, class_index) || interface == NULL || (ed_class->flags & 8) == 0)
+        if (!Editable(NULL, ed_class, class_index) || ed_class->interface == NULL || (ed_class->flags & 8) == 0)
             continue;
-        for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
-             object = interface->vtable->get_next_object(interface, object)) {
+        for (void *object = ed_class->interface->vtable->get_next_object(ed_class->interface, NULL); object != NULL;
+             object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
             if (!Editable(object, ed_class, -1))
                 continue;
             EdRef *reference = NULL;
-            f32 distance = interface->vtable->distance_to_ray(interface, origin, direction, object, &reference);
+            f32 distance = ed_class->interface->vtable->distance_to_ray(ed_class->interface, origin, direction, object,
+                                                                        &reference);
             if (distance < nearest_distance) {
                 nearest_class = ed_class;
                 nearest_object = object;
@@ -760,15 +759,15 @@ i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject 
     i32 candidate_count = 0;
     for (i32 class_index = 0; class_index < theRegistry.class_count; ++class_index) {
         EdClass *ed_class = &theRegistry.classes[class_index];
-        EdClassInterface *interface = ed_class->interface;
-        if (!Editable(NULL, ed_class, class_index) || interface == NULL || (ed_class->flags & 8) == 0)
+        if (!Editable(NULL, ed_class, class_index) || ed_class->interface == NULL || (ed_class->flags & 8) == 0)
             continue;
-        for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
-             object = interface->vtable->get_next_object(interface, object)) {
+        for (void *object = ed_class->interface->vtable->get_next_object(ed_class->interface, NULL); object != NULL;
+             object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
             if (!Editable(object, ed_class, -1))
                 continue;
             EdRef *reference = NULL;
-            f32 distance = interface->vtable->distance_to_ray(interface, origin, direction, object, &reference);
+            f32 distance = ed_class->interface->vtable->distance_to_ray(ed_class->interface, origin, direction, object,
+                                                                        &reference);
             if (distance < 0.01f && candidate_count < 16)
                 candidates[candidate_count++] = {ed_class, object, reference};
         }
@@ -1401,10 +1400,9 @@ void ClassEditor::cbEdClassSelectObjectMenu(eduimenu_s *parent, eduiitem_s *item
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (menu == NULL)
         return;
-    EdClassInterface *interface = ed_class->interface;
     EdRef *name_ref = ed_class->FindTypeRef(2, 1);
-    for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
-         object = interface->vtable->get_next_object(interface, object)) {
+    for (void *object = ed_class->interface->vtable->get_next_object(ed_class->interface, NULL); object != NULL;
+         object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
         char name[128];
         if (name_ref == NULL || !name_ref->GetAttributeData(object, 2, EdType_String, name, sizeof(name)))
             NuStrCpy(name, ed_class->name);

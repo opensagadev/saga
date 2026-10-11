@@ -2334,14 +2334,13 @@ void DeRotateTerrain(tertype *surface) {
     const f32 sin_yaw = NuTrigTable[(static_cast<i32>(-query->movement_yaw) >> 1) & 0x7fff];
     const f32 start_z = query->local_start.z;
     const f32 cos_yaw = NuTrigTable[(static_cast<i32>(16384.0f - query->movement_yaw) >> 1) & 0x7fff];
-    const f32 start_x = query->local_start.x;
     const f32 start_y = query->local_start.y;
 
     for (i32 vertex_index = 0; vertex_index < 3; ++vertex_index) {
         const NUVEC &vertex = surface->vectors[vertex_index];
         NUVEC &transformed = query->transformed_vertices[vertex_index];
         const f32 relative_z = vertex.z - start_z;
-        const f32 relative_x = vertex.x - start_x;
+        const f32 relative_x = vertex.x - query->local_start.x;
         const f32 rotated_x = relative_z * sin_yaw + relative_x * cos_yaw;
         const f32 rotated_z = relative_z * cos_yaw - relative_x * sin_yaw;
 
@@ -2354,7 +2353,7 @@ void DeRotateTerrain(tertype *surface) {
         const NUVEC &vertex = surface->vectors[3];
         NUVEC &transformed = query->transformed_vertices[3];
         const f32 relative_z = vertex.z - start_z;
-        const f32 relative_x = vertex.x - start_x;
+        const f32 relative_x = vertex.x - query->local_start.x;
         const f32 rotated_x = relative_z * sin_yaw + relative_x * cos_yaw;
         const f32 rotated_z = relative_z * cos_yaw - relative_x * sin_yaw;
 
@@ -2665,7 +2664,6 @@ static i32 TerrainKillPlayer(GameObject_s *object, i32 surface, NUVEC *normal) {
 void TerrainPlayer(GameObject_s *object) {
     NUVEC next_position;
     GAMEPAD_s *const entry_pad = object->pad_gamepad;
-    const u8 entry_underwater = object->apiobj.is_underwater;
     const u8 entry_intersects_water = object->apiobj.intersects_water;
     const i32 entry_menu_id = GetMenuID();
     const i16 entry_platform = object->apiobj.supporting_platform_id;
@@ -3346,7 +3344,7 @@ void TerrainPlayer(GameObject_s *object) {
                 api.intersects_water = static_cast<u8>(IntersectWater(object));
             }
             // Original 0x102ddb emits the splash only on a dry-to-water transition.
-            if (api.intersects_water != 0 && (entry_underwater | entry_intersects_water) == 0) {
+            if (api.intersects_water != 0 && (object->apiobj.is_underwater | entry_intersects_water) == 0) {
                 bool splash = object->character_context == 0x1f || object->character_context == 0 ||
                               (CInfo[object->character_context].flags & 4) != 0 || object->character_context == 0x0e ||
                               object->character_context == 0x0d;
@@ -5507,8 +5505,7 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
     bool cache_hit = false;
     for (i32 i = 0; i < 16; ++i) {
         TERRAIN_INDEX_LEVEL &candidate = CurTerr->index_levels[i];
-        const i32 age = candidate.cache_age;
-        if (age > 0) {
+        if (candidate.cache_age > 0) {
             const f32 dx = (position->x + 1.0f) - candidate.center_x;
             const f32 dz = (position->z + 1.0f) - candidate.center_z;
             if (dx > 0.0f && dx < 2.0f && dz > 0.0f && dz < 2.0f) {
@@ -5517,8 +5514,8 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
                 break;
             }
         }
-        if (age < oldest_age) {
-            oldest_age = age;
+        if (candidate.cache_age < oldest_age) {
+            oldest_age = candidate.cache_age;
             cache_index = i;
         }
     }
@@ -5718,7 +5715,6 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
 void NewScanRot(nuvec_s *position, i32 terrain_mask) {
     void *scratch = NuScratchAlloc32(0xd0);
     const f32 position_z = position->z;
-    const f32 position_x = position->x;
     i32 cache_index = 0;
     i16 oldest_age = CurTerr->index_levels[0].cache_age;
     bool cache_hit = false;
@@ -5726,7 +5722,7 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
         TERRAIN_INDEX_LEVEL &cache = CurTerr->index_levels[i];
         i16 age = cache.cache_age;
         if (age > 0) {
-            f32 dx = (position_x + 1.0f) - cache.center_x;
+            f32 dx = (position->x + 1.0f) - cache.center_x;
             if (dx > 0.0f && dx < 2.0f) {
                 f32 dz = (position_z + 1.0f) - cache.center_z;
                 if (dz > 0.0f && dz < 2.0f) {
@@ -5755,9 +5751,9 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
     writer.shape_count = 0;
 
     const f32 extent = fill_cache ? 1.0f : SHADOW_SCAN_HALF_EXTENT;
-    f32 min_x = position_x - extent;
+    f32 min_x = position->x - extent;
     f32 min_z = position_z - extent;
-    f32 max_x = position_x + extent;
+    f32 max_x = position->x + extent;
     f32 max_z = position_z + extent;
 
     if (!cache_hit) {
@@ -5818,8 +5814,8 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
         writer.group_header = TerI->scan_list_storage;
         writer.cursor = reinterpret_cast<TERRAIN_SHAPE **>(writer.group_header + sizeof(TERRAIN_SHAPE *));
         writer.limit = writer.group_header + 0x7f4;
-        max_x = position_x + SHADOW_SCAN_HALF_EXTENT;
-        min_x = position_x - SHADOW_SCAN_HALF_EXTENT;
+        max_x = position->x + SHADOW_SCAN_HALF_EXTENT;
+        min_x = position->x - SHADOW_SCAN_HALF_EXTENT;
         min_z = position_z - SHADOW_SCAN_HALF_EXTENT;
         max_z = position_z + SHADOW_SCAN_HALF_EXTENT;
         u8 *entry = cache.scan_list;
@@ -6993,8 +6989,7 @@ extern "C" i16 NewPlatPickupInst(void *object, i32 type) {
         if (++index == terrain->max_platforms)
             return -1;
     }
-    i16 group_index = terrain->group_count;
-    TERRAIN_GROUP &group = terrain->groups[group_index];
+    TERRAIN_GROUP &group = terrain->groups[terrain->group_count];
     group = PickupTerr->groups[source];
     group.scene_index = index;
     group.chunk_type = 1;
@@ -7005,10 +7000,10 @@ extern "C" i16 NewPlatPickupInst(void *object, i32 type) {
     group.origin.x = matrix->m30;
     group.origin.y = matrix->m31;
     group.origin.z = matrix->m32;
-    platform.terrain_group_index = group_index;
+    platform.terrain_group_index = terrain->group_count;
     platform.scene_transform = NULL;
     platform.scene_object_index = 0;
-    terrain->group_indices[terrain->group_index_count++] = group_index;
+    terrain->group_indices[terrain->group_index_count++] = terrain->group_count;
     platform.flags &= ~TERRAIN_PLATFORM_FLAG_COLLIDED;
     platform.bounce_impulse = 0.0f;
     platform.bounce_offset = 0.0f;

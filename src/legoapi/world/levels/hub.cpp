@@ -2529,7 +2529,6 @@ void Hub_UpdateFreePlaySelect() {
             i32 active = 0, confirmed = 0;
             i32 exit = 0;
             auto menu_input_activity = menu->input_activity;
-            auto menu_confirm_pressed = menu->confirm_pressed;
             auto collection_count_x = collection->count_x;
             for (i32 player = 0; player < 2; ++player) {
                 const i32 other = (player + 1) & 1;
@@ -2537,7 +2536,7 @@ void Hub_UpdateFreePlaySelect() {
                 i32 index = previous;
                 i32 select = 0, cancel = 0;
                 if (menu_input_activity != 0 && player == 0) {
-                    if (menu_confirm_pressed != 0) {
+                    if (menu->confirm_pressed != 0) {
                         if (menu->selected_item == 9999)
                             select = 1;
                         else

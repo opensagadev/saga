@@ -31,10 +31,9 @@ void ReadInstAnimBlockDlist(i32 file, nugscn_s *scene) {
     scene->instance_animations = animations;
 
     if (animations != NULL) {
-        const i32 special_count = display_list->nspecials;
-        if (special_count > 0) {
+        if (display_list->nspecials > 0) {
             NUDISPLAYSPECIAL *specials = static_cast<NUDISPLAYSPECIAL *>(display_list->specials);
-            for (i32 special_index = 0; special_index < special_count; ++special_index) {
+            for (i32 special_index = 0; special_index < display_list->nspecials; ++special_index) {
                 NUDISPLAYSPECIAL *special = &specials[special_index];
                 const isize animation_index = reinterpret_cast<isize>(special->instance_animation);
                 if (animation_index == -1) {

@@ -6823,7 +6823,6 @@ static i32 Action_SnapToSockPosition(AISYS *, AISCRIPTPROCESS *processor, AIPACK
     f32 random_y = NuRandFloat();
     f32 random_y2 = NuRandFloat();
     random_y = random_y * offset_scale + (1.0f - random_y2) * offset_scale;
-    u16 yaw = sock_position.midpoint_rotation.y;
     i32 random_angle = NuRand(NULL) % 65536;
     for (i32 index = 0; index < 8; ++index) {
         if (party != 0)
@@ -6842,14 +6841,14 @@ static i32 Action_SnapToSockPosition(AISYS *, AISCRIPTPROCESS *processor, AIPACK
                 position.y = y;
                 position.z = 0.0f;
                 NuVecRotateX(&position, &position, sock_position.midpoint_rotation.x);
-                NuVecRotateY(&position, &position, NuAngAdd(yaw, 0x8000));
+                NuVecRotateY(&position, &position, NuAngAdd(sock_position.midpoint_rotation.y, 0x8000));
             } else {
                 position.x = position.y = position.z = offset_scale;
             }
             NuVecAdd(&position, &position, &sock_position.midpoint);
-            object->apiobj.field_0x276 = yaw;
-            object->apiobj.facing_angle = yaw;
-            object->apiobj.movement_facing_angle = yaw;
+            object->apiobj.field_0x276 = sock_position.midpoint_rotation.y;
+            object->apiobj.facing_angle = sock_position.midpoint_rotation.y;
+            object->apiobj.movement_facing_angle = sock_position.midpoint_rotation.y;
             object->apiobj.position = position;
             object->apiobj.initial_position = position;
             object->apiobj.collision_position = position;
@@ -8356,16 +8355,15 @@ __used__ static i32 Action_SetScaleOverride(AISYS *sys, AISCRIPTPROCESS *process
         }
     }
 
-    f32 remaining = processor->action_data_4;
-    if (!(remaining > 0.0f)) {
+    if (!(processor->action_data_4 > 0.0f)) {
         return 1;
     }
-    if (remaining > FRAMETIME) {
+    if (processor->action_data_4 > FRAMETIME) {
         object->field_0x1038 += FRAMETIME * processor->action_data_5;
-        processor->action_data_4 = remaining - FRAMETIME;
+        processor->action_data_4 = processor->action_data_4 - FRAMETIME;
         return 0;
     }
-    object->field_0x1038 += remaining * processor->action_data_5;
+    object->field_0x1038 += processor->action_data_4 * processor->action_data_5;
     processor->action_data_4 = 0.0f;
     return 1;
 }
@@ -8377,12 +8375,11 @@ __used__ static i32 Action_UseBigJumpToJump(AISYS *sys, AISCRIPTPROCESS *process
     (void)param_5;
     (void)param_6;
     if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
-        GameObject_s *object = packet->owner->apiobj.objptr;
-        object->field_0xf03 |= 0x40;
+        packet->owner->apiobj.objptr->field_0xf03 |= 0x40;
         if (param_4 != 0) {
             for (i32 index = 0; index < param_4; ++index) {
                 if (NuStrICmp(params[index], "FALSE") == 0) {
-                    object->field_0xf03 &= ~0x40;
+                    packet->owner->apiobj.objptr->field_0xf03 &= ~0x40;
                 }
             }
         }

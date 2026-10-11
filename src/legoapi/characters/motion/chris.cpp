@@ -879,14 +879,13 @@ anakin_door_setup_s DoorSetupList[15] = {
 };
 
 static void DrawStarFighter(starfighter_s *starfighter) {
-    const i32 model_id = starfighter->model_id;
     NUMTX_ALIGNED16 matrices[2];
     NUMTX &scaled_special_matrix = matrices[0];
     NUMTX &scaled_model_matrix = matrices[1];
-    if (model_id >= 0) {
+    if (starfighter->model_id >= 0) {
         const f32 scale = starfighter->scale;
         const i16 draw_flags = starfighter->draw_flags;
-        const i16 model_index = apicharsys->playermodelids[model_id];
+        const i16 model_index = apicharsys->playermodelids[starfighter->model_id];
         if (model_index == -1)
             return;
         NUMTX *matrix = &starfighter->matrix;
@@ -898,7 +897,8 @@ static void DrawStarFighter(starfighter_s *starfighter) {
         GameDrawCharacterModel(&apicharsys->models[model_index], NULL, matrix, NULL, NULL, NULL, NULL, draw_flags);
     } else {
         NUMTX *matrix = &starfighter->matrix;
-        if (model_id == -299 || model_id == -297 || model_id == -298 || model_id == -307) {
+        if (starfighter->model_id == -299 || starfighter->model_id == -297 || starfighter->model_id == -298 ||
+            starfighter->model_id == -307) {
             scaled_special_matrix = starfighter->matrix;
             scaled_special_matrix.m00 *= 1.15f;
             scaled_special_matrix.m01 *= 1.15f;
@@ -911,8 +911,8 @@ static void DrawStarFighter(starfighter_s *starfighter) {
             scaled_special_matrix.m22 *= 1.15f;
             matrix = &scaled_special_matrix;
         }
-        NuSpecialDrawAt(&WORLD->lev_objs[-model_id].special, matrix);
-        if (model_id == -307)
+        NuSpecialDrawAt(&WORLD->lev_objs[-starfighter->model_id].special, matrix);
+        if (starfighter->model_id == -307)
             AddVariableShotDebrisEffect(WORLD->debris_sys->entries[49].effect,
                                         reinterpret_cast<NUVEC *>(&starfighter->matrix.m30), 1, 0, 0);
     }
@@ -1243,8 +1243,6 @@ set_door_timer:
 }
 
 void ChrisRadialCam(nuvec_s *position, nuvec_s *target) {
-    const f32 position_y = position->y;
-    const f32 target_y = target->y;
     NUVEC position_delta = {position->x - RadialMoveCentre.x, 0.0f, position->z - RadialMoveCentre.z};
     const f32 position_radius = NuVecMag(&position_delta);
     NUVEC origin_delta = {-RadialMoveCentre.x, 0.0f, -RadialMoveCentre.z};
@@ -1263,7 +1261,7 @@ void ChrisRadialCam(nuvec_s *position, nuvec_s *target) {
         position_delta.x *= scale;
     }
     position->x = RadialMoveCentre.x + position_delta.x;
-    position->y = position_y;
+    position->y = position->y;
     position->z = RadialMoveCentre.z + position_delta.z;
 
     if (base_radius <= origin_radius) {
@@ -1275,7 +1273,7 @@ void ChrisRadialCam(nuvec_s *position, nuvec_s *target) {
         origin_delta.z *= scale;
     }
     target->x = RadialMoveCentre.x + origin_delta.x;
-    target->y = target_y;
+    target->y = target->y;
     target->z = RadialMoveCentre.z + origin_delta.z;
 }
 
