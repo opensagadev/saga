@@ -241,6 +241,7 @@ ClassEditor::ClassEditor() {
 }
 
 void ClassEditor::AddMenuItems(eduimenu_s *menu) {
+    i32 index;
     eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdClassFileMenu, const_cast<char *>("File")));
     eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdClassToolsMenu, const_cast<char *>("Tools")));
     eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdClassSnapMenu, const_cast<char *>("Snap")));
@@ -263,7 +264,7 @@ void ClassEditor::AddMenuItems(eduimenu_s *menu) {
     EdClass *classes[32];
     i32 class_count = 0;
     for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next) {
-        i32 index;
+
         for (index = 0; index < class_count; ++index) {
             if (classes[index] == entry->ed_class)
                 break;
@@ -383,6 +384,7 @@ void ClassEditor::Initialise(variptr_u &first, variptr_u &second, i32) {
 }
 
 void ClassEditor::Process(EdInputContext &input) {
+    EdMember member;
     UpdateSnapRay(*reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(&input) + 0x30));
     UpdateSelectedObjects(input);
     UpdateClassFilter(input);
@@ -433,7 +435,7 @@ void ClassEditor::Process(EdInputContext &input) {
             theRegistry.ClassIFaceProcess(entry->ed_class, entry->object, input);
         if (input.GetPress(39) != 0.0f) {
             ClassObjectListEntry *entry = selected_objects.first;
-            EdMember member;
+
             VuVec position __attribute__((aligned(16)));
             i32 position_type = EdType_VuVec;
             if (entry->reference == NULL ||
@@ -625,6 +627,7 @@ i32 ClassEditor::Editable(void *object, EdClass *object_class, i32 index) {
 }
 
 i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, ClassObject &after, i32 filter) {
+    EdMember member;
     EdClass *candidate_classes[16] = {};
     void *candidate_objects[16] = {};
     i32 candidate_count = 0;
@@ -638,7 +641,7 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, ClassObjec
              object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
             if (!Editable(object, ed_class, -1))
                 continue;
-            EdMember member;
+
             if (!ed_class->FindMember(&member, object, 8, 1))
                 continue;
             VuVec position;

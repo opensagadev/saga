@@ -1587,6 +1587,7 @@ void NetworkObjectManager::Term() {
 }
 
 void NetworkObjectManager::Update() {
+    i32 message_limit;
     for (i32 i = 0; i < 2048; i++) {
         NetworkObject *object = &objects[i];
         if (object->id == 0) {
@@ -1627,7 +1628,7 @@ void NetworkObjectManager::Update() {
         if (push->stage == 1 || push->stage == 2) {
             i32 object_index = push->field_10;
             i32 object_count = local_object_count;
-            i32 message_limit = theNuNetEmu.field_1c;
+            message_limit = theNuNetEmu.field_1c;
             if (theNuNetEmu.packet_stats.pack_ratio > 0.0f) {
                 message_limit = static_cast<i32>(message_limit * theNuNetEmu.packet_stats.pack_ratio);
             }

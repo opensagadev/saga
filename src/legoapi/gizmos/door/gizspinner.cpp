@@ -1418,9 +1418,10 @@ void GizSpinner_GetSpinnerPos(GIZSPINNER_s *spinner, nuvec_s *position) {
 }
 
 GIZSPINNER_s *GizSpinner_FindNearest(nuvec_s *position, WORLDINFO_s *world, f32 *distance_out) {
+    f32 nearest_distance;
     GIZSPINNER_s *nearest = NULL;
     if (world->spinners != NULL) {
-        f32 nearest_distance = 1000000000.0f;
+        nearest_distance = 1000000000.0f;
         for (i32 index = 0; index < world->current_level->max_spinners; ++index) {
             GIZSPINNER_s *spinner = &world->spinners[index];
             if ((spinner->flags & GIZSPINNER_FLAG_VALID) == 0 || (spinner->flags & 0x26) != 0) {

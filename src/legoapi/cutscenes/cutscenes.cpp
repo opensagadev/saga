@@ -429,6 +429,7 @@ void CutScenes_Start(WORLDINFO_s *world) {
 }
 
 void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
+    FADETYPE fade_type;
     i32 active_before[32];
     if (CutScenePlayer_Active() != 0 && CutStopInfo != NULL) {
         CutScenePlayer_SetObjects(static_cast<CUTINFO *>(CutStopInfo));
@@ -599,7 +600,7 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
         return;
     }
     if (NewLData == NULL || NewLData == WORLD->current_level || NewLData != HUB_LDATA) {
-        FADETYPE fade_type;
+
         fade_type.type = FADE_TYPE_STILL_WIPE;
         FadeSys.SetFade(fade_type, 0);
     }

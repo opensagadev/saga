@@ -2000,6 +2000,7 @@ void GameAnimSet_RemoveAllObjects(GAMEANIMSET_s *set) {
 
 i32 GameAnimSet_GetCentreAndRadius(GAMEANIMSET_s *set, NUVEC *centre, f32 *radius, i32 frame_selection,
                                    i32 include_animated, i32 include_static) {
+    f32 object_radius;
     if (centre == NULL || set == NULL || set->object_count == 0 || set->objects == NULL) {
         return 0;
     }
@@ -2039,7 +2040,7 @@ i32 GameAnimSet_GetCentreAndRadius(GAMEANIMSET_s *set, NUVEC *centre, f32 *radiu
         }
 
         NUVEC4 object_centre;
-        f32 object_radius;
+
         NuSpecialGetRadius(&object->special, reinterpret_cast<NUVEC *>(&object_centre), &object_radius);
         object_radius *= 0.75f;
         object_centre.w = 1.0f;

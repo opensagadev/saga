@@ -18,8 +18,8 @@ i32 unref(unsigned char *source, unsigned char *destination) {
                 destination[i] = match[i];
             destination += length;
         } else if ((control & 0x40) == 0) {
-            const u8 first = source[1];
             const u8 second = source[2];
+            const u8 first = source[1];
             source += 3;
             const i32 literal_count = first >> 6;
             for (i32 i = 0; i < literal_count; ++i)

@@ -192,10 +192,11 @@ extern "C" void _NuTimeBarSlotBegin(i32 set, i32 slot, const char *name) {
 // elapsed microseconds into the double-buffered slot, and return the
 // updated accumulator value.  Returns 0 when profiling is disabled.
 extern "C" u32 _NuTimeBarSlotEnd(i32 set, i32 slot) {
+    NUTIME now;
     u32 value = 0;
     if (NuTimeBar_Initialised != 0) {
         TimeBarSet *timebar = NuTimeBar_SetList[set + 1];
-        NUTIME now;
+
         NuTimeGet(&now);
 
         NUTIME delta;

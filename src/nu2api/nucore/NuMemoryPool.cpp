@@ -217,13 +217,14 @@ NuMemoryPool::NuMemoryPool(IEventHandler *handler, u32 size, const char *debug_n
 }
 
 void *NuMemoryPool::PageAlloc(u32 size, const char *name) {
+    Page *candidate;
     pthread_mutex_lock(&mutex);
     page_list_stable = false;
 
     Page *page = pages;
     if (page != NULL && size > page->size - page->offset) {
         Page *previous = page;
-        Page *candidate = page->next;
+        candidate = page->next;
         while (candidate != NULL) {
             // The original rotates the first later page that is also full;
             // usable later pages are left in place.

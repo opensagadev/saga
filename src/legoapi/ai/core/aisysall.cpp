@@ -704,8 +704,9 @@ static AIPATHCNX *GetNextConnection(const AIPACKET *packet, i32 *direction) {
 }
 
 extern "C" i32 AISysGetCharacterWaypoint(const AIPACKET *packet, NUVEC *position) {
+    i32 direction;
     if (packet->path_info.connection != packet->fallback_path_info.connection) {
-        i32 direction;
+
         AIPATHCNX *connection = GetNextConnection(packet, &direction);
         if (connection != NULL) {
             if (position != NULL) {

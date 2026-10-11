@@ -165,6 +165,7 @@ static __attribute__((noinline)) void eduiFntPrintEx(void *font, float x, float 
 
 static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignment, float clip_x, float clip_width,
                                         char *format, ...) {
+    va_list arguments;
     if (!edui_donotdraw) {
         char text[1024];
         i32 screen_x = static_cast<i32>(x * 16.0f);
@@ -172,7 +173,7 @@ static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignm
         i32 screen_clip_x = static_cast<i32>(clip_x * 16.0f);
         i32 screen_clip_width = static_cast<i32>(clip_width * 16.0f);
         NuQFntPushPrintMode(2);
-        va_list arguments;
+
         va_start(arguments, format);
         NuVSPrintf(text, format, arguments);
         va_end(arguments);

@@ -127,8 +127,8 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
             angle += 0x3333;
         }
     }
-    NUVEC minimum = {explosion->position.x - radius, explosion->position.y - radius, explosion->position.z - radius};
     NUVEC maximum = {explosion->position.x + radius, explosion->position.y + radius, explosion->position.z + radius};
+    NUVEC minimum = {explosion->position.x - radius, explosion->position.y - radius, explosion->position.z - radius};
     i32 hit_character = 0;
     if ((explosion->field_0x24 & 0x100) == 0) {
         GameObject_s *target = Obj;

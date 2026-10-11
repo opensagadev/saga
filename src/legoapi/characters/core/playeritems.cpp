@@ -233,8 +233,8 @@ void KeepWeaponOut(GameObject_s *object) {
 
 i32 ReleaseHearts() {
     GameObject_s *player = Player[0];
-    i32 total_hitpoints;
     i32 missing_hitpoints;
+    i32 total_hitpoints;
     if (player != NULL && player->apiobj.field_0x287 == 0) {
         total_hitpoints = player->hitpoints;
         const i32 current_hitpoints = static_cast<i8>(player->current_hp);
@@ -246,8 +246,8 @@ i32 ReleaseHearts() {
 
     player = Player[1];
     if (player != NULL && player->apiobj.field_0x287 == 0) {
-        i32 hitpoints = player->hitpoints;
         i32 current_hitpoints = static_cast<i8>(player->current_hp);
+        i32 hitpoints = player->hitpoints;
         if (hitpoints != 0) {
             total_hitpoints += hitpoints;
             missing_hitpoints += hitpoints - current_hitpoints;

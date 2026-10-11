@@ -127,6 +127,7 @@ static NUFPCOMJMP Traffic_ConfigKeywords[] = {
 };
 
 void TrafficAnimSys_Draw(TRAFFICANIMSYS_s *system) {
+    i32 room;
     if (g_lowEndLevelBehaviour != 0 || system == NULL) {
         return;
     }
@@ -134,7 +135,7 @@ void TrafficAnimSys_Draw(TRAFFICANIMSYS_s *system) {
     if (traffic_portalling != 0) {
         u32 visible_rooms = 0;
         if (WORLD->current_gscn->num_rooms > 0) {
-            i32 room = 0;
+            room = 0;
             while (room < WORLD->current_gscn->num_rooms && room < 32) {
                 if (WORLD->rooms_visible_ptr[room] != 0) {
                     visible_rooms |= 1U << room;

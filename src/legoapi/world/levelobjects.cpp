@@ -37,8 +37,8 @@ void LevelObjects_InitForGame(LEVELOBJECT *tab, VARIPTR *buf, VARIPTR *buf_end, 
         }
     }
 
-    const i32 reflection_range = LEVOBJREF_LASTREFOBJ - LEVOBJREF_FIRSTREFOBJ;
     const i32 object_range = LEVOBJREF_LASTOBJ - LEVOBJREF_FIRSTOBJ;
+    const i32 reflection_range = LEVOBJREF_LASTREFOBJ - LEVOBJREF_FIRSTREFOBJ;
     if (object_range > reflection_range) {
         LEVOBJREF_LASTOBJ = LEVOBJREF_FIRSTOBJ + reflection_range;
     } else if (object_range < reflection_range) {

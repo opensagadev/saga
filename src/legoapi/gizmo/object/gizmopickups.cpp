@@ -88,8 +88,8 @@ void AddCoinsToPanel(i32 coins, nuvec_s *position, i32 player, float, GameObject
         DrawBuildUpTime = COINMSGTIME + 1.0f;
         for (i32 i = 0; i < 4; ++i) {
             const i32 type_index = CoinTab[i];
-            const i32 count = counts[type_index];
             GIZMO_PICKUP_TYPE *type = &GizmoPickupType[type_index];
+            const i32 count = counts[type_index];
             i32 base_model = static_cast<i16>(type->first_model_id);
             for (i32 j = 0; j < count; ++j) {
                 i32 model = base_model;

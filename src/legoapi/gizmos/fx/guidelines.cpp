@@ -141,8 +141,8 @@ static void GuideLines_StoreProgress(void *world_ptr, void *, void *progress_ptr
 
 GUIDELINE *GuideLine_FindNearest(nuvec_s *position, WORLDINFO_s *world, i32 *endpoint, float *distance) {
     GUIDELINE *nearest = NULL;
-    f32 nearest_distance = 1000000000.0f;
     i32 nearest_endpoint = -1;
+    f32 nearest_distance = 1000000000.0f;
     GUIDELINE *guideline = world->guidelines;
     for (i32 index = 0; index < world->guideline_count; ++index, ++guideline) {
         f32 candidate_distance = NuVecDistSqr(position, &guideline->start_position, NULL);

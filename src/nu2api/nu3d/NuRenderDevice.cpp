@@ -111,8 +111,8 @@ bool NuRenderDevice::IsExtensionSupported(const char *wanted) {
         }
 
         const bool at_start = (found == cursor);
-        const bool preceded_by_space = at_start || found[-1] == ' ';
         const char terminator = found[wanted_len];
+        const bool preceded_by_space = at_start || found[-1] == ' ';
         // Terminator is either end-of-string ('\0'), space, or other
         // whitespace — the original uses a case-insensitive space check
         // via (c & 0xDF) != 0 which effectively treats '\0' as

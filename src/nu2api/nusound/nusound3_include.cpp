@@ -571,6 +571,7 @@ void NuSound3ResumeStereoStream(i32 stream_index) {
 // flag; positional setup is selected independently by source_position.
 void NuSound3CreateVoice(nuvec_s *pos, i32 index, f32 falloff_a, f32 falloff_b, i32 volume_left, i32 volume_right,
                          f32 pitch, bool loop) {
+    f32 oldest_time;
     (void)volume_right;
     if (!(NuSound.GetNumAvailableOutputDevices() < 1 || index < 0 ||
           index >= static_cast<i32>(g_NuSoundSamples.length))) {
@@ -594,7 +595,6 @@ void NuSound3CreateVoice(nuvec_s *pos, i32 index, f32 falloff_a, f32 falloff_b, 
                 return;
             }
 
-            f32 oldest_time;
             NuSoundVoice *oldest_voice = NuSound.GetOldestVoice(sample, oldest_time);
             if (oldest_voice != NULL) {
                 NuSound3StopVoice(oldest_voice);

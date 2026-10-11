@@ -627,6 +627,7 @@ void GizBuildItPushAwayFromStart(GameObject_s *player, GIZBUILDIT_s *buildit) {
 }
 
 void GizBuildItPushAwayFromEnd(GameObject_s *player) {
+    f32 nearest_distance;
     if (WORLD->giz_buildit_sys == NULL)
         return;
     GIZBUILDIT_s *buildit = WORLD->giz_buildit_sys->buildits;
@@ -643,7 +644,7 @@ void GizBuildItPushAwayFromEnd(GameObject_s *player) {
             maximum.x = maximum.z = -1000000000.0f;
             f32 radius;
             if (buildit->state_flags & 0x10) {
-                f32 nearest_distance = 1000000000.0f;
+                nearest_distance = 1000000000.0f;
                 for (i32 j = 0; j < buildit->built_object_count; ++j) {
                     GIZBUILDITANIMDATA_s *data =
                         static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[j]->object_data);

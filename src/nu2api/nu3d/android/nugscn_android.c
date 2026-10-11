@@ -263,8 +263,8 @@ extern "C" void NuGScnRestoreTIDsPS(NUGSCN *scene) {
 static void PreWarmGeomsAndBakeVAOs(nudisplayscene_s *scene, nunativegscene_s *) {
     for (i32 clip_index = 0; clip_index < scene->nclip_objects; ++clip_index) {
         u8 *clip = reinterpret_cast<u8 *>(&scene->clip_objects[clip_index]);
-        u32 nitems = *reinterpret_cast<u32 *>(clip);
         u32 *materials = *reinterpret_cast<u32 **>(clip + 4);
+        u32 nitems = *reinterpret_cast<u32 *>(clip);
         i32 *items = *reinterpret_cast<i32 **>(clip + 8);
         for (u32 item_index = 0; item_index < nitems; ++item_index) {
             NUDISPLAYLISTITEM *item = &scene->items[items[item_index]];

@@ -119,8 +119,8 @@ void DoInput(WORLDINFO_s *world) {
     i32 player_state_changed = PlayersDropInOut();
 
     for (i32 player_index = 0; player_index < 2; ++player_index) {
-        GameObject_s *player = Player[player_index];
         nupad_s *pad = GamePad[player_index].pad;
+        GameObject_s *player = Player[player_index];
         const i32 input_result = player_index == 0 ? player_0_input : player_1_input;
         if (GamePads_IgnoreInputFn != NULL && GamePads_IgnoreInputFn() != 0) {
             continue;
@@ -187,8 +187,8 @@ void DieRumble(GameObject_s *object) {
 
 i32 charToInt(char const *text) {
     const i32 length = static_cast<i32>(strlen(text));
-    i32 first = 0;
     u32 sign = 1;
+    i32 first = 0;
     if (length > 0 && text[0] == '-') {
         first = 1;
         sign = static_cast<u32>(-1);

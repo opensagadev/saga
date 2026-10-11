@@ -221,8 +221,8 @@ static void Shards_Reset(void *context, void *, void *data) {
         current->random_offset = 0;
         current->collection_time = 0.0f;
         if (i < 128 && progress != NULL) {
-            u32 mask = 1u << (i & 31);
             i32 word = i >> 5;
+            u32 mask = 1u << (i & 31);
             shard->collected = (progress->collected[word] & mask) != 0;
             shard->visible = (progress->visible[word] & mask) != 0;
             shard->active = (progress->active[word] & mask) != 0;

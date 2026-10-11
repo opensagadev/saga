@@ -95,6 +95,7 @@ static void GizTurrets_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *, void 
 }
 
 static void GizTurrets_Update(void *context, void *system_ptr, float frame_time) {
+    bool should_fire;
     GIZTURRETSYS_s *system = static_cast<GIZTURRETSYS_s *>(system_ptr);
     if (system != NULL) {
         GIZTURRET_s *turret = system->turrets;
@@ -141,7 +142,7 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                             if (turret->fire_cooldown < 0.0f)
                                 turret->fire_cooldown = 0.0f;
                             i32 desired_pitch = 0, desired_yaw = base_yaw;
-                            bool should_fire = false;
+                            should_fire = false;
                             GameObject_s *autoaim_target = NULL;
                             if (turret->controller != NULL) {
                                 GameObject_s *controller = turret->controller;

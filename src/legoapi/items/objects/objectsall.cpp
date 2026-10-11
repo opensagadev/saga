@@ -98,9 +98,9 @@ pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, 
         f32 ymax = other->bounds_max.y - block->bounds_min.y;
         bool overlapx = x > (other->bounds_min.x - block->bounds_max.x) + 0.01f &&
                         x < (other->bounds_max.x - block->bounds_min.x) - 0.01f;
-        bool overlapy = y > other->bounds_min.y - block->bounds_max.y && y < ymax;
         bool overlapz = z > (other->bounds_min.z - block->bounds_max.z) + 0.01f &&
                         z < (other->bounds_max.z - block->bounds_min.z) - 0.01f;
+        bool overlapy = y > other->bounds_min.y - block->bounds_max.y && y < ymax;
         if (support && overlapz && overlapx && y - ymax > 0.0f) {
             if (!*support)
                 *support = other;
@@ -257,8 +257,8 @@ i32 FindNearestBreak(unsigned char *text, i32 index) {
     }
 
     i32 length = NuStrLen(reinterpret_cast<char *>(text)) - 1;
-    i32 forward = index;
     i32 backward = index;
+    i32 forward = index;
     i32 count = 20;
     do {
         forward += forward < length;

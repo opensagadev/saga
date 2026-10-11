@@ -659,8 +659,8 @@ NuEList<NuSoundListener, DefaultElist> *NuSoundSystem::GetListeners() {
 
 NuSoundListener *NuSoundSystem::GetNearestRealListener(NuEList<NuSoundListener, DefaultElist> const &listeners,
                                                        VuVec const &position) {
-    f32 nearest_distance = FLT_MAX;
     NuSoundListener *nearest = NULL;
+    f32 nearest_distance = FLT_MAX;
     NuSoundListener *listener = static_cast<NuSoundListener *>(listeners.begin->field_0x4);
 
     while (listener != listeners.end) {

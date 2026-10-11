@@ -1279,6 +1279,8 @@ i32 GizmoIsNameUnique(GIZMOSYS *gizmo_sys, char *name) {
 }
 
 i32 GizmoSysWriteInfo(GIZMOSYS_s *gizmo_sys, char *path, nugscn_s *scene) {
+    nuhspecial_s special;
+    GIZMO gizmo;
     if (gizmotypes == NULL) {
         return 0;
     }
@@ -1346,7 +1348,7 @@ i32 GizmoSysWriteInfo(GIZMOSYS_s *gizmo_sys, char *path, nugscn_s *scene) {
         if (length != 0) {
             EdFileWrite(special_type->prefix, length);
         }
-        GIZMO gizmo;
+
         gizmo.type_id = static_cast<u8>(gizspecial_gizmotype_id);
         i32 outputs = GizmoGetNumOutputs(gizmo_sys, &gizmo);
         EdFileWriteChar(static_cast<char>(outputs));
@@ -1367,7 +1369,7 @@ i32 GizmoSysWriteInfo(GIZMOSYS_s *gizmo_sys, char *path, nugscn_s *scene) {
     i32 special_count = NuGScnNumSpecials(scene);
     EdFileWriteInt(special_count);
     for (i32 special_index = 0; special_index < special_count; ++special_index) {
-        nuhspecial_s special;
+
         NuGScnGetSpecial(&special, scene, special_index);
         char *name = NuSpecialGetName(&special);
         i32 length = strlen(name) + 1;

@@ -136,6 +136,7 @@ static void SecurityDoors_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *worl
 }
 
 static void SecurityDoors_Update(void *world_data, void *, float) {
+    i32 right_angle;
     if (world_data == NULL) {
         return;
     }
@@ -156,7 +157,7 @@ static void SecurityDoors_Update(void *world_data, void *, float) {
         }
 
         i32 left_angle;
-        i32 right_angle;
+
         if (door->opening <= 0.0f) {
             left_angle = 0;
             right_angle = 0;
@@ -184,6 +185,7 @@ static void SecurityDoors_Update(void *world_data, void *, float) {
 }
 
 static void SecurityDoors_Draw(void *world_data, void *, float) {
+    GameObject_s *nearest_player;
     WORLDINFO *world = static_cast<WORLDINFO *>(world_data);
     SECURITYDOOR *door = world->security_doors;
     if (door == NULL) {
@@ -221,7 +223,6 @@ static void SecurityDoors_Draw(void *world_data, void *, float) {
                 }
                 NuMtxTranslate(&matrix, &door->player_position);
 
-                GameObject_s *nearest_player;
                 f32 distance_squared;
                 if (FindNearestPlayerToVec(&door->position, &nearest_player, distance_squared, true, 0x2000000)) {
                     const f32 distance_phase = NuFmin(distance_squared / 6.0f, 1.0f) * 16384.0f + 49152.0f + 16384.0f;
@@ -301,8 +302,8 @@ static void SecurityDoors_StoreProgress(void *world_data, void *, void *progress
 
     SECURITYDOOR *door = world->security_doors;
     for (i32 i = 0; i != count && i != 32; ++i, ++door) {
-        const u32 mask = 1U << i;
         const i32 word = i >> 5;
+        const u32 mask = 1U << i;
         if (!door->visible) {
             progress->state[0 + word] &= ~mask;
         }

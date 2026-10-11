@@ -251,6 +251,7 @@ increment_index:
 }
 
 void HeadMovement(GameObject_s *object) {
+    f32 previous;
     NUVEC direction;
     if (CInfo[object->character_context].flags & 0x200000) {
         return;
@@ -322,7 +323,7 @@ void HeadMovement(GameObject_s *object) {
             object->joint_modifiers[object->field_0x1089].joint_index = character->game_character->head_joint;
             object->joint_modifiers[object->field_0x1089].flags = static_cast<NUJOINTANIM_FLAGS>(0);
             f32 blend = character->game_character->field_0x58 * FRAMETIME;
-            f32 previous;
+
             if (blend > 1.0f) {
                 blend = 1.0f;
                 previous = 0.0f;

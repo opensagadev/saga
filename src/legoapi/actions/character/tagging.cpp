@@ -192,6 +192,7 @@ void Tag_ResetTransfers() {
 }
 
 void Tag_DrawIcon_Batman(GameObject_s *object) {
+    i32 count;
     if (VehicleArea != 0 || FadeSys.fade != 0.0f || static_cast<i8>(object->apiobj.field_0x1f8) >= 0 ||
         !(object->pause_context_state > 0.0f)) {
         return;
@@ -216,7 +217,7 @@ void Tag_DrawIcon_Batman(GameObject_s *object) {
         f32 max_y = object->apiobj.collision_position.y;
         f32 x_sum = 0.0f;
         f32 z_sum = 0.0f;
-        i32 count = 0;
+        count = 0;
         if (model->points_of_interest[0] != NULL) {
             const f32 x = object->joint_matrices[0].m30;
             count = 1;

@@ -1649,6 +1649,8 @@ static inline u8 Text_MenuColourLerp(u8 first, u8 second, f32 amount) {
 }
 
 void MenuDrawViewTextStrings(MENU_s *menu) {
+    i32 blue;
+    i32 green;
     menu->item_scale = 2.0f;
     menu->centre_offset = MENUDY * 2.0f;
     menu->draw_x = -0.75f;
@@ -1673,8 +1675,7 @@ void MenuDrawViewTextStrings(MENU_s *menu) {
 
         const bool registered = (Text_StringBits[i >> 5] & (1U << (i & 0x1f))) != 0;
         i32 red;
-        i32 green;
-        i32 blue;
+
         if (registered) {
             if (menu->selected_item != i) {
                 if (menu_pulse > 0.0f) {

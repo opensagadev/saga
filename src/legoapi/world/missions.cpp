@@ -183,8 +183,8 @@ i32 Mission_CurrentState(MISSIONSYS *ms) {
 }
 
 i32 Missions_NumCompleted(MISSIONSYS *ms, MISSIONSAVE *save, i32 count) {
-    i32 i;
     i32 total = 0;
+    i32 i;
 
     if (ms == NULL) {
         ms = MissionSys;
