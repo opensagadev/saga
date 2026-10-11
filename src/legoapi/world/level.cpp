@@ -90,8 +90,8 @@ static void Credits_Update_Game(WORLDINFO *) {
 static void Credits_Draw_Game(WORLDINFO *) {
     if (LevTime[0] > 0.0f) {
         const f32 time = CreditsTime;
-        f32 duration;
         f32 alpha;
+        f32 duration;
         Credits_GetInfo(&duration, NULL, &alpha);
         alpha *= 0.5f * LevTime[0];
         duration -= 1.0f;

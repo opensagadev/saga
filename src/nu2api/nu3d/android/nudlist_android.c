@@ -344,9 +344,9 @@ extern "C" void *DisplayListCreateSkinTransformPS(VARIPTR *buffer, NUMTX *skin_m
         const usize vertex_data_size = static_cast<usize>(geometry->vertex_stride) * geometry->vertex_count;
         buffer->addr += vertex_data_size;
 
+        u8 *destination = static_cast<u8 *>(copy->dynamic_vertex_data);
         u8 *source = reinterpret_cast<u8 *>(static_cast<usize>(geometry->vertex_buffer)) +
                      static_cast<usize>(geometry->vertex_stride) * geometry->base_vertex;
-        u8 *destination = static_cast<u8 *>(copy->dynamic_vertex_data);
         memmove(destination, source, vertex_data_size);
 
         for (i32 vertex = 0; vertex < geometry->vertex_count; ++vertex) {

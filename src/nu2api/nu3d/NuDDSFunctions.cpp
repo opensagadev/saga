@@ -272,8 +272,8 @@ void NuDDSGetMipLevel(i32 width, i32 height, i32 depth, NUTEXFORMAT format, i32 
             height = height >= minimum_height ? height : minimum_height;
             level_width = width;
             level_height = height;
-            width >>= 1;
             height >>= 1;
+            width >>= 1;
         }
 
         previous_size = bpp * level_width * level_height * mip_depth / 8;

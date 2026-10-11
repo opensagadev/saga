@@ -386,9 +386,10 @@ void NuMemoryPool::ReleaseUnreferencedPages() {
                 while (reinterpret_cast<usize>(block) < cursor_page_end) {
                     block = block->next;
                     ++free_block_count;
-                    if (block == NULL) {
-                        break;
+                    if (block != NULL) {
+                        continue;
                     }
+                    break;
                 }
             }
             cursors[i] = block;

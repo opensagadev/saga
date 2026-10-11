@@ -175,8 +175,8 @@ initialise_slot:
     slot->field_0xd4 = 0.0f;
     slot->position = *message->position;
     slot->position_a = slot->position;
-    slot->field_0xac = message->scale;
     slot->field_0xb4 = message->scale;
+    slot->field_0xac = message->scale;
     slot->elapsed = 0.0f;
     if ((message->flags & 0x80) == 0) {
         slot->duration = message->duration;
@@ -201,8 +201,8 @@ initialise_slot:
         slot->field_0xfb = 0;
     }
     slot->field_0xf9 = static_cast<u8>((message->flags & 1) == 0);
-    slot->field_0xfa = 0;
     slot->active = 1;
+    slot->field_0xfa = 0;
     slot->field_0xfc = message->field_0x4f;
     slot->icon = static_cast<u16>(message->icon);
     if (message->special == NULL) {

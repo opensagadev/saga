@@ -228,8 +228,8 @@ void MechAutoJumpManager::Process() {
                         AutoJumpStreakLink *new_streak = new AutoJumpStreakLink;
                         new_streak->link.prev = NULL;
                         new_streak->link.next = NULL;
-                        new_streak->connection = jump;
                         new_streak->path = path;
+                        new_streak->connection = jump;
                         new_streak->path_connection = connection;
                         new_streak->direction = direction;
                         new_streak->handle = NULL;

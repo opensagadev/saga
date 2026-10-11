@@ -51,9 +51,8 @@ bool MechInputTouchBonusCavalryController::OnRelease(GameObject_s &, TouchHolder
 }
 
 void MechInputTouchBonusCavalryController::Update(NuInputTouchData const *) {
-    if (player != NULL && NewMode == 0 && NewLData == NULL && FadeSys.fade == 0.0f && Paused == 0 &&
-        CUTSTOPGAME == 0 && GetMenuID() != 12 && GetMenuID() != 16 && TouchHacks::TouchControlsActive &&
-        MiniCutCam != 2 &&
+    if (player != NULL && NewMode == 0 && NewLData == NULL && FadeSys.fade == 0.0f && Paused == 0 && CUTSTOPGAME == 0 &&
+        GetMenuID() != 12 && GetMenuID() != 16 && TouchHacks::TouchControlsActive && MiniCutCam != 2 &&
         *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(MechSystems::Get()) + 0x271c) == 0) {
         Activate();
     } else {
@@ -84,18 +83,17 @@ void MechInputTouchBonusCavalryController::Update(NuInputTouchData const *) {
     GameObject_s *facing_object = player;
     const u16 angle = facing_object->apiobj.facing_angle;
     const f32 radius = facing_object->field_0x1008;
-    VuVec world_target(facing_object->apiobj.position.x + radius * NU_SIN_LUT(angle),
-                       facing_object->apiobj.position.y,
+    VuVec world_target(facing_object->apiobj.position.x + radius * NU_SIN_LUT(angle), facing_object->apiobj.position.y,
                        facing_object->apiobj.position.z + radius * NU_COS_LUT(angle), 1.0f);
     VuVec projected;
     NuCameraTransformScreenClip(&projected.xyz, &world_target.xyz, 1, NULL);
     GameObject_s *screen_object = player;
-    const f32 forward_x = projected.x - screen_object->camera_screen_position.x;
     const f32 forward_y = projected.y - screen_object->camera_screen_position.y;
+    const f32 forward_x = projected.x - screen_object->camera_screen_position.x;
     const f32 forward_length = NuFsqrt(forward_x * forward_x + forward_y * forward_y);
     const f32 inverse_forward_length = forward_length == 0.0f ? 0.0f : 1.0f / forward_length;
-    const f32 normalized_forward_x = forward_x * inverse_forward_length;
     const f32 normalized_forward_y = forward_y * inverse_forward_length;
+    const f32 normalized_forward_x = forward_x * inverse_forward_length;
     const f32 along = direction_x * normalized_forward_x + direction_y * normalized_forward_y;
     const f32 across = direction_x * normalized_forward_y - direction_y * normalized_forward_x;
     const f32 intensity = MAX(0.0f, MIN(1.0f, drag_length / drag_scale));

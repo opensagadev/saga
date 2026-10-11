@@ -21,8 +21,8 @@ NuSoundBus *NuSoundSystem::GetBus(const char *name) {
 }
 
 NuSoundBus::NuSoundBus(const char *name, bool is_master) {
-    effect_begin = &effect_begin_prev;
     effect_end_prev = &effect_begin_prev;
+    effect_begin = &effect_begin_prev;
     intrusive_next = NULL;
     intrusive_prev = NULL;
     effect_begin_prev = NULL;
@@ -43,8 +43,8 @@ NuSoundBus::NuSoundBus(const char *name, bool is_master) {
 }
 
 NuSoundBus::NuSoundBus(const char *name, NuSoundBus *parent) {
-    effect_begin = &effect_begin_prev;
     effect_end_prev = &effect_begin_prev;
+    effect_begin = &effect_begin_prev;
     intrusive_next = NULL;
     intrusive_prev = NULL;
     effect_begin_prev = NULL;
