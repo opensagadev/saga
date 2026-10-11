@@ -69,6 +69,7 @@ static f32 ForceBackRadius2 = 0.0f;
 #include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nuang.h"
 #include "nu2api/numath/numtx.h"
+#include "nu2api/numath/numtx_inline.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 
@@ -1687,7 +1688,7 @@ static __used__ void ZapCode(GameObject_s *object, i32 pressed, i32 retract_weap
             NUVEC forward;
             object->force_target = NULL;
             NuVecRotateY(&forward, &v001, object->apiobj.movement_facing_angle);
-            f32 nearest_distance = 0.2f;
+            f32 nearest_distance = 0.36f;
             for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
                 GameObject_s *candidate = &Obj[index];
                 if (candidate == object) {
@@ -1791,7 +1792,7 @@ static __used__ void ZapCode(GameObject_s *object, i32 pressed, i32 retract_weap
                     if (Cheat_IsOn(0x15) != 0 && (target->apiobj.character_data->model_flags & 0x10) != 0 &&
                         (target->apiobj.character_data->game_character->flags_090 & 0x40) == 0) {
                         target->action_movement_state = 2;
-                        const f32 duration = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 0.666f + 0.2f;
+                        const f32 duration = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 0.3f + 0.2f;
                         target->field_0x768 = duration;
                         target->context_variant_flags =
                             (target->context_variant_flags & ~1) | (object->id == id_R2Q5 ? 1 : 0);
@@ -2212,43 +2213,10 @@ void MovePlayer_ROLLING(GameObject_s *object) {
     angles.y = NuAtan2D(object->apiobj.velocity.x, object->apiobj.velocity.z);
     NUVEC &local_velocity = local.velocity;
     NuVecRotateY(&local_velocity, &object->apiobj.velocity, -angles.y);
-    // Retail 0x154547..0x1548c2 rotates all four rows in this routine.
-    // Keep the original components until both components of each row are written.
-    const auto rotate_y = [&matrix](i32 angle) {
-        const f32 cosine = NU_COS_LUT(angle);
-        const f32 sine = NU_SIN_LUT(angle);
-        const f32 m00 = matrix.m00;
-        const f32 m10 = matrix.m10;
-        const f32 m20 = matrix.m20;
-        const f32 m30 = matrix.m30;
-        matrix.m00 = m00 * cosine + matrix.m02 * sine;
-        matrix.m02 = matrix.m02 * cosine - m00 * sine;
-        matrix.m10 = m10 * cosine + matrix.m12 * sine;
-        matrix.m12 = matrix.m12 * cosine - m10 * sine;
-        matrix.m20 = m20 * cosine + matrix.m22 * sine;
-        matrix.m22 = matrix.m22 * cosine - m20 * sine;
-        matrix.m30 = m30 * cosine + matrix.m32 * sine;
-        matrix.m32 = matrix.m32 * cosine - m30 * sine;
-    };
-    rotate_y(-angles.y);
-    const auto rotate_x = [&matrix](i32 rotation) {
-        const f32 sine = NU_SIN_LUT(rotation);
-        const f32 cosine = NU_SIN_LUT(static_cast<i32>(static_cast<u32>(rotation) + 0x4000u));
-        const f32 m01 = matrix.m01;
-        const f32 m11 = matrix.m11;
-        const f32 m31 = matrix.m31;
-        const f32 m21 = matrix.m21;
-        matrix.m01 = cosine * m01 - matrix.m02 * sine;
-        matrix.m02 = m01 * sine + matrix.m02 * cosine;
-        matrix.m11 = cosine * m11 - matrix.m12 * sine;
-        matrix.m12 = m11 * sine + matrix.m12 * cosine;
-        matrix.m21 = m21 * cosine - matrix.m22 * sine;
-        matrix.m22 = m21 * sine + matrix.m22 * cosine;
-        matrix.m31 = m31 * cosine - matrix.m32 * sine;
-        matrix.m32 = m31 * sine + matrix.m32 * cosine;
-    };
-    rotate_x(static_cast<i32>(((local_velocity.z * FRAMETIME) / object->apiobj.collision_radius) * 10430.3779296875f));
-    rotate_y(angles.y);
+    NuMtxRotateYInline(&matrix, -angles.y);
+    NuMtxRotateXInline(&matrix, static_cast<i32>(((local_velocity.z * FRAMETIME) / object->apiobj.collision_radius) *
+                                                 10430.3779296875f));
+    NuMtxRotateYInline(&matrix, angles.y);
     NuMtxGetEulerXYZ(&matrix, &angles.x, &angles.y, &angles.z);
     object->apiobj.pitch_angle = angles.x;
     object->apiobj.field_0x276 = angles.y;
@@ -5094,6 +5062,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
         object->ai_combo_cooldown = 0.0f;
     else if (object->ai_combo_cooldown > 0.0f)
         object->ai_combo_cooldown -= FRAMETIME;
+    const u8 previous_context_flags = object->context_flags;
     object->context_flags &= ~2;
     if (object->character_context == CHARACTER_CONTEXT_COMBO) {
         object->field_0xef9 |= 8;
@@ -5208,7 +5177,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                 if (object->character_context == CHARACTER_CONTEXT_NONE && action_held != 0 &&
                     (object->id != id_IMPERIALGUARD || object->combo_stage != 2))
                     StartHold(object);
-                if ((object->context_flags & 0x40) != 0 && (object->context_flags & 0x40) == 0) {
+                if ((object->context_flags & 0x40) != 0 && (previous_context_flags & 0x40) == 0) {
                     NewRumble(object->pad_gamepad->pad, object->combo_branch == 6 ? 0.7f : 0.35f, 0);
                 }
                 if ((object->apiobj.flags_low & 0x80) == 0 &&
@@ -10875,13 +10844,13 @@ static __used__ void PooCode(GameObject_s *object) {
                        object->context_animation_timer >= object->airborne_action_duration * 0.5f) {
                 PlaySfx("Lego_Poo", &position);
                 NUVEC velocity;
-                velocity.x = (f32)qrand() * (1.0f / 65536.0f) - 0.5f - NU_SIN_LUT(object->apiobj.field_0x276);
-                velocity.y = (f32)qrand() * (1.0f / 65536.0f) - 0.5f;
-                velocity.z = (f32)qrand() * (1.0f / 65536.0f) - 0.5f - NU_COS_LUT(object->apiobj.field_0x276);
+                velocity.x = (f32)qrand() * (1.0f / 65535.0f) - 0.5f - NU_SIN_LUT(object->apiobj.field_0x276);
+                velocity.y = (f32)qrand() * (1.0f / 65535.0f) - 0.5f;
+                velocity.z = (f32)qrand() * (1.0f / 65535.0f) - 0.5f - NU_COS_LUT(object->apiobj.field_0x276);
                 if (Cheat_IsOn(9)) {
                     NUVEC direction;
                     NuVecNorm(&direction, &velocity);
-                    f32 random = (f32)qrand() * (1.0f / 65536.0f);
+                    f32 random = (f32)qrand() * (1.0f / 65535.0f);
                     i32 count = random < 0.2f ? 1000 : random < 0.8f ? 100 : 10;
                     AddPickups(count, 0, 0, 0, &position, &direction, 1.0f, -1, 2000000.0f, 0.0f, object, 0, 0, true);
                 }
@@ -10908,34 +10877,8 @@ static __used__ void PooCode(GameObject_s *object) {
                     matrix.m32 = 0.0f;
                     matrix.m33 = 1.0f;
 
-                    i32 angle_y = qrand();
-                    f32 siny = NU_SIN_LUT(angle_y);
-                    f32 cosy = NU_COS_LUT(angle_y);
-                    f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20, m30 = matrix.m30;
-                    matrix.m00 = m00 * cosy + matrix.m02 * siny;
-                    matrix.m02 = matrix.m02 * cosy - m00 * siny;
-                    matrix.m10 = m10 * cosy + matrix.m12 * siny;
-                    matrix.m12 = matrix.m12 * cosy - m10 * siny;
-                    matrix.m20 = m20 * cosy + matrix.m22 * siny;
-                    matrix.m22 = matrix.m22 * cosy - m20 * siny;
-                    matrix.m30 = m30 * cosy + matrix.m32 * siny;
-                    matrix.m32 = matrix.m32 * cosy - m30 * siny;
-
-                    i32 angle_z = qrand();
-                    f32 sinz = NU_SIN_LUT(angle_z);
-                    f32 cosz = NU_COS_LUT(angle_z);
-                    m00 = matrix.m00;
-                    m10 = matrix.m10;
-                    m20 = matrix.m20;
-                    m30 = matrix.m30;
-                    matrix.m00 = m00 * cosz - matrix.m01 * sinz;
-                    matrix.m01 = m00 * sinz + matrix.m01 * cosz;
-                    matrix.m10 = m10 * cosz - matrix.m11 * sinz;
-                    matrix.m11 = m10 * sinz + matrix.m11 * cosz;
-                    matrix.m20 = m20 * cosz - matrix.m21 * sinz;
-                    matrix.m21 = m20 * sinz + matrix.m21 * cosz;
-                    matrix.m30 = m30 * cosz - matrix.m31 * sinz;
-                    matrix.m31 = m30 * sinz + matrix.m31 * cosz;
+                    NuMtxRotateYInline(&matrix, qrand());
+                    NuMtxRotateZInline(&matrix, qrand());
 
                     NuMtxTranslate(&matrix, &position);
                     NUVEC radius_position;

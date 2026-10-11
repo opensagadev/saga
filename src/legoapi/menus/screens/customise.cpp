@@ -309,47 +309,14 @@ static u16 *Customiser_GetSelection(i32 side) {
     return Game.customizer[side].pieces;
 }
 
-static CUSTOMPIECE *Customiser_GetSelectedPiece(CUSTOMISER *customiser, const u16 *selection, i32 category) {
-    if (customiser->piece_sets[category] == NULL || customiser->piece_counts[category] <= 0) {
-        return NULL;
-    }
-    i32 index = selection[category];
-    if (index < 0 || index >= customiser->piece_counts[category]) {
-        index = 0;
-    }
-    return &customiser->piece_sets[category][index];
-}
-
-static u32 Customiser_GetLayerMask(CUSTOMISER *customiser, GAMECHARACTERDATA *runtime, const u16 *selection) {
-    u32 layer_mask = 0;
-    for (i32 category = 0; category < 9; ++category) {
-        // Slot five is the cape selection; its hierarchy layer is supplied by the character data.
-        if (category != 5 && customiser->layer_indices[category] != -1) {
-            layer_mask |= 1u << (static_cast<u8>(customiser->layer_indices[category]) & 31);
-        }
-    }
-    if (layer_mask == 0) {
-        layer_mask = 1;
-    }
-    if (runtime->cape_layer != -1) {
-        const u32 cape_mask = 1u << (static_cast<u8>(runtime->cape_layer) & 31);
-        layer_mask |= cape_mask;
-        CUSTOMPIECE *cape = Customiser_GetSelectedPiece(customiser, selection, 5);
-        if (cape != NULL && (cape->layer_flags & 0x40) != 0) {
-            layer_mask &= ~cape_mask;
-        }
-    }
-    return layer_mask;
-}
-
 #define CUSTOM_SETUP_LAYER(category)                                                                                   \
     if (customiser->layer_indices[category] != -1)                                                                     \
-        layer_mask |= 1u << (static_cast<u8>(customiser->layer_indices[category]) & 31);
+        layer_mask |= 1u << customiser->layer_indices[category];
 
 #define CUSTOM_SETUP_PIECE(category)                                                                                   \
     {                                                                                                                  \
         if (customiser->piece_counts[category] > 0) {                                                                  \
-            CUSTOMPIECE *piece = &customiser->piece_sets[category][selection[category]];                               \
+            CUSTOMPIECE *piece = category == 1 ? torso : &customiser->piece_sets[category][selection[category]];       \
             character->model_flags |= piece->model_flags;                                                              \
             if ((character->model_flags & CHARACTER_MODEL_FLAG_ALTERNATE_WEAPON) != 0)                                 \
                 character->model_flags |= 0x10000000;                                                                  \
@@ -376,7 +343,7 @@ static u32 Customiser_GetLayerMask(CUSTOMISER *customiser, GAMECHARACTERDATA *ru
         if (layer_mask == 0)                                                                                           \
             layer_mask = 1;                                                                                            \
         if (runtime->cape_layer != -1) {                                                                               \
-            const u32 cape_mask = 1u << (static_cast<u8>(runtime->cape_layer) & 31);                                   \
+            const u32 cape_mask = 1u << runtime->cape_layer;                                                           \
             layer_mask |= cape_mask;                                                                                   \
             CUSTOMPIECE *cape = &customiser->piece_sets[5][selection[5]];                                              \
             if ((cape->layer_flags & 0x40) != 0)                                                                       \
@@ -389,7 +356,7 @@ static u32 Customiser_GetLayerMask(CUSTOMISER *customiser, GAMECHARACTERDATA *ru
         runtime->layer_mask_dead = layer_mask;                                                                         \
         character->model_flags &= 3;                                                                                   \
         CUSTOMPIECE *torso = &customiser->piece_sets[1][selection[1]];                                                 \
-        const u16 torso_replaces_base = torso->layer_flags & 1;                                                        \
+        const u16 torso_replaces_base = torso->availability_flags & 1;                                                 \
         if (customiser->piece_counts[0] > 0) {                                                                         \
             CUSTOMPIECE *head = &customiser->piece_sets[0][selection[0]];                                              \
             if (!torso_replaces_base)                                                                                  \
@@ -573,35 +540,54 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
 
 void Customiser_Draw3D(CUSTOMISER *customiser) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (customiser == NULL || world == NULL || world->camera_splines == NULL || world->camera_splines[18] == NULL)
+    if (customiser == NULL || world->camera_splines[18] == NULL)
         return;
     i32 active_side, active_count;
     Customiser_GetActiveWeirdoIndex(&active_side, &active_count);
     i32 preview_side = -1;
-    if (active_count == 1 && active_side >= 0 && active_side < 2)
-        preview_side = MenuPacket.customise_other_player[active_side] != 0 ? 1 - active_side : active_side;
-    for (i32 side = 0; side < 2; ++side) {
+    if (active_count == 1)
+        preview_side = MenuPacket.customise_other_player[active_side] != 0 ? active_side == 0 : active_side;
+    CUSTOMISESAVE_s *settings = Game.customizer;
+    for (i32 side = 0; side < 2; ++side, ++settings) {
         const i32 character_id = customiser->character_ids[side];
-        if (character_id < 0 || character_id >= CHARCOUNT)
-            continue;
         CHARACTERMODEL_s *model = APICharacterLoaded(character_id);
         if (model == NULL || customiser->animation_state[side] != 0)
             continue;
-        if (GCDataList == NULL)
-            continue;
         GAMECHARACTERDATA *runtime = &GCDataList[character_id];
         i32 helmet = runtime->helmet_locator;
-        if (helmet < 0 || helmet >= 16 || model->points_of_interest[helmet] == NULL)
+        if (helmet != -1 && model->points_of_interest[helmet] == NULL)
             helmet = -1;
         const i32 selected = CustomiseMenuY[side];
         rtldata_s light_data;
         rtlResetEx(&light_data, 1);
         rtlApplySetScale(world->rtl_set, &light_data, &CustomisePos[side], NULL, -1, 1.0f);
         SetLights_RTLDATA(&light_data, 1.0f);
-        const u16 *selection = Customiser_GetSelection(side);
-        u32 layer_mask = Customiser_GetLayerMask(customiser, runtime, selection);
-        if (runtime->cape_layer != -1 && selected == 5 && GetMenuID() == 12 && customiser_quit == 0)
-            layer_mask |= 1u << (static_cast<u8>(runtime->cape_layer) & 31);
+        const u16 *selection = settings->pieces;
+        u32 layer_mask = 0;
+        if (customiser->layer_indices[0] != -1)
+            layer_mask |= 1u << customiser->layer_indices[0];
+        if (customiser->layer_indices[1] != -1)
+            layer_mask |= 1u << customiser->layer_indices[1];
+        if (customiser->layer_indices[2] != -1)
+            layer_mask |= 1u << customiser->layer_indices[2];
+        if (customiser->layer_indices[3] != -1)
+            layer_mask |= 1u << customiser->layer_indices[3];
+        if (customiser->layer_indices[4] != -1)
+            layer_mask |= 1u << customiser->layer_indices[4];
+        if (customiser->layer_indices[6] != -1)
+            layer_mask |= 1u << customiser->layer_indices[6];
+        if (customiser->layer_indices[7] != -1)
+            layer_mask |= 1u << customiser->layer_indices[7];
+        if (customiser->layer_indices[8] != -1)
+            layer_mask |= 1u << customiser->layer_indices[8];
+        if (layer_mask == 0)
+            layer_mask = 1;
+        if (runtime->cape_layer != -1) {
+            layer_mask |= 1u << runtime->cape_layer;
+            if ((selected == -1 || GetMenuID() != 12 || customiser_quit != 0 || selected != 5) &&
+                (customiser->piece_sets[5][selection[5]].layer_flags & 0x40) != 0)
+                layer_mask &= ~(1u << runtime->cape_layer);
+        }
         // The reference's preview matrix lives in a 16-byte-aligned frame.
         NUMTX_ALIGNED16 matrix;
         NuMtxSetRotationY(&matrix, CustomiseYRot[side] + 0x8000);
@@ -611,22 +597,23 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
             continue;
         if (helmet != -1) {
             for (i32 category = 0; category < 9; ++category) {
-                if (customiser->categories[category] == NULL || customiser->categories[category]->uses_special == 0 ||
-                    world->customiser_resources[category] == NULL || customiser->piece_counts[category] <= 0)
+                if (world->customiser_resources[category] == NULL || customiser->piece_counts[category] <= 0 ||
+                    customiser->categories[category]->uses_special == 0)
                     continue;
                 const i32 piece_index = selection[category];
-                if (piece_index < 0 || piece_index >= customiser->piece_counts[category])
-                    continue;
                 CUSTOMPIECERESOURCE *resource = &world->customiser_resources[category][piece_index];
                 if (NuSpecialExistsFn(&resource->special) == 0)
                     continue;
-                const bool preview = GetMenuID() == 12 && customiser_quit == 0 && category == selected &&
-                                     (active_count == 2 || side == preview_side);
-                if (preview)
+                CUSTOMPIECE *pieces = customiser->piece_sets[category];
+                bool preview = false;
+                if (GetMenuID() == 12 && customiser_quit == 0 && category == selected &&
+                    (active_count == 2 || side == preview_side)) {
                     NuFmod(CustomiseMenuTime[side], 0.3f);
-                if (category == 0 && !preview) {
-                    CUSTOMPIECE *piece = Customiser_GetSelectedPiece(customiser, selection, category);
-                    if (piece != NULL && (piece->layer_flags & 0x20) != 0)
+                    preview = true;
+                }
+                if (!preview && category == 0) {
+                    CUSTOMPIECE *piece = &pieces[piece_index];
+                    if ((piece->layer_flags & 0x20) != 0)
                         continue;
                 }
                 matrix = customiser->joint_matrices[side][helmet];
@@ -635,17 +622,20 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
                 NuSpecialDrawAt(&resource->special, &matrix);
             }
         }
-        const i32 hand = runtime->weapon_joints[0];
-        CUSTOMPIECE *weapon = Customiser_GetSelectedPiece(customiser, selection, 2);
-        if (weapon != NULL && hand >= 0 && hand < 16 && model->points_of_interest[hand] != NULL &&
-            weapon->weapon_model >= 0 && world->lev_objs != NULL) {
+        if (customiser->piece_counts[2] > 0) {
+            const i32 hand = runtime->weapon_joints[0];
+            if (hand == -1 || model->points_of_interest[hand] == NULL)
+                continue;
+            CUSTOMPIECE *weapon = &customiser->piece_sets[2][selection[2]];
+            if (weapon->weapon_model == -1)
+                continue;
             LEVEL_OBJECT_RUNTIME_s *object = &world->lev_objs[weapon->weapon_model];
             if (object->active != 0) {
                 matrix = customiser->joint_matrices[side][hand];
                 NuSpecialDrawAt(&object->special, &matrix);
-                i32 blade = -1;
+                i32 blade;
                 if (LightSabre_ColourFromObj(weapon->weapon_model, &blade) != -1) {
-                    if (blade >= 0)
+                    if (blade != -1)
                         NuSpecialDrawAt(&world->lev_objs[blade].special, &matrix);
                     NuSpecialDrawAt(&world->lev_objs[17].special, &matrix);
                 }
@@ -750,7 +740,7 @@ void CustomiserMenu_Draw(MENU_s *) {
                             pulse = 1.0f + excess;
                     }
                 }
-                const f32 size = pulse * 0.1f * icon_size;
+                const f32 size = pulse * 1.25f * icon_size;
                 const f32 x = CustomiseScreenPos[side].x;
                 const f32 alpha = (1.0f - CustomiseNameBoardMul[side]) * Customise_NameAlpha;
                 DrawPanel3DObject(x, -0.6f, 1.0f, size, size, size, 0, 0, 0, &WORLD->lev_objs[167].special, 0, alpha);

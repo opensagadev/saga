@@ -340,7 +340,7 @@ static void SecurityDoors_Reset(void *world_data, void *, void *progress_data) {
         if (height == 2000000.0f) {
             door->player_position.y = 2000000.0f;
         } else {
-            door->player_position.y = height + 0.01f;
+            door->player_position.y = height + 0.005f;
             FindAnglesZX(&ShadNorm, &door->terrain_angle_z, &door->terrain_angle_x);
         }
 

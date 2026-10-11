@@ -70,7 +70,10 @@ uv1deb *GenDebIndexRadial(debkeydatatype_s *key, debinftype *effect, float time)
         key->field_18a = 0;
     if (effect->particle_type == 7)
         return NULL;
-    dma_particle_s *particle = DebrisParticleAt(key, key->field_18a++, effect->particle_type);
+    auto *particle_chunk = key->particle_chunks[key->field_18a / 32];
+    const i32 particle_offset = key->field_18a % 32;
+    ++key->field_18a;
+    dma_particle_s *particle = &particle_chunk->particles[particle_offset];
     particle->start_time = time;
     key->emission_epoch = time;
     particle->inverse_lifetime = 64.0f / effect->particle_lifetime;
@@ -87,7 +90,9 @@ uv1deb *GenDebIndexRadial(debkeydatatype_s *key, debinftype *effect, float time)
     NuVecRotateZ(&vector, &vector, angle_z);
     NuVecRotateY(&vector, &vector, angle_y);
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
-    particle->position = vector;
+    particle->position.x = vector.x;
+    particle->position.y = vector.y;
+    particle->position.z = vector.z;
     random = NuRandFloatSeeded(&debrisseed);
     vector.x = 0.0f;
     vector.y = (random + random) * effect->field_04c - effect->field_04c + effect->field_048;
@@ -95,7 +100,9 @@ uv1deb *GenDebIndexRadial(debkeydatatype_s *key, debinftype *effect, float time)
     NuVecRotateZ(&vector, &vector, angle_z);
     NuVecRotateY(&vector, &vector, angle_y);
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
-    particle->momentum = vector;
+    particle->momentum.x = vector.x;
+    particle->momentum.y = vector.y;
+    particle->momentum.z = vector.z;
     if (key->momentum_adjuster != NULL)
         key->momentum_adjuster(key, effect, reinterpret_cast<uv1deb *>(particle));
     particle->position.x += key->emission_position.x;
@@ -108,7 +115,7 @@ uv1deb *GenDebIndexRadial(debkeydatatype_s *key, debinftype *effect, float time)
         if (key->field_18a >= key->particle_count)
             key->field_18a = 0;
         dma_particle_s *copy = DebrisParticleAt(key, key->field_18a++, 0);
-        *copy = *particle;
+        *copy = particle_chunk->particles[particle_offset];
         copy->start_time += static_cast<f32>(trail + 1) * effect->trail_time;
     }
     if (effect->native_data == NULL)
@@ -217,7 +224,9 @@ uv1deb *GenDebIndexBounceY(debkeydatatype_s *key, debinftype *effect, float time
     random = NuRandFloatSeeded(&debrisseed);
     vector.z = (random + random) * effect->field_060 - effect->field_060;
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
-    particle->position = vector;
+    particle->position.x = vector.x;
+    particle->position.y = vector.y;
+    particle->position.z = vector.z;
     random = NuRandFloatSeeded(&debrisseed);
     vector.x = (random + random) * effect->field_04c - effect->field_04c;
     random = NuRandFloatSeeded(&debrisseed);
@@ -225,7 +234,9 @@ uv1deb *GenDebIndexBounceY(debkeydatatype_s *key, debinftype *effect, float time
     random = NuRandFloatSeeded(&debrisseed);
     vector.z = (random + random) * effect->field_054 - effect->field_054;
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
-    particle->momentum = vector;
+    particle->momentum.x = vector.x;
+    particle->momentum.y = vector.y;
+    particle->momentum.z = vector.z;
 
     f32 first, second;
     if (SolveQuadratic(effect->field_0a0, particle->momentum.y, particle->position.y - key->collision_plane, &first,
@@ -287,7 +298,9 @@ uv1deb *GenDebIndexBounceXZ(debkeydatatype_s *key, debinftype *effect, float tim
     random = NuRandFloatSeeded(&debrisseed);
     vector.z = (random + random) * effect->field_060 - effect->field_060;
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
-    particle->position = vector;
+    particle->position.x = vector.x;
+    particle->position.y = vector.y;
+    particle->position.z = vector.z;
     random = NuRandFloatSeeded(&debrisseed);
     vector.x = (random + random) * effect->field_04c - effect->field_04c;
     random = NuRandFloatSeeded(&debrisseed);
@@ -295,7 +308,9 @@ uv1deb *GenDebIndexBounceXZ(debkeydatatype_s *key, debinftype *effect, float tim
     random = NuRandFloatSeeded(&debrisseed);
     vector.z = (random + random) * effect->field_054 - effect->field_054;
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
-    particle->momentum = vector;
+    particle->momentum.x = vector.x;
+    particle->momentum.y = vector.y;
+    particle->momentum.z = vector.z;
 
     NuVecRotateY(&normal, &normal, key->reflection_y);
     NUVEC plane_position;
@@ -360,25 +375,7 @@ uv1deb *GenDebIndexSpheroid(debkeydatatype_s *key, debinftype *effect, float tim
     i32 angle_y = static_cast<i32>(NuRandFloatSeeded(&debrisseed) * 65536.0f);
     f32 random = NuRandFloatSeeded(&debrisseed);
     f32 sine = random + random - 1.0f;
-    f32 absolute = NuFabs(sine);
-    f32 root = NuFsqrt(1.0f - sine * sine);
-    f32 small = root < absolute ? root : absolute;
-    f32 region = (absolute - 0.70710677f) * 3.40282e+38f;
-    region = region < 1.0f ? (region > -1.0f ? region : -1.0f) : 1.0f;
-    f32 sign = sine * 3.40282e+38f;
-    sign = sign < 1.0f ? (sign > -1.0f ? sign : -1.0f) : 1.0f;
-    f32 quadrant = region * sign;
-    f32 argument = small * quadrant;
-    f32 squared = argument * argument;
-    f32 cubed = argument * squared;
-    f32 fourth = squared * squared;
-    f32 fifth = squared * cubed;
-    f32 radians = (quadrant + sign) * 0.785398f - argument;
-    radians += (argument * -0.166667f) * squared;
-    radians = (-0.075f * squared) * cubed + radians;
-    radians += (-0.0446429f * cubed) * fourth;
-    radians += (-0.0303819f * fourth) * fifth;
-    i16 angle_z = static_cast<i16>(static_cast<i32>(radians * 10430.4f));
+    i16 angle_z = NuASin(sine);
     NuVecRotateZ(&vector, &vector, angle_z);
     NuVecRotateY(&vector, &vector, angle_y);
     NUMTX scale;
@@ -388,7 +385,9 @@ uv1deb *GenDebIndexSpheroid(debkeydatatype_s *key, debinftype *effect, float tim
     scale.m22 = effect->field_060;
     NuVecMtxTransformVU0(&vector, &vector, &scale);
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
-    particle->position = vector;
+    particle->position.x = vector.x;
+    particle->position.y = vector.y;
+    particle->position.z = vector.z;
     random = NuRandFloatSeeded(&debrisseed);
     vector.x = (random + random) * effect->field_04c - effect->field_04c;
     random = NuRandFloatSeeded(&debrisseed);
@@ -396,12 +395,18 @@ uv1deb *GenDebIndexSpheroid(debkeydatatype_s *key, debinftype *effect, float tim
     random = NuRandFloatSeeded(&debrisseed);
     vector.z = (random + random) * effect->field_054 - effect->field_054;
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
-    particle->momentum = vector;
+    particle->momentum.x = vector.x;
+    particle->momentum.y = vector.y;
+    particle->momentum.z = vector.z;
     if (key->momentum_adjuster != NULL) {
         key->momentum_adjuster(key, effect, reinterpret_cast<uv1deb *>(particle));
     }
-    NuVecAdd(&particle->position, &particle->position, &key->emission_position);
-    NuVecAdd(&particle->momentum, &particle->momentum, &key->momentum);
+    particle->position.x += key->emission_position.x;
+    particle->position.y += key->emission_position.y;
+    particle->position.z += key->emission_position.z;
+    particle->momentum.x += key->momentum.x;
+    particle->momentum.y += key->momentum.y;
+    particle->momentum.z += key->momentum.z;
 
     for (i32 trail = 0; trail < static_cast<i8>(effect->trail_count); ++trail) {
         i16 trail_index = key->field_18a;
@@ -433,7 +438,10 @@ uv1deb *GenDebIndexRadialStar(debkeydatatype_s *key, debinftype *effect, float t
         key->field_18a = 0;
     if (effect->particle_type == 7)
         return NULL;
-    dma_particle_s *particle = DebrisParticleAt(key, key->field_18a++, effect->particle_type);
+    auto *particle_chunk = key->particle_chunks[key->field_18a / 32];
+    const i32 particle_offset = key->field_18a % 32;
+    ++key->field_18a;
+    dma_particle_s *particle = &particle_chunk->particles[particle_offset];
     particle->start_time = time;
     key->emission_epoch = time;
     particle->inverse_lifetime = 64.0f / effect->particle_lifetime;
@@ -456,7 +464,9 @@ uv1deb *GenDebIndexRadialStar(debkeydatatype_s *key, debinftype *effect, float t
     NuVecRotateZ(&vector, &vector, angle_z);
     NuVecRotateY(&vector, &vector, angle_y);
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
-    particle->position = vector;
+    particle->position.x = vector.x;
+    particle->position.y = vector.y;
+    particle->position.z = vector.z;
     random = NuRandFloatSeeded(&debrisseed);
     vector.x = 0.0f;
     vector.y = (random + random) * effect->field_04c - effect->field_04c + effect->field_048;
@@ -464,7 +474,9 @@ uv1deb *GenDebIndexRadialStar(debkeydatatype_s *key, debinftype *effect, float t
     NuVecRotateZ(&vector, &vector, angle_z);
     NuVecRotateY(&vector, &vector, angle_y);
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
-    particle->momentum = vector;
+    particle->momentum.x = vector.x;
+    particle->momentum.y = vector.y;
+    particle->momentum.z = vector.z;
     if (key->momentum_adjuster != NULL)
         key->momentum_adjuster(key, effect, reinterpret_cast<uv1deb *>(particle));
     particle->position.x += key->emission_position.x;
@@ -478,7 +490,7 @@ uv1deb *GenDebIndexRadialStar(debkeydatatype_s *key, debinftype *effect, float t
         if (key->field_18a >= key_particle_count)
             key->field_18a = 0;
         dma_particle_s *copy = DebrisParticleAt(key, key->field_18a++, 0);
-        *copy = *particle;
+        *copy = particle_chunk->particles[particle_offset];
         copy->start_time += static_cast<f32>(trail + 1) * effect->trail_time;
     }
     if (effect->native_data == NULL)
@@ -491,7 +503,10 @@ uv1deb *GenDebIndexRadialRotor(debkeydatatype_s *key, debinftype *effect, float 
         key->field_18a = 0;
     if (effect->particle_type == 7)
         return NULL;
-    dma_particle_s *particle = DebrisParticleAt(key, key->field_18a++, effect->particle_type);
+    auto *particle_chunk = key->particle_chunks[key->field_18a / 32];
+    const i32 particle_offset = key->field_18a % 32;
+    ++key->field_18a;
+    dma_particle_s *particle = &particle_chunk->particles[particle_offset];
     particle->start_time = time;
     key->emission_epoch = time;
     particle->inverse_lifetime = 64.0f / effect->particle_lifetime;
@@ -504,7 +519,9 @@ uv1deb *GenDebIndexRadialRotor(debkeydatatype_s *key, debinftype *effect, float 
     NuVecRotateZ(&vector, &vector, angle_z);
     NuVecRotateY(&vector, &vector, angle_y);
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
-    particle->position = vector;
+    particle->position.x = vector.x;
+    particle->position.y = vector.y;
+    particle->position.z = vector.z;
     f32 random = NuRandFloatSeeded(&debrisseed);
     vector.x = 0.0f;
     vector.y = (random + random) * effect->field_04c - effect->field_04c + effect->field_048;
@@ -512,7 +529,9 @@ uv1deb *GenDebIndexRadialRotor(debkeydatatype_s *key, debinftype *effect, float 
     NuVecRotateZ(&vector, &vector, angle_z);
     NuVecRotateY(&vector, &vector, angle_y);
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
-    particle->momentum = vector;
+    particle->momentum.x = vector.x;
+    particle->momentum.y = vector.y;
+    particle->momentum.z = vector.z;
     if (key->momentum_adjuster != NULL)
         key->momentum_adjuster(key, effect, reinterpret_cast<uv1deb *>(particle));
     particle->position.x += key->emission_position.x;
@@ -525,7 +544,7 @@ uv1deb *GenDebIndexRadialRotor(debkeydatatype_s *key, debinftype *effect, float 
         if (key->field_18a >= key->particle_count)
             key->field_18a = 0;
         dma_particle_s *copy = DebrisParticleAt(key, key->field_18a++, 0);
-        *copy = *particle;
+        *copy = particle_chunk->particles[particle_offset];
         copy->start_time += static_cast<f32>(trail + 1) * effect->trail_time;
     }
     if (effect->native_data == NULL)
@@ -571,7 +590,10 @@ uv1deb *GenDebIndexImprovedRadial(debkeydatatype_s *key, debinftype *effect, flo
         key->field_18a = 0;
     if (effect->particle_type == 7)
         return NULL;
-    dma_particle_s *particle = DebrisParticleAt(key, key->field_18a++, effect->particle_type);
+    auto *particle_chunk = key->particle_chunks[key->field_18a / 32];
+    const i32 particle_offset = key->field_18a % 32;
+    ++key->field_18a;
+    dma_particle_s *particle = &particle_chunk->particles[particle_offset];
     particle->start_time = time;
     key->emission_epoch = time;
     particle->inverse_lifetime = 64.0f / effect->particle_lifetime;
@@ -608,7 +630,9 @@ uv1deb *GenDebIndexImprovedRadial(debkeydatatype_s *key, debinftype *effect, flo
     NuVecRotateZ(&vector, &vector, angle_z);
     NuVecRotateY(&vector, &vector, angle_y);
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
-    particle->position = vector;
+    particle->position.x = vector.x;
+    particle->position.y = vector.y;
+    particle->position.z = vector.z;
     random = NuRandFloatSeeded(&debrisseed);
     vector.x = (random + random) * effect->field_04c - effect->field_04c + effect->field_048;
     vector.y = 0.0f;
@@ -616,7 +640,9 @@ uv1deb *GenDebIndexImprovedRadial(debkeydatatype_s *key, debinftype *effect, flo
     NuVecRotateZ(&vector, &vector, angle_z);
     NuVecRotateY(&vector, &vector, angle_y);
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
-    particle->momentum = vector;
+    particle->momentum.x = vector.x;
+    particle->momentum.y = vector.y;
+    particle->momentum.z = vector.z;
     if (key->momentum_adjuster != NULL)
         key->momentum_adjuster(key, effect, reinterpret_cast<uv1deb *>(particle));
     particle->position.y += key->emission_position.y;
@@ -629,7 +655,7 @@ uv1deb *GenDebIndexImprovedRadial(debkeydatatype_s *key, debinftype *effect, flo
         if (key->field_18a >= key->particle_count)
             key->field_18a = 0;
         dma_particle_s *copy = DebrisParticleAt(key, key->field_18a++, 0);
-        *copy = *particle;
+        *copy = particle_chunk->particles[particle_offset];
         copy->start_time += static_cast<f32>(trail + 1) * effect->trail_time;
     }
     if (effect->native_data == NULL)
@@ -881,16 +907,18 @@ extern "C" {
         Debris_Init = 1;
         NuRegisterEndFrameCallBackFn(DebrisProcessTimeSlip);
 
-        const i32 total_chunks = debrischunks + debrischunksglass;
         buffer->addr = ALIGN(buffer->addr, 0x10);
+        const i32 regular_chunks = debrischunks;
+        const i32 glass_chunks = debrischunksglass;
+        const i32 total_chunks = regular_chunks + glass_chunks;
         debris_chunk_controls = reinterpret_cast<debris_chunk_control_s *>(buffer->addr);
         buffer->addr += static_cast<usize>(total_chunks) * 2 * sizeof(debris_chunk_control_s);
         freechunkcontrols = reinterpret_cast<debris_chunk_control_s **>(buffer->addr);
         buffer->addr += static_cast<usize>(total_chunks) * 2 * sizeof(debris_chunk_control_s *);
         freedebchunks = reinterpret_cast<dma_particle_chunk_s **>(buffer->addr);
-        buffer->addr += static_cast<usize>(debrischunks) * sizeof(dma_particle_chunk_s *);
+        buffer->addr += static_cast<usize>(regular_chunks) * sizeof(dma_particle_chunk_s *);
         freedebchunksglass = reinterpret_cast<dma_particle_chunk_s **>(buffer->addr);
-        buffer->addr += static_cast<usize>(debrischunksglass) * sizeof(dma_particle_chunk_s *);
+        buffer->addr += static_cast<usize>(glass_chunks) * sizeof(dma_particle_chunk_s *);
         ParticleChunkToRender = reinterpret_cast<particlechunkrendertype_s *>(buffer->addr);
         buffer->addr += static_cast<usize>(total_chunks) * sizeof(particlechunkrendertype_s);
 
@@ -1120,13 +1148,6 @@ extern "C" {
 
 } // extern "C"
 
-static inline void DebrisEmissionSound(debkeydatatype_s *key, debinftype *effect, i32 event, f32 volume) {
-    for (i32 i = 0; i < 4; ++i) {
-        if (effect->sound_data[i * 3] != -1 && effect->sound_data[i * 3 + 1] == event)
-            PlaySfxByIdEx(effect->sound_data[i * 3], &key->position, volume, 1.0f);
-    }
-}
-
 extern "C" void DebrisStartOffsetEx(debkeydatatype_s *key, f32 offset) {
     if (key == NULL) {
         return;
@@ -1187,10 +1208,11 @@ void DebrisProcessGeneration() {
                 key->field_184 = 0;
         }
         f32 sound_range = effect->sound_range_override;
-        if (sound_range == 0.0f)
+        if (sound_range == 0.0f) {
             sound_range = effect->sound_range;
-        if (sound_range == 0.0f)
-            sound_range = effect->clip_extent;
+            if (sound_range == 0.0f)
+                sound_range = effect->clip_extent;
+        }
         f32 volume = 1.0f;
         if (sound_range > key->cutoff_distance) {
             for (i32 i = 0; i < 4; ++i)
@@ -1198,8 +1220,16 @@ void DebrisProcessGeneration() {
                     SetSfxBit_On(effect->sound_data[i * 3]);
             volume = (sound_range - key->cutoff_distance) / sound_range;
         }
-        if (key->process_collision_sound != 0 && key->field_184 != 0 && sound_range > key->cutoff_distance)
-            DebrisEmissionSound(key, effect, 4, volume);
+        if (key->process_collision_sound != 0 && key->field_184 != 0 && sound_range > key->cutoff_distance) {
+            if (effect->sound_data[0] != -1 && effect->sound_data[1] == 4)
+                PlaySfxByIdEx(effect->sound_data[0], &key->position, volume, 1.0f);
+            if (effect->sound_data[3] != -1 && effect->sound_data[4] == 4)
+                PlaySfxByIdEx(effect->sound_data[3], &key->position, volume, 1.0f);
+            if (effect->sound_data[6] != -1 && effect->sound_data[7] == 4)
+                PlaySfxByIdEx(effect->sound_data[6], &key->position, volume, 1.0f);
+            if (effect->sound_data[9] != -1 && effect->sound_data[10] == 4)
+                PlaySfxByIdEx(effect->sound_data[9], &key->position, volume, 1.0f);
+        }
         if (effect->status == 0)
             key->field_184 = 0;
         if (effect->status == 2)
@@ -1223,11 +1253,15 @@ void DebrisProcessGeneration() {
         key->emission_position.y = key->emitter_momentum.y * elapsed;
         key->emission_position.z = key->emitter_momentum.z * elapsed;
         const f32 frequency = static_cast<f32>(effect->frequency);
-        const f32 thinning =
-            forced_debris_thinning != 0
-                ? debris_thinning_level
-                : (effect->thinning < debris_thinning_level ? effect->thinning : debris_thinning_level);
-        const f32 emission_interval = frequency > 0.0f ? 1.0f / (frequency / thinning) : 0.0f;
+        f32 emission_interval;
+        if (!(frequency > 0.0f))
+            emission_interval = 0.0f;
+        else if (forced_debris_thinning != 0)
+            emission_interval = 1.0f / (frequency / debris_thinning_level);
+        else {
+            const f32 thinning = effect->thinning < debris_thinning_level ? effect->thinning : debris_thinning_level;
+            emission_interval = 1.0f / (frequency / thinning);
+        }
         f32 emission_time = key->emission_epoch + emission_interval;
         f32 pause = 0.0f;
         i32 emission = 1;
@@ -1235,7 +1269,7 @@ void DebrisProcessGeneration() {
             do {
                 i32 transitions = 100;
                 while (emission_time >= key->field_1e4 && emission_time >= key->emission_time && --transitions != 0) {
-                    if (!(key->emission_time < key->field_1e4)) {
+                    if (key->emission_time >= key->field_1e4) {
                         key->field_1e4 = key->emission_time + effect->emission_period_random +
                                          NuRandFloatSeeded(&debrisseed) * effect->emission_pause;
                         if (key->field_1d4 > 0) {
@@ -1250,8 +1284,16 @@ void DebrisProcessGeneration() {
                             key->field_184 = 0;
                         }
                         if (key->process_collision_sound != 0 && key->field_184 != 0 &&
-                            sound_range > key->cutoff_distance)
-                            DebrisEmissionSound(key, effect, 1, volume);
+                            sound_range > key->cutoff_distance) {
+                            if (effect->sound_data[0] != -1 && effect->sound_data[1] == 1)
+                                PlaySfxByIdEx(effect->sound_data[0], &key->position, volume, 1.0f);
+                            if (effect->sound_data[3] != -1 && effect->sound_data[4] == 1)
+                                PlaySfxByIdEx(effect->sound_data[3], &key->position, volume, 1.0f);
+                            if (effect->sound_data[6] != -1 && effect->sound_data[7] == 1)
+                                PlaySfxByIdEx(effect->sound_data[6], &key->position, volume, 1.0f);
+                            if (effect->sound_data[9] != -1 && effect->sound_data[10] == 1)
+                                PlaySfxByIdEx(effect->sound_data[9], &key->position, volume, 1.0f);
+                        }
                         pause = 0.0f;
                     } else {
                         key->previous_emission_time = key->emission_time;
@@ -1261,8 +1303,16 @@ void DebrisProcessGeneration() {
                         if (key->field_184 == 2)
                             key->field_184 = 0;
                         if (key->process_collision_sound != 0 && key->field_184 != 0 &&
-                            sound_range > key->cutoff_distance)
-                            DebrisEmissionSound(key, effect, 2, volume);
+                            sound_range > key->cutoff_distance) {
+                            if (effect->sound_data[0] != -1 && effect->sound_data[1] == 2)
+                                PlaySfxByIdEx(effect->sound_data[0], &key->position, volume, 1.0f);
+                            if (effect->sound_data[3] != -1 && effect->sound_data[4] == 2)
+                                PlaySfxByIdEx(effect->sound_data[3], &key->position, volume, 1.0f);
+                            if (effect->sound_data[6] != -1 && effect->sound_data[7] == 2)
+                                PlaySfxByIdEx(effect->sound_data[6], &key->position, volume, 1.0f);
+                            if (effect->sound_data[9] != -1 && effect->sound_data[10] == 2)
+                                PlaySfxByIdEx(effect->sound_data[9], &key->position, volume, 1.0f);
+                        }
                     }
                 }
                 if (pause > 0.0f) {
@@ -1271,8 +1321,16 @@ void DebrisProcessGeneration() {
                     uv1deb *particle = key->generator(key, effect, emission_time);
                     if (effect->process_spheres != 0 && particle != NULL && emission == 1)
                         DebrisProcessSpheres(particle, emission_time, effect, key, 0);
-                    if (key->process_collision_sound != 0 && sound_range > key->cutoff_distance)
-                        DebrisEmissionSound(key, effect, 3, volume);
+                    if (key->process_collision_sound != 0 && sound_range > key->cutoff_distance) {
+                        if (effect->sound_data[0] != -1 && effect->sound_data[1] == 3)
+                            PlaySfxByIdEx(effect->sound_data[0], &key->position, volume, 1.0f);
+                        if (effect->sound_data[3] != -1 && effect->sound_data[4] == 3)
+                            PlaySfxByIdEx(effect->sound_data[3], &key->position, volume, 1.0f);
+                        if (effect->sound_data[6] != -1 && effect->sound_data[7] == 3)
+                            PlaySfxByIdEx(effect->sound_data[6], &key->position, volume, 1.0f);
+                        if (effect->sound_data[9] != -1 && effect->sound_data[10] == 3)
+                            PlaySfxByIdEx(effect->sound_data[9], &key->position, volume, 1.0f);
+                    }
                 }
                 key->emission_epoch = emission_time;
                 emission_time += emission_interval;
@@ -1406,14 +1464,13 @@ extern "C" {
             NUMTX matrix;
             NUVEC position;
             if (key != NULL) {
-                i32 assigned = (effect->particle_keys[0] != -1 && &debkeydata[effect->particle_keys[0]] == key) ||
-                               (effect->particle_keys[1] != -1 && &debkeydata[effect->particle_keys[1]] == key) ||
-                               (effect->particle_keys[2] != -1 && &debkeydata[effect->particle_keys[2]] == key) ||
-                               (effect->particle_keys[3] != -1 && &debkeydata[effect->particle_keys[3]] == key) ||
-                               (effect->particle_keys[4] != -1 && &debkeydata[effect->particle_keys[4]] == key) ||
-                               (effect->particle_keys[5] != -1 && &debkeydata[effect->particle_keys[5]] == key) ||
-                               (effect->particle_keys[6] != -1 && &debkeydata[effect->particle_keys[6]] == key) ||
-                               (effect->particle_keys[7] != -1 && &debkeydata[effect->particle_keys[7]] == key);
+                i32 assigned = 0;
+                for (i32 i = 0; i < 8; ++i) {
+                    if (effect->particle_keys[i] != -1 && &debkeydata[effect->particle_keys[i]] == key) {
+                        assigned = 1;
+                        break;
+                    }
+                }
                 i32 visible = 1;
                 if (!assigned && effect->sound_range > 0.0f && effect->use_explicit_clip_box == 0 &&
                     key->cutoff_distance > effect->sound_range)

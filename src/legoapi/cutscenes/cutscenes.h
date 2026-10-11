@@ -5,6 +5,17 @@
 #include "legoapi/legoapi_types.h"
 
 // Cutscene API shared by the cutscene owners.
+struct CutSceneListEntry {
+    char *directory;
+    char *filename;
+    i16 level;
+    i16 padding;
+};
+DECOMP_ASSERT(sizeof(CutSceneListEntry) == 0xc, "Cutscene list entry ABI");
+DECOMP_ASSERT(offsetof(CutSceneListEntry, level) == 8, "Cutscene list level offset");
+extern i32 CUTCOUNT;
+extern CutSceneListEntry *CutList;
+
 enum CUTSCENEPLAYER_CLIP_TYPE { CLIP_INTRO, CLIP_MIDTRO, CLIP_OUTRO, CLIP_ENDING };
 struct CUTSCENEPLAYERCLIP {
     i16 level_id;

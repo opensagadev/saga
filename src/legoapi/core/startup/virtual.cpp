@@ -16,20 +16,16 @@ void VirtualControlDPad_LockButton_OnClick_Callback(MechTouchUIElement &, TouchH
 void VirtualControlDPad::Process(float elapsed) {
     MechTouchUITexButton::Process(elapsed);
 
-    const f32 timer = MechInputTouchVirtualConsoleController::s_noInputTimer;
-    if (timer >= 0.0f && owner != NULL) {
+    if (MechInputTouchVirtualConsoleController::s_noInputTimer >= 0.0f &&
+        (owner != NULL || SuperOptions.dpad_locked == 0 || GetMenuID() == 25)) {
+        const f32 opacity = owner != NULL ? 0.75f : 0.4f;
+        alpha = opacity;
+        alpha_to = opacity;
         alpha_elapsed = alpha_duration;
-        alpha = 0.75f;
-        alpha_to = 0.75f;
-        disabled = 0;
-    } else {
-        if (timer >= 0.0f && (SuperOptions.dpad_locked == 0 || GetMenuID() == 25)) {
-            alpha_elapsed = alpha_duration;
-            alpha = 0.4f;
-            alpha_to = 0.4f;
-        }
-        disabled = SuperOptions.dpad_locked != 0 && GetMenuID() != 25;
     }
+    disabled = !(!(MechInputTouchVirtualConsoleController::s_noInputTimer < 0.0f) && owner != NULL) &&
+               SuperOptions.dpad_locked != 0 && GetMenuID() != 25;
+    const f32 timer = MechInputTouchVirtualConsoleController::s_noInputTimer;
 
     if (timer < 0.0f) {
         visible = 1;
@@ -69,8 +65,7 @@ void VirtualControlDPad::Process(float elapsed) {
         const f32 distance = NuFsqrt(dx * dx + dy * dy);
         const i32 angle = NuAtan2D(dx, dy);
         const f32 ratio = distance / radius_y;
-        const f32 strength =
-            ratio >= 1.0f || ratio < 0.0f ? 1.5f : static_cast<f32>(static_cast<double>(ratio) * 1.4) * 3.0f;
+        const f32 strength = static_cast<f32>(static_cast<double>(MAX(0.0f, MIN(ratio, 1.0f))) * 1.4) * 3.0f;
         stick_values.x = MAX(-1.0f, MIN(NU_SIN_LUT(angle) * strength, 1.0f));
         stick_values.y = MAX(-1.0f, MIN(NU_COS_LUT(angle) * strength, 1.0f));
         MechInputTouchVirtualConsoleController::s_noInputTimer = 20.0f;

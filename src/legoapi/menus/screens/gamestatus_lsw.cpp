@@ -419,26 +419,28 @@ void InitStatusScreen(WORLDINFO_s *world) {
     if ((p.mode_flags & 4) != 0) {
         if (NewLData == STATUS_LDATA || WORLD->current_level == STATUS_LDATA) {
             EPISODESAVE_s &save = Game.episode_save[episode];
+            p.previous_best_score = save.superstory_score_target;
             p.previous_best_time = save.superstory_time_limit;
             p.superstory_time = SuperStoryTimer.time_elapsed;
             p.superstory_score = SuperStoryScore;
-            p.previous_best_score = save.superstory_score_target;
             i32 gold = 0;
             if (episode == -1) {
                 p.new_best_score = 0;
                 p.new_best_time = 0.0f;
                 p.time_reward_score = *p.score;
             } else {
-                p.new_best_time = p.superstory_time;
-                if (p.previous_best_time <= p.superstory_time)
-                    p.new_best_time = 0.0f;
+                f32 new_time = p.superstory_time;
+                if (p.previous_best_time <= new_time)
+                    new_time = 0.0f;
                 else
-                    save.superstory_time_limit = p.superstory_time;
-                p.new_best_score = p.superstory_score;
-                if (p.previous_best_score < p.superstory_score)
-                    save.superstory_score_target = p.superstory_score;
+                    save.superstory_time_limit = new_time;
+                p.new_best_time = new_time;
+                u32 new_score = p.superstory_score;
+                if (p.previous_best_score < new_score)
+                    save.superstory_score_target = new_score;
                 else
-                    p.new_best_score = 0;
+                    new_score = 0;
+                p.new_best_score = new_score;
                 if (save.superstory_complete == 0) {
                     save.superstory_complete = 1;
                     AddToCompletionPoints(POINTS_PER_SUPERSTORY);
@@ -611,14 +613,15 @@ void InitStatusScreen(WORLDINFO_s *world) {
     else
         p.collected_score = static_cast<f32>(p.coins_remaining[0] + p.coins_remaining[1]);
     p.newly_completed = 0;
-    if ((p.field_0xb0 & 4) != 0)
+    if ((p.field_0xb0 & 4) != 0) {
         p.true_hero_percent = 100.0f;
-    else {
-        const f32 percent = NuFdiv(p.collected_score * 100.0f, p.true_hero_target);
-        if (percent > 99.0f) {
-            p.true_hero_percent = 99.0f;
+    } else {
+        f32 numerator = p.collected_score * 100.0f;
+        if (numerator != 0.0f && p.true_hero_target != 0.0f) {
+            f32 percent = numerator / p.true_hero_target;
+            p.true_hero_percent = 99.0f < percent ? 99.0f : percent;
         } else {
-            p.true_hero_percent = percent;
+            p.true_hero_percent = 0.0f;
         }
     }
     p.coins_collected[0] = p.coins_remaining[0];

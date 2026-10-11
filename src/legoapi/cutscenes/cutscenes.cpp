@@ -1383,16 +1383,6 @@ void CutScenes_BGLoadManager() {
     NuGCutSceneSysPostBackgroundLoad();
 }
 
-extern i32 CUTCOUNT;
-extern CUTINFO *CutList;
-
-struct CutSceneListEntry {
-    char *directory;
-    char *filename;
-    i16 level;
-    i16 padding;
-};
-
 void CutScenes_ConfigureList(char *filename, variptr_u *buffer, variptr_u) {
     CutList = NULL;
     CUTCOUNT = 0;
@@ -1472,7 +1462,7 @@ void CutScenes_ConfigureList(char *filename, variptr_u *buffer, variptr_u) {
     NuFParDestroy(parser);
     if (CUTCOUNT > 0) {
         buffer->addr = ALIGN(reinterpret_cast<usize>(cursor), 4);
-        CutList = reinterpret_cast<CUTINFO *>(buffer->void_ptr);
+        CutList = reinterpret_cast<CutSceneListEntry *>(buffer->void_ptr);
         usize list_bytes = CUTCOUNT * sizeof(CutSceneListEntry);
         memmove(buffer->void_ptr, entries, list_bytes);
         buffer->addr += list_bytes;

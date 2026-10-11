@@ -24,3 +24,27 @@ cc_test(
     ],
     target_compatible_with = ["@platforms//os:linux"],
 )
+
+cc_test(
+    name = "terrain_callback_test",
+    size = "small",
+    srcs = ["terrain_callback_test.cpp"],
+    additional_compiler_inputs = ["//src:all_source_files"],
+    defines = ["ANDROID"],
+    copts = [
+        "-Isrc",
+        "-std=gnu++17",
+        "-m32",
+        "-march=i686",
+        "-msse2",
+        "-mfpmath=sse",
+        "-fno-rtti",
+        "-ffunction-sections",
+        "-fdata-sections",
+    ],
+    linkopts = [
+        "-m32",
+        "-Wl,--gc-sections",
+    ],
+    target_compatible_with = ["@platforms//os:linux"],
+)

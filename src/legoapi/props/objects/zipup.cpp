@@ -322,7 +322,7 @@ void ZipUps_Reset(void *world_ptr, void *, void *progress_ptr) {
 
             NewTerrPlatformsOff();
             f32 ground_height = GameShadow(NULL, &zipup->lower_position, 5.0f, -1);
-            if (ground_height != -78.0f) {
+            if (ground_height != 2000000.0f) {
                 zipup->lower_ground_height = ground_height + 0.005f;
                 FindAnglesZX(&ShadNorm, &zipup->lower_ground_x_rotation, &zipup->lower_ground_z_rotation);
             } else {
@@ -331,7 +331,7 @@ void ZipUps_Reset(void *world_ptr, void *, void *progress_ptr) {
 
             NewTerrPlatformsOff();
             ground_height = GameShadow(NULL, &zipup->upper_position, 5.0f, -1);
-            if (ground_height != -78.0f) {
+            if (ground_height != 2000000.0f) {
                 zipup->upper_ground_height = ground_height + 0.005f;
                 FindAnglesZX(&ShadNorm, &zipup->upper_ground_x_rotation, &zipup->upper_ground_z_rotation);
             } else {

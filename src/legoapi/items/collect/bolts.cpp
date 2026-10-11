@@ -1213,9 +1213,8 @@ void Bolt_End(BOLT_s *bolt, i32 run_callback) {
 
 BOLT_s *Bolt_Find(i32 type_id, NUVEC *position, GameObject_s *owner) {
     BOLT_s *nearest = NULL;
-    f32 nearest_distance = 0.49f;
-    for (i32 index = 0; index < 32; ++index) {
-        BOLT_s *bolt = &Bolt[index];
+    f32 nearest_distance = 1000000.0f;
+    for (BOLT_s *bolt = Bolt; bolt != Bolt + 32; ++bolt) {
         if (bolt->active == 0)
             continue;
         if (!(type_id != -1 && bolt->type_id != type_id)) {

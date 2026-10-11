@@ -1469,7 +1469,7 @@ extern "C" {
     void AddVariableShotDebrisEffectTimed5(i32 effect_index, NUVEC *position, NUVEC *momentum, NUVEC *position_delta,
                                            i32 count, f32 duration, NUMTX *emitter_orientation,
                                            NUMTX *particle_orientation, u16 render_priority, i8 timed_flags) {
-        if (debris_suspended != 0 || static_cast<u32>(effect_index + 1) <= 1 || EDPP_MAX_TYPES <= effect_index ||
+        if (debris_suspended != 0 || static_cast<u32>(effect_index) + 1U <= 1U || EDPP_MAX_TYPES <= effect_index ||
             debtab[effect_index] == NULL) {
             return;
         }

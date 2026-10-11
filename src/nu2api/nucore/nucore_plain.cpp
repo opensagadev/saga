@@ -3578,28 +3578,31 @@ extern "C" {
         memset(weights_by_render, 0, clear_size);
 
         for (i32 render = 0; render < render_count; ++render) {
-            i32 node = render_indices == NULL ? 0 : render_indices[render];
-            if (node < 0) {
-                continue;
-            }
-            if (node >= NuAnimNumNodes(animation)) {
-                weights_by_render[render] = NuRndrCreateBlendShapeDeformerWeightsArray(0);
-                continue;
+            i32 node = 0;
+            if (render_indices != NULL) {
+                node = render_indices[render];
+                if (node < 0)
+                    continue;
+                if (node >= NuAnimNumNodes(animation)) {
+                    weights_by_render[render] = NuRndrCreateBlendShapeDeformerWeightsArray(0);
+                    continue;
+                }
             }
 
             i32 curve_count = static_cast<i16>(animation->curve_count);
             f32 *weights = NuRndrCreateBlendShapeDeformerWeightsArray(curve_count);
             weights_by_render[render] = weights;
-            u8 *types = animation->curve_types + curve_count * node;
-            nuanimcurve2_s *curves = animation->curves + curve_count * node;
+            i32 curve_offset = animation->curve_count * node;
+            i8 *types = reinterpret_cast<i8 *>(animation->curve_types) + curve_offset;
+            nuanimcurve2_s *curves = animation->curves + curve_offset;
             if (weights == NULL || curve_count <= 0) {
                 continue;
             }
-            for (i32 curve = 0; curve < curve_count; ++curve) {
+            for (i32 curve = 0; curve < curve_count; ++curve, ++curves) {
                 if (types[curve] == 0) {
-                    weights[curve + 1] = curves[curve].data.constant;
+                    weights[curve + 1] = curves->data.constant;
                 } else {
-                    weights[curve + 1] = NuAnimCurve2CalcValEx(&curves[curve], &time, types[curve]);
+                    weights[curve + 1] = NuAnimCurve2CalcValEx(curves, &time, types[curve]);
                 }
             }
         }
@@ -3793,52 +3796,62 @@ extern "C" {
         i32 drawn = 0;
 
         for (i32 render_index = 0; render_index < render_count; ++render_index) {
-            const i32 part_index = render_indices != NULL ? render_indices[render_index] : 0;
-            if (part_index < 0 || part_index >= object->render_count) {
-                continue;
+            i32 part_index;
+            if (render_indices != NULL) {
+                part_index = render_indices[render_index];
+                if (part_index < 0 || part_index >= object->render_count)
+                    continue;
+            } else {
+                part_index = 0;
+                render_count = 1;
             }
-
-            nuhgobjrender_s &part = object->render_parts[part_index];
             NUMTX *skin_matrices = NULL;
-            if (part.smooth_skin_special != NULL || part.alternate_smooth_skin_special != NULL) {
-                display_list_buffer->addr = ALIGN(display_list_buffer->addr, 0x80);
+            if (object->render_parts[part_index].smooth_skin_special != NULL ||
+                object->render_parts[part_index].alternate_smooth_skin_special != NULL) {
+                display_list_buffer->addr = ALIGN(ALIGN(display_list_buffer->addr, 0x10), 0x80);
                 skin_matrices = reinterpret_cast<NUMTX *>(display_list_buffer->addr);
                 display_list_buffer->addr += static_cast<usize>(object->joint_count) * sizeof(NUMTX);
             }
 
             void *blend_value = blend_values != NULL ? blend_values[render_index] : NULL;
 
-            if (part.rigid_specials != NULL) {
+            if (object->render_parts[part_index].rigid_specials != NULL) {
                 for (i32 joint_index = 0; joint_index < object->joint_count; ++joint_index) {
-                    if (part.rigid_specials[joint_index] != NULL) {
+                    if (object->render_parts[part_index].rigid_specials[joint_index] != NULL) {
 
                         NuMtxMulVU0(&draw_matrix, &joint_matrices[joint_index], world_matrix);
-                        drawn |= NuSpecialDrawAt(part.rigid_specials[joint_index], &draw_matrix);
+                        drawn |=
+                            NuSpecialDrawAt(object->render_parts[part_index].rigid_specials[joint_index], &draw_matrix);
                     }
                 }
             }
 
-            if (part.alternate_rigid_specials != NULL) {
+            if (object->render_parts[part_index].alternate_rigid_specials != NULL) {
                 for (i32 joint_index = 0; joint_index < object->joint_count; ++joint_index) {
-                    if (part.alternate_rigid_specials[joint_index] != NULL) {
-                        NUMTX draw_matrix;
+                    if (object->render_parts[part_index].alternate_rigid_specials[joint_index] != NULL) {
                         NuMtxMulVU0(&draw_matrix, &joint_matrices[joint_index], world_matrix);
-                        drawn |= NuSpecialDrawAt(part.alternate_rigid_specials[joint_index], &draw_matrix);
+                        drawn |= NuSpecialDrawAt(object->render_parts[part_index].alternate_rigid_specials[joint_index],
+                                                 &draw_matrix);
                     }
                 }
             }
 
-            if (part.smooth_skin_special != NULL || part.alternate_smooth_skin_special != NULL) {
-                for (i32 joint_index = 0; joint_index < object->joint_count; ++joint_index) {
-                    NuMtxMulH(&skin_matrices[joint_index], &object->inverse_bind_matrices[joint_index],
+            if (object->render_parts[part_index].smooth_skin_special != NULL ||
+                object->render_parts[part_index].alternate_smooth_skin_special != NULL) {
+                const i32 joint_count = object->joint_count;
+                NUMTX *inverse_bind_matrix = object->inverse_bind_matrices;
+                for (i32 joint_index = 0; joint_index < joint_count; ++joint_index) {
+                    NuMtxMulH(&skin_matrices[joint_index], &inverse_bind_matrix[joint_index],
                               &joint_matrices[joint_index]);
                 }
-                if (part.smooth_skin_special != NULL) {
-                    drawn |= NuSpecialDrawSmoothSkinDwa(part.smooth_skin_special, skin_matrices, world_matrix,
-                                                        static_cast<DEFORMERWEIGHTSARRAY *>(blend_value));
+                if (object->render_parts[part_index].smooth_skin_special != NULL) {
+                    drawn |=
+                        NuSpecialDrawSmoothSkinDwa(object->render_parts[part_index].smooth_skin_special, skin_matrices,
+                                                   world_matrix, static_cast<DEFORMERWEIGHTSARRAY *>(blend_value));
                 }
-                if (part.alternate_smooth_skin_special != NULL) {
-                    drawn |= NuSpecialDrawSmoothSkinDwa(part.alternate_smooth_skin_special, skin_matrices, world_matrix,
+                if (object->render_parts[part_index].alternate_smooth_skin_special != NULL) {
+                    drawn |= NuSpecialDrawSmoothSkinDwa(object->render_parts[part_index].alternate_smooth_skin_special,
+                                                        skin_matrices, world_matrix,
                                                         static_cast<DEFORMERWEIGHTSARRAY *>(blend_value));
                 }
             }
@@ -4504,9 +4517,98 @@ extern "C" {
         }
         return result;
     }
-    void NuVisiInstTree(void *, NUGSCN *) {
-        STUBBED();
+    struct NuInstanceTreeNode {
+        u16 bounds_index;
+        u16 subtree_instance_count;
+        u16 child_count;
+        u16 first_child;
+        u16 instance_count;
+        u16 first_instance;
+    };
+    struct NuInstanceTreeBounds {
+        NUVEC center;
+        f32 center_w;
+        NUVEC extent;
+        f32 extent_w;
+    };
+    struct NuInstanceTree_s {
+        u32 reserved_00;
+        u32 reserved_04;
+        u16 *instance_indices;
+        NuInstanceTreeBounds *instance_bounds;
+        u32 reserved_10;
+        NuInstanceTreeNode *nodes;
+        NuInstanceTreeBounds *node_bounds;
+        u16 tree_count;
+        u16 reserved_1e;
+        u16 *roots;
+        f32 *far_clips;
+    };
+    DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
+    DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
+    DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
+    DECOMP_ASSERT(offsetof(NuInstanceTree_s, nodes) == 0x14, "instance tree nodes offset");
+    DECOMP_ASSERT(offsetof(NuInstanceTree_s, roots) == 0x20, "instance tree roots offset");
+    DECOMP_ASSERT(offsetof(NuInstanceTree_s, far_clips) == 0x24, "instance tree far clips offset");
+    NuVisibilityResult *myvisi;
+    extern "C++" {
+        static void ClipInstTree(NuInstanceTree_s *tree, i32 tree_index, NUDLDLISTSCENE *, char *) {
+            NuInstanceTreeNode *pending[100];
+            NuInstanceTreeNode **end = pending;
+            *end++ = &tree->nodes[tree->roots[tree_index]];
+            f32 far_clip = tree->far_clips[tree_index];
+            if (far_clip == 0.0f)
+                far_clip = global_camera.far_clip;
+            do {
+                NuInstanceTreeNode *node = *--end;
+                NuInstanceTreeBounds *bounds = &tree->node_bounds[node->bounds_index];
+                i32 result = NuCameraIntersectsAABB(&bounds->center, &bounds->extent, far_clip, 0);
+                if (result == 1) {
+                    u16 *instance = tree->instance_indices + node->first_instance;
+                    u16 *last = instance + node->subtree_instance_count;
+                    for (; instance != last; ++instance)
+                        static_cast<u8 *>(myvisi->visibility_context)[*instance >> 2] |= 1 << ((*instance & 3) * 2);
+                } else if (result != 0) {
+                    if (node->child_count != 0) {
+                        NuInstanceTreeNode *child = tree->nodes + node->first_child;
+                        NuInstanceTreeNode *last_child = child + node->child_count;
+                        for (; child != last_child; ++child)
+                            *end++ = child;
+                    }
+                    if (node->instance_count != 0) {
+                        u16 *instance = tree->instance_indices + node->first_instance;
+                        u16 *last = instance + node->instance_count;
+                        NuInstanceTreeBounds *instance_bounds = tree->instance_bounds + node->first_instance;
+                        for (; instance != last; ++instance, ++instance_bounds) {
+                            u16 index = *instance;
+                            i32 classification =
+                                NuCameraIntersectsAABB(&instance_bounds->center, &instance_bounds->extent, far_clip, 1);
+                            static_cast<u8 *>(myvisi->visibility_context)[index >> 2] |= classification
+                                                                                         << ((index & 3) * 2);
+                        }
+                    }
+                }
+            } while (end != pending);
+        }
     }
+    void NuVisiInstTree(void *visibility_result, NUGSCN *scene) {
+        NuVisibilityResult *result = static_cast<NuVisibilityResult *>(visibility_result);
+        bool enabled = result->instance_tree != NULL && do_InstTree != 0;
+        result->state = (result->state & ~0x10) | (enabled << 4);
+        if ((result->state & 0x10) != 0) {
+            myvisi = result;
+            if (!TreeInitialised)
+                BuildCamSpaceClipPlanes();
+            BuildWorldSpaceClipPlanes();
+            NuInstanceTree_s *tree = static_cast<NuInstanceTree_s *>(result->instance_tree);
+            for (i32 i = tree->tree_count - 1; i >= 0; --i) {
+                ClipInstTree(static_cast<NuInstanceTree_s *>(result->instance_tree), i,
+                             reinterpret_cast<NUDLDLISTSCENE *>(scene->display_list),
+                             reinterpret_cast<char *>(result->instance_tree_bits));
+            }
+        }
+    }
+
     struct NuVisibilityOcclusionGrid {
         u32 reserved_00;
         i32 width;

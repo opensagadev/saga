@@ -714,10 +714,10 @@ static void Lever_Reset(LEVER_s *lever) {
     target_position.y = lever->position.y;
     lever->floor_position.y = GameShadow(NULL, &lever->floor_position, 0.2f, -1);
     const f32 target_floor = GameShadow(NULL, &target_position, 0.2f, -1);
-    if (target_floor == -1.0f) {
-        lever->target_offset.y = -1.0f;
+    if (target_floor == 2000000.0f) {
+        lever->target_offset.y = 2000000.0f;
     } else {
-        lever->target_offset.y = target_floor + 0.02f;
+        lever->target_offset.y = target_floor + 0.005f;
         FindAnglesZX(&ShadNorm, &lever->target_x_rotation, &lever->target_z_rotation);
     }
 

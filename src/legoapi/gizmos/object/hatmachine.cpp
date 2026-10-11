@@ -720,7 +720,7 @@ void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_p
         }
         if (object == player) {
             show_hatmachine_hint = 0;
-            if (distance < 1.0f) {
+            if (distance < 2.25f) {
                 show_hatmachine_hint = machine->current_hat;
             }
         }

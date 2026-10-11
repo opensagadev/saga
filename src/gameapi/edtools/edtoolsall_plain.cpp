@@ -5342,8 +5342,8 @@ extern "C" {
         u8 *filter_flags = reinterpret_cast<u8 *>(filter) + 0x4c;
         if (*filter_flags & 2) {
             filter->label_width = edui_cursor_x - static_cast<f32>(item->x);
-            if (filter->label_width < 1.0f)
-                filter->label_width = 1.0f;
+            if (filter->label_width < 5.0f)
+                filter->label_width = 5.0f;
             for (eduiitem_s *other = menu->first; other; other = other->next) {
                 if (other->type == 17 && other != item)
                     static_cast<edui_prop_s *>(other)->label_width = filter->label_width;
@@ -6350,7 +6350,7 @@ extern "C" {
                            show_x_scale_help ? picker->graph->x_scale : picker->graph->y_scale);
             help_y += static_cast<i32>(NuQFntHeight(edui_font));
         }
-        i32 label_height = static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 3;
+        i32 label_height = static_cast<i32>(NuQFntHeight(edui_font) * 1.125f) >> 3;
         i32 label_y = (y + total_height) << 3;
         f32 label_font_height = NuQFntHeight(edui_font);
         i32 label_baseline = static_cast<i32>(NuQFntBaseline(edui_font)) +

@@ -912,13 +912,7 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
     animation_updated:
 
         NUMTX matrix;
-        matrix.m00 = matrix.m22 = NU_COS_LUT(spinner->rotation);
-        matrix.m20 = NU_SIN_LUT(spinner->rotation);
-        matrix.m11 = 1.0f;
-        matrix.m02 = -matrix.m20;
-        matrix.m01 = matrix.m10 = matrix.m03 = matrix.m23 = matrix.m12 = matrix.m21 = matrix.m13 = matrix.m30 =
-            matrix.m31 = matrix.m32 = 0.0f;
-        matrix.m33 = 1.0f;
+        NuMtxSetRotationYInline(&matrix, spinner->rotation);
         if ((old_flags & 0x100) != 0)
             NuMtxRotateYInline(&matrix, 0x0222);
         else if ((old_flags & 0x200) != 0)
@@ -1105,7 +1099,7 @@ static void GizSpinner_ResetAll(void *world_ptr, void *, void *progress_ptr) {
             if ((spinner.flags & GIZSPINNER_FLAG_VALID) != 0) {
                 if (entry != NULL && (entry->flags & SPINNER_PROGRESS_VALID) != 0) {
                     spinner.rotation = entry->rotation;
-                    if (entry->animation_position != 0.0f) {
+                    if (entry->animation_position != 1.0f) {
                         GameAnimSet_JumpToAnimPos(spinner.anim_set, entry->animation_position);
                     } else {
                         GameAnimSet_JumpToEnd(spinner.anim_set);
@@ -1140,7 +1134,7 @@ static void GizSpinner_ResetAll(void *world_ptr, void *, void *progress_ptr) {
                 if (NuSpecialGetMtx(&spinner.special) != NULL) {
                     NUMTX *special_matrix = NuSpecialGetMtx(&spinner.special);
                     spinner.ground_height = GameShadow(NULL, NUMTX_GET_ROW_VEC(special_matrix, 3), 5.0f, -1);
-                    if (spinner.ground_height != -78.0f && ShadowInfo() == 2) {
+                    if (spinner.ground_height != 2000000.0f && ShadowInfo() == 2) {
                         spinner.state_flags |= GIZSPINNER_STATE_SHADOW_PLATFORM;
                     }
                 } else {
@@ -1457,7 +1451,7 @@ GIZSPINNER_s *GizSpinner_FindNearest(nuvec_s *position, WORLDINFO_s *world, f32 
 GIZSPINNER_s *GizSpinner_Find(WORLDINFO_s *world, nuvec_s *position, i32 alternate) {
     GIZSPINNER_s *nearest = NULL;
     if (world->current_level->max_spinners != 0) {
-        f32 nearest_distance = 1000000000.0f;
+        f32 nearest_distance = 1.5625f;
         if (alternate == 0) {
             i32 index = 0;
             do {
