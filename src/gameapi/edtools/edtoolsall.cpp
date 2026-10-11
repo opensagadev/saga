@@ -4934,14 +4934,15 @@ i32 EdManipulator::Process(EdInputContext &input, ClassObjectList &selected) {
         delta->x = point.x - last_point->x;
         delta->y = point.y - last_point->y;
         delta->z = point.z - last_point->z;
-        delta->w = 1.0f;
+        delta->w = 0.0f;
     }
     *last_point = point;
     last_point->w = 0.0f;
-    delta->w = 1.0f;
     *cursor = *reinterpret_cast<VuVec *>(input.reserved_00);
-    if (EdTerrRay(*cursor, *last_point) == 0)
+    if (EdTerrRay(*cursor, *ray_direction) == 0)
         *cursor = *last_point;
+    last_point->w = 1.0f;
+    delta->w = 1.0f;
     cursor->w = 1.0f;
     *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x08) = 0;
     for (ClassObjectListEntry *entry = selected.first; entry != NULL; entry = entry->next) {

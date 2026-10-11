@@ -24,6 +24,10 @@ extern "C" {
 }
 
 i32 ImplodeGetI(void *buf, i32 size);
+void *ImplodePutI(void *buf, u32 value, i32 size);
+void ImplodePutByteToMem(unsigned char value);
+usize ImplodeFReadMem(unsigned char *buffer, i32 size);
+i32 ImplodeMakeTree(i32 symbols, u16 *frequencies, unsigned char *lengths, u16 *codes);
 
 u32 ImplodeDecodeC();
 u32 ImplodeDecodeOffset();

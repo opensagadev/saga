@@ -1820,13 +1820,12 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
     AREASAVE_s *save = &Game.area_save[area_index];
     const u16 flags = area->flags;
     if ((flags & 0x10) != 0) {
-        if (save->complete != 0 && (flags & 4) == 0) {
+        if (save->area_complete != 0 && (flags & 4) == 0) {
             Episode_CountOpenAreas(static_cast<i8>(area->episode_index), area_index, Game.area_save);
-            const f32 icon_phase = NU_SIN_LUT(static_cast<i32>(16384.0f * phase));
 
             if (BOTHTRUEJEDIGOLDBRICKS != 0) {
                 DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
-                               icon_phase, 1.0f, 1.0f, 0);
+                               NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
                 NuStrCpy(text, save->true_hero_complete[0] ? "$" : "X");
                 Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
                          PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
@@ -1834,7 +1833,7 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
                             255, 255, 255, 0.4f, 1, NULL, 0, static_cast<i32>(static_cast<f32>(TJTYPEA) * phase));
 
                 DrawBuildUpBar(HUB_AREAPANELX[4], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
-                               icon_phase, 1.0f, 1.0f, 0);
+                               NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
                 NuStrCpy(text, save->true_hero_complete[1] ? "$" : "X");
                 Text3DEx(text, HUB_AREAPANELX[4], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
                          PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
@@ -1842,7 +1841,7 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
                             0, 255, 255, 255, 0.4f, 1, NULL, 0, static_cast<i32>(static_cast<f32>(TJTYPEA) * phase));
             } else {
                 DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
-                               icon_phase, 1.0f, 1.0f, 0);
+                               NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
                 NuStrCpy(text, (save->true_hero_complete[0] || save->true_hero_complete[1]) ? "$" : "X");
                 Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
                          PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
@@ -1869,7 +1868,7 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
         return;
     }
 
-    if (save->complete == 0) {
+    if (save->area_complete == 0) {
         return;
     }
 
@@ -1879,12 +1878,12 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
         if ((flags & 0x800) == 0) {
             const i32 gold_count = 1 + (save->true_hero_complete[0] || save->true_hero_complete[1]);
             Hub_DrawImportantBrick(211, -0.20100002f, HUB_EPISODETITLEY, phase, gold_count, 2);
+        } else {
+            Hub_DrawImportantBrick(251, build_x, HUB_EPISODESUBTITLEY - 0.05f, phase, -1, -1);
         }
     } else if ((flags & 0x800) == 0) {
         Hub_DrawImportantBrick(211, -0.0f, HUB_EPISODESUBTITLEY + 0.05f, phase, -1, -1);
-    }
-
-    if ((flags & 0x800) != 0) {
+    } else {
         Hub_DrawImportantBrick(251, build_x, HUB_EPISODESUBTITLEY - 0.05f, phase, -1, -1);
     }
     if ((area->flags & 0x4000) == 0) {
@@ -2527,14 +2526,14 @@ void Hub_UpdateFreePlaySelect() {
             break;
         case 1: {
             i32 active = 0, confirmed = 0;
-            i32 exit = 0;
+            bool exit = false;
             auto menu_input_activity = menu->input_activity;
             auto collection_count_x = collection->count_x;
             for (i32 player = 0; player < 2; ++player) {
                 const i32 other = (player + 1) & 1;
                 const i32 previous = freeplay_i[player];
                 i32 index = previous;
-                i32 select = 0, cancel = 0;
+                bool select = false, cancel = false;
                 if (menu_input_activity != 0 && player == 0) {
                     if (menu->confirm_pressed != 0) {
                         if (menu->selected_item == 9999)
@@ -2574,7 +2573,7 @@ void Hub_UpdateFreePlaySelect() {
                         if (up) {
                             const i32 columns = collection_count_x;
                             const i32 count = collection->count_y;
-                            const i32 span = (count / columns + 1) * columns;
+                            const i32 span = (static_cast<u32>(count) / static_cast<u32>(columns) + 1) * columns;
                             index = previous;
                             do {
                                 index -= columns;
@@ -2587,7 +2586,7 @@ void Hub_UpdateFreePlaySelect() {
                         } else if (down) {
                             const i32 count = collection->count_y;
                             const i32 columns = collection_count_x;
-                            const i32 span = (count / columns + 1) * columns;
+                            const i32 span = (static_cast<u32>(count) / static_cast<u32>(columns) + 1) * columns;
                             index = previous;
                             do {
                                 index += columns;

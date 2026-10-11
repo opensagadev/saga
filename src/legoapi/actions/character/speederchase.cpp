@@ -82,9 +82,6 @@ f32 speeder_mode_ahead_timer;
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
-NuMechPtr<MechObjectInterface, 4> lungeTarget;
-NuMechPtr<MechObjectInterface, 4> forceNextAttackOpponent;
-NuMechPtr<MechObjectInterface, 4> nextShootTarget;
 i32 objopponent_ignoreaiopponent;
 i32 test_ai_combo = 1;
 i32 CanPunchGirls = 1;

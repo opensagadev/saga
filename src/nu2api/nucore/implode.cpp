@@ -485,3 +485,149 @@ void ImplodeError(char *msg, ...) {
 
     exit(1);
 }
+
+// Encoding-side memory I/O shares the decoder's input/output buffers.
+static i32 inlen;
+
+void *ImplodePutI(void *buf, u32 value, i32 size) {
+    unsigned char *cursor = static_cast<unsigned char *>(buf);
+    while (size != 0) {
+        *cursor = static_cast<unsigned char>(value);
+        ++cursor;
+        value >>= 8;
+        --size;
+    }
+    return buf;
+}
+
+void ImplodePutByteToMem(unsigned char value) {
+    *implode_outbuffer++ = value;
+}
+
+usize ImplodeFReadMem(unsigned char *buffer, i32 size) {
+    usize count = size < inlen ? size : inlen;
+    memcpy(buffer, implode_inbuffer, count);
+    implode_inbuffer += count;
+    implode_origsize += count;
+    inlen -= count;
+    return count;
+}
+
+// The encoder and decoder share the Huffman branch arrays. The encoder builds
+// a frequency heap, limits code lengths to 16 bits, then assigns canonical codes.
+static i32 n;
+static i32 heapsize;
+static i16 heap[511];
+static u16 *freq;
+static u16 *sortptr;
+static u16 len_cnt[17];
+static unsigned char *len;
+
+static void count_len(i32 node) {
+    static i32 depth;
+    if (node < n) {
+        ++len_cnt[depth < 16 ? depth : 16];
+    } else {
+        ++depth;
+        count_len(implode_left[node]);
+        count_len(implode_right[node]);
+        --depth;
+    }
+}
+
+static void make_len(i32 root) {
+    i32 i;
+    u32 count;
+    i32 total;
+    for (i = 0; i <= 16; ++i)
+        len_cnt[i] = 0;
+    count_len(root);
+    total = 0;
+    for (i = 16; i > 0; --i)
+        total += static_cast<u32>(len_cnt[i]) << (16 - i);
+    while (total != 65536) {
+        --len_cnt[16];
+        for (i = 15; i > 0; --i) {
+            if (len_cnt[i] != 0) {
+                --len_cnt[i];
+                len_cnt[i + 1] += 2;
+                break;
+            }
+        }
+        --total;
+    }
+    for (i = 16; i > 0; --i) {
+        count = len_cnt[i];
+        while (static_cast<i32>(--count) >= 0)
+            len[*sortptr++] = static_cast<unsigned char>(i);
+    }
+}
+
+static void downheap(i32 parent) {
+    i32 child;
+    i32 node = heap[parent];
+    while ((child = parent * 2) <= heapsize) {
+        if (child < heapsize && freq[heap[child]] > freq[heap[child + 1]])
+            ++child;
+        if (freq[node] <= freq[heap[child]])
+            break;
+        heap[parent] = heap[child];
+        parent = child;
+    }
+    heap[parent] = node;
+}
+
+static void make_code(i32 symbols, unsigned char *lengths, u16 *codes) {
+    u16 start[18];
+    i32 i;
+    // Zero-length symbols are unused, but the original still assigns a code.
+    // Initialize their otherwise indeterminate running counter.
+    start[0] = 0;
+    start[1] = 0;
+    for (i = 1; i <= 16; ++i)
+        start[i + 1] = (start[i] + len_cnt[i]) << 1;
+    for (i = 0; i < symbols; ++i)
+        codes[i] = start[lengths[i]]++;
+}
+
+i32 ImplodeMakeTree(i32 symbols, u16 *frequencies, unsigned char *lengths, u16 *codes) {
+    i32 i, next_node, j, root;
+    n = symbols;
+    freq = frequencies;
+    len = lengths;
+    next_node = n;
+    heapsize = 0;
+    heap[1] = 0;
+    for (i = 0; i < n; ++i) {
+        len[i] = 0;
+        if (freq[i] != 0)
+            heap[++heapsize] = static_cast<i16>(i);
+    }
+    if (heapsize < 2) {
+        codes[heap[1]] = 0;
+        return heap[1];
+    }
+    for (i = heapsize / 2; i > 0; --i)
+        downheap(i);
+    sortptr = codes;
+    do {
+        i = heap[1];
+        if (i < n)
+            *sortptr++ = static_cast<u16>(i);
+        heap[1] = heap[heapsize--];
+        downheap(1);
+        j = heap[1];
+        if (j < n)
+            *sortptr++ = static_cast<u16>(j);
+        root = next_node++;
+        freq[root] = freq[i] + freq[j];
+        heap[1] = static_cast<i16>(root);
+        downheap(1);
+        implode_left[root] = static_cast<u16>(i);
+        implode_right[root] = static_cast<u16>(j);
+    } while (heapsize > 1);
+    sortptr = codes;
+    make_len(root);
+    make_code(symbols, lengths, codes);
+    return root;
+}

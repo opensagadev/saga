@@ -830,7 +830,7 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
     teamswitchtimer = 120.0f;
 }
 
-NuMechPtr<MechObjectInterface, 4> BobaRocketTarget;
+extern MechWeakPtr<MechObjectInterface, 4> BobaRocketTarget;
 
 void SetBobaRocketTarget(MechObjectInterface *target) {
     BobaRocketTarget = target;

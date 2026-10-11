@@ -72,6 +72,12 @@ static f32 ForceBackRadius2 = 0.0f;
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 
+// The retail move.cpp initializer owns these four managed references.
+MechWeakPtr<MechObjectInterface, 4> nextShootTarget(NULL);
+MechWeakPtr<MechObjectInterface, 4> forceNextAttackOpponent;
+MechWeakPtr<MechObjectInterface, 4> lungeTarget(NULL);
+MechWeakPtr<MechObjectInterface, 4> BobaRocketTarget(NULL);
+
 extern "C" i16 id_R2Q5;
 
 // Original action/context lookup data, with its arrays and pointers in one owner.

@@ -4247,13 +4247,26 @@ void GameObjectSetCanUse(GameObject_s *object, void *target, unsigned char actio
 }
 
 CABLE_s *GameObjOwnsAnyCables(GameObject_s *object) {
-    CABLE_s *cable = cables;
-    auto cables_source = cables->source;
-    for (i32 i = 0; i < 8; ++i, ++cable) {
-        // The original checks the first cable's owner for the entire array.
-        if (cables_source == object && (cable->flags_1e9 & 1) != 0)
-            return cable;
-    }
+    // The original checks the first cable's owner for the entire array.
+    if (cables[0].source != object)
+        return NULL;
+
+    if ((cables[0].flags_1e9 & 1) != 0)
+        return &cables[0];
+    if ((cables[1].flags_1e9 & 1) != 0)
+        return &cables[1];
+    if ((cables[2].flags_1e9 & 1) != 0)
+        return &cables[2];
+    if ((cables[3].flags_1e9 & 1) != 0)
+        return &cables[3];
+    if ((cables[4].flags_1e9 & 1) != 0)
+        return &cables[4];
+    if ((cables[5].flags_1e9 & 1) != 0)
+        return &cables[5];
+    if ((cables[6].flags_1e9 & 1) != 0)
+        return &cables[6];
+    if ((cables[7].flags_1e9 & 1) != 0)
+        return &cables[7];
     return NULL;
 }
 
@@ -7397,7 +7410,7 @@ GameObject_s *TargetGameObject(GameObject_s *object, nuvec_s *position, nuvec_s 
         if (arcade == 0 && (object->apiobj.flags_low & 0x80) != 0 && (target->field_0xf02 & 0x80) == 0) {
             u32 *mask = WORLD->api_object_sys->hostility_masks[object->apiobj.field_0x289];
             u64 hostility = static_cast<u64>(mask[0]) | (static_cast<u64>(mask[1]) << 32);
-            if (((hostility >> (target->apiobj.field_0x289 & 63)) & 1) == 0)
+            if (((hostility >> target->apiobj.field_0x289) & 1) == 0)
                 continue;
         }
         if (target->apiobj.collision_position.x < min_x || target->apiobj.collision_position.x > max_x ||

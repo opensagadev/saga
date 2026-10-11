@@ -27,7 +27,7 @@ void SetWeaponOut(GameObject_s *);
 bool FireBountyHunterRocket(GameObject_s *);
 void SetBobaRocketTarget(MechObjectInterface *);
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
-extern NuMechPtr<MechObjectInterface, 4> NextThermalTarget;
+extern MechWeakPtr<MechObjectInterface, 4> NextThermalTarget;
 
 f32 s_mechTouchMoveToStuckVel = 0.2f;
 f32 s_mechTouchMoveToStuckTime = 0.55f;

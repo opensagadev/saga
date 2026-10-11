@@ -1082,8 +1082,6 @@ void NuQFntPrintCharW(NUQFNT *font, u16 *text, u32 flags) {
         i32 colour = platform->colour;
         u16 character = *text++;
         if (character != 0) {
-            auto vufnt_height = vufnt->height;
-            auto vufnt_ic_gap = vufnt->ic_gap;
             do {
                 VUFNTCHAR *glyph = &vufnt->glyphs[character];
                 f32 glyph_width = character == 0x20 ? space_width : glyph->width * *vufnt->x_scale;
@@ -1111,7 +1109,7 @@ void NuQFntPrintCharW(NUQFNT *font, u16 *text, u32 flags) {
                         const f32 u0 = inverse_texture_width * glyph->x;
                         const f32 v0 = inverse_texture_height * glyph->y;
                         const f32 u1 = (glyph->width + glyph->x) * inverse_texture_width;
-                        const f32 v1 = (glyph->y + vufnt_height) * inverse_texture_height;
+                        const f32 v1 = (glyph->y + vufnt->height) * inverse_texture_height;
                         NuRndrPrimSetColour(colour);
                         NuRndrPrimUV(u0, v1);
                         NuRndrPrimPosition(left, top, z);
@@ -1137,13 +1135,13 @@ void NuQFntPrintCharW(NUQFNT *font, u16 *text, u32 flags) {
                         NuRndrPrimUV(u0, v0);
                         NuPrim2DAddXYZ(left, top, 0.0f);
                         NuRndrPrimSetColour(colour);
-                        const f32 v1 = (glyph->y + vufnt_height) * inverse_texture_height;
+                        const f32 v1 = (glyph->y + vufnt->height) * inverse_texture_height;
                         const f32 u1 = (glyph->x + glyph->width) * inverse_texture_width;
                         NuRndrPrimUV(u1, v1);
                         NuPrim2DAddXYZ(right, bottom, 0.0f);
                     }
                 }
-                x += vufnt_ic_gap * *vufnt->x_scale + advance;
+                x = x + vufnt->ic_gap * *vufnt->x_scale + advance;
             } while ((character = *text++) != 0);
         }
 

@@ -3594,8 +3594,8 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
             HUBMINIKITPIECE_s *piece = &pieces->pieces[i];
             if (!NuSpecialExistsFn(&piece->special))
                 continue;
-            NUMTX matrix;
-            NuMtxMul(&matrix, &piece->matrix, &object->apiobj.field_0xb8);
+            NUMTX matrix = pieces->pieces[i].matrix;
+            NuMtxMul(&matrix, &matrix, &object->apiobj.field_0xb8);
             NUVEC momentum;
             SetKillPartMom(&momentum);
             NuVecScale(&momentum, &momentum, 3.0f);
@@ -3607,7 +3607,7 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
             params.velocity = &momentum;
             params.field_14 = params.field_18 = 0.2f;
             params.gravity = -10.0f;
-            params.special = &piece->special;
+            params.special = &pieces->pieces[i].special;
             params.field_3c = PartImpact_Brick;
             params.flags = mode == 0 ? 0x480 : 0x90;
             params.stop_fn = PartStop_Flickerer;

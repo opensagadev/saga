@@ -232,27 +232,25 @@ void StorePlatImpact() {
     castnum = query->terrain_group_index;
     NUVEC impact_normal = query->movement_normal;
 
-    const u8 maximum_supported_hit_type = TERRAIN_HIT_TYPE_SECOND_NORMAL | TERRAIN_HIT_TYPE_SPHERE;
-    if (hit_type > maximum_supported_hit_type) {
-        return;
-    }
-
-    const i32 hit_type_flag = 1 << hit_type;
-    const i32 rotated_class_mask =
-        (1 << TERRAIN_HIT_TYPE_CYLINDER) | (1 << TERRAIN_HIT_TYPE_VERTEX) | (1 << TERRAIN_HIT_TYPE_SPHERE);
-    const i32 rotated_hit_mask = rotated_class_mask | (rotated_class_mask << TERRAIN_HIT_TYPE_SECOND_NORMAL);
-    const i32 face_class_mask = 1 << TERRAIN_HIT_TYPE_FACE;
-    const i32 direct_hit_mask = face_class_mask | (face_class_mask << TERRAIN_HIT_TYPE_SECOND_NORMAL);
-    if ((hit_type_flag & rotated_hit_mask) != 0) {
-        RotateVec(&impact_normal, &impact_normal);
-        query = TerI;
-        if ((query->hit_type & TERRAIN_HIT_TYPE_SECOND_NORMAL) == 0) {
-            impact_normal.x *= query->inverse_collision_radius;
-            impact_normal.y *= query->inverse_collision_radius;
-            impact_normal.z *= query->inverse_collision_radius;
-        }
-    } else if ((hit_type_flag & direct_hit_mask) == 0) {
-        return;
+    switch (hit_type) {
+        case TERRAIN_HIT_TYPE_CYLINDER:
+        case TERRAIN_HIT_TYPE_VERTEX:
+        case TERRAIN_HIT_TYPE_SPHERE:
+        case TERRAIN_HIT_TYPE_CYLINDER | TERRAIN_HIT_TYPE_SECOND_NORMAL:
+        case TERRAIN_HIT_TYPE_VERTEX | TERRAIN_HIT_TYPE_SECOND_NORMAL:
+        case TERRAIN_HIT_TYPE_SPHERE | TERRAIN_HIT_TYPE_SECOND_NORMAL:
+            RotateVec(&impact_normal, &impact_normal);
+            query = TerI;
+            if ((query->hit_type & TERRAIN_HIT_TYPE_SECOND_NORMAL) == 0) {
+                impact_normal.x *= query->inverse_collision_radius;
+                impact_normal.y *= query->inverse_collision_radius;
+                impact_normal.z *= query->inverse_collision_radius;
+            }
+        case TERRAIN_HIT_TYPE_FACE:
+        case TERRAIN_HIT_TYPE_FACE | TERRAIN_HIT_TYPE_SECOND_NORMAL:
+            break;
+        default:
+            return;
     }
 
     const f32 unit_scale = 1.0f;
@@ -740,15 +738,14 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
     cursor->u8_ptr += sizeof(TERRSET);
 
     terrain->groups = reinterpret_cast<TERRAIN_GROUP *>(cursor->u8_ptr);
+    terrain->max_group_indices = max_group_indices;
+    terrain->max_groups = max_groups;
+    terrain->max_platforms = max_platforms;
     cursor->u8_ptr += (max_groups + 0x80) * sizeof(TERRAIN_GROUP);
     terrain->group_indices = reinterpret_cast<i16 *>(cursor->u8_ptr);
     cursor->u8_ptr += max_group_indices * sizeof(i16);
     terrain->platforms = reinterpret_cast<TERRAIN_PLATFORM *>(cursor->u8_ptr);
     cursor->u8_ptr += max_platforms * sizeof(TERRAIN_PLATFORM);
-
-    terrain->max_group_indices = max_group_indices;
-    terrain->max_groups = max_groups;
-    terrain->max_platforms = max_platforms;
 
     for (i32 level = 0; level < TERRAIN_INDEX_LEVEL_COUNT; ++level) {
         terrain->index_levels[level].entry_count = 0;
@@ -793,7 +790,7 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
     TerrWallInfo = 0;
     PlatImpactId = -1;
 
-    const i16 group_count = static_cast<i16>(
+    i16 group_count = static_cast<i16>(
         ReadTerrain(reinterpret_cast<unsigned char *>(path), 0, reinterpret_cast<i16 **>(cursor), terrain));
     terrain->group_count = static_cast<i16>(group_count);
     if (group_count < 0) {
@@ -807,8 +804,9 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
 
     terrain->minimum_height = INT_MAX;
 
-    for (i32 group_index = 0; group_index < group_count; ++group_index) {
-        TERRAIN_GROUP &group = terrain->groups[group_index];
+    TERRAIN_GROUP *next_group = terrain->groups;
+    for (i32 group_index = 0; group_index < terrain->group_count; ++group_index, ++next_group) {
+        TERRAIN_GROUP &group = *next_group;
         if (static_cast<u32>(group.chunk_type) > TERRAIN_CHUNK_GROUP_SECONDARY) {
             continue;
         }
@@ -824,7 +822,8 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
         TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group.data);
         while (batch->marker >= 0) {
             TERRAIN_SHAPE *shape = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
-            for (i32 shape_index = 0; shape_index < batch->shape_count; ++shape_index, ++shape) {
+            const i32 shape_count = batch->shape_count;
+            for (i32 shape_index = 0; shape_index < shape_count; ++shape_index, ++shape) {
                 NuVecCheckForSNANs(&shape->normals[0]);
                 NuVecCheckForSNANs(&shape->normals[1]);
 
@@ -885,8 +884,7 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
                 }
             }
 
-            batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(reinterpret_cast<TERRAIN_SHAPE *>(batch + 1) +
-                                                            batch->shape_count);
+            batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(reinterpret_cast<TERRAIN_SHAPE *>(batch + 1) + shape_count);
         }
 
         group.radius = NuFsqrt(radius_squared);
@@ -908,6 +906,7 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
         ++terraincnt;
     }
 
+    group_count = terrain->group_count;
     f32 terrain_min_z = kBoundsMaximum;
     f32 terrain_min_x = kBoundsMaximum;
     f32 terrain_max_x = kBoundsMinimum;
@@ -3691,58 +3690,51 @@ extern "C" void NewShapeInit(NUVEC *offset) {
 void TerrainImpactNorm() {
     TerrainMoveImpactData();
 
-    const u8 maximum_supported_hit_type = TERRAIN_HIT_TYPE_SECOND_NORMAL | TERRAIN_HIT_TYPE_SPHERE;
-    if (TerI->hit_type > maximum_supported_hit_type) {
+    switch (TerI->hit_type) {
+        case TERRAIN_HIT_TYPE_SPHERE:
+        case TERRAIN_HIT_TYPE_SPHERE | TERRAIN_HIT_TYPE_SECOND_NORMAL:
+            terrhitflags |= 4;
+            // Fall through to rotate curved hit normals.
+        case TERRAIN_HIT_TYPE_CYLINDER:
+        case TERRAIN_HIT_TYPE_CYLINDER | TERRAIN_HIT_TYPE_SECOND_NORMAL:
+        case TERRAIN_HIT_TYPE_VERTEX:
+        case TERRAIN_HIT_TYPE_VERTEX | TERRAIN_HIT_TYPE_SECOND_NORMAL:
+            RotateVec(&TerI->movement_normal, &TerI->movement_normal);
+            if ((TerI->hit_type & TERRAIN_HIT_TYPE_SECOND_NORMAL) == 0) {
+                TerI->movement_normal.x *= TerI->inverse_collision_radius;
+                TerI->movement_normal.y *= TerI->inverse_collision_radius;
+                TerI->movement_normal.z *= TerI->inverse_collision_radius;
+            }
+            // Fall through to the common normal output.
+        case TERRAIN_HIT_TYPE_FACE:
+        case TERRAIN_HIT_TYPE_FACE | TERRAIN_HIT_TYPE_SECOND_NORMAL:
+            break;
+        default:
+            return;
+    }
+
+    TerrainQuery_s *query = TerI;
+
+    if (query->object_scale == 1.0f) {
+        query->impact_normal.x = query->movement_normal.x;
+        query->impact_normal.y = query->movement_normal.y;
+        query->impact_normal.z = query->movement_normal.z;
         return;
     }
 
-    const i32 hit_type_flag = 1 << TerI->hit_type;
-    const i32 sphere_class_mask = 1 << TERRAIN_HIT_TYPE_SPHERE;
-    const i32 rotate_and_mark_mask = sphere_class_mask | (sphere_class_mask << TERRAIN_HIT_TYPE_SECOND_NORMAL);
-    const i32 rotated_surface_mask = (1 << TERRAIN_HIT_TYPE_CYLINDER) | (1 << TERRAIN_HIT_TYPE_VERTEX);
-    const i32 rotate_mask = rotated_surface_mask | (rotated_surface_mask << TERRAIN_HIT_TYPE_SECOND_NORMAL);
-    const i32 face_class_mask = 1 << TERRAIN_HIT_TYPE_FACE;
-    const i32 direct_normal_mask = face_class_mask | (face_class_mask << TERRAIN_HIT_TYPE_SECOND_NORMAL);
-
-    if ((hit_type_flag & rotate_and_mark_mask) != 0) {
-        terrhitflags |= 4;
+    const f32 normal_length =
+        NuFsqrt(query->movement_normal.x * query->movement_normal.x +
+                query->movement_normal.y * query->movement_normal.y * query->inverse_object_scale_sq +
+                query->movement_normal.z * query->movement_normal.z);
+    f32 inverse_normal_length = 0.0f;
+    if (normal_length != 0.0f) {
+        inverse_normal_length = 1.0f / normal_length;
     }
 
-    const bool rotated_hit = (hit_type_flag & (rotate_and_mark_mask | rotate_mask)) != 0;
-    if (rotated_hit) {
-        RotateVec(&TerI->movement_normal, &TerI->movement_normal);
-    } else if ((hit_type_flag & direct_normal_mask) != 0) {
-
-        TerrainQuery_s *query = TerI;
-        // Curved hits are produced in collision-height-scaled space and need to
-        // be transformed back. Face normals already come from the terrain in
-        // object space; the target's direct-face branch deliberately bypasses
-        // this scaling before copying the normal below.
-        if (rotated_hit && (query->hit_type & TERRAIN_HIT_TYPE_SECOND_NORMAL) == 0) {
-            query->movement_normal.x *= query->inverse_collision_radius;
-            query->movement_normal.y *= query->inverse_collision_radius;
-            query->movement_normal.z *= query->inverse_collision_radius;
-        }
-
-        if (query->object_scale == 1.0f) {
-            query->impact_normal = query->movement_normal;
-            return;
-        }
-
-        const f32 normal_length =
-            NuFsqrt(query->movement_normal.x * query->movement_normal.x +
-                    query->movement_normal.y * query->movement_normal.y * query->inverse_object_scale_sq +
-                    query->movement_normal.z * query->movement_normal.z);
-        f32 inverse_normal_length = 0.0f;
-        if (normal_length != 0.0f) {
-            inverse_normal_length = 1.0f / normal_length;
-        }
-
-        query = TerI;
-        query->impact_normal.x = query->movement_normal.x * inverse_normal_length;
-        query->impact_normal.y = query->movement_normal.y * query->inverse_object_scale * inverse_normal_length;
-        query->impact_normal.z = query->movement_normal.z * inverse_normal_length;
-    }
+    query = TerI;
+    query->impact_normal.x = query->movement_normal.x * inverse_normal_length;
+    query->impact_normal.y = query->movement_normal.y * query->inverse_object_scale * inverse_normal_length;
+    query->impact_normal.z = query->movement_normal.z * inverse_normal_length;
 }
 void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
     void *scratch = NuScratchAlloc32(0xd0);
@@ -4315,18 +4307,21 @@ void NewTerrStoreAnyInfo() {
 }
 
 void TerrainMoveImpactData() {
-    const i32 stored_class_mask = (1 << TERRAIN_HIT_TYPE_FACE) | (1 << TERRAIN_HIT_TYPE_CYLINDER) |
-                                  (1 << TERRAIN_HIT_TYPE_VERTEX) | (1 << TERRAIN_HIT_TYPE_SPHERE);
-    const i32 stored_hit_type_mask = stored_class_mask | (stored_class_mask << TERRAIN_HIT_TYPE_SECOND_NORMAL);
-    const u8 maximum_stored_hit_type = TERRAIN_HIT_TYPE_SECOND_NORMAL | TERRAIN_HIT_TYPE_SPHERE;
-
-    if (TerI->hit_type > maximum_stored_hit_type) {
-        return;
+    switch (TerI->hit_type) {
+        case TERRAIN_HIT_TYPE_FACE:
+        case TERRAIN_HIT_TYPE_CYLINDER:
+        case TERRAIN_HIT_TYPE_VERTEX:
+        case TERRAIN_HIT_TYPE_SPHERE:
+        case TERRAIN_HIT_TYPE_FACE | TERRAIN_HIT_TYPE_SECOND_NORMAL:
+        case TERRAIN_HIT_TYPE_CYLINDER | TERRAIN_HIT_TYPE_SECOND_NORMAL:
+        case TERRAIN_HIT_TYPE_VERTEX | TERRAIN_HIT_TYPE_SECOND_NORMAL:
+        case TERRAIN_HIT_TYPE_SPHERE | TERRAIN_HIT_TYPE_SECOND_NORMAL:
+            break;
+        default:
+            return;
     }
 
-    i32 hit_type_flag = 1 << TerI->hit_type;
-    hit_type_flag &= stored_hit_type_mask;
-    if (hit_type_flag == 0 || TerI->terrain_group_index == -1) {
+    if (TerI->terrain_group_index == -1) {
         return;
     }
 
@@ -4804,9 +4799,11 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                         vertices[1].z = surface->vectors[2].z - surface->vectors[3].z;
                         surface->normals[1] = TerCrossProduct(reinterpret_cast<NUVEC *>(&vertices[0]),
                                                               reinterpret_cast<NUVEC *>(&vertices[1]));
+                        surface = &ScaleTerrain[transformed_count];
                         NUVEC *normal = &surface->normals[1];
                         f32 length = NuFsqrt(normal->x * normal->x + normal->y * normal->y + normal->z * normal->z);
                         f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
+                        surface = &ScaleTerrain[transformed_count];
                         surface->normals[1].x *= inverse;
                         surface->normals[1].y *= inverse;
                         surface->normals[1].z *= inverse;
@@ -4819,9 +4816,11 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                     vertices[1].z = surface->vectors[1].z - surface->vectors[0].z;
                     surface->normals[0] = TerCrossProduct(reinterpret_cast<NUVEC *>(&vertices[0]),
                                                           reinterpret_cast<NUVEC *>(&vertices[1]));
+                    surface = &ScaleTerrain[transformed_count];
                     NUVEC *normal = &surface->normals[0];
                     f32 length = NuFsqrt(normal->x * normal->x + normal->y * normal->y + normal->z * normal->z);
                     f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
+                    surface = &ScaleTerrain[transformed_count];
                     surface->normals[0].x *= inverse;
                     surface->normals[0].y *= inverse;
                     surface->normals[0].z *= inverse;
@@ -4909,9 +4908,11 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                         vertices[1].z = surface->vectors[2].z - surface->vectors[3].z;
                         surface->normals[1] = TerCrossProduct(reinterpret_cast<NUVEC *>(&vertices[0]),
                                                               reinterpret_cast<NUVEC *>(&vertices[1]));
+                        surface = &ScaleTerrain[transformed_count];
                         NUVEC *normal = &surface->normals[1];
                         f32 length = NuFsqrt(normal->x * normal->x + normal->y * normal->y + normal->z * normal->z);
                         f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
+                        surface = &ScaleTerrain[transformed_count];
                         surface->normals[1].x *= inverse;
                         surface->normals[1].y *= inverse;
                         surface->normals[1].z *= inverse;
@@ -4924,9 +4925,11 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                     vertices[1].z = surface->vectors[1].z - surface->vectors[0].z;
                     surface->normals[0] = TerCrossProduct(reinterpret_cast<NUVEC *>(&vertices[0]),
                                                           reinterpret_cast<NUVEC *>(&vertices[1]));
+                    surface = &ScaleTerrain[transformed_count];
                     NUVEC *normal = &surface->normals[0];
                     f32 length = NuFsqrt(normal->x * normal->x + normal->y * normal->y + normal->z * normal->z);
                     f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
+                    surface = &ScaleTerrain[transformed_count];
                     surface->normals[0].x *= inverse;
                     surface->normals[0].y *= inverse;
                     surface->normals[0].z *= inverse;
@@ -4970,6 +4973,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                         f32 length = NuFsqrt(normal->x * normal->x + (normal->y * normal->y) * query->object_scale_sq +
                                              normal->z * normal->z);
                         f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
+                        surface = &ScaleTerrain[transformed_count];
                         surface->normals[1].x = normal->x * inverse;
                         surface->normals[1].y = (normal->y * query_object_scale) * inverse;
                         surface->normals[1].z = normal->z * inverse;
@@ -4980,6 +4984,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                     f32 length = NuFsqrt(normal->x * normal->x + (normal->y * normal->y) * query->object_scale_sq +
                                          normal->z * normal->z);
                     f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
+                    surface = &ScaleTerrain[transformed_count];
                     surface->normals[0].x = normal->x * inverse;
                     surface->normals[0].y = (normal->y * query_object_scale) * inverse;
                     surface->normals[0].z = normal->z * inverse;

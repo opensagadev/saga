@@ -2176,14 +2176,14 @@ __used__ static i32 Action_CanDefend(AISYS *sys, AISCRIPTPROCESS *processor, AIP
     (void)sys;
     (void)processor;
     (void)param_6;
-    if (param_5 != 0 && packet != NULL && packet->owner != NULL) {
-        bool enabled = true;
+    if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL && param_5 != 0) {
+        GameObject_s *object = packet->owner->apiobj.objptr;
+        object->field_0xef8 |= 2;
         for (i32 index = 0; index < param_4; ++index) {
             if (NuStrICmp(params[index], "false") == 0) {
-                enabled = false;
+                object->field_0xef8 &= static_cast<u8>(~2u);
             }
         }
-        packet->owner->field_0xef8 = static_cast<u8>((packet->owner->field_0xef8 & ~2u) | (enabled ? 2u : 0u));
     }
     return 1;
 }
@@ -7846,11 +7846,11 @@ __used__ static i32 Action_UseCurrentSpeed(AISYS *sys, AISCRIPTPROCESS *processo
     (void)sys;
     (void)processor;
     (void)param_6;
-    if (packet == NULL || packet->owner == NULL || param_5 == 0) {
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL || param_5 == 0) {
         return 1;
     }
 
-    GameObject_s *object = packet->owner;
+    GameObject_s *object = packet->owner->apiobj.objptr;
     object->field_0xf02 |= 0x20;
     object->current_speed_multiplier = 1.0f;
     bool snap_to_speed = false;
@@ -7858,7 +7858,7 @@ __used__ static i32 Action_UseCurrentSpeed(AISYS *sys, AISCRIPTPROCESS *processo
         if (NuStrICmp(params[index], "FALSE") == 0) {
             object->field_0xf02 &= static_cast<u8>(~0x20u);
         } else if (char *value = NuStrIStr(params[index], "multiplier")) {
-            object->current_speed_multiplier = AIParamToFloat(processor, value + NuStrLen("multiplier") + 1);
+            object->current_speed_multiplier = AIParamToFloat(processor, value + 11);
         } else if (NuStrICmp(params[index], "snaptospeed") == 0) {
             snap_to_speed = true;
         }
@@ -7866,7 +7866,7 @@ __used__ static i32 Action_UseCurrentSpeed(AISYS *sys, AISCRIPTPROCESS *processo
 
     if ((object->field_0xf02 & 0x20) != 0 && (object->field_0xef9 & 0x40) == 0) {
         object->field_0xef9 |= 0x40;
-        if (snap_to_speed && WORLD != NULL) {
+        if (snap_to_speed) {
             ComplexSockPosition(WORLD->sock_sys, &object->apiobj.position, static_cast<i8>(object->field_0x661),
                                 object->sock_segment, &object->sock_position);
             ComplexSockAngles(&object->sock_angles);

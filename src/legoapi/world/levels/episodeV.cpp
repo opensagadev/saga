@@ -50,7 +50,7 @@
 extern i32 dagobah_training;
 extern i32 obstacle_gizmotype_id;
 extern u8 LevFlag[16];
-extern NuMechPtr<MechObjectInterface, 4> BobaRocketTarget;
+extern MechWeakPtr<MechObjectInterface, 4> BobaRocketTarget;
 extern "C" i16 id_PROBEDROID, id_ATST_LOWRES, id_ATAT;
 GIZPANEL_s *LevGizPanel;
 AILOCATOR_s *locator;

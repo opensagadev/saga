@@ -35,21 +35,30 @@ template <class T, i32 Tag> class NuMechPtr {
         }
     };
 
-    NuMechPtr(T *value = NULL) : object(NULL), next(NULL), previous(NULL) {
-        Attach(value);
+    NuMechPtr() : object(NULL), next(NULL), previous(NULL) {
+    }
+    NuMechPtr(T *value) : object(NULL), next(NULL), previous(NULL) {
+        Set(value);
     }
     NuMechPtr(const NuMechPtr &other) : object(NULL), next(NULL), previous(NULL) {
-        Attach(other.object);
+        Set(other.object);
     }
     ~NuMechPtr() {
-        Reset();
+        Unlink();
     }
 
     NuMechPtr &operator=(const NuMechPtr &other) {
         T *value = other.object;
-        Reset();
+        Unlink();
         Attach(value);
         return *this;
+    }
+    void Reset() {
+        Unlink();
+    }
+    void Set(T *value) {
+        Unlink();
+        Attach(value);
     }
     T *Get() const {
         return object;
@@ -58,7 +67,7 @@ template <class T, i32 Tag> class NuMechPtr {
         return object;
     }
 
-    void Reset() {
+    void Unlink() {
         if (object != NULL) {
             if (next == this) {
                 object->managed_links = NULL;
@@ -97,4 +106,14 @@ template <class T, i32 Tag> class NuMechPtr {
     T *object;
     NuMechPtr *next;
     NuMechPtr *previous;
+};
+
+// The original movement globals register this wrapper's destructor.
+template <class T, i32 Tag> class MechWeakPtr : public NuMechPtr<T, Tag> {
+  public:
+    MechWeakPtr() : NuMechPtr<T, Tag>() {
+    }
+    explicit MechWeakPtr(T *value) : NuMechPtr<T, Tag>(value) {
+    }
+    using NuMechPtr<T, Tag>::operator=;
 };

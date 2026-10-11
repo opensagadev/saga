@@ -1495,20 +1495,20 @@ extern "C" {
 #define CHECK_PATH_CONNECTION(slot)                                                                                    \
     {                                                                                                                  \
         EDAIPATHNODE_s *other = node->connections[slot].node;                                                          \
-        if (other != nullptr && !(checked[node_index][other->index / 8] & (1 << (other->index % 8)))) {                \
+        if (other != nullptr && !((checked[node_index][other->index / 8] >> (other->index % 8)) & 1)) {                \
             checked[node_index][other->index / 8] |= 1 << (other->index % 8);                                          \
             checked[other->index][node_index / 8] |= 1 << (node_index % 8);                                            \
             f32 fraction;                                                                                              \
             f32 width;                                                                                                 \
             i32 angle;                                                                                                 \
             if (TestPointPathCheck(point, node, other, &fraction, &width, &angle, tolerance)) {                        \
+                result->fraction = fraction;                                                                           \
+                result->angle = angle;                                                                                 \
                 result->on_path = 1;                                                                                   \
                 result->path = path;                                                                                   \
                 result->first = node;                                                                                  \
                 result->second = node->connections[slot].node;                                                         \
-                result->fraction = fraction;                                                                           \
                 result->width = width;                                                                                 \
-                result->angle = angle;                                                                                 \
             }                                                                                                          \
         }                                                                                                              \
     }
@@ -1524,30 +1524,98 @@ extern "C" {
             node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&path->nodes, &node->link);
         }
     }
-
     void pathEditor_QuickOnPathCheck(nuvec_s *point, EDAIPATHCHECK_s *previous, EDAIPATHCHECK_s *result) {
+        // Test the current edge, then the eight connections on each endpoint in slot order.
         result->on_path = 0;
-        if (TestPointPathCheck(point, previous->first, previous->second, &result->fraction, &result->width,
-                               &result->angle, 0.0f)) {
-            result->on_path = 1;
-            return;
-        }
-        for (i32 index = 0; index < 8; ++index) {
-            EDAIPATHNODE_s *other = previous->first->connections[index].node;
-            if (other != nullptr && TestPointPathCheck(point, other, previous->first, &result->fraction, &result->width,
-                                                       &result->angle, 0.0f)) {
-                result->on_path = 1;
-                return;
+        if (!TestPointPathCheck(point, previous->first, previous->second, &result->fraction, &result->width,
+                                &result->angle, 0.0f)) {
+            if (previous->first->connections[0].node == nullptr ||
+                !TestPointPathCheck(point, previous->first->connections[0].node, previous->first, &result->fraction,
+                                    &result->width, &result->angle, 0.0f)) {
+                if (previous->second->connections[0].node == nullptr ||
+                    !TestPointPathCheck(point, previous->second, previous->second->connections[0].node,
+                                        &result->fraction, &result->width, &result->angle, 0.0f)) {
+                    if (previous->first->connections[1].node == nullptr ||
+                        !TestPointPathCheck(point, previous->first->connections[1].node, previous->first,
+                                            &result->fraction, &result->width, &result->angle, 0.0f)) {
+                        if (previous->second->connections[1].node == nullptr ||
+                            !TestPointPathCheck(point, previous->second, previous->second->connections[1].node,
+                                                &result->fraction, &result->width, &result->angle, 0.0f)) {
+                            if (previous->first->connections[2].node == nullptr ||
+                                !TestPointPathCheck(point, previous->first->connections[2].node, previous->first,
+                                                    &result->fraction, &result->width, &result->angle, 0.0f)) {
+                                if (previous->second->connections[2].node == nullptr ||
+                                    !TestPointPathCheck(point, previous->second, previous->second->connections[2].node,
+                                                        &result->fraction, &result->width, &result->angle, 0.0f)) {
+                                    if (previous->first->connections[3].node == nullptr ||
+                                        !TestPointPathCheck(point, previous->first->connections[3].node,
+                                                            previous->first, &result->fraction, &result->width,
+                                                            &result->angle, 0.0f)) {
+                                        if (previous->second->connections[3].node == nullptr ||
+                                            !TestPointPathCheck(
+                                                point, previous->second, previous->second->connections[3].node,
+                                                &result->fraction, &result->width, &result->angle, 0.0f)) {
+                                            if (previous->first->connections[4].node == nullptr ||
+                                                !TestPointPathCheck(point, previous->first->connections[4].node,
+                                                                    previous->first, &result->fraction, &result->width,
+                                                                    &result->angle, 0.0f)) {
+                                                if (previous->second->connections[4].node == nullptr ||
+                                                    !TestPointPathCheck(
+                                                        point, previous->second, previous->second->connections[4].node,
+                                                        &result->fraction, &result->width, &result->angle, 0.0f)) {
+                                                    if (previous->first->connections[5].node == nullptr ||
+                                                        !TestPointPathCheck(point, previous->first->connections[5].node,
+                                                                            previous->first, &result->fraction,
+                                                                            &result->width, &result->angle, 0.0f)) {
+                                                        if (previous->second->connections[5].node == nullptr ||
+                                                            !TestPointPathCheck(point, previous->second,
+                                                                                previous->second->connections[5].node,
+                                                                                &result->fraction, &result->width,
+                                                                                &result->angle, 0.0f)) {
+                                                            if (previous->first->connections[6].node == nullptr ||
+                                                                !TestPointPathCheck(
+                                                                    point, previous->first->connections[6].node,
+                                                                    previous->first, &result->fraction, &result->width,
+                                                                    &result->angle, 0.0f)) {
+                                                                if (previous->second->connections[6].node == nullptr ||
+                                                                    !TestPointPathCheck(
+                                                                        point, previous->second,
+                                                                        previous->second->connections[6].node,
+                                                                        &result->fraction, &result->width,
+                                                                        &result->angle, 0.0f)) {
+                                                                    if (previous->first->connections[7].node ==
+                                                                            nullptr ||
+                                                                        !TestPointPathCheck(
+                                                                            point, previous->first->connections[7].node,
+                                                                            previous->first, &result->fraction,
+                                                                            &result->width, &result->angle, 0.0f)) {
+                                                                        if (previous->second->connections[7].node ==
+                                                                                nullptr ||
+                                                                            !TestPointPathCheck(
+                                                                                point, previous->second,
+                                                                                previous->second->connections[7].node,
+                                                                                &result->fraction, &result->width,
+                                                                                &result->angle, 0.0f)) {
+                                                                            return;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            other = previous->second->connections[index].node;
-            if (other != nullptr && TestPointPathCheck(point, previous->second, other, &result->fraction,
-                                                       &result->width, &result->angle, 0.0f)) {
-                result->on_path = 1;
-                return;
-            }
         }
+        result->on_path = 1;
     }
-
     void pathEditor_UpdateNodesOnPlatforms(void) {
         EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths);
         while (path != nullptr) {
@@ -2076,72 +2144,214 @@ eduimenu_s *routeEditor_Process(nupad_s *pad) {
     EDAIPATH_s *path = aieditor->current_path;
     if (path == nullptr)
         return nullptr;
-    // Both route cycling directions are expanded across the 16 fixed slots in the original.
+    // Each direction visits the fixed route slots in order, stopping at the first active route.
     if (pressed & 0x1000) {
         i32 index = path->current_route == nullptr ? 1 : path->current_route - path->routes + 1;
-#define ROUTE_EDITOR_TRY_FORWARD()                                                                                     \
-    if (index >= 16)                                                                                                   \
-        index = 0;                                                                                                     \
-    path->current_route = &path->routes[index];                                                                        \
-    if (path->current_route->flags & 1)                                                                                \
-        goto route_selected;                                                                                           \
-    ++index
-        ROUTE_EDITOR_TRY_FORWARD();
-        ROUTE_EDITOR_TRY_FORWARD();
-        ROUTE_EDITOR_TRY_FORWARD();
-        ROUTE_EDITOR_TRY_FORWARD();
-        ROUTE_EDITOR_TRY_FORWARD();
-        ROUTE_EDITOR_TRY_FORWARD();
-        ROUTE_EDITOR_TRY_FORWARD();
-        ROUTE_EDITOR_TRY_FORWARD();
-        ROUTE_EDITOR_TRY_FORWARD();
-        ROUTE_EDITOR_TRY_FORWARD();
-        ROUTE_EDITOR_TRY_FORWARD();
-        ROUTE_EDITOR_TRY_FORWARD();
-        ROUTE_EDITOR_TRY_FORWARD();
-        ROUTE_EDITOR_TRY_FORWARD();
-        ROUTE_EDITOR_TRY_FORWARD();
-        ROUTE_EDITOR_TRY_FORWARD();
-#undef ROUTE_EDITOR_TRY_FORWARD
-        path->current_route = nullptr;
-        return nullptr;
+        if (index >= 16)
+            index = 0;
+        path->current_route = &path->routes[index];
+        if (!(path->current_route->flags & 1)) {
+            ++index;
+            if (index >= 16)
+                index = 0;
+            path->current_route = &path->routes[index];
+            if (!(path->current_route->flags & 1)) {
+                ++index;
+                if (index >= 16)
+                    index = 0;
+                path->current_route = &path->routes[index];
+                if (!(path->current_route->flags & 1)) {
+                    ++index;
+                    if (index >= 16)
+                        index = 0;
+                    path->current_route = &path->routes[index];
+                    if (!(path->current_route->flags & 1)) {
+                        ++index;
+                        if (index >= 16)
+                            index = 0;
+                        path->current_route = &path->routes[index];
+                        if (!(path->current_route->flags & 1)) {
+                            ++index;
+                            if (index >= 16)
+                                index = 0;
+                            path->current_route = &path->routes[index];
+                            if (!(path->current_route->flags & 1)) {
+                                ++index;
+                                if (index >= 16)
+                                    index = 0;
+                                path->current_route = &path->routes[index];
+                                if (!(path->current_route->flags & 1)) {
+                                    ++index;
+                                    if (index >= 16)
+                                        index = 0;
+                                    path->current_route = &path->routes[index];
+                                    if (!(path->current_route->flags & 1)) {
+                                        ++index;
+                                        if (index >= 16)
+                                            index = 0;
+                                        path->current_route = &path->routes[index];
+                                        if (!(path->current_route->flags & 1)) {
+                                            ++index;
+                                            if (index >= 16)
+                                                index = 0;
+                                            path->current_route = &path->routes[index];
+                                            if (!(path->current_route->flags & 1)) {
+                                                ++index;
+                                                if (index >= 16)
+                                                    index = 0;
+                                                path->current_route = &path->routes[index];
+                                                if (!(path->current_route->flags & 1)) {
+                                                    ++index;
+                                                    if (index >= 16)
+                                                        index = 0;
+                                                    path->current_route = &path->routes[index];
+                                                    if (!(path->current_route->flags & 1)) {
+                                                        ++index;
+                                                        if (index >= 16)
+                                                            index = 0;
+                                                        path->current_route = &path->routes[index];
+                                                        if (!(path->current_route->flags & 1)) {
+                                                            ++index;
+                                                            if (index >= 16)
+                                                                index = 0;
+                                                            path->current_route = &path->routes[index];
+                                                            if (!(path->current_route->flags & 1)) {
+                                                                ++index;
+                                                                if (index >= 16)
+                                                                    index = 0;
+                                                                path->current_route = &path->routes[index];
+                                                                if (!(path->current_route->flags & 1)) {
+                                                                    ++index;
+                                                                    if (index >= 16)
+                                                                        index = 0;
+                                                                    path->current_route = &path->routes[index];
+                                                                    if (!(path->current_route->flags & 1)) {
+                                                                        path->current_route = nullptr;
+                                                                        return nullptr;
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     } else if (pressed & 0x4000) {
         i32 index = path->current_route == nullptr ? 15 : path->current_route - path->routes - 1;
-#define ROUTE_EDITOR_TRY_BACKWARD()                                                                                    \
-    if (index < 0)                                                                                                     \
-        index = 15;                                                                                                    \
-    path->current_route = &path->routes[index];                                                                        \
-    if (path->current_route->flags & 1)                                                                                \
-        goto route_selected;                                                                                           \
-    --index
-        ROUTE_EDITOR_TRY_BACKWARD();
-        ROUTE_EDITOR_TRY_BACKWARD();
-        ROUTE_EDITOR_TRY_BACKWARD();
-        ROUTE_EDITOR_TRY_BACKWARD();
-        ROUTE_EDITOR_TRY_BACKWARD();
-        ROUTE_EDITOR_TRY_BACKWARD();
-        ROUTE_EDITOR_TRY_BACKWARD();
-        ROUTE_EDITOR_TRY_BACKWARD();
-        ROUTE_EDITOR_TRY_BACKWARD();
-        ROUTE_EDITOR_TRY_BACKWARD();
-        ROUTE_EDITOR_TRY_BACKWARD();
-        ROUTE_EDITOR_TRY_BACKWARD();
-        ROUTE_EDITOR_TRY_BACKWARD();
-        ROUTE_EDITOR_TRY_BACKWARD();
-        ROUTE_EDITOR_TRY_BACKWARD();
-        ROUTE_EDITOR_TRY_BACKWARD();
-#undef ROUTE_EDITOR_TRY_BACKWARD
-        path->current_route = nullptr;
+        if (index < 0)
+            index = 15;
+        path->current_route = &path->routes[index];
+        if (!(path->current_route->flags & 1)) {
+            --index;
+            if (index < 0)
+                index = 15;
+            path->current_route = &path->routes[index];
+            if (!(path->current_route->flags & 1)) {
+                --index;
+                if (index < 0)
+                    index = 15;
+                path->current_route = &path->routes[index];
+                if (!(path->current_route->flags & 1)) {
+                    --index;
+                    if (index < 0)
+                        index = 15;
+                    path->current_route = &path->routes[index];
+                    if (!(path->current_route->flags & 1)) {
+                        --index;
+                        if (index < 0)
+                            index = 15;
+                        path->current_route = &path->routes[index];
+                        if (!(path->current_route->flags & 1)) {
+                            --index;
+                            if (index < 0)
+                                index = 15;
+                            path->current_route = &path->routes[index];
+                            if (!(path->current_route->flags & 1)) {
+                                --index;
+                                if (index < 0)
+                                    index = 15;
+                                path->current_route = &path->routes[index];
+                                if (!(path->current_route->flags & 1)) {
+                                    --index;
+                                    if (index < 0)
+                                        index = 15;
+                                    path->current_route = &path->routes[index];
+                                    if (!(path->current_route->flags & 1)) {
+                                        --index;
+                                        if (index < 0)
+                                            index = 15;
+                                        path->current_route = &path->routes[index];
+                                        if (!(path->current_route->flags & 1)) {
+                                            --index;
+                                            if (index < 0)
+                                                index = 15;
+                                            path->current_route = &path->routes[index];
+                                            if (!(path->current_route->flags & 1)) {
+                                                --index;
+                                                if (index < 0)
+                                                    index = 15;
+                                                path->current_route = &path->routes[index];
+                                                if (!(path->current_route->flags & 1)) {
+                                                    --index;
+                                                    if (index < 0)
+                                                        index = 15;
+                                                    path->current_route = &path->routes[index];
+                                                    if (!(path->current_route->flags & 1)) {
+                                                        --index;
+                                                        if (index < 0)
+                                                            index = 15;
+                                                        path->current_route = &path->routes[index];
+                                                        if (!(path->current_route->flags & 1)) {
+                                                            --index;
+                                                            if (index < 0)
+                                                                index = 15;
+                                                            path->current_route = &path->routes[index];
+                                                            if (!(path->current_route->flags & 1)) {
+                                                                --index;
+                                                                if (index < 0)
+                                                                    index = 15;
+                                                                path->current_route = &path->routes[index];
+                                                                if (!(path->current_route->flags & 1)) {
+                                                                    --index;
+                                                                    if (index < 0)
+                                                                        index = 15;
+                                                                    path->current_route = &path->routes[index];
+                                                                    if (!(path->current_route->flags & 1)) {
+                                                                        path->current_route = nullptr;
+                                                                        return nullptr;
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else if (path->current_route == nullptr)
         return nullptr;
-    } else if (path->current_route == nullptr) {
-        return nullptr;
-    }
-route_selected:
     if ((pad->digital_buttons & 0x40) && (pressed & 0x40) && path->nearest_node != nullptr) {
         path->current_node = path->nearest_node;
         nuvec_s position = path->current_node->position;
         position.y = aieditor->cursor_position.y;
         edcamSetPos(&position);
+        pressed = pad->digital_buttons_pressed;
+        path = aieditor->current_path;
     }
     if ((pressed & 0x20) && path->current_node != nullptr && path->nearest_node != nullptr &&
         path->current_node != path->nearest_node) {
@@ -2153,17 +2363,27 @@ route_selected:
             nuvec_s position = nearest->position;
             position.y = aieditor->cursor_position.y;
             edcamSetPos(&position);
+            pressed = pad->digital_buttons_pressed;
+            path = aieditor->current_path;
         }
     }
-    if ((pressed & 0x10) && path->current_node != nullptr) {
+    if ((pressed & 0x10) && path->nearest_node != nullptr) {
+        // The route toggle acts on the highlighted node, which may differ from the selected node.
+        EDAIPATHNODE_s *node = path->nearest_node;
         i32 index = path->current_route - path->routes;
-        u32 mask = 1u << index;
-        for (i32 slot = 0; slot < 8; ++slot) {
-            EDAIPATHCNX_s *connection = &path->current_node->connections[slot];
-            if (connection->node != nullptr && (connection->route_mask & mask)) {
-                path->current_node->route_mask ^= mask;
-                break;
-            }
+        u64 mask = 1ull << index;
+        if ((node->connections[0].node != nullptr && (node->connections[0].route_mask & mask)) ||
+            (node->connections[1].node != nullptr && (node->connections[1].route_mask & mask)) ||
+            (node->connections[2].node != nullptr && (node->connections[2].route_mask & mask)) ||
+            (node->connections[3].node != nullptr && (node->connections[3].route_mask & mask)) ||
+            (node->connections[4].node != nullptr && (node->connections[4].route_mask & mask)) ||
+            (node->connections[5].node != nullptr && (node->connections[5].route_mask & mask)) ||
+            (node->connections[6].node != nullptr && (node->connections[6].route_mask & mask)) ||
+            (node->connections[7].node != nullptr && (node->connections[7].route_mask & mask))) {
+            if ((static_cast<u64>(node->route_mask) >> index) & 1)
+                node->route_mask &= ~mask;
+            else
+                node->route_mask |= mask;
         }
     }
     if (pressed & 0x100) {
@@ -2185,10 +2405,13 @@ route_selected:
             }
         }
         path->current_node = nearest;
-        if (path->current_node != nullptr)
+        if (path->current_node != nullptr) {
             edcamSetPos(&path->current_node->position);
+            path = aieditor->current_path;
+        }
     }
     path->nearest_node = pathEditor_GetNearestNode(path, 1);
+    path = aieditor->current_path;
     aieditor->flags &= ~u8(1);
     if (path->current_node != nullptr && path->current_node == path->nearest_node)
         aieditor->flags |= 1;

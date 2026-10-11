@@ -3562,8 +3562,8 @@ extern "C" {
     }
     void eduiItemGraphSetCursor(edui_graph_s *item, f32 x, f32 y) {
         if (item->type == 15) {
-            item->cursor_x = x < 0.0f ? 0.0f : (x > 1.0f ? 1.0f : x);
-            item->cursor_y = y < 0.0f ? 0.0f : (y > 1.0f ? 1.0f : y);
+            item->cursor_x = MIN(1.0f, (MAX(0.0f, x)));
+            item->cursor_y = MIN(1.0f, (MAX(0.0f, y)));
         }
     }
     void eduiItemGraphSetLabels(edui_graph_s *item, char *x, char *y, char *title) {
@@ -4932,35 +4932,26 @@ extern "C" {
 
     static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact) {
         edui_colour_pick_s *pick = static_cast<edui_colour_pick_s *>(interact->item);
-        if (((edui_cursor_x >= interact->x && edui_cursor_y >= interact->y &&
-              edui_cursor_x < interact->x + interact->width &&
-              edui_cursor_y < interact->y + interact->height * 0.75f) ||
+        if ((!(edui_cursor_x < interact->x || edui_cursor_y < interact->y ||
+               edui_cursor_x >= interact->x + interact->width ||
+               edui_cursor_y >= interact->y + interact->height * 0.75f) ||
              pick->dragging_colour) &&
             !pick->dragging_saturation) {
             pick->cursor_y = (edui_cursor_y - interact->y) / (interact->height * 0.75f);
             pick->cursor_x = (edui_cursor_x - interact->x) / interact->width;
             pick->dragging_colour = (edui_cursor_buttons & EDUI_CURSOR_PRIMARY) != 0;
         }
-        if (((edui_cursor_x >= interact->x && edui_cursor_y >= interact->y + interact->height * 0.75f &&
-              edui_cursor_x < interact->x + interact->width &&
-              edui_cursor_y < interact->y + interact->height * 0.75f + interact->height * 0.125f) ||
+        if ((!(edui_cursor_x < interact->x || edui_cursor_y < interact->y + interact->height * 0.75f ||
+               edui_cursor_x >= interact->x + interact->width ||
+               edui_cursor_y >= interact->y + interact->height * 0.75f + interact->height * 0.125f) ||
              pick->dragging_saturation) &&
             !pick->dragging_colour) {
             pick->saturation = (edui_cursor_x - interact->x) / interact->width;
             pick->dragging_saturation = (edui_cursor_buttons & EDUI_CURSOR_PRIMARY) != 0;
         }
-        if (pick->cursor_x > 1.0f)
-            pick->cursor_x = 1.0f;
-        else if (pick->cursor_x < 0.0f)
-            pick->cursor_x = 0.0f;
-        if (pick->cursor_y > 1.0f)
-            pick->cursor_y = 1.0f;
-        else if (pick->cursor_y < 0.0f)
-            pick->cursor_y = 0.0f;
-        if (pick->saturation > 1.0f)
-            pick->saturation = 1.0f;
-        else if (pick->saturation < 0.0f)
-            pick->saturation = 0.0f;
+        pick->cursor_x = MIN(1.0f, (MAX(0.0f, pick->cursor_x)));
+        pick->cursor_y = MIN(1.0f, (MAX(0.0f, pick->cursor_y)));
+        pick->saturation = MIN(1.0f, (MAX(0.0f, pick->saturation)));
         pick->hue = pick->cursor_x * 360.0f;
         pick->value = pick->cursor_y;
         eduiHSVToRGB(pick->hue, pick->saturation, pick->value, pick->red, pick->green, pick->blue);
@@ -5012,50 +5003,53 @@ extern "C" {
         return 0;
     }
     static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact) {
+        eduimenu_s *menu = interact->menu;
         edui_prop_s *property = static_cast<edui_prop_s *>(interact->item);
         u8 &property_flags = reinterpret_cast<u8 *>(property)[0x4c];
-        if (!(edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY) || (property_flags & 0x0a))
-            return (property_flags & 0x0b) != 0;
-        f32 label_end = interact->x + property->label_width;
-        f32 cursor_bottom = interact->y + interact->height;
-        bool in_row = edui_cursor_y >= interact->y && edui_cursor_y < cursor_bottom;
-        if (property_flags & 1) {
-            if (in_row && edui_cursor_x >= label_end + 1.0f && edui_cursor_x < property->button_x) {
-                property_flags |= 1;
-                eduiPropTextPos = -1;
-                return 1;
+        if ((edui_cursor_buttons & EDUI_CURSOR_PRIMARY) && !(property_flags & 0x0a)) {
+            f32 label_end = interact->x + property->label_width;
+            if (property_flags & 1) {
+                if (edui_cursor_x >= label_end + 1.0f && edui_cursor_y >= interact->y &&
+                    edui_cursor_x < property->button_x && edui_cursor_y < interact->y + interact->height) {
+                    property_flags |= 1;
+                    eduiPropTextPos = -1;
+                    return 1;
+                }
+            } else {
+                edui_prop_s *bounds_property = property;
+                if (edui_cursor_x >= interact->x && edui_cursor_y >= interact->y && edui_cursor_x < label_end - 1.0f &&
+                    edui_cursor_y < interact->y + interact->height && property->selected) {
+                    property->selected(menu, property, 0);
+                    bounds_property = static_cast<edui_prop_s *>(interact->item);
+                    label_end = interact->x + bounds_property->label_width;
+                }
+                if (edui_cursor_x >= label_end - 1.0f && edui_cursor_y >= interact->y &&
+                    edui_cursor_x < label_end + 1.0f && edui_cursor_y < interact->y + interact->height) {
+                    property_flags |= 0x06;
+                    bounds_property = static_cast<edui_prop_s *>(interact->item);
+                    label_end = interact->x + bounds_property->label_width;
+                }
+                if (edui_cursor_x >= label_end + 1.0f && edui_cursor_y >= interact->y &&
+                    edui_cursor_x < bounds_property->button_x && edui_cursor_y < interact->y + interact->height &&
+                    !(property_flags & 1)) {
+                    if (property->selected)
+                        property->selected(menu, property, 0);
+                    NuKeyFlush();
+                    property_flags |= 1;
+                    NuStrCpy(eduiPropTextStore, property->property_text);
+                    NuStrCpy(eduiPropTextEdit, property->property_text);
+                    eduiPropTextPos = NuStrLen(property->property_text);
+                }
+                if ((!(edui_cursor_x < property->button_x || edui_cursor_y < property->button_y * 0.5f ||
+                       edui_cursor_x >= property->button_x + property->button_size ||
+                       edui_cursor_y >= (property->button_y + property->button_size) * 0.5f) ||
+                     eduiInteractLocked) &&
+                    property->button) {
+                    property->button(menu, property, 0);
+                    if (property_flags & 0x20)
+                        return 1;
+                }
             }
-            return (property_flags & 0x0b) != 0;
-        }
-        edui_prop_s *bounds_property = property;
-        if (in_row && edui_cursor_x >= label_end - 1.0f && edui_cursor_x < label_end + 1.0f && property->selected) {
-            property->selected(interact->menu, property, 0);
-            bounds_property = static_cast<edui_prop_s *>(interact->item);
-            label_end = interact->x + bounds_property->label_width;
-        }
-        if (in_row && edui_cursor_x >= label_end - 1.0f && edui_cursor_x < label_end + 1.0f) {
-            bounds_property = static_cast<edui_prop_s *>(interact->item);
-            property_flags |= 0x06;
-            label_end = interact->x + bounds_property->label_width;
-        }
-        if (in_row && edui_cursor_x >= label_end + 1.0f && edui_cursor_x < bounds_property->button_x &&
-            !(property_flags & 1)) {
-            if (property->selected)
-                property->selected(interact->menu, property, 0);
-            NuKeyFlush();
-            property_flags |= 1;
-            NuStrCpy(eduiPropTextStore, property->property_text);
-            NuStrCpy(eduiPropTextEdit, property->property_text);
-            eduiPropTextPos = NuStrLen(property->property_text);
-        }
-        if ((eduiInteractLocked ||
-             (edui_cursor_x >= property->button_x && edui_cursor_x < property->button_x + property->button_size &&
-              edui_cursor_y >= property->button_y * 0.5f &&
-              edui_cursor_y < (property->button_y + property->button_size) * 0.5f)) &&
-            property->button) {
-            property->button(interact->menu, property, 0);
-            if (property_flags & 0x20)
-                return 1;
         }
         return (property_flags & 0x0b) != 0;
     }
@@ -5148,14 +5142,8 @@ extern "C" {
         f32 dy = eduiPickerDeadZone32(pad->analog_left_y) * 0.001f;
         pick->cursor_x += dx;
         pick->cursor_y += dy;
-        if (pick->cursor_x < 0.0f)
-            pick->cursor_x = 0.0f;
-        else if (pick->cursor_x > 1.0f)
-            pick->cursor_x = 1.0f;
-        if (pick->cursor_y < 0.0f)
-            pick->cursor_y = 0.0f;
-        else if (pick->cursor_y > 1.0f)
-            pick->cursor_y = 1.0f;
+        pick->cursor_x = MIN(1.0f, (MAX(0.0f, pick->cursor_x)));
+        pick->cursor_y = MIN(1.0f, (MAX(0.0f, pick->cursor_y)));
         if (pad->analog_l2) {
             pick->saturation -= static_cast<u32>(pad->analog_l2) * delta_time * 0.005f;
             if (pick->saturation < 0.0f)
@@ -5441,63 +5429,55 @@ extern "C" {
     }
     static __used__ i32 eduicbProcessGraph(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad) {
         edui_graph_s *graph_item = static_cast<edui_graph_s *>(item);
-        show_y_scale_help = show_y_scale_help > 0 ? show_y_scale_help - 1 : 0;
-        show_x_scale_help = show_x_scale_help > 0 ? show_x_scale_help - 1 : 0;
-        f32 x = NuPs2ApplyDeadZone(pad->analog_left_x, 32) * (1.0f / 8192.0f);
-        f32 y = -NuPs2ApplyDeadZone(pad->analog_left_y, 32) * (1.0f / 8192.0f);
+        show_y_scale_help = show_y_scale_help > 1 ? show_y_scale_help - 1 : 0;
+        show_x_scale_help = show_x_scale_help > 1 ? show_x_scale_help - 1 : 0;
+        f32 x = eduiPickerDeadZone32(pad->analog_left_x) * (1.0f / 8192.0f);
+        f32 y = -eduiPickerDeadZone32(pad->analog_left_y) * (1.0f / 8192.0f);
         x += graph_item->cursor_x;
         y += graph_item->cursor_y;
-        if (x < 0.0f)
-            x = 0.0f;
-        else if (x > 1.0f)
-            x = 1.0f;
-        if (y < 0.0f)
-            y = 0.0f;
-        else if (y > 1.0f)
-            y = 1.0f;
-        graph_item->cursor_y = y;
+        x = MIN(1.0f, (MAX(0.0f, x)));
+        y = MIN(1.0f, (MAX(0.0f, y)));
         graph_item->cursor_x = x;
+        graph_item->cursor_y = y;
 
         u32 left = pad->analog_l2;
         u32 right = pad->analog_r2;
-        if (left && right) {
-            graph_item->graph->x_scale = 1.0f;
+        if (left) {
+            if (right) {
+                show_x_scale_help = 60;
+                graph_item->graph->x_scale = 1.0f;
+                return 1;
+            }
+            if (left > 55) {
+                show_x_scale_help = 60;
+                f32 scale = graph_item->graph->x_scale - left * 0.02f / 255.0f;
+                graph_item->graph->x_scale = scale < 0.01f ? 0.01f : scale;
+                return 1;
+            }
+        } else if (right > 55) {
             show_x_scale_help = 60;
+            graph_item->graph->x_scale = right * 0.02f / 255.0f + graph_item->graph->x_scale;
             return 1;
         }
-        if (left > 55) {
-            graph_item->graph->x_scale -= left * 0.02f / 255.0f;
-            if (graph_item->graph->x_scale < 0.01f)
-                graph_item->graph->x_scale = 0.01f;
-            show_x_scale_help = 60;
-            return 1;
-        }
-        if (right > 55) {
-            graph_item->graph->x_scale += right * 0.02f / 255.0f;
-            show_x_scale_help = 60;
-            return 1;
-        }
-
         left = pad->analog_l1;
         right = pad->analog_r1;
-        if (left && right) {
-            graph_item->graph->y_scale = 1.0f;
-            show_y_scale_help = 60;
-            return 1;
-        }
         if (left) {
-            graph_item->graph->y_scale -= left * 0.02f / 255.0f;
-            if (graph_item->graph->y_scale < 0.01f)
-                graph_item->graph->y_scale = 0.01f;
+            if (right) {
+                show_y_scale_help = 60;
+                graph_item->graph->y_scale = 1.0f;
+                return 1;
+            }
+            if (left) {
+                show_y_scale_help = 60;
+                f32 scale = graph_item->graph->y_scale - left * 0.02f / 255.0f;
+                graph_item->graph->y_scale = scale < 0.01f ? 0.01f : scale;
+                return 1;
+            }
+        } else if (right) {
             show_y_scale_help = 60;
+            graph_item->graph->y_scale = right * 0.02f / 255.0f + graph_item->graph->y_scale;
             return 1;
         }
-        if (right) {
-            graph_item->graph->y_scale += right * 0.02f / 255.0f;
-            show_y_scale_help = 60;
-            return 1;
-        }
-
         u32 pressed = pad->digital_buttons_pressed;
         if ((pressed & 0x80) && graph_item->selected_point >= 0) {
             nugraphDeletePoint(graph_item->graph, graph_item->selected_point);
@@ -5893,14 +5873,8 @@ extern "C" {
         i32 corner = pick->selected_corner;
         x = pick->uv_x[corner] + x / (8192.0f * pick->zoom);
         y = pick->uv_y[corner] + y / (8192.0f * pick->zoom);
-        if (x < 0.0f)
-            x = 0.0f;
-        else if (x > 1.0f)
-            x = 1.0f;
-        if (y < 0.0f)
-            y = 0.0f;
-        else if (y > 1.0f)
-            y = 1.0f;
+        x = MIN(1.0f, (MAX(0.0f, x)));
+        y = MIN(1.0f, (MAX(0.0f, y)));
         pick->uv_x[corner] = x;
         pick->uv_y[corner] = y;
         i32 left = pad->analog_l1 ? pad->analog_l1 : pad->analog_l2;
@@ -6673,12 +6647,12 @@ extern "C" {
             eduiDrawRect(x << 4, y << 3, item_width << 4, total_height << 3, item->colours[2], uimtls[ui_bgmtl]);
             for (i32 row = 0; row < 4; ++row) {
                 auto draw_key = [&](i32 column) {
-                    if (!(row == picker->keyboard_row && column == picker->keyboard_column)) {
-                        eduiDrawFontSet(edui_font);
-                        eduiSetFontColour(edui_font, item->colours[0]);
-                    } else {
+                    if (row == picker->keyboard_row && column == picker->keyboard_column) {
                         eduiDrawFontSet(edui_font);
                         eduiSetFontColour(edui_font, item->colours[1]);
+                    } else {
+                        eduiDrawFontSet(edui_font);
+                        eduiSetFontColour(edui_font, item->colours[0]);
                     }
                     letter[0] = textrow[row][column];
                     eduiFntPrintEx(edui_font, (x + height * column) << 4, ((y + row * height) << 3) + baseline, 16,

@@ -29,7 +29,7 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-NuMechPtr<MechObjectInterface, 4> NextThermalTarget;
+MechWeakPtr<MechObjectInterface, 4> NextThermalTarget;
 
 EXPLOSION *AddExplosion(nuvec_s *, f32, f32, GameObject_s *, i32, i32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
