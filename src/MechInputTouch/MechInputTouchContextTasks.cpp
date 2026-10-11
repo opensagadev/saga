@@ -767,8 +767,8 @@ void MechTouchTaskPlannedGoTo::BackgroundProcess() {
 }
 
 void MechTouchTaskPlannedGoTo::GenerateWaypoints() {
-    i32 waypoint_index = 0;
     i32 current = 0;
+    i32 waypoint_index = 0;
     if (path_count <= 0 || path_points[1].y == -1000000000.0f) {
         goto write_final_waypoint;
     }

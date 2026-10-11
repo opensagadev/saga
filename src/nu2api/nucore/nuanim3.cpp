@@ -466,8 +466,8 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *anim, f32 frame, nuanim
     const u16 *curve_types = anim->curve_types;
     nuanimbuffjoint_s *joint = buffer->joints;
     i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
-    const u8 *first_flags = node_flags + first_joint;
     u8 *joint_flags = buffer->joint_flags + first_joint;
+    const u8 *first_flags = node_flags + first_joint;
     for (; node_flags < first_flags; ++node_flags, ++joint) {
         if (*node_flags & 2) {
             SkipAni4V4Curve(curve_types[0], keys, scale_min);
@@ -680,8 +680,8 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
     i32 key_stride = anim->key_stride;
     const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     ani3_scalemin_s *scale_min = anim->scale_min;
-    const u16 *curve_types = anim->curve_types;
     i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
+    const u16 *curve_types = anim->curve_types;
     const u8 *first_flags = node_flags + first_joint;
     for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
         if (*skip_flags & 2) {
@@ -702,8 +702,8 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
         curve_types += 9;
     }
     node_flags += first_joint;
-    const u8 *end_flags = node_flags + count;
     u8 *joint_flags = buffer->joint_flags + first_joint;
+    const u8 *end_flags = node_flags + count;
     nuanimbuffjoint_s *joint = buffer->joints + first_joint;
     for (; node_flags < end_flags; ++node_flags, ++joint) {
         const u8 flags = *node_flags;
@@ -817,12 +817,12 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint(ani3_animheader_s *anim, f32 frame, n
     ani3_scalemin_s *scale_min = anim->scale_min;
     const u16 *curve_types = anim->curve_types;
 
-    const i32 decode_count = joint_count <= anim->node_count ? joint_count : anim->node_count;
     const u8 *first_flags = node_flags + first_joint;
+    const i32 decode_count = joint_count <= anim->node_count ? joint_count : anim->node_count;
     const u16 *skip_types = curve_types;
     ani3_scalemin_s *skip_scale_min = scale_min;
-    nuanimbuffjoint_s *joint = buffer->joints;
     u8 *joint_flags = buffer->joint_flags + first_joint;
+    nuanimbuffjoint_s *joint = buffer->joints;
     const u8 *skip_flags = node_flags;
     for (; skip_flags < first_flags; ++skip_flags) {
         const u8 flags = *skip_flags;
@@ -1043,8 +1043,8 @@ i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s *anim, f32 frame,
     const u32 quarter = static_cast<u32>(whole) & 3;
     const f32 fraction = key - static_cast<f32>(whole);
     const i32 key_stride = anim->key_stride;
-    u8 *keys = anim->keys + (whole / 4) * key_stride;
     ani3_scalemin_s *scale_min = anim->scale_min;
+    u8 *keys = anim->keys + (whole / 4) * key_stride;
     const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     const u16 *curve_types = anim->curve_types;
     const i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
@@ -1189,8 +1189,8 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend_EulerQuat(ani3_animheader_s *an
         curve_types += 9;
     }
     node_flags += first_joint;
-    const u8 *end_flags = node_flags + count;
     u8 *joint_flags = buffer->joint_flags + first_joint;
+    const u8 *end_flags = node_flags + count;
     nuanimbuffjoint_s *joint = buffer->joints + first_joint;
     NUVEC *root = first_joint == 0 ? root_translation : NULL;
     for (; node_flags < end_flags; ++node_flags, ++joint) {
@@ -1340,8 +1340,8 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 fr
     }
 
     const i32 decode_count = joint_count <= anim->node_count ? joint_count : anim->node_count;
-    const i32 end_joint = first_joint + decode_count;
     NUVEC *root = first_joint == 0 ? root_translation : NULL;
+    const i32 end_joint = first_joint + decode_count;
     const f32 inverse_blend = 1.0f - blend;
 
     for (i32 joint_index = first_joint; joint_index < end_joint; ++joint_index) {

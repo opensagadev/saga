@@ -4138,8 +4138,8 @@ void EdRegistry::Serialise(EdStream &stream) {
     }
     if (stream.BeginBlock("ClassList")) {
         if (stream.mode == 2) {
-            i32 mapping[64];
             i32 count = 0;
+            i32 mapping[64];
             GetStreamClassMapping(stream, mapping, count, 64);
             stream.SerialiseBuffer(&count, sizeof(count), 1);
             for (i32 index = 0; index < class_count; ++index) {

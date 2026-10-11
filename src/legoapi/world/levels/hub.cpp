@@ -2241,8 +2241,8 @@ void Hub_DrawFreePlaySelect() {
             // An already-selected icon remains at its base without drawing or
             // name/radar updates until the next transition starts.
             if (freeplay_time[0] > 0.0f || freeplay_selected[0] == 0) {
-                f32 progress = 1.0f;
                 f32 eased = 0.0f;
+                f32 progress = 1.0f;
                 if (freeplay_time[0] > 0.0f) {
                     progress = freeplay_time[0] / 0.75f;
                     if (freeplay_selected[0] == 0)
@@ -2543,8 +2543,8 @@ void Hub_UpdateFreePlaySelect() {
                     } else if ((GamePad[player].pad->digital_buttons_pressed & GAMEPAD_MENUCANCEL) != 0) {
                         cancel = 1;
                     } else if (freeplay_selected[player] == 0) {
-                        const u32 held = GamePad[player].buttons_held | GamePad[player].buttons_released;
                         const u32 pressed = GamePad[player].buttons_pressed | GamePad[player].left_directions;
+                        const u32 held = GamePad[player].buttons_held | GamePad[player].buttons_released;
                         i32 up = pressed & GAMEPAD_DUP, down = pressed & GAMEPAD_DDOWN;
                         i32 left = pressed & GAMEPAD_DLEFT, right = pressed & GAMEPAD_DRIGHT;
                         i32 up_held = held & GAMEPAD_DUP, down_held = held & GAMEPAD_DDOWN;
@@ -3921,9 +3921,9 @@ static void Hub_DrawBonusModeMenu(int selected, float alpha) {
                          (1u << (static_cast<i8>(ArcadeItem.field_c_0xc) & 31))) != 0)
                         NuStrCat(text[0], " ~2$");
                     if ((reinterpret_cast<LEVELSAVE_s *>(Game_LevelSave)[level].arcade_flags & 7) == 7) {
+                        const f32 scale = NU_SIN_LUT(static_cast<i32>(alpha * 16384.0f)) * PANEL_REDBRICKSCALE;
                         const i32 rotation =
                             static_cast<i32>((NuFmod(GlobalTimer.time_elapsed, 4.0f) * 0.25f) * 65536.0f) & 0xffff;
-                        const f32 scale = NU_SIN_LUT(static_cast<i32>(alpha * 16384.0f)) * PANEL_REDBRICKSCALE;
                         const u16 tilt = static_cast<i32>(1820.0f * NuTrigTable[rotation & 0x7fff]) - 0x1555;
                         DrawPanel3DObjectNoAlpha(0.0f, y + 0.35f, 1.0f, scale, scale, scale, tilt, rotation, 0,
                                                  &WORLD->lev_objs[211].special, 2);

@@ -1750,7 +1750,7 @@ void MenuDrawViewTextStrings(MENU_s *menu) {
 
 abi_ulong GetMatchLength(unsigned char *first, unsigned char *second, abi_ulong maximum) {
     abi_ulong length = 0;
-    if (maximum != 0 && *first == *second) {
+    if (maximum != 0 && *second == *first) {
         do {
             ++length;
         } while (length != maximum && first[length] == second[length]);

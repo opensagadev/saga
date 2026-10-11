@@ -3322,8 +3322,8 @@ extern AREADATA *VADER_ADATA;
 void MakeBaddiesForgetAboutParty(i32 check_hostility) {
     GameObject_s *baddies[64];
     GameObject_s *party[64];
-    i32 party_count = 0;
     i32 baddie_count = 0;
+    i32 party_count = 0;
     GameObject_s *objects = Obj;
     i32 count = HIGHGAMEOBJECT;
     GameObject_s *object = objects;
@@ -3880,13 +3880,13 @@ void GameObjectRotation(GameObject_s *object, i32 mode) {
         static NUVEC mower[4] = {
             {-0.1175f, 0, 0.155f}, {0.1175f, 0, 0.155f}, {0.1175f, 0, -0.155f}, {-0.1175f, 0, -0.155f}};
         static NUVEC standard[4] = {{-0.2f, 0, 0.2f}, {0.2f, 0, 0.2f}, {0.2f, 0, -0.2f}, {-0.2f, 0, -0.2f}};
+        const f32 dy = api.position.y - api.start_position.y;
+        const f32 vertical_speed = dy / FRAMETIME;
         NUVEC *offsets = object->id == id_BUGGY       ? buggy
                          : object->id == id_RADIOCAR  ? radio
                          : object->id == id_POLICECAR ? police
                          : object->id == id_MOWER     ? mower
                                                       : standard;
-        const f32 dy = api.position.y - api.start_position.y;
-        const f32 vertical_speed = dy / FRAMETIME;
         NUVEC points[4];
         for (i32 i = 0; i < 4; ++i) {
             NuVecRotateY(&points[i], &offsets[i], api.field_0x276);
@@ -7133,8 +7133,8 @@ void Tag_Check(GameObject_s *object) {
         if (FindGameMsgsWithID(-1, 0, -1, NULL) != 0) {
             Hint_CancelCurrent();
         } else {
-            i32 pack_index = -1;
             f32 nearest = 0.7f * 0.7f * 2.0f;
+            i32 pack_index = -1;
             NUVEC difference;
             for (i32 i = 0; i < 11; ++i) {
                 if (!Store_IsPackUnlocked(i) && StorePack[i].id != NULL) {

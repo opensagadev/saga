@@ -1088,7 +1088,7 @@ void AddChunkToRenderStack(particlechunkrendertype_s *chunk, particlechunkrender
         const u16 priority = static_cast<u16>(chunk->render_priority);
         const u16 current_priority = static_cast<u16>(current->render_priority);
         if (priority <= current_priority &&
-            (priority != current_priority || current->effect->particle_type < chunk->effect->particle_type)) {
+            (priority != current_priority || chunk->effect->particle_type > current->effect->particle_type)) {
             particlechunkrendertype_s *next = current->next;
             while (next != NULL) {
                 const u16 next_priority = static_cast<u16>(next->render_priority);
@@ -1283,7 +1283,7 @@ void DebrisProcessControlChunks(i32 panel_time) {
             const f32 time = control->collision_time;
             const f32 old_y = particle->momentum.y;
             const f32 gravity_velocity = 2.0f * (time * effect->field_0a0);
-            const f32 new_y = -control->restitution * (old_y + gravity_velocity) - gravity_velocity;
+            const f32 new_y = -control->restitution * (gravity_velocity + old_y) - gravity_velocity;
             particle->momentum.y = new_y;
             particle->position.y -= time * new_y - time * old_y;
             f32 first, second;
@@ -1422,7 +1422,7 @@ void DebrisProcessControlChunks(i32 panel_time) {
                 const i32 particles_per_chunk = effect->particle_type == 7 ? 12 : 32;
                 key->particle_count -= static_cast<i16>(particles_per_chunk);
                 key->previous_particle_count -= static_cast<i16>(particles_per_chunk);
-                if ((chunk_index + 1) * particles_per_chunk < key->field_18a) {
+                if (key->field_18a > (chunk_index + 1) * particles_per_chunk) {
                     key->field_18a -= static_cast<i16>(particles_per_chunk);
                 }
                 LinkDmaParticalSets(key->particle_chunks, key->allocated_chunk_count);
