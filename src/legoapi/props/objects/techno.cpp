@@ -355,14 +355,19 @@ static void Technos_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
         return;
     }
 
-    const i32 count = world->ntechnos < 32 ? world->ntechnos : 32;
-    for (i32 index = 0; index < count; ++index) {
-        const u32 bit = 1u << index;
-        if ((world->technos[index].flags & TECHNO_FLAG_VISIBLE) == 0) {
-            progress->state[1] &= ~bit;
+    TECHNO *techno = world->technos;
+    const i32 count = world->ntechnos;
+    for (i32 index = 0; index < count; ++index, ++techno) {
+        if (index == 32) {
+            break;
         }
-        if ((world->technos[index].flags & TECHNO_FLAG_ACTIVE) == 0) {
-            progress->state[0] &= ~bit;
+        const i32 word = index >> 5;
+        const u32 bit = 1u << index;
+        if ((techno->flags & TECHNO_FLAG_VISIBLE) == 0) {
+            progress->state[word + 1] &= ~bit;
+        }
+        if ((techno->flags & TECHNO_FLAG_ACTIVE) == 0) {
+            progress->state[word] &= ~bit;
         }
     }
 }
