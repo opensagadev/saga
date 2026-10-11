@@ -4279,6 +4279,7 @@ static __attribute__((noinline)) void ShieldCode(GameObject_s *object) {
 }
 
 void Move_VEHICLE(GameObject_s *object) {
+    GAMEPAD_s *pad = object->pad_gamepad;
     if (FreePlay != 0 && WORLD->area != NULL && WORLD->area == PODSPRINT_ADATA) {
         Move_POD(object);
         return;
@@ -4311,10 +4312,9 @@ vehicle_gravity_done:
     DeactivatedCode(object);
 
     if (object->id == id_SNOWMOB) {
-        Buck_MoveCode(object, object->pad_gamepad->buttons_pressed & (GAMEPAD_SPECIAL | GAMEPAD_ACTION));
-    }
-    if (object->id == id_ZAMSSPEEDER && WORLD->current_level == BOUNTYHUNTERPURSUITE_LDATA &&
-        object->current_hp < static_cast<i32>(object->hitpoints)) {
+        Buck_MoveCode(object, pad->buttons_pressed & (GAMEPAD_SPECIAL | GAMEPAD_ACTION));
+    } else if (object->id == id_ZAMSSPEEDER && WORLD->current_level == BOUNTYHUNTERPURSUITE_LDATA &&
+               object->current_hp < static_cast<i32>(object->hitpoints)) {
         const i32 effect = WORLD->debris_sys->entries[134].effect;
         if (effect != -1) {
             i32 count = ParticlesPerSecond(zam_smoke_rate, FRAMETIME) *
@@ -4339,9 +4339,8 @@ vehicle_gravity_done:
 
     if (object->apiobj.character_data->game_character->field_0x28 > 0.0f &&
         (object->apiobj.character_data->game_character->flags_090 & 0x10000) == 0) {
-        LoopCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP,
-                 object->pad_gamepad->buttons_held & GAMEPAD_JUMP, object->pad_gamepad, 1);
-        TurnCode(object, 0, object->pad_gamepad);
+        LoopCode(object, pad->buttons_pressed & GAMEPAD_JUMP, pad->buttons_held & GAMEPAD_JUMP, pad, 1);
+        TurnCode(object, 0, pad);
         DisorientateCode(object, NULL, 225.0f);
     }
 
@@ -4349,21 +4348,19 @@ vehicle_gravity_done:
         (object->apiobj.character_data->game_character->flags_094[0] & 8) == 0) {
         if (object->id == id_STAP || object->id == id_STAP2) {
             if (object->apiobj.character_model->model_data_b[0x16] == NULL) {
-                FireCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION,
-                         object->pad_gamepad->buttons_held & GAMEPAD_ACTION, 0.25f, 1);
+                FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.25f, 1);
             } else {
                 ShootCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION, 0, 0, 0, 1);
             }
         } else {
-            FireCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION,
-                     object->pad_gamepad->buttons_held & GAMEPAD_ACTION, 0.15f, 0);
+            FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.15f, 0);
         }
     }
     if (WORLD->current_level == DOGFIGHTA_LDATA) {
         CatchUpCode(object, 0.01f, 2.0f, 0);
     }
     if ((object->apiobj.character_data->game_character->flags_090 & 0x400) != 0) {
-        CableCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL, 0.5f);
+        CableCode(object, pad->buttons_pressed & GAMEPAD_SPECIAL, 0.5f);
     }
     if (WORLD->area != NULL && (WORLD->area->flags & 1) != 0 && static_cast<i8>(object->apiobj.flags_low) < 0 &&
         (Cheat[29].enabled != 0 || object->field_0xdec > 0.0f)) {
@@ -4371,9 +4368,9 @@ vehicle_gravity_done:
     }
 
     const f32 speed_multiplier = GetVehicleSpeedMul(object, object->pad_gamepad->input_magnitude);
-    const f32 thrust_target = speed_multiplier <= 1.0f ? speed_multiplier * 0.5f + 0.5f : 1.0f;
+    const f32 thrust_target = !(speed_multiplier > 1.0f) ? speed_multiplier * 0.75f + 0.75f : 1.5f;
     object->thrust_effect_scale =
-        SeekValF(object->thrust_effect_scale, thrust_target, object->thrust_effect_scale < thrust_target ? 4.0f : 2.0f);
+        SeekValF(object->thrust_effect_scale, thrust_target, object->thrust_effect_scale < thrust_target ? 8.0f : 3.0f);
     object->reserved_e27[0] = static_cast<u8>(qrand() >> 8);
     object->reserved_e27[1] = static_cast<u8>(qrand() >> 8);
     object->reserved_e27[2] = static_cast<u8>(qrand() >> 8);
@@ -4402,7 +4399,7 @@ vehicle_gravity_done:
                 object->apiobj.pitch_angle = 0xc000;
                 object->apiobj.velocity.x = 0.0f;
                 object->apiobj.velocity.y = 0.0f;
-                object->apiobj.velocity.z = 2.0f * object->apiobj.character_data->game_character->run_speed;
+                object->apiobj.velocity.z = 0.5f * object->apiobj.character_data->game_character->run_speed;
                 x_rotation = 0xc000;
                 goto rotate_flight_velocity;
             }
@@ -4412,7 +4409,7 @@ vehicle_gravity_done:
             object->apiobj.roll_angle = 0;
             object->apiobj.velocity.x = 0.0f;
             object->apiobj.velocity.y = 0.0f;
-            object->apiobj.velocity.z = 2.0f * object->apiobj.character_data->game_character->run_speed;
+            object->apiobj.velocity.z = 0.5f * object->apiobj.character_data->game_character->run_speed;
             x_rotation = object->apiobj.pitch_angle;
             if (object->apiobj.pitch_angle == 0) {
                 object->field_0x7a3 = 2;
@@ -4422,25 +4419,25 @@ vehicle_gravity_done:
         } else if (object->field_0x7a3 == 2) {
             object->context_animation_timer += FRAMETIME;
             f32 remaining;
+            f32 flight_time = object->context_animation_timer;
             i32 phase;
-            if (!(object->context_animation_timer < 1.0f)) {
+            if (object->context_animation_timer >= 1.0f) {
                 object->character_context = -1;
                 phase = 0x6000;
                 remaining = 0.0f;
-                object->context_animation_timer = 1.0f;
+                flight_time = 1.0f;
             } else {
                 remaining = 1.0f - object->context_animation_timer;
-                phase = (static_cast<i32>(-65536.0f * object->context_animation_timer + 2.0f) >> 1) & 0x7fff;
+                phase = (static_cast<i32>(32768.0f * object->context_animation_timer + 16384.0f) >> 1) & 0x7fff;
             }
             object->apiobj.roll_angle = 0;
             object->apiobj.pitch_angle = 0;
             object->apiobj.velocity.x = 0.0f;
             object->apiobj.velocity.y = 0.0f;
-            object->apiobj.velocity.z =
-                object->context_animation_timer * object->apiobj.character_data->game_character->run_speed +
-                object->apiobj.character_data->game_character->run_speed * 2.0f * remaining;
+            object->apiobj.velocity.z = flight_time * object->apiobj.character_data->game_character->run_speed +
+                                        object->apiobj.character_data->game_character->run_speed * 0.5f * remaining;
             x_rotation = 0;
-            const f32 blend = 1.0f - (1.0f + NuTrigTable[phase]) * 2.0f;
+            const f32 blend = 1.0f - (1.0f + NuTrigTable[phase]) * 0.5f;
             object->apiobj.position.y = hover_height * blend + (1.0f - blend) * object->context_destination.y;
         } else {
             x_rotation = object->apiobj.pitch_angle;
@@ -4453,7 +4450,7 @@ vehicle_gravity_done:
     }
 
     FloatCode(object);
-    TorpedoCode(object, object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL, 0.5f);
+    TorpedoCode(object, pad->buttons_held & GAMEPAD_SPECIAL, 0.5f);
 
     if (object->id == id_ZAMSSPEEDER && WORLD->area != NULL && WORLD->area == BOUNTYHUNTERPURSUIT_ADATA) {
         ShieldCode(object);
@@ -4463,15 +4460,15 @@ vehicle_gravity_done:
         object->combo_input_timer = 0.0f;
     } else if (object->combo_input_timer == 0.0f) {
         if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0) {
-            object->combo_input_timer = FRAMETIME;
+            object->combo_input_timer += FRAMETIME;
         }
     } else if ((object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0) {
         object->combo_input_timer += FRAMETIME;
-        if (object->combo_input_timer >= 4.0f) {
+        if (object->combo_input_timer >= 2.0f) {
             object->combo_input_timer = 0.0f;
             TouchHacks().TriggerVehicleSmartBomb(*object);
         } else {
-            TouchHacks().PlaySmartBombBuildupEffects(*object, object->combo_input_timer, 4.0f);
+            TouchHacks().PlaySmartBombBuildupEffects(*object, object->combo_input_timer, 2.0f);
         }
     }
 
@@ -4504,7 +4501,7 @@ vehicle_gravity_done:
     }
 
     if ((object->apiobj.character_data->game_character->flags_090 & 0x100000) != 0) {
-        if (Cheat_IsOn(7) != 0 && (object->pad_gamepad->buttons_pressed & (GAMEPAD_ACTION | GAMEPAD_SPECIAL)) != 0) {
+        if (Cheat_IsOn(7) != 0 && (pad->buttons_pressed & (GAMEPAD_ACTION | GAMEPAD_SPECIAL)) != 0) {
             GameAudio_PlaySfx(0x4b, &object->apiobj.collision_position, 0, 0);
         }
         NUJOINTANIM_s &joint = object->joint_modifiers[0];
@@ -5271,9 +5268,9 @@ static void JediLightCode(GameObject_s *object) {
             colour.y = qrand() < 0x8000 ? 2.0f : 0.25f;
             colour.z = colour.y;
             rtlDynamicSetColours(object->dynamic_light_id, &colour, NULL);
-            position.x = delta.x * 0.5f + object->apiobj.pos_x;
-            position.z = delta.z * 0.5f + object->apiobj.pos_z;
-            position.y = delta.y * 0.5f + object->apiobj.pos_y;
+            position.x = 0.5f * delta.x + object->apiobj.pos_x;
+            position.y = 0.5f * delta.y + object->apiobj.pos_y;
+            position.z = 0.5f * delta.z + object->apiobj.pos_z;
             rtlDynamicSetPos(object->dynamic_light_id, &position);
             return;
         }
@@ -5283,11 +5280,10 @@ static void JediLightCode(GameObject_s *object) {
         if (object->apiobj.field_0x288 == 0)
             return;
         i32 point_count = 0;
-        auto f0xe23 = object->field_0xe23;
         for (i32 blade = 0; blade < 4; ++blade) {
             if (object->apiobj.field_0x288 == 0)
                 break;
-            if ((f0xe23 & 8) == 0)
+            if ((object->field_0xe23 & 8) == 0)
                 continue;
             GAMECHARACTERDATA *data = GetGameCharacterData(object);
             i32 first = data->streak_joints[blade][0];
@@ -5296,15 +5292,15 @@ static void JediLightCode(GameObject_s *object) {
             i32 second = data->streak_joints[blade][1];
             if (second == -1 || object->apiobj.character_model->points_of_interest[second] == NULL)
                 continue;
+            point_count += 2;
             NuVecAdd(&position, &position, reinterpret_cast<NUVEC *>(&object->joint_matrices[first].m30));
             NuVecAdd(&position, &position, reinterpret_cast<NUVEC *>(&object->joint_matrices[second].m30));
-            point_count += 2;
         }
         if (point_count == 0)
             return;
         NuVecScale(&position, &position, 1.0f / point_count);
         rtlDynamicEnable(object->dynamic_light_id, 1);
-        f32 radius = object->sabre_collision_radius * 3.0f * object->weapon_scale * object->apiobj.field_0xa8;
+        f32 radius = 3.0f * object->sabre_collision_radius * object->weapon_scale * object->apiobj.field_0xa8;
         rtlDynamicSetRadii(object->dynamic_light_id, radius + 0.25f, radius + 0.5f);
         f32 brightness = qrand() < 0x8000 ? 0.003921569f : 0.007843138f;
         i32 blade = -1;
@@ -5313,23 +5309,24 @@ static void JediLightCode(GameObject_s *object) {
         else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object))
             blade = 3;
         else if (object->id == id_GRIEVOUS) {
+            colour.x = static_cast<f32>(static_cast<u32>(BladeTab[1].colour[0]));
+            colour.y = static_cast<f32>(static_cast<u32>(BladeTab[1].colour[1]));
+            colour.z = static_cast<f32>(static_cast<u32>(BladeTab[1].colour[2]));
+            NUVEC other;
+            other.x = static_cast<f32>(static_cast<u32>(BladeTab[2].colour[0]));
+            other.y = static_cast<f32>(static_cast<u32>(BladeTab[2].colour[1]));
+            other.z = static_cast<f32>(static_cast<u32>(BladeTab[2].colour[2]));
             f32 phase =
-                (NU_SIN_LUT(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f)) + 1.0f) * 0.5f;
-            colour.x =
-                ((BladeTab[2].colour[0] - static_cast<f32>(BladeTab[1].colour[0])) * phase + BladeTab[1].colour[0]) *
-                brightness;
-            colour.y =
-                ((BladeTab[2].colour[1] - static_cast<f32>(BladeTab[1].colour[1])) * phase + BladeTab[1].colour[1]) *
-                brightness;
-            colour.z =
-                ((BladeTab[2].colour[2] - static_cast<f32>(BladeTab[1].colour[2])) * phase + BladeTab[1].colour[2]) *
-                brightness;
+                (1.0f + NU_SIN_LUT(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f))) * 0.5f;
+            colour.x = ((other.x - colour.x) * phase + colour.x) * brightness;
+            colour.y = ((other.y - colour.y) * phase + colour.y) * brightness;
+            colour.z = ((other.z - colour.z) * phase + colour.z) * brightness;
         } else
             blade = static_cast<i8>(GetGameCharacterData(object)->field_0x117);
         if (blade != -1) {
-            colour.x = BladeTab[blade].colour[0] * brightness;
-            colour.y = BladeTab[blade].colour[1] * brightness;
-            colour.z = BladeTab[blade].colour[2] * brightness;
+            colour.x = static_cast<f32>(static_cast<u32>(BladeTab[blade].colour[0])) * brightness;
+            colour.y = static_cast<f32>(static_cast<u32>(BladeTab[blade].colour[1])) * brightness;
+            colour.z = static_cast<f32>(static_cast<u32>(BladeTab[blade].colour[2])) * brightness;
         }
         rtlDynamicSetColours(object->dynamic_light_id, &colour, NULL);
         rtlDynamicSetColours(object->dynamic_light_id, &colour, NULL);
@@ -10459,9 +10456,9 @@ shoot_weapon_in:
 
 static void DodgeCode(GameObject_s *object, i32 action_pressed, i32 jump_pressed) {
     if (object->character_context == 0x25) {
-        if (jump_pressed != 0) {
+        if (action_pressed != 0) {
             object->landing_followup = 2;
-        } else if (action_pressed != 0 && object->context_animation == 0x58) {
+        } else if (jump_pressed != 0 && object->context_animation == 0x58) {
             object->landing_followup = 1;
         }
 
@@ -10511,7 +10508,7 @@ static void DodgeCode(GameObject_s *object, i32 action_pressed, i32 jump_pressed
 
     BOLT_s *bolt = FindIncomingBolt(object, 1, 1);
     object->incoming_bolt = bolt;
-    if (bolt == NULL || jump_pressed == 0) {
+    if (bolt == NULL || action_pressed == 0) {
         return;
     }
 

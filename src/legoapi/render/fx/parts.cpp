@@ -935,7 +935,7 @@ static __used__ void PartMove_VehiclePickup(PART_s *part, f32) {
 extern "C" {
 
     void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z) {
-        if (handle == NULL || effect_index < 0 || EDPP_MAX_TYPES <= effect_index || debtab == NULL ||
+        if (static_cast<u32>(effect_index) + 1U <= 1 || EDPP_MAX_TYPES <= effect_index ||
             debtab[effect_index] == NULL) {
             return;
         }
@@ -959,70 +959,76 @@ extern "C" {
         debkeydata[key_index].field_184 = 0;
         debkeydata[key_index].effect_index = static_cast<i16>(effect_index);
         DebrisStartOffset(key_index, effect->emission_period);
-        debkeydata[key_index].generator = gensorttab[static_cast<i8>(effect->generator_type)];
-        debkeydata[key_index].momentum_adjuster = gencodetab[static_cast<i8>(effect->momentum_adjustment_type)];
-        debkeydata[key_index].field_1d4 = 0;
-        debkeydata[key_index].sphere_next_time = 0.0f;
-        debkeydata[key_index].emitter_rotation_x = 0;
-        debkeydata[key_index].emitter_rotation_y = 0;
-        debkeydata[key_index].field_2c8 = 0;
-        for (i32 i = 0; i < effect->process_spheres; ++i) {
-            debkeydata[key_index].process_spheres[i].time = -1.0f;
+        debkeydatatype_s *key = &debkeydata[key_index];
+        key->generator = gensorttab[static_cast<i8>(effect->generator_type)];
+        key->momentum_adjuster = gencodetab[static_cast<i8>(effect->momentum_adjustment_type)];
+        key->field_1d4 = 0;
+        key->sphere_next_time = 0.0f;
+        key->emitter_rotation_x = 0;
+        key->emitter_rotation_y = 0;
+        key->field_2c8 = 0;
+        for (i32 i = 0; i < static_cast<i8>(debtab[effect_index]->process_spheres); ++i) {
+            key->process_spheres[i].time = -1.0f;
         }
-        memset(&debkeydata[key_index].emission_position, 0, sizeof(debkeydata[key_index].emission_position));
-        memset(&debkeydata[key_index].momentum, 0, sizeof(debkeydata[key_index].momentum));
-        memset(&debkeydata[key_index].emitter_momentum, 0, sizeof(debkeydata[key_index].emitter_momentum));
-        debkeydata[key_index].orientation_dirty = 0.0f;
-        debkeydata[key_index].cutoff_distance = 999999.0f;
-        debkeydata[key_index].field_2f2 = -1;
-        debkeydata[key_index].field_1d8 = 0;
-        debkeydata[key_index].field_1da = 7;
-        debkeydata[key_index].gscene = NULL;
-        debkeydata[key_index].process_collision_sound = 0;
-        debkeydata[key_index].last_update_time = now;
-        debkeydata[key_index].field_2f9 = 1;
-        debkeydata[key_index].user_data = NULL;
-        debkeydata[key_index].field_2fa = 0;
-        debkeydata[key_index].emission_epoch =
-            debkeydata[key_index].field_1e4 < now ? debkeydata[key_index].field_1e4 : now;
+        key->emission_position.x = 0.0f;
+        key->emission_position.y = 0.0f;
+        key->emission_position.z = 0.0f;
+        key->momentum.x = 0.0f;
+        key->momentum.y = 0.0f;
+        key->momentum.z = 0.0f;
+        key->emitter_momentum.x = 0.0f;
+        key->emitter_momentum.y = 0.0f;
+        key->emitter_momentum.z = 0.0f;
+        key->orientation_dirty = 0.0f;
+        key->cutoff_distance = 999999.0f;
+        key->field_2f2 = -1;
+        key->field_1d8 = 0;
+        key->field_1da = 7;
+        key->gscene = NULL;
+        key->process_collision_sound = 0;
+        key->last_update_time = now;
+        key->field_2f9 = 1;
+        key->user_data = NULL;
+        key->field_2fa = 0;
+        key->emission_epoch = key->field_1e4 < now ? key->field_1e4 : now;
 
         switch (effect->particle_type) {
             case 3:
-                debkeydata[key_index].render_priority = static_cast<i16>(40000);
+                key->render_priority = static_cast<i16>(40000);
                 break;
             case 7:
-                debkeydata[key_index].render_priority = static_cast<i16>(20000);
+                key->render_priority = static_cast<i16>(20000);
                 break;
             case 2:
-                debkeydata[key_index].render_priority = static_cast<i16>(50000);
+                key->render_priority = static_cast<i16>(50000);
                 break;
             default:
-                debkeydata[key_index].render_priority = static_cast<i16>(30000);
+                key->render_priority = static_cast<i16>(30000);
                 break;
         }
-        debkeydata[key_index].collision_timers[0] = 9999;
+        key->collision_timers[0] = 9999;
         if (effect->sound_data[0] != -1) {
             if (effect->sound_data[1] == 3 || effect->sound_data[1] == 4)
-                debkeydata[key_index].collision_timers[0] = 1;
-            debkeydata[key_index].process_collision_sound = 1;
+                key->collision_timers[0] = 1;
+            key->process_collision_sound = 1;
         }
-        debkeydata[key_index].collision_timers[1] = 9999;
+        key->collision_timers[1] = 9999;
         if (effect->sound_data[3] != -1) {
             if (effect->sound_data[4] == 3 || effect->sound_data[4] == 4)
-                debkeydata[key_index].collision_timers[1] = 1;
-            debkeydata[key_index].process_collision_sound = 1;
+                key->collision_timers[1] = 1;
+            key->process_collision_sound = 1;
         }
-        debkeydata[key_index].collision_timers[2] = 9999;
+        key->collision_timers[2] = 9999;
         if (effect->sound_data[6] != -1) {
             if (effect->sound_data[7] == 3 || effect->sound_data[7] == 4)
-                debkeydata[key_index].collision_timers[2] = 1;
-            debkeydata[key_index].process_collision_sound = 1;
+                key->collision_timers[2] = 1;
+            key->process_collision_sound = 1;
         }
-        debkeydata[key_index].collision_timers[3] = 9999;
+        key->collision_timers[3] = 9999;
         if (effect->sound_data[9] != -1) {
             if (effect->sound_data[10] == 3 || effect->sound_data[10] == 4)
-                debkeydata[key_index].collision_timers[3] = 1;
-            debkeydata[key_index].process_collision_sound = 1;
+                key->collision_timers[3] = 1;
+            key->process_collision_sound = 1;
         }
         DebrisEmitterPos(key_index, x, y, z);
         DebrisEmitterOrientation(key_index, 0, 0, 0);

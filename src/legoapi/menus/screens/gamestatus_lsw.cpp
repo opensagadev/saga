@@ -850,7 +850,7 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
         if (stage->field_0x18 >= 0.5f) {
             GAMEPAD_s *pad = GamePad;
             for (i32 player = 0; player < 2; ++player, ++pad) {
-                if ((player == 0 ? packet->player0_active : packet->player1_active) != 0) {
+                if (packet->player_active[player] != 0) {
                     bool selected = false;
                     if (menu_level > 0 && GameMenu[menu_level].queued_item != -1) {
                         status_prompt = GameMenu[menu_level].queued_item;
@@ -1455,13 +1455,13 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
         y += 0.075f;
     }
     for (i32 i = 0; i < count; ++i) {
-        i32 red, green, blue;
+        u8 red, green, blue;
         if (selected != 0 && status_prompt == i && TestForController()) {
             if (menu_pulsate > 0.0f) {
                 const f32 inverse = 1.0f - menu_pulsate;
-                blue = MENUFLASH0B * menu_pulsate + MENUFLASH1B * inverse;
-                green = MENUFLASH0G * menu_pulsate + MENUFLASH1G * inverse;
-                red = MENUFLASH0R * menu_pulsate + MENUFLASH1R * inverse;
+                red = static_cast<u32>(MENUFLASH0R) * menu_pulsate + static_cast<u32>(MENUFLASH1R) * inverse;
+                green = static_cast<u32>(MENUFLASH0G) * menu_pulsate + static_cast<u32>(MENUFLASH1G) * inverse;
+                blue = static_cast<u32>(MENUFLASH0B) * menu_pulsate + static_cast<u32>(MENUFLASH1B) * inverse;
             } else if (menu_flash == 0) {
                 red = MENUFLASH1R;
                 blue = MENUFLASH1B;
@@ -1473,9 +1473,9 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
             }
         } else if (menu_pulse > 0.0f) {
             const f32 inverse = 1.0f - menu_pulse;
-            red = MENUFLASH0R * menu_pulse + MENUNORMALR * inverse;
-            green = MENUFLASH0G * menu_pulse + MENUNORMALG * inverse;
-            blue = MENUFLASH0B * menu_pulse + MENUNORMALB * inverse;
+            red = static_cast<u32>(MENUFLASH0R) * menu_pulse + static_cast<u32>(MENUNORMALR) * inverse;
+            green = static_cast<u32>(MENUFLASH0G) * menu_pulse + static_cast<u32>(MENUNORMALG) * inverse;
+            blue = static_cast<u32>(MENUFLASH0B) * menu_pulse + static_cast<u32>(MENUNORMALB) * inverse;
         } else {
             red = MENUENTRYR;
             green = MENUENTRYG;

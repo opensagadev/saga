@@ -756,7 +756,7 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
     }
 
     memset(terrain->groups, 0, max_groups * sizeof(TERRAIN_GROUP));
-    for (u32 group_index = 0; group_index < max_groups; ++group_index) {
+    for (i32 group_index = 0; group_index < static_cast<i32>(terrain->max_groups); ++group_index) {
         terrain->groups[group_index].chunk_type = -1;
     }
 
@@ -764,7 +764,7 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
         terrain->cells[cell].group_count = 0;
     }
 
-    for (u32 platform_index = 0; platform_index < max_platforms; ++platform_index) {
+    for (i32 platform_index = 0; platform_index < static_cast<i32>(terrain->max_platforms); ++platform_index) {
         TERRAIN_PLATFORM &platform = terrain->platforms[platform_index];
         platform.flags &= ~TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED;
         platform.scene_object = NULL;
@@ -875,7 +875,9 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
                         terrain->minimum_height = static_cast<i32>(world_y);
                         current_minimum_height = static_cast<f32>(terrain->minimum_height);
                     }
-
+                }
+                for (i32 vector_index = 0; vector_index < 4; ++vector_index) {
+                    const NUVEC &vector = shape->vectors[vector_index];
                     const f32 length_squared = vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
                     if (length_squared > radius_squared) {
                         radius_squared = length_squared;
@@ -1316,23 +1318,22 @@ i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 rem
     // This normal lies in the plane formed by the edge and the movement axis.
     // Its z component tells how far along the sweep the cylinder surface is
     // reached.
-    NUVEC cylinder_side = {
-        edge_direction.x * edge_direction.z,
-        -edge_direction.y * edge_direction.z,
-        -(edge_direction.x * edge_direction.x + edge_direction.y * edge_direction.y),
-    };
-    const f32 cylinder_side_length = NuFsqrt(cylinder_side.x * cylinder_side.x + cylinder_side.y * cylinder_side.y +
-                                             cylinder_side.z * cylinder_side.z);
-    if (cylinder_side_length != 0.0f && cylinder_side.z != 0.0f) {
-        cylinder_side.z /= cylinder_side_length;
+    f32 cylinder_side_z = horizontal_perpendicular.x * edge_direction.y - horizontal_perpendicular.y * edge_direction.x;
+    const f32 cylinder_side_x = horizontal_perpendicular.y * edge_direction.z;
+    const f32 cylinder_side_y = edge_direction.z * horizontal_perpendicular.x;
+    // Preserve the cross product's subtraction before squaring its components.
+    const f32 cylinder_side_length = NuFsqrt(cylinder_side_x * cylinder_side_x + cylinder_side_y * cylinder_side_y +
+                                             cylinder_side_z * cylinder_side_z);
+    if (cylinder_side_length != 0.0f && cylinder_side_z != 0.0f) {
+        cylinder_side_z /= cylinder_side_length;
     } else {
-        cylinder_side.z = 0.0f;
+        cylinder_side_z = 0.0f;
     }
 
     const f32 radial_extent = NuFsqrt(query->collision_radius_sq - line_distance_sq);
     f32 height_offset = 0.0f;
-    if (radial_extent != 0.0f && cylinder_side.z != 0.0f) {
-        height_offset = radial_extent / cylinder_side.z;
+    if (radial_extent != 0.0f && cylinder_side_z != 0.0f) {
+        height_offset = radial_extent / cylinder_side_z;
     }
 
     f32 hit_distance;
@@ -1541,7 +1542,7 @@ i32 CheckSphereTer(NUVEC *position, f32 radius) {
 
 i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 secondary_end, tertype *surface) {
     TerrainQuery_s *query = TerI;
-    const f32 radius = query->collision_radius;
+    f32 radius = query->collision_radius;
     const f32 no_secondary_normal = 65536.0f;
 
     i32 collision_found = 0;
@@ -1550,23 +1551,20 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
 
     const NUVEC &primary_origin = surface->vectors[0];
     NUVEC &primary_normal = surface->normals[0];
-    contact_point.x = query->local_start.x - radius * primary_normal.x - primary_origin.x;
-    contact_point.z = query->local_start.z - radius * primary_normal.z - primary_origin.z;
-    contact_point.y = query->local_start.y - radius * primary_normal.y - primary_origin.y;
 
     i32 test_primary_face = 0;
     if (primary_start > 0.0f && primary_end < 0.0f) {
         candidate_time = primary_start / (primary_start - primary_end);
-        contact_point.y += query->movement.y * candidate_time;
-        contact_point.x += query->movement.x * candidate_time;
-        contact_point.z += query->movement.z * candidate_time;
+        contact_point.y = query->movement.y * candidate_time;
+        contact_point.x = query->movement.x * candidate_time;
+        contact_point.z = query->movement.z * candidate_time;
         test_primary_face = 1;
     } else if (primary_start <= 0.0f && primary_end <= 0.0f && primary_start >= -radius && primary_end >= -radius) {
         candidate_time = primary_start;
         const f32 projection_distance = -primary_start;
-        contact_point.y += primary_normal.y * projection_distance;
-        contact_point.x += primary_normal.x * projection_distance;
-        contact_point.z += primary_normal.z * projection_distance;
+        contact_point.y = primary_normal.y * projection_distance;
+        contact_point.x = primary_normal.x * projection_distance;
+        contact_point.z = primary_normal.z * projection_distance;
         test_primary_face = 1;
     }
 
@@ -1581,9 +1579,13 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
             surface->vectors[2].y - primary_origin.y,
             surface->vectors[2].z - primary_origin.z,
         };
-        if (InsidePolLines(contact_point.x, contact_point.y, contact_point.z, edge_0_1.x, edge_0_1.y, edge_0_1.z,
-                           edge_0_2.x, edge_0_2.y, edge_0_2.z, &primary_normal) != 0 &&
-            candidate_time <= query->hit_time) {
+        if (InsidePolLines(contact_point.x + (query->local_start.x - radius * primary_normal.x - primary_origin.x),
+                           contact_point.y + (query->local_start.y - radius * primary_normal.y - primary_origin.y),
+                           contact_point.z + (query->local_start.z - primary_normal.z * radius - primary_origin.z),
+                           edge_0_1.x, edge_0_1.y, edge_0_1.z, edge_0_2.x, edge_0_2.y, edge_0_2.z,
+                           &primary_normal) != 0 &&
+            candidate_time <= TerI->hit_time) {
+            query = TerI;
             query->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP) != 0;
             query->hit_time = candidate_time;
             query->hit_type =
@@ -1593,27 +1595,26 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
         }
     }
 
+    query = TerI;
+    radius = query->collision_radius;
     NUVEC &secondary_normal = surface->normals[1];
     if (secondary_normal.y < no_secondary_normal) {
         const NUVEC &secondary_origin = surface->vectors[3];
-        contact_point.x = query->local_start.x - radius * secondary_normal.x - secondary_origin.x;
-        contact_point.y = query->local_start.y - radius * secondary_normal.y - secondary_origin.y;
-        contact_point.z = query->local_start.z - radius * secondary_normal.z - secondary_origin.z;
 
         i32 test_secondary_face = 0;
         if (secondary_start > 0.0f && secondary_end < 0.0f) {
             candidate_time = secondary_start / (secondary_start - secondary_end);
-            contact_point.x += query->movement.x * candidate_time;
-            contact_point.y += query->movement.y * candidate_time;
-            contact_point.z += query->movement.z * candidate_time;
+            contact_point.x = query->movement.x * candidate_time;
+            contact_point.y = query->movement.y * candidate_time;
+            contact_point.z = query->movement.z * candidate_time;
             test_secondary_face = 1;
         } else if (secondary_start <= 0.0f && secondary_end <= 0.0f && secondary_start >= -radius &&
                    secondary_end >= -radius) {
             candidate_time = secondary_start;
             const f32 projection_distance = -secondary_start;
-            contact_point.y += secondary_normal.y * projection_distance;
-            contact_point.x += secondary_normal.x * projection_distance;
-            contact_point.z += secondary_normal.z * projection_distance;
+            contact_point.y = secondary_normal.y * projection_distance;
+            contact_point.x = secondary_normal.x * projection_distance;
+            contact_point.z = secondary_normal.z * projection_distance;
             test_secondary_face = 1;
         }
 
@@ -1628,9 +1629,13 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
                 surface->vectors[1].y - secondary_origin.y,
                 surface->vectors[1].z - secondary_origin.z,
             };
-            if (InsidePolLines(contact_point.x, contact_point.y, contact_point.z, edge_3_2.x, edge_3_2.y, edge_3_2.z,
-                               edge_3_1.x, edge_3_1.y, edge_3_1.z, &secondary_normal) != 0 &&
-                candidate_time < query->hit_time) {
+            if (InsidePolLines(
+                    contact_point.x + (query->local_start.x - radius * secondary_normal.x - secondary_origin.x),
+                    contact_point.y + (query->local_start.y - radius * secondary_normal.y - secondary_origin.y),
+                    contact_point.z + (query->local_start.z - secondary_normal.z * radius - secondary_origin.z),
+                    edge_3_2.x, edge_3_2.y, edge_3_2.z, edge_3_1.x, edge_3_1.y, edge_3_1.z, &secondary_normal) != 0 &&
+                candidate_time < TerI->hit_time) {
+                query = TerI;
                 query->hit_time = candidate_time;
                 query->movement_normal = secondary_normal;
                 query->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_SECOND_STEEP) != 0;
@@ -1641,6 +1646,8 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
         }
     }
 
+    query = TerI;
+    radius = query->collision_radius;
     if (radius != 0.0f) {
         query->working_surface = surface;
         i32 vertex_mask = 0xf;
@@ -2664,6 +2671,7 @@ static i32 TerrainKillPlayer(GameObject_s *object, i32 surface, NUVEC *normal) {
 void TerrainPlayer(GameObject_s *object) {
     NUVEC next_position;
     GAMEPAD_s *const entry_pad = object->pad_gamepad;
+    const u8 entry_is_underwater = object->apiobj.is_underwater;
     const u8 entry_intersects_water = object->apiobj.intersects_water;
     const i32 entry_menu_id = GetMenuID();
     const i16 entry_platform = object->apiobj.supporting_platform_id;
@@ -3344,7 +3352,7 @@ void TerrainPlayer(GameObject_s *object) {
                 api.intersects_water = static_cast<u8>(IntersectWater(object));
             }
             // Original 0x102ddb emits the splash only on a dry-to-water transition.
-            if (api.intersects_water != 0 && (object->apiobj.is_underwater | entry_intersects_water) == 0) {
+            if (api.intersects_water != 0 && (entry_is_underwater | entry_intersects_water) == 0) {
                 bool splash = object->character_context == 0x1f || object->character_context == 0 ||
                               (CInfo[object->character_context].flags & 4) != 0 || object->character_context == 0x0e ||
                               object->character_context == 0x0d;
@@ -3904,11 +3912,10 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
         const f32 x = (bounds.max_x + bounds.min_x) * 0.5f - group->origin.x;
         const f32 y = ((bounds.max_y + bounds.min_y) * 0.5f - group->origin.y) * query->inverse_object_scale;
         const f32 z = (bounds.max_z + bounds.min_z) * 0.5f - group->origin.z;
-        if (matrix != NULL && group->chunk_type != -1 &&
+        if (group->chunk_type != -1 &&
             x * x + y * y + z * z < (scan_radius + group->radius) * (scan_radius + group->radius)) {
             NUVEC4 *vertices = reinterpret_cast<NUVEC4 *>((reinterpret_cast<uintptr_t>(scratch) + 31) & ~uintptr_t(15));
             TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group->data);
-            auto TerI_inverse_object_scale = TerI->inverse_object_scale;
             while (batch->marker >= 0) {
                 i32 shape_count = batch->shape_count;
                 TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
@@ -3956,7 +3963,7 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
                     TERRAIN_SHAPE *surface = &ScaleTerrain[scaled_count];
                     memcpy(surface->material, source->material, 4);
                     const f32 origin_y = group->origin.y;
-                    const f32 inverse_scale = TerI_inverse_object_scale;
+                    const f32 inverse_scale = TerI->inverse_object_scale;
                     surface->vectors[0].x = vertices[0].x;
                     surface->vectors[0].z = vertices[0].z;
                     surface->vectors[1].x = vertices[1].x;

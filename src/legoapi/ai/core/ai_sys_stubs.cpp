@@ -3178,10 +3178,6 @@ extern "C" {
 
         AILOCATOR *locator = system->locators;
         for (i32 index = 0; index < system->locator_count; ++index, ++locator) {
-            if (locator->path_info.path == NULL || locator->path_info.connection == NULL) {
-                continue;
-            }
-
             AIPATHNODE *start = &locator->path_info.path->nodes[locator->path_info.connection->node_indices[0]];
             AIPATHNODE *end = &locator->path_info.path->nodes[locator->path_info.connection->node_indices[1]];
             if ((start->runtime_flags & AIPATHNODE_RUNTIME_POSITION_CHANGED) == 0 &&
@@ -3196,12 +3192,14 @@ extern "C" {
 
             const f32 position_on_connection = locator->path_info.dist;
             f32 radius;
-            if (position_on_connection > 1.0f) {
-                radius = end->radius;
-            } else if (position_on_connection < 0.0f) {
-                radius = start->radius;
+            if (position_on_connection <= 1.0f) {
+                if (position_on_connection < 0.0f) {
+                    radius = start->radius;
+                } else {
+                    radius = end->radius * position_on_connection + (1.0f - position_on_connection) * start->radius;
+                }
             } else {
-                radius = end->radius * position_on_connection + (1.0f - position_on_connection) * start->radius;
+                radius = end->radius;
             }
 
             const f32 direction_x = direction.x;

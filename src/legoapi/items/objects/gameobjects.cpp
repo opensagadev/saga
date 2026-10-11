@@ -4101,9 +4101,11 @@ void GameAISysStartFrame(AISYS_s *system) {
                 if (node->has_special != 0) {
                     AIPathNodeUpdatePos(system, path, node);
                 }
+                path = system->path_sys->paths[path_index];
                 node = &path->nodes[connection->direction_b];
                 if (node->has_special != 0) {
                     AIPathNodeUpdatePos(system, path, node);
+                    path = system->path_sys->paths[path_index];
                 }
             }
         }
@@ -6215,24 +6217,16 @@ void InitExtraList() {
 
 GameObject_s *FindGameObject(i32 character_id, u32 required_flags, i32 alive_only, i32 vehicle_only,
                              i32 non_level_only) {
-    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
-        GameObject_s *object = &Obj[index];
-        if ((object->apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) != 0) {
-            if (!(vehicle_only != 0 && (object->apiobj.field_0x1f8 & 0x1000) == 0)) {
-                if (required_flags != 0 && (object->apiobj.field_0x1f4 & required_flags) != required_flags) {
-                    continue;
-                }
-                if (character_id != -1 && object->id != character_id) {
-                    continue;
-                }
-                if (alive_only != 0 && object->apiobj.field_0x287 != 0) {
-                    continue;
-                }
-                if (non_level_only != 0 && object->field_0x107c != -1) {
-                    continue;
-                }
-                return object;
-            }
+    GameObject_s *object = Obj;
+    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
+        if ((object->apiobj.flags_low & APIOBJECT_FLAG_IN_USE) != 0 &&
+            (vehicle_only == 0 || (object->apiobj.flags_high & 0x10) != 0) &&
+            (required_flags == 0 || (object->apiobj.field_0x1f4 & required_flags) == required_flags) &&
+            (character_id == -1 || object->id == character_id) &&
+            (alive_only == 0 ||
+             (object->apiobj.field_0x287 == 0 && (CInfo[object->character_context].flags & 0x8000) == 0)) &&
+            (non_level_only == 0 || object->field_0x107c == -1)) {
+            return object;
         }
     }
     return NULL;
@@ -6362,10 +6356,10 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
             (WORLD->current_level == HOTHBATTLEA_LDATA || WORLD->current_level == GUNSHIPA_LDATA))
             GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
     }
-    i32 terminal_kill = 0;
+    bool terminal_kill = false;
     bool kill_rider = false;
     if (reason == 4) {
-        terminal_kill = 1;
+        terminal_kill = true;
         reason = 2;
         kill_rider = true;
     } else if (WORLD->current_level == SPEEDERCHASEA_LDATA && object->ai.creature_set == 2) {
@@ -6441,7 +6435,8 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
         if (group->leader == &object->apiobj) {
             group->leader = NULL;
             if (!group->is_reversed) {
-                for (i32 i = 0; i < group->member_count; ++i) {
+                const u32 member_count = group->member_count;
+                for (u32 i = 0; i < member_count; ++i) {
                     if (group->members[i] != NULL) {
                         GameObject_s *candidate = group->members[i]->objptr;
                         if (candidate != object && candidate != NULL &&
@@ -6556,8 +6551,10 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
             if (creature->min_respawn_time > 0.0f && creature->max_respawn_time > 0.0f)
                 object->ai_spawn_delay = creature->max_respawn_time * object->ai_spawn_delay +
                                          creature->min_respawn_time * (1.0f - object->ai_spawn_delay);
-            else
-                object->ai_spawn_delay *= (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) * 2.0f;
+            else {
+                const f32 random_fraction = static_cast<f32>(qrand()) * (1.0f / 65535.0f);
+                object->ai_spawn_delay = (random_fraction + random_fraction) * object->ai_spawn_delay;
+            }
         } else {
             object->field_0x101c = 1.0f;
         }
@@ -7147,7 +7144,7 @@ void Tag_Check(GameObject_s *object) {
     object->tag_player_index = -1;
     if (!object->apiobj.player_controlled || object->apiobj.field_0x287 != 0 ||
         (CInfo[object->character_context].flags & 0x800) != 0 || object->apiobj.script_enabled ||
-        !(object->tag_cooldown <= 0.0f))
+        object->tag_cooldown > 0.0f)
         goto draw_icon;
     if (VehicleArea != 0) {
         if ((object->pad_gamepad->buttons_pressed & GAMEPAD_TAG) != 0)
@@ -7199,16 +7196,11 @@ void Tag_Check(GameObject_s *object) {
     }
     if (Arcade != 0)
         goto no_target;
-    if (Tag_Mode == 1 || Tag_Mode == 3) {
+    if (Tag_Mode == 3) {
         if (object->character_context == 0x17 || object->character_context == -1 ||
-            (CInfo[object->character_context].flags & 4) != 0 ||
-            (CInfo[object->character_context].parameter & 0x10) != 0) {
+            (CInfo[object->character_context].parameter & 0x10) != 0 ||
+            (CInfo[object->character_context].flags & 4) != 0) {
             target = Tag_FindGameObject_TRANSFER(object);
-        }
-        if (Tag_Mode == 1) {
-            if (target != NULL && target->apiobj.field_0x27c != -1)
-                object->tag_player_index = target->apiobj.field_0x27c;
-            goto select_player;
         }
         if (target == NULL)
             goto no_target;
@@ -7235,8 +7227,16 @@ void Tag_Check(GameObject_s *object) {
             goto no_target;
         }
         goto attempt_tag;
+    } else if (Tag_Mode == 1) {
+        if (object->character_context == 0x17 || object->character_context == -1 ||
+            (CInfo[object->character_context].parameter & 0x10) != 0 ||
+            (CInfo[object->character_context].flags & 4) != 0) {
+            target = Tag_FindGameObject_TRANSFER(object);
+            if (target != NULL && target->apiobj.field_0x27c != -1)
+                object->tag_player_index = target->apiobj.field_0x27c;
+        }
     } else {
-        i32 index = object->apiobj.field_0x289;
+        u32 index = object->apiobj.field_0x289;
         for (i32 remaining = HIGHGAMEOBJECT - 1; remaining > 0; --remaining) {
             if (++index == HIGHGAMEOBJECT)
                 index = 0;
@@ -7250,7 +7250,6 @@ void Tag_Check(GameObject_s *object) {
             break;
         }
     }
-select_player:
     if (object->tag_player_index < 0)
         goto no_target;
     target = Player[object->tag_player_index];
@@ -7321,20 +7320,13 @@ void RemoveGameObject(GameObject_s *obj, i32) {
     obj->ClearAddons();
     obj->ClearMechObjectInterface();
 
-    const u32 low_mask = ~obj->apiobj.field_0x1e4;
-    const u32 high_mask = ~obj->apiobj.field_0x1e8;
-    const u8 index = obj->apiobj.field_0x289;
-    const u32 index_low_mask = index < 32 ? ~(1u << index) : ~0u;
-    const u32 index_high_mask = index < 32 ? ~0u : ~(1u << (index - 32));
+    const u64 contact_mask = ~obj->apiobj.collision_identity_mask;
+    const u64 object_mask = ~(1ULL << obj->apiobj.field_0x289);
     for (i32 i = 0; i < HIGHGAMEOBJECT; i++) {
-        Obj[i].apiobj.field_0x1ec &= low_mask;
-        Obj[i].apiobj.field_0x1f0 &= high_mask;
-        Obj[i].apiobj.field387_0x2a0 &= index_low_mask;
-        Obj[i].apiobj.field388_0x2a4 &= index_high_mask;
-        Obj[i].field_0xebc &= index_low_mask;
-        Obj[i].field_0xec0 &= index_high_mask;
-        Obj[i].field_0xec4 &= index_low_mask;
-        Obj[i].field_0xec8 &= index_high_mask;
+        Obj[i].apiobj.collision_contact_mask &= contact_mask;
+        Obj[i].apiobj.ai_awareness_mask &= object_mask;
+        Obj[i].ai_seen_mask &= object_mask;
+        Obj[i].ai_opponent_exclusion_mask &= object_mask;
     }
 
     if (obj->pad_gamepad != NULL) {
@@ -7343,15 +7335,16 @@ void RemoveGameObject(GameObject_s *obj, i32) {
     DestroySnakeBody(obj);
     APIObjectDestroy(WORLD->api_object_sys, &obj->apiobj);
 
-    HIGHGAMEOBJECT = 0;
+    i32 object_count = 0;
     for (i32 i = 0; i < 64; i++) {
         if ((Obj[i].apiobj.field_0x1f8 & 1) != 0) {
-            HIGHGAMEOBJECT = i + 1;
+            object_count = i + 1;
         }
     }
+    HIGHGAMEOBJECT = object_count;
     for (i32 i = 0; i < 8; i++) {
-        if (Player[i] == obj) {
-            Player[i] = NULL;
+        if (LevGameObject[i] == obj) {
+            LevGameObject[i] = NULL;
         }
     }
 }

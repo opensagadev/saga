@@ -172,23 +172,6 @@ static void ActionCopyParam(char *destination, i32 capacity, const char *source)
     destination[index] = '\0';
 }
 
-static GameObject_s *ActionCharacterAndToggle(AISYS *system, AIPACKET *packet, char **params, i32 param_count,
-                                              bool *enabled) {
-    GameObject_s *object = packet != NULL ? packet->owner : NULL;
-    *enabled = true;
-    for (i32 index = 0; index < param_count; ++index) {
-        char *name = ActionParamValue(params[index], "character");
-        if (name != NULL) {
-            if (NuStrICmp(name, "myself") != 0) {
-                object = GetNamedGameObject(system, name);
-            }
-        } else if (NuStrICmp(params[index], "FALSE") == 0) {
-            *enabled = false;
-        }
-    }
-    return object;
-}
-
 static GAMECHARACTERDATA *ActionGameCharacterData(GameObject_s *object) {
     if (object == NULL || object->apiobj.character_data == NULL) {
         return NULL;
@@ -231,32 +214,36 @@ static GameObject_s *ActionPacketOpponent(AIPACKET *packet) {
     return opponent != NULL ? opponent->objptr : NULL;
 }
 
-static void ActionApplySide(AISYS *system, GameObject_s *object, i32 side) {
+static inline void ActionApplySide(AISYS *system, GameObject_s *object, i32 side) {
     if (object == NULL) {
         return;
     }
 
     const u32 old_state = object->apiobj.field_0x1f4;
-    u32 new_state = old_state & 0xfffefffau;
-    if (side == 1) {
-        new_state |= 1;
-    } else if (side == 0) {
-        new_state |= 4;
-    } else if (side == 2) {
-        new_state |= 0x10000;
-    } else if (side == 3 && (old_state & APIOBJECT_MOTION_FLAG_AI_CONTROLLED) != 0 && object->ai.field_0x134 != 0xff &&
-               system != NULL && apicharsys != NULL) {
-        const i32 type = system->creatures[object->ai.field_0x134].type;
-        if (type >= 0 && type < apicharsys->character_count) {
-            const u32 model_flags = apicharsys->char_data[type].model_flags;
-            if ((model_flags & 0x200) != 0) {
-                new_state |= 4;
-            } else if ((model_flags & 4) != 0) {
-                new_state |= 1;
+    object->apiobj.field_0x1f4 = old_state & 0xfffefffau;
+    switch (side) {
+        case 1:
+            object->apiobj.field_0x1f4 |= 1;
+            break;
+        case 0:
+            object->apiobj.field_0x1f4 |= 4;
+            break;
+        case 2:
+            object->apiobj.field_0x1f4 |= 0x10000;
+            break;
+        case 3:
+            if ((old_state & APIOBJECT_MOTION_FLAG_AI_CONTROLLED) != 0 && object->ai.field_0x134 != 0xff) {
+                const i32 type = system->creatures[object->ai.field_0x134].type;
+                const u32 model_flags = apicharsys->char_data[type].model_flags;
+                if ((model_flags & 0x200) != 0) {
+                    object->apiobj.field_0x1f4 |= 4;
+                } else if ((model_flags & 4) != 0) {
+                    object->apiobj.field_0x1f4 |= 1;
+                }
             }
-        }
+            break;
     }
-    object->apiobj.field_0x1f4 = new_state;
+    const u32 new_state = object->apiobj.field_0x1f4;
 
     object->ai.capabilities &=
         ~(static_cast<u32>(LEGO_AIPATHCNX_FORGOODIES) | static_cast<u32>(LEGO_AIPATHCNX_FORBADDIES));
@@ -338,10 +325,10 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
     GameObject_s *excluded = NULL;
     AIAREA *area = NULL;
     i32 creature_set = 0;
-    i32 all_ai = 0;
-    i32 check_if_dead = 0;
-    i32 debris = 0;
-    i32 parts_on = 0;
+    bool all_ai = false;
+    bool check_if_dead = false;
+    bool debris = false;
+    bool parts_on = false;
     i32 respawn = 0;
     bool respawn_at_origin = false;
 
@@ -395,7 +382,7 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
             continue;
         }
         value = NuStrIStr(params[index], "area=");
-        if (value != NULL && WORLD != NULL && WORLD->ai_sys != NULL) {
+        if (value != NULL) {
             area = AISysFindArea(WORLD->ai_sys, value + 5);
         }
     }
@@ -404,28 +391,22 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
         return (candidate->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) ==
                (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER);
     };
-    const auto kill = [respawn, respawn_at_origin, debris, parts_on](GameObject_s *candidate) {
-        candidate->field_0xefa = static_cast<u8>((candidate->field_0xefa & 0xcfu) | (static_cast<u8>(respawn) << 4) |
-                                                 (static_cast<u8>(respawn_at_origin) << 5));
-        if (parts_on) {
-            KillParts(candidate, -1, -1, 1, 0.0f, 0, NULL);
-        }
-        if (debris)
-            KillGameObject(candidate, 2, 0);
-        else
-            KillGameObject(candidate, 4, 0);
-    };
-
     // Group scans require the object array; the reference checks group
     // membership before applying the optional dead-state filter.
-    if (Obj == NULL && (all_ai || creature_set != 0 || area != NULL))
-        return 1;
     if (all_ai) {
         GameObject_s *candidate = Obj;
         for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++candidate) {
             if (has_group_flags(candidate) && (candidate->apiobj.field_0x1f4 & 0x400u) != 0 && candidate != excluded &&
-                (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f)))
-                kill(candidate);
+                (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f))) {
+                candidate->field_0xefa =
+                    static_cast<u8>((candidate->field_0xefa & 0xcfu) | (respawn << 4) | (respawn_at_origin << 5));
+                if (parts_on)
+                    KillParts(candidate, -1, -1, 1, 0.0f, 0, NULL);
+                if (debris)
+                    KillGameObject(candidate, 2, 0);
+                else
+                    KillGameObject(candidate, 4, 0);
+            }
         }
         return 1;
     }
@@ -433,8 +414,16 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
         GameObject_s *candidate = Obj;
         for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++candidate) {
             if (has_group_flags(candidate) && candidate->ai.creature_set == creature_set &&
-                (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f)))
-                kill(candidate);
+                (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f))) {
+                candidate->field_0xefa =
+                    static_cast<u8>((candidate->field_0xefa & 0xcfu) | (respawn << 4) | (respawn_at_origin << 5));
+                if (parts_on)
+                    KillParts(candidate, -1, -1, 1, 0.0f, 0, NULL);
+                if (debris)
+                    KillGameObject(candidate, 2, 0);
+                else
+                    KillGameObject(candidate, 4, 0);
+            }
         }
         return 1;
     }
@@ -444,26 +433,37 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
             if (candidate == NULL || !has_group_flags(candidate)) {
                 continue;
             }
-            if (area->system != NULL && area->system->areas != NULL) {
-                const isize area_index = area - area->system->areas;
-                const u64 mask = static_cast<u64>(candidate->apiobj.ai_area_mask_low) |
-                                 (static_cast<u64>(candidate->apiobj.ai_area_mask_high) << 32);
-                if (area_index < 0 || area_index >= 64 || (mask & (1ull << area_index)) == 0) {
-                    continue;
-                }
-            } else {
+            const isize area_index = area - area->system->areas;
+            const u64 mask = static_cast<u64>(candidate->apiobj.ai_area_mask_low) |
+                             (static_cast<u64>(candidate->apiobj.ai_area_mask_high) << 32);
+            if (((mask >> area_index) & 1) == 0) {
                 continue;
             }
-            if (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f))
-                kill(candidate);
+            if (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f)) {
+                candidate->field_0xefa =
+                    static_cast<u8>((candidate->field_0xefa & 0xcfu) | (respawn << 4) | (respawn_at_origin << 5));
+                if (parts_on)
+                    KillParts(candidate, -1, -1, 1, 0.0f, 0, NULL);
+                if (debris)
+                    KillGameObject(candidate, 2, 0);
+                else
+                    KillGameObject(candidate, 4, 0);
+            }
         }
         return 1;
     }
 
     // An explicitly selected object is not subject to the group scan's
     // in-use/character flags; only check_if_dead gates this path.
-    if (object != NULL && (!check_if_dead || (object->apiobj.field_0x287 == 0 && object->field_0x101c <= 0.0f))) {
-        kill(object);
+    if (object != NULL && (!check_if_dead || (object->apiobj.field_0x287 == 0 && !(object->field_0x101c > 0.0f)))) {
+        object->field_0xefa =
+            static_cast<u8>((object->field_0xefa & 0xcfu) | (respawn << 4) | (respawn_at_origin << 5));
+        if (parts_on)
+            KillParts(object, -1, -1, 1, 0.0f, 0, NULL);
+        if (debris)
+            KillGameObject(object, 2, 0);
+        else
+            KillGameObject(object, 4, 0);
     }
     return 1;
 }
@@ -826,9 +826,10 @@ __used__ static i32 Action_SetSide(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
             continue;
         }
 
-        bool type_matches = false;
+        i32 type_matches = 0;
         for (i32 type_index = 0; type_index < type_count; ++type_index) {
-            type_matches |= candidate->id == type_ids[type_index];
+            if (candidate->id == type_ids[type_index])
+                type_matches = 1;
         }
         if (range_squared > 0.0f && object != NULL) {
             NUVEC offset;
@@ -7692,10 +7693,22 @@ __used__ static i32 Action_SetUseOneAtOnce(AISYS *sys, AISCRIPTPROCESS *processo
     (void)processor;
     (void)param_6;
     if (param_5 != 0) {
-        bool enabled;
-        GameObject_s *object = ActionCharacterAndToggle(sys, packet, params, param_4, &enabled);
+        GameObject_s *object = packet != NULL ? packet->owner->apiobj.objptr : NULL;
+        i32 enabled = 1;
+        for (i32 index = 0; index < param_4; ++index) {
+            char *name = NuStrIStr(params[index], "character");
+            if (name != NULL) {
+                if (NuStrICmp(name + 10, "myself") == 0 && packet != NULL) {
+                    object = packet->owner->apiobj.objptr;
+                } else {
+                    object = GetNamedGameObject(WORLD->ai_sys, name + 10);
+                }
+            } else if (NuStrICmp(params[index], "FALSE") == 0) {
+                enabled = 0;
+            }
+        }
         if (object != NULL) {
-            object->field_0xf01 = static_cast<u8>((object->field_0xf01 & ~0x20u) | (enabled ? 0x20u : 0u));
+            object->field_0xf01 = static_cast<u8>((object->field_0xf01 & ~0x20u) | ((enabled & 1) << 5));
         }
     }
     return 1;

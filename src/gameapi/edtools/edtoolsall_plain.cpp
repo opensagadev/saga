@@ -2604,9 +2604,9 @@ extern "C" {
             f32 time = globaltime - sphere->time;
             if (time >= 0.0f && time <= effect->particle_lifetime) {
 
-                position.y = sphere->position.y + (sphere->momentum.y * time + time * time * effect->field_0a0);
-                position.x = sphere->position.x + sphere->momentum.x * time;
-                position.z = sphere->position.z + sphere->momentum.z * time;
+                position.y = sphere->momentum.y * time + time * time * effect->field_0a0 + sphere->position.y;
+                position.x = sphere->momentum.x * time + sphere->position.x;
+                position.z = sphere->momentum.z * time + sphere->position.z;
                 time /= effect->particle_lifetime;
                 i32 first = edppCurveSegment(effect->collision_keys, time);
                 f32 radius = ((time - effect->collision_keys[first].time) /
@@ -2747,7 +2747,7 @@ extern "C" {
             i32 instances = EdFileReadInt();
             if (instances + edpp_instances_used > 512)
                 instances = 512 - edpp_instances_used;
-            edpp_instances_used = 0;
+            edpp_num_orphans = 0;
             for (i32 n = 0; n < instances; ++n) {
                 i32 index = 0;
                 while (index < 512 && edpp_ptls[index].instance_id != -1)
@@ -2781,7 +2781,7 @@ extern "C" {
                 particle->instance_id = 99999;
                 particle->effect_index = LookupDebrisEffectPageOnly(particle->name, static_cast<char>(page_index));
                 if (particle->effect_index == -1)
-                    ++edpp_instances_used;
+                    ++edpp_num_orphans;
 
                 if (version > 8) {
                     particle->switch_type = EdFileReadInt();
@@ -2836,11 +2836,11 @@ extern "C" {
         edppDetermineNearest(1.0f);
 
         if (flag == 0) {
-            DEBPAGE_GENERAL = page_index;
+            edbits_particle_general_page = page_index;
         } else if (flag == 5) {
-            DEBPAGE_CHARACTER = page_index;
+            edbits_particle_char_page = page_index;
         } else if (flag == 1) {
-            DEBPAGE_AREA = page_index;
+            edbits_particle_level_page = page_index;
         }
         return page_index;
     }
@@ -4340,13 +4340,13 @@ extern "C" {
             if (numInteracts < 64 && !eduiInteractLocked) {
                 edui_interact_s *entry = &eduiInteracts[numInteracts];
                 entry->x = static_cast<f32>(x);
+                entry->menu = menu;
+                entry->item = item;
+                entry->callback = callback;
+                entry->buttons = buttons;
                 entry->y = static_cast<f32>(y) * 0.5f;
                 entry->width = static_cast<f32>(width);
                 entry->height = static_cast<f32>(height) * 0.5f;
-                entry->menu = menu;
-                entry->callback = callback;
-                entry->buttons = buttons;
-                entry->item = item;
                 entry->field_20 = field_20;
                 ++numInteracts;
             }
@@ -4448,8 +4448,8 @@ extern "C" {
             x = menu->x + menu->width;
         else
             y += max_item_height;
-        menu->field_28 = y - menu->y;
         menu->field_24 = x - menu->x;
+        menu->field_28 = y - menu->y;
 
         const u32 outline = eduiGetActiveMenu() == menu ? eduimenu_selected_outline_colour : eduimenu_outline_colour;
         outline_rect((menu->x - 1) << 4, (menu->y << 3) - 8, (menu->field_24 + 2) << 4, (menu->field_28 << 3) + 16,

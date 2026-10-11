@@ -588,8 +588,9 @@ static void cbPtlColMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     grad_item = edui_last_item;
     for (i32 index = 0; index < 8; ++index) {
         const debris_colour_key_s &key = effect->colour_keys[index];
-        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(grad_item), key.time, key.red / 255.0f,
-                            key.green / 255.0f, key.blue / 255.0f);
+        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(grad_item), key.time,
+                            static_cast<u32>(key.red) / 255.0f, static_cast<u32>(key.green) / 255.0f,
+                            static_cast<u32>(key.blue) / 255.0f);
         if (key.time == 1.0f)
             break;
     }
