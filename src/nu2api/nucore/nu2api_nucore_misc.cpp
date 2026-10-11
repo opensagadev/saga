@@ -184,8 +184,8 @@ void NuLgtArcLaserDraw(i32 paused) {
         if (!(vertices[4].w >= 0.5f) && !(vertices[5].w >= 0.5f))
             continue;
         if (vertices[4].w < 0.5f) {
-            f32 denominator = vertices[5].w - vertices[4].w;
             f32 numerator = vertices[5].w - 0.5f;
+            f32 denominator = vertices[5].w - vertices[4].w;
             vertices[6].x = (laser->start.x - laser->end.x) * numerator / denominator + laser->end.x;
             vertices[6].y = (laser->start.y - laser->end.y) * numerator / denominator + laser->end.y;
             vertices[6].z = (laser->start.z - laser->end.z) * numerator / denominator + laser->end.z;
@@ -200,8 +200,8 @@ void NuLgtArcLaserDraw(i32 paused) {
         f32 dz = vertices[6].z - laser->end.z;
         sqrt((double)(dx * dx + dy * dy + dz * dz));
         if (vertices[5].w < 0.5f) {
-            f32 numerator = vertices[4].w - 0.5f;
             f32 denominator = vertices[4].w - vertices[5].w;
+            f32 numerator = vertices[4].w - 0.5f;
             vertices[7].x = (laser->end.x - laser->start.x) * numerator / denominator + laser->start.x;
             vertices[7].y = (laser->end.y - laser->start.y) * numerator / denominator + laser->start.y;
             vertices[7].z = (laser->end.z - laser->start.z) * numerator / denominator + laser->start.z;

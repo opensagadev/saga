@@ -171,8 +171,8 @@ void MechHintUIButton::Process(float elapsed) {
             if (active_hint != NULL) {
                 const f32 blend = AlphaBlendTime;
                 pending_hint = NULL;
-                slide_to = -1.5f;
                 slide_from = *slide_target;
+                slide_to = -1.5f;
                 slide_elapsed = 0.0f;
                 slide_delay = 0.0f;
                 active_hint = NULL;
@@ -386,8 +386,8 @@ void Hint_SetHint(HINT_s *hint, i32 force, i32 allow_completed) {
             button->field_0x48 = 0.0f;
             button->field_0x4c = 0.0f;
             button->field_0x54 = 0.0f;
-            button->field_0x50 = blend_time;
             button->field_0x44 = alpha_value;
+            button->field_0x50 = blend_time;
         }
     } else {
         if (button->field_0x78 != NULL) {

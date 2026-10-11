@@ -841,7 +841,7 @@ void NetworkObjectManager::NotifyDestroyObject(void *object, EdClass *object_cla
     }
 }
 
-static NetMessage MakeObjectCallMessage(NetMessage const &message, i32 call_id, NetworkObject const *object) {
+static inline NetMessage MakeObjectCallMessage(NetMessage const &message, i32 call_id, NetworkObject const *object) {
     NetMessage outgoing(message);
     if (outgoing.data != NULL) {
         i16 class_id = static_cast<i16>(theRegistry.GetClassId(object->object_class));

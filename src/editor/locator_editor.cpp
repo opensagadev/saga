@@ -869,6 +869,7 @@ void locatorEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
 }
 
 __attribute__((optimize("no-tree-vectorize"))) eduimenu_s *locatorEditor_Process(nupad_s *pad) {
+    char base[32];
     if ((pad->digital_buttons_pressed & 0x80) != 0) {
         goto options;
     }
@@ -950,7 +951,7 @@ process_buttons:
         } else if ((pad->digital_buttons_pressed & 0x40) != 0 &&
                    *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x48) != 0) {
             EDLOCATOR_s *previous = aieditor->current_locator;
-            char base[32];
+
             if (aieditor->current_locator_set != nullptr && NuStrLen(aieditor->current_locator_set->name) != 0) {
                 NuStrCpy(base, aieditor->current_locator_set->name);
             } else if (previous != nullptr) {

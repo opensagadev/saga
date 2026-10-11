@@ -477,8 +477,9 @@ void MechInputTouchSystem::FindTargetForce(WORLDINFO_s *world, GameObject_s &obj
 MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object, VuVec const &touch, i32 flags,
                                                             MechObjectInterface *required_target,
                                                             MechTempPosInterface *temporary) {
-    MechObjectInterface *best = NULL;
+    VuVec normal;
     f32 best_distance = 25.0f;
+    MechObjectInterface *best = NULL;
     if (VehicleArea)
         best_distance = 5000.0f;
     VuVec start, end, direction;
@@ -535,7 +536,19 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                                   (world->current_level == CLOUDCITYESCAPEA_LDATA && index == 0) || VehicleArea;
                     f32 distance;
                     bool hit;
-                    if (!!__builtin_expect(sphere, 0)) {
+                    if (!!!__builtin_expect(sphere, 0)) {
+                        // bounds preserve the original special's fourth lanes.
+                        VuVec minimum, maximum;
+                        minimum.x = special->display_special->bounds_min.x + mid_z[-2];
+                        minimum.y = special->display_special->bounds_min.y + mid_z[-1];
+                        minimum.z = special->display_special->bounds_min.z + mid_z[0];
+                        minimum.w = special->display_special->bounds_min.w;
+                        maximum.y = special->display_special->bounds_max.y + mid_z[-1];
+                        maximum.w = special->display_special->bounds_max.w;
+                        maximum.z = special->display_special->bounds_max.z + mid_z[0];
+                        maximum.x = special->display_special->bounds_max.x + mid_z[-2];
+                        hit = CalculateRayBoxIntersection(minimum, maximum, start, direction, 30.0f, distance);
+                    } else {
                         NUVEC *position = item->field_0x120 ? static_cast<NUVEC *>(item->field_0x120)
                                                             : reinterpret_cast<NUVEC *>(mid_z - 2);
                         VuVec center;
@@ -549,18 +562,6 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                         distance = CalcCapsuleIntersectDistance(start, direction, best_distance + best_distance, center,
                                                                 radius);
                         hit = distance != 1000000000.0f;
-                    } else {
-                        // bounds preserve the original special's fourth lanes.
-                        VuVec minimum, maximum;
-                        minimum.x = special->display_special->bounds_min.x + mid_z[-2];
-                        minimum.y = special->display_special->bounds_min.y + mid_z[-1];
-                        minimum.z = special->display_special->bounds_min.z + mid_z[0];
-                        minimum.w = special->display_special->bounds_min.w;
-                        maximum.y = special->display_special->bounds_max.y + mid_z[-1];
-                        maximum.w = special->display_special->bounds_max.w;
-                        maximum.z = special->display_special->bounds_max.z + mid_z[0];
-                        maximum.x = special->display_special->bounds_max.x + mid_z[-2];
-                        hit = CalculateRayBoxIntersection(minimum, maximum, start, direction, 30.0f, distance);
                     }
                     if (hit && best_distance + best_distance > distance) {
                         best_distance = distance;
@@ -633,8 +634,8 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                     continue;
                 NUVEC *point = &item->path->pts[0];
                 VuVec center;
-                center.z = point->z;
                 center.x = point->x;
+                center.z = point->z;
                 center.y = point->y + object.apiobj.scaled_height * 0.5f;
                 center.w = 1.0f;
                 f32 distance = CalcCapsuleIntersectDistance(start, direction, best_distance, center, 0.4f);
@@ -695,8 +696,8 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
     if (flags & 1) {
         GameObject_s *candidate = Obj;
         GameObject_s *selected = NULL;
-        bool selected_nonplayer = false;
         f32 selected_distance = 1000000000.0f;
+        bool selected_nonplayer = false;
         f32 weighted_distance = 1000000000.0f;
         const u8 *collision_z =
             candidate != NULL ? reinterpret_cast<const u8 *>(&candidate->apiobj.collision_position.z) : NULL;
@@ -803,7 +804,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                 delta.z = direction.z * static_cast<f32>(step);
                 if (GameRayCast(&position.xyz, &delta.xyz, 0.0f, 0)) {
                     f32 distance = NuVecMag(&delta.xyz);
-                    VuVec normal = VuVec_Zero;
+                    normal = VuVec_Zero;
                     NewRayCastGetImpactNormal(&normal.xyz);
                     if (WORLD->current_level != DEATHSTARESCAPEB_LDATA)
                         remaining = -1.0f;

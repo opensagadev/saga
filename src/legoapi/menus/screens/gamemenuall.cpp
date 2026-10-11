@@ -298,8 +298,8 @@ void APIMenuDrawMemCardSlots(MENU *menu, f32 y) {
                 blue = MenuSlotColourLerp(MENUFLASH0B, MENUNORMALB, menu_pulse);
             } else {
                 red = MENUENTRYR;
-                blue = MENUENTRYB;
                 green = MENUENTRYG;
+                blue = MENUENTRYB;
             }
             MenuText3DEx(apitxt_NEWSAVE, x, y, 1.0f, MENUTEXTSCALE * 0.85f, MENUTEXTSCALE * 0.85f, MENUTEXTSCALE, 0,
                          red, green, blue, static_cast<u8>(MenuA));
@@ -720,12 +720,14 @@ void MenuDrawOptions(MENU_s *menu) {
         GameDrawMenuEntry(menu, text);
     }
 
-    if (memcmp(&TempOptions, &Game.options_save, sizeof(TempOptions)) == 0) {
-        NuStrCpy(text, TTab[tBACK]);
-    } else if (menu->selected_item != menu->draw_item && menu_flash != 0) {
-        text[0] = '\0';
+    if (memcmp(&TempOptions, &Game.options_save, sizeof(TempOptions)) != 0) {
+        if (menu->selected_item != menu->draw_item && menu_flash != 0) {
+            text[0] = '\0';
+        } else {
+            NuStrCpy(text, TTab[tACCEPT]);
+        }
     } else {
-        NuStrCpy(text, TTab[tACCEPT]);
+        NuStrCpy(text, TTab[tBACK]);
     }
     dme_sy = menu->item_scale;
     GameDrawMenuEntry(menu, text);
@@ -2361,12 +2363,14 @@ extern "C" {
             return 0;
 
         MENU *menu = &GameMenu[GameMenuLevel];
-        if (MenuFadeEnabled == 0) {
+        if (MenuFadeEnabled != 0) {
+            if (MenuAlpha < 1.0f) {
+                MenuAlpha += elapsed + elapsed;
+                if (MenuAlpha > 1.0f)
+                    MenuAlpha = 1.0f;
+            }
+        } else {
             MenuAlpha = 1.0f;
-        } else if (MenuAlpha < 1.0f) {
-            MenuAlpha += elapsed + elapsed;
-            if (MenuAlpha > 1.0f)
-                MenuAlpha = 1.0f;
         }
 
         const i32 alpha_angle = static_cast<i32>(MenuAlpha * 16384.0f);
@@ -2404,14 +2408,14 @@ extern "C" {
             pressed = 0;
         }
 
-        i32 up_pressed = pressed & 0x1000;
         i32 down_pressed = pressed & 0x4000;
-        i32 left_pressed = pressed & 0x8000;
+        i32 up_pressed = pressed & 0x1000;
         i32 right_pressed = pressed & 0x2000;
-        i32 up_held = held & 0x1000;
+        i32 left_pressed = pressed & 0x8000;
         i32 down_held = held & 0x4000;
-        i32 left_held = held & 0x8000;
+        i32 up_held = held & 0x1000;
         i32 right_held = held & 0x2000;
+        i32 left_held = held & 0x8000;
 
         if (up_pressed != 0 && down_pressed != 0)
             up_pressed = down_pressed = 0;
@@ -2469,8 +2473,8 @@ extern "C" {
         MenuRepeat(&left_held, &left_pressed, &menu->repeat_left_time, &menu->repeat_left_count, 0.1f, elapsed);
         MenuRepeat(&right_held, &right_pressed, &menu->repeat_right_time, &menu->repeat_right_count, 0.1f, elapsed);
 
-        const i16 first_column = menu->first_column;
         const i16 last_column = menu->last_column;
+        const i16 first_column = menu->first_column;
         const i16 first_row = menu->first_row;
         const i16 last_row = menu->last_row;
         const i32 column_count = last_column - first_column + 1;
@@ -2491,28 +2495,30 @@ extern "C" {
             const MENUFNINFO &info = MenuInfo[menu->menu];
             const bool wrap = info.wrap != 0;
             bool row_clamped = false;
-            if (menu->selected_row < first_row) {
+            if (!(menu->selected_row < first_row)) {
+                if (menu->selected_row > last_row) {
+                    menu->selected_row = last_row;
+                    row_clamped = true;
+                } else if (down_pressed != 0 && (wrap || menu->selected_row < last_row)) {
+                    if (!wrap) {
+                        ++menu->selected_row;
+                    } else {
+                        ++menu->selected_row;
+                        if (menu->selected_row > last_row)
+                            menu->selected_row = first_row;
+                    }
+                } else if (up_pressed != 0 && (wrap || menu->selected_row > first_row)) {
+                    if (!wrap) {
+                        --menu->selected_row;
+                    } else {
+                        --menu->selected_row;
+                        if (menu->selected_row < first_row)
+                            menu->selected_row = last_row;
+                    }
+                }
+            } else {
                 menu->selected_row = first_row;
                 row_clamped = true;
-            } else if (menu->selected_row > last_row) {
-                menu->selected_row = last_row;
-                row_clamped = true;
-            } else if (down_pressed != 0 && (wrap || menu->selected_row < last_row)) {
-                if (!wrap) {
-                    ++menu->selected_row;
-                } else {
-                    ++menu->selected_row;
-                    if (menu->selected_row > last_row)
-                        menu->selected_row = first_row;
-                }
-            } else if (up_pressed != 0 && (wrap || menu->selected_row > first_row)) {
-                if (!wrap) {
-                    --menu->selected_row;
-                } else {
-                    --menu->selected_row;
-                    if (menu->selected_row < first_row)
-                        menu->selected_row = last_row;
-                }
             }
             if (menu->selected_row != old_row) {
                 menu->unk = 0.0f;

@@ -521,11 +521,11 @@ static __used__ void creatureEditor_cbScriptParams(eduimenu_s *parent, eduiitem_
     if (menu != nullptr) {
 
         if (NuLinkedListGetHead(creatureEditor_AreaList()) != nullptr) {
-            if (creatureEditor_Current()->trigger_area != nullptr) {
+            if (creatureEditor_Current()->trigger_area == nullptr) {
+                strcpy(label, "Trigger Area NONE");
+            } else {
                 sprintf(label, "Trigger Area \"%s\"",
                         reinterpret_cast<char *>(creatureEditor_Current()->trigger_area) + 8);
-            } else {
-                strcpy(label, "Trigger Area NONE");
             }
             eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, creatureEditor_cbSelectTriggerArea, label));
         }
@@ -1065,8 +1065,8 @@ extern "C" {
             bool reversed = false;
             for (i32 index = 0; index < runtime_path->connection_count; ++index) {
                 AIPATHCNX *connection = &runtime_path->connections[index];
-                i32 first_index = check->first->index;
                 i32 second_index = check->second->index;
+                i32 first_index = check->first->index;
                 if (connection->node_indices[0] == first_index && connection->node_indices[1] == second_index) {
                     connection_index = index;
                     connection_found = true;
@@ -1174,8 +1174,8 @@ extern "C" {
                 continue;
             CreatureEditorRecord *record = reinterpret_cast<CreatureEditorRecord *>(creature);
             u8 *model = reinterpret_cast<u8 *>(GlobalCharacterHGobjFn(record->character_type));
-            f32 min_height = 0.0f;
             f32 height = 0.4f;
+            f32 min_height = 0.0f;
             f32 radius = 0.4f;
             if (model != nullptr) {
                 min_height = *reinterpret_cast<f32 *>(model + 0x1c4);
@@ -1329,6 +1329,7 @@ extern "C" {
 } // extern "C"
 
 __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad) {
+    char base_name[0x10];
     if (pad->digital_buttons_pressed & 0x80) {
         eduimenu_s *menu =
             eduiMenuCreate(200, 70, 240, 330, ed_fnt, aieditor_cbCancelMainMenu, const_cast<char *>("Options"));
@@ -1420,25 +1421,27 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
         } else {
             CreatureEditorRecord *selected = creatureEditor_Current();
             bool change_selection = false;
-            if ((pad->digital_buttons_pressed & 0x1000) != 0 ||
-                ((pad->digital_buttons & 0x100) != 0 && (pad->digital_buttons_pressed & 8) != 0)) {
+            if ((pad->digital_buttons_pressed & 0x1000) == 0 &&
+                !((pad->digital_buttons & 0x100) != 0 && (pad->digital_buttons_pressed & 8) != 0)) {
+                if ((pad->digital_buttons & 0x100) != 0 && (pad->digital_buttons_pressed & 2) != 0) {
+                    if (selected != nullptr)
+                        aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(
+                            NuLinkedListGetPrev(&aieditor->creatures, &selected->link));
+                    if (creatureEditor_Current() == nullptr)
+                        aieditor->mode_selection_36930 =
+                            reinterpret_cast<EditorNamedEntry *>(NuLinkedListGetTail(&aieditor->creatures));
+                    change_selection = true;
+                } else if (pad->digital_buttons_pressed & 0x100) {
+                    aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(creatureEditor_GetNearest(0));
+                    change_selection = true;
+                }
+            } else {
                 if (selected != nullptr)
                     aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(
                         NuLinkedListGetNext(&aieditor->creatures, &selected->link));
                 if (creatureEditor_Current() == nullptr)
                     aieditor->mode_selection_36930 =
                         reinterpret_cast<EditorNamedEntry *>(NuLinkedListGetHead(&aieditor->creatures));
-                change_selection = true;
-            } else if ((pad->digital_buttons & 0x100) != 0 && (pad->digital_buttons_pressed & 2) != 0) {
-                if (selected != nullptr)
-                    aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(
-                        NuLinkedListGetPrev(&aieditor->creatures, &selected->link));
-                if (creatureEditor_Current() == nullptr)
-                    aieditor->mode_selection_36930 =
-                        reinterpret_cast<EditorNamedEntry *>(NuLinkedListGetTail(&aieditor->creatures));
-                change_selection = true;
-            } else if (pad->digital_buttons_pressed & 0x100) {
-                aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(creatureEditor_GetNearest(0));
                 change_selection = true;
             }
 
@@ -1523,21 +1526,21 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
                 if (selected != nullptr) {
                     EDAIPATHCHECK_s *check =
                         reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(aieditor) + 0x48);
-                    if (check->on_path == 0) {
-                        edcamSetPos(&selected->position);
-                    } else {
+                    if (check->on_path != 0) {
                         selected->position = aieditor->camera_position;
                         memcpy(selected->path_check, check, sizeof(selected->path_check));
                         reinterpret_cast<EDAIPATHCHECK_s *>(selected->path_check)->angle =
                             NuAngSub(selected->angle, check->angle);
                         creatureEditor_Updated(reinterpret_cast<EDCREATURE_s *>(selected));
+                    } else {
+                        edcamSetPos(&selected->position);
                     }
                 }
             }
         } else if ((pad->digital_buttons_pressed & 0x40) != 0 &&
                    reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(aieditor) + 0x48)->on_path != 0) {
             CreatureEditorRecord *previous = creatureEditor_Current();
-            char base_name[0x10];
+
             u8 set = 0;
             if (previous == nullptr) {
                 NuStrNCpy(base_name, GlobalCharacterNameFn(aieditorsettings.current_path_type), 0xd);
@@ -1562,10 +1565,11 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
                     bool in_use = false;
                     for (NULISTLNK *link = NuLinkedListGetHead(&aieditor->creatures); link != nullptr;
                          link = NuLinkedListGetNext(&aieditor->creatures, link)) {
-                        if (NuStrICmp(name, reinterpret_cast<CreatureEditorRecord *>(link)->name) == 0) {
-                            in_use = true;
-                            break;
+                        if (NuStrICmp(name, reinterpret_cast<CreatureEditorRecord *>(link)->name) != 0) {
+                            continue;
                         }
+                        in_use = true;
+                        break;
                     }
                     if (!in_use)
                         break;
@@ -1575,8 +1579,8 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
                     strcpy(creatureEditor_Current()->script_name, aieditorsettings.current_script_name);
                 created = creatureEditor_Current();
                 memcpy(created->script_params, aieditorsettings.current_script_params, sizeof(created->script_params));
-                created->flags = (created->flags & ~0x1eu) | aieditorsettings.current_script_flags;
                 created->path = aieditor->current_path;
+                created->flags = (created->flags & ~0x1eu) | aieditorsettings.current_script_flags;
                 memcpy(created->path_check, reinterpret_cast<u8 *>(aieditor) + 0x48, sizeof(created->path_check));
                 reinterpret_cast<EDAIPATHCHECK_s *>(created->path_check)->angle =
                     NuAngSub(created->angle, *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x60));

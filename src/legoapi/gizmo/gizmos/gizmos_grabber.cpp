@@ -225,7 +225,20 @@ void Grabber_Update(WORLDINFO_s *world) {
     next.x += FRAMETIME * g->velocity.x;
     next.y += g->velocity.y * FRAMETIME;
     next.z += FRAMETIME * g->velocity.z;
-    if (world->current_level == DEATHSTARESCAPEB_LDATA) {
+    if (world->current_level != DEATHSTARESCAPEB_LDATA) {
+        if (world->current_level == JABBASPALACEB_LDATA) {
+            f32 pitch = (NuVecMag(&g->velocity) / g->speed) * 0.25f + 0.5f;
+            if (pitch > 1.0f)
+                pitch = 1.0f;
+            PlaySfxAndSetPitch("env_hover_box_lp", &next, pitch);
+            next.y = g->initial_position.y + 0.0125f * NU_SIN_LUT((u16)((NuFmod(GameTimer, 2.0f) * 0.5f) * 65536.0f));
+            g->target_velocity.y = g->velocity.y = 0.0f;
+            if (g->platform_contact_timer > 0.0f)
+                next.y -=
+                    ((1.0f - NU_SIN_LUT((i32)((g->platform_contact_timer * 4.0f) * 65536.0f + 16384.0f))) * 0.5f) *
+                    0.02f;
+        }
+    } else {
         if (next.z >= 11.84f) {
             next.z = 11.84f;
             g->target_velocity.z = g->velocity.z = 0.0f;
@@ -240,16 +253,6 @@ void Grabber_Update(WORLDINFO_s *world) {
             next.y = -3.9f;
             g->target_velocity.y = g->velocity.y = 0.0f;
         }
-    } else if (world->current_level == JABBASPALACEB_LDATA) {
-        f32 pitch = (NuVecMag(&g->velocity) / g->speed) * 0.25f + 0.5f;
-        if (pitch > 1.0f)
-            pitch = 1.0f;
-        PlaySfxAndSetPitch("env_hover_box_lp", &next, pitch);
-        next.y = g->initial_position.y + 0.0125f * NU_SIN_LUT((u16)((NuFmod(GameTimer, 2.0f) * 0.5f) * 65536.0f));
-        g->target_velocity.y = g->velocity.y = 0.0f;
-        if (g->platform_contact_timer > 0.0f)
-            next.y -=
-                ((1.0f - NU_SIN_LUT((i32)((g->platform_contact_timer * 4.0f) * 65536.0f + 16384.0f))) * 0.5f) * 0.02f;
     }
     i32 moved = 0;
     if (next.x != g->grab_position.x || next.y != g->grab_position.y || next.z != g->grab_position.z) {
@@ -315,31 +318,33 @@ void Grabber_Update(WORLDINFO_s *world) {
                     (g->action_switch->anim_set->flags & 1))
                     break;
             }
-            if (g->character_model && g->character_model->model_data_b[102]) {
+            if (!(g->character_model && g->character_model->model_data_b[102])) {
+                if (g->character_id == id_GRABMAGNET) {
+                    g->victim = FindNearestGameObject(Grabber_GetGrabPos(g, NULL), NULL, 16, 0.5f, 0, -1, -1, -1, NULL,
+                                                      1, IsGrabbable, false);
+                    if (g->victim) {
+                        GameObject_s *v = g->victim;
+                        v->character_context = 47;
+                        v->context_animation = v->apiobj.character_model->model_data_b[104] ? 104 : 5;
+                        NewRumbleAllPlayers(0, 0.1f, 0, 0);
+                        v->airborne_action_duration = 0.75f;
+                        v->context_animation_timer = 0;
+                        v->external_force = v->apiobj.start_position;
+                        v->field_0x7a3 = 0;
+                        Hint_SetComplete(651);
+                        g->stuck_timer = 0;
+                        g->state = 2;
+                        if (!control)
+                            g->flags_559 |= 4;
+                    }
+                }
+            } else {
                 g->state = 1;
                 g->animation_timer = AnimDuration(g->character_model->model_id, 102, 0, 0, 1);
                 g->flags_559 &= ~2;
                 if (!control)
                     g->flags_559 |= 4;
                 NewRumbleAllPlayers(0, 0, 2, 0);
-            } else if (g->character_id == id_GRABMAGNET) {
-                g->victim = FindNearestGameObject(Grabber_GetGrabPos(g, NULL), NULL, 16, 0.5f, 0, -1, -1, -1, NULL, 1,
-                                                  IsGrabbable, false);
-                if (g->victim) {
-                    GameObject_s *v = g->victim;
-                    v->character_context = 47;
-                    v->context_animation = v->apiobj.character_model->model_data_b[104] ? 104 : 5;
-                    NewRumbleAllPlayers(0, 0.1f, 0, 0);
-                    v->airborne_action_duration = 0.75f;
-                    v->context_animation_timer = 0;
-                    v->external_force = v->apiobj.start_position;
-                    v->field_0x7a3 = 0;
-                    Hint_SetComplete(651);
-                    g->stuck_timer = 0;
-                    g->state = 2;
-                    if (!control)
-                        g->flags_559 |= 4;
-                }
             }
             PlaySfx("env_grabber_pickup", Grabber_GetGrabPos(g, NULL));
             break;
@@ -382,8 +387,8 @@ void Grabber_Update(WORLDINFO_s *world) {
                     v->character_context = 47;
                     v->context_animation = v->apiobj.character_model->model_data_b[104] ? 104 : 5;
                     NewRumbleAllPlayers(0, 0.1f, 0, 0);
-                    v->airborne_action_duration = 0.75f;
                     v->context_animation_timer = 0;
+                    v->airborne_action_duration = 0.75f;
                     v->external_force = v->apiobj.start_position;
                     v->field_0x7a3 = 0;
                     Hint_SetComplete(651);
