@@ -1414,7 +1414,6 @@ extern "C" {
     }
     void edanimUpdateObjects(float elapsed) {
         NUVEC position;
-        NUVEC position;
         static i32 localframecount;
         float seconds;
         if (NuVideoGetMode() == 3)
