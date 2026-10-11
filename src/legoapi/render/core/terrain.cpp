@@ -756,7 +756,7 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
     }
 
     memset(terrain->groups, 0, max_groups * sizeof(TERRAIN_GROUP));
-    for (u32 group_index = 0; group_index < max_groups; ++group_index) {
+    for (i32 group_index = 0; group_index < static_cast<i32>(terrain->max_groups); ++group_index) {
         terrain->groups[group_index].chunk_type = -1;
     }
 
@@ -764,7 +764,7 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
         terrain->cells[cell].group_count = 0;
     }
 
-    for (u32 platform_index = 0; platform_index < max_platforms; ++platform_index) {
+    for (i32 platform_index = 0; platform_index < static_cast<i32>(terrain->max_platforms); ++platform_index) {
         TERRAIN_PLATFORM &platform = terrain->platforms[platform_index];
         platform.flags &= ~TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED;
         platform.scene_object = NULL;
@@ -875,7 +875,9 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
                         terrain->minimum_height = static_cast<i32>(world_y);
                         current_minimum_height = static_cast<f32>(terrain->minimum_height);
                     }
-
+                }
+                for (i32 vector_index = 0; vector_index < 4; ++vector_index) {
+                    const NUVEC &vector = shape->vectors[vector_index];
                     const f32 length_squared = vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
                     if (length_squared > radius_squared) {
                         radius_squared = length_squared;

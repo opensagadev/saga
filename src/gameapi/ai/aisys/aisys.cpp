@@ -826,9 +826,10 @@ __used__ static i32 Action_SetSide(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
             continue;
         }
 
-        bool type_matches = false;
+        i32 type_matches = 0;
         for (i32 type_index = 0; type_index < type_count; ++type_index) {
-            type_matches |= candidate->id == type_ids[type_index];
+            if (candidate->id == type_ids[type_index])
+                type_matches = 1;
         }
         if (range_squared > 0.0f && object != NULL) {
             NUVEC offset;
