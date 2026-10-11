@@ -1466,25 +1466,26 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 fr
     const u32 quarter = static_cast<u32>(whole_key) & 3;
     const f32 fraction = key - static_cast<f32>(whole_key);
     u8 *keys = anim->keys + (whole_key / 4) * key_stride;
+    ani3_scalemin_s *scale_min = anim->scale_min;
     const u16 *curve_types = anim->curve_types;
 
     // Advance all packed stream cursors to the first requested joint.
     for (i32 joint = 0; joint < first_joint; ++joint) {
         const u8 flags = anim->node_flags[joint];
         if ((flags & NUANIMBUFF_JOINT_TRANSLATION) != 0) {
-            SkipAni4V4Curve(curve_types[0], keys, anim->scale_min);
-            SkipAni4V4Curve(curve_types[1], keys, anim->scale_min);
-            SkipAni4V4Curve(curve_types[2], keys, anim->scale_min);
+            SkipAni4V4Curve(curve_types[0], keys, scale_min);
+            SkipAni4V4Curve(curve_types[1], keys, scale_min);
+            SkipAni4V4Curve(curve_types[2], keys, scale_min);
         }
         if ((flags & NUANIMBUFF_JOINT_ROTATION) != 0) {
-            SkipAni4V4Curve(curve_types[3], keys, anim->scale_min);
-            SkipAni4V4Curve(curve_types[4], keys, anim->scale_min);
-            SkipAni4V4Curve(curve_types[5], keys, anim->scale_min);
+            SkipAni4V4Curve(curve_types[3], keys, scale_min);
+            SkipAni4V4Curve(curve_types[4], keys, scale_min);
+            SkipAni4V4Curve(curve_types[5], keys, scale_min);
         }
         if ((flags & NUANIMBUFF_JOINT_SCALE) != 0) {
-            SkipAni4V4Curve(curve_types[6], keys, anim->scale_min);
-            SkipAni4V4Curve(curve_types[7], keys, anim->scale_min);
-            SkipAni4V4Curve(curve_types[8], keys, anim->scale_min);
+            SkipAni4V4Curve(curve_types[6], keys, scale_min);
+            SkipAni4V4Curve(curve_types[7], keys, scale_min);
+            SkipAni4V4Curve(curve_types[8], keys, scale_min);
         }
         curve_types += 9;
     }
@@ -1502,7 +1503,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 fr
         for (i32 group = 0; group < 3; ++group) {
             if ((flags & CurveGroupMasks[group]) != 0) {
                 f32 decoded = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[0], quarter, fraction,
-                                                    keys, anim->scale_min);
+                                                    keys, scale_min);
                 f32 delta = decoded - group_values[0];
                 if (group == 1) {
                     delta = WrapAni4BlendRotation(delta);
@@ -1513,7 +1514,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 fr
                 group_values[0] += delta * blend;
 
                 decoded = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[1], quarter, fraction, keys,
-                                                anim->scale_min);
+                                                scale_min);
                 delta = decoded - group_values[1];
                 if (group == 1) {
                     delta = WrapAni4BlendRotation(delta);
@@ -1524,7 +1525,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 fr
                 group_values[1] += delta * blend;
 
                 decoded = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[2], quarter, fraction, keys,
-                                                anim->scale_min);
+                                                scale_min);
                 delta = decoded - group_values[2];
                 if (group == 1) {
                     delta = WrapAni4BlendRotation(delta);
