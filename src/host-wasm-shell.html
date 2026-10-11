@@ -637,6 +637,16 @@
       });
       canvas.addEventListener("pointerdown", () => canvas.focus());
 
+      // SDL handles keys on the game thread, too late to cancel the browser's
+      // default action, so stop keys the page would otherwise scroll with.
+      const scrollKeys = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space",
+        "PageUp", "PageDown", "Home", "End", "Backspace"]);
+      canvas.addEventListener("keydown", (event) => {
+        if (scrollKeys.has(event.code)) {
+          event.preventDefault();
+        }
+      });
+
       var Module = {
         canvas,
         noInitialRun: true,
