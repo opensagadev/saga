@@ -217,7 +217,11 @@ void SetLevelSfxBits(WORLDINFO *world) {
         ADD_SFX("SwLever");
     }
 
-    if (world->area == NULL || (world->area->flags & 1) == 0) {
+    if (world->area != NULL && (world->area->flags & 1) != 0) {
+        ADD_SFX("XWing_Torpedo");
+        ADD_SFX("imp_proton_torp");
+        ADD_SFX("XWing_LoopDeLoop");
+    } else {
         ADD_SFX("Char_Slide_Lp");
         if (world->push_block_count > 0) {
             ADD_SFX("Block_Shove");
@@ -228,10 +232,6 @@ void SetLevelSfxBits(WORLDINFO *world) {
         if (world->area != NULL && world->area == SPEEDERCHASE_ADATA) {
             ADD_SFX("XWing_LoopDeLoop");
         }
-    } else {
-        ADD_SFX("XWing_Torpedo");
-        ADD_SFX("imp_proton_torp");
-        ADD_SFX("XWing_LoopDeLoop");
     }
     ADD_SFX("Explode1");
 
@@ -1455,10 +1455,10 @@ void LevChatterSfx(char *name, nuvec_s *position) {
 
 void PlayRepeatSfx(char *name, i32 sfx_id, f32 initial_delay, char play_count, f32 interval, nuvec_s *position) {
     if (play_count == 1 && initial_delay == 0.0f) {
-        if (sfx_id != -1) {
-            GameAudio_PlaySfxById(sfx_id, position, 0, 0);
-        } else {
+        if (sfx_id == -1) {
             PlaySfx(name, position);
+        } else {
+            GameAudio_PlaySfxById(sfx_id, position, 0, 0);
         }
         return;
     }

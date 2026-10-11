@@ -205,8 +205,8 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
     const f32 base_size = COLLECTION_ICONSIZE;
     nuhspecial_s *special = collection_draw_hspecial;
     i32 (*valid)(COLLECTION_s *, i32) = collection_draw_IsValidFn;
-    collection_draw_hspecial = NULL;
     collection_draw_IsValidFn = NULL;
+    collection_draw_hspecial = NULL;
     if (collection->list == NULL || FadeSys.fade > 0.0f)
         return;
     const i32 columns = collection->count_x;
@@ -356,8 +356,8 @@ void Collection_CreateMaster(char *file, i16 *idlist, COLLECTION_s *collection, 
     collection->list = CollectList;
     collection->count_x = (u16)param4;
     collection->count_y = (u16)CollectCount;
-    collection->field_8 = idlist;
     collection->field_c = file;
+    collection->field_8 = idlist;
     collection->field_10 = param5;
 }
 
@@ -587,8 +587,8 @@ void UpdateCoinPacket(COINPACKET_s *packet, i32 active, i32 player_index) {
 
     packet->scale = SeekLinearF(packet->scale, 1.0f, 3.0f * FRAMETIME);
     if (((DoubleScore >> player_index) & 1) == 0) {
-        packet->active = 1;
         packet->double_score_timer = 0.0f;
+        packet->active = 1;
     } else if (packet->double_score_timer > 0.0f) {
         packet->double_score_timer -= FRAMETIME;
         if (packet->double_score_timer <= 0.0f) {
@@ -655,8 +655,8 @@ extern i32 SHOPHINTCOUNT;
 extern i16 HintTab[24];
 
 void ReCalculateCompletionPoints() {
-    Game.completion = 0;
     Game.gold_bricks = 0;
+    Game.completion = 0;
     memset(CompletionPointInfo_ReCalculate, 0, sizeof(CompletionPointInfo_ReCalculate));
 
     for (i32 index = 0; index < MasterCollection.count_y; ++index) {

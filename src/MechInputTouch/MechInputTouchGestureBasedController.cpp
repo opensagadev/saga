@@ -576,8 +576,8 @@ bool MechInputTouchGestureBasedController::OnSwipe(GameObject_s &object, TouchHo
 
     MechSystems::Get()->NewSwipeMarker(holder, index, static_cast<SwipeDecalRenderer::Style>(0));
     JumpTriggerPacket packet = {};
-    packet.type = 3;
     packet.player = &object;
+    packet.type = 3;
     packet.touch_holder = &holder;
     packet.start = holder.swipe_samples[index].position;
     packet.velocity = VuVec_Zero;
@@ -673,9 +673,9 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpOverGap(GameObject_s *
             return;
         }
         JumpTriggerPacket packet = {};
-        packet.type = 1;
         packet.player = object;
         packet.touch_holder = holder;
+        packet.type = 1;
         packet.velocity = VuVec(object->apiobj.velocity.x, object->apiobj.velocity.y, object->apiobj.velocity.z, 1.0f);
         if (object->apiobj.field_0x27d == 0 && !ObjLandReady(object)) {
             return;
@@ -706,8 +706,8 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpOverGap(GameObject_s *
                         ? *reinterpret_cast<f32 *>(
                               reinterpret_cast<u8 *>(object->apiobj.character_data->player_config) + 0x1c)
                         : 0.0f;
-            boosted_velocity.x *= speed;
             boosted_velocity.y *= speed;
+            boosted_velocity.x *= speed;
             boosted_velocity.z *= speed;
         }
         GameObject_s *backup_recipient = player != NULL ? player : object;

@@ -100,16 +100,16 @@ void PlayRadio(char *special_name, char *blowup_name, i32 play) {
                 return;
             }
 
-            if (blowup_name != NULL) {
+            if (blowup_name == NULL) {
+                if (special_name == NULL || NuSpecialFind(WORLD->current_gscn, &radio->special, special_name, 1) == 0) {
+                    return;
+                }
+            } else {
                 GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, blowup_gizmotype_id, blowup_name);
                 if (gizmo == NULL) {
                     return;
                 }
                 radio->blowup = static_cast<GIZMOBLOWUP_s *>(gizmo->object);
-            } else {
-                if (special_name == NULL || NuSpecialFind(WORLD->current_gscn, &radio->special, special_name, 1) == 0) {
-                    return;
-                }
             }
             radio->time = 20.0f;
             radios_playing = 1;

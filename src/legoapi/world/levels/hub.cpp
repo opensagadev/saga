@@ -686,8 +686,8 @@ void Hub_Update(WORLDINFO_s *world) {
             LevLock[0] = 0;
         }
     } else if (GetMenuID() == -1 && shop_available) {
-        SHOPACTIVE = 1;
         TempGame = Game;
+        SHOPACTIVE = 1;
         MakeMenuPacket();
         Hint_CancelCurrent();
         NewMenu(13, -1, -1);
@@ -1113,8 +1113,8 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                 buildup_total += EpBuildUpTotal;
                 both_true_jedi_bricks = BOTHTRUEJEDIGOLDBRICKS;
                 if (both_true_jedi_bricks) {
-                    story_count += EpStoryBuildUpCount;
                     story_total += EpStoryBuildUpTotal;
+                    story_count += EpStoryBuildUpCount;
                     free_count += EpFreePlayBuildUpCount;
                     free_total += EpFreePlayBuildUpTotal;
                 }
@@ -1993,8 +1993,8 @@ void Hub_UpdateMiniKits(WORLDINFO_s *world) {
             f32 vz = (0.0f - kit->offset_z) * 5.0f;
             kit->velocity_x = SeekValF(kit->velocity_x, vx, 10.0f);
             kit->velocity_z = SeekValF(kit->velocity_z, vz, 10.0f);
-            kit->offset_x += kit->velocity_x * FRAMETIME;
             kit->offset_z += kit->velocity_z * FRAMETIME;
+            kit->offset_x += kit->velocity_x * FRAMETIME;
             u16 old_rotation = kit->rotation;
             if (i == hub_minikitviewer_area) {
                 if (speed > 0.0f)
@@ -2060,11 +2060,11 @@ void Hub_UpdateMiniKits(WORLDINFO_s *world) {
                 current->collision_center.y += 0.025f * NU_SIN_LUT(current->phase_rotation) * current->scale;
                 current->collision_center.y += info ? info->panel_offset : 0.0f;
                 current->bounds_min.x = current->collision_center.x - current->radius;
-                current->bounds_min.y = current->collision_center.y - current->radius * current->height_ratio;
                 current->bounds_min.z = current->collision_center.z - current->radius;
-                current->bounds_max.x = current->collision_center.x + current->radius;
+                current->bounds_min.y = current->collision_center.y - current->radius * current->height_ratio;
                 current->bounds_max.y = current->collision_center.y + current->radius * current->height_ratio;
                 current->bounds_max.z = current->collision_center.z + current->radius;
+                current->bounds_max.x = current->collision_center.x + current->radius;
             }
         }
         kit = world->hub_minikits;
@@ -2250,8 +2250,8 @@ void Hub_DrawFreePlaySelect() {
                     eased =
                         1.0f - (NU_SIN_LUT(static_cast<i32>((1.0f - progress) * 32768.0f + 16384.0f)) + 1.0f) * 0.5f;
                 }
-                size = (COLLECTION_ICONSIZE - base_size) * eased + base_size;
                 x = (-ICONX - base_x) * eased + base_x;
+                size = (COLLECTION_ICONSIZE - base_size) * eased + base_size;
                 y = (STATSPOSY - 0.7f) * eased + 0.7f;
                 if (opacity > 0.0f) {
                     if (freeplay_time[0] > 0.0f || opacity != 1.0f) {
@@ -2306,8 +2306,8 @@ void Hub_DrawFreePlaySelect() {
         Hub_DrawIconCursors(collection, 0, 1.0f, 1.0f);
         i32 status = -1, select = -1, cancel = -1;
         if (freeplay_selected[0] == 0 && freeplay_time[0] <= 0.0f) {
-            status = tSELECTING;
             select = tSELECT;
+            status = tSELECTING;
             cancel = tEXIT;
         } else if (freeplay_selected[0] == 1 && freeplay_time[0] <= 0.0f) {
             status = tSELECTED;
@@ -3064,8 +3064,8 @@ static __used__ void Hub_UpdateSelectMode() {
                 return;
             }
             NextArea_FreePlay = 0;
-            FreePlay = 0;
             NewLData = &LDataList[hub_new_level];
+            FreePlay = 0;
             break;
         case 3:
             selectmodetime += FRAMETIME;
@@ -3229,10 +3229,10 @@ static void DrawEpisodesMenu(i32 selected, f32 alpha) {
                     if (menu_pulsate > 0.0f) {
                         red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
                                                static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
-                        green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
-                                                 static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
                         blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
                                                 static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
+                        green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
+                                                 static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
                     } else {
                         red = menu_flash ? MENUFLASH0R : MENUFLASH1R;
                         green = menu_flash ? MENUFLASH0G : MENUFLASH1G;
@@ -3274,8 +3274,8 @@ draw_clips: {
     i16 clips[128];
     const i32 all = hub_new_level == -1 || LDataList[hub_new_level].episode_index == -1;
     collection.count_y = CutScenePlayer_CountEpisodeClips(i_episodes, all, clips);
-    collection.count_x = 7;
     collection.field_10 = 1.0f;
+    collection.count_x = 7;
     if (episodesmode != 1 && episodestime < episodesduration)
         alpha = (episodestime / episodesduration) * alpha;
     CutScenePlayer_DrawGrid(&collection, clips, 0.0f, 0.05f, i_clip[i_episodes], alpha);
@@ -3357,8 +3357,8 @@ void MenuUpdateEpisodes(MENU_s *) {
                 hub_goto_clipsmenu_episode = 99;
             } else if (menu->cancel_pressed || cancel) {
                 GameAudio_PlaySfx(0x31, NULL, 0, 0);
-                episodestime = 0.0f;
                 lastepisodesmode = episodesmode;
+                episodestime = 0.0f;
                 episodesmode = 2;
                 episodesduration = 0.6f;
             }
@@ -3781,8 +3781,8 @@ void MenuUpdateBonusMode(MENU_s *) {
                 return;
             }
             GameAudio_PlaySfx(0x30, NULL, 0, 0);
-            hub_new_level = area->levels[0];
             hub_freeplaysource = 1;
+            hub_new_level = area->levels[0];
             Hub_InitFreePlaySelect(area->index, -1, -1);
             NewMenu(17, -1, -1);
             return;
@@ -3936,20 +3936,20 @@ static void Hub_DrawBonusModeMenu(int selected, float alpha) {
                 if (menu_pulsate > 0.0f) {
                     red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
                                            static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
-                    green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
-                                             static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
                     blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
                                             static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
+                    green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
+                                             static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
                 } else {
                     red = menu_flash ? MENUFLASH0R : MENUFLASH1R;
-                    green = menu_flash ? MENUFLASH0G : MENUFLASH1G;
                     blue = menu_flash ? MENUFLASH0B : MENUFLASH1B;
+                    green = menu_flash ? MENUFLASH0G : MENUFLASH1G;
                 }
             } else if (menu_pulse > 0.0f) {
-                red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
-                                       static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
                 green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
                                          static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse));
+                red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
+                                       static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
                 blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
                                         static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse));
             } else {

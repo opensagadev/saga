@@ -668,11 +668,11 @@ void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32) {
         message.flags = 0x2112d;
         message.duration = 1.0f;
         message.icon = 0xd0;
-        message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0xd0]);
         message.update_fn = PowerUp_UpdateMsg;
+        message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0xd0]);
         message.end_fn = PowerUp_EndMsg;
-        message.player_index = player_index;
         message.field_0x4d = 1;
+        message.player_index = player_index;
         message.field_0x4e = 7;
         GAMEMESSAGE_s *game_message = AddGameMsg(&message);
         if (game_message != NULL) {
@@ -808,8 +808,8 @@ void KillParts_SpeederBike(ADDPART_s *params, i32, i32, GameObject_s *object) {
     params->flags = 0x400;
     params->field_44 = SpeederPart_Kill;
     params->field_48 = SpeederPart_Update;
-    params->draw_fn = SpeederPart_Draw;
     params->velocity = &velocity;
+    params->draw_fn = SpeederPart_Draw;
 
     PART_s *part = AddPart(params);
     if (part == NULL) {
@@ -857,9 +857,9 @@ void KillParts_SpeederBike(ADDPART_s *params, i32, i32, GameObject_s *object) {
     if (distance >= 0.0f) {
         yaw -= 0x8000;
     }
-    part->rotation_y = yaw;
     part->rotation_x = -pitch;
     part->field_13c = 0;
+    part->rotation_y = yaw;
 }
 
 extern WORLDINFO_s *WORLD;
@@ -1186,14 +1186,14 @@ extern "C" {
             NuMtxSetTranslation(&part->transform, params->position);
         }
         part->initial_position = part->position;
-        part->owner = params->owner;
         part->recipient = params->recipient;
+        part->owner = params->owner;
         part->velocity = *params->velocity;
-        part->force_player_mask = -1;
         part->field_20b = -1;
+        part->force_player_mask = -1;
         part->field_100 = part->field_104 = params->field_a4;
-        part->active = (part->active & ~0x60) | 0x21;
         part->time_step = params->time_step;
+        part->active = (part->active & ~0x60) | 0x21;
         part->scale_time = 0.0f;
         part->target_radius = params->field_14;
         part->radius = (params->time_step / PARTSCALEUPTIME) * params->field_14;
@@ -1201,10 +1201,10 @@ extern "C" {
         part->field_214 = params->field_c0;
         part->gravity = params->gravity;
         part->field_0ec = params->field_20;
-        part->active &= ~2;
         part->pickup_type = params->field_28;
         part->field_0f0 = params->field_88;
         part->flags = params->flags;
+        part->active &= ~2;
         part->field_20a = params->field_c4;
         part->render_flags &= ~0x40;
         if (params->lighting != NULL) {
@@ -1268,8 +1268,8 @@ extern "C" {
         part->field_1e4 = params->field_64;
         part->field_1e8 = params->field_68;
         part->field_1ec = params->field_6c;
-        part->field_1f0 = params->field_70;
         part->field_1f8 = params->field_74;
+        part->field_1f0 = params->field_70;
         part->field_1f4 = params->field_78;
         part->field_1fc = params->field_7c;
         part->previous_transform = part->transform;
@@ -1578,10 +1578,10 @@ extern "C" {
         effect->particle_keys[particle_key_slot] = static_cast<i16>(new_key_index);
         key = &debkeydata[effect->particle_keys[particle_key_slot]];
         key->effect_index = static_cast<i16>(effect_index);
-        key->field_1d4 = 0;
         key->generator = gensorttab[static_cast<i8>(effect->generator_type)];
-        key->momentum_adjuster = gencodetab[static_cast<i8>(effect->momentum_adjustment_type)];
+        key->field_1d4 = 0;
         key->effect_orientation = *particle_orientation;
+        key->momentum_adjuster = gencodetab[static_cast<i8>(effect->momentum_adjustment_type)];
         key->effect_orientation.m30 = 0.0f;
         key->effect_orientation.m31 = 0.0f;
         key->effect_orientation.m32 = 0.0f;
@@ -1693,8 +1693,8 @@ extern "C" {
                 continue;
             }
             debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr];
-            control->particle_chunk = key->particle_chunks[chunk_index];
             control->active = 1;
+            control->particle_chunk = key->particle_chunks[chunk_index];
             control->owner = key;
             control->expiry_time =
                 now + effect->particle_lifetime + static_cast<f32>(effect->trail_count) * effect->trail_time;
@@ -1778,8 +1778,8 @@ extern "C" {
             NuVecMtxTransformVU0(&velocity, &velocity, orientation);
 
             params.position = &part_position;
-            params.velocity = &velocity;
             params.gravity = type->gravity;
+            params.velocity = &velocity;
             params.field_20 = type->bounce;
 
             i32 variant = 0;
@@ -2963,13 +2963,13 @@ void AddTorpedoAsPart(nuvec_s *position, nuvec_s *velocity, float scale, float l
     params.special = &world->lev_objs[0x79].special;
     params.field_28 = 0x79;
     params.flags = 0x256;
-    params.move_fn = params.gravity == 0.0f ? PartMove_VehiclePickup : NULL;
     params.field_40 = PartCollide_3D;
+    params.move_fn = params.gravity == 0.0f ? PartMove_VehiclePickup : NULL;
     if (FreePlay != 0 && WORLD->current_level == ANAKINSFLIGHTB_LDATA)
         params.field_40 = PartCollide_2D;
     params.field_48 = NULL;
-    params.stop_fn = PartStop_Flickerer;
     params.draw_fn = PartDraw_Torp;
+    params.stop_fn = PartStop_Flickerer;
     params.field_88 = lifetime;
     params.time_step = FRAMETIME;
     params.field_c0 = scale;
@@ -3025,16 +3025,16 @@ void PowerUp_AddPart(NUVEC *position, NUVEC *velocity, f32 scale, f32 lifetime) 
     params.gravity = AreaPickupGravity;
     params.field_28 = 0xd0;
     params.flags = 0x256;
-    params.field_3c = PowerUp_ImpactPart;
     params.field_40 = PartCollide_3D;
+    params.field_3c = PowerUp_ImpactPart;
     params.field_48 = PowerUp_UpdatePart;
     params.stop_fn = PartStop_Flickerer;
     params.draw_fn = PowerUp_DrawPart;
     if (params.gravity == 0.0f)
         params.move_fn = PartMove_VehiclePickup;
-    params.field_88 = lifetime;
     params.time_step = FRAMETIME;
     params.field_c0 = scale;
+    params.field_88 = lifetime;
     PART_s *part = AddPart(&params);
     if (part != NULL)
         part->rotation_y = NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f;
@@ -3126,10 +3126,10 @@ void AddCoinsAsParts(i32 type_id, nuvec_s *position, nuvec_s *velocity, float li
     if (object->active == 0)
         return;
     ADDPART_ALIGNED16 params = Default_ADDPART;
-    params.special = &object->special;
     params.field_28 = model;
     params.position = position;
     params.velocity = velocity;
+    params.special = &object->special;
     params.field_14 = params.field_18 = scale * type->shadow_radius_x;
     params.flags = 0x56;
     params.gravity = AreaPickupGravity;
@@ -3219,8 +3219,8 @@ void UpdatePartEmits(f32 time) {
         if ((type->flags & 0x400000) != 0) {
             if (type->maximum_distance > emitter->camera_distance && previous_distance >= type->maximum_distance) {
                 emitter->time_24 = partglobaltime;
-                emitter->time_28 = partglobaltime - 1.0f;
                 emitter->time_20 = partglobaltime - interval + 0.001f;
+                emitter->time_28 = partglobaltime - 1.0f;
             } else if (emitter->time_24 > emitter->time_28) {
                 emitter->time_28 += time;
                 emitter->time_24 += time;
@@ -3356,8 +3356,8 @@ void UpdatePartEmits(f32 time) {
                 params.field_70 = type->impact_effect;
                 if (type->impact_part == -1 && type->impact_part_name[0] != 0)
                     type->impact_part = PARTLookupType(type->impact_part_name);
-                params.field_74 = type->impact_part;
                 params.field_7c = type->effect_scale;
+                params.field_74 = type->impact_part;
                 params.field_98 = type->field_160;
                 params.field_9c = type->field_164;
                 params.field_a0 = type->field_168;
@@ -3624,19 +3624,19 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
             SetKillPartMom(&momentum);
             NuVecScale(&momentum, &momentum, 3.0f);
             momentum.x += object->apiobj.velocity.x * 0.75f;
-            momentum.y = 5.0f + momentum.y + object->apiobj.velocity.y * 0.75f;
             momentum.z += object->apiobj.velocity.z * 0.75f;
+            momentum.y = 5.0f + momentum.y + object->apiobj.velocity.y * 0.75f;
             ADDPART_s params = Default_ADDPART;
             params.matrix = &matrix;
             params.velocity = &momentum;
             params.field_14 = params.field_18 = 0.2f;
             params.gravity = -10.0f;
             params.special = &piece->special;
-            params.flags = mode == 0 ? 0x480 : 0x90;
             params.field_3c = PartImpact_Brick;
+            params.flags = mode == 0 ? 0x480 : 0x90;
             params.stop_fn = PartStop_Flickerer;
-            params.draw_fn = PartDraw_Flickerer;
             params.time_step = FRAMETIME;
+            params.draw_fn = PartDraw_Flickerer;
             params.lighting = Cheats_CheckFlags(1) ? reinterpret_cast<PARTLIGHTSOURCE_s *>(ZeroRTL)
                                                    : reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);
             params.field_c4 = 1;
@@ -3691,8 +3691,8 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
                     NuMtxMul(&matrix, &joint_matrices[joint], &object->apiobj.field_0xb8);
                     SetKillPartMom(&momentum);
                     NuVecScale(&momentum, &momentum, 4.0f);
-                    momentum.x += object->apiobj.velocity.x * 0.75f;
                     momentum.y = 6.0f + momentum.y + object->apiobj.velocity.y * 0.75f;
+                    momentum.x += object->apiobj.velocity.x * 0.75f;
                     momentum.z += object->apiobj.velocity.z * 0.75f;
                     params = Default_ADDPART;
                     params.field_14 = params.field_18 = 0.4f;
@@ -3703,8 +3703,8 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
                     if (animation != -1)
                         momentum.y += 1.0f;
                     if ((object->apiobj.character_data->model_flags & 0x2000) != 0) {
-                        momentum.x += object->apiobj.velocity.x * 0.75f;
                         momentum.y += object->apiobj.velocity.y * 0.75f;
+                        momentum.x += object->apiobj.velocity.x * 0.75f;
                         momentum.z += object->apiobj.velocity.z * 0.75f;
                     } else if (use_vehicle_velocity != 0) {
                         momentum.x += object->reset_velocity.x * 0.75f;

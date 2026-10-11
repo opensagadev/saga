@@ -241,10 +241,10 @@ uv1deb *GenDebIndexBounceY(debkeydatatype_s *key, debinftype *effect, float time
                 control->active = 5;
                 control->expiry_time = time + collision_time;
                 control->effect_index = key->effect_index;
-                control->rotation_y = 0;
                 control->collision_plane = key->collision_plane;
-                control->field_01e = 0;
+                control->rotation_y = 0;
                 control->restitution = key->reflection_scale;
+                control->field_01e = 0;
                 control->collision_time = collision_time;
                 control->particle_index = key->field_18a % 32;
                 AddChunkControlToStack(control, &debris_chunk_control_stack[0]);
@@ -618,9 +618,9 @@ uv1deb *GenDebIndexImprovedRadial(debkeydatatype_s *key, debinftype *effect, flo
     particle->momentum = vector;
     if (key->momentum_adjuster != NULL)
         key->momentum_adjuster(key, effect, reinterpret_cast<uv1deb *>(particle));
-    particle->position.x += key->emission_position.x;
     particle->position.y += key->emission_position.y;
     particle->position.z += key->emission_position.z;
+    particle->position.x += key->emission_position.x;
     particle->momentum.x += key->momentum.x;
     particle->momentum.y += key->momentum.y;
     particle->momentum.z += key->momentum.z;
@@ -871,8 +871,8 @@ extern "C" {
     void DebrisSetup2(VARIPTR *buffer, VARIPTR buffer_end, VARIPTR *trash_buffer, VARIPTR trash_end, char *texture_name,
                       i32 chunk_count, i32 glass_chunk_count, i32 key_count, i32 effect_count) {
         if (debris_trash_space == 0) {
-            debrischunks = chunk_count;
             debrischunksglass = glass_chunk_count;
+            debrischunks = chunk_count;
         }
         debris_setup_called = 1;
         maxdebkeys = key_count;
@@ -971,8 +971,8 @@ extern "C" {
         glass->attribs.cull_mode = 2;
         glass->attribs.z_mode = 1;
         glass->attribs.unknown_2_1_2 = 2;
-        glass->attribs.unknown_2_4 = 1;
         glass->attribs.alpha_fail = 1;
+        glass->attribs.unknown_2_4 = 1;
         glass->sort_pri = 128;
         glass->particle_type_tag = -105;
         NuMtlUpdate(glass);

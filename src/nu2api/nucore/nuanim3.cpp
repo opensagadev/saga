@@ -521,8 +521,8 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *anim, f32 frame, nuanim
                     second = negated;
                 }
                 NUQUAT result;
-                result.x = first.x * (1.0f - fraction) + second.x * fraction;
                 result.y = first.y * (1.0f - fraction) + second.y * fraction;
+                result.x = first.x * (1.0f - fraction) + second.x * fraction;
                 result.z = first.z * (1.0f - fraction) + second.z * fraction;
                 result.w = first.w * (1.0f - fraction) + second.w * fraction;
                 f32 length =
@@ -605,8 +605,8 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuani
                                     second.w);
                 curve_types += 4;
                 NUQUAT result;
-                result.x = first.x * (1.0f - fraction) + second.x * fraction;
                 result.y = first.y * (1.0f - fraction) + second.y * fraction;
+                result.x = first.x * (1.0f - fraction) + second.x * fraction;
                 result.z = first.z * (1.0f - fraction) + second.z * fraction;
                 result.w = first.w * (1.0f - fraction) + second.w * fraction;
                 f32 length =
@@ -876,8 +876,8 @@ i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3_animheader_s *anim, f32 frame, 
                 NuQuatHarmonize(&first, &second);
                 result.x = first.x * (1.0f - fraction) + second.x * fraction;
                 result.y = first.y * (1.0f - fraction) + second.y * fraction;
-                result.w = first.w * (1.0f - fraction) + second.w * fraction;
                 result.z = first.z * (1.0f - fraction) + second.z * fraction;
+                result.w = first.w * (1.0f - fraction) + second.w * fraction;
                 f32 length =
                     NuFsqrt(result.w * result.w + result.x * result.x + result.y * result.y + result.z * result.z);
                 f32 inverse_length = length == 0.0f ? 0.0f : 1.0f / length;
@@ -928,8 +928,8 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint(ani3_animheader_s *anim, f32 frame, n
             whole_key = static_cast<i32>(last_key);
             fraction = last_key - static_cast<f32>(whole_key);
         }
-        quarter = static_cast<u32>(whole_key) & 3;
         key_offset = (whole_key / 4) * anim->key_stride;
+        quarter = static_cast<u32>(whole_key) & 3;
     }
 
     const i32 key_stride = anim->key_stride;
@@ -1264,8 +1264,8 @@ i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s *anim, f32 frame,
                                           first.w, second.w);
                 curve_types += 4;
                 result.x = first.x * (1.0f - fraction) + second.x * fraction;
-                result.y = first.y * (1.0f - fraction) + second.y * fraction;
                 result.z = first.z * (1.0f - fraction) + second.z * fraction;
+                result.y = first.y * (1.0f - fraction) + second.y * fraction;
                 result.w = first.w * (1.0f - fraction) + second.w * fraction;
                 f32 length =
                     NuFsqrt(result.w * result.w + result.x * result.x + result.y * result.y + result.z * result.z);

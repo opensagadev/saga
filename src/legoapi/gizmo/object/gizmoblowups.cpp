@@ -530,8 +530,8 @@ ADDGIZMOTYPE *NewBlowup_RegisterGizmo(i32 type_id) {
     addtype.fns.early_update_fn = GizmoBlowupEarlyUpdate;
     addtype.fns.panel_draw_fn = NULL;
     addtype.fns.get_max_gizmos_fn = Blowup_GetMaxGizmos;
-    addtype.fns.get_pos_fn = GizmoBlowup_GetPos;
     addtype.fns.get_visibility_fn = Blowup_GetVisibility;
+    addtype.fns.get_pos_fn = GizmoBlowup_GetPos;
     addtype.fns.using_special_fn = NULL;
     addtype.fns.add_gizmos_fn = Blowup_AddGizmos;
     addtype.fns.bolt_hit_plat_fn = NULL;
@@ -782,8 +782,8 @@ void GizmoBlowUp_AddEffects(nuvec_s *position, GIZMOBLOWUP_s *blowup, i32 offset
                 part.gravity = type->field_0x94;
                 part.flags |= 0x80;
                 part.stop_fn = PartStop_Flickerer;
-                part.draw_fn = PartDraw_Flickerer;
                 part.time_step = FRAMETIME;
+                part.draw_fn = PartDraw_Flickerer;
                 part.field_c4 = 1;
                 AddPart(&part);
             }
@@ -885,8 +885,8 @@ i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 dama
             NuSpecialSetVisibility(&type->animated_special, 0);
         }
         blowup->output_flags |= 1;
-        blowup->visibility_flags &= 0x3f;
         blowup->field_0x9f &= ~1;
+        blowup->visibility_flags &= 0x3f;
         blowup->state_flags &= 0x73;
         blowup->animation_time = 1.0f;
         if (object != NULL) {
@@ -1161,8 +1161,8 @@ i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *blowup) {
 }
 
 i32 SetGizmoBlowUpTarget(GameObject_s *object, GIZMOBLOWUP_s *blowup) {
-    object->attack_target_velocity = v000;
     object->attack_target_position = blowup->mid_position;
+    object->attack_target_velocity = v000;
     object->attack_blowup_target = VehicleArea != 0 ? NULL : blowup;
     object->field_0xe21 |= 8;
     return 1;
@@ -1757,8 +1757,8 @@ void GizmoBlowupsFinalSetup(WORLDINFO_s *world) {
         }
 
         if (NuSpecialExistsFn(special) == 0) {
-            blowup->bounds_min = v000;
             blowup->bounds_max = v000;
+            blowup->bounds_min = v000;
         } else {
             if (NuSpecialExistsFn(&blowup->type->burst_special) != 0) {
                 NuSpecialSetVisibility(&blowup->type->burst_special, 0);

@@ -146,9 +146,9 @@ void SuperCarry_GetObjectPos(GameObject_s *object, NUVEC *position, NUVEC *secon
         if (second != -1 && object->apiobj.character_model->points_of_interest[second] != NULL) {
             *position = *NUMTX_GET_ROW_VEC(&object->joint_matrices[first], 3);
             NUVEC *other = NUMTX_GET_ROW_VEC(&object->joint_matrices[second], 3);
-            position->y += (other->y - position->y) * 0.5f;
             position->z += (other->z - position->z) * 0.5f;
             position->x += (other->x - position->x) * 0.5f;
+            position->y += (other->y - position->y) * 0.5f;
         }
     }
     if (SuperCarry_AlignObject != 0) {

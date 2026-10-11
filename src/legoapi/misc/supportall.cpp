@@ -1080,8 +1080,8 @@ void NuHtmlGraphArray(char **strings) {
 }
 
 void AddChunkToRenderStack(particlechunkrendertype_s *chunk, particlechunkrendertype_s **stack) {
-    chunk->previous = NULL;
     chunk->next = NULL;
+    chunk->previous = NULL;
 
     particlechunkrendertype_s *current = *stack;
     if (current != NULL) {
@@ -1604,8 +1604,8 @@ void xxxNuDisplayListUpdateSpecial(nuhspecial_s *special) {
 
     if ((scene->render_buffer & NUDL_SCENE_RENDER_FLAG_CENTER_EXTENT_BOUNDS) != 0) {
         NUVEC extent;
-        extent.x = (maximum.x - minimum.x) * 0.5f;
         extent.y = (maximum.y - minimum.y) * 0.5f;
+        extent.x = (maximum.x - minimum.x) * 0.5f;
         extent.z = (maximum.z - minimum.z) * 0.5f;
         const f32 radius = NuFsqrt(extent.x + extent.y + extent.z);
         NUCLIPBOUNDS *bounds = &scene->clip_bounds[display->instance_ix];

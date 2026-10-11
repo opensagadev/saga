@@ -1032,9 +1032,9 @@ void DrawPanel() {
                                 f32 y = PowerUp_GetPanelY(0);
                                 DrawPanel3DObject(-ICONX, y + status_y, 1.0f, scale, scale, scale, 0, angle, 0, special,
                                                   0, 1.0f);
-                                special = &WORLD->lev_objs[0xd1].special;
                                 angle = PowerUp_PanelYRot[0];
                                 scale = POWERUPOBJSIZE;
+                                special = &WORLD->lev_objs[0xd1].special;
                                 y = PowerUp_GetPanelY(0);
                                 DrawPanel3DObject(-ICONX, y + status_y, 1.0f, scale, scale, scale, 0, angle, 0, special,
                                                   0, 1.0f);

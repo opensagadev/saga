@@ -509,8 +509,8 @@ i32 NuSound3PlayStereoV(NUSOUNDPLAYTOK token, ...) {
         if (streaming_sample != NULL && streaming_sample->GetResourceCount() == 0) {
             NuSoundStream *node = new NuSoundStream();
 
-            node->ps2volume = volume_bits;
             node->field_0xc = (u8)(voice_loop != 0);
+            node->ps2volume = volume_bits;
             node->pending_start = start_voice;
             node->field_0xd = 0;
             g_NuSoundStreams[stream_index] = node;
@@ -605,8 +605,8 @@ void NuSound3CreateVoice(nuvec_s *pos, i32 index, f32 falloff_a, f32 falloff_b, 
         voice->source = source;
         voice->pitch = pitch;
         voice->volume = volume_left;
-        voice->falloff_a = falloff_a;
         voice->falloff_b = falloff_b;
+        voice->falloff_a = falloff_a;
         voice->source_position = pos;
         voice->loop = loop;
         if (pos != NULL) {
@@ -769,8 +769,8 @@ void NuSound3Update(void) {
                     ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->SetAutoDelete(false);
                     ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->SetVolume(PS2VolumeToScalar(stream->ps2volume));
                     ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->Play();
-                    stream->pending_start = 0;
                     stream->field_0xd = 1;
+                    stream->pending_start = 0;
                 }
             }
         } else if (NuSound3Stream::mVoice.obj != NULL) {

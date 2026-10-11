@@ -2013,83 +2013,6 @@ void edanimDrawCursor() {
     NuQFntPopCoordinateSystem();
 }
 
-i32 edgraClumpCreate(NUVEC *position) {
-    if (edgra_clumps_used == EDGRA_MAX_CLUMPS)
-        return -1;
-    if (edgra_copy_source == -1 && edgra_mode == 3) {
-        if (edgra_units_used == 0x3000 || edgra_ind_clumps_used == EDGRA_MAX_INDIVIDUAL_CLUMPS)
-            return -1;
-    } else if (edgra_units_used + edgra_clump_size > 0x3000)
-        return -1;
-    i32 index = 0;
-    while (GrassClumps[index].element_count != 0)
-        ++index;
-    edgra_clump_s *clump = &GrassClumps[index];
-    if (edgra_copy_source != -1) {
-        clump->field_18 = GrassClumps[edgra_copy_source].field_18;
-        clump->special_index = GrassClumps[edgra_copy_source].special_index;
-        clump->field_20 = GrassClumps[edgra_copy_source].field_20;
-        clump->element_count = edgra_clump_size;
-        clump->flags = GrassClumps[edgra_copy_source].flags;
-        clump->page = edgra_pageid;
-        clump->seed = NuRand(NULL);
-        GrassClumps[index].unknown_25 = GrassClumps[edgra_copy_source].unknown_25;
-        GrassClumps[index].field_2c = GrassClumps[edgra_copy_source].field_2c;
-        GrassClumps[index].unknown_26 = GrassClumps[edgra_copy_source].unknown_26;
-        GrassClumps[index].field_30 = GrassClumps[edgra_copy_source].field_30;
-        GrassClumps[index].kind = GrassClumps[edgra_copy_source].kind;
-        GrassClumps[index].near_distance = GrassClumps[edgra_copy_source].near_distance;
-        GrassClumps[index].field_42 = GrassClumps[edgra_copy_source].field_42;
-        GrassClumps[index].far_distance = GrassClumps[edgra_copy_source].far_distance;
-        GrassClumps[index].field_44 = GrassClumps[edgra_copy_source].field_44;
-        GrassClumps[index].field_43 = GrassClumps[edgra_copy_source].field_43;
-    } else {
-        clump->special_index = edgra_instance_type;
-        clump->element_count = edgra_mode == 3 ? 1 : edgra_clump_size;
-        clump->field_18 = 0.2f;
-        clump->field_20 = 1.0f;
-        clump->flags = 1;
-        clump->page = edgra_pageid;
-        clump->seed = NuRand(NULL);
-        GrassClumps[index].unknown_25 = 1;
-        GrassClumps[index].unknown_26 = 1;
-        GrassClumps[index].field_2c = 0.0f;
-        GrassClumps[index].field_30 = 1.0f;
-        GrassClumps[index].kind = edgra_mode;
-        GrassClumps[index].near_distance = edgra_global_fadein;
-        GrassClumps[index].far_distance = edgra_global_fadeout;
-        GrassClumps[index].field_42 = 1;
-        GrassClumps[index].field_44 = 0.0f;
-        GrassClumps[index].field_43 = 1;
-    }
-    if (GrassClumps[index].kind == 3) {
-        i32 individual = 0;
-        while (IndGrassClumpsUsed[individual])
-            ++individual;
-        GrassClumps[index].individual_index = individual;
-        IndGrassClumpsUsed[individual] = 1;
-        GetIndGrassClump(individual, 0)->position.x = 0.0f;
-        GetIndGrassClump(individual, 0)->position.y = 0.0f;
-        GetIndGrassClump(individual, 0)->position.z = 0.0f;
-        GetIndGrassClump(individual, 0)->field_0c = 1.0f;
-        GetIndGrassClump(individual, 0)->field_10 = edgra_rotz;
-        GetIndGrassClump(individual, 0)->field_12 = edgra_roty;
-        ++edgra_ind_clumps_used;
-    } else
-        GrassClumps[index].individual_index = -1;
-    ++edgra_clumps_used;
-    if (!edgra_page_used[edgra_pageid]) {
-        edgra_page_used[edgra_pageid] = 1;
-        edgra_page_scene[edgra_pageid] = edbits_base_scene;
-        edgra_page_terrain[edgra_pageid] = edbits_base_terrain;
-        edgra_page_matrix_stack[edgra_pageid] = edgra_mtxbuffer;
-    }
-    GrassClumps[index].vector_buffer = edgra_free_vecbuffer;
-    edgra_last_clump_in_buffer = index;
-    edgraClumpPlace(index, position);
-    return index;
-}
-
 void edpartDrawCursor() {
     extern i32 edpart_copy_mode, edpart_copyrotz, edpart_copyroty, edpart_rotz, edpart_roty;
     extern i32 edpart_emitrotz, edpart_emitroty, edpart_emitrotx, edpart_refrotz, edpart_refroty;
@@ -2324,6 +2247,83 @@ void edpartDrawCursor() {
     NuQFntPopCoordinateSystem();
 }
 
+i32 edgraClumpCreate(NUVEC *position) {
+    if (edgra_clumps_used == EDGRA_MAX_CLUMPS)
+        return -1;
+    if (edgra_copy_source == -1 && edgra_mode == 3) {
+        if (edgra_units_used == 0x3000 || edgra_ind_clumps_used == EDGRA_MAX_INDIVIDUAL_CLUMPS)
+            return -1;
+    } else if (edgra_units_used + edgra_clump_size > 0x3000)
+        return -1;
+    i32 index = 0;
+    while (GrassClumps[index].element_count != 0)
+        ++index;
+    edgra_clump_s *clump = &GrassClumps[index];
+    if (edgra_copy_source != -1) {
+        clump->field_18 = GrassClumps[edgra_copy_source].field_18;
+        clump->special_index = GrassClumps[edgra_copy_source].special_index;
+        clump->field_20 = GrassClumps[edgra_copy_source].field_20;
+        clump->element_count = edgra_clump_size;
+        clump->flags = GrassClumps[edgra_copy_source].flags;
+        clump->page = edgra_pageid;
+        clump->seed = NuRand(NULL);
+        GrassClumps[index].unknown_25 = GrassClumps[edgra_copy_source].unknown_25;
+        GrassClumps[index].field_2c = GrassClumps[edgra_copy_source].field_2c;
+        GrassClumps[index].unknown_26 = GrassClumps[edgra_copy_source].unknown_26;
+        GrassClumps[index].field_30 = GrassClumps[edgra_copy_source].field_30;
+        GrassClumps[index].kind = GrassClumps[edgra_copy_source].kind;
+        GrassClumps[index].near_distance = GrassClumps[edgra_copy_source].near_distance;
+        GrassClumps[index].field_42 = GrassClumps[edgra_copy_source].field_42;
+        GrassClumps[index].far_distance = GrassClumps[edgra_copy_source].far_distance;
+        GrassClumps[index].field_44 = GrassClumps[edgra_copy_source].field_44;
+        GrassClumps[index].field_43 = GrassClumps[edgra_copy_source].field_43;
+    } else {
+        clump->special_index = edgra_instance_type;
+        clump->element_count = edgra_mode == 3 ? 1 : edgra_clump_size;
+        clump->field_18 = 0.2f;
+        clump->field_20 = 1.0f;
+        clump->flags = 1;
+        clump->page = edgra_pageid;
+        clump->seed = NuRand(NULL);
+        GrassClumps[index].unknown_25 = 1;
+        GrassClumps[index].unknown_26 = 1;
+        GrassClumps[index].field_2c = 0.0f;
+        GrassClumps[index].field_30 = 1.0f;
+        GrassClumps[index].kind = edgra_mode;
+        GrassClumps[index].near_distance = edgra_global_fadein;
+        GrassClumps[index].far_distance = edgra_global_fadeout;
+        GrassClumps[index].field_42 = 1;
+        GrassClumps[index].field_44 = 0.0f;
+        GrassClumps[index].field_43 = 1;
+    }
+    if (GrassClumps[index].kind == 3) {
+        i32 individual = 0;
+        while (IndGrassClumpsUsed[individual])
+            ++individual;
+        GrassClumps[index].individual_index = individual;
+        IndGrassClumpsUsed[individual] = 1;
+        GetIndGrassClump(individual, 0)->position.x = 0.0f;
+        GetIndGrassClump(individual, 0)->position.y = 0.0f;
+        GetIndGrassClump(individual, 0)->position.z = 0.0f;
+        GetIndGrassClump(individual, 0)->field_0c = 1.0f;
+        GetIndGrassClump(individual, 0)->field_10 = edgra_rotz;
+        GetIndGrassClump(individual, 0)->field_12 = edgra_roty;
+        ++edgra_ind_clumps_used;
+    } else
+        GrassClumps[index].individual_index = -1;
+    ++edgra_clumps_used;
+    if (!edgra_page_used[edgra_pageid]) {
+        edgra_page_used[edgra_pageid] = 1;
+        edgra_page_scene[edgra_pageid] = edbits_base_scene;
+        edgra_page_terrain[edgra_pageid] = edbits_base_terrain;
+        edgra_page_matrix_stack[edgra_pageid] = edgra_mtxbuffer;
+    }
+    GrassClumps[index].vector_buffer = edgra_free_vecbuffer;
+    edgra_last_clump_in_buffer = index;
+    edgraClumpPlace(index, position);
+    return index;
+}
+
 template <i32 Axis> static inline void EdDrawCircle(VuVec const &centre, float radius, i32 colour, i32 segments) {
     VuVec base(0.0f, Axis == 2 ? radius : 0.0f, Axis == 2 ? 0.0f : radius, 0.0f);
     VuVec point(base.x + centre.x, base.y + centre.y, base.z + centre.z, 0.0f);
@@ -2349,12 +2349,12 @@ void EdDrawLineCircleX(VuVec const &centre, float radius, i32 colour, i32 segmen
     EdDrawCircle<0>(centre, radius, colour, segments);
 }
 
-void EdDrawLineCircleY(VuVec const &centre, float radius, i32 colour, i32 segments) {
-    EdDrawCircle<1>(centre, radius, colour, segments);
-}
-
 void EdDrawLineCircleZ(VuVec const &centre, float radius, i32 colour, i32 segments) {
     EdDrawCircle<2>(centre, radius, colour, segments);
+}
+
+void EdDrawLineCircleY(VuVec const &centre, float radius, i32 colour, i32 segments) {
+    EdDrawCircle<1>(centre, radius, colour, segments);
 }
 
 void EdDrawLineSegment(VuVec const &a, VuVec const &b, i32 colour) {
@@ -2971,31 +2971,6 @@ i32 edSpline_FindAllBeg(NUGSCN *scene, char *prefix, NUGSPLINE **results, i32 ca
     return count;
 }
 
-i32 edSpline_FindAllSub(NUGSCN *scene, char *name, NUGSPLINE **results, i32 capacity) {
-    i32 count = 0;
-    if (capacity <= 0)
-        return 0;
-    if (splineStore != NULL) {
-        for (i32 i = 0; i < numSplinesLoaded; ++i) {
-            if (NuStrIStr(splineStore[i].name, name) != NULL) {
-                results[count++] = &splineStore[i];
-                if (count >= capacity)
-                    return count;
-            }
-        }
-    }
-    if (scene != NULL) {
-        for (i32 i = 0; i < scene->numsplines; ++i) {
-            if (NuStrIStr(scene->splines[i].name, name) != NULL) {
-                results[count++] = &scene->splines[i];
-                if (count >= capacity)
-                    return count;
-            }
-        }
-    }
-    return count;
-}
-
 i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end) {
     splineStore = reinterpret_cast<NUGSPLINE *>(buf->void_ptr);
     buf->addr = (buf->addr + 3) & ~static_cast<usize>(3);
@@ -3084,6 +3059,31 @@ NUGSPLINE *edSpline_SplineFind(NUGSCN *scene, char *name) {
         }
     }
     return NuSplineFind(scene, name);
+}
+
+i32 edSpline_FindAllSub(NUGSCN *scene, char *name, NUGSPLINE **results, i32 capacity) {
+    i32 count = 0;
+    if (capacity <= 0)
+        return 0;
+    if (splineStore != NULL) {
+        for (i32 i = 0; i < numSplinesLoaded; ++i) {
+            if (NuStrIStr(splineStore[i].name, name) != NULL) {
+                results[count++] = &splineStore[i];
+                if (count >= capacity)
+                    return count;
+            }
+        }
+    }
+    if (scene != NULL) {
+        for (i32 i = 0; i < scene->numsplines; ++i) {
+            if (NuStrIStr(scene->splines[i].name, name) != NULL) {
+                results[count++] = &scene->splines[i];
+                if (count >= capacity)
+                    return count;
+            }
+        }
+    }
+    return count;
 }
 
 void edSpline_SplineList(nugscn_s *) {
@@ -3573,6 +3573,33 @@ eduiitem_s *eduiItemFileSelectorCreate(u32 data, eduiiattr_s *colours, EdUiItemC
     return item;
 }
 
+void edanimRenderParticleEmitters(i32 parameter_index) {
+    auto &param = AnimParams[parameter_index];
+    nuhspecial_s special;
+    NuGScnGetSpecial(&special, edbits_base_scene, param.instance_id);
+    const NUVEC *base_position = NuSpecialGetPos(&special);
+    for (i32 particle = 0; particle < param.effect_count; ++particle) {
+        const i32 effect_id = param.effect_ids[particle];
+        if (effect_id == -1) {
+            continue;
+        }
+        const auto &offset = param.effect_positions[particle];
+        const f32 x = base_position->x + offset[0];
+        const f32 y = base_position->y + offset[1];
+        const f32 z = base_position->z + offset[2];
+        i32 colour = 0xffffffff;
+        if (edanim_particle_mode && edanim_nearest_particle == particle) {
+            const debinftype *definition = debtab[effect_id];
+            if (definition->generator_type == 0) {
+                edbitsDrawCube(x, y, z, definition->field_058, definition->field_05c, definition->field_060,
+                               edanim_emitrotz, edanim_emitroty, 0, 0, 0, 0xff008000, edanim_mtl);
+            }
+            colour = 0xff00ff00;
+        }
+        edbitsDrawDiagonalCross(x, y, z, 0.25f, colour, edanim_mtl);
+    }
+}
+
 void edanimDetermineNearestSound(float distance) {
     if (edanim_nearest == -1 || edanim_nearest_param_id == -1) {
         edanim_nearest_sound = -1;
@@ -3601,33 +3628,6 @@ void edanimDetermineNearestSound(float distance) {
             distance = candidate;
             edanim_nearest_sound = sound;
         }
-    }
-}
-
-void edanimRenderParticleEmitters(i32 parameter_index) {
-    auto &param = AnimParams[parameter_index];
-    nuhspecial_s special;
-    NuGScnGetSpecial(&special, edbits_base_scene, param.instance_id);
-    const NUVEC *base_position = NuSpecialGetPos(&special);
-    for (i32 particle = 0; particle < param.effect_count; ++particle) {
-        const i32 effect_id = param.effect_ids[particle];
-        if (effect_id == -1) {
-            continue;
-        }
-        const auto &offset = param.effect_positions[particle];
-        const f32 x = base_position->x + offset[0];
-        const f32 y = base_position->y + offset[1];
-        const f32 z = base_position->z + offset[2];
-        i32 colour = 0xffffffff;
-        if (edanim_particle_mode && edanim_nearest_particle == particle) {
-            const debinftype *definition = debtab[effect_id];
-            if (definition->generator_type == 0) {
-                edbitsDrawCube(x, y, z, definition->field_058, definition->field_05c, definition->field_060,
-                               edanim_emitrotz, edanim_emitroty, 0, 0, 0, 0xff008000, edanim_mtl);
-            }
-            colour = 0xff00ff00;
-        }
-        edbitsDrawDiagonalCross(x, y, z, 0.25f, colour, edanim_mtl);
     }
 }
 
@@ -4071,17 +4071,17 @@ void EdRegistry::NotifyCreateObject(void *object, EdClass *object_class, void *s
     }
 }
 
-void EdRegistry::NotifyDefunctObject(void *object, EdClass *object_class, i32 flags) {
-    for (i32 i = 0; i < notifier_count; ++i) {
-        EdObjectNotifier *notifier = notifiers[i];
-        notifier->NotifyDefunctObject(object, object_class, flags);
-    }
-}
-
 void EdRegistry::NotifyDestroyObject(void *object, EdClass *object_class, i32 index, i32 flags) {
     for (i32 i = 0; i < notifier_count; ++i) {
         EdObjectNotifier *notifier = notifiers[i];
         notifier->NotifyDestroyObject(object, object_class, index, flags);
+    }
+}
+
+void EdRegistry::NotifyDefunctObject(void *object, EdClass *object_class, i32 flags) {
+    for (i32 i = 0; i < notifier_count; ++i) {
+        EdObjectNotifier *notifier = notifiers[i];
+        notifier->NotifyDefunctObject(object, object_class, flags);
     }
 }
 
@@ -4951,124 +4951,6 @@ void EdManipulator::Render(ClassObjectList &selected) {
     }
 }
 
-// The original realigns the stack for its local locator vectors.
-__attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputContext &input, VuVec &origin,
-                                                                       VuVec &first_axis, VuVec &second_axis,
-                                                                       VuMtx *matrix) {
-    VuVec locators[8];
-    first_axis.x = 0.0f;
-    first_axis.y = 0.0f;
-    first_axis.z = 0.0f;
-    first_axis.w = 1.0f;
-    second_axis.x = 0.0f;
-    second_axis.y = 0.0f;
-    second_axis.z = 0.0f;
-    second_axis.w = 1.0f;
-    GetAxisLocators(origin, locators, matrix);
-
-    VuVec *ray_origin = reinterpret_cast<VuVec *>(input.reserved_00 + 0x20);
-    VuVec *ray_direction = reinterpret_cast<VuVec *>(input.reserved_00 + 0x30);
-    i32 nearest = 0;
-    f32 nearest_distance = __FLT_MAX__;
-#define CHECK_AXIS(index, radius)                                                                                      \
-    {                                                                                                                  \
-        f32 distance = LineToPointDistance(*ray_origin, *ray_direction, locators[index], NULL);                        \
-        if (distance < (radius) * Scale && distance < nearest_distance) {                                              \
-            nearest_distance = distance;                                                                               \
-            nearest = index;                                                                                           \
-        }                                                                                                              \
-    }
-    CHECK_AXIS(1, 0.25f);
-    CHECK_AXIS(2, 0.25f);
-    CHECK_AXIS(3, 0.25f);
-    CHECK_AXIS(4, 0.1f);
-    CHECK_AXIS(5, 0.1f);
-    CHECK_AXIS(6, 0.1f);
-    CHECK_AXIS(7, 0.1f);
-#undef CHECK_AXIS
-
-    i32 *selected_axis = reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x0c);
-
-    switch (nearest) {
-        case 1:
-            first_axis = VuVec(1.0f, 0.0f, 0.0f, 1.0f);
-            break;
-        case 2:
-            first_axis = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
-            break;
-        case 3:
-            first_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
-            break;
-        case 4:
-            first_axis = VuVec(1.0f, 0.0f, 0.0f, 1.0f);
-            second_axis = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
-            break;
-        case 5:
-            first_axis = VuVec(1.0f, 0.0f, 0.0f, 1.0f);
-            second_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
-            break;
-        case 6:
-            first_axis = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
-            second_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
-            break;
-        case 7:
-            first_axis = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
-            second_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
-            break;
-        default:
-            break;
-    }
-    if (matrix != NULL) {
-        const NUMTX &transform = matrix->matrix;
-        f32 first_x = first_axis.x;
-        f32 first_y = first_axis.y;
-        f32 first_z = first_axis.z;
-        first_axis.y = first_x * transform.m01 + first_y * transform.m11 + first_z * transform.m21;
-        first_axis.z = first_x * transform.m02 + first_y * transform.m12 + first_z * transform.m22;
-        first_axis.x = first_x * transform.m00 + first_y * transform.m10 + first_z * transform.m20;
-
-        f32 second_x = second_axis.x;
-        f32 second_y = second_axis.y;
-        f32 second_z = second_axis.z;
-        second_axis.y = second_x * transform.m01 + second_y * transform.m11 + second_z * transform.m21;
-        second_axis.z = second_x * transform.m02 + second_y * transform.m12 + second_z * transform.m22;
-        second_axis.x = second_x * transform.m00 + second_y * transform.m10 + second_z * transform.m20;
-
-        NuVecNorm(reinterpret_cast<NUVEC *>(&first_axis), reinterpret_cast<NUVEC *>(&first_axis));
-        NuVecNorm(reinterpret_cast<NUVEC *>(&second_axis), reinterpret_cast<NUVEC *>(&second_axis));
-    }
-    if (input.GetPress(3) != 0.0f) {
-        *selected_axis = nearest;
-        VuVec *selected_first = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10);
-        VuVec *selected_second = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20);
-        selected_first->x = first_axis.x;
-        selected_first->y = first_axis.y;
-        selected_first->z = first_axis.z;
-        selected_first->w = first_axis.w;
-        selected_second->x = second_axis.x;
-        selected_second->y = second_axis.y;
-        selected_second->z = second_axis.z;
-        selected_second->w = second_axis.w;
-    } else if (input.GetHold(3) != 0.0f) {
-        nearest = *selected_axis;
-        const VuVec *selected_first = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10);
-        const VuVec *selected_second = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20);
-        first_axis.x = selected_first->x;
-        first_axis.y = selected_first->y;
-        first_axis.z = selected_first->z;
-        first_axis.w = selected_first->w;
-        second_axis.x = selected_second->x;
-        second_axis.y = selected_second->y;
-        second_axis.z = selected_second->z;
-        second_axis.w = selected_second->w;
-    } else {
-        *selected_axis = 0;
-        *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10) = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
-        *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20) = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
-    }
-    return nearest;
-}
-
 i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &plane) {
     f32 scale = Scale;
     i32 *selected_axis = reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x0c);
@@ -5186,6 +5068,124 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
         delta -= 0x10000;
     *angle_delta = delta;
     return axis;
+}
+
+// The original realigns the stack for its local locator vectors.
+__attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputContext &input, VuVec &origin,
+                                                                       VuVec &first_axis, VuVec &second_axis,
+                                                                       VuMtx *matrix) {
+    VuVec locators[8];
+    first_axis.x = 0.0f;
+    first_axis.y = 0.0f;
+    first_axis.z = 0.0f;
+    first_axis.w = 1.0f;
+    second_axis.x = 0.0f;
+    second_axis.y = 0.0f;
+    second_axis.z = 0.0f;
+    second_axis.w = 1.0f;
+    GetAxisLocators(origin, locators, matrix);
+
+    VuVec *ray_origin = reinterpret_cast<VuVec *>(input.reserved_00 + 0x20);
+    VuVec *ray_direction = reinterpret_cast<VuVec *>(input.reserved_00 + 0x30);
+    i32 nearest = 0;
+    f32 nearest_distance = __FLT_MAX__;
+#define CHECK_AXIS(index, radius)                                                                                      \
+    {                                                                                                                  \
+        f32 distance = LineToPointDistance(*ray_origin, *ray_direction, locators[index], NULL);                        \
+        if (distance < (radius) * Scale && distance < nearest_distance) {                                              \
+            nearest_distance = distance;                                                                               \
+            nearest = index;                                                                                           \
+        }                                                                                                              \
+    }
+    CHECK_AXIS(1, 0.25f);
+    CHECK_AXIS(2, 0.25f);
+    CHECK_AXIS(3, 0.25f);
+    CHECK_AXIS(4, 0.1f);
+    CHECK_AXIS(5, 0.1f);
+    CHECK_AXIS(6, 0.1f);
+    CHECK_AXIS(7, 0.1f);
+#undef CHECK_AXIS
+
+    i32 *selected_axis = reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x0c);
+
+    switch (nearest) {
+        case 1:
+            first_axis = VuVec(1.0f, 0.0f, 0.0f, 1.0f);
+            break;
+        case 2:
+            first_axis = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
+            break;
+        case 3:
+            first_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
+            break;
+        case 4:
+            first_axis = VuVec(1.0f, 0.0f, 0.0f, 1.0f);
+            second_axis = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
+            break;
+        case 5:
+            first_axis = VuVec(1.0f, 0.0f, 0.0f, 1.0f);
+            second_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
+            break;
+        case 6:
+            first_axis = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
+            second_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
+            break;
+        case 7:
+            first_axis = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
+            second_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
+            break;
+        default:
+            break;
+    }
+    if (matrix != NULL) {
+        const NUMTX &transform = matrix->matrix;
+        f32 first_x = first_axis.x;
+        f32 first_y = first_axis.y;
+        f32 first_z = first_axis.z;
+        first_axis.y = first_x * transform.m01 + first_y * transform.m11 + first_z * transform.m21;
+        first_axis.z = first_x * transform.m02 + first_y * transform.m12 + first_z * transform.m22;
+        first_axis.x = first_x * transform.m00 + first_y * transform.m10 + first_z * transform.m20;
+
+        f32 second_x = second_axis.x;
+        f32 second_y = second_axis.y;
+        f32 second_z = second_axis.z;
+        second_axis.y = second_x * transform.m01 + second_y * transform.m11 + second_z * transform.m21;
+        second_axis.z = second_x * transform.m02 + second_y * transform.m12 + second_z * transform.m22;
+        second_axis.x = second_x * transform.m00 + second_y * transform.m10 + second_z * transform.m20;
+
+        NuVecNorm(reinterpret_cast<NUVEC *>(&first_axis), reinterpret_cast<NUVEC *>(&first_axis));
+        NuVecNorm(reinterpret_cast<NUVEC *>(&second_axis), reinterpret_cast<NUVEC *>(&second_axis));
+    }
+    if (input.GetPress(3) != 0.0f) {
+        *selected_axis = nearest;
+        VuVec *selected_first = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10);
+        VuVec *selected_second = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20);
+        selected_first->x = first_axis.x;
+        selected_first->y = first_axis.y;
+        selected_first->z = first_axis.z;
+        selected_first->w = first_axis.w;
+        selected_second->x = second_axis.x;
+        selected_second->y = second_axis.y;
+        selected_second->z = second_axis.z;
+        selected_second->w = second_axis.w;
+    } else if (input.GetHold(3) != 0.0f) {
+        nearest = *selected_axis;
+        const VuVec *selected_first = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10);
+        const VuVec *selected_second = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20);
+        first_axis.x = selected_first->x;
+        first_axis.y = selected_first->y;
+        first_axis.z = selected_first->z;
+        first_axis.w = selected_first->w;
+        second_axis.x = selected_second->x;
+        second_axis.y = selected_second->y;
+        second_axis.z = selected_second->z;
+        second_axis.w = selected_second->w;
+    } else {
+        *selected_axis = 0;
+        *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10) = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
+        *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20) = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
+    }
+    return nearest;
 }
 
 void EdInputContext::Clear(i32 input) {

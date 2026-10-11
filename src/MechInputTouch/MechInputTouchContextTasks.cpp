@@ -132,8 +132,8 @@ bool MechTouchTaskGoTo::Update() {
             } else if (!(field_44 < 0.000001f) && !(field_40 < 0.1f)) {
                 if (field_4c == 0 || !(field_40 > s_mechTouchMoveToWalkAlwaysDist)) {
                     direction.x *= s_mechTouchMoveToWalkSpeed;
-                    direction.y *= s_mechTouchMoveToWalkSpeed;
                     direction.z *= s_mechTouchMoveToWalkSpeed;
+                    direction.y *= s_mechTouchMoveToWalkSpeed;
                 }
                 movement_x = direction.x;
                 movement_y = -direction.y;
@@ -212,8 +212,8 @@ MechTouchTaskJump::MechTouchTaskJump(MechInputTouchGestureBasedController &owner
                                      bool disable_auto, bool direct_velocity)
     : MechTouchTask(owner), velocity(packet.velocity), stick(), start(), end() {
     frames = 0;
-    started = false;
     landed = false;
+    started = false;
     descending = false;
     disable_autopilot = disable_auto;
     use_velocity = direct_velocity;
@@ -364,8 +364,8 @@ bool MechTouchTaskPanel::Update() {
     if (player->character_context != 0x0b) {
         VuVec position;
         target.Get()->GetPos(position, -1);
-        position.x -= player->apiobj.position.x;
         position.y -= player->apiobj.position.y;
+        position.x -= player->apiobj.position.x;
         position.z -= player->apiobj.position.z;
         const f32 distance_squared = position.x * position.x + position.y * position.y + position.z * position.z;
         if (distance_squared < 1.4f * 1.4f) {
@@ -418,8 +418,8 @@ bool MechTouchTaskAttack::Update() {
         VuVec delta;
         opponent->GetPos(delta, -1);
         delta.y -= origin_y;
-        delta.x -= origin_x;
         delta.z -= origin_z;
+        delta.x -= origin_x;
         const f32 distance_squared = delta.x * delta.x + delta.z * delta.z;
         const f32 radius = opponent->GetRadius();
         bool nearby = false;
@@ -691,8 +691,8 @@ void MechTouchTaskPlannedGoTo::AnalysePath() {
     position.z = start_position.z;
     position.w = start_position.w;
     for (; path_index <= end;) {
-        position.x += step_x;
         position.z += step_z;
+        position.x += step_x;
         const f32 ground_height = GameShadow(player, &position.xyz, 0.0f, -1);
         if (ground_height > position.y) {
             break;
@@ -1151,8 +1151,8 @@ void MechTouchTaskPlannedDoubleClickGoTo::OnResume() {
     const f32 previous_target_x = player->target_velocity.x;
     GameObject_s *angle_player = player;
     const i32 angle = NuAtan2D(velocity_x, velocity_z);
-    angle_player->apiobj.movement_facing_angle = angle;
     angle_player->apiobj.facing_angle = angle;
+    angle_player->apiobj.movement_facing_angle = angle;
     player->apiobj.velocity.x = velocity_x;
     player->apiobj.velocity.y = velocity_y;
     player->apiobj.velocity.z = velocity_z;

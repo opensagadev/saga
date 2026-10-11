@@ -327,10 +327,10 @@ void Grabber_Update(WORLDINFO_s *world) {
                     v->character_context = 47;
                     v->context_animation = v->apiobj.character_model->model_data_b[104] ? 104 : 5;
                     NewRumbleAllPlayers(0, 0.1f, 0, 0);
-                    v->context_animation_timer = 0;
                     v->airborne_action_duration = 0.75f;
-                    v->field_0x7a3 = 0;
+                    v->context_animation_timer = 0;
                     v->external_force = v->apiobj.start_position;
+                    v->field_0x7a3 = 0;
                     Hint_SetComplete(651);
                     g->stuck_timer = 0;
                     g->state = 2;
@@ -652,10 +652,10 @@ void Grabber_Draw(WORLDINFO_s *world) {
                 reflection.m20 = 0;
                 reflection.m21 = zero_c - sz;
                 reflection.m22 = cz + zero_s;
-                reflection.m23 = 0;
                 reflection.m30 = 0;
-                reflection.m31 = zero_c - zero_s;
+                reflection.m23 = 0;
                 reflection.m32 = zero_c + zero_s;
+                reflection.m31 = zero_c - zero_s;
                 reflection.m33 = 1;
                 NuMtxTranslate(&reflection, &position);
                 NuSpecialDrawAt(&g->shadow_special, &reflection);
@@ -690,8 +690,8 @@ void Grabber_Draw(WORLDINFO_s *world) {
         memcpy(&matrix, &g->carried_matrix, sizeof(matrix));
         matrix.m30 = grab_position->x;
         matrix.m31 = grab_position->y;
-        matrix.m32 = grab_position->z;
         matrix.m31 += g->carried_height_offset;
+        matrix.m32 = grab_position->z;
         NuSpecialDrawAt(&g->carried_blowup->type->special, &matrix);
         if ((u8)Reflections_On && g->floor_height != 2000000.0f &&
             MatrixReflection(&matrix, 2, g->floor_height, WORLD->current_level->unknown_0cc, &reflection))

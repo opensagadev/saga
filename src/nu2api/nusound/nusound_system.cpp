@@ -154,8 +154,8 @@ void NuSoundInitDefaultRoutingTables(void) {
 }
 
 NuSoundSystem::NuSoundSystem() {
-    field_0xf8 = 0;
     samples = NULL;
+    field_0xf8 = 0;
     sample_count = 0x100;
     initialised = true;
     s_staticInstance = this;

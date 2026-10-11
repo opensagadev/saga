@@ -840,8 +840,8 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
                         break;
                 }
             }
-            metadata += record.data_size;
             remaining -= record.data_size;
+            metadata += record.data_size;
         }
     }
 
@@ -863,8 +863,8 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
         if (pixel_format >= 6) {
             return 0;
         }
-        internal_format = compressed_formats[pixel_format];
         bits_per_pixel = pixel_format < 2 ? 2 : 4;
+        internal_format = compressed_formats[pixel_format];
         compressed = true;
     } else if (pixel_format == 0x61626772 && channel_bits == 0x08080808) { // "rgba", 8 bits each
         internal_format = GL_RGBA;

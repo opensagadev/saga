@@ -145,8 +145,8 @@ void NuSoundStreamer::ThreadFunc(void *self) {
         QueueElement element;
         element.sample = NULL;
         element.loop = false;
-        element.start_offset = 0.0f;
         element.buffer = NULL;
+        element.start_offset = 0.0f;
         element.weak_flag = false;
         if (!streamer->queue2.Empty()) {
             element = streamer->queue2.Pop();
@@ -200,10 +200,10 @@ void NuSoundStreamer::ThreadFunc(void *self) {
 
 NuSoundStreamingSample::NuSoundStreamingSample(const char *file)
     : NuSoundSample(file, NuSoundSource::FeedType::STREAMING) {
-    this->some_count = 0;
     this->field8_0x90 = 0;
     this->streamer = NULL;
     this->file_loader = NULL;
+    this->some_count = 0;
     this->field_0x88 = 0;
     this->field_0x1c = 1;
 }

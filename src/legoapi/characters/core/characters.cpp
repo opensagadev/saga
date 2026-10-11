@@ -888,8 +888,8 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
     obj->apiobj.start_position = *start_position;
     obj->apiobj.initial_position = *start_position;
     obj->apiobj.pos_x = start_position->x;
-    obj->apiobj.position = *start_position;
     obj->apiobj.pos_y = start_position->y;
+    obj->apiobj.position = *start_position;
     obj->apiobj.pos_z = start_position->z;
     obj->field_0x1018 = 0.5f;
 

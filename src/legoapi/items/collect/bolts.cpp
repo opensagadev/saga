@@ -656,8 +656,8 @@ void Bolt_Debris_LSW(BOLT_s *bolt, nuvec_s *points, i32 point, nuvec_s *, i32 no
             (bolt->owner == Player[0] || bolt->owner == Player[1]) &&
             (bolt->owner->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
             static_cast<u8>(bolt->owner->apiobj.field_0x27c) <= 1) {
-            explosion->field_0x24 |= 0x10000;
             explosion->object = bolt->owner;
+            explosion->field_0x24 |= 0x10000;
         }
     }
 }
@@ -830,8 +830,8 @@ __attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt
     }
 
     NUANGVEC angles;
-    angles.x = i_temp_xrot;
     angles.y = static_cast<u16>(temp_yrot);
+    angles.x = i_temp_xrot;
     NUMTX matrix;
     NuMtxSetRotationXYVU0(&matrix, &angles);
 
@@ -1288,8 +1288,8 @@ void Bolt_Init(void *storage, NetMessage &message) {
         }
         BoltSys->debris(bolt, old_points, -1, NULL, 0);
     }
-    bolt->type = type;
     bolt->type_id = type_id;
+    bolt->type = type;
     if (BOLT_OVERRIDE_PLAYERBOLTSPEED != 0.0f && BOLT_OVERRIDE_PLAYERBOLTDURATION != 0.0f) {
         bolt->speed = BOLT_OVERRIDE_PLAYERBOLTSPEED;
         bolt->lifetime = BOLT_OVERRIDE_PLAYERBOLTDURATION;
@@ -1297,11 +1297,11 @@ void Bolt_Init(void *storage, NetMessage &message) {
         bolt->speed = type->field_10;
         bolt->lifetime = type->field_14;
     }
-    bolt->acceleration_y = type->field_18;
     bolt->radius = type->field_1c;
-    bolt->scale = type->field_20;
+    bolt->acceleration_y = type->field_18;
     bolt->hit_debris = static_cast<i16>(static_cast<u32>(type->field_2c) >> 16);
     bolt->hit_part_debris = type->field_38;
+    bolt->scale = type->field_20;
     bolt->index = bolt - Bolt;
     if (hit_flags == 0)
         hit_flags = ObjHitObj_Flags(owner);
@@ -1364,8 +1364,8 @@ void Bolt_Init(void *storage, NetMessage &message) {
         collision_radius *= 1.0f / 3.0f;
     bolt->radius *= bolt->scale;
     bolt->collision_radius = collision_radius * bolt->scale;
-    bolt->velocity.x = 0.0f;
     bolt->velocity.y = 0.0f;
+    bolt->velocity.x = 0.0f;
     bolt->velocity.z = bolt->speed;
     NuMtxSetRotationX(&bolt->effect_orientation, 0x4000);
     bolt->orientation = orientation;
@@ -1778,8 +1778,8 @@ void Bolts_Update(WORLDINFO_s *world) {
                             character_hit = true;
                             break;
                         }
-                        flags = bolt->flags;
                         count = HIGHGAMEOBJECT;
+                        flags = bolt->flags;
                     }
                 }
             }

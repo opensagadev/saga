@@ -189,8 +189,8 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
     if (crawl_area != -1) {
         area = &ADataList[crawl_area];
         episode_index = static_cast<i8>(area->episode_index);
-        body_text_id = area->text_id;
         area_index = static_cast<i8>(area->area_index);
+        body_text_id = area->text_id;
     }
 
     char *episode_name = NULL;
@@ -895,8 +895,8 @@ void DrawMessageBoxRGBA(f32 x, f32 y, f32 width, f32 height, u32 blue, u32 green
     NuRndrRect2di(screen_x, screen_y, box_width, box_height, colour, material);
     NuRndrRect2di(screen_x, screen_y, edge_width, corner_height, edge_colour, material);
     NuRndrRect2di(screen_x, screen_y, corner_width, edge_height, edge_colour, material);
-    screen_x += box_width;
     screen_y += box_height;
+    screen_x += box_width;
     NuRndrRect2di(screen_x, screen_y, -edge_width, -corner_height, edge_colour, material);
     NuRndrRect2di(screen_x, screen_y, -corner_width, -edge_height, edge_colour, material);
 }
@@ -1261,8 +1261,8 @@ extern "C" {
                 box_width = smarttextex_longestwidth;
             }
             line_height -= 0.01f;
-            box->y = y;
             box->x = x;
+            box->y = y;
             box_width = 0.03f * QFONTSCALEX * 0.75f + box_width;
             box->width = box_width;
             const f32 box_height = -static_cast<f32>(last_line + 1) * line_height;

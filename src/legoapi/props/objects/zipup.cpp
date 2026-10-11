@@ -889,9 +889,9 @@ static inline void SetRopeVertex(NURND_VERTEX3D *vertex, f32 x, f32 y, f32 z, f3
     vertex->normal.x = normal_x;
     vertex->normal.y = 0.0f;
     vertex->normal.z = normal_z;
-    vertex->colour = colour;
     vertex->u = u;
     vertex->v = v;
+    vertex->colour = colour;
 }
 
 void DrawRopeSingle(nuvec_s *start, nuvec_s *end, float amount, numtl_s *material, float time, float grow_time,

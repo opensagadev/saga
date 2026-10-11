@@ -1220,13 +1220,13 @@ static void CC_anim_start(NUFPAR *parser) {
                 existing->event_frame_2 = animation.event_frame_2;
                 existing->priority = animation.priority;
                 existing->event_frame_3 = animation.event_frame_3;
-                existing->flags = animation.flags;
                 existing->minimum_repetitions = animation.minimum_repetitions;
+                existing->flags = animation.flags;
                 existing->event_frame_4 = animation.event_frame_4;
                 existing->maximum_repetitions = animation.maximum_repetitions;
                 existing->stop_frame = animation.stop_frame;
-                existing->misc_flags = animation.misc_flags;
                 existing->locator = animation.locator;
+                existing->misc_flags = animation.misc_flags;
             }
             return;
         }
@@ -2273,20 +2273,20 @@ void CharVariants_Init(CHARVARIANT *variants, i32 count) {
     }
 }
 
-i32 CharVariant_Find(char *name) {
-    if (CharVariant != NULL && CHARVARIANTCOUNT > 0) {
-        for (i32 i = 0; i < CHARVARIANTCOUNT; ++i) {
-            if (NuStrICmp(CharVariant[i].name, name) == 0)
-                return i;
+i32 LayerFromName(GAMECHARACTERDATA_s *character, char *name) {
+    for (i32 i = 0; i < character->layer_count; ++i) {
+        if (NuStrICmp(name, character->layers[i].name) == 0) {
+            return character->layers[i].mask_bit;
         }
     }
     return -1;
 }
 
-i32 LayerFromName(GAMECHARACTERDATA_s *character, char *name) {
-    for (i32 i = 0; i < character->layer_count; ++i) {
-        if (NuStrICmp(name, character->layers[i].name) == 0) {
-            return character->layers[i].mask_bit;
+i32 CharVariant_Find(char *name) {
+    if (CharVariant != NULL && CHARVARIANTCOUNT > 0) {
+        for (i32 i = 0; i < CHARVARIANTCOUNT; ++i) {
+            if (NuStrICmp(CharVariant[i].name, name) == 0)
+                return i;
         }
     }
     return -1;
@@ -2485,8 +2485,8 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
     memset(&charconfig, 0, sizeof(charconfig));
     charconfig.character_id = static_cast<i16>(character_id);
     charconfig.character = character;
-    charconfig.runtime = static_cast<GAMECHARACTERDATA_s *>(character->field11_0x24);
     charconfig.flags = (permanent & 1) << 6;
+    charconfig.runtime = static_cast<GAMECHARACTERDATA_s *>(character->field11_0x24);
     charconfig.effect_scratch = effects;
     charconfig.arena = arena;
     charconfig.arena_end = arena_end;
@@ -2494,8 +2494,8 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
     memset(effects, 0, sizeof(effects));
     GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (data->layers == NULL && (character->model_flags & 1) == 0 && arena != NULL && arena_end != NULL) {
-        data->layer_count = 0;
         data->layers = layers;
+        data->layer_count = 0;
         charconfig.flags |= 2;
     } else if (data->layer_count != 0) {
         charconfig.named_layers = 1;

@@ -8113,6 +8113,26 @@ i32 HitTerrPoly(tertype *surface, i32 group_index) {
     return 0;
 }
 
+void PlatformConnect(char *track_id, NUVEC *position_delta, NUVEC *movement_delta, i32 platform_index) {
+    if (CurTrackInfo == NULL) {
+        CurTrackInfo = AllocTerrId();
+        if (CurTrackInfo != NULL) {
+            CurTrackInfo->flags |= TERRAIN_TRACK_FLAG_CONNECTED;
+            CurTrackInfo->platform_index = static_cast<i16>(platform_index);
+            CurTrackInfo->id = track_id;
+            CurTrackInfo->platform_contact_state = TERRAIN_TRACK_CONTACT_ACTIVE;
+            position_delta->y = 0.0f;
+            movement_delta->y = 0.0f;
+        }
+    } else {
+        CurTrackInfo->flags |= TERRAIN_TRACK_FLAG_CONNECTED;
+        CurTrackInfo->platform_index = static_cast<i16>(platform_index);
+        CurTrackInfo->platform_contact_state = TERRAIN_TRACK_CONTACT_ACTIVE;
+    }
+
+    castnum = CurTerr->platforms[platform_index].terrain_group_index;
+}
+
 void RayImpact(NUVEC *movement) {
     TerrainMoveImpactData();
     switch (TerI->hit_type) {
@@ -8138,24 +8158,4 @@ void RayImpact(NUVEC *movement) {
             movement->z = 0.0f;
             break;
     }
-}
-
-void PlatformConnect(char *track_id, NUVEC *position_delta, NUVEC *movement_delta, i32 platform_index) {
-    if (CurTrackInfo == NULL) {
-        CurTrackInfo = AllocTerrId();
-        if (CurTrackInfo != NULL) {
-            CurTrackInfo->flags |= TERRAIN_TRACK_FLAG_CONNECTED;
-            CurTrackInfo->platform_index = static_cast<i16>(platform_index);
-            CurTrackInfo->id = track_id;
-            CurTrackInfo->platform_contact_state = TERRAIN_TRACK_CONTACT_ACTIVE;
-            position_delta->y = 0.0f;
-            movement_delta->y = 0.0f;
-        }
-    } else {
-        CurTrackInfo->flags |= TERRAIN_TRACK_FLAG_CONNECTED;
-        CurTrackInfo->platform_index = static_cast<i16>(platform_index);
-        CurTrackInfo->platform_contact_state = TERRAIN_TRACK_CONTACT_ACTIVE;
-    }
-
-    castnum = CurTerr->platforms[platform_index].terrain_group_index;
 }

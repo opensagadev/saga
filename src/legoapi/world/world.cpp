@@ -311,8 +311,8 @@ void CalculateWorldSize(WORLDINFO *world) {
         NUVEC box_maximum = box->second;
         if (scene->display_list != NULL &&
             (scene->display_list->render_buffer & NUDL_SCENE_RENDER_FLAG_CENTER_EXTENT_BOUNDS) != 0) {
-            box_minimum.x = box->first.x - box->second.x;
             box_minimum.z = box->first.z - box->second.z;
+            box_minimum.x = box->first.x - box->second.x;
             box_minimum.y = box->first.y - box->second.y;
             box_maximum.x = box->first.x + box->second.x;
             box_maximum.y = box->first.y + box->second.y;

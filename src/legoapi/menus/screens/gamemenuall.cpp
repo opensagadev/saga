@@ -258,8 +258,8 @@ void APIMenuDrawMemCardSlots(MENU *menu, f32 y) {
         }
         const f32 right_offset = slideright * 0.5f / 10.0f;
         const f32 left_offset = slideleft * 0.5f / 10.0f;
-        first = slideleft != 0 ? menu->selected_column - 2 : menu->selected_column - 1;
         last = slideright != 0 ? menu->selected_column + 2 : menu->selected_column + 1;
+        first = slideleft != 0 ? menu->selected_column - 2 : menu->selected_column - 1;
         if (count > 6) {
             count = memcard_slotsused;
         }
@@ -287,12 +287,12 @@ void APIMenuDrawMemCardSlots(MENU *menu, f32 y) {
                     blue = MenuSlotColourLerp(MENUFLASH0B, MENUFLASH1B, menu_pulsate);
                 } else if (menu_flash != 0) {
                     red = MENUFLASH0R;
-                    green = MENUFLASH0G;
                     blue = MENUFLASH0B;
+                    green = MENUFLASH0G;
                 } else {
                     red = MENUFLASH1R;
-                    green = MENUFLASH1G;
                     blue = MENUFLASH1B;
+                    green = MENUFLASH1G;
                 }
             } else if (menu_pulse > 0.0f) {
                 red = MenuSlotColourLerp(MENUFLASH0R, MENUNORMALR, menu_pulse);
@@ -434,8 +434,8 @@ void MenuEnterSave(MENU_s *menu) {
             --menu->last_column;
         }
     }
-    menu->state = 2;
     menu->last_row = 1;
+    menu->state = 2;
     lastslot = 0;
     slideleft = 0;
     slideright = 0;
@@ -980,8 +980,8 @@ void MenuUpdateOptions(MENU_s *menu) {
     i32 preview = 0;
     opts_sfx_wait -= FRAMETIME;
     if (opts_sfx_wait <= 0.0f) {
-        opts_sfx_wait += 1.5f;
         opts_sfx_i = static_cast<i32>(static_cast<u32>(opts_sfx_i) + 1);
+        opts_sfx_wait += 1.5f;
         if (opts_sfx_i == 1)
             opts_sfx_i = 0;
         preview = 1;
@@ -1789,8 +1789,8 @@ void MenuUpdateRestoreNewGame(MENU_s *menu) {
         startnewgame = 0;
         const i32 save_occurred = MenuSaveOccurred;
         NewGame();
-        MenuSaveOccurred = save_occurred;
         NewLData = NEWGAME_LDATA;
+        MenuSaveOccurred = save_occurred;
         UsePlayerList = 2;
         newgamecam = 1;
         newgamecamtime = 0.0f;
@@ -1930,8 +1930,8 @@ extern "C" {
             MenuInfo[menu_index].exit_fn(menu);
         }
         MenuRememberCursor(menu);
-        menu->field_b4 = 0;
         menu->field_b8 = 1;
+        menu->field_b4 = 0;
         menu->field_bc = 0;
         menu->menu = -1;
 
@@ -1984,12 +1984,12 @@ extern "C" {
 
         MenuHeader[0] = '\0';
         menu->draw_item = menu->first_row;
-        menu->item_scale = 1.0f;
         menu->draw_x = 0.0f;
+        menu->item_scale = 1.0f;
         menu->centre_offset = static_cast<f32>(menu->last_row - menu->first_row) * MENUDY * 0.5f;
         menu->draw_y = -menu->centre_offset;
-        menu->draw_z = 1.0f;
         menu->field_a0 = 0.0f;
+        menu->draw_z = 1.0f;
         menu->paused = paused;
         if (predrawfn != NULL) {
             predrawfn(menu);
@@ -2118,8 +2118,8 @@ extern "C" {
         ++menu->draw_item;
         dme_sx = 1.0f;
         dme_sy = 1.0f;
-        dme_align = 0;
         dme_rgb = 0;
+        dme_align = 0;
         menu->draw_y += spacing;
     }
 
@@ -2207,8 +2207,8 @@ extern "C" {
         vertex->colour = colour;
         NuPrim2DAddXYZ(0.0f, 0.0f, 0.0f);
 
-        vertex = reinterpret_cast<MenuFadeVertex *>((*stream)->void_ptr);
         colour = static_cast<u32>(menufadelevel) << 24;
+        vertex = reinterpret_cast<MenuFadeVertex *>((*stream)->void_ptr);
         if (__builtin_expect(*overbright == 0, 1))
             colour &= 0xff000000u;
         vertex->colour = colour;
@@ -2551,8 +2551,8 @@ extern "C" {
         menu->up_pressed = output_up_pressed;
         menu->down_pressed = output_down_pressed;
         menu->left_pressed = left_pressed;
-        menu->right_pressed = right_pressed;
         menu->confirm_pressed = confirm_pressed;
+        menu->right_pressed = right_pressed;
         menu->cancel_pressed = cancel_pressed;
         menu->up_held = up_held;
         menu->down_held = down_held;
@@ -2568,8 +2568,8 @@ extern "C" {
         if (menu->queued_item != -1) {
             menu->selected_item = menu->queued_item;
             menu->selected_column = static_cast<i16>(menu->queued_column);
-            menu->selected_row = static_cast<i16>(menu->queued_row);
             menu->confirm_pressed = 1;
+            menu->selected_row = static_cast<i16>(menu->queued_row);
             menu->queued_item = -1;
             menu->input_activity = 1;
         }

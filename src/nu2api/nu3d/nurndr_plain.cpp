@@ -807,8 +807,8 @@ extern "C" i32 NuRndrLine3d(NURND_VERTEX3D *vertices, NUMTL *material, NUMTX *ma
         f32 y = vertices[0].position.y;
         f32 z = vertices[0].position.z;
         PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
-        vertex->x = x;
         vertex->y = y;
+        vertex->x = x;
         vertex->z = z;
         g_NuPrim_StreamBufferPtr->u8_ptr += sizeof(PrimVertexRaw);
         ++g_NuPrim_VertexCount;
@@ -825,8 +825,8 @@ extern "C" i32 NuRndrLine3d(NURND_VERTEX3D *vertices, NUMTL *material, NUMTX *ma
         f32 z = vertices[1].position.z;
         PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
         vertex->x = x;
-        vertex->y = y;
         vertex->z = z;
+        vertex->y = y;
         g_NuPrim_StreamBufferPtr->u8_ptr += sizeof(PrimVertexRaw);
         ++g_NuPrim_VertexCount;
     }

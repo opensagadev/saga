@@ -39,12 +39,12 @@ NuVertexFormatPS *NuGetVertexDeclaration(NUVERTEXDESCRIPTOR vtx_desc) {
     const bool diffuse = vtx_desc.has_diffuse;
     const bool specular = (descriptor & 0x600) != 0;
     i32 texture_mode, half_texture_mode;
-    if (vtx_desc.has_half_uvs) {
-        half_texture_mode = vtx_desc.tex_coord_mode;
-        texture_mode = 0;
-    } else {
+    if (!vtx_desc.has_half_uvs) {
         texture_mode = vtx_desc.tex_coord_mode;
         half_texture_mode = 0;
+    } else {
+        half_texture_mode = vtx_desc.tex_coord_mode;
+        texture_mode = 0;
     }
     const i32 weights = (descriptor & 0x8000) ? 2 : (descriptor >> 14) & 1;
     const i32 colour2 = (descriptor & 0x20000) ? 2 : (descriptor >> 16) & 1;

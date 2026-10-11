@@ -791,8 +791,8 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
                     Level_FindByName(fp->word_buf, &level_index);
                     if (level_index == -1 || LDataList[level_index].area_index != area)
                         continue;
-                    load->first_level = static_cast<i16>(level_index);
                     load->second_level = -1;
+                    load->first_level = static_cast<i16>(level_index);
                     if (NuFParGetWord(fp) != 0) {
                         Level_FindByName(fp->word_buf, &level_index);
                         if (level_index != -1 && LDataList[level_index].area_index == area)
@@ -995,8 +995,8 @@ void NewArea() {
     HIGHJUMPHEIGHT = (LSW1 != 0 || Arcade != 0) ? 1.14f : 0.75f;
     ClearAreaProgress(Area, 0);
     if (WORLD->level_progress != NULL && (WORLD->level_progress->flags & 1) == 0) {
-        WORLD->level_progress->data = WORLD->progress_data;
         WORLD->level_progress->flags |= 1;
+        WORLD->level_progress->data = WORLD->progress_data;
     }
     SuperCounters_Reset(Area);
     AreaGlobals.values.field_0x10 = 0;

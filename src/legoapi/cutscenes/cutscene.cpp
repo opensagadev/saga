@@ -551,12 +551,12 @@ static __used__ void CutScene_Configure(CUTINFO *cut, char *name, VARIPTR *buf, 
     cut->camera_far_clip = 0;
     cut->legacy_music_index = -1;
     cut->skip_level = -1;
-    cut->linked_audio = 0;
     cut->debris_render_group = 2;
+    cut->linked_audio = 0;
     cut->door_name[0] = '\0';
     cut->next_cutscene[0] = '\0';
-    cut->end_flags = 0;
     cut->music_handle = -1;
+    cut->end_flags = 0;
 
     for (CUTSCENESFX &sfx : cut->sfx) {
         sfx.id = -1;
@@ -570,8 +570,8 @@ static __used__ void CutScene_Configure(CUTINFO *cut, char *name, VARIPTR *buf, 
         animation.index = -1;
     }
     memset(cut->fade_fog, 0, sizeof(cut->fade_fog));
-    cut->subtitle_data = NULL;
     cut->subtitle_count = 0;
+    cut->subtitle_data = NULL;
     cut->end_flags &= ~3U;
     cut->pad_18b = 0;
     cut->low_end_distance = 0.0f;
@@ -1243,8 +1243,8 @@ extern "C" {
         if (cutscene->version > 1) {
             const u8 cutscene_flags = static_cast<u8>(cutscene->flags);
             if ((cutscene_flags & 1) != 0) {
-                instance->stream_buffer_0 = cutscene->stream_buffer_0;
                 instance->stream_buffer_1 = cutscene->stream_buffer_1;
+                instance->stream_buffer_0 = cutscene->stream_buffer_0;
                 instance->pending_stream_buffer = cutscene->stream_buffer_1;
                 instance->flags_8b &= ~0x10U;
             }
@@ -1518,8 +1518,8 @@ extern "C" {
             instNUGCUTSCENECAMERA_s *camera = instance->camera_instance;
             NUGCUTCAMERASYS_s *system = instance->cutscene->camera_system;
             camera->state_index = 0;
-            camera->next_target_index = 0;
             camera->camera_index = static_cast<i8>(system->field_10);
+            camera->next_target_index = 0;
             for (u32 i = 0; i < system->camera_count; ++i) {
                 camera->camera_states[i].flags &= ~2U;
                 camera->camera_states[i].event_index = 0;
@@ -2168,8 +2168,8 @@ static __used__ void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paus
                                     instNuGCutSceneCopyStreamAnimations(instance);
                                     instance->flags_8b &= ~8U;
                                     instNuGCutSceneStart(instance);
-                                    instance->flags_88 |= 1;
                                     instance->current_frame += overflow;
+                                    instance->flags_88 |= 1;
                                 } else {
                                     --instance->stream_index;
                                     instance->current_frame = instance->cutscene->duration - 1.0f;

@@ -1297,8 +1297,8 @@ void NetworkObjectManager::ReceiveReplicaMessage(NetMessage &message, NetPeer co
 
     ReplicatorData data;
     data.start = static_cast<u8 *>(object->replicator_data) + data_offset;
-    data.end = data.start + replicator->data_size;
     data.cursor = data.start;
+    data.end = data.start + replicator->data_size;
     replicator->AllowPush(object_class, object->object, data, 1, 0);
     stream.message = &message;
     replicator->SerialiseObject(stream, const_cast<NetPeer *>(&peer), object_class, object->object, data,
@@ -1610,8 +1610,8 @@ void NetworkObjectManager::Update() {
             if ((replicator->replication_group & 4) != 0) {
                 ReplicatorData data;
                 data.start = static_cast<u8 *>(object->replicator_data) + data_offset;
-                data.end = data.start + data_size;
                 data.cursor = data.start;
+                data.end = data.start + data_size;
                 replicator->AllowPush(object->object_class, object->object, data, 0, 0);
                 replicator->DoPrediction(object->object_class, object->object, data, 0);
             }

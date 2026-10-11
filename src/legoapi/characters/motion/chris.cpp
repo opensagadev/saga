@@ -231,8 +231,8 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
                 impulse.z *= scale;
             }
             fighter->velocity.x += impulse.x;
-            fighter->velocity.y += impulse.y;
             fighter->velocity.z += impulse.z;
+            fighter->velocity.y += impulse.y;
             fighter->death_rotate_x = qrand() * (65536.0f / 65535.0f) - 32768.0f;
             fighter->death_rotate_z = qrand() * (65536.0f / 65535.0f) - 32768.0f;
             if (fighter->spline == NULL || static_cast<u32>(fighter->spline->id - 84) > 1)
@@ -278,8 +278,8 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
     }
     if (fighter->spline == NULL)
         return 0;
-    direction.x = fighter->target_position.x - fighter->matrix.m30;
     direction.y = fighter->target_position.y - fighter->matrix.m31;
+    direction.x = fighter->target_position.x - fighter->matrix.m30;
     direction.z = fighter->target_position.z - fighter->matrix.m32;
     f32 distance_squared = direction.x * direction.x + direction.y * direction.y + direction.z * direction.z;
     if (fighter->death_timer >= 0.0f)
@@ -366,12 +366,12 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
             return 1;
         const i32 target_id = fighter->spline->field_0x51c;
         if (target_id == -1) {
-            fighter->target_id = -1;
             fighter->target = NULL;
+            fighter->target_id = -1;
             return 1;
         } else if (target_id == -2) {
-            fighter->target_ready = 1;
             fighter->target_id = -2;
+            fighter->target_ready = 1;
             fighter->target = NULL;
         } else if (target_id == -3) {
             fighter->target_ready = 1;
@@ -565,17 +565,17 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
     NUVEC4_ALIGNED16 passing_start, passing_target;
     NUVEC4_ALIGNED16 direction;
     space->door_elapsed = space->door_countdown;
-    space->door_time += FRAMETIME;
     space->door_countdown += FRAMETIME * space->normalized_speed;
+    space->door_time += FRAMETIME;
     if (space->actions != NULL) {
         if (space->unknown_337c == 4) {
             space->current_action = &space->actions[space->unknown_3378];
             space->unknown_337c = space->current_action->command;
             ++space->unknown_3378;
             if (space->unknown_337c == 3) {
-                space->current_action = space->actions;
                 space->unknown_3378 = 1;
                 space->unknown_337c = space->actions->command;
+                space->current_action = space->actions;
             }
             if (space->unknown_337c == 1) {
                 formation_start = {0.0f, 0.0f, 300.0f, 1.0f};
@@ -760,8 +760,8 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
                 fighter->draw_flags = 1;
                 fighter->object_id = spline->field_0x520;
                 fighter->target_id = spline->field_0x51c;
-                fighter->speed = 50.0f;
                 fighter->missile_count = 1;
+                fighter->speed = 50.0f;
                 if (spline->id == 87)
                     fighter->speed = 22.5f;
                 else if (spline->id == 86)
@@ -959,8 +959,8 @@ static inline void DrawSpaceJet(i32 player_index, i32 key_index, bool left) {
                     player->apiobj.field_0xb8.m30,  player->apiobj.field_0xb8.m31,  player->apiobj.field_0xb8.m32,
                     player->apiobj.field_0xb8.m33};
                 if (left) {
-                    matrix.m30 += (matrix.m20 * Jetpos.y - matrix.m00 * Jetpos.x) + matrix.m10 * Jetpos.z;
                     matrix.m31 += (matrix.m21 * Jetpos.y - matrix.m01 * Jetpos.x) + matrix.m11 * Jetpos.z;
+                    matrix.m30 += (matrix.m20 * Jetpos.y - matrix.m00 * Jetpos.x) + matrix.m10 * Jetpos.z;
                     matrix.m32 += (matrix.m22 * Jetpos.y - matrix.m02 * Jetpos.x) + matrix.m12 * Jetpos.z;
                 } else {
                     matrix.m30 += matrix.m00 * Jetpos.x + matrix.m20 * Jetpos.y + matrix.m10 * Jetpos.z;
@@ -1145,31 +1145,31 @@ reset_space:
         memset(space->reset_buffer, 0, space->reset_buffer_count * 96);
         space->reset_buffer_used = 0;
     }
-    space->unknown_337c = 4;
     space->current_action = NULL;
-    space->unknown_3378 = 0;
+    space->unknown_337c = 4;
     space->unknown_338c = space;
-    space->value_one_a = 1.0f;
+    space->unknown_3378 = 0;
     space->value_one_b = 1.0f;
+    space->value_one_a = 1.0f;
 
-    space->player_matrix_flags = 0;
     space->player_colour = 0xffffff;
-    space->player_matrix.m00 = 80.0f;
+    space->player_matrix_flags = 0;
     space->player_matrix.m01 = 55.0f;
-    space->player_matrix.m02 = 200.0f;
+    space->player_matrix.m00 = 80.0f;
     space->player_matrix.m03 = 1.0f;
-    space->player_matrix.m30 = 0.0f;
+    space->player_matrix.m02 = 200.0f;
     space->player_matrix.m31 = 0.0f;
-    space->player_matrix.m32 = 0.0f;
+    space->player_matrix.m30 = 0.0f;
     space->player_matrix.m33 = 1.0f;
-    space->player_matrix.m10 = 0.0f;
+    space->player_matrix.m32 = 0.0f;
     space->player_matrix.m11 = 0.0f;
-    space->player_matrix.m13 = 1.0f;
+    space->player_matrix.m10 = 0.0f;
     space->player_matrix.m20 = 0.0f;
-    space->player_matrix.m21 = 0.0f;
+    space->player_matrix.m13 = 1.0f;
     space->player_matrix.m22 = 0.0f;
-    space->player_matrix.m23 = 1.0f;
+    space->player_matrix.m21 = 0.0f;
     space->player_matrix.m12 = 200.0f;
+    space->player_matrix.m23 = 1.0f;
     space->player_matrix_state = 0;
 
     space->camera_matrix.m00 = 5.0f;
@@ -1178,18 +1178,18 @@ reset_space:
     space->camera_matrix.m03 = 200.0f;
     space->camera_matrix.m30 = 0.0f;
     space->camera_matrix.m31 = 0.0f;
-    space->camera_matrix.m32 = 0.0f;
     space->camera_matrix.m33 = 1.0f;
     space->camera_matrix.m10 = 0.0f;
+    space->camera_matrix.m32 = 0.0f;
     space->camera_matrix.m11 = 0.0f;
     space->camera_matrix.m13 = 1.0f;
     space->camera_matrix.m20 = 0.0f;
     space->camera_matrix.m21 = 0.0f;
-    space->camera_matrix.m22 = 0.0f;
     space->camera_matrix.m23 = 1.0f;
     space->camera_matrix.m12 = 200.0f;
-    space->camera_matrix_w = 1.0f;
+    space->camera_matrix.m22 = 0.0f;
     space->camera_value = 5.0f;
+    space->camera_matrix_w = 1.0f;
     space->camera_colour = 0xffffff;
     space->camera_matrix_flags = 0;
     space->camera_matrix_state = 0;
@@ -1251,8 +1251,8 @@ void ChrisRadialCam(nuvec_s *position, nuvec_s *target) {
     f32 target_radius = base_radius + extra_radius;
     if (position_radius != 0.0f) {
         const f32 scale = target_radius / position_radius;
-        position_delta.x *= scale;
         position_delta.z *= scale;
+        position_delta.x *= scale;
     }
     position->x = RadialMoveCentre.x + position_delta.x;
     position->y = position_y;

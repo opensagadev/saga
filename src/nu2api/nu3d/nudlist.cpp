@@ -394,8 +394,8 @@ extern "C" NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *
     if (source->material_animations != NULL) {
         scene->material_animations = CloneSceneAllocate<NUMTLANIMSET>(buffer, 1);
         *scene->material_animations = *source->material_animations;
-        scene->material_animations->scene = scene;
         scene->material_animations->next = global_dlist_manager.mtlanim_list;
+        scene->material_animations->scene = scene;
         global_dlist_manager.mtlanim_list = scene->material_animations;
     } else {
         scene->material_animations = NULL;
@@ -1377,13 +1377,13 @@ extern "C" void NuDisplayListBurstRndrSpecial(nuhspecial_s *handle, u32 count, N
                     NUMTX *matrix = &matrices[i];
                     void *transform = DisplayListCreateGeomTransformPS(buffer, matrix, scene->mtls[list->mtl_id],
                                                                        geometry_data, NULL);
+                    list->items->next = transform;
                     list->items->type = 0x8c;
                     list->items->id = 3;
-                    list->items->next = transform;
                     NUDISPLAYLISTITEM *first = list->items++;
                     list->items->type = 0x82;
-                    list->items->id = 3;
                     list->items->next = geometry_data;
+                    list->items->id = 3;
                     NUDISPLAYLISTITEM *last = list->items++;
                     DisplayListSetAlphaPS(first, last, 1);
                 }
@@ -1392,8 +1392,8 @@ extern "C" void NuDisplayListBurstRndrSpecial(nuhspecial_s *handle, u32 count, N
                     NUMTX *matrix = &matrices[static_cast<u8>(visible[i])];
                     void *transform = DisplayListCreateGeomTransformPS(buffer, matrix, scene->mtls[list->mtl_id],
                                                                        geometry_data, NULL);
-                    list->items->type = 0x8c;
                     list->items->id = 3;
+                    list->items->type = 0x8c;
                     list->items->next = transform;
                     NUDISPLAYLISTITEM *first = list->items++;
                     list->items->type = 0x82;
@@ -1582,8 +1582,8 @@ void DisplayListCreateDynMtlList(variptr_u *buffer, variptr_u buffer_end) {
     *buffer = manager->mtlbuffend;
 
     NUDISPLAYLIST *list = &manager->dlist_2d;
-    list->first->type = 0x8d;
     list->first->id = 1;
+    list->first->type = 0x8d;
     list->first->next = nullptr;
     list->mtl_last = list->first;
     list->state = reinterpret_cast<NURNDRSTATE *>(ALIGN(buffer->addr, 4));

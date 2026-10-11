@@ -503,8 +503,8 @@ void GizDrawBuildItPiece(GameObject_s *player, i32 draw_reflection) {
         NuQuatSlerp(&rotation, &from, &to, progress);
         NUMTX_ALIGNED16 interpolated;
         NuQuatToMtx(&rotation, &interpolated);
-        interpolated.m30 = matrix.m30 + (data->end_mtx.m30 - matrix.m30) * progress;
         interpolated.m31 = matrix.m31 + (data->end_mtx.m31 - matrix.m31) * progress;
+        interpolated.m30 = matrix.m30 + (data->end_mtx.m30 - matrix.m30) * progress;
         interpolated.m32 = matrix.m32 + (data->end_mtx.m32 - matrix.m32) * progress;
         interpolated.m31 += 0.1f * NU_SIN_LUT(static_cast<i32>(32768.0f * progress));
         matrix = interpolated;
@@ -1084,8 +1084,8 @@ static void GizmoBuildit_SetVisibility(GIZMO *gizmo, i32 visible) {
 }
 
 void GizBuildit_Reset(GIZBUILDIT_s *buildit, void *world_ptr) {
-    buildit->availability_flags |= GIZBUILDIT_AVAILABILITY_ACTIVE | GIZBUILDIT_AVAILABILITY_VISIBLE;
     buildit->field_0x83 &= static_cast<u8>(~GIZBUILDIT_RUNTIME_REWARD_RELEASED);
+    buildit->availability_flags |= GIZBUILDIT_AVAILABILITY_ACTIVE | GIZBUILDIT_AVAILABILITY_VISIBLE;
 
     buildit->start_position = buildit->file_position;
     buildit->position = buildit->file_position;
@@ -1160,8 +1160,8 @@ void GizBuildit_Reset(GIZBUILDIT_s *buildit, void *world_ptr) {
         buildit->start_position.y = (start_min.y + start_max.y) * 0.5f;
         buildit->start_position.z = (start_min.z + start_max.z) * 0.5f;
         buildit->position.x = (end_min.x + end_max.x) * 0.5f;
-        buildit->position.y = (end_min.y + end_max.y) * 0.5f;
         buildit->position.z = (end_min.z + end_max.z) * 0.5f;
+        buildit->position.y = (end_min.y + end_max.y) * 0.5f;
 
         f32 span = start_max.x - start_min.x;
         if (span < start_max.z - start_min.z) {
@@ -1549,8 +1549,8 @@ void BuildIt_MoveCode(GameObject_s *player) {
                 return;
             nextBuildit.Reset();
             player->context_animation_timer = 0.4f;
-            player->field_0x788 = buildit;
             player->build_button_taps = 0;
+            player->field_0x788 = buildit;
             player->build_context = LEGOCONTEXT_BUILDIT;
             player->context_animation = LEGOACT_BUILD;
             player->field_0xe21 &= ~0x40;

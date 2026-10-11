@@ -1198,10 +1198,10 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
                     GAMEANIMSET_STATE_AT_END) {
                     if (paintmixed == painttarget) {
                         ++painttry;
-                        if (painttry == 3) {
-                            PAINTPUZZLESTAGE = 4;
-                        } else {
+                        if (painttry != 3) {
                             PAINTPUZZLESTAGE = 0;
+                        } else {
+                            PAINTPUZZLESTAGE = 4;
                         }
                     } else {
                         randpaints[0] = qrand() / 21846;

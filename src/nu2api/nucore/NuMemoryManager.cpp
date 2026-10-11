@@ -295,8 +295,8 @@ void NuMemoryManager::ConvertToUsedBlock(FreeHeader *header, u32 alignment, u32 
     align_mask = -(CountLeadingZeros(alignment >> 2) << 0x1b);
     header_value = header->block_header.value & BLOCK_SIZE_MASK;
 
-    manager_idx = this->idx;
     aligned = header_value | align_mask;
+    manager_idx = this->idx;
 
     header->block_header.value = aligned;
 
@@ -571,8 +571,8 @@ void NuMemoryManager::AddPage(void *ptr, u32 size, bool _unknown) {
 
     page->original_ptr = ptr;
     page->size = size;
-    page->first_header = (Header *)((usize)page + 0x20);
     page->end = (u32 *)(allocation_end - 4);
+    page->first_header = (Header *)((usize)page + 0x20);
     page->is_external = _unknown;
 
     // Fence flags prevent coalescing beyond the page while preserving the other bits.
@@ -1431,8 +1431,8 @@ void NuMemoryManager::DumpBlocksForContext(u32 dump_id, NuSymbolQuery *query, Co
                         debug->flags.unknown |= 1;
                         u16 category = DumpBlock(dump_id, query, header, count, block_size, flags);
                         category_bytes[category] += block_size;
-                        total_bytes += block_size;
                         total_blocks += count;
+                        total_bytes += block_size;
                     }
                 }
             }

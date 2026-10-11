@@ -223,8 +223,8 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                                     switch (turret->field_0x12c) {
                                         case 0: {
                                             GameObject_s *target = static_cast<GameObject_s *>(turret->field_0xe4);
-                                            target_position = &target->apiobj.collision_position;
                                             target_velocity = &target->apiobj.velocity;
+                                            target_position = &target->apiobj.collision_position;
                                             distance =
                                                 NuVecDistSqr(target_position, &turret->field_0x3c, &local_direction);
                                             break;

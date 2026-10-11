@@ -157,8 +157,8 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
                     n = TerCrossProduct(&a, &b);
                     f32 squared = (n.x * n.x + n.y * n.y) + n.z * n.z;
                     f32 inverse = squared == 0.0f ? 0.0f : 1.0f / NuFsqrt(squared);
-                    n.x *= inverse;
                     n.y *= inverse;
+                    n.x *= inverse;
                     n.z *= inverse;
                 }
                 {
@@ -173,8 +173,8 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
                     n = TerCrossProduct(&a, &b);
                     f32 squared = (n.x * n.x + n.y * n.y) + n.z * n.z;
                     f32 inverse = squared == 0.0f ? 0.0f : 1.0f / NuFsqrt(squared);
-                    n.x *= inverse;
                     n.y *= inverse;
+                    n.x *= inverse;
                     n.z = inverse * n.z;
                 }
             }
@@ -575,8 +575,8 @@ extern "C" {
         }
         DebrisReScale(scaled_index, requested_scale);
         scaled->scale = requested_scale;
-        scaled->last_render_time = scaled->time_group == 4 ? panelglobaltime : globaltime;
         scaled->unscaled_effect_index = effect_index;
+        scaled->last_render_time = scaled->time_group == 4 ? panelglobaltime : globaltime;
 
         if (!(strlen(effect->name) < 13)) {
             char shortened[13];
@@ -756,10 +756,10 @@ void DebrisTimeSlip(i32 group) {
         if (effect->time_group == 4 ? group != 1 : group != 0)
             continue;
         key->last_update_time -= 800.0f;
-        key->emission_epoch -= 800.0f;
         key->emission_time -= 800.0f;
         key->previous_emission_time -= 800.0f;
         key->field_1e4 -= 800.0f;
+        key->emission_epoch -= 800.0f;
         for (i32 chunk = 0; chunk < 32; ++chunk) {
             if (key->particle_chunks[chunk] == NULL)
                 continue;
@@ -1254,8 +1254,8 @@ extern "C" {
         matrix->m02 = z0 * cosine - x0 * sine;
         f32 x1 = matrix->m10;
         z1 = matrix->m12;
-        matrix->m10 = x1 * cosine + z1 * sine;
         matrix->m12 = z1 * cosine - x1 * sine;
+        matrix->m10 = x1 * cosine + z1 * sine;
         f32 x2 = matrix->m20;
         z2 = matrix->m22;
         matrix->m20 = x2 * cosine + z2 * sine;
@@ -1579,8 +1579,8 @@ extern "C" {
             group.scene_index = index;
             group.chunk_type = 1;
             TERRAIN_PLATFORM &platform = platforms[index];
-            platform.scene_object = object;
             platform.terrain_group_index = group_index;
+            platform.scene_object = object;
             platform.scene_object_index = instance;
             platform.scene_transform = NULL;
             platform.flags = (platform.flags & ~1) | (original.flags & 1);
@@ -1616,8 +1616,8 @@ extern "C" {
         group.scene_index = index;
         group.chunk_type = 1;
         TERRAIN_PLATFORM &platform = terrain->platforms[index];
-        platform.scene_object = object;
         platform.terrain_group_index = group_index;
+        platform.scene_object = object;
         platform.scene_object_index = source;
         platform.flags &= ~TERRAIN_PLATFORM_FLAG_ROTATING;
         platform.scene_transform = NULL;
@@ -1699,8 +1699,8 @@ extern "C" {
     void PlatSkinMemRigister(void *start, void *end, i32 maximum) {
         PlatSkinMax = maximum;
         PlatSkinInfo = static_cast<PLATSKININFO *>(start);
-        PlatSkinMem = reinterpret_cast<u8 *>(PlatSkinInfo + maximum);
         PlatSkinMemEnd = static_cast<u8 *>(end);
+        PlatSkinMem = reinterpret_cast<u8 *>(PlatSkinInfo + maximum);
         PlatSkinMaxSize = 0;
         PlatSkinCnt = 0;
         PlatSkinResetTotal = CurTerr->group_count;
@@ -1847,9 +1847,9 @@ extern "C" {
                 terrain->group_indices[terrain->group_index_count++] = i;
             }
             if (cell.group_count != 0) {
-                cell.min_x = min_x;
                 cell.min_z = min_z;
                 cell.max_x = max_x;
+                cell.min_x = min_x;
                 cell.max_z = max_z;
                 ++terrain->used_cell_count;
             }

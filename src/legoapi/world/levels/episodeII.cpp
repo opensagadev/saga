@@ -784,8 +784,8 @@ void KaminoC_Update(WORLDINFO_s *world) {
             }
             break;
     }
-    kaminoc_netpacket->final_mask = 0;
     kaminoc_netpacket->off_mask = 0;
+    kaminoc_netpacket->final_mask = 0;
     kaminoc_netpacket->pending_mask = 0;
     kaminoc_netpacket->occupied_mask = 0;
     kaminoc_netpacket->complete_mask = 0;
@@ -1141,8 +1141,8 @@ void KaminoE_Update(WORLDINFO_s *world) {
             return;
         jango->apiobj.position = wait->position;
         jango->apiobj.field_0x276 = wait->direction;
-        jango->apiobj.facing_angle = wait->direction;
         jango->apiobj.movement_facing_angle = wait->direction;
+        jango->apiobj.facing_angle = wait->direction;
         jango->ai.path_info = wait->path_info;
         jango->apiobj.initial_position = wait->position;
         jango->apiobj.collision_position = wait->position;

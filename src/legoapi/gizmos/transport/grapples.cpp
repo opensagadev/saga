@@ -1098,8 +1098,8 @@ i32 Grapple_ReachedTop(GameObject_s *object) {
 
 void Grapple_SetPlayerTargetPoint(GameObject_s *object, nuvec_s *target) {
     target->x = 0.0f;
-    target->z = 0.0f;
     target->y = -object->field_0x768;
+    target->z = 0.0f;
     i32 amplitude = (static_cast<i32>(object->grapple_swing_degrees) << 16) / 360;
     i32 angle = static_cast<i32>(static_cast<f32>(amplitude) * NuTrigTable[object->grapple_swing_phase >> 1] *
                                  static_cast<GRAPPLE *>(object->field_0x788)->field_0x4c);

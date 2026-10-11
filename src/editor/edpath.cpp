@@ -1592,8 +1592,8 @@ void pathEditor_Enter(void) {
     for (i32 index = 0; index < 32; ++index) {
         NuLinkedListAppend(&aieditor->free_paths, &aieditor->path_storage[index].link);
     }
-    aieditor->free_path_nodes.head = nullptr;
     aieditor->free_path_nodes.tail = nullptr;
+    aieditor->free_path_nodes.head = nullptr;
     for (i32 index = 0; index < 1024; ++index) {
         NuLinkedListAppend(&aieditor->free_path_nodes, &aieditor->node_storage[index].link);
     }

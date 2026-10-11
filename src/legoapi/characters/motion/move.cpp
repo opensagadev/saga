@@ -5654,29 +5654,6 @@ static void ForceCode(GameObject_s *object, i32 pressed, i32 held, i32) {
     }
 }
 
-i32 FaceOpponent(GameObject_s *object, NUVEC *position) {
-    if (position == NULL) {
-        GameObject_s *target = object->force_target;
-        if (target != NULL) {
-            if ((target->apiobj.field_0x1f8 & 0x1001) != 0x1001) {
-                return 0;
-            }
-            position = &target->apiobj.position;
-            if (target->apiobj.field_0x287 != 0) {
-                return 0;
-            }
-        } else {
-            if (object->blowup_target == NULL) {
-                return 0;
-            }
-            position = &object->blowup_target->mid_position;
-        }
-    }
-    object->apiobj.movement_facing_angle =
-        NuAtan2D(position->x - object->apiobj.position.x, position->z - object->apiobj.position.z);
-    return 1;
-}
-
 i32 ForcePushed_SetTargetMom(GameObject_s *object, float *seek_rate) {
     GameObject_s *source = object->force_target;
     if (source == NULL) {
@@ -5764,6 +5741,29 @@ i32 ForcePushed_SetTargetMom(GameObject_s *object, float *seek_rate) {
     object->target_velocity.x = NU_SIN_LUT(angle) * 2.5f;
     object->target_velocity.z = NU_COS_LUT(angle) * 2.5f;
     return 0;
+}
+
+i32 FaceOpponent(GameObject_s *object, NUVEC *position) {
+    if (position == NULL) {
+        GameObject_s *target = object->force_target;
+        if (target != NULL) {
+            if ((target->apiobj.field_0x1f8 & 0x1001) != 0x1001) {
+                return 0;
+            }
+            position = &target->apiobj.position;
+            if (target->apiobj.field_0x287 != 0) {
+                return 0;
+            }
+        } else {
+            if (object->blowup_target == NULL) {
+                return 0;
+            }
+            position = &object->blowup_target->mid_position;
+        }
+    }
+    object->apiobj.movement_facing_angle =
+        NuAtan2D(position->x - object->apiobj.position.x, position->z - object->apiobj.position.z);
+    return 1;
 }
 
 i32 ForcePushed_YRotation(GameObject_s *object) {
@@ -6475,143 +6475,6 @@ static void ForceDeflectCode(GameObject_s *object, i32 pressed, i32 held, i32) {
     PlaySfx("JForcePush", &object->apiobj.collision_position);
 }
 
-void Move_WEIRDO(GameObject_s *object) {
-    GAMEPAD_s *pad = object->pad_gamepad;
-    u32 action_held = pad->buttons_held & GAMEPAD_ACTION;
-    u32 action_pressed = pad->buttons_pressed & GAMEPAD_ACTION;
-    u32 jump_held = pad->buttons_held & GAMEPAD_JUMP;
-    u32 jump_pressed = pad->buttons_pressed & GAMEPAD_JUMP;
-    u32 special_held = pad->buttons_held & GAMEPAD_SPECIAL;
-    u32 special_pressed = pad->buttons_pressed & GAMEPAD_SPECIAL;
-    u32 tag_pressed = pad->buttons_pressed & GAMEPAD_TAG;
-    i32 hit_effect = object->blade_index == -1 ? -1 : BladeTab[object->blade_index].hit_effect;
-    i32 glow_model;
-    if (SuperWeirdo(object) && (object->apiobj.character_data->model_flags & 8) == 0)
-        glow_model = 0xdf;
-    else
-        glow_model = object->blade_index == -1 ? -1 : BladeTab[object->blade_index].glow_model;
-    DropInOutCode(object);
-    ApplyGravity(object, NULL, 0.0f, 8.0f, NULL);
-    u16 weapon = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->weapon_model & 0xfffd;
-    i32 has_sabre = weapon == 0x65 || weapon == 0x69;
-    if (object->suit != NULL)
-        Signal_MoveCode(WORLD, object);
-    TakeHitCode(object);
-    FloatCode(object);
-    SlideCode(object);
-    FlattenCode(object);
-    Hang_MoveCode(object);
-    Ledge_MoveCode(WORLD, object);
-    if (LedgeTerrain_On)
-        LedgeTerrain_MoveCode(object);
-    Climb_MoveCode(object);
-    TightRope_MoveCode(object, jump_pressed);
-    ForcePushed_MoveCode(object);
-    ForcedBackCode(object);
-    Tube_MoveCode(object, WORLD);
-    DeactivatedCode(object);
-    PushCode(object, 1);
-    BackFlipCode(object);
-    TakeOverCode(object, tag_pressed);
-    Glide_MoveCode(object);
-    u32 jump_animations;
-    if (!has_sabre) {
-        hit_effect = -1;
-        jump_animations = SuperWeirdo(object) ? 0x109 : 0x208;
-    } else
-        jump_animations = SuperWeirdo(object) ? 0x11b : 0x1b;
-    JumpCode(object, jump_pressed, jump_held, jump_animations, action_pressed, action_held, hit_effect);
-    GizPanel_MoveCode(WORLD, object, special_pressed);
-    HatMachine_MoveCode(WORLD, object, special_pressed);
-    ZipUp_MoveCode(object, special_pressed);
-    if ((object->apiobj.character_data->model_flags & 0x100000) != 0)
-        Grapple_MoveCode(object);
-    BuildIt_MoveCode(object);
-    if (has_sabre || SuperWeirdo(object)) {
-        ForceDeflectCode(object, special_pressed, special_held, 0);
-        ForcePushCode(object, special_held, 0);
-        FindForcePushTarget(object, special_pressed, 1);
-        ForceThrowCode(object, special_pressed, 0);
-        ForceCode(object, special_pressed, special_held, 0);
-        FindForcePushTarget(object, special_pressed, 2);
-        if (object->apiobj.field_0x287 == 0 && FadeSys.fade == 0.0f) {
-            if (object->force_glow_step > 0.0f)
-                object->force_glow_step -= FRAMETIME;
-            else
-                ForceGlowCode(object, glow_model);
-        } else
-            ResetForceGlow(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
-    }
-    ForcePushed_MoveCode(object);
-    Lever_MoveCode(WORLD, object);
-    if ((object->apiobj.character_data->model_flags & 0x40000) != 0 || SuperWeirdo(object))
-        Teleport_MoveCode(object, special_pressed);
-    i32 detonator_used = ThermalDetonator_MoveCode(object);
-    SuperCarry_MoveCode(WORLD, object);
-    GizmoBlowupCheckProximity(WORLD, object);
-    ComboRotateCode(object, action_held);
-    WeaponOutCode(object);
-    WeaponInCode(object);
-    WeaponScalingCode(object);
-    SpecialMove_VictimCode(object);
-    HoldCode(object);
-    Attracto_MoveCode(WORLD, object);
-    SecurityDoor_MoveCode(WORLD, object);
-    if (has_sabre) {
-        BlockCode(object, action_pressed, action_held, jump_pressed, 0);
-        SwipeCode(object, action_pressed, action_held);
-        if (detonator_used == 1)
-            special_pressed = 0;
-        LightSabreComboCode(object, action_pressed, action_held, jump_pressed, special_pressed);
-        JediLightCode(object);
-    } else {
-        BlockCode(object, action_pressed, action_held, 0, 0);
-        PunchCode(object, action_pressed, action_held, 1, 0, 0.0f);
-        DodgeCode(object, action_pressed, jump_pressed);
-        if ((object->apiobj.character_data->model_flags & 0x80) != 0) {
-            if (detonator_used == 1)
-                special_pressed = 0;
-            ShootCode(object, action_pressed, special_pressed, 1, 1, 0);
-        } else if (object->batarang != NULL)
-            Batarang_MoveCode(object);
-    }
-    if (static_cast<i8>(static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_094[0]) <
-        0) {
-        CommunicateCode(object, GAMEPAD_SPECIAL & object->pad_gamepad->buttons_pressed, 0);
-    }
-    if (object->character_context == 0x14) {
-        f32 *frame = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
-        if (frame != NULL) {
-            if ((object->field_0xe22 & 4) == 0) {
-                f32 event = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
-                if (event >= 1.0f && event <= *frame) {
-                    object->field_0xe22 |= 4;
-                    object->field_0xe20 |= 0x10;
-                    PlaySfx("JgRocket", &object->apiobj.collision_position);
-                }
-            }
-            object->context_animation_timer -= FRAMETIME;
-            if (object->context_animation_timer <= 0.0f)
-                object->character_context = -1;
-        }
-    } else if (object->character_context == -1 && (object->pad_gamepad->buttons_pressed & GAMEPAD_TAG) != 0 &&
-               ((object->apiobj.character_data->model_flags & 0x1000000) != 0 || object->field_0x108e == 6)) {
-        FireBountyHunterRocket(object);
-    }
-    if (object->character_context == -1 && object->field_0xe31 == 0 && object->apiobj.field_0x27d != 0 &&
-        object->apiobj.field_0x27e == 0 &&
-        ((object->movement_runtime_flags & 4) != 0 ||
-         (object->fall_animation_timer >= 0.2f &&
-          (object->pad_gamepad->input_magnitude == 0.0f ||
-           ((object->apiobj.flags_low & 0x80) == 0 && object->apiobj.character_model->model_data_b[0x59] != NULL)))))
-        StartFallLand(object, -1);
-    if (object->apiobj.field_0x27d != 0)
-        object->movement_runtime_flags &= ~4;
-    HeadMovement(object);
-    CloakMovement(object);
-    HairMovement(object);
-}
-
 void Move_JEDI(GameObject_s *object) {
     GAMEPAD_s *pad = object->pad_gamepad;
     const struct {
@@ -6758,6 +6621,143 @@ void Move_JEDI(GameObject_s *object) {
         !Cheat_PowerUpActive(object->apiobj.field_0x27c)) {
         ConstantRumble(object, qrand() * 1.5259022e-05f * 0.5f, object->apiobj.field_0x289 * 0.3f);
     }
+}
+
+void Move_WEIRDO(GameObject_s *object) {
+    GAMEPAD_s *pad = object->pad_gamepad;
+    u32 action_held = pad->buttons_held & GAMEPAD_ACTION;
+    u32 action_pressed = pad->buttons_pressed & GAMEPAD_ACTION;
+    u32 jump_held = pad->buttons_held & GAMEPAD_JUMP;
+    u32 jump_pressed = pad->buttons_pressed & GAMEPAD_JUMP;
+    u32 special_held = pad->buttons_held & GAMEPAD_SPECIAL;
+    u32 special_pressed = pad->buttons_pressed & GAMEPAD_SPECIAL;
+    u32 tag_pressed = pad->buttons_pressed & GAMEPAD_TAG;
+    i32 hit_effect = object->blade_index == -1 ? -1 : BladeTab[object->blade_index].hit_effect;
+    i32 glow_model;
+    if (SuperWeirdo(object) && (object->apiobj.character_data->model_flags & 8) == 0)
+        glow_model = 0xdf;
+    else
+        glow_model = object->blade_index == -1 ? -1 : BladeTab[object->blade_index].glow_model;
+    DropInOutCode(object);
+    ApplyGravity(object, NULL, 0.0f, 8.0f, NULL);
+    u16 weapon = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->weapon_model & 0xfffd;
+    i32 has_sabre = weapon == 0x65 || weapon == 0x69;
+    if (object->suit != NULL)
+        Signal_MoveCode(WORLD, object);
+    TakeHitCode(object);
+    FloatCode(object);
+    SlideCode(object);
+    FlattenCode(object);
+    Hang_MoveCode(object);
+    Ledge_MoveCode(WORLD, object);
+    if (LedgeTerrain_On)
+        LedgeTerrain_MoveCode(object);
+    Climb_MoveCode(object);
+    TightRope_MoveCode(object, jump_pressed);
+    ForcePushed_MoveCode(object);
+    ForcedBackCode(object);
+    Tube_MoveCode(object, WORLD);
+    DeactivatedCode(object);
+    PushCode(object, 1);
+    BackFlipCode(object);
+    TakeOverCode(object, tag_pressed);
+    Glide_MoveCode(object);
+    u32 jump_animations;
+    if (!has_sabre) {
+        hit_effect = -1;
+        jump_animations = SuperWeirdo(object) ? 0x109 : 0x208;
+    } else
+        jump_animations = SuperWeirdo(object) ? 0x11b : 0x1b;
+    JumpCode(object, jump_pressed, jump_held, jump_animations, action_pressed, action_held, hit_effect);
+    GizPanel_MoveCode(WORLD, object, special_pressed);
+    HatMachine_MoveCode(WORLD, object, special_pressed);
+    ZipUp_MoveCode(object, special_pressed);
+    if ((object->apiobj.character_data->model_flags & 0x100000) != 0)
+        Grapple_MoveCode(object);
+    BuildIt_MoveCode(object);
+    if (has_sabre || SuperWeirdo(object)) {
+        ForceDeflectCode(object, special_pressed, special_held, 0);
+        ForcePushCode(object, special_held, 0);
+        FindForcePushTarget(object, special_pressed, 1);
+        ForceThrowCode(object, special_pressed, 0);
+        ForceCode(object, special_pressed, special_held, 0);
+        FindForcePushTarget(object, special_pressed, 2);
+        if (object->apiobj.field_0x287 == 0 && FadeSys.fade == 0.0f) {
+            if (object->force_glow_step > 0.0f)
+                object->force_glow_step -= FRAMETIME;
+            else
+                ForceGlowCode(object, glow_model);
+        } else
+            ResetForceGlow(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
+    }
+    ForcePushed_MoveCode(object);
+    Lever_MoveCode(WORLD, object);
+    if ((object->apiobj.character_data->model_flags & 0x40000) != 0 || SuperWeirdo(object))
+        Teleport_MoveCode(object, special_pressed);
+    i32 detonator_used = ThermalDetonator_MoveCode(object);
+    SuperCarry_MoveCode(WORLD, object);
+    GizmoBlowupCheckProximity(WORLD, object);
+    ComboRotateCode(object, action_held);
+    WeaponOutCode(object);
+    WeaponInCode(object);
+    WeaponScalingCode(object);
+    SpecialMove_VictimCode(object);
+    HoldCode(object);
+    Attracto_MoveCode(WORLD, object);
+    SecurityDoor_MoveCode(WORLD, object);
+    if (has_sabre) {
+        BlockCode(object, action_pressed, action_held, jump_pressed, 0);
+        SwipeCode(object, action_pressed, action_held);
+        if (detonator_used == 1)
+            special_pressed = 0;
+        LightSabreComboCode(object, action_pressed, action_held, jump_pressed, special_pressed);
+        JediLightCode(object);
+    } else {
+        BlockCode(object, action_pressed, action_held, 0, 0);
+        PunchCode(object, action_pressed, action_held, 1, 0, 0.0f);
+        DodgeCode(object, action_pressed, jump_pressed);
+        if ((object->apiobj.character_data->model_flags & 0x80) != 0) {
+            if (detonator_used == 1)
+                special_pressed = 0;
+            ShootCode(object, action_pressed, special_pressed, 1, 1, 0);
+        } else if (object->batarang != NULL)
+            Batarang_MoveCode(object);
+    }
+    if (static_cast<i8>(static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_094[0]) <
+        0) {
+        CommunicateCode(object, GAMEPAD_SPECIAL & object->pad_gamepad->buttons_pressed, 0);
+    }
+    if (object->character_context == 0x14) {
+        f32 *frame = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
+        if (frame != NULL) {
+            if ((object->field_0xe22 & 4) == 0) {
+                f32 event = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
+                if (event >= 1.0f && event <= *frame) {
+                    object->field_0xe22 |= 4;
+                    object->field_0xe20 |= 0x10;
+                    PlaySfx("JgRocket", &object->apiobj.collision_position);
+                }
+            }
+            object->context_animation_timer -= FRAMETIME;
+            if (object->context_animation_timer <= 0.0f)
+                object->character_context = -1;
+        }
+    } else if (object->character_context == -1 && (object->pad_gamepad->buttons_pressed & GAMEPAD_TAG) != 0 &&
+               ((object->apiobj.character_data->model_flags & 0x1000000) != 0 || object->field_0x108e == 6)) {
+        FireBountyHunterRocket(object);
+    }
+    if (object->character_context == -1 && object->field_0xe31 == 0 && object->apiobj.field_0x27d != 0 &&
+        object->apiobj.field_0x27e == 0 &&
+        ((object->movement_runtime_flags & 4) != 0 ||
+         (object->fall_animation_timer >= 0.2f &&
+          (object->pad_gamepad->input_magnitude == 0.0f ||
+           ((object->apiobj.flags_low & 0x80) == 0 && object->apiobj.character_model->model_data_b[0x59] != NULL)))))
+        StartFallLand(object, -1);
+    if (object->apiobj.field_0x27d != 0)
+        object->movement_runtime_flags &= ~4;
+    HeadMovement(object);
+    CloakMovement(object);
+    HairMovement(object);
 }
 
 void MovePlayer_NETWORK(GameObject_s *object) {
@@ -8600,48 +8600,6 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
 
 i32 MosEisleyC_PastBarrier(GameObject_s *object);
 
-void ForcedBackCode(GameObject_s *object) {
-    f32 distance = 1000000.0f;
-    if (ForceBackPos != NULL && (object->field_0xeff & 0x10) == 0)
-        distance = NuVecDistSqr(&object->apiobj.collision_position, ForceBackPos, NULL);
-    if (object->character_context == 0x22) {
-        if (MosEisleyC_PastBarrier(object))
-            object->apiobj.position.z = 5.85f;
-        object->field_0x768 += FRAMETIME;
-        if (object->context_animation_timer > 0.0f) {
-            object->context_animation_timer -= FRAMETIME;
-            if (object->context_animation_timer < 0.0f)
-                object->context_animation_timer = 0.0f;
-        }
-        if (ForceBackPos == NULL || distance > (ForceBackRadius + 0.2f) * (ForceBackRadius + 0.2f)) {
-            if (object->context_animation_timer <= 0.0f) {
-                object->character_context = -1;
-                object->field_0xeff &= ~2;
-                object->ground_contact_grace_timer = 0.0f;
-                object->movement_runtime_flags |= 4;
-            }
-        } else if (ForceBackType == 4 && object->context_animation_timer < 0.2f) {
-            object->context_animation_timer = 0.2f;
-        }
-        if (ForceBackType == 2)
-            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[111].effect,
-                                              &object->apiobj.collision_position, 50, FRAMETIME, 0, 0, NULL);
-        NewRumble(object->pad_gamepad->pad, (qrand() * (1.0f / 65535.0f)) * 0.6f, 0);
-    } else if (ForceBackPos != NULL && object != ForceBackObj &&
-               (ForceBackType != 2 || (object->apiobj.character_data->model_flags & 0x10) != 0) &&
-               !MosEisleyC_PastBarrier(object) &&
-               (ForceBackType != 3 || ForceBackObj == NULL || ForceBackObj->force_target == object) &&
-               distance < (ForceBackRadius - 0.2f) * (ForceBackRadius - 0.2f)) {
-        Player_ClearContext(object, 1);
-        Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
-        object->context_animation_timer = 0.5f;
-        object->field_0x768 = 0.0f;
-        object->character_context = 0x22;
-        object->context_animation = 5;
-        PlaySfx("JForcePush", &object->apiobj.collision_position);
-    }
-}
-
 void Glide_MoveCode(GameObject_s *object) {
     f32 height;
     i8 context = object->character_context;
@@ -8707,6 +8665,48 @@ void Glide_MoveCode(GameObject_s *object) {
         } else {
             object->character_context = -1;
         }
+    }
+}
+
+void ForcedBackCode(GameObject_s *object) {
+    f32 distance = 1000000.0f;
+    if (ForceBackPos != NULL && (object->field_0xeff & 0x10) == 0)
+        distance = NuVecDistSqr(&object->apiobj.collision_position, ForceBackPos, NULL);
+    if (object->character_context == 0x22) {
+        if (MosEisleyC_PastBarrier(object))
+            object->apiobj.position.z = 5.85f;
+        object->field_0x768 += FRAMETIME;
+        if (object->context_animation_timer > 0.0f) {
+            object->context_animation_timer -= FRAMETIME;
+            if (object->context_animation_timer < 0.0f)
+                object->context_animation_timer = 0.0f;
+        }
+        if (ForceBackPos == NULL || distance > (ForceBackRadius + 0.2f) * (ForceBackRadius + 0.2f)) {
+            if (object->context_animation_timer <= 0.0f) {
+                object->character_context = -1;
+                object->field_0xeff &= ~2;
+                object->ground_contact_grace_timer = 0.0f;
+                object->movement_runtime_flags |= 4;
+            }
+        } else if (ForceBackType == 4 && object->context_animation_timer < 0.2f) {
+            object->context_animation_timer = 0.2f;
+        }
+        if (ForceBackType == 2)
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[111].effect,
+                                              &object->apiobj.collision_position, 50, FRAMETIME, 0, 0, NULL);
+        NewRumble(object->pad_gamepad->pad, (qrand() * (1.0f / 65535.0f)) * 0.6f, 0);
+    } else if (ForceBackPos != NULL && object != ForceBackObj &&
+               (ForceBackType != 2 || (object->apiobj.character_data->model_flags & 0x10) != 0) &&
+               !MosEisleyC_PastBarrier(object) &&
+               (ForceBackType != 3 || ForceBackObj == NULL || ForceBackObj->force_target == object) &&
+               distance < (ForceBackRadius - 0.2f) * (ForceBackRadius - 0.2f)) {
+        Player_ClearContext(object, 1);
+        Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
+        object->context_animation_timer = 0.5f;
+        object->field_0x768 = 0.0f;
+        object->character_context = 0x22;
+        object->context_animation = 5;
+        PlaySfx("JForcePush", &object->apiobj.collision_position);
     }
 }
 
@@ -9064,41 +9064,6 @@ float VehicleTurnOrLoopOffset(GameObject_s *object) {
     return 0.0f;
 }
 
-i32 WallShuffle_SetTargetMom(GameObject_s *object, u16 input_angle) {
-    object->target_velocity.x = NU_SIN_LUT(object->apiobj.movement_facing_angle);
-    object->target_velocity.z = NU_COS_LUT(object->apiobj.movement_facing_angle);
-    u16 sideways_angle = object->apiobj.movement_facing_angle + 0x4000;
-    f32 direction = PushingTowardsAngle(input_angle, sideways_angle);
-    f32 speed;
-    if (!(direction > NuTrigTable[0x3555])) {
-        if (direction < -NuTrigTable[0x3555]) {
-            if (LEGOACT_WALLSHUFFLE_LEFT != -1 &&
-                object->apiobj.character_model->model_data_b[LEGOACT_WALLSHUFFLE_LEFT] != NULL) {
-                object->context_animation = LEGOACT_WALLSHUFFLE_LEFT;
-                speed = -AnimSpeed(object->apiobj.character_model, LEGOACT_WALLSHUFFLE_LEFT);
-            } else {
-                speed = -0.5f;
-            }
-        } else {
-            object->context_animation = LEGOACT_WALLSHUFFLE_IDLE;
-            return 0;
-        }
-    } else {
-        if (LEGOACT_WALLSHUFFLE_RIGHT != -1 &&
-            object->apiobj.character_model->model_data_b[LEGOACT_WALLSHUFFLE_RIGHT] != NULL) {
-            object->context_animation = LEGOACT_WALLSHUFFLE_RIGHT;
-            speed = AnimSpeed(object->apiobj.character_model, LEGOACT_WALLSHUFFLE_RIGHT);
-        } else {
-            speed = 0.5f;
-        }
-    }
-    if (speed != 0.0f) {
-        object->target_velocity.x += NU_SIN_LUT(sideways_angle) * speed;
-        object->target_velocity.z += NU_COS_LUT(sideways_angle) * speed;
-    }
-    return 0;
-}
-
 void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 game_flag_mask, u32 game_flag_value,
                                 i32 movement_type, void *move_function, void *animate_function, void *draw_function) {
     const CHARACTERUPDATEFN move = reinterpret_cast<CHARACTERUPDATEFN>(move_function);
@@ -9233,6 +9198,41 @@ void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 g
 #undef GAME_MATCH
 #undef MODEL_MATCH
 #undef UPDATE_MATCHING_CHARACTERS
+}
+
+i32 WallShuffle_SetTargetMom(GameObject_s *object, u16 input_angle) {
+    object->target_velocity.x = NU_SIN_LUT(object->apiobj.movement_facing_angle);
+    object->target_velocity.z = NU_COS_LUT(object->apiobj.movement_facing_angle);
+    u16 sideways_angle = object->apiobj.movement_facing_angle + 0x4000;
+    f32 direction = PushingTowardsAngle(input_angle, sideways_angle);
+    f32 speed;
+    if (!(direction > NuTrigTable[0x3555])) {
+        if (direction < -NuTrigTable[0x3555]) {
+            if (LEGOACT_WALLSHUFFLE_LEFT != -1 &&
+                object->apiobj.character_model->model_data_b[LEGOACT_WALLSHUFFLE_LEFT] != NULL) {
+                object->context_animation = LEGOACT_WALLSHUFFLE_LEFT;
+                speed = -AnimSpeed(object->apiobj.character_model, LEGOACT_WALLSHUFFLE_LEFT);
+            } else {
+                speed = -0.5f;
+            }
+        } else {
+            object->context_animation = LEGOACT_WALLSHUFFLE_IDLE;
+            return 0;
+        }
+    } else {
+        if (LEGOACT_WALLSHUFFLE_RIGHT != -1 &&
+            object->apiobj.character_model->model_data_b[LEGOACT_WALLSHUFFLE_RIGHT] != NULL) {
+            object->context_animation = LEGOACT_WALLSHUFFLE_RIGHT;
+            speed = AnimSpeed(object->apiobj.character_model, LEGOACT_WALLSHUFFLE_RIGHT);
+        } else {
+            speed = 0.5f;
+        }
+    }
+    if (speed != 0.0f) {
+        object->target_velocity.x += NU_SIN_LUT(sideways_angle) * speed;
+        object->target_velocity.z += NU_COS_LUT(sideways_angle) * speed;
+    }
+    return 0;
 }
 
 u16 SeekRot(u16 current, u16 target, f32 rate) {
@@ -9466,6 +9466,23 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
 void FloatCode(GameObject_s *) {
 }
 
+void StartHold(GameObject_s *object) {
+    if (CanStartHoldFn == NULL)
+        return;
+    if (CanStartHoldFn(object) == 2) {
+        object->hold_timer = 0.0f;
+        object->character_context = -1;
+        return;
+    }
+    if (LEGOCONTEXT_HOLD != -1 && NewBlockAction(object) != 0) {
+        object->context_animation_timer = 0.3f;
+        object->character_context = LEGOCONTEXT_HOLD;
+        PlaySabreSfx(NULL, object, NULL, 1);
+        return;
+    }
+    object->character_context = -1;
+}
+
 void SlideCode(GameObject_s *object) {
     if (object->field_0x7a5 != 0x33) {
         StartSlide(object, 1);
@@ -9483,23 +9500,6 @@ void SlideCode(GameObject_s *object) {
             PlaySfx("Char_Slide_Lp", &object->apiobj.lower_position);
         }
     }
-}
-
-void StartHold(GameObject_s *object) {
-    if (CanStartHoldFn == NULL)
-        return;
-    if (CanStartHoldFn(object) == 2) {
-        object->hold_timer = 0.0f;
-        object->character_context = -1;
-        return;
-    }
-    if (LEGOCONTEXT_HOLD != -1 && NewBlockAction(object) != 0) {
-        object->context_animation_timer = 0.3f;
-        object->character_context = LEGOCONTEXT_HOLD;
-        PlaySabreSfx(NULL, object, NULL, 1);
-        return;
-    }
-    object->character_context = -1;
 }
 
 void StartTurn(GameObject_s *object) {

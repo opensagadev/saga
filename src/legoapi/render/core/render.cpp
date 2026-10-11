@@ -122,8 +122,8 @@ extern "C" void LocaledbitsDrawSolidCircleXY(NUVEC *centre, f32 radius, f32 lowe
 extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour) {
     f32 corners[4][2] = {{-1.0f, -1.0f}, {1.0f, -1.0f}, {1.0f, 1.0f}, {-1.0f, 1.0f}};
     NUMTX matrix = global_camera.mtx;
-    matrix.m30 = centre->x;
     matrix.m31 = centre->y;
+    matrix.m30 = centre->x;
     matrix.m32 = centre->z;
     for (i32 remaining = 4; remaining > 0; --remaining) {
         const i32 i = 4 - remaining;
@@ -1018,8 +1018,8 @@ void DrawLocator(nuvec_s *position, float radius, i32 rotation, i32 colour) {
     vertices[1].position.y = centre.y + radius;
     AiRndrLine3d(vertices, NULL, NULL);
     axis.x = 0.0f;
-    axis.y = 0.0f;
     axis.z = radius;
+    axis.y = 0.0f;
     NuVecRotateY(&axis, &axis, rotation);
     NuVecAdd(&vertices[0].position, &centre, &axis);
     NuVecSub(&vertices[1].position, &centre, &axis);
@@ -2159,8 +2159,8 @@ void DrawGameMessages() {
         if ((flags & 0x20) != 0) {
             scale += (message->target_scale - scale) * progress;
         }
-        position.x += message->field_0xc4;
         position.z += message->field_0xc8;
+        position.x += message->field_0xc4;
 
         if (message->draw_callback != NULL) {
             message->draw_callback(message, &position, scale);
@@ -2395,9 +2395,9 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
                 NuMtxScale(&matrix, &built_size);
             }
             if (i <= currentminikit) {
-                matrix.m30 += offset.x;
                 matrix.m31 += offset.y;
                 matrix.m32 += offset.z;
+                matrix.m30 += offset.x;
             }
 
             const NUANG rotation_y =
@@ -2431,8 +2431,8 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
             matrix.m10 = z1 * cz - matrix.m11 * sz;
             matrix.m11 = z1 * sz + matrix.m11 * cz;
             matrix.m20 = z2 * cz - matrix.m21 * sz;
-            matrix.m21 = z2 * sz + matrix.m21 * cz;
             matrix.m30 = z3 * cz - matrix.m31 * sz;
+            matrix.m21 = z2 * sz + matrix.m21 * cz;
             matrix.m31 = z3 * sz + matrix.m31 * cz;
 
             const u16 x_phase =
@@ -2883,8 +2883,8 @@ void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_
     if (object != NULL) {
         id = object->id;
         model = object->apiobj.character_model;
-        axis = object->field_0x1087;
         hat = object->field_0x108e;
+        axis = object->field_0x1087;
         plane = object->field_0x1020;
     } else {
         id = dco_id;
@@ -3387,8 +3387,8 @@ SwipeDecalRenderer::SwipeDecalRenderer(TouchHolder &holder, i32 index, SwipeDeca
 
     width.Start(0.0f, target_width, 0.1f);
     width.value = 0.0f;
-    x = swipe_x;
     y = swipe_y;
+    x = swipe_x;
     angle = NuAtan2D(dx, dy);
     alpha.Start(0.02f, 1.0f, 0.1f);
     alpha.value = 0.02f;
@@ -3721,8 +3721,8 @@ static void DrawParaphernalia(GameObject_s *object) {
         }
     } else {
         carried->field_0x1088 = object->field_0x1088;
-        carried->field_0x1020 = object->field_0x1020;
         carried->field_0x1087 = object->field_0x1087;
+        carried->field_0x1020 = object->field_0x1020;
         i32 locator = object->apiobj.character_data->game_character->ride_locator;
         if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
             matrix = object->joint_matrices[locator];
@@ -3859,8 +3859,8 @@ static void DrawParaphernalia(GameObject_s *object) {
                 NUVEC scaling = {scale, scale, scale};
                 NuMtxSetScale(&communicate_matrix, &scaling);
                 NuMtxRotateY(&communicate_matrix, static_cast<u16>(object->apiobj.field_0x276 + 0x8000));
-                communicate_matrix.m30 = joints[locator].m30;
                 communicate_matrix.m31 = joints[locator].m31;
+                communicate_matrix.m30 = joints[locator].m30;
                 communicate_matrix.m32 = joints[locator].m32;
                 if (object->apiobj.field_0x27f == 9 && object->apiobj.water_height > communicate_matrix.m31)
                     communicate_matrix.m31 = object->apiobj.water_height;

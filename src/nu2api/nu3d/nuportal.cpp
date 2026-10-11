@@ -31,8 +31,8 @@ static NUFRUSTRUM *allocateFrustrum(i16 plane_count, i16 room_id) {
     NUFRUSTRUM *frustum = reinterpret_cast<NUFRUSTRUM *>(ALIGN(fstack_top.addr, 16));
     frustum->planes = reinterpret_cast<NUPLANE *>(reinterpret_cast<u8 *>(frustum) + sizeof(NUFRUSTRUM));
     fstack_top.addr = reinterpret_cast<usize>(frustum->planes + plane_count);
-    frustum->plane_count = plane_count;
     frustum->room_id = room_id;
+    frustum->plane_count = plane_count;
     frustra[*nfrustra] = frustum;
     ++*nfrustra;
     return frustum;

@@ -959,8 +959,8 @@ void LegoCity_Update(WORLDINFO_s *world) {
     u8 changed = changedTractor | changedTaunTaun | changedMoonCar | changedTownCar;
     prevOnTractor = onTractor;
     prevOnTaunTaun = onTaunTaun;
-    prevOnMoonCar = onMoonCar;
     prevOnTownCar = onTownCar;
+    prevOnMoonCar = onMoonCar;
     if (changed == 0) {
         return;
     }
@@ -1246,8 +1246,8 @@ void DeathStar2BattleD_Update(WORLDINFO_s *) {
         qrand();
         colour.x = 0.0f;
         if (!(qrand() > 0x7fff)) {
-            colour.y = 2.0f;
             colour.z = 2.0f;
+            colour.y = 2.0f;
         } else {
             colour.y = 0.25f;
             colour.z = 0.25f;

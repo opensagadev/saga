@@ -412,8 +412,8 @@ void LoadAreaCharacters() {
     }
 
     if (Area == -1) {
-        VehicleArea = 0;
         BonusArea = 0;
+        VehicleArea = 0;
     } else {
         const u16 area_flags = ADataList[Area].flags;
         if ((area_flags & AREAFLAG_VEHICLE_AREA) == 0) {

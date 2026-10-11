@@ -251,10 +251,10 @@ void GameCam_UpdateLookRot(GAMECAMERA_s *camera) {
                         vertical = look_pitch;
                 } else {
                     nupad_s *pad = Player[0]->pad_gamepad->pad;
-                    horizontal =
-                        (static_cast<f32>(static_cast<u32>(pad->analog_left_x)) - 127.5f) * (1.0f / 127.5f) * look_yaw;
                     vertical = (static_cast<f32>(static_cast<u32>(pad->analog_left_y)) - 127.5f) * (1.0f / 127.5f) *
                                look_pitch;
+                    horizontal =
+                        (static_cast<f32>(static_cast<u32>(pad->analog_left_x)) - 127.5f) * (1.0f / 127.5f) * look_yaw;
                 }
                 camera->field_0x204 += vertical;
                 camera->field_0x208 += horizontal;
@@ -293,10 +293,10 @@ void GameCam_UpdateLookRot(GAMECAMERA_s *camera) {
                         vertical = look_pitch;
                 } else {
                     nupad_s *pad = Player[1]->pad_gamepad->pad;
-                    horizontal =
-                        (static_cast<f32>(static_cast<u32>(pad->analog_left_x)) - 127.5f) * (1.0f / 127.5f) * look_yaw;
                     vertical = (static_cast<f32>(static_cast<u32>(pad->analog_left_y)) - 127.5f) * (1.0f / 127.5f) *
                                look_pitch;
+                    horizontal =
+                        (static_cast<f32>(static_cast<u32>(pad->analog_left_x)) - 127.5f) * (1.0f / 127.5f) * look_yaw;
                 }
                 camera->field_0x204 += vertical;
                 camera->field_0x208 += horizontal;
@@ -1430,8 +1430,8 @@ mode_selected:
         }
     }
     if (camera->reset_blend != 0) {
-        camera->reset_blend = 0;
         camera->blend_destination_position = position;
+        camera->reset_blend = 0;
         camera->blend_destination_target = target;
     }
     f32 blend = 0.0f, angle_blend = 0.0f;
@@ -1465,8 +1465,8 @@ mode_selected:
                 camera->blend_end_target.z + (camera->blend_destination_target.z - camera->blend_end_target.z) * blend;
         }
     }
-    camera->position_seek = position_seek;
     camera->angle_seek = angle_seek;
+    camera->position_seek = position_seek;
     if (camera->mode != previous_mode && camera->blend_time >= camera->blend_duration)
         camera->pos = position;
     else {
@@ -1905,8 +1905,8 @@ void SetCameraMatrices() {
     NuMtxScale(&effect_matrix, &scale);
     effect_matrix.m30 = 1.0f;
     effect_matrix.m31 = 1.0f;
-    effect_matrix.m32 = 0.0f;
     effect_matrix.m33 = 1.0f;
+    effect_matrix.m32 = 0.0f;
     effect_matrix.m23 = 0.0f;
     effect_matrix.m13 = 0.0f;
     effect_matrix.m03 = 0.0f;

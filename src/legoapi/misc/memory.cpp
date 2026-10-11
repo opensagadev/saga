@@ -92,13 +92,13 @@ extern "C" {
         key->particle_count = 0;
         key->previous_allocated_chunk_count = 0;
         key->previous_particle_count = 0;
-        key->controlled_chunk_count = 0;
         key->field_2f2 = -1;
         key->gscene = NULL;
+        key->controlled_chunk_count = 0;
         key->field_2f4 = 1;
         key->field_2f6 = 1;
-        key->field_2f7 = 1;
         key->user_data = NULL;
+        key->field_2f7 = 1;
         key->allocation_index = slot;
         key->field_2fa = 0;
         return slot;
@@ -134,8 +134,8 @@ extern "C" {
                 RemoveAnyChunkControls(reinterpret_cast<i32 *>(key->particle_chunks[i]));
                 debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr];
                 control->particle_chunk = key->particle_chunks[i];
-                control->active = effect->particle_type == 7 ? 7 : 0;
                 control->owner = NULL;
+                control->active = effect->particle_type == 7 ? 7 : 0;
                 const i32 panel = effect->time_group == 4;
                 debinftype *expiry_effect = debtab[key->effect_index];
                 control->expiry_time = expiry_effect->particle_lifetime + (panel ? panelglobaltime : globaltime) +
@@ -167,8 +167,8 @@ extern "C" {
         for (i32 i = 0; i < key->allocated_chunk_count; ++i)
             key->particle_chunks[i] = NULL;
         key->allocated_chunk_count = 0;
-        key->effect_index = 0;
         key->allocation_index = -1;
+        key->effect_index = 0;
         freedebkeys[--freedebkeyptr] = static_cast<i16>(*handle);
         key->allocation_locked = 0;
         *handle = -1;
@@ -343,8 +343,8 @@ extern "C" {
                     }
                     if (render_chunk != NULL) {
                         render_chunk->particle_chunk = key->particle_chunks[0];
-                        render_chunk->effect = effect;
                         render_chunk->key = key;
+                        render_chunk->effect = effect;
                         render_chunk->render_priority = key->render_priority;
                         if (key->field_2f6 != 0) {
                             AddChunkToRenderStack(render_chunk, &ParticleChunkRenderStack[effect->time_group]);
@@ -387,8 +387,8 @@ extern "C" {
                         }
                     }
                     if (render_chunk != NULL) {
-                        render_chunk->particle_chunk = key->particle_chunks[0];
                         render_chunk->effect = effect;
+                        render_chunk->particle_chunk = key->particle_chunks[0];
                         render_chunk->key = key;
                         render_chunk->render_priority = key->render_priority;
                         if (key->field_2f6 != 0) {
@@ -448,8 +448,8 @@ extern "C" {
                 render_chunk->particle_chunk = key->particle_chunks[key->allocated_chunk_count + additional_chunks];
                 render_chunk->effect = debtab[key->effect_index];
                 render_chunk->key = NULL;
-                render_chunk->effect_orientation = key->effect_orientation;
                 render_chunk->position = key->position;
+                render_chunk->effect_orientation = key->effect_orientation;
                 render_chunk->render_priority = key->render_priority;
                 if (key->field_2f6 != 0) {
                     AddChunkToRenderStack(render_chunk, &ParticleChunkRenderStack[render_chunk->effect->time_group]);

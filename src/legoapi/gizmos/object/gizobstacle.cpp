@@ -403,8 +403,8 @@ static i32 GizmoObstacle_ActivateRev(GIZMO *gizmo, i32 activate, i32 flags) {
 
     if ((flags & GIZOBSTACLE_ACTIVATE_REVERSE_VALIDATE) == 0) {
         if (activate == 0) {
-            obstacle->progress_flags |= GIZOBSTACLE_PROGRESS_FLAG_ENABLED;
             obstacle->control_flags &= static_cast<u8>(~GIZOBSTACLE_CONTROL_FLAG_REVERSE_ACTIVE);
+            obstacle->progress_flags |= GIZOBSTACLE_PROGRESS_FLAG_ENABLED;
             return 1;
         }
         GizObstacle_PlayBackwards(obstacle);

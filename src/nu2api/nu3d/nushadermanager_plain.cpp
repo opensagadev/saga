@@ -807,12 +807,12 @@ namespace nu2api {
             const u8 baseFlag = descBytes[0x1b8];
 
             u8 v24 = 0;
-            if ((baseFlag & 1) == 0 || filter->texture_id_threshold >= thresholdB) {
+            if ((baseFlag & 1) != 0 && !(filter->texture_id_threshold >= thresholdB)) {
+                v24 = 2;
+            } else {
                 if ((baseFlag & 2) != 0) {
                     v24 = filter->texture_id_threshold < thresholdB;
                 }
-            } else {
-                v24 = 2;
             }
             block[0x24] = v24;
 
@@ -829,10 +829,10 @@ namespace nu2api {
         const u8 vtxType = mtlBytes[0x40] & 0xf;
 
         bool texcoordIsLong = false;
-        if (unitsLow == 3 || unitsLow == 5) {
-            texcoordIsLong = true;
-        } else {
+        if (unitsLow != 3 && unitsLow != 5) {
             texcoordIsLong = (vtxType == 10) || ((unitsLow & 3) == 2);
+        } else {
+            texcoordIsLong = true;
         }
         const u8 attribC0 = mtlBytes[0x41] & 0xc0;
         if (attribC0 == 0 || attribC0 == 0x80 || vtxType == 0 || vtxType == 10) {

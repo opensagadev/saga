@@ -690,10 +690,10 @@ void Batarang_MoveCode(GameObject_s *object) {
             message.position = &static_cast<BATARANG_s *>(object->batarang)->sight_position;
             message.flags = 0x1080;
             message.scale = 1.0f;
-            message.red = static_cast<u8>(colour[0]);
             message.green = static_cast<u8>(colour[1]);
-            message.blue = static_cast<u8>(colour[2]);
+            message.red = static_cast<u8>(colour[0]);
             message.alpha = static_cast<i32>((0.2f * game_pulse + 0.8f) * 128.0f);
+            message.blue = static_cast<u8>(colour[2]);
             message.text = text;
             AddGameMsg(&message);
             message.flags = 0x87;
@@ -715,8 +715,8 @@ void Batarang_MoveCode(GameObject_s *object) {
             object->field_0x7a3 = 1;
             object->context_animation = 0x65;
             f32 duration = AnimDuration(object->id, 0x65, 0.0f, 0.0f, 1);
-            object->context_flags &= ~0x40U;
             object->context_animation_timer = 0.0f;
+            object->context_flags &= ~0x40U;
             object->airborne_action_duration = duration <= 0.0f ? 0.5f : duration;
             if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
                 AnimListFrame(object->apiobj.character_model, object->context_animation, 0) != 0.0f) {

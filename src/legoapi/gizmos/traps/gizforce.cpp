@@ -296,8 +296,8 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
     for (i32 i = 0; i < 8; ++i) {
         force_sys->groups[i].field_0x24 &= static_cast<u8>(~GIZFORCE_GROUP_ACTIVE);
     }
-    force_sys->visible_force_count = 0;
     force_sys->hit_test_gizmo_count = 0;
+    force_sys->visible_force_count = 0;
     GIZMOSET *set = &gizmo_sys->sets[force_gizmotype_id];
     GIZMO *gizmo = set->gizmos;
     for (i32 index = 0; index < set->count; ++index, ++gizmo) {
@@ -940,9 +940,9 @@ static i32 *GizForces_GetBestBoltTarget(GIZMOSET *set, float *result_distance, N
     if (best != NULL) {
         *result_position = *best_position;
         *result_distance = nearest_distance;
-        result_velocity->x = 0.0f;
         result_velocity->y = 0.0f;
         result_velocity->z = 0.0f;
+        result_velocity->x = 0.0f;
         return reinterpret_cast<i32 *>(best);
     }
     if (previous == NULL) {

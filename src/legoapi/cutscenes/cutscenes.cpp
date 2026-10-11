@@ -461,9 +461,9 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
             continue;
         }
         if ((cut->flags & 1) != 0) {
-            CUTSTOPGAME = 1;
             CUTDRAWWORLD = cut->flags & 2;
             CUTNOFOG = cut->flags & 4;
+            CUTSTOPGAME = 1;
             CutStopInfo = cut;
             stop_index = i;
             DebrisSetRenderGroup(cut->debris_render_group);
@@ -901,8 +901,8 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     if (instance->field_15 != animation_index) {
         const u8 requested_animation = static_cast<u8>(animation_index);
         if (!(blend_time > 0.0f) || instance->field_15 == 0xff) {
-            instance->field_16 = requested_animation;
             instance->animation_frame_a = !(animation_start_frame > 1.0f) ? 1.0f : animation_start_frame;
+            instance->field_16 = requested_animation;
         } else {
             if ((instance->field_14 & 1) == 0) {
                 if (instance->field_15 == 0) {
@@ -936,8 +936,8 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
         if (blend_time <= 0.0f) {
             instance->blend_progress = 0;
             animation_a_index = instance->field_17;
-            instance->field_14 ^= 1;
             instance->field_16 = instance->field_17;
+            instance->field_14 ^= 1;
             instance->animation_frame_a = instance->animation_frame_b;
             blending = false;
         } else {

@@ -1119,8 +1119,8 @@ static void GizSpinner_ResetAll(void *world_ptr, void *, void *progress_ptr) {
 
                 spinner.field_0x090 = 0.0f;
                 spinner.room_index = -1;
-                spinner.previous_rotation = spinner.rotation;
                 spinner.target_rotation = spinner.rotation;
+                spinner.previous_rotation = spinner.rotation;
                 spinner.state = static_cast<u8>(GizSpinner_GetState(&spinner));
                 spinner.state_flags = (spinner.state_flags & ~0x300u) | GIZSPINNER_STATE_RESET;
 

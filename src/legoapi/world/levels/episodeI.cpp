@@ -838,8 +838,8 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
                         speed = 1.5f * speed - ratio * speed;
                     }
                     speed /= length;
-                    pod->previous_axis.x = direction.x * speed;
                     pod->previous_axis.y = direction.y * speed;
+                    pod->previous_axis.x = direction.x * speed;
                     pod->previous_axis.z = direction.z * speed;
                 }
                 direction.x = pod->previous_axis.x * FRAMETIME;
@@ -917,8 +917,8 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
         ResetLevel(world, reason, 1);
     }
     if (netclient == 0) {
-        podrace_netpacket->start_countdown = PodRace->lap_countdown;
         podrace_netpacket->remaining_time = PodRace->lap_display;
+        podrace_netpacket->start_countdown = PodRace->lap_countdown;
         podrace_netpacket->available_time = PodRace->prev_lap_display;
         podrace_netpacket->lap = Lap;
     }
@@ -1291,8 +1291,8 @@ i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **
     racepod_s *pod = &PodRace->lap_entries[slot];
     pod->data = (u32 *)spline;
     pod->start = start;
-    pod->model_id = model_id;
     pod->next = (void *)1;
+    pod->model_id = model_id;
 
     float spline_length = spline->length;
     float duration = time_factor * PodRace->prev_lap_display;
@@ -1378,8 +1378,8 @@ i32 Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **, 
         NuVecSub(&object_offset, &object->apiobj.position, &object->sock_position.midpoint);
         NuVecRotateY(&object_offset, &object_offset, -object->yrot);
         goal.x = object_offset.x * sebulba_lerpf + target_offset.x * (1.0f - sebulba_lerpf);
-        goal.y = 0.0f;
         goal.z = 0.0f;
+        goal.y = 0.0f;
         NuVecAdd(&goal, &goal, &ahead.midpoint);
 
         packet->script_process.action_timer += FRAMETIME;
@@ -1877,8 +1877,8 @@ void PodSprintA_Reset(WORLDINFO_s *world) {
     ps->flags &= 0xef;
     ps->field_0x88 = 0;
     if ((ps->flags & 0xc) == 0 && !(netclient != 0 && podsprint_netpacket->ai_state > 2)) {
-        ps->ai_state = 1;
         ps->ai_index = 0;
+        ps->ai_state = 1;
         ps->flags &= 0xfe;
         ps->speed = 3.0f;
         podstartracealpha = 0.0f;
@@ -1890,16 +1890,16 @@ void PodSprintA_Reset(WORLDINFO_s *world) {
         GameObject_s *p = player;
         if (p != NULL && (p->apiobj.field_0x1f8 & 0x1000)) {
             p->field_0xdc8 = 1.0f;
-            p->apiobj.velocity.x = 0.0f;
             p->apiobj.velocity.y = 0.0f;
+            p->apiobj.velocity.x = 0.0f;
             p->apiobj.velocity.z = ((PLAYERSUBOBJ2_s *)((PLAYERSUBOBJ_s *)p->apiobj.character_data)->field_0x24)->value;
             NuVecRotateY(&p->apiobj.velocity, &p->apiobj.velocity, p->apiobj.field_0x276);
         }
         if (player2 != NULL && (player2->apiobj.field_0x1f8 & 0x1000)) {
             GameObject_s *p2 = player2;
             p2->field_0xdc8 = 1.0f;
-            p2->apiobj.velocity.x = 0.0f;
             p2->apiobj.velocity.y = 0.0f;
+            p2->apiobj.velocity.x = 0.0f;
             p2->apiobj.velocity.z =
                 ((PLAYERSUBOBJ2_s *)((PLAYERSUBOBJ_s *)p2->apiobj.character_data)->field_0x24)->value;
             NuVecRotateY(&p2->apiobj.velocity, &p2->apiobj.velocity, p2->apiobj.field_0x276);

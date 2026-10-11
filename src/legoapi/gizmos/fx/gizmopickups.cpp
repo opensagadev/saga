@@ -954,8 +954,8 @@ ADDGIZMOTYPE *GizmoPickups_RegisterGizmo(i32 type_id) {
     addtype.fns.allocate_progress_data_fn = GizmoPickups_AllocateProgressData;
     addtype.fns.clear_progress_fn = GizmoPickups_ClearProgress;
     addtype.fns.store_progress_fn = GizmoPickups_StoreProgress;
-    addtype.fns.reset_fn = GizmoPickups_Reset;
     addtype.fns.reserve_buffer_space_fn = GizmoPickups_ReserveBufferSpace;
+    addtype.fns.reset_fn = GizmoPickups_Reset;
     addtype.fns.load_fn = GizmoPickups_Load;
     addtype.fns.post_load_fn = GizmoPickups_PostLoad;
     addtype.fns.add_level_sfx_fn = NULL;

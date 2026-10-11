@@ -242,8 +242,8 @@ void CruiserDUpdate(WORLDINFO_s *) {
         if (CruiserD_direction >= 0 && LevGizmo[0] != NULL && LevGizmo[0]->object != NULL &&
             (((u8 *)LevGizmo[0]->object)[0x68] & 2) != 0) {
             CruiserD_direction = -1;
-            CruiserD_LiftAnim->playing = 1;
             CruiserD_LiftAnim->tfactor = -0.1f;
+            CruiserD_LiftAnim->playing = 1;
         }
 
         if (!CruiserD_LiftAnim->playing) {

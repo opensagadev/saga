@@ -631,8 +631,8 @@ void AddStatusMiniKitParts() {
             message.duration = COINMSGTIME;
             message.score = GizmoPickupType[2].score;
             message.end_fn = EndScoreMessage;
-            message.update_fn = GameMsg_DrawAdjustNewPos_CoinToTotal;
             message.field_0x20 = delay;
+            message.update_fn = GameMsg_DrawAdjustNewPos_CoinToTotal;
             message.field_0x4e = 1;
             AddGameMsg(&message);
             if (delay == 0.0f) {

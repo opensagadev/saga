@@ -479,8 +479,8 @@ void InitStatusScreen(WORLDINFO_s *world) {
     }
     if ((p.mode_flags & 1) != 0 && area != -1) {
         p.field_0xb0 = (p.field_0xb0 & 0xdf) | ((BonusWinner & 1) << 5);
-        p.previous_best_time = Game.area_save[area].challenge_trial_time;
         p.elapsed_time = BonusTimer.time_elapsed;
+        p.previous_best_time = Game.area_save[area].challenge_trial_time;
         i32 gold = 0;
         if (p.previous_best_time <= 0.0f || p.elapsed_time < p.previous_best_time) {
             if (WORLD->area->challenge_trial_time != 0 && WORLD->area->challenge_trial_time <= p.previous_best_time) {
@@ -521,8 +521,8 @@ void InitStatusScreen(WORLDINFO_s *world) {
         return;
     }
     if (p.mission_state != 0) {
-        p.newly_completed = 0;
         p.elapsed_time = MissionSys->timer.time_elapsed;
+        p.newly_completed = 0;
         p.original_score = *p.score;
         p.reward_score = p.original_score;
         i32 gold = 0;
@@ -1146,26 +1146,26 @@ void DrawStatusScreen(WORLDINFO_s *) {
             i32 red, green, blue;
             if (gamedemo_option == option && TestForController() != 0) {
                 if (menu_pulsate > 0.0f) {
-                    red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
-                                           static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
                     green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
                                              static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
+                    red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
+                                           static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
                     blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
                                             static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
                 } else if (menu_flash != 0) {
-                    red = MENUFLASH0R;
                     green = MENUFLASH0G;
+                    red = MENUFLASH0R;
                     blue = MENUFLASH0B;
                 } else {
                     red = MENUFLASH1R;
-                    green = MENUFLASH1G;
                     blue = MENUFLASH1B;
+                    green = MENUFLASH1G;
                 }
             } else if (menu_pulse > 0.0f) {
-                red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
-                                       static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
                 green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
                                          static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse));
+                red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
+                                       static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
                 blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
                                         static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse));
             } else {
@@ -1297,8 +1297,8 @@ void TrueHero_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float el
     switch (stage->field_0x14) {
         case 0:
             stage->field_0x14 = 1;
-            stage->field_0x18 = 0.0f;
             stage->field_0x1c = 1.0f;
+            stage->field_0x18 = 0.0f;
             break;
         case 1:
             stage->field_0x18 += elapsed;
@@ -1459,17 +1459,17 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
         if (selected != 0 && status_prompt == i && TestForController()) {
             if (menu_pulsate > 0.0f) {
                 const f32 inverse = 1.0f - menu_pulsate;
-                red = MENUFLASH0R * menu_pulsate + MENUFLASH1R * inverse;
                 blue = MENUFLASH0B * menu_pulsate + MENUFLASH1B * inverse;
                 green = MENUFLASH0G * menu_pulsate + MENUFLASH1G * inverse;
+                red = MENUFLASH0R * menu_pulsate + MENUFLASH1R * inverse;
             } else if (menu_flash == 0) {
                 red = MENUFLASH1R;
                 blue = MENUFLASH1B;
                 green = MENUFLASH1G;
             } else {
                 red = MENUFLASH0R;
-                green = MENUFLASH0G;
                 blue = MENUFLASH0B;
+                green = MENUFLASH0G;
             }
         } else if (menu_pulse > 0.0f) {
             const f32 inverse = 1.0f - menu_pulse;
@@ -1951,8 +1951,8 @@ void ChallangeCash_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float e
     switch (stage->field_0x14) {
         case 0:
             stage->field_0x1c = 4.0f;
-            stage->field_0x18 = 0.0f;
             stage->field_0x14 = 1;
+            stage->field_0x18 = 0.0f;
             break;
         case 1: {
             f32 previous = stage->field_0x18;
