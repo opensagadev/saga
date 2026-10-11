@@ -10,7 +10,7 @@ import tempfile
 def main():
     binary = str(pathlib.Path(sys.argv[1]).resolve())
     root = pathlib.Path(__file__).resolve().parents[2]
-    fixture = root / "res/SavedGames/SaveGame0.LEGO Star Wars - The Complete Saga_SavedGame"
+    fixture = root / "res/SavedGames/SaveGame2.LEGO Star Wars - The Complete Saga_SavedGame"
     original = fixture.read_bytes()
 
     def run(args, status, message):

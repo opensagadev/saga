@@ -194,7 +194,10 @@ The outputs are `bazel-bin/src/saga.html`, `saga.js`, and `saga.wasm`. Build
 this variant when changing browser support or portable host behavior.
 After loading the OBB, the browser build runs the regular startup sequence.
 The saves in `res/SavedGames/` are embedded at the same path in the browser
-filesystem, so they can be loaded from the in-game menu.
+filesystem, so they can be loaded from the in-game menu: slot 2 is a
+completed game and slot 3 holds the Android `SuperOptions` with every store
+pack unlocked. The game also needs slot 3 to load a game slot, because the
+load checks the `SuperOptions` checksum along with the slot.
 
 With the OBB under `res/`, build and serve the browser version with:
 

@@ -177,7 +177,7 @@ extern "C" void __wrap_NuFrameBegin() {
 }
 
 extern "C" int __wrap_main(int argc, char **argv) {
-    const char *save = "res/SavedGames/SaveGame0.LEGO Star Wars - The Complete Saga_SavedGame";
+    const char *save = "res/SavedGames/SaveGame2.LEGO Star Wars - The Complete Saga_SavedGame";
     saga::host::harness::WindowOptions window;
     window.offscreen = true;
     window.mute = true;

@@ -29,7 +29,7 @@ intro/midtro/outro/status entries. Asset loading still takes time; “direct” 
 there is no menu interaction or startup-screen wait.
 
 The default fixture is
-`res/SavedGames/SaveGame0.LEGO Star Wars - The Complete Saga_SavedGame`.
+`res/SavedGames/SaveGame2.LEGO Star Wars - The Complete Saga_SavedGame`.
 For reproducible tests, supply a fixed fixture with `--save`. The input is read
 only and its envelope, payload size and checksum are validated. Autosave is
 disabled and any incidental writes go to a unique `.work/smoke/<run>/` directory.
