@@ -94,8 +94,7 @@ extern "C" NUMTL *NuMtlFindVariantMtl(NUMTL *source, NUMTL *original) {
         return material;
     }
     NuMtlRegisterForOverride(original, &source->shader_desc.vtx_desc, 1);
-    NUVERTEXDESCRIPTOR descriptor = source->shader_desc.vtx_desc;
-    return FindOverrideMaterial(original, descriptor);
+    return FindOverrideMaterial(original, source->shader_desc.vtx_desc);
 }
 
 extern "C" NUMTL *NuMtlFindVariantMtlFromDesc(NUMTL *original, NUVERTEXDESCRIPTOR descriptor) {

@@ -1211,13 +1211,12 @@ static void GizForces_Reset(void *world_ptr, void *data, void *progress_ptr) {
                 }
 
                 GIZFORCE_s &force = force_sys->forces[force_index];
-                GIZFORCEGROUP_s *group = force.group;
                 if ((force.progress_flags & GIZFORCE_PROGRESS_GROUP_MEMBER) == 0) {
-                    if (group == NULL || group->count >= 8) {
+                    if (force.group == NULL || force.group->count >= 8) {
                         continue;
                     }
-                    if (group->count != 0) {
-                        GIZFORCE_s *previous = group->forces[group->count - 1];
+                    if (force.group->count != 0) {
+                        GIZFORCE_s *previous = force.group->forces[force.group->count - 1];
                         f32 minimum_y = 1.0e9f;
                         f32 maximum_y = -1.0e9f;
                         if (previous != NULL && previous->anim_set != NULL) {
@@ -1234,13 +1233,14 @@ static void GizForces_Reset(void *world_ptr, void *data, void *progress_ptr) {
                                 }
                             }
                         }
-                        group->combined_height += maximum_y - minimum_y;
+                        force.group->combined_height += maximum_y - minimum_y;
                     }
-                    group->forces[group->count++] = &force;
+                    force.group->forces[force.group->count++] = &force;
                     force.progress_flags |= GIZFORCE_PROGRESS_GROUP_MEMBER;
                 }
 
-                NUVEC offset = {0.0f, GameAnimSet_GetCompletionRatio(force.anim_set) * group->combined_height, 0.0f};
+                NUVEC offset = {0.0f, GameAnimSet_GetCompletionRatio(force.anim_set) * force.group->combined_height,
+                                0.0f};
                 GameAnimSet_SetOffset(force.anim_set, &offset);
                 force.radius = 1.0f;
                 force.position = force.file_position;

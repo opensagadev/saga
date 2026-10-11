@@ -879,18 +879,17 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
     }
     if ((object->flags_low & 0x80) == 0 && packet->current_route != 0xff &&
         ((static_cast<u64>(connection->route_mask) >> packet->current_route) & 1) == 0) {
-        AIPATHCNX *current = packet->path_info.connection;
-        if (current == NULL || current == connection) {
+        if (packet->path_info.connection == NULL || packet->path_info.connection == connection) {
             return 0;
         }
         AIPATHNODE *shared = NULL;
-        if (current->node_indices[0] == connection->node_indices[0]) {
+        if (packet->path_info.connection->node_indices[0] == connection->node_indices[0]) {
             shared = &path->nodes[connection->node_indices[0]];
-        } else if (current->node_indices[0] == connection->node_indices[1]) {
-            shared = &path->nodes[current->node_indices[0]];
-        } else if (current->node_indices[1] == connection->node_indices[0]) {
+        } else if (packet->path_info.connection->node_indices[0] == connection->node_indices[1]) {
+            shared = &path->nodes[packet->path_info.connection->node_indices[0]];
+        } else if (packet->path_info.connection->node_indices[1] == connection->node_indices[0]) {
             shared = &path->nodes[connection->node_indices[0]];
-        } else if (current->node_indices[1] == connection->node_indices[1]) {
+        } else if (packet->path_info.connection->node_indices[1] == connection->node_indices[1]) {
             shared = &path->nodes[connection->node_indices[1]];
         }
         if (shared == NULL || ((static_cast<u64>(shared->route_boundary_mask) >> packet->current_route) & 1) == 0) {

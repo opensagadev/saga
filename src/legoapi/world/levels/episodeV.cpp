@@ -1376,8 +1376,7 @@ static void Asteroid_AddParts(GIZMOBLOWUP_s *blowup) {
 static __used__ void Asteroids_Update() {
     ASTEROID_s *asteroid = asteroids;
     for (i32 index = 0; index < nasteroids; ++index, ++asteroid) {
-        GIZMOBLOWUP_s *blowup = asteroid->blowup;
-        if (blowup == NULL) {
+        if (asteroid->blowup == NULL) {
             if (NuSpecialGetVisibilityFn(&asteroid->special) != 0) {
                 asteroid->activated = 0;
                 NUMTX *matrix = NuSpecialGetDrawMtx(&asteroid->special);
@@ -1389,22 +1388,25 @@ static __used__ void Asteroids_Update() {
                 }
             }
         } else {
-            if ((static_cast<u16>(blowup->status_flags) & 0x4001) == 0x4000) {
+            if ((static_cast<u16>(asteroid->blowup->status_flags) & 0x4001) == 0x4000) {
                 asteroid->activated = 0;
-                blowup->field_0xf0 += static_cast<i16>(static_cast<f32>(asteroid->rotation_speed_x) * FRAMETIME);
-                blowup->field_0xf2 += static_cast<i16>(static_cast<f32>(asteroid->rotation_speed_y) * FRAMETIME);
-                blowup->field_0xf4 += static_cast<i16>(static_cast<f32>(asteroid->rotation_speed_z) * FRAMETIME);
-                blowup->state_flags |= 1;
-                GizmoBlowupUpdateMatrix(blowup);
+                asteroid->blowup->field_0xf0 +=
+                    static_cast<i16>(static_cast<f32>(asteroid->rotation_speed_x) * FRAMETIME);
+                asteroid->blowup->field_0xf2 +=
+                    static_cast<i16>(static_cast<f32>(asteroid->rotation_speed_y) * FRAMETIME);
+                asteroid->blowup->field_0xf4 +=
+                    static_cast<i16>(static_cast<f32>(asteroid->rotation_speed_z) * FRAMETIME);
+                asteroid->blowup->state_flags |= 1;
+                GizmoBlowupUpdateMatrix(asteroid->blowup);
                 continue;
             }
         }
 
         if (asteroid->activated == 0) {
             asteroid->activated = 1;
-            if (blowup != NULL) {
-                blowup->field_0xa8 = 0;
-                Asteroid_AddParts(blowup);
+            if (asteroid->blowup != NULL) {
+                asteroid->blowup->field_0xa8 = 0;
+                Asteroid_AddParts(asteroid->blowup);
             }
         }
     }

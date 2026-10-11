@@ -158,7 +158,6 @@ __attribute__((optimize("no-tree-loop-optimize"))) void areaEditor_Enter() {
     }
     for (i32 index = 0; index < aieditor->ai_system->area_count; ++index) {
         AIAREA *source = &aieditor->ai_system->areas[index];
-        u8 flags = source->game_flags;
         i16 rotation = source->rotation;
         EDAIAREA_s *area = reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetHead(area_free_list()));
         if (area != NULL) {
@@ -166,7 +165,7 @@ __attribute__((optimize("no-tree-loop-optimize"))) void areaEditor_Enter() {
             NuLinkedListAppend(area_list(), &area->link);
             area->position = source->position;
             memcpy(&area->size, &source->half_width, sizeof(area->size));
-            area->flags = flags;
+            area->flags = source->game_flags;
             area->rotation = rotation;
         }
         NuStrNCpy(area->name, source->name, 16);

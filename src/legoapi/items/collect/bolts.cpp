@@ -1621,7 +1621,6 @@ void Bolts_Update(WORLDINFO_s *world) {
             continue;
         if (bolt->owner != NULL && (bolt->owner->apiobj.field_0x1f8 & 0x1001) != 0x1001)
             bolt->owner = NULL;
-        BOLTTYPE_s *type = bolt->type;
         if ((bolt->flags & 4) == 0) {
             bolt->ray_time -= FRAMETIME;
             if (bolt->ray_time <= 0.0f) {
@@ -1645,7 +1644,7 @@ void Bolts_Update(WORLDINFO_s *world) {
                 bolt->field_0xe8 = 2000000.0f;
                 f32 height = GameShadow(NULL, &bolt->position, 5.0f, -1);
                 if (height != 2000000.0f) {
-                    if (NuSpecialExistsFn(type->pad_68 + 0x30)) {
+                    if (NuSpecialExistsFn(bolt->type->pad_68 + 0x30)) {
                         bolt->field_0xe4 = height;
                         FindAnglesZX(&ShadNorm, &bolt->surface_x_rotation, &bolt->surface_z_rotation);
                     }
@@ -1658,8 +1657,8 @@ void Bolts_Update(WORLDINFO_s *world) {
             }
         }
         bolt->time += FRAMETIME;
-        if (type->update_callback != NULL)
-            type->update_callback(bolt);
+        if (bolt->type->update_callback != NULL)
+            bolt->type->update_callback(bolt);
         if (bolt->acceleration_y != 0.0f) {
             bolt->velocity.y += FRAMETIME * bolt->acceleration_y;
             bolt->speed = NuVecMag(&bolt->velocity);
@@ -1743,8 +1742,8 @@ void Bolts_Update(WORLDINFO_s *world) {
             if (Bolt_HitCustomFn != NULL)
                 Bolt_HitCustomFn(bolt, points);
             for (i32 i = 0; i < 2; ++i) {
-                i16 effect = static_cast<i16>(static_cast<u32>(type->field_30) >> (i * 16));
-                u16 count = static_cast<u16>(static_cast<u32>(type->field_34) >> (i * 16));
+                i16 effect = static_cast<i16>(static_cast<u32>(bolt->type->field_30) >> (i * 16));
+                u16 count = static_cast<u16>(static_cast<u32>(bolt->type->field_34) >> (i * 16));
                 if (effect != -1 && count != 0)
                     AddVariableShotDebrisEffectTimed5(world_debris_sys->entries[effect].effect, &bolt->position, NULL,
                                                       &bolt->velocity, count, FRAMETIME, NULL, NULL, 20000, 0);

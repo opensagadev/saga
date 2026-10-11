@@ -319,7 +319,6 @@ i32 StunGameObject(GameObject_s *object, GameObject_s *attacker, float duration,
     if (animation == -1)
         return 0;
 
-    const u8 saved_variant = object->field_0xe31;
     object->context_animation = animation;
     object->external_force.z = AnimSpeed(object->apiobj.character_model, animation);
     if (animation != 0x3d && animation != 0xb9) {
@@ -362,7 +361,7 @@ i32 StunGameObject(GameObject_s *object, GameObject_s *attacker, float duration,
                      -(object->apiobj.collision_position.z - attacker->apiobj.collision_position.z));
     }
 
-    object->field_0xe31 = saved_variant;
+    object->field_0xe31 = object->field_0xe31;
     return (object->context_animation == 0xb9) + 1;
 }
 

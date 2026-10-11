@@ -169,10 +169,9 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
     if (world == NULL)
         return nearest;
     pushblock_s *blocks = world->push_blocks;
-    i32 count = world->push_block_count;
     if (blocks == NULL)
         return nearest;
-    if (count == 0)
+    if (world->push_block_count == 0)
         return nearest;
     if (LEGOCONTEXT_PUSH == -1)
         return nearest;
@@ -246,7 +245,6 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
             continue;
         if ((block->flags_0cb & 2) != 0)
             continue;
-        f32 max_x = block->bounds_max.x;
         NUVEC *pos = block->position;
         f32 top = pos->y + fabsf(block->bounds_max.y);
         f32 bottom = pos->y - fabsf(block->bounds_min.y);
@@ -301,12 +299,12 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
             continue;
         if ((block->flags_0ca & 0x50) == 0x50)
             continue;
-        gap = fabsf(dx) - max_x;
+        gap = fabsf(dx) - block->bounds_max.x;
         goto have_gap;
     }
     mode3_geometry: {
         f32 block_min_x = min_x + pos->x - 0.01f;
-        f32 block_max_x = pos->x + max_x - 0.01f;
+        f32 block_max_x = pos->x + block->bounds_max.x - 0.01f;
         if (block_min_x >= object->apiobj.collision_position.x)
             continue;
         if (object->apiobj.collision_position.x >= block_max_x)
@@ -319,7 +317,7 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
         goto have_gap;
     }
     mode2_geometry: {
-        f32 block_max_x = max_x + pos->x - 0.01f;
+        f32 block_max_x = block->bounds_max.x + pos->x - 0.01f;
         f32 block_min_x = pos->x + min_x - 0.01f;
         if (object->apiobj.collision_position.x >= block_max_x)
             continue;

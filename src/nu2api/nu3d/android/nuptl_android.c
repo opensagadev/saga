@@ -59,10 +59,9 @@ static void NuDisplayListSetID_CALL(NUDISPLAYLISTITEM *item) {
 }
 
 static NUDISPLAYLISTITEM *NuDisplayListAddItem(NUDISPLAYLIST *list, u8 type, void *next) {
-    NUDISPLAYLISTITEM *item = list->items;
-    item->type = type;
-    NuDisplayListSetID_CALL(item);
-    NuDisplayListSetNext(item, next);
+    list->items->type = type;
+    NuDisplayListSetID_CALL(list->items);
+    NuDisplayListSetNext(list->items, next);
     list->items = reinterpret_cast<NUDISPLAYLISTITEM *>(reinterpret_cast<u8 *>(list->items) + 0x10);
     return reinterpret_cast<NUDISPLAYLISTITEM *>(reinterpret_cast<u8 *>(list->items) - 0x10);
 }
@@ -369,14 +368,13 @@ void BuildDebrisVerts(PartHeader *header, uv1debdata *chunk_data, NUMTL *materia
             NuVecMtxTransform(&corners[corner].xyz, &corners[corner].xyz, &NuRndr_DebrisMtx);
         }
 
-        const u32 colour = first.colour;
         debris_vertex_s *vertices = static_cast<debris_vertex_s *>(g_pVBData) + g_CurrentVBVertexCount + emitted;
-        vertices[0] = {corners[0].xyz, colour, u0, v1};
-        vertices[1] = {corners[2].xyz, colour, u1, v1};
-        vertices[2] = {corners[1].xyz, colour, u1, v0};
+        vertices[0] = {corners[0].xyz, first.colour, u0, v1};
+        vertices[1] = {corners[2].xyz, first.colour, u1, v1};
+        vertices[2] = {corners[1].xyz, first.colour, u1, v0};
         vertices[3] = vertices[0];
         vertices[4] = vertices[2];
-        vertices[5] = {corners[3].xyz, colour, u0, v0};
+        vertices[5] = {corners[3].xyz, first.colour, u0, v0};
         emitted += 6;
     }
 

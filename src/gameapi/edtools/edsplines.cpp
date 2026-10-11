@@ -626,14 +626,13 @@ void SplineHelper::cbEdSplineSmoothKnot(eduimenu_s *, eduiitem_s *, u32) {
             continue;
         SplineKnot *knot = static_cast<SplineKnot *>(selected->object);
         knot->Smooth();
-        SplineObject *spline = knot->spline;
-        if (!theSplineHelper.auto_generate_points || spline == NULL)
+        if (!theSplineHelper.auto_generate_points || knot->spline == NULL)
             continue;
         i32 index = 0;
-        while (index < changed_count && changed_splines[index] != spline)
+        while (index < changed_count && changed_splines[index] != knot->spline)
             ++index;
         if (index == changed_count)
-            changed_splines[changed_count++] = spline;
+            changed_splines[changed_count++] = knot->spline;
     }
     for (i32 index = 0; index < changed_count; ++index)
         changed_splines[index]->GenPoints();

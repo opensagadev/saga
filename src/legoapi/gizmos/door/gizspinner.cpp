@@ -442,13 +442,13 @@ i32 GizSpinner_UsingSpecial(GIZMO **results, void *world_ptr, i32 capacity, char
         nuhspecial_s special;
         NuSpecialFind(world->current_gscn, &special, name, 0);
         if (NuSpecialExistsFn(&special) != 0) {
-            GIZSPINNER_s *spinners = world->spinners;
             i32 type_id = -1;
             for (i32 index = 0; index < world->current_level->max_spinners && count < capacity; ++index) {
                 if ((world->spinners[index].flags & GIZSPINNER_FLAG_VALID) == 0) {
                     continue;
                 }
-                for (GAMEANIMOBJ_s *object = spinners[index].anim_set->objects; object != NULL; object = object->next) {
+                for (GAMEANIMOBJ_s *object = world->spinners[index].anim_set->objects; object != NULL;
+                     object = object->next) {
                     if (NuSpecialCompare(&special, &object->special) != 0) {
                         GIZMO *gizmo = GizmoFindByName(world->gizmo_sys, type_id, name);
                         if (gizmo != NULL) {

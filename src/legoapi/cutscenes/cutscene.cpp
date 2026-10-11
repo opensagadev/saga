@@ -2412,8 +2412,7 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
 
 static void instNuGCutSceneClipTest(instNUGCUTSCENE_s *instance) {
     instance->flags_89 |= 4;
-    NUGCUTSCENE_s *cutscene = instance->cutscene;
-    if (cutscene->bounds == NULL) {
+    if (instance->cutscene->bounds == NULL) {
         return;
     }
     if ((instance->flags_89 & 2) != 0 &&
@@ -2422,7 +2421,7 @@ static void instNuGCutSceneClipTest(instNUGCUTSCENE_s *instance) {
         return;
     }
     if ((instance->flags_89 & 1) != 0) {
-        NUVEC *bounds = static_cast<NUVEC *>(cutscene->bounds);
+        NUVEC *bounds = static_cast<NUVEC *>(instance->cutscene->bounds);
         NUMTX *matrix = static_cast<i8>(instance->flags_88) < 0 ? &instance->matrix : &numtx_identity;
         if (NuCameraClipTestExtents(&bounds[0], &bounds[1], matrix, 0.0f, 0) == 0) {
             instance->flags_89 &= ~4U;

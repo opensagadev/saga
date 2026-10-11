@@ -553,16 +553,15 @@ static i32 GameAudio_CheckReverb_LSW() {
 static inline i32 GameAudio_OverrideFootStep_LSW(GameObject_s *object, i32 alternate) {
     WORLDINFO *world = WorldInfo_CurrentlyActive();
     AREADATA *area = world->area;
-    LEVELDATA *level = world->current_level;
 
-    if ((area == HOTHESCAPE_ADATA || level == JABBASPALACEE_LDATA) && alternate == 0) {
+    if ((area == HOTHESCAPE_ADATA || world->current_level == JABBASPALACEE_LDATA) && alternate == 0) {
         return GetSfxId("fs_ice");
     }
 
     if (area == DAGOBAH_ADATA && alternate == 0) {
-        if (level != DAGOBAHA_LDATA || object->apiobj.field_0x281 != 0x14) {
-            if (level != DAGOBAHD_LDATA) {
-                if (level != DAGOBAHE_LDATA ||
+        if (world->current_level != DAGOBAHA_LDATA || object->apiobj.field_0x281 != 0x14) {
+            if (world->current_level != DAGOBAHD_LDATA) {
+                if (world->current_level != DAGOBAHE_LDATA ||
                     (GameCam->sock_position.location.sock != 4 && GameCam->sock_position.location.sock != 1)) {
                     return GetSfxId("fs_swamp");
                 }
@@ -570,7 +569,8 @@ static inline i32 GameAudio_OverrideFootStep_LSW(GameObject_s *object, i32 alter
         }
     }
 
-    if (level == JABBASPALACEA_LDATA && (object->apiobj.field_0x281 == 9 || object->apiobj.field_0x281 == 0x18)) {
+    if (world->current_level == JABBASPALACEA_LDATA &&
+        (object->apiobj.field_0x281 == 9 || object->apiobj.field_0x281 == 0x18)) {
         return GetSfxId("fs_ice");
     }
 

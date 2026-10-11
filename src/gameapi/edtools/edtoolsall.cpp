@@ -5149,18 +5149,15 @@ __attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputCo
     if (matrix != NULL) {
         const NUMTX &transform = matrix->matrix;
         f32 first_x = first_axis.x;
-        f32 first_y = first_axis.y;
-        f32 first_z = first_axis.z;
-        first_axis.z = first_x * transform.m02 + first_y * transform.m12 + first_z * transform.m22;
-        first_axis.y = first_x * transform.m01 + first_y * transform.m11 + first_z * transform.m21;
-        first_axis.x = first_x * transform.m00 + first_y * transform.m10 + first_z * transform.m20;
+        first_axis.z = first_x * transform.m02 + first_axis.y * transform.m12 + first_axis.z * transform.m22;
+        first_axis.y = first_x * transform.m01 + first_axis.y * transform.m11 + first_axis.z * transform.m21;
+        first_axis.x = first_x * transform.m00 + first_axis.y * transform.m10 + first_axis.z * transform.m20;
 
         f32 second_x = second_axis.x;
-        f32 second_y = second_axis.y;
         f32 second_z = second_axis.z;
-        second_axis.y = second_x * transform.m01 + second_y * transform.m11 + second_z * transform.m21;
-        second_axis.z = second_x * transform.m02 + second_y * transform.m12 + second_z * transform.m22;
-        second_axis.x = second_x * transform.m00 + second_y * transform.m10 + second_z * transform.m20;
+        second_axis.y = second_x * transform.m01 + second_axis.y * transform.m11 + second_z * transform.m21;
+        second_axis.z = second_x * transform.m02 + second_axis.y * transform.m12 + second_z * transform.m22;
+        second_axis.x = second_x * transform.m00 + second_axis.y * transform.m10 + second_z * transform.m20;
 
         NuVecNorm(reinterpret_cast<NUVEC *>(&first_axis), reinterpret_cast<NUVEC *>(&first_axis));
         NuVecNorm(reinterpret_cast<NUVEC *>(&second_axis), reinterpret_cast<NUVEC *>(&second_axis));

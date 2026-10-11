@@ -440,8 +440,7 @@ void NuVoiceAndroid::UpdateHardwareVoice(f32 frametime) {
     }
 
     if ((this->hardware_flags & 4) != 0) {
-        NuSoundSource *source = this->sound_source;
-        source->RequestBuffer((this->flags2 >> 3) & 1, this);
+        this->sound_source->RequestBuffer((this->flags2 >> 3) & 1, this);
         this->hardware_flags &= 0xfb;
     }
 
@@ -545,18 +544,17 @@ void NuVoiceAndroid::UpdateSamplePlaybackCount() {
         return;
     }
 
-    NuSoundSource *source = this->sound_source;
-    NuSoundStreamDesc *desc = source->GetStreamDesc();
+    NuSoundStreamDesc *desc = this->sound_source->GetStreamDesc();
     i32 rate = (i32)desc->GetSampleRate();
     u32 position = (u32)(rate / 1000) * millisec;
 
-    if (source->feed_type != NuSoundSource::FeedType::STREAMING) {
+    if (this->sound_source->feed_type != NuSoundSource::FeedType::STREAMING) {
         this->field11_0x174 = position;
         this->field12_0x178 = 0;
         return;
     }
 
-    u64 max_buffer_size = (u64)(i64)(i32)source->GetMaxBufferSize();
+    u64 max_buffer_size = (u64)(i64)(i32)this->sound_source->GetMaxBufferSize();
     u64 block_size = (u64)(i64)(i32)desc->GetBlockSize();
     u64 block_samples = max_buffer_size / block_size;
     u64 relative_position = (u64)(u32)position % block_samples;

@@ -92,9 +92,8 @@ static i32 StarWars_PrepareTakeOverJump(AIPACKET_s *packet, APIOBJECT_s *object,
 static i32 StarWars_PrepareObstacle(AIPACKET_s *packet, APIOBJECT_s *object, i32) {
     i32 near_index = packet->path_info.dist > 0.5f;
     i32 far_index = near_index == 0;
-    AIPATHCNX *connection = packet->path_info.connection;
-    AIPATHNODE *near_node = &packet->path_info.path->nodes[connection->node_indices[near_index]];
-    AIPATHNODE *far_node = &packet->path_info.path->nodes[connection->node_indices[far_index]];
+    AIPATHNODE *near_node = &packet->path_info.path->nodes[packet->path_info.connection->node_indices[near_index]];
+    AIPATHNODE *far_node = &packet->path_info.path->nodes[packet->path_info.connection->node_indices[far_index]];
     NUVEC offset;
     offset.z = far_node->position.z - near_node->position.z;
     offset.y = 0.0f;
@@ -103,7 +102,7 @@ static i32 StarWars_PrepareObstacle(AIPACKET_s *packet, APIOBJECT_s *object, i32
     if (radius < 0.0f) {
         radius = 0.0f;
     }
-    NuVecScale(&offset, &offset, radius / connection->horizontal_distance);
+    NuVecScale(&offset, &offset, radius / packet->path_info.connection->horizontal_distance);
     NuVecAdd(&packet->movement_destination, &near_node->position, &offset);
     offset.x = packet->path_info.width;
     offset.y = 0.0f;

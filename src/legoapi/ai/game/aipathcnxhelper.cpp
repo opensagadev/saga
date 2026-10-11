@@ -45,9 +45,8 @@ void AIPathCalcExtents(AIPATH *path) {
         AIPATHNODE &node = path->nodes[node_index];
         const f32 x = node.position.x;
         const f32 radius = node.radius;
-        const f32 z = node.position.z;
         const f32 min_x = x - radius;
-        const f32 min_z = z - radius;
+        const f32 min_z = node.position.z - radius;
         const f32 min_height = node.min_height;
 
         if (min_x < path->bounds_min.x) {
@@ -60,7 +59,7 @@ void AIPathCalcExtents(AIPATH *path) {
             path->bounds_min.z = min_z;
         }
         const f32 max_x = x + radius;
-        const f32 max_z = z + radius;
+        const f32 max_z = node.position.z + radius;
         if (max_x > path->bounds_max.x) {
             path->bounds_max.x = max_x;
         }

@@ -637,18 +637,17 @@ void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32) {
         return;
     }
 
-    const i8 player_index = object->apiobj.field_0x27c;
     if (ONEPLAYERPOWERUPS != 0) {
         const u16 camera_rotation = GameCam_GetAdjustedYRot(NULL);
         const u16 panel_rotation = rotation - RotDiff(0, camera_rotation);
-        NUVEC target_position = {ICONX, PowerUp_GetPanelY(player_index) + STATSPOSY, 1.0f};
-        if (player_index == 0) {
+        NUVEC target_position = {ICONX, PowerUp_GetPanelY(object->apiobj.field_0x27c) + STATSPOSY, 1.0f};
+        if (object->apiobj.field_0x27c == 0) {
             target_position.x = -target_position.x;
         }
 
         if (object->field_0xdec > 0.0f) {
-            NUVEC icon_position = {ICONX, PowerUp_GetPanelY(player_index) + STATSPOSY, 1.0f};
-            if (player_index == 0) {
+            NUVEC icon_position = {ICONX, PowerUp_GetPanelY(object->apiobj.field_0x27c) + STATSPOSY, 1.0f};
+            if (object->apiobj.field_0x27c == 0) {
                 icon_position.x = -icon_position.x;
             }
             ADDGAMEMSG icon_message = AddGameMsg_Default;
@@ -674,12 +673,12 @@ void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32) {
         message.end_fn = PowerUp_EndMsg;
         message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0xd0]);
         message.field_0x4d = 1;
-        message.player_index = player_index;
+        message.player_index = object->apiobj.field_0x27c;
         message.field_0x4e = 7;
         GAMEMESSAGE_s *game_message = AddGameMsg(&message);
         if (game_message != NULL) {
             game_message->rotation_y = panel_rotation;
-            PowerUp_PanelYRot[player_index] = panel_rotation;
+            PowerUp_PanelYRot[object->apiobj.field_0x27c] = panel_rotation;
         }
     }
 

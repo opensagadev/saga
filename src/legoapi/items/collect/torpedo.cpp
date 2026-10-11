@@ -651,27 +651,26 @@ void Torpedo_InitBolt(BOLT_s *bolt) {
 
 void Torpedo_UpdateBolt(BOLT_s *bolt) {
     if (bolt->owner != NULL && bolt->owner->torpedo != NULL) {
-        TORPEDOPACKET *packet = bolt->owner->torpedo;
-        HomeNearestTorpTarget(bolt, packet);
+        HomeNearestTorpTarget(bolt, bolt->owner->torpedo);
 
-        if (packet->target != NULL) {
+        if (bolt->owner->torpedo->target != NULL) {
             NUVEC *target_position = NULL;
             f32 target_radius;
-            switch (packet->target_type) {
+            switch (bolt->owner->torpedo->target_type) {
                 case 0: {
-                    GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(packet->target);
+                    GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(bolt->owner->torpedo->target);
                     target_position = &blowup->mid_position;
                     target_radius = blowup->target_scale;
                     break;
                 }
                 case 1: {
-                    GIZTURRET_s *turret = static_cast<GIZTURRET_s *>(packet->target);
+                    GIZTURRET_s *turret = static_cast<GIZTURRET_s *>(bolt->owner->torpedo->target);
                     target_radius = NuSpecialGetOriginRadius(&turret->primary_anim_obj->special);
                     target_position = NuSpecialGetDrawPos(&turret->primary_anim_obj->special);
                     break;
                 }
                 case 2: {
-                    GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(packet->target);
+                    GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(bolt->owner->torpedo->target);
                     target_position = &obstacle->evaluated_position;
                     target_radius = obstacle->field_0x58;
                     break;

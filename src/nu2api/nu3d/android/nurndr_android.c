@@ -819,12 +819,11 @@ void NuIOSDLKonstCallback(void *arg) {
 void NuIOSDLFogCallback(void *arg) {
     const NUFOGSTATE *fog = static_cast<const NUFOGSTATE *>(arg);
     if (fog->enabled != 0) {
-        const u32 colour = fog->colour;
         const f32 fog_colour[4] = {
-            static_cast<f32>(colour & 0xff) / 255.0f,
-            static_cast<f32>((colour >> 8) & 0xff) / 255.0f,
-            static_cast<f32>((colour >> 16) & 0xff) / 255.0f,
-            static_cast<f32>(colour >> 24) / 255.0f,
+            static_cast<f32>(fog->colour & 0xff) / 255.0f,
+            static_cast<f32>((fog->colour >> 8) & 0xff) / 255.0f,
+            static_cast<f32>((fog->colour >> 16) & 0xff) / 255.0f,
+            static_cast<f32>(fog->colour >> 24) / 255.0f,
         };
         const f32 fog_params[4] = {
             fog->near_distance,

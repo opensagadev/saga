@@ -1543,13 +1543,12 @@ void NuMusic::xNoDuck(nufpar_s *fpar) {
     ((u8 *)&this->current_track->flags)[0] |= 1;
 }
 void NuMusic::xDuck(nufpar_s *fpar) {
-    Track *track = this->current_track;
-    track->duck_volume = NuFParGetFloatRDP(fpar);
-    if (track->duck_volume < 0.0f) {
+    this->current_track->duck_volume = NuFParGetFloatRDP(fpar);
+    if (this->current_track->duck_volume < 0.0f) {
         // Negative values are decibels.
-        track->duck_volume = NuSound3dBToAmplitude(track->duck_volume);
+        this->current_track->duck_volume = NuSound3dBToAmplitude(this->current_track->duck_volume);
     }
-    track->duck_fade = NuFParGetFloatRDP(fpar);
+    this->current_track->duck_fade = NuFParGetFloatRDP(fpar);
 }
 void NuMusic::xLooping(nufpar_s *fpar) {
     (void)fpar;
@@ -1560,11 +1559,10 @@ void NuMusic::xNonLooping(nufpar_s *fpar) {
     ((u8 *)&this->current_track->flags)[0] &= 0xfd;
 }
 void NuMusic::xAttenuation(nufpar_s *fpar) {
-    Track *track = this->current_track;
-    track->attenuation = NuFParGetFloatRDP(fpar);
-    if (track->attenuation < 0.0f) {
+    this->current_track->attenuation = NuFParGetFloatRDP(fpar);
+    if (this->current_track->attenuation < 0.0f) {
         // Negative values are decibels.
-        track->attenuation = NuSound3dBToAmplitude(track->attenuation);
+        this->current_track->attenuation = NuSound3dBToAmplitude(this->current_track->attenuation);
     }
 }
 

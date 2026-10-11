@@ -640,18 +640,17 @@ static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *, eduimenu_s 
 static __used__ void pathEditor_cbCancelSelectMenu(eduimenu_s *, eduimenu_s *);
 static __used__ void pathEditor_cbSetCurrentPath(eduimenu_s *, eduiitem_s *, u32);
 static __used__ void pathEditor_cbSetShareNode(eduimenu_s *, eduiitem_s *item, u32) {
-    EDAIPATH_s *current_path = aieditor->current_path;
-    if (current_path == nullptr || current_path->current_node == nullptr) {
+    if (aieditor->current_path == nullptr || aieditor->current_path->current_node == nullptr) {
         return;
     }
-    EDAIPATHNODE_s *current = current_path->current_node;
+    EDAIPATHNODE_s *current = aieditor->current_path->current_node;
     EDAISHAREDPATHNODE_s *shared = current->shared_node;
     EDAIPATHNODE_s *matches[16];
     i32 path_number = 1;
     i32 match_count = 0;
     for (EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths); path != nullptr;
          path = (EDAIPATH_s *)NuLinkedListGetNext(&aieditor->paths, &path->link)) {
-        if (path == current_path) {
+        if (path == aieditor->current_path) {
             continue;
         }
         if (item->data != 0 && path_number != item->data) {
@@ -763,11 +762,10 @@ static __used__ void pathEditor_cbShareNodeMenu(eduimenu_s *parent, eduiitem_s *
     while (path != nullptr) {
         if (path != aieditor->current_path) {
             i32 selected = 0;
-            EDAISHAREDPATHNODE_s *shared = aieditor->current_path->current_node->shared_node;
-            if (shared != nullptr) {
+            if (aieditor->current_path->current_node->shared_node != nullptr) {
                 EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes);
                 while (node != nullptr) {
-                    if (node->shared_node == shared) {
+                    if (node->shared_node == aieditor->current_path->current_node->shared_node) {
                         selected = 1;
                         break;
                     }

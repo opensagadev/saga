@@ -3291,8 +3291,8 @@ void GameAISysReset(AISYS_s *system) {
         for (i32 path_index = 0; path_index < path_system->path_count; ++path_index) {
             AIPATH *path = path_system->paths[path_index];
             AIPATHCNX *connection = path->connections;
-            for (i32 connection_index = 0; connection_index < path->connection_count;
-                 ++connection_index, ++connection) {
+            auto path_connection_count = path->connection_count;
+            for (i32 connection_index = 0; connection_index < path_connection_count; ++connection_index, ++connection) {
                 connection->node_a = connection->previous_node_a;
                 connection->node_b = connection->previous_node_b;
 
@@ -3811,8 +3811,9 @@ void GameAnimSys_Update(GAMEANIMSYS_s *system) {
 
         if ((set->flags & GAMEANIMSET_FLAG_NO_VISIBILITY_TEST) != any_special_no_visibility_test) {
             object = set->objects;
+            auto set_flags = set->flags;
             while (object != NULL) {
-                NuSpecialSetNoVisiTest(&object->special, set->flags & GAMEANIMSET_FLAG_NO_VISIBILITY_TEST);
+                NuSpecialSetNoVisiTest(&object->special, set_flags & GAMEANIMSET_FLAG_NO_VISIBILITY_TEST);
                 object = object->next;
             }
         }
@@ -4245,9 +4246,10 @@ void GameObjectSetCanUse(GameObject_s *object, void *target, unsigned char actio
 
 CABLE_s *GameObjOwnsAnyCables(GameObject_s *object) {
     CABLE_s *cable = cables;
+    auto cables_source = cables->source;
     for (i32 i = 0; i < 8; ++i, ++cable) {
         // The original checks the first cable's owner for the entire array.
-        if (cables->source == object && (cable->flags_1e9 & 1) != 0)
+        if (cables_source == object && (cable->flags_1e9 & 1) != 0)
             return cable;
     }
     return NULL;
@@ -7689,7 +7691,8 @@ void ManageGameObjects() {
                 group->rows[3].is_alive == 0) {
                 DestroyAIGroup(group);
             } else {
-                for (i32 j = 0; j < group->member_count; ++j) {
+                auto group_member_count = group->member_count;
+                for (i32 j = 0; j < group_member_count; ++j) {
                     if (group->members[j] == &object->apiobj)
                         group->members[j] = NULL;
                 }

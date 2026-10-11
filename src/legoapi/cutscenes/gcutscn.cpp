@@ -382,8 +382,7 @@ void instGetLookAtLocatorInfo(instNUGCUTSCENE_s *instance, instNUGCUTLOOKAT_s *o
     state->locator = NULL;
     NUGCUTSCENE_s *cutscene = instance->cutscene;
     NUGCUTCHARANIM_s *animations = cutscene->character_animations;
-    i32 character_count = cutscene->character_system->character_count;
-    for (i32 i = 0; i < character_count; ++i) {
+    for (i32 i = 0; i < cutscene->character_system->character_count; ++i) {
         if (static_cast<u8>(animations[i].field_00) == character_id) {
             state->character_index = i + 1;
             break;

@@ -301,9 +301,8 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
 
 void Collection_GetPos(COLLECTION_s *collection, i32 id, float *x, float *y) {
     COLLECTID *list = collection->list;
-    i32 count = collection->count_y;
 
-    for (i32 i = 0; i < count; i++) {
+    for (i32 i = 0; i < collection->count_y; i++) {
         if (list[i].id == id) {
             float *f = (float *)&list[i].cheat_code[8];
             *x = f[0];

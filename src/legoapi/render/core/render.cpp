@@ -2787,12 +2787,11 @@ void DrawGameObjectsDraw(i32) {
             continue;
         }
 
-        CHARACTERMODEL_s *model = object->apiobj.character_model;
         NUMTX *tertiary_matrix = object->field_0x1088 != 0 ? &object->apiobj.field_0x138 : NULL;
         NUMTX *secondary_matrix = (object->field_0xefe & 2) != 0 ? &object->apiobj.field_0xf8 : NULL;
-        const u8 drawn = static_cast<u8>(
-            GameDrawCharacterModel(model, &object->apiobj.anim_packet, &object->apiobj.field_0xb8, secondary_matrix,
-                                   tertiary_matrix, &object->field_0x7f4, object, object->field_0x1054));
+        const u8 drawn = static_cast<u8>(GameDrawCharacterModel(
+            object->apiobj.character_model, &object->apiobj.anim_packet, &object->apiobj.field_0xb8, secondary_matrix,
+            tertiary_matrix, &object->field_0x7f4, object, object->field_0x1054));
 
         object->apiobj.model_draw_result = static_cast<u8>(drawn);
         object->field_0xe24 =
