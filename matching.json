@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 75.740715,
+    "fuzzy_match_percent": 75.747765,
     "total_code": "4722419",
     "matched_code": "581816",
     "matched_code_percent": 12.320295,
@@ -28651,7 +28651,7 @@
           "address": 3548400,
           "offset": 2658432,
           "size": 3031,
-          "match_percent": 78.23575
+          "match_percent": 78.27581
         },
         {
           "name": "_Z29edgraDetermineNearestInstancef",
@@ -28667,7 +28667,7 @@
           "address": 3552544,
           "offset": 2662576,
           "size": 969,
-          "match_percent": 67.5625
+          "match_percent": 68.1875
         },
         {
           "name": "_Z15edgraDrawCursorv",
@@ -28699,7 +28699,7 @@
           "address": 3558480,
           "offset": 2668512,
           "size": 869,
-          "match_percent": 70.741936
+          "match_percent": 70.81106
         },
         {
           "name": "_Z17edppPtlCreateCopyP7nuvec_si",
@@ -28779,7 +28779,7 @@
           "address": 3573504,
           "offset": 2683536,
           "size": 855,
-          "match_percent": 78.510414
+          "match_percent": 78.640625
         },
         {
           "name": "_Z15edppSaveEffectsPcc",
@@ -28803,7 +28803,7 @@
           "address": 3594096,
           "offset": 2704128,
           "size": 256,
-          "match_percent": 49.38158
+          "match_percent": 48.986843
         },
         {
           "name": "_Z20edgraInstanceDestroyi",
@@ -29003,7 +29003,7 @@
           "address": 4908720,
           "offset": 4018752,
           "size": 674,
-          "match_percent": 69.24157
+          "match_percent": 69.44944
         },
         {
           "name": "_Z19edSpline_SplineFindP8nugscn_sPc",
@@ -29835,7 +29835,7 @@
           "address": 5502080,
           "offset": 4612112,
           "size": 808,
-          "match_percent": 75.821625
+          "match_percent": 75.88649
         },
         {
           "name": "_Z18EdDrawPolyCylinderRK5VuMtxfffiiii",
@@ -30459,7 +30459,7 @@
           "address": 5564608,
           "offset": 4674640,
           "size": 1275,
-          "match_percent": 69.92171
+          "match_percent": 72.38078
         },
         {
           "name": "_ZN13EdManipulator6RenderER15ClassObjectList",
@@ -30667,7 +30667,7 @@
           "address": 5597616,
           "offset": 4707648,
           "size": 578,
-          "match_percent": 49.129253
+          "match_percent": 49.231293
         },
         {
           "name": "_ZN13EdManipulator7ProcessER14EdInputContextR15ClassObjectList",
@@ -30683,7 +30683,7 @@
           "address": 5599872,
           "offset": 4709904,
           "size": 1795,
-          "match_percent": 78.45088
+          "match_percent": 78.47103
         },
         {
           "name": "_ZN10EdManScale7ProcessER14EdInputContextR15ClassObjectList",
@@ -30691,7 +30691,7 @@
           "address": 5601680,
           "offset": 4711712,
           "size": 3144,
-          "match_percent": 63.93027
+          "match_percent": 65.09524
         },
         {
           "name": "_ZN9EdManMove7ProcessER14EdInputContextR15ClassObjectList",
@@ -30699,7 +30699,7 @@
           "address": 5604832,
           "offset": 4714864,
           "size": 1154,
-          "match_percent": 58.865456
+          "match_percent": 59.054546
         },
         {
           "name": "_ZN16EdClassInterface16DistanceToObjectER5VuVecS1_PvPP5EdRef",
@@ -56966,7 +56966,7 @@
           "address": 4982816,
           "offset": 4092848,
           "size": 283,
-          "match_percent": 27.61111
+          "match_percent": 43.930557
         },
         {
           "name": "_ZL26GizmoPickups_StoreProgressPvS_S_",
@@ -61114,7 +61114,7 @@
           "address": 3975686,
           "offset": 3085718,
           "size": 4233,
-          "match_percent": 94.187195
+          "match_percent": 94.36548
         },
         {
           "name": "APICharacterSysInit",
@@ -62985,7 +62985,7 @@
           "address": 2046832,
           "offset": 1156864,
           "size": 1467,
-          "match_percent": 80.15625
+          "match_percent": 80.607635
         },
         {
           "name": "_Z16MiniKit_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
@@ -63422,7 +63422,7 @@
           "address": 2062448,
           "offset": 1172480,
           "size": 1639,
-          "match_percent": 51.857143
+          "match_percent": 51.862434
         },
         {
           "name": "_Z21FindNearestTorpTargetP11WORLDINFO_sP7nuvec_sfPh",
@@ -63438,7 +63438,7 @@
           "address": 2064864,
           "offset": 1174896,
           "size": 2068,
-          "match_percent": 61.565216
+          "match_percent": 61.702175
         },
         {
           "name": "_Z21HomeNearestTorpTargetP6BOLT_sP15TORPEDOPACKET_s",
@@ -63446,7 +63446,7 @@
           "address": 2066944,
           "offset": 1176976,
           "size": 1105,
-          "match_percent": 70.702126
+          "match_percent": 74.88085
         },
         {
           "name": "_Z20Torpedo_InitRicochetP6BOLT_sP7nuvec_s",
@@ -63462,7 +63462,7 @@
           "address": 2068192,
           "offset": 1178224,
           "size": 1005,
-          "match_percent": 75.62882
+          "match_percent": 78.1703
         },
         {
           "name": "_Z16TorpedoHitTargetP6BOLT_s",
@@ -63470,7 +63470,7 @@
           "address": 2069200,
           "offset": 1179232,
           "size": 530,
-          "match_percent": 79.852715
+          "match_percent": 99.441864
         },
         {
           "name": "_Z23DrawTorpedoTargetSpritePvhf",
@@ -63842,7 +63842,7 @@
           "address": 2292528,
           "offset": 1402560,
           "size": 5336,
-          "match_percent": 42.829044
+          "match_percent": 42.86058
         },
         {
           "name": "_Z21CableTargetGameObjectP12GameObject_sP7nuvec_sf",
@@ -75995,7 +75995,7 @@
           "address": 3844733,
           "offset": 2954765,
           "size": 1753,
-          "match_percent": 90.26144
+          "match_percent": 90.38998
         },
         {
           "name": "rtlLoadSet",
@@ -77155,7 +77155,7 @@
           "address": 3894392,
           "offset": 3004424,
           "size": 1053,
-          "match_percent": 99.886665
+          "match_percent": 99.99333
         },
         {
           "name": "_Z13SelectNextRTLv",
@@ -77187,7 +77187,7 @@
           "address": 3899123,
           "offset": 3009155,
           "size": 546,
-          "match_percent": 99.86452
+          "match_percent": 99.980644
         },
         {
           "name": "edrtlGetFogSet",
@@ -99604,7 +99604,7 @@
           "address": 3099968,
           "offset": 2210000,
           "size": 1877,
-          "match_percent": 39.193623
+          "match_percent": 39.517086
         },
         {
           "name": "_ZN12NuCopyFilterD1Ev",

@@ -113,8 +113,8 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
 
         const f32 distance =
             1.5f * object->apiobj.field_0x1dc + static_cast<f32>(index) * object->apiobj.field_0x1dc * 1.25f;
-        const u16 z_rotation = static_cast<u16>(packet->pickup_data[index]);
         const u16 y_rotation = static_cast<u16>(packet->pickup_flags[index]);
+        const u16 z_rotation = static_cast<u16>(packet->pickup_data[index]);
         NUVEC position;
         position.x = NU_SIN_LUT(z_rotation) * NU_COS_LUT(y_rotation) * distance + object->apiobj.collision_position.x;
         position.y = NU_SIN_LUT(y_rotation) * distance + object->apiobj.collision_position.y;
@@ -327,8 +327,8 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
                     object->torpedo->pickup_positions[object->torpedo->count] = machine->position;
                     ++object->torpedo->count;
                     machine->activation_time = 0.0f;
-                    object->torpedo->field_08 = 0.0f;
                     object->torpedo->field_03 = 0;
+                    object->torpedo->field_08 = 0.0f;
                 }
             }
         }
@@ -473,8 +473,8 @@ void HomeNearestTorpTarget(BOLT_s *bolt, TORPEDOPACKET_s *packet) {
     } else {
         bolt->velocity.y += 6.0f;
     }
-    packet->field_0x1 |= 4;
     packet->target = target;
+    packet->field_0x1 |= 4;
 }
 
 void Torpedo_InitRicochet(BOLT_s *bolt, nuvec_s *position) {
@@ -516,8 +516,8 @@ void Torpedo_Ricochet(BOLT_s *bolt, TORPEDOPACKET_s *packet) {
             f32 x = smaller * product;
             f32 square = x * x;
             f32 cube = x * square;
-            f32 fourth = square * square;
             f32 angle_radians = (product + sign) * 0.785398f - x;
+            f32 fourth = square * square;
             angle_radians += (x * -0.166667f) * square;
             angle_radians += (-0.075f * square) * cube;
             angle_radians += (-0.0446429f * cube) * fourth;
@@ -542,6 +542,7 @@ void Torpedo_Ricochet(BOLT_s *bolt, TORPEDOPACKET_s *packet) {
 }
 
 void TorpedoHitTarget(BOLT_s *bolt) {
+    NUVEC delta;
     if (bolt == NULL || bolt->owner == NULL || bolt->owner->torpedo == NULL)
         return;
 
@@ -570,7 +571,7 @@ void TorpedoHitTarget(BOLT_s *bolt) {
             }
         }
         if (position != NULL) {
-            NUVEC delta;
+
             NuVecSub(&delta, position, &bolt->position);
             if (NuVecMagSqr(&delta) < radius * radius) {
                 i32 player = bolt->owner != NULL ? static_cast<i8>(bolt->owner->apiobj.field_0x27c) : -1;

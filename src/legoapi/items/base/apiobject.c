@@ -2161,6 +2161,7 @@ extern "C" {
     void AddAnimEffects(CHARACTERMODEL_s *model, CHARACTERDATA *, ANIMPACKET_s *packet, NUMTX *locator_matrices,
                         GameObject_s *object, CHARACTER_EFFECT_s *effects, i32 paused, f32 frame_time,
                         void (*footprint_callback)(void *, GameObject_s *, i32, i32), APIDEBRISSYS_s *debris_sys) {
+        NUVEC locator_positions[16];
         if (paused == 0 && effects != NULL) {
 
             i32 animation_id;
@@ -2256,7 +2257,7 @@ extern "C" {
                 }
 
                 NUVEC position = {0.0f, 0.0f, 0.0f};
-                NUVEC locator_positions[16];
+
                 i32 locator_indices[16];
                 i32 locator_count = 0;
                 i32 position_count = 0;

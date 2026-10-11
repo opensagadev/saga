@@ -659,6 +659,73 @@ i32 edbriFileSave(char *path) {
     return 1;
 }
 
+i32 edppPtlCreate(NUVEC *position, i32 effect_index) {
+    if (edpp_instances_used == 512)
+        return -1;
+    i32 index = 0;
+    while (edpp_ptls[index].instance_id != -1)
+        ++index;
+    AddDebrisEffect(&edpp_ptls[index].instance_id, effect_index, position->x, position->y, position->z);
+    edpp_particle_s *particle = &edpp_ptls[index];
+    if (particle->instance_id == -1)
+        return -1;
+    debkeydata[particle->instance_id].field_2f9 = 0;
+    particle->position = *position;
+    particle->effect_index = effect_index;
+    particle->rotation_z = edpp_rotz;
+    particle->rotation_y = edpp_roty;
+    particle->emitter_rotation_z = edpp_emitrotz;
+    particle->emitter_rotation_y = edpp_emitroty;
+    particle->emitter_rotation_x = edpp_emitrotx;
+    particle->start_offset = edpp_offset;
+    particle->switch_type = 0;
+    particle->switch_variable = 0.0f;
+    particle->switch_id = -1;
+    particle->reflection_bounce = 0.9f;
+    particle->reflection_offset = 0.0f;
+    particle->render_group = 0;
+    particle->page = edbits_particle_level_page;
+    particle->detail_levels = 7;
+    switch (debtab[effect_index]->particle_type) {
+        case 0:
+            particle->render_priority = 20000;
+            break;
+        case 2:
+            particle->render_priority = static_cast<i16>(40000);
+            break;
+        case 3:
+            particle->render_priority = 30000;
+            break;
+        case 7:
+            particle->render_priority = 10000;
+            break;
+    }
+    particle = &edpp_ptls[index];
+    particle->dynamic_priority = 0;
+    particle->facing_mode = 0;
+    particle->facing_rotation_x = 0;
+    particle->facing_rotation_y = 0;
+    strcpy(particle->name, debtab[particle->effect_index]->name);
+    DebrisOrientation(particle->instance_id, particle->rotation_z, particle->rotation_y);
+    DebrisEmitterOrientation(particle->instance_id, particle->emitter_rotation_z, particle->emitter_rotation_y,
+                             particle->emitter_rotation_x);
+    DebrisStartOffset(particle->instance_id, particle->start_offset);
+    DebrisReflectionOrientation(particle->instance_id, particle->reflection_rotation_z, particle->reflection_rotation_y,
+                                particle->reflection_offset, particle->reflection_bounce);
+    DebrisSetFacing(particle->instance_id, particle->facing_mode, particle->facing_rotation_x,
+                    particle->facing_rotation_y);
+    DebrisSetGroupID(particle->instance_id, particle->render_group);
+    DebrisSetPriority(particle->instance_id, particle->render_priority, particle->dynamic_priority);
+    DebrisSetRoomID(particle->instance_id, 0);
+    DebrisSetDetailLevels(particle->instance_id, particle->detail_levels);
+    ++edpp_instances_used;
+    edpp_page_used[edbits_particle_level_page] = 1;
+    edpp_page_on[edbits_particle_level_page] = 1;
+    if (edpp_page_scene[edbits_particle_level_page] == 0)
+        edpp_page_scene[edbits_particle_level_page] = reinterpret_cast<usize>(edbits_base_scene);
+    return index;
+}
+
 i32 edgraFileSave(char *path) {
     i32 clump_count = 0;
     i32 element_count = 0;
@@ -725,73 +792,6 @@ i32 edgraFileSave(char *path) {
     EdFileSetReadWrongEndianess(0);
     EdFileClose();
     return 1;
-}
-
-i32 edppPtlCreate(NUVEC *position, i32 effect_index) {
-    if (edpp_instances_used == 512)
-        return -1;
-    i32 index = 0;
-    while (edpp_ptls[index].instance_id != -1)
-        ++index;
-    AddDebrisEffect(&edpp_ptls[index].instance_id, effect_index, position->x, position->y, position->z);
-    edpp_particle_s *particle = &edpp_ptls[index];
-    if (particle->instance_id == -1)
-        return -1;
-    debkeydata[particle->instance_id].field_2f9 = 0;
-    particle->position = *position;
-    particle->effect_index = effect_index;
-    particle->rotation_z = edpp_rotz;
-    particle->rotation_y = edpp_roty;
-    particle->emitter_rotation_z = edpp_emitrotz;
-    particle->emitter_rotation_y = edpp_emitroty;
-    particle->emitter_rotation_x = edpp_emitrotx;
-    particle->start_offset = edpp_offset;
-    particle->switch_type = 0;
-    particle->switch_variable = 0.0f;
-    particle->switch_id = -1;
-    particle->reflection_bounce = 0.9f;
-    particle->reflection_offset = 0.0f;
-    particle->render_group = 0;
-    particle->page = edbits_particle_level_page;
-    particle->detail_levels = 7;
-    switch (debtab[effect_index]->particle_type) {
-        case 0:
-            particle->render_priority = 20000;
-            break;
-        case 2:
-            particle->render_priority = static_cast<i16>(40000);
-            break;
-        case 3:
-            particle->render_priority = 30000;
-            break;
-        case 7:
-            particle->render_priority = 10000;
-            break;
-    }
-    particle = &edpp_ptls[index];
-    particle->dynamic_priority = 0;
-    particle->facing_mode = 0;
-    particle->facing_rotation_x = 0;
-    particle->facing_rotation_y = 0;
-    strcpy(particle->name, debtab[particle->effect_index]->name);
-    DebrisOrientation(particle->instance_id, particle->rotation_z, particle->rotation_y);
-    DebrisEmitterOrientation(particle->instance_id, particle->emitter_rotation_z, particle->emitter_rotation_y,
-                             particle->emitter_rotation_x);
-    DebrisStartOffset(particle->instance_id, particle->start_offset);
-    DebrisReflectionOrientation(particle->instance_id, particle->reflection_rotation_z, particle->reflection_rotation_y,
-                                particle->reflection_offset, particle->reflection_bounce);
-    DebrisSetFacing(particle->instance_id, particle->facing_mode, particle->facing_rotation_x,
-                    particle->facing_rotation_y);
-    DebrisSetGroupID(particle->instance_id, particle->render_group);
-    DebrisSetPriority(particle->instance_id, particle->render_priority, particle->dynamic_priority);
-    DebrisSetRoomID(particle->instance_id, 0);
-    DebrisSetDetailLevels(particle->instance_id, particle->detail_levels);
-    ++edpp_instances_used;
-    edpp_page_used[edbits_particle_level_page] = 1;
-    edpp_page_on[edbits_particle_level_page] = 1;
-    if (edpp_page_scene[edbits_particle_level_page] == 0)
-        edpp_page_scene[edbits_particle_level_page] = reinterpret_cast<usize>(edbits_base_scene);
-    return index;
 }
 
 void edppPtlShelve(i32 index) {
@@ -1910,8 +1910,8 @@ void EdDrawPolySector(VuVec const &center, float radius, i32 axis, i32 first_ang
                 first.z = 0.0f * radius;
                 NuVecRotateZ(&first.xyz, &first.xyz, -previous_angle);
                 second.w = 1.0f;
-                second.y = radius;
                 second.x = 0.0f * radius;
+                second.y = radius;
                 second.z = 0.0f * radius;
                 NuVecRotateZ(&second.xyz, &second.xyz, -angle);
                 break;
@@ -2816,14 +2816,14 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
                 }
                 NuVecRotateZ(&offset, &offset, GrassClumps[clump_index].rotation_z);
                 NuVecRotateY(&offset, &offset, GrassClumps[clump_index].rotation_y);
-                sample.x = offset.x;
                 sample.z = offset.z;
+                sample.x = offset.x;
                 sample.y = offset.y;
             }
         translate_sample:
             sample.x += GrassClumps[clump_index].position.x;
-            sample.z += GrassClumps[clump_index].position.z;
             sample.y += GrassClumps[clump_index].position.y;
+            sample.z += GrassClumps[clump_index].position.z;
             if (GrassClumps[clump_index].kind == 3) {
                 edgra_individual_s *individual = GetIndGrassClump(GrassClumps[clump_index].individual_index, element);
                 sample.w =
@@ -3036,32 +3036,20 @@ i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end) {
             point_cursor[j].z = EdFileReadFloat();
         }
         point_cursor += spline->length;
-        if (!(point_cursor > data_end)) {
-            continue;
+        if (point_cursor > data_end) {
+            EdFileClose();
+            splineStore = NULL;
+            EdFileClose();
+            numSplinesLoaded = spline_count;
+            buf->void_ptr = data_end;
+            return 0;
         }
-        EdFileClose();
-        splineStore = NULL;
-        EdFileClose();
-        numSplinesLoaded = spline_count;
-        buf->void_ptr = data_end;
-        return 0;
     }
 
     EdFileClose();
     numSplinesLoaded = spline_count;
     buf->void_ptr = data_end;
     return spline_count;
-}
-
-NUGSPLINE *edSpline_SplineFind(NUGSCN *scene, char *name) {
-    if (splineStore != NULL) {
-        for (i32 i = 0; i < numSplinesLoaded; ++i) {
-            if (NuStrICmp(splineStore[i].name, name) == 0) {
-                return &splineStore[i];
-            }
-        }
-    }
-    return NuSplineFind(scene, name);
 }
 
 i32 edSpline_FindAllSub(NUGSCN *scene, char *name, NUGSPLINE **results, i32 capacity) {
@@ -3087,6 +3075,17 @@ i32 edSpline_FindAllSub(NUGSCN *scene, char *name, NUGSPLINE **results, i32 capa
         }
     }
     return count;
+}
+
+NUGSPLINE *edSpline_SplineFind(NUGSCN *scene, char *name) {
+    if (splineStore != NULL) {
+        for (i32 i = 0; i < numSplinesLoaded; ++i) {
+            if (NuStrICmp(splineStore[i].name, name) == 0) {
+                return &splineStore[i];
+            }
+        }
+    }
+    return NuSplineFind(scene, name);
 }
 
 void edSpline_SplineList(nugscn_s *) {
@@ -3734,8 +3733,8 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
         if (first->ed_class->FindMember(&member, first->object, 0x10, 1) != 0)
             member.reference->GetAttributeData(member.object, 0x10, matrix_type, &transform, 0);
     }
-    VuVec first_axis;
     VuVec second_axis;
+    VuVec first_axis;
     i32 axis = SelectAxis(input, average, first_axis, second_axis, &transform);
     theLevelEditor.field_0x2c = AxisColour[axis];
     if (input.GetHold(3) != 0.0f) {
@@ -3771,8 +3770,8 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
                     NuVecNorm(reinterpret_cast<NUVEC *>(&first_axis), reinterpret_cast<NUVEC *>(&first_axis));
                     f32 change = (scaled_magnitude + movement) / scaled_magnitude - 1.0f;
                     scale_y = first_axis.y * change + 1.0f;
-                    scale_z = first_axis.z * change + 1.0f;
                     scale_x = first_axis.x * change + 1.0f;
+                    scale_z = first_axis.z * change + 1.0f;
                     break;
                 }
                 case 4:
@@ -3812,13 +3811,13 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
             average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
             const NUMTX original = matrix;
             const f32 zero = 0.0f;
-            matrix.m00 = scale_x * original.m00 + zero * original.m10 + zero * original.m20;
             matrix.m02 = scale_x * original.m02 + zero * original.m12 + zero * original.m22;
+            matrix.m00 = scale_x * original.m00 + zero * original.m10 + zero * original.m20;
             matrix.m10 = zero * original.m00 + scale_y * original.m10 + zero * original.m20;
             matrix.m01 = scale_x * original.m01 + zero * original.m11 + zero * original.m21;
-            matrix.m20 = zero * original.m00 + zero * original.m10 + scale_z * original.m20;
             matrix.m11 = zero * original.m01 + scale_y * original.m11 + zero * original.m21;
             matrix.m12 = zero * original.m02 + scale_y * original.m12 + zero * original.m22;
+            matrix.m20 = zero * original.m00 + zero * original.m10 + scale_z * original.m20;
             matrix.m21 = zero * original.m01 + zero * original.m11 + scale_z * original.m21;
             matrix.m22 = zero * original.m02 + zero * original.m12 + scale_z * original.m22;
             matrix.m03 = matrix.m13 = matrix.m23 = 0.0f;
@@ -4367,8 +4366,8 @@ __attribute__((force_align_arg_pointer)) i32 EdManRotate::RotateItem(EdInputCont
         switch (axis) {
             case 1: {
                 average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
-                f32 sine = NuTrigTable[sine_index];
                 f32 cosine = NuTrigTable[cosine_index];
+                f32 sine = NuTrigTable[sine_index];
                 f32 m01 = matrix.m01, m11 = matrix.m11, m21 = matrix.m21;
                 matrix.m01 = cosine * m01 - sine * matrix.m02;
                 matrix.m02 = m01 * sine + matrix.m02 * cosine;
@@ -4386,8 +4385,8 @@ __attribute__((force_align_arg_pointer)) i32 EdManRotate::RotateItem(EdInputCont
                 matrix.m00 = cosine * m00 + sine * matrix.m02;
                 matrix.m02 = matrix.m02 * cosine - m00 * sine;
                 matrix.m10 = cosine * m10 + sine * matrix.m12;
-                matrix.m20 = cosine * m20 + sine * matrix.m22;
                 matrix.m12 = matrix.m12 * cosine - m10 * sine;
+                matrix.m20 = cosine * m20 + sine * matrix.m22;
                 matrix.m22 = matrix.m22 * cosine - m20 * sine;
                 break;
             }
@@ -4397,10 +4396,10 @@ __attribute__((force_align_arg_pointer)) i32 EdManRotate::RotateItem(EdInputCont
                 f32 cosine = NuTrigTable[cosine_index];
                 f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20;
                 matrix.m00 = cosine * m00 - sine * matrix.m01;
-                matrix.m10 = cosine * m10 - sine * matrix.m11;
                 matrix.m01 = m00 * sine + matrix.m01 * cosine;
-                matrix.m20 = cosine * m20 - sine * matrix.m21;
+                matrix.m10 = cosine * m10 - sine * matrix.m11;
                 matrix.m11 = m10 * sine + matrix.m11 * cosine;
+                matrix.m20 = cosine * m20 - sine * matrix.m21;
                 matrix.m21 = m20 * sine + matrix.m21 * cosine;
                 break;
             }
@@ -5084,8 +5083,8 @@ __attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputCo
                                                                        VuVec &first_axis, VuVec &second_axis,
                                                                        VuMtx *matrix) {
     VuVec locators[8];
-    first_axis.z = 0.0f;
     first_axis.y = 0.0f;
+    first_axis.z = 0.0f;
     first_axis.w = 1.0f;
     first_axis.x = 0.0f;
     second_axis.x = 0.0f;
@@ -5183,12 +5182,12 @@ __attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputCo
         const VuVec *selected_second = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20);
         first_axis.z = selected_first->z;
         first_axis.y = selected_first->y;
-        first_axis.w = selected_first->w;
         first_axis.x = selected_first->x;
+        first_axis.w = selected_first->w;
         second_axis.x = selected_second->x;
         second_axis.y = selected_second->y;
-        second_axis.w = selected_second->w;
         second_axis.z = selected_second->z;
+        second_axis.w = selected_second->w;
     } else {
         *selected_axis = 0;
         *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10) = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
@@ -6934,8 +6933,8 @@ __attribute__((force_align_arg_pointer)) i32 EdManMove::Process(EdInputContext &
     VuVec average;
     if (selected.GetAveragePosition(average) == 0)
         return 0;
-    VuVec second_axis;
     VuVec first_axis;
+    VuVec second_axis;
     i32 axis = SelectAxis(input, average, first_axis, second_axis, NULL);
     theLevelEditor.field_0x2c = AxisColour[axis];
     if (input.GetHold(3) == 0.0f && input.GetHold(38) == 0.0f)
@@ -6944,12 +6943,16 @@ __attribute__((force_align_arg_pointer)) i32 EdManMove::Process(EdInputContext &
     for (ClassObjectListEntry *entry = selected.first; entry != NULL; entry = entry->next) {
         position = VuVec_Zero;
         get_manipulator_attribute(entry, 8, EdType_VuVec, &position);
-        if (axis != 7) {
+        if (axis == 7) {
+            if (input.GetHold(38) == 0.0f)
+                continue;
+            memcpy(&position, theLevelEditor.background_colour, sizeof(position));
+        } else {
             f32 amount = delta->x * first_axis.x + delta->y * first_axis.y + delta->z * first_axis.z;
             if (amount != 0.0f) {
                 position.y += first_axis.y * amount;
-                position.x += first_axis.x * amount;
                 position.z += first_axis.z * amount;
+                position.x += first_axis.x * amount;
             }
             if (axis >= 4) {
                 f32 second_amount = delta->x * second_axis.x + delta->y * second_axis.y + delta->z * second_axis.z;
@@ -6963,10 +6966,6 @@ __attribute__((force_align_arg_pointer)) i32 EdManMove::Process(EdInputContext &
             } else if (amount == 0.0f) {
                 continue;
             }
-        } else {
-            if (input.GetHold(38) == 0.0f)
-                continue;
-            memcpy(&position, theLevelEditor.background_colour, sizeof(position));
         }
         theClassEditor.SnapPoint(position);
         set_manipulator_attribute(entry, 8, EdType_VuVec, &position);
@@ -7045,8 +7044,8 @@ void EdRefKnot::SetMemberData(void *object, i32 type, void *data, i32 data_size,
             f32 dy = position->y - knot->position.y;
             f32 dx = position->x - knot->position.x;
             f32 dz = position->z - knot->position.z;
-            knot->position.x += dx;
             knot->position.y += dy;
+            knot->position.x += dx;
             knot->position.z += dz;
             knot->position.w = 1.0f;
             if (!theClassEditor.IsSelectedObject(knot, theKnotHelper.in_tangent_ref)) {

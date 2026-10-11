@@ -294,8 +294,8 @@ void UpdateCables() {
                 if (combined * combined > line_distance &&
                     object->apiobj.collision_position.y + half_height > closest.y &&
                     closest.y > object->apiobj.collision_position.y - half_height) {
-                    f32 dx = object->apiobj.collision_position.x - closest.x;
                     f32 dz = object->apiobj.collision_position.z - closest.z;
+                    f32 dx = object->apiobj.collision_position.x - closest.x;
                     if (radius * radius > dx * dx + dz * dz) {
                         obstruction = 1;
                         break;

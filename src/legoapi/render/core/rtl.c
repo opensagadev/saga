@@ -456,8 +456,8 @@ extern "C" {
                 ++buffer->addr;
                 u8 *indices = reinterpret_cast<u8 *>(grid->cells[row * grid->width + column]);
                 *indices = 0;
-                const f32 minimum_cell_x = static_cast<f32>(column) / grid->scale - grid->offset_x;
                 i32 index = 0;
+                const f32 minimum_cell_x = static_cast<f32>(column) / grid->scale - grid->offset_x;
 
                 const f32 maximum_cell_x = static_cast<f32>(column + 1) / grid->scale - grid->offset_x;
                 light = set->lights;
@@ -2899,8 +2899,8 @@ static void edrtlLeave() {
 }
 
 static __used__ rtl_s *FindNearestRTL(nuvec_s *position, int ignore_radius) {
-    i32 nearest = -1;
     i32 i;
+    i32 nearest = -1;
     f32 nearest_distance = FLT_MAX;
     f32 distance;
     if (base_rtl != NULL) {
@@ -3162,8 +3162,8 @@ static i32 edrtlProcRTL(float delta_time, nupad_s *pad) {
 }
 
 static __used__ EDRTLFOG_s *FindNearestFog(nuvec_s *position) {
-    i32 nearest = -1;
     i32 i;
+    i32 nearest = -1;
     f32 nearest_distance = FLT_MAX;
     f32 distance;
     for (i = 0; i < 32; ++i) {

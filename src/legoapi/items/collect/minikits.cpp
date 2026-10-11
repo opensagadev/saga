@@ -517,8 +517,8 @@ void AllMiniKits_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 cur
             title_alpha = 1.0f;
         else if (time < 4.0f) {
             icon_alpha = (time - 3.5f) + (time - 3.5f);
-            title_alpha = 1.0f - icon_alpha;
             y = (1.0f - NuTrigTable[(static_cast<i32>(icon_alpha * 16384.0f) >> 1) & 0x7fff]) * -0.5f + 0.225f;
+            title_alpha = 1.0f - icon_alpha;
         } else if (time < 6.0f) {
             title_alpha = 0.0f;
             icon_alpha = 1.0f;

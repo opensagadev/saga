@@ -254,6 +254,7 @@ namespace {
 } // namespace
 
 static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count) {
+    NUMTX matrix;
     if (world == NULL || pickups == NULL || world->lev_objs == NULL || GameCam == NULL) {
         return;
     }
@@ -307,7 +308,7 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
         const i32 model_index = type->first_model_id + pickup.model_variant;
         LEVEL_OBJECT_RUNTIME_s &model = world->lev_objs[model_index];
         if (model.active != 0) {
-            NUMTX matrix;
+
             if ((type->flags & GIZMOPICKUP_TYPE_DRAW_TUMBLING) != 0) {
                 const u16 y_rotation = pickup.draw_rotation;
                 const i32 x_rotation = static_cast<i32>(NuTrigTable[y_rotation & 0x7fff] * 1820.0f);
