@@ -1514,7 +1514,6 @@ f32 speeder_offset_speed = 2.0f;
 extern f32 GetVehicleSpeedMul(GameObject_s *, f32);
 
 void Move_SPEEDERBIKE(GameObject_s *object) {
-    GAMEPAD_s *pad = object->pad_gamepad;
     PreResetCode(object);
     KeepWeaponOut(object);
     DropInOutCode(object);
@@ -1525,15 +1524,17 @@ void Move_SPEEDERBIKE(GameObject_s *object) {
     GAMECHARACTERDATA *vehicle = object->apiobj.character_data->game_character;
     if (vehicle->field_0x28 > 0.0f && (vehicle->flags_090 & 0x10000) == 0 &&
         (WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks == 0)) {
-        LoopCode(object, pad->buttons_pressed & GAMEPAD_JUMP, pad->buttons_held & GAMEPAD_JUMP, pad, 1);
-        TurnCode(object, 0, pad);
+        LoopCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP,
+                 object->pad_gamepad->buttons_held & GAMEPAD_JUMP, object->pad_gamepad, 1);
+        TurnCode(object, 0, object->pad_gamepad);
     }
     DeactivatedCode(object);
     if ((object->apiobj.character_data->model_flags & 0x10000000) != 0) {
-        FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.2f, 0);
+        FireCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION,
+                 object->pad_gamepad->buttons_held & GAMEPAD_ACTION, 0.2f, 0);
     }
 
-    f32 speed = GetVehicleSpeedMul(object, pad->input_magnitude);
+    f32 speed = GetVehicleSpeedMul(object, object->pad_gamepad->input_magnitude);
     f32 target = speed <= 1.0f ? speed * 0.75f + 0.75f : 1.5f;
     object->thrust_effect_scale =
         SeekValF(object->thrust_effect_scale, target, object->thrust_effect_scale < target ? 8.0f : 3.0f);
@@ -1747,10 +1748,11 @@ static __used__ void ZapCode(GameObject_s *object, i32 pressed, i32 retract_weap
         if ((object->context_flags & 0x40) != 0) {
             AddGameDebris(WORLD->debris_sys, object->id == id_R2Q5 ? 1 : 3, origin);
             NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
-            const i16 shoot_sfx = object->apiobj.character_data->game_character->sfx_shoot;
             const i32 sfx_bits = GameAudio_GetPlrSfxBits(object);
-            GameAudio_PlaySfxById(shoot_sfx == -1 ? GetSfxId("R2Zap") : shoot_sfx, &object->apiobj.collision_position,
-                                  sfx_bits, 1);
+            GameAudio_PlaySfxById(object->apiobj.character_data->game_character->sfx_shoot == -1
+                                      ? GetSfxId("R2Zap")
+                                      : object->apiobj.character_data->game_character->sfx_shoot,
+                                  &object->apiobj.collision_position, sfx_bits, 1);
 
             if (target == NULL) {
                 AddGameDebris(WORLD->debris_sys, 0x58, origin);
@@ -2332,9 +2334,8 @@ update_along:
 void MoveBlocksOverBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, nuvec_s *velocity) {
     if (block->runtime_flags_0c9 & 4)
         return;
-    NUVEC *base = block->position;
-    f32 xmin = block->bounds_min.x + base->x, xmax = base->x + block->bounds_max.x;
-    f32 zmin = block->bounds_min.z + base->z, zmax = base->z + block->bounds_max.z;
+    f32 xmin = block->bounds_min.x + block->position->x, xmax = block->position->x + block->bounds_max.x;
+    f32 zmin = block->bounds_min.z + block->position->z, zmax = block->position->z + block->bounds_max.z;
     for (i32 i = 0; i < world->push_block_count; ++i) {
         if (i == excluded)
             continue;
@@ -2342,7 +2343,7 @@ void MoveBlocksOverBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, n
         if ((other->flags_0cb & 4) || !(other->flags_0ca & 4))
             continue;
         NUVEC *position = other->position;
-        if (base->y >= position->y)
+        if (block->position->y >= position->y)
             continue;
         if (!(position->x >= (xmin - other->bounds_max.x) + 0.01f &&
               position->x <= (xmax - other->bounds_min.x) - 0.01f &&
@@ -4157,10 +4158,10 @@ void Move_POD(GameObject_s *object) {
     ApplyGravity(object, NULL, FindPodHoverHeight(object), 8.0f, NULL);
 
     GAMECHARACTERDATA *vehicle = object->apiobj.character_data->game_character;
-    GAMEPAD_s *pad = object->pad_gamepad;
     if (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA && vehicle->field_0x28 > 0.0f &&
         PodSprint_InStartCountdown(WORLD) <= 0.0f) {
-        LoopCode(object, pad->buttons_pressed & GAMEPAD_JUMP, pad->buttons_held & GAMEPAD_JUMP, pad, 0);
+        LoopCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP,
+                 object->pad_gamepad->buttons_held & GAMEPAD_JUMP, object->pad_gamepad, 0);
     }
     TakeHitCode(object);
 
@@ -4170,7 +4171,7 @@ void Move_POD(GameObject_s *object) {
         f32 target_speed;
         f32 rate = 3.0f * FRAMETIME;
         if (WORLD->area == PODRACE_ADATA) {
-            if ((pad->buttons_held & GAMEPAD_JUMP) != 0) {
+            if ((object->pad_gamepad->buttons_held & GAMEPAD_JUMP) != 0) {
                 target_speed = 1.0f + object->camera_shake_strength;
                 rate = 5.0f * FRAMETIME;
             } else if (FadeSys.fade == 0.0f && MiniCutCam == 0) {
@@ -4187,8 +4188,8 @@ void Move_POD(GameObject_s *object) {
 
         if ((object->field_0xe20 & 0x20) == 0 && object->apiobj.field_0x281 == 0x14 &&
             object->apiobj.collision_min.y - object->apiobj.field_0x218 < PODBOOSTHEIGHT) {
-            NewBuzz(pad->pad, 0.1f, 0);
-            NewRumble(pad->pad, 0.5f, 0);
+            NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
+            NewRumble(object->pad_gamepad->pad, 0.5f, 0);
             object->current_speed_mul = WORLD->area == PODRACE_ADATA ? 2.0f : 1.4f;
             object->camera_shake_strength = 1.0f;
             if ((object->field_0xe20 & 1) == 0) {
@@ -4204,12 +4205,13 @@ void Move_POD(GameObject_s *object) {
             }
         }
         if (object->current_speed_mul > 1.0f)
-            NewRumble(pad->pad, object->current_speed_mul - 1.0f, 0);
+            NewRumble(object->pad_gamepad->pad, object->current_speed_mul - 1.0f, 0);
     }
 
     if (FreePlay != 0 && (object->apiobj.character_data->model_flags & 0x10000000) != 0 &&
         (vehicle->flags_094[0] & 8) == 0) {
-        FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.15f, 0);
+        FireCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION,
+                 object->pad_gamepad->buttons_held & GAMEPAD_ACTION, 0.15f, 0);
     }
     if (WORLD->area != NULL && (WORLD->area == PODRACE_ADATA || WORLD->area == PODSPRINT_ADATA))
         CatchUpCode(object, 0.025f, 3.0f, 0);
@@ -4230,7 +4232,8 @@ void Move_POD(GameObject_s *object) {
         if (static_cast<i8>(object->apiobj.flags_low) < 0) {
             i32 player_index = object == Player[0] ? 0 : 1;
             if (WORLD->area == PODRACE_ADATA) {
-                f32 steering = -fabsf(NuTrigTable[pad->input_angle >> 1]) * (pad->input_magnitude - 6.0f) / 96.0f;
+                f32 steering = -fabsf(NuTrigTable[object->pad_gamepad->input_angle >> 1]) *
+                               (object->pad_gamepad->input_magnitude - 6.0f) / 96.0f;
                 f32 speed = avg_currentspeed_mul < 1.1f ? avg_currentspeed_mul + 1.0f + steering : 2.0f + steering;
                 f32 pitch = speed * 0.5f;
                 f32 previous = PosSeekPitch[player_index];
@@ -4276,7 +4279,6 @@ static __attribute__((noinline)) void ShieldCode(GameObject_s *object) {
 }
 
 void Move_VEHICLE(GameObject_s *object) {
-    GAMEPAD_s *pad = object->pad_gamepad;
     if (FreePlay != 0 && WORLD->area != NULL && WORLD->area == PODSPRINT_ADATA) {
         Move_POD(object);
         return;
@@ -4309,7 +4311,7 @@ vehicle_gravity_done:
     DeactivatedCode(object);
 
     if (object->id == id_SNOWMOB) {
-        Buck_MoveCode(object, pad->buttons_pressed & (GAMEPAD_SPECIAL | GAMEPAD_ACTION));
+        Buck_MoveCode(object, object->pad_gamepad->buttons_pressed & (GAMEPAD_SPECIAL | GAMEPAD_ACTION));
     }
     if (object->id == id_ZAMSSPEEDER && WORLD->current_level == BOUNTYHUNTERPURSUITE_LDATA &&
         object->current_hp < static_cast<i32>(object->hitpoints)) {
@@ -4337,8 +4339,9 @@ vehicle_gravity_done:
 
     if (object->apiobj.character_data->game_character->field_0x28 > 0.0f &&
         (object->apiobj.character_data->game_character->flags_090 & 0x10000) == 0) {
-        LoopCode(object, pad->buttons_pressed & GAMEPAD_JUMP, pad->buttons_held & GAMEPAD_JUMP, pad, 1);
-        TurnCode(object, 0, pad);
+        LoopCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP,
+                 object->pad_gamepad->buttons_held & GAMEPAD_JUMP, object->pad_gamepad, 1);
+        TurnCode(object, 0, object->pad_gamepad);
         DisorientateCode(object, NULL, 225.0f);
     }
 
@@ -4346,26 +4349,28 @@ vehicle_gravity_done:
         (object->apiobj.character_data->game_character->flags_094[0] & 8) == 0) {
         if (object->id == id_STAP || object->id == id_STAP2) {
             if (object->apiobj.character_model->model_data_b[0x16] == NULL) {
-                FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.25f, 1);
+                FireCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION,
+                         object->pad_gamepad->buttons_held & GAMEPAD_ACTION, 0.25f, 1);
             } else {
-                ShootCode(object, pad->buttons_pressed & GAMEPAD_ACTION, 0, 0, 0, 1);
+                ShootCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION, 0, 0, 0, 1);
             }
         } else {
-            FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.15f, 0);
+            FireCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION,
+                     object->pad_gamepad->buttons_held & GAMEPAD_ACTION, 0.15f, 0);
         }
     }
     if (WORLD->current_level == DOGFIGHTA_LDATA) {
         CatchUpCode(object, 0.01f, 2.0f, 0);
     }
     if ((object->apiobj.character_data->game_character->flags_090 & 0x400) != 0) {
-        CableCode(object, pad->buttons_pressed & GAMEPAD_SPECIAL, 0.5f);
+        CableCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL, 0.5f);
     }
     if (WORLD->area != NULL && (WORLD->area->flags & 1) != 0 && static_cast<i8>(object->apiobj.flags_low) < 0 &&
         (Cheat[29].enabled != 0 || object->field_0xdec > 0.0f)) {
         TractorBeamCode(object);
     }
 
-    const f32 speed_multiplier = GetVehicleSpeedMul(object, pad->input_magnitude);
+    const f32 speed_multiplier = GetVehicleSpeedMul(object, object->pad_gamepad->input_magnitude);
     const f32 thrust_target = speed_multiplier <= 1.0f ? speed_multiplier * 0.5f + 0.5f : 1.0f;
     object->thrust_effect_scale =
         SeekValF(object->thrust_effect_scale, thrust_target, object->thrust_effect_scale < thrust_target ? 4.0f : 2.0f);
@@ -4448,7 +4453,7 @@ vehicle_gravity_done:
     }
 
     FloatCode(object);
-    TorpedoCode(object, pad->buttons_held & GAMEPAD_SPECIAL, 0.5f);
+    TorpedoCode(object, object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL, 0.5f);
 
     if (object->id == id_ZAMSSPEEDER && WORLD->area != NULL && WORLD->area == BOUNTYHUNTERPURSUIT_ADATA) {
         ShieldCode(object);
@@ -4457,10 +4462,10 @@ vehicle_gravity_done:
     if (!TouchHacks::CanUseVehicleSmartBomb(*object)) {
         object->combo_input_timer = 0.0f;
     } else if (object->combo_input_timer == 0.0f) {
-        if ((pad->buttons_pressed & GAMEPAD_SPECIAL) != 0) {
+        if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0) {
             object->combo_input_timer = FRAMETIME;
         }
-    } else if ((pad->buttons_held & GAMEPAD_SPECIAL) != 0) {
+    } else if ((object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0) {
         object->combo_input_timer += FRAMETIME;
         if (object->combo_input_timer >= 4.0f) {
             object->combo_input_timer = 0.0f;
@@ -4499,7 +4504,7 @@ vehicle_gravity_done:
     }
 
     if ((object->apiobj.character_data->game_character->flags_090 & 0x100000) != 0) {
-        if (Cheat_IsOn(7) != 0 && (pad->buttons_pressed & (GAMEPAD_ACTION | GAMEPAD_SPECIAL)) != 0) {
+        if (Cheat_IsOn(7) != 0 && (object->pad_gamepad->buttons_pressed & (GAMEPAD_ACTION | GAMEPAD_SPECIAL)) != 0) {
             GameAudio_PlaySfx(0x4b, &object->apiobj.collision_position, 0, 0);
         }
         NUJOINTANIM_s &joint = object->joint_modifiers[0];
@@ -4902,8 +4907,7 @@ static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pres
 }
 
 static void SwipeCode(GameObject_s *object, i32 pressed, i32 held) {
-    i8 context = object->character_context;
-    if (context == 0x10) {
+    if (object->character_context == 0x10) {
         f32 *frame = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
         if (frame != NULL) {
             if ((object->context_flags & 0x40) == 0) {
@@ -4927,7 +4931,8 @@ static void SwipeCode(GameObject_s *object, i32 pressed, i32 held) {
         }
     } else if ((object->field_0xe22 & 1) != 0 && object->weapon_scale_state == 0 && pressed &&
                object->apiobj.field_0x27d != 0 && object->apiobj.character_model != NULL &&
-               (context == 1 || context == -1 || context == 2 || context == 4 || context == 3) &&
+               (object->character_context == 1 || object->character_context == -1 || object->character_context == 2 ||
+                object->character_context == 4 || object->character_context == 3) &&
                SetComboOpponent(object, 0.6f, 0, 2) == 1) {
         NUVEC *position;
         if (object->force_target != NULL)
@@ -4962,7 +4967,6 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
         object->ai_combo_cooldown = 0.0f;
     else if (object->ai_combo_cooldown > 0.0f)
         object->ai_combo_cooldown -= FRAMETIME;
-    u8 previous_flags = object->context_flags;
     object->context_flags &= ~2;
     if (object->character_context == CHARACTER_CONTEXT_COMBO) {
         object->field_0xef9 |= 8;
@@ -5077,7 +5081,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                 if (object->character_context == CHARACTER_CONTEXT_NONE && action_held != 0 &&
                     (object->id != id_IMPERIALGUARD || object->combo_stage != 2))
                     StartHold(object);
-                if ((object->context_flags & 0x40) != 0 && (previous_flags & 0x40) == 0) {
+                if ((object->context_flags & 0x40) != 0 && (object->context_flags & 0x40) == 0) {
                     NewRumble(object->pad_gamepad->pad, object->combo_branch == 6 ? 0.7f : 0.35f, 0);
                 }
                 if ((object->apiobj.flags_low & 0x80) == 0 &&
@@ -10225,15 +10229,14 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
         return 0;
     }
 
-    i8 context = object->character_context;
-    if ((object->field_0xef8 & 8) != 0 && pressed != 0 && (CInfo[context].flags & 0x20) == 0) {
+    if ((object->field_0xef8 & 8) != 0 && pressed != 0 && (CInfo[object->character_context].flags & 0x20) == 0) {
         if (static_cast<i8>(object->apiobj.flags_low) < 0) {
-            if ((context == 6 || context == 7) &&
+            if ((object->character_context == 6 || object->character_context == 7) &&
                 (object->apiobj.character_data->game_character->flags_094[1] & 0x10) != 0)
                 return 0;
-        } else if (context == 6 || context == 7) {
+        } else if (object->character_context == 6 || object->character_context == 7) {
             goto shoot_weapon_in;
-        } else if (context == 1) {
+        } else if (object->character_context == 1) {
             if (object->context_animation == 0xb3 || object->context_animation == 0x59)
                 goto shoot_weapon_in;
         }
@@ -10250,7 +10253,7 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
                     object->apiobj.character_model->model_data_b
                             [data->uses_weapon_action == 0 && (character->model_flags & 0x80) != 0 ? 0x7f : 0x11] !=
                         NULL &&
-                    (context == -1 || (CInfo[context].flags & 4) != 0))
+                    (object->character_context == -1 || (CInfo[object->character_context].flags & 4) != 0))
                     SlowWeaponOut(object);
                 else
                     FastWeaponOut(object, 1);
@@ -10430,10 +10433,12 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
     }
 shoot_weapon_in:
     if (weapon_mode == 0 || ((object->pad_gamepad->allocated_5a & 4) == 0 && special_pressed == 0) ||
-        (object->field_0xe22 & 1) == 0 || object->weapon_scale_state != 0 || context == 6 || context == 7 ||
-        context == 0x47 || context == 0x46 || context == 0x0b || context == 0x2e ||
+        (object->field_0xe22 & 1) == 0 || object->weapon_scale_state != 0 || object->character_context == 6 ||
+        object->character_context == 7 || object->character_context == 0x47 || object->character_context == 0x46 ||
+        object->character_context == 0x0b || object->character_context == 0x2e ||
         (object->apiobj.character_data->game_character->uses_weapon_action == 2 && object->field_0xe31 == 1) ||
-        context == 8 || context == 0x1b || context == 0x1d || TouchHacks::ShouldKeepWeaponOut(*object))
+        object->character_context == 8 || object->character_context == 0x1b || object->character_context == 0x1d ||
+        TouchHacks::ShouldKeepWeaponOut(*object))
         return 0;
     if (weapon_mode == 2) {
         SetWeaponIn(object);
