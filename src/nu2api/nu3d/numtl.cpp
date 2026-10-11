@@ -142,8 +142,8 @@ void NuMtlInitEx(VARIPTR *buf, i32 mtl_count) {
     desc2d.flags = 0x1000;
     desc2d.diffuse_color[0] = 0xffffffff;
     desc2d.unknown_24 = 1.0f;
-    desc2d.vtx_desc.has_position = 1;
     desc2d.vtx_desc.has_diffuse = 1;
+    desc2d.vtx_desc.has_position = 1;
     desc2d.vtx_desc.has_no_transform = 1;
     NUSHADERMTLDESC desc3d;
     memset(&desc3d, 0, sizeof(desc3d));
@@ -308,8 +308,8 @@ extern "C" NUMTL *NuMtlCreate3D(i32 count) {
 
         DefaultMtl(mtl);
 
-        mtl->is_used = true;
         mtl->renderplane = numtl_renderplane;
+        mtl->is_used = true;
         mtl->unknown_0_4 = true;
         // NB: no unknown_6_128 here — original Create3D leaves byte6 clear.
 

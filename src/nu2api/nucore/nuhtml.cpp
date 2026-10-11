@@ -183,8 +183,8 @@ extern "C" {
         NuHtmlWrite(text);
 
         i32 quarter_width = static_cast<i32>(static_cast<f32>(width) * 0.88f * 0.25f);
-        i32 label_width = static_cast<i32>(static_cast<f32>(width) * 0.12f);
         i32 tick_width = static_cast<i32>(static_cast<f32>(quarter_width) / 600.0f * 100.0f);
+        i32 label_width = static_cast<i32>(static_cast<f32>(width) * 0.12f);
         f32 scale = static_cast<f32>(quarter_width * 4) / static_cast<f32>(maximum);
         const char *tick = "<TD width=\"%d%%%%\" bgColor=gray Align=right>"
                            "<DIV style=\"FONT-SIZE: 10pt; WIDTH: 10pt;\">%d</DIV></TD>\r\n";

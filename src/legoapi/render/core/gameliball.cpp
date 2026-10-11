@@ -104,8 +104,8 @@ i32 ReadTerrain(unsigned char *base_path, i32 first_group, i16 **buffer, TERRSET
     terrain->file_version = chunk->version;
     terrain->spatial_nodes = NULL;
 
-    i32 chunk_index = 0;
     i32 group_count = 0;
+    i32 chunk_index = 0;
     do {
         u8 *chunk_data = reinterpret_cast<u8 *>(*buffer);
 
@@ -184,8 +184,8 @@ i32 ReadTerrainPickup(unsigned char *base_path, i16 **buffer, TERRPICKUPSET *ter
                 group->origin = chunk->origin;
                 group->chunk_type = chunk->chunk_type;
                 group->scene_index = chunk->field_0x16;
-                group->platform_flags = chunk->field_0x2c;
                 group->data = chunk_data;
+                group->platform_flags = chunk->field_0x2c;
                 ++group_count;
             }
         } else if (chunk->chunk_type == TERRAIN_CHUNK_CRASH_DATA) {

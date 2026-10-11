@@ -119,8 +119,8 @@ bool MechInputTouchMenuController::OnRelease(GameObject_s &, TouchHolder &holder
 
     const NuVec2 down = holder.down_position;
     const NuVec2 touch = holder.touch_position;
-    const f32 dx = touch.x - down.x;
     const f32 dy = touch.y - down.y;
+    const f32 dx = touch.x - down.x;
     LastTouchTime = GlobalTimer.time_elapsed;
     LastTouchPos = touch;
     AnyTouchesThisFrame = 3;

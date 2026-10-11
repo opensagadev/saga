@@ -150,9 +150,9 @@ i32 InModelListDataFlags(APICHARACTERMODELLIST_s *models, u32 model_flags, u32 g
                     if ((game_data.flags_090 & game_flags) != game_flags ||
                         (CDataList[current_id].model_flags & model_flags) != model_flags)
                         continue;
-                    if (static_cast<i8>(game_data.flags_094[1]) < 0)
-                        continue;
-                    return 1;
+                    if (!(static_cast<i8>(game_data.flags_094[1]) < 0)) {
+                        return 1;
+                    }
                 }
                 return 0;
             } else {
@@ -303,6 +303,7 @@ void antinodeEditor_Render(i32 x, i32 y, float xscale, float yscale) {
 }
 
 void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
+    char set_name[32];
     nuvec_s displacement;
     if (GlobalCharacterRenderFn == nullptr)
         return;
@@ -326,7 +327,7 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
             NuQFntPrintEx(system_qfont, text_x, y * 8 + 120, 16, "\"%s\", xzrng=%.2f", display + 8, distance);
         }
         u8 set = display[0x5a];
-        char set_name[32];
+
         if (set != 0) {
             sprintf(set_name, "Set=%d", set);
         } else {

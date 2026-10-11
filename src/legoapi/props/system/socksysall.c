@@ -1394,8 +1394,8 @@ extern "C" {
             *separation_scale = 0.0f;
         }
 
-        f32 single_player_pullback = 0.0f;
         f32 two_player_pullback = 0.0f;
+        f32 single_player_pullback = 0.0f;
         f32 camera_height_above_ground = 0.0f;
         i32 contributing_sockets = 0;
         for (i = 0; i < TempSPosCount; ++i) {

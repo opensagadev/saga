@@ -157,8 +157,8 @@ i32 NuInitHardware(VARIPTR *buf, VARIPTR *buf_end, i32 heap_size, ...) {
     i32 resolution_x = 0, resolution_y = 0;
     NUVIDEO_SWAPMODE swapmode = NUVIDEO_SWAPMODE_FIELDSYNC;
     u32 flags = 0, framebuffer_format = 0;
-    u32 occlusion_capacity = 0;
     i32 animation_count = 160;
+    u32 occlusion_capacity = 0;
 
     NuAPIInit();
     ParseCommandLine();

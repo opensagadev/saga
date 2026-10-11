@@ -176,8 +176,8 @@ extern i32 TERRAINMASK_NONWEAPON, TERRAINMASK_NONDROID;
 i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
 
 static __used__ void ClimbObject_FindNormal(CLIMBOBJECT_s *object) {
-    AIPATHNODE *first = &object->path->nodes[object->connection->node_indices[0]];
     AIPATHNODE *second = &object->path->nodes[object->connection->node_indices[1]];
+    AIPATHNODE *first = &object->path->nodes[object->connection->node_indices[0]];
     AIPATHNODE *node = second->position.y > first->position.y ? first : second;
     NUVEC displacement, origin;
 #define PROBE_CLIMB_NORMAL(angle)                                                                                      \

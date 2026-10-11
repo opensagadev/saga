@@ -32,25 +32,25 @@ void DrawRopeCurved(nuvec_s *start, nuvec_s *points, i32 count, i32, numtl_s *) 
     for (i32 i = 0; i < count - 1; ++i, ++next) {
         NUVEC middle;
         middle.x = (next->x - points[i].x) * 0.5f + points[i].x;
-        middle.y = (next->y - points[i].y) * 0.5f + points[i].y;
         middle.z = (next->z - points[i].z) * 0.5f + points[i].z;
+        middle.y = (next->y - points[i].y) * 0.5f + points[i].y;
 
         vertices[0].position = vertices[1].position;
-        vertices[1].position.x = (0.4444443881511688f * px + 0.444444477558136f * points[i].x) +
-                                 0.11111113429069519f * middle.x;
-        vertices[1].position.y = (0.4444443881511688f * py + 0.444444477558136f * points[i].y) +
-                                 0.11111113429069519f * middle.y;
-        vertices[1].position.z = (0.4444443881511688f * pz + 0.444444477558136f * points[i].z) +
-                                 0.11111113429069519f * middle.z;
+        vertices[1].position.x =
+            (0.4444443881511688f * px + 0.444444477558136f * points[i].x) + 0.11111113429069519f * middle.x;
+        vertices[1].position.y =
+            (0.4444443881511688f * py + 0.444444477558136f * points[i].y) + 0.11111113429069519f * middle.y;
+        vertices[1].position.z =
+            (0.4444443881511688f * pz + 0.444444477558136f * points[i].z) + 0.11111113429069519f * middle.z;
         NuRndrLine3d(vertices, SolidMtl3D, NULL);
 
         memcpy(&vertices[0], &vertices[1], sizeof(vertices[0]));
-        vertices[1].position.x = (0.11111107468605042f * px + 0.4444444179534912f * points[i].x) +
-                                 0.44444453716278076f * middle.x;
-        vertices[1].position.y = (0.11111107468605042f * py + 0.4444444179534912f * points[i].y) +
-                                 0.44444453716278076f * middle.y;
-        vertices[1].position.z = (0.11111107468605042f * pz + 0.4444444179534912f * points[i].z) +
-                                 0.44444453716278076f * middle.z;
+        vertices[1].position.x =
+            (0.11111107468605042f * px + 0.4444444179534912f * points[i].x) + 0.44444453716278076f * middle.x;
+        vertices[1].position.y =
+            (0.11111107468605042f * py + 0.4444444179534912f * points[i].y) + 0.44444453716278076f * middle.y;
+        vertices[1].position.z =
+            (0.11111107468605042f * pz + 0.4444444179534912f * points[i].z) + 0.44444453716278076f * middle.z;
         NuRndrLine3d(vertices, SolidMtl3D, NULL);
 
         memcpy(&vertices[0], &vertices[1], sizeof(vertices[0]));

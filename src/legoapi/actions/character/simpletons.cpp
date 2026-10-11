@@ -113,8 +113,8 @@ f32 oneAtOnce_GetHoldRange(GameObject_s *object) {
     }
 
     AtOnceAttacker *attackers = AtOnce_attackingPlayer[player_index];
-    i32 row = 0;
     i32 unassigned_in_row = 0;
+    i32 row = 0;
     i32 index = 0;
     GameObject_s *candidate = attackers[index].object;
     while (candidate != NULL && index < 17) {
@@ -155,10 +155,11 @@ void oneAtOnce_MaintainArray() {
         GameObject_s *opponent = opponent_api != NULL ? opponent_api->objptr : NULL;
         i32 player_index = -1;
         for (i32 player = 0; player < 8; ++player) {
-            if (Player[player] == opponent) {
-                player_index = player;
-                break;
+            if (Player[player] != opponent) {
+                continue;
             }
+            player_index = player;
+            break;
         }
         if (player_index < 0) {
             continue;

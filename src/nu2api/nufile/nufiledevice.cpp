@@ -21,32 +21,15 @@ void NuFileDevice::AddDevice(NuFileDevice *device) {
     sm_Devices[sm_NumDevices++] = device;
 }
 
-void NuFileDevice::AddPathRule(NuFileDeviceType type, char const *path) {
-    if (sm_NumRules >= 32)
-        return;
-    PathRule &rule = sm_Rules[sm_NumRules];
-    rule.device_type = type;
-    if (path) {
-        char *copy = static_cast<char *>(NuMemoryGet()->GetThreadMem()->_BlockAlloc(
-            std::strlen(path) + 1, 4, 4,
-            "i:/SagaTouch-Android_9176564/nu2api.saga/../nu2api.2013/numemory/NuMemory.h:340", 0));
-        std::strcpy(copy, path);
-        rule.path = copy;
-    } else {
-        rule.path = NULL;
-    }
-    rule.path_length = NuStrLen(path);
-    ++sm_NumRules;
-}
-
 i32 NuFileDevice::AllocDirectoryHandle(char const *path) {
     pthread_mutex_lock(&sm_CriticalSection.mutex);
     i32 handle = 0;
     for (i32 i = 1; i < 16; ++i) {
-        if (!sm_DirectoryHandles[i].device) {
-            handle = i;
-            break;
+        if (sm_DirectoryHandles[i].device) {
+            continue;
         }
+        handle = i;
+        break;
     }
     if (handle) {
         DirectoryHandle &entry = sm_DirectoryHandles[handle];
@@ -63,6 +46,24 @@ i32 NuFileDevice::AllocDirectoryHandle(char const *path) {
     }
     pthread_mutex_unlock(&sm_CriticalSection.mutex);
     return handle;
+}
+
+void NuFileDevice::AddPathRule(NuFileDeviceType type, char const *path) {
+    if (sm_NumRules >= 32)
+        return;
+    PathRule &rule = sm_Rules[sm_NumRules];
+    rule.device_type = type;
+    if (path) {
+        char *copy = static_cast<char *>(NuMemoryGet()->GetThreadMem()->_BlockAlloc(
+            std::strlen(path) + 1, 4, 4,
+            "i:/SagaTouch-Android_9176564/nu2api.saga/../nu2api.2013/numemory/NuMemory.h:340", 0));
+        std::strcpy(copy, path);
+        rule.path = copy;
+    } else {
+        rule.path = NULL;
+    }
+    rule.path_length = NuStrLen(path);
+    ++sm_NumRules;
 }
 
 void NuFileDevice::ClearPathRules() {

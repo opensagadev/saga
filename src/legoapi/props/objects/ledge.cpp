@@ -115,8 +115,8 @@ void LedgeTerrain_MoveCode(GameObject_s *object) {
             object->airborne_action_duration = 0.25f;
             object->launch_origin.y = position.y;
             object->launch_origin.z = position.z;
-            x = object->apiobj.position.x - x;
             z = object->apiobj.position.z - z;
+            x = object->apiobj.position.x - x;
             travelled = NuFsqrt(x * x + z * z);
         } else {
             object->airborne_action_duration -= FRAMETIME;

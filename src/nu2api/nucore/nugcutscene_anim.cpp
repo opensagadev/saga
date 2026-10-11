@@ -36,8 +36,8 @@ extern "C" i32 NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMTX
         return 0;
     }
     nuanimdata2_s *animation = locator->animation;
-    nuanimcurve2_s *curves = animation->curves;
     u8 *curve_types = animation->curve_types;
+    nuanimcurve2_s *curves = animation->curves;
     auto evaluate = [&](u32 curve) {
         const i8 type = static_cast<i8>(curve_types[curve]);
         return type == 0 ? curves[curve].data.constant

@@ -116,8 +116,8 @@ void __attribute__((force_align_arg_pointer)) SetPanelLights(float intensity) {
     const f32 scale = 0.5f * intensity;
     NUCOLOUR3 scaled_colours[3];
     NUCOLOUR3 scaled_ambient;
-    NUCOLOUR3 *colour0;
     NUCOLOUR3 *colour1;
+    NUCOLOUR3 *colour0;
     NUCOLOUR3 *colour2;
     NUCOLOUR3 *ambient;
 
@@ -306,14 +306,14 @@ __attribute__((force_align_arg_pointer)) void SetCreatureLights(APIOBJECT_s *obj
         green = blue = 1.0f - flash;
     } else if (Lighting_HighlightFlash != 0 && owner->apiobj.player_controlled && owner->timer_d5c > 0.0f &&
                (owner->timer_d5c >= 2.0f || NuFmod(owner->timer_d5c, 0.4f) >= 0.2f)) {
-        if (owner->apiobj.field_0x27c != 1) {
-            red = 1.4f;
-            green = 1.85f;
-            blue = 2.0f;
-        } else {
+        if (owner->apiobj.field_0x27c == 1) {
             red = 1.7f;
             green = 2.0f;
             blue = 1.4f;
+        } else {
+            red = 1.4f;
+            green = 1.85f;
+            blue = 2.0f;
         }
     } else if ((static_cast<GAMECHARACTERDATA *>(owner->apiobj.character_data->field11_0x24)->flags_090 & 0x8000) !=
                    0 &&
@@ -352,8 +352,8 @@ __attribute__((force_align_arg_pointer)) void SetCreatureLights(APIOBJECT_s *obj
     }
     if (owner->field_0xd6c > 0.0f) {
         const f32 scale = owner->field_0xd6c * -0.334f + 1.0f;
-        red *= scale;
         green *= scale;
+        red *= scale;
         blue *= scale;
     }
     character = static_cast<GAMECHARACTERDATA *>(owner->apiobj.character_data->field11_0x24);

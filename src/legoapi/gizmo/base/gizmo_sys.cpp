@@ -163,8 +163,8 @@ void MiniKit_InitPieces(MINIKIT *minikit, i32 count, VARIPTR *buf, VARIPTR *buf_
     char name[76];
 
     buf->addr = ALIGN(buf->addr, 4);
-    minikit->field_0x4 = reinterpret_cast<void *>(buf->addr);
     minikit->field_0x8 = 0;
+    minikit->field_0x4 = reinterpret_cast<void *>(buf->addr);
 
     for (i32 index = 0; index < count; ++index) {
         for (u8 direction = 0; direction < 6; ++direction) {

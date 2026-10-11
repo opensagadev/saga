@@ -209,8 +209,8 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Defragment(u32 size) {
                     continue;
                 }
 
-                NuSoundMemoryBuffer *merged = NULL;
                 NuSoundMemoryBuffer *split = NULL;
+                NuSoundMemoryBuffer *merged = NULL;
                 NuSoundMemoryBuffer *moved = this->MoveLargestTrailingBufferIntoBuffer(buffer, &split, &merged);
 
                 if (size != 0 && merged != NULL && merged->GetSize() >= size) {
@@ -314,7 +314,11 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Alloc(u32 size) {
 NuSoundMemoryBuffer *NuSoundMemoryManager::SplitFreeBuffer(NuSoundMemoryBuffer *buffer, u32 size,
                                                            NuSoundMemoryBuffer **remainder) {
     u32 total = buffer->GetSize();
-    if (total > size) {
+    if (!(total > size)) {
+        if (remainder != NULL) {
+            *remainder = NULL;
+        }
+    } else {
         NuSoundMemoryBuffer *tail = PopFreeBuffer();
 
         tail->SetSize(total - size);
@@ -333,8 +337,6 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::SplitFreeBuffer(NuSoundMemoryBuffer *
         if (remainder != NULL) {
             *remainder = tail;
         }
-    } else if (remainder != NULL) {
-        *remainder = NULL;
     }
 
     return buffer;
@@ -610,8 +612,8 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::SwapOrMergeAdjacentBuffers(NuSoundMem
     next->SetAddress(buffer_address);
 
     u32 remaining = next_size;
-    char *dest = buffer_address;
     char *source = next_address;
+    char *dest = buffer_address;
     while (remaining != 0) {
         u32 amount = remaining < buffer_size ? remaining : buffer_size;
         memmove(dest, source, amount);

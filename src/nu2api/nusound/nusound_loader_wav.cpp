@@ -70,8 +70,8 @@ u32 NuSoundLoaderWAV::FindChunks(i32 file, NuSoundStreamDesc *desc, ChunkReadReq
     }
 
     u32 found_mask = 0;
-    u64 file_offset = 0xc;
     u32 scratch_index = 0;
+    u64 file_offset = 0xc;
 
     for (;;) {
         ChunkInfo *read_info = &requests[scratch_index].chunk_info;

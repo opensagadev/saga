@@ -76,11 +76,11 @@ void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *) {
 
     ResetForceGlow(packet);
     packet->ground_height = 2000000.0f;
-    packet->field_0x73c = 0;
     packet->field_0x6fc = 0;
+    packet->field_0x73c = 0;
     packet->movement_flags &= static_cast<u8>(~0x01);
-    packet->force_glow_index = -1;
     packet->movement_angle_0 = -1;
+    packet->force_glow_index = -1;
     packet->field_0x718 = 0;
     packet->movement_angle_1 = qrand() > 0x7fff ? 0x4f : 0x26;
     packet->random_state[0] = static_cast<u8>(qrand() >> 8);
@@ -94,8 +94,8 @@ void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *) {
     packet->field_0x69c = 0;
     packet->field_0x690 = 0;
     packet->field_0x694 = 0;
-    packet->field_0x794 = 0;
     packet->field_0x688 = 0;
+    packet->field_0x794 = 0;
     packet->field_0x771 &= static_cast<u8>(~0x0c);
     packet->field_0x604 = NULL;
     packet->surface_type = -1;
