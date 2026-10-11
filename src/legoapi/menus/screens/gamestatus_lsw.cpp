@@ -387,8 +387,8 @@ void InitStatusScreen(WORLDINFO_s *world) {
     p.next_area_unlocked = 0;
     p.score = &Game.coins;
     p.previous_completion = Game.completion;
-    p.area_id = area;
     p.previous_gold_bricks = Game.field_0x7c26[0];
+    p.area_id = area;
     p.displayed_gold_bricks = Game.field_0x7c26[0];
     p.vehicle_area = 0;
     p.bonus_mode = 0;
@@ -420,8 +420,8 @@ void InitStatusScreen(WORLDINFO_s *world) {
         if (NewLData == STATUS_LDATA || WORLD->current_level == STATUS_LDATA) {
             EPISODESAVE_s &save = Game.episode_save[episode];
             p.previous_best_time = save.superstory_time_limit;
-            p.previous_best_score = save.superstory_score_target;
             p.superstory_time = SuperStoryTimer.time_elapsed;
+            p.previous_best_score = save.superstory_score_target;
             p.superstory_score = SuperStoryScore;
             i32 gold = 0;
             if (episode == -1) {
@@ -522,8 +522,8 @@ void InitStatusScreen(WORLDINFO_s *world) {
     }
     if (p.mission_state != 0) {
         p.newly_completed = 0;
-        p.original_score = *p.score;
         p.elapsed_time = MissionSys->timer.time_elapsed;
+        p.original_score = *p.score;
         p.reward_score = p.original_score;
         i32 gold = 0;
         if (p.mission_state == 2) {
@@ -1052,6 +1052,84 @@ i32 UpdateAchievements(STATUSPACKET_s *) {
     return 0;
 }
 
+void UpdateStatusScreen(WORLDINFO_s *) {
+    const f32 elapsed = FRAMETIME;
+    CoinTotalScale = SeekLinearF(CoinTotalScale, 1.0f, FRAMETIME * 3.0f);
+    DrawGoldBrick_Phase = -1;
+    DrawGoldBrick_Stage = -1;
+    if (GAMEDEMO != 0) {
+        if (GAMEDEMO == 2) {
+            if (GameTimer.time_elapsed >= 8.0f) {
+                EndOfDemo(0);
+            }
+            return;
+        }
+        if (GAMEDEMO != 1 || FadeSys.fade != 0.0f || NewLData != NULL) {
+            return;
+        }
+        for (i32 player = 0; player < 2; ++player) {
+            if ((player == 0 ? StatusPacket.player0_active : StatusPacket.player1_active) == 0) {
+                continue;
+            }
+            if ((GamePad[player].buttons_pressed & GAMEPAD_MENUSELECT) != 0) {
+                GameAudio_PlaySfx(0x30, NULL, 0, 0);
+                if (gamedemo_option == 0) {
+                    new_level_from_menu = 1;
+                    NewLData = HUB_LDATA;
+                    GAMEDEMO = 2;
+                } else if (gamedemo_option == 1) {
+                    EndOfDemo(0);
+                }
+                return;
+            }
+            const u32 navigation = GamePad[player].buttons_pressed | GamePad[player].left_directions;
+            if ((navigation & GAMEPAD_DUP) != 0) {
+                if (gamedemo_option > 0) {
+                    --gamedemo_option;
+                    GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+                }
+                return;
+            }
+            if ((navigation & GAMEPAD_DDOWN) == 0) {
+                continue;
+            }
+            if (gamedemo_option < 1) {
+                ++gamedemo_option;
+                GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+            }
+            return;
+        }
+        return;
+    }
+    if (StatusPacket.status_flags == 0) {
+        return;
+    }
+    if ((StatusPacket.field_0xb0 & 2) == 0) {
+        bool skip = MechInputTouchMenuController::AnyTouchesThisFrame > 0;
+        if (skip) {
+            MechInputTouchMenuController::AnyTouchesThisFrame = 0;
+        } else {
+            const u32 button = Text_Language == 0 ? GAMEPAD_MENUSELECT : GAMEPAD_JUMP;
+            skip = (StatusPacket.player0_active != 0 && (GamePad[0].buttons_pressed & button) != 0) ||
+                   (StatusPacket.player1_active != 0 && (GamePad[1].buttons_pressed & button) != 0);
+        }
+        if (skip) {
+            if (StatusPacket.stage == NULL) {
+                return;
+            }
+            if (StatusPacket.stage->skip_callback != NULL) {
+                StatusPacket.stage->skip_callback(StatusPacket.stage, &StatusPacket);
+            }
+        }
+    }
+    if (StatusPacket.stage != NULL && StatusPacket.stage->update_callback != NULL) {
+        StatusPacket.stage->update_callback(StatusPacket.stage, &StatusPacket, elapsed);
+    }
+    if (StatusPacket.status_flags == 0 && GameTimer.time_elapsed >= 5.0f) {
+        FinishStatusPacket(0);
+    }
+}
+
 void DrawStatusScreen(WORLDINFO_s *) {
     iconalphaoverride = -1.0f;
     memset(KitPart, 0, sizeof(KitPart));
@@ -1196,84 +1274,6 @@ void DrawStatusScreen(WORLDINFO_s *) {
     }
 }
 
-void UpdateStatusScreen(WORLDINFO_s *) {
-    const f32 elapsed = FRAMETIME;
-    CoinTotalScale = SeekLinearF(CoinTotalScale, 1.0f, FRAMETIME * 3.0f);
-    DrawGoldBrick_Phase = -1;
-    DrawGoldBrick_Stage = -1;
-    if (GAMEDEMO != 0) {
-        if (GAMEDEMO == 2) {
-            if (GameTimer.time_elapsed >= 8.0f) {
-                EndOfDemo(0);
-            }
-            return;
-        }
-        if (GAMEDEMO != 1 || FadeSys.fade != 0.0f || NewLData != NULL) {
-            return;
-        }
-        for (i32 player = 0; player < 2; ++player) {
-            if ((player == 0 ? StatusPacket.player0_active : StatusPacket.player1_active) == 0) {
-                continue;
-            }
-            if ((GamePad[player].buttons_pressed & GAMEPAD_MENUSELECT) != 0) {
-                GameAudio_PlaySfx(0x30, NULL, 0, 0);
-                if (gamedemo_option == 0) {
-                    new_level_from_menu = 1;
-                    NewLData = HUB_LDATA;
-                    GAMEDEMO = 2;
-                } else if (gamedemo_option == 1) {
-                    EndOfDemo(0);
-                }
-                return;
-            }
-            const u32 navigation = GamePad[player].buttons_pressed | GamePad[player].left_directions;
-            if ((navigation & GAMEPAD_DUP) != 0) {
-                if (gamedemo_option > 0) {
-                    --gamedemo_option;
-                    GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-                }
-                return;
-            }
-            if ((navigation & GAMEPAD_DDOWN) == 0) {
-                continue;
-            }
-            if (gamedemo_option < 1) {
-                ++gamedemo_option;
-                GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-            }
-            return;
-        }
-        return;
-    }
-    if (StatusPacket.status_flags == 0) {
-        return;
-    }
-    if ((StatusPacket.field_0xb0 & 2) == 0) {
-        bool skip = MechInputTouchMenuController::AnyTouchesThisFrame > 0;
-        if (skip) {
-            MechInputTouchMenuController::AnyTouchesThisFrame = 0;
-        } else {
-            const u32 button = Text_Language == 0 ? GAMEPAD_MENUSELECT : GAMEPAD_JUMP;
-            skip = (StatusPacket.player0_active != 0 && (GamePad[0].buttons_pressed & button) != 0) ||
-                   (StatusPacket.player1_active != 0 && (GamePad[1].buttons_pressed & button) != 0);
-        }
-        if (skip) {
-            if (StatusPacket.stage == NULL) {
-                return;
-            }
-            if (StatusPacket.stage->skip_callback != NULL) {
-                StatusPacket.stage->skip_callback(StatusPacket.stage, &StatusPacket);
-            }
-        }
-    }
-    if (StatusPacket.stage != NULL && StatusPacket.stage->update_callback != NULL) {
-        StatusPacket.stage->update_callback(StatusPacket.stage, &StatusPacket, elapsed);
-    }
-    if (StatusPacket.status_flags == 0 && GameTimer.time_elapsed >= 5.0f) {
-        FinishStatusPacket(0);
-    }
-}
-
 void RedBrick_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
     if (stage->field_0x14 == 0) {
         stage->field_0x18 = 0.0f;
@@ -1365,8 +1365,8 @@ void RegisterStatusScreen(STATUS_STAGE_s *stages, i32 *, REGISTERSTATUSPACKET_s 
     StatusPacket.init_callback = registration->init_callback;
     StatusPacket.finish_callback = registration->finish_callback;
     StatusPacket.reset_callback = registration->reset_callback;
-    StatusPacket.draw_background_callback = registration->draw_background_callback;
     StatusPacket.lsw_packet = registration->lsw_packet;
+    StatusPacket.draw_background_callback = registration->draw_background_callback;
     StatusPacket.field_0x68 = registration->stage_delay;
 }
 
@@ -1385,6 +1385,30 @@ extern "C" {
 void Hint_SetHintFromId(i32, i32, i32);
 void Hint_SetComplete(i32);
 void Hint_Draw(i32);
+
+f32 getFinishedStatusAlpha(STATUSPACKET_s *packet) {
+    STATUS_STAGE_s *stage = packet->stage;
+    f32 alpha = 1.0f;
+    if (stage->type == 11 || stage->type == 12) {
+        alpha = 0.0f;
+    } else if (stage->type == 10) {
+        if (stage->field_0x18 < 1.0f) {
+            alpha = 1.0f - stage->field_0x18;
+        } else {
+            alpha = 0.0f;
+        }
+    } else if (stage->type == 19 && stage->field_0x14 != 0) {
+        if (stage->field_0x18 < 1.0f) {
+            alpha = 1.0f - stage->field_0x18;
+        } else {
+            const f32 fade_start = stage->field_0x1c - 1.0f;
+            alpha = stage->field_0x18 < fade_start
+                        ? 0.0f
+                        : (stage->field_0x18 - fade_start) / (stage->field_0x1c - fade_start);
+        }
+    }
+    return alpha;
+}
 
 void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
     i32 labels[2];
@@ -1436,12 +1460,12 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
             if (menu_pulsate > 0.0f) {
                 const f32 inverse = 1.0f - menu_pulsate;
                 red = MENUFLASH0R * menu_pulsate + MENUFLASH1R * inverse;
-                green = MENUFLASH0G * menu_pulsate + MENUFLASH1G * inverse;
                 blue = MENUFLASH0B * menu_pulsate + MENUFLASH1B * inverse;
+                green = MENUFLASH0G * menu_pulsate + MENUFLASH1G * inverse;
             } else if (menu_flash == 0) {
                 red = MENUFLASH1R;
-                green = MENUFLASH1G;
                 blue = MENUFLASH1B;
+                green = MENUFLASH1G;
             } else {
                 red = MENUFLASH0R;
                 green = MENUFLASH0G;
@@ -1468,30 +1492,6 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
         menu->item_row[i] = i;
         y -= 0.2f;
     }
-}
-
-f32 getFinishedStatusAlpha(STATUSPACKET_s *packet) {
-    STATUS_STAGE_s *stage = packet->stage;
-    f32 alpha = 1.0f;
-    if (stage->type == 11 || stage->type == 12) {
-        alpha = 0.0f;
-    } else if (stage->type == 10) {
-        if (stage->field_0x18 < 1.0f) {
-            alpha = 1.0f - stage->field_0x18;
-        } else {
-            alpha = 0.0f;
-        }
-    } else if (stage->type == 19 && stage->field_0x14 != 0) {
-        if (stage->field_0x18 < 1.0f) {
-            alpha = 1.0f - stage->field_0x18;
-        } else {
-            const f32 fade_start = stage->field_0x1c - 1.0f;
-            alpha = stage->field_0x18 < fade_start
-                        ? 0.0f
-                        : (stage->field_0x18 - fade_start) / (stage->field_0x1c - fade_start);
-        }
-    }
-    return alpha;
 }
 
 void SuperStoryTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {
@@ -1725,8 +1725,8 @@ void Coins_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
                  1.0f) *
                     0.5f;
             total_y = (0.3f - STATSPOSY) * blend + STATSPOSY;
-            scale = (2.0f - CoinTotalScale) * blend + CoinTotalScale;
             coin_y = STATSPOS2Y + (STATSPOSY - STATSPOS2Y) * blend;
+            scale = (2.0f - CoinTotalScale) * blend + CoinTotalScale;
             break;
         }
     }
@@ -1982,8 +1982,8 @@ void ChallangeCash_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float e
                     message.duration = COINMSGTIME;
                     message.score = GizmoPickupType[2].score;
                     message.end_fn = EndScoreMessage;
-                    message.update_fn = GameMsg_DrawAdjustNewPos_CoinToTotal;
                     message.field_0x20 = delay;
+                    message.update_fn = GameMsg_DrawAdjustNewPos_CoinToTotal;
                     AddGameMsg(&message);
                     if (delay == 0.0f) {
                         NewStatusRumbleBuzz(-1, 0.0f, 0.0f, 1);

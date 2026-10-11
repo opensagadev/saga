@@ -437,27 +437,6 @@ void *Technos_FindTgt(TECHNO_s *techno) {
     return techno->controlled_object;
 }
 
-NUVEC *Technos_TgtPos(TECHNO_s *techno) {
-    if (techno == NULL) {
-        return NULL;
-    }
-
-    if (techno->controlled_object == NULL) {
-        Technos_FindTgt(techno);
-    }
-
-    switch (techno->target_mode) {
-        case 1:
-            return &static_cast<GameObject_s *>(techno->controlled_object)->apiobj.collision_position;
-        case 2:
-            return NuSpecialGetPos(techno->controlled_object);
-        case 3:
-            return GizmoGetPos(WORLD->gizmo_sys, static_cast<GIZMO *>(techno->controlled_object));
-        default:
-            return NULL;
-    }
-}
-
 void Technos_MoveTarget(TECHNO_s *techno, GameObject_s *object) {
     f32 speed = 0.0f;
     if (object != NULL) {
@@ -501,6 +480,27 @@ void Technos_MoveTarget(TECHNO_s *techno, GameObject_s *object) {
         GizObstacle_SetTechnoControlled(obstacle, TechnoMoveSpeed[static_cast<i8>(object->apiobj.field_0x27c)]);
     } else {
         GizObstacle_SetTechnoControlled(obstacle, speed);
+    }
+}
+
+NUVEC *Technos_TgtPos(TECHNO_s *techno) {
+    if (techno == NULL) {
+        return NULL;
+    }
+
+    if (techno->controlled_object == NULL) {
+        Technos_FindTgt(techno);
+    }
+
+    switch (techno->target_mode) {
+        case 1:
+            return &static_cast<GameObject_s *>(techno->controlled_object)->apiobj.collision_position;
+        case 2:
+            return NuSpecialGetPos(techno->controlled_object);
+        case 3:
+            return GizmoGetPos(WORLD->gizmo_sys, static_cast<GIZMO *>(techno->controlled_object));
+        default:
+            return NULL;
     }
 }
 

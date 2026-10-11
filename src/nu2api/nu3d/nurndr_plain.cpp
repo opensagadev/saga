@@ -1066,18 +1066,18 @@ extern "C" void NuRndrSetDebBox(NUVEC *range) {
         (((size.x * cammtx.m00) * 0.2f + cammtx.m30) + (size.y * cammtx.m10) * -0.2f) + (size.z * cammtx.m20) * -0.05f,
         (((size.x * cammtx.m01) * 0.2f + cammtx.m31) + (size.y * cammtx.m11) * -0.2f) + (size.z * cammtx.m21) * -0.05f,
         (((size.x * cammtx.m02) * 0.2f + cammtx.m32) + (size.y * cammtx.m12) * -0.2f) + (size.z * cammtx.m22) * -0.05f};
-    minimum.x = corner1.x < minimum.x ? corner1.x : minimum.x;
     minimum.y = corner1.y < minimum.y ? corner1.y : minimum.y;
+    minimum.x = corner1.x < minimum.x ? corner1.x : minimum.x;
     minimum.z = corner1.z < minimum.z ? corner1.z : minimum.z;
-    maximum.x = corner1.x > maximum.x ? corner1.x : maximum.x;
     maximum.y = corner1.y > maximum.y ? corner1.y : maximum.y;
+    maximum.x = corner1.x > maximum.x ? corner1.x : maximum.x;
     maximum.z = corner1.z > maximum.z ? corner1.z : maximum.z;
     NUVEC corner2 = {
         (((size.x * cammtx.m00) * -0.2f + cammtx.m30) + (size.y * cammtx.m10) * 0.2f) + (size.z * cammtx.m20) * -0.05f,
         (((size.x * cammtx.m01) * -0.2f + cammtx.m31) + (size.y * cammtx.m11) * 0.2f) + (size.z * cammtx.m21) * -0.05f,
         (((size.x * cammtx.m02) * -0.2f + cammtx.m32) + (size.y * cammtx.m12) * 0.2f) + (size.z * cammtx.m22) * -0.05f};
-    minimum.x = corner2.x < minimum.x ? corner2.x : minimum.x;
     minimum.y = corner2.y < minimum.y ? corner2.y : minimum.y;
+    minimum.x = corner2.x < minimum.x ? corner2.x : minimum.x;
     minimum.z = corner2.z < minimum.z ? corner2.z : minimum.z;
     maximum.x = corner2.x > maximum.x ? corner2.x : maximum.x;
     maximum.y = corner2.y > maximum.y ? corner2.y : maximum.y;
@@ -1087,8 +1087,8 @@ extern "C" void NuRndrSetDebBox(NUVEC *range) {
         (((size.x * cammtx.m01) * 0.2f + cammtx.m31) + (size.y * cammtx.m11) * 0.2f) + (size.z * cammtx.m21) * -0.05f,
         (((size.x * cammtx.m02) * 0.2f + cammtx.m32) + (size.y * cammtx.m12) * 0.2f) + (size.z * cammtx.m22) * -0.05f};
     minimum.x = corner3.x < minimum.x ? corner3.x : minimum.x;
-    minimum.y = corner3.y < minimum.y ? corner3.y : minimum.y;
     minimum.z = corner3.z < minimum.z ? corner3.z : minimum.z;
+    minimum.y = corner3.y < minimum.y ? corner3.y : minimum.y;
     maximum.x = corner3.x > maximum.x ? corner3.x : maximum.x;
     maximum.y = corner3.y > maximum.y ? corner3.y : maximum.y;
     maximum.z = corner3.z > maximum.z ? corner3.z : maximum.z;
@@ -1133,8 +1133,8 @@ extern "C" void NuRndrSetDebBox(NUVEC *range) {
     maximum.y = corner7.y > maximum.y ? corner7.y : maximum.y;
     maximum.z = corner7.z > maximum.z ? corner7.z : maximum.z;
     NuRndrDebBase.x = (maximum.x + minimum.x) * 0.5f - size.x * 0.5f;
-    NuRndrDebBase.y = (maximum.y + minimum.y) * 0.5f - size.y * 0.5f;
     NuRndrDebBase.z = (maximum.z + minimum.z) * 0.5f - size.z * 0.5f;
+    NuRndrDebBase.y = (maximum.y + minimum.y) * 0.5f - size.y * 0.5f;
     NuRndrDebRange = size;
     NuRndrDebRangeInv.x = 1.0f / size.x;
     NuRndrDebRangeInv.y = 1.0f / size.y;

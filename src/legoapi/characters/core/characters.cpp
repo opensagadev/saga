@@ -739,6 +739,26 @@ void InitSurfaceInfo(GameObject_s *);
 i32 SetObjOnSurface(GameObject_s *, i32);
 extern NUVEC plr_lastpos;
 
+void FinishWeirdoNames(i32 which) {
+    if (which != 1) {
+        NuStrUpr(Game.customizer[0].name, Game.customizer[0].name);
+        i32 length = NuStrLen(Game.customizer[0].name);
+        for (; length <= 14; length++) {
+            Game.customizer[0].name[length] = ' ';
+        }
+        Game.customizer[0].name[15] = '\0';
+        if (which == 0) {
+            return;
+        }
+    }
+    NuStrUpr(Game.customizer[1].name, Game.customizer[1].name);
+    i32 length = NuStrLen(Game.customizer[1].name);
+    for (; length <= 14; length++) {
+        Game.customizer[1].name[length] = ' ';
+    }
+    Game.customizer[1].name[15] = '\0';
+}
+
 GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle) {
     if (Mission_Active(NULL) != NULL || name == NULL)
         return NULL;
@@ -771,26 +791,6 @@ GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle) {
     }
     LightGameObject(object, WORLD->rtl_set);
     return object;
-}
-
-void FinishWeirdoNames(i32 which) {
-    if (which != 1) {
-        NuStrUpr(Game.customizer[0].name, Game.customizer[0].name);
-        i32 length = NuStrLen(Game.customizer[0].name);
-        for (; length <= 14; length++) {
-            Game.customizer[0].name[length] = ' ';
-        }
-        Game.customizer[0].name[15] = '\0';
-        if (which == 0) {
-            return;
-        }
-    }
-    NuStrUpr(Game.customizer[1].name, Game.customizer[1].name);
-    i32 length = NuStrLen(Game.customizer[1].name);
-    for (; length <= 14; length++) {
-        Game.customizer[1].name[length] = ' ';
-    }
-    Game.customizer[1].name[15] = '\0';
 }
 
 extern i32 addcreature_override_id_check;
@@ -887,8 +887,8 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
 
     obj->apiobj.start_position = *start_position;
     obj->apiobj.initial_position = *start_position;
-    obj->apiobj.position = *start_position;
     obj->apiobj.pos_x = start_position->x;
+    obj->apiobj.position = *start_position;
     obj->apiobj.pos_y = start_position->y;
     obj->apiobj.pos_z = start_position->z;
     obj->field_0x1018 = 0.5f;
@@ -1274,22 +1274,9 @@ void UpdateCharacterIDs() {
         COLLECTID *collect = ShopCollection.list;
         shopitem_s *item = CharItems;
         for (i32 i = 0; i < count; ++i, ++item, ++collect) {
-            item->item_id = collect->id;
             item->price = collect->field3_0x4;
+            item->item_id = collect->id;
         }
-    }
-}
-
-void CharScenes_AreaDump() {
-    if (CharScene_Area == NULL) {
-        return;
-    }
-    for (i32 i = 0; i < CHARCOUNT; ++i) {
-        CHARSCENE_s &entry = CharScene_Area[i];
-        if (entry.scene != NULL) {
-            NuGScnRemove(entry.scene);
-        }
-        entry.scene = NULL;
     }
 }
 
@@ -1315,6 +1302,19 @@ void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_
                 NuSpecialFind(entry.scene, &entry.special_scene, CDataList[model_id].file, 1);
             }
         }
+    }
+}
+
+void CharScenes_AreaDump() {
+    if (CharScene_Area == NULL) {
+        return;
+    }
+    for (i32 i = 0; i < CHARCOUNT; ++i) {
+        CHARSCENE_s &entry = CharScene_Area[i];
+        if (entry.scene != NULL) {
+            NuGScnRemove(entry.scene);
+        }
+        entry.scene = NULL;
     }
 }
 
@@ -1589,61 +1589,6 @@ void CollectCharcters_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
     NextStatusStage(packet);
 }
 
-AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
-                                   f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y) {
-    i32 candidates[64] __attribute__((aligned(16)));
-    if (count > 64) {
-        count = 64;
-    }
-    i32 candidate_count = 0;
-    for (i32 i = 0; i < count; ++i) {
-        if (locators[i] == NULL) {
-            continue;
-        }
-        bool valid = false;
-        if (outside_camera != 0) {
-            if (NuCameraClipTestSphere(&locators[i]->position, 0.0f, &numtx_identity) == 0) {
-                valid = true;
-            }
-        } else {
-            valid = true;
-            if (clip_radius > 0.0f) {
-                if (NuCameraClipTestSphere(&locators[i]->position, clip_radius, &numtx_identity) == 0) {
-                    const i16 room = static_cast<i16>(NuPortalWhichRoom(WORLD->current_gscn, &locators[i]->position));
-                    valid = false;
-                    if (room >= 0 && WORLD->rooms_visible_ptr[room] == 0) {
-                        valid = true;
-                    }
-                }
-            }
-        }
-        if (valid != 0) {
-            if (max_distance == 1000000000.0f) {
-                candidates[candidate_count++] = i;
-            } else {
-                NUVEC delta __attribute__((aligned(16)));
-                const f32 distance = NuVecDistSqr(position, &locators[i]->position, &delta);
-                if (min_delta_y != 1000000000.0f && min_delta_y > delta.y) {
-                    continue;
-                }
-                if (max_delta_y != 1000000000.0f && delta.y > max_delta_y) {
-                    continue;
-                }
-                if (max_distance * max_distance > distance) {
-                    candidates[candidate_count++] = i;
-                }
-            }
-        }
-    }
-    if (candidate_count == 0) {
-        return NULL;
-    }
-    const i32 selected = qrand() / (65535 / candidate_count + 1);
-    AILOCATOR_s *result = locators[candidates[selected]];
-    locators[candidates[selected]] = NULL;
-    return result;
-}
-
 void PostAnimate_ASTROMECH(GameObject_s *object) {
     const i8 context = object->character_context;
     if (object->apiobj.field_0x287 == 0 && context == 0 && object->apiobj.model_draw_result != 0 &&
@@ -1701,6 +1646,61 @@ nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id) {
         scene = NULL;
     }
     return scene == NULL ? NULL : &scene->special_scene;
+}
+
+AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
+                                   f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y) {
+    i32 candidates[64] __attribute__((aligned(16)));
+    if (count > 64) {
+        count = 64;
+    }
+    i32 candidate_count = 0;
+    for (i32 i = 0; i < count; ++i) {
+        if (locators[i] == NULL) {
+            continue;
+        }
+        bool valid = false;
+        if (outside_camera != 0) {
+            if (NuCameraClipTestSphere(&locators[i]->position, 0.0f, &numtx_identity) == 0) {
+                valid = true;
+            }
+        } else {
+            valid = true;
+            if (clip_radius > 0.0f) {
+                if (NuCameraClipTestSphere(&locators[i]->position, clip_radius, &numtx_identity) == 0) {
+                    const i16 room = static_cast<i16>(NuPortalWhichRoom(WORLD->current_gscn, &locators[i]->position));
+                    valid = false;
+                    if (room >= 0 && WORLD->rooms_visible_ptr[room] == 0) {
+                        valid = true;
+                    }
+                }
+            }
+        }
+        if (valid != 0) {
+            if (max_distance == 1000000000.0f) {
+                candidates[candidate_count++] = i;
+            } else {
+                NUVEC delta __attribute__((aligned(16)));
+                const f32 distance = NuVecDistSqr(position, &locators[i]->position, &delta);
+                if (min_delta_y != 1000000000.0f && min_delta_y > delta.y) {
+                    continue;
+                }
+                if (max_delta_y != 1000000000.0f && delta.y > max_delta_y) {
+                    continue;
+                }
+                if (max_distance * max_distance > distance) {
+                    candidates[candidate_count++] = i;
+                }
+            }
+        }
+    }
+    if (candidate_count == 0) {
+        return NULL;
+    }
+    const i32 selected = qrand() / (65535 / candidate_count + 1);
+    AILOCATOR_s *result = locators[candidates[selected]];
+    locators[candidates[selected]] = NULL;
+    return result;
 }
 
 AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,

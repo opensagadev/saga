@@ -469,15 +469,6 @@ static inline void TexQuadSubmit3D(f32 x, f32 y, i32 colour, i32 u, i32 v) {
     ++g_NuPrim_VertexCount;
 }
 
-void RndrTexQuad3D(VuMtx const &matrix, i32 colour, numtl_s *material) {
-    NuPrim3DBegin(1, 7, material, reinterpret_cast<NUMTX *>(const_cast<VuMtx *>(&matrix)));
-    TexQuadSubmit3D(-0.5f, -0.5f, colour, 0, 0);
-    TexQuadSubmit3D(0.5f, -0.5f, colour, 1, 0);
-    TexQuadSubmit3D(-0.5f, 0.5f, colour, 0, 1);
-    TexQuadSubmit3D(0.5f, 0.5f, colour, 1, 1);
-    NuPrim3DEnd();
-}
-
 void CheckResetBits() {
     if ((ResetBits & RESETBIT_CLEAR_LEVEL_PROGRESS) != 0 && WORLD->current_level->area_level_index != -1) {
         ClearLevelProgress(WORLD->current_level->area_level_index, WORLD);
@@ -754,6 +745,15 @@ void CheckResetBits() {
     arcade_placed_stud_total = ((GizmoPickups_TotalScore(WORLD) * 85u) / 100u) / 1000u * 1000u;
 }
 
+void RndrTexQuad3D(VuMtx const &matrix, i32 colour, numtl_s *material) {
+    NuPrim3DBegin(1, 7, material, reinterpret_cast<NUMTX *>(const_cast<VuMtx *>(&matrix)));
+    TexQuadSubmit3D(-0.5f, -0.5f, colour, 0, 0);
+    TexQuadSubmit3D(0.5f, -0.5f, colour, 1, 0);
+    TexQuadSubmit3D(-0.5f, 0.5f, colour, 0, 1);
+    TexQuadSubmit3D(0.5f, 0.5f, colour, 1, 1);
+    NuPrim3DEnd();
+}
+
 void bgProcAbortAll() {
 }
 
@@ -766,6 +766,13 @@ extern AREADATA_s *GUNSHIP_ADATA;
 extern i16 id_LANDSPEEDER;
 void PodDust(WORLDINFO_s *, GameObject_s *);
 extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+
+i32 bgprocIsFreezing() {
+    i32 freezing = 1;
+    if (bgproc_frozen == 0)
+        freezing = bgproc_freeze != 0;
+    return freezing;
+}
 
 void AddSurfaceDebris(GameObject_s *object) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
@@ -839,13 +846,6 @@ void AddSurfaceDebris(GameObject_s *object) {
                           previous.z + delta.z * fraction};
         AddVariableShotDebrisEffect(world->debris_sys->entries[effect].effect, &position, 1, 0, 0);
     } while (--count != 0);
-}
-
-i32 bgprocIsFreezing() {
-    i32 freezing = 1;
-    if (bgproc_frozen == 0)
-        freezing = bgproc_freeze != 0;
-    return freezing;
 }
 
 extern "C" void DebFree(i32 *);
@@ -1562,10 +1562,6 @@ void DebrisCleanUpDmaDebTypeTables() {
     }
 }
 
-void DebrisReleaseControlStackLock() {
-    control_stack_lock = 0;
-}
-
 void xxxNuDisplayListUpdateSpecial(nuhspecial_s *special) {
     NUDLDLISTSCENE *scene = special->scene->display_list;
     NUDISPLAYSPECIAL *display = special->display_special;
@@ -1627,6 +1623,10 @@ void xxxNuDisplayListUpdateSpecial(nuhspecial_s *special) {
         // as the active NuDisplayListUpdateSpecial implementation does.
     }
     DisplayListUpdateSpecialTransformPS(special, &matrix);
+}
+
+void DebrisReleaseControlStackLock() {
+    control_stack_lock = 0;
 }
 
 static inline __attribute__((always_inline)) f32 DebrisInterpolateFloatKeys(const debris_float_key_s *keys, f32 time) {

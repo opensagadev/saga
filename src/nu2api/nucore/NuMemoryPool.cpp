@@ -273,6 +273,79 @@ void NuMemoryPool::ReleaseAllPages() {
     pthread_mutex_unlock(&mutex);
 }
 
+void NuMemoryPool::ReleaseUnreferencedPages_OLD() {
+    Page *previous = NULL;
+    Page *recycled = NULL;
+    u32 released_count = 0;
+    u32 recycled_count = 0;
+
+    Page *page = pages;
+    while (page != NULL) {
+        u32 free_block_count = 0;
+        for (u32 i = 0; i < 256; ++i) {
+            for (FreeBlock volatile *block = free_lists[i]; block != NULL; block = block->next) {
+                usize address = reinterpret_cast<usize>(block);
+                usize page_begin = reinterpret_cast<usize>(page->ptr);
+                if (address >= page_begin && address < page_begin + page->size) {
+                    ++free_block_count;
+                }
+            }
+        }
+
+        if (page->allocation_count != free_block_count) {
+            previous = page;
+            page = page->next;
+            continue;
+        }
+
+        usize page_begin = reinterpret_cast<usize>(page->ptr);
+        for (u32 i = 0; i < 256; ++i) {
+            FreeBlock volatile *previous_block = NULL;
+            for (FreeBlock volatile *block = free_lists[i]; block != NULL; block = block->next) {
+                usize address = reinterpret_cast<usize>(block);
+                if (address >= page_begin && address < page_begin + page->size) {
+                    if (previous_block != NULL) {
+                        previous_block->next = block->next;
+                    } else {
+                        free_lists[i] = block->next;
+                    }
+                } else {
+                    previous_block = block;
+                }
+            }
+        }
+
+        Page *next_page = page->next;
+        if (previous != NULL) {
+            previous->next = next_page;
+        } else {
+            pages = next_page;
+        }
+        if (event_handler->ReleasePage(this, page->ptr)) {
+            InterlockedSub(&free_bytes, page->size);
+            NU_FREE(page);
+            ++released_count;
+        } else {
+            page->allocation_count = 0;
+            page->next = recycled;
+            page->offset = 0;
+            ++recycled_count;
+            recycled = page;
+        }
+        page = next_page;
+    }
+
+    while (recycled != NULL) {
+        Page *next_page = recycled->next;
+        recycled->next = pages;
+        pages = recycled;
+        recycled = next_page;
+    }
+
+    unknown_0x438 = released_count;
+    unknown_0x43c = recycled_count;
+}
+
 void NuMemoryPool::ReleaseUnreferencedPages() {
     pthread_mutex_lock(&mutex);
     page_list_stable = false;
@@ -386,79 +459,6 @@ void NuMemoryPool::ReleaseUnreferencedPages() {
     unknown_0x43c = 0;
     page_list_stable = true;
     pthread_mutex_unlock(&mutex);
-}
-
-void NuMemoryPool::ReleaseUnreferencedPages_OLD() {
-    Page *previous = NULL;
-    Page *recycled = NULL;
-    u32 released_count = 0;
-    u32 recycled_count = 0;
-
-    Page *page = pages;
-    while (page != NULL) {
-        u32 free_block_count = 0;
-        for (u32 i = 0; i < 256; ++i) {
-            for (FreeBlock volatile *block = free_lists[i]; block != NULL; block = block->next) {
-                usize address = reinterpret_cast<usize>(block);
-                usize page_begin = reinterpret_cast<usize>(page->ptr);
-                if (address >= page_begin && address < page_begin + page->size) {
-                    ++free_block_count;
-                }
-            }
-        }
-
-        if (page->allocation_count != free_block_count) {
-            previous = page;
-            page = page->next;
-            continue;
-        }
-
-        usize page_begin = reinterpret_cast<usize>(page->ptr);
-        for (u32 i = 0; i < 256; ++i) {
-            FreeBlock volatile *previous_block = NULL;
-            for (FreeBlock volatile *block = free_lists[i]; block != NULL; block = block->next) {
-                usize address = reinterpret_cast<usize>(block);
-                if (address >= page_begin && address < page_begin + page->size) {
-                    if (previous_block != NULL) {
-                        previous_block->next = block->next;
-                    } else {
-                        free_lists[i] = block->next;
-                    }
-                } else {
-                    previous_block = block;
-                }
-            }
-        }
-
-        Page *next_page = page->next;
-        if (previous != NULL) {
-            previous->next = next_page;
-        } else {
-            pages = next_page;
-        }
-        if (event_handler->ReleasePage(this, page->ptr)) {
-            InterlockedSub(&free_bytes, page->size);
-            NU_FREE(page);
-            ++released_count;
-        } else {
-            page->allocation_count = 0;
-            page->next = recycled;
-            page->offset = 0;
-            ++recycled_count;
-            recycled = page;
-        }
-        page = next_page;
-    }
-
-    while (recycled != NULL) {
-        Page *next_page = recycled->next;
-        recycled->next = pages;
-        pages = recycled;
-        recycled = next_page;
-    }
-
-    unknown_0x438 = released_count;
-    unknown_0x43c = recycled_count;
 }
 
 void NuMemoryPool::VisitPools(IVisitor *visitor) {

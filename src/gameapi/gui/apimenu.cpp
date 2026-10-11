@@ -1100,27 +1100,6 @@ static __used__ void MenuUpdatePauseCut(MENU *menu) {
         }
     }
 }
-static __used__ void MenuUpdateHowToPlay(MENU *menu) {
-    if (menu->cancel_pressed != 0) {
-        BackupMenu();
-        return;
-    }
-    if (menu->confirm_pressed == 0) {
-        return;
-    }
-
-    switch (menu->selected_item) {
-        case 0:
-            SuperOptions.music_enabled = SuperOptions.music_enabled == 0;
-            MenuSFX = GameAudio_GetSfxId(0x30);
-            break;
-        case 1:
-            NewMenu(26, -1, -1);
-            MenuSFX = GameAudio_GetSfxId(0x30);
-            NuIOS_RecordFlurryEvent("menu_howtoplay");
-            break;
-    }
-}
 static __used__ void MenuUpdatePauseExit(MENU *menu) {
     if (menu->confirm_pressed != 0) {
         LEVELDATA_s *save_level = CanSaveAndExit(WORLD);
@@ -1164,6 +1143,27 @@ static __used__ void MenuUpdatePauseExit(MENU *menu) {
     } else if (menu->cancel_pressed != 0) {
         BackupMenu();
         MenuSFX = GameAudio_GetSfxId(0x31);
+    }
+}
+static __used__ void MenuUpdateHowToPlay(MENU *menu) {
+    if (menu->cancel_pressed != 0) {
+        BackupMenu();
+        return;
+    }
+    if (menu->confirm_pressed == 0) {
+        return;
+    }
+
+    switch (menu->selected_item) {
+        case 0:
+            SuperOptions.music_enabled = SuperOptions.music_enabled == 0;
+            MenuSFX = GameAudio_GetSfxId(0x30);
+            break;
+        case 1:
+            NewMenu(26, -1, -1);
+            MenuSFX = GameAudio_GetSfxId(0x30);
+            NuIOS_RecordFlurryEvent("menu_howtoplay");
+            break;
     }
 }
 static __used__ void MenuUpdatePauseMain(MENU *menu) {

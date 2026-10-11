@@ -137,6 +137,15 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     }
 }
 
+void Levers_InitTerrain(WORLDINFO_s *world) {
+    if (world->levers != NULL) {
+        for (i32 index = 0; index < world->nlevers; ++index) {
+            world->levers[index].platform_id = NewPlatPickupInst(&world->levers[index], 3);
+            PlatInstRotate(world->levers[index].platform_id, 1);
+        }
+    }
+}
+
 void Lever_GetAbsTargetPos(LEVER_s *lever, nuvec_s *target_position) {
     if (target_position != NULL && lever != NULL) {
         NUVEC offset = lever->target_offset;
@@ -147,13 +156,8 @@ void Lever_GetAbsTargetPos(LEVER_s *lever, nuvec_s *target_position) {
     }
 }
 
-void Levers_InitTerrain(WORLDINFO_s *world) {
-    if (world->levers != NULL) {
-        for (i32 index = 0; index < world->nlevers; ++index) {
-            world->levers[index].platform_id = NewPlatPickupInst(&world->levers[index], 3);
-            PlatInstRotate(world->levers[index].platform_id, 1);
-        }
-    }
+i32 Lever_FullyPulledDown(LEVER_s *lever) {
+    return lever->visible && lever->being_pulled && lever->pull_progress >= 1.0f;
 }
 
 LEVER_s *Lever_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *object, f32 *distance_squared) {
@@ -182,10 +186,6 @@ LEVER_s *Lever_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *
     if (distance_squared != NULL)
         *distance_squared = nearest_distance;
     return nearest;
-}
-
-i32 Lever_FullyPulledDown(LEVER_s *lever) {
-    return lever->visible && lever->being_pulled && lever->pull_progress >= 1.0f;
 }
 
 i32 Lever_BeingPulled(LEVER_s *lever) {

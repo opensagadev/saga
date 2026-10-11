@@ -130,66 +130,6 @@ void SetAreaPickupGravity(i32 area, i32 level) {
         AreaPickupGravity = -20.0f;
     }
 }
-void WorldInfo_Dump(WORLDINFO *world) {
-    if (world->mech_auto_jump_manager != NULL) {
-        delete world->mech_auto_jump_manager;
-        world->mech_auto_jump_manager = NULL;
-    }
-    MechSystems::Get()->ExitLevel(world);
-    Customiser_DumpAll(Game_Customiser, world);
-    if (world->cutscene_sys != NULL) {
-        for (i32 index = 0; index < world->cutscene_sys->count; ++index)
-            ClearLinkedCutSceneMusic(world->cutscene_sys->cuts[index]->instance);
-    }
-    CharacterMiniKits_Dump(world);
-    CharScenes_LevelDump(world);
-    CutScenes_Destroy(world->cutscene_sys);
-    if (world->icons_gscn != nullptr) {
-        NuGScnRemove(world->icons_gscn);
-        world->icons_gscn = nullptr;
-    }
-    if (world->page_pp != -1) {
-        edppStopPage(static_cast<i8>(world->page_pp));
-        edppClearPage(static_cast<i8>(world->page_pp));
-    }
-    if (world->page_part != -1) {
-        edpartStopPage(static_cast<i8>(world->page_part));
-        edpartClearPage(static_cast<i8>(world->page_part));
-    }
-    if (world->page_grass != -1) {
-        edgraStopPage(static_cast<i8>(world->page_grass));
-        edgraClearPage(static_cast<i8>(world->page_grass));
-    }
-    if (world->page_bridge != -1)
-        edbriClearPage(static_cast<i8>(world->page_bridge));
-    if (world->page_anim != -1) {
-        edanimStopPage(world->page_anim);
-        edanimClearPage(world->page_anim);
-    }
-    if (BGLOAD == 0) {
-        for (i32 page = 2; page < 8; ++page) {
-            if (edpp_page_on[page] != 0) {
-                edppStopPage(page);
-                edppClearPage(page);
-            }
-        }
-        for (i32 page = 1; page < 8; ++page) {
-            if (part_page_on[page] != 0) {
-                edpartStopPage(page);
-                edpartClearPage(page);
-            }
-        }
-    }
-    DestroyRippleMtls(world);
-    if (world->current_gscn != nullptr) {
-        NuGScnRemove(world->current_gscn);
-        world->current_gscn = nullptr;
-    }
-    if (world->scene != nullptr) {
-        NuGScnRemove(world->scene);
-        world->scene = nullptr;
-    }
-}
 void StoreSceneProgress(NUGSCN *gscn, SCENEPROGRESS_s *progress, i32 param) {
     if (progress == NULL || gscn == NULL)
         return;
@@ -269,6 +209,66 @@ store_flags:
             memmove(progress->disabled_effect_names, world->level_progress->disabled_effect_names, 0xc0);
         reinterpret_cast<u8 *>(&progress->flags)[0] =
             (reinterpret_cast<u8 *>(&progress->flags)[0] & ~4) | ((world->field_0x5174 & 1) << 2) | 2;
+    }
+}
+void WorldInfo_Dump(WORLDINFO *world) {
+    if (world->mech_auto_jump_manager != NULL) {
+        delete world->mech_auto_jump_manager;
+        world->mech_auto_jump_manager = NULL;
+    }
+    MechSystems::Get()->ExitLevel(world);
+    Customiser_DumpAll(Game_Customiser, world);
+    if (world->cutscene_sys != NULL) {
+        for (i32 index = 0; index < world->cutscene_sys->count; ++index)
+            ClearLinkedCutSceneMusic(world->cutscene_sys->cuts[index]->instance);
+    }
+    CharacterMiniKits_Dump(world);
+    CharScenes_LevelDump(world);
+    CutScenes_Destroy(world->cutscene_sys);
+    if (world->icons_gscn != nullptr) {
+        NuGScnRemove(world->icons_gscn);
+        world->icons_gscn = nullptr;
+    }
+    if (world->page_pp != -1) {
+        edppStopPage(static_cast<i8>(world->page_pp));
+        edppClearPage(static_cast<i8>(world->page_pp));
+    }
+    if (world->page_part != -1) {
+        edpartStopPage(static_cast<i8>(world->page_part));
+        edpartClearPage(static_cast<i8>(world->page_part));
+    }
+    if (world->page_grass != -1) {
+        edgraStopPage(static_cast<i8>(world->page_grass));
+        edgraClearPage(static_cast<i8>(world->page_grass));
+    }
+    if (world->page_bridge != -1)
+        edbriClearPage(static_cast<i8>(world->page_bridge));
+    if (world->page_anim != -1) {
+        edanimStopPage(world->page_anim);
+        edanimClearPage(world->page_anim);
+    }
+    if (BGLOAD == 0) {
+        for (i32 page = 2; page < 8; ++page) {
+            if (edpp_page_on[page] != 0) {
+                edppStopPage(page);
+                edppClearPage(page);
+            }
+        }
+        for (i32 page = 1; page < 8; ++page) {
+            if (part_page_on[page] != 0) {
+                edpartStopPage(page);
+                edpartClearPage(page);
+            }
+        }
+    }
+    DestroyRippleMtls(world);
+    if (world->current_gscn != nullptr) {
+        NuGScnRemove(world->current_gscn);
+        world->current_gscn = nullptr;
+    }
+    if (world->scene != nullptr) {
+        NuGScnRemove(world->scene);
+        world->scene = nullptr;
     }
 }
 

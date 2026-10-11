@@ -1123,6 +1123,56 @@ ADDGIZMOTYPE *GizTurrets_RegisterGizmo(i32 type_id) {
     return &addtype;
 }
 
+GameObject_s *GizTurret_GetTgt(GIZTURRET_s *, numtx_s *matrix) {
+    NUVEC forward = {0.0f, 0.0f, -1.0f};
+    if (WORLD != NULL && player != NULL && WORLD->current_level == DEATHSTARRESCUEE_LDATA &&
+        player->id == id_GRABCONTROL && TouchHacks::TouchControlsActive) {
+        return NULL;
+    }
+
+    NuVecMtxRotate(&forward, &forward, matrix);
+    GameObject_s *best = NULL;
+    f32 best_distance = 1000000000.0f;
+    GameObject_s *object = Obj;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
+        if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
+            (object->apiobj.field_0x1f4 & 1) == 0 || object->apiobj.model_draw_result == 0) {
+            continue;
+        }
+
+        NUVEC direction;
+        const f32 distance =
+            NuVecDistSqr(&object->apiobj.collision_position, reinterpret_cast<NUVEC *>(&matrix->m30), &direction);
+        if (!(best_distance > distance)) {
+            continue;
+        }
+        const f32 length = NuFsqrt(distance);
+        const f32 scale = length > 0.0f ? 1.0f / length : 0.0f;
+        direction.x *= scale;
+        direction.y *= scale;
+        direction.z *= scale;
+        if (!(NuVecDot(&direction, &forward) > NU_COS_LUT(gizturret_test_ang))) {
+            continue;
+        }
+        best = object;
+        best_distance = distance;
+    }
+    return best;
+}
+
+GIZTURRET_s *GizTurret_FindByName(GIZTURRETSYS_s *system, char *name) {
+    GIZTURRET_s *turret = NULL;
+    if (name != NULL && system != NULL) {
+        turret = system->turrets;
+        for (i32 i = 0; i < system->count; ++i, ++turret) {
+            if (NuStrICmp(turret->name, name) == 0) {
+                break;
+            }
+        }
+    }
+    return turret;
+}
+
 i32 GizTurrets_Hit(void *world, GIZTURRET_s *turret, nuvec_s *, i32 player_index, i32 damage) {
     if (static_cast<i8>(turret->field_0x12e) <= 0) {
         return 0;
@@ -1180,56 +1230,6 @@ i32 GizTurrets_Hit(void *world, GIZTURRET_s *turret, nuvec_s *, i32 player_index
         Hint_SetComplete(LEGOHINT_SHOOTCAMERAS);
     }
     return 1;
-}
-
-GameObject_s *GizTurret_GetTgt(GIZTURRET_s *, numtx_s *matrix) {
-    NUVEC forward = {0.0f, 0.0f, -1.0f};
-    if (WORLD != NULL && player != NULL && WORLD->current_level == DEATHSTARRESCUEE_LDATA &&
-        player->id == id_GRABCONTROL && TouchHacks::TouchControlsActive) {
-        return NULL;
-    }
-
-    NuVecMtxRotate(&forward, &forward, matrix);
-    GameObject_s *best = NULL;
-    f32 best_distance = 1000000000.0f;
-    GameObject_s *object = Obj;
-    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
-        if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
-            (object->apiobj.field_0x1f4 & 1) == 0 || object->apiobj.model_draw_result == 0) {
-            continue;
-        }
-
-        NUVEC direction;
-        const f32 distance =
-            NuVecDistSqr(&object->apiobj.collision_position, reinterpret_cast<NUVEC *>(&matrix->m30), &direction);
-        if (!(best_distance > distance)) {
-            continue;
-        }
-        const f32 length = NuFsqrt(distance);
-        const f32 scale = length > 0.0f ? 1.0f / length : 0.0f;
-        direction.x *= scale;
-        direction.y *= scale;
-        direction.z *= scale;
-        if (!(NuVecDot(&direction, &forward) > NU_COS_LUT(gizturret_test_ang))) {
-            continue;
-        }
-        best = object;
-        best_distance = distance;
-    }
-    return best;
-}
-
-GIZTURRET_s *GizTurret_FindByName(GIZTURRETSYS_s *system, char *name) {
-    GIZTURRET_s *turret = NULL;
-    if (name != NULL && system != NULL) {
-        turret = system->turrets;
-        for (i32 i = 0; i < system->count; ++i, ++turret) {
-            if (NuStrICmp(turret->name, name) == 0) {
-                break;
-            }
-        }
-    }
-    return turret;
 }
 
 GIZTURRET_s *GizTurret_FindNearest(GIZTURRETSYS_s *system, nuvec_s *position, GameObject_s *, f32 *distance, i32) {

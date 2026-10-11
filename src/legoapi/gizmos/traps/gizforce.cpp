@@ -1549,6 +1549,16 @@ void GizForce_ResetLOS(GameObject_s *object) {
     }
 }
 
+i32 GizForce_UpdateHint(HINT_s *) {
+    for (i32 i = 0; i < 2; ++i) {
+        GameObject_s *object = Player[i];
+        if (object != NULL && (object->apiobj.flags_low & 0x80) != 0 && object->field_0xd80 > 0.0f &&
+            object->force_glow_object != NULL && object->force_glow_kind == 0)
+            return 1;
+    }
+    return 0;
+}
+
 GIZFORCE_s *GizForce_FindByName(GIZFORCESYS_s *force_sys, char *name) {
     GIZFORCE_s *force = NULL;
     if (name == NULL || force_sys == NULL) {
@@ -1561,16 +1571,6 @@ GIZFORCE_s *GizForce_FindByName(GIZFORCESYS_s *force_sys, char *name) {
         }
     }
     return force;
-}
-
-i32 GizForce_UpdateHint(HINT_s *) {
-    for (i32 i = 0; i < 2; ++i) {
-        GameObject_s *object = Player[i];
-        if (object != NULL && (object->apiobj.flags_low & 0x80) != 0 && object->field_0xd80 > 0.0f &&
-            object->force_glow_object != NULL && object->force_glow_kind == 0)
-            return 1;
-    }
-    return 0;
 }
 
 GIZFORCE_s *GizForces_FindForce(WORLDINFO_s *world, char *name) {

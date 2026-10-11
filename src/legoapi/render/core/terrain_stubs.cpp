@@ -192,8 +192,8 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
     group->bounds_min.y = (min_y - 0.1f) + info->matrix->m31;
     group->bounds_min.z = (min_z - 0.1f) + info->matrix->m32;
     group->bounds_max.x = (max_x + 0.1f) + info->matrix->m30;
-    group->bounds_max.y = (max_y + 0.1f) + info->matrix->m31;
     group->bounds_max.z = (max_z + 0.1f) + info->matrix->m32;
+    group->bounds_max.y = (max_y + 0.1f) + info->matrix->m31;
     group->radius = NuFsqrt(radius_squared);
     if (bytes > PlatSkinMaxSize)
         PlatSkinMaxSize = bytes;

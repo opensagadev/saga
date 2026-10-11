@@ -337,13 +337,6 @@ static void Signal_SetGizmoVisibility(GIZMO *gizmo, i32 visible) {
     }
 }
 
-void Signals_InitTerrain(WORLDINFO_s *world) {
-    for (i32 index = 0; index < world->signal_count; ++index) {
-        SIGNAL *signal = &world->signals[index];
-        signal->platform_id = NewPlatPickupInst(&signal->matrix, 2);
-    }
-}
-
 SIGNAL *Signal_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *object, float *distance) {
     SIGNAL *nearest = NULL;
     f32 nearest_distance = 1000000000.0f;
@@ -367,6 +360,13 @@ SIGNAL *Signal_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *
         *distance = nearest_distance;
     }
     return nearest;
+}
+
+void Signals_InitTerrain(WORLDINFO_s *world) {
+    for (i32 index = 0; index < world->signal_count; ++index) {
+        SIGNAL *signal = &world->signals[index];
+        signal->platform_id = NewPlatPickupInst(&signal->matrix, 2);
+    }
 }
 
 ADDGIZMOTYPE *Signals_RegisterGizmo(i32 type_id) {

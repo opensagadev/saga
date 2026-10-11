@@ -397,7 +397,7 @@ static void edgracbClumpModeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
                         eduiItemCheckCreate(3, edblack, edgra_mode == 3, 1, edgracbSetClumpMode, "Individual FS Mode"));
     edgraAttachMenu(parent, edgra_clumpmode_menu);
 }
-static void edgracbClumpSizesMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+static inline void edgracbClumpSizesMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (edgra_nearest == -1 || !GrassClumps[edgra_nearest].element_count)
         return;

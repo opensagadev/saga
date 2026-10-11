@@ -1843,6 +1843,33 @@ static SPECIAL_LAYER_s SpecialLayer[] = {
     {&id_ROBIN, "nextgen_limbs_blue", 0},  {&id_ROBIN, "hires_limbs_blue", 0},   {&id_ROBIN, "lowres_limbs_blue", 0},
 };
 
+void FixUpLayers() {
+    for (i32 model_index = 0; model_index < apicharsys->loaded_model_count; ++model_index) {
+        CHARACTERMODEL_s *model = &apicharsys->models[model_index];
+        GAMECHARACTERDATA_s *character = &GCDataList[model->model_id];
+
+        for (i32 layer_index = 0; layer_index < character->layer_count; ++layer_index) {
+            GAMECHARACTERLAYER_s *layer = &character->layers[layer_index];
+            layer->hierarchy_layer_index = NuHGobjGetLayerIndex(layer->name, model->hierarchy);
+        }
+    }
+
+    SPECIAL_LAYER_s *layer = SpecialLayer;
+    SPECIAL_LAYER_s *layer_end = SpecialLayer + sizeof(SpecialLayer) / sizeof(SpecialLayer[0]);
+    for (; layer != layer_end; ++layer) {
+        layer->mask = 0;
+        if (layer->character_id != NULL && *layer->character_id != -1) {
+            layer->mask = 1 << LayerFromName(&GCDataList[*layer->character_id], layer->name);
+        }
+    }
+}
+
+i32 Player_HasPurpleForce(GameObject_s *obj) {
+    if (Cheat_IsOn(0x1c))
+        return 1;
+    return obj != NULL && obj->field_0xdec > 0.0f;
+}
+
 // Shares the original translation-unit-local layer table with FixUpLayers.
 u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
     GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
@@ -1942,33 +1969,6 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
     if (data->ride_layers_off != 0 && object->field_0xcc0 != NULL && object->field_0x7a5 == 0x3b)
         mask &= ~data->ride_layers_off;
     return mask;
-}
-
-void FixUpLayers() {
-    for (i32 model_index = 0; model_index < apicharsys->loaded_model_count; ++model_index) {
-        CHARACTERMODEL_s *model = &apicharsys->models[model_index];
-        GAMECHARACTERDATA_s *character = &GCDataList[model->model_id];
-
-        for (i32 layer_index = 0; layer_index < character->layer_count; ++layer_index) {
-            GAMECHARACTERLAYER_s *layer = &character->layers[layer_index];
-            layer->hierarchy_layer_index = NuHGobjGetLayerIndex(layer->name, model->hierarchy);
-        }
-    }
-
-    SPECIAL_LAYER_s *layer = SpecialLayer;
-    SPECIAL_LAYER_s *layer_end = SpecialLayer + sizeof(SpecialLayer) / sizeof(SpecialLayer[0]);
-    for (; layer != layer_end; ++layer) {
-        layer->mask = 0;
-        if (layer->character_id != NULL && *layer->character_id != -1) {
-            layer->mask = 1 << LayerFromName(&GCDataList[*layer->character_id], layer->name);
-        }
-    }
-}
-
-i32 Player_HasPurpleForce(GameObject_s *obj) {
-    if (Cheat_IsOn(0x1c))
-        return 1;
-    return obj != NULL && obj->field_0xdec > 0.0f;
 }
 
 bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, float &distance_squared,

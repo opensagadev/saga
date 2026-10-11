@@ -856,6 +856,35 @@ void MechInputTouchGestureBasedController::ProcessDragMovement(GameObject_s &obj
 void MechInputTouchGestureBasedController::Render() {
 }
 
+void MechInputTouchGestureBasedController::StartNewTask(MechTouchTask *task, TouchHolder &holder, bool clear_touches,
+                                                        bool kill_tasks) {
+    GameObject_s *object = Player[player_id];
+    if (object == NULL) {
+        return;
+    }
+    if (object->touch_task != NULL && (object->touch_task->flags & 2) != 0) {
+        delete task;
+        return;
+    }
+    if (kill_tasks) {
+        KillTasks(false);
+    }
+    if (object->touch_task != NULL && task != NULL) {
+        object->touch_task->OnSuspend();
+        task->next = object->touch_task;
+    }
+    object->touch_task = task;
+    if (clear_touches) {
+        field_90 = NULL;
+        field_94 = NULL;
+    }
+    if (task != NULL) {
+        task->character = Player[player_id];
+        task->touch_holder = &holder;
+        object->touch_task->OnStart();
+    }
+}
+
 bool MechInputTouchGestureBasedController::StartJumpUsingAIPath(JumpTriggerPacket const &packet, i32 heading) {
     MechAutoJumpConnection *jump = MechAutoJumpGetBest(packet, heading);
     if (jump == NULL) {
@@ -903,35 +932,6 @@ bool MechInputTouchGestureBasedController::StartJumpUsingAIPath(JumpTriggerPacke
     }
     Hint_SetComplete(id_HINT_LSW_AUTOJUMP_FAIL);
     return true;
-}
-
-void MechInputTouchGestureBasedController::StartNewTask(MechTouchTask *task, TouchHolder &holder, bool clear_touches,
-                                                        bool kill_tasks) {
-    GameObject_s *object = Player[player_id];
-    if (object == NULL) {
-        return;
-    }
-    if (object->touch_task != NULL && (object->touch_task->flags & 2) != 0) {
-        delete task;
-        return;
-    }
-    if (kill_tasks) {
-        KillTasks(false);
-    }
-    if (object->touch_task != NULL && task != NULL) {
-        object->touch_task->OnSuspend();
-        task->next = object->touch_task;
-    }
-    object->touch_task = task;
-    if (clear_touches) {
-        field_90 = NULL;
-        field_94 = NULL;
-    }
-    if (task != NULL) {
-        task->character = Player[player_id];
-        task->touch_holder = &holder;
-        object->touch_task->OnStart();
-    }
 }
 
 bool MechInputTouchGestureBasedController::TriggerJumpTask(JumpTriggerPacket const &packet, bool disable_autopilot,

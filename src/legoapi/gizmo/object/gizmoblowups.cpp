@@ -529,19 +529,19 @@ ADDGIZMOTYPE *NewBlowup_RegisterGizmo(i32 type_id) {
     addtype.fns.unknown1 = 0x100;
     addtype.fns.early_update_fn = GizmoBlowupEarlyUpdate;
     addtype.fns.panel_draw_fn = NULL;
-    addtype.fns.get_visibility_fn = Blowup_GetVisibility;
     addtype.fns.get_max_gizmos_fn = Blowup_GetMaxGizmos;
     addtype.fns.get_pos_fn = GizmoBlowup_GetPos;
+    addtype.fns.get_visibility_fn = Blowup_GetVisibility;
     addtype.fns.using_special_fn = NULL;
     addtype.fns.add_gizmos_fn = Blowup_AddGizmos;
     addtype.fns.bolt_hit_plat_fn = NULL;
     addtype.fns.get_best_bolt_target_fn = NULL;
     addtype.fns.late_update_fn = GizmoBlowupLateUpdate;
     addtype.fns.bolt_hit_fn = NULL;
-    addtype.fns.draw_fn = GizmoBlowupBurstDraw;
     addtype.fns.get_gizmo_name_fn = Blowup_GetGizmoName;
     addtype.fns.get_output_fn = Blowup_GetOutput;
     addtype.fns.get_output_name_fn = Blowup_GetOutputName;
+    addtype.fns.draw_fn = GizmoBlowupBurstDraw;
     addtype.fns.get_num_outputs_fn = Blowup_GetNumOutputs;
     addtype.fns.activate_fn = Blowup_Activate;
     addtype.fns.activate_rev_fn = NULL;
@@ -776,8 +776,8 @@ void GizmoBlowUp_AddEffects(nuvec_s *position, GIZMOBLOWUP_s *blowup, i32 offset
                     velocity.z += 0.75f * object->apiobj.velocity.z;
                 }
                 ADDPART_s part = Default_ADDPART;
-                part.matrix = &matrix;
                 part.velocity = &velocity;
+                part.matrix = &matrix;
                 part.special = &type->alternate_specials[i];
                 part.gravity = type->field_0x94;
                 part.flags |= 0x80;
@@ -1161,10 +1161,10 @@ i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *blowup) {
 }
 
 i32 SetGizmoBlowUpTarget(GameObject_s *object, GIZMOBLOWUP_s *blowup) {
-    object->attack_target_position = blowup->mid_position;
     object->attack_target_velocity = v000;
-    object->field_0xe21 |= 8;
+    object->attack_target_position = blowup->mid_position;
     object->attack_blowup_target = VehicleArea != 0 ? NULL : blowup;
+    object->field_0xe21 |= 8;
     return 1;
 }
 

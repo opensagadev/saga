@@ -213,6 +213,32 @@ i32 DoShopMenu(MENU_s *menu) {
     return 0;
 }
 
+i32 BuyShopItem(shopitem_s *items, i32 index, i32 charge) {
+    shopitem_s *item = &items[index];
+    u32 *bits = NULL;
+    if (item->type == 0)
+        bits = Game.shop_hint_purchased_bits;
+    else if (item->type == 1)
+        bits = Game.shop_character_purchased_bits;
+    else if (item->type == 2)
+        bits = Game.extra_unlocked_bits;
+    else if (item->type == 4)
+        bits = &Game.shop_gold_brick_purchased_bits;
+    else if (item->type == 5) {
+        PlaySfx("MenuSelect", 0);
+        return 1;
+    }
+    if (bits != NULL)
+        bits[index / 32] |= static_cast<u32>(u64(1) << (index % 32));
+    if (charge != 0)
+        Game.coins -= item->price;
+    pickedbing = 0.35f;
+    item->unlocked = 1;
+    if (charge != 0)
+        PlaySfx("Shop_BuyCheat", &SubShelfPos[3]);
+    return 1;
+}
+
 i32 UpdateShop(MENU_s *menu) {
     UpdateCharacterIDs();
 
@@ -266,32 +292,6 @@ i32 UpdateShop(MENU_s *menu) {
     }
 
     return DoShopMenu(menu) != 0;
-}
-
-i32 BuyShopItem(shopitem_s *items, i32 index, i32 charge) {
-    shopitem_s *item = &items[index];
-    u32 *bits = NULL;
-    if (item->type == 0)
-        bits = Game.shop_hint_purchased_bits;
-    else if (item->type == 1)
-        bits = Game.shop_character_purchased_bits;
-    else if (item->type == 2)
-        bits = Game.extra_unlocked_bits;
-    else if (item->type == 4)
-        bits = &Game.shop_gold_brick_purchased_bits;
-    else if (item->type == 5) {
-        PlaySfx("MenuSelect", 0);
-        return 1;
-    }
-    if (bits != NULL)
-        bits[index / 32] |= static_cast<u32>(u64(1) << (index % 32));
-    if (charge != 0)
-        Game.coins -= item->price;
-    pickedbing = 0.35f;
-    item->unlocked = 1;
-    if (charge != 0)
-        PlaySfx("Shop_BuyCheat", &SubShelfPos[3]);
-    return 1;
 }
 
 void SelectSubItem() {

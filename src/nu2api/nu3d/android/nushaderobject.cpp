@@ -102,29 +102,6 @@ void NuShaderObjectCreate(NUSHADEROBJECT *shader) {
     }
 }
 
-// Original 0x30ba90. Parameter metadata is populated by the GLSL semantic
-// probe; the low nibble selects scalar/vector/matrix upload behaviour.
-extern "C" void NuShaderObjectSetElementsfv(NUSHADEROBJECT *shader, i32 semantic, i32 first_element, i32 count,
-                                            const f32 *values) {
-    GLSLParameter &parameter = shader->parameters[semantic];
-    if (parameter.location < 0) {
-        return;
-    }
-
-    switch (parameter.parameter_type) {
-        case 1:
-            g_glConstantSetterTable[parameter.element_count_and_setter & 3](parameter.location + first_element, count,
-                                                                            values);
-            break;
-        case 2:
-            glUniform4fv(parameter.location + first_element, count, values);
-            break;
-        case 3:
-            parameter.setElementsMatrix(first_element, count, values);
-            break;
-    }
-}
-
 // Original 0x30bb60. The caller has already transposed matrix payloads, so
 // matrix parameters are uploaded as their contiguous vec4 rows instead of
 // passing through GLSLParameter::setElementsMatrix a second time.
@@ -152,6 +129,29 @@ extern "C" void NuShaderObjectSetElementsfv_transpose(NUSHADEROBJECT *shader, i3
             glUniform4fv(parameter.location + first_element * 4, vector_count, values);
             break;
         }
+    }
+}
+
+// Original 0x30ba90. Parameter metadata is populated by the GLSL semantic
+// probe; the low nibble selects scalar/vector/matrix upload behaviour.
+extern "C" void NuShaderObjectSetElementsfv(NUSHADEROBJECT *shader, i32 semantic, i32 first_element, i32 count,
+                                            const f32 *values) {
+    GLSLParameter &parameter = shader->parameters[semantic];
+    if (parameter.location < 0) {
+        return;
+    }
+
+    switch (parameter.parameter_type) {
+        case 1:
+            g_glConstantSetterTable[parameter.element_count_and_setter & 3](parameter.location + first_element, count,
+                                                                            values);
+            break;
+        case 2:
+            glUniform4fv(parameter.location + first_element, count, values);
+            break;
+        case 3:
+            parameter.setElementsMatrix(first_element, count, values);
+            break;
     }
 }
 

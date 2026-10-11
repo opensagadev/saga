@@ -938,6 +938,23 @@ NuDynamicLight *NuDynamicLight::clone(variptr_u *arena, variptr_u) {
     return copy;
 }
 
+void NuDynamicLight::resetGeometry() {
+    for (i32 i = 0; i < render_set_capacity; ++i) {
+        RenderSet &set = render_sets[i];
+        set.geometry_count = 0;
+        NuDisplayListReset(&set.display_lists[0]);
+        NUDISPLAYLISTITEM *item0 = set.display_lists[0].first;
+        item0->type = 0x8d;
+        item0->next = NULL;
+        item0->id = 1;
+        NuDisplayListReset(&set.display_lists[1]);
+        NUDISPLAYLISTITEM *item1 = set.display_lists[1].first;
+        item1->type = 0x8d;
+        item1->id = 1;
+        item1->next = NULL;
+    }
+}
+
 void NuDynamicLight::renderShadowMap(i32 index, nuframebuffer_s *) {
     RenderSet &set = render_sets[index];
     if (set.display_lists[0].mtl_last == set.display_lists[0].first &&
@@ -984,23 +1001,6 @@ void NuDynamicLight::renderShadowMap(i32 index, nuframebuffer_s *) {
     for (i32 i = 0; i < set.geometry_count; ++i)
         NuDisplayListDrawRenderScene(set.reserved_33c[i]);
     NuDisplayListSetItemTable(0);
-}
-
-void NuDynamicLight::resetGeometry() {
-    for (i32 i = 0; i < render_set_capacity; ++i) {
-        RenderSet &set = render_sets[i];
-        set.geometry_count = 0;
-        NuDisplayListReset(&set.display_lists[0]);
-        NUDISPLAYLISTITEM *item0 = set.display_lists[0].first;
-        item0->type = 0x8d;
-        item0->next = NULL;
-        item0->id = 1;
-        NuDisplayListReset(&set.display_lists[1]);
-        NUDISPLAYLISTITEM *item1 = set.display_lists[1].first;
-        item1->type = 0x8d;
-        item1->id = 1;
-        item1->next = NULL;
-    }
 }
 
 void NuDynamicLight::setCameraViewProj(NUMTX *view, NUMTX *projection) {

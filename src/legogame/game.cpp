@@ -756,98 +756,6 @@ GAMEAUDIO GameAudio_LSW = {
     {},
 };
 
-void InitGameBeforeConfig(void) {
-    f32 frame_time;
-    if (PAL != 0) {
-        NuStrCpy(prodcode, "BESLES-54221");
-        frame_time = 0.02f;
-    } else {
-        NuStrCpy(prodcode, "BASLUS-21409");
-        frame_time = 0.016666668f;
-    }
-    FRAMETIME = frame_time;
-    DEFAULTFPS = 1.0f / frame_time;
-    DEFAULTFRAMETIME = 0.016666668f;
-    MAXFRAMETIME = 0.1f;
-    permbuffer_ptr = permbuffer_base;
-    permbuffer_end = superbuffer_end;
-
-    saveloadInit(&permbuffer_base, superbuffer_end, 0x7e58, prodcode, iconname, unicodename, 4);
-    original_permbuffer_base = permbuffer_base;
-    SaveSystemInitialise(3, (void *)MakeSaveHash, &Game, sizeof(GAMESAVE_s), 1, DrawAutoSaveIcon, &SuperOptions,
-                         sizeof(SuperOptions));
-
-    Game_OptionsSave = &Game.options_save;
-    Game_LevelSave = Game.level_save;
-    Game_AreaSave = Game.area_save;
-    Game_EpisodeSave = Game.episode_save;
-    Game_CharacterSave = Game.character_save;
-    Game_CompletionSave = &Game.completion;
-    Game_MissionSave = &Game.mission_save;
-
-    ResetSeeds();
-    ResetTimer(&GlobalTimer, 0.0f);
-    ResetTimer(&OverallGamePlayTimer, 0.0f);
-    SetAnimBlendMode(2);
-    SetAPIObjPlaySfxByIdFn(PlaySfxById);
-    NuSetPadDemoEndButtons(GAMEPAD_SKIP);
-
-    // Original option defaults.  OPTIONSSAVE occupies Game[0x4..0x10]; the
-    // final brightness byte at 0xc was previously misplaced outside the type.
-    const i32 aspect = NuVideoGetAspect();
-    Game.options_save.field0_0x0 = 1;
-    Game.options_save.field1_0x1 = 1;
-    Game.options_save.field2_0x2 = 0;
-    Game.options_save.field4_0x4 = 10;
-    Game.options_save.field3_0x3 = 10;
-    Game.options_save.field7_0x7 = 0;
-    Game.options_save.field8_0x8 = 0;
-    Game.options_save.field5_0x5 = 10;
-    Game.options_save.field6_0x6 = 1;
-    const bool standard_aspect = aspect == 0 || aspect == 3;
-    Game.options_save.field11_0xb = !standard_aspect;
-    Game.options_save.field12_0xc = 10;
-
-    // Persistent touch/control options are initialized before any save data is
-    // loaded.  In particular, byte 0x14 is the original music-enable gate.
-    SuperOptions.field0_0x0 = -1;
-    SuperOptions.field8_0x15 = -1;
-    SuperOptions.touch_controls = 1;
-    SuperOptions.field2_0x3 = 1;
-    if (NuIOS_IsSmallScreen() == 0) {
-        SuperOptions.left_control_x = MechInputTouchVirtualConsoleController::s_defaultDPadPosX;
-        SuperOptions.left_control_y = MechInputTouchVirtualConsoleController::s_defaultDPadPosY;
-        SuperOptions.right_control_x = MechInputTouchVirtualConsoleController::s_defaultButtonsPosX;
-        SuperOptions.right_control_y = MechInputTouchVirtualConsoleController::s_defaultButtonsPosY;
-    } else {
-        SuperOptions.left_control_x = MechInputTouchVirtualConsoleController::s_defaultDPadPosX_SmallScreen;
-        SuperOptions.left_control_y = MechInputTouchVirtualConsoleController::s_defaultDPadPosY_SmallScreen;
-        SuperOptions.right_control_x = MechInputTouchVirtualConsoleController::s_defaultButtonsPosX_SmallScreen;
-        SuperOptions.right_control_y = MechInputTouchVirtualConsoleController::s_defaultButtonsPosY_SmallScreen;
-    }
-    SuperOptions.music_enabled = 1;
-
-    GameSetSoundVolume(&Game.options_save);
-    GameSetMusicVolume(&Game.options_save);
-    Text_GameSetLanguageFn = Text_SetLanguage_Game;
-
-    if (Text_Language != 13) {
-        if (Text_Language != 0 && PAL != 0) {
-            Text_SetLanguage(NuLanguageGet());
-        }
-    }
-
-    GameRegisterGizActions();
-    WorldInfo_Reset(&WorldInfo[0], -1);
-    WorldInfo_Reset(&WorldInfo[1], -1);
-    memset(ZeroRTL, 0, sizeof(ZeroRTL));
-    memset(GameCam, 0, sizeof(*GameCam));
-    InitPartTable(partdebris_name);
-    GameAudio_Reset();
-    MENUTEXTSCALE *= 1.2f;
-    MENUDY *= 1.5f;
-}
-
 void InitGameAfterConfig(void) {
     AREADATA *pAVar5 = ADataList;
 
@@ -1351,6 +1259,98 @@ void InitGameAfterConfig(void) {
         extern u8 CharClipToBlobShadows;
         CharClipToBlobShadows = 1;
     }
+}
+
+void InitGameBeforeConfig(void) {
+    f32 frame_time;
+    if (PAL != 0) {
+        NuStrCpy(prodcode, "BESLES-54221");
+        frame_time = 0.02f;
+    } else {
+        NuStrCpy(prodcode, "BASLUS-21409");
+        frame_time = 0.016666668f;
+    }
+    FRAMETIME = frame_time;
+    DEFAULTFPS = 1.0f / frame_time;
+    DEFAULTFRAMETIME = 0.016666668f;
+    MAXFRAMETIME = 0.1f;
+    permbuffer_ptr = permbuffer_base;
+    permbuffer_end = superbuffer_end;
+
+    saveloadInit(&permbuffer_base, superbuffer_end, 0x7e58, prodcode, iconname, unicodename, 4);
+    original_permbuffer_base = permbuffer_base;
+    SaveSystemInitialise(3, (void *)MakeSaveHash, &Game, sizeof(GAMESAVE_s), 1, DrawAutoSaveIcon, &SuperOptions,
+                         sizeof(SuperOptions));
+
+    Game_OptionsSave = &Game.options_save;
+    Game_LevelSave = Game.level_save;
+    Game_AreaSave = Game.area_save;
+    Game_EpisodeSave = Game.episode_save;
+    Game_CharacterSave = Game.character_save;
+    Game_CompletionSave = &Game.completion;
+    Game_MissionSave = &Game.mission_save;
+
+    ResetSeeds();
+    ResetTimer(&GlobalTimer, 0.0f);
+    ResetTimer(&OverallGamePlayTimer, 0.0f);
+    SetAnimBlendMode(2);
+    SetAPIObjPlaySfxByIdFn(PlaySfxById);
+    NuSetPadDemoEndButtons(GAMEPAD_SKIP);
+
+    // Original option defaults.  OPTIONSSAVE occupies Game[0x4..0x10]; the
+    // final brightness byte at 0xc was previously misplaced outside the type.
+    const i32 aspect = NuVideoGetAspect();
+    Game.options_save.field0_0x0 = 1;
+    Game.options_save.field1_0x1 = 1;
+    Game.options_save.field2_0x2 = 0;
+    Game.options_save.field4_0x4 = 10;
+    Game.options_save.field3_0x3 = 10;
+    Game.options_save.field7_0x7 = 0;
+    Game.options_save.field8_0x8 = 0;
+    Game.options_save.field5_0x5 = 10;
+    Game.options_save.field6_0x6 = 1;
+    const bool standard_aspect = aspect == 0 || aspect == 3;
+    Game.options_save.field11_0xb = !standard_aspect;
+    Game.options_save.field12_0xc = 10;
+
+    // Persistent touch/control options are initialized before any save data is
+    // loaded.  In particular, byte 0x14 is the original music-enable gate.
+    SuperOptions.field0_0x0 = -1;
+    SuperOptions.field8_0x15 = -1;
+    SuperOptions.touch_controls = 1;
+    SuperOptions.field2_0x3 = 1;
+    if (NuIOS_IsSmallScreen() == 0) {
+        SuperOptions.left_control_x = MechInputTouchVirtualConsoleController::s_defaultDPadPosX;
+        SuperOptions.left_control_y = MechInputTouchVirtualConsoleController::s_defaultDPadPosY;
+        SuperOptions.right_control_x = MechInputTouchVirtualConsoleController::s_defaultButtonsPosX;
+        SuperOptions.right_control_y = MechInputTouchVirtualConsoleController::s_defaultButtonsPosY;
+    } else {
+        SuperOptions.left_control_x = MechInputTouchVirtualConsoleController::s_defaultDPadPosX_SmallScreen;
+        SuperOptions.left_control_y = MechInputTouchVirtualConsoleController::s_defaultDPadPosY_SmallScreen;
+        SuperOptions.right_control_x = MechInputTouchVirtualConsoleController::s_defaultButtonsPosX_SmallScreen;
+        SuperOptions.right_control_y = MechInputTouchVirtualConsoleController::s_defaultButtonsPosY_SmallScreen;
+    }
+    SuperOptions.music_enabled = 1;
+
+    GameSetSoundVolume(&Game.options_save);
+    GameSetMusicVolume(&Game.options_save);
+    Text_GameSetLanguageFn = Text_SetLanguage_Game;
+
+    if (Text_Language != 13) {
+        if (Text_Language != 0 && PAL != 0) {
+            Text_SetLanguage(NuLanguageGet());
+        }
+    }
+
+    GameRegisterGizActions();
+    WorldInfo_Reset(&WorldInfo[0], -1);
+    WorldInfo_Reset(&WorldInfo[1], -1);
+    memset(ZeroRTL, 0, sizeof(ZeroRTL));
+    memset(GameCam, 0, sizeof(*GameCam));
+    InitPartTable(partdebris_name);
+    GameAudio_Reset();
+    MENUTEXTSCALE *= 1.2f;
+    MENUDY *= 1.5f;
 }
 
 void CompleteLevel(WORLDINFO *world) {

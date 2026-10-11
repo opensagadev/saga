@@ -202,8 +202,8 @@ static void *GizBuildIts_ReserveBufferSpace(void *world_ptr) {
     GIZBUILDITSYS_s *buildit_sys = static_cast<GIZBUILDITSYS_s *>(
         GameBufferAlloc(&world->giz_buffer, &world->unknown_0108, sizeof(GIZBUILDITSYS_s)));
 
-    buildit_sys->max_animation_objects = world->current_level->max_buildit_objs;
     buildit_sys->capacity = world->current_level->max_buildits;
+    buildit_sys->max_animation_objects = world->current_level->max_buildit_objs;
     buildit_sys->buildits = static_cast<GIZBUILDIT_s *>(
         GameBufferAlloc(&world->giz_buffer, &world->unknown_0108, buildit_sys->capacity * sizeof(GIZBUILDIT_s)));
     buildit_sys->anim_pool = GameAnimSet_CreateObjectPool(&world->giz_buffer, &world->unknown_0108, 0xc8,
@@ -469,9 +469,9 @@ void GizMoveAttractoBuildItPiece(GIZBUILDIT_s *buildit, GAMEANIMOBJ_s *piece) {
         delta.x *= progress;
         delta.y *= progress;
         delta.z *= progress;
-        result.m30 = delta.x + draw->m30;
         result.m31 = delta.y + draw->m31;
         result.m32 = delta.z + draw->m32;
+        result.m30 = delta.x + draw->m30;
         result.m31 += 0.1f * NU_SIN_LUT(progress * 32768.0f);
         *draw = result;
     }
@@ -665,8 +665,8 @@ void GizBuildItPushAwayFromEnd(GameObject_s *player) {
                 for (i32 j = 0; j < buildit->built_object_count; ++j) {
                     GIZBUILDITANIMDATA_s *data =
                         static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[j]->object_data);
-                    centre.x += data->end_mtx.m30;
                     centre.z += data->end_mtx.m32;
+                    centre.x += data->end_mtx.m30;
                     f32 dx = data->end_mtx.m30 - end_position.x;
                     f32 dz = data->end_mtx.m32 - end_position.z;
                     maximum.x = NuFmax(maximum.x, dx);
@@ -737,8 +737,8 @@ void GizBuildIt_SetToEnd(GIZBUILDIT_s *buildit) {
         }
     }
 
-    buildit->built_object_count = buildit->anim_set != NULL ? buildit->anim_object_count : 0;
     buildit->builders_active = 0;
+    buildit->built_object_count = buildit->anim_set != NULL ? buildit->anim_object_count : 0;
     buildit->availability_flags &= static_cast<u8>(~GIZBUILDIT_AVAILABILITY_INTERACTING);
     GizBuildIt_Finish(buildit);
 }
@@ -855,8 +855,8 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
                 }
                 const f32 offset = 0.2f * NU_SIN_LUT(32768.0f * finish_progress);
                 if ((buildit.state_flags & GIZBUILDIT_STATE_ROTATING_WOBBLE) != 0) {
-                    displacement.x = 0.0f;
                     displacement.y = 0.0f;
+                    displacement.x = 0.0f;
                     displacement.z = offset;
                     const i32 angle =
                         static_cast<i32>(static_cast<u32>(static_cast<u16>(buildit.field_0x5c)) << 16) / 360;
@@ -1263,8 +1263,8 @@ static i32 GizBuildIts_Load(void *world_ptr, void *data) {
                 for (i32 linked_index = 0; linked_index < static_cast<GIZBUILDITSYS_s *>(data)->count; ++linked_index) {
                     if (NuStrICmp(static_cast<GIZBUILDITSYS_s *>(data)->buildits[linked_index].name, linked_name) ==
                         0) {
-                        buildit->availability_flags |= GIZBUILDIT_AVAILABILITY_LINKED;
                         buildit->linked_buildit = &static_cast<GIZBUILDITSYS_s *>(data)->buildits[linked_index];
+                        buildit->availability_flags |= GIZBUILDIT_AVAILABILITY_LINKED;
                         break;
                     }
                 }
@@ -1301,13 +1301,13 @@ static void GizBuildIts_Reset(void *world_ptr, void *data, void *progress_ptr) {
             const u32 bit = 1u << (index & 31);
             buildit.build_state =
                 (progress->completed[word] & bit) != 0 ? GIZBUILDIT_BUILD_COMPLETE : GIZBUILDIT_BUILD_IDLE;
+            buildit.field_0x83 = static_cast<u8>(
+                (buildit.field_0x83 & ~GIZBUILDIT_RUNTIME_REWARD_RELEASED) |
+                ((progress->reward_released[word] & bit) != 0 ? GIZBUILDIT_RUNTIME_REWARD_RELEASED : 0));
             buildit.availability_flags =
                 static_cast<u8>((buildit.availability_flags & ~GIZBUILDIT_AVAILABILITY_LINKED) |
                                 ((progress->active[word] & bit) != 0 ? GIZBUILDIT_AVAILABILITY_ACTIVE : 0) |
                                 ((progress->visible[word] & bit) != 0 ? GIZBUILDIT_AVAILABILITY_VISIBLE : 0));
-            buildit.field_0x83 = static_cast<u8>(
-                (buildit.field_0x83 & ~GIZBUILDIT_RUNTIME_REWARD_RELEASED) |
-                ((progress->reward_released[word] & bit) != 0 ? GIZBUILDIT_RUNTIME_REWARD_RELEASED : 0));
             buildit.built_object_count = progress->built_object_count[index];
         }
     }

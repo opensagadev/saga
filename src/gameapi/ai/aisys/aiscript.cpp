@@ -1425,30 +1425,6 @@ i32 AIScriptSetStateByName(AISCRIPTPROCESS *processor, char *name) {
     return 0;
 }
 
-i32 AIScriptSetBaseScriptStateByName(AISCRIPTPROCESS *processor, char *name) {
-    AISTATE *state;
-
-    if (name != NULL && processor != NULL && processor->script != NULL) {
-        state = AIStateFind(name, processor->base_script);
-
-        if (state != NULL) {
-            if (processor->script == processor->base_script) {
-                AIScriptSetState(processor, state);
-
-                return 1;
-            }
-
-            AIScriptProcessorInit(NULL, NULL, processor, NULL, NULL, NULL, 0, processor->base_script, state);
-
-            processor->active_ref_count = 0;
-
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
 void RegisterAIScriptActions(AIACTIONDEF *action_defs) {
     AIACTIONDEF *def;
     i16 i;
@@ -1474,6 +1450,30 @@ void RegisterAIScriptActions(AIACTIONDEF *action_defs) {
         def++;
         i++;
     }
+}
+
+i32 AIScriptSetBaseScriptStateByName(AISCRIPTPROCESS *processor, char *name) {
+    AISTATE *state;
+
+    if (name != NULL && processor != NULL && processor->script != NULL) {
+        state = AIStateFind(name, processor->base_script);
+
+        if (state != NULL) {
+            if (processor->script == processor->base_script) {
+                AIScriptSetState(processor, state);
+
+                return 1;
+            }
+
+            AIScriptProcessorInit(NULL, NULL, processor, NULL, NULL, NULL, 0, processor->base_script, state);
+
+            processor->active_ref_count = 0;
+
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 void RegisterAIScriptConditions(AICONDITIONDEF *cond_defs) {

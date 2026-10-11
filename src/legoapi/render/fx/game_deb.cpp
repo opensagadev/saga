@@ -242,8 +242,8 @@ uv1deb *GenDebIndexBounceY(debkeydatatype_s *key, debinftype *effect, float time
                 control->expiry_time = time + collision_time;
                 control->effect_index = key->effect_index;
                 control->rotation_y = 0;
-                control->field_01e = 0;
                 control->collision_plane = key->collision_plane;
+                control->field_01e = 0;
                 control->restitution = key->reflection_scale;
                 control->collision_time = collision_time;
                 control->particle_index = key->field_18a % 32;

@@ -1917,6 +1917,15 @@ GAMEPAD_s *ViewCamGetGamePad() {
     return ViewCam.gamepad;
 }
 
+void CentreTwoPlayerCamera(nuvec_s *center, nuvec_s *player_a, nuvec_s *player_b, nuvec_s *reference) {
+    const f32 distance_a = NuVecDist(reference, player_a, NULL);
+    const f32 distance_b = NuVecDist(reference, player_b, NULL);
+    const f32 blend = distance_a / (distance_a + distance_b);
+    center->x = player_a->x + (player_b->x - player_a->x) * blend;
+    center->y = player_a->y + (player_b->y - player_a->y) * blend;
+    center->z = player_a->z + (player_b->z - player_a->z) * blend;
+}
+
 // Original: 784 bytes.
 void KeepVehicleOnScreen(GameObject_s *object, i32 sides, i32 top, i32 bottom) {
     object->field_0xf03 |= 0x10;
@@ -1962,15 +1971,6 @@ void KeepVehicleOnScreen(GameObject_s *object, i32 sides, i32 top, i32 bottom) {
             object->target_velocity.y += (speed + speed) * (correction + correction);
         }
     }
-}
-
-void CentreTwoPlayerCamera(nuvec_s *center, nuvec_s *player_a, nuvec_s *player_b, nuvec_s *reference) {
-    const f32 distance_a = NuVecDist(reference, player_a, NULL);
-    const f32 distance_b = NuVecDist(reference, player_b, NULL);
-    const f32 blend = distance_a / (distance_a + distance_b);
-    center->x = player_a->x + (player_b->x - player_a->x) * blend;
-    center->y = player_a->y + (player_b->y - player_a->y) * blend;
-    center->z = player_a->z + (player_b->z - player_a->z) * blend;
 }
 
 void do_Pad_flymode_camera(edcam_s *camera, float delta_time, nupad_s *pad) {

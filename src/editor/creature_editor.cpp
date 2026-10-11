@@ -623,28 +623,6 @@ static __used__ void creatureEditor_cbSelectScript(eduimenu_s *parent, eduiitem_
     }
 }
 
-static __used__ void creatureEditor_cbSelectType(eduimenu_s *parent, eduiitem_s *, unsigned int) {
-    if (LevelCharacterGlobalIDFn == nullptr || GlobalCharacterNameFn == nullptr)
-        return;
-    eduimenu_s *menu = eduiMenuCreate(220, 70, 240, 250, ed_fnt, creatureEditor_cbCancelMenu, "Select AI Type");
-    if (menu == nullptr)
-        return;
-    i32 index = 0;
-    i32 type = LevelCharacterGlobalIDFn(0);
-    while (type != -1) {
-        if (aieditorsettings.current_path_type == type) {
-            eduiMenuAddItem(
-                menu, eduiItemCheckCreate(type, attr, 1, 1, creatureEditor_cbSetType, GlobalCharacterNameFn(type)));
-            menu->selected = edui_last_item;
-        } else {
-            eduiMenuAddItem(
-                menu, eduiItemCheckCreate(type, attr, 0, 1, creatureEditor_cbSetType, GlobalCharacterNameFn(type)));
-        }
-        eduiMenuAttach(parent, menu);
-        type = LevelCharacterGlobalIDFn(static_cast<u8>(++index));
-    }
-}
-
 static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbSetScript(eduimenu_s *, eduiitem_s *item,
                                                                                          unsigned int) {
     if (item == nullptr || creatureEditor_Current() == nullptr)
@@ -680,6 +658,32 @@ static __used__ void creatureEditor_cbSetScriptParam(eduimenu_s *menu, eduiitem_
         reset_params_option =
             eduiMenuAddItem(menu, eduiItemToggleCreate(1, attr, 1, 1, creatureEditor_cbResetParams, "Reset Params"));
     }
+}
+
+static __used__ void creatureEditor_cbSelectType(eduimenu_s *parent, eduiitem_s *, unsigned int) {
+    if (LevelCharacterGlobalIDFn == nullptr || GlobalCharacterNameFn == nullptr)
+        return;
+    eduimenu_s *menu = eduiMenuCreate(220, 70, 240, 250, ed_fnt, creatureEditor_cbCancelMenu, "Select AI Type");
+    if (menu == nullptr)
+        return;
+    i32 index = 0;
+    i32 type = LevelCharacterGlobalIDFn(0);
+    while (type != -1) {
+        if (aieditorsettings.current_path_type == type) {
+            eduiMenuAddItem(
+                menu, eduiItemCheckCreate(type, attr, 1, 1, creatureEditor_cbSetType, GlobalCharacterNameFn(type)));
+            menu->selected = edui_last_item;
+        } else {
+            eduiMenuAddItem(
+                menu, eduiItemCheckCreate(type, attr, 0, 1, creatureEditor_cbSetType, GlobalCharacterNameFn(type)));
+        }
+        eduiMenuAttach(parent, menu);
+        type = LevelCharacterGlobalIDFn(static_cast<u8>(++index));
+    }
+}
+
+static __used__ void creatureEditor_cbSetActivation(eduimenu_s *, eduiitem_s *item, unsigned int) {
+    creatureEditor_Current()->activation = item->data;
 }
 
 static __used__ void creatureEditor_cbSetType(eduimenu_s *, eduiitem_s *item, unsigned int) {
@@ -722,10 +726,6 @@ static __used__ void creatureEditor_cbSetType(eduimenu_s *, eduiitem_s *item, un
     }
 }
 
-static __used__ void creatureEditor_cbSetActivation(eduimenu_s *, eduiitem_s *item, unsigned int) {
-    creatureEditor_Current()->activation = item->data;
-}
-
 static __used__ void creatureEditor_cbSetAreaActivation(eduimenu_s *, eduiitem_s *item, unsigned int) {
     if (item == nullptr || creatureEditor_Current() == nullptr)
         return;
@@ -734,32 +734,6 @@ static __used__ void creatureEditor_cbSetAreaActivation(eduimenu_s *, eduiitem_s
         CreatureEditorRecord *creature = creatureEditor_Current();
         creature->activation_area = area;
         creature->activation = 1;
-    }
-}
-
-static __used__ void creatureEditor_cbSelectLocator(eduimenu_s *parent, eduiitem_s *, unsigned int) {
-    eduimenu_s *menu = eduiMenuCreate(220, 70, 240, 250, ed_fnt, creatureEditor_cbCancelMenu, "Select Locator");
-    if (menu == nullptr)
-        return;
-    CreatureEditorRecord *creature = creatureEditor_Current();
-    eduiMenuAddItem(
-        menu, eduiItemCheckCreate(-1, attr, creature->locator == nullptr, 1, creatureEditor_cbSetLocator, "NONE"));
-    i32 index = 0;
-    for (NULISTLNK *link = NuLinkedListGetHead(creatureEditor_LocatorList()); link != nullptr;
-         link = NuLinkedListGetNext(creatureEditor_LocatorList(), link)) {
-        EDLOCATOR_s *locator = reinterpret_cast<EDLOCATOR_s *>(link);
-        void *locator_path = *reinterpret_cast<void **>(reinterpret_cast<u8 *>(locator) + 0x2c);
-        CreatureEditorRecord *current = creatureEditor_Current();
-        if (locator_path != current->path)
-            continue;
-        if (current->locator == locator) {
-            eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 1, 1, creatureEditor_cbSetLocator, locator->name));
-            menu->selected = edui_last_item;
-        } else {
-            eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 0, 1, creatureEditor_cbSetLocator, locator->name));
-        }
-        eduiMenuAttach(parent, menu);
-        ++index;
     }
 }
 
@@ -811,19 +785,30 @@ static __used__ void creatureEditor_cbSelectRespawnLocator(eduimenu_s *parent, e
     }
 }
 
-static __used__ void creatureEditor_cbSetRespawnLocator(eduimenu_s *, eduiitem_s *item, unsigned int) {
-    if (item == nullptr)
+static __used__ void creatureEditor_cbSelectLocator(eduimenu_s *parent, eduiitem_s *, unsigned int) {
+    eduimenu_s *menu = eduiMenuCreate(220, 70, 240, 250, ed_fnt, creatureEditor_cbCancelMenu, "Select Locator");
+    if (menu == nullptr)
         return;
     CreatureEditorRecord *creature = creatureEditor_Current();
-    if (creature == nullptr)
-        return;
-    if (item->data == -1) {
-        creature->locator = nullptr;
-        return;
+    eduiMenuAddItem(
+        menu, eduiItemCheckCreate(-1, attr, creature->locator == nullptr, 1, creatureEditor_cbSetLocator, "NONE"));
+    i32 index = 0;
+    for (NULISTLNK *link = NuLinkedListGetHead(creatureEditor_LocatorList()); link != nullptr;
+         link = NuLinkedListGetNext(creatureEditor_LocatorList(), link)) {
+        EDLOCATOR_s *locator = reinterpret_cast<EDLOCATOR_s *>(link);
+        void *locator_path = *reinterpret_cast<void **>(reinterpret_cast<u8 *>(locator) + 0x2c);
+        CreatureEditorRecord *current = creatureEditor_Current();
+        if (locator_path != current->path)
+            continue;
+        if (current->locator == locator) {
+            eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 1, 1, creatureEditor_cbSetLocator, locator->name));
+            menu->selected = edui_last_item;
+        } else {
+            eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 0, 1, creatureEditor_cbSetLocator, locator->name));
+        }
+        eduiMenuAttach(parent, menu);
+        ++index;
     }
-    NULISTLNK *locator = creatureEditor_ListItem(creatureEditor_LocatorList(), item->data);
-    if (locator != nullptr)
-        creatureEditor_Current()->respawn_locator = locator;
 }
 
 static __used__ void creatureEditor_cbSelectTriggerArea(eduimenu_s *parent, eduiitem_s *, unsigned int) {
@@ -854,6 +839,27 @@ static __used__ void creatureEditor_cbSelectTriggerArea(eduimenu_s *parent, edui
     }
 }
 
+static __used__ void creatureEditor_cbSetRespawnLocator(eduimenu_s *, eduiitem_s *item, unsigned int) {
+    if (item == nullptr)
+        return;
+    CreatureEditorRecord *creature = creatureEditor_Current();
+    if (creature == nullptr)
+        return;
+    if (item->data == -1) {
+        creature->locator = nullptr;
+        return;
+    }
+    NULISTLNK *locator = creatureEditor_ListItem(creatureEditor_LocatorList(), item->data);
+    if (locator != nullptr)
+        creatureEditor_Current()->respawn_locator = locator;
+}
+
+static __used__ void creatureEditor_cb_assigntoset(eduimenu_s *, eduiitem_s *item, unsigned int) {
+    CreatureEditorRecord *creature = creatureEditor_Current();
+    if (creature != nullptr)
+        creature->set = static_cast<i32>(reinterpret_cast<edui_slider_s *>(item)->value);
+}
+
 static __used__ void creatureEditor_cbSetTriggerArea(eduimenu_s *, eduiitem_s *item, unsigned int) {
     if (item == nullptr)
         return;
@@ -867,12 +873,6 @@ static __used__ void creatureEditor_cbSetTriggerArea(eduimenu_s *, eduiitem_s *i
     NULISTLNK *area = creatureEditor_ListItem(creatureEditor_AreaList(), item->data);
     if (area != nullptr)
         creatureEditor_Current()->trigger_area = area;
-}
-
-static __used__ void creatureEditor_cb_assigntoset(eduimenu_s *, eduiitem_s *item, unsigned int) {
-    CreatureEditorRecord *creature = creatureEditor_Current();
-    if (creature != nullptr)
-        creature->set = static_cast<i32>(reinterpret_cast<edui_slider_s *>(item)->value);
 }
 
 static __used__ void creatureEditor_cb_ngroup(eduimenu_s *, eduiitem_s *item, unsigned int) {

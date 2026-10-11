@@ -180,6 +180,49 @@ i32 Customiser_NextPieceRight(CUSTOMISER *customiser, i32 index, i32 count, i32 
     return index;
 }
 
+void Customiser_DrawAccessories(CUSTOMISER *customiser, GameObject_s *object, numtx_s *matrices) {
+    NUMTX_ALIGNED16 reflection;
+    NUMTX_ALIGNED16 matrix;
+    const i32 joint = object->apiobj.character_data->player_config->helmet_locator;
+    if (customiser == NULL || joint == -1 || object->apiobj.character_model->points_of_interest[joint] == NULL)
+        return;
+
+    const i32 side = object->id != customiser->character_ids[0];
+    i32 next_category = 0;
+    CUSTOMPIECERESOURCE *next_resource = Accessory[side];
+    do {
+        CUSTOMPIECERESOURCE *resource = next_resource++;
+        const i32 category = next_category++;
+        if (customiser->piece_counts[category] <= 0 || category == 2)
+            continue;
+        if (category == 0) {
+            const u16 *pieces = customiser->save[side].pieces;
+            if ((customiser->piece_sets[0][static_cast<u16>(pieces[0])].layer_flags & 0x20) != 0 ||
+                (customiser->piece_sets[1][static_cast<u16>(pieces[1])].layer_flags & 1) != 0 ||
+                object->field_0x108e != 0)
+                continue;
+        }
+
+        nuhspecial_s *special = &resource->special;
+        if (!NuSpecialExistsFn(special))
+            continue;
+
+        // Retail keeps both draw matrices on a 16-byte-aligned stack.
+
+        if (matrices != NULL)
+            matrix = matrices[joint];
+        else
+            matrix = object->joint_matrices[joint];
+        NuSpecialDrawAt(special, &matrix);
+        if (object->field_0x1088 != 0 && MatrixReflection(&matrix, object->field_0x1087, object->field_0x1020,
+                                                          WORLD->current_level->unknown_0cc, &reflection)) {
+            NuRndrStartReflectionRender(0);
+            NuSpecialDrawAt(special, &reflection);
+            NuRndrEndReflectionRender();
+        }
+    } while (next_category != 9);
+}
+
 void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s *models) {
     if (customiser == NULL) {
         return;
@@ -247,49 +290,6 @@ void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s 
             }
         }
     }
-}
-
-void Customiser_DrawAccessories(CUSTOMISER *customiser, GameObject_s *object, numtx_s *matrices) {
-    NUMTX_ALIGNED16 reflection;
-    NUMTX_ALIGNED16 matrix;
-    const i32 joint = object->apiobj.character_data->player_config->helmet_locator;
-    if (customiser == NULL || joint == -1 || object->apiobj.character_model->points_of_interest[joint] == NULL)
-        return;
-
-    const i32 side = object->id != customiser->character_ids[0];
-    i32 next_category = 0;
-    CUSTOMPIECERESOURCE *next_resource = Accessory[side];
-    do {
-        CUSTOMPIECERESOURCE *resource = next_resource++;
-        const i32 category = next_category++;
-        if (customiser->piece_counts[category] <= 0 || category == 2)
-            continue;
-        if (category == 0) {
-            const u16 *pieces = customiser->save[side].pieces;
-            if ((customiser->piece_sets[0][static_cast<u16>(pieces[0])].layer_flags & 0x20) != 0 ||
-                (customiser->piece_sets[1][static_cast<u16>(pieces[1])].layer_flags & 1) != 0 ||
-                object->field_0x108e != 0)
-                continue;
-        }
-
-        nuhspecial_s *special = &resource->special;
-        if (!NuSpecialExistsFn(special))
-            continue;
-
-        // Retail keeps both draw matrices on a 16-byte-aligned stack.
-
-        if (matrices != NULL)
-            matrix = matrices[joint];
-        else
-            matrix = object->joint_matrices[joint];
-        NuSpecialDrawAt(special, &matrix);
-        if (object->field_0x1088 != 0 && MatrixReflection(&matrix, object->field_0x1087, object->field_0x1020,
-                                                          WORLD->current_level->unknown_0cc, &reflection)) {
-            NuRndrStartReflectionRender(0);
-            NuSpecialDrawAt(special, &reflection);
-            NuRndrEndReflectionRender();
-        }
-    } while (next_category != 9);
 }
 
 void Customiser_AddPartAccessories(CUSTOMISER *customiser, GameObject_s *object, i32 animation, i32 mode, float scale) {
@@ -381,6 +381,33 @@ void Customiser_DumpAccessories(CUSTOMISER *customiser) {
         Customiser_DumpAccessory(customiser, 1, 6);
         Customiser_DumpAccessory(customiser, 1, 7);
         Customiser_DumpAccessory(customiser, 1, 8);
+    }
+}
+
+void Customiser_DumpAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
+    if (customiser == NULL) {
+        return;
+    }
+    for (i32 category = 0; category < 9; ++category) {
+        CUSTOMPIECERESOURCE *resources = world->customiser_resources[category];
+        if (resources == NULL) {
+            continue;
+        }
+        for (i32 piece = 0; piece < customiser->piece_counts[category]; ++piece) {
+            CUSTOMPIECERESOURCE *resource = &resources[piece];
+            if (resource->scene != NULL) {
+                if (resource->scene != world->customiser_shared_scenes[category]) {
+                    NuGScnRemove(resource->scene);
+                }
+                resource->scene = NULL;
+            } else if (resource->texture_id != 0) {
+                NuTexDestroy(resource->texture_id);
+            }
+        }
+        if (world->customiser_shared_scenes[category] != NULL) {
+            NuGScnRemove(world->customiser_shared_scenes[category]);
+            world->customiser_shared_scenes[category] = NULL;
+        }
     }
 }
 
@@ -488,33 +515,6 @@ void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
     }
 }
 
-void Customiser_DumpAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
-    if (customiser == NULL) {
-        return;
-    }
-    for (i32 category = 0; category < 9; ++category) {
-        CUSTOMPIECERESOURCE *resources = world->customiser_resources[category];
-        if (resources == NULL) {
-            continue;
-        }
-        for (i32 piece = 0; piece < customiser->piece_counts[category]; ++piece) {
-            CUSTOMPIECERESOURCE *resource = &resources[piece];
-            if (resource->scene != NULL) {
-                if (resource->scene != world->customiser_shared_scenes[category]) {
-                    NuGScnRemove(resource->scene);
-                }
-                resource->scene = NULL;
-            } else if (resource->texture_id != 0) {
-                NuTexDestroy(resource->texture_id);
-            }
-        }
-        if (world->customiser_shared_scenes[category] != NULL) {
-            NuGScnRemove(world->customiser_shared_scenes[category]);
-            world->customiser_shared_scenes[category] = NULL;
-        }
-    }
-}
-
 void Customiser_ResetModelTextureIDs(CUSTOMISER *customiser) {
     if (customiser == NULL) {
         return;
@@ -540,26 +540,6 @@ void Customiser_ResetModelTextureIDs(CUSTOMISER *customiser) {
     customiser->model_texture_ids[17] = 0;
 }
 
-void Customiser_SaveModelTextureIDs(CUSTOMISER *customiser, CHARACTERMODEL_s *model) {
-    if (model == NULL || customiser == NULL) {
-        return;
-    }
-    for (i32 character = 0; character < 2; ++character) {
-        if (customiser->character_ids[character] != model->model_id) {
-            continue;
-        }
-        nuhgobj_s *hierarchy = model->hierarchy;
-        for (i32 category = 0; category < 9; ++category) {
-            for (i32 material = 0; material < hierarchy->material_count; ++material) {
-                NUMTL *entry = hierarchy->materials[material];
-                if (entry->unknown_9a[0] == customiser->categories[category]->material_tag) {
-                    customiser->model_texture_ids[character * 9 + category] = entry->tex_id;
-                }
-            }
-        }
-    }
-}
-
 void Customiser_RestoreModelTextureIDs(CUSTOMISER *customiser) {
     if (customiser == NULL)
         return;
@@ -575,6 +555,26 @@ void Customiser_RestoreModelTextureIDs(CUSTOMISER *customiser) {
                 if (entry->unknown_9a[0] == customiser->categories[category]->material_tag) {
                     entry->tex_id = customiser->model_texture_ids[character * 9 + category];
                     NuMtlUpdate(entry);
+                }
+            }
+        }
+    }
+}
+
+void Customiser_SaveModelTextureIDs(CUSTOMISER *customiser, CHARACTERMODEL_s *model) {
+    if (model == NULL || customiser == NULL) {
+        return;
+    }
+    for (i32 character = 0; character < 2; ++character) {
+        if (customiser->character_ids[character] != model->model_id) {
+            continue;
+        }
+        nuhgobj_s *hierarchy = model->hierarchy;
+        for (i32 category = 0; category < 9; ++category) {
+            for (i32 material = 0; material < hierarchy->material_count; ++material) {
+                NUMTL *entry = hierarchy->materials[material];
+                if (entry->unknown_9a[0] == customiser->categories[category]->material_tag) {
+                    customiser->model_texture_ids[character * 9 + category] = entry->tex_id;
                 }
             }
         }

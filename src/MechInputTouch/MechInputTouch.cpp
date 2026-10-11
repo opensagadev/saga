@@ -848,14 +848,6 @@ void MechInputTouchSystem::ProcessEvenWhenPaused(ThingProcessData *data) {
     }
 }
 
-void MechInputTouchSystem::ResetAllOwners() {
-    for (i32 index = 0; index < 10; ++index) {
-        if (locked_buttons[index] != NULL) {
-            locked_buttons[index]->Reset();
-        }
-    }
-}
-
 void MechInputTouchSystem::SetTouchLockedBy(u32 touch_id, MechInputTouchButton *button, bool) {
     for (i32 index = 0; index < 10; ++index) {
         if (locked_touch_ids[index] == touch_id) {
@@ -881,6 +873,14 @@ void MechInputTouchSystem::SetTouchLockedBy(u32 touch_id, MechInputTouchButton *
                 locked_buttons[index] = button;
                 return;
             }
+        }
+    }
+}
+
+void MechInputTouchSystem::ResetAllOwners() {
+    for (i32 index = 0; index < 10; ++index) {
+        if (locked_buttons[index] != NULL) {
+            locked_buttons[index]->Reset();
         }
     }
 }

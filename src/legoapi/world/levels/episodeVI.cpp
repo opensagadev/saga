@@ -711,6 +711,73 @@ void SarlaccPitC_Init(WORLDINFO_s *) {
     target_shield[1] = 0;
 }
 
+void SarlaccPitC_Update(WORLDINFO_s *world) {
+    if (LevGameObject[0] != NULL && gizmoblowuptargetcount == 4) {
+        if (LevGameObject[0]->field_0xcc0 != NULL) {
+            world->field_50d0 = 4;
+            world->blowup_target_candidates = gizmoblowuptarget;
+            if (taken_over == 0)
+                taken_over = 1;
+        } else if (taken_over != 0) {
+            taken_over = 0;
+            world->field_50d0 = 0;
+            world->blowup_target_candidates = NULL;
+        }
+
+        if (power == 0) {
+            if ((LevGameObject[0]->field_0xef8 & 8) != 0)
+                LevGameObject[0]->field_0xef8 &= ~8;
+        } else if (static_cast<i8>(LevGameObject[0]->quick_shoot_bolt_id) >= 0) {
+            --power;
+            NuSpecialSetVisibility(&LevHSpecial[power], 1);
+            NuSpecialSetVisibility(&LevHSpecial[power + 8], 0);
+            GIZPANEL_s *panel = static_cast<GIZPANEL_s *>(LevGizmo[0]->object);
+            if (panel->state)
+                panel->state = 0;
+        }
+
+        if (recharging == 0) {
+            if (static_cast<u32>(power) <= 7 && LevGizmo[0] != NULL &&
+                GizmoGetOutput(world->gizmo_sys, LevGizmo[0], 0, 0) != 0) {
+                recharging = 1;
+                rechargetimer = 0.0f;
+            }
+        } else {
+            rechargetimer -= FRAMETIME;
+            if (rechargetimer <= 0.0f) {
+                LevGameObject[0]->field_0xef8 |= 8;
+                NuSpecialSetVisibility(&LevHSpecial[power], 0);
+                NuSpecialSetVisibility(&LevHSpecial[power + 8], 1);
+                PlaySfx("imp_c3po_magnet_drop", NuSpecialGetDrawPos(&LevHSpecial[power + 8]));
+                ++power;
+                if (power == 8) {
+                    recharging = 0;
+                    PlaySfx("env_magnet_on", NuSpecialGetDrawPos(&LevHSpecial[power + 8]));
+                } else {
+                    rechargetimer = 0.25f;
+                }
+            }
+        }
+    }
+
+    if (target_shield[0] == 0) {
+        if (gizmoblowuptarget[0] != NULL && (gizmoblowuptarget[0]->visibility_flags & 0x40) == 0) {
+            PlaySfx("ffieldoff", NuSpecialGetDrawPos(&LevHSpecial[16]));
+            target_shield[0] = 1;
+        } else {
+            PlaySfx("ffield", NuSpecialGetDrawPos(&LevHSpecial[16]));
+        }
+    }
+    if (target_shield[1] == 0) {
+        if (gizmoblowuptarget[1] != NULL && (gizmoblowuptarget[1]->visibility_flags & 0x40) == 0) {
+            PlaySfx("ffieldoff", NuSpecialGetDrawPos(&LevHSpecial[17]));
+            target_shield[1] = 1;
+        } else {
+            PlaySfx("ffield", NuSpecialGetDrawPos(&LevHSpecial[17]));
+        }
+    }
+}
+
 void SarlaccPitC_Reset(WORLDINFO_s *world) {
     char name[32];
     taken_over = 0;
@@ -790,73 +857,6 @@ void SarlaccPitC_Reset(WORLDINFO_s *world) {
     RESET_SHOT(6, 6);
     RESET_SHOT(7, 7);
 #undef RESET_SHOT
-}
-
-void SarlaccPitC_Update(WORLDINFO_s *world) {
-    if (LevGameObject[0] != NULL && gizmoblowuptargetcount == 4) {
-        if (LevGameObject[0]->field_0xcc0 != NULL) {
-            world->field_50d0 = 4;
-            world->blowup_target_candidates = gizmoblowuptarget;
-            if (taken_over == 0)
-                taken_over = 1;
-        } else if (taken_over != 0) {
-            taken_over = 0;
-            world->field_50d0 = 0;
-            world->blowup_target_candidates = NULL;
-        }
-
-        if (power == 0) {
-            if ((LevGameObject[0]->field_0xef8 & 8) != 0)
-                LevGameObject[0]->field_0xef8 &= ~8;
-        } else if (static_cast<i8>(LevGameObject[0]->quick_shoot_bolt_id) >= 0) {
-            --power;
-            NuSpecialSetVisibility(&LevHSpecial[power], 1);
-            NuSpecialSetVisibility(&LevHSpecial[power + 8], 0);
-            GIZPANEL_s *panel = static_cast<GIZPANEL_s *>(LevGizmo[0]->object);
-            if (panel->state)
-                panel->state = 0;
-        }
-
-        if (recharging == 0) {
-            if (static_cast<u32>(power) <= 7 && LevGizmo[0] != NULL &&
-                GizmoGetOutput(world->gizmo_sys, LevGizmo[0], 0, 0) != 0) {
-                recharging = 1;
-                rechargetimer = 0.0f;
-            }
-        } else {
-            rechargetimer -= FRAMETIME;
-            if (rechargetimer <= 0.0f) {
-                LevGameObject[0]->field_0xef8 |= 8;
-                NuSpecialSetVisibility(&LevHSpecial[power], 0);
-                NuSpecialSetVisibility(&LevHSpecial[power + 8], 1);
-                PlaySfx("imp_c3po_magnet_drop", NuSpecialGetDrawPos(&LevHSpecial[power + 8]));
-                ++power;
-                if (power == 8) {
-                    recharging = 0;
-                    PlaySfx("env_magnet_on", NuSpecialGetDrawPos(&LevHSpecial[power + 8]));
-                } else {
-                    rechargetimer = 0.25f;
-                }
-            }
-        }
-    }
-
-    if (target_shield[0] == 0) {
-        if (gizmoblowuptarget[0] != NULL && (gizmoblowuptarget[0]->visibility_flags & 0x40) == 0) {
-            PlaySfx("ffieldoff", NuSpecialGetDrawPos(&LevHSpecial[16]));
-            target_shield[0] = 1;
-        } else {
-            PlaySfx("ffield", NuSpecialGetDrawPos(&LevHSpecial[16]));
-        }
-    }
-    if (target_shield[1] == 0) {
-        if (gizmoblowuptarget[1] != NULL && (gizmoblowuptarget[1]->visibility_flags & 0x40) == 0) {
-            PlaySfx("ffieldoff", NuSpecialGetDrawPos(&LevHSpecial[17]));
-            target_shield[1] = 1;
-        } else {
-            PlaySfx("ffield", NuSpecialGetDrawPos(&LevHSpecial[17]));
-        }
-    }
 }
 
 i32 SarlaccPitDiscoActive(WORLDINFO_s *world) {

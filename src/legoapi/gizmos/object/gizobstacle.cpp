@@ -1086,21 +1086,6 @@ void GizObstacle_JumpToEnd(GIZOBSTACLE_s *obstacle) {
     }
 }
 
-GIZOBSTACLE_s *GizObstacle_FindByName(GIZOBSTACLESYS_s *system, char *name) {
-    if (system == NULL || name == NULL) {
-        return NULL;
-    }
-
-    for (i32 index = 0; index < system->count; ++index) {
-        GIZOBSTACLE_s *obstacle = &system->obstacles[index];
-        if (NuStrICmp(obstacle->name, name) == 0) {
-            return obstacle;
-        }
-    }
-
-    return NULL;
-}
-
 GIZOBSTACLE_s *GizObstacle_FindNearest(GIZOBSTACLESYS_s *system, NUVEC *position, GameObject_s *object,
                                        f32 *distance_squared, i32 mode) {
     if (system == NULL)
@@ -1133,6 +1118,21 @@ GIZOBSTACLE_s *GizObstacle_FindNearest(GIZOBSTACLESYS_s *system, NUVEC *position
     if (distance_squared != NULL)
         *distance_squared = best;
     return nearest;
+}
+
+GIZOBSTACLE_s *GizObstacle_FindByName(GIZOBSTACLESYS_s *system, char *name) {
+    if (system == NULL || name == NULL) {
+        return NULL;
+    }
+
+    for (i32 index = 0; index < system->count; ++index) {
+        GIZOBSTACLE_s *obstacle = &system->obstacles[index];
+        if (NuStrICmp(obstacle->name, name) == 0) {
+            return obstacle;
+        }
+    }
+
+    return NULL;
 }
 
 void GizObstacle_JumpToStart(GIZOBSTACLE_s *obstacle) {

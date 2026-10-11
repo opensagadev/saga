@@ -94,20 +94,6 @@ static __used__ void locatorEditor_cbDeleteLocator(eduimenu_s *, eduiitem_s *ite
     }
     aieditor_ClearMainMenu();
 }
-static __used__ void locatorEditor_cbRenameLocator(eduimenu_s *, eduiitem_s *item, u32) {
-    char *name = ((edui_textpicker_s *)item)->value;
-    if (aieditor->current_locator == nullptr || name[0] == 0) {
-        return;
-    }
-    EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
-    while (locator != nullptr) {
-        if (NuStrICmp(locator->name, name) == 0) {
-            return;
-        }
-        locator = (EDLOCATOR_s *)NuLinkedListGetNext(&aieditor->locators, &locator->link);
-    }
-    strcpy(aieditor->current_locator->name, name);
-}
 static __used__ void locatorEditor_cbSetLocatorSet(eduimenu_s *, eduiitem_s *item, u32) {
     if (item != nullptr) {
         if (item->data != 0) {
@@ -128,6 +114,20 @@ static __used__ void locatorEditor_cbSetLocatorSet(eduimenu_s *, eduiitem_s *ite
         }
     }
     aieditor_ClearMainMenu();
+}
+static __used__ void locatorEditor_cbRenameLocator(eduimenu_s *, eduiitem_s *item, u32) {
+    char *name = ((edui_textpicker_s *)item)->value;
+    if (aieditor->current_locator == nullptr || name[0] == 0) {
+        return;
+    }
+    EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
+    while (locator != nullptr) {
+        if (NuStrICmp(locator->name, name) == 0) {
+            return;
+        }
+        locator = (EDLOCATOR_s *)NuLinkedListGetNext(&aieditor->locators, &locator->link);
+    }
+    strcpy(aieditor->current_locator->name, name);
 }
 static __used__ void locatorEditor_cbEmptyLocatorSet(eduimenu_s *parent, eduiitem_s *item, u32) {
     if (item == nullptr) {

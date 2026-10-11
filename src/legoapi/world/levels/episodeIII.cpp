@@ -167,6 +167,15 @@ void CruiserCReset(WORLDINFO_s *) {
     cruiser_c.palpatine_locator = NULL;
 }
 
+void CruiserCPanel(WORLDINFO_s *) {
+    if (netclient == 0) {
+        if (cruiser_c.count_dooku != NULL && cruiser_c.dooku_fight != NULL && cruiser_c.dooku_fight->value == 1.0f)
+            DrawBossHitPoints(cruiser_c.count_dooku);
+        else
+            DrawBossHitPoints(NULL);
+    }
+}
+
 void CruiserCUpdate(WORLDINFO_s *) {
     if (cruiser_c.free_palpatine == NULL)
         cruiser_c.free_palpatine = CheckGizAIMessage(gizaimessagesys, "FreePalpatine", NULL);
@@ -186,15 +195,6 @@ void CruiserCUpdate(WORLDINFO_s *) {
         cruiser_c.free_palpatine != NULL && cruiser_c.free_palpatine->value < 2.0f) {
         cruiser_c.palpatine->apiobj.position = cruiser_c.palpatine_locator->position;
         cruiser_c.palpatine->apiobj.field_0x276 = cruiser_c.palpatine_locator->direction;
-    }
-}
-
-void CruiserCPanel(WORLDINFO_s *) {
-    if (netclient == 0) {
-        if (cruiser_c.count_dooku != NULL && cruiser_c.dooku_fight != NULL && cruiser_c.dooku_fight->value == 1.0f)
-            DrawBossHitPoints(cruiser_c.count_dooku);
-        else
-            DrawBossHitPoints(NULL);
     }
 }
 
@@ -230,34 +230,6 @@ void CruiserDInit(WORLDINFO_s *world) {
     FIND_CRUISER_D_TUBE(9);
     FIND_CRUISER_D_TUBE(10);
 #undef FIND_CRUISER_D_TUBE
-}
-
-void CruiserDReset(WORLDINFO_s *) {
-    CruiserD_LiftChase_msg = CheckGizAIMessage(gizaimessagesys, "LiftChase", NULL);
-    MiscTime = 0.0f;
-
-    if (NuSpecialExistsFn(&CruiserD_Lift) != 0 && CruiserD_LiftAnim != NULL) {
-        if ((*(u8 *)((u8 *)LevelProgressData + CruiserE_ix * 0x2e24 + 0x2800) & 1) != 0) {
-            if (CruiserD_direction < 0) {
-                CruiserD_LiftAnim->ltime = CruiserD_frame;
-                CruiserD_LiftAnim->playing = 1;
-                CruiserD_LiftAnim->tfactor = -0.1f;
-            } else {
-                f32 end_frame = *(f32 *)CruiserD_Lift.scene->instance_animation_data[CruiserD_LiftAnim->anim_ix];
-                CruiserD_LiftAnim->playing = 0;
-                CruiserD_LiftAnim->tfactor = 0.1f;
-                CruiserD_LiftAnim->ltime = end_frame;
-            }
-        } else {
-            CruiserD_frame = 1.0f;
-            CruiserD_direction = 1;
-            CruiserD_LiftAnim->playing = 1;
-            CruiserD_LiftAnim->ltime = 1.0f;
-            CruiserD_LiftAnim->tfactor = 0.1f;
-        }
-    }
-
-    CruiserD_LiftChase = 0;
 }
 
 void CruiserDUpdate(WORLDINFO_s *) {
@@ -325,6 +297,34 @@ void CruiserDUpdate(WORLDINFO_s *) {
         CruiserD_LiftAnim->tfactor = cruiserd_netpacket->speed;
         CruiserD_LiftAnim->playing = (cruiserd_netpacket->flags & 1) != 0;
     }
+}
+
+void CruiserDReset(WORLDINFO_s *) {
+    CruiserD_LiftChase_msg = CheckGizAIMessage(gizaimessagesys, "LiftChase", NULL);
+    MiscTime = 0.0f;
+
+    if (NuSpecialExistsFn(&CruiserD_Lift) != 0 && CruiserD_LiftAnim != NULL) {
+        if ((*(u8 *)((u8 *)LevelProgressData + CruiserE_ix * 0x2e24 + 0x2800) & 1) != 0) {
+            if (CruiserD_direction < 0) {
+                CruiserD_LiftAnim->ltime = CruiserD_frame;
+                CruiserD_LiftAnim->playing = 1;
+                CruiserD_LiftAnim->tfactor = -0.1f;
+            } else {
+                f32 end_frame = *(f32 *)CruiserD_Lift.scene->instance_animation_data[CruiserD_LiftAnim->anim_ix];
+                CruiserD_LiftAnim->playing = 0;
+                CruiserD_LiftAnim->tfactor = 0.1f;
+                CruiserD_LiftAnim->ltime = end_frame;
+            }
+        } else {
+            CruiserD_frame = 1.0f;
+            CruiserD_direction = 1;
+            CruiserD_LiftAnim->playing = 1;
+            CruiserD_LiftAnim->ltime = 1.0f;
+            CruiserD_LiftAnim->tfactor = 0.1f;
+        }
+    }
+
+    CruiserD_LiftChase = 0;
 }
 
 // ===========================================================================

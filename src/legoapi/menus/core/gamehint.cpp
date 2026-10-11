@@ -682,29 +682,6 @@ void Hint_SetHintFromId(i32 hint_id, i32 force, i32 allow_completed) {
         Hint_SetHint(hint, force, allow_completed);
 }
 
-void Hint_LoadAllGameState() {
-    HINTSYS_s *system = &hintsys;
-    HINT_s *hint = system->hints;
-    if (hint == NULL || system->save_bits == NULL || hint->control_mode_ids[0] == -1 || system->save_bit_count <= 0) {
-        return;
-    }
-
-    i32 index = 0;
-    const i32 control_mode = MechInputTouchSystem::s_baseControlMode;
-    do {
-        if (HINT_COMPLETE(index) != 0) {
-            hint->completion_flags[control_mode] = 1;
-        } else {
-            hint->completion_flags[control_mode] = 0;
-        }
-        ++hint;
-        if (hint->control_mode_ids[0] == -1) {
-            return;
-        }
-        ++index;
-    } while ((index >> 5) < system->save_bit_count);
-}
-
 void Hint_SaveAllGameState() {
     HINT_s *hint = hintsys.hints;
     if (hint == NULL) {
@@ -726,6 +703,29 @@ void Hint_SaveAllGameState() {
         ++hint;
         ++index;
     } while (hint->control_mode_ids[0] != -1);
+}
+
+void Hint_LoadAllGameState() {
+    HINTSYS_s *system = &hintsys;
+    HINT_s *hint = system->hints;
+    if (hint == NULL || system->save_bits == NULL || hint->control_mode_ids[0] == -1 || system->save_bit_count <= 0) {
+        return;
+    }
+
+    i32 index = 0;
+    const i32 control_mode = MechInputTouchSystem::s_baseControlMode;
+    do {
+        if (HINT_COMPLETE(index) != 0) {
+            hint->completion_flags[control_mode] = 1;
+        } else {
+            hint->completion_flags[control_mode] = 0;
+        }
+        ++hint;
+        if (hint->control_mode_ids[0] == -1) {
+            return;
+        }
+        ++index;
+    } while ((index >> 5) < system->save_bit_count);
 }
 
 void Hint_ClearHintsAndDoneFlags() {

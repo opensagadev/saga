@@ -964,6 +964,33 @@ ADDGIZMOTYPE *GizmoPickups_RegisterGizmo(i32 type_id) {
     return &addtype;
 }
 
+void SpecialMiniKits_Reset(WORLDINFO_s *world) {
+    WORLDINFO_s *world_info = world;
+    SPECIALMINIKITSYS_s *system = world_info->special_minikits;
+    if (system == NULL || GizmoPickupSys->gizmo_type_id == -1) {
+        return;
+    }
+
+    i32 count = system->count;
+    SPECIALMINIKIT_s *item = system->items;
+    if (count <= 0) {
+        return;
+    }
+
+    i32 index = 0;
+    for (;;) {
+        item->pickup_gizmo = GizmoFindByName(world_info->gizmo_sys, gizmopickup_typeid, item->pickup_name);
+        if ((item->flags & 0x20) != 0) {
+            item->special_gizmo = GizmoFindByName(world_info->gizmo_sys, -1, item->special_name);
+        }
+        ++index;
+        ++item;
+        if (world_info->special_minikits->count <= index) {
+            break;
+        }
+    }
+}
+
 void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
     world->special_minikits = NULL;
     if (world->current_gscn == NULL) {
@@ -1049,33 +1076,6 @@ void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
     system->count = count;
     world->special_minikits = system;
     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr + sizeof(*system), 4);
-}
-
-void SpecialMiniKits_Reset(WORLDINFO_s *world) {
-    WORLDINFO_s *world_info = world;
-    SPECIALMINIKITSYS_s *system = world_info->special_minikits;
-    if (system == NULL || GizmoPickupSys->gizmo_type_id == -1) {
-        return;
-    }
-
-    i32 count = system->count;
-    SPECIALMINIKIT_s *item = system->items;
-    if (count <= 0) {
-        return;
-    }
-
-    i32 index = 0;
-    for (;;) {
-        item->pickup_gizmo = GizmoFindByName(world_info->gizmo_sys, gizmopickup_typeid, item->pickup_name);
-        if ((item->flags & 0x20) != 0) {
-            item->special_gizmo = GizmoFindByName(world_info->gizmo_sys, -1, item->special_name);
-        }
-        ++index;
-        ++item;
-        if (world_info->special_minikits->count <= index) {
-            break;
-        }
-    }
 }
 
 void SpecialMiniKits_Draw(WORLDINFO_s *world) {

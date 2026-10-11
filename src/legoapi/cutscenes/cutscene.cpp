@@ -59,8 +59,8 @@ static void CS_play_sfx(NUFPAR *fp) {
     }
 
     CUTSCENESFX *sfx = &CS_CutInfo->sfx[slot];
-    sfx->id = static_cast<i16>(sfx_id);
     sfx->flags &= ~1U;
+    sfx->id = static_cast<i16>(sfx_id);
     while (NuFParGetWord(fp) != 0) {
         if (NuStrICmp(fp->word_buf, "frame") == 0) {
             sfx->frame = NuFParGetFloat(fp);
@@ -388,7 +388,7 @@ static void CS_goto_level(NUFPAR *fp) {
     CS_CutInfo->skip_level = static_cast<i16>(level_index);
 }
 
-static void CS_subtitle(NUFPAR *fp) {
+static inline void CS_subtitle(NUFPAR *fp) {
     if (CS_CutInfo->subtitle_data == NULL) {
         CS_CutInfo->subtitle_data = reinterpret_cast<CUTSCENESUBTITLE *>(CS_buffptr->addr);
     }
@@ -1988,8 +1988,8 @@ static __used__ void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paus
     }
     instance->flags_8b &= ~0x40U;
     if (instance->skip_countdown != 0 && (instance->flags_88 & 1) == 0 && (instance->flags_8c & 0xf) != 0) {
-        instance->flags_8b |= 0x40;
         instance->flags_8c = (instance->flags_8c & 0xf0) | ((instance->flags_8c - 1) & 0xf);
+        instance->flags_8b |= 0x40;
         paused = 1;
     }
     if ((instance->flags_88 & 2) == 0) {
@@ -2081,8 +2081,8 @@ static __used__ void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paus
                             const f32 overflow = 1.0f - instance->current_frame;
                             --instance->repeat_count;
                             instNuGCutSceneStart(instance);
-                            instance->flags_88 |= 1;
                             instance->current_frame += overflow;
+                            instance->flags_88 |= 1;
                         } else if (instance->chained_instance != NULL) {
                             const f32 overflow = 1.0f - instance->current_frame;
                             instNuGCutSceneEndFirstFrame(instance);
@@ -2128,8 +2128,8 @@ static __used__ void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paus
                                 }
                                 --instance->repeat_count;
                                 instNuGCutSceneStart(instance);
-                                instance->flags_88 |= 1;
                                 instance->current_frame += overflow;
+                                instance->flags_88 |= 1;
                             } else if (instance->chained_instance != NULL) {
                                 f32 overflow = instance->current_frame - (cutscene->duration - 1.0f);
                                 if (overflow > cutscene->duration) {
@@ -2148,8 +2148,8 @@ static __used__ void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paus
                                     overflow = 0.0f;
                                 }
                                 instNuGCutSceneStart(instance);
-                                instance->flags_88 |= 1;
                                 instance->current_frame += overflow;
+                                instance->flags_88 |= 1;
                             } else {
                                 instNuGCutSceneEnd(instance);
                             }
