@@ -72,15 +72,15 @@ void GetNativeTextureFormat(NUTEXFORMAT inFormat, i32 &outBpp, u32 &outInternalF
         case NUTEX_DXT1:                                         // 1
             outInternalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT; // 0x83F0
             outType = GL_UNSIGNED_BYTE;
-            outFormat = GL_RGB;     // 0x1907
-            outIsCompressed = true; // 0x1401
+            outIsCompressed = true; // 0x1907
+            outFormat = GL_RGB;     // 0x1401
             break;
 
         case NUTEX_DX1A:                                          // 2
             outInternalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT; // 0x83F1
-            outType = GL_UNSIGNED_BYTE;
-            outFormat = GL_RGBA;    // 0x1908
-            outIsCompressed = true; // 0x1401
+            outFormat = GL_RGBA;
+            outType = GL_UNSIGNED_BYTE; // 0x1908
+            outIsCompressed = true;     // 0x1401
             break;
 
         case NUTEX_DXT5:                 // 6
@@ -100,23 +100,23 @@ void GetNativeTextureFormat(NUTEXFORMAT inFormat, i32 &outBpp, u32 &outInternalF
 
         case NUTEX_ETC1:                          // 0x11
             outInternalFormat = GL_ETC1_RGB8_OES; // 0x8D64
-            outType = GL_UNSIGNED_BYTE;
-            outFormat = GL_RGB;     // 0x1907
-            outIsCompressed = true; // 0x1401
+            outFormat = GL_RGB;
+            outType = GL_UNSIGNED_BYTE; // 0x1907
+            outIsCompressed = true;     // 0x1401
             break;
 
         case NUTEX_PVRTC2:                                          // 0x14
             outInternalFormat = GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG; // 0x8C01
-            outFormat = GL_RGB;
-            outIsCompressed = true;     // 0x1907
+            outIsCompressed = true;
+            outFormat = GL_RGB;         // 0x1907
             outType = GL_UNSIGNED_BYTE; // 0x1401
             break;
 
         case NUTEX_PVRTC2A:                                          // 0x15
             outInternalFormat = GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG; // 0x8C03
-            outIsCompressed = true;
-            outType = GL_UNSIGNED_BYTE; // 0x1908
-            outFormat = GL_RGBA;        // 0x1401
+            outType = GL_UNSIGNED_BYTE;
+            outIsCompressed = true; // 0x1908
+            outFormat = GL_RGBA;    // 0x1401
             break;
 
         case NUTEX_PVRTC4:                                          // 0x16
@@ -128,8 +128,8 @@ void GetNativeTextureFormat(NUTEXFORMAT inFormat, i32 &outBpp, u32 &outInternalF
 
         case NUTEX_PVRTC4A:                                          // 0x17
             outInternalFormat = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG; // 0x8C02
-            outFormat = GL_RGBA;
-            outIsCompressed = true;     // 0x1908
+            outIsCompressed = true;
+            outFormat = GL_RGBA;        // 0x1908
             outType = GL_UNSIGNED_BYTE; // 0x1401
             break;
 
@@ -149,8 +149,8 @@ void GetNativeTextureFormat(NUTEXFORMAT inFormat, i32 &outBpp, u32 &outInternalF
 
         case 0x66:
             outInternalFormat = GL_RGB; // 0x1907
-            outType = GL_UNSIGNED_BYTE; // 0x18
-            outFormat = GL_RGB;         // 0x1907
+            outFormat = GL_RGB;         // 0x18
+            outType = GL_UNSIGNED_BYTE; // 0x1907
             outBpp = 24;                // 0x1401
             outFormatEnum = inFormat;
             return;
@@ -164,8 +164,8 @@ void GetNativeTextureFormat(NUTEXFORMAT inFormat, i32 &outBpp, u32 &outInternalF
             outInternalFormat = GL_RGBA;
             outType = GL_UNSIGNED_BYTE;
             outFormat = GL_RGBA;
-            outBpp = 32;
             outFormatEnum = inFormat;
+            outBpp = 32;
             return;
     }
 

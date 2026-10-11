@@ -358,33 +358,23 @@ void DagobahA_Update(WORLDINFO_s *world) {
             node0->position.x = -16.31f;
             node0->position.y = 0.31f;
             node0->position.z = 15.13f;
-            if (group->forces[1] != first) {
-                node1->position.x = -16.31f;
-                node1->position.y = 0.67f;
-                node1->position.z = 14.82f;
-                node2->position.x = -16.36f;
-                node2->position.y = 1.33f;
-                node2->position.z = 14.54f;
-            } else {
+            if (group->forces[1] == first) {
                 node1->position.x = -16.31f;
                 node1->position.y = 0.67f;
                 node1->position.z = 14.82f;
                 node2->position.x = -16.17f;
                 node2->position.y = 1.31f;
                 node2->position.z = 14.65f;
+            } else {
+                node1->position.x = -16.31f;
+                node1->position.y = 0.67f;
+                node1->position.z = 14.82f;
+                node2->position.x = -16.36f;
+                node2->position.y = 1.33f;
+                node2->position.z = 14.54f;
             }
         } else if (selected == third) {
-            if (group->forces[1] == first) {
-                node0->position.x = -16.73f;
-                node0->position.y = 0.51f;
-                node0->position.z = 14.51f;
-                node1->position.x = -16.49f;
-                node1->position.y = 0.95f;
-                node1->position.z = 14.45f;
-                node2->position.x = -16.31f;
-                node2->position.y = 1.29f;
-                node2->position.z = 14.66f;
-            } else {
+            if (group->forces[1] != first) {
                 node0->position.x = -16.20f;
                 node0->position.y = 0.31f;
                 node0->position.z = 15.13f;
@@ -394,6 +384,16 @@ void DagobahA_Update(WORLDINFO_s *world) {
                 node2->position.x = -16.38f;
                 node2->position.y = 1.31f;
                 node2->position.z = 14.59f;
+            } else {
+                node0->position.x = -16.73f;
+                node0->position.y = 0.51f;
+                node0->position.z = 14.51f;
+                node1->position.x = -16.49f;
+                node1->position.y = 0.95f;
+                node1->position.z = 14.45f;
+                node2->position.x = -16.31f;
+                node2->position.y = 1.29f;
+                node2->position.z = 14.66f;
             }
         }
         if (world->ai_sys->path_sys != NULL && world->ai_sys->path_sys->active_path != NULL) {

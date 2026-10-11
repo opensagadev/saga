@@ -320,8 +320,8 @@ extern "C" {
             if (forward != 0) {
                 return;
             }
-            instance->flags_88 |= 2;
             instance->flags_89 &= ~0x10;
+            instance->flags_88 |= 2;
             instance->current_frame = instance->cutscene->duration - 1.0f;
             if (instance->rate > 0.0f) {
                 instance->rate = -instance->rate;
@@ -507,6 +507,7 @@ extern "C" {
     void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *instance, NUGCUTLOCATORSYS_s *system,
                                  instNUGCUTLOCATOR_s *inst_locator, NUGCUTLOCATOR_s *locator, f32 frame,
                                  NUMTX *parent_mtx, i32 paused) {
+        NUMTX matrix;
         NUGCUTLOCATORTYPE_s *type = &system->types[locator->type_index];
         i32 effect_index = static_cast<i32>(static_cast<u16>(type->function_index));
         debinftype *effect =
@@ -530,7 +531,7 @@ extern "C" {
                 if ((locator->flags & 0x10) != 0 && inst_locator->effect_handle != 0) {
                     return;
                 }
-                NUMTX matrix;
+
                 NuGCutLocatorCalcMtx(locator, frame, &matrix, &time);
                 if ((locator->flags & 4) != 0) {
                     NuMtxPreTranslate(&matrix, &locator->pivot);

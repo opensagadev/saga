@@ -124,8 +124,8 @@ void VecRotateAxis(nuvec_s *vector, u16 angle, nuvec_s *axis) {
     const f32 complement = 1.0f - cosine;
     const f32 x = axis->x;
     const f32 y = axis->y;
-    const f32 z = axis->z;
     const NUVEC source = *vector;
+    const f32 z = axis->z;
     const f32 ty = complement * y;
     const f32 tx = complement * x;
     const f32 tz = complement * z;

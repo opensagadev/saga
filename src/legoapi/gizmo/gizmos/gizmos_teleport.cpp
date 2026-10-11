@@ -37,7 +37,11 @@ static inline void Teleport_GetSegment(GameObject_s *object, TELEPORT_s *telepor
         *end = object->field_0x7a4 == 0 ? 1 : 3;
     } else {
         *start = object->field_0x7a4 == 0 ? 3 : 1;
-        *end = object->field_0x7a4 == 0 ? 2 : 0;
+        if (object->field_0x7a4 == 0) {
+            *end = 2;
+        } else {
+            *end = 0;
+        }
     }
 }
 

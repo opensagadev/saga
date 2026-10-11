@@ -285,15 +285,17 @@ i32 FindNearestBreak(unsigned char *text, i32 index) {
         }
 
         ch = text[backward];
-        if (ch == ' ') {
+        if (ch != ' ') {
+            if (ch == '.') {
+                if (text[backward + 1] != '.')
+                    return backward;
+            } else if (static_cast<u8>(ch - ',') <= 1) {
+                return backward;
+            }
+        } else {
             u8 next = text[backward + 1];
             if (next != '?' && next != '!' && next != ';' && next != ':')
                 return backward;
-        } else if (ch == '.') {
-            if (text[backward + 1] != '.')
-                return backward;
-        } else if (static_cast<u8>(ch - ',') <= 1) {
-            return backward;
         }
     } while (--count != 0);
 
@@ -313,8 +315,8 @@ void BuckStartExtra_LSW(GameObject_s *object) {
 void Buck_StartRiderJump(GameObject_s *rider, GameObject_s *mount) {
     u16 angle = qrand();
     f32 speed = static_cast<f32>(qrand()) * 1.5259021893143654e-05f * 0.09f + 0.01f;
-    rider->apiobj.velocity.z = speed * NuTrigTable[((i32)angle + 0x4000) >> 1 & 0x7fff];
     rider->apiobj.velocity.x = NuTrigTable[angle >> 1] * speed;
+    rider->apiobj.velocity.z = speed * NuTrigTable[((i32)angle + 0x4000) >> 1 & 0x7fff];
     StartJump(rider, 0);
     rider->airborne_collision_target = mount;
     rider->tag_flags |= 1;

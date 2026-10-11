@@ -147,10 +147,12 @@ extern "C" i32 NuMain(i32 argc, char **argv) {
     FreePlay = 1;
     goto continue_init;
 check_gamedemo:
-    if (1 < GAMEDEMO) {
-        FreePlay = 1;
-        GAMEDEMO = 2;
-    } else if (GAMEDEMO != 0 && FreePlay != 0) {
+    if (!(1 < GAMEDEMO)) {
+        if (GAMEDEMO != 0 && FreePlay != 0) {
+            FreePlay = 1;
+            GAMEDEMO = 2;
+        }
+    } else {
         FreePlay = 1;
         GAMEDEMO = 2;
     }
@@ -1025,10 +1027,12 @@ giz_freeplay:
             } else if (FRAMETIME > MAXFRAMETIME) {
                 FRAMETIME = MAXFRAMETIME;
             }
-            if (FRAMETIME < DEFAULTFRAMETIME) {
+            if (!(FRAMETIME < DEFAULTFRAMETIME)) {
+                if (FRAMETIME > MAXFRAMETIME) {
+                    FRAMETIME = MAXFRAMETIME;
+                }
+            } else {
                 FRAMETIME = DEFAULTFRAMETIME;
-            } else if (FRAMETIME > MAXFRAMETIME) {
-                FRAMETIME = MAXFRAMETIME;
             }
 
             if (enable_zero_frametime != 0) {

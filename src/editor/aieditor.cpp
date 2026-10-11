@@ -434,8 +434,8 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
         if (selected != nullptr)
             edcamSetPos(&selected->position);
     } else if ((held & 0x100) && (pressed & (1 | 2 | 4 | 8))) {
-        bool forward = false;
         bool skip_platforms = false;
+        bool forward = false;
         if (pressed & 8) {
             forward = true;
         } else if (pressed & 2) {

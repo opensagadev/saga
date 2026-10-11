@@ -273,6 +273,7 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
 }
 
 void ThermalDetonator_ThrowMom(GameObject_s *object, nuvec_s *velocity) {
+    NUVEC movement;
     ADDPART_s params = Default_ADDPART;
     if (!(object == NULL || WORLD == NULL || WORLD->lev_objs == NULL || WORLD->lev_objs[0xe9].active == 0)) {
         // This entry point creates the thrown part with supplied momentum; it
@@ -303,7 +304,7 @@ void ThermalDetonator_ThrowMom(GameObject_s *object, nuvec_s *velocity) {
                     object->apiobj.collision_min.y,
                 object->apiobj.collision_position.z,
             };
-            NUVEC movement;
+
             NuVecSub(&movement, NUMTX_GET_ROW_VEC(&matrix, 3), &origin);
             GameRayCast(&origin, &movement, 0.0f, TERRAINMASK_NONWEAPON | 0x1f);
         }
