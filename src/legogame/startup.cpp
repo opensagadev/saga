@@ -611,7 +611,7 @@ void LoadPerm(void) {
                             }
 
                             NuRndrClear(0xb00, 0, 1.0f);
-                            const u32 colour = static_cast<u32>(alpha * 255.0f) << 24;
+                            const u32 colour = SAGA_X86_F32_TO_U32(alpha * 255.0f) << 24;
                             NuPrimCSPos++;
                             NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_ABSOLUTE);
                             NuPrim2DBegin(4, 7, legal_mtl);
