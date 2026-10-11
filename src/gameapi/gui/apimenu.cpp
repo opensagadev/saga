@@ -1010,7 +1010,7 @@ static __used__ void MenuDrawPauseExit(MENU *menu) {
         GameDrawMenuEntry(menu, TTab[tNO]);
     }
 }
-static __used__ void MenuDrawPauseMain(MENU *menu) {
+static inline __used__ void MenuDrawPauseMain(MENU *menu) {
     const i32 both_players_active = Players_BothActive();
 
     dme_r = 0;

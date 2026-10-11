@@ -536,16 +536,6 @@ extern "C" void NuShaderManagerSetCurrentShader(NUSHADEROBJECT *slot) {
     static_cast<ShaderManagerOpenGL *>(g_shaderManager)->bound_slot = slot;
 }
 
-extern "C" void NuShaderManagerDestroyShaders(void) {
-    ShaderManagerOpenGL *manager = static_cast<ShaderManagerOpenGL *>(g_shaderManager);
-    for (i32 i = 0; i < nu2api::kSlotCount; ++i) {
-        NUSHADEROBJECT *slot = &manager->slots[i];
-        if (slot->glsl.base.field1 >= 0) {
-            NuShaderObjectUnInit(slot);
-        }
-    }
-}
-
 extern "C" void NuShaderManagerDestroy(void) {
     ShaderManagerOpenGL *manager = static_cast<ShaderManagerOpenGL *>(g_shaderManager);
     for (i32 i = 0; i < nu2api::kSlotCount; ++i) {
@@ -555,6 +545,16 @@ extern "C" void NuShaderManagerDestroy(void) {
         }
     }
     g_shaderManager = nullptr;
+}
+
+extern "C" void NuShaderManagerDestroyShaders(void) {
+    ShaderManagerOpenGL *manager = static_cast<ShaderManagerOpenGL *>(g_shaderManager);
+    for (i32 i = 0; i < nu2api::kSlotCount; ++i) {
+        NUSHADEROBJECT *slot = &manager->slots[i];
+        if (slot->glsl.base.field1 >= 0) {
+            NuShaderObjectUnInit(slot);
+        }
+    }
 }
 
 extern "C" void NuShaderManagerSetShaderSaveFolder(const char *folder) {

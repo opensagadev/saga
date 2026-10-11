@@ -1980,8 +1980,8 @@ static void edpartFileSaveEffectsLevel(eduimenu_s *parent, eduiitem_s *, u32) {
         if (edpart_message_menu != NULL) {
             eduiMenuAddItem(edpart_message_menu, eduiItemSelCreate(1, colours, 0, 0, NULL, "Save Failed"));
             eduiMenuAttach(parent, edpart_message_menu);
-            edpart_message_menu->x = parent->x + 10;
             edpart_message_menu->y = parent->y + 40;
+            edpart_message_menu->x = parent->x + 10;
         }
     } else if (!backed_up) {
         u32 colours[4] = {0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
@@ -2127,8 +2127,8 @@ static void edpartFileSaveEffectsGeneral(eduimenu_s *parent, eduiitem_s *, u32) 
         if (edpart_message_menu != NULL) {
             eduiMenuAddItem(edpart_message_menu, eduiItemSelCreate(1, colours, 0, 0, NULL, "Save Failed"));
             eduiMenuAttach(parent, edpart_message_menu);
-            edpart_message_menu->x = parent->x + 10;
             edpart_message_menu->y = parent->y + 40;
+            edpart_message_menu->x = parent->x + 10;
         }
     } else if (!backed_up) {
         u32 colours[4] = {0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
@@ -2293,8 +2293,8 @@ void edpartDoInput(nupad_s *pad) {
             edcamSetPos(&emit->position);
             emit = &part_emits[edpart_nearest];
             const i16 *reference_rotation = reinterpret_cast<const i16 *>(&emit->trailing_state_words[0]);
-            edpart_rotz = reference_rotation[0];
             edpart_roty = reference_rotation[1];
+            edpart_rotz = reference_rotation[0];
             edpart_emitrotz = emit->rotation_2c;
             edpart_emitroty = emit->rotation_2e;
             edpart_emitrotx = emit->rotation_30;

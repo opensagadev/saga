@@ -351,6 +351,17 @@ void MiniKit_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
     NextStatusStage(packet);
 }
 
+void CollectAllMiniKits(AREASAVE_s *save) {
+    if (save == NULL)
+        return;
+    for (i32 i = 0; i < AREACOUNT; ++i) {
+        if ((ADataList[i].flags & AREAFLAG_MINIKIT) != 0 && save[i].complete != SAVE_INCOMPLETE) {
+            save[i].minikit_count = 10;
+            save[i].minikit_complete = SAVE_COMPLETE;
+        }
+    }
+}
+
 i32 UpdateNewMiniKits(STATUSPACKET_s *, STATUS_STAGE_s *stage) {
     if (stage->field_0x18 > stage->field_0x1c) {
         stage->field_0x18 = 0.0f;
@@ -364,17 +375,6 @@ i32 UpdateNewMiniKits(STATUSPACKET_s *, STATUS_STAGE_s *stage) {
         slideseek = ((stage->field_0x1c - stage->field_0x18) - jibberlen) / slidetime;
     }
     return 0;
-}
-
-void CollectAllMiniKits(AREASAVE_s *save) {
-    if (save == NULL)
-        return;
-    for (i32 i = 0; i < AREACOUNT; ++i) {
-        if ((ADataList[i].flags & AREAFLAG_MINIKIT) != 0 && save[i].complete != SAVE_INCOMPLETE) {
-            save[i].minikit_count = 10;
-            save[i].minikit_complete = SAVE_COMPLETE;
-        }
-    }
 }
 
 void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
@@ -570,6 +570,24 @@ rtldata_s KitPartRTL;
 extern NUCOLOUR3 panelcol[3], panelamb;
 extern NUVEC paneldir[3];
 
+void AllMiniKits_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
+    if (stage->field_0x14 == 0) {
+        stage->field_0x18 = 0.0f;
+        stage->field_0x1c = 6.5f;
+        stage->field_0x14 = 1;
+    } else if (stage->field_0x14 == 1) {
+        const f32 previous = stage->field_0x18;
+        stage->field_0x18 += elapsed;
+        if (stage->field_0x18 >= stage->field_0x1c)
+            NextStatusStage(packet);
+        else if (previous < 0.5f && stage->field_0x18 >= 0.5f) {
+            PlaySfx(const_cast<char *>("StatusAward"), NULL);
+            NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
+        } else if (previous < 4.0f && stage->field_0x18 >= 4.0f)
+            PlaySfx(const_cast<char *>("Char_Icon_App"), NULL);
+    }
+}
+
 void AddStatusMiniKitParts() {
     NUVEC target_position = {0.0f, STATSPOSY, 1.0f};
     for (i32 i = 0; i < 3; ++i) {
@@ -625,24 +643,6 @@ void AddStatusMiniKitParts() {
         }
     }
     SetPanelLights(1.0f);
-}
-
-void AllMiniKits_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    if (stage->field_0x14 == 0) {
-        stage->field_0x18 = 0.0f;
-        stage->field_0x1c = 6.5f;
-        stage->field_0x14 = 1;
-    } else if (stage->field_0x14 == 1) {
-        const f32 previous = stage->field_0x18;
-        stage->field_0x18 += elapsed;
-        if (stage->field_0x18 >= stage->field_0x1c)
-            NextStatusStage(packet);
-        else if (previous < 0.5f && stage->field_0x18 >= 0.5f) {
-            PlaySfx(const_cast<char *>("StatusAward"), NULL);
-            NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
-        } else if (previous < 4.0f && stage->field_0x18 >= 4.0f)
-            PlaySfx(const_cast<char *>("Char_Icon_App"), NULL);
-    }
 }
 
 void CharacterMiniKits_Dump(WORLDINFO_s *world) {

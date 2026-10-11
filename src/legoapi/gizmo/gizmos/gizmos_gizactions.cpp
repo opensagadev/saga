@@ -49,50 +49,6 @@ f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 void AISysGetPathPos2(AISYS_s *, NUVEC *, AIPATHINFO_s *, NUVEC *, AIPATH_s *, i32);
 void GameObjectSetCanUse(GameObject_s *, void *, u8, u8, f32);
 
-i32 Action_UsePanel(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
-                    i32 first_time, f32 elapsed) {
-    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL)
-        return 1;
-    GameObject_s *object = packet->owner->apiobj.objptr;
-    if (first_time != 0) {
-        for (i32 index = 0; index < param_count; ++index) {
-            char *name = NuStrIStr(params[index], "name=");
-            if (name == NULL)
-                continue;
-            GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, gizpanel_gizmotype_id, name + 5);
-            if (gizmo == NULL || gizmo->object == NULL)
-                continue;
-            GIZPANEL *panel = static_cast<GIZPANEL *>(gizmo->object);
-            processor->action_data_3 = panel;
-            if ((panel->flags & 2) != 0)
-                continue;
-            processor->action_pos = panel->floor_position;
-            f32 height = GameShadow(NULL, &processor->action_pos, 5.0f, -1);
-            if (height != 2000000.0f)
-                processor->action_pos.y = height;
-            AISysGetPathPos2(system, &processor->action_pos, &processor->path_info, &processor->action_pos, NULL, 0xff);
-        }
-    }
-    GIZPANEL *panel = static_cast<GIZPANEL *>(processor->action_data_3);
-    if (panel == NULL || (panel->flags & 2) != 0)
-        return 1;
-    AIMoveInstruction(packet, &processor->action_pos, 0.0f, &processor->path_info, 1, 0.0f);
-    if (GizPanel_CanUsePanel(object, panel) != 0) {
-        f32 distance = NuVecDistSqr(&packet->terrain_origin, &processor->action_pos, NULL);
-        if (distance < ai_moveradius * ai_moveradius) {
-            packet->movement_look_target = &panel->position;
-            object->pad_gamepad->buttons_pressed |= GAMEPAD_SPECIAL;
-        }
-    } else if (FreePlay != 0) {
-        processor->action_timer -= elapsed;
-        if (processor->action_timer < 0.0f) {
-            processor->action_timer = 0.5f;
-            object->pad_gamepad->buttons_pressed |= GAMEPAD_TOGGLERIGHT;
-        }
-    }
-    return object->field_0x7a5 == 0x0b && object->field_0x788 == panel;
-}
-
 i32 Action_CameraCut(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
                      i32 first_time, f32) {
     NUVEC target_position = {1000000000.0f, 1000000000.0f, 1000000000.0f};
@@ -232,48 +188,38 @@ camera_ready:
     return 1;
 }
 
-i32 Action_PullLever(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
-                     i32 first_time, f32 elapsed) {
-    i32 instant = 0;
-    if (first_time != 0) {
-        for (i32 index = 0; index < param_count; ++index) {
-            char *name = NuStrIStr(params[index], "lever=");
-            if (name != NULL) {
-                GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, lever_gizmotype_id, name + 6);
-                if (gizmo == NULL || gizmo->object == NULL)
-                    continue;
-                LEVER *lever = static_cast<LEVER *>(gizmo->object);
-                processor->action_data_3 = lever;
-                if (lever->being_pulled)
-                    continue;
-                processor->action_pos = lever->floor_position;
-                f32 height = GameShadow(NULL, &processor->action_pos, 5.0f, -1);
-                if (height != 2000000.0f)
-                    processor->action_pos.y = height;
-                AISysGetPathPos2(system, &processor->action_pos, &processor->path_info, &processor->action_pos, NULL,
-                                 0xff);
-            } else if (NuStrICmp(params[index], "instant") == 0) {
-                instant = 1;
-            }
-        }
-    }
-    LEVER *lever = static_cast<LEVER *>(processor->action_data_3);
-    if (lever == NULL)
-        return 1;
-    if (instant != 0) {
-        lever->being_pulled = 1;
-        lever->animation_frame = 0x8000;
-        lever->pull_progress = 1.0f;
-        return 1;
-    }
+i32 Action_UsePanel(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
+                    i32 first_time, f32 elapsed) {
     if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL)
         return 1;
     GameObject_s *object = packet->owner->apiobj.objptr;
+    if (first_time != 0) {
+        for (i32 index = 0; index < param_count; ++index) {
+            char *name = NuStrIStr(params[index], "name=");
+            if (name == NULL)
+                continue;
+            GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, gizpanel_gizmotype_id, name + 5);
+            if (gizmo == NULL || gizmo->object == NULL)
+                continue;
+            GIZPANEL *panel = static_cast<GIZPANEL *>(gizmo->object);
+            processor->action_data_3 = panel;
+            if ((panel->flags & 2) != 0)
+                continue;
+            processor->action_pos = panel->floor_position;
+            f32 height = GameShadow(NULL, &processor->action_pos, 5.0f, -1);
+            if (height != 2000000.0f)
+                processor->action_pos.y = height;
+            AISysGetPathPos2(system, &processor->action_pos, &processor->path_info, &processor->action_pos, NULL, 0xff);
+        }
+    }
+    GIZPANEL *panel = static_cast<GIZPANEL *>(processor->action_data_3);
+    if (panel == NULL || (panel->flags & 2) != 0)
+        return 1;
     AIMoveInstruction(packet, &processor->action_pos, 0.0f, &processor->path_info, 1, 0.0f);
-    if ((object->field_0xefe & 0x80) != 0) {
+    if (GizPanel_CanUsePanel(object, panel) != 0) {
         f32 distance = NuVecDistSqr(&packet->terrain_origin, &processor->action_pos, NULL);
         if (distance < ai_moveradius * ai_moveradius) {
-            packet->movement_look_target = &lever->position;
+            packet->movement_look_target = &panel->position;
             object->pad_gamepad->buttons_pressed |= GAMEPAD_SPECIAL;
         }
     } else if (FreePlay != 0) {
@@ -283,7 +229,7 @@ i32 Action_PullLever(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *
             object->pad_gamepad->buttons_pressed |= GAMEPAD_TOGGLERIGHT;
         }
     }
-    return object->field_0x7a5 == 0x4a && object->field_0x788 == lever;
+    return object->field_0x7a5 == 0x0b && object->field_0x788 == panel;
 }
 
 i32 Action_UseTechno(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
@@ -349,6 +295,77 @@ i32 Action_EndCameraCut(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, c
     return 1;
 }
 
+i32 Action_PullLever(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
+                     i32 first_time, f32 elapsed) {
+    i32 instant = 0;
+    if (first_time != 0) {
+        for (i32 index = 0; index < param_count; ++index) {
+            char *name = NuStrIStr(params[index], "lever=");
+            if (name != NULL) {
+                GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, lever_gizmotype_id, name + 6);
+                if (gizmo == NULL || gizmo->object == NULL)
+                    continue;
+                LEVER *lever = static_cast<LEVER *>(gizmo->object);
+                processor->action_data_3 = lever;
+                if (lever->being_pulled)
+                    continue;
+                processor->action_pos = lever->floor_position;
+                f32 height = GameShadow(NULL, &processor->action_pos, 5.0f, -1);
+                if (height != 2000000.0f)
+                    processor->action_pos.y = height;
+                AISysGetPathPos2(system, &processor->action_pos, &processor->path_info, &processor->action_pos, NULL,
+                                 0xff);
+            } else if (NuStrICmp(params[index], "instant") == 0) {
+                instant = 1;
+            }
+        }
+    }
+    LEVER *lever = static_cast<LEVER *>(processor->action_data_3);
+    if (lever == NULL)
+        return 1;
+    if (instant != 0) {
+        lever->being_pulled = 1;
+        lever->animation_frame = 0x8000;
+        lever->pull_progress = 1.0f;
+        return 1;
+    }
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL)
+        return 1;
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    AIMoveInstruction(packet, &processor->action_pos, 0.0f, &processor->path_info, 1, 0.0f);
+    if ((object->field_0xefe & 0x80) != 0) {
+        f32 distance = NuVecDistSqr(&packet->terrain_origin, &processor->action_pos, NULL);
+        if (distance < ai_moveradius * ai_moveradius) {
+            packet->movement_look_target = &lever->position;
+            object->pad_gamepad->buttons_pressed |= GAMEPAD_SPECIAL;
+        }
+    } else if (FreePlay != 0) {
+        processor->action_timer -= elapsed;
+        if (processor->action_timer < 0.0f) {
+            processor->action_timer = 0.5f;
+            object->pad_gamepad->buttons_pressed |= GAMEPAD_TOGGLERIGHT;
+        }
+    }
+    return object->field_0x7a5 == 0x4a && object->field_0x788 == lever;
+}
+
+i32 Action_PlayCutScene(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params, i32 param_count, i32 first_time,
+                        float) {
+    if (first_time != 0) {
+        char *name = NULL;
+        for (i32 i = 0; i < param_count; ++i) {
+            char *value = NuStrIStr(params[i], "name");
+            if (value != NULL) {
+                name = value + 5;
+            }
+        }
+        if (name != NULL) {
+            NewCutScene(NULL, WORLD->cutscene_sys, name, 0);
+        }
+    }
+    return 1;
+}
+
 i32 Action_FollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
                         i32 first_time, float) {
     if (packet == NULL) {
@@ -375,23 +392,6 @@ i32 Action_FollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *
                         packet->movement_instruction_parameter);
     }
     return 0;
-}
-
-i32 Action_PlayCutScene(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params, i32 param_count, i32 first_time,
-                        float) {
-    if (first_time != 0) {
-        char *name = NULL;
-        for (i32 i = 0; i < param_count; ++i) {
-            char *value = NuStrIStr(params[i], "name");
-            if (value != NULL) {
-                name = value + 5;
-            }
-        }
-        if (name != NULL) {
-            NewCutScene(NULL, WORLD->cutscene_sys, name, 0);
-        }
-    }
-    return 1;
 }
 
 i32 Action_SetVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params, i32 param_count, i32 first_time,

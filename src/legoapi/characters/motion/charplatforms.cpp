@@ -146,6 +146,34 @@ void CharPlatforms_Reset(CHARPLATFORMSYS_s *system) {
     }
 }
 
+void CharPlatforms_Update(CHARPLATFORMSYS_s *system) {
+    if (system == NULL)
+        return;
+    for (i32 i = 0; i < system->platform_count; ++i) {
+        if (system->platforms[i].object_id == -1)
+            continue;
+        i32 visible = 0;
+        GameObject_s *object = Obj;
+        for (i32 j = 0; j < HIGHGAMEOBJECT; ++j, ++object) {
+            if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->apiobj.field_0x287 == 0 &&
+                object->field_0x107c == system->platforms[i].platform_id) {
+                nuhspecial_s *special = &system->platforms[i].special;
+                NUMTX *matrix = NuSpecialGetDrawMtx(special);
+                if (matrix != NULL) {
+                    *matrix = object->apiobj.field_0xb8;
+                    if (GameTimer.time_elapsed * 2.0f < 1.0f) {
+                        matrix->m31 -= 1.0f - GameTimer.time_elapsed * 2.0f;
+                    }
+                    NuSpecialUpdate(special);
+                }
+                visible = 1;
+                break;
+            }
+        }
+        NuSpecialSetVisibility(&system->platforms[i].special, visible);
+    }
+}
+
 void CharPlatforms_Configure(WORLDINFO_s *world, char *config) {
     world->char_platform_sys = NULL;
     if (world->current_gscn == NULL) {
@@ -192,34 +220,6 @@ void CharPlatforms_Configure(WORLDINFO_s *world, char *config) {
         world->giz_buffer.addr = ALIGN(reinterpret_cast<usize>(&system->platforms[system->platform_count]), 4);
     } else {
         world->char_platform_sys = NULL;
-    }
-}
-
-void CharPlatforms_Update(CHARPLATFORMSYS_s *system) {
-    if (system == NULL)
-        return;
-    for (i32 i = 0; i < system->platform_count; ++i) {
-        if (system->platforms[i].object_id == -1)
-            continue;
-        i32 visible = 0;
-        GameObject_s *object = Obj;
-        for (i32 j = 0; j < HIGHGAMEOBJECT; ++j, ++object) {
-            if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->apiobj.field_0x287 == 0 &&
-                object->field_0x107c == system->platforms[i].platform_id) {
-                nuhspecial_s *special = &system->platforms[i].special;
-                NUMTX *matrix = NuSpecialGetDrawMtx(special);
-                if (matrix != NULL) {
-                    *matrix = object->apiobj.field_0xb8;
-                    if (GameTimer.time_elapsed * 2.0f < 1.0f) {
-                        matrix->m31 -= 1.0f - GameTimer.time_elapsed * 2.0f;
-                    }
-                    NuSpecialUpdate(special);
-                }
-                visible = 1;
-                break;
-            }
-        }
-        NuSpecialSetVisibility(&system->platforms[i].special, visible);
     }
 }
 

@@ -236,8 +236,8 @@ extern "C" void NuRndrParticleGroup(uv1debdata *chunks, PartHeader *header, NUMT
             g_ParticleGroup->vertex_buffer_index = static_cast<u8>(g_CurrentDebriVBIndex);
             g_ParticleGroup->use_system_memory_vb = g_UseSysMemVB;
             g_ParticleGroup->first_vertex = static_cast<i32>(g_CurrentVBVertexCount);
-            g_ParticleGroup->vertex_count = 0;
             g_ParticleGroup->material = material;
+            g_ParticleGroup->vertex_count = 0;
             if (g_pVBData == NULL) {
                 g_pVBData = g_debrisUploadBuffer;
             }

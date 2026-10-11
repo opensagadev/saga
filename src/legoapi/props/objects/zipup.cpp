@@ -340,8 +340,8 @@ void ZipUps_Reset(void *world_ptr, void *, void *progress_ptr) {
             zipup->facing_angle = static_cast<u16>(NuAtan2D(zipup->upper_position.x - zipup->lower_position.x,
                                                             zipup->upper_position.z - zipup->lower_position.z));
             zipup->runtime_flags &= ~ZIPUP_RUNTIME_FLAG_OCCUPIED;
-            zipup->occupant = NULL;
             zipup->flags |= ZIPUP_FLAG_ACTIVE | ZIPUP_FLAG_VISIBLE;
+            zipup->occupant = NULL;
 
             if (progress != NULL && index <= 31) {
                 const u32 bit = 1u << index;
@@ -799,8 +799,8 @@ void InitRopeMtl(char *name, variptr_u *buffer, variptr_u *buffer_end) {
     }
     ropemtl = NuMtlCreate3D(1);
     ropemtl->opacity = 1.0f;
-    ropemtl->attribs.unknown_2_1_2 = 0;
     ropemtl->attribs.unknown_1_1_2 = 0;
+    ropemtl->attribs.unknown_2_1_2 = 0;
     ropemtl->attribs.unknown_1_4_8 = 0;
     ropemtl->attribs.z_mode = 0;
     ropemtl->attribs.alpha_mode = 0;

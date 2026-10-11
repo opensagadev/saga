@@ -106,16 +106,6 @@ u32 ShaderMtlDescFilter::getVertexFlags() const {
     return flags;
 }
 
-bool ShaderMtlDescFilter::hasDiffuseMap(i32 layer) const {
-    if (variant != 0 && desc->unknown_1b4 == 0) {
-        return false;
-    }
-    if (layer < 0 || layer >= 4) {
-        return false;
-    }
-    return desc->diffuse_map_tex_id[layer] > texture_id_threshold;
-}
-
 bool ShaderMtlDescFilter::hasLayer(i32 layer) const {
     if (variant != 0) {
         return layer == 0 && (desc->unknown_1b4 & 1) != 0;
@@ -133,6 +123,16 @@ bool ShaderMtlDescFilter::hasLayer(i32 layer) const {
         default:
             return false;
     }
+}
+
+bool ShaderMtlDescFilter::hasDiffuseMap(i32 layer) const {
+    if (variant != 0 && desc->unknown_1b4 == 0) {
+        return false;
+    }
+    if (layer < 0 || layer >= 4) {
+        return false;
+    }
+    return desc->diffuse_map_tex_id[layer] > texture_id_threshold;
 }
 
 void ShaderMtlDescFilter::internalInit(nushadermtldesc_s const *material_desc, numtl_s const *material, i32 flags,

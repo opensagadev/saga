@@ -906,8 +906,8 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
         } else {
             if ((instance->field_14 & 1) == 0) {
                 if (instance->field_15 == 0) {
-                    instance->animation_frame_a = frame;
                     instance->field_16 = requested_animation;
+                    instance->animation_frame_a = frame;
                 } else {
                     instance->field_16 = instance->field_15;
                     animation_index = instance->field_15;

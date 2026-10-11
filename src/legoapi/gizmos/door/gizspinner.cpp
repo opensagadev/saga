@@ -1372,8 +1372,8 @@ i32 GizSpinner_GetTargetPoints(GIZSPINNER_s *spinner, nuvec_s *positions, nuvec_
             positions[count].z =
                 spinner->field_0x094 * NuTrigTable[((position_angle + 0x4000) >> 1) & 0x7fff] + spinner->position.z;
         }
-        position_angle += step;
         direction_angle += step;
+        position_angle += step;
     }
     return count;
 }
@@ -1493,8 +1493,8 @@ ADDGIZMOTYPE *Spinner_RegisterGizmo(i32 type_id) {
     addtype.fns.panel_draw_fn = GizSpinner_PanelDraw;
     addtype.fns.get_visibility_fn = NULL;
     addtype.fns.get_max_gizmos_fn = GizSpinner_GetMaxGizmos;
-    addtype.fns.get_pos_fn = GizSpinner_GetPos;
     addtype.fns.using_special_fn = GizSpinner_UsingSpecial;
+    addtype.fns.get_pos_fn = GizSpinner_GetPos;
     addtype.fns.add_gizmos_fn = GizSpinner_AddGizmos;
     addtype.fns.bolt_hit_plat_fn = GizSpinner_BoltHitPlat;
     addtype.fns.get_best_bolt_target_fn = GizSpinner_GetBestBoltTarget;
@@ -1507,8 +1507,8 @@ ADDGIZMOTYPE *Spinner_RegisterGizmo(i32 type_id) {
     addtype.fns.get_num_outputs_fn = GizSpinner_GetNumOutputs;
     addtype.fns.activate_fn = GizSpinner_Activate;
     addtype.fns.activate_rev_fn = NULL;
-    addtype.fns.set_visibility_fn = GizSpinner_SetVisibility;
     addtype.fns.allocate_progress_data_fn = GizSpinner_AllocateProgressData;
+    addtype.fns.set_visibility_fn = GizSpinner_SetVisibility;
     addtype.fns.clear_progress_fn = GizSpinner_ClearProgress;
     addtype.fns.store_progress_fn = GizSpinner_StoreProgressData;
     addtype.fns.reset_fn = GizSpinner_ResetAll;

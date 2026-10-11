@@ -904,8 +904,8 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
         NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
         NUMTX matrix;
         NUANGVEC angles;
-        angles.x = static_cast<u16>(temp_xrot);
         angles.y = static_cast<u16>(temp_yrot);
+        angles.x = static_cast<u16>(temp_xrot);
         NuMtxSetRotationXYVU0(&matrix, &angles);
         BOLT_s *reflected_bolt = Bolt_Add(object, &points[hit], &matrix, bolt->type_id, 0);
         if (reflected_bolt != NULL)
@@ -934,8 +934,8 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
                     temp_xrot = static_cast<i32>(-1820.0f - (qrand() * (1.0f / 65535.0f)) * 6371.0f);
                     NUMTX matrix;
                     NUANGVEC angles;
-                    angles.x = static_cast<u16>(temp_xrot);
                     angles.y = static_cast<u16>(temp_yrot);
+                    angles.x = static_cast<u16>(temp_xrot);
                     NuMtxSetRotationXYVU0(&matrix, &angles);
                     addbolt_nosfx = 1;
                     BOLT_s *reflected_bolt = Bolt_Add(object, &points[hit], &matrix, bolt->type_id, 0);
@@ -1518,8 +1518,8 @@ static __used__ void Bolt_GetShootOrigin_Default(GameObject_s *object, nuvec_s *
 static __used__ i32 Bolt_GetShootDirection_Default(GameObject_s *object, nuvec_s *direction) {
     u16 angle = object->apiobj.movement_facing_angle;
     if (direction != NULL) {
-        direction->x = NuTrigTable[angle >> 1];
         direction->y = 0.0f;
+        direction->x = NuTrigTable[angle >> 1];
         direction->z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff];
     }
     return angle;

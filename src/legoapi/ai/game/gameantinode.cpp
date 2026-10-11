@@ -195,28 +195,6 @@ GAMEANTINODE_s *GameAntinode_RegisterAntiNode(GAMEANTINODESYS_s *system, NUVEC *
     return node;
 }
 
-void GameAntinode_UnregisterAntiNode(GAMEANTINODESYS_s *system, GAMEANTINODE_s *node) {
-    if (system == NULL || system->active == NULL || node == NULL)
-        return;
-    GAMEANTINODE_s *previous = system->active;
-    if (previous == node) {
-        system->active = previous->next;
-        previous->next = system->free;
-        system->free = previous;
-    } else {
-        while (previous->next != NULL) {
-            if (previous->next == node) {
-                previous->next = node->next;
-                node->next = system->free;
-                system->free = node;
-                break;
-            }
-            previous = previous->next;
-        }
-    }
-    --system->count;
-}
-
 GAMEANTINODE_s *GameAntinode_RegisterAntiNodeUsingData(GAMEANTINODESYS_s *system, NUVEC *position, u16 angle,
                                                        GAMEANTINODEDATA_s *data, f32 duration, i32 disabled) {
     if (disabled != 0 || (data->mode & 1) != 0 || position == NULL || system == NULL)
@@ -282,6 +260,28 @@ GAMEANTINODE_s *GameAntinode_UpdateAntiNodeUsingData(GAMEANTINODESYS_s *system, 
     }
 
     return node;
+}
+
+void GameAntinode_UnregisterAntiNode(GAMEANTINODESYS_s *system, GAMEANTINODE_s *node) {
+    if (system == NULL || system->active == NULL || node == NULL)
+        return;
+    GAMEANTINODE_s *previous = system->active;
+    if (previous == node) {
+        system->active = previous->next;
+        previous->next = system->free;
+        system->free = previous;
+    } else {
+        while (previous->next != NULL) {
+            if (previous->next == node) {
+                previous->next = node->next;
+                node->next = system->free;
+                system->free = node;
+                break;
+            }
+            previous = previous->next;
+        }
+    }
+    --system->count;
 }
 
 void AISysDrawAntinode_Circle(AIANTINODE_s *node, u32 colour) {

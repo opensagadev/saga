@@ -219,8 +219,8 @@ static inline f32 DecodeAni4Quat3Scalar(const ani3_animheader_s *anim, i32 key_s
     return value;
 }
 
-static inline void DecodeAni4Quat3Pair(const ani3_animheader_s *anim, i32 key_stride, const u16 *constants, u16 type,
-                                       u32 quarter, u8 *&keys, ani3_scalemin_s *&scale_min, f32 &first, f32 &second) {
+static void DecodeAni4Quat3Pair(const ani3_animheader_s *anim, i32 key_stride, const u16 *constants, u16 type,
+                                u32 quarter, u8 *&keys, ani3_scalemin_s *&scale_min, f32 &first, f32 &second) {
     if (type == 7) {
         CalcValue1648Get2Values(reinterpret_cast<char *>(keys), quarter, key_stride, scale_min, &first, &second);
         keys += 8;
@@ -260,9 +260,8 @@ static inline void DecodeAni4Quat3Pair(const ani3_animheader_s *anim, i32 key_st
     first = second = static_cast<f32>(static_cast<u32>(constants[type - 16])) * anim->scale + anim->minimum;
 }
 
-static inline void DecodeAni4BlendQuat3Pair(const ani3_animheader_s *anim, i32 key_stride, const u16 *constants,
-                                            u16 type, u32 quarter, u8 *&keys, ani3_scalemin_s *&scale_min, f32 &first,
-                                            f32 &second) {
+static void DecodeAni4BlendQuat3Pair(const ani3_animheader_s *anim, i32 key_stride, const u16 *constants, u16 type,
+                                     u32 quarter, u8 *&keys, ani3_scalemin_s *&scale_min, f32 &first, f32 &second) {
     if (type == 6) {
         const u32 first_word = *reinterpret_cast<const u32 *>(keys);
         const u32 next_word = *reinterpret_cast<const u32 *>(keys + key_stride);
@@ -293,9 +292,8 @@ static inline void DecodeAni4BlendQuat3Pair(const ani3_animheader_s *anim, i32 k
     first = second = static_cast<f32>(static_cast<u32>(constants[type - 16])) * anim->scale + anim->minimum;
 }
 
-static inline void DecodeAni4BlendQuat3WPair(const ani3_animheader_s *anim, i32 key_stride, const u16 *constants,
-                                             u16 type, u32 quarter, u8 *&keys, ani3_scalemin_s *&scale_min, f32 &first,
-                                             f32 &second) {
+static void DecodeAni4BlendQuat3WPair(const ani3_animheader_s *anim, i32 key_stride, const u16 *constants, u16 type,
+                                      u32 quarter, u8 *&keys, ani3_scalemin_s *&scale_min, f32 &first, f32 &second) {
     if (type == 6) {
         const u32 first_word = *reinterpret_cast<const u32 *>(keys);
         const u32 next_word = *reinterpret_cast<const u32 *>(keys + key_stride);
@@ -625,8 +623,8 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuani
 }
 
 // Euler curves interpolate quaternion endpoints, not interpolated Euler angles.
-static inline void DecodeAni4EulerPair(const ani3_animheader_s *anim, i32 key_stride, const u16 *constants, u16 type,
-                                       u32 quarter, u8 *&keys, ani3_scalemin_s *&scale_min, f32 &first, f32 &second) {
+static void DecodeAni4EulerPair(const ani3_animheader_s *anim, i32 key_stride, const u16 *constants, u16 type,
+                                u32 quarter, u8 *&keys, ani3_scalemin_s *&scale_min, f32 &first, f32 &second) {
     if (type == 6) {
         const u32 first_word = *reinterpret_cast<const u32 *>(keys);
         const u32 next_word = *reinterpret_cast<const u32 *>(keys + key_stride);
@@ -871,8 +869,8 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint(ani3_animheader_s *anim, f32 frame, n
         skip_types += 9;
     }
     const i32 skipped_joints = skip_flags - node_flags;
-    curve_types += skipped_joints * 9;
     joint += skipped_joints;
+    curve_types += skipped_joints * 9;
     node_flags = skip_flags;
     scale_min = skip_scale_min;
 
@@ -1013,8 +1011,8 @@ i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3_animheader_s *anim, f32 frame, 
                 NuQuatHarmonize(&first, &second);
                 result.x = first.x * (1.0f - fraction) + second.x * fraction;
                 result.y = first.y * (1.0f - fraction) + second.y * fraction;
-                result.z = first.z * (1.0f - fraction) + second.z * fraction;
                 result.w = first.w * (1.0f - fraction) + second.w * fraction;
+                result.z = first.z * (1.0f - fraction) + second.z * fraction;
                 f32 length =
                     NuFsqrt(result.w * result.w + result.x * result.x + result.y * result.y + result.z * result.z);
                 f32 inverse_length = length == 0.0f ? 0.0f : 1.0f / length;

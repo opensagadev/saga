@@ -264,6 +264,16 @@ f32 FindPodHoverHeight(GameObject_s *object) {
 
 extern i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
 i32 IDLESPEEDINNARROWSOCKSONLY = 0;
+
+i32 ObjIsTargetSpeeder(GameObject_s *object) {
+    if (object->id != id_SPEEDERBIKE) {
+        return 0;
+    }
+    if (object->field_0xcc0 == NULL) {
+        return 0;
+    }
+    return object->apiobj.field_0x27c == -1;
+}
 f32 GetVehicleSpeedMul(GameObject_s *object, f32 speed) {
     f32 effective;
     if (object->character_context == 0x36 || object->character_context == 0x2a || object->character_context == 0x3a)
@@ -286,16 +296,6 @@ f32 GetVehicleSpeedMul(GameObject_s *object, f32 speed) {
     if (effective < 0.0f)
         effective = 0.0f;
     return effective / ((GAMECHARACTERDATA_s *)object->apiobj.character_data->field11_0x24)->run_speed;
-}
-
-i32 ObjIsTargetSpeeder(GameObject_s *object) {
-    if (object->id != id_SPEEDERBIKE) {
-        return 0;
-    }
-    if (object->field_0xcc0 == NULL) {
-        return 0;
-    }
-    return object->apiobj.field_0x27c == -1;
 }
 
 void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));

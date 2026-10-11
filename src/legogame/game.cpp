@@ -550,7 +550,7 @@ static i32 GameAudio_CheckReverb_LSW() {
     return 0;
 }
 
-static i32 GameAudio_OverrideFootStep_LSW(GameObject_s *object, i32 alternate) {
+static inline i32 GameAudio_OverrideFootStep_LSW(GameObject_s *object, i32 alternate) {
     WORLDINFO *world = WorldInfo_CurrentlyActive();
     AREADATA *area = world->area;
     LEVELDATA *level = world->current_level;

@@ -67,117 +67,6 @@ void Pulses_AddSfx(PULSESYS_s *pulse_sys, i32 *sfx_ids, i32 *sfx_count, i32 max_
     }
 }
 
-void Pulses_Update(PULSESYS_s *pulse_sys) {
-    NUVEC offset;
-    if (pulse_sys != NULL) {
-        WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-        if (pulse_sys->pulse_count == 0) {
-            return;
-        }
-
-        NUVEC hit_direction = {pulse_sys->hit_direction_line, 0.0f, pulse_sys->hit_direction_radius_origin};
-        NuVecRotateY(&hit_direction, &hit_direction, 0x4000);
-
-        for (i32 i = 0; i < pulse_sys->pulse_count; ++i) {
-            PULSE_s *pulse = &pulse_sys->pulses[i];
-            if (pulse->gizmo != NULL) {
-                i32 visible = GizmoGetVisibility(world->gizmo_sys, pulse->gizmo);
-                pulse = &pulse_sys->pulses[i];
-                if (visible == 0) {
-                    pulse->disabled = 1;
-                    NuSpecialSetVisibility(&pulse->special, 0);
-                    pulse = &pulse_sys->pulses[i];
-                }
-            }
-            if (pulse->disabled != 0) {
-                continue;
-            }
-
-            NUVEC *pulse_position = NuSpecialGetDrawPos(&pulse->special);
-            pulse = &pulse_sys->pulses[i];
-            pulse->timer -= FRAMETIME;
-            if (pulse->timer <= 0.0f && netclient == 0) {
-                if (pulse->active != 0) {
-                    pulse->active = 0;
-                    pulse->timer = pulse->off_time;
-                    GameAudio_PlaySfxById(pulse_sys->sfx_turn_off, pulse_position, 0, 0);
-                } else {
-                    pulse->active = 1;
-                    pulse->timer = pulse->on_time;
-                    GameAudio_PlaySfxById(pulse_sys->sfx_turn_on, pulse_position, 0, 0);
-                }
-
-                pulse = &pulse_sys->pulses[i];
-                NuSpecialSetVisibility(&pulse->special, pulse->active);
-                pulse = &pulse_sys->pulses[i];
-                if (pulse->active != 0) {
-                    GameAudio_PlaySfxById(pulse_sys->sfx_on_loop, pulse_position, 0, 0);
-                } else {
-                    GameAudio_PlaySfxById(pulse_sys->sfx_off_loop, pulse_position, 0, 0);
-                }
-            }
-
-            pulse = &pulse_sys->pulses[i];
-            if (pulse->active == 0) {
-                continue;
-            }
-
-            f32 collide_radius = pulse_sys->collide_radius;
-            NUVEC direction = {hit_direction.x, 0.0f, hit_direction.z};
-            if (pulse_sys->radial_hit_direction != 0) {
-                direction.x = pulse_position->x - hit_direction.x;
-                direction.z = pulse_position->z - hit_direction.z;
-                NuVecNorm(&direction, &direction);
-            }
-
-            for (i32 player_index = 0; player_index < 2; ++player_index) {
-                GameObject_s *player = Player[player_index];
-                if (player == NULL || !player->apiobj.player_controlled || player->apiobj.field_0x287 != 0 ||
-                    (LEGOCONTEXT_DOOMED != -1 && player->character_context == LEGOCONTEXT_DOOMED) ||
-                    !(player->flicker_timer <= 0.0f) || player->spawn_protection_timer > 0.0f ||
-                    (player->field_0xefe & 0x40) != 0) {
-                    continue;
-                }
-
-                NuVecSub(&offset, &player->apiobj.collision_position, pulse_position);
-                f32 distance = direction.x * offset.x + direction.z * offset.z;
-                if (pulse_sys->radial_hit_direction == 1) {
-                    if (distance < 0.0f) {
-                        continue;
-                    }
-                    NuVecRotateY(&offset, &offset, 0x4000);
-                    distance = direction.x * offset.x + direction.z * offset.z;
-                }
-
-                if (!(NuFabs(distance) < collide_radius)) {
-                    continue;
-                }
-                if (pulse_sys->radial_hit_direction == 0 &&
-                    offset.x * pulse_sys->hit_direction_line + offset.z * pulse_sys->hit_direction_radius_origin <
-                        0.0f) {
-                    continue;
-                }
-
-                GameAudio_PlaySfxById(pulse_sys->sfx_hit_player, &player->apiobj.collision_position, 0, 0);
-                if (ObjHitObj(NULL, player, 1, 0, 0, 1) == 2) {
-                    KillRumble(player);
-                    continue;
-                }
-
-                TakeHitRumble(player, 0.7f);
-                player->apiobj.velocity.x = 0.0f;
-                player->apiobj.velocity.z = 0.0f;
-                player->flicker_flags = (player->flicker_flags & ~7) | (distance >= 0.0f ? 4 : 3);
-
-                i32 debris_handle = -1;
-                AddFiniteShotDebrisEffect(&debris_handle,
-                                          world->debris_sys->entries[pulse_sys->debris_hit_player].effect,
-                                          &player->apiobj.collision_position, 1);
-            }
-        }
-    }
-}
-
 void Pulses_Configure(WORLDINFO_s *world, char *config) {
     world->pulses_sys = NULL;
     if (world->current_gscn == NULL) {
@@ -301,4 +190,115 @@ parsing_done:
     world->pulses_sys = reinterpret_cast<PULSESYS_s *>(world->giz_buffer.addr);
     *world->pulses_sys = pulse_sys;
     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr + sizeof(PULSESYS_s), 4);
+}
+
+void Pulses_Update(PULSESYS_s *pulse_sys) {
+    NUVEC offset;
+    if (pulse_sys != NULL) {
+        WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+        if (pulse_sys->pulse_count == 0) {
+            return;
+        }
+
+        NUVEC hit_direction = {pulse_sys->hit_direction_line, 0.0f, pulse_sys->hit_direction_radius_origin};
+        NuVecRotateY(&hit_direction, &hit_direction, 0x4000);
+
+        for (i32 i = 0; i < pulse_sys->pulse_count; ++i) {
+            PULSE_s *pulse = &pulse_sys->pulses[i];
+            if (pulse->gizmo != NULL) {
+                i32 visible = GizmoGetVisibility(world->gizmo_sys, pulse->gizmo);
+                pulse = &pulse_sys->pulses[i];
+                if (visible == 0) {
+                    pulse->disabled = 1;
+                    NuSpecialSetVisibility(&pulse->special, 0);
+                    pulse = &pulse_sys->pulses[i];
+                }
+            }
+            if (pulse->disabled != 0) {
+                continue;
+            }
+
+            NUVEC *pulse_position = NuSpecialGetDrawPos(&pulse->special);
+            pulse = &pulse_sys->pulses[i];
+            pulse->timer -= FRAMETIME;
+            if (pulse->timer <= 0.0f && netclient == 0) {
+                if (pulse->active != 0) {
+                    pulse->active = 0;
+                    pulse->timer = pulse->off_time;
+                    GameAudio_PlaySfxById(pulse_sys->sfx_turn_off, pulse_position, 0, 0);
+                } else {
+                    pulse->active = 1;
+                    pulse->timer = pulse->on_time;
+                    GameAudio_PlaySfxById(pulse_sys->sfx_turn_on, pulse_position, 0, 0);
+                }
+
+                pulse = &pulse_sys->pulses[i];
+                NuSpecialSetVisibility(&pulse->special, pulse->active);
+                pulse = &pulse_sys->pulses[i];
+                if (pulse->active != 0) {
+                    GameAudio_PlaySfxById(pulse_sys->sfx_on_loop, pulse_position, 0, 0);
+                } else {
+                    GameAudio_PlaySfxById(pulse_sys->sfx_off_loop, pulse_position, 0, 0);
+                }
+            }
+
+            pulse = &pulse_sys->pulses[i];
+            if (pulse->active == 0) {
+                continue;
+            }
+
+            f32 collide_radius = pulse_sys->collide_radius;
+            NUVEC direction = {hit_direction.x, 0.0f, hit_direction.z};
+            if (pulse_sys->radial_hit_direction != 0) {
+                direction.x = pulse_position->x - hit_direction.x;
+                direction.z = pulse_position->z - hit_direction.z;
+                NuVecNorm(&direction, &direction);
+            }
+
+            for (i32 player_index = 0; player_index < 2; ++player_index) {
+                GameObject_s *player = Player[player_index];
+                if (player == NULL || !player->apiobj.player_controlled || player->apiobj.field_0x287 != 0 ||
+                    (LEGOCONTEXT_DOOMED != -1 && player->character_context == LEGOCONTEXT_DOOMED) ||
+                    !(player->flicker_timer <= 0.0f) || player->spawn_protection_timer > 0.0f ||
+                    (player->field_0xefe & 0x40) != 0) {
+                    continue;
+                }
+
+                NuVecSub(&offset, &player->apiobj.collision_position, pulse_position);
+                f32 distance = direction.x * offset.x + direction.z * offset.z;
+                if (pulse_sys->radial_hit_direction == 1) {
+                    if (distance < 0.0f) {
+                        continue;
+                    }
+                    NuVecRotateY(&offset, &offset, 0x4000);
+                    distance = direction.x * offset.x + direction.z * offset.z;
+                }
+
+                if (!(NuFabs(distance) < collide_radius)) {
+                    continue;
+                }
+                if (pulse_sys->radial_hit_direction == 0 &&
+                    offset.x * pulse_sys->hit_direction_line + offset.z * pulse_sys->hit_direction_radius_origin <
+                        0.0f) {
+                    continue;
+                }
+
+                GameAudio_PlaySfxById(pulse_sys->sfx_hit_player, &player->apiobj.collision_position, 0, 0);
+                if (ObjHitObj(NULL, player, 1, 0, 0, 1) == 2) {
+                    KillRumble(player);
+                    continue;
+                }
+
+                TakeHitRumble(player, 0.7f);
+                player->apiobj.velocity.x = 0.0f;
+                player->apiobj.velocity.z = 0.0f;
+                player->flicker_flags = (player->flicker_flags & ~7) | (distance >= 0.0f ? 4 : 3);
+
+                i32 debris_handle = -1;
+                AddFiniteShotDebrisEffect(&debris_handle,
+                                          world->debris_sys->entries[pulse_sys->debris_hit_player].effect,
+                                          &player->apiobj.collision_position, 1);
+            }
+        }
+    }
 }

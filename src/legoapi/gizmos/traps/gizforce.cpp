@@ -396,8 +396,8 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
                     started_shaking = force->field_0x50 == 0.0f;
                     force->field_0x50 += FRAMETIME;
                     if (force->field_0x50 >= force->force_range) {
-                        force->field_0x50 = 0.0f;
                         force->runtime_flags |= GIZFORCE_RUNTIME_FORCE_RANGE_COMPLETE;
+                        force->field_0x50 = 0.0f;
                     }
                 } else {
                     force->field_0x50 = 0.0f;

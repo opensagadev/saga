@@ -121,10 +121,10 @@ NuSoundVoice::NuSoundVoice(NuSoundSource *sound_source, bool loop) {
     this->listeners = NULL;
     this->field130_0x144 = 1.0f;
     this->field131_0x148 = -1;
-    this->custom_surround_mix = NULL;
-
     this->flags2 = (u8)(this->flags2 & 0xf6 | loop << 3);
+
     this->flags2 &= 0xf9;
+    this->custom_surround_mix = NULL;
     this->flags = (u8)(this->flags & 0xf0 | 0x10); // mix update on the first Update
 
     this->SetState(PLAYSTATE_STOPPED); // libTTapp.so ctor tail (0x3275b9)

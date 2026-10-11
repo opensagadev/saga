@@ -58,6 +58,22 @@ static inline void Teleport_SetFacing(GameObject_s *object, NUVEC *start, NUVEC 
     }
 }
 
+void Teleports_Reset(WORLDINFO_s *world) {
+    if (world->teleports == NULL || WORLD->teleport_count <= 0) {
+        return;
+    }
+
+    TELEPORT_s *teleport = world->teleports;
+    for (i32 i = 0; i < WORLD->teleport_count; ++i, ++teleport) {
+        teleport->active = 0;
+        teleport->enabled = 1;
+        teleport->field_78 = 0;
+        teleport->field_74 = 0;
+        teleport->field_7a = 0;
+        teleport->field_76 = 0;
+    }
+}
+
 TELEPORT_s *Teleport_Find(GameObject_s *object, float range_squared, VuVec *position) {
     if (WORLD->teleports == NULL)
         return NULL;
@@ -113,22 +129,6 @@ TELEPORT_s *Teleport_Find(GameObject_s *object, float range_squared, VuVec *posi
         }
     }
     return nearest == -1 ? NULL : &WORLD->teleports[nearest];
-}
-
-void Teleports_Reset(WORLDINFO_s *world) {
-    if (world->teleports == NULL || WORLD->teleport_count <= 0) {
-        return;
-    }
-
-    TELEPORT_s *teleport = world->teleports;
-    for (i32 i = 0; i < WORLD->teleport_count; ++i, ++teleport) {
-        teleport->active = 0;
-        teleport->enabled = 1;
-        teleport->field_78 = 0;
-        teleport->field_74 = 0;
-        teleport->field_7a = 0;
-        teleport->field_76 = 0;
-    }
 }
 
 void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {

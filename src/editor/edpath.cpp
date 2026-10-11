@@ -1949,8 +1949,8 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
                     end = aieditor->current_path->runtime_end;
                     if (current == end)
                         break;
-                    node = &runtime_path->nodes[current];
                     edge = runtime_path->route_matrix[current][end];
+                    node = &runtime_path->nodes[current];
                 }
             }
         }

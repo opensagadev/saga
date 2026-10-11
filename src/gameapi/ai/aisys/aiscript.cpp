@@ -802,7 +802,7 @@ static void xActionMacro(NUFPAR *parser) {
     load_actionshdr = NULL;
 }
 
-static void xDeriveFromScript(NUFPAR *parser) {
+static inline void xDeriveFromScript(NUFPAR *parser) {
     i32 is_done;
 
     if (load_aiscript == NULL || load_aiscript->derived_from != NULL) {

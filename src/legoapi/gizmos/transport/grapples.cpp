@@ -752,8 +752,8 @@ GRAPPLE *Grapple_AddDynamic(void *attached_object, i32 retain_attachment) {
         GRAPPLE *grapple = &DynamicGrapple[index];
         if (grapple->attached_object == NULL) {
             grapple->attached_object = static_cast<GameObject_s *>(attached_object);
-            grapple->retain_attachment = static_cast<u8>(retain_attachment);
             grapple->flags |= GRAPPLE_FLAG_VISIBLE;
+            grapple->retain_attachment = static_cast<u8>(retain_attachment);
             return grapple;
         }
     }
@@ -827,8 +827,8 @@ void Grapple_MoveCode(GameObject_s *object) {
             if (object->pad_gamepad->input_magnitude == 0.0f || object->pad_gamepad->input_angle < 0x6001 ||
                 object->pad_gamepad->input_angle > 0x9fff)
                 return;
-            object->field_0x7a3 = 0;
             object->airborne_action_duration = 0.0f;
+            object->field_0x7a3 = 0;
             object->context_variant_flags &= ~1;
             object->context_animation = LEGOACT_GRAPPLE_IDLE;
             object->field_0x768 = 0.1f;

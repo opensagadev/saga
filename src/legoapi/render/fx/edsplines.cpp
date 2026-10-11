@@ -243,49 +243,6 @@ static void SplinePointAngles(NUGSPLINE *spline, i32 index, i32 looping, u16 *pi
         *angle = NuAtan2D(direction.x, direction.z);
 }
 
-void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle, u16 *pitch, i32 looping) {
-    if (angle != NULL)
-        *angle = 0;
-    if (pitch != NULL)
-        *pitch = 0;
-    if (spline == NULL)
-        return;
-    if (along > 1.0f)
-        along = 1.0f;
-    else if (along < 0.0f)
-        along = 0.0f;
-    u32 extent = (u32)(looping ? spline->length : spline->length - 1) << 16;
-    u32 fixed = (i32)((f32)extent * along);
-    i32 index = fixed >> 16;
-    NUVEC *current = &spline->pts[index];
-    *position = *current;
-    if (pitch != NULL || angle != NULL)
-        SplinePointAngles(spline, index, looping, pitch, angle);
-    index++;
-    if (index >= spline->length) {
-        if (!looping)
-            return;
-        index = 0;
-    }
-    fixed &= 0xffff;
-    if (fixed == 0)
-        return;
-    f32 fraction = fixed * (1.0f / 65536.0f);
-    NUVEC *next = &spline->pts[index];
-    position->x += (next->x - current->x) * fraction;
-    position->y += (next->y - current->y) * fraction;
-    position->z += (next->z - current->z) * fraction;
-    if (angle != NULL || pitch != NULL) {
-        u16 next_angle, next_pitch;
-        SplinePointAngles(spline, index, looping, pitch != NULL ? &next_pitch : NULL,
-                          angle != NULL ? &next_angle : NULL);
-        if (angle != NULL)
-            *angle += (i32)(RotDiff(*angle, next_angle) * fraction);
-        if (pitch != NULL)
-            *pitch += (i32)(RotDiff(*pitch, next_pitch) * fraction);
-    }
-}
-
 void FlightSpline_Init(WORLDINFO_s *world, flightspline_s *splines, i32 capacity) {
     char filename[256];
     sprintf(filename, "%s%s", world->config_file, FSP_Extension);
@@ -378,6 +335,49 @@ void FlightSpline_Init(WORLDINFO_s *world, flightspline_s *splines, i32 capacity
     for (; i < capacity; ++i)
         splines[i].point_count = 0;
     EdFileClose();
+}
+
+void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle, u16 *pitch, i32 looping) {
+    if (angle != NULL)
+        *angle = 0;
+    if (pitch != NULL)
+        *pitch = 0;
+    if (spline == NULL)
+        return;
+    if (along > 1.0f)
+        along = 1.0f;
+    else if (along < 0.0f)
+        along = 0.0f;
+    u32 extent = (u32)(looping ? spline->length : spline->length - 1) << 16;
+    u32 fixed = (i32)((f32)extent * along);
+    i32 index = fixed >> 16;
+    NUVEC *current = &spline->pts[index];
+    *position = *current;
+    if (pitch != NULL || angle != NULL)
+        SplinePointAngles(spline, index, looping, pitch, angle);
+    index++;
+    if (index >= spline->length) {
+        if (!looping)
+            return;
+        index = 0;
+    }
+    fixed &= 0xffff;
+    if (fixed == 0)
+        return;
+    f32 fraction = fixed * (1.0f / 65536.0f);
+    NUVEC *next = &spline->pts[index];
+    position->x += (next->x - current->x) * fraction;
+    position->y += (next->y - current->y) * fraction;
+    position->z += (next->z - current->z) * fraction;
+    if (angle != NULL || pitch != NULL) {
+        u16 next_angle, next_pitch;
+        SplinePointAngles(spline, index, looping, pitch != NULL ? &next_pitch : NULL,
+                          angle != NULL ? &next_angle : NULL);
+        if (angle != NULL)
+            *angle += (i32)(RotDiff(*angle, next_angle) * fraction);
+        if (pitch != NULL)
+            *pitch += (i32)(RotDiff(*pitch, next_pitch) * fraction);
+    }
 }
 
 i32 LineIntersectXY(NUVEC *, NUVEC *, NUVEC *, NUVEC *, NUVEC *, NUVEC *);

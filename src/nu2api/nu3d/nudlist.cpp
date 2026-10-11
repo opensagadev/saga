@@ -1157,8 +1157,8 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
         } else {
             dl->dyn_geom->next = dl->scene_first[dl->scene_buffer];
             dl->scene_next->type = kItemType_Link;
-            dl->scene_next->id = kItemId_Next;
             dl->scene_next->next = dl->dyn_geom + 1;
+            dl->scene_next->id = kItemId_Next;
         }
     };
 
@@ -1169,8 +1169,8 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
         } else if (dl->scene_first[dl->scene_buffer] != dl->scene_next) {
             dl->mtl_last->next = dl->scene_first[dl->scene_buffer];
             dl->scene_next->type = kItemType_Link;
-            dl->scene_next->id = kItemId_Next;
             dl->scene_next->next = dl->dyn_geom + 1;
+            dl->scene_next->id = kItemId_Next;
         }
         dl->mtl_last = first;
     };
@@ -1309,16 +1309,16 @@ void NuDisplayListCreate(nudisplayscene_s *raw_scene, variptr_u *buffer, variptr
         display_list->state->reflection_id = -1;
 
         display_list->first->type = 0x8d;
-        display_list->first->id = 1;
         display_list->first->next = NULL;
+        display_list->first->id = 1;
     }
     scene->local_state = NULL;
 
     i32 used_size = ((((material_count + 7) >> 3) & ~0xf) + 0x10);
     scene->mtl_used[0] = reinterpret_cast<u8 *>(ALIGN(buffer->addr, 0x10));
     scene->mtl_used[1] = scene->mtl_used[0] + used_size;
-    scene->nsort_pris = sort_priority_count;
     scene->sort_pris = reinterpret_cast<NUSORTPRI *>(scene->mtl_used[1] + used_size);
+    scene->nsort_pris = sort_priority_count;
     buffer->addr = reinterpret_cast<usize>(scene->sort_pris + sort_priority_count);
     memset(scene->sort_pris, 0, sort_priority_count * sizeof(NUSORTPRI));
 
@@ -1378,12 +1378,12 @@ extern "C" void NuDisplayListBurstRndrSpecial(nuhspecial_s *handle, u32 count, N
                 void *faceon =
                     NuDisplayListPrepareFaceonPS(buffer, scene->items[object->indices[material]].next, matrix);
                 list->items->type = 0x90;
-                list->items->id = 3;
                 list->items->next = transform;
+                list->items->id = 3;
                 NUDISPLAYLISTITEM *first = list->items++;
                 list->items->type = 0x8f;
-                list->items->id = 3;
                 list->items->next = faceon;
+                list->items->id = 3;
                 NUDISPLAYLISTITEM *last = list->items++;
                 DisplayListSetAlphaPS(first, last, 1);
             }

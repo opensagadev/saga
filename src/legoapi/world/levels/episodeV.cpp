@@ -1355,8 +1355,8 @@ static void Asteroid_AddParts(GIZMOBLOWUP_s *blowup) {
         params.special = special;
         params.flags = index == 0 ? 0x800019b : 0x8000193;
         params.field_40 = PartCollide_3D;
-        params.field_44 = Asteroid_PartKill;
         params.time_step = FRAMETIME;
+        params.field_44 = Asteroid_PartKill;
         params.field_a4 = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 3.0f + 7.0f;
 
         PART_s *part = AddPart(&params);
@@ -1386,8 +1386,8 @@ static __used__ void Asteroids_Update() {
                 asteroid->activated = 0;
                 blowup->field_0xf0 += static_cast<i16>(static_cast<f32>(asteroid->rotation_speed_x) * FRAMETIME);
                 blowup->field_0xf2 += static_cast<i16>(static_cast<f32>(asteroid->rotation_speed_y) * FRAMETIME);
-                blowup->state_flags |= 1;
                 blowup->field_0xf4 += static_cast<i16>(static_cast<f32>(asteroid->rotation_speed_z) * FRAMETIME);
+                blowup->state_flags |= 1;
                 GizmoBlowupUpdateMatrix(blowup);
                 continue;
             }

@@ -65,6 +65,57 @@ static dma_particle_s *DebrisParticleAt(debkeydatatype_s *key, i16 index, u8 par
     return &key->particle_chunks[index / 32]->particles[index % 32];
 }
 
+uv1deb *GenDebIndexRadial(debkeydatatype_s *key, debinftype *effect, float time) {
+    if (key->field_18a >= key->particle_count)
+        key->field_18a = 0;
+    if (effect->particle_type == 7)
+        return NULL;
+    dma_particle_s *particle = DebrisParticleAt(key, key->field_18a++, effect->particle_type);
+    particle->start_time = time;
+    key->emission_epoch = time;
+    particle->inverse_lifetime = 64.0f / effect->particle_lifetime;
+    f32 random = NuRandFloatSeeded(&debrisseed);
+    i32 angle_y = static_cast<i32>((random + random) * effect->field_050 - effect->field_050 + effect->field_05c);
+    random = NuRandFloatSeeded(&debrisseed);
+    i32 angle_z = static_cast<i32>((random + random) * effect->field_054 - effect->field_054 + effect->field_060);
+    f32 radius;
+    if (effect->scale_in_time != 0.0f && effect->scale_in_time > globaltime - key->last_update_time)
+        radius = (globaltime - key->last_update_time) / effect->scale_in_time * effect->field_058;
+    else
+        radius = effect->field_058;
+    NUVEC vector = {0.0f, radius, 0.0f};
+    NuVecRotateZ(&vector, &vector, angle_z);
+    NuVecRotateY(&vector, &vector, angle_y);
+    NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
+    particle->position = vector;
+    random = NuRandFloatSeeded(&debrisseed);
+    vector.x = 0.0f;
+    vector.y = (random + random) * effect->field_04c - effect->field_04c + effect->field_048;
+    vector.z = 0.0f;
+    NuVecRotateZ(&vector, &vector, angle_z);
+    NuVecRotateY(&vector, &vector, angle_y);
+    NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
+    particle->momentum = vector;
+    if (key->momentum_adjuster != NULL)
+        key->momentum_adjuster(key, effect, reinterpret_cast<uv1deb *>(particle));
+    particle->position.x += key->emission_position.x;
+    particle->position.y += key->emission_position.y;
+    particle->position.z += key->emission_position.z;
+    particle->momentum.x += key->momentum.x;
+    particle->momentum.y += key->momentum.y;
+    particle->momentum.z += key->momentum.z;
+    for (i32 trail = 0; trail < static_cast<i8>(effect->trail_count); ++trail) {
+        if (key->field_18a >= key->particle_count)
+            key->field_18a = 0;
+        dma_particle_s *copy = DebrisParticleAt(key, key->field_18a++, 0);
+        *copy = *particle;
+        copy->start_time += static_cast<f32>(trail + 1) * effect->trail_time;
+    }
+    if (effect->native_data == NULL)
+        GenericDebinfoDmaTypeUpdate(effect);
+    return reinterpret_cast<uv1deb *>(particle);
+}
+
 uv1deb *GenDebIndex(debkeydatatype_s *key, debinftype *effect, float time) {
     u16 particle_index = key->field_18a;
     u16 next_particle_index;
@@ -134,57 +185,6 @@ uv1deb *GenDebIndex(debkeydatatype_s *key, debinftype *effect, float time) {
     if (effect->native_data == NULL) {
         GenericDebinfoDmaTypeUpdate(effect);
     }
-    return reinterpret_cast<uv1deb *>(particle);
-}
-
-uv1deb *GenDebIndexRadial(debkeydatatype_s *key, debinftype *effect, float time) {
-    if (key->field_18a >= key->particle_count)
-        key->field_18a = 0;
-    if (effect->particle_type == 7)
-        return NULL;
-    dma_particle_s *particle = DebrisParticleAt(key, key->field_18a++, effect->particle_type);
-    particle->start_time = time;
-    key->emission_epoch = time;
-    particle->inverse_lifetime = 64.0f / effect->particle_lifetime;
-    f32 random = NuRandFloatSeeded(&debrisseed);
-    i32 angle_y = static_cast<i32>((random + random) * effect->field_050 - effect->field_050 + effect->field_05c);
-    random = NuRandFloatSeeded(&debrisseed);
-    i32 angle_z = static_cast<i32>((random + random) * effect->field_054 - effect->field_054 + effect->field_060);
-    f32 radius;
-    if (effect->scale_in_time != 0.0f && effect->scale_in_time > globaltime - key->last_update_time)
-        radius = (globaltime - key->last_update_time) / effect->scale_in_time * effect->field_058;
-    else
-        radius = effect->field_058;
-    NUVEC vector = {0.0f, radius, 0.0f};
-    NuVecRotateZ(&vector, &vector, angle_z);
-    NuVecRotateY(&vector, &vector, angle_y);
-    NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
-    particle->position = vector;
-    random = NuRandFloatSeeded(&debrisseed);
-    vector.x = 0.0f;
-    vector.y = (random + random) * effect->field_04c - effect->field_04c + effect->field_048;
-    vector.z = 0.0f;
-    NuVecRotateZ(&vector, &vector, angle_z);
-    NuVecRotateY(&vector, &vector, angle_y);
-    NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
-    particle->momentum = vector;
-    if (key->momentum_adjuster != NULL)
-        key->momentum_adjuster(key, effect, reinterpret_cast<uv1deb *>(particle));
-    particle->position.x += key->emission_position.x;
-    particle->position.y += key->emission_position.y;
-    particle->position.z += key->emission_position.z;
-    particle->momentum.x += key->momentum.x;
-    particle->momentum.y += key->momentum.y;
-    particle->momentum.z += key->momentum.z;
-    for (i32 trail = 0; trail < static_cast<i8>(effect->trail_count); ++trail) {
-        if (key->field_18a >= key->particle_count)
-            key->field_18a = 0;
-        dma_particle_s *copy = DebrisParticleAt(key, key->field_18a++, 0);
-        *copy = *particle;
-        copy->start_time += static_cast<f32>(trail + 1) * effect->trail_time;
-    }
-    if (effect->native_data == NULL)
-        GenericDebinfoDmaTypeUpdate(effect);
     return reinterpret_cast<uv1deb *>(particle);
 }
 

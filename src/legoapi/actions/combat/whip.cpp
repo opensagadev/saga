@@ -22,15 +22,6 @@ struct SHOPINPUT;
 
 void SetWeaponIn(GameObject_s *object);
 
-void Whip_Release(GameObject_s *object) {
-    if (LEGOCONTEXT_WHIP != -1 && object->character_context == LEGOCONTEXT_WHIP && object->field_0x788 != NULL) {
-        object->carried_object_basis[0] = v100;
-        object->carried_object_basis[1] = v010;
-        object->carried_object_basis[2] = v001;
-        SuperCarry_Throw(object, 1);
-    }
-}
-
 void Whip_MoveCode(GameObject_s *object) {
     if (LEGOCONTEXT_WHIP == -1) {
         return;
@@ -169,5 +160,14 @@ void Whip_MoveCode(GameObject_s *object) {
 
     if (object->character_context == -1 && object->field_0x7a3 == 3 && object->field_0x788 != NULL) {
         SuperCarry_Start(object, static_cast<GIZMOBLOWUP_s *>(object->field_0x788), 1);
+    }
+}
+
+void Whip_Release(GameObject_s *object) {
+    if (LEGOCONTEXT_WHIP != -1 && object->character_context == LEGOCONTEXT_WHIP && object->field_0x788 != NULL) {
+        object->carried_object_basis[0] = v100;
+        object->carried_object_basis[1] = v010;
+        object->carried_object_basis[2] = v001;
+        SuperCarry_Throw(object, 1);
     }
 }
