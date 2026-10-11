@@ -917,8 +917,9 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
             AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
             AIPATHCNX *next = GetNextConnection(packet, &direction);
             if (next != NULL) {
+                auto packet_current_route = packet->current_route;
                 while (WithinConnection(system, &packet->terrain_origin, packet->path_info.path, next, checks,
-                                        packet->path_info.connection, packet->current_route, object->field_0x289, NULL,
+                                        packet->path_info.connection, packet_current_route, object->field_0x289, NULL,
                                         object->collision_radius, 0) != 0) {
                     if (connection == destination_connection) {
                         break;
@@ -1436,13 +1437,14 @@ void AIWander(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object, i32 chec
         u8 node_index = packet->path_info.connection->node_indices[packet->path_info.direction == 0];
         AIPATHNODE *node = &packet->path_info.path->nodes[node_index];
         i32 start = NuRandInt() % node->connection_count;
+        auto node_route_boundary_mask = node->route_boundary_mask;
         for (i32 index = 0; index < node->connection_count; ++index) {
             packet->movement_target = node->connections[(index + start) % node->connection_count];
             AIPATHCNX *target = packet->movement_target;
             if (target != packet->path_info.connection) {
                 if (packet->current_route == 0xff ||
                     ((static_cast<u64>(target->route_mask) >> packet->current_route) & 1) != 0 ||
-                    ((static_cast<u64>(node->route_boundary_mask) >> packet->current_route) & 1) != 0) {
+                    ((static_cast<u64>(node_route_boundary_mask) >> packet->current_route) & 1) != 0) {
                     packet->movement_target_direction = node_index != target->node_indices[0];
                     if (target->traversal_flags[packet->movement_target_direction] == 0) {
                         break;

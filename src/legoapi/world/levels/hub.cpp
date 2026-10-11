@@ -2528,13 +2528,16 @@ void Hub_UpdateFreePlaySelect() {
         case 1: {
             i32 active = 0, confirmed = 0;
             i32 exit = 0;
+            auto menu_input_activity = menu->input_activity;
+            auto menu_confirm_pressed = menu->confirm_pressed;
+            auto collection_count_x = collection->count_x;
             for (i32 player = 0; player < 2; ++player) {
                 const i32 other = (player + 1) & 1;
                 const i32 previous = freeplay_i[player];
                 i32 index = previous;
                 i32 select = 0, cancel = 0;
-                if (menu->input_activity != 0 && player == 0) {
-                    if (menu->confirm_pressed != 0) {
+                if (menu_input_activity != 0 && player == 0) {
+                    if (menu_confirm_pressed != 0) {
                         if (menu->selected_item == 9999)
                             select = 1;
                         else
@@ -2570,7 +2573,7 @@ void Hub_UpdateFreePlaySelect() {
                         MenuRepeat(&right_held, &right, &rightrepeattime[player], &rightrepeatcount[player], 0.1f,
                                    FRAMETIME);
                         if (up) {
-                            const i32 columns = collection->count_x;
+                            const i32 columns = collection_count_x;
                             const i32 count = collection->count_y;
                             const i32 span = (count / columns + 1) * columns;
                             index = previous;
@@ -2584,7 +2587,7 @@ void Hub_UpdateFreePlaySelect() {
                             } while (collection->list[index].id == MenuPacket.player_model[other]);
                         } else if (down) {
                             const i32 count = collection->count_y;
-                            const i32 columns = collection->count_x;
+                            const i32 columns = collection_count_x;
                             const i32 span = (count / columns + 1) * columns;
                             index = previous;
                             do {
@@ -2597,7 +2600,7 @@ void Hub_UpdateFreePlaySelect() {
                             } while (collection->list[index].id == MenuPacket.player_model[other]);
                         } else if (left) {
                             const i32 count = collection->count_y;
-                            const i32 columns = collection->count_x;
+                            const i32 columns = collection_count_x;
                             index = previous;
                             do {
                                 i32 column = index % columns - 1;
@@ -2608,7 +2611,7 @@ void Hub_UpdateFreePlaySelect() {
                                     index = count - 1;
                             } while (collection->list[index].id == MenuPacket.player_model[other]);
                         } else if (right) {
-                            const i32 columns = collection->count_x;
+                            const i32 columns = collection_count_x;
                             const i32 count = collection->count_y;
                             index = previous;
                             do {

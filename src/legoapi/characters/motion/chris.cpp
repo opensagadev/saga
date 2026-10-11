@@ -288,6 +288,8 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
     if (fighter->death_timer >= 0.0f)
         fighter->death_timer -= FRAMETIME;
     bool finished = false;
+    auto fighter_spline = fighter->spline;
+    auto fighter_model_id = fighter->model_id;
     while (distance_squared < 25.0f) {
         fighter->spline_progress += 0.01f;
         if (fighter->spline_progress > 1.0f) {
@@ -296,9 +298,9 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
             distance_squared = 1000000.0f;
             break;
         }
-        CalcSplinePoint(fighter->spline, reinterpret_cast<_vuv_s *>(&fighter->target_position),
+        CalcSplinePoint(fighter_spline, reinterpret_cast<_vuv_s *>(&fighter->target_position),
                         fighter->spline_progress);
-        if (fighter->model_id == -307) {
+        if (fighter_model_id == -307) {
             fighter->target_position.x += fighter->matrix.m10 * MissileDist;
             fighter->target_position.y += fighter->matrix.m11 * MissileDist;
             fighter->target_position.z += fighter->matrix.m12 * MissileDist;

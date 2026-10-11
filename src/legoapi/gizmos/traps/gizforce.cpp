@@ -569,6 +569,7 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
                     }
                 }
             } else {
+                auto force_horizontal_range = force->horizontal_range;
                 for (GAMEANIMOBJ_s *object = force->anim_set->objects; object != NULL; object = object->next) {
                     GIZFORCEANIMDATA_s *object_data = static_cast<GIZFORCEANIMDATA_s *>(object->object_data);
                     if (object_data->force_glow_active || !NuSpecialExistsFn(&object->special))
@@ -576,7 +577,7 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
                     NUVEC centre;
                     f32 radius = 0.0f;
                     NuSpecialGetRadius(&object->special, &centre, &radius);
-                    radius = 1.2f * force->horizontal_range * radius;
+                    radius = 1.2f * force_horizontal_range * radius;
                     NuVecMtxTransformVU0(&centre, &centre, NuSpecialGetDrawMtx(&object->special));
                     NUVEC offset = {0.0f, 0.0f, 0.0f};
                     if (radius != 0.0f)
@@ -613,7 +614,8 @@ static void GizForces_Draw(void *world_ptr, void *data, float) {
     }
 
     GIZFORCE_s *force = force_sys->forces;
-    for (i32 index = 0; index < force_sys->count; ++index, ++force) {
+    auto force_sys_count = force_sys->count;
+    for (i32 index = 0; index < force_sys_count; ++index, ++force) {
         if ((force->progress_flags & GIZFORCE_PROGRESS_VISIBLE) == 0 || static_cast<i8>(force->progress_flags) >= 0 ||
             (force->room_id >= 0 && world->rooms_visible_ptr[force->room_id] == 0)) {
             continue;
@@ -834,6 +836,7 @@ static i32 GizForces_BoltHitPlat(void *world_ptr, void *data, BOLT *bolt, unsign
     if (force_sys == NULL || force_sys->hit_test_gizmo_count == 0) {
         return 0;
     }
+    auto bolt_hit_platform = bolt->hit_platform;
     for (i32 index = 0; index < force_sys->hit_test_gizmo_count; ++index) {
         GIZFORCE_s *force = static_cast<GIZFORCE_s *>(force_sys->hit_test_gizmos[index]->object);
         if ((force->progress_flags & GIZFORCE_PROGRESS_VISIBLE) == 0 ||
@@ -844,7 +847,7 @@ static i32 GizForces_BoltHitPlat(void *world_ptr, void *data, BOLT *bolt, unsign
         }
         for (GAMEANIMOBJ_s *object = force->anim_set->objects; object != NULL; object = object->next) {
             GIZFORCEANIMDATA_s *object_data = static_cast<GIZFORCEANIMDATA_s *>(object->object_data);
-            if (object_data->platform_id == bolt->hit_platform) {
+            if (object_data->platform_id == bolt_hit_platform) {
                 i32 damage = BoltType_FindByID(bolt->type_id, static_cast<WORLDINFO_s *>(world_ptr))->field_3c;
                 i32 player_index = bolt->owner != NULL ? static_cast<i8>(bolt->owner->apiobj.field_0x27c) : -1;
                 GizForces_Hit(world_ptr, force, &bolt->position, damage, player_index);
@@ -969,6 +972,8 @@ static i32 GizForces_BoltHit(void *world_ptr, void *data, void *object_ptr, NUVE
     GameObject_s *object = static_cast<GameObject_s *>(object_ptr);
     GIZFORCE_s *nearest = NULL;
     f32 nearest_distance = 1000000000.0f;
+    auto maximum_x = maximum->x;
+    auto maximum_z = maximum->z;
     for (i32 index = 0; index < force_sys->hit_test_gizmo_count; ++index) {
         GIZFORCE_s *force = static_cast<GIZFORCE_s *>(force_sys->hit_test_gizmos[index]->object);
         if ((force->progress_flags & GIZFORCE_PROGRESS_VISIBLE) == 0 ||
@@ -978,7 +983,7 @@ static i32 GizForces_BoltHit(void *world_ptr, void *data, void *object_ptr, NUVE
         }
         const NUVEC &position = force->position;
         const f32 extent = force->radius;
-        if (position.x - extent > maximum->x || minimum->x > position.x + extent || position.z - extent > maximum->z ||
+        if (position.x - extent > maximum_x || minimum->x > position.x + extent || position.z - extent > maximum_z ||
             minimum->z > position.z + extent || position.y - extent > maximum->y || minimum->y > position.y + extent) {
             continue;
         }

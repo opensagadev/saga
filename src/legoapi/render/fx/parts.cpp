@@ -292,6 +292,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
     maximum.z += radius;
     GameObject_s *object = Obj;
     i8 force_player_mask = part->force_player_mask;
+    auto part_pickup_type = part->pickup_type;
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
         APIOBJECT_s *api = &object->apiobj;
         if ((api->field_0x1f8 & 0x1001) != 0x1001 || api->field_0x287 != 0)
@@ -376,7 +377,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
         } else {
         collect_pickup:
             if ((part->active & 2) == 0) {
-                if (part->pickup_type == 0xcb) {
+                if (part_pickup_type == 0xcb) {
                     if (!(part->scale_time >= 0.5f))
                         continue;
                     if (VehicleArea == 0 && (static_cast<i8>(object->current_hp) <= 0 ||
@@ -389,8 +390,8 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
                 KillPart(part, 2);
                 continue;
             }
-            if (part->pickup_type != 0xcb) {
-                if (part->pickup_type == 0xd0) {
+            if (part_pickup_type != 0xcb) {
+                if (part_pickup_type == 0xd0) {
                     CollectPowerUp(object, &part->position, part->rotation_y, 1);
                     KillPart(part, 2);
                 } else if (force_player_mask == 3) {
@@ -408,7 +409,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
                     }
                 } else {
                     GIZMOPICKUP_s pickup;
-                    SetCoinType(part->pickup_type, &pickup);
+                    SetCoinType(part_pickup_type, &pickup);
                     GizmoPickup_CollectCoin(WORLD, &part->position, pickup.type_index, pickup.model_variant, object, 1);
                     KillPart(part, 2);
                 }

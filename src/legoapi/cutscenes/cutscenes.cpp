@@ -310,7 +310,8 @@ void CutScenes_Stop(CUTSYS *system) {
 void CutScenes_Reset(WORLDINFO_s *world) {
     CUTSYS *system = world->cutscene_sys;
     if (system != NULL) {
-        for (i32 i = 0; i < system->count; ++i) {
+        auto system_count = system->count;
+        for (i32 i = 0; i < system_count; ++i) {
             CUTINFO *cut = system->cuts[i];
             instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
             if (instance == NULL)
@@ -1817,7 +1818,8 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
                 system->events = NULL;
             }
             if (system->events != NULL) {
-                for (i32 i = 0; i < system->event_count; ++i) {
+                auto system_event_count = system->event_count;
+                for (i32 i = 0; i < system_event_count; ++i) {
                     NUGCUTTRIGGEREVENT_s *event = &system->events[i];
                     event->field_04 =
                         event->field_04 != NULL

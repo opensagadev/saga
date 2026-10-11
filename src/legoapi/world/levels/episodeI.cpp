@@ -269,6 +269,7 @@ static __used__ void PodRaceSnipersReset(void) {
         NUGSPLINE *spline = NuSplineFind(WORLD->current_gscn, buf);
         if (spline != NULL && spline->length > 0 && PodRace_nsnipers <= 9) {
             i32 npts = 0;
+            auto spline_length = spline->length;
             do {
                 SNIPER_s *dst = &PodRace_snipers[PodRace_nsnipers];
                 memcpy(dst, &spline->pts[npts], 0x18);
@@ -276,7 +277,7 @@ static __used__ void PodRaceSnipersReset(void) {
                 dst->state = 0.0f;
                 PodRace_nsnipers++;
                 npts += 2;
-            } while (spline->length > npts && PodRace_nsnipers <= 9);
+            } while (spline_length > npts && PodRace_nsnipers <= 9);
         }
     }
 }
@@ -377,10 +378,11 @@ static void PodSprint_InitAISpline(WORLDINFO_s *world, PODSPRINT_AISPLINE_s *ai,
     ai->spline = NuSplineFind(world->current_gscn, name);
     if (ai->spline != NULL && podsprint.finish_line != NULL && podsprint.halfway != NULL) {
         i32 count = 0;
-        for (i32 i = 0; i < (i32)(i16)ai->spline->length - 1; i++) {
+        auto ai_spline = ai->spline;
+        for (i32 i = 0; i < (i32)(i16)ai_spline->length - 1; i++) {
             if (count > 5)
                 break;
-            NUVEC *pts = ai->spline->pts;
+            NUVEC *pts = ai_spline->pts;
             NUVEC *pts2 = ((count & 1) ? podsprint.finish_line : podsprint.halfway)->pts;
             if (XZLinesIntersect(&pts[i], &pts[i + 1], &pts2[0], &pts2[1], NULL, NULL)) {
                 ai->vals[count] = (i16)i;

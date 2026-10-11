@@ -648,13 +648,14 @@ void *CutScenes_Load(char *config, NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VAR
     CS_cutsys = sys;
     buf->void_ptr = reinterpret_cast<char *>(sys->character_bits) + ((CHARCOUNT + 0x1f) / 32) * 4;
 
+    auto buf_addr = buf->addr;
     while (NuFParGetLine(fp) != 0) {
         if (NuFParGetWord(fp) == 0 || NuStrICmp(fp->word_buf, "cutscene") != 0 || sys->count > 0x1f ||
             NuFParGetWord(fp) == 0) {
             continue;
         }
 
-        cut = (CUTINFO *)ALIGN(buf->addr, 4);
+        cut = (CUTINFO *)ALIGN(buf_addr, 4);
         entries[sys->count] = cut;
         buf->void_ptr = cut + 1;
         NuStrLwr(name, fp->word_buf);
@@ -686,7 +687,7 @@ void *CutScenes_Load(char *config, NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VAR
             buf->void_ptr = cut;
             continue;
         }
-        buf->void_ptr = (char *)ALIGN(buf->addr, 0x40);
+        buf->void_ptr = (char *)ALIGN(buf_addr, 0x40);
         NuStrCpy(full_path, "cut\\");
         NuStrCat(full_path, name);
         NuStrCat(full_path, ".cu2");
@@ -713,7 +714,7 @@ void *CutScenes_Load(char *config, NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VAR
         cut->instance = instNuGCutSceneCreate(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), NULL, NULL, name, buf, 0);
         if (cut->instance != NULL) {
             reinterpret_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = cut->frames_per_second * DEFAULTFRAMETIME;
-            buf->void_ptr = (char *)ALIGN(buf->addr, 0x10);
+            buf->void_ptr = (char *)ALIGN(buf_addr, 0x10);
         }
         sys->count++;
     }
@@ -965,7 +966,8 @@ static void NuGCutSceneFixPtrs_Title(NUGCUTSCENE_s *cutscene, isize anim_delta) 
         if (system->events != NULL) {
             system->events =
                 reinterpret_cast<NUGCUTTRIGGEREVENT_s *>(reinterpret_cast<isize>(system->events) + data_delta);
-            for (i32 i = 0; i < system->event_count; ++i) {
+            auto system_event_count = system->event_count;
+            for (i32 i = 0; i < system_event_count; ++i) {
                 NUGCUTTRIGGEREVENT_s *event = &system->events[i];
                 if (event->field_04 != NULL) {
                     event->field_04 = reinterpret_cast<void *>(reinterpret_cast<isize>(event->field_04) + data_delta);
@@ -2593,10 +2595,11 @@ extern "C" void NuGCutSceneSysRender(i32 paused) {
                 NUGCUTSCENE_s *cutscene = instance->cutscene;
                 const f32 frame = instance->render_frame;
                 NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
+                auto instance_flags_88 = instance->flags_88;
                 for (u32 i = 0; system != NULL && i < system->locator_count; ++i) {
                     NUGCUTLOCATOR_s *locator = &system->locators[i];
                     if ((locator->flags & 3) == 0) {
-                        NUMTX *parent_matrix = static_cast<i8>(instance->flags_88) < 0 ? &instance->matrix : NULL;
+                        NUMTX *parent_matrix = static_cast<i8>(instance_flags_88) < 0 ? &instance->matrix : NULL;
                         instNuGCutLocatorUpdate(instance, system, &locator_instance->locators[i], locator, frame,
                                                 parent_matrix, paused);
                     }
@@ -2634,7 +2637,8 @@ extern "C" void NuGCutSceneSysRender(i32 paused) {
                 NUGCUTSCENE_s *cutscene = instance->cutscene;
                 const f32 frame = cutscene->duration - instance->render_frame;
                 NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
-                for (u32 i = 0; system != NULL && i < system->locator_count; ++i) {
+                auto system_locator_count = system->locator_count;
+                for (u32 i = 0; system != NULL && i < system_locator_count; ++i) {
                     NUGCUTLOCATOR_s *locator = &system->locators[i];
                     if ((locator->flags & 3) == 0) {
                         NUMTX *parent_matrix = static_cast<i8>(instance->flags_88) < 0 ? &instance->matrix : NULL;
@@ -2680,7 +2684,8 @@ void NewCopyAnims(instNUGCUTSCENE_s *instance) {
     NUGCUTLOCATORSYS_s *source_locators = source->locator_system;
     if (destination_locators != NULL) {
         if (destination_locators->locator_count != 0) {
-            for (i32 i = 0; i < destination_locators->locator_count; ++i) {
+            auto destination_locators_locator_count = destination_locators->locator_count;
+            for (i32 i = 0; i < destination_locators_locator_count; ++i) {
                 nuanimdata2_s *animation = destination_locators->locators[i].animation;
                 destination_locators->locators[i] = source_locators->locators[i];
                 destination_locators->locators[i].animation = animation;
@@ -2708,7 +2713,8 @@ void NewCopyAnims(instNUGCUTSCENE_s *instance) {
     NUGCUTCHARSYS_s *source_characters = source->character_system;
     NUGCUTCHARSYS_s *destination_characters = destination->character_system;
     if (destination_characters != NULL && destination_characters->character_count != 0) {
-        for (i32 i = 0; i < destination_characters->character_count; ++i) {
+        auto destination_characters_character_count = destination_characters->character_count;
+        for (i32 i = 0; i < destination_characters_character_count; ++i) {
             NUGCUTCHAR_s *character = &destination_characters->characters[i];
             nuanimdata2_s *animation = character->animation;
             nuanimdata2_s *face_animation = character->face_animation;
@@ -2749,7 +2755,8 @@ static __used__ void copyAnims(NUGCUTSCENE_s *destination, NUGCUTSCENE_s *source
     NUGCUTLOCATORSYS_s *source_locators = source->locator_system;
     if (source_locators != NULL && source_locators->locators != NULL && source_locators->locator_count != 0) {
         NUGCUTLOCATORSYS_s *destination_locators = destination->locator_system;
-        for (i32 i = 0; i < source_locators->locator_count; ++i) {
+        auto source_locators_locator_count = source_locators->locator_count;
+        for (i32 i = 0; i < source_locators_locator_count; ++i) {
             if (source_locators->locators[i].animation != NULL) {
                 destination_locators->locators[i].animation = source_locators->locators[i].animation;
             }

@@ -625,8 +625,9 @@ static __used__ void pathEditor_cbRenamePath(eduimenu_s *, eduiitem_s *item, u32
         return;
     }
     EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths);
+    auto input_name = input->name;
     while (path != nullptr) {
-        if (NuStrICmp(path->name, input->name) == 0) {
+        if (NuStrICmp(path->name, input_name) == 0) {
             return;
         }
         path = (EDAIPATH_s *)NuLinkedListGetNext(&aieditor->paths, &path->link);
@@ -927,7 +928,8 @@ static __used__ void pathEditor_cbSetCurrentPath(eduimenu_s *, eduiitem_s *item,
     if (item != nullptr) {
         EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths);
         i32 index = 0;
-        while (path != nullptr && index != item->data) {
+        auto item_data = item->data;
+        while (path != nullptr && index != item_data) {
             path = (EDAIPATH_s *)NuLinkedListGetNext(&aieditor->paths, &path->link);
             ++index;
         }
@@ -1227,8 +1229,9 @@ static __used__ void routeEditor_cbRenameRoute(eduimenu_s *, eduiitem_s *item, u
     if (input->name[0] == '\0') {
         return;
     }
+    auto input_name = input->name;
     for (i32 index = 0; index < 16; ++index) {
-        if (NuStrICmp(path->routes[index].name, input->name) == 0) {
+        if (NuStrICmp(path->routes[index].name, input_name) == 0) {
             return;
         }
     }

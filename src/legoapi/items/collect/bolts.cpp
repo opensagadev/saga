@@ -701,9 +701,11 @@ void Bolt_HitGameObjectRC(NetMessage &);
 i32 Bolt_HitGameObject(BOLT_s *bolt, GameObject_s *object, NUVEC *points, NUVEC *, NUVEC *, f32 radius, u8 *) {
     NUVEC center = object->apiobj.collision_position;
     i32 hit = (bolt->flags & 0x200) != 0 ? 1 : 2;
+    auto bolt_type = bolt->type;
+    auto f24 = bolt_type->field_24;
     for (;;) {
         NUVEC point = points[hit];
-        if ((bolt->flags & 0x8000000) != 0 && bolt->time >= bolt->type->field_24) {
+        if ((bolt->flags & 0x8000000) != 0 && bolt->time >= f24) {
             center.y = 0.0f;
             point.y = 0.0f;
         }
@@ -1613,6 +1615,7 @@ void Bolts_Update(WORLDINFO_s *world) {
     NUVEC normal = v010;
     u8 processed[32] = {};
     u8 *processed_bolt = processed;
+    auto world_debris_sys = world->debris_sys;
     for (BOLT_s *bolt = Bolt; bolt != Bolt + 32; ++bolt, ++processed_bolt) {
         if (!bolt->active || *processed_bolt)
             continue;
@@ -1743,7 +1746,7 @@ void Bolts_Update(WORLDINFO_s *world) {
                 i16 effect = static_cast<i16>(static_cast<u32>(type->field_30) >> (i * 16));
                 u16 count = static_cast<u16>(static_cast<u32>(type->field_34) >> (i * 16));
                 if (effect != -1 && count != 0)
-                    AddVariableShotDebrisEffectTimed5(world->debris_sys->entries[effect].effect, &bolt->position, NULL,
+                    AddVariableShotDebrisEffectTimed5(world_debris_sys->entries[effect].effect, &bolt->position, NULL,
                                                       &bolt->velocity, count, FRAMETIME, NULL, NULL, 20000, 0);
             }
             if ((bolt->flags & 0x10000) != 0)

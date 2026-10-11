@@ -3483,6 +3483,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
     }
     i32 sabre = 0;
     u16 rotation = 0;
+    auto f0x1020 = object->field_0x1020;
     for (i32 hand = 0; hand < 4; ++hand) {
         data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
         const i32 joint = data->weapon_joints[hand];
@@ -3601,7 +3602,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                                     model = models[part];
                                 }
                                 NUMTX reflected;
-                                if (MatrixReflection(matrix, object->field_0x1087, object->field_0x1020,
+                                if (MatrixReflection(matrix, object->field_0x1087, f0x1020,
                                                      WORLD->current_level->unknown_0cc, &reflected)) {
                                     NuRndrStartReflectionRender(0);
                                     Draw3DObjectMtx(NULL, model, &reflected);

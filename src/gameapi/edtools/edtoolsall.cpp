@@ -3066,7 +3066,8 @@ i32 edSpline_FindAllSub(NUGSCN *scene, char *name, NUGSPLINE **results, i32 capa
         }
     }
     if (scene != NULL) {
-        for (i32 i = 0; i < scene->numsplines; ++i) {
+        auto scene_numsplines = scene->numsplines;
+        for (i32 i = 0; i < scene_numsplines; ++i) {
             if (NuStrIStr(scene->splines[i].name, name) != NULL) {
                 results[count++] = &scene->splines[i];
                 if (count >= capacity)

@@ -836,7 +836,8 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char
             AIPATHSPECIALROUTE *route = &path_system->special_routes[i];
             route->path_count = static_cast<u8>(EdFileReadChar());
             route->paths = static_cast<AIPATH **>(AISysLoadAlloc(system, route->path_count * sizeof(AIPATH *)));
-            for (i32 path_index = 0; path_index < route->path_count; ++path_index) {
+            auto route_path_count = route->path_count;
+            for (i32 path_index = 0; path_index < route_path_count; ++path_index) {
                 const i32 read_path_index = EdFileReadChar();
                 route->paths[path_index] = path_system->paths[read_path_index];
             }
@@ -846,7 +847,8 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char
 }
 
 static AIAREA *AISysLoadFindArea(AISYS *system, char *name) {
-    for (i32 index = 0; index < system->area_count; ++index) {
+    auto system_area_count = system->area_count;
+    for (i32 index = 0; index < system_area_count; ++index) {
         AIAREA *area = &system->areas[index];
         if (NuStrICmp(name, area->name) == 0) {
             return area;
@@ -1151,7 +1153,8 @@ static void AISysResetPathSearchConnectionChecks(AIPATH *path) {
 }
 
 static AILOCATOR *AISysLoadFindLocator(AISYS *system, char *name) {
-    for (i32 index = 0; index < system->locator_count; ++index) {
+    auto system_locator_count = system->locator_count;
+    for (i32 index = 0; index < system_locator_count; ++index) {
         AILOCATOR *locator = &system->locators[index];
         if (NuStrICmp(name, locator->name) == 0) {
             return locator;
@@ -1278,6 +1281,7 @@ static void AISysLoadCreatures(AISYS *system, i32 version) {
     }
 
     system->creatures = static_cast<AICREATURE *>(AISysLoadAlloc(system, system->creature_count * sizeof(AICREATURE)));
+    auto system_path_sys = system->path_sys;
     for (i32 index = 0; index < system->creature_count; ++index) {
         AICREATURE *creature = &system->creatures[index];
         EdFileRead(creature->name, sizeof(creature->name));
@@ -1306,7 +1310,7 @@ static void AISysLoadCreatures(AISYS *system, i32 version) {
         creature->z_spacing = EdFileReadFloat();
         creature->flags = EdFileReadInt();
         u8 path_index = static_cast<u8>(EdFileReadChar());
-        creature->path_info.path = system->path_sys->paths[path_index];
+        creature->path_info.path = system_path_sys->paths[path_index];
         creature->path_info.direction = static_cast<u8>(EdFileReadChar());
         u16 connection_index = static_cast<u16>(EdFileReadShort());
         creature->path_info.connection = &creature->path_info.path->connections[connection_index];

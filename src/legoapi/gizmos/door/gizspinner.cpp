@@ -950,9 +950,10 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
         spinner->matrix = matrix;
         i32 angle = 0;
         i32 arm_count = spinner->type < 8 ? spinner->type : 8;
+        auto spinner_rotation = spinner->rotation;
         for (i32 arm = 0; arm < arm_count; ++arm) {
             NuMtxSetRotationY(&matrix, 0);
-            NuMtxRotateY(&matrix, spinner->rotation + spinner->initial_rotation);
+            NuMtxRotateY(&matrix, spinner_rotation + spinner->initial_rotation);
             NuMtxRotateY(&matrix, angle);
             NuMtxTranslate(&matrix, &spinner->position);
             spinner->arms[arm].matrix = matrix;
@@ -1389,10 +1390,11 @@ f32 GizSpinner_GetNearestTargetPoint(GIZSPINNER_s *spinner, nuvec_s *origin, nuv
     f32 nearest_distance = 1000000000.0f;
     NUVEC *nearest_position = NULL;
     NUVEC *nearest_direction = NULL;
+    auto spinner_initial_rotation = spinner->initial_rotation;
     for (i32 i = 0; i < count; ++i) {
         f32 distance = NuVecDistSqr(origin, &positions[i], NULL);
         if (check_direction != 0) {
-            u16 angle = spinner->field_0x08c + 0x4000 - spinner->rotation - spinner->initial_rotation +
+            u16 angle = spinner->field_0x08c + 0x4000 - spinner->rotation - spinner_initial_rotation +
                         (-65536 / spinner->type) * i;
             NUVEC offset;
             NuVecSub(&offset, origin, &spinner->position);
@@ -1424,7 +1426,8 @@ GIZSPINNER_s *GizSpinner_FindNearest(nuvec_s *position, WORLDINFO_s *world, f32 
     GIZSPINNER_s *nearest = NULL;
     if (world->spinners != NULL) {
         nearest_distance = 1000000000.0f;
-        for (i32 index = 0; index < world->current_level->max_spinners; ++index) {
+        auto world_current_level = world->current_level;
+        for (i32 index = 0; index < world_current_level->max_spinners; ++index) {
             GIZSPINNER_s *spinner = &world->spinners[index];
             if ((spinner->flags & GIZSPINNER_FLAG_VALID) == 0 || (spinner->flags & 0x26) != 0) {
                 continue;

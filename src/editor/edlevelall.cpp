@@ -1162,8 +1162,9 @@ void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
     if (input.GetPress(20) != 0.0f) {
         void *current = entry->object;
         void *previous = NULL;
+        auto entry_ed_class = entry->ed_class;
         for (i32 remaining = 4096; remaining != 0; --remaining) {
-            if (Editable(current, entry->ed_class, -1))
+            if (Editable(current, entry_ed_class, -1))
                 previous = current;
             current = interface->vtable->get_next_object(interface, current);
             if (current == NULL)
@@ -2538,6 +2539,7 @@ void PropertyMenu::SelectAttr(i32 selected) {
 }
 
 void PropertyTool::AddPropertyMenuItems(eduimenu_s *menu, EdClass *ed_class, void *object, eduiitem_s *parent) {
+    auto menu_last = menu->last;
     for (EdRef *member = ed_class->members; member != NULL; member = member->next) {
         if (member->attributes < 0) {
             eduiitem_s *expander = eduiItemExpanderCreate(0, &EdLevelAttr, 0, member->name);
@@ -2549,7 +2551,7 @@ void PropertyTool::AddPropertyMenuItems(eduimenu_s *menu, EdClass *ed_class, voi
             EdClass *child_class = theRegistry.GetClass(member->type_id);
             AddPropertyMenuItems(menu, child_class, member->GetMemberObject(object), expander);
         } else if (member->control != NULL) {
-            eduiitem_s *last = menu->last;
+            eduiitem_s *last = menu_last;
             member->control->AddMenuItem(menu, member, object);
             if (parent != NULL) {
                 eduiitem_s *item = last != NULL ? last->next : menu->first;

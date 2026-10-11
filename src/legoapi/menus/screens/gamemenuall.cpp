@@ -270,9 +270,10 @@ void APIMenuDrawMemCardSlots(MENU *menu, f32 y) {
         x = (count - 1) * -0.25f;
     }
 
+    auto menu_first_row = menu->first_row;
     for (i32 slot = first; slot <= last; ++slot, x += 0.5f) {
         const i32 highlight =
-            menu->selected_row == menu->first_row && menu->selected_column == slot && slideleft == 0 && slideright == 0;
+            menu->selected_row == menu_first_row && menu->selected_column == slot && slideleft == 0 && slideright == 0;
         if (slot < 0 || slot > menu->last_column) {
             continue;
         }
