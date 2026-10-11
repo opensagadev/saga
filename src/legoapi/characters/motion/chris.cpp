@@ -1476,7 +1476,7 @@ i32 ShipDropCoins(starfighter_s *fighter) {
     if (space->coin_history_count > 0) {
         for (; index < space->coin_history_count; ++index) {
             if (space->coin_history[index].spline_id == fighter->spline->id &&
-                space->coin_history[index].spawn_time == fighter->spawn_time)
+                fighter->spawn_time == space->coin_history[index].spawn_time)
                 return 0;
         }
         if (index > 255)

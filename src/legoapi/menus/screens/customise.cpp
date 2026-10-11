@@ -86,7 +86,7 @@ void Text_FillInExtendedSaveInfo();
 extern i16 tPLAYER1, tPLAYER2;
 
 static void UpdateCustomPieceAnim(CUSTOMPIECEANIM *anim, u16 minimum, u16 maximum) {
-    if (anim->duration > anim->elapsed) {
+    if (anim->elapsed < anim->duration) {
         anim->elapsed += FRAMETIME;
         if (anim->elapsed >= anim->duration) {
             anim->elapsed = anim->duration;
@@ -95,7 +95,7 @@ static void UpdateCustomPieceAnim(CUSTOMPIECEANIM *anim, u16 minimum, u16 maximu
         i32 difference = RotDiff(anim->start_angle, anim->target_angle);
         f32 blend =
             1.0f - (NU_SIN_LUT(static_cast<i32>(anim->elapsed / anim->duration * 32768.0f + 16384.0f)) + 1.0f) * 0.5f;
-        anim->current_angle = static_cast<i32>(anim->start_angle + static_cast<f32>(difference) * blend);
+        anim->current_angle = static_cast<i32>(static_cast<f32>(difference) * blend + anim->start_angle);
     } else {
         anim->hold_time -= FRAMETIME;
         if (anim->hold_time <= 0.0f) {

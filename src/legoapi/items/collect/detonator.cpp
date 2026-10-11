@@ -169,6 +169,7 @@ static inline i32 DetonatorPlacementSlot(GameObject_s *object) {
 }
 
 void Detonator_MoveCode(GameObject_s *object) {
+    f32 oldest_time;
     if (object->character_context != 0x48 && object->character_context != 0x49) {
         if (WORLD->lev_objs[0xec].active == 0 || static_cast<i8>(object->apiobj.flags_low) >= 0 ||
             (object->apiobj.field_0x27d == 0 && object->field_0xe31 != 1) ||
@@ -184,7 +185,7 @@ void Detonator_MoveCode(GameObject_s *object) {
             object->field_0xe21 |= 0x80;
             object->field_0xde0 += FRAMETIME;
             if (object->field_0xde0 >= 0.3f && object->field_0xde0 >= 1.0f) {
-                f32 oldest_time = -1.0f;
+                oldest_time = -1.0f;
                 DETONATOR_s *oldest = NULL;
                 if (Detonator[0].active != 0) {
                     oldest = &Detonator[0];

@@ -737,7 +737,7 @@ void CutScene_StartAudio() {
 }
 
 i32 CutScene_IsSkippable(CUTINFO *cut) {
-    return FadeSys.fade == 0.0f && cut != NULL && (CutStopInfo != cut || CutSceneWaiting == 0 || cutaudiopaused == 0);
+    return FadeSys.fade == 0.0f && cut != NULL && (cut != CutStopInfo || CutSceneWaiting == 0 || cutaudiopaused == 0);
 }
 
 i32 CutScene_StartFn_LSW(CUTINFO *cut) {
@@ -1885,7 +1885,7 @@ void GoldBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 activ
         }
     }
     if ((stage->field_0x14 == 0 || stage->field_0x18 < 1.0f) && packet->mission_state != 0 &&
-        packet->previous_gold_bricks < Game.field_0x7c26[0])
+        Game.field_0x7c26[0] > packet->previous_gold_bricks)
         iconalphaoverride = 0.0f;
 }
 

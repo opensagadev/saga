@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 75.15322,
+    "fuzzy_match_percent": 75.15787,
     "total_code": "4722419",
     "matched_code": "574465",
     "matched_code_percent": 12.164635,
@@ -47233,7 +47233,7 @@
           "address": 2340224,
           "offset": 1450256,
           "size": 200,
-          "match_percent": 70.71186
+          "match_percent": 74.169495
         },
         {
           "name": "_ZL22CollideBoltStarFighterP6BOLT_sP13starfighter_sP6_vuv_sS4_",
@@ -50648,7 +50648,7 @@
           "address": 4415904,
           "offset": 3525936,
           "size": 2100,
-          "match_percent": 47.791668
+          "match_percent": 48.68849
         },
         {
           "name": "_ZL21instNuGCutRigidSysEndP17instNUGCUTSCENE_sf",
@@ -51462,7 +51462,7 @@
           "address": 2035824,
           "offset": 1145856,
           "size": 1047,
-          "match_percent": 86.49231
+          "match_percent": 87.88718
         },
         {
           "name": "_Z22LevelComplete_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
@@ -51630,7 +51630,7 @@
           "address": 4838320,
           "offset": 3948352,
           "size": 83,
-          "match_percent": 83.61539
+          "match_percent": 84.0
         },
         {
           "name": "_Z14CutScenes_DrawP11WORLDINFO_s",
@@ -62906,7 +62906,7 @@
           "address": 1925152,
           "offset": 1035184,
           "size": 3211,
-          "match_percent": 38.969116
+          "match_percent": 44.25294
         }
       ]
     },
@@ -68907,7 +68907,7 @@
           "address": 1805136,
           "offset": 915168,
           "size": 432,
-          "match_percent": 88.052635
+          "match_percent": 90.094734
         },
         {
           "name": "_Z22Customiser_PieceConfigP11CUSTOMPIECEP8nufpar_s",

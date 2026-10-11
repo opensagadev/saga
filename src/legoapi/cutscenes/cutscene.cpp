@@ -2323,7 +2323,7 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
     NUGCUTCAMERA_s *camera = &system->cameras[camera_index];
     instNUGCUTCAMSTATE_s *camera_state = &camera_instance->camera_states[camera_index];
     CutSceneCameraCTRL = 1;
-    if ((camera->flags & 1) == 0 || NuAnimNumNodes(system->animation) <= camera->animation_node) {
+    if ((camera->flags & 1) == 0 || camera->animation_node >= NuAnimNumNodes(system->animation)) {
         cutscenecammtx = camera->base_matrix;
     } else {
         if (static_cast<u8>(instance->cutscene->version) > 4 && system->focus_animation != NULL &&
