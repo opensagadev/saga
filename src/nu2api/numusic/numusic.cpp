@@ -985,6 +985,10 @@ i32 NuMusic::SetTrackEntryTimeByClass(u32 clazz, f32 entry_time) {
     return 1;
 }
 
+void NuMusic::Track::SetEntryTime(f32 entry_time) {
+    this->start_offset = entry_time;
+}
+
 void NuMusic::Track::ManageEntryTime() {
     // Advance to the next INDEX entry; the value becomes this track's
     // start offset the next time it is played.
@@ -995,10 +999,6 @@ void NuMusic::Track::ManageEntryTime() {
         this->entry_index = index;
     }
     this->start_offset = value;
-}
-
-void NuMusic::Track::SetEntryTime(f32 entry_time) {
-    this->start_offset = entry_time;
 }
 
 void NuMusic::Process(f32 delta) {
@@ -1199,6 +1199,12 @@ NuMusic *NuMusic::GetPlayer() {
     return the_music_player;
 }
 
+void NuMusic::NoMusic(i32 no_music) {
+    if (this != NULL && the_music_player != NULL) {
+        this->track_index = no_music != 0;
+    }
+}
+
 int NuMusic::GetStatus(u32 clazz, i32 *class_status) {
     if (this == NULL || the_music_player == NULL) {
         return 0;
@@ -1262,12 +1268,6 @@ int NuMusic::GetStatus(u32 clazz, i32 *class_status) {
         }
     }
     return result;
-}
-
-void NuMusic::NoMusic(i32 no_music) {
-    if (this != NULL && the_music_player != NULL) {
-        this->track_index = no_music != 0;
-    }
 }
 
 i32 NuMusic::SetAlbum(char const *name) {

@@ -435,7 +435,9 @@ void NuMemoryManager::BlockFree(void *ptr, u32 flags) {
             manager_idx = tag_value - 1;
         }
 
-        if (manager->idx == manager_idx) {
+        if (manager->idx != manager_idx) {
+            manager = m_memoryManagers[manager_idx];
+        } else {
             u32 header_value;
             Header *right;
             u32 left_end;
@@ -484,8 +486,6 @@ void NuMemoryManager::BlockFree(void *ptr, u32 flags) {
 
             pthread_mutex_unlock(&manager->mutex);
             return;
-        } else {
-            manager = m_memoryManagers[manager_idx];
         }
     }
 }
@@ -853,10 +853,10 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
             largest_stranded_dbg = (DebugHeader *)largest_stranded;
 
             block_name = largest_stranded_dbg->name;
-            if (block_name != NULL) {
-                block_name = NuStrStripPath(block_name);
-            } else {
+            if (block_name == NULL) {
                 block_name = "UNKNOWN";
+            } else {
+                block_name = NuStrStripPath(block_name);
             }
 
             strcpy(largest_leak, block_name);
@@ -1191,9 +1191,6 @@ done:
     return frag;
 }
 
-void NuMemoryManager::Dump(u32 _unknown, const char *filepath) {
-}
-
 void NuMemoryManager::StrandBlocksForContext(Context *ctx, u32 &stranded_block_count, u32 &_unknown,
                                              Header *&largest_stranded, u32 &stranded_bytes_count) {
     if ((m_flags & MEM_MANAGER_DEBUG) == 0) {
@@ -1236,6 +1233,9 @@ void NuMemoryManager::StrandBlocksForContext(Context *ctx, u32 &stranded_block_c
     _unknown = total_stranded;
     largest_stranded = largest;
     stranded_bytes_count = stranded_bytes;
+}
+
+void NuMemoryManager::Dump(u32 _unknown, const char *filepath) {
 }
 
 void NuMemoryManager::FreeStrandedBlocks() {

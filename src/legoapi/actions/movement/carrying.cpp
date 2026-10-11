@@ -429,11 +429,11 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         case 1: {
             bool event = false;
             if ((object->context_flags & 0x40) == 0) {
-                if (frame != NULL) {
+                if (frame == NULL) {
+                    event = SuperCarry_PutDownDrop != 0;
+                } else {
                     f32 marker = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
                     event = marker >= 1.0f && *frame >= marker;
-                } else {
-                    event = SuperCarry_PutDownDrop != 0;
                 }
             }
             object->context_animation_timer -= FRAMETIME;

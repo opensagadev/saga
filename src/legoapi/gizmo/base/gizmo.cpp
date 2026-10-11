@@ -380,24 +380,6 @@ i32 GizmoGetVisibility(GIZMOSYS *gizmo_sys, GIZMO *gizmo) {
     return gizmotypes->types[gizmo->type_id].fns.get_visibility_fn(gizmo);
 }
 
-void GizmoActivate(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 unknown1, i32 unknown2) {
-    if (gizmotypes == NULL || gizmo == NULL || gizmo_sys == NULL || gizmo->type_id >= gizmotypes->count) {
-        return;
-    }
-
-    GIZMOTYPE *type = &gizmotypes->types[gizmo->type_id];
-    if (type->fns.activate_fn == NULL) {
-        return;
-    }
-
-    if (unknown1 != 0 && type->fns.set_visibility_fn != NULL) {
-        type->fns.set_visibility_fn(gizmo, 1);
-    }
-
-    type->fns.activate_fn(gizmo, unknown1);
-    LOG_INFO("gizmo activate type=%s gizmo=%p active=%d", type->name, (void *)gizmo, unknown1);
-}
-
 char *GizmoGetOutputName(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 output_index) {
     if (gizmotypes == NULL || gizmo == NULL || gizmo_sys == NULL) {
         return NULL;
@@ -420,6 +402,24 @@ i32 GizmoGetOutput(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 unknown1, i32 unknown2
     }
 
     return gizmotypes->types[gizmo->type_id].fns.get_output_fn(gizmo, unknown1, unknown2);
+}
+
+void GizmoActivate(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 unknown1, i32 unknown2) {
+    if (gizmotypes == NULL || gizmo == NULL || gizmo_sys == NULL || gizmo->type_id >= gizmotypes->count) {
+        return;
+    }
+
+    GIZMOTYPE *type = &gizmotypes->types[gizmo->type_id];
+    if (type->fns.activate_fn == NULL) {
+        return;
+    }
+
+    if (unknown1 != 0 && type->fns.set_visibility_fn != NULL) {
+        type->fns.set_visibility_fn(gizmo, 1);
+    }
+
+    type->fns.activate_fn(gizmo, unknown1);
+    LOG_INFO("gizmo activate type=%s gizmo=%p active=%d", type->name, (void *)gizmo, unknown1);
 }
 
 void GizmoSysEarlyUpdate(GIZMOSYS *gizmo_sys, void *world_info, float delta_time) {
@@ -978,42 +978,6 @@ void GizmoSysReset(GIZMOSYS *gizmo_sys, void *world, i32 progress_index) {
     }
 }
 
-GIZMO *GizmoFindByData(GIZMOSYS *gizmo_sys, i32 type_id, void *data) {
-    if (gizmotypes == NULL || data == NULL || gizmo_sys == NULL) {
-        return NULL;
-    }
-
-    if (type_id >= 0 && type_id <= gizmotypes->count) {
-        GIZMOTYPE &type = gizmotypes->types[type_id];
-        GIZMOSET &set = gizmo_sys->sets[type_id];
-        if (type.fns.get_gizmo_name_fn == NULL) {
-            return NULL;
-        }
-
-        GIZMO *gizmo = set.gizmos;
-        for (i32 i = 0; i < set.count; ++i, ++gizmo) {
-            if (gizmo->object == data) {
-                return gizmo;
-            }
-        }
-        return NULL;
-    }
-
-    GIZMOTYPE *type = gizmotypes->types;
-    GIZMOSET *set = gizmo_sys->sets;
-    for (i32 type_index = 0; type_index < gizmotypes->count; ++type_index, ++type, ++set) {
-        if (type->fns.get_gizmo_name_fn != NULL) {
-            GIZMO *gizmo = set->gizmos;
-            for (i32 i = 0; i < set->count; ++i, ++gizmo) {
-                if (gizmo->object == data) {
-                    return gizmo;
-                }
-            }
-        }
-    }
-    return NULL;
-}
-
 GIZMO *GizmoFindByName(GIZMOSYS *gizmo_sys, i32 type_id, char *name) {
     if (gizmotypes == NULL || name == NULL || gizmo_sys == NULL) {
         return NULL;
@@ -1050,6 +1014,42 @@ GIZMO *GizmoFindByName(GIZMOSYS *gizmo_sys, i32 type_id, char *name) {
         }
     }
 
+    return NULL;
+}
+
+GIZMO *GizmoFindByData(GIZMOSYS *gizmo_sys, i32 type_id, void *data) {
+    if (gizmotypes == NULL || data == NULL || gizmo_sys == NULL) {
+        return NULL;
+    }
+
+    if (type_id >= 0 && type_id <= gizmotypes->count) {
+        GIZMOTYPE &type = gizmotypes->types[type_id];
+        GIZMOSET &set = gizmo_sys->sets[type_id];
+        if (type.fns.get_gizmo_name_fn == NULL) {
+            return NULL;
+        }
+
+        GIZMO *gizmo = set.gizmos;
+        for (i32 i = 0; i < set.count; ++i, ++gizmo) {
+            if (gizmo->object == data) {
+                return gizmo;
+            }
+        }
+        return NULL;
+    }
+
+    GIZMOTYPE *type = gizmotypes->types;
+    GIZMOSET *set = gizmo_sys->sets;
+    for (i32 type_index = 0; type_index < gizmotypes->count; ++type_index, ++type, ++set) {
+        if (type->fns.get_gizmo_name_fn != NULL) {
+            GIZMO *gizmo = set->gizmos;
+            for (i32 i = 0; i < set->count; ++i, ++gizmo) {
+                if (gizmo->object == data) {
+                    return gizmo;
+                }
+            }
+        }
+    }
     return NULL;
 }
 

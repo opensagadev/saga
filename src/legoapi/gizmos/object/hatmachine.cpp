@@ -181,11 +181,11 @@ static void HatMachine_Update(void *world_ptr, void *, float elapsed) {
         if (machine->hat_delay > 0.0f) {
             machine->hat_delay -= FRAMETIME;
             if (machine->hat_delay <= 0.0f && machine->displayed_hat == 0) {
-                if (machine->configured_hat_count != 0) {
-                    machine->displayed_hat = machine->configured_hat_count;
-                } else {
+                if (machine->configured_hat_count == 0) {
                     machine->displayed_hat =
                         static_cast<u8>(NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) * 4.0f) + 1;
+                } else {
+                    machine->displayed_hat = machine->configured_hat_count;
                 }
                 machine->hat_delay = 1.0f;
             }
@@ -481,18 +481,7 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
         // The animated machine body is evaluated in its own space and then
         // composed with the machine transform.
         if (animated_instance_animation != NULL) {
-            if (machine->animation_state > 0) {
-                machine->animation_time += FRAMETIME;
-                if (machine->animation_state <= 3 && machine->animation_time >= 3.0f) {
-                    machine->animation_state = 4;
-                    machine->state_elapsed = 0.0f;
-                    machine->state_duration = 2.0f;
-                }
-                animation_frame = machine->animation_time * animated_instance_animation->tfactor * 60.0f;
-                if (animated_end_frame <= animation_frame) {
-                    animation_frame = animated_end_frame;
-                }
-            } else {
+            if (!(machine->animation_state > 0)) {
                 machine->animation_time = 0.0f;
                 animation_frame = 0.0f;
                 if ((machine->flags & (HATMACHINE_FLAG_ANIMATING | HATMACHINE_FLAG_FINISHED |
@@ -510,6 +499,17 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
                     } else if (qrand() <= 0x7ff) {
                         machine->idle_bounce_timer = 0.15f;
                     }
+                }
+            } else {
+                machine->animation_time += FRAMETIME;
+                if (machine->animation_state <= 3 && machine->animation_time >= 3.0f) {
+                    machine->animation_state = 4;
+                    machine->state_elapsed = 0.0f;
+                    machine->state_duration = 2.0f;
+                }
+                animation_frame = machine->animation_time * animated_instance_animation->tfactor * 60.0f;
+                if (animated_end_frame <= animation_frame) {
+                    animation_frame = animated_end_frame;
                 }
             }
 

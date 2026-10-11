@@ -903,36 +903,6 @@ void MenuUpdateNoData(MENU_s *menu) {
     }
 }
 
-void MenuUpdateSaving(MENU_s *) {
-    if (memcard_saveneeded != 0) {
-        memcard_savemessage_delay = 1.0f;
-        memcard_saveresult_delay = 1.0f;
-        if (memcard_cardchanged != 0 || saveload_autosave == -1) {
-            memcard_saveneeded = 0;
-            memcard_savefailed = 1;
-        }
-        return;
-    }
-
-    if (memcard_savestarted != 0) {
-        memcard_saveresult_delay = 1.0f;
-        return;
-    }
-    if (memcard_savemessage_delay > 0.0f || memcard_saveresult_delay > 0.0f) {
-        return;
-    }
-
-    if (memcard_savefailed == 0 && memcard_autosave != 0 && saveload_autosave != -1) {
-        BackupMenuNoFn();
-        BackupMenuNoFn();
-        memcard_autosaveenabled = 1;
-        memcard_autosavedisabled = 0;
-        return;
-    }
-    BackupMenuNoFn();
-    BackupMenu();
-}
-
 void MenuUpdateLoading(MENU_s *) {
     if (memcard_loadneeded != 0) {
         memcard_loadmessage_delay = 1.0f;
@@ -964,6 +934,36 @@ void MenuUpdateLoading(MENU_s *) {
         memcard_autosavedisabled = 0;
         return;
     }
+    BackupMenu();
+}
+
+void MenuUpdateSaving(MENU_s *) {
+    if (memcard_saveneeded != 0) {
+        memcard_savemessage_delay = 1.0f;
+        memcard_saveresult_delay = 1.0f;
+        if (memcard_cardchanged != 0 || saveload_autosave == -1) {
+            memcard_saveneeded = 0;
+            memcard_savefailed = 1;
+        }
+        return;
+    }
+
+    if (memcard_savestarted != 0) {
+        memcard_saveresult_delay = 1.0f;
+        return;
+    }
+    if (memcard_savemessage_delay > 0.0f || memcard_saveresult_delay > 0.0f) {
+        return;
+    }
+
+    if (memcard_savefailed == 0 && memcard_autosave != 0 && saveload_autosave != -1) {
+        BackupMenuNoFn();
+        BackupMenuNoFn();
+        memcard_autosaveenabled = 1;
+        memcard_autosavedisabled = 0;
+        return;
+    }
+    BackupMenuNoFn();
     BackupMenu();
 }
 
@@ -1389,19 +1389,6 @@ void MenuUpdateFormatting(MENU_s *) {
         BackupMenu();
 }
 
-void MenuUpdateInsertCard(MENU_s *menu) {
-    if (menu->cancel_pressed != 0) {
-        MenuSFX = MENUSFX_MENUSELECT;
-        BackupMenuNoFn();
-        NewMenu(1016, 1, -1);
-    }
-    if (menu->confirm_pressed != 0 && menu->selected_row == menu->last_row) {
-        MenuSFX = MENUSFX_MENUSELECT;
-        BackupMenuNoFn();
-        NewMenu(1016, 1, -1);
-    }
-}
-
 void MenuUpdateLoadCancel(MENU_s *menu) {
     if (menu->confirm_pressed != 0) {
         if (menu->selected_row == 0) {
@@ -1425,6 +1412,19 @@ void MenuUpdateSaveCancel(MENU_s *menu) {
     } else if (menu->cancel_pressed != 0) {
         BackupMenu();
         MenuSFX = MENUSFX_MENUSELECT;
+    }
+}
+
+void MenuUpdateInsertCard(MENU_s *menu) {
+    if (menu->cancel_pressed != 0) {
+        MenuSFX = MENUSFX_MENUSELECT;
+        BackupMenuNoFn();
+        NewMenu(1016, 1, -1);
+    }
+    if (menu->confirm_pressed != 0 && menu->selected_row == menu->last_row) {
+        MenuSFX = MENUSFX_MENUSELECT;
+        BackupMenuNoFn();
+        NewMenu(1016, 1, -1);
     }
 }
 
@@ -2498,12 +2498,12 @@ extern "C" {
                 menu->selected_row = last_row;
                 row_clamped = true;
             } else if (down_pressed != 0 && (wrap || menu->selected_row < last_row)) {
-                if (wrap) {
+                if (!wrap) {
+                    ++menu->selected_row;
+                } else {
                     ++menu->selected_row;
                     if (menu->selected_row > last_row)
                         menu->selected_row = first_row;
-                } else {
-                    ++menu->selected_row;
                 }
             } else if (up_pressed != 0 && (wrap || menu->selected_row > first_row)) {
                 if (wrap) {

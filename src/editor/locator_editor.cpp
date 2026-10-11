@@ -1022,10 +1022,7 @@ process_buttons:
                         break;
                     }
                 }
-                if ((pad->digital_buttons_pressed & 0x08) != 0) {
-                    next = index < 0 || index >= 63 || set->locators[index + 1] == nullptr ? set->locators[0]
-                                                                                           : set->locators[index + 1];
-                } else {
+                if ((pad->digital_buttons_pressed & 0x08) == 0) {
                     if (aieditor->current_locator == nullptr) {
                         next = set->locators[0];
                     } else if (index > 0) {
@@ -1038,6 +1035,9 @@ process_buttons:
                             }
                         }
                     }
+                } else {
+                    next = index < 0 || index >= 63 || set->locators[index + 1] == nullptr ? set->locators[0]
+                                                                                           : set->locators[index + 1];
                 }
             } else if ((pad->digital_buttons_pressed & 0x08) != 0) {
                 if (aieditor->current_locator != nullptr) {

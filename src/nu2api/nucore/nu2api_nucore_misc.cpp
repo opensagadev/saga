@@ -254,16 +254,16 @@ void NuLgtArcLaserDraw(i32 paused) {
         f32 progress = 0.0f;
         do {
             f32 next = progress + step;
-            if (next >= 1.0f) {
-                vertices[5].x = vertices[6].x + vertices[7].x;
-                vertices[5].y = vertices[6].y + vertices[7].y;
-                vertices[5].z = vertices[6].z + vertices[7].z;
-                u = NuLgtArcMtl[0].u1 + (1.0f - progress) * (NuLgtArcMtl[0].u0 - NuLgtArcMtl[0].u1) / step;
-            } else {
+            if (!(next >= 1.0f)) {
                 i32 angle = ((i32)(32768.0f * next) >> 1) & 0x7fff;
                 vertices[5].x = next * vertices[7].x + vertices[6].x + vertices[10].x * NuTrigTable[angle];
                 vertices[5].y = next * vertices[7].y + vertices[6].y + vertices[10].y * NuTrigTable[angle];
                 vertices[5].z = next * vertices[7].z + vertices[6].z + vertices[10].z * NuTrigTable[angle];
+            } else {
+                vertices[5].x = vertices[6].x + vertices[7].x;
+                vertices[5].y = vertices[6].y + vertices[7].y;
+                vertices[5].z = vertices[6].z + vertices[7].z;
+                u = NuLgtArcMtl[0].u1 + (1.0f - progress) * (NuLgtArcMtl[0].u0 - NuLgtArcMtl[0].u1) / step;
             }
             vertices[5].w = 1.0f;
             NuVec4MtxTransformVU0(&vertices[5], &vertices[5], clip);

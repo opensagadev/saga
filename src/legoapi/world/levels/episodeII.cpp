@@ -357,20 +357,6 @@ void BountyHunterPursuitD_Reset(WORLDINFO_s *world) {
     LevGameObject[0] = GetNamedGameObject(world->ai_sys, "ai_zam");
 }
 
-void BountyHunterPursuitA_Update(WORLDINFO_s *world) {
-    if (zamarrow.object != NULL && (zamarrow.object->apiobj.field_0x1f8 & 0x1000) != 0 &&
-        zamarrow.object->apiobj.field_0x287 == 0) {
-        if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
-            zamarrow.timer = MIN(1.0f, (FRAMETIME + FRAMETIME) + zamarrow.timer);
-            if (0.1f > NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f)) {
-                UpdateZamArrow(world);
-            }
-        } else {
-            zamarrow.timer = 0.0f;
-        }
-    }
-}
-
 void BountyHunterPursuitB_Update(WORLDINFO_s *world) {
     if (LevAIMessage[0] == NULL || LevAIMessage[0]->value != 1.0f || zamarrow.object == NULL ||
         (zamarrow.object->apiobj.field_0x1f8 & 0x1000) == 0 || zamarrow.object->apiobj.field_0x287 != 0) {
@@ -384,6 +370,20 @@ void BountyHunterPursuitB_Update(WORLDINFO_s *world) {
         }
     } else {
         zamarrow.timer = 0.0f;
+    }
+}
+
+void BountyHunterPursuitA_Update(WORLDINFO_s *world) {
+    if (zamarrow.object != NULL && (zamarrow.object->apiobj.field_0x1f8 & 0x1000) != 0 &&
+        zamarrow.object->apiobj.field_0x287 == 0) {
+        if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
+            zamarrow.timer = MIN(1.0f, (FRAMETIME + FRAMETIME) + zamarrow.timer);
+            if (0.1f > NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f)) {
+                UpdateZamArrow(world);
+            }
+        } else {
+            zamarrow.timer = 0.0f;
+        }
     }
 }
 
@@ -914,6 +914,13 @@ void KaminoE_Reset(WORLDINFO_s *world) {
 
 static NUVEC kamino_e_centre = {56.5f, -2.890000104904175f, 8.0f};
 static NUVEC kamino_e_gunoffset[2] = {{0.2f, -1.1f, 0.9f}, {-0.2f, -1.1f, 0.9f}};
+
+void KaminoE_AlwaysUpdate(WORLDINFO_s *) {
+    bool v = 1;
+    if (CUTSTOPGAME == 0)
+        v = (GameCam->sock_position.location.sock == 0x1e);
+    object_switches[1] = v;
+}
 void KaminoE_Update(WORLDINFO_s *world) {
     if (kamino_e.reset_turrets != NULL && kamino_e.reset_turrets->value == 1.0f) {
         kamino_e.active_turret = NULL;
@@ -1149,13 +1156,6 @@ void KaminoE_Update(WORLDINFO_s *world) {
     }
 }
 
-void KaminoE_AlwaysUpdate(WORLDINFO_s *) {
-    bool v = 1;
-    if (CUTSTOPGAME == 0)
-        v = (GameCam->sock_position.location.sock == 0x1e);
-    object_switches[1] = v;
-}
-
 void KaminoE_Draw(WORLDINFO_s *world) {
     if (netclient == 0) {
         if (kamino_e.show_hearts->value > 0.0f) {
@@ -1311,23 +1311,6 @@ void FactoryB_Draw(WORLDINFO_s *) {
     DrawPaintLights();
 }
 
-void FactoryG_Init(WORLDINFO_s *world) {
-    if (netclient != 0)
-        return;
-    GIZMO *g = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force5");
-    if (g != NULL)
-        force_array[0] = (GIZFORCE_s *)g->object;
-    g = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force6");
-    if (g != NULL)
-        force_array[1] = (GIZFORCE_s *)g->object;
-    g = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force7");
-    if (g != NULL)
-        force_array[2] = (GIZFORCE_s *)g->object;
-    g = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force8");
-    if (g != NULL)
-        force_array[3] = (GIZFORCE_s *)g->object;
-}
-
 void FactoryG_Update(WORLDINFO_s *world) {
     if (netclient == 0) {
         i32 complete = 0;
@@ -1357,6 +1340,23 @@ void FactoryG_Update(WORLDINFO_s *world) {
             ObiWan = (GameObject_s *)FindGameObject((i32)(i16)id_OBIWANKENOBIJEDIMASTER, 0x400, 0, 1, 0);
         }
     }
+}
+
+void FactoryG_Init(WORLDINFO_s *world) {
+    if (netclient != 0)
+        return;
+    GIZMO *g = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force5");
+    if (g != NULL)
+        force_array[0] = (GIZFORCE_s *)g->object;
+    g = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force6");
+    if (g != NULL)
+        force_array[1] = (GIZFORCE_s *)g->object;
+    g = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force7");
+    if (g != NULL)
+        force_array[2] = (GIZFORCE_s *)g->object;
+    g = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force8");
+    if (g != NULL)
+        force_array[3] = (GIZFORCE_s *)g->object;
 }
 
 // ===========================================================================
@@ -1709,6 +1709,98 @@ void JediB_Reset(WORLDINFO_s *world) {
     jedi_b.unique_spawned &= ~3;
 }
 
+void JediB_DrawPanel(WORLDINFO_s *) {
+    if (Mission_Active(MissionSys) != NULL) {
+        return;
+    }
+    i16 ids[8];
+    char spawned[8] = {0};
+    if (netclient == 0) {
+        if (nethost != 0) {
+            jedib_netpacket->state = jedi_b.state;
+            jedib_netpacket->phase = jedi_b.phase;
+        }
+        if (jedi_b.state != 1) {
+            return;
+        }
+        switch (jedi_b.phase) {
+            case 1:
+            case 2:
+            case 3: {
+                i32 count;
+                if (jedi_b.goody_count != 0) {
+                    count = jedi_b.goody_count;
+                    if (count > 8) {
+                        count = 8;
+                    }
+                    for (i32 index = 0; index < count; index++) {
+                        ids[index] = static_cast<i16>(jedi_b.goodies[index].id);
+                        if (jedi_b.goodies[index].object == NULL) {
+                            spawned[index] = 1;
+                        }
+                    }
+                } else {
+                    if (jedi_b.phase == 1) {
+                        ids[0] = id_PADMECLAWED;
+                    } else if (jedi_b.phase == 2) {
+                        ids[0] = id_ANAKINPADAWAN;
+                    } else {
+                        ids[0] = id_OBIWANKENOBIJEDIMASTER;
+                    }
+                    count = 1;
+                }
+                DrawMeleeTargets(ids, spawned, NULL, count);
+                if (nethost != 0) {
+                    memmove(jedib_netpacket->ids, ids, count * 2);
+                    memmove(jedib_netpacket->spawned, spawned, count);
+                    jedib_netpacket->count = static_cast<i16>(count);
+                }
+                break;
+            }
+            case 4:
+            case 5:
+            case 6:
+                DrawMeleeTargets(jedi_b.wave_ids, jedi_b.wave_spawned, NULL, g_lowEndLevelBehaviour != 0 ? 4 : 6);
+                if (nethost != 0) {
+                    memmove(jedib_netpacket->ids, jedi_b.wave_ids, sizeof(jedi_b.wave_ids));
+                    memmove(jedib_netpacket->spawned, jedi_b.wave_spawned, sizeof(jedi_b.wave_spawned));
+                }
+                break;
+            case 7:
+                if (jedi_b.boss == NULL) {
+                    jedi_b.boss = (GameObject_s *)FindGameObject((i32)(i16)id_JANGOFETT, 1, 1, 0, 0);
+                    if (jedi_b.boss == NULL) {
+                        return;
+                    }
+                }
+                DrawBossHitPoints(jedi_b.boss);
+                break;
+        }
+    } else {
+        if (jedib_netpacket->state != 1) {
+            return;
+        }
+        switch (jedib_netpacket->phase) {
+            case 1:
+            case 2:
+            case 3:
+                DrawMeleeTargets(jedib_netpacket->ids, jedib_netpacket->spawned, NULL, jedib_netpacket->count);
+                break;
+            case 4:
+            case 5:
+            case 6:
+                DrawMeleeTargets(jedib_netpacket->ids, jedib_netpacket->spawned, NULL,
+                                 g_lowEndLevelBehaviour != 0 ? 4 : 6);
+                break;
+            case 7:
+                if (jedi_b.boss != NULL) {
+                    DrawBossHitPoints(jedi_b.boss);
+                }
+                break;
+        }
+    }
+}
+
 void JediB_Update(WORLDINFO_s *world) {
     char name[0x10];
     if (Mission_Active(MissionSys) != NULL) {
@@ -1750,7 +1842,14 @@ void JediB_Update(WORLDINFO_s *world) {
     jedi_b.exclusion_mask = 0;
     // Not `timer >= 4.0f`: that form compares the other way round and is not
     // equivalent for NaN, and the original tests `4.0f > timer`.
-    if (!(jedi_b.timer < 4.0f)) {
+    if (jedi_b.timer < 4.0f) {
+        if (player != NULL) {
+            jedi_b.exclusion_mask = 1ULL << player->apiobj.field_0x289;
+        }
+        if (player2 != NULL) {
+            jedi_b.exclusion_mask |= 1ULL << player2->apiobj.field_0x289;
+        }
+    } else {
         if (jedi_b.phase != 7) {
             if (player->apiobj.pos_x * player->apiobj.pos_x + player->apiobj.pos_z * player->apiobj.pos_z >
                 jedib_safe_r * jedib_safe_r) {
@@ -1764,13 +1863,6 @@ void JediB_Update(WORLDINFO_s *world) {
         } else if (jedi_b.boss != NULL) {
             GameObject_s *target = player2 != NULL && jedi_b.boss->ai.opponent == player2 ? player2 : player;
             jedi_b.exclusion_mask = 1ULL << target->apiobj.field_0x289;
-        }
-    } else {
-        if (player != NULL) {
-            jedi_b.exclusion_mask = 1ULL << player->apiobj.field_0x289;
-        }
-        if (player2 != NULL) {
-            jedi_b.exclusion_mask |= 1ULL << player2->apiobj.field_0x289;
         }
     }
 
@@ -1919,13 +2011,13 @@ void JediB_Update(WORLDINFO_s *world) {
                 case 6: {
                     // The low-end wave is two slots shorter.
                     i32 wave_done;
-                    if (g_lowEndLevelBehaviour == 0) {
+                    if (g_lowEndLevelBehaviour != 0) {
+                        wave_done = jedi_b.wave_spawned[0] != 0 && jedi_b.wave_spawned[1] != 0 &&
+                                    jedi_b.wave_spawned[2] != 0 && jedi_b.wave_spawned[3] != 0;
+                    } else {
                         wave_done = jedi_b.wave_spawned[0] != 0 && jedi_b.wave_spawned[1] != 0 &&
                                     jedi_b.wave_spawned[2] != 0 && jedi_b.wave_spawned[3] != 0 &&
                                     jedi_b.wave_spawned[4] != 0 && jedi_b.wave_spawned[5] != 0;
-                    } else {
-                        wave_done = jedi_b.wave_spawned[0] != 0 && jedi_b.wave_spawned[1] != 0 &&
-                                    jedi_b.wave_spawned[2] != 0 && jedi_b.wave_spawned[3] != 0;
                     }
                     jedi_b.wave_timer += FRAMETIME;
                     if (jedi_b.wave_timer > 5.0f) {
@@ -1994,12 +2086,10 @@ void JediB_Update(WORLDINFO_s *world) {
         if (object != NULL) {
             if (baddie->released != 0) {
                 object->ai.locator = NULL;
-                if ((player->apiobj.character_data->model_flags & 0x80000) == 0 &&
-                    (player->apiobj.objptr->id != id_JARJAR || static_cast<i8>(player->apiobj.flags_low) < 0) &&
-                    (player->apiobj.character_data->game_character->uses_weapon_action != 4 ||
-                     object->apiobj.character_data->game_character->uses_weapon_action != 4)) {
-                    object->ai.opponent = player;
-                } else {
+                if (!((player->apiobj.character_data->model_flags & 0x80000) == 0 &&
+                      (player->apiobj.objptr->id != id_JARJAR || static_cast<i8>(player->apiobj.flags_low) < 0) &&
+                      (player->apiobj.character_data->game_character->uses_weapon_action != 4 ||
+                       object->apiobj.character_data->game_character->uses_weapon_action != 4))) {
                     if (object->ai.opponent == player) {
                         object->ai.opponent = NULL;
                     }
@@ -2013,6 +2103,8 @@ void JediB_Update(WORLDINFO_s *world) {
                             object->ai.opponent = NULL;
                         }
                     }
+                } else {
+                    object->ai.opponent = player;
                 }
             } else {
                 if ((OnOrInsidePlane(&object->apiobj.position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL, 2.0f,
@@ -2057,7 +2149,9 @@ void JediB_Update(WORLDINFO_s *world) {
                 NuVecRotateY(&spawn_position, &spawn_position, 0x8000);
             }
             if (baddie->id == -1) {
-                if (baddie->random_type != 0) {
+                if (baddie->random_type == 0) {
+                    baddie->id = id_BOB;
+                } else {
                     if (FreePlay == 0 && (jedi_b.unique_spawned & 1) == 0) {
                         baddie->id = id_LUMINARA;
                         jedi_b.unique_spawned |= 1;
@@ -2069,8 +2163,6 @@ void JediB_Update(WORLDINFO_s *world) {
                     } else {
                         baddie->id = id_GEONOSIAN;
                     }
-                } else {
-                    baddie->id = id_BOB;
                 }
                 baddie->two_row_hp = 0;
                 baddie->in_wave = 0;
@@ -2086,21 +2178,21 @@ void JediB_Update(WORLDINFO_s *world) {
             object->ai.locator = &baddie->locator;
             object->field_0xeb4 = JediBKilledCallback;
             if (baddie->id == id_BOB) {
-                if (baddie->field_0x58 != 0) {
-                    object->field_0x1054 = baddie->field_0x58;
-                    if (baddie->two_row_hp != 0) {
-                        object->field_0xefd |= 2;
-                    } else {
-                        object->field_0xefd &= static_cast<u8>(~2);
-                    }
-                    object = baddie->object;
-                } else {
+                if (baddie->field_0x58 == 0) {
                     baddie->field_0x58 = object->field_0x1054;
                     if ((object->field_0xefd & 2) != 0) {
                         baddie->two_row_hp = 1;
                     } else {
                         baddie->two_row_hp = 0;
                     }
+                } else {
+                    object->field_0x1054 = baddie->field_0x58;
+                    if (baddie->two_row_hp == 0) {
+                        object->field_0xefd &= static_cast<u8>(~2);
+                    } else {
+                        object->field_0xefd |= 2;
+                    }
+                    object = baddie->object;
                 }
             }
         }
@@ -2111,98 +2203,6 @@ void JediB_Update(WORLDINFO_s *world) {
         jedib_n_active++;
         if (baddie->released == 0) {
             object->ai_opponent_exclusion_mask |= jedi_b.exclusion_mask;
-        }
-    }
-}
-
-void JediB_DrawPanel(WORLDINFO_s *) {
-    if (Mission_Active(MissionSys) != NULL) {
-        return;
-    }
-    i16 ids[8];
-    char spawned[8] = {0};
-    if (netclient == 0) {
-        if (nethost != 0) {
-            jedib_netpacket->state = jedi_b.state;
-            jedib_netpacket->phase = jedi_b.phase;
-        }
-        if (jedi_b.state != 1) {
-            return;
-        }
-        switch (jedi_b.phase) {
-            case 1:
-            case 2:
-            case 3: {
-                i32 count;
-                if (jedi_b.goody_count != 0) {
-                    count = jedi_b.goody_count;
-                    if (count > 8) {
-                        count = 8;
-                    }
-                    for (i32 index = 0; index < count; index++) {
-                        ids[index] = static_cast<i16>(jedi_b.goodies[index].id);
-                        if (jedi_b.goodies[index].object == NULL) {
-                            spawned[index] = 1;
-                        }
-                    }
-                } else {
-                    if (jedi_b.phase == 1) {
-                        ids[0] = id_PADMECLAWED;
-                    } else if (jedi_b.phase == 2) {
-                        ids[0] = id_ANAKINPADAWAN;
-                    } else {
-                        ids[0] = id_OBIWANKENOBIJEDIMASTER;
-                    }
-                    count = 1;
-                }
-                DrawMeleeTargets(ids, spawned, NULL, count);
-                if (nethost != 0) {
-                    memmove(jedib_netpacket->ids, ids, count * 2);
-                    memmove(jedib_netpacket->spawned, spawned, count);
-                    jedib_netpacket->count = static_cast<i16>(count);
-                }
-                break;
-            }
-            case 4:
-            case 5:
-            case 6:
-                DrawMeleeTargets(jedi_b.wave_ids, jedi_b.wave_spawned, NULL, g_lowEndLevelBehaviour != 0 ? 4 : 6);
-                if (nethost != 0) {
-                    memmove(jedib_netpacket->ids, jedi_b.wave_ids, sizeof(jedi_b.wave_ids));
-                    memmove(jedib_netpacket->spawned, jedi_b.wave_spawned, sizeof(jedi_b.wave_spawned));
-                }
-                break;
-            case 7:
-                if (jedi_b.boss == NULL) {
-                    jedi_b.boss = (GameObject_s *)FindGameObject((i32)(i16)id_JANGOFETT, 1, 1, 0, 0);
-                    if (jedi_b.boss == NULL) {
-                        return;
-                    }
-                }
-                DrawBossHitPoints(jedi_b.boss);
-                break;
-        }
-    } else {
-        if (jedib_netpacket->state != 1) {
-            return;
-        }
-        switch (jedib_netpacket->phase) {
-            case 1:
-            case 2:
-            case 3:
-                DrawMeleeTargets(jedib_netpacket->ids, jedib_netpacket->spawned, NULL, jedib_netpacket->count);
-                break;
-            case 4:
-            case 5:
-            case 6:
-                DrawMeleeTargets(jedib_netpacket->ids, jedib_netpacket->spawned, NULL,
-                                 g_lowEndLevelBehaviour != 0 ? 4 : 6);
-                break;
-            case 7:
-                if (jedi_b.boss != NULL) {
-                    DrawBossHitPoints(jedi_b.boss);
-                }
-                break;
         }
     }
 }
@@ -2482,25 +2482,25 @@ void DookuC_Update(WORLDINFO_s *world) {
                     (node3 = static_cast<AIPATHNODE_s *>(LevAIPathNode[3])) != NULL) {
                     if (LevGizForce[0] == group->forces[0]) {
                         node0->position = {3.76f, 0.01f, -1.59f};
-                        if (LevGizForce[1] == group->forces[1]) {
-                            node1->position = {4.29f, 0.56f, -1.50f};
-                            node2->position = {4.05f, 1.12f, -1.12f};
-                            node3->position = {4.46f, 1.69f, -0.97f};
-                        } else {
+                        if (LevGizForce[1] != group->forces[1]) {
                             node1->position = {4.42f, 0.56f, -1.46f};
                             node2->position = {4.66f, 1.12f, -1.08f};
                             node3->position = {4.41f, 1.69f, -1.04f};
+                        } else {
+                            node1->position = {4.29f, 0.56f, -1.50f};
+                            node2->position = {4.05f, 1.12f, -1.12f};
+                            node3->position = {4.46f, 1.69f, -0.97f};
                         }
                     } else if (LevGizForce[1] == group->forces[0]) {
                         node0->position = {3.60f, 0.01f, -0.96f};
-                        if (LevGizForce[0] == group->forces[1]) {
-                            node1->position = {4.06f, 0.56f, -0.98f};
-                            node2->position = {4.20f, 1.12f, -1.28f};
-                            node3->position = {4.41f, 1.69f, -1.04f};
-                        } else {
+                        if (LevGizForce[0] != group->forces[1]) {
                             node1->position = {4.06f, 0.56f, -0.98f};
                             node2->position = {4.37f, 1.12f, -0.81f};
                             node3->position = {4.30f, 1.69f, -1.30f};
+                        } else {
+                            node1->position = {4.06f, 0.56f, -0.98f};
+                            node2->position = {4.20f, 1.12f, -1.28f};
+                            node3->position = {4.41f, 1.69f, -1.04f};
                         }
                     } else if (LevGizForce[2] == group->forces[0]) {
                         node0->position = {4.28f, 0.01f, -0.41f};

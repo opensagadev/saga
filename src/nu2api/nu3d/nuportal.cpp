@@ -228,10 +228,10 @@ static __used__ void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_
 
     NUROOM *room = &scene->rooms[room_id];
     rooms_visited[depth] = room_id;
-    if (room_id == camera_roomid) {
-        FlagRoomInstancesAsVisible(room, scene);
-    } else {
+    if (room_id != camera_roomid) {
         clipRoomAgainstFrustrum(scene, room, frustum);
+    } else {
+        FlagRoomInstancesAsVisible(room, scene);
     }
     room->flags |= NUROOM_FLAG_VISITED;
     if (depth >= scene->portal_depth || room->portal_count == 0) {
@@ -257,10 +257,10 @@ static __used__ void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_
         for (i32 plane_index = 0; plane_index < frustum->plane_count; ++plane_index) {
             i32 outside_vertices = 0;
             for (i32 vertex_index = 0; vertex_index < portal->vertex_count; ++vertex_index) {
-                if (!(planeDistance(frustum->planes[plane_index], portal->vertices[vertex_index]) >= 0.0f)) {
-                    ++outside_vertices;
-                } else {
+                if (planeDistance(frustum->planes[plane_index], portal->vertices[vertex_index]) >= 0.0f) {
                     ++inside_tests;
+                } else {
+                    ++outside_vertices;
                 }
             }
             if (outside_vertices == portal->vertex_count) {

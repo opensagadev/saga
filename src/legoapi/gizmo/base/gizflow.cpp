@@ -965,6 +965,31 @@ static u8 getNextLoopChecksum() {
     return ++loop_checksum;
 }
 
+void ResetGizFlowPointers(GIZFLOW_s *system) {
+    if (system == NULL || system->flowbox_count == 0)
+        return;
+    FLOWBOX_s *box = system->flowboxes;
+    for (i32 i = 0; i < system->flowbox_count; ++i, ++box) {
+        if (box->type != 0)
+            continue;
+        FLOWBOXGIZMODATA_s *data = box->data;
+        for (i32 j = 0; j < data->gizmo_count; ++j) {
+            FLOWBOXGIZMOREF_s *ref = data->gizmos[j];
+            if (ref->gizmo != NULL) {
+                ref->gizmo = GizmoFindByName(system->gizmo_sys, ref->gizmo->type_id, ref->name);
+            } else {
+                ref->gizmo = GizmoFindByName(system->gizmo_sys, -1, ref->name);
+                if (data->gizmos[j]->gizmo != NULL && (box->state_flags_low & 1) == 0) {
+                    if (flowboxtypes[box->type].reset != NULL)
+                        flowboxtypes[box->type].reset(system, box);
+                    if ((box->state_flags_low & 5) == 4 && box->type == 0)
+                        GizmoSetVisibility(system->gizmo_sys, data->gizmos[j]->gizmo, 0, 1);
+                }
+            }
+        }
+    }
+}
+
 void DynamicAddGizmoToFlow(GIZFLOW_s *system, GIZMO_s *gizmo) {
     if (gizmo == NULL || system == NULL || gizmotypes == NULL || gizmo->type_id >= gizmotypes->count ||
         gizmotypes->types[gizmo->type_id].fns.get_gizmo_name_fn == NULL)
@@ -986,31 +1011,6 @@ void DynamicAddGizmoToFlow(GIZFLOW_s *system, GIZMO_s *gizmo) {
                     flowboxtypes[box->type].reset(system, box);
                 if ((box->state_flags_low & 5) == 4 && box->type == 0)
                     GizmoSetVisibility(system->gizmo_sys, data->gizmos[j]->gizmo, 0, 1);
-            }
-        }
-    }
-}
-
-void ResetGizFlowPointers(GIZFLOW_s *system) {
-    if (system == NULL || system->flowbox_count == 0)
-        return;
-    FLOWBOX_s *box = system->flowboxes;
-    for (i32 i = 0; i < system->flowbox_count; ++i, ++box) {
-        if (box->type != 0)
-            continue;
-        FLOWBOXGIZMODATA_s *data = box->data;
-        for (i32 j = 0; j < data->gizmo_count; ++j) {
-            FLOWBOXGIZMOREF_s *ref = data->gizmos[j];
-            if (ref->gizmo != NULL) {
-                ref->gizmo = GizmoFindByName(system->gizmo_sys, ref->gizmo->type_id, ref->name);
-            } else {
-                ref->gizmo = GizmoFindByName(system->gizmo_sys, -1, ref->name);
-                if (data->gizmos[j]->gizmo != NULL && (box->state_flags_low & 1) == 0) {
-                    if (flowboxtypes[box->type].reset != NULL)
-                        flowboxtypes[box->type].reset(system, box);
-                    if ((box->state_flags_low & 5) == 4 && box->type == 0)
-                        GizmoSetVisibility(system->gizmo_sys, data->gizmos[j]->gizmo, 0, 1);
-                }
             }
         }
     }

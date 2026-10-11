@@ -231,6 +231,34 @@ static void StartAnimation(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i16 an
     packet->blending = 0;
 }
 
+void Animate_ATAT(GameObject_s *object) {
+    ANIMPACKET_s &packet = object->apiobj.anim_packet;
+    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
+        packet.requested_animation = object->context_animation;
+    } else {
+        packet.requested_animation = CHARACTER_ANIMATION_IDLE;
+        if (static_cast<i8>(object->apiobj.field_0x1f8) < 0 &&
+            object->apiobj.character_model->model_data_b[15] != NULL) {
+            packet.requested_animation = 15;
+        }
+        if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+            object->pad_gamepad->input_magnitude > 0.0f) {
+            packet.requested_animation = CHARACTER_ANIMATION_WALK;
+        }
+    }
+
+    if (packet.requested_animation != CHARACTER_ANIMATION_IDLE) {
+        return;
+    }
+
+    const i32 turn = RotDiff(object->previous_movement_angle, object->apiobj.field_0x276);
+    if (turn < 0 && object->apiobj.character_model->model_data_b[38] != NULL) {
+        packet.requested_animation = 38;
+    } else if (turn > 0 && object->apiobj.character_model->model_data_b[79] != NULL) {
+        packet.requested_animation = 79;
+    }
+}
+
 void Animate_POD(GameObject_s *object) {
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
     packet.requested_animation = 1;
@@ -273,34 +301,6 @@ normal_animation:
     }
     if (object->apiobj.character_model->model_data_b[packet.requested_animation] == NULL) {
         packet.requested_animation = 1;
-    }
-}
-
-void Animate_ATAT(GameObject_s *object) {
-    ANIMPACKET_s &packet = object->apiobj.anim_packet;
-    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
-        packet.requested_animation = object->context_animation;
-    } else {
-        packet.requested_animation = CHARACTER_ANIMATION_IDLE;
-        if (static_cast<i8>(object->apiobj.field_0x1f8) < 0 &&
-            object->apiobj.character_model->model_data_b[15] != NULL) {
-            packet.requested_animation = 15;
-        }
-        if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
-            object->pad_gamepad->input_magnitude > 0.0f) {
-            packet.requested_animation = CHARACTER_ANIMATION_WALK;
-        }
-    }
-
-    if (packet.requested_animation != CHARACTER_ANIMATION_IDLE) {
-        return;
-    }
-
-    const i32 turn = RotDiff(object->previous_movement_angle, object->apiobj.field_0x276);
-    if (turn < 0 && object->apiobj.character_model->model_data_b[38] != NULL) {
-        packet.requested_animation = 38;
-    } else if (turn > 0 && object->apiobj.character_model->model_data_b[79] != NULL) {
-        packet.requested_animation = 79;
     }
 }
 
@@ -677,6 +677,60 @@ void Animate_WALKER(GameObject_s *object) {
     }
 }
 
+void Animate_CRITTER(GameObject_s *object) {
+    ANIMPACKET_s &packet = object->apiobj.anim_packet;
+    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
+        packet.requested_animation = object->context_animation;
+        return;
+    }
+
+    if (object->character_context == 30) {
+        if (object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL) {
+            packet.requested_animation = CHARACTER_ANIMATION_FALL;
+            return;
+        }
+    }
+    packet.requested_animation = CHARACTER_ANIMATION_FALL;
+
+    if (object->character_context != CHARACTER_CONTEXT_DOOMED) {
+        if (object->apiobj.field_0x27d != 0 ||
+            ((object->ground_contact_grace_timer > 0.0f ||
+              object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL ||
+              (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
+               object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f)) &&
+             (!(static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->field_0x28 > 0.0f) ||
+              object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL))) {
+            packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
+        }
+    }
+
+    if (!UseFallAnim(object)) {
+        if (packet.requested_animation != CHARACTER_ANIMATION_FALL &&
+            (object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+            object->pad_gamepad->input_magnitude > 0.0f) {
+            const bool has_walk = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_WALK] != NULL;
+            const bool has_run = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_RUN] != NULL;
+            if (has_run) {
+                if (has_walk) {
+                    const GAMECHARACTERDATA *game_character =
+                        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+                    const f32 run_threshold = (game_character->walk_speed + game_character->run_speed) * 0.5f;
+                    packet.requested_animation = run_threshold >= object->pad_gamepad->input_magnitude
+                                                     ? CHARACTER_ANIMATION_WALK
+                                                     : CHARACTER_ANIMATION_RUN;
+                } else {
+                    packet.requested_animation = CHARACTER_ANIMATION_RUN;
+                }
+            } else if (has_walk) {
+                packet.requested_animation = CHARACTER_ANIMATION_WALK;
+            }
+        }
+    } else {
+        packet.requested_animation = CHARACTER_ANIMATION_FALL;
+    }
+    MoveAnim_Check(object);
+}
+
 void Animate_WEIRDO(GameObject_s *object) {
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
     if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
@@ -764,60 +818,6 @@ void Animate_WEIRDO(GameObject_s *object) {
     }
 }
 
-void Animate_CRITTER(GameObject_s *object) {
-    ANIMPACKET_s &packet = object->apiobj.anim_packet;
-    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
-        packet.requested_animation = object->context_animation;
-        return;
-    }
-
-    if (object->character_context == 30) {
-        if (object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL) {
-            packet.requested_animation = CHARACTER_ANIMATION_FALL;
-            return;
-        }
-    }
-    packet.requested_animation = CHARACTER_ANIMATION_FALL;
-
-    if (object->character_context != CHARACTER_CONTEXT_DOOMED) {
-        if (object->apiobj.field_0x27d != 0 ||
-            ((object->ground_contact_grace_timer > 0.0f ||
-              object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL ||
-              (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
-               object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f)) &&
-             (!(static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->field_0x28 > 0.0f) ||
-              object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL))) {
-            packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
-        }
-    }
-
-    if (!UseFallAnim(object)) {
-        if (packet.requested_animation != CHARACTER_ANIMATION_FALL &&
-            (object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
-            object->pad_gamepad->input_magnitude > 0.0f) {
-            const bool has_walk = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_WALK] != NULL;
-            const bool has_run = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_RUN] != NULL;
-            if (has_run) {
-                if (has_walk) {
-                    const GAMECHARACTERDATA *game_character =
-                        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-                    const f32 run_threshold = (game_character->walk_speed + game_character->run_speed) * 0.5f;
-                    packet.requested_animation = run_threshold >= object->pad_gamepad->input_magnitude
-                                                     ? CHARACTER_ANIMATION_WALK
-                                                     : CHARACTER_ANIMATION_RUN;
-                } else {
-                    packet.requested_animation = CHARACTER_ANIMATION_RUN;
-                }
-            } else if (has_walk) {
-                packet.requested_animation = CHARACTER_ANIMATION_WALK;
-            }
-        }
-    } else {
-        packet.requested_animation = CHARACTER_ANIMATION_FALL;
-    }
-    MoveAnim_Check(object);
-}
-
 void Animate_DEFAULT(GameObject_s *object) {
     object->apiobj.anim_packet.requested_animation = CHARACTER_ANIMATION_IDLE;
 }
@@ -847,60 +847,6 @@ void Animate_VEHICLE(GameObject_s *object) {
         object->render_offset.y = 0.05f * NU_SIN_LUT(static_cast<u16>(phase + 0x2000));
         object->render_offset.z = 0.025f * NU_SIN_LUT(static_cast<u16>(phase ^ 0x8000));
         NuVecMtxRotate(&object->render_offset, &object->render_offset, &object->apiobj.field_0xb8);
-    }
-}
-
-void Animate_DROIDEKA(GameObject_s *object) {
-    ANIMPACKET_s &packet = object->apiobj.anim_packet;
-    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
-        packet.requested_animation = object->context_animation;
-    } else {
-        packet.requested_animation = CHARACTER_ANIMATION_FALL;
-        if (object->character_context != CHARACTER_CONTEXT_DOOMED) {
-            if (object->apiobj.field_0x27d != 0) {
-                packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
-            } else if (object->ground_contact_grace_timer > 0.0f) {
-                const GAMECHARACTERDATA *game_character =
-                    static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-                if (!(game_character->field_0x28 > 0.0f) ||
-                    object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL) {
-                    packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
-                }
-            } else if (object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL ||
-                       (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
-                        object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f)) {
-                const GAMECHARACTERDATA *game_character =
-                    static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-                if (!(game_character->field_0x28 > 0.0f) ||
-                    object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL) {
-                    packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
-                }
-            }
-        }
-
-        if (!UseFallAnim(object) && !(object->character_context == -1 && object->apiobj.field_0x27d == 0)) {
-            if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
-                object->pad_gamepad->input_magnitude > 0.0f) {
-                const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
-                const f32 walk_threshold = (game_character->tiptoe_speed + game_character->walk_speed) * 0.5f;
-                packet.requested_animation = !(object->pad_gamepad->input_magnitude <= walk_threshold)
-                                                 ? CHARACTER_ANIMATION_WALK
-                                                 : CHARACTER_ANIMATION_TIPTOE;
-            }
-        } else {
-            packet.requested_animation = CHARACTER_ANIMATION_FALL;
-        }
-        MoveAnim_Check(object);
-    }
-
-    const i16 animation = packet.requested_animation;
-    if (animation != CHARACTER_ANIMATION_FALL &&
-        !((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
-          (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
-           animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
-        object->fall_animation_timer = 0.0f;
-    } else {
-        object->fall_animation_timer += FRAMETIME;
     }
 }
 
@@ -976,6 +922,60 @@ final_animation:
     if (packet.requested_animation == CHARACTER_ANIMATION_FALL)
         packet.requested_animation = static_cast<i16>(SetProtocolDroidFallAnim(object));
     UpdateCharacterIdle(object);
+    const i16 animation = packet.requested_animation;
+    if (animation != CHARACTER_ANIMATION_FALL &&
+        !((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
+          (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
+           animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
+        object->fall_animation_timer = 0.0f;
+    } else {
+        object->fall_animation_timer += FRAMETIME;
+    }
+}
+
+void Animate_DROIDEKA(GameObject_s *object) {
+    ANIMPACKET_s &packet = object->apiobj.anim_packet;
+    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
+        packet.requested_animation = object->context_animation;
+    } else {
+        packet.requested_animation = CHARACTER_ANIMATION_FALL;
+        if (object->character_context != CHARACTER_CONTEXT_DOOMED) {
+            if (object->apiobj.field_0x27d != 0) {
+                packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
+            } else if (object->ground_contact_grace_timer > 0.0f) {
+                const GAMECHARACTERDATA *game_character =
+                    static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+                if (!(game_character->field_0x28 > 0.0f) ||
+                    object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL) {
+                    packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
+                }
+            } else if (object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL ||
+                       (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
+                        object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f)) {
+                const GAMECHARACTERDATA *game_character =
+                    static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+                if (!(game_character->field_0x28 > 0.0f) ||
+                    object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL) {
+                    packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
+                }
+            }
+        }
+
+        if (!UseFallAnim(object) && !(object->character_context == -1 && object->apiobj.field_0x27d == 0)) {
+            if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+                object->pad_gamepad->input_magnitude > 0.0f) {
+                const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
+                const f32 walk_threshold = (game_character->tiptoe_speed + game_character->walk_speed) * 0.5f;
+                packet.requested_animation = !(object->pad_gamepad->input_magnitude <= walk_threshold)
+                                                 ? CHARACTER_ANIMATION_WALK
+                                                 : CHARACTER_ANIMATION_TIPTOE;
+            }
+        } else {
+            packet.requested_animation = CHARACTER_ANIMATION_FALL;
+        }
+        MoveAnim_Check(object);
+    }
+
     const i16 animation = packet.requested_animation;
     if (animation != CHARACTER_ANIMATION_FALL &&
         !((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
@@ -1771,10 +1771,7 @@ i32 GameAnimSet_GetAveragePos(GAMEANIMSET_s *set, NUVEC *position, i32 frame_sel
     } else {
         do {
             if ((object->flags & 1) == 0) {
-                if (object->instance_animation == NULL) {
-                    NuVecAdd(&sum, &sum, NuSpecialGetDrawPos(&object->special));
-                    ++count;
-                } else {
+                if (object->instance_animation != NULL) {
                     f32 frame;
                     if (frame_selection == 0)
                         frame = object->start_frame;
@@ -1785,6 +1782,9 @@ i32 GameAnimSet_GetAveragePos(GAMEANIMSET_s *set, NUVEC *position, i32 frame_sel
                     EvalAnim(&object->special, frame, &matrix, 1);
                     ++count;
                     NuVecAdd(&sum, &sum, NUMTX_GET_ROW_VEC(&matrix, 3));
+                } else {
+                    NuVecAdd(&sum, &sum, NuSpecialGetDrawPos(&object->special));
+                    ++count;
                 }
             }
             object = object->next;

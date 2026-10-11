@@ -2918,9 +2918,7 @@ extern "C" {
             }
         }
         NuFParDestroy(fp);
-        if (i < 1) {
-            characterdata = NULL;
-        } else {
+        if (!(i < 1)) {
             bufferStart->void_ptr = cdata;
             memmove(bufferStart->void_ptr, buf, offset);
             for (j = 0; j < i; j = j + 1) {
@@ -2942,6 +2940,8 @@ extern "C" {
             if (countDest != (i32 *)0x0) {
                 *countDest = i;
             }
+        } else {
+            characterdata = NULL;
         }
         return characterdata;
     }

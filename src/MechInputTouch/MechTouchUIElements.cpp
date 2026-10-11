@@ -939,16 +939,16 @@ MechTouchUIPartySelector::MechTouchUIPartySelector(MechTouchUIPlayerButton &butt
         ++column;
         MechSystems::Get()->TouchUI().AddUIElement(*icon);
         ++icon_index;
-        if (column >= icons_per_row) {
+        if (!(column >= icons_per_row)) {
+            y -= scale + gap;
+            delay += delay_step;
+            delay_step *= 0.9f;
+        } else {
             column = 0;
             x += GetAspectRatio() * (scale + gap);
             y = first_y;
             delay = 0.0f;
             delay_step = 0.03f;
-        } else {
-            y -= scale + gap;
-            delay += delay_step;
-            delay_step *= 0.9f;
         }
     }
 }

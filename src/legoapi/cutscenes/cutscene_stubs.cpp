@@ -415,7 +415,7 @@ extern "C" {
     void instNuGCutSceneStop(instNUGCUTSCENE_s *instance) {
         instance->flags_88 &= ~6;
         instance->flags_89 &= ~0x10;
-        if ((instance->flags_8a & 4) != 0) {
+        if ((instance->flags_8a & 4) == 0) {
             instNUGCUTCHARSYS_s *runtime = instance->character_instance;
             if (runtime != NULL) {
                 NUGCUTCHARSYS_s *system = instance->cutscene->character_system;

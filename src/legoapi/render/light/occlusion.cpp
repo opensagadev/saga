@@ -229,10 +229,10 @@ void OccluderSet::PrepareForQueries(numtx_s const *query, numtx_s const *project
                       record.max_y < -1.0f || record.min_y > 1.0f)) {
             valid = false;
         }
-        if (valid) {
-            indices[index] = index;
-        } else {
+        if (!valid) {
             indices[index] = 0xffffffffu;
+        } else {
+            indices[index] = index;
         }
     }
     qsort(indices, count, sizeof(*indices), SortByDepth);

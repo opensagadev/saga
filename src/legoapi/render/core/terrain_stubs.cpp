@@ -578,13 +578,13 @@ extern "C" {
         scaled->last_render_time = scaled->time_group == 4 ? panelglobaltime : globaltime;
         scaled->unscaled_effect_index = effect_index;
 
-        if (strlen(effect->name) < 13) {
-            sprintf(scaled->name, "%s%03d", effect->name, scaled_index);
-        } else {
+        if (!(strlen(effect->name) < 13)) {
             char shortened[13];
             memcpy(shortened, effect->name, 12);
             shortened[12] = '\0';
             sprintf(scaled->name, "%s%03d", shortened, scaled_index);
+        } else {
+            sprintf(scaled->name, "%s%03d", effect->name, scaled_index);
         }
         ++edpp_types_used;
 

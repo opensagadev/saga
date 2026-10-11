@@ -598,10 +598,10 @@ static void Levers_Reset(void *world_ptr, void *, void *progress_ptr) {
             } else {
                 lever.flags &= ~LEVER_FLAG_VISIBLE;
             }
-            if ((progress->enabled[0] & bit) != 0) {
-                lever.flags |= LEVER_FLAG_ENABLED;
-            } else {
+            if ((progress->enabled[0] & bit) == 0) {
                 lever.flags &= ~LEVER_FLAG_ENABLED;
+            } else {
+                lever.flags |= LEVER_FLAG_ENABLED;
             }
         }
     }

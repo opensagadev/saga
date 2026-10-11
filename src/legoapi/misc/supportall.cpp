@@ -450,17 +450,17 @@ apply_weights:
 static inline void TexQuadSubmit3D(f32 x, f32 y, i32 colour, i32 u, i32 v) {
     VARIPTR *stream = g_NuPrim_StreamBufferPtr;
     TexQuadVertex *vertex = static_cast<TexQuadVertex *>(stream->void_ptr);
-    if (g_NuPrim_NeedsOverbrightening != 0) {
-        vertex->colour = colour;
-    } else {
+    if (g_NuPrim_NeedsOverbrightening == 0) {
         vertex->colour = ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000);
-    }
-    if (g_NuPrim_NeedsHalfUVs != 0) {
-        vertex->half_uv[0] = u != 0 ? 0x3c00 : 0;
-        vertex->half_uv[1] = v != 0 ? 0x3c00 : 0;
     } else {
+        vertex->colour = colour;
+    }
+    if (g_NuPrim_NeedsHalfUVs == 0) {
         vertex->uv[0] = static_cast<f32>(u);
         vertex->uv[1] = static_cast<f32>(v);
+    } else {
+        vertex->half_uv[0] = u != 0 ? 0x3c00 : 0;
+        vertex->half_uv[1] = v != 0 ? 0x3c00 : 0;
     }
     vertex->x = x;
     vertex->y = y;

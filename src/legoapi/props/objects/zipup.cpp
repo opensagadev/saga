@@ -684,10 +684,10 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
                     object->airborne_action_duration = 0.5f;
                 object->zipup_entry_position = api.position;
                 ZIPUP *current = static_cast<ZIPUP *>(object->field_0x788);
-                if (endpoint == 0) {
-                    object->zipup_start_position = current->lower_position;
-                } else {
+                if (endpoint != 0) {
                     object->zipup_start_position = current->upper_position;
+                } else {
+                    object->zipup_start_position = current->lower_position;
                 }
                 object->zipup_landing_position = endpoint == 0 ? current->upper_position : current->lower_position;
                 object->zipup_landing_position.y =

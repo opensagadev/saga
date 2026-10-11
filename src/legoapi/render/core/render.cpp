@@ -1452,6 +1452,26 @@ void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha) {
 void DrawCross_Now(_vuv_s *, float, i32, i32) {
 }
 
+void DrawPauseFade() {
+    if (editor_active != 0 || screendump != 0)
+        return;
+
+    f32 step = FRAMETIME * 2.0f;
+    i32 fade;
+    if (Paused == 0 && NetPaused == 0) {
+        fade = static_cast<i32>(pause_fade - step);
+        if (fade < 0)
+            fade = 0;
+    } else {
+        fade = static_cast<i32>(pause_fade + step);
+        if (fade > 0) {
+            pause_fade = 1.0f;
+            return;
+        }
+    }
+    pause_fade = static_cast<f32>(fade);
+}
+
 void DrawGameState(float x, float y, i32 highlight, i32 slot) {
     const f32 text_scale = MENUTEXTSCALE;
     char game_name[256];
@@ -1529,26 +1549,6 @@ void DrawGameState(float x, float y, i32 highlight, i32 slot) {
                         MenuA);
         }
     }
-}
-
-void DrawPauseFade() {
-    if (editor_active != 0 || screendump != 0)
-        return;
-
-    f32 step = FRAMETIME * 2.0f;
-    i32 fade;
-    if (Paused == 0 && NetPaused == 0) {
-        fade = static_cast<i32>(pause_fade - step);
-        if (fade < 0)
-            fade = 0;
-    } else {
-        fade = static_cast<i32>(pause_fade + step);
-        if (fade > 0) {
-            pause_fade = 1.0f;
-            return;
-        }
-    }
-    pause_fade = static_cast<f32>(fade);
 }
 
 void DrawRippleSet(ripple_set_s *set) {

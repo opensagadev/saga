@@ -173,14 +173,14 @@ void MechTouchTaskGoTo::UpdateStuck() {
         velocity_threshold *= 0.25f;
     }
 
-    if (field_4f == 0) {
-        field_4f = velocity_delta > velocity_threshold;
-    } else {
+    if (field_4f != 0) {
         bool stuck = false;
         if (field_34 > 0.25f && velocity_delta > 0.0f) {
             stuck = velocity_delta < velocity_threshold * 0.5f;
         }
         field_4e = stuck;
+    } else {
+        field_4f = velocity_delta > velocity_threshold;
     }
 
     f32 stuck_time = 0.0f;
@@ -982,17 +982,17 @@ bool MechTouchTaskPlannedGoTo::Update() {
     f32 velocity_x;
     f32 velocity_y;
     f32 velocity_z;
-    if (dx * dx + dy * dy + dz * dz > 1.4f * 1.4f || dy > player->apiobj.scaled_height) {
+    if (!(dx * dx + dy * dy + dz * dz > 1.4f * 1.4f) && !(dy > player->apiobj.scaled_height)) {
+        const VuVec velocity = TouchHacks::CalculateJumpVelToHitPoint(*player, waypoint.position);
+        velocity_x = velocity.x;
+        velocity_y = velocity.y;
+        velocity_z = velocity.z;
+    } else {
         const VuVec velocity = TouchHacks::CalculateJumpVelToHitPointDblJump(*player, waypoint.position);
         velocity_x = velocity.x;
         velocity_y = velocity.y;
         velocity_z = velocity.z;
         player->jump_input_flags |= 0x10;
-    } else {
-        const VuVec velocity = TouchHacks::CalculateJumpVelToHitPoint(*player, waypoint.position);
-        velocity_x = velocity.x;
-        velocity_y = velocity.y;
-        velocity_z = velocity.z;
     }
     GameObject_s *angle_player = player;
     const f32 previous_z = player->apiobj.velocity.z;

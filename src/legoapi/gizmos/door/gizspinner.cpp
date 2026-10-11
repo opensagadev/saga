@@ -1096,10 +1096,10 @@ static void GizSpinner_ResetAll(void *world_ptr, void *, void *progress_ptr) {
             if ((spinner.flags & GIZSPINNER_FLAG_VALID) != 0) {
                 if (entry != NULL && (entry->flags & SPINNER_PROGRESS_VALID) != 0) {
                     spinner.rotation = entry->rotation;
-                    if (entry->animation_position != 0.0f) {
-                        GameAnimSet_JumpToAnimPos(spinner.anim_set, entry->animation_position);
-                    } else {
+                    if (entry->animation_position == 0.0f) {
                         GameAnimSet_JumpToEnd(spinner.anim_set);
+                    } else {
+                        GameAnimSet_JumpToAnimPos(spinner.anim_set, entry->animation_position);
                     }
 
                     if ((entry->flags & SPINNER_PROGRESS_ARM_VISIBLE) != 0) {

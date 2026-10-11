@@ -492,16 +492,16 @@ i32 Action_BoulderSection(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKE
     }
     // The retail third probe reads padding past this two-entry array. Do not
     // reproduce that out-of-bounds access or enlarge the recovered global.
-    if (nearest == NULL) {
+    if (nearest != NULL) {
+        packet->movement_look_target = &nearest->position;
+        if (can_attack)
+            object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
+    } else {
         if (system != NULL && system->player_1 != NULL && system->player_1->ai != NULL) {
             AIPACKET_s *player_packet = system->player_1->ai;
             AIMoveInstruction(packet, &player_packet->last_path_position, player_packet->mover_height,
                               &player_packet->path_info, 1, packet->movement_instruction_parameter);
         }
-    } else {
-        packet->movement_look_target = &nearest->position;
-        if (can_attack)
-            object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
     }
     return 0;
 }

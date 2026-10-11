@@ -324,10 +324,10 @@ void NuSoundDecodeThread::ThreadFunc(void *self_) {
         NuSoundMutexLock(&decoder->decode_mutex);
         if (decoder->decode_done == false) {
             decoder->decode_done = true;
-            if (decoder->decode_broadcast) {
-                NuSoundConditionBroadcast(&decoder->decode_cond);
-            } else {
+            if (!decoder->decode_broadcast) {
                 NuSoundConditionSignal(&decoder->decode_cond);
+            } else {
+                NuSoundConditionBroadcast(&decoder->decode_cond);
             }
         }
         NuSoundMutexUnlock(&decoder->decode_mutex);

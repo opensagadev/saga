@@ -995,7 +995,25 @@ void DisplayListLinkDynamicMtls(void) {
         dl->mtl_id = insert;
 
         nusortpri_s *sp;
-        if (sp_idx == -1) {
+        if (sp_idx != -1) {
+            sp = &mgr->dyn_mtl_dlist.sort_pris[sp_idx];
+            if (insert != 0 && MtlSortKey(mgr->dyn_mtl_dlist.mtls[insert - 1]) == key) {
+                // Splice after previous material's block.
+                auto *anchor = mgr->dyn_mtl_dlist.mtls[insert - 1]->display_list->mtl_item;
+                auto *follow = static_cast<nudisplaylistitem_s *>(anchor[7].next);
+                items[7].type = kItemType_Link;
+                items[7].id = kItemId_Next;
+                items[7].next = follow;
+                anchor[7].next = items;
+            } else {
+                // Head of chain.
+                items[7].type = kItemType_Link;
+                items[7].id = kItemId_Next;
+                items[7].next = sp->items;
+                sp->items = items;
+            }
+            ++sp->nmtls;
+        } else {
             sp = &mgr->dyn_mtl_dlist.sort_pris[mgr->dyn_mtl_dlist.nsort_pris];
             sp->items = items;
             sp->field_18 = mgr->field_4a8;
@@ -1015,24 +1033,6 @@ void DisplayListLinkDynamicMtls(void) {
             ++mgr->nused_sort_pris;
             ++mgr->dyn_mtl_dlist.nsort_pris;
             sp->nmtls = 1;
-        } else {
-            sp = &mgr->dyn_mtl_dlist.sort_pris[sp_idx];
-            if (insert != 0 && MtlSortKey(mgr->dyn_mtl_dlist.mtls[insert - 1]) == key) {
-                // Splice after previous material's block.
-                auto *anchor = mgr->dyn_mtl_dlist.mtls[insert - 1]->display_list->mtl_item;
-                auto *follow = static_cast<nudisplaylistitem_s *>(anchor[7].next);
-                items[7].type = kItemType_Link;
-                items[7].id = kItemId_Next;
-                items[7].next = follow;
-                anchor[7].next = items;
-            } else {
-                // Head of chain.
-                items[7].type = kItemType_Link;
-                items[7].id = kItemId_Next;
-                items[7].next = sp->items;
-                sp->items = items;
-            }
-            ++sp->nmtls;
         }
 
         {
@@ -1152,13 +1152,13 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
     nuglobalrndrstate_s *last_local = nullptr;
 
     auto linkSceneGeometry = [](NUDISPLAYLIST *dl) {
-        if (dl->scene_first[dl->scene_buffer] == dl->scene_next) {
-            dl->dyn_geom->next = dl->dyn_geom + 1;
-        } else {
+        if (dl->scene_first[dl->scene_buffer] != dl->scene_next) {
             dl->dyn_geom->next = dl->scene_first[dl->scene_buffer];
             dl->scene_next->type = kItemType_Link;
             dl->scene_next->next = dl->dyn_geom + 1;
             dl->scene_next->id = kItemId_Next;
+        } else {
+            dl->dyn_geom->next = dl->dyn_geom + 1;
         }
     };
 
@@ -1198,10 +1198,10 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
                 if (!same_as_last) {
                     DisplayListUpdateRenderState(dl, ls);
                     last_local = sc->local_state;
-                    if (dl->mtl_last != dl->first) {
-                        copyMaterialGeometry(dl, dl->first, sc);
-                    } else {
+                    if (dl->mtl_last == dl->first) {
                         linkSceneGeometry(dl);
+                    } else {
+                        copyMaterialGeometry(dl, dl->first, sc);
                     }
                 } else {
                     linkSceneGeometry(dl);
@@ -1370,24 +1370,7 @@ extern "C" void NuDisplayListBurstRndrSpecial(nuhspecial_s *handle, u32 count, N
         DisplayListUpdateRenderState(list, &render_state);
         VARIPTR *buffer = NuDisplayListLinkItems(list, visible_count * 2);
         NUDISPLAYLISTITEM *geometry = &scene->items[object->indices[material]];
-        if (geometry->type == 0x8f) {
-            for (u32 i = 0; i != visible_count; ++i) {
-                NUMTX *matrix = &matrices[clip != 0 ? static_cast<u8>(visible[i]) : i];
-                void *transform = DisplayListCreateFaceonTransformPS(buffer, matrix, scene->mtls[list->mtl_id],
-                                                                     scene->items[object->indices[material]].next);
-                void *faceon =
-                    NuDisplayListPrepareFaceonPS(buffer, scene->items[object->indices[material]].next, matrix);
-                list->items->type = 0x90;
-                list->items->next = transform;
-                list->items->id = 3;
-                NUDISPLAYLISTITEM *first = list->items++;
-                list->items->type = 0x8f;
-                list->items->next = faceon;
-                list->items->id = 3;
-                NUDISPLAYLISTITEM *last = list->items++;
-                DisplayListSetAlphaPS(first, last, 1);
-            }
-        } else {
+        if (geometry->type != 0x8f) {
             void *geometry_data = geometry->next;
             if (clip == 0) {
                 for (u32 i = 0; i != visible_count; ++i) {
@@ -1419,6 +1402,23 @@ extern "C" void NuDisplayListBurstRndrSpecial(nuhspecial_s *handle, u32 count, N
                     NUDISPLAYLISTITEM *last = list->items++;
                     DisplayListSetAlphaPS(first, last, 1);
                 }
+            }
+        } else {
+            for (u32 i = 0; i != visible_count; ++i) {
+                NUMTX *matrix = &matrices[clip != 0 ? static_cast<u8>(visible[i]) : i];
+                void *transform = DisplayListCreateFaceonTransformPS(buffer, matrix, scene->mtls[list->mtl_id],
+                                                                     scene->items[object->indices[material]].next);
+                void *faceon =
+                    NuDisplayListPrepareFaceonPS(buffer, scene->items[object->indices[material]].next, matrix);
+                list->items->type = 0x90;
+                list->items->next = transform;
+                list->items->id = 3;
+                NUDISPLAYLISTITEM *first = list->items++;
+                list->items->type = 0x8f;
+                list->items->next = faceon;
+                list->items->id = 3;
+                NUDISPLAYLISTITEM *last = list->items++;
+                DisplayListSetAlphaPS(first, last, 1);
             }
         }
     }

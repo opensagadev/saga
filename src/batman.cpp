@@ -1290,7 +1290,10 @@ after_sound:
     afterArea = HUB_ADATA;
     i = Area;
 
-    if (Area != -1) {
+    if (Area == -1) {
+        NextArea_FreePlay = 0;
+        FreePlay = 0;
+    } else {
         if ((ADataList[Area].flags & AREAFLAG_BONUS_AREA) != 0) {
             NextArea_FreePlay = 1;
             FreePlay = 1;
@@ -1313,9 +1316,6 @@ after_sound:
                 }
             }
         }
-    } else {
-        NextArea_FreePlay = 0;
-        FreePlay = 0;
     }
 
     c = StatusPacket.status_flags;

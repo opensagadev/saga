@@ -204,18 +204,18 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
 
     i32 angle;
     AIPATHINFO *path_info;
-    if (object->ai_respawn_count != 0 && object->ai.respawn_locator != NULL) {
+    if (!(object->ai_respawn_count != 0 && object->ai.respawn_locator != NULL)) {
+        angle = creature.y_rot;
+        NuVecRotateY(&offset, &offset, angle);
+        NuVecAdd(&object->apiobj.position, &offset, &creature.pos);
+        path_info = &creature.path_info;
+    } else {
         angle = object->ai.respawn_locator->flags;
         NuVecRotateY(&offset, &offset, angle);
         NuVecAdd(&object->apiobj.position, &offset, &object->ai.respawn_locator->position);
         AILOCATOR *locator = object->ai.respawn_locator;
         object->ai.respawn_locator = NULL;
         path_info = &locator->path_info;
-    } else {
-        angle = creature.y_rot;
-        NuVecRotateY(&offset, &offset, angle);
-        NuVecAdd(&object->apiobj.position, &offset, &creature.pos);
-        path_info = &creature.path_info;
     }
 
     object->apiobj.pos_x = object->apiobj.position.x;

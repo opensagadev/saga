@@ -1439,9 +1439,7 @@ extern "C" {
             }
 
             f32 lateral_ratio;
-            if (sock->lateral == NULL) {
-                lateral_ratio = sock->camera_lateral_ratio;
-            } else {
+            if (sock->lateral != NULL) {
 
                 SockSysPointAlongSpline(&scratch, sock->lateral, candidate->location.segment, candidate->next_segment,
                                         candidate->ratio);
@@ -1464,6 +1462,8 @@ extern "C" {
                 half_width += NuFsqrt(displacement.x * displacement.x + displacement.z * displacement.z);
                 half_width *= 0.5f;
                 lateral_ratio = half_width > 0.0f ? magnitude / half_width * working_scale : 0.0f;
+            } else {
+                lateral_ratio = sock->camera_lateral_ratio;
             }
 
             if (lateral_ratio != 0.0f && (sock->flags & SOCK_FLAG_PROJECT_CAMERA_FROM_PLAYER) == 0) {
@@ -1538,13 +1538,7 @@ extern "C" {
                 }
             }
 
-            if (sock->camera_distance_to_target == 0.0f) {
-                if (sock->camera_pullback_ratio != 0.0f) {
-                    candidate_camera.x += (camera_target->x - candidate_camera.x) * sock->camera_pullback_ratio;
-                    candidate_camera.y += (camera_target->y - candidate_camera.y) * sock->camera_pullback_ratio;
-                    candidate_camera.z += (camera_target->z - candidate_camera.z) * sock->camera_pullback_ratio;
-                }
-            } else {
+            if (sock->camera_distance_to_target != 0.0f) {
 
                 if ((sock->flags & SOCK_FLAG_CAMERA_DISTANCE_XZ) != 0) {
                     scratch = {camera_target->x - candidate_camera.x, 0.0f, camera_target->z - candidate_camera.z};
@@ -1557,11 +1551,15 @@ extern "C" {
                 if ((sock->flags & SOCK_FLAG_CAMERA_DISTANCE_XZ) == 0) {
                     candidate_camera.y = camera_target->y - scratch.y * sock->camera_distance_to_target;
                 }
+            } else {
+                if (sock->camera_pullback_ratio != 0.0f) {
+                    candidate_camera.x += (camera_target->x - candidate_camera.x) * sock->camera_pullback_ratio;
+                    candidate_camera.y += (camera_target->y - candidate_camera.y) * sock->camera_pullback_ratio;
+                    candidate_camera.z += (camera_target->z - candidate_camera.z) * sock->camera_pullback_ratio;
+                }
             }
 
-            if (sock->look_ratio_xz == 1.0f && sock->look_ratio_y == 1.0f && sock->look_ahead_segments == 0) {
-                NuVecAdd(&accumulated_target, &accumulated_target, camera_target);
-            } else {
+            if (!(sock->look_ratio_xz == 1.0f && sock->look_ratio_y == 1.0f && sock->look_ahead_segments == 0)) {
 
                 if (sock->look != NULL) {
                     SockSysPointAlongSpline(&look_position, sock->look, candidate->location.segment,
@@ -1570,10 +1568,7 @@ extern "C" {
                     look_position = {0.0f, 0.0f, NuVecDist(&candidate_camera, camera_target, NULL)};
                     i32 look_from;
                     i32 look_to;
-                    if (SockSegmentsAhead(sock, candidate->location.segment, &look_from, &look_to) == 0) {
-                        NuVecRotateX(&look_position, &look_position, candidate->camera_rotation.x);
-                        NuVecRotateY(&look_position, &look_position, candidate->camera_rotation.y);
-                    } else {
+                    if (SockSegmentsAhead(sock, candidate->location.segment, &look_from, &look_to) != 0) {
                         u16 from_angle = sock->cam_rotations[look_from].x;
                         i32 difference = RotDiff(sock->cam_rotations[look_from].x, sock->cam_rotations[look_to].x);
                         const u16 pitch = static_cast<u16>(
@@ -1584,12 +1579,17 @@ extern "C" {
                             static_cast<i32>(from_angle + static_cast<f32>(difference) * candidate->ratio));
                         NuVecRotateX(&look_position, &look_position, pitch);
                         NuVecRotateY(&look_position, &look_position, yaw - 0x1555);
+                    } else {
+                        NuVecRotateX(&look_position, &look_position, candidate->camera_rotation.x);
+                        NuVecRotateY(&look_position, &look_position, candidate->camera_rotation.y);
                     }
                     NuVecAdd(&look_position, &look_position, &candidate_camera);
                 }
                 accumulated_target.x += (camera_target->x - look_position.x) * sock->look_ratio_xz + look_position.x;
                 accumulated_target.y += (camera_target->y - look_position.y) * sock->look_ratio_y + look_position.y;
                 accumulated_target.z += (camera_target->z - look_position.z) * sock->look_ratio_xz + look_position.z;
+            } else {
+                NuVecAdd(&accumulated_target, &accumulated_target, camera_target);
             }
 
             NuVecAdd(camera_position, camera_position, &candidate_camera);

@@ -127,6 +127,23 @@ void DagobahC_Init(WORLDINFO_s *world) {
     }
 }
 
+void DagobahB_Reset(WORLDINFO_s *world) {
+    LevSafePlatID[1] = -1;
+    LevSafePlatID[0] = -1;
+
+    if (NuSpecialFind(world->current_gscn, &LevHSpecial[0], "pad_2_base_2", 1) != 0) {
+        if (world->terrain != NULL) {
+            LevSafePlatID[0] = FindPlatInst(NuSpecialGetInstanceix(&LevHSpecial[0]));
+        }
+    }
+
+    if (NuSpecialFind(world->current_gscn, &LevHSpecial[1], "pad_4_base_2", 1) != 0) {
+        if (world->terrain != NULL) {
+            LevSafePlatID[1] = FindPlatInst(NuSpecialGetInstanceix(&LevHSpecial[1]));
+        }
+    }
+}
+
 void DagobahE_Init(WORLDINFO_s *world) {
     GIZAIMESSAGE_s *completed = CheckGizAIMessage(gizaimessagesys, "CompletedTraining", NULL);
     if (FreePlay == 0 && completed != NULL && completed->value == 0.0f) {
@@ -152,23 +169,6 @@ void DagobahE_Init(WORLDINFO_s *world) {
     }
     SetGizAIMessage(gizaimessagesys, "DagobahTraining", static_cast<f32>(dagobah_training), NULL);
     SetGizAIMessage(gizaimessagesys, NULL, 1.0f, completed);
-}
-
-void DagobahB_Reset(WORLDINFO_s *world) {
-    LevSafePlatID[1] = -1;
-    LevSafePlatID[0] = -1;
-
-    if (NuSpecialFind(world->current_gscn, &LevHSpecial[0], "pad_2_base_2", 1) != 0) {
-        if (world->terrain != NULL) {
-            LevSafePlatID[0] = FindPlatInst(NuSpecialGetInstanceix(&LevHSpecial[0]));
-        }
-    }
-
-    if (NuSpecialFind(world->current_gscn, &LevHSpecial[1], "pad_4_base_2", 1) != 0) {
-        if (world->terrain != NULL) {
-            LevSafePlatID[1] = FindPlatInst(NuSpecialGetInstanceix(&LevHSpecial[1]));
-        }
-    }
 }
 
 void DagobahC_Panel(WORLDINFO_s *) {
@@ -358,20 +358,20 @@ void DagobahA_Update(WORLDINFO_s *world) {
             node0->position.x = -16.31f;
             node0->position.y = 0.31f;
             node0->position.z = 15.13f;
-            if (group->forces[1] == first) {
-                node1->position.x = -16.31f;
-                node1->position.y = 0.67f;
-                node1->position.z = 14.82f;
-                node2->position.x = -16.17f;
-                node2->position.y = 1.31f;
-                node2->position.z = 14.65f;
-            } else {
+            if (group->forces[1] != first) {
                 node1->position.x = -16.31f;
                 node1->position.y = 0.67f;
                 node1->position.z = 14.82f;
                 node2->position.x = -16.36f;
                 node2->position.y = 1.33f;
                 node2->position.z = 14.54f;
+            } else {
+                node1->position.x = -16.31f;
+                node1->position.y = 0.67f;
+                node1->position.z = 14.82f;
+                node2->position.x = -16.17f;
+                node2->position.y = 1.31f;
+                node2->position.z = 14.65f;
             }
         } else if (selected == third) {
             if (group->forces[1] == first) {
@@ -691,10 +691,10 @@ void HothBattleE_Panel(WORLDINFO_s *) {
             break;
     }
     for (i32 index = 0; index < count; ++index) {
-        if (targets[index] != -1 && defeated[index] != 0) {
-            alpha[index] = SeekLinearF(alpha[index], 0.4f, 0.1f);
-        } else {
+        if (!(targets[index] != -1 && defeated[index] != 0)) {
             alpha[index] = 1.0f;
+        } else {
+            alpha[index] = SeekLinearF(alpha[index], 0.4f, 0.1f);
         }
     }
     DrawMeleeTargetsRows(targets, defeated, alpha, count);
@@ -858,26 +858,6 @@ void CloudCityEscapeC_Init(WORLDINFO_s *world) {
     NuSpecialFind(world->current_gscn, &LevHSpecial[2], "gas_3_animin", 1);
 }
 
-void CloudCityTrapA_Update(WORLDINFO_s *world) {
-    static NUVEC pos = {33.0f, -0.75f, -3.0f};
-    if (netclient == 0) {
-        ResetTrooperCannons(world, id_SNOWTROOPER);
-        UpdateTrooperCannons(world);
-    }
-    if (LevGameObject[0] == NULL)
-        LevGameObject[0] = FindGameObject(id_DARTHVADER, 1, 1, 1, 0);
-    if (netclient == 0) {
-        if (LevAIMessage[0] != NULL && LevAIMessage[0]->value == 1.0f)
-            DrawBossHitPoints(LevGameObject[0]);
-        else
-            DrawBossHitPoints(NULL);
-    }
-    GIZMO *gizmo = LevGizmo[0];
-    if (gizmo != NULL && gizmo->object != NULL &&
-        static_cast<GIZFORCE_s *>(gizmo->object)->anim_set->state == GAMEANIMSET_STATE_AT_END)
-        AIAntinodeCreateSingleFrame(&pos, 0.5f);
-}
-
 void CloudCityTrapB_Update(WORLDINFO_s *) {
     if (LevGameObject[0] == NULL)
         LevGameObject[0] = FindGameObject(id_DARTHVADER, 1, 1, 1, 0);
@@ -896,6 +876,26 @@ void CloudCityTrapB_Update(WORLDINFO_s *) {
         else if (CLOUDCITYTRAPOUTRO_LDATA != NULL)
             GoToNewLevel(CLOUDCITYTRAPOUTRO_LDATA->idx);
     }
+}
+
+void CloudCityTrapA_Update(WORLDINFO_s *world) {
+    static NUVEC pos = {33.0f, -0.75f, -3.0f};
+    if (netclient == 0) {
+        ResetTrooperCannons(world, id_SNOWTROOPER);
+        UpdateTrooperCannons(world);
+    }
+    if (LevGameObject[0] == NULL)
+        LevGameObject[0] = FindGameObject(id_DARTHVADER, 1, 1, 1, 0);
+    if (netclient == 0) {
+        if (LevAIMessage[0] != NULL && LevAIMessage[0]->value == 1.0f)
+            DrawBossHitPoints(LevGameObject[0]);
+        else
+            DrawBossHitPoints(NULL);
+    }
+    GIZMO *gizmo = LevGizmo[0];
+    if (gizmo != NULL && gizmo->object != NULL &&
+        static_cast<GIZFORCE_s *>(gizmo->object)->anim_set->state == GAMEANIMSET_STATE_AT_END)
+        AIAntinodeCreateSingleFrame(&pos, 0.5f);
 }
 
 void CloudCityTrapC_Update(WORLDINFO_s *) {
@@ -975,10 +975,10 @@ void HothBattleE_UpdateWave() {
             melee.wave_delay = 0.0f;
             HothBattle_ClearBackgroundObjects();
             char state[16];
-            if (g_lowEndLevelBehaviour != 0) {
-                sprintf(state, "CamCutLow_%d", melee.next_wave);
-            } else {
+            if (g_lowEndLevelBehaviour == 0) {
                 sprintf(state, "CamCut_%d", melee.next_wave);
+            } else {
+                sprintf(state, "CamCutLow_%d", melee.next_wave);
             }
             if (AIScriptSetBaseScriptStateByName(&WORLD->processors[0].processor, state) != 0) {
                 AIScriptProcess(WORLD->ai_sys, NULL, NULL, &WORLD->processors[0].processor, FRAMETIME);
@@ -1731,10 +1731,10 @@ void AsteroidChaseD_Update(WORLDINFO_s *) {
     if (turretAliveCount == 0 && netclient == 0) {
         LevTime[0] += FRAMETIME;
         if (melee_waveDelay <= 0.0f && LevTime[0] >= 12.0f) {
-            if (FreePlay != 0) {
-                GoToNewLevel(ASTEROIDCHASEA_LDATA->idx);
-            } else {
+            if (FreePlay == 0) {
                 GoToNewLevel(ASTEROIDCHASEMITRO_LDATA->idx);
+            } else {
+                GoToNewLevel(ASTEROIDCHASEA_LDATA->idx);
             }
         }
     }

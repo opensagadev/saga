@@ -309,10 +309,7 @@ bool MechInputTouchGestureBasedController::OnDoubleClick(GameObject_s &object, T
         if (character == &object) {
             GameObject_s *nearby = FindNearestGameObject(&object.apiobj.position, &object, 0, 1.5f, 1.5f, -1, -1, 100,
                                                          NULL, 0, NULL, false);
-            if (nearby != NULL) {
-                StartNewTask(new MechTouchTaskAttack(*this, nearby->GetMechObjectInterface(), touch_position), holder,
-                             false, true);
-            } else {
+            if (nearby == NULL) {
                 JumpTriggerPacket packet = {};
                 packet.type = 2;
                 packet.player = &object;
@@ -324,6 +321,9 @@ bool MechInputTouchGestureBasedController::OnDoubleClick(GameObject_s &object, T
                 Hint_SetComplete(0x629);
                 object.field_0xf04 |= 0x10;
                 TriggerJumpTask(packet, false, false, false);
+            } else {
+                StartNewTask(new MechTouchTaskAttack(*this, nearby->GetMechObjectInterface(), touch_position), holder,
+                             false, true);
             }
             return true;
         }

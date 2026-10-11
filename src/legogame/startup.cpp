@@ -227,10 +227,10 @@ static void LoadPermData(BGPROCINFO *proc) {
 
     // Font path depends on language.  `Text_Language == 0` is Japanese in the
     // original; everything else uses the Latin font.
-    if (Text_Language != 0) {
-        Text_LoadFont((char *)"stuff\\text\\starwars_font", &permbuffer_ptr, &permbuffer_end);
-    } else {
+    if (Text_Language == 0) {
         Text_LoadFont((char *)"stuff\\text\\starwars_font_j", &permbuffer_ptr, &permbuffer_end);
+    } else {
+        Text_LoadFont((char *)"stuff\\text\\starwars_font", &permbuffer_ptr, &permbuffer_end);
     }
 
     // PAL builds show the language menu — the loader spins here until the menu
@@ -602,12 +602,12 @@ void LoadPerm(void) {
                             const f32 aspect = NuIOS_GetAspectRatio();
                             f32 half_w;
                             f32 half_h;
-                            if (!(!(aspect > 1.7777778f))) {
-                                half_h = 0.5f;
-                                half_w = aspect * 0.5f / 1.7777778f;
-                            } else {
+                            if (!(aspect > 1.7777778f)) {
                                 half_w = 0.5f;
                                 half_h = aspect * 0.5f / 1.7777778f;
+                            } else {
+                                half_h = 0.5f;
+                                half_w = aspect * 0.5f / 1.7777778f;
                             }
 
                             NuRndrClear(0xb00, 0, 1.0f);

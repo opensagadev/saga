@@ -332,10 +332,10 @@ static __used__ void LoadAreaData(bgprocinfo_s *) {
     }
 
     if (makefreeplaymodellist != 0) {
-        if ((ADataList[area].flags & AREAFLAG_VEHICLE_AREA) != 0 || (Area_PlayerModelCount > 1 && BonusArea == 0)) {
-            MakeFreePlayModelList(Area_PlayerModelList[0], Area_PlayerModelList[2], area, level, 0);
-        } else {
+        if ((ADataList[area].flags & AREAFLAG_VEHICLE_AREA) == 0 && !(Area_PlayerModelCount > 1 && BonusArea == 0)) {
             MakeFreePlayModelList(id_DEFAULTCHARACTER[0], id_DEFAULTCHARACTER[1], area, level, 0);
+        } else {
+            MakeFreePlayModelList(Area_PlayerModelList[0], Area_PlayerModelList[2], area, level, 0);
         }
         story_list = Area_StoryModelList;
         makefreeplaymodellist = 0;
@@ -421,10 +421,10 @@ void LoadAreaCharacters() {
         } else {
             VehicleArea = 1;
         }
-        if ((area_flags & AREAFLAG_BONUS_AREA) == 0) {
-            BonusArea = 0;
-        } else {
+        if ((area_flags & AREAFLAG_BONUS_AREA) != 0) {
             BonusArea = 1;
+        } else {
+            BonusArea = 0;
         }
     }
     AreaGlobals.values.field_0x04 = VehicleArea != 0 && BonusArea == 0;

@@ -566,44 +566,6 @@ void NegotiationsB_Init(WORLDINFO_s *world) {
         f->strength_0x6c = 0.5f;
 }
 
-void GunganA_Init(WORLDINFO_s *world) {
-    if (netclient == 0) {
-        memset(&gungan_a, 0, sizeof(gungan_a));
-        gungan_a.models[0] = id_KAADU;
-        gungan_a.models[1] = id_GUNGAN;
-        gungan_a.models[2] = id_FALUMPASET;
-        gungan_a.models[3] = id_GUNGAN;
-        for (i32 i = 0; i < 32; i++) {
-            char buf[32];
-            sprintf(buf, "origin_%d", i);
-            gungan_a.origins[i] = AIPathFindLocator(world->ai_sys, buf);
-            sprintf(buf, "target_%d", i);
-            gungan_a.targets[i] = AIPathFindLocator(world->ai_sys, buf);
-            if (gungan_a.origins[i] == NULL || gungan_a.targets[i] == NULL)
-                break;
-            gungan_a.count++;
-        }
-    }
-    GIZMOBLOWUP_s *b = GizmoBlowUp_FindByName(world, "Trunk2_exp11");
-    if (b != NULL) {
-        UpdateMidPos(b);
-        b->field_0x124 = 1;
-        b->field_0x128 = b->target_scale;
-        GIZMOBLOWUP_s *b2 = GizmoBlowUp_FindByName(world, "leaves_exp11");
-        if (b2 != NULL) {
-            b2->field_0x124 = 1;
-            b2->field_0x120 = &b->mid_position;
-            b2->field_0x128 = b->target_scale;
-        }
-        GIZMOBLOWUP_s *b3 = GizmoBlowUp_FindByName(world, "branch3_exp11");
-        if (b3 != NULL) {
-            b3->field_0x124 = 1;
-            b3->field_0x120 = &b->mid_position;
-            b3->field_0x128 = b->target_scale;
-        }
-    }
-}
-
 void GunganA_Update(WORLDINFO_s *world) {
     (void)world;
     if (netclient != 0)
@@ -646,6 +608,44 @@ void GunganA_Update(WORLDINFO_s *world) {
         }
     reset_spawn_timer:
         gungan_a.spawn_timer = 0.25f - NuFloatRand(NULL) * 0.5f;
+    }
+}
+
+void GunganA_Init(WORLDINFO_s *world) {
+    if (netclient == 0) {
+        memset(&gungan_a, 0, sizeof(gungan_a));
+        gungan_a.models[0] = id_KAADU;
+        gungan_a.models[1] = id_GUNGAN;
+        gungan_a.models[2] = id_FALUMPASET;
+        gungan_a.models[3] = id_GUNGAN;
+        for (i32 i = 0; i < 32; i++) {
+            char buf[32];
+            sprintf(buf, "origin_%d", i);
+            gungan_a.origins[i] = AIPathFindLocator(world->ai_sys, buf);
+            sprintf(buf, "target_%d", i);
+            gungan_a.targets[i] = AIPathFindLocator(world->ai_sys, buf);
+            if (gungan_a.origins[i] == NULL || gungan_a.targets[i] == NULL)
+                break;
+            gungan_a.count++;
+        }
+    }
+    GIZMOBLOWUP_s *b = GizmoBlowUp_FindByName(world, "Trunk2_exp11");
+    if (b != NULL) {
+        UpdateMidPos(b);
+        b->field_0x124 = 1;
+        b->field_0x128 = b->target_scale;
+        GIZMOBLOWUP_s *b2 = GizmoBlowUp_FindByName(world, "leaves_exp11");
+        if (b2 != NULL) {
+            b2->field_0x124 = 1;
+            b2->field_0x120 = &b->mid_position;
+            b2->field_0x128 = b->target_scale;
+        }
+        GIZMOBLOWUP_s *b3 = GizmoBlowUp_FindByName(world, "branch3_exp11");
+        if (b3 != NULL) {
+            b3->field_0x124 = 1;
+            b3->field_0x120 = &b->mid_position;
+            b3->field_0x128 = b->target_scale;
+        }
     }
 }
 
@@ -1646,50 +1646,6 @@ void PodSprintA_Init(WORLDINFO_s *world) {
     NuSpecialFind(world->current_gscn, &bigrocks[51], "bigrock_eight", 1);
 }
 
-void PodSprintA_Reset(WORLDINFO_s *world) {
-    PODSPRINT_s *ps = &podsprint;
-    ps->field_0x78 = 0;
-    pod_old_pos[0].x = pod_old_pos[0].y = pod_old_pos[0].z = -1.0f;
-    pod_old_pos[1].x = pod_old_pos[1].y = pod_old_pos[1].z = -1.0f;
-    ps->flags &= 0xef;
-    ps->field_0x88 = 0;
-    if ((ps->flags & 0xc) == 0 && !(netclient != 0 && podsprint_netpacket->ai_state > 2)) {
-        ps->ai_state = 1;
-        ps->ai_index = 0;
-        ps->flags &= 0xfe;
-        ps->speed = 3.0f;
-        podstartracealpha = 0.0f;
-    } else {
-        ps->ai_state = 3;
-        ps->flags &= 0xf2;
-        ps->ai_index = 4;
-        VehicleAreaRememberSpeed = 1.0f;
-        GameObject_s *p = player;
-        if (p != NULL && (p->apiobj.field_0x1f8 & 0x1000)) {
-            p->field_0xdc8 = 1.0f;
-            p->apiobj.velocity.x = 0.0f;
-            p->apiobj.velocity.y = 0.0f;
-            p->apiobj.velocity.z = ((PLAYERSUBOBJ2_s *)((PLAYERSUBOBJ_s *)p->apiobj.character_data)->field_0x24)->value;
-            NuVecRotateY(&p->apiobj.velocity, &p->apiobj.velocity, p->apiobj.field_0x276);
-        }
-        if (player2 != NULL && (player2->apiobj.field_0x1f8 & 0x1000)) {
-            GameObject_s *p2 = player2;
-            p2->field_0xdc8 = 1.0f;
-            p2->apiobj.velocity.x = 0.0f;
-            p2->apiobj.velocity.y = 0.0f;
-            p2->apiobj.velocity.z =
-                ((PLAYERSUBOBJ2_s *)((PLAYERSUBOBJ_s *)p2->apiobj.character_data)->field_0x24)->value;
-            NuVecRotateY(&p2->apiobj.velocity, &p2->apiobj.velocity, p2->apiobj.field_0x276);
-        }
-        if (game_cutscenes.cutscene != NULL) {
-            CutScene_SnapToEnd((CUTINFO *)game_cutscenes.cutscene);
-            CutScene_StoppedFn_LSW((CUTINFO *)game_cutscenes.cutscene);
-        }
-    }
-    PodRaceSnipersReset();
-    ps->boulders = AISysFindArea(world->ai_sys, "Boulders");
-}
-
 void PodSprintA_Update(WORLDINFO_s *world) {
     PODSPRINT_s *ps = &podsprint;
     VehicleAreaRememberSpeed = 1.0f;
@@ -1911,6 +1867,50 @@ void PodSprintA_Panel(WORLDINFO_s *world) {
             DrawPanel3DObject(0.0f, f, 1.0f, 0.16f, 0.16f, 0.16f, (u16)0, (u16)0, (u16)0, (nuhspecial_s *)entry, 0, c);
         }
     }
+}
+
+void PodSprintA_Reset(WORLDINFO_s *world) {
+    PODSPRINT_s *ps = &podsprint;
+    ps->field_0x78 = 0;
+    pod_old_pos[0].x = pod_old_pos[0].y = pod_old_pos[0].z = -1.0f;
+    pod_old_pos[1].x = pod_old_pos[1].y = pod_old_pos[1].z = -1.0f;
+    ps->flags &= 0xef;
+    ps->field_0x88 = 0;
+    if ((ps->flags & 0xc) == 0 && !(netclient != 0 && podsprint_netpacket->ai_state > 2)) {
+        ps->ai_state = 1;
+        ps->ai_index = 0;
+        ps->flags &= 0xfe;
+        ps->speed = 3.0f;
+        podstartracealpha = 0.0f;
+    } else {
+        ps->ai_state = 3;
+        ps->flags &= 0xf2;
+        ps->ai_index = 4;
+        VehicleAreaRememberSpeed = 1.0f;
+        GameObject_s *p = player;
+        if (p != NULL && (p->apiobj.field_0x1f8 & 0x1000)) {
+            p->field_0xdc8 = 1.0f;
+            p->apiobj.velocity.x = 0.0f;
+            p->apiobj.velocity.y = 0.0f;
+            p->apiobj.velocity.z = ((PLAYERSUBOBJ2_s *)((PLAYERSUBOBJ_s *)p->apiobj.character_data)->field_0x24)->value;
+            NuVecRotateY(&p->apiobj.velocity, &p->apiobj.velocity, p->apiobj.field_0x276);
+        }
+        if (player2 != NULL && (player2->apiobj.field_0x1f8 & 0x1000)) {
+            GameObject_s *p2 = player2;
+            p2->field_0xdc8 = 1.0f;
+            p2->apiobj.velocity.x = 0.0f;
+            p2->apiobj.velocity.y = 0.0f;
+            p2->apiobj.velocity.z =
+                ((PLAYERSUBOBJ2_s *)((PLAYERSUBOBJ_s *)p2->apiobj.character_data)->field_0x24)->value;
+            NuVecRotateY(&p2->apiobj.velocity, &p2->apiobj.velocity, p2->apiobj.field_0x276);
+        }
+        if (game_cutscenes.cutscene != NULL) {
+            CutScene_SnapToEnd((CUTINFO *)game_cutscenes.cutscene);
+            CutScene_StoppedFn_LSW((CUTINFO *)game_cutscenes.cutscene);
+        }
+    }
+    PodRaceSnipersReset();
+    ps->boulders = AISysFindArea(world->ai_sys, "Boulders");
 }
 
 void PodSprint_GetIAlongVals(nugspline_s *spline, i16 *out1, i16 *out2) {

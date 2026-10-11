@@ -311,15 +311,15 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                             }
                             if (turret->primary_anim_obj != NULL) {
                                 if (NuSpecialExistsFn(&turret->primary_anim_obj->special)) {
-                                    if (secondary_base != NULL) {
+                                    if (secondary_base == NULL) {
+                                        *primary_draw = *primary_base;
+                                        if (turret->yaw != 0)
+                                            NuMtxPreRotateY(primary_draw, turret->yaw);
+                                    } else {
                                         *secondary_draw = *secondary_base;
                                         if (turret->yaw != 0)
                                             NuMtxPreRotateY(secondary_draw, turret->yaw);
                                         NuMtxMul(primary_draw, &turret->field_0xa4, secondary_draw);
-                                    } else {
-                                        *primary_draw = *primary_base;
-                                        if (turret->yaw != 0)
-                                            NuMtxPreRotateY(primary_draw, turret->yaw);
                                     }
                                     if (turret->pitch != 0 && !(turret->behavior_flags & 0x40))
                                         NuMtxPreRotateX(primary_draw, turret->pitch);
@@ -1003,13 +1003,13 @@ static i32 GizTurrets_Load(void *world_ptr, void *system_ptr) {
         } else {
             turret->field_0x12f = static_cast<u8>(EdFileReadChar());
         }
-        if (version > 3) {
-            turret->field_0x131 = static_cast<u8>(EdFileReadChar());
-            turret->base_y_rotation = static_cast<i16>(EdFileReadShort());
+        if (!(version > 3)) {
             if (GizmoFileReadName(name) != 0) {
                 turret->bolt_type_id = static_cast<i8>(BoltType_FindIDByName(name, world));
             }
         } else {
+            turret->field_0x131 = static_cast<u8>(EdFileReadChar());
+            turret->base_y_rotation = static_cast<i16>(EdFileReadShort());
             if (GizmoFileReadName(name) != 0) {
                 turret->bolt_type_id = static_cast<i8>(BoltType_FindIDByName(name, world));
             }

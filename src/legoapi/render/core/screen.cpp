@@ -331,14 +331,16 @@ void HandleStillRender() {
     }
     old_pause_state = Paused;
 
-    if ((waiting_for_level == -1 ||
-         (gone_through_door_to_new_level == 0 && cut_waiting_for_new_level == 0 && waiting_for_new_level == 0)) &&
-        (NewLData != CREDITS_LDATA || LastLData != STATUS_LDATA) &&
-        (NewLData != STATUS_LDATA ||
-         ((WORLD->level_sub_id == -1 || (WORLD->area[WORLD->level_sub_id].flags & 2) == 0) && GAMEDEMO == 0)) &&
-        NewLData != CREDITS_LDATA &&
-        (NewLData != HUB_LDATA || WORLD->level_sub_id == -1 || (WORLD->area[WORLD->level_sub_id].flags & 2) == 0) &&
-        !(MainRenderTime > 0.0f && MainRenderTime < 1.0f)) {
+    if (!((waiting_for_level == -1 ||
+           (gone_through_door_to_new_level == 0 && cut_waiting_for_new_level == 0 && waiting_for_new_level == 0)) &&
+          (NewLData != CREDITS_LDATA || LastLData != STATUS_LDATA) &&
+          (NewLData != STATUS_LDATA ||
+           ((WORLD->level_sub_id == -1 || (WORLD->area[WORLD->level_sub_id].flags & 2) == 0) && GAMEDEMO == 0)) &&
+          NewLData != CREDITS_LDATA &&
+          (NewLData != HUB_LDATA || WORLD->level_sub_id == -1 || (WORLD->area[WORLD->level_sub_id].flags & 2) == 0) &&
+          !(MainRenderTime > 0.0f && MainRenderTime < 1.0f))) {
+        pause_rndr_on = 1;
+    } else {
         if (Paused == 0 || IsGrabbingScreen() != 0) {
             pause_rndr_on = static_cast<u32>(grab_screen_image) > 1;
         } else if (PauseRenderOffFn != NULL && PauseRenderOffFn() != 0) {
@@ -346,8 +348,6 @@ void HandleStillRender() {
         } else {
             pause_rndr_on = 1;
         }
-    } else {
-        pause_rndr_on = 1;
     }
 
     if (screendump != 0) {

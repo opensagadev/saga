@@ -699,6 +699,28 @@ void Store_HubInitFloorTargets(WORLDINFO_s *world) {
     }
 }
 
+void MenuUpdateDebugStore(MENU_s *menu) {
+    if (menu->cancel_pressed == 0) {
+        if (menu->confirm_pressed != 0) {
+            if (__builtin_expect(menu->selected_item > 10, 0)) {
+                SuperOptions.store_pack_flags = 0xffff;
+                SuperOptions.store_bundle_flags = 0xff;
+                TriggerExtraDataSave();
+                BackupMenu();
+            } else if (__builtin_expect(Store_IsPackUnlocked(menu->selected_item), 1)) {
+                GameAudio_PlaySfx(0x32, NULL, 0, 0);
+            } else {
+                Store_UnlockPack(menu->selected_item, true);
+                GameAudio_PlaySfx(0x30, NULL, 0, 0);
+                ReCalculateCompletionPoints();
+                BackupMenu();
+            }
+        }
+    } else {
+        BackupMenu();
+    }
+}
+
 void Store_HubDrawFloorTargets(WORLDINFO_s *world) {
     (void)NuFmod(GameTimer.time_elapsed, 4.0f);
     const u16 alpha_angle = static_cast<u16>(NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f);
@@ -746,28 +768,6 @@ void Store_HubDrawFloorTargets(WORLDINFO_s *world) {
             Draw3DObjectAlpha(world, object_id, &position, 0, facing, 0, 0.45f, 0.45f, 0.45f, 0, 1.0f);
         }
         Draw3DObjectAlpha(world, 0xa7, &position, 0, facing, 0, 0.45f, 0.45f, 0.45f, 0, 1.0f);
-    }
-}
-
-void MenuUpdateDebugStore(MENU_s *menu) {
-    if (menu->cancel_pressed == 0) {
-        if (menu->confirm_pressed != 0) {
-            if (__builtin_expect(menu->selected_item > 10, 0)) {
-                SuperOptions.store_pack_flags = 0xffff;
-                SuperOptions.store_bundle_flags = 0xff;
-                TriggerExtraDataSave();
-                BackupMenu();
-            } else if (__builtin_expect(Store_IsPackUnlocked(menu->selected_item), 1)) {
-                GameAudio_PlaySfx(0x32, NULL, 0, 0);
-            } else {
-                Store_UnlockPack(menu->selected_item, true);
-                GameAudio_PlaySfx(0x30, NULL, 0, 0);
-                ReCalculateCompletionPoints();
-                BackupMenu();
-            }
-        }
-    } else {
-        BackupMenu();
     }
 }
 
@@ -879,94 +879,6 @@ void MenuInitStore(MENU_s *) {
     sprintf(event, "pack_%s_tapped", product_id);
     NuIOS_RecordFlurryEvent(event);
     GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
-}
-
-void MenuUpdateStore(MENU_s *menu) {
-    char event[128];
-    if (__builtin_expect(menu->cancel_pressed != 0 || StoreIAP[0].text[0] == 'x', 0)) {
-        GameAudio_PlaySfx(0x31, NULL, 0, 0);
-        GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
-        MenuReset();
-        return;
-    }
-
-    const f32 time = NuFmod(menu->menu_time, 12.0f);
-    i32 hit;
-#define CHECK_STORE_TOUCH_POINT(INDEX)                                                                                 \
-    if (MenuAlpha >= 1.0f && MechInputTouchMenuController::AnyTouchesThisFrame > 0) {                                  \
-        const f32 dx = StoreTouchLastPos.x - entry_x;                                                                  \
-        const f32 dy = StoreTouchLastPos.y - entry_y;                                                                  \
-        if (__builtin_expect(dx * dx + dy * dy < 0.01f, 0)) {                                                          \
-            hit = INDEX;                                                                                               \
-            goto store_touch_selected;                                                                                 \
-        }                                                                                                              \
-    }
-#define CHECK_STORE_TOUCH(INDEX)                                                                                       \
-    do {                                                                                                               \
-        STOREIAP_s &entry = StoreIAP[INDEX];                                                                           \
-        if (entry.text[0] == 0) {                                                                                      \
-            return;                                                                                                    \
-        }                                                                                                              \
-        const f32 entry_x = entry.x;                                                                                   \
-        const f32 entry_y = entry.y;                                                                                   \
-        CHECK_STORE_TOUCH_POINT(INDEX);                                                                                \
-    } while (0)
-#define CHECK_STORE_PULSE(INDEX)                                                                                       \
-    do {                                                                                                               \
-        STOREIAP_s &entry = StoreIAP[INDEX];                                                                           \
-        if (entry.text[0] == 0) {                                                                                      \
-            return;                                                                                                    \
-        }                                                                                                              \
-        const f32 entry_x = entry.x;                                                                                   \
-        const f32 entry_y = entry.y;                                                                                   \
-        const f32 trigger = 8.0f - (entry_y + 1.0f) * 4.0f;                                                            \
-        if (time >= trigger && time - FRAMETIME < trigger) {                                                           \
-            VuVec pulse __attribute__((aligned(16))) = VuVec(entry_x, entry_y, 1.0f, 1.0f);                            \
-            MechSystems::Get()->NewRadarPulse(pulse, false);                                                           \
-        }                                                                                                              \
-        CHECK_STORE_TOUCH_POINT(INDEX);                                                                                \
-    } while (0)
-    if (!(time < 8.0f)) {
-        CHECK_STORE_TOUCH(0);
-        CHECK_STORE_TOUCH(1);
-        CHECK_STORE_TOUCH(2);
-    } else {
-        CHECK_STORE_PULSE(0);
-        CHECK_STORE_PULSE(1);
-        CHECK_STORE_PULSE(2);
-    }
-#undef CHECK_STORE_PULSE
-#undef CHECK_STORE_TOUCH
-#undef CHECK_STORE_TOUCH_POINT
-    return;
-
-store_touch_selected:
-    if (NuIOS_AreInAppPurchasesAvailable() != 0 && NuIOS_CanMakeInAppPurchases() != 0) {
-        menu_storepurchase_iap_name = StoreIAP[hit].text;
-        menu_i_bundle = StoreBundle_FindByName(menu_storepurchase_iap_name);
-        NewMenu(LEGOMENU_STORE_PURCHASE, -1, -1);
-
-        if (menu_i_bundle != -1) {
-            sprintf(event, "bundle_%s_bought", StoreBundle[menu_i_bundle].name);
-        } else if (menu_i_pack != -1) {
-            sprintf(event, "pack_%s_bought", *reinterpret_cast<char **>(&StorePack[menu_i_pack].field1_0x4));
-        } else {
-            return;
-        }
-        NuIOS_RecordFlurryEvent(event);
-        return;
-    }
-    if (TTab[0x60f] != NULL) {
-        NUVEC position = {0.0f, -0.6f, 1.0f};
-        GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
-            AddGameMessage(TTab[0x60f], &position, 0.5f, &position, 0.55f, 255, 31, 31, 0x20, 2.5f));
-        if (message != NULL) {
-            message->field_0xfe = 0xff;
-        }
-    }
-    GameAudio_PlaySfx(0x32, NULL, 0, 0);
-    GameCam_HitRoll();
-    MenuReset();
 }
 
 void MenuDrawStore(MENU_s *) {
@@ -1130,6 +1042,94 @@ void MenuDrawStore(MENU_s *) {
             return;
         }
     }
+}
+
+void MenuUpdateStore(MENU_s *menu) {
+    char event[128];
+    if (__builtin_expect(menu->cancel_pressed != 0 || StoreIAP[0].text[0] == 'x', 0)) {
+        GameAudio_PlaySfx(0x31, NULL, 0, 0);
+        GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
+        MenuReset();
+        return;
+    }
+
+    const f32 time = NuFmod(menu->menu_time, 12.0f);
+    i32 hit;
+#define CHECK_STORE_TOUCH_POINT(INDEX)                                                                                 \
+    if (MenuAlpha >= 1.0f && MechInputTouchMenuController::AnyTouchesThisFrame > 0) {                                  \
+        const f32 dx = StoreTouchLastPos.x - entry_x;                                                                  \
+        const f32 dy = StoreTouchLastPos.y - entry_y;                                                                  \
+        if (__builtin_expect(dx * dx + dy * dy < 0.01f, 0)) {                                                          \
+            hit = INDEX;                                                                                               \
+            goto store_touch_selected;                                                                                 \
+        }                                                                                                              \
+    }
+#define CHECK_STORE_TOUCH(INDEX)                                                                                       \
+    do {                                                                                                               \
+        STOREIAP_s &entry = StoreIAP[INDEX];                                                                           \
+        if (entry.text[0] == 0) {                                                                                      \
+            return;                                                                                                    \
+        }                                                                                                              \
+        const f32 entry_x = entry.x;                                                                                   \
+        const f32 entry_y = entry.y;                                                                                   \
+        CHECK_STORE_TOUCH_POINT(INDEX);                                                                                \
+    } while (0)
+#define CHECK_STORE_PULSE(INDEX)                                                                                       \
+    do {                                                                                                               \
+        STOREIAP_s &entry = StoreIAP[INDEX];                                                                           \
+        if (entry.text[0] == 0) {                                                                                      \
+            return;                                                                                                    \
+        }                                                                                                              \
+        const f32 entry_x = entry.x;                                                                                   \
+        const f32 entry_y = entry.y;                                                                                   \
+        const f32 trigger = 8.0f - (entry_y + 1.0f) * 4.0f;                                                            \
+        if (time >= trigger && time - FRAMETIME < trigger) {                                                           \
+            VuVec pulse __attribute__((aligned(16))) = VuVec(entry_x, entry_y, 1.0f, 1.0f);                            \
+            MechSystems::Get()->NewRadarPulse(pulse, false);                                                           \
+        }                                                                                                              \
+        CHECK_STORE_TOUCH_POINT(INDEX);                                                                                \
+    } while (0)
+    if (time < 8.0f) {
+        CHECK_STORE_PULSE(0);
+        CHECK_STORE_PULSE(1);
+        CHECK_STORE_PULSE(2);
+    } else {
+        CHECK_STORE_TOUCH(0);
+        CHECK_STORE_TOUCH(1);
+        CHECK_STORE_TOUCH(2);
+    }
+#undef CHECK_STORE_PULSE
+#undef CHECK_STORE_TOUCH
+#undef CHECK_STORE_TOUCH_POINT
+    return;
+
+store_touch_selected:
+    if (NuIOS_AreInAppPurchasesAvailable() != 0 && NuIOS_CanMakeInAppPurchases() != 0) {
+        menu_storepurchase_iap_name = StoreIAP[hit].text;
+        menu_i_bundle = StoreBundle_FindByName(menu_storepurchase_iap_name);
+        NewMenu(LEGOMENU_STORE_PURCHASE, -1, -1);
+
+        if (menu_i_bundle != -1) {
+            sprintf(event, "bundle_%s_bought", StoreBundle[menu_i_bundle].name);
+        } else if (menu_i_pack != -1) {
+            sprintf(event, "pack_%s_bought", *reinterpret_cast<char **>(&StorePack[menu_i_pack].field1_0x4));
+        } else {
+            return;
+        }
+        NuIOS_RecordFlurryEvent(event);
+        return;
+    }
+    if (TTab[0x60f] != NULL) {
+        NUVEC position = {0.0f, -0.6f, 1.0f};
+        GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
+            AddGameMessage(TTab[0x60f], &position, 0.5f, &position, 0.55f, 255, 31, 31, 0x20, 2.5f));
+        if (message != NULL) {
+            message->field_0xfe = 0xff;
+        }
+    }
+    GameAudio_PlaySfx(0x32, NULL, 0, 0);
+    GameCam_HitRoll();
+    MenuReset();
 }
 
 void MenuExitStore(MENU_s *) {

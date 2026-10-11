@@ -1117,10 +1117,7 @@ void AIRetreatFromDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *
     }
     AIPATH *path = packet->path_info.path;
     AIPATHCNX *destination_connection = packet->fallback_path_info.connection;
-    if (connection == destination_connection) {
-        AISysCharacterSetPathCnx(packet, &object->position, connection,
-                                 packet->fallback_path_info.dist > packet->path_info.dist);
-    } else {
+    if (connection != destination_connection) {
         f32 length = connection->distance;
         f32 parameter = packet->path_info.dist;
         if (parameter > 1.0f) {
@@ -1188,6 +1185,9 @@ void AIRetreatFromDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *
             connection = packet->path_info.connection;
         }
         AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
+    } else {
+        AISysCharacterSetPathCnx(packet, &object->position, connection,
+                                 packet->fallback_path_info.dist > packet->path_info.dist);
     }
 
     connection = packet->path_info.connection;

@@ -1254,11 +1254,11 @@ extern "C" {
         if (box != NULL) {
             NuQFntSetScale(SmartTextFont != NULL ? SmartTextFont : QFont2D, draw_x_scale, y_scale);
             f32 box_width;
-            if (widest_line == -1) {
-                box_width = smarttextex_longestwidth;
-            } else {
+            if (widest_line != -1) {
                 Text3DStringEncode(reinterpret_cast<char *>(lines[widest_line]), encoded);
                 box_width = NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded);
+            } else {
+                box_width = smarttextex_longestwidth;
             }
             line_height -= 0.01f;
             box->y = y;
@@ -1494,12 +1494,7 @@ extern "C" {
         for (i32 i = 0; decoded[i] != 0 && count < 509;) {
             if (decoded[i] == '~' && (decoded[i + 1] == '~' || (decoded[i + 1] >= '0' && decoded[i + 1] <= '9'))) {
                 u32 colour;
-                if (decoded[i + 1] == '~') {
-                    colour = opacity | red | (static_cast<u32>(green) << 8) | (static_cast<u32>(blue) << 16);
-                    if (apitext_half_rgb != 0)
-                        colour = opacity | (red >> 1) | (static_cast<u32>(green >> 1) << 8) |
-                                 (static_cast<u32>(blue >> 1) << 16);
-                } else {
+                if (decoded[i + 1] != '~') {
                     colour = opacity;
                     if (red != 0 || green != 0 || blue != 0) {
                         const i32 preset = decoded[i + 1] - '0';
@@ -1511,6 +1506,11 @@ extern "C" {
                             colour |= text_preset_r[preset] | (static_cast<u32>(text_preset_g[preset]) << 8) |
                                       (static_cast<u32>(text_preset_b[preset]) << 16);
                     }
+                } else {
+                    colour = opacity | red | (static_cast<u32>(green) << 8) | (static_cast<u32>(blue) << 16);
+                    if (apitext_half_rgb != 0)
+                        colour = opacity | (red >> 1) | (static_cast<u32>(green >> 1) << 8) |
+                                 (static_cast<u32>(blue >> 1) << 16);
                 }
                 i += 2;
                 if (count != 0 && colour != current_rgba) {
@@ -1677,17 +1677,7 @@ void MenuDrawViewTextStrings(MENU_s *menu) {
         i32 red;
 
         if (registered) {
-            if (menu->selected_item != i) {
-                if (menu_pulse > 0.0f) {
-                    red = Text_MenuColourLerp(MENUFLASH0R, MENUNORMALR, menu_pulse);
-                    green = Text_MenuColourLerp(MENUFLASH0G, MENUNORMALG, menu_pulse);
-                    blue = Text_MenuColourLerp(MENUFLASH0B, MENUNORMALB, menu_pulse);
-                } else {
-                    red = MENUENTRYR;
-                    green = MENUENTRYG;
-                    blue = MENUENTRYB;
-                }
-            } else {
+            if (menu->selected_item == i) {
                 if (!TestForController()) {
                     if (menu_pulse > 0.0f) {
                         red = Text_MenuColourLerp(MENUFLASH0R, MENUNORMALR, menu_pulse);
@@ -1712,6 +1702,16 @@ void MenuDrawViewTextStrings(MENU_s *menu) {
                         green = MENUFLASH1G;
                         blue = MENUFLASH1B;
                     }
+                }
+            } else {
+                if (menu_pulse > 0.0f) {
+                    red = Text_MenuColourLerp(MENUFLASH0R, MENUNORMALR, menu_pulse);
+                    green = Text_MenuColourLerp(MENUFLASH0G, MENUNORMALG, menu_pulse);
+                    blue = Text_MenuColourLerp(MENUFLASH0B, MENUNORMALB, menu_pulse);
+                } else {
+                    red = MENUENTRYR;
+                    green = MENUENTRYG;
+                    blue = MENUENTRYB;
                 }
             }
         } else {

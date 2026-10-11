@@ -214,11 +214,11 @@ static void antinodeEditor_cbSelectType(eduimenu_s *parent, eduiitem_s *, unsign
         eduiMenuAddItem(menu, eduiItemCheckCreate(1, &attr, 0, 1, antinodeEditor_cbSetType, antinode_types[1]));
     }
     eduiMenuAttach(parent, menu);
-    if (antinode_selected()->type == 2) {
+    if (antinode_selected()->type != 2) {
+        eduiMenuAddItem(menu, eduiItemCheckCreate(2, &attr, 0, 1, antinodeEditor_cbSetType, antinode_types[2]));
+    } else {
         eduiMenuAddItem(menu, eduiItemCheckCreate(2, &attr, 1, 1, antinodeEditor_cbSetType, antinode_types[2]));
         menu->selected = edui_last_item;
-    } else {
-        eduiMenuAddItem(menu, eduiItemCheckCreate(2, &attr, 0, 1, antinodeEditor_cbSetType, antinode_types[2]));
     }
     eduiMenuAttach(parent, menu);
 }

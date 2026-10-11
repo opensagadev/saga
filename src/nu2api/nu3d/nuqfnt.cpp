@@ -614,11 +614,11 @@ NUQFNT *NuQFntReadBuffer(VARIPTR *font, VARIPTR *buf, VARIPTR buf_end) {
         *(i32 *)relocation_table.void_ptr = relocation_count;
         relocation_entry.addr = relocation_table.addr + 4;
         for (i = 0; i < relocation_count; i++, relocation_entry.addr += 4) {
-            if (relocations[i].pointer != 0) {
+            if (relocations[i].pointer == 0) {
+                *(i32 *)relocation_entry.void_ptr = 0;
+            } else {
                 *(i32 *)relocation_entry.void_ptr = relocations[i].pointer - (relocation_entry.addr - base.addr);
                 *(i32 *)(base.addr + relocations[i].pointer) = relocations[i].target - relocations[i].pointer;
-            } else {
-                *(i32 *)relocation_entry.void_ptr = 0;
             }
         }
     }

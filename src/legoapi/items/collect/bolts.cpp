@@ -811,6 +811,47 @@ void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
 i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
 void NewBuzz(nupad_s *, f32, i32);
 void GameCam_HitJudder();
+
+__attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction, nuvec_s *normal,
+                                                                    unsigned char *processed) {
+    BOLTTYPE_s *type = bolt->type;
+    if ((type->field_60 & 0x100000) != 0)
+        return;
+
+    NUVEC reflected;
+    NUVEC position;
+    Bolt_Reflect(normal, direction, &reflected);
+    NuVecNorm(&reflected, &reflected);
+    FindAnglesXY(&reflected, NULL, NULL);
+
+    if (static_cast<u8>(bolt->field_0x104) > 31 || (TerSurface[bolt->field_0x104].flags & 0x800) == 0) {
+        i_temp_xrot += static_cast<i32>((qrand() * (1.0f / 65535.0f)) * 16384.0f - 8192.0f);
+        temp_yrot = static_cast<u16>(temp_yrot) + static_cast<i32>((qrand() * (1.0f / 65535.0f)) * 16384.0f - 8192.0f);
+    }
+
+    NUANGVEC angles;
+    angles.x = i_temp_xrot;
+    angles.y = static_cast<u16>(temp_yrot);
+    NUMTX matrix;
+    NuMtxSetRotationXYVU0(&matrix, &angles);
+
+    i32 type_id = static_cast<i8>(type->field_3d);
+    if (type_id < 0 || type_id >= BoltSys->count)
+        type_id = bolt->type_id;
+
+    position = bolt->position;
+    f32 offset = 1.01f * bolt->ray_radius;
+    position.x += reflected.x * offset;
+    position.y += reflected.y * offset;
+    position.z += reflected.z * offset;
+    addbolt_nosfx = 1;
+    BOLT_s *deflected = Bolt_Add(NULL, &position, &matrix, type_id, bolt->hit_flags);
+    if (deflected != NULL) {
+        deflected->flags |= 0x10000000;
+        if (processed != NULL)
+            processed[deflected->index] = 1;
+    }
+}
 void Bolt_HitGameObjectRC(NetMessage &message) {
     u16 bolt_index, object_index;
     NUVEC points[3];
@@ -982,47 +1023,6 @@ finish:
     if ((object->apiobj.flags_low & 0x80) != 0)
         GameCam_HitJudder();
     Bolt_End(bolt, 1);
-}
-
-__attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction, nuvec_s *normal,
-                                                                    unsigned char *processed) {
-    BOLTTYPE_s *type = bolt->type;
-    if ((type->field_60 & 0x100000) != 0)
-        return;
-
-    NUVEC reflected;
-    NUVEC position;
-    Bolt_Reflect(normal, direction, &reflected);
-    NuVecNorm(&reflected, &reflected);
-    FindAnglesXY(&reflected, NULL, NULL);
-
-    if (static_cast<u8>(bolt->field_0x104) > 31 || (TerSurface[bolt->field_0x104].flags & 0x800) == 0) {
-        i_temp_xrot += static_cast<i32>((qrand() * (1.0f / 65535.0f)) * 16384.0f - 8192.0f);
-        temp_yrot = static_cast<u16>(temp_yrot) + static_cast<i32>((qrand() * (1.0f / 65535.0f)) * 16384.0f - 8192.0f);
-    }
-
-    NUANGVEC angles;
-    angles.x = i_temp_xrot;
-    angles.y = static_cast<u16>(temp_yrot);
-    NUMTX matrix;
-    NuMtxSetRotationXYVU0(&matrix, &angles);
-
-    i32 type_id = static_cast<i8>(type->field_3d);
-    if (type_id < 0 || type_id >= BoltSys->count)
-        type_id = bolt->type_id;
-
-    position = bolt->position;
-    f32 offset = 1.01f * bolt->ray_radius;
-    position.x += reflected.x * offset;
-    position.y += reflected.y * offset;
-    position.z += reflected.z * offset;
-    addbolt_nosfx = 1;
-    BOLT_s *deflected = Bolt_Add(NULL, &position, &matrix, type_id, bolt->hit_flags);
-    if (deflected != NULL) {
-        deflected->flags |= 0x10000000;
-        if (processed != NULL)
-            processed[deflected->index] = 1;
-    }
 }
 
 static i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags, WORLDINFO_s *) {
@@ -1683,7 +1683,10 @@ void Bolts_Update(WORLDINFO_s *world) {
         bolt->bounds_max.z = bolt->position.z + bolt->radius;
         if (bolt->time >= bolt->lifetime) {
             i32 surface_hit;
-            if (bolt->field_0x104 != -1) {
+            if (bolt->field_0x104 == -1) {
+                BoltSys->debris(bolt, points, -1, NULL, 0);
+                surface_hit = 0;
+            } else {
                 NUVEC reflection;
                 Bolt_Reflect(&bolt->hit_normal, &bolt->velocity, &reflection);
                 NuVecScale(&reflection, &reflection, 0.2f);
@@ -1693,9 +1696,6 @@ void Bolts_Update(WORLDINFO_s *world) {
                 else
                     BoltSys->debris(bolt, points, -1, &reflection, 0);
                 surface_hit = 1;
-            } else {
-                BoltSys->debris(bolt, points, -1, NULL, 0);
-                surface_hit = 0;
             }
             Bolt_End(bolt, 1);
             if ((bolt->flags & 0x10000) != 0)
