@@ -1107,16 +1107,18 @@ extern "C" {
             }
             if (key->field_184 != 0) {
                 if (DebrisSingleCollisionCheckScaleYFlag(key_index, position, radius, 1.0f, 3) != 0) {
-                    u32 *entry = spherecolldata + numspherecolldata * 2;
+                    const i32 count = numspherecolldata;
+                    u32 *entry = spherecolldata + count * 2;
                     entry[0] = key_index;
                     entry[1] = debtab[effect_index]->field_2f2;
-                    ++numspherecolldata;
+                    numspherecolldata = count + 1;
                 }
                 if (DebrisSingleTorusCollisionCheckScaleYFlag(key_index, position, radius, 1.0f, 3) != 0) {
-                    u32 *entry = toruscolldata + numtoruscolldata * 2;
+                    const i32 count = numtoruscolldata;
+                    u32 *entry = toruscolldata + count * 2;
                     entry[0] = key_index;
                     entry[1] = debtab[effect_index]->field_2f2;
-                    ++numtoruscolldata;
+                    numtoruscolldata = count + 1;
                 }
             }
             key = previous;
