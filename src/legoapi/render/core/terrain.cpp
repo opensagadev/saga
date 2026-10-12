@@ -5369,13 +5369,12 @@ extern "C" void terrainpickupinit(char *path, void **buffer) {
     for (TERRAIN_GROUP *group = terrain->groups; group != initial_group_end; ++group)
         group->chunk_type = -1;
     for (i32 i = 0; i < 32; ++i) {
-        TERRAIN_PLATFORM &platform = terrain->platforms[i];
-        platform.scene_object = NULL;
-        platform.bounce_impulse = 0.0f;
-        platform.bounce_offset = 0.0f;
-        platform.bounce_velocity = 0.0f;
-        platform.bounce_spring = 0.0f;
-        platform.bounce_damping = 0.0f;
+        terrain->platforms[i].scene_object = NULL;
+        terrain->platforms[i].bounce_impulse = 0.0f;
+        terrain->platforms[i].bounce_offset = 0.0f;
+        terrain->platforms[i].bounce_velocity = 0.0f;
+        terrain->platforms[i].bounce_damping = 0.0f;
+        terrain->platforms[i].bounce_spring = 0.0f;
     }
     for (i32 i = 0; i < 128; ++i)
         terrain->group_for_type[i] = -1;
@@ -5401,7 +5400,7 @@ extern "C" void terrainpickupinit(char *path, void **buffer) {
         while (batch->marker >= 0) {
             TERRAIN_SHAPE *shape = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
             auto batch_shape_count = batch->shape_count;
-            for (i32 remaining = batch_shape_count; remaining > 0; --remaining, ++shape) {
+            for (i32 i = 0; i < batch_shape_count; ++i, ++shape) {
                 if (shape->material[0] == 0xff) {
                     shape->flags |= 0x80;
                     shape->material[0] = shape->material[1];
@@ -5414,8 +5413,9 @@ extern "C" void terrainpickupinit(char *path, void **buffer) {
                 maximum.x = MAX(shape->max_x, maximum.x);
                 maximum.y = MAX(shape->max_y, maximum.y);
                 for (i32 k = 0; k < 4; ++k) {
-                    NUVEC &v = shape->vectors[k];
-                    f32 length_squared = (v.x * v.x + v.y * v.y) + v.z * v.z;
+                    f32 length_squared =
+                        (shape->vectors[k].x * shape->vectors[k].x + shape->vectors[k].y * shape->vectors[k].y) +
+                        shape->vectors[k].z * shape->vectors[k].z;
                     radius_squared = MAX(length_squared, radius_squared);
                 }
             }
@@ -5425,8 +5425,12 @@ extern "C" void terrainpickupinit(char *path, void **buffer) {
         group.radius = NuFsqrt(radius_squared);
         group.chunk_type = 0;
         ++terraincnt;
-        group.bounds_min = minimum;
-        group.bounds_max = maximum;
+        group.bounds_min.x = minimum.x;
+        group.bounds_min.y = minimum.y;
+        group.bounds_min.z = minimum.z;
+        group.bounds_max.x = maximum.x;
+        group.bounds_max.y = maximum.y;
+        group.bounds_max.z = maximum.z;
     }
     TERRAIN_GROUP *group = terrain->groups;
     for (i32 i = 0; i < 32; ++i, ++group) {
