@@ -4077,15 +4077,11 @@ i32 TerrainBlockOnBlock(WORLDINFO_s *world, pushblock_s *block, nuvec_s *points,
 }
 
 void ScanTerrIDRemovePlat(i32 platform_index) {
-    TERRAIN_TRACK_SLOT *slot = CurTerr->track_slots;
-    i32 remaining = TERRAIN_TRACK_SLOT_COUNT;
-    do {
-        if (slot->platform_index == platform_index) {
-            slot->id = NULL;
+    for (i32 i = 0; i < TERRAIN_TRACK_SLOT_COUNT; ++i) {
+        if (CurTerr->track_slots[i].platform_index == platform_index) {
+            CurTerr->track_slots[i].id = NULL;
         }
-        ++slot;
-        --remaining;
-    } while (remaining != 0);
+    }
 }
 i32 HitWallSpline() {
     f32 hit = 0.0f;
