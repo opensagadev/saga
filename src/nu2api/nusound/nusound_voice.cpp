@@ -20,33 +20,10 @@ NuCriticalSection NuSoundVoice::sStateCriticalSection("NuSoundVoice::sStateCriti
 NuCriticalSection NuSoundVoice::sReleaseCriticalSection("NuSoundVoice::sReleaseCriticalSection");
 
 namespace {
-    struct VoiceListenerLink {
-        NuSoundListener *listener;
-        VoiceListenerLink *previous;
-        VoiceListenerLink *next;
-    };
+    typedef NuSoundVoiceListenerLink VoiceListenerLink;
 
     static inline void DetachVoiceListener(VoiceListenerLink *link) {
-        NuSoundListener *listener = link->listener;
-        if (listener == NULL) {
-            return;
-        }
-
-        VoiceListenerLink *previous = link->previous;
-        if (previous == link) {
-            listener->field_0x8 = NULL;
-        } else {
-            VoiceListenerLink *next = link->next;
-            previous->next = next;
-            next->previous = previous;
-            if (listener->field_0x8 == link) {
-                listener->field_0x8 = previous;
-            }
-        }
-
-        link->listener = NULL;
-        link->previous = NULL;
-        link->next = NULL;
+        link->Detach();
     }
 
     static inline void AttachVoiceListener(VoiceListenerLink *link, NuSoundListener *listener) {
@@ -78,12 +55,12 @@ namespace {
 NuSoundVoice::NuSoundVoice(NuSoundSource *sound_source, bool loop) {
     this->field_0x24 = NULL;
     this->field_0x28 = NULL;
-    this->field57_0x80 = NULL;
-    this->field58_0x84 = NULL;
-    this->field59_0x88 = NULL;
-    this->field60_0x8c = NULL;
-    this->field61_0x90 = NULL;
-    this->field62_0x94 = NULL;
+    this->real_listener_link.listener = NULL;
+    this->real_listener_link.previous = NULL;
+    this->real_listener_link.next = NULL;
+    this->focus_listener_link.listener = NULL;
+    this->focus_listener_link.previous = NULL;
+    this->focus_listener_link.next = NULL;
     this->queued_buffers = 0;
 
     // The source is locked for the lifetime of the voice and keeps the stream
@@ -139,16 +116,14 @@ NuSoundVoice::~NuSoundVoice() {
         handle->SetVoice(NULL);
     }
     while (this->handles.length != 0) {
-        this->handles.Remove(this->handles.Front());
+        this->handles.PopFront();
     }
 
     this->sound_source->VoiceRelease();
     this->sound_source->Unlock();
 
-    // The target destructor unlinks both embedded listener memberships before
-    // the voice storage is returned to the scratch allocator.
-    DetachVoiceListener(reinterpret_cast<VoiceListenerLink *>(&this->field60_0x8c));
-    DetachVoiceListener(reinterpret_cast<VoiceListenerLink *>(&this->field57_0x80));
+    // The handle list and then both embedded listener links are torn down by
+    // their member destructors.
 }
 
 // ---------------------------------------------------------------------------
@@ -329,9 +304,9 @@ void NuSoundVoice::CalculatePositionalMix() {
     this->field64_0x9c = 0.0f;
     this->field66_0xa4 = this->field69_0xb0;
 
-    VoiceListenerLink *real_link = reinterpret_cast<VoiceListenerLink *>(&this->field57_0x80);
+    VoiceListenerLink *real_link = &this->real_listener_link;
     DetachVoiceListener(real_link);
-    VoiceListenerLink *focus_link = reinterpret_cast<VoiceListenerLink *>(&this->field60_0x8c);
+    VoiceListenerLink *focus_link = &this->focus_listener_link;
     DetachVoiceListener(focus_link);
 
     if (this->surround_mode == 0) {

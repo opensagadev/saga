@@ -57,7 +57,7 @@ void NuSoundEffectAttenuation::ProcessVoice(NuSoundVoice *voice, f32) {
     if (voice->GetSurroundMode() != NuSoundSystem::SurroundMode::TWO) {
         for (NuListNodeBase *node = attachments.Head(); node != attachments.Tail(); node = node->GetNext()) {
             void *listener = static_cast<NuListNode<void *> *>(node)->value;
-            if (listener != NULL && listener == voice->field60_0x8c) {
+            if (listener != NULL && listener == voice->focus_listener_link.listener) {
                 output_mix = attenuation;
                 return;
             }
