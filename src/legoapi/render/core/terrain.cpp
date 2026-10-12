@@ -7053,38 +7053,43 @@ extern "C" void NewTerrAxisFreedom(TERRAIN_AXIS_FREEDOM_SHAPE *shape, NUVEC *pos
 
 extern "C" i16 NewPlatPickupInst(void *object, i32 type) {
     TERRSET *terrain = CurTerr;
-    if (terrain == NULL || terrain->group_index_count >= terrain->max_group_indices ||
-        terrain->group_count >= terrain->max_groups || object == NULL)
+    if (terrain == NULL)
         return -1;
-    i16 source = PickupTerr->group_for_type[type];
-    if (source == -1 || terrain->max_platforms <= 0)
+    i32 index_count = terrain->group_index_count;
+    if (index_count >= terrain->max_group_indices)
         return -1;
-    i32 index = 0;
-    while (terrain->platforms[index].scene_object != NULL) {
-        if (++index == terrain->max_platforms)
-            return -1;
-    }
-    TERRAIN_GROUP &group = terrain->groups[terrain->group_count];
-    group = PickupTerr->groups[source];
+    i16 group_index = terrain->group_count;
+    if (group_index >= terrain->max_groups || object == NULL)
+        return -1;
+    TERRPICKUPSET *pickups = PickupTerr;
+    i16 source = pickups->group_for_type[type];
+    if (source == -1)
+        return -1;
+    i32 index;
+    TERRAIN_PLATFORM *platform = FindFreeTerrainPlatform(terrain, &index);
+    if (index == -1)
+        return -1;
+    TERRAIN_GROUP &group = terrain->groups[group_index];
+    group = pickups->groups[source];
     group.scene_index = index;
     group.chunk_type = 1;
-    TERRAIN_PLATFORM &platform = terrain->platforms[index];
-    platform.scene_object = object;
-    platform.flags &= ~TERRAIN_PLATFORM_FLAG_ROTATING;
+    platform->scene_object = object;
+    platform->flags &= ~TERRAIN_PLATFORM_FLAG_ROTATING;
     NUMTX *matrix = static_cast<NUMTX *>(object);
     group.origin.x = matrix->m30;
     group.origin.y = matrix->m31;
     group.origin.z = matrix->m32;
-    platform.terrain_group_index = terrain->group_count;
-    platform.scene_transform = NULL;
-    platform.scene_object_index = 0;
-    terrain->group_indices[terrain->group_index_count++] = terrain->group_count;
-    platform.flags &= ~TERRAIN_PLATFORM_FLAG_COLLIDED;
-    platform.bounce_impulse = 0.0f;
-    platform.bounce_offset = 0.0f;
-    platform.bounce_velocity = 0.0f;
-    platform.bounce_damping = 0.0f;
-    platform.bounce_spring = 0.0f;
+    platform->terrain_group_index = group_index;
+    platform->scene_object_index = 0;
+    platform->scene_transform = NULL;
+    terrain->group_indices[index_count] = group_index;
+    terrain->group_index_count = index_count + 1;
+    platform->flags &= ~TERRAIN_PLATFORM_FLAG_COLLIDED;
+    platform->bounce_impulse = 0.0f;
+    platform->bounce_offset = 0.0f;
+    platform->bounce_velocity = 0.0f;
+    platform->bounce_damping = 0.0f;
+    platform->bounce_spring = 0.0f;
     ++terrain->group_count;
     ++terrain->cells[TERRAIN_PLATFORM_CELL].group_count;
     return index;
