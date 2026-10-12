@@ -4220,10 +4220,12 @@ void ScanWallSplineTerrain(i32, i32 terrain_mask, i32) {
     WallSplCount = 0;
     for (TERRAIN_SPATIAL_NODE *node = CurTerr->spatial_nodes; node != NULL;
          node = *reinterpret_cast<TERRAIN_SPATIAL_NODE **>(reinterpret_cast<u8 *>(node) - sizeof(void *))) {
-        const u8 mask = node->field_0x02 >> 8;
+        // field_0x02 holds the material in its low byte and the mask in its high byte.
+        const u8 *material_bytes = reinterpret_cast<const u8 *>(&node->field_0x02);
+        const u8 mask = material_bytes[1];
         if (mask != 0 && (mask & wall_mask) == 0)
             continue;
-        const u8 material = static_cast<u8>(node->field_0x02);
+        const u8 material = material_bytes[0];
         auto node_points = node->points;
         for (i32 first = 0; first < node->point_count; first += 16) {
             NUVEC *points = node_points + first;
