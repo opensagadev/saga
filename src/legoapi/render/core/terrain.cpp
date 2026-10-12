@@ -30,6 +30,7 @@
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuang.h"
+#include "nu2api/nuplatform/nudevicespecs.hpp"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
@@ -875,9 +876,7 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
                 for (i32 vector_index = 0; vector_index < 4; ++vector_index) {
                     const NUVEC &vector = shape->vectors[vector_index];
                     const f32 length_squared = vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
-                    if (length_squared > radius_squared) {
-                        radius_squared = length_squared;
-                    }
+                    radius_squared = MAX(length_squared, radius_squared);
                 }
             }
 
@@ -975,7 +974,7 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
             static_cast<i32>(static_cast<f32>(x_distance * TERRAIN_GRID_WIDTH) / (terrain_max_x - terrain_min_x));
         if (x_cell < 0)
             x_cell = 0;
-        else if (x_cell >= TERRAIN_GRID_WIDTH)
+        if (x_cell >= TERRAIN_GRID_WIDTH)
             x_cell = TERRAIN_GRID_WIDTH - 1;
 
         const i32 z_distance = static_cast<i32>((min_z + max_z) * 0.5f - terrain_min_z);
@@ -983,7 +982,7 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
             static_cast<i32>(static_cast<f32>(z_distance * TERRAIN_GRID_WIDTH) / (terrain_max_z - terrain_min_z));
         if (z_cell < 0)
             z_cell = 0;
-        else if (z_cell >= TERRAIN_GRID_WIDTH)
+        if (z_cell >= TERRAIN_GRID_WIDTH)
             z_cell = TERRAIN_GRID_WIDTH - 1;
 
         group_cells[group_index] = static_cast<i16>(z_cell * TERRAIN_GRID_WIDTH + x_cell);
@@ -992,8 +991,7 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
     terrain->used_cell_count = 0;
     terrain->group_index_count = 0;
     for (i32 cell_index = 0; cell_index < TERRAIN_GRID_CELL_COUNT; ++cell_index) {
-        TERRAIN_CELL &cell = terrain->cells[terrain->used_cell_count];
-        cell.first_group = static_cast<u16>(terrain->group_index_count);
+        terrain->cells[terrain->used_cell_count].first_group = static_cast<u16>(terrain->group_index_count);
 
         f32 min_x = kBoundsMaximum;
         f32 min_z = kBoundsMaximum;
@@ -1005,25 +1003,21 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
                 continue;
             }
 
-            if (group_min_x[group_index] < min_x)
-                min_x = group_min_x[group_index];
-            if (group_min_z[group_index] < min_z)
-                min_z = group_min_z[group_index];
-            if (group_max_x[group_index] > max_x)
-                max_x = group_max_x[group_index];
-            if (group_max_z[group_index] > max_z)
-                max_z = group_max_z[group_index];
+            min_x = MIN(group_min_x[group_index], min_x);
+            min_z = MIN(group_min_z[group_index], min_z);
+            max_x = MAX(group_max_x[group_index], max_x);
+            max_z = MAX(group_max_z[group_index], max_z);
 
-            ++cell.group_count;
+            ++terrain->cells[terrain->used_cell_count].group_count;
             terrain->group_indices[terrain->group_index_count] = static_cast<i16>(group_index);
             ++terrain->group_index_count;
         }
 
-        if (cell.group_count != 0) {
-            cell.min_x = min_x;
-            cell.min_z = min_z;
-            cell.max_x = max_x;
-            cell.max_z = max_z;
+        if (terrain->cells[terrain->used_cell_count].group_count != 0) {
+            terrain->cells[terrain->used_cell_count].min_x = min_x;
+            terrain->cells[terrain->used_cell_count].min_z = min_z;
+            terrain->cells[terrain->used_cell_count].max_x = max_x;
+            terrain->cells[terrain->used_cell_count].max_z = max_z;
             ++terrain->used_cell_count;
         }
     }
@@ -1123,7 +1117,7 @@ void LoadTerrainFile(WORLDINFO *world) {
     }
 }
 void LoadGrassFile(WORLDINFO *world) {
-    char path[268];
+    char path[256];
     world->page_grass = -1;
     Grass_Available = 1;
     char *config = world->config_file;
@@ -1144,14 +1138,13 @@ void LoadGrassFile(WORLDINFO *world) {
         }
     }
 
-    if (g_isMidRangeDevice != 0 && NuStrIStr(config, "GunGan_A") != NULL) {
+    if (NuStrIStr(config, "SpeederChase") != NULL) {
         Grass_Available = 0;
-        return;
     }
 
-    char *found = NuStrIStr(config, "SpeederChase");
-    if (found != NULL) {
+    if (NuDeviceSpecs::ms_instance->specs < 3 && NuStrIStr(config, "GunGan_A") != NULL) {
         Grass_Available = 0;
+        return;
     }
 
     if (Grass_Available != 0) {
@@ -4227,10 +4220,12 @@ void ScanWallSplineTerrain(i32, i32 terrain_mask, i32) {
     WallSplCount = 0;
     for (TERRAIN_SPATIAL_NODE *node = CurTerr->spatial_nodes; node != NULL;
          node = *reinterpret_cast<TERRAIN_SPATIAL_NODE **>(reinterpret_cast<u8 *>(node) - sizeof(void *))) {
-        const u8 mask = node->field_0x02 >> 8;
+        // field_0x02 holds the material in its low byte and the mask in its high byte.
+        const u8 *material_bytes = reinterpret_cast<const u8 *>(&node->field_0x02);
+        const u8 mask = material_bytes[1];
         if (mask != 0 && (mask & wall_mask) == 0)
             continue;
-        const u8 material = static_cast<u8>(node->field_0x02);
+        const u8 material = material_bytes[0];
         auto node_points = node->points;
         for (i32 first = 0; first < node->point_count; first += 16) {
             NUVEC *points = node_points + first;
@@ -4368,33 +4363,33 @@ i32 TerrainPlatformMoveCheck(nuvec_s *, nuvec_s *, i32, i32, i32);
 static f32 TerrWallDeflectYScale;
 
 extern "C" void TerrainScanWallSpline(TERRAIN_SPATIAL_NODE *node) {
-    if (node->point_count <= 2) {
-        node->points[0].y = 2147483648.0f;
-        return;
-    }
-    i32 count = node->point_count <= 14 ? node->point_count + 1 : 16;
-    f32 first_x = node->points[0].x;
-    f32 first_z = node->points[0].z;
-    // The original Android binary repeats this block without advancing
-    // the spline or terminating when point_count is greater than two.
-    for (;;) {
-        f32 min_x = first_x;
-        f32 min_z = first_z;
-        f32 max_x = first_x;
-        f32 max_z = first_z;
-        for (i32 i = 1; i < count; ++i) {
-            f32 x = node->points[i].x;
-            f32 z = node->points[i].z;
-            min_x = x < min_x ? x : min_x;
-            min_z = z < min_z ? z : min_z;
-            max_x = x > max_x ? x : max_x;
-            max_z = z > max_z ? z : max_z;
+    const i32 point_count = node->point_count;
+    if (point_count > 2) {
+        i32 count = point_count <= 14 ? point_count + 1 : 16;
+        f32 first_x = node->points[0].x;
+        f32 first_z = node->points[0].z;
+        // The original Android binary repeats this block without advancing
+        // the spline or terminating when point_count is greater than two.
+        for (;;) {
+            f32 min_x = first_x;
+            f32 min_z = first_z;
+            f32 max_x = first_x;
+            f32 max_z = first_z;
+            for (i32 i = 1; i < count; ++i) {
+                f32 x = node->points[i].x;
+                f32 z = node->points[i].z;
+                min_x = x < min_x ? x : min_x;
+                min_z = z < min_z ? z : min_z;
+                max_x = x > max_x ? x : max_x;
+                max_z = z > max_z ? z : max_z;
+            }
+            node->points[0].y = min_x;
+            node->points[1].y = max_x;
+            node->points[2].y = min_z;
+            node->points[3].y = max_z;
         }
-        node->points[0].y = min_x;
-        node->points[1].y = max_x;
-        node->points[2].y = min_z;
-        node->points[3].y = max_z;
     }
+    node->points[0].y = 2147483648.0f;
 }
 
 extern "C" void TerrainAddWallSpline(TERRAIN_SPATIAL_NODE *node, TERRSET *terrain) {
@@ -7172,9 +7167,14 @@ extern "C" i32 NewRayCastSetHandel(NUVEC *position, NUVEC *movement, f32 radius,
     SetRayCastUnitScale(TerI);
     ConfigureRayCast(TerI, position, movement, radius, separation_epsilon, compare_epsilon);
     ScanTerrainHandel(scan_type, handle);
-    ResolveRayCast(movement);
-    if (TerI->hit_type != 0)
+    DerotateMovementVector();
+    HitTerrain();
+    if (TerI->hit_type != 0) {
+        RayImpact(movement);
+        TerrainImpactNorm();
+        ShadNorm = TerI->movement_normal;
         TerrPoly = TerI->surface;
+    }
     NuScratchRelease();
     return TerI->hit_type;
 }

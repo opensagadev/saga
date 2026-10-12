@@ -389,11 +389,11 @@ extern "C" void TerrainPlatformNewUpdate(void) {
         if (matrix != NULL) {
             if (platform.bounce_frames != 0) {
                 f32 velocity;
-                if (platform.bounce_frames >= 125)
+                if (platform.bounce_frames < 125)
+                    velocity = platform.bounce_velocity - platform.bounce_damping * platform.bounce_velocity;
+                else
                     velocity = (platform.bounce_impulse - platform.bounce_damping * platform.bounce_velocity) +
                                platform.bounce_velocity;
-                else
-                    velocity = platform.bounce_velocity - platform.bounce_damping * platform.bounce_velocity;
                 const f32 offset = platform.bounce_offset;
                 --platform.bounce_frames;
                 velocity = (-offset * fabsf(offset) * platform.bounce_spring * 0.5f - platform.bounce_spring * offset) +
@@ -611,7 +611,10 @@ extern "C" {
 
     i32 CreateScaledPARTEffect(i32 effect_index, f32 requested_scale) {
         // Retail uses this inclusive upper check; loaded type IDs are 0..127.
-        if (effect_index <= 0 || effect_index > 128 || part_types[effect_index].effect_ids[0] == -1) {
+        if (effect_index <= 0) {
+            return -1;
+        }
+        if (effect_index > 128 || part_types[effect_index].effect_ids[0] == -1) {
             return -1;
         }
         if (part_types[effect_index].scale != 1.0f) {
@@ -1071,7 +1074,7 @@ extern "C" {
     i32 DebrisQueryPriority(i32 effect_index) {
         if (effect_index < 0 || effect_index >= EDPP_MAX_TYPES || debtab[effect_index] == NULL)
             return 0;
-        i16 priority = 0;
+        i16 priority;
         switch (static_cast<i8>(debtab[effect_index]->particle_type)) {
             case 0:
                 priority = 20000;
@@ -1086,7 +1089,7 @@ extern "C" {
                 priority = 10000;
                 break;
             default:
-                break;
+                return 0;
         }
         return priority;
     }
@@ -1423,17 +1426,16 @@ extern "C" {
         if (CurTerr == NULL || platform_index < 0)
             return;
 
-        TERRAIN_PLATFORM &platform = CurTerr->platforms[platform_index];
-        const i16 group_index = platform.terrain_group_index;
-        TERRAIN_GROUP &group = CurTerr->groups[group_index];
+        TERRAIN_GROUP &group = CurTerr->groups[CurTerr->platforms[platform_index].terrain_group_index];
         if (static_cast<u32>(group.chunk_type) > TERRAIN_CHUNK_GROUP_SECONDARY)
             return;
 
         TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group.data);
         while (batch->marker >= 0) {
+            const i32 shape_count = batch->shape_count;
             TERRAIN_SHAPE *shape = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
-            for (i32 i = 0; i < batch->shape_count; ++i, ++shape)
-                TerrDrawPlat(shape, group_index);
+            for (i32 i = shape_count; i > 0; --i, ++shape)
+                TerrDrawPlat(shape, CurTerr->platforms[platform_index].terrain_group_index);
             batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(shape);
         }
     }
