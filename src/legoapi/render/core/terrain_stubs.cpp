@@ -1071,7 +1071,7 @@ extern "C" {
     i32 DebrisQueryPriority(i32 effect_index) {
         if (effect_index < 0 || effect_index >= EDPP_MAX_TYPES || debtab[effect_index] == NULL)
             return 0;
-        i16 priority = 0;
+        i16 priority;
         switch (static_cast<i8>(debtab[effect_index]->particle_type)) {
             case 0:
                 priority = 20000;
@@ -1086,7 +1086,7 @@ extern "C" {
                 priority = 10000;
                 break;
             default:
-                break;
+                return 0;
         }
         return priority;
     }
