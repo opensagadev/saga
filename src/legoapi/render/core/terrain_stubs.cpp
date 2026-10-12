@@ -10,6 +10,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/numtx.h"
+#include "nu2api/numath/numtx_inline.h"
 #include "nu2api/numath/nurand.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nutex.h"
@@ -808,50 +809,10 @@ extern "C" {
             return;
         }
         NuMtxSetIdentity(&debkeydata[handle].emitter_orientation);
-        debkeydatatype_s &key = debkeydata[handle];
-        NUMTX *mtx = &key.emitter_orientation;
-        // Retail performs these rotations locally after reloading debkeydata;
-        // it does not call the exported rotation helpers or clear translation.
-        {
-            const f32 cosine = NU_COS_LUT(z);
-            const f32 sine = NU_SIN_LUT(z);
-            const f32 m00 = mtx->m00, m10 = mtx->m10, m20 = mtx->m20, m30 = mtx->m30;
-            mtx->m00 = m00 * cosine - mtx->m01 * sine;
-            mtx->m01 = m00 * sine + mtx->m01 * cosine;
-            mtx->m10 = m10 * cosine - mtx->m11 * sine;
-            mtx->m11 = m10 * sine + mtx->m11 * cosine;
-            mtx->m20 = m20 * cosine - mtx->m21 * sine;
-            mtx->m21 = m20 * sine + mtx->m21 * cosine;
-            mtx->m30 = m30 * cosine - mtx->m31 * sine;
-            mtx->m31 = m30 * sine + mtx->m31 * cosine;
-        }
-        {
-            const f32 cosine = NU_COS_LUT(y);
-            const f32 sine = NU_SIN_LUT(y);
-            const f32 m00 = mtx->m00, m10 = mtx->m10, m20 = mtx->m20, m30 = mtx->m30;
-            mtx->m00 = m00 * cosine + mtx->m02 * sine;
-            mtx->m02 = mtx->m02 * cosine - m00 * sine;
-            mtx->m10 = m10 * cosine + mtx->m12 * sine;
-            mtx->m12 = mtx->m12 * cosine - m10 * sine;
-            mtx->m20 = m20 * cosine + mtx->m22 * sine;
-            mtx->m22 = mtx->m22 * cosine - m20 * sine;
-            mtx->m30 = m30 * cosine + mtx->m32 * sine;
-            mtx->m32 = mtx->m32 * cosine - m30 * sine;
-        }
-        {
-            const f32 cosine = NU_COS_LUT(x);
-            const f32 sine = NU_SIN_LUT(x);
-            const f32 m01 = mtx->m01, m11 = mtx->m11, m21 = mtx->m21, m31 = mtx->m31;
-            mtx->m01 = m01 * cosine - mtx->m02 * sine;
-            mtx->m02 = m01 * sine + mtx->m02 * cosine;
-            mtx->m11 = m11 * cosine - mtx->m12 * sine;
-            mtx->m12 = m11 * sine + mtx->m12 * cosine;
-            mtx->m21 = m21 * cosine - mtx->m22 * sine;
-            mtx->m22 = m21 * sine + mtx->m22 * cosine;
-            mtx->m31 = m31 * cosine - mtx->m32 * sine;
-            mtx->m32 = m31 * sine + mtx->m32 * cosine;
-        }
-        key.orientation_dirty = 0.0f;
+        NuMtxRotateZInline(&debkeydata[handle].emitter_orientation, z);
+        NuMtxRotateYInline(&debkeydata[handle].emitter_orientation, y);
+        NuMtxRotateXInline(&debkeydata[handle].emitter_orientation, x);
+        debkeydata[handle].orientation_dirty = 0.0f;
     }
 
     void DebrisEmitterOrientationMtx(i32 handle, NUMTX *source) {
@@ -978,37 +939,8 @@ extern "C" {
     void DebrisOrientation(i32 handle, i16 z, i16 y) {
         if (handle != -1) {
             NuMtxSetIdentity(&debkeydata[handle].effect_orientation);
-            NUMTX *mtx = &debkeydata[handle].effect_orientation;
-
-            const f32 cos_z = NU_COS_LUT(z);
-            const f32 sin_z = NU_SIN_LUT(z);
-            const f32 z_m00 = mtx->m00;
-            const f32 z_m10 = mtx->m10;
-            const f32 z_m20 = mtx->m20;
-            const f32 z_m30 = mtx->m30;
-            mtx->m00 = z_m00 * cos_z - mtx->m01 * sin_z;
-            mtx->m01 = z_m00 * sin_z + mtx->m01 * cos_z;
-            mtx->m10 = z_m10 * cos_z - mtx->m11 * sin_z;
-            mtx->m11 = z_m10 * sin_z + mtx->m11 * cos_z;
-            mtx->m20 = z_m20 * cos_z - mtx->m21 * sin_z;
-            mtx->m21 = z_m20 * sin_z + mtx->m21 * cos_z;
-            mtx->m30 = z_m30 * cos_z - mtx->m31 * sin_z;
-            mtx->m31 = z_m30 * sin_z + mtx->m31 * cos_z;
-
-            const f32 cos_y = NU_COS_LUT(y);
-            const f32 sin_y = NU_SIN_LUT(y);
-            const f32 y_m00 = mtx->m00;
-            const f32 y_m10 = mtx->m10;
-            const f32 y_m20 = mtx->m20;
-            const f32 y_m30 = mtx->m30;
-            mtx->m00 = y_m00 * cos_y + mtx->m02 * sin_y;
-            mtx->m02 = mtx->m02 * cos_y - y_m00 * sin_y;
-            mtx->m10 = y_m10 * cos_y + mtx->m12 * sin_y;
-            mtx->m12 = mtx->m12 * cos_y - y_m10 * sin_y;
-            mtx->m20 = y_m20 * cos_y + mtx->m22 * sin_y;
-            mtx->m22 = mtx->m22 * cos_y - y_m20 * sin_y;
-            mtx->m30 = y_m30 * cos_y + mtx->m32 * sin_y;
-            mtx->m32 = mtx->m32 * cos_y - y_m30 * sin_y;
+            NuMtxRotateZInline(&debkeydata[handle].effect_orientation, z);
+            NuMtxRotateYInline(&debkeydata[handle].effect_orientation, y);
             debkeydata[handle].orientation_dirty = 0.0f;
         }
     }
@@ -1242,43 +1174,8 @@ extern "C" {
             return;
         debkeydata[handle].field_2fa = enabled;
         NuMtxSetIdentity(&debkeydata[handle].particle_orientation);
-        NUMTX *matrix = &debkeydata[handle].particle_orientation;
-        f32 sine = NU_SIN_LUT(x_angle);
-        f32 cosine = NU_COS_LUT(x_angle);
-        f32 y0 = matrix->m01;
-        f32 z0 = matrix->m02;
-        matrix->m01 = cosine * y0 - z0 * sine;
-        matrix->m02 = sine * y0 + z0 * cosine;
-        f32 y1 = matrix->m11;
-        f32 z1 = matrix->m12;
-        matrix->m11 = cosine * y1 - z1 * sine;
-        matrix->m12 = sine * y1 + z1 * cosine;
-        f32 y2 = matrix->m21;
-        f32 z2 = matrix->m22;
-        matrix->m21 = cosine * y2 - z2 * sine;
-        matrix->m22 = sine * y2 + z2 * cosine;
-        f32 y3 = matrix->m31;
-        f32 z3 = matrix->m32;
-        matrix->m31 = cosine * y3 - z3 * sine;
-        matrix->m32 = sine * y3 + z3 * cosine;
-        sine = NU_SIN_LUT(y_angle);
-        cosine = NU_COS_LUT(y_angle);
-        f32 x0 = matrix->m00;
-        z0 = matrix->m02;
-        matrix->m00 = x0 * cosine + z0 * sine;
-        matrix->m02 = z0 * cosine - x0 * sine;
-        f32 x1 = matrix->m10;
-        z1 = matrix->m12;
-        matrix->m12 = z1 * cosine - x1 * sine;
-        matrix->m10 = x1 * cosine + z1 * sine;
-        f32 x2 = matrix->m20;
-        z2 = matrix->m22;
-        matrix->m20 = x2 * cosine + z2 * sine;
-        matrix->m22 = z2 * cosine - x2 * sine;
-        f32 x3 = matrix->m30;
-        z3 = matrix->m32;
-        matrix->m30 = x3 * cosine + z3 * sine;
-        matrix->m32 = z3 * cosine - x3 * sine;
+        NuMtxRotateXInline(&debkeydata[handle].particle_orientation, x_angle);
+        NuMtxRotateYInline(&debkeydata[handle].particle_orientation, y_angle);
     }
 
     void DebrisSetGroupID(i32 handle, i16 group) {
