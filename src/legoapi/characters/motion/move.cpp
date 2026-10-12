@@ -7378,9 +7378,21 @@ i32 Glide_Start(GameObject_s *object) {
 void StartJetPackFall(GameObject_s *object, i32 fall);
 void PlayLandSfx(GameObject_s *object, i32 type, i32 surface);
 
+// Fires the jet pack: plays the jump sound, applies the character's jump
+// speed and readies a jet-pack weapon.
+static inline void JetPackLaunch(GameObject_s *object) {
+    object->field_0xe31 = 1;
+    PlayJumpSfx(object, 0);
+    GAMECHARACTERDATA *character = object->apiobj.character_data->game_character;
+    object->apiobj.velocity.y = character->jump_speed;
+    if (character->uses_weapon_action == 2 && object->character_context != 7)
+        FastWeaponOut(object, 1);
+    object->jump_variant_timer = 0.0f;
+}
+
 void JetPackCode(GameObject_s *object, i32 jump_pressed, i32 fall, i32) {
     i8 context = object->character_context;
-    if (context == 0x19 || context == 2 ||
+    if (context == 2 || context == 0x19 ||
         (object->apiobj.character_data->game_character->uses_weapon_action == 2 && context == 1)) {
         object->context_animation_timer -= FRAMETIME;
         if (object->context_animation_timer <= 0.0f)
@@ -7414,40 +7426,30 @@ void JetPackCode(GameObject_s *object, i32 jump_pressed, i32 fall, i32) {
             StartJetPackFall(object, fall);
         return;
     }
-    bool finish_hover = context == 0x13;
-    if (finish_hover) {
+    if (context == 0x13) {
         if (AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) == NULL)
             return;
         object->context_animation_timer -= FRAMETIME;
         if (!(object->context_animation_timer <= 0.0f))
             return;
-    } else {
-        if (jump_pressed == 0 || (object->apiobj.field_0x27d == 0 && !(object->ground_contact_grace_timer > 0.0f)) ||
-            ObjLandReady(object) == 0)
-            return;
-        if (object->character_context == 6)
-            FastWeaponIn(object, 0);
-        else if (object->character_context == 7)
-            FastWeaponOut(object, 0);
-        object->context_animation = 0x48;
-        object->context_animation_timer = AnimDuration(object->id, 0x48, 0.0f, 0.0f, 1);
-        if (!(object->context_animation_timer <= 0.0f)) {
-            object->character_context = 0x13;
-            object->fall_hover_height = 2000000.0f;
-            return;
-        }
-    }
-    object->field_0xe31 = 1;
-    PlayJumpSfx(object, 0);
-    GAMECHARACTERDATA *character = object->apiobj.character_data->game_character;
-    object->apiobj.velocity.y = character->jump_speed;
-    if (character->uses_weapon_action == 2 && object->character_context != 7)
-        FastWeaponOut(object, 1);
-    object->jump_variant_timer = 0.0f;
-    if (finish_hover)
+        JetPackLaunch(object);
         object->character_context = -1;
+        return;
+    }
+    if (jump_pressed == 0 || (object->apiobj.field_0x27d == 0 && !(object->ground_contact_grace_timer > 0.0f)) ||
+        ObjLandReady(object) == 0)
+        return;
+    if (object->character_context == 6)
+        FastWeaponIn(object, 0);
+    else if (object->character_context == 7)
+        FastWeaponOut(object, 0);
+    object->context_animation = 0x48;
+    object->context_animation_timer = AnimDuration(object->id, 0x48, 0.0f, 0.0f, 1);
+    if (!(object->context_animation_timer <= 0.0f))
+        object->character_context = 0x13;
     else
-        object->fall_hover_height = 2000000.0f;
+        JetPackLaunch(object);
+    object->fall_hover_height = 2000000.0f;
 }
 
 float SeekLinearF(float current, float target, float step) {
