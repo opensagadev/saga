@@ -2223,84 +2223,89 @@ void MovePlayer_ROLLING(GameObject_s *object) {
 }
 
 void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
-    if (position == NULL || position->spline == NULL || position->spline->length <= 1)
-        return;
-    NUGSPLINE *spline = position->spline;
-    i32 segments = spline->length - 1 + (position->looping != 0);
-    if (position->segment >= segments)
-        return;
-    NUVEC offset;
-    if (distance > 0.0f) {
-        do {
-            position->segment_distance += distance;
-            if (!(position->segment_distance >= position->segment_length))
-                goto interpolate;
-            distance = position->segment_distance - position->segment_length;
-            i16 previous = position->segment;
-            position->segment++;
-            if (position->segment >= segments) {
-                if (!position->looping) {
-                    position->reached_end = 1;
-                    position->position = *(NUVEC *)((u8 *)spline->pts + position->segment * (i16)spline->pt_size);
-                    position->segment = previous;
-                    position->along = 1.0f;
-                    position->segment_distance = position->segment_length;
-                    return;
-                }
-                position->segment = 0;
-            }
-            NUVEC *current = (NUVEC *)((u8 *)spline->pts + position->segment * (i16)spline->pt_size);
-            NUVEC *next =
-                (NUVEC *)((u8 *)spline->pts + ((position->segment + 1) % spline->length) * (i16)spline->pt_size);
-            position->segment_distance = 0.0f;
-            position->segment_length = NuVecDist(next, current, &offset);
-            if (distance == 0.0f)
-                position->position = *current;
-            spline = position->spline;
-        } while (distance > 0.0f);
-        goto update_along;
-    } else if (distance < 0.0f && position->segment >= 0) {
-        for (;;) {
-            position->segment_distance += distance;
-            if (!(position->segment_distance < 0.0f))
-                break;
-            distance = position->segment_distance;
-            i16 previous = position->segment;
-            position->segment--;
-            if (position->segment < 0) {
-                if (!position->looping) {
-                    position->reached_end = 1;
-                    position->position = *spline->pts;
-                    position->segment = previous;
-                    position->along = 0.0f;
+    if (position != NULL && position->spline != NULL && position->spline->length > 1) {
+        NUGSPLINE *spline = position->spline;
+        i32 points = spline->length;
+        if (position->looping)
+            points++;
+        i32 segments = points - 1;
+        if (position->segment < segments) {
+            NUVEC offset;
+            if (distance > 0.0f) {
+                do {
+                    position->segment_distance += distance;
+                    if (!(position->segment_distance >= position->segment_length))
+                        goto interpolate;
+                    distance = position->segment_distance - position->segment_length;
+                    i16 previous = position->segment;
+                    position->segment++;
+                    if (position->segment >= segments) {
+                        if (!position->looping) {
+                            position->reached_end = 1;
+                            position->position =
+                                *(NUVEC *)((u8 *)spline->pts + position->segment * (i16)spline->pt_size);
+                            position->segment = previous;
+                            position->along = 1.0f;
+                            position->segment_distance = position->segment_length;
+                            return;
+                        }
+                        position->segment = 0;
+                    }
+                    NUVEC *current = (NUVEC *)((u8 *)spline->pts + position->segment * (i16)spline->pt_size);
+                    NUVEC *next = (NUVEC *)((u8 *)spline->pts +
+                                            ((position->segment + 1) % spline->length) * (i16)spline->pt_size);
                     position->segment_distance = 0.0f;
-                    return;
+                    position->segment_length = NuVecDist(next, current, &offset);
+                    if (distance == 0.0f)
+                        position->position = *current;
+                    spline = position->spline;
+                } while (distance > 0.0f);
+                goto update_along;
+            } else if (position->segment >= 0 && distance < 0.0f) {
+                for (;;) {
+                    position->segment_distance += distance;
+                    if (!(position->segment_distance < 0.0f))
+                        break;
+                    distance = position->segment_distance;
+                    i16 previous = position->segment;
+                    position->segment--;
+                    if (position->segment < 0) {
+                        if (!position->looping) {
+                            position->reached_end = 1;
+                            position->position = *spline->pts;
+                            position->segment = previous;
+                            position->along = 0.0f;
+                            position->segment_distance = 0.0f;
+                            return;
+                        }
+                        position->segment = segments - 1;
+                    }
+                    NUVEC *current = (NUVEC *)((u8 *)spline->pts + position->segment * (i16)spline->pt_size);
+                    NUVEC *next = (NUVEC *)((u8 *)spline->pts +
+                                            ((position->segment + 1) % spline->length) * (i16)spline->pt_size);
+                    position->segment_length = NuVecDist(next, current, &offset);
+                    position->segment_distance = position->segment_length;
+                    if (distance == 0.0f)
+                        position->position = *next;
+                    spline = position->spline;
                 }
-                position->segment = segments - 1;
-            }
+            } else
+                goto update_along;
+        interpolate: {
             NUVEC *current = (NUVEC *)((u8 *)spline->pts + position->segment * (i16)spline->pt_size);
             NUVEC *next =
                 (NUVEC *)((u8 *)spline->pts + ((position->segment + 1) % spline->length) * (i16)spline->pt_size);
-            position->segment_length = NuVecDist(next, current, &offset);
-            position->segment_distance = position->segment_length;
-            if (distance == 0.0f)
-                position->position = *next;
-            spline = position->spline;
+            NuVecSub(&offset, next, current);
+            f32 fraction = 0.0f;
+            if (position->segment_length != 0.0f)
+                fraction = position->segment_distance / position->segment_length;
+            NuVecScale(&offset, &offset, fraction);
+            NuVecAdd(&position->position, current, &offset);
         }
-    } else
-        goto update_along;
-interpolate: {
-    NUVEC *current = (NUVEC *)((u8 *)spline->pts + position->segment * (i16)spline->pt_size);
-    NUVEC *next = (NUVEC *)((u8 *)spline->pts + ((position->segment + 1) % spline->length) * (i16)spline->pt_size);
-    NuVecSub(&offset, next, current);
-    f32 fraction = 0.0f;
-    if (position->segment_length != 0.0f)
-        fraction = position->segment_distance / position->segment_length;
-    NuVecScale(&offset, &offset, fraction);
-    NuVecAdd(&position->position, current, &offset);
-}
-update_along:
-    position->along = (position->segment_distance / position->segment_length + position->segment) / segments;
+        update_along:
+            position->along = (position->segment_distance / position->segment_length + position->segment) / segments;
+        }
+    }
 }
 
 void MoveBlocksOverBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, nuvec_s *velocity) {
@@ -10441,60 +10446,61 @@ static void DodgeCode(GameObject_s *object, i32 action_pressed, i32 jump_pressed
         return;
     }
 
-    if (static_cast<i8>(object->apiobj.flags_low) >= 0 || object->apiobj.field_0x27d == 0 ||
-        (object->character_context != -1 && (object->character_context != 0x0a || object->context_animation == 0x57))) {
-        return;
-    }
+    if (object->apiobj.player_controlled && object->apiobj.field_0x27d != 0 &&
+        (object->character_context == -1 || (object->character_context == 0x0a && object->context_animation != 0x57))) {
+        GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+        if (object->pad_gamepad->input_magnitude <= (data->walk_speed + data->movement_speed) * 0.5f) {
+            BOLT_s *bolt = FindIncomingBolt(object, 1, 1);
+            object->incoming_bolt = bolt;
+            if (bolt == NULL)
+                return;
+            if (action_pressed == 0)
+                return;
 
-    GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-    if (!((data->walk_speed + data->movement_speed) * 0.5f >= object->pad_gamepad->input_magnitude)) {
-        return;
-    }
+            const i16 previous_animation = object->context_animation;
+            NUVEC dodge_direction = bolt->field_0xac;
+            NuVecRotateY(&dodge_direction, &dodge_direction, 0x4000);
 
-    BOLT_s *bolt = FindIncomingBolt(object, 1, 1);
-    object->incoming_bolt = bolt;
-    if (bolt == NULL || action_pressed == 0) {
-        return;
-    }
-
-    const i16 previous_animation = object->context_animation;
-    NUVEC dodge_direction = bolt->field_0xac;
-    NuVecRotateY(&dodge_direction, &dodge_direction, 0x4000);
-
-    i16 animation;
-    if ((object->field_0xe21 & 0x20) == 0) {
-        const f32 side = (object->apiobj.collision_position.x - bolt->position.x) * dodge_direction.x +
-                         (object->apiobj.collision_position.z - bolt->position.z) * dodge_direction.z;
-        animation = side < 0.0f ? 0x4f : 0x26;
-    } else {
-        animation = object->field_0xe12 == 0x26 ? 0x4f : 0x26;
-    }
-    object->context_animation = animation;
-    object->field_0xe12 = animation;
-
-    if (object->apiobj.character_model->model_data_b[animation] != NULL) {
-        object->context_animation_timer = AnimDuration(object->id, animation, 0.0f, 0.0f, 0);
-        if (object->context_animation_timer > 0.0f) {
-            object->character_context = 0x25;
-            object->landing_followup = 2;
-            object->blowup_target = NULL;
-            ResetAnimPacket(&object->apiobj.anim_packet, -1);
-            if (object->context_animation == 0x58 && object->pad_gamepad->input_magnitude > 0.0f) {
-                object->force_target = NULL;
+            if ((object->field_0xe21 & 0x20) != 0) {
+                if (object->field_0xe12 == 0x26)
+                    object->context_animation = 0x4f;
+                else
+                    object->context_animation = 0x26;
             } else {
-                object->force_target = bolt->owner;
-                if (FaceOpponent(object, NULL) != 0) {
-                    object->apiobj.field_0x276 = object->apiobj.movement_facing_angle;
-                    object->apiobj.facing_angle = object->apiobj.movement_facing_angle;
+                const f32 side = (object->apiobj.collision_position.x - bolt->position.x) * dodge_direction.x +
+                                 (object->apiobj.collision_position.z - bolt->position.z) * dodge_direction.z;
+                if (side < 0.0f)
+                    object->context_animation = 0x4f;
+                else
+                    object->context_animation = 0x26;
+            }
+            object->field_0xe12 = object->context_animation;
+
+            if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
+                object->context_animation_timer = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 0);
+                if (object->context_animation_timer > 0.0f) {
+                    object->character_context = 0x25;
+                    object->blowup_target = NULL;
+                    object->landing_followup = 2;
+                    ResetAnimPacket(&object->apiobj.anim_packet, -1);
+                    if (object->context_animation == 0x58 && object->pad_gamepad->input_magnitude > 0.0f) {
+                        object->force_target = NULL;
+                    } else {
+                        object->force_target = bolt->owner;
+                        if (FaceOpponent(object, NULL) != 0) {
+                            object->apiobj.field_0x276 = object->apiobj.movement_facing_angle;
+                            object->apiobj.facing_angle = object->apiobj.movement_facing_angle;
+                        }
+                    }
+                    if (object->apiobj.player_controlled) {
+                        Hint_SetComplete(0x265);
+                    }
                 }
             }
-            if (object->apiobj.player_controlled) {
-                Hint_SetComplete(0x265);
+            if (object->character_context != 0x25) {
+                object->context_animation = previous_animation;
             }
         }
-    }
-    if (object->character_context != 0x25) {
-        object->context_animation = previous_animation;
     }
 }
 
