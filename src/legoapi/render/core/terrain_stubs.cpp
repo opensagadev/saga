@@ -743,10 +743,9 @@ extern "C" {
 
     i32 DebrisCollisionCheckScaleYFlag(NUVEC *position, f32 radius, f32 y_scale, u8 flags) {
         for (i32 i = 0; i < numspherecolldata; ++i) {
-            u32 *entry = spherecolldata + i * 2;
-            if ((entry[1] & flags) != 0 &&
-                DebrisSingleCollisionCheckScaleYFlag(entry[0], position, radius, y_scale, flags) != 0)
-                return entry[0];
+            if ((spherecolldata[i * 2 + 1] & flags) != 0 &&
+                DebrisSingleCollisionCheckScaleYFlag(spherecolldata[i * 2], position, radius, y_scale, flags) != 0)
+                return spherecolldata[i * 2];
         }
         return -1;
     }
@@ -1304,10 +1303,9 @@ extern "C" {
 
     i32 DebrisTorusCollisionCheckScaleYFlag(NUVEC *position, f32 radius, f32 y_scale, u8 flags) {
         for (i32 i = 0; i < numtoruscolldata; ++i) {
-            u32 *entry = toruscolldata + i * 2;
-            if ((entry[1] & flags) != 0 &&
-                DebrisSingleTorusCollisionCheckScaleYFlag(entry[0], position, radius, y_scale, flags) != 0)
-                return entry[0];
+            if ((toruscolldata[i * 2 + 1] & flags) != 0 &&
+                DebrisSingleTorusCollisionCheckScaleYFlag(toruscolldata[i * 2], position, radius, y_scale, flags) != 0)
+                return toruscolldata[i * 2];
         }
         return -1;
     }
