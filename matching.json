@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 77.369,
+    "fuzzy_match_percent": 77.437485,
     "total_code": "4722419",
-    "matched_code": "588599",
-    "matched_code_percent": 12.46393,
+    "matched_code": "589054",
+    "matched_code_percent": 12.473564,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6686,
-    "matched_functions_percent": 49.676796,
+    "matched_functions": 6688,
+    "matched_functions_percent": 49.691658,
     "total_units": 1
   },
   "text": {
@@ -48189,7 +48189,7 @@
           "address": 1405664,
           "offset": 515696,
           "size": 429,
-          "match_percent": 33.788235
+          "match_percent": 50.294117
         },
         {
           "name": "_ZL9PunchCodeP12GameObject_siiiif",
@@ -48269,7 +48269,7 @@
           "address": 1421760,
           "offset": 531792,
           "size": 1074,
-          "match_percent": 35.391705
+          "match_percent": 94.16129
         },
         {
           "name": "_Z24LightSabre_ColourFromObjiPi",
@@ -48349,7 +48349,7 @@
           "address": 1440256,
           "offset": 550288,
           "size": 780,
-          "match_percent": 54.77439
+          "match_percent": 91.45122
         },
         {
           "name": "_Z21GetShootDirection_LSWP12GameObject_sP7nuvec_s",
@@ -48733,7 +48733,7 @@
           "address": 4571328,
           "offset": 3681360,
           "size": 280,
-          "match_percent": 51.422222
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12MoveToMarker6RenderEv",
@@ -48877,7 +48877,7 @@
           "address": 5121136,
           "offset": 4231168,
           "size": 303,
-          "match_percent": 49.03125
+          "match_percent": 95.296875
         },
         {
           "name": "_Z14FindSlamOriginP12GameObject_sP7nuvec_sS2_",
@@ -62811,7 +62811,7 @@
           "address": 4736192,
           "offset": 3846224,
           "size": 1421,
-          "match_percent": 43.88889
+          "match_percent": 71.567566
         },
         {
           "name": "_Z19Bolt_HitGameObjectsP6BOLT_sP7nuvec_sS2_S2_fPh",
@@ -63478,7 +63478,7 @@
           "address": 2069760,
           "offset": 1179792,
           "size": 961,
-          "match_percent": 28.690142
+          "match_percent": 47.093895
         },
         {
           "name": "_Z16Torpedo_InitBoltP6BOLT_s",
@@ -77816,7 +77816,7 @@
           "address": 3597696,
           "offset": 2707728,
           "size": 4578,
-          "match_percent": 40.821507
+          "match_percent": 45.66129
         },
         {
           "name": "terrainpickupinit",
@@ -78088,7 +78088,7 @@
           "address": 3663952,
           "offset": 2773984,
           "size": 1371,
-          "match_percent": 67.593445
+          "match_percent": 70.12787
         },
         {
           "name": "_Z11ScanTerrainiii",
@@ -78104,7 +78104,7 @@
           "address": 3674064,
           "offset": 2784096,
           "size": 175,
-          "match_percent": 64.588234
+          "match_percent": 100.0
         },
         {
           "name": "TerrainAddWallSpline",
@@ -78248,7 +78248,7 @@
           "address": 3680432,
           "offset": 2790464,
           "size": 5421,
-          "match_percent": 36.21567
+          "match_percent": 36.235863
         },
         {
           "name": "_Z15StorePlatImpactv",
@@ -78648,7 +78648,7 @@
           "address": 3721312,
           "offset": 2831344,
           "size": 527,
-          "match_percent": 50.16346
+          "match_percent": 67.64423
         },
         {
           "name": "NewShadowHandelEx",
@@ -78688,7 +78688,7 @@
           "address": 3727424,
           "offset": 2837456,
           "size": 495,
-          "match_percent": 94.46154
+          "match_percent": 94.31731
         },
         {
           "name": "_Z15TerrShowCamTerrv",
@@ -78720,7 +78720,7 @@
           "address": 4665376,
           "offset": 3775408,
           "size": 455,
-          "match_percent": 51.07767
+          "match_percent": 67.37864
         },
         {
           "name": "_Z14LoadBridgeFileP11WORLDINFO_s",
@@ -78975,7 +78975,7 @@
           "address": 3473888,
           "offset": 2583920,
           "size": 115,
-          "match_percent": 53.08108
+          "match_percent": 99.5946
         },
         {
           "name": "DebrisSetDrawFlag",
@@ -79287,7 +79287,7 @@
           "address": 3616832,
           "offset": 2726864,
           "size": 1616,
-          "match_percent": 69.13802
+          "match_percent": 70.77865
         },
         {
           "name": "DrawPlatform",
@@ -79295,7 +79295,7 @@
           "address": 3626912,
           "offset": 2736944,
           "size": 191,
-          "match_percent": 56.19298
+          "match_percent": 80.47369
         },
         {
           "name": "_Z19TerrainSkinAllocateP10terrsitu_s",
@@ -79567,7 +79567,7 @@
           "address": 4343168,
           "offset": 3453200,
           "size": 668,
-          "match_percent": 58.410713
+          "match_percent": 61.482143
         },
         {
           "name": "_Z14Particles_LoadP11WORLDINFO_sPPcii",
@@ -117885,7 +117885,7 @@
           "address": 3261104,
           "offset": 2371136,
           "size": 1141,
-          "match_percent": 59.006516
+          "match_percent": 66.7329
         },
         {
           "name": "_ZN13NuSoundSystemD2Ev",
@@ -117893,7 +117893,7 @@
           "address": 3261104,
           "offset": 2371136,
           "size": 1141,
-          "match_percent": 59.006516
+          "match_percent": 66.7329
         },
         {
           "name": "_ZN13NuSoundSystemD0Ev",
@@ -118196,7 +118196,7 @@
           "address": 3305408,
           "offset": 2415440,
           "size": 630,
-          "match_percent": 39.87037
+          "match_percent": 86.833336
         },
         {
           "name": "_ZN12NuSoundVoiceD2Ev",
@@ -118204,7 +118204,7 @@
           "address": 3305408,
           "offset": 2415440,
           "size": 630,
-          "match_percent": 39.87037
+          "match_percent": 86.833336
         },
         {
           "name": "_ZN12NuSoundVoiceD0Ev",
