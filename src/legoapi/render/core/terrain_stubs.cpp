@@ -753,21 +753,22 @@ void DebrisTimeSlip(i32 group) {
     for (i32 i = 0; i < maxdebkeys; ++i) {
         debkeydatatype_s *key = &debkeydata[i];
         debinftype *effect = debtab[key->effect_index];
-        if ((effect->time_group == 4 ? group != 1 : group != 0)) {
+        if (effect->time_group == 4) {
+            if (group != 1)
+                continue;
+        } else if (group != 0) {
             continue;
         }
         key->last_update_time -= 800.0f;
+        key->emission_epoch -= 800.0f;
+        key->emission_time -= 800.0f;
         key->previous_emission_time -= 800.0f;
         key->field_1e4 -= 800.0f;
-        key->emission_time -= 800.0f;
-        key->emission_epoch -= 800.0f;
         for (i32 chunk = 0; chunk < 32; ++chunk) {
-            if (key->particle_chunks[chunk] == NULL)
-                continue;
-            dma_particle_chunk_s *particles = key->particle_chunks[chunk];
-            i32 count = effect->particle_type == 7 ? 12 : 32;
-            for (i32 particle = 0; particle < count; ++particle)
-                particles->particles[particle].start_time -= 800.0f;
+            if (key->particle_chunks[chunk] != NULL) {
+                for (i32 particle = 0; particle < (effect->particle_type == 7 ? 12 : 32); ++particle)
+                    key->particle_chunks[chunk]->particles[particle].start_time -= 800.0f;
+            }
         }
     }
     for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
@@ -1481,23 +1482,25 @@ extern "C" {
     }
 
     i32 DeletePlatinst(i32 index) {
-        if (index < 0 || index >= CurTerr->max_platforms)
+        if (index < 0)
             return 0;
-        TERRAIN_PLATFORM &platform = CurTerr->platforms[index];
+        TERRSET *terrain = CurTerr;
+        if (index >= terrain->max_platforms)
+            return 0;
+        TERRAIN_PLATFORM &platform = terrain->platforms[index];
         if (platform.scene_object == NULL)
             return 0;
-        const i16 last_group = --CurTerr->group_count;
-        --CurTerr->group_index_count;
-        TERRAIN_GROUP &last = CurTerr->groups[last_group];
-        CurTerr->platforms[last.scene_index].terrain_group_index = platform.terrain_group_index;
-        CurTerr->groups[platform.terrain_group_index] = last;
+        const i16 last_group = --terrain->group_count;
+        const i32 index_count = --terrain->group_index_count;
+        TERRAIN_GROUP &last = terrain->groups[last_group];
+        terrain->platforms[last.scene_index].terrain_group_index = platform.terrain_group_index;
+        terrain->groups[platform.terrain_group_index] = last;
         last.chunk_type = -1;
         platform.scene_object = NULL;
-        TERRAIN_CELL &cell = CurTerr->cells[TERRAIN_PLATFORM_CELL];
-        i16 *indices = CurTerr->group_indices + cell.first_group;
-        for (i32 i = 0; i < cell.group_count; ++i) {
-            if (indices[i] == last_group) {
-                indices[i] = CurTerr->group_indices[CurTerr->group_index_count];
+        TERRAIN_CELL &cell = terrain->cells[TERRAIN_PLATFORM_CELL];
+        for (i16 i = 0; i < static_cast<i16>(cell.group_count); ++i) {
+            if (terrain->group_indices[cell.first_group + i] == last_group) {
+                terrain->group_indices[cell.first_group + i] = terrain->group_indices[index_count];
                 break;
             }
         }
