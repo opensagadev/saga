@@ -32,6 +32,42 @@ struct nuvec_s;
 struct VuMtx;
 struct VuVec;
 
+// A voice's membership in a listener's circular voice ring.  The voice embeds
+// one link for its nearest real listener and one for its focus listener; the
+// links detach themselves when the voice is destroyed.
+struct NuSoundVoiceListenerLink {
+    NuSoundListener *listener;
+    NuSoundVoiceListenerLink *previous;
+    NuSoundVoiceListenerLink *next;
+
+    ~NuSoundVoiceListenerLink() {
+        Detach();
+    }
+
+    void Detach() {
+        NuSoundListener *listener = this->listener;
+        if (listener == NULL) {
+            return;
+        }
+
+        NuSoundVoiceListenerLink *previous = this->previous;
+        if (previous == this) {
+            listener->field_0x8 = NULL;
+        } else {
+            NuSoundVoiceListenerLink *next = this->next;
+            previous->next = next;
+            next->previous = previous;
+            if (listener->field_0x8 == this) {
+                listener->field_0x8 = previous;
+            }
+        }
+
+        this->listener = NULL;
+        this->previous = NULL;
+        this->next = NULL;
+    }
+};
+
 // The voice doubles as the NuSoundBufferCallback the sample hands filled
 // buffers to (the original dispatched through the callback vtable slot +8,
 // which is NuVoiceAndroid::SubmitBuffer).
@@ -87,13 +123,8 @@ class NuSoundVoice : public NuSoundBufferCallback {
 
     f32 *custom_surround_mix;
 
-    void *field57_0x80;
-    void *field58_0x84;
-    void *field59_0x88;
-
-    void *field60_0x8c;
-    void *field61_0x90;
-    void *field62_0x94;
+    NuSoundVoiceListenerLink real_listener_link;  // +0x80
+    NuSoundVoiceListenerLink focus_listener_link; // +0x8c
 
     f32 field63_0x98;
     f32 field64_0x9c;

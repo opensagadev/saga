@@ -120,11 +120,11 @@ f32 NuSoundHandle::GetLastListenerDistance() const {
 }
 
 NuSoundListener *NuSoundHandle::GetLastPositionalListener() const {
-    return voice != NULL ? static_cast<NuSoundListener *>(voice->field57_0x80) : NULL;
+    return voice != NULL ? voice->real_listener_link.listener : NULL;
 }
 
 NuSoundListener *NuSoundHandle::GetLastAttenuationListener() const {
-    return voice != NULL ? static_cast<NuSoundListener *>(voice->field60_0x8c) : NULL;
+    return voice != NULL ? voice->focus_listener_link.listener : NULL;
 }
 
 NuSoundSystem::SurroundMode NuSoundHandle::GetSurroundMode() const {
