@@ -1673,15 +1673,17 @@ extern "C" {
         info->flags = flags;
         info->mirrored = matrix->m02 * matrix->m20 - matrix->m00 * matrix->m22 > 0.0f;
         SkinPlatformSize(group_index, PlatSkinMem, info);
+        TERRSET *current = CurTerr;
         info = &PlatSkinInfo[PlatSkinCnt];
-        info->terrain_group = CurTerr->group_count;
-        TERRAIN_GROUP &registered_group = CurTerr->groups[CurTerr->group_count];
+        const i16 registered = current->group_count;
+        info->terrain_group = registered;
+        TERRAIN_GROUP &registered_group = current->groups[registered];
         info->terrain_data = registered_group.data;
         registered_group.data = NULL;
         registered_group.scene_index = ~PlatSkinCnt;
-        ++CurTerr->group_count;
+        current->group_count = registered + 1;
         ++PlatSkinCnt;
-        return CurTerr->group_count - 1;
+        return current->group_count - 1;
     }
 
     i32 PlatInstSkinRegister(NUMTX *matrix, void *skin_data, void *matrix_data, f32 scale, i32 instance, i32 flags) {
