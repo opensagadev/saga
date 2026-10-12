@@ -7006,7 +7006,10 @@ void MoveToMarker::BlowUp() {
     fading_out = false;
     field_108_3 = false;
     secondary_rotation.Start(*secondary_rotation.target, 16384.0f, 0.3f);
-    colour.from = *colour.target;
+    colour.from.x = colour.target->x;
+    colour.from.y = colour.target->y;
+    colour.from.z = colour.target->z;
+    colour.from.w = colour.target->w;
     colour.to = VuVec(21.0f, 146.0f, 27.0f, 1.0f);
     colour.elapsed = 0.0f;
     colour.duration = 0.2f;
