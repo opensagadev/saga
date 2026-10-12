@@ -1209,7 +1209,9 @@ i32 MovePlayer_POD(GameObject_s *object) {
     WORLDINFO *world = WorldInfo_CurrentlyActive();
     GAMEPAD_s *pad = object->pad_gamepad;
     f32 input = pad->input_direction_z;
-    if (object->apiobj.field_0x27c == -1 || !PodLevel(world->area))
+    if (object->apiobj.field_0x27c == -1)
+        return 0;
+    if (!PodLevel(world->area))
         return 0;
     if (object->current_speed_mul == 0.0f)
         return 1;
@@ -2390,8 +2392,13 @@ i32 MovePlayer_GUNSHIPIN(GameObject_s *object) {
     f32 input_z = pad->input_direction_x;
     f32 magnitude = pad->input_magnitude;
     f32 input_x = pad->input_direction_z;
-    if (object->apiobj.field_0x27c == -1 || !GunshipInLevel(world->current_level) || world->sock_sys == NULL ||
-        object->sock_position.location.sock == -1)
+    if (object->apiobj.field_0x27c == -1)
+        return 0;
+    if (!GunshipInLevel(world->current_level))
+        return 0;
+    if (world->sock_sys == NULL)
+        return 0;
+    if (object->sock_position.location.sock == -1)
         return 0;
     object->field_0x1086 = 3;
     u16 heading = object->sock_angles.y;
@@ -10379,13 +10386,35 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
         return 1;
     }
 shoot_weapon_in:
-    if (weapon_mode == 0 || ((object->pad_gamepad->allocated_5a & 4) == 0 && special_pressed == 0) ||
-        (object->field_0xe22 & 1) == 0 || object->weapon_scale_state != 0 || object->character_context == 6 ||
-        object->character_context == 7 || object->character_context == 0x47 || object->character_context == 0x46 ||
-        object->character_context == 0x0b || object->character_context == 0x2e ||
-        (object->apiobj.character_data->game_character->uses_weapon_action == 2 && object->field_0xe31 == 1) ||
-        object->character_context == 8 || object->character_context == 0x1b || object->character_context == 0x1d ||
-        TouchHacks::ShouldKeepWeaponOut(*object))
+    if (weapon_mode == 0)
+        return 0;
+    if (((object->pad_gamepad->allocated_5a & 4) == 0 && special_pressed == 0))
+        return 0;
+    if ((object->field_0xe22 & 1) == 0)
+        return 0;
+    if (object->weapon_scale_state != 0)
+        return 0;
+    if (object->character_context == 6)
+        return 0;
+    if (object->character_context == 7)
+        return 0;
+    if (object->character_context == 0x47)
+        return 0;
+    if (object->character_context == 0x46)
+        return 0;
+    if (object->character_context == 0x0b)
+        return 0;
+    if (object->character_context == 0x2e)
+        return 0;
+    if ((object->apiobj.character_data->game_character->uses_weapon_action == 2 && object->field_0xe31 == 1))
+        return 0;
+    if (object->character_context == 8)
+        return 0;
+    if (object->character_context == 0x1b)
+        return 0;
+    if (object->character_context == 0x1d)
+        return 0;
+    if (TouchHacks::ShouldKeepWeaponOut(*object))
         return 0;
     if (weapon_mode == 2) {
         SetWeaponIn(object);
