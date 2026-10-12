@@ -389,11 +389,11 @@ extern "C" void TerrainPlatformNewUpdate(void) {
         if (matrix != NULL) {
             if (platform.bounce_frames != 0) {
                 f32 velocity;
-                if (platform.bounce_frames >= 125)
+                if (platform.bounce_frames < 125)
+                    velocity = platform.bounce_velocity - platform.bounce_damping * platform.bounce_velocity;
+                else
                     velocity = (platform.bounce_impulse - platform.bounce_damping * platform.bounce_velocity) +
                                platform.bounce_velocity;
-                else
-                    velocity = platform.bounce_velocity - platform.bounce_damping * platform.bounce_velocity;
                 const f32 offset = platform.bounce_offset;
                 --platform.bounce_frames;
                 velocity = (-offset * fabsf(offset) * platform.bounce_spring * 0.5f - platform.bounce_spring * offset) +
