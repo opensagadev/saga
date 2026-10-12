@@ -506,16 +506,20 @@ extern "C" {
         return 0;
     }
 
+    // Relative difference between a requested scale and an existing effect scale.
+    static inline f32 ScaledEffectDistance(f32 requested_scale, f32 scale) {
+        const f32 ratio = requested_scale / scale;
+        return ratio > 1.0f ? ratio - 1.0f : 1.0f - ratio;
+    }
+
     i32 CreateScaledEffect(i32 effect_index, f32 requested_scale) {
         if (effect_index < 1 || EDPP_MAX_TYPES < effect_index || debtab[effect_index] == NULL) {
             return -1;
         }
 
-        debinftype *effect = debtab[effect_index];
-        if (effect->scale != 1.0f) {
-            effect_index = effect->unscaled_effect_index;
-            effect = debtab[effect_index];
-            if (effect == NULL) {
+        if (debtab[effect_index]->scale != 1.0f) {
+            effect_index = debtab[effect_index]->unscaled_effect_index;
+            if (debtab[effect_index] == NULL) {
                 return -1;
             }
         }
@@ -540,13 +544,16 @@ extern "C" {
         }
 
         i32 closest_index = effect_index;
-        f32 closest_distance = fabsf(requested_scale / effect->scale - 1.0f);
+        f32 closest_distance = ScaledEffectDistance(requested_scale, debtab[effect_index]->scale);
         for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
             debinftype *candidate = debtab[i];
             if (candidate != NULL && candidate->unscaled_effect_index == effect_index) {
-                f32 distance = 1.0f;
-                if (requested_scale != 0.0f && candidate->scale != 0.0f) {
-                    distance = fabsf(requested_scale / candidate->scale - 1.0f);
+                const f32 scale = candidate->scale;
+                f32 distance;
+                if (requested_scale == 0.0f || scale == 0.0f) {
+                    distance = 1.0f;
+                } else {
+                    distance = ScaledEffectDistance(requested_scale, scale);
                 }
                 if (distance < closest_distance) {
                     closest_distance = distance;
@@ -558,45 +565,47 @@ extern "C" {
             return closest_index;
         }
 
-        i32 scaled_index = 1;
-        while (scaled_index < EDPP_MAX_TYPES && debtab[scaled_index] != NULL) {
-            ++scaled_index;
-        }
-        if (scaled_index == EDPP_MAX_TYPES) {
-            return closest_index;
-        }
-
-        debinftype *scaled = &effecttypes[scaled_index];
-        debtab[scaled_index] = scaled;
-        *scaled = *effect;
-        scaled->native_data = NULL;
-        for (i32 i = 0; i < 8; ++i) {
-            scaled->particle_keys[i] = -1;
-        }
-        DebrisReScale(scaled_index, requested_scale);
-        scaled->scale = requested_scale;
-        scaled->unscaled_effect_index = effect_index;
-        scaled->last_render_time = scaled->time_group == 4 ? panelglobaltime : globaltime;
-
-        if (!(strlen(effect->name) < 13)) {
-            char shortened[13];
-            memcpy(shortened, effect->name, 12);
-            shortened[12] = '\0';
-            sprintf(scaled->name, "%s%03d", shortened, scaled_index);
-        } else {
-            sprintf(scaled->name, "%s%03d", effect->name, scaled_index);
-        }
-        ++edpp_types_used;
-
-        for (i32 i = 0; i < EDPP_SCALE_TYPES; ++i) {
-            if (debscale[i].scale == 0.0f) {
-                debscale[i].unscaled_effect_index = effect_index;
-                debscale[i].scaled_effect_index = scaled_index;
-                debscale[i].scale = requested_scale;
+        i32 scaled_index = 0;
+        for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
+            if (debtab[i] == NULL) {
+                scaled_index = i;
                 break;
             }
         }
-        return scaled_index;
+        // Without a free effect slot, fall back to the closest existing scale.
+        if (scaled_index != 0) {
+            debtab[scaled_index] = &effecttypes[scaled_index];
+            memcpy(debtab[scaled_index], debtab[effect_index], sizeof(debinftype));
+            debtab[scaled_index]->native_data = NULL;
+            for (i32 i = 0; i < 8; ++i) {
+                debtab[scaled_index]->particle_keys[i] = -1;
+            }
+            DebrisReScale(scaled_index, requested_scale);
+            const f32 render_time = debtab[scaled_index]->time_group == 4 ? panelglobaltime : globaltime;
+            debtab[scaled_index]->scale = requested_scale;
+            debtab[scaled_index]->last_render_time = render_time;
+            debtab[scaled_index]->unscaled_effect_index = effect_index;
+
+            if (strlen(debtab[effect_index]->name) <= 12) {
+                sprintf(debtab[scaled_index]->name, "%s%03d", debtab[effect_index]->name, scaled_index);
+            } else {
+                char shortened[32];
+                strcpy(shortened, debtab[effect_index]->name);
+                shortened[12] = '\0';
+                sprintf(debtab[scaled_index]->name, "%s%03d", shortened, scaled_index);
+            }
+            ++edpp_types_used;
+
+            for (i32 i = 0; i < EDPP_SCALE_TYPES; ++i) {
+                if (debscale[i].scale == 0.0f) {
+                    debscale[i].unscaled_effect_index = effect_index;
+                    debscale[i].scale = requested_scale;
+                    debscale[i].scaled_effect_index = scaled_index;
+                    break;
+                }
+            }
+        }
+        return scaled_index != 0 ? scaled_index : closest_index;
     }
 
     i32 CreateScaledPARTEffect(i32 effect_index, f32 requested_scale) {
