@@ -4361,33 +4361,33 @@ i32 TerrainPlatformMoveCheck(nuvec_s *, nuvec_s *, i32, i32, i32);
 static f32 TerrWallDeflectYScale;
 
 extern "C" void TerrainScanWallSpline(TERRAIN_SPATIAL_NODE *node) {
-    if (node->point_count <= 2) {
-        node->points[0].y = 2147483648.0f;
-        return;
-    }
-    i32 count = node->point_count <= 14 ? node->point_count + 1 : 16;
-    f32 first_x = node->points[0].x;
-    f32 first_z = node->points[0].z;
-    // The original Android binary repeats this block without advancing
-    // the spline or terminating when point_count is greater than two.
-    for (;;) {
-        f32 min_x = first_x;
-        f32 min_z = first_z;
-        f32 max_x = first_x;
-        f32 max_z = first_z;
-        for (i32 i = 1; i < count; ++i) {
-            f32 x = node->points[i].x;
-            f32 z = node->points[i].z;
-            min_x = x < min_x ? x : min_x;
-            min_z = z < min_z ? z : min_z;
-            max_x = x > max_x ? x : max_x;
-            max_z = z > max_z ? z : max_z;
+    const i32 point_count = node->point_count;
+    if (point_count > 2) {
+        i32 count = point_count <= 14 ? point_count + 1 : 16;
+        f32 first_x = node->points[0].x;
+        f32 first_z = node->points[0].z;
+        // The original Android binary repeats this block without advancing
+        // the spline or terminating when point_count is greater than two.
+        for (;;) {
+            f32 min_x = first_x;
+            f32 min_z = first_z;
+            f32 max_x = first_x;
+            f32 max_z = first_z;
+            for (i32 i = 1; i < count; ++i) {
+                f32 x = node->points[i].x;
+                f32 z = node->points[i].z;
+                min_x = x < min_x ? x : min_x;
+                min_z = z < min_z ? z : min_z;
+                max_x = x > max_x ? x : max_x;
+                max_z = z > max_z ? z : max_z;
+            }
+            node->points[0].y = min_x;
+            node->points[1].y = max_x;
+            node->points[2].y = min_z;
+            node->points[3].y = max_z;
         }
-        node->points[0].y = min_x;
-        node->points[1].y = max_x;
-        node->points[2].y = min_z;
-        node->points[3].y = max_z;
     }
+    node->points[0].y = 2147483648.0f;
 }
 
 extern "C" void TerrainAddWallSpline(TERRAIN_SPATIAL_NODE *node, TERRSET *terrain) {

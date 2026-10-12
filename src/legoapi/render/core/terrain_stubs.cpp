@@ -1423,17 +1423,16 @@ extern "C" {
         if (CurTerr == NULL || platform_index < 0)
             return;
 
-        TERRAIN_PLATFORM &platform = CurTerr->platforms[platform_index];
-        const i16 group_index = platform.terrain_group_index;
-        TERRAIN_GROUP &group = CurTerr->groups[group_index];
+        TERRAIN_GROUP &group = CurTerr->groups[CurTerr->platforms[platform_index].terrain_group_index];
         if (static_cast<u32>(group.chunk_type) > TERRAIN_CHUNK_GROUP_SECONDARY)
             return;
 
         TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group.data);
         while (batch->marker >= 0) {
+            const i32 shape_count = batch->shape_count;
             TERRAIN_SHAPE *shape = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
-            for (i32 i = 0; i < batch->shape_count; ++i, ++shape)
-                TerrDrawPlat(shape, group_index);
+            for (i32 i = shape_count; i > 0; --i, ++shape)
+                TerrDrawPlat(shape, CurTerr->platforms[platform_index].terrain_group_index);
             batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(shape);
         }
     }
