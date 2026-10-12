@@ -6119,210 +6119,198 @@ namespace {
 
 f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
     u8 *scan = TerI->scan_list_storage;
+    TERRAIN_SHAPE *floor_poly = NULL;
+    TERRAIN_SHAPE *roof_poly = NULL;
+    TERRAIN_SHAPE *efloor_poly = NULL;
+    TERRAIN_SHAPE *eroof_poly = NULL;
+    f32 floor_y = -2000000.0f;
+    f32 efloor_y = -2000000.0f;
+    f32 roof_y = 2000000.0f;
+    f32 eroof_y = 2000000.0f;
+    i16 roof_group = -1;
+    i16 eroof_group = -1;
+    f32 floor_nx, floor_ny, floor_nz;
+    f32 efloor_nx, efloor_ny, efloor_nz;
+    f32 roof_nx, roof_ny, roof_nz;
+    f32 eroof_nx, eroof_ny, eroof_nz;
+    i16 shape_count;
+
     castnum = -1;
     ecastnum = -1;
-    TERRAIN_SHAPE *ordinary_above = NULL;
-    TERRAIN_SHAPE *ordinary_floor = NULL;
-    TERRAIN_SHAPE *extended_above = NULL;
-    TERRAIN_SHAPE *extended_floor = NULL;
-    f32 ordinary_floor_y = -2000000.0f;
-    f32 extended_floor_y = -2000000.0f;
-    f32 ordinary_above_y = 2000000.0f;
-    f32 extended_above_y = 2000000.0f;
-    i16 ordinary_above_group = -1;
-    i16 extended_above_group = -1;
-    NUVEC ordinary_floor_normal;
-    NUVEC extended_floor_normal;
-    NUVEC ordinary_above_normal;
-    NUVEC extended_above_normal;
-    // These values are only used after a candidate has been recorded. Keep
-    // the previous reconstruction's deterministic sentinel tie behavior.
-    ordinary_above_normal.y = 1.0f;
-    extended_above_normal.y = 1.0f;
-    i16 shape_count = *reinterpret_cast<i16 *>(scan);
-    for (;;) {
-        if (shape_count <= 0) {
-            if (!(2000000.0f > extended_above_y) || !(extended_above_normal.y < 0.0f) ||
-                !(roof_range + position->y > extended_above_y)) {
-                EShadRoofPoly = NULL;
-                EShadRoofY = 2000000.0f;
-            } else if (!(2000000.0f > ordinary_above_y) || !(ordinary_above_normal.y < 0.0f) ||
-                       !(roof_range + position->y > ordinary_above_y) || !(extended_above_y > ordinary_above_y)) {
-                EShadRoofPoly = extended_above;
-                EShadRoofY = extended_above_y;
-                EShadRoofNorm = extended_above_normal;
-                ecastroofnum = extended_above_group;
-                eshadroofhit = 1;
-            } else {
-                EShadRoofPoly = NULL;
-                EShadRoofY = 2000000.0f;
-            }
-            if (!(2000000.0f > extended_above_y) || !(extended_above_normal.y > 0.0f) ||
-                !(roof_range + position->y > extended_above_y)) {
-                if (extended_floor_y <= -2000000.0f ||
-                    (-2000000.0f < ordinary_floor_y && extended_floor_y < ordinary_floor_y)) {
-                    eshadhit = 3;
-                    EShadY = 2000000.0f;
-                    EShadPoly = NULL;
-                    EShadNorm.y = 1.0f;
-                } else {
-                    eshadhit = 2;
-                    EShadY = extended_floor_y;
-                    EShadPoly = extended_floor;
-                    EShadNorm = extended_floor_normal;
-                }
-            } else if (!(2000000.0f > ordinary_above_y) || !(ordinary_above_normal.y < 0.0f) ||
-                       !(roof_range + position->y > ordinary_above_y) || !(extended_above_y > ordinary_above_y)) {
-                EShadY = extended_above_y;
-                EShadPoly = extended_above;
-                EShadNorm = extended_above_normal;
-                eshadhit = 1;
-                ecastnum = extended_above_group;
-            } else {
-                eshadhit = 3;
-                EShadY = 2000000.0f;
-                EShadNorm.y = 1.0f;
-                EShadPoly = NULL;
-            }
-            if (!(2000000.0f > ordinary_above_y) || !(ordinary_above_normal.y < 0.0f) ||
-                !(roof_range + position->y > ordinary_above_y)) {
-                ShadRoofPoly = NULL;
-                ShadRoofY = 2000000.0f;
-            } else {
-                castroofnum = ordinary_above_group;
-                shadroofhit = 1;
-                ShadRoofNorm = ordinary_above_normal;
-                ShadRoofPoly = ordinary_above;
-                ShadRoofY = ordinary_above_y;
-            }
-            if (!(2000000.0f > ordinary_above_y) || !(ordinary_above_normal.y > 0.0f) ||
-                !(height_above + position->y > ordinary_above_y)) {
-                if (-2000000.0f < ordinary_floor_y) {
-                    shadhit = 2;
-                    ShadPoly = ordinary_floor;
-                    ShadNorm = ordinary_floor_normal;
-                    position->y = ordinary_floor_y;
-                } else {
-                    shadhit = 3;
-                    position->y = 2000000.0f;
-                    ShadNorm.y = 1.0f;
-                    ShadPoly = NULL;
-                }
-            } else {
-                position->y = ordinary_above_y;
-                shadhit = 1;
-                ShadPoly = ordinary_above;
-                ShadNorm = ordinary_above_normal;
-                castnum = ordinary_above_group;
-            }
-            return 0.0f;
-        }
+    shape_count = *reinterpret_cast<i16 *>(scan);
+    while (shape_count > 0) {
         i16 group_index = reinterpret_cast<i16 *>(scan)[1];
-        const f32 x = position->x - CurTerr->groups[group_index].origin.x;
-        const f32 z = position->z - CurTerr->groups[group_index].origin.z;
-        TERRAIN_SHAPE **surfaces = reinterpret_cast<TERRAIN_SHAPE **>(scan) + 1;
-        TERRAIN_SHAPE **entry = surfaces;
-        for (i32 remaining = shape_count; remaining != 0; --remaining, ++entry) {
-            TERRAIN_SHAPE *surface = *entry;
-            f32 normal_y = surface->normals[0].y;
-            f32 normal_x;
-            f32 normal_z;
-            f32 plane_y;
-            i32 winding;
+        TERRAIN_SHAPE **surfaces = reinterpret_cast<TERRAIN_SHAPE **>(scan + 4);
+        f32 x = position->x - CurTerr->groups[group_index].origin.x;
+        f32 z = position->z - CurTerr->groups[group_index].origin.z;
+        for (i32 i = 0; i < shape_count; i++) {
+            TERRAIN_SHAPE *surface = surfaces[i];
+            i32 facing = 0;
+            i32 plane = 0;
 #define CAST_LINE(a, b)                                                                                                \
     InsideLineF(x, z, surface->vectors[a].x, surface->vectors[a].z, surface->vectors[b].x, surface->vectors[b].z)
-            if (!(surface->normals[1].y > 65535.0f)) {
-                if (!(normal_y > 0.0f)) {
-                    if (normal_y < 0.0f) {
-                        if (CAST_LINE(1, 2) == 0) {
-                            if (CAST_LINE(1, 3) != 0 && CAST_LINE(3, 2) != 0) {
-                                winding = 2;
-                                goto second_plane;
-                            }
-                        } else if (CAST_LINE(0, 1) != 0 && CAST_LINE(2, 0) != 0) {
-                            winding = 2;
-                            goto first_plane;
-                        }
+            if (surface->normals[1].y > 65535.0f) {
+                if (surface->normals[0].y > 0.0f) {
+                    if (CAST_LINE(1, 0) && CAST_LINE(0, 2) && CAST_LINE(2, 1)) {
+                        facing = 1;
                     }
-                } else {
-                    if (CAST_LINE(2, 1) == 0) {
-                        if (CAST_LINE(3, 1) != 0 && CAST_LINE(2, 3) != 0) {
-                            winding = 1;
-                        second_plane:
-                            normal_y = surface->normals[1].y;
-                            if (normal_y == 0.0f)
-                                goto first_plane;
-                            normal_x = surface->normals[1].x;
-                            normal_z = surface->normals[1].z;
-                            plane_y =
-                                surface->vectors[3].y + CurTerr->groups[group_index].origin.y +
-                                ((x - surface->vectors[3].x) * normal_x + (z - surface->vectors[3].z) * normal_z) /
-                                    -normal_y;
-                            goto record_plane;
-                        }
-                    } else if (CAST_LINE(1, 0) != 0 && CAST_LINE(0, 2) != 0) {
-                        winding = 1;
-                    first_plane:
-                        normal_z = surface->normals[0].z;
-                        normal_x = surface->normals[0].x;
-                        normal_y = surface->normals[0].y;
-                        plane_y = surface->vectors[0].y + CurTerr->groups[group_index].origin.y +
-                                  ((x - surface->vectors[0].x) * normal_x + (z - surface->vectors[0].z) * normal_z) /
-                                      -normal_y;
-                    record_plane:
-                        if (surface->material[1] == 0) {
-                            if (plane_y <= position->y && ordinary_floor_y < plane_y && winding == 1) {
-                                ordinary_floor_normal.x = normal_x;
-                                ordinary_floor_normal.y = normal_y;
-                                ordinary_floor_normal.z = normal_z;
-                                ordinary_floor = surface;
-                                ordinary_floor_y = plane_y;
-                                castnum = group_index;
-                            } else if (position->y < plane_y && plane_y <= ordinary_above_y &&
-                                       (plane_y != ordinary_above_y || normal_y < ordinary_above_normal.y)) {
-                                ordinary_above_normal.x = normal_x;
-                                ordinary_above_normal.y = normal_y;
-                                ordinary_above_normal.z = normal_z;
-                                ordinary_above = surface;
-                                ordinary_above_y = plane_y;
-                                ordinary_above_group = group_index;
-                            }
-                        } else {
-                            if (plane_y <= position->y && extended_floor_y < plane_y && winding == 1) {
-                                extended_floor_normal.x = normal_x;
-                                extended_floor_normal.y = normal_y;
-                                extended_floor_normal.z = normal_z;
-                                extended_floor = surface;
-                                extended_floor_y = plane_y;
-                                ecastnum = group_index;
-                            } else if (position->y < plane_y && plane_y <= extended_above_y &&
-                                       (plane_y != extended_above_y || normal_y < extended_above_normal.y)) {
-                                extended_above_normal.x = normal_x;
-                                extended_above_normal.y = normal_y;
-                                extended_above_normal.z = normal_z;
-                                extended_above = surface;
-                                extended_above_y = plane_y;
-                                extended_above_group = group_index;
-                            }
-                        }
+                } else if (surface->normals[0].y < 0.0f) {
+                    if (CAST_LINE(0, 1) && CAST_LINE(2, 0) && CAST_LINE(1, 2)) {
+                        facing = 2;
                     }
                 }
-            } else if (!(normal_y > 0.0f)) {
-                if (normal_y < 0.0f && CAST_LINE(0, 1) != 0 && CAST_LINE(2, 0) != 0 && CAST_LINE(1, 2) != 0) {
-                    winding = 2;
-                    goto first_plane;
+            } else if (surface->normals[0].y > 0.0f) {
+                if (CAST_LINE(2, 1)) {
+                    if (CAST_LINE(1, 0) && CAST_LINE(0, 2)) {
+                        facing = 1;
+                    }
+                } else if (CAST_LINE(3, 1) && CAST_LINE(2, 3)) {
+                    facing = 1;
+                    plane = 1;
                 }
-            } else {
-                if (CAST_LINE(1, 0) != 0 && CAST_LINE(0, 2) != 0 && CAST_LINE(2, 1) != 0) {
-                    winding = 1;
-                    goto first_plane;
+            } else if (surface->normals[0].y < 0.0f) {
+                if (CAST_LINE(1, 2)) {
+                    if (CAST_LINE(0, 1) && CAST_LINE(2, 0)) {
+                        facing = 2;
+                    }
+                } else if (CAST_LINE(1, 3) && CAST_LINE(3, 2)) {
+                    facing = 2;
+                    plane = 1;
                 }
             }
 #undef CAST_LINE
+            if (facing != 0) {
+                if (plane != 0 && surface->normals[1].y == 0.0f) {
+                    plane = 0;
+                }
+                NUVEC *normal = &surface->normals[plane];
+                NUVEC *corner = &surface->vectors[plane * 3];
+                f32 nx = normal->x;
+                f32 ny = normal->y;
+                f32 nz = normal->z;
+                f32 y = corner->y + CurTerr->groups[group_index].origin.y +
+                        ((x - corner->x) * nx + (z - corner->z) * nz) / -ny;
+                if (surface->material[1] != 0) {
+                    if (position->y >= y && y > efloor_y && facing == 1) {
+                        efloor_nx = nx;
+                        efloor_ny = ny;
+                        efloor_nz = nz;
+                        efloor_poly = surface;
+                        efloor_y = y;
+                        ecastnum = group_index;
+                    } else if (y > position->y && eroof_y >= y && (y != eroof_y || eroof_ny > ny)) {
+                        eroof_nx = nx;
+                        eroof_ny = ny;
+                        eroof_nz = nz;
+                        eroof_poly = surface;
+                        eroof_y = y;
+                        eroof_group = group_index;
+                    }
+                } else {
+                    if (position->y >= y && y > floor_y && facing == 1) {
+                        floor_nx = nx;
+                        floor_ny = ny;
+                        floor_nz = nz;
+                        floor_poly = surface;
+                        floor_y = y;
+                        castnum = group_index;
+                    } else if (y > position->y && roof_y >= y && (y != roof_y || roof_ny > ny)) {
+                        roof_nx = nx;
+                        roof_ny = ny;
+                        roof_nz = nz;
+                        roof_poly = surface;
+                        roof_y = y;
+                        roof_group = group_index;
+                    }
+                }
+            }
         }
         scan = reinterpret_cast<u8 *>(surfaces + shape_count);
         shape_count = *reinterpret_cast<i16 *>(scan);
     }
+
+    if (eroof_y < 2000000.0f && eroof_ny < 0.0f && roof_range + position->y > eroof_y) {
+        if (roof_y < 2000000.0f && roof_ny < 0.0f && roof_range + position->y > roof_y && eroof_y > roof_y) {
+            EShadRoofPoly = NULL;
+            EShadRoofY = 2000000.0f;
+        } else {
+            EShadRoofPoly = eroof_poly;
+            EShadRoofY = eroof_y;
+            EShadRoofNorm.x = eroof_nx;
+            EShadRoofNorm.y = eroof_ny;
+            EShadRoofNorm.z = eroof_nz;
+            eshadroofhit = 1;
+            ecastroofnum = eroof_group;
+        }
+    } else {
+        EShadRoofPoly = NULL;
+        EShadRoofY = 2000000.0f;
+    }
+
+    if (eroof_y < 2000000.0f && eroof_ny > 0.0f && roof_range + position->y > eroof_y) {
+        if (roof_y < 2000000.0f && roof_ny < 0.0f && roof_range + position->y > roof_y && eroof_y > roof_y) {
+            eshadhit = 3;
+            EShadY = 2000000.0f;
+            EShadNorm.y = 1.0f;
+            EShadPoly = NULL;
+        } else {
+            EShadPoly = eroof_poly;
+            EShadY = eroof_y;
+            EShadNorm.x = eroof_nx;
+            EShadNorm.y = eroof_ny;
+            EShadNorm.z = eroof_nz;
+            eshadhit = 1;
+            ecastnum = eroof_group;
+        }
+    } else if (efloor_y > -2000000.0f && !(floor_y > -2000000.0f && floor_y > efloor_y)) {
+        eshadhit = 2;
+        EShadY = efloor_y;
+        EShadPoly = efloor_poly;
+        EShadNorm.x = efloor_nx;
+        EShadNorm.y = efloor_ny;
+        EShadNorm.z = efloor_nz;
+    } else {
+        eshadhit = 3;
+        EShadY = 2000000.0f;
+        EShadPoly = NULL;
+        EShadNorm.y = 1.0f;
+    }
+
+    if (roof_y < 2000000.0f && roof_ny < 0.0f && roof_range + position->y > roof_y) {
+        shadroofhit = 1;
+        ShadRoofNorm.x = roof_nx;
+        ShadRoofNorm.y = roof_ny;
+        ShadRoofNorm.z = roof_nz;
+        castroofnum = roof_group;
+        ShadRoofY = roof_y;
+        ShadRoofPoly = roof_poly;
+    } else {
+        ShadRoofPoly = NULL;
+        ShadRoofY = 2000000.0f;
+    }
+
+    if (roof_y < 2000000.0f && roof_ny > 0.0f && height_above + position->y > roof_y) {
+        position->y = roof_y;
+        ShadNorm.x = roof_nx;
+        ShadNorm.y = roof_ny;
+        ShadNorm.z = roof_nz;
+        shadhit = 1;
+        ShadPoly = roof_poly;
+        castnum = roof_group;
+    } else if (floor_y > -2000000.0f) {
+        ShadNorm.x = floor_nx;
+        ShadNorm.y = floor_ny;
+        ShadNorm.z = floor_nz;
+        shadhit = 2;
+        ShadPoly = floor_poly;
+        position->y = floor_y;
+    } else {
+        shadhit = 3;
+        position->y = 2000000.0f;
+        ShadNorm.y = 1.0f;
+        ShadPoly = NULL;
+    }
+    return 0.0f;
 }
 
 extern "C" void TerrainWallAng(f32 slope) {
@@ -6389,32 +6377,50 @@ extern "C" void AddPickupTerr(i32 type, NUVEC *position) {
     ++curPickInst;
 }
 
+static inline TERRAIN_PLATFORM *FindFreeTerrainPlatform(TERRSET *terrain, i32 *index) {
+    TERRAIN_PLATFORM *platform = NULL;
+    *index = -1;
+    for (i32 i = 0; i < terrain->max_platforms; i++) {
+        platform = &terrain->platforms[i];
+        if (platform->scene_object == NULL) {
+            *index = i;
+            break;
+        }
+    }
+    return platform;
+}
+
 static inline i32 InstallExtraTerrainPlatform(TERRSET *terrain, TERRAIN_GROUP *source, NUMTX *matrix, NUMTX *previous,
-                                              i32 rotating, i32 index) {
-    i16 group_index = terrain->group_count;
+                                              i32 rotating, i32 index, TERRAIN_PLATFORM &platform, i16 group_index,
+                                              i32 index_count) {
     TERRAIN_GROUP &group = terrain->groups[group_index];
     group = *source;
     group.scene_index = index;
     group.chunk_type = 1;
-    TERRAIN_PLATFORM &platform = terrain->platforms[index];
     platform.scene_object = matrix;
     if (rotating != 0) {
         platform.previous_matrix = *previous;
         platform.flags |= TERRAIN_PLATFORM_FLAG_ROTATING;
     } else {
-        NUMTX *old = previous != NULL ? previous : matrix;
-        platform.previous_matrix.m30 = old->m30;
-        platform.previous_matrix.m31 = old->m31;
-        platform.previous_matrix.m32 = old->m32;
+        if (previous != NULL) {
+            platform.previous_matrix.m30 = previous->m30;
+            platform.previous_matrix.m31 = previous->m31;
+            platform.previous_matrix.m32 = previous->m32;
+        } else {
+            platform.previous_matrix.m30 = matrix->m30;
+            platform.previous_matrix.m31 = matrix->m31;
+            platform.previous_matrix.m32 = matrix->m32;
+        }
         platform.flags &= ~TERRAIN_PLATFORM_FLAG_ROTATING;
     }
     group.origin.x = matrix->m30;
     group.origin.y = matrix->m31;
     group.origin.z = matrix->m32;
+    platform.terrain_group_index = group_index;
     platform.scene_object_index = 0;
     platform.scene_transform = NULL;
-    platform.terrain_group_index = group_index;
-    terrain->group_indices[terrain->group_index_count++] = group_index;
+    terrain->group_indices[index_count] = group_index;
+    terrain->group_index_count = index_count + 1;
     platform.flags &= ~TERRAIN_PLATFORM_FLAG_COLLIDED;
     platform.bounce_impulse = 0.0f;
     platform.bounce_offset = 0.0f;
@@ -6437,18 +6443,22 @@ extern "C" i32 AddPickupTerrRot(i32 type, NUMTX *matrix, NUMTX *previous, i32 ro
         AddPickupTerr(type, reinterpret_cast<NUVEC *>(&matrix->m30));
         return -1;
     }
-    if (terrain->group_index_count >= terrain->max_group_indices || terrain->group_count >= terrain->max_groups ||
-        matrix == NULL || (rotating != 0 && previous == NULL))
+    i32 index_count = terrain->group_index_count;
+    if (index_count >= terrain->max_group_indices)
         return -1;
-    i16 source = PickupTerr->group_for_type[type];
-    if (source == -1 || terrain->removed_platform_count >= 32 || terrain->max_platforms <= 0)
+    i16 group_index = terrain->group_count;
+    if (group_index >= terrain->max_groups || matrix == NULL || (rotating != 0 && previous == NULL))
         return -1;
-    i32 index = 0;
-    while (terrain->platforms[index].scene_object != NULL) {
-        if (++index == terrain->max_platforms)
-            return -1;
-    }
-    return InstallExtraTerrainPlatform(terrain, &PickupTerr->groups[source], matrix, previous, rotating, index);
+    TERRPICKUPSET *pickups = PickupTerr;
+    i16 source = pickups->group_for_type[type];
+    if (source == -1 || terrain->removed_platform_count >= 32)
+        return -1;
+    i32 index;
+    TERRAIN_PLATFORM *platform = FindFreeTerrainPlatform(terrain, &index);
+    if (index == -1)
+        return -1;
+    return InstallExtraTerrainPlatform(terrain, &pickups->groups[source], matrix, previous, rotating, index, *platform,
+                                       group_index, index_count);
 }
 
 void TerrainSideClamp(NUVEC *axis, NUVEC *position) {
@@ -6882,7 +6892,9 @@ extern "C" i32 NewRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 scan
     TerrOverRideScan = NULL;
     SetRayCastUnitScale(TerI);
     ConfigureRayCast(TerI, position, movement, radius, 0.01f, 0.00001f);
-    ScanTerrain(1, 0, scan_flags != 0 ? 0x40 : 0);
+    if (scan_flags != 0)
+        scan_flags = 0x40;
+    ScanTerrain(1, 0, scan_flags);
     ResolveRayCast(movement);
     NuScratchRelease();
     return TerI->hit_type;
@@ -6898,10 +6910,13 @@ extern "C" i32 NewRayCastScaleYMask(NUVEC *position, NUVEC *movement, f32 radius
     TerrainQuery_s *query = TerI;
     query->object_scale = scale_y;
     query->object_scale_sq = scale_y * scale_y;
+    query->collision_radius = radius;
     query->inverse_object_scale = scale_y == 0.0f ? 0.0f : 1.0f / scale_y;
     query->inverse_object_scale_sq = query->inverse_object_scale * query->inverse_object_scale;
     ConfigureRayCast(query, position, movement, radius, 0.01f, 0.00001f);
-    ScanTerrain(1, terrain_mask, scan_flags != 0 ? 0x40 : 0);
+    if (scan_flags != 0)
+        scan_flags = 0x40;
+    ScanTerrain(1, terrain_mask, scan_flags);
     TerI->position.y *= TerI->inverse_object_scale;
     TerI->movement.y *= TerI->inverse_object_scale;
     ResolveRayCast(movement);
@@ -6983,7 +6998,9 @@ extern "C" i32 NewRayCastMask(NUVEC *position, NUVEC *movement, f32 radius, i32 
     TerrOverRideScan = NULL;
     SetRayCastUnitScale(TerI);
     ConfigureRayCast(TerI, position, movement, radius, 0.01f, 0.00001f);
-    ScanTerrain(1, terrain_mask, scan_flags != 0 ? 0x40 : 0);
+    if (scan_flags != 0)
+        scan_flags = 0x40;
+    ScanTerrain(1, terrain_mask, scan_flags);
     ResolveRayCast(movement);
     NuScratchRelease();
     return TerI->hit_type;
@@ -6998,7 +7015,9 @@ extern "C" i32 NewRayCastSet(NUVEC *position, NUVEC *movement, f32 radius, f32 s
     TerrOverRideScan = NULL;
     SetRayCastUnitScale(TerI);
     ConfigureRayCast(TerI, position, movement, radius, separation_epsilon, compare_epsilon);
-    ScanTerrain(scan_type, 0, scan_flags != 0 ? 0x40 : 0);
+    if (scan_flags != 0)
+        scan_flags = 0x40;
+    ScanTerrain(scan_type, 0, scan_flags);
     ResolveRayCast(movement);
     NuScratchRelease();
     return TerI->hit_type;
@@ -7012,7 +7031,9 @@ extern "C" i32 NewRayCastSetMask(NUVEC *position, NUVEC *movement, f32 radius, f
     TerI = static_cast<TerrainQuery_s *>(NuScratchAlloc32(sizeof(TerrainQuery_s)));
     SetRayCastUnitScale(TerI);
     ConfigureRayCast(TerI, position, movement, radius, separation_epsilon, compare_epsilon);
-    ScanTerrain(scan_type, terrain_mask, scan_flags != 0 ? 0x40 : 0);
+    if (scan_flags != 0)
+        scan_flags = 0x40;
+    ScanTerrain(scan_type, terrain_mask, scan_flags);
     ResolveRayCast(movement);
     NuScratchRelease();
     return TerI->hit_type;
@@ -7032,38 +7053,43 @@ extern "C" void NewTerrAxisFreedom(TERRAIN_AXIS_FREEDOM_SHAPE *shape, NUVEC *pos
 
 extern "C" i16 NewPlatPickupInst(void *object, i32 type) {
     TERRSET *terrain = CurTerr;
-    if (terrain == NULL || terrain->group_index_count >= terrain->max_group_indices ||
-        terrain->group_count >= terrain->max_groups || object == NULL)
+    if (terrain == NULL)
         return -1;
-    i16 source = PickupTerr->group_for_type[type];
-    if (source == -1 || terrain->max_platforms <= 0)
+    i32 index_count = terrain->group_index_count;
+    if (index_count >= terrain->max_group_indices)
         return -1;
-    i32 index = 0;
-    while (terrain->platforms[index].scene_object != NULL) {
-        if (++index == terrain->max_platforms)
-            return -1;
-    }
-    TERRAIN_GROUP &group = terrain->groups[terrain->group_count];
-    group = PickupTerr->groups[source];
+    i16 group_index = terrain->group_count;
+    if (group_index >= terrain->max_groups || object == NULL)
+        return -1;
+    TERRPICKUPSET *pickups = PickupTerr;
+    i16 source = pickups->group_for_type[type];
+    if (source == -1)
+        return -1;
+    i32 index;
+    TERRAIN_PLATFORM *platform = FindFreeTerrainPlatform(terrain, &index);
+    if (index == -1)
+        return -1;
+    TERRAIN_GROUP &group = terrain->groups[group_index];
+    group = pickups->groups[source];
     group.scene_index = index;
     group.chunk_type = 1;
-    TERRAIN_PLATFORM &platform = terrain->platforms[index];
-    platform.scene_object = object;
-    platform.flags &= ~TERRAIN_PLATFORM_FLAG_ROTATING;
+    platform->scene_object = object;
+    platform->flags &= ~TERRAIN_PLATFORM_FLAG_ROTATING;
     NUMTX *matrix = static_cast<NUMTX *>(object);
     group.origin.x = matrix->m30;
     group.origin.y = matrix->m31;
     group.origin.z = matrix->m32;
-    platform.terrain_group_index = terrain->group_count;
-    platform.scene_transform = NULL;
-    platform.scene_object_index = 0;
-    terrain->group_indices[terrain->group_index_count++] = terrain->group_count;
-    platform.flags &= ~TERRAIN_PLATFORM_FLAG_COLLIDED;
-    platform.bounce_impulse = 0.0f;
-    platform.bounce_offset = 0.0f;
-    platform.bounce_velocity = 0.0f;
-    platform.bounce_damping = 0.0f;
-    platform.bounce_spring = 0.0f;
+    platform->terrain_group_index = group_index;
+    platform->scene_object_index = 0;
+    platform->scene_transform = NULL;
+    terrain->group_indices[index_count] = group_index;
+    terrain->group_index_count = index_count + 1;
+    platform->flags &= ~TERRAIN_PLATFORM_FLAG_COLLIDED;
+    platform->bounce_impulse = 0.0f;
+    platform->bounce_offset = 0.0f;
+    platform->bounce_velocity = 0.0f;
+    platform->bounce_damping = 0.0f;
+    platform->bounce_spring = 0.0f;
     ++terrain->group_count;
     ++terrain->cells[TERRAIN_PLATFORM_CELL].group_count;
     return index;
@@ -7094,17 +7120,19 @@ extern "C" i32 AddMSituExtraTerrRot(i32 source_index, NUMTX *matrix, NUMTX *prev
         curSphereter = 0;
     }
     TERRSET *terrain = CurTerr;
-    if (terrain->group_index_count >= terrain->max_group_indices || terrain->group_count >= terrain->max_groups ||
-        matrix == NULL || (rotating != 0 && previous == NULL) || source->removed_platform_count >= 32 ||
-        source->group_count <= source_index || terrain->max_platforms <= 0)
+    i32 index_count = terrain->group_index_count;
+    if (index_count >= terrain->max_group_indices)
         return -1;
-    i32 index = 0;
-    auto terrain_max_platforms = terrain->max_platforms;
-    while (terrain->platforms[index].scene_object != NULL) {
-        if (++index == terrain_max_platforms)
-            return -1;
-    }
-    return InstallExtraTerrainPlatform(terrain, &source->groups[source_index], matrix, previous, rotating, index);
+    i16 group_index = terrain->group_count;
+    if (group_index >= terrain->max_groups || matrix == NULL || (rotating != 0 && previous == NULL) ||
+        source->removed_platform_count >= 32 || source->group_count <= source_index)
+        return -1;
+    i32 index;
+    TERRAIN_PLATFORM *platform = FindFreeTerrainPlatform(terrain, &index);
+    if (index == -1)
+        return -1;
+    return InstallExtraTerrainPlatform(terrain, &source->groups[source_index], matrix, previous, rotating, index,
+                                       *platform, group_index, index_count);
 }
 
 extern "C" void TerrainWallSideSlide(NUVEC *movement, void *id, f32 speed, f32 upward_scale, NUANG angle) {
