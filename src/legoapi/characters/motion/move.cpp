@@ -8973,7 +8973,7 @@ i32 Glide_SetTargetMom(GameObject_s *object) {
     } else {
         object->target_velocity.x = NU_SIN_LUT(object->apiobj.movement_facing_angle) * speed;
         object->target_velocity.z = NU_COS_LUT(object->apiobj.movement_facing_angle) * speed;
-        f32 descent = static_cast<i8>(object->apiobj.field_0x1f8) < 0 ? -0.5f : -0.375f;
+        f32 descent = object->apiobj.player_controlled ? -0.5f : -0.375f;
         object->target_velocity.y = descent;
         if (object->context_animation_timer < 0.5f)
             object->target_velocity.y = (object->context_animation_timer + object->context_animation_timer) * descent;
@@ -9850,6 +9850,7 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
                     i32 alternate_animations[4];
                     u8 combo_stage = object->combo_stage++;
                     if ((object->context_flags & 1) != 0) {
+                        alternate_animations[0] = -1;
                         alternate_animations[1] = -1;
                         alternate_animations[2] = -1;
                         alternate_animations[3] = -1;
@@ -9971,48 +9972,47 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
     }
 
 check_blowup_target:
-    if (object->blowup_target != NULL && GizmoBlowUpOpponent_Behind != 0)
-        goto behind_attack;
-    object->field_0x7a7 = -1;
-    switch (object->attack_override) {
-        case 1:
-            object->context_animation = 0x51;
-            object->combo_stage = 2;
-            object->context_flags &= ~0x80;
-            break;
-        case 2:
-            object->context_animation = 0x55;
-            object->combo_stage = 2;
-            object->context_flags &= ~0x80;
-            break;
-        case 3:
-            object->context_animation = 0x56;
-            object->combo_stage = 2;
-            object->context_flags &= ~0x80;
-            break;
-        case 4:
-            goto behind_attack;
-        case 5:
-            object->context_animation = 0x64;
-            break;
-        case 6:
-            StartHold(object);
-            return;
-        case 7:
-            return;
-        default:
-            object->context_animation = 0x51;
-            object->combo_stage = 0;
-            object->context_flags &= ~0x80;
-            break;
+    if (object->blowup_target != NULL && GizmoBlowUpOpponent_Behind != 0) {
+        object->field_0x7a7 = -1;
+    behind_attack:
+        object->context_animation = 0x94;
+        object->combo_stage = 0;
+        object->context_flags |= 0x80;
+    } else {
+        object->field_0x7a7 = -1;
+        switch (object->attack_override) {
+            case 1:
+                object->context_animation = 0x51;
+                object->combo_stage = 2;
+                object->context_flags &= ~0x80;
+                break;
+            case 2:
+                object->context_animation = 0x55;
+                object->combo_stage = 2;
+                object->context_flags &= ~0x80;
+                break;
+            case 3:
+                object->context_animation = 0x56;
+                object->combo_stage = 2;
+                object->context_flags &= ~0x80;
+                break;
+            case 4:
+                goto behind_attack;
+            case 5:
+                object->context_animation = 0x64;
+                break;
+            case 6:
+                StartHold(object);
+                return;
+            case 7:
+                return;
+            default:
+                object->context_animation = 0x51;
+                object->combo_stage = 0;
+                object->context_flags &= ~0x80;
+                break;
+        }
     }
-    goto start_attack;
-
-behind_attack:
-    object->field_0x7a7 = -1;
-    object->context_animation = 0x94;
-    object->combo_stage = 0;
-    object->context_flags |= 0x80;
 
 start_attack:
     object->context_flags &= ~1;
