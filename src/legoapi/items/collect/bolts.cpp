@@ -700,22 +700,23 @@ BOLTTYPE_s *BoltType_FindByID(i32 id, WORLDINFO_s *world) {
 void Bolt_HitGameObjectRC(NetMessage &);
 i32 Bolt_HitGameObject(BOLT_s *bolt, GameObject_s *object, NUVEC *points, NUVEC *, NUVEC *, f32 radius, u8 *) {
     NUVEC center = object->apiobj.collision_position;
-    i32 hit = (bolt->flags & 0x200) != 0 ? 1 : 2;
-    auto bolt_type = bolt->type;
-    auto f24 = bolt_type->field_24;
-    for (;;) {
+    // Test the bolt's points from newest to oldest; bolts flagged 0x200 only
+    // test the middle point.
+    i32 hit;
+    for (hit = 2; hit >= 0; --hit) {
+        if ((bolt->flags & 0x200) != 0 && hit != 1)
+            continue;
         NUVEC point = points[hit];
-        if ((bolt->flags & 0x8000000) != 0 && bolt->time >= f24) {
+        if ((bolt->flags & 0x8000000) != 0 && bolt->time >= bolt->type->field_24) {
             center.y = 0.0f;
             point.y = 0.0f;
         }
         if (SphereSphereOverlapScaleY(&center, object->apiobj.field_0x1dc, object->apiobj.field_0x1e0, &point, radius,
                                       radius))
             break;
-        if (hit == 0 || (hit == 1 && (bolt->flags & 0x200) != 0))
-            return 0;
-        --hit;
     }
+    if (hit < 0)
+        return 0;
     i16 bolt_index = static_cast<i16>(bolt - Bolt);
     i16 object_index = static_cast<i16>(object - Obj);
     NetMessage message;
