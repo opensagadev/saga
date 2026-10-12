@@ -169,8 +169,18 @@ extern "C" void NuRndrLine3dDbg(f32, f32, f32, f32, f32, f32, i32);
 extern "C" void SphereDrawEx(NUVEC *centre, f32 radius, f32 vertical_scale, i32 colour) {
     f32 radius_squared = radius * radius;
     for (i32 band = 0; band < 8; ++band) {
-        f32 lower_radius = radius * NU_SIN_LUT((band < 4 ? band : 8 - band) * 4096);
-        f32 upper_radius = radius * NU_SIN_LUT((band < 3 ? band + 1 : 7 - band) * 4096);
+        f32 lower_radius;
+        f32 upper_radius;
+        if (band < 4) {
+            lower_radius = radius * NU_SIN_LUT(band * 4096);
+        } else {
+            lower_radius = radius * NU_SIN_LUT((8 - band) * 4096);
+        }
+        if (band < 3) {
+            upper_radius = radius * NU_SIN_LUT((band + 1) * 4096);
+        } else {
+            upper_radius = radius * NU_SIN_LUT((7 - band) * 4096);
+        }
         f32 lower_y = NuFsqrt(radius_squared - lower_radius * lower_radius) * vertical_scale;
         f32 upper_y = NuFsqrt(radius_squared - upper_radius * upper_radius) * vertical_scale;
         if (band > 4)
