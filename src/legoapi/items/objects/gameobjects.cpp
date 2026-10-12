@@ -3606,10 +3606,9 @@ void GameObjectOrigin(GameObject_s *object) {
             }
         }
 
-        const i32 collision_origin_joint = config->collision_origin_joint;
-        if (object->field_0xd24 == 1.0f && collision_origin_joint != -1 &&
-            api.character_model->points_of_interest[collision_origin_joint] != NULL && api.field_0x288 != 0) {
-            api.collision_position = *NUMTX_GET_ROW_VEC(&object->joint_matrices[collision_origin_joint], 3);
+        if (object->field_0xd24 == 1.0f && config->collision_origin_joint != -1 &&
+            api.character_model->points_of_interest[config->collision_origin_joint] != NULL && api.field_0x288 != 0) {
+            api.collision_position = *NUMTX_GET_ROW_VEC(&object->joint_matrices[config->collision_origin_joint], 3);
             const f32 frame_time = FRAMETIME;
             origin_x = api.position.x + api.previous_velocity.x * frame_time;
             origin_z = api.position.z + api.previous_velocity.z * frame_time;
