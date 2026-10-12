@@ -7006,7 +7006,10 @@ void MoveToMarker::BlowUp() {
     fading_out = false;
     field_108_3 = false;
     secondary_rotation.Start(*secondary_rotation.target, 16384.0f, 0.3f);
-    colour.from = *colour.target;
+    colour.from.x = colour.target->x;
+    colour.from.y = colour.target->y;
+    colour.from.z = colour.target->z;
+    colour.from.w = colour.target->w;
     colour.to = VuVec(21.0f, 146.0f, 27.0f, 1.0f);
     colour.elapsed = 0.0f;
     colour.duration = 0.2f;
@@ -7375,9 +7378,21 @@ i32 Glide_Start(GameObject_s *object) {
 void StartJetPackFall(GameObject_s *object, i32 fall);
 void PlayLandSfx(GameObject_s *object, i32 type, i32 surface);
 
+// Fires the jet pack: plays the jump sound, applies the character's jump
+// speed and readies a jet-pack weapon.
+static inline void JetPackLaunch(GameObject_s *object) {
+    object->field_0xe31 = 1;
+    PlayJumpSfx(object, 0);
+    GAMECHARACTERDATA *character = object->apiobj.character_data->game_character;
+    object->apiobj.velocity.y = character->jump_speed;
+    if (character->uses_weapon_action == 2 && object->character_context != 7)
+        FastWeaponOut(object, 1);
+    object->jump_variant_timer = 0.0f;
+}
+
 void JetPackCode(GameObject_s *object, i32 jump_pressed, i32 fall, i32) {
     i8 context = object->character_context;
-    if (context == 0x19 || context == 2 ||
+    if (context == 2 || context == 0x19 ||
         (object->apiobj.character_data->game_character->uses_weapon_action == 2 && context == 1)) {
         object->context_animation_timer -= FRAMETIME;
         if (object->context_animation_timer <= 0.0f)
@@ -7411,40 +7426,30 @@ void JetPackCode(GameObject_s *object, i32 jump_pressed, i32 fall, i32) {
             StartJetPackFall(object, fall);
         return;
     }
-    bool finish_hover = context == 0x13;
-    if (finish_hover) {
+    if (context == 0x13) {
         if (AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) == NULL)
             return;
         object->context_animation_timer -= FRAMETIME;
         if (!(object->context_animation_timer <= 0.0f))
             return;
-    } else {
-        if (jump_pressed == 0 || (object->apiobj.field_0x27d == 0 && !(object->ground_contact_grace_timer > 0.0f)) ||
-            ObjLandReady(object) == 0)
-            return;
-        if (object->character_context == 6)
-            FastWeaponIn(object, 0);
-        else if (object->character_context == 7)
-            FastWeaponOut(object, 0);
-        object->context_animation = 0x48;
-        object->context_animation_timer = AnimDuration(object->id, 0x48, 0.0f, 0.0f, 1);
-        if (!(object->context_animation_timer <= 0.0f)) {
-            object->character_context = 0x13;
-            object->fall_hover_height = 2000000.0f;
-            return;
-        }
-    }
-    object->field_0xe31 = 1;
-    PlayJumpSfx(object, 0);
-    GAMECHARACTERDATA *character = object->apiobj.character_data->game_character;
-    object->apiobj.velocity.y = character->jump_speed;
-    if (character->uses_weapon_action == 2 && object->character_context != 7)
-        FastWeaponOut(object, 1);
-    object->jump_variant_timer = 0.0f;
-    if (finish_hover)
+        JetPackLaunch(object);
         object->character_context = -1;
+        return;
+    }
+    if (jump_pressed == 0 || (object->apiobj.field_0x27d == 0 && !(object->ground_contact_grace_timer > 0.0f)) ||
+        ObjLandReady(object) == 0)
+        return;
+    if (object->character_context == 6)
+        FastWeaponIn(object, 0);
+    else if (object->character_context == 7)
+        FastWeaponOut(object, 0);
+    object->context_animation = 0x48;
+    object->context_animation_timer = AnimDuration(object->id, 0x48, 0.0f, 0.0f, 1);
+    if (!(object->context_animation_timer <= 0.0f))
+        object->character_context = 0x13;
     else
-        object->fall_hover_height = 2000000.0f;
+        JetPackLaunch(object);
+    object->fall_hover_height = 2000000.0f;
 }
 
 float SeekLinearF(float current, float target, float step) {
@@ -8841,17 +8846,19 @@ void ForcedBackCode(GameObject_s *object) {
                                               &object->apiobj.collision_position, 50, FRAMETIME, 0, 0, NULL);
         NewRumble(object->pad_gamepad->pad, (qrand() * (1.0f / 65535.0f)) * 0.6f, 0);
     } else if (ForceBackPos != NULL && object != ForceBackObj &&
-               (ForceBackType != 2 || (object->apiobj.character_data->model_flags & 0x10) != 0) &&
-               !MosEisleyC_PastBarrier(object) &&
-               (ForceBackType != 3 || ForceBackObj == NULL || ForceBackObj->force_target == object) &&
-               distance < (ForceBackRadius - 0.2f) * (ForceBackRadius - 0.2f)) {
-        Player_ClearContext(object, 1);
-        Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
-        object->context_animation_timer = 0.5f;
-        object->field_0x768 = 0.0f;
-        object->character_context = 0x22;
-        object->context_animation = 5;
-        PlaySfx("JForcePush", &object->apiobj.collision_position);
+               (ForceBackType != 2 || (object->apiobj.character_data->model_flags & 0x10) != 0)) {
+        if (MosEisleyC_PastBarrier(object))
+            return;
+        if ((ForceBackType != 3 || ForceBackObj == NULL || ForceBackObj->force_target == object) &&
+            distance < (ForceBackRadius - 0.2f) * (ForceBackRadius - 0.2f)) {
+            Player_ClearContext(object, 1);
+            Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
+            object->context_animation_timer = 0.5f;
+            object->field_0x768 = 0.0f;
+            object->character_context = 0x22;
+            object->context_animation = 5;
+            PlaySfx("JForcePush", &object->apiobj.collision_position);
+        }
     }
 }
 
@@ -8861,35 +8868,28 @@ i32 SetObjOnSurface(GameObject_s *object, i32 mode) {
         return 0;
     }
 
-    const f32 lower_bound = object->character_bottom * api.field_0xa8;
     f32 position_y;
     if (mode == 2) {
-        position_y = api.collision_min.y - lower_bound + 0.1f - 0.0999f;
+        position_y = api.collision_min.y - object->character_bottom * api.field_0xa8 + 0.1f - 0.0999f;
         api.position.y = position_y;
         api.initial_position.y = position_y;
         api.collision_position.y = position_y;
-    } else if (mode == 0) {
-        position_y = api.field_0x218 - lower_bound + 0.1f - 0.0999f;
-        api.position.y = position_y;
-        api.initial_position.y = position_y;
-        api.collision_position.y = position_y;
-        api.velocity.y = -1.0f;
-        return 1;
     } else {
         position_y = api.position.y;
     }
 
-    if (position_y + lower_bound <= api.field_0x218 + 0.1f) {
-        position_y = api.field_0x218 - lower_bound + 0.1f - 0.0999f;
+    i32 snapped;
+    if (mode != 0 && position_y + object->character_bottom * api.field_0xa8 > api.field_0x218 + 0.1f) {
+        snapped = 0;
+    } else {
+        position_y = api.field_0x218 - object->character_bottom * api.field_0xa8 + 0.1f - 0.0999f;
         api.position.y = position_y;
         api.initial_position.y = position_y;
         api.collision_position.y = position_y;
-        api.velocity.y = -1.0f;
-        return 1;
+        snapped = 1;
     }
-
     api.velocity.y = -1.0f;
-    return 0;
+    return snapped;
 }
 
 void TurnCodeCamSafe(GameObject_s *object, numtx_s *matrix) {
@@ -9747,7 +9747,7 @@ static void CommunicateCode(GameObject_s *object, i32 pressed, i32) {
 }
 
 static void SelectOpponent(GameObject_s *object, f32 range, f32 extra_radius, i32 mode, i32 gizmo_first) {
-    if (forceNextAttackOpponent.Get() != NULL && static_cast<i8>(object->apiobj.flags_low) < 0) {
+    if (forceNextAttackOpponent.Get() != NULL && object->apiobj.player_controlled) {
         object->force_target = forceNextAttackOpponent->GetCharacterObject();
         object->blowup_target = forceNextAttackOpponent->GetGizBlowup();
         return;
@@ -9757,15 +9757,13 @@ static void SelectOpponent(GameObject_s *object, f32 range, f32 extra_radius, i3
     object->blowup_target = NULL;
     if (gizmo_first == 0) {
         object->force_target = ObjOpponent(object, range, extra_radius, 1, mode, 1);
-        if (object->force_target != NULL) {
+        if (object->force_target != NULL)
             return;
-        }
-        if (!object->apiobj.player_controlled) {
-            if (object->blowup_target == NULL) {
-                object->force_target = ObjOpponent(object, range, extra_radius, 1, mode, 2);
-            }
-            return;
-        }
+    }
+    if (gizmo_first == 0 && !object->apiobj.player_controlled) {
+        if (object->blowup_target == NULL)
+            object->force_target = ObjOpponent(object, range, extra_radius, 1, mode, 2);
+        return;
     }
 
     object->blowup_target = GizmoBlowUpOpponent(object, range, extra_radius, 0.0f, 4, 0, 0, 0);
