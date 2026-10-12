@@ -9747,7 +9747,7 @@ static void CommunicateCode(GameObject_s *object, i32 pressed, i32) {
 }
 
 static void SelectOpponent(GameObject_s *object, f32 range, f32 extra_radius, i32 mode, i32 gizmo_first) {
-    if (forceNextAttackOpponent.Get() != NULL && static_cast<i8>(object->apiobj.flags_low) < 0) {
+    if (forceNextAttackOpponent.Get() != NULL && object->apiobj.player_controlled) {
         object->force_target = forceNextAttackOpponent->GetCharacterObject();
         object->blowup_target = forceNextAttackOpponent->GetGizBlowup();
         return;
@@ -9757,15 +9757,13 @@ static void SelectOpponent(GameObject_s *object, f32 range, f32 extra_radius, i3
     object->blowup_target = NULL;
     if (gizmo_first == 0) {
         object->force_target = ObjOpponent(object, range, extra_radius, 1, mode, 1);
-        if (object->force_target != NULL) {
+        if (object->force_target != NULL)
             return;
-        }
-        if (!object->apiobj.player_controlled) {
-            if (object->blowup_target == NULL) {
-                object->force_target = ObjOpponent(object, range, extra_radius, 1, mode, 2);
-            }
-            return;
-        }
+    }
+    if (gizmo_first == 0 && !object->apiobj.player_controlled) {
+        if (object->blowup_target == NULL)
+            object->force_target = ObjOpponent(object, range, extra_radius, 1, mode, 2);
+        return;
     }
 
     object->blowup_target = GizmoBlowUpOpponent(object, range, extra_radius, 0.0f, 4, 0, 0, 0);
