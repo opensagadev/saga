@@ -528,6 +528,21 @@ static void Hub_UpdatePackObstacle(i32 pack) {
     }
 }
 
+static void Hub_ResetBuildIts() {
+    i32 buildit_index = 0;
+    for (i32 i = 0; HubAreaInfo[i].area_name != NULL; ++i) {
+        if (HubAreaInfo[i].bonus_gizmo != NULL) {
+            if ((Game.field_0x7c26[2] & (1 << buildit_index)) != 0) {
+                GizBuildIt_SetToEnd(static_cast<GIZBUILDIT_s *>(HubAreaInfo[i].bonus_gizmo->object));
+            }
+            ++buildit_index;
+        }
+    }
+    if ((Game.field_0x7c26[2] & 0x80) != 0 && LevGizmo[0] != NULL) {
+        GizBuildIt_SetToEnd(static_cast<GIZBUILDIT_s *>(LevGizmo[0]->object));
+    }
+}
+
 void Hub_Update(WORLDINFO_s *world) {
     const i32 menu = GetMenuID();
 
@@ -610,18 +625,7 @@ void Hub_Update(WORLDINFO_s *world) {
         }
     }
     if (buildits_reset == 0) {
-        i32 buildit_index = 0;
-        for (i32 i = 0; HubAreaInfo[i].area_name != NULL; ++i) {
-            if (HubAreaInfo[i].bonus_gizmo != NULL) {
-                if ((Game.field_0x7c26[2] & (1U << (buildit_index & 31))) != 0) {
-                    GizBuildIt_SetToEnd(static_cast<GIZBUILDIT_s *>(HubAreaInfo[i].bonus_gizmo->object));
-                }
-                ++buildit_index;
-            }
-        }
-        if ((Game.field_0x7c26[2] & 0x80) != 0 && LevGizmo[0] != NULL) {
-            GizBuildIt_SetToEnd(static_cast<GIZBUILDIT_s *>(LevGizmo[0]->object));
-        }
+        Hub_ResetBuildIts();
         ++buildits_reset;
     }
 
@@ -660,11 +664,10 @@ void Hub_Update(WORLDINFO_s *world) {
     } else if (GetMenuID() != 12) {
         for (i32 player_index = 0; player_index < 2; ++player_index) {
             GameObject_s *player = Player[player_index];
-            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 && player->apiobj.field_0x27d != 0 &&
+            if (player != NULL && player->apiobj.active && player->apiobj.field_0x27d != 0 &&
                 player->pad_gamepad->input_magnitude == 0.0f && player->pad_gamepad->previous_input_magnitude == 0.0f &&
-                (player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x32) &&
-                player->apiobj.field_0x281 == 0x0e) {
-                shop_available = true;
+                (player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0x32)) {
+                shop_available = player->apiobj.field_0x281 == 0x0e;
             }
         }
         if (shop_available && !HubShopUnlocked()) {
@@ -701,11 +704,10 @@ void Hub_Update(WORLDINFO_s *world) {
     if (Customiser_MenuAvailable(CharacterCustomiser) != 0) {
         for (i32 player_index = 0; player_index < 2; ++player_index) {
             GameObject_s *player = Player[player_index];
-            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 && player->apiobj.field_0x27d != 0 &&
+            if (player != NULL && player->apiobj.active && player->apiobj.field_0x27d != 0 &&
                 player->pad_gamepad->input_magnitude == 0.0f && player->pad_gamepad->previous_input_magnitude == 0.0f &&
-                (player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x32) &&
-                player->apiobj.field_0x281 == 0x0f) {
-                customiser_available = true;
+                (player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0x32)) {
+                customiser_available = player->apiobj.field_0x281 == 0x0f;
             }
         }
         if (customiser_available && !HubCustomiserUnlocked()) {
@@ -741,11 +743,10 @@ void Hub_Update(WORLDINFO_s *world) {
     if (missions_available != 0) {
         for (i32 player_index = 0; player_index < 2; ++player_index) {
             GameObject_s *player = Player[player_index];
-            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 && player->apiobj.field_0x27d != 0 &&
+            if (player != NULL && player->apiobj.active && player->apiobj.field_0x27d != 0 &&
                 player->pad_gamepad->input_magnitude == 0.0f && player->pad_gamepad->previous_input_magnitude == 0.0f &&
-                (player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x32) &&
-                player->apiobj.field_0x281 == 0x14) {
-                mission_menu_available = true;
+                (player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0x32)) {
+                mission_menu_available = player->apiobj.field_0x281 == 0x14;
             }
         }
     }

@@ -496,7 +496,13 @@ typedef struct APIOBJECT_s {
     union {
         u32 object_flags; // 0x1f8, complete flag word
         struct {
-            u8 flags_low;
+            union {
+                u8 flags_low;
+                struct {
+                    u8 : 7;
+                    u8 active : 1;
+                };
+            };
             union {
                 u8 flags_high;
                 struct {
