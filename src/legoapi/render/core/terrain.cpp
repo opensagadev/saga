@@ -30,6 +30,7 @@
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuang.h"
+#include "nu2api/nuplatform/nudevicespecs.hpp"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
@@ -1116,7 +1117,7 @@ void LoadTerrainFile(WORLDINFO *world) {
     }
 }
 void LoadGrassFile(WORLDINFO *world) {
-    char path[268];
+    char path[256];
     world->page_grass = -1;
     Grass_Available = 1;
     char *config = world->config_file;
@@ -1137,14 +1138,13 @@ void LoadGrassFile(WORLDINFO *world) {
         }
     }
 
-    if (g_isMidRangeDevice != 0 && NuStrIStr(config, "GunGan_A") != NULL) {
+    if (NuStrIStr(config, "SpeederChase") != NULL) {
         Grass_Available = 0;
-        return;
     }
 
-    char *found = NuStrIStr(config, "SpeederChase");
-    if (found != NULL) {
+    if (NuDeviceSpecs::ms_instance->specs < 3 && NuStrIStr(config, "GunGan_A") != NULL) {
         Grass_Available = 0;
+        return;
     }
 
     if (Grass_Available != 0) {
@@ -7165,9 +7165,14 @@ extern "C" i32 NewRayCastSetHandel(NUVEC *position, NUVEC *movement, f32 radius,
     SetRayCastUnitScale(TerI);
     ConfigureRayCast(TerI, position, movement, radius, separation_epsilon, compare_epsilon);
     ScanTerrainHandel(scan_type, handle);
-    ResolveRayCast(movement);
-    if (TerI->hit_type != 0)
+    DerotateMovementVector();
+    HitTerrain();
+    if (TerI->hit_type != 0) {
+        RayImpact(movement);
+        TerrainImpactNorm();
+        ShadNorm = TerI->movement_normal;
         TerrPoly = TerI->surface;
+    }
     NuScratchRelease();
     return TerI->hit_type;
 }
