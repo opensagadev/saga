@@ -2293,15 +2293,18 @@ void RotateVec(NUVEC *source, NUVEC *destination) {
     const f32 sin_pitch = NuTrigTable[(static_cast<i32>(pitch) >> 1) & (NUTRIGTABLE_COUNT - 1)];
     const f32 cos_pitch = NuTrigTable[(static_cast<i32>(pitch + 16384.0f) >> 1) & (NUTRIGTABLE_COUNT - 1)];
 
-    const f32 rotated_z = source->y * sin_pitch + source->z * cos_pitch;
-    destination->y = source->y * cos_pitch - source->z * sin_pitch;
+    const f32 z = source->z;
+    const f32 y = source->y;
+    const f32 rotated_z = y * sin_pitch + z * cos_pitch;
+    destination->y = y * cos_pitch - z * sin_pitch;
 
+    // The yaw table entries are read again after each destination store.
     const f32 yaw = query->movement_yaw;
-    const f32 cos_yaw = NuTrigTable[(static_cast<i32>(yaw + 16384.0f) >> 1) & (NUTRIGTABLE_COUNT - 1)];
-    const f32 sin_yaw = NuTrigTable[(static_cast<i32>(yaw) >> 1) & (NUTRIGTABLE_COUNT - 1)];
-
-    destination->z = rotated_z * cos_yaw - source->x * sin_yaw;
-    destination->x = rotated_z * sin_yaw + source->x * cos_yaw;
+    const i32 cos_yaw = (static_cast<i32>(yaw + 16384.0f) >> 1) & (NUTRIGTABLE_COUNT - 1);
+    const i32 sin_yaw = (static_cast<i32>(yaw) >> 1) & (NUTRIGTABLE_COUNT - 1);
+    const f32 x = source->x;
+    destination->z = rotated_z * NuTrigTable[cos_yaw] - x * NuTrigTable[sin_yaw];
+    destination->x = rotated_z * NuTrigTable[sin_yaw] + x * NuTrigTable[cos_yaw];
 }
 
 void RotateTerrain(tertype *surface) {
@@ -2316,18 +2319,22 @@ void RotateTerrain(tertype *surface) {
     for (i32 vertex_index = 0; vertex_index < 3; ++vertex_index) {
         const NUVEC &source = surface->vectors[vertex_index];
         NUVEC &destination = query->transformed_vertices[vertex_index];
-        const f32 rotated_z = source.y * sin_pitch + source.z * cos_pitch;
-        destination.y = source.y * cos_pitch - source.z * sin_pitch;
-        destination.z = rotated_z * cos_yaw - source.x * sin_yaw;
-        destination.x = rotated_z * sin_yaw + source.x * cos_yaw;
+        const f32 z = source.z;
+        const f32 x = source.x;
+        destination.y = source.y * cos_pitch - z * sin_pitch;
+        const f32 rotated_z = source.y * sin_pitch + z * cos_pitch;
+        destination.z = rotated_z * cos_yaw - x * sin_yaw;
+        destination.x = rotated_z * sin_yaw + x * cos_yaw;
     }
     if (65536.0f > surface->normals[1].y) {
         const NUVEC &source = surface->vectors[3];
         NUVEC &destination = query->transformed_vertices[3];
-        const f32 rotated_z = source.y * sin_pitch + source.z * cos_pitch;
-        destination.y = source.y * cos_pitch - source.z * sin_pitch;
-        destination.z = rotated_z * cos_yaw - source.x * sin_yaw;
-        destination.x = rotated_z * sin_yaw + source.x * cos_yaw;
+        const f32 z = source.z;
+        const f32 x = source.x;
+        destination.y = source.y * cos_pitch - z * sin_pitch;
+        const f32 rotated_z = source.y * sin_pitch + z * cos_pitch;
+        destination.z = rotated_z * cos_yaw - x * sin_yaw;
+        destination.x = rotated_z * sin_yaw + x * cos_yaw;
     }
 }
 
