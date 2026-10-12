@@ -878,18 +878,20 @@ extern "C" {
 
     i32 DebrisFindAllOfType(i32 effect_index, NUVEC *positions, i32 *handles, i32 capacity, i32 skip, i32 active_only) {
         i32 count = 0;
-        debkeydatatype_s *key = debkeydata;
-        for (i32 i = 0; i < maxdebkeys; ++i, ++key) {
-            if ((active_only == 0 || key->allocated_chunk_count != 0) && key->effect_index == effect_index) {
+        for (i32 i = 0; i < maxdebkeys; ++i) {
+            debkeydatatype_s *key = &debkeydata[i];
+            if (key->effect_index == effect_index && (key->allocated_chunk_count != 0 || active_only == 0)) {
                 i32 output_index = count - skip;
-                if (output_index >= 0 && output_index < capacity) {
-                    if (positions != NULL) {
-                        positions[output_index].x = key->position.x;
-                        positions[output_index].y = key->position.y;
-                        positions[output_index].z = key->position.z;
+                if (output_index >= 0) {
+                    if (capacity > output_index) {
+                        if (positions != NULL) {
+                            positions[output_index].x = key->position.x;
+                            positions[output_index].y = key->position.y;
+                            positions[output_index].z = key->position.z;
+                        }
+                        if (handles != NULL)
+                            handles[output_index] = i;
                     }
-                    if (handles != NULL)
-                        handles[output_index] = i;
                 }
                 ++count;
             }
