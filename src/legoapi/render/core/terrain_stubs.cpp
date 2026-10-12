@@ -1746,13 +1746,13 @@ extern "C" {
             i32 x_cell = static_cast<i32>(static_cast<f32>(x_distance * 7) / (maximum_x - minimum_x));
             if (x_cell < 0)
                 x_cell = 0;
-            else if (x_cell > 6)
+            if (x_cell > 6)
                 x_cell = 6;
             i32 z_distance = static_cast<i32>((group_min_z[i] + group_max_z[i]) * 0.5f - minimum_z);
             i32 z_cell = static_cast<i32>(static_cast<f32>(z_distance * 7) / (maximum_z - minimum_z));
             if (z_cell < 0)
                 z_cell = 0;
-            else if (z_cell > 6)
+            if (z_cell > 6)
                 z_cell = 6;
             group_cells[i] = x_cell + z_cell * 7;
         }
@@ -1760,8 +1760,7 @@ extern "C" {
             terrain->cells[i].group_count = 0;
         terrain->used_cell_count = 0;
         for (i32 cell_index = 0; cell_index < TERRAIN_GRID_CELL_COUNT; ++cell_index) {
-            TERRAIN_CELL &cell = terrain->cells[terrain->used_cell_count];
-            cell.first_group = terrain->group_index_count;
+            terrain->cells[terrain->used_cell_count].first_group = terrain->group_index_count;
             f32 min_x = 200000000.0f, min_z = 200000000.0f;
             f32 max_x = -200000000.0f, max_z = -200000000.0f;
             for (i32 i = 0; i < terrain->group_count; ++i) {
@@ -1771,14 +1770,14 @@ extern "C" {
                 min_z = MIN(group_min_z[i], min_z);
                 max_x = MAX(group_max_x[i], max_x);
                 max_z = MAX(group_max_z[i], max_z);
-                ++cell.group_count;
+                ++terrain->cells[terrain->used_cell_count].group_count;
                 terrain->group_indices[terrain->group_index_count++] = i;
             }
-            if (cell.group_count != 0) {
-                cell.min_z = min_z;
-                cell.max_x = max_x;
-                cell.min_x = min_x;
-                cell.max_z = max_z;
+            if (terrain->cells[terrain->used_cell_count].group_count != 0) {
+                terrain->cells[terrain->used_cell_count].min_z = min_z;
+                terrain->cells[terrain->used_cell_count].max_x = max_x;
+                terrain->cells[terrain->used_cell_count].min_x = min_x;
+                terrain->cells[terrain->used_cell_count].max_z = max_z;
                 ++terrain->used_cell_count;
             }
         }
