@@ -6377,32 +6377,50 @@ extern "C" void AddPickupTerr(i32 type, NUVEC *position) {
     ++curPickInst;
 }
 
+static inline TERRAIN_PLATFORM *FindFreeTerrainPlatform(TERRSET *terrain, i32 *index) {
+    TERRAIN_PLATFORM *platform = NULL;
+    *index = -1;
+    for (i32 i = 0; i < terrain->max_platforms; i++) {
+        platform = &terrain->platforms[i];
+        if (platform->scene_object == NULL) {
+            *index = i;
+            break;
+        }
+    }
+    return platform;
+}
+
 static inline i32 InstallExtraTerrainPlatform(TERRSET *terrain, TERRAIN_GROUP *source, NUMTX *matrix, NUMTX *previous,
-                                              i32 rotating, i32 index) {
-    i16 group_index = terrain->group_count;
+                                              i32 rotating, i32 index, TERRAIN_PLATFORM &platform, i16 group_index,
+                                              i32 index_count) {
     TERRAIN_GROUP &group = terrain->groups[group_index];
     group = *source;
     group.scene_index = index;
     group.chunk_type = 1;
-    TERRAIN_PLATFORM &platform = terrain->platforms[index];
     platform.scene_object = matrix;
     if (rotating != 0) {
         platform.previous_matrix = *previous;
         platform.flags |= TERRAIN_PLATFORM_FLAG_ROTATING;
     } else {
-        NUMTX *old = previous != NULL ? previous : matrix;
-        platform.previous_matrix.m30 = old->m30;
-        platform.previous_matrix.m31 = old->m31;
-        platform.previous_matrix.m32 = old->m32;
+        if (previous != NULL) {
+            platform.previous_matrix.m30 = previous->m30;
+            platform.previous_matrix.m31 = previous->m31;
+            platform.previous_matrix.m32 = previous->m32;
+        } else {
+            platform.previous_matrix.m30 = matrix->m30;
+            platform.previous_matrix.m31 = matrix->m31;
+            platform.previous_matrix.m32 = matrix->m32;
+        }
         platform.flags &= ~TERRAIN_PLATFORM_FLAG_ROTATING;
     }
     group.origin.x = matrix->m30;
     group.origin.y = matrix->m31;
     group.origin.z = matrix->m32;
+    platform.terrain_group_index = group_index;
     platform.scene_object_index = 0;
     platform.scene_transform = NULL;
-    platform.terrain_group_index = group_index;
-    terrain->group_indices[terrain->group_index_count++] = group_index;
+    terrain->group_indices[index_count] = group_index;
+    terrain->group_index_count = index_count + 1;
     platform.flags &= ~TERRAIN_PLATFORM_FLAG_COLLIDED;
     platform.bounce_impulse = 0.0f;
     platform.bounce_offset = 0.0f;
@@ -6425,18 +6443,22 @@ extern "C" i32 AddPickupTerrRot(i32 type, NUMTX *matrix, NUMTX *previous, i32 ro
         AddPickupTerr(type, reinterpret_cast<NUVEC *>(&matrix->m30));
         return -1;
     }
-    if (terrain->group_index_count >= terrain->max_group_indices || terrain->group_count >= terrain->max_groups ||
-        matrix == NULL || (rotating != 0 && previous == NULL))
+    i32 index_count = terrain->group_index_count;
+    if (index_count >= terrain->max_group_indices)
         return -1;
-    i16 source = PickupTerr->group_for_type[type];
-    if (source == -1 || terrain->removed_platform_count >= 32 || terrain->max_platforms <= 0)
+    i16 group_index = terrain->group_count;
+    if (group_index >= terrain->max_groups || matrix == NULL || (rotating != 0 && previous == NULL))
         return -1;
-    i32 index = 0;
-    while (terrain->platforms[index].scene_object != NULL) {
-        if (++index == terrain->max_platforms)
-            return -1;
-    }
-    return InstallExtraTerrainPlatform(terrain, &PickupTerr->groups[source], matrix, previous, rotating, index);
+    TERRPICKUPSET *pickups = PickupTerr;
+    i16 source = pickups->group_for_type[type];
+    if (source == -1 || terrain->removed_platform_count >= 32)
+        return -1;
+    i32 index;
+    TERRAIN_PLATFORM *platform = FindFreeTerrainPlatform(terrain, &index);
+    if (index == -1)
+        return -1;
+    return InstallExtraTerrainPlatform(terrain, &pickups->groups[source], matrix, previous, rotating, index, *platform,
+                                       group_index, index_count);
 }
 
 void TerrainSideClamp(NUVEC *axis, NUVEC *position) {
@@ -7093,17 +7115,19 @@ extern "C" i32 AddMSituExtraTerrRot(i32 source_index, NUMTX *matrix, NUMTX *prev
         curSphereter = 0;
     }
     TERRSET *terrain = CurTerr;
-    if (terrain->group_index_count >= terrain->max_group_indices || terrain->group_count >= terrain->max_groups ||
-        matrix == NULL || (rotating != 0 && previous == NULL) || source->removed_platform_count >= 32 ||
-        source->group_count <= source_index || terrain->max_platforms <= 0)
+    i32 index_count = terrain->group_index_count;
+    if (index_count >= terrain->max_group_indices)
         return -1;
-    i32 index = 0;
-    auto terrain_max_platforms = terrain->max_platforms;
-    while (terrain->platforms[index].scene_object != NULL) {
-        if (++index == terrain_max_platforms)
-            return -1;
-    }
-    return InstallExtraTerrainPlatform(terrain, &source->groups[source_index], matrix, previous, rotating, index);
+    i16 group_index = terrain->group_count;
+    if (group_index >= terrain->max_groups || matrix == NULL || (rotating != 0 && previous == NULL) ||
+        source->removed_platform_count >= 32 || source->group_count <= source_index)
+        return -1;
+    i32 index;
+    TERRAIN_PLATFORM *platform = FindFreeTerrainPlatform(terrain, &index);
+    if (index == -1)
+        return -1;
+    return InstallExtraTerrainPlatform(terrain, &source->groups[source_index], matrix, previous, rotating, index,
+                                       *platform, group_index, index_count);
 }
 
 extern "C" void TerrainWallSideSlide(NUVEC *movement, void *id, f32 speed, f32 upward_scale, NUANG angle) {
