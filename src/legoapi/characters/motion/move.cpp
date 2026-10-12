@@ -10388,31 +10388,16 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
 shoot_weapon_in:
     if (weapon_mode == 0)
         return 0;
-    if (((object->pad_gamepad->allocated_5a & 4) == 0 && special_pressed == 0))
+    if ((object->pad_gamepad->allocated_5a & 4) == 0 && special_pressed == 0)
         return 0;
-    if ((object->field_0xe22 & 1) == 0)
+    if ((object->field_0xe22 & 1) == 0 || object->weapon_scale_state != 0)
         return 0;
-    if (object->weapon_scale_state != 0)
+    if (object->character_context == 6 || object->character_context == 7 || object->character_context == 0x47 ||
+        object->character_context == 0x46 || object->character_context == 0x0b || object->character_context == 0x2e)
         return 0;
-    if (object->character_context == 6)
+    if (object->apiobj.character_data->game_character->uses_weapon_action == 2 && object->field_0xe31 == 1)
         return 0;
-    if (object->character_context == 7)
-        return 0;
-    if (object->character_context == 0x47)
-        return 0;
-    if (object->character_context == 0x46)
-        return 0;
-    if (object->character_context == 0x0b)
-        return 0;
-    if (object->character_context == 0x2e)
-        return 0;
-    if ((object->apiobj.character_data->game_character->uses_weapon_action == 2 && object->field_0xe31 == 1))
-        return 0;
-    if (object->character_context == 8)
-        return 0;
-    if (object->character_context == 0x1b)
-        return 0;
-    if (object->character_context == 0x1d)
+    if (object->character_context == 8 || object->character_context == 0x1b || object->character_context == 0x1d)
         return 0;
     if (TouchHacks::ShouldKeepWeaponOut(*object))
         return 0;
