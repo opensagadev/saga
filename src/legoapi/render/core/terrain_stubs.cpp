@@ -130,7 +130,7 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
             TERRAIN_SHAPE *destination = reinterpret_cast<TERRAIN_SHAPE *>(output + 1);
             for (i32 i = 0; i < shape_count; ++i, ++source, ++destination) {
                 i32 last_vertex = source->normals[1].y > 65535.0f ? 2 : 3;
-                memcpy(destination, source, sizeof(TERRAIN_SHAPE));
+                *destination = *source;
                 for (i32 vertex = last_vertex; vertex >= 0; --vertex) {
                     NUVEC &v = destination->vectors[vertex];
                     v = TerrainSkin(info, &source->vectors[SkinFlipTab[vertex + info->mirrored * 4]], -1.0f,
@@ -139,10 +139,10 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
                     v.y -= info->matrix->m31;
                     v.z -= info->matrix->m32;
                     min_x = MIN(v.x, min_x);
-                    min_y = MIN(v.y, min_y);
-                    min_z = MIN(v.z, min_z);
                     max_x = MAX(v.x, max_x);
+                    min_y = MIN(v.y, min_y);
                     max_y = MAX(v.y, max_y);
+                    min_z = MIN(v.z, min_z);
                     max_z = MAX(v.z, max_z);
                     radius_squared = MAX((v.x * v.x + v.y * v.y) + v.z * v.z, radius_squared);
                 }
