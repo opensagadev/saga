@@ -664,7 +664,7 @@ void Hub_Update(WORLDINFO_s *world) {
     } else if (GetMenuID() != 12) {
         for (i32 player_index = 0; player_index < 2; ++player_index) {
             GameObject_s *player = Player[player_index];
-            if (player != NULL && player->apiobj.active && player->apiobj.field_0x27d != 0 &&
+            if (player != NULL && player->apiobj.player_controlled && player->apiobj.field_0x27d != 0 &&
                 player->pad_gamepad->input_magnitude == 0.0f && player->pad_gamepad->previous_input_magnitude == 0.0f &&
                 (player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0x32)) {
                 shop_available = player->apiobj.field_0x281 == 0x0e;
@@ -704,7 +704,7 @@ void Hub_Update(WORLDINFO_s *world) {
     if (Customiser_MenuAvailable(CharacterCustomiser) != 0) {
         for (i32 player_index = 0; player_index < 2; ++player_index) {
             GameObject_s *player = Player[player_index];
-            if (player != NULL && player->apiobj.active && player->apiobj.field_0x27d != 0 &&
+            if (player != NULL && player->apiobj.player_controlled && player->apiobj.field_0x27d != 0 &&
                 player->pad_gamepad->input_magnitude == 0.0f && player->pad_gamepad->previous_input_magnitude == 0.0f &&
                 (player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0x32)) {
                 customiser_available = player->apiobj.field_0x281 == 0x0f;
@@ -743,7 +743,7 @@ void Hub_Update(WORLDINFO_s *world) {
     if (missions_available != 0) {
         for (i32 player_index = 0; player_index < 2; ++player_index) {
             GameObject_s *player = Player[player_index];
-            if (player != NULL && player->apiobj.active && player->apiobj.field_0x27d != 0 &&
+            if (player != NULL && player->apiobj.player_controlled && player->apiobj.field_0x27d != 0 &&
                 player->pad_gamepad->input_magnitude == 0.0f && player->pad_gamepad->previous_input_magnitude == 0.0f &&
                 (player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0x32)) {
                 mission_menu_available = player->apiobj.field_0x281 == 0x14;
