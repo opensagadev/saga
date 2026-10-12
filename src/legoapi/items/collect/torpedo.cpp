@@ -1,6 +1,7 @@
 #include "legoapi/items/collect/torpedo.h"
 
 #include "decomp.h"
+#include "nu2api/numath/numtx_inline.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "globals.h"
 #include "legoapi/actions/combat/hits.h"
@@ -618,11 +619,11 @@ void DrawTorpedos(GameObject_s *object) {
                                           NU_SIN_LUT(packet->field_08 / 0.8f * 16384.0f));
         }
 
-        NUMTX matrix;
+        NUMTX_ALIGNED16 matrix;
         NuMtxSetIdentity(&matrix);
         NuMtxPreRotateX(&matrix, static_cast<u16>(x_rotation));
         packet = object->torpedo;
-        NuMtxRotateY(&matrix, static_cast<u16>(packet->pickup_data[index]));
+        NuMtxRotateYInline(&matrix, static_cast<u16>(packet->pickup_data[index]));
         NuMtxTranslate(&matrix, &packet->pickup_positions[index]);
 
         packet = object->torpedo;
