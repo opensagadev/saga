@@ -753,21 +753,22 @@ void DebrisTimeSlip(i32 group) {
     for (i32 i = 0; i < maxdebkeys; ++i) {
         debkeydatatype_s *key = &debkeydata[i];
         debinftype *effect = debtab[key->effect_index];
-        if ((effect->time_group == 4 ? group != 1 : group != 0)) {
+        if (effect->time_group == 4) {
+            if (group != 1)
+                continue;
+        } else if (group != 0) {
             continue;
         }
         key->last_update_time -= 800.0f;
+        key->emission_epoch -= 800.0f;
+        key->emission_time -= 800.0f;
         key->previous_emission_time -= 800.0f;
         key->field_1e4 -= 800.0f;
-        key->emission_time -= 800.0f;
-        key->emission_epoch -= 800.0f;
         for (i32 chunk = 0; chunk < 32; ++chunk) {
-            if (key->particle_chunks[chunk] == NULL)
-                continue;
-            dma_particle_chunk_s *particles = key->particle_chunks[chunk];
-            i32 count = effect->particle_type == 7 ? 12 : 32;
-            for (i32 particle = 0; particle < count; ++particle)
-                particles->particles[particle].start_time -= 800.0f;
+            if (key->particle_chunks[chunk] != NULL) {
+                for (i32 particle = 0; particle < (effect->particle_type == 7 ? 12 : 32); ++particle)
+                    key->particle_chunks[chunk]->particles[particle].start_time -= 800.0f;
+            }
         }
     }
     for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
