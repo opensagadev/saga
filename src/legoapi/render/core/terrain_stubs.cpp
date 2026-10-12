@@ -1323,20 +1323,21 @@ extern "C" {
             cursor = buffer->addr;
         }
 
-        const i32 chunk_count = debrischunks + debrischunksglass;
-        memset(debris_chunk_controls, 0, static_cast<usize>(chunk_count) * 2 * sizeof(debris_chunk_control_s));
-        memset(freechunkcontrols, 0, static_cast<usize>(chunk_count) * 2 * sizeof(debris_chunk_control_s *));
+        memset(debris_chunk_controls, 0,
+               static_cast<usize>(debrischunks + debrischunksglass) * 2 * sizeof(debris_chunk_control_s));
+        memset(freechunkcontrols, 0,
+               static_cast<usize>(debrischunks + debrischunksglass) * 2 * sizeof(debris_chunk_control_s *));
         memset(freedebchunks, 0, static_cast<usize>(debrischunks) * sizeof(dma_particle_chunk_s *));
         memset(freedebchunksglass, 0, static_cast<usize>(debrischunksglass) * sizeof(dma_particle_chunk_s *));
-        memset(ParticleChunkToRender, 0, static_cast<usize>(chunk_count) * sizeof(particlechunkrendertype_s));
+        memset(ParticleChunkToRender, 0,
+               static_cast<usize>(debrischunks + debrischunksglass) * sizeof(particlechunkrendertype_s));
 
+        i32 size;
         for (i32 i = 0; i < debrischunks; ++i) {
-            i32 size;
             freedebchunks[i] = CreateDmaParticleSet(reinterpret_cast<void *>(cursor), &size);
             cursor += static_cast<usize>(size);
         }
         for (i32 i = 0; i < debrischunksglass; ++i) {
-            i32 size;
             freedebchunksglass[i] = CreateDmaParticleSetGlass(reinterpret_cast<void *>(cursor), &size);
             cursor += static_cast<usize>(size);
         }
@@ -1344,7 +1345,6 @@ extern "C" {
         freedebchkptr = 0;
         freedebchkptrg = 0;
         for (i32 i = 0; i < EDPP_MAX_DMADEBTYPES; ++i) {
-            i32 size;
             DmaDebTypes[i] = CreateDmaPartEffectList(reinterpret_cast<void *>(cursor), &size);
             cursor += static_cast<usize>(size);
         }
@@ -1355,6 +1355,7 @@ extern "C" {
             buffer->addr = cursor;
         }
 
+        const i32 chunk_count = debrischunks + debrischunksglass;
         debris_chunk_control_stack[0] = NULL;
         debris_chunk_control_stack[1] = NULL;
         for (i32 i = 0; i < chunk_count * 2; ++i) {
