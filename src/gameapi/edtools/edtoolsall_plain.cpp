@@ -2698,29 +2698,26 @@ extern "C" {
     }
     // Parts-page loader (edppLoadPage @0x36c630).
     i32 edppLoadPage(char *path, i32 flag, usize scene) {
-        i32 page_index = -1;
-        i8 category = static_cast<i8>(flag);
-        if (flag == 0) {
-            category = 0;
+        const i8 page_type = static_cast<i8>(flag);
+        const i8 category = page_type == 6 ? 1 : page_type;
+        i32 page_index;
+        if (page_type == 0) {
             page_index = 0;
-        } else if (flag == 5) {
-            category = 5;
+        } else if (page_type == 5) {
             page_index = 1;
         } else {
-            if (flag == 6)
-                category = 1;
-            for (i32 page = 2; page < 8; ++page) {
-                if (edpp_page_used[page] != 0) {
-                    continue;
-                }
-                page_index = page;
-                break;
+            for (page_index = 2; page_index < 8; ++page_index) {
+                if (edpp_page_used[page_index] == 0)
+                    break;
             }
-            if (page_index == -1)
+            if (page_index == 8)
                 return -1;
         }
 
-        EdFileSetMedia(edpp_usememcard == 0 ? 1 : 2);
+        if (edpp_usememcard == 0)
+            EdFileSetMedia(1);
+        else
+            EdFileSetMedia(2);
         if (EdFileOpen(path, NUFILE_READ) == 0) {
             return -1;
         }
@@ -2745,12 +2742,11 @@ extern "C" {
         }
 
         for (i32 n = 0; n < requested; n++) {
+            // The request was clamped to the free slot count above, so the
+            // original scans for the next free slot without a bound.
             i32 index = 1;
-            while (index < EDPP_MAX_TYPES && debtab[index] != NULL) {
+            while (debtab[index] != NULL) {
                 index++;
-            }
-            if (index >= EDPP_MAX_TYPES) {
-                break;
             }
 
             debinftype *effect = &effecttypes[index];
@@ -2767,7 +2763,7 @@ extern "C" {
         for (i32 n = 0; n < skipped; ++n)
             FileLoadSingleEffectType(&discarded, version, category);
 
-        if (flag == 1 || flag == 2) {
+        if (page_type == 1 || page_type == 2) {
             i32 instances = EdFileReadInt();
             if (instances + edpp_instances_used > 512)
                 instances = 512 - edpp_instances_used;
@@ -2859,11 +2855,11 @@ extern "C" {
         EdFileClose();
         edppDetermineNearest(1.0f);
 
-        if (flag == 0) {
+        if (page_type == 0) {
             edbits_particle_general_page = page_index;
-        } else if (flag == 5) {
+        } else if (page_type == 5) {
             edbits_particle_char_page = page_index;
-        } else if (flag == 1) {
+        } else if (page_type == 1) {
             edbits_particle_level_page = page_index;
         }
         return page_index;
@@ -5054,27 +5050,27 @@ extern "C" {
         edui_prop_s *property = static_cast<edui_prop_s *>(interact->item);
         u8 &property_flags = reinterpret_cast<u8 *>(property)[0x4c];
         if ((edui_cursor_buttons & EDUI_CURSOR_PRIMARY) && !(property_flags & 0x0a)) {
-            f32 label_end = interact->x + property->label_width;
             if (property_flags & 1) {
-                if (edui_cursor_x >= label_end + 1.0f && edui_cursor_y >= interact->y &&
+                if (edui_cursor_x >= interact->x + property->label_width + 1.0f && edui_cursor_y >= interact->y &&
                     edui_cursor_x < property->button_x && edui_cursor_y < interact->y + interact->height) {
                     property_flags |= 1;
                     eduiPropTextPos = -1;
                     return 1;
                 }
             } else {
+                f32 label_end = interact->x + property->label_width;
                 edui_prop_s *bounds_property = property;
                 if (edui_cursor_x >= interact->x && edui_cursor_y >= interact->y && edui_cursor_x < label_end - 1.0f &&
                     edui_cursor_y < interact->y + interact->height && property->selected) {
                     property->selected(menu, property, 0);
                     bounds_property = static_cast<edui_prop_s *>(interact->item);
-                    label_end = interact->x + bounds_property->label_width;
+                    label_end = bounds_property->label_width + interact->x;
                 }
                 if (edui_cursor_x >= label_end - 1.0f && edui_cursor_y >= interact->y &&
                     edui_cursor_x < label_end + 1.0f && edui_cursor_y < interact->y + interact->height) {
                     property_flags |= 0x06;
                     bounds_property = static_cast<edui_prop_s *>(interact->item);
-                    label_end = interact->x + bounds_property->label_width;
+                    label_end = bounds_property->label_width + interact->x;
                 }
                 if (edui_cursor_x >= label_end + 1.0f && edui_cursor_y >= interact->y &&
                     edui_cursor_x < bounds_property->button_x && edui_cursor_y < interact->y + interact->height &&
