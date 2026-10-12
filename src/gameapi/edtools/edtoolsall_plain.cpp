@@ -323,7 +323,7 @@ extern "C" {
     static i32 eduicbProcessTexturePick(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessColourSlider(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessExpander(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
-    static inline void eduicbItemExpanderClose(edui_expander_s *);
+    static void eduicbItemExpanderClose(edui_expander_s *);
     static i32 eduicbProcessFilter(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessFilePick(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static void eduicbAttachDirectoryList(eduimenu_s *, edui_file_pick_s *);
@@ -5008,7 +5008,7 @@ extern "C" {
         }
         return pick->dragging_colour || pick->dragging_saturation;
     }
-    static inline void eduicbItemExpanderClose(edui_expander_s *expander) {
+    static void eduicbItemExpanderClose(edui_expander_s *expander) {
         for (eduiitem_s *child = expander->first_child; child; child = child->next) {
             if (child->type == EDUI_ITEM_EXPANDER)
                 eduicbItemExpanderClose(static_cast<edui_expander_s *>(child));
@@ -5024,10 +5024,11 @@ extern "C" {
         }
     }
     static __used__ i32 eduicbInteractExpander(edui_interact_s *interact) {
+        eduimenu_s *menu = interact->menu;
+        edui_expander_s *expander = static_cast<edui_expander_s *>(interact->item);
         if (edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY) {
-            edui_expander_s *expander = static_cast<edui_expander_s *>(interact->item);
             if (expander->changed)
-                expander->changed(interact->menu, expander, 0);
+                expander->changed(menu, expander, 0);
             if (edui_cursor_x >= expander->button_x && edui_cursor_y >= expander->button_y * 0.5f &&
                 edui_cursor_x < expander->button_x + expander->button_size &&
                 edui_cursor_y < (expander->button_y + expander->button_size) * 0.5f && expander->first_child) {
