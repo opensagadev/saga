@@ -875,9 +875,7 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
                 for (i32 vector_index = 0; vector_index < 4; ++vector_index) {
                     const NUVEC &vector = shape->vectors[vector_index];
                     const f32 length_squared = vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
-                    if (length_squared > radius_squared) {
-                        radius_squared = length_squared;
-                    }
+                    radius_squared = MAX(length_squared, radius_squared);
                 }
             }
 
@@ -975,7 +973,7 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
             static_cast<i32>(static_cast<f32>(x_distance * TERRAIN_GRID_WIDTH) / (terrain_max_x - terrain_min_x));
         if (x_cell < 0)
             x_cell = 0;
-        else if (x_cell >= TERRAIN_GRID_WIDTH)
+        if (x_cell >= TERRAIN_GRID_WIDTH)
             x_cell = TERRAIN_GRID_WIDTH - 1;
 
         const i32 z_distance = static_cast<i32>((min_z + max_z) * 0.5f - terrain_min_z);
@@ -983,7 +981,7 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
             static_cast<i32>(static_cast<f32>(z_distance * TERRAIN_GRID_WIDTH) / (terrain_max_z - terrain_min_z));
         if (z_cell < 0)
             z_cell = 0;
-        else if (z_cell >= TERRAIN_GRID_WIDTH)
+        if (z_cell >= TERRAIN_GRID_WIDTH)
             z_cell = TERRAIN_GRID_WIDTH - 1;
 
         group_cells[group_index] = static_cast<i16>(z_cell * TERRAIN_GRID_WIDTH + x_cell);
@@ -992,8 +990,7 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
     terrain->used_cell_count = 0;
     terrain->group_index_count = 0;
     for (i32 cell_index = 0; cell_index < TERRAIN_GRID_CELL_COUNT; ++cell_index) {
-        TERRAIN_CELL &cell = terrain->cells[terrain->used_cell_count];
-        cell.first_group = static_cast<u16>(terrain->group_index_count);
+        terrain->cells[terrain->used_cell_count].first_group = static_cast<u16>(terrain->group_index_count);
 
         f32 min_x = kBoundsMaximum;
         f32 min_z = kBoundsMaximum;
@@ -1005,25 +1002,21 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
                 continue;
             }
 
-            if (group_min_x[group_index] < min_x)
-                min_x = group_min_x[group_index];
-            if (group_min_z[group_index] < min_z)
-                min_z = group_min_z[group_index];
-            if (group_max_x[group_index] > max_x)
-                max_x = group_max_x[group_index];
-            if (group_max_z[group_index] > max_z)
-                max_z = group_max_z[group_index];
+            min_x = MIN(group_min_x[group_index], min_x);
+            min_z = MIN(group_min_z[group_index], min_z);
+            max_x = MAX(group_max_x[group_index], max_x);
+            max_z = MAX(group_max_z[group_index], max_z);
 
-            ++cell.group_count;
+            ++terrain->cells[terrain->used_cell_count].group_count;
             terrain->group_indices[terrain->group_index_count] = static_cast<i16>(group_index);
             ++terrain->group_index_count;
         }
 
-        if (cell.group_count != 0) {
-            cell.min_x = min_x;
-            cell.min_z = min_z;
-            cell.max_x = max_x;
-            cell.max_z = max_z;
+        if (terrain->cells[terrain->used_cell_count].group_count != 0) {
+            terrain->cells[terrain->used_cell_count].min_x = min_x;
+            terrain->cells[terrain->used_cell_count].min_z = min_z;
+            terrain->cells[terrain->used_cell_count].max_x = max_x;
+            terrain->cells[terrain->used_cell_count].max_z = max_z;
             ++terrain->used_cell_count;
         }
     }
