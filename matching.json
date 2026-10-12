@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 77.29638,
+    "fuzzy_match_percent": 77.34579,
     "total_code": "4722419",
-    "matched_code": "585825",
-    "matched_code_percent": 12.4051895,
+    "matched_code": "588200",
+    "matched_code_percent": 12.455482,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6680,
-    "matched_functions_percent": 49.632217,
+    "matched_functions": 6684,
+    "matched_functions_percent": 49.661938,
     "total_units": 1
   },
   "text": {
@@ -32914,7 +32914,7 @@
           "address": 3406864,
           "offset": 2516896,
           "size": 1539,
-          "match_percent": 54.49544
+          "match_percent": 56.05471
         },
         {
           "name": "_ZL13cbPtlCopySizeP10eduimenu_sP10eduiitem_sj",
@@ -32922,7 +32922,7 @@
           "address": 3408960,
           "offset": 2518992,
           "size": 2159,
-          "match_percent": 61.872772
+          "match_percent": 61.74555
         },
         {
           "name": "_ZL22cbPtlTextureSelectMenuP10eduimenu_sP10eduiitem_sj",
@@ -33018,7 +33018,7 @@
           "address": 3418496,
           "offset": 2528528,
           "size": 762,
-          "match_percent": 69.78362
+          "match_percent": 69.8421
         },
         {
           "name": "_ZL26edptlChangeRepeatBoxXZLockP10eduimenu_sP10eduiitem_sj",
@@ -33562,7 +33562,7 @@
           "address": 3538400,
           "offset": 2648432,
           "size": 402,
-          "match_percent": 74.978264
+          "match_percent": 88.45652
         },
         {
           "name": "edbriStopPage",
@@ -33866,7 +33866,7 @@
           "address": 3589680,
           "offset": 2699712,
           "size": 1934,
-          "match_percent": 40.72648
+          "match_percent": 63.466084
         },
         {
           "name": "edppRestartAllEffectsInLevel",
@@ -33874,7 +33874,7 @@
           "address": 3591616,
           "offset": 2701648,
           "size": 489,
-          "match_percent": 72.655464
+          "match_percent": 72.36134
         },
         {
           "name": "_ZL21edptlcbResetParticlesP10eduimenu_sP10eduiitem_sj",
@@ -33914,7 +33914,7 @@
           "address": 3593072,
           "offset": 2703104,
           "size": 458,
-          "match_percent": 81.04511
+          "match_percent": 81.1579
         },
         {
           "name": "_ZL15edptlcbStopPageP10eduimenu_sP10eduiitem_sj",
@@ -34282,7 +34282,7 @@
           "address": 3746224,
           "offset": 2856256,
           "size": 472,
-          "match_percent": 99.83929
+          "match_percent": 98.76786
         },
         {
           "name": "eduicbRenderNumber",
@@ -34290,7 +34290,7 @@
           "address": 3746704,
           "offset": 2856736,
           "size": 464,
-          "match_percent": 99.88182
+          "match_percent": 98.42727
         },
         {
           "name": "eduicbRenderGraph",
@@ -34354,7 +34354,7 @@
           "address": 3761680,
           "offset": 2871712,
           "size": 111,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "eduicbInteractExpander",
@@ -34362,7 +34362,7 @@
           "address": 3761792,
           "offset": 2871824,
           "size": 224,
-          "match_percent": 0.0
+          "match_percent": 71.97183
         },
         {
           "name": "eduicbInteractProp",
@@ -34370,7 +34370,7 @@
           "address": 3762016,
           "offset": 2872048,
           "size": 761,
-          "match_percent": 11.766304
+          "match_percent": 12.396739
         },
         {
           "name": "eduicbInteractFilter",
@@ -34410,7 +34410,7 @@
           "address": 3766064,
           "offset": 2876096,
           "size": 2741,
-          "match_percent": 41.43436
+          "match_percent": 41.36305
         },
         {
           "name": "eduicbRenderSelWithClipColour",
@@ -35434,7 +35434,7 @@
           "address": 3805472,
           "offset": 2915504,
           "size": 1601,
-          "match_percent": 28.582634
+          "match_percent": 28.59944
         },
         {
           "name": "eduiGetTopLevelParent",
@@ -48101,7 +48101,7 @@
           "address": 1391216,
           "offset": 501248,
           "size": 1232,
-          "match_percent": 46.072876
+          "match_percent": 89.31984
         },
         {
           "name": "_Z17MovePlayer_CIRCLEP12GameObject_s",
@@ -48125,7 +48125,7 @@
           "address": 1395472,
           "offset": 505504,
           "size": 1376,
-          "match_percent": 62.61644
+          "match_percent": 63.96575
         },
         {
           "name": "_Z9StartTurnP12GameObject_s",
@@ -48389,7 +48389,7 @@
           "address": 1450864,
           "offset": 560896,
           "size": 4744,
-          "match_percent": 45.63019
+          "match_percent": 51.835865
         },
         {
           "name": "_Z9ZapTargetP12GameObject_s",
@@ -78879,7 +78879,7 @@
           "address": 3469920,
           "offset": 2579952,
           "size": 578,
-          "match_percent": 70.5625
+          "match_percent": 100.0
         },
         {
           "name": "DebrisPosOrientationMtx",
@@ -78903,7 +78903,7 @@
           "address": 3470912,
           "offset": 2580944,
           "size": 967,
-          "match_percent": 70.15686
+          "match_percent": 100.0
         },
         {
           "name": "DebrisEmitterOrientationMtx",
@@ -78927,7 +78927,7 @@
           "address": 3472240,
           "offset": 2582272,
           "size": 719,
-          "match_percent": 54.62162
+          "match_percent": 100.0
         },
         {
           "name": "DebrisGetParticleCount",
@@ -79023,7 +79023,7 @@
           "address": 3486752,
           "offset": 2596784,
           "size": 607,
-          "match_percent": 55.71212
+          "match_percent": 74.371216
         },
         {
           "name": "DebrisSetRenderGroup",
@@ -79087,7 +79087,7 @@
           "address": 3494736,
           "offset": 2604768,
           "size": 1415,
-          "match_percent": 32.571037
+          "match_percent": 56.691257
         },
         {
           "name": "DebrisGetName",
@@ -79119,7 +79119,7 @@
           "address": 3506192,
           "offset": 2616224,
           "size": 912,
-          "match_percent": 45.897118
+          "match_percent": 79.73251
         },
         {
           "name": "DebrisGetRingProperties",
@@ -79207,7 +79207,7 @@
           "address": 3511600,
           "offset": 2621632,
           "size": 446,
-          "match_percent": 34.860657
+          "match_percent": 50.92623
         },
         {
           "name": "DebrisAllCollisionCheckScaleYFlag",
@@ -122704,7 +122704,7 @@
       "address": 3760592,
       "offset": 2870624,
       "size": 1079,
-      "match_percent": 95.57927,
+      "match_percent": 11.219512,
       "candidate_units": [
         "gameapi/edtools/edtoolsall_plain.cpp.o",
         "gameapi/edtools/edui.cpp.o"
