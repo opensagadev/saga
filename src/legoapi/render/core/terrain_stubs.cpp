@@ -819,9 +819,9 @@ extern "C" {
         if (handle != -1) {
             debkeydatatype_s &key = debkeydata[handle];
             NUMTX *mtx = &key.emitter_orientation;
-            memcpy(mtx, source, sizeof(NUMTX));
-            mtx->m31 = 0.0f;
+            *mtx = *source;
             mtx->m30 = 0.0f;
+            mtx->m31 = 0.0f;
             mtx->m32 = 0.0f;
             key.orientation_dirty = 0.0f;
         }
@@ -949,9 +949,9 @@ extern "C" {
         if (handle != -1) {
             debkeydatatype_s &key = debkeydata[handle];
             NUMTX *mtx = &key.effect_orientation;
-            memcpy(mtx, source, sizeof(NUMTX));
-            mtx->m31 = 0.0f;
+            *mtx = *source;
             mtx->m30 = 0.0f;
+            mtx->m31 = 0.0f;
             mtx->m32 = 0.0f;
             key.orientation_dirty = 0.0f;
         }
@@ -1011,12 +1011,12 @@ extern "C" {
         if (handle != -1) {
             debkeydatatype_s &key = debkeydata[handle];
             NUMTX *mtx = &key.effect_orientation;
-            memcpy(mtx, source, sizeof(NUMTX));
+            *mtx = *source;
             key.position.x = source->m30;
             key.position.y = source->m31;
             key.position.z = source->m32;
-            mtx->m31 = 0.0f;
             mtx->m30 = 0.0f;
+            mtx->m31 = 0.0f;
             mtx->m32 = 0.0f;
             key.orientation_dirty = 0.0f;
         }
