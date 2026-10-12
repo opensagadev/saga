@@ -3342,25 +3342,187 @@ void MenuUpdateEpisodes(MENU_s *) {
     const f32 elapsed = FRAMETIME;
     episodestime = elapsed + episodestime;
     MENU *menu = &GameMenu[GameMenuLevel];
-    if (episodesmode == 1) {
-        episodestime = episodestime + elapsed;
-        if (episodestime < episodesduration)
-            return;
-        WipeBackToHub();
-        return;
-    }
-    if (episodesmode == 2 || episodesmode == 3) {
-        const bool playing = episodesmode == 3;
-        i16 clips[128];
-        const i32 all = hub_new_level == -1 || LDataList[hub_new_level].episode_index == -1;
-        const u16 count = CutScenePlayer_CountEpisodeClips(i_episodes, all, clips);
-        if (playing) {
+    i16 clips[128];
+    switch (episodesmode) {
+        case 0: {
+            i32 up = 0, down = 0, left = 0, right = 0, confirm = 0, cancel = 0;
+            for (i32 player = 0; player < 2; ++player) {
+                if (!MenuPacket.active_player[player])
+                    continue;
+                const u32 pressed = GamePad[player].buttons_pressed;
+                if (pressed & GAMEPAD_MENUSELECT) {
+                    confirm = 1;
+                    break;
+                }
+                if (pressed & GAMEPAD_MENUCANCEL) {
+                    cancel = 1;
+                    break;
+                }
+                const u32 directions = pressed | GamePad[player].left_directions;
+                if (directions & GAMEPAD_DUP)
+                    up = 1;
+                else if (directions & GAMEPAD_DDOWN)
+                    down = 1;
+                else if (directions & GAMEPAD_DLEFT)
+                    left = 1;
+                else if (directions & GAMEPAD_DRIGHT)
+                    right = 1;
+            }
+            if (menu->input_activity) {
+                if (menu->confirm_pressed) {
+                    if (menu->selected_item == i_episodes)
+                        confirm = 1;
+                    else
+                        i_episodes = menu->selected_item;
+                }
+                if (menu->cancel_pressed)
+                    cancel = 1;
+            }
+            if (confirm) {
+                if (Game_AreaSave != NULL && Game_AreaSave[EDataList[i_episodes].area_ids[0]].complete) {
+                    GameAudio_PlaySfx(0x30, NULL, 0, 0);
+                    episodestime = 0.0f;
+                    lastepisodesmode = episodesmode;
+                    episodesmode = 2;
+                    episodesduration = 0.6f;
+                } else {
+                    GameAudio_PlaySfx(0x32, NULL, 0, 0);
+                }
+            } else if (cancel) {
+                GameAudio_PlaySfx(0x31, NULL, 0, 0);
+                episodestime = 0.0f;
+                lastepisodesmode = episodesmode;
+                episodesmode = 1;
+                episodesduration = 0.6f;
+            } else {
+                const i8 previous = i_episodes;
+                if (up && previous >= 3)
+                    i_episodes -= 3;
+                else if (down && previous < 3)
+                    i_episodes += 3;
+                else if (left && previous % 3 > 0)
+                    --i_episodes;
+                else if (right && previous % 3 != 2)
+                    ++i_episodes;
+                if (previous != i_episodes)
+                    GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+            }
+            break;
+        }
+        case 1:
+            episodestime = episodestime + elapsed;
+            if (episodestime < episodesduration)
+                return;
+            WipeBackToHub();
+            break;
+        case 2: {
+            const i32 all = hub_new_level == -1 || LDataList[hub_new_level].episode_index == -1;
+            const u16 count = CutScenePlayer_CountEpisodeClips(i_episodes, all, clips);
+            if (i_clip[i_episodes] >= count)
+                i_clip[i_episodes] = count - 1;
+            const i32 previous = i_clip[i_episodes];
             bool confirm = false, cancel = false;
             if (MenuPacket.active_player[0]) {
-                if (GamePad[0].pad->digital_buttons_pressed & GAMEPAD_MENUSELECT)
+                if (GamePad[0].pad->digital_buttons_pressed & GAMEPAD_MENUSELECT) {
                     confirm = true;
-                else if (GamePad[0].pad->digital_buttons_pressed & GAMEPAD_MENUCANCEL)
+                } else if (GamePad[0].pad->digital_buttons_pressed & GAMEPAD_MENUCANCEL) {
                     cancel = true;
+                } else {
+                    const u32 held = GamePad[0].buttons_held | GamePad[0].buttons_released;
+                    const u32 pressed = GamePad[0].buttons_pressed | GamePad[0].left_directions;
+                    i32 up = pressed & GAMEPAD_DUP, down = pressed & GAMEPAD_DDOWN;
+                    i32 left = pressed & GAMEPAD_DLEFT, right = pressed & GAMEPAD_DRIGHT;
+                    i32 up_held = held & GAMEPAD_DUP, down_held = held & GAMEPAD_DDOWN;
+                    i32 left_held = held & GAMEPAD_DLEFT, right_held = held & GAMEPAD_DRIGHT;
+                    if (down && up)
+                        down = up = 0;
+                    if (right && left)
+                        right = left = 0;
+                    if (down_held && up_held)
+                        down_held = up_held = 0;
+                    if (right_held && left_held)
+                        right_held = left_held = 0;
+                    MenuRepeat(&up_held, &up, uprepeattime, uprepeatcount, 0.1f, FRAMETIME);
+                    MenuRepeat(&down_held, &down, downrepeattime, downrepeatcount, 0.1f, FRAMETIME);
+                    MenuRepeat(&left_held, &left, leftrepeattime, leftrepeatcount, 0.1f, FRAMETIME);
+                    MenuRepeat(&right_held, &right, rightrepeattime, rightrepeatcount, 0.1f, FRAMETIME);
+                    if (!up) {
+                        if (down) {
+                            i32 next = previous + 7;
+                            if (next >= count) {
+                                const i32 rows = count / 7 + 1;
+                                next = (next < rows * 7 ? previous + 14 : next) - rows * 7;
+                            }
+                            i_clip[i_episodes] = next;
+                        } else if (left) {
+                            i32 column = previous % 7 - 1;
+                            if (column < 0)
+                                column += 7;
+                            i32 next = column + previous / 7 * 7;
+                            if (next >= count)
+                                next = count - 1;
+                            i_clip[i_episodes] = next;
+                        } else if (right) {
+                            i32 column = previous % 7 + 1;
+                            if (column == 7)
+                                column -= 7;
+                            const i32 row = previous / 7 * 7;
+                            const i32 next = row + column;
+                            if (next < count) {
+                                i_clip[i_episodes] = next;
+                            } else {
+                                i_clip[i_episodes] = row;
+                            }
+                        }
+                    } else {
+                        i32 next = previous - 7;
+                        if (next < 0) {
+                            next += (count / 7 + 1) * 7;
+                            if (next >= count)
+                                next -= 7;
+                        }
+                        i_clip[i_episodes] = next;
+                    }
+                }
+            }
+            if (menu->input_activity && menu->confirm_pressed) {
+                if (menu->selected_item == i_clip[i_episodes])
+                    confirm = true;
+                else
+                    i_clip[i_episodes] = menu->selected_item;
+            }
+            if (confirm) {
+                if (CutScenePlayer_CanStart(clips[i_clip[i_episodes]])) {
+                    GameAudio_PlaySfx(0x30, NULL, 0, 0);
+                    episodestime = 0.0f;
+                    lastepisodesmode = episodesmode;
+                    episodesmode = 3;
+                    episodesduration = 0.6f;
+                } else {
+                    GameAudio_PlaySfx(0x32, NULL, 0, 0);
+                }
+            } else if (menu->cancel_pressed || cancel) {
+                GameAudio_PlaySfx(0x31, NULL, 0, 0);
+                episodestime = 0.0f;
+                lastepisodesmode = episodesmode;
+                episodesmode = 0;
+                episodesduration = 0.6f;
+                if (hub_new_level != -1 && LDataList[hub_new_level].episode_index != -1)
+                    episodesmode = 1;
+            } else if (previous != i_clip[i_episodes]) {
+                GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+            }
+            break;
+        }
+        case 3: {
+            const i32 all = hub_new_level == -1 || LDataList[hub_new_level].episode_index == -1;
+            CutScenePlayer_CountEpisodeClips(i_episodes, all, clips);
+            i32 confirm = 0, cancel = 0;
+            if (MenuPacket.active_player[0]) {
+                if (GamePad[0].pad->digital_buttons_pressed & GAMEPAD_MENUSELECT)
+                    confirm = 1;
+                else if (GamePad[0].pad->digital_buttons_pressed & GAMEPAD_MENUCANCEL)
+                    cancel = 1;
             }
             if (menu->confirm_pressed || confirm) {
                 const i16 clip = clips[i_clip[i_episodes]];
@@ -3374,167 +3536,8 @@ void MenuUpdateEpisodes(MENU_s *) {
                 episodesmode = 2;
                 episodesduration = 0.6f;
             }
-            return;
-        }
-        if (i_clip[i_episodes] >= count)
-            i_clip[i_episodes] = count - 1;
-        const i32 previous = i_clip[i_episodes];
-        bool confirm = false, cancel = false;
-        if (MenuPacket.active_player[0]) {
-            if (GamePad[0].pad->digital_buttons_pressed & GAMEPAD_MENUSELECT) {
-                confirm = true;
-            } else if (GamePad[0].pad->digital_buttons_pressed & GAMEPAD_MENUCANCEL) {
-                cancel = true;
-            } else {
-                const u32 held = GamePad[0].buttons_held | GamePad[0].buttons_released;
-                const u32 pressed = GamePad[0].buttons_pressed | GamePad[0].left_directions;
-                i32 up = pressed & GAMEPAD_DUP, down = pressed & GAMEPAD_DDOWN;
-                i32 left = pressed & GAMEPAD_DLEFT, right = pressed & GAMEPAD_DRIGHT;
-                i32 up_held = held & GAMEPAD_DUP, down_held = held & GAMEPAD_DDOWN;
-                i32 left_held = held & GAMEPAD_DLEFT, right_held = held & GAMEPAD_DRIGHT;
-                if (down && up)
-                    down = up = 0;
-                if (right && left)
-                    right = left = 0;
-                if (down_held && up_held)
-                    down_held = up_held = 0;
-                if (right_held && left_held)
-                    right_held = left_held = 0;
-                MenuRepeat(&up_held, &up, uprepeattime, uprepeatcount, 0.1f, FRAMETIME);
-                MenuRepeat(&down_held, &down, downrepeattime, downrepeatcount, 0.1f, FRAMETIME);
-                MenuRepeat(&left_held, &left, leftrepeattime, leftrepeatcount, 0.1f, FRAMETIME);
-                MenuRepeat(&right_held, &right, rightrepeattime, rightrepeatcount, 0.1f, FRAMETIME);
-                if (!up) {
-                    if (down) {
-                        i32 next = previous + 7;
-                        if (next >= count) {
-                            const i32 rows = count / 7 + 1;
-                            next = (next < rows * 7 ? previous + 14 : next) - rows * 7;
-                        }
-                        i_clip[i_episodes] = next;
-                    } else if (left) {
-                        i32 column = previous % 7 - 1;
-                        if (column < 0)
-                            column += 7;
-                        i32 next = column + previous / 7 * 7;
-                        if (next >= count)
-                            next = count - 1;
-                        i_clip[i_episodes] = next;
-                    } else if (right) {
-                        i32 column = previous % 7 + 1;
-                        if (column == 7)
-                            column -= 7;
-                        const i32 row = previous / 7 * 7;
-                        const i32 next = row + column;
-                        if (next < count) {
-                            i_clip[i_episodes] = next;
-                        } else {
-                            i_clip[i_episodes] = row;
-                        }
-                    }
-                } else {
-                    i32 next = previous - 7;
-                    if (next < 0) {
-                        next += (count / 7 + 1) * 7;
-                        if (next >= count)
-                            next -= 7;
-                    }
-                    i_clip[i_episodes] = next;
-                }
-            }
-        }
-        if (menu->input_activity && menu->confirm_pressed) {
-            if (menu->selected_item == i_clip[i_episodes])
-                confirm = true;
-            else
-                i_clip[i_episodes] = menu->selected_item;
-        }
-        if (confirm) {
-            if (CutScenePlayer_CanStart(clips[i_clip[i_episodes]])) {
-                GameAudio_PlaySfx(0x30, NULL, 0, 0);
-                episodestime = 0.0f;
-                lastepisodesmode = episodesmode;
-                episodesmode = 3;
-                episodesduration = 0.6f;
-            } else {
-                GameAudio_PlaySfx(0x32, NULL, 0, 0);
-            }
-        } else if (menu->cancel_pressed || cancel) {
-            GameAudio_PlaySfx(0x31, NULL, 0, 0);
-            episodestime = 0.0f;
-            lastepisodesmode = episodesmode;
-            episodesmode = 0;
-            episodesduration = 0.6f;
-            if (hub_new_level != -1 && LDataList[hub_new_level].episode_index != -1)
-                episodesmode = 1;
-        } else if (previous != i_clip[i_episodes]) {
-            GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-        }
-        return;
-    }
-    if (episodesmode != 0)
-        return;
-    bool up = false, down = false, left = false, right = false, confirm = false, cancel = false;
-    for (i32 player = 0; player < 2; ++player) {
-        if (!MenuPacket.active_player[player])
-            continue;
-        const u32 pressed = GamePad[player].buttons_pressed;
-        if (pressed & GAMEPAD_MENUSELECT) {
-            confirm = true;
             break;
         }
-        if (pressed & GAMEPAD_MENUCANCEL) {
-            cancel = true;
-            break;
-        }
-        const u32 directions = pressed | GamePad[player].left_directions;
-        if (directions & GAMEPAD_DUP)
-            up = true;
-        else if (directions & GAMEPAD_DDOWN)
-            down = true;
-        else if (directions & GAMEPAD_DLEFT)
-            left = true;
-        else if (directions & GAMEPAD_DRIGHT)
-            right = true;
-    }
-    if (menu->input_activity) {
-        if (menu->confirm_pressed) {
-            if (menu->selected_item == i_episodes)
-                confirm = true;
-            else
-                i_episodes = menu->selected_item;
-        }
-        if (menu->cancel_pressed)
-            cancel = true;
-    }
-    if (confirm) {
-        if (Game_AreaSave != NULL && Game_AreaSave[EDataList[i_episodes].area_ids[0]].complete) {
-            GameAudio_PlaySfx(0x30, NULL, 0, 0);
-            episodestime = 0.0f;
-            lastepisodesmode = episodesmode;
-            episodesmode = 2;
-            episodesduration = 0.6f;
-        } else {
-            GameAudio_PlaySfx(0x32, NULL, 0, 0);
-        }
-    } else if (cancel) {
-        GameAudio_PlaySfx(0x31, NULL, 0, 0);
-        episodestime = 0.0f;
-        lastepisodesmode = episodesmode;
-        episodesmode = 1;
-        episodesduration = 0.6f;
-    } else {
-        const i8 previous = i_episodes;
-        if (up && previous >= 3)
-            i_episodes -= 3;
-        else if (down && previous < 3)
-            i_episodes += 3;
-        else if (left && previous % 3 > 0)
-            --i_episodes;
-        else if (right && previous % 3 != 2)
-            ++i_episodes;
-        if (previous != i_episodes)
-            GameAudio_PlaySfx(0x2f, NULL, 0, 0);
     }
 }
 
