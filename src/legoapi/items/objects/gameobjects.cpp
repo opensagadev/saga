@@ -2346,7 +2346,7 @@ void GameAIProcess() {
             continue;
         }
         object->ai.capabilities &= ~0x00e00000u;
-        if (object->apiobj.active && TouchHacks::TouchControlsActive) {
+        if (object->apiobj.player_controlled && TouchHacks::TouchControlsActive) {
             if ((object->ai.capabilities & 1) != 0)
                 object->ai.capabilities |= 0x00200000;
             if ((object->ai.capabilities & 2) != 0)
@@ -2463,7 +2463,7 @@ void GameAIProcess() {
         object = Player[index];
         if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
             (object->apiobj.field_0x287 == 0 || object->field_0x101c > 0.0f) && (object->field_0xeff & 1) == 0 &&
-            !object->apiobj.active) {
+            !object->apiobj.player_controlled) {
             party_follow_offsets[object->apiobj.field_0x27c] = follow_offset;
             follow_offset += 0.2f;
         }
@@ -2618,9 +2618,10 @@ void GameAIProcess() {
                     object->field_0xefb &= ~0x20;
                 }
             }
-            if ((object->field_0xef8 & 8) != 0 && (defend || (object->field_0xef8 & 0x30) != 0 ||
-                                                   ((object->id == id_YODA || object->id == id_YODAGHOST) &&
-                                                    !object->apiobj.active && object->apiobj.field_0x27c != -1))) {
+            if ((object->field_0xef8 & 8) != 0 &&
+                (defend || (object->field_0xef8 & 0x30) != 0 ||
+                 ((object->id == id_YODA || object->id == id_YODAGHOST) && !object->apiobj.player_controlled &&
+                  object->apiobj.field_0x27c != -1))) {
                 if ((object->field_0xe22 & 1) == 0 && object->character_context != 7 && object->field_0xe32 == 0)
                     object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
             } else if ((object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION) == 0 && (object->field_0xe22 & 1) != 0 &&
@@ -2628,7 +2629,8 @@ void GameAIProcess() {
                 object->pad_gamepad->buttons_pressed |= GAMEPAD_SPECIAL;
             }
         }
-        if ((object->apiobj.character_data->game_character->flags_094[3] & 0x10) != 0 && !object->apiobj.active) {
+        if ((object->apiobj.character_data->game_character->flags_094[3] & 0x10) != 0 &&
+            !object->apiobj.player_controlled) {
             f32 threshold = object->apiobj.character_data->game_character->walk_speed - 0.01f;
             if (object->field_0xe31 == 1) {
                 if (threshold >= object->pad_gamepad->input_magnitude) {
@@ -2654,7 +2656,7 @@ void GameAIProcess() {
             SetObjAsHeadTarget(object, *object->ai.action_target_ref, 2, 1.0f, 0.0f, 0.0f);
         goto interaction;
     ai_precombat:
-        if (__builtin_expect(!object->apiobj.active, 1)) {
+        if (__builtin_expect(!object->apiobj.player_controlled, 1)) {
             if (object->character_context == 0x5d)
                 SetBallooningHeight(object, object->ai.movement_destination.y);
             if (__builtin_expect(WORLD->current_level == JEDI_B_LDATA, 0) && object->id == id_JANGOFETT &&
@@ -2772,7 +2774,7 @@ void GameAIProcess() {
         }
     ai_route:
         if (FreePlay != 0 && (object->apiobj.field_0x1f4 & 0x400) == 0) {
-            if (!object->apiobj.active && object->character_context != 0x0b) {
+            if (!object->apiobj.player_controlled && object->character_context != 0x0b) {
                 if (drop_in_teleport == 1 && VehicleArea == 0 && (Arcade != 0 || teleport_all_freeplay_modes != 0) &&
                     object->apiobj.model_draw_result == 0 && (object->tag_flags & 2) == 0 &&
                     drop_back_in_timer > 0.0f) {
@@ -2863,7 +2865,7 @@ void GameAIProcess() {
             object->apiobj.collision_priority = HIGHGAMEOBJECT - object->apiobj.field_0x289;
             if ((object->apiobj.flags_low & 2) != 0 || (object->field_0xeff & 0x80) != 0) {
                 object->apiobj.collision_priority = 0x8000;
-            } else if (!object->apiobj.active) {
+            } else if (!object->apiobj.player_controlled) {
                 if (__builtin_expect((object->ai.field_0x1e7 & 0x80) != 0, 1))
                     object->apiobj.collision_priority |= 0x4000;
                 if ((object->ai.field_0x1e7 & 0x40) != 0)
@@ -2897,7 +2899,7 @@ void GameAIProcess() {
                 if (player2 != NULL)
                     object->ai_opponent_exclusion_mask |= (u64)1 << player2->apiobj.field_0x289;
             }
-            if (object->apiobj.active && object->apiobj.field_0x27d != 0 &&
+            if (object->apiobj.player_controlled && object->apiobj.field_0x27d != 0 &&
                 object->pad_gamepad->input_magnitude >
                     (WALKSTEALTH != 0 ? object->apiobj.character_data->game_character->walk_speed
                                       : object->apiobj.character_data->game_character->tiptoe_speed))
@@ -2952,8 +2954,8 @@ void GameAIProcess() {
                     second->collision_min.y > first->collision_max.y || first->collision_link == second ||
                     second->collision_link == first)
                     continue;
-                bool fixed_first = first->active;
-                bool fixed_second = second->active;
+                bool fixed_first = first->player_controlled;
+                bool fixed_second = second->player_controlled;
                 if (first->collision_priority > second->collision_priority)
                     fixed_first = true;
                 if (first->collision_priority == second->collision_priority)
@@ -4128,7 +4130,8 @@ void GameAISysStartFrame(AISYS_s *system) {
                 (APIOBJECT_FLAG_CHARACTER | APIOBJECT_FLAG_IN_USE)) {
                 continue;
             }
-            if (object->apiobj.field_0x287 != 0 && !(object->field_0x101c > 0.0f) && !object->apiobj.active) {
+            if (object->apiobj.field_0x287 != 0 && !(object->field_0x101c > 0.0f) &&
+                !object->apiobj.player_controlled) {
                 continue;
             }
 
@@ -4487,7 +4490,7 @@ void GameObjectToCameraCode(GameObject_s *object) {
     }
     if (object->id == id_ANAKINJEDISCARRED)
         mask = data->layer_mask_special;
-    else if (g_lowEndLevelBehaviour == 0 || object->apiobj.active) {
+    else if (g_lowEndLevelBehaviour == 0 || object->apiobj.player_controlled) {
         if (distance > data->field_0xb8)
             mask = data->layer_mask_low;
         else if (distance > data->field_0xb4)
@@ -4725,8 +4728,9 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                                         best_baddy = baddy;
                                     }
                                 }
-                            } else if (goody->active && (baddy_object->field_0xefb & 0x40)) {
-                                if (!packet->pending_opponent->active || packet->pending_opponent_metric > metric) {
+                            } else if (goody->player_controlled && (baddy_object->field_0xefb & 0x40)) {
+                                if (!packet->pending_opponent->player_controlled ||
+                                    packet->pending_opponent_metric > metric) {
                                     best_distance = distance;
                                     best_baddy = baddy;
                                 }
@@ -4872,7 +4876,7 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
     if ((context == 0 && (object->action_movement_state == 4 || object->action_movement_state == 2)) || context == 4 ||
         context == 16 || (context == 13 && object->id != id_THEEMPEROR) || context == 14 ||
         (context == 31 && object->field_0x7a3 == 1) ||
-        (object->apiobj.active && Cheat_PowerUpActive(object->apiobj.field_0x27c))) {
+        (object->apiobj.player_controlled && Cheat_PowerUpActive(object->apiobj.field_0x27c))) {
         object->sabre_flags |= 2;
     }
     if (object->id == id_IMPERIALGUARD)
@@ -5057,8 +5061,8 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
             AddGameDebris(WORLD->debris_sys, effect, &points[nearest_point]);
             if (!CannotKill(nearest)) {
                 i32 damage = object->sabre_damage;
-                if (damage != 0 && nearest->apiobj.active) {
-                    damage = object->apiobj.active && Player_HasDoubleWeaponDamage(object) ? 2 : 1;
+                if (damage != 0 && nearest->apiobj.player_controlled) {
+                    damage = object->apiobj.player_controlled && Player_HasDoubleWeaponDamage(object) ? 2 : 1;
                 }
                 ObjHitObj(object, nearest, damage, ObjHitObj_Flags(object) | 0x100, 0, 1);
             } else {
@@ -5067,9 +5071,9 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
             }
             return;
         }
-        if ((object->apiobj.active || (object->field_0xef8 & 0x40) != 0 || object->use_action == 5) &&
+        if ((object->apiobj.player_controlled || (object->field_0xef8 & 0x40) != 0 || object->use_action == 5) &&
             (object->sabre_flags & 4) != 0) {
-            if (!object->apiobj.active && object->apiobj.model_draw_result == 0) {
+            if (!object->apiobj.player_controlled && object->apiobj.model_draw_result == 0) {
                 if (object->blowup_target == NULL)
                     return;
                 GizmoBlowupBlowup(object->blowup_target, 1, -1, 1, NULL, 1);
@@ -6902,7 +6906,7 @@ i32 TagCode(GameObject_s *source, GameObject_s *destination, i32 takeover, i32 b
         destination->current_hp = source_hp;
         if (destination->current_hp == 0 && destination->hitpoints != 0)
             destination->current_hp = 1;
-        if (WORLD->current_level == VADERC_LDATA || source->apiobj.active)
+        if (WORLD->current_level == VADERC_LDATA || source->apiobj.player_controlled)
             source->current_hp = destination_hp;
         else if ((source->apiobj.character_data->model_flags & 0x20) != 0)
             source->current_hp = source->field_0xe38;
@@ -7366,7 +7370,7 @@ GameObject_s *TargetGameObject(GameObject_s *object, nuvec_s *position, nuvec_s 
     BOLTTYPE_s *bolt = BoltType_FindByID(bolt_id, WORLD);
     u16 near_angle = TargetDeg_Near, mid_angle = TargetDeg_Mid, far_angle = TargetDeg_Far;
     f32 near_distance = TargetDist_Near2, mid_distance = TargetDist_Mid2;
-    if (object->apiobj.active &&
+    if (object->apiobj.player_controlled &&
         (WORLD->current_level == DEATHSTAR2BATTLEA_LDATA || WORLD->current_level == ASTEROIDCHASED_LDATA)) {
         near_angle = 0x2aaa;
         mid_angle = 0x1c71;
@@ -7402,7 +7406,7 @@ GameObject_s *TargetGameObject(GameObject_s *object, nuvec_s *position, nuvec_s 
             continue;
         if (static_cast<u8>(context - 0x5f) <= 1)
             continue;
-        if (arcade == 0 && object->apiobj.active && (target->field_0xf02 & 0x80) == 0) {
+        if (arcade == 0 && object->apiobj.player_controlled && (target->field_0xf02 & 0x80) == 0) {
             u32 *mask = WORLD->api_object_sys->hostility_masks[object->apiobj.field_0x289];
             u64 hostility = static_cast<u64>(mask[0]) | (static_cast<u64>(mask[1]) << 32);
             if (((hostility >> target->apiobj.field_0x289) & 1) == 0)
@@ -7882,7 +7886,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         if (object == NULL || (object->apiobj.field_0x1f8 & player_flags) != player_flags) {
             continue;
         }
-        if (VehicleArea != 0 && static_cast<u8>(object->apiobj.field_0x27c) <= 1 && !object->apiobj.active)
+        if (VehicleArea != 0 && static_cast<u8>(object->apiobj.field_0x27c) <= 1 && !object->apiobj.player_controlled)
             object->field_0xe20 |= 0x20;
         else
             object->field_0xe20 &= ~0x20;
@@ -7893,11 +7897,11 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         if (object->spawn_protection_timer > 0.0f)
             object->spawn_protection_timer -= FRAMETIME;
         PowerUp_Update(object);
-        if (object->apiobj.active && (Cheats_CheckFlags(0x1000) != 0 || object->field_0xdec > 0.0f))
+        if (object->apiobj.player_controlled && (Cheats_CheckFlags(0x1000) != 0 || object->field_0xdec > 0.0f))
             RegenerateHearts(object);
         object->field_0xf03 &= ~0x10;
         f32 flicker_decay = 1.0f;
-        if (object->field_0x1024 > 0.0f && object->apiobj.active) {
+        if (object->field_0x1024 > 0.0f && object->apiobj.player_controlled) {
             if (adtab[adaptivedifficulty[0]][2] == 1)
                 flicker_decay = 2.0f;
             else if (adtab[adaptivedifficulty[0]][2] == -1)
@@ -7914,7 +7918,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         if ((object->apiobj.field_0x1f4 & 0x40000) != 0) {
             MovePlayer_NETWORK(object);
         } else {
-            if (!object->apiobj.active) {
+            if (!object->apiobj.player_controlled) {
                 if (FreePlay != 0) {
                     Player_ToggleCharacter(object, 0, 0);
                 }
@@ -8228,7 +8232,8 @@ void UpdateGameObjects(WORLDINFO_s *world) {
     }
     i32 player_indicator[2] = {0, 0};
     if ((VehicleArea != 0 || (WORLD->current_level == SPEEDERCHASEA_LDATA && disable_narrow_socks == 0)) &&
-        Player[0] != NULL && Player[0]->apiobj.active && Player[1] != NULL && Player[1]->apiobj.active) {
+        Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[1] != NULL &&
+        Player[1]->apiobj.player_controlled) {
         player_indicator[0] = 1;
         player_indicator[1] = 1;
     } else {
@@ -8236,7 +8241,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
 #define CHECK_PLAYER_VEHICLE_INDICATOR(i)                                                                              \
     {                                                                                                                  \
         GameObject_s *object = Player[i];                                                                              \
-        if (object != NULL && object->apiobj.active && (object->field_0xe24 & 8) != 0 &&                               \
+        if (object != NULL && object->apiobj.player_controlled && (object->field_0xe24 & 8) != 0 &&                    \
             object->field_0xcc0 != NULL &&                                                                             \
             (object->id == id_ATST || object->id == id_ATST_LOWRES || object->id == id_ATAT)) {                        \
             player_indicator[i] = 2;                                                                                   \
