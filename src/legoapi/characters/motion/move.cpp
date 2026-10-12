@@ -8863,35 +8863,28 @@ i32 SetObjOnSurface(GameObject_s *object, i32 mode) {
         return 0;
     }
 
-    const f32 lower_bound = object->character_bottom * api.field_0xa8;
     f32 position_y;
     if (mode == 2) {
-        position_y = api.collision_min.y - lower_bound + 0.1f - 0.0999f;
+        position_y = api.collision_min.y - object->character_bottom * api.field_0xa8 + 0.1f - 0.0999f;
         api.position.y = position_y;
         api.initial_position.y = position_y;
         api.collision_position.y = position_y;
-    } else if (mode == 0) {
-        position_y = api.field_0x218 - lower_bound + 0.1f - 0.0999f;
-        api.position.y = position_y;
-        api.initial_position.y = position_y;
-        api.collision_position.y = position_y;
-        api.velocity.y = -1.0f;
-        return 1;
     } else {
         position_y = api.position.y;
     }
 
-    if (position_y + lower_bound <= api.field_0x218 + 0.1f) {
-        position_y = api.field_0x218 - lower_bound + 0.1f - 0.0999f;
+    i32 snapped;
+    if (mode != 0 && position_y + object->character_bottom * api.field_0xa8 > api.field_0x218 + 0.1f) {
+        snapped = 0;
+    } else {
+        position_y = api.field_0x218 - object->character_bottom * api.field_0xa8 + 0.1f - 0.0999f;
         api.position.y = position_y;
         api.initial_position.y = position_y;
         api.collision_position.y = position_y;
-        api.velocity.y = -1.0f;
-        return 1;
+        snapped = 1;
     }
-
     api.velocity.y = -1.0f;
-    return 0;
+    return snapped;
 }
 
 void TurnCodeCamSafe(GameObject_s *object, numtx_s *matrix) {
