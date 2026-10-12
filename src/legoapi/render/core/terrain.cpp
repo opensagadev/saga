@@ -3645,12 +3645,13 @@ extern "C" void DrawHitTerrain(void) {
     for (;;) {
         while (count > 0) {
             TERRAIN_SHAPE **surfaces = reinterpret_cast<TERRAIN_SHAPE **>(scan) + 1;
-            for (i32 i = 0; i < count; ++i) {
+            TERRAIN_SHAPE **surface = surfaces;
+            for (i32 i = count; i > 0; --i, ++surface) {
                 i16 group_index = *reinterpret_cast<i16 *>(scan + sizeof(i16));
                 if (CurTerr->groups[group_index].chunk_type == 0)
-                    TerrDraw(surfaces[i], group_index);
+                    TerrDraw(*surface, group_index);
                 else
-                    TerrDrawPlat(surfaces[i], group_index);
+                    TerrDrawPlat(*surface, group_index);
             }
             scan = reinterpret_cast<u8 *>(surfaces + count);
             count = *reinterpret_cast<i16 *>(scan);
@@ -3673,26 +3674,27 @@ void TerrShowCamTerr() {
     PlatCrush = 0;
     terrhitflags = 0;
 
-    TerI = static_cast<TerrainQuery_s *>(NuScratchAlloc32(sizeof(TerrainQuery_s)));
-    TerI->object_scale_sq = 1.0f;
-    TerI->object_scale = 1.0f;
-    TerI->inverse_object_scale = 1.0f;
-    TerI->inverse_object_scale_sq = 1.0f;
-    TerI->hit_flags = NULL;
-    TerI->collision_radius = 0.1f;
-    TerI->collision_radius_sq = 0.01f;
-    TerI->inverse_collision_radius = 10.0f;
-    TerI->scan_result = 0;
-    TerI->object_index = 0;
-    TerI->separation_epsilon = 0.01f;
-    TerI->compare_epsilon = 0.00001f;
-
-    TerI->start_position.x = TerI->position.x = global_camera.mtx.m30 - 2.0f;
-    TerI->start_position.y = TerI->position.y = global_camera.mtx.m31 - 2.0f;
-    TerI->start_position.z = TerI->position.z = global_camera.mtx.m32 - 2.0f;
-    TerI->start_movement.x = TerI->movement.x = 4.0f;
-    TerI->start_movement.y = TerI->movement.y = 4.0f;
-    TerI->start_movement.z = TerI->movement.z = 4.0f;
+    TerrainQuery_s *query = static_cast<TerrainQuery_s *>(NuScratchAlloc32(sizeof(TerrainQuery_s)));
+    TerI = query;
+    query->object_scale = 1.0f;
+    query->object_scale_sq = 1.0f;
+    query->inverse_object_scale = 1.0f;
+    query->inverse_object_scale_sq = 1.0f;
+    query->hit_flags = NULL;
+    query->collision_radius = 0.1f;
+    query->inverse_collision_radius = 10.0f;
+    query->collision_radius_sq = 0.1f * 0.1f;
+    query->start_position.x = query->position.x = global_camera.mtx.m30 - 2.0f;
+    query->start_position.y = query->position.y = global_camera.mtx.m31 - 2.0f;
+    query->start_position.z = query->position.z = global_camera.mtx.m32 - 2.0f;
+    query->start_movement.x = query->movement.x = 4.0f;
+    query->start_movement.y = query->movement.y = 4.0f;
+    query->start_movement.z = query->movement.z = 4.0f;
+    query->object_index = 0;
+    query->scan_result = 0;
+    query->radius = 0.0f;
+    query->separation_epsilon = 0.01f;
+    query->compare_epsilon = 0.00001f;
 
     ScanTerrain(1, 1, 0);
     NuScratchRelease();
