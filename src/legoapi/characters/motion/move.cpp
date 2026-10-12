@@ -9214,20 +9214,7 @@ i32 WallShuffle_SetTargetMom(GameObject_s *object, u16 input_angle) {
     u16 sideways_angle = object->apiobj.movement_facing_angle + 0x4000;
     f32 direction = PushingTowardsAngle(input_angle, sideways_angle);
     f32 speed;
-    if (!(direction > NuTrigTable[0x3555])) {
-        if (direction < -NuTrigTable[0x3555]) {
-            if (LEGOACT_WALLSHUFFLE_LEFT != -1 &&
-                object->apiobj.character_model->model_data_b[LEGOACT_WALLSHUFFLE_LEFT] != NULL) {
-                object->context_animation = LEGOACT_WALLSHUFFLE_LEFT;
-                speed = -AnimSpeed(object->apiobj.character_model, LEGOACT_WALLSHUFFLE_LEFT);
-            } else {
-                speed = -0.5f;
-            }
-        } else {
-            object->context_animation = LEGOACT_WALLSHUFFLE_IDLE;
-            return 0;
-        }
-    } else {
+    if (direction > NuTrigTable[0x3555]) {
         if (LEGOACT_WALLSHUFFLE_RIGHT != -1 &&
             object->apiobj.character_model->model_data_b[LEGOACT_WALLSHUFFLE_RIGHT] != NULL) {
             object->context_animation = LEGOACT_WALLSHUFFLE_RIGHT;
@@ -9235,6 +9222,17 @@ i32 WallShuffle_SetTargetMom(GameObject_s *object, u16 input_angle) {
         } else {
             speed = 0.5f;
         }
+    } else if (direction < -NuTrigTable[0x3555]) {
+        if (LEGOACT_WALLSHUFFLE_LEFT != -1 &&
+            object->apiobj.character_model->model_data_b[LEGOACT_WALLSHUFFLE_LEFT] != NULL) {
+            object->context_animation = LEGOACT_WALLSHUFFLE_LEFT;
+            speed = -AnimSpeed(object->apiobj.character_model, LEGOACT_WALLSHUFFLE_LEFT);
+        } else {
+            speed = -0.5f;
+        }
+    } else {
+        object->context_animation = LEGOACT_WALLSHUFFLE_IDLE;
+        speed = 0.0f;
     }
     if (speed != 0.0f) {
         object->target_velocity.x += NU_SIN_LUT(sideways_angle) * speed;
