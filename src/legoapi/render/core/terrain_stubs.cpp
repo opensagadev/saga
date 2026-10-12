@@ -1481,23 +1481,25 @@ extern "C" {
     }
 
     i32 DeletePlatinst(i32 index) {
-        if (index < 0 || index >= CurTerr->max_platforms)
+        if (index < 0)
             return 0;
-        TERRAIN_PLATFORM &platform = CurTerr->platforms[index];
+        TERRSET *terrain = CurTerr;
+        if (index >= terrain->max_platforms)
+            return 0;
+        TERRAIN_PLATFORM &platform = terrain->platforms[index];
         if (platform.scene_object == NULL)
             return 0;
-        const i16 last_group = --CurTerr->group_count;
-        --CurTerr->group_index_count;
-        TERRAIN_GROUP &last = CurTerr->groups[last_group];
-        CurTerr->platforms[last.scene_index].terrain_group_index = platform.terrain_group_index;
-        CurTerr->groups[platform.terrain_group_index] = last;
+        const i16 last_group = --terrain->group_count;
+        const i32 index_count = --terrain->group_index_count;
+        TERRAIN_GROUP &last = terrain->groups[last_group];
+        terrain->platforms[last.scene_index].terrain_group_index = platform.terrain_group_index;
+        terrain->groups[platform.terrain_group_index] = last;
         last.chunk_type = -1;
         platform.scene_object = NULL;
-        TERRAIN_CELL &cell = CurTerr->cells[TERRAIN_PLATFORM_CELL];
-        i16 *indices = CurTerr->group_indices + cell.first_group;
-        for (i32 i = 0; i < cell.group_count; ++i) {
-            if (indices[i] == last_group) {
-                indices[i] = CurTerr->group_indices[CurTerr->group_index_count];
+        TERRAIN_CELL &cell = terrain->cells[TERRAIN_PLATFORM_CELL];
+        for (i16 i = 0; i < static_cast<i16>(cell.group_count); ++i) {
+            if (terrain->group_indices[cell.first_group + i] == last_group) {
+                terrain->group_indices[cell.first_group + i] = terrain->group_indices[index_count];
                 break;
             }
         }
