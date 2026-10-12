@@ -8841,17 +8841,19 @@ void ForcedBackCode(GameObject_s *object) {
                                               &object->apiobj.collision_position, 50, FRAMETIME, 0, 0, NULL);
         NewRumble(object->pad_gamepad->pad, (qrand() * (1.0f / 65535.0f)) * 0.6f, 0);
     } else if (ForceBackPos != NULL && object != ForceBackObj &&
-               (ForceBackType != 2 || (object->apiobj.character_data->model_flags & 0x10) != 0) &&
-               !MosEisleyC_PastBarrier(object) &&
-               (ForceBackType != 3 || ForceBackObj == NULL || ForceBackObj->force_target == object) &&
-               distance < (ForceBackRadius - 0.2f) * (ForceBackRadius - 0.2f)) {
-        Player_ClearContext(object, 1);
-        Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
-        object->context_animation_timer = 0.5f;
-        object->field_0x768 = 0.0f;
-        object->character_context = 0x22;
-        object->context_animation = 5;
-        PlaySfx("JForcePush", &object->apiobj.collision_position);
+               (ForceBackType != 2 || (object->apiobj.character_data->model_flags & 0x10) != 0)) {
+        if (MosEisleyC_PastBarrier(object))
+            return;
+        if ((ForceBackType != 3 || ForceBackObj == NULL || ForceBackObj->force_target == object) &&
+            distance < (ForceBackRadius - 0.2f) * (ForceBackRadius - 0.2f)) {
+            Player_ClearContext(object, 1);
+            Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
+            object->context_animation_timer = 0.5f;
+            object->field_0x768 = 0.0f;
+            object->character_context = 0x22;
+            object->context_animation = 5;
+            PlaySfx("JForcePush", &object->apiobj.collision_position);
+        }
     }
 }
 
