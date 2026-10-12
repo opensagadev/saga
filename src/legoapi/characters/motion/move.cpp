@@ -2233,8 +2233,8 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
         i32 segments = points - 1;
         if (position->segment < segments) {
             NUVEC offset;
-            if (distance > 0.0f) {
-                do {
+            if (distance >= 0.0f) {
+                while (distance > 0.0f) {
                     position->segment_distance += distance;
                     if (!(position->segment_distance >= position->segment_length))
                         goto interpolate;
@@ -2261,7 +2261,7 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
                     if (distance == 0.0f)
                         position->position = *current;
                     spline = position->spline;
-                } while (distance > 0.0f);
+                }
                 goto update_along;
             } else if (position->segment >= 0 && distance < 0.0f) {
                 for (;;) {
