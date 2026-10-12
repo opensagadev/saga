@@ -130,7 +130,7 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
             TERRAIN_SHAPE *destination = reinterpret_cast<TERRAIN_SHAPE *>(output + 1);
             for (i32 i = 0; i < shape_count; ++i, ++source, ++destination) {
                 i32 last_vertex = source->normals[1].y > 65535.0f ? 2 : 3;
-                memcpy(destination, source, sizeof(TERRAIN_SHAPE));
+                *destination = *source;
                 for (i32 vertex = last_vertex; vertex >= 0; --vertex) {
                     NUVEC &v = destination->vectors[vertex];
                     v = TerrainSkin(info, &source->vectors[SkinFlipTab[vertex + info->mirrored * 4]], -1.0f,
@@ -139,10 +139,10 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
                     v.y -= info->matrix->m31;
                     v.z -= info->matrix->m32;
                     min_x = MIN(v.x, min_x);
-                    min_y = MIN(v.y, min_y);
-                    min_z = MIN(v.z, min_z);
                     max_x = MAX(v.x, max_x);
+                    min_y = MIN(v.y, min_y);
                     max_y = MAX(v.y, max_y);
+                    min_z = MIN(v.z, min_z);
                     max_z = MAX(v.z, max_z);
                     radius_squared = MAX((v.x * v.x + v.y * v.y) + v.z * v.z, radius_squared);
                 }
@@ -819,9 +819,9 @@ extern "C" {
         if (handle != -1) {
             debkeydatatype_s &key = debkeydata[handle];
             NUMTX *mtx = &key.emitter_orientation;
-            memcpy(mtx, source, sizeof(NUMTX));
-            mtx->m31 = 0.0f;
+            *mtx = *source;
             mtx->m30 = 0.0f;
+            mtx->m31 = 0.0f;
             mtx->m32 = 0.0f;
             key.orientation_dirty = 0.0f;
         }
@@ -949,9 +949,9 @@ extern "C" {
         if (handle != -1) {
             debkeydatatype_s &key = debkeydata[handle];
             NUMTX *mtx = &key.effect_orientation;
-            memcpy(mtx, source, sizeof(NUMTX));
-            mtx->m31 = 0.0f;
+            *mtx = *source;
             mtx->m30 = 0.0f;
+            mtx->m31 = 0.0f;
             mtx->m32 = 0.0f;
             key.orientation_dirty = 0.0f;
         }
@@ -1011,12 +1011,12 @@ extern "C" {
         if (handle != -1) {
             debkeydatatype_s &key = debkeydata[handle];
             NUMTX *mtx = &key.effect_orientation;
-            memcpy(mtx, source, sizeof(NUMTX));
+            *mtx = *source;
             key.position.x = source->m30;
             key.position.y = source->m31;
             key.position.z = source->m32;
-            mtx->m31 = 0.0f;
             mtx->m30 = 0.0f;
+            mtx->m31 = 0.0f;
             mtx->m32 = 0.0f;
             key.orientation_dirty = 0.0f;
         }
@@ -1323,20 +1323,21 @@ extern "C" {
             cursor = buffer->addr;
         }
 
-        const i32 chunk_count = debrischunks + debrischunksglass;
-        memset(debris_chunk_controls, 0, static_cast<usize>(chunk_count) * 2 * sizeof(debris_chunk_control_s));
-        memset(freechunkcontrols, 0, static_cast<usize>(chunk_count) * 2 * sizeof(debris_chunk_control_s *));
+        memset(debris_chunk_controls, 0,
+               static_cast<usize>(debrischunks + debrischunksglass) * 2 * sizeof(debris_chunk_control_s));
+        memset(freechunkcontrols, 0,
+               static_cast<usize>(debrischunks + debrischunksglass) * 2 * sizeof(debris_chunk_control_s *));
         memset(freedebchunks, 0, static_cast<usize>(debrischunks) * sizeof(dma_particle_chunk_s *));
         memset(freedebchunksglass, 0, static_cast<usize>(debrischunksglass) * sizeof(dma_particle_chunk_s *));
-        memset(ParticleChunkToRender, 0, static_cast<usize>(chunk_count) * sizeof(particlechunkrendertype_s));
+        memset(ParticleChunkToRender, 0,
+               static_cast<usize>(debrischunks + debrischunksglass) * sizeof(particlechunkrendertype_s));
 
+        i32 size;
         for (i32 i = 0; i < debrischunks; ++i) {
-            i32 size;
             freedebchunks[i] = CreateDmaParticleSet(reinterpret_cast<void *>(cursor), &size);
             cursor += static_cast<usize>(size);
         }
         for (i32 i = 0; i < debrischunksglass; ++i) {
-            i32 size;
             freedebchunksglass[i] = CreateDmaParticleSetGlass(reinterpret_cast<void *>(cursor), &size);
             cursor += static_cast<usize>(size);
         }
@@ -1344,7 +1345,6 @@ extern "C" {
         freedebchkptr = 0;
         freedebchkptrg = 0;
         for (i32 i = 0; i < EDPP_MAX_DMADEBTYPES; ++i) {
-            i32 size;
             DmaDebTypes[i] = CreateDmaPartEffectList(reinterpret_cast<void *>(cursor), &size);
             cursor += static_cast<usize>(size);
         }
@@ -1355,6 +1355,7 @@ extern "C" {
             buffer->addr = cursor;
         }
 
+        const i32 chunk_count = debrischunks + debrischunksglass;
         debris_chunk_control_stack[0] = NULL;
         debris_chunk_control_stack[1] = NULL;
         for (i32 i = 0; i < chunk_count * 2; ++i) {
@@ -1745,13 +1746,13 @@ extern "C" {
             i32 x_cell = static_cast<i32>(static_cast<f32>(x_distance * 7) / (maximum_x - minimum_x));
             if (x_cell < 0)
                 x_cell = 0;
-            else if (x_cell > 6)
+            if (x_cell > 6)
                 x_cell = 6;
             i32 z_distance = static_cast<i32>((group_min_z[i] + group_max_z[i]) * 0.5f - minimum_z);
             i32 z_cell = static_cast<i32>(static_cast<f32>(z_distance * 7) / (maximum_z - minimum_z));
             if (z_cell < 0)
                 z_cell = 0;
-            else if (z_cell > 6)
+            if (z_cell > 6)
                 z_cell = 6;
             group_cells[i] = x_cell + z_cell * 7;
         }
@@ -1759,8 +1760,7 @@ extern "C" {
             terrain->cells[i].group_count = 0;
         terrain->used_cell_count = 0;
         for (i32 cell_index = 0; cell_index < TERRAIN_GRID_CELL_COUNT; ++cell_index) {
-            TERRAIN_CELL &cell = terrain->cells[terrain->used_cell_count];
-            cell.first_group = terrain->group_index_count;
+            terrain->cells[terrain->used_cell_count].first_group = terrain->group_index_count;
             f32 min_x = 200000000.0f, min_z = 200000000.0f;
             f32 max_x = -200000000.0f, max_z = -200000000.0f;
             for (i32 i = 0; i < terrain->group_count; ++i) {
@@ -1770,14 +1770,14 @@ extern "C" {
                 min_z = MIN(group_min_z[i], min_z);
                 max_x = MAX(group_max_x[i], max_x);
                 max_z = MAX(group_max_z[i], max_z);
-                ++cell.group_count;
+                ++terrain->cells[terrain->used_cell_count].group_count;
                 terrain->group_indices[terrain->group_index_count++] = i;
             }
-            if (cell.group_count != 0) {
-                cell.min_z = min_z;
-                cell.max_x = max_x;
-                cell.min_x = min_x;
-                cell.max_z = max_z;
+            if (terrain->cells[terrain->used_cell_count].group_count != 0) {
+                terrain->cells[terrain->used_cell_count].min_z = min_z;
+                terrain->cells[terrain->used_cell_count].max_x = max_x;
+                terrain->cells[terrain->used_cell_count].min_x = min_x;
+                terrain->cells[terrain->used_cell_count].max_z = max_z;
                 ++terrain->used_cell_count;
             }
         }
