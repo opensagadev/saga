@@ -970,7 +970,7 @@ extern "C" {
 
         debkeydatatype_s *key = &debkeydata[handle];
         debinftype *effect = debtab[key->effect_index];
-        if (effect->frequency == 0) {
+        if (effect->frequency == 0.0f) {
             return;
         }
         if (duration == 0.0f) {
@@ -983,7 +983,7 @@ extern "C" {
         if (key->previous_allocated_chunk_count == 0) {
             const f32 thinning =
                 forced_debris_thinning == 0
-                    ? (debris_thinning_level <= effect->thinning ? debris_thinning_level : effect->thinning)
+                    ? (effect->thinning < debris_thinning_level ? effect->thinning : debris_thinning_level)
                     : debris_thinning_level;
             DebReAlloc(key, static_cast<i32>(static_cast<f32>(effect->max_particles) / thinning));
         }
@@ -992,10 +992,9 @@ extern "C" {
         if (key->allocated_chunk_count <= 0) {
             return;
         }
-        const f32 thinning =
-            forced_debris_thinning == 0
-                ? (debris_thinning_level <= effect->thinning ? debris_thinning_level : effect->thinning)
-                : debris_thinning_level;
+        const f32 thinning = forced_debris_thinning == 0
+                                 ? (effect->thinning < debris_thinning_level ? effect->thinning : debris_thinning_level)
+                                 : debris_thinning_level;
         const f32 emission_interval = 1.0f / (static_cast<f32>(effect->frequency) / thinning);
         key->emission_epoch = emission_time;
         emission_time += emission_interval;
