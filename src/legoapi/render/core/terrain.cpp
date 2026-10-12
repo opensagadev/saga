@@ -711,14 +711,10 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
     i16 *group_cells = reinterpret_cast<i16 *>(scratch);
 
     scratch &= ~static_cast<usize>(3);
-    scratch -= max_groups * sizeof(f32);
-    f32 *group_min_x = reinterpret_cast<f32 *>(scratch);
-    scratch -= max_groups * sizeof(f32);
-    f32 *group_max_x = reinterpret_cast<f32 *>(scratch);
-    scratch -= max_groups * sizeof(f32);
-    f32 *group_min_z = reinterpret_cast<f32 *>(scratch);
-    scratch -= max_groups * sizeof(f32);
-    f32 *group_max_z = reinterpret_cast<f32 *>(scratch);
+    f32 *group_min_x = reinterpret_cast<f32 *>(scratch) - max_groups;
+    f32 *group_max_x = group_min_x - max_groups;
+    f32 *group_min_z = group_max_x - max_groups;
+    f32 *group_max_z = group_min_z - max_groups;
 
     if (ScaleTerrainT1 == NULL) {
         ScaleTerrainT1 = NU_ALLOC(0xc800, 4, NuMemoryManager::MEM_ALLOC_SET_TO_ZERO, "", NUMEMORY_CATEGORY_NONE);
@@ -753,8 +749,9 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
     }
 
     memset(terrain->groups, 0, max_groups * sizeof(TERRAIN_GROUP));
-    for (i32 group_index = 0; group_index < static_cast<i32>(terrain->max_groups); ++group_index) {
-        terrain->groups[group_index].chunk_type = -1;
+    TERRAIN_GROUP *cleared_group = terrain->groups;
+    for (i32 group_index = 0; group_index < static_cast<i32>(terrain->max_groups); ++group_index, ++cleared_group) {
+        cleared_group->chunk_type = -1;
     }
 
     for (i32 cell = 0; cell < TERRAIN_CELL_RECORD_COUNT; ++cell) {
