@@ -611,7 +611,10 @@ extern "C" {
 
     i32 CreateScaledPARTEffect(i32 effect_index, f32 requested_scale) {
         // Retail uses this inclusive upper check; loaded type IDs are 0..127.
-        if (effect_index <= 0 || effect_index > 128 || part_types[effect_index].effect_ids[0] == -1) {
+        if (effect_index <= 0) {
+            return -1;
+        }
+        if (effect_index > 128 || part_types[effect_index].effect_ids[0] == -1) {
             return -1;
         }
         if (part_types[effect_index].scale != 1.0f) {
