@@ -717,10 +717,7 @@ enum JEDI_ACTION : i16 {
 };
 
 static GAMECHARACTERDATA *GetGameCharacterData(GameObject_s *object) {
-    if (object == NULL || object->apiobj.character_data == NULL) {
-        return NULL;
-    }
-    return static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+    return object->apiobj.character_data->game_character;
 }
 
 static i32 RotationDistance(u16 current, u16 target) {
@@ -4618,8 +4615,7 @@ void Move_JAWA(GameObject_s *object) {
 }
 
 static bool JediHasAction(const GameObject_s *object, JEDI_ACTION action) {
-    return object->apiobj.character_model != NULL && object->apiobj.character_model->model_data_b != NULL &&
-           object->apiobj.character_model->model_data_b[action] != NULL;
+    return object->apiobj.character_model->model_data_b[action] != NULL;
 }
 
 static i32 ComboOpponent_Behind;
@@ -4837,79 +4833,85 @@ finished:
     return result;
 }
 
-static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pressed, i32 allow_start) {
-    if ((object->field_0xe22 & 1) != 0 && object->weapon_scale_state == 0) {
-        void **animations = object->apiobj.character_model->model_data_b;
-        bool has_block = animations[0x1a] != NULL || animations[0x1b] != NULL || animations[0x1c] != NULL;
-        object->incoming_bolt = has_block ? FindIncomingBolt(object, 0, 0) : NULL;
-        animations = object->apiobj.character_model->model_data_b;
-        has_block = animations[0x1a] != NULL || animations[0x1b] != NULL || animations[0x1c] != NULL;
-        GameObject_s *melee = NULL;
-        if (has_block) {
-            for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-                GameObject_s *target = &Obj[i];
-                if (target != object && (target->apiobj.field_0x1f8 & 0x1000) != 0 && target->apiobj.field_0x287 == 0 &&
-                    target->character_context == 5 && (target->context_flags & 0xc) == 0 &&
-                    target->force_target == object) {
-                    melee = target;
-                    break;
-                }
+static inline void ComboJump(GameObject_s *object) {
+    SetComboOpponent(object, 1.0f, 0, 1);
+    object->jump_flags &= ~1;
+    object->context_animation_timer = 0.0f;
+    object->delayed_turn_timer = 0.0f;
+    object->airborne_input_timer = 0.0f;
+    object->field_0xe22 |= 0x10;
+    object->character_context = 0;
+    object->apiobj.velocity.y = object->apiobj.character_data->game_character->second_jump_speed;
+    object->context_variant_flags &= 0x4f;
+    object->action_movement_state = 2;
+    object->context_animation = 0x12;
+    object->apiobj.field_0x27d = 0;
+    object->field_0x105c = 0;
+    object->airborne_collision_target = NULL;
+    PlayJumpSfx(object, 2);
+    ResetAnimPacket(&object->apiobj.anim_packet, object->context_animation);
+    if ((object->apiobj.flags_low & 0x80) != 0)
+        object->field_0xef9 |= 8;
+}
+
+static void FindIncomingThreats(GameObject_s *object) {
+    void **animations = object->apiobj.character_model->model_data_b;
+    bool has_block = animations[0x1a] != NULL || animations[0x1b] != NULL || animations[0x1c] != NULL;
+    object->incoming_bolt = has_block ? FindIncomingBolt(object, 0, 0) : NULL;
+    animations = object->apiobj.character_model->model_data_b;
+    has_block = animations[0x1a] != NULL || animations[0x1b] != NULL || animations[0x1c] != NULL;
+    GameObject_s *melee = NULL;
+    if (has_block) {
+        for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
+            GameObject_s *target = &Obj[i];
+            if (target != object && (target->apiobj.field_0x1f8 & 0x1000) != 0 && target->apiobj.field_0x287 == 0 &&
+                target->character_context == 5 && (target->context_flags & 0xc) == 0 &&
+                target->force_target == object) {
+                melee = target;
+                break;
             }
         }
-        object->incoming_melee = melee;
-        GameObject_s *special = NULL;
-        if (((object->apiobj.character_data->model_flags & 8) != 0 || object->id == id_BODYGUARD ||
-             object->id == id_IMPERIALGUARD) &&
-            has_block) {
-            for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-                GameObject_s *target = &Obj[i];
-                if (target != object && (target->apiobj.field_0x1f8 & 0x1000) != 0 && target->apiobj.field_0x287 == 0 &&
-                    target->character_context == 0x26 && target->force_target == object &&
-                    (target->id != id_GAMORREANGUARD || target->context_animation != 0x56 ||
-                     (target->context_flags & 0x40) == 0)) {
-                    special = target;
-                    break;
-                }
-            }
-        }
-        object->incoming_special = special;
-        if (object->incoming_bolt == NULL && melee == NULL) {
-            if (object->apiobj.field_0x27c == -1 || !has_block)
-                object->incoming_part = NULL;
-            else {
-                f32 radius = object->apiobj.field_0x1e0 > object->apiobj.field_0x1dc ? object->apiobj.field_0x1e0
-                                                                                     : object->apiobj.field_0x1dc;
-                object->incoming_part = FindIncomingPart(object, &object->apiobj.collision_position, radius, 10, 0.0f);
-            }
-        }
-        if ((object->field_0xe22 & 8) == 0 &&
-            (object->incoming_bolt != NULL || object->incoming_melee != NULL || object->incoming_part != NULL) &&
-            object->character_context == -1)
-            object->field_0xe22 |= 8;
     }
+    object->incoming_melee = melee;
+    GameObject_s *special = NULL;
+    if (((object->apiobj.character_data->model_flags & 8) != 0 || object->id == id_BODYGUARD ||
+         object->id == id_IMPERIALGUARD) &&
+        has_block) {
+        for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
+            GameObject_s *target = &Obj[i];
+            if (target != object && (target->apiobj.field_0x1f8 & 0x1000) != 0 && target->apiobj.field_0x287 == 0 &&
+                target->character_context == 0x26 && target->force_target == object &&
+                (target->id != id_GAMORREANGUARD || target->context_animation != 0x56 ||
+                 (target->context_flags & 0x40) == 0)) {
+                special = target;
+                break;
+            }
+        }
+    }
+    object->incoming_special = special;
+    if (object->incoming_bolt == NULL && melee == NULL) {
+        if (object->apiobj.field_0x27c == -1 || !has_block)
+            object->incoming_part = NULL;
+        else {
+            f32 radius = object->apiobj.field_0x1e0 > object->apiobj.field_0x1dc ? object->apiobj.field_0x1e0
+                                                                                 : object->apiobj.field_0x1dc;
+            object->incoming_part = FindIncomingPart(object, &object->apiobj.collision_position, radius, 10, 0.0f);
+        }
+    }
+    if ((object->field_0xe22 & 8) == 0 &&
+        (object->incoming_bolt != NULL || object->incoming_melee != NULL || object->incoming_part != NULL) &&
+        object->character_context == -1)
+        object->field_0xe22 |= 8;
+}
+
+static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pressed, i32 allow_start) {
+    if ((object->field_0xe22 & 1) != 0 && object->weapon_scale_state == 0)
+        FindIncomingThreats(object);
     if (object->character_context == 0xc) {
         GameObject_s *attacker = object->block_attacker;
         if (attacker != NULL) {
             if (jump_pressed != 0 && object->apiobj.character_model->model_data_b[0x12] != NULL) {
-                SetComboOpponent(object, 1.0f, 0, 1);
-                f32 speed = GetGameCharacterData(object)->second_jump_speed;
-                object->jump_flags &= ~1;
-                object->context_animation_timer = 0.0f;
-                object->delayed_turn_timer = 0.0f;
-                object->airborne_input_timer = 0.0f;
-                object->field_0xe22 |= 0x10;
-                object->character_context = 0;
-                object->apiobj.velocity.y = speed;
-                object->context_variant_flags &= 0x4f;
-                object->action_movement_state = 2;
-                object->context_animation = 0x12;
-                object->apiobj.field_0x27d = 0;
-                object->field_0x105c = 0;
-                object->collision_target = NULL;
-                PlayJumpSfx(object, 2);
-                ResetAnimPacket(&object->apiobj.anim_packet, object->context_animation);
-                if ((object->apiobj.flags_low & 0x80) != 0)
-                    object->field_0xef9 |= 8;
+                ComboJump(object);
                 return;
             }
             if (object->block_latch == 0 && object->blocked_attack_stage != 0) {
@@ -5085,25 +5087,8 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                     if (action_held != 0)
                         StartHold(object);
                 } else if (object->combo_stage < 2 && jump_pressed != 0 &&
-                           JediHasAction(object, static_cast<JEDI_ACTION>(0x12))) {
-                    SetComboOpponent(object, 1.0f, 0, 1);
-                    object->jump_flags &= ~1;
-                    object->context_animation_timer = 0.0f;
-                    object->delayed_turn_timer = 0.0f;
-                    object->airborne_input_timer = 0.0f;
-                    object->field_0xe22 |= 0x10;
-                    object->character_context = 0;
-                    object->apiobj.velocity.y = GetGameCharacterData(object)->second_jump_speed;
-                    object->context_variant_flags &= 0x4f;
-                    object->action_movement_state = 2;
-                    object->context_animation = 0x12;
-                    object->apiobj.field_0x27d = 0;
-                    object->field_0x105c = 0;
-                    object->collision_target = NULL;
-                    PlayJumpSfx(object, 2);
-                    ResetAnimPacket(&animation, object->context_animation);
-                    if ((object->apiobj.flags_low & 0x80) != 0)
-                        object->field_0xef9 |= 8;
+                           object->apiobj.character_model->model_data_b[0x12] != NULL) {
+                    ComboJump(object);
                 }
             } else {
                 SetComboOpponent(object, 1.0f, 1, 0);
@@ -7025,17 +7010,8 @@ void MoveToMarker::FadeOut() {
 }
 
 MoveToMarker::MoveToMarker(MechObjectInterface &object) : target(&object) {
-    colour.target = &colour.value;
-    colour.duration = -1.0f;
-    colour.elapsed = 0.0f;
-    colour.delay = 0.0f;
-    rotation.Initialize();
-    scale.Initialize();
-    secondary_rotation.Initialize();
-    radius.Initialize();
-    alpha.Initialize();
-    field_108_0 = false;
     field_5c = 0.0f;
+    field_108_0 = false;
     field_108_1 = false;
     fading_out = false;
     field_108_3 = false;
@@ -7046,12 +7022,12 @@ MoveToMarker::MoveToMarker(MechObjectInterface &object) : target(&object) {
     field_100 = 0.0f;
     rotation.Start(0.0f, 21845.0f, 0.5f);
     *rotation.target = 0.0f;
+    colour.elapsed = 0.0f;
+    colour.duration = 0.5f;
+    colour.delay = 0.0f;
     colour.from = VuVec(255.0f, 255.0f, 255.0f, 1.0f);
     colour.to = VuVec(0.0f, 85.0f, 253.0f, 1.0f);
-    colour.duration = 0.5f;
-    colour.elapsed = 0.0f;
-    colour.delay = 0.0f;
-    *colour.target = colour.from;
+    *colour.target = VuVec(255.0f, 255.0f, 255.0f, 1.0f);
     scale.Start(0.0f, 1.0f, 0.5f);
     *scale.target = 0.0f;
     secondary_rotation.Start(0.0f, 32768.0f, 0.5f);
@@ -7068,14 +7044,16 @@ MoveToMarker::MoveToMarker(MechObjectInterface &object) : target(&object) {
 
 void MoveToMarker::Process(float frame_time) {
     field_5c -= frame_time;
-    if (fading_out && !field_108_3 && field_5c < 0.0f) {
-        field_108_3 = true;
-        fading_out = false;
-        scale.Start(*scale.target, 0.0f, 0.3f);
-        alpha.Start(*alpha.target, 0.0f, 0.3f);
-        secondary_rotation.Start(*secondary_rotation.target, 0.0f, 0.3f);
-        if (target.Get() != NULL && target.Get()->GetObjectType() == 1) {
-            radius.Start(*radius.target, 0.0f, 0.7f);
+    if (fading_out) {
+        if (!field_108_3 && field_5c < 0.0f) {
+            field_108_3 = true;
+            fading_out = false;
+            scale.Start(*scale.target, 0.0f, 0.3f);
+            alpha.Start(*alpha.target, 0.0f, 0.3f);
+            secondary_rotation.Start(*secondary_rotation.target, 0.0f, 0.3f);
+            if (target.Get() != NULL && target.Get()->GetObjectType() == 1) {
+                radius.Start(*radius.target, 0.0f, 0.7f);
+            }
         }
     }
     if (target.Get() != NULL && target.Get()->GetObjectType() != 1) {
@@ -7165,37 +7143,43 @@ void AtatPart_Update(PART_s *part) {
                                           static_cast<i32>(part->scale_time * 20.0f), FRAMETIME, 0, 0, NULL);
     } else if (part->scale_time < 2.0f) {
         if (choice < 10.0f) {
-            i16 y_rotation = qrand();
-            i16 z_rotation = qrand();
             AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position,
-                                              static_cast<i32>(part->scale_time * 3.0f), FRAMETIME, z_rotation,
-                                              y_rotation, NULL);
+                                              static_cast<i32>(part->scale_time * 3.0f), FRAMETIME, qrand(), qrand(),
+                                              NULL);
         } else if (choice > 90.0f) {
-            i16 y_rotation = qrand();
-            i16 z_rotation = qrand();
             AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position,
-                                              static_cast<i32>(part->scale_time * 15.0f), FRAMETIME, z_rotation,
-                                              y_rotation, NULL);
+                                              static_cast<i32>(part->scale_time * 15.0f), FRAMETIME, qrand(), qrand(),
+                                              NULL);
         }
     } else if (part->scale_time < 5.0f) {
-        if (choice < 10.0f || choice > 70.0f) {
-            i32 count = choice < 10.0f ? 15 : 30;
-            i16 y_rotation = qrand();
-            i16 z_rotation = qrand();
-            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position, count, FRAMETIME,
-                                              z_rotation, y_rotation, NULL);
+        if (choice < 10.0f) {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position, 15, FRAMETIME,
+                                              qrand(), qrand(), NULL);
+        } else if (choice > 70.0f) {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position, 30, FRAMETIME,
+                                              qrand(), qrand(), NULL);
         }
-        i32 count = choice < 30.0f ? 1 : choice < 70.0f ? 3 : 20;
-        i16 y_rotation = qrand();
-        i16 z_rotation = qrand();
-        AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, count, FRAMETIME,
-                                          z_rotation, y_rotation, NULL);
+        if (choice < 30.0f) {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 1, FRAMETIME,
+                                              qrand(), qrand(), NULL);
+        } else if (choice < 70.0f) {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 3, FRAMETIME,
+                                              qrand(), qrand(), NULL);
+        } else {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 20, FRAMETIME,
+                                              qrand(), qrand(), NULL);
+        }
     } else if (part->scale_time < 10.0f) {
-        i32 count = choice < 30.0f ? 1 : choice < 70.0f ? 3 : 20;
-        i16 y_rotation = qrand();
-        i16 z_rotation = qrand();
-        AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, count, FRAMETIME,
-                                          z_rotation, y_rotation, NULL);
+        if (choice < 30.0f) {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 1, FRAMETIME,
+                                              qrand(), qrand(), NULL);
+        } else if (choice < 70.0f) {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 3, FRAMETIME,
+                                              qrand(), qrand(), NULL);
+        } else {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 20, FRAMETIME,
+                                              qrand(), qrand(), NULL);
+        }
     }
 }
 
