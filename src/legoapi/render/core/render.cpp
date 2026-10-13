@@ -1785,7 +1785,7 @@ void Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx) {
 void DrawGameObjects() {
     const f32 saved_far_clip = global_camera.unknown_64;
     const f32 object_far_clip = VehicleArea != 0 ? 50.0f : 20.0f;
-    if (object_far_clip <= global_camera.unknown_64) {
+    if (!(global_camera.unknown_64 < object_far_clip)) {
         global_camera.unknown_64 = object_far_clip;
     }
 

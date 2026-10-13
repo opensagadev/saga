@@ -250,17 +250,13 @@ void CutScenes_End() {
     if (CutScenePlayer_Active() != 0 && NewLData != NULL && NewLData == HUB_LDATA) {
         return;
     }
-    i32 i = 0;
-    if (CutInstEndCount > 0) {
-        do {
-            instNuGCutSceneEnd(CutInstEnd[i]);
-            if (i == CutInstEndStop) {
-                CUTSTOPGAME = 0;
-                CutStopInfo = NULL;
-                GameCam_Reset(GameCam);
-            }
-            ++i;
-        } while (CutInstEndCount > i);
+    for (i32 i = 0; i < CutInstEndCount; ++i) {
+        instNuGCutSceneEnd(CutInstEnd[i]);
+        if (i == CutInstEndStop) {
+            CUTSTOPGAME = 0;
+            CutStopInfo = NULL;
+            GameCam_Reset(GameCam);
+        }
     }
 }
 
