@@ -1563,30 +1563,55 @@ extern "C" {
         instance->render_frame = 1.0f;
         instance->flags_89 &= 0xef;
         instance->flags_8d &= 0xef;
-        instance->flags_88 = (instance->flags_88 & 0xfe) | 2;
+        instance->flags_88 |= 2;
+        instance->flags_88 &= ~1;
         if (instance->rate < 0.0f) {
             instance->rate = -instance->rate;
         }
-        if (instance->camera_instance != NULL && instance->cutscene->camera_system != NULL) {
+        if (instance->camera_instance != NULL) {
             instNUGCUTSCENECAMERA_s *camera = instance->camera_instance;
             NUGCUTCAMERASYS_s *system = instance->cutscene->camera_system;
             camera->state_index = 0;
             camera->camera_index = static_cast<i8>(system->field_10);
             camera->next_target_index = 0;
             for (u32 i = 0; i < system->camera_count; ++i) {
-                camera->camera_states[i].flags &= ~2U;
-                camera->camera_states[i].event_index = 0;
+                instNUGCUTCAMSTATE_s *state = &camera->camera_states[i];
+                state->flags &= ~2U;
+                state->event_index = 0;
             }
         }
-        if (instance->rigid_instance != NULL && instance->cutscene->rigid_system != NULL) {
-            for (u32 i = 0; i < instance->cutscene->rigid_system->count; ++i) {
-                instNUGCUTRIGID_s *inst_rigid = &instance->rigid_instance->rigids[i];
-                NUGCUTRIGID_s *rigid = &instance->cutscene->rigid_system->rigids[i];
+        instNUGCUTRIGIDSYS_s *rigid_instance = instance->rigid_instance;
+        if (rigid_instance != NULL) {
+            NUGCUTRIGIDSYS_s *system = instance->cutscene->rigid_system;
+            for (u32 i = 0; i < system->count; ++i) {
+                instNUGCUTRIGID_s *inst_rigid = &rigid_instance->rigids[i];
+                NUGCUTRIGID_s *rigid = &system->rigids[i];
                 inst_rigid->state_index = 0;
                 if ((rigid->flags & 6) == 6) {
                     inst_rigid->visible = rigid->flags & 1;
                 }
             }
+        }
+        if (instance->locator_instance != NULL) {
+            NUGCUTLOCATORSYS_s *system = instance->cutscene->locator_system;
+            for (u32 i = 0; i < system->locator_count; ++i) {
+                instNUGCUTLOCATOR_s *inst_locator = &instance->locator_instance->locators[i];
+                inst_locator->field_00 = 0;
+                if ((system->types[system->locators[i].type_index].flags & 0x10) != 0) {
+                    inst_locator->effect_handle = -1;
+                }
+            }
+        }
+        instNUGCUTTRIGGERSYS_s *trigger_instance = instance->trigger_instance;
+        if (trigger_instance != NULL) {
+            NUGCUTTRIGGERSYS_s *system = instance->cutscene->trigger_system;
+            for (i32 i = 0; i < system->event_count; ++i) {
+                *reinterpret_cast<u8 *>(&trigger_instance->event_states[i]) = 0;
+            }
+        }
+        if (instance->skip_countdown != 0 && instance->stream_index == 0) {
+            instance->flags_8b |= 0x40;
+            instance->flags_8c = (instance->flags_8c & 0xf0) | 0xa;
         }
     }
 
