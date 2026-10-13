@@ -4741,7 +4741,7 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
     object->blowup_target = NULL;
     bool searched;
     u8 result;
-    if ((object->apiobj.flags_low & 0x80) != 0 && mode == 0 && object->pad_gamepad->input_magnitude > 0.0f) {
+    if (object->apiobj.player_controlled && mode == 0 && object->pad_gamepad->input_magnitude > 0.0f) {
         object->force_target = ObjOpponent(object, range, 0.0f, 0, 0, 1);
         searched = true;
         if (object->force_target != NULL) {
@@ -5070,7 +5070,7 @@ static void SwipeCode(GameObject_s *object, i32 pressed, i32 held) {
 static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 action_held, i32 jump_pressed,
                                 i32 buttons_pressed) {
     ANIMPACKET_s &animation = object->apiobj.anim_packet;
-    if ((object->apiobj.flags_low & 0x80) != 0)
+    if (object->apiobj.player_controlled)
         object->ai_combo_cooldown = 0.0f;
     else if (object->ai_combo_cooldown > 0.0f)
         object->ai_combo_cooldown -= FRAMETIME;
@@ -6882,7 +6882,7 @@ void MovePlayer_NETWORK(GameObject_s *object) {
         object->in_narrow_socket = ObjInNarrowSock(object, WORLD->sock_sys, WORLD->level_idx);
 
     f32 turn_override = 0.0f;
-    if ((api.flags_low & 0x80) != 0 && object->character_context == 0x1b && (object->field_0xe21 & 2) == 0) {
+    if (api.player_controlled && object->character_context == 0x1b && (object->field_0xe21 & 2) == 0) {
         if (object->field_0x7a3 != 1)
             FaceOpponent(object, NULL);
         turn_override = 0.333f;
@@ -7190,14 +7190,14 @@ i32 Slam_Start(GameObject_s *object, f32 speed) {
     object->action_movement_state = 4;
     object->context_animation_timer = 0.0f;
     object->context_animation = LEGOACT_SLAM;
-    if ((object->apiobj.flags_low & 0x80) != 0)
+    if (object->apiobj.player_controlled)
         object->field_0xef9 |= 8;
     object->jump_sequence = 0;
     object->apiobj.velocity.y = speed;
     PlayJumpSfx(object, 4);
     NewRumble(object->pad_gamepad->pad, 0.5f, 0);
     object->jump_flags |= 1;
-    if ((object->apiobj.flags_low & 0x80) != 0)
+    if (object->apiobj.player_controlled)
         Hint_SetComplete(0x60a);
     return 1;
 }
@@ -7208,7 +7208,7 @@ void StartLunge(GameObject_s *object, f32 speed, f32 height) {
     object->character_context = 0;
     object->action_movement_state = 3;
     object->context_animation = 0x1f;
-    if ((object->apiobj.flags_low & 0x80) != 0)
+    if (object->apiobj.player_controlled)
         object->field_0xef9 |= 8;
     object->jump_flags |= 1;
     object->apiobj.velocity.y = speed;
@@ -8111,7 +8111,7 @@ void UpdateLastSafePosition(GameObject_s *object) {
         }
     }
 safe_position_done:
-    if ((object->field_0xf03 & 1) == 0 && (api.flags_low & 0x80) == 0 &&
+    if ((object->field_0xf03 & 1) == 0 && !api.player_controlled &&
         (LEGOCONTEXT_EATEN == -1 || object->character_context != LEGOCONTEXT_EATEN) && (api.flags_high & 0x20) != 0) {
         if ((object->ai.path_info.flags & 1) != 0)
             ClearLastSafeTakeoverSource(object);
@@ -9121,7 +9121,7 @@ void VehicleCollisionCode(GameObject_s *object) {
         return;
     LEVELDATA_s *level = WORLD->current_level;
     LEVELDATA_s *speeder_level = SPEEDERCHASEA_LDATA;
-    if (object->apiobj.field_0x27c == -1 || (object->apiobj.flags_low & 0x80) == 0 || !object->field_0x1084)
+    if (object->apiobj.field_0x27c == -1 || !object->apiobj.player_controlled || !object->field_0x1084)
         return;
     NUVEC normal, reverse_velocity, debris_position;
     debris_position = object->contact_position;
