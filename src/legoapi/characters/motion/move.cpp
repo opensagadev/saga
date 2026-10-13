@@ -7044,14 +7044,16 @@ MoveToMarker::MoveToMarker(MechObjectInterface &object) : target(&object) {
 
 void MoveToMarker::Process(float frame_time) {
     field_5c -= frame_time;
-    if (fading_out && !field_108_3 && field_5c < 0.0f) {
-        field_108_3 = true;
-        fading_out = false;
-        scale.Start(*scale.target, 0.0f, 0.3f);
-        alpha.Start(*alpha.target, 0.0f, 0.3f);
-        secondary_rotation.Start(*secondary_rotation.target, 0.0f, 0.3f);
-        if (target.Get() != NULL && target.Get()->GetObjectType() == 1) {
-            radius.Start(*radius.target, 0.0f, 0.7f);
+    if (fading_out) {
+        if (!field_108_3 && field_5c < 0.0f) {
+            field_108_3 = true;
+            fading_out = false;
+            scale.Start(*scale.target, 0.0f, 0.3f);
+            alpha.Start(*alpha.target, 0.0f, 0.3f);
+            secondary_rotation.Start(*secondary_rotation.target, 0.0f, 0.3f);
+            if (target.Get() != NULL && target.Get()->GetObjectType() == 1) {
+                radius.Start(*radius.target, 0.0f, 0.7f);
+            }
         }
     }
     if (target.Get() != NULL && target.Get()->GetObjectType() != 1) {
