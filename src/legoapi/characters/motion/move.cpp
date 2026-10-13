@@ -3634,7 +3634,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
         object->previous_block_animation = -1;
     i32 in_tube = 0;
     if (PODSPRINT_ADATA != NULL && (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA) &&
-        (api.flags_low & 0x80) != 0 && Tube_InAnyCylinder(WORLD, object, 1)) {
+        api.player_controlled && Tube_InAnyCylinder(WORLD, object, 1)) {
         NewRumble(object->pad_gamepad->pad, qrand() * (1.0f / 65535.0f), 0);
         in_tube = 1;
     }
@@ -3684,7 +3684,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                        object->character_context != 0x23 && object->character_context != 0x24 &&
                        (object->character_context != 0x17 || (object->jump_input_flags & 1) != 0) &&
                        !AnimPlaying(&api.anim_packet, 12, 1, 1) && !AnimPlaying(&api.anim_packet, 6, 1, 1)) {
-                if ((object->in_narrow_socket && (api.flags_low & 0x80) != 0 &&
+                if ((object->in_narrow_socket && api.player_controlled &&
                      WORLD->current_level == DEATHSTARBATTLED_LDATA &&
                      ObjInNarrowSock(object, WORLD->sock_sys, WORLD->level_idx)) ||
                     (object->in_narrow_socket && (WORLD->current_level == DEATHSTAR2BATTLEE_LDATA ||
@@ -3693,7 +3693,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                     turn_multiplier = 0.5f;
                 else if (WORLD->current_level == SPEEDERCHASEA_LDATA && !disable_narrow_socks)
                     turn_multiplier = 0.75f;
-                else if ((api.flags_low & 0x80) != 0 && (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA))
+                else if (api.player_controlled && (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA))
                     turn_multiplier = 0.25f;
                 f32 ratio =
                     (NuFsqrt(api.velocity.x * api.velocity.x + api.velocity.z * api.velocity.z) -
@@ -3721,7 +3721,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                     i32 degrees = static_cast<i32>(-30.0f * object->field_0xdc8 + 60.0f);
                     if (degrees < 0)
                         degrees = 0;
-                    if ((api.flags_low & 0x80) != 0 && (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA))
+                    if (api.player_controlled && (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA))
                         degrees = 0;
                     else if (turn_multiplier != 0.0f)
                         degrees = (i32)(degrees * turn_multiplier);
@@ -4741,7 +4741,7 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
     object->blowup_target = NULL;
     bool searched;
     u8 result;
-    if ((object->apiobj.flags_low & 0x80) != 0 && mode == 0 && object->pad_gamepad->input_magnitude > 0.0f) {
+    if (object->apiobj.player_controlled && mode == 0 && object->pad_gamepad->input_magnitude > 0.0f) {
         object->force_target = ObjOpponent(object, range, 0.0f, 0, 0, 1);
         searched = true;
         if (object->force_target != NULL) {
@@ -4850,7 +4850,7 @@ static inline void ComboJump(GameObject_s *object) {
     object->airborne_collision_target = NULL;
     PlayJumpSfx(object, 2);
     ResetAnimPacket(&object->apiobj.anim_packet, object->context_animation);
-    if ((object->apiobj.flags_low & 0x80) != 0)
+    if (object->apiobj.player_controlled)
         object->field_0xef9 |= 8;
 }
 
@@ -5070,7 +5070,7 @@ static void SwipeCode(GameObject_s *object, i32 pressed, i32 held) {
 static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 action_held, i32 jump_pressed,
                                 i32 buttons_pressed) {
     ANIMPACKET_s &animation = object->apiobj.anim_packet;
-    if ((object->apiobj.flags_low & 0x80) != 0)
+    if (object->apiobj.player_controlled)
         object->ai_combo_cooldown = 0.0f;
     else if (object->ai_combo_cooldown > 0.0f)
         object->ai_combo_cooldown -= FRAMETIME;
@@ -5221,7 +5221,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
 
     {
         const i8 context = object->character_context;
-        const bool player_active = (object->apiobj.flags_low & 0x80) != 0;
+        const bool player_active = object->apiobj.player_controlled;
         if (action_pressed == 0 || (!player_active && object->ai_combo_cooldown > 0.0f) || context == 0x15 ||
             context == 0x5a || context == 0x13 || context == 0x2e ||
             (!player_active && static_cast<u8>(context - 6) < 2) || context == 8 || context == 0x1b ||
@@ -5311,7 +5311,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
             (object->field_0xef9 & 4) == 0)
             goto combo_finished;
         SetComboOpponent(object, 1.0f, 1, 0);
-        if ((object->apiobj.flags_low & 0x80) != 0 && object->force_target != NULL &&
+        if (object->apiobj.player_controlled && object->force_target != NULL &&
             object->force_target->apiobj.field_0x27c == -1)
             Hint_SetComplete(0x277);
         object->combo_stage = 0;
@@ -5541,7 +5541,7 @@ static void ForceGlowCode(GameObject_s *object, i32 model) {
 }
 
 void CableCode(GameObject_s *object, i32 special_pressed, f32) {
-    if ((object->apiobj.flags_low & 0x80) != 0 && object->character_context == -1 && object->cable == NULL) {
+    if (object->apiobj.player_controlled && object->character_context == -1 && object->cable == NULL) {
         GameObject_s *target =
             CableTargetGameObject(object, &object->apiobj.collision_position, max_cable_length * 0.9f);
         if (target != NULL) {
@@ -5552,11 +5552,7 @@ void CableCode(GameObject_s *object, i32 special_pressed, f32) {
             } else {
                 MechAddonCollection *addons = target->GetAddons(false);
                 if (addons != NULL) {
-                    MechAddon *addon = addons->first;
-                    while (addon != NULL && addon->hash_id != CantPickupBombTimerAddon::s_hashId.value) {
-                        addon = addon->next;
-                    }
-                    if (addon == NULL) {
+                    if (addons->Find(CantPickupBombTimerAddon::s_hashId) == NULL) {
                         object->cable = CreateCable(object, target, 1);
                         if (target->id == id_DRAGBOMB) {
                             Hint_SetComplete(0x5ee);
@@ -5579,7 +5575,7 @@ void CableCode(GameObject_s *object, i32 special_pressed, f32) {
         ResetForceGlow(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
     }
 
-    if ((object->apiobj.flags_low & 0x80) != 0 && object->force_glow_candidate_kind != 0 &&
+    if (object->apiobj.player_controlled && object->force_glow_candidate_kind != 0 &&
         object->force_glow_candidate != NULL && object->field_0xd80 > 0.0f) {
         GameObject_s *target = static_cast<GameObject_s *>(object->force_glow_candidate);
         GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
@@ -5666,7 +5662,7 @@ static void ForceCode(GameObject_s *object, i32 pressed, i32 held, i32) {
                 !GizForce_Complete(object->gizforce_target) &&
                 !GizForce_StoodOnForce(object->gizforce_target, object)) {
                 AlertSurroundingCreatures(object, &object->apiobj.collision_position);
-                if ((WORLD->current_level == VADERC_LDATA || (object->apiobj.flags_low & 0x80) == 0 ||
+                if ((WORLD->current_level == VADERC_LDATA || !object->apiobj.player_controlled ||
                      object->apiobj.model_draw_result == 0 || !(object->field_0xc54 > 0.0f) ||
                      !(object->head_target_facing < -0.85f || object->head_target_facing > 0.85f)) &&
                     !(WORLD->current_level == DAGOBAHC_LDATA && object->id == id_LUKESKYWALKERDAGOBAH &&
@@ -6723,7 +6719,7 @@ void Move_WEIRDO(GameObject_s *object) {
         ((object->movement_runtime_flags & 4) != 0 ||
          (object->fall_animation_timer >= 0.2f &&
           (object->pad_gamepad->input_magnitude == 0.0f ||
-           ((object->apiobj.flags_low & 0x80) == 0 && object->apiobj.character_model->model_data_b[0x59] != NULL)))))
+           (!object->apiobj.player_controlled && object->apiobj.character_model->model_data_b[0x59] != NULL)))))
         StartFallLand(object, -1);
     if (object->apiobj.field_0x27d != 0)
         object->movement_runtime_flags &= ~4;
@@ -6886,7 +6882,7 @@ void MovePlayer_NETWORK(GameObject_s *object) {
         object->in_narrow_socket = ObjInNarrowSock(object, WORLD->sock_sys, WORLD->level_idx);
 
     f32 turn_override = 0.0f;
-    if ((api.flags_low & 0x80) != 0 && object->character_context == 0x1b && (object->field_0xe21 & 2) == 0) {
+    if (api.player_controlled && object->character_context == 0x1b && (object->field_0xe21 & 2) == 0) {
         if (object->field_0x7a3 != 1)
             FaceOpponent(object, NULL);
         turn_override = 0.333f;
@@ -7194,14 +7190,14 @@ i32 Slam_Start(GameObject_s *object, f32 speed) {
     object->action_movement_state = 4;
     object->context_animation_timer = 0.0f;
     object->context_animation = LEGOACT_SLAM;
-    if ((object->apiobj.flags_low & 0x80) != 0)
+    if (object->apiobj.player_controlled)
         object->field_0xef9 |= 8;
     object->jump_sequence = 0;
     object->apiobj.velocity.y = speed;
     PlayJumpSfx(object, 4);
     NewRumble(object->pad_gamepad->pad, 0.5f, 0);
     object->jump_flags |= 1;
-    if ((object->apiobj.flags_low & 0x80) != 0)
+    if (object->apiobj.player_controlled)
         Hint_SetComplete(0x60a);
     return 1;
 }
@@ -7212,7 +7208,7 @@ void StartLunge(GameObject_s *object, f32 speed, f32 height) {
     object->character_context = 0;
     object->action_movement_state = 3;
     object->context_animation = 0x1f;
-    if ((object->apiobj.flags_low & 0x80) != 0)
+    if (object->apiobj.player_controlled)
         object->field_0xef9 |= 8;
     object->jump_flags |= 1;
     object->apiobj.velocity.y = speed;
@@ -8115,7 +8111,7 @@ void UpdateLastSafePosition(GameObject_s *object) {
         }
     }
 safe_position_done:
-    if ((object->field_0xf03 & 1) == 0 && (api.flags_low & 0x80) == 0 &&
+    if ((object->field_0xf03 & 1) == 0 && !api.player_controlled &&
         (LEGOCONTEXT_EATEN == -1 || object->character_context != LEGOCONTEXT_EATEN) && (api.flags_high & 0x20) != 0) {
         if ((object->ai.path_info.flags & 1) != 0)
             ClearLastSafeTakeoverSource(object);
@@ -9125,7 +9121,7 @@ void VehicleCollisionCode(GameObject_s *object) {
         return;
     LEVELDATA_s *level = WORLD->current_level;
     LEVELDATA_s *speeder_level = SPEEDERCHASEA_LDATA;
-    if (object->apiobj.field_0x27c == -1 || (object->apiobj.flags_low & 0x80) == 0 || !object->field_0x1084)
+    if (object->apiobj.field_0x27c == -1 || !object->apiobj.player_controlled || !object->field_0x1084)
         return;
     NUVEC normal, reverse_velocity, debris_position;
     debris_position = object->contact_position;
