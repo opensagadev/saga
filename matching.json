@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 77.887535,
+    "fuzzy_match_percent": 77.95127,
     "total_code": "4722419",
-    "matched_code": "596155",
-    "matched_code_percent": 12.623933,
+    "matched_code": "596671",
+    "matched_code_percent": 12.63486,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6701,
-    "matched_functions_percent": 49.788246,
+    "matched_functions": 6703,
+    "matched_functions_percent": 49.803104,
     "total_units": 1
   },
   "text": {
@@ -46047,7 +46047,7 @@
           "address": 1035968,
           "offset": 146000,
           "size": 877,
-          "match_percent": 58.176212
+          "match_percent": 59.881058
         },
         {
           "name": "_Z21Player_CopyEssentialsP12GameObject_sS0_",
@@ -46079,7 +46079,7 @@
           "address": 1042752,
           "offset": 152784,
           "size": 328,
-          "match_percent": 71.830986
+          "match_percent": 71.61972
         },
         {
           "name": "_Z11ResetPlayerP12GameObject_siP7nuvec_si",
@@ -46095,7 +46095,7 @@
           "address": 1049776,
           "offset": 159808,
           "size": 215,
-          "match_percent": 100.0
+          "match_percent": 99.71698
         },
         {
           "name": "_Z19ActivePlayerInRangeP7nuvec_sfPf",
@@ -46103,7 +46103,7 @@
           "address": 1084464,
           "offset": 194496,
           "size": 724,
-          "match_percent": 60.124325
+          "match_percent": 75.85406
         },
         {
           "name": "_Z17AvailableToPlayerjiii",
@@ -46111,7 +46111,7 @@
           "address": 1085200,
           "offset": 195232,
           "size": 4312,
-          "match_percent": 65.93396
+          "match_percent": 91.77101
         },
         {
           "name": "_Z20GetOtherActivePlayerP12GameObject_s",
@@ -46327,7 +46327,7 @@
           "address": 4633152,
           "offset": 3743184,
           "size": 361,
-          "match_percent": 57.74074
+          "match_percent": 58.833332
         },
         {
           "name": "_Z22FindNearestPlayerToVecP7nuvec_sPP12GameObject_sRfbj",
@@ -46335,7 +46335,7 @@
           "address": 4634576,
           "offset": 3744608,
           "size": 1943,
-          "match_percent": 80.18432
+          "match_percent": 92.60169
         },
         {
           "name": "_Z25FindFurthestPlayerFromVecP7nuvec_sPP12GameObject_sRfbj",
@@ -46343,7 +46343,7 @@
           "address": 4636528,
           "offset": 3746560,
           "size": 1978,
-          "match_percent": 63.919567
+          "match_percent": 77.56739
         },
         {
           "name": "_Z22Player_ToggleCharacterP12GameObject_sii",
@@ -48229,7 +48229,7 @@
           "address": 1413984,
           "offset": 524016,
           "size": 4225,
-          "match_percent": 43.538376
+          "match_percent": 43.922123
         },
         {
           "name": "_Z11Glide_StartP12GameObject_s",
@@ -48373,7 +48373,7 @@
           "address": 1445952,
           "offset": 555984,
           "size": 2473,
-          "match_percent": 69.938934
+          "match_percent": 70.30153
         },
         {
           "name": "_ZL9DodgeCodeP12GameObject_sii",
@@ -48533,7 +48533,7 @@
           "address": 1502368,
           "offset": 612400,
           "size": 2140,
-          "match_percent": 61.55315
+          "match_percent": 64.7874
         },
         {
           "name": "_Z14Move_CHARACTERP12GameObject_s",
@@ -48669,7 +48669,7 @@
           "address": 1523712,
           "offset": 633744,
           "size": 4260,
-          "match_percent": 36.111744
+          "match_percent": 36.187
         },
         {
           "name": "_Z20Move_REPUBLICGUNSHIPP12GameObject_s",
@@ -48909,7 +48909,7 @@
           "address": 5171920,
           "offset": 4281952,
           "size": 8829,
-          "match_percent": 51.851215
+          "match_percent": 52.44469
         },
         {
           "name": "_Z13Hang_MoveCodeP12GameObject_s",
@@ -54873,7 +54873,7 @@
           "address": 5033504,
           "offset": 4143536,
           "size": 163,
-          "match_percent": 55.541668
+          "match_percent": 100.0
         },
         {
           "name": "_ZL32GizBuildIts_AllocateProgressDataP9variptr_uS0_",
@@ -54905,7 +54905,7 @@
           "address": 5034624,
           "offset": 4144656,
           "size": 372,
-          "match_percent": 57.804123
+          "match_percent": 95.81443
         },
         {
           "name": "_Z15GizBuildIt_FindP11WORLDINFO_sPc",
@@ -56242,7 +56242,7 @@
           "address": 5012880,
           "offset": 4122912,
           "size": 274,
-          "match_percent": 51.24
+          "match_percent": 71.46667
         },
         {
           "name": "_ZL31GizSpinner_AllocateProgressDataP9variptr_uS0_",
@@ -59657,7 +59657,7 @@
           "address": 1858320,
           "offset": 968352,
           "size": 358,
-          "match_percent": 50.3
+          "match_percent": 100.0
         },
         {
           "name": "_ZL28GizForces_ReserveBufferSpacePv",
@@ -60064,7 +60064,7 @@
           "address": 4992016,
           "offset": 4102048,
           "size": 210,
-          "match_percent": 15.705882
+          "match_percent": 100.0
         },
         {
           "name": "_ZL29GizTurrets_ReserveBufferSpacePv",
@@ -60080,7 +60080,7 @@
           "address": 4992528,
           "offset": 4102560,
           "size": 975,
-          "match_percent": 59.586468
+          "match_percent": 85.73684
         },
         {
           "name": "_ZL31GizTurrets_AllocateProgressDataP9variptr_uS0_",
@@ -60128,7 +60128,7 @@
           "address": 4994128,
           "offset": 4104160,
           "size": 393,
-          "match_percent": 38.453487
+          "match_percent": 95.790695
         },
         {
           "name": "_Z16GizTurret_GetTgtP11GIZTURRET_sP7numtx_s",
@@ -60208,7 +60208,7 @@
           "address": 5003792,
           "offset": 4113824,
           "size": 1146,
-          "match_percent": 56.083332
+          "match_percent": 56.026516
         },
         {
           "name": "_ZL22GizTurrets_BoltHitPlatPvS_P6BOLT_sPh",
