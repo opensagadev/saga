@@ -723,16 +723,17 @@ float GetHoverPosY(GameObject_s *obj) {
         return vehicle_offset + obj->apiobj.water_height;
 
     f32 height = obj->apiobj.field_0x218;
-    if (height == 2000000.0f)
-        return 2000000.0f;
-    if (obj->apiobj.water_height != 2000000.0f)
-        height = MAX(obj->apiobj.water_height, height);
+    if (height != 2000000.0f) {
+        if (obj->apiobj.water_height != 2000000.0f)
+            height = MAX(obj->apiobj.water_height, height);
 
-    f32 hover_height = WORLD->current_level->hover_height;
-    if (hover_height != 0.0f)
-        return hover_height + height + vehicle_offset;
-    return height + static_cast<GAMECHARACTERDATA *>(obj->apiobj.character_data->field11_0x24)->field_0x28 +
-           vehicle_offset;
+        f32 hover_height = WORLD->current_level->hover_height;
+        if (hover_height != 0.0f)
+            return hover_height + height + vehicle_offset;
+        return height + static_cast<GAMECHARACTERDATA *>(obj->apiobj.character_data->field11_0x24)->field_0x28 +
+               vehicle_offset;
+    }
+    return 2000000.0f;
 }
 
 void PlayerTakeHit(GameObject_s *object, GameObject_s *attacker) {
