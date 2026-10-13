@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 78.04756,
+    "fuzzy_match_percent": 78.10184,
     "total_code": "4722419",
-    "matched_code": "600807",
-    "matched_code_percent": 12.722442,
+    "matched_code": "601312",
+    "matched_code_percent": 12.733134,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6709,
-    "matched_functions_percent": 49.847687,
+    "matched_functions": 6711,
+    "matched_functions_percent": 49.862545,
     "total_units": 1
   },
   "text": {
@@ -25780,7 +25780,7 @@
           "address": 4171488,
           "offset": 3281520,
           "size": 589,
-          "match_percent": 37.356163
+          "match_percent": 91.64384
         },
         {
           "name": "AILocatorSet_AssignRandomLocator",
@@ -25788,7 +25788,7 @@
           "address": 4172080,
           "offset": 3282112,
           "size": 1238,
-          "match_percent": 69.181816
+          "match_percent": 79.28571
         }
       ]
     },
@@ -48573,7 +48573,7 @@
           "address": 1509024,
           "offset": 619056,
           "size": 628,
-          "match_percent": 76.751724
+          "match_percent": 78.16552
         },
         {
           "name": "_Z13PeriscodeCodeP12GameObject_s",
@@ -54588,7 +54588,7 @@
           "address": 2005376,
           "offset": 1115408,
           "size": 769,
-          "match_percent": 42.46154
+          "match_percent": 69.21978
         },
         {
           "name": "_Z18GizPanel_BeingUsedP10GIZPANEL_s",
@@ -54628,7 +54628,7 @@
           "address": 2008800,
           "offset": 1118832,
           "size": 2049,
-          "match_percent": 77.58116
+          "match_percent": 77.64128
         }
       ]
     },
@@ -57006,7 +57006,7 @@
           "address": 4984160,
           "offset": 4094192,
           "size": 762,
-          "match_percent": 56.07143
+          "match_percent": 54.336735
         },
         {
           "name": "_ZL31GizmoPickups_ReserveBufferSpacePv",
@@ -57014,7 +57014,7 @@
           "address": 4984928,
           "offset": 4094960,
           "size": 369,
-          "match_percent": 51.646343
+          "match_percent": 68.89024
         },
         {
           "name": "_Z23GizmoPickups_TotalScorePv",
@@ -62340,7 +62340,7 @@
           "address": 4717760,
           "offset": 3827792,
           "size": 826,
-          "match_percent": 56.55056
+          "match_percent": 96.65169
         }
       ]
     },
@@ -62699,7 +62699,7 @@
           "address": 4718592,
           "offset": 3828624,
           "size": 750,
-          "match_percent": 48.110527
+          "match_percent": 98.494736
         },
         {
           "name": "_Z8Bolt_EndP6BOLT_si",
@@ -62795,7 +62795,7 @@
           "address": 4728032,
           "offset": 3838064,
           "size": 799,
-          "match_percent": 48.791855
+          "match_percent": 86.1086
         },
         {
           "name": "_Z10Bolt_ShootP12GameObject_sii",
@@ -63430,7 +63430,7 @@
           "address": 2064096,
           "offset": 1174128,
           "size": 767,
-          "match_percent": 60.876236
+          "match_percent": 80.78713
         },
         {
           "name": "_Z11TorpedoCodeP12GameObject_sif",
@@ -63438,7 +63438,7 @@
           "address": 2064864,
           "offset": 1174896,
           "size": 2068,
-          "match_percent": 61.702175
+          "match_percent": 61.734783
         },
         {
           "name": "_Z21HomeNearestTorpTargetP6BOLT_sP15TORPEDOPACKET_s",
@@ -63454,7 +63454,7 @@
           "address": 2068064,
           "offset": 1178096,
           "size": 128,
-          "match_percent": 99.61539
+          "match_percent": 100.0
         },
         {
           "name": "_Z16Torpedo_RicochetP6BOLT_sP15TORPEDOPACKET_s",
@@ -71325,7 +71325,7 @@
           "address": 2395456,
           "offset": 1505488,
           "size": 230,
-          "match_percent": 85.14754
+          "match_percent": 99.86885
         },
         {
           "name": "_Z14DrawCodeMenu3Dv",
@@ -75661,7 +75661,7 @@
           "address": 4801536,
           "offset": 3911568,
           "size": 400,
-          "match_percent": 62.04717
+          "match_percent": 69.43396
         },
         {
           "name": "_Z12Draw3DObjectP11WORLDINFO_siP7nuvec_stttfffi",
@@ -75669,7 +75669,7 @@
           "address": 4801936,
           "offset": 3911968,
           "size": 392,
-          "match_percent": 60.923077
+          "match_percent": 69.375
         },
         {
           "name": "_Z15Draw3DObjectMtxP11WORLDINFO_siP7numtx_s",
@@ -75693,7 +75693,7 @@
           "address": 4802912,
           "offset": 3912944,
           "size": 377,
-          "match_percent": 63.185566
+          "match_percent": 100.0
         },
         {
           "name": "_Z20DrawPanel3DObjectMtxP12nuhspecial_sP7numtx_sf",
@@ -80250,7 +80250,7 @@
           "address": 1276912,
           "offset": 386944,
           "size": 690,
-          "match_percent": 55.962963
+          "match_percent": 82.84568
         },
         {
           "name": "_Z9KillPartsP12GameObject_siiifiPt",
@@ -80402,7 +80402,7 @@
           "address": 1983760,
           "offset": 1093792,
           "size": 819,
-          "match_percent": 58.384182
+          "match_percent": 91.36158
         },
         {
           "name": "_Z16AddTorpedoAsPartP7nuvec_sS0_ff",
