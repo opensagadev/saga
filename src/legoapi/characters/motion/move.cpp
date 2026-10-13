@@ -4457,7 +4457,7 @@ vehicle_gravity_done:
     EngineNoiseCode(object, object->character_context == 0x17);
 
     if (((object->apiobj.player_controlled && object->current_hp == 1) ||
-         (!object->apiobj.player_controlled && object->current_hp <= 1)) &&
+         ((object->apiobj.flags_low & 0x80) == 0 && object->current_hp <= 1)) &&
         object->apiobj.character_data->game_character->uses_weapon_action == 10 &&
         (object->apiobj.character_data->model_flags & 0x04000000) == 0) {
         const i32 effect = WORLD->debris_sys->entries[96].effect;
@@ -5070,7 +5070,7 @@ static void SwipeCode(GameObject_s *object, i32 pressed, i32 held) {
 static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 action_held, i32 jump_pressed,
                                 i32 buttons_pressed) {
     ANIMPACKET_s &animation = object->apiobj.anim_packet;
-    if (object->apiobj.player_controlled)
+    if ((object->apiobj.flags_low & 0x80) != 0)
         object->ai_combo_cooldown = 0.0f;
     else if (object->ai_combo_cooldown > 0.0f)
         object->ai_combo_cooldown -= FRAMETIME;
@@ -5541,7 +5541,7 @@ static void ForceGlowCode(GameObject_s *object, i32 model) {
 }
 
 void CableCode(GameObject_s *object, i32 special_pressed, f32) {
-    if (object->apiobj.player_controlled && object->character_context == -1 && object->cable == NULL) {
+    if ((object->apiobj.flags_low & 0x80) != 0 && object->character_context == -1 && object->cable == NULL) {
         GameObject_s *target =
             CableTargetGameObject(object, &object->apiobj.collision_position, max_cable_length * 0.9f);
         if (target != NULL) {
