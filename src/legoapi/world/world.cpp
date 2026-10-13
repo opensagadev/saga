@@ -305,18 +305,20 @@ void CalculateWorldSize(WORLDINFO *world) {
     }
 
     NUGSCN *scene = world->current_gscn;
-    for (i32 i = 0; i < scene->portal_instance_count; ++i) {
-        NUPORTALBOX *box = &scene->portal_boxes[i];
-        NUVEC box_maximum = box->second;
-        NUVEC box_minimum = box->first;
+    for (i32 i = 0; i < scene->portal_instance_count * 2; i += 2) {
+        // Retail walks the boxes as consecutive first/second vectors.
+        NUVEC4 *first = &((NUVEC4 *)scene->portal_boxes)[i];
+        NUVEC4 *second = &((NUVEC4 *)scene->portal_boxes)[i + 1];
+        NUVEC box_maximum = *(NUVEC *)second;
+        NUVEC box_minimum = *(NUVEC *)first;
         if (scene->display_list != NULL &&
             (scene->display_list->render_buffer & NUDL_SCENE_RENDER_FLAG_CENTER_EXTENT_BOUNDS) != 0) {
-            box_minimum.z = box->first.z - box->second.z;
-            box_minimum.x = box->first.x - box->second.x;
-            box_minimum.y = box->first.y - box->second.y;
-            box_maximum.x = box->first.x + box->second.x;
-            box_maximum.y = box->first.y + box->second.y;
-            box_maximum.z = box->first.z + box->second.z;
+            box_minimum.z = first->z - second->z;
+            box_minimum.x = first->x - second->x;
+            box_minimum.y = first->y - second->y;
+            box_maximum.x = first->x + second->x;
+            box_maximum.y = first->y + second->y;
+            box_maximum.z = first->z + second->z;
         }
         minimum.x = MIN(box_minimum.x, minimum.x);
         minimum.y = MIN(box_minimum.y, minimum.y);

@@ -37,7 +37,7 @@ struct rtl_s {
     u8 pad_62[2];
     f32 field_64;
     u16 field_68;
-    i16 uid;
+    u16 uid;
     f32 intensity;
     f32 blend_rate;
     f32 blend;

@@ -21,14 +21,17 @@ void AndroidOBBUtils::InitPackagePaths() {
 }
 
 i32 AndroidOBBUtils::LookupPackagePath(char *output, NuFileDeviceAndroidOBBType::T type) {
-    char directory[512];
-    char filename[512];
+    // Retail realigns this frame to 16 bytes for the two path buffers.
+    typedef char PathBuffer[512] __attribute__((aligned(16)));
+    i32 size;
+    PathBuffer directory;
+    PathBuffer filename;
     if (output != NULL) {
         output[0] = '\0';
     }
     i32 prefix_length = NuStrIStr(g_externalDataPath, "Android/Data") + 8 - g_externalDataPath;
-    if ((type == NuFileDeviceAndroidOBBType::MAIN && g_obbMainSize > 0) ||
-        (type != NuFileDeviceAndroidOBBType::MAIN && g_obbPatchSize > 0)) {
+    size = type == NuFileDeviceAndroidOBBType::MAIN ? g_obbMainSize : g_obbPatchSize;
+    if (size > 0) {
         directory[0] = '\0';
         sprintf(filename, "%s%s.%04d.0000.%s", directory, type == NuFileDeviceAndroidOBBType::MAIN ? "main" : "patch",
                 type == NuFileDeviceAndroidOBBType::MAIN ? g_obbMainVersion : g_obbPatchVersion, "jpg");
@@ -44,8 +47,8 @@ i32 AndroidOBBUtils::LookupPackagePath(char *output, NuFileDeviceAndroidOBBType:
             return 2;
         }
     }
-    if ((type == NuFileDeviceAndroidOBBType::MAIN && g_obbMainSize > 0) ||
-        (type != NuFileDeviceAndroidOBBType::MAIN && g_obbPatchSize > 0)) {
+    size = type == NuFileDeviceAndroidOBBType::MAIN ? g_obbMainSize : g_obbPatchSize;
+    if (size > 0) {
         memcpy(directory, g_externalDataPath, prefix_length);
         directory[prefix_length] = '\0';
         strcat(directory, "obb/");
@@ -59,8 +62,8 @@ i32 AndroidOBBUtils::LookupPackagePath(char *output, NuFileDeviceAndroidOBBType:
             goto disk_found;
         }
     }
-    if ((type == NuFileDeviceAndroidOBBType::MAIN && g_obbMainSize > 0) ||
-        (type != NuFileDeviceAndroidOBBType::MAIN && g_obbPatchSize > 0)) {
+    size = type == NuFileDeviceAndroidOBBType::MAIN ? g_obbMainSize : g_obbPatchSize;
+    if (size > 0) {
         prefix_length -= 9;
         memcpy(directory, g_externalDataPath, prefix_length);
         directory[prefix_length] = '\0';

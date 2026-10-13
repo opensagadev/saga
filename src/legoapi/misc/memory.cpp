@@ -112,45 +112,47 @@ extern "C" {
     void DebFree(i32 *handle) {
         if (*handle == -1)
             return;
-        debkeydatatype_s *key = &debkeydata[*handle];
-        if (key->allocation_locked != 0)
+        if (debkeydata[*handle].allocation_locked != 0)
             return;
-        key->allocation_locked = 1;
+        debkeydata[*handle].allocation_locked = 1;
         for (i32 i = freedebkeyptr; i < maxdebkeys; ++i) {
             if (freedebkeys[i] == *handle) {
-                key->allocation_locked = 0;
+                debkeydata[*handle].allocation_locked = 0;
                 *handle = -1;
                 return;
             }
         }
-        if (key->effect_index == 0) {
-            key->allocation_locked = 0;
+        if (debkeydata[*handle].effect_index == 0) {
+            debkeydata[*handle].allocation_locked = 0;
             return;
         }
-        debinftype *effect = debtab[key->effect_index];
-        if (key->allocated_chunk_count != 0) {
+        debinftype *effect = debtab[debkeydata[*handle].effect_index];
+        if (debkeydata[*handle].allocated_chunk_count != 0) {
             DebrisGetControlStackLock();
-            for (i32 i = 0; i < key->allocated_chunk_count; ++i) {
-                RemoveAnyChunkControls(reinterpret_cast<i32 *>(key->particle_chunks[i]));
-                debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr];
-                control->owner = NULL;
-                control->particle_chunk = key->particle_chunks[i];
-                control->active = effect->particle_type == 7 ? 7 : 0;
-                debinftype *expiry_effect = debtab[key->effect_index];
+            for (i32 i = 0; i < debkeydata[*handle].allocated_chunk_count; ++i) {
+                RemoveAnyChunkControls(reinterpret_cast<i32 *>(debkeydata[*handle].particle_chunks[i]));
+                freechunkcontrols[freechunkcontrolsptr]->particle_chunk = debkeydata[*handle].particle_chunks[i];
+                freechunkcontrols[freechunkcontrolsptr]->active = effect->particle_type == 7 ? 7 : 0;
+                freechunkcontrols[freechunkcontrolsptr]->owner = NULL;
+                debinftype *expiry_effect = debtab[debkeydata[*handle].effect_index];
                 const i32 panel = effect->time_group == 4;
-                control->expiry_time = expiry_effect->particle_lifetime + (panel ? panelglobaltime : globaltime) +
-                                       static_cast<i8>(expiry_effect->trail_count) * expiry_effect->trail_time;
-                AddChunkControlToStack(control, &debris_chunk_control_stack[panel]);
+                freechunkcontrols[freechunkcontrolsptr]->expiry_time =
+                    expiry_effect->particle_lifetime + (panel ? panelglobaltime : globaltime) +
+                    static_cast<i8>(expiry_effect->trail_count) * expiry_effect->trail_time;
+                AddChunkControlToStack(freechunkcontrols[freechunkcontrolsptr], &debris_chunk_control_stack[panel]);
                 ++freechunkcontrolsptr;
             }
             DebrisReleaseControlStackLock();
-            for (i32 i = 0; i < debrischunks + debrischunksglass; ++i) {
+            i32 count = debrischunks + debrischunksglass;
+            for (i32 i = 0; i < count; ++i) {
                 particlechunkrendertype_s *render = &ParticleChunkToRender[i];
-                if (render->particle_chunk == key->particle_chunks[0]) {
+                if (render->particle_chunk == debkeydata[*handle].particle_chunks[0]) {
                     render->key = NULL;
                     render->effect = effect;
-                    render->effect_orientation = key->effect_orientation;
-                    render->position = key->position;
+                    render->effect_orientation = debkeydata[*handle].effect_orientation;
+                    render->position.x = debkeydata[*handle].position.x;
+                    render->position.y = debkeydata[*handle].position.y;
+                    render->position.z = debkeydata[*handle].position.z;
                     break;
                 }
             }
@@ -163,14 +165,16 @@ extern "C" {
             }
         }
         if (linked == 0)
-            RemoveDebrisEffectFromStack(key);
-        for (i32 i = 0; i < key->allocated_chunk_count; ++i)
-            key->particle_chunks[i] = NULL;
-        key->allocated_chunk_count = 0;
-        key->allocation_index = -1;
-        key->effect_index = 0;
+            RemoveDebrisEffectFromStack(&debkeydata[*handle]);
+        // Retail clears the chunk slots as pointer-sized integers, so *handle is re-read
+        // after each store.
+        for (i32 i = 0; i < debkeydata[*handle].allocated_chunk_count; ++i)
+            *reinterpret_cast<isize *>(&debkeydata[*handle].particle_chunks[i]) = 0;
+        debkeydata[*handle].allocated_chunk_count = 0;
+        debkeydata[*handle].effect_index = 0;
+        debkeydata[*handle].allocation_index = -1;
         freedebkeys[--freedebkeyptr] = static_cast<i16>(*handle);
-        key->allocation_locked = 0;
+        debkeydata[*handle].allocation_locked = 0;
         *handle = -1;
     }
 
@@ -185,58 +189,37 @@ extern "C" {
     }
 
     void DebFreeInstantly(i32 *handle) {
-        if (*handle == -1) {
+        if (*handle == -1)
             return;
-        }
-
-        const i32 index = *handle;
-        debkeydatatype_s *key = debkeydata + index;
-        if (key->allocation_locked != 0) {
+        if (debkeydata[*handle].allocation_locked != 0)
             return;
-        }
-        key->allocation_locked = 1;
-
-        // A key that has not yet been linked into an effect's active list can
-        // be returned immediately.  The original scans the free-key tail to
-        // distinguish that case from a live key.
-        if (freedebkeyptr < maxdebkeys) {
-            i32 p = freedebkeyptr;
-            while (p < maxdebkeys && freedebkeys[p] != index) {
-                ++p;
-            }
-            if (p < maxdebkeys) {
-                key->allocation_locked = 0;
+        debkeydata[*handle].allocation_locked = 1;
+        for (i32 i = freedebkeyptr; i < maxdebkeys; ++i) {
+            if (freedebkeys[i] == *handle) {
+                debkeydata[*handle].allocation_locked = 0;
                 *handle = -1;
                 return;
             }
         }
-
-        const i16 effect_index = key->effect_index;
-        if (effect_index == 0) {
-            key->allocation_locked = 0;
+        if (debkeydata[*handle].effect_index == 0) {
+            debkeydata[*handle].allocation_locked = 0;
             return;
         }
-
-        debinftype *effect = debtab[effect_index];
+        debinftype *effect = debtab[debkeydata[*handle].effect_index];
         DebFreeChunksInstantly(handle);
-        const i32 freed = *handle;
-        bool linked = false;
-        for (i32 i = 0; i != 8; ++i) {
-            i16 *owner = &effect->particle_keys[i];
-            if (*owner == freed) {
-                *owner = -1;
-                linked = true;
+        i32 linked = 0;
+        for (i32 i = 0; i < 8; ++i) {
+            if (effect->particle_keys[i] == *handle) {
+                effect->particle_keys[i] = -1;
+                linked = 1;
             }
         }
-        if (!linked) {
-            RemoveDebrisEffectFromStack(debkeydata + freed);
-        }
-
-        --freedebkeyptr;
-        debkeydata[freed].effect_index = 0;
-        debkeydata[freed].allocation_index = -1;
-        freedebkeys[freedebkeyptr] = static_cast<i16>(freed);
-        debkeydata[freed].allocation_locked = 0;
+        if (linked == 0)
+            RemoveDebrisEffectFromStack(&debkeydata[*handle]);
+        debkeydata[*handle].effect_index = 0;
+        debkeydata[*handle].allocation_index = -1;
+        freedebkeys[--freedebkeyptr] = static_cast<i16>(*handle);
+        debkeydata[*handle].allocation_locked = 0;
         *handle = -1;
     }
 

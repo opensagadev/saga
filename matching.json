@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 79.23727,
+    "fuzzy_match_percent": 79.31633,
     "total_code": "4722419",
-    "matched_code": "616214",
-    "matched_code_percent": 13.048694,
+    "matched_code": "617811",
+    "matched_code_percent": 13.082512,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6804,
-    "matched_functions_percent": 50.55353,
+    "matched_functions": 6811,
+    "matched_functions_percent": 50.60554,
     "total_units": 1
   },
   "text": {
@@ -36704,7 +36704,7 @@
           "address": 984592,
           "offset": 94624,
           "size": 1139,
-          "match_percent": 13.629252
+          "match_percent": 72.47619
         },
         {
           "name": "_ZN15AndroidOBBUtils16InitPackagePathsEv",
@@ -60930,7 +60930,7 @@
           "address": 3959202,
           "offset": 3069234,
           "size": 185,
-          "match_percent": 88.796295
+          "match_percent": 100.0
         },
         {
           "name": "APIObjectSetUsed",
@@ -60946,7 +60946,7 @@
           "address": 3959453,
           "offset": 3069485,
           "size": 163,
-          "match_percent": 96.6
+          "match_percent": 100.0
         },
         {
           "name": "APIObjectRemoveFromLOSTable",
@@ -60970,7 +60970,7 @@
           "address": 3960010,
           "offset": 3070042,
           "size": 68,
-          "match_percent": 81.5
+          "match_percent": 100.0
         },
         {
           "name": "QuickNewRayCast",
@@ -61138,7 +61138,7 @@
           "address": 3980775,
           "offset": 3090807,
           "size": 235,
-          "match_percent": 71.1875
+          "match_percent": 100.0
         },
         {
           "name": "_ZL17NormalizeAnimPathPc",
@@ -61218,7 +61218,7 @@
           "address": 3986157,
           "offset": 3096189,
           "size": 641,
-          "match_percent": 78.849464
+          "match_percent": 99.935486
         },
         {
           "name": "MakeLayerList_Index",
@@ -61234,7 +61234,7 @@
           "address": 3986924,
           "offset": 3096956,
           "size": 326,
-          "match_percent": 73.53608
+          "match_percent": 100.0
         },
         {
           "name": "EvalModelAnim",
@@ -61386,7 +61386,7 @@
           "address": 3994827,
           "offset": 3104859,
           "size": 370,
-          "match_percent": 84.809525
+          "match_percent": 100.0
         },
         {
           "name": "_Z8RootFnExP7numtx_sPvP7nuvec_sS3_S3_fi",
@@ -61506,7 +61506,7 @@
           "address": 4004819,
           "offset": 3114851,
           "size": 1266,
-          "match_percent": 79.700294
+          "match_percent": 97.860535
         },
         {
           "name": "_GLOBAL__sub_I_apiobject.c",
@@ -71695,7 +71695,7 @@
           "address": 3474592,
           "offset": 2584624,
           "size": 678,
-          "match_percent": 57.033558
+          "match_percent": 86.27517
         },
         {
           "name": "DebFree",
@@ -71703,7 +71703,7 @@
           "address": 3475568,
           "offset": 2585600,
           "size": 1472,
-          "match_percent": 46.293255
+          "match_percent": 85.26393
         },
         {
           "name": "_ZN13MemoryManager9AllocPoolEji",
@@ -75867,7 +75867,7 @@
           "address": 3842650,
           "offset": 2952682,
           "size": 564,
-          "match_percent": 99.817566
+          "match_percent": 98.66216
         },
         {
           "name": "rtlDynamicFree",
@@ -75995,7 +75995,7 @@
           "address": 3844733,
           "offset": 2954765,
           "size": 1753,
-          "match_percent": 93.91939
+          "match_percent": 95.37255
         },
         {
           "name": "rtlLoadSet",
@@ -76003,7 +76003,7 @@
           "address": 3846486,
           "offset": 2956518,
           "size": 712,
-          "match_percent": 99.96191
+          "match_percent": 99.00476
         },
         {
           "name": "rtlSaveSet",
@@ -76123,7 +76123,7 @@
           "address": 3851389,
           "offset": 2961421,
           "size": 4488,
-          "match_percent": 86.9472
+          "match_percent": 99.1384
         },
         {
           "name": "_ZL13rtlCalcShadowP10rtlidata_s",
@@ -76139,7 +76139,7 @@
           "address": 3856941,
           "offset": 2966973,
           "size": 368,
-          "match_percent": 98.239586
+          "match_percent": 99.958336
         },
         {
           "name": "_ZL29rtlApplyModifiersToChainLightP5rtl_s",
@@ -77339,7 +77339,7 @@
           "address": 3910050,
           "offset": 3020082,
           "size": 3428,
-          "match_percent": 86.521194
+          "match_percent": 99.937
         },
         {
           "name": "_ZL16edrtlDrawFogInfov",
@@ -81200,7 +81200,7 @@
           "address": 4760736,
           "offset": 3870768,
           "size": 152,
-          "match_percent": 77.0
+          "match_percent": 99.61539
         },
         {
           "name": "_Z19CreateFadeMaterialsv",
@@ -81208,7 +81208,7 @@
           "address": 4760896,
           "offset": 3870928,
           "size": 254,
-          "match_percent": 55.61111
+          "match_percent": 100.0
         },
         {
           "name": "_Z8FadeLoopPcifPFvfE",
@@ -81232,7 +81232,7 @@
           "address": 5238496,
           "offset": 4348528,
           "size": 75,
-          "match_percent": 47.058823
+          "match_percent": 99.82353
         },
         {
           "name": "_ZN4Fade10UpdateFadeEv",
@@ -81288,7 +81288,7 @@
           "address": 5238704,
           "offset": 4348736,
           "size": 141,
-          "match_percent": 79.82927
+          "match_percent": 99.97561
         },
         {
           "name": "_ZN8FadeWipe8InitFadeEv",
@@ -81296,7 +81296,7 @@
           "address": 5238848,
           "offset": 4348880,
           "size": 125,
-          "match_percent": 83.52631
+          "match_percent": 99.92105
         },
         {
           "name": "_ZN13FadeStillWipe8InitFadeEv",
@@ -81304,7 +81304,7 @@
           "address": 5238976,
           "offset": 4349008,
           "size": 276,
-          "match_percent": 56.28169
+          "match_percent": 97.57746
         },
         {
           "name": "_ZN8FadeWipe8DrawFadeEv",
@@ -81320,7 +81320,7 @@
           "address": 5239296,
           "offset": 4349328,
           "size": 168,
-          "match_percent": 87.35135
+          "match_percent": 99.89189
         },
         {
           "name": "_ZN13FadeStillWipe10UpdateFadeEv",
@@ -81336,7 +81336,7 @@
           "address": 5239536,
           "offset": 4349568,
           "size": 91,
-          "match_percent": 68.666664
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13FadeStillWipe8DrawFadeEv",
@@ -81368,7 +81368,7 @@
           "address": 5239792,
           "offset": 4349824,
           "size": 248,
-          "match_percent": 74.08696
+          "match_percent": 99.04348
         },
         {
           "name": "_ZN10FadeSystem4DrawEv",
@@ -81431,7 +81431,7 @@
           "address": 4774128,
           "offset": 3884160,
           "size": 95,
-          "match_percent": 100.0
+          "match_percent": 99.5
         },
         {
           "name": "_Z11Faders_DrawP11WORLDINFO_s",
@@ -81439,7 +81439,7 @@
           "address": 4774224,
           "offset": 3884256,
           "size": 408,
-          "match_percent": 46.018867
+          "match_percent": 75.84906
         }
       ]
     },
@@ -81963,7 +81963,7 @@
           "address": 5120304,
           "offset": 4230336,
           "size": 122,
-          "match_percent": 49.0
+          "match_percent": 94.39024
         },
         {
           "name": "_Z14GetSurfaceInfoP12GameObject_sif",
@@ -86951,7 +86951,7 @@
           "address": 1221664,
           "offset": 331696,
           "size": 798,
-          "match_percent": 41.707867
+          "match_percent": 43.44382
         },
         {
           "name": "_Z14WorldInfo_LoadP11WORLDINFO_s",

@@ -422,10 +422,10 @@ extern "C" {
         f32 size_x;
         f32 size_z;
         char *indices;
-        char *start;
+        VARIPTR start;
 
-        // The reference stores an unused start-of-buffer pointer here.
-        start = buffer->char_ptr;
+        // The reference keeps an unused copy of the incoming buffer cursor.
+        start = *buffer;
         (void)start;
         grid = static_cast<rtlindex_s *>(buffer->void_ptr);
         buffer->addr += sizeof(rtlindex_s);
@@ -844,9 +844,9 @@ static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *po
     f32 distance_sq;
     f32 strength;
     char *indices = NULL;
+    i32 x, z;
     rtlset *lights;
     rtlindex_s *grid;
-    i32 x, z;
     f32 distance;
     i32 index;
     lighting_data->specular_value = 0.0f;
@@ -855,13 +855,16 @@ static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *po
         light = lights->lights;
         grid = reinterpret_cast<rtlindex_s *>(lights + 1);
         dbg_rtlindex = grid;
-        if (grid->enabled != 0 && position != NULL &&
-            (x = static_cast<i32>(grid->scale * (position->x + grid->offset_x))) < grid->width && x >= 0 &&
-            (z = static_cast<i32>(grid->scale * (position->z + grid->offset_z))) < grid->depth && z >= 0 &&
-            grid->cells != NULL) {
-            indices = grid->cells[x + grid->width * z];
-            index = 0;
-            light = GetNextRTL(set, light, indices, &index);
+        if (grid->enabled != 0 && position != NULL) {
+            x = static_cast<i32>((position->x + grid->offset_x) * grid->scale);
+            if (grid->width > x && x >= 0) {
+                z = static_cast<i32>((position->z + grid->offset_z) * grid->scale);
+                if (grid->depth > z && z >= 0) {
+                    indices = grid->cells[x + grid->width * z];
+                    index = 0;
+                    light = GetNextRTL(set, light, indices, &index);
+                }
+            }
         }
     } else {
         light = reinterpret_cast<rtl_s *>(NuLstGetNext(rtl_dynamic_pool, NULL));
@@ -880,14 +883,15 @@ static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *po
 #define RTL_RADIUS_FRACTION ((distance - light->inner_radius) / (light->outer_radius - light->inner_radius))
 #define RTL_FALLOFF                                                                                                    \
     do {                                                                                                               \
-        if (!(light->inner_radius >= light->outer_radius)) {                                                           \
+        if (light->outer_radius <= light->inner_radius)                                                                \
+            strength = 1.0f;                                                                                           \
+        else {                                                                                                         \
             distance = NuFsqrt(distance_sq);                                                                           \
             strength = 1.0f - ((RTL_RADIUS_FRACTION > 1.0f ? 1.0f : RTL_RADIUS_FRACTION) < 0.0f                        \
                                    ? 0.0f                                                                              \
                                    : (RTL_RADIUS_FRACTION > 1.0f ? 1.0f : RTL_RADIUS_FRACTION));                       \
-        } else                                                                                                         \
-            strength = 1.0f;                                                                                           \
-        if (light->field_79 == -1 && light->field_7a == -1 && light->field_7b >= 0 && light->field_7b < modifier_cnt)  \
+        }                                                                                                              \
+        if (light->field_79 == -1 && light->field_7a == -1)                                                            \
             strength *= modifiers[light->field_7b];                                                                    \
     } while (0)
     if (light != NULL) {
@@ -901,19 +905,25 @@ static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *po
                 light = GetNextRTL(set, light, indices, &index);
                 continue;
             }
-            if (identity >= 0 && light->type != 7) {
-                if ((static_cast<u16>(light->field_60) >> identity) & 1) {
-                    light = GetNextRTL(set, light, indices, &index);
-                    continue;
-                }
-                if (light->field_5e != 0 && light->type == 5 &&
-                    (identity == -1 || !((static_cast<u16>(light->field_5e) >> identity) & 1))) {
-                    light = GetNextRTL(set, light, indices, &index);
-                    continue;
-                }
-                if (restricted != 0 && light->field_5e == 0) {
-                    light = GetNextRTL(set, light, indices, &index);
-                    continue;
+            if (identity >= 0) {
+                switch (light->type) {
+                    default:
+                        if ((static_cast<u16>(light->field_60) >> identity) & 1) {
+                            light = GetNextRTL(set, light, indices, &index);
+                            continue;
+                        }
+                        if (light->field_5e != 0 && light->type == 5 &&
+                            (identity == -1 || !((static_cast<u16>(light->field_5e) >> identity) & 1))) {
+                            light = GetNextRTL(set, light, indices, &index);
+                            continue;
+                        }
+                        if (restricted != 0 && light->field_5e == 0) {
+                            light = GetNextRTL(set, light, indices, &index);
+                            continue;
+                        }
+                        break;
+                    case 7:
+                        break;
                 }
             }
             if (light == NULL || light->type == 0)
@@ -952,17 +962,14 @@ static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *po
                                 lighting_data->specular_value += strength;
                                 if (light->intensity > 16.0f) {
                                     lighting_data->field_134.x +=
-                                        static_cast<f32>(static_cast<i32>(light->intensity) & 15) *
-                                        (NU_SIN_LUT((static_cast<i32>(light->intensity) >> 4) * rtltimer1) * strength) *
-                                        rtlwob;
+                                        NU_SIN_LUT(rtltimer1 * (static_cast<i32>(light->intensity) >> 4)) * strength *
+                                        static_cast<f32>(static_cast<i32>(light->intensity) & 15) * rtlwob;
                                     lighting_data->field_134.y +=
-                                        static_cast<f32>(static_cast<i32>(light->intensity) & 15) *
-                                        (NU_COS_LUT((static_cast<i32>(light->intensity) >> 4) * rtltimer1) * strength) *
-                                        rtlwob;
+                                        NU_COS_LUT(rtltimer1 * (static_cast<i32>(light->intensity) >> 4)) * strength *
+                                        static_cast<f32>(static_cast<i32>(light->intensity) & 15) * rtlwob;
                                     lighting_data->field_134.z +=
-                                        static_cast<f32>(static_cast<i32>(light->intensity) & 15) *
-                                        (NU_COS_LUT((static_cast<i32>(light->intensity) >> 4) * rtltimer1) * strength) *
-                                        rtlwob;
+                                        NU_COS_LUT(rtltimer1 * (static_cast<i32>(light->intensity) >> 4)) * strength *
+                                        static_cast<f32>(static_cast<i32>(light->intensity) & 15) * rtlwob;
                                 }
                             }
                             if (position != NULL && light->cast_shadow) {
@@ -990,16 +997,18 @@ static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *po
                                 lighting_data->cached_value = 0.0000001f;
                         }
                         break;
+                    case 7:
+                        if (position != NULL) {
+                            distance_sq = RTL_DISTANCE_SQ;
+                            if (distance_sq < light->outer_radius * light->outer_radius) {
+                                RTL_FALLOFF;
+                                if (strength != 0.0f)
+                                    InsertAntiLight(light, lighting_data, strength);
+                            }
+                        }
+                        break;
                     case 5:
                         InsertLight(light, lighting_data, 2.0f);
-                        break;
-                    case 7:
-                        if (position != NULL &&
-                            (distance_sq = RTL_DISTANCE_SQ) < light->outer_radius * light->outer_radius) {
-                            RTL_FALLOFF;
-                            if (strength != 0.0f)
-                                InsertAntiLight(light, lighting_data, strength);
-                        }
                         break;
                 }
             }
@@ -3843,46 +3852,60 @@ static void edrtlDrawRTLInfo() {
         "INVALID", "AMBIENT",     "POINT",     "POINT FLICKER", "DIRECTIONAL",
         "CAMDIR",  "POINT BLEND", "ANTILIGHT", "JON FLICKER",   "ALSO INVALID",
     };
+    i32 x;
+    i32 height;
+    i32 y;
+    i32 lines;
+    i32 i;
+    i32 j;
+    i32 count;
+    rtl_s *light;
+    i32 forward;
+    i32 backward;
+    rtl_s *alternate;
+
     NuQFntSet(system_qfont);
     NuQFntSetScale(system_qfont, edrtl_text_scale, edrtl_text_scale);
     NuQFntSetColour(system_qfont, 0x80ffffff);
-    i32 height = static_cast<i32>(NuQFntHeight(system_qfont));
+    height = static_cast<i32>(NuQFntHeight(system_qfont));
     if (rtl_debug) {
-        i32 y = 512;
-        NuQFntPrintEx(system_qfont, 5440, y, 16, "ix - ty - nx : pr");
+        x = 5440;
+        y = 512;
+        NuQFntPrintEx(system_qfont, x, y, 16, "ix - ty - nx : pr");
         y += height;
-        for (i32 i = 0; i < 10; ++i) {
+        for (i = 0; i < 10; i++) {
             NuQFntSet(system_qfont);
-            const rtl_s *light = &curr_set->lights[i];
-            NuQFntPrintEx(system_qfont, 5440, y, 16, "%02d - %02d - %02d : %02d", i, light->type, light->field_79,
-                          light->field_7a);
+            NuQFntPrintEx(system_qfont, x, y, 16, "%02d - %02d - %02d : %02d", i, curr_set->lights[i].type,
+                          curr_set->lights[i].field_79, curr_set->lights[i].field_7a);
             y += height;
         }
     }
     if (base_rtl) {
-        i32 y = 512;
+        x = 9600;
+        y = 512;
         NuQFntSet(system_qfont);
-        for (i32 i = 0; i < modifier_cnt; ++i) {
-            NuQFntPrintEx(system_qfont, 9600, y, 32, "%s = %.2f", modifier_names[i], static_cast<f64>(modifiers[i]));
+        for (j = 0; j < modifier_cnt; j++) {
+            NuQFntPrintEx(system_qfont, x, y, 32, "%s = %.2f", modifier_names[j], static_cast<f64>(modifiers[j]));
             y += height;
         }
     }
 
-    const i32 x = 640;
-    i32 y = 512;
+    x = 640;
+    y = 512;
     if (curr_rtl) {
-        i32 lines = 8;
+        lines = 8;
         if (curr_rtl->field_68 != 0)
-            ++lines;
+            lines++;
         if (curr_rtl->type == 5 && curr_rtl->field_5e != 0)
-            ++lines;
+            lines++;
         if (curr_rtl->field_60 != 0)
-            ++lines;
+            lines++;
         if (curr_rtl->group_id != 0)
-            ++lines;
+            lines++;
         if (rtl_locked != NULL)
-            ++lines;
-        NuRndrRect2di(128, y - height, 4160, (lines + 1) * height, 0x20404040, mtls[2]);
+            lines++;
+        lines = (lines + 1) * 2 * height >> 1;
+        NuRndrRect2di(128, y - height, 4160, lines, 0x20404040, mtls[2]);
         NuQFntSet(system_qfont);
         if (base_rtl)
             NuQFntPrintEx(system_qfont, x, y, 16, "RTL Editor %d/%d (Parent %d)",
@@ -3915,12 +3938,11 @@ static void edrtlDrawRTLInfo() {
             y += height;
         }
         if (curr_rtl->field_7a != -1 || (curr_rtl->field_7a == -1 && curr_rtl->field_79 == -1)) {
-            i32 modifier_index = curr_rtl->field_7b;
-            if (modifier_index >= modifier_cnt)
-                modifier_index = modifier_cnt - 1;
-            if (modifier_index < 0)
-                modifier_index = 0;
-            NuQFntPrintEx(system_qfont, x, y, 16, "MODIFIER: %s", modifier_names[modifier_index]);
+            NuQFntPrintEx(
+                system_qfont, x, y, 16, "MODIFIER: %s",
+                modifier_names[(curr_rtl->field_7b > modifier_cnt - 1 ? modifier_cnt - 1 : curr_rtl->field_7b) < 0
+                                   ? 0
+                                   : (curr_rtl->field_7b > modifier_cnt - 1 ? modifier_cnt - 1 : curr_rtl->field_7b)]);
             y += height;
         }
         if (curr_rtl->type == 5 && curr_rtl->field_5e != 0) {
@@ -3936,27 +3958,18 @@ static void edrtlDrawRTLInfo() {
             y += height;
         }
         if (curr_rtl->field_79 != -1 && curr_rtl->field_7a == -1) {
-            i32 count = 0;
-            rtl_s *light = curr_rtl;
-            while (light->field_79 != -1) {
-                ++count;
-                light = &light->field_7c[light->field_79];
-            }
+            count = 0;
+            for (light = curr_rtl; light->field_79 != -1; light = &light->field_7c[light->field_79])
+                count++;
             NuQFntPrintEx(system_qfont, x, y, 16, "[HAS %d ALTERNATE SETTINGS]", count);
             y += height;
         }
         if (curr_rtl->field_7a != -1) {
-            i32 forward = 0;
-            rtl_s *light = curr_rtl;
-            while (light->field_7a != -1) {
-                ++forward;
-                light = &curr_set->lights[light->field_7a];
-            }
-            i32 backward = 0;
-            while (light->field_79 != -1) {
-                ++backward;
-                light = &curr_set->lights[light->field_79];
-            }
+            forward = 0;
+            for (alternate = curr_rtl; alternate->field_7a != -1; alternate = &curr_set->lights[alternate->field_7a])
+                forward++;
+            for (backward = 0; alternate->field_79 != -1; alternate = &curr_set->lights[alternate->field_79])
+                backward++;
             NuQFntPrintEx(system_qfont, x, y, 16, "[ALTERNATE SETTING %d/%d]", forward, backward);
             y += height;
         }
@@ -3966,7 +3979,7 @@ static void edrtlDrawRTLInfo() {
             y += height;
         }
     } else {
-        NuRndrRect2di(128, y - height, 4160, height * 2, 0x20404040, mtls[2]);
+        NuRndrRect2di(128, y - height, 4160, height * 4 / 2, 0x20404040, mtls[2]);
         NuQFntSet(system_qfont);
         NuQFntPrintEx(system_qfont, x, y, 16, "RTL Editor");
         y += height;
@@ -3976,8 +3989,10 @@ static void edrtlDrawRTLInfo() {
                       static_cast<f64>(pcpos.y), static_cast<f64>(pcpos.z));
         y += height;
     }
-    if (maxundo)
-        NuQFntPrintEx(system_qfont, PS2_REZ_W * 16, 512, 16, "UNDO %d/%d/%d", rtl_undo_cnt, rtl_undo_maxcnt, maxundo);
+    if (maxundo) {
+        y = 512;
+        NuQFntPrintEx(system_qfont, PS2_REZ_W * 16, y, 16, "UNDO %d/%d/%d", rtl_undo_cnt, rtl_undo_maxcnt, maxundo);
+    }
     edrtlDrawHelp();
 }
 

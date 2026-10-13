@@ -168,16 +168,14 @@ extern "C" {
 
     APIOBJECTSYS_s *APIObjectSysInit(i32 size, VARIPTR *buf, VARIPTR *buf_end) {
         APIOBJECTSYS_s *system = static_cast<APIOBJECTSYS_s *>(AISysBufferAlloc(buf, buf_end, sizeof(APIOBJECTSYS_s)));
-        if (system == NULL) {
-            return NULL;
-        }
-
-        memset(system, 0, sizeof(*system));
-        if (size != 0) {
-            system->objects = static_cast<APIOBJECT *>(AISysBufferAlloc(buf, buf_end, static_cast<u32>(size) * 64));
-            if (system->objects != NULL) {
-                system->object_size = static_cast<u32>(size);
-                memset(system->objects, 0, static_cast<u32>(size) * 64);
+        if (system != NULL) {
+            memset(system, 0, sizeof(*system));
+            if (size != 0) {
+                system->objects = static_cast<APIOBJECT *>(AISysBufferAlloc(buf, buf_end, size * 64));
+                if (system->objects != NULL) {
+                    system->object_size = size;
+                    memset(system->objects, 0, system->object_size * 64);
+                }
             }
         }
         return system;
@@ -521,7 +519,7 @@ extern "C" {
             object = system->objects;
             for (index = 0; index < 64; ++index,
                 object = reinterpret_cast<APIOBJECT *>(reinterpret_cast<u8 *>(object) + system->object_size)) {
-                if ((object->flags_low & 1) == 0) {
+                if (!object->in_use) {
                     memset(object, 0, system->object_size);
                     APIObjectSetUsed(object, index, 1);
                     return object;
@@ -785,15 +783,14 @@ extern "C" {
 
     void APICharacterModelReset(APICHARACTERMODEL *model) {
         model->model_id = 0;
-        model->flags &= 0xfe;
+        model->flag_0 = 0;
         model->field_0x3 = 0;
         model->hierarchy = NULL;
 
         if (apicharsys->model_id_capacity != 0) {
-            usize table_size = (usize)apicharsys->model_id_capacity * sizeof(void *);
-            memset(model->model_data_a, 0, table_size);
-            memset(model->model_data_b, 0, table_size);
-            memset(model->model_data_c, 0, table_size);
+            memset(model->model_data_a, 0, apicharsys->model_id_capacity * sizeof(void *));
+            memset(model->model_data_b, 0, apicharsys->model_id_capacity * sizeof(void *));
+            memset(model->model_data_c, 0, apicharsys->model_id_capacity * sizeof(void *));
         }
         memset(model->points_of_interest, 0, sizeof(model->points_of_interest));
     }
@@ -1154,23 +1151,20 @@ extern "C" {
     }
 
     f32 AnimDuration(i32 character_id, i32 animation, f32 start_frame, f32 end_frame, i32 subtract_frame_time) {
-        if (apicharsys == NULL || character_id < 0 || character_id >= apicharsys->character_count || animation < 0 ||
-            animation >= apicharsys->model_id_capacity) {
+        f32 duration;
+        CHARACTERMODEL_s *model;
+        if (character_id < 0 || character_id >= apicharsys->character_count)
             return 0.0f;
-        }
-
-        const i16 model_index = apicharsys->playermodelids[character_id];
-        if (model_index == -1) {
+        if (animation < 0 || animation >= apicharsys->model_id_capacity)
             return 0.0f;
-        }
-
-        CHARACTERMODEL_s *model = &apicharsys->models[model_index];
-        if (model->model_data_b == NULL || model->model_data_b[animation] == NULL || model->model_data_a == NULL ||
-            model->model_data_a[animation] == NULL) {
+        if (apicharsys->playermodelids[character_id] == -1)
             return 0.0f;
-        }
 
-        f32 duration = NuAnimEndFrame(model->model_data_b[animation]);
+        model = &apicharsys->models[apicharsys->playermodelids[character_id]];
+        if (model->model_data_b[animation] == NULL)
+            return 0.0f;
+
+        duration = NuAnimEndFrame(model->model_data_b[animation]);
         if (start_frame >= 1.0f && duration > start_frame) {
             if (end_frame >= 1.0f && duration > end_frame && end_frame > start_frame) {
                 duration = end_frame - start_frame;
@@ -1183,9 +1177,9 @@ extern "C" {
             duration -= 1.0f;
         }
 
-        CHARACTERANIM_s *animation_info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
-        duration *= (1.0f / (animation_info->playback_rate / 30.0f)) * (1.0f / 30.0f);
-        animduration_blendouttime = animation_info->blend_out_time;
+        duration *= (1.0f / (static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->playback_rate / 30.0f)) *
+                    (1.0f / 30.0f);
+        animduration_blendouttime = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->blend_out_time;
         if (subtract_frame_time != 0) {
             duration -= animduration_blendouttime;
         }
@@ -1216,12 +1210,10 @@ extern "C" {
         if (positions != NULL || matrices != NULL) {
             for (i32 index = 0; index < 16; ++index) {
                 if (model->points_of_interest[index] != NULL) {
-                    NUMTX matrix;
+                    NUMTX_ALIGNED16 matrix;
                     NuHGobjPOIMtx(model->hierarchy, static_cast<u8>(index), world_matrix, joint_matrices, &matrix);
                     if (positions != NULL) {
-                        positions[index].x = matrix.m30;
-                        positions[index].y = matrix.m31;
-                        positions[index].z = matrix.m32;
+                        positions[index] = *reinterpret_cast<NUVEC *>(&matrix.m30);
                     }
                     if (matrices != NULL) {
                         matrices[index] = matrix;
@@ -1766,32 +1758,30 @@ extern "C" {
     }
 
     i32 AnimsAvailableToBothCharacters(ANIMPACKET_s *packet, i32 first_character, i32 second_character) {
-        if (first_character == -1) {
-            return 0;
+        i32 model_index;
+        CHARACTERMODEL_s *first_model;
+        CHARACTERMODEL_s *second_model;
+        if ((first_character != -1 && (model_index = apicharsys->playermodelids[first_character]) != -1) ? true
+                                                                                                         : false) {
+            first_model = &apicharsys->models[model_index];
+            if ((second_character != -1 && (model_index = apicharsys->playermodelids[second_character]) != -1)
+                    ? true
+                    : false) {
+                second_model = &apicharsys->models[model_index];
+                if (packet->blending != 0) {
+                    if (first_model->model_data_b[packet->blend_animation_a] != NULL &&
+                        first_model->model_data_b[packet->blend_animation_b] != NULL &&
+                        second_model->model_data_b[packet->blend_animation_a] != NULL &&
+                        second_model->model_data_b[packet->blend_animation_b] != NULL) {
+                        return 1;
+                    }
+                } else if (first_model->model_data_b[packet->animation_index] != NULL &&
+                           second_model->model_data_b[packet->animation_index] != NULL) {
+                    return 1;
+                }
+            }
         }
-        i32 first_model_index = apicharsys->playermodelids[first_character];
-        if (first_model_index == -1) {
-            return 0;
-        }
-        CHARACTERMODEL_s *first_model = &apicharsys->models[first_model_index];
-
-        if (second_character == -1) {
-            return 0;
-        }
-        i32 second_model_index = apicharsys->playermodelids[second_character];
-        if (second_model_index == -1) {
-            return 0;
-        }
-        CHARACTERMODEL_s *second_model = &apicharsys->models[second_model_index];
-
-        if (packet->blending != 0) {
-            return first_model->model_data_b[packet->blend_animation_a] != NULL &&
-                   first_model->model_data_b[packet->blend_animation_b] != NULL &&
-                   second_model->model_data_b[packet->blend_animation_a] != NULL &&
-                   second_model->model_data_b[packet->blend_animation_b] != NULL;
-        }
-        return first_model->model_data_b[packet->animation_index] != NULL &&
-               second_model->model_data_b[packet->animation_index] != NULL;
+        return 0;
     }
 
 } // extern "C"
@@ -2828,120 +2818,114 @@ extern "C" {
 
     CHARACTERDATA *ConfigureCharacterList(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd, i32 count,
                                           i32 *countDest, i32 count2, GAMECHARACTERDATA **dataList) {
-        bool bVar1;
-        bool bVar2;
+        CHARACTERDATA *cdata;
+        i32 i;
+        i32 in_char;
+        i32 offset;
+        i32 j;
         nufpar_s *fp;
         CHARACTERDATA *characterdata;
+        i32 len;
+        char buf[10000];
         i16 dirnameOffsets[500];
         i16 filenameOffsets[500];
-        char buf[10000];
-        CHARACTERDATA *cdatas;
-        i32 j;
-        usize offset;
-        i32 i;
-        CHARACTERDATA *cdata;
 
         fp = NuFParCreate(file);
-        if (500 < count) {
+        if (count > 500) {
             count = 500;
         }
-        bufferStart->void_ptr = (void *)ALIGN(bufferStart->addr, 4);
+        bufferStart->addr = ALIGN(bufferStart->addr, 4);
         characterdata = (CHARACTERDATA *)bufferStart->void_ptr;
+        cdata = characterdata;
         i = 0;
 
         memset(buf, 0, 10000);
 
         buf[0] = '\0';
         offset = 0;
-        bVar2 = false;
-        cdata = characterdata;
+        in_char = 0;
         while (NuFParGetLine(fp) != 0) {
             NuFParGetWord(fp);
             if (*fp->word_buf != '\0') {
-                if (bVar2) {
+                if (in_char) {
                     if (NuStrICmp(fp->word_buf, "char_end") == 0) {
-                        bVar2 = false;
-                        if ((dirnameOffsets[i] != -1) && (filenameOffsets[i] != -1)) {
-                            i = i + 1;
-                            cdata = cdata + 1;
+                        in_char = 0;
+                        if (dirnameOffsets[i] != -1 && filenameOffsets[i] != -1) {
+                            i++;
+                            cdata++;
                         }
-                    } else if (NuStrICmp(fp->word_buf, "dir") == 0 && NuFParGetWord(fp) != 0) {
-                        i32 len = NuStrLen(fp->word_buf);
-                        if ((len + offset + 1) < 10000) {
-                            NuStrCpy(buf + offset, fp->word_buf);
-                            dirnameOffsets[i] = (i16)offset;
-                            offset = offset + len + 1;
+                    } else if (NuStrICmp(fp->word_buf, "dir") == 0) {
+                        if (NuFParGetWord(fp) != 0) {
+                            len = NuStrLen(fp->word_buf);
+                            if (offset + len + 1 < 10000) {
+                                NuStrCpy(&buf[offset], fp->word_buf);
+                                dirnameOffsets[i] = (i16)offset;
+                                offset += len + 1;
+                            }
                         }
-                    } else if (NuStrICmp(fp->word_buf, "file") == 0 && NuFParGetWord(fp) != 0) {
-                        i32 len = NuStrLen(fp->word_buf);
-                        if ((len + offset + 1) < 10000) {
-                            NuStrCpy(buf + offset, fp->word_buf);
-                            filenameOffsets[i] = (i16)offset;
-                            offset = offset + len + 1;
+                    } else if (NuStrICmp(fp->word_buf, "file") == 0) {
+                        if (NuFParGetWord(fp) != 0) {
+                            len = NuStrLen(fp->word_buf);
+                            if (offset + len + 1 < 10000) {
+                                NuStrCpy(&buf[offset], fp->word_buf);
+                                filenameOffsets[i] = (i16)offset;
+                                offset += len + 1;
+                            }
                         }
                     }
-                } else {
-                    if (NuStrICmp(fp->word_buf, "char_start") == 0 && i < count) {
-                        bVar1 = true;
-                    } else {
-                        bVar1 = false;
-                    }
-
-                    if (bVar1) {
-                        bVar2 = true;
-                        dirnameOffsets[i] = -1;
-                        filenameOffsets[i] = -1;
-                        cdata->field0_0x0 = -1;
-                        cdata->model_flags = 0;
-                        cdata->dir = (char *)0x0;
-                        cdata->file = (char *)0x0;
-                        cdata->animations = NULL;
-                        cdata->field5_0x14 = 0;
-                        cdata->move_fn = NULL;
-                        cdata->animate_fn = NULL;
-                        cdata->draw_fn = NULL;
-                        cdata->field11_0x24 = 0;
-                        cdata->field12_0x28 = 0;
-                        cdata->field13_0x2c = 1.0f;
-                        cdata->field14_0x30 = 0.5f;
-                        cdata->field15_0x34 = -0.5f;
-                        cdata->field16_0x38 = 0.5f;
-                        cdata->field17_0x3c = 1.0f;
-                        cdata->flags = cdata->flags & 0xfe;
-                        cdata->field20_0x42 = -1;
-                        cdata->field21_0x44 = 0;
-                        cdata->field22_0x48 = 0;
-                    }
+                } else if ((NuStrICmp(fp->word_buf, "char_start") == 0 && i < count) ? true : false) {
+                    in_char = 1;
+                    dirnameOffsets[i] = -1;
+                    filenameOffsets[i] = -1;
+                    cdata->field0_0x0 = -1;
+                    cdata->model_flags = 0;
+                    cdata->dir = (char *)0x0;
+                    cdata->file = (char *)0x0;
+                    cdata->animations = NULL;
+                    cdata->field5_0x14 = 0;
+                    cdata->move_fn = NULL;
+                    cdata->animate_fn = NULL;
+                    cdata->draw_fn = NULL;
+                    cdata->field11_0x24 = 0;
+                    cdata->field12_0x28 = 0;
+                    cdata->field13_0x2c = 1.0f;
+                    cdata->field14_0x30 = 0.5f;
+                    cdata->field15_0x34 = -0.5f;
+                    cdata->field16_0x38 = 0.5f;
+                    cdata->field17_0x3c = 1.0f;
+                    cdata->flags = cdata->flags & 0xfe;
+                    cdata->field20_0x42 = -1;
+                    cdata->field21_0x44 = 0;
+                    cdata->field22_0x48 = 0;
                 }
             }
         }
         NuFParDestroy(fp);
-        if (!(i < 1)) {
+        if (i > 0) {
             bufferStart->void_ptr = cdata;
             memmove(bufferStart->void_ptr, buf, offset);
-            for (j = 0; j < i; j = j + 1) {
-                characterdata[j].dir = (char *)((i32)dirnameOffsets[j] + (usize)bufferStart->void_ptr);
-                characterdata[j].file = (char *)((i32)filenameOffsets[j] + (usize)bufferStart->void_ptr);
+            for (j = 0; j < i; j++) {
+                characterdata[j].dir = (char *)(bufferStart->addr + dirnameOffsets[j]);
+                characterdata[j].file = (char *)(bufferStart->addr + filenameOffsets[j]);
             }
-            bufferStart->void_ptr = (void *)((usize)bufferStart->void_ptr + offset);
-            bufferStart->void_ptr = (void *)ALIGN((usize)bufferStart->void_ptr, 4);
-            if (0 < count2) {
+            bufferStart->addr += offset;
+            bufferStart->addr = ALIGN(bufferStart->addr, 4);
+            if (count2 > 0) {
                 if (dataList != NULL) {
                     *dataList = (GAMECHARACTERDATA_s *)bufferStart->void_ptr;
                 }
-                for (j = 0; j < i; j = j + 1) {
+                for (j = 0; j < i; j++) {
                     characterdata[j].field11_0x24 = bufferStart->void_ptr;
-                    bufferStart->void_ptr = (void *)((usize)bufferStart->void_ptr + count2);
+                    bufferStart->addr += count2;
                 }
             }
-            bufferStart->void_ptr = (void *)ALIGN((usize)bufferStart->void_ptr, 4);
-            if (countDest != (i32 *)0x0) {
+            bufferStart->addr = ALIGN(bufferStart->addr, 4);
+            if (countDest != NULL) {
                 *countDest = i;
             }
-        } else {
-            characterdata = NULL;
+            return characterdata;
         }
-        return characterdata;
+        return NULL;
     }
 
 } // extern "C"

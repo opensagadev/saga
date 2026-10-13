@@ -160,21 +160,14 @@ void SurfaceMaskOff(u32 *surface_mask) {
 void Surfaces_Reset() {
     LAYER_HOVERIGNORE = 0x10;
     SURFACEBITS_DUST = 0;
-
-    i32 i = 0;
-    u32 no_dust = 0;
-    const u32 initial_surface_bit = 1;
-    u32 dust = 0;
-    while (i < 32) {
-        const u32 surface_bit = initial_surface_bit << i;
+    u16 no_dust = 0;
+    for (i32 i = 0; i < 32; ++i) {
         if ((TerSurface[i].flags & 4) != 0) {
-            dust |= surface_bit;
+            SURFACEBITS_DUST |= 1 << i;
         } else {
-            no_dust |= surface_bit;
+            no_dust |= 1 << i;
         }
-        ++i;
     }
-    SURFACEBITS_DUST = dust;
     SURFACEBITS_NODUST = no_dust;
 }
 

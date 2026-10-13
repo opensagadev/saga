@@ -16,23 +16,29 @@ struct SHOPINPUT;
 
 // Retail realigns this stack frame before copying the matrix local.
 void __attribute__((force_align_arg_pointer)) Faders_Draw(WORLDINFO_s *world) {
-    for (i32 i = 0; world->faders != NULL && i < world->fader_count; ++i) {
-        FADER_s &fader = world->faders[i];
-        NUMTX matrix = *NuSpecialGetDrawMtx(&fader.special);
-        f32 alpha = 0.0f;
-        if (NuSpecialExistsFn(&fader.while_animating) == 0) {
-            f32 distance =
-                NuVecDist(reinterpret_cast<NUVEC *>(&matrix.m30), reinterpret_cast<NUVEC *>(&pNuCam->mtx.m30), NULL);
-            if (distance >= 2.0f) {
-                alpha = 1.0f;
-            } else if (distance >= 0.5f) {
-                alpha = (distance - 0.5f) / 1.5f;
-            }
+    if (world->faders == NULL) {
+        return;
+    }
+    FADER_s *fader = world->faders;
+    for (i32 i = 0; i < world->fader_count; ++i, ++fader) {
+        NUMTX matrix = *NuSpecialGetDrawMtx(&fader->special);
+        f32 alpha;
+        if (NuSpecialExistsFn(&fader->while_animating) != 0) {
+            alpha = 1.0f - NuSpecialGetAnimPos(&fader->while_animating);
         } else {
-            alpha = 1.0f - NuSpecialGetAnimPos(&fader.while_animating);
+            const f32 distance =
+                NuVecDist(reinterpret_cast<NUVEC *>(&matrix.m30), reinterpret_cast<NUVEC *>(&pNuCam->mtx.m30), NULL);
+            if (distance < 0.5f) {
+                continue;
+            }
+            if (distance < 2.0f) {
+                alpha = (distance - 0.5f) / 1.5f;
+            } else {
+                alpha = 1.0f;
+            }
         }
         if (alpha > 0.0f) {
-            NuSpecialDrawAtAlpha(&fader.special, &matrix, alpha);
+            NuSpecialDrawAtAlpha(&fader->special, &matrix, alpha);
         }
     }
 }
