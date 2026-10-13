@@ -5671,9 +5671,7 @@ static void ForceCode(GameObject_s *object, i32 pressed, i32 held, i32) {
     u8 previous_force = object->force_repeat_requested;
     object->force_repeat_requested = 0;
     if (object->character_context == 8) {
-        if ((!held && (object->pad_gamepad->allocated_5a & 4) == 0) || object->gizforce_target == NULL) {
-            object->character_context = -1;
-        } else {
+        if ((held || (object->pad_gamepad->allocated_5a & 4) != 0) && object->gizforce_target != NULL) {
             if ((dagobah_training == 0 || object->field_0xcc0 != NULL || FreePlay != 0) &&
                 !GizForce_Complete(object->gizforce_target) &&
                 !GizForce_StoodOnForce(object->gizforce_target, object)) {
@@ -5713,6 +5711,8 @@ static void ForceCode(GameObject_s *object, i32 pressed, i32 held, i32) {
                 object->character_context = -1;
                 object->gizforce_target = NULL;
             }
+        } else {
+            object->character_context = -1;
         }
         if (object->character_context == -1)
             GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
