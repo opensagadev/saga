@@ -2524,19 +2524,23 @@ PART_s *TargetPart(GameObject_s *object, nuvec_s *position, nuvec_s *direction, 
 }
 
 extern "C" i32 NuGScnNumSpecials(nugscn_s *);
+static char nullobjectname[16] = "NULL instance";
 i32 edpartLookupObjectInScene(char *name, nugscn_s *scene) {
     if (name[0] == 0)
         return -1;
-    if (NuStrNCmp(name, "NULL instance", 16) == 0)
+    if (NuStrNCmp(name, nullobjectname, 16) == 0)
         return 9999;
     if (scene != NULL) {
         nuhspecial_s special;
         const i32 count = NuGScnNumSpecials(scene);
-        for (i32 i = 0; i < count; ++i) {
+        i32 i;
+        for (i = 0; i < count; ++i) {
             NuGScnGetSpecial(&special, scene, i);
             if (NuSpecialExistsFn(&special) && NuStrNCmp(name, NuSpecialGetName(&special), 16) == 0)
-                return i;
+                break;
         }
+        if (i < count)
+            return i;
     }
     return -1;
 }
