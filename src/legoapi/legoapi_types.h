@@ -3447,7 +3447,15 @@ struct instNUGCUTSCENE_s;
 struct mdct_lookup {};
 struct minisnowtrooper_s {
     u8 formation_index;
-    u8 state_flags;
+    union {
+        u8 state_flags;
+        struct {
+            u8 state_low_bits : 2;
+            u8 step_frame : 2;
+            u8 slot : 2;
+            u8 state_high_bits : 2;
+        };
+    };
     u8 reserved_002;
     u8 speed_divisor;
     u16 rotation;

@@ -1274,7 +1274,7 @@ void DrawMiniSnowTroopers(WORLDINFO_s *world) {
             }
             team->height += ground;
 
-            const i32 frame = TrooperStepFrames[(trooper->state_flags >> 2) & 3];
+            const i32 frame = TrooperStepFrames[trooper->step_frame];
             const u16 draw_rotation = static_cast<u16>(trooper->rotation + 0x8000);
             NUMTX *matrix = next[frame];
             const f32 cosine = NU_COS_LUT(draw_rotation);
@@ -1283,18 +1283,18 @@ void DrawMiniSnowTroopers(WORLDINFO_s *world) {
                               sine,   0.0f, cosine, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
             *matrix = rotation;
 
-            const f32 step_time = 1.0f / static_cast<f32>(trooper->speed_divisor);
+            const u16 frame_phase = static_cast<u16>(static_cast<u8>(trooper->state_flags >> 2) << 14);
+            const f32 step_time = 1.0f / static_cast<f32>(static_cast<i32>(trooper->speed_divisor));
             const f32 step =
                 1.0f -
                 (NU_SIN_LUT(static_cast<i32>(trooper->timer * (1.0f / step_time) * 32768.0f + 16384.0f)) + 1.0f) * 0.5f;
-            const u16 frame_phase = static_cast<u16>((trooper->state_flags >> 2) << 14);
-            const i32 phase = static_cast<i32>(static_cast<f32>(frame_phase) + step * 16384.0f);
-            position.y = ground + fabsf(NU_SIN_LUT(phase)) * 0.04f;
+            const u16 phase = static_cast<i32>(static_cast<f32>(static_cast<i32>(frame_phase)) + step * 16384.0f);
+            position.y = ground + fabsf(NuTrigTable[static_cast<u16>(phase / 2)]) * 0.04f;
             NuMtxTranslate(matrix, &position);
 
             next[frame] = matrix + 1;
             ++counts[frame];
-            if ((team->team_flags & 2) == 0) {
+            if (!team->team_side) {
                 ++first_side_counts[frame];
             }
         }
@@ -1302,11 +1302,12 @@ void DrawMiniSnowTroopers(WORLDINFO_s *world) {
         team->height /= static_cast<f32>(static_cast<i32>(team->trooper_count));
     }
 
+    NUMTX *second_side[3];
     for (i32 frame = 0; frame < 3; ++frame) {
         NuSpecialBurstDrawAt(&hothtroopers[frame], first_side_counts[frame], matrices[frame], 1);
+        second_side[frame] = matrices[frame] + first_side_counts[frame];
     }
     for (i32 frame = 0; frame < 3; ++frame) {
-        NuSpecialBurstDrawAt(&hothtroopers[frame + 3], counts[frame] - first_side_counts[frame],
-                             matrices[frame] + first_side_counts[frame], 1);
+        NuSpecialBurstDrawAt(&hothtroopers[frame + 3], counts[frame] - first_side_counts[frame], second_side[frame], 1);
     }
 }
