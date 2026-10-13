@@ -3403,9 +3403,7 @@ PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f3
 }
 
 void InstantKillParts(GameObject_s *object, i32 mode, float scale) {
-    i32 variant = -1;
-    if (object->id == id_BODYGUARD)
-        variant = object->current_hp <= 1 ? 4 : -1;
+    i32 variant = (object->id == id_BODYGUARD && object->current_hp <= 1) ? 4 : -1;
     KillParts(object, -1, variant, mode, scale, 0, NULL);
 }
 
