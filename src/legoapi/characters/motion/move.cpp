@@ -7022,12 +7022,12 @@ MoveToMarker::MoveToMarker(MechObjectInterface &object) : target(&object) {
     field_100 = 0.0f;
     rotation.Start(0.0f, 21845.0f, 0.5f);
     *rotation.target = 0.0f;
+    colour.elapsed = 0.0f;
+    colour.duration = 0.5f;
+    colour.delay = 0.0f;
     colour.from = VuVec(255.0f, 255.0f, 255.0f, 1.0f);
     colour.to = VuVec(0.0f, 85.0f, 253.0f, 1.0f);
-    colour.duration = 0.5f;
-    colour.elapsed = 0.0f;
-    colour.delay = 0.0f;
-    *colour.target = colour.from;
+    *colour.target = VuVec(255.0f, 255.0f, 255.0f, 1.0f);
     scale.Start(0.0f, 1.0f, 0.5f);
     *scale.target = 0.0f;
     secondary_rotation.Start(0.0f, 32768.0f, 0.5f);
