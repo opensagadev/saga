@@ -502,7 +502,15 @@ typedef struct APIOBJECT_s {
     union {
         u32 object_flags; // 0x1f8, complete flag word
         struct {
-            u8 flags_low;
+            union {
+                u8 flags_low;
+                struct {
+                    u8 : 1;
+                    // Objects with this bit are not pushed apart by 2D collision resolution.
+                    u8 flags_low_bit1 : 1;
+                    u8 : 6;
+                };
+            };
             union {
                 u8 flags_high;
                 struct {

@@ -86,7 +86,7 @@ static rtl_s **base_rtl_undo;
 static NUVEC *curpos_undo;
 static i32 rtl_undo_cnt;
 static i32 rtl_undo_maxcnt;
-static i32 rtl_undo_ix;
+static u32 rtl_undo_ix;
 static eduiitem_s *undo_item;
 static eduiitem_s *redo_item;
 static NUVEC pcpos;
@@ -296,49 +296,57 @@ extern "C" {
     }
 
     i32 rtlDynamicSetType(i32 id, i32 type) {
-        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max || type <= 0 || type >= 9)
+        rtl_s *light;
+        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max)
             return 0;
-        rtl_s *light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
-        if (light == NULL)
-            return 0;
-        light->type = type;
-        return 1;
+        if (type > 0 && type <= 8) {
+            light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
+            if (light != NULL) {
+                light->type = type;
+                return 1;
+            }
+        }
+        return 0;
     }
 
     i32 rtlDynamicSetPos(i32 id, NUVEC *position) {
+        rtl_s *light;
         if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max)
             return 0;
-        rtl_s *light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
-        if (light == NULL || position == NULL)
-            return 0;
-        light->position = *position;
-        return 1;
+        light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
+        if (light != NULL && position != NULL) {
+            light->position = *position;
+            return 1;
+        }
+        return 0;
     }
 
     i32 rtlDynamicSetRadii(i32 id, f32 inner, f32 outer) {
+        rtl_s *light;
         if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max)
             return 0;
-        rtl_s *light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
-        if (light == NULL)
-            return 0;
-        light->inner_radius = inner;
-        if (outer < inner)
-            outer = inner;
-        light->outer_radius = outer;
-        return 1;
+        light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
+        if (light != NULL) {
+            light->inner_radius = inner;
+            light->outer_radius = inner > outer ? inner : outer;
+            return 1;
+        }
+        return 0;
     }
 
     i32 rtlDynamicSetColours(i32 id, NUVEC *colour, NUVEC *secondary) {
+        rtl_s *light;
         if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max)
             return 0;
-        rtl_s *light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
-        if (light == NULL || (colour == NULL && secondary == NULL))
-            return 0;
-        if (colour != NULL)
-            light->colour = *colour;
-        if (secondary != NULL)
-            light->secondary_colour = *secondary;
-        return 1;
+        light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
+        if (light != NULL && (colour != NULL || secondary != NULL)) {
+            if (colour != NULL)
+                light->colour = *colour;
+            if (secondary != NULL)
+                light->secondary_colour = *secondary;
+            return 1;
+        }
+        return 0;
     }
 
     bool rtlDynamicEnable(i32 id, i32 enabled) {
@@ -603,13 +611,9 @@ extern "C" {
         }
         lighting_data->anti_light_count = 0;
         lighting_data->field_120 = 1.0f;
-        lighting_data->ambient = black;
-        lighting_data->intensity_vectors[2] = lighting_data->ambient;
-        lighting_data->intensity_vectors[1] = lighting_data->intensity_vectors[2];
-        lighting_data->intensity_vectors[0] = lighting_data->intensity_vectors[1];
-        lighting_data->direction[2] = nuvec_x;
-        lighting_data->direction[1] = lighting_data->direction[2];
-        lighting_data->direction[0] = lighting_data->direction[1];
+        lighting_data->intensity_vectors[0] = lighting_data->intensity_vectors[1] =
+            lighting_data->intensity_vectors[2] = lighting_data->ambient = black;
+        lighting_data->direction[0] = lighting_data->direction[1] = lighting_data->direction[2] = nuvec_x;
         lighting_data->field_134.x = 1.0f;
         lighting_data->field_134.y = 0.0f;
         lighting_data->field_134.z = 0.0f;
@@ -807,16 +811,17 @@ static __used__ void rtlCalcLights(nuvec_s *position, numtx_s *rotation, f32 sca
 
 static __used__ rtl_s *GetNextRTL(void *set, rtl_s *light, char *indices, int *index) {
     if (set != NULL) {
-        if ((indices != NULL && index != NULL)) {
-            if (!(*index < static_cast<i32>(*indices))) {
+        if (indices != NULL && index != NULL) {
+            rtlset *lights = static_cast<rtlset *>(set);
+            if (*index >= *indices) {
                 light = NULL;
             } else {
                 ++*index;
-                const i32 light_index = indices[*index];
-                light = light_index < 0 ? NULL : &static_cast<rtlset *>(set)->lights[light_index];
+                // IndexLights stores only indices 0..127, so this lookup stays in bounds.
+                light = &lights->lights[indices[*index]];
             }
         } else {
-            ++light;
+            light++;
         }
     } else {
         light = reinterpret_cast<rtl_s *>(NuLstGetNext(rtl_dynamic_pool, reinterpret_cast<NULNKHDR *>(light)));
@@ -1033,29 +1038,28 @@ static __used__ void rtlCalcShadow(rtlidata_s *data) {
     if (data->cached_value != 0.0f)
         NuVecNorm(&data->shadow_direction, &data->shadow_direction);
 
-    if (data->shadow_blend == 0.0f) {
+    if (data->shadow_blend != 0.0f) {
+        if (data->shadow_blend == 1.0f) {
+            data->previous_shadow_direction = data->blended_shadow_direction;
+            data->previous_shadow_value = data->blended_shadow_value;
+            data->shadow_blend = 0.999f;
+        }
+
+        if (data->previous_shadow_direction.x == 0.0f && data->previous_shadow_direction.y == 0.0f &&
+            data->previous_shadow_direction.z == 0.0f) {
+            data->blended_shadow_direction = data->shadow_direction;
+        } else {
+            NuVecLerp(&data->blended_shadow_direction, &data->previous_shadow_direction, &data->shadow_direction,
+                      data->shadow_blend);
+        }
+        NuVecNorm(&data->blended_shadow_direction, &data->blended_shadow_direction);
+        data->blended_shadow_value =
+            data->previous_shadow_value * data->shadow_blend + data->cached_value * (1.0f - data->shadow_blend);
+        data->shadow_blend = MAX(0.0f, data->shadow_blend - rtl_frametime * rtl_shadow_blend_rate);
+    } else {
         data->blended_shadow_direction = data->shadow_direction;
         data->blended_shadow_value = data->cached_value;
-        return;
     }
-
-    if (data->shadow_blend == 1.0f) {
-        data->previous_shadow_direction = data->blended_shadow_direction;
-        data->previous_shadow_value = data->blended_shadow_value;
-        data->shadow_blend = 0.999f;
-    }
-
-    if (data->previous_shadow_direction.x == 0.0f && data->previous_shadow_direction.y == 0.0f &&
-        data->previous_shadow_direction.z == 0.0f) {
-        data->blended_shadow_direction = data->shadow_direction;
-    } else {
-        NuVecLerp(&data->blended_shadow_direction, &data->previous_shadow_direction, &data->shadow_direction,
-                  data->shadow_blend);
-    }
-    NuVecNorm(&data->blended_shadow_direction, &data->blended_shadow_direction);
-    data->blended_shadow_value =
-        data->previous_shadow_value * data->shadow_blend + (1.0f - data->shadow_blend) * data->cached_value;
-    data->shadow_blend = MAX(0.0f, data->shadow_blend - rtl_frametime * rtl_shadow_blend_rate);
 }
 
 extern "C" {
@@ -1250,10 +1254,7 @@ static void edrtlSaveUndo() {
         rtl_locked_undo[rtl_undo_ix] = rtl_locked;
         base_rtl_undo[rtl_undo_ix] = base_rtl;
         rtl_undo_ix = (rtl_undo_ix + 1) & (maxundo - 1);
-        i32 next_count = rtl_undo_cnt + 1;
-        if (next_count >= maxundo)
-            next_count = maxundo - 1;
-        rtl_undo_cnt = next_count;
+        rtl_undo_cnt = rtl_undo_cnt + 1 < maxundo - 1 ? rtl_undo_cnt + 1 : maxundo - 1;
         rtl_undo_maxcnt = rtl_undo_cnt;
         undo_item->disabled = 0;
         redo_item->disabled = 1;
@@ -1601,6 +1602,8 @@ static void cbDeleteNo(eduimenu_s *, eduiitem_s *item, u32) {
     item->highlighted = 0;
 }
 static __used__ void RefreshUI() {
+    i32 i;
+
     NuQFntPushCoordinateSystem(static_cast<NUQFNT_CSMODE>(1));
     NuQFntSetScale(system_qfont, edrtl_text_scale, edrtl_text_scale);
 
@@ -1609,12 +1612,20 @@ static __used__ void RefreshUI() {
     flicker_item->disabled = 1;
     paste_item->disabled = clipboard_light.type == 0;
     pasteinto_item->disabled = clipboard_light.type == 0 || curr_rtl == NULL;
-    copytogroup_item->disabled = curr_rtl == NULL || curr_rtl->group_id == 0;
+    if (curr_rtl == NULL)
+        copytogroup_item->disabled = 1;
+    else if (curr_rtl->group_id == 0)
+        copytogroup_item->disabled = 1;
+    else
+        copytogroup_item->disabled = 0;
 
     if (curr_rtl != NULL) {
         prop_item->disabled = 0;
         copy_item->disabled = 0;
-        colour_item->disabled = curr_rtl->field_79 != -1 && curr_rtl->field_7a == -1;
+        if (curr_rtl->field_79 != -1 && curr_rtl->field_7a == -1)
+            colour_item->disabled = 1;
+        else
+            colour_item->disabled = 0;
         switch (curr_rtl->type) {
             case 1:
                 eduiMenuHighlight(type_menu, ambient_item);
@@ -1627,46 +1638,47 @@ static __used__ void RefreshUI() {
                 flicker_item->data_ptr = flicker_menu;
                 flicker_item->disabled = 0;
                 break;
-            case 4:
-                eduiMenuHighlight(type_menu, directional_item);
-                break;
-            case 5:
-                eduiMenuHighlight(type_menu, camdir_item);
-                break;
             case 6:
                 eduiMenuHighlight(type_menu, pointblend_item);
                 flicker_item->data_ptr = flicker_menu;
                 flicker_item->disabled = 0;
                 break;
+            case 4:
+                eduiMenuHighlight(type_menu, directional_item);
+                break;
             case 7:
                 eduiMenuHighlight(type_menu, antilight_item);
+                break;
+            case 5:
+                eduiMenuHighlight(type_menu, camdir_item);
                 break;
             case 8:
                 eduiMenuHighlight(type_menu, jonflicker_item);
                 flicker_item->data_ptr = jonflicker_menu;
                 flicker_item->disabled = 0;
                 break;
+            default:
+                break;
         }
         castshadow_item->highlighted = curr_rtl->cast_shadow;
         hasspecular_item->highlighted = curr_rtl->has_specular;
-        i32 modifier_index = curr_rtl->field_7b;
-        if (modifier_index > modifier_cnt - 1)
-            modifier_index = modifier_cnt - 1;
-        eduiMenuHighlight(modifier_menu, modifier_items[modifier_index]);
-        for (i32 i = 0; i < 16; ++i) {
-            if (((curr_rtl->field_5e >> i) & 1) != associd_items[i]->highlighted)
+        eduiMenuHighlight(
+            modifier_menu,
+            modifier_items[curr_rtl->field_7b > modifier_cnt - 1 ? modifier_cnt - 1 : curr_rtl->field_7b]);
+        for (i = 0; i < 16; i++) {
+            if (((static_cast<u16>(curr_rtl->field_5e) >> i) & 1) != associd_items[i]->highlighted)
                 eduiMenuHighlight(associd_menu, associd_items[i]);
         }
-        for (i32 i = 0; i < 16; ++i) {
-            if (((curr_rtl->field_60 >> i) & 1) != excludeid_items[i]->highlighted)
+        for (i = 0; i < 16; i++) {
+            if (((static_cast<u16>(curr_rtl->field_60) >> i) & 1) != excludeid_items[i]->highlighted)
                 eduiMenuHighlight(excludeid_menu, excludeid_items[i]);
         }
-        for (i32 i = 0; i < 16; ++i) {
+        for (i = 0; i < 16; i++) {
             if (curr_rtl->field_68 == i)
                 eduiMenuHighlight(userid_menu, userid_items[i]);
         }
         eduiItemSliderSetValEx(static_cast<edui_slider_s *>(multiplier_item), curr_rtl->intensity, 0, 0);
-        eduiItemSliderSetValEx(static_cast<edui_slider_s *>(groupid_item), curr_rtl->group_id, 0, 0);
+        eduiItemSliderSetValEx(static_cast<edui_slider_s *>(groupid_item), static_cast<u32>(curr_rtl->group_id), 0, 0);
         eduiItemSliderSetValEx(static_cast<edui_slider_s *>(t_hi_item), curr_rtl->parameters[0], 0, 0);
         eduiItemSliderSetValEx(static_cast<edui_slider_s *>(rt_hi_item), curr_rtl->parameters[1], 0, 0);
         eduiItemSliderSetValEx(static_cast<edui_slider_s *>(t_low_item), curr_rtl->parameters[2], 0, 0);
@@ -1676,12 +1688,14 @@ static __used__ void RefreshUI() {
         eduiItemSliderSetValEx(static_cast<edui_slider_s *>(jon_t_low_item), curr_rtl->parameters[2], 0, 0);
     }
     if (clipboard_light.type != 0) {
-        paste_item->colours[2] = 0x80000000 | static_cast<i32>(clipboard_light.colour.x * 255.0f) & 0xff |
-                                 (static_cast<i32>(clipboard_light.colour.y * 255.0f) & 0xff) << 8 |
-                                 (static_cast<i32>(clipboard_light.colour.z * 255.0f) & 0xff) << 16;
-        pasteinto_item->colours[2] = 0x80000000 | static_cast<i32>(clipboard_light.colour.x * 255.0f) & 0xff |
-                                     (static_cast<i32>(clipboard_light.colour.y * 255.0f) & 0xff) << 8 |
-                                     (static_cast<i32>(clipboard_light.colour.z * 255.0f) & 0xff) << 16;
+        paste_item->colours[2] =
+            (((static_cast<i32>(clipboard_light.colour.z * 255.0f) & 0xff) << 16 | static_cast<i32>(0x80000000u)) |
+             ((static_cast<i32>(clipboard_light.colour.y * 255.0f) << 8) & 0xffff)) |
+            (static_cast<i32>(clipboard_light.colour.x * 255.0f) & 0xff);
+        pasteinto_item->colours[2] =
+            (((static_cast<i32>(clipboard_light.colour.z * 255.0f) & 0xff) << 16 | static_cast<i32>(0x80000000u)) |
+             ((static_cast<i32>(clipboard_light.colour.y * 255.0f) << 8) & 0xffff)) |
+            (static_cast<i32>(clipboard_light.colour.x * 255.0f) & 0xff);
     }
 
     fog_copy_item->disabled = 1;
@@ -1696,16 +1710,16 @@ static __used__ void RefreshUI() {
         eduiItemSliderSetValEx(static_cast<edui_slider_s *>(fogendpsp_item), curr_fog->end_psp, 0, 0);
         eduiItemSliderSetValEx(static_cast<edui_slider_s *>(fogstart_item), curr_fog->start, 0, 0);
         eduiItemSliderSetValEx(static_cast<edui_slider_s *>(fogend_item), curr_fog->end, 0, 0);
-        eduiItemSliderSetValEx(static_cast<edui_slider_s *>(dof_fstop_item), curr_fog->depth_of_field_fstop / 10.0f, 0,
-                               0);
+        eduiItemSliderSetValEx(static_cast<edui_slider_s *>(dof_fstop_item),
+                               static_cast<u32>(curr_fog->depth_of_field_fstop) / 10.0f, 0, 0);
         eduiItemSliderSetValEx(static_cast<edui_slider_s *>(hazedensity_item), curr_fog->low_quality_colour >> 24, 0,
                                0);
-        eduiItemSliderSetValEx(static_cast<edui_slider_s *>(blurdensity_item), curr_fog->low_quality_density / 128.0f,
-                               0, 0);
+        eduiItemSliderSetValEx(static_cast<edui_slider_s *>(blurdensity_item),
+                               0.0078125f * curr_fog->low_quality_density, 0, 0);
         fog_item->disabled = 0;
         fog_copy_item->disabled = 0;
     }
-    for (i32 i = 0; i < modifier_cnt; ++i)
+    for (i = 0; i < modifier_cnt; i++)
         eduiItemSliderSetValEx(static_cast<edui_slider_s *>(modifier_adj_items[i]), modifiers[i], 0, 0);
     NuQFntPopCoordinateSystem();
 }
@@ -2828,9 +2842,18 @@ static void edrtlBurnoutFileSave(eduimenu_s *menu, eduiitem_s *, u32) {
     char directory[256];
     char name[256];
     char extension[256];
-    strcpy(directory, edbits_level_save_directory[0] ? edbits_level_save_directory : ".");
-    strcpy(name, edbits_level_save_name[0] ? edbits_level_save_name : "burnout");
-    strcpy(extension, edbits_level_save_extension[0] ? edbits_level_save_extension : "bur");
+    if (!edbits_level_save_directory[0])
+        strcpy(directory, ".");
+    else
+        strcpy(directory, edbits_level_save_directory);
+    if (!edbits_level_save_name[0])
+        strcpy(name, "burnout");
+    else
+        strcpy(name, edbits_level_save_name);
+    if (!edbits_level_save_extension[0])
+        strcpy(extension, "bur");
+    else
+        strcpy(extension, edbits_level_save_extension);
     sprintf(filepath, "%s\\%s.%s", directory, name, extension);
     if (edrtlBurnoutSave(filepath, edrtl_edit_burnset))
         eduiCreateMessageMenu(menu, const_cast<char *>("Saved OK"), 1);
@@ -2842,9 +2865,18 @@ static void edrtlBurnoutFileLoad(eduimenu_s *menu, eduiitem_s *, u32) {
     char directory[256];
     char name[256];
     char extension[256];
-    strcpy(directory, edbits_level_save_directory[0] ? edbits_level_save_directory : ".");
-    strcpy(name, edbits_level_save_name[0] ? edbits_level_save_name : "burnout");
-    strcpy(extension, edbits_level_save_extension[0] ? edbits_level_save_extension : "bur");
+    if (!edbits_level_save_directory[0])
+        strcpy(directory, ".");
+    else
+        strcpy(directory, edbits_level_save_directory);
+    if (!edbits_level_save_name[0])
+        strcpy(name, "burnout");
+    else
+        strcpy(name, edbits_level_save_name);
+    if (!edbits_level_save_extension[0])
+        strcpy(extension, "bur");
+    else
+        strcpy(extension, edbits_level_save_extension);
     sprintf(filepath, "%s\\%s.%s", directory, name, extension);
     edrtlResetBurnset(edrtl_edit_burnset);
     if (NuFileExists(filepath))
@@ -2908,11 +2940,14 @@ static void edrtlClose() {
 }
 
 static void edrtlEnter() {
+    rtlindex_s *grid;
+
     RTL_EditorActive = 1;
     ed_just_entered = 1;
     edmainExtCamera(usr_cam);
     curr_set = rtlGetEnvSet();
-    *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(curr_set) + 0x4f84) = 0;
+    grid = reinterpret_cast<rtlindex_s *>(curr_set + 1);
+    grid->enabled = 0;
     rtl_locked = NULL;
     rtled_menu_active = 0;
     delete_menu_active = 0;
@@ -2922,15 +2957,14 @@ static void edrtlEnter() {
     game_nearclip = global_camera.near_clip;
     game_farclip = global_camera.far_clip;
     if (fogadjfar_item) {
-        edui_slider_s *slider = static_cast<edui_slider_s *>(fogadjfar_item);
-        slider->range = game_farclip * 2.0f;
-        slider->minimum = game_nearclip;
-        eduiItemSliderSetValEx(slider, game_farclip, 0, 0);
+        static_cast<edui_slider_s *>(fogadjfar_item)->range = game_farclip * 2.0f;
+        static_cast<edui_slider_s *>(fogadjfar_item)->minimum = game_nearclip;
+        eduiItemSliderSetValEx(static_cast<edui_slider_s *>(fogadjfar_item), game_farclip, 0, 0);
     }
     if (fogadjnear_item) {
-        edui_slider_s *slider = static_cast<edui_slider_s *>(fogadjnear_item);
-        slider->range = game_farclip - slider->minimum;
-        eduiItemSliderSetValEx(slider, game_nearclip, 0, 0);
+        static_cast<edui_slider_s *>(fogadjnear_item)->range =
+            game_farclip - static_cast<edui_slider_s *>(fogadjnear_item)->minimum;
+        eduiItemSliderSetValEx(static_cast<edui_slider_s *>(fogadjnear_item), game_nearclip, 0, 0);
     }
     edrtlInvalidateUndo();
 }
@@ -3036,169 +3070,182 @@ static i32 edrtlProcRTL(float delta_time, nupad_s *pad) {
     static i32 dragundo = 1;
     static NUVEC dragstart;
     static NUVEC dragoff;
+    f32 dist;
+    i16 previous_yaw;
+    i16 previous_pitch;
+    f32 distance;
+    f32 move_scale;
+    NUVEC previous_position;
+    rtl_s updated;
 
     helpmode = 0;
     if (delete_menu_active) {
         eduiMenuProcess(delete_menu, delta_time, pad);
-        return 0;
-    }
-    if (rtled_menu_active) {
+    } else if (rtled_menu_active) {
         eduiMenuProcess(main_menu, delta_time, pad);
         if (!rtled_menu_active) {
             menu_cancelled = 1;
             dragging = 0;
         }
-        return 0;
-    }
-    if (ctl[ctl_ix][4] & pad->digital_buttons_pressed) {
+    } else if (pad->digital_buttons_pressed & ctl[ctl_ix][4]) {
         rtled_menu_active = 1;
         RefreshUI();
-        return 0;
-    }
-    if (ctl[ctl_ix][5] & pad->digital_buttons) {
+    } else if (pad->digital_buttons & ctl[ctl_ix][5]) {
         helpmode = 5;
         edcamGetPosAng(&pcpos, &peax, &peay);
         if (curr_rtl) {
             edcamSetPos(&curr_rtl->position);
-            if (ctl[ctl_ix][7] & pad->digital_buttons_pressed)
+            if (pad->digital_buttons_pressed & ctl[ctl_ix][7])
                 SelectNextRTL();
-            else if (ctl[ctl_ix][6] & pad->digital_buttons_pressed)
+            else if (pad->digital_buttons_pressed & ctl[ctl_ix][6])
                 SelectPrevRTL();
         } else {
             curr_rtl = FindNearestRTL(&pcpos, 1);
         }
         if (rtl_locked)
             rtl_locked = curr_rtl;
-        return 0;
-    }
-
-    NUVEC previous_position;
-    edcamGetPosAng(&previous_position, NULL, NULL);
-    edcamGetDist();
-    edcamMoveEx(pad, delta_time);
-    const i16 previous_pitch = static_cast<i16>(peax);
-    const i16 previous_yaw = static_cast<i16>(peay);
-    edcamGetPosAng(&pcpos, &peax, &peay);
-    const f32 distance = NuFabs(edcamGetDist());
-    const f32 move_scale = camscale_factor * distance < 1.0f ? 1.0f : camscale_factor * distance;
-
-    if (menu_cancelled && pad->digital_buttons)
-        return 0;
-    menu_cancelled = 0;
-    if (ed_just_entered && pad->digital_buttons)
-        return 0;
-    ed_just_entered = 0;
-    if (pad->digital_buttons_pressed & 0x800)
-        return 1;
-
-    helpmode = 1;
-    if (dragging) {
-        helpmode = 2;
-        if (!(ctl[ctl_ix][2] & pad->digital_buttons)) {
-            dragging = 0;
-            return 0;
-        }
-        rtl_s updated = *drag_rtl;
-        NuVecSub(&dragoff, &pcpos, &dragstart);
-        NuVecAdd(&updated.position, &updated.position, &dragoff);
-        dragstart = pcpos;
-        updated.pitch += static_cast<i16>(peax) - previous_pitch;
-        updated.yaw += static_cast<i16>(peay) - previous_yaw;
-        edcamSetAng(previous_pitch, previous_yaw);
-        peax = previous_pitch;
-        peay = previous_yaw;
-        updated.direction.x = 0.0f;
-        updated.direction.y = 0.0f;
-        updated.direction.z = 1.0f;
-        NuVecRotateX(&updated.direction, &updated.direction, updated.pitch);
-        NuVecRotateY(&updated.direction, &updated.direction, updated.yaw);
-        updated.inner_radius +=
-            scale_rate * (static_cast<i32>(pad->analog_left_pad_right) - static_cast<i32>(pad->analog_left_pad_left)) *
-            move_scale * delta_time;
-        updated.outer_radius +=
-            scale_rate * (static_cast<i32>(pad->analog_left_pad_up) - static_cast<i32>(pad->analog_left_pad_down)) *
-            move_scale * delta_time;
-        if (updated.inner_radius < min_r)
-            updated.inner_radius = min_r;
-        if (updated.outer_radius < updated.inner_radius)
-            updated.outer_radius = updated.inner_radius;
-        if (dragundo && rtlCmp(&updated, drag_rtl)) {
-            edrtlSaveUndo();
-            dragundo = 0;
-        }
-        *drag_rtl = updated;
-        return 0;
-    }
-
-    if (rtl_locked) {
-        curr_rtl = rtl_locked;
     } else {
-        curr_rtl = FindNearestRTL(&pcpos, 0);
-    }
-    if (base_rtl && (pad->digital_buttons_pressed & 0x8000)) {
-        edcamSetPos(&base_rtl->position);
-        base_rtl = NULL;
-        rtl_locked = NULL;
-    } else if (ctl[ctl_ix][0] & pad->digital_buttons_pressed) {
-        edrtlSaveUndo();
-        curr_rtl = rtlAlloc();
-        if (curr_rtl) {
-            rtl_locked = NULL;
-            curr_rtl->position = pcpos;
-            curr_rtl->inner_radius = min_r;
-            curr_rtl->outer_radius = def_fr;
-            curr_rtl->colour.x = curr_rtl->colour.y = curr_rtl->colour.z = 1.0f;
-            curr_rtl->secondary_colour.x = curr_rtl->secondary_colour.y = curr_rtl->secondary_colour.z = 0.5f;
-            curr_rtl->type = 2;
-            curr_rtl->disabled = 0;
-            curr_rtl->field_5e = 0;
-            curr_rtl->field_60 = 0;
-            curr_rtl->parameters[0] = curr_rtl->parameters[1] = curr_rtl->parameters[2] = curr_rtl->parameters[3] =
-                0.1f;
-            curr_rtl->parameter_54 = 0.0f;
-            curr_rtl->pitch = 0;
-            curr_rtl->yaw = 0;
-            curr_rtl->direction.x = 0.0f;
-            curr_rtl->direction.y = 0.0f;
-            curr_rtl->direction.z = 1.0f;
-            curr_rtl->field_64 = 0.0f;
-            NuVecRotateX(&curr_rtl->direction, &curr_rtl->direction, curr_rtl->pitch);
-            NuVecRotateY(&curr_rtl->direction, &curr_rtl->direction, curr_rtl->yaw);
-            curr_rtl->field_79 = -1;
-            curr_rtl->field_7a = -1;
-            curr_rtl->field_7b = 0;
-            curr_rtl->field_7c = curr_set->lights;
-            if (base_rtl) {
-                *curr_rtl = *base_rtl;
-                curr_rtl->field_79 = base_rtl->field_79;
-                const i8 current_index = static_cast<i8>(curr_rtl - curr_set->lights);
-                if (curr_rtl->field_79 != -1)
-                    curr_set->lights[curr_rtl->field_79].field_7a = current_index;
-                curr_rtl->field_7a = static_cast<i8>(base_rtl - curr_set->lights);
-                base_rtl->field_79 = current_index;
+        edcamGetPosAng(&previous_position, NULL, NULL);
+        dist = edcamGetDist();
+        (void)dist;
+        edcamMoveEx(pad, delta_time);
+        previous_yaw = static_cast<i16>(peay);
+        previous_pitch = static_cast<i16>(peax);
+        edcamGetPosAng(&pcpos, &peax, &peay);
+        distance = NuFabs(edcamGetDist());
+        move_scale = 1.0f > camscale_factor * distance ? 1.0f : camscale_factor * distance;
+
+        if (menu_cancelled && pad->digital_buttons)
+            return 0;
+        menu_cancelled = 0;
+        if (ed_just_entered && pad->digital_buttons)
+            return 0;
+        ed_just_entered = 0;
+        if (pad->digital_buttons_pressed & 0x800)
+            return 1;
+
+        helpmode = 1;
+        if (dragging) {
+            helpmode = 2;
+            if (!(pad->digital_buttons & ctl[ctl_ix][2])) {
+                dragging = 0;
+            } else {
+                updated = *drag_rtl;
+                NuVecSub(&dragoff, &pcpos, &dragstart);
+                NuVecAdd(&updated.position, &updated.position, &dragoff);
+                dragstart = pcpos;
+                updated.pitch += static_cast<i16>(peax) - previous_pitch;
+                updated.yaw += static_cast<i16>(peay) - previous_yaw;
+                edcamSetAng(previous_pitch, previous_yaw);
+                peax = previous_pitch;
+                peay = previous_yaw;
+                updated.direction.x = 0.0f;
+                updated.direction.y = 0.0f;
+                updated.direction.z = 1.0f;
+                NuVecRotateX(&updated.direction, &updated.direction, updated.pitch);
+                NuVecRotateY(&updated.direction, &updated.direction, updated.yaw);
+                updated.inner_radius +=
+                    scale_rate *
+                    (static_cast<i32>(pad->analog_left_pad_right) - static_cast<i32>(pad->analog_left_pad_left)) *
+                    move_scale * delta_time;
+                updated.outer_radius +=
+                    scale_rate *
+                    (static_cast<i32>(pad->analog_left_pad_up) - static_cast<i32>(pad->analog_left_pad_down)) *
+                    move_scale * delta_time;
+                updated.inner_radius = min_r > updated.inner_radius ? min_r : updated.inner_radius;
+                updated.outer_radius =
+                    updated.inner_radius > updated.outer_radius ? updated.inner_radius : updated.outer_radius;
+                if (dragundo) {
+                    if (rtlCmp(&updated, drag_rtl)) {
+                        edrtlSaveUndo();
+                        dragundo = 0;
+                    }
+                }
+                *drag_rtl = updated;
+            }
+        } else {
+            if (rtl_locked)
+                curr_rtl = rtl_locked;
+            else
+                curr_rtl = FindNearestRTL(&pcpos, 0);
+            if (base_rtl && (pad->digital_buttons_pressed & 0x8000)) {
+                edcamSetPos(&base_rtl->position);
+                base_rtl = NULL;
+                rtl_locked = NULL;
+            } else if (pad->digital_buttons_pressed & ctl[ctl_ix][0]) {
+                edrtlSaveUndo();
+                curr_rtl = rtlAlloc();
+                if (curr_rtl) {
+                    rtl_locked = NULL;
+                    curr_rtl->position = pcpos;
+                    curr_rtl->inner_radius = min_r;
+                    curr_rtl->outer_radius = def_fr;
+                    curr_rtl->colour.x = 1.0f;
+                    curr_rtl->colour.y = 1.0f;
+                    curr_rtl->colour.z = 1.0f;
+                    curr_rtl->secondary_colour.x = 0.5f;
+                    curr_rtl->secondary_colour.y = 0.5f;
+                    curr_rtl->secondary_colour.z = 0.5f;
+                    curr_rtl->type = 2;
+                    curr_rtl->disabled = 0;
+                    curr_rtl->field_5e = 0;
+                    curr_rtl->field_60 = 0;
+                    curr_rtl->parameters[0] = 0.1f;
+                    curr_rtl->parameters[1] = 0.1f;
+                    curr_rtl->parameters[2] = 0.1f;
+                    curr_rtl->parameters[3] = 0.1f;
+                    curr_rtl->parameter_54 = 0.0f;
+                    curr_rtl->pitch = 0;
+                    curr_rtl->yaw = 0;
+                    curr_rtl->direction.x = 0.0f;
+                    curr_rtl->direction.y = 0.0f;
+                    curr_rtl->direction.z = 1.0f;
+                    curr_rtl->field_64 = 0.0f;
+                    NuVecRotateX(&curr_rtl->direction, &curr_rtl->direction, curr_rtl->pitch);
+                    NuVecRotateY(&curr_rtl->direction, &curr_rtl->direction, curr_rtl->yaw);
+                    curr_rtl->field_79 = -1;
+                    curr_rtl->field_7a = -1;
+                    curr_rtl->field_7b = 0;
+                    curr_rtl->field_7c = curr_set->lights;
+                    if (base_rtl) {
+                        *curr_rtl = *base_rtl;
+                        curr_rtl->field_79 = base_rtl->field_79;
+                        if (curr_rtl->field_79 != -1)
+                            curr_set->lights[curr_rtl->field_79].field_7a =
+                                static_cast<i8>(curr_rtl - curr_set->lights);
+                        curr_rtl->field_7a = static_cast<i8>(base_rtl - curr_set->lights);
+                        base_rtl->field_79 = static_cast<i8>(curr_rtl - curr_set->lights);
+                    }
+                }
+            } else if (curr_rtl) {
+                if (curr_rtl->field_7a != -1)
+                    helpmode = 4;
+                else
+                    helpmode = 3;
+                if (pad->digital_buttons_pressed & ctl[ctl_ix][2]) {
+                    dragging = 1;
+                    dragundo = 1;
+                    dragstart = pcpos;
+                    drag_rtl = curr_rtl;
+                } else if (pad->digital_buttons_pressed & ctl[ctl_ix][1]) {
+                    delete_menu_active = 1;
+                    delete_menu->selected = delete_menu->first;
+                } else if (pad->digital_buttons_pressed & ctl[ctl_ix][3]) {
+                    if (rtl_locked)
+                        rtl_locked = NULL;
+                    else
+                        rtl_locked = curr_rtl;
+                } else if (pad->digital_buttons_pressed & 0x8000) {
+                    if (!base_rtl)
+                        base_rtl = curr_rtl;
+                    rtl_locked = NULL;
+                }
+            }
+            if (pad->digital_buttons_pressed & 0x4000) {
+                curr_fog = NULL;
+                edrtl_mode = 2;
             }
         }
-    } else if (curr_rtl) {
-        helpmode = curr_rtl->field_7a == -1 ? 3 : 4;
-        if (ctl[ctl_ix][2] & pad->digital_buttons_pressed) {
-            dragging = 1;
-            dragundo = 1;
-            dragstart = pcpos;
-            drag_rtl = curr_rtl;
-        } else if (ctl[ctl_ix][1] & pad->digital_buttons_pressed) {
-            delete_menu_active = 1;
-            delete_menu->selected = delete_menu->first;
-        } else if (ctl[ctl_ix][3] & pad->digital_buttons_pressed) {
-            rtl_locked = rtl_locked ? NULL : curr_rtl;
-        } else if (pad->digital_buttons_pressed & 0x8000) {
-            if (!base_rtl)
-                base_rtl = curr_rtl;
-            rtl_locked = NULL;
-        }
-    }
-    if (pad->digital_buttons_pressed & 0x4000) {
-        curr_fog = NULL;
-        edrtl_mode = 2;
     }
     return 0;
 }
@@ -3294,6 +3341,10 @@ static i32 edrtlProcFog(float delta_time, nupad_s *pad) {
     static NUVEC dragoff;
     static NUVEC dragstart;
     static EDRTLFOG_s *drag_fog;
+    i16 previous_yaw;
+    i16 previous_pitch;
+    f32 distance;
+    f32 camera_step;
 
     fog_editor_active = 1;
     if (pad->digital_buttons_pressed & ctl[ctl_ix][4]) {
@@ -3306,10 +3357,7 @@ static i32 edrtlProcFog(float delta_time, nupad_s *pad) {
             menu_cancelled = 1;
             dragging = 0;
         }
-        return 0;
-    }
-
-    if (pad->digital_buttons & ctl[ctl_ix][5]) {
+    } else if (pad->digital_buttons & ctl[ctl_ix][5]) {
         if (curr_fog != NULL)
             edcamSetPos(&curr_fog->position);
         if (pad->digital_buttons_pressed & ctl[ctl_ix][7]) {
@@ -3321,72 +3369,72 @@ static i32 edrtlProcFog(float delta_time, nupad_s *pad) {
             if (curr_fog != NULL)
                 edcamSetPos(&curr_fog->position);
         }
-        return 0;
-    }
+    } else {
+        edcamMoveEx(pad, delta_time);
+        previous_yaw = static_cast<i16>(peay);
+        previous_pitch = static_cast<i16>(peax);
+        (void)previous_yaw;
+        (void)previous_pitch;
+        edcamGetPosAng(&pcpos, &peax, &peay);
+        distance = NuFabs(edcamGetDist());
+        camera_step = 1.0f > camscale_factor * distance ? 1.0f : camscale_factor * distance;
 
-    edcamMoveEx(pad, delta_time);
-    edcamGetPosAng(&pcpos, &peax, &peay);
-    f32 camera_step = camscale_factor * NuFabs(edcamGetDist());
-    if (camera_step < 1.0f)
-        camera_step = 1.0f;
+        if (menu_cancelled != 0 && pad->digital_buttons != 0)
+            return 0;
+        menu_cancelled = 0;
+        if (ed_just_entered != 0 && pad->digital_buttons != 0)
+            return 0;
+        ed_just_entered = 0;
+        if (pad->digital_buttons_pressed & 0x800)
+            return 1;
 
-    if (menu_cancelled != 0 && pad->digital_buttons != 0)
-        return 0;
-    menu_cancelled = 0;
-    if (ed_just_entered != 0 && pad->digital_buttons != 0)
-        return 0;
-    ed_just_entered = 0;
-    if (pad->digital_buttons_pressed & 0x800)
-        return 1;
-
-    if (dragging != 0) {
-        if ((pad->digital_buttons & ctl[ctl_ix][2]) == 0) {
-            dragging = 0;
+        if (dragging != 0) {
+            if ((pad->digital_buttons & ctl[ctl_ix][2]) == 0) {
+                dragging = 0;
+            } else {
+                NuVecSub(&dragoff, &pcpos, &dragstart);
+                NuVecAdd(&drag_fog->position, &drag_fog->position, &dragoff);
+                dragstart = pcpos;
+                curr_fog->radius +=
+                    scale_rate *
+                    (static_cast<i32>(pad->analog_left_pad_right) - static_cast<i32>(pad->analog_left_pad_left)) *
+                    camera_step * delta_time;
+                curr_fog->radius = min_r > curr_fog->radius ? min_r : curr_fog->radius;
+            }
         } else {
-            NuVecSub(&dragoff, &pcpos, &dragstart);
-            NuVecAdd(&drag_fog->position, &drag_fog->position, &dragoff);
-            dragstart = pcpos;
-            curr_fog->radius +=
-                scale_rate *
-                (static_cast<i32>(pad->analog_left_pad_right) - static_cast<i32>(pad->analog_left_pad_left)) *
-                camera_step * delta_time;
-            if (curr_fog->radius < min_r)
-                curr_fog->radius = min_r;
-        }
-        return 0;
-    }
-
-    curr_fog = FindNearestFog(&pcpos);
-    if (pad->digital_buttons_pressed & ctl[ctl_ix][0]) {
-        curr_fog = fogAlloc();
-        if (curr_fog != NULL) {
-            curr_fog->type = 1;
-            curr_fog->position = pcpos;
-            curr_fog->radius = min_r;
-            curr_fog->start = 10.0f;
-            curr_fog->end = 100.0f;
-            curr_fog->start_psp = 10.0f;
-            curr_fog->end_psp = 100.0f;
-            curr_fog->colour = 0x80808080;
-            curr_fog->low_quality_density = 0;
-            curr_fog->low_quality_colour = 0;
-            curr_fog->density = 0.0f;
-            curr_fog->density_wii = 0.0f;
-            curr_fog->depth_of_field_fstop = 1;
-        }
-    } else if (curr_fog != NULL) {
-        if (pad->digital_buttons_pressed & ctl[ctl_ix][2]) {
-            dragging = 1;
-            dragstart = pcpos;
-            drag_fog = curr_fog;
-        } else if (pad->digital_buttons_pressed & ctl[ctl_ix][1]) {
-            fogFree(curr_fog);
+            curr_fog = FindNearestFog(&pcpos);
+            if (pad->digital_buttons_pressed & ctl[ctl_ix][0]) {
+                curr_fog = fogAlloc();
+                if (curr_fog != NULL) {
+                    curr_fog->type = 1;
+                    curr_fog->position = pcpos;
+                    curr_fog->radius = min_r;
+                    curr_fog->start = 10.0f;
+                    curr_fog->end = 100.0f;
+                    curr_fog->start_psp = 10.0f;
+                    curr_fog->end_psp = 100.0f;
+                    curr_fog->colour = 0x80808080;
+                    curr_fog->low_quality_density = 0;
+                    curr_fog->low_quality_colour = 0;
+                    curr_fog->density = 0.0f;
+                    curr_fog->density_wii = 0.0f;
+                    curr_fog->depth_of_field_fstop = 1;
+                }
+            } else if (curr_fog != NULL) {
+                if (pad->digital_buttons_pressed & ctl[ctl_ix][2]) {
+                    dragging = 1;
+                    dragstart = pcpos;
+                    drag_fog = curr_fog;
+                } else if (pad->digital_buttons_pressed & ctl[ctl_ix][1]) {
+                    fogFree(curr_fog);
+                }
+            }
+            if (pad->digital_buttons_pressed & 0x4000)
+                edrtl_mode = 1;
+            if (pad->digital_buttons_pressed & 0x1000)
+                fogmode = 1 - fogmode;
         }
     }
-    if (pad->digital_buttons_pressed & 0x4000)
-        edrtl_mode = 1;
-    if (pad->digital_buttons_pressed & 0x1000)
-        fogmode = 1 - fogmode;
     return 0;
 }
 
@@ -3415,6 +3463,9 @@ void edrtlDetermineNearestBurn(float distance, burnset_s *set) {
 eduimenu_s *edrtl_burn_main_menu;
 
 static i32 edrtlProcBurn(float delta_time, nupad_s *pad) {
+    i16 previous_yaw;
+    i16 previous_pitch;
+
     if (edrtl_edit_burnset == NULL) {
         edrtl_edit_burnset =
             static_cast<burnset_s *>(NuMemoryGet()->GetThreadMem()->_BlockAlloc(sizeof(burnset_s), 4, 1, "", 0));
@@ -3426,6 +3477,10 @@ static i32 edrtlProcBurn(float delta_time, nupad_s *pad) {
     } else {
         if (!(pad->digital_buttons & 0x100))
             edcamMoveEx(pad, delta_time);
+        previous_yaw = static_cast<i16>(peay);
+        previous_pitch = static_cast<i16>(peax);
+        (void)previous_yaw;
+        (void)previous_pitch;
         edcamGetPosAng(&pcpos, &peax, &peay);
 
         if (pad->digital_buttons_pressed & 0x80) {
@@ -3434,28 +3489,26 @@ static i32 edrtlProcBurn(float delta_time, nupad_s *pad) {
         }
 
         if (pad->digital_buttons & 0x100) {
-            burnset_s *set = edrtl_edit_burnset;
-            if (set != NULL && set->selected_index != -1) {
+            if (edrtl_edit_burnset != NULL && edrtl_edit_burnset->selected_index != -1) {
                 if (pad->digital_buttons_pressed & 8) {
                     do {
-                        ++set->selected_index;
-                        if (set->selected_index == 32)
-                            set->selected_index = 0;
-                    } while (!set->burnouts[set->selected_index].active);
+                        edrtl_edit_burnset->selected_index++;
+                        if (edrtl_edit_burnset->selected_index == 32)
+                            edrtl_edit_burnset->selected_index = 0;
+                    } while (!edrtl_edit_burnset->burnouts[edrtl_edit_burnset->selected_index].active);
                 }
                 if (pad->digital_buttons_pressed & 2) {
                     do {
-                        --set->selected_index;
-                        if (set->selected_index == -1)
-                            set->selected_index = 31;
-                    } while (!set->burnouts[set->selected_index].active);
+                        edrtl_edit_burnset->selected_index--;
+                        if (edrtl_edit_burnset->selected_index == -1)
+                            edrtl_edit_burnset->selected_index = 31;
+                    } while (!edrtl_edit_burnset->burnouts[edrtl_edit_burnset->selected_index].active);
                 }
             } else {
-                edrtlDetermineNearestBurn(-1.0f, set);
+                edrtlDetermineNearestBurn(-1.0f, edrtl_edit_burnset);
             }
-            if (set != NULL && set->selected_index != -1) {
-                burnout_s *burnout = &set->burnouts[set->selected_index];
-                edcamSetPos(&burnout->position);
+            if (edrtl_edit_burnset != NULL && edrtl_edit_burnset->selected_index != -1) {
+                edcamSetPos(&edrtl_edit_burnset->burnouts[edrtl_edit_burnset->selected_index].position);
                 edrtl_edit_burnset->field_558 =
                     edrtl_edit_burnset->burnouts[edrtl_edit_burnset->selected_index].field_1c;
                 edrtl_edit_burnset->field_55c =
@@ -3475,7 +3528,7 @@ static i32 edrtlProcBurn(float delta_time, nupad_s *pad) {
             edrtlRemoveBurnout(edrtl_edit_burnset->selected_index);
     }
     edrtlDetermineNearestBurn(-1.0f, edrtl_edit_burnset);
-    return (pad->digital_buttons_pressed & 0x800) != 0;
+    return (pad->digital_buttons_pressed & 0x800) ? 1 : 0;
 }
 
 extern "C" void edrtlCalculateBurnout(burnset_s *set, f32 *threshold, f32 *intensity, f32 *dispersion,
@@ -3743,16 +3796,17 @@ extern "C" void edrtlDrawLightEx(i32 index, i32 style) {
 }
 
 static void edrtlDrawLights() {
+    i32 index;
     if (base_rtl != NULL) {
-        for (i32 index = base_rtl->field_79; index != -1; index = curr_set->lights[index].field_79) {
+        for (index = base_rtl->field_79; index != -1; index = curr_set->lights[index].field_79) {
             edrtlDrawLight(index);
         }
     } else {
-        for (i32 index = 0; index < 128; ++index) {
-            rtl_s *light = &curr_set->lights[index];
-            if (!(!hide_types[light->type] && light->field_7a == -1)) {
+        for (index = 0; index < 128; index++) {
+            if (hide_types[curr_set->lights[index].type])
                 continue;
-            }
+            if (curr_set->lights[index].field_7a != -1)
+                continue;
             edrtlDrawLight(index);
         }
     }
@@ -3830,18 +3884,20 @@ static void edrtlDrawHelp() {
     NuQFntSetColour(system_qfont, 0x80ffffff);
     i32 y = help_line * 16;
     const char *source = help_text[ctl_ix][helpmode];
-    while (source != NULL && *source != 0) {
-        char line[512];
-        char *out = line;
-        while (*source != 0 && *source != '\n') {
-            *out++ = *source++;
+    if (source != NULL) {
+        while (*source != 0) {
+            char line[512];
+            char *out = line;
+            while (*source != 0 && *source != '\n') {
+                *out++ = *source++;
+            }
+            if (*source != 0) {
+                ++source;
+            }
+            *out = 0;
+            NuQFntPrintEx(system_qfont, 640, y, 16, line);
+            y += static_cast<i32>(NuQFntHeight(system_qfont));
         }
-        if (*source != 0) {
-            ++source;
-        }
-        *out = 0;
-        NuQFntPrintEx(system_qfont, 640, y, 16, line);
-        y += static_cast<i32>(NuQFntHeight(system_qfont));
     }
 }
 
@@ -4009,7 +4065,10 @@ static void edrtlDrawFogInfo() {
         NuQFntSet(system_qfont);
         NuQFntPrintEx(system_qfont, x, y, 16, "Fog Editor");
         y += height;
-        NuQFntPrintEx(system_qfont, x, y, 16, fogmode == 0 ? "FOGMODE: SELECTION" : "FOGMODE: CAMERA POS");
+        if (fogmode == 0)
+            NuQFntPrintEx(system_qfont, x, y, 16, "FOGMODE: SELECTION");
+        else
+            NuQFntPrintEx(system_qfont, x, y, 16, "FOGMODE: CAMERA POS");
         y += height;
         NuQFntPrintEx(system_qfont, x, y, 16, "POS: %.03f %.03f %.03f", static_cast<f64>(curr_fog->position.x),
                       static_cast<f64>(curr_fog->position.y), static_cast<f64>(curr_fog->position.z));
@@ -4017,15 +4076,20 @@ static void edrtlDrawFogInfo() {
         NuQFntPrintEx(system_qfont, x, y, 16, "TYPE: %s", fog_types[curr_fog->type]);
         y += height;
         NuQFntPrintEx(system_qfont, x, y, 16, "RADIUS: %.03f", static_cast<f64>(curr_fog->radius));
+        y += height;
     } else {
         NuRndrRect2di(128, y - height, 4800, height * 5 / 2, 0x20000080, mtls[2]);
         NuQFntSet(system_qfont);
         NuQFntPrintEx(system_qfont, x, y, 16, "Fog Editor");
         y += height;
-        NuQFntPrintEx(system_qfont, x, y, 16, fogmode == 0 ? "FOGMODE: SELECTION" : "FOGMODE: CAMERA POS");
+        if (fogmode == 0)
+            NuQFntPrintEx(system_qfont, x, y, 16, "FOGMODE: SELECTION");
+        else
+            NuQFntPrintEx(system_qfont, x, y, 16, "FOGMODE: CAMERA POS");
         y += height;
         NuQFntPrintEx(system_qfont, x, y, 16, "POS: %.03f %.03f %.03f", static_cast<f64>(pcpos.x),
                       static_cast<f64>(pcpos.y), static_cast<f64>(pcpos.z));
+        y += height;
     }
 }
 

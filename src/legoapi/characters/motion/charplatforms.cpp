@@ -42,7 +42,7 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
         TERRAIN_SHAPE *const end_shape = shape_count > 0 ? source + shape_count : source;
         for (; source != end_shape; ++source, ++destination) {
             i32 last_vertex = source->normals[1].y > 65535.0f ? 2 : 3;
-            memcpy(destination, source, sizeof(TERRAIN_SHAPE));
+            *destination = *source;
             f32 shape_min_x = 123456792.0f, shape_min_y = 123456792.0f, shape_min_z = 123456792.0f;
             f32 shape_max_x = -123456792.0f, shape_max_y = -123456792.0f, shape_max_z = -123456792.0f;
             for (i32 vertex = last_vertex; vertex >= 0; --vertex) {

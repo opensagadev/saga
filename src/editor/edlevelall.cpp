@@ -1516,6 +1516,7 @@ void ClassEditor::cbEdClassToolsMenu(eduimenu_s *parent, eduiitem_s *item, u32) 
 void ClassEditor::cbEdClassViewMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
     eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
+    const i32 shortcuts[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
     if (menu == NULL)
         return;
     eduiMenuAddItem(menu, eduiItemCheckCreate(0, &EdLevelAttr, 0, 0, cbEdClassSetPinned, const_cast<char *>("Pinned")));
@@ -1538,7 +1539,6 @@ void ClassEditor::cbEdClassViewMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
         eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdLevelDestroyOnSelect,
                                                 const_cast<char *>("No Registered Classes")));
     } else {
-        const i32 shortcuts[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
         char label[128];
         for (i32 index = 0; index < theRegistry.class_count; ++index) {
             EdClass *ed_class = &theRegistry.classes[index];
@@ -3017,12 +3017,10 @@ void PropertyTool::ediMenuRetrieveMetrics(eduimenu_s *menu) {
 }
 
 void PropertyTool::ediMenuStoreMetrics(eduimenu_s *menu) {
-    menu_startmetrics.x = menu->x > 0 ? menu->x : 20;
-    if (menu->y > 0) {
-        menu_startmetrics.y = menu->y;
-    } else {
-        menu_startmetrics.y = 5;
-    }
+    const i32 x = menu->x;
+    const i32 y = menu->y;
+    menu_startmetrics.x = x > 0 ? x : 20;
+    menu_startmetrics.y = y > 0 ? y : 5;
     menu_startmetrics.width = menu->width;
     menu_startmetrics.height = menu->height;
 }
@@ -3365,8 +3363,8 @@ void EdClass::Serialise(EdStream &stream, i32 *class_mapping) {
                     continue;
                 }
             } else {
-                if ((member->attributes & 0x10000000) != 0 ||
-                    (class_mapping != NULL && member->attributes < 0 && class_mapping[member->type_id] == -1)) {
+                if ((class_mapping != NULL && member->attributes < 0 && class_mapping[member->type_id] == -1) ||
+                    (member->attributes & 0x10000000) != 0) {
                     continue;
                 }
             }
@@ -3379,8 +3377,8 @@ void EdClass::Serialise(EdStream &stream, i32 *class_mapping) {
                     continue;
                 }
             } else {
-                if ((member->attributes & 0x10000000) != 0 ||
-                    (class_mapping != NULL && member->attributes < 0 && class_mapping[member->type_id] == -1)) {
+                if ((class_mapping != NULL && member->attributes < 0 && class_mapping[member->type_id] == -1) ||
+                    (member->attributes & 0x10000000) != 0) {
                     continue;
                 }
             }
@@ -3416,13 +3414,15 @@ i32 EdClass::GetStreamClasses(EdStream &stream, i32 *classes, i32 &count, i32 ca
 
 EdRef *EdClass::FindTypeRef(char *member_name, i32 recursive) {
     for (EdRef *member = members; member != NULL; member = member->next) {
-        if (recursive != 0 && member->attributes < 0) {
+        if (recursive == 0 || member->attributes >= 0) {
+            if (NuStrICmp(member->name, member_name) == 0) {
+                return member;
+            }
+        } else {
             EdRef *reference = theRegistry.GetClass(member->type_id)->FindTypeRef(member_name, 1);
             if (reference != NULL) {
                 return reference;
             }
-        } else if (NuStrICmp(member->name, member_name) == 0) {
-            return member;
         }
     }
     return NULL;

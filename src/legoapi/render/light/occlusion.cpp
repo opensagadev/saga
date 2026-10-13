@@ -16,13 +16,25 @@ NUMTL *OccluderSet::ms_pZOnlyMtl3D;
 NUMTL *OccluderSet::ms_pZOnlyMtl2D;
 NUMTL *OccluderSet::ms_pAlphaMtl2D;
 
+namespace {
+struct OccluderVertex {
+    f32 x, y, z, w;
+    OccluderVertex(f32 vx, f32 vy, f32 vz, f32 vw) : x(vx), y(vy), z(vz), w(vw) {
+    }
+};
+} // namespace
+
 void OccluderSet::AddOccluder(const NUVEC *a, const NUVEC *b, const NUVEC *c, const NUVEC *d) {
     if (count < capacity) {
         queries_prepared = false;
-        occluders[count].vertices[0] = NUVEC4{a->x, a->y, a->z, 1.0f};
-        occluders[count].vertices[1] = NUVEC4{b->x, b->y, b->z, 1.0f};
-        occluders[count].vertices[2] = NUVEC4{c->x, c->y, c->z, 1.0f};
-        occluders[count].vertices[3] = NUVEC4{d->x, d->y, d->z, 1.0f};
+        const OccluderVertex va(a->x, a->y, a->z, 1.0f);
+        memcpy(&occluders[count].vertices[0], &va, sizeof(va));
+        const OccluderVertex vb(b->x, b->y, b->z, 1.0f);
+        memcpy(&occluders[count].vertices[1], &vb, sizeof(vb));
+        const OccluderVertex vc(c->x, c->y, c->z, 1.0f);
+        memcpy(&occluders[count].vertices[2], &vc, sizeof(vc));
+        const OccluderVertex vd(d->x, d->y, d->z, 1.0f);
+        memcpy(&occluders[count].vertices[3], &vd, sizeof(vd));
         ++count;
     }
 }

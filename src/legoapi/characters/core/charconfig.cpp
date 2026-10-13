@@ -351,6 +351,29 @@ static void CC_layer(NUFPAR *parser) {
     data->make_layer_list = MakeLayerList_Name;
 }
 
+static inline i32 ParseLayerMask(NUFPAR *parser, u32 *mask) {
+    i32 count = 0;
+    *mask = 0;
+    if (charconfig.named_layers != 0) {
+        while (NuFParGetWord(parser) != 0) {
+            const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
+            if (layer != -1) {
+                count++;
+                *mask |= 1u << layer;
+            }
+        }
+    } else {
+        while (NuFParGetWord(parser) != 0) {
+            const u32 layer = NuAToI(parser->word_buf);
+            if (layer < 32) {
+                count++;
+                *mask |= 1u << layer;
+            }
+        }
+    }
+    return count;
+}
+
 static void CC_layers_special(NUFPAR *parser) {
     u32 *mask = &charconfig.runtime->layer_mask_special;
     *mask = 0;
@@ -495,29 +518,7 @@ static void CC_radius(NUFPAR *parser) {
 }
 
 static void CC_ride_layersoff(NUFPAR *parser) {
-    u32 *mask = &charconfig.runtime->ride_layers_off;
-    *mask = 0;
-    i32 count = 0;
-    if (charconfig.named_layers == 0) {
-        while (NuFParGetWord(parser) != 0) {
-            const u32 layer = NuAToI(parser->word_buf);
-            if (!(layer < 32)) {
-                continue;
-            }
-            ++count;
-            *mask |= 1u << layer;
-        }
-    } else {
-        auto parser_word_buf = parser->word_buf;
-        while (NuFParGetWord(parser) != 0) {
-            const i32 layer = LayerFromName(charconfig.runtime, parser_word_buf);
-            if (layer == -1) {
-                continue;
-            }
-            ++count;
-            *mask |= 1u << layer;
-        }
-    }
+    ParseLayerMask(parser, &charconfig.runtime->ride_layers_off);
 }
 
 static void CC_rocket_locator(NUFPAR *parser) {
@@ -1609,29 +1610,7 @@ static void CC_jump_speed(NUFPAR *parser) {
 }
 
 static void CC_layers_dead(NUFPAR *parser) {
-    u32 *mask = &charconfig.runtime->layer_mask_dead;
-    *mask = 0;
-    i32 count = 0;
-    if (charconfig.named_layers == 0) {
-        while (NuFParGetWord(parser) != 0) {
-            const u32 layer = NuAToI(parser->word_buf);
-            if (!(layer < 32)) {
-                continue;
-            }
-            ++count;
-            *mask |= 1u << layer;
-        }
-    } else {
-        auto parser_word_buf = parser->word_buf;
-        while (NuFParGetWord(parser) != 0) {
-            const i32 layer = LayerFromName(charconfig.runtime, parser_word_buf);
-            if (layer == -1) {
-                continue;
-            }
-            ++count;
-            *mask |= 1u << layer;
-        }
-    }
+    ParseLayerMask(parser, &charconfig.runtime->layer_mask_dead);
 }
 
 static void CC_layers_high(NUFPAR *parser) {
@@ -1662,28 +1641,7 @@ static void CC_layers_high(NUFPAR *parser) {
 }
 
 static void CC_layers_low(NUFPAR *parser) {
-    u32 *mask = &charconfig.runtime->layer_mask_low;
-    *mask = 0;
-    i32 count = 0;
-    if (charconfig.named_layers == 0) {
-        while (NuFParGetWord(parser) != 0) {
-            const u32 layer = NuAToI(parser->word_buf);
-            if (!(layer < 32)) {
-                continue;
-            }
-            ++count;
-            *mask |= 1u << layer;
-        }
-    } else {
-        while (NuFParGetWord(parser) != 0) {
-            const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
-            if (layer == -1) {
-                continue;
-            }
-            ++count;
-            *mask |= 1u << layer;
-        }
-    }
+    ParseLayerMask(parser, &charconfig.runtime->layer_mask_low);
 }
 
 static void CC_layers_medium(NUFPAR *parser) {

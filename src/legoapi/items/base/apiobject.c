@@ -63,22 +63,22 @@ f32 character_farclip = 0.0f;
 static void GameObjectForceApart2D(APIOBJECT *first, APIOBJECT *second) {
     const u16 angle = static_cast<u16>(NuRandFloat() * 65536.0f);
 
-    if ((first->flags_low & 2) != 0 && (second->flags_low & 2) == 0) {
-        second->velocity.x = NuTrigTable[static_cast<u16>(angle >> 1)] * 4.0f;
+    if (first->flags_low_bit1 && !(second->flags_low_bit1)) {
+        second->velocity.x = NU_SIN_LUT(angle) * 4.0f;
         second->velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * 4.0f;
         second->movement_direction.x = second->velocity.x;
         second->movement_direction.z = second->velocity.z;
         first->movement_direction.x = first->velocity.x;
         first->movement_direction.z = first->velocity.z;
-    } else if ((first->flags_low & 2) == 0 && (second->flags_low & 2) != 0) {
-        first->velocity.x = NuTrigTable[static_cast<u16>(angle >> 1)] * 4.0f;
+    } else if (!(first->flags_low_bit1) && second->flags_low_bit1) {
+        first->velocity.x = NU_SIN_LUT(angle) * 4.0f;
         first->velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * 4.0f;
         first->movement_direction.x = first->velocity.x;
         first->movement_direction.z = first->velocity.z;
         second->movement_direction.x = second->velocity.x;
         second->movement_direction.z = second->velocity.z;
     } else {
-        first->velocity.x = NuTrigTable[static_cast<u16>(angle >> 1)] * 2.0f;
+        first->velocity.x = NU_SIN_LUT(angle) * 2.0f;
         first->velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * 2.0f;
         first->movement_direction.x = first->velocity.x;
         first->movement_direction.z = first->velocity.z;
@@ -186,8 +186,8 @@ extern "C" {
         f32 first_weight;
         f32 second_weight;
         i32 already_touching;
-        NUVEC *first_position = &first->initial_position;
-        NUVEC *second_position = &second->initial_position;
+        NUVEC *first_position;
+        NUVEC *second_position;
         f32 first_speed;
         f32 second_speed;
         f32 first_dot;
@@ -197,13 +197,15 @@ extern "C" {
         NUVEC first_component;
         NUVEC second_component;
         NUVEC average;
-        already_touching =
-            ((first->field_0x1ec & second->field_0x1e4) | (first->field_0x1f0 & second->field_0x1e8) |
-             (second->field_0x1ec & first->field_0x1e4) | (second->field_0x1f0 & first->field_0x1e8)) != 0;
-        first->field_0x1ec |= second->field_0x1e4;
-        first->field_0x1f0 |= second->field_0x1e8;
-        second->field_0x1ec |= first->field_0x1e4;
-        second->field_0x1f0 |= first->field_0x1e8;
+        first_position = &first->initial_position;
+        second_position = &second->initial_position;
+        if ((first->colliding_objects_mask & second->collision_identity_mask) ||
+            (second->colliding_objects_mask & first->collision_identity_mask))
+            already_touching = 1;
+        else
+            already_touching = 0;
+        first->colliding_objects_mask |= second->collision_identity_mask;
+        second->colliding_objects_mask |= first->collision_identity_mask;
         value = first->scaled_radius + second->scaled_radius;
         if (value > 0.0f) {
             first_weight = first->scaled_radius / value * 2.0f;
@@ -248,11 +250,11 @@ extern "C" {
             second_component.x = normal.x * value;
             second_component.y = normal.y * value;
             second_component.z = normal.z * value;
-            if ((first->flags_low & 2) != 0 && (second->flags_low & 2) == 0) {
+            if (first->flags_low_bit1 && !second->flags_low_bit1) {
                 second->velocity.x += (first_component.x - second_component.x) * first_weight * 2.0f;
                 second->velocity.y += (first_component.y - second_component.y) * first_weight * 2.0f;
                 second->velocity.z += (first_component.z - second_component.z) * first_weight * 2.0f;
-            } else if ((first->flags_low & 2) == 0 && (second->flags_low & 2) != 0) {
+            } else if (!first->flags_low_bit1 && second->flags_low_bit1) {
                 first->velocity.x += (second_component.x - first_component.x) * second_weight * 2.0f;
                 first->velocity.y += (second_component.y - first_component.y) * second_weight * 2.0f;
                 first->velocity.z += (second_component.z - first_component.z) * second_weight * 2.0f;
@@ -285,10 +287,10 @@ extern "C" {
             force = 3.0f;
             value *= force / 2.1f;
             NuVecScale(&normal, &normal, value);
-            if ((first->flags_low & 2) != 0 && (second->flags_low & 2) == 0) {
+            if (first->flags_low_bit1 && !second->flags_low_bit1) {
                 NuVecAdd(&second->velocity, &average, &normal);
                 NuVecAdd(&second->velocity, &average, &normal);
-            } else if ((first->flags_low & 2) == 0 && (second->flags_low & 2) != 0) {
+            } else if (!first->flags_low_bit1 && second->flags_low_bit1) {
                 NuVecSub(&first->velocity, &average, &normal);
                 NuVecSub(&first->velocity, &average, &normal);
             } else {
@@ -304,8 +306,8 @@ extern "C" {
         f32 first_weight;
         f32 second_weight;
         i32 already_touching;
-        NUVEC *first_position = &first->initial_position;
-        NUVEC *second_position = &second->initial_position;
+        NUVEC *first_position;
+        NUVEC *second_position;
         f32 distance;
         f32 first_speed;
         f32 second_speed;
@@ -1809,12 +1811,20 @@ void RootFnEx(NUMTX *matrix, void *data, NUVEC *sampled_root, NUVEC *, NUVEC *tr
     object->previous_animation_root_time = object->anim_packet.current_time;
 
     if (object->anim_packet.requested_animation != -1) {
-        CHARACTERANIM_s *animation = static_cast<CHARACTERANIM_s *>(
-            object->character_model->model_data_a[object->anim_packet.requested_animation]);
-        matrix->m30 = translation->x + animation->root_translation.x;
-        matrix->m32 = translation->z + animation->root_translation.z;
+        NUVEC root;
+        root.x = static_cast<CHARACTERANIM_s *>(
+                     object->character_model->model_data_a[object->anim_packet.requested_animation])
+                     ->root_translation.x;
+        root.z = static_cast<CHARACTERANIM_s *>(
+                     object->character_model->model_data_a[object->anim_packet.requested_animation])
+                     ->root_translation.z;
+        matrix->m30 = translation->x + root.x;
+        matrix->m32 = translation->z + root.z;
         if (include_y) {
-            matrix->m31 = translation->y + animation->root_translation.y;
+            root.y = static_cast<CHARACTERANIM_s *>(
+                         object->character_model->model_data_a[object->anim_packet.requested_animation])
+                         ->root_translation.y;
+            matrix->m31 = translation->y + root.y;
         }
     } else {
         matrix->m30 = translation->x;
@@ -2027,13 +2037,11 @@ extern "C" {
 
     extern i32 EDPP_MAX_TYPES;
 
-    APIDEBRISSYS_s *InitGameDebris(VARIPTR *cursor, VARIPTR *end, i32 count, i32 flags, char **names, char page) {
+    APIDEBRISSYS_s *InitGameDebris(VARIPTR *cursor, VARIPTR *end, i32 count, i32 flags, char **names, i32 page) {
+        APIDEBRISSYS_s *sys = NULL;
         (void)end;
-        if (cursor->addr == 0) {
-            return NULL;
-        }
 
-        APIDEBRISSYS_s *sys = reinterpret_cast<APIDEBRISSYS_s *>(ALIGN(cursor->addr, 0x10));
+        sys = reinterpret_cast<APIDEBRISSYS_s *>(ALIGN(cursor->addr, 0x10));
         cursor->addr = ALIGN(cursor->addr, 0x10);
         cursor->addr += sizeof(*sys);
         if (sys != NULL) {
@@ -2044,7 +2052,7 @@ extern "C" {
             cursor->addr = ALIGN(cursor->addr, 0x10);
             cursor->addr += static_cast<usize>(count) * sizeof(*sys->entries);
             if (sys->entries != NULL) {
-                memset(sys->entries, 0xff, static_cast<usize>(count) * sizeof(*sys->entries));
+                memset(sys->entries, -1, static_cast<usize>(count) * sizeof(*sys->entries));
 
                 i32 i;
                 for (i = 0; i < sys->named_count; i++) {
@@ -2794,20 +2802,24 @@ extern "C" {
     }
 
     i32 ActionFromName(const char *name) {
-        if (apicharsys == NULL || name == NULL) {
+        EXTRAACTIONDATA_s *extra;
+        i32 action;
+
+        if (apicharsys == NULL) {
             return -1;
         }
 
         if (APIActionInfo != NULL) {
-            for (i32 action = 0; action < apicharsys->model_id_capacity; ++action) {
+            for (action = 0; action < apicharsys->model_id_capacity; action++) {
                 if (NuStrICmp(APIActionInfo[action].name, name) == 0) {
                     return action;
                 }
             }
         }
 
-        if (APIExtraActionData != NULL) {
-            for (EXTRAACTIONDATA_s *extra = APIExtraActionData; extra->name != NULL; ++extra) {
+        extra = APIExtraActionData;
+        if (extra != NULL) {
+            for (; extra->name != NULL; extra++) {
                 if (NuStrICmp(extra->name, name) == 0) {
                     return extra->action;
                 }

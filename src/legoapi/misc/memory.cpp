@@ -134,12 +134,21 @@ extern "C" {
                 freechunkcontrols[freechunkcontrolsptr]->particle_chunk = debkeydata[*handle].particle_chunks[i];
                 freechunkcontrols[freechunkcontrolsptr]->active = effect->particle_type == 7 ? 7 : 0;
                 freechunkcontrols[freechunkcontrolsptr]->owner = NULL;
-                debinftype *expiry_effect = debtab[debkeydata[*handle].effect_index];
-                const i32 panel = effect->time_group == 4;
-                freechunkcontrols[freechunkcontrolsptr]->expiry_time =
-                    expiry_effect->particle_lifetime + (panel ? panelglobaltime : globaltime) +
-                    static_cast<i8>(expiry_effect->trail_count) * expiry_effect->trail_time;
-                AddChunkControlToStack(freechunkcontrols[freechunkcontrolsptr], &debris_chunk_control_stack[panel]);
+                i32 stack;
+                if (effect->time_group == 4) {
+                    freechunkcontrols[freechunkcontrolsptr]->expiry_time =
+                        debtab[debkeydata[*handle].effect_index]->particle_lifetime + panelglobaltime +
+                        static_cast<i8>(debtab[debkeydata[*handle].effect_index]->trail_count) *
+                            debtab[debkeydata[*handle].effect_index]->trail_time;
+                    stack = 1;
+                } else {
+                    freechunkcontrols[freechunkcontrolsptr]->expiry_time =
+                        debtab[debkeydata[*handle].effect_index]->particle_lifetime + globaltime +
+                        static_cast<i8>(debtab[debkeydata[*handle].effect_index]->trail_count) *
+                            debtab[debkeydata[*handle].effect_index]->trail_time;
+                    stack = 0;
+                }
+                AddChunkControlToStack(freechunkcontrols[freechunkcontrolsptr], &debris_chunk_control_stack[stack]);
                 ++freechunkcontrolsptr;
             }
             DebrisReleaseControlStackLock();
@@ -225,19 +234,26 @@ extern "C" {
 
     void DebFreeOrphansInstantly(debinftype *effect) {
         DebrisGetControlStackLock();
-        i32 count = debrischunks + debrischunksglass;
-        for (i32 i = 0; i < count; ++i, count = debrischunks + debrischunksglass) {
+        for (i32 i = 0; i < debrischunks + debrischunksglass; ++i) {
             particlechunkrendertype_s *chunk = &ParticleChunkToRender[i];
             if (chunk->key != NULL || chunk->effect != effect)
                 continue;
             RemoveAnyChunkControls(reinterpret_cast<i32 *>(chunk->particle_chunk));
-            debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr];
-            control->particle_chunk = ParticleChunkToRender[i].particle_chunk;
-            control->active = effect->particle_type == 7 ? 9 : 2;
-            control->owner = NULL;
-            i32 stack = effect->time_group == 4 ? 1 : 0;
-            control->expiry_time = stack != 0 ? panelglobaltime : globaltime;
-            AddChunkControlToStack(control, &debris_chunk_control_stack[stack]);
+            freechunkcontrols[freechunkcontrolsptr]->particle_chunk = ParticleChunkToRender[i].particle_chunk;
+            if (effect->particle_type != 7)
+                freechunkcontrols[freechunkcontrolsptr]->active = 2;
+            else
+                freechunkcontrols[freechunkcontrolsptr]->active = 9;
+            freechunkcontrols[freechunkcontrolsptr]->owner = NULL;
+            i32 stack;
+            if (effect->time_group == 4) {
+                freechunkcontrols[freechunkcontrolsptr]->expiry_time = panelglobaltime;
+                stack = 1;
+            } else {
+                freechunkcontrols[freechunkcontrolsptr]->expiry_time = globaltime;
+                stack = 0;
+            }
+            AddChunkControlToStack(freechunkcontrols[freechunkcontrolsptr], &debris_chunk_control_stack[stack]);
             ++freechunkcontrolsptr;
             RemoveChunkFromRenderStack(&ParticleChunkToRender[i],
                                        &ParticleChunkRenderStack[static_cast<i8>(effect->time_group)]);
