@@ -4090,21 +4090,22 @@ i32 HitWallSpline() {
     if (WallSplCount == 0)
         return hit;
     for (i32 i = 0; i < WallSplCount; i += 2) {
-        const NUVEC &a = WallSplList[i].position;
-        const NUVEC &b = WallSplList[i + 1].position;
         TerrainQuery_s *query = TerI;
-        if (!(64.0f > fabsf(query->position.x - a.x) && 64.0f > fabsf(query->position.z - a.z)))
+        if (!(64.0f > fabsf(query->position.x - WallSplList[i].position.x) &&
+              64.0f > fabsf(query->position.z - WallSplList[i].position.z)))
             continue;
-        normal.x = b.z - a.z;
-        normal.z = a.x - b.x;
+        normal.x = WallSplList[i + 1].position.z - WallSplList[i].position.z;
+        normal.z = WallSplList[i].position.x - WallSplList[i + 1].position.x;
         NuVecNorm(&normal, &normal);
         const f32 radius = query->collision_radius;
         const f32 px = query->position.x;
         const f32 mz = query->movement.z;
         const f32 pz = query->position.z;
         const f32 mx = query->movement.x;
-        const f32 end_distance = ((mx + px) - a.x) * normal.x + ((mz + pz) - a.z) * normal.z - radius;
-        const f32 start_distance = (px - a.x) * normal.x + (pz - a.z) * normal.z - radius;
+        const f32 end_distance = ((mx + px) - WallSplList[i].position.x) * normal.x +
+                                 ((mz + pz) - WallSplList[i].position.z) * normal.z - radius;
+        const f32 start_distance =
+            (px - WallSplList[i].position.x) * normal.x + (pz - WallSplList[i].position.z) * normal.z - radius;
         if ((end_distance < 0.0f || start_distance < 0.0f) && start_distance > -radius) {
             f32 time, x, z;
             if (start_distance < 0.0f) {
@@ -4116,9 +4117,10 @@ i32 HitWallSpline() {
                 x = (mx * time + px) - normal.x * radius;
                 z = (mz * time + pz) - normal.z * radius;
             }
-            const f32 dx = b.x - a.x;
-            const f32 dz = b.z - a.z;
-            if ((x - a.x) * dx + dz * (z - a.z) >= -0.00005f && -dx * (x - b.x) - (z - b.z) * dz >= -0.00005f &&
+            const f32 dx = WallSplList[i + 1].position.x - WallSplList[i].position.x;
+            const f32 dz = WallSplList[i + 1].position.z - WallSplList[i].position.z;
+            if ((x - WallSplList[i].position.x) * dx + dz * (z - WallSplList[i].position.z) >= -0.00005f &&
+                -dx * (x - WallSplList[i + 1].position.x) - (z - WallSplList[i + 1].position.z) * dz >= -0.00005f &&
                 time < query->hit_time) {
                 query->shape_adjusted = 4;
                 query->terrain_group_index = -1;
@@ -4134,8 +4136,8 @@ i32 HitWallSpline() {
                 hit = 1.0f;
             }
         }
-        const f32 dx = a.x - px;
-        const f32 dz = a.z - pz;
+        const f32 dx = WallSplList[i].position.x - px;
+        const f32 dz = WallSplList[i].position.z - pz;
         const f32 reach = radius + 0.005f + query->horizontal_movement_length;
         const f32 distance_sq = dx * dx + dz * dz;
         if (!(64.0f > fabsf(dx) && 64.0f > fabsf(dz) && reach * reach > distance_sq))
@@ -4145,23 +4147,16 @@ i32 HitWallSpline() {
         const f32 along = direction.x * dx + direction.z * dz;
         const f32 padded_radius = radius + 0.0005f;
         f32 time = 0.0f;
-        if (!(along >= 0.0f)) {
-            if (!(padded_radius * padded_radius >= distance_sq))
-                continue;
-            goto penetrating_hit;
-        } else {
-            const f32 side_z = a.z - (direction.z * along + pz);
-            const f32 side_x = a.x - (direction.x * along + px);
+        bool penetrating = true;
+        if (along >= 0.0f) {
+            const f32 side_z = WallSplList[i].position.z - (direction.z * along + pz);
+            const f32 side_x = WallSplList[i].position.x - (direction.x * along + px);
             const f32 side_x_sq = side_x * side_x;
             const f32 side_z_sq = side_z * side_z;
             if (side_x_sq + side_z_sq <= padded_radius * padded_radius) {
                 const f32 distance = along - NuFsqrt((radius * radius - side_x_sq) - side_z_sq);
                 const f32 movement_sq = mx * mx + mz * mz;
-                if (!(distance >= -0.0005f && movement_sq >= distance * distance)) {
-                    if (!(padded_radius * padded_radius >= distance_sq))
-                        continue;
-                    goto penetrating_hit;
-                } else {
+                if (distance >= -0.0005f && movement_sq >= distance * distance) {
                     const f32 length = NuFsqrt(movement_sq);
                     if (length != 0.0f && distance != 0.0f) {
                         time = distance / length;
@@ -4170,25 +4165,24 @@ i32 HitWallSpline() {
                     }
                     if (!(query->hit_time > time))
                         continue;
-                    normal.x = direction.x * distance + px - a.x;
-                    normal.z = distance * direction.z + pz - a.z;
+                    normal.x = direction.x * distance + px - WallSplList[i].position.x;
+                    normal.z = distance * direction.z + pz - WallSplList[i].position.z;
                     NuVecNorm(&normal, &normal);
+                    penetrating = false;
                 }
-            } else {
-                if (!(padded_radius * padded_radius >= distance_sq))
-                    continue;
-                goto penetrating_hit;
             }
         }
-        query->hit_type = 1;
-        goto resolved_hit;
-    penetrating_hit:
-        normal.x = px - a.x;
-        normal.z = pz - a.z;
-        NuVecNorm(&normal, &normal);
-        query->hit_type = 0x11;
-        time = (NuFsqrt(distance_sq) - radius) - 0.0005f;
-    resolved_hit:
+        if (penetrating) {
+            if (!(padded_radius * padded_radius >= distance_sq))
+                continue;
+            normal.x = px - WallSplList[i].position.x;
+            normal.z = pz - WallSplList[i].position.z;
+            NuVecNorm(&normal, &normal);
+            query->hit_type = 0x11;
+            time = (NuFsqrt(distance_sq) - radius) - 0.0005f;
+        } else {
+            query->hit_type = 1;
+        }
         query->hit_time = time;
         query->movement_normal.x = normal.x;
         query->movement_normal.y = normal.y;
