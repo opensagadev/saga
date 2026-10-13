@@ -120,7 +120,7 @@ class NuSoundHeaderWAV : public NuSoundStreamDesc {
         return GetEncodedLengthBytes() / ((GetBitsPerChannel() + 7) / 8);
     }
     f32 GetLengthSeconds() const override {
-        return (f32)GetLengthSamples() / (f32)GetSampleRate();
+        return (f32)GetLengthSamples() / (f32)(i32)GetSampleRate();
     }
     u64 GetDataOffset() const override {
         return this->data_position;
