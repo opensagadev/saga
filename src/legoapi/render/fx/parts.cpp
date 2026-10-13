@@ -525,9 +525,12 @@ static __used__ void PartExtra_BlueCoin(PART_s *part) {
     i32 effect = WORLD->debris_sys->entries[56].effect;
     if (effect == -1)
         return;
-    f32 rate = 5.0f;
-    if (WORLD->area != NULL && (WORLD->area->flags & 0x104) == 4)
-        rate = 2.5f;
+    f32 rate;
+    if (WORLD->area != NULL) {
+        rate = (WORLD->area->flags & 0x104) == 4 ? 2.5f : 5.0f;
+    } else {
+        rate = 5.0f;
+    }
     i32 count = ParticlesPerSecond(rate, FRAMETIME);
     if (count > 0)
         AddVariableShotDebrisEffect(effect, &part->position, count, 0, 0);
@@ -539,9 +542,12 @@ static __used__ void PartExtra_PurpleCoin(PART_s *part) {
     i32 effect = WORLD->debris_sys->entries[57].effect;
     if (effect == -1)
         return;
-    f32 rate = 5.0f;
-    if (WORLD->area != NULL && (WORLD->area->flags & 0x104) == 4)
-        rate = 2.5f;
+    f32 rate;
+    if (WORLD->area != NULL) {
+        rate = (WORLD->area->flags & 0x104) == 4 ? 2.5f : 5.0f;
+    } else {
+        rate = 5.0f;
+    }
     i32 count = ParticlesPerSecond(rate, FRAMETIME);
     if (count > 0)
         AddVariableShotDebrisEffect(effect, &part->position, count, 0, 0);
