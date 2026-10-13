@@ -397,7 +397,7 @@ f32 RatioAlongLineXZ(nuvec_s *point, nuvec_s *start, nuvec_s *end) {
     f32 dx = end->x - start->x;
     f32 dz = end->z - start->z;
     i32 angle = -NuAtan2D(dx, dz);
-    f32 sine = NuTrigTable[static_cast<u16>(angle) >> 1];
+    f32 sine = NuTrigTable[static_cast<u16>(static_cast<u16>(angle) / 2)];
     f32 cosine = NuTrigTable[((static_cast<u16>(angle) + 0x4000) >> 1) & 0x7fff];
     f32 px = point->x - start->x;
     f32 pz = point->z - start->z;

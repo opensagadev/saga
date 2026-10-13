@@ -233,7 +233,7 @@ static i32 CanMagnetClimb_Game(GameObject_s *object) {
 
 static i32 CanGlide_Game(GameObject_s *object) {
     SUIT_s *suit = static_cast<SUIT_s *>(object->suit);
-    return suit != NULL ? suit->can_glide : 0;
+    return suit != NULL ? (suit->flags & 2) != 0 : 0;
 }
 
 static i32 Slam_GetDebris_Game(GameObject_s *object, i32 effect) {
