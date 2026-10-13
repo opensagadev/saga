@@ -745,26 +745,21 @@ void PlayerTakeHit(GameObject_s *object, GameObject_s *attacker) {
 
     const u8 state = object->field_0xe31;
     i32 animation;
+    void *animation_data;
     if (state != 1) {
         animation = 0x3d;
-        if (object->apiobj.character_model->model_data_b[0x3d] == NULL) {
-            if ((object->field_0xefb & 8) != 0) {
-                ResetAnimPacket(&object->apiobj.anim_packet, -1);
-                Player_ClearContext(object, 1);
-                Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
-            }
-            return;
-        }
+        animation_data = object->apiobj.character_model->model_data_b[0x3d];
     } else {
         animation = 0x3e;
-        if (object->apiobj.character_model->model_data_b[0x3e] == NULL) {
-            if ((object->field_0xefb & 8) != 0) {
-                ResetAnimPacket(&object->apiobj.anim_packet, -1);
-                Player_ClearContext(object, 1);
-                Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
-            }
-            return;
+        animation_data = object->apiobj.character_model->model_data_b[0x3e];
+    }
+    if (animation_data == NULL) {
+        if ((object->field_0xefb & 8) != 0) {
+            ResetAnimPacket(&object->apiobj.anim_packet, -1);
+            Player_ClearContext(object, 1);
+            Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
         }
+        return;
     }
 
     if (object->field_0x7a5 == 0x1b && object->field_0x780 != NULL) {
