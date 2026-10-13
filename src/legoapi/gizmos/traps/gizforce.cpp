@@ -819,7 +819,7 @@ static i32 GizForces_Hit(void *world_ptr, GIZFORCE_s *force, NUVEC *, i32, i32 p
         GameAnimSet_SetVisibility(force->anim_set, 0);
         force->state_flags |= GIZFORCE_STATE_DESTROYED_OR_THROWN;
     }
-    if (player_index != -1 && static_cast<i8>(Player[player_index]->apiobj.flags_low) < 0) {
+    if (player_index != -1 && Player[player_index]->apiobj.player_controlled) {
         NewBuzz(Player[player_index]->pad_gamepad->pad, 0.1f, 0);
     }
     return 1;

@@ -87,8 +87,8 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
         both_pads = false;
     } else if (menu_id == 0x1e && PlayerProgress[0].active != 0 && PlayerProgress[1].active != 0) {
         both_pads = true;
-    } else if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0 && Player[1] != NULL &&
-               static_cast<i8>(Player[1]->apiobj.field_0x1f8) < 0) {
+    } else if (Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[1] != NULL &&
+               Player[1]->apiobj.player_controlled) {
         both_pads = true;
     } else if (pad == &GamePad[0]) {
         if (WORLD->current_level == CREDITS_LDATA) {
@@ -101,8 +101,8 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
             }
         } else if (Player[0] != NULL && Player[1] != NULL) {
             const bool first_active =
-                (Player[0]->apiobj.field_0x1f4 & 0x40000) == 0 && static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0;
-            if ((Player[1]->apiobj.field_0x1f4 & 0x40000) == 0 && static_cast<i8>(Player[1]->apiobj.field_0x1f8) < 0) {
+                (Player[0]->apiobj.field_0x1f4 & 0x40000) == 0 && Player[0]->apiobj.player_controlled;
+            if ((Player[1]->apiobj.field_0x1f4 & 0x40000) == 0 && Player[1]->apiobj.player_controlled) {
                 if (!first_active)
                     pad = Player[1]->pad_gamepad;
             } else if (!first_active) {

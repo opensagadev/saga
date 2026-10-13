@@ -2257,7 +2257,7 @@ GIZMOBLOWUP_s *GizmoBlowUp_Target(GameObject_s *object, nuvec_s *position, nuvec
 
 i32 GizmoBlowupCheckProximity(WORLDINFO_s *world, GameObject_s *object) {
     i32 count = 0;
-    if (object == NULL || static_cast<i8>(object->apiobj.field_0x1f8) >= 0)
+    if (object == NULL || !object->apiobj.player_controlled)
         return count;
     i32 special;
     i32 ordinary;

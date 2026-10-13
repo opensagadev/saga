@@ -9,6 +9,8 @@
 #include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/items/collect/spacelevel.h"
+#include "nu2api/numusic/numusic.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "legoapi/props/system/socksys.h"
 #include "legoapi/world/area.h"
@@ -129,7 +131,7 @@ void GamePads_NetReset(i32) {
 }
 
 u16 GamePad_InputAngle(GameObject_s *object, GAMEPAD_s *pad) {
-    if (static_cast<i8>(object->apiobj.field_0x1f8) >= 0 || object->field_0x661 == 0xff) {
+    if (!object->apiobj.player_controlled || object->field_0x661 == 0xff) {
         goto camera_relative;
     }
     {
@@ -252,7 +254,7 @@ void NewBuzzFrames(nupad_s *pad, i32 frames, i32) {
 }
 
 void TakeHitRumble(GameObject_s *object, float strength) {
-    if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0) {
+    if (object != NULL && object->apiobj.player_controlled) {
         NewRumble(object->pad_gamepad->pad, strength, 0);
         NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
     }
@@ -270,9 +272,24 @@ f32 SpeedAdd = 1.0f;
 f32 SpeedDist = 5.0f;
 f32 MulAdd = 0.0f;
 
+extern "C" void SetPreSeekStartPoint(f32 start_point);
+
+void SpaceResetAudioPoint() {
+    for (i32 door = 6; door >= 0; --door) {
+        for (i32 player = 0; player < 2; ++player) {
+            if (Player[player] != NULL && Player[player]->sock_position.distance > DogFightDoors.doors[door].distance) {
+                music_man.SetTrackEntryTimeByClass(TRACK_CLASS_ACTION, DogFightDoors.doors[door].timer);
+                music_man.SetTrackEntryTimeByClass(TRACK_CLASS_NOMUSIC, DogFightDoors.doors[door].timer);
+                return;
+            }
+        }
+    }
+    SetPreSeekStartPoint(0.0f);
+}
+
 void SpaceRumbleProcess() {
     NUVEC_ALIGNED16 origin;
-    if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0) {
+    if (Player[0] != NULL && Player[0]->apiobj.player_controlled) {
         origin = Player[0]->apiobj.position;
     } else if (Player[1] != NULL) {
         origin = Player[1]->apiobj.position;
@@ -350,16 +367,6 @@ void SpaceRumbleProcess() {
     }
 }
 
-static inline void NewPlayerRumble(GameObject_s *object, f32 strength, f32 duration, f32 amount) {
-    if (object == NULL || static_cast<i8>(object->apiobj.flags_low) >= 0) {
-        return;
-    }
-    nupad_s *pad = object->pad_gamepad->pad;
-    if (pad != NULL) {
-        NuSound3AddRumble(pad, duration, static_cast<i32>(amount), 0, strength);
-    }
-}
-
 void NewRumbleAllPlayers(float strength, float duration, i32 frames, i32) {
     if (frames > 0) {
         f32 frame_duration = static_cast<f32>(frames) / DEFAULTFPS;
@@ -367,14 +374,12 @@ void NewRumbleAllPlayers(float strength, float duration, i32 frames, i32) {
             duration = frame_duration;
     }
     const f32 amount = strength * 255.0f;
-    NewPlayerRumble(Player[0], strength, duration, amount);
-    NewPlayerRumble(Player[1], strength, duration, amount);
-    NewPlayerRumble(Player[2], strength, duration, amount);
-    NewPlayerRumble(Player[3], strength, duration, amount);
-    NewPlayerRumble(Player[4], strength, duration, amount);
-    NewPlayerRumble(Player[5], strength, duration, amount);
-    NewPlayerRumble(Player[6], strength, duration, amount);
-    NewPlayerRumble(Player[7], strength, duration, amount);
+    for (i32 i = 0; i < 8; ++i) {
+        GameObject_s *object = Player[i];
+        if (object != NULL && object->apiobj.player_controlled && object->pad_gamepad->pad != NULL) {
+            NuSound3AddRumble(object->pad_gamepad->pad, duration, static_cast<i32>(amount), 0, strength);
+        }
+    }
 }
 
 i32 ObjLookingWithLeftStick(GameObject_s *object) {
@@ -510,7 +515,7 @@ i32 ReadPad(i32 port) {
     } else if (port >= PLAYERCOUNT || Player[port] == NULL) {
         result = 1;
         input_mode = 1;
-    } else if (static_cast<i8>(Player[port]->apiobj.field_0x1f8) < 0) {
+    } else if (Player[port]->apiobj.player_controlled) {
         result = 0;
         input_mode = 2;
     } else {

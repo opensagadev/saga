@@ -804,7 +804,7 @@ void Grapple_MoveCode(GameObject_s *object) {
         StartJump(object, 0);                                                                                          \
         object->movement_runtime_flags |= 0x10;                                                                        \
         GameAudio_PlaySfx(0x45, &object->apiobj.collision_position, 0, 0);                                             \
-        if (static_cast<i8>(object->apiobj.flags_low) < 0)                                                             \
+        if (object->apiobj.player_controlled)                                                                          \
             Hint_SetComplete(LEGOHINT_GRAPPLE);                                                                        \
         if (GRAPPLE_CURRENT != NULL && GRAPPLE_CURRENT->has_terrain_platform == 0 && object->field_0x7a3 == 1) {       \
             const f32 height = (0.1f + GRAPPLE_CURRENT->position.y) - object->apiobj.lower_position.y;                 \
@@ -817,7 +817,7 @@ void Grapple_MoveCode(GameObject_s *object) {
     } while (0)
 
     if (object->character_context == LEGOCONTEXT_GRAPPLE) {
-        if (static_cast<i8>(object->apiobj.flags_low) >= 0 && object->can_use_object != object->field_0x788) {
+        if (!object->apiobj.player_controlled && object->can_use_object != object->field_0x788) {
             GRAPPLE_CURRENT->activation_progress = 0.0f;
             object->character_context = -1;
             return;
@@ -1017,7 +1017,7 @@ void Grapple_MoveCode(GameObject_s *object) {
     } else {
         if (Grapples_Available == 0)
             return;
-        if (static_cast<i8>(object->apiobj.flags_low) >= 0 && object->use_action != 1)
+        if (!object->apiobj.player_controlled && object->use_action != 1)
             return;
         if (ObjLandReady(object) == 0 && (LEGOCONTEXT_JUMP == -1 || object->character_context != LEGOCONTEXT_JUMP)) {
             if (LEGOCONTEXT_GLIDE == -1 || object->character_context != LEGOCONTEXT_GLIDE || LEGOACT_GLIDE == -1 ||
@@ -1027,7 +1027,7 @@ void Grapple_MoveCode(GameObject_s *object) {
         GRAPPLE *grapple = Grapple_FindNearest(WORLD, &object->apiobj.collision_position, object, NULL);
         if (grapple == NULL)
             return;
-        if (static_cast<i8>(object->apiobj.flags_low) >= 0 && object->can_use_object != grapple)
+        if (!object->apiobj.player_controlled && object->can_use_object != grapple)
             return;
         if ((grapple->flags & GRAPPLE_FLAG_DISABLED) == 0) {
             if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0 &&
@@ -1069,7 +1069,7 @@ void Grapple_MoveCode(GameObject_s *object) {
         object->grapple_swing_phase = 0x2000;
         const f32 depth = 0.75f * FRAMETIME + object->field_0x768;
         object->field_0x768 = MIN(maximum_length, depth);
-        if (object->pad_gamepad->input_magnitude > 0.0f && static_cast<i8>(object->apiobj.flags_low) < 0) {
+        if (object->pad_gamepad->input_magnitude > 0.0f && object->apiobj.player_controlled) {
             object->grapple_swing_degrees = static_cast<u8>(static_cast<i32>(
                 (object->pad_gamepad->input_magnitude / object->apiobj.character_data->game_character->run_speed) *
                 30.0f));

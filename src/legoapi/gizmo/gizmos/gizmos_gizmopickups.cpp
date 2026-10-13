@@ -26,8 +26,8 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
     if (object != NULL) {
         player_index = object->apiobj.field_0x27c;
     } else {
-        i32 player0_active = Player[0] == NULL ? 0 : static_cast<i8>(Player[0]->apiobj.flags_low) < 0;
-        if (Player[1] == NULL || static_cast<i8>(Player[1]->apiobj.flags_low) >= 0) {
+        i32 player0_active = Player[0] == NULL ? 0 : Player[0]->apiobj.player_controlled;
+        if (Player[1] == NULL || !Player[1]->apiobj.player_controlled) {
             if (player0_active == 0) {
                 return;
             }

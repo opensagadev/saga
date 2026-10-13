@@ -254,7 +254,7 @@ static bool ActionValidOpponent(GameObject_s *opponent) {
            (opponent->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) ==
                (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER) &&
            opponent->apiobj.field_0x287 == 0 && opponent->character_context != CHARACTER_CONTEXT_DOOMED &&
-           !(static_cast<i8>(opponent->apiobj.flags_low) < 0 && opponent->spawn_protection_timer > 0.0f);
+           !(opponent->apiobj.player_controlled && opponent->spawn_protection_timer > 0.0f);
 }
 
 // Game-specific AI actions and conditions (registered via
@@ -3652,7 +3652,7 @@ __used__ static i32 Action_SetTaggable(AISYS *sys, AISCRIPTPROCESS *processor, A
     if (object != NULL) {
         bool set_disabled = false;
         if (disabled != 0) {
-            if (static_cast<i8>(object->apiobj.flags_low) < 0) {
+            if (object->apiobj.player_controlled) {
                 if (object->field_0xcc0 != NULL) {
                     ReleaseTakeOver(object, 0);
                     set_disabled = disabled;
@@ -5659,7 +5659,7 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
     object->field_0xef8 |= 0x20;
     if ((opponent->apiobj.field_0x1f8 & 0x1001) != 0x1001 || opponent->apiobj.field_0x287 != 0 ||
         opponent->character_context == 0x2b ||
-        (static_cast<i8>(opponent->apiobj.flags_low) < 0 && opponent->spawn_protection_timer > 1.5f))
+        (opponent->apiobj.player_controlled && opponent->spawn_protection_timer > 1.5f))
         return 0;
 
     NUVEC difference;
@@ -5675,11 +5675,10 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
         }
     } else {
         goal_range = packet->movement_instruction_parameter;
-        if (goal_range != 0.0f &&
-            ((static_cast<i8>(opponent->apiobj.flags_low) < 0 && object->apiobj.model_draw_result == 0) ||
-             ((WORLD->api_object_sys->line_of_sight[packet->owner->apiobj.field_0x289] >>
-               opponent->apiobj.field_0x289) &
-              1) == 0))
+        if (goal_range != 0.0f && ((opponent->apiobj.player_controlled && object->apiobj.model_draw_result == 0) ||
+                                   ((WORLD->api_object_sys->line_of_sight[packet->owner->apiobj.field_0x289] >>
+                                     opponent->apiobj.field_0x289) &
+                                    1) == 0))
             goal_range = 0.1f;
     }
 

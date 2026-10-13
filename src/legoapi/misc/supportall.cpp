@@ -233,7 +233,7 @@ void CatchUpCode(GameObject_s *object, f32 divisor, f32 maximum, i32 mode) {
     if (socket_index == -1 || WORLD->sock_sys == NULL) {
         return;
     }
-    if (mode != 0 && static_cast<i8>(object->apiobj.field_0x1f8) >= 0) {
+    if (mode != 0 && !object->apiobj.player_controlled) {
         return;
     }
 
@@ -247,10 +247,8 @@ void CatchUpCode(GameObject_s *object, f32 divisor, f32 maximum, i32 mode) {
         return;
     }
 
-    if (other != NULL &&
-        (static_cast<i8>(object->apiobj.field_0x1f8) >= 0 || static_cast<i8>(other->apiobj.field_0x1f8) < 0) &&
-        static_cast<i8>(other->field_0x661) == socket_index &&
-        (mode == 0 || static_cast<i8>(other->apiobj.field_0x1f8) < 0)) {
+    if (other != NULL && (!object->apiobj.player_controlled || other->apiobj.player_controlled) &&
+        static_cast<i8>(other->field_0x661) == socket_index && (mode == 0 || other->apiobj.player_controlled)) {
         f32 distance = object->sock_position.normalized_distance - other->sock_position.normalized_distance;
         if (looping) {
             if (!(distance >= 0.5f)) {

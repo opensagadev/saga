@@ -188,8 +188,9 @@ static void GizBuildIts_PostLoad(void *world_ptr, void *data) {
         return;
     }
 
-    for (i32 index = 0; index < buildit_sys->count; ++index) {
-        GIZBUILDIT_s &buildit = buildit_sys->buildits[index];
+    GIZBUILDIT_s *buildit_ptr = buildit_sys->buildits;
+    for (i32 index = 0; index < buildit_sys->count; ++index, ++buildit_ptr) {
+        GIZBUILDIT_s &buildit = *buildit_ptr;
         if ((buildit.availability_flags & GIZBUILDIT_AVAILABILITY_HAS_BLOWUP_TYPE) != 0) {
             buildit.blowup_type = static_cast<i16>(GizmoBlowupGetTypeFromNameTableId(world, buildit.blowup_type));
             buildit.availability_flags &= static_cast<u8>(~GIZBUILDIT_AVAILABILITY_HAS_BLOWUP_TYPE);
@@ -234,8 +235,9 @@ static void GizBuildIts_Draw(void *world_ptr, void *data, float) {
         return;
     }
 
-    for (i32 index = 0; index < buildit_sys->count; ++index) {
-        GIZBUILDIT_s &buildit = buildit_sys->buildits[index];
+    GIZBUILDIT_s *buildit_ptr = buildit_sys->buildits;
+    for (i32 index = 0; index < buildit_sys->count; ++index, ++buildit_ptr) {
+        GIZBUILDIT_s &buildit = *buildit_ptr;
         if ((buildit.availability_flags & GIZBUILDIT_AVAILABILITY_VISIBLE) == 0 ||
             (buildit.room_index >= 0 && world->rooms_visible_ptr[buildit.room_index] == 0)) {
             continue;
@@ -273,10 +275,8 @@ static void GizBuildIts_Draw(void *world_ptr, void *data, float) {
             object_data->was_drawn = static_cast<u8>(NuSpecialDrawAt(&object->special, &draw_mtx));
 
             if ((buildit.state_flags & GIZBUILDIT_STATE_DRAW_REFLECTION) != 0 && (object->flags & 2) == 0) {
-                const f32 override_plane = WORLD != NULL && WORLD->current_level != NULL
-                                               ? WORLD->current_level->unknown_0cc
-                                               : world->current_level->unknown_0cc;
-                if (MatrixReflection(&object_data->draw_mtx, 2, reflection_plane, override_plane, &draw_mtx) != 0) {
+                if (MatrixReflection(&object_data->draw_mtx, 2, reflection_plane, WORLD->current_level->unknown_0cc,
+                                     &draw_mtx) != 0) {
                     NuSpecialDrawAt(&object->special, &draw_mtx);
                 }
             }
@@ -690,7 +690,7 @@ void GizBuildItPushAwayFromEnd(GameObject_s *player) {
 }
 
 f32 GizBuildItMul(GameObject_s *player) {
-    if (static_cast<i8>(player->apiobj.field_0x1f8) < 0 && Player_HasFastBuild(player)) {
+    if (player->apiobj.player_controlled && Player_HasFastBuild(player)) {
         return 3.0f;
     }
 

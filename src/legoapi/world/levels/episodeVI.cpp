@@ -1271,7 +1271,7 @@ void DeathStar2BattleD_Update(WORLDINFO_s *) {
 }
 
 GIZMOBLOWUP_s *DeathStar2BattleD_InZapRange(GameObject_s *object) {
-    if (object == NULL || static_cast<i8>(object->apiobj.field_0x1f8) >= 0 || object->apiobj.field_0x287 != 0)
+    if (object == NULL || !object->apiobj.player_controlled || object->apiobj.field_0x287 != 0)
         return NULL;
 
     GIZMOBLOWUP_s *nearest;
