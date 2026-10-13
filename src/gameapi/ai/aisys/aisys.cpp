@@ -6074,14 +6074,12 @@ __used__ static i32 Action_SetScriptParam(AISYS *, AISCRIPTPROCESS *processor, A
             char *value = NuStrIStr(params[i], "name=");
             if (value != NULL) {
                 value += 5;
-                if (NuStrICmp(processor->script->params[0].name, value) == 0)
-                    index = 0;
-                else if (NuStrICmp(processor->script->params[1].name, value) == 0)
-                    index = 1;
-                else if (NuStrICmp(processor->script->params[2].name, value) == 0)
-                    index = 2;
-                else if (NuStrICmp(processor->script->params[3].name, value) == 0)
-                    index = 3;
+                for (i32 j = 0; j < 4; j++) {
+                    if (NuStrICmp(processor->script->params[j].name, value) == 0) {
+                        index = j;
+                        break;
+                    }
+                }
             } else if ((value = NuStrIStr(params[i], "ix=")) != NULL) {
                 index = (i32)AIParamToFloat(processor, value + 3);
                 if (index >= 4)
@@ -6097,12 +6095,17 @@ __used__ static i32 Action_SetScriptParam(AISYS *, AISCRIPTPROCESS *processor, A
             }
         }
         if (index >= 0) {
-            if (operation == 0)
-                processor->params[index] = amount;
-            else if (operation == 1)
-                processor->params[index] = amount + processor->params[index];
-            else if (operation == -1)
-                processor->params[index] -= amount;
+            switch (operation) {
+                case 0:
+                    processor->params[index] = amount;
+                    break;
+                case 1:
+                    processor->params[index] = amount + processor->params[index];
+                    break;
+                case -1:
+                    processor->params[index] -= amount;
+                    break;
+            }
         }
     }
     return 1;
