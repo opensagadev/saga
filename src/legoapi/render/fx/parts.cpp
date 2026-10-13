@@ -3003,21 +3003,21 @@ void PowerUp_AddPart(NUVEC *position, NUVEC *velocity, f32 scale, f32 lifetime) 
     ADDPART_ALIGNED16 params = Default_ADDPART;
     params.position = position;
     params.velocity = velocity;
-    params.special = &world->lev_objs[0xd0].special;
     params.field_18 = params.field_14 = scale * GizmoPickupType[9].shadow_radius_x;
     params.gravity = AreaPickupGravity;
-    params.field_28 = 0xd0;
-    params.flags = 0x256;
+    params.special = &world->lev_objs[0xd0].special;
     params.field_40 = PartCollide_3D;
-    params.field_3c = PowerUp_ImpactPart;
     params.field_48 = PowerUp_UpdatePart;
+    params.field_3c = PowerUp_ImpactPart;
     params.stop_fn = PartStop_Flickerer;
     params.draw_fn = PowerUp_DrawPart;
+    params.field_28 = 0xd0;
+    params.flags = 0x256;
+    params.field_88 = lifetime;
     if (params.gravity == 0.0f)
         params.move_fn = PartMove_VehiclePickup;
     params.time_step = FRAMETIME;
     params.field_c0 = scale;
-    params.field_88 = lifetime;
     PART_s *part = AddPart(&params);
     if (part != NULL)
         part->rotation_y = NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f;
