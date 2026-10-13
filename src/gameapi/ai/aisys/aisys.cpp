@@ -2152,20 +2152,17 @@ __used__ static i32 Action_CanAttack(AISYS *sys, AISCRIPTPROCESS *processor, AIP
     (void)param_6;
     if (param_5 != 0) {
         GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
-        bool enabled = true;
+        i32 enabled = 1;
         for (i32 index = 0; index < param_4; ++index) {
-            if (params[index] == NULL) {
-                continue;
-            }
             char *name = NuStrIStr(params[index], "character=");
             if (name != NULL) {
                 object = GetNamedGameObject(sys, name + 10);
             } else if (NuStrICmp(params[index], "FALSE") == 0) {
-                enabled = false;
+                enabled = 0;
             }
         }
         if (object != NULL) {
-            object->field_0xef9 = static_cast<u8>((object->field_0xef9 & ~2u) | (enabled ? 2u : 0u));
+            object->field_0xef9 = static_cast<u8>((object->field_0xef9 & ~2u) | ((enabled & 1) << 1));
         }
     }
     return 1;
@@ -2486,15 +2483,14 @@ __used__ static i32 Action_DontAttack(AISYS *sys, AISCRIPTPROCESS *processor, AI
     (void)sys;
     (void)processor;
     (void)param_6;
-    if (packet != NULL && packet->owner != NULL) {
-        bool enabled = true;
+    if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
+        GameObject_s *object = packet->owner->apiobj.objptr;
+        object->jump_input_flags |= 2;
         for (i32 index = 0; index < param_4; ++index) {
             if (NuStrICmp(params[index], "FALSE") == 0) {
-                enabled = false;
+                object->jump_input_flags &= static_cast<u8>(~2u);
             }
         }
-        packet->owner->jump_input_flags =
-            static_cast<u8>((packet->owner->jump_input_flags & ~2u) | (enabled ? 2u : 0u));
     }
     return 1;
 }
@@ -3392,20 +3388,17 @@ __used__ static i32 Action_NoIdleSpeed(AISYS *sys, AISCRIPTPROCESS *processor, A
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
     if (object != NULL) {
         if (param_5 != 0) {
-            bool enabled = true;
+            i32 enabled = 1;
             for (i32 index = 0; index < param_4; ++index) {
-                if (params[index] == NULL) {
-                    continue;
-                }
                 char *name = NuStrIStr(params[index], "character=");
                 if (name != NULL) {
                     object = GetNamedGameObject(sys, name + 10);
                 } else if (NuStrICmp(params[index], "FALSE") == 0) {
-                    enabled = false;
+                    enabled = 0;
                 }
             }
             if (object != NULL) {
-                object->field_0xf03 = static_cast<u8>((object->field_0xf03 & ~2u) | (enabled ? 2u : 0u));
+                object->field_0xf03 = static_cast<u8>((object->field_0xf03 & ~2u) | ((enabled & 1) << 1));
             }
         }
     }
@@ -3456,21 +3449,18 @@ __used__ static i32 Action_SetDontMove(AISYS *sys, AISCRIPTPROCESS *processor, A
     (void)param_6;
     if (param_5 != 0) {
         GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
-        bool enabled = true;
+        i32 enabled = 1;
         for (i32 index = 0; index < param_4; ++index) {
-            if (params[index] == NULL) {
-                continue;
-            }
             char *name = NuStrIStr(params[index], "character");
             if (name != NULL) {
                 object = GetNamedGameObject(sys, name + 10);
             } else if (NuStrICmp("FALSE", params[0]) == 0) {
                 // This action's FALSE toggle uses the first parameter, not the current one.
-                enabled = false;
+                enabled = 0;
             }
         }
         if (object != NULL) {
-            object->field_0xefc = static_cast<u8>((object->field_0xefc & ~0x10u) | (enabled ? 0x10u : 0u));
+            object->field_0xefc = static_cast<u8>((object->field_0xefc & ~0x10u) | ((enabled & 1) << 4));
         }
     }
     return 1;
@@ -3744,10 +3734,10 @@ __used__ static i32 Action_CanOpenDoors(AISYS *sys, AISCRIPTPROCESS *processor, 
     GameObject_s *object = packet->owner->apiobj.objptr;
     object->field_0x1050 |= 1;
     for (i32 index = 0; index < param_4; ++index) {
-        if (NuStrICmp(params[index], "FALSE") == 0) {
-            object->field_0x1050 &= ~1u;
-        } else if (NuStrICmp(params[index], "TRUE") == 0) {
+        if (NuStrICmp(params[index], "TRUE") == 0) {
             object->field_0x1050 |= 1;
+        } else if (NuStrICmp(params[index], "FALSE") == 0) {
+            object->field_0x1050 &= ~1u;
         }
     }
     return 1;
@@ -4010,20 +4000,17 @@ __used__ static i32 Action_NotWithParty(AISYS *sys, AISCRIPTPROCESS *processor, 
     (void)param_6;
     if (param_5 != 0) {
         GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
-        bool enabled = true;
+        i32 enabled = 1;
         for (i32 index = 0; index < param_4; ++index) {
-            if (params[index] == NULL) {
-                continue;
-            }
             char *name = NuStrIStr(params[index], "character=");
             if (name != NULL) {
                 object = GetNamedGameObject(sys, name + 10);
             } else if (NuStrICmp(params[index], "FALSE") == 0) {
-                enabled = false;
+                enabled = 0;
             }
         }
         if (object != NULL) {
-            object->field_0xeff = static_cast<u8>((object->field_0xeff & ~1u) | (enabled ? 1u : 0u));
+            object->field_0xeff = static_cast<u8>((object->field_0xeff & ~1u) | (enabled & 1));
         }
     }
     return 1;
