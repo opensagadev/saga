@@ -1898,12 +1898,12 @@ void GoldBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 activ
                 count = previous;
             } else {
                 const f32 end = stage->field_0x1c - 2.0f;
-                if (time >= end)
+                if (!(time < end))
                     blend = NuTrigTable[(static_cast<i32>((1.0f - (time - end)) * 16384.0f) >> 1) & 0x7fff];
-                if (time < (count - previous - 1) * 2.5f + 2.0f)
+                if (!(time < 2.0f) && time < (count - previous - 1) * 2.5f + 2.0f)
                     count = (previous + 1) + (time - 2.0f) / 2.5f;
             }
-            char text[268];
+            char text[256];
             sprintf(text, "%i/%i", count, GOLDBRICKPOINTS);
             SmartTextEx(text, 0.0f, blend * -0.99999994f + 1.3f, 1.0f, 1.5f, 1.5f, 1.5f, 0, 255, 255, 255, 1.7f, 1,
                         NULL, 0, static_cast<i32>(blend * 128.0f));
