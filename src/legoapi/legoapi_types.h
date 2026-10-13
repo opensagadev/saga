@@ -4940,7 +4940,8 @@ struct GIZTURRET_s {
     union {
         u8 runtime_flags; // 0x13b
         struct {
-            u8 : 3;
+            u8 : 2;
+            u8 runtime_bit2 : 1; // persisted in turret progress
             u8 rotation_sound_playing : 1;
             u8 : 4;
         };
