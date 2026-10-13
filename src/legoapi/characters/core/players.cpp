@@ -1586,8 +1586,7 @@ i32 MakePlayerList(i32 count) {
             PlayerList[player_count] = player->id;
         }
 
-        PLAYERPROGRESS *progress = &PlayerProgress[player_count];
-        progress->active = (u8)player->apiobj.field_0x1f8 >> 7;
+        PlayerProgress[player_count].active = player->apiobj.flags_low >> 7;
 
         bool unavailable = false;
         if (player->field_0x7a5 != 6 && player->field_0xe32 != 2) {
@@ -1596,20 +1595,20 @@ i32 MakePlayerList(i32 count) {
                 unavailable = player->field_0xe32 != 0;
             }
         }
-        progress->coins = player->coinpacket != NULL ? player->coinpacket->coins : 0;
-        progress->field_0x7 = unavailable;
-        progress->field_0xb = player->field_0xe31 == 1;
+        PlayerProgress[player_count].coins = player->coinpacket != NULL ? player->coinpacket->coins : 0;
+        PlayerProgress[player_count].field_0x7 = unavailable;
+        PlayerProgress[player_count].field_0xb = player->field_0xe31 == 1;
 
         if (player->apiobj.field_0x287 != 0) {
-            progress->hitpoints = player->hitpoints;
-            progress->field_0x9 = 4;
+            PlayerProgress[player_count].hitpoints = player->hitpoints;
+            PlayerProgress[player_count].field_0x9 = 4;
         } else {
-            progress->hitpoints = player->current_hp;
-            progress->field_0x9 = player->field_0xe38;
+            PlayerProgress[player_count].hitpoints = player->current_hp;
+            PlayerProgress[player_count].field_0x9 = player->field_0xe38;
         }
-        progress->field_0xa = player->field_0x108e;
-        progress->field_0x4 = player->field_0x106e;
-        progress->field_0xc = player->field_0xdec;
+        PlayerProgress[player_count].field_0xa = player->field_0x108e;
+        PlayerProgress[player_count].field_0x4 = player->field_0x106e;
+        PlayerProgress[player_count].field_0xc = player->field_0xdec;
 
         PlayerSuit[player_count] = player->suit;
         PlayerTorpedoCount[player_count] = player->torpedo != NULL ? player->torpedo->count : 0;
