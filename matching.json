@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 78.017555,
+    "fuzzy_match_percent": 78.04756,
     "total_code": "4722419",
-    "matched_code": "600533",
-    "matched_code_percent": 12.716639,
+    "matched_code": "600807",
+    "matched_code_percent": 12.722442,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6708,
-    "matched_functions_percent": 49.840256,
+    "matched_functions": 6709,
+    "matched_functions_percent": 49.847687,
     "total_units": 1
   },
   "text": {
@@ -43611,7 +43611,7 @@
           "address": 1037440,
           "offset": 147472,
           "size": 177,
-          "match_percent": 51.0
+          "match_percent": 86.31579
         },
         {
           "name": "_Z18ResetCharacterIdleP12GameObject_sii",
@@ -43627,7 +43627,7 @@
           "address": 1038000,
           "offset": 148032,
           "size": 650,
-          "match_percent": 49.71875
+          "match_percent": 51.40625
         },
         {
           "name": "_Z12InitCreatureP12GameObject_sii",
@@ -46279,7 +46279,7 @@
           "address": 4628720,
           "offset": 3738752,
           "size": 2774,
-          "match_percent": 69.990974
+          "match_percent": 84.669174
         },
         {
           "name": "_Z17RememberPlayerIDsiii",
@@ -55097,7 +55097,7 @@
           "address": 5052960,
           "offset": 4162992,
           "size": 274,
-          "match_percent": 60.022472
+          "match_percent": 100.0
         },
         {
           "name": "_ZL21GizmoBuildit_ActivateP7GIZMO_si",
@@ -56942,7 +56942,7 @@
           "address": 4979200,
           "offset": 4089232,
           "size": 493,
-          "match_percent": 55.379562
+          "match_percent": 85.04379
         },
         {
           "name": "_ZL22GizmoPickups_AddGizmosP10GIZMOSYS_siPvS1_",
@@ -56958,7 +56958,7 @@
           "address": 4979824,
           "offset": 4089856,
           "size": 929,
-          "match_percent": 65.937256
+          "match_percent": 99.97647
         },
         {
           "name": "_ZL21GizmoPickups_DrawListP11WORLDINFO_sP13GIZMOPICKUP_si.part.2",
@@ -75525,7 +75525,7 @@
           "address": 4567792,
           "offset": 3677824,
           "size": 461,
-          "match_percent": 33.14433
+          "match_percent": 72.68041
         },
         {
           "name": "_ZN18SwipeDecalRendererC2ER11TouchHolderiNS_5StyleE",
@@ -75533,7 +75533,7 @@
           "address": 4567792,
           "offset": 3677824,
           "size": 461,
-          "match_percent": 33.14433
+          "match_percent": 72.68041
         },
         {
           "name": "_ZN18SwipeDecalRenderer7ProcessEf",
