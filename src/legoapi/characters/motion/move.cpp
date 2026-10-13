@@ -9908,11 +9908,11 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
                             object->context_animation_timer = duration + object->airborne_action_duration;
                             ResetAnimPacket(&object->apiobj.anim_packet, -1);
                             if ((object->apiobj.character_data->game_character->flags_098[0] & 0x10) == 0) {
-                                if ((AnimMiscFlags(object->apiobj.character_model, object->context_animation) & 4) ==
-                                    0) {
-                                    PlaySfx(const_cast<char *>("Swipe"), &object->apiobj.collision_position);
-                                } else {
+                                if (!((AnimMiscFlags(object->apiobj.character_model, object->context_animation) & 4) ==
+                                      0)) {
                                     PlaySfx(const_cast<char *>("WhipSwish"), &object->apiobj.collision_position);
+                                } else {
+                                    PlaySfx(const_cast<char *>("Swipe"), &object->apiobj.collision_position);
                                 }
                             }
                             if (object->force_target == NULL && object->blowup_target == NULL) {
