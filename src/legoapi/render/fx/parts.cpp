@@ -390,31 +390,29 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
                 KillPart(part, 2);
                 continue;
             }
-            if (part_pickup_type != 0xcb) {
-                if (part_pickup_type == 0xd0) {
-                    CollectPowerUp(object, &part->position, part->rotation_y, 1);
-                    KillPart(part, 2);
-                } else if (force_player_mask == 3) {
-                    if ((api->character_data->model_flags & 0x2000) == 0 || object->torpedo == NULL)
-                        continue;
-                    if (object->torpedo->count < getMaxTorpedos(object)) {
-                        TORPEDOPACKET_s *packet = object->torpedo;
-                        packet->pickup_positions[packet->count] = part->position;
-                        packet->pickup_data[packet->count] = part->field_10c[0];
-                        packet->pickup_flags[packet->count] = part->field_10c[1];
-                        ++packet->count;
-                        object->torpedo->field_08 = 0.0f;
-                        object->torpedo->field_03 = 0;
-                        KillPart(part, 2);
-                    }
-                } else {
-                    GIZMOPICKUP_s pickup;
-                    SetCoinType(part_pickup_type, &pickup);
-                    GizmoPickup_CollectCoin(WORLD, &part->position, pickup.type_index, pickup.model_variant, object, 1);
+            if (part_pickup_type == 0xcb) {
+                CollectHitPoint(object, &part->position, 1);
+                KillPart(part, 2);
+            } else if (part_pickup_type == 0xd0) {
+                CollectPowerUp(object, &part->position, part->rotation_y, 1);
+                KillPart(part, 2);
+            } else if (force_player_mask == 3) {
+                if ((api->character_data->model_flags & 0x2000) == 0 || object->torpedo == NULL)
+                    continue;
+                if (object->torpedo->count < getMaxTorpedos(object)) {
+                    TORPEDOPACKET_s *packet = object->torpedo;
+                    packet->pickup_positions[packet->count] = part->position;
+                    packet->pickup_data[packet->count] = part->field_10c[0];
+                    packet->pickup_flags[packet->count] = part->field_10c[1];
+                    ++packet->count;
+                    object->torpedo->field_08 = 0.0f;
+                    object->torpedo->field_03 = 0;
                     KillPart(part, 2);
                 }
             } else {
-                CollectHitPoint(object, &part->position, 1);
+                GIZMOPICKUP_s pickup;
+                SetCoinType(part_pickup_type, &pickup);
+                GizmoPickup_CollectCoin(WORLD, &part->position, pickup.type_index, pickup.model_variant, object, 1);
                 KillPart(part, 2);
             }
         }
@@ -829,38 +827,39 @@ void KillParts_SpeederBike(ADDPART_s *params, i32, i32, GameObject_s *object) {
     } else if (bikeParts[3].active == 0) {
         index = 3;
     } else {
+        index = -1;
+    }
+    if (index == -1) {
         part->speeder_index = -1.0f;
-        KillPart(part, 0);
-        return;
-    }
-    part->speeder_index = static_cast<f32>(index);
+    } else {
+        part->speeder_index = static_cast<f32>(index);
+        if (object->movement_spline != NULL) {
 
-    if (object->movement_spline == NULL) {
-        KillPart(part, 0);
-        return;
-    }
+            f32 distance = NuVecMag(&part->velocity) * FRAMETIME;
+            BIKEPART_s *bike = &bikeParts[static_cast<i32>(part->speeder_index)];
+            bike->spline_position = object->movement_spline_position;
+            bike->active = 1;
+            bike->rider = object->field_0xcc0;
+            if (bike->rider != NULL) {
+                bike->rider->apiobj.velocity = velocity;
+                bike->rider->apiobj.velocity.y += 1.5f;
+            }
+            bike->rider_position = object->apiobj.position;
 
-    f32 distance = NuVecMag(&part->velocity) * FRAMETIME;
-    BIKEPART_s *bike = &bikeParts[static_cast<i32>(part->speeder_index)];
-    bike->spline_position = object->movement_spline_position;
-    bike->active = 1;
-    bike->rider = object->field_0xcc0;
-    if (bike->rider != NULL) {
-        bike->rider->apiobj.velocity = velocity;
-        bike->rider->apiobj.velocity.y += 1.5f;
+            NUVEC position;
+            u16 yaw;
+            u16 pitch;
+            PointAlongSpline(bike->spline_position.spline, bike->spline_position.along, &position, &yaw, &pitch, 1);
+            if (distance >= 0.0f) {
+                yaw -= 0x8000;
+            }
+            part->rotation_x = -pitch;
+            part->field_13c = 0;
+            part->rotation_y = yaw;
+            return;
+        }
     }
-    bike->rider_position = object->apiobj.position;
-
-    NUVEC position;
-    u16 yaw;
-    u16 pitch;
-    PointAlongSpline(bike->spline_position.spline, bike->spline_position.along, &position, &yaw, &pitch, 1);
-    if (distance >= 0.0f) {
-        yaw -= 0x8000;
-    }
-    part->rotation_x = -pitch;
-    part->field_13c = 0;
-    part->rotation_y = yaw;
+    KillPart(part, 0);
 }
 
 extern WORLDINFO_s *WORLD;
@@ -1984,12 +1983,14 @@ extern "C" {
         for (i32 i = 0; i < MAXPARTS; ++i, ++part) {
             if ((part->active & 1) != 0 && (player == -1 || part->force_player_mask == player) &&
                 (owner == NULL || part->owner == owner)) {
-                if (position == NULL)
+                if (position != NULL) {
+                    f32 distance = NuVecDistSqr(position, &part->position, NULL);
+                    if (distance < nearest) {
+                        nearest = distance;
+                        result = part;
+                    }
+                } else {
                     return part;
-                f32 distance = NuVecDistSqr(position, &part->position, NULL);
-                if (distance < nearest) {
-                    nearest = distance;
-                    result = part;
                 }
             }
         }

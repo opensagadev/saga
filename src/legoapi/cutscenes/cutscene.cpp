@@ -1788,6 +1788,7 @@ extern "C" void DebFreeInstantly(i32 *handle);
 static void instNuGCutRigidSysEnd(instNUGCUTSCENE_s *instance, float frame) {
     NUGCUTRIGIDSYS_s *system = instance->cutscene->rigid_system;
     instNUGCUTRIGIDSYS_s *rigid_instance = instance->rigid_instance;
+    u8 visible;
 
     for (i32 i = 0; i < system->count; ++i) {
         NUGCUTRIGID_s *rigid = &system->rigids[i];
@@ -2547,39 +2548,48 @@ static __used__ void instNuGCutRigidSysRender(instNUGCUTSCENE_s *instance, float
     }
 }
 
-static __used__ void instNuGCutRigidSysUpdate(instNUGCUTSCENE_s *instance, float frame, int paused) {
-    NUGCUTRIGIDSYS_s *system = instance->cutscene->rigid_system;
+static void instNuGCutRigidSysUpdate(instNUGCUTSCENE_s *instance, float frame, int paused) {
+    NUGCUTSCENE_s *cutscene = instance->cutscene;
+    NUGCUTRIGIDSYS_s *system = cutscene->rigid_system;
+    instNUGCUTRIGIDSYS_s *rigid_instance = instance->rigid_instance;
+    u8 visible;
 
-    for (u32 i = 0; i < system->count; ++i) {
+    for (i32 i = 0; i < system->count; ++i) {
         NUGCUTRIGID_s *rigid = &system->rigids[i];
-        if ((rigid->flags & 4) == 0 || (rigid->flags & 2) != 0) {
+        instNUGCUTRIGID_s *inst_rigid = &rigid_instance->rigids[i];
+        if ((rigid->flags & 2) != 0) {
+            continue;
+        }
+        if ((rigid->flags & 4) == 0) {
             continue;
         }
 
-        instNUGCUTRIGID_s *inst_rigid = &instance->rigid_instance->rigids[i];
-        u8 visible;
         if (rigid->state_animation != NULL &&
             StateAnimEvaluate(rigid->state_animation, &inst_rigid->state_index, &visible, frame) != 0) {
-            NuSpecialSetVisibility(inst_rigid, visible != 0);
+            if (visible != 0) {
+                NuSpecialSetVisibility(inst_rigid, 1);
+            } else {
+                NuSpecialSetVisibility(inst_rigid, 0);
+            }
         }
 
         if (NuSpecialGetVisibilityFn(inst_rigid) == 0) {
             continue;
         }
 
-        NUMTX matrix;
+        NUMTX_ALIGNED16 matrix;
         NuGCutRigidCalcMtx(rigid, frame, &matrix);
         if ((instance->flags_88 & 0x80) != 0) {
             NuMtxMul(&matrix, &matrix, &instance->matrix);
         }
         NuSpecialSetDrawMtx(inst_rigid, &matrix);
 
-        if (NuSpecialGetVisibilityFn(inst_rigid) != 0 && rigid->locator_index != 0xff && rigid->locator_count != 0 &&
-            instance->cutscene->locator_system != NULL && instance->locator_instance != NULL) {
-            NUGCUTLOCATORSYS_s *locator_system = instance->cutscene->locator_system;
-            for (u32 locator_offset = 0; locator_offset < rigid->locator_count; ++locator_offset) {
-                u32 locator_index = rigid->locator_index + locator_offset;
-                instNuGCutLocatorUpdate(instance, locator_system, &instance->locator_instance->locators[locator_index],
+        if (NuSpecialGetVisibilityFn(inst_rigid) != 0 && rigid->locator_index != 0xff) {
+            NUGCUTLOCATORSYS_s *locator_system = cutscene->locator_system;
+            instNUGCUTLOCATORSYS_s *locator_instance = instance->locator_instance;
+            for (i32 locator_offset = 0; locator_offset < rigid->locator_count; ++locator_offset) {
+                i32 locator_index = rigid->locator_index + locator_offset;
+                instNuGCutLocatorUpdate(instance, locator_system, &locator_instance->locators[locator_index],
                                         &locator_system->locators[locator_index], frame, &matrix, paused);
             }
         }

@@ -538,11 +538,12 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
             if (CutScene_PreUpdateFn != NULL) {
                 CutScene_PreUpdateFn(cut);
             }
-            for (CUTSCENETEXANIM &animation : cut->texture_animations) {
-                if (animation.index != -1) {
-                    const u32 bit = 1U << (animation.index & 0x1f);
+            for (i32 j = 0; j < 4; ++j) {
+                CUTSCENETEXANIM *animation = &cut->texture_animations[j];
+                if (animation->index != -1) {
+                    const u32 bit = 1U << animation->index;
                     if ((texanimbits & bit) == 0 &&
-                        animation.frame <= static_cast<instNUGCUTSCENE_s *>(cut->instance)->current_frame) {
+                        animation->frame <= static_cast<instNUGCUTSCENE_s *>(cut->instance)->current_frame) {
                         texanimbits |= bit;
                     }
                 }
@@ -570,10 +571,11 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
             }
             instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
             if (instance->rate > 0.0f) {
-                for (CUTSCENESFX &sfx : cut->sfx) {
-                    if (sfx.id != -1 && cut->previous_frame < sfx.frame &&
-                        sfx.frame <= static_cast<instNUGCUTSCENE_s *>(cut->instance)->current_frame) {
-                        PlaySfxById(sfx.id, (sfx.flags & 1) != 0 ? &sfx.position : NULL);
+                for (i32 j = 0; j < 6; ++j) {
+                    CUTSCENESFX *sfx = &cut->sfx[j];
+                    if (sfx->id != -1 && cut->previous_frame < sfx->frame &&
+                        sfx->frame <= static_cast<instNUGCUTSCENE_s *>(cut->instance)->current_frame) {
+                        PlaySfxById(sfx->id, (sfx->flags & 1) != 0 ? &sfx->position : NULL);
                     }
                 }
             }
@@ -608,9 +610,9 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
     if (CutScene_StoppedFn != NULL) {
         CutScene_StoppedFn(stop_cut);
     }
-    for (CUTSCENETEXANIM &animation : stop_cut->texture_animations) {
-        if (animation.index != -1) {
-            texanimbits &= ~(1U << (animation.index & 0x1f));
+    for (i32 i = 0; i < 4; ++i) {
+        if (stop_cut->texture_animations[i].index != -1) {
+            texanimbits &= ~(1U << stop_cut->texture_animations[i].index);
         }
     }
 
