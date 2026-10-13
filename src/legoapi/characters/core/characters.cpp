@@ -1107,15 +1107,6 @@ i32 GetDefaultIdle(GameObject_s *obj) {
     return 1;
 }
 
-static i32 IdleRepetitionCount(u8 minimum, u8 maximum) {
-    if (maximum <= minimum) {
-        return minimum;
-    }
-
-    const i32 bucket_size = 0xffff / (maximum - minimum) + 1;
-    return minimum + qrand() / bucket_size;
-}
-
 void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation) {
     // Animation 151 belongs to the held-batarang override and deliberately
     // leaves the ordinary idle scheduler untouched.
@@ -1127,19 +1118,20 @@ void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation) {
     object->idle_animation_time = 0.0f;
 
     CHARACTERMODEL_s *model = object->apiobj.character_model;
-    CHARACTERANIM_s *animation_info = NULL;
-    if (model != NULL && model->model_data_b != NULL && model->model_data_b[animation] != NULL &&
-        model->model_data_a != NULL) {
-        animation_info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
-    }
-
-    const u8 minimum = animation_info != NULL ? static_cast<u8>(animation_info->minimum_repetitions) : 0;
-    if (minimum == 0) {
-        object->idle_animation_limit = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 7.0f + 8.0f;
+    CHARACTERANIM_s *animation_info;
+    i32 repetitions;
+    // The signed > 0 test (rather than != 0) keeps the retail branch layout.
+    if (model->model_data_b[object->idle_animation] != NULL &&
+        (animation_info = static_cast<CHARACTERANIM_s *>(model->model_data_a[object->idle_animation]),
+         repetitions = static_cast<u8>(animation_info->minimum_repetitions)) > 0) {
+        const i32 maximum = static_cast<u8>(animation_info->maximum_repetitions);
+        if (repetitions < maximum) {
+            repetitions += qrand() / (0xffff / (maximum - repetitions) + 1);
+        }
+        object->idle_animation_limit =
+            AnimDuration(object->id, object->idle_animation, 0.0f, 0.0f, 0) * repetitions - animduration_blendouttime;
     } else {
-        const u8 maximum = static_cast<u8>(animation_info->maximum_repetitions);
-        const i32 repetitions = IdleRepetitionCount(minimum, maximum);
-        object->idle_animation_limit = AnimDuration(object->id, animation, 0.0f, 0.0f, 0) * repetitions - FRAMETIME;
+        object->idle_animation_limit = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 7.0f + 8.0f;
     }
 
     if (mode > 0) {
