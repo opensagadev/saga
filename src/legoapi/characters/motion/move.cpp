@@ -1921,7 +1921,27 @@ static void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 fire_delay
         const bool target_bolts = (bolt_type->field_60 & 0x800) == 0;
         const AREADATA_s *area = WORLD->area;
 
-        if (!(area != NULL && area == BONUS_GUNSHIP_ADATA)) {
+        if (area != NULL && area == BONUS_GUNSHIP_ADATA) {
+            if (object->id == id_REPUBLICGUNSHIP || object->id == id_REPUBLICGUNSHIP_GREEN) {
+                i32 angle;
+                if (player2 == NULL) {
+                    angle = WORLD->current_level == BONUS_GUNSHIPB_LDATA ? 3 : 8;
+                } else if (object == player) {
+                    angle = WORLD->current_level == BONUS_GUNSHIPB_LDATA ? 4 : 10;
+                } else if (object == player2) {
+                    angle = WORLD->current_level == BONUS_GUNSHIPB_LDATA ? 0 : 5;
+                } else {
+                    angle = WORLD->current_level == BONUS_GUNSHIPB_LDATA ? 3 : 8;
+                }
+
+                NUVEC offset = {0.0f, 0.0f, 100.0f};
+                NuVecRotateX(&offset, &offset, (angle << 16) / 360);
+                NuVecRotateY(&offset, &offset, object->apiobj.movement_facing_angle);
+                NuVecAdd(&object->attack_target_position, &origin, &offset);
+                object->attack_target_velocity = v000;
+                object->field_0xe21 |= 8;
+            }
+        } else {
             if (target_bolts && (area == NULL || area != DOGFIGHT_ADATA)) {
                 GameObject_s *target =
                     TargetGameObject(object, &origin, &direction, range, range_squared, 0, target_mode, 0, bolt_id);
@@ -1970,26 +1990,6 @@ static void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 fire_delay
                         }
                     }
                 }
-            }
-        } else {
-            if (object->id == id_REPUBLICGUNSHIP || object->id == id_REPUBLICGUNSHIP_GREEN) {
-                i32 angle;
-                if (player2 == NULL) {
-                    angle = WORLD->current_level == BONUS_GUNSHIPB_LDATA ? 3 : 8;
-                } else if (object == player) {
-                    angle = WORLD->current_level == BONUS_GUNSHIPB_LDATA ? 4 : 10;
-                } else if (object == player2) {
-                    angle = WORLD->current_level == BONUS_GUNSHIPB_LDATA ? 0 : 5;
-                } else {
-                    angle = WORLD->current_level == BONUS_GUNSHIPB_LDATA ? 3 : 8;
-                }
-
-                NUVEC offset = {0.0f, 0.0f, 100.0f};
-                NuVecRotateX(&offset, &offset, (angle << 16) / 360);
-                NuVecRotateY(&offset, &offset, object->apiobj.movement_facing_angle);
-                NuVecAdd(&object->attack_target_position, &origin, &offset);
-                object->attack_target_velocity = v000;
-                object->field_0xe21 |= 8;
             }
         }
 
@@ -4410,14 +4410,14 @@ void Move_VEHICLE(GameObject_s *object) {
             f32 remaining;
             f32 flight_time = object->context_animation_timer;
             i32 phase;
-            if (object->context_animation_timer >= 1.0f) {
+            if (!(object->context_animation_timer >= 1.0f)) {
+                remaining = 1.0f - object->context_animation_timer;
+                phase = (static_cast<i32>(32768.0f * object->context_animation_timer + 16384.0f) >> 1) & 0x7fff;
+            } else {
                 object->character_context = -1;
                 phase = 0x6000;
                 remaining = 0.0f;
                 flight_time = 1.0f;
-            } else {
-                remaining = 1.0f - object->context_animation_timer;
-                phase = (static_cast<i32>(32768.0f * object->context_animation_timer + 16384.0f) >> 1) & 0x7fff;
             }
             object->apiobj.roll_angle = 0;
             object->apiobj.pitch_angle = 0;
@@ -5114,7 +5114,19 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                     PlaySabreSfx(NULL, object, NULL, 1);
                 if (object->combo_stage == 2)
                     NewRumble(object->pad_gamepad->pad, 0.35f, 0);
-                if (object->combo_stage != 1) {
+                if (object->combo_stage == 1) {
+                    object->combo_branch =
+                        (object->field_0xe20 & 0x40) != 0 &&
+                                JediHasAction(object, static_cast<JEDI_ACTION>(object->queued_context_animation + 2))
+                            ? 2
+                            : 1;
+                    if (object->combo_branch == 1)
+                        object->field_0xe20 &= ~0x40;
+                    NewRumble(object->pad_gamepad->pad, object->combo_branch == 2 ? 0.5f : 0.35f, 0);
+                    if (object->combo_branch == 2 && object->id != id_IMPERIALGUARD) {
+                        PlaySabreSfx("ComboSaber2", object, &object->apiobj.collision_position, 0);
+                    }
+                } else {
                     if (object->combo_branch == 1) {
                         object->combo_branch =
                             (object->field_0xe20 & 0x40) != 0 &&
@@ -5139,18 +5151,6 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                                 PlaySabreSfx("ComboSaber1", object, &object->apiobj.collision_position, 0);
                             }
                         }
-                    }
-                } else {
-                    object->combo_branch =
-                        (object->field_0xe20 & 0x40) != 0 &&
-                                JediHasAction(object, static_cast<JEDI_ACTION>(object->queued_context_animation + 2))
-                            ? 2
-                            : 1;
-                    if (object->combo_branch == 1)
-                        object->field_0xe20 &= ~0x40;
-                    NewRumble(object->pad_gamepad->pad, object->combo_branch == 2 ? 0.5f : 0.35f, 0);
-                    if (object->combo_branch == 2 && object->id != id_IMPERIALGUARD) {
-                        PlaySabreSfx("ComboSaber2", object, &object->apiobj.collision_position, 0);
                     }
                 }
                 object->context_animation = object->queued_context_animation + object->combo_branch;
@@ -6691,7 +6691,14 @@ void Move_WEIRDO(GameObject_s *object) {
     HoldCode(object);
     Attracto_MoveCode(WORLD, object);
     SecurityDoor_MoveCode(WORLD, object);
-    if (!has_sabre) {
+    if (has_sabre) {
+        BlockCode(object, action_pressed, action_held, jump_pressed, 0);
+        SwipeCode(object, action_pressed, action_held);
+        if (detonator_used == 1)
+            special_pressed = 0;
+        LightSabreComboCode(object, action_pressed, action_held, jump_pressed, special_pressed);
+        JediLightCode(object);
+    } else {
         BlockCode(object, action_pressed, action_held, 0, 0);
         PunchCode(object, action_pressed, action_held, 1, 0, 0.0f);
         DodgeCode(object, action_pressed, jump_pressed);
@@ -6701,13 +6708,6 @@ void Move_WEIRDO(GameObject_s *object) {
             ShootCode(object, action_pressed, special_pressed, 1, 1, 0);
         } else if (object->batarang != NULL)
             Batarang_MoveCode(object);
-    } else {
-        BlockCode(object, action_pressed, action_held, jump_pressed, 0);
-        SwipeCode(object, action_pressed, action_held);
-        if (detonator_used == 1)
-            special_pressed = 0;
-        LightSabreComboCode(object, action_pressed, action_held, jump_pressed, special_pressed);
-        JediLightCode(object);
     }
     if (static_cast<i8>(static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_094[0]) <
         0) {
@@ -8332,20 +8332,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                     object->jump_sequence = 1;
                 else
                     ++object->jump_sequence;
-                if (!((animation_set & 1) != 0 && object->jump_sequence > 1)) {
-                    if ((animation_set & 0x40) != 0 &&
-                        (object->context_animation == -1 ||
-                         object->apiobj.character_model->model_data_b[object->context_animation] == NULL))
-                        object->context_animation = LEGOACT_FALL;
-                    object->apiobj.velocity.y =
-                        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->jump_speed;
-                    if (object->action_movement_state != 5)
-                        ResetAnimPacket(&object->apiobj.anim_packet, object->context_animation);
-                    if ((animation_set & 0x101) == 0x100)
-                        MakeJumpReachHeight(object, HIGHJUMPHEIGHT, 1);
-                    if ((object->apiobj.flags_low & 0x80) != 0)
-                        Hint_SetComplete(0x604);
-                } else {
+                if ((animation_set & 1) != 0 && object->jump_sequence > 1) {
                     if (UsingExtraActionsFn != NULL && UsingExtraActionsFn(object) && LEGOACT_EXTRA_JUMP2 != -1 &&
                         object->apiobj.character_model->model_data_b[LEGOACT_EXTRA_JUMP2] != NULL)
                         object->context_animation = LEGOACT_EXTRA_JUMP2;
@@ -8360,6 +8347,19 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                     object->context_variant_flags &= ~0x40;
                     if ((animation_set & 0x100) != 0)
                         MakeJumpReachHeight(object, HIGHJUMPHEIGHT, 1);
+                } else {
+                    if ((animation_set & 0x40) != 0 &&
+                        (object->context_animation == -1 ||
+                         object->apiobj.character_model->model_data_b[object->context_animation] == NULL))
+                        object->context_animation = LEGOACT_FALL;
+                    object->apiobj.velocity.y =
+                        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->jump_speed;
+                    if (object->action_movement_state != 5)
+                        ResetAnimPacket(&object->apiobj.anim_packet, object->context_animation);
+                    if ((animation_set & 0x101) == 0x100)
+                        MakeJumpReachHeight(object, HIGHJUMPHEIGHT, 1);
+                    if ((object->apiobj.flags_low & 0x80) != 0)
+                        Hint_SetComplete(0x604);
                 }
             } else {
                 if (flip_kind == 1 && StartBackFlip(object))
