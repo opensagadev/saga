@@ -10652,11 +10652,12 @@ extern "C" void AILocatorSet_AssignFurthestLocator(AISYS *system, AILOCATORSET *
                 if (distance > furthest_distance) {
                     if (second_position != NULL) {
                         const f32 second_distance = NuVecDistSqr(second_position, &locator->position, &difference);
-                        if (!(second_distance > furthest_distance)) {
+                        if (second_distance > furthest_distance) {
+                            if (second_distance < distance) {
+                                distance = second_distance;
+                            }
+                        } else {
                             continue;
-                        }
-                        if (second_distance < distance) {
-                            distance = second_distance;
                         }
                     }
                     if (max_range == 0.0f || max_range * max_range > distance) {
@@ -10691,12 +10692,11 @@ extern "C" void AILocatorSet_AssignRandomLocator(AISYS *system, AILOCATORSET *lo
         if (!(ignore_assigned != 0 && locator_set->assigned[index] != 0xff)) {
 
             AILOCATOR *locator = &system->locators[locator_set->locator_entries[index]];
-            if (off_screen_radius != 0.0f &&
-                NuCameraClipTestSphere(&locator->position, off_screen_radius, &numtx_identity) == 0) {
-                continue;
-            }
-            if (NuVecDistSqr(position, &locator->position, &difference) <= max_distance) {
-                ++candidate_count;
+            if (!(off_screen_radius != 0.0f &&
+                  NuCameraClipTestSphere(&locator->position, off_screen_radius, &numtx_identity) == 0)) {
+                if (NuVecDistSqr(position, &locator->position, &difference) <= max_distance) {
+                    ++candidate_count;
+                }
             }
         }
     }

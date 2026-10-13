@@ -1568,19 +1568,17 @@ void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float
     NUVEC scale;
     NUANGVEC rotation;
     NUMTX_ALIGNED16 matrix;
-    if (position != NULL) {
-        if (NuSpecialExistsFn(special) != 0) {
-            rotation.y = y_rot;
-            rotation.x = x_rot;
-            rotation.z = z_rot;
-            NuMtxSetRotateXYZVU0(&matrix, &rotation);
+    if (position != NULL && NuSpecialExistsFn(special) != 0) {
+        rotation.y = y_rot;
+        rotation.x = x_rot;
+        rotation.z = z_rot;
+        NuMtxSetRotateXYZVU0(&matrix, &rotation);
 
-            scale.x = scale.y = scale.z = scale_value;
-            NuMtxScaleVU0(&matrix, &scale);
-            *reinterpret_cast<NUVEC *>(&matrix.m30) = *position;
-            matrix.m31 += y_push;
-            NuSpecialDrawAt(special, &matrix);
-        }
+        scale.x = scale.y = scale.z = scale_value;
+        NuMtxScaleVU0(&matrix, &scale);
+        *reinterpret_cast<NUVEC *>(&matrix.m30) = *position;
+        matrix.m31 += y_push;
+        NuSpecialDrawAt(special, &matrix);
     }
 }
 
