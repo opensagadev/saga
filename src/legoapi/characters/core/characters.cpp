@@ -846,7 +846,10 @@ static void SetLayers_MOSEISLEYCITIZEN(GameObject_s *object) {
 
 i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
     addcreature_override_id_check = 0;
-    if (id < 0 || id > 0x153 || apicharsys->playermodelids[id] == -1) {
+    if (id < 0) {
+        return 0;
+    }
+    if (id > 0x153 || apicharsys->playermodelids[id] == -1) {
         return 0;
     }
 
@@ -859,7 +862,7 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
     memset(obj->player_packet, 0, 0x798);
     obj->apiobj.field_0x27c = -1;
 
-    NUVEC *start_position = Player_StartPos(obj);
+    const NUVEC start_position = *Player_StartPos(obj);
     if (param != 0) {
         obj->apiobj.field_0x1f4 |= 0x4002;
     } else {
@@ -871,29 +874,26 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
 
     obj->pad_gamepad = GamePad_Allocate();
     obj->pad_gamepad->input_mode = 1;
-    obj->hitpoints = game_character_data->hitpoints;
-    obj->current_hp = game_character_data->hitpoints;
+    const u8 hitpoints = obj->apiobj.character_data->game_character->hitpoints;
+    obj->hitpoints = hitpoints;
+    obj->current_hp = hitpoints;
     ResetPlayerPacket(reinterpret_cast<PLAYERPACKET_s *>(obj->player_packet),
-                      reinterpret_cast<CHARACTERDATA_s *>(character_data));
+                      reinterpret_cast<CHARACTERDATA_s *>(obj->apiobj.character_data));
 
-    obj->apiobj.field_0x1fc = v000.x;
-    obj->apiobj.field_0x200 = v000.y;
-    obj->apiobj.field_0x204 = v000.z;
+    obj->apiobj.movement_direction = v000;
     obj->field_0xe38 = 4;
-    obj->field_0xe37 = game_character_data->field_0xf5;
+    obj->field_0xe37 = obj->apiobj.character_data->game_character->field_0xf5;
     obj->id = static_cast<i16>(id);
     obj->apiobj.character_model = &apicharsys->models[apicharsys->playermodelids[id]];
     obj->suit = Suit_GetDefault(id);
     obj->ai.field_0x134 = 0xff;
     SetGameObjectCharacterData(obj);
 
-    obj->apiobj.start_position = *start_position;
-    obj->apiobj.pos_y = start_position->y;
-    obj->apiobj.pos_x = start_position->x;
-    obj->apiobj.pos_z = start_position->z;
-    obj->apiobj.position = *start_position;
-    obj->apiobj.initial_position = *start_position;
+    obj->apiobj.start_position = start_position;
+    obj->apiobj.position = obj->apiobj.start_position;
     obj->field_0x1018 = 0.5f;
+    obj->apiobj.initial_position = start_position;
+    obj->apiobj.collision_position = obj->apiobj.initial_position;
 
     GetTopBot(obj);
     GameObjectDimensions(obj);
@@ -902,7 +902,7 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
     i32 reset_animation = 1;
     if (obj->apiobj.character_model != NULL) {
         void **animation_table = obj->apiobj.character_model->model_data_b;
-        if (animation_table != NULL && animation_table[1] == NULL) {
+        if (animation_table[1] == NULL) {
             for (i32 i = 0; i < 0xe9; i++) {
                 if (animation_table[i] != NULL) {
                     obj->apiobj.anim_packet.animation_index = static_cast<u16>(i);
@@ -918,39 +918,40 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
 
     obj->ai.mover_height = obj->apiobj.field_0x1dc + default_mover_extra;
     GameObjectOrigin(obj);
-    obj->apiobj.previous_position[0] = obj->apiobj.position.x;
-    obj->apiobj.previous_position[1] = obj->apiobj.position.y;
-    obj->apiobj.previous_position[2] = obj->apiobj.position.z;
-    obj->field_0x10c8 = obj->apiobj.position.x;
-    obj->field_0x10cc = obj->apiobj.position.y;
-    obj->field_0x10d0 = obj->apiobj.position.z;
+    obj->apiobj.last_safe_position = obj->apiobj.position;
+    obj->saved_position = obj->apiobj.position;
 
-    obj->field_0xf01 = static_cast<u8>((obj->field_0xf01 & ~8u) | (((game_character_data->flags_090 >> 17) & 1) << 3));
-    if (id == id_MOSEISLEYCITIZEN) {
+    game_character_data = obj->apiobj.character_data->game_character;
+    obj->field_0xf01 = (obj->field_0xf01 & ~8) | (((game_character_data->flags_090 >> 17) & 1) << 3);
+    if (obj->id == id_MOSEISLEYCITIZEN) {
         SetLayers_MOSEISLEYCITIZEN(obj);
-    } else if (id == id_CANTINAALIEN) {
+    } else if (obj->id == id_CANTINAALIEN) {
         static const u8 head_layers[3] = {0, 3, 6};
         static const u8 body_layers[3] = {1, 4, 7};
         static const u8 leg_layers[3] = {2, 5, 8};
-        obj->field_0x1054 = LayerBit(head_layers[qrand() / 0x5556]) | LayerBit(body_layers[qrand() / 0x5556]) |
-                            LayerBit(leg_layers[qrand() / 0x5556]);
-    } else if (id == id_CLOUDCITYCITIZEN) {
+        obj->field_0x1054 = 0;
+        obj->field_0x1054 |= LayerBit(head_layers[qrand() / 0x5556]);
+        obj->field_0x1054 |= LayerBit(body_layers[qrand() / 0x5556]);
+        obj->field_0x1054 |= LayerBit(leg_layers[qrand() / 0x5556]);
+    } else if (obj->id == id_CLOUDCITYCITIZEN) {
         static const u8 head_layers[3] = {1, 5, 7};
         static const u8 body_layers[3] = {2, 3, 6};
         static const u8 leg_layers[3] = {0, 4, 8};
-        obj->field_0x1054 = LayerBit(head_layers[qrand() / 0x5556]) | LayerBit(body_layers[qrand() / 0x5556]) |
-                            LayerBit(leg_layers[qrand() / 0x5556]);
-        obj->field_0xf01 = static_cast<u8>((obj->field_0xf01 & ~8u) | (((obj->field_0x1054 >> 7) & 1) << 3));
-    } else if (id == id_BOB) {
+        obj->field_0x1054 = 0;
+        obj->field_0x1054 |= LayerBit(head_layers[qrand() / 0x5556]);
+        obj->field_0x1054 |= LayerBit(body_layers[qrand() / 0x5556]);
+        obj->field_0x1054 |= LayerBit(leg_layers[qrand() / 0x5556]);
+        obj->field_0xf01 = (obj->field_0xf01 & ~8) | (((obj->field_0x1054 >> 7) & 1) << 3);
+    } else if (obj->id == id_BOB) {
         SetLayers_BOB(obj);
-    } else if (id == id_GEONOSIAN) {
+    } else if (obj->id == id_GEONOSIAN) {
         obj->random_layer_variant = qrand() <= 0x7fff;
     }
 
-    if ((game_character_data->flags_090 & 0x8000u) != 0) {
+    if ((obj->apiobj.character_data->game_character->flags_090 & 0x8000) != 0) {
         obj->apiobj.field_0x1f4 |= 0x20000;
     } else {
-        obj->apiobj.field_0x1f4 &= ~0x20000u;
+        obj->apiobj.field_0x1f4 &= ~0x20000;
     }
     return 1;
 }
