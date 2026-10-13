@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 78.57903,
+    "fuzzy_match_percent": 78.617935,
     "total_code": "4722419",
-    "matched_code": "604246",
-    "matched_code_percent": 12.795265,
+    "matched_code": "606194",
+    "matched_code_percent": 12.836514,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6727,
-    "matched_functions_percent": 49.981422,
+    "matched_functions": 6736,
+    "matched_functions_percent": 50.048298,
     "total_units": 1
   },
   "text": {
@@ -19962,7 +19962,7 @@
           "address": 5473616,
           "offset": 4583648,
           "size": 848,
-          "match_percent": 86.17588
+          "match_percent": 99.71859
         },
         {
           "name": "_ZN11ClassEditor16cbEdClassNewMenuEP10eduimenu_sP10eduiitem_sj",
@@ -20258,7 +20258,7 @@
           "address": 5509952,
           "offset": 4619984,
           "size": 201,
-          "match_percent": 66.76471
+          "match_percent": 79.54902
         },
         {
           "name": "_ZN11LevelEditor12EndMultiLoadEP9variptr_uS1_",
@@ -20266,7 +20266,7 @@
           "address": 5510160,
           "offset": 4620192,
           "size": 209,
-          "match_percent": 79.13461
+          "match_percent": 97.69231
         },
         {
           "name": "_ZN11LevelEditor15SetSaveFilenameEPc",
@@ -20466,7 +20466,7 @@
           "address": 5519712,
           "offset": 4629744,
           "size": 375,
-          "match_percent": 78.85555
+          "match_percent": 93.03333
         },
         {
           "name": "_ZN11ClassEditor22DestroySelectedObjectsEv",
@@ -20826,7 +20826,7 @@
           "address": 5542608,
           "offset": 4652640,
           "size": 451,
-          "match_percent": 74.87786
+          "match_percent": 88.72519
         },
         {
           "name": "_ZN7EdClass21SerialiseObjectHeaderER8EdStreamPv",
@@ -20834,7 +20834,7 @@
           "address": 5543472,
           "offset": 4653504,
           "size": 78,
-          "match_percent": 81.791664
+          "match_percent": 100.0
         },
         {
           "name": "_ZN7EdClass10CopyObjectEPvS0_",
@@ -20882,7 +20882,7 @@
           "address": 5547248,
           "offset": 4657280,
           "size": 823,
-          "match_percent": 65.28445
+          "match_percent": 71.09778
         },
         {
           "name": "_ZN7EdClass11FindTypeRefEii",
@@ -20906,7 +20906,7 @@
           "address": 5549472,
           "offset": 4659504,
           "size": 368,
-          "match_percent": 88.62245
+          "match_percent": 97.92857
         },
         {
           "name": "_ZN11ClassEditor12IsUniqueNameEPc",
@@ -20930,7 +20930,7 @@
           "address": 5550432,
           "offset": 4660464,
           "size": 365,
-          "match_percent": 77.48864
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11ClassEditor12CreateObjectEP7EdClass",
@@ -20954,7 +20954,7 @@
           "address": 5551216,
           "offset": 4661248,
           "size": 599,
-          "match_percent": 60.57664
+          "match_percent": 74.78832
         },
         {
           "name": "_ZN11ClassEditor14cbFileSelectedEP10eduimenu_sP10eduiitem_sj",
@@ -21010,7 +21010,7 @@
           "address": 5553104,
           "offset": 4663136,
           "size": 757,
-          "match_percent": 45.48691
+          "match_percent": 46.282722
         },
         {
           "name": "_ZN11ClassEditor13FocusSelectedEv",
@@ -21050,7 +21050,7 @@
           "address": 5555072,
           "offset": 4665104,
           "size": 512,
-          "match_percent": 66.558624
+          "match_percent": 68.44827
         },
         {
           "name": "_ZN11ClassEditor21UpdateSelectedObjectsER14EdInputContext",
@@ -21066,7 +21066,7 @@
           "address": 5556336,
           "offset": 4666368,
           "size": 749,
-          "match_percent": 66.89447
+          "match_percent": 67.201004
         },
         {
           "name": "_ZN11ClassEditor17FindNearestObjectER5VuVecR11ClassObjecti",
@@ -21074,7 +21074,7 @@
           "address": 5557088,
           "offset": 4667120,
           "size": 707,
-          "match_percent": 76.19075
+          "match_percent": 76.16763
         },
         {
           "name": "_ZN11ClassEditor25cbEdClassSelectObjectMenuEP10eduimenu_sP10eduiitem_sj",
@@ -21090,7 +21090,7 @@
           "address": 5558624,
           "offset": 4668656,
           "size": 1069,
-          "match_percent": 63.390625
+          "match_percent": 76.88672
         },
         {
           "name": "_ZN11ClassObject7GetNameEPci",
@@ -21146,7 +21146,7 @@
           "address": 5562144,
           "offset": 4672176,
           "size": 1029,
-          "match_percent": 60.71154
+          "match_percent": 60.759617
         },
         {
           "name": "_ZN12PropertyTool7ProcessER14EdInputContext",
@@ -21162,7 +21162,7 @@
           "address": 5563280,
           "offset": 4673312,
           "size": 1328,
-          "match_percent": 84.68827
+          "match_percent": 84.734566
         },
         {
           "name": "_ZN11ClassEditor16DrawObjectSphereER11ClassObjecti",
@@ -21258,7 +21258,7 @@
           "address": 5573392,
           "offset": 4683424,
           "size": 392,
-          "match_percent": 72.264465
+          "match_percent": 99.75207
         },
         {
           "name": "_ZN11LevelEditor9LoadStateEP9variptr_uS1_S1_S1_S1_S1_",
@@ -21274,7 +21274,7 @@
           "address": 5584112,
           "offset": 4694144,
           "size": 802,
-          "match_percent": 74.441025
+          "match_percent": 79.28718
         },
         {
           "name": "_ZN11LevelEditor9SaveStateEP9variptr_uS1_",
@@ -21306,7 +21306,7 @@
           "address": 5589136,
           "offset": 4699168,
           "size": 1968,
-          "match_percent": 81.1969
+          "match_percent": 81.23009
         },
         {
           "name": "_Z13cbEdLevelSaveP10eduimenu_sP10eduiitem_sj",
@@ -29915,7 +29915,7 @@
           "address": 5523792,
           "offset": 4633824,
           "size": 1695,
-          "match_percent": 85.984276
+          "match_percent": 95.12893
         },
         {
           "name": "_ZN13EdManipulator11DrawRotatorER5VuVec",
@@ -30675,7 +30675,7 @@
           "address": 5598208,
           "offset": 4708240,
           "size": 910,
-          "match_percent": 56.63184
+          "match_percent": 70.01492
         },
         {
           "name": "_ZN13EdManipulator10SelectAxisER14EdInputContextR5VuVecS3_S3_P5VuMtx",
@@ -30683,7 +30683,7 @@
           "address": 5599872,
           "offset": 4709904,
           "size": 1795,
-          "match_percent": 82.83879
+          "match_percent": 82.80101
         },
         {
           "name": "_ZN10EdManScale7ProcessER14EdInputContextR15ClassObjectList",
@@ -33242,7 +33242,7 @@
           "address": 3515776,
           "offset": 2625808,
           "size": 226,
-          "match_percent": 46.02941
+          "match_percent": 100.0
         },
         {
           "name": "_ZL16edanimcbFileSaveP10eduimenu_sP10eduiitem_sj",
@@ -34634,7 +34634,7 @@
           "address": 3772064,
           "offset": 2882096,
           "size": 264,
-          "match_percent": 17.298246
+          "match_percent": 99.85965
         },
         {
           "name": "eduiMenuCreate",
@@ -46095,7 +46095,7 @@
           "address": 1049776,
           "offset": 159808,
           "size": 215,
-          "match_percent": 99.71698
+          "match_percent": 100.0
         },
         {
           "name": "_Z19ActivePlayerInRangeP7nuvec_sfPf",
@@ -46335,7 +46335,7 @@
           "address": 4634576,
           "offset": 3744608,
           "size": 1943,
-          "match_percent": 93.45127
+          "match_percent": 93.419495
         },
         {
           "name": "_Z25FindFurthestPlayerFromVecP7nuvec_sPP12GameObject_sRfbj",
@@ -46969,7 +46969,7 @@
           "address": 2309392,
           "offset": 1419424,
           "size": 2796,
-          "match_percent": 56.0
+          "match_percent": 58.0437
         },
         {
           "name": "_Z18ChrisAnakinCUpdatev",
@@ -51662,7 +51662,7 @@
           "address": 4839184,
           "offset": 3949216,
           "size": 409,
-          "match_percent": 86.64
+          "match_percent": 99.98
         },
         {
           "name": "_Z13CutScenes_Endv",
@@ -55208,7 +55208,7 @@
           "address": 1429792,
           "offset": 539824,
           "size": 363,
-          "match_percent": 59.94872
+          "match_percent": 100.0
         },
         {
           "name": "_Z14ResetForceGlowP14PLAYERPACKET_s",
@@ -58137,7 +58137,7 @@
           "address": 1898176,
           "offset": 1008208,
           "size": 170,
-          "match_percent": 89.583336
+          "match_percent": 72.895836
         },
         {
           "name": "_ZL13Levers_UpdatePvS_f",
@@ -58145,7 +58145,7 @@
           "address": 1898352,
           "offset": 1008384,
           "size": 509,
-          "match_percent": 86.43519
+          "match_percent": 86.296295
         },
         {
           "name": "_ZL16Levers_AddGizmosP10GIZMOSYS_siPvS1_",
@@ -58161,7 +58161,7 @@
           "address": 1899008,
           "offset": 1009040,
           "size": 585,
-          "match_percent": 99.8777
+          "match_percent": 99.98561
         },
         {
           "name": "_ZL20Levers_StoreProgressPvS_S_",
@@ -58177,7 +58177,7 @@
           "address": 1899840,
           "offset": 1009872,
           "size": 143,
-          "match_percent": 99.625
+          "match_percent": 100.0
         },
         {
           "name": "_Z12ReleaseLeverP12GameObject_s",
@@ -58209,7 +58209,7 @@
           "address": 1900832,
           "offset": 1010864,
           "size": 215,
-          "match_percent": 99.791664
+          "match_percent": 100.0
         },
         {
           "name": "_ZL14Lever_ActivateP7GIZMO_si",
@@ -69090,7 +69090,7 @@
           "address": 1141200,
           "offset": 251232,
           "size": 337,
-          "match_percent": 58.175674
+          "match_percent": 58.31081
         },
         {
           "name": "_Z15MenuExitOptionsP6MENU_s",
@@ -69122,7 +69122,7 @@
           "address": 1145120,
           "offset": 255152,
           "size": 183,
-          "match_percent": 58.673912
+          "match_percent": 59.326088
         },
         {
           "name": "_Z17MenuUpdateOptionsP6MENU_s",
@@ -69250,7 +69250,7 @@
           "address": 2451728,
           "offset": 1561760,
           "size": 1760,
-          "match_percent": 10.615176
+          "match_percent": 10.899729
         },
         {
           "name": "RemapAddr",
@@ -69554,7 +69554,7 @@
           "address": 4352560,
           "offset": 3462592,
           "size": 258,
-          "match_percent": 98.8
+          "match_percent": 99.89091
         },
         {
           "name": "_Z18MenuUpdateDeletingP6MENU_s",
@@ -69570,7 +69570,7 @@
           "address": 4352960,
           "offset": 3462992,
           "size": 160,
-          "match_percent": 91.47727
+          "match_percent": 91.818184
         },
         {
           "name": "_Z25MenuUpdateDoNotRemoveCardP6MENU_s",
@@ -69650,7 +69650,7 @@
           "address": 4354672,
           "offset": 3464704,
           "size": 170,
-          "match_percent": 100.0
+          "match_percent": 99.63415
         },
         {
           "name": "_Z21MenuUpdateFileCorruptP6MENU_s",
@@ -69682,7 +69682,7 @@
           "address": 4355456,
           "offset": 3465488,
           "size": 82,
-          "match_percent": 99.25
+          "match_percent": 100.0
         },
         {
           "name": "_Z22MenuUpdateNoMemoryCardP6MENU_s",
@@ -69714,7 +69714,7 @@
           "address": 4356000,
           "offset": 3466032,
           "size": 92,
-          "match_percent": 88.44444
+          "match_percent": 87.888885
         },
         {
           "name": "_Z15MenuIsAvailablev",
@@ -69746,7 +69746,7 @@
           "address": 4356256,
           "offset": 3466288,
           "size": 638,
-          "match_percent": 83.40523
+          "match_percent": 83.60131
         },
         {
           "name": "_Z13MenuStartLoadv",
@@ -69802,7 +69802,7 @@
           "address": 4357984,
           "offset": 3468016,
           "size": 122,
-          "match_percent": 93.125
+          "match_percent": 100.0
         },
         {
           "name": "Draw_SPACENEEDED",
@@ -70090,7 +70090,7 @@
           "address": 4396112,
           "offset": 3506144,
           "size": 378,
-          "match_percent": 98.48148
+          "match_percent": 99.96296
         },
         {
           "name": "_Z21MenuDrawDeleteConfirmP6MENU_s",
@@ -70417,7 +70417,7 @@
           "address": 2034928,
           "offset": 1144960,
           "size": 885,
-          "match_percent": 8.541237
+          "match_percent": 15.041237
         },
         {
           "name": "_Z17RedBrick_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
@@ -75125,7 +75125,7 @@
           "address": 2114304,
           "offset": 1224336,
           "size": 309,
-          "match_percent": 87.02128
+          "match_percent": 100.0
         },
         {
           "name": "_Z12DrawHint_LSWP6HINT_si",
