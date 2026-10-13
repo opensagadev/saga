@@ -765,6 +765,9 @@ struct MechTouchUIAnimation {
     f32 delay;
     f32 value;
 
+    MechTouchUIAnimation() {
+        Initialize();
+    }
     void Initialize() {
         target = &value;
         elapsed = 0.0f;
@@ -801,6 +804,8 @@ struct MechTouchColourAnimation {
     f32 duration;
     f32 delay;
     VuVec value;
+    MechTouchColourAnimation() : target(&value), elapsed(0.0f), duration(-1.0f), delay(0.0f) {
+    }
     void Process(f32 frame_time) {
         if (!(duration < 0.0f) && !(elapsed >= duration + delay)) {
             elapsed += frame_time;

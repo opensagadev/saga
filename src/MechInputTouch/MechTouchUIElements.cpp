@@ -363,42 +363,27 @@ MechTouchUITagButton::MechTouchUITagButton(GameObject_s &object, TouchHolder &ho
     enabled = 1;
     rectangular = 0;
 
-    first_fade.target = &first_fade.value;
     first_fade.from = 0.0f;
     first_fade.to = 1.0f;
-    first_fade.elapsed = 0.0f;
     first_fade.duration = 0.3f;
-    first_fade.delay = 0.0f;
     first_fade.value = 0.0f;
 
-    hover_animation.target = &hover_animation.value;
     hover_animation.to = 0.0f;
     hover_animation.elapsed = -1.0f;
-    hover_animation.duration = -1.0f;
-    hover_animation.delay = 0.0f;
     hover_animation.value = 0.0f;
 
-    size_animation.target = &size_animation.value;
     size_animation.to = 1.0f;
     size_animation.elapsed = -1.0f;
     size_animation.value = 1.0f;
-    size_animation.duration = -1.0f;
-    size_animation.delay = 0.0f;
 
-    second_fade.target = &second_fade.value;
     second_fade.from = 0.0f;
     second_fade.to = 1.0f;
     second_fade.duration = 0.8f;
-    second_fade.elapsed = 0.0f;
-    second_fade.delay = 0.0f;
     second_fade.value = 0.0f;
     field_0xbc = 0.0f;
 
-    timer_animation.target = &timer_animation.value;
     timer_animation.to = 0.0f;
     timer_animation.elapsed = -1.0f;
-    timer_animation.duration = -1.0f;
-    timer_animation.delay = 0.0f;
     timer_animation.value = 0.0f;
     timer = 1.0f;
 }

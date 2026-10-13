@@ -7010,17 +7010,8 @@ void MoveToMarker::FadeOut() {
 }
 
 MoveToMarker::MoveToMarker(MechObjectInterface &object) : target(&object) {
-    colour.target = &colour.value;
-    colour.duration = -1.0f;
-    colour.elapsed = 0.0f;
-    colour.delay = 0.0f;
-    rotation.Initialize();
-    scale.Initialize();
-    secondary_rotation.Initialize();
-    radius.Initialize();
-    alpha.Initialize();
-    field_108_0 = false;
     field_5c = 0.0f;
+    field_108_0 = false;
     field_108_1 = false;
     fading_out = false;
     field_108_3 = false;
