@@ -4222,11 +4222,12 @@ extern "C" {
             }
             NUMTX *draw_mtx = special->draw_mtx_ptr;
             if (draw_mtx == reinterpret_cast<NUMTX *>(-1)) {
-                draw_mtx = &special->draw_mtx;
+                NuDisplayListRndrSpecial(&special_handle, &special->draw_mtx, 0, NULL, NULL);
             } else if (draw_mtx == NULL) {
-                draw_mtx = &special->draw_mtx;
+                NuDisplayListRndrSpecial(&special_handle, &special->draw_mtx, 0, NULL, NULL);
+            } else {
+                NuDisplayListRndrSpecial(&special_handle, draw_mtx, 0, NULL, NULL);
             }
-            NuDisplayListRndrSpecial(&special_handle, draw_mtx, 0, NULL, NULL);
         }
     }
 }
