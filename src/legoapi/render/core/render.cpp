@@ -3520,6 +3520,11 @@ static void DrawParaphernalia(GameObject_s *object) {
     NUMTX shield_matrix, shield_reflected;
     NUMTX hand_matrix, hand_reflected;
     NUMTX attachment_matrices[16];
+    // Function-scope temporaries: the original keeps these in their own stack slots instead of sharing them with
+    // the per-block scaling vectors.
+    NUVEC position;
+    NUANGVEC rotation;
+    NUVEC effect_vector;
     GameObject_s *carried = object->field_0xcc0;
     if (!(carried != NULL && object->field_0x7a5 != 0x3b &&
           (object->apiobj.character_data->game_character->flags_098[0] & 0x40) == 0)) {
@@ -3529,7 +3534,9 @@ static void DrawParaphernalia(GameObject_s *object) {
             if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
                 matrix = object->joint_matrices[locator];
             } else {
-                NUANGVEC rotation = {-0x4000, object->apiobj.field_0x276, 0};
+                rotation.x = -0x4000;
+                rotation.y = object->apiobj.field_0x276;
+                rotation.z = 0;
                 NuMtxSetRotationXYVU0(&matrix, &rotation);
                 matrix.m30 = object->apiobj.position.x +
                              NuTrigTable[object->apiobj.field_0x276 >> 1] * object->apiobj.field_0x1dc * 1.75f;
@@ -3553,7 +3560,9 @@ static void DrawParaphernalia(GameObject_s *object) {
         } else {
             // The original fallback does not initialize its temporary Z component.
             // Zero gives this otherwise undefined path a deterministic position.
-            NUVEC position = {0.0f, object->apiobj.field_0x1e0, 0.0f};
+            position.x = 0.0f;
+            position.y = object->apiobj.field_0x1e0;
+            position.z = 0.0f;
             NuVecMtxRotate(&position, &position, &object->apiobj.field_0xb8);
             NuVecAdd(&position, &position, &object->apiobj.collision_position);
             matrix = object->apiobj.field_0xb8;
@@ -3693,8 +3702,8 @@ static void DrawParaphernalia(GameObject_s *object) {
                 model_id = (communicate_config->flags_094[0] & 0x80) ? 0x0e : -1;
                 communicate_matrix = joints[locator];
                 if (object->communicate_blend != 1.0f) {
-                    NUVEC scaling = {object->communicate_blend, object->communicate_blend, object->communicate_blend};
-                    NuMtxPreScale(&communicate_matrix, &scaling);
+                    effect_vector.x = effect_vector.y = effect_vector.z = object->communicate_blend;
+                    NuMtxPreScale(&communicate_matrix, &effect_vector);
                 }
             }
             if (model_id != -1 && WORLD->lev_objs[model_id].active) {
@@ -3713,11 +3722,10 @@ static void DrawParaphernalia(GameObject_s *object) {
     if (object->field_0x7a5 == 0x22) {
         if ((WORLD->area != NULL && WORLD->area == HUB_ADATA) || WORLD->current_level == BLOCKADERUNNERB_LDATA ||
             WORLD->current_level == DOOKUC_LDATA) {
-            NUVEC position;
-            position.x = object->apiobj.collision_position.x;
-            position.y = object->character_bottom * object->apiobj.field_0xa8 + object->apiobj.position.y +
-                         (object->character_top - object->character_bottom) * 0.5f * object->apiobj.field_0xa8;
-            position.z = object->apiobj.collision_position.z;
+            effect_vector.x = object->apiobj.collision_position.x;
+            effect_vector.y = object->character_bottom * object->apiobj.field_0xa8 + object->apiobj.position.y +
+                              (object->character_top - object->character_bottom) * 0.5f * object->apiobj.field_0xa8;
+            effect_vector.z = object->apiobj.collision_position.z;
             f32 radius = NuFmax(object->apiobj.field_0x1dc, object->apiobj.field_0x1e0) * 1.75f;
             f32 alpha;
             if (object->field_0x768 < 0.2f) {
@@ -3727,7 +3735,7 @@ static void DrawParaphernalia(GameObject_s *object) {
             } else {
                 alpha = 1.0f;
             }
-            DrawForceGlowSprite(&position, radius, 0xdf, alpha, object);
+            DrawForceGlowSprite(&effect_vector, radius, 0xdf, alpha, object);
         }
     } else if (object->field_0xd80 > 0.0f && object->field_0xd8c > 0.0f &&
                WORLD->lev_objs[object->field_0xe1e].active != 0 &&
@@ -4022,7 +4030,7 @@ extern f32 SeekLinearF(f32, f32, f32);
 
 static NUGSCN *backdrop_scene = nullptr;
 
-static nuhspecial_s s_backdrop_hspecial[4];
+static nuhspecial_s backdrop_hspecial[4];
 
 static f32 backdrop_back_wait = 0.0f;
 
@@ -4080,19 +4088,17 @@ static __used__ void BackDrop_Alpha(float *alpha) {
 }
 
 void BackDrop_Init(char *path, variptr_u *buf, variptr_u *buf_end) {
-    NUGSCN *scene = backdrop_scene;
-    if (scene == NULL) {
-        scene = NuGScnRead(buf, *buf_end, path);
-        backdrop_scene = scene;
+    if (backdrop_scene == NULL) {
+        backdrop_scene = NuGScnRead(buf, *buf_end, path);
     }
-    memset(s_backdrop_hspecial, 0, sizeof(s_backdrop_hspecial));
-    if (scene == NULL) {
+    memset(backdrop_hspecial, 0, sizeof(backdrop_hspecial));
+    if (backdrop_scene == NULL) {
         return;
     }
-    NuSpecialFind(scene, &s_backdrop_hspecial[0], (char *)"ball1", 1);
-    NuSpecialFind(scene, &s_backdrop_hspecial[1], (char *)"ball2", 1);
-    NuSpecialFind(scene, &s_backdrop_hspecial[2], (char *)"ball3", 1);
-    NuSpecialFind(scene, &s_backdrop_hspecial[3], (char *)"ball4", 1);
+    NuSpecialFind(backdrop_scene, &backdrop_hspecial[0], (char *)"ball1", 1);
+    NuSpecialFind(backdrop_scene, &backdrop_hspecial[1], (char *)"ball2", 1);
+    NuSpecialFind(backdrop_scene, &backdrop_hspecial[2], (char *)"ball3", 1);
+    NuSpecialFind(backdrop_scene, &backdrop_hspecial[3], (char *)"ball4", 1);
 }
 
 void BackDrop_Dump() {
@@ -4184,7 +4190,7 @@ void BackDrop_Draw(float alpha, i32 flags) {
     }
 
     for (i32 special_index = 0; special_index < 2; ++special_index) {
-        nuhspecial_s *special = &s_backdrop_hspecial[special_index];
+        nuhspecial_s *special = &backdrop_hspecial[special_index];
         if (NuSpecialExistsFn(special) == 0) {
             continue;
         }

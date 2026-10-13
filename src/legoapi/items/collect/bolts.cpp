@@ -1528,7 +1528,7 @@ static __used__ i32 Bolt_GetShootDirection_Default(GameObject_s *object, nuvec_s
     u16 angle = object->apiobj.movement_facing_angle;
     if (direction != NULL) {
         direction->y = 0.0f;
-        direction->x = NuTrigTable[angle >> 1];
+        direction->x = NuTrigTable[static_cast<u16>(angle / 2)];
         direction->z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff];
     }
     return angle;

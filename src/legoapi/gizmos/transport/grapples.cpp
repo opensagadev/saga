@@ -1104,8 +1104,9 @@ void Grapple_SetPlayerTargetPoint(GameObject_s *object, nuvec_s *target) {
     target->y = -object->field_0x768;
     target->z = 0.0f;
     i32 amplitude = (static_cast<i32>(object->grapple_swing_degrees) << 16) / 360;
-    i32 angle = static_cast<i32>(static_cast<f32>(amplitude) * NuTrigTable[object->grapple_swing_phase >> 1] *
-                                 static_cast<GRAPPLE *>(object->field_0x788)->field_0x4c);
+    i32 angle =
+        static_cast<i32>(static_cast<f32>(amplitude) * NuTrigTable[static_cast<u16>(object->grapple_swing_phase / 2)] *
+                         static_cast<GRAPPLE *>(object->field_0x788)->field_0x4c);
     NuVecRotateX(target, target, angle);
     NuVecRotateY(target, target, object->takeover_start_angle);
     NuVecAdd(target, target, &static_cast<GRAPPLE *>(object->field_0x788)->shadow_probe_position);

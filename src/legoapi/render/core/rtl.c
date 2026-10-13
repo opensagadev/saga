@@ -1650,11 +1650,12 @@ static __used__ void RefreshUI() {
         eduiItemSliderSetValEx(static_cast<edui_slider_s *>(jon_t_low_item), curr_rtl->parameters[2], 0, 0);
     }
     if (clipboard_light.type != 0) {
-        u32 colour = 0x80000000 | static_cast<u32>(clipboard_light.colour.x * 255.0f) & 0xff |
-                     (static_cast<u32>(clipboard_light.colour.y * 255.0f) & 0xff) << 8 |
-                     (static_cast<u32>(clipboard_light.colour.z * 255.0f) & 0xff) << 16;
-        paste_item->colours[2] = colour;
-        pasteinto_item->colours[2] = colour;
+        paste_item->colours[2] = 0x80000000 | static_cast<i32>(clipboard_light.colour.x * 255.0f) & 0xff |
+                                 (static_cast<i32>(clipboard_light.colour.y * 255.0f) & 0xff) << 8 |
+                                 (static_cast<i32>(clipboard_light.colour.z * 255.0f) & 0xff) << 16;
+        pasteinto_item->colours[2] = 0x80000000 | static_cast<i32>(clipboard_light.colour.x * 255.0f) & 0xff |
+                                     (static_cast<i32>(clipboard_light.colour.y * 255.0f) & 0xff) << 8 |
+                                     (static_cast<i32>(clipboard_light.colour.z * 255.0f) & 0xff) << 16;
     }
 
     fog_copy_item->disabled = 1;

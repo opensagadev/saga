@@ -528,39 +528,37 @@ static void GenerateTrooperTeamShape(minitrooperteam_s *team, i32 initialize_rot
 }
 
 static void TrooperTeamSetStateCode(minitrooperteam_s *team) {
-    team->route_state = (team->route_state & 0x1f) | ((team->waypoint_state >> 3) << 5);
+    team->route_index = team->waypoint_index;
+    team->waypoint_index = qrand() / (0xffff / team->waypoint_count + 1);
 
-    const i32 waypoint_count = (*reinterpret_cast<u16 *>(&team->waypoint_state) >> 6) & 7;
-    const i32 waypoint = qrand() / (0xffff / waypoint_count + 1);
-    team->waypoint_state = (team->waypoint_state & 0xc7) | ((waypoint & 7) << 3);
-
-    team->route_point = &team->path->pts[team->route_state >> 5];
-    team->formation_state = (team->formation_state & 0xf) | ((qrand() / 0x4000) << 4);
+    team->route_point = &team->path->pts[team->route_index];
+    team->formation_mode = qrand() / 0x4000;
     team->state_timer = static_cast<f32>(qrand()) * (4.0f / 65536.0f) + 1.0f;
 
-    const NUVEC &destination = team->path->pts[(team->waypoint_state >> 3) & 7];
-    const NUVEC &origin = team->path->pts[team->route_state >> 5];
+    const NUVEC &destination = team->path->pts[team->waypoint_index];
+    const NUVEC &origin = team->path->pts[team->route_index];
     team->facing_angle = NuAtan2D(destination.x - origin.x, destination.z - origin.z);
 
     if (droid_hack == 0) {
-        if ((team->formation_state & 0xf0) == 0x10)
+        if (team->formation_mode == 1)
             team->formation_state = 0x11;
         else
-            team->formation_state = (team->formation_state & 0xf0) | (qrand() / (0xffff / 3 + 1) & 0xf);
+            team->formation_shape = qrand() / (0xffff / 3 + 1);
     } else {
-        team->formation_state = (team->formation_state & 0xf0) | 4;
+        team->formation_shape = 4;
     }
 
     GenerateTrooperTeamShape(team, 0);
-    for (i32 i = 0; i < team->trooper_count; ++i) {
-        minisnowtrooper_s &trooper = team->troopers[i];
-        trooper.state_flags &= ~0x40;
+    minisnowtrooper_s *trooper = team->troopers;
+    for (i32 i = 0; i < team->trooper_count; ++i, ++trooper) {
+        trooper->state_flags &= ~0x40;
         if (droid_hack != 0) {
-            trooper.state_flags = (trooper.state_flags & 0x8f) | 0x20;
+            trooper->state_flags = (trooper->state_flags & 0x8f) | 0x20;
         } else {
-            trooper.state_flags = (trooper.state_flags & 0xcf) | (((qrand() / (0xffff / 3 + 1) + 1) & 3) << 4);
+            const i32 slot = qrand() / (0xffff / 3 + 1) + 1;
+            trooper->state_flags = (trooper->state_flags & 0xcf) | ((slot & 3) << 4);
         }
-        trooper.formation_index = static_cast<u8>(i);
+        trooper->formation_index = static_cast<u8>(i);
     }
     team->route_state |= 0x10;
 }

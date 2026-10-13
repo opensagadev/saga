@@ -1370,12 +1370,13 @@ i32 GizSpinner_GetTargetPoints(GIZSPINNER_s *spinner, nuvec_s *positions, nuvec_
     i32 count = 0;
     for (; count < spinner->type; ++count) {
         if (directions != NULL) {
-            directions[count].x = NuTrigTable[direction_angle >> 1];
+            directions[count].x = NuTrigTable[static_cast<u16>(direction_angle / 2)];
             directions[count].y = 0.0f;
             directions[count].z = NuTrigTable[((direction_angle + 0x4000) >> 1) & 0x7fff];
         }
         if (positions != NULL) {
-            positions[count].x = spinner->field_0x094 * NuTrigTable[position_angle >> 1] + spinner->position.x;
+            positions[count].x =
+                spinner->field_0x094 * NuTrigTable[static_cast<u16>(position_angle / 2)] + spinner->position.x;
             positions[count].y = y;
             positions[count].z =
                 spinner->field_0x094 * NuTrigTable[((position_angle + 0x4000) >> 1) & 0x7fff] + spinner->position.z;

@@ -201,7 +201,7 @@ void NuRenderDevice::DetermineBackBufferResolution(i32 width, i32 height) {
     // rate in check and scale height to preserve aspect.
     if (this->is_not_amazon_kf && NuDeviceSpecs::ms_instance->specs < 3 && this->backing_width > 1280) {
         this->backing_width = 1280;
-        this->backing_height = static_cast<u32>(static_cast<f32>(height) / static_cast<f32>(width) * 1280.0f);
+        this->backing_height = static_cast<i32>(static_cast<f32>(height) / static_cast<f32>(width) * 1280.0f);
     }
 }
 

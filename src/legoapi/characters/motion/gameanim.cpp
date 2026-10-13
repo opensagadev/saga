@@ -2518,8 +2518,12 @@ void GameAnimSys_StoreProgress(GAMEANIMSYS_s *system, i32 index) {
     if (system == NULL || system->sets == NULL || index < 0 || index >= gameanimsysprogress.count)
         return;
     u8 *progress = gameanimsysprogress.entries[index];
-    for (i32 i = 0; i < gameanimsysprogress.entry_size && system->sets[i] != NULL; ++i)
-        progress[i] = system->sets[i]->state;
+    for (i32 i = 0; i < gameanimsysprogress.entry_size; ++i) {
+        GAMEANIMSET_s *set = system->sets[i];
+        if (set == NULL)
+            return;
+        progress[i] = static_cast<u8>(set->state);
+    }
 }
 
 void GameAnimSys_ReStoreProgress(GAMEANIMSYS_s *system, i32 index) {
