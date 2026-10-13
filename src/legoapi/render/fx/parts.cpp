@@ -2110,10 +2110,9 @@ extern "C" {
     void NewPartRotation(PART_s *part) {
         part->rotation_axis_1 = (NuRandIntSeeded(&partseed) % 65535u) / 21845u + 1;
         part->field_124[3] = static_cast<i32>((NuRandFloatSeeded(&partseed) * 2.0f - 1.0f) * 65536.0f);
-        part->rotation_axis_2 = (NuRandIntSeeded(&partseed) % 65535u) / 21845u + 1;
-        while (part->rotation_axis_2 == part->rotation_axis_1) {
+        do {
             part->rotation_axis_2 = (NuRandIntSeeded(&partseed) % 65535u) / 21845u + 1;
-        }
+        } while (part->rotation_axis_2 == part->rotation_axis_1);
         part->field_124[4] = static_cast<i32>((NuRandFloatSeeded(&partseed) * 2.0f - 1.0f) * 65536.0f);
     }
 
