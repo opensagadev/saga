@@ -1797,18 +1797,17 @@ i32 UnderPlayerControl(GameObject_s *object) {
 }
 
 i32 ActivePlayerInRange(nuvec_s *position, float range_squared, float *distance_squared) {
-    f32 distance;
-#define PLAYER_IN_RANGE(index)                                                                                         \
-    (Player[index] != NULL && static_cast<i8>(Player[index]->apiobj.flags_low) < 0 &&                                  \
-     (distance = NuVecDistSqr(&Player[index]->apiobj.collision_position, position, NULL)) < range_squared)
-    if (PLAYER_IN_RANGE(0) || PLAYER_IN_RANGE(1) || PLAYER_IN_RANGE(2) || PLAYER_IN_RANGE(3) || PLAYER_IN_RANGE(4) ||
-        PLAYER_IN_RANGE(5) || PLAYER_IN_RANGE(6) || PLAYER_IN_RANGE(7)) {
-        if (distance_squared != NULL) {
-            *distance_squared = distance;
+    for (i32 i = 0; i < 8; i++) {
+        if (Player[i] != NULL && static_cast<i8>(Player[i]->apiobj.flags_low) < 0) {
+            const f32 distance = NuVecDistSqr(&Player[i]->apiobj.collision_position, position, NULL);
+            if (distance < range_squared) {
+                if (distance_squared != NULL) {
+                    *distance_squared = distance;
+                }
+                return 1;
+            }
         }
-        return 1;
     }
-#undef PLAYER_IN_RANGE
     return 0;
 }
 
