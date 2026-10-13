@@ -677,7 +677,9 @@ void DrawCables() {
             if (cable.slack > cable_slack) {
                 cable.slack = cable_slack;
             }
-        } else if (!(cable.total_length >= tow_length)) {
+        } else if (cable.total_length >= tow_length) {
+            cable.slack = 0.0f;
+        } else {
             f32 fraction = cable.total_length / tow_length;
             if (fraction > 1.0f) {
                 fraction = 0.0f;
@@ -685,8 +687,6 @@ void DrawCables() {
                 fraction = 1.0f - fraction;
             }
             cable.slack = fraction * cable_slack;
-        } else {
-            cable.slack = 0.0f;
         }
 
         f32 distance_along = 0.0f;
@@ -748,7 +748,7 @@ void DrawCables() {
                     NuVecAdd(&cursor, &cursor, &step);
                     end = cursor;
                     const f32 phase = NuFdiv(global_distance + step_length, cable.total_length);
-                    const i32 angle = phase <= 1.0f ? static_cast<i32>(phase * 32768.0f) : 32768;
+                    const i32 angle = !(phase > 1.0f) ? static_cast<i32>(phase * 32768.0f) : 32768;
                     local_distance += step_length;
                     const f32 end_sag = cable.slack * NU_SIN_LUT(angle);
                     end.y -= end_sag;
