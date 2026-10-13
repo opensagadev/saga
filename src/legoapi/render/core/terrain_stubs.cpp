@@ -776,9 +776,10 @@ void DebrisTimeSlip(i32 group) {
         key->emission_time -= 800.0f;
         key->previous_emission_time -= 800.0f;
         key->field_1e4 -= 800.0f;
+        const i32 count = effect->particle_type == 7 ? 12 : 32;
         for (i32 chunk = 0; chunk < 32; ++chunk) {
             if (key->particle_chunks[chunk] != NULL) {
-                for (i32 particle = 0; particle < (effect->particle_type == 7 ? 12 : 32); ++particle)
+                for (i32 particle = 0; particle < count; ++particle)
                     key->particle_chunks[chunk]->particles[particle].start_time -= 800.0f;
             }
         }
@@ -787,11 +788,15 @@ void DebrisTimeSlip(i32 group) {
         debinftype *effect = debtab[i];
         if (effect == NULL)
             continue;
-        if (!(effect->time_group == 4 ? group != 1 : group != 0)) {
-            effect->last_render_time -= 800.0f;
-            if (effect->native_data != NULL)
-                effect->native_data->last_render_time -= 800.0f;
+        if (effect->time_group == 4) {
+            if (group != 1)
+                continue;
+        } else if (group != 0) {
+            continue;
         }
+        effect->last_render_time -= 800.0f;
+        if (effect->native_data != NULL)
+            effect->native_data->last_render_time -= 800.0f;
     }
 }
 
@@ -1231,13 +1236,13 @@ extern "C" {
             if (key->effect_index == 0)
                 continue;
             debinftype *effect = debtab[key->effect_index];
-            i32 slot;
-            for (slot = 0; slot < 8; ++slot) {
+            i32 group = effect->time_group == 4;
+            i32 found = 0;
+            for (i32 slot = 0; slot < 8; ++slot) {
                 if (effect->particle_keys[slot] == i)
-                    break;
+                    found = 1;
             }
-            if (slot != 8) {
-                i32 group = effect->time_group == 4;
+            if (found) {
                 if (key->controlled_chunk_count != 0) {
                     for (i32 chunk = 0; chunk < key->controlled_chunk_count; ++chunk) {
                         for (debris_chunk_control_s *control = debris_chunk_control_stack[group]; control != NULL;
@@ -1246,7 +1251,8 @@ extern "C" {
                                 continue;
                             }
                             RemoveChunkControlFromStack(control, &debris_chunk_control_stack[group]);
-                            freechunkcontrols[--freechunkcontrolsptr] = control;
+                            --freechunkcontrolsptr;
+                            freechunkcontrols[freechunkcontrolsptr] = control;
                             break;
                         }
                     }
