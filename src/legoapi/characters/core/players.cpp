@@ -2008,18 +2008,17 @@ void AveragePlayerCurrentSpeedMul() {
 }
 
 void SetPlayer() {
-    if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0) {
+    if (Player[0] != NULL && Player[0]->apiobj.player_controlled) {
         player = Player[0];
-        if (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.field_0x1f8) < 0) {
+        if (Player[1] != NULL && Player[1]->apiobj.player_controlled) {
             player2 = Player[1];
-            return;
+        } else {
+            player2 = NULL;
         }
-    } else if (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.field_0x1f8) < 0) {
+    } else if (Player[1] != NULL && Player[1]->apiobj.player_controlled) {
         player = Player[1];
+        player2 = NULL;
     } else {
         player = NULL;
-        return;
     }
-
-    player2 = NULL;
 }
