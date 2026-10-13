@@ -107,7 +107,7 @@ static void ZipUps_Draw(void *world_ptr, void *, float) {
         NUVEC endpoint_position;
         NUVEC offset;
         NUVEC ground_position;
-        NUMTX matrices[ZIPUP_MATRIX_COUNT];
+        NUMTX_ALIGNED16 matrices[ZIPUP_MATRIX_COUNT];
 
         for (i32 index = 0; index < world->zipup_count; ++index, ++zipup) {
             if ((zipup->flags & (ZIPUP_FLAG_ACTIVE | ZIPUP_FLAG_VISIBLE)) != (ZIPUP_FLAG_ACTIVE | ZIPUP_FLAG_VISIBLE)) {

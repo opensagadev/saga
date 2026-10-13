@@ -1078,6 +1078,7 @@ void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
 }
 
 void SpecialMiniKits_Draw(WORLDINFO_s *world) {
+    NUVEC scale = {AreaPickupScale, AreaPickupScale, AreaPickupScale};
     SPECIALMINIKITSYS_s *system = world->special_minikits;
     if (system == NULL || GizmoPickupSys->gizmo_type_id == -1 ||
         GizmoPickupSys->types[GizmoPickupSys->gizmo_type_id].field_0x0f != 0) {
@@ -1087,11 +1088,10 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
     const u16 y_rotation = static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f));
     const u16 x_rotation =
         static_cast<u16>(static_cast<i32>(NuTrigTable[static_cast<i32>(y_rotation) & 0x7fff] * 1820.0f));
-    NUVEC scale = {AreaPickupScale, AreaPickupScale, AreaPickupScale};
 
     SPECIALMINIKIT_s *item = world->special_minikits->items;
     for (i32 index = 0; index < world->special_minikits->count; ++index, ++item) {
-        NUMTX matrix;
+        NUMTX_ALIGNED16 matrix;
         NUVEC *position;
 
         if ((item->flags & 0x20) != 0) {
