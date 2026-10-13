@@ -855,8 +855,8 @@ i32 Players_AveragePos(nuvec_s *position, SOCKPOSITION_s *socket_position) {
 }
 
 i32 Players_BothActive() {
-    return Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0 && Player[1] != NULL &&
-           static_cast<i8>(Player[1]->apiobj.field_0x1f8) < 0;
+    return Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[1] != NULL &&
+           Player[1]->apiobj.player_controlled;
 }
 
 PLAYERITEMTYPE_s *PlayerItemType_Find(i32 id) {
@@ -1711,13 +1711,13 @@ i32 GetNumLocalPlayers() {
 }
 
 i32 UnderPlayerControl(GameObject_s *object) {
-    return static_cast<i8>(object->apiobj.flags_low) < 0 ||
-           (object->field_0xcc0 != NULL && static_cast<i8>(object->field_0xcc0->apiobj.flags_low) < 0);
+    return object->apiobj.player_controlled ||
+           (object->field_0xcc0 != NULL && object->field_0xcc0->apiobj.player_controlled);
 }
 
 i32 ActivePlayerInRange(nuvec_s *position, float range_squared, float *distance_squared) {
     for (i32 i = 0; i < 8; i++) {
-        if (Player[i] != NULL && static_cast<i8>(Player[i]->apiobj.flags_low) < 0) {
+        if (Player[i] != NULL && Player[i]->apiobj.player_controlled) {
             const f32 distance = NuVecDistSqr(&Player[i]->apiobj.collision_position, position, NULL);
             if (distance < range_squared) {
                 if (distance_squared != NULL) {
@@ -1989,35 +1989,36 @@ bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player
 }
 
 void AveragePlayerCurrentSpeedMul() {
-    avg_currentspeed_mul = 0.0f;
-    f32 total = avg_currentspeed_mul;
     i32 count = 0;
-    if (Player[0] != NULL && (Player[0]->apiobj.flags_low & 0x80) != 0) {
+    avg_currentspeed_mul = 0.0f;
+    f32 total = 0.0f;
+    if (Player[0] != NULL && Player[0]->apiobj.player_controlled) {
         total += Player[0]->current_speed_mul;
         count = 1;
     }
-    if (Player[1] != NULL && (Player[1]->apiobj.flags_low & 0x80) != 0) {
+    if (Player[1] == NULL || !Player[1]->apiobj.player_controlled) {
+        avg_currentspeed_mul = total;
+    } else {
         total += Player[1]->current_speed_mul;
+        avg_currentspeed_mul = total;
         if (count == 1) {
-            total *= 0.5f;
+            avg_currentspeed_mul *= 0.5f;
         }
     }
-    avg_currentspeed_mul = total;
 }
 
 void SetPlayer() {
-    if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0) {
+    if (Player[0] != NULL && Player[0]->apiobj.player_controlled) {
         player = Player[0];
-        if (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.field_0x1f8) < 0) {
+        if (Player[1] != NULL && Player[1]->apiobj.player_controlled) {
             player2 = Player[1];
-            return;
+        } else {
+            player2 = NULL;
         }
-    } else if (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.field_0x1f8) < 0) {
+    } else if (Player[1] != NULL && Player[1]->apiobj.player_controlled) {
         player = Player[1];
+        player2 = NULL;
     } else {
         player = NULL;
-        return;
     }
-
-    player2 = NULL;
 }
