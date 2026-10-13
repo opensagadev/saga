@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 78.90042,
+    "fuzzy_match_percent": 78.97361,
     "total_code": "4722419",
-    "matched_code": "608876",
-    "matched_code_percent": 12.893307,
+    "matched_code": "609136",
+    "matched_code_percent": 12.898813,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6755,
-    "matched_functions_percent": 50.189465,
+    "matched_functions": 6757,
+    "matched_functions_percent": 50.204323,
     "total_units": 1
   },
   "text": {
@@ -28619,7 +28619,7 @@
           "address": 3537504,
           "offset": 2647536,
           "size": 194,
-          "match_percent": 50.588234
+          "match_percent": 99.803925
         },
         {
           "name": "_Z13edbriFileSavePc",
@@ -30019,7 +30019,7 @@
           "address": 5531872,
           "offset": 4641904,
           "size": 275,
-          "match_percent": 59.185184
+          "match_percent": 82.14815
         },
         {
           "name": "_ZN15EdMatrixControl10cbSelectedEP10eduimenu_sP10eduiitem_sj",
@@ -30059,7 +30059,7 @@
           "address": 5534576,
           "offset": 4644608,
           "size": 259,
-          "match_percent": 33.8
+          "match_percent": 41.17647
         },
         {
           "name": "_ZN5EdRef16SetAttributeDataEPviiS0_i",
@@ -32402,7 +32402,7 @@
           "address": 3362384,
           "offset": 2472416,
           "size": 1331,
-          "match_percent": 66.17544
+          "match_percent": 99.72983
         },
         {
           "name": "_ZL16cbPtlTextureMenuP10eduimenu_sP10eduiitem_sj",
@@ -32898,7 +32898,7 @@
           "address": 3403664,
           "offset": 2513696,
           "size": 1642,
-          "match_percent": 55.5625
+          "match_percent": 83.54464
         },
         {
           "name": "_ZL17cbPtlStartVelMenuP10eduimenu_sP10eduiitem_sj",
@@ -32922,7 +32922,7 @@
           "address": 3408960,
           "offset": 2518992,
           "size": 2159,
-          "match_percent": 61.74555
+          "match_percent": 83.07124
         },
         {
           "name": "_ZL22cbPtlTextureSelectMenuP10eduimenu_sP10eduiitem_sj",
@@ -32994,7 +32994,7 @@
           "address": 3417408,
           "offset": 2527440,
           "size": 869,
-          "match_percent": 56.312775
+          "match_percent": 65.95154
         },
         {
           "name": "_ZL25edanimcbMCTBCardSlotsUsedP10eduimenu_sP10eduiitem_sj",
@@ -33018,7 +33018,7 @@
           "address": 3418496,
           "offset": 2528528,
           "size": 762,
-          "match_percent": 69.8421
+          "match_percent": 69.78362
         },
         {
           "name": "_ZL26edptlChangeRepeatBoxXZLockP10eduimenu_sP10eduiitem_sj",
@@ -35290,7 +35290,7 @@
           "address": 3793936,
           "offset": 2903968,
           "size": 2363,
-          "match_percent": 12.797873
+          "match_percent": 20.48227
         },
         {
           "name": "cbMMEditorConfig",
@@ -43899,7 +43899,7 @@
           "address": 4588368,
           "offset": 3698400,
           "size": 105,
-          "match_percent": 96.8421
+          "match_percent": 100.0
         },
         {
           "name": "_Z19CharScenes_AreaDumpv",
@@ -43931,7 +43931,7 @@
           "address": 4656064,
           "offset": 3766096,
           "size": 495,
-          "match_percent": 37.537735
+          "match_percent": 99.34906
         },
         {
           "name": "_Z20ResetCharacterBufferi",
@@ -56370,7 +56370,7 @@
           "address": 5028608,
           "offset": 4138640,
           "size": 619,
-          "match_percent": 56.374233
+          "match_percent": 58.190186
         },
         {
           "name": "_Z15GizSpinner_SpinP12GIZSPINNER_si",
@@ -68342,7 +68342,7 @@
           "address": 4375840,
           "offset": 3485872,
           "size": 488,
-          "match_percent": 69.46988
+          "match_percent": 92.97591
         },
         {
           "name": "MessageBoxInitMtl",
@@ -69082,7 +69082,7 @@
           "address": 1140320,
           "offset": 250352,
           "size": 880,
-          "match_percent": 55.182266
+          "match_percent": 78.02956
         },
         {
           "name": "_Z16MenuUpdateExtrasP6MENU_s",
@@ -70002,7 +70002,7 @@
           "address": 4393872,
           "offset": 3503904,
           "size": 295,
-          "match_percent": 81.76923
+          "match_percent": 86.07692
         },
         {
           "name": "_Z20MenuDrawNoMemoryCardP6MENU_s",
@@ -80538,7 +80538,7 @@
           "address": 3485408,
           "offset": 2595440,
           "size": 1181,
-          "match_percent": 97.86239
+          "match_percent": 98.96789
         },
         {
           "name": "AddRotatedDebrisEffect",
@@ -80602,7 +80602,7 @@
           "address": 3504928,
           "offset": 2614960,
           "size": 1072,
-          "match_percent": 46.170124
+          "match_percent": 60.41079
         },
         {
           "name": "AddScaledFiniteShotDebrisEffect",
@@ -81122,7 +81122,7 @@
           "address": 4864256,
           "offset": 3974288,
           "size": 1136,
-          "match_percent": 95.31984
+          "match_percent": 97.51417
         },
         {
           "name": "_Z21Part_FindFromHSpecialP12nuhspecial_s",
@@ -113281,7 +113281,7 @@
           "address": 3267632,
           "offset": 2377664,
           "size": 122,
-          "match_percent": 91.075
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10NuSoundBusD2Ev",
@@ -113289,7 +113289,7 @@
           "address": 3267632,
           "offset": 2377664,
           "size": 122,
-          "match_percent": 91.075
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10NuSoundBus12SetOutputBusEPS_",
@@ -113345,7 +113345,7 @@
           "address": 3268320,
           "offset": 2378352,
           "size": 308,
-          "match_percent": 51.11
+          "match_percent": 65.98
         },
         {
           "name": "_ZN10NuSoundBus9AddEffectEP13NuSoundEffect",
@@ -113353,7 +113353,7 @@
           "address": 3268640,
           "offset": 2378672,
           "size": 158,
-          "match_percent": 52.381817
+          "match_percent": 62.890907
         }
       ]
     },
@@ -114045,7 +114045,7 @@
           "address": 3277312,
           "offset": 2387344,
           "size": 296,
-          "match_percent": 35.488373
+          "match_percent": 37.069767
         },
         {
           "name": "_ZN13NuSoundEffectD2Ev",
@@ -114053,7 +114053,7 @@
           "address": 3277312,
           "offset": 2387344,
           "size": 296,
-          "match_percent": 35.488373
+          "match_percent": 37.069767
         },
         {
           "name": "_ZN13NuSoundEffectD0Ev",
@@ -114385,7 +114385,7 @@
           "address": 3338528,
           "offset": 2448560,
           "size": 248,
-          "match_percent": 88.98684
+          "match_percent": 95.789474
         },
         {
           "name": "_ZN13NuSoundHandleD2Ev",
@@ -114393,7 +114393,7 @@
           "address": 3338528,
           "offset": 2448560,
           "size": 248,
-          "match_percent": 88.98684
+          "match_percent": 95.789474
         },
         {
           "name": "_ZN13NuSoundHandleeqERKS_",
@@ -114681,7 +114681,7 @@
           "address": 3340608,
           "offset": 2450640,
           "size": 366,
-          "match_percent": 75.330185
+          "match_percent": 78.65094
         },
         {
           "name": "_ZN13NuSoundHandleC1ERS_",
@@ -117166,7 +117166,7 @@
           "address": 3299216,
           "offset": 2409248,
           "size": 297,
-          "match_percent": 31.820225
+          "match_percent": 90.22472
         },
         {
           "name": "_ZN15NuSoundStreamerD2Ev",
@@ -117174,7 +117174,7 @@
           "address": 3299216,
           "offset": 2409248,
           "size": 297,
-          "match_percent": 31.820225
+          "match_percent": 90.22472
         },
         {
           "name": "_ZN15NuSoundStreamer10ThreadFuncEPv",
@@ -117190,7 +117190,7 @@
           "address": 3302064,
           "offset": 2412096,
           "size": 1115,
-          "match_percent": 58.77091
+          "match_percent": 58.716362
         },
         {
           "name": "_ZN22NuSoundStreamingSample13RequestBufferEb14NuSoundWeakPtrI21NuSoundBufferCallbackE",
@@ -117254,7 +117254,7 @@
           "address": 3305280,
           "offset": 2415312,
           "size": 122,
-          "match_percent": 92.22
+          "match_percent": 99.36
         },
         {
           "name": "_ZN6NuListIP15NuSoundStreamerED2Ev",
@@ -117262,7 +117262,7 @@
           "address": 3305280,
           "offset": 2415312,
           "size": 122,
-          "match_percent": 92.22
+          "match_percent": 99.36
         }
       ]
     },
@@ -117301,7 +117301,7 @@
           "address": 3248848,
           "offset": 2358880,
           "size": 89,
-          "match_percent": 100.0
+          "match_percent": 99.42308
         },
         {
           "name": "_ZN13NuSoundSystem19GetStreamBufferSizeEv",
@@ -117381,7 +117381,7 @@
           "address": 3250080,
           "offset": 2360112,
           "size": 298,
-          "match_percent": 51.152172
+          "match_percent": 99.83696
         },
         {
           "name": "_ZN13NuSoundSystem15GetAllocdMemoryENS_16MemoryDisciplineE",
@@ -117709,7 +117709,7 @@
           "address": 3256320,
           "offset": 2366352,
           "size": 472,
-          "match_percent": 86.35577
+          "match_percent": 86.21154
         },
         {
           "name": "_ZN13NuSoundSystem21SourceRequiresDecoderEP13NuSoundSource",
@@ -117805,7 +117805,7 @@
           "address": 3259568,
           "offset": 2369600,
           "size": 33,
-          "match_percent": 20.0
+          "match_percent": 19.09091
         },
         {
           "name": "_ZN13NuSoundSystem28GetNumAvailableOutputDevicesEv",
@@ -117885,7 +117885,7 @@
           "address": 3261104,
           "offset": 2371136,
           "size": 1141,
-          "match_percent": 66.7329
+          "match_percent": 70.1987
         },
         {
           "name": "_ZN13NuSoundSystemD2Ev",
@@ -117893,7 +117893,7 @@
           "address": 3261104,
           "offset": 2371136,
           "size": 1141,
-          "match_percent": 66.7329
+          "match_percent": 70.1987
         },
         {
           "name": "_ZN13NuSoundSystemD0Ev",
@@ -118196,7 +118196,7 @@
           "address": 3305408,
           "offset": 2415440,
           "size": 630,
-          "match_percent": 86.833336
+          "match_percent": 89.0679
         },
         {
           "name": "_ZN12NuSoundVoiceD2Ev",
@@ -118204,7 +118204,7 @@
           "address": 3305408,
           "offset": 2415440,
           "size": 630,
-          "match_percent": 86.833336
+          "match_percent": 89.0679
         },
         {
           "name": "_ZN12NuSoundVoiceD0Ev",
@@ -118732,7 +118732,7 @@
           "address": 3318464,
           "offset": 2428496,
           "size": 308,
-          "match_percent": 51.05
+          "match_percent": 66.23
         },
         {
           "name": "_ZN12NuSoundVoice13UpdateEffectsEfN13NuSoundEffect18EffectProcessStageE",
@@ -118804,7 +118804,7 @@
           "address": 3319872,
           "offset": 2429904,
           "size": 158,
-          "match_percent": 60.090908
+          "match_percent": 62.890907
         },
         {
           "name": "_ZN12NuSoundVoice4PlayEv",
