@@ -313,9 +313,9 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
     GameObject_s *excluded = NULL;
     AIAREA *area = NULL;
     i32 creature_set = 0;
-    bool all_ai = false;
+    i32 all_ai = 0;
     bool check_if_dead = false;
-    bool debris = false;
+    i32 debris = 0;
     bool parts_on = false;
     i32 respawn = 0;
     bool respawn_at_origin = false;
@@ -1351,9 +1351,11 @@ static i32 Action_PressSpecialButton(AISYS *, AISCRIPTPROCESS *processor, AIPACK
     if (object == NULL)
         return 1;
     if (first_time) {
-        for (i32 index = 0; index < param_count; ++index) {
-            if (NuStrICmp(params[index], "hold_button") == 0)
-                processor->hold_special_button = 1;
+        if (param_count != 0) {
+            for (i32 index = 0; index < param_count; ++index) {
+                if (NuStrICmp(params[index], "hold_button") == 0)
+                    processor->hold_special_button = 1;
+            }
         }
     }
     object->pad_gamepad->buttons_pressed |= GAMEPAD_SPECIAL;
@@ -2196,7 +2198,7 @@ __used__ static i32 Action_CnxHelper(AISYS *sys, AISCRIPTPROCESS *processor, AIP
     char *to = NULL;
     void *grapple = NULL;
     f32 jump_off_dy = 0.0f;
-    bool both_ways = false;
+    i32 both_ways = 0;
     for (i32 index = 0; index < param_4; ++index) {
         char *value = NuStrIStr(params[index], "pathname=");
         if (value != NULL) {
@@ -2204,7 +2206,7 @@ __used__ static i32 Action_CnxHelper(AISYS *sys, AISCRIPTPROCESS *processor, AIP
             continue;
         }
         if (NuStrIStr(params[index], "bothways") != NULL) {
-            both_ways = true;
+            both_ways = 1;
             continue;
         }
         value = NuStrIStr(params[index], "from=");
@@ -4497,27 +4499,30 @@ __used__ static i32 Action_CircleLocator(AISYS *sys, AISCRIPTPROCESS *processor,
     if (first_time != 0) {
         processor->action_data_1 = 0;
         processor->action_data_3 = processor->locator;
-        for (i32 index = 0; index < param_count; ++index) {
-            if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[index], &packet->goal_speed_mode) != 0) {
-                continue;
-            }
-            char *value = NuStrIStr(params[index], "name=");
-            if (value == NULL) {
-                value = NuStrIStr(params[index], "teleport");
-            }
-            if (value != NULL) {
-                processor->action_data_3 = AIPathFindLocator(sys, value + NuStrLen("name="));
-            } else if ((value = NuStrIStr(params[index], "goalrange")) != NULL) {
-                packet->movement_instruction_parameter =
-                    AIParamToFloatEx(packet, processor, value + NuStrLen("goalrange") + 1);
-            } else if (NuStrICmp(params[index], "reverse") == 0) {
-                packet->field_0x1e5 ^= 2;
-            } else if (NuStrICmp(params[index], "anticlockwise") == 0) {
-                packet->field_0x1e5 &= static_cast<u8>(~2u);
-            } else if (NuStrICmp(params[index], "clockwise") == 0) {
-                packet->field_0x1e5 |= 2;
-            } else {
-                packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[index]);
+        if (param_count != 0) {
+            for (i32 index = 0; index < param_count; ++index) {
+                if (AIActionParseSpeedFn != NULL &&
+                    AIActionParseSpeedFn(params[index], &packet->goal_speed_mode) != 0) {
+                    continue;
+                }
+                char *value = NuStrIStr(params[index], "name=");
+                if (value == NULL) {
+                    value = NuStrIStr(params[index], "teleport");
+                }
+                if (value != NULL) {
+                    processor->action_data_3 = AIPathFindLocator(sys, value + NuStrLen("name="));
+                } else if ((value = NuStrIStr(params[index], "goalrange")) != NULL) {
+                    packet->movement_instruction_parameter =
+                        AIParamToFloatEx(packet, processor, value + NuStrLen("goalrange") + 1);
+                } else if (NuStrICmp(params[index], "reverse") == 0) {
+                    packet->field_0x1e5 ^= 2;
+                } else if (NuStrICmp(params[index], "anticlockwise") == 0) {
+                    packet->field_0x1e5 &= static_cast<u8>(~2u);
+                } else if (NuStrICmp(params[index], "clockwise") == 0) {
+                    packet->field_0x1e5 |= 2;
+                } else {
+                    packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[index]);
+                }
             }
         }
     }
@@ -4973,11 +4978,11 @@ __used__ static i32 Action_KeepWeaponOut(AISYS *sys, AISCRIPTPROCESS *processor,
     }
 
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
-    bool keep_out = true;
+    i32 keep_out = 1;
     if (param_4 != 0) {
         for (i32 index = 0; index < param_4; ++index) {
             if (NuStrICmp(params[index], "FALSE") == 0) {
-                keep_out = false;
+                keep_out = 0;
                 continue;
             }
             char *value = NuStrIStr(params[index], "character=");
@@ -5199,14 +5204,16 @@ __used__ static i32 Action_SnapWeaponOut(AISYS *sys, AISCRIPTPROCESS *processor,
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
     i32 enabled = 1;
     i32 keep_out = -1;
-    for (i32 index = 0; index < param_4; ++index) {
-        char *value = NuStrIStr(params[index], "character=");
-        if (value != NULL) {
-            object = GetNamedGameObject(sys, value + 10);
-        } else if ((value = NuStrIStr(params[index], "keep_out=")) != NULL) {
-            keep_out = NuStrICmp(value + 9, "TRUE") == 0;
-        } else if (NuStrICmp(params[index], "FALSE") == 0) {
-            enabled = 0;
+    if (param_4 != 0) {
+        for (i32 index = 0; index < param_4; ++index) {
+            char *value = NuStrIStr(params[index], "character=");
+            if (value != NULL) {
+                object = GetNamedGameObject(sys, value + 10);
+            } else if ((value = NuStrIStr(params[index], "keep_out=")) != NULL) {
+                keep_out = NuStrICmp(value + 9, "TRUE") == 0;
+            } else if (NuStrICmp(params[index], "FALSE") == 0) {
+                enabled = 0;
+            }
         }
     }
 
@@ -5302,14 +5309,16 @@ __used__ static i32 Action_AddMiscPickups(AISYS *sys, AISCRIPTPROCESS *processor
         }
         i32 value = 0;
         i32 torpedo = 0;
-        for (i32 index = 0; index < param_4; ++index) {
-            char *parameter = NuStrIStr(params[index], "character=");
-            if (parameter != NULL) {
-                object = GetNamedGameObject(sys, parameter + 10);
-            } else if ((parameter = NuStrIStr(params[index], "value=")) != NULL) {
-                value = static_cast<i32>(AIParamToFloat(processor, parameter + 6));
-            } else if ((parameter = NuStrIStr(params[index], "torpedo=")) != NULL) {
-                torpedo = static_cast<i32>(AIParamToFloat(processor, parameter + 8));
+        if (param_4 != 0) {
+            for (i32 index = 0; index < param_4; ++index) {
+                char *parameter = NuStrIStr(params[index], "character=");
+                if (parameter != NULL) {
+                    object = GetNamedGameObject(sys, parameter + 10);
+                } else if ((parameter = NuStrIStr(params[index], "value=")) != NULL) {
+                    value = static_cast<i32>(AIParamToFloat(processor, parameter + 6));
+                } else if ((parameter = NuStrIStr(params[index], "torpedo=")) != NULL) {
+                    torpedo = static_cast<i32>(AIParamToFloat(processor, parameter + 8));
+                }
             }
         }
         if (object == NULL) {
@@ -7882,14 +7891,14 @@ __used__ static i32 Action_UseCurrentSpeed(AISYS *sys, AISCRIPTPROCESS *processo
     GameObject_s *object = packet->owner->apiobj.objptr;
     object->field_0xf02 |= 0x20;
     object->current_speed_multiplier = 1.0f;
-    bool snap_to_speed = false;
+    i32 snap_to_speed = 0;
     for (i32 index = 0; index < param_4; ++index) {
         if (NuStrICmp(params[index], "FALSE") == 0) {
             object->field_0xf02 &= static_cast<u8>(~0x20u);
         } else if (char *value = NuStrIStr(params[index], "multiplier")) {
             object->current_speed_multiplier = AIParamToFloat(processor, value + 11);
         } else if (NuStrICmp(params[index], "snaptospeed") == 0) {
-            snap_to_speed = true;
+            snap_to_speed = 1;
         }
     }
 
