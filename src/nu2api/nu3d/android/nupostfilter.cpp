@@ -352,10 +352,14 @@ extern "C" void NuPostEffectDepthOfField(const NuDepthOfFieldParameters *paramet
 }
 
 extern "C" void NuPostEffectDeferredShading(const f32 *parameters) {
+    // The four shading parameters are copied as one block.
+    struct DeferredShadingParameters {
+        f32 values[4];
+    };
     if (deferredFilter == NULL)
         return;
-    for (i32 i = 0; i < 4; ++i)
-        deferredFilter->parameters[i] = parameters[i];
+    *reinterpret_cast<DeferredShadingParameters *>(deferredFilter->parameters) =
+        *reinterpret_cast<const DeferredShadingParameters *>(parameters);
 }
 
 extern "C" void NuPostEffectMotionBlur(const NUMTX *previous, const NUMTX *current, f32 scale, f32 maximum,

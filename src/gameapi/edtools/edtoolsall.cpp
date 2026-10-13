@@ -4821,12 +4821,12 @@ void EdManipulator::DrawRotator(VuVec &origin) {
                       32);
     EdDrawEnd();
     const u8 *data = reinterpret_cast<const u8 *>(this);
-    const i32 end_angle = *reinterpret_cast<const i32 *>(data + 0x64);
-    const i32 start_angle = *reinterpret_cast<const i32 *>(data + 0x60);
-    const i32 selected_axis = *reinterpret_cast<const i32 *>(data + 0x0c);
-    if (start_angle != end_angle && selected_axis != 0) {
+    const i32 *selected_axis = reinterpret_cast<const i32 *>(data + 0x0c);
+    const i32 *start_angle = reinterpret_cast<const i32 *>(data + 0x60);
+    const i32 *end_angle = reinterpret_cast<const i32 *>(data + 0x64);
+    if (*start_angle != *end_angle && *selected_axis != 0) {
         EdDrawBegin(1);
-        EdDrawPolySector(origin, scale, selected_axis - 1, start_angle, end_angle, static_cast<i32>(0x80808080), 32);
+        EdDrawPolySector(origin, scale, *selected_axis - 1, *start_angle, *end_angle, static_cast<i32>(0x80808080), 32);
         EdDrawEnd();
     }
 }
@@ -4867,40 +4867,26 @@ void EdManipulator::GetAxisLocators(VuVec &origin, VuVec *points, VuMtx *matrix)
     points[6].z = half;
     points[6].w = 0.0f;
     if (matrix != NULL) {
-#define TRANSFORM_LOCATOR(index)                                                                                       \
-    {                                                                                                                  \
-        VuVec &point = points[index];                                                                                  \
-        const NUMTX &transform = matrix->matrix;                                                                       \
-        const f32 x = point.x;                                                                                         \
-        const f32 y = point.y;                                                                                         \
-        const f32 z = point.z;                                                                                         \
-        point.x = x * transform.m00 + y * transform.m10 + z * transform.m20;                                           \
-        point.y = x * transform.m01 + y * transform.m11 + z * transform.m21;                                           \
-        point.z = x * transform.m02 + y * transform.m12 + z * transform.m22;                                           \
+        for (i32 index = 0; index < 8; ++index) {
+            VuVec &point = points[index];
+            // The original reads the matrix rows as vectors, so they are reloaded after each locator store.
+            const VuVec *rows = reinterpret_cast<const VuVec *>(&matrix->matrix);
+            const f32 x = point.x;
+            const f32 y = point.y;
+            const f32 z = point.z;
+            const f32 transformed_x = x * rows[0].x + y * rows[1].x + z * rows[2].x;
+            const f32 transformed_y = x * rows[0].y + y * rows[1].y + z * rows[2].y;
+            const f32 transformed_z = x * rows[0].z + y * rows[1].z + z * rows[2].z;
+            point.x = transformed_x;
+            point.y = transformed_y;
+            point.z = transformed_z;
+        }
     }
-        TRANSFORM_LOCATOR(0);
-        TRANSFORM_LOCATOR(1);
-        TRANSFORM_LOCATOR(2);
-        TRANSFORM_LOCATOR(3);
-        TRANSFORM_LOCATOR(4);
-        TRANSFORM_LOCATOR(5);
-        TRANSFORM_LOCATOR(6);
-        TRANSFORM_LOCATOR(7);
-#undef TRANSFORM_LOCATOR
+    for (i32 index = 0; index < 8; ++index) {
+        points[index].x += origin.x;
+        points[index].y += origin.y;
+        points[index].z += origin.z;
     }
-#define OFFSET_LOCATOR(index)                                                                                          \
-    points[index].x += origin.x;                                                                                       \
-    points[index].y += origin.y;                                                                                       \
-    points[index].z += origin.z
-    OFFSET_LOCATOR(0);
-    OFFSET_LOCATOR(1);
-    OFFSET_LOCATOR(2);
-    OFFSET_LOCATOR(3);
-    OFFSET_LOCATOR(4);
-    OFFSET_LOCATOR(5);
-    OFFSET_LOCATOR(6);
-    OFFSET_LOCATOR(7);
-#undef OFFSET_LOCATOR
 }
 
 i32 EdManipulator::Process(EdInputContext &input, ClassObjectList &selected) {

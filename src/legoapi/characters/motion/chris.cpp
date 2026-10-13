@@ -1557,8 +1557,11 @@ i32 ChrisExtraBoltCollision(BOLT_s *bolt, nuvec_s *points) {
     if (WORLD->has_level_specific_data == 0 || WORLD->space_level == NULL || (bolt->flags & 3) == 0)
         return 0;
     spacelevel_s *space = WORLD->space_level;
-    NUVEC4_ALIGNED16 velocity = {bolt->velocity.x, bolt->velocity.y, bolt->velocity.z, 0.0f};
-    NUVEC4_ALIGNED16 position = {points[1].x, points[1].y, points[1].z, 0.0f};
+    // Only the xyz parts of these aligned vectors are filled; the collision test ignores w.
+    NUVEC4_ALIGNED16 velocity;
+    NUVEC4_ALIGNED16 position;
+    *reinterpret_cast<NUVEC *>(&position) = points[1];
+    *reinterpret_cast<NUVEC *>(&velocity) = bolt->velocity;
 #define COLLIDE_SPACE_FIGHTER(group_index, fighter_index)                                                              \
     if (space->flight_groups[group_index].fighters[fighter_index].active != 0 &&                                       \
         CollideBoltStarFighter(bolt, &space->flight_groups[group_index].fighters[fighter_index],                       \
