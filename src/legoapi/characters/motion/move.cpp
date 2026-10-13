@@ -717,10 +717,7 @@ enum JEDI_ACTION : i16 {
 };
 
 static GAMECHARACTERDATA *GetGameCharacterData(GameObject_s *object) {
-    if (object == NULL || object->apiobj.character_data == NULL) {
-        return NULL;
-    }
-    return static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+    return object->apiobj.character_data->game_character;
 }
 
 static i32 RotationDistance(u16 current, u16 target) {
