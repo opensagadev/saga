@@ -1534,7 +1534,7 @@ void BuildIt_MoveCode(GameObject_s *player) {
              (player->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0)) {
             if (GizBuildIt_CanStartBuildingFn != NULL && GizBuildIt_CanStartBuildingFn(buildit, player) == 0)
                 return;
-            nextBuildit.Reset();
+            nextBuildit = MechWeakPtr<MechObjectInterface, 4>();
             player->context_animation_timer = 0.4f;
             player->build_button_taps = 0;
             player->field_0x788 = buildit;

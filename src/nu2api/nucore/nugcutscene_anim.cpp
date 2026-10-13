@@ -2,7 +2,7 @@
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/numath/numtx.h"
 
-void NuGCutLocatorCalcMtx_3(NUGCUTLOCATOR_s *locator, numtx_s *mtx, float frame) {
+f32 *NuGCutLocatorCalcMtx_3(NUGCUTLOCATOR_s *locator, numtx_s *mtx, float frame) {
     ani3_animheader_s *animation = reinterpret_cast<ani3_animheader_s *>(locator->animation);
     f32 *values = NuAnimCurveExtractAllNodeCurves_3(animation, 0, frame, NULL);
     if ((*animation->node_flags & 1) != 0) {
@@ -24,16 +24,16 @@ void NuGCutLocatorCalcMtx_3(NUGCUTLOCATOR_s *locator, numtx_s *mtx, float frame)
     mtx->m23 = -mtx->m23;
     mtx->m32 = -mtx->m32;
     NuMtxTranslate(mtx, reinterpret_cast<NUVEC *>(&locator->base_matrix.m30));
+    return values;
 }
 
-extern "C" i32 NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMTX *mtx, nuanimtime_s *time) {
+extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMTX *mtx, nuanimtime_s *time) {
     if (locator->animation == NULL) {
         *mtx = locator->base_matrix;
-        return 0;
+        return NULL;
     }
     if (*reinterpret_cast<u32 *>(locator->animation) + 0xbeb1b6ccU < 2) {
-        NuGCutLocatorCalcMtx_3(locator, mtx, frame);
-        return 0;
+        return NuGCutLocatorCalcMtx_3(locator, mtx, frame);
     }
     nuanimdata2_s *animation = locator->animation;
     u8 *curve_types = animation->curve_types;
@@ -65,7 +65,7 @@ extern "C" i32 NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMTX
     mtx->m23 = -mtx->m23;
     mtx->m32 = -mtx->m32;
     NuMtxTranslate(mtx, reinterpret_cast<NUVEC *>(&locator->base_matrix.m30));
-    return 0;
+    return NULL;
 }
 
 i32 NuGCutLocatorIsVisble_3(NUGCUTLOCATOR_s *locator, float frame, float *scale, float *rate) {

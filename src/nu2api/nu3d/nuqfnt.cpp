@@ -555,8 +555,8 @@ NUQFNT *NuQFntReadBuffer(VARIPTR *font, VARIPTR *buf, VARIPTR buf_end) {
     i32 relocation_table_end;
     u32 relocation_count;
     u32 i;
-    i32 width;
-    i32 height;
+    i32 width __attribute__((aligned(16)));
+    i32 height __attribute__((aligned(16)));
     u32 gl_texture;
     VUFNT *result;
     NUNATIVETEX *native_texture;
@@ -796,7 +796,7 @@ f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font_ptr, u16 *text, f32 x
                             f32 width, f32 line_spacing, u32 colour, NUMTX *mtx) {
     VUFNT *font = static_cast<VUFNT *>(font_ptr);
     f32 saved_space_width = nuqfnt_space_width;
-    u16 encoded_space[2] = {0x20, 0};
+    u16 encoded_space[2] __attribute__((aligned(16))) = {0x20, 0};
     f32 saved_ic_gap = font->ic_gap;
     f32 space_width = saved_space_width == 0.0f ? font->space_width : saved_space_width;
 
@@ -812,7 +812,7 @@ f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font_ptr, u16 *text, f32 x
     do {
         NuQFntSetICGap(font, saved_ic_gap);
         NuQFntSetScaleRS(stream, font, sx, sy);
-        u16 line[256];
+        u16 line[256] __attribute__((aligned(16)));
         u16 *next = text;
         i32 words = 0, punctuation_spaces = 0;
         f32 words_width = 0.0f;
@@ -994,7 +994,7 @@ void NuQFntUTF8toQCode(NUQFNT *font, char *text, u16 *encoded) {
 
     NUWCHAR8 *cursor = reinterpret_cast<NUWCHAR8 *>(text);
     while (*cursor != '\0') {
-        NUWCHAR16 character;
+        NUWCHAR16 character __attribute__((aligned(16)));
         cursor = NuUnicodeCharFromUTF8(&character, cursor);
         *encoded = NuQFntEncodeUnicodeChar(font, character);
         if (*encoded == 0xffff)
@@ -1015,7 +1015,7 @@ f32 NuQFntPrintLenU(NUQFNT *font, char *text) {
     f32 length = 0.0f;
     NUWCHAR8 *cursor = reinterpret_cast<NUWCHAR8 *>(text);
     while (*cursor != '\0') {
-        NUWCHAR16 character;
+        NUWCHAR16 character __attribute__((aligned(16)));
         cursor = NuUnicodeCharFromUTF8(&character, cursor);
         u16 qcode = NuQFntEncodeUnicodeChar(font, character);
         if (qcode == 0xffff)

@@ -2562,8 +2562,8 @@ extern "C" {
             goto cleanup;
 
         {
-            NUVEC bounds_min = model->hierarchy->bounds_min;
-            NUVEC bounds_max = model->hierarchy->bounds_max;
+            NUVEC bounds_min __attribute__((aligned(16))) = model->hierarchy->bounds_min;
+            NUVEC bounds_max __attribute__((aligned(16))) = model->hierarchy->bounds_max;
             if ((object == NULL || (object->apiobj.field_0x1f4 & 0x200) == 0) &&
                 NuCameraClipTestExtents(&bounds_min, &bounds_max, matrix, character_farclip, 0) == 0) {
                 if (evaluate_only == 0)

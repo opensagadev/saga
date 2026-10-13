@@ -867,11 +867,12 @@ struct MechAddonCollection {
     explicit MechAddonCollection(MechObjectInterface &object) : target(&object), first(NULL) {
     }
     MechAddon *Find(const HashedKey &id) {
-        MechAddon *addon = first;
-        while (addon != NULL && addon->hash_id != id.value) {
-            addon = addon->next;
+        for (MechAddon *addon = first; addon != NULL; addon = addon->next) {
+            if (addon->hash_id == id.value) {
+                return addon;
+            }
         }
-        return addon;
+        return NULL;
     }
     ~MechAddonCollection() {
         MechAddon *addon = first;

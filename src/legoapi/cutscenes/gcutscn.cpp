@@ -350,20 +350,6 @@ SCENESPECIALPROGRESS_s *FindSceneStateObj(nugscn_s *scene, SCENEPROGRESS_s *prog
     return NULL;
 }
 
-// The instance look-at record is still opaque in legoapi_types.h. Its fields
-// are used here at the offsets written by the original cutscene code.
-struct GCutLookAtState {
-    NUGSCN *scene;
-    u32 field_04;
-    u16 character_index;
-    u16 material_index;
-    u16 texture_animation_index;
-    u16 secondary_material_index;
-    u16 tertiary_material_index;
-    u16 joint_override_index;
-    NUGCUTLOCATOR_s *locator;
-};
-
 i32 FindMtlInHGObj(nugscn_s *scene, i32 material_type) {
     for (i32 index = 0; index < scene->nummtl; ++index) {
         if (scene->mtls[index]->unknown_9a[0] == material_type) {

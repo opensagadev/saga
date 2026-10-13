@@ -1350,13 +1350,12 @@ void GizmoBlowupBurstDraw(void *world_ptr, void *, float) {
     i32 type_index = 0;
     GIZMOBLOWUP_s *type_instances = world->gizmo_blowups;
 
-    auto world_gizmo_blowup_type_count = world->gizmo_blowup_type_count;
-    while (type_index < world_gizmo_blowup_type_count) {
+    while (type_index < world->gizmo_blowup_type_count) {
         GIZMOBLOWUPTYPE_s *type = type_instances->type;
         GIZMOBLOWUP_s *next_type_instances = type_instances;
         if (type != NULL) {
+            NUMTX_ALIGNED16 animated_matrix;
             GIZMOBLOWUP_s *blowup = type_instances;
-            auto type_animation_flags = type->animation_flags;
             for (i32 instance_index = 0; instance_index < type->instance_count; ++instance_index, ++blowup) {
                 if ((blowup->draw_flags & GIZMOBLOWUP_DRAW_PROJECT_ONLY) != 0) {
                     blowup->visibility_flags |= GIZMOBLOWUP_DRAWN;
@@ -1383,8 +1382,7 @@ void GizmoBlowupBurstDraw(void *world_ptr, void *, float) {
 
                 nuhspecial_s *animated_special = &type->animated_special;
                 nuinstanim_s *animation = NuSpecialGetInstAnim(animated_special);
-                NUMTX animated_matrix;
-                NUMTX draw_matrix;
+                NUMTX_ALIGNED16 draw_matrix;
                 if (animation == NULL || (blowup->state_flags & GIZMOBLOWUP_STATE_REPEAT_ANIMATION) == 0) {
                     i32 drawn = NuSpecialDrawAt(animated_special, &blowup->transform);
                     blowup->visibility_flags =
@@ -1401,7 +1399,7 @@ void GizmoBlowupBurstDraw(void *world_ptr, void *, float) {
                         frame = frame - end_frame + animation->tfirst;
                     }
 
-                    if ((type_animation_flags & GIZMOBLOWUPTYPE_ANIMATION_INCLUDES_INSTANCE_TRANSFORM) == 0) {
+                    if ((type->animation_flags & GIZMOBLOWUPTYPE_ANIMATION_INCLUDES_INSTANCE_TRANSFORM) == 0) {
                         if ((blowup->state_flags & GIZMOBLOWUP_STATE_REPEATING) == 0) {
                             frame = blowup->animation_time;
                         }
@@ -1444,9 +1442,8 @@ void GizmoBlowupBurstDraw(void *world_ptr, void *, float) {
                 for (i32 instance_index = 0; instance_index < type->instance_count; ++instance_index, ++decal_blowup) {
                     if ((decal_blowup->draw_flags & GIZMOBLOWUP_DRAW_HIDE_DECAL) == 0 &&
                         (decal_blowup->output_flags & GIZMOBLOWUP_OUTPUT_BLOWN_UP) != 0) {
-                        NUMTX decal_matrix;
-                        GizmoBlowupGenDecalMatrix(decal_blowup, &decal_matrix, 0);
-                        NuSpecialDrawAt(&type->decal_special, &decal_matrix);
+                        GizmoBlowupGenDecalMatrix(decal_blowup, &animated_matrix, 0);
+                        NuSpecialDrawAt(&type->decal_special, &animated_matrix);
                     }
                 }
             }
@@ -1456,9 +1453,8 @@ void GizmoBlowupBurstDraw(void *world_ptr, void *, float) {
                     GIZMOBLOWUP_s *blowup = &type_instances[instance_index];
                     if ((blowup->state_flags & GIZMOBLOWUP_STATE_ACTIVATED) != 0 &&
                         (blowup->draw_flags & GIZMOBLOWUP_DRAW_RESET_SHADOW_MAP) == 0) {
-                        NUMTX shadow_matrix;
-                        GizmoBlowupGenShadowMatrix(blowup, &shadow_matrix);
-                        NuSpecialDrawAt(&type->shadow_special, &shadow_matrix);
+                        GizmoBlowupGenShadowMatrix(blowup, &animated_matrix);
+                        NuSpecialDrawAt(&type->shadow_special, &animated_matrix);
                     }
                 }
             }

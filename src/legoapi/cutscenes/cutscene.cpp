@@ -1212,7 +1212,7 @@ extern "C" {
         }
     }
 
-    void NuGCutSceneFixUp(NUGCUTSCENE_s *cutscene, NUGSCN *scene, i32 flags, i8 area) {
+    void NuGCutSceneFixUp(NUGCUTSCENE_s *cutscene, NUGSCN *scene, i32 flags, i32 area) {
         if (cutscene == NULL) {
             return;
         }
@@ -1252,9 +1252,11 @@ extern "C" {
                 NUGCUTLOCATORTYPE_s *type = &system->types[i];
                 if ((type->flags & 1) != 0) {
                     if (NuGCutDebFixUp_SearchAllPages == 0) {
-                        type->function_index = static_cast<u16>(LookupDebrisEffectPageOnly(type->name, area));
+                        type->function_index =
+                            static_cast<u16>(LookupDebrisEffectPageOnly(type->name, static_cast<i8>(area)));
                     } else {
-                        type->function_index = static_cast<u16>(LookupDebrisEffectPage(type->name, area));
+                        type->function_index =
+                            static_cast<u16>(LookupDebrisEffectPage(type->name, static_cast<i8>(area)));
                     }
                 } else if ((type->flags & 2) != 0) {
                     i32 function_index = -1;
@@ -1803,7 +1805,7 @@ struct NUGCUTLOCATORSYS_s;
 struct instNUGCUTLOCATOR_s;
 struct NUGCUTLOCATOR_s;
 struct numtx_s;
-extern "C" i32 NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
+extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
 extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
 extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
 extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
@@ -2541,8 +2543,9 @@ static void instNuGCutRigidSysRender(instNUGCUTSCENE_s *instance, float frame, i
     NUGCUTRIGIDSYS_s *system = cutscene->rigid_system;
     instNUGCUTRIGIDSYS_s *rigid_instance = instance->rigid_instance;
     u8 visible;
+    const u16 count = system->count;
 
-    for (i32 i = 0; i < system->count; ++i) {
+    for (i32 i = 0; i < count; ++i) {
         NUGCUTRIGID_s *rigid = &system->rigids[i];
         instNUGCUTRIGID_s *inst_rigid = &rigid_instance->rigids[i];
         if ((rigid->flags & 2) == 0) {

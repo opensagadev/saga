@@ -46,8 +46,10 @@ const VuVec *NuSoundListener::GetFocusPosition() const {
     if (focus_position != NULL && focus_position_enabled) {
         return focus_position;
     }
-    return head_matrix != NULL ? reinterpret_cast<const VuVec *>(reinterpret_cast<const u8 *>(head_matrix) + 0x30)
-                               : NULL;
+    if (head_matrix != NULL) {
+        return reinterpret_cast<const VuVec *>(reinterpret_cast<const u8 *>(head_matrix) + 0x30);
+    }
+    return NULL;
 }
 
 f32 NuSoundListener::GetHeadDistance(VuVec const &position) const {
@@ -116,8 +118,11 @@ void NuSoundListener::SetSensitivity(float value) {
     }
 }
 
+// Retail copies the velocity as one unaligned four-float vector.
+typedef f32 NuSoundListenerVec4 __attribute__((vector_size(16), aligned(4)));
+
 void NuSoundListener::SetVelocity(VuVec const &value) {
-    velocity = value;
+    *reinterpret_cast<NuSoundListenerVec4 *>(&velocity) = *reinterpret_cast<const NuSoundListenerVec4 *>(&value);
 }
 
 NuSoundListener::~NuSoundListener() {

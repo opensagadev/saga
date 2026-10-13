@@ -91,7 +91,7 @@ void bgProcInit() {
 }
 
 BGPROCINFO *bgPostRequest(bgprocdofn *do_fn, bgprocackfn *ack_fn, void *data, i32 data_size) {
-    BGPROCINFO local;
+    BGPROCINFO local __attribute__((aligned(16)));
     BGPROCINFO *info;
 
     if (!multithreaded) {

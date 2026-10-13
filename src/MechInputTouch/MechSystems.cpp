@@ -391,7 +391,7 @@ void MechSystems::RenderCurrentPlayerHighlight() {
         NUVEC position = player->apiobj.position;
         position.y = GameShadow(player, &position, 2.0f, -1) + 0.001f;
 
-        NUMTX matrix;
+        NUMTX_ALIGNED16 matrix;
         NuMtxSetRotationY(&matrix, 0);
         NuMtxRotateX(&matrix, 0x4000);
         NuMtxScale(&matrix, &scale);

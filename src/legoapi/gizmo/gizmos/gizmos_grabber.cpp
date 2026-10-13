@@ -630,7 +630,7 @@ void Grabber_Draw(WORLDINFO_s *world) {
         rtlSetLights(&lights);
     } else if (!NuSpecialGetVisibilityFn(&g->special))
         return;
-    NUMTX matrix;
+    NUMTX matrix __attribute__((aligned(32)));
     memcpy(&matrix, NuSpecialGetDrawMtx(&g->special), sizeof(matrix));
     NUMTX reflection;
     if (world->current_level == BLOCKADERUNNERC_LDATA) {

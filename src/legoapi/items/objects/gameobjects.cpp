@@ -1884,7 +1884,7 @@ static i32 GameFindAlternativeSpecialObject(AISYS *, nuhspecial_s *special) {
     return EquivalentObject_Find(WorldInfo_CurrentlyActive(), special);
 }
 
-static void GameAILoad(AISYS *system, i32 version, NUGSCN *, VARIPTR *buffer, VARIPTR *buffer_end) {
+static void GameAILoad(AISYS *system, i32 version, NUGSCN *, VARIPTR *, VARIPTR *) {
     if (version < 12 && system->path_sys != NULL && system->path_sys->path_count != 0) {
         AIPATHSYS *path_system = system->path_sys;
         AIPATH **paths = path_system->paths;
@@ -1907,7 +1907,10 @@ static void GameAILoad(AISYS *system, i32 version, NUGSCN *, VARIPTR *buffer, VA
         EdFileRead(tag, tag_length);
         if (NuStrICmp(tag, "LEGO") == 0) {
             EdFileReadInt();
-            system->game_sys = AISysBufferAlloc(buffer, buffer_end, 4);
+            // Retail allocates through a fresh 16-aligned cursor against the
+            // system's storage end instead of the caller's buffer.
+            VARIPTR cursor __attribute__((aligned(16)));
+            system->game_sys = AISysBufferAlloc(&cursor, &system->storage_end, 4);
         }
     }
 }
@@ -1925,7 +1928,7 @@ static void GlobalCharacterRender(NUVEC *position, i16 angle, i32 character, i32
                 angle = NuAngAdd(angle, 0x8000);
                 NUVEC scale;
                 scale.x = scale.y = scale.z = CDataList[character].model_scale;
-                NUMTX matrix;
+                NUMTX_ALIGNED16 matrix;
                 NuMtxSetScale(&matrix, &scale);
                 NuMtxTranslate(&matrix, position);
                 NuMtxPreRotateY(&matrix, angle);

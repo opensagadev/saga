@@ -865,7 +865,7 @@ extern "C" void NuShaderObjectKeyGenerate2(u32 *key, const NUSHADERMTLDESC *desc
 
 extern "C" void NuShaderObjectKeyGenerate4(u32 *key, i32 flags, i32 selector) {
     // Serialized hash input, not a native pointer-bearing material structure.
-    u8 block[0x68] = {};
+    u8 block[0x68] __attribute__((aligned(16))) = {};
     block[0x14] = 1;
     block[0x0c] = uberShader2_md5[0];
     block[0x0d] = uberShader2_md5[1];

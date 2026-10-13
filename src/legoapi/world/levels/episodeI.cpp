@@ -1659,10 +1659,9 @@ void PodSprintA_Update(WORLDINFO_s *world) {
     if (nethost != 0) {
         PODSPRINTNETPACKET_s *net = podsprint_netpacket;
         net->ai_state = (i16)(i8)ps->ai_state;
-        const i32 client = netclient;
         net->speed = (i16)ps->speed;
         net->speed2 = (i16)ps->field_0x88;
-        if (client != 0)
+        if (netclient != 0)
             goto speed_section;
     } else if (netclient != 0) {
         PODSPRINTNETPACKET_s *net = podsprint_netpacket;
@@ -1688,23 +1687,23 @@ speed_section:
             ps->speed -= FRAMETIME;
         float remaining = ps->speed;
         if (Player[0] != NULL) {
-            if (remaining > 0.0f) {
+            if (remaining <= 0.0f) {
+                Player[0]->field_0xee0 = 1000000000.0f;
+            } else {
                 Player[0]->field_0xdc8 = 0.0f;
                 Player[0]->apiobj.velocity.z = 0.0f;
                 Player[0]->apiobj.velocity.x = 0.0f;
                 Player[0]->field_0xee0 = 0.0f;
-            } else {
-                Player[0]->field_0xee0 = 1000000000.0f;
             }
         }
         if (Player[1] != NULL) {
-            if (remaining > 0.0f) {
+            if (remaining <= 0.0f) {
+                Player[1]->field_0xee0 = 1000000000.0f;
+            } else {
                 Player[1]->field_0xdc8 = 0.0f;
                 Player[1]->apiobj.velocity.z = 0.0f;
                 Player[1]->apiobj.velocity.x = 0.0f;
                 Player[1]->field_0xee0 = 0.0f;
-            } else {
-                Player[1]->field_0xee0 = 1000000000.0f;
             }
         }
         if (remaining < 2.9f && v >= 2.9f) {

@@ -5,6 +5,20 @@
 #include "legoapi/legoapi_types.h"
 
 // Cutscene API shared by the cutscene owners.
+
+// The instance look-at record is still opaque in legoapi_types.h. Its fields
+// are used at the offsets written by the original cutscene code.
+struct GCutLookAtState {
+    struct nugscn_s *scene;
+    f32 lid_frame; // Eyelid texture frame, eased towards open or closed.
+    u16 character_index;
+    u16 material_index;
+    u16 texture_animation_index;
+    u16 secondary_material_index;
+    u16 tertiary_material_index;
+    u16 joint_override_index;
+    struct NUGCUTLOCATOR_s *locator;
+};
 struct CutSceneListEntry {
     char *directory;
     char *filename;

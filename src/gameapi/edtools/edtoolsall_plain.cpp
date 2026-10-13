@@ -182,7 +182,7 @@ static __used__ void eduiFntPrintEx(void *font, int x, int y, int alignment, cha
     if (edui_donotdraw) {
         return;
     }
-    char text[1024];
+    char text[1024] __attribute__((aligned(16)));
     NuQFntPushPrintMode(2);
     va_list arguments;
     va_start(arguments, format);

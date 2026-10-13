@@ -22,9 +22,11 @@ void NuSoundEffectDoppler::ProcessVoice(NuSoundVoice *voice, float) {
     const VuVec *voice_position = voice->GetPosition();
     const VuVec *listener_position = listener->GetFocusPosition();
 
-    VuVec direction(listener_position->x - voice_position->x, listener_position->y - voice_position->y,
-                    listener_position->z - voice_position->z, 0.0f);
-    NuVecNorm(reinterpret_cast<NUVEC *>(&direction), reinterpret_cast<NUVEC *>(&direction));
+    NUVEC_ALIGNED16 direction;
+    direction.x = listener_position->x - voice_position->x;
+    direction.y = listener_position->y - voice_position->y;
+    direction.z = listener_position->z - voice_position->z;
+    NuVecNorm(&direction, &direction);
 
     f32 listener_speed =
         listener_velocity->x * direction.x + listener_velocity->y * direction.y + listener_velocity->z * direction.z;

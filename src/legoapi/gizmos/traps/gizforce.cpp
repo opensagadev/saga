@@ -1611,20 +1611,20 @@ void GizForce_PlayForwards(GIZFORCE_s *force) {
     if ((force->progress_flags & GIZFORCE_PROGRESS_ANIMATION_REVERSED) == 0) {
         GameAnimSet_SetRepeating(force->anim_set, 0);
         f32 speed = force->animation_speed;
-        if (speed < 0.0f) {
+        if (force->animation_speed < 0.0f) {
             GameAnimSet_Play(force->anim_set, speed * force->end_frame, 0);
-            return;
+        } else {
+            GameAnimSet_Play(force->anim_set, speed * force->start_frame, 0);
         }
-        GameAnimSet_Play(force->anim_set, speed * force->start_frame, 0);
-        return;
+    } else {
+        GameAnimSet_SetRepeating(force->anim_set, 0);
+        f32 speed = -force->animation_speed;
+        if (force->animation_speed < 0.0f) {
+            GameAnimSet_Play(force->anim_set, speed * force->start_frame, 0);
+        } else {
+            GameAnimSet_Play(force->anim_set, speed * force->end_frame, 0);
+        }
     }
-    GameAnimSet_SetRepeating(force->anim_set, 0);
-    f32 speed = -force->animation_speed;
-    if (!(force->animation_speed < 0.0f)) {
-        GameAnimSet_Play(force->anim_set, speed * force->end_frame, 0);
-        return;
-    }
-    GameAnimSet_Play(force->anim_set, speed * force->start_frame, 0);
 }
 
 i32 GizForce_StoodOnForce(GIZFORCE_s *force, GameObject_s *object) {
@@ -1650,20 +1650,20 @@ void GizForce_PlayBackwards(GIZFORCE_s *force) {
     if ((force->progress_flags & GIZFORCE_PROGRESS_ANIMATION_REVERSED) == 0) {
         GameAnimSet_SetRepeating(force->anim_set, 0);
         f32 speed = -force->animation_speed;
-        if (force->animation_speed < 0.0f) {
+        if (speed > 0.0f) {
             GameAnimSet_Play(force->anim_set, speed * force->start_frame, 0);
-            return;
+        } else {
+            GameAnimSet_Play(force->anim_set, speed * force->end_frame, 0);
         }
-        GameAnimSet_Play(force->anim_set, speed * force->end_frame, 0);
-        return;
+    } else {
+        GameAnimSet_SetRepeating(force->anim_set, 0);
+        f32 speed = force->animation_speed;
+        if (force->animation_speed < 0.0f) {
+            GameAnimSet_Play(force->anim_set, speed * force->end_frame, 0);
+        } else {
+            GameAnimSet_Play(force->anim_set, speed * force->start_frame, 0);
+        }
     }
-    GameAnimSet_SetRepeating(force->anim_set, 0);
-    f32 speed = force->animation_speed;
-    if (!(speed < 0.0f)) {
-        GameAnimSet_Play(force->anim_set, speed * force->start_frame, 0);
-        return;
-    }
-    GameAnimSet_Play(force->anim_set, speed * force->end_frame, 0);
 }
 
 void GizForce_SetVisibility(GIZFORCE_s *force, i32 visibility) {
