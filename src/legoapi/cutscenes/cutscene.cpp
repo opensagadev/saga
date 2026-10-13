@@ -321,13 +321,11 @@ static void CS_tex_anim(NUFPAR *fp) {
     if (CS_texanimcount > 3) {
         return;
     }
-    CUTSCENETEXANIM *animation = &CS_CutInfo->texture_animations[CS_texanimcount];
-    animation->index = NuFParGetInt(fp);
-    if (animation->index == -1) {
+    // Retail re-reads the cut info and slot for each store.
+    if ((CS_CutInfo->texture_animations[CS_texanimcount].index = NuFParGetInt(fp)) == -1) {
         return;
     }
-    animation->frame = static_cast<f32>(NuFParGetInt(fp));
-    if (animation->frame >= 0.0f) {
+    if ((CS_CutInfo->texture_animations[CS_texanimcount].frame = static_cast<f32>(NuFParGetInt(fp))) >= 0.0f) {
         ++CS_texanimcount;
     }
 }
