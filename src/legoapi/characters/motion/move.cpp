@@ -9643,23 +9643,25 @@ static void AwkwardShapeCode(GameObject_s *object, i32) {
             }
         }
     }
-    for (i32 i = 0; i < count; ++i) {
-        if (object->apiobj.character_model->points_of_interest[joints[i]] != NULL) {
-            f32 radius = radii[i];
-            NUVEC *position = NUMTX_GET_ROW_VEC(&object->joint_matrices[joints[i]], 3);
-            PushAway(position, radius, NULL, NULL, NULL, object, 2.0f, 5);
-            if (flags[i] != 0 && (object->apiobj.player_controlled || static_cast<i8>(object->field_0xf00) < 0)) {
-                NUVEC displacement;
-                NUVEC extension;
-                NUVEC hit_position;
-                NuVecSub(&displacement, position, &object->apiobj.collision_position);
-                NuVecNorm(&extension, &displacement);
-                NuVecScale(&extension, &extension, radius);
-                NuVecAdd(&displacement, &displacement, &extension);
-                if (GameRayCast(&object->apiobj.collision_position, &displacement, radius * 0.5f,
-                                TERRAINMASK_NONWEAPON | 0x1f)) {
-                    NuVecAdd(&hit_position, &object->apiobj.collision_position, &displacement);
-                    PushAway(&hit_position, 10.0f, NULL, NULL, object, NULL, 3.0f, 1);
+    if (count != 0) {
+        for (i32 i = 0; i < count; ++i) {
+            if (object->apiobj.character_model->points_of_interest[joints[i]] != NULL) {
+                f32 radius = radii[i];
+                NUVEC *position = NUMTX_GET_ROW_VEC(&object->joint_matrices[joints[i]], 3);
+                PushAway(position, radius, NULL, NULL, NULL, object, 2.0f, 5);
+                if (flags[i] != 0 && (object->apiobj.player_controlled || static_cast<i8>(object->field_0xf00) < 0)) {
+                    NUVEC displacement;
+                    NUVEC extension;
+                    NUVEC hit_position;
+                    NuVecSub(&displacement, position, &object->apiobj.collision_position);
+                    NuVecNorm(&extension, &displacement);
+                    NuVecScale(&extension, &extension, radius);
+                    NuVecAdd(&displacement, &displacement, &extension);
+                    if (GameRayCast(&object->apiobj.collision_position, &displacement, radius * 0.5f,
+                                    TERRAINMASK_NONWEAPON | 0x1f)) {
+                        NuVecAdd(&hit_position, &object->apiobj.collision_position, &displacement);
+                        PushAway(&hit_position, 10.0f, NULL, NULL, object, NULL, 3.0f, 1);
+                    }
                 }
             }
         }
