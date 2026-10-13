@@ -666,7 +666,7 @@ void *CutScenePlayer_Available(void) {
 void ChatterSfx(GameObject_s *g, i32 a, float b) {
     if (chattersfxwait <= 0.0f && ParticlesPerSecond(2.0f, FRAMETIME) > 0 && g->apiobj.field_0x287 == 0 &&
         g->character_context == -1) {
-        if (a == last_chatter_sfx && !(b <= 0.0f)) {
+        if (a == last_chatter_sfx && b > 0.0f) {
             chattersfxwait = b;
             last_chatter_sfx = -1;
         } else {

@@ -573,7 +573,7 @@ static __used__ void PowerUp_ImpactPart(PART_s *part) {
         volume = 1.0f;
     } else {
         f32 minimum = 0.1f * scale;
-        if (speed < minimum)
+        if (!(speed >= minimum))
             return;
         volume = (speed - minimum) / (maximum - minimum);
     }
@@ -3499,8 +3499,8 @@ i32 PartDraw_Flickerer(PART_s *part) {
     if (part->field_100 > 0.0f) {
         if (PickupFlickerFrame % PickUpFlickerFrames < PickUpFlickerTest)
             return 1;
-        f32 threshold = (part->field_20a & 1) != 0 ? 1.0f : 2.0f;
-        return part->field_100 >= threshold;
+        f32 threshold = (part->field_20a & 1) == 0 ? 2.0f : 1.0f;
+        return !(part->field_100 < threshold);
     }
     return 1;
 }

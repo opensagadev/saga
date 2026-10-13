@@ -250,17 +250,13 @@ void CutScenes_End() {
     if (CutScenePlayer_Active() != 0 && NewLData != NULL && NewLData == HUB_LDATA) {
         return;
     }
-    i32 i = 0;
-    if (CutInstEndCount > 0) {
-        do {
-            instNuGCutSceneEnd(CutInstEnd[i]);
-            if (i == CutInstEndStop) {
-                CUTSTOPGAME = 0;
-                CutStopInfo = NULL;
-                GameCam_Reset(GameCam);
-            }
-            ++i;
-        } while (CutInstEndCount > i);
+    for (i32 i = 0; i < CutInstEndCount; ++i) {
+        instNuGCutSceneEnd(CutInstEnd[i]);
+        if (i == CutInstEndStop) {
+            CUTSTOPGAME = 0;
+            CutStopInfo = NULL;
+            GameCam_Reset(GameCam);
+        }
     }
 }
 
@@ -725,7 +721,7 @@ i32 CutScene_HasPlayed(CUTINFO *cut) {
     i32 has_played = 0;
     if (cutscene_index != -1) {
         world = WorldInfo_CurrentlyActive();
-        has_played = (world->level_progress->played_cutscene_mask & (1u << (cutscene_index & 0x1f))) != 0;
+        has_played = (world->level_progress->played_cutscene_mask & (1 << cutscene_index)) != 0;
     }
     return has_played;
 }
@@ -1604,15 +1600,14 @@ i32 CutScene_ReplaceCharacterModelFn_LSW(CUTINFO *cut, NUGCUTCHAR_s *character) 
 
 CUTINFO *NewCutScene(CUTINFO *cut, CUTSYS *system, char *name, i32) {
     if (cut == NULL) {
-        if (name == NULL || system == NULL)
+        if (name != NULL && system != NULL)
+            cut = CutScene_Find(system, name);
+        if (cut == NULL)
             return NULL;
-        cut = CutScene_Find(system, name);
     }
-    if (cut != NULL) {
-        if (NewCutInfoCount < 8) {
-            NewCutInfo[NewCutInfoCount++] = cut;
-            return cut;
-        }
+    if (NewCutInfoCount < 8) {
+        NewCutInfo[NewCutInfoCount++] = cut;
+        return cut;
     }
     return NULL;
 }
