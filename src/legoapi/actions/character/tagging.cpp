@@ -69,7 +69,7 @@ i32 TagCode(GameObject_s *, GameObject_s *, i32, i32, i32);
 i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode) {
     const auto available = [source](GameObject_s *candidate) {
         return candidate != NULL && (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 && candidate != source &&
-               candidate->apiobj.field_0x287 == 0 && static_cast<i8>(candidate->apiobj.flags_low) >= 0 &&
+               candidate->apiobj.field_0x287 == 0 && !candidate->apiobj.player_controlled &&
                (candidate->tag_context_flags & 2) == 0;
     };
     if (!available(target)) {
@@ -145,7 +145,7 @@ void Tag_NewTransfer(GameObject_s *source, GameObject_s *target) {
         third.position[2].y = third.height[2] * (source->apiobj.collision_max.y - source->apiobj.collision_min.y) +
                               source->apiobj.collision_min.y;
     }
-    if (__builtin_expect(static_cast<i8>(target->apiobj.flags_low) >= 0, 0)) {
+    if (!target->apiobj.player_controlled) {
         return;
     }
     if (Tag_DoneFirst == 0) {
@@ -157,7 +157,7 @@ void Tag_NewTransfer(GameObject_s *source, GameObject_s *target) {
 }
 
 void Tag_DrawIcon_LSW(GameObject_s *object) {
-    if (VehicleArea != 0 || FadeSys.fade != 0.0f || static_cast<i8>(object->apiobj.flags_low) >= 0 ||
+    if (VehicleArea != 0 || FadeSys.fade != 0.0f || !object->apiobj.player_controlled ||
         (WORLD->current_level->flags & LEVEL_HIDE_ICONS) != 0) {
         return;
     }
@@ -193,7 +193,7 @@ void Tag_ResetTransfers() {
 
 void Tag_DrawIcon_Batman(GameObject_s *object) {
     i32 count;
-    if (VehicleArea != 0 || FadeSys.fade != 0.0f || static_cast<i8>(object->apiobj.field_0x1f8) >= 0 ||
+    if (VehicleArea != 0 || FadeSys.fade != 0.0f || !object->apiobj.player_controlled ||
         !(object->pause_context_state > 0.0f)) {
         return;
     }

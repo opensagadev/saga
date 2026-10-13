@@ -1870,7 +1870,7 @@ void JediB_Update(WORLDINFO_s *world) {
                 continue;
             }
             Player[slot]->ai_opponent_exclusion_mask = 0;
-            if (jedi_b.phase == 7 && boss != NULL && static_cast<i8>(Player[slot]->apiobj.flags_low) >= 0) {
+            if (jedi_b.phase == 7 && boss != NULL && !Player[slot]->apiobj.player_controlled) {
                 Player[slot]->ai_opponent_exclusion_mask = 1ULL << boss->apiobj.field_0x289;
             }
         }
@@ -2085,7 +2085,7 @@ void JediB_Update(WORLDINFO_s *world) {
                 if (baddie->released != 0) {
                     object->ai.locator = NULL;
                     if (!((player->apiobj.character_data->model_flags & 0x80000) == 0 &&
-                          (player->apiobj.objptr->id != id_JARJAR || static_cast<i8>(player->apiobj.flags_low) < 0) &&
+                          (player->apiobj.objptr->id != id_JARJAR || player->apiobj.player_controlled) &&
                           (player->apiobj.character_data->game_character->uses_weapon_action != 4 ||
                            object->apiobj.character_data->game_character->uses_weapon_action != 4))) {
                         if (object->ai.opponent == player) {
@@ -2093,8 +2093,7 @@ void JediB_Update(WORLDINFO_s *world) {
                         }
                         if (player2 != NULL) {
                             if ((player2->apiobj.character_data->model_flags & 0x80000) == 0 &&
-                                (player->apiobj.objptr->id != id_JARJAR ||
-                                 static_cast<i8>(player->apiobj.flags_low) < 0) &&
+                                (player->apiobj.objptr->id != id_JARJAR || player->apiobj.player_controlled) &&
                                 (player->apiobj.character_data->game_character->uses_weapon_action != 4 ||
                                  object->apiobj.character_data->game_character->uses_weapon_action != 4)) {
                                 object->ai.opponent = player2;

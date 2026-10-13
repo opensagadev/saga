@@ -237,8 +237,7 @@ void Animate_ATAT(GameObject_s *object) {
         packet.requested_animation = object->context_animation;
     } else {
         packet.requested_animation = CHARACTER_ANIMATION_IDLE;
-        if (static_cast<i8>(object->apiobj.field_0x1f8) < 0 &&
-            object->apiobj.character_model->model_data_b[15] != NULL) {
+        if (object->apiobj.player_controlled && object->apiobj.character_model->model_data_b[15] != NULL) {
             packet.requested_animation = 15;
         }
         if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
@@ -264,7 +263,7 @@ void Animate_POD(GameObject_s *object) {
     packet.requested_animation = 1;
 
     {
-        if (__builtin_expect(static_cast<i8>(object->apiobj.field_0x1f8) >= 0, 0)) {
+        if (__builtin_expect(!object->apiobj.player_controlled, 0)) {
             goto normal_animation;
         }
         const i8 index = object->apiobj.field_0x27c;
@@ -290,7 +289,7 @@ normal_animation:
         packet.requested_animation = 1;
     } else if (object->camera_shake_strength > 0.0f) {
         packet.requested_animation = 0x17;
-    } else if (__builtin_expect(static_cast<i8>(object->apiobj.field_0x1f8) >= 0, 0)) {
+    } else if (__builtin_expect(!object->apiobj.player_controlled, 0)) {
         packet.requested_animation = 3;
     } else if (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA) {
         if (object->previous_block_animation != -1) {

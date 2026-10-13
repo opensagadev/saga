@@ -2146,7 +2146,7 @@ f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 te
         }
 
         if (world != NULL && world->char_platform_sys != NULL && VehicleArea == 0 &&
-            static_cast<i8>(object->apiobj.field_0x1f8) >= 0) {
+            !object->apiobj.player_controlled) {
             CHARPLATFORMSYS_s *system = world->char_platform_sys;
             for (i32 i = 0; i < system->platform_count; ++i) {
                 if (system->platforms[i].object != NULL) {

@@ -690,7 +690,7 @@ void GizBuildItPushAwayFromEnd(GameObject_s *player) {
 }
 
 f32 GizBuildItMul(GameObject_s *player) {
-    if (static_cast<i8>(player->apiobj.field_0x1f8) < 0 && Player_HasFastBuild(player)) {
+    if (player->apiobj.player_controlled && Player_HasFastBuild(player)) {
         return 3.0f;
     }
 

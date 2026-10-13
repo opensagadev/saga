@@ -945,11 +945,11 @@ void Hub_Update(WORLDINFO_s *world) {
         if (position == NULL) {
             continue;
         }
-        if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.flags_low) < 0 &&
+        if (Player[0] != NULL && Player[0]->apiobj.player_controlled &&
             NuVecDistSqr(&Player[0]->apiobj.position, position, NULL) < 0.25f) {
             break;
         }
-        if (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.flags_low) < 0 &&
+        if (Player[1] != NULL && Player[1]->apiobj.player_controlled &&
             NuVecDistSqr(&Player[1]->apiobj.position, position, NULL) < 0.25f) {
             break;
         }
@@ -976,7 +976,7 @@ void Hub_Update(WORLDINFO_s *world) {
                   (E1VEHICLE_ADATA == NULL || hub_area != E1VEHICLE_ADATA->index)) &&
                 minikit_candidate != -1) {
                 const auto player_ready = [](GameObject_s *object) {
-                    return object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0 &&
+                    return object != NULL && object->apiobj.player_controlled &&
                            object->pad_gamepad->input_magnitude == 0.0f;
                 };
                 if (player_ready(Player[0]) || player_ready(Player[1])) {
@@ -1018,7 +1018,7 @@ void Hub_Update(WORLDINFO_s *world) {
         for (i32 i = 0; HubAreaInfo[i].area_name != NULL && selected_buildit == -1; ++i) {
             GIZMO *gizmo = HubAreaInfo[i].bonus_gizmo;
             if (gizmo != NULL && GizmoGetOutput(world->gizmo_sys, gizmo, 0, 0) == 0 && Player[0] != NULL &&
-                static_cast<i8>(Player[0]->apiobj.flags_low) < 0 && Player[0]->field_0x7a5 != 0x2d) {
+                Player[0]->apiobj.player_controlled && Player[0]->field_0x7a5 != 0x2d) {
                 GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(HubAreaInfo[i].bonus_gizmo->object);
                 if ((buildit->availability_flags & GIZBUILDIT_AVAILABILITY_INTERACTING) != 0 ||
                     (nearest_buildit != NULL && nearest_buildit == buildit)) {
@@ -1028,8 +1028,7 @@ void Hub_Update(WORLDINFO_s *world) {
         }
         if (LevGizmo[0] != NULL) {
             if (selected_buildit == -1 && GizmoGetOutput(world->gizmo_sys, LevGizmo[0], 0, 0) == 0) {
-                if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.flags_low) < 0 &&
-                    Player[0]->field_0x7a5 != 0x2d &&
+                if (Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[0]->field_0x7a5 != 0x2d &&
                     ((LevBuildIt[0]->availability_flags & GIZBUILDIT_AVAILABILITY_INTERACTING) != 0 ||
                      (nearest_buildit != NULL && nearest_buildit == LevBuildIt[0]))) {
                     selected_buildit = 999;

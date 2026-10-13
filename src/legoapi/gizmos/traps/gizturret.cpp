@@ -147,8 +147,7 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                             GameObject_s *autoaim_target = NULL;
                             if (turret->controller != NULL) {
                                 GameObject_s *controller = turret->controller;
-                                if (controller->field_0xcc0 != NULL &&
-                                    static_cast<i8>(controller->apiobj.field_0x1f8) < 0) {
+                                if (controller->field_0xcc0 != NULL && controller->apiobj.player_controlled) {
                                     GAMEPAD_s *pad = controller->pad_gamepad;
                                     f32 pitch_rate = -pad->input_direction_x * turret->pitch_turn_speed;
                                     if (pitch_rate < 0.0f) {
@@ -577,8 +576,7 @@ static i32 GizTurrets_BoltHitPlat(void *world_ptr, void *system_ptr, BOLT *bolt,
                     damage = bolt_type->field_3c;
                 } else {
                     if (((turret->behavior_flags & 0x10000) != 0 && bolt->owner->field_0xcc0 == NULL) ||
-                        ((turret->behavior_flags & 0x20000) != 0 &&
-                         static_cast<i8>(bolt->owner->apiobj.field_0x1f8) >= 0)) {
+                        ((turret->behavior_flags & 0x20000) != 0 && !bolt->owner->apiobj.player_controlled)) {
                         damage = 0;
                     } else {
                         damage = bolt_type->field_3c;

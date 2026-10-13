@@ -174,8 +174,8 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
     for (i32 index = 0; index < 2; ++index) {
         GameObject_s *player = Player[index];
         if (player == NULL || (player->apiobj.flags_high & 0x10) == 0 || player->apiobj.field_0x287 != 0 ||
-            static_cast<i8>(player->apiobj.field_0x1f8) >= 0 || (player->field_0xe20 & 0x20) != 0 ||
-            player->torpedo->count > 4 || player->torpedo->steal_timer != 0.0f) {
+            !player->apiobj.player_controlled || (player->field_0xe20 & 0x20) != 0 || player->torpedo->count > 4 ||
+            player->torpedo->steal_timer != 0.0f) {
             continue;
         }
         packet = object->torpedo;

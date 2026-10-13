@@ -131,7 +131,7 @@ void GamePads_NetReset(i32) {
 }
 
 u16 GamePad_InputAngle(GameObject_s *object, GAMEPAD_s *pad) {
-    if (static_cast<i8>(object->apiobj.field_0x1f8) >= 0 || object->field_0x661 == 0xff) {
+    if (!object->apiobj.player_controlled || object->field_0x661 == 0xff) {
         goto camera_relative;
     }
     {
@@ -254,7 +254,7 @@ void NewBuzzFrames(nupad_s *pad, i32 frames, i32) {
 }
 
 void TakeHitRumble(GameObject_s *object, float strength) {
-    if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0) {
+    if (object != NULL && object->apiobj.player_controlled) {
         NewRumble(object->pad_gamepad->pad, strength, 0);
         NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
     }
@@ -289,7 +289,7 @@ void SpaceResetAudioPoint() {
 
 void SpaceRumbleProcess() {
     NUVEC_ALIGNED16 origin;
-    if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0) {
+    if (Player[0] != NULL && Player[0]->apiobj.player_controlled) {
         origin = Player[0]->apiobj.position;
     } else if (Player[1] != NULL) {
         origin = Player[1]->apiobj.position;
@@ -515,7 +515,7 @@ i32 ReadPad(i32 port) {
     } else if (port >= PLAYERCOUNT || Player[port] == NULL) {
         result = 1;
         input_mode = 1;
-    } else if (static_cast<i8>(Player[port]->apiobj.field_0x1f8) < 0) {
+    } else if (Player[port]->apiobj.player_controlled) {
         result = 0;
         input_mode = 2;
     } else {

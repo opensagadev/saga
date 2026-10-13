@@ -301,7 +301,7 @@ void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
     u32 flags = type->field_60;
     f32 speed = type->field_10;
     f32 duration = type->field_14;
-    if (static_cast<i8>(object->apiobj.flags_low) < 0) {
+    if (object->apiobj.player_controlled) {
         flags |= 0x20;
         if (object->apiobj.field_0x27c == 0)
             flags |= 1;
@@ -393,7 +393,7 @@ void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
         NUMTX matrix;
         if ((flags & 0x600000) != 0) {
             i32 pitch = (flags & 0x200000) != 0 ? 0xf8e4 : 0xf1c8;
-            if (static_cast<i32>(flags) < 0 && static_cast<i8>(object->apiobj.flags_low) >= 0 &&
+            if (static_cast<i32>(flags) < 0 && !object->apiobj.player_controlled &&
                 object->script_fire_target != NULL) {
                 f32 distance = NuVecXZDist(&object->script_fire_target->apiobj.collision_position,
                                            &object->apiobj.collision_position, NULL);
@@ -649,8 +649,8 @@ void Bolt_Debris_LSW(BOLT_s *bolt, nuvec_s *points, i32 point, nuvec_s *, i32 no
         GameCam_NewShake(GameCam, 0.75f, 0.75f, 1.0f);
         NewRumbleAllPlayers(0.5f, 0.0f, 0, 0);
     }
-    if (no_explosion == 0 && bolt->owner != NULL && static_cast<i8>(bolt->owner->apiobj.flags_low) < 0 &&
-        Cheat_IsOn(0x12) && (world->area == NULL || !(world->area->flags & 1))) {
+    if (no_explosion == 0 && bolt->owner != NULL && bolt->owner->apiobj.player_controlled && Cheat_IsOn(0x12) &&
+        (world->area == NULL || !(world->area->flags & 1))) {
         AddGameDebris(WORLD->debris_sys, 0x49, &bolt->position);
         NewRumble(bolt->owner->pad_gamepad->pad, 0.3f, 0);
         PlaySfx("exp_thermalDet", points);
