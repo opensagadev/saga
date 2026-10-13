@@ -269,11 +269,11 @@ static __used__ void PodRaceSnipersReset(void) {
         NUGSPLINE *spline = NuSplineFind(WORLD->current_gscn, buf);
         if (spline != NULL && spline->length > 0 && PodRace_nsnipers <= 9) {
             i32 npts = 0;
+            float half_time = PodRace_sniper_fire_time * 0.5f;
             do {
                 SNIPER_s *dst = &PodRace_snipers[PodRace_nsnipers];
                 dst->prev = spline->pts[npts];
                 dst->pos = spline->pts[npts + 1];
-                float half_time = PodRace_sniper_fire_time * 0.5f;
                 dst->fire_timer = NuRandFloat() * PodRace_sniper_fire_time + half_time;
                 PodRace_snipers[PodRace_nsnipers++].state = 0.0f;
                 npts += 2;
@@ -1053,7 +1053,8 @@ void PodRaceA_AlwaysUpdate(WORLDINFO_s *world) {
 }
 
 void PodRaceADraw(WORLDINFO_s *world) {
-    NUMTX mtx;
+    // Retail realigns the stack for this 16-byte aligned matrix local.
+    NUMTX_ALIGNED16 mtx;
     if (netclient == 0) {
         if (NuSpecialExistsFn(&minesys) != 0) {
             MINESYS_s *mines = &minesys;
