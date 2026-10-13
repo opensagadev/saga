@@ -245,17 +245,14 @@ void NuShaderMtlDescInit(NUSHADERMTLDESC *desc) {
 }
 
 NUMTL *NuMtlCreate(i32 count) {
-    i32 i;
-    i32 j;
-    NUMTL *mtl;
-    NUMTL *next;
+    const i32 render_plane = numtl_renderplane;
+    NUMTL *mtl = NULL;
 
-    next = NULL;
-
-    for (i = 0; i < count; i++) {
+    for (i32 i = 0; i < count; i++) {
+        NUMTL *next = mtl;
         mtl = NULL;
 
-        for (j = 0; j < max_materials; j++) {
+        for (i32 j = 0; j < max_materials; j++) {
             if (!material_list[j].is_used && material_list[j].display_list == NULL) {
                 mtl = &material_list[j];
                 break;
@@ -268,11 +265,10 @@ NUMTL *NuMtlCreate(i32 count) {
 
         mtl->is_used = true;
         mtl->unknown_0_4 = true;
-        mtl->renderplane = numtl_renderplane;
+        mtl->renderplane = render_plane;
         mtl->attribs.unknown_6_128 = true;
 
         mtl->next = next;
-        next = mtl;
     }
 
     NuMtlCreatePS(mtl, 0);
@@ -281,19 +277,18 @@ NUMTL *NuMtlCreate(i32 count) {
 }
 
 // original 0x2f24a0 — same allocation sweep as NuMtlCreate, but WITHOUT
-// the attribs byte6 bit7 set (asm has no `orb $0x80,0x46` here). The material
+// the attribs byte6 bit7 set (asm has no `orb $0x80,0x46` here). Each material
 // is queued for dynamic display-list creation and the platform pass runs with
 // is_3d=1 (no has_no_transform bit). Byte6 clear keeps NuMtlUpdatePS on the
 // RetrieveShaderVariant path instead of the vtx_desc bit2 poke path.
 extern "C" NUMTL *NuMtlCreate3D(i32 count) {
     i32 i;
     i32 j;
-    NUMTL *mtl;
-    NUMTL *next;
-
-    next = NULL;
+    const i32 render_plane = numtl_renderplane;
+    NUMTL *mtl = NULL;
 
     for (i = 0; i < count; i++) {
+        NUMTL *next = mtl;
         mtl = NULL;
 
         for (j = 0; j < max_materials; j++) {
@@ -307,26 +302,24 @@ extern "C" NUMTL *NuMtlCreate3D(i32 count) {
 
         DefaultMtl(mtl);
 
-        mtl->renderplane = numtl_renderplane;
         mtl->is_used = true;
         mtl->unknown_0_4 = true;
+        mtl->renderplane = render_plane;
         // NB: no unknown_6_128 here — original Create3D leaves byte6 clear.
+        NuDisplayListCreateMtl(mtl);
 
         mtl->next = next;
-        next = mtl;
     }
-
-    NuDisplayListCreateMtl(mtl);
 
     NuMtlCreatePS(mtl, 1);
 
     return mtl;
 }
 
-extern "C" NUMTL *NuMtlCreateEx(i32 count, u8 render_plane) {
-    NUMTL *mtl;
-    NUMTL *next = NULL;
+extern "C" NUMTL *NuMtlCreateEx(i32 count, i32 render_plane) {
+    NUMTL *mtl = NULL;
     for (i32 i = 0; i < count; ++i) {
+        NUMTL *next = mtl;
         mtl = NULL;
         for (i32 j = 0; j < max_materials; ++j) {
             if (!material_list[j].is_used && material_list[j].display_list == NULL) {
@@ -341,16 +334,15 @@ extern "C" NUMTL *NuMtlCreateEx(i32 count, u8 render_plane) {
         mtl->renderplane = render_plane;
         mtl->attribs.unknown_6_128 = true;
         mtl->next = next;
-        next = mtl;
     }
     NuMtlCreatePS(mtl, 0);
     return mtl;
 }
 
-extern "C" NUMTL *NuMtlCreateEx3D(i32 count, u8 render_plane) {
-    NUMTL *mtl;
-    NUMTL *next = NULL;
+extern "C" NUMTL *NuMtlCreateEx3D(i32 count, i32 render_plane) {
+    NUMTL *mtl = NULL;
     for (i32 i = 0; i < count; ++i) {
+        NUMTL *next = mtl;
         mtl = NULL;
         for (i32 j = 0; j < max_materials; ++j) {
             if (!material_list[j].is_used && material_list[j].display_list == NULL) {
@@ -365,7 +357,6 @@ extern "C" NUMTL *NuMtlCreateEx3D(i32 count, u8 render_plane) {
         mtl->renderplane = render_plane;
         NuDisplayListCreateMtl(mtl);
         mtl->next = next;
-        next = mtl;
     }
     NuMtlCreatePS(mtl, 1);
     return mtl;

@@ -234,13 +234,16 @@ namespace {
     // Sets AreaPickupScale from the current area's flags and returns it.
     f32 UpdateAreaPickupScale(const WORLDINFO *world) {
         AreaPickupScale = 1.0f;
-        if (world->level_sub_id < 0 || world->level_sub_id >= AREACOUNT) {
-            return AreaPickupScale;
-        }
-        if ((ADataList[world->level_sub_id].flags & AREAFLAG_NOPICKUPGRAVITY) != 0) {
-            AreaPickupScale = 6.0f;
-        } else if ((ADataList[world->level_sub_id].flags & AREAFLAG_VEHICLE_AREA) != 0) {
-            AreaPickupScale = BonusArea == 0 ? 5.0f : 3.0f;
+        if (world->level_sub_id >= 0 && world->level_sub_id < AREACOUNT) {
+            if ((ADataList[world->level_sub_id].flags & AREAFLAG_NOPICKUPGRAVITY) != 0) {
+                AreaPickupScale = 6.0f;
+            } else if ((ADataList[world->level_sub_id].flags & AREAFLAG_VEHICLE_AREA) != 0) {
+                if (BonusArea != 0) {
+                    AreaPickupScale = 3.0f;
+                } else {
+                    AreaPickupScale = 5.0f;
+                }
+            }
         }
         return AreaPickupScale;
     }

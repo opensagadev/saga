@@ -55,7 +55,7 @@ struct MechHintUIButton : MechTouchUITexButton {
     u8 pulse_active;
     f32 pulse_remaining;
 
-    MechHintUIButton(VuVec const &pos, f32 radius) : MechTouchUITexButton(pos, radius) {
+    MechHintUIButton() : MechTouchUITexButton(VuVec(ICONXPOS_TOUCHYFEELY, ICONYPOS_TOUCHYFEELY, 0.0f, 1.0f), 0.075f) {
         slide_elapsed = 0.0f;
         slide_duration = -1.0f;
         slide_delay = 0.0f;
@@ -136,11 +136,10 @@ void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder 
 }
 
 void initHintSys() {
+    hintsys.current_hint = 0;
     hintsys.state = 2;
     hintsys.active_hint = NULL;
-    hintsys.current_hint = 0;
-    MechHintUIButton *button =
-        new MechHintUIButton(VuVec(ICONXPOS_TOUCHYFEELY, ICONYPOS_TOUCHYFEELY, 0.0f, 1.0f), 0.075f);
+    MechHintUIButton *button = new MechHintUIButton();
     button->UpdateTexture(MechInputTouchVirtualConsoleController::s_textures[3]);
     button->alpha = 0.0f;
     button->alpha_to = 0.0f;
