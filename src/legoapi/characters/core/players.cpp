@@ -809,7 +809,7 @@ GameObject_s *Player_FindByID(i32 id) {
 
 NUVEC *Player_StartPos(GameObject_s *obj) {
     i32 index = obj->apiobj.field_0x27c;
-    if (index < 0 || index > 7) {
+    if (static_cast<u8>(index) > 7) {
         index = obj->apiobj.field_0x289;
     }
     index &= 7;
