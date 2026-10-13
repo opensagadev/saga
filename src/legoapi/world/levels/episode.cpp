@@ -943,7 +943,7 @@ static inline void MiniTrooperMove(minisnowtrooper_s *trooper) {
     trooper->shot_position.x += movement.x;
     trooper->shot_position.z += movement.z;
 
-    if (trooper->timer >= 1.0f / static_cast<f32>(trooper->speed_divisor)) {
+    if (trooper->timer >= 1.0f / static_cast<f32>(static_cast<i32>(trooper->speed_divisor))) {
         trooper->timer = 0.0f;
         trooper->state_flags = (trooper->state_flags & ~0xc) | ((((trooper->state_flags >> 2) + 1) << 2) & 0xc);
     }
@@ -1195,7 +1195,7 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
             }
         }
 
-        const f32 count = static_cast<f32>(team->trooper_count);
+        const f32 count = static_cast<f32>(static_cast<i32>(team->trooper_count));
         team->position.x = total.x / count;
         team->position.y = total.y;
         team->position.z = total.z / count;
