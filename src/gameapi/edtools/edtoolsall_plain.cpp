@@ -1432,18 +1432,17 @@ extern "C" {
         memset(edanim_page_on, 0, sizeof(edanim_page_on));
     }
     void edanimParticleDestroy(i32 parameter_index, i32 particle_index) {
-        edanim_param_s *parameters = AnimParams;
-        for (i32 index = particle_index; index < parameters[parameter_index].effect_count - 1; ++index) {
-            parameters[parameter_index].effect_ids[index] = parameters[parameter_index].effect_ids[index + 1];
-            parameters[parameter_index].effect_intervals[index] =
-                parameters[parameter_index].effect_intervals[index + 1];
-            parameters[parameter_index].effect_flags[index] = parameters[parameter_index].effect_flags[index + 1];
-            memcpy(parameters[parameter_index].effect_positions[index],
-                   parameters[parameter_index].effect_positions[index + 1], sizeof(NUVEC));
-            strcpy(parameters[parameter_index].effect_names[index],
-                   parameters[parameter_index].effect_names[index + 1]);
+        for (i32 index = particle_index; index < AnimParams[parameter_index].effect_count - 1; ++index) {
+            AnimParams[parameter_index].effect_ids[index] = AnimParams[parameter_index].effect_ids[index + 1];
+            AnimParams[parameter_index].effect_intervals[index] =
+                AnimParams[parameter_index].effect_intervals[index + 1];
+            AnimParams[parameter_index].effect_flags[index] = AnimParams[parameter_index].effect_flags[index + 1];
+            memcpy(AnimParams[parameter_index].effect_positions[index],
+                   AnimParams[parameter_index].effect_positions[index + 1], sizeof(NUVEC));
+            strcpy(AnimParams[parameter_index].effect_names[index],
+                   AnimParams[parameter_index].effect_names[index + 1]);
         }
-        --parameters[parameter_index].effect_count;
+        --AnimParams[parameter_index].effect_count;
     }
     void edanimRegisterCubeDumpInfo(void) {
     }
@@ -3098,11 +3097,11 @@ extern "C" {
         if (pad && (pad->digital_buttons & EDUI_CURSOR_PRIMARY)) {
             if (pad->analog_left_x > 192)
                 value = (pad->analog_left_y - 128.0f) * 0.01f;
-            else if (pad->analog_left_x < 64)
+            if (pad->analog_left_x < 64)
                 value = (128.0f - pad->analog_left_y) * -0.01f;
             if (pad->analog_right_x > 192)
                 value = (pad->analog_right_y - 128.0f) * 0.001f;
-            else if (pad->analog_right_x < 64)
+            if (pad->analog_right_x < 64)
                 value = (128.0f - pad->analog_right_y) * -0.001f;
         }
         return value;
