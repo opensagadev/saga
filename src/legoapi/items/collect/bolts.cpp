@@ -1183,25 +1183,27 @@ BOLT_s *Bolt_Add(GameObject_s *object, nuvec_s *position, numtx_s *matrix, i32 t
         return NULL;
     i16 owner = object != NULL ? static_cast<i16>(object - Obj) : -1;
     NetMessage message;
+    message.Write16(owner);
     if (message.data != NULL) {
-        memcpy(message.data->bytes + message.write_offset, &owner, sizeof(owner));
-        EdFileSwapEndianess16(message.data->bytes + message.write_offset);
-        message.write_offset += 2;
         memmove(message.data->bytes + message.write_offset, position, sizeof(*position));
-        for (i32 i = 0; i < 3; ++i)
-            EdFileSwapEndianess32(message.data->bytes + message.write_offset + i * 4);
+        if (message.swap_endianness) {
+            u8 *written = message.data->bytes + message.write_offset;
+            for (i32 i = 0; i < 3; ++i)
+                EdFileSwapEndianess32(written + i * 4);
+        }
         message.write_offset += 12;
-        memmove(message.data->bytes + message.write_offset, matrix, sizeof(*matrix));
-        for (i32 i = 0; i < 16; ++i)
-            EdFileSwapEndianess32(message.data->bytes + message.write_offset + i * 4);
-        message.write_offset += 64;
-        memcpy(message.data->bytes + message.write_offset, &type_id, sizeof(type_id));
-        EdFileSwapEndianess32(message.data->bytes + message.write_offset);
-        message.write_offset += 4;
-        memcpy(message.data->bytes + message.write_offset, &flags, sizeof(flags));
-        EdFileSwapEndianess32(message.data->bytes + message.write_offset);
-        message.write_offset += 4;
     }
+    if (message.data != NULL) {
+        memmove(message.data->bytes + message.write_offset, matrix, sizeof(*matrix));
+        if (message.swap_endianness) {
+            u8 *written = message.data->bytes + message.write_offset;
+            for (i32 i = 0; i < 16; ++i)
+                EdFileSwapEndianess32(written + i * 4);
+        }
+        message.write_offset += 64;
+    }
+    message.Write32(type_id);
+    message.Write32(flags);
     Bolt_Init(bolt, message);
     return bolt;
 }
