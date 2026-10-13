@@ -1976,18 +1976,13 @@ static char *SpecialRouteCharacterName(u8 route_id) {
         return Suit[route_id].suit_character_name;
     }
 
+    i32 route_index = 0;
     i32 skipped_count = 0;
-    for (i32 route_index = 0; route_index < 64;) {
-        const i32 list_index = route_index + skipped_count;
-        const i16 character_type = CurrentStoryCList[list_index].model_id;
-        if (character_type == -1 || list_index > 63) {
-            return NULL;
-        }
-
-        char *name = apicharsys->char_data[character_type].file;
+    while (CurrentStoryCList[route_index + skipped_count].model_id != -1 && route_index + skipped_count < 64) {
+        char *name = apicharsys->char_data[CurrentStoryCList[route_index + skipped_count].model_id].file;
         bool skip = false;
-        for (const char **skip_name = &skip_chars[1]; *skip_name != NULL; ++skip_name) {
-            if (NuStrICmp(name, *skip_name) == 0) {
+        for (i32 skip_index = 0; skip_chars[skip_index] != NULL; ++skip_index) {
+            if (NuStrICmp(name, skip_chars[skip_index]) == 0) {
                 skip = true;
                 break;
             }
@@ -1997,7 +1992,7 @@ static char *SpecialRouteCharacterName(u8 route_id) {
             continue;
         }
         if (route_index + 10 == route_id) {
-            return name;
+            return apicharsys->char_data[CurrentStoryCList[route_index + skipped_count].model_id].file;
         }
         ++route_index;
     }
@@ -2005,33 +2000,19 @@ static char *SpecialRouteCharacterName(u8 route_id) {
 }
 
 static i32 LevelCharacterTypeID(char *name) {
-    if (NuStrICmp(name, "Everyone") == 0) {
-        return 0x40;
-    }
-    if (CurrentStoryCList == NULL) {
-        return -1;
-    }
-
-    i32 character_index = 0;
-    i16 character_type = CurrentStoryCList[character_index].model_id;
-    if (character_type == -1) {
-        return -1;
-    }
-
-    while (true) {
-        if (NuStrICmp(name, apicharsys->char_data[character_type].file) == 0) {
-            return character_index;
-        }
-
-        ++character_index;
-        character_type = CurrentStoryCList[character_index].model_id;
-        if (character_type == -1) {
-            return -1;
-        }
-        if (character_index == 64) {
-            return -1;
+    i32 result = 0x40;
+    if (NuStrICmp(name, "Everyone") != 0) {
+        result = -1;
+        if (CurrentStoryCList != NULL) {
+            for (i32 index = 0; CurrentStoryCList[index].model_id != -1 && index < 64; ++index) {
+                if (NuStrICmp(name, apicharsys->char_data[CurrentStoryCList[index].model_id].file) == 0) {
+                    result = index;
+                    break;
+                }
+            }
         }
     }
+    return result;
 }
 
 static u32 AIBigJumpToDestination(APIOBJECT *object, NUVEC *destination) {
@@ -2100,33 +2081,28 @@ static i32 SpecialRouteCharacterTypeID(char *name) {
         }
     }
 
-    if (CurrentStoryCList == NULL) {
-        return -1;
-    }
+    i32 route_index = 0;
     i32 skipped_count = 0;
-    for (i32 route_index = 0; route_index < 64;) {
-        const i32 list_index = route_index + skipped_count;
-        const i16 character_type = CurrentStoryCList[list_index].model_id;
-        if (character_type == -1 || list_index > 63) {
-            return -1;
-        }
-
-        char *character_name = apicharsys->char_data[character_type].file;
-        bool skip = false;
-        for (const char **skip_name = &skip_chars[1]; *skip_name != NULL; ++skip_name) {
-            if (NuStrICmp(character_name, *skip_name) == 0) {
-                skip = true;
-                break;
+    if (CurrentStoryCList != NULL) {
+        while (CurrentStoryCList[route_index].model_id != -1 && route_index < 64) {
+            char *character_name = apicharsys->char_data[CurrentStoryCList[route_index + skipped_count].model_id].file;
+            bool skip = false;
+            for (i32 skip_index = 0; skip_chars[skip_index] != NULL; ++skip_index) {
+                if (NuStrICmp(character_name, skip_chars[skip_index]) == 0) {
+                    skip = true;
+                    break;
+                }
             }
+            if (skip) {
+                ++skipped_count;
+                continue;
+            }
+            if (NuStrICmp(name, apicharsys->char_data[CurrentStoryCList[route_index + skipped_count].model_id].file) ==
+                0) {
+                return route_index + 10;
+            }
+            ++route_index;
         }
-        if (skip) {
-            ++skipped_count;
-            continue;
-        }
-        if (NuStrICmp(name, character_name) == 0) {
-            return route_index + 10;
-        }
-        ++route_index;
     }
     return -1;
 }
@@ -5562,7 +5538,7 @@ void ThingManager::DisplayThings(ThingRenderData *data) {
     for (i32 i = 0; i < this->count; ++i) {
         BaseThing *thing = this->things[i];
         if (thing != NULL && (thing->flags & THING_FLAG_SKIP_DISPLAY) == 0) {
-            if (thing->profiling_0xc != 0) {
+            if (__builtin_expect(thing->profiling_0xc != 0, 0)) {
                 _NuTimeBarSlotBegin(this->timebar, 3, name);
                 thing = this->things[i];
             }
@@ -5581,7 +5557,7 @@ void ThingManager::EffectsThings(ThingRenderData *data) {
         if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_EFFECTS) != 0) {
             continue;
         }
-        if (this->things[i]->profiling_0xc != 0) {
+        if (__builtin_expect(this->things[i]->profiling_0xc != 0, 0)) {
             _NuTimeBarSlotBegin(this->timebar, 5, name);
         }
         this->things[i]->Effects(data);
@@ -5641,7 +5617,7 @@ void ThingManager::ProcessThings(ThingProcessData *data) {
     const char *name = "PROC";
     for (i32 i = 0; i < this->count; ++i) {
         if (this->things[i] != NULL && (this->things[i]->flags & THING_FLAG_SKIP_PROCESS_EVEN_WHEN_PAUSED) == 0) {
-            if (this->things[i]->profiling_0xc != 0) {
+            if (__builtin_expect(this->things[i]->profiling_0xc != 0, 0)) {
                 _NuTimeBarSlotBegin(this->timebar, 0, name);
             }
             this->things[i]->ProcessEvenWhenPaused(data);
@@ -5653,7 +5629,7 @@ void ThingManager::ProcessThings(ThingProcessData *data) {
     if (data->paused == 0) {
         for (i32 i = 0; i < this->count; ++i) {
             if (this->things[i] != NULL && (this->things[i]->flags & THING_FLAG_SKIP_PROCESS) == 0) {
-                if (this->things[i]->profiling_0xc != 0) {
+                if (__builtin_expect(this->things[i]->profiling_0xc != 0, 0)) {
                     _NuTimeBarSlotBegin(this->timebar, 0, name);
                 }
                 this->things[i]->Process(data);
@@ -5665,7 +5641,7 @@ void ThingManager::ProcessThings(ThingProcessData *data) {
     } else {
         for (i32 i = 0; i < this->count; ++i) {
             if (this->things[i] != NULL && (this->things[i]->flags & THING_FLAG_SKIP_PROCESS_ONLY_WHEN_PAUSED) == 0) {
-                if (this->things[i]->profiling_0xc != 0) {
+                if (__builtin_expect(this->things[i]->profiling_0xc != 0, 0)) {
                     _NuTimeBarSlotBegin(this->timebar, 0, name);
                 }
                 this->things[i]->ProcessOnlyWhenPaused(data);
@@ -5708,7 +5684,7 @@ void ThingManager::RenderThings(ThingRenderData *data) {
     for (i32 i = 0; i < this->count; ++i) {
         BaseThing *thing = this->things[i];
         if (thing != NULL && (thing->flags & THING_FLAG_SKIP_RENDER) == 0) {
-            if (thing->profiling_0xc != 0) {
+            if (__builtin_expect(thing->profiling_0xc != 0, 0)) {
                 _NuTimeBarSlotBegin(this->timebar, 1, name);
                 thing = this->things[i];
             }
@@ -5725,15 +5701,12 @@ void ThingManager::ResetThings(ThingResetData *data) {
     const char *name = "Res";
 
     for (i32 i = 0; i < this->count; ++i) {
-        BaseThing *thing = this->things[i];
-        if (thing != NULL && (thing->flags & 8) == 0) {
-            if (thing->profiling_0xc != 0) {
+        if (this->things[i] != NULL && (this->things[i]->flags & 8) == 0) {
+            if (__builtin_expect(this->things[i]->profiling_0xc != 0, 0)) {
                 _NuTimeBarSlotBegin(this->timebar, 4, name);
-                thing = this->things[i];
             }
-            thing->Reset(data);
-            thing = this->things[i];
-            if (thing->profiling_0xc != 0) {
+            this->things[i]->Reset(data);
+            if (this->things[i]->profiling_0xc != 0) {
                 _NuTimeBarSlotEnd(this->timebar, 4);
             }
         }

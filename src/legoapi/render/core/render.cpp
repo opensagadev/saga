@@ -638,8 +638,8 @@ extern "C" {
     nuhgobj_s *NuGHGRead(char *path, VARIPTR *buf, VARIPTR buf_end) {
         nuapi.loading_hgobj = 1;
         nuhgobj_s *object = reinterpret_cast<nuhgobj_s *>(NuReadGraphicsData(buf, &buf_end, path, NULL, NULL));
-        if (object != NULL && nuapi.force_shadows_on_characters != 0 && object->display_list != NULL) {
-            for (i32 i = 0; i < object->display_list->nspecials; ++i) {
+        if (object != NULL && nuapi.force_shadows_on_characters != 0) {
+            for (i32 i = 0; i != object->display_list->nspecials; ++i) {
                 object->display_list->visibility_flags[i] |= 0x20;
             }
         }
@@ -2653,9 +2653,10 @@ void Draw_AUTOSAVEWARNING() {
 
 void Draw_NODATAAVAILABLE() {
     char message[1024];
+    const f32 scale = MENUTEXTSCALE;
     sprintf(message, apitxt_NODATAAVAILABLE, apiGameName);
-    MenuSmartTextEx(message, 0.0f, -0.4f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, MENUNORMALR,
-                    MENUNORMALG, MENUNORMALB, 1.5f, 3, NULL, 0, MenuA);
+    MenuSmartTextEx(message, 0.0f, -0.4f, 1.0f, scale, scale, scale, 0, MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.5f, 3,
+                    NULL, 0, MenuA);
 }
 
 i32 dco_locatorposonly;

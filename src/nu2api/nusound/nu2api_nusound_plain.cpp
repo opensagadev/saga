@@ -92,19 +92,14 @@ extern "C" {
     }
 
     void edanimSoundDestroy(i32 parameter_index, i32 sound_index) {
-        edanim_param_s &params = AnimParams[parameter_index];
-        i32 final_count = params.sound_count - 1;
-        while (sound_index < final_count) {
-            params.sound_values[sound_index] = params.sound_values[sound_index + 1];
-            params.sound_ids[sound_index] = params.sound_ids[sound_index + 1];
-            params.sound_positions[sound_index][0] = params.sound_positions[sound_index + 1][0];
-            params.sound_positions[sound_index][1] = params.sound_positions[sound_index + 1][1];
-            params.sound_positions[sound_index][2] = params.sound_positions[sound_index + 1][2];
-            strcpy(params.sound_names[sound_index], params.sound_names[sound_index + 1]);
-            sound_index++;
-            final_count = params.sound_count - 1;
+        for (i32 i = sound_index; i < AnimParams[parameter_index].sound_count - 1; i++) {
+            AnimParams[parameter_index].sound_values[i] = AnimParams[parameter_index].sound_values[i + 1];
+            AnimParams[parameter_index].sound_ids[i] = AnimParams[parameter_index].sound_ids[i + 1];
+            memcpy(AnimParams[parameter_index].sound_positions[i], AnimParams[parameter_index].sound_positions[i + 1],
+                   sizeof(NUVEC));
+            strcpy(AnimParams[parameter_index].sound_names[i], AnimParams[parameter_index].sound_names[i + 1]);
         }
-        params.sound_count = final_count;
+        AnimParams[parameter_index].sound_count--;
     }
     void edbitsSoundPlay(NUVEC *, i32) {
     }

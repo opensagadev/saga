@@ -831,11 +831,11 @@ i32 Players_AveragePos(nuvec_s *position, SOCKPOSITION_s *socket_position) {
     NUVEC total = {0.0f, 0.0f, 0.0f};
     f32 player_count = 0.0f;
 
-    if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0) {
+    if (Player[0] != NULL && Player[0]->apiobj.player_controlled) {
         NuVecAdd(&total, &total, &Player[0]->apiobj.position);
         player_count += 1.0f;
     }
-    if (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.field_0x1f8) < 0) {
+    if (Player[1] != NULL && Player[1]->apiobj.player_controlled) {
         NuVecAdd(&total, &total, &Player[1]->apiobj.position);
         player_count += 1.0f;
     }

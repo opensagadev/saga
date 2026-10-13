@@ -606,7 +606,9 @@ CHARACTERDATA *CDataFromName(char *name) {
     return nullptr;
 }
 
-i32 RedirectAnim(char *path, ANIMREDIRECT *redirects, ANIMLIST_s *animation_list, char *directory) {
+// Retail copies the first argument into the fourth and appends the animation name there.
+// Retail also returns 0 for a NULL redirect table; that check is not reproduced yet.
+i32 RedirectAnim(char *directory, ANIMREDIRECT *redirects, ANIMLIST_s *animation_list, char *path) {
     CHARACTERANIM_s *animation = reinterpret_cast<CHARACTERANIM_s *>(animation_list);
     for (ANIMREDIRECT *redirect = redirects; redirect->name != NULL; ++redirect) {
         if (!(redirect->animation_id == animation->animation_id && NuStrICmp(redirect->name, animation->name) == 0)) {

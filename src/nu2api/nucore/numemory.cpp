@@ -27,6 +27,7 @@ bool g_disallowGlobalNew = false;
 
 NuMemory::NuMemory(void **buf) {
     void *ptr;
+    NuMemoryManager *manager;
 
     this->tls_index = -1;
 
@@ -40,22 +41,24 @@ NuMemory::NuMemory(void **buf) {
     this->mem1_event_handler = new (ptr) NuMemoryPS::Mem1EventHandler();
     ptr = (void *)((usize)ptr + sizeof(NuMemoryPS::Mem1EventHandler));
 
-    this->mem1_manager = (NuMemoryManager *)ptr;
-    if (this->mem1_manager != NULL) {
-        new (this->mem1_manager) NuMemoryManager(this->mem1_event_handler, this->error_handler, "MEM1", g_categoryNames,
-                                                 sizeof(g_categoryNames) / sizeof(char *));
+    manager = (NuMemoryManager *)ptr;
+    if (manager != NULL) {
+        new (manager) NuMemoryManager(this->mem1_event_handler, this->error_handler, "MEM1", g_categoryNames,
+                                      sizeof(g_categoryNames) / sizeof(char *));
     }
-    ptr = (void *)((usize)this->mem1_manager + sizeof(NuMemoryManager));
+    this->mem1_manager = manager;
+    ptr = (void *)((usize)manager + sizeof(NuMemoryManager));
 
     this->mem2_event_handler = new (ptr) NuMemoryPS::Mem2EventHandler();
     ptr = (void *)((usize)ptr + sizeof(NuMemoryPS::Mem2EventHandler));
 
-    this->mem2_manager = (NuMemoryManager *)ptr;
-    if (this->mem2_manager != NULL) {
-        new (this->mem2_manager) NuMemoryManager(this->mem2_event_handler, this->error_handler, "MEM2", g_categoryNames,
-                                                 sizeof(g_categoryNames) / sizeof(char *));
+    manager = (NuMemoryManager *)ptr;
+    if (manager != NULL) {
+        new (manager) NuMemoryManager(this->mem2_event_handler, this->error_handler, "MEM2", g_categoryNames,
+                                      sizeof(g_categoryNames) / sizeof(char *));
     }
-    ptr = (void *)((usize)this->mem2_manager + sizeof(NuMemoryManager));
+    this->mem2_manager = manager;
+    ptr = (void *)((usize)manager + sizeof(NuMemoryManager));
 
     this->fixed_pool_event_handler = new (ptr) FixedPoolEventHandler();
     ptr = (void *)((usize)ptr + sizeof(FixedPoolEventHandler));
