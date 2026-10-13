@@ -4618,8 +4618,7 @@ void Move_JAWA(GameObject_s *object) {
 }
 
 static bool JediHasAction(const GameObject_s *object, JEDI_ACTION action) {
-    return object->apiobj.character_model != NULL && object->apiobj.character_model->model_data_b != NULL &&
-           object->apiobj.character_model->model_data_b[action] != NULL;
+    return object->apiobj.character_model->model_data_b[action] != NULL;
 }
 
 static i32 ComboOpponent_Behind;
@@ -5091,7 +5090,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                     if (action_held != 0)
                         StartHold(object);
                 } else if (object->combo_stage < 2 && jump_pressed != 0 &&
-                           JediHasAction(object, static_cast<JEDI_ACTION>(0x12))) {
+                           object->apiobj.character_model->model_data_b[0x12] != NULL) {
                     ComboJump(object);
                 }
             } else {
