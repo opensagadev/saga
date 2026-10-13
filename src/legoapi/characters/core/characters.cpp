@@ -1359,13 +1359,12 @@ void LoadSingleCharacter(bgprocinfo_s *) {
                 continue;
             }
 
-            LEVEL_OBJECT_RUNTIME &object = WORLD->lev_objs[i];
-            if (object.active != 0) {
+            if (WORLD->lev_objs[i].active != 0) {
                 continue;
             }
 
-            if (NuSpecialFind(icon_scene, &object.special, ObjTab[i].name, 1) != 0) {
-                object.active = 1;
+            if (NuSpecialFind(icon_scene, &WORLD->lev_objs[i].special, ObjTab[i].name, 1) != 0) {
+                WORLD->lev_objs[i].active = 1;
             }
         }
     }
