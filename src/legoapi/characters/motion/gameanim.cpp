@@ -1338,48 +1338,50 @@ GAMEANIMSET_s *GameAnimSet_Create(variptr_u *buf, variptr_u *buf_end, GAMEANIMOB
 
 void Animate_BATTLEDROID(GameObject_s *object) {
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
-    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
-        packet.requested_animation = object->context_animation;
-    } else if (object->context_target_position != NULL) {
-        if (object->apiobj.character_model->model_data_b[43] != NULL) {
-            packet.requested_animation = 43;
-        } else {
-            if (object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL) {
-                packet.requested_animation = CHARACTER_ANIMATION_IDLE;
+    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) == 0) {
+        if (object->context_target_position != NULL) {
+            if (object->apiobj.character_model->model_data_b[43] != NULL) {
+                packet.requested_animation = 43;
             } else {
-                packet.requested_animation = CHARACTER_ANIMATION_FALL;
-            }
-        }
-    } else {
-        packet.requested_animation = CHARACTER_ANIMATION_FALL;
-        if (object->character_context == CHARACTER_CONTEXT_DOOMED)
-            goto choose_movement;
-        if (object->apiobj.field_0x27d != 0)
-            goto default_idle;
-        if (object->ground_contact_grace_timer > 0.0f ||
-            object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL ||
-            (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
-             object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f)) {
-            if (!(GetGameCharacterData(object)->field_0x28 > 0.0f) ||
-                object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL)
-                goto default_idle;
-        }
-        goto choose_movement;
-    default_idle:
-        packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
-    choose_movement:
-
-        if (!UseFallAnim(object)) {
-            if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
-                object->pad_gamepad->input_magnitude > 0.0f) {
-                const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
-                MoveAnim_Manage(object, object->pad_gamepad->input_magnitude,
-                                (game_character->flags_090 & GAMECHARACTER_FLAG_DISABLE_TIPTOE) == 0 ? 1 : 0, 0);
+                if (object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL) {
+                    packet.requested_animation = CHARACTER_ANIMATION_IDLE;
+                } else {
+                    packet.requested_animation = CHARACTER_ANIMATION_FALL;
+                }
             }
         } else {
             packet.requested_animation = CHARACTER_ANIMATION_FALL;
+            if (object->character_context == CHARACTER_CONTEXT_DOOMED)
+                goto choose_movement;
+            if (object->apiobj.field_0x27d != 0)
+                goto default_idle;
+            if (object->ground_contact_grace_timer > 0.0f ||
+                object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL ||
+                (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
+                 object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f)) {
+                if (!(GetGameCharacterData(object)->field_0x28 > 0.0f) ||
+                    object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL)
+                    goto default_idle;
+            }
+            goto choose_movement;
+        default_idle:
+            packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
+        choose_movement:
+
+            if (!UseFallAnim(object)) {
+                if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+                    object->pad_gamepad->input_magnitude > 0.0f) {
+                    const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
+                    MoveAnim_Manage(object, object->pad_gamepad->input_magnitude,
+                                    (game_character->flags_090 & GAMECHARACTER_FLAG_DISABLE_TIPTOE) == 0 ? 1 : 0, 0);
+                }
+            } else {
+                packet.requested_animation = CHARACTER_ANIMATION_FALL;
+            }
+            MoveAnim_Check(object);
         }
-        MoveAnim_Check(object);
+    } else {
+        packet.requested_animation = object->context_animation;
     }
 
     const i16 animation = packet.requested_animation;
