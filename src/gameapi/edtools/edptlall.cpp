@@ -428,16 +428,17 @@ static void edptlcbDetailMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     if (edptl_detail_menu == NULL)
         return;
     if (edpp_nearest != -1 && edpp_ptls[edpp_nearest].instance_id != -1) {
-        edpp_particle_s *particle = &edpp_ptls[edpp_nearest];
-        debinftype *effect = debtab[debkeydata[particle->instance_id].effect_index];
+        debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
         eduiMenuAddItem(edptl_detail_menu, eduiItemSliderCreate(0, edblack, 0, edptlcbSetMaxThin, 1.0f, 9.0f,
                                                                 effect->thinning, "Maximum Thinning"));
-        eduiMenuAddItem(edptl_detail_menu, eduiItemToggleCreate(4, edblack, (particle->detail_levels >> 2) & 1, 1,
-                                                                edptlcbSetDetail, "High Detail"));
-        eduiMenuAddItem(edptl_detail_menu, eduiItemToggleCreate(2, edblack, (particle->detail_levels >> 1) & 1, 2,
-                                                                edptlcbSetDetail, "Medium Detail"));
-        eduiMenuAddItem(edptl_detail_menu, eduiItemToggleCreate(1, edblack, particle->detail_levels & 1, 3,
-                                                                edptlcbSetDetail, "Low Detail"));
+        eduiMenuAddItem(edptl_detail_menu,
+                        eduiItemToggleCreate(4, edblack, (edpp_ptls[edpp_nearest].detail_levels >> 2) & 1, 1,
+                                             edptlcbSetDetail, "High Detail"));
+        eduiMenuAddItem(edptl_detail_menu,
+                        eduiItemToggleCreate(2, edblack, (edpp_ptls[edpp_nearest].detail_levels >> 1) & 1, 2,
+                                             edptlcbSetDetail, "Medium Detail"));
+        eduiMenuAddItem(edptl_detail_menu, eduiItemToggleCreate(1, edblack, edpp_ptls[edpp_nearest].detail_levels & 1,
+                                                                3, edptlcbSetDetail, "Low Detail"));
         eduiMenuAddItem(edptl_detail_menu,
                         eduiItemSelCreate(1, edblack, 0, 0, edptlcbTestDetailMenu, "Detail Level Test..."));
     }

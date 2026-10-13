@@ -385,24 +385,22 @@ static void edptlcbApplyBounceFactor(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
         return;
     }
-    edpp_particle_s *particle = &edpp_ptls[edpp_nearest];
-    if (particle->instance_id == -1) {
+    if (edpp_ptls[edpp_nearest].instance_id == -1) {
         return;
     }
-    particle->reflection_bounce = static_cast<edui_slider_s *>(item)->value;
-    debkeydata[particle->instance_id].reflection_scale = particle->reflection_bounce;
+    edpp_ptls[edpp_nearest].reflection_bounce = static_cast<edui_slider_s *>(item)->value;
+    debkeydata[edpp_ptls[edpp_nearest].instance_id].reflection_scale = edpp_ptls[edpp_nearest].reflection_bounce;
 }
 
 static void edptlcbApplyBounceOffset(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
         return;
     }
-    edpp_particle_s *particle = &edpp_ptls[edpp_nearest];
-    if (particle->instance_id == -1) {
+    if (edpp_ptls[edpp_nearest].instance_id == -1) {
         return;
     }
-    particle->reflection_offset = static_cast<edui_slider_s *>(item)->value;
-    debkeydata[particle->instance_id].collision_plane = particle->reflection_offset;
+    edpp_ptls[edpp_nearest].reflection_offset = static_cast<edui_slider_s *>(item)->value;
+    debkeydata[edpp_ptls[edpp_nearest].instance_id].collision_plane = edpp_ptls[edpp_nearest].reflection_offset;
 }
 
 static void edptlcbCancelSoundIDMenu(eduimenu_s *, eduimenu_s *) {
@@ -1268,16 +1266,16 @@ static void cbPtlGSortMenu(eduimenu_s *menu, eduiitem_s *, u32) {
 }
 
 static void cbPtlSetFacing(eduimenu_s *, eduiitem_s *item, u32) {
-    edpp_particle_s *particle = &edpp_ptls[edpp_nearest];
-    particle->facing_mode = item->highlighted;
+    edpp_ptls[edpp_nearest].facing_mode = item->highlighted;
     if (item->highlighted) {
-        particle->facing_rotation_x = edpp_facrotx;
-        particle->facing_rotation_y = edpp_facroty;
-        DebrisSetFacing(particle->instance_id, 1, particle->facing_rotation_x, particle->facing_rotation_y);
+        edpp_ptls[edpp_nearest].facing_rotation_x = edpp_facrotx;
+        edpp_ptls[edpp_nearest].facing_rotation_y = edpp_facroty;
+        DebrisSetFacing(edpp_ptls[edpp_nearest].instance_id, 1, edpp_ptls[edpp_nearest].facing_rotation_x,
+                        edpp_ptls[edpp_nearest].facing_rotation_y);
     } else {
-        particle->facing_rotation_x = 0;
-        particle->facing_rotation_y = 0;
-        DebrisSetFacing(particle->instance_id, 0, 0, 0);
+        edpp_ptls[edpp_nearest].facing_rotation_x = 0;
+        edpp_ptls[edpp_nearest].facing_rotation_y = 0;
+        DebrisSetFacing(edpp_ptls[edpp_nearest].instance_id, 0, 0, 0);
     }
 }
 
@@ -2089,20 +2087,14 @@ static void cbPtlSelTextureType(eduimenu_s *menu, eduiitem_s *item, u32) {
         debinftype *effect = debtab[type];
         i8 old_type = static_cast<i8>(effect->particle_type);
         if (old_type != item->data) {
-            switch (item->data) {
-                case 0:
-                    edpp_ptls[edpp_nearest].render_priority = 20000;
-                    break;
-                case 2:
-                    edpp_ptls[edpp_nearest].render_priority = static_cast<i16>(40000);
-                    break;
-                case 3:
-                    edpp_ptls[edpp_nearest].render_priority = 30000;
-                    break;
-                case 7:
-                    edpp_ptls[edpp_nearest].render_priority = 10000;
-                    break;
-            }
+            if (item->data == 2)
+                edpp_ptls[edpp_nearest].render_priority = static_cast<i16>(40000);
+            else if (item->data == 3)
+                edpp_ptls[edpp_nearest].render_priority = 30000;
+            else if (item->data == 0)
+                edpp_ptls[edpp_nearest].render_priority = 20000;
+            else if (item->data == 7)
+                edpp_ptls[edpp_nearest].render_priority = 10000;
         }
         if (item->data == 7) {
             effect->time_group = 2;
@@ -2119,31 +2111,32 @@ static void cbPtlSelTextureType(eduimenu_s *menu, eduiitem_s *item, u32) {
             effect->particle_type = static_cast<u8>(item->data);
             GenericDebinfoDmaTypeUpdate(effect);
             for (i32 index = 0; index < 512; ++index) {
-                edpp_particle_s *particle = &edpp_ptls[index];
-                if (particle->effect_index != type || particle->instance_id != 99999) {
+                if (edpp_ptls[index].effect_index != type || edpp_ptls[index].instance_id != 99999) {
                     continue;
                 }
-                particle->instance_id = -1;
-                AddDebrisEffect(&particle->instance_id, type, particle->position.x, particle->position.y,
-                                particle->position.z);
-                if (particle->instance_id == -1) {
-                    particle->instance_id = 99999;
+                edpp_ptls[index].instance_id = -1;
+                AddDebrisEffect(&edpp_ptls[index].instance_id, type, edpp_ptls[index].position.x,
+                                edpp_ptls[index].position.y, edpp_ptls[index].position.z);
+                if (edpp_ptls[index].instance_id == -1) {
+                    edpp_ptls[index].instance_id = 99999;
                     continue;
                 }
-                debkeydata[particle->instance_id].field_2f9 = 0;
-                DebrisOrientation(particle->instance_id, particle->rotation_z, particle->rotation_y);
-                DebrisEmitterOrientation(particle->instance_id, particle->emitter_rotation_z,
-                                         particle->emitter_rotation_y, particle->emitter_rotation_x);
-                DebrisStartOffset(particle->instance_id, particle->start_offset);
-                DebrisSetTrigger(particle->instance_id, particle->switch_type, particle->switch_id,
-                                 particle->switch_variable);
-                DebrisReflectionOrientation(particle->instance_id, particle->reflection_rotation_z,
-                                            particle->reflection_rotation_y, particle->reflection_offset,
-                                            particle->reflection_bounce);
-                DebrisSetFacing(particle->instance_id, particle->facing_mode, particle->facing_rotation_x,
-                                particle->facing_rotation_y);
-                DebrisSetGroupID(particle->instance_id, particle->render_group);
-                DebrisSetRoomID(particle->instance_id, reinterpret_cast<nugscn_s *>(edpp_page_scene[particle->page]));
+                debkeydata[edpp_ptls[index].instance_id].field_2f9 = 0;
+                DebrisOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].rotation_z,
+                                  edpp_ptls[index].rotation_y);
+                DebrisEmitterOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].emitter_rotation_z,
+                                         edpp_ptls[index].emitter_rotation_y, edpp_ptls[index].emitter_rotation_x);
+                DebrisStartOffset(edpp_ptls[index].instance_id, edpp_ptls[index].start_offset);
+                DebrisSetTrigger(edpp_ptls[index].instance_id, edpp_ptls[index].switch_type, edpp_ptls[index].switch_id,
+                                 edpp_ptls[index].switch_variable);
+                DebrisReflectionOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].reflection_rotation_z,
+                                            edpp_ptls[index].reflection_rotation_y, edpp_ptls[index].reflection_offset,
+                                            edpp_ptls[index].reflection_bounce);
+                DebrisSetFacing(edpp_ptls[index].instance_id, edpp_ptls[index].facing_mode,
+                                edpp_ptls[index].facing_rotation_x, edpp_ptls[index].facing_rotation_y);
+                DebrisSetGroupID(edpp_ptls[index].instance_id, edpp_ptls[index].render_group);
+                DebrisSetRoomID(edpp_ptls[index].instance_id,
+                                reinterpret_cast<nugscn_s *>(edpp_page_scene[edpp_ptls[index].page]));
             }
         } else {
             effect->particle_type = static_cast<u8>(item->data);
