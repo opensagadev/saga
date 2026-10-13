@@ -2393,7 +2393,7 @@ template <i32 Axis> static inline void EdDrawCircle(VuVec const &centre, float r
     VuVec base(0.0f, Axis == 2 ? radius : 0.0f, Axis == 2 ? 0.0f : radius, 0.0f);
     VuVec point(base.x + centre.x, base.y + centre.y, base.z + centre.z, 0.0f);
     for (i32 i = 1; i <= segments; i++) {
-        VuVec previous = point;
+        VuVec previous(point.x, point.y, point.z, point.w);
         i32 angle = i * (0x10000 / segments);
         if (Axis == 0) {
             NuVecRotateX(&point.xyz, &base.xyz, angle);
@@ -2402,10 +2402,7 @@ template <i32 Axis> static inline void EdDrawCircle(VuVec const &centre, float r
         } else {
             NuVecRotateZ(&point.xyz, &base.xyz, angle);
         }
-        point.x += centre.x;
-        point.y += centre.y;
-        point.z += centre.z;
-        point.w = 0.0f;
+        point = VuVec(point.x + centre.x, point.y + centre.y, point.z + centre.z, 0.0f);
         EdDrawLineSegment(previous, point, colour);
     }
 }
@@ -3018,18 +3015,20 @@ i32 edSpline_FindAllBeg(NUGSCN *scene, char *prefix, NUGSPLINE **results, i32 ca
     if (capacity <= 0)
         return 0;
     if (splineStore != NULL) {
-        for (i32 i = 0; i < numSplinesLoaded; ++i) {
-            if (NuStrNICmp(prefix, splineStore[i].name, -1) == 0) {
-                results[count++] = &splineStore[i];
+        NUGSPLINE *spline = splineStore;
+        for (i32 i = 0; i < numSplinesLoaded; ++spline, ++i) {
+            if (NuStrNICmp(prefix, spline->name, -1) == 0) {
+                results[count++] = spline;
                 if (count >= capacity)
                     return count;
             }
         }
     }
     if (scene != NULL) {
-        for (i32 i = 0; i < scene->numsplines; ++i) {
-            if (NuStrNICmp(prefix, scene->splines[i].name, -1) == 0) {
-                results[count++] = &scene->splines[i];
+        NUGSPLINE *spline = scene->splines;
+        for (i32 i = 0; i < scene->numsplines; ++spline, ++i) {
+            if (NuStrNICmp(prefix, spline->name, -1) == 0) {
+                results[count++] = spline;
                 if (count >= capacity)
                     return count;
             }
@@ -3194,22 +3193,10 @@ i32 edpartPtlChangeType(i32 index, i32 type) {
 }
 
 void edppDestroyAllPages() {
-    if (edpp_page_used[0])
-        edppClearPage(0);
-    if (edpp_page_used[1])
-        edppClearPage(1);
-    if (edpp_page_used[2])
-        edppClearPage(2);
-    if (edpp_page_used[3])
-        edppClearPage(3);
-    if (edpp_page_used[4])
-        edppClearPage(4);
-    if (edpp_page_used[5])
-        edppClearPage(5);
-    if (edpp_page_used[6])
-        edppClearPage(6);
-    if (edpp_page_used[7])
-        edppClearPage(7);
+    for (i32 i = 0; i < 8; i++) {
+        if (edpp_page_used[i])
+            edppClearPage(i);
+    }
 }
 
 void edanimParticleCreate(NUVEC *position) {
@@ -3383,22 +3370,10 @@ void edgraSortVectorBuffer(i32 index) {
 }
 
 void edpartDestroyAllPages() {
-    if (part_page_used[0])
-        edpartClearPage(0);
-    if (part_page_used[1])
-        edpartClearPage(1);
-    if (part_page_used[2])
-        edpartClearPage(2);
-    if (part_page_used[3])
-        edpartClearPage(3);
-    if (part_page_used[4])
-        edpartClearPage(4);
-    if (part_page_used[5])
-        edpartClearPage(5);
-    if (part_page_used[6])
-        edpartClearPage(6);
-    if (part_page_used[7])
-        edpartClearPage(7);
+    for (i32 i = 0; i < 8; i++) {
+        if (part_page_used[i])
+            edpartClearPage(i);
+    }
 }
 
 void edppMultipleCopyClear() {
