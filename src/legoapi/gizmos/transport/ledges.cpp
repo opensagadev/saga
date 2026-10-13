@@ -305,23 +305,23 @@ static i32 Ledges_Load(void *world_info, void *) {
         return 0;
     i32 version = EdFileReadInt();
     world->ledge_count = EdFileReadInt();
+    // Each field is written through world->ledges, as in the original.
     for (i32 i = 0; i < world->ledge_count; ++i) {
-        LEDGE *ledge = &static_cast<LEDGE *>(world->ledges)[i];
-        EdFileRead(ledge->name, 8);
-        EdFileReadNuVec(&ledge->position);
-        ledge->y_rotation = EdFileReadShort();
-        ledge->type_code = EdFileReadChar();
+        EdFileRead(static_cast<LEDGE *>(world->ledges)[i].name, 8);
+        EdFileReadNuVec(&static_cast<LEDGE *>(world->ledges)[i].position);
+        static_cast<LEDGE *>(world->ledges)[i].y_rotation = EdFileReadShort();
+        static_cast<LEDGE *>(world->ledges)[i].type_code = EdFileReadChar();
         if (version > 1) {
-            ledge->field_0x1c = EdFileReadShort();
-            ledge->field_0x1e = EdFileReadShort();
-            if (version == 2)
-                ledge->flags = 0;
-            else
-                ledge->flags = EdFileReadUnsignedChar();
+            static_cast<LEDGE *>(world->ledges)[i].field_0x1c = EdFileReadShort();
+            static_cast<LEDGE *>(world->ledges)[i].field_0x1e = EdFileReadShort();
         } else {
-            ledge->field_0x1c = -1;
-            ledge->field_0x1e = -1;
-            ledge->flags = 0;
+            static_cast<LEDGE *>(world->ledges)[i].field_0x1c = -1;
+            static_cast<LEDGE *>(world->ledges)[i].field_0x1e = -1;
+        }
+        if (version > 2) {
+            static_cast<LEDGE *>(world->ledges)[i].flags = EdFileReadUnsignedChar();
+        } else {
+            static_cast<LEDGE *>(world->ledges)[i].flags = 0;
         }
     }
     return 1;
