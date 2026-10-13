@@ -48,7 +48,19 @@ struct CHARCONFIG_s {
     characterdata_s *character;
     GAMECHARACTERDATA_s *runtime;
     GAMECHARACTERLAYER_s *layer_scratch;
-    u8 flags;
+    union {
+        u8 flags;
+        struct {
+            u8 flags_bit0 : 1;
+            u8 flags_bit1 : 1;
+            u8 flags_bit2 : 1;
+            u8 flags_bit3 : 1;
+            u8 flags_bit4 : 1;
+            u8 flags_bit5 : 1;
+            u8 flags_bit6 : 1;
+            u8 flags_bit7 : 1;
+        };
+    };
     u8 named_layers;
     u8 field_0x0e[2];
     u32 field_0x10;

@@ -548,18 +548,21 @@ extern "C" {
     }
 
     void APIObjectDestroy(APIOBJECTSYS_s *system, APIOBJECT *object) {
-        if (system == NULL || object == NULL || system->object_size == 0) {
-            return;
-        }
-        for (i32 i = 0; i < 64; i++) {
-            APIOBJECT *other =
-                reinterpret_cast<APIOBJECT *>(reinterpret_cast<u8 *>(system->objects) + system->object_size * i);
-            if ((other->field_0x1f8 & APIOBJECT_FLAG_IN_USE) != 0) {
-                APIObjectRemoveFromLOSTable(system, other, object);
+        i32 i;
+        APIOBJECT *other;
+        if (system != NULL && object != NULL && system->object_size != 0) {
+            if (system->line_of_sight != NULL) {
+                other = system->objects;
+                for (i = 0; i < 64;
+                     i++, other = reinterpret_cast<APIOBJECT *>(reinterpret_cast<u8 *>(other) + system->object_size)) {
+                    if (other->in_use) {
+                        APIObjectRemoveFromLOSTable(system, other, object);
+                    }
+                }
+                APIObjectRemoveFromLOSTable(system, NULL, object);
             }
+            memset(object, 0, system->object_size);
         }
-        APIObjectRemoveFromLOSTable(system, NULL, object);
-        memset(object, 0, system->object_size);
     }
 
     i32 NewRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 scan_flags);
@@ -1130,9 +1133,8 @@ extern "C" {
     void APIDumpCharacterModels(i32 mode) {
         i32 model_index = mode == 0 ? apicharsys->permanent_model_count : 0;
         while (model_index < apicharsys->loaded_model_count) {
-            APICHARACTERMODEL &model = apicharsys->models[model_index];
-            if (model.hierarchy != NULL) {
-                NuHGobjDestroy(model.hierarchy);
+            if (apicharsys->models[model_index].hierarchy != NULL) {
+                NuHGobjDestroy(apicharsys->models[model_index].hierarchy);
             }
             ++model_index;
         }
@@ -1309,14 +1311,15 @@ extern "C" {
     }
 
     f32 BlendTimeBetweenAnims(CHARACTERMODEL_s *model, i32 source_animation, i32 target_animation) {
-        if (model->model_data_a[source_animation] == NULL || model->model_data_a[target_animation] == NULL) {
+        f32 time;
+        if (model->model_data_a[source_animation] == NULL)
             return 0.0f;
-        }
+        if (model->model_data_a[target_animation] == NULL)
+            return 0.0f;
 
-        f32 time = static_cast<CHARACTERANIM_s *>(model->model_data_a[target_animation])->blend_in_time;
-        const f32 source_time = static_cast<CHARACTERANIM_s *>(model->model_data_a[source_animation])->blend_out_time;
-        if (time > source_time) {
-            time = source_time;
+        time = static_cast<CHARACTERANIM_s *>(model->model_data_a[target_animation])->blend_in_time;
+        if (time > static_cast<CHARACTERANIM_s *>(model->model_data_a[source_animation])->blend_out_time) {
+            time = static_cast<CHARACTERANIM_s *>(model->model_data_a[source_animation])->blend_out_time;
         }
         return time;
     }
@@ -1352,13 +1355,9 @@ extern "C" {
     }
 
     void SetAnimTimeRandom(CHARACTERMODEL_s *model, ANIMPACKET_s *packet) {
-        if (model != NULL && packet != NULL) {
-            void *animation = model->model_data_b[packet->field_0x3a];
-            if (animation != NULL) {
-                const f32 random = NuRandFloat();
-                const f32 end_frame = NuAnimEndFrame(model->model_data_b[packet->field_0x3a]);
-                packet->field_0x00 = 1.0f + random * (end_frame - 1.0f);
-            }
+        if (model != NULL && packet != NULL && model->model_data_b[packet->field_0x3a] != NULL) {
+            packet->field_0x00 =
+                1.0f + NuRandFloat() * (NuAnimEndFrame(model->model_data_b[packet->field_0x3a]) - 1.0f);
         }
     }
 

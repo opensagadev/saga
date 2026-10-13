@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 79.21633,
+    "fuzzy_match_percent": 79.229706,
     "total_code": "4722419",
-    "matched_code": "613643",
-    "matched_code_percent": 12.994252,
+    "matched_code": "615291",
+    "matched_code_percent": 13.029149,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6787,
-    "matched_functions_percent": 50.427223,
+    "matched_functions": 6801,
+    "matched_functions_percent": 50.531242,
     "total_units": 1
   },
   "text": {
@@ -44106,7 +44106,7 @@
           "address": 4595792,
           "offset": 3705824,
           "size": 155,
-          "match_percent": 82.63415
+          "match_percent": 99.21951
         },
         {
           "name": "_ZL16CC_hand_locatorsP8nufpar_s",
@@ -44138,7 +44138,7 @@
           "address": 4596384,
           "offset": 3706416,
           "size": 107,
-          "match_percent": 33.344826
+          "match_percent": 92.206894
         },
         {
           "name": "_ZL19CC_blobshadow_alphaP8nufpar_s",
@@ -44346,7 +44346,7 @@
           "address": 4598256,
           "offset": 3708288,
           "size": 71,
-          "match_percent": 88.833336
+          "match_percent": 99.94444
         },
         {
           "name": "_ZL12CC_turn_rateP8nufpar_s",
@@ -44354,7 +44354,7 @@
           "address": 4598336,
           "offset": 3708368,
           "size": 71,
-          "match_percent": 88.833336
+          "match_percent": 99.94444
         },
         {
           "name": "_ZL18CC_lowres_swapdistP8nufpar_s",
@@ -44546,7 +44546,7 @@
           "address": 4601136,
           "offset": 3711168,
           "size": 90,
-          "match_percent": 74.681816
+          "match_percent": 100.0
         },
         {
           "name": "_ZL13CC_cape_layerP8nufpar_s",
@@ -44578,7 +44578,7 @@
           "address": 4607264,
           "offset": 3717296,
           "size": 146,
-          "match_percent": 88.888885
+          "match_percent": 100.0
         },
         {
           "name": "_ZL19CC_weapon_locator_2P8nufpar_s",
@@ -44602,7 +44602,7 @@
           "address": 4607648,
           "offset": 3717680,
           "size": 90,
-          "match_percent": 74.681816
+          "match_percent": 100.0
         },
         {
           "name": "_ZL10CC_sfx_dieP8nufpar_s",
@@ -44610,7 +44610,7 @@
           "address": 4607744,
           "offset": 3717776,
           "size": 90,
-          "match_percent": 74.681816
+          "match_percent": 100.0
         },
         {
           "name": "_ZL14CC_sfx_chatterP8nufpar_s",
@@ -44618,7 +44618,7 @@
           "address": 4607840,
           "offset": 3717872,
           "size": 90,
-          "match_percent": 74.681816
+          "match_percent": 100.0
         },
         {
           "name": "_ZL13CC_sfx_engineP8nufpar_s",
@@ -44626,7 +44626,7 @@
           "address": 4607936,
           "offset": 3717968,
           "size": 90,
-          "match_percent": 74.681816
+          "match_percent": 100.0
         },
         {
           "name": "_ZL15CC_sfx_footstepP8nufpar_s",
@@ -44634,7 +44634,7 @@
           "address": 4608032,
           "offset": 3718064,
           "size": 90,
-          "match_percent": 74.681816
+          "match_percent": 100.0
         },
         {
           "name": "_ZL12CC_sfx_shootP8nufpar_s",
@@ -44642,7 +44642,7 @@
           "address": 4608128,
           "offset": 3718160,
           "size": 90,
-          "match_percent": 74.681816
+          "match_percent": 100.0
         },
         {
           "name": "_ZL12CC_sfx_gruntP8nufpar_s",
@@ -44650,7 +44650,7 @@
           "address": 4608224,
           "offset": 3718256,
           "size": 90,
-          "match_percent": 74.681816
+          "match_percent": 100.0
         },
         {
           "name": "_ZL13CC_layers_lowP8nufpar_s",
@@ -45314,7 +45314,7 @@
           "address": 4618976,
           "offset": 3729008,
           "size": 155,
-          "match_percent": 93.54762
+          "match_percent": 99.97619
         },
         {
           "name": "_ZL10CC_vehicleP8nufpar_s",
@@ -45570,7 +45570,7 @@
           "address": 4623072,
           "offset": 3733104,
           "size": 155,
-          "match_percent": 82.63415
+          "match_percent": 99.21951
         },
         {
           "name": "_ZL20CC_streak_1_locatorsP8nufpar_s",
@@ -45578,7 +45578,7 @@
           "address": 4623232,
           "offset": 3733264,
           "size": 155,
-          "match_percent": 82.63415
+          "match_percent": 99.21951
         },
         {
           "name": "_ZL20CC_streak_3_locatorsP8nufpar_s",
@@ -45586,7 +45586,7 @@
           "address": 4623392,
           "offset": 3733424,
           "size": 155,
-          "match_percent": 82.63415
+          "match_percent": 99.21951
         },
         {
           "name": "_ZL22CC_set_timebaseupdate4P8nufpar_s",
@@ -45594,7 +45594,7 @@
           "address": 4623552,
           "offset": 3733584,
           "size": 146,
-          "match_percent": 88.888885
+          "match_percent": 100.0
         },
         {
           "name": "_ZL22CC_set_timebaseupdate3P8nufpar_s",
@@ -45602,7 +45602,7 @@
           "address": 4623712,
           "offset": 3733744,
           "size": 146,
-          "match_percent": 88.888885
+          "match_percent": 100.0
         },
         {
           "name": "_ZL22CC_set_timebaseupdate1P8nufpar_s",
@@ -45610,7 +45610,7 @@
           "address": 4623872,
           "offset": 3733904,
           "size": 146,
-          "match_percent": 88.888885
+          "match_percent": 100.0
         },
         {
           "name": "_ZL14CC_layers_deadP8nufpar_s",
@@ -48213,7 +48213,7 @@
           "address": 1410976,
           "offset": 521008,
           "size": 2148,
-          "match_percent": 45.0
+          "match_percent": 47.67245
         },
         {
           "name": "_ZL9SwipeCodeP12GameObject_sii",
@@ -60962,7 +60962,7 @@
           "address": 3959804,
           "offset": 3069836,
           "size": 206,
-          "match_percent": 78.4
+          "match_percent": 100.0
         },
         {
           "name": "APIObjectDestroyAll",
@@ -61202,7 +61202,7 @@
           "address": 3985898,
           "offset": 3095930,
           "size": 138,
-          "match_percent": 80.111115
+          "match_percent": 100.0
         },
         {
           "name": "FindAnimIX",
@@ -61250,7 +61250,7 @@
           "address": 3988947,
           "offset": 3098979,
           "size": 175,
-          "match_percent": 82.22034
+          "match_percent": 99.9661
         },
         {
           "name": "ResetAnimPacket",
@@ -61274,7 +61274,7 @@
           "address": 3989376,
           "offset": 3099408,
           "size": 164,
-          "match_percent": 80.64
+          "match_percent": 99.96
         },
         {
           "name": "GetAnimTimeRandom",
@@ -71173,7 +71173,7 @@
           "address": 1174976,
           "offset": 285008,
           "size": 181,
-          "match_percent": 88.81481
+          "match_percent": 89.72222
         },
         {
           "name": "_ZL13Shop_GetInputP9SHOPINPUT",

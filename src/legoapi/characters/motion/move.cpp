@@ -4875,16 +4875,15 @@ static inline i32 ComboJump(GameObject_s *object) {
     return 1;
 }
 
-static inline bool HasBlockAnims(void **animations) {
-    return animations[0x1a] != NULL || animations[0x1b] != NULL || animations[0x1c] != NULL;
-}
+// Retail re-tests the three block animations at each use instead of caching a flag.
+#define HAS_BLOCK_ANIMS(animations) ((animations)[0x1a] != NULL || (animations)[0x1b] != NULL || (animations)[0x1c] != NULL)
 
 static void FindIncomingThreats(GameObject_s *object) {
     void **animations = object->apiobj.character_model->model_data_b;
-    object->incoming_bolt = HasBlockAnims(animations) ? FindIncomingBolt(object, 0, 0) : NULL;
+    object->incoming_bolt = HAS_BLOCK_ANIMS(animations) ? FindIncomingBolt(object, 0, 0) : NULL;
     animations = object->apiobj.character_model->model_data_b;
     GameObject_s *melee = NULL;
-    if (HasBlockAnims(animations)) {
+    if (HAS_BLOCK_ANIMS(animations)) {
         GameObject_s *target = Obj;
         for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
             if (target != object && (target->apiobj.field_0x1f8 & 0x1000) != 0 && target->apiobj.field_0x287 == 0 &&
@@ -4899,7 +4898,7 @@ static void FindIncomingThreats(GameObject_s *object) {
     GameObject_s *special = NULL;
     if (((object->apiobj.character_data->model_flags & 8) != 0 || object->id == id_BODYGUARD ||
          object->id == id_IMPERIALGUARD) &&
-        HasBlockAnims(animations))
+        HAS_BLOCK_ANIMS(animations))
     {
         GameObject_s *target = Obj;
         for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
@@ -4914,7 +4913,7 @@ static void FindIncomingThreats(GameObject_s *object) {
     }
     object->incoming_special = special;
     if (object->incoming_bolt == NULL && melee == NULL) {
-        if (object->apiobj.field_0x27c == -1 || !HasBlockAnims(animations))
+        if (object->apiobj.field_0x27c == -1 || !HAS_BLOCK_ANIMS(animations))
             object->incoming_part = NULL;
         else {
             f32 radius = object->apiobj.field_0x1e0 > object->apiobj.field_0x1dc ? object->apiobj.field_0x1e0

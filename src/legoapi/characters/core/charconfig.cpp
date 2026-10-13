@@ -421,8 +421,7 @@ static void CC_minikit_with_scene(NUFPAR *parser) {
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         charconfig.character->model_flags &= ~0x4000000u;
     }
-    charconfig.runtime->flags_094[0] =
-        (charconfig.runtime->flags_094[0] & 0xfe) | ((charconfig.character->model_flags >> 26) & 1);
+    charconfig.runtime->flag094_0_0 = charconfig.character->model_flags >> 26;
 }
 
 static void CC_miny(NUFPAR *parser) {
@@ -551,7 +550,7 @@ static void CC_set_timebaseupdate1(NUFPAR *parser) {
             const i32 frames = NuAToI(parser->word_buf);
             charconfig.runtime->ai_update_distance_0 = distance;
             charconfig.runtime->ai_update_interval_0 = static_cast<u8>(frames);
-            charconfig.flags |= 0x10;
+            charconfig.flags_bit4 = 1;
         }
     }
 }
@@ -563,7 +562,7 @@ static void CC_set_timebaseupdate2(NUFPAR *parser) {
             const i32 frames = NuAToI(parser->word_buf);
             charconfig.runtime->ai_update_distance_0 = distance;
             charconfig.runtime->ai_update_interval_0 = static_cast<u8>(frames);
-            charconfig.flags |= 0x10;
+            charconfig.flags_bit4 = 1;
         }
     }
 }
@@ -575,7 +574,7 @@ static void CC_set_timebaseupdate3(NUFPAR *parser) {
             const i32 frames = NuAToI(parser->word_buf);
             charconfig.runtime->ai_update_distance_0 = distance;
             charconfig.runtime->ai_update_interval_0 = static_cast<u8>(frames);
-            charconfig.flags |= 0x10;
+            charconfig.flags_bit4 = 1;
         }
     }
 }
@@ -587,7 +586,7 @@ static void CC_set_timebaseupdate4(NUFPAR *parser) {
             const i32 frames = NuAToI(parser->word_buf);
             charconfig.runtime->ai_update_distance_0 = distance;
             charconfig.runtime->ai_update_interval_0 = static_cast<u8>(frames);
-            charconfig.flags |= 0x10;
+            charconfig.flags_bit4 = 1;
         }
     }
 }
@@ -658,69 +657,73 @@ static void CC_streak(NUFPAR *parser) {
 }
 
 static void CC_streak_1_locators(NUFPAR *parser) {
-    charconfig.runtime->streak_joints[0][0] = -1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    data->streak_joints[0][0] = -1;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator) < 16) {
-            charconfig.runtime->streak_joints[0][0] = static_cast<i8>(locator);
+            data->streak_joints[0][0] = static_cast<i8>(locator);
         }
     }
-    charconfig.runtime->streak_joints[0][1] = -1;
+    data->streak_joints[0][1] = -1;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator) < 16) {
-            charconfig.runtime->streak_joints[0][1] = static_cast<i8>(locator);
+            data->streak_joints[0][1] = static_cast<i8>(locator);
         }
     }
 }
 
 static void CC_streak_2_locators(NUFPAR *parser) {
-    charconfig.runtime->streak_joints[1][0] = -1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    data->streak_joints[1][0] = -1;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator) < 16) {
-            charconfig.runtime->streak_joints[1][0] = static_cast<i8>(locator);
+            data->streak_joints[1][0] = static_cast<i8>(locator);
         }
     }
-    charconfig.runtime->streak_joints[1][1] = -1;
+    data->streak_joints[1][1] = -1;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator) < 16) {
-            charconfig.runtime->streak_joints[1][1] = static_cast<i8>(locator);
+            data->streak_joints[1][1] = static_cast<i8>(locator);
         }
     }
 }
 
 static void CC_streak_3_locators(NUFPAR *parser) {
-    charconfig.runtime->streak_joints[2][0] = -1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    data->streak_joints[2][0] = -1;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator) < 16) {
-            charconfig.runtime->streak_joints[2][0] = static_cast<i8>(locator);
+            data->streak_joints[2][0] = static_cast<i8>(locator);
         }
     }
-    charconfig.runtime->streak_joints[2][1] = -1;
+    data->streak_joints[2][1] = -1;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator) < 16) {
-            charconfig.runtime->streak_joints[2][1] = static_cast<i8>(locator);
+            data->streak_joints[2][1] = static_cast<i8>(locator);
         }
     }
 }
 
 static void CC_streak_4_locators(NUFPAR *parser) {
-    charconfig.runtime->streak_joints[3][0] = -1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    data->streak_joints[3][0] = -1;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator) < 16) {
-            charconfig.runtime->streak_joints[3][0] = static_cast<i8>(locator);
+            data->streak_joints[3][0] = static_cast<i8>(locator);
         }
     }
-    charconfig.runtime->streak_joints[3][1] = -1;
+    data->streak_joints[3][1] = -1;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator) < 16) {
-            charconfig.runtime->streak_joints[3][1] = static_cast<i8>(locator);
+            data->streak_joints[3][1] = static_cast<i8>(locator);
         }
     }
 }
@@ -1290,9 +1293,9 @@ static void CC_bounty_hunter(NUFPAR *parser) {
 static void CC_bsa_default(NUFPAR *parser) {
     if (NuFParGetWord(parser) != 0) {
         if (NuStrICmp(parser->word_buf, "on") == 0) {
-            charconfig.flags |= 1;
+            charconfig.flags_bit0 = 1;
         } else if (NuStrICmp(parser->word_buf, "off") == 0) {
-            charconfig.flags &= ~1;
+            charconfig.flags_bit0 = 0;
         }
     }
 }
@@ -1400,11 +1403,9 @@ static void CC_cloak_joint2(NUFPAR *parser) {
 
 static void CC_coin_value(NUFPAR *parser) {
     i32 value = NuFParGetInt(parser);
-    if (value < 0)
-        value = 0;
-    if (value > 10000)
-        value = 10000;
-    charconfig.runtime->field_0xee = static_cast<i16>(value / 10) * 10;
+    value = value < 0 ? 0 : value;
+    value = value > 10000 ? 10000 : value;
+    charconfig.runtime->field_0xee = static_cast<i16>(value / 10 * 10);
 }
 
 static void CC_combat_roll(NUFPAR *parser) {
@@ -1892,38 +1893,44 @@ static void CC_run_speed(NUFPAR *parser) {
 }
 
 static void CC_sfx_chatter(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
-        charconfig.runtime->sfx_chatter = static_cast<i16>(GetSfxId(parser->word_buf));
+        data->sfx_chatter = static_cast<i16>(GetSfxId(parser->word_buf));
     }
 }
 
 static void CC_sfx_die(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
-        charconfig.runtime->sfx_die = static_cast<i16>(GetSfxId(parser->word_buf));
+        data->sfx_die = static_cast<i16>(GetSfxId(parser->word_buf));
     }
 }
 
 static void CC_sfx_engine(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
-        charconfig.runtime->sfx_engine = static_cast<i16>(GetSfxId(parser->word_buf));
+        data->sfx_engine = static_cast<i16>(GetSfxId(parser->word_buf));
     }
 }
 
 static void CC_sfx_footstep(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
-        charconfig.runtime->sfx_footstep = static_cast<i16>(GetSfxId(parser->word_buf));
+        data->sfx_footstep = static_cast<i16>(GetSfxId(parser->word_buf));
     }
 }
 
 static void CC_sfx_grunt(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
-        charconfig.runtime->sfx_grunt = static_cast<i16>(GetSfxId(parser->word_buf));
+        data->sfx_grunt = static_cast<i16>(GetSfxId(parser->word_buf));
     }
 }
 
 static void CC_sfx_hurt(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
-        charconfig.runtime->sfx_hurt = static_cast<i16>(GetSfxId(parser->word_buf));
+        data->sfx_hurt = static_cast<i16>(GetSfxId(parser->word_buf));
     }
 }
 
@@ -1953,14 +1960,16 @@ static void CC_sfx_misc(NUFPAR *parser) {
 }
 
 static void CC_sfx_sabre(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
-        charconfig.runtime->sfx_sabre = static_cast<i16>(GetSfxId(parser->word_buf));
+        data->sfx_sabre = static_cast<i16>(GetSfxId(parser->word_buf));
     }
 }
 
 static void CC_sfx_shoot(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
-        charconfig.runtime->sfx_shoot = static_cast<i16>(GetSfxId(parser->word_buf));
+        data->sfx_shoot = static_cast<i16>(GetSfxId(parser->word_buf));
     }
 }
 
@@ -1997,7 +2006,7 @@ static void CC_turn_rate(NUFPAR *parser) {
     const f32 rate = NuFParGetFloat(parser);
     if (rate > 0.0f) {
         charconfig.runtime->turn_rate = rate;
-        charconfig.flags |= 4;
+        charconfig.flags_bit2 = 1;
     }
 }
 
@@ -2005,7 +2014,7 @@ static void CC_turn_rate_2(NUFPAR *parser) {
     const f32 rate = NuFParGetFloat(parser);
     if (rate > 0.0f) {
         charconfig.runtime->field_0x78 = rate;
-        charconfig.flags |= 8;
+        charconfig.flags_bit3 = 1;
     }
 }
 

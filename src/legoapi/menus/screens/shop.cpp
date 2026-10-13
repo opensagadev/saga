@@ -480,9 +480,9 @@ void BuyAllShopExtras() {
         Game.purchased_extra_bits[i >> 5] |= 1u << (i & 31);
         if (world->current_level == HUB_LDATA)
             item->unlocked = 1;
-        i32 area = static_cast<i8>(Cheat[i].area);
-        if (area != -1 && Game.area_save[area].field_0x5[1] == 0)
-            Game.area_save[area].field_0x5[1] = 1;
+        i8 area = static_cast<i8>(Cheat[i].area);
+        if (area != -1 && Game.area_save[area].red_brick_collected == 0)
+            Game.area_save[area].red_brick_collected = 1;
     }
     Game.unlocked_extra_bits[0] = 0xffffffff;
     Game.unlocked_extra_bits[1] = 0xffffffff;
