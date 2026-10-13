@@ -53,8 +53,13 @@ static i32 GizSpecial_GetOutput(GIZMO *gizmo, i32 output_index, i32 include_inac
     }
 
     GIZSPECIAL *special = static_cast<GIZSPECIAL *>(gizmo->object);
-    if (special == NULL || special->anim_set->object_count == 0 ||
-        NuSpecialExistsFn(&special->anim_set->objects->special) == 0) {
+    if (special == NULL) {
+        return 0;
+    }
+    if (special->anim_set->object_count == 0) {
+        return 0;
+    }
+    if (NuSpecialExistsFn(&special->anim_set->objects->special) == 0) {
         return 0;
     }
     if (special->is_active == 0 && include_inactive == 0) {
@@ -64,12 +69,11 @@ static i32 GizSpecial_GetOutput(GIZMO *gizmo, i32 output_index, i32 include_inac
     if ((special->anim_set->flags & GAMEANIMSET_FLAG_IN_SYSTEM_LIST) == 0) {
         GameAnimSet_EvaluateState(special->anim_set);
     }
-    if (output_index != 0) {
-        if (output_index == 1) {
+    switch (output_index) {
+        case 0:
+            return special->anim_set->state == GAMEANIMSET_STATE_AT_END;
+        case 1:
             return special->anim_set->state != GAMEANIMSET_STATE_AT_START;
-        }
-    } else {
-        return special->anim_set->state == GAMEANIMSET_STATE_AT_END;
     }
     return 0;
 }

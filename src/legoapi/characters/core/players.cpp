@@ -637,18 +637,16 @@ void RememberPlayerIDs(i32 a, i32 b, i32 c) {
     if (VehicleArea != 0 || GAMEDEMO != 0) {
         return;
     }
-    if (a == 0) {
-        if ((WORLD->current_level->flags & 0x4e2) != 2) {
-            return;
+    if (a == 0 && (WORLD->current_level->flags & 0x4e2) != 2) {
+        return;
+    }
+    const i32 ids[2] = {b, c};
+    for (i32 i = 0; i < 2; ++i) {
+        const i32 id = ids[i];
+        if (id != -1 && (CDataList[id].model_flags & 0x2000) == 0 && PlayerID[i] != id && Collection_Got(id) == 1 &&
+            GCDataList[id].field275_0x116 != 0 && PlayerID[1 - i] != id) {
+            PlayerID[i] = id;
         }
-    }
-    if (b != -1 && (CDataList[b].model_flags & 0x2000) == 0 && PlayerID[0] != b && Collection_Got(b) == 1 &&
-        GCDataList[b].field275_0x116 != 0 && PlayerID[1] != b) {
-        PlayerID[0] = b;
-    }
-    if (c != -1 && (CDataList[c].model_flags & 0x2000) == 0 && PlayerID[1] != c && Collection_Got(c) == 1 &&
-        GCDataList[c].field275_0x116 != 0 && PlayerID[0] != c) {
-        PlayerID[1] = c;
     }
     if (b != c && PlayerID[1] == b && PlayerID[0] == c) {
         PlayerID[0] = b;

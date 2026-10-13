@@ -311,7 +311,7 @@ static char *GizmoObstacle_GetGizmoName(GIZMO *gizmo) {
 }
 
 static i32 GizmoObstacle_GetOutput(GIZMO *gizmo, i32 output_index, i32 ignore_activation_state) {
-    GIZOBSTACLE_s *obstacle = gizmo != NULL ? static_cast<GIZOBSTACLE_s *>(gizmo->object) : NULL;
+    GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(gizmo->object);
     if (obstacle == NULL) {
         return 0;
     }
@@ -323,18 +323,32 @@ static i32 GizmoObstacle_GetOutput(GIZMO *gizmo, i32 output_index, i32 ignore_ac
 
     switch (output_index) {
         case GIZOBSTACLE_OUTPUT_AT_END:
-            return obstacle->anim_set != NULL && obstacle->anim_set->state == GAMEANIMSET_STATE_AT_END;
+            if (obstacle->anim_set != NULL && obstacle->anim_set->state == GAMEANIMSET_STATE_AT_END) {
+                return 1;
+            }
+            break;
         case GIZOBSTACLE_OUTPUT_NOT_AT_START:
-            return obstacle->anim_set != NULL && obstacle->anim_set->state != GAMEANIMSET_STATE_AT_START;
+            if (obstacle->anim_set != NULL && obstacle->anim_set->state != GAMEANIMSET_STATE_AT_START) {
+                return 1;
+            }
+            break;
         case GIZOBSTACLE_OUTPUT_PROXIMITY:
-            return obstacle->anim_set != NULL && obstacle->proximity_output != 0;
+            if (obstacle->anim_set != NULL && obstacle->proximity_output != 0) {
+                return 1;
+            }
+            break;
         case GIZOBSTACLE_OUTPUT_AT_START:
-            return obstacle->anim_set != NULL && obstacle->anim_set->state == GAMEANIMSET_STATE_AT_START;
+            if (obstacle->anim_set != NULL && obstacle->anim_set->state == GAMEANIMSET_STATE_AT_START) {
+                return 1;
+            }
+            break;
         case GIZOBSTACLE_OUTPUT_PLAYING_FORWARD:
-            return obstacle->anim_set != NULL && obstacle->anim_set->state == GAMEANIMSET_STATE_ACTIVE_FORWARD;
-        default:
-            return 0;
+            if (obstacle->anim_set != NULL && obstacle->anim_set->state == GAMEANIMSET_STATE_ACTIVE_FORWARD) {
+                return 1;
+            }
+            break;
     }
+    return 0;
 }
 
 static char *GizmoObstacle_GetOutputName(GIZMO *, i32 output_index) {
@@ -384,19 +398,22 @@ static void GizmoObstacle_Activate(GIZMO *gizmo, i32 activate) {
 }
 
 static i32 GizmoObstacle_ActivateRev(GIZMO *gizmo, i32 activate, i32 flags) {
-    GIZOBSTACLE_s *obstacle = gizmo != NULL ? static_cast<GIZOBSTACLE_s *>(gizmo->object) : NULL;
+    if (gizmo == NULL) {
+        return 0;
+    }
+    GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(gizmo->object);
     if (obstacle == NULL) {
         return 0;
     }
 
-    const u8 initial_runtime_flags = obstacle->runtime_flags;
-    if ((obstacle->control_flags & GIZOBSTACLE_CONTROL_FLAG_REVERSE_ACTIVE) != 0 && obstacle->anim_set != NULL &&
+    if ((obstacle->control_flags & GIZOBSTACLE_CONTROL_FLAG_REVERSE_ACTIVE) != 0 &&
         (obstacle->anim_set->state == GAMEANIMSET_STATE_ACTIVE_FORWARD ||
          obstacle->anim_set->state == GAMEANIMSET_STATE_AT_END)) {
         obstacle->control_flags &= static_cast<u8>(~GIZOBSTACLE_CONTROL_FLAG_REVERSE_ACTIVE);
         obstacle->progress_flags |= GIZOBSTACLE_PROGRESS_FLAG_ENABLED;
     }
-    if ((initial_runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE) != 0) {
+    const u8 ai_active = obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE;
+    if (ai_active != 0) {
         obstacle->control_flags &= static_cast<u8>(~GIZOBSTACLE_CONTROL_FLAG_REVERSE_ACTIVE);
         obstacle->progress_flags |= GIZOBSTACLE_PROGRESS_FLAG_ENABLED;
     }
@@ -419,12 +436,14 @@ static i32 GizmoObstacle_ActivateRev(GIZMO *gizmo, i32 activate, i32 flags) {
             return 0;
         }
         const i32 visible = (obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) != 0 ? 1 : 0;
-        if (visible != activate) {
+        if (activate != visible) {
             return 0;
         }
     }
-    if (activate == 1 && (initial_runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE) != 0) {
-        return 0;
+    if (activate == 1) {
+        if (ai_active != 0) {
+            return 0;
+        }
     }
     return 1;
 }
@@ -451,30 +470,27 @@ static NUVEC *GizmoObstacle_GetPos(GIZMO *gizmo) {
 
 static i32 GizObstacles_BoltHitPlat(void *world_ptr, void *data, BOLT *bolt, unsigned char *) {
     GIZOBSTACLESYS_s *system = static_cast<GIZOBSTACLESYS_s *>(data);
-    if (system == NULL || system->active_gizmo_count == 0) {
+    if (system == NULL) {
+        return 0;
+    }
+    const i32 count = system->active_gizmo_count;
+    if (count == 0) {
         return 0;
     }
 
-    for (i32 index = 0; index < system->active_gizmo_count; ++index) {
+    for (i32 index = 0; index < count; ++index) {
         GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(system->active_gizmos[index]->object);
-        if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) == 0 ||
-            (obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_ENABLED) == 0 ||
-            (obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_HAS_PLATFORM) == 0 ||
-            (obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) != 0 ||
-            obstacle->anim_set->objects == NULL) {
-            continue;
-        }
-
-        for (GAMEANIMOBJ_s *object = obstacle->anim_set->objects; object != NULL; object = object->next) {
-            i16 *object_data = static_cast<i16 *>(object->object_data);
-            if (object_data[1] != bolt->hit_platform) {
-                continue;
+        if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) != 0 && obstacle->progress_enabled &&
+            obstacle->runtime_has_platform && static_cast<i8>(obstacle->runtime_flags) >= 0) {
+            for (GAMEANIMOBJ_s *object = obstacle->anim_set->objects; object != NULL; object = object->next) {
+                i16 *object_data = static_cast<i16 *>(object->object_data);
+                if (object_data[1] == bolt->hit_platform) {
+                    i32 damage = BoltType_FindByID(bolt->type_id, static_cast<WORLDINFO_s *>(world_ptr))->field_3c;
+                    i32 player_index = bolt->owner != NULL ? static_cast<i8>(bolt->owner->apiobj.field_0x27c) : -1;
+                    GizObstacles_Hit(world_ptr, obstacle, &bolt->position, player_index, damage);
+                    return 1;
+                }
             }
-
-            i32 damage = BoltType_FindByID(bolt->type_id, static_cast<WORLDINFO_s *>(world_ptr))->field_3c;
-            i32 player_index = bolt->owner != NULL ? static_cast<i8>(bolt->owner->apiobj.field_0x27c) : -1;
-            GizObstacles_Hit(world_ptr, obstacle, &bolt->position, player_index, damage);
-            return 1;
         }
     }
     return 0;

@@ -387,10 +387,11 @@ static void CS_goto_level(NUFPAR *fp) {
     if (NuFParGetWord(fp) == 0) {
         return;
     }
-    i32 level_index;
+    // Retail realigns the frame (and esp,-16) and keeps both out-parameters in 16-byte aligned slots.
+    i32 level_index __attribute__((aligned(16)));
     Level_FindByName(fp->word_buf, &level_index);
     if (level_index != -1 && &LDataList[level_index] == HUB_LDATA && CS_area != -1) {
-        i32 status_index;
+        i32 status_index __attribute__((aligned(16)));
         Area_FindStatusLevel(&ADataList[CS_area], &status_index);
         if (status_index != -1) {
             level_index = status_index;
@@ -1310,13 +1311,14 @@ extern "C" {
         }
 
         NUGCUTRIGIDSYS_s *system = cutscene->rigid_system;
-        for (u32 i = 0; i < system->count; ++i) {
+        for (i32 i = 0; i < system->count; ++i) {
             NUGCUTRIGID_s *rigid = &system->rigids[i];
             if ((rigid->flags & 4) != 0) {
                 continue;
             }
 
-            nuhspecial_s special;
+            // Retail realigns the frame (and esp,-16) and keeps this handle 16-byte aligned.
+            nuhspecial_s special __attribute__((aligned(16)));
             if (NuSpecialFind(area, &special, rigid->name, 1) == 0) {
                 continue;
             }
@@ -1815,7 +1817,8 @@ static __used__ void LocatorFunction_Blaster(instNUGCUTSCENE_s *, NUGCUTLOCATORS
     if (NuGCutLocatorIsVisble(locator, frame, &time, NULL, NULL) == 0) {
         return;
     }
-    NUMTX matrix;
+    // Retail realigns the frame (and esp,-16) for this matrix.
+    NUMTX_ALIGNED16 matrix;
     NuGCutLocatorCalcMtx(locator, frame, &matrix, &time);
     if ((locator->flags & 4) != 0) {
         NuMtxPreTranslate(&matrix, &locator->pivot);
@@ -2666,14 +2669,15 @@ static void instNuGCutRigidSysUpdate(instNUGCUTSCENE_s *instance, float frame, i
 }
 
 static __used__ void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
-    NUGCUTTRIGGERSYS_s *system = instance->cutscene->trigger_system;
     instNUGCUTTRIGGERSYS_s *trigger_instance = instance->trigger_instance;
+    NUGCUTTRIGGERSYS_s *system = instance->cutscene->trigger_system;
     for (i32 i = 0; i < system->event_count; ++i) {
         NUGCUTTRIGGEREVENT_s *event = &system->events[i];
         if (event->state_animation == NULL) {
             continue;
         }
-        u8 value;
+        // Retail realigns the frame (and esp,-16) and keeps this out-parameter in a 16-byte aligned slot.
+        u8 value __attribute__((aligned(16)));
         if (StateAnimEvaluate(event->state_animation, reinterpret_cast<u8 *>(&trigger_instance->event_states[i]),
                               &value, frame) == 0) {
             continue;

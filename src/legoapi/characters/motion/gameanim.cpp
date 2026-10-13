@@ -2526,10 +2526,13 @@ void GameAnimSys_ReStoreProgress(GAMEANIMSYS_s *system, i32 index) {
     if (system == NULL || system->sets == NULL || index < 0 || index >= gameanimsysprogress.count)
         return;
     u8 *progress = gameanimsysprogress.entries[index];
-    for (i32 i = 0; i < gameanimsysprogress.entry_size && system->sets[i] != NULL; ++i) {
+    for (i32 i = 0; i < gameanimsysprogress.entry_size; ++i) {
         GAMEANIMSET_s *set = system->sets[i];
-        set->state = static_cast<GAMEANIMSET_STATE>(static_cast<i8>(progress[i]));
-        if (set->state == GAMEANIMSET_STATE_ACTIVE_FORWARD || set->state == GAMEANIMSET_STATE_ACTIVE_BACKWARD) {
+        if (set == NULL)
+            return;
+        const i8 state = static_cast<i8>(progress[i]);
+        set->state = static_cast<GAMEANIMSET_STATE>(state);
+        if (state == GAMEANIMSET_STATE_ACTIVE_FORWARD || state == GAMEANIMSET_STATE_ACTIVE_BACKWARD) {
             if ((set->flags & GAMEANIMSET_FLAG_IN_SYSTEM_LIST) == 0)
                 GameAnimSet_AddToSystemList(set);
         } else if ((set->flags & GAMEANIMSET_FLAG_IN_SYSTEM_LIST) != 0)
