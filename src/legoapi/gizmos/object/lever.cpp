@@ -515,15 +515,18 @@ static void Lever_SetVisibility(GIZMO *gizmo, i32 visible) {
     }
 
     LEVER_s *lever = static_cast<LEVER_s *>(gizmo->object);
-    const bool was_visible = lever->visible;
-    lever->visible = visible != 0;
-    if (lever->visible) {
+    const bool was_visible = (lever->flags & LEVER_FLAG_VISIBLE) != 0;
+    if (visible != 0) {
+        lever->flags |= LEVER_FLAG_VISIBLE;
         if (!was_visible) {
             lever->platform_id = NewPlatPickupInst(lever, 3);
             PlatInstRotate(lever->platform_id, 1);
         }
-    } else if (was_visible) {
-        DeletePlatinst(lever->platform_id);
+    } else {
+        lever->flags &= ~LEVER_FLAG_VISIBLE;
+        if (was_visible) {
+            DeletePlatinst(lever->platform_id);
+        }
     }
 }
 

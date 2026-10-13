@@ -846,71 +846,75 @@ void UpdateIconWibble() {
 }
 
 void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    if (stage->field_0x14 == 0) {
-        if (stage->field_0x18 == 0.0f) {
-            NewMenu(0x400, 0, -1);
-        }
-        stage->field_0x18 += elapsed;
-        const i32 menu_level = GameMenuLevel;
-        if (stage->field_0x18 >= 0.5f) {
-            GAMEPAD_s *pad = GamePad;
-            for (i32 player = 0; player < 2; ++player, ++pad) {
-                if (packet->player_active[player] != 0) {
-                    bool selected = false;
-                    if (menu_level > 0 && GameMenu[menu_level].queued_item != -1) {
-                        status_prompt = GameMenu[menu_level].queued_item;
-                        GameMenu[menu_level].queued_item = -1;
-                        selected = true;
-                    }
-                    const u32 buttons = pad->buttons_pressed;
-                    if ((buttons & GAMEPAD_MENUSELECT) != 0) {
-                        selected = true;
-                    }
-                    bool moved = false;
-                    if ((buttons & GAMEPAD_MENUSELECT) == 0 &&
-                        (((packet->field_0xb0 & 0x48) == 8 &&
-                          (packet->next_area == -1 || (packet->area->flags & 2) != 0 ||
-                           Game.area_save[packet->next_area].complete != 0)) ||
-                         (packet->mode_flags & 1) != 0 || packet->challenge_state != 0 || packet->mission_state != 0)) {
-                        const u32 navigation = buttons | pad->left_directions;
-                        if (status_prompt < 1) {
-                            if ((navigation & GAMEPAD_DDOWN) != 0) {
+    switch (stage->field_0x14) {
+        case 0: {
+            if (stage->field_0x18 == 0.0f) {
+                NewMenu(0x400, 0, -1);
+            }
+            stage->field_0x18 += elapsed;
+            const i32 menu_level = GameMenuLevel;
+            if (stage->field_0x18 >= 0.5f) {
+                MENU *menu = &GameMenu[menu_level];
+                i32 player = 0;
+                i32 selected;
+                i32 moved_down;
+                i32 moved_up;
+                do {
+                    selected = 0;
+                    moved_down = 0;
+                    moved_up = 0;
+                    if (packet->player_active[player] != 0) {
+                        if (GameMenuLevel > 0 && menu->queued_item != -1) {
+                            status_prompt = menu->queued_item;
+                            menu->queued_item = -1;
+                            selected = 1;
+                        }
+                        const u32 buttons = GamePad[player].buttons_pressed;
+                        if ((buttons & GAMEPAD_MENUSELECT) != 0) {
+                            selected = 1;
+                        } else if (((packet->field_0xb0 & 0x48) == 8 &&
+                                    (packet->next_area == -1 || (packet->area->flags & 2) != 0 ||
+                                     Game.area_save[packet->next_area].complete != 0)) ||
+                                   (packet->mode_flags & 1) != 0 || packet->challenge_state != 0 ||
+                                   packet->mission_state != 0) {
+                            if (status_prompt < 1) {
+                                if (((buttons | GamePad[player].left_directions) & GAMEPAD_DDOWN) != 0) {
+                                    GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+                                    ++status_prompt;
+                                    moved_down = 1;
+                                }
+                            } else if (((buttons | GamePad[player].left_directions) & GAMEPAD_DUP) != 0) {
                                 GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-                                ++status_prompt;
-                                moved = true;
+                                --status_prompt;
+                                moved_up = 1;
                             }
-                        } else if ((navigation & GAMEPAD_DUP) != 0) {
-                            GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-                            --status_prompt;
-                            moved = true;
                         }
                     }
-                    if (selected) {
-                        packet->prompt_choice = (packet->field_0xb0 & 8) != 0 && packet->next_area != -1 &&
-                                                        (packet->area->flags & 2) == 0 &&
-                                                        Game.area_save[packet->next_area].complete == 0
-                                                    ? 1
-                                                    : static_cast<u8>(status_prompt);
-                        GameAudio_PlaySfx(0x30, NULL, 0, 0);
-                        stage->field_0x14 = 1;
-                        stage->field_0x18 = 0.0f;
-                        stage->field_0x1c = 0.5f;
-                        return;
-                    }
-                    if (!moved) {
-                        continue;
-                    }
-                    return;
+                    ++player;
+                } while (selected == 0 && player < 2 && (moved_down | moved_up) == 0);
+                if (selected) {
+                    packet->prompt_choice = (packet->field_0xb0 & 8) != 0 && packet->next_area != -1 &&
+                                                    (packet->area->flags & 2) == 0 &&
+                                                    Game.area_save[packet->next_area].complete == 0
+                                                ? 1
+                                                : static_cast<u8>(status_prompt);
+                    GameAudio_PlaySfx(0x30, NULL, 0, 0);
+                    stage->field_0x14 = 1;
+                    stage->field_0x18 = 0.0f;
+                    stage->field_0x1c = 0.5f;
                 }
             }
+            break;
         }
-    } else if (stage->field_0x14 == 1) {
-        if (stage->field_0x18 == 0.0f) {
-            BackupMenu();
-        }
-        stage->field_0x18 += elapsed;
-        if (stage->field_0x18 > stage->field_0x1c) {
-            NextStatusStage(packet);
+        case 1: {
+            if (stage->field_0x18 == 0.0f) {
+                BackupMenu();
+            }
+            stage->field_0x18 += elapsed;
+            if (stage->field_0x18 > stage->field_0x1c) {
+                NextStatusStage(packet);
+            }
+            break;
         }
     }
 }
