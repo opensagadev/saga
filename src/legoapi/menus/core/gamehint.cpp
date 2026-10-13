@@ -855,21 +855,6 @@ void GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s *message, nuvec_s *position, flo
              scale, clipped ? 0 : 4, message->red, message->green, message->blue, message->alpha);
 }
 
-pushblock_s *NearestPushBlock(WORLDINFO_s *, nuvec_s *, f32);
-
-i32 Push_UpdateHints(HINT_s *) {
-    if (LEGOACT_PUSH == -1)
-        return 0;
-    for (i32 i = 0; i < 8; ++i) {
-        GameObject_s *object = Player[i];
-        if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0 &&
-            object->apiobj.character_model->model_data_b[LEGOACT_PUSH] != NULL &&
-            NearestPushBlock(WORLD, &object->apiobj.collision_position, 2.0f) != NULL)
-            return 1;
-    }
-    return 0;
-}
-
 i32 Percent_UpdateHint(HINT_s *hint) {
     i32 control_mode = MechInputTouchSystem::s_baseControlMode;
     if (hint->completion_flags[control_mode] != 0 || WORLD->current_level != HUB_LDATA || FadeSys.fade != 0.0f ||
