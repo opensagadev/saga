@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 78.10184,
+    "fuzzy_match_percent": 78.12181,
     "total_code": "4722419",
-    "matched_code": "601312",
-    "matched_code_percent": 12.733134,
+    "matched_code": "601637",
+    "matched_code_percent": 12.740018,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6711,
-    "matched_functions_percent": 49.862545,
+    "matched_functions": 6712,
+    "matched_functions_percent": 49.869976,
     "total_units": 1
   },
   "text": {
@@ -23652,7 +23652,7 @@
           "address": 1615120,
           "offset": 725152,
           "size": 498,
-          "match_percent": 77.44927
+          "match_percent": 91.60145
         },
         {
           "name": "_ZL14Action_ExplodeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -23724,7 +23724,7 @@
           "address": 1620544,
           "offset": 730576,
           "size": 1718,
-          "match_percent": 84.67161
+          "match_percent": 84.85679
         },
         {
           "name": "_ZL23Action_GoToOriginalPathP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -24052,7 +24052,7 @@
           "address": 1641712,
           "offset": 751744,
           "size": 144,
-          "match_percent": 34.31818
+          "match_percent": 49.93182
         },
         {
           "name": "_ZL25Action_AddScriptProcessorP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -24380,7 +24380,7 @@
           "address": 1667264,
           "offset": 777296,
           "size": 262,
-          "match_percent": 21.265823
+          "match_percent": 49.64557
         },
         {
           "name": "_ZL19Action_SetForceBackP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -24396,7 +24396,7 @@
           "address": 1668208,
           "offset": 778240,
           "size": 733,
-          "match_percent": 76.99477
+          "match_percent": 77.39267
         },
         {
           "name": "_ZL16Action_AddDebrisP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -24484,7 +24484,7 @@
           "address": 1677344,
           "offset": 787376,
           "size": 4428,
-          "match_percent": 61.051895
+          "match_percent": 62.54391
         },
         {
           "name": "_ZL16Action_ForcePushP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -54730,7 +54730,7 @@
           "address": 1237408,
           "offset": 347440,
           "size": 790,
-          "match_percent": 61.848038
+          "match_percent": 87.98529
         },
         {
           "name": "_Z15Teleports_ResetP11WORLDINFO_s",
@@ -57620,7 +57620,7 @@
           "address": 4902128,
           "offset": 4012160,
           "size": 396,
-          "match_percent": 39.504585
+          "match_percent": 85.917435
         },
         {
           "name": "_ZL20GizObstacles_BoltHitPvS_S_P7nuvec_sifS1_S1_P6BOLT_sjPh",
@@ -62173,7 +62173,7 @@
           "address": 1928384,
           "offset": 1038416,
           "size": 325,
-          "match_percent": 32.72277
+          "match_percent": 100.0
         },
         {
           "name": "_ZL19Batarang_FindTargetP11WORLDINFO_sP12GameObject_si.isra.0",
@@ -62285,7 +62285,7 @@
           "address": 1937088,
           "offset": 1047120,
           "size": 2265,
-          "match_percent": 52.606743
+          "match_percent": 52.876404
         }
       ]
     },
@@ -119408,7 +119408,7 @@
       "address": 1657184,
       "offset": 767216,
       "size": 1003,
-      "match_percent": 4.821277,
+      "match_percent": 13.676596,
       "candidate_units": [
         "gameapi/ai/aisys/aisys.cpp.o"
       ]
