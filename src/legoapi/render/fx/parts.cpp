@@ -3499,8 +3499,8 @@ i32 PartDraw_Flickerer(PART_s *part) {
     if (part->field_100 > 0.0f) {
         if (PickupFlickerFrame % PickUpFlickerFrames < PickUpFlickerTest)
             return 1;
-        f32 threshold = (part->field_20a & 1) != 0 ? 1.0f : 2.0f;
-        return part->field_100 >= threshold;
+        f32 threshold = (part->field_20a & 1) == 0 ? 2.0f : 1.0f;
+        return !(part->field_100 < threshold);
     }
     return 1;
 }
