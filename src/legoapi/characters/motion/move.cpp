@@ -4753,7 +4753,7 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
     object->force_target = NULL;
     object->blowup_target = NULL;
     bool searched;
-    u8 result;
+    i32 result;
     if (object->apiobj.player_controlled && mode == 0 && object->pad_gamepad->input_magnitude > 0.0f) {
         object->force_target = ObjOpponent(object, range, 0.0f, 0, 0, 1);
         searched = true;
@@ -4799,6 +4799,7 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
     }
     {
         NUVEC forward;
+        f32 range_squared = range * range;
         if (object->pad_gamepad->input_magnitude > 0.0f) {
             NuVecRotateY(&forward, &v001, GamePad_InputAngle(object, object->pad_gamepad));
         }
@@ -4807,14 +4808,16 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
         GameObject_s *target = Obj;
         for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
             if (target == object || (target->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
-                target->apiobj.field_0x287 != 0 || (target->apiobj.field_0x1f4 & 1) != 0 ||
-                (target->character_context & 0xfd) == 0x39 || target->character_context == 0x3c ||
-                (GetGameCharacterData(target)->flags_090 & 0x8000) != 0 ||
-                (CInfo[target->character_context].flags & 0x8000) != 0 || target == object->field_0xcc0)
+                target->apiobj.field_0x287 != 0 || (target->apiobj.field_0x1f4 & 1) != 0)
+                continue;
+            i8 context = target->character_context;
+            if ((context & ~2) == 0x39 || context == 0x3c ||
+                (GetGameCharacterData(target)->flags_090 & 0x8000) != 0 || (CInfo[context].flags & 0x8000) != 0 ||
+                (object->field_0xcc0 != NULL && target == object->field_0xcc0))
                 continue;
 
             f32 distance = NuVecDistSqr(&target->apiobj.position, &object->apiobj.position, &delta);
-            if (!(distance < range * range) ||
+            if (!(distance < range_squared) ||
                 (object->pad_gamepad->input_magnitude > 0.0f && forward.x * delta.x + forward.z * delta.z < 0.0f))
                 continue;
             u16 angle = NuAtan2D(target->apiobj.position.x - object->apiobj.position.x,

@@ -25,6 +25,13 @@ DECOMP_ASSERT(sizeof(SOCKCAMERARESULT) == 0x64, "Socket camera result ABI");
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufpar.h"
 #include "nu2api/nu3d/nuspecial.h"
+
+// The Android build is gnu++11, where `register` still steers -O0 allocation; C++17 tooling rejects it.
+#if __cplusplus >= 201703L
+#define SOCK_REGISTER
+#else
+#define SOCK_REGISTER register
+#endif
 struct GameObject_s;
 
 extern "C" void PerspectMidPoint(NUVEC *result, NUVEC *first, NUVEC *second, NUVEC *camera_position);
@@ -242,39 +249,39 @@ static __used__ void SockParBlend(nufpar_s *parser, void *) {
 
 // The selected socket is captured before parsing, as in the original callbacks.
 static __used__ void SockCamATSTLIFT(nufpar_s *parser, void *) {
-    register SOCK *socket = sockpar_sock;
+    SOCK_REGISTER SOCK *socket = sockpar_sock;
     socket->camera_character_close_lift = NuFParGetFloat(parser);
 }
 static __used__ void SockCamATSTDIST(nufpar_s *parser, void *) {
-    register SOCK *socket = sockpar_sock;
+    SOCK_REGISTER SOCK *socket = sockpar_sock;
     socket->camera_min_distance = NuFParGetFloat(parser);
 }
 static __used__ void SockCamATSTCAMRANGE(nufpar_s *parser, void *) {
-    register SOCK *socket = sockpar_sock;
+    SOCK_REGISTER SOCK *socket = sockpar_sock;
     socket->camera_range_of_effect = NuFParGetFloat(parser);
 }
 static __used__ void SockCamATSTTILT(nufpar_s *parser, void *) {
-    register SOCK *socket = sockpar_sock;
+    SOCK_REGISTER SOCK *socket = sockpar_sock;
     socket->camera_tilt_angle_change = NuFParGetFloat(parser);
 }
 static __used__ void SockCamATSTTILTRATE(nufpar_s *parser, void *) {
-    register SOCK *socket = sockpar_sock;
+    SOCK_REGISTER SOCK *socket = sockpar_sock;
     socket->camera_tilt_angle_rate = NuFParGetFloat(parser);
 }
 static __used__ void SockCamCAMERARAYTILTDIST(nufpar_s *parser, void *) {
-    register SOCK *socket = sockpar_sock;
+    SOCK_REGISTER SOCK *socket = sockpar_sock;
     socket->camera_tilt_distance = NuFParGetFloat(parser);
 }
 static __used__ void SockCamCAMERARAYTILTHEIGHT(nufpar_s *parser, void *) {
-    register SOCK *socket = sockpar_sock;
+    SOCK_REGISTER SOCK *socket = sockpar_sock;
     socket->camera_tilt_height = NuFParGetFloat(parser);
 }
 static __used__ void SockManCam_MAX_X(nufpar_s *parser, void *) {
-    register SOCK *socket = sockpar_sock;
+    SOCK_REGISTER SOCK *socket = sockpar_sock;
     socket->manual_camera_max_x = NuFParGetFloat(parser);
 }
 static __used__ void SockManCam_MAX_Y(nufpar_s *parser, void *) {
-    register SOCK *socket = sockpar_sock;
+    SOCK_REGISTER SOCK *socket = sockpar_sock;
     socket->manual_camera_max_y = NuFParGetFloat(parser);
 }
 static __used__ void SockTerrainCamInActive(nufpar_s *, void *) {

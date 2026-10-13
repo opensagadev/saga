@@ -345,11 +345,12 @@ extern "C" {
         if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max)
             return false;
         rtl_s *light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
-        if (light == NULL)
-            return false;
-        bool previous = (light->flags & 1) == 0;
-        light->flags = (light->flags & ~1) | (enabled == 0);
-        return previous;
+        if (light != NULL) {
+            i32 previous = !light->disabled;
+            light->disabled = enabled == 0;
+            return previous;
+        }
+        return false;
     }
 
     i32 rtlDynamicSetDirection(i32 id, NUVEC *direction) {
@@ -1318,28 +1319,26 @@ extern "C" {
     }
 
     void rtlSetUndoBuffer(VARIPTR *buffer, VARIPTR, i32 count) {
-        maxundo = NuMiscNextPow2(count);
-        if (maxundo <= 1)
-            maxundo = 2;
+        maxundo = NuMiscNextPow2(count) > 1 ? NuMiscNextPow2(count) : 2;
 
+        rtl_undo = reinterpret_cast<rtl_s *>(ALIGN(buffer->addr, 4));
         buffer->addr = ALIGN(buffer->addr, 4);
-        rtl_undo = reinterpret_cast<rtl_s *>(buffer->addr);
         buffer->addr += maxundo * sizeof(rtl_s) * 128;
 
+        curr_rtl_undo = reinterpret_cast<rtl_s **>(ALIGN(buffer->addr, 4));
         buffer->addr = ALIGN(buffer->addr, 4);
-        curr_rtl_undo = reinterpret_cast<rtl_s **>(buffer->addr);
         buffer->addr += maxundo * sizeof(rtl_s *);
 
+        rtl_locked_undo = reinterpret_cast<rtl_s **>(ALIGN(buffer->addr, 4));
         buffer->addr = ALIGN(buffer->addr, 4);
-        rtl_locked_undo = reinterpret_cast<rtl_s **>(buffer->addr);
         buffer->addr += maxundo * sizeof(rtl_s *);
 
+        base_rtl_undo = reinterpret_cast<rtl_s **>(ALIGN(buffer->addr, 4));
         buffer->addr = ALIGN(buffer->addr, 4);
-        base_rtl_undo = reinterpret_cast<rtl_s **>(buffer->addr);
         buffer->addr += maxundo * sizeof(rtl_s *);
 
+        curpos_undo = reinterpret_cast<NUVEC *>(ALIGN(buffer->addr, 4));
         buffer->addr = ALIGN(buffer->addr, 4);
-        curpos_undo = reinterpret_cast<NUVEC *>(buffer->addr);
         buffer->addr += maxundo * sizeof(NUVEC);
     }
 
@@ -1435,7 +1434,13 @@ extern "C" {
 
 // RTL editor state and callbacks from the same original rtl.c text/data run.
 
-struct nuvtx_tc1_s;
+// Debug line vertex layout used by the RTL editor line helper.
+struct nuvtx_tc1_s {
+    NUVEC position; // 0x00
+    NUVEC normal;   // 0x0c
+    i32 colour;     // 0x18
+    f32 uv[2];      // 0x1c
+};
 struct numtl_s;
 struct numtx_s;
 
@@ -1920,45 +1925,42 @@ static void cbPasteLight(eduimenu_s *, eduiitem_s *, u32) {
     if (clipboard_light.type != 0) {
         edrtlSaveUndo();
         curr_rtl = rtlAlloc();
-        if (curr_rtl == NULL)
-            return;
-        *curr_rtl = clipboard_light;
-        if (base_rtl != NULL) {
-            curr_rtl->field_79 = base_rtl->field_79;
-            i8 current_index = static_cast<i8>(curr_rtl - curr_set->lights);
-            if (curr_rtl->field_79 != -1)
-                curr_set->lights[curr_rtl->field_79].field_7a = current_index;
-            curr_rtl->field_7a = static_cast<i8>(base_rtl - curr_set->lights);
-            base_rtl->field_79 = current_index;
-        } else {
-            curr_rtl->field_79 = -1;
-            curr_rtl->field_7a = -1;
+        if (curr_rtl != NULL) {
+            *curr_rtl = clipboard_light;
+            if (base_rtl != NULL) {
+                curr_rtl->field_79 = base_rtl->field_79;
+                if (curr_rtl->field_79 != -1)
+                    curr_set->lights[curr_rtl->field_79].field_7a = static_cast<i8>(curr_rtl - curr_set->lights);
+                curr_rtl->field_7a = static_cast<i8>(base_rtl - curr_set->lights);
+                base_rtl->field_79 = static_cast<i8>(curr_rtl - curr_set->lights);
+            } else {
+                curr_rtl->field_79 = curr_rtl->field_7a = -1;
+            }
+            curr_rtl->position = pcpos;
         }
-        curr_rtl->position = pcpos;
     }
 }
 static void cbPasteIntoLight(eduimenu_s *menu, eduiitem_s *item, u32 flags) {
-    if (clipboard_light.type == 0)
-        return;
-    edrtlSaveUndo();
-    if (curr_rtl == NULL) {
-        cbPasteLight(menu, item, flags);
-        return;
+    NUVEC position;
+    if (clipboard_light.type != 0) {
+        edrtlSaveUndo();
+        if (curr_rtl != NULL) {
+            position = curr_rtl->position;
+            *curr_rtl = clipboard_light;
+            if (base_rtl != NULL) {
+                curr_rtl->field_79 = base_rtl->field_79;
+                if (curr_rtl->field_79 != -1)
+                    curr_set->lights[curr_rtl->field_79].field_7a = static_cast<i8>(curr_rtl - curr_set->lights);
+                curr_rtl->field_7a = static_cast<i8>(base_rtl - curr_set->lights);
+                base_rtl->field_79 = static_cast<i8>(curr_rtl - curr_set->lights);
+            } else {
+                curr_rtl->field_79 = curr_rtl->field_7a = -1;
+            }
+            curr_rtl->position = position;
+        } else {
+            cbPasteLight(menu, item, flags);
+        }
     }
-    NUVEC position = curr_rtl->position;
-    *curr_rtl = clipboard_light;
-    if (base_rtl != NULL) {
-        curr_rtl->field_79 = base_rtl->field_79;
-        i8 current_index = static_cast<i8>(curr_rtl - curr_set->lights);
-        if (curr_rtl->field_79 != -1)
-            curr_set->lights[curr_rtl->field_79].field_7a = current_index;
-        curr_rtl->field_7a = static_cast<i8>(base_rtl - curr_set->lights);
-        base_rtl->field_79 = current_index;
-    } else {
-        curr_rtl->field_79 = -1;
-        curr_rtl->field_7a = -1;
-    }
-    curr_rtl->position = position;
 }
 static void cbCopyToGroup(eduimenu_s *, eduiitem_s *, u32) {
     i32 save_undo = 1;
@@ -3585,30 +3587,27 @@ extern "C" void edrtlCalculateBurnoutEx(burnset_s *set, NuBloomParameters *param
                           camera_position, frame_time);
 }
 
-struct edrtl_line_vertex_s {
-    u8 unused_0c[0x0c];
-    NUVEC position;
-    i32 colour;
-    u8 unused_1c[0x08];
-};
-
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 
 static void edrtlRndrLine3d(nuvtx_tc1_s *vertices, numtl_s *, numtx_s *matrix) {
-    const edrtl_line_vertex_s *line = reinterpret_cast<const edrtl_line_vertex_s *>(vertices);
-    NUVEC start = line[0].position;
-    NUVEC end = line[1].position;
+    NUMTX *transform;
+    NUVEC start;
+    NUVEC end;
+    NUMTX_ALIGNED16 aligned;
+
+    start = vertices[0].position;
+    end = vertices[1].position;
     if (matrix != NULL) {
-        NUMTX_ALIGNED16 aligned;
-        NUMTX *transform = reinterpret_cast<NUMTX *>(matrix);
         if ((reinterpret_cast<usize>(matrix) & 0xf) != 0) {
-            memcpy(&aligned, matrix, sizeof(aligned));
+            aligned = *reinterpret_cast<NUMTX *>(matrix);
             transform = &aligned;
+        } else {
+            transform = reinterpret_cast<NUMTX *>(matrix);
         }
         NuVecMtxTransform(&start, &start, transform);
         NuVecMtxTransform(&end, &end, transform);
     }
-    NuRndrLine3dDbg(start.x, start.y, start.z, end.x, end.y, end.z, line[0].colour);
+    NuRndrLine3dDbg(start.x, start.y, start.z, end.x, end.y, end.z, vertices[0].colour);
 }
 
 static i32 edrtlProc(float delta_time, nupad_s *pad) {
@@ -3627,24 +3626,34 @@ static i32 edrtlProc(float delta_time, nupad_s *pad) {
 static f32 cursor_size = 1.0f;
 
 static void edrtlDrawCursor() {
-    edrtl_line_vertex_s line[2] = {};
+    nuvtx_tc1_s line[2];
+    line[0].position.x = pcpos.x - cursor_size;
+    line[0].position.y = pcpos.y;
+    line[0].position.z = pcpos.z;
     line[0].colour = -1;
+    line[1].position.x = pcpos.x + cursor_size;
+    line[1].position.y = pcpos.y;
+    line[1].position.z = pcpos.z;
     line[1].colour = -1;
-    line[0].position = pcpos;
-    line[1].position = pcpos;
-    line[0].position.x -= cursor_size;
-    line[1].position.x += cursor_size;
-    edrtlRndrLine3d(reinterpret_cast<nuvtx_tc1_s *>(line), mtls[0], NULL);
-    line[0].position = pcpos;
-    line[1].position = pcpos;
-    line[0].position.y -= cursor_size;
-    line[1].position.y += cursor_size;
-    edrtlRndrLine3d(reinterpret_cast<nuvtx_tc1_s *>(line), mtls[0], NULL);
-    line[0].position = pcpos;
-    line[1].position = pcpos;
-    line[0].position.z -= cursor_size;
-    line[1].position.z += cursor_size;
-    edrtlRndrLine3d(reinterpret_cast<nuvtx_tc1_s *>(line), mtls[0], NULL);
+    edrtlRndrLine3d(line, mtls[0], NULL);
+    line[0].position.x = pcpos.x;
+    line[0].position.y = pcpos.y - cursor_size;
+    line[0].position.z = pcpos.z;
+    line[0].colour = -1;
+    line[1].position.x = pcpos.x;
+    line[1].position.y = pcpos.y + cursor_size;
+    line[1].position.z = pcpos.z;
+    line[1].colour = -1;
+    edrtlRndrLine3d(line, mtls[0], NULL);
+    line[0].position.x = pcpos.x;
+    line[0].position.y = pcpos.y;
+    line[0].position.z = pcpos.z - cursor_size;
+    line[0].colour = -1;
+    line[1].position.x = pcpos.x;
+    line[1].position.y = pcpos.y;
+    line[1].position.z = pcpos.z + cursor_size;
+    line[1].colour = -1;
+    edrtlRndrLine3d(line, mtls[0], NULL);
 }
 
 extern "C" void edrtlDrawLightEx(i32, i32);
@@ -3654,57 +3663,60 @@ extern "C" void edrtlDrawLight(i32 index) {
 }
 
 extern "C" void edrtlDrawLightEx(i32 index, i32 style) {
-    u32 colour = ((static_cast<i32>(curr_set->lights[index].colour.z * 255.0f) & 0xffu) << 16) | 0x80000000u |
-                 ((static_cast<u32>(static_cast<i32>(curr_set->lights[index].colour.y * 255.0f)) << 8) & 0xffffu) |
-                 (static_cast<i32>(curr_set->lights[index].colour.x * 255.0f) & 0xffu);
-    u32 outer_colour = colour, inner_colour = outer_colour;
+    i32 colour;
+    i32 inner_colour;
+    i32 outer_colour;
+    nuvtx_tc1_s line[2];
+
+    colour =
+        ((static_cast<i32>(curr_set->lights[index].colour.z * 255.0f) & 0xff) << 16 | static_cast<i32>(0x80000000u)) |
+        ((static_cast<i32>(curr_set->lights[index].colour.y * 255.0f) << 8) & 0xffff) |
+        (static_cast<i32>(curr_set->lights[index].colour.x * 255.0f) & 0xff);
+    inner_colour = outer_colour = colour;
     if (style == 1)
-        inner_colour = ~colour;
+        inner_colour = ~inner_colour;
     if (style == 2)
-        outer_colour = ~colour;
-    edrtl_line_vertex_s line[2] = {};
+        outer_colour = ~outer_colour;
     // Three distinct reference switch arms render the same radius pair.
 #define EDRTL_RADIUS_PAIR()                                                                                            \
     RndrOSphere(&curr_set->lights[index].position, curr_set->lights[index].inner_radius, inner_colour, numsegs,        \
-                reinterpret_cast<usize>(mtls[rtl_zoff != 0]));                                                         \
-    if (curr_set->lights[index].inner_radius < curr_set->lights[index].outer_radius)                                   \
+                reinterpret_cast<i32>(mtls[rtl_zoff ? 1 : 0]));                                                        \
+    if (curr_set->lights[index].outer_radius > curr_set->lights[index].inner_radius)                                   \
         RndrOSphere(&curr_set->lights[index].position, curr_set->lights[index].outer_radius, outer_colour, numsegs,    \
-                    reinterpret_cast<usize>(mtls[rtl_zoff != 0]));                                                     \
+                    reinterpret_cast<i32>(mtls[rtl_zoff ? 1 : 0]));                                                    \
     if (&curr_set->lights[index] == curr_rtl)                                                                          \
     RndrOSquare(&curr_set->lights[index].position, curr_set->lights[index].outer_radius, -1)
     switch (curr_set->lights[index].type) {
         case 1:
             EDRTL_RADIUS_PAIR();
-            break;
+            return;
+        case 4:
+            line[0].colour = line[1].colour = colour;
+            line[0].position = curr_set->lights[index].position;
+            NuVecScale(&line[1].position, &curr_set->lights[index].direction, curr_set->lights[index].outer_radius);
+            NuVecSub(&line[1].position, &line[0].position, &line[1].position);
+            edrtlRndrLine3d(line, NULL, NULL);
+            EDRTL_RADIUS_PAIR();
+            return;
+        case 5:
+            line[0].colour = line[1].colour = colour;
+            line[0].position = curr_set->lights[index].position;
+            NuVecScale(&line[1].position, &curr_set->lights[index].direction, 2.0f);
+            NuVecMtxRotate(&line[1].position, &line[1].position, &global_camera.mtx);
+            NuVecSub(&line[1].position, &line[0].position, &line[1].position);
+            edrtlRndrLine3d(line, NULL, NULL);
+            RndrOSphere(&curr_set->lights[index].position, 2.0f, colour, numsegs,
+                        reinterpret_cast<i32>(mtls[rtl_zoff ? 1 : 0]));
+            if (&curr_set->lights[index] == curr_rtl)
+                RndrOSquare(&curr_set->lights[index].position, 2.0f, -1);
+            return;
         case 2:
         case 3:
         case 6:
         case 7:
         case 8:
             EDRTL_RADIUS_PAIR();
-            break;
-        case 4:
-            line[0].position = curr_set->lights[index].position;
-            line[0].colour = colour;
-            line[1].colour = colour;
-            NuVecScale(&line[1].position, &curr_set->lights[index].direction, curr_set->lights[index].outer_radius);
-            NuVecSub(&line[1].position, &line[0].position, &line[1].position);
-            edrtlRndrLine3d(reinterpret_cast<nuvtx_tc1_s *>(line), NULL, NULL);
-            EDRTL_RADIUS_PAIR();
-            break;
-        case 5:
-            line[0].position = curr_set->lights[index].position;
-            line[0].colour = colour;
-            line[1].colour = colour;
-            NuVecScale(&line[1].position, &curr_set->lights[index].direction, 2.0f);
-            NuVecMtxRotate(&line[1].position, &line[1].position, &global_camera.mtx);
-            NuVecSub(&line[1].position, &line[0].position, &line[1].position);
-            edrtlRndrLine3d(reinterpret_cast<nuvtx_tc1_s *>(line), NULL, NULL);
-            RndrOSphere(&curr_set->lights[index].position, 2.0f, colour, numsegs,
-                        reinterpret_cast<usize>(mtls[rtl_zoff != 0]));
-            if (&curr_set->lights[index] == curr_rtl)
-                RndrOSquare(&curr_set->lights[index].position, 2.0f, -1);
-            break;
+            return;
     }
 #undef EDRTL_RADIUS_PAIR
 }

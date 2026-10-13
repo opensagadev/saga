@@ -431,6 +431,7 @@ static void UpdatePacemakerDisplay(WORLDINFO_s *world) {
 // Client: present, unacknowledged mines report every overlapping vehicle.
 static __used__ void UpdatePodRaceMines(void) {
     GameObject_s *minesarr[64];
+    NUVEC_ALIGNED16 delta;
     i32 minecount = 0;
 
     // The shared pool contains 64 canonical GameObject records.
@@ -449,7 +450,6 @@ static __used__ void UpdatePodRaceMines(void) {
             if (entry->active == 0)
                 continue;
 
-            NUVEC_ALIGNED16 delta;
             NuVecSub(&delta, &entry->pos, &GameCam->pos);
             GAMECAMERA_s *cam = GameCam;
             float along = delta.x * cam->dir.x + delta.y * cam->dir.y + delta.z * cam->dir.z;
@@ -465,10 +465,9 @@ static __used__ void UpdatePodRaceMines(void) {
             }
 
             entry->grow += FRAMETIME;
+            entry->grow_alpha = entry->grow;
             if (entry->grow > 1.0f)
                 entry->grow_alpha = 1.0f;
-            else
-                entry->grow_alpha = entry->grow;
 
             float r = entry->grow_alpha * mines->mine_radius;
             if (minecount == 0)
@@ -478,10 +477,10 @@ static __used__ void UpdatePodRaceMines(void) {
                 GameObject_s *obj = minesarr[i];
                 if (obj == NULL)
                     continue;
-                float dx = obj->apiobj.pos_x - entry->pos.x;
-                float dz = obj->apiobj.pos_z - entry->pos.z;
+                delta.x = obj->apiobj.pos_x - entry->pos.x;
+                delta.z = obj->apiobj.pos_z - entry->pos.z;
                 float rr = obj->apiobj.field_0x1dc + r;
-                if (!(rr * rr > dx * dx + dz * dz))
+                if (!(rr * rr > delta.x * delta.x + delta.z * delta.z))
                     continue;
 
                 if ((u8)obj->apiobj.field_0x27c == 0xff) {
@@ -528,10 +527,10 @@ static __used__ void UpdatePodRaceMines(void) {
                 GameObject_s *obj = minesarr[i];
                 if (obj == NULL)
                     continue;
-                float dx = obj->apiobj.pos_x - mine_pos->x;
-                float dz = obj->apiobj.pos_z - mine_pos->z;
+                delta.x = obj->apiobj.pos_x - mine_pos->x;
+                delta.z = obj->apiobj.pos_z - mine_pos->z;
                 float rr = obj->apiobj.field_0x1dc + radius;
-                if (!(rr * rr > dx * dx + dz * dz))
+                if (!(rr * rr > delta.x * delta.x + delta.z * delta.z))
                     continue;
                 if (mines->mine_debris != -1)
                     AddGameDebris(WORLD->debris_sys, mines->mine_debris, mine_pos);

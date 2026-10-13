@@ -8,6 +8,7 @@
 #include "legoapi/world/world_shared.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nulgtlaser.h"
 #include "nu2api/nu3d/nutex.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/gamepads.h"
@@ -80,7 +81,7 @@ extern "C" {
     void DebrisSetup(VARIPTR *, VARIPTR, char *, i32, i32, i32);
     void DebrisRegisterCutoffCameraVec(void *);
     void edgraSetup(VARIPTR *, VARIPTR, i32, i32, i32);
-    void InitParts(i32, VARIPTR *, VARIPTR);
+    void InitParts(i32, VARIPTR *, VARIPTR *);
     void ParticleReset(void);
     i32 NuFileExists(char *);
     i32 NuStrCpy(char *, const char *);
@@ -1888,6 +1889,11 @@ void SetProtocolDroidDeactivatedAction(GameObject_s *object) {
         object->context_animation = 0x44;
 }
 
+NUMTL *lightningmat;
+extern NUMTL *DebMat[10];
+extern "C" void NuWaterInit(void);
+extern "C" void NuBridgeInit(void);
+
 void LoadPerm1() {
     char buf[0x100];
 
@@ -1898,7 +1904,24 @@ void LoadPerm1() {
     if (Grass_Available != 0) {
         edgraSetup(&permbuffer_ptr, permbuffer_end, 0x200, 0x20, 0x40);
     }
-    InitParts(0x40, &permbuffer_ptr, permbuffer_end);
+    lightningmat = NuMtlCreateEx(1, 10);
+    lightningmat->diffuse_color.b = 1.0f;
+    lightningmat->diffuse_color.g = 1.0f;
+    lightningmat->diffuse_color.r = 1.0f;
+    lightningmat->attribs.alpha_mode = 2;
+    lightningmat->attribs.filter_mode = 1;
+    lightningmat->attribs.unknown_1_1_2 = 1;
+    lightningmat->attribs.unknown_1_4_8 = 1;
+    lightningmat->attribs.cull_mode = 2;
+    lightningmat->attribs.z_mode = 1;
+    lightningmat->opacity = 0.999f;
+    lightningmat->tex_id = DebMat[5]->tex_id;
+    lightningmat->attribs.alpha_fail = 1;
+    NuMtlUpdate(lightningmat);
+    NuLgtSetArcMat(lightningmat, 0.0f, 0.50390625f, 0.25f, 0.5625f);
+    NuWaterInit();
+    NuBridgeInit();
+    InitParts(0x40, &permbuffer_ptr, &permbuffer_end);
     ParticleReset();
 
     NuStrCpy(buf, (char *)"stuff\\general.ptl");
@@ -1909,7 +1932,7 @@ void LoadPerm1() {
     if (NuFileExists(buf) != 0) {
         DEBPAGE_CHARACTER = edppLoadPage(buf, 5, 0);
     }
-    perm_debrissys = InitGameDebris(&permbuffer_ptr, permbuffer_end, 0x190, 0x93, debris_name, 0);
+    perm_debrissys = InitGameDebris(&permbuffer_ptr, &permbuffer_end, 0x190, 0x93, debris_name, 0);
 
     permbuffer_ptr.addr = (permbuffer_ptr.addr + 3) & ~3u;
     InitStreaks(&permbuffer_ptr, permbuffer_end, (char *)"stuff\\streak.pnt");

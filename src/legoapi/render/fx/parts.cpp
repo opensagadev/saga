@@ -2035,7 +2035,7 @@ extern "C" {
     i16 part_platimpactlist[4];
     void ResetParts(void);
 
-    void InitParts(i32 count, VARIPTR *buffer, VARIPTR) {
+    void InitParts(i32 count, VARIPTR *buffer, VARIPTR *) {
         MAXPARTS = count;
         buffer->addr = (buffer->addr + 15) & ~static_cast<usize>(15);
         Part = reinterpret_cast<PART_s *>(buffer->void_ptr);

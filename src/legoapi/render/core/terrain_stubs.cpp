@@ -469,7 +469,7 @@ void Particles_Load(WORLDINFO *world, char **debris_name, i32 count, i32 flags) 
         world->page_pp = edppLoadPage(path, 1, reinterpret_cast<usize>(world->current_gscn));
     }
 
-    world->debris_sys = (APIDEBRISSYS_s *)InitGameDebris(&world->giz_buffer, world->unknown_0108, count, flags,
+    world->debris_sys = (APIDEBRISSYS_s *)InitGameDebris(&world->giz_buffer, &world->unknown_0108, count, flags,
                                                          debris_name, (char)world->page_pp);
 }
 

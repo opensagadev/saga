@@ -2048,7 +2048,7 @@ extern "C" {
 
     extern i32 EDPP_MAX_TYPES;
 
-    APIDEBRISSYS_s *InitGameDebris(VARIPTR *cursor, VARIPTR end, i32 count, i32 flags, char **names, char page) {
+    APIDEBRISSYS_s *InitGameDebris(VARIPTR *cursor, VARIPTR *end, i32 count, i32 flags, char **names, char page) {
         (void)end;
         if (cursor->addr == 0) {
             return NULL;
