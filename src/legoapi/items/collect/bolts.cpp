@@ -1218,17 +1218,18 @@ BOLT_s *Bolt_Find(i32 type_id, NUVEC *position, GameObject_s *owner) {
     for (BOLT_s *bolt = Bolt; bolt != Bolt + 32; ++bolt) {
         if (bolt->active == 0)
             continue;
-        if (!(type_id != -1 && bolt->type_id != type_id)) {
-            if (owner != NULL && bolt->owner != owner)
-                continue;
-            if (position == NULL)
-                return bolt;
-
+        if (type_id != -1 && bolt->type_id != type_id)
+            continue;
+        if (owner != NULL && bolt->owner != owner)
+            continue;
+        if (position != NULL) {
             const f32 distance = NuVecDistSqr(&bolt->position, position, NULL);
             if (distance < nearest_distance) {
                 nearest_distance = distance;
                 nearest = bolt;
             }
+        } else {
+            return bolt;
         }
     }
     return nearest;
