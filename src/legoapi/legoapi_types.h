@@ -5162,6 +5162,9 @@ struct LEVER_s {
             u8 : 8;
             u8 hide_base : 1;             // LEVER_FLAG_HIDE_BASE
             u8 hide_target_indicator : 1; // LEVER_FLAG_HIDE_TARGET_INDICATOR
+            u8 : 1;
+            u8 interaction_finished : 1; // LEVER_FLAG_INTERACTION_FINISHED
+            u8 pulled_down : 1;          // LEVER_FLAG_PULLED_DOWN
         };
     };
     char model_variant; // 0x9e
