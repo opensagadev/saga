@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 78.84197,
+    "fuzzy_match_percent": 78.87568,
     "total_code": "4722419",
     "matched_code": "607839",
     "matched_code_percent": 12.871349,
@@ -28803,7 +28803,7 @@
           "address": 3594096,
           "offset": 2704128,
           "size": 256,
-          "match_percent": 48.789474
+          "match_percent": 98.61842
         },
         {
           "name": "_Z20edgraInstanceDestroyi",
@@ -28995,7 +28995,7 @@
           "address": 4344560,
           "offset": 3454592,
           "size": 256,
-          "match_percent": 48.789474
+          "match_percent": 98.61842
         },
         {
           "name": "_Z17LoadEditorSplinesPcP9variptr_uS1_",
@@ -29027,7 +29027,7 @@
           "address": 4909568,
           "offset": 4019600,
           "size": 253,
-          "match_percent": 47.682354
+          "match_percent": 87.29412
         },
         {
           "name": "_Z19edSpline_FindAllSubP8nugscn_sPcPP11nugspline_si",
@@ -29539,7 +29539,7 @@
           "address": 5491264,
           "offset": 4601296,
           "size": 383,
-          "match_percent": 92.94175
+          "match_percent": 94.05825
         },
         {
           "name": "_ZN12EdBitControl12cbSelectItemEP10eduimenu_sP10eduiitem_sj",
@@ -29771,7 +29771,7 @@
           "address": 5496176,
           "offset": 4606208,
           "size": 333,
-          "match_percent": 59.580246
+          "match_percent": 86.87654
         },
         {
           "name": "_Z17EdDrawLineCircleYRK5VuVecfii",
@@ -29779,7 +29779,7 @@
           "address": 5496512,
           "offset": 4606544,
           "size": 333,
-          "match_percent": 59.76543
+          "match_percent": 87.06173
         },
         {
           "name": "_Z17EdDrawLineCircleZRK5VuVecfii",
@@ -29787,7 +29787,7 @@
           "address": 5497136,
           "offset": 4607168,
           "size": 333,
-          "match_percent": 59.5679
+          "match_percent": 87.049385
         },
         {
           "name": "_Z15EdDrawLineArrowRK5VuMtxfi",
@@ -32402,7 +32402,7 @@
           "address": 3362384,
           "offset": 2472416,
           "size": 1331,
-          "match_percent": 63.494736
+          "match_percent": 66.17544
         },
         {
           "name": "_ZL16cbPtlTextureMenuP10eduimenu_sP10eduiitem_sj",
@@ -32626,7 +32626,7 @@
           "address": 3384528,
           "offset": 2494560,
           "size": 430,
-          "match_percent": 65.16161
+          "match_percent": 87.51515
         },
         {
           "name": "_ZL16edptlcbGhostMenuP10eduimenu_sP10eduiitem_sj",
@@ -32634,7 +32634,7 @@
           "address": 3384960,
           "offset": 2494992,
           "size": 434,
-          "match_percent": 65.05
+          "match_percent": 87.64
         },
         {
           "name": "_ZL19cbChangeGenRateMenuP10eduimenu_sP10eduiitem_sj",
@@ -32954,7 +32954,7 @@
           "address": 3415520,
           "offset": 2525552,
           "size": 652,
-          "match_percent": 82.287674
+          "match_percent": 86.34931
         },
         {
           "name": "_ZL12cbChangeNameP10eduimenu_sP10eduiitem_sj",
@@ -34274,7 +34274,7 @@
           "address": 3744464,
           "offset": 2854496,
           "size": 1752,
-          "match_percent": 30.886599
+          "match_percent": 32.96134
         },
         {
           "name": "eduicbRenderTextSelector",
@@ -43627,7 +43627,7 @@
           "address": 1038656,
           "offset": 148688,
           "size": 1537,
-          "match_percent": 87.263306
+          "match_percent": 90.4846
         },
         {
           "name": "_Z17ActivateCharacterPcP7nuvec_si",
@@ -43739,7 +43739,7 @@
           "address": 1712368,
           "offset": 822400,
           "size": 1147,
-          "match_percent": 77.321655
+          "match_percent": 77.33758
         },
         {
           "name": "_Z17FinishWeirdoNamesi",
@@ -46023,7 +46023,7 @@
           "address": 1033632,
           "offset": 143664,
           "size": 384,
-          "match_percent": 96.985916
+          "match_percent": 97.1831
         },
         {
           "name": "_Z12InitPlayerAIP12GameObject_s",
@@ -51470,7 +51470,7 @@
           "address": 4437600,
           "offset": 3547632,
           "size": 1307,
-          "match_percent": 79.26943
+          "match_percent": 80.044044
         },
         {
           "name": "_ZL32CutScene_CreateCharacterInstanceP12NUGCUTCHAR_sP16instNUGCUTCHAR_sP9variptr_u",
@@ -57006,7 +57006,7 @@
           "address": 4984160,
           "offset": 4094192,
           "size": 762,
-          "match_percent": 54.336735
+          "match_percent": 56.0
         },
         {
           "name": "_ZL31GizmoPickups_ReserveBufferSpacePv",
@@ -57014,7 +57014,7 @@
           "address": 4984928,
           "offset": 4094960,
           "size": 369,
-          "match_percent": 68.89024
+          "match_percent": 86.68293
         },
         {
           "name": "_Z23GizmoPickups_TotalScorePv",
@@ -67443,7 +67443,7 @@
           "address": 5141072,
           "offset": 4251104,
           "size": 337,
-          "match_percent": 60.578125
+          "match_percent": 76.140625
         },
         {
           "name": "_Z19RegisterWithHintSysPFvP6HINT_siES0_Pji",
@@ -92554,7 +92554,7 @@
           "address": 3055152,
           "offset": 2165184,
           "size": 416,
-          "match_percent": 45.652172
+          "match_percent": 58.226086
         },
         {
           "name": "NuDisplaySceneDestroy",
@@ -92824,7 +92824,7 @@
           "address": 3088432,
           "offset": 2198464,
           "size": 283,
-          "match_percent": 61.17442
+          "match_percent": 98.81396
         },
         {
           "name": "NuMtlCreateEx",
@@ -92832,7 +92832,7 @@
           "address": 3089280,
           "offset": 2199312,
           "size": 283,
-          "match_percent": 60.44706
+          "match_percent": 98.8
         },
         {
           "name": "NuMtlCreate3D",
@@ -92840,7 +92840,7 @@
           "address": 3089568,
           "offset": 2199600,
           "size": 287,
-          "match_percent": 62.655174
+          "match_percent": 96.52873
         },
         {
           "name": "NuMtlInitEx",
@@ -92856,7 +92856,7 @@
           "address": 3091344,
           "offset": 2201376,
           "size": 287,
-          "match_percent": 60.2093
+          "match_percent": 98.81396
         },
         {
           "name": "NuMtlSetCurrentRenderPlane",
