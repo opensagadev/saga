@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 78.51784,
+    "fuzzy_match_percent": 78.57903,
     "total_code": "4722419",
-    "matched_code": "604811",
-    "matched_code_percent": 12.807229,
+    "matched_code": "604246",
+    "matched_code_percent": 12.795265,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6728,
-    "matched_functions_percent": 49.988853,
+    "matched_functions": 6727,
+    "matched_functions_percent": 49.981422,
     "total_units": 1
   },
   "text": {
@@ -34786,7 +34786,7 @@
           "address": 3776672,
           "offset": 2886704,
           "size": 446,
-          "match_percent": 2.375
+          "match_percent": 89.33929
         },
         {
           "name": "eduiGradStageAdd",
@@ -40863,7 +40863,7 @@
           "address": 5213520,
           "offset": 4323552,
           "size": 159,
-          "match_percent": 89.85366
+          "match_percent": 100.0
         },
         {
           "name": "_Z16NearestPushBlockP11WORLDINFO_sP7nuvec_sf",
@@ -58137,7 +58137,7 @@
           "address": 1898176,
           "offset": 1008208,
           "size": 170,
-          "match_percent": 72.895836
+          "match_percent": 89.583336
         },
         {
           "name": "_ZL13Levers_UpdatePvS_f",
@@ -58145,7 +58145,7 @@
           "address": 1898352,
           "offset": 1008384,
           "size": 509,
-          "match_percent": 86.296295
+          "match_percent": 86.43519
         },
         {
           "name": "_ZL16Levers_AddGizmosP10GIZMOSYS_siPvS1_",
@@ -58161,7 +58161,7 @@
           "address": 1899008,
           "offset": 1009040,
           "size": 585,
-          "match_percent": 99.98561
+          "match_percent": 99.8777
         },
         {
           "name": "_ZL20Levers_StoreProgressPvS_S_",
@@ -58177,7 +58177,7 @@
           "address": 1899840,
           "offset": 1009872,
           "size": 143,
-          "match_percent": 100.0
+          "match_percent": 99.625
         },
         {
           "name": "_Z12ReleaseLeverP12GameObject_s",
@@ -58209,7 +58209,7 @@
           "address": 1900832,
           "offset": 1010864,
           "size": 215,
-          "match_percent": 100.0
+          "match_percent": 99.791664
         },
         {
           "name": "_ZL14Lever_ActivateP7GIZMO_si",
@@ -59474,7 +59474,7 @@
           "address": 2301232,
           "offset": 1411264,
           "size": 98,
-          "match_percent": 66.13793
+          "match_percent": 92.413795
         },
         {
           "name": "_ZL24GizBombGens_GetMaxGizmosPv",
@@ -62985,7 +62985,7 @@
           "address": 2028512,
           "offset": 1138544,
           "size": 231,
-          "match_percent": 56.581818
+          "match_percent": 99.92727
         },
         {
           "name": "_Z20AllMiniKits_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
@@ -64281,7 +64281,7 @@
           "address": 1560992,
           "offset": 671024,
           "size": 14477,
-          "match_percent": 51.7245
+          "match_percent": 51.779453
         },
         {
           "name": "_Z18AddDynamicCreatureiP7nuvec_siPcP12AIPATHINFO_sP9AIGROUP_siP11nugspline_sS0_ii",
@@ -65609,7 +65609,7 @@
           "address": 2419824,
           "offset": 1529856,
           "size": 3425,
-          "match_percent": 52.206757
+          "match_percent": 68.77567
         },
         {
           "name": "_Z18TakeOverGameObjectP12GameObject_sS0_ii",
@@ -66001,7 +66001,7 @@
           "address": 4346976,
           "offset": 3457008,
           "size": 523,
-          "match_percent": 36.080746
+          "match_percent": 42.198757
         },
         {
           "name": "_ZN12ThingManager11ResetThingsEP14ThingResetData",
@@ -66289,7 +66289,7 @@
           "address": 4648576,
           "offset": 3758608,
           "size": 401,
-          "match_percent": 100.0
+          "match_percent": 99.34344
         },
         {
           "name": "_Z19GameObjectSetCanUseP12GameObject_sPvhhf",
@@ -70337,7 +70337,7 @@
           "address": 2028080,
           "offset": 1138112,
           "size": 233,
-          "match_percent": 52.653847
+          "match_percent": 99.96154
         },
         {
           "name": "_Z19RedBrick_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
@@ -70345,7 +70345,7 @@
           "address": 2028320,
           "offset": 1138352,
           "size": 185,
-          "match_percent": 54.720932
+          "match_percent": 99.95349
         },
         {
           "name": "_Z24SuperStoryScore_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
@@ -70361,7 +70361,7 @@
           "address": 2029872,
           "offset": 1139904,
           "size": 751,
-          "match_percent": 72.318184
+          "match_percent": 85.62987
         },
         {
           "name": "_Z25SuperStoryTime_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
@@ -70369,7 +70369,7 @@
           "address": 2030624,
           "offset": 1140656,
           "size": 808,
-          "match_percent": 59.608433
+          "match_percent": 80.35542
         },
         {
           "name": "_Z16Coins_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
@@ -70393,7 +70393,7 @@
           "address": 2033056,
           "offset": 1143088,
           "size": 286,
-          "match_percent": 54.741936
+          "match_percent": 90.870964
         },
         {
           "name": "_Z24BonusComplete_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
@@ -70401,7 +70401,7 @@
           "address": 2033344,
           "offset": 1143376,
           "size": 285,
-          "match_percent": 83.96722
+          "match_percent": 98.95082
         },
         {
           "name": "_Z15Prompt_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
@@ -72385,7 +72385,7 @@
           "address": 4791920,
           "offset": 3901952,
           "size": 253,
-          "match_percent": 92.316666
+          "match_percent": 97.9
         },
         {
           "name": "_Z16DistanceToLineXZP7nuvec_sS0_S0_",
@@ -83649,7 +83649,7 @@
           "address": 2074848,
           "offset": 1184880,
           "size": 1117,
-          "match_percent": 56.851147
+          "match_percent": 86.33969
         },
         {
           "name": "_ZL19PodRaceSnipersResetv",
@@ -83657,7 +83657,7 @@
           "address": 2075968,
           "offset": 1186000,
           "size": 386,
-          "match_percent": 62.2243
+          "match_percent": 75.869156
         },
         {
           "name": "_ZL17CreatePodRaceMineP7nuvec_s",
@@ -83681,7 +83681,7 @@
           "address": 2078240,
           "offset": 1188272,
           "size": 1474,
-          "match_percent": 71.42609
+          "match_percent": 71.50145
         },
         {
           "name": "_Z18NegotiationsA_InitP11WORLDINFO_s",
@@ -83825,7 +83825,7 @@
           "address": 2088720,
           "offset": 1198752,
           "size": 346,
-          "match_percent": 62.642857
+          "match_percent": 99.98214
         },
         {
           "name": "_Z23Action_MushroomCollapseP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -83833,7 +83833,7 @@
           "address": 2089072,
           "offset": 1199104,
           "size": 562,
-          "match_percent": 99.131386
+          "match_percent": 99.350365
         },
         {
           "name": "_Z19PodSeekMushCutSoundv",
@@ -87015,7 +87015,7 @@
           "address": 4657424,
           "offset": 3767456,
           "size": 198,
-          "match_percent": 66.27586
+          "match_percent": 99.74138
         },
         {
           "name": "_Z28WorldInfo_LoadObjectAnimFileP11WORLDINFO_s",
@@ -87150,7 +87150,7 @@
           "address": 1153120,
           "offset": 263152,
           "size": 35,
-          "match_percent": 90.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL22UsingExtraActions_GameP12GameObject_s",
@@ -99414,7 +99414,7 @@
           "address": 2880112,
           "offset": 1990144,
           "size": 5132,
-          "match_percent": 28.682343
+          "match_percent": 30.142035
         },
         {
           "name": "ANI_SimpleAni3PlayerV4Joint_EulerQuat",
@@ -100761,7 +100761,7 @@
           "address": 2938768,
           "offset": 2048800,
           "size": 561,
-          "match_percent": 59.35065
+          "match_percent": 75.24026
         },
         {
           "name": "NuHGobjEvalDwa2",
@@ -100769,7 +100769,7 @@
           "address": 2939344,
           "offset": 2049376,
           "size": 526,
-          "match_percent": 71.53521
+          "match_percent": 83.91549
         },
         {
           "name": "NuHGobjEvalDwaBlend",
@@ -100777,7 +100777,7 @@
           "address": 2939872,
           "offset": 2049904,
           "size": 930,
-          "match_percent": 65.55022
+          "match_percent": 65.59389
         },
         {
           "name": "NuHGobjEvalDwaBlend2",
@@ -100785,7 +100785,7 @@
           "address": 2940816,
           "offset": 2050848,
           "size": 1214,
-          "match_percent": 71.108696
+          "match_percent": 70.847824
         },
         {
           "name": "NuHGobjEvalAnimBlend",
@@ -101177,7 +101177,7 @@
           "address": 2984384,
           "offset": 2094416,
           "size": 146,
-          "match_percent": 92.11539
+          "match_percent": 92.69231
         },
         {
           "name": "NuPortalEnabled",
@@ -101209,7 +101209,7 @@
           "address": 2984928,
           "offset": 2094960,
           "size": 676,
-          "match_percent": 47.331577
+          "match_percent": 54.468422
         },
         {
           "name": "NuPortalRoomClipTest",
@@ -101297,7 +101297,7 @@
           "address": 2994768,
           "offset": 2104800,
           "size": 351,
-          "match_percent": 49.103897
+          "match_percent": 67.67532
         },
         {
           "name": "NuCameraSetVPortClipMtx",
@@ -101305,7 +101305,7 @@
           "address": 2995120,
           "offset": 2105152,
           "size": 335,
-          "match_percent": 56.714287
+          "match_percent": 73.792206
         },
         {
           "name": "NuCameraSetEx",
@@ -101385,7 +101385,7 @@
           "address": 3043520,
           "offset": 2153552,
           "size": 311,
-          "match_percent": 34.657536
+          "match_percent": 74.328766
         },
         {
           "name": "NuLgtLaserDraw",
