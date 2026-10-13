@@ -1217,8 +1217,13 @@ extern "C" {
         part->field_20a = params->field_c4;
         part->render_flags &= ~0x40;
         if (params->lighting != NULL) {
-            for (i32 i = 0; i < 7; ++i)
-                part->lighting[i] = params->lighting->values[i];
+            part->lighting[0] = params->lighting->values[0];
+            part->lighting[3] = params->lighting->values[3];
+            part->lighting[1] = params->lighting->values[1];
+            part->lighting[4] = params->lighting->values[4];
+            part->lighting[2] = params->lighting->values[2];
+            part->lighting[5] = params->lighting->values[5];
+            part->lighting[6] = params->lighting->values[6];
             part->active |= 8;
         } else {
             part->active &= ~8;
