@@ -2941,20 +2941,19 @@ void AddTorpedoAsPart(nuvec_s *position, nuvec_s *velocity, float scale, float l
     f32 torpedo_scale = 0.1f * WORLD->giz_torp_machine_sys->scale;
     params.field_14 = torpedo_scale * GizmoPickupType[8].shadow_radius_x;
     params.field_18 = torpedo_scale * GizmoPickupType[8].shadow_extent_x;
+    params.special = &world->lev_objs[0x79].special;
+    params.field_28 = 0x79;
     params.gravity = AreaPickupGravity;
     if (params.gravity == 0.0f)
         params.field_a4 = 15.0f;
-    params.special = &world->lev_objs[0x79].special;
-    params.field_28 = 0x79;
-    params.flags = 0x256;
-    params.field_40 = PartCollide_3D;
-    params.move_fn = params.gravity == 0.0f ? PartMove_VehiclePickup : NULL;
-    if (FreePlay != 0 && WORLD->current_level == ANAKINSFLIGHTB_LDATA)
-        params.field_40 = PartCollide_2D;
-    params.field_48 = NULL;
-    params.draw_fn = PartDraw_Torp;
     params.stop_fn = PartStop_Flickerer;
+    params.field_40 = FreePlay != 0 && WORLD->current_level == ANAKINSFLIGHTB_LDATA ? PartCollide_2D : PartCollide_3D;
     params.field_88 = lifetime;
+    params.draw_fn = PartDraw_Torp;
+    params.field_48 = NULL;
+    params.flags = 0x256;
+    if (params.gravity == 0.0f)
+        params.move_fn = PartMove_VehiclePickup;
     params.time_step = FRAMETIME;
     params.field_c0 = scale;
     PART_s *part = AddPart(&params);
