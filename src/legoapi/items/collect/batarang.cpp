@@ -83,25 +83,21 @@ static unsigned int Batarang_GetTargetPos(BATARANG_s *batarang, int index, nuvec
         }
         return 1;
     }
-    if (index < 0 || index >= 5 || index >= batarang->active)
+    if (index >= batarang->active)
         return 0;
     BATARANG_TARGET_s *target = &batarang->targets[index];
-    switch (target->type) {
-        case 0:
-            *position = static_cast<GameObject_s *>(target->object)->apiobj.collision_position;
-            return 1;
-        case 1:
-            *position = static_cast<DETONATOR_s *>(target->object)->field_0x0c;
-            return 1;
-        case 2:
-            *position = static_cast<GIZMOBLOWUP_s *>(target->object)->mid_position;
-            return 1;
-        case 3:
-            *position = *static_cast<NUVEC *>(target->object);
-            return 1;
-        default:
-            return 0;
+    if (target->type == 0) {
+        *position = static_cast<GameObject_s *>(target->object)->apiobj.collision_position;
+    } else if (target->type == 1) {
+        *position = static_cast<DETONATOR_s *>(target->object)->field_0x0c;
+    } else if (target->type == 2) {
+        *position = static_cast<GIZMOBLOWUP_s *>(target->object)->mid_position;
+    } else if (target->type == 3) {
+        *position = *static_cast<NUVEC *>(target->object);
+    } else {
+        return 0;
     }
+    return 1;
 }
 
 static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 automatic) {
@@ -452,19 +448,13 @@ i32 Batarang_SeekToTarget(BATARANG_s *batarang) {
 }
 
 void Batarangs_Draw() {
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (world == NULL || world->lev_objs == NULL) {
-        return;
-    }
     for (i32 i = 0; i < 8; ++i) {
         BATARANG_s *batarang = &Batarang[i];
-        if (batarang->field_0x7d == 0 || batarang->cooldown >= 0x1000 ||
-            world->lev_objs[batarang->cooldown].active == 0) {
-            continue;
+        if (batarang->field_0x7d != 0 && WORLD->lev_objs[batarang->cooldown].active != 0) {
+            NUMTX_ALIGNED16 matrix;
+            NuMtxSetTranslation(&matrix, &batarang->position);
+            NuSpecialDrawAt(&WORLD->lev_objs[batarang->cooldown].special, &matrix);
         }
-        NUMTX matrix;
-        NuMtxSetTranslation(&matrix, &batarang->position);
-        NuSpecialDrawAt(&world->lev_objs[batarang->cooldown].special, &matrix);
     }
 }
 
@@ -535,14 +525,18 @@ i32 Batarang_StartTargetting(GameObject_s *object) {
 }
 
 void Batarangs_Update() {
-    for (i32 i = 0; i < 8; ++i) {
-        BATARANG_s *batarang = &Batarang[i];
-        if (batarang->field_0x7d == 0 || batarang->owner == NULL) {
+    for (BATARANG_s *batarang = Batarang; batarang != &Batarang[8]; ++batarang) {
+        if (batarang->field_0x7d == 0) {
             continue;
         }
         batarang->flight_time += FRAMETIME;
-        if (!(batarang->flight_time < 2.0f) && batarang->flight_time > 4.0f)
+        if (batarang->flight_time >= 2.0f && batarang->flight_time > 4.0f)
             batarang->flight_time = 4.0f;
+
+        while (batarang->targets[batarang->current_target].lost != 0 && batarang->current_target < batarang->active) {
+            ++batarang->current_target;
+        }
+
         if (!Batarang_SeekToTarget(batarang)) {
             continue;
         }
@@ -557,6 +551,7 @@ void Batarangs_Update() {
             } else if (owner->pad_gamepad->input_magnitude == 0.0f && owner->character_context == -1 &&
                        owner->apiobj.character_model->model_data_b[0x98] != NULL) {
                 owner->character_context = 0x50;
+                owner = batarang->owner;
                 owner->context_animation = 0x98;
                 owner->context_animation_timer = AnimDuration(owner->id, 0x98, 0.0f, 0.0f, 1);
             }
@@ -567,26 +562,29 @@ void Batarangs_Update() {
             continue;
         }
 
-        BATARANG_TARGET_s &target = batarang->targets[batarang->current_target++];
-        batarang->flight_time = 0.0f;
-        if (target.lost != 0 || target.object == NULL || target.type == 3) {
-            continue;
+        BATARANG_TARGET_s *target = &batarang->targets[batarang->current_target];
+        const u8 type = target->type;
+        void *object = target->object;
+        if (type != 3) {
+            NewRumble(batarang->owner->pad_gamepad->pad, 0.5f, 0);
+            NewBuzzFrames(batarang->owner->pad_gamepad->pad, 1, 0);
+            GameCam_HitJudder();
         }
-        NewRumble(batarang->owner->pad_gamepad->pad, 0.5f, 0);
-        NewBuzzFrames(batarang->owner->pad_gamepad->pad, 1, 0);
-        GameCam_HitJudder();
-        if (target.type == 0) {
-            GameObject_s *victim = static_cast<GameObject_s *>(target.object);
+        batarang->flight_time = 0.0f;
+        batarang->current_target++;
+
+        if (type == 0) {
+            GameObject_s *victim = static_cast<GameObject_s *>(object);
             if (victim->id == id_CATWOMAN && victim->apiobj.field_0x27c == -1) {
                 victim->field_0xef8 |= 1;
                 StunGameObject(victim, batarang->owner, catwoman_stun_time, 0);
             } else if ((victim->field_0xefb & 8) == 0) {
                 ObjHitObj(batarang->owner, victim, 1, 0, 0, 1);
             }
-        } else if (target.type == 1) {
-            Detonator_Detonate(static_cast<DETONATOR_s *>(target.object));
-        } else if (target.type == 2) {
-            GizmoBlowupBlowup(static_cast<GIZMOBLOWUP_s *>(target.object), 1, 2, 2, NULL, 1);
+        } else if (type == 1) {
+            Detonator_Detonate(static_cast<DETONATOR_s *>(object));
+        } else if (type == 2) {
+            GizmoBlowupBlowup(static_cast<GIZMOBLOWUP_s *>(object), 1, 2, 2, NULL, 1);
         }
     }
 }

@@ -8,9 +8,9 @@
 #include "nu2api/numath/numtx.h"
 
 struct PLUGPROGRESS {
-    i32 visible_mask;
-    i32 active_mask;
-    i32 plugged_mask;
+    i32 visible_mask[1];
+    i32 active_mask[1];
+    i32 plugged_mask[1];
 };
 
 i32 plug_gizmotype_id = -1;
@@ -119,9 +119,9 @@ static void Plugs_ClearProgress(void *, void *progress_ptr) {
     if (progress == NULL) {
         return;
     }
-    progress->visible_mask = -1;
-    progress->active_mask = -1;
-    progress->plugged_mask = 0;
+    progress->visible_mask[0] = -1;
+    progress->active_mask[0] = -1;
+    progress->plugged_mask[0] = 0;
 }
 
 static void Plugs_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
@@ -131,29 +131,27 @@ static void Plugs_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
         return;
     }
 
-    progress->visible_mask = -1;
-    progress->active_mask = -1;
-    progress->plugged_mask = 0;
+    progress->visible_mask[0] = -1;
+    progress->active_mask[0] = -1;
+    progress->plugged_mask[0] = 0;
     if (world == NULL || world->plug_sys == NULL || world->plug_sys->plugs == NULL) {
         return;
     }
 
-    for (i32 index = 0; index < world->plug_sys->count; ++index) {
-        if (index == 32) {
-            break;
+    PLUG *plug = world->plug_sys->plugs;
+    for (i32 index = 0; index < world->plug_sys->count && index != 32; ++index, ++plug) {
+        const i32 word = index >> 5;
+        const u32 bit = 1u << (index & 31);
+        if ((plug->flags & PLUG_FLAG_VISIBLE) == 0) {
+            progress->visible_mask[word] &= ~bit;
         }
-        const u32 bit = 1u << index;
-        const u8 flags = world->plug_sys->plugs[index].flags;
-        if ((flags & PLUG_FLAG_VISIBLE) == 0) {
-            progress->visible_mask &= ~bit;
+        if ((plug->flags & PLUG_FLAG_ACTIVE) == 0) {
+            progress->active_mask[word] &= ~bit;
         }
-        if ((flags & PLUG_FLAG_ACTIVE) == 0) {
-            progress->active_mask &= ~bit;
-        }
-        if ((flags & PLUG_FLAG_PLUGGED) != 0) {
+        if ((plug->flags & PLUG_FLAG_PLUGGED) != 0) {
             // This is how the original encodes the state, despite having a
             // separately initialized plugged mask in the progress record.
-            progress->active_mask |= bit;
+            progress->active_mask[word] |= bit;
         }
     }
 }
@@ -165,17 +163,18 @@ static void Plugs_Reset(void *world_ptr, void *, void *progress_ptr) {
         return;
     }
 
-    for (i32 index = 0; index < world->plug_sys->count; ++index) {
-        PLUG &plug = world->plug_sys->plugs[index];
+    PLUG *plug_ptr = world->plug_sys->plugs;
+    for (i32 index = 0; index < world->plug_sys->count; ++index, ++plug_ptr) {
+        PLUG &plug = *plug_ptr;
         plug.flags = static_cast<u8>((plug.flags | PLUG_FLAG_ACTIVE | PLUG_FLAG_VISIBLE) & ~PLUG_FLAG_PLUGGED);
         if (progress != NULL && !(index > 31)) {
 
             const u32 bit = 1u << index;
             plug.flags = static_cast<u8>((plug.flags & ~(PLUG_FLAG_VISIBLE | PLUG_FLAG_PLUGGED)) |
-                                         ((progress->visible_mask & bit) != 0 ? PLUG_FLAG_VISIBLE : 0));
+                                         ((progress->visible_mask[0] & bit) != 0 ? PLUG_FLAG_VISIBLE : 0));
             plug.flags = static_cast<u8>((plug.flags & ~PLUG_FLAG_ACTIVE) |
-                                         ((progress->active_mask & bit) != 0 ? PLUG_FLAG_ACTIVE : 0));
-            if ((progress->plugged_mask & bit) != 0) {
+                                         ((progress->active_mask[0] & bit) != 0 ? PLUG_FLAG_ACTIVE : 0));
+            if ((progress->plugged_mask[0] & bit) != 0) {
                 plug.flags |= PLUG_FLAG_PLUGGED;
             }
         }
@@ -207,8 +206,9 @@ static i32 Plugs_Load(void *world_ptr, void *) {
 
     const i32 version = EdFileReadInt();
     world->plug_sys->count = EdFileReadInt();
-    for (i32 index = 0; index < world->plug_sys->count; ++index) {
-        PLUG &plug = world->plug_sys->plugs[index];
+    PLUG *plug_ptr = world->plug_sys->plugs;
+    for (i32 index = 0; index < world->plug_sys->count; ++index, ++plug_ptr) {
+        PLUG &plug = *plug_ptr;
         EdFileRead(plug.name, sizeof(plug.name));
         EdFileReadNuVec(&plug.position);
         plug.x_rotation = EdFileReadUnsignedShort();

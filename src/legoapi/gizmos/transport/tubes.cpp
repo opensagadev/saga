@@ -23,8 +23,8 @@ static const i32 DIRECTIONAL_TUBE_MAX_NORMAL_Y_ANGLE = 0x3c71;
 static const i32 DIRECTIONAL_TUBE_MIN_ALIGNMENT_ANGLE = 0x238e;
 
 struct TUBEPROGRESS {
-    u32 visible_mask;
-    u32 active_mask;
+    u32 visible_mask[1];
+    u32 active_mask[1];
 };
 
 static void Tubes_Update(void *world_ptr, void *progress_ptr, float frame_time);
@@ -87,14 +87,13 @@ static void Tubes_Reset(void *world_ptr, void *, void *progress_ptr) {
     for (i32 index = 0; index < world->tube_count; ++index, ++tube) {
         tube->top = tube->position.y + tube->height;
         tube->radius_squared = tube->radius * tube->radius;
-        tube->flags |= TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE;
+        tube->active = 1;
+        tube->visible = 1;
 
         if (index < 32 && progress != NULL) {
             const u32 tube_bit = 1U << index;
-            const i32 visible_flag = (progress->visible_mask & tube_bit) != 0;
-            tube->flags = static_cast<u8>((tube->flags & ~TUBE_FLAG_VISIBLE) | (visible_flag << 1));
-            const i32 active_flag = (progress->active_mask & tube_bit) != 0;
-            tube->flags = static_cast<u8>((tube->flags & ~TUBE_FLAG_ACTIVE) | active_flag);
+            tube->visible = (progress->visible_mask[0] & tube_bit) != 0;
+            tube->active = (progress->active_mask[0] & tube_bit) != 0;
         }
     }
 }
@@ -131,8 +130,8 @@ static NUVEC *Tube_GetPos(GIZMO *gizmo) {
 static void Tubes_ClearProgress(void *, void *progress_ptr) {
     TUBEPROGRESS *progress = static_cast<TUBEPROGRESS *>(progress_ptr);
     if (progress != NULL) {
-        progress->visible_mask = 0xffffffff;
-        progress->active_mask = 0xffffffff;
+        progress->visible_mask[0] = 0xffffffff;
+        progress->active_mask[0] = 0xffffffff;
     }
 }
 
@@ -166,12 +165,11 @@ static i32 Tubes_Load(void *world_ptr, void *) {
         tube->radius = EdFileReadFloat();
 
         if (version > 1) {
-            const i32 directional = EdFileReadChar() != 0;
+            tube->directional = EdFileReadChar() != 0;
             tube->field_0x24 = 1.25f;
-            tube->flags = static_cast<u8>((tube->flags & ~TUBE_FLAG_DIRECTIONAL) | (directional << 2));
         } else {
             tube->field_0x24 = 1.25f;
-            tube->flags &= static_cast<u8>(~TUBE_FLAG_DIRECTIONAL);
+            tube->directional = 0;
         }
     }
 
@@ -184,22 +182,24 @@ static void Tubes_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
         return;
     }
 
-    progress->visible_mask = 0xffffffff;
-    progress->active_mask = 0xffffffff;
+    progress->visible_mask[0] = 0xffffffff;
+    progress->active_mask[0] = 0xffffffff;
 
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     if (world == NULL || world->tubes == NULL || world->tube_count <= 0) {
         return;
     }
 
-    auto world_tube_count = world->tube_count;
-    for (i32 index = 0; index < world_tube_count && index < 32; ++index) {
-        const u32 tube_bit = 1U << index;
-        if ((world->tubes[index].flags & TUBE_FLAG_VISIBLE) == 0) {
-            progress->visible_mask &= ~tube_bit;
+    TUBE *tube = world->tubes;
+    const i32 tube_count = world->tube_count;
+    for (i32 index = 0; index < tube_count && index != 32; ++index, ++tube) {
+        const i32 word = index >> 5;
+        const u32 tube_bit = 1U << (index & 31);
+        if (!tube->visible) {
+            progress->visible_mask[word] &= ~tube_bit;
         }
-        if ((world->tubes[index].flags & TUBE_FLAG_ACTIVE) == 0) {
-            progress->active_mask &= ~tube_bit;
+        if (!tube->active) {
+            progress->active_mask[word] &= ~tube_bit;
         }
     }
 }
@@ -390,8 +390,8 @@ void Tube_MoveCode(GameObject_s *object, WORLDINFO_s *world) {
 
     TUBE *tube = world->tubes;
     for (i32 index = 0; index < world->tube_count; ++index, ++tube) {
-        if ((tube->flags & (TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE | TUBE_FLAG_DIRECTIONAL)) !=
-            (TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE)) {
+        if ((tube->flags & (TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE)) != (TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE) ||
+            tube->directional) {
             continue;
         }
         if (!(Tube_InCylinder(object, tube, NULL, 0) == 0 &&

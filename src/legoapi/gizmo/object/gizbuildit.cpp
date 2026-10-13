@@ -65,11 +65,11 @@ namespace {
             return;
         }
 
-        memset(progress, 0, sizeof(*progress));
-        for (i32 word = 0; word < GIZBUILDIT_PROGRESS_WORDS; ++word) {
-            progress->active[word] = 0xffffffff;
-            progress->visible[word] = 0xffffffff;
-        }
+        memset(progress->completed, 0, sizeof(progress->completed));
+        memset(progress->active, 0xff, sizeof(progress->active));
+        memset(progress->visible, 0xff, sizeof(progress->visible));
+        memset(progress->reward_released, 0, sizeof(progress->reward_released));
+        memset(progress->built_object_count, 0, sizeof(progress->built_object_count));
     }
 
     enum BUILDIT_GAMEPLAY_CONSTANTS : i32 {
@@ -188,8 +188,9 @@ static void GizBuildIts_PostLoad(void *world_ptr, void *data) {
         return;
     }
 
-    for (i32 index = 0; index < buildit_sys->count; ++index) {
-        GIZBUILDIT_s &buildit = buildit_sys->buildits[index];
+    GIZBUILDIT_s *buildit_ptr = buildit_sys->buildits;
+    for (i32 index = 0; index < buildit_sys->count; ++index, ++buildit_ptr) {
+        GIZBUILDIT_s &buildit = *buildit_ptr;
         if ((buildit.availability_flags & GIZBUILDIT_AVAILABILITY_HAS_BLOWUP_TYPE) != 0) {
             buildit.blowup_type = static_cast<i16>(GizmoBlowupGetTypeFromNameTableId(world, buildit.blowup_type));
             buildit.availability_flags &= static_cast<u8>(~GIZBUILDIT_AVAILABILITY_HAS_BLOWUP_TYPE);
@@ -234,8 +235,9 @@ static void GizBuildIts_Draw(void *world_ptr, void *data, float) {
         return;
     }
 
-    for (i32 index = 0; index < buildit_sys->count; ++index) {
-        GIZBUILDIT_s &buildit = buildit_sys->buildits[index];
+    GIZBUILDIT_s *buildit_ptr = buildit_sys->buildits;
+    for (i32 index = 0; index < buildit_sys->count; ++index, ++buildit_ptr) {
+        GIZBUILDIT_s &buildit = *buildit_ptr;
         if ((buildit.availability_flags & GIZBUILDIT_AVAILABILITY_VISIBLE) == 0 ||
             (buildit.room_index >= 0 && world->rooms_visible_ptr[buildit.room_index] == 0)) {
             continue;
@@ -269,14 +271,12 @@ static void GizBuildIts_Draw(void *world_ptr, void *data, float) {
 
         while (object != NULL) {
             GIZBUILDITANIMDATA_s *object_data = static_cast<GIZBUILDITANIMDATA_s *>(object->object_data);
-            NUMTX draw_mtx = object_data->draw_mtx;
+            NUMTX_ALIGNED16 draw_mtx = object_data->draw_mtx;
             object_data->was_drawn = static_cast<u8>(NuSpecialDrawAt(&object->special, &draw_mtx));
 
             if ((buildit.state_flags & GIZBUILDIT_STATE_DRAW_REFLECTION) != 0 && (object->flags & 2) == 0) {
-                const f32 override_plane = WORLD != NULL && WORLD->current_level != NULL
-                                               ? WORLD->current_level->unknown_0cc
-                                               : world->current_level->unknown_0cc;
-                if (MatrixReflection(&object_data->draw_mtx, 2, reflection_plane, override_plane, &draw_mtx) != 0) {
+                if (MatrixReflection(&object_data->draw_mtx, 2, reflection_plane, WORLD->current_level->unknown_0cc,
+                                     &draw_mtx) != 0) {
                     NuSpecialDrawAt(&object->special, &draw_mtx);
                 }
             }
@@ -309,13 +309,9 @@ static void GizBuildIts_StoreProgress(void *, void *data, void *progress_ptr) {
     }
 
     ClearBuildItProgress(progress);
-    i32 count = buildit_sys->count;
-    if (count > GIZBUILDIT_PROGRESS_CAPACITY) {
-        count = GIZBUILDIT_PROGRESS_CAPACITY;
-    }
-
-    for (i32 index = 0; index < count; ++index) {
-        const GIZBUILDIT_s &buildit = buildit_sys->buildits[index];
+    const GIZBUILDIT_s *buildit_entry = buildit_sys->buildits;
+    for (i32 index = 0; index < buildit_sys->count && index != GIZBUILDIT_PROGRESS_CAPACITY; ++index, ++buildit_entry) {
+        const GIZBUILDIT_s &buildit = *buildit_entry;
         const i32 word = index >> 5;
         const u32 bit = 1u << (index & 31);
         if (buildit.build_state != GIZBUILDIT_BUILD_IDLE) {
@@ -694,7 +690,7 @@ void GizBuildItPushAwayFromEnd(GameObject_s *player) {
 }
 
 f32 GizBuildItMul(GameObject_s *player) {
-    if (static_cast<i8>(player->apiobj.field_0x1f8) < 0 && Player_HasFastBuild(player)) {
+    if (player->apiobj.player_controlled && Player_HasFastBuild(player)) {
         return 3.0f;
     }
 
@@ -1102,7 +1098,7 @@ void GizBuildit_Reset(GIZBUILDIT_s *buildit, void *world_ptr) {
             GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(object->object_data);
             memset(data, 0, sizeof(*data));
 
-            NUMTX evaluated;
+            NUMTX_ALIGNED16 evaluated;
             EvalAnim(&object->special, object->start_frame, &evaluated, 1);
             data->start_mtx = evaluated;
             if (buildit->linked_buildit != NULL) {
@@ -1292,25 +1288,18 @@ static void GizBuildIts_Reset(void *world_ptr, void *data, void *progress_ptr) {
     GIZBUILDITSYS_s *buildit_sys = static_cast<GIZBUILDITSYS_s *>(data);
     GIZBUILDITPROGRESS_s *progress = static_cast<GIZBUILDITPROGRESS_s *>(progress_ptr);
 
-    auto buildit_sys_count = buildit_sys->count;
-    for (i32 index = 0; index < buildit_sys_count; ++index) {
-        GIZBUILDIT_s &buildit = buildit_sys->buildits[index];
-        GizBuildit_Reset(&buildit, world_ptr);
-
-        if (!(index >= GIZBUILDIT_PROGRESS_CAPACITY) && progress != NULL) {
-
+    GIZBUILDIT_s *buildit = buildit_sys->buildits;
+    for (i32 index = 0; index < buildit_sys->count; ++index, ++buildit) {
+        GizBuildit_Reset(buildit, world_ptr);
+        if (index < GIZBUILDIT_PROGRESS_CAPACITY && progress != NULL) {
             const i32 word = index >> 5;
             const u32 bit = 1u << (index & 31);
-            buildit.build_state =
+            buildit->build_state =
                 (progress->completed[word] & bit) != 0 ? GIZBUILDIT_BUILD_COMPLETE : GIZBUILDIT_BUILD_IDLE;
-            buildit.field_0x83 = static_cast<u8>(
-                (buildit.field_0x83 & ~GIZBUILDIT_RUNTIME_REWARD_RELEASED) |
-                ((progress->reward_released[word] & bit) != 0 ? GIZBUILDIT_RUNTIME_REWARD_RELEASED : 0));
-            buildit.availability_flags =
-                static_cast<u8>((buildit.availability_flags & ~GIZBUILDIT_AVAILABILITY_LINKED) |
-                                ((progress->active[word] & bit) != 0 ? GIZBUILDIT_AVAILABILITY_ACTIVE : 0) |
-                                ((progress->visible[word] & bit) != 0 ? GIZBUILDIT_AVAILABILITY_VISIBLE : 0));
-            buildit.built_object_count = progress->built_object_count[index];
+            buildit->available_visible = (progress->visible[word] & bit) != 0;
+            buildit->available_active = (progress->active[word] & bit) != 0;
+            buildit->reward_released = (progress->reward_released[word] & bit) != 0;
+            buildit->built_object_count = progress->built_object_count[index];
         }
     }
 }
@@ -1321,9 +1310,8 @@ static void GizmoBuildit_Activate(GIZMO *gizmo, i32 active) {
     }
 
     GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(gizmo->object);
-    buildit->availability_flags = static_cast<u8>((buildit->availability_flags & ~GIZBUILDIT_AVAILABILITY_ACTIVE) |
-                                                  (active != 0 ? GIZBUILDIT_AVAILABILITY_ACTIVE : 0));
-    if (active == 0) {
+    buildit->available_active = active != 0;
+    if (!buildit->available_active) {
         return;
     }
 
@@ -1334,10 +1322,9 @@ static void GizmoBuildit_Activate(GIZMO *gizmo, i32 active) {
         GameAnimSet_JumpToStart(buildit->anim_set);
     }
 
-    const u8 reward_released = buildit->field_0x83 & GIZBUILDIT_RUNTIME_REWARD_RELEASED;
+    const u8 reward_released = buildit->reward_released;
     GizBuildit_Reset(buildit, NULL);
-    buildit->field_0x83 =
-        static_cast<u8>((buildit->field_0x83 & ~GIZBUILDIT_RUNTIME_REWARD_RELEASED) | reward_released);
+    buildit->reward_released = reward_released;
 
     if ((buildit->state_flags & GIZBUILDIT_STATE_AUTO_BUILD_STATIC_OBJECTS) == 0 || GizBuildit_AutoBuildPosFn == NULL) {
         return;
@@ -1359,9 +1346,7 @@ static void GizmoBuildit_Activate(GIZMO *gizmo, i32 active) {
             NuSpecialSetDrawPos(&object->special, &scatter_position);
         } else {
             GIZBUILDITANIMDATA_s *object_data = static_cast<GIZBUILDITANIMDATA_s *>(object->object_data);
-            object_data->draw_mtx.m30 = scatter_position.x;
-            object_data->draw_mtx.m31 = scatter_position.y;
-            object_data->draw_mtx.m32 = scatter_position.z;
+            *NUMTX_GET_ROW_VEC(&object_data->draw_mtx, 3) = scatter_position;
         }
         AddGameDebris(WORLD->debris_sys, GizBuilditGDeb[qrand() / 0x2aab], &scatter_position);
     }

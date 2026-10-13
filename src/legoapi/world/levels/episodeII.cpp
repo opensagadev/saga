@@ -357,48 +357,37 @@ void BountyHunterPursuitD_Reset(WORLDINFO_s *world) {
     LevGameObject[0] = GetNamedGameObject(world->ai_sys, "ai_zam");
 }
 
+static void ZamArrow_Update(WORLDINFO_s *world) {
+    if (zamarrow.object != NULL && (zamarrow.object->apiobj.field_0x1f8 & 0x1000) != 0 &&
+        zamarrow.object->apiobj.field_0x287 == 0) {
+        if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
+            zamarrow.timer = (FRAMETIME + FRAMETIME) + zamarrow.timer;
+            if (zamarrow.timer > 1.0f) {
+                zamarrow.timer = 1.0f;
+            }
+            if (0.1f > NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f)) {
+                UpdateZamArrow(world);
+            }
+        } else {
+            zamarrow.timer = 0.0f;
+        }
+    }
+}
+
 void BountyHunterPursuitB_Update(WORLDINFO_s *world) {
-    if (LevAIMessage[0] == NULL || LevAIMessage[0]->value != 1.0f || zamarrow.object == NULL ||
-        (zamarrow.object->apiobj.field_0x1f8 & 0x1000) == 0 || zamarrow.object->apiobj.field_0x287 != 0) {
+    if (LevAIMessage[0] == NULL || LevAIMessage[0]->value != 1.0f) {
         return;
     }
 
-    if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
-        zamarrow.timer = MIN(1.0f, (FRAMETIME + FRAMETIME) + zamarrow.timer);
-        if (0.1f > NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f)) {
-            UpdateZamArrow(world);
-        }
-    } else {
-        zamarrow.timer = 0.0f;
-    }
+    ZamArrow_Update(world);
 }
 
 void BountyHunterPursuitA_Update(WORLDINFO_s *world) {
-    if (zamarrow.object != NULL && (zamarrow.object->apiobj.field_0x1f8 & 0x1000) != 0 &&
-        zamarrow.object->apiobj.field_0x287 == 0) {
-        if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
-            zamarrow.timer = MIN(1.0f, (FRAMETIME + FRAMETIME) + zamarrow.timer);
-            if (0.1f > NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f)) {
-                UpdateZamArrow(world);
-            }
-        } else {
-            zamarrow.timer = 0.0f;
-        }
-    }
+    ZamArrow_Update(world);
 }
 
 void BountyHunterPursuitC_Update(WORLDINFO_s *world) {
-    if (zamarrow.object != NULL && (zamarrow.object->apiobj.field_0x1f8 & 0x1000) != 0 &&
-        zamarrow.object->apiobj.field_0x287 == 0) {
-        if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
-            zamarrow.timer = MIN(1.0f, (FRAMETIME + FRAMETIME) + zamarrow.timer);
-            if (0.1f > NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f)) {
-                UpdateZamArrow(world);
-            }
-        } else {
-            zamarrow.timer = 0.0f;
-        }
-    }
+    ZamArrow_Update(world);
 
     PURSUIT_TRAFFIC_s *traffic = reinterpret_cast<PURSUIT_TRAFFIC_s *>(world->trafficanim_sys);
     if (traffic == NULL || player == NULL) {
@@ -1870,7 +1859,7 @@ void JediB_Update(WORLDINFO_s *world) {
                 continue;
             }
             Player[slot]->ai_opponent_exclusion_mask = 0;
-            if (jedi_b.phase == 7 && boss != NULL && static_cast<i8>(Player[slot]->apiobj.flags_low) >= 0) {
+            if (jedi_b.phase == 7 && boss != NULL && !Player[slot]->apiobj.player_controlled) {
                 Player[slot]->ai_opponent_exclusion_mask = 1ULL << boss->apiobj.field_0x289;
             }
         }
@@ -2085,7 +2074,7 @@ void JediB_Update(WORLDINFO_s *world) {
                 if (baddie->released != 0) {
                     object->ai.locator = NULL;
                     if (!((player->apiobj.character_data->model_flags & 0x80000) == 0 &&
-                          (player->apiobj.objptr->id != id_JARJAR || static_cast<i8>(player->apiobj.flags_low) < 0) &&
+                          (player->apiobj.objptr->id != id_JARJAR || player->apiobj.player_controlled) &&
                           (player->apiobj.character_data->game_character->uses_weapon_action != 4 ||
                            object->apiobj.character_data->game_character->uses_weapon_action != 4))) {
                         if (object->ai.opponent == player) {
@@ -2093,8 +2082,7 @@ void JediB_Update(WORLDINFO_s *world) {
                         }
                         if (player2 != NULL) {
                             if ((player2->apiobj.character_data->model_flags & 0x80000) == 0 &&
-                                (player->apiobj.objptr->id != id_JARJAR ||
-                                 static_cast<i8>(player->apiobj.flags_low) < 0) &&
+                                (player->apiobj.objptr->id != id_JARJAR || player->apiobj.player_controlled) &&
                                 (player->apiobj.character_data->game_character->uses_weapon_action != 4 ||
                                  object->apiobj.character_data->game_character->uses_weapon_action != 4)) {
                                 object->ai.opponent = player2;

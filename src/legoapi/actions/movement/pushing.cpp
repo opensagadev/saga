@@ -149,8 +149,8 @@ void ResetPushProgress(WORLDINFO_s *world, void *progress_data) {
     for (i32 index = 0; index < world->push_block_count; ++index, ++block) {
         if (index < 16 && progress != NULL) {
             const u32 bit = 1u << index;
-            block->flags_0cb = (block->flags_0cb & ~2u) | (((progress->state_mask & bit) != 0) << 1);
-            block->push_visible = (progress->visible_mask & bit) != 0;
+            block->flags_0cb = (block->flags_0cb & ~2u) | (((progress->state_mask[0] & bit) != 0) << 1);
+            block->push_visible = (progress->visible_mask[0] & bit) != 0;
             if (!block->push_visible) {
                 NuSpecialSetVisibility(&block->special, 0);
                 block->push_visible = 0;
@@ -159,7 +159,7 @@ void ResetPushProgress(WORLDINFO_s *world, void *progress_data) {
                 }
             }
 
-            if ((progress->position_mask & bit) == 0) {
+            if ((progress->position_mask[0] & bit) == 0) {
                 continue;
             }
             nuinstanim_s *animation = NuSpecialGetInstAnim(&block->special);

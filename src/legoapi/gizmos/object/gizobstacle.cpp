@@ -667,39 +667,33 @@ static void GizObstacles_StoreProgress(void *, void *data, void *progress_ptr) {
     }
 
     ClearObstacleProgress(progress);
-    if (obstacle_sys == NULL) {
-        return;
-    }
 
-    i32 count = obstacle_sys->count;
-    if (count > GIZOBSTACLE_PROGRESS_CAPACITY) {
-        count = GIZOBSTACLE_PROGRESS_CAPACITY;
-    }
-
-    for (i32 index = 0; index < count; ++index) {
-        const GIZOBSTACLE_s &obstacle = obstacle_sys->obstacles[index];
+    const GIZOBSTACLE_s *obstacle_entry = obstacle_sys->obstacles;
+    for (i32 index = 0; index < obstacle_sys->count && index != GIZOBSTACLE_PROGRESS_CAPACITY;
+         ++index, ++obstacle_entry) {
+        const GIZOBSTACLE_s &obstacle = *obstacle_entry;
         const i32 word = index >> 5;
         const u32 bit = 1u << (index & 31);
 
-        if ((obstacle.progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) == 0) {
+        if (!obstacle.progress_visible) {
             progress->progress_flag_1[word] &= ~bit;
         }
-        if ((obstacle.progress_flags & GIZOBSTACLE_PROGRESS_FLAG_ENABLED) == 0) {
+        if (!obstacle.progress_enabled) {
             progress->progress_flag_0[word] &= ~bit;
         }
-        if ((obstacle.runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_PICKUPS_SPAWNED) != 0) {
+        if (obstacle.runtime_pickups_spawned) {
             progress->runtime_flag_0[word] |= bit;
         }
-        if ((obstacle.runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE) != 0) {
+        if (obstacle.runtime_ai_active) {
             progress->runtime_flag_2[word] |= bit;
         }
-        if ((obstacle.runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_BLOCKED) != 0) {
+        if (obstacle.runtime_blocked) {
             progress->runtime_flag_3[word] |= bit;
         }
-        if ((obstacle.runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_TRIGGER_LATCHED) != 0) {
+        if (obstacle.runtime_trigger_latched) {
             progress->runtime_flag_6[word] |= bit;
         }
-        if ((obstacle.runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) != 0) {
+        if (obstacle.runtime_destroyed) {
             progress->runtime_flag_7[word] |= bit;
         }
     }
@@ -710,30 +704,28 @@ static void GizObstacles_Reset(void *world_ptr, void *data, void *progress_ptr) 
     GIZOBSTACLESYS_s *obstacle_sys = static_cast<GIZOBSTACLESYS_s *>(data);
     GIZOBSTACLEPROGRESS_s *progress = static_cast<GIZOBSTACLEPROGRESS_s *>(progress_ptr);
     GIZOBSTACLE_s *obstacle_entry = obstacle_sys->obstacles;
-    auto world_terrain = world->terrain;
     for (i32 index = 0; index < obstacle_sys->count; ++index, ++obstacle_entry) {
         GIZOBSTACLE_s &obstacle = *obstacle_entry;
-        obstacle.progress_flags = static_cast<u8>(
-            (obstacle.progress_flags | GIZOBSTACLE_PROGRESS_FLAG_ENABLED | GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) &
-            ~(GIZOBSTACLE_PROGRESS_FLAG_EXTERNAL_CONTROL | GIZOBSTACLE_PROGRESS_FLAG_PUSH_CONTROL));
+        obstacle.progress_enabled = 1;
+        obstacle.progress_visible = 1;
+        obstacle.progress_external_control = 0;
+        obstacle.progress_push_control = 0;
         obstacle.runtime_flags &=
             static_cast<u8>(GIZOBSTACLE_RUNTIME_FLAG_PICKUPS_SPAWNED | GIZOBSTACLE_RUNTIME_FLAG_PENDING_BLOWUP_TYPE);
         obstacle.animation_speed = 1.0f;
 
-        GAMEANIMSET_s *anim_set = obstacle.anim_set;
-        if (anim_set != NULL) {
-            auto anim_set_objects = anim_set->objects;
-            for (GAMEANIMOBJ_s *object = anim_set_objects; object != NULL; object = object->next) {
+        if (obstacle.anim_set != NULL) {
+            for (GAMEANIMOBJ_s *object = obstacle.anim_set->objects; object != NULL; object = object->next) {
                 i16 *object_data = static_cast<i16 *>(object->object_data);
                 object_data[1] = -1;
-                if (world_terrain != NULL && (object_data[0] & 1) == 0 && NuSpecialExistsFn(&object->special) != 0) {
+                if (world->terrain != NULL && (object_data[0] & 1) == 0 && NuSpecialExistsFn(&object->special) != 0) {
                     object_data[1] = FindPlatInst(NuSpecialGetInstanceix(&object->special));
-                }
-                if (object_data[1] != -1) {
-                    obstacle.runtime_flags |= GIZOBSTACLE_RUNTIME_FLAG_HAS_PLATFORM;
+                    if (object_data[1] != -1) {
+                        obstacle.runtime_has_platform = 1;
+                    }
                 }
                 if ((object_data[0] & 2) != 0) {
-                    obstacle.runtime_flags |= GIZOBSTACLE_RUNTIME_FLAG_ANIM_OBJECT_BIT_1;
+                    obstacle.runtime_anim_object_bit_1 = 1;
                 }
             }
 
@@ -743,39 +735,23 @@ static void GizObstacles_Reset(void *world_ptr, void *data, void *progress_ptr) 
                 obstacle.room_id = -1;
             }
             if ((obstacle.config_flags & GIZOBSTACLE_CONFIG_USE_ANIM_AVERAGE_POSITION) != 0) {
-                GameAnimSet_GetAveragePos(anim_set, &obstacle.secondary_position, 0, 1, 1);
+                GameAnimSet_GetAveragePos(obstacle.anim_set, &obstacle.secondary_position, 0, 1, 1);
             }
-            GameAnimSet_EvaluateState(anim_set);
+            GameAnimSet_EvaluateState(obstacle.anim_set);
             GizObstacle_EvalAveragePosAndRadius(&obstacle, 2);
         }
 
-        if (!(progress != NULL && index < GIZOBSTACLE_PROGRESS_CAPACITY)) {
-            continue;
+        if (index < GIZOBSTACLE_PROGRESS_CAPACITY && progress != NULL) {
+            const i32 word = index >> 5;
+            const u32 bit = 1u << (index & 31);
+            obstacle.progress_visible = (progress->progress_flag_1[word] & bit) != 0;
+            obstacle.progress_enabled = (progress->progress_flag_0[word] & bit) != 0;
+            obstacle.runtime_pickups_spawned = (progress->runtime_flag_0[word] & bit) != 0;
+            obstacle.runtime_ai_active = (progress->runtime_flag_2[word] & bit) != 0;
+            obstacle.runtime_blocked = (progress->runtime_flag_3[word] & bit) != 0;
+            obstacle.runtime_trigger_latched = (progress->runtime_flag_6[word] & bit) != 0;
+            obstacle.runtime_destroyed = (progress->runtime_flag_7[word] & bit) != 0;
         }
-        const i32 word = index >> 5;
-        const u32 bit = 1u << (index & 31);
-
-        obstacle.progress_flags =
-            static_cast<u8>((obstacle.progress_flags & ~GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) |
-                            ((progress->progress_flag_1[word] & bit) != 0 ? GIZOBSTACLE_PROGRESS_FLAG_VISIBLE : 0));
-        obstacle.progress_flags =
-            static_cast<u8>((obstacle.progress_flags & ~GIZOBSTACLE_PROGRESS_FLAG_ENABLED) |
-                            ((progress->progress_flag_0[word] & bit) != 0 ? GIZOBSTACLE_PROGRESS_FLAG_ENABLED : 0));
-        obstacle.runtime_flags = static_cast<u8>(
-            (obstacle.runtime_flags & ~GIZOBSTACLE_RUNTIME_FLAG_PICKUPS_SPAWNED) |
-            ((progress->runtime_flag_0[word] & bit) != 0 ? GIZOBSTACLE_RUNTIME_FLAG_PICKUPS_SPAWNED : 0));
-        obstacle.runtime_flags =
-            static_cast<u8>((obstacle.runtime_flags & ~GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE) |
-                            ((progress->runtime_flag_2[word] & bit) != 0 ? GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE : 0));
-        obstacle.runtime_flags =
-            static_cast<u8>((obstacle.runtime_flags & ~GIZOBSTACLE_RUNTIME_FLAG_BLOCKED) |
-                            ((progress->runtime_flag_3[word] & bit) != 0 ? GIZOBSTACLE_RUNTIME_FLAG_BLOCKED : 0));
-        obstacle.runtime_flags = static_cast<u8>(
-            (obstacle.runtime_flags & ~GIZOBSTACLE_RUNTIME_FLAG_TRIGGER_LATCHED) |
-            ((progress->runtime_flag_6[word] & bit) != 0 ? GIZOBSTACLE_RUNTIME_FLAG_TRIGGER_LATCHED : 0));
-        obstacle.runtime_flags =
-            static_cast<u8>((obstacle.runtime_flags & ~GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) |
-                            ((progress->runtime_flag_7[word] & bit) != 0 ? GIZOBSTACLE_RUNTIME_FLAG_DESTROYED : 0));
     }
     ngizobstacletriggers = 0;
 }
@@ -807,8 +783,9 @@ static i32 GizObstacles_Load(void *world_ptr, void *data) {
     const u8 version = static_cast<u8>(EdFileReadChar());
     obstacle_sys->count = static_cast<u16>(EdFileReadShort());
 
-    for (i32 index = 0; index < obstacle_sys->count; ++index) {
-        GIZOBSTACLE_s &obstacle = obstacle_sys->obstacles[index];
+    GIZOBSTACLE_s *obstacle_ptr = obstacle_sys->obstacles;
+    for (i32 index = 0; index < obstacle_sys->count; ++index, ++obstacle_ptr) {
+        GIZOBSTACLE_s &obstacle = *obstacle_ptr;
         EdFileRead(obstacle.name, sizeof(obstacle.name));
         EdFileReadNuVec(&obstacle.position);
 
@@ -846,29 +823,29 @@ static i32 GizObstacles_Load(void *world_ptr, void *data) {
         GizmoFileReadGameAnimSet(obstacle.anim_set, world, Gizobstacle_ReadAnimSetData, version,
                                  const_cast<char *>("GizObstacle"), obstacle.name);
 
-        if (version <= 3) {
-            obstacle.field_0x4c = 1.0f;
-            obstacle.field_0x50 = 1.0f;
-        } else {
+        if (version > 3) {
             obstacle.field_0x4c = EdFileReadFloat();
-            if (version <= 4) {
-                obstacle.field_0x50 = obstacle.field_0x4c;
-            } else {
-                obstacle.field_0x50 = EdFileReadFloat();
-            }
+        } else {
+            obstacle.field_0x4c = 1.0f;
+        }
+        if (version > 4) {
+            obstacle.field_0x50 = EdFileReadFloat();
+        } else {
+            obstacle.field_0x50 = obstacle.field_0x4c;
         }
 
-        obstacle.blowup_type = -1;
         if (version > 7) {
             obstacle.reflection_alpha = EdFileReadFloat();
-
+        }
+        obstacle.blowup_type = -1;
+        if (version > 8) {
             if (version == 9) {
                 obstacle.blowup_type = EdFileReadShort();
                 obstacle.pickup_count = EdFileReadShort();
                 obstacle.pickup_direction_x = EdFileReadShort();
                 obstacle.pickup_direction_y = EdFileReadShort();
                 EdFileReadNuVec(&obstacle.pickup_offset);
-            } else if (version > 9) {
+            } else {
                 char blowup_name[32];
                 const i32 name_length = static_cast<i8>(EdFileReadChar());
                 if (name_length != 0) {
@@ -886,22 +863,20 @@ static i32 GizObstacles_Load(void *world_ptr, void *data) {
             }
         }
 
-        if (version <= 9 || version == 10) {
-            obstacle.pickup_scatter_height = world->area != NULL && (world->area->flags & 1) != 0 ? 12.0f : 1.75f;
-            obstacle.start_sfx_id = -1;
-            obstacle.stop_sfx_id = -1;
-        } else {
+        if (version > 10) {
             obstacle.pickup_scatter_height = EdFileReadFloat();
-            obstacle.start_sfx_id = -1;
-            obstacle.stop_sfx_id = -1;
-            if (version > 12) {
-                char sfx_name[32];
-                if (GizmoFileReadName(sfx_name) != 0) {
-                    obstacle.start_sfx_id = static_cast<i16>(GetSfxId(sfx_name));
-                }
-                if (version > 13 && GizmoFileReadName(sfx_name) != 0) {
-                    obstacle.stop_sfx_id = static_cast<i16>(GetSfxId(sfx_name));
-                }
+        } else {
+            obstacle.pickup_scatter_height = world->area != NULL && (world->area->flags & 1) != 0 ? 12.0f : 1.75f;
+        }
+        obstacle.start_sfx_id = -1;
+        obstacle.stop_sfx_id = -1;
+        if (version > 12) {
+            char sfx_name[32];
+            if (GizmoFileReadName(sfx_name) != 0) {
+                obstacle.start_sfx_id = static_cast<i16>(GetSfxId(sfx_name));
+            }
+            if (version > 13 && GizmoFileReadName(sfx_name) != 0) {
+                obstacle.stop_sfx_id = static_cast<i16>(GetSfxId(sfx_name));
             }
         }
 
@@ -1050,8 +1025,7 @@ void GizObstacle_Stop(GIZOBSTACLE_s *obstacle) {
 }
 
 i32 GizObstacles_Hit(void *context, GIZOBSTACLE_s *obstacle, nuvec_s *, i32 player, i32) {
-    if ((obstacle->progress_flags & 2) == 0 || (obstacle->progress_flags & 1) == 0 ||
-        (obstacle->runtime_flags & 0x80) != 0)
+    if ((obstacle->progress_flags & 2) == 0 || !obstacle->progress_enabled || obstacle->runtime_destroyed)
         return 0;
 
     if ((obstacle->config_flags & 0x800) == 0) {
@@ -1060,11 +1034,10 @@ i32 GizObstacles_Hit(void *context, GIZOBSTACLE_s *obstacle, nuvec_s *, i32 play
         if (obstacle->blowup_type != -1) {
             if ((obstacle->config_flags & 0x200) != 0) {
                 if (obstacle->anim_set != NULL) {
-                    auto obstacle_blowup_type = obstacle->blowup_type;
                     for (GAMEANIMOBJ_s *object = obstacle->anim_set->objects; object != NULL; object = object->next) {
                         NUVEC *position = NuSpecialGetDrawPos(&object->special);
                         if (position != NULL) {
-                            GizmoBlowUpTypeBlowUp(static_cast<WORLDINFO_s *>(context), obstacle_blowup_type, position);
+                            GizmoBlowUpTypeBlowUp(static_cast<WORLDINFO_s *>(context), obstacle->blowup_type, position);
                         }
                     }
                 }

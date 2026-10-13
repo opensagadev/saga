@@ -390,31 +390,29 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
                 KillPart(part, 2);
                 continue;
             }
-            if (part_pickup_type != 0xcb) {
-                if (part_pickup_type == 0xd0) {
-                    CollectPowerUp(object, &part->position, part->rotation_y, 1);
-                    KillPart(part, 2);
-                } else if (force_player_mask == 3) {
-                    if ((api->character_data->model_flags & 0x2000) == 0 || object->torpedo == NULL)
-                        continue;
-                    if (object->torpedo->count < getMaxTorpedos(object)) {
-                        TORPEDOPACKET_s *packet = object->torpedo;
-                        packet->pickup_positions[packet->count] = part->position;
-                        packet->pickup_data[packet->count] = part->field_10c[0];
-                        packet->pickup_flags[packet->count] = part->field_10c[1];
-                        ++packet->count;
-                        object->torpedo->field_08 = 0.0f;
-                        object->torpedo->field_03 = 0;
-                        KillPart(part, 2);
-                    }
-                } else {
-                    GIZMOPICKUP_s pickup;
-                    SetCoinType(part_pickup_type, &pickup);
-                    GizmoPickup_CollectCoin(WORLD, &part->position, pickup.type_index, pickup.model_variant, object, 1);
+            if (part_pickup_type == 0xcb) {
+                CollectHitPoint(object, &part->position, 1);
+                KillPart(part, 2);
+            } else if (part_pickup_type == 0xd0) {
+                CollectPowerUp(object, &part->position, part->rotation_y, 1);
+                KillPart(part, 2);
+            } else if (force_player_mask == 3) {
+                if ((api->character_data->model_flags & 0x2000) == 0 || object->torpedo == NULL)
+                    continue;
+                if (object->torpedo->count < getMaxTorpedos(object)) {
+                    TORPEDOPACKET_s *packet = object->torpedo;
+                    packet->pickup_positions[packet->count] = part->position;
+                    packet->pickup_data[packet->count] = part->field_10c[0];
+                    packet->pickup_flags[packet->count] = part->field_10c[1];
+                    ++packet->count;
+                    object->torpedo->field_08 = 0.0f;
+                    object->torpedo->field_03 = 0;
                     KillPart(part, 2);
                 }
             } else {
-                CollectHitPoint(object, &part->position, 1);
+                GIZMOPICKUP_s pickup;
+                SetCoinType(part_pickup_type, &pickup);
+                GizmoPickup_CollectCoin(WORLD, &part->position, pickup.type_index, pickup.model_variant, object, 1);
                 KillPart(part, 2);
             }
         }
@@ -640,41 +638,43 @@ void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32) {
     if (ONEPLAYERPOWERUPS != 0) {
         const u16 camera_rotation = GameCam_GetAdjustedYRot(NULL);
         const u16 panel_rotation = rotation - RotDiff(0, camera_rotation);
-        NUVEC target_position = {ICONX, PowerUp_GetPanelY(object->apiobj.field_0x27c) + STATSPOSY, 1.0f};
-        if (object->apiobj.field_0x27c == 0) {
-            target_position.x = -target_position.x;
-        }
+        NUVEC target_position;
+        target_position.x = object->apiobj.field_0x27c == 0 ? -ICONX : ICONX;
+        target_position.y = PowerUp_GetPanelY(object->apiobj.field_0x27c) + STATSPOSY;
+        target_position.z = 1.0f;
 
+        ADDGAMEMSG message;
         if (object->field_0xdec > 0.0f) {
-            NUVEC icon_position = {ICONX, PowerUp_GetPanelY(object->apiobj.field_0x27c) + STATSPOSY, 1.0f};
-            if (object->apiobj.field_0x27c == 0) {
-                icon_position.x = -icon_position.x;
-            }
-            ADDGAMEMSG icon_message = AddGameMsg_Default;
-            icon_message.position = &icon_position;
-            icon_message.scale = 0.6f;
-            icon_message.target_scale = 0.0f;
-            icon_message.flags = 0x20;
-            icon_message.duration = 0.3f;
-            icon_message.icon = 0x35;
-            icon_message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0x35]);
-            AddGameMsg(&icon_message);
+            NUVEC icon_position;
+            const i32 player = object->apiobj.field_0x27c;
+            icon_position.x = player == 0 ? -ICONX : ICONX;
+            icon_position.y = PowerUp_GetPanelY(player) + STATSPOSY;
+            icon_position.z = 1.0f;
+            message = AddGameMsg_Default;
+            message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0x35]);
+            message.icon = 0x35;
+            message.position = &icon_position;
+            message.scale = 0.6f;
+            message.target_scale = 0.0f;
+            message.duration = 0.3f;
+            message.flags = 0x20;
+            AddGameMsg(&message);
         }
 
-        ADDGAMEMSG message = AddGameMsg_Default;
+        message = AddGameMsg_Default;
+        message.icon = 0xd0;
+        message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0xd0]);
         message.position = position;
+        message.field_0x4d = 1;
         message.scale = AreaPickupScale;
         message.target_position = &target_position;
-        message.target_scale = POWERUPOBJSIZE;
         message.flags = 0x2112d;
-        message.duration = 1.0f;
-        message.icon = 0xd0;
-        message.update_fn = PowerUp_UpdateMsg;
+        message.target_scale = POWERUPOBJSIZE;
+        message.tick_fn = PowerUp_UpdateMsg;
         message.end_fn = PowerUp_EndMsg;
-        message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0xd0]);
-        message.field_0x4d = 1;
-        message.player_index = object->apiobj.field_0x27c;
         message.field_0x4e = 7;
+        message.player_index = object->apiobj.field_0x27c;
+        message.duration = 1.0f;
         GAMEMESSAGE_s *game_message = AddGameMsg(&message);
         if (game_message != NULL) {
             game_message->rotation_y = panel_rotation;
@@ -820,47 +820,42 @@ void KillParts_SpeederBike(ADDPART_s *params, i32, i32, GameObject_s *object) {
     part->field_104 = 1.5f;
 
     i32 index;
-    if (bikeParts[0].active == 0) {
-        index = 0;
-    } else if (bikeParts[1].active == 0) {
-        index = 1;
-    } else if (bikeParts[2].active == 0) {
-        index = 2;
-    } else if (bikeParts[3].active == 0) {
-        index = 3;
-    } else {
+    for (index = 0; index < 4; ++index) {
+        if (bikeParts[index].active == 0)
+            break;
+    }
+    if (index == 4) {
         part->speeder_index = -1.0f;
-        KillPart(part, 0);
-        return;
-    }
-    part->speeder_index = static_cast<f32>(index);
+    } else {
+        part->speeder_index = static_cast<f32>(index);
+        if (object->movement_spline != NULL) {
+            f32 distance = NuVecMag(&part->velocity) * FRAMETIME;
+            const i32 bike_index = static_cast<i32>(part->speeder_index);
+            BIKEPART_s *bike = &bikeParts[bike_index];
+            bike->spline_position = object->movement_spline_position;
+            bike->active = 1;
+            GameObject_s *rider = object->field_0xcc0;
+            if (rider != NULL) {
+                bike->rider = rider;
+                rider->apiobj.velocity = velocity;
+                rider->apiobj.velocity.y += 1.5f;
+            } else {
+                bike->rider = NULL;
+            }
+            bike->rider_position = object->apiobj.position;
 
-    if (object->movement_spline == NULL) {
-        KillPart(part, 0);
-        return;
+            NUVEC position;
+            u16 yaw;
+            u16 pitch;
+            PointAlongSpline(bikeParts[bike_index].spline_position.spline, bikeParts[bike_index].spline_position.along,
+                             &position, &yaw, &pitch, 1);
+            part->rotation_y = distance < 0.0f ? yaw : yaw - 0x8000;
+            part->rotation_x = -pitch;
+            part->field_13c = 0;
+            return;
+        }
     }
-
-    f32 distance = NuVecMag(&part->velocity) * FRAMETIME;
-    BIKEPART_s *bike = &bikeParts[static_cast<i32>(part->speeder_index)];
-    bike->spline_position = object->movement_spline_position;
-    bike->active = 1;
-    bike->rider = object->field_0xcc0;
-    if (bike->rider != NULL) {
-        bike->rider->apiobj.velocity = velocity;
-        bike->rider->apiobj.velocity.y += 1.5f;
-    }
-    bike->rider_position = object->apiobj.position;
-
-    NUVEC position;
-    u16 yaw;
-    u16 pitch;
-    PointAlongSpline(bike->spline_position.spline, bike->spline_position.along, &position, &yaw, &pitch, 1);
-    if (distance >= 0.0f) {
-        yaw -= 0x8000;
-    }
-    part->rotation_x = -pitch;
-    part->field_13c = 0;
-    part->rotation_y = yaw;
+    KillPart(part, 0);
 }
 
 extern WORLDINFO_s *WORLD;
@@ -1167,11 +1162,13 @@ extern "C" {
         }
         PART_s *part = &Part[i_part];
         i32 scanned = 0;
-        while ((part->active & 1) != 0 && (part->flags & 0x200) != 0 && scanned < MAXPARTS) {
-            if (++i_part == MAXPARTS)
-                i_part = 0;
-            part = &Part[i_part];
-            ++scanned;
+        if ((part->active & 1) != 0) {
+            while ((part->active & 1) != 0 && (part->flags & 0x200) != 0 && scanned < MAXPARTS) {
+                if (++i_part == MAXPARTS)
+                    i_part = 0;
+                part = &Part[i_part];
+                ++scanned;
+            }
         }
         if (scanned == MAXPARTS)
             return NULL;
@@ -1181,8 +1178,9 @@ extern "C" {
             KillPart(part, 0);
         }
         if (params->matrix != NULL) {
-            part->transform = *params->matrix;
-            NUMTX_ALIGNED16 matrix = *params->matrix;
+            NUMTX *source = params->matrix;
+            part->transform = *source;
+            NUMTX_ALIGNED16 matrix = *source;
             NuVecMtxRotate(&forward, &forward, &matrix);
             part->rotation_y = NuAtan2D(forward.x, forward.z);
             NuVecRotateY(&forward, &forward, -part->rotation_y);
@@ -1215,8 +1213,13 @@ extern "C" {
         part->field_20a = params->field_c4;
         part->render_flags &= ~0x40;
         if (params->lighting != NULL) {
-            for (i32 i = 0; i < 7; ++i)
-                part->lighting[i] = params->lighting->values[i];
+            part->lighting[0] = params->lighting->values[0];
+            part->lighting[3] = params->lighting->values[3];
+            part->lighting[1] = params->lighting->values[1];
+            part->lighting[4] = params->lighting->values[4];
+            part->lighting[2] = params->lighting->values[2];
+            part->lighting[5] = params->lighting->values[5];
+            part->lighting[6] = params->lighting->values[6];
             part->active |= 8;
         } else {
             part->active &= ~8;
@@ -1984,12 +1987,14 @@ extern "C" {
         for (i32 i = 0; i < MAXPARTS; ++i, ++part) {
             if ((part->active & 1) != 0 && (player == -1 || part->force_player_mask == player) &&
                 (owner == NULL || part->owner == owner)) {
-                if (position == NULL)
+                if (position != NULL) {
+                    f32 distance = NuVecDistSqr(position, &part->position, NULL);
+                    if (distance < nearest) {
+                        nearest = distance;
+                        result = part;
+                    }
+                } else {
                     return part;
-                f32 distance = NuVecDistSqr(position, &part->position, NULL);
-                if (distance < nearest) {
-                    nearest = distance;
-                    result = part;
                 }
             }
         }
@@ -2036,7 +2041,7 @@ extern "C" {
         MAXPARTS = count;
         buffer->addr = (buffer->addr + 15) & ~static_cast<usize>(15);
         Part = reinterpret_cast<PART_s *>(buffer->void_ptr);
-        buffer->addr += MAXPARTS * sizeof(PART_s);
+        buffer->char_ptr += MAXPARTS * sizeof(PART_s);
         ResetParts();
         memset(part_types, 0, sizeof(part_types));
         for (i32 i = 0; i < 128; ++i) {
@@ -2054,7 +2059,9 @@ extern "C" {
         memset(part_page_used, 0, sizeof(part_page_used));
         memset(part_page_on, 0, sizeof(part_page_on));
         memset(part_scene, 0, sizeof(part_scene));
-        memset(part_scene_pageid, -1, sizeof(part_scene_pageid));
+        for (i32 i = 0; i < 32; ++i) {
+            part_scene_pageid[i] = -1;
+        }
         part_platimpactcnt = 0;
     }
 
@@ -2105,10 +2112,9 @@ extern "C" {
     void NewPartRotation(PART_s *part) {
         part->rotation_axis_1 = (NuRandIntSeeded(&partseed) % 65535u) / 21845u + 1;
         part->field_124[3] = static_cast<i32>((NuRandFloatSeeded(&partseed) * 2.0f - 1.0f) * 65536.0f);
-        part->rotation_axis_2 = (NuRandIntSeeded(&partseed) % 65535u) / 21845u + 1;
-        while (part->rotation_axis_2 == part->rotation_axis_1) {
+        do {
             part->rotation_axis_2 = (NuRandIntSeeded(&partseed) % 65535u) / 21845u + 1;
-        }
+        } while (part->rotation_axis_2 == part->rotation_axis_1);
         part->field_124[4] = static_cast<i32>((NuRandFloatSeeded(&partseed) * 2.0f - 1.0f) * 65536.0f);
     }
 
@@ -2520,19 +2526,23 @@ PART_s *TargetPart(GameObject_s *object, nuvec_s *position, nuvec_s *direction, 
 }
 
 extern "C" i32 NuGScnNumSpecials(nugscn_s *);
+static char nullobjectname[16] = "NULL instance";
 i32 edpartLookupObjectInScene(char *name, nugscn_s *scene) {
     if (name[0] == 0)
         return -1;
-    if (NuStrNCmp(name, "NULL instance", 16) == 0)
+    if (NuStrNCmp(name, nullobjectname, 16) == 0)
         return 9999;
     if (scene != NULL) {
         nuhspecial_s special;
         const i32 count = NuGScnNumSpecials(scene);
-        for (i32 i = 0; i < count; ++i) {
+        i32 i;
+        for (i = 0; i < count; ++i) {
             NuGScnGetSpecial(&special, scene, i);
             if (NuSpecialExistsFn(&special) && NuStrNCmp(name, NuSpecialGetName(&special), 16) == 0)
-                return i;
+                break;
         }
+        if (i < count)
+            return i;
     }
     return -1;
 }
@@ -2894,13 +2904,10 @@ void LoadPartFile(WORLDINFO *world) {
 
     if ((world->current_level->flags & (LEVEL_OUTRO | LEVEL_MIDTRO | LEVEL_INTRO)) == 0) {
         sprintf(path, "%s.par", world->config_file);
-        i32 page = -1;
-        if (NuFileExists(path)) {
-            page = edpartLoadPage(path, 1, world->current_gscn);
-            world->page_part = page;
-        }
+        if (NuFileExists(path) > 0)
+            world->page_part = edpartLoadPage(path, 1, world->current_gscn);
         world->part_debris_sys = static_cast<PARTDEBSYS_s *>(
-            InitPartDebris(&world->giz_buffer, &world->unknown_0108, 0x40, PDEBCOUNT, PDebNameList, page));
+            InitPartDebris(&world->giz_buffer, &world->unknown_0108, 0x40, PDEBCOUNT, PDebNameList, world->page_part));
     }
 }
 
@@ -2937,20 +2944,19 @@ void AddTorpedoAsPart(nuvec_s *position, nuvec_s *velocity, float scale, float l
     f32 torpedo_scale = 0.1f * WORLD->giz_torp_machine_sys->scale;
     params.field_14 = torpedo_scale * GizmoPickupType[8].shadow_radius_x;
     params.field_18 = torpedo_scale * GizmoPickupType[8].shadow_extent_x;
+    params.special = &world->lev_objs[0x79].special;
+    params.field_28 = 0x79;
     params.gravity = AreaPickupGravity;
     if (params.gravity == 0.0f)
         params.field_a4 = 15.0f;
-    params.special = &world->lev_objs[0x79].special;
-    params.field_28 = 0x79;
-    params.flags = 0x256;
-    params.field_40 = PartCollide_3D;
-    params.move_fn = params.gravity == 0.0f ? PartMove_VehiclePickup : NULL;
-    if (FreePlay != 0 && WORLD->current_level == ANAKINSFLIGHTB_LDATA)
-        params.field_40 = PartCollide_2D;
-    params.field_48 = NULL;
-    params.draw_fn = PartDraw_Torp;
     params.stop_fn = PartStop_Flickerer;
+    params.field_40 = FreePlay != 0 && WORLD->current_level == ANAKINSFLIGHTB_LDATA ? PartCollide_2D : PartCollide_3D;
     params.field_88 = lifetime;
+    params.draw_fn = PartDraw_Torp;
+    params.field_48 = NULL;
+    params.flags = 0x256;
+    if (params.gravity == 0.0f)
+        params.move_fn = PartMove_VehiclePickup;
     params.time_step = FRAMETIME;
     params.field_c0 = scale;
     PART_s *part = AddPart(&params);
@@ -3000,21 +3006,21 @@ void PowerUp_AddPart(NUVEC *position, NUVEC *velocity, f32 scale, f32 lifetime) 
     ADDPART_ALIGNED16 params = Default_ADDPART;
     params.position = position;
     params.velocity = velocity;
-    params.special = &world->lev_objs[0xd0].special;
     params.field_18 = params.field_14 = scale * GizmoPickupType[9].shadow_radius_x;
     params.gravity = AreaPickupGravity;
-    params.field_28 = 0xd0;
-    params.flags = 0x256;
+    params.special = &world->lev_objs[0xd0].special;
     params.field_40 = PartCollide_3D;
-    params.field_3c = PowerUp_ImpactPart;
     params.field_48 = PowerUp_UpdatePart;
+    params.field_3c = PowerUp_ImpactPart;
     params.stop_fn = PartStop_Flickerer;
     params.draw_fn = PowerUp_DrawPart;
+    params.field_28 = 0xd0;
+    params.flags = 0x256;
+    params.field_88 = lifetime;
     if (params.gravity == 0.0f)
         params.move_fn = PartMove_VehiclePickup;
     params.time_step = FRAMETIME;
     params.field_c0 = scale;
-    params.field_88 = lifetime;
     PART_s *part = AddPart(&params);
     if (part != NULL)
         part->rotation_y = NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f;
@@ -3048,8 +3054,8 @@ void MakePartVector(NUVEC *velocity, NUVEC *direction, f32 scale) {
         *velocity = v010;
         const i32 z_random = qrand();
         const i32 x_random = qrand();
-        NuVecRotateZ(velocity, velocity, (z_random / 6 + static_cast<u16>(temp_zrot) - 0x1555) & 0xffff);
-        NuVecRotateX(velocity, velocity, (x_random / 6 + static_cast<u16>(temp_xrot) - 0x1555) & 0xffff);
+        NuVecRotateZ(velocity, velocity, static_cast<u16>(temp_zrot + z_random / 6 - 0x1555));
+        NuVecRotateX(velocity, velocity, static_cast<u16>(temp_xrot + x_random / 6 - 0x1555));
         NuVecScale(velocity, velocity, scale);
     }
 }
@@ -3364,29 +3370,31 @@ void UpdatePartEmits(f32 time) {
 i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 
 PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f32 range) {
+    PART_s *part = Part;
+    radius *= radius;
     f32 nearest_distance = range > 0.0f ? range : 100.0f;
     PART_s *nearest = NULL;
-    for (i32 i = 0; i < MAXPARTS; ++i) {
-        PART_s *part = &Part[i];
+    for (i32 i = 0; i < MAXPARTS; ++i, ++part) {
         if ((part->active & 1) == 0 || part->owner == owner || (part->flags & flags) != flags)
             continue;
-        if (range <= 0.0f) {
-            f32 speed = NuVecMag(&part->velocity);
-            if (speed != 0.0f) {
-                NUVEC direction;
-                NuVecScale(&direction, &part->velocity, 1.0f / speed);
-                f32 distance = NuVecDistSqr(&part->position, position, NULL);
-                if (distance < speed * 0.5f * speed * 0.5f &&
-                    LineIntersectSphere(&part->position, &direction, position, radius * radius, NULL)) {
-                    nearest_distance = distance;
-                    nearest = part;
-                }
-            }
-        } else {
+        if (range > 0.0f) {
             f32 distance = NuVecDistSqr(&part->position, position, NULL);
             if (distance < nearest_distance) {
                 nearest_distance = distance;
                 nearest = part;
+            }
+        } else {
+            f32 speed = NuVecMag(&part->velocity);
+            if (speed != 0.0f) {
+                NUVEC direction;
+                NuVecScale(&direction, &part->velocity, 1.0f / speed);
+                f32 reach = speed * 0.5f;
+                reach *= reach;
+                f32 distance = NuVecDistSqr(&part->position, position, NULL);
+                if (distance < reach && LineIntersectSphere(&part->position, &direction, position, radius, NULL)) {
+                    nearest_distance = distance;
+                    nearest = part;
+                }
             }
         }
     }

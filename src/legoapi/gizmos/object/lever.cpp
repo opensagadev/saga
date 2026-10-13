@@ -583,27 +583,18 @@ static void Levers_Reset(void *world_ptr, void *, void *progress_ptr) {
         return;
     }
 
-    for (i32 index = 0; index < world->nlevers; ++index) {
-        LEVER_s &lever = world->levers[index];
-        Lever_Reset(&lever);
-        if (progress != NULL && !(index >= 32)) {
-
+    LEVER_s *lever = world->levers;
+    for (i32 index = 0; index < world->nlevers; ++index, ++lever) {
+        Lever_Reset(lever);
+        if (index < 32 && progress != NULL) {
             const u32 bit = 1u << index;
             if ((progress->pulled_down[0] & bit) != 0) {
-                lever.flags |= LEVER_FLAG_BEING_PULLED;
-                lever.pull_progress = 1.0f;
-                lever.animation_frame = 0x8000;
+                lever->being_pulled = 1;
+                lever->pull_progress = 1.0f;
+                lever->animation_frame = 0x8000;
             }
-            if ((progress->visible[0] & bit) != 0) {
-                lever.flags |= LEVER_FLAG_VISIBLE;
-            } else {
-                lever.flags &= ~LEVER_FLAG_VISIBLE;
-            }
-            if ((progress->enabled[0] & bit) == 0) {
-                lever.flags &= ~LEVER_FLAG_ENABLED;
-            } else {
-                lever.flags |= LEVER_FLAG_ENABLED;
-            }
+            lever->visible = (progress->visible[0] & bit) != 0;
+            lever->enabled = (progress->enabled[0] & bit) != 0;
         }
     }
 }
@@ -629,84 +620,66 @@ static i32 Levers_Load(void *world_ptr, void *) {
     const i32 version = EdFileReadInt();
     world->nlevers = EdFileReadInt();
     for (i32 index = 0; index < world->nlevers; ++index) {
-        LEVER_s &lever = world->levers[index];
-        lever.flags = 0;
-        EdFileRead(lever.name, sizeof(lever.name));
-        EdFileReadNuVec(&lever.position);
-        lever.y_rotation = static_cast<u16>(EdFileReadShort());
-        lever.model_variant = static_cast<char>(EdFileReadChar());
+        EdFileRead(world->levers[index].name, sizeof(world->levers[index].name));
+        EdFileReadNuVec(&world->levers[index].position);
+        world->levers[index].y_rotation = static_cast<u16>(EdFileReadShort());
+        world->levers[index].model_variant = static_cast<char>(EdFileReadChar());
 
-        if (version < 2) {
-            lever.auto_reset_delay = 2.0f;
-        } else {
-            if (EdFileReadChar() != 0) {
-                lever.flags |= LEVER_FLAG_AUTO_RESET;
-            }
-            if (version == 2) {
-                lever.auto_reset_delay = 2.0f;
-            } else {
-                lever.auto_reset_delay = EdFileReadFloat();
-                if (version == 3) {
-                    lever.flags &= ~LEVER_FLAG_HIDE_BASE;
-                } else {
-                    if (EdFileReadChar() != 0) {
-                        lever.flags |= LEVER_FLAG_HIDE_BASE;
-                    }
-                    if (version != 4) {
-                        EdFileReadNuVec(&lever.target_offset);
-                        lever.target_indicator_scale = EdFileReadFloat();
-                        if (version != 5 && EdFileReadChar() != 0) {
-                            lever.flags |= LEVER_FLAG_HIDE_TARGET_INDICATOR;
-                        }
-                        lever.platform_id = -1;
-                        continue;
-                    }
-                }
-            }
+        if (version > 1) {
+            world->levers[index].auto_reset = EdFileReadChar();
         }
-
-        lever.target_offset.x = 0.0f;
-        lever.target_offset.y = 0.0f;
-        lever.target_offset.z = -0.1441f;
-        lever.target_indicator_scale = 1.0f;
-        lever.platform_id = -1;
+        if (version > 2) {
+            world->levers[index].auto_reset_delay = EdFileReadFloat();
+        } else {
+            world->levers[index].auto_reset_delay = 2.0f;
+        }
+        if (version > 3) {
+            world->levers[index].hide_base = EdFileReadChar();
+        } else {
+            world->levers[index].hide_base = 0;
+        }
+        if (version > 4) {
+            EdFileReadNuVec(&world->levers[index].target_offset);
+            world->levers[index].target_indicator_scale = EdFileReadFloat();
+        } else {
+            world->levers[index].target_offset.x = 0.0f;
+            world->levers[index].target_offset.y = 0.0f;
+            world->levers[index].target_offset.z = -0.1441f;
+            world->levers[index].target_indicator_scale = 1.0f;
+        }
+        if (version > 5) {
+            world->levers[index].hide_target_indicator = EdFileReadChar();
+        }
+        world->levers[index].platform_id = -1;
     }
     return 1;
 }
 
 static void Lever_Reset(LEVER_s *lever) {
-    switch (lever->model_variant) {
-        case 'r':
-            lever->model_special_index = 0x22;
-            break;
-        case 'o':
-            lever->model_special_index = 0x21;
-            break;
-        case 'y':
-            lever->model_special_index = 0x20;
-            break;
-        case 'b':
-            lever->model_special_index = 0x23;
-            break;
-        case 'g':
-            lever->model_special_index = 0x24;
-            break;
-        case 'p':
-            lever->model_special_index = 0x25;
-            break;
-        case 'w':
-            lever->model_special_index = 0x26;
-            break;
-        case 'u':
-            lever->model_special_index = 0x27;
-            break;
-        case 'l':
-            lever->model_special_index = 0x28;
-            break;
+    if (lever->model_variant == 'r') {
+        lever->model_special_index = 0x22;
+    } else if (lever->model_variant == 'o') {
+        lever->model_special_index = 0x21;
+    } else if (lever->model_variant == 'y') {
+        lever->model_special_index = 0x20;
+    } else if (lever->model_variant == 'b') {
+        lever->model_special_index = 0x23;
+    } else if (lever->model_variant == 'g') {
+        lever->model_special_index = 0x24;
+    } else if (lever->model_variant == 'p') {
+        lever->model_special_index = 0x25;
+    } else if (lever->model_variant == 'w') {
+        lever->model_special_index = 0x26;
+    } else if (lever->model_variant == 'u') {
+        lever->model_special_index = 0x27;
+    } else if (lever->model_variant == 'l') {
+        lever->model_special_index = 0x28;
     }
 
-    lever->floor_position = {0.0f, 0.0f, 0.1441f};
-    NuVecRotateY(&lever->floor_position, &lever->floor_position, static_cast<u16>(lever->y_rotation + 0x8000));
+    lever->floor_position.y = 0.0f;
+    lever->floor_position.x = 0.0f;
+    lever->floor_position.z = 0.1441f;
+    NuVecRotateY(&lever->floor_position, &lever->floor_position, lever->y_rotation + 0x8000);
     NuVecAdd(&lever->floor_position, &lever->floor_position, &lever->position);
 
     NUVEC target_position;
@@ -722,15 +695,17 @@ static void Lever_Reset(LEVER_s *lever) {
     }
 
     lever->animation_frame = 0;
-    const u16 old_flags = lever->flags;
-    lever->flags |= LEVER_FLAG_VISIBLE | LEVER_FLAG_ENABLED;
-    if ((old_flags & (LEVER_FLAG_AUTO_RESET | LEVER_FLAG_BEING_PULLED)) !=
-        (LEVER_FLAG_AUTO_RESET | LEVER_FLAG_BEING_PULLED)) {
+    lever->visible = 1;
+    lever->enabled = 1;
+    if (!lever->being_pulled || !lever->auto_reset) {
         lever->pull_progress = 0.0f;
         lever->auto_reset_timer = 0.0f;
-        lever->flags &= ~LEVER_FLAG_PULLED_DOWN;
-        lever->flags =
-            static_cast<u16>((lever->flags & ~LEVER_FLAG_LOW_STATE_MASK) | LEVER_FLAG_VISIBLE | LEVER_FLAG_ENABLED);
+        lever->interacting = 0;
+        lever->being_pulled = 0;
+        lever->goodie = 0;
+        lever->baddie = 0;
+        lever->returning = 0;
+        lever->pulled_down = 0;
     }
 
     NuMtxSetRotationY(&lever->transform, lever->y_rotation);

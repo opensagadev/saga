@@ -342,22 +342,18 @@ static void Blowup_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
         return;
     }
 
-    i32 count = world->gizmo_blowup_count;
-    if (count > 512) {
-        count = 512;
-    }
-    for (i32 index = 0; index < count; ++index) {
-        GIZMOBLOWUP_s *blowup = &world->gizmo_blowups[index];
+    GIZMOBLOWUP_s *blowup = world->gizmo_blowups;
+    for (i32 index = 0; index < world->gizmo_blowup_count && index != 512; ++index, ++blowup) {
         const i32 word = index >> 5;
         const u32 bit = 1u << (index & 31);
         if ((blowup->output_flags & GIZMOBLOWUP_OUTPUT_BLOWN_UP) != 0) {
             progress->blown_up[word] |= bit;
         }
-        if ((blowup->state_flags & GIZMOBLOWUP_STATE_ACTIVATED) == 0) {
-            progress->activated[word] &= ~bit;
-        }
         if ((blowup->visibility_flags & GIZMOBLOWUP_VISIBLE) == 0) {
             progress->visible[word] &= ~bit;
+        }
+        if ((blowup->state_flags & GIZMOBLOWUP_STATE_ACTIVATED) == 0) {
+            progress->activated[word] &= ~bit;
         }
         if ((blowup->field_0x9f & 0x10) != 0) {
             progress->secondary_output[word] |= bit;
@@ -1532,12 +1528,13 @@ GIZMOBLOWUPTYPE_s *GizmoBlowup_FindType(char *name, WORLDINFO_s *world) {
     return NULL;
 }
 
-static void Blowup_ReadString(char *text) {
-    memset(text, 0, 0x100);
-    const i32 length = static_cast<i8>(EdFileReadChar());
+// Reads a length-prefixed name into `name` without terminating it; returns the stored length.
+static i32 Blowup_ReadName(char *name) {
+    const i8 length = static_cast<i8>(EdFileReadChar());
     if (length > 0) {
-        EdFileRead(text, length);
+        EdFileRead(name, length);
     }
+    return length;
 }
 
 static void Blowup_FindSpecial(WORLDINFO *world, nuhspecial_s *special, char *name, char *label, char *type_name) {
@@ -1554,151 +1551,309 @@ i32 gizmoblowup_Load(void *world_ptr, void *) {
         return 0;
     }
 
+    char text[0x100];
+    char debris_name[0x100];
+    char part_name[0x100];
+
     const i32 version = EdFileReadInt();
-    i32 file_type_count = 0;
     i32 file_instance_count;
     if (version < 2) {
         file_instance_count = EdFileReadInt();
     } else {
-        file_type_count = EdFileReadInt();
+        const i32 file_type_count = EdFileReadInt();
         file_instance_count = EdFileReadInt();
-    }
 
-    char text[0x100];
-    auto world_page_part = world->page_part;
-    auto world_page_pp = world->page_pp;
-    for (i32 file_type_index = 0; file_type_index < file_type_count; ++file_type_index) {
-        GIZMOBLOWUPTYPE_s type;
-        memset(&type, 0, sizeof(type));
+        GIZMOBLOWUPTYPE_s *next_type = world->gizmo_blowup_types;
+        i32 type_count = 0;
+        for (i32 file_type_index = 0; file_type_index < file_type_count; ++file_type_index) {
+            GIZMOBLOWUPTYPE_s type;
+            memset(&type, 0, sizeof(type));
 
-        Blowup_ReadString(text);
-        NuStrCpy(type.name, text);
-        Blowup_ReadString(text);
-        Blowup_FindSpecial(world, &type.animated_special, text, const_cast<char *>("BlowUp"), type.name);
+            // The type and model names are read unconditionally and are not terminated here.
+            EdFileRead(text, static_cast<i8>(EdFileReadChar()));
+            NuStrCpy(type.name, text);
+            EdFileRead(text, static_cast<i8>(EdFileReadChar()));
+            Blowup_FindSpecial(world, &type.animated_special, text, const_cast<char *>("BlowUp"), type.name);
+            const i32 exists = NuSpecialExistsFn(&type.animated_special);
 
-        for (i32 particle_index = 0; particle_index < 9; ++particle_index) {
-            type.particle_types[particle_index] = -1;
-        }
-        if (version > 16) {
-            Blowup_ReadString(text);
-            type.particle_types[0] = PARTLookupTypePageOnly(text, world_page_part);
-            Blowup_ReadString(text);
-            type.particle_types[1] = PARTLookupTypePageOnly(text, world_page_part);
-        } else if (version > 4) {
-            Blowup_ReadString(text);
-            type.particle_types[0] = PARTLookupType(text);
-        } else {
-            type.particle_types[0] = EdFileReadShort();
-        }
-        for (i32 particle_index = 0; particle_index < 3; ++particle_index) {
-            Blowup_ReadString(text);
-            type.particle_types[particle_index + 4] =
-                LookupDebrisEffectPageOnly(text, static_cast<char>(world_page_pp));
-        }
-        if (version >= 26) {
-            Blowup_ReadString(text);
-            type.particle_types[2] = LookupDebrisEffect(text);
-            Blowup_ReadString(text);
-            type.particle_types[3] = LookupDebrisEffect(text);
-        }
-        if (version != 26) {
-            Blowup_ReadString(text);
-            type.particle_types[7] = LookupDebrisEffect(text);
-            Blowup_ReadString(text);
-            type.particle_types[8] = LookupDebrisEffect(text);
-        }
+            type.particle_types[0] = -1;
+            type.particle_types[1] = -1;
+            if (version <= 4) {
+                type.particle_types[0] = EdFileReadShort();
+            } else if (version <= 16) {
+                if (Blowup_ReadName(part_name) > 0) {
+                    type.particle_types[0] = PARTLookupType(part_name);
+                }
+            } else {
+                if (Blowup_ReadName(part_name) > 0) {
+                    type.particle_types[0] = -1;
+                    type.particle_types[0] = PARTLookupTypePageOnly(part_name, world->page_part);
+                }
+                if (Blowup_ReadName(part_name) > 0) {
+                    type.particle_types[1] = -1;
+                    type.particle_types[1] = PARTLookupTypePageOnly(part_name, world->page_part);
+                }
+            }
 
-        type.type_flags = static_cast<u32>(EdFileReadInt());
-        type.effect_flags = static_cast<u32>(EdFileReadInt());
-        type.field_0xfb = static_cast<u8>(EdFileReadChar());
-        type.animation_time_scale = EdFileReadFloat();
+            type.particle_types[4] = -1;
+            type.particle_types[5] = -1;
+            type.particle_types[6] = -1;
+            type.particle_types[2] = -1;
+            type.particle_types[3] = -1;
+            type.particle_types[7] = -1;
+            type.particle_types[8] = -1;
+            if (version > 3) {
+                for (i32 particle_index = 4; particle_index < 7; ++particle_index) {
+                    if (Blowup_ReadName(debris_name) > 0) {
+                        type.particle_types[particle_index] = -1;
+                        type.particle_types[particle_index] =
+                            LookupDebrisEffectPageOnly(debris_name, static_cast<char>(world->page_pp));
+                    }
+                }
+            }
+            if (version > 25) {
+                for (i32 particle_index = 2; particle_index < 4; ++particle_index) {
+                    if (Blowup_ReadName(debris_name) > 0) {
+                        type.particle_types[particle_index] = -1;
+                        type.particle_types[particle_index] = LookupDebrisEffect(debris_name);
+                    }
+                }
+                if (version != 26) {
+                    for (i32 particle_index = 7; particle_index < 9; ++particle_index) {
+                        if (Blowup_ReadName(debris_name) > 0) {
+                            type.particle_types[particle_index] = -1;
+                            type.particle_types[particle_index] = LookupDebrisEffect(debris_name);
+                        }
+                    }
+                }
+            }
 
-        Blowup_ReadString(text);
-        Blowup_FindSpecial(world, &type.decal_special, text, const_cast<char *>("BlowUpDecal"), type.name);
-        type.animation_start_frame = EdFileReadFloat();
-        type.animation_end_frame = EdFileReadFloat();
-        type.field_0xf8 = static_cast<u8>(EdFileReadChar());
-        type.field_0xf9 = static_cast<u8>(EdFileReadChar());
-        GameAntiNodeData_Init(&type.anti_node_data, &type.animated_special);
-        if (version >= 16) {
-            GameAntiNodeData_Read(&type.anti_node_data);
-        }
-        if (version >= 22) {
-            for (i32 alternate_index = 0; alternate_index < 4; ++alternate_index) {
-                Blowup_ReadString(text);
-                Blowup_FindSpecial(world, &type.alternate_specials[alternate_index], text,
-                                   const_cast<char *>("BlowUpEmitObj"), type.name);
+            type.type_flags = static_cast<u32>(EdFileReadInt());
+            if (version > 6) {
+                type.effect_flags = static_cast<u32>(EdFileReadInt());
+                type.field_0xfb = static_cast<u8>(EdFileReadChar());
+            } else {
+                type.effect_flags = 100;
+                type.field_0xfb = 1;
+            }
+            if (version > 7) {
+                type.animation_time_scale = EdFileReadFloat();
+            } else {
+                type.animation_time_scale = 0.0f;
+            }
+            if (version > 8) {
+                memset(text, 0, sizeof(text));
+                if (Blowup_ReadName(text) > 0) {
+                    Blowup_FindSpecial(world, &type.decal_special, text, const_cast<char *>("BlowUpDecal"), type.name);
+                }
+            }
+            if (version > 13) {
+                type.animation_start_frame = EdFileReadFloat();
+                type.animation_end_frame = EdFileReadFloat();
+            } else {
+                type.animation_start_frame = 1.0f;
+                nuinstanim_s *animation = NuSpecialGetInstAnim(&type.animated_special);
+                if (animation != NULL) {
+                    type.animation_end_frame =
+                        NuAnimEndFrameOld(type.animated_special.scene->instance_animation_data[animation->anim_ix]);
+                } else {
+                    type.animation_end_frame = 1.0f;
+                }
+            }
+            if (version > 14) {
+                type.field_0xf8 = static_cast<u8>(EdFileReadChar());
+                type.field_0xf9 = static_cast<u8>(EdFileReadChar());
+            } else {
+                type.field_0xf8 = 0;
+                type.field_0xf9 = 0;
+            }
+            if (version > 15) {
+                GameAntiNodeData_Read(&type.anti_node_data);
+            } else if (NuSpecialExistsFn(&type.animated_special) != 0) {
+                GameAntiNodeData_Init(&type.anti_node_data, &type.animated_special);
+            }
+
+            if (version > 21) {
+                for (i32 alternate_index = 0; alternate_index < 4; ++alternate_index) {
+                    memset(text, 0, sizeof(text));
+                    if (Blowup_ReadName(text) > 0) {
+                        Blowup_FindSpecial(world, &type.alternate_specials[alternate_index], text,
+                                           const_cast<char *>("BlowUpEmitObj"), type.name);
+                    }
+                }
+                type.field_0xfa = static_cast<u8>(EdFileReadChar());
+                type.field_0x94 = EdFileReadFloat();
+                type.field_0x98 = EdFileReadFloat();
+            } else if (version > 17) {
+                memset(text, 0, sizeof(text));
+                if (Blowup_ReadName(text) > 0) {
+                    Blowup_FindSpecial(world, &type.alternate_specials[0], text, const_cast<char *>("BlowUpEmitObj"),
+                                       type.name);
+                }
+                type.field_0xfa = static_cast<u8>(EdFileReadChar());
+                type.field_0x94 = EdFileReadFloat();
+                type.field_0x98 = EdFileReadFloat();
+            } else {
+                type.field_0xfa = 0;
+                type.field_0x94 = -10.0f;
+                type.field_0x98 = 1.0f;
+            }
+            if (version > 18) {
+                memset(text, 0, 0x10);
+                if (Blowup_ReadName(text) > 0) {
+                    text[0x10] = '\0';
+                    Blowup_FindSpecial(world, &type.shadow_special, text, const_cast<char *>("BlowUpShadow"),
+                                       type.name);
+                }
+            }
+            if (version > 19) {
+                memset(&type.burst_special, 0, sizeof(type.burst_special));
+                memset(text, 0, 0x10);
+                if (Blowup_ReadName(text) > 0) {
+                    Blowup_FindSpecial(world, &type.burst_special, text, const_cast<char *>("BlowUpSwap"), type.name);
+                }
+                if (version > 22) {
+                    type.field_0x9c = EdFileReadFloat();
+                    if (version > 23) {
+                        type.field_0x84 = EdFileReadFloat();
+                    }
+                }
+            }
+
+            if (exists != 0) {
+                *next_type++ = type;
+                ++type_count;
             }
         }
-        type.field_0xfa = static_cast<u8>(EdFileReadChar());
-        type.field_0x94 = EdFileReadFloat();
-        type.field_0x98 = EdFileReadFloat();
-        Blowup_ReadString(text);
-        Blowup_FindSpecial(world, &type.shadow_special, text, const_cast<char *>("BlowUpShadow"), type.name);
-        if (version >= 20) {
-            Blowup_ReadString(text);
-            Blowup_FindSpecial(world, &type.burst_special, text, const_cast<char *>("BlowUpSwap"), type.name);
-        }
-        if (version >= 23) {
-            type.field_0x9c = EdFileReadFloat();
-        }
-        if (version >= 24) {
-            type.field_0x84 = EdFileReadFloat();
-        }
-
-        if (NuSpecialExistsFn(&type.animated_special) != 0) {
-            world->gizmo_blowup_types[world->gizmo_blowup_type_count++] = type;
-        }
+        world->gizmo_blowup_type_count = type_count;
     }
 
     for (i32 file_instance_index = 0; file_instance_index < file_instance_count; ++file_instance_index) {
         GIZMOBLOWUP_s blowup;
         memset(&blowup, 0, sizeof(blowup));
 
-        Blowup_ReadString(text);
-        GIZMOBLOWUPTYPE_s *type = GizmoBlowup_FindType(text, world);
+        EdFileRead(text, static_cast<i8>(EdFileReadChar()));
         if (version > 1) {
-            Blowup_ReadString(text);
-            NuStrNCpy(blowup.name, text, sizeof(blowup.name));
+            EdFileRead(blowup.name, static_cast<i8>(EdFileReadChar()));
+            // Terminates one byte past the 16-byte name, in the low byte of platform_id (reset below).
+            reinterpret_cast<char *>(&blowup.platform_id)[0] = '\0';
         }
-        blowup.type = type;
-        EdFileReadNuVec(&blowup.position);
+        GIZMOBLOWUPTYPE_s *type = GizmoBlowup_FindType(text, world);
+        GIZMOBLOWUP_s *destination = NULL;
+        i32 skip;
+        if (type == NULL) {
+            skip = 1;
+        } else {
+            skip = 0;
+            blowup.type = type;
+            destination = &world->gizmo_blowups[world->gizmo_blowup_count++];
+        }
+
+        NUVEC position;
+        EdFileReadNuVec(&position);
         blowup.field_0xf0 = EdFileReadShort();
         blowup.field_0xf2 = EdFileReadShort();
         blowup.field_0xf4 = EdFileReadShort();
-        blowup.draw_flags = static_cast<u32>(EdFileReadInt());
-        if (version >= 30) {
-            blowup.secondary_flags = static_cast<u32>(EdFileReadInt());
+        blowup.field_0xa8 = 0;
+        blowup.field_0x115 = 1;
+        blowup.field_0x114 = 0;
+        if (version > 1) {
+            blowup.draw_flags = 0;
+            u32 draw_flags;
+            if (version < 20) {
+                draw_flags = static_cast<i16>(EdFileReadShort());
+            } else {
+                draw_flags = static_cast<u32>(EdFileReadInt());
+                if (version == 28) {
+                    EdFileReadInt();
+                }
+            }
+            blowup.draw_flags = draw_flags;
+            blowup.secondary_flags = 0;
+            if (version > 29) {
+                blowup.secondary_flags = static_cast<u32>(EdFileReadInt());
+            } else {
+                // Older files kept the secondary flags in the draw flags.
+                if ((draw_flags & 0x100) != 0) {
+                    draw_flags &= ~0x100;
+                    blowup.secondary_flags = 1;
+                    blowup.draw_flags = draw_flags;
+                }
+                if ((draw_flags & 0x40000000) != 0) {
+                    draw_flags &= ~0x40000000;
+                    blowup.secondary_flags |= 4;
+                    blowup.draw_flags = draw_flags;
+                }
+            }
+            if (version < 3) {
+                blowup.draw_flags |= 5;
+            }
+            blowup.field_0xa8 = static_cast<u32>(EdFileReadInt());
+            blowup.field_0x115 = static_cast<u8>(EdFileReadChar());
+            blowup.field_0x114 = static_cast<u8>(EdFileReadChar());
         }
-        blowup.field_0xa8 = static_cast<u32>(EdFileReadInt());
-        blowup.field_0x115 = static_cast<u8>(EdFileReadChar());
-        blowup.field_0x114 = static_cast<u8>(EdFileReadChar());
-        blowup.initial_state_0 = static_cast<u8>(EdFileReadChar());
-        blowup.field_0xb4 = EdFileReadFloat();
-        blowup.field_0xb8 = EdFileReadFloat();
-        blowup.field_0xc0 = EdFileReadFloat();
-        blowup.field_0xe4 = EdFileReadShort();
-        blowup.field_0xe6 = EdFileReadShort();
-        blowup.field_0xe8 = EdFileReadShort();
-        blowup.field_0x74 = EdFileReadFloat();
-        blowup.field_0x78 = EdFileReadFloat();
-        blowup.field_0x7c = EdFileReadFloat();
-        blowup.field_0xc8 = EdFileReadFloat();
-        blowup.field_0x80 = EdFileReadFloat();
-        blowup.field_0x84 = EdFileReadFloat();
-        blowup.field_0x88 = EdFileReadFloat();
-        blowup.saved_state_1 = static_cast<u8>(EdFileReadChar());
-        blowup.initial_state_1 = blowup.saved_state_1;
-        blowup.field_0xf6 = EdFileReadShort();
-        blowup.field_0xf8 = EdFileReadShort();
-        blowup.field_0xea = EdFileReadShort();
-        blowup.field_0xec = EdFileReadShort();
-        blowup.field_0xee = EdFileReadShort();
-        blowup.field_0x8c = EdFileReadFloat();
-        blowup.field_0x90 = EdFileReadFloat();
-        blowup.field_0x94 = EdFileReadFloat();
-        blowup.field_0xcc = EdFileReadFloat();
-        blowup.animation_offset = EdFileReadFloat();
+        blowup.initial_state_0 = 0;
+        if (version > 3) {
+            blowup.initial_state_0 = static_cast<u8>(EdFileReadChar());
+        }
+        blowup.field_0xb4 = 0.0f;
+        if (version > 5) {
+            blowup.field_0xb4 = EdFileReadFloat();
+        }
+        if (version > 7) {
+            blowup.field_0xb8 = EdFileReadFloat();
+            blowup.field_0xc0 = EdFileReadFloat();
+        } else {
+            blowup.field_0xb8 = 0.0f;
+            blowup.field_0xc0 = 0.0f;
+        }
+        if (version > 8) {
+            blowup.field_0xe4 = EdFileReadShort();
+            blowup.field_0xe6 = EdFileReadShort();
+            blowup.field_0xe8 = EdFileReadShort();
+            blowup.field_0x74 = EdFileReadFloat();
+            blowup.field_0x78 = EdFileReadFloat();
+            blowup.field_0x7c = EdFileReadFloat();
+        }
+        if (version > 9) {
+            blowup.field_0xc8 = EdFileReadFloat();
+        } else {
+            blowup.field_0xc8 = 1.0f;
+        }
+        if (version > 10) {
+            blowup.field_0x80 = EdFileReadFloat();
+            blowup.field_0x84 = EdFileReadFloat();
+            blowup.field_0x88 = EdFileReadFloat();
+        } else {
+            blowup.field_0x80 = 0.0f;
+            blowup.field_0x84 = 0.0f;
+            blowup.field_0x88 = 0.0f;
+        }
+        if (version > 11) {
+            blowup.saved_state_1 = blowup.initial_state_1 = static_cast<u8>(EdFileReadChar());
+        } else {
+            blowup.saved_state_1 = blowup.initial_state_1 = 1;
+        }
+        if (version > 12) {
+            blowup.field_0xf6 = EdFileReadShort();
+            blowup.field_0xf8 = EdFileReadShort();
+        } else {
+            blowup.field_0xf6 = 0;
+            blowup.field_0xf8 = 0;
+        }
+        if (version > 18) {
+            blowup.field_0xea = EdFileReadShort();
+            blowup.field_0xec = EdFileReadShort();
+            blowup.field_0xee = EdFileReadShort();
+            blowup.field_0x8c = EdFileReadFloat();
+            blowup.field_0x90 = EdFileReadFloat();
+            blowup.field_0x94 = EdFileReadFloat();
+            blowup.field_0xcc = EdFileReadFloat();
+        }
+        blowup.animation_offset = 0.0f;
+        if (version > 20) {
+            blowup.animation_offset = EdFileReadFloat();
+        }
         if (version > 22) {
             blowup.field_0xd8 = EdFileReadFloat();
         }
@@ -1706,8 +1861,9 @@ i32 gizmoblowup_Load(void *world_ptr, void *) {
             blowup.reflection_height = EdFileReadFloat();
         }
 
-        if (type != NULL) {
-            world->gizmo_blowups[world->gizmo_blowup_count++] = blowup;
+        if (skip == 0) {
+            *destination = blowup;
+            destination->position = position;
         }
     }
 
@@ -1724,9 +1880,9 @@ i32 gizmoblowup_Load(void *world_ptr, void *) {
 
     for (i32 instance_index = 0; instance_index < world->gizmo_blowup_count; ++instance_index) {
         GIZMOBLOWUP_s *blowup = &world->gizmo_blowups[instance_index];
-        NUVEC *draw_position = NuSpecialGetDrawPos(&blowup->type->animated_special);
-        if (draw_position != NULL && draw_position->x == blowup->position.x && draw_position->y == blowup->position.y &&
-            draw_position->z == blowup->position.z) {
+        const NUVEC draw_position = *NuSpecialGetDrawPos(&blowup->type->animated_special);
+        if (draw_position.x == blowup->position.x && draw_position.y == blowup->position.y &&
+            draw_position.z == blowup->position.z) {
             blowup->type->type_flags |= 0x2000;
         }
         blowup->platform_id = -1;
@@ -2101,7 +2257,7 @@ GIZMOBLOWUP_s *GizmoBlowUp_Target(GameObject_s *object, nuvec_s *position, nuvec
 
 i32 GizmoBlowupCheckProximity(WORLDINFO_s *world, GameObject_s *object) {
     i32 count = 0;
-    if (object == NULL || static_cast<i8>(object->apiobj.field_0x1f8) >= 0)
+    if (object == NULL || !object->apiobj.player_controlled)
         return count;
     i32 special;
     i32 ordinary;

@@ -124,13 +124,10 @@ static i32 GizTorp_Load(void *world_ptr, void *) {
         EdFileReadNuVec(&system->machines[index].position);
         GIZTORPMACHINE &rotation_machine = system->machines[index];
         rotation_machine.y_rotation = static_cast<u16>(EdFileReadShort());
-        GIZTORPMACHINE &machine = system->machines[index];
         if (version > 1) {
-            const u8 alternate_model = EdFileReadUnsignedChar() != 0;
-            machine.flags =
-                static_cast<u8>((machine.flags & ~GIZTORPMACHINE_FLAG_ALTERNATE_MODEL) | (alternate_model << 2));
+            system->machines[index].alternate_model = EdFileReadUnsignedChar() != 0;
         } else {
-            machine.flags &= ~GIZTORPMACHINE_FLAG_ALTERNATE_MODEL;
+            system->machines[index].alternate_model = 0;
         }
     }
     return 1;
@@ -166,23 +163,23 @@ static void GizTorp_Draw(void *world_ptr, void *, float) {
 
     GIZTORPMACHINESYS *system = world->giz_torp_machine_sys;
     EnableShadowMapRendering(0);
-    auto system_scale = system->scale;
     for (i32 index = 0; index < system->count; ++index) {
         GIZTORPMACHINE &machine = system->machines[index];
         if ((machine.flags & GIZTORPMACHINE_FLAG_VISIBLE) == 0 && editor_active == 0) {
             continue;
         }
 
-        NUMTX matrix;
+        NUMTX_ALIGNED16 matrix;
         NuMtxSetRotationY(&matrix, machine.y_rotation);
         NuMtxTranslate(&matrix, &machine.position);
-        NuMtxPreScaleU(&matrix, system_scale);
+        NuMtxPreScaleU(&matrix, system->scale);
 
-        const i32 model_index = (machine.flags & GIZTORPMACHINE_FLAG_ALTERNATE_MODEL) != 0
-                                    ? GIZTORP_LEVEL_OBJECT_ALTERNATE
-                                    : GIZTORP_LEVEL_OBJECT_PRIMARY;
-        if (world->lev_objs[model_index].active != 0) {
-            NuSpecialDrawAt(&world->lev_objs[model_index].special, &matrix);
+        if ((machine.flags & GIZTORPMACHINE_FLAG_ALTERNATE_MODEL) != 0) {
+            if (world->lev_objs[GIZTORP_LEVEL_OBJECT_ALTERNATE].active != 0) {
+                NuSpecialDrawAt(&world->lev_objs[GIZTORP_LEVEL_OBJECT_ALTERNATE].special, &matrix);
+            }
+        } else if (world->lev_objs[GIZTORP_LEVEL_OBJECT_PRIMARY].active != 0) {
+            NuSpecialDrawAt(&world->lev_objs[GIZTORP_LEVEL_OBJECT_PRIMARY].special, &matrix);
         }
 
         if ((machine.flags & GIZTORPMACHINE_FLAG_ACTIVE) != 0 && machine.activation_time > 0.0f) {

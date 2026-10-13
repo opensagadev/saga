@@ -10,6 +10,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/numtx.h"
+#include "nu2api/numath/numtx_inline.h"
 #include "nu2api/numath/nurand.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nutex.h"
@@ -129,7 +130,7 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
             TERRAIN_SHAPE *destination = reinterpret_cast<TERRAIN_SHAPE *>(output + 1);
             for (i32 i = 0; i < shape_count; ++i, ++source, ++destination) {
                 i32 last_vertex = source->normals[1].y > 65535.0f ? 2 : 3;
-                memcpy(destination, source, sizeof(TERRAIN_SHAPE));
+                *destination = *source;
                 for (i32 vertex = last_vertex; vertex >= 0; --vertex) {
                     NUVEC &v = destination->vectors[vertex];
                     v = TerrainSkin(info, &source->vectors[SkinFlipTab[vertex + info->mirrored * 4]], -1.0f,
@@ -138,10 +139,10 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
                     v.y -= info->matrix->m31;
                     v.z -= info->matrix->m32;
                     min_x = MIN(v.x, min_x);
-                    min_y = MIN(v.y, min_y);
-                    min_z = MIN(v.z, min_z);
                     max_x = MAX(v.x, max_x);
+                    min_y = MIN(v.y, min_y);
                     max_y = MAX(v.y, max_y);
+                    min_z = MIN(v.z, min_z);
                     max_z = MAX(v.z, max_z);
                     radius_squared = MAX((v.x * v.x + v.y * v.y) + v.z * v.z, radius_squared);
                 }
@@ -388,11 +389,11 @@ extern "C" void TerrainPlatformNewUpdate(void) {
         if (matrix != NULL) {
             if (platform.bounce_frames != 0) {
                 f32 velocity;
-                if (platform.bounce_frames >= 125)
+                if (platform.bounce_frames < 125)
+                    velocity = platform.bounce_velocity - platform.bounce_damping * platform.bounce_velocity;
+                else
                     velocity = (platform.bounce_impulse - platform.bounce_damping * platform.bounce_velocity) +
                                platform.bounce_velocity;
-                else
-                    velocity = platform.bounce_velocity - platform.bounce_damping * platform.bounce_velocity;
                 const f32 offset = platform.bounce_offset;
                 --platform.bounce_frames;
                 velocity = (-offset * fabsf(offset) * platform.bounce_spring * 0.5f - platform.bounce_spring * offset) +
@@ -506,16 +507,20 @@ extern "C" {
         return 0;
     }
 
+    // Relative difference between a requested scale and an existing effect scale.
+    static inline f32 ScaledEffectDistance(f32 requested_scale, f32 scale) {
+        const f32 ratio = requested_scale / scale;
+        return ratio > 1.0f ? ratio - 1.0f : 1.0f - ratio;
+    }
+
     i32 CreateScaledEffect(i32 effect_index, f32 requested_scale) {
         if (effect_index < 1 || EDPP_MAX_TYPES < effect_index || debtab[effect_index] == NULL) {
             return -1;
         }
 
-        debinftype *effect = debtab[effect_index];
-        if (effect->scale != 1.0f) {
-            effect_index = effect->unscaled_effect_index;
-            effect = debtab[effect_index];
-            if (effect == NULL) {
+        if (debtab[effect_index]->scale != 1.0f) {
+            effect_index = debtab[effect_index]->unscaled_effect_index;
+            if (debtab[effect_index] == NULL) {
                 return -1;
             }
         }
@@ -540,13 +545,16 @@ extern "C" {
         }
 
         i32 closest_index = effect_index;
-        f32 closest_distance = fabsf(requested_scale / effect->scale - 1.0f);
+        f32 closest_distance = ScaledEffectDistance(requested_scale, debtab[effect_index]->scale);
         for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
             debinftype *candidate = debtab[i];
             if (candidate != NULL && candidate->unscaled_effect_index == effect_index) {
-                f32 distance = 1.0f;
-                if (requested_scale != 0.0f && candidate->scale != 0.0f) {
-                    distance = fabsf(requested_scale / candidate->scale - 1.0f);
+                const f32 scale = candidate->scale;
+                f32 distance;
+                if (requested_scale == 0.0f || scale == 0.0f) {
+                    distance = 1.0f;
+                } else {
+                    distance = ScaledEffectDistance(requested_scale, scale);
                 }
                 if (distance < closest_distance) {
                     closest_distance = distance;
@@ -558,50 +566,55 @@ extern "C" {
             return closest_index;
         }
 
-        i32 scaled_index = 1;
-        while (scaled_index < EDPP_MAX_TYPES && debtab[scaled_index] != NULL) {
-            ++scaled_index;
-        }
-        if (scaled_index == EDPP_MAX_TYPES) {
-            return closest_index;
-        }
-
-        debinftype *scaled = &effecttypes[scaled_index];
-        debtab[scaled_index] = scaled;
-        *scaled = *effect;
-        scaled->native_data = NULL;
-        for (i32 i = 0; i < 8; ++i) {
-            scaled->particle_keys[i] = -1;
-        }
-        DebrisReScale(scaled_index, requested_scale);
-        scaled->scale = requested_scale;
-        scaled->unscaled_effect_index = effect_index;
-        scaled->last_render_time = scaled->time_group == 4 ? panelglobaltime : globaltime;
-
-        if (!(strlen(effect->name) < 13)) {
-            char shortened[13];
-            memcpy(shortened, effect->name, 12);
-            shortened[12] = '\0';
-            sprintf(scaled->name, "%s%03d", shortened, scaled_index);
-        } else {
-            sprintf(scaled->name, "%s%03d", effect->name, scaled_index);
-        }
-        ++edpp_types_used;
-
-        for (i32 i = 0; i < EDPP_SCALE_TYPES; ++i) {
-            if (debscale[i].scale == 0.0f) {
-                debscale[i].unscaled_effect_index = effect_index;
-                debscale[i].scaled_effect_index = scaled_index;
-                debscale[i].scale = requested_scale;
+        i32 scaled_index = 0;
+        for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
+            if (debtab[i] == NULL) {
+                scaled_index = i;
                 break;
             }
         }
-        return scaled_index;
+        // Without a free effect slot, fall back to the closest existing scale.
+        if (scaled_index != 0) {
+            debtab[scaled_index] = &effecttypes[scaled_index];
+            memcpy(debtab[scaled_index], debtab[effect_index], sizeof(debinftype));
+            debtab[scaled_index]->native_data = NULL;
+            for (i32 i = 0; i < 8; ++i) {
+                debtab[scaled_index]->particle_keys[i] = -1;
+            }
+            DebrisReScale(scaled_index, requested_scale);
+            const f32 render_time = debtab[scaled_index]->time_group == 4 ? panelglobaltime : globaltime;
+            debtab[scaled_index]->scale = requested_scale;
+            debtab[scaled_index]->last_render_time = render_time;
+            debtab[scaled_index]->unscaled_effect_index = effect_index;
+
+            if (strlen(debtab[effect_index]->name) <= 12) {
+                sprintf(debtab[scaled_index]->name, "%s%03d", debtab[effect_index]->name, scaled_index);
+            } else {
+                char shortened[32];
+                strcpy(shortened, debtab[effect_index]->name);
+                shortened[12] = '\0';
+                sprintf(debtab[scaled_index]->name, "%s%03d", shortened, scaled_index);
+            }
+            ++edpp_types_used;
+
+            for (i32 i = 0; i < EDPP_SCALE_TYPES; ++i) {
+                if (debscale[i].scale == 0.0f) {
+                    debscale[i].unscaled_effect_index = effect_index;
+                    debscale[i].scale = requested_scale;
+                    debscale[i].scaled_effect_index = scaled_index;
+                    break;
+                }
+            }
+        }
+        return scaled_index != 0 ? scaled_index : closest_index;
     }
 
     i32 CreateScaledPARTEffect(i32 effect_index, f32 requested_scale) {
         // Retail uses this inclusive upper check; loaded type IDs are 0..127.
-        if (effect_index <= 0 || effect_index > 128 || part_types[effect_index].effect_ids[0] == -1) {
+        if (effect_index <= 0) {
+            return -1;
+        }
+        if (effect_index > 128 || part_types[effect_index].effect_ids[0] == -1) {
             return -1;
         }
         if (part_types[effect_index].scale != 1.0f) {
@@ -730,10 +743,9 @@ extern "C" {
 
     i32 DebrisCollisionCheckScaleYFlag(NUVEC *position, f32 radius, f32 y_scale, u8 flags) {
         for (i32 i = 0; i < numspherecolldata; ++i) {
-            u32 *entry = spherecolldata + i * 2;
-            if ((entry[1] & flags) != 0 &&
-                DebrisSingleCollisionCheckScaleYFlag(entry[0], position, radius, y_scale, flags) != 0)
-                return entry[0];
+            if ((spherecolldata[i * 2 + 1] & flags) != 0 &&
+                DebrisSingleCollisionCheckScaleYFlag(spherecolldata[i * 2], position, radius, y_scale, flags) != 0)
+                return spherecolldata[i * 2];
         }
         return -1;
     }
@@ -753,21 +765,22 @@ void DebrisTimeSlip(i32 group) {
     for (i32 i = 0; i < maxdebkeys; ++i) {
         debkeydatatype_s *key = &debkeydata[i];
         debinftype *effect = debtab[key->effect_index];
-        if ((effect->time_group == 4 ? group != 1 : group != 0)) {
+        if (effect->time_group == 4) {
+            if (group != 1)
+                continue;
+        } else if (group != 0) {
             continue;
         }
         key->last_update_time -= 800.0f;
+        key->emission_epoch -= 800.0f;
+        key->emission_time -= 800.0f;
         key->previous_emission_time -= 800.0f;
         key->field_1e4 -= 800.0f;
-        key->emission_time -= 800.0f;
-        key->emission_epoch -= 800.0f;
         for (i32 chunk = 0; chunk < 32; ++chunk) {
-            if (key->particle_chunks[chunk] == NULL)
-                continue;
-            dma_particle_chunk_s *particles = key->particle_chunks[chunk];
-            i32 count = effect->particle_type == 7 ? 12 : 32;
-            for (i32 particle = 0; particle < count; ++particle)
-                particles->particles[particle].start_time -= 800.0f;
+            if (key->particle_chunks[chunk] != NULL) {
+                for (i32 particle = 0; particle < (effect->particle_type == 7 ? 12 : 32); ++particle)
+                    key->particle_chunks[chunk]->particles[particle].start_time -= 800.0f;
+            }
         }
     }
     for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
@@ -798,59 +811,19 @@ extern "C" {
             return;
         }
         NuMtxSetIdentity(&debkeydata[handle].emitter_orientation);
-        debkeydatatype_s &key = debkeydata[handle];
-        NUMTX *mtx = &key.emitter_orientation;
-        // Retail performs these rotations locally after reloading debkeydata;
-        // it does not call the exported rotation helpers or clear translation.
-        {
-            const f32 cosine = NU_COS_LUT(z);
-            const f32 sine = NU_SIN_LUT(z);
-            const f32 m00 = mtx->m00, m10 = mtx->m10, m20 = mtx->m20, m30 = mtx->m30;
-            mtx->m00 = m00 * cosine - mtx->m01 * sine;
-            mtx->m01 = m00 * sine + mtx->m01 * cosine;
-            mtx->m10 = m10 * cosine - mtx->m11 * sine;
-            mtx->m11 = m10 * sine + mtx->m11 * cosine;
-            mtx->m20 = m20 * cosine - mtx->m21 * sine;
-            mtx->m21 = m20 * sine + mtx->m21 * cosine;
-            mtx->m30 = m30 * cosine - mtx->m31 * sine;
-            mtx->m31 = m30 * sine + mtx->m31 * cosine;
-        }
-        {
-            const f32 cosine = NU_COS_LUT(y);
-            const f32 sine = NU_SIN_LUT(y);
-            const f32 m00 = mtx->m00, m10 = mtx->m10, m20 = mtx->m20, m30 = mtx->m30;
-            mtx->m00 = m00 * cosine + mtx->m02 * sine;
-            mtx->m02 = mtx->m02 * cosine - m00 * sine;
-            mtx->m10 = m10 * cosine + mtx->m12 * sine;
-            mtx->m12 = mtx->m12 * cosine - m10 * sine;
-            mtx->m20 = m20 * cosine + mtx->m22 * sine;
-            mtx->m22 = mtx->m22 * cosine - m20 * sine;
-            mtx->m30 = m30 * cosine + mtx->m32 * sine;
-            mtx->m32 = mtx->m32 * cosine - m30 * sine;
-        }
-        {
-            const f32 cosine = NU_COS_LUT(x);
-            const f32 sine = NU_SIN_LUT(x);
-            const f32 m01 = mtx->m01, m11 = mtx->m11, m21 = mtx->m21, m31 = mtx->m31;
-            mtx->m01 = m01 * cosine - mtx->m02 * sine;
-            mtx->m02 = m01 * sine + mtx->m02 * cosine;
-            mtx->m11 = m11 * cosine - mtx->m12 * sine;
-            mtx->m12 = m11 * sine + mtx->m12 * cosine;
-            mtx->m21 = m21 * cosine - mtx->m22 * sine;
-            mtx->m22 = m21 * sine + mtx->m22 * cosine;
-            mtx->m31 = m31 * cosine - mtx->m32 * sine;
-            mtx->m32 = m31 * sine + mtx->m32 * cosine;
-        }
-        key.orientation_dirty = 0.0f;
+        NuMtxRotateZInline(&debkeydata[handle].emitter_orientation, z);
+        NuMtxRotateYInline(&debkeydata[handle].emitter_orientation, y);
+        NuMtxRotateXInline(&debkeydata[handle].emitter_orientation, x);
+        debkeydata[handle].orientation_dirty = 0.0f;
     }
 
     void DebrisEmitterOrientationMtx(i32 handle, NUMTX *source) {
         if (handle != -1) {
             debkeydatatype_s &key = debkeydata[handle];
             NUMTX *mtx = &key.emitter_orientation;
-            memcpy(mtx, source, sizeof(NUMTX));
-            mtx->m31 = 0.0f;
+            *mtx = *source;
             mtx->m30 = 0.0f;
+            mtx->m31 = 0.0f;
             mtx->m32 = 0.0f;
             key.orientation_dirty = 0.0f;
         }
@@ -868,18 +841,20 @@ extern "C" {
 
     i32 DebrisFindAllOfType(i32 effect_index, NUVEC *positions, i32 *handles, i32 capacity, i32 skip, i32 active_only) {
         i32 count = 0;
-        debkeydatatype_s *key = debkeydata;
-        for (i32 i = 0; i < maxdebkeys; ++i, ++key) {
-            if ((active_only == 0 || key->allocated_chunk_count != 0) && key->effect_index == effect_index) {
+        for (i32 i = 0; i < maxdebkeys; ++i) {
+            debkeydatatype_s *key = &debkeydata[i];
+            if (key->effect_index == effect_index && (key->allocated_chunk_count != 0 || active_only == 0)) {
                 i32 output_index = count - skip;
-                if (output_index >= 0 && output_index < capacity) {
-                    if (positions != NULL) {
-                        positions[output_index].x = key->position.x;
-                        positions[output_index].y = key->position.y;
-                        positions[output_index].z = key->position.z;
+                if (output_index >= 0) {
+                    if (capacity > output_index) {
+                        if (positions != NULL) {
+                            positions[output_index].x = key->position.x;
+                            positions[output_index].y = key->position.y;
+                            positions[output_index].z = key->position.z;
+                        }
+                        if (handles != NULL)
+                            handles[output_index] = i;
                     }
-                    if (handles != NULL)
-                        handles[output_index] = i;
                 }
                 ++count;
             }
@@ -966,37 +941,8 @@ extern "C" {
     void DebrisOrientation(i32 handle, i16 z, i16 y) {
         if (handle != -1) {
             NuMtxSetIdentity(&debkeydata[handle].effect_orientation);
-            NUMTX *mtx = &debkeydata[handle].effect_orientation;
-
-            const f32 cos_z = NU_COS_LUT(z);
-            const f32 sin_z = NU_SIN_LUT(z);
-            const f32 z_m00 = mtx->m00;
-            const f32 z_m10 = mtx->m10;
-            const f32 z_m20 = mtx->m20;
-            const f32 z_m30 = mtx->m30;
-            mtx->m00 = z_m00 * cos_z - mtx->m01 * sin_z;
-            mtx->m01 = z_m00 * sin_z + mtx->m01 * cos_z;
-            mtx->m10 = z_m10 * cos_z - mtx->m11 * sin_z;
-            mtx->m11 = z_m10 * sin_z + mtx->m11 * cos_z;
-            mtx->m20 = z_m20 * cos_z - mtx->m21 * sin_z;
-            mtx->m21 = z_m20 * sin_z + mtx->m21 * cos_z;
-            mtx->m30 = z_m30 * cos_z - mtx->m31 * sin_z;
-            mtx->m31 = z_m30 * sin_z + mtx->m31 * cos_z;
-
-            const f32 cos_y = NU_COS_LUT(y);
-            const f32 sin_y = NU_SIN_LUT(y);
-            const f32 y_m00 = mtx->m00;
-            const f32 y_m10 = mtx->m10;
-            const f32 y_m20 = mtx->m20;
-            const f32 y_m30 = mtx->m30;
-            mtx->m00 = y_m00 * cos_y + mtx->m02 * sin_y;
-            mtx->m02 = mtx->m02 * cos_y - y_m00 * sin_y;
-            mtx->m10 = y_m10 * cos_y + mtx->m12 * sin_y;
-            mtx->m12 = mtx->m12 * cos_y - y_m10 * sin_y;
-            mtx->m20 = y_m20 * cos_y + mtx->m22 * sin_y;
-            mtx->m22 = mtx->m22 * cos_y - y_m20 * sin_y;
-            mtx->m30 = y_m30 * cos_y + mtx->m32 * sin_y;
-            mtx->m32 = mtx->m32 * cos_y - y_m30 * sin_y;
+            NuMtxRotateZInline(&debkeydata[handle].effect_orientation, z);
+            NuMtxRotateYInline(&debkeydata[handle].effect_orientation, y);
             debkeydata[handle].orientation_dirty = 0.0f;
         }
     }
@@ -1005,9 +951,9 @@ extern "C" {
         if (handle != -1) {
             debkeydatatype_s &key = debkeydata[handle];
             NUMTX *mtx = &key.effect_orientation;
-            memcpy(mtx, source, sizeof(NUMTX));
-            mtx->m31 = 0.0f;
+            *mtx = *source;
             mtx->m30 = 0.0f;
+            mtx->m31 = 0.0f;
             mtx->m32 = 0.0f;
             key.orientation_dirty = 0.0f;
         }
@@ -1026,7 +972,7 @@ extern "C" {
 
         debkeydatatype_s *key = &debkeydata[handle];
         debinftype *effect = debtab[key->effect_index];
-        if (effect->frequency == 0) {
+        if (effect->frequency == 0.0f) {
             return;
         }
         if (duration == 0.0f) {
@@ -1039,7 +985,7 @@ extern "C" {
         if (key->previous_allocated_chunk_count == 0) {
             const f32 thinning =
                 forced_debris_thinning == 0
-                    ? (debris_thinning_level <= effect->thinning ? debris_thinning_level : effect->thinning)
+                    ? (effect->thinning < debris_thinning_level ? effect->thinning : debris_thinning_level)
                     : debris_thinning_level;
             DebReAlloc(key, static_cast<i32>(static_cast<f32>(effect->max_particles) / thinning));
         }
@@ -1048,10 +994,9 @@ extern "C" {
         if (key->allocated_chunk_count <= 0) {
             return;
         }
-        const f32 thinning =
-            forced_debris_thinning == 0
-                ? (debris_thinning_level <= effect->thinning ? debris_thinning_level : effect->thinning)
-                : debris_thinning_level;
+        const f32 thinning = forced_debris_thinning == 0
+                                 ? (effect->thinning < debris_thinning_level ? effect->thinning : debris_thinning_level)
+                                 : debris_thinning_level;
         const f32 emission_interval = 1.0f / (static_cast<f32>(effect->frequency) / thinning);
         key->emission_epoch = emission_time;
         emission_time += emission_interval;
@@ -1068,12 +1013,12 @@ extern "C" {
         if (handle != -1) {
             debkeydatatype_s &key = debkeydata[handle];
             NUMTX *mtx = &key.effect_orientation;
-            memcpy(mtx, source, sizeof(NUMTX));
+            *mtx = *source;
             key.position.x = source->m30;
             key.position.y = source->m31;
             key.position.z = source->m32;
-            mtx->m31 = 0.0f;
             mtx->m30 = 0.0f;
+            mtx->m31 = 0.0f;
             mtx->m32 = 0.0f;
             key.orientation_dirty = 0.0f;
         }
@@ -1095,16 +1040,18 @@ extern "C" {
             }
             if (key->field_184 != 0) {
                 if (DebrisSingleCollisionCheckScaleYFlag(key_index, position, radius, 1.0f, 3) != 0) {
-                    u32 *entry = spherecolldata + numspherecolldata * 2;
+                    const i32 count = numspherecolldata;
+                    u32 *entry = spherecolldata + count * 2;
                     entry[0] = key_index;
                     entry[1] = debtab[effect_index]->field_2f2;
-                    ++numspherecolldata;
+                    numspherecolldata = count + 1;
                 }
                 if (DebrisSingleTorusCollisionCheckScaleYFlag(key_index, position, radius, 1.0f, 3) != 0) {
-                    u32 *entry = toruscolldata + numtoruscolldata * 2;
+                    const i32 count = numtoruscolldata;
+                    u32 *entry = toruscolldata + count * 2;
                     entry[0] = key_index;
                     entry[1] = debtab[effect_index]->field_2f2;
-                    ++numtoruscolldata;
+                    numtoruscolldata = count + 1;
                 }
             }
             key = previous;
@@ -1126,7 +1073,7 @@ extern "C" {
     i32 DebrisQueryPriority(i32 effect_index) {
         if (effect_index < 0 || effect_index >= EDPP_MAX_TYPES || debtab[effect_index] == NULL)
             return 0;
-        i16 priority = 0;
+        i16 priority;
         switch (static_cast<i8>(debtab[effect_index]->particle_type)) {
             case 0:
                 priority = 20000;
@@ -1141,7 +1088,7 @@ extern "C" {
                 priority = 10000;
                 break;
             default:
-                break;
+                return 0;
         }
         return priority;
     }
@@ -1228,43 +1175,8 @@ extern "C" {
             return;
         debkeydata[handle].field_2fa = enabled;
         NuMtxSetIdentity(&debkeydata[handle].particle_orientation);
-        NUMTX *matrix = &debkeydata[handle].particle_orientation;
-        f32 sine = NU_SIN_LUT(x_angle);
-        f32 cosine = NU_COS_LUT(x_angle);
-        f32 y0 = matrix->m01;
-        f32 z0 = matrix->m02;
-        matrix->m01 = cosine * y0 - z0 * sine;
-        matrix->m02 = sine * y0 + z0 * cosine;
-        f32 y1 = matrix->m11;
-        f32 z1 = matrix->m12;
-        matrix->m11 = cosine * y1 - z1 * sine;
-        matrix->m12 = sine * y1 + z1 * cosine;
-        f32 y2 = matrix->m21;
-        f32 z2 = matrix->m22;
-        matrix->m21 = cosine * y2 - z2 * sine;
-        matrix->m22 = sine * y2 + z2 * cosine;
-        f32 y3 = matrix->m31;
-        f32 z3 = matrix->m32;
-        matrix->m31 = cosine * y3 - z3 * sine;
-        matrix->m32 = sine * y3 + z3 * cosine;
-        sine = NU_SIN_LUT(y_angle);
-        cosine = NU_COS_LUT(y_angle);
-        f32 x0 = matrix->m00;
-        z0 = matrix->m02;
-        matrix->m00 = x0 * cosine + z0 * sine;
-        matrix->m02 = z0 * cosine - x0 * sine;
-        f32 x1 = matrix->m10;
-        z1 = matrix->m12;
-        matrix->m12 = z1 * cosine - x1 * sine;
-        matrix->m10 = x1 * cosine + z1 * sine;
-        f32 x2 = matrix->m20;
-        z2 = matrix->m22;
-        matrix->m20 = x2 * cosine + z2 * sine;
-        matrix->m22 = z2 * cosine - x2 * sine;
-        f32 x3 = matrix->m30;
-        z3 = matrix->m32;
-        matrix->m30 = x3 * cosine + z3 * sine;
-        matrix->m32 = z3 * cosine - x3 * sine;
+        NuMtxRotateXInline(&debkeydata[handle].particle_orientation, x_angle);
+        NuMtxRotateYInline(&debkeydata[handle].particle_orientation, y_angle);
     }
 
     void DebrisSetGroupID(i32 handle, i16 group) {
@@ -1391,10 +1303,9 @@ extern "C" {
 
     i32 DebrisTorusCollisionCheckScaleYFlag(NUVEC *position, f32 radius, f32 y_scale, u8 flags) {
         for (i32 i = 0; i < numtoruscolldata; ++i) {
-            u32 *entry = toruscolldata + i * 2;
-            if ((entry[1] & flags) != 0 &&
-                DebrisSingleTorusCollisionCheckScaleYFlag(entry[0], position, radius, y_scale, flags) != 0)
-                return entry[0];
+            if ((toruscolldata[i * 2 + 1] & flags) != 0 &&
+                DebrisSingleTorusCollisionCheckScaleYFlag(toruscolldata[i * 2], position, radius, y_scale, flags) != 0)
+                return toruscolldata[i * 2];
         }
         return -1;
     }
@@ -1413,20 +1324,21 @@ extern "C" {
             cursor = buffer->addr;
         }
 
-        const i32 chunk_count = debrischunks + debrischunksglass;
-        memset(debris_chunk_controls, 0, static_cast<usize>(chunk_count) * 2 * sizeof(debris_chunk_control_s));
-        memset(freechunkcontrols, 0, static_cast<usize>(chunk_count) * 2 * sizeof(debris_chunk_control_s *));
+        memset(debris_chunk_controls, 0,
+               static_cast<usize>(debrischunks + debrischunksglass) * 2 * sizeof(debris_chunk_control_s));
+        memset(freechunkcontrols, 0,
+               static_cast<usize>(debrischunks + debrischunksglass) * 2 * sizeof(debris_chunk_control_s *));
         memset(freedebchunks, 0, static_cast<usize>(debrischunks) * sizeof(dma_particle_chunk_s *));
         memset(freedebchunksglass, 0, static_cast<usize>(debrischunksglass) * sizeof(dma_particle_chunk_s *));
-        memset(ParticleChunkToRender, 0, static_cast<usize>(chunk_count) * sizeof(particlechunkrendertype_s));
+        memset(ParticleChunkToRender, 0,
+               static_cast<usize>(debrischunks + debrischunksglass) * sizeof(particlechunkrendertype_s));
 
+        i32 size;
         for (i32 i = 0; i < debrischunks; ++i) {
-            i32 size;
             freedebchunks[i] = CreateDmaParticleSet(reinterpret_cast<void *>(cursor), &size);
             cursor += static_cast<usize>(size);
         }
         for (i32 i = 0; i < debrischunksglass; ++i) {
-            i32 size;
             freedebchunksglass[i] = CreateDmaParticleSetGlass(reinterpret_cast<void *>(cursor), &size);
             cursor += static_cast<usize>(size);
         }
@@ -1434,7 +1346,6 @@ extern "C" {
         freedebchkptr = 0;
         freedebchkptrg = 0;
         for (i32 i = 0; i < EDPP_MAX_DMADEBTYPES; ++i) {
-            i32 size;
             DmaDebTypes[i] = CreateDmaPartEffectList(reinterpret_cast<void *>(cursor), &size);
             cursor += static_cast<usize>(size);
         }
@@ -1445,6 +1356,7 @@ extern "C" {
             buffer->addr = cursor;
         }
 
+        const i32 chunk_count = debrischunks + debrischunksglass;
         debris_chunk_control_stack[0] = NULL;
         debris_chunk_control_stack[1] = NULL;
         for (i32 i = 0; i < chunk_count * 2; ++i) {
@@ -1481,23 +1393,25 @@ extern "C" {
     }
 
     i32 DeletePlatinst(i32 index) {
-        if (index < 0 || index >= CurTerr->max_platforms)
+        if (index < 0)
             return 0;
-        TERRAIN_PLATFORM &platform = CurTerr->platforms[index];
+        TERRSET *terrain = CurTerr;
+        if (index >= terrain->max_platforms)
+            return 0;
+        TERRAIN_PLATFORM &platform = terrain->platforms[index];
         if (platform.scene_object == NULL)
             return 0;
-        const i16 last_group = --CurTerr->group_count;
-        --CurTerr->group_index_count;
-        TERRAIN_GROUP &last = CurTerr->groups[last_group];
-        CurTerr->platforms[last.scene_index].terrain_group_index = platform.terrain_group_index;
-        CurTerr->groups[platform.terrain_group_index] = last;
+        const i16 last_group = --terrain->group_count;
+        const i32 index_count = --terrain->group_index_count;
+        TERRAIN_GROUP &last = terrain->groups[last_group];
+        terrain->platforms[last.scene_index].terrain_group_index = platform.terrain_group_index;
+        terrain->groups[platform.terrain_group_index] = last;
         last.chunk_type = -1;
         platform.scene_object = NULL;
-        TERRAIN_CELL &cell = CurTerr->cells[TERRAIN_PLATFORM_CELL];
-        i16 *indices = CurTerr->group_indices + cell.first_group;
-        for (i32 i = 0; i < cell.group_count; ++i) {
-            if (indices[i] == last_group) {
-                indices[i] = CurTerr->group_indices[CurTerr->group_index_count];
+        TERRAIN_CELL &cell = terrain->cells[TERRAIN_PLATFORM_CELL];
+        for (i16 i = 0; i < static_cast<i16>(cell.group_count); ++i) {
+            if (terrain->group_indices[cell.first_group + i] == last_group) {
+                terrain->group_indices[cell.first_group + i] = terrain->group_indices[index_count];
                 break;
             }
         }
@@ -1510,17 +1424,16 @@ extern "C" {
         if (CurTerr == NULL || platform_index < 0)
             return;
 
-        TERRAIN_PLATFORM &platform = CurTerr->platforms[platform_index];
-        const i16 group_index = platform.terrain_group_index;
-        TERRAIN_GROUP &group = CurTerr->groups[group_index];
+        TERRAIN_GROUP &group = CurTerr->groups[CurTerr->platforms[platform_index].terrain_group_index];
         if (static_cast<u32>(group.chunk_type) > TERRAIN_CHUNK_GROUP_SECONDARY)
             return;
 
         TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group.data);
         while (batch->marker >= 0) {
+            const i32 shape_count = batch->shape_count;
             TERRAIN_SHAPE *shape = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
-            for (i32 i = 0; i < batch->shape_count; ++i, ++shape)
-                TerrDrawPlat(shape, group_index);
+            for (i32 i = shape_count; i > 0; --i, ++shape)
+                TerrDrawPlat(shape, CurTerr->platforms[platform_index].terrain_group_index);
             batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(shape);
         }
     }
@@ -1560,32 +1473,37 @@ extern "C" {
 
     i32 NewPlatInst(void *object, i32 instance) {
         TERRSET *terrain = CurTerr;
-        if (terrain == NULL || terrain->group_index_count >= terrain->max_group_indices ||
-            terrain->group_count >= terrain->max_groups || object == NULL || terrain->max_platforms <= 0)
+        if (terrain == NULL)
             return -1;
-        const i32 platform_count = terrain->max_platforms;
-        TERRAIN_PLATFORM *platforms = terrain->platforms;
         const i32 group_index_count = terrain->group_index_count;
+        if (group_index_count >= terrain->max_group_indices)
+            return -1;
         const i16 group_index = terrain->group_count;
-        i32 index = 0;
-        while (platforms[index].scene_object != NULL) {
-            if (++index == platform_count)
-                return -1;
+        if (group_index >= terrain->max_groups || object == NULL)
+            return -1;
+        i32 index = -1;
+        for (i32 i = 0; i < terrain->max_platforms; i++) {
+            if (terrain->platforms[i].scene_object == NULL) {
+                index = i;
+                break;
+            }
         }
-        for (i32 source = 0; source < platform_count; ++source) {
-            TERRAIN_PLATFORM &original = platforms[source];
-            if (original.scene_object == NULL || static_cast<i16>(original.scene_object_index) != instance)
+        if (index == -1)
+            return -1;
+        TERRAIN_PLATFORM *original = terrain->platforms;
+        for (i32 source = 0; source < terrain->max_platforms; ++source, ++original) {
+            if (original->scene_object == NULL || static_cast<i16>(original->scene_object_index) != instance)
                 continue;
             TERRAIN_GROUP &group = terrain->groups[group_index];
-            group = terrain->groups[original.terrain_group_index];
+            group = terrain->groups[original->terrain_group_index];
             group.scene_index = index;
             group.chunk_type = 1;
-            TERRAIN_PLATFORM &platform = platforms[index];
-            platform.terrain_group_index = group_index;
+            TERRAIN_PLATFORM &platform = terrain->platforms[index];
             platform.scene_object = object;
+            platform.terrain_group_index = group_index;
             platform.scene_object_index = instance;
             platform.scene_transform = NULL;
-            platform.flags = (platform.flags & ~1) | (original.flags & 1);
+            platform.flags = (platform.flags & ~1) | (original->flags & 1);
             terrain->group_indices[group_index_count] = group_index;
             terrain->group_index_count = group_index_count + 1;
             platform.bounce_impulse = 0.0f;
@@ -1602,24 +1520,31 @@ extern "C" {
 
     i32 NewPlatInstMSitu(void *object, i32 source) {
         TERRSET *terrain = CurTerr;
-        if (terrain == NULL || terrain->group_index_count >= terrain->max_group_indices ||
-            terrain->group_count >= terrain->max_groups || object == NULL || terrain->max_platforms <= 0)
+        if (terrain == NULL)
             return -1;
-        i32 index = 0;
-        while (terrain->platforms[index].scene_object != NULL) {
-            if (++index == terrain->max_platforms)
-                return -1;
+        const i32 group_index_count = terrain->group_index_count;
+        if (group_index_count >= terrain->max_group_indices)
+            return -1;
+        const i16 group_index = terrain->group_count;
+        if (group_index >= terrain->max_groups || object == NULL)
+            return -1;
+        TERRAIN_PLATFORM *platforms = terrain->platforms;
+        i32 index = -1;
+        for (i32 i = 0; i < terrain->max_platforms; i++) {
+            if (platforms[i].scene_object == NULL) {
+                index = i;
+                break;
+            }
         }
         if (index == -1 || source == -1)
             return -1;
-        i16 group_index = terrain->group_count;
         TERRAIN_GROUP &group = terrain->groups[group_index];
         group = terrain->groups[source];
         group.scene_index = index;
         group.chunk_type = 1;
-        TERRAIN_PLATFORM &platform = terrain->platforms[index];
-        platform.terrain_group_index = group_index;
+        TERRAIN_PLATFORM &platform = platforms[index];
         platform.scene_object = object;
+        platform.terrain_group_index = group_index;
         platform.scene_object_index = source;
         platform.flags &= ~TERRAIN_PLATFORM_FLAG_ROTATING;
         platform.scene_transform = NULL;
@@ -1628,7 +1553,8 @@ extern "C" {
         platform.bounce_velocity = 0.0f;
         platform.bounce_damping = 0.0f;
         platform.bounce_spring = 0.0f;
-        terrain->group_indices[terrain->group_index_count++] = group_index;
+        terrain->group_indices[group_index_count] = group_index;
+        terrain->group_index_count = group_index_count + 1;
         ++terrain->cells[TERRAIN_PLATFORM_CELL].group_count;
         ++terrain->group_count;
         return index;
@@ -1747,15 +1673,17 @@ extern "C" {
         info->flags = flags;
         info->mirrored = matrix->m02 * matrix->m20 - matrix->m00 * matrix->m22 > 0.0f;
         SkinPlatformSize(group_index, PlatSkinMem, info);
+        TERRSET *current = CurTerr;
         info = &PlatSkinInfo[PlatSkinCnt];
-        info->terrain_group = CurTerr->group_count;
-        TERRAIN_GROUP &registered_group = CurTerr->groups[CurTerr->group_count];
+        const i16 registered = current->group_count;
+        info->terrain_group = registered;
+        TERRAIN_GROUP &registered_group = current->groups[registered];
         info->terrain_data = registered_group.data;
         registered_group.data = NULL;
         registered_group.scene_index = ~PlatSkinCnt;
-        ++CurTerr->group_count;
+        current->group_count = registered + 1;
         ++PlatSkinCnt;
-        return CurTerr->group_count - 1;
+        return current->group_count - 1;
     }
 
     i32 PlatInstSkinRegister(NUMTX *matrix, void *skin_data, void *matrix_data, f32 scale, i32 instance, i32 flags) {
@@ -1820,13 +1748,13 @@ extern "C" {
             i32 x_cell = static_cast<i32>(static_cast<f32>(x_distance * 7) / (maximum_x - minimum_x));
             if (x_cell < 0)
                 x_cell = 0;
-            else if (x_cell > 6)
+            if (x_cell > 6)
                 x_cell = 6;
             i32 z_distance = static_cast<i32>((group_min_z[i] + group_max_z[i]) * 0.5f - minimum_z);
             i32 z_cell = static_cast<i32>(static_cast<f32>(z_distance * 7) / (maximum_z - minimum_z));
             if (z_cell < 0)
                 z_cell = 0;
-            else if (z_cell > 6)
+            if (z_cell > 6)
                 z_cell = 6;
             group_cells[i] = x_cell + z_cell * 7;
         }
@@ -1834,8 +1762,7 @@ extern "C" {
             terrain->cells[i].group_count = 0;
         terrain->used_cell_count = 0;
         for (i32 cell_index = 0; cell_index < TERRAIN_GRID_CELL_COUNT; ++cell_index) {
-            TERRAIN_CELL &cell = terrain->cells[terrain->used_cell_count];
-            cell.first_group = terrain->group_index_count;
+            terrain->cells[terrain->used_cell_count].first_group = terrain->group_index_count;
             f32 min_x = 200000000.0f, min_z = 200000000.0f;
             f32 max_x = -200000000.0f, max_z = -200000000.0f;
             for (i32 i = 0; i < terrain->group_count; ++i) {
@@ -1845,14 +1772,14 @@ extern "C" {
                 min_z = MIN(group_min_z[i], min_z);
                 max_x = MAX(group_max_x[i], max_x);
                 max_z = MAX(group_max_z[i], max_z);
-                ++cell.group_count;
+                ++terrain->cells[terrain->used_cell_count].group_count;
                 terrain->group_indices[terrain->group_index_count++] = i;
             }
-            if (cell.group_count != 0) {
-                cell.min_z = min_z;
-                cell.max_x = max_x;
-                cell.min_x = min_x;
-                cell.max_z = max_z;
+            if (terrain->cells[terrain->used_cell_count].group_count != 0) {
+                terrain->cells[terrain->used_cell_count].min_z = min_z;
+                terrain->cells[terrain->used_cell_count].max_x = max_x;
+                terrain->cells[terrain->used_cell_count].min_x = min_x;
+                terrain->cells[terrain->used_cell_count].max_z = max_z;
                 ++terrain->used_cell_count;
             }
         }

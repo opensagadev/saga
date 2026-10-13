@@ -60,7 +60,15 @@ namespace {
     struct SPINNERPROGRESSENTRY {
         f32 animation_position;
         u16 rotation;
-        u8 flags;
+        union {
+            u8 flags; // SPINNER_PROGRESS_FLAGS
+            struct {
+                u8 valid : 1;
+                u8 base_visible : 1;
+                u8 arm_visible : 1;
+                u8 : 5;
+            };
+        };
         u8 field_0x07;
     };
 
@@ -184,7 +192,7 @@ static void *GizSpinner_ReserveBufferSpace(void *world_ptr) {
 static void GizSpinner_StoreProgressData(void *world_ptr, void *, void *progress_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     SPINNERPROGRESSENTRY *entry = static_cast<SPINNERPROGRESSENTRY *>(progress_ptr);
-    if (entry == NULL || world->spinners == NULL || world->current_level->max_spinners == 0) {
+    if (entry == NULL || world->spinners == NULL) {
         return;
     }
 
@@ -193,23 +201,17 @@ static void GizSpinner_StoreProgressData(void *world_ptr, void *, void *progress
         if ((spinner->flags & GIZSPINNER_FLAG_VALID) == 0) {
             continue;
         }
-        entry->flags |= SPINNER_PROGRESS_VALID;
+        entry->valid = 1;
         entry->rotation = spinner->target_rotation;
-        entry->flags =
-            static_cast<u8>((entry->flags & ~SPINNER_PROGRESS_ARM_VISIBLE) |
-                            (((spinner->flags & GIZSPINNER_FLAG_HIDE_ARM) == 0) ? SPINNER_PROGRESS_ARM_VISIBLE : 0));
-        entry->flags =
-            static_cast<u8>((entry->flags & ~SPINNER_PROGRESS_BASE_VISIBLE) |
-                            (((spinner->flags & GIZSPINNER_FLAG_HIDE_BASE) == 0) ? SPINNER_PROGRESS_BASE_VISIBLE : 0));
+        entry->arm_visible = (spinner->flags & GIZSPINNER_FLAG_HIDE_ARM) == 0;
+        entry->base_visible = (spinner->flags & GIZSPINNER_FLAG_HIDE_BASE) == 0;
         if (GameAnimSet_IsAnimationReset(spinner->anim_set) != 0) {
             entry->animation_position = 0.0f;
         }
-        if (spinner->anim_set != NULL) {
-            if (spinner->anim_set->state == GAMEANIMSET_STATE_AT_END) {
-                entry->animation_position = 1.0f;
-            } else {
-                entry->animation_position = GameAnimSet_GetAnimPos(spinner->primary_anim_obj);
-            }
+        if (spinner->anim_set->state == GAMEANIMSET_STATE_AT_END) {
+            entry->animation_position = 1.0f;
+        } else {
+            entry->animation_position = GameAnimSet_GetAnimPos(spinner->primary_anim_obj);
         }
     }
 }
@@ -313,7 +315,7 @@ static i32 *GizSpinner_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *result_posi
 }
 
 static void GizSpinner_Draw(void *world_ptr, void *, float) {
-    NUMTX reflection_matrix;
+    NUMTX_ALIGNED16 reflection_matrix;
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     if (world->spinners == NULL || world->current_level->max_spinners == 0) {
         return;
@@ -483,6 +485,16 @@ char *GizSpinner_GetOutputName(GIZMO *gizmo, i32 output_index) {
     return gizspinner_outputName;
 }
 
+// Looks the special up in the level scene first, then in the shared things scene.
+static bool GizSpinner_FindSpecial(WORLDINFO *world, nuhspecial_s *special, char *name) {
+    NuSpecialFind(world->current_gscn, special, name, 0);
+    if (NuSpecialExistsFn(special) != 0) {
+        return true;
+    }
+    NuSpecialFind(things_scene, special, name, 0);
+    return NuSpecialExistsFn(special) != 0;
+}
+
 static i32 GizSpinner_Load(void *world_ptr, void *) {
     i32 version = -1;
 
@@ -519,49 +531,46 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
         const i32 special_name_length = static_cast<signed char>(EdFileReadChar());
         EdFileRead(special_name, special_name_length);
         nuhspecial_s special;
-        NuSpecialFind(world->current_gscn, &special, special_name, 0);
-        bool special_missing = NuSpecialExistsFn(&special) == 0;
-        if (special_missing) {
-            NuSpecialFind(things_scene, &special, special_name, 0);
-            special_missing = NuSpecialExistsFn(&special) == 0;
-        }
+        const bool special_missing = !GizSpinner_FindSpecial(world, &special, special_name);
         world->spinners[index].special = special;
 
         const u8 output_count = static_cast<u8>(EdFileReadChar());
         const i32 output_points = static_cast<signed char>(output_count);
-        u8 spinner_type = 4;
+        i32 spinner_type = 4;
         u32 spinner_state_flags = 0;
         f32 animation_speed = 0.0f;
         f32 initial_animation_point = 1.0f;
         f32 spinner_field_98 = 0.0f;
-        u8 spinner_flags = 0;
+        i32 spinner_flags = 0;
         bool read_game_anim_set = false;
 
         if (version > 1) {
-            spinner_type = static_cast<u8>(EdFileReadChar());
-        }
-        if (version <= 2) {
-            GameAnimSet_RemoveAllObjects(world->spinners[index].anim_set);
-            animation_speed = 1.0f;
-        } else {
-            spinner_state_flags = static_cast<u32>(EdFileReadInt()) & ~0x360u;
-            world->spinners[index].field_0x2d8 = EdFileReadFloat();
-            if (version == 3) {
+            spinner_type = static_cast<signed char>(EdFileReadChar());
+            if (version <= 2) {
                 GameAnimSet_RemoveAllObjects(world->spinners[index].anim_set);
                 animation_speed = 1.0f;
             } else {
-                animation_speed = EdFileReadFloat();
-                if (version == 4) {
+                spinner_state_flags = static_cast<u32>(EdFileReadInt()) & ~0x360u;
+                world->spinners[index].field_0x2d8 = EdFileReadFloat();
+                if (version == 3) {
                     GameAnimSet_RemoveAllObjects(world->spinners[index].anim_set);
-                    initial_animation_point = animation_speed;
+                    animation_speed = 1.0f;
                 } else {
+                    animation_speed = EdFileReadFloat();
                     if (version > 5) {
-                        spinner_flags = static_cast<u8>(EdFileReadChar());
+                        spinner_flags = static_cast<signed char>(EdFileReadChar());
                     }
                     GameAnimSet_RemoveAllObjects(world->spinners[index].anim_set);
-                    read_game_anim_set = true;
+                    if (version == 4) {
+                        initial_animation_point = animation_speed;
+                    } else {
+                        read_game_anim_set = true;
+                    }
                 }
             }
+        } else {
+            GameAnimSet_RemoveAllObjects(world->spinners[index].anim_set);
+            animation_speed = 1.0f;
         }
 
         if (!read_game_anim_set) {
@@ -569,11 +578,7 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
             for (i32 object_index = 0; object_index < object_count; ++object_index) {
                 const i32 object_name_length = static_cast<signed char>(EdFileReadChar());
                 EdFileRead(special_name, object_name_length);
-                NuSpecialFind(world->current_gscn, &special, special_name, 0);
-                if (NuSpecialExistsFn(&special) == 0) {
-                    NuSpecialFind(things_scene, &special, special_name, 0);
-                    NuSpecialExistsFn(&special);
-                }
+                GizSpinner_FindSpecial(world, &special, special_name);
                 f32 start_frame = 1.0f;
                 f32 end_frame = 1000000000.0f;
                 if (version > 2) {
@@ -643,9 +648,9 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
         } else {
             initial_animation_point = animation_speed;
             if (spinner->anim_set != NULL && spinner->primary_anim_obj != NULL) {
+                const f32 start_frame = spinner->primary_anim_obj->start_frame;
+                const f32 duration = spinner->primary_anim_obj->end_frame - start_frame;
                 if (output_points > 0) {
-                    const f32 start_frame = spinner->primary_anim_obj->start_frame;
-                    const f32 duration = spinner->primary_anim_obj->end_frame - start_frame;
                     {
                         const f32 interval = duration / static_cast<f32>(output_points - 1);
                         for (i32 point = 0; point < output_points; ++point) {
@@ -1390,16 +1395,16 @@ f32 GizSpinner_GetNearestTargetPoint(GIZSPINNER_s *spinner, nuvec_s *origin, nuv
     f32 nearest_distance = 1000000000.0f;
     NUVEC *nearest_position = NULL;
     NUVEC *nearest_direction = NULL;
-    auto spinner_initial_rotation = spinner->initial_rotation;
     for (i32 i = 0; i < count; ++i) {
         f32 distance = NuVecDistSqr(origin, &positions[i], NULL);
         if (check_direction != 0) {
-            u16 angle = spinner->field_0x08c + 0x4000 - spinner->rotation - spinner_initial_rotation +
+            u16 angle = spinner->field_0x08c + 0x4000 - spinner->rotation - spinner->initial_rotation +
                         (-65536 / spinner->type) * i;
             NUVEC offset;
             NuVecSub(&offset, origin, &spinner->position);
             NuVecRotateY(&offset, &offset, angle);
-            if (!(distance < nearest_distance && offset.z >= 0.0f))
+            const f32 facing = offset.z;
+            if (!(distance < nearest_distance && facing >= 0.0f))
                 continue;
         } else if (!(distance < nearest_distance)) {
             continue;

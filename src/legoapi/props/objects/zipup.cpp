@@ -32,8 +32,9 @@
 #include "nu2api/numath/nuvec.h"
 
 struct ZIPUPPROGRESS {
-    u32 active_mask;
-    u32 visible_mask;
+    // One bit per zip-up; 32 zip-ups fit in a single word.
+    u32 active_mask[1];
+    u32 visible_mask[1];
 };
 
 i32 zipup_gizmotype_id = -1;
@@ -107,7 +108,7 @@ static void ZipUps_Draw(void *world_ptr, void *, float) {
         NUVEC endpoint_position;
         NUVEC offset;
         NUVEC ground_position;
-        NUMTX matrices[ZIPUP_MATRIX_COUNT];
+        NUMTX_ALIGNED16 matrices[ZIPUP_MATRIX_COUNT];
 
         for (i32 index = 0; index < world->zipup_count; ++index, ++zipup) {
             if ((zipup->flags & (ZIPUP_FLAG_ACTIVE | ZIPUP_FLAG_VISIBLE)) != (ZIPUP_FLAG_ACTIVE | ZIPUP_FLAG_VISIBLE)) {
@@ -277,8 +278,8 @@ static void ZipUps_ClearProgress(void *, void *progress_data) {
         return;
     }
 
-    progress->active_mask = ~0u;
-    progress->visible_mask = ~0u;
+    progress->active_mask[0] = ~0u;
+    progress->visible_mask[0] = ~0u;
 }
 
 static void ZipUps_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
@@ -288,20 +289,21 @@ static void ZipUps_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
         return;
     }
 
-    progress->active_mask = ~0u;
-    progress->visible_mask = ~0u;
+    progress->active_mask[0] = ~0u;
+    progress->visible_mask[0] = ~0u;
     if (world == NULL || world->zipups == NULL) {
         return;
     }
 
     auto world_zipup_count = world->zipup_count;
-    for (i32 index = 0; index < world_zipup_count && index < 32; ++index) {
-        const u32 mask = 1u << index;
+    for (i32 index = 0; index < world_zipup_count && index != 32; ++index) {
+        const i32 word = index >> 5;
+        const u32 mask = 1u << (index & 31);
         if ((world->zipups[index].flags & ZIPUP_FLAG_VISIBLE) == 0) {
-            progress->visible_mask &= ~mask;
+            progress->visible_mask[word] &= ~mask;
         }
         if ((world->zipups[index].flags & ZIPUP_FLAG_ACTIVE) == 0) {
-            progress->active_mask &= ~mask;
+            progress->active_mask[word] &= ~mask;
         }
     }
 }
@@ -341,15 +343,14 @@ void ZipUps_Reset(void *world_ptr, void *, void *progress_ptr) {
             zipup->facing_angle = static_cast<u16>(NuAtan2D(zipup->upper_position.x - zipup->lower_position.x,
                                                             zipup->upper_position.z - zipup->lower_position.z));
             zipup->runtime_flags &= ~ZIPUP_RUNTIME_FLAG_OCCUPIED;
-            zipup->flags |= ZIPUP_FLAG_ACTIVE | ZIPUP_FLAG_VISIBLE;
+            zipup->active = 1;
+            zipup->visible = 1;
             zipup->occupant = NULL;
 
             if (progress != NULL && index <= 31) {
                 const u32 bit = 1u << index;
-                const u8 visible = (progress->visible_mask & bit) != 0;
-                zipup->flags = static_cast<u8>((zipup->flags & ~ZIPUP_FLAG_VISIBLE) | (visible << 7));
-                const u8 active = (progress->active_mask & bit) != 0;
-                zipup->flags = static_cast<u8>((zipup->flags & ~ZIPUP_FLAG_ACTIVE) | (active << 6));
+                zipup->visible = (progress->visible_mask[0] & bit) != 0;
+                zipup->active = (progress->active_mask[0] & bit) != 0;
             }
         }
     }
@@ -389,41 +390,23 @@ static i32 ZipUps_Load(void *world_ptr, void *) {
         world->zipups[index].hook_x_rotation = EdFileReadUnsignedShort();
         world->zipups[index].hook_y_rotation = EdFileReadUnsignedShort();
 
-        ZIPUP *config_zipup_0 = &world->zipups[index];
-        const u8 config_0 = EdFileReadUnsignedChar() != 0;
-        config_zipup_0->flags = static_cast<u8>((config_zipup_0->flags & ~ZIPUP_FLAG_CONFIG_0) | config_0);
-        ZIPUP *config_zipup_1 = &world->zipups[index];
-        const u8 config_1 = EdFileReadUnsignedChar() != 0;
-        config_zipup_1->flags = static_cast<u8>((config_zipup_1->flags & ~ZIPUP_FLAG_CONFIG_1) | (config_1 << 1));
-        ZIPUP *config_zipup_3 = &world->zipups[index];
-        const u8 config_3 = EdFileReadUnsignedChar() != 0;
-        config_zipup_3->flags = static_cast<u8>((config_zipup_3->flags & ~ZIPUP_FLAG_CONFIG_3) | (config_3 << 3));
-
-        if (!(version <= 1)) {
-            ZIPUP *config_zipup_4 = &world->zipups[index];
-            const u8 config_4 = EdFileReadUnsignedChar() != 0;
-            config_zipup_4->flags = static_cast<u8>((config_zipup_4->flags & ~ZIPUP_FLAG_CONFIG_4) | (config_4 << 4));
-            if (version != 2) {
-                ZIPUP *config_zipup_5 = &world->zipups[index];
-                const u8 config_5 = EdFileReadUnsignedChar() != 0;
-                config_zipup_5->flags =
-                    static_cast<u8>((config_zipup_5->flags & ~ZIPUP_FLAG_CONFIG_5) | (config_5 << 5));
-                if (version != 3) {
-                    ZIPUP *config_zipup_2 = &world->zipups[index];
-                    const u8 config_2 = EdFileReadUnsignedChar() != 0;
-                    config_zipup_2->flags =
-                        static_cast<u8>((config_zipup_2->flags & ~ZIPUP_FLAG_CONFIG_2) | (config_2 << 2));
-                } else {
-                    world->zipups[index].flags |= ZIPUP_FLAG_CONFIG_2;
-                }
-            } else {
-                world->zipups[index].flags &= ~ZIPUP_FLAG_CONFIG_5;
-                world->zipups[index].flags |= ZIPUP_FLAG_CONFIG_2;
-            }
+        world->zipups[index].config_0 = EdFileReadUnsignedChar() != 0;
+        world->zipups[index].config_1 = EdFileReadUnsignedChar() != 0;
+        world->zipups[index].config_3 = EdFileReadUnsignedChar() != 0;
+        if (version > 1) {
+            world->zipups[index].config_4 = EdFileReadUnsignedChar() != 0;
         } else {
-            world->zipups[index].flags |= ZIPUP_FLAG_CONFIG_4;
-            world->zipups[index].flags &= ~ZIPUP_FLAG_CONFIG_5;
-            world->zipups[index].flags |= ZIPUP_FLAG_CONFIG_2;
+            world->zipups[index].config_4 = 1;
+        }
+        if (version > 2) {
+            world->zipups[index].config_5 = EdFileReadUnsignedChar() != 0;
+        } else {
+            world->zipups[index].config_5 = 0;
+        }
+        if (version > 3) {
+            world->zipups[index].config_2 = EdFileReadUnsignedChar() != 0;
+        } else {
+            world->zipups[index].config_2 = 1;
         }
     }
     return 1;

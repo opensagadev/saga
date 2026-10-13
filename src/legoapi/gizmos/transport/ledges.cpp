@@ -112,7 +112,7 @@ static void Ledges_Reset(void *world_info, void *, void *progress_data) {
         ledge->type_index = type;
         ledge->bounds_min.x = ledge->bounds_min.y = ledge->bounds_min.z = 999.0f;
         ledge->bounds_max.x = ledge->bounds_max.y = ledge->bounds_max.z = -999.0f;
-        NUVEC point;
+        NUVEC_ALIGNED16 point;
         NuVecRotateY(&point, &LedgePiece[ledge->type_index].start, ledge->y_rotation);
         if (point.x < ledge->bounds_min.x)
             ledge->bounds_min.x = point.x;
@@ -305,23 +305,23 @@ static i32 Ledges_Load(void *world_info, void *) {
         return 0;
     i32 version = EdFileReadInt();
     world->ledge_count = EdFileReadInt();
+    // Each field is written through world->ledges, as in the original.
     for (i32 i = 0; i < world->ledge_count; ++i) {
-        LEDGE *ledge = &static_cast<LEDGE *>(world->ledges)[i];
-        EdFileRead(ledge->name, 8);
-        EdFileReadNuVec(&ledge->position);
-        ledge->y_rotation = EdFileReadShort();
-        ledge->type_code = EdFileReadChar();
+        EdFileRead(static_cast<LEDGE *>(world->ledges)[i].name, 8);
+        EdFileReadNuVec(&static_cast<LEDGE *>(world->ledges)[i].position);
+        static_cast<LEDGE *>(world->ledges)[i].y_rotation = EdFileReadShort();
+        static_cast<LEDGE *>(world->ledges)[i].type_code = EdFileReadChar();
         if (version > 1) {
-            ledge->field_0x1c = EdFileReadShort();
-            ledge->field_0x1e = EdFileReadShort();
-            if (version == 2)
-                ledge->flags = 0;
-            else
-                ledge->flags = EdFileReadUnsignedChar();
+            static_cast<LEDGE *>(world->ledges)[i].field_0x1c = EdFileReadShort();
+            static_cast<LEDGE *>(world->ledges)[i].field_0x1e = EdFileReadShort();
         } else {
-            ledge->field_0x1c = -1;
-            ledge->field_0x1e = -1;
-            ledge->flags = 0;
+            static_cast<LEDGE *>(world->ledges)[i].field_0x1c = -1;
+            static_cast<LEDGE *>(world->ledges)[i].field_0x1e = -1;
+        }
+        if (version > 2) {
+            static_cast<LEDGE *>(world->ledges)[i].flags = EdFileReadUnsignedChar();
+        } else {
+            static_cast<LEDGE *>(world->ledges)[i].flags = 0;
         }
     }
     return 1;
@@ -338,12 +338,13 @@ static void Ledges_StoreProgress(void *world_info, void *, void *progress_data) 
         return;
     LEDGE *ledge = static_cast<LEDGE *>(world->ledges);
     auto world_ledge_count = world->ledge_count;
-    for (i32 i = 0; i < world_ledge_count && i < 128; ++i, ++ledge) {
-        u32 mask = 1u << (i & 31);
+    for (i32 i = 0; i < world_ledge_count && i != 128; ++i, ++ledge) {
+        const i32 word = i >> 5;
+        const u32 mask = 1u << (i & 31);
         if (!(ledge->state_flags & 2))
-            progress->state[4 + (i >> 5)] &= ~mask;
+            progress->state[4 + word] &= ~mask;
         if (!(ledge->state_flags & 1))
-            progress->state[i >> 5] &= ~mask;
+            progress->state[word] &= ~mask;
     }
 }
 

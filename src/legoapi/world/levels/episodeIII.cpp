@@ -714,9 +714,9 @@ void VaderA_Update(WORLDINFO_s *) {
                 (vader_a.timer > 0.0f && static_cast<i32>(previous_time) != static_cast<i32>(vader_a.timer)))
                 TickTockSfx();
         } else if (netclient == 0 && vader_a.timer <= 0.0f) {
-            if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0)
+            if (Player[0] != NULL && Player[0]->apiobj.player_controlled)
                 LoseCoins(Player[0], 1);
-            if (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.field_0x1f8) < 0)
+            if (Player[1] != NULL && Player[1]->apiobj.player_controlled)
                 LoseCoins(Player[1], 1);
             KillGameObject(player, 2, 0);
         }

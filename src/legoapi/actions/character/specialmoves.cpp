@@ -97,7 +97,7 @@ void SpecialMove_VictimCode(GameObject_s *object) {
             }
             GameObject_s *victim = static_cast<GameObject_s *>(object->field_0x780);
             i32 damage = -1;
-            if (static_cast<i8>(victim->apiobj.field_0x1f8) < 0 && Player_HasInvincibility(victim) != 0) {
+            if (victim->apiobj.player_controlled && Player_HasInvincibility(victim) != 0) {
                 damage = 1;
             }
             victim = static_cast<GameObject_s *>(object->field_0x780);
@@ -130,18 +130,11 @@ void SpecialMoves_Configure(char *filename, variptr_u *buffer, variptr_u *) {
 
     buffer->addr = ALIGN(buffer->addr, 4);
     SpecialMove = reinterpret_cast<SPECIALMOVE_s *>(buffer->addr);
-    {
-        SPECIALMOVE_s *move;
-    outer_line:
-        if (!NuFParGetLine(parser))
-            goto done;
-    outer_word:
-        if (!NuFParGetWord(parser))
-            goto outer_line;
-        if (NuStrICmp(parser->word_buf, "specialmove_start") != 0)
-            goto outer_line;
+    while (NuFParGetLine(parser)) {
+        if (!NuFParGetWord(parser) || NuStrICmp(parser->word_buf, "specialmove_start") != 0)
+            continue;
 
-        move = &SpecialMove[SpecialMoveCount];
+        SPECIALMOVE_s *move = &SpecialMove[SpecialMoveCount];
         move->distance = 0.0f;
         move->attacker_action_type = -1;
         move->attacker_animation = -1;
@@ -151,43 +144,37 @@ void SpecialMoves_Configure(char *filename, variptr_u *buffer, variptr_u *) {
         move->victim_id = -1;
         move->flags = 0;
 
-    inner_line:
-        if (!NuFParGetLine(parser))
-            goto outer_line;
-        if (!NuFParGetWord(parser))
-            goto outer_line;
-        if (__builtin_expect(NuStrICmp(parser->word_buf, "specialmove_end") == 0, 1)) {
+        while (NuFParGetLine(parser) && NuFParGetWord(parser)) {
+            if (NuStrICmp(parser->word_buf, "specialmove_end") != 0) {
+                if (NuStrICmp(parser->word_buf, "attacker") == 0)
+                    SpecialMove_ConfigParticipant(parser, &move->attacker_id, &move->attacker_action_type,
+                                                  &move->attacker_animation);
+                else if (NuStrICmp(parser->word_buf, "victim") == 0)
+                    SpecialMove_ConfigParticipant(parser, &move->victim_id, &move->victim_action_type,
+                                                  &move->victim_animation);
+                else if (NuStrICmp(parser->word_buf, "distance_apart") == 0)
+                    move->distance = NuFParGetFloat(parser);
+                else if (NuStrICmp(parser->word_buf, "kill_victim_at_end") == 0)
+                    move->flags |= 2;
+                else if (NuStrICmp(parser->word_buf, "kill_victim_at_release") == 0)
+                    move->flags |= 4;
+                else if (NuStrICmp(parser->word_buf, "flash_victim_at_attack_end") == 0)
+                    move->flags |= 8;
+                else if (NuStrICmp(parser->word_buf, "throw_kill_parts_up") == 0)
+                    move->flags |= 0x10;
+                else if (NuStrICmp(parser->word_buf, "can_always_do") == 0)
+                    move->flags |= 1;
+                continue;
+            }
             if ((move->attacker_action_type != -1 || move->attacker_id != -1) && move->attacker_animation != -1 &&
                 (move->victim_action_type != -1 || move->victim_id != -1) && move->victim_animation != -1) {
                 ++SpecialMoveCount;
-                if (!NuFParGetLine(parser))
-                    goto done;
-                goto outer_word;
             }
-            goto outer_line;
+            break;
         }
-        if (NuStrICmp(parser->word_buf, "attacker") == 0)
-            SpecialMove_ConfigParticipant(parser, &move->attacker_id, &move->attacker_action_type,
-                                          &move->attacker_animation);
-        else if (NuStrICmp(parser->word_buf, "victim") == 0)
-            SpecialMove_ConfigParticipant(parser, &move->victim_id, &move->victim_action_type, &move->victim_animation);
-        else if (NuStrICmp(parser->word_buf, "distance_apart") == 0)
-            move->distance = NuFParGetFloat(parser);
-        else if (NuStrICmp(parser->word_buf, "kill_victim_at_end") == 0)
-            move->flags |= 2;
-        else if (NuStrICmp(parser->word_buf, "kill_victim_at_release") == 0)
-            move->flags |= 4;
-        else if (NuStrICmp(parser->word_buf, "flash_victim_at_attack_end") == 0)
-            move->flags |= 8;
-        else if (NuStrICmp(parser->word_buf, "throw_kill_parts_up") == 0)
-            move->flags |= 0x10;
-        else if (NuStrICmp(parser->word_buf, "can_always_do") == 0)
-            move->flags |= 1;
-        goto inner_line;
     }
-done:
     NuFParDestroy(parser);
-    if (__builtin_expect(SpecialMoveCount > 0, 1))
+    if (SpecialMoveCount > 0)
         buffer->addr = reinterpret_cast<usize>(SpecialMove + SpecialMoveCount);
     else
         SpecialMove = NULL;
@@ -210,7 +197,7 @@ i32 SpecialMove_ReleaseVictim(GameObject_s *object) {
         }
         GameObject_s *target = static_cast<GameObject_s *>(victim->field_0x780);
         i32 damage = -1;
-        if (static_cast<i8>(target->apiobj.field_0x1f8) < 0 && Player_HasInvincibility(target) != 0) {
+        if (target->apiobj.player_controlled && Player_HasInvincibility(target) != 0) {
             damage = 1;
         }
         target = static_cast<GameObject_s *>(victim->field_0x780);

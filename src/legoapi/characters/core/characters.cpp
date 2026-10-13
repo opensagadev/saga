@@ -763,18 +763,20 @@ GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle) {
     if (Mission_Active(NULL) != NULL || name == NULL)
         return NULL;
     GameObject_s *object = GetNamedGameObject(WORLD->ai_sys, name);
-    if (object == NULL || (object->apiobj.field_0x1f8 & 0x1000) != 0)
+    if (object == NULL || (object->apiobj.flags_high & 0x10) != 0)
         return NULL;
     if (FreePlay != 0 && (object->apiobj.field_0x1f4 & 0x400) == 0)
         return NULL;
     if (object->ai.field_0x134 != 0xff) {
         ResetAICreature(object, WORLD->ai_sys);
     } else {
-        object->apiobj.field_0x1f8 |= 0x1000;
+        object->apiobj.flags_high |= 0x10;
         AIScriptSetBaseScriptStateByName(reinterpret_cast<AISCRIPTPROCESS *>(&object->ai), const_cast<char *>("Base"));
         if (position != NULL) {
             object->apiobj.position = *position;
-            object->apiobj.field_0x276 = object->apiobj.facing_angle = object->apiobj.movement_facing_angle = angle;
+            object->apiobj.field_0x276 = angle;
+            object->apiobj.facing_angle = angle;
+            object->apiobj.movement_facing_angle = angle;
             AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, &object->ai, 0xff, 1);
             object->apiobj.initial_position = object->apiobj.position;
             object->apiobj.collision_position = object->apiobj.position;
@@ -1086,11 +1088,15 @@ i32 GetDefaultIdle(GameObject_s *obj) {
     CHARACTERDATA *character = obj->apiobj.character_data;
     DefaultIdleCharacterData *game_character = static_cast<DefaultIdleCharacterData *>(character->field11_0x24);
 
-    i32 animation = 25;
-    i32 table_offset = 100;
-    if (game_character->use_standard_idle == 0 && (character->model_flags & 0x80) != 0) {
-        animation = 118;
-        table_offset = 472;
+    i32 animation;
+    i32 table_offset;
+    if (game_character->use_standard_idle != 0) {
+        animation = 25;
+        table_offset = 100;
+    } else {
+        const u32 alternate = character->model_flags & 0x80;
+        table_offset = alternate != 0 ? 472 : 100;
+        animation = alternate != 0 ? 118 : 25;
     }
     if (obj->batarang != NULL && *(reinterpret_cast<u8 *>(obj->batarang) + 0x7d) != 0) {
         return 151;
@@ -1098,20 +1104,11 @@ i32 GetDefaultIdle(GameObject_s *obj) {
 
     u8 *animation_table = reinterpret_cast<u8 *>(obj->apiobj.character_model->model_data_b);
     void *entry = *reinterpret_cast<void **>(animation_table + table_offset);
-    if (entry != NULL &&
-        (*reinterpret_cast<i32 *>(animation_table + 4) == 0 || (obj->field_0xe22 & 1) != 0 || obj->field_0xe32 == 1)) {
+    if ((*reinterpret_cast<i32 *>(animation_table + 4) == 0 || (obj->field_0xe22 & 1) != 0 || obj->field_0xe32 == 1) &&
+        entry != NULL) {
         return animation;
     }
     return 1;
-}
-
-static i32 IdleRepetitionCount(u8 minimum, u8 maximum) {
-    if (maximum <= minimum) {
-        return minimum;
-    }
-
-    const i32 bucket_size = 0xffff / (maximum - minimum) + 1;
-    return minimum + qrand() / bucket_size;
 }
 
 void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation) {
@@ -1125,19 +1122,20 @@ void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation) {
     object->idle_animation_time = 0.0f;
 
     CHARACTERMODEL_s *model = object->apiobj.character_model;
-    CHARACTERANIM_s *animation_info = NULL;
-    if (model != NULL && model->model_data_b != NULL && model->model_data_b[animation] != NULL &&
-        model->model_data_a != NULL) {
-        animation_info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
-    }
-
-    const u8 minimum = animation_info != NULL ? static_cast<u8>(animation_info->minimum_repetitions) : 0;
-    if (minimum == 0) {
-        object->idle_animation_limit = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 7.0f + 8.0f;
+    CHARACTERANIM_s *animation_info;
+    i32 repetitions;
+    // The signed > 0 test (rather than != 0) keeps the retail branch layout.
+    if (model->model_data_b[object->idle_animation] != NULL &&
+        (animation_info = static_cast<CHARACTERANIM_s *>(model->model_data_a[object->idle_animation]),
+         repetitions = static_cast<u8>(animation_info->minimum_repetitions)) > 0) {
+        const i32 maximum = static_cast<u8>(animation_info->maximum_repetitions);
+        if (repetitions < maximum) {
+            repetitions += qrand() / (0xffff / (maximum - repetitions) + 1);
+        }
+        object->idle_animation_limit =
+            AnimDuration(object->id, object->idle_animation, 0.0f, 0.0f, 0) * repetitions - animduration_blendouttime;
     } else {
-        const u8 maximum = static_cast<u8>(animation_info->maximum_repetitions);
-        const i32 repetitions = IdleRepetitionCount(minimum, maximum);
-        object->idle_animation_limit = AnimDuration(object->id, animation, 0.0f, 0.0f, 0) * repetitions - FRAMETIME;
+        object->idle_animation_limit = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 7.0f + 8.0f;
     }
 
     if (mode > 0) {
@@ -1156,7 +1154,6 @@ static void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
     i32 candidates[233];
     i32 candidate_count = 0;
     CHARACTERMODEL_s *model = object->apiobj.character_model;
-    const bool select_alternate_group = alternate_idle == default_idle;
     for (i32 animation = 0; animation < 233; ++animation) {
         if (model->model_data_b[animation] == NULL) {
             continue;
@@ -1165,8 +1162,11 @@ static void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
         if ((info->flags & 0x10) == 0) {
             continue;
         }
-        const bool alternate_group = (info->flags & 0x800) != 0;
-        if (alternate_group == select_alternate_group) {
+        if (alternate_idle == default_idle) {
+            if ((info->flags & 0x800) != 0) {
+                candidates[candidate_count++] = animation;
+            }
+        } else if ((info->flags & 0x800) == 0) {
             candidates[candidate_count++] = animation;
         }
     }
@@ -1176,34 +1176,34 @@ static void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
         return;
     }
 
-    i32 animation;
-    if (candidate_count == 1) {
-        animation = candidates[0];
-    } else {
-        auto object_previous_idle_animation = object->previous_idle_animation;
+    if (candidate_count != 1) {
         do {
-            const i32 bucket_size = 0xffff / candidate_count + 1;
-            animation = candidates[qrand() / bucket_size];
-            object->idle_animation = static_cast<i16>(animation);
-        } while (animation == object_previous_idle_animation);
+            object->idle_animation = static_cast<i16>(candidates[qrand() / (0xffff / candidate_count + 1)]);
+        } while (object->idle_animation == object->previous_idle_animation);
+    } else {
+        object->idle_animation = static_cast<i16>(candidates[0]);
     }
-    object->idle_animation = static_cast<i16>(animation);
 
-    CHARACTERANIM_s *info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
-    const u8 maximum = static_cast<u8>(info->maximum_repetitions);
+    CHARACTERANIM_s *info =
+        static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[object->idle_animation]);
     i32 repetitions = static_cast<u8>(info->minimum_repetitions);
     if (repetitions == 0) {
         repetitions = 1;
-    } else if (maximum > repetitions) {
-        repetitions = IdleRepetitionCount(static_cast<u8>(repetitions), maximum);
+    } else {
+        const i32 maximum = static_cast<u8>(info->maximum_repetitions);
+        if (maximum != 0 && maximum > repetitions) {
+            repetitions += qrand() / (0xffff / (maximum - repetitions) + 1);
+        }
     }
-    object->previous_idle_animation = static_cast<i16>(animation);
-    if (repetitions > 1 && (info->flags & 2) == 0) {
+    object->previous_idle_animation = object->idle_animation;
+    if (repetitions > 1 &&
+        (static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[object->idle_animation])->flags &
+         2) == 0) {
         repetitions = 1;
     }
 
     object->idle_animation_time = 0.0f;
-    const f32 duration = AnimDuration(object->id, animation, 0.0f, 0.0f, 0);
+    const f32 duration = AnimDuration(object->id, object->idle_animation, 0.0f, 0.0f, 0);
     object->idle_animation_limit = duration * repetitions - animduration_blendouttime;
 }
 
@@ -1214,59 +1214,50 @@ void UpdateCharacterIdle(GameObject_s *object) {
 
     CHARACTERDATA *character = object->apiobj.character_data;
     GAMECHARACTERDATA *game_character = static_cast<GAMECHARACTERDATA *>(character->field11_0x24);
-    const i16 alternate_idle =
-        static_cast<i16>(game_character->field275_0x116 == 0 && (character->model_flags & 0x80) != 0 ? 118 : 25);
+    const i32 alternate_idle = game_character->field275_0x116 == 0 && (character->model_flags & 0x80) != 0 ? 118 : 25;
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
     const i16 requested = packet.requested_animation;
 
-    if (requested != 1 && requested != alternate_idle) {
-        const i32 default_idle = GetDefaultIdle(object);
-        if (default_idle != -1) {
-            ResetCharacterIdle(object, 1, default_idle);
-            return;
-        }
+    i32 idle;
+    if (requested == 1 && packet.previous_animation == alternate_idle) {
+        idle = 1;
+    } else if (requested == alternate_idle && packet.previous_animation == 1) {
+        idle = alternate_idle;
+    } else if (requested != 1 && requested != alternate_idle) {
+        idle = GetDefaultIdle(object);
+    } else {
+        idle = -1;
     }
-
-    if (requested == 1) {
-        if (packet.previous_animation == alternate_idle) {
-            ResetCharacterIdle(object, 1, 1);
-        } else {
-            object->idle_total_time += FRAMETIME;
-            object->idle_animation_time += FRAMETIME;
-            if (object->idle_animation_time >= object->idle_animation_limit) {
-                if (object->idle_animation == 1) {
-                    NewCharacterIdle(object, 1);
-                } else {
-                    ResetCharacterIdle(object, 1, 1);
-                }
-            }
-        }
-        packet.requested_animation = object->idle_animation;
+    if (idle != -1) {
+        ResetCharacterIdle(object, 1, idle);
         return;
     }
 
-    if (requested == alternate_idle) {
-        if (packet.previous_animation == 1) {
-            ResetCharacterIdle(object, 1, alternate_idle);
-        } else {
-            object->idle_total_time += FRAMETIME;
-            object->idle_animation_time += FRAMETIME;
-            if (object->idle_animation_time >= object->idle_animation_limit) {
-                if (object->idle_animation == alternate_idle) {
-                    NewCharacterIdle(object, alternate_idle);
-                } else {
-                    ResetCharacterIdle(object, 1, alternate_idle);
-                }
+    if (packet.requested_animation == 1) {
+        object->idle_total_time += FRAMETIME;
+        object->idle_animation_time += FRAMETIME;
+        if (object->idle_animation_time >= object->idle_animation_limit) {
+            if (object->idle_animation == 1) {
+                NewCharacterIdle(object, 1);
+            } else {
+                ResetCharacterIdle(object, 1, 1);
             }
         }
-        packet.requested_animation = object->idle_animation;
+    } else if (packet.requested_animation == alternate_idle) {
+        object->idle_total_time += FRAMETIME;
+        object->idle_animation_time += FRAMETIME;
+        if (object->idle_animation_time >= object->idle_animation_limit) {
+            if (object->idle_animation == alternate_idle) {
+                NewCharacterIdle(object, alternate_idle);
+            } else {
+                ResetCharacterIdle(object, 1, alternate_idle);
+            }
+        }
+    } else {
+        ResetCharacterIdle(object, 1, GetDefaultIdle(object));
         return;
     }
-
-    const i32 default_idle = GetDefaultIdle(object);
-    if (default_idle != -1) {
-        ResetCharacterIdle(object, 1, default_idle);
-    }
+    packet.requested_animation = object->idle_animation;
 }
 
 void UpdateCharacterIDs() {
@@ -1323,22 +1314,19 @@ void CharScenes_AreaDump() {
 // follows the scene/category helpers and precedes character model loading.
 void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 game_flag_mask, u32 game_flag_value,
                                 i32 movement_type, void *move_function, void *animate_function, void *draw_function) {
-    const i32 count = CHARCOUNT;
-    CHARACTERDATA *character = CDataList;
-    GAMECHARACTERDATA *game_character = GCDataList;
-    for (i32 i = 0; i < count; ++i, ++character, ++game_character) {
-        if (model_flag_mask != 0 && (character->model_flags & model_flag_mask) != model_flag_value)
+    for (i32 i = 0; i < CHARCOUNT; ++i) {
+        if (model_flag_mask != 0 && (CDataList[i].model_flags & model_flag_mask) != model_flag_value)
             continue;
-        if (game_flag_mask != 0 && (game_character->flags_090 & game_flag_mask) != game_flag_value)
+        if (game_flag_mask != 0 && (GCDataList[i].flags_090 & game_flag_mask) != game_flag_value)
             continue;
-        if (movement_type != -1 && static_cast<i8>(game_character->uses_weapon_action) != movement_type)
+        if (movement_type != -1 && static_cast<i8>(GCDataList[i].uses_weapon_action) != movement_type)
             continue;
         if (move_function != NULL)
-            character->move_fn = reinterpret_cast<CHARACTERUPDATEFN>(move_function);
+            CDataList[i].move_fn = reinterpret_cast<CHARACTERUPDATEFN>(move_function);
         if (animate_function != NULL)
-            character->animate_fn = reinterpret_cast<CHARACTERUPDATEFN>(animate_function);
+            CDataList[i].animate_fn = reinterpret_cast<CHARACTERUPDATEFN>(animate_function);
         if (draw_function != NULL)
-            character->draw_fn = reinterpret_cast<CHARACTERUPDATEFN>(draw_function);
+            CDataList[i].draw_fn = reinterpret_cast<CHARACTERUPDATEFN>(draw_function);
     }
 }
 
@@ -1371,13 +1359,12 @@ void LoadSingleCharacter(bgprocinfo_s *) {
                 continue;
             }
 
-            LEVEL_OBJECT_RUNTIME &object = WORLD->lev_objs[i];
-            if (object.active != 0) {
+            if (WORLD->lev_objs[i].active != 0) {
                 continue;
             }
 
-            if (NuSpecialFind(icon_scene, &object.special, ObjTab[i].name, 1) != 0) {
-                object.active = 1;
+            if (NuSpecialFind(icon_scene, &WORLD->lev_objs[i].special, ObjTab[i].name, 1) != 0) {
+                WORLD->lev_objs[i].active = 1;
             }
         }
     }

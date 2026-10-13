@@ -97,6 +97,19 @@ pushblock_s *NearestPushBlock(WORLDINFO_s *world, nuvec_s *position, float range
     return nearest;
 }
 
+i32 Push_UpdateHints(HINT_s *) {
+    if (LEGOACT_PUSH == -1)
+        return 0;
+    for (i32 i = 0; i < 8; ++i) {
+        GameObject_s *object = Player[i];
+        if (object != NULL && object->apiobj.player_controlled &&
+            object->apiobj.character_model->model_data_b[LEGOACT_PUSH] != NULL &&
+            NearestPushBlock(WORLD, &object->apiobj.collision_position, 2.0f) != NULL)
+            return 1;
+    }
+    return 0;
+}
+
 extern "C" f32 NuFmax(f32, f32);
 void NewBuzz(nupad_s *, f32, i32);
 void PushSeekComplete(pushblock_s *block, i32 index) {

@@ -2922,7 +2922,6 @@ extern "C" {
         VARIPTR *cursor = static_cast<VARIPTR *>(buffer);
         VARIPTR *end = static_cast<VARIPTR *>(buffer_end);
         NUGSCN *gscene = static_cast<NUGSCN *>(scene);
-        VARIPTR pak_start = *end;
         void *pak = NULL;
         char pak_path[128];
         char ai2_path[128];
@@ -2933,6 +2932,7 @@ extern "C" {
             sprintf(pak_path, "%sLevels\\%s\\%s\\ai.pak", AiLevelPathName, directory, parameter);
             i32 pak_size = static_cast<i32>(NuFileSize(pak_path));
             if (pak_size > 0) {
+                VARIPTR pak_start;
                 pak_start.addr = end->addr - ALIGN(pak_size + 1, 0x10);
                 pak = NuFilePakLoad(pak_path, &pak_start, *end, 0x10);
             }

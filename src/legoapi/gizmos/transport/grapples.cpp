@@ -43,8 +43,9 @@ i16 Grapple_RopeSwingRotate = 0x5555;
 extern i32 GrappleSwingMode;
 
 struct GRAPPLEPROGRESS {
-    u32 active_mask;
-    u32 visible_mask;
+    // One bit per grapple; 32 grapples fit in a single word.
+    u32 active_mask[1];
+    u32 visible_mask[1];
 };
 
 static NUVEC GrapplePointOffset = {0.0f, -0.023f, 0.169f};
@@ -433,8 +434,8 @@ static void *Grapples_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end)
 static void Grapples_ClearProgress(void *, void *progress_ptr) {
     GRAPPLEPROGRESS *progress = static_cast<GRAPPLEPROGRESS *>(progress_ptr);
     if (progress != NULL) {
-        progress->active_mask = ~0u;
-        progress->visible_mask = ~0u;
+        progress->active_mask[0] = ~0u;
+        progress->visible_mask[0] = ~0u;
     }
 }
 
@@ -446,20 +447,21 @@ static void Grapples_StoreProgress(void *world_ptr, void *, void *progress_ptr) 
         return;
     }
 
-    progress->active_mask = ~0u;
-    progress->visible_mask = ~0u;
+    progress->active_mask[0] = ~0u;
+    progress->visible_mask[0] = ~0u;
     if (world == NULL || world->grapples == NULL) {
         return;
     }
 
     auto world_grapple_count = world->grapple_count;
-    for (i32 index = 0; index < world_grapple_count && index < 32; ++index) {
-        const u32 mask = 1u << index;
+    for (i32 index = 0; index < world_grapple_count && index != 32; ++index) {
+        const i32 word = index >> 5;
+        const u32 mask = 1u << (index & 31);
         if ((world->grapples[index].flags & GRAPPLE_FLAG_VISIBLE) == 0) {
-            progress->visible_mask &= ~mask;
+            progress->visible_mask[word] &= ~mask;
         }
         if ((world->grapples[index].flags & GRAPPLE_FLAG_ACTIVE) == 0) {
-            progress->active_mask &= ~mask;
+            progress->active_mask[word] &= ~mask;
         }
     }
 }
@@ -482,8 +484,8 @@ static void Grapples_Reset(void *world_ptr, void *, void *progress_ptr) {
 
             if (index <= 31 && progress != NULL) {
                 const u32 bit = 1u << index;
-                grapple->visible = (progress->visible_mask & bit) != 0;
-                grapple->active = (progress->active_mask & bit) != 0;
+                grapple->visible = (progress->visible_mask[0] & bit) != 0;
+                grapple->active = (progress->active_mask[0] & bit) != 0;
             }
         }
     }
@@ -802,7 +804,7 @@ void Grapple_MoveCode(GameObject_s *object) {
         StartJump(object, 0);                                                                                          \
         object->movement_runtime_flags |= 0x10;                                                                        \
         GameAudio_PlaySfx(0x45, &object->apiobj.collision_position, 0, 0);                                             \
-        if (static_cast<i8>(object->apiobj.flags_low) < 0)                                                             \
+        if (object->apiobj.player_controlled)                                                                          \
             Hint_SetComplete(LEGOHINT_GRAPPLE);                                                                        \
         if (GRAPPLE_CURRENT != NULL && GRAPPLE_CURRENT->has_terrain_platform == 0 && object->field_0x7a3 == 1) {       \
             const f32 height = (0.1f + GRAPPLE_CURRENT->position.y) - object->apiobj.lower_position.y;                 \
@@ -815,7 +817,7 @@ void Grapple_MoveCode(GameObject_s *object) {
     } while (0)
 
     if (object->character_context == LEGOCONTEXT_GRAPPLE) {
-        if (static_cast<i8>(object->apiobj.flags_low) >= 0 && object->can_use_object != object->field_0x788) {
+        if (!object->apiobj.player_controlled && object->can_use_object != object->field_0x788) {
             GRAPPLE_CURRENT->activation_progress = 0.0f;
             object->character_context = -1;
             return;
@@ -1015,7 +1017,7 @@ void Grapple_MoveCode(GameObject_s *object) {
     } else {
         if (Grapples_Available == 0)
             return;
-        if (static_cast<i8>(object->apiobj.flags_low) >= 0 && object->use_action != 1)
+        if (!object->apiobj.player_controlled && object->use_action != 1)
             return;
         if (ObjLandReady(object) == 0 && (LEGOCONTEXT_JUMP == -1 || object->character_context != LEGOCONTEXT_JUMP)) {
             if (LEGOCONTEXT_GLIDE == -1 || object->character_context != LEGOCONTEXT_GLIDE || LEGOACT_GLIDE == -1 ||
@@ -1025,7 +1027,7 @@ void Grapple_MoveCode(GameObject_s *object) {
         GRAPPLE *grapple = Grapple_FindNearest(WORLD, &object->apiobj.collision_position, object, NULL);
         if (grapple == NULL)
             return;
-        if (static_cast<i8>(object->apiobj.flags_low) >= 0 && object->can_use_object != grapple)
+        if (!object->apiobj.player_controlled && object->can_use_object != grapple)
             return;
         if ((grapple->flags & GRAPPLE_FLAG_DISABLED) == 0) {
             if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0 &&
@@ -1067,7 +1069,7 @@ void Grapple_MoveCode(GameObject_s *object) {
         object->grapple_swing_phase = 0x2000;
         const f32 depth = 0.75f * FRAMETIME + object->field_0x768;
         object->field_0x768 = MIN(maximum_length, depth);
-        if (object->pad_gamepad->input_magnitude > 0.0f && static_cast<i8>(object->apiobj.flags_low) < 0) {
+        if (object->pad_gamepad->input_magnitude > 0.0f && object->apiobj.player_controlled) {
             object->grapple_swing_degrees = static_cast<u8>(static_cast<i32>(
                 (object->pad_gamepad->input_magnitude / object->apiobj.character_data->game_character->run_speed) *
                 30.0f));

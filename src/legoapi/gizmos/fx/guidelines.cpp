@@ -125,16 +125,14 @@ static void GuideLines_StoreProgress(void *world_ptr, void *, void *progress_ptr
         return;
     }
     GUIDELINE *guideline = world->guidelines;
-    for (i32 index = 0; index < world->guideline_count; ++index, ++guideline) {
-        if (index == 32) {
-            break;
-        }
-        const u32 bit = 1u << index;
+    for (i32 index = 0; index < world->guideline_count && index != 32; ++index, ++guideline) {
+        const i32 word = index >> 5;
+        const u32 bit = 1u << (index & 31);
         if (guideline->visible == 0) {
-            progress->state[(index >> 5) + 1] &= ~bit;
+            progress->state[word + 1] &= ~bit;
         }
         if (guideline->active == 0) {
-            progress->state[index >> 5] &= ~bit;
+            progress->state[word] &= ~bit;
         }
     }
 }

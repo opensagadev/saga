@@ -1,6 +1,7 @@
 #pragma once
 
 #include "decomp.h"
+#include "nu2api/nucore/numemory.h"
 
 class DefaultElist;
 
@@ -42,9 +43,11 @@ template <typename T, typename D = DefaultElist> class NuEList {
 
     ~NuEList() {
         while (length != 0) {
-            T *entry = Front();
-            Remove(entry);
-            delete entry;
+            T *entry = PopFront();
+            // The original destroys entries in place and returns them to the
+            // thread allocator rather than going through operator delete.
+            entry->~T();
+            NU_FREE(entry);
         }
     }
 
@@ -66,6 +69,24 @@ template <typename T, typename D = DefaultElist> class NuEList {
         entry_links->next = end;
         length++;
         return true;
+    }
+
+    // Unlinks the first entry without the membership check Remove performs.
+    T *PopFront() {
+        T *entry = Front();
+        Links *entry_links = GetLinks(entry);
+        T *previous = entry_links->prev;
+        T *next = entry_links->next;
+        if (previous != nullptr) {
+            GetLinks(previous)->next = next;
+        }
+        if (next != nullptr) {
+            GetLinks(next)->prev = previous;
+        }
+        length--;
+        entry_links->next = nullptr;
+        entry_links->prev = nullptr;
+        return entry;
     }
 
     void Remove(T *entry) {

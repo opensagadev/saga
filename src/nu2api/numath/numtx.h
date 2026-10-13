@@ -26,6 +26,9 @@ typedef struct numtx_s {
 
 // Use only for locals whose original stack layout requires 16-byte alignment.
 typedef NUMTX NUMTX_ALIGNED16 __attribute__((aligned(16)));
+// Use only for locals the original places in a 32-byte-aligned frame slot
+// (those functions realign the stack with `and esp, -32`).
+typedef NUMTX NUMTX_ALIGNED32 __attribute__((aligned(32)));
 
 extern NUMTX numtx_zero;
 extern NUMTX numtx_identity;

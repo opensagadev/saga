@@ -67,7 +67,7 @@ void DeflectPart(PART_s *part, GameObject_s *object, float speed, float gravity,
     if (deflect != 0 && owner != NULL) {
         NUVEC velocity;
         f32 facing;
-        if (__builtin_expect(static_cast<i8>(object->apiobj.field_0x1f8) < 0, 1)) {
+        if (object->apiobj.player_controlled) {
             if (owner->apiobj.field_0x27c == -1) {
                 MakeThrowVector(&velocity, reinterpret_cast<NUVEC *>(&matrix.m30), &owner->apiobj.collision_position,
                                 &owner->apiobj.velocity, speed, gravity);
@@ -309,7 +309,7 @@ i32 StunGameObject(GameObject_s *object, GameObject_s *attacker, float duration,
     if ((flags & 0x200) == 0) {
         if (animations[0x3d] != NULL)
             candidates[candidate_count++] = 0x3d;
-        if (attacker != NULL && static_cast<i8>(attacker->apiobj.flags_low) < 0 && animations[0xb9] != NULL)
+        if (attacker != NULL && attacker->apiobj.player_controlled && animations[0xb9] != NULL)
             candidates[candidate_count++] = 0xb9;
     }
 
@@ -503,7 +503,7 @@ void Punch_Hit(GameObject_s *attacker, GameObject_s *target, float, float gap) {
             goto hit;
         }
 
-        if (static_cast<i8>(target->apiobj.flags_low) < 0) {
+        if (target->apiobj.player_controlled) {
             if (LEGOCONTEXT_PUNCH != -1 && target->character_context == LEGOCONTEXT_PUNCH) {
                 goto finish;
             }
@@ -573,7 +573,7 @@ void Punch_Hit(GameObject_s *attacker, GameObject_s *target, float, float gap) {
 
 hit:
     attacker->movement_runtime_flags |= 1;
-    if (static_cast<i8>(attacker->apiobj.flags_low) < 0) {
+    if (attacker->apiobj.player_controlled) {
         GameCam_HitJudder();
     }
     goto extra_code;

@@ -32,7 +32,8 @@ typedef struct TUBE_s {
         struct {
             u8 active : 1;
             u8 visible : 1;
-            u8 reserved_flags : 6;
+            u8 directional : 1; // TUBE_FLAG_DIRECTIONAL
+            u8 reserved_flags : 5;
         };
     };
     u8 reserved_0x35[3];

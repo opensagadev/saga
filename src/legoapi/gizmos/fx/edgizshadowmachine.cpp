@@ -95,43 +95,39 @@ static i32 edGizShadow_Load(void *world_ptr, void *) {
         EdFileReadNuVec(&shadow->direction);
         shadow->field_0x0c = EdFileReadFloat();
 
-        if (!(version <= 1)) {
+        if (version > 1) {
             shadow->field_0x10 = EdFileReadFloat();
             shadow->field_0x14 = EdFileReadFloat();
-            if (version != 2) {
-                shadow->field_0x18 = EdFileReadFloat();
-                shadow->field_0x1c = EdFileReadFloat();
-                if (version != 3) {
-                    shadow->field_0x20 = EdFileReadFloat();
-                    if (version != 4) {
-                        (void)EdFileReadFloat();
-                        (void)EdFileReadFloat();
-                        if (version != 5) {
-                            shadow->field_0x24 = EdFileReadFloat();
-                            shadow->field_0x28 = EdFileReadFloat();
-                            shadow->field_0x2c = EdFileReadFloat();
-                            if (version != 6) {
-                                shadow->field_0x30 = EdFileReadFloat();
-                                if (version != 7) {
-                                    shadow->preset = static_cast<EDGIZSHADOW_PRESET>(EdFileReadInt());
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    shadow->field_0x20 = 22.0f;
-                }
-            } else {
-                shadow->field_0x18 = 0.0005f;
-                shadow->field_0x1c = 0.01f;
-                shadow->field_0x20 = 22.0f;
-            }
         } else {
             shadow->field_0x10 = 2.0f;
             shadow->field_0x14 = 0.5f;
+        }
+        if (version > 2) {
+            shadow->field_0x18 = EdFileReadFloat();
+            shadow->field_0x1c = EdFileReadFloat();
+        } else {
             shadow->field_0x18 = 0.0005f;
             shadow->field_0x1c = 0.01f;
+        }
+        if (version > 3) {
+            shadow->field_0x20 = EdFileReadFloat();
+        } else {
             shadow->field_0x20 = 22.0f;
+        }
+        if (version > 4) {
+            (void)EdFileReadFloat();
+            (void)EdFileReadFloat();
+        }
+        if (version > 5) {
+            shadow->field_0x24 = EdFileReadFloat();
+            shadow->field_0x28 = EdFileReadFloat();
+            shadow->field_0x2c = EdFileReadFloat();
+        }
+        if (version > 6) {
+            shadow->field_0x30 = EdFileReadFloat();
+        }
+        if (version > 7) {
+            shadow->preset = static_cast<EDGIZSHADOW_PRESET>(EdFileReadInt());
         }
 
         if (version <= 7 && world->area != NULL) {

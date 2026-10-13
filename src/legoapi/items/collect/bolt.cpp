@@ -31,20 +31,21 @@ BOLT_s *FindIncomingBolt(GameObject_s *object, i32 exclude_players, i32 mark_dir
     BOLT_s *nearest = NULL;
     f32 radius = object->apiobj.field_0x1e0 > object->apiobj.field_0x1dc ? object->apiobj.field_0x1e0
                                                                          : object->apiobj.field_0x1dc;
+    const f32 radius_squared = radius * radius;
     f32 nearest_distance = 1.0e8f;
     BOLT_s *bolts = Bolt;
     for (BOLT_s *bolt = bolts; bolt != bolts + 32; ++bolt) {
         if (bolt->active == 0)
             continue;
-        GameObject_s *owner = bolt->owner;
-        if (exclude_players != 0 && owner != NULL && (owner->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
-            owner->apiobj.field_0x287 == 0 && owner->apiobj.field_0x27c != -1)
+        if (exclude_players != 0 && bolt->owner != NULL && (bolt->owner->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
+            bolt->owner->apiobj.field_0x287 == 0 && bolt->owner->apiobj.field_0x27c != -1)
             continue;
         f32 time = TouchHacks::TouchControlsActive ? 1.5f : 0.5f;
-        f32 travel_distance = time * bolt->speed;
+        f32 travel_squared = time * bolt->speed;
+        travel_squared *= travel_squared;
         f32 distance = NuVecDistSqr(&bolt->position, &object->apiobj.collision_position, NULL);
-        if (distance < travel_distance * travel_distance &&
-            LineIntersectSphere(&bolt->position, &bolt->field_0xac, &object->apiobj.collision_position, radius * radius,
+        if (distance < travel_squared &&
+            LineIntersectSphere(&bolt->position, &bolt->field_0xac, &object->apiobj.collision_position, radius_squared,
                                 NULL) &&
             distance < nearest_distance) {
             nearest = bolt;

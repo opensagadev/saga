@@ -191,33 +191,28 @@ void CharPlatforms_Configure(WORLDINFO_s *world, char *config) {
     system->field_0x00 = static_cast<i32>(reinterpret_cast<usize>(world->current_gscn));
     system->platform_count = 0;
 
-    while (NuFParGetLine(parser) != 0) {
-        if (NuFParGetWord(parser) == 0) {
-            break;
+    while (NuFParGetLine(parser) != 0 && NuFParGetWord(parser) != 0) {
+        if (NuStrICmp(parser->word_buf, const_cast<char *>("char_platform")) != 0 || NuFParGetWord(parser) == 0) {
+            continue;
         }
-        if (NuStrICmp(parser->word_buf, const_cast<char *>("char_platform")) == 0 && NuFParGetWord(parser) != 0) {
-
-            system = world->char_platform_sys;
-            CHARPLATFORM_s *platform = &system->platforms[system->platform_count];
-            platform->object_id = CharIDFromName(parser->word_buf);
-            if (platform->object_id == -1 || NuFParGetWord(parser) == 0) {
-                continue;
-            }
-            if (NuSpecialFind(world->current_gscn, &platform->special, parser->word_buf, 1) == 0) {
-                continue;
-            }
-
-            system = world->char_platform_sys;
-            platform->object = NULL;
+        CHARPLATFORM_s *platform = &world->char_platform_sys->platforms[world->char_platform_sys->platform_count];
+        platform->object_id = CharIDFromName(parser->word_buf);
+        if (platform->object_id == -1 || NuFParGetWord(parser) == 0) {
+            continue;
+        }
+        if (NuSpecialFind(world->current_gscn, &platform->special, parser->word_buf, 1) != 0) {
             platform->platform_id = -1;
-            ++system->platform_count;
+            platform->object = NULL;
+            ++world->char_platform_sys->platform_count;
         }
     }
 
     NuFParDestroy(parser);
     system = world->char_platform_sys;
     if (system->platform_count > 0) {
-        world->giz_buffer.addr = ALIGN(reinterpret_cast<usize>(&system->platforms[system->platform_count]), 4);
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr + sizeof(CHARPLATFORMSYS_s) +
+                                           (system->platform_count - 1) * sizeof(CHARPLATFORM_s),
+                                       4);
     } else {
         world->char_platform_sys = NULL;
     }

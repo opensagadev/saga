@@ -301,7 +301,7 @@ void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
     u32 flags = type->field_60;
     f32 speed = type->field_10;
     f32 duration = type->field_14;
-    if (static_cast<i8>(object->apiobj.flags_low) < 0) {
+    if (object->apiobj.player_controlled) {
         flags |= 0x20;
         if (object->apiobj.field_0x27c == 0)
             flags |= 1;
@@ -393,7 +393,7 @@ void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
         NUMTX matrix;
         if ((flags & 0x600000) != 0) {
             i32 pitch = (flags & 0x200000) != 0 ? 0xf8e4 : 0xf1c8;
-            if (static_cast<i32>(flags) < 0 && static_cast<i8>(object->apiobj.flags_low) >= 0 &&
+            if (static_cast<i32>(flags) < 0 && !object->apiobj.player_controlled &&
                 object->script_fire_target != NULL) {
                 f32 distance = NuVecXZDist(&object->script_fire_target->apiobj.collision_position,
                                            &object->apiobj.collision_position, NULL);
@@ -649,8 +649,8 @@ void Bolt_Debris_LSW(BOLT_s *bolt, nuvec_s *points, i32 point, nuvec_s *, i32 no
         GameCam_NewShake(GameCam, 0.75f, 0.75f, 1.0f);
         NewRumbleAllPlayers(0.5f, 0.0f, 0, 0);
     }
-    if (no_explosion == 0 && bolt->owner != NULL && static_cast<i8>(bolt->owner->apiobj.flags_low) < 0 &&
-        Cheat_IsOn(0x12) && (world->area == NULL || !(world->area->flags & 1))) {
+    if (no_explosion == 0 && bolt->owner != NULL && bolt->owner->apiobj.player_controlled && Cheat_IsOn(0x12) &&
+        (world->area == NULL || !(world->area->flags & 1))) {
         AddGameDebris(WORLD->debris_sys, 0x49, &bolt->position);
         NewRumble(bolt->owner->pad_gamepad->pad, 0.3f, 0);
         PlaySfx("exp_thermalDet", points);
@@ -700,22 +700,23 @@ BOLTTYPE_s *BoltType_FindByID(i32 id, WORLDINFO_s *world) {
 void Bolt_HitGameObjectRC(NetMessage &);
 i32 Bolt_HitGameObject(BOLT_s *bolt, GameObject_s *object, NUVEC *points, NUVEC *, NUVEC *, f32 radius, u8 *) {
     NUVEC center = object->apiobj.collision_position;
-    i32 hit = (bolt->flags & 0x200) != 0 ? 1 : 2;
-    auto bolt_type = bolt->type;
-    auto f24 = bolt_type->field_24;
-    for (;;) {
+    // Test the bolt's points from newest to oldest; bolts flagged 0x200 only
+    // test the middle point.
+    i32 hit;
+    for (hit = 2; hit >= 0; --hit) {
+        if ((bolt->flags & 0x200) != 0 && hit != 1)
+            continue;
         NUVEC point = points[hit];
-        if ((bolt->flags & 0x8000000) != 0 && bolt->time >= f24) {
+        if ((bolt->flags & 0x8000000) != 0 && bolt->time >= bolt->type->field_24) {
             center.y = 0.0f;
             point.y = 0.0f;
         }
         if (SphereSphereOverlapScaleY(&center, object->apiobj.field_0x1dc, object->apiobj.field_0x1e0, &point, radius,
                                       radius))
             break;
-        if (hit == 0 || (hit == 1 && (bolt->flags & 0x200) != 0))
-            return 0;
-        --hit;
     }
+    if (hit < 0)
+        return 0;
     i16 bolt_index = static_cast<i16>(bolt - Bolt);
     i16 object_index = static_cast<i16>(object - Obj);
     NetMessage message;
@@ -1182,25 +1183,27 @@ BOLT_s *Bolt_Add(GameObject_s *object, nuvec_s *position, numtx_s *matrix, i32 t
         return NULL;
     i16 owner = object != NULL ? static_cast<i16>(object - Obj) : -1;
     NetMessage message;
+    message.Write16(owner);
     if (message.data != NULL) {
-        memcpy(message.data->bytes + message.write_offset, &owner, sizeof(owner));
-        EdFileSwapEndianess16(message.data->bytes + message.write_offset);
-        message.write_offset += 2;
         memmove(message.data->bytes + message.write_offset, position, sizeof(*position));
-        for (i32 i = 0; i < 3; ++i)
-            EdFileSwapEndianess32(message.data->bytes + message.write_offset + i * 4);
+        if (message.swap_endianness) {
+            u8 *written = message.data->bytes + message.write_offset;
+            for (i32 i = 0; i < 3; ++i)
+                EdFileSwapEndianess32(written + i * 4);
+        }
         message.write_offset += 12;
-        memmove(message.data->bytes + message.write_offset, matrix, sizeof(*matrix));
-        for (i32 i = 0; i < 16; ++i)
-            EdFileSwapEndianess32(message.data->bytes + message.write_offset + i * 4);
-        message.write_offset += 64;
-        memcpy(message.data->bytes + message.write_offset, &type_id, sizeof(type_id));
-        EdFileSwapEndianess32(message.data->bytes + message.write_offset);
-        message.write_offset += 4;
-        memcpy(message.data->bytes + message.write_offset, &flags, sizeof(flags));
-        EdFileSwapEndianess32(message.data->bytes + message.write_offset);
-        message.write_offset += 4;
     }
+    if (message.data != NULL) {
+        memmove(message.data->bytes + message.write_offset, matrix, sizeof(*matrix));
+        if (message.swap_endianness) {
+            u8 *written = message.data->bytes + message.write_offset;
+            for (i32 i = 0; i < 16; ++i)
+                EdFileSwapEndianess32(written + i * 4);
+        }
+        message.write_offset += 64;
+    }
+    message.Write32(type_id);
+    message.Write32(flags);
     Bolt_Init(bolt, message);
     return bolt;
 }
@@ -1217,17 +1220,18 @@ BOLT_s *Bolt_Find(i32 type_id, NUVEC *position, GameObject_s *owner) {
     for (BOLT_s *bolt = Bolt; bolt != Bolt + 32; ++bolt) {
         if (bolt->active == 0)
             continue;
-        if (!(type_id != -1 && bolt->type_id != type_id)) {
-            if (owner != NULL && bolt->owner != owner)
-                continue;
-            if (position == NULL)
-                return bolt;
-
+        if (type_id != -1 && bolt->type_id != type_id)
+            continue;
+        if (owner != NULL && bolt->owner != owner)
+            continue;
+        if (position != NULL) {
             const f32 distance = NuVecDistSqr(&bolt->position, position, NULL);
             if (distance < nearest_distance) {
                 nearest_distance = distance;
                 nearest = bolt;
             }
+        } else {
+            return bolt;
         }
     }
     return nearest;

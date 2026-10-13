@@ -254,7 +254,7 @@ static bool ActionValidOpponent(GameObject_s *opponent) {
            (opponent->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) ==
                (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER) &&
            opponent->apiobj.field_0x287 == 0 && opponent->character_context != CHARACTER_CONTEXT_DOOMED &&
-           !(static_cast<i8>(opponent->apiobj.flags_low) < 0 && opponent->spawn_protection_timer > 0.0f);
+           !(opponent->apiobj.player_controlled && opponent->spawn_protection_timer > 0.0f);
 }
 
 // Game-specific AI actions and conditions (registered via
@@ -3661,7 +3661,7 @@ __used__ static i32 Action_SetTaggable(AISYS *sys, AISCRIPTPROCESS *processor, A
     if (object != NULL) {
         bool set_disabled = false;
         if (disabled != 0) {
-            if (static_cast<i8>(object->apiobj.flags_low) < 0) {
+            if (object->apiobj.player_controlled) {
                 if (object->field_0xcc0 != NULL) {
                     ReleaseTakeOver(object, 0);
                     set_disabled = disabled;
@@ -5686,7 +5686,7 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
     object->field_0xef8 |= 0x20;
     if ((opponent->apiobj.field_0x1f8 & 0x1001) != 0x1001 || opponent->apiobj.field_0x287 != 0 ||
         opponent->character_context == 0x2b ||
-        (static_cast<i8>(opponent->apiobj.flags_low) < 0 && opponent->spawn_protection_timer > 1.5f))
+        (opponent->apiobj.player_controlled && opponent->spawn_protection_timer > 1.5f))
         return 0;
 
     NUVEC difference;
@@ -5702,11 +5702,10 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
         }
     } else {
         goal_range = packet->movement_instruction_parameter;
-        if (goal_range != 0.0f &&
-            ((static_cast<i8>(opponent->apiobj.flags_low) < 0 && object->apiobj.model_draw_result == 0) ||
-             ((WORLD->api_object_sys->line_of_sight[packet->owner->apiobj.field_0x289] >>
-               opponent->apiobj.field_0x289) &
-              1) == 0))
+        if (goal_range != 0.0f && ((opponent->apiobj.player_controlled && object->apiobj.model_draw_result == 0) ||
+                                   ((WORLD->api_object_sys->line_of_sight[packet->owner->apiobj.field_0x289] >>
+                                     opponent->apiobj.field_0x289) &
+                                    1) == 0))
             goal_range = 0.1f;
     }
 
@@ -6107,14 +6106,12 @@ __used__ static i32 Action_SetScriptParam(AISYS *, AISCRIPTPROCESS *processor, A
             char *value = NuStrIStr(params[i], "name=");
             if (value != NULL) {
                 value += 5;
-                if (NuStrICmp(processor->script->params[0].name, value) == 0)
-                    index = 0;
-                else if (NuStrICmp(processor->script->params[1].name, value) == 0)
-                    index = 1;
-                else if (NuStrICmp(processor->script->params[2].name, value) == 0)
-                    index = 2;
-                else if (NuStrICmp(processor->script->params[3].name, value) == 0)
-                    index = 3;
+                for (i32 j = 0; j < 4; j++) {
+                    if (NuStrICmp(processor->script->params[j].name, value) == 0) {
+                        index = j;
+                        break;
+                    }
+                }
             } else if ((value = NuStrIStr(params[i], "ix=")) != NULL) {
                 index = (i32)AIParamToFloat(processor, value + 3);
                 if (index >= 4)
@@ -6130,12 +6127,17 @@ __used__ static i32 Action_SetScriptParam(AISYS *, AISCRIPTPROCESS *processor, A
             }
         }
         if (index >= 0) {
-            if (operation == 0)
-                processor->params[index] = amount;
-            else if (operation == 1)
-                processor->params[index] = amount + processor->params[index];
-            else if (operation == -1)
-                processor->params[index] -= amount;
+            switch (operation) {
+                case 0:
+                    processor->params[index] = amount;
+                    break;
+                case 1:
+                    processor->params[index] = amount + processor->params[index];
+                    break;
+                case -1:
+                    processor->params[index] -= amount;
+                    break;
+            }
         }
     }
     return 1;
@@ -10699,14 +10701,13 @@ extern "C" void AILocatorSet_AssignFurthestLocator(AISYS *system, AILOCATORSET *
                     if (second_position != NULL) {
                         const f32 second_distance = NuVecDistSqr(second_position, &locator->position, &difference);
                         if (second_distance > furthest_distance) {
-                            if (second_distance < distance) {
-                                distance = second_distance;
+                            distance = MIN(second_distance, distance);
+                            if (max_range == 0.0f || max_range * max_range > distance) {
+                                furthest_distance = distance;
+                                furthest_index = index;
                             }
-                        } else {
-                            continue;
                         }
-                    }
-                    if (max_range == 0.0f || max_range * max_range > distance) {
+                    } else if (max_range == 0.0f || max_range * max_range > distance) {
                         furthest_distance = distance;
                         furthest_index = index;
                     }

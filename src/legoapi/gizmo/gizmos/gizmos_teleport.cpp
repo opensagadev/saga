@@ -102,17 +102,16 @@ TELEPORT_s *Teleport_Find(GameObject_s *object, float range_squared, VuVec *posi
                 continue;
             }
         }
-        const u16 range_flag = teleport->flags & 2;
+        const i32 range_flag = teleport->flags & 2;
         NUVEC *point = teleport->path->pts;
         f32 distance = NuVecDistSqr(&object->apiobj.collision_position, point, NULL);
         if (((range_squared != 0.0f && distance < range_squared) ||
-             distance < (range_flag != 0 ? teleport->range_squared : radius_squared)) &&
+             (range_flag == 0 ? distance < radius_squared : distance < teleport->range_squared)) &&
             (nearest == -1 || distance < nearest_distance)) {
-            point = teleport->path->pts;
-            if (position != NULL && point != NULL) {
-                position->x = point->x;
-                position->y = point->y;
-                position->z = point->z;
+            if (position != NULL) {
+                point = teleport->path->pts;
+                if (point != NULL)
+                    position->xyz = *point;
             }
             FindTeleport_Direction = 0;
             nearest = i;
@@ -123,13 +122,12 @@ TELEPORT_s *Teleport_Find(GameObject_s *object, float range_squared, VuVec *posi
         point = &teleport->path->pts[teleport->path->length - 1];
         distance = NuVecDistSqr(&object->apiobj.collision_position, point, NULL);
         if (((range_squared != 0.0f && distance < range_squared) ||
-             distance < (range_flag != 0 ? teleport->range_squared : radius_squared)) &&
+             (range_flag == 0 ? distance < radius_squared : distance < teleport->range_squared)) &&
             (nearest == -1 || distance < nearest_distance)) {
-            point = &teleport->path->pts[teleport->path->length - 1];
-            if (position != NULL && point != NULL) {
-                position->x = point->x;
-                position->y = point->y;
-                position->z = point->z;
+            if (position != NULL) {
+                point = &teleport->path->pts[teleport->path->length - 1];
+                if (point != NULL)
+                    position->xyz = *point;
             }
             FindTeleport_Direction = 1;
             nearest = i;
