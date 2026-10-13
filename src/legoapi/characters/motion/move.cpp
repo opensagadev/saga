@@ -5541,7 +5541,7 @@ static void ForceGlowCode(GameObject_s *object, i32 model) {
 }
 
 void CableCode(GameObject_s *object, i32 special_pressed, f32) {
-    if ((object->apiobj.flags_low & 0x80) != 0 && object->character_context == -1 && object->cable == NULL) {
+    if (object->apiobj.player_controlled && object->character_context == -1 && object->cable == NULL) {
         GameObject_s *target =
             CableTargetGameObject(object, &object->apiobj.collision_position, max_cable_length * 0.9f);
         if (target != NULL) {
@@ -5552,11 +5552,7 @@ void CableCode(GameObject_s *object, i32 special_pressed, f32) {
             } else {
                 MechAddonCollection *addons = target->GetAddons(false);
                 if (addons != NULL) {
-                    MechAddon *addon = addons->first;
-                    while (addon != NULL && addon->hash_id != CantPickupBombTimerAddon::s_hashId.value) {
-                        addon = addon->next;
-                    }
-                    if (addon == NULL) {
+                    if (addons->Find(CantPickupBombTimerAddon::s_hashId) == NULL) {
                         object->cable = CreateCable(object, target, 1);
                         if (target->id == id_DRAGBOMB) {
                             Hint_SetComplete(0x5ee);
@@ -5579,7 +5575,7 @@ void CableCode(GameObject_s *object, i32 special_pressed, f32) {
         ResetForceGlow(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
     }
 
-    if ((object->apiobj.flags_low & 0x80) != 0 && object->force_glow_candidate_kind != 0 &&
+    if (object->apiobj.player_controlled && object->force_glow_candidate_kind != 0 &&
         object->force_glow_candidate != NULL && object->field_0xd80 > 0.0f) {
         GameObject_s *target = static_cast<GameObject_s *>(object->force_glow_candidate);
         GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
