@@ -9280,10 +9280,8 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
     }
 
     if (object->character_context != 0x2a) {
-        if (object->character_context != 0x36) {
-            if (object->character_context != -1) {
-                return;
-            }
+        if (object->character_context != -1 && object->character_context != 0x36) {
+            return;
         }
 
         u8 player_active = 0;
