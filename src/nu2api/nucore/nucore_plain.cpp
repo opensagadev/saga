@@ -2702,15 +2702,15 @@ extern "C" {
         laser->width_wobble = width_wobble;
         laser->segment_length = segment_length;
         laser->arc = 0;
+        laser->end_width_ratio = end_width / width;
         laser->width = width;
-        laser->start = *start;
         laser->type = static_cast<u8>(type);
+        laser->start = *start;
         laser->length = length;
         laser->end.x = delta->x + start->x;
         laser->end.y = delta->y + start->y;
         laser->end.z = delta->z + start->z;
         laser->colour = colour;
-        laser->end_width_ratio = end_width / width;
         // The original tests the arc cursor here, even for a straight laser.
         if ((NuLgtArcLaserFrame & 1) == 0 || NuLgtLaserData[NuLgtArcLaserCnt].seed == 0) {
             NuLgtLaserData[NuLgtLaserCnt].seed = NuLgtRand();
@@ -4422,15 +4422,12 @@ extern "C" {
         for (i32 room_index = 0; room_index < scene->num_rooms; ++room_index) {
             NUROOM *room = &scene->rooms[room_index];
             f32 plane_distance = 0.0f;
-            i32 plane_count = room->plane_count;
             NUPLANE *plane = room->planes;
-            while (plane_count != 0) {
+            for (i32 plane_index = 0; plane_index < room->plane_count; ++plane_index, ++plane) {
                 plane_distance = plane->a * position->x + plane->b * position->y + plane->c * position->z + plane->d;
                 if (plane_distance > 0.0f) {
                     break;
                 }
-                ++plane;
-                --plane_count;
             }
             if (!(plane_distance <= 0.0f)) {
                 continue;
