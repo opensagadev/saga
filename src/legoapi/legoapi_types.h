@@ -4625,7 +4625,19 @@ struct GIZOBSTACLE_s {
     u8 control_flags; // 0x99, GIZOBSTACLE_CONTROL_FLAGS
     u8 field_0x9a[2];
     i32 proximity_output; // 0x9c
-    u8 runtime_flags;     // 0xa0, GIZOBSTACLE_RUNTIME_FLAGS
+    union {
+        u8 runtime_flags; // 0xa0, GIZOBSTACLE_RUNTIME_FLAGS
+        struct {
+            u8 runtime_pickups_spawned : 1;
+            u8 runtime_pending_blowup_type : 1;
+            u8 runtime_ai_active : 1;
+            u8 runtime_blocked : 1;
+            u8 runtime_has_platform : 1;
+            u8 runtime_anim_object_bit_1 : 1;
+            u8 runtime_trigger_latched : 1;
+            u8 runtime_destroyed : 1;
+        };
+    };
     u8 field_a1_0xa1;
     u8 field_0xa2[2];
     void ClearMechObjectInterface();
