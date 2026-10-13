@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 77.95127,
+    "fuzzy_match_percent": 77.96124,
     "total_code": "4722419",
-    "matched_code": "596671",
-    "matched_code_percent": 12.63486,
+    "matched_code": "597358",
+    "matched_code_percent": 12.649406,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6703,
-    "matched_functions_percent": 49.803104,
+    "matched_functions": 6706,
+    "matched_functions_percent": 49.825397,
     "total_units": 1
   },
   "text": {
@@ -46287,7 +46287,7 @@
           "address": 4631872,
           "offset": 3741904,
           "size": 460,
-          "match_percent": 84.469025
+          "match_percent": 100.0
         },
         {
           "name": "_Z15Player_StartPosP12GameObject_s",
@@ -46399,7 +46399,7 @@
           "address": 4641424,
           "offset": 3751456,
           "size": 88,
-          "match_percent": 4.423077
+          "match_percent": 100.0
         },
         {
           "name": "_Z28Player_HasDoubleWeaponDamageP12GameObject_s",
@@ -56585,7 +56585,7 @@
           "address": 5242944,
           "offset": 4352976,
           "size": 162,
-          "match_percent": 75.08772
+          "match_percent": 96.052635
         },
         {
           "name": "_Z16Plug_FindNearestP9PLUGSYS_sP7nuvec_sPfi",
@@ -56704,7 +56704,7 @@
           "address": 5204096,
           "offset": 4314128,
           "size": 531,
-          "match_percent": 72.35971
+          "match_percent": 86.633095
         },
         {
           "name": "_ZL22Pushblocks_BoltHitPlatPvS_P6BOLT_sPh",
@@ -57237,7 +57237,7 @@
           "address": 4911024,
           "offset": 4021056,
           "size": 139,
-          "match_percent": 74.18367
+          "match_percent": 100.0
         },
         {
           "name": "_Z21GuideLine_FindNearestP7nuvec_sP11WORLDINFO_sPiPf",
@@ -57938,7 +57938,7 @@
           "address": 2012544,
           "offset": 1122576,
           "size": 141,
-          "match_percent": 72.94231
+          "match_percent": 93.84615
         },
         {
           "name": "_Z19Hat_GetAbsTargetPosP12HATMACHINE_sP7nuvec_s",
@@ -58535,7 +58535,7 @@
           "address": 5059936,
           "offset": 4169968,
           "size": 141,
-          "match_percent": 75.34694
+          "match_percent": 93.85714
         },
         {
           "name": "_Z16Grapple_OccupiedP9GRAPPLE_sP12GameObject_sP11AIPATHCNX_s",
@@ -58814,7 +58814,7 @@
           "address": 1964704,
           "offset": 1074736,
           "size": 182,
-          "match_percent": 80.89091
+          "match_percent": 93.43636
         },
         {
           "name": "_Z20Ledges_RegisterGizmoi",
@@ -59148,7 +59148,7 @@
           "address": 5137072,
           "offset": 4247104,
           "size": 139,
-          "match_percent": 77.81633
+          "match_percent": 93.85714
         },
         {
           "name": "_Z15Tube_FindByNameP11WORLDINFO_sPc",
@@ -59562,7 +59562,7 @@
           "address": 2304336,
           "offset": 1414368,
           "size": 147,
-          "match_percent": 76.81633
+          "match_percent": 88.081635
         },
         {
           "name": "_Z21GizBombGen_FindByNameP15GIZBOMBGENSYS_sPc",
@@ -73404,7 +73404,7 @@
           "address": 1946784,
           "offset": 1056816,
           "size": 139,
-          "match_percent": 87.244896
+          "match_percent": 93.85714
         },
         {
           "name": "_Z29Technos_FindControllingTechnoP12GameObject_s",
@@ -73627,7 +73627,7 @@
           "address": 1884160,
           "offset": 994192,
           "size": 125,
-          "match_percent": 80.152176
+          "match_percent": 96.71739
         },
         {
           "name": "_Z21TightRope_FindNearestP7nuvec_sP11WORLDINFO_sPiPf",
@@ -73849,7 +73849,7 @@
           "address": 1908064,
           "offset": 1018096,
           "size": 138,
-          "match_percent": 77.4898
+          "match_percent": 93.85714
         },
         {
           "name": "_ZL11ZipUps_DrawPvS_f",
