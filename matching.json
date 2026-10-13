@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 77.96124,
+    "fuzzy_match_percent": 77.98068,
     "total_code": "4722419",
     "matched_code": "597358",
     "matched_code_percent": 12.649406,
@@ -40823,7 +40823,7 @@
           "address": 5206544,
           "offset": 4316576,
           "size": 1474,
-          "match_percent": 64.30124
+          "match_percent": 64.25466
         },
         {
           "name": "_Z9PushBlockP12GameObject_s",
@@ -40847,7 +40847,7 @@
           "address": 5210704,
           "offset": 4320736,
           "size": 2169,
-          "match_percent": 75.142525
+          "match_percent": 75.119156
         },
         {
           "name": "_Z17OtherBlockInRangeP11WORLDINFO_sP11pushblock_sP7nuvec_si",
@@ -40872,6 +40872,14 @@
           "offset": 4329552,
           "size": 451,
           "match_percent": 97.696075
+        },
+        {
+          "name": "_Z16Push_UpdateHintsP6HINT_s",
+          "demangled_name": "Push_UpdateHints(HINT_s*)",
+          "address": 5219984,
+          "offset": 4330016,
+          "size": 623,
+          "match_percent": 49.21229
         },
         {
           "name": "_Z30GizPushBlock_EndFrameCompletedP11pushblock_si",
@@ -46087,7 +46095,7 @@
           "address": 1047568,
           "offset": 157600,
           "size": 2198,
-          "match_percent": 64.62661
+          "match_percent": 70.12017
         },
         {
           "name": "_Z22SetPlayerGroupPositionfff",
@@ -46191,7 +46199,7 @@
           "address": 1372144,
           "offset": 482176,
           "size": 484,
-          "match_percent": 80.87395
+          "match_percent": 80.7479
         },
         {
           "name": "_Z12PreResetCodeP12GameObject_s",
@@ -46271,7 +46279,7 @@
           "address": 4628720,
           "offset": 3738752,
           "size": 2774,
-          "match_percent": 64.58346
+          "match_percent": 69.990974
         },
         {
           "name": "_Z17RememberPlayerIDsiii",
@@ -46335,7 +46343,7 @@
           "address": 4634576,
           "offset": 3744608,
           "size": 1943,
-          "match_percent": 92.60169
+          "match_percent": 93.45127
         },
         {
           "name": "_Z25FindFurthestPlayerFromVecP7nuvec_sPP12GameObject_sRfbj",
@@ -46343,7 +46351,7 @@
           "address": 4636528,
           "offset": 3746560,
           "size": 1978,
-          "match_percent": 77.56739
+          "match_percent": 77.89783
         },
         {
           "name": "_Z22Player_ToggleCharacterP12GameObject_sii",
@@ -46351,7 +46359,7 @@
           "address": 4638512,
           "offset": 3748544,
           "size": 2391,
-          "match_percent": 54.214554
+          "match_percent": 54.186565
         },
         {
           "name": "_Z18Players_BothActivev",
@@ -49912,14 +49920,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_Z18FinishStatusPacketi",
-          "demangled_name": "FinishStatusPacket(int)",
-          "address": 2447232,
-          "offset": 1557264,
-          "size": 732,
-          "match_percent": 36.84884
-        },
-        {
           "name": "_Z18FinishLoop_Networkv",
           "demangled_name": "FinishLoop_Network()",
           "address": 4760592,
@@ -52178,7 +52178,7 @@
           "address": 4913632,
           "offset": 4023664,
           "size": 317,
-          "match_percent": 24.793814
+          "match_percent": 45.73196
         },
         {
           "name": "_Z22GizmoTypeStoreProgressP10GIZMOSYS_sPviiPc",
@@ -67604,14 +67604,6 @@
           "offset": 4255760,
           "size": 1526,
           "match_percent": 5.059937
-        },
-        {
-          "name": "_Z16Push_UpdateHintsP6HINT_s",
-          "demangled_name": "Push_UpdateHints(HINT_s*)",
-          "address": 5219984,
-          "offset": 4330016,
-          "size": 623,
-          "match_percent": 0.497207
         }
       ]
     },
@@ -70585,7 +70577,15 @@
           "address": 2444672,
           "offset": 1554704,
           "size": 2554,
-          "match_percent": 75.41237
+          "match_percent": 75.08247
+        },
+        {
+          "name": "_Z18FinishStatusPacketi",
+          "demangled_name": "FinishStatusPacket(int)",
+          "address": 2447232,
+          "offset": 1557264,
+          "size": 732,
+          "match_percent": 73.273254
         },
         {
           "name": "_Z18UpdateStatusScreenP11WORLDINFO_s",
@@ -70593,7 +70593,7 @@
           "address": 2447968,
           "offset": 1558000,
           "size": 879,
-          "match_percent": 56.92347
+          "match_percent": 56.77041
         },
         {
           "name": "_Z18UpdateAchievementsP14STATUSPACKET_s",
