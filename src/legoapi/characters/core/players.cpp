@@ -1485,24 +1485,24 @@ void InitPlayerAI(GameObject_s *object) {
 }
 
 void ResetPlayerAI(GameObject_s *object) {
-    object->field_0x109c = 0;
     object->ai.movement_flags &= 0x9f;
     object->field_0xefe &= 0xdf;
     object->ai.field_0x1e5 &= 0xfd;
+    object->ai.intersection_connection = NULL;
     object->ai.intersection_target_connection = NULL;
     object->ai.animation_override_from = -1;
     object->ai.animation_override_to = -1;
     object->ai.field_0x180 = NULL;
-    object->ai.intersection_connection = NULL;
+    object->field_0x1092 = 0;
     object->field_0x1093 = 0;
     object->field_0x1098 = 0;
     object->field_0x1094 = 0;
     object->field_0xf08 = 0;
     object->field_0xf0c = 0;
     object->field_0xf10 = 0;
-    object->field_0x1092 = 0;
     object->ai.frame_state = 0;
     object->field_0xf14 = 0;
+    object->field_0x109c = 0;
     memset(&object->ai.path_info, 0, sizeof(object->ai.path_info));
     object->ai.current_route = 0xff;
     object->ai.next_route = 0;
