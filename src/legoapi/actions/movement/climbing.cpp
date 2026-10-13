@@ -133,13 +133,13 @@ i32 Climb_SetTargetMom(GameObject_s *object, u16 input_angle) {
     if (speed == 0.0f)
         speed = 0.5f;
     u16 angle = object->apiobj.movement_facing_angle;
-    object->target_velocity.x = NuTrigTable[angle >> 1] * speed;
+    object->target_velocity.x = NuTrigTable[static_cast<u16>(angle / 2)] * speed;
     object->target_velocity.y = 0.0f;
     object->target_velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * speed;
     if (object->pad_gamepad->input_magnitude > 0.0f) {
         angle += 0x4000;
         f32 lateral = PushingTowardsAngle(input_angle, angle);
-        object->target_velocity.x += NuTrigTable[angle >> 1] * lateral * speed;
+        object->target_velocity.x += NuTrigTable[static_cast<u16>(angle / 2)] * lateral * speed;
         object->target_velocity.z += lateral * NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * speed;
         f32 vertical = PushingTowardsAngle(input_angle, object->apiobj.movement_facing_angle);
         object->target_velocity.y += vertical * speed;
