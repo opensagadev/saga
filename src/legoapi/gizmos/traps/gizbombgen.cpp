@@ -288,9 +288,8 @@ static void GizBombGens_SetResetFlag(void *world_ptr, void *system_ptr, void *pr
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     GIZBOMBGENSYS *system = static_cast<GIZBOMBGENSYS *>(system_ptr);
 
-    system->flags |= GIZBOMBGENSYS_FLAG_RESET;
-    const u8 visible_flag = come_from_an_editor == 0 && (world->reset_flags & 1) != 0;
-    system->flags = static_cast<u8>((system->flags & ~GIZBOMBGENSYS_FLAG_KILL_BOMBS_ON_RESET) | (visible_flag << 1));
+    system->reset = 1;
+    system->kill_bombs_on_reset = come_from_an_editor == 0 ? world->reset_requested : 0;
     system->progress = progress_ptr;
 }
 

@@ -47,7 +47,13 @@ typedef struct GIZBOMBGENSYS_s {
     u16 count;
     u16 capacity;
     void *anim_object_pool;
-    u8 flags;
+    union {
+        u8 flags;
+        struct {
+            u8 reset : 1;
+            u8 kill_bombs_on_reset : 1;
+        };
+    };
     u8 reserved_0x0d[3];
     void *progress;
 } GIZBOMBGENSYS;
