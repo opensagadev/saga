@@ -3630,18 +3630,18 @@ static void edrtlDrawCursor() {
     line[0].colour = -1;
     line[1].colour = -1;
     line[0].position = pcpos;
-    line[1].position = pcpos;
     line[0].position.x -= cursor_size;
+    line[1].position = pcpos;
     line[1].position.x += cursor_size;
     edrtlRndrLine3d(reinterpret_cast<nuvtx_tc1_s *>(line), mtls[0], NULL);
     line[0].position = pcpos;
-    line[1].position = pcpos;
     line[0].position.y -= cursor_size;
+    line[1].position = pcpos;
     line[1].position.y += cursor_size;
     edrtlRndrLine3d(reinterpret_cast<nuvtx_tc1_s *>(line), mtls[0], NULL);
     line[0].position = pcpos;
-    line[1].position = pcpos;
     line[0].position.z -= cursor_size;
+    line[1].position = pcpos;
     line[1].position.z += cursor_size;
     edrtlRndrLine3d(reinterpret_cast<nuvtx_tc1_s *>(line), mtls[0], NULL);
 }

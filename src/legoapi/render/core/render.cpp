@@ -4237,10 +4237,13 @@ extern "C" {
                     (!portal_filter ||
                      (scene->visibility_flags[special->instance_ix] & NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) ||
                      (visibility->portal_bits[special->instance_ix >> 3] & (1U << (special->instance_ix & 7))))) {
-                    if (special->draw_mtx_ptr != reinterpret_cast<NUMTX *>(-1) && special->draw_mtx_ptr != NULL)
-                        NuDisplayListRndrSpecial(&special_handle, special->draw_mtx_ptr, 0, NULL, NULL);
-                    else
+                    if (special->draw_mtx_ptr == reinterpret_cast<NUMTX *>(-1)) {
                         NuDisplayListRndrSpecial(&special_handle, &special->draw_mtx, 0, NULL, NULL);
+                    } else if (special->draw_mtx_ptr == NULL) {
+                        NuDisplayListRndrSpecial(&special_handle, &special->draw_mtx, 0, NULL, NULL);
+                    } else {
+                        NuDisplayListRndrSpecial(&special_handle, special->draw_mtx_ptr, 0, NULL, NULL);
+                    }
                 }
             }
         }

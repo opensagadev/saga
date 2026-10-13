@@ -3591,19 +3591,19 @@ void edanimRenderParticleEmitters(i32 parameter_index) {
             continue;
         }
         const auto &offset = param.effect_positions[particle];
-        const f32 x = base_position->x + offset[0];
-        const f32 y = base_position->y + offset[1];
-        const f32 z = base_position->z + offset[2];
         i32 colour = 0xffffffff;
         if (edanim_particle_mode && edanim_nearest_particle == particle) {
             const debinftype *definition = debtab[effect_id];
             if (definition->generator_type == 0) {
-                edbitsDrawCube(x, y, z, definition->field_058, definition->field_05c, definition->field_060,
-                               edanim_emitrotz, edanim_emitroty, 0, 0, 0, 0xff008000, edanim_mtl);
+                edbitsDrawCube(base_position->x + offset[0], base_position->y + offset[1],
+                               base_position->z + offset[2], definition->field_058, definition->field_05c,
+                               definition->field_060, edanim_emitrotz, edanim_emitroty, 0, 0, 0, 0xff008000,
+                               edanim_mtl);
             }
             colour = 0xff00ff00;
         }
-        edbitsDrawDiagonalCross(x, y, z, 0.25f, colour, edanim_mtl);
+        edbitsDrawDiagonalCross(base_position->x + offset[0], base_position->y + offset[1],
+                                base_position->z + offset[2], 0.25f, colour, edanim_mtl);
     }
 }
 

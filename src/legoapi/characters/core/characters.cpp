@@ -184,6 +184,7 @@ void HairMovement(GameObject_s *object) {
     u32 state_index;
     u8 *state;
     f32 value;
+    f32 phase_squared;
     constexpr f32 gravity = -1.8325958f;
 
     index = object->field_0x1089;
@@ -234,7 +235,8 @@ interpolate:
     current_index = object->field_0x1089;
     state_index = current_index;
     state = reinterpret_cast<u8 *>(object) + state_index * 0x34;
-    value = gravity * phase * phase + (1.0f - phase * phase) * 0.0f;
+    phase_squared = phase * phase;
+    value = gravity * phase_squared + (1.0f - phase_squared) * 0.0f;
     state[0xf78] = static_cast<u8>(object->apiobj.character_data->game_character->cloak_joint_2);
     *reinterpret_cast<f32 *>(state + 0xf50) = value;
     if (value == 0.0f) {
@@ -763,14 +765,17 @@ GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle) {
     if (Mission_Active(NULL) != NULL || name == NULL)
         return NULL;
     GameObject_s *object = GetNamedGameObject(WORLD->ai_sys, name);
-    if (object == NULL || (object->apiobj.field_0x1f8 & 0x1000) != 0)
+    if (object == NULL)
+        return NULL;
+    u8 *flags = reinterpret_cast<u8 *>(&object->apiobj.field_0x1f8);
+    if ((flags[1] & 0x10) != 0)
         return NULL;
     if (FreePlay != 0 && (object->apiobj.field_0x1f4 & 0x400) == 0)
         return NULL;
     if (object->ai.field_0x134 != 0xff) {
         ResetAICreature(object, WORLD->ai_sys);
     } else {
-        object->apiobj.field_0x1f8 |= 0x1000;
+        flags[1] |= 0x10;
         AIScriptSetBaseScriptStateByName(reinterpret_cast<AISCRIPTPROCESS *>(&object->ai), const_cast<char *>("Base"));
         if (position != NULL) {
             object->apiobj.position = *position;

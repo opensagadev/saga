@@ -168,7 +168,7 @@ NuFileDevice *NuFileDevice::GetDeviceFromDirectoryHandle(i32 handle) {
 }
 
 NuFileDevice *NuFileDevice::GetDeviceFromPath(char const *path) {
-    if (((path[0] | 0x20) >= 'a' && (path[0] | 0x20) <= 'z') && path[1] == ':' && (path[2] == '/' || path[2] == '\\'))
+    if (((path[0] & ~0x20) >= 'A' && (path[0] & ~0x20) <= 'Z') && path[1] == ':' && (path[2] == '/' || path[2] == '\\'))
         return sm_DefaultDevice;
     if (path[0] == 'h' && path[1] == 'o' && path[2] == 's' && path[3] == 't' && path[4] == ':')
         return sm_HostDevice;

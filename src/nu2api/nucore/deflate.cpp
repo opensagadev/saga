@@ -255,7 +255,8 @@ i32 DecodeDeflatedBlock(DEFLATECONTEXT *ctx) {
 i32 DecodeUncompressedBlock(DEFLATECONTEXT *ctx) {
     i32 alignment = ctx->num_bits_available & 7;
     if (alignment != 0) {
-        READBITS(ctx, alignment);
+        PEEKBITS(ctx, alignment);
+        DROPBITS(ctx, alignment);
     }
 
     u8 bytes[sizeof(ctx->bit_buffer)];
