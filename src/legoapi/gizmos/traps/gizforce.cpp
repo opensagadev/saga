@@ -1077,45 +1077,38 @@ static void GizForces_StoreProgress(void *, void *data, void *progress_ptr) {
     CLEAR_FORCE_GROUP_WORD(14);
     CLEAR_FORCE_GROUP_WORD(15);
 #undef CLEAR_FORCE_GROUP_WORD
-    // The group table and the force bit words are disjoint, so their order
-    // does not change the snapshot. The original emits the force loop after
-    // the fully unrolled group stores.
+    GIZFORCE_s *force = force_sys->forces;
+    for (i32 index = 0; index < force_sys->count && index != GIZFORCE_PROGRESS_CAPACITY; ++index, ++force) {
+        const i32 word = index >> 5;
+        const u32 bit = 1u << (index & 31);
+        if (!force->progress_visible) {
+            progress->progress_flag_1[word] &= ~bit;
+        }
+        if (!force->progress_enabled) {
+            progress->progress_flag_0[word] &= ~bit;
+        }
+        if (force->runtime_reward_released) {
+            progress->runtime_flag_1[word] |= bit;
+        }
+        if (force->runtime_along_socket_hidden) {
+            progress->runtime_flag_3[word] |= bit;
+        }
+        if (force->runtime_completion_released) {
+            progress->runtime_flag_6[word] |= bit;
+        }
+        if (force->runtime_pending_completion) {
+            progress->runtime_flag_7[word] |= bit;
+        }
+        if (force->state_destroyed_or_thrown) {
+            progress->field_aa_flag_0[word] |= bit;
+        }
+    }
+
     for (i32 group_index = 0; group_index < 8; group_index++) {
         GIZFORCEGROUP_s *group = &force_sys->groups[group_index];
         for (i32 member = 0; member < 8; member++) {
             progress->group_members[group_index][member] =
                 member < group->count ? static_cast<i8>(group->forces[member] - force_sys->forces) : -1;
-        }
-    }
-
-    GIZFORCE_s *force = force_sys->forces;
-    const i32 count = force_sys->count;
-    for (i32 index = 0; index < count; index++, force++) {
-        if (index >= GIZFORCE_PROGRESS_CAPACITY) {
-            break;
-        }
-        const i32 word = index >> 5;
-        const u32 bit = 1u << (index & 31);
-        if ((force->progress_flags & GIZFORCE_PROGRESS_VISIBLE) == 0) {
-            progress->progress_flag_1[word] &= ~bit;
-        }
-        if ((force->progress_flags & GIZFORCE_PROGRESS_ENABLED) == 0) {
-            progress->progress_flag_0[word] &= ~bit;
-        }
-        if ((force->runtime_flags & GIZFORCE_RUNTIME_REWARD_RELEASED) != 0) {
-            progress->runtime_flag_1[word] |= bit;
-        }
-        if ((force->runtime_flags & GIZFORCE_RUNTIME_ALONG_SOCKET_HIDDEN) != 0) {
-            progress->runtime_flag_3[word] |= bit;
-        }
-        if ((force->runtime_flags & GIZFORCE_RUNTIME_COMPLETION_RELEASED) != 0) {
-            progress->runtime_flag_6[word] |= bit;
-        }
-        if ((force->runtime_flags & GIZFORCE_RUNTIME_PENDING_COMPLETION) != 0) {
-            progress->runtime_flag_7[word] |= bit;
-        }
-        if ((force->field_0xaa & GIZFORCE_STATE_DESTROYED_OR_THROWN) != 0) {
-            progress->field_aa_flag_0[word] |= bit;
         }
     }
 }
