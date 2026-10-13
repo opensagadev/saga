@@ -313,7 +313,7 @@ static i32 *GizSpinner_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *result_posi
 }
 
 static void GizSpinner_Draw(void *world_ptr, void *, float) {
-    NUMTX reflection_matrix;
+    NUMTX_ALIGNED16 reflection_matrix;
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     if (world->spinners == NULL || world->current_level->max_spinners == 0) {
         return;

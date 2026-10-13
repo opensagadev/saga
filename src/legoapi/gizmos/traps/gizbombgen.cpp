@@ -325,7 +325,8 @@ static i32 GizBombGens_Load(void *world_ptr, void *system_ptr) {
             EdFileRead(bomb_generator->name, sizeof(bomb_generator->name));
             EdFileReadNuVec(&bomb_generator->position);
             bomb_generator->interval = EdFileReadInt();
-            bomb_generator->flags |= GIZBOMBGEN_FLAG_ACTIVE | GIZBOMBGEN_FLAG_VISIBLE;
+            bomb_generator->active = 1;
+            bomb_generator->visible = 1;
             GizmoFileReadGameAnimSet(bomb_generator->anim_set, world_ptr, NULL, version,
                                      const_cast<char *>("BombGenerator"), bomb_generator->name);
             ++index;

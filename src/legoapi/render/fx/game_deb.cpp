@@ -1461,7 +1461,7 @@ extern "C" {
                 if (effect->native_data == NULL)
                     continue;
             }
-            NUMTX matrix;
+            NUMTX_ALIGNED16 matrix;
             NUVEC position;
             if (key != NULL) {
                 i32 assigned = 0;

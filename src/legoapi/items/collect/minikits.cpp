@@ -621,7 +621,7 @@ void AddStatusMiniKitParts() {
         for (i32 coin = 0; coin < 5; ++coin) {
             NUVEC position = {0.0f, (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) * 0.1f, 1.0f};
             NuVecRotateZ(&position, &position, qrand());
-            ADDGAMEMSG message = AddGameMsg_Default;
+            ADDGAMEMSG_ALIGNED16 message = AddGameMsg_Default;
             message.position = &position;
             message.target_scale = 0.75f;
             message.player_index = qrand() / 0x8000;

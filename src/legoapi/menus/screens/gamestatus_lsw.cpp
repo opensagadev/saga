@@ -2123,7 +2123,7 @@ void ChallangeCash_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float e
                 for (i32 i = 0; i < 50; ++i) {
                     NUVEC position = {0.0f, QRAND_FLOAT() * 0.1f, 1.0f};
                     NuVecRotateZ(&position, &position, qrand());
-                    ADDGAMEMSG message = AddGameMsg_Default;
+                    ADDGAMEMSG_ALIGNED16 message = AddGameMsg_Default;
                     message.position = &position;
                     message.target_scale = 0.75f;
                     message.player_index = qrand() / 0x8000;

@@ -107,7 +107,7 @@ static void ZipUps_Draw(void *world_ptr, void *, float) {
         NUVEC endpoint_position;
         NUVEC offset;
         NUVEC ground_position;
-        NUMTX matrices[ZIPUP_MATRIX_COUNT];
+        NUMTX_ALIGNED16 matrices[ZIPUP_MATRIX_COUNT];
 
         for (i32 index = 0; index < world->zipup_count; ++index, ++zipup) {
             if ((zipup->flags & (ZIPUP_FLAG_ACTIVE | ZIPUP_FLAG_VISIBLE)) != (ZIPUP_FLAG_ACTIVE | ZIPUP_FLAG_VISIBLE)) {
@@ -341,15 +341,14 @@ void ZipUps_Reset(void *world_ptr, void *, void *progress_ptr) {
             zipup->facing_angle = static_cast<u16>(NuAtan2D(zipup->upper_position.x - zipup->lower_position.x,
                                                             zipup->upper_position.z - zipup->lower_position.z));
             zipup->runtime_flags &= ~ZIPUP_RUNTIME_FLAG_OCCUPIED;
-            zipup->flags |= ZIPUP_FLAG_ACTIVE | ZIPUP_FLAG_VISIBLE;
+            zipup->active = 1;
+            zipup->visible = 1;
             zipup->occupant = NULL;
 
             if (progress != NULL && index <= 31) {
                 const u32 bit = 1u << index;
-                const u8 visible = (progress->visible_mask & bit) != 0;
-                zipup->flags = static_cast<u8>((zipup->flags & ~ZIPUP_FLAG_VISIBLE) | (visible << 7));
-                const u8 active = (progress->active_mask & bit) != 0;
-                zipup->flags = static_cast<u8>((zipup->flags & ~ZIPUP_FLAG_ACTIVE) | (active << 6));
+                zipup->visible = (progress->visible_mask & bit) != 0;
+                zipup->active = (progress->active_mask & bit) != 0;
             }
         }
     }

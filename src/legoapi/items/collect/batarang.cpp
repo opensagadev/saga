@@ -452,19 +452,13 @@ i32 Batarang_SeekToTarget(BATARANG_s *batarang) {
 }
 
 void Batarangs_Draw() {
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (world == NULL || world->lev_objs == NULL) {
-        return;
-    }
     for (i32 i = 0; i < 8; ++i) {
         BATARANG_s *batarang = &Batarang[i];
-        if (batarang->field_0x7d == 0 || batarang->cooldown >= 0x1000 ||
-            world->lev_objs[batarang->cooldown].active == 0) {
-            continue;
+        if (batarang->field_0x7d != 0 && WORLD->lev_objs[batarang->cooldown].active != 0) {
+            NUMTX_ALIGNED16 matrix;
+            NuMtxSetTranslation(&matrix, &batarang->position);
+            NuSpecialDrawAt(&WORLD->lev_objs[batarang->cooldown].special, &matrix);
         }
-        NUMTX matrix;
-        NuMtxSetTranslation(&matrix, &batarang->position);
-        NuSpecialDrawAt(&world->lev_objs[batarang->cooldown].special, &matrix);
     }
 }
 

@@ -124,13 +124,10 @@ static i32 GizTorp_Load(void *world_ptr, void *) {
         EdFileReadNuVec(&system->machines[index].position);
         GIZTORPMACHINE &rotation_machine = system->machines[index];
         rotation_machine.y_rotation = static_cast<u16>(EdFileReadShort());
-        GIZTORPMACHINE &machine = system->machines[index];
         if (version > 1) {
-            const u8 alternate_model = EdFileReadUnsignedChar() != 0;
-            machine.flags =
-                static_cast<u8>((machine.flags & ~GIZTORPMACHINE_FLAG_ALTERNATE_MODEL) | (alternate_model << 2));
+            system->machines[index].alternate_model = EdFileReadUnsignedChar() != 0;
         } else {
-            machine.flags &= ~GIZTORPMACHINE_FLAG_ALTERNATE_MODEL;
+            system->machines[index].alternate_model = 0;
         }
     }
     return 1;
