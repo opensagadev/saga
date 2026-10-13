@@ -365,9 +365,9 @@ i32 GizPush_GetNumOutputs(GIZMO *gizmo) {
 static void Push_ClearProgress(void *, void *progress_ptr) {
     PUSHPROGRESS *progress = static_cast<PUSHPROGRESS *>(progress_ptr);
     if (progress != NULL) {
-        progress->state_mask = 0;
-        progress->visible_mask = ~0u;
-        progress->position_mask = 0;
+        progress->state_mask[0] = 0;
+        progress->visible_mask[0] = ~0u;
+        progress->position_mask[0] = 0;
         NuMemSet128(progress->positions, 0, 0);
     }
 }
@@ -508,39 +508,32 @@ static void Push_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
         return;
     }
 
-    for (i32 index = 0; index < world->push_block_count && index < 16; ++index) {
-        pushblock_s *push_block = &world->push_blocks[index];
-        const u32 mask = 1u << (index & 31);
+    pushblock_s *push_block = world->push_blocks;
+    for (i32 index = 0; index < world->push_block_count && index != 16; ++index, ++push_block) {
         const i32 mask_index = index >> 5;
-        u32 *visible_masks = &progress->visible_mask;
-        u32 *state_masks = &progress->state_mask;
-        u32 *position_masks = &progress->position_mask;
-
+        const u32 mask = 1u << (index & 31);
         if ((push_block->flags_0ca & PUSHBLOCK_FLAG_VISIBLE) == 0) {
-            visible_masks[mask_index] &= ~mask;
+            progress->visible_mask[mask_index] &= ~mask;
         }
         if ((push_block->flags_0cb & PUSHBLOCK_FLAG_STATE) != 0) {
-            state_masks[mask_index] |= mask;
+            progress->state_mask[mask_index] |= mask;
         }
 
-        NUMTX *matrix =
-            NuSpecialExistsFn(&push_block->special) != 0 ? NuSpecialGetInstanceMtx(&push_block->special) : NULL;
-        if (matrix == NULL) {
-            progress->positions[index] = v000;
+        if (NuSpecialExistsFn(&push_block->special) != 0) {
+            progress->positions[index] = *NUMTX_GET_ROW_VEC(NuSpecialGetInstanceMtx(&push_block->special), 3);
         } else {
-            progress->positions[index] = *reinterpret_cast<NUVEC *>(&matrix->m30);
+            progress->positions[index] = v000;
         }
 
         for (i32 end_index = 0; end_index < push_block->end_position_count; ++end_index) {
             nuhspecial_s *special = &push_block->end_position_specials[end_index];
-            matrix = NuSpecialExistsFn(special) != 0 ? NuSpecialGetInstanceMtx(special) : NULL;
-            if (matrix != NULL) {
-                progress->end_positions[end_index][index] = *reinterpret_cast<NUVEC *>(&matrix->m30);
+            if (NuSpecialExistsFn(special) != 0) {
+                progress->end_positions[end_index][index] = *NUMTX_GET_ROW_VEC(NuSpecialGetInstanceMtx(special), 3);
             } else {
                 progress->end_positions[end_index][index] = v000;
             }
         }
-        position_masks[mask_index] |= mask;
+        progress->position_mask[mask_index] |= mask;
     }
 }
 
