@@ -816,42 +816,40 @@ extern "C" {
     }
 
     void *instNuGCutSceneCleanUp(void) {
-        CutSceneCleanUpEntry *begin = DefragCutSceneListBase;
-        CutSceneCleanUpEntry *end = begin + DefragCutSceneListSize;
+        CutSceneCleanUpEntry *end = DefragCutSceneListBase + DefragCutSceneListSize;
 
-        for (CutSceneCleanUpEntry *entry = begin; entry < end; ++entry) {
+        for (CutSceneCleanUpEntry *entry = DefragCutSceneListBase; entry < end; ++entry) {
             if ((entry->flags & 1) != 0) {
                 continue;
             }
-            bool shared = false;
-            for (CutSceneCleanUpEntry *other = entry + 1; other < end; ++other) {
-                if ((other->flags & 1) != 0 && other->cutscene == entry->cutscene) {
-                    shared = true;
+            NUGCUTSCENE_s *scene = entry->cutscene;
+            CutSceneCleanUpEntry *other;
+            for (other = entry; other < end; ++other) {
+                if ((other->flags & 1) != 0 && other->cutscene == scene) {
                     break;
                 }
             }
-            if (shared) {
-                for (CutSceneCleanUpEntry *other = entry + 1; other < end; ++other) {
-                    if ((other->flags & 1) != 0 && other->cutscene == entry->cutscene) {
+            if (other < end) {
+                for (other = entry; other < end; ++other) {
+                    if ((other->flags & 1) != 0 && other->cutscene == scene) {
                         other->flags |= 1;
                     }
                 }
-            } else if (*reinterpret_cast<u32 *>(entry->cutscene) != 0x44454144u) {
-                NuGCutSceneDestroy(entry->cutscene);
+            } else if (*reinterpret_cast<u32 *>(scene) != 0x44454144u) {
+                NuGCutSceneDestroy(scene);
                 *reinterpret_cast<u32 *>(entry->cutscene) = 0x44454144u;
             }
         }
 
-        for (CutSceneCleanUpEntry *entry = begin; entry < end; ++entry) {
+        for (CutSceneCleanUpEntry *entry = DefragCutSceneListBase; entry < end; ++entry) {
             instNuGCutSceneDestroy(DefragGetInstFn(entry->handle));
         }
 
         VARIPTR cursor __attribute__((aligned(16)));
         cursor.void_ptr = DefragCutSceneBaseMem;
-        for (;;) {
+        for (CutSceneCleanUpEntry *first = NULL; DefragCutSceneListBase < end;) {
             u32 lowest = 0xffffffffu;
-            CutSceneCleanUpEntry *first = NULL;
-            for (CutSceneCleanUpEntry *entry = begin; entry < end; ++entry) {
+            for (CutSceneCleanUpEntry *entry = DefragCutSceneListBase; entry < end; ++entry) {
                 u32 address = static_cast<u32>(reinterpret_cast<usize>(entry->cutscene));
                 if ((entry->flags & 1) != 0 && address < lowest) {
                     lowest = address;
@@ -861,7 +859,7 @@ extern "C" {
             if (lowest == 0xffffffffu) {
                 break;
             }
-            NUGCUTSCENE_s *old_scene = first->cutscene;
+            NUGCUTSCENE_s *old_scene = reinterpret_cast<NUGCUTSCENE_s *>(static_cast<usize>(lowest));
             NUGCUTSCENE_s *new_scene = RelocateCutScene(old_scene, &cursor);
             for (CutSceneCleanUpEntry *entry = first; entry < end; ++entry) {
                 if ((entry->flags & 1) != 0 && entry->cutscene == old_scene) {
@@ -873,7 +871,7 @@ extern "C" {
         if (DefragInstBaseMem != NULL) {
             cursor.void_ptr = DefragInstBaseMem;
         }
-        for (CutSceneCleanUpEntry *entry = begin; entry < end; ++entry) {
+        for (CutSceneCleanUpEntry *entry = DefragCutSceneListBase; entry < end; ++entry) {
             if (entry->flags == 0) {
                 DefragInstDestroyedFn(entry->handle);
             } else {
