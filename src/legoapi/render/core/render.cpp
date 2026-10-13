@@ -4022,7 +4022,7 @@ extern f32 SeekLinearF(f32, f32, f32);
 
 static NUGSCN *backdrop_scene = nullptr;
 
-static nuhspecial_s s_backdrop_hspecial[4];
+static nuhspecial_s backdrop_hspecial[4];
 
 static f32 backdrop_back_wait = 0.0f;
 
@@ -4080,19 +4080,17 @@ static __used__ void BackDrop_Alpha(float *alpha) {
 }
 
 void BackDrop_Init(char *path, variptr_u *buf, variptr_u *buf_end) {
-    NUGSCN *scene = backdrop_scene;
-    if (scene == NULL) {
-        scene = NuGScnRead(buf, *buf_end, path);
-        backdrop_scene = scene;
+    if (backdrop_scene == NULL) {
+        backdrop_scene = NuGScnRead(buf, *buf_end, path);
     }
-    memset(s_backdrop_hspecial, 0, sizeof(s_backdrop_hspecial));
-    if (scene == NULL) {
+    memset(backdrop_hspecial, 0, sizeof(backdrop_hspecial));
+    if (backdrop_scene == NULL) {
         return;
     }
-    NuSpecialFind(scene, &s_backdrop_hspecial[0], (char *)"ball1", 1);
-    NuSpecialFind(scene, &s_backdrop_hspecial[1], (char *)"ball2", 1);
-    NuSpecialFind(scene, &s_backdrop_hspecial[2], (char *)"ball3", 1);
-    NuSpecialFind(scene, &s_backdrop_hspecial[3], (char *)"ball4", 1);
+    NuSpecialFind(backdrop_scene, &backdrop_hspecial[0], (char *)"ball1", 1);
+    NuSpecialFind(backdrop_scene, &backdrop_hspecial[1], (char *)"ball2", 1);
+    NuSpecialFind(backdrop_scene, &backdrop_hspecial[2], (char *)"ball3", 1);
+    NuSpecialFind(backdrop_scene, &backdrop_hspecial[3], (char *)"ball4", 1);
 }
 
 void BackDrop_Dump() {
@@ -4184,7 +4182,7 @@ void BackDrop_Draw(float alpha, i32 flags) {
     }
 
     for (i32 special_index = 0; special_index < 2; ++special_index) {
-        nuhspecial_s *special = &s_backdrop_hspecial[special_index];
+        nuhspecial_s *special = &backdrop_hspecial[special_index];
         if (NuSpecialExistsFn(special) == 0) {
             continue;
         }
