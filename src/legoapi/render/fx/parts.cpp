@@ -2902,13 +2902,10 @@ void LoadPartFile(WORLDINFO *world) {
 
     if ((world->current_level->flags & (LEVEL_OUTRO | LEVEL_MIDTRO | LEVEL_INTRO)) == 0) {
         sprintf(path, "%s.par", world->config_file);
-        i32 page = -1;
-        if (NuFileExists(path)) {
-            page = edpartLoadPage(path, 1, world->current_gscn);
-            world->page_part = page;
-        }
+        if (NuFileExists(path) > 0)
+            world->page_part = edpartLoadPage(path, 1, world->current_gscn);
         world->part_debris_sys = static_cast<PARTDEBSYS_s *>(
-            InitPartDebris(&world->giz_buffer, &world->unknown_0108, 0x40, PDEBCOUNT, PDebNameList, page));
+            InitPartDebris(&world->giz_buffer, &world->unknown_0108, 0x40, PDEBCOUNT, PDebNameList, world->page_part));
     }
 }
 
