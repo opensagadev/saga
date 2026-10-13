@@ -2696,49 +2696,7 @@ extern "C" void NuGCutSceneSysRender(i32 paused) {
         if ((instance->flags_89 & 8) != 0 || (instance->flags_88 & 2) == 0 || (instance->flags_89 & 4) == 0) {
             continue;
         }
-        if ((instance->flags_8a & 4) == 0) {
-            if (instance->rigid_instance != NULL) {
-                instNuGCutRigidSysRender(instance, instance->render_frame, paused);
-            }
-
-            instNUGCUTCHARSYS_s *character_instance = instance->character_instance;
-            if (character_instance != NULL) {
-                const f32 frame = instance->render_frame;
-                NUGCUTSCENE_s *cutscene = instance->cutscene;
-                NUGCUTCHARSYS_s *system = cutscene->character_system;
-                if (system != NULL && NuCutSceneCharacterRender != NULL) {
-                    for (i32 i = 0; i < system->character_count; ++i) {
-                        instNUGCUTCHAR_s *character = &character_instance->characters[i];
-                        if (character->character_model != NULL) {
-                            NuCutSceneCharacterRender(instance, cutscene, character, &system->characters[i], frame,
-                                                      paused);
-                        }
-                    }
-                }
-            }
-
-            if ((instance->flags_8c & 0x40) != 0 && instance->current_frame == instance->cutscene->duration - 1.0f) {
-                continue;
-            }
-            if ((instance->flags_8b & 0x40) != 0) {
-                continue;
-            }
-            instNUGCUTLOCATORSYS_s *locator_instance = instance->locator_instance;
-            if (locator_instance != NULL) {
-                NUGCUTSCENE_s *cutscene = instance->cutscene;
-                const f32 frame = instance->render_frame;
-                NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
-                auto instance_flags_88 = instance->flags_88;
-                for (u32 i = 0; system != NULL && i < system->locator_count; ++i) {
-                    NUGCUTLOCATOR_s *locator = &system->locators[i];
-                    if ((locator->flags & 3) == 0) {
-                        NUMTX *parent_matrix = static_cast<i8>(instance_flags_88) < 0 ? &instance->matrix : NULL;
-                        instNuGCutLocatorUpdate(instance, system, &locator_instance->locators[i], locator, frame,
-                                                parent_matrix, paused);
-                    }
-                }
-            }
-        } else {
+        if ((instance->flags_8a & 4) != 0) {
             if (instance->rigid_instance != NULL) {
                 instNuGCutRigidSysRender(instance, instance->cutscene->duration - instance->render_frame, paused);
             }
@@ -2748,7 +2706,7 @@ extern "C" void NuGCutSceneSysRender(i32 paused) {
                 NUGCUTSCENE_s *cutscene = instance->cutscene;
                 const f32 frame = cutscene->duration - instance->render_frame;
                 NUGCUTCHARSYS_s *system = cutscene->character_system;
-                if (system != NULL && NuCutSceneCharacterRender != NULL) {
+                if (NuCutSceneCharacterRender != NULL) {
                     for (i32 i = 0; i < system->character_count; ++i) {
                         instNUGCUTCHAR_s *character = &character_instance->characters[i];
                         if (character->character_model != NULL) {
@@ -2770,12 +2728,61 @@ extern "C" void NuGCutSceneSysRender(i32 paused) {
                 NUGCUTSCENE_s *cutscene = instance->cutscene;
                 const f32 frame = cutscene->duration - instance->render_frame;
                 NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
-                for (u32 i = 0; system != NULL && i < system->locator_count; ++i) {
+                for (u32 i = 0; i < system->locator_count; ++i) {
                     NUGCUTLOCATOR_s *locator = &system->locators[i];
                     if ((locator->flags & 3) == 0) {
-                        NUMTX *parent_matrix = static_cast<i8>(instance->flags_88) < 0 ? &instance->matrix : NULL;
-                        instNuGCutLocatorUpdate(instance, system, &locator_instance->locators[i], locator, frame,
-                                                parent_matrix, paused);
+                        if (static_cast<i8>(instance->flags_88) < 0) {
+                            instNuGCutLocatorUpdate(instance, system, &locator_instance->locators[i], locator, frame,
+                                                    &instance->matrix, paused);
+                        } else {
+                            instNuGCutLocatorUpdate(instance, system, &locator_instance->locators[i], locator, frame,
+                                                    NULL, paused);
+                        }
+                    }
+                }
+            }
+        } else {
+            if (instance->rigid_instance != NULL) {
+                instNuGCutRigidSysRender(instance, instance->render_frame, paused);
+            }
+
+            instNUGCUTCHARSYS_s *character_instance = instance->character_instance;
+            if (character_instance != NULL) {
+                NUGCUTSCENE_s *cutscene = instance->cutscene;
+                const f32 frame = instance->render_frame;
+                NUGCUTCHARSYS_s *system = cutscene->character_system;
+                if (NuCutSceneCharacterRender != NULL) {
+                    for (i32 i = 0; i < system->character_count; ++i) {
+                        instNUGCUTCHAR_s *character = &character_instance->characters[i];
+                        if (character->character_model != NULL) {
+                            NuCutSceneCharacterRender(instance, cutscene, character, &system->characters[i], frame,
+                                                      paused);
+                        }
+                    }
+                }
+            }
+
+            if ((instance->flags_8c & 0x40) != 0 && instance->current_frame == instance->cutscene->duration - 1.0f) {
+                continue;
+            }
+            if ((instance->flags_8b & 0x40) != 0) {
+                continue;
+            }
+            instNUGCUTLOCATORSYS_s *locator_instance = instance->locator_instance;
+            if (locator_instance != NULL) {
+                NUGCUTSCENE_s *cutscene = instance->cutscene;
+                const f32 frame = instance->render_frame;
+                NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
+                for (u32 i = 0; i < system->locator_count; ++i) {
+                    NUGCUTLOCATOR_s *locator = &system->locators[i];
+                    if ((locator->flags & 3) == 0) {
+                        if (static_cast<i8>(instance->flags_88) < 0) {
+                            instNuGCutLocatorUpdate(instance, system, &locator_instance->locators[i], locator, frame,
+                                                    &instance->matrix, paused);
+                        } else {
+                            instNuGCutLocatorUpdate(instance, system, &locator_instance->locators[i], locator, frame,
+                                                    NULL, paused);
+                        }
                     }
                 }
             }
