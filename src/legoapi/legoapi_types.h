@@ -1178,6 +1178,20 @@ struct FLOWBOX_s {
             u8 state_flags_low;
             u8 state_flags_high;
         };
+        struct {
+            u8 state_low_bits : 2;
+            u8 start_invisible : 1;
+            u8 finished_invisible : 1;
+            u8 finished_deactive : 1;
+            u8 state_low_bit5 : 1;
+            u8 reverse : 1;
+            u8 reverse_invisible : 1;
+            u8 state_high_bits : 4;
+            u8 output_only : 1;
+            u8 freeplay : 1;
+            u8 story_mode : 1;
+            u8 state_high_bit7 : 1;
+        };
     };
     union {
         FLOWBOXGIZMODATA_s *data;

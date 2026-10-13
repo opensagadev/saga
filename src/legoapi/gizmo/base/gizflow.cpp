@@ -152,11 +152,14 @@ static __used__ void xGizmo(nufpar_s *parser) {
     }
     ++data->gizmo_count;
 set_flags:
-    load_flowbox->state_flags_low = (load_flowbox->state_flags_low & ~0xdc) | ((load_g_flags & 1) << 2) |
-                                    ((load_g_flags & 2) << 2) | ((load_g_flags & 8) << 1) | ((load_g_flags & 4) << 4) |
-                                    (load_g_flags & 0x80);
-    load_flowbox->state_flags_high = (load_flowbox->state_flags_high & ~0x70) | (load_g_flags & 0x10) |
-                                     (((load_g_flags >> 5) ^ 1) & 1) << 6 | (((load_g_flags >> 6) ^ 1) & 1) << 5;
+    load_flowbox->start_invisible = (load_g_flags & 1) != 0;
+    load_flowbox->finished_invisible = (load_g_flags & 2) != 0;
+    load_flowbox->finished_deactive = (load_g_flags & 8) != 0;
+    load_flowbox->reverse = (load_g_flags & 4) != 0;
+    load_flowbox->reverse_invisible = (load_g_flags & 0x80) != 0;
+    load_flowbox->output_only = (load_g_flags & 0x10) != 0;
+    load_flowbox->story_mode = (load_g_flags & 0x20) == 0;
+    load_flowbox->freeplay = (load_g_flags & 0x40) == 0;
 }
 
 struct FLOWREMAP {
