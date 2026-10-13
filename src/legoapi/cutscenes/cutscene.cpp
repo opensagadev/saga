@@ -2501,26 +2501,34 @@ static void instNuGCutSceneClipTest(instNUGCUTSCENE_s *instance) {
     }
 }
 
-static __used__ void instNuGCutRigidSysRender(instNUGCUTSCENE_s *instance, float frame, int paused) {
-    NUGCUTRIGIDSYS_s *system = instance->cutscene->rigid_system;
-    if (system == NULL || instance->rigid_instance == NULL) {
-        return;
-    }
-    for (u32 i = 0; i < system->count; ++i) {
+static void instNuGCutRigidSysRender(instNUGCUTSCENE_s *instance, float frame, int paused) {
+    NUGCUTSCENE_s *cutscene = instance->cutscene;
+    NUGCUTRIGIDSYS_s *system = cutscene->rigid_system;
+    instNUGCUTRIGIDSYS_s *rigid_instance = instance->rigid_instance;
+    u8 visible;
+
+    for (i32 i = 0; i < system->count; ++i) {
         NUGCUTRIGID_s *rigid = &system->rigids[i];
-        if ((rigid->flags & 6) != 6) {
+        instNUGCUTRIGID_s *inst_rigid = &rigid_instance->rigids[i];
+        if ((rigid->flags & 2) == 0) {
             continue;
         }
-        instNUGCUTRIGID_s *inst_rigid = &instance->rigid_instance->rigids[i];
-        u8 visible = inst_rigid->visible;
+        if ((rigid->flags & 4) == 0) {
+            continue;
+        }
         if (rigid->state_animation != NULL &&
             StateAnimEvaluate(rigid->state_animation, &inst_rigid->state_index, &visible, frame) != 0) {
-            inst_rigid->visible = visible != 0;
-        }
-        if (inst_rigid->visible == 0) {
+            if (visible != 0) {
+                inst_rigid->visible = 1;
+            } else {
+                inst_rigid->visible = 0;
+                continue;
+            }
+        } else if (inst_rigid->visible == 0) {
             continue;
         }
-        NUMTX matrix;
+
+        NUMTX_ALIGNED16 matrix;
         NuGCutRigidCalcMtx(rigid, frame, &matrix);
         if ((instance->flags_88 & 0x80) != 0) {
             NuMtxMul(&matrix, &matrix, &instance->matrix);
@@ -2536,12 +2544,12 @@ static __used__ void instNuGCutRigidSysRender(instNUGCUTSCENE_s *instance, float
         if (NuCutSceneRigidCollisionCheck != NULL) {
             NuCutSceneRigidCollisionCheck(rigid, &matrix);
         }
-        if (rigid->locator_index != 0xff && rigid->locator_count != 0 && instance->cutscene->locator_system != NULL &&
-            instance->locator_instance != NULL) {
-            NUGCUTLOCATORSYS_s *locator_system = instance->cutscene->locator_system;
-            for (u32 locator_offset = 0; locator_offset < rigid->locator_count; ++locator_offset) {
-                u32 locator_index = rigid->locator_index + locator_offset;
-                instNuGCutLocatorUpdate(instance, locator_system, &instance->locator_instance->locators[locator_index],
+        if (rigid->locator_index != 0xff) {
+            NUGCUTLOCATORSYS_s *locator_system = cutscene->locator_system;
+            instNUGCUTLOCATORSYS_s *locator_instance = instance->locator_instance;
+            for (i32 locator_offset = 0; locator_offset < rigid->locator_count; ++locator_offset) {
+                i32 locator_index = rigid->locator_index + locator_offset;
+                instNuGCutLocatorUpdate(instance, locator_system, &locator_instance->locators[locator_index],
                                         &locator_system->locators[locator_index], frame, &matrix, paused);
             }
         }
