@@ -1288,25 +1288,18 @@ static void GizBuildIts_Reset(void *world_ptr, void *data, void *progress_ptr) {
     GIZBUILDITSYS_s *buildit_sys = static_cast<GIZBUILDITSYS_s *>(data);
     GIZBUILDITPROGRESS_s *progress = static_cast<GIZBUILDITPROGRESS_s *>(progress_ptr);
 
-    auto buildit_sys_count = buildit_sys->count;
-    for (i32 index = 0; index < buildit_sys_count; ++index) {
-        GIZBUILDIT_s &buildit = buildit_sys->buildits[index];
-        GizBuildit_Reset(&buildit, world_ptr);
-
-        if (!(index >= GIZBUILDIT_PROGRESS_CAPACITY) && progress != NULL) {
-
+    GIZBUILDIT_s *buildit = buildit_sys->buildits;
+    for (i32 index = 0; index < buildit_sys->count; ++index, ++buildit) {
+        GizBuildit_Reset(buildit, world_ptr);
+        if (index < GIZBUILDIT_PROGRESS_CAPACITY && progress != NULL) {
             const i32 word = index >> 5;
             const u32 bit = 1u << (index & 31);
-            buildit.build_state =
+            buildit->build_state =
                 (progress->completed[word] & bit) != 0 ? GIZBUILDIT_BUILD_COMPLETE : GIZBUILDIT_BUILD_IDLE;
-            buildit.field_0x83 = static_cast<u8>(
-                (buildit.field_0x83 & ~GIZBUILDIT_RUNTIME_REWARD_RELEASED) |
-                ((progress->reward_released[word] & bit) != 0 ? GIZBUILDIT_RUNTIME_REWARD_RELEASED : 0));
-            buildit.availability_flags =
-                static_cast<u8>((buildit.availability_flags & ~GIZBUILDIT_AVAILABILITY_LINKED) |
-                                ((progress->active[word] & bit) != 0 ? GIZBUILDIT_AVAILABILITY_ACTIVE : 0) |
-                                ((progress->visible[word] & bit) != 0 ? GIZBUILDIT_AVAILABILITY_VISIBLE : 0));
-            buildit.built_object_count = progress->built_object_count[index];
+            buildit->available_visible = (progress->visible[word] & bit) != 0;
+            buildit->available_active = (progress->active[word] & bit) != 0;
+            buildit->reward_released = (progress->reward_released[word] & bit) != 0;
+            buildit->built_object_count = progress->built_object_count[index];
         }
     }
 }
