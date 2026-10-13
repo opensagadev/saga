@@ -111,7 +111,13 @@ i32 GamePad_Waggle(GAMEPAD_s *pad) {
         RotationDistance(RotDiff(pad->previous_input_angle, pad->input_angle)) > 0x2000) {
         return 1;
     }
-    return (pad->input_magnitude != 0.0f) != (pad->previous_input_magnitude != 0.0f);
+    if (pad->input_magnitude == 0.0f && pad->previous_input_magnitude != 0.0f) {
+        return 1;
+    }
+    if (pad->input_magnitude != 0.0f && pad->previous_input_magnitude == 0.0f) {
+        return 1;
+    }
+    return 0;
 }
 
 GAMEPAD_s *GamePad_Allocate() {

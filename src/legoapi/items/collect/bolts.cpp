@@ -279,9 +279,7 @@ BOLT_s *Bolt_Alloc() {
     i32 index = i_bolt;
     i32 attempts = 0;
     while (Bolt[index].active != 0 && (Bolt[index].flags & 8) != 0 && attempts < 32) {
-        ++index;
-        if (index == 32)
-            index = 0;
+        index = index + 1 == 32 ? 0 : index + 1;
         ++attempts;
     }
     i_bolt = (index + 1) % 32;
