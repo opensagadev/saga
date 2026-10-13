@@ -4273,23 +4273,20 @@ void Move_VEHICLE(GameObject_s *object) {
     }
 
     if ((object->apiobj.character_data->game_character->flags_094[0] & 0x20) == 0) {
+        f32 hover_height;
         if (object->apiobj.character_data->game_character->uses_weapon_action == 0x15) {
             ApplyGravity(object, NULL, FindGunshipHoverHeight(object), 8.0f, NULL);
+        } else if (object->apiobj.character_data->game_character->field_0x28 > 0.0f &&
+                   ((hover_height = GetVehicleHoverHeight(object, NULL)) != 0.0f ||
+                    getvehiclehoverheight_hothbattlehack != 0)) {
+            ApplyGravity(object, NULL, hover_height, 10.0f, NULL);
         } else {
-            if (object->apiobj.character_data->game_character->field_0x28 > 0.0f) {
-                const f32 hover_height = GetVehicleHoverHeight(object, NULL);
-                if (hover_height != 0.0f || getvehiclehoverheight_hothbattlehack != 0) {
-                    ApplyGravity(object, NULL, hover_height, 10.0f, NULL);
-                    goto vehicle_gravity_done;
-                }
-            }
-            const f32 hover_height =
+            hover_height =
                 object->character_context != 0x17 ? object->apiobj.character_data->game_character->field_0x28 : 0.0f;
             ApplyGravity(object, NULL, hover_height, 8.0f, NULL);
         }
     }
 
-vehicle_gravity_done:
     DeactivatedCode(object);
 
     if (object->id == id_SNOWMOB) {
@@ -4457,7 +4454,7 @@ vehicle_gravity_done:
     EngineNoiseCode(object, object->character_context == 0x17);
 
     if (((object->apiobj.player_controlled && object->current_hp == 1) ||
-         (!object->apiobj.player_controlled && object->current_hp <= 1)) &&
+         ((object->apiobj.flags_low & 0x80) == 0 && object->current_hp <= 1)) &&
         object->apiobj.character_data->game_character->uses_weapon_action == 10 &&
         (object->apiobj.character_data->model_flags & 0x04000000) == 0) {
         const i32 effect = WORLD->debris_sys->entries[96].effect;
@@ -4528,15 +4525,15 @@ vehicle_gravity_done:
         } else if (object->field_0xcc0 != NULL && object->apiobj.field_0x27c == -1) {
             GameObject_s *player = Player[0];
             if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 && player->field_0xcc0 != NULL &&
-                ((object->apiobj.field_0x1e8 & player->apiobj.field_0x1f0) != 0 ||
-                 (object->apiobj.field_0x1e4 & player->apiobj.field_0x1ec) != 0) &&
+                ((object->apiobj.field_0x1e4 & player->apiobj.field_0x1ec) |
+                 (object->apiobj.field_0x1e8 & player->apiobj.field_0x1f0)) != 0 &&
                 object->field_0x1024 <= 0.0f) {
                 ObjHitObj(player, object, 1, 1, 0, 1);
             }
             player = Player[1];
             if (player != NULL && player->apiobj.player_controlled && player->field_0xcc0 != NULL &&
-                ((object->apiobj.field_0x1e8 & player->apiobj.field_0x1f0) != 0 ||
-                 (object->apiobj.field_0x1e4 & player->apiobj.field_0x1ec) != 0) &&
+                ((object->apiobj.field_0x1e4 & player->apiobj.field_0x1ec) |
+                 (object->apiobj.field_0x1e8 & player->apiobj.field_0x1f0)) != 0 &&
                 object->field_0x1024 <= 0.0f) {
                 ObjHitObj(player, object, 1, 1, 0, 1);
             }
@@ -5070,7 +5067,7 @@ static void SwipeCode(GameObject_s *object, i32 pressed, i32 held) {
 static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 action_held, i32 jump_pressed,
                                 i32 buttons_pressed) {
     ANIMPACKET_s &animation = object->apiobj.anim_packet;
-    if (object->apiobj.player_controlled)
+    if ((object->apiobj.flags_low & 0x80) != 0)
         object->ai_combo_cooldown = 0.0f;
     else if (object->ai_combo_cooldown > 0.0f)
         object->ai_combo_cooldown -= FRAMETIME;
@@ -5541,7 +5538,7 @@ static void ForceGlowCode(GameObject_s *object, i32 model) {
 }
 
 void CableCode(GameObject_s *object, i32 special_pressed, f32) {
-    if (object->apiobj.player_controlled && object->character_context == -1 && object->cable == NULL) {
+    if ((object->apiobj.flags_low & 0x80) != 0 && object->character_context == -1 && object->cable == NULL) {
         GameObject_s *target =
             CableTargetGameObject(object, &object->apiobj.collision_position, max_cable_length * 0.9f);
         if (target != NULL) {
@@ -6609,7 +6606,9 @@ void Move_WEIRDO(GameObject_s *object) {
     DropInOutCode(object);
     ApplyGravity(object, NULL, 0.0f, 8.0f, NULL);
     u16 weapon = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->weapon_model & 0xfffd;
-    i32 has_sabre = weapon == 0x65 || weapon == 0x69;
+    i32 has_sabre = weapon == 0x65;
+    if (!has_sabre)
+        has_sabre = weapon == 0x69;
     if (object->suit != NULL)
         Signal_MoveCode(WORLD, object);
     TakeHitCode(object);
@@ -9283,10 +9282,8 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
     }
 
     if (object->character_context != 0x2a) {
-        if (object->character_context != 0x36) {
-            if (object->character_context != -1) {
-                return;
-            }
+        if (object->character_context != -1 && object->character_context != 0x36) {
+            return;
         }
 
         u8 player_active = 0;
