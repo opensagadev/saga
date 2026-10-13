@@ -456,8 +456,8 @@ void PreResetCode(GameObject_s *obj) {
         obj->field_0xe22 &= 0xf7;
         obj->weapon_trail_offset.x = (f32)qrand() * sPreResetMulA * sPreResetMulB - sPreResetSubC;
         obj->weapon_trail_offset.y = (f32)qrand() * sPreResetMulA * sPreResetMulB - sPreResetSubC;
-        obj->field_0xe20 &= 0xfb;
         obj->weapon_trail_offset.z = (f32)qrand() * sPreResetMulA * sPreResetMulB - sPreResetSubC;
+        obj->field_0xe20 &= 0xfb;
         obj->incoming_bolt = NULL;
         obj->incoming_melee = NULL;
         obj->incoming_special = NULL;
@@ -592,12 +592,10 @@ void PreResetCode(GameObject_s *obj) {
                 }
 
                 {
-                    u32 mask = GAMEPAD_ACTION;
-                    f32 xmm0 = obj->hold_timer;
-                    if ((obj->pad_gamepad->buttons_held & mask) != 0) {
-                        obj->hold_timer = xmm0 + FRAMETIME;
+                    if ((obj->pad_gamepad->buttons_held & GAMEPAD_ACTION) != 0) {
+                        obj->hold_timer += FRAMETIME;
                     } else {
-                        if (xmm0 > 0.0f && sPreResetD18Scale > xmm0) {
+                        if (obj->hold_timer > 0.0f && sPreResetD18Scale > obj->hold_timer) {
                             obj->field_0xe24 |= 0x40;
                         }
                         obj->hold_timer = 0.0f;
