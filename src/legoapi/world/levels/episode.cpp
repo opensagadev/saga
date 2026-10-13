@@ -565,7 +565,10 @@ static void TrooperTeamSetStateCode(minitrooperteam_s *team) {
 
 i32 TrooperShoot(WORLDINFO_s *world, minitrooperteam_s *team, minisnowtrooper_s *trooper, u16 *shot_angle,
                  i32 team_index) {
-    NUVEC shot_position = trooper->shot_position;
+    NUVEC shot_position;
+    shot_position.x = trooper->shot_position.x;
+    shot_position.y = trooper->shot_position.y;
+    shot_position.z = trooper->shot_position.z;
     NUVEC direction;
 
     if (droid_hack != 0) {
@@ -592,8 +595,7 @@ i32 TrooperShoot(WORLDINFO_s *world, minitrooperteam_s *team, minisnowtrooper_s 
 
         for (i32 i = 0; i < trooperteamcount; ++i) {
             minitrooperteam_s *candidate = &teams[i];
-            if (i == team_index || (candidate->state_flags & 1) == 0 ||
-                ((team->team_flags ^ candidate->team_flags) & 2) == 0)
+            if (i == team_index || (candidate->state_flags & 1) == 0 || team->team_side == candidate->team_side)
                 continue;
 
             const f32 x = candidate->position.x - team->position.x;
