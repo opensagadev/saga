@@ -82,7 +82,7 @@ void LoadGizmoSys(GIZMOSYS_s *gizmo_sys, void *world, char *config_file) {
                         continue;
                     }
 
-                    while (data_length != 0) {
+                    while (data_length > 0) {
                         EdFileReadChar();
                         --data_length;
                     }

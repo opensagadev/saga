@@ -211,45 +211,36 @@ void MechInputTouchSystem::AddChangeLayoutButtons(NuVirtualTouchDevice &, i32) {
 i32 MechInputTouchSystem::ChooseTouchLayout(bool) {
     i32 layout = control_mode;
     s_baseControlMode = layout != 1;
-    bool active;
     if (GetMenuID() == 0x19 || (Paused == 0 && GetMenuID() == -1)) {
         if (Controller_IsConnected() != 0) {
             s_baseControlMode = 0;
             layout = 7;
-            active = false;
             goto done;
         }
         if (layout != 2) {
-            active = layout != 7 && layout != 1;
             goto done;
         }
     } else if (Controller_IsConnected() != 0) {
         s_baseControlMode = 0;
         layout = 7;
-        active = false;
         goto done;
     }
     if (WORLD != NULL && (WORLD->area == PODRACE_ADATA || WORLD->area == PODSPRINT_ADATA)) {
         layout = 3;
-        active = true;
     } else if (WORLD != NULL && WORLD->area == BONUS_GUNSHIP_ADATA) {
         layout = 4;
-        active = true;
     } else if (WORLD != NULL && WORLD->current_level == DEATHSTARRESCUEE_LDATA && player != NULL &&
                player->id == id_GRABCONTROL) {
         layout = 5;
-        active = true;
     } else if (WORLD != NULL && WORLD->current_level == SPEEDERCHASEA_LDATA && players_cannot_exit_speeder != 0 &&
                player != NULL && (player->id == id_SPEEDERBIKE || player->id == id_SPEEDERBIKESNOW)) {
         layout = 6;
-        active = true;
     } else {
         layout = 2;
-        active = true;
     }
 
 done:
-    TouchHacks::TouchControlsActive = active;
+    TouchHacks::TouchControlsActive = layout != 7 && layout != 1;
     s_actualTouchMode = layout;
     return layout;
 }

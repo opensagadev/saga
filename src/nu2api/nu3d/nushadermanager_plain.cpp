@@ -1217,5 +1217,9 @@ void ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion(NUSHADERMTLDESC *d
     }
 
     u8 &mobile_capabilities = reinterpret_cast<u8 *>(&desc->field_1bc)[0];
-    mobile_capabilities = (mobile_capabilities & 0xfb) | ((NuIOS_IsLowEndDevice() == 0) << 2);
+    if (NuIOS_IsLowEndDevice() == 0) {
+        mobile_capabilities |= 4;
+    } else {
+        mobile_capabilities &= 0xfb;
+    }
 }

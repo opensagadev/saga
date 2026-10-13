@@ -10,17 +10,19 @@ f32 TimeSampleDelta = 0.05f;
 i32 GetMenuID();
 
 TouchHolder *MechInputTouchGestureTrackingSystem::GetTouch(NuInputTouch const &touch) {
-    for (i32 index = 0; index < 10; ++index) {
-        TouchHolder *holder = &holders[index];
-        if (holder->touch_id == static_cast<i32>(touch.unknown_14)) {
-            return holder;
+    i32 index;
+    for (index = 0; index < 10; ++index) {
+        if (holders[index].touch_id == static_cast<i32>(touch.unknown_14)) {
+            break;
         }
     }
+    if (index < 10) {
+        return &holders[index];
+    }
     for (i32 index = 0; index < 10; ++index) {
-        TouchHolder *holder = &holders[index];
-        if (holder->touch_id == -1) {
-            holder->touch_id = touch.unknown_14;
-            return holder;
+        if (holders[index].touch_id == -1) {
+            holders[index].touch_id = touch.unknown_14;
+            return &holders[index];
         }
     }
     return holders;
