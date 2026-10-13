@@ -814,30 +814,11 @@ void PlayerItem_Set(PLAYERITEM_s *item, PLAYERITEMTYPE_s *type) {
 }
 
 GameObject_s *Player_FindByID(i32 id) {
-    GameObject_s *object = Player[0];
-    if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->id == id)
-        return object;
-    object = Player[1];
-    if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->id == id)
-        return object;
-    object = Player[2];
-    if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->id == id)
-        return object;
-    object = Player[3];
-    if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->id == id)
-        return object;
-    object = Player[4];
-    if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->id == id)
-        return object;
-    object = Player[5];
-    if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->id == id)
-        return object;
-    object = Player[6];
-    if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->id == id)
-        return object;
-    object = Player[7];
-    if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->id == id)
-        return object;
+    for (i32 i = 0; i < 8; i++) {
+        GameObject_s *object = Player[i];
+        if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->id == id)
+            return object;
+    }
     return NULL;
 }
 
@@ -1199,8 +1180,10 @@ i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *bolt) {
     else if (bolt->flags & 2)
         player = 1;
     else
-        return 0;
-    return Player_HasDoubleBoltDamage(Player[player]);
+        player = -1;
+    if (player != -1)
+        return Player_HasDoubleBoltDamage(Player[player]);
+    return 0;
 }
 
 void PlayerButton_OnClick_Callback_NextButton(MechTouchUIElement &element, TouchHolder &) {
