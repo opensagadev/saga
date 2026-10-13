@@ -63,12 +63,16 @@ static void cbEdLevelSettingsMenu(eduimenu_s *, eduiitem_s *, u32);
 
 static inline i32 get_class_object_attribute(EdClass *ed_class, void *object, EdRef *reference, i32 attribute, i32 type,
                                              void *data, i32 size) {
-    if (reference != NULL && reference->GetAttributeData(object, attribute, type, data, size)) {
-        return 1;
+    if (reference != NULL) {
+        if (reference->GetAttributeData(object, attribute, type, data, size)) {
+            return 1;
+        }
     }
     EdMember member;
-    return ed_class->FindMember(&member, object, attribute, 1) &&
-           member.reference->GetAttributeData(member.object, attribute, type, data, size);
+    if (ed_class->FindMember(&member, object, attribute, 1)) {
+        return member.reference->GetAttributeData(member.object, attribute, type, data, size) != 0;
+    }
+    return 0;
 }
 
 extern EdRegistry theRegistry;
@@ -166,40 +170,44 @@ void CursorTool::Initialise(variptr_u &, variptr_u &, i32) {
 i32 CursorTool::Process(EdInputContext &input) {
     VuVec &origin = *reinterpret_cast<VuVec *>(input.reserved_00 + 0x20);
     VuVec &direction = *reinterpret_cast<VuVec *>(input.reserved_00 + 0x30);
-    const bool extend_selection = static_cast<i32>(input.GetHold(16)) != 0;
-    VuVec end = origin;
-    end.x += direction.x;
-    end.y += direction.y;
-    end.z += direction.z;
+    // The original keeps these locals in 16-byte aligned slots of a realigned frame.
+    ClassObject hover __attribute__((aligned(16))) = {NULL, NULL, NULL};
+    const f32 extend_selection = input.GetHold(16);
+    VuVec end __attribute__((aligned(16)));
+    end.x = origin.x + direction.x;
+    end.y = origin.y + direction.y;
+    end.z = origin.z + direction.z;
+    const i32 colour = NuRandInt();
     EdDrawBegin(0);
-    EdDrawLineSegment(origin, end, NuRandInt());
+    EdDrawLineSegment(origin, end, colour);
     EdDrawEnd();
     if (theLevelEditor.field_0x30 == 0)
         return 0;
 
-    ClassObject after = {NULL, NULL, NULL};
-    ClassObject hover = {NULL, NULL, NULL};
-    if (theClassEditor.selected_objects.first != NULL) {
+    ClassObject after __attribute__((aligned(16))) = {NULL, NULL, NULL};
+    if (theClassEditor.selected_objects.count > 0) {
         ClassObjectListEntry *first = theClassEditor.selected_objects.first;
-        after = {first->ed_class, first->object, first->reference};
+        after = *reinterpret_cast<ClassObject *>(&first->ed_class);
     }
     if (theClassEditor.FindNearestObject(origin, direction, hover, 1)) {
         theClassEditor.current_object = hover;
         if (input.GetPress(3) != 0.0f) {
             theClassEditor.FindNearestObject(origin, direction, hover, after, 1);
-            theClassEditor.SelectObject(hover, extend_selection ? 1 : 0);
+            theClassEditor.SelectObject(hover, static_cast<i32>(extend_selection) != 0);
         }
-        char name[128];
+        char text[128] __attribute__((aligned(16)));
+        char name[128] __attribute__((aligned(16)));
         if (!get_class_object_attribute(hover.ed_class, hover.object, hover.reference, 2, EdType_String, name,
                                         sizeof(name))) {
             theLevelEditor.AddInfoText(const_cast<char *>("object : no name"));
         } else {
-            char text[136];
             sprintf(text, "object : %s", name);
             theLevelEditor.AddInfoText(text);
         }
     } else {
-        theClassEditor.current_object = {NULL, NULL, NULL};
+        hover.ed_class = NULL;
+        hover.object = NULL;
+        theClassEditor.current_object = hover;
         if (input.GetPress(11) != 0.0f) {
             if (after.object != NULL)
                 theClassEditor.CreateObject(after);
@@ -210,8 +218,9 @@ i32 CursorTool::Process(EdInputContext &input) {
     if (input.GetPress(12) != 0.0f)
         theClassEditor.DestroySelectedObjects();
     if (hover.object == NULL && input.GetPress(3) != 0.0f) {
-        ClassObject none = {NULL, NULL, NULL};
-        theClassEditor.SelectObject(none, 0);
+        hover.ed_class = NULL;
+        hover.object = NULL;
+        theClassEditor.SelectObject(hover, 0);
     }
     return 0;
 }
@@ -644,10 +653,11 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, i32 filter
         EdClassInterface *interface = ed_class->interface;
         for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
              object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
-            EdMember member;
+            // The original keeps the lookup and position in 16-byte aligned slots.
+            EdMember member __attribute__((aligned(16)));
             if (!ed_class->FindMember(&member, object, 8, 1))
                 continue;
-            VuVec position;
+            VuVec position __attribute__((aligned(16)));
             member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &position, 0);
             f32 dx = position.x - point.x;
             f32 dy = position.y - point.y;
@@ -662,9 +672,10 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, i32 filter
     }
     if (nearest_object != NULL && filter != 0) {
         f32 nearest_radius = NuFsqrt(nearest_distance);
-        f32 radius = 1.0f;
+        // The original keeps the radius and lookup in 16-byte aligned slots.
+        f32 radius __attribute__((aligned(16))) = 1.0f;
         if ((nearest_class->flags & 0x40) != 0) {
-            EdMember member;
+            EdMember member __attribute__((aligned(16)));
             if (nearest_class->FindMember(&member, nearest_object, 0x40, 1))
                 member.reference->GetAttributeData(member.object, 0x40, EdType_Float, &radius, 0);
         }
@@ -701,7 +712,8 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, ClassObjec
             f32 dy = position.y - point.y;
             f32 dz = position.z - point.z;
             f32 distance_squared = dx * dx + dy * dy + dz * dz;
-            f32 radius = 1.0f;
+            // The original keeps the radius in a 16-byte aligned slot.
+            f32 radius __attribute__((aligned(16))) = 1.0f;
             if (ed_class->FindMember(&member, object, 0x40, 1))
                 member.reference->GetAttributeData(member.object, 0x40, EdType_Float, &radius, 0);
             if (distance_squared < radius * radius && candidate_count < 16) {
@@ -740,7 +752,8 @@ i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject 
              object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
             if (!Editable(object, ed_class, -1))
                 continue;
-            EdRef *reference = NULL;
+            // The original keeps the hit reference in a 16-byte aligned slot.
+            EdRef *reference __attribute__((aligned(16))) = NULL;
             f32 distance = ed_class->interface->vtable->distance_to_ray(ed_class->interface, origin, direction, object,
                                                                         &reference);
             if (distance < nearest_distance) {
