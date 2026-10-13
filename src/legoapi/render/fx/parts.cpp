@@ -2041,7 +2041,7 @@ extern "C" {
         MAXPARTS = count;
         buffer->addr = (buffer->addr + 15) & ~static_cast<usize>(15);
         Part = reinterpret_cast<PART_s *>(buffer->void_ptr);
-        buffer->addr += MAXPARTS * sizeof(PART_s);
+        buffer->char_ptr += MAXPARTS * sizeof(PART_s);
         ResetParts();
         memset(part_types, 0, sizeof(part_types));
         for (i32 i = 0; i < 128; ++i) {
@@ -2059,7 +2059,9 @@ extern "C" {
         memset(part_page_used, 0, sizeof(part_page_used));
         memset(part_page_on, 0, sizeof(part_page_on));
         memset(part_scene, 0, sizeof(part_scene));
-        memset(part_scene_pageid, -1, sizeof(part_scene_pageid));
+        for (i32 i = 0; i < 32; ++i) {
+            part_scene_pageid[i] = -1;
+        }
         part_platimpactcnt = 0;
     }
 
