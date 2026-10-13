@@ -145,16 +145,15 @@ static void Technos_Reset(void *world_ptr, void *, void *progress_ptr) {
         }
         techno.ground_offset = 0.0f;
 
-        techno.flags =
-            static_cast<u8>((techno.flags | TECHNO_FLAG_ACTIVE | TECHNO_FLAG_VISIBLE) & ~TECHNO_FLAG_USED_THIS_FRAME);
+        techno.active = 1;
+        techno.visible = 1;
+        techno.used_this_frame = 0;
         NuStrCpy(techno.target_name, techno.target_object_name);
 
         if (progress != NULL && index <= 31) {
             const u32 bit = 1u << index;
-            const u8 visible = (progress->state[1] & bit) != 0;
-            techno.flags = static_cast<u8>((techno.flags & ~TECHNO_FLAG_VISIBLE) | (visible << 1));
-            const u8 active = (progress->state[0] & bit) != 0;
-            techno.flags = static_cast<u8>((techno.flags & ~TECHNO_FLAG_ACTIVE) | active);
+            techno.visible = (progress->state[1] & bit) != 0;
+            techno.active = (progress->state[0] & bit) != 0;
         }
     }
 }
@@ -197,6 +196,22 @@ static i32 Techno_GetOutput(GIZMO *gizmo, i32, i32) {
     return 0;
 }
 
+static inline void Techno_DrawHand(WORLDINFO *world, TECHNO *techno, NUMTX *matrix, const i16 *object_id, NUVEC *offset,
+                                   i32 mirrored) {
+    if (world->lev_objs[*object_id].active == 0) {
+        return;
+    }
+    const f32 hand_phase = techno->ground_offset * 32768.0f + 16384.0f;
+    const i32 hand_angle =
+        static_cast<i32>((1.0f - (NuTrigTable[(static_cast<i32>(hand_phase) >> 1) & 0x7fff] + 1.0f) * 0.5f) * 29127.0f);
+    NuMtxSetRotationY(matrix, mirrored ? -hand_angle : hand_angle);
+    NuMtxTranslate(matrix, offset);
+    NuMtxRotateY(matrix, techno->y_rotation);
+    NUVEC *translation = NUMTX_GET_ROW_VEC(matrix, 3);
+    NuVecAdd(translation, translation, &techno->position);
+    NuSpecialDrawAt(&world->lev_objs[*object_id].special, matrix);
+}
+
 static void Technos_Draw(void *world_ptr, void *, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     if (TechnoSys.active_effect_id == -1 || world->lev_objs[TechnoSys.active_effect_id].active == 0 ||
@@ -210,11 +225,11 @@ static void Technos_Draw(void *world_ptr, void *, float) {
     const f32 pulse = NuTrigTable[(static_cast<i32>(pulse_phase) >> 1) & 0x7fff] * 0.2f + 0.8f;
 
     for (i32 index = 0; index < world->ntechnos; ++index, ++techno) {
-        if ((techno->flags & TECHNO_FLAG_VISIBLE) == 0) {
+        if (!techno->visible) {
             continue;
         }
 
-        NUMTX matrix;
+        NUMTX_ALIGNED16 matrix;
         if (TechnoSys.active_effect_id != -1) {
             NuMtxSetTranslation(&matrix, &TechnoSys.idle_offset);
             NuMtxRotateY(&matrix, techno->y_rotation);
@@ -234,28 +249,8 @@ static void Technos_Draw(void *world_ptr, void *, float) {
             NuSpecialDrawAt(&world->lev_objs[TechnoSys.failure_effect_id].special, &matrix);
         }
 
-        if (world->lev_objs[TechnoSys.activation_effect_id].active != 0) {
-            const f32 hand_phase = techno->ground_offset * 32768.0f + 16384.0f;
-            const i32 hand_angle = static_cast<i32>(
-                (1.0f - (NuTrigTable[(static_cast<i32>(hand_phase) >> 1) & 0x7fff] + 1.0f) * 0.5f) * 29127.0f);
-            NuMtxSetRotationY(&matrix, hand_angle);
-            NuMtxTranslate(&matrix, &TechnoSys.left_hand_offset);
-            NuMtxRotateY(&matrix, techno->y_rotation);
-            NUVEC *translation = NUMTX_GET_ROW_VEC(&matrix, 3);
-            NuVecAdd(translation, translation, &techno->position);
-            NuSpecialDrawAt(&world->lev_objs[TechnoSys.activation_effect_id].special, &matrix);
-        }
-        if (world->lev_objs[TechnoSys.completion_effect_id].active != 0) {
-            const f32 hand_phase = techno->ground_offset * 32768.0f + 16384.0f;
-            const i32 hand_angle = static_cast<i32>(
-                (1.0f - (NuTrigTable[(static_cast<i32>(hand_phase) >> 1) & 0x7fff] + 1.0f) * 0.5f) * 29127.0f);
-            NuMtxSetRotationY(&matrix, -hand_angle);
-            NuMtxTranslate(&matrix, &TechnoSys.right_hand_offset);
-            NuMtxRotateY(&matrix, techno->y_rotation);
-            NUVEC *translation = NUMTX_GET_ROW_VEC(&matrix, 3);
-            NuVecAdd(translation, translation, &techno->position);
-            NuSpecialDrawAt(&world->lev_objs[TechnoSys.completion_effect_id].special, &matrix);
-        }
+        Techno_DrawHand(world, techno, &matrix, &TechnoSys.activation_effect_id, &TechnoSys.left_hand_offset, 0);
+        Techno_DrawHand(world, techno, &matrix, &TechnoSys.completion_effect_id, &TechnoSys.right_hand_offset, 1);
 
         if ((techno->flags & TECHNO_FLAG_ACTIVE) != 0 && techno->ground_position.y != 2000000.0f &&
             world->lev_objs[TechnoSys.floor_target_object_id].active != 0 && pulse > 0.0f) {
@@ -354,10 +349,10 @@ static void Technos_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
         }
         const i32 word = index >> 5;
         const u32 bit = 1u << index;
-        if ((techno->flags & TECHNO_FLAG_VISIBLE) == 0) {
+        if (!techno->visible) {
             progress->state[word + 1] &= ~bit;
         }
-        if ((techno->flags & TECHNO_FLAG_ACTIVE) == 0) {
+        if (!techno->active) {
             progress->state[word] &= ~bit;
         }
     }
