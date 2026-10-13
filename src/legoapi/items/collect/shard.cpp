@@ -246,8 +246,9 @@ static i32 Shards_Load(void *world_info, void *) {
             shard = &static_cast<SHARD *>(world->shards)[i];
             shard->angle_z = EdFileReadShort();
         } else {
-            static_cast<SHARD *>(world->shards)[i].angle_x = 0;
-            static_cast<SHARD *>(world->shards)[i].angle_z = 0;
+            SHARD *shard = &static_cast<SHARD *>(world->shards)[i];
+            shard->angle_x = 0;
+            shard->angle_z = 0;
         }
     }
     return 1;

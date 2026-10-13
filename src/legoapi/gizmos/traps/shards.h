@@ -8,44 +8,39 @@
 struct GameObject_s;
 typedef struct SHARD_s {
     char name[0x10];
+    NUVEC position; // 0x10
     union {
-        char reserved_10[0x44];
+        u8 reserved_1c[0xc];
+        NUVEC current_position;
+    };
+    NUVEC screen_position; // 0x28
+    union {
+        u8 reserved_34[2];
+        i16 model_index;
+    };
+    u16 angle_x; // 0x36
+    u16 angle_z; // 0x38
+    union {
+        u8 reserved_3a[2];
+        u16 spin_angle;
+    };
+    union {
+        u8 state_flags; // 0x3c
         struct {
-            NUVEC position; // 0x10
-            union {
-                u8 reserved_1c[0xc];
-                NUVEC current_position;
-            };
-            NUVEC screen_position; // 0x28
-            union {
-                u8 reserved_34[2];
-                i16 model_index;
-            };
-            u16 angle_x; // 0x36
-            u16 angle_z; // 0x38
-            union {
-                u8 reserved_3a[2];
-                u16 spin_angle;
-            };
-            union {
-                u8 state_flags; // 0x3c
-                struct {
-                    u8 active : 1;
-                    u8 visible : 1;
-                    u8 collecting : 1;
-                    u8 collected : 1;
-                    u8 drawn : 1;
-                    u8 random_offset : 1;
-                    u8 tumble_x : 1;
-                    u8 reserved_state : 1;
-                };
-            };
-            u8 reserved_3d[3];
-            f32 collection_time;       // 0x40
-            GameObject_s *collector;   // 0x44
-            NUVEC collection_velocity; // 0x48
+            u8 active : 1;
+            u8 visible : 1;
+            u8 collecting : 1;
+            u8 collected : 1;
+            u8 drawn : 1;
+            u8 random_offset : 1;
+            u8 tumble_x : 1;
+            u8 reserved_state : 1;
         };
     };
+    u8 reserved_3d[3];
+    f32 collection_time;       // 0x40
+    GameObject_s *collector;   // 0x44
+    NUVEC collection_velocity; // 0x48
 } SHARD;
 
 DECOMP_ASSERT(sizeof(SHARD_s) == 0x54, "SHARD ABI");
