@@ -879,7 +879,7 @@ void Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x
     if (world != NULL) {
         if (world->lev_objs[object_index].active != 0 && (scale_x != 0.0f || scale_y != 0.0f || scale_z != 0.0f)) {
             NUVEC scale = {scale_x, scale_y, scale_z};
-            NUMTX matrix;
+            NUMTX_ALIGNED16 matrix;
             NuMtxSetScale(&matrix, &scale);
             RotateGameMatrix(&matrix, rotate_order, x_rotation, y_rotation, z_rotation);
             NuMtxTranslate(&matrix, position);
@@ -2107,7 +2107,7 @@ void Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, 
     if (world != NULL) {
         if (world->lev_objs[object_index].active != 0 && (scale_x != 0.0f || scale_y != 0.0f || scale_z != 0.0f)) {
             NUVEC scale = {scale_x, scale_y, scale_z};
-            NUMTX matrix;
+            NUMTX_ALIGNED16 matrix;
             NuMtxSetScale(&matrix, &scale);
             RotateGameMatrix(&matrix, rotate_order, x_rotation, y_rotation, z_rotation);
             NuMtxTranslate(&matrix, position);
