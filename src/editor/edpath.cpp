@@ -1090,11 +1090,13 @@ static __used__ void routeEditor_cbRouteUsers(eduimenu_s *parent, eduiitem_s *, 
 static __used__ void routeEditor_cbCreateRoute(eduimenu_s *, eduiitem_s *, u32) {
     EDAIPATH_s *path = aieditor->current_path;
     i32 index = path->current_route != nullptr ? path->current_route - path->routes + 1 : 1;
+    u8 flags;
     // The original checks each of the fixed 16 slots in sequence.
 #define ROUTE_EDITOR_TRY_FREE()                                                                                        \
     if (index >= 16)                                                                                                   \
         index = 0;                                                                                                     \
-    if (!(path->routes[index].flags & 1))                                                                              \
+    flags = path->routes[index].flags;                                                                                 \
+    if (!(flags & 1))                                                                                                  \
         goto route_found;                                                                                              \
     ++index
     ROUTE_EDITOR_TRY_FREE();
@@ -1117,15 +1119,15 @@ static __used__ void routeEditor_cbCreateRoute(eduimenu_s *, eduiitem_s *, u32) 
     return;
 route_found:
     EDAIPATHROUTE_s *route = &path->routes[index];
-    route->flags |= 1;
+    route->flags = flags | 1;
     route->user_mask = 0;
-    path->current_route = route;
+    aieditor->current_path->current_route = route;
     char name[16];
     i32 number = 0;
 next_name:
     sprintf(name, "route%d", ++number);
 #define ROUTE_EDITOR_CHECK_NAME(N)                                                                                     \
-    if ((path->routes[N].flags & 1) && NuStrICmp(name, path->routes[N].name) == 0)                                     \
+    if ((aieditor->current_path->routes[N].flags & 1) && NuStrICmp(name, aieditor->current_path->routes[N].name) == 0) \
     goto next_name
     ROUTE_EDITOR_CHECK_NAME(0);
     ROUTE_EDITOR_CHECK_NAME(1);
@@ -1152,7 +1154,7 @@ static __used__ void routeEditor_cbDeleteRoute(eduimenu_s *parent, eduiitem_s *i
     if (item == nullptr) {
         return;
     }
-    switch (item->data) {
+    switch (static_cast<u32>(item->data)) {
         case 0: {
             eduimenu_s *menu = eduiMenuCreate(240, 90, 240, 250, ed_fnt, nullptr, "Delete current route??");
             if (menu != nullptr) {
@@ -1173,10 +1175,10 @@ static __used__ void routeEditor_cbDeleteRoute(eduimenu_s *parent, eduiitem_s *i
             }
             i32 index = route - path->routes;
             route->flags &= ~u8(1);
-            path->current_route = nullptr;
+            aieditor->current_path->current_route = nullptr;
             u64 mask = ~(1ULL << index);
             for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes); node != nullptr;
-                 node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&path->nodes, &node->link)) {
+                 node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&aieditor->current_path->nodes, &node->link)) {
 #define CLEAR_CONNECTION_ROUTE(N) node->connections[N].route_mask &= mask
                 CLEAR_CONNECTION_ROUTE(0);
                 CLEAR_CONNECTION_ROUTE(1);
