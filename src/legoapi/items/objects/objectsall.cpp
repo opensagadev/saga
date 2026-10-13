@@ -240,23 +240,33 @@ begin_scan:
     return index;
 }
 
+static i32 IsTextBreak(unsigned char *text, i32 index) {
+    const u8 ch = text[index];
+    if (ch == ' ') {
+        const u8 next = text[index + 1];
+        if (next == '?' || next == '!' || next == ';' || next == ':') {
+            return 0;
+        }
+        return 1;
+    }
+    if (ch == '.') {
+        if (text[index + 1] == '.') {
+            return 0;
+        }
+        return 1;
+    }
+    if (ch == ',' || ch == '-') {
+        return 1;
+    }
+    return 0;
+}
+
 i32 FindNearestBreak(unsigned char *text, i32 index) {
     while (static_cast<u8>(text[index] - 0x80) <= 0x3f)
         --index;
 
-    u8 ch = text[index];
-    if (ch != ' ') {
-        if (ch == '.') {
-            if (text[index + 1] != '.')
-                return index;
-        } else if (static_cast<u8>(ch - ',') <= 1) {
-            return index;
-        }
-    } else {
-        u8 next = text[index + 1];
-        if (next != '?' && next != '!' && next != ';' && next != ':')
-            return index;
-    }
+    if (IsTextBreak(text, index))
+        return index;
 
     i32 length = NuStrLen(reinterpret_cast<char *>(text)) - 1;
     i32 backward = index;
@@ -270,33 +280,10 @@ i32 FindNearestBreak(unsigned char *text, i32 index) {
         while (static_cast<u8>(text[backward] - 0x80) <= 0x3f)
             --backward;
 
-        ch = text[forward];
-        if (ch != ' ') {
-            if (ch == '.') {
-                if (text[forward + 1] != '.')
-                    return forward;
-            } else if (static_cast<u8>(ch - ',') <= 1) {
-                return forward;
-            }
-        } else {
-            u8 next = text[forward + 1];
-            if (next != '?' && next != '!' && next != ';' && next != ':')
-                return forward;
-        }
-
-        ch = text[backward];
-        if (ch != ' ') {
-            if (ch == '.') {
-                if (text[backward + 1] != '.')
-                    return backward;
-            } else if (static_cast<u8>(ch - ',') <= 1) {
-                return backward;
-            }
-        } else {
-            u8 next = text[backward + 1];
-            if (next != '?' && next != '!' && next != ';' && next != ':')
-                return backward;
-        }
+        if (IsTextBreak(text, forward))
+            return forward;
+        if (IsTextBreak(text, backward))
+            return backward;
     } while (--count != 0);
 
     if (text[index] == '~') {
