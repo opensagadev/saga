@@ -3932,21 +3932,22 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                 other = GetOtherActivePlayer(object);
                 i32 forwards;
                 if (other != NULL) {
-                    if (other->in_narrow_socket &&
-                        (forwards = GoingForwardsAlongNarrowSock(object)) == GoingForwardsAlongNarrowSock(other)) {
-                        NuVecRotateY(&direction, &v001, object->yrot);
-                        NuVecSub(&separation, &other->apiobj.position, &api.position);
-                        f32 longitudinal = separation.x * direction.x + separation.z * direction.z;
-                        f32 radius = api.field_0x1dc + other->apiobj.field_0x1dc;
-                        if (fabsf(longitudinal) > radius * 2.0f) {
-                            f32 amount =
-                                fabsf(longitudinal) > radius * 5.0f + 0.1f
-                                    ? 1.0f
-                                    : (fabsf(longitudinal) - radius * 2.0f) / (radius * 5.0f + 0.1f - radius * 2.0f);
-                            i32 ahead = forwards ? longitudinal > 0.0f : longitudinal < 0.0f;
-                            f32 factor = other->apiobj.field_0x287 ? 1.0f : 0.75f;
-                            if (!ahead)
-                                speed *= 1.0f - factor * amount;
+                    if (other->in_narrow_socket) {
+                        if ((forwards = GoingForwardsAlongNarrowSock(object)) == GoingForwardsAlongNarrowSock(other)) {
+                            NuVecRotateY(&direction, &v001, object->yrot);
+                            NuVecSub(&separation, &other->apiobj.position, &api.position);
+                            f32 longitudinal = separation.x * direction.x + separation.z * direction.z;
+                            f32 radius = api.field_0x1dc + other->apiobj.field_0x1dc;
+                            if (fabsf(longitudinal) > radius * 2.0f) {
+                                f32 amount = fabsf(longitudinal) > radius * 5.0f + 0.1f
+                                                 ? 1.0f
+                                                 : (fabsf(longitudinal) - radius * 2.0f) /
+                                                       (radius * 5.0f + 0.1f - radius * 2.0f);
+                                i32 ahead = forwards ? longitudinal > 0.0f : longitudinal < 0.0f;
+                                f32 factor = other->apiobj.field_0x287 ? 1.0f : 0.75f;
+                                if (!ahead)
+                                    speed *= 1.0f - factor * amount;
+                            }
                         }
                     }
                 }
@@ -4005,9 +4006,12 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
             if (object->character_context != 0x2a) {
                 if (object->character_context != 0x36 && object->character_context != 0x3a) {
                     angular_speed = (i32)(RotDiff(object->previous_movement_angle, api.field_0x276) / FRAMETIME);
-                    if (WORLD->current_level == PLATFORM_LDATA && NeedsPretendAnim(object)) {
-                        u16 phase = (i32)(NuFmod(GameTimer.time_elapsed, 2.1f) / 2.1f * 65536.0f);
-                        angular_speed = (i32)(angular_speed + 4551.0f * NuTrigTable[((phase - 0x2000) >> 1) & 0x7fff]);
+                    if (WORLD->current_level == PLATFORM_LDATA) {
+                        if (NeedsPretendAnim(object)) {
+                            u16 phase = (i32)(NuFmod(GameTimer.time_elapsed, 2.1f) / 2.1f * 65536.0f);
+                            angular_speed =
+                                (i32)(angular_speed + 4551.0f * NuTrigTable[((phase - 0x2000) >> 1) & 0x7fff]);
+                        }
                     }
                 }
             }
@@ -4636,8 +4640,10 @@ extern i32 CanPunchGirls;
 GameObject_s *ObjOpponent(GameObject_s *object, f32 range, f32 extra_radius, i32 allow_untargeted, i32 mode,
                           i32 player_filter) {
     NUVEC delta;
-    if (forceNextAttackOpponent.Get() != NULL && (object->apiobj.flags_low & 0x80) != 0) {
-        return forceNextAttackOpponent->GetCharacterObject();
+    if (forceNextAttackOpponent.Get() != NULL) {
+        if ((object->apiobj.flags_low & 0x80) != 0) {
+            return forceNextAttackOpponent->GetCharacterObject();
+        }
     }
     i32 ignore_ai = objopponent_ignoreaiopponent;
     objopponent_ignoreaiopponent = 0;
