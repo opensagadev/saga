@@ -733,7 +733,6 @@ __used__ static i32 Action_SetPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
     AIPATHSYS *path_system = sys->path_sys;
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
     AIPATH *path = NULL;
-    auto path_system_path_count = path_system->path_count;
     for (i32 index = 0; index < param_4; ++index) {
         char *value = NuStrIStr(params[index], "character=");
         if (value != NULL) {
@@ -746,9 +745,8 @@ __used__ static i32 Action_SetPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
         }
         value = NuStrIStr(params[index], "path");
         if (value != NULL) {
-            for (i32 path_index = 0; path_index < path_system_path_count; ++path_index) {
-                AIPATH *candidate = path_system->paths[path_index];
-                if (candidate != NULL && NuStrICmp(candidate->name, value + 5) == 0) {
+            for (i32 path_index = 0; path_index < path_system->path_count; ++path_index) {
+                if (NuStrICmp(path_system->paths[path_index]->name, value + 5) == 0) {
                     path = path_system->paths[path_index];
                     break;
                 }
@@ -3553,26 +3551,28 @@ __used__ static i32 Action_SetRunSpeed(AISYS *, AISCRIPTPROCESS *processor, AIPA
         f32 speed = 1000000000.0f;
         f32 minimum = 0.0f, maximum = 1000000000.0f, multiplier = 1.0f;
         i32 multiply = 0;
-        for (i32 i = 0; i < num_params; i++) {
-            char *value = NuStrIStr(params[i], "multiply=");
-            if (value != NULL) {
-                multiplier = AIParamToFloat(processor, value + 9);
-                multiply = 1;
-            } else if (NuStrICmp(params[i], "max=default") == 0)
-                maximum = ((GAMECHARACTERDATA *)object->apiobj.character_data->field11_0x24)->run_speed;
-            else if (NuStrICmp(params[i], "default") == 0)
-                speed = ((GAMECHARACTERDATA *)object->apiobj.character_data->field11_0x24)->run_speed;
-            else if (NuStrICmp(params[i], "clear") == 0) {
-            } else if ((value = NuStrIStr(params[i], "max=")) != NULL)
-                maximum = AIParamToFloat(processor, value + 4);
-            else if ((value = NuStrIStr(params[i], "min=")) != NULL)
-                minimum = AIParamToFloat(processor, value + 4);
-            else if ((value = NuStrIStr(params[i], "seek=")) != NULL)
-                processor->action_data_4 = AIParamToFloat(processor, value + 5);
-            else if (NuStrIStr(params[i], "player_run_speed") != NULL)
-                speed = ((GAMECHARACTERDATA *)player->apiobj.character_data->field11_0x24)->run_speed;
-            else
-                speed = AIParamToFloat(processor, params[i]);
+        if (num_params != 0) {
+            for (i32 i = 0; i < num_params; i++) {
+                char *value = NuStrIStr(params[i], "multiply=");
+                if (value != NULL) {
+                    multiplier = AIParamToFloat(processor, value + 9);
+                    multiply = 1;
+                } else if (NuStrICmp(params[i], "max=default") == 0)
+                    maximum = ((GAMECHARACTERDATA *)object->apiobj.character_data->field11_0x24)->run_speed;
+                else if (NuStrICmp(params[i], "default") == 0)
+                    speed = ((GAMECHARACTERDATA *)object->apiobj.character_data->field11_0x24)->run_speed;
+                else if (NuStrICmp(params[i], "clear") == 0) {
+                } else if ((value = NuStrIStr(params[i], "max=")) != NULL)
+                    maximum = AIParamToFloat(processor, value + 4);
+                else if ((value = NuStrIStr(params[i], "min=")) != NULL)
+                    minimum = AIParamToFloat(processor, value + 4);
+                else if ((value = NuStrIStr(params[i], "seek=")) != NULL)
+                    processor->action_data_4 = AIParamToFloat(processor, value + 5);
+                else if (NuStrIStr(params[i], "player_run_speed") != NULL)
+                    speed = ((GAMECHARACTERDATA *)player->apiobj.character_data->field11_0x24)->run_speed;
+                else
+                    speed = AIParamToFloat(processor, params[i]);
+            }
         }
         minimum = fabsf(minimum);
         maximum = fabsf(maximum);
