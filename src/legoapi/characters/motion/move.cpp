@@ -1598,8 +1598,9 @@ void Move_SPEEDERBIKE(GameObject_s *object) {
 i32 MovePlayer_CIRCLE(GameObject_s *object) {
     WORLDINFO *world = WorldInfo_CurrentlyActive();
     GAMEPAD_s *pad = object->pad_gamepad;
-    if (object->apiobj.field_0x27c == -1 || !CircleLevel(world->current_level) || world->sock_sys == NULL ||
-        object->sock_position.location.sock == -1)
+    if (object->apiobj.field_0x27c == -1)
+        return 0;
+    if (!CircleLevel(world->current_level) || world->sock_sys == NULL || object->sock_position.location.sock == -1)
         return 0;
     object->field_0x1086 = 3;
     u16 heading = world->sock_sys->sock[object->sock_position.location.sock].input_yaw +
@@ -1678,8 +1679,10 @@ static void ZapCode(GameObject_s *object, i32 pressed, i32 retract_weapon) {
                 }
             } else {
                 animation = 0x16;
-                if (object->apiobj.character_model->model_data_b[animation] == NULL ||
-                    object->apiobj.field_0x27d == 0 || ObjLandReady(object) == 0) {
+                if (object->apiobj.character_model->model_data_b[animation] == NULL) {
+                    return;
+                }
+                if (object->apiobj.field_0x27d == 0 || ObjLandReady(object) == 0) {
                     return;
                 }
             }
@@ -10371,7 +10374,9 @@ shoot_weapon_in:
         return 0;
     if (object->apiobj.character_data->game_character->uses_weapon_action == 2 && object->field_0xe31 == 1)
         return 0;
-    if (object->character_context == 8 || object->character_context == 0x1b || object->character_context == 0x1d)
+    if (object->character_context == 8)
+        return 0;
+    if (object->character_context == 0x1b || object->character_context == 0x1d)
         return 0;
     if (TouchHacks::ShouldKeepWeaponOut(*object))
         return 0;
