@@ -930,7 +930,7 @@ void RedBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active
                         0x7fff];
     SmartTextEx(TTab[tUNLOCKED], 0.0f, 0.05f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G, STATUS_B, 1.7f, 1, NULL, 0,
                 static_cast<i32>(blend * 128.0f));
-    const u32 angle = NuFmod(GlobalTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f;
+    const i32 angle = static_cast<i32>(NuFmod(GlobalTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f);
     DrawPanel3DObjectNoAlpha(0.0f, blend - 1.5f, 1.0f, 1.0f, 1.0f, 1.0f,
                              static_cast<i32>(NuTrigTable[angle & 0x7fff] * 1820.0f), angle, 0,
                              reinterpret_cast<nuhspecial_s *>(&WORLD->lev_objs[0xd2]), 2);
@@ -1997,7 +1997,7 @@ void Coins_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elaps
                     for (u32 threshold = 100; threshold <= remaining; threshold *= 10) {
                         rate *= 10;
                     }
-                    u32 amount = static_cast<u32>(static_cast<f32>(rate) * elapsed);
+                    u32 amount = static_cast<i32>(static_cast<f32>(rate) * elapsed);
                     if (amount > remaining) {
                         amount = remaining;
                     } else if (amount == 0) {
