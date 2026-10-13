@@ -1321,9 +1321,8 @@ static void GizmoBuildit_Activate(GIZMO *gizmo, i32 active) {
     }
 
     GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(gizmo->object);
-    buildit->availability_flags = static_cast<u8>((buildit->availability_flags & ~GIZBUILDIT_AVAILABILITY_ACTIVE) |
-                                                  (active != 0 ? GIZBUILDIT_AVAILABILITY_ACTIVE : 0));
-    if (active == 0) {
+    buildit->available_active = active != 0;
+    if (!buildit->available_active) {
         return;
     }
 
@@ -1334,10 +1333,9 @@ static void GizmoBuildit_Activate(GIZMO *gizmo, i32 active) {
         GameAnimSet_JumpToStart(buildit->anim_set);
     }
 
-    const u8 reward_released = buildit->field_0x83 & GIZBUILDIT_RUNTIME_REWARD_RELEASED;
+    const u8 reward_released = buildit->reward_released;
     GizBuildit_Reset(buildit, NULL);
-    buildit->field_0x83 =
-        static_cast<u8>((buildit->field_0x83 & ~GIZBUILDIT_RUNTIME_REWARD_RELEASED) | reward_released);
+    buildit->reward_released = reward_released;
 
     if ((buildit->state_flags & GIZBUILDIT_STATE_AUTO_BUILD_STATIC_OBJECTS) == 0 || GizBuildit_AutoBuildPosFn == NULL) {
         return;
@@ -1359,9 +1357,7 @@ static void GizmoBuildit_Activate(GIZMO *gizmo, i32 active) {
             NuSpecialSetDrawPos(&object->special, &scatter_position);
         } else {
             GIZBUILDITANIMDATA_s *object_data = static_cast<GIZBUILDITANIMDATA_s *>(object->object_data);
-            object_data->draw_mtx.m30 = scatter_position.x;
-            object_data->draw_mtx.m31 = scatter_position.y;
-            object_data->draw_mtx.m32 = scatter_position.z;
+            *NUMTX_GET_ROW_VEC(&object_data->draw_mtx, 3) = scatter_position;
         }
         AddGameDebris(WORLD->debris_sys, GizBuilditGDeb[qrand() / 0x2aab], &scatter_position);
     }
