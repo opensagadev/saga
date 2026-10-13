@@ -207,6 +207,7 @@ void *FindNearestTorpTarget(WORLDINFO_s *world, NUVEC *position, f32 distance_sq
     if (world->gizmo_blowup_count == 0)
         return NULL;
     void *nearest = NULL;
+    f32 nearest_distance = distance_squared;
     u8 type = 0;
     NUVEC delta;
     for (i32 i = 0; i < world->gizmo_blowup_count; ++i) {
@@ -214,8 +215,8 @@ void *FindNearestTorpTarget(WORLDINFO_s *world, NUVEC *position, f32 distance_sq
         if ((blowup->visibility_flags & 0x40) != 0 && (blowup->status_flags & 0x20008000) != 0 &&
             (blowup->status_flags & 0x800001) == 0x800000 && (blowup->draw_flags & 0x1000000) != 0) {
             f32 distance = NuVecDistSqr(&blowup->mid_position, position, &delta);
-            if (distance < distance_squared) {
-                distance_squared = distance;
+            if (distance < nearest_distance) {
+                nearest_distance = distance;
                 nearest = blowup;
             }
         }
@@ -223,15 +224,14 @@ void *FindNearestTorpTarget(WORLDINFO_s *world, NUVEC *position, f32 distance_sq
     if (WORLD->area != NULL && WORLD->area == BOUNTYHUNTERPURSUIT_ADATA) {
         if (world->giz_turret_sys != NULL) {
             GIZTURRET_s *turret = world->giz_turret_sys->turrets;
-            auto world_giz_turret_sys = world->giz_turret_sys;
-            for (i32 i = 0; i < world_giz_turret_sys->count; ++i, ++turret) {
-                if ((turret->flags & 4) != 0 && (turret->flags & 2) != 0 && (turret->flags & 0x30) == 0 &&
+            for (i32 i = 0; i < world->giz_turret_sys->count; ++i, ++turret) {
+                if ((turret->flags & 4) != 0 && turret->active && (turret->flags & 0x30) == 0 &&
                     turret->primary_anim_obj != NULL) {
                     NUVEC *draw_position = NuSpecialGetDrawPos(&turret->primary_anim_obj->special);
                     if (draw_position != NULL) {
                         f32 distance = NuVecDistSqr(draw_position, position, &delta);
-                        if (distance < distance_squared) {
-                            distance_squared = distance;
+                        if (distance < nearest_distance) {
+                            nearest_distance = distance;
                             nearest = turret;
                             type = 1;
                         }
@@ -245,11 +245,10 @@ void *FindNearestTorpTarget(WORLDINFO_s *world, NUVEC *position, f32 distance_sq
             for (i32 i = 0; i < world->giz_obstacle_sys->active_gizmo_count; ++i) {
                 GIZOBSTACLE_s *obstacle =
                     static_cast<GIZOBSTACLE_s *>(world->giz_obstacle_sys->active_gizmos[i]->object);
-                if ((obstacle->progress_flags & 2) != 0 && (obstacle->progress_flags & 1) != 0 &&
-                    (obstacle->runtime_flags & 0x80) == 0) {
+                if ((obstacle->progress_flags & 2) != 0 && obstacle->progress_enabled && !obstacle->runtime_destroyed) {
                     f32 distance = NuVecDistSqr(&obstacle->evaluated_position, position, &delta);
-                    if (distance < distance_squared) {
-                        distance_squared = distance;
+                    if (distance < nearest_distance) {
+                        nearest_distance = distance;
                         nearest = obstacle;
                         type = 2;
                     }
