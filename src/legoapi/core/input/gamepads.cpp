@@ -367,16 +367,6 @@ void SpaceRumbleProcess() {
     }
 }
 
-static inline void NewPlayerRumble(GameObject_s *object, f32 strength, f32 duration, f32 amount) {
-    if (object == NULL || static_cast<i8>(object->apiobj.flags_low) >= 0) {
-        return;
-    }
-    nupad_s *pad = object->pad_gamepad->pad;
-    if (pad != NULL) {
-        NuSound3AddRumble(pad, duration, static_cast<i32>(amount), 0, strength);
-    }
-}
-
 void NewRumbleAllPlayers(float strength, float duration, i32 frames, i32) {
     if (frames > 0) {
         f32 frame_duration = static_cast<f32>(frames) / DEFAULTFPS;
@@ -384,14 +374,12 @@ void NewRumbleAllPlayers(float strength, float duration, i32 frames, i32) {
             duration = frame_duration;
     }
     const f32 amount = strength * 255.0f;
-    NewPlayerRumble(Player[0], strength, duration, amount);
-    NewPlayerRumble(Player[1], strength, duration, amount);
-    NewPlayerRumble(Player[2], strength, duration, amount);
-    NewPlayerRumble(Player[3], strength, duration, amount);
-    NewPlayerRumble(Player[4], strength, duration, amount);
-    NewPlayerRumble(Player[5], strength, duration, amount);
-    NewPlayerRumble(Player[6], strength, duration, amount);
-    NewPlayerRumble(Player[7], strength, duration, amount);
+    for (i32 i = 0; i < 8; ++i) {
+        GameObject_s *object = Player[i];
+        if (object != NULL && object->apiobj.player_controlled && object->pad_gamepad->pad != NULL) {
+            NuSound3AddRumble(object->pad_gamepad->pad, duration, static_cast<i32>(amount), 0, strength);
+        }
+    }
 }
 
 i32 ObjLookingWithLeftStick(GameObject_s *object) {
