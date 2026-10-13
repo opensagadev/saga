@@ -3367,29 +3367,31 @@ void UpdatePartEmits(f32 time) {
 i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 
 PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f32 range) {
+    PART_s *part = Part;
+    radius *= radius;
     f32 nearest_distance = range > 0.0f ? range : 100.0f;
     PART_s *nearest = NULL;
-    for (i32 i = 0; i < MAXPARTS; ++i) {
-        PART_s *part = &Part[i];
+    for (i32 i = 0; i < MAXPARTS; ++i, ++part) {
         if ((part->active & 1) == 0 || part->owner == owner || (part->flags & flags) != flags)
             continue;
-        if (range <= 0.0f) {
-            f32 speed = NuVecMag(&part->velocity);
-            if (speed != 0.0f) {
-                NUVEC direction;
-                NuVecScale(&direction, &part->velocity, 1.0f / speed);
-                f32 distance = NuVecDistSqr(&part->position, position, NULL);
-                if (distance < speed * 0.5f * speed * 0.5f &&
-                    LineIntersectSphere(&part->position, &direction, position, radius * radius, NULL)) {
-                    nearest_distance = distance;
-                    nearest = part;
-                }
-            }
-        } else {
+        if (range > 0.0f) {
             f32 distance = NuVecDistSqr(&part->position, position, NULL);
             if (distance < nearest_distance) {
                 nearest_distance = distance;
                 nearest = part;
+            }
+        } else {
+            f32 speed = NuVecMag(&part->velocity);
+            if (speed != 0.0f) {
+                NUVEC direction;
+                NuVecScale(&direction, &part->velocity, 1.0f / speed);
+                f32 reach = speed * 0.5f;
+                reach *= reach;
+                f32 distance = NuVecDistSqr(&part->position, position, NULL);
+                if (distance < reach && LineIntersectSphere(&part->position, &direction, position, radius, NULL)) {
+                    nearest_distance = distance;
+                    nearest = part;
+                }
             }
         }
     }
