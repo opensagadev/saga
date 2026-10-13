@@ -794,6 +794,20 @@ extern "C" {
 }
 void NuGCutRigidCalcMtx(NUGCUTRIGID_s *, f32, numtx_s *);
 
+// Name table passed as NuGCutSceneFixUp's third argument: count at +0x08 and 0x34-byte entries at +0x0c
+// whose first field is the trigger target name (offsets from the original's trigger fix-up loop).
+struct CutSceneTriggerNameEntry {
+    char *name;
+    u8 unknown_04[0x30];
+};
+struct CutSceneTriggerNameTable {
+    u32 unknown_00[2];
+    i32 count;
+    CutSceneTriggerNameEntry *entries;
+};
+DECOMP_ASSERT(sizeof(CutSceneTriggerNameEntry) == 0x34, "cutscene trigger name entry stride");
+DECOMP_ASSERT(offsetof(CutSceneTriggerNameTable, entries) == 0x0c, "cutscene trigger name table entries offset");
+
 static instNUGCUTSCENE_s *background_cutscene_instances;
 static instNUGCUTSCENE_s *active_cutscene_instances;
 static i32 cutscene_synchro_counter;
@@ -1198,9 +1212,11 @@ extern "C" {
             cutscene->scene = scene;
             cutscene->extra_scene = reinterpret_cast<void *>(static_cast<usize>(flags));
         }
-        if (scene != NULL && cutscene->rigid_system != NULL && cutscene->rigid_system->rigids != NULL) {
-            for (u32 i = 0; i < cutscene->rigid_system->count; ++i) {
-                NUGCUTRIGID_s *rigid = &cutscene->rigid_system->rigids[i];
+        NUGCUTRIGIDSYS_s *rigid_system = cutscene->rigid_system;
+        if (rigid_system != NULL && scene != NULL) {
+            NUGCUTLOCATORSYS_s *locator_system = cutscene->locator_system;
+            for (i32 i = 0; i < rigid_system->count; ++i) {
+                NUGCUTRIGID_s *rigid = &rigid_system->rigids[i];
                 nuhspecial_s special;
                 if (NuSpecialFind(scene, &special, rigid->name, 1) != 0) {
                     rigid->flags |= 4;
@@ -1211,9 +1227,9 @@ extern "C" {
                         rigid->special_object = special.special;
                     }
                 }
-                if (rigid->locator_count != 0 && cutscene->locator_system != NULL && rigid->locator < 0xff) {
+                if (rigid->locator_count != 0 && static_cast<i32>(rigid->locator) < 0xff) {
                     rigid->locator_index = static_cast<u8>(rigid->locator);
-                    rigid->locator = reinterpret_cast<usize>(&cutscene->locator_system->locators[rigid->locator_index]);
+                    rigid->locator = reinterpret_cast<usize>(&locator_system->locators[rigid->locator]);
                 } else {
                     rigid->locator_index = 0xff;
                 }
@@ -1223,39 +1239,55 @@ extern "C" {
             NuCutSceneFindCharacters(cutscene);
         }
         NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
-        if (system == NULL || system->types == NULL || system->type_count == 0) {
-            return;
-        }
-        for (u32 i = 0; i < system->type_count; ++i) {
-            NUGCUTLOCATORTYPE_s *type = &system->types[i];
-            if ((type->flags & 1) != 0) {
-                if (NuGCutDebFixUp_SearchAllPages == 0) {
-                    type->function_index = static_cast<u16>(LookupDebrisEffectPageOnly(type->name, area));
-                } else {
-                    type->function_index = static_cast<u16>(LookupDebrisEffectPage(type->name, area));
-                }
-            } else if ((type->flags & 2) != 0) {
-                i32 function_index = -1;
-                if (locatorfns != NULL && type->name != NULL && locatorfns[0].name != NULL) {
-                    for (i32 j = 0; locatorfns[j].name != NULL; ++j) {
-                        if (NuStrICmp(type->name, locatorfns[j].name) != 0) {
-                            continue;
+        if (system != NULL && system->types != NULL && system->type_count != 0) {
+            for (u32 i = 0; i < system->type_count; ++i) {
+                NUGCUTLOCATORTYPE_s *type = &system->types[i];
+                if ((type->flags & 1) != 0) {
+                    if (NuGCutDebFixUp_SearchAllPages == 0) {
+                        type->function_index = static_cast<u16>(LookupDebrisEffectPageOnly(type->name, area));
+                    } else {
+                        type->function_index = static_cast<u16>(LookupDebrisEffectPage(type->name, area));
+                    }
+                } else if ((type->flags & 2) != 0) {
+                    i32 function_index = -1;
+                    if (locatorfns != NULL && type->name != NULL && locatorfns[0].name != NULL) {
+                        for (i32 j = 0; locatorfns[j].name != NULL; ++j) {
+                            if (NuStrICmp(type->name, locatorfns[j].name) != 0) {
+                                continue;
+                            }
+                            function_index = j;
+                            break;
                         }
-                        function_index = j;
-                        break;
+                    }
+                    type->function_index = static_cast<u16>(function_index);
+                } else if ((type->flags & 0x10) != 0 && LookupLocatorVfxFn != NULL && type->name != NULL) {
+                    char *underscore = NuStrRChr(type->name, '_');
+                    if (underscore != NULL && underscore[1] > '/' && underscore[1] < ':') {
+                        *underscore = '\0';
+                    }
+                    type->function_index = static_cast<u16>(LookupLocatorVfxFn(type->name));
+                } else if ((type->flags & 4) != 0 && NuCutSceneSFXFixUp != NULL && type->name != NULL) {
+                    type->function_index = static_cast<u16>(NuCutSceneSFXFixUp(reinterpret_cast<usize>(type->name)));
+                    if (static_cast<i16>(type->function_index) != -1) {
+                        cutscene->flags |= 4;
                     }
                 }
-                type->function_index = static_cast<u16>(function_index);
-            } else if ((type->flags & 0x10) != 0 && LookupLocatorVfxFn != NULL && type->name != NULL) {
-                char *underscore = NuStrRChr(type->name, '_');
-                if (underscore != NULL && underscore[1] > '/' && underscore[1] < ':') {
-                    *underscore = '\0';
-                }
-                type->function_index = static_cast<u16>(LookupLocatorVfxFn(type->name));
-            } else if ((type->flags & 4) != 0 && NuCutSceneSFXFixUp != NULL && type->name != NULL) {
-                type->function_index = static_cast<u16>(NuCutSceneSFXFixUp(reinterpret_cast<usize>(type->name)));
-                if (static_cast<i16>(type->function_index) != -1) {
-                    cutscene->flags |= 4;
+            }
+        }
+        NUGCUTTRIGGERSYS_s *trigger_system = cutscene->trigger_system;
+        if (trigger_system != NULL && flags != 0) {
+            const CutSceneTriggerNameTable *table =
+                reinterpret_cast<const CutSceneTriggerNameTable *>(static_cast<usize>(flags));
+            for (i32 i = 0; i < trigger_system->event_count; ++i) {
+                NUGCUTTRIGGEREVENT_s *event = &trigger_system->events[i];
+                // The event's target index is the low 16 bits of field_00 (read back as i16 elsewhere).
+                u16 *target_index = reinterpret_cast<u16 *>(&event->field_00);
+                *target_index = 0xffff;
+                for (i32 j = 0; j < table->count; ++j) {
+                    if (NuStrICmp(static_cast<char *>(event->field_04), table->entries[j].name) == 0) {
+                        *target_index = static_cast<u16>(j);
+                        break;
+                    }
                 }
             }
         }
