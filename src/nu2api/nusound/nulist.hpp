@@ -32,6 +32,8 @@ class NuListNodeBase {
     }
 
     void Remove() {
+        NuListNodeBase *prev = this->prev;
+        NuListNodeBase *next = this->next;
         if (prev != NULL) {
             prev->next = next;
         }
@@ -102,14 +104,17 @@ template <typename T> class NuList {
         if (length == 0) {
             return false;
         }
-        NuListNodeBase *node = head;
         NuListNodeBase *last = tail->GetPrev();
-        do {
+        NuListNodeBase *node = Head();
+        if (value == static_cast<NuListNode<T> *>(node)->value) {
+            return true;
+        }
+        while (node != last) {
             node = node->GetNext();
-            if (static_cast<NuListNode<T> *>(node)->value == value) {
+            if (value == static_cast<NuListNode<T> *>(node)->value) {
                 return true;
             }
-        } while (node != last);
+        }
         return false;
     }
 
@@ -121,22 +126,30 @@ template <typename T> class NuList {
         NU_FREE(node);
     }
 
+    // Callers check Length() first.  After removing a match the reference
+    // resumes the scan past the following node.
     i32 RemoveValue(T const &value) {
         i32 removed = 0;
+        NuListNodeBase *last = tail->GetPrev();
         NuListNodeBase *node = Head();
-        NuListNodeBase *end = Tail();
-        while (node != end) {
-            while (node != end && static_cast<NuListNode<T> *>(node)->value != value) {
-                node = node->GetNext();
+        for (;;) {
+            if (static_cast<NuListNode<T> *>(node)->value == value) {
+                NuListNodeBase *next = node->GetNext();
+                if (node == last) {
+                    node->Remove();
+                    NU_FREE(node);
+                    ++removed;
+                    break;
+                }
+                node->Remove();
+                NU_FREE(node);
+                ++removed;
+                node = next;
             }
-            if (node == end) {
+            if (node == last) {
                 break;
             }
-            NuListNodeBase *next = node->GetNext();
-            node->Remove();
-            NU_FREE(node);
-            ++removed;
-            node = next;
+            node = node->GetNext();
         }
         length -= removed;
         return removed;

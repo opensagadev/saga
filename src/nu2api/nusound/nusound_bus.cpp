@@ -72,10 +72,8 @@ NuSoundBus::~NuSoundBus() {
 bool NuSoundBus::AddEffect(NuSoundEffect *effect) {
     NuList<NuSoundEffect *> &effects = *reinterpret_cast<NuList<NuSoundEffect *> *>(&this->effect_begin_prev);
 
-    for (NuListNodeBase *node = effects.Head(); node != effects.Tail(); node = node->GetNext()) {
-        if (static_cast<NuListNode<NuSoundEffect *> *>(node)->value == effect) {
-            return false;
-        }
+    if (effects.Contains(effect)) {
+        return false;
     }
 
     bool attached = effect->AttachBus(this);

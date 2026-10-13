@@ -541,24 +541,14 @@ void NuSoundVoice::UpdateHardwareVoice(f32) {
 // ---------------------------------------------------------------------------
 
 bool NuSoundVoice::AddEffect(NuSoundEffect *effect) {
-    if (effects.Length() != 0) {
-        NuListNodeBase *node = effects.Head();
-        NuListNodeBase *last = effects.Tail()->GetPrev();
-        if (static_cast<NuListNode<NuSoundEffect *> *>(node)->value == effect) {
-            return false;
-        }
-        while (node != last) {
-            node = node->GetNext();
-            if (static_cast<NuListNode<NuSoundEffect *> *>(node)->value == effect) {
-                return false;
-            }
-        }
-    }
-    bool attached = effect->AttachVoice(this);
-    if (!attached) {
+    if (effects.Contains(effect)) {
         return false;
     }
-    NuSoundMemory::PushNuListNode(effects, effect);
+
+    bool attached = effect->AttachVoice(this);
+    if (attached) {
+        NuSoundMemory::PushNuListNode(effects, effect);
+    }
     return attached;
 }
 
