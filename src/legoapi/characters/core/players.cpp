@@ -1989,20 +1989,22 @@ bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player
 }
 
 void AveragePlayerCurrentSpeedMul() {
-    avg_currentspeed_mul = 0.0f;
-    f32 total = avg_currentspeed_mul;
     i32 count = 0;
-    if (Player[0] != NULL && (Player[0]->apiobj.flags_low & 0x80) != 0) {
+    avg_currentspeed_mul = 0.0f;
+    f32 total = 0.0f;
+    if (Player[0] != NULL && Player[0]->apiobj.player_controlled) {
         total += Player[0]->current_speed_mul;
         count = 1;
     }
-    if (Player[1] != NULL && (Player[1]->apiobj.flags_low & 0x80) != 0) {
+    if (Player[1] == NULL || !Player[1]->apiobj.player_controlled) {
+        avg_currentspeed_mul = total;
+    } else {
         total += Player[1]->current_speed_mul;
+        avg_currentspeed_mul = total;
         if (count == 1) {
-            total *= 0.5f;
+            avg_currentspeed_mul *= 0.5f;
         }
     }
-    avg_currentspeed_mul = total;
 }
 
 void SetPlayer() {
