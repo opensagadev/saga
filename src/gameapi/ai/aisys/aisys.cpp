@@ -8382,11 +8382,9 @@ __used__ static i32 Action_SetScaleOverride(AISYS *sys, AISCRIPTPROCESS *process
         }
 
         if (time != zero) {
-            if (max != 1000000000.0f) {
-                if (min != 1000000000.0f) {
-                    f32 random = NuRandFloat();
-                    scale = random * max + (1.0f - random) * min;
-                }
+            if (max != 1000000000.0f && min != 1000000000.0f) {
+                f32 random = NuRandFloat();
+                scale = random * max + (1.0f - random) * min;
             }
             processor->action_data_4 = time;
             processor->action_data_5 = (scale - object->field_0x1038) / time;
