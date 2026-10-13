@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 77.98068,
+    "fuzzy_match_percent": 78.017555,
     "total_code": "4722419",
-    "matched_code": "597358",
-    "matched_code_percent": 12.649406,
+    "matched_code": "600533",
+    "matched_code_percent": 12.716639,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6706,
-    "matched_functions_percent": 49.825397,
+    "matched_functions": 6708,
+    "matched_functions_percent": 49.840256,
     "total_units": 1
   },
   "text": {
@@ -46207,7 +46207,7 @@
           "address": 1372640,
           "offset": 482672,
           "size": 1370,
-          "match_percent": 81.579765
+          "match_percent": 85.12062
         },
         {
           "name": "_Z13PostResetCodeP12GameObject_s",
@@ -55359,7 +55359,7 @@
           "address": 4946896,
           "offset": 4056928,
           "size": 703,
-          "match_percent": 85.61905
+          "match_percent": 96.85714
         },
         {
           "name": "_Z21SetLevelExBlowupFlagsj",
@@ -56913,6 +56913,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL28GameMsg_Draw_MiniKitDetectorP13GAMEMESSAGE_sP7nuvec_sf",
+          "demangled_name": "GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s*, nuvec_s*, float)",
+          "address": 4976800,
+          "offset": 4086832,
+          "size": 1357,
+          "match_percent": 99.90426
+        },
+        {
           "name": "_ZL24GizmoPickups_CollideListP12GameObject_sP13GIZMOPICKUP_si",
           "demangled_name": "GizmoPickups_CollideList(GameObject_s*, GIZMOPICKUP_s*, int)",
           "address": 4978160,
@@ -57073,6 +57081,14 @@
           "match_percent": 63.846153
         },
         {
+          "name": "_Z15MiniKitDetectorP7nuvec_s",
+          "demangled_name": "MiniKitDetector(nuvec_s*)",
+          "address": 4986784,
+          "offset": 4096816,
+          "size": 138,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL19GizmoPickups_UpdatePvS_f",
           "demangled_name": "GizmoPickups_Update(void*, void*, float)",
           "address": 4988128,
@@ -57086,7 +57102,7 @@
           "address": 4988928,
           "offset": 4098960,
           "size": 1047,
-          "match_percent": 79.42803
+          "match_percent": 79.31439
         },
         {
           "name": "_Z21SpecialMiniKits_ResetP11WORLDINFO_s",
@@ -57094,7 +57110,7 @@
           "address": 4989984,
           "offset": 4100016,
           "size": 169,
-          "match_percent": 98.23077
+          "match_percent": 96.01923
         },
         {
           "name": "_Z20SpecialMiniKits_DrawP11WORLDINFO_s",
@@ -57460,7 +57476,7 @@
           "address": 4895168,
           "offset": 4005200,
           "size": 408,
-          "match_percent": 87.36264
+          "match_percent": 92.53846
         },
         {
           "name": "_Z35GizObstacle_EvalAveragePosAndRadiusP13GIZOBSTACLE_si",
@@ -58185,7 +58201,7 @@
           "address": 1900208,
           "offset": 1010240,
           "size": 614,
-          "match_percent": 65.53384
+          "match_percent": 92.06015
         },
         {
           "name": "_ZL12Levers_ResetPvS_S_",
@@ -58193,7 +58209,7 @@
           "address": 1900832,
           "offset": 1010864,
           "size": 215,
-          "match_percent": 52.444443
+          "match_percent": 100.0
         },
         {
           "name": "_ZL14Lever_ActivateP7GIZMO_si",
@@ -59769,7 +59785,7 @@
           "address": 1865568,
           "offset": 975600,
           "size": 2960,
-          "match_percent": 91.85022
+          "match_percent": 100.0
         },
         {
           "name": "_ZL15GizForces_ResetPvS_S_",
@@ -63017,7 +63033,7 @@
           "address": 2439264,
           "offset": 1549296,
           "size": 2855,
-          "match_percent": 81.54512
+          "match_percent": 82.01473
         },
         {
           "name": "_Z13MiniKits_InitP9variptr_uS0_",
@@ -63082,14 +63098,6 @@
           "offset": 3921088,
           "size": 316,
           "match_percent": 62.575756
-        },
-        {
-          "name": "_Z15MiniKitDetectorP7nuvec_s",
-          "demangled_name": "MiniKitDetector(nuvec_s*)",
-          "address": 4986784,
-          "offset": 4096816,
-          "size": 138,
-          "match_percent": 100.0
         }
       ]
     },
@@ -67372,14 +67380,6 @@
           "offset": 871312,
           "size": 344,
           "match_percent": 84.08889
-        },
-        {
-          "name": "_ZL28GameMsg_Draw_MiniKitDetectorP13GAMEMESSAGE_sP7nuvec_sf",
-          "demangled_name": "GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s*, nuvec_s*, float)",
-          "address": 4976800,
-          "offset": 4086832,
-          "size": 1357,
-          "match_percent": 33.081562
         },
         {
           "name": "_Z33MechHintUIButton_OnClick_CallbackR18MechTouchUIElementR11TouchHolder",
@@ -80802,7 +80802,7 @@
           "address": 4317360,
           "offset": 3427392,
           "size": 2574,
-          "match_percent": 64.602516
+          "match_percent": 71.241005
         },
         {
           "name": "KillAllParts",
