@@ -2037,18 +2037,11 @@ static inline u8 instNuGCutSceneLastStream(instNUGCUTSCENE_s *instance) {
 }
 
 static inline NUGCUTSCENE_s *instNuGCutSceneCurrentStreamBuffer(instNUGCUTSCENE_s *instance) {
-    return (instance->flags_8b & 0x10) != 0 ? instance->stream_buffer_1 : instance->stream_buffer_0;
+    // stream_buffer_0/1 are adjacent (asserted in nugcutscene.h); the original indexes them by flag bit.
+    return (&instance->stream_buffer_0)[(static_cast<u32>(instance->flags_8b) >> 4) & 1];
 }
 
-static inline void instNuGCutSceneCopyStreamAnimations(instNUGCUTSCENE_s *instance) {
-    if (NumCommonStreamingBuffers > 1) {
-        NewCopyAnims(instance);
-    } else {
-        copyAnims(instance->cutscene, instNuGCutSceneCurrentStreamBuffer(instance));
-    }
-}
-
-static __used__ void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int skip, float elapsed) {
+static void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int skip, float elapsed) {
     NUGCUTSCENE_s *cutscene = instance->cutscene;
     instance->flags_8d &= ~0x10U;
     u16 *sync_flags = reinterpret_cast<u16 *>(&instance->flags_8a);
@@ -2131,7 +2124,11 @@ static __used__ void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paus
                 if (cutscene_load_instance == NULL) {
                     if (instance->stream_index == last_stream - 1) {
                         instNuGCutSceneSwapBuffers(instance, 0);
-                        instNuGCutSceneCopyStreamAnimations(instance);
+                        if (NumCommonStreamingBuffers > 1) {
+                            NewCopyAnims(instance);
+                        } else {
+                            copyAnims(instance->cutscene, instNuGCutSceneCurrentStreamBuffer(instance));
+                        }
                         instance->stream_index = instance->cutscene->last_stream;
                         instNuGCutSceneStart(instance);
                         instance->current_frame = instance->cutscene->duration - 1.0f;
@@ -2244,7 +2241,11 @@ static __used__ void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paus
                                 instance->accumulated_stream_duration += instance->cutscene->duration;
                                 ++instance->stream_index;
                                 if (instNuGCutSceneSwapBuffers(instance, 0) != 0) {
-                                    instNuGCutSceneCopyStreamAnimations(instance);
+                                    if (NumCommonStreamingBuffers > 1) {
+                                        NewCopyAnims(instance);
+                                    } else {
+                                        copyAnims(instance->cutscene, instNuGCutSceneCurrentStreamBuffer(instance));
+                                    }
                                     instance->flags_8b &= ~8U;
                                     instNuGCutSceneStart(instance);
                                     instance->current_frame += overflow;
