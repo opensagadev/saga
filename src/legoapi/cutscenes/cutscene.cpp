@@ -1715,13 +1715,13 @@ extern "C" {
         char *dot = strchr(path, '.');
         NuStrCpy(extension, dot);
 
-        i32 stream_number = cutscene_load_instance->stream_index + 1;
-        i32 tens = stream_number / 10;
+        const i32 tens = (cutscene_load_instance->stream_index + 1) / 10;
+        const i32 units = (cutscene_load_instance->stream_index + 1) % 10;
         if (tens != 0) {
             *dot++ = static_cast<char>('0' + tens);
         }
-        *dot = static_cast<char>('0' + stream_number - tens * 10);
-        NuStrCpy(dot + 1, extension);
+        *dot++ = static_cast<char>('0' + units);
+        NuStrCpy(dot, extension);
 
         instNUGCUTSCENE_s *instance = cutscene_load_instance;
         VARIPTR buffer = {instance->pending_stream_buffer};
