@@ -1939,7 +1939,7 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
             NuQFntSetScale(system_qfont, x_scale, y_scale);
             path = aieditor->current_path;
             if (path->current_node != nullptr) {
-                if (!(path->current_node->name[0] != '\0')) {
+                if (path->current_node->name[0] == '\0') {
                     NuQFntPrintEx(system_qfont, screen_x, screen_y + 120, 16, "ix=%d, %d nodes",
                                   path->current_node->index, path->node_count);
                 } else {
