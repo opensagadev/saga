@@ -44,7 +44,12 @@ typedef struct ZIPUP_s {
     union {
         u8 flags;
         struct {
-            u8 configuration_flags : 6;
+            u8 config_0 : 1; // ZIPUP_FLAG_CONFIG_0
+            u8 config_1 : 1;
+            u8 config_2 : 1;
+            u8 config_3 : 1;
+            u8 config_4 : 1;
+            u8 config_5 : 1;
             u8 active : 1;
             u8 visible : 1;
         };
@@ -72,8 +77,8 @@ ADDGIZMOTYPE *ZipUps_RegisterGizmo(i32 type_id);
 ZIPUP *ZipUp_FindNearest(WORLDINFO_s *world, NUVEC *position, f32 radius, f32 *distance, i32 *endpoint,
                          GameObject_s *object, bool touch);
 void InitRopeMtl(char *name, VARIPTR *buffer, VARIPTR *buffer_end);
-void DrawRopeSingle(NUVEC *start, NUVEC *end, f32 amount, numtl_s *material, f32 time, f32 grow_time,
-                    f32 spacing, f32 scale);
+void DrawRopeSingle(NUVEC *start, NUVEC *end, f32 amount, numtl_s *material, f32 time, f32 grow_time, f32 spacing,
+                    f32 scale);
 extern numtl_s *ropemtl;
 
 extern "C" {

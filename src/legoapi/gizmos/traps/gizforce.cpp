@@ -1273,6 +1273,34 @@ static void *GizForces_ReserveBufferSpace(void *world_ptr) {
     return force_sys;
 }
 
+// Finds the "<prefix>AlongSock" special next to one of the force's animated objects.
+static void GizForce_FindAlongSocket(GIZFORCE_s *force) {
+    force->along_socket = {};
+    if ((force->config_flags & GIZFORCE_CONFIG_ALONG_SOCKET) == 0) {
+        return;
+    }
+
+    for (GAMEANIMOBJ_s *object = force->anim_set->objects; object != NULL; object = object->next) {
+        char *special_name = NuSpecialGetName(&object->special);
+        if (special_name == NULL) {
+            continue;
+        }
+
+        char along_socket_name[64] = {};
+        for (i32 name_pos = 0; name_pos < 63; ++name_pos) {
+            const char c = special_name[name_pos];
+            along_socket_name[name_pos] = c;
+            if (c == '_' || special_name[name_pos + 1] == '\0') {
+                break;
+            }
+        }
+        NuStrCat(along_socket_name, const_cast<char *>("AlongSock"));
+        if (NuSpecialFind(object->special.scene, &force->along_socket, along_socket_name, 1) != 0) {
+            return;
+        }
+    }
+}
+
 static i32 GizForces_Load(void *world_ptr, void *data) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     GIZFORCESYS_s *force_sys = static_cast<GIZFORCESYS_s *>(data);
@@ -1283,11 +1311,6 @@ static i32 GizForces_Load(void *world_ptr, void *data) {
     GIZFORCE_s *force_ptr = force_sys->forces;
     for (i32 index = 0; index < force_sys->count; ++index, ++force_ptr) {
         GIZFORCE_s &force = *force_ptr;
-        force.progress_flags = 0;
-        force.runtime_flags = 0;
-        force.field_0xaa = 0;
-        force.collision_mask = 0;
-        force.along_socket = {};
 
         EdFileRead(force.name, sizeof(force.name));
         EdFileReadNuVec(&force.file_position);
@@ -1305,17 +1328,16 @@ static i32 GizForces_Load(void *world_ptr, void *data) {
             EdFileReadChar();
         } else {
             force.force_strength = EdFileReadFloat();
-            if (version < 8) {
-                force.interaction_radius = EdFileReadFloat();
-                force.config_flags = static_cast<u32>(EdFileReadInt()) | GIZFORCE_CONFIG_LEGACY_ENABLED;
-                force.group_index = static_cast<u8>(EdFileReadChar());
-            } else {
+            if (version > 7) {
                 force.force_range = EdFileReadFloat();
-                force.interaction_radius = EdFileReadFloat();
-                force.config_flags = static_cast<u32>(EdFileReadInt());
-                if (version < 13) {
-                    force.config_flags |= GIZFORCE_CONFIG_LEGACY_ENABLED;
-                }
+            }
+            force.interaction_radius = EdFileReadFloat();
+            force.config_flags = static_cast<u32>(EdFileReadInt());
+            if (version > 12) {
+                force.group_index = static_cast<u8>(EdFileReadChar());
+                force.collision_mask = static_cast<u8>(EdFileReadChar());
+            } else {
+                force.config_flags |= GIZFORCE_CONFIG_LEGACY_ENABLED;
                 force.group_index = static_cast<u8>(EdFileReadChar());
                 if (version > 10) {
                     force.collision_mask = static_cast<u8>(EdFileReadChar());
@@ -1332,19 +1354,18 @@ static i32 GizForces_Load(void *world_ptr, void *data) {
         force.start_frame = EdFileReadFloat();
         force.end_frame = EdFileReadFloat();
 
-        force.horizontal_range = 1.0f;
-        force.blowup_type = -1;
         if (version > 5) {
             force.effect_scale = EdFileReadFloat();
-            if (version == 6) {
-                force.vertical_range = EdFileReadFloat();
-            } else {
-                force.horizontal_range = EdFileReadFloat();
-                force.vertical_range = EdFileReadFloat();
-            }
-        } else if (version > 2) {
+        }
+        if (version > 6) {
+            force.horizontal_range = EdFileReadFloat();
+        } else {
+            force.horizontal_range = 1.0f;
+        }
+        if (version > 2) {
             force.vertical_range = EdFileReadFloat();
         }
+        force.blowup_type = -1;
 
         if (version == 4) {
             force.blowup_type = EdFileReadShort();
@@ -1353,7 +1374,7 @@ static i32 GizForces_Load(void *world_ptr, void *data) {
             force.pickup_rotation_y = EdFileReadShort();
             EdFileReadNuVec(&force.effect_position);
         } else if (version > 4) {
-            char blowup_name[32] = {};
+            char blowup_name[32];
             const i32 name_length = static_cast<i8>(EdFileReadChar());
             if (name_length != 0) {
                 EdFileRead(blowup_name, name_length);
@@ -1397,27 +1418,7 @@ static i32 GizForces_Load(void *world_ptr, void *data) {
         }
 
         if ((force.config_flags & GIZFORCE_CONFIG_ALONG_SOCKET) != 0) {
-            for (GAMEANIMOBJ_s *object = force.anim_set->objects; object != NULL; object = object->next) {
-                char *special_name = NuSpecialGetName(&object->special);
-                if (special_name == NULL) {
-                    continue;
-                }
-
-                char along_socket_name[64] = {};
-                i32 name_pos = 0;
-                while (name_pos < 63) {
-                    along_socket_name[name_pos] = special_name[name_pos];
-                    if (special_name[name_pos] == '_' || special_name[name_pos + 1] == '\0') {
-                        break;
-                    }
-                    ++name_pos;
-                }
-                NuStrCat(along_socket_name, const_cast<char *>("AlongSock"));
-                if (NuSpecialFind(object->special.scene, &force.along_socket, along_socket_name, 1) == 0) {
-                    continue;
-                }
-                break;
-            }
+            GizForce_FindAlongSocket(&force);
         }
     }
     return 1;
