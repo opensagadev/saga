@@ -983,7 +983,6 @@ extern "C" {
         key->orientation_dirty = 0.0f;
         key->cutoff_distance = 999999.0f;
         key->field_2f2 = -1;
-        key->field_1d8 = 0;
         key->field_1da = 7;
         key->gscene = NULL;
         key->process_collision_sound = 0;
@@ -991,6 +990,7 @@ extern "C" {
         key->field_2f9 = 1;
         key->user_data = NULL;
         key->field_2fa = 0;
+        key->field_1d8 = 0;
         key->emission_epoch = key->field_1e4 < now ? key->field_1e4 : now;
 
         switch (effect->particle_type) {
