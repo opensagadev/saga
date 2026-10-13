@@ -907,19 +907,19 @@ i32 edanimFileSave(char *path) {
 }
 
 void edpartInitType(i32 index) {
-    part_type_s *type = &part_types[index];
+    part_types[index].lifetime = 0.0f;
     for (i32 variant = 0; variant < 8; ++variant) {
-        type->effect_ids[variant] = -1;
-        type->effect_pages[variant] = 1;
+        part_types[index].effect_ids[variant] = -1;
+        part_types[index].effect_pages[variant] = 1;
     }
-    type->lifetime = 0.0f;
+    part_type_s *type = &part_types[index];
     type->variant_count = 0;
     type->speed = 1.0f;
     type->gravity = 0.0f;
     type->emission_rate = 1.0f;
+    type->emission_period = 1.0f;
     type->emission_period_random = 0.0f;
     type->emission_pause = 0.0f;
-    type->emission_period = 1.0f;
     type->emission_pause_random = 0.0f;
     type->rotation[0] = 0;
     type->rotation[1] = 0;
@@ -927,12 +927,12 @@ void edpartInitType(i32 index) {
     type->flags = 0;
     type->trail_effects[0] = -1;
     type->trail_effects[1] = -1;
-    type->kill_effect = -1;
     type->attached_effect = -1;
-    type->impact_part = -1;
+    type->kill_effect = -1;
     type->impact_effect = -1;
-    type->field_174 = -1;
+    type->impact_part = -1;
     type->last_used_time = 0.0f;
+    type->field_174 = -1;
     type->scale = 1.0f;
     for (i32 sound = 0; sound < 4; ++sound) {
         type->sounds[sound] = -1;
