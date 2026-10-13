@@ -1687,10 +1687,10 @@ void SuperStoryTime_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, fl
                 *packet->score = packet->time_reward_score;
                 NextStatusStage(packet);
             } else if (previous < 0.5f && stage->field_0x18 >= 0.5f) {
-                if (packet->new_best_time == 0.0f)
-                    GameAudio_PlaySfx(0x32, NULL, 0, 0);
-                else
+                if (packet->new_best_time != 0.0f)
                     PlaySfx(const_cast<char *>("StatusAward"), NULL);
+                else
+                    GameAudio_PlaySfx(0x32, NULL, 0, 0);
                 NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
             }
             if (packet->new_best_time != 0.0f) {
@@ -1702,12 +1702,12 @@ void SuperStoryTime_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, fl
                 if (stage->field_0x18 >= 4.5f)
                     *packet->score = packet->time_reward_score;
                 else if (stage->field_0x18 >= 0.5f && stage->field_0x18 < 4.0f) {
-                    const u32 difference = packet->time_reward_score - packet->original_score;
-                    const f32 blend =
-                        NuTrigTable[(static_cast<i32>(((stage->field_0x18 - 0.5f) / 3.5f) * 16384.0f) >> 1) & 0x7fff];
+                    const f32 difference = static_cast<f32>(packet->time_reward_score - packet->original_score);
+                    const i32 increase = static_cast<i32>(
+                        difference *
+                        NuTrigTable[(static_cast<i32>(((stage->field_0x18 - 0.5f) / 3.5f) * 16384.0f) >> 1) & 0x7fff]);
                     *packet->score = packet->original_score;
-                    IncreaseScore(packet->score,
-                                  static_cast<i64>(static_cast<i32>(static_cast<f32>(difference) * blend)), 0);
+                    IncreaseScore(packet->score, static_cast<i64>(increase), 0);
                     if (static_cast<i32>(previous / 0.2f) != static_cast<i32>(stage->field_0x18 / 0.2f))
                         PlaySfx(const_cast<char *>("PickupCoin"), NULL);
                 }
@@ -1732,10 +1732,10 @@ void SuperStoryScore_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, f
                 *packet->score = packet->final_reward_score;
                 NextStatusStage(packet);
             } else if (previous < 0.5f && stage->field_0x18 >= 0.5f) {
-                if (packet->new_best_score == 0)
-                    GameAudio_PlaySfx(0x32, NULL, 0, 0);
-                else
+                if (packet->new_best_score != 0)
                     PlaySfx(const_cast<char *>("StatusAward"), NULL);
+                else
+                    GameAudio_PlaySfx(0x32, NULL, 0, 0);
                 NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
             }
             if (packet->final_reward_score != packet->original_score) {
@@ -1751,10 +1751,9 @@ void SuperStoryScore_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, f
                         1.0f -
                         NuTrigTable[(static_cast<i32>(((stage->field_0x18 - 0.5f) / 3.5f) * 16384.0f + 16384.0f) >> 1) &
                                     0x7fff];
-                    const u32 difference = packet->final_reward_score - packet->original_score;
+                    const f32 difference = static_cast<f32>(packet->final_reward_score - packet->original_score);
                     *packet->score = packet->original_score;
-                    IncreaseScore(packet->score,
-                                  static_cast<i64>(static_cast<i32>(static_cast<f32>(difference) * blend)), 0);
+                    IncreaseScore(packet->score, static_cast<i64>(static_cast<i32>(difference * blend)), 0);
                     if (static_cast<i32>(previous / 0.2f) != static_cast<i32>(stage->field_0x18 / 0.2f))
                         PlaySfx(const_cast<char *>("PickupCoin"), NULL);
                 }
