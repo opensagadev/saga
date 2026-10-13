@@ -1762,10 +1762,10 @@ struct GIZMOPICKUP_s {
             u8 state_active : 1;
             u8 state_enabled : 1;
             u8 state_visible : 1;
-            u8 other_state_flags : 5;
-        };
-        struct {
-            u8 activation_state_padding : 7;
+            u8 state_collected : 1;
+            u8 state_drawn : 1;
+            u8 state_draw_visible : 1;
+            u8 state_alternate_type : 1;
             u8 state_activated : 1;
         };
     }; // 0x17
