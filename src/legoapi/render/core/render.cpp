@@ -1847,15 +1847,10 @@ second_hidden:
 }
 
 void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha) {
-    f32 icon_alpha;
-    if (status->player0_active == 0) {
-        icon_alpha = 0.25f;
-    } else {
-        icon_alpha = 1.0f;
-    }
-    icon_alpha *= alpha;
+    const f32 x = ICONX;
+    const f32 icon_alpha = (status->player0_active == 0 ? 0.25f : 1.0f) * alpha;
     const f32 size = ICONSIZE;
-    DrawCharIcon(static_cast<i16>(status->player0_model), -ICONX, y, 0.0f, size, 0xa5, icon_alpha, icon_alpha, 1, NULL);
+    DrawCharIcon(static_cast<i16>(status->player0_model), -x, y, 0.0f, size, 0xa5, icon_alpha, icon_alpha, 1, NULL);
 }
 
 void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large) {
