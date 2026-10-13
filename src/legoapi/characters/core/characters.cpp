@@ -1838,8 +1838,8 @@ void CollectCharactersOff_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i3
     if (active == 0)
         return;
     f32 alpha = 1.0f;
-    if (stage->field_0x14 > 0 && stage->field_0x1c != 0.0f && stage->field_0x18 != 0.0f)
-        alpha = 1.0f - stage->field_0x18 / stage->field_0x1c;
+    if (stage->field_0x14 > 0)
+        alpha = 1.0f - NuFdiv(stage->field_0x18, stage->field_0x1c);
     Collection_Draw(collection, 0.0f, COLLECTION_Y_STATUS, collection->field_10, NULL, alpha, 0);
 }
 

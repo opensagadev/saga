@@ -1727,20 +1727,9 @@ extern "C" {
             orientation = &numtx_identity;
         }
 
-        f32 interval;
-        f32 emission_time;
+        const f32 interval = NuFdiv(1.0f, effective_rate);
         const f32 end_time = partglobaltime + duration;
-        if (effective_rate == 0.0f) {
-            interval = 0.0f;
-            emission_time = 0.0f;
-        } else {
-            interval = 1.0f / effective_rate;
-            if (interval == 0.0f || partglobaltime == 0.0f) {
-                emission_time = interval;
-            } else {
-                emission_time = static_cast<i32>(partglobaltime / interval) * interval + interval;
-            }
-        }
+        f32 emission_time = static_cast<i32>(NuFdiv(partglobaltime, interval)) * interval + interval;
         if (emission_time <= end_time) {
 
             i32 remaining = 99;
