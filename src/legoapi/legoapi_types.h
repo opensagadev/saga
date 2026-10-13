@@ -3753,6 +3753,11 @@ struct pushblock_s {
     union {
         u16 completion_flags; // 0xcc
         u16 field_0xcc;
+        struct {
+            u16 completion_low_bits : 3;
+            u16 completed_outputs : 8;
+            u16 completion_high_bits : 5;
+        };
     };
     union {
         struct {

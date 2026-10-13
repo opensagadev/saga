@@ -256,7 +256,12 @@ typedef struct WORLDINFO_s {
     i32 loaded; // 0x110  set to 1 at end of WorldInfo_Load
 
     i32 field_0x114;
-    u32 reset_flags; // 0x118
+    union {
+        u32 reset_flags; // 0x118
+        struct {
+            i32 reset_requested : 1;
+        };
+    };
 
     i32 level_idx;    // 0x11c
     i32 level_sub_id; // 0x120  from LEVELDATA.unknown_0af
