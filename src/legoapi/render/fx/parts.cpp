@@ -573,7 +573,7 @@ static __used__ void PowerUp_ImpactPart(PART_s *part) {
         volume = 1.0f;
     } else {
         f32 minimum = 0.1f * scale;
-        if (speed < minimum)
+        if (!(speed >= minimum))
             return;
         volume = (speed - minimum) / (maximum - minimum);
     }
