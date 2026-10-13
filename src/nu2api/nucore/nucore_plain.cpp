@@ -559,16 +559,17 @@ extern "C" {
         *reflect = global_reflect;
     }
     static void NuCameraBuildClipProjection(NUMTX *projection, NUCAMERA *camera, f32 x_scale, f32 y_scale) {
-        f32 far_clip = camera->unknown_64;
-        if (far_clip == 0.0f)
-            far_clip = camera->far_clip;
-        far_clip -= nucamera_farclip_hack;
+        f32 far_clip;
+        if (camera->unknown_64 == 0.0f)
+            far_clip = camera->far_clip - nucamera_farclip_hack;
+        else
+            far_clip = camera->unknown_64 - nucamera_farclip_hack;
         f32 near_clip = camera->unknown_60;
         if (near_clip == 0.0f)
             near_clip = camera->near_clip;
         const i32 angle = static_cast<i32>(camera->fov * 0.5f * 10430.378f);
         const f32 cotangent = NuTrigTable[(angle + 0x4000) >> 1 & 0x7fff] / NuTrigTable[angle >> 1 & 0x7fff];
-        const f32 x = camera->aspect * cotangent * x_scale;
+        const f32 x = x_scale * camera->aspect * cotangent;
         const f32 y = cotangent * y_scale;
         memset(projection, 0, sizeof(*projection));
         projection->m00 = x;
