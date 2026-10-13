@@ -1732,15 +1732,18 @@ char *LevelEditor::AddText(char *text) {
 }
 
 void LevelEditor::BeginMultiLoad(variptr_u *buffer, variptr_u *buffer_end) {
-    MemoryBuffer source = {buffer, buffer_end, 0, static_cast<u32>(buffer_end->addr - buffer->addr)};
+    // The original keeps these stream descriptors 16-byte aligned in a realigned frame.
+    MemoryBuffer source
+        __attribute__((aligned(16))) = {buffer, buffer_end, 0, static_cast<u32>(buffer_end->addr - buffer->addr)};
     if (editor_buffer_from_front == 0) {
         editor_buffer_end = *buffer_end;
         editor_buffer_begin.addr = buffer_end->addr - 0x20000;
     }
     multi_load_active = 1;
     editor_buffer_cursor = editor_buffer_begin;
-    MemoryBuffer scratch = {&editor_buffer_cursor, &editor_buffer_end, 0,
-                            static_cast<u32>(editor_buffer_end.addr - editor_buffer_begin.addr)};
+    MemoryBuffer scratch
+        __attribute__((aligned(16))) = {&editor_buffer_cursor, &editor_buffer_end, 0,
+                                        static_cast<u32>(editor_buffer_end.addr - editor_buffer_begin.addr)};
     theClassEditor.PreLoadInitialisation(&source, &scratch);
 }
 
@@ -1896,14 +1899,17 @@ void LevelEditor::Display(ThingRenderData *) {
 }
 
 void LevelEditor::EndMultiLoad(variptr_u *buffer, variptr_u *buffer_end) {
-    MemoryBuffer source = {buffer, buffer_end, 0, static_cast<u32>(buffer_end->addr - buffer->addr)};
+    // The original keeps these stream descriptors 16-byte aligned in a realigned frame.
+    MemoryBuffer source
+        __attribute__((aligned(16))) = {buffer, buffer_end, 0, static_cast<u32>(buffer_end->addr - buffer->addr)};
     if (editor_buffer_from_front == 0) {
         editor_buffer_end = *buffer_end;
         editor_buffer_begin.addr = buffer_end->addr - 0x20000;
     }
     editor_buffer_cursor = editor_buffer_begin;
-    MemoryBuffer scratch = {&editor_buffer_cursor, &editor_buffer_end, 0,
-                            static_cast<u32>(editor_buffer_end.addr - editor_buffer_begin.addr)};
+    MemoryBuffer scratch
+        __attribute__((aligned(16))) = {&editor_buffer_cursor, &editor_buffer_end, 0,
+                                        static_cast<u32>(editor_buffer_end.addr - editor_buffer_begin.addr)};
     theClassEditor.PostLoadInitialisation(&source, &scratch);
     current_led_file = -1;
     multi_load_active = 0;
@@ -2142,7 +2148,9 @@ LevelEditor::LevelEditor() {
 }
 
 i32 LevelEditor::Load(char *filename, variptr_u *buffer, variptr_u *buffer_end, i32 flags) {
-    MemoryBuffer source = {buffer, buffer_end, 0, static_cast<u32>(buffer_end->addr - buffer->addr)};
+    // The original keeps these stream descriptors 16-byte aligned in a realigned frame.
+    MemoryBuffer source
+        __attribute__((aligned(16))) = {buffer, buffer_end, 0, static_cast<u32>(buffer_end->addr - buffer->addr)};
     if (editor_buffer_from_front == 0) {
         editor_buffer_end = *buffer_end;
         editor_buffer_begin.addr = buffer_end->addr - 0x20000;
@@ -2163,8 +2171,9 @@ i32 LevelEditor::Load(char *filename, variptr_u *buffer, variptr_u *buffer_end, 
     }
 
     editor_buffer_cursor = editor_buffer_begin;
-    MemoryBuffer scratch = {&editor_buffer_cursor, &editor_buffer_end, 0,
-                            static_cast<u32>(editor_buffer_end.addr - editor_buffer_begin.addr)};
+    MemoryBuffer scratch
+        __attribute__((aligned(16))) = {&editor_buffer_cursor, &editor_buffer_end, 0,
+                                        static_cast<u32>(editor_buffer_end.addr - editor_buffer_begin.addr)};
     SetSaveFilename(filename);
     if (!multi_load_active) {
         theClassEditor.PreLoadInitialisation(&source, &scratch);
