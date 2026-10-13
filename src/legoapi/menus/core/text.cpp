@@ -1417,7 +1417,10 @@ extern "C" {
         f32 draw_y_scale = APITEXTSCALEY;
         if (x < -2.0f || x > 2.0f || y < -2.0f || y > 2.0f)
             return;
-        NuQFntPushPrintMode(smarttext_fwn == 0 ? 2 : 3);
+        if (smarttext_fwn != 0)
+            NuQFntPushPrintMode(3);
+        else
+            NuQFntPushPrintMode(2);
         unsigned char decoded[512];
         TextDecode(text, decoded);
         if (followon_line == 0)

@@ -34,7 +34,15 @@ struct ShaderObjectKey {
 };
 struct nushadermtldesc_s;
 enum SHADERSEMANTIC_enum : i32;
-struct NuShaderObject : NUSHADEROBJECT {};
+struct NuShaderObject : NUSHADEROBJECT {
+    // Slot arrays are constructed first slot first and destroyed last slot first.
+    NuShaderObject() {
+        NuShaderObjectCreate(this);
+    }
+    ~NuShaderObject() {
+        NuShaderObjectDestroy(this);
+    }
+};
 
 template <typename T> struct ShaderManagerTemplate {
     static f32 shininessFactor;
@@ -44,15 +52,11 @@ template <typename T> struct ShaderManagerTemplate {
     NUSHADEROBJECT *bound_slot;
 
     ShaderManagerTemplate() {
-        for (i32 i = 0; i < 400; ++i)
-            NuShaderObjectCreate(&slots[i]);
         ++slots[0].glsl.base.field1;
         bound_slot = nullptr;
         last_allocated = -1;
     }
     virtual ~ShaderManagerTemplate() {
-        for (i32 i = 400; i != 0;)
-            NuShaderObjectDestroy(&slots[--i]);
     }
     virtual bool createShader(ShaderMtlDescFilter &, bool, T *, i32) {
         return false;

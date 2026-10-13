@@ -68,12 +68,12 @@ ShaderManagerOpenGL::~ShaderManagerOpenGL() {
 u32 ShaderMtlDescFilter::getVertexFlags() const {
     const u8 *vertex_descriptor = reinterpret_cast<const u8 *>(&desc->vtx_desc);
     const u8 attribute_flags = vertex_descriptor[2];
-    u32 flags = (attribute_flags >> 2) & 1;
+    u32 flags = desc->vtx_desc.has_no_transform;
     if ((attribute_flags & 3) != 0 && (attribute_flags & 0x40) == 0) {
         flags |= 2;
     }
     if (variant == 0 || desc->unknown_1b4 != 0) {
-        const u8 texture_count = (vertex_descriptor[1] >> 1) & 3;
+        const u8 texture_count = desc->vtx_desc.unknown_1_2_4;
         if (texture_count != 0) {
             flags |= 4;
         }
@@ -154,37 +154,16 @@ void ShaderMtlDescFilter::internalInit(nushadermtldesc_s const *material_desc, n
     texture_id_threshold = texture_threshold;
     variant = flags & 3;
 
-    const u8 *vertex_descriptor = reinterpret_cast<const u8 *>(&desc->vtx_desc);
-    if (variant == 0) {
-        if ((flags & 0x10) == 0) {
-            field_0x10 = 0;
-            goto clear_secondary;
-        }
-        if ((vertex_descriptor[2] & 4) == 0 && (material_bytes[0x41] & 0x40) == 0) {
-            field_0x10 = 1;
-        } else {
-            field_0x10 = 0;
-        }
-    } else {
-        field_0x10 = 0;
-    }
-    if ((vertex_descriptor[2] & 4) == 0 && (material_bytes[0x41] & 0x40) == 0) {
-        field_0x18 = 1;
-    } else {
-    clear_secondary:
-        field_0x18 = 0;
-    }
+    const u8 *vertex_descriptor = reinterpret_cast<const u8 *>(&material_desc->vtx_desc);
+    field_0x10 = variant == 0 && (flags & 0x10) != 0 && (vertex_descriptor[2] & 4) == 0 &&
+                 (material_bytes[0x41] & 0x40) == 0;
+    field_0x18 = (variant != 0 || (flags & 0x10) != 0) && (vertex_descriptor[2] & 4) == 0 &&
+                 (material_bytes[0x41] & 0x40) == 0;
     field_0x14 =
         variant == 0 && (flags & 0x20) != 0 && (vertex_descriptor[2] & 4) == 0 && (material_bytes[0x41] & 0x40) == 0;
-    const bool base_variant = variant == 0;
-
-    layer_count = 0;
-    if (base_variant) {
-        if (field_0x10 == 0 && (desc->flagsbits_1ba & 1) == 0) {
-            layer_count = 1;
-        } else {
-            layer_count = 2;
-        }
+    layer_count = variant == 0 ? 1 : 0;
+    if (field_0x10 != 0 || (variant == 0 && (desc->flagsbits_1ba & 1) != 0)) {
+        ++layer_count;
     }
     if (field_0x18 != 0) {
         ++layer_count;

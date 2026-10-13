@@ -1208,6 +1208,7 @@ DECOMP_ASSERT(offsetof(FLOWBOX_s, state_flags_low) == 0xa, "FLOWBOX completion f
 DECOMP_ASSERT(offsetof(FLOWBOX_s, ai_trigger_group) == 4, "FLOWBOX AI trigger group offset");
 struct FS_FILEENTRYHDR {};
 struct FadeBase {
+    FadeBase() : info(NULL) {}
     virtual ~FadeBase() = default;
     virtual void Init(FADEINFO_s *) = 0;
     virtual void InitFade() = 0;
@@ -4077,6 +4078,9 @@ struct FadeStillWipe : FadeBase {
     void UpdateFade();
 };
 struct FadeSystem : FADEINFO_s {
+    // User-declared: the original screen.cpp initializer registers FadeSys's
+    // destructor with __cxa_atexit.
+    ~FadeSystem() {}
     i32 AddFade(FadeBase *);
     void Draw();
     void Init();

@@ -971,6 +971,15 @@ static u8 getNextLoopChecksum() {
     return ++loop_checksum;
 }
 
+static i32 Loop_CountLoopingInputs(FLOWBOX_s *box) {
+    u8 checksum = getNextLoopChecksum();
+    i32 count = 0;
+    for (i32 child = 0; child < box->child_count; ++child) {
+        count = Loop_CountLoopingInputsEx(box, box->children[child], count, checksum);
+    }
+    return count;
+}
+
 void ResetGizFlowPointers(GIZFLOW_s *system) {
     if (system == NULL || system->flowbox_count == 0)
         return;
@@ -1042,24 +1051,14 @@ void ResetGizFlow(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress) {
             const u8 output_state = static_cast<u8>((progress->output_state[word] & bit) != 0);
             box->state_flags_high = (box->state_flags_high & ~4) | (output_state << 2);
             if (box->type == 1 && box->condition_data[0] == 4) {
-                u8 checksum = getNextLoopChecksum();
-                i32 count = 0;
-                for (i32 child = 0; child < box->child_count; ++child) {
-                    count = Loop_CountLoopingInputsEx(box, box->children[child], count, checksum);
-                }
-                box->loop_parent_count = count;
+                box->loop_parent_count = Loop_CountLoopingInputs(box);
             }
             continue;
         }
         box->state_flags_low &= ~2;
         box->state_flags_high &= ~1;
         if (box->type == 1 && box->condition_data[0] == 4) {
-            u8 checksum = getNextLoopChecksum();
-            i32 count = 0;
-            for (i32 child = 0; child < box->child_count; ++child) {
-                count = Loop_CountLoopingInputsEx(box, box->children[child], count, checksum);
-            }
-            box->loop_parent_count = count;
+            box->loop_parent_count = Loop_CountLoopingInputs(box);
             box->state_flags_high |= 4;
             if (box->parent_count == box->loop_parent_count) {
                 box->state_flags_high |= 8;

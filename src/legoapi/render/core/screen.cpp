@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/core/screen.h"
+#include "legoapi/render/light/fade.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/menus/core/text.h"
 #include "gameapi/gui/apimenu.h"
@@ -90,6 +91,16 @@ f32 GetAspectRatio() {
     return static_cast<f32>(g_backingHeight) / static_cast<f32>(g_backingWidth);
 }
 
+// The fade system and the four fade effects handed to FadeSystem::AddFade()
+// are screen.cpp globals in the original: its static initializer registers
+// their destructors (original bss @0x127bf20 / 0x127bf08 / 0x127bf00 /
+// 0x127bef8 / 0x127bef0).
+FadeSystem FadeSys;
+Fade fade;
+FadeWipe fadeWipe;
+FadeStillWipe fadeStillWipe;
+FadeStill fadeStill;
+
 static u8 ScreenGrabNeeded;
 static i32 pause_rt;
 static NUMTL *pause_rndr_mtl;
@@ -106,7 +117,6 @@ extern f32 hackFlashTimer;
 extern GAMEANIMSET_s *hackFlashingGameAnimSet;
 extern nuhspecial_s *hackFlashingSpecial;
 
-extern FadeSystem FadeSys;
 extern i32 Paused;
 extern volatile i32 waiting_for_level;
 extern i32 GAMEDEMO;

@@ -25,13 +25,6 @@ extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 
 static u32 FRAMES_TO_WAIT = 1;
 
-// The four global fade effect objects handed to FadeSystem::AddFade() during
-// LoadPermData (original bss @0x127bf08 / 0x127bf00 / 0x127bef8 / 0x127bef0).
-Fade fade;
-FadeWipe fadeWipe;
-FadeStillWipe fadeStillWipe;
-FadeStill fadeStill;
-
 // Material handles used by the original 2-D fade paths.
 NUMTL *ScreenFadeMtl;
 NUMTL *FadeMtl2;

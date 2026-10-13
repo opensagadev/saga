@@ -321,15 +321,22 @@ static void GizPanel_Draw(void *world_ptr, void *, float) {
                 NuMtxMulVU0(&animated_matrix, &animated_matrix, &transition_base);
                 NuSpecialDrawAtAlpha(&world->lev_objs[models.animated_transition].special, &animated_matrix,
                                      1.0f - transition_progress);
+                EvalAnim(&world->lev_objs[models.animated].special, panel.activation_time / 0.8f * 24.0f + 1.0f,
+                         &animated_matrix, 0);
+                animated_matrix.m30 = 0.0f;
+                animated_matrix.m31 = 0.0f;
+                animated_matrix.m32 = 0.0f;
+                NuMtxMulVU0(&animated_matrix, &animated_matrix, &base_matrix);
+                NuSpecialDrawAtAlpha(&world->lev_objs[models.animated].special, &animated_matrix, 1.0f);
+            } else {
+                EvalAnim(&world->lev_objs[models.animated].special, panel.activation_time / 0.8f * 24.0f + 1.0f,
+                         &animated_matrix, 0);
+                animated_matrix.m30 = 0.0f;
+                animated_matrix.m31 = 0.0f;
+                animated_matrix.m32 = 0.0f;
+                NuMtxMulVU0(&animated_matrix, &animated_matrix, &base_matrix);
+                NuSpecialDrawAtAlpha(&world->lev_objs[models.animated].special, &animated_matrix, 1.0f);
             }
-
-            const f32 frame = panel.activation_time / 0.8f * 24.0f + 1.0f;
-            EvalAnim(&world->lev_objs[models.animated].special, frame, &animated_matrix, 0);
-            animated_matrix.m30 = 0.0f;
-            animated_matrix.m31 = 0.0f;
-            animated_matrix.m32 = 0.0f;
-            NuMtxMulVU0(&animated_matrix, &animated_matrix, &base_matrix);
-            NuSpecialDrawAtAlpha(&world->lev_objs[models.animated].special, &animated_matrix, 1.0f);
         }
 
         if ((panel.flags & (GIZPANEL_FLAG_TRACK_PLAYER | GIZPANEL_FLAG_HIDE_TARGET)) == GIZPANEL_FLAG_TRACK_PLAYER &&

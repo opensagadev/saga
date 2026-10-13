@@ -841,11 +841,8 @@ void NetworkObjectManager::NotifyDestroyObject(void *object, EdClass *object_cla
     }
 }
 
-static inline NetMessage MakeObjectCallMessage(NetMessage const &message, i32 call_id, NetworkObject const *object) {
-    NetMessage outgoing(message);
+static inline void PrependObjectCallHeader(NetMessage &outgoing, i16 object_id, i16 class_id, i32 call_id) {
     if (outgoing.data != NULL) {
-        i16 object_id = object->id;
-        i16 class_id = static_cast<i16>(theRegistry.GetClassId(object->object_class));
         outgoing.read_offset -= 2;
         memcpy(outgoing.data->bytes + outgoing.read_offset, &class_id, sizeof(class_id));
         if (outgoing.swap_endianness != 0) {
@@ -859,7 +856,6 @@ static inline NetMessage MakeObjectCallMessage(NetMessage const &message, i32 ca
         outgoing.data->bytes[--outgoing.read_offset] = static_cast<u8>(call_id);
         outgoing.data->bytes[--outgoing.read_offset] = 8;
     }
-    return outgoing;
 }
 
 i32 NetworkObjectManager::ObjectCall(void *instance, i32 call_id, NetMessage message, NetPeer const *peer) {
@@ -868,7 +864,10 @@ i32 NetworkObjectManager::ObjectCall(void *instance, i32 call_id, NetMessage mes
         return 0;
     }
 
-    NetMessage outgoing = MakeObjectCallMessage(message, call_id, object);
+    i16 class_id = static_cast<i16>(theRegistry.GetClassId(object->object_class));
+    i16 object_id = object->id;
+    NetMessage outgoing(message);
+    PrependObjectCallHeader(outgoing, object_id, class_id, call_id);
     if (peer == NULL) {
         theNetwork.ReliableBroadcast(outgoing, 3);
         reinterpret_cast<void (*)(void *, NetMessage &)>(registered_calls[call_id - 1].callback)(instance, message);
@@ -889,7 +888,10 @@ i32 NetworkObjectManager::ObjectOtherCall(void *instance, i32 call_id, NetMessag
         return 1;
     }
 
-    NetMessage outgoing = MakeObjectCallMessage(message, call_id, object);
+    i16 class_id = static_cast<i16>(theRegistry.GetClassId(object->object_class));
+    i16 object_id = object->id;
+    NetMessage outgoing(message);
+    PrependObjectCallHeader(outgoing, object_id, class_id, call_id);
     theNetwork.ReliableBroadcast(outgoing, 3);
     return 1;
 }
@@ -904,7 +906,10 @@ i32 NetworkObjectManager::ObjectOwnerCall(void *instance, i32 call_id, NetMessag
         return 1;
     }
 
-    NetMessage outgoing = MakeObjectCallMessage(message, call_id, object);
+    i16 class_id = static_cast<i16>(theRegistry.GetClassId(object->object_class));
+    i16 object_id = object->id;
+    NetMessage outgoing(message);
+    PrependObjectCallHeader(outgoing, object_id, class_id, call_id);
     theNetwork.ReliableSend(outgoing, 3, *const_cast<NetPeer *>(object->owner), NULL, 0);
     return 1;
 }

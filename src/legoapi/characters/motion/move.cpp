@@ -6049,12 +6049,21 @@ static void DeactivatedCode(GameObject_s *object) {
         return;
     }
     if ((object->apiobj.character_data->model_flags & 0x20000000) != 0) {
+        // Retail tests all eight player slots without a loop.
         i32 controlled = 0;
-        for (i32 i = 0; i < 8; ++i) {
-            if (Player[i] != NULL && Player[i]->character_context == 0x51 && Player[i]->field_0x788 != NULL &&
-                static_cast<TECHNO *>(Player[i]->field_0x788)->controlled_object == object)
-                controlled = 1;
-        }
+#define CHECK_CONTROLLING_PLAYER(i)                                                                                    \
+    if (Player[i] != NULL && Player[i]->character_context == 0x51 && Player[i]->field_0x788 != NULL &&                 \
+        static_cast<TECHNO *>(Player[i]->field_0x788)->controlled_object == object)                                    \
+        controlled = 1;
+        CHECK_CONTROLLING_PLAYER(0)
+        CHECK_CONTROLLING_PLAYER(1)
+        CHECK_CONTROLLING_PLAYER(2)
+        CHECK_CONTROLLING_PLAYER(3)
+        CHECK_CONTROLLING_PLAYER(4)
+        CHECK_CONTROLLING_PLAYER(5)
+        CHECK_CONTROLLING_PLAYER(6)
+        CHECK_CONTROLLING_PLAYER(7)
+#undef CHECK_CONTROLLING_PLAYER
         if (!controlled && object->field_0xcc0 == NULL && (object->apiobj.flags_low & 0x80) == 0) {
             if (object->character_context != 0x2b && object->character_context != 0x3e) {
                 if (object->character_context != 0x17)

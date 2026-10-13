@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 79.45854,
+    "fuzzy_match_percent": 79.495834,
     "total_code": "4722419",
-    "matched_code": "620190",
-    "matched_code_percent": 13.132888,
+    "matched_code": "620995",
+    "matched_code_percent": 13.149935,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6815,
-    "matched_functions_percent": 50.63526,
+    "matched_functions": 6824,
+    "matched_functions_percent": 50.70213,
     "total_units": 1
   },
   "text": {
@@ -37508,7 +37508,7 @@
           "address": 5440992,
           "offset": 4551024,
           "size": 487,
-          "match_percent": 51.053032
+          "match_percent": 55.507576
         },
         {
           "name": "_ZN20NetworkObjectManager15ObjectOwnerCallEPvi10NetMessage",
@@ -37516,7 +37516,7 @@
           "address": 5441488,
           "offset": 4551520,
           "size": 554,
-          "match_percent": 48.101353
+          "match_percent": 49.216217
         },
         {
           "name": "_ZN20NetworkObjectManager10ObjectCallEPvi10NetMessagePK7NetPeer",
@@ -37524,7 +37524,7 @@
           "address": 5442048,
           "offset": 4552080,
           "size": 678,
-          "match_percent": 46.935295
+          "match_percent": 58.988235
         },
         {
           "name": "_ZN20NetworkObjectManager13ReleaseObjectEPvP7EdClassi",
@@ -48493,7 +48493,7 @@
           "address": 1495152,
           "offset": 605184,
           "size": 2431,
-          "match_percent": 55.255318
+          "match_percent": 73.42166
         },
         {
           "name": "_Z10Move_BEASTP12GameObject_s",
@@ -51151,7 +51151,7 @@
           "address": 4409088,
           "offset": 3519120,
           "size": 294,
-          "match_percent": 55.19355
+          "match_percent": 75.51613
         },
         {
           "name": "instNuGCutSceneIsFinished",
@@ -51311,7 +51311,7 @@
           "address": 4428704,
           "offset": 3538736,
           "size": 1665,
-          "match_percent": 33.382133
+          "match_percent": 32.72953
         },
         {
           "name": "instNuGCutSceneCalculateAverageCentre",
@@ -52602,7 +52602,7 @@
           "address": 4935936,
           "offset": 4045968,
           "size": 1120,
-          "match_percent": 54.84424
+          "match_percent": 79.15576
         },
         {
           "name": "_Z14ProcessGizFlowP9GIZFLOW_sf",
@@ -57532,7 +57532,7 @@
           "address": 4898352,
           "offset": 4008384,
           "size": 1768,
-          "match_percent": 12.326139
+          "match_percent": 13.908873
         },
         {
           "name": "_ZL27GizObstacleUpdate_NoTriggerP13GIZOBSTACLE_s",
@@ -57811,7 +57811,7 @@
           "address": 2000608,
           "offset": 1110640,
           "size": 3337,
-          "match_percent": 33.23511
+          "match_percent": 34.358932
         },
         {
           "name": "_ZL15GizPanels_ResetPvS_S_",
@@ -68318,7 +68318,7 @@
           "address": 4371936,
           "offset": 3481968,
           "size": 3480,
-          "match_percent": 47.897713
+          "match_percent": 49.044415
         },
         {
           "name": "Text3D",
@@ -77418,7 +77418,7 @@
           "address": 919056,
           "offset": 29088,
           "size": 447,
-          "match_percent": 28.0
+          "match_percent": 99.63415
         },
         {
           "name": "_Z13InitAlphaListv",
@@ -77547,6 +77547,22 @@
           "offset": 3881632,
           "size": 943,
           "match_percent": 74.820755
+        },
+        {
+          "name": "_ZN10FadeSystemD1Ev",
+          "demangled_name": "FadeSystem::~FadeSystem()",
+          "address": 4773328,
+          "offset": 3883360,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN10FadeSystemD2Ev",
+          "demangled_name": "FadeSystem::~FadeSystem()",
+          "address": 4773328,
+          "offset": 3883360,
+          "size": 9,
+          "match_percent": 100.0
         }
       ]
     },
@@ -77593,7 +77609,7 @@
           "address": 3183168,
           "offset": 2293200,
           "size": 374,
-          "match_percent": 41.23656
+          "match_percent": 87.63441
         },
         {
           "name": "_ZNK19ShaderMtlDescFilter8hasLayerEi",
@@ -77617,7 +77633,7 @@
           "address": 3183840,
           "offset": 2293872,
           "size": 318,
-          "match_percent": 79.32653
+          "match_percent": 89.908165
         },
         {
           "name": "_ZN19ShaderManagerOpenGL12createShaderER19ShaderMtlDescFilterbP14NuShaderObjecti",
@@ -77633,7 +77649,7 @@
           "address": 3201152,
           "offset": 2311184,
           "size": 74,
-          "match_percent": 71.91304
+          "match_percent": 100.0
         },
         {
           "name": "_ZN19ShaderManagerOpenGLD2Ev",
@@ -77641,7 +77657,7 @@
           "address": 3201152,
           "offset": 2311184,
           "size": 74,
-          "match_percent": 71.91304
+          "match_percent": 100.0
         },
         {
           "name": "_ZN19ShaderManagerOpenGLD0Ev",
@@ -77657,7 +77673,7 @@
           "address": 3201536,
           "offset": 2311568,
           "size": 190,
-          "match_percent": 79.818184
+          "match_percent": 100.0
         },
         {
           "name": "_ZN19ShaderManagerOpenGLC2ER21VirtualStackAllocator",
@@ -77665,7 +77681,7 @@
           "address": 3201536,
           "offset": 2311568,
           "size": 190,
-          "match_percent": 79.818184
+          "match_percent": 100.0
         },
         {
           "name": "_ZN19ShaderManagerOpenGL5setfvE19SHADERSEMANTIC_enumPKf",
@@ -77729,7 +77745,7 @@
           "address": 3203360,
           "offset": 2313392,
           "size": 74,
-          "match_percent": 71.91304
+          "match_percent": 100.0
         },
         {
           "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectED2Ev",
@@ -77737,7 +77753,7 @@
           "address": 3203360,
           "offset": 2313392,
           "size": 74,
-          "match_percent": 71.91304
+          "match_percent": 100.0
         },
         {
           "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectED0Ev",
@@ -77745,7 +77761,7 @@
           "address": 3203440,
           "offset": 2313472,
           "size": 111,
-          "match_percent": 28.285715
+          "match_percent": 100.0
         }
       ]
     },
@@ -123474,6 +123490,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123486,6 +123503,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123498,6 +123516,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123510,6 +123529,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123522,6 +123542,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123534,6 +123555,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123546,6 +123568,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123558,6 +123581,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123570,6 +123594,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123582,6 +123607,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123594,6 +123620,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123606,6 +123633,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123618,6 +123646,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123630,6 +123659,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123642,6 +123672,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123654,6 +123685,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123666,6 +123698,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123678,6 +123711,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -123690,6 +123724,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "legoapi/menus/screens/menus.cpp.o",
+        "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o"
       ]
     },
@@ -125769,22 +125804,6 @@
       "address": 4751360,
       "offset": 3861392,
       "size": 42,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN10FadeSystemD1Ev",
-      "demangled_name": "FadeSystem::~FadeSystem()",
-      "address": 4773328,
-      "offset": 3883360,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN10FadeSystemD2Ev",
-      "demangled_name": "FadeSystem::~FadeSystem()",
-      "address": 4773328,
-      "offset": 3883360,
-      "size": 9,
       "match_percent": 0.0
     },
     {
@@ -128119,8 +128138,8 @@
   "summary": {
     "bazel_units": 454,
     "functions": 13454,
-    "assigned_functions": 12699,
+    "assigned_functions": 12701,
     "ambiguous_functions": 272,
-    "unassigned_functions": 483
+    "unassigned_functions": 481
   }
 }
