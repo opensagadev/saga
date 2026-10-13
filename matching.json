@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 78.355446,
+    "fuzzy_match_percent": 78.36047,
     "total_code": "4722419",
     "matched_code": "604206",
     "matched_code_percent": 12.794417,
@@ -22017,7 +22017,7 @@
           "address": 4255968,
           "offset": 3366000,
           "size": 2043,
-          "match_percent": 69.87444
+          "match_percent": 69.93946
         }
       ]
     },
@@ -47662,7 +47662,7 @@
           "address": 4883392,
           "offset": 3993424,
           "size": 211,
-          "match_percent": 51.89041
+          "match_percent": 78.21918
         },
         {
           "name": "_Z28GameAnimSet_CreateObjectPoolP9variptr_uS0_ii",
@@ -48197,7 +48197,7 @@
           "address": 1406096,
           "offset": 516128,
           "size": 3368,
-          "match_percent": 53.225
+          "match_percent": 53.439705
         },
         {
           "name": "_ZL16SetComboOpponentP12GameObject_sfii",
@@ -50480,7 +50480,7 @@
           "address": 4401488,
           "offset": 3511520,
           "size": 184,
-          "match_percent": 82.85
+          "match_percent": 90.3
         },
         {
           "name": "_ZL23instNuGCutSceneClipTestP17instNUGCUTSCENE_s",
@@ -50560,7 +50560,7 @@
           "address": 4406672,
           "offset": 3516704,
           "size": 190,
-          "match_percent": 84.55556
+          "match_percent": 92.53968
         },
         {
           "name": "NuGCutSceneSysPostBackgroundLoad",
@@ -50904,7 +50904,7 @@
           "address": 4819744,
           "offset": 3929776,
           "size": 281,
-          "match_percent": 74.402596
+          "match_percent": 95.71429
         },
         {
           "name": "_ZL18CutScene_ConfigureP7CUTINFOPcP9variptr_uS3_",
@@ -51088,7 +51088,7 @@
           "address": 4832656,
           "offset": 3942688,
           "size": 191,
-          "match_percent": 76.218185
+          "match_percent": 99.96364
         },
         {
           "name": "_ZL11CS_play_sfxP8nufpar_s",
@@ -57556,7 +57556,7 @@
           "address": 4900288,
           "offset": 4010320,
           "size": 304,
-          "match_percent": 50.725
+          "match_percent": 63.6125
         },
         {
           "name": "_Z23GizObstacles_AddTriggerP7nuvec_s",
@@ -57628,7 +57628,7 @@
           "address": 4902528,
           "offset": 4012560,
           "size": 1019,
-          "match_percent": 21.658333
+          "match_percent": 21.720833
         },
         {
           "name": "_ZL24GizObstacles_BoltHitPlatPvS_P6BOLT_sPh",
