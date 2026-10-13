@@ -638,41 +638,43 @@ void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32) {
     if (ONEPLAYERPOWERUPS != 0) {
         const u16 camera_rotation = GameCam_GetAdjustedYRot(NULL);
         const u16 panel_rotation = rotation - RotDiff(0, camera_rotation);
-        NUVEC target_position = {ICONX, PowerUp_GetPanelY(object->apiobj.field_0x27c) + STATSPOSY, 1.0f};
-        if (object->apiobj.field_0x27c == 0) {
-            target_position.x = -target_position.x;
-        }
+        NUVEC target_position;
+        target_position.x = object->apiobj.field_0x27c == 0 ? -ICONX : ICONX;
+        target_position.y = PowerUp_GetPanelY(object->apiobj.field_0x27c) + STATSPOSY;
+        target_position.z = 1.0f;
 
+        ADDGAMEMSG message;
         if (object->field_0xdec > 0.0f) {
-            NUVEC icon_position = {ICONX, PowerUp_GetPanelY(object->apiobj.field_0x27c) + STATSPOSY, 1.0f};
-            if (object->apiobj.field_0x27c == 0) {
-                icon_position.x = -icon_position.x;
-            }
-            ADDGAMEMSG icon_message = AddGameMsg_Default;
-            icon_message.position = &icon_position;
-            icon_message.scale = 0.6f;
-            icon_message.target_scale = 0.0f;
-            icon_message.flags = 0x20;
-            icon_message.duration = 0.3f;
-            icon_message.icon = 0x35;
-            icon_message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0x35]);
-            AddGameMsg(&icon_message);
+            NUVEC icon_position;
+            const i32 player = object->apiobj.field_0x27c;
+            icon_position.x = player == 0 ? -ICONX : ICONX;
+            icon_position.y = PowerUp_GetPanelY(player) + STATSPOSY;
+            icon_position.z = 1.0f;
+            message = AddGameMsg_Default;
+            message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0x35]);
+            message.icon = 0x35;
+            message.position = &icon_position;
+            message.scale = 0.6f;
+            message.target_scale = 0.0f;
+            message.duration = 0.3f;
+            message.flags = 0x20;
+            AddGameMsg(&message);
         }
 
-        ADDGAMEMSG message = AddGameMsg_Default;
+        message = AddGameMsg_Default;
+        message.icon = 0xd0;
+        message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0xd0]);
         message.position = position;
+        message.field_0x4d = 1;
         message.scale = AreaPickupScale;
         message.target_position = &target_position;
-        message.target_scale = POWERUPOBJSIZE;
         message.flags = 0x2112d;
-        message.duration = 1.0f;
-        message.icon = 0xd0;
-        message.update_fn = PowerUp_UpdateMsg;
+        message.target_scale = POWERUPOBJSIZE;
+        message.tick_fn = PowerUp_UpdateMsg;
         message.end_fn = PowerUp_EndMsg;
-        message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0xd0]);
-        message.field_0x4d = 1;
-        message.player_index = object->apiobj.field_0x27c;
         message.field_0x4e = 7;
+        message.player_index = object->apiobj.field_0x27c;
+        message.duration = 1.0f;
         GAMEMESSAGE_s *game_message = AddGameMsg(&message);
         if (game_message != NULL) {
             game_message->rotation_y = panel_rotation;
