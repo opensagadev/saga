@@ -1807,43 +1807,14 @@ void DrawPaintLights() {
             NuSpecialDrawAt(&green_light, NuSpecialGetDrawMtx(light));
         }
     }
-    u8 first_colour = static_cast<const u8 *>(factoryb_netpacket)[3];
-    u8 second_colour;
-    u8 third_colour;
-    if (first_colour == 3)
-        goto first_visible;
-    if (first_colour != 0)
-        goto first_hidden;
-first_visible:
-    NuSpecialSetVisibility(&painttargetcolour[0], 1);
-    goto first_done;
-first_done:
-    second_colour = static_cast<const u8 *>(factoryb_netpacket)[3];
-    if (second_colour == 4)
-        goto second_visible;
-    if (second_colour != 0)
-        goto second_hidden;
-second_visible:
-    NuSpecialSetVisibility(&painttargetcolour[1], 1);
-    goto second_done;
-second_done:
-    third_colour = static_cast<const u8 *>(factoryb_netpacket)[3];
-    if (third_colour == 5)
-        goto third_visible;
-    if (third_colour != 0)
-        goto third_hidden;
-third_visible:
-    NuSpecialSetVisibility(&painttargetcolour[2], 1);
-    return;
-first_hidden:
-    NuSpecialSetVisibility(&painttargetcolour[0], 0);
-    goto first_done;
-third_hidden:
-    NuSpecialSetVisibility(&painttargetcolour[2], 0);
-    return;
-second_hidden:
-    NuSpecialSetVisibility(&painttargetcolour[1], 0);
-    goto second_done;
+    for (i32 slot = 0; slot < 3; ++slot) {
+        const u8 colour = static_cast<const u8 *>(factoryb_netpacket)[3];
+        if (colour == slot + 3 || colour == 0) {
+            NuSpecialSetVisibility(&painttargetcolour[slot], 1);
+        } else {
+            NuSpecialSetVisibility(&painttargetcolour[slot], 0);
+        }
+    }
 }
 
 void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha) {
