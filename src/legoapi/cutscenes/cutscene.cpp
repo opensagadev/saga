@@ -1797,19 +1797,20 @@ static void instNuGCutRigidSysEnd(instNUGCUTSCENE_s *instance, float frame) {
 
     for (i32 i = 0; i < system->count; ++i) {
         NUGCUTRIGID_s *rigid = &system->rigids[i];
-        if ((rigid->flags & 4) == 0 || (rigid->flags & 2) != 0) {
+        instNUGCUTRIGID_s *inst_rigid = &rigid_instance->rigids[i];
+        if ((rigid->flags & 4) == 0) {
+            continue;
+        }
+        if ((rigid->flags & 2) != 0) {
             continue;
         }
 
-        instNUGCUTRIGID_s *inst_rigid = &rigid_instance->rigids[i];
-        if (rigid->state_animation != NULL) {
-            u8 visible;
-            if (StateAnimEvaluate(rigid->state_animation, &inst_rigid->state_index, &visible, frame) != 0) {
-                if (visible != 0) {
-                    NuSpecialSetVisibility(inst_rigid, 1);
-                } else {
-                    NuSpecialSetVisibility(inst_rigid, 0);
-                }
+        if (rigid->state_animation != NULL &&
+            StateAnimEvaluate(rigid->state_animation, &inst_rigid->state_index, &visible, frame) != 0) {
+            if (visible != 0) {
+                NuSpecialSetVisibility(inst_rigid, 1);
+            } else {
+                NuSpecialSetVisibility(inst_rigid, 0);
             }
         }
 
@@ -1817,9 +1818,9 @@ static void instNuGCutRigidSysEnd(instNUGCUTSCENE_s *instance, float frame) {
             continue;
         }
 
-        NUMTX matrix;
+        NUMTX_ALIGNED16 matrix;
         NuGCutRigidCalcMtx(rigid, frame, &matrix);
-        if (static_cast<i8>(instance->flags_88) < 0) {
+        if ((instance->flags_88 & 0x80) != 0) {
             NuMtxMul(&matrix, &matrix, &instance->matrix);
         }
         NuSpecialSetDrawMtx(inst_rigid, &matrix);
