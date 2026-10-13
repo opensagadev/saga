@@ -1810,35 +1810,6 @@ extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s 
                                         NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
 void Draw3DObjectMtx(WORLDINFO_s *, i32, numtx_s *);
 
-static __used__ void LocatorFunction_Blaster(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
-                                             NUGCUTLOCATOR_s *locator, float frame, numtx_s *parent_mtx, int) {
-    nuanimtime_s time;
-    NuAnimData2CalcTime(locator->animation, frame, &time);
-    if (NuGCutLocatorIsVisble(locator, frame, &time, NULL, NULL) == 0) {
-        return;
-    }
-    // Retail realigns the frame (and esp,-16) for this matrix.
-    NUMTX_ALIGNED16 matrix;
-    NuGCutLocatorCalcMtx(locator, frame, &matrix, &time);
-    if ((locator->flags & 4) != 0) {
-        NuMtxPreTranslate(&matrix, &locator->pivot);
-    }
-    if (parent_mtx != NULL) {
-        NuMtxMul(&matrix, &matrix, parent_mtx);
-    }
-    if (CutSceneSys != NULL) {
-        Draw3DObjectMtx(NULL, CutSceneSys->blaster_object_0, &matrix);
-        Draw3DObjectMtx(NULL, CutSceneSys->blaster_object_1, &matrix);
-    }
-}
-
-extern "C" {
-    __attribute__((weak)) NUGCUTLOCATORFNENTRY_s cutscene_locatorfns[] = {
-        {"blaster", 0, 0, 0, LocatorFunction_Blaster},
-        {NULL, 0, 0, 0, NULL},
-    };
-}
-
 void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance);
 void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance);
 extern "C" void DebFreeInstantly(i32 *handle);

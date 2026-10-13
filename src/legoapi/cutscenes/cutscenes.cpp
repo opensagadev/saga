@@ -75,7 +75,6 @@ extern "C" {
     void instNuGCutSceneDestroy(instNUGCUTSCENE_s *);
     void NuGCutSceneSysRender(i32);
     void NuGCutSceneSysUpdate(i32, i32, f32);
-    extern NUGCUTLOCATORFNENTRY_s cutscene_locatorfns[];
 }
 
 void SetLevelLights(void *, f32);
@@ -779,6 +778,37 @@ i32 CutScene_StartFn_LSW(CUTINFO *cut) {
     instNuGCutSceneSetMtx(static_cast<instNUGCUTSCENE_s *>(cut->instance), &matrix);
     return 1;
 }
+
+extern "C" i32 NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
+extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
+extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
+
+static __used__ void LocatorFunction_Blaster(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
+                                             NUGCUTLOCATOR_s *locator, float frame, numtx_s *parent_mtx, int) {
+    nuanimtime_s time;
+    NuAnimData2CalcTime(locator->animation, frame, &time);
+    if (NuGCutLocatorIsVisble(locator, frame, &time, NULL, NULL) == 0) {
+        return;
+    }
+    // Retail realigns the frame (and esp,-16) for this matrix.
+    NUMTX_ALIGNED16 matrix;
+    NuGCutLocatorCalcMtx(locator, frame, &matrix, &time);
+    if ((locator->flags & 4) != 0) {
+        NuMtxPreTranslate(&matrix, &locator->pivot);
+    }
+    if (parent_mtx != NULL) {
+        NuMtxMul(&matrix, &matrix, parent_mtx);
+    }
+    if (CutSceneSys != NULL) {
+        Draw3DObjectMtx(NULL, CutSceneSys->blaster_object_0, &matrix);
+        Draw3DObjectMtx(NULL, CutSceneSys->blaster_object_1, &matrix);
+    }
+}
+
+static NUGCUTLOCATORFNENTRY_s cutscene_locatorfns[] = {
+    {"blaster", 0, 0, 0, LocatorFunction_Blaster},
+    {NULL, 0, 0, 0, NULL},
+};
 
 void CutScenes_InitSystem(CUTSCENESYS *system) {
     CutSceneSys = system;
