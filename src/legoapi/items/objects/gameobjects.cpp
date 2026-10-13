@@ -4483,10 +4483,10 @@ void GameObjectToCameraCode(GameObject_s *object) {
     else if (g_lowEndLevelBehaviour == 0 || object->apiobj.player_controlled) {
         if (distance > data->field_0xb8)
             mask = data->layer_mask_low;
-        else if (distance > data->field_0xb4)
-            mask = data->layer_mask_medium;
-        else
+        else if (!(distance > data->field_0xb4))
             mask = data->layer_mask;
+        else
+            mask = data->layer_mask_medium;
     } else {
         if (data->field_0xb4 > distance)
             mask = data->layer_mask_medium;
