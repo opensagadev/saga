@@ -456,8 +456,8 @@ void PreResetCode(GameObject_s *obj) {
         obj->field_0xe22 &= 0xf7;
         obj->weapon_trail_offset.x = (f32)qrand() * sPreResetMulA * sPreResetMulB - sPreResetSubC;
         obj->weapon_trail_offset.y = (f32)qrand() * sPreResetMulA * sPreResetMulB - sPreResetSubC;
-        obj->field_0xe20 &= 0xfb;
         obj->weapon_trail_offset.z = (f32)qrand() * sPreResetMulA * sPreResetMulB - sPreResetSubC;
+        obj->field_0xe20 &= 0xfb;
         obj->incoming_bolt = NULL;
         obj->incoming_melee = NULL;
         obj->incoming_special = NULL;
@@ -592,12 +592,10 @@ void PreResetCode(GameObject_s *obj) {
                 }
 
                 {
-                    u32 mask = GAMEPAD_ACTION;
-                    f32 xmm0 = obj->hold_timer;
-                    if ((obj->pad_gamepad->buttons_held & mask) != 0) {
-                        obj->hold_timer = xmm0 + FRAMETIME;
+                    if ((obj->pad_gamepad->buttons_held & GAMEPAD_ACTION) != 0) {
+                        obj->hold_timer += FRAMETIME;
                     } else {
-                        if (xmm0 > 0.0f && sPreResetD18Scale > xmm0) {
+                        if (obj->hold_timer > 0.0f && sPreResetD18Scale > obj->hold_timer) {
                             obj->field_0xe24 |= 0x40;
                         }
                         obj->hold_timer = 0.0f;
@@ -745,26 +743,21 @@ void PlayerTakeHit(GameObject_s *object, GameObject_s *attacker) {
 
     const u8 state = object->field_0xe31;
     i32 animation;
+    void *animation_data;
     if (state != 1) {
         animation = 0x3d;
-        if (object->apiobj.character_model->model_data_b[0x3d] == NULL) {
-            if ((object->field_0xefb & 8) != 0) {
-                ResetAnimPacket(&object->apiobj.anim_packet, -1);
-                Player_ClearContext(object, 1);
-                Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
-            }
-            return;
-        }
+        animation_data = object->apiobj.character_model->model_data_b[0x3d];
     } else {
         animation = 0x3e;
-        if (object->apiobj.character_model->model_data_b[0x3e] == NULL) {
-            if ((object->field_0xefb & 8) != 0) {
-                ResetAnimPacket(&object->apiobj.anim_packet, -1);
-                Player_ClearContext(object, 1);
-                Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
-            }
-            return;
+        animation_data = object->apiobj.character_model->model_data_b[0x3e];
+    }
+    if (animation_data == NULL) {
+        if ((object->field_0xefb & 8) != 0) {
+            ResetAnimPacket(&object->apiobj.anim_packet, -1);
+            Player_ClearContext(object, 1);
+            Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
         }
+        return;
     }
 
     if (object->field_0x7a5 == 0x1b && object->field_0x780 != NULL) {
@@ -1591,7 +1584,7 @@ i32 MakePlayerList(i32 count) {
 }
 
 i32 DeactivatePlayer(GameObject_s *object, f32 duration, GameObject_s *source) {
-    if (object->character_context == 0x17 && duration <= object->context_animation_timer)
+    if (object->character_context == 0x17 && !(duration > object->context_animation_timer))
         return 0;
     f32 model_state = object->field_0xd24;
     Player_ClearContext(object, 1);
@@ -1604,20 +1597,18 @@ i32 DeactivatePlayer(GameObject_s *object, f32 duration, GameObject_s *source) {
     if (AIScriptSetBaseScriptStateByName(process, "BeenDeactivated")) {
         AIScriptProcess(WORLD->ai_sys, &object->apiobj, &object->ai, process, FRAMETIME);
     }
-    CHARACTERDATA *character = object->apiobj.character_data;
-    CHARACTERMODEL_s *model = object->apiobj.character_model;
-    GAMECHARACTERDATA *runtime = static_cast<GAMECHARACTERDATA *>(character->field11_0x24);
-    if (source != NULL && (source->apiobj.character_data->model_flags & 0x40) != 0 && runtime->field275_0x116 == 1 &&
-        model->model_data_b[0x62] != NULL) {
+    if (source != NULL && (source->apiobj.character_data->model_flags & 0x40) != 0 &&
+        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->field275_0x116 == 1 &&
+        object->apiobj.character_model->model_data_b[0x62] != NULL) {
         duration = 4.0f;
         object->context_animation = 0x62;
-    } else if (model->model_data_b[0x81] != NULL &&
-               (static_cast<CHARACTERANIM_s *>(model->model_data_a[0x81])->flags & 2) == 0) {
+    } else if (object->apiobj.character_model->model_data_b[0x81] != NULL &&
+               (static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[0x81])->flags & 2) == 0) {
         object->context_animation = 0x81;
     } else {
-        object->context_animation = model->model_data_b[0x41] != NULL ? 0x41 : 1;
+        object->context_animation = object->apiobj.character_model->model_data_b[0x41] != NULL ? 0x41 : 1;
     }
-    if ((character->model_flags & 0x20) != 0)
+    if ((object->apiobj.character_data->model_flags & 0x20) != 0)
         SetProtocolDroidDeactivatedAction(object);
     object->action_movement_state = 0;
     object->context_animation_timer = duration;

@@ -287,8 +287,8 @@ void CutScenes_Draw(WORLDINFO_s *world) {
         if (CUTDRAWWORLD != 0 && world->current_gscn != NULL) {
             SetLevelLights(world->rtl_set, 1.0f);
             NuGScnRndr3(world->current_gscn);
-            cut = static_cast<CUTINFO *>(CutStopInfo);
-            if (world->gizmo_sys != NULL && cut != NULL && (cut->flags & 0x8000) != 0) {
+            if (world->gizmo_sys != NULL && CutStopInfo != NULL &&
+                (static_cast<CUTINFO *>(CutStopInfo)->flags & 0x8000) != 0) {
                 GizmoSysDraw(world->gizmo_sys, world, FRAMETIME);
             }
         }
@@ -800,6 +800,7 @@ extern CHARACTERMODEL_s *dco_cmodel;
 
 static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTSCENE_s *cutscene,
                                    instNUGCUTCHAR_s *instance, NUGCUTCHAR_s *character, f32 frame, i32 paused) {
+    i32 visible;
     i32 layer_mask = -1;
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     CUTSYS *cutscene_system = world->cutscene_sys;
@@ -839,8 +840,8 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     const i32 character_id = model->model_id;
     CHARACTERDATA *character_data = &apicharsys->char_data[character_id];
     GAMECHARACTERDATA *game_data = static_cast<GAMECHARACTERDATA *>(character_data->field11_0x24);
-    NUMTX world_matrix;
-    i32 visible;
+    // Retail realigns this frame with `and esp, -32` for the world matrix.
+    NUMTX_ALIGNED32 world_matrix;
     u32 animation_index;
     f32 animation_rate;
     f32 blend_time;

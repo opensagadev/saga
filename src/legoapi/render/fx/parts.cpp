@@ -3054,8 +3054,8 @@ void MakePartVector(NUVEC *velocity, NUVEC *direction, f32 scale) {
         *velocity = v010;
         const i32 z_random = qrand();
         const i32 x_random = qrand();
-        NuVecRotateZ(velocity, velocity, (z_random / 6 + static_cast<u16>(temp_zrot) - 0x1555) & 0xffff);
-        NuVecRotateX(velocity, velocity, (x_random / 6 + static_cast<u16>(temp_xrot) - 0x1555) & 0xffff);
+        NuVecRotateZ(velocity, velocity, static_cast<u16>(temp_zrot + z_random / 6 - 0x1555));
+        NuVecRotateX(velocity, velocity, static_cast<u16>(temp_xrot + x_random / 6 - 0x1555));
         NuVecScale(velocity, velocity, scale);
     }
 }
