@@ -342,22 +342,18 @@ static void Blowup_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
         return;
     }
 
-    i32 count = world->gizmo_blowup_count;
-    if (count > 512) {
-        count = 512;
-    }
-    for (i32 index = 0; index < count; ++index) {
-        GIZMOBLOWUP_s *blowup = &world->gizmo_blowups[index];
+    GIZMOBLOWUP_s *blowup = world->gizmo_blowups;
+    for (i32 index = 0; index < world->gizmo_blowup_count && index != 512; ++index, ++blowup) {
         const i32 word = index >> 5;
         const u32 bit = 1u << (index & 31);
         if ((blowup->output_flags & GIZMOBLOWUP_OUTPUT_BLOWN_UP) != 0) {
             progress->blown_up[word] |= bit;
         }
-        if ((blowup->state_flags & GIZMOBLOWUP_STATE_ACTIVATED) == 0) {
-            progress->activated[word] &= ~bit;
-        }
         if ((blowup->visibility_flags & GIZMOBLOWUP_VISIBLE) == 0) {
             progress->visible[word] &= ~bit;
+        }
+        if ((blowup->state_flags & GIZMOBLOWUP_STATE_ACTIVATED) == 0) {
+            progress->activated[word] &= ~bit;
         }
         if ((blowup->field_0x9f & 0x10) != 0) {
             progress->secondary_output[word] |= bit;
