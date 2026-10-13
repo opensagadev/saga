@@ -4097,8 +4097,9 @@ void BackDrop_Init(char *path, variptr_u *buf, variptr_u *buf_end) {
 }
 
 void BackDrop_Dump() {
-    backdrop_scene = nullptr;
-    memset(s_backdrop_hspecial, 0, sizeof(s_backdrop_hspecial));
+    if (backdrop_scene != NULL) {
+        NuGScnRemove(backdrop_scene);
+    }
 }
 
 void BackDrop_Update(float dt) {
