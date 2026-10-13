@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 77.56483,
+    "fuzzy_match_percent": 77.6342,
     "total_code": "4722419",
-    "matched_code": "590482",
-    "matched_code_percent": 12.503804,
+    "matched_code": "593555",
+    "matched_code_percent": 12.568876,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6692,
-    "matched_functions_percent": 49.721375,
+    "matched_functions": 6695,
+    "matched_functions_percent": 49.743668,
     "total_units": 1
   },
   "text": {
@@ -43915,7 +43915,7 @@
           "address": 4591040,
           "offset": 3701072,
           "size": 2469,
-          "match_percent": 39.701626
+          "match_percent": 100.0
         },
         {
           "name": "_Z12HeadMovementP12GameObject_s",
@@ -48061,7 +48061,7 @@
           "address": 1377264,
           "offset": 487296,
           "size": 1218,
-          "match_percent": 83.51852
+          "match_percent": 84.40329
         },
         {
           "name": "_Z16NeedsPretendAnimP12GameObject_s",
@@ -48077,7 +48077,7 @@
           "address": 1379152,
           "offset": 489184,
           "size": 9744,
-          "match_percent": 30.974665
+          "match_percent": 33.354706
         },
         {
           "name": "_Z14ForceAlongSockP12GameObject_s",
@@ -48205,7 +48205,7 @@
           "address": 1409472,
           "offset": 519504,
           "size": 1500,
-          "match_percent": 45.611446
+          "match_percent": 46.96988
         },
         {
           "name": "_ZL9BlockCodeP12GameObject_siiii",
@@ -48213,7 +48213,7 @@
           "address": 1410976,
           "offset": 521008,
           "size": 2148,
-          "match_percent": 35.872017
+          "match_percent": 37.689804
         },
         {
           "name": "_ZL9SwipeCodeP12GameObject_sii",
@@ -48229,7 +48229,7 @@
           "address": 1413984,
           "offset": 524016,
           "size": 4225,
-          "match_percent": 39.63544
+          "match_percent": 41.909706
         },
         {
           "name": "_Z11Glide_StartP12GameObject_s",
@@ -48261,7 +48261,7 @@
           "address": 1420688,
           "offset": 530720,
           "size": 801,
-          "match_percent": 82.443115
+          "match_percent": 84.628746
         },
         {
           "name": "_Z11JetPackCodeP12GameObject_siii",
@@ -48421,7 +48421,7 @@
           "address": 1468688,
           "offset": 578720,
           "size": 691,
-          "match_percent": 61.950703
+          "match_percent": 81.84507
         },
         {
           "name": "_Z11CanObjSlideP12GameObject_si",
@@ -48533,7 +48533,7 @@
           "address": 1502368,
           "offset": 612400,
           "size": 2140,
-          "match_percent": 50.05118
+          "match_percent": 50.112206
         },
         {
           "name": "_Z14Move_CHARACTERP12GameObject_s",
@@ -48685,7 +48685,7 @@
           "address": 1528272,
           "offset": 638304,
           "size": 1627,
-          "match_percent": 72.14535
+          "match_percent": 77.66279
         },
         {
           "name": "_ZN9NuMechPtrI19MechObjectInterfaceLi4EE6UnlinkEv",
@@ -48797,7 +48797,7 @@
           "address": 4648992,
           "offset": 3759024,
           "size": 1564,
-          "match_percent": 81.02841
+          "match_percent": 81.59659
         },
         {
           "name": "_Z13SetHeadTargetP12GameObject_sP7nuvec_safff",
@@ -48901,7 +48901,7 @@
           "address": 5171648,
           "offset": 4281680,
           "size": 268,
-          "match_percent": 75.17242
+          "match_percent": 100.0
         },
         {
           "name": "_Z8JumpCodeP12GameObject_siijiii",
@@ -50600,7 +50600,7 @@
           "address": 4410800,
           "offset": 3520832,
           "size": 512,
-          "match_percent": 27.174496
+          "match_percent": 93.98658
         },
         {
           "name": "instNuGCutScenePause",
@@ -56306,7 +56306,7 @@
           "address": 5017248,
           "offset": 4127280,
           "size": 3590,
-          "match_percent": 59.0589
+          "match_percent": 59.229195
         },
         {
           "name": "_Z23GizSpinners_InitTerrainP11WORLDINFO_s",
@@ -56807,7 +56807,7 @@
           "address": 5237312,
           "offset": 4347344,
           "size": 547,
-          "match_percent": 67.03125
+          "match_percent": 86.40625
         },
         {
           "name": "_ZL30edGizShadow_ReserveBufferSpacePv",
@@ -58145,7 +58145,7 @@
           "address": 1899008,
           "offset": 1009040,
           "size": 585,
-          "match_percent": 32.88489
+          "match_percent": 99.98561
         },
         {
           "name": "_ZL20Levers_StoreProgressPvS_S_",
@@ -58806,7 +58806,7 @@
           "address": 1964368,
           "offset": 1074400,
           "size": 336,
-          "match_percent": 60.644444
+          "match_percent": 100.0
         },
         {
           "name": "_ZL20Ledges_StoreProgressPvS_S_",
@@ -60248,7 +60248,7 @@
           "address": 5006640,
           "offset": 4116672,
           "size": 1356,
-          "match_percent": 77.7171
+          "match_percent": 84.31579
         },
         {
           "name": "_Z21GizTurrets_TotalScorePv",
