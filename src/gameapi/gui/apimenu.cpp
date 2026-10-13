@@ -39,6 +39,8 @@
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nufloat.h"
 
+static f32 newgamewait;
+
 static void MenuDrawTitles(MENU *);
 static void MenuUpdateTitles(MENU *);
 static void MenuEnterTitles(MENU *);
