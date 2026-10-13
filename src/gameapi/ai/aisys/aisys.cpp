@@ -698,11 +698,13 @@ __used__ static i32 Action_SetBoss(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
     (void)processor;
     (void)param_6;
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
-    if (object != NULL && param_5 != 0) {
-        object->field_0xefb |= 8;
-        for (i32 index = 0; index < param_4; ++index) {
-            if (NuStrICmp(params[index], "false") == 0) {
-                object->field_0xefb &= static_cast<u8>(~8u);
+    if (object != NULL) {
+        if (param_5 != 0) {
+            object->field_0xefb |= 8;
+            for (i32 index = 0; index < param_4; ++index) {
+                if (NuStrICmp(params[index], "false") == 0) {
+                    object->field_0xefb &= static_cast<u8>(~8u);
+                }
             }
         }
     }
@@ -753,9 +755,11 @@ __used__ static i32 Action_SetPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
             }
         }
     }
-    if (object != NULL && path != NULL) {
-        AISysCharacterSetPath(&object->ai, path);
-        AISysGetCharacterPathPos(WORLD != NULL ? WORLD->ai_sys : sys, &object->apiobj, &object->ai, 0xff, 1);
+    if (object != NULL) {
+        if (path != NULL) {
+            AISysCharacterSetPath(&object->ai, path);
+            AISysGetCharacterPathPos(WORLD != NULL ? WORLD->ai_sys : sys, &object->apiobj, &object->ai, 0xff, 1);
+        }
     }
     return 1;
 }
@@ -792,8 +796,10 @@ __used__ static i32 Action_SetSide(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
                 const u8 local_type = static_cast<u8>(LevelCharacterTypeIDFn(value + 5));
                 if (local_type != 0xff) {
                     const i32 global_type = LevelCharacterGlobalIDFn(local_type);
-                    if (global_type != -1 && type_count < 10) {
-                        type_ids[type_count++] = global_type;
+                    if (global_type != -1) {
+                        if (type_count < 10) {
+                            type_ids[type_count++] = global_type;
+                        }
                     }
                 }
             }
