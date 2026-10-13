@@ -409,9 +409,11 @@ void edbriDoInput(nupad_s *pad) {
 }
 
 extern "C" i32 edbriLoadPage(char *path, void *gscn) {
-    i32 page = 0;
-    while (page < 8 && edbri_page_used[page])
-        ++page;
+    i32 page;
+    for (page = 0; page < 8; ++page) {
+        if (!edbri_page_used[page])
+            break;
+    }
     if (page == 8)
         return -1;
     EdFileSetMedia(1);
@@ -426,48 +428,48 @@ extern "C" i32 edbriLoadPage(char *path, void *gscn) {
     if (count + edbri_bridges_used > 64)
         count = 64 - edbri_bridges_used;
     i32 index = 0;
-    i32 i = 0;
-    while (count > 0 && i != count) {
-        while (index < 64 && edBridges[index].connection_index != 0xff)
-            ++index;
-        if (index >= 64) {
-            ++i;
-            continue;
+    if (count > 0) {
+        for (i32 i = 0; i != count; ++i) {
+            // Retail tests the slot before the bound, so a full table reads one
+            // entry past edBridges before the loop stops.
+            while (edBridges[index].connection_index != 0xff && index < 64)
+                ++index;
+            if (index >= 64)
+                continue;
+            edbridge_s &bridge = edBridges[index];
+            bridge.instance_id = -1;
+            EdFileReadNuVec(&bridge.position);
+            bridge.length = EdFileReadFloat();
+            bridge.field_14 = EdFileReadFloat();
+            bridge.rotation_z = EdFileReadShort();
+            bridge.rotation_y = EdFileReadShort();
+            bridge.connection_index = page;
+            bridge.field_1d = EdFileReadChar();
+            bridge.field_1e = EdFileReadChar();
+            char name[20];
+            EdFileRead(name, 20);
+            if (name[0])
+                bridge.special_20 = edbitsLookupInstance(name, static_cast<NUGSCN *>(gscn));
+            else
+                bridge.special_20 = -1;
+            EdFileRead(name, 20);
+            if (name[0]) {
+                bridge.special_24 = edbitsLookupInstance(name, static_cast<NUGSCN *>(gscn));
+            } else {
+                bridge.special_24 = -1;
+            }
+            bridge.field_28 = EdFileReadFloat();
+            bridge.field_2c = EdFileReadFloat();
+            bridge.field_30 = EdFileReadFloat();
+            bridge.field_34 = EdFileReadFloat();
+            bridge.field_38 = EdFileReadFloat();
+            bridge.field_3c = EdFileReadFloat();
+            bridge.red = EdFileReadChar();
+            bridge.green = EdFileReadChar();
+            bridge.blue = EdFileReadChar();
+            bridge.field_43 = EdFileReadChar();
+            ++edbri_bridges_used;
         }
-        edbridge_s &bridge = edBridges[index];
-        bridge.instance_id = -1;
-        EdFileReadNuVec(&bridge.position);
-        bridge.length = EdFileReadFloat();
-        bridge.field_14 = EdFileReadFloat();
-        bridge.rotation_z = EdFileReadShort();
-        bridge.rotation_y = EdFileReadShort();
-        bridge.connection_index = page;
-        bridge.field_1d = EdFileReadChar();
-        bridge.field_1e = EdFileReadChar();
-        char name[20];
-        EdFileRead(name, 20);
-        if (name[0])
-            bridge.special_20 = edbitsLookupInstance(name, static_cast<NUGSCN *>(gscn));
-        else
-            bridge.special_20 = -1;
-        EdFileRead(name, 20);
-        if (name[0]) {
-            bridge.special_24 = edbitsLookupInstance(name, static_cast<NUGSCN *>(gscn));
-        } else {
-            bridge.special_24 = -1;
-        }
-        bridge.field_28 = EdFileReadFloat();
-        bridge.field_2c = EdFileReadFloat();
-        bridge.field_30 = EdFileReadFloat();
-        bridge.field_34 = EdFileReadFloat();
-        bridge.field_38 = EdFileReadFloat();
-        bridge.field_3c = EdFileReadFloat();
-        bridge.red = EdFileReadChar();
-        bridge.green = EdFileReadChar();
-        bridge.blue = EdFileReadChar();
-        bridge.field_43 = EdFileReadChar();
-        ++edbri_bridges_used;
-        ++i;
     }
     EdFileClose();
     edbri_nearest = -1;

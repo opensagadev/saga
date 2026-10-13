@@ -120,18 +120,14 @@ static void Hub_GoneThroughDoor(WORLDINFO_s *world) {
         return;
     }
 
-    i32 new_area = -1;
-#define CHECK_HUB_AREA(index)                                                                                          \
-    if (CheckPosAIArea(hub_ai.areas[index], PlayerStart[static_cast<i8>(player->apiobj.field_0x27c)].pos, 0.0f) !=     \
-        0) {                                                                                                           \
-        new_area = index;                                                                                              \
+    i32 new_area;
+    for (new_area = 0; new_area < HUB_AREA_COUNT; ++new_area) {
+        if (CheckPosAIArea(hub_ai.areas[new_area], PlayerStart[static_cast<i8>(player->apiobj.field_0x27c)].pos,
+                           0.0f) != 0) {
+            break;
+        }
     }
-    CHECK_HUB_AREA(0)
-    else CHECK_HUB_AREA(1) else CHECK_HUB_AREA(2) else CHECK_HUB_AREA(3) else CHECK_HUB_AREA(4) else CHECK_HUB_AREA(
-        5) else CHECK_HUB_AREA(6) else CHECK_HUB_AREA(7) else CHECK_HUB_AREA(8) else CHECK_HUB_AREA(9)
-#undef CHECK_HUB_AREA
-
-        if (new_area == -1 || new_area == hub_ai.area) {
+    if (new_area == HUB_AREA_COUNT || new_area == hub_ai.area) {
         return;
     }
 

@@ -318,6 +318,8 @@ extern "C" {
         NUVEC first_component;
         NUVEC second_component;
         NUVEC average;
+        first_position = &first->initial_position;
+        second_position = &second->initial_position;
         if ((first->collision_contact_mask & second->collision_identity_mask) != 0 ||
             (second->collision_contact_mask & first->collision_identity_mask) != 0)
             already_touching = 1;
@@ -377,10 +379,10 @@ extern "C" {
             value = second_dot * second_speed;
             second_component.x = normal.x * value;
             second_component.z = normal.z * value;
-            if ((first->flags_low & 2) != 0 && (second->flags_low & 2) == 0) {
+            if (first->flags_low_bit1 && !second->flags_low_bit1) {
                 second->velocity.x += (first_component.x - second_component.x) * first_weight * 2.0f;
                 second->velocity.z += (first_component.z - second_component.z) * first_weight * 2.0f;
-            } else if ((first->flags_low & 2) == 0 && (second->flags_low & 2) != 0) {
+            } else if (!first->flags_low_bit1 && second->flags_low_bit1) {
                 first->velocity.x += (second_component.x - first_component.x) * second_weight * 2.0f;
                 first->velocity.z += (second_component.z - first_component.z) * second_weight * 2.0f;
             } else {
@@ -427,10 +429,10 @@ extern "C" {
             value *= force / 2.1f;
             normal.x *= value;
             normal.z *= value;
-            if ((first->flags_low & 2) != 0 && (second->flags_low & 2) == 0) {
+            if (first->flags_low_bit1 && !second->flags_low_bit1) {
                 second->velocity.x = average.x + normal.x * 2.0f;
                 second->velocity.z = average.z + normal.z * 2.0f;
-            } else if ((first->flags_low & 2) == 0 && (second->flags_low & 2) != 0) {
+            } else if (!first->flags_low_bit1 && second->flags_low_bit1) {
                 first->velocity.x = average.x - normal.x * 2.0f;
                 first->velocity.z = average.z - normal.z * 2.0f;
             } else {
@@ -449,59 +451,67 @@ extern "C" {
 
     void APIObjectCollisions(i32 count, APIOBJECT **objects, NUVEC *minimums, NUVEC *maximums,
                              i32 (*collide)(APIOBJECT *, APIOBJECT *)) {
-        if (collide == NULL)
-            return;
-        i32 outer = 1;
-        APIOBJECT **second = objects + outer;
-        NUVEC *second_min = minimums + outer;
-        NUVEC *second_max = maximums + outer;
-        for (; outer < count; ++outer, ++second, ++second_min, ++second_max) {
-            NUVEC *second_position = &(*second)->collision_position;
-            i32 inner = 0;
-            APIOBJECT **first = objects + inner;
-            NUVEC *first_min = minimums + inner;
-            NUVEC *first_max = maximums + inner;
-            for (; inner < outer; ++inner, ++first, ++first_min, ++first_max) {
-                if ((*first)->collision_excluded_object == *second)
-                    goto no_collision;
-                if ((*second)->collision_excluded_object == *first)
-                    goto no_collision;
-                if ((((static_cast<u64>((*first)->collision_exclusion_mask_high) << 32) |
-                      (*first)->collision_exclusion_mask_low) >>
-                     (*second)->field_0x289) &
-                    1)
-                    goto no_collision;
-                if ((((static_cast<u64>((*second)->collision_exclusion_mask_high) << 32) |
-                      (*second)->collision_exclusion_mask_low) >>
-                     (*first)->field_0x289) &
-                    1)
-                    goto no_collision;
-                if (first_min->x > second_max->x || second_min->x > first_max->x || first_min->z > second_max->z ||
-                    second_min->z > first_max->z || first_min->y > second_max->y || second_min->y > first_max->y)
-                    goto no_collision;
-                {
-                    NUVEC *first_position = &(*first)->collision_position;
-                    f32 dx = second_position->x - first_position->x;
-                    f32 dy = second_position->y - first_position->y;
-                    f32 dz = second_position->z - first_position->z;
-                    if ((*first)->field_0x1dc != (*first)->field_0x1e0 ||
-                        (*second)->field_0x1dc != (*second)->field_0x1e0) {
-                        dy *= ((*first)->field_0x1dc + (*second)->field_0x1dc) /
-                              ((*first)->field_0x1e0 + (*second)->field_0x1e0);
-                    }
-                    f32 distance_squared = dx * dx + dy * dy + dz * dz;
-                    f32 radius = (*first)->field_0x1dc + (*second)->field_0x1dc;
-                    if (distance_squared < radius * radius) {
-                        collide(*first, *second);
-                        continue;
-                    }
+        i32 outer;
+        i32 inner;
+        APIOBJECT **first;
+        APIOBJECT **second;
+        NUVEC *first_min;
+        NUVEC *first_max;
+        NUVEC *second_min;
+        NUVEC *second_max;
+        f32 dy;
+        NUVEC *second_position;
+        NUVEC *first_position;
+        f32 dx;
+        f32 dz;
+        f32 distance_squared;
+        f32 radius;
+
+        if (collide != NULL) {
+            for (outer = 1, second = objects + outer, second_min = minimums + outer, second_max = maximums + outer;
+                 outer < count; outer++, second++, second_min++, second_max++) {
+                second_position = &(*second)->collision_position;
+                for (inner = 0, first = objects + inner, first_min = minimums + inner, first_max = maximums + inner;
+                     inner < outer; inner++, first++, first_min++, first_max++) {
+                    // Exclusions leave this block and clear the contact bits; a
+                    // resolved collision skips the clear and moves to the next pair.
+                    do {
+                        if ((*first)->collision_excluded_object == *second)
+                            continue;
+                        if ((*second)->collision_excluded_object == *first)
+                            continue;
+                        if (((*first)->collision_exclusion_mask >> (*second)->field_0x289) & 1)
+                            continue;
+                        if (((*second)->collision_exclusion_mask >> (*first)->field_0x289) & 1)
+                            continue;
+                        if (first_min->x > second_max->x || first_max->x < second_min->x ||
+                            first_min->z > second_max->z || first_max->z < second_min->z ||
+                            first_min->y > second_max->y || first_max->y < second_min->y)
+                            goto no_collision;
+                        first_position = &(*first)->collision_position;
+                        dx = second_position->x - first_position->x;
+                        dy = second_position->y - first_position->y;
+                        dz = second_position->z - first_position->z;
+                        if ((*first)->field_0x1dc != (*first)->field_0x1e0 ||
+                            (*second)->field_0x1dc != (*second)->field_0x1e0) {
+                            dy *= ((*first)->field_0x1dc + (*second)->field_0x1dc) /
+                                  ((*first)->field_0x1e0 + (*second)->field_0x1e0);
+                        }
+                        distance_squared = dx * dx + dy * dy + dz * dz;
+                        radius = (*first)->field_0x1dc + (*second)->field_0x1dc;
+                        if (radius * radius > distance_squared) {
+                            collide(*first, *second);
+                            goto next;
+                        }
+                    } while (0);
+                no_collision:
+                    (*first)->colliding_objects_mask &= ~(*second)->collision_identity_mask;
+                    (*second)->colliding_objects_mask &= ~(*first)->collision_identity_mask;
+                next:;
                 }
-            no_collision:
-                (*first)->field_0x1ec &= ~(*second)->field_0x1e4;
-                (*first)->field_0x1f0 &= ~(*second)->field_0x1e8;
-                (*second)->field_0x1ec &= ~(*first)->field_0x1e4;
-                (*second)->field_0x1f0 &= ~(*first)->field_0x1e8;
             }
+        } else {
+            return;
         }
     }
 
