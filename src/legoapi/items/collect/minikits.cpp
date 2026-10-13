@@ -464,12 +464,13 @@ void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void MiniKit_GameMsg_End(GAMEMESSAGE_s *message) {
     MiniKitScale = 2.0f;
-    if (WorldInfo_CurrentlyActive()->area != NULL && message->icon != -1) {
-        if (message->icon == LEGOOBJ_MINIKIT) {
+    if (WorldInfo_CurrentlyActive()->area != NULL && static_cast<i16>(message->icon) != -1) {
+        if (static_cast<i16>(message->icon) == LEGOOBJ_MINIKIT) {
             ++AreaGlobals.values.field_0x14;
             if (AreaGlobals.values.field_0x14 > AreaGlobals.values.field_0x0c)
                 AreaGlobals.values.field_0x14 = AreaGlobals.values.field_0x0c;
-        } else if (message->icon == LEGOOBJ_CHARKIT && AreaGlobals.values.field_0x20 < AreaGlobals.values.field_0x1c) {
+        } else if (static_cast<i16>(message->icon) == LEGOOBJ_CHARKIT &&
+                   AreaGlobals.values.field_0x20 < AreaGlobals.values.field_0x1c) {
             ++AreaGlobals.values.field_0x20;
             if (AreaGlobals.values.field_0x20 == AreaGlobals.values.field_0x1c && AreaGlobals.values.field_0x1c > 9)
                 EndChallenge(2, 1);
