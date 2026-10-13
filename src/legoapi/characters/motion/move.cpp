@@ -1664,7 +1664,7 @@ i32 MovePlayer_CIRCLE(GameObject_s *object) {
     return 1;
 }
 
-static __used__ void ZapCode(GameObject_s *object, i32 pressed, i32 retract_weapon) {
+static void ZapCode(GameObject_s *object, i32 pressed, i32 retract_weapon) {
     if (object->character_context != 0x16) {
         if (pressed != 0 && (object->apiobj.character_data->game_character->flags_098[0] & 1) != 0) {
             i16 animation;
@@ -1673,14 +1673,15 @@ static __used__ void ZapCode(GameObject_s *object, i32 pressed, i32 retract_weap
                     return;
                 }
                 animation = 0x3c;
+                if (object->apiobj.character_model->model_data_b[animation] == NULL) {
+                    return;
+                }
             } else {
                 animation = 0x16;
-            }
-            if (object->apiobj.character_model->model_data_b[animation] == NULL) {
-                return;
-            }
-            if (object->field_0xe31 != 1 && (object->apiobj.field_0x27d == 0 || ObjLandReady(object) == 0)) {
-                return;
+                if (object->apiobj.character_model->model_data_b[animation] == NULL ||
+                    object->apiobj.field_0x27d == 0 || ObjLandReady(object) == 0) {
+                    return;
+                }
             }
 
             NUVEC forward;
@@ -6119,7 +6120,7 @@ static void DeactivatedCode(GameObject_s *object) {
                 continue;
             i8 context = target->character_context;
             if (context == 0x3c || context == 0x39 || context == 0x3b || context == 0x17 || context == 0x41 ||
-                context == 0x0f || context == 0x47 || context == 0x46 ||
+                context == 0x47 || context == 0x0f || context == 0x46 ||
                 (target->apiobj.character_data->model_flags & 0x10) != 0 ||
                 (static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24)->flags_090 & 0x8000) !=
                     0 ||
@@ -10668,15 +10669,13 @@ void Move_CHARACTER(GameObject_s *object) {
 extern "C" PART_s *FindPart(NUVEC *, i32, GameObject_s *);
 static NUVEC poopos[2];
 
-static __used__ void PooCode(GameObject_s *object) {
+static void PooCode(GameObject_s *object) {
     if (WORLD->lev_objs[0x18].active != 0) {
 
         NUVEC position;
         i32 locator = object->apiobj.character_data->game_character->poo_locator;
         if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
-            position.x = object->joint_matrices[locator].m30;
-            position.y = object->joint_matrices[locator].m31;
-            position.z = object->joint_matrices[locator].m32;
+            position = *reinterpret_cast<NUVEC *>(&object->joint_matrices[locator].m30);
         } else {
             u16 angle = object->apiobj.field_0x276;
             position.x = object->apiobj.collision_position.x - NU_SIN_LUT(angle) * object->apiobj.field_0x1dc;
