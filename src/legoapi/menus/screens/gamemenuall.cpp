@@ -498,29 +498,30 @@ void MakeMenuPacket() {
 
 void MenuDrawExtras(MENU_s *menu) {
     char text[256];
+    char value[64];
     menu->draw_y = -updateextras_current_y * MENUDY * menu->item_scale;
     for (i32 cheat = 0; cheat < 44; ++cheat) {
         CHEAT &entry = Cheat[cheat];
-        const char *value;
         f32 alpha = 0.5f;
-        bool locked_power_brick = false;
+        bool locked = false;
 
         if (MenuCheatUnlocked(cheat)) {
-            value = TTab[Cheat_IsOn(cheat) != 0 ? tON : tOFF];
+            NuStrCpy(value, TTab[Cheat_IsOn(cheat) != 0 ? tON : tOFF]);
             if (BonusArea == 0 || Cheat_CheckFlags(cheat, 0x200000) == 0) {
                 alpha = 1.0f;
             }
-        } else if (cheat < 8 || entry.area == 0xff || Game.area_save[entry.area].field_0x5[1] != 0) {
-            value = TTab[tAVAILABLETOBUY];
+        } else if (cheat < 8 || static_cast<i8>(entry.area) == -1 ||
+                   Game.area_save[static_cast<i8>(entry.area)].field_0x5[1] != 0) {
+            NuStrCpy(value, TTab[tAVAILABLETOBUY]);
         } else {
-            snprintf(text, sizeof(text), "%s %i: %s", TTab[tPOWERBRICK], cheat - 7, TTab[tLOCKED]);
-            locked_power_brick = true;
+            NuStrCpy(text, TTab[tPOWERBRICK]);
+            sprintf(value, " %i: ", cheat - 7);
+            NuStrCat(text, value);
+            NuStrCat(text, TTab[tLOCKED]);
+            locked = true;
         }
-
-        if (!locked_power_brick) {
-            const i16 text_id = entry.text_id != NULL ? *entry.text_id : -1;
-            const char *name = text_id >= 0 && TTab[text_id] != NULL ? TTab[text_id] : entry.name;
-            snprintf(text, sizeof(text), "%s: %s", name != NULL ? name : "", value);
+        if (!locked) {
+            sprintf(text, "%s: %s", TTab[*entry.text_id], value);
         }
 
         dme_sy = menu->item_scale;
@@ -539,7 +540,7 @@ void MenuDrawExtras(MENU_s *menu) {
             dme_align = PauseMenus_Align;
             menu->draw_x = PauseMenus_X;
         }
-        DrawMenuEntryEx(menu, text, static_cast<u8>(static_cast<i32>(static_cast<f32>(MenuA) * alpha)));
+        DrawMenuEntryEx(menu, text, static_cast<u8>(static_cast<f32>(MenuA) * alpha));
     }
 }
 
