@@ -2041,7 +2041,7 @@ extern "C" {
         MAXPARTS = count;
         buffer->addr = (buffer->addr + 15) & ~static_cast<usize>(15);
         Part = reinterpret_cast<PART_s *>(buffer->void_ptr);
-        buffer->addr += MAXPARTS * sizeof(PART_s);
+        buffer->char_ptr += MAXPARTS * sizeof(PART_s);
         ResetParts();
         memset(part_types, 0, sizeof(part_types));
         for (i32 i = 0; i < 128; ++i) {
@@ -2059,7 +2059,9 @@ extern "C" {
         memset(part_page_used, 0, sizeof(part_page_used));
         memset(part_page_on, 0, sizeof(part_page_on));
         memset(part_scene, 0, sizeof(part_scene));
-        memset(part_scene_pageid, -1, sizeof(part_scene_pageid));
+        for (i32 i = 0; i < 32; ++i) {
+            part_scene_pageid[i] = -1;
+        }
         part_platimpactcnt = 0;
     }
 
@@ -2110,10 +2112,9 @@ extern "C" {
     void NewPartRotation(PART_s *part) {
         part->rotation_axis_1 = (NuRandIntSeeded(&partseed) % 65535u) / 21845u + 1;
         part->field_124[3] = static_cast<i32>((NuRandFloatSeeded(&partseed) * 2.0f - 1.0f) * 65536.0f);
-        part->rotation_axis_2 = (NuRandIntSeeded(&partseed) % 65535u) / 21845u + 1;
-        while (part->rotation_axis_2 == part->rotation_axis_1) {
+        do {
             part->rotation_axis_2 = (NuRandIntSeeded(&partseed) % 65535u) / 21845u + 1;
-        }
+        } while (part->rotation_axis_2 == part->rotation_axis_1);
         part->field_124[4] = static_cast<i32>((NuRandFloatSeeded(&partseed) * 2.0f - 1.0f) * 65536.0f);
     }
 
@@ -2525,19 +2526,23 @@ PART_s *TargetPart(GameObject_s *object, nuvec_s *position, nuvec_s *direction, 
 }
 
 extern "C" i32 NuGScnNumSpecials(nugscn_s *);
+static char nullobjectname[16] = "NULL instance";
 i32 edpartLookupObjectInScene(char *name, nugscn_s *scene) {
     if (name[0] == 0)
         return -1;
-    if (NuStrNCmp(name, "NULL instance", 16) == 0)
+    if (NuStrNCmp(name, nullobjectname, 16) == 0)
         return 9999;
     if (scene != NULL) {
         nuhspecial_s special;
         const i32 count = NuGScnNumSpecials(scene);
-        for (i32 i = 0; i < count; ++i) {
+        i32 i;
+        for (i = 0; i < count; ++i) {
             NuGScnGetSpecial(&special, scene, i);
             if (NuSpecialExistsFn(&special) && NuStrNCmp(name, NuSpecialGetName(&special), 16) == 0)
-                return i;
+                break;
         }
+        if (i < count)
+            return i;
     }
     return -1;
 }
@@ -2899,13 +2904,10 @@ void LoadPartFile(WORLDINFO *world) {
 
     if ((world->current_level->flags & (LEVEL_OUTRO | LEVEL_MIDTRO | LEVEL_INTRO)) == 0) {
         sprintf(path, "%s.par", world->config_file);
-        i32 page = -1;
-        if (NuFileExists(path)) {
-            page = edpartLoadPage(path, 1, world->current_gscn);
-            world->page_part = page;
-        }
+        if (NuFileExists(path) > 0)
+            world->page_part = edpartLoadPage(path, 1, world->current_gscn);
         world->part_debris_sys = static_cast<PARTDEBSYS_s *>(
-            InitPartDebris(&world->giz_buffer, &world->unknown_0108, 0x40, PDEBCOUNT, PDebNameList, page));
+            InitPartDebris(&world->giz_buffer, &world->unknown_0108, 0x40, PDEBCOUNT, PDebNameList, world->page_part));
     }
 }
 
@@ -2942,20 +2944,19 @@ void AddTorpedoAsPart(nuvec_s *position, nuvec_s *velocity, float scale, float l
     f32 torpedo_scale = 0.1f * WORLD->giz_torp_machine_sys->scale;
     params.field_14 = torpedo_scale * GizmoPickupType[8].shadow_radius_x;
     params.field_18 = torpedo_scale * GizmoPickupType[8].shadow_extent_x;
+    params.special = &world->lev_objs[0x79].special;
+    params.field_28 = 0x79;
     params.gravity = AreaPickupGravity;
     if (params.gravity == 0.0f)
         params.field_a4 = 15.0f;
-    params.special = &world->lev_objs[0x79].special;
-    params.field_28 = 0x79;
-    params.flags = 0x256;
-    params.field_40 = PartCollide_3D;
-    params.move_fn = params.gravity == 0.0f ? PartMove_VehiclePickup : NULL;
-    if (FreePlay != 0 && WORLD->current_level == ANAKINSFLIGHTB_LDATA)
-        params.field_40 = PartCollide_2D;
-    params.field_48 = NULL;
-    params.draw_fn = PartDraw_Torp;
     params.stop_fn = PartStop_Flickerer;
+    params.field_40 = FreePlay != 0 && WORLD->current_level == ANAKINSFLIGHTB_LDATA ? PartCollide_2D : PartCollide_3D;
     params.field_88 = lifetime;
+    params.draw_fn = PartDraw_Torp;
+    params.field_48 = NULL;
+    params.flags = 0x256;
+    if (params.gravity == 0.0f)
+        params.move_fn = PartMove_VehiclePickup;
     params.time_step = FRAMETIME;
     params.field_c0 = scale;
     PART_s *part = AddPart(&params);
@@ -3005,21 +3006,21 @@ void PowerUp_AddPart(NUVEC *position, NUVEC *velocity, f32 scale, f32 lifetime) 
     ADDPART_ALIGNED16 params = Default_ADDPART;
     params.position = position;
     params.velocity = velocity;
-    params.special = &world->lev_objs[0xd0].special;
     params.field_18 = params.field_14 = scale * GizmoPickupType[9].shadow_radius_x;
     params.gravity = AreaPickupGravity;
-    params.field_28 = 0xd0;
-    params.flags = 0x256;
+    params.special = &world->lev_objs[0xd0].special;
     params.field_40 = PartCollide_3D;
-    params.field_3c = PowerUp_ImpactPart;
     params.field_48 = PowerUp_UpdatePart;
+    params.field_3c = PowerUp_ImpactPart;
     params.stop_fn = PartStop_Flickerer;
     params.draw_fn = PowerUp_DrawPart;
+    params.field_28 = 0xd0;
+    params.flags = 0x256;
+    params.field_88 = lifetime;
     if (params.gravity == 0.0f)
         params.move_fn = PartMove_VehiclePickup;
     params.time_step = FRAMETIME;
     params.field_c0 = scale;
-    params.field_88 = lifetime;
     PART_s *part = AddPart(&params);
     if (part != NULL)
         part->rotation_y = NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f;
@@ -3369,29 +3370,31 @@ void UpdatePartEmits(f32 time) {
 i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 
 PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f32 range) {
+    PART_s *part = Part;
+    radius *= radius;
     f32 nearest_distance = range > 0.0f ? range : 100.0f;
     PART_s *nearest = NULL;
-    for (i32 i = 0; i < MAXPARTS; ++i) {
-        PART_s *part = &Part[i];
+    for (i32 i = 0; i < MAXPARTS; ++i, ++part) {
         if ((part->active & 1) == 0 || part->owner == owner || (part->flags & flags) != flags)
             continue;
-        if (range <= 0.0f) {
-            f32 speed = NuVecMag(&part->velocity);
-            if (speed != 0.0f) {
-                NUVEC direction;
-                NuVecScale(&direction, &part->velocity, 1.0f / speed);
-                f32 distance = NuVecDistSqr(&part->position, position, NULL);
-                if (distance < speed * 0.5f * speed * 0.5f &&
-                    LineIntersectSphere(&part->position, &direction, position, radius * radius, NULL)) {
-                    nearest_distance = distance;
-                    nearest = part;
-                }
-            }
-        } else {
+        if (range > 0.0f) {
             f32 distance = NuVecDistSqr(&part->position, position, NULL);
             if (distance < nearest_distance) {
                 nearest_distance = distance;
                 nearest = part;
+            }
+        } else {
+            f32 speed = NuVecMag(&part->velocity);
+            if (speed != 0.0f) {
+                NUVEC direction;
+                NuVecScale(&direction, &part->velocity, 1.0f / speed);
+                f32 reach = speed * 0.5f;
+                reach *= reach;
+                f32 distance = NuVecDistSqr(&part->position, position, NULL);
+                if (distance < reach && LineIntersectSphere(&part->position, &direction, position, radius, NULL)) {
+                    nearest_distance = distance;
+                    nearest = part;
+                }
             }
         }
     }
