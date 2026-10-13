@@ -3093,36 +3093,45 @@ static __used__ void Hub_UpdateSelectMode() {
             return;
         case 0: {
             i32 last_choice = 0;
-            if (!lost_temple && area != -1 && (ADataList[area].flags & AREAFLAG_NO_FREEPLAY) == 0) {
+            if (!lost_temple && (ADataList[area].flags & AREAFLAG_NO_FREEPLAY) == 0) {
                 last_choice = 1;
                 if ((ADataList[area].flags & 0x10) != 0 && Store_IsPackUnlocked(8)) {
                     last_choice = 2;
                 }
             }
+            const u32 select_mask = GAMEPAD_MENUSELECT;
+            const u32 cancel_mask = GAMEPAD_MENUCANCEL;
+            const u32 up_mask = GAMEPAD_DUP;
+            const u32 down_mask = GAMEPAD_DDOWN;
             i32 confirm = 0, cancel = 0, up = 0, down = 0;
             if (MenuPacket.active_player[0]) {
                 const u32 pressed = GamePad[0].buttons_pressed;
-                if ((pressed & GAMEPAD_MENUSELECT) != 0) {
+                if ((pressed & select_mask) != 0) {
                     confirm = true;
-                } else if ((pressed & GAMEPAD_MENUCANCEL) != 0) {
+                } else if ((pressed & cancel_mask) != 0) {
                     cancel = true;
                 } else {
-                    up = ((pressed | GamePad[0].left_directions) & GAMEPAD_DUP) != 0;
-                    down = !up && ((pressed | GamePad[0].left_directions) & GAMEPAD_DDOWN) != 0;
+                    const u32 directions = pressed | GamePad[0].left_directions;
+                    if ((directions & up_mask) != 0) {
+                        up = true;
+                    } else if ((directions & down_mask) != 0) {
+                        down = true;
+                    }
                 }
             }
             if (!confirm && !cancel && MenuPacket.active_player[1]) {
                 const u32 pressed = GamePad[1].buttons_pressed;
-                if ((pressed & GAMEPAD_MENUSELECT) != 0) {
+                if ((pressed & select_mask) != 0) {
                     confirm = true;
-                    up = down = false;
-                } else if ((pressed & GAMEPAD_MENUCANCEL) != 0) {
+                } else if ((pressed & cancel_mask) != 0) {
                     cancel = true;
-                    up = down = false;
-                } else if (((pressed | GamePad[1].left_directions) & GAMEPAD_DUP) != 0) {
-                    up = true;
-                } else if (((pressed | GamePad[1].left_directions) & GAMEPAD_DDOWN) != 0) {
-                    down = true;
+                } else {
+                    const u32 directions = pressed | GamePad[1].left_directions;
+                    if ((directions & up_mask) != 0) {
+                        up = true;
+                    } else if ((directions & down_mask) != 0) {
+                        down = true;
+                    }
                 }
             }
             if (menu->input_activity != 0) {
@@ -3143,8 +3152,7 @@ static __used__ void Hub_UpdateSelectMode() {
                         selectmodeduration = 0.6f;
                         return;
                     }
-                    if (hub_selectmode == 1 && area != -1 && Game.area_save[area].area_complete != 0 &&
-                        freeplay_unlocked) {
+                    if (hub_selectmode == 1 && Game.area_save[area].area_complete != 0 && freeplay_unlocked) {
                         i32 first = -1, second = -1;
                         if ((ADataList[area].flags & 1) != 0) {
 
@@ -3165,8 +3173,7 @@ static __used__ void Hub_UpdateSelectMode() {
                         NewMenu(17, -1, -1);
                         return;
                     }
-                    if (hub_selectmode == 2 && area != -1 && Game.area_save[area].area_complete != 0 &&
-                        Store_IsPackUnlocked(8)) {
+                    if (hub_selectmode == 2 && Game.area_save[area].area_complete != 0 && Store_IsPackUnlocked(8)) {
                         hub_freeplaysource = 0;
                         Hub_InitFreePlaySelect(area, -1, -1);
                         NewMenu(17, -1, -1);
