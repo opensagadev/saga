@@ -261,7 +261,8 @@ void ClassEditor::AddMenuItems(eduimenu_s *menu) {
     eduiMenuAddItem(menu,
                     eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdClassDeleteObject, const_cast<char *>("Delete")));
 
-    EdClass *classes[32];
+    // The original keeps this class list 16-byte aligned.
+    EdClass *classes[32] __attribute__((aligned(16)));
     i32 class_count = 0;
     for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next) {
 
@@ -292,30 +293,35 @@ void *ClassEditor::CreateObject() {
 }
 
 i32 ClassEditor::CreateObject(ClassObject &source) {
-    ClassObject created = {source.ed_class, NULL, NULL};
+    // The original keeps the created object descriptor and the flags word in 16-byte aligned slots.
+    ClassObject created __attribute__((aligned(16))) = {source.ed_class, NULL, NULL};
     if (theLevelEditor.current_led_file == -1) {
         SelectLED(-1);
         return 1;
     }
     Placeable::CurrentLedFile = theLevelEditor.current_led_file;
-    EdClassInterface *interface = created.ed_class->interface;
-    void *object =
-        theRegistry.CreateObject(interface, (created.ed_class->flags & 0x04000000) ? source.object : NULL, 4, 0, 2);
-    if (object == NULL)
+    EdClassInterface *interface;
+    if (created.ed_class->flags & 0x04000000) {
+        created.object = theRegistry.CreateObject(created.ed_class->interface, source.object, 4, 0, 2);
+    } else {
+        created.object = theRegistry.CreateObject(created.ed_class->interface, NULL, 4, 0, 2);
+    }
+    if (created.object == NULL)
         return 0;
 
-    created.object = object;
     if (source.ed_class->flags & 0x04000000) {
-        i32 flags = 0x04000000;
-        if (created.reference == NULL || !created.reference->SetAttributeData(object, 1, EdType_Int, &flags, 0)) {
-            EdMember member;
-            if (created.ed_class->FindMember(&member, object, 1, 1))
-                member.reference->SetAttributeData(member.object, 1, EdType_Int, &flags, 0);
+        i32 flags __attribute__((aligned(16))) = 0x04000000;
+        i32 int_type = EdType_Int;
+        if (created.reference == NULL || !created.reference->SetAttributeData(created.object, 1, int_type, &flags, 0)) {
+            // The original keeps this member lookup in a 16-byte aligned slot.
+            EdMember member __attribute__((aligned(16)));
+            if (created.ed_class->FindMember(&member, created.object, 1, 1))
+                member.reference->SetAttributeData(member.object, 1, int_type, &flags, 0);
         }
     } else {
-        created.ed_class->CopyObject(object, source.object);
+        created.ed_class->CopyObject(created.object, source.object);
         interface = created.ed_class->interface;
-        interface->vtable->construct(interface, object, source.object);
+        interface->vtable->construct(interface, created.object, source.object);
     }
     InitialiseObject(created);
     theRegistry.NotifyCreateObject(created.object, created.ed_class, NULL, 0, 0, 0);
@@ -807,7 +813,8 @@ void ClassEditor::FocusSelected() {
 }
 
 void ClassEditor::InitialiseObject(ClassObject &created) {
-    EdMember member;
+    // The original keeps this member lookup in a 16-byte aligned slot.
+    EdMember member __attribute__((aligned(16)));
     if (created.ed_class->FindMember(&member, created.object, 2, 1)) {
         char name[128];
         char unique_name[128];
@@ -927,7 +934,9 @@ void ClassEditor::PreSaveInitialisation() {
 }
 
 void ClassEditor::SelectLED(i32 class_id) {
-    f32 x, y;
+    // The original keeps the cursor coordinates in 16-byte aligned slots.
+    f32 x __attribute__((aligned(16)));
+    f32 y __attribute__((aligned(16)));
     eduiGetCursorCoords(&x, &y);
     class_editor_create_pending = class_id;
     eduimenu_s *led_menu = eduiMenuCreate(static_cast<i32>(x * 640.0f), static_cast<i32>(y * 448.0f), 300, 250,
@@ -1671,7 +1680,8 @@ void ClassObject::Set(char *name) {
     char class_name[128];
     char object_name[128];
     char candidate_name[128];
-    EdMember member;
+    // The original keeps this member lookup in a 16-byte aligned slot.
+    EdMember member __attribute__((aligned(16)));
     *separator = '\0';
     NuStrCpy(class_name, name);
     *separator = '.';
@@ -2361,7 +2371,8 @@ i32 LevelEditor::ReadStream(EdFileInputStream &stream) {
         stream.EndBlock();
     }
     if (stream.BeginBlock("Editors") != NULL) {
-        i32 count;
+        // The original keeps the editor count in a 16-byte aligned slot.
+        i32 count __attribute__((aligned(16)));
         stream.SerialiseBuffer(&count, sizeof(count), 1);
         for (i32 index = 0; index < count; ++index) {
             char const *name = stream.BeginBlock(NULL);
@@ -3227,7 +3238,8 @@ void EdClass::SerialiseObject(EdStream &stream, void *object) {
         return;
     }
     if (object != NULL) {
-        u8 data[256];
+        // The original keeps this scratch buffer 16-byte aligned.
+        u8 data[256] __attribute__((aligned(16)));
         for (EdRef *member = members; member != NULL; member = member->next) {
             if (!((stream.flags & 0x400000) != 0 ? (member->attributes & 0x400000) != 0
                                                  : (member->attributes & 0x10000000) != 0)) {
@@ -3255,7 +3267,8 @@ void EdClass::SerialiseObject(EdStream &stream, void *object) {
 }
 
 i32 EdClass::SerialiseObjectHeader(EdStream &stream, void *object) {
-    u8 present = 0;
+    // The original stores this flag in a 16-byte aligned slot of a realigned frame.
+    u8 present __attribute__((aligned(16))) = 0;
     if (stream.mode == 2 && object != NULL) {
         present = 1;
     }
@@ -3402,7 +3415,8 @@ void EdClass::SerialiseObject(EdStream &stream, void *object, EdClass *schema, E
         return;
     }
     if (object != NULL) {
-        u8 data[256];
+        // The original keeps this scratch buffer 16-byte aligned.
+        u8 data[256] __attribute__((aligned(16)));
         for (EdRef *source = schema->members; source != NULL; source = source->next) {
             EdRef *member = FindTypeRef(source->name, 0);
             if (member != NULL) {
