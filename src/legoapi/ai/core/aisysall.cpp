@@ -694,12 +694,12 @@ static AIPATHCNX *GetNextConnection(const AIPACKET *packet, i32 *direction) {
             return NULL;
         }
     }
+    connection = NULL;
     connection_index = route->route_nodes[route->node_routes[node_index]][route->node_routes[next_node]];
-    if (connection_index >= node->connection_count) {
-        return NULL;
+    if (connection_index < node->connection_count) {
+        connection = node->connections[connection_index];
+        *direction = connection->node_indices[0] != node_index;
     }
-    connection = node->connections[connection_index];
-    *direction = connection->node_indices[0] != node_index;
     return connection;
 }
 

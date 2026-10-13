@@ -3403,11 +3403,7 @@ extern "C" {
             if (packet->path_info.path == NULL) {
                 packet->last_path_position = object->position;
             } else {
-                if ((object->field_0x1fa & 8) == 0) {
-                    AISysGetCharacterPathPos(system, object, packet, 1, checks);
-                } else {
-                    AISysGetCharacterPathPos(system, object, packet, 0, checks);
-                }
+                AISysGetCharacterPathPos(system, object, packet, (object->field_0x1fa & 8) == 0 ? 1 : 0, checks);
                 movement_source_flags = packet->field_0x1e7;
             }
 

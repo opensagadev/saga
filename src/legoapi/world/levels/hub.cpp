@@ -2097,12 +2097,13 @@ void Hub_LockUnlockDoors(WORLDINFO_s *) {
 }
 
 void Hub_ActivateDoorMenu(LEVELDATA_s **level) {
-    if ((*level)->area_index == -1) {
+    const i32 index = (*level)->area_index;
+    if (index == -1) {
         return;
     }
 
     const i32 area = last_hub_area;
-    if (area != (*level)->area_index) {
+    if (area != index) {
         *level = NULL;
         return;
     }
@@ -2118,10 +2119,7 @@ void Hub_ActivateDoorMenu(LEVELDATA_s **level) {
 
     i32 menu_id;
     if (area != -1 && (ADataList[area].flags & AREAFLAG_BONUS_AREA) != 0) {
-        menu_id = HUB_DOOR_MENU_BONUS;
-        if (ADataList[area].episode_index != -1) {
-            menu_id = HUB_DOOR_MENU_EPISODE_BONUS;
-        }
+        menu_id = ADataList[area].episode_index != 0xff ? HUB_DOOR_MENU_EPISODE_BONUS : HUB_DOOR_MENU_BONUS;
     } else if (VEHICLES_ADATA != NULL && area == VEHICLES_ADATA->index) {
         i16 vehicle_ids[HUB_VEHICLE_ID_CAPACITY];
         i32 vehicle_count;
@@ -2132,8 +2130,8 @@ void Hub_ActivateDoorMenu(LEVELDATA_s **level) {
         Hub_InitFreePlaySelect(area, vehicle_count, -1);
     } else {
         menu_id = HUB_DOOR_MENU_STANDARD;
-        if (LOSTTEMPLE_ADATA != NULL && area == LOSTTEMPLE_ADATA->index) {
-            menu_id = HUB_DOOR_MENU_EPISODE_BONUS;
+        if (LOSTTEMPLE_ADATA != NULL) {
+            menu_id = area == LOSTTEMPLE_ADATA->index ? HUB_DOOR_MENU_EPISODE_BONUS : HUB_DOOR_MENU_STANDARD;
         }
     }
 

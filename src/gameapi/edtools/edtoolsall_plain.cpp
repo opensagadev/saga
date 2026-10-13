@@ -3650,12 +3650,12 @@ extern "C" {
         if (item->disabled) {
             i32 left = x << 4;
             i32 top = y << 3;
-            i32 right = left + (width << 4);
+            i32 span = width << 4;
             i32 bottom = top + (height << 3);
-            eduiDrawLine(left, top, left + (width << 2), bottom, item->colours[0], uimtls[ui_bgmtl]);
-            eduiDrawLine(left + (width << 2), top, left + (width << 3), bottom, item->colours[0], uimtls[ui_bgmtl]);
-            eduiDrawLine(left + (width << 3), top, left + width * 12, bottom, item->colours[0], uimtls[ui_bgmtl]);
-            eduiDrawLine(left + width * 12, top, right, bottom, item->colours[0], uimtls[ui_bgmtl]);
+            eduiDrawLine(left, top, left + span / 4, bottom, item->colours[0], uimtls[ui_bgmtl]);
+            eduiDrawLine(left + span / 4, top, left + span / 2, bottom, item->colours[0], uimtls[ui_bgmtl]);
+            eduiDrawLine(left + span / 2, top, left + span * 3 / 4, bottom, item->colours[0], uimtls[ui_bgmtl]);
+            eduiDrawLine(left + span * 3 / 4, top, left + span, bottom, item->colours[0], uimtls[ui_bgmtl]);
         }
         return height;
     }
