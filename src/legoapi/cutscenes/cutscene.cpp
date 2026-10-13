@@ -2827,10 +2827,10 @@ void NewCopyAnims(instNUGCUTSCENE_s *instance) {
     }
 }
 
-static __used__ void copyAnims(NUGCUTSCENE_s *destination, NUGCUTSCENE_s *source) {
-    NUGCUTCAMERASYS_s *source_camera = source->camera_system;
+static void copyAnims(NUGCUTSCENE_s *destination, NUGCUTSCENE_s *source) {
     NUGCUTCAMERASYS_s *destination_camera = destination->camera_system;
-    if (destination->version > 4) {
+    NUGCUTCAMERASYS_s *source_camera = source->camera_system;
+    if (static_cast<u8>(destination->version) > 4) {
         destination_camera->focus_animation = source_camera->focus_animation;
         destination_camera->focus_state_animation = source_camera->focus_state_animation;
     }
@@ -2840,51 +2840,62 @@ static __used__ void copyAnims(NUGCUTSCENE_s *destination, NUGCUTSCENE_s *source
     destination_camera->state_animation = source_camera->state_animation;
 
     NUGCUTLOCATORSYS_s *source_locators = source->locator_system;
-    if (source_locators != NULL && source_locators->locators != NULL && source_locators->locator_count != 0) {
+    if (source_locators != NULL) {
         NUGCUTLOCATORSYS_s *destination_locators = destination->locator_system;
-        auto source_locators_locator_count = source_locators->locator_count;
-        for (i32 i = 0; i < source_locators_locator_count; ++i) {
-            if (source_locators->locators[i].animation != NULL) {
-                destination_locators->locators[i].animation = source_locators->locators[i].animation;
+        NUGCUTLOCATOR_s *source_locator = source_locators->locators;
+        if (source_locator != NULL) {
+            NUGCUTLOCATOR_s *destination_locator = destination_locators->locators;
+            for (i32 i = 0; i < source_locators->locator_count; ++i) {
+                if (source_locator[i].animation != NULL) {
+                    destination_locator[i].animation = source_locator[i].animation;
+                }
             }
         }
-        destination_locators->types = source_locators->types;
     }
 
     NUGCUTRIGIDSYS_s *source_rigids = source->rigid_system;
-    if (source_rigids != NULL && source_rigids->rigids != NULL && source_rigids->count != 0) {
+    if (source_rigids != NULL) {
         NUGCUTRIGIDSYS_s *destination_rigids = destination->rigid_system;
-        for (i32 i = 0; i < source_rigids->count; ++i) {
-            if (source_rigids->rigids[i].animation != NULL) {
-                destination_rigids->rigids[i].animation = source_rigids->rigids[i].animation;
+        NUGCUTRIGID_s *source_rigid = source_rigids->rigids;
+        if (source_rigid != NULL) {
+            NUGCUTRIGID_s *destination_rigid = destination_rigids->rigids;
+            for (i32 i = 0; i < source_rigids->count; ++i) {
+                if (source_rigid[i].animation != NULL) {
+                    destination_rigid[i].animation = source_rigid[i].animation;
+                }
+                destination_rigid[i].state_animation = source_rigid[i].state_animation;
             }
-            destination_rigids->rigids[i].state_animation = source_rigids->rigids[i].state_animation;
         }
     }
 
     NUGCUTCHARSYS_s *source_characters = source->character_system;
-    if (source_characters != NULL && source_characters->characters != NULL && source_characters->character_count != 0) {
+    if (source_characters != NULL) {
         NUGCUTCHARSYS_s *destination_characters = destination->character_system;
-        for (i32 i = 0; i < source_characters->character_count; ++i) {
-            if (source_characters->characters[i].animation != NULL) {
-                destination_characters->characters[i].animation = source_characters->characters[i].animation;
-            }
-            if (source_characters->characters[i].face_animation != NULL) {
-                destination_characters->characters[i].face_animation = source_characters->characters[i].face_animation;
-            }
-            if (source_characters->characters[i].extra_animation != NULL) {
-                destination_characters->characters[i].extra_animation =
-                    source_characters->characters[i].extra_animation;
+        NUGCUTCHAR_s *source_character = source_characters->characters;
+        if (source_character != NULL) {
+            NUGCUTCHAR_s *destination_character = destination_characters->characters;
+            for (i32 i = 0; i < source_characters->character_count; ++i) {
+                if (source_character[i].animation != NULL) {
+                    destination_character[i].animation = source_character[i].animation;
+                }
+                if (source_character[i].face_animation != NULL) {
+                    destination_character[i].face_animation = source_character[i].face_animation;
+                }
+                if (source_character[i].extra_animation != NULL) {
+                    destination_character[i].extra_animation = source_character[i].extra_animation;
+                }
             }
         }
     }
 
-    if (source->trigger_system != NULL) {
-        NUGCUTTRIGGERSYS_s *source_triggers = source->trigger_system;
-        if (source_triggers->events != NULL && source_triggers->event_count > 0) {
-            NUGCUTTRIGGERSYS_s *destination_triggers = destination->trigger_system;
+    NUGCUTTRIGGERSYS_s *source_triggers = source->trigger_system;
+    if (source_triggers != NULL) {
+        NUGCUTTRIGGERSYS_s *destination_triggers = destination->trigger_system;
+        NUGCUTTRIGGEREVENT_s *source_event = source_triggers->events;
+        if (source_event != NULL) {
+            NUGCUTTRIGGEREVENT_s *destination_event = destination_triggers->events;
             for (i32 i = 0; i < source_triggers->event_count; ++i) {
-                destination_triggers->events[i].state_animation = source_triggers->events[i].state_animation;
+                destination_event[i].state_animation = source_event[i].state_animation;
             }
         }
     }
