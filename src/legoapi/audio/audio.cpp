@@ -166,19 +166,6 @@ process_music:
 
     music_man.Process(FRAMETIME);
 }
-void SpaceResetAudioPoint() {
-    for (i32 door = 6; door >= 0; --door) {
-        const f32 distance = DogFightDoors.doors[door].distance;
-        if (!(Player[0] != NULL && Player[0]->sock_position.distance > distance) &&
-            !(Player[1] != NULL && Player[1]->sock_position.distance > distance)) {
-            continue;
-        }
-        music_man.SetTrackEntryTimeByClass(TRACK_CLASS_ACTION, DogFightDoors.doors[door].timer);
-        music_man.SetTrackEntryTimeByClass(TRACK_CLASS_NOMUSIC, DogFightDoors.doors[door].timer);
-        return;
-    }
-    SetPreSeekStartPoint(0.0f);
-}
 i32 CheckMusicSwapInstant() {
     // Original Android build is a platform placeholder returning false.
     return 0;

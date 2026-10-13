@@ -9,6 +9,8 @@
 #include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/items/collect/spacelevel.h"
+#include "nu2api/numusic/numusic.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "legoapi/props/system/socksys.h"
 #include "legoapi/world/area.h"
@@ -269,6 +271,21 @@ f32 MulDist = 0.5f;
 f32 SpeedAdd = 1.0f;
 f32 SpeedDist = 5.0f;
 f32 MulAdd = 0.0f;
+
+extern "C" void SetPreSeekStartPoint(f32 start_point);
+
+void SpaceResetAudioPoint() {
+    for (i32 door = 6; door >= 0; --door) {
+        for (i32 player = 0; player < 2; ++player) {
+            if (Player[player] != NULL && Player[player]->sock_position.distance > DogFightDoors.doors[door].distance) {
+                music_man.SetTrackEntryTimeByClass(TRACK_CLASS_ACTION, DogFightDoors.doors[door].timer);
+                music_man.SetTrackEntryTimeByClass(TRACK_CLASS_NOMUSIC, DogFightDoors.doors[door].timer);
+                return;
+            }
+        }
+    }
+    SetPreSeekStartPoint(0.0f);
+}
 
 void SpaceRumbleProcess() {
     NUVEC_ALIGNED16 origin;
