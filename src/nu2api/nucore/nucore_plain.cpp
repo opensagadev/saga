@@ -614,7 +614,7 @@ extern "C" {
             NuVecMtxTransformH(screen, world, &transform);
     }
     void NuCameraTransformScreenVU0(NUVEC4 *screen, NUVEC4 *world, i32 count, NUMTX *matrix) {
-        NUMTX transform;
+        NUMTX_ALIGNED16 transform; // The original realigns the frame for this matrix.
         NUVEC4 *end = world + count;
         if (matrix == NULL)
             transform = vpsmtx;
@@ -3785,7 +3785,7 @@ extern "C" {
     // matrices, then build skin matrices for the smooth hierarchy pieces.
     i32 NuHGobjRndrMtxDwa(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,
                           NUMTX *joint_matrices, void **blend_values, i32) {
-        NUMTX draw_matrix;
+        NUMTX_ALIGNED16 draw_matrix; // The original realigns the frame for this matrix.
         i32 clip_state = nuspecial_clip_state;
         if (clip_state == -1) {
             clip_state = NuCameraClipHGobj(reinterpret_cast<nugscn_s *>(object), world_matrix, joint_matrices);
