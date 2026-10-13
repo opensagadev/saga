@@ -4821,12 +4821,12 @@ void EdManipulator::DrawRotator(VuVec &origin) {
                       32);
     EdDrawEnd();
     const u8 *data = reinterpret_cast<const u8 *>(this);
-    const i32 end_angle = *reinterpret_cast<const i32 *>(data + 0x64);
-    const i32 start_angle = *reinterpret_cast<const i32 *>(data + 0x60);
-    const i32 selected_axis = *reinterpret_cast<const i32 *>(data + 0x0c);
-    if (start_angle != end_angle && selected_axis != 0) {
+    const i32 *selected_axis = reinterpret_cast<const i32 *>(data + 0x0c);
+    const i32 *start_angle = reinterpret_cast<const i32 *>(data + 0x60);
+    const i32 *end_angle = reinterpret_cast<const i32 *>(data + 0x64);
+    if (*start_angle != *end_angle && *selected_axis != 0) {
         EdDrawBegin(1);
-        EdDrawPolySector(origin, scale, selected_axis - 1, start_angle, end_angle, static_cast<i32>(0x80808080), 32);
+        EdDrawPolySector(origin, scale, *selected_axis - 1, *start_angle, *end_angle, static_cast<i32>(0x80808080), 32);
         EdDrawEnd();
     }
 }
