@@ -1904,24 +1904,40 @@ extern "C" {
             static_cast<i32>(static_cast<f32>(first) * amount + static_cast<f32>(second) * (1.0f - amount)));
     }
 
+    // Both backup variants leave the current menu (calling its exit hook), reset
+    // the parent's cursor state, queue the "back" sound unless another sound
+    // is already pending, and restart the menu fade-in.
     void BackupMenu(void) {
         if (GameMenuLevel == 0) {
             return;
         }
 
         MENU *menu = &GameMenu[GameMenuLevel];
-        const i16 menu_index = menu->menu;
-        if (menu_index != -1 && MenuInfo[menu_index].exit_fn != NULL) {
-            MenuInfo[menu_index].exit_fn(menu);
+        if (MenuInfo[menu->menu].exit_fn != NULL) {
+            MenuInfo[menu->menu].exit_fn(menu);
         }
+        MenuRememberCursor(menu);
         menu->menu = -1;
+        menu->field_b4 = 0;
+        menu->field_b8 = 1;
+        menu->field_bc = 0;
 
         --GameMenuLevel;
-        menu = &GameMenu[GameMenuLevel];
-        menu->menu_time = 0.0f;
-        if (menu->menu != -1 && MenuInfo[menu->menu].enter_fn != NULL) {
-            MenuInfo[menu->menu].enter_fn(menu);
+        MENU *parent = &GameMenu[GameMenuLevel];
+        parent->field_b8 = 1;
+        parent->field_b4 = 1;
+        parent->field_b0 = 0;
+        parent->field_c0 = 0;
+        parent->menu_time = 0.0f;
+        if (parent->menu != -1 && MenuInfo[parent->menu].enter_fn != NULL) {
+            MenuInfo[parent->menu].enter_fn(parent);
         }
+        if (MenuSFX == -1) {
+            MenuSFX = MENUSFX_MENUBACK;
+        }
+        MenuAlpha = 0.0f;
+        MenuA = 0;
+        MenuValidated = 0;
     }
 
     void BackupMenuNoFn(void) {
@@ -1930,15 +1946,14 @@ extern "C" {
         }
 
         MENU *menu = &GameMenu[GameMenuLevel];
-        const i16 menu_index = menu->menu;
-        if (menu_index != -1 && MenuInfo[menu_index].exit_fn != NULL) {
-            MenuInfo[menu_index].exit_fn(menu);
+        if (MenuInfo[menu->menu].exit_fn != NULL) {
+            MenuInfo[menu->menu].exit_fn(menu);
         }
         MenuRememberCursor(menu);
-        menu->field_b8 = 1;
         menu->field_b4 = 0;
-        menu->field_bc = 0;
+        menu->field_b8 = 1;
         menu->menu = -1;
+        menu->field_bc = 0;
 
         --GameMenuLevel;
         MENU *parent = &GameMenu[GameMenuLevel];
@@ -1947,11 +1962,12 @@ extern "C" {
         parent->field_b4 = 1;
         parent->field_b0 = 0;
         parent->field_c0 = 0;
-        if (parent->menu != -1) {
-            MenuAlpha = 0.0f;
-            MenuA = 0;
-            MenuValidated = 0;
+        if (MenuSFX == -1) {
+            MenuSFX = MENUSFX_MENUBACK;
         }
+        MenuAlpha = 0.0f;
+        MenuA = 0;
+        MenuValidated = 0;
     }
 
     void DrawMenu(i32 paused) {
