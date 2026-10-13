@@ -4055,9 +4055,7 @@ static __used__ void BackDrop_Alpha(float *alpha) {
     extern STATUSPACKET_s StatusPacket;
     extern i32 selectmodemode;
     extern f32 selectmodetime;
-    if (alpha == nullptr)
-        return;
-    if (WORLD != NULL && WORLD->current_level != NULL) {
+    if (WORLD != NULL) {
         LEVELDATA *level = WORLD->current_level;
         if (level == TITLES_LDATA) {
             *alpha *= newgamealpha;
@@ -4067,16 +4065,24 @@ static __used__ void BackDrop_Alpha(float *alpha) {
             *alpha *= CreditsAlpha;
             return;
         }
-        if ((level->flags & 0x400) != 0 && StatusPacket.status_flags != 0 && StatusPacket.stage != NULL &&
-            StatusPacket.stage->type == 12 && (StatusPacket.mode_flags & 0x10) == 0) {
+        if ((level->flags & 0x400) != 0 && StatusPacket.status_flags != 0 && StatusPacket.stage->type == 12 &&
+            (StatusPacket.mode_flags & 0x10) == 0) {
             const f32 time = StatusPacket.stage->field_0x18;
-            *alpha = time < 0.5f ? 1.0f - (time + time) : 0.0f;
+            if (time < 0.5f) {
+                *alpha = 1.0f - (time + time);
+            } else {
+                *alpha = 0.0f;
+            }
             return;
         }
     }
     if (GetMenuID() == 15 && selectmodemode == 4) {
         const f32 time = selectmodetime;
-        *alpha = time < 0.5f ? 1.0f - (time + time) : 0.0f;
+        if (time < 0.5f) {
+            *alpha = 1.0f - (time + time);
+        } else {
+            *alpha = 0.0f;
+        }
     }
 }
 
