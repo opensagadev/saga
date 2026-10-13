@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 78.87568,
+    "fuzzy_match_percent": 78.90042,
     "total_code": "4722419",
-    "matched_code": "607839",
-    "matched_code_percent": 12.871349,
+    "matched_code": "608876",
+    "matched_code_percent": 12.893307,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6747,
-    "matched_functions_percent": 50.13002,
+    "matched_functions": 6755,
+    "matched_functions_percent": 50.189465,
     "total_units": 1
   },
   "text": {
@@ -28779,7 +28779,7 @@
           "address": 3573504,
           "offset": 2683536,
           "size": 855,
-          "match_percent": 78.640625
+          "match_percent": 78.40625
         },
         {
           "name": "_Z15edppSaveEffectsPcc",
@@ -29003,7 +29003,7 @@
           "address": 4908720,
           "offset": 4018752,
           "size": 674,
-          "match_percent": 69.44944
+          "match_percent": 75.235954
         },
         {
           "name": "_Z19edSpline_SplineFindP8nugscn_sPc",
@@ -29035,7 +29035,7 @@
           "address": 4909824,
           "offset": 4019856,
           "size": 245,
-          "match_percent": 53.531914
+          "match_percent": 86.03191
         },
         {
           "name": "_Z13edbobsDrawBoxP7nuvec_sS0_i",
@@ -113424,7 +113424,7 @@
           "address": 3270608,
           "offset": 2380640,
           "size": 153,
-          "match_percent": 16.714285
+          "match_percent": 30.44898
         },
         {
           "name": "_ZN12NuSoundClock14RemoveCallbackEPNS_8CallbackE",
@@ -113440,7 +113440,7 @@
           "address": 3270864,
           "offset": 2380896,
           "size": 222,
-          "match_percent": 62.09589
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12NuSoundClock8Callback10OnCallbackEyy",
@@ -117413,7 +117413,7 @@
           "address": 3250672,
           "offset": 2360704,
           "size": 863,
-          "match_percent": 99.05854
+          "match_percent": 99.83903
         },
         {
           "name": "_ZN13NuSoundSystem9CreateBusEPKcb",
@@ -117493,7 +117493,7 @@
           "address": 3252384,
           "offset": 2362416,
           "size": 137,
-          "match_percent": 38.76
+          "match_percent": 99.8
         },
         {
           "name": "_ZN13NuSoundSystem13StopAllVoicesEv",
@@ -117501,7 +117501,7 @@
           "address": 3252528,
           "offset": 2362560,
           "size": 109,
-          "match_percent": 53.390244
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NuSoundSystem10StopVoicesEi",
@@ -117509,7 +117509,7 @@
           "address": 3252640,
           "offset": 2362672,
           "size": 121,
-          "match_percent": 52.711113
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NuSoundSystem10StopVoicesERK13NuSoundSource",
@@ -117517,7 +117517,7 @@
           "address": 3252768,
           "offset": 2362800,
           "size": 125,
-          "match_percent": 22.956522
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NuSoundSystem11PauseVoicesEi",
@@ -117525,7 +117525,7 @@
           "address": 3252896,
           "offset": 2362928,
           "size": 129,
-          "match_percent": 61.375
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NuSoundSystem14PauseAllVoicesEv",
@@ -117533,7 +117533,7 @@
           "address": 3253040,
           "offset": 2363072,
           "size": 101,
-          "match_percent": 55.1
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NuSoundSystem12ResumeVoicesEi",
@@ -117541,7 +117541,7 @@
           "address": 3253152,
           "offset": 2363184,
           "size": 129,
-          "match_percent": 61.375
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NuSoundSystem15ResumeAllVoicesEv",
@@ -117549,7 +117549,7 @@
           "address": 3253296,
           "offset": 2363328,
           "size": 101,
-          "match_percent": 55.1
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NuSoundSystem14GetOldestVoiceEP13NuSoundSampleRf",
@@ -117557,7 +117557,7 @@
           "address": 3253408,
           "offset": 2363440,
           "size": 229,
-          "match_percent": 63.894737
+          "match_percent": 99.97369
         },
         {
           "name": "_ZN13NuSoundSystem16GetQuietestVoiceEP13NuSoundSampleRf",
@@ -117565,7 +117565,7 @@
           "address": 3253648,
           "offset": 2363680,
           "size": 245,
-          "match_percent": 66.73077
+          "match_percent": 99.97436
         },
         {
           "name": "_ZN13NuSoundSystem9GetSampleEPKc",
@@ -117709,7 +117709,7 @@
           "address": 3256320,
           "offset": 2366352,
           "size": 472,
-          "match_percent": 77.07692
+          "match_percent": 86.35577
         },
         {
           "name": "_ZN13NuSoundSystem21SourceRequiresDecoderEP13NuSoundSource",
@@ -117733,7 +117733,7 @@
           "address": 3257360,
           "offset": 2367392,
           "size": 615,
-          "match_percent": 65.42941
+          "match_percent": 96.52941
         },
         {
           "name": "_ZN13NuSoundSystem6UpdateEf",
@@ -117741,7 +117741,7 @@
           "address": 3257984,
           "offset": 2368016,
           "size": 365,
-          "match_percent": 67.15179
+          "match_percent": 90.625
         },
         {
           "name": "_ZN13NuSoundSystem11CreateVoiceEP13NuSoundSourceb",
@@ -117749,7 +117749,7 @@
           "address": 3258352,
           "offset": 2368384,
           "size": 418,
-          "match_percent": 22.944
+          "match_percent": 17.648
         },
         {
           "name": "_ZN13NuSoundSystem17FileTypeSupportedENS_8FileTypeE",
