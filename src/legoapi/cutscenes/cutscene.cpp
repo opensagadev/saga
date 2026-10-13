@@ -360,21 +360,29 @@ static void CS_cutsceneplayerobj(NUFPAR *fp) {
         return;
     }
 
-    CUTSCENEPLAYEROBJ *object = &CS_CutInfo->state_entries[CS_CutInfo->state_count];
-    if (NuSpecialFind(CS_worldinfo->current_gscn, &object->special, fp->word_buf, 1) == 0) {
+    if (NuSpecialFind(CS_worldinfo->current_gscn, &CS_CutInfo->state_entries[CS_CutInfo->state_count].special,
+                      fp->word_buf, 1) == 0) {
         return;
     }
-    object->flags &= ~(CLIP_OBJECT_SHOW | CLIP_OBJECT_HIDE);
+    // Every flag update re-indexes the entry: the u8 store may alias state_count.
+#define CS_STATE_FLAGS CS_CutInfo->state_entries[CS_CutInfo->state_count].flags
+    CS_STATE_FLAGS &= ~CLIP_OBJECT_SHOW;
+    CS_STATE_FLAGS &= ~CLIP_OBJECT_HIDE;
     while (NuFParGetWord(fp) != 0) {
         if (NuStrICmp(fp->word_buf, "on") == 0) {
-            object->flags = (object->flags | CLIP_OBJECT_SHOW) & ~CLIP_OBJECT_HIDE;
+            CS_STATE_FLAGS |= CLIP_OBJECT_SHOW;
+            CS_STATE_FLAGS &= ~CLIP_OBJECT_HIDE;
         } else if (NuStrICmp(fp->word_buf, "off") == 0) {
-            object->flags = (object->flags & ~CLIP_OBJECT_SHOW) | CLIP_OBJECT_HIDE;
+            CS_STATE_FLAGS &= ~CLIP_OBJECT_SHOW;
+            CS_STATE_FLAGS |= CLIP_OBJECT_HIDE;
         } else if (NuStrICmp(fp->word_buf, "end_anim") == 0 || NuStrICmp(fp->word_buf, "endanim") == 0 ||
                    NuStrICmp(fp->word_buf, "anim_end") == 0 || NuStrICmp(fp->word_buf, "animend") == 0) {
-            object->flags = (object->flags & ~(CLIP_OBJECT_SHOW | CLIP_OBJECT_HIDE)) | CLIP_OBJECT_ANIM_END;
+            CS_STATE_FLAGS &= ~CLIP_OBJECT_SHOW;
+            CS_STATE_FLAGS &= ~CLIP_OBJECT_HIDE;
+            CS_STATE_FLAGS |= CLIP_OBJECT_ANIM_END;
         }
     }
+#undef CS_STATE_FLAGS
     ++CS_CutInfo->state_count;
 }
 
