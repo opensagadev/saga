@@ -3571,82 +3571,72 @@ void GameObjectOrigin(GameObject_s *object) {
     f32 predicted_vertical_displacement;
     f32 origin_x;
     f32 origin_z;
-    if (object->use_model_origin != 0) {
-        PLAYERCHARACTERCONFIG_s *config = api.character_data->player_config;
-        const i32 model_origin_joint = config->model_origin_joint;
-        if (model_origin_joint != -1) {
-            CHARACTERMODEL_s *model = api.character_model;
-            if (model != NULL && model->points_of_interest[model_origin_joint] != NULL) {
-                f32 predicted_x;
-                f32 predicted_z;
-                if ((object->field_0xe24 & GAMEOBJECT_E24_FLAG_JOINT_MATRICES_UPDATED) != 0) {
-                    const f32 frame_time = FRAMETIME;
-                    predicted_x = api.previous_velocity.x * frame_time;
-                    predicted_vertical_displacement = api.previous_velocity.y * frame_time;
-                    predicted_z = api.previous_velocity.z * frame_time;
-                    const NUVEC &joint_position = *NUMTX_GET_ROW_VEC(&object->joint_matrices[model_origin_joint], 3);
-                    api.collision_position.z = joint_position.z + predicted_z;
-                    api.collision_position.x = joint_position.x + predicted_x;
-                    api.collision_position.y = joint_position.y + predicted_vertical_displacement;
-                    api.collision_position.y +=
-                        (object->character_bottom + object->character_top) * api.field_0xa8 * 0.5f;
-                } else {
-                    api.collision_position = {0.0f, -object->character_bottom, 0.0f};
-                    NuVecMtxRotate(&api.collision_position, &api.collision_position, &api.field_0xb8);
-                    NuVecAdd(&api.collision_position, &api.collision_position, &api.position);
-                    const f32 frame_time = FRAMETIME;
-                    predicted_x = api.previous_velocity.x * frame_time;
-                    predicted_vertical_displacement = api.previous_velocity.y * frame_time;
-                    predicted_z = api.previous_velocity.z * frame_time;
-                }
-                api.collision_position.x += predicted_x;
-                api.collision_position.y += predicted_vertical_displacement;
-                api.collision_position.z += predicted_z;
-                origin_x = api.position.x + predicted_x;
-                origin_z = api.position.z + predicted_z;
-                goto update_bounds;
-            }
-        }
-
-        if (object->field_0xd24 == 1.0f && config->collision_origin_joint != -1 &&
-            api.character_model->points_of_interest[config->collision_origin_joint] != NULL && api.field_0x288 != 0) {
-            api.collision_position = *NUMTX_GET_ROW_VEC(&object->joint_matrices[config->collision_origin_joint], 3);
+    PLAYERCHARACTERCONFIG_s *config;
+    i32 model_origin_joint;
+    if (object->use_model_origin != 0 &&
+        (config = api.character_data->player_config, model_origin_joint = config->model_origin_joint) != -1 &&
+        api.character_model != NULL && api.character_model->points_of_interest[model_origin_joint] != NULL) {
+        f32 predicted_x;
+        f32 predicted_z;
+        if ((object->field_0xe24 & GAMEOBJECT_E24_FLAG_JOINT_MATRICES_UPDATED) != 0) {
             const f32 frame_time = FRAMETIME;
-            origin_x = api.position.x + api.previous_velocity.x * frame_time;
-            origin_z = api.position.z + api.previous_velocity.z * frame_time;
+            predicted_x = api.previous_velocity.x * frame_time;
             predicted_vertical_displacement = api.previous_velocity.y * frame_time;
-            goto update_bounds;
+            predicted_z = api.previous_velocity.z * frame_time;
+            const NUVEC &joint_position = *NUMTX_GET_ROW_VEC(&object->joint_matrices[model_origin_joint], 3);
+            api.collision_position.z = joint_position.z + predicted_z;
+            api.collision_position.x = joint_position.x + predicted_x;
+            api.collision_position.y = joint_position.y + predicted_vertical_displacement;
+            api.collision_position.y += (object->character_bottom + object->character_top) * api.field_0xa8 * 0.5f;
+        } else {
+            api.collision_position = {0.0f, -object->character_bottom, 0.0f};
+            NuVecMtxRotate(&api.collision_position, &api.collision_position, &api.field_0xb8);
+            NuVecAdd(&api.collision_position, &api.collision_position, &api.position);
+            const f32 frame_time = FRAMETIME;
+            predicted_x = api.previous_velocity.x * frame_time;
+            predicted_vertical_displacement = api.previous_velocity.y * frame_time;
+            predicted_z = api.previous_velocity.z * frame_time;
         }
+        api.collision_position.x += predicted_x;
+        api.collision_position.y += predicted_vertical_displacement;
+        api.collision_position.z += predicted_z;
+        origin_x = api.position.x + predicted_x;
+        origin_z = api.position.z + predicted_z;
+    } else if (object->use_model_origin != 0 && object->field_0xd24 == 1.0f && config->collision_origin_joint != -1 &&
+               api.character_model->points_of_interest[config->collision_origin_joint] != NULL &&
+               api.field_0x288 != 0) {
+        api.collision_position = *NUMTX_GET_ROW_VEC(&object->joint_matrices[config->collision_origin_joint], 3);
+        const f32 frame_time = FRAMETIME;
+        origin_x = api.position.x + api.previous_velocity.x * frame_time;
+        origin_z = api.position.z + api.previous_velocity.z * frame_time;
+        predicted_vertical_displacement = api.previous_velocity.y * frame_time;
+    } else {
+        api.field_0x1f4 ^= 0x100u;
+        predicted_vertical_displacement = api.previous_velocity.y * FRAMETIME;
+        api.collision_position.x = api.position.x + api.previous_velocity.x * FRAMETIME;
+        api.collision_position.z = api.position.z + api.previous_velocity.z * FRAMETIME;
+        api.collision_position.y = api.position.y + predicted_vertical_displacement;
+        api.collision_position.y += (object->character_bottom + object->character_top) * api.field_0xa8 * 0.5f;
+        origin_x = api.collision_position.x;
+        origin_z = api.collision_position.z;
     }
 
-    api.field_0x1f4 ^= 0x100u;
-    predicted_vertical_displacement = api.previous_velocity.y * FRAMETIME;
-    api.collision_position.x = api.position.x + api.previous_velocity.x * FRAMETIME;
-    api.collision_position.z = api.position.z + api.previous_velocity.z * FRAMETIME;
-    api.collision_position.y = api.position.y + predicted_vertical_displacement;
-    api.collision_position.y += (object->character_bottom + object->character_top) * api.field_0xa8 * 0.5f;
-    origin_x = api.collision_position.x;
-    origin_z = api.collision_position.z;
-
-update_bounds:
     const f32 radius = api.field_0x1dc;
-    const f32 half_height = api.field_0x1e0;
-    api.collision_min.x = api.collision_position.x - radius;
-    api.collision_min.y = api.collision_position.y - half_height;
-    api.collision_min.z = api.collision_position.z - radius;
-    api.collision_max.x = api.collision_position.x + radius;
-    api.collision_max.y = api.collision_position.y + half_height;
-    api.collision_max.z = api.collision_position.z + radius;
-
+    api.collision_origin.x = origin_x;
+    api.collision_origin.z = origin_z;
     api.upper_position.x = origin_x;
-    api.upper_position.y = api.collision_max.y;
     api.upper_position.z = origin_z;
     api.lower_position.x = origin_x;
-    api.lower_position.y = api.collision_min.y;
     api.lower_position.z = origin_z;
-    api.collision_origin.x = origin_x;
+    api.collision_min.x = api.collision_position.x - radius;
+    api.collision_max.x = api.collision_position.x + radius;
+    api.collision_min.z = api.collision_position.z - radius;
+    api.collision_max.z = api.collision_position.z + radius;
+    api.collision_min.y = api.collision_position.y - api.field_0x1e0;
+    api.collision_max.y = api.collision_position.y + api.field_0x1e0;
+    api.upper_position.y = api.collision_max.y;
+    api.lower_position.y = api.collision_min.y;
     api.collision_origin.y = api.collision_min.y + predicted_vertical_displacement;
-    api.collision_origin.z = origin_z;
 
     object->ai.terrain_origin = api.collision_origin;
     const u32 context_flags = CInfo[object->character_context].flags;
@@ -4493,10 +4483,10 @@ void GameObjectToCameraCode(GameObject_s *object) {
     else if (g_lowEndLevelBehaviour == 0 || object->apiobj.player_controlled) {
         if (distance > data->field_0xb8)
             mask = data->layer_mask_low;
-        else if (distance > data->field_0xb4)
-            mask = data->layer_mask_medium;
-        else
+        else if (!(distance > data->field_0xb4))
             mask = data->layer_mask;
+        else
+            mask = data->layer_mask_medium;
     } else {
         if (data->field_0xb4 > distance)
             mask = data->layer_mask_medium;
@@ -5649,45 +5639,39 @@ void ThingManager::ExitLevelThings(ThingLevelData *data) {
 // Profiling flags select which things receive NuTimeBarSlotBegin/End calls.
 void ThingManager::ProcessThings(ThingProcessData *data) {
     const char *name = "PROC";
-    if (this->count <= 0) {
-        return;
-    }
     for (i32 i = 0; i < this->count; ++i) {
-        if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_PROCESS_EVEN_WHEN_PAUSED) != 0) {
-            continue;
-        }
-        if (this->things[i]->profiling_0xc != 0) {
-            _NuTimeBarSlotBegin(this->timebar, 0, name);
-        }
-        this->things[i]->ProcessEvenWhenPaused(data);
-        if (this->things[i]->profiling_0xc != 0) {
-            _NuTimeBarSlotEnd(this->timebar, 0);
+        if (this->things[i] != NULL && (this->things[i]->flags & THING_FLAG_SKIP_PROCESS_EVEN_WHEN_PAUSED) == 0) {
+            if (this->things[i]->profiling_0xc != 0) {
+                _NuTimeBarSlotBegin(this->timebar, 0, name);
+            }
+            this->things[i]->ProcessEvenWhenPaused(data);
+            if (this->things[i]->profiling_0xc != 0) {
+                _NuTimeBarSlotEnd(this->timebar, 0);
+            }
         }
     }
     if (data->paused == 0) {
         for (i32 i = 0; i < this->count; ++i) {
-            if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_PROCESS) != 0) {
-                continue;
-            }
-            if (this->things[i]->profiling_0xc != 0) {
-                _NuTimeBarSlotBegin(this->timebar, 0, name);
-            }
-            this->things[i]->Process(data);
-            if (this->things[i]->profiling_0xc != 0) {
-                _NuTimeBarSlotEnd(this->timebar, 0);
+            if (this->things[i] != NULL && (this->things[i]->flags & THING_FLAG_SKIP_PROCESS) == 0) {
+                if (this->things[i]->profiling_0xc != 0) {
+                    _NuTimeBarSlotBegin(this->timebar, 0, name);
+                }
+                this->things[i]->Process(data);
+                if (this->things[i]->profiling_0xc != 0) {
+                    _NuTimeBarSlotEnd(this->timebar, 0);
+                }
             }
         }
     } else {
         for (i32 i = 0; i < this->count; ++i) {
-            if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_PROCESS_ONLY_WHEN_PAUSED) != 0) {
-                continue;
-            }
-            if (this->things[i]->profiling_0xc != 0) {
-                _NuTimeBarSlotBegin(this->timebar, 0, name);
-            }
-            this->things[i]->ProcessOnlyWhenPaused(data);
-            if (this->things[i]->profiling_0xc != 0) {
-                _NuTimeBarSlotEnd(this->timebar, 0);
+            if (this->things[i] != NULL && (this->things[i]->flags & THING_FLAG_SKIP_PROCESS_ONLY_WHEN_PAUSED) == 0) {
+                if (this->things[i]->profiling_0xc != 0) {
+                    _NuTimeBarSlotBegin(this->timebar, 0, name);
+                }
+                this->things[i]->ProcessOnlyWhenPaused(data);
+                if (this->things[i]->profiling_0xc != 0) {
+                    _NuTimeBarSlotEnd(this->timebar, 0);
+                }
             }
         }
     }
@@ -7114,28 +7098,172 @@ purchases_unavailable:
     goto draw_button;
 }
 
+static i32 Tag_FindNextPlayer(GameObject_s *object) {
+    i16 index = object->apiobj.field_0x289;
+    for (i32 remaining = HIGHGAMEOBJECT - 1; remaining > 0; --remaining) {
+        if (++index == HIGHGAMEOBJECT)
+            index = 0;
+        GameObject_s *candidate = &Obj[index];
+        if (candidate == object || candidate == NULL || (candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
+            candidate->apiobj.field_0x287 != 0 || candidate->apiobj.field_0x27c == -1 ||
+            (candidate->tag_flags & 2) != 0 || (candidate->field_0xf00 & 2) != 0 ||
+            (CInfo[candidate->character_context].flags & 0x800) != 0)
+            continue;
+        return candidate->apiobj.field_0x27c;
+    }
+    return -1;
+}
+
 void Tag_Check(GameObject_s *object) {
     NUVEC difference;
     DECOMP_ASSERT(offsetof(GameObject_s, tag_player_index) == 0x7b4, "Tag player index ABI");
     DECOMP_ASSERT(offsetof(GameObject_s, tag_flags) == 0x7b5, "Tag flags ABI");
     DECOMP_ASSERT(offsetof(GameObject_s, pending_tag_target) == 0x7b8, "Pending tag target ABI");
     GameObject_s *target = NULL;
-    i32 result;
-    if ((object->tag_flags & 1) != 0 || object->character_context == 0x51) {
+    i32 result = 0;
+    const i32 arcade = Arcade;
+    const bool disabled = (object->tag_flags & 1) != 0 || object->character_context == 0x51;
+    if (disabled) {
         object->field_0xefe &= ~0x18;
         object->hud_icon_timer = 0.0f;
         object->field_0xef0 = 0.0f;
         object->pause_context_state = 0.0f;
-        if (Arcade == 0)
+        if (arcade == 0)
             return;
-    } else if (Arcade != 0) {
+    } else if (arcade != 0) {
         object->field_0xef0 = 0.0f;
         object->pause_context_state = 0.0f;
         object->field_0xefe &= ~0x18;
     }
     if (object->apiobj.field_0x27c == -1)
         return;
-    if ((object->tag_flags & 4) != 0) {
+    if ((object->tag_flags & 4) == 0) {
+        object->tag_player_index = -1;
+        if (object->apiobj.player_controlled && object->apiobj.field_0x287 == 0 &&
+            (CInfo[object->character_context].flags & 0x800) == 0 && !object->apiobj.script_enabled &&
+            !(object->tag_cooldown > 0.0f)) {
+            if (VehicleArea != 0) {
+                if ((object->pad_gamepad->buttons_pressed & GAMEPAD_TAG) != 0)
+                    object->hud_icon_timer = 2.0f;
+            } else {
+                if (Arcade == 0 && Tag_Mode == 3 && GetMenuID() == -1) {
+                    if (FindGameMsgsWithID(-1, 0, -1, NULL) == 0) {
+                        f32 nearest = 0.7f * 0.7f * 2.0f;
+                        i32 pack_index = -1;
+
+                        for (i32 i = 0; i < 11; ++i) {
+                            if (!Store_IsPackUnlocked(i) && StorePack[i].id != NULL) {
+                                f32 distance = NuVecDistSqr(&object->apiobj.position, &StorePack[i].custodian_position,
+                                                            &difference);
+                                if (distance < nearest) {
+                                    nearest = distance;
+                                    pack_index = i;
+                                }
+                            }
+                        }
+                        if (pack_index != -1) {
+                            STOREPACK *pack = &StorePack[pack_index];
+                            NUVEC position = pack->custodian_position;
+                            position.y += CDataList[*pack->id].field16_0x38 + 0.075f;
+                            ADDGAMEMSG message = AddGameMsg_Default;
+                            message.position = &position;
+                            message.red = 255;
+                            message.text = TTab[pack->message_text_index];
+                            message.green = 191;
+                            message.blue = 0;
+                            message.flags = 0x1083;
+                            message.field_0x4e = pack_index;
+                            message.field_0x44 = reinterpret_cast<void *>(DrawPackButton);
+                            message.scale = 0.4f;
+                            AddGameMsg(&message);
+                            Hint_CancelCurrent();
+                        }
+                    } else {
+                        Hint_CancelCurrent();
+                    }
+                }
+                if ((object->pad_gamepad->buttons_pressed & GAMEPAD_TAG) != 0) {
+                    i32 no_target = 1;
+                    if (CUTSKIPLOCK != 0) {
+                        object->hud_icon_timer = 2.0f;
+                        object->input_toggle_hold_time = TOGGLEHOLDTIME;
+                    } else if (Arcade == 0) {
+                        if (Tag_Mode == 3) {
+                            if (object->character_context == 0x17 || object->character_context == -1 ||
+                                (CInfo[object->character_context].parameter & 0x10) != 0 ||
+                                (CInfo[object->character_context].flags & 4) != 0) {
+                                target = Tag_FindGameObject_TRANSFER(object);
+                            }
+                            if (target != NULL) {
+                                if (InCollectList_Index(target->id, NULL, 0) != -1) {
+                                    i32 pack = Store_FindPack(target->id, NULL);
+                                    if (pack != -1 && static_cast<i32>(target->apiobj.field_0x1f4) < 0 &&
+                                        !Store_IsPackUnlocked(pack)) {
+                                        Hint_CancelCurrent();
+                                        if (NuIOS_AreInAppPurchasesAvailable() && NuIOS_CanMakeInAppPurchases()) {
+                                            GameAudio_PlaySfx(0x30, NULL, 0, 0);
+                                            menu_i_pack = pack;
+                                            NewMenu(0x14, -1, -1);
+                                        } else {
+                                            GameAudio_PlaySfx(0x32, NULL, 0, 0);
+                                            GameCam_HitRoll();
+                                        }
+                                        no_target = 0;
+                                        target = NULL;
+                                    }
+                                } else if (InCollectList_Index(target->id, NULL, 0) == -1) {
+                                    GameAudio_PlaySfx(0x32, &object->apiobj.collision_position, 0, 0);
+                                    NewRumble(object->pad_gamepad->pad, 0.5f, 0);
+                                    AISCRIPTPROCESS *processor = reinterpret_cast<AISCRIPTPROCESS *>(&target->ai);
+                                    if (AIScriptSetBaseScriptStateByName(processor, const_cast<char *>("MapRunAway")) !=
+                                        0)
+                                        AIScriptProcess(WORLD->ai_sys, &target->apiobj, &target->ai, processor,
+                                                        FRAMETIME);
+                                    target = NULL;
+                                }
+                            }
+                        } else {
+                            if (Tag_Mode == 1) {
+                                if (object->character_context == 0x17 || object->character_context == -1 ||
+                                    (CInfo[object->character_context].parameter & 0x10) != 0 ||
+                                    (CInfo[object->character_context].flags & 4) != 0) {
+                                    GameObject_s *found = Tag_FindGameObject_TRANSFER(object);
+                                    if (found != NULL && found->apiobj.field_0x27c != -1)
+                                        object->tag_player_index = found->apiobj.field_0x27c;
+                                }
+                            } else {
+                                object->tag_player_index = Tag_FindNextPlayer(object);
+                            }
+                            if (object->tag_player_index >= 0)
+                                target = Player[object->tag_player_index];
+                        }
+                        if (target != NULL) {
+                            no_target = 0;
+                            if ((target->field_0xf00 & 2) != 0) {
+                                TakeOver2GetIn(target, object);
+                            } else if (!object->apiobj.player_controlled || !target->apiobj.player_controlled) {
+                                result = TagCode(object, target, 0, 0, 1);
+                                if (result == 2) {
+                                    object->pending_tag_target = target;
+                                    object->tag_cooldown = 1.0f;
+                                    object->tag_flags = (object->tag_flags | 4) & ~8;
+                                }
+                            } else if (player_tag_timer > 0.0f && object == player_tag_to &&
+                                       target == player_tag_from) {
+                                do_player_tag = 1;
+                            } else {
+                                player_tag_to = target;
+                                player_tag_from = object;
+                                player_tag_timer = 0.5f;
+                            }
+                        }
+                    }
+                    if (no_target && object->field_0xcc0 == NULL)
+                        object->hud_icon_timer = 2.0f;
+                }
+            }
+        }
+    } else {
         object->tag_cooldown -= FRAMETIME;
         if (object->tag_cooldown > 0.0f && object->pending_tag_target != NULL) {
             target = object->pending_tag_target;
@@ -7144,174 +7272,27 @@ void Tag_Check(GameObject_s *object) {
             } else {
                 result = (object->field_0xf00 & 2) != 0 ? TakeOverYoda(object, target, 0, 1)
                                                         : TagCode(object, target, (object->tag_flags >> 3) & 1, 0, 1);
-                if (result == 1)
-                    goto tagged;
-                if (result != 0)
-                    goto draw_icon;
             }
         }
+        if (result == 0)
+            object->tag_flags &= ~4;
+    }
+    if (result == 1) {
         object->tag_flags &= ~4;
-        goto draw_icon;
+        GameAudio_PlaySfx(0x21, &object->apiobj.collision_position, 0, 0);
+        if (target->apiobj.model_draw_result != 0)
+            GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
+        else
+            GameCam_Reset(GameCam);
+        RememberPlayerIDs(0, Player[0] != NULL ? Player[0]->id : -1, Player[1] != NULL ? Player[1]->id : -1);
+        if ((Tag_Mode & ~2) == 1)
+            Tag_NewTransfer(object, target);
+        if (static_cast<u8>(object->apiobj.field_0x27c) < 2 && static_cast<u8>(target->apiobj.field_0x27c) < 2)
+            ResetTimer(&JoinInTimer, 0.0f);
     }
-    object->tag_player_index = -1;
-    if (!object->apiobj.player_controlled || object->apiobj.field_0x287 != 0 ||
-        (CInfo[object->character_context].flags & 0x800) != 0 || object->apiobj.script_enabled ||
-        object->tag_cooldown > 0.0f)
-        goto draw_icon;
-    if (VehicleArea != 0) {
-        if ((object->pad_gamepad->buttons_pressed & GAMEPAD_TAG) != 0)
-            object->hud_icon_timer = 2.0f;
-        goto draw_icon;
-    }
-    if (Arcade == 0 && Tag_Mode == 3 && GetMenuID() == -1) {
-        if (FindGameMsgsWithID(-1, 0, -1, NULL) == 0) {
-            f32 nearest = 0.7f * 0.7f * 2.0f;
-            i32 pack_index = -1;
-
-            for (i32 i = 0; i < 11; ++i) {
-                if (!Store_IsPackUnlocked(i) && StorePack[i].id != NULL) {
-                    f32 distance =
-                        NuVecDistSqr(&object->apiobj.position, &StorePack[i].custodian_position, &difference);
-                    if (distance < nearest) {
-                        nearest = distance;
-                        pack_index = i;
-                    }
-                }
-            }
-            if (pack_index != -1) {
-                STOREPACK *pack = &StorePack[pack_index];
-                NUVEC position = pack->custodian_position;
-                position.y += CDataList[*pack->id].field16_0x38 + 0.075f;
-                ADDGAMEMSG message = AddGameMsg_Default;
-                message.position = &position;
-                message.red = 255;
-                message.text = TTab[pack->message_text_index];
-                message.green = 191;
-                message.blue = 0;
-                message.flags = 0x1083;
-                message.field_0x4e = pack_index;
-                message.field_0x44 = reinterpret_cast<void *>(DrawPackButton);
-                message.scale = 0.4f;
-                AddGameMsg(&message);
-                Hint_CancelCurrent();
-            }
-        } else {
-            Hint_CancelCurrent();
-        }
-    }
-    if ((object->pad_gamepad->buttons_pressed & GAMEPAD_TAG) == 0)
-        goto draw_icon;
-    if (CUTSKIPLOCK != 0) {
-        object->hud_icon_timer = 2.0f;
-        object->input_toggle_hold_time = TOGGLEHOLDTIME;
-        goto no_target;
-    }
-    if (Arcade != 0)
-        goto no_target;
-    if (Tag_Mode == 3) {
-        if (object->character_context == 0x17 || object->character_context == -1 ||
-            (CInfo[object->character_context].parameter & 0x10) != 0 ||
-            (CInfo[object->character_context].flags & 4) != 0) {
-            target = Tag_FindGameObject_TRANSFER(object);
-        }
-        if (target == NULL)
-            goto no_target;
-        if (InCollectList_Index(target->id, NULL, 0) != -1) {
-            i32 pack = Store_FindPack(target->id, NULL);
-            if (pack != -1 && static_cast<i32>(target->apiobj.field_0x1f4) < 0 && !Store_IsPackUnlocked(pack)) {
-                Hint_CancelCurrent();
-                if (NuIOS_AreInAppPurchasesAvailable() && NuIOS_CanMakeInAppPurchases()) {
-                    GameAudio_PlaySfx(0x30, NULL, 0, 0);
-                    menu_i_pack = pack;
-                    NewMenu(0x14, -1, -1);
-                } else {
-                    GameAudio_PlaySfx(0x32, NULL, 0, 0);
-                    GameCam_HitRoll();
-                }
-                goto draw_icon;
-            }
-        } else if (InCollectList_Index(target->id, NULL, 0) == -1) {
-            GameAudio_PlaySfx(0x32, &object->apiobj.collision_position, 0, 0);
-            NewRumble(object->pad_gamepad->pad, 0.5f, 0);
-            AISCRIPTPROCESS *processor = reinterpret_cast<AISCRIPTPROCESS *>(&target->ai);
-            if (AIScriptSetBaseScriptStateByName(processor, const_cast<char *>("MapRunAway")) != 0)
-                AIScriptProcess(WORLD->ai_sys, &target->apiobj, &target->ai, processor, FRAMETIME);
-            goto no_target;
-        }
-        goto attempt_tag;
-    } else if (Tag_Mode == 1) {
-        if (object->character_context == 0x17 || object->character_context == -1 ||
-            (CInfo[object->character_context].parameter & 0x10) != 0 ||
-            (CInfo[object->character_context].flags & 4) != 0) {
-            target = Tag_FindGameObject_TRANSFER(object);
-            if (target != NULL && target->apiobj.field_0x27c != -1)
-                object->tag_player_index = target->apiobj.field_0x27c;
-        }
-    } else {
-        u32 index = object->apiobj.field_0x289;
-        for (i32 remaining = HIGHGAMEOBJECT - 1; remaining > 0; --remaining) {
-            if (++index == HIGHGAMEOBJECT)
-                index = 0;
-            GameObject_s *candidate = &Obj[index];
-            if (candidate == object || candidate == NULL || (candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
-                candidate->apiobj.field_0x287 != 0 || candidate->apiobj.field_0x27c == -1 ||
-                (candidate->tag_flags & 2) != 0 || (candidate->field_0xf00 & 2) != 0 ||
-                (CInfo[candidate->character_context].flags & 0x800) != 0)
-                continue;
-            object->tag_player_index = candidate->apiobj.field_0x27c;
-            break;
-        }
-    }
-    if (object->tag_player_index < 0)
-        goto no_target;
-    target = Player[object->tag_player_index];
-    if (target == NULL)
-        goto no_target;
-attempt_tag:
-    if ((target->field_0xf00 & 2) != 0) {
-        TakeOver2GetIn(target, object);
-        goto draw_icon;
-    }
-    if (object->apiobj.player_controlled && target->apiobj.player_controlled) {
-        if (player_tag_timer > 0.0f && object == player_tag_to && target == player_tag_from)
-            do_player_tag = 1;
-        else {
-            player_tag_to = target;
-            player_tag_from = object;
-            player_tag_timer = 0.5f;
-        }
-        goto draw_icon;
-    }
-    result = TagCode(object, target, 0, 0, 1);
-    if (result == 2) {
-        object->pending_tag_target = target;
-        object->tag_cooldown = 1.0f;
-        object->tag_flags = (object->tag_flags | 4) & ~8;
-        goto draw_icon;
-    }
-    if (result != 1)
-        goto draw_icon;
-tagged:
-    object->tag_flags &= ~4;
-    GameAudio_PlaySfx(0x21, &object->apiobj.collision_position, 0, 0);
-    if (target->apiobj.model_draw_result != 0)
-        GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
-    else
-        GameCam_Reset(GameCam);
-    RememberPlayerIDs(0, Player[0] != NULL ? Player[0]->id : -1, Player[1] != NULL ? Player[1]->id : -1);
-    if ((Tag_Mode & ~2) == 1)
-        Tag_NewTransfer(object, target);
-    if (static_cast<u8>(object->apiobj.field_0x27c) < 2 && static_cast<u8>(target->apiobj.field_0x27c) < 2)
-        ResetTimer(&JoinInTimer, 0.0f);
-    goto draw_icon;
-no_target:
-    if (object->field_0xcc0 == NULL)
-        object->hud_icon_timer = 2.0f;
-draw_icon:
     if (Tag_DrawIconFn != NULL)
         Tag_DrawIconFn(object);
 }
-
 void ScaleGameObject(GameObject_s *object) {
     const f32 scale = object->apiobj.field_0xa8;
     CHARACTERDATA *character = object->apiobj.character_data;

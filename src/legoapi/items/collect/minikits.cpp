@@ -560,20 +560,24 @@ extern NUCOLOUR3 panelcol[3], panelamb;
 extern NUVEC paneldir[3];
 
 void AllMiniKits_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    if (stage->field_0x14 == 0) {
-        stage->field_0x18 = 0.0f;
-        stage->field_0x1c = 6.5f;
-        stage->field_0x14 = 1;
-    } else if (stage->field_0x14 == 1) {
-        const f32 previous = stage->field_0x18;
-        stage->field_0x18 += elapsed;
-        if (stage->field_0x18 >= stage->field_0x1c)
-            NextStatusStage(packet);
-        else if (previous < 0.5f && stage->field_0x18 >= 0.5f) {
-            PlaySfx(const_cast<char *>("StatusAward"), NULL);
-            NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
-        } else if (previous < 4.0f && stage->field_0x18 >= 4.0f)
-            PlaySfx(const_cast<char *>("Char_Icon_App"), NULL);
+    switch (stage->field_0x14) {
+        case 0:
+            stage->field_0x18 = 0.0f;
+            stage->field_0x1c = 6.5f;
+            stage->field_0x14 = 1;
+            break;
+        case 1: {
+            const f32 previous = stage->field_0x18;
+            stage->field_0x18 += elapsed;
+            if (stage->field_0x18 >= stage->field_0x1c)
+                NextStatusStage(packet);
+            else if (previous < 0.5f && stage->field_0x18 >= 0.5f) {
+                PlaySfx(const_cast<char *>("StatusAward"), NULL);
+                NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
+            } else if (previous < 4.0f && stage->field_0x18 >= 4.0f)
+                PlaySfx(const_cast<char *>("Char_Icon_App"), NULL);
+            break;
+        }
     }
 }
 

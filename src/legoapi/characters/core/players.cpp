@@ -666,7 +666,7 @@ void *CutScenePlayer_Available(void) {
 void ChatterSfx(GameObject_s *g, i32 a, float b) {
     if (chattersfxwait <= 0.0f && ParticlesPerSecond(2.0f, FRAMETIME) > 0 && g->apiobj.field_0x287 == 0 &&
         g->character_context == -1) {
-        if (a == last_chatter_sfx && !(b <= 0.0f)) {
+        if (a == last_chatter_sfx && b > 0.0f) {
             chattersfxwait = b;
             last_chatter_sfx = -1;
         } else {
@@ -723,16 +723,17 @@ float GetHoverPosY(GameObject_s *obj) {
         return vehicle_offset + obj->apiobj.water_height;
 
     f32 height = obj->apiobj.field_0x218;
-    if (height == 2000000.0f)
-        return 2000000.0f;
-    if (obj->apiobj.water_height != 2000000.0f)
-        height = MAX(obj->apiobj.water_height, height);
+    if (height != 2000000.0f) {
+        if (obj->apiobj.water_height != 2000000.0f)
+            height = MAX(obj->apiobj.water_height, height);
 
-    f32 hover_height = WORLD->current_level->hover_height;
-    if (hover_height != 0.0f)
-        return hover_height + height + vehicle_offset;
-    return height + static_cast<GAMECHARACTERDATA *>(obj->apiobj.character_data->field11_0x24)->field_0x28 +
-           vehicle_offset;
+        f32 hover_height = WORLD->current_level->hover_height;
+        if (hover_height != 0.0f)
+            return hover_height + height + vehicle_offset;
+        return height + static_cast<GAMECHARACTERDATA *>(obj->apiobj.character_data->field11_0x24)->field_0x28 +
+               vehicle_offset;
+    }
+    return 2000000.0f;
 }
 
 void PlayerTakeHit(GameObject_s *object, GameObject_s *attacker) {
@@ -808,7 +809,7 @@ GameObject_s *Player_FindByID(i32 id) {
 
 NUVEC *Player_StartPos(GameObject_s *obj) {
     i32 index = obj->apiobj.field_0x27c;
-    if (index < 0 || index > 7) {
+    if (static_cast<u8>(index) > 7) {
         index = obj->apiobj.field_0x289;
     }
     index &= 7;
@@ -891,21 +892,19 @@ i32 Player_HasFastBuild(GameObject_s *player) {
 void PlayerItemTypes_Init(PLAYERITEMTYPE_s *types) {
     PlayerItemType = NULL;
     PLAYERITEMTYPECOUNT = 0;
-    if (types == NULL)
-        return;
-
-    PlayerItemType = types;
-    if (types->id == -1) {
-        PlayerItemType = NULL;
-        return;
+    if (types != NULL) {
+        PlayerItemType = types;
+        if (types->id != -1) {
+            i32 count = 0;
+            do {
+                types++;
+                count++;
+            } while (types->id != -1);
+            PLAYERITEMTYPECOUNT = count;
+        } else {
+            PlayerItemType = NULL;
+        }
     }
-
-    i32 count = 0;
-    do {
-        types++;
-        count++;
-    } while (types->id != -1);
-    PLAYERITEMTYPECOUNT = count;
 }
 
 void Player_ResetContexts(PLAYERPACKET_s *packet) {
@@ -1897,6 +1896,16 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
     return mask;
 }
 
+void SetPlayerGroupPosition(f32 x, f32 y, f32 z) {
+    NUVEC offset = {0.0f, 0.0f, 0.2f};
+    for (i32 i = 0; i < PLAYERCOUNT; i++) {
+        NUVEC position = {x, y, z};
+        NuVecAdd(&position, &position, &offset);
+        ResetPlayer(Player[i], 1, &position, 1);
+        NuVecRotateY(&offset, &offset, 0x2000);
+    }
+}
+
 bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, float &distance_squared,
                             bool require_character_flags, u32 character_flags) {
     *nearest_player = NULL;
@@ -1925,16 +1934,6 @@ bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, fl
 #undef CONSIDER_PLAYER_DISTANCE
 
     return *nearest_player != NULL;
-}
-
-void SetPlayerGroupPosition(f32 x, f32 y, f32 z) {
-    NUVEC offset = {0.0f, 0.0f, 0.2f};
-    for (i32 i = 0; i < PLAYERCOUNT; i++) {
-        NUVEC position = {x, y, z};
-        NuVecAdd(&position, &position, &offset);
-        ResetPlayer(Player[i], 1, &position, 1);
-        NuVecRotateY(&offset, &offset, 0x2000);
-    }
 }
 
 i32 (*LastSafePosExtraFn)(GameObject_s *) = NULL;

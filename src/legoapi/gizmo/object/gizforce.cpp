@@ -30,28 +30,33 @@ void EndForce(GameObject_s *, i32);
 void GameCam_Blend(GAMECAMERA_s *, f32, f32, i32);
 
 void ReleaseForce(GameObject_s *object, i32 mode) {
-    if (object->character_context == 0x1b) {
-        if (object->force_target != NULL) {
-            if (object->force_target->character_context == 0x1c) {
-                object->force_target->character_context = -1;
-                object->force_target->force_target = NULL;
+    switch (object->character_context) {
+        case 8:
+            if (object->apiobj.player_controlled)
+                GameCam_Blend(GameCam, 1.0f, 0.0f, 1);
+            break;
+        case 0x1d:
+            if (object->force_part != NULL) {
+                object->force_part->force_player_mask &= ~(1 << static_cast<i8>(object->apiobj.field_0x27c));
+                if (object->force_part->force_player_mask == 0)
+                    object->force_part->force_player_mask = -1;
+                object->force_part->gravity = ForceThrowGravity;
+                object->force_part = NULL;
             }
-            object->force_target = NULL;
-        }
-    } else if (object->character_context == 0x1d) {
-        if (object->force_part != NULL) {
-            object->force_part->force_player_mask &= ~(1u << (object->apiobj.field_0x27c & 31));
-            if (object->force_part->force_player_mask == 0)
-                object->force_part->force_player_mask = -1;
-            object->force_part->gravity = ForceThrowGravity;
-            object->force_part = NULL;
-        }
-        object->character_context = -1;
-    } else if (object->character_context == 8) {
-        if (object->apiobj.player_controlled)
-            GameCam_Blend(GameCam, 1.0f, 0.0f, 1);
-    } else
-        return;
+            object->character_context = -1;
+            break;
+        case 0x1b:
+            if (object->force_target != NULL) {
+                if (object->force_target->character_context == 0x1c) {
+                    object->force_target->character_context = -1;
+                    object->force_target->force_target = NULL;
+                }
+                object->force_target = NULL;
+            }
+            break;
+        default:
+            return;
+    }
     EndForce(object, mode);
 }
 

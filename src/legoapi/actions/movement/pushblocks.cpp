@@ -113,8 +113,7 @@ i32 Push_UpdateHints(HINT_s *) {
 extern "C" f32 NuFmax(f32, f32);
 void NewBuzz(nupad_s *, f32, i32);
 void PushSeekComplete(pushblock_s *block, i32 index) {
-    block->completion_flags =
-        (block->completion_flags & 0xf807) | ((((block->completion_flags >> 3) | (1u << (index & 31))) & 0xff) << 3);
+    block->completed_outputs |= 1 << index;
     block->runtime_flags_0c9 &= ~2;
     if (!(block->flags_0cb & 0x20)) {
         block->flags_0cb |= 2;

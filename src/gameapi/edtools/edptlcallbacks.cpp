@@ -385,24 +385,22 @@ static void edptlcbApplyBounceFactor(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
         return;
     }
-    edpp_particle_s *particle = &edpp_ptls[edpp_nearest];
-    if (particle->instance_id == -1) {
+    if (edpp_ptls[edpp_nearest].instance_id == -1) {
         return;
     }
-    particle->reflection_bounce = static_cast<edui_slider_s *>(item)->value;
-    debkeydata[particle->instance_id].reflection_scale = particle->reflection_bounce;
+    edpp_ptls[edpp_nearest].reflection_bounce = static_cast<edui_slider_s *>(item)->value;
+    debkeydata[edpp_ptls[edpp_nearest].instance_id].reflection_scale = edpp_ptls[edpp_nearest].reflection_bounce;
 }
 
 static void edptlcbApplyBounceOffset(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
         return;
     }
-    edpp_particle_s *particle = &edpp_ptls[edpp_nearest];
-    if (particle->instance_id == -1) {
+    if (edpp_ptls[edpp_nearest].instance_id == -1) {
         return;
     }
-    particle->reflection_offset = static_cast<edui_slider_s *>(item)->value;
-    debkeydata[particle->instance_id].collision_plane = particle->reflection_offset;
+    edpp_ptls[edpp_nearest].reflection_offset = static_cast<edui_slider_s *>(item)->value;
+    debkeydata[edpp_ptls[edpp_nearest].instance_id].collision_plane = edpp_ptls[edpp_nearest].reflection_offset;
 }
 
 static void edptlcbCancelSoundIDMenu(eduimenu_s *, eduimenu_s *) {
@@ -1125,31 +1123,28 @@ static void cbPtlAddEffect(eduimenu_s *menu, eduiitem_s *, u32) {
         return;
     }
 
-    i32 index = 1;
-    while (index < EDPP_MAX_TYPES && debtab[index] != NULL)
-        ++index;
-    if (index < EDPP_MAX_TYPES) {
-        debtab[index] = &effecttypes[index];
-        *debtab[index] = *debtab[0];
-        debtab[index]->status = 1;
-        sprintf(debtab[index]->name, "New%d", index);
-        debtab[index]->category = edpp_effect_list;
-        if (edpp_effect_list == 0) {
-            i32 page = edbits_particle_general_page;
-            debtab[index]->page = static_cast<u8>(page);
-            edpp_page_used[page] = 1;
-        } else if (edpp_effect_list == 5) {
-            i32 page = edbits_particle_char_page;
-            debtab[index]->page = static_cast<u8>(page);
-            edpp_page_used[page] = 1;
-        } else if (edpp_effect_list == 1) {
-            i32 page = edbits_particle_level_page;
-            debtab[index]->page = static_cast<u8>(page);
-            edpp_page_used[page] = 1;
+    for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
+        if (debtab[index] == NULL) {
+            debtab[index] = &effecttypes[index];
+            memcpy(debtab[index], debtab[0], sizeof(debinftype));
+            debtab[index]->status = 1;
+            sprintf(debtab[index]->name, "New%d", index);
+            debtab[index]->category = edpp_effect_list;
+            if (edpp_effect_list == 0) {
+                debtab[index]->page = edbits_particle_general_page;
+                edpp_page_used[edbits_particle_general_page] = 1;
+            } else if (edpp_effect_list == 5) {
+                debtab[index]->page = edbits_particle_char_page;
+                edpp_page_used[edbits_particle_char_page] = 1;
+            } else if (edpp_effect_list == 1) {
+                debtab[index]->page = edbits_particle_level_page;
+                edpp_page_used[edbits_particle_level_page] = 1;
+            }
+            edpp_create_type = index;
+            ++edpp_types_used;
+            UpdateTotalPtls(debtab[index]);
+            break;
         }
-        edpp_create_type = index;
-        ++edpp_types_used;
-        UpdateTotalPtls(debtab[index]);
     }
     eduimenu_s *parent = menu->parent;
     if (parent != NULL)
@@ -1271,16 +1266,16 @@ static void cbPtlGSortMenu(eduimenu_s *menu, eduiitem_s *, u32) {
 }
 
 static void cbPtlSetFacing(eduimenu_s *, eduiitem_s *item, u32) {
-    edpp_particle_s *particle = &edpp_ptls[edpp_nearest];
-    particle->facing_mode = item->highlighted;
+    edpp_ptls[edpp_nearest].facing_mode = item->highlighted;
     if (item->highlighted) {
-        particle->facing_rotation_x = edpp_facrotx;
-        particle->facing_rotation_y = edpp_facroty;
-        DebrisSetFacing(particle->instance_id, 1, particle->facing_rotation_x, particle->facing_rotation_y);
+        edpp_ptls[edpp_nearest].facing_rotation_x = edpp_facrotx;
+        edpp_ptls[edpp_nearest].facing_rotation_y = edpp_facroty;
+        DebrisSetFacing(edpp_ptls[edpp_nearest].instance_id, 1, edpp_ptls[edpp_nearest].facing_rotation_x,
+                        edpp_ptls[edpp_nearest].facing_rotation_y);
     } else {
-        particle->facing_rotation_x = 0;
-        particle->facing_rotation_y = 0;
-        DebrisSetFacing(particle->instance_id, 0, 0, 0);
+        edpp_ptls[edpp_nearest].facing_rotation_x = 0;
+        edpp_ptls[edpp_nearest].facing_rotation_y = 0;
+        DebrisSetFacing(edpp_ptls[edpp_nearest].instance_id, 0, 0, 0);
     }
 }
 
@@ -1394,26 +1389,26 @@ static void cbPtlCopyEffect(eduimenu_s *menu, eduiitem_s *, u32) {
     if (edpp_create_type == -1) {
         eduiCreateMessageMenu(menu, "No particle to copy", 0);
     } else {
-        i32 index = 1;
-        while (index < EDPP_MAX_TYPES && debtab[index] != NULL)
-            ++index;
-        if (index < EDPP_MAX_TYPES) {
-            debinftype *effect = &effecttypes[index];
-            debtab[index] = effect;
-            *effect = *debtab[edpp_create_type];
-            effect->native_data = NULL;
-            effect->last_render_time = 0.0f;
-            const char *source_name = debtab[edpp_create_type]->name;
-            char short_name[32];
-            size_t name_length = strlen(source_name);
-            if (name_length > 12) {
-                memcpy(short_name, source_name, name_length + 1);
-                short_name[12] = '\0';
-                source_name = short_name;
+        for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
+            if (debtab[index] == NULL) {
+                debtab[index] = &effecttypes[index];
+                memcpy(debtab[index], debtab[edpp_create_type], sizeof(debinftype));
+                debtab[index]->native_data = NULL;
+                debtab[index]->last_render_time = 0.0f;
+                char *source_name = debtab[edpp_create_type]->name;
+                size_t name_length = strlen(source_name);
+                if (name_length <= 12) {
+                    sprintf(debtab[index]->name, "%s%03d", source_name, index);
+                } else {
+                    char short_name[16];
+                    memcpy(short_name, source_name, name_length + 1);
+                    short_name[12] = '\0';
+                    sprintf(debtab[index]->name, "%s%03d", short_name, index);
+                }
+                ++edpp_types_used;
+                edpp_create_type = index;
+                break;
             }
-            sprintf(effect->name, "%s%03d", source_name, index);
-            ++edpp_types_used;
-            edpp_create_type = index;
         }
         eduimenu_s *parent = menu->parent;
         if (parent != NULL)
@@ -2092,20 +2087,14 @@ static void cbPtlSelTextureType(eduimenu_s *menu, eduiitem_s *item, u32) {
         debinftype *effect = debtab[type];
         i8 old_type = static_cast<i8>(effect->particle_type);
         if (old_type != item->data) {
-            switch (item->data) {
-                case 0:
-                    edpp_ptls[edpp_nearest].render_priority = 20000;
-                    break;
-                case 2:
-                    edpp_ptls[edpp_nearest].render_priority = static_cast<i16>(40000);
-                    break;
-                case 3:
-                    edpp_ptls[edpp_nearest].render_priority = 30000;
-                    break;
-                case 7:
-                    edpp_ptls[edpp_nearest].render_priority = 10000;
-                    break;
-            }
+            if (item->data == 2)
+                edpp_ptls[edpp_nearest].render_priority = static_cast<i16>(40000);
+            else if (item->data == 3)
+                edpp_ptls[edpp_nearest].render_priority = 30000;
+            else if (item->data == 0)
+                edpp_ptls[edpp_nearest].render_priority = 20000;
+            else if (item->data == 7)
+                edpp_ptls[edpp_nearest].render_priority = 10000;
         }
         if (item->data == 7) {
             effect->time_group = 2;
@@ -2122,31 +2111,32 @@ static void cbPtlSelTextureType(eduimenu_s *menu, eduiitem_s *item, u32) {
             effect->particle_type = static_cast<u8>(item->data);
             GenericDebinfoDmaTypeUpdate(effect);
             for (i32 index = 0; index < 512; ++index) {
-                edpp_particle_s *particle = &edpp_ptls[index];
-                if (particle->effect_index != type || particle->instance_id != 99999) {
+                if (edpp_ptls[index].effect_index != type || edpp_ptls[index].instance_id != 99999) {
                     continue;
                 }
-                particle->instance_id = -1;
-                AddDebrisEffect(&particle->instance_id, type, particle->position.x, particle->position.y,
-                                particle->position.z);
-                if (particle->instance_id == -1) {
-                    particle->instance_id = 99999;
+                edpp_ptls[index].instance_id = -1;
+                AddDebrisEffect(&edpp_ptls[index].instance_id, type, edpp_ptls[index].position.x,
+                                edpp_ptls[index].position.y, edpp_ptls[index].position.z);
+                if (edpp_ptls[index].instance_id == -1) {
+                    edpp_ptls[index].instance_id = 99999;
                     continue;
                 }
-                debkeydata[particle->instance_id].field_2f9 = 0;
-                DebrisOrientation(particle->instance_id, particle->rotation_z, particle->rotation_y);
-                DebrisEmitterOrientation(particle->instance_id, particle->emitter_rotation_z,
-                                         particle->emitter_rotation_y, particle->emitter_rotation_x);
-                DebrisStartOffset(particle->instance_id, particle->start_offset);
-                DebrisSetTrigger(particle->instance_id, particle->switch_type, particle->switch_id,
-                                 particle->switch_variable);
-                DebrisReflectionOrientation(particle->instance_id, particle->reflection_rotation_z,
-                                            particle->reflection_rotation_y, particle->reflection_offset,
-                                            particle->reflection_bounce);
-                DebrisSetFacing(particle->instance_id, particle->facing_mode, particle->facing_rotation_x,
-                                particle->facing_rotation_y);
-                DebrisSetGroupID(particle->instance_id, particle->render_group);
-                DebrisSetRoomID(particle->instance_id, reinterpret_cast<nugscn_s *>(edpp_page_scene[particle->page]));
+                debkeydata[edpp_ptls[index].instance_id].field_2f9 = 0;
+                DebrisOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].rotation_z,
+                                  edpp_ptls[index].rotation_y);
+                DebrisEmitterOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].emitter_rotation_z,
+                                         edpp_ptls[index].emitter_rotation_y, edpp_ptls[index].emitter_rotation_x);
+                DebrisStartOffset(edpp_ptls[index].instance_id, edpp_ptls[index].start_offset);
+                DebrisSetTrigger(edpp_ptls[index].instance_id, edpp_ptls[index].switch_type, edpp_ptls[index].switch_id,
+                                 edpp_ptls[index].switch_variable);
+                DebrisReflectionOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].reflection_rotation_z,
+                                            edpp_ptls[index].reflection_rotation_y, edpp_ptls[index].reflection_offset,
+                                            edpp_ptls[index].reflection_bounce);
+                DebrisSetFacing(edpp_ptls[index].instance_id, edpp_ptls[index].facing_mode,
+                                edpp_ptls[index].facing_rotation_x, edpp_ptls[index].facing_rotation_y);
+                DebrisSetGroupID(edpp_ptls[index].instance_id, edpp_ptls[index].render_group);
+                DebrisSetRoomID(edpp_ptls[index].instance_id,
+                                reinterpret_cast<nugscn_s *>(edpp_page_scene[edpp_ptls[index].page]));
             }
         } else {
             effect->particle_type = static_cast<u8>(item->data);

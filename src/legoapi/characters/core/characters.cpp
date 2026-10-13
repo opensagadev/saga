@@ -633,10 +633,11 @@ i32 RedirectAnim(char *path, ANIMREDIRECT *redirects, ANIMLIST_s *animation_list
 }
 
 void CharScenes_Init(variptr_u *buf, variptr_u *) {
-    buf->addr = ALIGN(buf->addr, 4);
-    CharScene_Area = reinterpret_cast<CHARSCENE_s *>(buf->void_ptr);
-    buf->addr += static_cast<usize>(CHARCOUNT) * sizeof(*CharScene_Area);
-    memset(CharScene_Area, 0, static_cast<usize>(CHARCOUNT) * sizeof(*CharScene_Area));
+    const usize size = static_cast<usize>(CHARCOUNT) * sizeof(*CharScene_Area);
+    const usize area = ALIGN(buf->addr, 4);
+    CharScene_Area = reinterpret_cast<CHARSCENE_s *>(area);
+    buf->addr = area + size;
+    memset(reinterpret_cast<void *>(area), 0, size);
 }
 
 void CharScenes_LevelLoad(WORLDINFO *world) {
@@ -760,7 +761,9 @@ void FinishWeirdoNames(i32 which) {
 }
 
 GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle) {
-    if (Mission_Active(NULL) != NULL || name == NULL)
+    if (Mission_Active(NULL) != NULL)
+        return NULL;
+    if (name == NULL)
         return NULL;
     GameObject_s *object = GetNamedGameObject(WORLD->ai_sys, name);
     if (object == NULL || (object->apiobj.flags_high & 0x10) != 0)
@@ -1402,7 +1405,10 @@ void CharScenes_LevelDump(WORLDINFO_s *world) {
 
 void UpdateCharacterLoad() {
     const i32 menu_id = GetMenuID();
-    if (menu_id == 13 || (menu_id >= 15 && menu_id <= 19)) {
+    if (menu_id == 13) {
+        return;
+    }
+    if (menu_id >= 15 && menu_id <= 19) {
         return;
     }
 
@@ -1419,91 +1425,66 @@ void UpdateCharacterLoad() {
 
     i32 candidates[0x154] __attribute__((aligned(16)));
     i32 candidate_count = 0;
-    i32 candidate = 0;
-    i16 *fixed_candidate = NULL;
-    i32 fixed_value = -1;
-    i32 pack_index = 0;
 
     if (id_BARMAN != -1 && APICharacterLoaded(id_BARMAN) == NULL) {
-        fixed_candidate = &id_BARMAN;
-        goto queue_fixed_character;
-    }
-    if (id_CANTINABAND != -1 && APICharacterLoaded(id_CANTINABAND) == NULL) {
-        fixed_candidate = &id_CANTINABAND;
-        goto queue_fixed_character;
-    }
-    if (id_WEIRDO1 != -1 && APICharacterLoaded(id_WEIRDO1) == NULL) {
-        fixed_candidate = &id_WEIRDO1;
-        goto queue_fixed_character;
-    }
-    if (id_WEIRDO2 != -1 && APICharacterLoaded(id_WEIRDO2) == NULL) {
-        fixed_candidate = &id_WEIRDO2;
-        goto queue_fixed_character;
-    }
-    if (id_JABBA != -1 && APICharacterLoaded(id_JABBA) == NULL) {
-        fixed_candidate = &id_JABBA;
-        goto queue_fixed_character;
-    }
-    if (id_MOSEISLEYCITIZEN != -1 && APICharacterLoaded(id_MOSEISLEYCITIZEN) == NULL) {
-        fixed_candidate = &id_MOSEISLEYCITIZEN;
-        goto queue_fixed_character;
-    }
-    if (id_CANTINAALIEN != -1 && APICharacterLoaded(id_CANTINAALIEN) == NULL) {
-        fixed_candidate = &id_CANTINAALIEN;
-        goto queue_fixed_character;
-    }
-    if (id_WOMPRAT != -1 && APICharacterLoaded(id_WOMPRAT) == NULL) {
-        fixed_candidate = &id_WOMPRAT;
-        goto queue_fixed_character;
-    }
+        candidates[candidate_count++] = id_BARMAN;
+    } else if (id_CANTINABAND != -1 && APICharacterLoaded(id_CANTINABAND) == NULL) {
+        candidates[candidate_count++] = id_CANTINABAND;
+    } else if (id_WEIRDO1 != -1 && APICharacterLoaded(id_WEIRDO1) == NULL) {
+        candidates[candidate_count++] = id_WEIRDO1;
+    } else if (id_WEIRDO2 != -1 && APICharacterLoaded(id_WEIRDO2) == NULL) {
+        candidates[candidate_count++] = id_WEIRDO2;
+    } else if (id_JABBA != -1 && APICharacterLoaded(id_JABBA) == NULL) {
+        candidates[candidate_count++] = id_JABBA;
+    } else if (id_MOSEISLEYCITIZEN != -1 && APICharacterLoaded(id_MOSEISLEYCITIZEN) == NULL) {
+        candidates[candidate_count++] = id_MOSEISLEYCITIZEN;
+    } else if (id_CANTINAALIEN != -1 && APICharacterLoaded(id_CANTINAALIEN) == NULL) {
+        candidates[candidate_count++] = id_CANTINAALIEN;
+    } else if (id_WOMPRAT != -1 && APICharacterLoaded(id_WOMPRAT) == NULL) {
+        candidates[candidate_count++] = id_WOMPRAT;
+    } else {
+        i32 pack_index = 0;
+        for (STOREPACK *pack = StorePack; pack != StorePack + 11; ++pack, ++pack_index) {
+            if (g_lowEndLevelBehaviour != 0 && Hub_LowEnd_IconsInsteadOfModels != 0) {
+                continue;
+            }
+            if (Store_IsPackUnlocked(pack_index) != 0 || pack->id == NULL) {
+                continue;
+            }
 
-    for (STOREPACK *pack = StorePack; pack != StorePack + 11; ++pack, ++pack_index) {
-        if (g_lowEndLevelBehaviour != 0 && Hub_LowEnd_IconsInsteadOfModels != 0) {
-            continue;
-        }
-        if (Store_IsPackUnlocked(pack_index) != 0 || pack->id == NULL) {
-            continue;
+            const i32 id = *pack->id;
+            if (id != -1 && APICharacterLoaded(id) == NULL) {
+                candidates[candidate_count++] = id;
+                break;
+            }
         }
 
-        const i32 id = *pack->id;
-        if (id != -1 && APICharacterLoaded(id) == NULL) {
-            fixed_value = id;
-            goto queue_fixed_value;
+        if (candidate_count == 0) {
+            for (i32 id = 0; id < CHARCOUNT; ++id) {
+                if (id == id_DROIDEKA || (CDataList[id].model_flags & 0x04002000) != 0 ||
+                    APICharacterLoaded(id) != NULL) {
+                    continue;
+                }
+                if (static_cast<i32>(CDataList[id].field5_0x14) + apicharsys->loaded_animation_count >
+                    apicharsys->animation_capacity) {
+                    continue;
+                }
+                if (InCollectList_Index(id, NULL, 0) == -1 || Collection_Got(id) == 0) {
+                    continue;
+                }
+                candidates[candidate_count++] = id;
+            }
         }
-    }
-
-    for (i32 id = 0; id < CHARCOUNT; ++id) {
-        if (id == id_DROIDEKA || (CDataList[id].model_flags & 0x04002000) != 0 || APICharacterLoaded(id) != NULL) {
-            continue;
-        }
-        if (static_cast<i32>(CDataList[id].field5_0x14) + apicharsys->loaded_animation_count >
-            apicharsys->animation_capacity) {
-            continue;
-        }
-        if (InCollectList_Index(id, NULL, 0) == -1 || Collection_Got(id) == 0) {
-            continue;
-        }
-        candidates[candidate_count++] = id;
     }
 
     if (candidate_count == 0) {
         return;
     }
 
+    i32 candidate = 0;
     if (candidate_count != 1) {
         candidate = qrand() / ((0xffff / candidate_count) + 1);
     }
-    goto queue_character;
-
-queue_fixed_character:
-    candidates[0] = *fixed_candidate;
-    candidate = 0;
-    goto queue_character;
-
-queue_fixed_value:
-    candidates[0] = fixed_value;
-    candidate = 0;
-queue_character:
     waiting_for_character = candidates[candidate];
     WaitingForCharacterTime = 0.0f;
     bgPostRequest(LoadSingleCharacter, NULL, NULL, 0);
@@ -1770,7 +1751,8 @@ AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_
 i32 newCharactersCollected(STATUSPACKET_s *) {
     i32 count = 0;
     for (i16 *player_id = Area_PlayerIDList; *player_id != -1 && count < 7; ++player_id) {
-        const i32 id = *player_id;
+        const i16 player = *player_id;
+        const i32 id = player;
         i32 previous = 0;
         while (previous < count && StatusCollectList.ids[previous] != id) {
             ++previous;
@@ -1781,7 +1763,7 @@ i32 newCharactersCollected(STATUSPACKET_s *) {
             }
             const i32 index = InCollectList_Index(id, MasterCollection.list, MasterCollection.count_y);
             if (index != -1 && MasterCollection.list[index].can_buy == 0) {
-                StatusCollectList.ids[count++] = *player_id;
+                StatusCollectList.ids[count++] = player;
                 if (MasterCollection.list[index].field5_0x9 != 0) {
                     AddToCompletionPoints(POINTS_PER_CHARACTER);
                 }
@@ -1877,14 +1859,17 @@ void SetGameObjectCharacterData(GameObject_s *obj) {
 }
 
 void CollectCharactersOff_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    if (stage->field_0x14 == 0) {
-        stage->field_0x18 = 0.0f;
-        stage->field_0x1c = 1.0f;
-        stage->field_0x14 = 1;
-    } else if (stage->field_0x14 == 1) {
-        stage->field_0x18 += elapsed;
-        if (stage->field_0x18 >= stage->field_0x1c)
-            NextStatusStage(packet);
+    switch (stage->field_0x14) {
+        case 0:
+            stage->field_0x18 = 0.0f;
+            stage->field_0x1c = 1.0f;
+            stage->field_0x14 = 1;
+            break;
+        case 1:
+            stage->field_0x18 += elapsed;
+            if (stage->field_0x18 >= stage->field_0x1c)
+                NextStatusStage(packet);
+            break;
     }
 }
 

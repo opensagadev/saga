@@ -231,11 +231,8 @@ static void CS_blobshadow_fadenear(NUFPAR *fp) {
 
 static void CS_blobshadow_alpha(NUFPAR *fp) {
     i32 alpha = NuFParGetInt(fp);
-    if (alpha < 0) {
-        alpha = 0;
-    } else if (alpha > 0xfe) {
-        alpha = 0xfe;
-    }
+    alpha = alpha < 0 ? 0 : alpha;
+    alpha = alpha > 0xfe ? 0xfe : alpha;
     CS_CutInfo->blob_shadow_alpha = static_cast<u8>(alpha);
 }
 
@@ -321,13 +318,11 @@ static void CS_tex_anim(NUFPAR *fp) {
     if (CS_texanimcount > 3) {
         return;
     }
-    CUTSCENETEXANIM *animation = &CS_CutInfo->texture_animations[CS_texanimcount];
-    animation->index = NuFParGetInt(fp);
-    if (animation->index == -1) {
+    // Retail re-reads the cut info and slot for each store.
+    if ((CS_CutInfo->texture_animations[CS_texanimcount].index = NuFParGetInt(fp)) == -1) {
         return;
     }
-    animation->frame = static_cast<f32>(NuFParGetInt(fp));
-    if (animation->frame >= 0.0f) {
+    if ((CS_CutInfo->texture_animations[CS_texanimcount].frame = static_cast<f32>(NuFParGetInt(fp))) >= 0.0f) {
         ++CS_texanimcount;
     }
 }
@@ -1810,35 +1805,6 @@ extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s 
                                         NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
 void Draw3DObjectMtx(WORLDINFO_s *, i32, numtx_s *);
 
-static __used__ void LocatorFunction_Blaster(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
-                                             NUGCUTLOCATOR_s *locator, float frame, numtx_s *parent_mtx, int) {
-    nuanimtime_s time;
-    NuAnimData2CalcTime(locator->animation, frame, &time);
-    if (NuGCutLocatorIsVisble(locator, frame, &time, NULL, NULL) == 0) {
-        return;
-    }
-    // Retail realigns the frame (and esp,-16) for this matrix.
-    NUMTX_ALIGNED16 matrix;
-    NuGCutLocatorCalcMtx(locator, frame, &matrix, &time);
-    if ((locator->flags & 4) != 0) {
-        NuMtxPreTranslate(&matrix, &locator->pivot);
-    }
-    if (parent_mtx != NULL) {
-        NuMtxMul(&matrix, &matrix, parent_mtx);
-    }
-    if (CutSceneSys != NULL) {
-        Draw3DObjectMtx(NULL, CutSceneSys->blaster_object_0, &matrix);
-        Draw3DObjectMtx(NULL, CutSceneSys->blaster_object_1, &matrix);
-    }
-}
-
-extern "C" {
-    __attribute__((weak)) NUGCUTLOCATORFNENTRY_s cutscene_locatorfns[] = {
-        {"blaster", 0, 0, 0, LocatorFunction_Blaster},
-        {NULL, 0, 0, 0, NULL},
-    };
-}
-
 void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance);
 void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance);
 extern "C" void DebFreeInstantly(i32 *handle);
@@ -2814,11 +2780,10 @@ static __used__ void CutScene_OverrideConfigFileName_LSW(char *filename, int, in
     if (PODSPRINT_ADATA == NULL || WorldInfo_CurrentlyActive()->area != PODSPRINT_ADATA) {
         return;
     }
-    char prefix[] = "episodei\\ep1_podrace_";
-    if (NuStrIStr(filename, prefix) != filename) {
+    if (NuStrIStr(filename, const_cast<char *>("episodei\\ep1_podrace_")) != filename) {
         return;
     }
-    char *suffix = filename + NuStrLen(prefix);
+    char *suffix = filename + NuStrLen(const_cast<char *>("episodei\\ep1_podrace_"));
     if (NuStrICmp(suffix, "arrival1") == 0 || NuStrICmp(suffix, "arrival2") == 0 ||
         NuStrICmp(suffix, "arrival3") == 0 || NuStrICmp(suffix, "arrival4") == 0 || NuStrICmp(suffix, "intro") == 0 ||
         NuStrICmp(suffix, "tuskenraiders") == 0 || NuStrICmp(suffix, "outro1") == 0 ||

@@ -819,7 +819,7 @@ void Text_InsertCommasIntoNumber(char *number, char *text, i32 length) {
     char separator;
     if (Text_Language == 2) {
         separator = ' ';
-    } else if (Text_Language == 18 || Text_Language == 1 || Text_Language == 0) {
+    } else if (Text_Language == 1 || Text_Language == 18 || Text_Language == 0) {
         separator = ',';
     } else {
         separator = '.';
@@ -833,7 +833,7 @@ void Text_InsertCommasIntoNumber(char *number, char *text, i32 length) {
     for (i32 digit = 0; digit < length; ++digit) {
         text[output++] = number[digit];
         const i32 remaining = length - digit - 1;
-        if (remaining > 0 && remaining % 3 == 0) {
+        if (remaining != 0 && remaining % 3 == 0) {
             text[output++] = separator;
         }
     }

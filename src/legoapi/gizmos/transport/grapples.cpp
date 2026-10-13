@@ -745,18 +745,17 @@ ADDGIZMOTYPE *Grapples_RegisterGizmo(i32 type_id) {
 
 GRAPPLE *Grapple_AddDynamic(void *attached_object, i32 retain_attachment) {
     for (i32 index = 0; index < 4; ++index) {
-        if (DynamicGrapple[index].attached_object != attached_object) {
-            continue;
+        if (DynamicGrapple[index].attached_object == attached_object) {
+            return &DynamicGrapple[index];
         }
-        return &DynamicGrapple[index];
     }
 
     for (i32 index = 0; index < 4; ++index) {
-        GRAPPLE *grapple = &DynamicGrapple[index];
-        if (grapple->attached_object == NULL) {
+        if (DynamicGrapple[index].attached_object == NULL) {
+            GRAPPLE *grapple = &DynamicGrapple[index];
             grapple->attached_object = static_cast<GameObject_s *>(attached_object);
-            grapple->flags |= GRAPPLE_FLAG_VISIBLE;
             grapple->retain_attachment = static_cast<u8>(retain_attachment);
+            grapple->flags |= GRAPPLE_FLAG_VISIBLE;
             return grapple;
         }
     }

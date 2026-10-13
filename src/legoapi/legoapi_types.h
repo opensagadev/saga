@@ -3447,7 +3447,15 @@ struct instNUGCUTSCENE_s;
 struct mdct_lookup {};
 struct minisnowtrooper_s {
     u8 formation_index;
-    u8 state_flags;
+    union {
+        u8 state_flags;
+        struct {
+            u8 state_low_bits : 2;
+            u8 step_frame : 2;
+            u8 slot : 2;
+            u8 state_high_bits : 2;
+        };
+    };
     u8 reserved_002;
     u8 speed_divisor;
     u16 rotation;
@@ -3479,12 +3487,14 @@ struct minitrooperteam_s {
         struct {
             u8 formation_shape : 4;
             u8 formation_mode : 4;
-            u8 route_flags : 5;
+            u8 previous_mode : 4;
+            u8 mode_changed : 1;
             u8 route_index : 3;
-            u16 waypoint_flags : 3;
+            u16 waypoint_current : 3;
             u16 waypoint_index : 3;
             u16 waypoint_count : 3;
-            u16 team_bits : 7;
+            u16 team_side : 1;
+            u16 team_bits : 6;
         };
     };
     u8 trooper_count;
@@ -3743,6 +3753,11 @@ struct pushblock_s {
     union {
         u16 completion_flags; // 0xcc
         u16 field_0xcc;
+        struct {
+            u16 completion_low_bits : 3;
+            u16 completed_outputs : 8;
+            u16 completion_high_bits : 5;
+        };
     };
     union {
         struct {

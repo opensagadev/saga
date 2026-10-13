@@ -1040,20 +1040,18 @@ void WorldInfo_DrawScene(WORLDINFO *world) {
 }
 
 void WorldInfo_UpdateRoomVisibility(WORLDINFO *world, i32 param) {
-    // NOTE: using the named `rooms_visible` field (vs a raw byte offset) shifts
-    // GCC 4.7's register allocation for the 0x100-byte memset alignment path,
-    // dropping the fuzzy match (~70% -> ~65%) with identical instructions.
-    u8 *visBuf = world->rooms_visible;
     world->room_visibility_flag = 1;
-    world->rooms_visible_ptr = visBuf;
-    memset(visBuf, 0, 0x100);
+    world->rooms_visible_ptr = world->rooms_visible;
+    memset(world->rooms_visible, 0, 0x100);
 
-    if (param == 0 && world->current_gscn != NULL && world->current_gscn->num_rooms > 0) {
-        u8 *room_data = reinterpret_cast<u8 *>(world->current_gscn->rooms);
-        u8 *end = visBuf + world->current_gscn->num_rooms;
-        while (visBuf != end) {
-            *visBuf++ = static_cast<u8>((room_data[0x10] >> 2) & 1);
-            room_data += 0x18;
+    if (param == 0 && world->current_gscn != NULL) {
+        const i32 room_count = world->current_gscn->num_rooms;
+        if (room_count > 0) {
+            u8 *visible = world->rooms_visible_ptr;
+            NUROOM *rooms = world->current_gscn->rooms;
+            for (i32 i = 0; i < room_count; ++i) {
+                visible[i] = (rooms[i].flags & 4) != 0;
+            }
         }
     }
 }

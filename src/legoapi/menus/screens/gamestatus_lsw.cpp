@@ -203,27 +203,27 @@ void SetBonusWinner(i32 player) {
 }
 
 STATUS_STAGE_s *FindStatusStage(i32 type) {
-    for (STATUS_STAGE_s *stage = StatusStages; stage->type != -1; ++stage) {
-        if (stage->type == type) {
-            return stage;
+    for (i32 i = 0; StatusStages[i].type != -1; ++i) {
+        if (StatusStages[i].type == type) {
+            return &StatusStages[i];
         }
     }
     return NULL;
 }
 
 void NextStatusStage(STATUSPACKET_s *packet) {
-    STATUS_STAGE_s *stage = packet->stage;
-    if (stage != NULL) {
-        if (stage->field_0x14 == -1 && packet->field_0x68 > stage->field_0x18) {
+    if (packet->stage != NULL) {
+        if (packet->stage->field_0x14 == -1 && packet->field_0x68 > packet->stage->field_0x18) {
             packet->field_0xb0 |= 2;
             return;
         }
-        stage->field_0x12 = 1;
+        packet->stage->field_0x12 = 1;
     }
 
+    STATUS_STAGE_s *stage = packet->stage;
+    ++packet->current_gold_brick;
     packet->previous_stage_2 = packet->previous_stage;
     packet->previous_stage = stage;
-    ++packet->current_gold_brick;
     packet->stage = packet->next_stage;
     packet->next_stage = FindStatusStage(packet->stage_types[packet->current_gold_brick + 1]);
 
@@ -245,11 +245,11 @@ void NextStatusStage(STATUSPACKET_s *packet) {
     packet->field_0xb0 &= ~2;
     status_prompt = 0;
 
-    if (packet->stage->type == 10 || packet->stage->type == 11) {
+    if ((packet->stage != NULL && packet->stage->type == 11) || packet->stage->type == 10) {
         ResetRumble(reinterpret_cast<RUMBLEPACKET *>(&packet->player0_rumble_amount));
         ResetRumble(reinterpret_cast<RUMBLEPACKET *>(&packet->player1_rumble_amount));
     }
-    if (packet->stage->type == 11) {
+    if (packet->stage != NULL && packet->stage->type == 11) {
         ReCalculateCompletionPoints();
     }
 }
@@ -846,71 +846,75 @@ void UpdateIconWibble() {
 }
 
 void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    if (stage->field_0x14 == 0) {
-        if (stage->field_0x18 == 0.0f) {
-            NewMenu(0x400, 0, -1);
-        }
-        stage->field_0x18 += elapsed;
-        const i32 menu_level = GameMenuLevel;
-        if (stage->field_0x18 >= 0.5f) {
-            GAMEPAD_s *pad = GamePad;
-            for (i32 player = 0; player < 2; ++player, ++pad) {
-                if (packet->player_active[player] != 0) {
-                    bool selected = false;
-                    if (menu_level > 0 && GameMenu[menu_level].queued_item != -1) {
-                        status_prompt = GameMenu[menu_level].queued_item;
-                        GameMenu[menu_level].queued_item = -1;
-                        selected = true;
-                    }
-                    const u32 buttons = pad->buttons_pressed;
-                    if ((buttons & GAMEPAD_MENUSELECT) != 0) {
-                        selected = true;
-                    }
-                    bool moved = false;
-                    if ((buttons & GAMEPAD_MENUSELECT) == 0 &&
-                        (((packet->field_0xb0 & 0x48) == 8 &&
-                          (packet->next_area == -1 || (packet->area->flags & 2) != 0 ||
-                           Game.area_save[packet->next_area].complete != 0)) ||
-                         (packet->mode_flags & 1) != 0 || packet->challenge_state != 0 || packet->mission_state != 0)) {
-                        const u32 navigation = buttons | pad->left_directions;
-                        if (status_prompt < 1) {
-                            if ((navigation & GAMEPAD_DDOWN) != 0) {
+    switch (stage->field_0x14) {
+        case 0: {
+            if (stage->field_0x18 == 0.0f) {
+                NewMenu(0x400, 0, -1);
+            }
+            stage->field_0x18 += elapsed;
+            const i32 menu_level = GameMenuLevel;
+            if (stage->field_0x18 >= 0.5f) {
+                MENU *menu = &GameMenu[menu_level];
+                i32 player = 0;
+                i32 selected;
+                i32 moved_down;
+                i32 moved_up;
+                do {
+                    selected = 0;
+                    moved_down = 0;
+                    moved_up = 0;
+                    if (packet->player_active[player] != 0) {
+                        if (GameMenuLevel > 0 && menu->queued_item != -1) {
+                            status_prompt = menu->queued_item;
+                            menu->queued_item = -1;
+                            selected = 1;
+                        }
+                        const u32 buttons = GamePad[player].buttons_pressed;
+                        if ((buttons & GAMEPAD_MENUSELECT) != 0) {
+                            selected = 1;
+                        } else if (((packet->field_0xb0 & 0x48) == 8 &&
+                                    (packet->next_area == -1 || (packet->area->flags & 2) != 0 ||
+                                     Game.area_save[packet->next_area].complete != 0)) ||
+                                   (packet->mode_flags & 1) != 0 || packet->challenge_state != 0 ||
+                                   packet->mission_state != 0) {
+                            if (status_prompt < 1) {
+                                if (((buttons | GamePad[player].left_directions) & GAMEPAD_DDOWN) != 0) {
+                                    GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+                                    ++status_prompt;
+                                    moved_down = 1;
+                                }
+                            } else if (((buttons | GamePad[player].left_directions) & GAMEPAD_DUP) != 0) {
                                 GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-                                ++status_prompt;
-                                moved = true;
+                                --status_prompt;
+                                moved_up = 1;
                             }
-                        } else if ((navigation & GAMEPAD_DUP) != 0) {
-                            GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-                            --status_prompt;
-                            moved = true;
                         }
                     }
-                    if (selected) {
-                        packet->prompt_choice = (packet->field_0xb0 & 8) != 0 && packet->next_area != -1 &&
-                                                        (packet->area->flags & 2) == 0 &&
-                                                        Game.area_save[packet->next_area].complete == 0
-                                                    ? 1
-                                                    : static_cast<u8>(status_prompt);
-                        GameAudio_PlaySfx(0x30, NULL, 0, 0);
-                        stage->field_0x14 = 1;
-                        stage->field_0x18 = 0.0f;
-                        stage->field_0x1c = 0.5f;
-                        return;
-                    }
-                    if (!moved) {
-                        continue;
-                    }
-                    return;
+                    ++player;
+                } while (selected == 0 && player < 2 && (moved_down | moved_up) == 0);
+                if (selected) {
+                    packet->prompt_choice = (packet->field_0xb0 & 8) != 0 && packet->next_area != -1 &&
+                                                    (packet->area->flags & 2) == 0 &&
+                                                    Game.area_save[packet->next_area].complete == 0
+                                                ? 1
+                                                : static_cast<u8>(status_prompt);
+                    GameAudio_PlaySfx(0x30, NULL, 0, 0);
+                    stage->field_0x14 = 1;
+                    stage->field_0x18 = 0.0f;
+                    stage->field_0x1c = 0.5f;
                 }
             }
+            break;
         }
-    } else if (stage->field_0x14 == 1) {
-        if (stage->field_0x18 == 0.0f) {
-            BackupMenu();
-        }
-        stage->field_0x18 += elapsed;
-        if (stage->field_0x18 > stage->field_0x1c) {
-            NextStatusStage(packet);
+        case 1: {
+            if (stage->field_0x18 == 0.0f) {
+                BackupMenu();
+            }
+            stage->field_0x18 += elapsed;
+            if (stage->field_0x18 > stage->field_0x1c) {
+                NextStatusStage(packet);
+            }
+            break;
         }
     }
 }
@@ -1341,23 +1345,27 @@ void FinishStatusPacket(i32 choice) {
 }
 
 void RedBrick_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    if (stage->field_0x14 == 0) {
-        stage->field_0x18 = 0.0f;
-        stage->field_0x1c = 5.0f;
-        stage->field_0x14 = 1;
-    } else if (stage->field_0x14 == 1) {
-        const f32 previous = stage->field_0x18;
-        stage->field_0x18 += elapsed;
-        if (stage->field_0x18 >= stage->field_0x1c)
-            NextStatusStage(packet);
-        else if (previous < 0.75f && stage->field_0x18 >= 0.75f) {
-            PlaySfx(const_cast<char *>("TrueJedi_100pc"), NULL);
-            NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
+    switch (stage->field_0x14) {
+        case 0:
+            stage->field_0x18 = 0.0f;
+            stage->field_0x1c = 5.0f;
+            stage->field_0x14 = 1;
+            break;
+        case 1: {
+            const f32 previous = stage->field_0x18;
+            stage->field_0x18 += elapsed;
+            if (stage->field_0x18 >= stage->field_0x1c)
+                NextStatusStage(packet);
+            else if (previous < 0.75f && stage->field_0x18 >= 0.75f) {
+                PlaySfx(const_cast<char *>("TrueJedi_100pc"), NULL);
+                NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
+            }
+            break;
         }
     }
 }
 
-f32 nextsoundpercent;
+static f32 nextsoundpercent = 5.0f;
 void TrueHero_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
     static f32 spdelay;
     switch (stage->field_0x14) {
@@ -1370,8 +1378,8 @@ void TrueHero_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float el
             stage->field_0x18 += elapsed;
             if (stage->field_0x18 >= stage->field_0x1c) {
                 stage->field_0x14 = 2;
-                stage->field_0x1c = 3.0f;
                 stage->field_0x18 = 0.0f;
+                stage->field_0x1c = 3.0f;
                 nextsoundpercent = 5.0f;
                 packet->true_hero_percent = 0.0f;
             }
@@ -1380,8 +1388,9 @@ void TrueHero_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float el
             SetDrawGoldBrick(packet, packet->current_gold_brick);
             f32 percent = 100.0f;
             if ((packet->field_0xb0 & 4) == 0) {
-                const f32 ratio = packet->collected_score * 100.0f / packet->true_hero_target;
-                percent = ratio <= 99.0f ? ratio : 99.0f;
+                percent = packet->collected_score * 100.0f / packet->true_hero_target;
+                if (percent > 99.0f)
+                    percent = 99.0f;
             }
             stage->field_0x18 += elapsed;
             packet->true_hero_percent += (100.0f / stage->field_0x1c) * elapsed;
@@ -1468,9 +1477,11 @@ f32 getFinishedStatusAlpha(STATUSPACKET_s *packet) {
             alpha = 1.0f - stage->field_0x18;
         } else {
             const f32 fade_start = stage->field_0x1c - 1.0f;
-            alpha = stage->field_0x18 < fade_start
-                        ? 0.0f
-                        : (stage->field_0x18 - fade_start) / (stage->field_0x1c - fade_start);
+            if (stage->field_0x18 >= fade_start) {
+                alpha = (stage->field_0x18 - fade_start) / (stage->field_0x1c - fade_start);
+            } else {
+                alpha = 0.0f;
+            }
         }
     }
     return alpha;
@@ -1663,18 +1674,24 @@ void SuperStoryScore_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
 }
 
 void SuperStoryTime_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    if (stage->field_0x14 != 0) {
-        if (stage->field_0x14 == 1) {
+    switch (stage->field_0x14) {
+        case 0:
+            stage->field_0x14 = 1;
+            stage->field_0x18 = 0.0f;
+            stage->field_0x1c = 5.0f;
+            packet->original_score = *packet->score;
+            break;
+        case 1: {
             const f32 previous = stage->field_0x18;
             stage->field_0x18 += elapsed;
             if (stage->field_0x18 >= stage->field_0x1c) {
                 *packet->score = packet->time_reward_score;
                 NextStatusStage(packet);
             } else if (previous < 0.5f && stage->field_0x18 >= 0.5f) {
-                if (packet->new_best_time == 0.0f)
-                    GameAudio_PlaySfx(0x32, NULL, 0, 0);
-                else
+                if (packet->new_best_time != 0.0f)
                     PlaySfx(const_cast<char *>("StatusAward"), NULL);
+                else
+                    GameAudio_PlaySfx(0x32, NULL, 0, 0);
                 NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
             }
             if (packet->new_best_time != 0.0f) {
@@ -1686,64 +1703,63 @@ void SuperStoryTime_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, fl
                 if (stage->field_0x18 >= 4.5f)
                     *packet->score = packet->time_reward_score;
                 else if (stage->field_0x18 >= 0.5f && stage->field_0x18 < 4.0f) {
-                    const u32 difference = packet->time_reward_score - packet->original_score;
-                    const f32 blend =
-                        NuTrigTable[(static_cast<i32>(((stage->field_0x18 - 0.5f) / 3.5f) * 16384.0f) >> 1) & 0x7fff];
+                    const f32 difference = static_cast<f32>(packet->time_reward_score - packet->original_score);
+                    const i32 increase = static_cast<i32>(
+                        difference *
+                        NuTrigTable[(static_cast<i32>(((stage->field_0x18 - 0.5f) / 3.5f) * 16384.0f) >> 1) & 0x7fff]);
                     *packet->score = packet->original_score;
-                    IncreaseScore(packet->score,
-                                  static_cast<i64>(static_cast<i32>(static_cast<f32>(difference) * blend)), 0);
+                    IncreaseScore(packet->score, static_cast<i64>(increase), 0);
                     if (static_cast<i32>(previous / 0.2f) != static_cast<i32>(stage->field_0x18 / 0.2f))
                         PlaySfx(const_cast<char *>("PickupCoin"), NULL);
                 }
             }
+            break;
         }
-    } else {
-        stage->field_0x14 = 1;
-        stage->field_0x18 = 0.0f;
-        stage->field_0x1c = 5.0f;
-        packet->original_score = *packet->score;
     }
 }
 
 void SuperStoryScore_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    if (stage->field_0x14 == 0) {
-        stage->field_0x14 = 1;
-        stage->field_0x18 = 0.0f;
-        stage->field_0x1c = 5.0f;
-        packet->original_score = *packet->score;
-    } else if (stage->field_0x14 == 1) {
-        const f32 previous = stage->field_0x18;
-        stage->field_0x18 += elapsed;
-        if (stage->field_0x18 >= stage->field_0x1c) {
-            *packet->score = packet->final_reward_score;
-            NextStatusStage(packet);
-        } else if (previous < 0.5f && stage->field_0x18 >= 0.5f) {
-            if (packet->new_best_score == 0)
-                GameAudio_PlaySfx(0x32, NULL, 0, 0);
-            else
-                PlaySfx(const_cast<char *>("StatusAward"), NULL);
-            NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
-        }
-        if (packet->final_reward_score != packet->original_score) {
-            if (previous < 4.0f && stage->field_0x18 >= 4.0f) {
-                CoinTotalScale = 1.5f;
-                NewStatusRumbleBuzz(-1, 0.0f, 0.1f, 0);
-                PlaySfx(const_cast<char *>("Shop_BuyCheat"), NULL);
-            }
-            if (stage->field_0x18 >= 4.0f)
+    switch (stage->field_0x14) {
+        case 0:
+            stage->field_0x14 = 1;
+            stage->field_0x18 = 0.0f;
+            stage->field_0x1c = 5.0f;
+            packet->original_score = *packet->score;
+            break;
+        case 1: {
+            const f32 previous = stage->field_0x18;
+            stage->field_0x18 += elapsed;
+            if (stage->field_0x18 >= stage->field_0x1c) {
                 *packet->score = packet->final_reward_score;
-            else if (stage->field_0x18 >= 0.5f && stage->field_0x18 < 4.0f) {
-                const f32 blend =
-                    1.0f -
-                    NuTrigTable[(static_cast<i32>(((stage->field_0x18 - 0.5f) / 3.5f) * 16384.0f + 16384.0f) >> 1) &
-                                0x7fff];
-                const u32 difference = packet->final_reward_score - packet->original_score;
-                *packet->score = packet->original_score;
-                IncreaseScore(packet->score, static_cast<i64>(static_cast<i32>(static_cast<f32>(difference) * blend)),
-                              0);
-                if (static_cast<i32>(previous / 0.2f) != static_cast<i32>(stage->field_0x18 / 0.2f))
-                    PlaySfx(const_cast<char *>("PickupCoin"), NULL);
+                NextStatusStage(packet);
+            } else if (previous < 0.5f && stage->field_0x18 >= 0.5f) {
+                if (packet->new_best_score != 0)
+                    PlaySfx(const_cast<char *>("StatusAward"), NULL);
+                else
+                    GameAudio_PlaySfx(0x32, NULL, 0, 0);
+                NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
             }
+            if (packet->final_reward_score != packet->original_score) {
+                if (previous < 4.0f && stage->field_0x18 >= 4.0f) {
+                    CoinTotalScale = 1.5f;
+                    NewStatusRumbleBuzz(-1, 0.0f, 0.1f, 0);
+                    PlaySfx(const_cast<char *>("Shop_BuyCheat"), NULL);
+                }
+                if (stage->field_0x18 >= 4.0f)
+                    *packet->score = packet->final_reward_score;
+                else if (stage->field_0x18 >= 0.5f && stage->field_0x18 < 4.0f) {
+                    const f32 blend =
+                        1.0f -
+                        NuTrigTable[(static_cast<i32>(((stage->field_0x18 - 0.5f) / 3.5f) * 16384.0f + 16384.0f) >> 1) &
+                                    0x7fff];
+                    const f32 difference = static_cast<f32>(packet->final_reward_score - packet->original_score);
+                    *packet->score = packet->original_score;
+                    IncreaseScore(packet->score, static_cast<i64>(static_cast<i32>(difference * blend)), 0);
+                    if (static_cast<i32>(previous / 0.2f) != static_cast<i32>(stage->field_0x18 / 0.2f))
+                        PlaySfx(const_cast<char *>("PickupCoin"), NULL);
+                }
+            }
+            break;
         }
     }
 }
@@ -2125,8 +2141,14 @@ void ChallangeCash_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {
     STUBBED();
 }
 void BonusWin_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    if (stage->field_0x14 != 0) {
-        if (stage->field_0x14 == 1) {
+    switch (stage->field_0x14) {
+        case 0:
+            stage->field_0x14 = 1;
+            stage->field_0x18 = 0.0f;
+            stage->field_0x1c = 4.0f;
+            draw_player_icons = 1;
+            break;
+        case 1: {
             const f32 previous = stage->field_0x18;
             stage->field_0x18 += elapsed;
             if (stage->field_0x18 >= stage->field_0x1c)
@@ -2134,33 +2156,33 @@ void BonusWin_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float el
             else if (previous < stage->field_0x1c * 0.5f && stage->field_0x18 >= stage->field_0x1c * 0.5f) {
                 PlaySfx(const_cast<char *>("TrueJedi_100pc"), NULL);
                 NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
-                ++BonusScore[(packet->field_0xb0 >> 5) & 1];
+                ++BonusScore[(packet->field_0xb0 & 0x20) != 0];
             }
+            break;
         }
-    } else {
-        stage->field_0x14 = 1;
-        stage->field_0x18 = 0.0f;
-        stage->field_0x1c = 4.0f;
-        draw_player_icons = 1;
     }
 }
 void BonusTime_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    if (stage->field_0x14 == 0) {
-        stage->field_0x18 = 0.0f;
-        stage->field_0x1c = 4.0f;
-        stage->field_0x14 = 1;
-    } else if (stage->field_0x14 == 1) {
-        SetDrawGoldBrick(packet, packet->current_gold_brick);
-        const f32 previous = stage->field_0x18;
-        stage->field_0x18 += elapsed;
-        if (stage->field_0x18 >= stage->field_0x1c)
-            NextStatusStage(packet);
-        else if (previous < 0.5f && stage->field_0x18 >= 0.5f) {
-            if (packet->new_best_time == 0.0f)
-                GameAudio_PlaySfx(0x32, NULL, 0, 0);
-            else
-                PlaySfx(const_cast<char *>("StatusAward"), NULL);
-            NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
+    switch (stage->field_0x14) {
+        case 0:
+            stage->field_0x18 = 0.0f;
+            stage->field_0x1c = 4.0f;
+            stage->field_0x14 = 1;
+            break;
+        case 1: {
+            SetDrawGoldBrick(packet, packet->current_gold_brick);
+            const f32 previous = stage->field_0x18;
+            stage->field_0x18 += elapsed;
+            if (stage->field_0x18 >= stage->field_0x1c)
+                NextStatusStage(packet);
+            else if (previous < 0.5f && stage->field_0x18 >= 0.5f) {
+                if (packet->new_best_time == 0.0f)
+                    GameAudio_PlaySfx(0x32, NULL, 0, 0);
+                else
+                    PlaySfx(const_cast<char *>("StatusAward"), NULL);
+                NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
+            }
+            break;
         }
     }
 }
@@ -2253,20 +2275,24 @@ void BonusComplete_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
     NextStatusStage(packet);
 }
 void BonusComplete_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    if (stage->field_0x14 == 0) {
-        stage->field_0x18 = 0.0f;
-        stage->field_0x14 = 1;
-        stage->field_0x1c = packet->newly_completed == 0 ? 0.5f : 4.0f;
-        draw_player_icons = 1;
-    } else if (stage->field_0x14 == 1) {
-        SetDrawGoldBrick(packet, packet->current_gold_brick);
-        const f32 previous = stage->field_0x18;
-        stage->field_0x18 += elapsed;
-        if (stage->field_0x18 >= stage->field_0x1c)
-            NextStatusStage(packet);
-        else if (packet->newly_completed != 0 && previous < 0.5f && stage->field_0x18 >= 0.5f) {
-            PlaySfx(const_cast<char *>("StatusAward"), NULL);
-            NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
+    switch (stage->field_0x14) {
+        case 0:
+            stage->field_0x18 = 0.0f;
+            stage->field_0x14 = 1;
+            stage->field_0x1c = packet->newly_completed == 0 ? 0.5f : 4.0f;
+            draw_player_icons = 1;
+            break;
+        case 1: {
+            SetDrawGoldBrick(packet, packet->current_gold_brick);
+            const f32 previous = stage->field_0x18;
+            stage->field_0x18 += elapsed;
+            if (stage->field_0x18 >= stage->field_0x1c)
+                NextStatusStage(packet);
+            else if (packet->newly_completed != 0 && previous < 0.5f && stage->field_0x18 >= 0.5f) {
+                PlaySfx(const_cast<char *>("StatusAward"), NULL);
+                NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
+            }
+            break;
         }
     }
 }

@@ -525,9 +525,12 @@ static __used__ void PartExtra_BlueCoin(PART_s *part) {
     i32 effect = WORLD->debris_sys->entries[56].effect;
     if (effect == -1)
         return;
-    f32 rate = 5.0f;
-    if (WORLD->area != NULL && (WORLD->area->flags & 0x104) == 4)
-        rate = 2.5f;
+    f32 rate;
+    if (WORLD->area != NULL) {
+        rate = (WORLD->area->flags & 0x104) == 4 ? 2.5f : 5.0f;
+    } else {
+        rate = 5.0f;
+    }
     i32 count = ParticlesPerSecond(rate, FRAMETIME);
     if (count > 0)
         AddVariableShotDebrisEffect(effect, &part->position, count, 0, 0);
@@ -539,9 +542,12 @@ static __used__ void PartExtra_PurpleCoin(PART_s *part) {
     i32 effect = WORLD->debris_sys->entries[57].effect;
     if (effect == -1)
         return;
-    f32 rate = 5.0f;
-    if (WORLD->area != NULL && (WORLD->area->flags & 0x104) == 4)
-        rate = 2.5f;
+    f32 rate;
+    if (WORLD->area != NULL) {
+        rate = (WORLD->area->flags & 0x104) == 4 ? 2.5f : 5.0f;
+    } else {
+        rate = 5.0f;
+    }
     i32 count = ParticlesPerSecond(rate, FRAMETIME);
     if (count > 0)
         AddVariableShotDebrisEffect(effect, &part->position, count, 0, 0);
@@ -567,7 +573,7 @@ static __used__ void PowerUp_ImpactPart(PART_s *part) {
         volume = 1.0f;
     } else {
         f32 minimum = 0.1f * scale;
-        if (speed < minimum)
+        if (!(speed >= minimum))
             return;
         volume = (speed - minimum) / (maximum - minimum);
     }
@@ -3403,9 +3409,7 @@ PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f3
 }
 
 void InstantKillParts(GameObject_s *object, i32 mode, float scale) {
-    i32 variant = -1;
-    if (object->id == id_BODYGUARD)
-        variant = object->current_hp <= 1 ? 4 : -1;
+    i32 variant = (object->id == id_BODYGUARD && object->current_hp <= 1) ? 4 : -1;
     KillParts(object, -1, variant, mode, scale, 0, NULL);
 }
 
@@ -3495,8 +3499,8 @@ i32 PartDraw_Flickerer(PART_s *part) {
     if (part->field_100 > 0.0f) {
         if (PickupFlickerFrame % PickUpFlickerFrames < PickUpFlickerTest)
             return 1;
-        f32 threshold = (part->field_20a & 1) != 0 ? 1.0f : 2.0f;
-        return part->field_100 >= threshold;
+        f32 threshold = (part->field_20a & 1) == 0 ? 2.0f : 1.0f;
+        return !(part->field_100 < threshold);
     }
     return 1;
 }
