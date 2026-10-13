@@ -203,27 +203,27 @@ void SetBonusWinner(i32 player) {
 }
 
 STATUS_STAGE_s *FindStatusStage(i32 type) {
-    for (STATUS_STAGE_s *stage = StatusStages; stage->type != -1; ++stage) {
-        if (stage->type == type) {
-            return stage;
+    for (i32 i = 0; StatusStages[i].type != -1; ++i) {
+        if (StatusStages[i].type == type) {
+            return &StatusStages[i];
         }
     }
     return NULL;
 }
 
 void NextStatusStage(STATUSPACKET_s *packet) {
-    STATUS_STAGE_s *stage = packet->stage;
-    if (stage != NULL) {
-        if (stage->field_0x14 == -1 && packet->field_0x68 > stage->field_0x18) {
+    if (packet->stage != NULL) {
+        if (packet->stage->field_0x14 == -1 && packet->field_0x68 > packet->stage->field_0x18) {
             packet->field_0xb0 |= 2;
             return;
         }
-        stage->field_0x12 = 1;
+        packet->stage->field_0x12 = 1;
     }
 
+    STATUS_STAGE_s *stage = packet->stage;
+    ++packet->current_gold_brick;
     packet->previous_stage_2 = packet->previous_stage;
     packet->previous_stage = stage;
-    ++packet->current_gold_brick;
     packet->stage = packet->next_stage;
     packet->next_stage = FindStatusStage(packet->stage_types[packet->current_gold_brick + 1]);
 
@@ -245,11 +245,11 @@ void NextStatusStage(STATUSPACKET_s *packet) {
     packet->field_0xb0 &= ~2;
     status_prompt = 0;
 
-    if (packet->stage->type == 10 || packet->stage->type == 11) {
+    if ((packet->stage != NULL && packet->stage->type == 11) || packet->stage->type == 10) {
         ResetRumble(reinterpret_cast<RUMBLEPACKET *>(&packet->player0_rumble_amount));
         ResetRumble(reinterpret_cast<RUMBLEPACKET *>(&packet->player1_rumble_amount));
     }
-    if (packet->stage->type == 11) {
+    if (packet->stage != NULL && packet->stage->type == 11) {
         ReCalculateCompletionPoints();
     }
 }
@@ -1476,9 +1476,11 @@ f32 getFinishedStatusAlpha(STATUSPACKET_s *packet) {
             alpha = 1.0f - stage->field_0x18;
         } else {
             const f32 fade_start = stage->field_0x1c - 1.0f;
-            alpha = stage->field_0x18 < fade_start
-                        ? 0.0f
-                        : (stage->field_0x18 - fade_start) / (stage->field_0x1c - fade_start);
+            if (stage->field_0x18 >= fade_start) {
+                alpha = (stage->field_0x18 - fade_start) / (stage->field_0x1c - fade_start);
+            } else {
+                alpha = 0.0f;
+            }
         }
     }
     return alpha;
