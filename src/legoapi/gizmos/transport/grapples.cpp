@@ -43,8 +43,9 @@ i16 Grapple_RopeSwingRotate = 0x5555;
 extern i32 GrappleSwingMode;
 
 struct GRAPPLEPROGRESS {
-    u32 active_mask;
-    u32 visible_mask;
+    // One bit per grapple; 32 grapples fit in a single word.
+    u32 active_mask[1];
+    u32 visible_mask[1];
 };
 
 static NUVEC GrapplePointOffset = {0.0f, -0.023f, 0.169f};
@@ -433,8 +434,8 @@ static void *Grapples_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end)
 static void Grapples_ClearProgress(void *, void *progress_ptr) {
     GRAPPLEPROGRESS *progress = static_cast<GRAPPLEPROGRESS *>(progress_ptr);
     if (progress != NULL) {
-        progress->active_mask = ~0u;
-        progress->visible_mask = ~0u;
+        progress->active_mask[0] = ~0u;
+        progress->visible_mask[0] = ~0u;
     }
 }
 
@@ -446,20 +447,21 @@ static void Grapples_StoreProgress(void *world_ptr, void *, void *progress_ptr) 
         return;
     }
 
-    progress->active_mask = ~0u;
-    progress->visible_mask = ~0u;
+    progress->active_mask[0] = ~0u;
+    progress->visible_mask[0] = ~0u;
     if (world == NULL || world->grapples == NULL) {
         return;
     }
 
     auto world_grapple_count = world->grapple_count;
-    for (i32 index = 0; index < world_grapple_count && index < 32; ++index) {
-        const u32 mask = 1u << index;
+    for (i32 index = 0; index < world_grapple_count && index != 32; ++index) {
+        const i32 word = index >> 5;
+        const u32 mask = 1u << (index & 31);
         if ((world->grapples[index].flags & GRAPPLE_FLAG_VISIBLE) == 0) {
-            progress->visible_mask &= ~mask;
+            progress->visible_mask[word] &= ~mask;
         }
         if ((world->grapples[index].flags & GRAPPLE_FLAG_ACTIVE) == 0) {
-            progress->active_mask &= ~mask;
+            progress->active_mask[word] &= ~mask;
         }
     }
 }
@@ -482,8 +484,8 @@ static void Grapples_Reset(void *world_ptr, void *, void *progress_ptr) {
 
             if (index <= 31 && progress != NULL) {
                 const u32 bit = 1u << index;
-                grapple->visible = (progress->visible_mask & bit) != 0;
-                grapple->active = (progress->active_mask & bit) != 0;
+                grapple->visible = (progress->visible_mask[0] & bit) != 0;
+                grapple->active = (progress->active_mask[0] & bit) != 0;
             }
         }
     }

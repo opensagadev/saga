@@ -32,8 +32,9 @@
 #include "nu2api/numath/nuvec.h"
 
 struct ZIPUPPROGRESS {
-    u32 active_mask;
-    u32 visible_mask;
+    // One bit per zip-up; 32 zip-ups fit in a single word.
+    u32 active_mask[1];
+    u32 visible_mask[1];
 };
 
 i32 zipup_gizmotype_id = -1;
@@ -277,8 +278,8 @@ static void ZipUps_ClearProgress(void *, void *progress_data) {
         return;
     }
 
-    progress->active_mask = ~0u;
-    progress->visible_mask = ~0u;
+    progress->active_mask[0] = ~0u;
+    progress->visible_mask[0] = ~0u;
 }
 
 static void ZipUps_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
@@ -288,20 +289,21 @@ static void ZipUps_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
         return;
     }
 
-    progress->active_mask = ~0u;
-    progress->visible_mask = ~0u;
+    progress->active_mask[0] = ~0u;
+    progress->visible_mask[0] = ~0u;
     if (world == NULL || world->zipups == NULL) {
         return;
     }
 
     auto world_zipup_count = world->zipup_count;
-    for (i32 index = 0; index < world_zipup_count && index < 32; ++index) {
-        const u32 mask = 1u << index;
+    for (i32 index = 0; index < world_zipup_count && index != 32; ++index) {
+        const i32 word = index >> 5;
+        const u32 mask = 1u << (index & 31);
         if ((world->zipups[index].flags & ZIPUP_FLAG_VISIBLE) == 0) {
-            progress->visible_mask &= ~mask;
+            progress->visible_mask[word] &= ~mask;
         }
         if ((world->zipups[index].flags & ZIPUP_FLAG_ACTIVE) == 0) {
-            progress->active_mask &= ~mask;
+            progress->active_mask[word] &= ~mask;
         }
     }
 }
@@ -347,8 +349,8 @@ void ZipUps_Reset(void *world_ptr, void *, void *progress_ptr) {
 
             if (progress != NULL && index <= 31) {
                 const u32 bit = 1u << index;
-                zipup->visible = (progress->visible_mask & bit) != 0;
-                zipup->active = (progress->active_mask & bit) != 0;
+                zipup->visible = (progress->visible_mask[0] & bit) != 0;
+                zipup->active = (progress->active_mask[0] & bit) != 0;
             }
         }
     }

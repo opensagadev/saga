@@ -192,16 +192,14 @@ static void Tubes_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
 
     TUBE *tube = world->tubes;
     const i32 tube_count = world->tube_count;
-    for (i32 index = 0; index < tube_count; ++index, ++tube) {
-        if (index == 32) {
-            break;
-        }
+    for (i32 index = 0; index < tube_count && index != 32; ++index, ++tube) {
+        const i32 word = index >> 5;
         const u32 tube_bit = 1U << (index & 31);
         if (!tube->visible) {
-            progress->visible_mask[index >> 5] &= ~tube_bit;
+            progress->visible_mask[word] &= ~tube_bit;
         }
         if (!tube->active) {
-            progress->active_mask[index >> 5] &= ~tube_bit;
+            progress->active_mask[word] &= ~tube_bit;
         }
     }
 }

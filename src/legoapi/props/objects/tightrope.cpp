@@ -314,12 +314,13 @@ static void TightRopes_StoreProgress(void *world_info, void *, void *progress_da
     if (world == NULL || world->tightropes == NULL)
         return;
     auto world_tightrope_count = world->tightrope_count;
-    for (i32 i = 0; i < world_tightrope_count && i < 32; ++i) {
-        u32 mask = 1u << i;
+    for (i32 i = 0; i < world_tightrope_count && i != 32; ++i) {
+        const i32 word = i >> 5;
+        const u32 mask = 1u << (i & 31);
         if (!world->tightropes[i].visible)
-            progress->state[1] &= ~mask;
+            progress->state[1 + word] &= ~mask;
         if (!world->tightropes[i].active)
-            progress->state[0] &= ~mask;
+            progress->state[word] &= ~mask;
     }
 }
 

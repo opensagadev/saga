@@ -56,8 +56,8 @@ enum HATMACHINE_PLATFORM_TYPE {
 
 struct HATMACHINEPROGRESS {
     i32 preserved_state;
-    u32 enabled_mask;
-    u32 visible_mask;
+    u32 enabled_mask[1];
+    u32 visible_mask[1];
 };
 
 i32 hatmachine_gizmotype_id = -1;
@@ -164,8 +164,8 @@ static void HatMachines_ClearProgress(void *, void *progress_data) {
         return;
     }
 
-    progress->enabled_mask = ~0u;
-    progress->visible_mask = ~0u;
+    progress->enabled_mask[0] = ~0u;
+    progress->visible_mask[0] = ~0u;
 }
 
 static void HatMachine_Update(void *world_ptr, void *, float elapsed) {
@@ -260,21 +260,22 @@ static void HatMachines_StoreProgress(void *world_ptr, void *, void *progress_pt
         return;
     }
 
-    progress->enabled_mask = ~0u;
-    progress->visible_mask = ~0u;
+    progress->enabled_mask[0] = ~0u;
+    progress->visible_mask[0] = ~0u;
     if (world == NULL || world->hat_machine_sys == NULL || world->hat_machine_sys->machines == NULL) {
         return;
     }
 
     HATMACHINESYS_s *system = world->hat_machine_sys;
-    for (i32 index = 0; index < system->count && index < 32; ++index) {
-        const u32 mask = 1u << index;
+    for (i32 index = 0; index < system->count && index != 32; ++index) {
+        const i32 word = index >> 5;
+        const u32 mask = 1u << (index & 31);
         HATMACHINE *machine = &system->machines[index];
         if ((machine->flags & HATMACHINE_FLAG_VISIBLE) == 0) {
-            progress->visible_mask &= ~mask;
+            progress->visible_mask[word] &= ~mask;
         }
         if ((machine->flags & HATMACHINE_FLAG_ENABLED) == 0) {
-            progress->enabled_mask &= ~mask;
+            progress->enabled_mask[word] &= ~mask;
         }
     }
 }
@@ -354,8 +355,8 @@ static void HatMachines_Reset(void *world_ptr, void *, void *progress_ptr) {
 
         if (index <= 31 && progress != NULL) {
             const u32 mask = 1u << index;
-            machine->progress_state1 = (progress->visible_mask & mask) != 0;
-            machine->progress_state0 = (progress->enabled_mask & mask) != 0;
+            machine->progress_state1 = (progress->visible_mask[0] & mask) != 0;
+            machine->progress_state0 = (progress->enabled_mask[0] & mask) != 0;
         }
     }
 }

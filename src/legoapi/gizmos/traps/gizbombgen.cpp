@@ -271,13 +271,14 @@ static void GizBombGens_StoreProgress(void *, void *system_ptr, void *progress_p
     progress->visible_masks[1] = ~0u;
     progress->visible_masks[2] = ~0u;
 
-    for (i32 index = 0; index < system->count && index < 96; ++index) {
+    GIZBOMBGEN *bomb_generator = system->bomb_generators;
+    for (i32 index = 0; index < system->count && index != 96; ++index, ++bomb_generator) {
         const i32 word_index = index >> 5;
         const u32 mask = 1u << (index & 31);
-        if ((system->bomb_generators[index].flags & GIZBOMBGEN_FLAG_VISIBLE) == 0) {
+        if ((bomb_generator->flags & GIZBOMBGEN_FLAG_VISIBLE) == 0) {
             progress->visible_masks[word_index] &= ~mask;
         }
-        if ((system->bomb_generators[index].flags & GIZBOMBGEN_FLAG_ACTIVE) == 0) {
+        if ((bomb_generator->flags & GIZBOMBGEN_FLAG_ACTIVE) == 0) {
             progress->active_masks[word_index] &= ~mask;
         }
     }
