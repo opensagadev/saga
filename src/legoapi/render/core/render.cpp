@@ -4188,15 +4188,16 @@ void BackDrop_Draw(float alpha, i32 flags) {
         if (NuSpecialExistsFn(special) == 0) {
             continue;
         }
-        NUMTX mtx = *NuSpecialGetDrawMtx(special);
+        // Retail realigns the frame (and esp,-16) for this matrix.
+        NUMTX_ALIGNED16 mtx = *NuSpecialGetDrawMtx(special);
         NuSpecialDrawAtAlpha(special, &mtx, alpha);
         f32 x = mtx.m30;
         f32 y = mtx.m31;
         f32 z = mtx.m32;
         u16 angle = (u16)qrand();
         for (i32 i = 0; i < 3; ++i) {
-            mtx.m30 = NuTrigTable[angle >> 1] * 0.01f + x;
-            mtx.m31 = NuTrigTable[((i32)angle + 0x4000) >> 1 & 0x7fff] * 0.01f + y;
+            mtx.m30 = NU_SIN_LUT(angle) * 0.01f + x;
+            mtx.m31 = NU_COS_LUT(angle) * 0.01f + y;
             mtx.m32 = z;
             NuSpecialDrawAtAlpha(special, &mtx, alpha);
             angle = (u16)(angle + 0x5555);
