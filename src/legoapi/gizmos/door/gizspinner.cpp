@@ -1393,16 +1393,16 @@ f32 GizSpinner_GetNearestTargetPoint(GIZSPINNER_s *spinner, nuvec_s *origin, nuv
     f32 nearest_distance = 1000000000.0f;
     NUVEC *nearest_position = NULL;
     NUVEC *nearest_direction = NULL;
-    auto spinner_initial_rotation = spinner->initial_rotation;
     for (i32 i = 0; i < count; ++i) {
         f32 distance = NuVecDistSqr(origin, &positions[i], NULL);
         if (check_direction != 0) {
-            u16 angle = spinner->field_0x08c + 0x4000 - spinner->rotation - spinner_initial_rotation +
+            u16 angle = spinner->field_0x08c + 0x4000 - spinner->rotation - spinner->initial_rotation +
                         (-65536 / spinner->type) * i;
             NUVEC offset;
             NuVecSub(&offset, origin, &spinner->position);
             NuVecRotateY(&offset, &offset, angle);
-            if (!(distance < nearest_distance && offset.z >= 0.0f))
+            const f32 facing = offset.z;
+            if (!(distance < nearest_distance && facing >= 0.0f))
                 continue;
         } else if (!(distance < nearest_distance)) {
             continue;

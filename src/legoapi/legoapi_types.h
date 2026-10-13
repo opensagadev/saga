@@ -4210,9 +4210,22 @@ struct GIZBUILDIT_s {
     u16 state_flags; // 0x7a
     u16 field_0x7c;
     i16 room_index;
-    i16 blowup_type;       // 0x80
-    u8 availability_flags; // 0x82
-    u8 field_0x83;
+    i16 blowup_type; // 0x80
+    union {
+        u8 availability_flags; // 0x82, GIZBUILDIT_AVAILABILITY_FLAGS
+        struct {
+            u8 available_active : 1;
+            u8 available_other : 7;
+        };
+    };
+    union {
+        u8 field_0x83; // GIZBUILDIT_RUNTIME_FLAGS
+        struct {
+            u8 runtime_bit0 : 1;
+            u8 reward_released : 1;
+            u8 runtime_other : 6;
+        };
+    };
 
     void ClearMechObjectInterface();
     MechObjectInterface *GetMechObjectInterface();

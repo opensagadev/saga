@@ -125,10 +125,9 @@ void FinishStatusPacket(i32 choice) {
         if ((StatusPacket.mode_flags & 1) != 0 || StatusPacket.challenge_state != 0 ||
             StatusPacket.mission_state != 0) {
             NewLData = Area_FindNextPlayLevel(ADataList[StatusPacket.area->index].levels[0]);
-            FADETYPE fade = {FADE_TYPE_STILL_WIPE};
             ResetBits = 0xffffffbf;
             reset_area = 1;
-            FadeSys.SetFade(fade, 0);
+            FadeSys.SetFade(FADETYPE{FADE_TYPE_STILL_WIPE}, 0);
             NeedScreenGrab(1);
             GrabStillScreen();
             if (StatusPacket.challenge_state != 0) {
