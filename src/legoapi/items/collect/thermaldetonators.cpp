@@ -203,31 +203,43 @@ void PartKill_ThermalDetonator(PART_s *part, i32) {
 
 i32 ThermalDetonator_MoveCode(GameObject_s *object) {
     if (object->character_context != 0x2e) {
-        if (WORLD->lev_objs[0xe9].active == 0 || static_cast<i8>(object->apiobj.flags_low) >= 0 ||
-            (object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0) {
-            return 0;
-        }
-        const bool can_throw = (object->apiobj.character_data->model_flags & 0x01000000) != 0 ||
-                               object->field_0x108e == 6 || SuperWeirdo(object) != 0;
-        if (!can_throw || (object->apiobj.field_0x27d == 0 && object->field_0xe31 != 1)) {
-            return 0;
-        }
-        const i8 context = object->character_context;
-        if (context != -1 && context != 6 && context != 7 && (CInfo[context].flags & 4) == 0) {
-            return 0;
-        }
-
-        PART_s *part = FindPart(NULL, 0, object);
-        if (part != NULL) {
+        if (WORLD->lev_objs[0xe9].active != 0 && static_cast<i8>(object->apiobj.flags_low) < 0 &&
+            (object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0 &&
+            ((object->apiobj.character_data->model_flags & 0x01000000) != 0 || object->field_0x108e == 6 ||
+             SuperWeirdo(object) != 0) &&
+            (object->apiobj.field_0x27d != 0 || object->field_0xe31 == 1)) {
+            switch (object->character_context) {
+                case -1:
+                case 6:
+                case 7:
+                    break;
+                default:
+                    if ((CInfo[object->character_context].flags & 4) == 0) {
+                        return 0;
+                    }
+                    break;
+            }
+            PART_s *part = FindPart(NULL, 0, object);
+            if (part == NULL) {
+                goto start_throw;
+            }
             if ((part->active & 2) != 0 && !(part->field_100 > 1.0f)) {
                 return 0;
             }
             KillPart(part, 0);
             return 1;
         }
+        return 0;
 
+    start_throw:
         object->character_context = 0x2e;
-        object->context_animation = object->field_0xe31 == 1 ? 0x6f : (object->field_0xe22 & 1) != 0 ? 0x6e : 0x65;
+        if (object->field_0xe31 == 1) {
+            object->context_animation = 0x6f;
+        } else if ((object->field_0xe22 & 1) != 0) {
+            object->context_animation = 0x6e;
+        } else {
+            object->context_animation = 0x65;
+        }
         if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL) {
             object->context_animation = 0x65;
         }
@@ -251,7 +263,7 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
         }
     }
     object->context_animation_timer -= FRAMETIME;
-    if (!(object->context_animation_timer > 0.0f)) {
+    if (object->context_animation_timer <= 0.0f) {
         object->character_context = -1;
         if ((object->context_flags & 0x40) == 0) {
             object->movement_runtime_flags |= 0x40;
@@ -262,7 +274,7 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
             if (frame != NULL && *frame > 0.0f && *frame >= release_frame) {
                 object->movement_runtime_flags |= 0x40;
             }
-        } else if (!(object->context_animation_timer >= 0.5f)) {
+        } else if (object->context_animation_timer < 0.5f) {
             object->movement_runtime_flags |= 0x40;
         }
     }

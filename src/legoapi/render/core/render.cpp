@@ -2624,7 +2624,7 @@ void Draw_AUTOSAVECANCEL() {
 }
 
 void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha) {
-    if (alpha > 0.0f) {
+    if (!(alpha <= 0.0f)) {
         NUVEC scale = {1.0f / CameraZoom, 1.0f / CameraZoom, 1.0f / CameraZoom};
         NuMtxPreScale(matrix, &scale);
         if (special != NULL && NuSpecialExistsFn(special) != 0) {

@@ -273,13 +273,12 @@ MechTouchUITagButton *MechSystems::NewTagButton(GameObject_s &object, TouchHolde
     }
 
     i32 slot;
-    if (level_ui_elements[0] == NULL) {
-        slot = 0;
-    } else if (level_ui_elements[1] == NULL) {
-        slot = 1;
-    } else if (level_ui_elements[2] == NULL) {
-        slot = 2;
-    } else {
+    for (slot = 0; slot < 3; slot++) {
+        if (level_ui_elements[slot] == NULL) {
+            break;
+        }
+    }
+    if (slot == 3) {
         return NULL;
     }
     level_ui_elements[slot] = new MechTouchUITagButton(object, holder);

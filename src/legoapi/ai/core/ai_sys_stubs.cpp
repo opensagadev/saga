@@ -1562,13 +1562,15 @@ extern "C" {
             }
 
             node->runtime_flags &= static_cast<u8>(~AIPATHNODE_RUNTIME_SPECIAL_UNAVAILABLE);
+            AIPATHCNX **connections = node->connections;
+            AIPATHNODE *nodes = path->nodes;
             for (i32 index = 0; index < node->connection_count; ++index) {
-                AIPATHCNX *connection = node->connections[index];
+                AIPATHCNX *connection = connections[index];
                 AIPATHNODE *other_node;
                 if (connection->direction_a == node_index)
-                    other_node = &path->nodes[connection->direction_b];
+                    other_node = &nodes[connection->direction_b];
                 else
-                    other_node = &path->nodes[connection->direction_a];
+                    other_node = &nodes[connection->direction_a];
                 if ((other_node->runtime_flags & AIPATHNODE_RUNTIME_SPECIAL_UNAVAILABLE) == 0) {
                     connection->traversal_flags[0] &= ~AIPATH_CONNECTION_FLAG_SPECIAL_UNAVAILABLE;
                     connection->traversal_flags[1] &= ~AIPATH_CONNECTION_FLAG_SPECIAL_UNAVAILABLE;

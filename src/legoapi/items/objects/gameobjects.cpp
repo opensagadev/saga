@@ -1891,19 +1891,19 @@ static void GameAILoad(AISYS *system, i32 version, NUGSCN *, VARIPTR *buffer, VA
         for (i32 path_index = 0; path_index < path_system->path_count; ++path_index) {
             AIPATH *path = paths[path_index];
             const i32 connection_count = path->connection_count;
-            AIPATHCNX *entry = path->connections;
-            for (i32 connection = 0; connection < connection_count; ++connection, ++entry) {
-                entry->traversal_flags[0] = 0;
-                entry->traversal_flags[1] = 0;
-                entry->original_traversal_flags[0] = 0;
-                entry->original_traversal_flags[1] = 0;
+            AIPATHCNX *entries = path->connections;
+            for (i32 connection = 0; connection < connection_count; ++connection) {
+                entries[connection].traversal_flags[0] = 0;
+                entries[connection].original_traversal_flags[0] = 0;
+                entries[connection].traversal_flags[1] = 0;
+                entries[connection].original_traversal_flags[1] = 0;
             }
         }
     }
 
     i32 tag_length = static_cast<i8>(EdFileReadChar());
-    if (tag_length > 0 && tag_length < 9) {
-        char tag[12] = {};
+    if (tag_length <= 8 && tag_length != 0) {
+        char tag[16];
         EdFileRead(tag, tag_length);
         if (NuStrICmp(tag, "LEGO") == 0) {
             EdFileReadInt();
@@ -4082,11 +4082,6 @@ void GameAISysStartFrame(AISYS_s *system) {
     if (system->next_area_check < system->area_count) {
         AIAREA *area = &system->areas[system->next_area_check];
         const i32 area_index = static_cast<i32>(area - WORLD->ai_sys->areas);
-        const u64 area_bit = 1ULL << area_index;
-        // Inside occupancy uses the signed, wrapping 32-bit area bit; outside
-        // removal still addresses the corresponding full 64-bit bit.
-        const u32 inside_area_low = 1u << (area_index & 31);
-        const u32 inside_area_high = static_cast<u32>(static_cast<i64>(static_cast<i32>(inside_area_low)) >> 32);
         area->runtime_flags &= static_cast<u8>(
             ~(AIAREA_RUNTIME_PLAYER_PRESENT | AIAREA_RUNTIME_OBJECT_STATE_CLEAR | AIAREA_RUNTIME_OBJECT_STATE_SET));
 
@@ -4108,25 +4103,27 @@ void GameAISysStartFrame(AISYS_s *system) {
                                    local_position.z >= -area->half_depth && local_position.x <= area->half_width &&
                                    local_position.y <= area->height && local_position.z <= area->half_depth;
             if (!is_inside) {
+                // Outside removal addresses the full 64-bit area bit.
+                const u64 area_bit = 1ULL << area_index;
                 object->apiobj.ai_area_mask_low &= ~static_cast<u32>(area_bit);
                 object->apiobj.ai_area_mask_high &= ~static_cast<u32>(area_bit >> 32);
                 continue;
             }
 
-            object->apiobj.ai_area_mask_low |= inside_area_low;
-            object->apiobj.ai_area_mask_high |= inside_area_high;
+            // Inside occupancy uses the signed, wrapping 32-bit area bit.
+            const i64 inside_area_bit = static_cast<i32>(1u << (area_index & 31));
+            object->apiobj.ai_area_mask_low |= static_cast<u32>(inside_area_bit);
+            object->apiobj.ai_area_mask_high |= static_cast<u32>(inside_area_bit >> 32);
             if ((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0) {
                 area->runtime_flags |= AIAREA_RUNTIME_PLAYER_PRESENT;
             }
             if (object->apiobj.field_0x27c != -1) {
                 area->runtime_flags |= AIAREA_RUNTIME_CHARACTER_SLOT_SEEN;
             }
-            if ((object->apiobj.field_0x1f4 & 1) == 0) {
-                if ((object->apiobj.field_0x1f4 & 4) == 0) {
-                    area->runtime_flags |= AIAREA_RUNTIME_OBJECT_STATE_CLEAR;
-                }
-            } else {
+            if ((object->apiobj.field_0x1f4 & 1) != 0) {
                 area->runtime_flags |= AIAREA_RUNTIME_OBJECT_STATE_SET;
+            } else if ((object->apiobj.field_0x1f4 & 4) == 0) {
+                area->runtime_flags |= AIAREA_RUNTIME_OBJECT_STATE_CLEAR;
             }
         }
 
@@ -7286,13 +7283,12 @@ void RemoveGameObject(GameObject_s *obj, i32) {
     obj->ClearAddons();
     obj->ClearMechObjectInterface();
 
-    const u64 contact_mask = ~obj->apiobj.collision_identity_mask;
-    const u64 object_mask = ~(1ULL << obj->apiobj.field_0x289);
-    for (i32 i = 0; i < HIGHGAMEOBJECT; i++) {
-        Obj[i].apiobj.collision_contact_mask &= contact_mask;
-        Obj[i].apiobj.ai_awareness_mask &= object_mask;
-        Obj[i].ai_seen_mask &= object_mask;
-        Obj[i].ai_opponent_exclusion_mask &= object_mask;
+    GameObject_s *other = Obj;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; i++, other++) {
+        other->apiobj.collision_contact_mask &= ~obj->apiobj.collision_identity_mask;
+        other->apiobj.ai_awareness_mask &= ~(1ULL << obj->apiobj.field_0x289);
+        other->ai_seen_mask &= ~(1ULL << obj->apiobj.field_0x289);
+        other->ai_opponent_exclusion_mask &= ~(1ULL << obj->apiobj.field_0x289);
     }
 
     if (obj->pad_gamepad != NULL) {
@@ -8602,28 +8598,30 @@ GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 
 i32 GameObjectNearFloor(GameObject_s *object, f32 height, f32 *distance) {
     const f32 no_floor_height = 2000000.0f;
     const f32 floor_height = object->apiobj.field_0x218;
-    if (floor_height == no_floor_height) {
-        if (distance != NULL) {
-            *distance = no_floor_height;
+    if (floor_height != no_floor_height) {
+        const f32 radius_scale = object->apiobj.collision_radius / 0.225f;
+        i32 height_steps = static_cast<i32>(height);
+        if (height_steps < 0) {
+            height_steps = 0;
         }
-        return 0;
-    }
-
-    i32 height_steps = static_cast<i32>(height);
-    if (height_steps < 0) {
-        height_steps = 0;
-    }
-    f32 tolerance = static_cast<f32>(height_steps) * 0.025f;
-    const f32 radius_tolerance = object->apiobj.collision_radius / 0.225f * tolerance;
-    if (radius_tolerance > tolerance) {
+        f32 tolerance = static_cast<f32>(height_steps) * 0.025f;
+        f32 radius_tolerance = radius_scale * tolerance;
+        if (radius_tolerance < tolerance) {
+            radius_tolerance = tolerance;
+        }
         tolerance = radius_tolerance;
+
+        const f32 floor_distance = object->apiobj.collision_min.y - floor_height;
+        if (distance != NULL) {
+            *distance = floor_distance;
+        }
+        return tolerance > floor_distance;
     }
 
-    const f32 floor_distance = object->apiobj.collision_min.y - floor_height;
     if (distance != NULL) {
-        *distance = floor_distance;
+        *distance = no_floor_height;
     }
-    return tolerance > floor_distance;
+    return 0;
 }
 
 extern "C" {
