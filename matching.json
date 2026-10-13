@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 78.828545,
+    "fuzzy_match_percent": 78.84197,
     "total_code": "4722419",
-    "matched_code": "607087",
-    "matched_code_percent": 12.855424,
+    "matched_code": "607839",
+    "matched_code_percent": 12.871349,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6745,
-    "matched_functions_percent": 50.11516,
+    "matched_functions": 6747,
+    "matched_functions_percent": 50.13002,
     "total_units": 1
   },
   "text": {
@@ -43771,7 +43771,7 @@
           "address": 2022720,
           "offset": 1132752,
           "size": 218,
-          "match_percent": 68.603775
+          "match_percent": 82.0
         },
         {
           "name": "_Z21CollectCharcters_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
@@ -57556,7 +57556,7 @@
           "address": 4900288,
           "offset": 4010320,
           "size": 304,
-          "match_percent": 63.6125
+          "match_percent": 78.425
         },
         {
           "name": "_Z23GizObstacles_AddTriggerP7nuvec_s",
@@ -63097,7 +63097,7 @@
           "address": 4811056,
           "offset": 3921088,
           "size": 316,
-          "match_percent": 62.575756
+          "match_percent": 100.0
         }
       ]
     },
@@ -70074,7 +70074,7 @@
           "address": 4395440,
           "offset": 3505472,
           "size": 326,
-          "match_percent": 68.81159
+          "match_percent": 99.95652
         },
         {
           "name": "_Z18MenuDrawSaveCancelP6MENU_s",
@@ -70082,7 +70082,7 @@
           "address": 4395776,
           "offset": 3505808,
           "size": 326,
-          "match_percent": 68.81159
+          "match_percent": 99.95652
         },
         {
           "name": "_Z19MenuDrawSaveConfirmP6MENU_s",
@@ -80850,7 +80850,7 @@
           "address": 4321504,
           "offset": 3431536,
           "size": 2386,
-          "match_percent": 78.868484
+          "match_percent": 83.38776
         },
         {
           "name": "_Z20edpartLoadSingleTypeP15part_typedesc_sii",
@@ -112090,7 +112090,7 @@
           "address": 3225296,
           "offset": 2335328,
           "size": 436,
-          "match_percent": 70.13333
+          "match_percent": 100.0
         },
         {
           "name": "_ZN7NuMusic7ProcessEf",
