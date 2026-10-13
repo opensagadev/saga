@@ -338,12 +338,13 @@ static void Ledges_StoreProgress(void *world_info, void *, void *progress_data) 
         return;
     LEDGE *ledge = static_cast<LEDGE *>(world->ledges);
     auto world_ledge_count = world->ledge_count;
-    for (i32 i = 0; i < world_ledge_count && i < 128; ++i, ++ledge) {
-        u32 mask = 1u << (i & 31);
+    for (i32 i = 0; i < world_ledge_count && i != 128; ++i, ++ledge) {
+        const i32 word = i >> 5;
+        const u32 mask = 1u << (i & 31);
         if (!(ledge->state_flags & 2))
-            progress->state[4 + (i >> 5)] &= ~mask;
+            progress->state[4 + word] &= ~mask;
         if (!(ledge->state_flags & 1))
-            progress->state[i >> 5] &= ~mask;
+            progress->state[word] &= ~mask;
     }
 }
 

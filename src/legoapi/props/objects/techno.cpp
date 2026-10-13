@@ -343,12 +343,9 @@ static void Technos_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
 
     TECHNO *techno = world->technos;
     const i32 count = world->ntechnos;
-    for (i32 index = 0; index < count; ++index, ++techno) {
-        if (index == 32) {
-            break;
-        }
+    for (i32 index = 0; index < count && index != 32; ++index, ++techno) {
         const i32 word = index >> 5;
-        const u32 bit = 1u << index;
+        const u32 bit = 1u << (index & 31);
         if (!techno->visible) {
             progress->state[word + 1] &= ~bit;
         }
