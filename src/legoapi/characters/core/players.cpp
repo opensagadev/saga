@@ -1231,9 +1231,8 @@ namespace {
 
         obj->apiobj.initial_position = position;
         obj->apiobj.collision_position = position;
-        obj->apiobj.start_position = position;
-
         plr_lastpos = position;
+        obj->apiobj.start_position = position;
     }
 
 } // namespace
@@ -1369,12 +1368,8 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
         }
 
         ResetPlayerAI(obj);
-        obj->apiobj.previous_position[0] = obj->apiobj.position.x;
-        obj->apiobj.previous_position[1] = obj->apiobj.position.y;
-        obj->apiobj.previous_position[2] = obj->apiobj.position.z;
-        obj->field_0x10c8 = obj->apiobj.position.x;
-        obj->field_0x10cc = obj->apiobj.position.y;
-        obj->field_0x10d0 = obj->apiobj.position.z;
+        obj->apiobj.last_safe_position = obj->apiobj.position;
+        obj->saved_position = obj->apiobj.position;
         if ((obj->apiobj.character_data->model_flags & 0x2000) != 0) {
             obj->in_narrow_socket = ObjInNarrowSock(obj, WORLD->sock_sys, WORLD->level_idx);
             f32 speed = GetVehicleSpeedMul(obj, 0.0f);
