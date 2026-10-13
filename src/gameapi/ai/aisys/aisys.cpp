@@ -157,7 +157,10 @@ static char *ActionParamValue(char *param, const char *name) {
     }
 
     const i32 length = NuStrLen(name);
-    if (NuStrNICmp(param, name, length) != 0 || param[length] != '=') {
+    if (NuStrNICmp(param, name, length) != 0) {
+        return NULL;
+    }
+    if (param[length] != '=') {
         return NULL;
     }
     return param + length + 1;
@@ -413,16 +416,18 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
     if (creature_set != 0) {
         GameObject_s *candidate = Obj;
         for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++candidate) {
-            if (has_group_flags(candidate) && candidate->ai.creature_set == creature_set &&
-                (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f))) {
-                candidate->field_0xefa =
-                    static_cast<u8>((candidate->field_0xefa & 0xcfu) | (respawn << 4) | (respawn_at_origin << 5));
-                if (parts_on)
-                    KillParts(candidate, -1, -1, 1, 0.0f, 0, NULL);
-                if (debris)
-                    KillGameObject(candidate, 2, 0);
-                else
-                    KillGameObject(candidate, 4, 0);
+            if (has_group_flags(candidate)) {
+                if (candidate->ai.creature_set == creature_set &&
+                    (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f))) {
+                    candidate->field_0xefa =
+                        static_cast<u8>((candidate->field_0xefa & 0xcfu) | (respawn << 4) | (respawn_at_origin << 5));
+                    if (parts_on)
+                        KillParts(candidate, -1, -1, 1, 0.0f, 0, NULL);
+                    if (debris)
+                        KillGameObject(candidate, 2, 0);
+                    else
+                        KillGameObject(candidate, 4, 0);
+                }
             }
         }
         return 1;
@@ -609,7 +614,10 @@ __used__ static i32 Action_PlaySfx(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
                                    i32 param_5, f32 param_6) {
     (void)packet;
     (void)param_6;
-    if (param_5 == 0 || param_4 <= 0) {
+    if (param_5 == 0) {
+        return 1;
+    }
+    if (param_4 <= 0) {
         return 1;
     }
 
@@ -2387,7 +2395,10 @@ static i32 Action_SetSpline(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *pa
     (void)processor;
     (void)param_6;
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
-    if (object == NULL || param_5 == 0) {
+    if (object == NULL) {
+        return 1;
+    }
+    if (param_5 == 0) {
         return 1;
     }
 
