@@ -594,7 +594,9 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuani
                 curve_types += 3;
             } else {
                 // This format stores w explicitly and interpolates the stored signs.
-                NUQUAT first, second;
+                // The original keeps both decoded quaternions 16-byte aligned in a realigned frame.
+                NUQUAT first __attribute__((aligned(16)));
+                NUQUAT second __attribute__((aligned(16)));
                 DecodeAni4Quat3Pair(anim, key_stride, constants, curve_types[0], quarter, keys, scale_min, first.x,
                                     second.x);
                 DecodeAni4Quat3Pair(anim, key_stride, constants, curve_types[1], quarter, keys, scale_min, first.y,

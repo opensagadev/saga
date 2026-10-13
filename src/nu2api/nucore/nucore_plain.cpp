@@ -559,16 +559,17 @@ extern "C" {
         *reflect = global_reflect;
     }
     static void NuCameraBuildClipProjection(NUMTX *projection, NUCAMERA *camera, f32 x_scale, f32 y_scale) {
-        f32 far_clip = camera->unknown_64;
-        if (far_clip == 0.0f)
-            far_clip = camera->far_clip;
-        far_clip -= nucamera_farclip_hack;
+        f32 far_clip;
+        if (camera->unknown_64 == 0.0f)
+            far_clip = camera->far_clip - nucamera_farclip_hack;
+        else
+            far_clip = camera->unknown_64 - nucamera_farclip_hack;
         f32 near_clip = camera->unknown_60;
         if (near_clip == 0.0f)
             near_clip = camera->near_clip;
         const i32 angle = static_cast<i32>(camera->fov * 0.5f * 10430.378f);
         const f32 cotangent = NuTrigTable[(angle + 0x4000) >> 1 & 0x7fff] / NuTrigTable[angle >> 1 & 0x7fff];
-        const f32 x = camera->aspect * cotangent * x_scale;
+        const f32 x = x_scale * camera->aspect * cotangent;
         const f32 y = cotangent * y_scale;
         memset(projection, 0, sizeof(*projection));
         projection->m00 = x;
@@ -2702,15 +2703,15 @@ extern "C" {
         laser->width_wobble = width_wobble;
         laser->segment_length = segment_length;
         laser->arc = 0;
+        laser->end_width_ratio = end_width / width;
         laser->width = width;
-        laser->start = *start;
         laser->type = static_cast<u8>(type);
+        laser->start = *start;
         laser->length = length;
         laser->end.x = delta->x + start->x;
         laser->end.y = delta->y + start->y;
         laser->end.z = delta->z + start->z;
         laser->colour = colour;
-        laser->end_width_ratio = end_width / width;
         // The original tests the arc cursor here, even for a straight laser.
         if ((NuLgtArcLaserFrame & 1) == 0 || NuLgtLaserData[NuLgtArcLaserCnt].seed == 0) {
             NuLgtLaserData[NuLgtLaserCnt].seed = NuLgtRand();
@@ -3528,12 +3529,21 @@ extern "C" {
             return NULL;
 
         for (i32 render = 0; render < render_count; ++render) {
-            i32 node = render_indices == NULL ? 0 : render_indices[render];
-            if (node < 0)
-                continue;
-
-            NuLegacyDwaChunk *chunk = NuLegacyDwaGetChunk(animation, time.chunk);
-            nuanimcurveset_s *set = node < chunk->node_count ? chunk->curve_sets[node] : NULL;
+            i32 node = 0;
+            NuLegacyDwaChunk *chunk;
+            if (render_indices != NULL) {
+                node = render_indices[render];
+                if (node < 0)
+                    continue;
+                chunk = NuLegacyDwaGetChunk(animation, time.chunk);
+                if (node >= chunk->node_count) {
+                    weights_by_render[render] = NuRndrCreateBlendShapeDeformerWeightsArray(0);
+                    continue;
+                }
+            } else {
+                chunk = NuLegacyDwaGetChunk(animation, time.chunk);
+            }
+            nuanimcurveset_s *set = chunk->curve_sets[node];
             if (set == NULL) {
                 weights_by_render[render] = NuRndrCreateBlendShapeDeformerWeightsArray(0);
                 continue;
@@ -3595,7 +3605,7 @@ extern "C" {
             i32 curve_offset = animation->curve_count * node;
             i8 *types = reinterpret_cast<i8 *>(animation->curve_types) + curve_offset;
             nuanimcurve2_s *curves = animation->curves + curve_offset;
-            if (weights == NULL || curve_count <= 0) {
+            if (weights == NULL) {
                 continue;
             }
             for (i32 curve = 0; curve < curve_count; ++curve, ++curves) {
@@ -4413,15 +4423,12 @@ extern "C" {
         for (i32 room_index = 0; room_index < scene->num_rooms; ++room_index) {
             NUROOM *room = &scene->rooms[room_index];
             f32 plane_distance = 0.0f;
-            i32 plane_count = room->plane_count;
             NUPLANE *plane = room->planes;
-            while (plane_count != 0) {
+            for (i32 plane_index = 0; plane_index < room->plane_count; ++plane_index, ++plane) {
                 plane_distance = plane->a * position->x + plane->b * position->y + plane->c * position->z + plane->d;
                 if (plane_distance > 0.0f) {
                     break;
                 }
-                ++plane;
-                --plane_count;
             }
             if (!(plane_distance <= 0.0f)) {
                 continue;
