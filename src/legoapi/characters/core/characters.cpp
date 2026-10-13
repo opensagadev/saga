@@ -176,72 +176,60 @@ void LSW_SetIndy(i32) {
 }
 
 void HairMovement(GameObject_s *object) {
-    u8 index;
-    GAMECHARACTERDATA_s *character;
-    f32 phase;
-    i16 animation;
+    constexpr f32 gravity = -1.8325958f;
     u8 current_index;
     u32 state_index;
     u8 *state;
-    f32 value;
-    constexpr f32 gravity = -1.8325958f;
 
-    index = object->field_0x1089;
+    const u8 index = object->field_0x1089;
     if (index > 2) {
         return;
     }
-    character = object->apiobj.character_data->game_character;
-    if (character->cloak_joint_2 == -1) {
+    if (object->apiobj.character_data->game_character->cloak_joint_2 == -1) {
         return;
     }
 
-    phase = NuFsqrt(*reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(object) + index * 0x34 + 0xf50) / gravity);
-    if (LEGOACT_FALL == -1) {
-        goto not_falling;
-    }
-    if (object->apiobj.anim_packet.blending == 0) {
-        animation = object->apiobj.anim_packet.animation_index;
+    f32 phase = NuFsqrt(*reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(object) + index * 0x34 + 0xf50) / gravity);
+    if (LEGOACT_FALL == -1 ||
+        (object->apiobj.anim_packet.blending != 0 ? LEGOACT_FALL != object->apiobj.anim_packet.blend_animation_b
+                                                  : LEGOACT_FALL != object->apiobj.anim_packet.animation_index)) {
+        phase = phase - (FRAMETIME + FRAMETIME);
+        if (phase < 0.0f) {
+            current_index = object->field_0x1089;
+            state_index = current_index;
+            state = reinterpret_cast<u8 *>(object) + state_index * 0x34;
+            const u8 joint = static_cast<u8>(object->apiobj.character_data->game_character->cloak_joint_2);
+            *reinterpret_cast<f32 *>(state + 0xf50) = 0.0f;
+            state[0xf78] = joint;
+            goto increment_index;
+        }
     } else {
-        animation = object->apiobj.anim_packet.blend_animation_b;
-    }
-    if (LEGOACT_FALL != animation) {
-        goto not_falling;
+        phase = FRAMETIME + FRAMETIME + phase;
+        if (phase > 1.0f) {
+            current_index = object->field_0x1089;
+            state_index = current_index;
+            state = reinterpret_cast<u8 *>(object) + state_index * 0x34;
+            state[0xf78] = static_cast<u8>(object->apiobj.character_data->game_character->cloak_joint_2);
+            *reinterpret_cast<f32 *>(state + 0xf50) = gravity;
+            goto setup_state;
+        }
     }
 
-    phase = FRAMETIME + FRAMETIME + phase;
-    if (phase <= 1.0f) {
-        goto interpolate;
-    }
-    current_index = object->field_0x1089;
-    state_index = current_index;
-    state = reinterpret_cast<u8 *>(object) + state_index * 0x34;
-    state[0xf78] = static_cast<u8>(object->apiobj.character_data->game_character->cloak_joint_2);
-    *reinterpret_cast<f32 *>(state + 0xf50) = gravity;
-    goto setup_state;
-
-not_falling:
-    phase = phase - (FRAMETIME + FRAMETIME);
-    if (phase < 0.0f) {
+    {
+        const f32 squared = phase * phase;
+        const f32 value = gravity * squared + (1.0f - squared) * 0.0f;
         current_index = object->field_0x1089;
         state_index = current_index;
         state = reinterpret_cast<u8 *>(object) + state_index * 0x34;
-        *reinterpret_cast<f32 *>(state + 0xf50) = 0.0f;
         state[0xf78] = static_cast<u8>(object->apiobj.character_data->game_character->cloak_joint_2);
-        goto increment_index;
-    }
-
-interpolate:
-    current_index = object->field_0x1089;
-    state_index = current_index;
-    state = reinterpret_cast<u8 *>(object) + state_index * 0x34;
-    value = gravity * phase * phase + (1.0f - phase * phase) * 0.0f;
-    state[0xf78] = static_cast<u8>(object->apiobj.character_data->game_character->cloak_joint_2);
-    *reinterpret_cast<f32 *>(state + 0xf50) = value;
-    if (value == 0.0f) {
-        goto increment_index;
+        *reinterpret_cast<f32 *>(state + 0xf50) = value;
+        if (value == 0.0f) {
+            goto increment_index;
+        }
     }
 
 setup_state:
+    state = reinterpret_cast<u8 *>(object) + state_index * 0x34;
     state[0xf79] = 0x21;
     *reinterpret_cast<i16 *>(state + 0xf70) = 0;
     *reinterpret_cast<i16 *>(state + 0xf76) = static_cast<i16>(0xb556);
@@ -1389,18 +1377,13 @@ void LoadSingleCharacter(bgprocinfo_s *) {
 
 void CharScenes_LevelDump(WORLDINFO_s *world) {
     CHARSCENE_s *scenes = world->minikit.character_scenes;
-    if (scenes != NULL && CHARCOUNT > 0) {
-        i32 i = 0;
-        do {
-            CHARSCENE_s *entry = &scenes[i];
-            if (entry->scene != NULL) {
-                NuGScnRemove(entry->scene);
-                scenes = world->minikit.character_scenes;
-                entry = &scenes[i];
+    if (scenes != NULL) {
+        for (i32 i = 0; i < CHARCOUNT; ++i) {
+            if (world->minikit.character_scenes[i].scene != NULL) {
+                NuGScnRemove(world->minikit.character_scenes[i].scene);
             }
-            ++i;
-            entry->scene = NULL;
-        } while (CHARCOUNT > i);
+            world->minikit.character_scenes[i].scene = NULL;
+        }
     }
 }
 

@@ -983,7 +983,6 @@ extern "C" {
         key->orientation_dirty = 0.0f;
         key->cutoff_distance = 999999.0f;
         key->field_2f2 = -1;
-        key->field_1d8 = 0;
         key->field_1da = 7;
         key->gscene = NULL;
         key->process_collision_sound = 0;
@@ -991,6 +990,7 @@ extern "C" {
         key->field_2f9 = 1;
         key->user_data = NULL;
         key->field_2fa = 0;
+        key->field_1d8 = 0;
         key->emission_epoch = key->field_1e4 < now ? key->field_1e4 : now;
 
         switch (effect->particle_type) {
@@ -1054,14 +1054,15 @@ extern "C" {
             return;
         debkeydata[*handle].field_1d4 = count;
         const f32 now = debtab[effect]->time_group == 4 ? panelglobaltime : globaltime;
-        debkeydata[*handle].field_184 = 1;
-        debkeydata[*handle].field_1d8 = 0;
-        const f32 offset = debkeydata[*handle].emission_time - now;
-        debkeydata[*handle].emission_time -= offset;
-        debkeydata[*handle].field_1e4 -= offset;
-        debkeydata[*handle].emission_epoch = debkeydata[*handle].last_update_time;
+        debkeydatatype_s *key = &debkeydata[*handle];
+        key->field_184 = 1;
+        key->field_1d8 = 0;
+        const f32 offset = key->emission_time - now;
+        key->emission_time -= offset;
+        key->field_1e4 -= offset;
+        key->emission_epoch = key->last_update_time;
         debkeydata[*handle].cutoff_distance = CameraEmitterDistance(position);
-        if (debkeydata[*handle].process_collision_sound != 0) {
+        if (__builtin_expect(debkeydata[*handle].process_collision_sound != 0, 1)) {
             f32 range = debtab[effect]->sound_range_override;
             if (range == 0.0f)
                 range = debtab[effect]->sound_range;
@@ -2474,7 +2475,7 @@ PART_s *TargetPart(GameObject_s *object, nuvec_s *position, nuvec_s *direction, 
     NUVEC aim = *direction;
     BOLTTYPE_s *bolt = BoltType_FindByID(bolt_id, WORLD);
     PART_s *part = Part;
-    f32 min_x = position->x - radius, max_x = position->x + radius;
+    f32 max_x = position->x + radius, min_x = position->x - radius;
     f32 min_z = position->z - radius, max_z = position->z + radius;
     if (directional != 0) {
         aim = *direction;
