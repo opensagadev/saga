@@ -3469,10 +3469,24 @@ struct minitrooperteam_s {
     f32 formation_width;
     f32 formation_depth;
     u16 facing_angle;
-    u8 formation_state;
-    u8 route_state;
-    u8 waypoint_state;
-    u8 team_flags; // 0x19, bit 1 selects the opposing team
+    union {
+        struct {
+            u8 formation_state;
+            u8 route_state;
+            u8 waypoint_state;
+            u8 team_flags; // 0x19, bit 1 selects the opposing team
+        };
+        struct {
+            u8 formation_shape : 4;
+            u8 formation_mode : 4;
+            u8 route_flags : 5;
+            u8 route_index : 3;
+            u16 waypoint_flags : 3;
+            u16 waypoint_index : 3;
+            u16 waypoint_count : 3;
+            u16 team_bits : 7;
+        };
+    };
     u8 trooper_count;
     u8 reserved_01b;
     u32 state_flags; // 0x1c, bit 0 marks an active team
