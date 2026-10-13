@@ -542,10 +542,10 @@ void GizmoSysStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index) 
     GIZMOSET *set = system->sets;
     for (i32 i = 0; i < gizmotypes->count; ++i, ++type, ++set) {
         if (type->fns.store_progress_fn != NULL) {
-            if (progress_index < 0 || type->buffer == NULL)
-                type->fns.store_progress_fn(world, set->unknown, NULL);
-            else
+            if (progress_index >= 0 && type->buffer != NULL)
                 type->fns.store_progress_fn(world, set->unknown, type->buffer[progress_index].void_ptr);
+            else
+                type->fns.store_progress_fn(world, set->unknown, NULL);
         }
     }
 }
