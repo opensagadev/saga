@@ -4837,62 +4837,65 @@ finished:
     return result;
 }
 
-static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pressed, i32 allow_start) {
-    if ((object->field_0xe22 & 1) != 0 && object->weapon_scale_state == 0) {
-        void **animations = object->apiobj.character_model->model_data_b;
-        bool has_block = animations[0x1a] != NULL || animations[0x1b] != NULL || animations[0x1c] != NULL;
-        object->incoming_bolt = has_block ? FindIncomingBolt(object, 0, 0) : NULL;
-        animations = object->apiobj.character_model->model_data_b;
-        has_block = animations[0x1a] != NULL || animations[0x1b] != NULL || animations[0x1c] != NULL;
-        GameObject_s *melee = NULL;
-        if (has_block) {
-            for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-                GameObject_s *target = &Obj[i];
-                if (target != object && (target->apiobj.field_0x1f8 & 0x1000) != 0 && target->apiobj.field_0x287 == 0 &&
-                    target->character_context == 5 && (target->context_flags & 0xc) == 0 &&
-                    target->force_target == object) {
-                    melee = target;
-                    break;
-                }
+static void FindIncomingThreats(GameObject_s *object) {
+    void **animations = object->apiobj.character_model->model_data_b;
+    bool has_block = animations[0x1a] != NULL || animations[0x1b] != NULL || animations[0x1c] != NULL;
+    object->incoming_bolt = has_block ? FindIncomingBolt(object, 0, 0) : NULL;
+    animations = object->apiobj.character_model->model_data_b;
+    has_block = animations[0x1a] != NULL || animations[0x1b] != NULL || animations[0x1c] != NULL;
+    GameObject_s *melee = NULL;
+    if (has_block) {
+        for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
+            GameObject_s *target = &Obj[i];
+            if (target != object && (target->apiobj.field_0x1f8 & 0x1000) != 0 && target->apiobj.field_0x287 == 0 &&
+                target->character_context == 5 && (target->context_flags & 0xc) == 0 &&
+                target->force_target == object) {
+                melee = target;
+                break;
             }
         }
-        object->incoming_melee = melee;
-        GameObject_s *special = NULL;
-        if (((object->apiobj.character_data->model_flags & 8) != 0 || object->id == id_BODYGUARD ||
-             object->id == id_IMPERIALGUARD) &&
-            has_block) {
-            for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-                GameObject_s *target = &Obj[i];
-                if (target != object && (target->apiobj.field_0x1f8 & 0x1000) != 0 && target->apiobj.field_0x287 == 0 &&
-                    target->character_context == 0x26 && target->force_target == object &&
-                    (target->id != id_GAMORREANGUARD || target->context_animation != 0x56 ||
-                     (target->context_flags & 0x40) == 0)) {
-                    special = target;
-                    break;
-                }
-            }
-        }
-        object->incoming_special = special;
-        if (object->incoming_bolt == NULL && melee == NULL) {
-            if (object->apiobj.field_0x27c == -1 || !has_block)
-                object->incoming_part = NULL;
-            else {
-                f32 radius = object->apiobj.field_0x1e0 > object->apiobj.field_0x1dc ? object->apiobj.field_0x1e0
-                                                                                     : object->apiobj.field_0x1dc;
-                object->incoming_part = FindIncomingPart(object, &object->apiobj.collision_position, radius, 10, 0.0f);
-            }
-        }
-        if ((object->field_0xe22 & 8) == 0 &&
-            (object->incoming_bolt != NULL || object->incoming_melee != NULL || object->incoming_part != NULL) &&
-            object->character_context == -1)
-            object->field_0xe22 |= 8;
     }
+    object->incoming_melee = melee;
+    GameObject_s *special = NULL;
+    if (((object->apiobj.character_data->model_flags & 8) != 0 || object->id == id_BODYGUARD ||
+         object->id == id_IMPERIALGUARD) &&
+        has_block) {
+        for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
+            GameObject_s *target = &Obj[i];
+            if (target != object && (target->apiobj.field_0x1f8 & 0x1000) != 0 && target->apiobj.field_0x287 == 0 &&
+                target->character_context == 0x26 && target->force_target == object &&
+                (target->id != id_GAMORREANGUARD || target->context_animation != 0x56 ||
+                 (target->context_flags & 0x40) == 0)) {
+                special = target;
+                break;
+            }
+        }
+    }
+    object->incoming_special = special;
+    if (object->incoming_bolt == NULL && melee == NULL) {
+        if (object->apiobj.field_0x27c == -1 || !has_block)
+            object->incoming_part = NULL;
+        else {
+            f32 radius = object->apiobj.field_0x1e0 > object->apiobj.field_0x1dc ? object->apiobj.field_0x1e0
+                                                                                 : object->apiobj.field_0x1dc;
+            object->incoming_part = FindIncomingPart(object, &object->apiobj.collision_position, radius, 10, 0.0f);
+        }
+    }
+    if ((object->field_0xe22 & 8) == 0 &&
+        (object->incoming_bolt != NULL || object->incoming_melee != NULL || object->incoming_part != NULL) &&
+        object->character_context == -1)
+        object->field_0xe22 |= 8;
+}
+
+static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pressed, i32 allow_start) {
+    if ((object->field_0xe22 & 1) != 0 && object->weapon_scale_state == 0)
+        FindIncomingThreats(object);
     if (object->character_context == 0xc) {
         GameObject_s *attacker = object->block_attacker;
         if (attacker != NULL) {
             if (jump_pressed != 0 && object->apiobj.character_model->model_data_b[0x12] != NULL) {
                 SetComboOpponent(object, 1.0f, 0, 1);
-                f32 speed = GetGameCharacterData(object)->second_jump_speed;
+                f32 speed = object->apiobj.character_data->game_character->second_jump_speed;
                 object->jump_flags &= ~1;
                 object->context_animation_timer = 0.0f;
                 object->delayed_turn_timer = 0.0f;
@@ -4905,7 +4908,7 @@ static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pres
                 object->context_animation = 0x12;
                 object->apiobj.field_0x27d = 0;
                 object->field_0x105c = 0;
-                object->collision_target = NULL;
+                object->airborne_collision_target = NULL;
                 PlayJumpSfx(object, 2);
                 ResetAnimPacket(&object->apiobj.anim_packet, object->context_animation);
                 if ((object->apiobj.flags_low & 0x80) != 0)
@@ -5093,13 +5096,13 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                     object->airborne_input_timer = 0.0f;
                     object->field_0xe22 |= 0x10;
                     object->character_context = 0;
-                    object->apiobj.velocity.y = GetGameCharacterData(object)->second_jump_speed;
+                    object->apiobj.velocity.y = object->apiobj.character_data->game_character->second_jump_speed;
                     object->context_variant_flags &= 0x4f;
                     object->action_movement_state = 2;
                     object->context_animation = 0x12;
                     object->apiobj.field_0x27d = 0;
                     object->field_0x105c = 0;
-                    object->collision_target = NULL;
+                    object->airborne_collision_target = NULL;
                     PlayJumpSfx(object, 2);
                     ResetAnimPacket(&animation, object->context_animation);
                     if ((object->apiobj.flags_low & 0x80) != 0)
