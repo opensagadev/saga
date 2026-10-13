@@ -912,7 +912,7 @@ void MenuUpdateLoading(MENU_s *) {
     if (memcard_loadneeded != 0) {
         memcard_loadmessage_delay = 1.0f;
         memcard_loadresult_delay = 1.0f;
-        if (memcard_cardchanged != 0 || saveload_autosave == -1) {
+        if (memcard_cardchanged != 0 || saveload_cardtype == -1) {
             memcard_loadneeded = 0;
             memcard_loadfailed = 1;
         }
@@ -946,7 +946,7 @@ void MenuUpdateSaving(MENU_s *) {
     if (memcard_saveneeded != 0) {
         memcard_savemessage_delay = 1.0f;
         memcard_saveresult_delay = 1.0f;
-        if (memcard_cardchanged != 0 || saveload_autosave == -1) {
+        if (memcard_cardchanged != 0 || saveload_cardtype == -1) {
             memcard_saveneeded = 0;
             memcard_savefailed = 1;
         }
@@ -961,14 +961,16 @@ void MenuUpdateSaving(MENU_s *) {
         return;
     }
 
-    if (memcard_savefailed == 0 && memcard_autosave != 0 && saveload_autosave != -1) {
+    if (memcard_savefailed == 0) {
+        if (memcard_autosave != 0 && saveload_autosave != -1) {
+            BackupMenuNoFn();
+            BackupMenuNoFn();
+            memcard_autosaveenabled = 1;
+            memcard_autosavedisabled = 0;
+            return;
+        }
         BackupMenuNoFn();
-        BackupMenuNoFn();
-        memcard_autosaveenabled = 1;
-        memcard_autosavedisabled = 0;
-        return;
     }
-    BackupMenuNoFn();
     BackupMenu();
 }
 
