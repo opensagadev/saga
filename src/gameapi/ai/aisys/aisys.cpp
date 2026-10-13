@@ -3224,7 +3224,14 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
                                          : NuVecDistSqr(&packet->terrain_origin, &locator->position, &distance_vector);
         const f32 reach_distance = packet->movement_instruction_parameter + ai_moveradius +
                                    elapsed * packet->owner->apiobj.horizontal_velocity_magnitude;
-        if (reach_distance * reach_distance > distance_squared) {
+        if (!(reach_distance * reach_distance > distance_squared)) {
+            if ((packet->field_0x1e6 & 0x40) != 0 &&
+                (processor->action_data_1 & GO_TO_LOCATOR_MUST_REACH_DESTINATION) != 0 &&
+                AIBigJumpToDestinationFn != NULL) {
+                return AIBigJumpToDestinationFn(&packet->owner->apiobj, &locator->position) != 0;
+            }
+            return 0;
+        } else {
             if ((processor->action_data_1 & GO_TO_LOCATOR_FACE_OPPONENT) == 0 || packet->opponent_object == NULL) {
                 packet->movement_look_target = &processor->action_pos;
             }
@@ -3234,13 +3241,6 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
             processor->action_timer -= elapsed;
             if (processor->action_timer < 0.0f) {
                 processor->action_timer = 0.0f;
-            }
-            return 0;
-        } else {
-            if ((packet->field_0x1e6 & 0x40) != 0 &&
-                (processor->action_data_1 & GO_TO_LOCATOR_MUST_REACH_DESTINATION) != 0 &&
-                AIBigJumpToDestinationFn != NULL) {
-                return AIBigJumpToDestinationFn(&packet->owner->apiobj, &locator->position) != 0;
             }
             return 0;
         }
@@ -7530,10 +7530,10 @@ __used__ static i32 Action_SetAnimSpeedMul(AISYS *sys, AISCRIPTPROCESS *processo
         }
         if (multiply_by != 1.0f) {
             f32 speed = object->animation_speed_multiplier * multiply_by;
-            if (speed > maximum) {
-                object->animation_speed_multiplier = maximum;
-            } else {
+            if (!(speed > maximum)) {
                 object->animation_speed_multiplier = MAX(minimum, speed);
+            } else {
+                object->animation_speed_multiplier = maximum;
             }
         }
     }
