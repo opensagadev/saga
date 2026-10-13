@@ -1182,8 +1182,9 @@ extern "C" {
             KillPart(part, 0);
         }
         if (params->matrix != NULL) {
-            part->transform = *params->matrix;
-            NUMTX_ALIGNED16 matrix = *params->matrix;
+            NUMTX *source = params->matrix;
+            part->transform = *source;
+            NUMTX_ALIGNED16 matrix = *source;
             NuVecMtxRotate(&forward, &forward, &matrix);
             part->rotation_y = NuAtan2D(forward.x, forward.z);
             NuVecRotateY(&forward, &forward, -part->rotation_y);
