@@ -121,14 +121,14 @@ extern "C" void LocaledbitsDrawSolidCircleXY(NUVEC *centre, f32 radius, f32 lowe
 
 extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour) {
     f32 corners[4][2] = {{-1.0f, -1.0f}, {1.0f, -1.0f}, {1.0f, 1.0f}, {-1.0f, 1.0f}};
-    NUMTX matrix = global_camera.mtx;
+    NUMTX_ALIGNED32 matrix = global_camera.mtx;
     matrix.m31 = centre->y;
     matrix.m30 = centre->x;
     matrix.m32 = centre->z;
     for (i32 remaining = 4; remaining > 0; --remaining) {
         const i32 i = 4 - remaining;
-        NUVEC end;
-        NUVEC start;
+        NUVEC_ALIGNED16 start;
+        NUVEC_ALIGNED16 end;
         if (i == 0) {
             start = NUVEC{-radius, -radius, 0.0f};
             end = NUVEC{radius, -radius, 0.0f};
@@ -147,50 +147,50 @@ extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour) {
 }
 
 extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32) {
-    NUMTX matrix = global_camera.mtx;
+    NUMTX_ALIGNED32 matrix = global_camera.mtx;
     matrix.m30 = centre->x;
     matrix.m31 = centre->y;
     matrix.m32 = centre->z;
     i32 step = 65536 / segments;
-    NURND_VERTEX3D first, second;
-    first.position.x = radius;
-    first.position.y = 0.0f;
-    first.position.z = 0.0f;
-    first.colour = colour;
-    second.colour = colour;
-    NuVecRotateZ(&second.position, &first.position, step);
+    NURND_VERTEX3D vertices[2];
+    vertices[0].position.x = radius;
+    vertices[0].position.y = 0.0f;
+    vertices[0].position.z = 0.0f;
+    vertices[0].colour = colour;
+    vertices[1].colour = colour;
+    NuVecRotateZ(&vertices[1].position, &vertices[0].position, step);
     for (i32 i = 0; i < segments; ++i) {
-        NUVEC start = first.position;
-        NUVEC end = second.position;
+        NUVEC_ALIGNED16 start = vertices[0].position;
+        NUVEC_ALIGNED16 end = vertices[1].position;
         NuVecMtxTransform(&start, &start, &matrix);
         NuVecMtxTransform(&end, &end, &matrix);
-        NuRndrLine3dDbg(start.x, start.y, start.z, end.x, end.y, end.z, first.colour);
-        first.position = second.position;
-        NuVecRotateZ(&second.position, &second.position, step);
+        NuRndrLine3dDbg(start.x, start.y, start.z, end.x, end.y, end.z, vertices[0].colour);
+        vertices[0].position = vertices[1].position;
+        NuVecRotateZ(&vertices[1].position, &vertices[1].position, step);
     }
 }
 
 extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments) {
-    NUMTX matrix = numtx_identity;
+    NUMTX_ALIGNED32 matrix = numtx_identity;
     matrix.m30 = centre->x;
     matrix.m31 = centre->y;
     matrix.m32 = centre->z;
     i32 step = 65536 / segments;
-    NURND_VERTEX3D first, second;
-    first.position.x = radius;
-    first.position.y = 0.0f;
-    first.position.z = 0.0f;
-    first.colour = colour;
-    second.colour = colour;
-    NuVecRotateY(&second.position, &first.position, step);
+    NURND_VERTEX3D vertices[2];
+    vertices[0].position.x = radius;
+    vertices[0].position.y = 0.0f;
+    vertices[0].position.z = 0.0f;
+    vertices[0].colour = colour;
+    vertices[1].colour = colour;
+    NuVecRotateY(&vertices[1].position, &vertices[0].position, step);
     for (i32 i = 0; i < segments; ++i) {
-        NUVEC start = first.position;
-        NUVEC end = second.position;
+        NUVEC_ALIGNED16 start = vertices[0].position;
+        NUVEC_ALIGNED16 end = vertices[1].position;
         NuVecMtxTransform(&start, &start, &matrix);
         NuVecMtxTransform(&end, &end, &matrix);
-        NuRndrLine3dDbg(start.x, start.y, start.z, end.x, end.y, end.z, first.colour);
-        first.position = second.position;
-        NuVecRotateY(&second.position, &second.position, step);
+        NuRndrLine3dDbg(start.x, start.y, start.z, end.x, end.y, end.z, vertices[0].colour);
+        vertices[0].position = vertices[1].position;
+        NuVecRotateY(&vertices[1].position, &vertices[1].position, step);
     }
 }
 

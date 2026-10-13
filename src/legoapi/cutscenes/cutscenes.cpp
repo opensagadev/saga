@@ -1221,7 +1221,7 @@ static void CutScene_EvalCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
         object = static_cast<GameObject_s *>(instance->character_model);
     }
     i32 visible;
-    NUMTX matrix;
+    NUMTX_ALIGNED32 matrix;
     NuGCutCharAnimProcess(character, frame, &matrix, &visible, NULL, NULL, NULL, NULL, NULL);
     if (static_cast<i8>(cutscene_instance->flags_88) < 0) {
         NuMtxMul(&matrix, &matrix, &cutscene_instance->matrix);
