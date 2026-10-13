@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 77.50394,
+    "fuzzy_match_percent": 77.56483,
     "total_code": "4722419",
-    "matched_code": "589127",
-    "matched_code_percent": 12.475111,
+    "matched_code": "590482",
+    "matched_code_percent": 12.503804,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6689,
-    "matched_functions_percent": 49.699085,
+    "matched_functions": 6692,
+    "matched_functions_percent": 49.721375,
     "total_units": 1
   },
   "text": {
@@ -18816,7 +18816,7 @@
           "address": 4561600,
           "offset": 3671632,
           "size": 654,
-          "match_percent": 91.391304
+          "match_percent": 92.45217
         },
         {
           "name": "_ZN20MechTouchUITagButtonC2ER12GameObject_sR11TouchHolder",
@@ -18824,7 +18824,7 @@
           "address": 4561600,
           "offset": 3671632,
           "size": 654,
-          "match_percent": 91.391304
+          "match_percent": 92.45217
         },
         {
           "name": "_ZN20MechTouchUITagButton7FadeOutEv",
@@ -39432,7 +39432,7 @@
           "address": 5148816,
           "offset": 4258848,
           "size": 1117,
-          "match_percent": 47.288067
+          "match_percent": 64.36214
         },
         {
           "name": "_Z13DrawSnakeBodyP12GameObject_s",
@@ -47973,7 +47973,7 @@
           "address": 1243920,
           "offset": 353952,
           "size": 1229,
-          "match_percent": 53.39544
+          "match_percent": 99.93916
         },
         {
           "name": "_ZL10ShieldCodeP12GameObject_s",
@@ -47989,7 +47989,7 @@
           "address": 1356704,
           "offset": 466736,
           "size": 2265,
-          "match_percent": 44.975
+          "match_percent": 44.2375
         },
         {
           "name": "_ZL14ShootThisFrameP12GameObject_sii",
@@ -48205,7 +48205,7 @@
           "address": 1409472,
           "offset": 519504,
           "size": 1500,
-          "match_percent": 43.33735
+          "match_percent": 45.611446
         },
         {
           "name": "_ZL9BlockCodeP12GameObject_siiii",
@@ -48213,7 +48213,7 @@
           "address": 1410976,
           "offset": 521008,
           "size": 2148,
-          "match_percent": 27.091106
+          "match_percent": 35.872017
         },
         {
           "name": "_ZL9SwipeCodeP12GameObject_sii",
@@ -48221,7 +48221,7 @@
           "address": 1413136,
           "offset": 523168,
           "size": 838,
-          "match_percent": 87.07692
+          "match_percent": 86.99451
         },
         {
           "name": "_ZL19LightSabreComboCodeP12GameObject_siiii",
@@ -48229,7 +48229,7 @@
           "address": 1413984,
           "offset": 524016,
           "size": 4225,
-          "match_percent": 37.400677
+          "match_percent": 39.63544
         },
         {
           "name": "_Z11Glide_StartP12GameObject_s",
@@ -48701,7 +48701,7 @@
           "address": 4568656,
           "offset": 3678688,
           "size": 876,
-          "match_percent": 69.27397
+          "match_percent": 99.0
         },
         {
           "name": "_ZN12MoveToMarkerC2ER19MechObjectInterface",
@@ -48709,7 +48709,7 @@
           "address": 4568656,
           "offset": 3678688,
           "size": 876,
-          "match_percent": 69.27397
+          "match_percent": 99.0
         },
         {
           "name": "_ZN12MoveToMarker7FadeOutEv",
@@ -48725,7 +48725,7 @@
           "address": 4569568,
           "offset": 3679600,
           "size": 1747,
-          "match_percent": 60.73143
+          "match_percent": 89.045715
         },
         {
           "name": "_ZN12MoveToMarker6BlowUpEv",
@@ -51510,7 +51510,7 @@
           "address": 4820032,
           "offset": 3930064,
           "size": 360,
-          "match_percent": 94.85366
+          "match_percent": 95.0
         },
         {
           "name": "_ZL22CutScene_DrawCharacterP17instNUGCUTSCENE_sP13NUGCUTSCENE_sP16instNUGCUTCHAR_sP12NUGCUTCHAR_sfi",
@@ -56266,7 +56266,7 @@
           "address": 5014848,
           "offset": 4124880,
           "size": 711,
-          "match_percent": 77.041176
+          "match_percent": 77.21764
         },
         {
           "name": "_ZL20GizSpinner_AddGizmosP10GIZMOSYS_siPvS1_",
@@ -56290,7 +56290,7 @@
           "address": 5016608,
           "offset": 4126640,
           "size": 420,
-          "match_percent": 41.372547
+          "match_percent": 41.813725
         },
         {
           "name": "_Z24GizSpinner_GetOutputNameP7GIZMO_si",
@@ -56306,7 +56306,7 @@
           "address": 5017248,
           "offset": 4127280,
           "size": 3590,
-          "match_percent": 39.0589
+          "match_percent": 59.0589
         },
         {
           "name": "_Z23GizSpinners_InitTerrainP11WORLDINFO_s",
@@ -56314,7 +56314,7 @@
           "address": 5020848,
           "offset": 4130880,
           "size": 802,
-          "match_percent": 99.545
+          "match_percent": 99.62
         },
         {
           "name": "_Z28GizSpinner_FindBySpecialNamePvPc",
@@ -56322,7 +56322,7 @@
           "address": 5021664,
           "offset": 4131696,
           "size": 173,
-          "match_percent": 99.72222
+          "match_percent": 100.0
         },
         {
           "name": "_Z19GizSpinner_GetStateP12GIZSPINNER_s",
@@ -56434,7 +56434,7 @@
           "address": 5032368,
           "offset": 4142400,
           "size": 398,
-          "match_percent": 80.30986
+          "match_percent": 80.23943
         }
       ]
     },
@@ -75373,7 +75373,7 @@
           "address": 3838768,
           "offset": 2948800,
           "size": 591,
-          "match_percent": 95.08594
+          "match_percent": 100.0
         },
         {
           "name": "RndrCircleXZ",
@@ -75381,7 +75381,7 @@
           "address": 3839360,
           "offset": 2949392,
           "size": 591,
-          "match_percent": 95.08594
+          "match_percent": 100.0
         },
         {
           "name": "RndrOSquare",
@@ -75389,7 +75389,7 @@
           "address": 3839952,
           "offset": 2949984,
           "size": 1156,
-          "match_percent": 89.110596
+          "match_percent": 89.400925
         },
         {
           "name": "LocaledbitsDrawSolidCircleXY",
