@@ -165,8 +165,9 @@ static void Plugs_Reset(void *world_ptr, void *, void *progress_ptr) {
         return;
     }
 
-    for (i32 index = 0; index < world->plug_sys->count; ++index) {
-        PLUG &plug = world->plug_sys->plugs[index];
+    PLUG *plug_ptr = world->plug_sys->plugs;
+    for (i32 index = 0; index < world->plug_sys->count; ++index, ++plug_ptr) {
+        PLUG &plug = *plug_ptr;
         plug.flags = static_cast<u8>((plug.flags | PLUG_FLAG_ACTIVE | PLUG_FLAG_VISIBLE) & ~PLUG_FLAG_PLUGGED);
         if (progress != NULL && !(index > 31)) {
 
@@ -207,8 +208,9 @@ static i32 Plugs_Load(void *world_ptr, void *) {
 
     const i32 version = EdFileReadInt();
     world->plug_sys->count = EdFileReadInt();
-    for (i32 index = 0; index < world->plug_sys->count; ++index) {
-        PLUG &plug = world->plug_sys->plugs[index];
+    PLUG *plug_ptr = world->plug_sys->plugs;
+    for (i32 index = 0; index < world->plug_sys->count; ++index, ++plug_ptr) {
+        PLUG &plug = *plug_ptr;
         EdFileRead(plug.name, sizeof(plug.name));
         EdFileReadNuVec(&plug.position);
         plug.x_rotation = EdFileReadUnsignedShort();
