@@ -4055,9 +4055,7 @@ static __used__ void BackDrop_Alpha(float *alpha) {
     extern STATUSPACKET_s StatusPacket;
     extern i32 selectmodemode;
     extern f32 selectmodetime;
-    if (alpha == nullptr)
-        return;
-    if (WORLD != NULL && WORLD->current_level != NULL) {
+    if (WORLD != NULL) {
         LEVELDATA *level = WORLD->current_level;
         if (level == TITLES_LDATA) {
             *alpha *= newgamealpha;
@@ -4067,16 +4065,24 @@ static __used__ void BackDrop_Alpha(float *alpha) {
             *alpha *= CreditsAlpha;
             return;
         }
-        if ((level->flags & 0x400) != 0 && StatusPacket.status_flags != 0 && StatusPacket.stage != NULL &&
-            StatusPacket.stage->type == 12 && (StatusPacket.mode_flags & 0x10) == 0) {
+        if ((level->flags & 0x400) != 0 && StatusPacket.status_flags != 0 && StatusPacket.stage->type == 12 &&
+            (StatusPacket.mode_flags & 0x10) == 0) {
             const f32 time = StatusPacket.stage->field_0x18;
-            *alpha = time < 0.5f ? 1.0f - (time + time) : 0.0f;
+            if (time < 0.5f) {
+                *alpha = 1.0f - (time + time);
+            } else {
+                *alpha = 0.0f;
+            }
             return;
         }
     }
     if (GetMenuID() == 15 && selectmodemode == 4) {
         const f32 time = selectmodetime;
-        *alpha = time < 0.5f ? 1.0f - (time + time) : 0.0f;
+        if (time < 0.5f) {
+            *alpha = 1.0f - (time + time);
+        } else {
+            *alpha = 0.0f;
+        }
     }
 }
 
@@ -4231,19 +4237,25 @@ extern "C" {
         special_handle.scene = gscene;
         for (i32 index = 0; index < scene->nspecials; ++index) {
             NUDISPLAYSPECIAL *special = &static_cast<NUDISPLAYSPECIAL *>(scene->specials)[index];
-            if ((special->flags & NUDISPLAYSPECIAL_FLAG_VISIBLE) != 0) {
-                special_handle.display_special = special;
-                if ((!shadow_pass ||
-                     (scene->visibility_flags[special->instance_ix] & NUDL_INSTANCE_FLAG_CASTS_SHADOW)) &&
-                    (!portal_filter ||
-                     (scene->visibility_flags[special->instance_ix] & NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) ||
-                     (visibility->portal_bits[special->instance_ix >> 3] & (1U << (special->instance_ix & 7))))) {
-                    if (special->draw_mtx_ptr != reinterpret_cast<NUMTX *>(-1) && special->draw_mtx_ptr != NULL)
-                        NuDisplayListRndrSpecial(&special_handle, special->draw_mtx_ptr, 0, NULL, NULL);
-                    else
-                        NuDisplayListRndrSpecial(&special_handle, &special->draw_mtx, 0, NULL, NULL);
-                }
+            if ((special->flags & NUDISPLAYSPECIAL_FLAG_VISIBLE) == 0) {
+                continue;
             }
+            special_handle.display_special = special;
+            if (shadow_pass && (scene->visibility_flags[special->instance_ix] & NUDL_INSTANCE_FLAG_CASTS_SHADOW) == 0) {
+                continue;
+            }
+            if (portal_filter &&
+                (scene->visibility_flags[special->instance_ix] & NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) == 0 &&
+                (visibility->portal_bits[special->instance_ix >> 3] & (1U << (special->instance_ix & 7))) == 0) {
+                continue;
+            }
+            NUMTX *draw_mtx = special->draw_mtx_ptr;
+            if (draw_mtx == reinterpret_cast<NUMTX *>(-1)) {
+                draw_mtx = &special->draw_mtx;
+            } else if (draw_mtx == NULL) {
+                draw_mtx = &special->draw_mtx;
+            }
+            NuDisplayListRndrSpecial(&special_handle, draw_mtx, 0, NULL, NULL);
         }
     }
 }

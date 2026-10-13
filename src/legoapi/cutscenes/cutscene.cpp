@@ -52,38 +52,44 @@ static void CS_play_sfx(NUFPAR *fp) {
     }
 
     i32 slot;
-    for (slot = 0; slot < 6 && CS_CutInfo->sfx[slot].id != -1; ++slot) {
-    }
-    if (slot == 6) {
+    if (CS_CutInfo->sfx[0].id == -1) {
+        slot = 0;
+    } else if (CS_CutInfo->sfx[1].id == -1) {
+        slot = 1;
+    } else if (CS_CutInfo->sfx[2].id == -1) {
+        slot = 2;
+    } else if (CS_CutInfo->sfx[3].id == -1) {
+        slot = 3;
+    } else if (CS_CutInfo->sfx[4].id == -1) {
+        slot = 4;
+    } else if (CS_CutInfo->sfx[5].id == -1) {
+        slot = 5;
+    } else {
         return;
     }
 
-    CUTSCENESFX *sfx = &CS_CutInfo->sfx[slot];
-    sfx->flags &= ~1U;
-    sfx->id = static_cast<i16>(sfx_id);
+    CS_CutInfo->sfx[slot].id = static_cast<i16>(sfx_id);
+    CS_CutInfo->sfx[slot].flags &= ~1U;
     while (NuFParGetWord(fp) != 0) {
         if (NuStrICmp(fp->word_buf, "frame") == 0) {
-            sfx->frame = NuFParGetFloat(fp);
-            if (sfx->frame < 1.0f) {
-                sfx->frame = 1.0f;
+            CS_CutInfo->sfx[slot].frame = NuFParGetFloat(fp);
+            if (CS_CutInfo->sfx[slot].frame < 1.0f) {
+                CS_CutInfo->sfx[slot].frame = 1.0f;
             }
         } else if (NuStrICmp(fp->word_buf, "pos") == 0) {
-            f32 value = NuFParGetFloat(fp);
-            if (value == 0.0f) {
+            if (NuFParGetFloat(fp) == 0.0f) {
                 continue;
             }
-            sfx->position.x = NuAToF(fp->word_buf);
-            value = NuFParGetFloat(fp);
-            if (value == 0.0f) {
+            CS_CutInfo->sfx[slot].position.x = NuAToF(fp->word_buf);
+            if (NuFParGetFloat(fp) == 0.0f) {
                 continue;
             }
-            sfx->position.y = NuAToF(fp->word_buf);
-            value = NuFParGetFloat(fp);
-            if (value == 0.0f) {
+            CS_CutInfo->sfx[slot].position.y = NuAToF(fp->word_buf);
+            if (NuFParGetFloat(fp) == 0.0f) {
                 continue;
             }
-            sfx->position.z = NuAToF(fp->word_buf);
-            sfx->flags |= 1;
+            CS_CutInfo->sfx[slot].position.z = NuAToF(fp->word_buf);
+            CS_CutInfo->sfx[slot].flags |= 1;
         }
     }
 }
@@ -330,22 +336,19 @@ static void CS_fadefog(NUFPAR *fp) {
     if (CS_fadefogcount > 1) {
         return;
     }
-    CUTSCENEFADEFOG *fade = &CS_CutInfo->fade_fog[CS_fadefogcount];
-    fade->frame = NuFParGetFloat(fp);
-    if (fade->frame < 0.0f) {
-        return;
-    }
-    fade->near_distance = NuFParGetFloat(fp);
-    if (fade->near_distance < 0.0f) {
-        return;
-    }
-    fade->far_distance = NuFParGetFloat(fp);
-    if (fade->far_distance < 0.0f) {
-        return;
-    }
-    fade->value = NuFParGetFloat(fp);
-    if (fade->value >= 0.0f) {
-        ++CS_fadefogcount;
+    f32 value;
+    CS_CutInfo->fade_fog[CS_fadefogcount].frame = value = NuFParGetFloat(fp);
+    if (value >= 0.0f) {
+        CS_CutInfo->fade_fog[CS_fadefogcount].near_distance = value = NuFParGetFloat(fp);
+        if (value >= 0.0f) {
+            CS_CutInfo->fade_fog[CS_fadefogcount].far_distance = value = NuFParGetFloat(fp);
+            if (value >= 0.0f) {
+                CS_CutInfo->fade_fog[CS_fadefogcount].value = value = NuFParGetFloat(fp);
+                if (value >= 0.0f) {
+                    ++CS_fadefogcount;
+                }
+            }
+        }
     }
 }
 
@@ -354,21 +357,29 @@ static void CS_cutsceneplayerobj(NUFPAR *fp) {
         return;
     }
 
-    CUTSCENEPLAYEROBJ *object = &CS_CutInfo->state_entries[CS_CutInfo->state_count];
-    if (NuSpecialFind(CS_worldinfo->current_gscn, &object->special, fp->word_buf, 1) == 0) {
+    if (NuSpecialFind(CS_worldinfo->current_gscn, &CS_CutInfo->state_entries[CS_CutInfo->state_count].special,
+                      fp->word_buf, 1) == 0) {
         return;
     }
-    object->flags &= ~(CLIP_OBJECT_SHOW | CLIP_OBJECT_HIDE);
+    // Every flag update re-indexes the entry: the u8 store may alias state_count.
+#define CS_STATE_FLAGS CS_CutInfo->state_entries[CS_CutInfo->state_count].flags
+    CS_STATE_FLAGS &= ~CLIP_OBJECT_SHOW;
+    CS_STATE_FLAGS &= ~CLIP_OBJECT_HIDE;
     while (NuFParGetWord(fp) != 0) {
         if (NuStrICmp(fp->word_buf, "on") == 0) {
-            object->flags = (object->flags | CLIP_OBJECT_SHOW) & ~CLIP_OBJECT_HIDE;
+            CS_STATE_FLAGS |= CLIP_OBJECT_SHOW;
+            CS_STATE_FLAGS &= ~CLIP_OBJECT_HIDE;
         } else if (NuStrICmp(fp->word_buf, "off") == 0) {
-            object->flags = (object->flags & ~CLIP_OBJECT_SHOW) | CLIP_OBJECT_HIDE;
+            CS_STATE_FLAGS &= ~CLIP_OBJECT_SHOW;
+            CS_STATE_FLAGS |= CLIP_OBJECT_HIDE;
         } else if (NuStrICmp(fp->word_buf, "end_anim") == 0 || NuStrICmp(fp->word_buf, "endanim") == 0 ||
                    NuStrICmp(fp->word_buf, "anim_end") == 0 || NuStrICmp(fp->word_buf, "animend") == 0) {
-            object->flags = (object->flags & ~(CLIP_OBJECT_SHOW | CLIP_OBJECT_HIDE)) | CLIP_OBJECT_ANIM_END;
+            CS_STATE_FLAGS &= ~CLIP_OBJECT_SHOW;
+            CS_STATE_FLAGS &= ~CLIP_OBJECT_HIDE;
+            CS_STATE_FLAGS |= CLIP_OBJECT_ANIM_END;
         }
     }
+#undef CS_STATE_FLAGS
     ++CS_CutInfo->state_count;
 }
 
@@ -377,8 +388,8 @@ static void CS_goto_level(NUFPAR *fp) {
         return;
     }
     i32 level_index;
-    LEVELDATA *level = Level_FindByName(fp->word_buf, &level_index);
-    if (level_index != -1 && level == HUB_LDATA && CS_area != -1) {
+    Level_FindByName(fp->word_buf, &level_index);
+    if (level_index != -1 && &LDataList[level_index] == HUB_LDATA && CS_area != -1) {
         i32 status_index;
         Area_FindStatusLevel(&ADataList[CS_area], &status_index);
         if (status_index != -1) {
@@ -811,10 +822,11 @@ DECOMP_ASSERT(offsetof(CutSceneTriggerNameTable, entries) == 0x0c, "cutscene tri
 static instNUGCUTSCENE_s *background_cutscene_instances;
 static instNUGCUTSCENE_s *active_cutscene_instances;
 static i32 cutscene_synchro_counter;
-static i32 cutscene_quit_prompt;
-static i32 cutscene_has_quit;
-static i32 cutscene_lock_player;
-static i32 termcutstream_hack;
+// Exported (default visibility) in the original library.
+i32 cutscene_quit_prompt;
+i32 cutscene_has_quit;
+i32 cutscene_lock_player;
+i32 termcutstream_hack;
 
 extern "C" {
     instNUGCUTSCENE_s *cutscene_load_instance;
@@ -2528,8 +2540,9 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
 }
 
 static void instNuGCutSceneClipTest(instNUGCUTSCENE_s *instance) {
+    NUGCUTSCENE_s *cutscene = instance->cutscene;
     instance->flags_89 |= 4;
-    if (instance->cutscene->bounds == NULL) {
+    if (cutscene->bounds == NULL) {
         return;
     }
     if ((instance->flags_89 & 2) != 0 &&
@@ -2538,8 +2551,11 @@ static void instNuGCutSceneClipTest(instNUGCUTSCENE_s *instance) {
         return;
     }
     if ((instance->flags_89 & 1) != 0) {
-        NUVEC *bounds = static_cast<NUVEC *>(instance->cutscene->bounds);
-        NUMTX *matrix = static_cast<i8>(instance->flags_88) < 0 ? &instance->matrix : &numtx_identity;
+        NUVEC *bounds = static_cast<NUVEC *>(cutscene->bounds);
+        NUMTX *matrix = &instance->matrix;
+        if (static_cast<i8>(instance->flags_88) >= 0) {
+            matrix = &numtx_identity;
+        }
         if (NuCameraClipTestExtents(&bounds[0], &bounds[1], matrix, 0.0f, 0) == 0) {
             instance->flags_89 &= ~4U;
         }
@@ -2684,7 +2700,7 @@ extern "C" void NuGCutSceneSysUpdate(i32 paused, i32 skip, f32 elapsed) {
         skip = 0;
     }
     for (instNUGCUTSCENE_s *instance = active_cutscene_instances; instance != NULL; instance = instance->next) {
-        const i8 instance_sync = static_cast<i8>(*reinterpret_cast<u16 *>(&instance->flags_8a) >> 3);
+        const i8 instance_sync = static_cast<i8>(static_cast<u32>(*reinterpret_cast<u16 *>(&instance->flags_8a)) >> 3);
         if (instance_sync != cutscene_synchro_counter) {
             instNuGCutSceneUpdate(instance, paused, skip, elapsed);
         }
