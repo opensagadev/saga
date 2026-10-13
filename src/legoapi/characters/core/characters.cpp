@@ -1088,11 +1088,15 @@ i32 GetDefaultIdle(GameObject_s *obj) {
     CHARACTERDATA *character = obj->apiobj.character_data;
     DefaultIdleCharacterData *game_character = static_cast<DefaultIdleCharacterData *>(character->field11_0x24);
 
-    i32 animation = 25;
-    i32 table_offset = 100;
-    if (game_character->use_standard_idle == 0 && (character->model_flags & 0x80) != 0) {
-        animation = 118;
-        table_offset = 472;
+    i32 animation;
+    i32 table_offset;
+    if (game_character->use_standard_idle != 0) {
+        animation = 25;
+        table_offset = 100;
+    } else {
+        const u32 alternate = character->model_flags & 0x80;
+        table_offset = alternate != 0 ? 472 : 100;
+        animation = alternate != 0 ? 118 : 25;
     }
     if (obj->batarang != NULL && *(reinterpret_cast<u8 *>(obj->batarang) + 0x7d) != 0) {
         return 151;
@@ -1100,8 +1104,8 @@ i32 GetDefaultIdle(GameObject_s *obj) {
 
     u8 *animation_table = reinterpret_cast<u8 *>(obj->apiobj.character_model->model_data_b);
     void *entry = *reinterpret_cast<void **>(animation_table + table_offset);
-    if (entry != NULL &&
-        (*reinterpret_cast<i32 *>(animation_table + 4) == 0 || (obj->field_0xe22 & 1) != 0 || obj->field_0xe32 == 1)) {
+    if ((*reinterpret_cast<i32 *>(animation_table + 4) == 0 || (obj->field_0xe22 & 1) != 0 || obj->field_0xe32 == 1) &&
+        entry != NULL) {
         return animation;
     }
     return 1;
