@@ -268,12 +268,12 @@ void Players_InitPositions(WORLDINFO *world) {
     if (A != NULL) {
         NUVEC tmp;
         i32 n = ninit;
-        auto A_count = A->count;
         for (i32 i = 0; i < 8; i++) {
-            PlayerStart[i].pos = (NUVEC *)&A->positions[6 * n];
-            NuVecSub(&tmp, (NUVEC *)&A->positions[3 * (2 * n + 1)], (NUVEC *)&A->positions[6 * n]);
+            const i32 m = n * 2;
+            PlayerStart[i].pos = (NUVEC *)&A->positions[m * 3];
+            NuVecSub(&tmp, (NUVEC *)&A->positions[m * 3 + 3], PlayerStart[i].pos);
             PlayerStart[i].angle = NuAtan2D(tmp.x, tmp.z);
-            if (2 * n + 4 > A_count)
+            if (n * 2 + 4 > A->count)
                 n = ninit;
             else
                 n = n + 1;
