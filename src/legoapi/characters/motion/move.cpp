@@ -4837,6 +4837,27 @@ finished:
     return result;
 }
 
+static inline void ComboJump(GameObject_s *object) {
+    SetComboOpponent(object, 1.0f, 0, 1);
+    object->jump_flags &= ~1;
+    object->context_animation_timer = 0.0f;
+    object->delayed_turn_timer = 0.0f;
+    object->airborne_input_timer = 0.0f;
+    object->field_0xe22 |= 0x10;
+    object->character_context = 0;
+    object->apiobj.velocity.y = object->apiobj.character_data->game_character->second_jump_speed;
+    object->context_variant_flags &= 0x4f;
+    object->action_movement_state = 2;
+    object->context_animation = 0x12;
+    object->apiobj.field_0x27d = 0;
+    object->field_0x105c = 0;
+    object->airborne_collision_target = NULL;
+    PlayJumpSfx(object, 2);
+    ResetAnimPacket(&object->apiobj.anim_packet, object->context_animation);
+    if ((object->apiobj.flags_low & 0x80) != 0)
+        object->field_0xef9 |= 8;
+}
+
 static void FindIncomingThreats(GameObject_s *object) {
     void **animations = object->apiobj.character_model->model_data_b;
     bool has_block = animations[0x1a] != NULL || animations[0x1b] != NULL || animations[0x1c] != NULL;
@@ -4894,25 +4915,7 @@ static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pres
         GameObject_s *attacker = object->block_attacker;
         if (attacker != NULL) {
             if (jump_pressed != 0 && object->apiobj.character_model->model_data_b[0x12] != NULL) {
-                SetComboOpponent(object, 1.0f, 0, 1);
-                f32 speed = object->apiobj.character_data->game_character->second_jump_speed;
-                object->jump_flags &= ~1;
-                object->context_animation_timer = 0.0f;
-                object->delayed_turn_timer = 0.0f;
-                object->airborne_input_timer = 0.0f;
-                object->field_0xe22 |= 0x10;
-                object->character_context = 0;
-                object->apiobj.velocity.y = speed;
-                object->context_variant_flags &= 0x4f;
-                object->action_movement_state = 2;
-                object->context_animation = 0x12;
-                object->apiobj.field_0x27d = 0;
-                object->field_0x105c = 0;
-                object->airborne_collision_target = NULL;
-                PlayJumpSfx(object, 2);
-                ResetAnimPacket(&object->apiobj.anim_packet, object->context_animation);
-                if ((object->apiobj.flags_low & 0x80) != 0)
-                    object->field_0xef9 |= 8;
+                ComboJump(object);
                 return;
             }
             if (object->block_latch == 0 && object->blocked_attack_stage != 0) {
@@ -5089,24 +5092,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                         StartHold(object);
                 } else if (object->combo_stage < 2 && jump_pressed != 0 &&
                            JediHasAction(object, static_cast<JEDI_ACTION>(0x12))) {
-                    SetComboOpponent(object, 1.0f, 0, 1);
-                    object->jump_flags &= ~1;
-                    object->context_animation_timer = 0.0f;
-                    object->delayed_turn_timer = 0.0f;
-                    object->airborne_input_timer = 0.0f;
-                    object->field_0xe22 |= 0x10;
-                    object->character_context = 0;
-                    object->apiobj.velocity.y = object->apiobj.character_data->game_character->second_jump_speed;
-                    object->context_variant_flags &= 0x4f;
-                    object->action_movement_state = 2;
-                    object->context_animation = 0x12;
-                    object->apiobj.field_0x27d = 0;
-                    object->field_0x105c = 0;
-                    object->airborne_collision_target = NULL;
-                    PlayJumpSfx(object, 2);
-                    ResetAnimPacket(&animation, object->context_animation);
-                    if ((object->apiobj.flags_low & 0x80) != 0)
-                        object->field_0xef9 |= 8;
+                    ComboJump(object);
                 }
             } else {
                 SetComboOpponent(object, 1.0f, 1, 0);
