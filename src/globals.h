@@ -994,7 +994,6 @@ extern f32 LevAlpha;
 extern f32 TitlesAlpha;
 extern f32 newgamealpha;
 extern i32 newgamefade;
-extern f32 newgamewait;
 extern i32 newgame_menudrawoff;
 extern i32 netnewgame;
 extern i32 MenuLoadOccurred;
@@ -1108,7 +1107,6 @@ extern f32 global_pulse;
 extern i32 IntroText_TextID; // .data init -1
 extern i32 LANGUAGECOUNT;    // .data init 6
 extern i32 Text_Language;
-extern LANGUAGEDATA Text_LanguageList_Default[6];
 extern LANGUAGEDATA *Text_LanguageList;
 extern f32 INTROTEXT_Y;
 extern f32 INTROTEXT_SCALE;

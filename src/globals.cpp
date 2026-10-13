@@ -705,7 +705,6 @@ f32 LevAlpha = 0.0f;
 f32 TitlesAlpha = 0.0f;
 f32 newgamealpha = 0.0f;
 i32 newgamefade = 0;
-f32 newgamewait = 0.0f;
 i32 newgame_menudrawoff = 0;
 i32 netnewgame = 0;
 i32 MenuLoadOccurred = 0;
@@ -1305,7 +1304,7 @@ i32 IntroText_TextID = -1;
 i32 LANGUAGECOUNT = 6;
 // Original .data @0x667ce0: default language list, entries of {language, 0}
 // (8 bytes per entry); Text_LanguageList points at it (@0x667d30).
-LANGUAGEDATA Text_LanguageList_Default[6] = {{1, 0}, {2, 0}, {4, 0}, {5, 0}, {3, 0}, {8, 0}};
+static LANGUAGEDATA Text_LanguageList_Default[6] = {{1, 0}, {2, 0}, {4, 0}, {5, 0}, {3, 0}, {8, 0}};
 LANGUAGEDATA *Text_LanguageList = Text_LanguageList_Default;
 // Original .data @0x667ca0/@0x667ca4.
 f32 INTROTEXT_Y = 0.175f;
