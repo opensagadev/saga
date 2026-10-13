@@ -757,44 +757,43 @@ static i32 GizTurrets_BoltHit(void *world, void *system_ptr, void *object_ptr, N
     return 1;
 }
 
+namespace {
+    // Per-level turret progress: one bit per turret (64 turrets) for each flag, then one byte per turret.
+    struct GIZTURRETPROGRESS_s {
+        u32 active[2];
+        u32 visible[2];
+        u32 aim_locked[2];
+        u32 aim_at_fixed_angles[2];
+        u32 update_disabled[2];
+        u32 runtime_bit2[2];
+        u8 field_0x12e[64];
+    };
+    DECOMP_ASSERT(sizeof(GIZTURRETPROGRESS_s) == 0x70, "GIZTURRETPROGRESS_s ABI");
+} // namespace
+
 static void *GizTurrets_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end) {
-    return GizmoBufferAlloc(buffer, buffer_end, 0x70);
+    return GizmoBufferAlloc(buffer, buffer_end, sizeof(GIZTURRETPROGRESS_s));
 }
 
 static void GizTurrets_ClearProgress(void *, void *progress_ptr) {
-    u32 *progress = static_cast<u32 *>(progress_ptr);
+    GIZTURRETPROGRESS_s *progress = static_cast<GIZTURRETPROGRESS_s *>(progress_ptr);
     if (progress == NULL) {
         return;
     }
 
-    progress[0] = 0xffffffff;
-    progress[1] = 0xffffffff;
-    progress[2] = 0xffffffff;
-    progress[3] = 0xffffffff;
-    progress[4] = 0;
-    progress[5] = 0;
-    progress[6] = 0;
-    progress[7] = 0;
-    progress[8] = 0;
-    progress[9] = 0;
-    progress[10] = 0;
-    progress[11] = 0;
-    progress[12] = 0xffffffff;
-    progress[13] = 0xffffffff;
-    progress[14] = 0xffffffff;
-    progress[15] = 0xffffffff;
-    progress[16] = 0xffffffff;
-    progress[17] = 0xffffffff;
-    progress[18] = 0xffffffff;
-    progress[19] = 0xffffffff;
-    progress[20] = 0xffffffff;
-    progress[21] = 0xffffffff;
-    progress[22] = 0xffffffff;
-    progress[23] = 0xffffffff;
-    progress[24] = 0xffffffff;
-    progress[25] = 0xffffffff;
-    progress[26] = 0xffffffff;
-    progress[27] = 0xffffffff;
+    progress->active[0] = 0xffffffff;
+    progress->active[1] = 0xffffffff;
+    progress->visible[0] = 0xffffffff;
+    progress->visible[1] = 0xffffffff;
+    progress->aim_locked[0] = 0;
+    progress->aim_locked[1] = 0;
+    progress->aim_at_fixed_angles[0] = 0;
+    progress->aim_at_fixed_angles[1] = 0;
+    progress->update_disabled[0] = 0;
+    progress->update_disabled[1] = 0;
+    progress->runtime_bit2[0] = 0;
+    progress->runtime_bit2[1] = 0;
+    memset(progress->field_0x12e, 0xff, sizeof(progress->field_0x12e));
 }
 
 static void GizTurrets_StoreProgress(void *, void *system_ptr, void *progress_ptr) {
@@ -804,34 +803,30 @@ static void GizTurrets_StoreProgress(void *, void *system_ptr, void *progress_pt
 
     GizTurrets_ClearProgress(NULL, progress_ptr);
     GIZTURRETSYS_s *system = static_cast<GIZTURRETSYS_s *>(system_ptr);
-    if (system->count == 0) {
-        return;
-    }
-
-    u32 *progress = static_cast<u32 *>(progress_ptr);
+    GIZTURRETPROGRESS_s *progress = static_cast<GIZTURRETPROGRESS_s *>(progress_ptr);
     GIZTURRET_s *turret = system->turrets;
     for (i32 index = 0; index < system->count && index != 64; ++index, ++turret) {
         const i32 word = index >> 5;
         const u32 mask = 1u << (index & 31);
         if ((turret->flags & GIZTURRET_FLAG_VISIBLE) == 0) {
-            progress[word + 2] &= ~mask;
+            progress->visible[word] &= ~mask;
         }
         if ((turret->flags & GIZTURRET_FLAG_ACTIVE) == 0) {
-            progress[word] &= ~mask;
+            progress->active[word] &= ~mask;
         }
         if ((turret->flags & 0x08) != 0) {
-            progress[word + 4] |= mask;
+            progress->aim_locked[word] |= mask;
         }
         if ((turret->flags & 0x10) != 0) {
-            progress[word + 6] |= mask;
+            progress->aim_at_fixed_angles[word] |= mask;
         }
         if ((turret->flags & GIZTURRET_FLAG_UPDATE_DISABLED) != 0) {
-            progress[word + 8] |= mask;
+            progress->update_disabled[word] |= mask;
         }
         if ((turret->runtime_flags & 0x04) != 0) {
-            progress[word + 10] |= mask;
+            progress->runtime_bit2[word] |= mask;
         }
-        static_cast<u8 *>(progress_ptr)[0x30 + index] = turret->field_0x12e;
+        progress->field_0x12e[index] = turret->field_0x12e;
     }
 }
 
@@ -894,20 +889,17 @@ static void GizTurrets_Reset(void *world_ptr, void *system_ptr, void *progress_p
         }
 
         if (index <= 0x3f && has_progress != 0) {
-            u32 *progress = static_cast<u32 *>(progress_ptr);
+            GIZTURRETPROGRESS_s *progress = static_cast<GIZTURRETPROGRESS_s *>(progress_ptr);
             const i32 word = index >> 5;
             const u32 bit = 1u << (index & 31);
-            turret->flags = static_cast<u8>((turret->flags & ~GIZTURRET_FLAG_VISIBLE) |
-                                            ((progress[word + 2] & bit) != 0 ? GIZTURRET_FLAG_VISIBLE : 0));
-            turret->flags = static_cast<u8>((turret->flags & ~GIZTURRET_FLAG_ACTIVE) |
-                                            ((progress[word] & bit) != 0 ? GIZTURRET_FLAG_ACTIVE : 0));
-            turret->flags = static_cast<u8>((turret->flags & ~0x8) | ((progress[word + 4] & bit) != 0 ? 0x8 : 0));
-            turret->flags = static_cast<u8>((turret->flags & ~0x10) | ((progress[word + 6] & bit) != 0 ? 0x10 : 0));
-            turret->flags = static_cast<u8>((turret->flags & ~0x20) | ((progress[word + 8] & bit) != 0 ? 0x20 : 0));
-            turret->runtime_flags =
-                static_cast<u8>((turret->runtime_flags & ~4) | ((progress[word + 10] & bit) != 0 ? 4 : 0));
-            if (static_cast<u8 *>(progress_ptr)[index + 0x30] != 0xff) {
-                turret->field_0x12e = static_cast<u8 *>(progress_ptr)[index + 0x30];
+            turret->visible = (progress->visible[word] & bit) != 0;
+            turret->active = (progress->active[word] & bit) != 0;
+            turret->aim_locked = (progress->aim_locked[word] & bit) != 0;
+            turret->aim_at_fixed_angles = (progress->aim_at_fixed_angles[word] & bit) != 0;
+            turret->update_disabled = (progress->update_disabled[word] & bit) != 0;
+            turret->runtime_bit2 = (progress->runtime_bit2[word] & bit) != 0;
+            if (progress->field_0x12e[index] != 0xff) {
+                turret->field_0x12e = progress->field_0x12e[index];
             }
         }
 

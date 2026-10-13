@@ -183,20 +183,14 @@ namespace {
         if (progress == NULL) {
             return;
         }
-        for (i32 word = 0; word < GIZFORCE_PROGRESS_WORDS; ++word) {
-            progress->progress_flag_0[word] = 0xffffffff;
-            progress->progress_flag_1[word] = 0xffffffff;
-            progress->runtime_flag_1[word] = 0;
-            progress->runtime_flag_3[word] = 0;
-            progress->runtime_flag_6[word] = 0;
-            progress->runtime_flag_7[word] = 0;
-            progress->field_aa_flag_0[word] = 0;
-        }
-        for (i32 group = 0; group < 8; ++group) {
-            for (i32 member = 0; member < 8; ++member) {
-                progress->group_members[group][member] = -1;
-            }
-        }
+        memset(progress->progress_flag_0, 0xff, sizeof(progress->progress_flag_0));
+        memset(progress->progress_flag_1, 0xff, sizeof(progress->progress_flag_1));
+        memset(progress->runtime_flag_1, 0, sizeof(progress->runtime_flag_1));
+        memset(progress->runtime_flag_3, 0, sizeof(progress->runtime_flag_3));
+        memset(progress->runtime_flag_6, 0, sizeof(progress->runtime_flag_6));
+        memset(progress->runtime_flag_7, 0, sizeof(progress->runtime_flag_7));
+        memset(progress->field_aa_flag_0, 0, sizeof(progress->field_aa_flag_0));
+        memset(progress->group_members, 0xff, sizeof(progress->group_members));
     }
 
 } // namespace

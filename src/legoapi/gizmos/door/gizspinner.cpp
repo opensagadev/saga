@@ -60,7 +60,15 @@ namespace {
     struct SPINNERPROGRESSENTRY {
         f32 animation_position;
         u16 rotation;
-        u8 flags;
+        union {
+            u8 flags; // SPINNER_PROGRESS_FLAGS
+            struct {
+                u8 valid : 1;
+                u8 base_visible : 1;
+                u8 arm_visible : 1;
+                u8 : 5;
+            };
+        };
         u8 field_0x07;
     };
 
@@ -184,7 +192,7 @@ static void *GizSpinner_ReserveBufferSpace(void *world_ptr) {
 static void GizSpinner_StoreProgressData(void *world_ptr, void *, void *progress_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     SPINNERPROGRESSENTRY *entry = static_cast<SPINNERPROGRESSENTRY *>(progress_ptr);
-    if (entry == NULL || world->spinners == NULL || world->current_level->max_spinners == 0) {
+    if (entry == NULL || world->spinners == NULL) {
         return;
     }
 
@@ -193,23 +201,17 @@ static void GizSpinner_StoreProgressData(void *world_ptr, void *, void *progress
         if ((spinner->flags & GIZSPINNER_FLAG_VALID) == 0) {
             continue;
         }
-        entry->flags |= SPINNER_PROGRESS_VALID;
+        entry->valid = 1;
         entry->rotation = spinner->target_rotation;
-        entry->flags =
-            static_cast<u8>((entry->flags & ~SPINNER_PROGRESS_ARM_VISIBLE) |
-                            (((spinner->flags & GIZSPINNER_FLAG_HIDE_ARM) == 0) ? SPINNER_PROGRESS_ARM_VISIBLE : 0));
-        entry->flags =
-            static_cast<u8>((entry->flags & ~SPINNER_PROGRESS_BASE_VISIBLE) |
-                            (((spinner->flags & GIZSPINNER_FLAG_HIDE_BASE) == 0) ? SPINNER_PROGRESS_BASE_VISIBLE : 0));
+        entry->arm_visible = (spinner->flags & GIZSPINNER_FLAG_HIDE_ARM) == 0;
+        entry->base_visible = (spinner->flags & GIZSPINNER_FLAG_HIDE_BASE) == 0;
         if (GameAnimSet_IsAnimationReset(spinner->anim_set) != 0) {
             entry->animation_position = 0.0f;
         }
-        if (spinner->anim_set != NULL) {
-            if (spinner->anim_set->state == GAMEANIMSET_STATE_AT_END) {
-                entry->animation_position = 1.0f;
-            } else {
-                entry->animation_position = GameAnimSet_GetAnimPos(spinner->primary_anim_obj);
-            }
+        if (spinner->anim_set->state == GAMEANIMSET_STATE_AT_END) {
+            entry->animation_position = 1.0f;
+        } else {
+            entry->animation_position = GameAnimSet_GetAnimPos(spinner->primary_anim_obj);
         }
     }
 }
