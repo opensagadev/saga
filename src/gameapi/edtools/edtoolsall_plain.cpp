@@ -1281,23 +1281,11 @@ extern "C" {
     }
     i32 edanimLoadPage(char *path, NUGSCN *scene) {
         i32 page;
-        if (edanim_page_used[0] == 0)
-            page = 0;
-        else if (edanim_page_used[1] == 0)
-            page = 1;
-        else if (edanim_page_used[2] == 0)
-            page = 2;
-        else if (edanim_page_used[3] == 0)
-            page = 3;
-        else if (edanim_page_used[4] == 0)
-            page = 4;
-        else if (edanim_page_used[5] == 0)
-            page = 5;
-        else if (edanim_page_used[6] == 0)
-            page = 6;
-        else if (edanim_page_used[7] == 0)
-            page = 7;
-        else
+        for (page = 0; page < 8; ++page) {
+            if (edanim_page_used[page] == 0)
+                break;
+        }
+        if (page == 8)
             return -1;
         EdFileSetMedia(1);
         if (EdFileOpen(path, NUFILE_READ) == 0)
@@ -1320,70 +1308,72 @@ extern "C" {
                 continue;
             char name[20];
             EdFileRead(name, 20);
-            edanim_param_s *param = &AnimParams[slot];
-            param->instance_id = edanimLookupSpecial(name, scene);
-            param->effect_count = EdFileReadInt();
+            AnimParams[slot].instance_id = edanimLookupSpecial(name, scene);
+            AnimParams[slot].effect_count = EdFileReadInt();
             if (version > 1) {
-                param->sound_count = EdFileReadInt();
+                AnimParams[slot].sound_count = EdFileReadInt();
             } else {
-                param->sound_count = 0;
+                AnimParams[slot].sound_count = 0;
             }
-            param->field_00c = EdFileReadInt();
-            param->field_010 = EdFileReadInt();
-            param->field_014 = EdFileReadFloat();
-            param->field_018 = EdFileReadFloat();
-            if (param->effect_count > 8)
-                param->effect_count = 8;
-            for (i32 effect = 0; effect < param->effect_count; ++effect) {
-                EdFileRead(param->effect_names[effect], 16);
-                param->effect_ids[effect] = -1;
+            AnimParams[slot].field_00c = EdFileReadInt();
+            AnimParams[slot].field_010 = EdFileReadInt();
+            AnimParams[slot].field_014 = EdFileReadFloat();
+            AnimParams[slot].field_018 = EdFileReadFloat();
+            if (AnimParams[slot].effect_count > 8)
+                AnimParams[slot].effect_count = 8;
+            for (i32 effect = 0; effect < AnimParams[slot].effect_count; ++effect) {
+                EdFileRead(AnimParams[slot].effect_names[effect], 16);
+                AnimParams[slot].effect_ids[effect] = -1;
                 if (version > 4) {
                     if (version == 5) {
-                        param->effect_intervals[effect] = static_cast<i32>(EdFileReadFloat());
+                        AnimParams[slot].effect_intervals[effect] = static_cast<i32>(EdFileReadFloat());
                     } else {
-                        param->effect_intervals[effect] = EdFileReadInt();
+                        AnimParams[slot].effect_intervals[effect] = EdFileReadInt();
                     }
                 } else {
                     i32 interval = EdFileReadInt();
-                    param->effect_intervals[effect] = interval > 0 ? interval * 60 : interval == 0 ? 0 : -60 / interval;
+                    AnimParams[slot].effect_intervals[effect] = interval > 0    ? interval * 60
+                                                                : interval == 0 ? 0
+                                                                                : -60 / interval;
                 }
-                param->effect_flags[effect] = EdFileReadInt();
-                EdFileReadNuVec(reinterpret_cast<NUVEC *>(param->effect_positions[effect]));
+                AnimParams[slot].effect_flags[effect] = EdFileReadInt();
+                EdFileReadNuVec(reinterpret_cast<NUVEC *>(AnimParams[slot].effect_positions[effect]));
                 if (version > 2) {
-                    param->effect_angles[effect] = EdFileReadShort();
-                    param->effect_angle_ranges[effect] = EdFileReadShort();
+                    AnimParams[slot].effect_angles[effect] = EdFileReadShort();
+                    AnimParams[slot].effect_angle_ranges[effect] = EdFileReadShort();
                 } else {
-                    param->effect_angles[effect] = 0;
-                    param->effect_angle_ranges[effect] = 0;
+                    AnimParams[slot].effect_angles[effect] = 0;
+                    AnimParams[slot].effect_angle_ranges[effect] = 0;
                 }
             }
-            param->field_17c = 0.99f;
+            AnimParams[slot].field_17c = 0.99f;
             if (version > 1) {
-                if (param->sound_count > 8)
-                    param->sound_count = 8;
-                for (i32 sound = 0; sound < param->sound_count; ++sound) {
-                    EdFileRead(param->sound_names[sound], 16);
-                    param->sound_ids[sound] = -1;
-                    param->sound_flags[sound] = EdFileReadInt();
-                    param->sound_values[sound] = EdFileReadFloat();
-                    EdFileReadNuVec(reinterpret_cast<NUVEC *>(param->sound_positions[sound]));
+                if (AnimParams[slot].sound_count > 8)
+                    AnimParams[slot].sound_count = 8;
+                for (i32 sound = 0; sound < AnimParams[slot].sound_count; ++sound) {
+                    EdFileRead(AnimParams[slot].sound_names[sound], 16);
+                    AnimParams[slot].sound_ids[sound] = -1;
+                    AnimParams[slot].sound_flags[sound] = EdFileReadInt();
+                    AnimParams[slot].sound_values[sound] = EdFileReadFloat();
+                    EdFileReadNuVec(reinterpret_cast<NUVEC *>(AnimParams[slot].sound_positions[sound]));
                 }
             }
             nuhspecial_s special;
-            NuGScnGetSpecial(&special, scene, param->instance_id);
-            param->platform_id = FindPlatInst(NuSpecialGetInstanceix(&special));
+            NuGScnGetSpecial(&special, scene, AnimParams[slot].instance_id);
+            AnimParams[slot].platform_id = FindPlatInst(NuSpecialGetInstanceix(&special));
             if (version > 3) {
-                param->bounce_impulse = EdFileReadFloat();
-                param->bounce_spring = EdFileReadFloat();
-                param->bounce_damping = EdFileReadFloat();
+                AnimParams[slot].bounce_impulse = EdFileReadFloat();
+                AnimParams[slot].bounce_spring = EdFileReadFloat();
+                AnimParams[slot].bounce_damping = EdFileReadFloat();
             } else {
-                param->bounce_impulse = 0.0f;
-                param->bounce_spring = 0.0f;
-                param->bounce_damping = 0.0f;
+                AnimParams[slot].bounce_impulse = 0.0f;
+                AnimParams[slot].bounce_spring = 0.0f;
+                AnimParams[slot].bounce_damping = 0.0f;
             }
-            if (param->platform_id != -1)
-                PlatInstBounce(param->platform_id, param->bounce_impulse, param->bounce_spring, param->bounce_damping);
-            param->page = static_cast<i8>(page);
+            if (AnimParams[slot].platform_id != -1)
+                PlatInstBounce(AnimParams[slot].platform_id, AnimParams[slot].bounce_impulse,
+                               AnimParams[slot].bounce_spring, AnimParams[slot].bounce_damping);
+            AnimParams[slot].page = static_cast<i8>(page);
             ++edanim_params_used;
         }
         EdFileSetReadWrongEndianess(0);
