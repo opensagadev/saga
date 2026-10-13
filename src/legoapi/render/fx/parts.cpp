@@ -3589,7 +3589,7 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
     if ((character->model_flags & 0x02000000) != 0 ||
         (game_character->flags_090 & GAMECHARACTER_FLAG_GRAB_DISABLED) != 0)
         return;
-    if (object->id == id_BOBAFETT && WORLD != NULL && WORLD->current_level == SARLACCPITA_LDATA && FreePlay == 0 &&
+    if (object->id == id_BOBAFETT && WORLD->current_level == SARLACCPITA_LDATA && FreePlay == 0 &&
         static_cast<u8>(object->apiobj.field_0x27c) == 0xff)
         return;
 
@@ -3597,8 +3597,6 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
 
     extern HUBMINIKITPIECES_s **Char_MiniKit;
     if ((object->apiobj.character_data->model_flags & 0x04000000) != 0 && object->id != id_MINIDROIDEKA) {
-        if (Char_MiniKit == NULL || object->id < 0 || object->id >= CHARCOUNT)
-            return;
         HUBMINIKITPIECES_s *pieces = Char_MiniKit[object->id];
         if (pieces == NULL || pieces->piece_count == 0)
             return;
@@ -3616,17 +3614,18 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
             momentum.z += object->apiobj.velocity.z * 0.75f;
             ADDPART_s params = Default_ADDPART;
             params.matrix = &matrix;
+            params.field_14 = 0.2f;
             params.velocity = &momentum;
-            params.field_14 = params.field_18 = 0.2f;
-            params.gravity = -10.0f;
             params.special = &pieces->pieces[i].special;
-            params.field_3c = PartImpact_Brick;
-            params.flags = mode == 0 ? 0x480 : 0x90;
-            params.stop_fn = PartStop_Flickerer;
-            params.time_step = FRAMETIME;
-            params.draw_fn = PartDraw_Flickerer;
+            params.field_18 = 0.2f;
+            params.gravity = -10.0f;
             params.lighting = Cheats_CheckFlags(1) ? reinterpret_cast<PARTLIGHTSOURCE_s *>(ZeroRTL)
                                                    : reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);
+            params.flags = mode == 0 ? 0x480 : 0x90;
+            params.time_step = FRAMETIME;
+            params.stop_fn = PartStop_Flickerer;
+            params.draw_fn = PartDraw_Flickerer;
+            params.field_3c = PartImpact_Brick;
             params.field_c4 = 1;
             PART_s *part = AddPart(&params);
             if (part != NULL)
@@ -3635,10 +3634,8 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
         return;
     }
 
-    const u16 random_rotation_a =
-        static_cast<u16>(static_cast<i32>(static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 25486.0f - 12743.0f));
-    const u16 random_rotation_b =
-        static_cast<u16>(static_cast<i32>(static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 16384.0f - 8192.0f));
+    const u16 random_rotation_a = static_cast<u16>(static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 25486.0f - 12743.0f);
+    const u16 random_rotation_b = static_cast<u16>(static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 16384.0f - 8192.0f);
     i32 random_variant = qrand() / 21846;
     for (i32 retry = 0; retry < 8 && random_variant == lastrandkillmode; ++retry)
         random_variant = qrand() / 21846;
@@ -3652,7 +3649,8 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
     else if (excluded_layer != -1)
         layers &= ~(1u << excluded_layer);
 
-    NUMTX joint_matrices[256];
+    // Retail realigns this frame with `and esp, -32` for the joint matrices.
+    NUMTX_ALIGNED32 joint_matrices[256];
     i16 render_indices[32];
     CHARACTERMODEL_s *model = object->apiobj.character_model;
     EvalModelAnim(model, &object->apiobj.anim_packet, &object->apiobj.field_0xb8, joint_matrices, NULL, NULL, NULL,
@@ -3661,9 +3659,9 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
         object->apiobj.character_model, render_indices, layers);
     i32 part_index = 0;
     for (i32 render_index = 0; render_index < render_count; ++render_index) {
-        const i32 layer = render_indices[render_index];
-        if ((layer != -1 && !(animation != -1 && layer != animation) &&
-             !(excluded_layer != -1 && layer == excluded_layer))) {
+        const i16 layer = render_indices[render_index];
+        if (layer != -1 && (animation == -1 || layer == animation) &&
+            (excluded_layer == -1 || layer != excluded_layer)) {
             nuhgobjrender_s *render = &object->apiobj.character_model->hierarchy->render_parts[layer];
             if (render->rigid_specials == NULL)
                 continue;
