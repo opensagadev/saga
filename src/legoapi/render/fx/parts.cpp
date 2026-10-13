@@ -638,41 +638,43 @@ void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32) {
     if (ONEPLAYERPOWERUPS != 0) {
         const u16 camera_rotation = GameCam_GetAdjustedYRot(NULL);
         const u16 panel_rotation = rotation - RotDiff(0, camera_rotation);
-        NUVEC target_position = {ICONX, PowerUp_GetPanelY(object->apiobj.field_0x27c) + STATSPOSY, 1.0f};
-        if (object->apiobj.field_0x27c == 0) {
-            target_position.x = -target_position.x;
-        }
+        NUVEC target_position;
+        target_position.x = object->apiobj.field_0x27c == 0 ? -ICONX : ICONX;
+        target_position.y = PowerUp_GetPanelY(object->apiobj.field_0x27c) + STATSPOSY;
+        target_position.z = 1.0f;
 
+        ADDGAMEMSG message;
         if (object->field_0xdec > 0.0f) {
-            NUVEC icon_position = {ICONX, PowerUp_GetPanelY(object->apiobj.field_0x27c) + STATSPOSY, 1.0f};
-            if (object->apiobj.field_0x27c == 0) {
-                icon_position.x = -icon_position.x;
-            }
-            ADDGAMEMSG icon_message = AddGameMsg_Default;
-            icon_message.position = &icon_position;
-            icon_message.scale = 0.6f;
-            icon_message.target_scale = 0.0f;
-            icon_message.flags = 0x20;
-            icon_message.duration = 0.3f;
-            icon_message.icon = 0x35;
-            icon_message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0x35]);
-            AddGameMsg(&icon_message);
+            NUVEC icon_position;
+            const i32 player = object->apiobj.field_0x27c;
+            icon_position.x = player == 0 ? -ICONX : ICONX;
+            icon_position.y = PowerUp_GetPanelY(player) + STATSPOSY;
+            icon_position.z = 1.0f;
+            message = AddGameMsg_Default;
+            message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0x35]);
+            message.icon = 0x35;
+            message.position = &icon_position;
+            message.scale = 0.6f;
+            message.target_scale = 0.0f;
+            message.duration = 0.3f;
+            message.flags = 0x20;
+            AddGameMsg(&message);
         }
 
-        ADDGAMEMSG message = AddGameMsg_Default;
+        message = AddGameMsg_Default;
+        message.icon = 0xd0;
+        message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0xd0]);
         message.position = position;
+        message.field_0x4d = 1;
         message.scale = AreaPickupScale;
         message.target_position = &target_position;
-        message.target_scale = POWERUPOBJSIZE;
         message.flags = 0x2112d;
-        message.duration = 1.0f;
-        message.icon = 0xd0;
-        message.update_fn = PowerUp_UpdateMsg;
+        message.target_scale = POWERUPOBJSIZE;
+        message.tick_fn = PowerUp_UpdateMsg;
         message.end_fn = PowerUp_EndMsg;
-        message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0xd0]);
-        message.field_0x4d = 1;
-        message.player_index = object->apiobj.field_0x27c;
         message.field_0x4e = 7;
+        message.player_index = object->apiobj.field_0x27c;
+        message.duration = 1.0f;
         GAMEMESSAGE_s *game_message = AddGameMsg(&message);
         if (game_message != NULL) {
             game_message->rotation_y = panel_rotation;
@@ -818,44 +820,38 @@ void KillParts_SpeederBike(ADDPART_s *params, i32, i32, GameObject_s *object) {
     part->field_104 = 1.5f;
 
     i32 index;
-    if (bikeParts[0].active == 0) {
-        index = 0;
-    } else if (bikeParts[1].active == 0) {
-        index = 1;
-    } else if (bikeParts[2].active == 0) {
-        index = 2;
-    } else if (bikeParts[3].active == 0) {
-        index = 3;
-    } else {
-        index = -1;
+    for (index = 0; index < 4; ++index) {
+        if (bikeParts[index].active == 0)
+            break;
     }
-    if (index == -1) {
+    if (index == 4) {
         part->speeder_index = -1.0f;
     } else {
         part->speeder_index = static_cast<f32>(index);
         if (object->movement_spline != NULL) {
-
             f32 distance = NuVecMag(&part->velocity) * FRAMETIME;
-            BIKEPART_s *bike = &bikeParts[static_cast<i32>(part->speeder_index)];
+            const i32 bike_index = static_cast<i32>(part->speeder_index);
+            BIKEPART_s *bike = &bikeParts[bike_index];
             bike->spline_position = object->movement_spline_position;
             bike->active = 1;
-            bike->rider = object->field_0xcc0;
-            if (bike->rider != NULL) {
-                bike->rider->apiobj.velocity = velocity;
-                bike->rider->apiobj.velocity.y += 1.5f;
+            GameObject_s *rider = object->field_0xcc0;
+            if (rider != NULL) {
+                bike->rider = rider;
+                rider->apiobj.velocity = velocity;
+                rider->apiobj.velocity.y += 1.5f;
+            } else {
+                bike->rider = NULL;
             }
             bike->rider_position = object->apiobj.position;
 
             NUVEC position;
             u16 yaw;
             u16 pitch;
-            PointAlongSpline(bike->spline_position.spline, bike->spline_position.along, &position, &yaw, &pitch, 1);
-            if (distance >= 0.0f) {
-                yaw -= 0x8000;
-            }
+            PointAlongSpline(bikeParts[bike_index].spline_position.spline, bikeParts[bike_index].spline_position.along,
+                             &position, &yaw, &pitch, 1);
+            part->rotation_y = distance < 0.0f ? yaw : yaw - 0x8000;
             part->rotation_x = -pitch;
             part->field_13c = 0;
-            part->rotation_y = yaw;
             return;
         }
     }
