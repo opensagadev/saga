@@ -231,11 +231,8 @@ static void CS_blobshadow_fadenear(NUFPAR *fp) {
 
 static void CS_blobshadow_alpha(NUFPAR *fp) {
     i32 alpha = NuFParGetInt(fp);
-    if (alpha < 0) {
-        alpha = 0;
-    } else if (alpha > 0xfe) {
-        alpha = 0xfe;
-    }
+    alpha = alpha < 0 ? 0 : alpha;
+    alpha = alpha > 0xfe ? 0xfe : alpha;
     CS_CutInfo->blob_shadow_alpha = static_cast<u8>(alpha);
 }
 
