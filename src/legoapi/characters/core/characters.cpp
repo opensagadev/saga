@@ -968,7 +968,9 @@ void GizForce_ResetLOS(GameObject_s *);
 i32 StartSlide(GameObject_s *, i32);
 
 i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
-    if (id == old_id || id < 0 || id >= CHARCOUNT || apicharsys->playermodelids[id] == -1)
+    if (id == old_id)
+        return 0;
+    if (id < 0 || id >= CHARCOUNT || apicharsys->playermodelids[id] == -1)
         return 0;
     Shards_HandleLostObj(WORLD, object);
     if (VehicleArea == 0)
@@ -1029,10 +1031,10 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     ResetMiniAnimPacket(&object->mini_animation, -1);
     object->weapon_scale = (object->field_0xe22 & 1) != 0 ? 1.0f : 0.0f;
     object->field_0xe32 = 0;
-    if (on_surface)
-        object->ground_contact_grace_timer = 0.2f;
-    else
+    if (!on_surface)
         object->apiobj.velocity.y = velocity.y;
+    else
+        object->ground_contact_grace_timer = 0.2f;
     if (context == 0x33 && StartSlide(object, 0)) {
         object->apiobj.velocity.x = velocity.x;
         object->apiobj.velocity.z = velocity.z;
@@ -1042,12 +1044,17 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     if (lean_enabled && (object->apiobj.character_data->model_flags & 0x2000) != 0)
         object->movement_lean_angle = lean;
     data = apicharsys->char_data[object->id].game_character;
-    object->apiobj.viewdistance = data->viewdistance;
-    object->apiobj.heardistance = data->heardistance;
-    object->apiobj.maxviewheight = data->maxviewheight;
-    object->apiobj.minviewheight = data->minviewheight;
-    data = object->apiobj.character_data->game_character;
-    object->field_0xf01 = (object->field_0xf01 & ~8) | (((data->flags_090 >> 17) & 1) << 3);
+    // Read everything before the stores so the four-float copy vectorizes like retail.
+    const f32 viewdistance = data->viewdistance;
+    const f32 heardistance = data->heardistance;
+    const f32 maxviewheight = data->maxviewheight;
+    const f32 minviewheight = data->minviewheight;
+    const u32 flags_090_bit17 = (object->apiobj.character_data->game_character->flags_090 >> 17) & 1;
+    object->apiobj.viewdistance = viewdistance;
+    object->apiobj.heardistance = heardistance;
+    object->apiobj.maxviewheight = maxviewheight;
+    object->apiobj.minviewheight = minviewheight;
+    object->field_0xf01 = (object->field_0xf01 & ~8) | (flags_090_bit17 << 3);
     if (object->id == id_MOSEISLEYCITIZEN) {
         SetLayers_MOSEISLEYCITIZEN(object);
     } else if (object->id == id_CANTINAALIEN) {

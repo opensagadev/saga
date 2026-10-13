@@ -1483,11 +1483,12 @@ extern "C" {
         }
 
         if (effect->time_group != 4) {
-            NUVEC clipped_position;
+            // Retail realigns the frame (and esp,-16) and keeps both vectors 16-byte aligned.
+            NUVEC_ALIGNED16 clipped_position;
             clipped_position.x = position->x;
             clipped_position.y = position->y;
             clipped_position.z = position->z;
-            NUVEC extent;
+            NUVEC_ALIGNED16 extent;
             extent.x = extent.y = extent.z = 1.0f;
             if (NuCameraClipTestExtentsAxisAligned(&clipped_position, &extent, effect->clip_extent) == 0) {
                 return;
