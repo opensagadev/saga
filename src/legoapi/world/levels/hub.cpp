@@ -2849,18 +2849,6 @@ void Hub_Load(WORLDINFO_s *world, variptr_u *, variptr_u *) {
     Customiser_LoadAll(CharacterCustomiser, world);
 }
 
-static void Hub_SetDoorState(GIZMO *door, nuhspecial_s *lock, i32 open) {
-    if (door != NULL && door->object != NULL) {
-        GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(door->object);
-        if (open == 0) {
-            obstacle->runtime_flags |= GIZOBSTACLE_RUNTIME_FLAG_BLOCKED;
-        } else {
-            obstacle->runtime_flags &= static_cast<u8>(~GIZOBSTACLE_RUNTIME_FLAG_BLOCKED);
-        }
-    }
-    NuSpecialSetVisibility(lock, open != 0);
-}
-
 void Hub_Reset(WORLDINFO_s *world) {
     Customiser_Reset(CharacterCustomiser);
     if (Hub_ResetAIFn != NULL) {
@@ -2868,11 +2856,11 @@ void Hub_Reset(WORLDINFO_s *world) {
     }
 
     for (i32 i = 20; i < 52; ++i) {
-        if (((LevHSpecialExists >> (i & 63)) & 1) != 0) {
+        if (((LevHSpecialExists >> i) & 1) != 0) {
             NuSpecialSetVisibility(&LevHSpecial[i], 1);
         }
         const i32 hidden = i + 32;
-        if (((LevHSpecialExists >> (hidden & 63)) & 1) != 0) {
+        if (((LevHSpecialExists >> hidden) & 1) != 0) {
             NuSpecialSetVisibility(&LevHSpecial[hidden], 0);
         }
     }
@@ -2881,23 +2869,39 @@ void Hub_Reset(WORLDINFO_s *world) {
         NuSpecialSetVisibility(&LevHSpecial[84], 0);
     }
 
-    for (HUBAREAINFO_s *info = HubAreaInfo; info->area_name != NULL; ++info) {
-        if (info->door == NULL || info->area == NULL) {
+    for (i32 i = 0; HubAreaInfo[i].area_name != NULL; ++i) {
+        if (HubAreaInfo[i].door == NULL) {
             continue;
         }
-        i32 open = Episode_CountOpenAreas(info->area->episode_index, info->area->index, Game_AreaSave);
-        Hub_SetDoorState(info->door, &info->lock, open);
+        AREADATA_s *area = HubAreaInfo[i].area;
+        i32 open = Episode_CountOpenAreas(static_cast<i8>(area->episode_index), area->index, Game_AreaSave);
+        GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(HubAreaInfo[i].door->object);
+        if (open != 0) {
+            obstacle->runtime_flags &= static_cast<u8>(~GIZOBSTACLE_RUNTIME_FLAG_BLOCKED);
+            NuSpecialSetVisibility(&HubAreaInfo[i].lock, 1);
+        } else {
+            obstacle->runtime_flags |= GIZOBSTACLE_RUNTIME_FLAG_BLOCKED;
+            NuSpecialSetVisibility(&HubAreaInfo[i].lock, 0);
+        }
     }
 
-    for (HUBEPISODEINFO_s *info = HubEpisodeInfo; info->episode != -1; ++info) {
-        if (info->door == NULL) {
+    for (i32 i = 0; static_cast<u16>(HubEpisodeInfo[i].episode) <= 8; ++i) {
+        if (HubEpisodeInfo[i].door == NULL) {
             continue;
         }
-        i32 open = Episode_CountOpenAreas(info->episode, -1, Game_AreaSave);
+        i32 open = Episode_CountOpenAreas(HubEpisodeInfo[i].episode, -1, Game_AreaSave);
         if (open == 0) {
-            open = info->force_open;
+            open = HubEpisodeInfo[i].force_open;
         }
-        Hub_SetDoorState(info->door, &info->lock_on, open);
+        if (open == 0) {
+            static_cast<GIZOBSTACLE_s *>(HubEpisodeInfo[i].door->object)->runtime_flags |=
+                GIZOBSTACLE_RUNTIME_FLAG_BLOCKED;
+            NuSpecialSetVisibility(&HubEpisodeInfo[i].lock_on, 0);
+        } else {
+            static_cast<GIZOBSTACLE_s *>(HubEpisodeInfo[i].door->object)->runtime_flags &=
+                static_cast<u8>(~GIZOBSTACLE_RUNTIME_FLAG_BLOCKED);
+            NuSpecialSetVisibility(&HubEpisodeInfo[i].lock_on, 1);
+        }
     }
     if (Store_IsPackUnlocked(6) == 0) {
         NuSpecialSetVisibility(&HubEpisodeInfo[8].lock_on, 0);

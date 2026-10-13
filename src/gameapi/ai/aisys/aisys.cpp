@@ -5784,7 +5784,7 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
             const f32 interval = processor->action_data_5;
             const f32 random = NuRandFloat();
             processor->action_timer = 0.5f * interval + random * interval;
-            if (!PartyMemberInWay(object, opponent)) {
+            if ((object->apiobj.field_0x1f4 & 5) != 0 || !PartyMemberInWay(object, opponent)) {
                 if (oneAtOnce_CanAttack(object, opponent))
                     object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
             }
@@ -7776,8 +7776,6 @@ extern i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 
 // The original shooting action calls the out-of-line PartyMemberInWay clone.
 static i32 PartyMemberInWay(GameObject_s *object, GameObject_s *opponent) {
-    if ((object->apiobj.field_0x1f4 & 5) != 0)
-        return false;
     NUVEC difference, direction;
     const f32 target_distance =
         NuVecDistSqr(&opponent->apiobj.collision_position, &object->apiobj.collision_position, &difference);
@@ -7873,7 +7871,7 @@ __used__ static i32 Action_ShootAtOpponent(AISYS *sys, AISCRIPTPROCESS *processo
         const f32 interval = processor->action_data_5;
         const f32 random = NuRandFloat();
         processor->action_timer = 0.5f * interval + random * interval;
-        if (!PartyMemberInWay(object, opponent)) {
+        if ((object->apiobj.field_0x1f4 & 5) != 0 || !PartyMemberInWay(object, opponent)) {
             object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
             object->script_fire_target = opponent;
         }

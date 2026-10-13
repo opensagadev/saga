@@ -23,11 +23,12 @@ extern "C" {
 }
 
 static void CC_CharClipToBlobShadows(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_098[0] = (charconfig.runtime->flags_098[0] & 0x7f) | (enabled << 7);
+    data->flag098_0_7 = enabled;
 }
 
 static void CC_already_got_hat(NUFPAR *parser) {
@@ -38,11 +39,12 @@ static void CC_already_got_hat(NUFPAR *parser) {
 }
 
 static void CC_always_stop_to_shoot(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_098[0] = (charconfig.runtime->flags_098[0] & 0xfb) | (enabled << 2);
+    data->flag098_0_2 = enabled;
 }
 
 static void CC_atatheadmovement(NUFPAR *parser) {
@@ -83,11 +85,12 @@ static void CC_bypass_security(NUFPAR *parser) {
 }
 
 static void CC_can_communicate(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[0] = (charconfig.runtime->flags_094[0] & 0x7f) | (enabled << 7);
+    data->flag094_0_7 = enabled;
 }
 
 static void CC_can_drag_bombs(NUFPAR *parser) {
@@ -163,27 +166,30 @@ static void CC_complex_shadow(NUFPAR *parser) {
 }
 
 static void CC_deflect_bolts_in_minikit_bonus(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[3] = (charconfig.runtime->flags_094[3] & 0xfb) | (enabled << 2);
+    data->flag094_3_2 = enabled;
 }
 
 static void CC_die_usecurrentlayers(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[2] = (charconfig.runtime->flags_094[2] & 0xfb) | (enabled << 2);
+    data->flag094_2_2 = enabled;
 }
 
 static void CC_dont_draw_rider(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_098[0] = (charconfig.runtime->flags_098[0] & 0xbf) | (enabled << 6);
+    data->flag098_0_6 = enabled;
 }
 
 static void CC_dont_move_out_of_way(NUFPAR *parser) {
@@ -194,11 +200,12 @@ static void CC_dont_move_out_of_way(NUFPAR *parser) {
 }
 
 static void CC_double_jump_hover(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[1] = (charconfig.runtime->flags_094[1] & 0xdf) | (enabled << 5);
+    data->flag094_1_5 = enabled;
 }
 
 static void CC_droid(NUFPAR *parser) {
@@ -272,11 +279,12 @@ static void CC_helmet_locator(NUFPAR *parser) {
 }
 
 static void CC_hover_over_mud(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[2] = (charconfig.runtime->flags_094[2] & 0x7f) | (enabled << 7);
+    data->flag094_2_7 = enabled;
 }
 
 static void CC_icon(NUFPAR *parser) {
@@ -293,19 +301,21 @@ static void CC_icon(NUFPAR *parser) {
 }
 
 static void CC_immune_to_forcepush(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[1] = (charconfig.runtime->flags_094[1] & 0xfd) | (enabled << 1);
+    data->flag094_1_1 = enabled;
 }
 
 static void CC_immune_to_magnets(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[1] = (charconfig.runtime->flags_094[1] & 0xfe) | (enabled << 0);
+    data->flag094_1_0 = enabled;
 }
 
 static void CC_jedi(NUFPAR *parser) {
@@ -398,11 +408,12 @@ static void CC_min_viewheight(NUFPAR *parser) {
 }
 
 static void CC_minikit_noscenewhenplayable(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[1] = (charconfig.runtime->flags_094[1] & 0xfb) | (enabled << 2);
+    data->flag094_1_2 = enabled;
 }
 
 static void CC_minikit_with_scene(NUFPAR *parser) {
@@ -426,19 +437,21 @@ static void CC_no_offpath_teleport(NUFPAR *parser) {
 }
 
 static void CC_no_start_punch_sfx(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_098[0] = (charconfig.runtime->flags_098[0] & 0xef) | (enabled << 4);
+    data->flag098_0_4 = enabled;
 }
 
 static void CC_no_weapon_draw(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[2] = (charconfig.runtime->flags_094[2] & 0xdf) | (enabled << 5);
+    data->flag094_2_5 = enabled;
 }
 
 static void CC_oldheadmovement(NUFPAR *parser) {
@@ -470,11 +483,12 @@ static void CC_punch_weapon_out(NUFPAR *parser) {
 }
 
 static void CC_put_weapon_away_on_shoot(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_098[0] = (charconfig.runtime->flags_098[0] & 0xfd) | (enabled << 1);
+    data->flag098_0_1 = enabled;
 }
 
 static void CC_radius(NUFPAR *parser) {
@@ -522,11 +536,12 @@ static void CC_scale(NUFPAR *parser) {
 }
 
 static void CC_second_shot_only(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_098[0] = (charconfig.runtime->flags_098[0] & 0xf7) | (enabled << 3);
+    data->flag098_0_3 = enabled;
 }
 
 static void CC_set_timebaseupdate1(NUFPAR *parser) {
@@ -609,11 +624,12 @@ static void CC_shield_locator(NUFPAR *parser) {
 }
 
 static void CC_single_jump_slam(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_098[0] = (charconfig.runtime->flags_098[0] & 0xdf) | (enabled << 5);
+    data->flag098_0_5 = enabled;
 }
 
 static void CC_slide_orientation(NUFPAR *parser) {
@@ -751,19 +767,21 @@ static void CC_tightrope_walk(NUFPAR *parser) {
 }
 
 static void CC_toggle_if_in_minikit_bonus(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[3] = (charconfig.runtime->flags_094[3] & 0xfd) | (enabled << 1);
+    data->flag094_3_1 = enabled;
 }
 
 static void CC_toggle_if_not_in_collection(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[3] = (charconfig.runtime->flags_094[3] & 0xfe) | (enabled << 0);
+    data->flag094_3_0 = enabled;
 }
 
 static void CC_transformatron(NUFPAR *parser) {
@@ -781,11 +799,12 @@ static void CC_turning_circle(NUFPAR *parser) {
 }
 
 static void CC_wait_for_weapon_in_out(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[1] = (charconfig.runtime->flags_094[1] & 0xef) | (enabled << 4);
+    data->flag094_1_4 = enabled;
 }
 
 static void CC_weapon(NUFPAR *parser) {
@@ -875,11 +894,12 @@ static void CC_weapon_shoot_locator_4(NUFPAR *parser) {
 }
 
 static void CC_white_lightning(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[2] = (charconfig.runtime->flags_094[2] & 0xfe) | (enabled << 0);
+    data->flag094_2_0 = enabled;
 }
 
 static void CC_zipup(NUFPAR *parser) {
@@ -1278,11 +1298,12 @@ static void CC_bsa_default(NUFPAR *parser) {
 }
 
 static void CC_buck_rider(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[2] = (charconfig.runtime->flags_094[2] & 0xfd) | (enabled << 1);
+    data->flag094_2_1 = enabled;
 }
 
 static void CC_can_fire(NUFPAR *parser) {
@@ -1307,19 +1328,21 @@ static void CC_cannotbigjump(NUFPAR *parser) {
 }
 
 static void CC_cannot_kill(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[1] = (charconfig.runtime->flags_094[1] & 0xf7) | (enabled << 3);
+    data->flag094_1_3 = enabled;
 }
 
 static void CC_can_poo(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[3] = (charconfig.runtime->flags_094[3] & 0x7f) | (enabled << 7);
+    data->flag094_3_7 = enabled;
 }
 
 static void CC_can_take_over(NUFPAR *parser) {
@@ -1330,11 +1353,12 @@ static void CC_can_take_over(NUFPAR *parser) {
 }
 
 static void CC_can_zap(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_098[0] = (charconfig.runtime->flags_098[0] & 0xfe) | (enabled << 0);
+    data->flag098_0_0 = enabled;
 }
 
 static void CC_cape_layer(NUFPAR *parser) {
@@ -1412,11 +1436,12 @@ static void CC_dontpush(NUFPAR *parser) {
 }
 
 static void CC_dont_turn(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[0] = (charconfig.runtime->flags_094[0] & 0xfd) | (enabled << 1);
+    data->flag094_0_1 = enabled;
 }
 
 static void CC_extra_toggle(NUFPAR *parser) {
@@ -1427,19 +1452,21 @@ static void CC_extra_toggle(NUFPAR *parser) {
 }
 
 static void CC_fixed_layers(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[0] = (charconfig.runtime->flags_094[0] & 0xef) | (enabled << 4);
+    data->flag094_0_4 = enabled;
 }
 
 static void CC_glide_anytime(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[0] = (charconfig.runtime->flags_094[0] & 0xbf) | (enabled << 6);
+    data->flag094_0_6 = enabled;
 }
 
 static void CC_got_batarang(NUFPAR *parser) {
@@ -1473,11 +1500,12 @@ static void CC_hand_locators(NUFPAR *parser) {
 }
 
 static void CC_has_grapple(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[3] = (charconfig.runtime->flags_094[3] & 0xf7) | (enabled << 3);
+    data->flag094_3_3 = enabled;
 }
 
 static void CC_has_no_turn(NUFPAR *parser) {
@@ -1488,11 +1516,12 @@ static void CC_has_no_turn(NUFPAR *parser) {
 }
 
 static void CC_has_whip(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[3] = (charconfig.runtime->flags_094[3] & 0xdf) | (enabled << 5);
+    data->flag094_3_5 = enabled;
 }
 
 static void CC_head_joint(NUFPAR *parser) {
@@ -1543,11 +1572,12 @@ static void CC_hover_time(NUFPAR *parser) {
 }
 
 static void CC_hover_wings(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[3] = (charconfig.runtime->flags_094[3] & 0xef) | (enabled << 4);
+    data->flag094_3_4 = enabled;
 }
 
 static void CC_idle_speed(NUFPAR *parser) {
@@ -1684,11 +1714,12 @@ static void CC_layers_medium(NUFPAR *parser) {
 }
 
 static void CC_lift_hover(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[0] = (charconfig.runtime->flags_094[0] & 0xdf) | (enabled << 5);
+    data->flag094_0_5 = enabled;
 }
 
 static void CC_lightning(NUFPAR *parser) {
@@ -1729,35 +1760,39 @@ static void CC_neutral(NUFPAR *parser) {
 }
 
 static void CC_no_category(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[1] = (charconfig.runtime->flags_094[1] & 0xbf) | (enabled << 6);
+    data->flag094_1_6 = enabled;
 }
 
 static void CC_no_force(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[1] = (charconfig.runtime->flags_094[1] & 0x7f) | (enabled << 7);
+    data->flag094_1_7 = enabled;
 }
 
 static void CC_no_jump(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[0] = (charconfig.runtime->flags_094[0] & 0xfb) | (enabled << 2);
+    data->flag094_0_2 = enabled;
 }
 
 static void CC_no_jump_fire(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[2] = (charconfig.runtime->flags_094[2] & 0xbf) | (enabled << 6);
+    data->flag094_2_6 = enabled;
 }
 
 static void CC_no_kill_parts(NUFPAR *parser) {
@@ -1775,11 +1810,12 @@ static void CC_non_stick(NUFPAR *parser) {
 }
 
 static void CC_no_shoot(NUFPAR *parser) {
-    u8 enabled = 1;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
+    i32 enabled = 1;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         enabled = 0;
     }
-    charconfig.runtime->flags_094[0] = (charconfig.runtime->flags_094[0] & 0xf7) | (enabled << 3);
+    data->flag094_0_3 = enabled;
 }
 
 static void CC_not_got_hat(NUFPAR *parser) {

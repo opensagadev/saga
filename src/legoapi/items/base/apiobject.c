@@ -805,55 +805,55 @@ static void NormalizeAnimPath(char *path) {
 }
 
 static nuanimdata2_s *LoadAnimFromPAK(char *path, i32 area_animation, char *data, i32 size) {
+    ANIMLIST_s *entry = apicharsys->animations;
+    i32 i;
     NormalizeAnimPath(path);
-    for (i32 i = 0; i < apicharsys->loaded_animation_count; ++i) {
-        if (NuStrCmp(path, apicharsys->animations[i].path) == 0) {
-            return apicharsys->animations[i].animation;
+    for (i = 0; i < apicharsys->loaded_animation_count; i++, entry++) {
+        if (NuStrCmp(path, entry->path) == 0) {
+            return entry->animation;
         }
     }
 
-    if (apicharsys->loaded_animation_count >= apicharsys->animation_capacity) {
-        ++apicharsys->animation_load_attempts;
-        return NULL;
-    }
-
-    ANIMLIST_s &entry = apicharsys->animations[apicharsys->loaded_animation_count];
-    NuStrCpy(entry.path, path);
-    entry.animation = static_cast<nuanimdata2_s *>(NuAnimData2LoadBuffFromPAK(data, size));
-    if (entry.animation != NULL) {
-        if (area_animation != 0) {
-            ++apicharsys->area_animation_count;
+    if (apicharsys->animation_capacity > i) {
+        NuStrCpy(entry->path, path);
+        entry->animation = static_cast<nuanimdata2_s *>(NuAnimData2LoadBuffFromPAK(data, size));
+        if (entry->animation != NULL) {
+            if (area_animation != 0) {
+                ++apicharsys->area_animation_count;
+            }
+            ++apicharsys->loaded_animation_count;
+            ++apicharsys->animation_load_attempts;
         }
-        ++apicharsys->loaded_animation_count;
-        ++apicharsys->animation_load_attempts;
+        return entry->animation;
     }
-    return entry.animation;
+    ++apicharsys->animation_load_attempts;
+    return NULL;
 }
 
 static nuanimdata2_s *LoadAnim(char *path, i32 area_animation, VARIPTR *buf, VARIPTR buf_end) {
+    ANIMLIST_s *entry = apicharsys->animations;
+    i32 i;
     NormalizeAnimPath(path);
-    for (i32 i = 0; i < apicharsys->loaded_animation_count; ++i) {
-        if (NuStrCmp(path, apicharsys->animations[i].path) == 0) {
-            return apicharsys->animations[i].animation;
+    for (i = 0; i < apicharsys->loaded_animation_count; i++, entry++) {
+        if (NuStrCmp(path, entry->path) == 0) {
+            return entry->animation;
         }
     }
 
-    if (apicharsys->loaded_animation_count >= apicharsys->animation_capacity) {
-        ++apicharsys->animation_load_attempts;
-        return NULL;
-    }
-
-    ANIMLIST_s &entry = apicharsys->animations[apicharsys->loaded_animation_count];
-    NuStrCpy(entry.path, path);
-    entry.animation = static_cast<nuanimdata2_s *>(NuAnimData2LoadBuff(entry.path, buf, &buf_end));
-    if (entry.animation != NULL) {
-        if (area_animation != 0) {
-            ++apicharsys->area_animation_count;
+    if (apicharsys->animation_capacity > i) {
+        NuStrCpy(entry->path, path);
+        entry->animation = static_cast<nuanimdata2_s *>(NuAnimData2LoadBuff(entry->path, buf, &buf_end));
+        if (entry->animation != NULL) {
+            if (area_animation != 0) {
+                ++apicharsys->area_animation_count;
+            }
+            ++apicharsys->loaded_animation_count;
+            ++apicharsys->animation_load_attempts;
         }
-        ++apicharsys->loaded_animation_count;
-        ++apicharsys->animation_load_attempts;
+        return entry->animation;
     }
-    return entry.animation;
+    ++apicharsys->animation_load_attempts;
+    return NULL;
 }
 
 static void GetAnimationPath(char *path, const char *default_dir, CHARACTERANIM_s *animation, const char *extension) {
@@ -1120,15 +1120,9 @@ extern "C" {
     }
 
     APICHARACTERMODEL *APICharacterLoaded(i32 character_id) {
-        if (character_id == -1) {
-            return NULL;
-        }
-
-        const i16 model_index = apicharsys->playermodelids[character_id];
-        if (model_index == -1) {
-            return NULL;
-        }
-        return &apicharsys->models[model_index];
+        return character_id != -1 && apicharsys->playermodelids[character_id] != -1
+                   ? &apicharsys->models[apicharsys->playermodelids[character_id]]
+                   : NULL;
     }
 
     // Original @0x3cd1ea. Destroy the area-loaded hierarchy tail in mode 0
@@ -1755,11 +1749,9 @@ extern "C" {
     }
 
     f32 AnimListFrame(CHARACTERMODEL_s *model, i32 animation, i32 frame) {
-        if (animation == -1 || model->model_data_b[animation] == NULL || frame < 0 || frame > 3) {
-            return 0.0f;
-        }
-        CHARACTERANIM_s *info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
-        return info->event_frames[frame];
+        return animation != -1 && model->model_data_b[animation] != NULL && frame >= 0 && frame <= 3
+                   ? static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->event_frames[frame]
+                   : 0.0f;
     }
 
     f32 AnimStopFrame(CHARACTERMODEL_s *model, i32 animation) {
@@ -1769,11 +1761,9 @@ extern "C" {
     }
 
     f32 *AnimListFrameArray(CHARACTERMODEL_s *model, i32 animation) {
-        if (animation == -1 || model->model_data_b[animation] == NULL) {
-            return NULL;
-        }
-        CHARACTERANIM_s *info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
-        return info->event_frames;
+        return animation != -1 && model->model_data_b[animation] != NULL
+                   ? static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->event_frames
+                   : NULL;
     }
 
     i32 AnimsAvailableToBothCharacters(ANIMPACKET_s *packet, i32 first_character, i32 second_character) {

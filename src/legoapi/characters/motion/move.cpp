@@ -10443,17 +10443,16 @@ static void DodgeCode(GameObject_s *object, i32 action_pressed, i32 jump_pressed
             object->apiobj.facing_angle = object->apiobj.movement_facing_angle;
         }
 
-        if (object->landing_followup == 2) {
-            if (PlayerItem_GotAmmo(reinterpret_cast<PLAYERITEM_s *>(&object->field_0x7e4)) != 0) {
-                if (object->context_animation == 0x58 && object->pad_gamepad->input_magnitude > 0.0f) {
-                    SetWeaponOut(object);
-                    i32 bolt_id = BoltType_FindIDByCreature(object, 0);
-                    ShootThisFrame(object, bolt_id, 3);
-                } else {
-                    StartQuickShoot(object, 0x16);
-                }
-                object->quick_shoot_timer = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
+        if (object->landing_followup == 2 &&
+            PlayerItem_GotAmmo(reinterpret_cast<PLAYERITEM_s *>(&object->field_0x7e4)) != 0) {
+            if (object->context_animation == 0x58 && object->pad_gamepad->input_magnitude > 0.0f) {
+                SetWeaponOut(object);
+                i32 bolt_id = BoltType_FindIDByCreature(object, 0);
+                ShootThisFrame(object, bolt_id, 3);
+            } else {
+                StartQuickShoot(object, 0x16);
             }
+            object->quick_shoot_timer = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
         } else if (object->landing_followup == 1) {
             StartJump(object, 0);
         }

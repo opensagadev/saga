@@ -227,10 +227,55 @@ struct GAMECHARACTERDATA_s {
     union {
         u32 field_0x94;
         u8 flags_094[4];
+        // Single-bit views (flag094_<byte>_<bit>) for the CharConfig keyword handlers' bitfield stores.
+        struct {
+            u8 flag094_0_0 : 1;
+            u8 flag094_0_1 : 1;
+            u8 flag094_0_2 : 1;
+            u8 flag094_0_3 : 1;
+            u8 flag094_0_4 : 1;
+            u8 flag094_0_5 : 1;
+            u8 flag094_0_6 : 1;
+            u8 flag094_0_7 : 1;
+            u8 flag094_1_0 : 1;
+            u8 flag094_1_1 : 1;
+            u8 flag094_1_2 : 1;
+            u8 flag094_1_3 : 1;
+            u8 flag094_1_4 : 1;
+            u8 flag094_1_5 : 1;
+            u8 flag094_1_6 : 1;
+            u8 flag094_1_7 : 1;
+            u8 flag094_2_0 : 1;
+            u8 flag094_2_1 : 1;
+            u8 flag094_2_2 : 1;
+            u8 flag094_2_3 : 1;
+            u8 flag094_2_4 : 1;
+            u8 flag094_2_5 : 1;
+            u8 flag094_2_6 : 1;
+            u8 flag094_2_7 : 1;
+            u8 flag094_3_0 : 1;
+            u8 flag094_3_1 : 1;
+            u8 flag094_3_2 : 1;
+            u8 flag094_3_3 : 1;
+            u8 flag094_3_4 : 1;
+            u8 flag094_3_5 : 1;
+            u8 flag094_3_6 : 1;
+            u8 flag094_3_7 : 1;
+        };
     };
     union {
         u32 field_0x98;
         u8 flags_098[4];
+        struct {
+            u8 flag098_0_0 : 1;
+            u8 flag098_0_1 : 1;
+            u8 flag098_0_2 : 1;
+            u8 flag098_0_3 : 1;
+            u8 flag098_0_4 : 1;
+            u8 flag098_0_5 : 1;
+            u8 flag098_0_6 : 1;
+            u8 flag098_0_7 : 1;
+        };
     };
     u32 layer_mask_special; // 0x9c
     u32 layer_mask;         // 0xa0, high-detail hierarchy render-part visibility mask

@@ -410,15 +410,31 @@ void rtlSwapSetEndianess(rtlset *) {
 
 extern "C" {
     void IndexLights(rtlset *set, VARIPTR *buffer, i32 buffer_end) {
-        rtlindex_s *grid = static_cast<rtlindex_s *>(buffer->void_ptr);
+        rtl_s *light;
+        f32 minimum_x;
+        f32 maximum_x;
+        f32 minimum_z;
+        f32 maximum_z;
+        i32 column;
+        i32 row;
+        i32 index;
+        rtlindex_s *grid;
+        f32 size_x;
+        f32 size_z;
+        char *indices;
+        char *start;
+
+        // The reference stores an unused start-of-buffer pointer here.
+        start = buffer->char_ptr;
+        (void)start;
+        grid = static_cast<rtlindex_s *>(buffer->void_ptr);
         buffer->addr += sizeof(rtlindex_s);
         memset(grid, 0, sizeof(*grid));
 
-        f32 maximum_x = -FLT_MAX;
-        f32 minimum_x = FLT_MAX;
-        f32 maximum_z = -FLT_MAX;
-        f32 minimum_z = FLT_MAX;
-        rtl_s *light;
+        minimum_x = FLT_MAX;
+        maximum_x = -FLT_MAX;
+        minimum_z = FLT_MAX;
+        maximum_z = -FLT_MAX;
         for (light = set->lights; light < set->lights + 128 && light->type != 0; ++light) {
             minimum_x = MIN(minimum_x, light->position.x - light->outer_radius);
             maximum_x = MAX(maximum_x, light->position.x + light->outer_radius);
@@ -428,73 +444,69 @@ extern "C" {
 
         if (minimum_x > maximum_x || minimum_z > maximum_z)
             return;
-        // The reference writes offsets before checking the derived extents.
         grid->offset_x = -minimum_x;
         grid->offset_z = -minimum_z;
-        maximum_x -= minimum_x;
-        maximum_z -= minimum_z;
-        if (maximum_x <= 0.0f || maximum_z <= 0.0f)
+        size_x = maximum_x - minimum_x;
+        size_z = maximum_z - minimum_z;
+        if (0.0f >= size_x || 0.0f >= size_z)
             return;
-        if (maximum_x <= maximum_z) {
-            grid->depth = 16;
-            grid->width = MIN(static_cast<i32>(maximum_x * 16.0f / maximum_z) + 1, 16);
-            grid->scale = 16.0f / maximum_z;
-        } else {
+        if (size_x > size_z) {
             grid->width = 16;
-            grid->depth = MIN(static_cast<i32>(maximum_z * 16.0f / maximum_x) + 1, 16);
-            grid->scale = 16.0f / maximum_x;
+            grid->depth = MIN(static_cast<i32>(size_z * 16.0f / size_x) + 1, 16);
+            grid->scale = 16.0f / size_x;
+        } else {
+            grid->depth = 16;
+            grid->width = MIN(static_cast<i32>(size_x * 16.0f / size_z) + 1, 16);
+            grid->scale = 16.0f / size_z;
         }
 
-        buffer->addr = ALIGN(buffer->addr, alignof(char *));
-        grid->cells = static_cast<char **>(buffer->void_ptr);
+        grid->cells = reinterpret_cast<char **>(ALIGN(buffer->addr, 4));
+        buffer->addr = ALIGN(buffer->addr, 4);
         buffer->addr += grid->width * grid->depth * sizeof(char *);
 
-        for (i32 row = 0; row < grid->depth; ++row) {
-            const f32 minimum_cell_z = static_cast<f32>(row) / grid->scale - grid->offset_z;
-            const f32 maximum_cell_z = static_cast<f32>(row + 1) / grid->scale - grid->offset_z;
-            for (i32 column = 0; column < grid->width; ++column) {
+        for (row = 0; row < grid->depth; ++row) {
+            minimum_z = static_cast<f32>(row) / grid->scale - grid->offset_z;
+            maximum_z = static_cast<f32>(row + 1) / grid->scale - grid->offset_z;
+            for (column = 0; column < grid->width; ++column) {
                 grid->cells[row * grid->width + column] = buffer->char_ptr;
                 ++buffer->addr;
-                u8 *indices = reinterpret_cast<u8 *>(grid->cells[row * grid->width + column]);
+                indices = grid->cells[row * grid->width + column];
                 *indices = 0;
-                i32 index = 0;
-                const f32 minimum_cell_x = static_cast<f32>(column) / grid->scale - grid->offset_x;
-
-                const f32 maximum_cell_x = static_cast<f32>(column + 1) / grid->scale - grid->offset_x;
+                minimum_x = static_cast<f32>(column) / grid->scale - grid->offset_x;
+                maximum_x = static_cast<f32>(column + 1) / grid->scale - grid->offset_x;
                 light = set->lights;
+                index = 0;
                 while (light < set->lights + 128 && light->type != 0) {
                     // Original JBE overlap branches accept unordered comparisons.
                     if (light->type != 5) {
-                        if (minimum_cell_x > light->position.x + light->outer_radius) {
+                        if (minimum_x > light->position.x + light->outer_radius) {
                             ++index;
                             ++light;
                             continue;
                         }
-                        if (light->position.x - light->outer_radius > maximum_cell_x) {
+                        if (light->position.x - light->outer_radius > maximum_x) {
                             ++index;
                             ++light;
                             continue;
                         }
-                        if (minimum_cell_z > light->position.z + light->outer_radius) {
+                        if (minimum_z > light->position.z + light->outer_radius) {
                             ++index;
                             ++light;
                             continue;
                         }
-                        if (light->position.z - light->outer_radius > maximum_cell_z) {
+                        if (light->position.z - light->outer_radius > maximum_z) {
                             ++index;
                             ++light;
                             continue;
                         }
                     }
-                    {
-                        // GetNextRTL's original char count cannot represent 128.
-                        // Fall back to the bounded full scan for a full cell.
-                        if (indices[0] == 127)
-                            return;
-                        ++indices[0];
-                        indices[indices[0]] = static_cast<u8>(index);
-                        ++buffer->addr;
-                    }
+                    // GetNextRTL's original char count cannot represent 128.
+                    // Stop at a full cell instead of wrapping the count.
+                    if (*indices == 127)
+                        return;
+                    ++*indices;
+                    indices[*indices] = static_cast<char>(index);
+                    ++buffer->addr;
                     ++index;
                     ++light;
                 }
@@ -3680,10 +3692,10 @@ extern "C" void edrtlDrawLightEx(i32 index, i32 style) {
     // Three distinct reference switch arms render the same radius pair.
 #define EDRTL_RADIUS_PAIR()                                                                                            \
     RndrOSphere(&curr_set->lights[index].position, curr_set->lights[index].inner_radius, inner_colour, numsegs,        \
-                reinterpret_cast<i32>(mtls[rtl_zoff ? 1 : 0]));                                                        \
+                static_cast<i32>(reinterpret_cast<uintptr_t>(mtls[rtl_zoff ? 1 : 0])));                                \
     if (curr_set->lights[index].outer_radius > curr_set->lights[index].inner_radius)                                   \
         RndrOSphere(&curr_set->lights[index].position, curr_set->lights[index].outer_radius, outer_colour, numsegs,    \
-                    reinterpret_cast<i32>(mtls[rtl_zoff ? 1 : 0]));                                                    \
+                    static_cast<i32>(reinterpret_cast<uintptr_t>(mtls[rtl_zoff ? 1 : 0])));                            \
     if (&curr_set->lights[index] == curr_rtl)                                                                          \
     RndrOSquare(&curr_set->lights[index].position, curr_set->lights[index].outer_radius, -1)
     switch (curr_set->lights[index].type) {
@@ -3706,7 +3718,7 @@ extern "C" void edrtlDrawLightEx(i32 index, i32 style) {
             NuVecSub(&line[1].position, &line[0].position, &line[1].position);
             edrtlRndrLine3d(line, NULL, NULL);
             RndrOSphere(&curr_set->lights[index].position, 2.0f, colour, numsegs,
-                        reinterpret_cast<i32>(mtls[rtl_zoff ? 1 : 0]));
+                        static_cast<i32>(reinterpret_cast<uintptr_t>(mtls[rtl_zoff ? 1 : 0])));
             if (&curr_set->lights[index] == curr_rtl)
                 RndrOSquare(&curr_set->lights[index].position, 2.0f, -1);
             return;
