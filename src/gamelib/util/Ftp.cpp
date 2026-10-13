@@ -205,23 +205,23 @@ void FtpFile::Update() {
         return;
     }
 
-    NetMessage::MessageData *new_data = NULL;
-    for (i32 i = 0; i < 512; ++i) {
-        if (NetMessage::sm_poolMessageData[i].references == 0) {
-            new_data = &NetMessage::sm_poolMessageData[i];
-            new_data->references = 1;
-            break;
+    // The original builds a fresh pooled message, releases the old buffer and
+    // copies the new one in; the temporary's reference is dropped on exit.
+    {
+        NetMessage fresh;
+        NetMessage::MessageData *old = reinterpret_cast<NetMessage::MessageData *>(message_data);
+        if (old->references > 1) {
+            --old->references;
+        } else {
+            old->references = 0;
+        }
+        message_data = reinterpret_cast<TransferReference *>(fresh.data);
+        message_read_offset = 0xc;
+        message_write_offset = 0xc;
+        if (fresh.data != NULL) {
+            ++fresh.data->references;
         }
     }
-
-    if (message_data->reference_count > 1) {
-        --message_data->reference_count;
-    } else {
-        message_data->reference_count = 0;
-    }
-    message_data = reinterpret_cast<TransferReference *>(new_data);
-    message_read_offset = 0xc;
-    message_write_offset = 0xc;
 
     if (size - transferred > 0) {
         SendData();
