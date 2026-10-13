@@ -199,19 +199,19 @@ static __used__ void PodRaceSnipersUpdate(void) {
     i32 n = PodRace_nsnipers;
     if (n <= 0 || max_nsnipers <= 0)
         return;
-    for (i32 i = 0; i < n && i < max_nsnipers; i++) {
-        SNIPER_s *s = &PodRace_snipers[i];
-        bool in_range = false;
+    SNIPER_s *s = PodRace_snipers;
+    for (i32 i = 0; i < n && i < max_nsnipers; i++, s++) {
+        i32 in_range = 0;
         for (i32 j = 0; j < 2; ++j) {
             GameObject_s *target = Player[j];
             if (!(target != NULL && (target->apiobj.field_0x1f8 & 0x1001) == 0x1001)) {
                 continue;
             }
-            float dz = target->apiobj.collision_position.z - s->pos.z;
-            float dx = target->apiobj.collision_position.x - s->pos.x;
-            float dist2 = dx * dx + dz * dz;
+            direction.x = target->apiobj.collision_position.x - s->pos.x;
+            direction.z = target->apiobj.collision_position.z - s->pos.z;
+            float dist2 = direction.x * direction.x + direction.z * direction.z;
             if (dist2 < PodRace_sniper_start_fire_radius * PodRace_sniper_start_fire_radius) {
-                in_range = true;
+                in_range = 1;
                 if (dist2 < PodRace_sniper_fire_radius * PodRace_sniper_fire_radius)
                     s->state = PodRace_sniper_fire_range_time;
             }
@@ -243,17 +243,17 @@ static __used__ void PodRaceSnipersUpdate(void) {
                     aim.y = 0.0f;
                     aim.z = NuRandFloat() * PodRace_sniper_fire_radius;
                     NuVecRotateY(&aim, &aim, NuRandInt());
-                    NuVecAdd(&aim, &aim, &s->pos);
+                    NuVecAdd(&aim, &aim, &PodRace_snipers[i].pos);
                 }
 
-                float distance = NuVecDist(&aim, &s->prev, &direction);
+                float distance = NuVecDist(&aim, &PodRace_snipers[i].prev, &direction);
                 temp_yrot = NuAtan2D(direction.x, direction.z);
                 temp_xrot = NuAtan2D(-direction.y, distance);
                 // Retail uses an aligned matrix local in its realigned stack frame.
                 NUMTX_ALIGNED16 mtx;
                 NuMtxSetRotationX(&mtx, (u16)temp_xrot);
                 NuMtxRotateY(&mtx, (u16)temp_yrot);
-                Bolt_Add(NULL, &s->prev, &mtx, bolttype, 0);
+                Bolt_Add(NULL, &PodRace_snipers[i].prev, &mtx, bolttype, 0);
             }
             n = PodRace_nsnipers;
         }
