@@ -1750,7 +1750,8 @@ AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_
 i32 newCharactersCollected(STATUSPACKET_s *) {
     i32 count = 0;
     for (i16 *player_id = Area_PlayerIDList; *player_id != -1 && count < 7; ++player_id) {
-        const i32 id = *player_id;
+        const i16 player = *player_id;
+        const i32 id = player;
         i32 previous = 0;
         while (previous < count && StatusCollectList.ids[previous] != id) {
             ++previous;
@@ -1761,7 +1762,7 @@ i32 newCharactersCollected(STATUSPACKET_s *) {
             }
             const i32 index = InCollectList_Index(id, MasterCollection.list, MasterCollection.count_y);
             if (index != -1 && MasterCollection.list[index].can_buy == 0) {
-                StatusCollectList.ids[count++] = *player_id;
+                StatusCollectList.ids[count++] = player;
                 if (MasterCollection.list[index].field5_0x9 != 0) {
                     AddToCompletionPoints(POINTS_PER_CHARACTER);
                 }
