@@ -451,30 +451,27 @@ static NUVEC *GizmoObstacle_GetPos(GIZMO *gizmo) {
 
 static i32 GizObstacles_BoltHitPlat(void *world_ptr, void *data, BOLT *bolt, unsigned char *) {
     GIZOBSTACLESYS_s *system = static_cast<GIZOBSTACLESYS_s *>(data);
-    if (system == NULL || system->active_gizmo_count == 0) {
+    if (system == NULL) {
+        return 0;
+    }
+    const i32 count = system->active_gizmo_count;
+    if (count == 0) {
         return 0;
     }
 
-    for (i32 index = 0; index < system->active_gizmo_count; ++index) {
+    for (i32 index = 0; index < count; ++index) {
         GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(system->active_gizmos[index]->object);
-        if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) == 0 ||
-            (obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_ENABLED) == 0 ||
-            (obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_HAS_PLATFORM) == 0 ||
-            (obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) != 0 ||
-            obstacle->anim_set->objects == NULL) {
-            continue;
-        }
-
-        for (GAMEANIMOBJ_s *object = obstacle->anim_set->objects; object != NULL; object = object->next) {
-            i16 *object_data = static_cast<i16 *>(object->object_data);
-            if (object_data[1] != bolt->hit_platform) {
-                continue;
+        if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) != 0 && obstacle->progress_enabled &&
+            obstacle->runtime_has_platform && static_cast<i8>(obstacle->runtime_flags) >= 0) {
+            for (GAMEANIMOBJ_s *object = obstacle->anim_set->objects; object != NULL; object = object->next) {
+                i16 *object_data = static_cast<i16 *>(object->object_data);
+                if (object_data[1] == bolt->hit_platform) {
+                    i32 damage = BoltType_FindByID(bolt->type_id, static_cast<WORLDINFO_s *>(world_ptr))->field_3c;
+                    i32 player_index = bolt->owner != NULL ? static_cast<i8>(bolt->owner->apiobj.field_0x27c) : -1;
+                    GizObstacles_Hit(world_ptr, obstacle, &bolt->position, player_index, damage);
+                    return 1;
+                }
             }
-
-            i32 damage = BoltType_FindByID(bolt->type_id, static_cast<WORLDINFO_s *>(world_ptr))->field_3c;
-            i32 player_index = bolt->owner != NULL ? static_cast<i8>(bolt->owner->apiobj.field_0x27c) : -1;
-            GizObstacles_Hit(world_ptr, obstacle, &bolt->position, player_index, damage);
-            return 1;
         }
     }
     return 0;

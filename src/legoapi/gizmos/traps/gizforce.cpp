@@ -827,25 +827,26 @@ static i32 GizForces_Hit(void *world_ptr, GIZFORCE_s *force, NUVEC *, i32, i32 p
 
 static i32 GizForces_BoltHitPlat(void *world_ptr, void *data, BOLT *bolt, unsigned char *) {
     GIZFORCESYS_s *force_sys = static_cast<GIZFORCESYS_s *>(data);
-    if (force_sys == NULL || force_sys->hit_test_gizmo_count == 0) {
+    if (force_sys == NULL) {
         return 0;
     }
-    auto bolt_hit_platform = bolt->hit_platform;
-    for (i32 index = 0; index < force_sys->hit_test_gizmo_count; ++index) {
+    const i32 count = force_sys->hit_test_gizmo_count;
+    if (count == 0) {
+        return 0;
+    }
+    for (i32 index = 0; index < count; ++index) {
         GIZFORCE_s *force = static_cast<GIZFORCE_s *>(force_sys->hit_test_gizmos[index]->object);
-        if ((force->progress_flags & GIZFORCE_PROGRESS_VISIBLE) == 0 ||
-            (force->progress_flags & GIZFORCE_PROGRESS_ENABLED) == 0 ||
-            (force->runtime_flags & GIZFORCE_RUNTIME_HAS_PLATFORM) == 0 ||
-            (force->state_flags & GIZFORCE_STATE_DESTROYED_OR_THROWN) != 0) {
-            continue;
-        }
-        for (GAMEANIMOBJ_s *object = force->anim_set->objects; object != NULL; object = object->next) {
-            GIZFORCEANIMDATA_s *object_data = static_cast<GIZFORCEANIMDATA_s *>(object->object_data);
-            if (object_data->platform_id == bolt_hit_platform) {
-                i32 damage = BoltType_FindByID(bolt->type_id, static_cast<WORLDINFO_s *>(world_ptr))->field_3c;
-                i32 player_index = bolt->owner != NULL ? static_cast<i8>(bolt->owner->apiobj.field_0x27c) : -1;
-                GizForces_Hit(world_ptr, force, &bolt->position, damage, player_index);
-                return 1;
+        if ((force->progress_flags & GIZFORCE_PROGRESS_VISIBLE) != 0 && force->progress_enabled &&
+            (force->runtime_flags & GIZFORCE_RUNTIME_HAS_PLATFORM) != 0 &&
+            (force->state_flags & GIZFORCE_STATE_DESTROYED_OR_THROWN) == 0) {
+            for (GAMEANIMOBJ_s *object = force->anim_set->objects; object != NULL; object = object->next) {
+                GIZFORCEANIMDATA_s *object_data = static_cast<GIZFORCEANIMDATA_s *>(object->object_data);
+                if (object_data->platform_id == bolt->hit_platform) {
+                    i32 damage = BoltType_FindByID(bolt->type_id, static_cast<WORLDINFO_s *>(world_ptr))->field_3c;
+                    i32 player_index = bolt->owner != NULL ? static_cast<i8>(bolt->owner->apiobj.field_0x27c) : -1;
+                    GizForces_Hit(world_ptr, force, &bolt->position, damage, player_index);
+                    return 1;
+                }
             }
         }
     }
