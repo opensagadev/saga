@@ -1176,12 +1176,12 @@ static void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
         return;
     }
 
-    if (candidate_count == 1) {
-        object->idle_animation = static_cast<i16>(candidates[0]);
-    } else {
+    if (candidate_count != 1) {
         do {
             object->idle_animation = static_cast<i16>(candidates[qrand() / (0xffff / candidate_count + 1)]);
         } while (object->idle_animation == object->previous_idle_animation);
+    } else {
+        object->idle_animation = static_cast<i16>(candidates[0]);
     }
 
     CHARACTERANIM_s *info =
