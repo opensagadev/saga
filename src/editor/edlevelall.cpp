@@ -3057,10 +3057,11 @@ i32 ClassObjectList::GetAveragePosition(VuVec &average, float &radius) {
     average = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
     i32 position_count = 0;
     VuVec positions[64];
-    float radii[64];
+    // The original keeps these locals in 16-byte aligned slots of a realigned frame.
+    float radii[64] __attribute__((aligned(16)));
     for (ClassObjectListEntry *entry = first; entry != NULL && position_count < 64; entry = entry->next) {
         VuVec &position = positions[position_count];
-        EdMember member;
+        EdMember member __attribute__((aligned(16)));
         i32 position_type = EdType_VuVec;
         if (entry->reference != NULL &&
             entry->reference->GetAttributeData(entry->object, 8, position_type, &position, 0))
