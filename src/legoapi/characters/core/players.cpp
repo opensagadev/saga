@@ -953,15 +953,16 @@ void Player_ResetContexts(PLAYERPACKET_s *packet) {
     }
 
     packet->context_distance = 5.0f;
+    packet->field_0x670 = 0;
     packet->field_0x678 = 0;
     packet->field_0x668 = 0;
-    packet->field_0x670 = 0;
+    packet->field_0x77e = 0;
     packet->context_blend = context_blend;
     packet->build_context = -1;
     packet->action_movement_variant = 0;
     packet->action_movement_state = 0;
-    packet->field_0x77e = 0;
-    packet->gamepad->allocated_5a &= static_cast<u8>(~(0x04 | 0x10));
+    packet->gamepad->allocated_5a &= static_cast<u8>(~0x04);
+    packet->gamepad->allocated_5a &= static_cast<u8>(~0x10);
     packet->input_state = 0;
     packet->secondary_flags &= static_cast<u8>(~0x04);
     packet->field_0x648 = 0;
