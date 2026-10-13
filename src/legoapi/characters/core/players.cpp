@@ -1180,8 +1180,10 @@ i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *bolt) {
     else if (bolt->flags & 2)
         player = 1;
     else
-        return 0;
-    return Player_HasDoubleBoltDamage(Player[player]);
+        player = -1;
+    if (player != -1)
+        return Player_HasDoubleBoltDamage(Player[player]);
+    return 0;
 }
 
 void PlayerButton_OnClick_Callback_NextButton(MechTouchUIElement &element, TouchHolder &) {
