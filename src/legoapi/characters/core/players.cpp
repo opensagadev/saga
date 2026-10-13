@@ -361,10 +361,9 @@ void Players_InitPositions(WORLDINFO *world) {
     }
     Door_ExitCameraSplineName[0] = 0;
 
-    auto world_sock_sys = world->sock_sys;
     for (i32 i = 0; i < 8; i++) {
         SOCKPOSITION sp;
-        ComplexSockPosition(world_sock_sys, PlayerStart[i].pos, -1, -1, &sp);
+        ComplexSockPosition(world->sock_sys, PlayerStart[i].pos, -1, -1, &sp);
         PlayerStart[i].sock_location = sp.location;
         PlayerStart[i].sock_ratio = sp.ratio;
     }

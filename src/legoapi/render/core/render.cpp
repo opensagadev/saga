@@ -3212,16 +3212,16 @@ SwipeDecalRenderer::SwipeDecalRenderer(TouchHolder &holder, i32 index, SwipeDeca
     const f32 dx = current_x - swipe_x;
     const f32 dy = current_y - swipe_y;
     f32 target_width = NuFsqrt(dx * dx + dy * dy);
-    target_width = target_width < SwipeDecalRenderer_MaxWidth ? target_width : SwipeDecalRenderer_MaxWidth;
-    target_width = target_width < SwipeDecalRenderer_MinWidth ? SwipeDecalRenderer_MinWidth : target_width;
+    // MAX/MIN expand the inner MIN twice, which gives retail's re-tested clamp branches.
+    target_width = MAX(SwipeDecalRenderer_MinWidth, MIN(target_width, SwipeDecalRenderer_MaxWidth));
 
     width.Start(0.0f, target_width, 0.1f);
-    width.value = 0.0f;
-    y = swipe_y;
+    *width.target = 0.0f;
     x = swipe_x;
+    y = swipe_y;
     angle = NuAtan2D(dx, dy);
     alpha.Start(0.02f, 1.0f, 0.1f);
-    alpha.value = 0.02f;
+    *alpha.target = 0.02f;
 }
 
 extern i32 GetMenuID(void);
