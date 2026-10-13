@@ -5672,10 +5672,13 @@ void EdMatrixControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
 
         NuMtxSetIdentity(&rebuilt);
         if (control->components[6] && control->components[7] && control->components[8]) {
-            NUVEC scale = {NuAToF(static_cast<edui_prop_s *>(control->components[6])->property_text),
-                           NuAToF(static_cast<edui_prop_s *>(control->components[7])->property_text),
-                           NuAToF(static_cast<edui_prop_s *>(control->components[8])->property_text)};
-            NuMtxScale(&rebuilt, &scale);
+            // The original builds the scale as an aligned four-component vector with w set to one.
+            VuVec scale __attribute__((aligned(16)));
+            scale.x = NuAToF(static_cast<edui_prop_s *>(control->components[6])->property_text);
+            scale.y = NuAToF(static_cast<edui_prop_s *>(control->components[7])->property_text);
+            scale.z = NuAToF(static_cast<edui_prop_s *>(control->components[8])->property_text);
+            scale.w = 1.0f;
+            NuMtxScale(&rebuilt, reinterpret_cast<NUVEC *>(&scale));
         }
         {
             NUANG x = static_cast<NUANG>(NuAToF(static_cast<edui_prop_s *>(control->components[3])->property_text) *
@@ -5734,7 +5737,8 @@ void EdMatrixControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
     }
     matrix.m33 = 1.0f;
     control->reference->SetMemberData(control->object, EdType_VuMtx, &source, 0, nullptr);
-    char text[128];
+    // The original keeps the text buffer at a 16-byte aligned stack address.
+    char text[128] __attribute__((aligned(16)));
     sprintf(text, "%.2f", changed_value);
     eduiItemPropSetText(static_cast<edui_prop_s *>(item), text);
 }
