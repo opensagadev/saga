@@ -629,47 +629,37 @@ static i32 Levers_Load(void *world_ptr, void *) {
     const i32 version = EdFileReadInt();
     world->nlevers = EdFileReadInt();
     for (i32 index = 0; index < world->nlevers; ++index) {
-        LEVER_s &lever = world->levers[index];
-        lever.flags = 0;
-        EdFileRead(lever.name, sizeof(lever.name));
-        EdFileReadNuVec(&lever.position);
-        lever.y_rotation = static_cast<u16>(EdFileReadShort());
-        lever.model_variant = static_cast<char>(EdFileReadChar());
+        EdFileRead(world->levers[index].name, sizeof(world->levers[index].name));
+        EdFileReadNuVec(&world->levers[index].position);
+        world->levers[index].y_rotation = static_cast<u16>(EdFileReadShort());
+        world->levers[index].model_variant = static_cast<char>(EdFileReadChar());
 
-        if (version < 2) {
-            lever.auto_reset_delay = 2.0f;
-        } else {
-            if (EdFileReadChar() != 0) {
-                lever.flags |= LEVER_FLAG_AUTO_RESET;
-            }
-            if (version == 2) {
-                lever.auto_reset_delay = 2.0f;
-            } else {
-                lever.auto_reset_delay = EdFileReadFloat();
-                if (version == 3) {
-                    lever.flags &= ~LEVER_FLAG_HIDE_BASE;
-                } else {
-                    if (EdFileReadChar() != 0) {
-                        lever.flags |= LEVER_FLAG_HIDE_BASE;
-                    }
-                    if (version != 4) {
-                        EdFileReadNuVec(&lever.target_offset);
-                        lever.target_indicator_scale = EdFileReadFloat();
-                        if (version != 5 && EdFileReadChar() != 0) {
-                            lever.flags |= LEVER_FLAG_HIDE_TARGET_INDICATOR;
-                        }
-                        lever.platform_id = -1;
-                        continue;
-                    }
-                }
-            }
+        if (version > 1) {
+            world->levers[index].auto_reset = EdFileReadChar();
         }
-
-        lever.target_offset.x = 0.0f;
-        lever.target_offset.y = 0.0f;
-        lever.target_offset.z = -0.1441f;
-        lever.target_indicator_scale = 1.0f;
-        lever.platform_id = -1;
+        if (version > 2) {
+            world->levers[index].auto_reset_delay = EdFileReadFloat();
+        } else {
+            world->levers[index].auto_reset_delay = 2.0f;
+        }
+        if (version > 3) {
+            world->levers[index].hide_base = EdFileReadChar();
+        } else {
+            world->levers[index].hide_base = 0;
+        }
+        if (version > 4) {
+            EdFileReadNuVec(&world->levers[index].target_offset);
+            world->levers[index].target_indicator_scale = EdFileReadFloat();
+        } else {
+            world->levers[index].target_offset.x = 0.0f;
+            world->levers[index].target_offset.y = 0.0f;
+            world->levers[index].target_offset.z = -0.1441f;
+            world->levers[index].target_indicator_scale = 1.0f;
+        }
+        if (version > 5) {
+            world->levers[index].hide_target_indicator = EdFileReadChar();
+        }
+        world->levers[index].platform_id = -1;
     }
     return 1;
 }
