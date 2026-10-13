@@ -1703,7 +1703,7 @@ AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_r
 
 AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
                                     f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y) {
-    f32 nearest_distance = max_distance == 1000000000.0f ? max_distance : max_distance * max_distance;
+    f32 nearest_distance = max_distance == 1000000000.0f ? 1000000000.0f : max_distance * max_distance;
     i32 candidates[64];
     i32 candidate_count = 0;
     if (count > 64) {
