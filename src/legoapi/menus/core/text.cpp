@@ -1046,8 +1046,8 @@ extern "C" {
         SmartTextEx(text, x, y, z, x_scale, y_scale, z_scale, alignment, red, green, blue, max_width, max_lines,
                     message_box, suppress_draw, alpha);
     }
-    void MenuText3DEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u8 alignment, u8 red,
-                      u8 green, u8 blue, i32 alpha) {
+    void MenuText3DEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
+                      u8 green, u8 blue, u8 alpha) {
         if (MenuDrawDropShadows != 0) {
             Text3DEx2(text, x + x_scale * 0.015f, y - y_scale * 0.015f, z, x_scale, y_scale, z_scale, alignment, 0, 0,
                       0, alpha >> 2);
