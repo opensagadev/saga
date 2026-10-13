@@ -6079,14 +6079,12 @@ __used__ static i32 Action_SetScriptParam(AISYS *, AISCRIPTPROCESS *processor, A
             char *value = NuStrIStr(params[i], "name=");
             if (value != NULL) {
                 value += 5;
-                if (NuStrICmp(processor->script->params[0].name, value) == 0)
-                    index = 0;
-                else if (NuStrICmp(processor->script->params[1].name, value) == 0)
-                    index = 1;
-                else if (NuStrICmp(processor->script->params[2].name, value) == 0)
-                    index = 2;
-                else if (NuStrICmp(processor->script->params[3].name, value) == 0)
-                    index = 3;
+                for (i32 j = 0; j < 4; j++) {
+                    if (NuStrICmp(processor->script->params[j].name, value) == 0) {
+                        index = j;
+                        break;
+                    }
+                }
             } else if ((value = NuStrIStr(params[i], "ix=")) != NULL) {
                 index = (i32)AIParamToFloat(processor, value + 3);
                 if (index >= 4)
@@ -6102,12 +6100,17 @@ __used__ static i32 Action_SetScriptParam(AISYS *, AISCRIPTPROCESS *processor, A
             }
         }
         if (index >= 0) {
-            if (operation == 0)
-                processor->params[index] = amount;
-            else if (operation == 1)
-                processor->params[index] = amount + processor->params[index];
-            else if (operation == -1)
-                processor->params[index] -= amount;
+            switch (operation) {
+                case 0:
+                    processor->params[index] = amount;
+                    break;
+                case 1:
+                    processor->params[index] = amount + processor->params[index];
+                    break;
+                case -1:
+                    processor->params[index] -= amount;
+                    break;
+            }
         }
     }
     return 1;
@@ -10657,14 +10660,13 @@ extern "C" void AILocatorSet_AssignFurthestLocator(AISYS *system, AILOCATORSET *
                     if (second_position != NULL) {
                         const f32 second_distance = NuVecDistSqr(second_position, &locator->position, &difference);
                         if (second_distance > furthest_distance) {
-                            if (second_distance < distance) {
-                                distance = second_distance;
+                            distance = MIN(second_distance, distance);
+                            if (max_range == 0.0f || max_range * max_range > distance) {
+                                furthest_distance = distance;
+                                furthest_index = index;
                             }
-                        } else {
-                            continue;
                         }
-                    }
-                    if (max_range == 0.0f || max_range * max_range > distance) {
+                    } else if (max_range == 0.0f || max_range * max_range > distance) {
                         furthest_distance = distance;
                         furthest_index = index;
                     }
