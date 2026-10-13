@@ -503,8 +503,8 @@ static void edptlcbSetSoundID(eduimenu_s *menu, eduiitem_s *item, u32) {
     eduiMenuDestroy(menu);
 }
 static void edptlcbSoundXMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (!(edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)) {
-        const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
         char title[16];
         sprintf(title, "Sound %d Menu", static_cast<i32>(item->data) + 1);
         edptl_soundx_menu = eduiMenuCreate(70, 70, 250, 300, ed_fnt, edptlcbCancelSoundXMenu, title);
