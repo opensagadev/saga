@@ -451,29 +451,39 @@ extern "C" void NuDisplaySceneAdd(NUDLDLISTSCENE *scene) {
     if (scene->nsort_pris > 0) {
         NUSORTPRI *sort_list = global_dlist_manager.sort_list;
         i32 used_count = global_dlist_manager.nused_sort_pris;
-        for (i32 i = 0; i < scene->nsort_pris; ++i) {
+        i32 renderplane = numtl_renderplane;
+        i32 i;
+        for (i = 0; i < scene->nsort_pris; ++i) {
             NUSORTPRI *sort_pri = &scene->sort_pris[i];
-            if (numtl_renderplane != 0) {
-                sort_pri->sort_pri += numtl_renderplane * 0x20000;
+            if (renderplane != 0) {
+                i32 *key = &sort_pri->sort_pri;
+                *key += renderplane << 17;
             }
 
-            NUSORTPRI *previous = nullptr;
-            NUSORTPRI *current = sort_list;
-            auto sort_pri_sort_pri = sort_pri->sort_pri;
-            while (current != nullptr && current->sort_pri < sort_pri_sort_pri) {
-                previous = current;
-                current = current->sys_next;
-            }
-            sort_pri->sys_next = current;
-            if (previous == nullptr) {
+            if (sort_list == nullptr) {
+                sort_pri->sys_next = nullptr;
                 sort_list = sort_pri;
             } else {
-                previous->sys_next = sort_pri;
+                NUSORTPRI *previous = nullptr;
+                NUSORTPRI *current = sort_list;
+                while (current->sort_pri < sort_pri->sort_pri) {
+                    previous = current;
+                    current = current->sys_next;
+                    if (current == nullptr) {
+                        break;
+                    }
+                }
+                if (previous == nullptr) {
+                    sort_pri->sys_next = sort_list;
+                    sort_list = sort_pri;
+                } else {
+                    sort_pri->sys_next = current;
+                    previous->sys_next = sort_pri;
+                }
             }
-            ++used_count;
         }
         global_dlist_manager.sort_list = sort_list;
-        global_dlist_manager.nused_sort_pris = used_count;
+        global_dlist_manager.nused_sort_pris = used_count + i;
     }
 
     if (scene->material_animations != nullptr) {
