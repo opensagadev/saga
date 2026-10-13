@@ -1944,14 +1944,8 @@ bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, fl
         }                                                                                                              \
     } while (0)
 
-    if (!require_character_flags) {
-        for (i32 i = 0; i < 8; i++) {
-            CONSIDER_PLAYER_DISTANCE(i, false);
-        }
-    } else {
-        for (i32 i = 0; i < 8; i++) {
-            CONSIDER_PLAYER_DISTANCE(i, true);
-        }
+    for (i32 i = 0; i < 8; i++) {
+        CONSIDER_PLAYER_DISTANCE(i, require_character_flags);
     }
 
 #undef CONSIDER_PLAYER_DISTANCE
@@ -2012,14 +2006,8 @@ bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player
         }                                                                                                              \
     } while (0)
 
-    if (!require_character_flags) {
-        for (i32 i = 0; i < 8; i++) {
-            CONSIDER_PLAYER_DISTANCE(i, false);
-        }
-    } else {
-        for (i32 i = 0; i < 8; i++) {
-            CONSIDER_PLAYER_DISTANCE(i, true);
-        }
+    for (i32 i = 0; i < 8; i++) {
+        CONSIDER_PLAYER_DISTANCE(i, require_character_flags);
     }
 
 #undef CONSIDER_PLAYER_DISTANCE
