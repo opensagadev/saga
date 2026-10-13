@@ -35,7 +35,7 @@
 extern "C" void NuIOS_RecordFlurryEvent(char *);
 void SetLevelLights(void *, f32);
 void DrawItem(nuhspecial_s *, nuvec_s *, float, float, float, u16, u16, u16);
-void Draw3DObject(WORLDINFO_s *, i32, nuvec_s *, u16, u16, u16, float, float, float, i32);
+i32 Draw3DObject(WORLDINFO_s *, i32, nuvec_s *, u16, u16, u16, float, float, float, i32);
 void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
 extern f32 HUB_EPISODETITLEY;
 extern f32 HUB_EPISODESUBTITLEY;

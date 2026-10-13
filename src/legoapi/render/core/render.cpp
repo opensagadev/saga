@@ -868,24 +868,26 @@ void Draw_LOADED() {
                     MENUNORMALG, MENUNORMALB, 1.5f, 2, NULL, 0, MenuA);
 }
 
-void Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                  u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order) {
+i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
+                 u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order) {
     if (object_index == -1) {
-        return;
+        return 1;
     }
     if (world == NULL) {
         world = WorldInfo_CurrentlyActive();
     }
-    if (world != NULL) {
-        if (world->lev_objs[object_index].active != 0 && (scale_x != 0.0f || scale_y != 0.0f || scale_z != 0.0f)) {
-            NUVEC scale = {scale_x, scale_y, scale_z};
-            NUMTX_ALIGNED16 matrix;
-            NuMtxSetScale(&matrix, &scale);
-            RotateGameMatrix(&matrix, rotate_order, x_rotation, y_rotation, z_rotation);
-            NuMtxTranslate(&matrix, position);
-            NuSpecialDrawAt(&world->lev_objs[object_index].special, &matrix);
-        }
+    if (world == NULL) {
+        return 1;
     }
+    if (world->lev_objs[object_index].active != 0 && (scale_x != 0.0f || scale_y != 0.0f || scale_z != 0.0f)) {
+        NUVEC scale = {scale_x, scale_y, scale_z};
+        NUMTX_ALIGNED16 matrix;
+        NuMtxSetScale(&matrix, &scale);
+        RotateGameMatrix(&matrix, rotate_order, x_rotation, y_rotation, z_rotation);
+        NuMtxTranslate(&matrix, position);
+        return NuSpecialDrawAt(&world->lev_objs[object_index].special, &matrix);
+    }
+    return 0;
 }
 
 void DrawCharIcon(i32 character_id, float x, float y, float z, float scale, i32 frame_object_id, float character_alpha,
@@ -1766,20 +1768,21 @@ void DrawStatusText(char *text, u16 angle, float x, float y, float scale, u32 co
     NuQFntSetCoordinateSystem(NUQFNT_CSMODE_NORMALISED);
 }
 
-void Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx) {
+i32 Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx) {
     if (object_index == -1) {
-        return;
+        return 1;
     }
     if (world == NULL) {
         world = WorldInfo_CurrentlyActive();
-        if (world == NULL) {
-            return;
-        }
+    }
+    if (world == NULL) {
+        return 1;
     }
     LEVEL_OBJECT_RUNTIME &object = world->lev_objs[object_index];
     if (object.active != 0) {
-        NuSpecialDrawAt(&object.special, mtx);
+        return NuSpecialDrawAt(&object.special, mtx);
     }
+    return 0;
 }
 
 void DrawGameObjects() {
@@ -2062,24 +2065,26 @@ void Draw_LOADCORRUPT() {
                     MENUNORMALG, MENUNORMALB, 1.5f, 3, NULL, 0, MenuA);
 }
 
-void Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                       u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha) {
+i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
+                      u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha) {
     if (object_index == -1) {
-        return;
+        return 1;
     }
     if (world == NULL) {
         world = WorldInfo_CurrentlyActive();
     }
-    if (world != NULL) {
-        if (world->lev_objs[object_index].active != 0 && (scale_x != 0.0f || scale_y != 0.0f || scale_z != 0.0f)) {
-            NUVEC scale = {scale_x, scale_y, scale_z};
-            NUMTX_ALIGNED16 matrix;
-            NuMtxSetScale(&matrix, &scale);
-            RotateGameMatrix(&matrix, rotate_order, x_rotation, y_rotation, z_rotation);
-            NuMtxTranslate(&matrix, position);
-            NuSpecialDrawAtAlpha(&world->lev_objs[object_index].special, &matrix, alpha);
-        }
+    if (world == NULL) {
+        return 1;
     }
+    if (world->lev_objs[object_index].active != 0 && (scale_x != 0.0f || scale_y != 0.0f || scale_z != 0.0f)) {
+        NUVEC scale = {scale_x, scale_y, scale_z};
+        NUMTX_ALIGNED16 matrix;
+        NuMtxSetScale(&matrix, &scale);
+        RotateGameMatrix(&matrix, rotate_order, x_rotation, y_rotation, z_rotation);
+        NuMtxTranslate(&matrix, position);
+        return NuSpecialDrawAtAlpha(&world->lev_objs[object_index].special, &matrix, alpha);
+    }
+    return 0;
 }
 
 void DrawCameraTarget2(nuvec_s *) {

@@ -5,14 +5,14 @@
 #include "legoapi/legoapi_types.h"
 
 // Core rendering helpers.
-void Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *matrix);
+i32 Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *matrix);
 
 extern void (*DisguiseAdjustFn)(i32 character_id, i32 hat, NUVEC *scale, NUVEC *offset);
 
 void DrawPaintLights(void);
-void Draw3DObject(WORLDINFO_s *world, i32 object_index, NUVEC *position, u16 x_rotation, u16 y_rotation, u16 z_rotation,
+i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, NUVEC *position, u16 x_rotation, u16 y_rotation, u16 z_rotation,
                   f32 scale_x, f32 scale_y, f32 scale_z, i32 rotate_order);
-void Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, NUVEC *position, u16 x_rotation, u16 y_rotation,
+i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, NUVEC *position, u16 x_rotation, u16 y_rotation,
                        u16 z_rotation, f32 scale_x, f32 scale_y, f32 scale_z, i32 rotate_order, f32 alpha);
 void DrawGameMessage_Targets(GAMEMESSAGE_s *message, NUVEC *position, f32 scale);
 extern i32 dco_locatorposonly;

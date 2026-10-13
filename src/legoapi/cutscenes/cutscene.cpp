@@ -1803,7 +1803,7 @@ extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32
 extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
 extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
                                         NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
-void Draw3DObjectMtx(WORLDINFO_s *, i32, numtx_s *);
+i32 Draw3DObjectMtx(WORLDINFO_s *, i32, numtx_s *);
 
 void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance);
 void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance);
