@@ -717,37 +717,46 @@ i32 NuMusic::PlayTrack(u32 track, u32 unused) {
 }
 
 i32 NuMusic::StopAll(i32 toggle) {
+    Voice *voice = &this->voices[0];
     if ((toggle & 2) == 0) {
         // Stop both voices outright, cutscene tracks included.
-        NuSound3StopStereoStream(this->voices[0].stream_index);
-        this->voices[0].SetStatusFn(VOICE_STATUS_READY, 0x432);
-        this->voices[0].fade_rate = 0.0f;
-        this->voices[0].gain = 0.0f;
-        this->voices[0].track_index = 0;
-        this->voices[0].tracks[0] = NULL;
-        this->voices[0].tracks[1] = NULL;
+        NuSound3StopStereoStream(voice->stream_index);
+        voice->SetStatusFn(VOICE_STATUS_READY, 0x432);
+        voice->fade_rate = 0.0f;
+        voice->gain = 0.0f;
+        voice->track_index = 0;
+        voice->tracks[0] = NULL;
+        voice->tracks[1] = NULL;
         NuSound3StopStereoStream(this->voices[1].stream_index);
+        this->voices[1].SetStatusFn(VOICE_STATUS_READY, 0x432);
+        this->voices[1].fade_rate = 0.0f;
+        this->voices[1].gain = 0.0f;
+        this->voices[1].track_index = 0;
+        this->voices[1].tracks[0] = NULL;
+        this->voices[1].tracks[1] = NULL;
+        return 1;
     } else {
         // Keep playing cutscene tracks; stop everything else.
-        Track *track0 = this->voices[0].tracks[this->voices[0].track_index];
+        Track *track0 = voice->tracks[voice->track_index];
         if (track0 == NULL || track0->clazz != TRACK_CLASS_CUTSCENE) {
-            NuSound3StopStereoStream(this->voices[0].stream_index);
-            this->voices[0].SetStatusFn(VOICE_STATUS_READY, 0x432);
-            this->voices[0].fade_rate = 0.0f;
-            this->voices[0].gain = 0.0f;
-            this->voices[0].track_index = 0;
-            this->voices[0].tracks[0] = NULL;
-            this->voices[0].tracks[1] = NULL;
+            NuSound3StopStereoStream(voice->stream_index);
+            voice->SetStatusFn(VOICE_STATUS_READY, 0x432);
+            voice->fade_rate = 0.0f;
+            voice->gain = 0.0f;
+            voice->track_index = 0;
+            voice->tracks[0] = NULL;
+            voice->tracks[1] = NULL;
         }
 
-        Track *track1 = this->voices[1].tracks[this->voices[1].track_index];
+        voice = &this->voices[1];
+        Track *track1 = voice->tracks[voice->track_index];
         if (track1 != NULL && track1->clazz == TRACK_CLASS_CUTSCENE) {
             return 1;
         }
-        NuSound3StopStereoStream(this->voices[1].stream_index);
+        NuSound3StopStereoStream(voice->stream_index);
+        voice->SetStatusFn(VOICE_STATUS_READY, 0x432);
     }
 
-    this->voices[1].SetStatusFn(VOICE_STATUS_READY, 0x432);
     this->voices[1].fade_rate = 0.0f;
     this->voices[1].gain = 0.0f;
     this->voices[1].track_index = 0;

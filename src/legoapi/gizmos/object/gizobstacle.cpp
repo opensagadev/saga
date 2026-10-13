@@ -436,14 +436,12 @@ static i32 GizmoObstacle_ActivateRev(GIZMO *gizmo, i32 activate, i32 flags) {
             return 0;
         }
         const i32 visible = (obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) != 0 ? 1 : 0;
-        if (activate != visible) {
+        if (visible != activate) {
             return 0;
         }
     }
-    if (activate == 1) {
-        if (ai_active != 0) {
-            return 0;
-        }
+    if (activate == 1 && ai_active != 0) {
+        return 0;
     }
     return 1;
 }
