@@ -1123,16 +1123,15 @@ void edbriBridgeUpdate(i32 index, NUGSCN *scene) {
 }
 
 void edbriBridgePlace(i32 index, NUVEC *position) {
-    edbridge_s *bridge = &edBridges[index];
-    bridge->position = *position;
-    bridge->rotation_z = edbri_rotz;
-    bridge->rotation_y = edbri_roty;
-    bridge->length = edbri_length;
-    bridge->field_14 = edbri_width;
-    bridge->field_1d = edbri_planks;
-    bridge->field_1e = edbri_post_interval;
-    bridge->special_20 = edbri_plank_instance_type;
-    bridge->special_24 = edbri_post_instance_type;
+    edBridges[index].position = *position;
+    edBridges[index].rotation_z = edbri_rotz;
+    edBridges[index].rotation_y = edbri_roty;
+    edBridges[index].length = edbri_length;
+    edBridges[index].field_14 = edbri_width;
+    edBridges[index].field_1d = edbri_planks;
+    edBridges[index].field_1e = edbri_post_interval;
+    edBridges[index].special_20 = edbri_plank_instance_type;
+    edBridges[index].special_24 = edbri_post_instance_type;
     edbriBridgeUpdate(index, edbits_base_scene);
 }
 
@@ -1142,19 +1141,18 @@ i32 edbriBridgeCreate(NUVEC *position) {
     i32 index = 0;
     while (edBridges[index].connection_index != 0xff)
         ++index;
-    edbridge_s *bridge = &edBridges[index];
-    bridge->connection_index = edbri_pageid;
+    edBridges[index].connection_index = edbri_pageid;
     ++edbri_bridges_used;
-    bridge->field_28 = 0.18f;
-    bridge->field_30 = -0.01f;
-    bridge->field_34 = 4.0f;
-    bridge->field_2c = 0.1f;
-    bridge->field_38 = 0.5f;
-    bridge->field_3c = 0.5f;
-    bridge->red = 0x50;
-    bridge->green = 0x50;
-    bridge->blue = 0x30;
-    bridge->field_43 = 0x80;
+    edBridges[index].field_28 = 0.18f;
+    edBridges[index].field_30 = -0.01f;
+    edBridges[index].field_34 = 4.0f;
+    edBridges[index].field_2c = 0.1f;
+    edBridges[index].field_38 = 0.5f;
+    edBridges[index].field_3c = 0.5f;
+    edBridges[index].red = 0x50;
+    edBridges[index].green = 0x50;
+    edBridges[index].blue = 0x30;
+    edBridges[index].field_43 = 0x80;
     edbri_page_used[edbri_pageid] = 1;
     edbri_page_scene[edbri_pageid] = edbits_base_scene;
     edbriBridgePlace(index, position);
@@ -1774,10 +1772,9 @@ extern "C" {
     }
     void edbitsRegisterSoundEffect(char *name, i32 id) {
         i32 index = edbits_numsounds;
-        EDBITS_GAME_SOUND *sound = &edbitsGameSound[index];
-        strncpy(sound->name, name, 16);
-        sound->name[15] = '\0';
-        sound->id = id;
+        strncpy(edbitsGameSound[index].name, name, 16);
+        edbitsGameSound[index].name[15] = '\0';
+        edbitsGameSound[index].id = id;
         edbits_numsounds = index + 1;
     }
     void edbitsRegisterThingsScene(NUGSCN *scene) {

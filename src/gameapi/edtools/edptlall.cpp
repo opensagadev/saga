@@ -483,20 +483,19 @@ static void edptlcbSetSoundID(eduimenu_s *menu, eduiitem_s *item, u32) {
             continue;
         }
 
-        debkeydatatype_s *key = &debkeydata[instance_id];
-        debinftype *effect = debtab[key->effect_index];
-        key->process_collision_sound = 0;
+        debinftype *effect = debtab[debkeydata[instance_id].effect_index];
+        debkeydata[instance_id].process_collision_sound = 0;
         if (effect->sound_data[0] != -1) {
-            key->process_collision_sound = 1;
+            debkeydata[instance_id].process_collision_sound = 1;
         }
         if (effect->sound_data[3] != -1) {
-            key->process_collision_sound = 1;
+            debkeydata[instance_id].process_collision_sound = 1;
         }
         if (effect->sound_data[6] != -1) {
-            key->process_collision_sound = 1;
+            debkeydata[instance_id].process_collision_sound = 1;
         }
         if (effect->sound_data[9] != -1) {
-            key->process_collision_sound = 1;
+            debkeydata[instance_id].process_collision_sound = 1;
         }
     }
 
