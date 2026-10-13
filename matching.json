@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 77.85365,
+    "fuzzy_match_percent": 77.887535,
     "total_code": "4722419",
     "matched_code": "596155",
     "matched_code_percent": 12.623933,
@@ -43611,7 +43611,7 @@
           "address": 1037632,
           "offset": 147664,
           "size": 357,
-          "match_percent": 37.451218
+          "match_percent": 93.60976
         },
         {
           "name": "_ZL16NewCharacterIdleP12GameObject_si",
@@ -48013,7 +48013,7 @@
           "address": 1364864,
           "offset": 474896,
           "size": 2334,
-          "match_percent": 83.35927
+          "match_percent": 83.17849
         },
         {
           "name": "_Z23VehicleTurnOrLoopOffsetP12GameObject_s",
@@ -48077,7 +48077,7 @@
           "address": 1379152,
           "offset": 489184,
           "size": 9744,
-          "match_percent": 33.81179
+          "match_percent": 34.689762
         },
         {
           "name": "_Z14ForceAlongSockP12GameObject_s",
@@ -48181,7 +48181,7 @@
           "address": 1404080,
           "offset": 514112,
           "size": 1579,
-          "match_percent": 64.54648
+          "match_percent": 65.7831
         },
         {
           "name": "_ZL14SelectOpponentP12GameObject_sffii",
@@ -48565,7 +48565,7 @@
           "address": 1509024,
           "offset": 619056,
           "size": 628,
-          "match_percent": 78.16552
+          "match_percent": 76.751724
         },
         {
           "name": "_Z13PeriscodeCodeP12GameObject_s",
@@ -50488,7 +50488,7 @@
           "address": 4401680,
           "offset": 3511712,
           "size": 194,
-          "match_percent": 69.28571
+          "match_percent": 78.85714
         },
         {
           "name": "NuGCutSceneSysBackgroundFlush",
@@ -50728,7 +50728,7 @@
           "address": 4431664,
           "offset": 3541696,
           "size": 3581,
-          "match_percent": 62.602703
+          "match_percent": 64.78919
         },
         {
           "name": "NuGCutSceneSysUpdate",
@@ -50736,7 +50736,7 @@
           "address": 4435248,
           "offset": 3545280,
           "size": 196,
-          "match_percent": 70.603775
+          "match_percent": 78.62264
         },
         {
           "name": "NuGCutSceneSysRender",
@@ -51072,7 +51072,7 @@
           "address": 4831824,
           "offset": 3941856,
           "size": 286,
-          "match_percent": 68.41538
+          "match_percent": 93.53846
         },
         {
           "name": "_ZL20CS_cutsceneplayerobjP8nufpar_s",
@@ -51080,7 +51080,7 @@
           "address": 4832112,
           "offset": 3942144,
           "size": 533,
-          "match_percent": 61.61194
+          "match_percent": 88.3806
         },
         {
           "name": "_ZL13CS_goto_levelP8nufpar_s",
@@ -51088,7 +51088,7 @@
           "address": 4832656,
           "offset": 3942688,
           "size": 191,
-          "match_percent": 67.30909
+          "match_percent": 76.218185
         },
         {
           "name": "_ZL11CS_play_sfxP8nufpar_s",
@@ -51096,7 +51096,7 @@
           "address": 4832848,
           "offset": 3942880,
           "size": 562,
-          "match_percent": 57.604477
+          "match_percent": 96.31343
         },
         {
           "name": "_ZL6CS_sfxP8nufpar_s",
@@ -57476,7 +57476,7 @@
           "address": 4895696,
           "offset": 4005728,
           "size": 693,
-          "match_percent": 43.758427
+          "match_percent": 79.83708
         },
         {
           "name": "_Z16GizObstacle_StopP13GIZOBSTACLE_s",
@@ -59777,7 +59777,7 @@
           "address": 1868528,
           "offset": 978560,
           "size": 1455,
-          "match_percent": 38.385674
+          "match_percent": 54.980717
         },
         {
           "name": "_Z17GizForce_ResetLOSP12GameObject_s",
@@ -75093,7 +75093,7 @@
           "address": 1156528,
           "offset": 266560,
           "size": 343,
-          "match_percent": 39.67059
+          "match_percent": 99.95294
         },
         {
           "name": "_Z19DrawForceGlowSpriteP7nuvec_sfifP12GameObject_s",
@@ -75301,7 +75301,7 @@
           "address": 3099536,
           "offset": 2209568,
           "size": 432,
-          "match_percent": 39.258335
+          "match_percent": 50.233334
         },
         {
           "name": "_Z14DrawAlphaImageiiP7numtl_siP17NuBloomParameters",
