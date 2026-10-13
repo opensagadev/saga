@@ -1389,18 +1389,13 @@ void LoadSingleCharacter(bgprocinfo_s *) {
 
 void CharScenes_LevelDump(WORLDINFO_s *world) {
     CHARSCENE_s *scenes = world->minikit.character_scenes;
-    if (scenes != NULL && CHARCOUNT > 0) {
-        i32 i = 0;
-        do {
-            CHARSCENE_s *entry = &scenes[i];
-            if (entry->scene != NULL) {
-                NuGScnRemove(entry->scene);
-                scenes = world->minikit.character_scenes;
-                entry = &scenes[i];
+    if (scenes != NULL) {
+        for (i32 i = 0; i < CHARCOUNT; ++i) {
+            if (world->minikit.character_scenes[i].scene != NULL) {
+                NuGScnRemove(world->minikit.character_scenes[i].scene);
             }
-            ++i;
-            entry->scene = NULL;
-        } while (CHARCOUNT > i);
+            world->minikit.character_scenes[i].scene = NULL;
+        }
     }
 }
 
