@@ -5866,26 +5866,28 @@ template <>
 __attribute__((force_align_arg_pointer)) void EdValueControl<f32>::cbButton(eduimenu_s *, eduiitem_s *item, u32) {
     EdValueControl<f32> *control = static_cast<EdValueControl<f32> *>(item->data_ptr);
     nupad_s *pad = EdControl::Input->pad;
-    f32 sensitivity = control->maximum - control->minimum < 5.0f ? 0.001f : 0.01f;
+    f32 sensitivity = 0.01f;
+    if (control->maximum - control->minimum < 5.0f)
+        sensitivity = 0.001f;
     static_cast<edui_prop_s *>(item)->unknown_property_flags |= 0x20;
     f32 initial_value = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
-    f32 change = 0.0f;
+    f32 dx = 0.0f;
+    // The original keeps the change, shared with the cursor delta, at a 16-byte aligned stack address.
+    f32 change __attribute__((aligned(16))) = 0.0f;
     if (pad && (pad->digital_buttons & EDUI_CURSOR_PRIMARY)) {
-        f32 left_y = pad->analog_left_y;
+        f32 left_y = static_cast<i32>(pad->analog_left_y);
         if (left_y > 128.0f)
             change = 10.0f * sensitivity * (left_y - 128.0f);
-        if (left_y < 128.0f)
+        if (pad->analog_left_y < 128)
             change = -10.0f * sensitivity * (128.0f - left_y);
-        f32 right_y = pad->analog_right_y;
+        f32 right_y = static_cast<i32>(pad->analog_right_y);
         if (right_y > 128.0f)
             change = 0.1f * sensitivity * (right_y - 128.0f);
-        if (right_y < 128.0f)
+        if (pad->analog_right_y < 128)
             change = -0.1f * sensitivity * (128.0f - right_y);
     } else {
-        f32 dx = 0.0f;
-        f32 dy = 0.0f;
-        eduiGetCursorDelta(&dx, &dy);
-        change = dy * MouseScale;
+        eduiGetCursorDelta(&dx, &change);
+        change *= MouseScale;
     }
     initial_value -= change;
     char text[128];
