@@ -1008,10 +1008,7 @@ void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
     SPECIALMINIKIT_s *next = items;
     i32 count = 0;
 
-    while (NuFParGetLine(parser) != 0) {
-        if (NuFParGetWord(parser) == 0) {
-            break;
-        }
+    while (NuFParGetLine(parser) != 0 && NuFParGetWord(parser) != 0) {
         if (NuStrICmp(parser->word_buf, const_cast<char *>("specialminikit")) != 0) {
             continue;
         }
