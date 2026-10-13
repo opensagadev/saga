@@ -398,19 +398,22 @@ static void GizmoObstacle_Activate(GIZMO *gizmo, i32 activate) {
 }
 
 static i32 GizmoObstacle_ActivateRev(GIZMO *gizmo, i32 activate, i32 flags) {
-    GIZOBSTACLE_s *obstacle = gizmo != NULL ? static_cast<GIZOBSTACLE_s *>(gizmo->object) : NULL;
+    if (gizmo == NULL) {
+        return 0;
+    }
+    GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(gizmo->object);
     if (obstacle == NULL) {
         return 0;
     }
 
-    const u8 initial_runtime_flags = obstacle->runtime_flags;
-    if ((obstacle->control_flags & GIZOBSTACLE_CONTROL_FLAG_REVERSE_ACTIVE) != 0 && obstacle->anim_set != NULL &&
+    if ((obstacle->control_flags & GIZOBSTACLE_CONTROL_FLAG_REVERSE_ACTIVE) != 0 &&
         (obstacle->anim_set->state == GAMEANIMSET_STATE_ACTIVE_FORWARD ||
          obstacle->anim_set->state == GAMEANIMSET_STATE_AT_END)) {
         obstacle->control_flags &= static_cast<u8>(~GIZOBSTACLE_CONTROL_FLAG_REVERSE_ACTIVE);
         obstacle->progress_flags |= GIZOBSTACLE_PROGRESS_FLAG_ENABLED;
     }
-    if ((initial_runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE) != 0) {
+    const u8 ai_active = obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE;
+    if (ai_active != 0) {
         obstacle->control_flags &= static_cast<u8>(~GIZOBSTACLE_CONTROL_FLAG_REVERSE_ACTIVE);
         obstacle->progress_flags |= GIZOBSTACLE_PROGRESS_FLAG_ENABLED;
     }
@@ -433,12 +436,14 @@ static i32 GizmoObstacle_ActivateRev(GIZMO *gizmo, i32 activate, i32 flags) {
             return 0;
         }
         const i32 visible = (obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) != 0 ? 1 : 0;
-        if (visible != activate) {
+        if (activate != visible) {
             return 0;
         }
     }
-    if (activate == 1 && (initial_runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE) != 0) {
-        return 0;
+    if (activate == 1) {
+        if (ai_active != 0) {
+            return 0;
+        }
     }
     return 1;
 }
