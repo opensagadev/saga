@@ -85,6 +85,14 @@ void DestroySnakeBody(GameObject_s *object) {
 
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 
+static inline f32 SnakeMin(f32 a, f32 b) {
+    return a < b ? a : b;
+}
+
+static inline f32 SnakeMax(f32 a, f32 b) {
+    return a > b ? a : b;
+}
+
 void UpdateSnakeBody(GameObject_s *object) {
     if (object == NULL || object->snake_body == NULL)
         return;
@@ -125,11 +133,11 @@ void UpdateSnakeBody(GameObject_s *object) {
 
         f32 vertical = -offset.y / (object->snake_body->scale * 0.15f);
         f32 absolute = __builtin_fabsf(vertical);
-        f32 curved = __builtin_fminf(NuFsqrt(1.0f - vertical * vertical), absolute);
+        f32 curved = SnakeMin(NuFsqrt(1.0f - vertical * vertical), absolute);
         f32 side = (absolute - 0.7071067690849304f) * 3.402820018375656e+38f;
-        side = __builtin_fminf(__builtin_fmaxf(side, 0.0f), 1.0f);
+        side = SnakeMax(SnakeMin(side, 1.0f), 0.0f);
         f32 sign = vertical * 3.402820018375656e+38f;
-        sign = __builtin_fminf(__builtin_fmaxf(sign, 0.0f), 1.0f);
+        sign = SnakeMax(SnakeMin(sign, 1.0f), 0.0f);
         f32 t = curved * side;
         f32 t2 = t * t;
         f32 t3 = t * t2;
