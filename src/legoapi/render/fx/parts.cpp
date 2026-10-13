@@ -820,44 +820,38 @@ void KillParts_SpeederBike(ADDPART_s *params, i32, i32, GameObject_s *object) {
     part->field_104 = 1.5f;
 
     i32 index;
-    if (bikeParts[0].active == 0) {
-        index = 0;
-    } else if (bikeParts[1].active == 0) {
-        index = 1;
-    } else if (bikeParts[2].active == 0) {
-        index = 2;
-    } else if (bikeParts[3].active == 0) {
-        index = 3;
-    } else {
-        index = -1;
+    for (index = 0; index < 4; ++index) {
+        if (bikeParts[index].active == 0)
+            break;
     }
-    if (index == -1) {
+    if (index == 4) {
         part->speeder_index = -1.0f;
     } else {
         part->speeder_index = static_cast<f32>(index);
         if (object->movement_spline != NULL) {
-
             f32 distance = NuVecMag(&part->velocity) * FRAMETIME;
-            BIKEPART_s *bike = &bikeParts[static_cast<i32>(part->speeder_index)];
+            const i32 bike_index = static_cast<i32>(part->speeder_index);
+            BIKEPART_s *bike = &bikeParts[bike_index];
             bike->spline_position = object->movement_spline_position;
             bike->active = 1;
-            bike->rider = object->field_0xcc0;
-            if (bike->rider != NULL) {
-                bike->rider->apiobj.velocity = velocity;
-                bike->rider->apiobj.velocity.y += 1.5f;
+            GameObject_s *rider = object->field_0xcc0;
+            if (rider != NULL) {
+                bike->rider = rider;
+                rider->apiobj.velocity = velocity;
+                rider->apiobj.velocity.y += 1.5f;
+            } else {
+                bike->rider = NULL;
             }
             bike->rider_position = object->apiobj.position;
 
             NUVEC position;
             u16 yaw;
             u16 pitch;
-            PointAlongSpline(bike->spline_position.spline, bike->spline_position.along, &position, &yaw, &pitch, 1);
-            if (distance >= 0.0f) {
-                yaw -= 0x8000;
-            }
+            PointAlongSpline(bikeParts[bike_index].spline_position.spline, bikeParts[bike_index].spline_position.along,
+                             &position, &yaw, &pitch, 1);
+            part->rotation_y = distance < 0.0f ? yaw : yaw - 0x8000;
             part->rotation_x = -pitch;
             part->field_13c = 0;
-            part->rotation_y = yaw;
             return;
         }
     }
