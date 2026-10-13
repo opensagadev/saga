@@ -5132,6 +5132,11 @@ struct LEVER_s {
             u8 enabled : 1;
             u8 flags_high;
         };
+        struct {
+            u8 : 8;
+            u8 hide_base : 1;             // LEVER_FLAG_HIDE_BASE
+            u8 hide_target_indicator : 1; // LEVER_FLAG_HIDE_TARGET_INDICATOR
+        };
     };
     char model_variant; // 0x9e
     u8 field_0x9f[9];
