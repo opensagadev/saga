@@ -10651,14 +10651,14 @@ extern "C" void AILocatorSet_AssignFurthestLocator(AISYS *system, AILOCATORSET *
                 if (distance > furthest_distance) {
                     if (second_position != NULL) {
                         const f32 second_distance = NuVecDistSqr(second_position, &locator->position, &difference);
-                        if (!(second_distance > furthest_distance)) {
-                            continue;
+                        if (second_distance > furthest_distance) {
+                            distance = MIN(second_distance, distance);
+                            if (max_range == 0.0f || max_range * max_range > distance) {
+                                furthest_distance = distance;
+                                furthest_index = index;
+                            }
                         }
-                        if (second_distance < distance) {
-                            distance = second_distance;
-                        }
-                    }
-                    if (max_range == 0.0f || max_range * max_range > distance) {
+                    } else if (max_range == 0.0f || max_range * max_range > distance) {
                         furthest_distance = distance;
                         furthest_index = index;
                     }
