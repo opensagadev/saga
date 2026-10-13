@@ -896,17 +896,19 @@ static void cbPtlEmitMenu(eduimenu_s *parent, eduiitem_s *, u32) {
             eduiMenuAddItem(ptlemitmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlEmitVelMenu, "Emitter Vel..."));
             eduiMenuAddItem(ptlemitmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlGravMenu, "Gravity..."));
 
-            const u8 generator = effect->generator_type;
-            if ((generator & 0xf7) == 0 || generator == 9 || generator == 10) {
+            if ((effect->generator_type & 0xf7) == 0 || effect->generator_type == 9 || effect->generator_type == 10) {
                 eduiMenuAddItem(ptlemitmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlVarStartMenu, "Random Start..."));
-            } else if (generator == 6 || generator == 7 || generator == 11 || generator == 12) {
+            } else if (effect->generator_type == 6 || effect->generator_type == 7 || effect->generator_type == 11 ||
+                       effect->generator_type == 12) {
                 eduiMenuAddItem(ptlemitmenu,
                                 eduiItemSelCreate(1, colours, 0, 0, cbPtlVarStartMenu, "Base Emit Vector..."));
             }
-            if (generator == 0 || generator == 7 || generator == 11) {
-                char *label = generator == 0 ? const_cast<char *>("Start Velocity...")
-                                             : const_cast<char *>("Emit Point Velocity...");
-                eduiMenuAddItem(ptlemitmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlStartVelMenu, label));
+            if (effect->generator_type == 0) {
+                eduiMenuAddItem(ptlemitmenu,
+                                eduiItemSelCreate(1, colours, 0, 0, cbPtlStartVelMenu, "Start Velocity..."));
+            } else if (effect->generator_type == 7 || effect->generator_type == 11) {
+                eduiMenuAddItem(ptlemitmenu,
+                                eduiItemSelCreate(1, colours, 0, 0, cbPtlStartVelMenu, "Emit Point Velocity..."));
             }
 
             eduiMenuAddItem(ptlemitmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlVarEmitMenu, "Emitter Variation..."));
@@ -916,13 +918,18 @@ static void cbPtlEmitMenu(eduimenu_s *parent, eduiitem_s *, u32) {
             eduiMenuAddItem(ptlemitmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlEmitTimeMenu, "Emitter Timing..."));
             eduiMenuAddItem(ptlemitmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlCutOffMenu, "Repeat / Radii..."));
 
-            const bool ghosts_enabled = generator == 0 || generator == 6 || generator == 7 || generator == 11;
-            eduiMenuAddItem(ptlemitmenu,
-                            eduiItemSelCreate(1, ghosts_enabled ? colours : disabled_colours, 0, 0,
-                                              ghosts_enabled ? edptlcbGhostMenu : NULL, "Particle Ghosts..."));
-            const bool star_enabled = generator == 12;
-            eduiMenuAddItem(ptlemitmenu, eduiItemSelCreate(1, star_enabled ? colours : disabled_colours, 0, 0,
-                                                           star_enabled ? edptlcbStarMenu : NULL, "Star Settings..."));
+            if (effect->generator_type == 0 || effect->generator_type == 6 || effect->generator_type == 7 ||
+                effect->generator_type == 8) {
+                eduiMenuAddItem(ptlemitmenu,
+                                eduiItemSelCreate(1, colours, 0, 0, edptlcbGhostMenu, "Particle Ghosts..."));
+            } else {
+                eduiMenuAddItem(ptlemitmenu, eduiItemSelCreate(1, disabled_colours, 0, 0, NULL, "Particle Ghosts..."));
+            }
+            if (effect->generator_type == 12) {
+                eduiMenuAddItem(ptlemitmenu, eduiItemSelCreate(1, colours, 0, 0, edptlcbStarMenu, "Star Settings..."));
+            } else {
+                eduiMenuAddItem(ptlemitmenu, eduiItemSelCreate(1, disabled_colours, 0, 0, NULL, "Star Settings..."));
+            }
         }
         eduiMenuAttach(parent, ptlemitmenu);
         ptlemitmenu->x = parent->x + 10;
@@ -1620,11 +1627,10 @@ static void cbPtlVarEmitMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
         return;
 
-    const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
+    debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
     ptlvaremitmenu = eduiMenuCreate(70, 70, 180, 300, ed_fnt, cbPtlCancelVarEmitMenu, "Emitter Variation");
     if (ptlvaremitmenu != NULL) {
-        const u8 generator = effect->generator_type;
-        if ((generator & 0xf7) == 0 || generator == 9 || generator == 10) {
+        if ((effect->generator_type & 0xf7) == 0 || effect->generator_type == 9 || effect->generator_type == 10) {
             eduiMenuAddItem(ptlvaremitmenu,
                             eduiItemSliderCreate(0, colours, 0, cbPtlChangeX, 0.0f, 5.0f * edptl_superscale,
                                                  effect->field_04c, "Rand Emit X"));
@@ -1634,23 +1640,46 @@ static void cbPtlVarEmitMenu(eduimenu_s *parent, eduiitem_s *, u32) {
             eduiMenuAddItem(ptlvaremitmenu,
                             eduiItemSliderCreate(0, colours, 0, cbPtlChangeZ, 0.0f, 5.0f * edptl_superscale,
                                                  effect->field_054, "Rand Emit Z"));
-        } else if (generator == 6 || generator == 7 || generator == 11 || generator == 12) {
-            char *magnitude_label = generator == 7 ? const_cast<char *>("Rand Mag") : const_cast<char *>("Rand Mag X");
+        } else if (effect->generator_type == 11) {
             eduiMenuAddItem(ptlvaremitmenu,
                             eduiItemSliderCreate(0, colours, 0, cbPtlChangeX, 0.0f, 5.0f * edptl_superscale,
-                                                 effect->field_04c, magnitude_label));
+                                                 effect->field_04c, "Rand Mag X"));
             eduiMenuAddItem(ptlvaremitmenu,
-                            eduiItemSliderCreate(0, colours, 0, cbPtlChangeY, generator == 7 ? -90.0f : 0.0f, 180.0f,
-                                                 effect->field_050 * (360.0f / 65536.0f),
-                                                 generator == 7 ? const_cast<char *>("Step Rot Y")
-                                                                : const_cast<char *>("Rand Rot Y")));
+                            eduiItemSliderCreate(0, colours, 0, cbPtlChangeY, 0.0f, 180.0f,
+                                                 effect->field_050 * (360.0f / 65536.0f), "Rand Rot Y"));
             eduiItemSliderSetFmt(static_cast<edui_slider_s *>(edui_last_item), "(%1.01f)");
             eduiItemSliderSetGranularity(static_cast<edui_slider_s *>(edui_last_item), 0.1f);
             eduiMenuAddItem(ptlvaremitmenu,
-                            eduiItemSliderCreate(
-                                0, colours, 0, cbPtlChangeZ, generator == 7 ? -90.0f : 0.0f,
-                                generator == 11 ? 90.0f : 180.0f, effect->field_054 * (360.0f / 65536.0f),
-                                generator == 7 ? const_cast<char *>("Step Rot Z") : const_cast<char *>("Rand Rot Z")));
+                            eduiItemSliderCreate(0, colours, 0, cbPtlChangeZ, 0.0f, 90.0f,
+                                                 effect->field_054 * (360.0f / 65536.0f), "Rand Rot Z"));
+            eduiItemSliderSetFmt(static_cast<edui_slider_s *>(edui_last_item), "(%1.01f)");
+            eduiItemSliderSetGranularity(static_cast<edui_slider_s *>(edui_last_item), 0.1f);
+        } else if (effect->generator_type == 6 || effect->generator_type == 12) {
+            eduiMenuAddItem(ptlvaremitmenu,
+                            eduiItemSliderCreate(0, colours, 0, cbPtlChangeX, 0.0f, 5.0f * edptl_superscale,
+                                                 effect->field_04c, "Rand Mag X"));
+            eduiMenuAddItem(ptlvaremitmenu,
+                            eduiItemSliderCreate(0, colours, 0, cbPtlChangeY, 0.0f, 180.0f,
+                                                 effect->field_050 * (360.0f / 65536.0f), "Rand Rot Y"));
+            eduiItemSliderSetFmt(static_cast<edui_slider_s *>(edui_last_item), "(%1.01f)");
+            eduiItemSliderSetGranularity(static_cast<edui_slider_s *>(edui_last_item), 0.1f);
+            eduiMenuAddItem(ptlvaremitmenu,
+                            eduiItemSliderCreate(0, colours, 0, cbPtlChangeZ, 0.0f, 180.0f,
+                                                 effect->field_054 * (360.0f / 65536.0f), "Rand Rot Z"));
+            eduiItemSliderSetFmt(static_cast<edui_slider_s *>(edui_last_item), "(%1.01f)");
+            eduiItemSliderSetGranularity(static_cast<edui_slider_s *>(edui_last_item), 0.1f);
+        } else if (effect->generator_type == 7) {
+            eduiMenuAddItem(ptlvaremitmenu,
+                            eduiItemSliderCreate(0, colours, 0, cbPtlChangeX, 0.0f, 5.0f * edptl_superscale,
+                                                 effect->field_04c, "Rand Mag"));
+            eduiMenuAddItem(ptlvaremitmenu,
+                            eduiItemSliderCreate(0, colours, 0, cbPtlChangeY, -90.0f, 180.0f,
+                                                 effect->field_050 * (360.0f / 65536.0f), "Step Rot Y"));
+            eduiItemSliderSetFmt(static_cast<edui_slider_s *>(edui_last_item), "(%1.01f)");
+            eduiItemSliderSetGranularity(static_cast<edui_slider_s *>(edui_last_item), 0.1f);
+            eduiMenuAddItem(ptlvaremitmenu,
+                            eduiItemSliderCreate(0, colours, 0, cbPtlChangeZ, -90.0f, 180.0f,
+                                                 effect->field_054 * (360.0f / 65536.0f), "Step Rot Z"));
             eduiItemSliderSetFmt(static_cast<edui_slider_s *>(edui_last_item), "(%1.01f)");
             eduiItemSliderSetGranularity(static_cast<edui_slider_s *>(edui_last_item), 0.1f);
         }
