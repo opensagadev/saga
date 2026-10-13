@@ -1054,14 +1054,15 @@ extern "C" {
             return;
         debkeydata[*handle].field_1d4 = count;
         const f32 now = debtab[effect]->time_group == 4 ? panelglobaltime : globaltime;
-        debkeydata[*handle].field_184 = 1;
-        debkeydata[*handle].field_1d8 = 0;
-        const f32 offset = debkeydata[*handle].emission_time - now;
-        debkeydata[*handle].emission_time -= offset;
-        debkeydata[*handle].field_1e4 -= offset;
-        debkeydata[*handle].emission_epoch = debkeydata[*handle].last_update_time;
+        debkeydatatype_s *key = &debkeydata[*handle];
+        key->field_184 = 1;
+        key->field_1d8 = 0;
+        const f32 offset = key->emission_time - now;
+        key->emission_time -= offset;
+        key->field_1e4 -= offset;
+        key->emission_epoch = key->last_update_time;
         debkeydata[*handle].cutoff_distance = CameraEmitterDistance(position);
-        if (debkeydata[*handle].process_collision_sound != 0) {
+        if (__builtin_expect(debkeydata[*handle].process_collision_sound != 0, 1)) {
             f32 range = debtab[effect]->sound_range_override;
             if (range == 0.0f)
                 range = debtab[effect]->sound_range;
