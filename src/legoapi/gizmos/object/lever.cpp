@@ -436,22 +436,23 @@ static char *Lever_GetGizmoName(GIZMO *gizmo) {
 }
 
 static i32 Lever_GetOutput(GIZMO *gizmo, i32 output_index, i32) {
-    if (gizmo == NULL || gizmo->object == NULL) {
-        return 0;
-    }
-
     LEVER_s *lever = static_cast<LEVER_s *>(gizmo->object);
-    if ((lever->flags & LEVER_FLAG_ENABLED) == 0) {
+    if (!lever->enabled) {
         return 0;
     }
-    if (output_index == 0) {
-        return Lever_FullyPulledDown(lever);
-    }
-    if (output_index == 1) {
-        return (lever->flags & LEVER_FLAG_GOODIE) != 0 && Lever_FullyPulledDown(lever);
-    }
-    if (output_index == 2) {
-        return (lever->flags & LEVER_FLAG_BADDIE) != 0 && Lever_FullyPulledDown(lever);
+    switch (output_index) {
+        case 0:
+            return Lever_FullyPulledDown(lever) != 0;
+        case 1:
+            if (lever->goodie && Lever_FullyPulledDown(lever) != 0) {
+                return 1;
+            }
+            break;
+        case 2:
+            if (lever->baddie && Lever_FullyPulledDown(lever) != 0) {
+                return 1;
+            }
+            break;
     }
     return 0;
 }

@@ -659,33 +659,52 @@ static char *GizmoForce_GetGizmoName(GIZMO *gizmo) {
 
 static i32 GizmoForce_GetOutput(GIZMO *gizmo, i32 output_index, i32 ignore_activation_state) {
     GIZFORCE_s *force = static_cast<GIZFORCE_s *>(gizmo->object);
-    if (((force->progress_flags & GIZFORCE_PROGRESS_VISIBLE) == 0 && force->blowup_type == -1) ||
-        (force->progress_flags & GIZFORCE_PROGRESS_ENABLED) == 0) {
-        if (ignore_activation_state == 0) {
-            return 0;
-        }
+    const bool active = ((force->progress_flags & GIZFORCE_PROGRESS_VISIBLE) != 0 || force->blowup_type != -1) &&
+                        (force->progress_flags & GIZFORCE_PROGRESS_ENABLED) != 0;
+    if (!active && ignore_activation_state == 0) {
+        return 0;
     }
 
     switch (output_index) {
         case 0:
-            return force->anim_set != NULL && force->anim_set->state == GAMEANIMSET_STATE_AT_END;
+            if (force->anim_set != NULL && force->anim_set->state == GAMEANIMSET_STATE_AT_END) {
+                return 1;
+            }
+            break;
         case 1:
-            return force->anim_set != NULL && force->anim_set->state != GAMEANIMSET_STATE_AT_START;
+            if (force->anim_set != NULL && force->anim_set->state != GAMEANIMSET_STATE_AT_START) {
+                return 1;
+            }
+            break;
         case 2:
-            return force->anim_set != NULL && force->anim_set->state == GAMEANIMSET_STATE_AT_START;
+            if (force->anim_set != NULL && force->anim_set->state == GAMEANIMSET_STATE_AT_START) {
+                return 1;
+            }
+            break;
         case 3:
-            return force->group != NULL && (force->group->field_0x24 & GIZFORCE_GROUP_STACK_COMPLETE) != 0;
+            if (force->group != NULL && (force->group->field_0x24 & GIZFORCE_GROUP_STACK_COMPLETE) != 0) {
+                return 1;
+            }
+            break;
         case 4:
-            return force->group != NULL && (force->group->field_0x24 & GIZFORCE_GROUP_STACK_COMPLETE_IN_ORDER) != 0;
+            if (force->group != NULL && (force->group->field_0x24 & GIZFORCE_GROUP_STACK_COMPLETE_IN_ORDER) != 0) {
+                return 1;
+            }
+            break;
         case 5:
-            return (force->field_0xaa & GIZFORCE_STATE_DESTROYED_OR_THROWN) != 0;
+            if ((force->field_0xaa & GIZFORCE_STATE_DESTROYED_OR_THROWN) != 0) {
+                return 1;
+            }
+            break;
         case 6:
             return GizForce_Complete(force);
         case 7:
-            return (force->field_0xaa & GIZFORCE_STATE_BEING_USED) != 0;
-        default:
-            return 0;
+            if ((force->field_0xaa & GIZFORCE_STATE_BEING_USED) != 0) {
+                return 1;
+            }
+            break;
     }
+    return 0;
 }
 
 static char *GizmoForce_GetOutputName(GIZMO *, i32 output_index) {
