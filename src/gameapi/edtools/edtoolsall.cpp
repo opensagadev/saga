@@ -3233,9 +3233,8 @@ void edgraInstanceDestroy(i32 index) {
 void edppDetermineNearest(float max_distance_squared) {
     NUVEC delta;
     if (edpp_nearest != -1) {
-        edpp_particle_s *particle = &edpp_ptls[edpp_nearest];
-        if (particle->instance_id != 99999 && particle->instance_id != -1) {
-            NuVecSub(&delta, &edpp_cam_pos, &particle->position);
+        if (edpp_ptls[edpp_nearest].instance_id != -1 && edpp_ptls[edpp_nearest].instance_id != 99999) {
+            NuVecSub(&delta, &edpp_cam_pos, &edpp_ptls[edpp_nearest].position);
             if (delta.x * delta.x + delta.y * delta.y + delta.z * delta.z == 0.0f) {
                 return;
             }
@@ -3264,20 +3263,19 @@ void edppHighlightNearest() {
 
     if (edpp_copy_mode != 0) {
         edpp_copy_enclosed = 0;
-        edpp_particle_s *particle = edpp_ptls;
-        for (i32 index = 0; index < 512; ++index, ++particle) {
-            if (particle->instance_id == 99999)
+        for (i32 index = 0; index < 512; ++index) {
+            if (edpp_ptls[index].instance_id == 99999)
                 continue;
-            if (particle->instance_id == -1)
+            if (edpp_ptls[index].instance_id == -1)
                 continue;
 
-            NuVecSub(&delta, &edpp_cam_pos, &particle->position);
+            NuVecSub(&delta, &edpp_cam_pos, &edpp_ptls[index].position);
             if (!(__builtin_fabsf(delta.x) <= edpp_copy_size) || !(__builtin_fabsf(delta.y) <= edpp_copy_size) ||
                 !(__builtin_fabsf(delta.z) <= edpp_copy_size))
                 continue;
             ++edpp_copy_enclosed;
-            edbitsDrawDiagonalCross(particle->position.x, particle->position.y, particle->position.z, 0.05f, 0xffffffff,
-                                    edpp_mtl);
+            edbitsDrawDiagonalCross(edpp_ptls[index].position.x, edpp_ptls[index].position.y,
+                                    edpp_ptls[index].position.z, 0.05f, 0xffffffff, edpp_mtl);
         }
         for (i32 source = 0; source < edpp_copy_source_count; ++source) {
             NUVEC offset, position;
@@ -3292,11 +3290,10 @@ void edppHighlightNearest() {
             edbitsDrawCube(position.x, position.y, position.z, 0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0, 0xffffffff, edpp_mtl);
         }
         if (edpp_showAllPlaced != 0) {
-            const edpp_particle_s *particle = edpp_ptls;
-            for (i32 index = 0; index < 512; ++index, ++particle) {
-                if (particle->effect_index > 0 && index != edpp_nearest) {
-                    edbitsDrawCube(particle->position.x, particle->position.y, particle->position.z, 0.5f, 0.5f, 0.5f,
-                                   0, 0, 0, 0, 0, 0xff000000, edpp_mtl);
+            for (i32 index = 0; index < 512; ++index) {
+                if (edpp_ptls[index].effect_index > 0 && index != edpp_nearest) {
+                    edbitsDrawCube(edpp_ptls[index].position.x, edpp_ptls[index].position.y,
+                                   edpp_ptls[index].position.z, 0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0, 0xff000000, edpp_mtl);
                 }
             }
         }
@@ -3308,13 +3305,12 @@ void edppMultipleCopyCopy() {
     extern NUVEC edpp_copy_source_vec;
 
     edpp_copy_source_count = 0;
-    edpp_particle_s *particle = edpp_ptls;
-    for (i32 index = 0; index < 512; ++index, ++particle) {
-        if (particle->instance_id == 99999 || particle->instance_id == -1)
+    for (i32 index = 0; index < 512; ++index) {
+        if (edpp_ptls[index].instance_id == -1 || edpp_ptls[index].instance_id == 99999)
             continue;
 
         NUVEC delta;
-        NuVecSub(&delta, &edpp_cam_pos, &particle->position);
+        NuVecSub(&delta, &edpp_cam_pos, &edpp_ptls[index].position);
         if (__builtin_fabsf(delta.x) <= edpp_copy_size && __builtin_fabsf(delta.y) <= edpp_copy_size &&
             __builtin_fabsf(delta.z) <= edpp_copy_size) {
             edpp_copy_source[edpp_copy_source_count++] = index;
@@ -3386,13 +3382,14 @@ void edppMultipleCopyPaste() {
     extern i32 edpp_copy_source_count, edpp_copy_source[8], edpp_copyroty;
     extern NUVEC edpp_copy_source_vec;
 
+    if (edpp_copy_source_count == 0)
+        return;
     for (i32 source = 0; source < edpp_copy_source_count; ++source) {
         NUVEC offset, position;
-        const i32 source_index = edpp_copy_source[source];
-        NuVecSub(&offset, &edpp_ptls[source_index].position, &edpp_copy_source_vec);
+        NuVecSub(&offset, &edpp_ptls[edpp_copy_source[source]].position, &edpp_copy_source_vec);
         NuVecRotateY(&offset, &offset, edpp_copyroty);
         NuVecAdd(&position, &edpp_cam_pos, &offset);
-        const i32 index = edppPtlCreateCopy(&position, source_index);
+        const i32 index = edppPtlCreateCopy(&position, edpp_copy_source[source]);
         if (index != -1) {
             edpp_particle_s &particle = edpp_ptls[index];
             particle.emitter_rotation_y += static_cast<i16>(edpp_copyroty);
@@ -3434,11 +3431,10 @@ void edpartHighlightNearest() {
     extern NUMTL *edpart_mtl;
     if (edpart_copy_mode != 0) {
         edpart_copy_enclosed = 0;
-        part_emit_s *emitter = part_emits;
-        for (i32 index = 0; index < 512; ++index, ++emitter) {
-            if (emitter->instance_id == 99999)
+        for (i32 index = 0; index < 512; ++index) {
+            if (part_emits[index].instance_id == 99999)
                 continue;
-            if (emitter->instance_id == -1)
+            if (part_emits[index].instance_id == -1)
                 continue;
 
             NuVecSub(&delta, &edpart_cam_pos, &part_emits[index].position);
@@ -3446,8 +3442,8 @@ void edpartHighlightNearest() {
                 edpart_copy_size < __builtin_fabsf(delta.z))
                 continue;
             ++edpart_copy_enclosed;
-            edbitsDrawDiagonalCross(emitter->position.x, emitter->position.y, emitter->position.z, 0.05f, 0xffffffff,
-                                    edpart_mtl);
+            edbitsDrawDiagonalCross(part_emits[index].position.x, part_emits[index].position.y,
+                                    part_emits[index].position.z, 0.05f, 0xffffffff, edpart_mtl);
         }
         for (i32 index = 0; index < edpart_copy_source_count; ++index) {
             NUVEC offset, destination;
@@ -3469,12 +3465,11 @@ void edpartMultipleCopyCopy() {
 
     edpart_copy_source_count = 0;
     for (i32 index = 0; index < 512; ++index) {
-        part_emit_s &emitter = part_emits[index];
-        if (emitter.instance_id == 99999 || emitter.instance_id == -1)
+        if (part_emits[index].instance_id == -1 || part_emits[index].instance_id == 99999)
             continue;
 
         NUVEC delta;
-        NuVecSub(&delta, &edpart_cam_pos, &emitter.position);
+        NuVecSub(&delta, &edpart_cam_pos, &part_emits[index].position);
         if (__builtin_fabsf(delta.x) > edpart_copy_size || __builtin_fabsf(delta.y) > edpart_copy_size ||
             __builtin_fabsf(delta.z) > edpart_copy_size)
             continue;
