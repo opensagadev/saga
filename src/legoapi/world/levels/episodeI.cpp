@@ -1245,8 +1245,8 @@ i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **
     float start = 0.0f;
     float end = 1.0f;
     float time_factor = 1.0f;
-    bool pacemaker = false;
-    bool damaged = false;
+    i32 pacemaker = 0;
+    i32 damaged = 0;
     for (i32 i = 0; i != param_count; i++, ++params) {
         char *value = NuStrIStr(*params, "spline_id=");
         if (value != NULL) {
@@ -1265,9 +1265,9 @@ i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **
         } else if ((value = NuStrIStr(*params, "time_factor=")) != NULL) {
             time_factor = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 12);
         } else if (NuStrICmp(*params, "pacemaker") == 0) {
-            pacemaker = true;
+            pacemaker = 1;
         } else if (NuStrICmp(*params, "damaged") == 0) {
-            damaged = true;
+            damaged = 1;
         }
     }
     if ((u32)spline_id > 31 || model_id == -1)
@@ -1276,7 +1276,7 @@ i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **
     flightspline_s *spline = NULL;
     for (i32 spline_index = 0; spline_index != 32; ++spline_index) {
         spline = &PodRace->splines[spline_index];
-        if (spline->id == spline_id)
+        if (PodRace->splines[spline_index].id == spline_id)
             break;
     }
 
