@@ -311,7 +311,7 @@ static char *GizmoObstacle_GetGizmoName(GIZMO *gizmo) {
 }
 
 static i32 GizmoObstacle_GetOutput(GIZMO *gizmo, i32 output_index, i32 ignore_activation_state) {
-    GIZOBSTACLE_s *obstacle = gizmo != NULL ? static_cast<GIZOBSTACLE_s *>(gizmo->object) : NULL;
+    GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(gizmo->object);
     if (obstacle == NULL) {
         return 0;
     }
@@ -323,18 +323,32 @@ static i32 GizmoObstacle_GetOutput(GIZMO *gizmo, i32 output_index, i32 ignore_ac
 
     switch (output_index) {
         case GIZOBSTACLE_OUTPUT_AT_END:
-            return obstacle->anim_set != NULL && obstacle->anim_set->state == GAMEANIMSET_STATE_AT_END;
+            if (obstacle->anim_set != NULL && obstacle->anim_set->state == GAMEANIMSET_STATE_AT_END) {
+                return 1;
+            }
+            break;
         case GIZOBSTACLE_OUTPUT_NOT_AT_START:
-            return obstacle->anim_set != NULL && obstacle->anim_set->state != GAMEANIMSET_STATE_AT_START;
+            if (obstacle->anim_set != NULL && obstacle->anim_set->state != GAMEANIMSET_STATE_AT_START) {
+                return 1;
+            }
+            break;
         case GIZOBSTACLE_OUTPUT_PROXIMITY:
-            return obstacle->anim_set != NULL && obstacle->proximity_output != 0;
+            if (obstacle->anim_set != NULL && obstacle->proximity_output != 0) {
+                return 1;
+            }
+            break;
         case GIZOBSTACLE_OUTPUT_AT_START:
-            return obstacle->anim_set != NULL && obstacle->anim_set->state == GAMEANIMSET_STATE_AT_START;
+            if (obstacle->anim_set != NULL && obstacle->anim_set->state == GAMEANIMSET_STATE_AT_START) {
+                return 1;
+            }
+            break;
         case GIZOBSTACLE_OUTPUT_PLAYING_FORWARD:
-            return obstacle->anim_set != NULL && obstacle->anim_set->state == GAMEANIMSET_STATE_ACTIVE_FORWARD;
-        default:
-            return 0;
+            if (obstacle->anim_set != NULL && obstacle->anim_set->state == GAMEANIMSET_STATE_ACTIVE_FORWARD) {
+                return 1;
+            }
+            break;
     }
+    return 0;
 }
 
 static char *GizmoObstacle_GetOutputName(GIZMO *, i32 output_index) {
