@@ -52,38 +52,44 @@ static void CS_play_sfx(NUFPAR *fp) {
     }
 
     i32 slot;
-    for (slot = 0; slot < 6 && CS_CutInfo->sfx[slot].id != -1; ++slot) {
-    }
-    if (slot == 6) {
+    if (CS_CutInfo->sfx[0].id == -1) {
+        slot = 0;
+    } else if (CS_CutInfo->sfx[1].id == -1) {
+        slot = 1;
+    } else if (CS_CutInfo->sfx[2].id == -1) {
+        slot = 2;
+    } else if (CS_CutInfo->sfx[3].id == -1) {
+        slot = 3;
+    } else if (CS_CutInfo->sfx[4].id == -1) {
+        slot = 4;
+    } else if (CS_CutInfo->sfx[5].id == -1) {
+        slot = 5;
+    } else {
         return;
     }
 
-    CUTSCENESFX *sfx = &CS_CutInfo->sfx[slot];
-    sfx->flags &= ~1U;
-    sfx->id = static_cast<i16>(sfx_id);
+    CS_CutInfo->sfx[slot].id = static_cast<i16>(sfx_id);
+    CS_CutInfo->sfx[slot].flags &= ~1U;
     while (NuFParGetWord(fp) != 0) {
         if (NuStrICmp(fp->word_buf, "frame") == 0) {
-            sfx->frame = NuFParGetFloat(fp);
-            if (sfx->frame < 1.0f) {
-                sfx->frame = 1.0f;
+            CS_CutInfo->sfx[slot].frame = NuFParGetFloat(fp);
+            if (CS_CutInfo->sfx[slot].frame < 1.0f) {
+                CS_CutInfo->sfx[slot].frame = 1.0f;
             }
         } else if (NuStrICmp(fp->word_buf, "pos") == 0) {
-            f32 value = NuFParGetFloat(fp);
-            if (value == 0.0f) {
+            if (NuFParGetFloat(fp) == 0.0f) {
                 continue;
             }
-            sfx->position.x = NuAToF(fp->word_buf);
-            value = NuFParGetFloat(fp);
-            if (value == 0.0f) {
+            CS_CutInfo->sfx[slot].position.x = NuAToF(fp->word_buf);
+            if (NuFParGetFloat(fp) == 0.0f) {
                 continue;
             }
-            sfx->position.y = NuAToF(fp->word_buf);
-            value = NuFParGetFloat(fp);
-            if (value == 0.0f) {
+            CS_CutInfo->sfx[slot].position.y = NuAToF(fp->word_buf);
+            if (NuFParGetFloat(fp) == 0.0f) {
                 continue;
             }
-            sfx->position.z = NuAToF(fp->word_buf);
-            sfx->flags |= 1;
+            CS_CutInfo->sfx[slot].position.z = NuAToF(fp->word_buf);
+            CS_CutInfo->sfx[slot].flags |= 1;
         }
     }
 }
