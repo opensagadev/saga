@@ -535,7 +535,7 @@ static NUFPCOMJMP CutScene_ConfigKeywords[] = {
     {NULL, NULL},
 };
 
-static __used__ void CutScene_Configure(CUTINFO *cut, char *name, VARIPTR *buf, VARIPTR *buf_end) {
+static void CutScene_Configure(CUTINFO *cut, char *name, VARIPTR *buf, VARIPTR *buf_end) {
     CUTSCENEPLAYEROBJ state_entries[32];
 
     CS_CutInfo = cut;
@@ -556,20 +556,23 @@ static __used__ void CutScene_Configure(CUTINFO *cut, char *name, VARIPTR *buf, 
     cut->door_name[0] = '\0';
     cut->next_cutscene[0] = '\0';
     cut->music_handle = -1;
-    cut->end_flags = 0;
 
-    for (CUTSCENESFX &sfx : cut->sfx) {
-        sfx.id = -1;
+    for (i32 i = 0; i < 6; ++i) {
+        cut->sfx[i].id = -1;
     }
     cut->blob_shadow_alpha = 0xff;
     cut->blob_shadow_fade_near = 0xff;
     cut->blob_shadow_fade_far = 0xff;
     cut->reflection_range = 0xff;
-    memset(cut->texture_animations, 0, sizeof(cut->texture_animations));
-    for (CUTSCENETEXANIM &animation : cut->texture_animations) {
-        animation.index = -1;
+    for (i32 i = 0; i < 4; ++i) {
+        cut->texture_animations[i].index = -1;
     }
-    memset(cut->fade_fog, 0, sizeof(cut->fade_fog));
+    for (i32 i = 0; i < 2; ++i) {
+        cut->fade_fog[i].frame = 0.0f;
+        cut->fade_fog[i].near_distance = 0.0f;
+        cut->fade_fog[i].far_distance = 0.0f;
+        cut->fade_fog[i].value = 0.0f;
+    }
     cut->subtitle_count = 0;
     cut->subtitle_data = NULL;
     cut->end_flags &= ~3U;
@@ -592,19 +595,21 @@ static __used__ void CutScene_Configure(CUTINFO *cut, char *name, VARIPTR *buf, 
     }
     NuFParDestroy(fp);
 
-    if (cut->blob_shadow_fade_near > cut->blob_shadow_fade_far) {
-        cut->blob_shadow_fade_near = cut->blob_shadow_fade_far;
+    CUTINFO *info = CS_CutInfo;
+    if (info->blob_shadow_fade_near > info->blob_shadow_fade_far) {
+        info->blob_shadow_fade_near = info->blob_shadow_fade_far;
     }
-    if (cut->subtitle_data != NULL && cut->subtitle_count == 0) {
-        cut->subtitle_data = NULL;
+    if (info->subtitle_data != NULL && info->subtitle_count == 0) {
+        info->subtitle_data = NULL;
     }
-    if (cut->state_count == 0) {
-        cut->state_entries = NULL;
+    if (info->state_count == 0) {
+        info->state_entries = NULL;
     } else {
         buf->void_ptr = reinterpret_cast<void *>(ALIGN(buf->addr, 4));
-        cut->state_entries = reinterpret_cast<CUTSCENEPLAYEROBJ *>(buf->void_ptr);
-        memmove(cut->state_entries, state_entries, cut->state_count * sizeof(CUTSCENEPLAYEROBJ));
-        buf->void_ptr = reinterpret_cast<char *>(buf->void_ptr) + cut->state_count * sizeof(CUTSCENEPLAYEROBJ);
+        info->state_entries = reinterpret_cast<CUTSCENEPLAYEROBJ *>(buf->void_ptr);
+        const i32 size = info->state_count * sizeof(CUTSCENEPLAYEROBJ);
+        memmove(info->state_entries, state_entries, size);
+        buf->void_ptr = reinterpret_cast<char *>(buf->void_ptr) + size;
     }
 }
 
