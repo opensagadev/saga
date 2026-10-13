@@ -1917,11 +1917,10 @@ extern "C" {
         if (menu->menu == -1)
             return;
 
-        MENUFNINFO &info = MenuInfo[menu->menu];
-        if (info.memory_x != -1)
-            info.memory_x = menu->selected_column;
-        if (info.memory_y != -1)
-            info.memory_y = menu->selected_row;
+        if (MenuInfo[menu->menu].memory_x != -1)
+            MenuInfo[menu->menu].memory_x = menu->selected_column;
+        if (MenuInfo[menu->menu].memory_y != -1)
+            MenuInfo[menu->menu].memory_y = menu->selected_row;
     }
 
     // Both backup variants leave the current menu (calling its exit hook), reset
@@ -2041,9 +2040,8 @@ extern "C" {
         if (headerdrawfn != NULL)
             headerdrawfn();
         if (MenuAlpha >= 0.5f && g_enableButtonPrompts != 0) {
-            const MENUFNINFO &info = MenuInfo[menu->menu];
-            DrawMenuButtonPrompts(info.confirm_prompt, info.cancel_prompt, 1, MENUNORMALR, MENUNORMALG, MENUNORMALB,
-                                  static_cast<u8>(MenuA));
+            DrawMenuButtonPrompts(MenuInfo[menu->menu].confirm_prompt, MenuInfo[menu->menu].cancel_prompt, 1,
+                                  MENUNORMALR, MENUNORMALG, MENUNORMALB, static_cast<u8>(MenuA));
         }
 
         if (SmartTextFont != NULL) {
@@ -2312,20 +2310,18 @@ extern "C" {
     }
 
     void MenuRepeat(i32 *held, i32 *repeat, f32 *repeat_time, u8 *repeat_count, f32 interval, f32 elapsed) {
-        if (*held == 0) {
+        if (*held != 0) {
+            if (*repeat_time > 0.0f) {
+                *repeat_time -= elapsed;
+                if (*repeat_time <= 0.0f) {
+                    *repeat = 1;
+                    *repeat_time = interval;
+                    ++*repeat_count;
+                }
+            }
+        } else {
             *repeat_time = 0.5f;
             *repeat_count = 0;
-            return;
-        }
-
-        if (*repeat_time > 0.0f) {
-            *repeat_time -= elapsed;
-            if (*repeat_time > 0.0f)
-                return;
-
-            *repeat = 1;
-            *repeat_time = interval;
-            ++*repeat_count;
         }
     }
 
