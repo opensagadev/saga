@@ -1156,7 +1156,6 @@ static void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
     i32 candidates[233];
     i32 candidate_count = 0;
     CHARACTERMODEL_s *model = object->apiobj.character_model;
-    const bool select_alternate_group = alternate_idle == default_idle;
     for (i32 animation = 0; animation < 233; ++animation) {
         if (model->model_data_b[animation] == NULL) {
             continue;
@@ -1165,8 +1164,11 @@ static void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
         if ((info->flags & 0x10) == 0) {
             continue;
         }
-        const bool alternate_group = (info->flags & 0x800) != 0;
-        if (alternate_group == select_alternate_group) {
+        if (alternate_idle == default_idle) {
+            if ((info->flags & 0x800) != 0) {
+                candidates[candidate_count++] = animation;
+            }
+        } else if ((info->flags & 0x800) == 0) {
             candidates[candidate_count++] = animation;
         }
     }
@@ -1176,34 +1178,34 @@ static void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
         return;
     }
 
-    i32 animation;
     if (candidate_count == 1) {
-        animation = candidates[0];
+        object->idle_animation = static_cast<i16>(candidates[0]);
     } else {
-        auto object_previous_idle_animation = object->previous_idle_animation;
         do {
-            const i32 bucket_size = 0xffff / candidate_count + 1;
-            animation = candidates[qrand() / bucket_size];
-            object->idle_animation = static_cast<i16>(animation);
-        } while (animation == object_previous_idle_animation);
+            object->idle_animation = static_cast<i16>(candidates[qrand() / (0xffff / candidate_count + 1)]);
+        } while (object->idle_animation == object->previous_idle_animation);
     }
-    object->idle_animation = static_cast<i16>(animation);
 
-    CHARACTERANIM_s *info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
-    const u8 maximum = static_cast<u8>(info->maximum_repetitions);
+    CHARACTERANIM_s *info =
+        static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[object->idle_animation]);
     i32 repetitions = static_cast<u8>(info->minimum_repetitions);
     if (repetitions == 0) {
         repetitions = 1;
-    } else if (maximum > repetitions) {
-        repetitions = IdleRepetitionCount(static_cast<u8>(repetitions), maximum);
+    } else {
+        const i32 maximum = static_cast<u8>(info->maximum_repetitions);
+        if (maximum != 0 && maximum > repetitions) {
+            repetitions += qrand() / (0xffff / (maximum - repetitions) + 1);
+        }
     }
-    object->previous_idle_animation = static_cast<i16>(animation);
-    if (repetitions > 1 && (info->flags & 2) == 0) {
+    object->previous_idle_animation = object->idle_animation;
+    if (repetitions > 1 &&
+        (static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[object->idle_animation])->flags &
+         2) == 0) {
         repetitions = 1;
     }
 
     object->idle_animation_time = 0.0f;
-    const f32 duration = AnimDuration(object->id, animation, 0.0f, 0.0f, 0);
+    const f32 duration = AnimDuration(object->id, object->idle_animation, 0.0f, 0.0f, 0);
     object->idle_animation_limit = duration * repetitions - animduration_blendouttime;
 }
 
