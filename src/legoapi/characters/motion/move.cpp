@@ -1140,7 +1140,7 @@ void Move_DROIDEKA(GameObject_s *object) {
     ShootCode(object, action_pressed, special_pressed, 0, 0, 0);
 
     if (object->character_context == 0x32) {
-        if (object->apiobj.character_data->game_character->run_speed - 0.1f <= object->pad_gamepad->input_magnitude) {
+        if (object->pad_gamepad->input_magnitude >= object->apiobj.character_data->game_character->run_speed - 0.1f) {
             object->character_context = 0x31;
             object->context_animation = 3;
         } else {
@@ -1164,7 +1164,7 @@ void Move_DROIDEKA(GameObject_s *object) {
             }
         }
     } else if (object->character_context == -1 && object->apiobj.field_0x27d != 0) {
-        if (object->apiobj.character_data->game_character->run_speed - 0.1f <= object->pad_gamepad->input_magnitude) {
+        if (object->pad_gamepad->input_magnitude >= object->apiobj.character_data->game_character->run_speed - 0.1f) {
             object->character_context = 0x31;
             object->context_animation = 3;
         } else if (CurrentAnim(&object->apiobj.anim_packet) == 5 &&
@@ -1179,7 +1179,7 @@ void Move_DROIDEKA(GameObject_s *object) {
     ShieldCode(object);
     if (object->character_context == -1 && object->field_0xe31 == 0 && object->apiobj.field_0x27d != 0 &&
         object->apiobj.field_0x27e == 0 &&
-        ((object->movement_runtime_flags & 4) != 0 || object->fall_animation_timer >= 0.2f) &&
+        (object->fall_animation_timer >= 0.2f || (object->movement_runtime_flags & 4) != 0) &&
         ((object->movement_runtime_flags & 4) != 0 || object->pad_gamepad->input_magnitude == 0.0f ||
          (static_cast<i8>(object->apiobj.flags_low) >= 0 &&
           object->apiobj.character_model->model_data_b[0x59] != NULL))) {
@@ -2233,8 +2233,8 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
         i32 segments = points - 1;
         if (position->segment < segments) {
             NUVEC offset;
-            if (distance > 0.0f) {
-                do {
+            if (distance >= 0.0f) {
+                while (distance > 0.0f) {
                     position->segment_distance += distance;
                     if (!(position->segment_distance >= position->segment_length))
                         goto interpolate;
@@ -2261,7 +2261,7 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
                     if (distance == 0.0f)
                         position->position = *current;
                     spline = position->spline;
-                } while (distance > 0.0f);
+                }
                 goto update_along;
             } else if (position->segment >= 0 && distance < 0.0f) {
                 for (;;) {
