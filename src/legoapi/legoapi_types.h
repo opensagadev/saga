@@ -4215,7 +4215,8 @@ struct GIZBUILDIT_s {
         u8 availability_flags; // 0x82, GIZBUILDIT_AVAILABILITY_FLAGS
         struct {
             u8 available_active : 1;
-            u8 available_other : 7;
+            u8 available_visible : 1;
+            u8 available_other : 6;
         };
     };
     union {
