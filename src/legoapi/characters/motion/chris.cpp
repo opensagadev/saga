@@ -1244,14 +1244,21 @@ set_door_timer:
 }
 
 void ChrisRadialCam(nuvec_s *position, nuvec_s *target) {
-    NUVEC position_delta = {position->x - RadialMoveCentre.x, 0.0f, position->z - RadialMoveCentre.z};
+    // The original keeps both deltas and the new target at 16-byte aligned stack addresses.
+    const f32 position_y = position->y;
+    const f32 target_y = target->y;
+    NUVEC position_delta
+        __attribute__((aligned(16))) = {position->x - RadialMoveCentre.x, 0.0f, position->z - RadialMoveCentre.z};
     const f32 position_radius = NuVecMag(&position_delta);
-    NUVEC origin_delta = {-RadialMoveCentre.x, 0.0f, -RadialMoveCentre.z};
+    NUVEC origin_delta __attribute__((aligned(16))) = {0.0f - RadialMoveCentre.x, 0.0f, 0.0f - RadialMoveCentre.z};
     const f32 origin_radius = NuVecMag(&origin_delta);
     RadialPlayerRadius[0] = origin_radius;
+    NUVEC new_target __attribute__((aligned(16)));
 
-    f32 base_radius = 120.0f;
-    if (origin_radius >= 120.0f) {
+    f32 base_radius;
+    if (origin_radius < 120.0f) {
+        base_radius = 120.0f;
+    } else {
         base_radius = MIN(150.0f, origin_radius);
     }
     const f32 extra_radius = origin_radius - base_radius;
@@ -1262,7 +1269,7 @@ void ChrisRadialCam(nuvec_s *position, nuvec_s *target) {
         position_delta.x *= scale;
     }
     position->x = RadialMoveCentre.x + position_delta.x;
-    position->y = position->y;
+    position->y = position_y;
     position->z = RadialMoveCentre.z + position_delta.z;
 
     if (base_radius <= origin_radius) {
@@ -1273,9 +1280,10 @@ void ChrisRadialCam(nuvec_s *position, nuvec_s *target) {
         origin_delta.x *= scale;
         origin_delta.z *= scale;
     }
-    target->x = RadialMoveCentre.x + origin_delta.x;
-    target->y = target->y;
-    target->z = RadialMoveCentre.z + origin_delta.z;
+    new_target.x = RadialMoveCentre.x + origin_delta.x;
+    new_target.y = target_y;
+    new_target.z = RadialMoveCentre.z + origin_delta.z;
+    memcpy(target, &new_target, sizeof(new_target));
 }
 
 void ChrisAnakinAInit(WORLDINFO_s *world) {
