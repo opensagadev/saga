@@ -702,7 +702,7 @@ void DrawOffsetCode(GameObject_s *obj, i32 param) {
 
         const f32 distance = NuVecDist(&target, &obj->render_offset, &delta);
         const f32 step = 0.4f * FRAMETIME;
-        if (distance > step) {
+        if (!(distance <= step)) {
             NuVecNorm(&delta, &delta);
             NuVecScale(&delta, &delta, step);
             NuVecAdd(&obj->render_offset, &obj->render_offset, &delta);

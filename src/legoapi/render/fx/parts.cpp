@@ -1916,7 +1916,7 @@ extern "C" {
         }
         {
             f32 radius = (part->time_step - time) / PARTSCALEUPTIME * part->target_radius;
-            if (radius <= 0.0f)
+            if (!(radius > 0.0f))
                 return;
             part->active = (part->active & ~0x60) | 0x40;
             cast_movement = movement;
@@ -3254,7 +3254,7 @@ void UpdatePartEmits(f32 time) {
                     }
                 }
             }
-            if (partglobaltime + time <= emission_time)
+            if (!(partglobaltime + time > emission_time))
                 continue;
             if (emitter->field_3d != 0 &&
                 (type->maximum_distance == 0.0f || type->maximum_distance > emitter->camera_distance)) {

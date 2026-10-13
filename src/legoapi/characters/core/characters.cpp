@@ -1527,8 +1527,7 @@ void CollectCharcters_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 ac
         return;
     if (stage->field_0x14 == 0) {
         const f32 offscreen = (1.0f - fabsf(COLLECTION_Y_STATUS)) + 1.0f;
-        const f32 ratio =
-            stage->field_0x1c != 0.0f && stage->field_0x18 != 0.0f ? stage->field_0x18 / stage->field_0x1c : 0.0f;
+        const f32 ratio = NuFdiv(stage->field_0x18, stage->field_0x1c);
         Collection_Draw(collection, 0.0f,
                         NuTrigTable[(static_cast<i32>(ratio * 16384.0f) >> 1) & 0x7fff] *
                                 (COLLECTION_Y_STATUS + offscreen) -
