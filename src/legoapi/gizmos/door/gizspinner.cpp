@@ -483,6 +483,16 @@ char *GizSpinner_GetOutputName(GIZMO *gizmo, i32 output_index) {
     return gizspinner_outputName;
 }
 
+// Looks the special up in the level scene first, then in the shared things scene.
+static bool GizSpinner_FindSpecial(WORLDINFO *world, nuhspecial_s *special, char *name) {
+    NuSpecialFind(world->current_gscn, special, name, 0);
+    if (NuSpecialExistsFn(special) != 0) {
+        return true;
+    }
+    NuSpecialFind(things_scene, special, name, 0);
+    return NuSpecialExistsFn(special) != 0;
+}
+
 static i32 GizSpinner_Load(void *world_ptr, void *) {
     i32 version = -1;
 
@@ -519,12 +529,7 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
         const i32 special_name_length = static_cast<signed char>(EdFileReadChar());
         EdFileRead(special_name, special_name_length);
         nuhspecial_s special;
-        NuSpecialFind(world->current_gscn, &special, special_name, 0);
-        bool special_missing = NuSpecialExistsFn(&special) == 0;
-        if (special_missing) {
-            NuSpecialFind(things_scene, &special, special_name, 0);
-            special_missing = NuSpecialExistsFn(&special) == 0;
-        }
+        const bool special_missing = !GizSpinner_FindSpecial(world, &special, special_name);
         world->spinners[index].special = special;
 
         const u8 output_count = static_cast<u8>(EdFileReadChar());
@@ -539,29 +544,31 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
 
         if (version > 1) {
             spinner_type = static_cast<u8>(EdFileReadChar());
-        }
-        if (version <= 2) {
-            GameAnimSet_RemoveAllObjects(world->spinners[index].anim_set);
-            animation_speed = 1.0f;
-        } else {
-            spinner_state_flags = static_cast<u32>(EdFileReadInt()) & ~0x360u;
-            world->spinners[index].field_0x2d8 = EdFileReadFloat();
-            if (version == 3) {
+            if (version <= 2) {
                 GameAnimSet_RemoveAllObjects(world->spinners[index].anim_set);
                 animation_speed = 1.0f;
             } else {
-                animation_speed = EdFileReadFloat();
-                if (version == 4) {
+                spinner_state_flags = static_cast<u32>(EdFileReadInt()) & ~0x360u;
+                world->spinners[index].field_0x2d8 = EdFileReadFloat();
+                if (version == 3) {
                     GameAnimSet_RemoveAllObjects(world->spinners[index].anim_set);
-                    initial_animation_point = animation_speed;
+                    animation_speed = 1.0f;
                 } else {
+                    animation_speed = EdFileReadFloat();
                     if (version > 5) {
                         spinner_flags = static_cast<u8>(EdFileReadChar());
                     }
                     GameAnimSet_RemoveAllObjects(world->spinners[index].anim_set);
-                    read_game_anim_set = true;
+                    if (version == 4) {
+                        initial_animation_point = animation_speed;
+                    } else {
+                        read_game_anim_set = true;
+                    }
                 }
             }
+        } else {
+            GameAnimSet_RemoveAllObjects(world->spinners[index].anim_set);
+            animation_speed = 1.0f;
         }
 
         if (!read_game_anim_set) {
@@ -569,11 +576,7 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
             for (i32 object_index = 0; object_index < object_count; ++object_index) {
                 const i32 object_name_length = static_cast<signed char>(EdFileReadChar());
                 EdFileRead(special_name, object_name_length);
-                NuSpecialFind(world->current_gscn, &special, special_name, 0);
-                if (NuSpecialExistsFn(&special) == 0) {
-                    NuSpecialFind(things_scene, &special, special_name, 0);
-                    NuSpecialExistsFn(&special);
-                }
+                GizSpinner_FindSpecial(world, &special, special_name);
                 f32 start_frame = 1.0f;
                 f32 end_frame = 1000000000.0f;
                 if (version > 2) {
