@@ -2787,11 +2787,9 @@ void edanimParamDestroy(i32 index) {
 void edbitsDoSingleDump(i32 face) {
     char filename[32];
     i32 index;
-    for (index = 0; index < 1000; ++index) {
+    for (index = 0;; ++index) {
         sprintf(filename, "pictures\\cub%03d_%d.bmp", index, face);
-        if (NuFileSize(filename) <= 0)
-            break;
-        if (index == 999)
+        if (NuFileSize(filename) <= 0 || index == 999)
             break;
     }
     sprintf(filename, "pictures\\cub%03d_", index);
@@ -6664,27 +6662,23 @@ EdRef::EdRef(char *type_name, char *member_name, i32 offset, i32 member_size, i3
 }
 
 i32 EdRef::GetAttributeData(void *object, i32 attribute, i32 requested_type, void *data, i32 data_size) {
-    if (!(attributes & attribute)) {
-        return 0;
-    }
-    if ((attribute & 8) && type_id == EdType_VuMtx) {
-        NUMTX_ALIGNED16 matrix;
-        GetMemberData(object, type_id, &matrix, 0);
-        VuVec *position = static_cast<VuVec *>(data);
-        position->x = matrix.m30;
-        position->y = matrix.m31;
-        position->z = matrix.m32;
-        position->w = matrix.m33;
-        return 1;
-    }
-    if (!(attribute & 0x100)) {
-        GetMemberData(object, requested_type, data, data_size);
-    } else {
+    if (attributes & attribute) {
+        if ((attribute & 8) && type_id == EdType_VuMtx) {
+            NUMTX_ALIGNED16 matrix;
+            GetMemberData(object, type_id, &matrix, 0);
+            *static_cast<VuVec *>(data) = *reinterpret_cast<VuVec *>(&matrix.m30);
+            return 1;
+        }
+        if (!(attribute & 0x100)) {
+            GetMemberData(object, requested_type, data, data_size);
+            return 1;
+        }
         i16 value;
         GetMemberData(object, EdType_Short, &value, 0);
         *static_cast<i16 *>(data) = value;
+        return 1;
     }
-    return 1;
+    return 0;
 }
 
 void EdRef::GetMemberData(void *object, i32 requested_type, void *data, i32 data_size) {
@@ -6907,21 +6901,22 @@ void EdControl::Render() {
 // The original realigns the stack for its local ClassObject.
 __attribute__((force_align_arg_pointer)) i32 EdControl::SelectSubObject() {
     ClassObject selection = {};
-    void *target = object;
-    for (ClassObjectListEntry *entry = theClassEditor.selected_objects.first; entry; entry = entry->next) {
-        if (entry->object != target)
-            continue;
-        selection.ed_class = entry->ed_class;
-        selection.object = entry->object;
-        selection.reference = entry->reference;
-        if (selection.object != NULL) {
-            i32 mode = static_cast<i32>(Input->GetHold(16)) >= 1 ? 1 : 2;
-            selection.reference = reference;
-            theClassEditor.SelectObject(selection, mode);
-            if (!theClassEditor.selected_objects.IsInList(selection.object, NULL))
-                theClassEditor.SelectObject(selection, 1);
-        }
+    ClassObjectListEntry *entry;
+    for (entry = theClassEditor.selected_objects.first; entry; entry = entry->next) {
+        if (entry->object == object)
+            break;
+    }
+    if (entry == NULL)
         return 1;
+    selection.ed_class = entry->ed_class;
+    selection.object = entry->object;
+    selection.reference = entry->reference;
+    if (selection.object != NULL) {
+        i32 mode = static_cast<i32>(Input->GetHold(16)) != 0 ? 1 : 2;
+        selection.reference = reference;
+        theClassEditor.SelectObject(selection, mode);
+        if (!theClassEditor.selected_objects.IsInList(selection.object, NULL))
+            theClassEditor.SelectObject(selection, 1);
     }
     return 1;
 }
