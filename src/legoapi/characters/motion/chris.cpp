@@ -669,13 +669,13 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
         i32 valid0 = 0, valid1 = 0;
         f32 player0x, player0y, player0z;
         f32 player1x, player1y, player1z;
-        if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.object_flags) < 0) {
+        if (Player[0] != NULL && Player[0]->apiobj.player_controlled) {
             player0x = Player[0]->apiobj.field_0xb8.m30;
             player0y = Player[0]->apiobj.field_0xb8.m31;
             player0z = Player[0]->apiobj.field_0xb8.m32;
             valid0 = 1;
         }
-        if (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.object_flags) < 0) {
+        if (Player[1] != NULL && Player[1]->apiobj.player_controlled) {
             player1x = Player[1]->apiobj.field_0xb8.m30;
             player1y = Player[1]->apiobj.field_0xb8.m31;
             player1z = Player[1]->apiobj.field_0xb8.m32;
