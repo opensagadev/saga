@@ -6606,7 +6606,9 @@ void Move_WEIRDO(GameObject_s *object) {
     DropInOutCode(object);
     ApplyGravity(object, NULL, 0.0f, 8.0f, NULL);
     u16 weapon = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->weapon_model & 0xfffd;
-    i32 has_sabre = weapon == 0x65 || weapon == 0x69;
+    i32 has_sabre = weapon == 0x65;
+    if (!has_sabre)
+        has_sabre = weapon == 0x69;
     if (object->suit != NULL)
         Signal_MoveCode(WORLD, object);
     TakeHitCode(object);
