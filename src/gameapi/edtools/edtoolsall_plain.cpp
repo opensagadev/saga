@@ -5836,11 +5836,17 @@ extern "C" {
         if (pad->digital_buttons_pressed & 0x80)
             delete_previous();
         if (pad->digital_buttons_pressed & 0x20) {
-            bool uppercase = textrow[1] == const_cast<char *>("QWERTYUIOP");
-            textrow[0] = const_cast<char *>("1234567890");
-            textrow[1] = uppercase ? const_cast<char *>("qwertyuiop") : const_cast<char *>("QWERTYUIOP");
-            textrow[2] = uppercase ? const_cast<char *>("asdfghjkl_") : const_cast<char *>("ASDFGHJKL_");
-            textrow[3] = uppercase ? const_cast<char *>("zxcvbnm<>?") : const_cast<char *>("ZXCVBNM<>?");
+            if (textrow[1] == const_cast<char *>("QWERTYUIOP")) {
+                textrow[0] = const_cast<char *>("1234567890");
+                textrow[1] = const_cast<char *>("qwertyuiop");
+                textrow[2] = const_cast<char *>("asdfghjkl_");
+                textrow[3] = const_cast<char *>("zxcvbnm<>?");
+            } else {
+                textrow[0] = const_cast<char *>("1234567890");
+                textrow[1] = const_cast<char *>("QWERTYUIOP");
+                textrow[2] = const_cast<char *>("ASDFGHJKL_");
+                textrow[3] = const_cast<char *>("ZXCVBNM<>?");
+            }
         }
         return 0;
     }
