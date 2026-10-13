@@ -3202,50 +3202,10 @@ extern "C" {
         NU_FREE(stage);
     }
     void eduiGradStageSetHSV(edui_gradient_node_s *stage, f32 hue, f32 saturation, f32 value) {
-        f32 red = 0.0f, green = 0.0f, blue = 0.0f;
-        if (saturation == 0.0f) {
-            red = green = blue = value;
-        } else {
-            f32 adjusted_hue = hue == 360.0f ? 0.0f : hue;
-            adjusted_hue /= 60.0f;
-            i32 sector = static_cast<i32>(NuFloor(adjusted_hue));
-            f32 fraction = adjusted_hue - sector;
-            f32 low = (1.0f - saturation) * value;
-            f32 falling = (1.0f - saturation * fraction) * value;
-            f32 rising = (1.0f - (1.0f - fraction) * saturation) * value;
-            switch (sector) {
-                case 0:
-                    red = value;
-                    green = rising;
-                    blue = low;
-                    break;
-                case 1:
-                    red = falling;
-                    green = value;
-                    blue = low;
-                    break;
-                case 2:
-                    red = low;
-                    green = value;
-                    blue = rising;
-                    break;
-                case 3:
-                    red = low;
-                    green = falling;
-                    blue = value;
-                    break;
-                case 4:
-                    red = rising;
-                    green = low;
-                    blue = value;
-                    break;
-                case 5:
-                    red = value;
-                    green = low;
-                    blue = falling;
-                    break;
-            }
-        }
+        // Left uninitialised as in the original: the out-of-range sector path
+        // reads undefined values, which GCC materialises as zero.
+        f32 red, green, blue;
+        eduiHSVToRGB(hue, saturation, value, red, green, blue);
         stage->saturation = saturation;
         stage->hue = hue;
         stage->value = value;
