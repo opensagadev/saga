@@ -1214,59 +1214,50 @@ void UpdateCharacterIdle(GameObject_s *object) {
 
     CHARACTERDATA *character = object->apiobj.character_data;
     GAMECHARACTERDATA *game_character = static_cast<GAMECHARACTERDATA *>(character->field11_0x24);
-    const i16 alternate_idle =
-        static_cast<i16>(game_character->field275_0x116 == 0 && (character->model_flags & 0x80) != 0 ? 118 : 25);
+    const i32 alternate_idle = game_character->field275_0x116 == 0 && (character->model_flags & 0x80) != 0 ? 118 : 25;
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
     const i16 requested = packet.requested_animation;
 
-    if (requested != 1 && requested != alternate_idle) {
-        const i32 default_idle = GetDefaultIdle(object);
-        if (default_idle != -1) {
-            ResetCharacterIdle(object, 1, default_idle);
-            return;
-        }
+    i32 idle;
+    if (requested == 1 && packet.previous_animation == alternate_idle) {
+        idle = 1;
+    } else if (requested == alternate_idle && packet.previous_animation == 1) {
+        idle = alternate_idle;
+    } else if (requested != 1 && requested != alternate_idle) {
+        idle = GetDefaultIdle(object);
+    } else {
+        idle = -1;
     }
-
-    if (requested == 1) {
-        if (packet.previous_animation == alternate_idle) {
-            ResetCharacterIdle(object, 1, 1);
-        } else {
-            object->idle_total_time += FRAMETIME;
-            object->idle_animation_time += FRAMETIME;
-            if (object->idle_animation_time >= object->idle_animation_limit) {
-                if (object->idle_animation == 1) {
-                    NewCharacterIdle(object, 1);
-                } else {
-                    ResetCharacterIdle(object, 1, 1);
-                }
-            }
-        }
-        packet.requested_animation = object->idle_animation;
+    if (idle != -1) {
+        ResetCharacterIdle(object, 1, idle);
         return;
     }
 
-    if (requested == alternate_idle) {
-        if (packet.previous_animation == 1) {
-            ResetCharacterIdle(object, 1, alternate_idle);
-        } else {
-            object->idle_total_time += FRAMETIME;
-            object->idle_animation_time += FRAMETIME;
-            if (object->idle_animation_time >= object->idle_animation_limit) {
-                if (object->idle_animation == alternate_idle) {
-                    NewCharacterIdle(object, alternate_idle);
-                } else {
-                    ResetCharacterIdle(object, 1, alternate_idle);
-                }
+    if (packet.requested_animation == 1) {
+        object->idle_total_time += FRAMETIME;
+        object->idle_animation_time += FRAMETIME;
+        if (object->idle_animation_time >= object->idle_animation_limit) {
+            if (object->idle_animation == 1) {
+                NewCharacterIdle(object, 1);
+            } else {
+                ResetCharacterIdle(object, 1, 1);
             }
         }
-        packet.requested_animation = object->idle_animation;
+    } else if (packet.requested_animation == alternate_idle) {
+        object->idle_total_time += FRAMETIME;
+        object->idle_animation_time += FRAMETIME;
+        if (object->idle_animation_time >= object->idle_animation_limit) {
+            if (object->idle_animation == alternate_idle) {
+                NewCharacterIdle(object, alternate_idle);
+            } else {
+                ResetCharacterIdle(object, 1, alternate_idle);
+            }
+        }
+    } else {
+        ResetCharacterIdle(object, 1, GetDefaultIdle(object));
         return;
     }
-
-    const i32 default_idle = GetDefaultIdle(object);
-    if (default_idle != -1) {
-        ResetCharacterIdle(object, 1, default_idle);
-    }
+    packet.requested_animation = object->idle_animation;
 }
 
 void UpdateCharacterIDs() {
