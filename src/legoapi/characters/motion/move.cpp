@@ -8780,14 +8780,13 @@ void Glide_MoveCode(GameObject_s *object) {
 
     if (object->apiobj.field_0x27d == 0 && object->apiobj.field_0x218 != 2000000.0f &&
         (height = object->apiobj.collision_min.y - object->apiobj.field_0x218,
-         object->apiobj.field_0x1e0 <= height && height != object->apiobj.field_0x1e0)) {
-        if ((object->pad_gamepad->buttons_held & GAMEPAD_ACTION) != 0 &&
-            object->apiobj.character_model->model_data_b[0x21] != NULL) {
-            if (Slam_Start(object, SLAMJUMPSPEED) != 0) {
-                ResetAnimPacket(&object->apiobj.anim_packet, -1);
-                ResetMiniAnimPacket(&object->mini_animation, -1);
-                return;
-            }
+         object->apiobj.field_0x1e0 <= height && height != object->apiobj.field_0x1e0) &&
+        (object->pad_gamepad->buttons_held & GAMEPAD_ACTION) != 0 &&
+        object->apiobj.character_model->model_data_b[0x21] != NULL) {
+        if (Slam_Start(object, SLAMJUMPSPEED) != 0) {
+            ResetAnimPacket(&object->apiobj.anim_packet, -1);
+            ResetMiniAnimPacket(&object->mini_animation, -1);
+            return;
         }
     }
 
