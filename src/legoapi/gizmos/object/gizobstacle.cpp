@@ -667,39 +667,33 @@ static void GizObstacles_StoreProgress(void *, void *data, void *progress_ptr) {
     }
 
     ClearObstacleProgress(progress);
-    if (obstacle_sys == NULL) {
-        return;
-    }
 
-    i32 count = obstacle_sys->count;
-    if (count > GIZOBSTACLE_PROGRESS_CAPACITY) {
-        count = GIZOBSTACLE_PROGRESS_CAPACITY;
-    }
-
-    for (i32 index = 0; index < count; ++index) {
-        const GIZOBSTACLE_s &obstacle = obstacle_sys->obstacles[index];
+    const GIZOBSTACLE_s *obstacle_entry = obstacle_sys->obstacles;
+    for (i32 index = 0; index < obstacle_sys->count && index != GIZOBSTACLE_PROGRESS_CAPACITY;
+         ++index, ++obstacle_entry) {
+        const GIZOBSTACLE_s &obstacle = *obstacle_entry;
         const i32 word = index >> 5;
         const u32 bit = 1u << (index & 31);
 
-        if ((obstacle.progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) == 0) {
+        if (!obstacle.progress_visible) {
             progress->progress_flag_1[word] &= ~bit;
         }
-        if ((obstacle.progress_flags & GIZOBSTACLE_PROGRESS_FLAG_ENABLED) == 0) {
+        if (!obstacle.progress_enabled) {
             progress->progress_flag_0[word] &= ~bit;
         }
-        if ((obstacle.runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_PICKUPS_SPAWNED) != 0) {
+        if (obstacle.runtime_pickups_spawned) {
             progress->runtime_flag_0[word] |= bit;
         }
-        if ((obstacle.runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE) != 0) {
+        if (obstacle.runtime_ai_active) {
             progress->runtime_flag_2[word] |= bit;
         }
-        if ((obstacle.runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_BLOCKED) != 0) {
+        if (obstacle.runtime_blocked) {
             progress->runtime_flag_3[word] |= bit;
         }
-        if ((obstacle.runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_TRIGGER_LATCHED) != 0) {
+        if (obstacle.runtime_trigger_latched) {
             progress->runtime_flag_6[word] |= bit;
         }
-        if ((obstacle.runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) != 0) {
+        if (obstacle.runtime_destroyed) {
             progress->runtime_flag_7[word] |= bit;
         }
     }
