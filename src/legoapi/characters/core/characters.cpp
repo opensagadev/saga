@@ -857,8 +857,8 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
     }
 
     CHARACTERDATA *character_data = &apicharsys->char_data[id];
-    GAMECHARACTERDATA *game_character_data = static_cast<GAMECHARACTERDATA *>(character_data->field11_0x24);
     obj->apiobj.character_data = character_data;
+    GAMECHARACTERDATA *game_character_data = static_cast<GAMECHARACTERDATA *>(character_data->field11_0x24);
     obj->field_0x1054 = game_character_data->layer_mask;
     obj->apiobj.field_0x1f4 = 0;
     obj->field_0x107c = -1;
@@ -884,8 +884,9 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
                       reinterpret_cast<CHARACTERDATA_s *>(obj->apiobj.character_data));
 
     obj->apiobj.movement_direction = v000;
+    const u8 field_0xf5 = obj->apiobj.character_data->game_character->field_0xf5;
     obj->field_0xe38 = 4;
-    obj->field_0xe37 = obj->apiobj.character_data->game_character->field_0xf5;
+    obj->field_0xe37 = field_0xf5;
     obj->id = static_cast<i16>(id);
     obj->apiobj.character_model = &apicharsys->models[apicharsys->playermodelids[id]];
     obj->suit = Suit_GetDefault(id);
@@ -1703,7 +1704,7 @@ AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_r
 
 AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
                                     f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y) {
-    f32 nearest_distance = max_distance == 1000000000.0f ? max_distance : max_distance * max_distance;
+    f32 nearest_distance = max_distance == 1000000000.0f ? 1000000000.0f : max_distance * max_distance;
     i32 candidates[64];
     i32 candidate_count = 0;
     if (count > 64) {

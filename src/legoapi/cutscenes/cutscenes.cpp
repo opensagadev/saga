@@ -1707,6 +1707,7 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
                 : NULL;
         if (cutscene->camera_system != NULL) {
             isize data_delta = cutscene->string_delta;
+            const i32 version = cutscene->version & 0xff;
             cutscene->camera_system =
                 reinterpret_cast<NUGCUTCAMERASYS_s *>(reinterpret_cast<isize>(cutscene->camera_system) + data_delta);
             NUGCUTCAMERASYS_s *system = cutscene->camera_system;
@@ -1714,7 +1715,7 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
                 system->cameras != NULL
                     ? reinterpret_cast<NUGCUTCAMERA_s *>(reinterpret_cast<isize>(system->cameras) + data_delta)
                     : NULL;
-            if (__builtin_expect(static_cast<u8>(cutscene->version) > 4, 1)) {
+            if (__builtin_expect(version > 4, 1)) {
                 if (system->focus_animation != NULL) {
                     system->focus_animation =
                         static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(system->focus_animation, delta, 1, 0));
