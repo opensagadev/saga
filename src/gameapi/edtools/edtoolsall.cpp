@@ -5309,7 +5309,7 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
         if (eduiGetActiveMenu() == NULL) {
             const u32 buttons = pad->digital_buttons;
             square = buttons & 0x80;
-            Set(38, static_cast<f32>(buttons & 0x40), elapsed);
+            Set(38, static_cast<f32>(static_cast<i32>(buttons & 0x40)), elapsed);
         }
         right_click = NuMouseReadButtons() == 2 || (pad->digital_buttons & 0x20) != 0;
     } else {
@@ -5318,8 +5318,8 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     Set(0, mouse_x, elapsed);
     Set(1, mouse_y, elapsed);
     Set(2, mouse_z, elapsed);
-    Set(3, left_click && !control_or_c, elapsed);
-    Set(4, right_click && !alt_or_space && !control_or_c, elapsed);
+    Set(3, static_cast<i32>(left_click && !control_or_c), elapsed);
+    Set(4, static_cast<i32>(right_click && !alt_or_space && !control_or_c), elapsed);
     Set(5, static_cast<f32>(NuKeyboard(0x10)), elapsed);
     Set(6, static_cast<f32>(NuKeyboard(0x11)), elapsed);
     Set(7, static_cast<f32>(NuKeyboard(0x12)), elapsed);
@@ -5338,9 +5338,9 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     Set(20, static_cast<f32>(NuKeyboard(0xcb)), elapsed);
     Set(21, static_cast<f32>(shift_or_s), elapsed);
     Set(22, static_cast<f32>(control_or_c), elapsed);
-    Set(23, static_cast<f32>(NuKeyboard(0x1f) && control_or_c), elapsed);
+    Set(23, static_cast<i32>(NuKeyboard(0x1f) && control_or_c), elapsed);
     Set(24, static_cast<f32>(NuKeyboard(0x01)), elapsed);
-    Set(25, static_cast<f32>(left_click && control_or_c), elapsed);
+    Set(25, static_cast<i32>(left_click && control_or_c), elapsed);
     Set(26, static_cast<f32>(NuKeyboard(2)), elapsed);
     Set(27, static_cast<f32>(NuKeyboard(3)), elapsed);
     Set(28, static_cast<f32>(NuKeyboard(4)), elapsed);
@@ -5351,8 +5351,8 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     Set(33, static_cast<f32>(NuKeyboard(9)), elapsed);
     Set(34, static_cast<f32>(NuKeyboard(10)), elapsed);
     Set(35, static_cast<f32>(NuKeyboard(11)), elapsed);
-    Set(37, static_cast<f32>(square), elapsed);
-    Set(39, static_cast<f32>(pad->digital_buttons & 0x800), elapsed);
+    Set(37, static_cast<f32>(static_cast<i32>(square)), elapsed);
+    Set(39, static_cast<f32>(static_cast<i32>(pad->digital_buttons & 0x800)), elapsed);
     memset(cleared, 0, sizeof(cleared));
 }
 
@@ -5672,10 +5672,13 @@ void EdMatrixControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
 
         NuMtxSetIdentity(&rebuilt);
         if (control->components[6] && control->components[7] && control->components[8]) {
-            NUVEC scale = {NuAToF(static_cast<edui_prop_s *>(control->components[6])->property_text),
-                           NuAToF(static_cast<edui_prop_s *>(control->components[7])->property_text),
-                           NuAToF(static_cast<edui_prop_s *>(control->components[8])->property_text)};
-            NuMtxScale(&rebuilt, &scale);
+            // The original builds the scale as an aligned four-component vector with w set to one.
+            VuVec scale __attribute__((aligned(16)));
+            scale.x = NuAToF(static_cast<edui_prop_s *>(control->components[6])->property_text);
+            scale.y = NuAToF(static_cast<edui_prop_s *>(control->components[7])->property_text);
+            scale.z = NuAToF(static_cast<edui_prop_s *>(control->components[8])->property_text);
+            scale.w = 1.0f;
+            NuMtxScale(&rebuilt, reinterpret_cast<NUVEC *>(&scale));
         }
         {
             NUANG x = static_cast<NUANG>(NuAToF(static_cast<edui_prop_s *>(control->components[3])->property_text) *
@@ -5734,7 +5737,8 @@ void EdMatrixControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
     }
     matrix.m33 = 1.0f;
     control->reference->SetMemberData(control->object, EdType_VuMtx, &source, 0, nullptr);
-    char text[128];
+    // The original keeps the text buffer at a 16-byte aligned stack address.
+    char text[128] __attribute__((aligned(16)));
     sprintf(text, "%.2f", changed_value);
     eduiItemPropSetText(static_cast<edui_prop_s *>(item), text);
 }
@@ -5862,26 +5866,28 @@ template <>
 __attribute__((force_align_arg_pointer)) void EdValueControl<f32>::cbButton(eduimenu_s *, eduiitem_s *item, u32) {
     EdValueControl<f32> *control = static_cast<EdValueControl<f32> *>(item->data_ptr);
     nupad_s *pad = EdControl::Input->pad;
-    f32 sensitivity = control->maximum - control->minimum < 5.0f ? 0.001f : 0.01f;
+    f32 sensitivity = 0.01f;
+    if (control->maximum - control->minimum < 5.0f)
+        sensitivity = 0.001f;
     static_cast<edui_prop_s *>(item)->unknown_property_flags |= 0x20;
     f32 initial_value = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
-    f32 change = 0.0f;
+    f32 dx = 0.0f;
+    // The original keeps the change, shared with the cursor delta, at a 16-byte aligned stack address.
+    f32 change __attribute__((aligned(16))) = 0.0f;
     if (pad && (pad->digital_buttons & EDUI_CURSOR_PRIMARY)) {
-        f32 left_y = pad->analog_left_y;
+        f32 left_y = static_cast<i32>(pad->analog_left_y);
         if (left_y > 128.0f)
             change = 10.0f * sensitivity * (left_y - 128.0f);
-        if (left_y < 128.0f)
+        if (pad->analog_left_y < 128)
             change = -10.0f * sensitivity * (128.0f - left_y);
-        f32 right_y = pad->analog_right_y;
+        f32 right_y = static_cast<i32>(pad->analog_right_y);
         if (right_y > 128.0f)
             change = 0.1f * sensitivity * (right_y - 128.0f);
-        if (right_y < 128.0f)
+        if (pad->analog_right_y < 128)
             change = -0.1f * sensitivity * (128.0f - right_y);
     } else {
-        f32 dx = 0.0f;
-        f32 dy = 0.0f;
-        eduiGetCursorDelta(&dx, &dy);
-        change = dy * MouseScale;
+        eduiGetCursorDelta(&dx, &change);
+        change *= MouseScale;
     }
     initial_value -= change;
     char text[128];
