@@ -7143,37 +7143,43 @@ void AtatPart_Update(PART_s *part) {
                                           static_cast<i32>(part->scale_time * 20.0f), FRAMETIME, 0, 0, NULL);
     } else if (part->scale_time < 2.0f) {
         if (choice < 10.0f) {
-            i16 y_rotation = qrand();
-            i16 z_rotation = qrand();
             AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position,
-                                              static_cast<i32>(part->scale_time * 3.0f), FRAMETIME, z_rotation,
-                                              y_rotation, NULL);
+                                              static_cast<i32>(part->scale_time * 3.0f), FRAMETIME, qrand(), qrand(),
+                                              NULL);
         } else if (choice > 90.0f) {
-            i16 y_rotation = qrand();
-            i16 z_rotation = qrand();
             AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position,
-                                              static_cast<i32>(part->scale_time * 15.0f), FRAMETIME, z_rotation,
-                                              y_rotation, NULL);
+                                              static_cast<i32>(part->scale_time * 15.0f), FRAMETIME, qrand(), qrand(),
+                                              NULL);
         }
     } else if (part->scale_time < 5.0f) {
-        if (choice < 10.0f || choice > 70.0f) {
-            i32 count = choice < 10.0f ? 15 : 30;
-            i16 y_rotation = qrand();
-            i16 z_rotation = qrand();
-            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position, count, FRAMETIME,
-                                              z_rotation, y_rotation, NULL);
+        if (choice < 10.0f) {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position, 15, FRAMETIME,
+                                              qrand(), qrand(), NULL);
+        } else if (choice > 70.0f) {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position, 30, FRAMETIME,
+                                              qrand(), qrand(), NULL);
         }
-        i32 count = choice < 30.0f ? 1 : choice < 70.0f ? 3 : 20;
-        i16 y_rotation = qrand();
-        i16 z_rotation = qrand();
-        AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, count, FRAMETIME,
-                                          z_rotation, y_rotation, NULL);
+        if (choice < 30.0f) {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 1, FRAMETIME,
+                                              qrand(), qrand(), NULL);
+        } else if (choice < 70.0f) {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 3, FRAMETIME,
+                                              qrand(), qrand(), NULL);
+        } else {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 20, FRAMETIME,
+                                              qrand(), qrand(), NULL);
+        }
     } else if (part->scale_time < 10.0f) {
-        i32 count = choice < 30.0f ? 1 : choice < 70.0f ? 3 : 20;
-        i16 y_rotation = qrand();
-        i16 z_rotation = qrand();
-        AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, count, FRAMETIME,
-                                          z_rotation, y_rotation, NULL);
+        if (choice < 30.0f) {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 1, FRAMETIME,
+                                              qrand(), qrand(), NULL);
+        } else if (choice < 70.0f) {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 3, FRAMETIME,
+                                              qrand(), qrand(), NULL);
+        } else {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 20, FRAMETIME,
+                                              qrand(), qrand(), NULL);
+        }
     }
 }
 
