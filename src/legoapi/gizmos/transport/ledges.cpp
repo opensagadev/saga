@@ -112,7 +112,7 @@ static void Ledges_Reset(void *world_info, void *, void *progress_data) {
         ledge->type_index = type;
         ledge->bounds_min.x = ledge->bounds_min.y = ledge->bounds_min.z = 999.0f;
         ledge->bounds_max.x = ledge->bounds_max.y = ledge->bounds_max.z = -999.0f;
-        NUVEC point;
+        NUVEC_ALIGNED16 point;
         NuVecRotateY(&point, &LedgePiece[ledge->type_index].start, ledge->y_rotation);
         if (point.x < ledge->bounds_min.x)
             ledge->bounds_min.x = point.x;

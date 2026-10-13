@@ -557,7 +557,7 @@ void Grabber_Reset(WORLDINFO_s *world) {
     }
     g->victim = NULL;
     g->carried_blowup = NULL;
-    NUVEC query = g->grab_position;
+    NUVEC_ALIGNED16 query = g->grab_position;
     query.y += 0.25f;
     if (WORLD->current_level != CLOUDCITYTRAPA_LDATA)
         NewTerrPlatformsOff();

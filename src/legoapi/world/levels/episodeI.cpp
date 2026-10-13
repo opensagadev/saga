@@ -449,7 +449,7 @@ static __used__ void UpdatePodRaceMines(void) {
             if (entry->active == 0)
                 continue;
 
-            NUVEC delta;
+            NUVEC_ALIGNED16 delta;
             NuVecSub(&delta, &entry->pos, &GameCam->pos);
             GAMECAMERA_s *cam = GameCam;
             float along = delta.x * cam->dir.x + delta.y * cam->dir.y + delta.z * cam->dir.z;

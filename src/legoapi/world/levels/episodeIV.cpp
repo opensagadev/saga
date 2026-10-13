@@ -1096,10 +1096,10 @@ void DeathStarBattleDUpdate(WORLDINFO_s *world) {
                 timer = 5.0f;
 #define SPAWN_TRENCH_SHIP(slot, model, ox, oy, oz)                                                                     \
     do {                                                                                                               \
-        NUVEC spawn = {player->apiobj.collision_position.x + trench_spawn_distance,                                    \
-                       player->apiobj.collision_position.y + trench_spawn_height,                                      \
-                       player->apiobj.collision_position.z};                                                           \
-        NUVEC offset = {ox, oy, oz};                                                                                   \
+        NUVEC_ALIGNED16 spawn = {player->apiobj.collision_position.x + trench_spawn_distance,                          \
+                                 player->apiobj.collision_position.y + trench_spawn_height,                            \
+                                 player->apiobj.collision_position.z};                                                 \
+        NUVEC_ALIGNED16 offset = {ox, oy, oz};                                                                         \
         NuVecAdd(&spawn, &spawn, &offset);                                                                             \
         GameObject_s *ship = AddDynamicCreature(model, &spawn, 0xc000, "TrenchBaddie", &player->ai.path_info, NULL, 0, \
                                                 NULL, NULL, 0, 1);                                                     \
