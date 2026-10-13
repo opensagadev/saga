@@ -1507,23 +1507,31 @@ extern "C" {
             instance->rate = -instance->rate;
         }
         instance->cutscene = instance->cutscene_copy;
-        if (instance->rigid_instance != NULL && instance->cutscene->rigid_system != NULL) {
-            for (u32 i = 0; i < instance->cutscene->rigid_system->count; ++i) {
-                NUGCUTRIGID_s *rigid = &instance->cutscene->rigid_system->rigids[i];
-                instNUGCUTRIGID_s *inst_rigid = &instance->rigid_instance->rigids[i];
+        instNUGCUTRIGIDSYS_s *rigid_instance = instance->rigid_instance;
+        if (rigid_instance != NULL) {
+            NUGCUTRIGIDSYS_s *system = instance->cutscene->rigid_system;
+            for (u32 i = 0; i < system->count; ++i) {
+                instNUGCUTRIGID_s *inst_rigid = &rigid_instance->rigids[i];
+                NUGCUTRIGID_s *rigid = &system->rigids[i];
                 inst_rigid->state_index = 0;
-                if ((rigid->flags & 4) != 0) {
-                    if ((rigid->flags & 2) != 0) {
-                        inst_rigid->visible = rigid->flags & 1;
+                const u8 flags = rigid->flags;
+                if ((flags & 4) != 0) {
+                    if ((flags & 2) != 0) {
+                        inst_rigid->visible = flags & 1;
                     } else {
-                        NuSpecialSetVisibility(inst_rigid, (rigid->flags & 1) != 0);
+                        if ((flags & 1) != 0) {
+                            NuSpecialSetVisibility(inst_rigid, 1);
+                        } else {
+                            NuSpecialSetVisibility(inst_rigid, 0);
+                        }
                         NuSpecialSetDrawMtx(inst_rigid, &rigid->base_matrix);
                     }
                 }
             }
         }
-        if (instance->locator_instance != NULL && instance->cutscene->locator_system != NULL) {
-            instNUGCUTLOCATORSYS_s *inst_system = instance->locator_instance;
+        instNUGCUTLOCATORSYS_s *locator_instance = instance->locator_instance;
+        if (locator_instance != NULL) {
+            instNUGCUTLOCATORSYS_s *inst_system = locator_instance;
             NUGCUTLOCATORSYS_s *system = instance->cutscene->locator_system;
             for (u32 i = 0; i < system->locator_count; ++i) {
                 instNUGCUTLOCATOR_s *inst_locator = &inst_system->locators[i];
@@ -1538,7 +1546,7 @@ extern "C" {
                 }
             }
         }
-        if (instance->trigger_instance != NULL && instance->cutscene->trigger_system != NULL) {
+        if (instance->trigger_instance != NULL) {
             instNUGCUTTRIGGERSYS_s *inst_system = instance->trigger_instance;
             NUGCUTTRIGGERSYS_s *system = instance->cutscene->trigger_system;
             for (i32 i = 0; i < system->event_count; ++i) {
