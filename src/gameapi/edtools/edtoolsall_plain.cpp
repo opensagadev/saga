@@ -6072,8 +6072,8 @@ extern "C" {
         const f32 row_height = NuQFntHeight(edui_font) * 1.25f * 0.125f;
         const i32 height = static_cast<i32>(row_height);
         const f32 baseline = (NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font)) * 0.125f;
-        for (eduimenu_s *ancestor = menu; ancestor; ancestor = ancestor->parent) {
-            if (ancestor == eduiGetActiveMenu()) {
+        for (eduimenu_s *submenu = menu; submenu; submenu = submenu->child) {
+            if (submenu == eduiGetActiveMenu()) {
                 eduiDrawRect(x << 4, y << 3, width << 4, static_cast<i32>(row_height * 8.0f),
                              item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
                 break;
