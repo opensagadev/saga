@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 78.97361,
+    "fuzzy_match_percent": 79.0049,
     "total_code": "4722419",
-    "matched_code": "609136",
-    "matched_code_percent": 12.898813,
+    "matched_code": "610187",
+    "matched_code_percent": 12.921068,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6757,
-    "matched_functions_percent": 50.204323,
+    "matched_functions": 6762,
+    "matched_functions_percent": 50.241478,
     "total_units": 1
   },
   "text": {
@@ -28731,7 +28731,7 @@
           "address": 3560880,
           "offset": 2670912,
           "size": 272,
-          "match_percent": 76.5946
+          "match_percent": 99.98649
         },
         {
           "name": "_Z21edppMultipleCopyPastev",
@@ -28739,7 +28739,7 @@
           "address": 3561152,
           "offset": 2671184,
           "size": 271,
-          "match_percent": 61.492958
+          "match_percent": 87.11268
         },
         {
           "name": "_Z21edppMultipleCopyClearv",
@@ -28763,7 +28763,7 @@
           "address": 3571168,
           "offset": 2681200,
           "size": 399,
-          "match_percent": 54.950497
+          "match_percent": 54.544556
         },
         {
           "name": "_Z11edppDoInputP7nupad_s",
@@ -28779,7 +28779,7 @@
           "address": 3573504,
           "offset": 2683536,
           "size": 855,
-          "match_percent": 78.40625
+          "match_percent": 97.625
         },
         {
           "name": "_Z15edppSaveEffectsPcc",
@@ -28915,7 +28915,7 @@
           "address": 4296880,
           "offset": 3406912,
           "size": 272,
-          "match_percent": 76.0946
+          "match_percent": 96.810814
         },
         {
           "name": "_Z23edpartMultipleCopyClearv",
@@ -28939,7 +28939,7 @@
           "address": 4304320,
           "offset": 3414352,
           "size": 654,
-          "match_percent": 77.14286
+          "match_percent": 95.61039
         },
         {
           "name": "_Z14edpartInitTypei",
@@ -28947,7 +28947,7 @@
           "address": 4305040,
           "offset": 3415072,
           "size": 430,
-          "match_percent": 58.943398
+          "match_percent": 99.98113
         },
         {
           "name": "_Z15edpartScaleTypeif",
@@ -33858,7 +33858,7 @@
           "address": 3582784,
           "offset": 2692816,
           "size": 1552,
-          "match_percent": 53.84375
+          "match_percent": 55.0875
         },
         {
           "name": "edppLoadPage",
@@ -33946,7 +33946,7 @@
           "address": 3594352,
           "offset": 2704384,
           "size": 1025,
-          "match_percent": 51.38679
+          "match_percent": 93.15094
         },
         {
           "name": "edppFindAllSounds",
@@ -36982,7 +36982,7 @@
           "address": 5430128,
           "offset": 4540160,
           "size": 262,
-          "match_percent": 60.048386
+          "match_percent": 75.22581
         }
       ]
     },
@@ -46103,7 +46103,7 @@
           "address": 1084464,
           "offset": 194496,
           "size": 724,
-          "match_percent": 75.85406
+          "match_percent": 100.0
         },
         {
           "name": "_Z17AvailableToPlayerjiii",
@@ -46215,7 +46215,7 @@
           "address": 1388944,
           "offset": 498976,
           "size": 127,
-          "match_percent": 47.27027
+          "match_percent": 55.27027
         },
         {
           "name": "_Z24CheckForPlayersTurnedOffv",
@@ -46311,7 +46311,7 @@
           "address": 4632784,
           "offset": 3742816,
           "size": 126,
-          "match_percent": 56.13158
+          "match_percent": 100.0
         },
         {
           "name": "_Z19Player_ClearContextP12GameObject_si",
@@ -46359,7 +46359,7 @@
           "address": 4640912,
           "offset": 3750944,
           "size": 54,
-          "match_percent": 78.23529
+          "match_percent": 100.0
         },
         {
           "name": "_Z23Player_HasInvincibilityP12GameObject_s",
@@ -46423,7 +46423,7 @@
           "address": 4644192,
           "offset": 3754224,
           "size": 41,
-          "match_percent": 62.916668
+          "match_percent": 100.0
         },
         {
           "name": "_Z24CutScenePlayer_Availablev",
@@ -69514,7 +69514,7 @@
           "address": 4349936,
           "offset": 3459968,
           "size": 106,
-          "match_percent": 52.75
+          "match_percent": 100.0
         },
         {
           "name": "_Z13MenuEnterLoadP6MENU_s",
@@ -69714,7 +69714,7 @@
           "address": 4356000,
           "offset": 3466032,
           "size": 92,
-          "match_percent": 87.888885
+          "match_percent": 99.44444
         },
         {
           "name": "_Z15MenuIsAvailablev",
@@ -69746,7 +69746,7 @@
           "address": 4356256,
           "offset": 3466288,
           "size": 638,
-          "match_percent": 83.60131
+          "match_percent": 85.640526
         },
         {
           "name": "_Z13MenuStartLoadv",
