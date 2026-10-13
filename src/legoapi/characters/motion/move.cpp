@@ -4273,23 +4273,20 @@ void Move_VEHICLE(GameObject_s *object) {
     }
 
     if ((object->apiobj.character_data->game_character->flags_094[0] & 0x20) == 0) {
+        f32 hover_height;
         if (object->apiobj.character_data->game_character->uses_weapon_action == 0x15) {
             ApplyGravity(object, NULL, FindGunshipHoverHeight(object), 8.0f, NULL);
+        } else if (object->apiobj.character_data->game_character->field_0x28 > 0.0f &&
+                   ((hover_height = GetVehicleHoverHeight(object, NULL)) != 0.0f ||
+                    getvehiclehoverheight_hothbattlehack != 0)) {
+            ApplyGravity(object, NULL, hover_height, 10.0f, NULL);
         } else {
-            if (object->apiobj.character_data->game_character->field_0x28 > 0.0f) {
-                const f32 hover_height = GetVehicleHoverHeight(object, NULL);
-                if (hover_height != 0.0f || getvehiclehoverheight_hothbattlehack != 0) {
-                    ApplyGravity(object, NULL, hover_height, 10.0f, NULL);
-                    goto vehicle_gravity_done;
-                }
-            }
-            const f32 hover_height =
+            hover_height =
                 object->character_context != 0x17 ? object->apiobj.character_data->game_character->field_0x28 : 0.0f;
             ApplyGravity(object, NULL, hover_height, 8.0f, NULL);
         }
     }
 
-vehicle_gravity_done:
     DeactivatedCode(object);
 
     if (object->id == id_SNOWMOB) {
@@ -4528,15 +4525,15 @@ vehicle_gravity_done:
         } else if (object->field_0xcc0 != NULL && object->apiobj.field_0x27c == -1) {
             GameObject_s *player = Player[0];
             if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 && player->field_0xcc0 != NULL &&
-                ((object->apiobj.field_0x1e8 & player->apiobj.field_0x1f0) != 0 ||
-                 (object->apiobj.field_0x1e4 & player->apiobj.field_0x1ec) != 0) &&
+                ((object->apiobj.field_0x1e4 & player->apiobj.field_0x1ec) |
+                 (object->apiobj.field_0x1e8 & player->apiobj.field_0x1f0)) != 0 &&
                 object->field_0x1024 <= 0.0f) {
                 ObjHitObj(player, object, 1, 1, 0, 1);
             }
             player = Player[1];
             if (player != NULL && player->apiobj.player_controlled && player->field_0xcc0 != NULL &&
-                ((object->apiobj.field_0x1e8 & player->apiobj.field_0x1f0) != 0 ||
-                 (object->apiobj.field_0x1e4 & player->apiobj.field_0x1ec) != 0) &&
+                ((object->apiobj.field_0x1e4 & player->apiobj.field_0x1ec) |
+                 (object->apiobj.field_0x1e8 & player->apiobj.field_0x1f0)) != 0 &&
                 object->field_0x1024 <= 0.0f) {
                 ObjHitObj(player, object, 1, 1, 0, 1);
             }
