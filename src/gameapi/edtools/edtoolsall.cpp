@@ -5309,7 +5309,7 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
         if (eduiGetActiveMenu() == NULL) {
             const u32 buttons = pad->digital_buttons;
             square = buttons & 0x80;
-            Set(38, static_cast<f32>(buttons & 0x40), elapsed);
+            Set(38, static_cast<f32>(static_cast<i32>(buttons & 0x40)), elapsed);
         }
         right_click = NuMouseReadButtons() == 2 || (pad->digital_buttons & 0x20) != 0;
     } else {
@@ -5318,8 +5318,8 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     Set(0, mouse_x, elapsed);
     Set(1, mouse_y, elapsed);
     Set(2, mouse_z, elapsed);
-    Set(3, left_click && !control_or_c, elapsed);
-    Set(4, right_click && !alt_or_space && !control_or_c, elapsed);
+    Set(3, static_cast<i32>(left_click && !control_or_c), elapsed);
+    Set(4, static_cast<i32>(right_click && !alt_or_space && !control_or_c), elapsed);
     Set(5, static_cast<f32>(NuKeyboard(0x10)), elapsed);
     Set(6, static_cast<f32>(NuKeyboard(0x11)), elapsed);
     Set(7, static_cast<f32>(NuKeyboard(0x12)), elapsed);
@@ -5338,9 +5338,9 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     Set(20, static_cast<f32>(NuKeyboard(0xcb)), elapsed);
     Set(21, static_cast<f32>(shift_or_s), elapsed);
     Set(22, static_cast<f32>(control_or_c), elapsed);
-    Set(23, static_cast<f32>(NuKeyboard(0x1f) && control_or_c), elapsed);
+    Set(23, static_cast<i32>(NuKeyboard(0x1f) && control_or_c), elapsed);
     Set(24, static_cast<f32>(NuKeyboard(0x01)), elapsed);
-    Set(25, static_cast<f32>(left_click && control_or_c), elapsed);
+    Set(25, static_cast<i32>(left_click && control_or_c), elapsed);
     Set(26, static_cast<f32>(NuKeyboard(2)), elapsed);
     Set(27, static_cast<f32>(NuKeyboard(3)), elapsed);
     Set(28, static_cast<f32>(NuKeyboard(4)), elapsed);
@@ -5351,8 +5351,8 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     Set(33, static_cast<f32>(NuKeyboard(9)), elapsed);
     Set(34, static_cast<f32>(NuKeyboard(10)), elapsed);
     Set(35, static_cast<f32>(NuKeyboard(11)), elapsed);
-    Set(37, static_cast<f32>(square), elapsed);
-    Set(39, static_cast<f32>(pad->digital_buttons & 0x800), elapsed);
+    Set(37, static_cast<f32>(static_cast<i32>(square)), elapsed);
+    Set(39, static_cast<f32>(static_cast<i32>(pad->digital_buttons & 0x800)), elapsed);
     memset(cleared, 0, sizeof(cleared));
 }
 
