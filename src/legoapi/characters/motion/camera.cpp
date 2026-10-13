@@ -1702,10 +1702,12 @@ void KeepOnScreen(GameObject_s *object) {
         if (controlled == 0)
             return;
     }
-    if (object->apiobj.field_0x287 != 0 || object->character_context == 0x2b || (object->field_0xefe & 4) == 0 ||
-        object->character_context == 0x47 || object->character_context == 0x0f || object->character_context == 0x1f ||
-        object->character_context == 0x46 || object->character_context == 0x51 || MiniCutCam != 0 ||
-        GetMenuID() != -1) {
+    if (object->apiobj.field_0x287 != 0) {
+        return;
+    }
+    if (object->character_context == 0x2b || (object->field_0xefe & 4) == 0 || object->character_context == 0x47 ||
+        object->character_context == 0x0f || object->character_context == 0x1f || object->character_context == 0x46 ||
+        object->character_context == 0x51 || MiniCutCam != 0 || GetMenuID() != -1) {
         return;
     }
 
