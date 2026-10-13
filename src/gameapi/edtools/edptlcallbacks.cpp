@@ -1078,11 +1078,18 @@ height_stages_done:
 
 static void cbPtlTypeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     i32 count = 0;
-    for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
-        debinftype *effect = debtab[index];
-        if (effect != NULL && effect->category == edpp_effect_list &&
-            (edpp_effect_list != 1 || effect->page == edbits_particle_level_page)) {
-            ++count;
+    if (edpp_effect_list == 1) {
+        for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
+            if (debtab[index] != NULL && debtab[index]->category == 1 &&
+                debtab[index]->page == edbits_particle_level_page) {
+                ++count;
+            }
+        }
+    } else {
+        for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
+            if (debtab[index] != NULL && debtab[index]->category == edpp_effect_list) {
+                ++count;
+            }
         }
     }
 
@@ -1095,24 +1102,28 @@ static void cbPtlTypeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     bool found_selected = false;
     for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
         debinftype *effect = debtab[index];
-        if (effect == NULL || effect->category != edpp_effect_list ||
-            (edpp_effect_list == 1 && effect->page != edbits_particle_level_page)) {
+        if (effect == NULL)
+            continue;
+        if (edpp_effect_list == 1) {
+            if (effect->category != 1 || effect->page != edbits_particle_level_page)
+                continue;
+        } else if (effect->category != edpp_effect_list) {
             continue;
         }
 
         bool placed = false;
         for (const edpp_particle_s &particle : edpp_ptls) {
-            if (particle.instance_id != 99999 && particle.instance_id != -1 && particle.effect_index == index) {
+            if (particle.instance_id != -1 && particle.instance_id != 99999 && particle.effect_index == index) {
                 placed = true;
                 break;
             }
         }
-        eduiitem_s *item = eduiItemCheckCreate(index, placed ? edblack : eddarkred, index == edpp_create_type, 1,
-                                               cbPtlSelType, effect->name);
-        eduiMenuAddItem(ptltypemenu, item);
-        if (index == edpp_create_type) {
+        const i32 selected = index == edpp_create_type;
+        eduiMenuAddItem(ptltypemenu, eduiItemCheckCreate(index, placed ? edblack : eddarkred, selected, 1, cbPtlSelType,
+                                                         effect->name));
+        if (selected == 1) {
             found_selected = true;
-            ptltypemenu->selected = item;
+            ptltypemenu->selected = edui_last_item;
         }
     }
     eduiMenuSortItemsByTxt(ptltypemenu);
