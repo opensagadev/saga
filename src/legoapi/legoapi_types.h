@@ -3479,12 +3479,14 @@ struct minitrooperteam_s {
         struct {
             u8 formation_shape : 4;
             u8 formation_mode : 4;
-            u8 route_flags : 5;
+            u8 previous_mode : 4;
+            u8 mode_changed : 1;
             u8 route_index : 3;
-            u16 waypoint_flags : 3;
+            u16 waypoint_current : 3;
             u16 waypoint_index : 3;
             u16 waypoint_count : 3;
-            u16 team_bits : 7;
+            u16 team_side : 1;
+            u16 team_bits : 6;
         };
     };
     u8 trooper_count;

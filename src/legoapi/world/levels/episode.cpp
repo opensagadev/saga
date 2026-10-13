@@ -450,7 +450,7 @@ static void GenerateTrooperTeamShape(minitrooperteam_s *team, i32 initialize_rot
     NUVEC position;
     minisnowtrooper_s *trooper = team->troopers;
 
-    switch (team->formation_state & 0xf) {
+    switch (team->formation_shape) {
         case 0: {
             width.x = team->formation_width;
             width.z = 0.0f;
@@ -670,10 +670,7 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
 
     for (i32 i = 0; i < team_count; ++i) {
         minitrooperteam_s *team = &static_cast<minitrooperteam_s *>(world->mini_trooper_teams)[i];
-        u16 waypoint_data;
-        memcpy(&waypoint_data, &team->waypoint_state, sizeof(waypoint_data));
-        waypoint_data &= 0xfe3f;
-        memcpy(&team->waypoint_state, &waypoint_data, sizeof(waypoint_data));
+        team->waypoint_count = 0;
     }
 
     for (i32 team_index = 0; team_index < trooperteamcount; ++team_index) {
@@ -682,7 +679,7 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
         team->trooper_count = static_cast<u8>(trooper_count);
 
         const u8 side = trooper_side[team_index] & 1;
-        team->team_flags = (team->team_flags & ~2) | (side << 1);
+        team->team_side = side;
         team->bolt_type = trooper_boltid[side];
         team->debris_timer = static_cast<f32>(qrand()) * (10.0f / 65535.0f) + 4.0f;
 
@@ -695,11 +692,8 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
         }
 
         const u32 state_flags = team->state_flags;
-        u16 waypoint_data;
-        memcpy(&waypoint_data, &team->waypoint_state, sizeof(waypoint_data));
-        waypoint_data = (waypoint_data & 0xfe3f) | ((static_cast<u8>(team->path->length) & 7) << 6);
-        memcpy(&team->waypoint_state, &waypoint_data, sizeof(waypoint_data));
-        team->route_state = (team->route_state & 0x1f) | ((team_index % 5) << 5);
+        team->waypoint_count = team->path->length;
+        team->route_index = team_index % 5;
         team->route_point = &team->path->pts[0];
         team->state_flags = state_flags | 5;
         team->origin_x = team->route_point->x;
@@ -711,18 +705,18 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
             NUVEC direction;
             NuVecSub(&direction, &team->path->pts[0], &team->path->pts[1]);
             team->facing_angle = NuAtan2D(direction.x, direction.z);
-            team->formation_state = (team->formation_state & 0xf0) | 1;
+            team->formation_shape = 1;
         } else {
             team->facing_angle = static_cast<u16>(qrand());
-            team->formation_state = (team->formation_state & 0xf0) | (qrand() / (0xffff / 3 + 1) & 0xf);
+            team->formation_shape = qrand() / (0xffff / 3 + 1);
         }
 
         GenerateTrooperTeamShape(team, 1);
-        if ((team->formation_state & 0xf) == 1) {
-            team->formation_state &= 0xf;
+        if (team->formation_shape == 1) {
+            team->formation_mode = 0;
             team->state_timer = static_cast<f32>(qrand()) * (10.0f / 65535.0f);
         }
-        team->formation_state = (team->formation_state & 0xf) | 0x30;
+        team->formation_mode = 3;
 
         shadow_position.x = team->route_point->x;
         shadow_position.z = team->route_point->z;
@@ -746,7 +740,7 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
             team->troopers[i].speed_divisor = 6;
             troopers = team->troopers;
             minisnowtrooper_s *trooper = &troopers[i];
-            if ((team->formation_state & 0xf) == 1) {
+            if (team->formation_shape == 1) {
                 trooper->timer = 0.0f;
             } else {
                 trooper->timer = static_cast<f32>(i) * (1.0f / static_cast<f32>(static_cast<i32>(team->trooper_count)));
