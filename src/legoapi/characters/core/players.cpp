@@ -892,21 +892,19 @@ i32 Player_HasFastBuild(GameObject_s *player) {
 void PlayerItemTypes_Init(PLAYERITEMTYPE_s *types) {
     PlayerItemType = NULL;
     PLAYERITEMTYPECOUNT = 0;
-    if (types == NULL)
-        return;
-
-    PlayerItemType = types;
-    if (types->id == -1) {
-        PlayerItemType = NULL;
-        return;
+    if (types != NULL) {
+        PlayerItemType = types;
+        if (types->id != -1) {
+            i32 count = 0;
+            do {
+                types++;
+                count++;
+            } while (types->id != -1);
+            PLAYERITEMTYPECOUNT = count;
+        } else {
+            PlayerItemType = NULL;
+        }
     }
-
-    i32 count = 0;
-    do {
-        types++;
-        count++;
-    } while (types->id != -1);
-    PLAYERITEMTYPECOUNT = count;
 }
 
 void Player_ResetContexts(PLAYERPACKET_s *packet) {

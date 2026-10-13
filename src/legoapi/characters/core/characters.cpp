@@ -633,10 +633,11 @@ i32 RedirectAnim(char *path, ANIMREDIRECT *redirects, ANIMLIST_s *animation_list
 }
 
 void CharScenes_Init(variptr_u *buf, variptr_u *) {
-    buf->addr = ALIGN(buf->addr, 4);
-    CharScene_Area = reinterpret_cast<CHARSCENE_s *>(buf->void_ptr);
-    buf->addr += static_cast<usize>(CHARCOUNT) * sizeof(*CharScene_Area);
-    memset(CharScene_Area, 0, static_cast<usize>(CHARCOUNT) * sizeof(*CharScene_Area));
+    const usize size = static_cast<usize>(CHARCOUNT) * sizeof(*CharScene_Area);
+    const usize area = ALIGN(buf->addr, 4);
+    CharScene_Area = reinterpret_cast<CHARSCENE_s *>(area);
+    buf->addr = area + size;
+    memset(reinterpret_cast<void *>(area), 0, size);
 }
 
 void CharScenes_LevelLoad(WORLDINFO *world) {
@@ -1858,14 +1859,17 @@ void SetGameObjectCharacterData(GameObject_s *obj) {
 }
 
 void CollectCharactersOff_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    if (stage->field_0x14 == 0) {
-        stage->field_0x18 = 0.0f;
-        stage->field_0x1c = 1.0f;
-        stage->field_0x14 = 1;
-    } else if (stage->field_0x14 == 1) {
-        stage->field_0x18 += elapsed;
-        if (stage->field_0x18 >= stage->field_0x1c)
-            NextStatusStage(packet);
+    switch (stage->field_0x14) {
+        case 0:
+            stage->field_0x18 = 0.0f;
+            stage->field_0x1c = 1.0f;
+            stage->field_0x14 = 1;
+            break;
+        case 1:
+            stage->field_0x18 += elapsed;
+            if (stage->field_0x18 >= stage->field_0x1c)
+                NextStatusStage(packet);
+            break;
     }
 }
 
