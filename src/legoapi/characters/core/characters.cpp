@@ -763,18 +763,20 @@ GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle) {
     if (Mission_Active(NULL) != NULL || name == NULL)
         return NULL;
     GameObject_s *object = GetNamedGameObject(WORLD->ai_sys, name);
-    if (object == NULL || (object->apiobj.field_0x1f8 & 0x1000) != 0)
+    if (object == NULL || (object->apiobj.flags_high & 0x10) != 0)
         return NULL;
     if (FreePlay != 0 && (object->apiobj.field_0x1f4 & 0x400) == 0)
         return NULL;
     if (object->ai.field_0x134 != 0xff) {
         ResetAICreature(object, WORLD->ai_sys);
     } else {
-        object->apiobj.field_0x1f8 |= 0x1000;
+        object->apiobj.flags_high |= 0x10;
         AIScriptSetBaseScriptStateByName(reinterpret_cast<AISCRIPTPROCESS *>(&object->ai), const_cast<char *>("Base"));
         if (position != NULL) {
             object->apiobj.position = *position;
-            object->apiobj.field_0x276 = object->apiobj.facing_angle = object->apiobj.movement_facing_angle = angle;
+            object->apiobj.field_0x276 = angle;
+            object->apiobj.facing_angle = angle;
+            object->apiobj.movement_facing_angle = angle;
             AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, &object->ai, 0xff, 1);
             object->apiobj.initial_position = object->apiobj.position;
             object->apiobj.collision_position = object->apiobj.position;
