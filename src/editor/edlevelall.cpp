@@ -2174,29 +2174,34 @@ i32 LevelEditor::Load(char *filename, variptr_u *buffer, variptr_u *buffer_end, 
     // The original keeps these stream descriptors 16-byte aligned in a realigned frame.
     MemoryBuffer source
         __attribute__((aligned(16))) = {buffer, buffer_end, 0, static_cast<u32>(buffer_end->addr - buffer->addr)};
+    MemoryBuffer scratch __attribute__((aligned(16)));
+    scratch.position = NULL;
+    scratch.end = NULL;
     if (editor_buffer_from_front == 0) {
         editor_buffer_end = *buffer_end;
         editor_buffer_begin.addr = buffer_end->addr - 0x20000;
     }
 
-    char *basename = NuStrRChr(filename, '/');
-    i32 basename_length = NuStrLen(basename + 1);
-    char scene_name[32];
-    char directory[128];
-    NuStrNCpy(scene_name, basename + 1, basename_length - 3);
-    NuStrNCpy(directory, filename, NuStrLen(filename) - basename_length);
-    Placeable::CurrentLedFile = static_cast<i16>(FindSceneId(scene_name));
-    if (Placeable::CurrentLedFile != -1) {
-        NuStrCpy(scenes[Placeable::CurrentLedFile].directory, directory);
-        current_led_file = Placeable::CurrentLedFile;
-    } else {
-        current_led_file = -1;
+    {
+        char *basename = NuStrRChr(filename, '/');
+        i32 basename_length = NuStrLen(basename + 1);
+        // The original keeps these name buffers 16-byte aligned and reuses their slots for the stream.
+        char scene_name[32] __attribute__((aligned(16)));
+        char directory[128] __attribute__((aligned(16)));
+        NuStrNCpy(scene_name, basename + 1, basename_length - 3);
+        NuStrNCpy(directory, filename, NuStrLen(filename) - basename_length);
+        Placeable::CurrentLedFile = static_cast<i16>(FindSceneId(scene_name));
+        i16 led_file = -1;
+        if (Placeable::CurrentLedFile != -1) {
+            NuStrCpy(scenes[Placeable::CurrentLedFile].directory, directory);
+            led_file = Placeable::CurrentLedFile;
+        }
+        current_led_file = led_file;
     }
 
     editor_buffer_cursor = editor_buffer_begin;
-    MemoryBuffer scratch
-        __attribute__((aligned(16))) = {&editor_buffer_cursor, &editor_buffer_end, 0,
-                                        static_cast<u32>(editor_buffer_end.addr - editor_buffer_begin.addr)};
+    scratch = {&editor_buffer_cursor, &editor_buffer_end, 0,
+               static_cast<u32>(editor_buffer_end.addr - editor_buffer_begin.addr)};
     SetSaveFilename(filename);
     if (!multi_load_active) {
         theClassEditor.PreLoadInitialisation(&source, &scratch);
