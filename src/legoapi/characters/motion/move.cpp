@@ -5214,7 +5214,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                 ComboHitFrame(object, object->combo_branch == 2 ? 2 : 1);
             }
         }
-        bool can_queue = false;
+        i32 can_queue = 0;
         if (time != NULL) {
             if ((object->context_flags & 0x10) == 0) {
                 const f32 frame = AnimListFrame(object->apiobj.character_model, object->context_animation, 1);
@@ -7633,7 +7633,7 @@ void ApplyGravity(GameObject_s *object, float *gravity, float hover_height, floa
     }
 
     float height = object->hover_height_override == 1.0e9f ? hover_height : object->hover_height_override;
-    bool falling_hover = false;
+    i32 falling_hover = 0;
     if (height != 0.0f && object->fall_recovery_timer > 0.0f && WORLD->current_level != E2VEHICLEBONUSA_LDATA) {
         if ((GUNSHIP_ADATA != NULL && GUNSHIP_ADATA == WORLD->area) ||
             (BONUS_GUNSHIP_ADATA != NULL && BONUS_GUNSHIP_ADATA == WORLD->area)) {
@@ -7641,7 +7641,7 @@ void ApplyGravity(GameObject_s *object, float *gravity, float hover_height, floa
         } else if (static_cast<GAMECHARACTERDATA *>(character->field11_0x24)->field275_0x116 == 2 &&
                    static_cast<i8>(flags) < 0) {
             if (object->fall_hover_height != 2.0e6f) {
-                falling_hover = true;
+                falling_hover = 1;
                 if (object->fall_recovery_timer >= 0.6f) {
                     object->fall_hover_height -= FRAMETIME * 3.0f;
                 }
@@ -9361,7 +9361,7 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
 
             const u16 input_angle = GamePad_InputAngle(object, pad);
             if (object->in_narrow_socket) {
-                bool turn = false;
+                i32 turn = 0;
                 if (object->delayed_turn_timer <= 0.0f) {
                     if (abs(RotDiff(object->yrot, object->apiobj.movement_facing_angle)) <= 0x4000) {
                         turn = abs(RotDiff(object->yrot, input_angle)) > 0x6000;
