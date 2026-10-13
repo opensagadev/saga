@@ -2474,7 +2474,7 @@ PART_s *TargetPart(GameObject_s *object, nuvec_s *position, nuvec_s *direction, 
     NUVEC aim = *direction;
     BOLTTYPE_s *bolt = BoltType_FindByID(bolt_id, WORLD);
     PART_s *part = Part;
-    f32 min_x = position->x - radius, max_x = position->x + radius;
+    f32 max_x = position->x + radius, min_x = position->x - radius;
     f32 min_z = position->z - radius, max_z = position->z + radius;
     if (directional != 0) {
         aim = *direction;
