@@ -65,11 +65,11 @@ namespace {
             return;
         }
 
-        memset(progress, 0, sizeof(*progress));
-        for (i32 word = 0; word < GIZBUILDIT_PROGRESS_WORDS; ++word) {
-            progress->active[word] = 0xffffffff;
-            progress->visible[word] = 0xffffffff;
-        }
+        memset(progress->completed, 0, sizeof(progress->completed));
+        memset(progress->active, 0xff, sizeof(progress->active));
+        memset(progress->visible, 0xff, sizeof(progress->visible));
+        memset(progress->reward_released, 0, sizeof(progress->reward_released));
+        memset(progress->built_object_count, 0, sizeof(progress->built_object_count));
     }
 
     enum BUILDIT_GAMEPLAY_CONSTANTS : i32 {
@@ -309,13 +309,9 @@ static void GizBuildIts_StoreProgress(void *, void *data, void *progress_ptr) {
     }
 
     ClearBuildItProgress(progress);
-    i32 count = buildit_sys->count;
-    if (count > GIZBUILDIT_PROGRESS_CAPACITY) {
-        count = GIZBUILDIT_PROGRESS_CAPACITY;
-    }
-
-    for (i32 index = 0; index < count; ++index) {
-        const GIZBUILDIT_s &buildit = buildit_sys->buildits[index];
+    const GIZBUILDIT_s *buildit_entry = buildit_sys->buildits;
+    for (i32 index = 0; index < buildit_sys->count && index != GIZBUILDIT_PROGRESS_CAPACITY; ++index, ++buildit_entry) {
+        const GIZBUILDIT_s &buildit = *buildit_entry;
         const i32 word = index >> 5;
         const u32 bit = 1u << (index & 31);
         if (buildit.build_state != GIZBUILDIT_BUILD_IDLE) {
