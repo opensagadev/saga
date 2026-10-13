@@ -534,16 +534,16 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
 
         const u8 output_count = static_cast<u8>(EdFileReadChar());
         const i32 output_points = static_cast<signed char>(output_count);
-        u8 spinner_type = 4;
+        i32 spinner_type = 4;
         u32 spinner_state_flags = 0;
         f32 animation_speed = 0.0f;
         f32 initial_animation_point = 1.0f;
         f32 spinner_field_98 = 0.0f;
-        u8 spinner_flags = 0;
+        i32 spinner_flags = 0;
         bool read_game_anim_set = false;
 
         if (version > 1) {
-            spinner_type = static_cast<u8>(EdFileReadChar());
+            spinner_type = static_cast<signed char>(EdFileReadChar());
             if (version <= 2) {
                 GameAnimSet_RemoveAllObjects(world->spinners[index].anim_set);
                 animation_speed = 1.0f;
@@ -556,7 +556,7 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
                 } else {
                     animation_speed = EdFileReadFloat();
                     if (version > 5) {
-                        spinner_flags = static_cast<u8>(EdFileReadChar());
+                        spinner_flags = static_cast<signed char>(EdFileReadChar());
                     }
                     GameAnimSet_RemoveAllObjects(world->spinners[index].anim_set);
                     if (version == 4) {
@@ -646,9 +646,9 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
         } else {
             initial_animation_point = animation_speed;
             if (spinner->anim_set != NULL && spinner->primary_anim_obj != NULL) {
+                const f32 start_frame = spinner->primary_anim_obj->start_frame;
+                const f32 duration = spinner->primary_anim_obj->end_frame - start_frame;
                 if (output_points > 0) {
-                    const f32 start_frame = spinner->primary_anim_obj->start_frame;
-                    const f32 duration = spinner->primary_anim_obj->end_frame - start_frame;
                     {
                         const f32 interval = duration / static_cast<f32>(output_points - 1);
                         for (i32 point = 0; point < output_points; ++point) {
