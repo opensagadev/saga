@@ -2650,11 +2650,10 @@ void PropertyTool::BringToFront(PropertyMenu *menu) {
     menu->next = NULL;
     --menu_count;
     menu->order = -2;
-    PropertyMenu *position = active_menu;
-    if (position != NULL && position->order < -1) {
-        do {
-            position = position->next;
-        } while (position != NULL && position->order < -1);
+    PropertyMenu *position;
+    for (position = active_menu; position != NULL; position = position->next) {
+        if (position->order >= -1)
+            break;
     }
     if (position == NULL) {
         menu->previous = last_menu;
