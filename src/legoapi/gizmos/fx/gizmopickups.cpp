@@ -231,18 +231,18 @@ namespace {
         return 0;
     }
 
-    f32 GetAreaPickupScale(const WORLDINFO *world) {
+    // Sets AreaPickupScale from the current area's flags and returns it.
+    f32 UpdateAreaPickupScale(const WORLDINFO *world) {
+        AreaPickupScale = 1.0f;
         if (world->level_sub_id < 0 || world->level_sub_id >= AREACOUNT) {
-            return 1.0f;
+            return AreaPickupScale;
         }
-        const u16 flags = ADataList[world->level_sub_id].flags;
-        if ((flags & AREAFLAG_NOPICKUPGRAVITY) != 0) {
-            return 6.0f;
+        if ((ADataList[world->level_sub_id].flags & AREAFLAG_NOPICKUPGRAVITY) != 0) {
+            AreaPickupScale = 6.0f;
+        } else if ((ADataList[world->level_sub_id].flags & AREAFLAG_VEHICLE_AREA) != 0) {
+            AreaPickupScale = BonusArea == 0 ? 5.0f : 3.0f;
         }
-        if ((flags & AREAFLAG_VEHICLE_AREA) != 0) {
-            return BonusArea == 0 ? 5.0f : 3.0f;
-        }
-        return 1.0f;
+        return AreaPickupScale;
     }
 
     void ClearPickupProgress(GIZMOPICKUPPROGRESS_s *progress) {
@@ -946,35 +946,23 @@ static void GizmoPickups_Reset(void *world_ptr, void *, void *progress_ptr) {
 static void *GizmoPickups_ReserveBufferSpace(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
-    GIZMOPICKUPRUNTIMESYS_s *pickup_sys = reinterpret_cast<GIZMOPICKUPRUNTIMESYS_s *>(world->giz_buffer.addr);
-    world->gizmo_pickup_sys = pickup_sys;
-    world->giz_buffer.addr += sizeof(*pickup_sys);
-    memset(pickup_sys, 0, sizeof(*pickup_sys));
+    world->gizmo_pickup_sys = reinterpret_cast<GIZMOPICKUPRUNTIMESYS_s *>(world->giz_buffer.addr);
+    world->giz_buffer.addr += sizeof(GIZMOPICKUPRUNTIMESYS_s);
+    memset(world->gizmo_pickup_sys, 0, sizeof(GIZMOPICKUPRUNTIMESYS_s));
 
+    GIZMOPICKUPRUNTIMESYS_s *pickup_sys = world->gizmo_pickup_sys;
     pickup_sys->draw_distance = 10.0f;
-    AreaPickupScale = 1.0f;
-    const i32 area_index = world->level_sub_id;
-    if (area_index >= 0 && area_index < AREACOUNT) {
-        const u16 flags = ADataList[area_index].flags;
-        if ((flags & AREAFLAG_NOPICKUPGRAVITY) != 0) {
-            AreaPickupScale = 6.0f;
-        } else if ((flags & AREAFLAG_VEHICLE_AREA) != 0) {
-            AreaPickupScale = BonusArea == 0 ? 5.0f : 3.0f;
-        }
-    }
-    pickup_sys->pickup_scale = AreaPickupScale;
+    pickup_sys->pickup_scale = UpdateAreaPickupScale(world);
     SetAreaPickupGravity(world->level_sub_id, world->level_idx);
 
-    usize buffer_address = world->giz_buffer.addr;
+    pickup_sys = world->gizmo_pickup_sys;
     if (world->current_level->max_pickups != 0) {
-        buffer_address = ALIGN(buffer_address, 4);
-        world->giz_buffer.addr = buffer_address;
-        pickup_sys->pickups = reinterpret_cast<GIZMOPICKUP_s *>(buffer_address);
-        buffer_address += world->current_level->max_pickups * sizeof(GIZMOPICKUP_s);
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
+        pickup_sys->pickups = reinterpret_cast<GIZMOPICKUP_s *>(world->giz_buffer.addr);
+        world->giz_buffer.addr += world->current_level->max_pickups * sizeof(GIZMOPICKUP_s);
     }
-    buffer_address = ALIGN(buffer_address, 4);
-    world->giz_buffer.addr = buffer_address;
-    pickup_sys->temporary_pickups = reinterpret_cast<GIZMOPICKUP_s *>(buffer_address);
+    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
+    pickup_sys->temporary_pickups = reinterpret_cast<GIZMOPICKUP_s *>(world->giz_buffer.addr);
     world->giz_buffer.addr += GIZMOPICKUP_TEMPORARY_CAPACITY * sizeof(GIZMOPICKUP_s);
     return pickup_sys;
 }
@@ -995,7 +983,7 @@ static i32 GizmoPickups_Load(void *world_ptr, void *) {
         pickup_sys->draw_distance = EdFileReadFloat();
         pickup_sys->pickup_scale = EdFileReadFloat();
         if (version == 5) {
-            pickup_sys->pickup_scale = GetAreaPickupScale(world);
+            pickup_sys->pickup_scale = UpdateAreaPickupScale(world);
         }
         AreaPickupScale = pickup_sys->pickup_scale;
     } else {
