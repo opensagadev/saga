@@ -1333,15 +1333,16 @@ static void CutScene_CreateCharacterInstance(NUGCUTCHAR_s *character, instNUGCUT
     }
 }
 
+// The loop re-reads the active cut through CutStopInfo after each SmartTextEx call.
+#define CUT_STOP static_cast<CUTINFO *>(CutStopInfo)
 void CutScene_DrawSubtitles() {
-    CUTINFO *cut = static_cast<CUTINFO *>(CutStopInfo);
-    if (cut == NULL || cut->subtitle_data == NULL || cut->subtitle_count == 0) {
+    if (CutStopInfo == NULL || CUT_STOP->subtitle_data == NULL) {
         return;
     }
 
-    CUTSCENESUBTITLE *subtitle = cut->subtitle_data;
-    for (i32 i = 0; i < cut->subtitle_count; ++i, ++subtitle) {
-        f32 frame = cut->field_58;
+    CUTSCENESUBTITLE *subtitle = CUT_STOP->subtitle_data;
+    for (i32 i = 0; i < CUT_STOP->subtitle_count; ++i, ++subtitle) {
+        f32 frame = CUT_STOP->field_58;
         if (frame >= subtitle->start_frame && subtitle->end_frame >= frame) {
             f32 alpha = 1.0f;
             if (subtitle->fade_time > 0.0f) {
@@ -1362,6 +1363,7 @@ void CutScene_DrawSubtitles() {
         }
     }
 }
+#undef CUT_STOP
 
 void CutScene_StoppedFn_LSW(CUTINFO *cut) {
     LOG_INFO("cutscene stopped cut=%p world=%p", (void *)cut, (void *)WORLD);
