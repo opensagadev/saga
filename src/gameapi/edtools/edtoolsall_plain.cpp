@@ -2695,19 +2695,11 @@ extern "C" {
         } else if (page_type == 5) {
             page_index = 1;
         } else {
-            if (edpp_page_used[2] == 0)
-                page_index = 2;
-            else if (edpp_page_used[3] == 0)
-                page_index = 3;
-            else if (edpp_page_used[4] == 0)
-                page_index = 4;
-            else if (edpp_page_used[5] == 0)
-                page_index = 5;
-            else if (edpp_page_used[6] == 0)
-                page_index = 6;
-            else if (edpp_page_used[7] == 0)
-                page_index = 7;
-            else
+            for (page_index = 2; page_index < 8; ++page_index) {
+                if (edpp_page_used[page_index] == 0)
+                    break;
+            }
+            if (page_index == 8)
                 return -1;
         }
 
