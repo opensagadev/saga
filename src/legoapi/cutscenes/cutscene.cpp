@@ -2756,33 +2756,30 @@ static __used__ void CutScene_OverrideConfigFileName_LSW(char *filename, int, in
 }
 
 void NewCopyAnims(instNUGCUTSCENE_s *instance) {
+    // stream_buffer_0/1 are adjacent (asserted in nugcutscene.h); the original indexes them by flag bit.
     NUGCUTSCENE_s *source = instance->cutscene_copy;
-    NUGCUTSCENE_s *destination =
-        (instance->flags_8b & 0x10) != 0 ? instance->stream_buffer_1 : instance->stream_buffer_0;
+    NUGCUTSCENE_s *destination = (&instance->stream_buffer_0)[(static_cast<u32>(instance->flags_8b) >> 4) & 1];
     instance->cutscene = destination;
 
     destination->filename = source->filename;
     destination->stream_buffer_0 = source->stream_buffer_0;
     destination->stream_buffer_1 = source->stream_buffer_1;
     reinterpret_cast<u8 *>(&destination->flags)[0] =
-        (reinterpret_cast<u8 *>(&destination->flags)[0] & ~2U) | (reinterpret_cast<u8 *>(&source->flags)[0] & 2);
+        (reinterpret_cast<u8 *>(&source->flags)[0] & 2) | (reinterpret_cast<u8 *>(&destination->flags)[0] & ~2U);
 
     NUGCUTLOCATORSYS_s *destination_locators = destination->locator_system;
     NUGCUTLOCATORSYS_s *source_locators = source->locator_system;
     if (destination_locators != NULL) {
-        if (destination_locators->locator_count != 0) {
-            auto destination_locators_locator_count = destination_locators->locator_count;
-            for (i32 i = 0; i < destination_locators_locator_count; ++i) {
-                nuanimdata2_s *animation = destination_locators->locators[i].animation;
-                destination_locators->locators[i] = source_locators->locators[i];
-                destination_locators->locators[i].animation = animation;
-            }
+        for (i32 i = 0; i < destination_locators->locator_count; ++i) {
+            nuanimdata2_s *animation = destination_locators->locators[i].animation;
+            destination_locators->locators[i] = source_locators->locators[i];
+            destination_locators->locators[i].animation = animation;
         }
         destination_locators->types = source_locators->types;
     }
 
-    NUGCUTRIGIDSYS_s *source_rigids = source->rigid_system;
     NUGCUTRIGIDSYS_s *destination_rigids = destination->rigid_system;
+    NUGCUTRIGIDSYS_s *source_rigids = source->rigid_system;
     if (destination_rigids != NULL && destination_rigids->rigids != NULL && destination_rigids->count != 0) {
         for (i32 i = 0; i < destination_rigids->count; ++i) {
             nuanimdata2_s *animation = destination_rigids->rigids[i].animation;
@@ -2790,36 +2787,37 @@ void NewCopyAnims(instNUGCUTSCENE_s *instance) {
             destination_rigids->rigids[i] = source_rigids->rigids[i];
             destination_rigids->rigids[i].animation = animation;
             destination_rigids->rigids[i].state_animation = state_animation;
-            NUGCUTRIGID_s *rigid = &destination_rigids->rigids[i];
-            if (rigid->locator != 0 && rigid->locator_count != 0 && rigid->locator_index != 0xff) {
-                rigid->locator = reinterpret_cast<usize>(&destination_locators->locators[rigid->locator_index]);
+            if (destination_rigids->rigids[i].locator != 0 && destination_rigids->rigids[i].locator_count != 0 &&
+                destination_rigids->rigids[i].locator_index != 0xff) {
+                destination_rigids->rigids[i].locator = reinterpret_cast<usize>(
+                    &destination->locator_system->locators[destination_rigids->rigids[i].locator_index]);
             }
         }
     }
 
-    NUGCUTCHARSYS_s *source_characters = source->character_system;
     NUGCUTCHARSYS_s *destination_characters = destination->character_system;
+    NUGCUTCHARSYS_s *source_characters = source->character_system;
     if (destination_characters != NULL && destination_characters->character_count != 0) {
-        auto destination_characters_character_count = destination_characters->character_count;
-        for (i32 i = 0; i < destination_characters_character_count; ++i) {
-            NUGCUTCHAR_s *character = &destination_characters->characters[i];
-            nuanimdata2_s *animation = character->animation;
-            nuanimdata2_s *face_animation = character->face_animation;
-            nuanimdata2_s *extra_animation = character->extra_animation;
-            NUGCUTLOCATOR_s *locator = character->locator;
-            *character = source_characters->characters[i];
-            character->animation = animation;
-            character->face_animation = face_animation;
-            character->extra_animation = extra_animation;
-            if (locator != NULL && character->has_locator != 0 && character->locator_index != 0xff) {
-                character->locator = &destination_locators->locators[character->locator_index];
+        for (i32 i = 0; i < destination_characters->character_count; ++i) {
+            nuanimdata2_s *animation = destination_characters->characters[i].animation;
+            nuanimdata2_s *face_animation = destination_characters->characters[i].face_animation;
+            nuanimdata2_s *extra_animation = destination_characters->characters[i].extra_animation;
+            NUGCUTLOCATOR_s *locator = destination_characters->characters[i].locator;
+            destination_characters->characters[i] = source_characters->characters[i];
+            destination_characters->characters[i].animation = animation;
+            destination_characters->characters[i].face_animation = face_animation;
+            destination_characters->characters[i].extra_animation = extra_animation;
+            if (locator != NULL && destination_characters->characters[i].has_locator != 0 &&
+                destination_characters->characters[i].locator_index != 0xff) {
+                destination_characters->characters[i].locator =
+                    &destination->locator_system->locators[destination_characters->characters[i].locator_index];
             }
         }
     }
 
-    if (destination->trigger_system != NULL) {
-        NUGCUTTRIGGERSYS_s *destination_triggers = destination->trigger_system;
-        NUGCUTTRIGGERSYS_s *source_triggers = source->trigger_system;
+    NUGCUTTRIGGERSYS_s *source_triggers = source->trigger_system;
+    NUGCUTTRIGGERSYS_s *destination_triggers = destination->trigger_system;
+    if (destination_triggers != NULL) {
         for (i32 i = 0; i < destination_triggers->event_count; ++i) {
             destination_triggers->events[i].field_00 = source_triggers->events[i].field_00;
             destination_triggers->events[i].field_04 = source_triggers->events[i].field_04;
