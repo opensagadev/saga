@@ -1896,6 +1896,16 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
     return mask;
 }
 
+void SetPlayerGroupPosition(f32 x, f32 y, f32 z) {
+    NUVEC offset = {0.0f, 0.0f, 0.2f};
+    for (i32 i = 0; i < PLAYERCOUNT; i++) {
+        NUVEC position = {x, y, z};
+        NuVecAdd(&position, &position, &offset);
+        ResetPlayer(Player[i], 1, &position, 1);
+        NuVecRotateY(&offset, &offset, 0x2000);
+    }
+}
+
 bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, float &distance_squared,
                             bool require_character_flags, u32 character_flags) {
     *nearest_player = NULL;
@@ -1924,16 +1934,6 @@ bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, fl
 #undef CONSIDER_PLAYER_DISTANCE
 
     return *nearest_player != NULL;
-}
-
-void SetPlayerGroupPosition(f32 x, f32 y, f32 z) {
-    NUVEC offset = {0.0f, 0.0f, 0.2f};
-    for (i32 i = 0; i < PLAYERCOUNT; i++) {
-        NUVEC position = {x, y, z};
-        NuVecAdd(&position, &position, &offset);
-        ResetPlayer(Player[i], 1, &position, 1);
-        NuVecRotateY(&offset, &offset, 0x2000);
-    }
 }
 
 i32 (*LastSafePosExtraFn)(GameObject_s *) = NULL;
