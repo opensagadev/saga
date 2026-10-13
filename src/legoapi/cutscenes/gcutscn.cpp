@@ -87,15 +87,17 @@ void CutScenePlayer_GetText(i32 id, char *title, char *subtitle, i32 mode) {
             NuStrCpy(subtitle, "?");
         return;
     }
-    CUTSCENEPLAYERCLIP *clip = &CutScenePlayer->clips[id];
     if (title != NULL) {
         if (mode <= 1) {
-            sprintf(title, CutScenePlayer->clip_text != NULL ? TTab[*CutScenePlayer->clip_text] : "Clip %i", id + 1);
+            if (CutScenePlayer->clip_text != NULL)
+                sprintf(title, TTab[*CutScenePlayer->clip_text], id + 1);
+            else
+                sprintf(title, "Clip %i", id + 1);
         } else
             title[0] = 0;
         if (mode != 0) {
             char *type_text = NULL;
-            switch (clip->type) {
+            switch (CutScenePlayer->clips[id].type) {
                 case CLIP_INTRO:
                     if (CutScenePlayer->intro_text)
                         type_text = TTab[*CutScenePlayer->intro_text];
@@ -117,26 +119,27 @@ void CutScenePlayer_GetText(i32 id, char *title, char *subtitle, i32 mode) {
                 NuStrCat(title, " - ");
             else {
                 title[0] = 0;
-                i32 area = LDataList[clip->level_id].area_index;
-                if (mode != 2 && area != -1 && !(ADataList[area].flags & 2) &&
-                    static_cast<i8>(ADataList[area].area_index) != -1) {
-                    sprintf(title, "%s %i", TTab[tCHAPTER], static_cast<i8>(ADataList[area].area_index) + 1);
-                    NuStrCat(title, " - ");
+                if (mode != 2) {
+                    const i32 area = LDataList[CutScenePlayer->clips[id].level_id].area_index;
+                    if (area != -1 && !(ADataList[area].flags & 2)) {
+                        const i32 chapter = static_cast<i8>(ADataList[area].area_index);
+                        if (chapter != -1) {
+                            sprintf(title, "%s %i", TTab[tCHAPTER], chapter + 1);
+                            NuStrCat(title, " - ");
+                        }
+                    }
                 }
             }
             NuStrCat(title, type_text);
         }
     }
     if (subtitle != NULL) {
-        LEVELDATA_s *level = &LDataList[clip->level_id];
+        LEVELDATA_s *level = &LDataList[CutScenePlayer->clips[id].level_id];
         if (level->area_index != -1) {
             AREADATA_s *area = &ADataList[level->area_index];
-            if (!(area->flags & 2)) {
-                NuStrCpy(subtitle, TTab[area->name_id]);
-                return;
-            }
-            if (level->episode_index != -1) {
-                NuStrCpy(subtitle, TTab[EDataList[level->episode_index].text_id]);
+            if (!(area->flags & 2) || level->episode_index != -1) {
+                const i32 text_id = !(area->flags & 2) ? area->name_id : EDataList[level->episode_index].text_id;
+                NuStrCpy(subtitle, TTab[text_id]);
                 return;
             }
         }
@@ -180,19 +183,19 @@ void CutScenePlayer_DrawGrid(COLLECTION_s *collection, i16 *ids, float x, float 
     i32 previous_area = -1, colour = -1;
     static const u8 colours[8][3] = {{255, 63, 0},  {255, 127, 0},  {255, 223, 0},  {0, 255, 63},
                                      {0, 127, 255}, {191, 31, 255}, {255, 31, 191}, {255, 255, 255}};
-    auto collection_count_y = collection->count_y;
     for (i32 row = 0; row <= rows; ++row, y += dy) {
         x = first_x;
         for (i32 column = 0; column < collection->count_x; ++column, x += dx) {
             const i32 i = row * collection->count_x + column;
-            if (i >= collection_count_y)
+            if (i >= collection->count_y)
                 continue;
-            collection->list[i].grid_x = x;
-            collection->list[i].grid_y = y;
+            COLLECTID *item = &collection->list[i];
+            item->grid_y = y;
+            item->grid_x = x;
             if (alpha <= 0.0f)
                 continue;
             i32 object = i == selected ? (menu_flash ? 168 : 166) : 167;
-            f32 opacity = CutScenePlayer_CanStart(ids[i]) ? alpha : alpha * 0.375f;
+            f32 opacity = CutScenePlayer_CanStart(ids[i]) ? alpha : 0.375f * alpha;
             DrawPanel3DObject(x, y, 1.0f, scale, scale, scale, 0, 0, 0, &WORLD->lev_objs[object].special, 0, opacity);
             menu->item_x[i] = x;
             menu->item_y[i] = y;

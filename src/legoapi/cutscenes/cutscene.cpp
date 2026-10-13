@@ -1225,7 +1225,7 @@ extern "C" {
             NUGCUTLOCATORSYS_s *locator_system = cutscene->locator_system;
             for (i32 i = 0; i < rigid_system->count; ++i) {
                 NUGCUTRIGID_s *rigid = &rigid_system->rigids[i];
-                nuhspecial_s special;
+                nuhspecial_s special __attribute__((aligned(16)));
                 if (NuSpecialFind(scene, &special, rigid->name, 1) != 0) {
                     rigid->flags |= 4;
                     rigid->scene = special.scene;
@@ -1247,7 +1247,7 @@ extern "C" {
             NuCutSceneFindCharacters(cutscene);
         }
         NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
-        if (system != NULL && system->types != NULL && system->type_count != 0) {
+        if (system != NULL && system->type_count != 0) {
             for (u32 i = 0; i < system->type_count; ++i) {
                 NUGCUTLOCATORTYPE_s *type = &system->types[i];
                 if ((type->flags & 1) != 0) {
@@ -1258,7 +1258,7 @@ extern "C" {
                     }
                 } else if ((type->flags & 2) != 0) {
                     i32 function_index = -1;
-                    if (locatorfns != NULL && type->name != NULL && locatorfns[0].name != NULL) {
+                    if (locatorfns != NULL && locatorfns[0].name != NULL) {
                         for (i32 j = 0; locatorfns[j].name != NULL; ++j) {
                             if (NuStrICmp(type->name, locatorfns[j].name) != 0) {
                                 continue;
@@ -1268,16 +1268,21 @@ extern "C" {
                         }
                     }
                     type->function_index = static_cast<u16>(function_index);
-                } else if ((type->flags & 0x10) != 0 && LookupLocatorVfxFn != NULL && type->name != NULL) {
-                    char *underscore = NuStrRChr(type->name, '_');
-                    if (underscore != NULL && underscore[1] > '/' && underscore[1] < ':') {
-                        *underscore = '\0';
+                } else if ((type->flags & 0x10) != 0) {
+                    if (LookupLocatorVfxFn != NULL) {
+                        char *underscore = NuStrRChr(type->name, '_');
+                        if (underscore != NULL && underscore[1] > '/' && underscore[1] < ':') {
+                            *underscore = '\0';
+                        }
+                        type->function_index = static_cast<u16>(LookupLocatorVfxFn(type->name));
                     }
-                    type->function_index = static_cast<u16>(LookupLocatorVfxFn(type->name));
-                } else if ((type->flags & 4) != 0 && NuCutSceneSFXFixUp != NULL && type->name != NULL) {
-                    type->function_index = static_cast<u16>(NuCutSceneSFXFixUp(reinterpret_cast<usize>(type->name)));
-                    if (static_cast<i16>(type->function_index) != -1) {
-                        cutscene->flags |= 4;
+                } else if ((type->flags & 4) != 0) {
+                    if (NuCutSceneSFXFixUp != NULL) {
+                        type->function_index =
+                            static_cast<u16>(NuCutSceneSFXFixUp(reinterpret_cast<usize>(type->name)));
+                        if (static_cast<i16>(type->function_index) != -1) {
+                            cutscene->flags |= 4;
+                        }
                     }
                 }
             }
@@ -1290,8 +1295,8 @@ extern "C" {
                 NUGCUTTRIGGEREVENT_s *event = &trigger_system->events[i];
                 // The event's target index is the low 16 bits of field_00 (read back as i16 elsewhere).
                 u16 *target_index = reinterpret_cast<u16 *>(&event->field_00);
-                *target_index = 0xffff;
                 for (i32 j = 0; j < table->count; ++j) {
+                    *target_index = 0xffff;
                     if (NuStrICmp(static_cast<char *>(event->field_04), table->entries[j].name) == 0) {
                         *target_index = static_cast<u16>(j);
                         break;

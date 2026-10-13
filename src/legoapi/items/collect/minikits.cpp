@@ -164,7 +164,7 @@ i32 AllMiniKitsDone(AREASAVE_s *save) {
 char *LEGOASCII_BIGARROW = NULL;
 i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
 void CharMiniKit_Draw(i32 id, numtx_s *matrix, i32 reflection_axis, float reflection_plane, float reflection_height) {
-    NUMTX draw_matrix;
+    NUMTX_ALIGNED16 draw_matrix;
     if (Char_MiniKit == NULL)
         return;
     HUBMINIKITPIECES_s *kit = Char_MiniKit[id];

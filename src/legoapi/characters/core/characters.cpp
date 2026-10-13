@@ -1277,7 +1277,7 @@ void UpdateCharacterIDs() {
 
 void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_u buf_end) {
     char path[128];
-    if (CharScene_Area == NULL || apicharsys->loaded_model_count == 0) {
+    if (CharScene_Area == NULL) {
         return;
     }
 
@@ -1285,9 +1285,8 @@ void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_
         const i32 model_id = apicharsys->models[i].model_id;
         CHARSCENE_s &entry = CharScene_Area[model_id];
         if (entry.scene == NULL && (CDataList[model_id].flags & 1) != 0) {
-
-            i32 list_index;
-            if (InModelList(list, model_id, &list_index) == 0 || list[list_index].count == 0) {
+            // The original reuses the loop counter as InModelList's output index.
+            if (InModelList(list, model_id, &i) == 0 || list[i].count == 0) {
                 continue;
             }
 

@@ -917,30 +917,22 @@ void MenuUpdateLoading(MENU_s *) {
             memcard_loadneeded = 0;
             memcard_loadfailed = 1;
         }
-        return;
-    }
-
-    if (memcard_loadstarted != 0) {
+    } else if (memcard_loadstarted != 0 || memcard_loadmessage_delay > 0.0f) {
         memcard_loadresult_delay = 1.0f;
-        return;
-    }
-    if (memcard_loadmessage_delay > 0.0f || memcard_loadresult_delay > 0.0f) {
-        return;
-    }
-
-    if (memcard_loadfailed == 0 && memcard_loadcorrupt == 0 && (memcard_autosave == 0 || saveload_autosave == -1)) {
-        BackupMenuNoFn();
+    } else if (memcard_loadresult_delay <= 0.0f) {
+        if (memcard_loadfailed == 0 && memcard_loadcorrupt == 0) {
+            if (memcard_autosave == 0 || saveload_autosave == -1) {
+                BackupMenuNoFn();
+            } else {
+                BackupMenuNoFn();
+                BackupMenuNoFn();
+                memcard_autosaveenabled = 1;
+                memcard_autosavedisabled = 0;
+                return;
+            }
+        }
         BackupMenu();
-        return;
     }
-    if (memcard_loadfailed == 0 && memcard_loadcorrupt == 0) {
-        BackupMenuNoFn();
-        BackupMenuNoFn();
-        memcard_autosaveenabled = 1;
-        memcard_autosavedisabled = 0;
-        return;
-    }
-    BackupMenu();
 }
 
 void MenuUpdateSaving(MENU_s *) {

@@ -29,7 +29,7 @@ i32 giztorpmachine_gizmotype_id;
 i32 PartDraw_Torp(PART_s *part) {
     i32 draw = PartDraw_Flickerer(part);
     if (draw != 0 && WORLD->lev_objs[0x7b].active != 0) {
-        NUMTX matrix = part->transform;
+        NUMTX_ALIGNED16 matrix = part->transform;
         NuMtxPreScaleU(&matrix, 0.1f * WORLD->giz_torp_machine_sys->scale);
         NuSpecialDrawAt(&WORLD->lev_objs[0x7b].special, &matrix);
     }

@@ -65,7 +65,7 @@ static void GizTurret_ReadAnimSetData(GAMEANIMOBJ_s *object, unsigned char versi
         GizTurretAnimObjectData fallback;
         GizTurretAnimObjectData *data = static_cast<GizTurretAnimObjectData *>(object->object_data);
         if (data == NULL) {
-            fallback = GizTurretAnimObjectData();
+            memset(&fallback, 0, sizeof(fallback));
             data = &fallback;
         }
         data->flags = static_cast<u8>(EdFileReadChar());

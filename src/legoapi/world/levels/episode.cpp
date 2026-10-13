@@ -849,7 +849,7 @@ void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id) {
     char name[32];
     for (i32 number = 1; number < 5; ++number) {
         TROOPERCANNON_s &cannon = troopercannons[cannon_index];
-        memset(&cannon, 0, sizeof(cannon));
+        cannon = TROOPERCANNON_s();
 
         sprintf(name, "trooper_cannon%d", number);
         cannon.buildit = GizBuildIt_Find(world, name);

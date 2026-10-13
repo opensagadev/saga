@@ -676,7 +676,8 @@ extern "C" {
     void DebFreeAllCreatedEffects(void) {
         for (i32 i = 0; i < maxdebkeys; ++i) {
             if (debkeydata[i].effect_index != 0 && debkeydata[i].field_2f9 != 0) {
-                i32 handle = i;
+                // Retail keeps the handle in a 16-byte aligned slot.
+                i32 handle __attribute__((aligned(16))) = i;
                 DebFreeInstantly(&handle);
             }
         }
@@ -696,7 +697,8 @@ extern "C" {
         for (i32 i = 0; i < maxdebkeys; ++i) {
             const i16 effect_index = debkeydata[i].effect_index;
             if (effect_index != 0 && debtab[effect_index]->time_group == 4) {
-                i32 handle = i;
+                // Retail keeps the handle in a 16-byte aligned slot.
+                i32 handle __attribute__((aligned(16))) = i;
                 DebFreeInstantly(&handle);
             }
         }

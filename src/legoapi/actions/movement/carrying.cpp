@@ -763,7 +763,7 @@ void LetGoOfBalloon(GameObject_s *object) {
         return;
     }
 
-    NUMTX matrix;
+    NUMTX_ALIGNED16 matrix;
     NuMtxSetTranslation(&matrix, NUMTX_GET_ROW_VEC(&object->joint_matrices[hand], 3));
     NUVEC velocity = {0.0f, 0.0f, 0.2f};
     NuVecMtxRotate(&velocity, &velocity, &matrix);

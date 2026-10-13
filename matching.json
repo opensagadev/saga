@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 79.495834,
+    "fuzzy_match_percent": 79.54714,
     "total_code": "4722419",
-    "matched_code": "620995",
-    "matched_code_percent": 13.149935,
+    "matched_code": "621508",
+    "matched_code_percent": 13.160798,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6824,
-    "matched_functions_percent": 50.70213,
+    "matched_functions": 6835,
+    "matched_functions_percent": 50.78386,
     "total_units": 1
   },
   "text": {
@@ -19491,7 +19491,7 @@
           "address": 4014928,
           "offset": 3124960,
           "size": 167,
-          "match_percent": 59.774193
+          "match_percent": 37.274193
         },
         {
           "name": "_ZL34creatureEditor_cbSetAreaActivationP10eduimenu_sP10eduiitem_sj",
@@ -19499,7 +19499,7 @@
           "address": 4015104,
           "offset": 3125136,
           "size": 147,
-          "match_percent": 63.307693
+          "match_percent": 43.846153
         },
         {
           "name": "_ZL27creatureEditor_cbSetLocatorP10eduimenu_sP10eduiitem_sj",
@@ -19507,7 +19507,7 @@
           "address": 4015264,
           "offset": 3125296,
           "size": 175,
-          "match_percent": 69.66102
+          "match_percent": 73.32204
         },
         {
           "name": "_ZL31creatureEditor_cbSetTriggerAreaP10eduimenu_sP10eduiitem_sj",
@@ -19515,7 +19515,7 @@
           "address": 4015440,
           "offset": 3125472,
           "size": 167,
-          "match_percent": 59.774193
+          "match_percent": 39.29032
         },
         {
           "name": "_ZL14CreateCreatureiP7nuvec_si",
@@ -19523,7 +19523,7 @@
           "address": 4015840,
           "offset": 3125872,
           "size": 541,
-          "match_percent": 63.072994
+          "match_percent": 68.79562
         },
         {
           "name": "_ZL27creatureEditor_cbVisionMenuP10eduimenu_sP10eduiitem_sj",
@@ -19539,7 +19539,7 @@
           "address": 4017872,
           "offset": 3127904,
           "size": 602,
-          "match_percent": 83.07317
+          "match_percent": 99.756096
         },
         {
           "name": "_ZL28creatureEditor_cbRespawnMenuP10eduimenu_sP10eduiitem_sj",
@@ -19547,7 +19547,7 @@
           "address": 4018480,
           "offset": 3128512,
           "size": 710,
-          "match_percent": 79.63448
+          "match_percent": 99.082756
         },
         {
           "name": "_ZL30creatureEditor_cb_heardistanceP10eduimenu_sP10eduiitem_sj",
@@ -19611,7 +19611,7 @@
           "address": 4021520,
           "offset": 3131552,
           "size": 473,
-          "match_percent": 72.947365
+          "match_percent": 78.0614
         },
         {
           "name": "_ZL31creatureEditor_cbActivationMenuP10eduimenu_sP10eduiitem_sj",
@@ -19619,7 +19619,7 @@
           "address": 4022000,
           "offset": 3132032,
           "size": 765,
-          "match_percent": 70.78531
+          "match_percent": 75.282486
         },
         {
           "name": "_ZL30creatureEditor_cbSelectLocatorP10eduimenu_sP10eduiitem_sj",
@@ -19627,7 +19627,7 @@
           "address": 4022768,
           "offset": 3132800,
           "size": 476,
-          "match_percent": 76.27586
+          "match_percent": 83.913795
         },
         {
           "name": "_ZL34creatureEditor_cbSelectTriggerAreaP10eduimenu_sP10eduiitem_sj",
@@ -19635,7 +19635,7 @@
           "address": 4023248,
           "offset": 3133280,
           "size": 608,
-          "match_percent": 60.446808
+          "match_percent": 64.50355
         },
         {
           "name": "_ZL27creatureEditor_cbSelectTypeP10eduimenu_sP10eduiitem_sj",
@@ -19643,7 +19643,7 @@
           "address": 4023856,
           "offset": 3133888,
           "size": 401,
-          "match_percent": 78.18812
+          "match_percent": 90.69307
         },
         {
           "name": "_ZL35creatureEditor_cbRenameCreatureMenuP10eduimenu_sP10eduiitem_sj",
@@ -19651,7 +19651,7 @@
           "address": 4024624,
           "offset": 3134656,
           "size": 289,
-          "match_percent": 71.44615
+          "match_percent": 73.815384
         },
         {
           "name": "_ZL24creatureEditor_cbSetTypeP10eduimenu_sP10eduiitem_sj",
@@ -19659,7 +19659,7 @@
           "address": 4032240,
           "offset": 3142272,
           "size": 319,
-          "match_percent": 73.09876
+          "match_percent": 86.79012
         },
         {
           "name": "_ZL31creatureEditor_cbRenameCreatureP10eduimenu_sP10eduiitem_sj",
@@ -19667,7 +19667,7 @@
           "address": 4044064,
           "offset": 3154096,
           "size": 156,
-          "match_percent": 73.36364
+          "match_percent": 49.909092
         },
         {
           "name": "_ZL31creatureEditor_cbSetScriptParamP10eduimenu_sP10eduiitem_sj",
@@ -19675,7 +19675,7 @@
           "address": 4049280,
           "offset": 3159312,
           "size": 242,
-          "match_percent": 69.508194
+          "match_percent": 64.590164
         },
         {
           "name": "_ZL29creatureEditor_cbScriptParamsP10eduimenu_sP10eduiitem_sj",
@@ -19683,7 +19683,7 @@
           "address": 4061056,
           "offset": 3171088,
           "size": 1873,
-          "match_percent": 84.23077
+          "match_percent": 89.78205
         },
         {
           "name": "_ZL29creatureEditor_cbSelectScriptP10eduimenu_sP10eduiitem_sj",
@@ -19691,7 +19691,7 @@
           "address": 4063968,
           "offset": 3174000,
           "size": 393,
-          "match_percent": 31.726316
+          "match_percent": 34.505264
         },
         {
           "name": "_ZL31creatureEditor_cbDeleteCreatureP10eduimenu_sP10eduiitem_sj",
@@ -19699,7 +19699,7 @@
           "address": 4211760,
           "offset": 3321792,
           "size": 235,
-          "match_percent": 60.666668
+          "match_percent": 68.681816
         },
         {
           "name": "_ZL37pathEditor_cbCancelDeleteCreatureMenuP10eduimenu_sS0_",
@@ -19715,7 +19715,7 @@
           "address": 4222448,
           "offset": 3332480,
           "size": 1704,
-          "match_percent": 81.86308
+          "match_percent": 82.16137
         },
         {
           "name": "creatureEditor_GetNearest",
@@ -19723,7 +19723,7 @@
           "address": 4225200,
           "offset": 3335232,
           "size": 525,
-          "match_percent": 81.099236
+          "match_percent": 85.25191
         },
         {
           "name": "_Z20creatureEditor_Enterv",
@@ -19731,7 +19731,7 @@
           "address": 4229696,
           "offset": 3339728,
           "size": 1433,
-          "match_percent": 61.18254
+          "match_percent": 71.8545
         },
         {
           "name": "_ZL28creatureEditor_cbResetParamsP10eduimenu_sP10eduiitem_sj",
@@ -19763,7 +19763,7 @@
           "address": 4243264,
           "offset": 3353296,
           "size": 347,
-          "match_percent": 56.23158
+          "match_percent": 74.778946
         },
         {
           "name": "creatureEditor_PathDeleted",
@@ -19771,7 +19771,7 @@
           "address": 4245344,
           "offset": 3355376,
           "size": 302,
-          "match_percent": 72.435295
+          "match_percent": 94.4
         },
         {
           "name": "_ZL22creatureEditor_UpdatedP12EDCREATURE_s",
@@ -19779,7 +19779,7 @@
           "address": 4248544,
           "offset": 3358576,
           "size": 111,
-          "match_percent": 83.47369
+          "match_percent": 85.36842
         },
         {
           "name": "_ZL26creatureEditor_cb_zspacingP10eduimenu_sP10eduiitem_sj",
@@ -19787,7 +19787,7 @@
           "address": 4248656,
           "offset": 3358688,
           "size": 143,
-          "match_percent": 79.4
+          "match_percent": 81.22222
         },
         {
           "name": "_ZL26creatureEditor_cb_xspacingP10eduimenu_sP10eduiitem_sj",
@@ -19795,7 +19795,7 @@
           "address": 4248800,
           "offset": 3358832,
           "size": 143,
-          "match_percent": 79.4
+          "match_percent": 81.22222
         },
         {
           "name": "_ZL25creatureEditor_cb_nacrossP10eduimenu_sP10eduiitem_sj",
@@ -19803,7 +19803,7 @@
           "address": 4248944,
           "offset": 3358976,
           "size": 143,
-          "match_percent": 74.17778
+          "match_percent": 80.22222
         },
         {
           "name": "_ZL24creatureEditor_cb_ngroupP10eduimenu_sP10eduiitem_sj",
@@ -19811,7 +19811,7 @@
           "address": 4249088,
           "offset": 3359120,
           "size": 143,
-          "match_percent": 65.28889
+          "match_percent": 78.86667
         },
         {
           "name": "_Z22creatureEditor_ProcessP7nupad_s",
@@ -19819,7 +19819,7 @@
           "address": 4249232,
           "offset": 3359264,
           "size": 4175,
-          "match_percent": 58.76653
+          "match_percent": 57.366737
         },
         {
           "name": "creatureEditor_RenderAllCreatures",
@@ -37332,7 +37332,7 @@
           "address": 5437200,
           "offset": 4547232,
           "size": 758,
-          "match_percent": 72.643906
+          "match_percent": 73.28293
         },
         {
           "name": "_ZN12NetPredictor12DoPredictionEPK7EdClassPvR14ReplicatorDatai",
@@ -37668,7 +37668,7 @@
           "address": 5447392,
           "offset": 4557424,
           "size": 387,
-          "match_percent": 86.0084
+          "match_percent": 84.806725
         },
         {
           "name": "_ZN20NetworkObjectManager14RegisterObjectEPvP7EdClassi",
@@ -37900,7 +37900,7 @@
           "address": 5457856,
           "offset": 4567888,
           "size": 551,
-          "match_percent": 77.0637
+          "match_percent": 92.407646
         },
         {
           "name": "_ZN20NetworkObjectManager7ReceiveE10NetMessagehRK7NetPeer",
@@ -39757,7 +39757,7 @@
           "address": 4173536,
           "offset": 3283568,
           "size": 24,
-          "match_percent": 49.0
+          "match_percent": 100.0
         },
         {
           "name": "InitFn_MidSpecialMove",
@@ -39765,7 +39765,7 @@
           "address": 4173568,
           "offset": 3283600,
           "size": 24,
-          "match_percent": 49.0
+          "match_percent": 100.0
         }
       ]
     },
@@ -39788,7 +39788,7 @@
           "address": 4865920,
           "offset": 3975952,
           "size": 1399,
-          "match_percent": 80.49451
+          "match_percent": 84.23901
         },
         {
           "name": "_Z13UpdateStreaksf",
@@ -39796,7 +39796,7 @@
           "address": 4867328,
           "offset": 3977360,
           "size": 368,
-          "match_percent": 63.63478
+          "match_percent": 65.28696
         },
         {
           "name": "_Z11DrawStreaksv",
@@ -39812,7 +39812,7 @@
           "address": 4868592,
           "offset": 3978624,
           "size": 231,
-          "match_percent": 61.93671
+          "match_percent": 65.55696
         },
         {
           "name": "_Z11InitStreaksP9variptr_uS_Pc",
@@ -40395,7 +40395,7 @@
           "address": 1418672,
           "offset": 528704,
           "size": 486,
-          "match_percent": 75.85981
+          "match_percent": 79.58878
         },
         {
           "name": "_Z15MovingBackwardsP12GameObject_s",
@@ -41116,7 +41116,7 @@
           "address": 4083808,
           "offset": 3193840,
           "size": 1883,
-          "match_percent": 60.872066
+          "match_percent": 57.41791
         },
         {
           "name": "AiSysUsePackFile",
@@ -41212,7 +41212,7 @@
           "address": 4099904,
           "offset": 3209936,
           "size": 6313,
-          "match_percent": 57.765766
+          "match_percent": 59.389317
         },
         {
           "name": "AISysProcess",
@@ -43875,7 +43875,7 @@
           "address": 4587728,
           "offset": 3697760,
           "size": 400,
-          "match_percent": 71.68807
+          "match_percent": 90.19266
         },
         {
           "name": "_Z22CharScene_FindHSpecialP11WORLDINFO_si",
@@ -47264,7 +47264,7 @@
           "address": 2340176,
           "offset": 1450208,
           "size": 47,
-          "match_percent": 29.833334
+          "match_percent": 100.0
         }
       ]
     },
@@ -50552,7 +50552,7 @@
           "address": 4405712,
           "offset": 3515744,
           "size": 954,
-          "match_percent": 53.090908
+          "match_percent": 56.013985
         },
         {
           "name": "NuGCutSceneFixUpExtra",
@@ -50560,7 +50560,7 @@
           "address": 4406672,
           "offset": 3516704,
           "size": 190,
-          "match_percent": 92.53968
+          "match_percent": 92.30159
         },
         {
           "name": "NuGCutSceneSysPostBackgroundLoad",
@@ -50584,7 +50584,7 @@
           "address": 4406976,
           "offset": 3517008,
           "size": 2103,
-          "match_percent": 27.694853
+          "match_percent": 27.722427
         },
         {
           "name": "instNuGCutSceneReset",
@@ -51733,7 +51733,7 @@
           "address": 1778832,
           "offset": 888864,
           "size": 1273,
-          "match_percent": 59.73359
+          "match_percent": 65.47491
         },
         {
           "name": "_Z27instNuGCutSceneResetCamLockP17instNUGCUTSCENE_s",
@@ -51853,7 +51853,7 @@
           "address": 4841504,
           "offset": 3951536,
           "size": 755,
-          "match_percent": 52.19388
+          "match_percent": 98.0102
         },
         {
           "name": "_Z25CutScenePlayer_SetObjectsP7CUTINFO",
@@ -54691,7 +54691,7 @@
           "address": 2282144,
           "offset": 1392176,
           "size": 2207,
-          "match_percent": 86.18807
+          "match_percent": 86.33486
         },
         {
           "name": "_Z21Grabber_StoreProgressP11WORLDINFO_sP16LEVEL_PROGRESS_s",
@@ -55057,7 +55057,7 @@
           "address": 5043648,
           "offset": 4153680,
           "size": 6532,
-          "match_percent": 41.0212
+          "match_percent": 41.346493
         },
         {
           "name": "_Z24GizBuildit_SetVisibilityP12GIZBUILDIT_si",
@@ -55980,7 +55980,7 @@
           "address": 2071968,
           "offset": 1182000,
           "size": 290,
-          "match_percent": 74.46342
+          "match_percent": 99.98781
         },
         {
           "name": "_ZL21GizTorp_SetVisibilityP7GIZMO_si",
@@ -60136,7 +60136,7 @@
           "address": 4994032,
           "offset": 4104064,
           "size": 94,
-          "match_percent": 61.4
+          "match_percent": 100.0
         },
         {
           "name": "_ZL24GizTurrets_StoreProgressPvS_S_",
@@ -63049,7 +63049,7 @@
           "address": 4808448,
           "offset": 3918480,
           "size": 488,
-          "match_percent": 77.5
+          "match_percent": 84.28788
         },
         {
           "name": "_Z22CharacterMiniKits_LoadP12COLLECTION_sP11WORLDINFO_sP9variptr_uS4_",
@@ -69626,7 +69626,7 @@
           "address": 4354016,
           "offset": 3464048,
           "size": 279,
-          "match_percent": 41.2
+          "match_percent": 53.066666
         },
         {
           "name": "_Z25MenuUpdateAutoSaveWarningP6MENU_s",
@@ -71734,7 +71734,7 @@
           "address": 3221792,
           "offset": 2331824,
           "size": 9,
-          "match_percent": 32.5
+          "match_percent": 100.0
         },
         {
           "name": "StreamSeek",
@@ -71742,7 +71742,7 @@
           "address": 3221808,
           "offset": 2331840,
           "size": 9,
-          "match_percent": 24.444445
+          "match_percent": 100.0
         },
         {
           "name": "StreamCache",
@@ -71750,7 +71750,7 @@
           "address": 3221824,
           "offset": 2331856,
           "size": 9,
-          "match_percent": 24.444445
+          "match_percent": 100.0
         },
         {
           "name": "StreamCacheCheckComplete",
@@ -71758,7 +71758,7 @@
           "address": 3221840,
           "offset": 2331872,
           "size": 9,
-          "match_percent": 32.5
+          "match_percent": 100.0
         }
       ]
     },
@@ -72101,7 +72101,7 @@
           "address": 4559248,
           "offset": 3669280,
           "size": 1096,
-          "match_percent": 74.11712
+          "match_percent": 78.954956
         },
         {
           "name": "_Z13RndrTexQuad3DRK5VuMtxiP7numtl_s",
@@ -72156,7 +72156,7 @@
           "address": 2573696,
           "offset": 1683728,
           "size": 22,
-          "match_percent": 48.57143
+          "match_percent": 100.0
         }
       ]
     },
@@ -77776,7 +77776,7 @@
           "address": 1058464,
           "offset": 168496,
           "size": 12323,
-          "match_percent": 25.9524
+          "match_percent": 26.158531
         },
         {
           "name": "TerrainSetImpactData",
@@ -78400,7 +78400,7 @@
           "address": 3689872,
           "offset": 2799904,
           "size": 864,
-          "match_percent": 86.100876
+          "match_percent": 86.9386
         },
         {
           "name": "NewTerrHitInfo",
@@ -78568,7 +78568,7 @@
           "address": 3702368,
           "offset": 2812400,
           "size": 493,
-          "match_percent": 92.67407
+          "match_percent": 94.23704
         },
         {
           "name": "ReassignPickupInst",
@@ -78584,7 +78584,7 @@
           "address": 3709440,
           "offset": 2819472,
           "size": 884,
-          "match_percent": 86.543106
+          "match_percent": 87.36207
         },
         {
           "name": "TerrainPlatformOldUpdate",
@@ -79023,7 +79023,7 @@
           "address": 3475280,
           "offset": 2585312,
           "size": 130,
-          "match_percent": 83.65116
+          "match_percent": 100.0
         },
         {
           "name": "DebFreeAllCreatedEffects",
@@ -79031,7 +79031,7 @@
           "address": 3475424,
           "offset": 2585456,
           "size": 136,
-          "match_percent": 58.69091
+          "match_percent": 100.0
         },
         {
           "name": "DebrisPopulateInstance",
@@ -83498,7 +83498,7 @@
           "address": 2197120,
           "offset": 1307152,
           "size": 2776,
-          "match_percent": 74.92892
+          "match_percent": 88.83037
         },
         {
           "name": "_Z20UpdateTrooperCannonsP11WORLDINFO_s",
@@ -83618,7 +83618,7 @@
           "address": 5157904,
           "offset": 4267936,
           "size": 4569,
-          "match_percent": 52.587097
+          "match_percent": 53.152073
         },
         {
           "name": "_Z20DrawMiniSnowTroopersP11WORLDINFO_s",
@@ -98985,7 +98985,7 @@
           "address": 2746288,
           "offset": 1856320,
           "size": 2449,
-          "match_percent": 46.858208
+          "match_percent": 46.58582
         },
         {
           "name": "_Z29NuIOS_CopyBackbufferToTextureP13nunativetex_sb",
@@ -99073,7 +99073,7 @@
           "address": 3072992,
           "offset": 2183024,
           "size": 4731,
-          "match_percent": 47.036743
+          "match_percent": 48.526318
         },
         {
           "name": "_Z25NuIOS_GetShaderProgramKeyRK15ShaderObjectKey",
@@ -99081,7 +99081,7 @@
           "address": 3201424,
           "offset": 2311456,
           "size": 112,
-          "match_percent": 90.4
+          "match_percent": 83.77143
         },
         {
           "name": "_Z25NuSpecialFindByPlatformIDP8nugscn_sP12nuhspecial_si",
@@ -119480,11 +119480,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119530,11 +119527,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119580,11 +119574,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119642,16 +119633,13 @@
       "address": 2556180,
       "offset": 1666212,
       "size": 373,
-      "match_percent": 99.7,
+      "match_percent": 95.7125,
       "candidate_units": [
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119734,11 +119722,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119801,11 +119786,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119868,11 +119850,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119935,11 +119914,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120002,11 +119978,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120069,11 +120042,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120346,11 +120316,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120413,11 +120380,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120480,11 +120444,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120596,11 +120557,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120675,11 +120633,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120843,11 +120798,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120962,11 +120914,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121081,11 +121030,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121148,11 +121094,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121215,11 +121158,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121282,11 +121222,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121375,11 +121312,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121442,11 +121376,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121521,11 +121452,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121672,11 +121600,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121752,11 +121677,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121819,11 +121741,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121906,11 +121825,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121973,11 +121889,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -122040,11 +121953,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -122107,11 +122017,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -122237,11 +122144,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -122304,11 +122208,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -122371,11 +122272,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -122810,11 +122708,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -122925,11 +122820,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -123040,11 +122932,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -123756,11 +123645,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -123823,11 +123709,8 @@
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
-        "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/items/base/apiobject.c.o",
         "legoapi/misc/buffers.cpp.o",
-        "legoapi/misc/stream.cpp.o",
-        "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
