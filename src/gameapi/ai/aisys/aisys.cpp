@@ -2486,9 +2486,11 @@ __used__ static i32 Action_DontAttack(AISYS *sys, AISCRIPTPROCESS *processor, AI
     if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
         GameObject_s *object = packet->owner->apiobj.objptr;
         object->jump_input_flags |= 2;
-        for (i32 index = 0; index < param_4; ++index) {
-            if (NuStrICmp(params[index], "FALSE") == 0) {
-                object->jump_input_flags &= static_cast<u8>(~2u);
+        if (param_4 != 0) {
+            for (i32 index = 0; index < param_4; ++index) {
+                if (NuStrICmp(params[index], "FALSE") == 0) {
+                    object->jump_input_flags &= static_cast<u8>(~2u);
+                }
             }
         }
     }
@@ -3016,25 +3018,27 @@ __used__ static i32 Action_TakeDamage(AISYS *sys, AISCRIPTPROCESS *processor, AI
     GameObject_s *hitter = NULL;
     i32 damage = 1;
     i32 creature_set = 0;
-    for (i32 index = 0; index < param_4; ++index) {
-        char *value = NuStrIStr(params[index], "character=");
-        if (value != NULL) {
-            object = GetNamedGameObject(sys, value + 10);
-        } else if ((value = NuStrIStr(params[index], "hitter=")) != NULL) {
-            hitter = GetNamedGameObject(sys, value + 7);
-        } else if ((value = NuStrIStr(params[index], "damage=")) != NULL) {
-            damage = static_cast<i32>(AIParamToFloat(processor, value + 7));
-        } else if (NuStrIStr(params[index], "opponent") != NULL) {
-            if (packet != NULL && packet->opponent_object != NULL && packet->opponent_object->objptr != NULL) {
-                object = packet->opponent_object->objptr;
-                if (packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
-                    hitter = packet->owner->apiobj.objptr;
+    if (param_4 != 0) {
+        for (i32 index = 0; index < param_4; ++index) {
+            char *value = NuStrIStr(params[index], "character=");
+            if (value != NULL) {
+                object = GetNamedGameObject(sys, value + 10);
+            } else if ((value = NuStrIStr(params[index], "hitter=")) != NULL) {
+                hitter = GetNamedGameObject(sys, value + 7);
+            } else if ((value = NuStrIStr(params[index], "damage=")) != NULL) {
+                damage = static_cast<i32>(AIParamToFloat(processor, value + 7));
+            } else if (NuStrIStr(params[index], "opponent") != NULL) {
+                if (packet != NULL && packet->opponent_object != NULL && packet->opponent_object->objptr != NULL) {
+                    object = packet->opponent_object->objptr;
+                    if (packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
+                        hitter = packet->owner->apiobj.objptr;
+                    }
                 }
-            }
-        } else if ((value = NuStrIStr(params[index], "set=")) != NULL) {
-            i32 parsed_set = static_cast<i32>(AIParamToFloat(processor, value + 4));
-            if (static_cast<u32>(parsed_set) < 17) {
-                creature_set = parsed_set;
+            } else if ((value = NuStrIStr(params[index], "set=")) != NULL) {
+                i32 parsed_set = static_cast<i32>(AIParamToFloat(processor, value + 4));
+                if (static_cast<u32>(parsed_set) < 17) {
+                    creature_set = parsed_set;
+                }
             }
         }
     }
@@ -4970,14 +4974,16 @@ __used__ static i32 Action_KeepWeaponOut(AISYS *sys, AISCRIPTPROCESS *processor,
 
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
     bool keep_out = true;
-    for (i32 index = 0; index < param_4; ++index) {
-        if (NuStrICmp(params[index], "FALSE") == 0) {
-            keep_out = false;
-            continue;
-        }
-        char *value = NuStrIStr(params[index], "character=");
-        if (value != NULL) {
-            object = GetNamedGameObject(sys, value + 10);
+    if (param_4 != 0) {
+        for (i32 index = 0; index < param_4; ++index) {
+            if (NuStrICmp(params[index], "FALSE") == 0) {
+                keep_out = false;
+                continue;
+            }
+            char *value = NuStrIStr(params[index], "character=");
+            if (value != NULL) {
+                object = GetNamedGameObject(sys, value + 10);
+            }
         }
     }
     if (object != NULL) {
@@ -7716,16 +7722,18 @@ __used__ static i32 Action_SetUseOneAtOnce(AISYS *sys, AISCRIPTPROCESS *processo
     if (param_5 != 0) {
         GameObject_s *object = packet != NULL ? packet->owner->apiobj.objptr : NULL;
         i32 enabled = 1;
-        for (i32 index = 0; index < param_4; ++index) {
-            char *name = NuStrIStr(params[index], "character");
-            if (name != NULL) {
-                if (NuStrICmp(name + 10, "myself") == 0 && packet != NULL) {
-                    object = packet->owner->apiobj.objptr;
-                } else {
-                    object = GetNamedGameObject(WORLD->ai_sys, name + 10);
+        if (param_4 != 0) {
+            for (i32 index = 0; index < param_4; ++index) {
+                char *name = NuStrIStr(params[index], "character");
+                if (name != NULL) {
+                    if (NuStrICmp(name + 10, "myself") == 0 && packet != NULL) {
+                        object = packet->owner->apiobj.objptr;
+                    } else {
+                        object = GetNamedGameObject(WORLD->ai_sys, name + 10);
+                    }
+                } else if (NuStrICmp(params[index], "FALSE") == 0) {
+                    enabled = 0;
                 }
-            } else if (NuStrICmp(params[index], "FALSE") == 0) {
-                enabled = 0;
             }
         }
         if (object != NULL) {
