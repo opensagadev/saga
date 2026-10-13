@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 77.437485,
+    "fuzzy_match_percent": 77.50394,
     "total_code": "4722419",
-    "matched_code": "589054",
-    "matched_code_percent": 12.473564,
+    "matched_code": "589127",
+    "matched_code_percent": 12.475111,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6688,
-    "matched_functions_percent": 49.691658,
+    "matched_functions": 6689,
+    "matched_functions_percent": 49.699085,
     "total_units": 1
   },
   "text": {
@@ -48637,7 +48637,7 @@
           "address": 1517216,
           "offset": 627248,
           "size": 1215,
-          "match_percent": 30.143396
+          "match_percent": 70.43396
         },
         {
           "name": "_Z14Move_GEONOSIANP12GameObject_s",
@@ -48869,7 +48869,7 @@
           "address": 4795440,
           "offset": 3905472,
           "size": 866,
-          "match_percent": 21.16883
+          "match_percent": 41.82251
         },
         {
           "name": "_Z15SetObjOnSurfaceP12GameObject_si",
@@ -55655,7 +55655,7 @@
           "address": 4963904,
           "offset": 4073936,
           "size": 4728,
-          "match_percent": 39.803818
+          "match_percent": 84.34358
         },
         {
           "name": "_Z16gizmoblowup_LoadPvS_",
@@ -77896,7 +77896,7 @@
           "address": 3627280,
           "offset": 2737312,
           "size": 883,
-          "match_percent": 75.910446
+          "match_percent": 95.0597
         },
         {
           "name": "SphereDraw",
@@ -77984,7 +77984,7 @@
           "address": 3635728,
           "offset": 2745760,
           "size": 73,
-          "match_percent": 64.333336
+          "match_percent": 100.0
         },
         {
           "name": "TerrainTrackFlush",
@@ -78248,7 +78248,7 @@
           "address": 3680432,
           "offset": 2790464,
           "size": 5421,
-          "match_percent": 36.235863
+          "match_percent": 36.21567
         },
         {
           "name": "_Z15StorePlatImpactv",
@@ -78696,7 +78696,7 @@
           "address": 3727920,
           "offset": 2837952,
           "size": 334,
-          "match_percent": 79.85965
+          "match_percent": 99.8421
         },
         {
           "name": "DrawHitTerrain",
@@ -78704,7 +78704,7 @@
           "address": 3728256,
           "offset": 2838288,
           "size": 247,
-          "match_percent": 70.75714
+          "match_percent": 76.942856
         },
         {
           "name": "_Z15LoadTerrainFileP11WORLDINFO_s",
@@ -79143,7 +79143,7 @@
           "address": 3509920,
           "offset": 2619952,
           "size": 182,
-          "match_percent": 77.03333
+          "match_percent": 79.4
         },
         {
           "name": "DebrisTorusCollisionCheckScaleY",
@@ -79175,7 +79175,7 @@
           "address": 3511200,
           "offset": 2621232,
           "size": 182,
-          "match_percent": 77.28333
+          "match_percent": 79.4
         },
         {
           "name": "DebrisCollisionCheckScaleY",
@@ -79495,7 +79495,7 @@
           "address": 3730512,
           "offset": 2840544,
           "size": 552,
-          "match_percent": 79.73548
+          "match_percent": 94.129036
         },
         {
           "name": "PlatInstSkinRegister",
