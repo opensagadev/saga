@@ -807,8 +807,9 @@ static i32 GizObstacles_Load(void *world_ptr, void *data) {
     const u8 version = static_cast<u8>(EdFileReadChar());
     obstacle_sys->count = static_cast<u16>(EdFileReadShort());
 
-    for (i32 index = 0; index < obstacle_sys->count; ++index) {
-        GIZOBSTACLE_s &obstacle = obstacle_sys->obstacles[index];
+    GIZOBSTACLE_s *obstacle_ptr = obstacle_sys->obstacles;
+    for (i32 index = 0; index < obstacle_sys->count; ++index, ++obstacle_ptr) {
+        GIZOBSTACLE_s &obstacle = *obstacle_ptr;
         EdFileRead(obstacle.name, sizeof(obstacle.name));
         EdFileReadNuVec(&obstacle.position);
 
@@ -846,29 +847,29 @@ static i32 GizObstacles_Load(void *world_ptr, void *data) {
         GizmoFileReadGameAnimSet(obstacle.anim_set, world, Gizobstacle_ReadAnimSetData, version,
                                  const_cast<char *>("GizObstacle"), obstacle.name);
 
-        if (version <= 3) {
-            obstacle.field_0x4c = 1.0f;
-            obstacle.field_0x50 = 1.0f;
-        } else {
+        if (version > 3) {
             obstacle.field_0x4c = EdFileReadFloat();
-            if (version <= 4) {
-                obstacle.field_0x50 = obstacle.field_0x4c;
-            } else {
-                obstacle.field_0x50 = EdFileReadFloat();
-            }
+        } else {
+            obstacle.field_0x4c = 1.0f;
+        }
+        if (version > 4) {
+            obstacle.field_0x50 = EdFileReadFloat();
+        } else {
+            obstacle.field_0x50 = obstacle.field_0x4c;
         }
 
-        obstacle.blowup_type = -1;
         if (version > 7) {
             obstacle.reflection_alpha = EdFileReadFloat();
-
+        }
+        obstacle.blowup_type = -1;
+        if (version > 8) {
             if (version == 9) {
                 obstacle.blowup_type = EdFileReadShort();
                 obstacle.pickup_count = EdFileReadShort();
                 obstacle.pickup_direction_x = EdFileReadShort();
                 obstacle.pickup_direction_y = EdFileReadShort();
                 EdFileReadNuVec(&obstacle.pickup_offset);
-            } else if (version > 9) {
+            } else {
                 char blowup_name[32];
                 const i32 name_length = static_cast<i8>(EdFileReadChar());
                 if (name_length != 0) {
@@ -886,22 +887,20 @@ static i32 GizObstacles_Load(void *world_ptr, void *data) {
             }
         }
 
-        if (version <= 9 || version == 10) {
-            obstacle.pickup_scatter_height = world->area != NULL && (world->area->flags & 1) != 0 ? 12.0f : 1.75f;
-            obstacle.start_sfx_id = -1;
-            obstacle.stop_sfx_id = -1;
-        } else {
+        if (version > 10) {
             obstacle.pickup_scatter_height = EdFileReadFloat();
-            obstacle.start_sfx_id = -1;
-            obstacle.stop_sfx_id = -1;
-            if (version > 12) {
-                char sfx_name[32];
-                if (GizmoFileReadName(sfx_name) != 0) {
-                    obstacle.start_sfx_id = static_cast<i16>(GetSfxId(sfx_name));
-                }
-                if (version > 13 && GizmoFileReadName(sfx_name) != 0) {
-                    obstacle.stop_sfx_id = static_cast<i16>(GetSfxId(sfx_name));
-                }
+        } else {
+            obstacle.pickup_scatter_height = world->area != NULL && (world->area->flags & 1) != 0 ? 12.0f : 1.75f;
+        }
+        obstacle.start_sfx_id = -1;
+        obstacle.stop_sfx_id = -1;
+        if (version > 12) {
+            char sfx_name[32];
+            if (GizmoFileReadName(sfx_name) != 0) {
+                obstacle.start_sfx_id = static_cast<i16>(GetSfxId(sfx_name));
+            }
+            if (version > 13 && GizmoFileReadName(sfx_name) != 0) {
+                obstacle.stop_sfx_id = static_cast<i16>(GetSfxId(sfx_name));
             }
         }
 
