@@ -4341,7 +4341,7 @@ struct GIZFORCE_s {
     f32 horizontal_range;   // 0x74
     u32 config_flags;       // 0x78, GIZFORCE_CONFIG_FLAGS
     u32 field_0x7c;
-    u8 group_index;     // 0x80
+    i8 group_index;     // 0x80, negative when the force is ungrouped
     u8 collision_mask;  // 0x81
     u8 activation_mode; // 0x82
     u8 field_0x83;
@@ -4410,7 +4410,7 @@ struct GIZFORCE_s {
                 struct {
                     u8 state_destroyed_or_thrown : 1;
                     u8 state_debris_active : 1;
-                    u8 : 3;
+                    u8 state_reset_bits : 3; // cleared on reset, otherwise unused here
                     u8 state_being_used : 1;
                     u8 : 2;
                 };
@@ -4625,7 +4625,19 @@ struct GIZOBSTACLE_s {
     u8 control_flags; // 0x99, GIZOBSTACLE_CONTROL_FLAGS
     u8 field_0x9a[2];
     i32 proximity_output; // 0x9c
-    u8 runtime_flags;     // 0xa0, GIZOBSTACLE_RUNTIME_FLAGS
+    union {
+        u8 runtime_flags; // 0xa0, GIZOBSTACLE_RUNTIME_FLAGS
+        struct {
+            u8 runtime_pickups_spawned : 1;
+            u8 runtime_pending_blowup_type : 1;
+            u8 runtime_ai_active : 1;
+            u8 runtime_blocked : 1;
+            u8 runtime_has_platform : 1;
+            u8 runtime_anim_object_bit_1 : 1;
+            u8 runtime_trigger_latched : 1;
+            u8 runtime_destroyed : 1;
+        };
+    };
     u8 field_a1_0xa1;
     u8 field_0xa2[2];
     void ClearMechObjectInterface();
