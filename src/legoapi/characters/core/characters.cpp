@@ -760,7 +760,9 @@ void FinishWeirdoNames(i32 which) {
 }
 
 GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle) {
-    if (Mission_Active(NULL) != NULL || name == NULL)
+    if (Mission_Active(NULL) != NULL)
+        return NULL;
+    if (name == NULL)
         return NULL;
     GameObject_s *object = GetNamedGameObject(WORLD->ai_sys, name);
     if (object == NULL || (object->apiobj.flags_high & 0x10) != 0)
