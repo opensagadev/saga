@@ -2438,37 +2438,36 @@ i32 edanimParamCreate(i32 instance_id) {
         return -1;
     }
     const i32 start = edanim_next_param;
-    i32 index = start;
-    while (AnimParams[index].instance_id != -1) {
-        index = index + 1 >= 65 ? 0 : index + 1;
-        if (index == start) {
+    while (AnimParams[edanim_next_param].instance_id != -1) {
+        edanim_next_param++;
+        if (edanim_next_param >= 65)
+            edanim_next_param = 0;
+        if (edanim_next_param == start) {
             edanim_next_param = start;
             return -1;
         }
     }
-    auto &param = AnimParams[index];
-    edanim_next_param = index;
-    param.effect_count = 0;
-    param.instance_id = instance_id;
+    AnimParams[edanim_next_param].effect_count = 0;
+    AnimParams[edanim_next_param].instance_id = instance_id;
     nuhspecial_s special;
     NuGScnGetSpecial(&special, edbits_base_scene, instance_id);
-    param.platform_id = FindPlatInst(NuSpecialGetInstanceix(&special));
-    param.bounce_impulse = 0.0f;
-    param.bounce_spring = 0.0f;
-    param.bounce_damping = 0.0f;
-    if (param.platform_id != -1) {
-        PlatInstBounce(param.platform_id, 0.0f, 0.0f, 0.0f);
+    AnimParams[edanim_next_param].platform_id = FindPlatInst(NuSpecialGetInstanceix(&special));
+    AnimParams[edanim_next_param].bounce_impulse = 0.0f;
+    AnimParams[edanim_next_param].bounce_spring = 0.0f;
+    AnimParams[edanim_next_param].bounce_damping = 0.0f;
+    if (AnimParams[edanim_next_param].platform_id != -1) {
+        PlatInstBounce(AnimParams[edanim_next_param].platform_id, 0.0f, 0.0f, 0.0f);
     }
-    const i32 page = edbits_anim_page;
-    param.page = static_cast<i8>(page);
-    edanim_page_used[page] = 1;
-    edanim_page_on[page] = 1;
-    if (!edanim_page_scene[page]) {
-        edanim_page_scene[page] = edbits_base_scene;
+    AnimParams[edanim_next_param].page = static_cast<i8>(edbits_anim_page);
+    edanim_page_used[edbits_anim_page] = 1;
+    edanim_page_on[edbits_anim_page] = 1;
+    if (!edanim_page_scene[edbits_anim_page]) {
+        edanim_page_scene[edbits_anim_page] = edbits_base_scene;
     }
-    edanim_next_param = index + 1;
+    const i32 created = edanim_next_param;
+    edanim_next_param = created + 1;
     ++edanim_params_used;
-    return index;
+    return created;
 }
 
 i32 edpartSaveEffects(char *filename, char page) {
@@ -3536,7 +3535,8 @@ void edanimRenderSoundEmitters(i32 parameter_index) {
     NuGScnGetSpecial(&special, edbits_base_scene, param.instance_id);
     const NUVEC *base_position = NuSpecialGetPos(&special);
     for (i32 sound = 0; sound < param.sound_count; ++sound) {
-        if (param.sound_ids[sound] == -1) {
+        // The original skips sounds by their flags slot rather than the sound id.
+        if (param.sound_flags[sound] == -1) {
             continue;
         }
         const i32 colour = edanim_sound_mode && edanim_nearest_sound == sound ? 0xffff0000 : 0xffffffff;
@@ -3645,29 +3645,28 @@ eduiitem_s *eduiItemFileSelectorCreate(u32 data, eduiiattr_s *colours, EdUiItemC
 }
 
 void edanimRenderParticleEmitters(i32 parameter_index) {
-    auto &param = AnimParams[parameter_index];
     nuhspecial_s special;
-    NuGScnGetSpecial(&special, edbits_base_scene, param.instance_id);
+    NuGScnGetSpecial(&special, edbits_base_scene, AnimParams[parameter_index].instance_id);
     const NUVEC *base_position = NuSpecialGetPos(&special);
-    for (i32 particle = 0; particle < param.effect_count; ++particle) {
-        const i32 effect_id = param.effect_ids[particle];
-        if (effect_id == -1) {
+    for (i32 particle = 0; particle < AnimParams[parameter_index].effect_count; ++particle) {
+        if (AnimParams[parameter_index].effect_ids[particle] == -1)
             continue;
-        }
-        const auto &offset = param.effect_positions[particle];
-        const f32 x = base_position->x + offset[0];
-        const f32 y = base_position->y + offset[1];
-        const f32 z = base_position->z + offset[2];
         i32 colour = 0xffffffff;
         if (edanim_particle_mode && edanim_nearest_particle == particle) {
-            const debinftype *definition = debtab[effect_id];
+            const debinftype *definition = debtab[AnimParams[parameter_index].effect_ids[particle]];
             if (definition->generator_type == 0) {
-                edbitsDrawCube(x, y, z, definition->field_058, definition->field_05c, definition->field_060,
-                               edanim_emitrotz, edanim_emitroty, 0, 0, 0, 0xff008000, edanim_mtl);
+                edbitsDrawCube(base_position->x + AnimParams[parameter_index].effect_positions[particle][0],
+                               base_position->y + AnimParams[parameter_index].effect_positions[particle][1],
+                               base_position->z + AnimParams[parameter_index].effect_positions[particle][2],
+                               definition->field_058, definition->field_05c, definition->field_060, edanim_emitrotz,
+                               edanim_emitroty, 0, 0, 0, 0xff008000, edanim_mtl);
             }
             colour = 0xff00ff00;
         }
-        edbitsDrawDiagonalCross(x, y, z, 0.25f, colour, edanim_mtl);
+        edbitsDrawDiagonalCross(base_position->x + AnimParams[parameter_index].effect_positions[particle][0],
+                                base_position->y + AnimParams[parameter_index].effect_positions[particle][1],
+                                base_position->z + AnimParams[parameter_index].effect_positions[particle][2], 0.25f,
+                                colour, edanim_mtl);
     }
 }
 
@@ -3681,18 +3680,18 @@ void edanimDetermineNearestSound(float distance) {
     NUVEC *base_position = NuSpecialGetPos(&special);
     NUVEC delta;
     NUVEC world_position;
-    auto &param = AnimParams[edanim_nearest_param_id];
     if (edanim_nearest_sound != -1) {
         NuVecAdd(&world_position, base_position,
-                 reinterpret_cast<NUVEC *>(param.sound_positions[edanim_nearest_sound]));
+                 reinterpret_cast<NUVEC *>(AnimParams[edanim_nearest_param_id].sound_positions[edanim_nearest_sound]));
         NuVecSub(&delta, &edanim_cam_pos, &world_position);
         if (delta.x * delta.x + delta.y * delta.y + delta.z * delta.z == 0.0f) {
             return;
         }
     }
     edanim_nearest_sound = -1;
-    for (i32 sound = 0; sound < param.sound_count; ++sound) {
-        NuVecAdd(&world_position, base_position, reinterpret_cast<NUVEC *>(param.sound_positions[sound]));
+    for (i32 sound = 0; sound < AnimParams[edanim_nearest_param_id].sound_count; ++sound) {
+        NuVecAdd(&world_position, base_position,
+                 reinterpret_cast<NUVEC *>(AnimParams[edanim_nearest_param_id].sound_positions[sound]));
         NuVecSub(&delta, &edanim_cam_pos, &world_position);
         const f32 candidate = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
         if (distance < 0.0f || candidate < distance) {
@@ -3738,18 +3737,19 @@ void edanimDetermineNearestParticle(float distance) {
     NUVEC *base_position = NuSpecialGetPos(&special);
     NUVEC delta;
     NUVEC world_position;
-    auto &param = AnimParams[edanim_nearest_param_id];
     if (edanim_nearest_particle != -1) {
-        NuVecAdd(&world_position, base_position,
-                 reinterpret_cast<NUVEC *>(param.effect_positions[edanim_nearest_particle]));
+        NuVecAdd(
+            &world_position, base_position,
+            reinterpret_cast<NUVEC *>(AnimParams[edanim_nearest_param_id].effect_positions[edanim_nearest_particle]));
         NuVecSub(&delta, &edanim_cam_pos, &world_position);
         if (delta.x * delta.x + delta.y * delta.y + delta.z * delta.z == 0.0f) {
             return;
         }
     }
     edanim_nearest_particle = -1;
-    for (i32 particle = 0; particle < param.effect_count; ++particle) {
-        NuVecAdd(&world_position, base_position, reinterpret_cast<NUVEC *>(param.effect_positions[particle]));
+    for (i32 particle = 0; particle < AnimParams[edanim_nearest_param_id].effect_count; ++particle) {
+        NuVecAdd(&world_position, base_position,
+                 reinterpret_cast<NUVEC *>(AnimParams[edanim_nearest_param_id].effect_positions[particle]));
         NuVecSub(&delta, &edanim_cam_pos, &world_position);
         const f32 candidate = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
         if (distance < 0.0f || candidate < distance) {
