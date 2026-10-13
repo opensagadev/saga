@@ -1166,11 +1166,13 @@ extern "C" {
         }
         PART_s *part = &Part[i_part];
         i32 scanned = 0;
-        while ((part->active & 1) != 0 && (part->flags & 0x200) != 0 && scanned < MAXPARTS) {
-            if (++i_part == MAXPARTS)
-                i_part = 0;
-            part = &Part[i_part];
-            ++scanned;
+        if ((part->active & 1) != 0) {
+            while ((part->active & 1) != 0 && (part->flags & 0x200) != 0 && scanned < MAXPARTS) {
+                if (++i_part == MAXPARTS)
+                    i_part = 0;
+                part = &Part[i_part];
+                ++scanned;
+            }
         }
         if (scanned == MAXPARTS)
             return NULL;
