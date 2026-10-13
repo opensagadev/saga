@@ -3931,21 +3931,23 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
             if (object->in_narrow_socket) {
                 other = GetOtherActivePlayer(object);
                 i32 forwards;
-                if (other != NULL && other->in_narrow_socket &&
-                    (forwards = GoingForwardsAlongNarrowSock(object)) == GoingForwardsAlongNarrowSock(other)) {
-                    NuVecRotateY(&direction, &v001, object->yrot);
-                    NuVecSub(&separation, &other->apiobj.position, &api.position);
-                    f32 longitudinal = separation.x * direction.x + separation.z * direction.z;
-                    f32 radius = api.field_0x1dc + other->apiobj.field_0x1dc;
-                    if (fabsf(longitudinal) > radius * 2.0f) {
-                        f32 amount =
-                            fabsf(longitudinal) > radius * 5.0f + 0.1f
-                                ? 1.0f
-                                : (fabsf(longitudinal) - radius * 2.0f) / (radius * 5.0f + 0.1f - radius * 2.0f);
-                        i32 ahead = forwards ? longitudinal > 0.0f : longitudinal < 0.0f;
-                        f32 factor = other->apiobj.field_0x287 ? 1.0f : 0.75f;
-                        if (!ahead)
-                            speed *= 1.0f - factor * amount;
+                if (other != NULL) {
+                    if (other->in_narrow_socket &&
+                        (forwards = GoingForwardsAlongNarrowSock(object)) == GoingForwardsAlongNarrowSock(other)) {
+                        NuVecRotateY(&direction, &v001, object->yrot);
+                        NuVecSub(&separation, &other->apiobj.position, &api.position);
+                        f32 longitudinal = separation.x * direction.x + separation.z * direction.z;
+                        f32 radius = api.field_0x1dc + other->apiobj.field_0x1dc;
+                        if (fabsf(longitudinal) > radius * 2.0f) {
+                            f32 amount =
+                                fabsf(longitudinal) > radius * 5.0f + 0.1f
+                                    ? 1.0f
+                                    : (fabsf(longitudinal) - radius * 2.0f) / (radius * 5.0f + 0.1f - radius * 2.0f);
+                            i32 ahead = forwards ? longitudinal > 0.0f : longitudinal < 0.0f;
+                            f32 factor = other->apiobj.field_0x287 ? 1.0f : 0.75f;
+                            if (!ahead)
+                                speed *= 1.0f - factor * amount;
+                        }
                     }
                 }
             }
@@ -4000,12 +4002,13 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
             object->movement_lean_angle = SeekRot(object->movement_lean_angle, special_lean, 3.0f);
         else if ((api.character_data->game_character->flags_090 & 1) != 0) {
             i32 angular_speed = 0;
-            if (object->character_context != 0x2a && object->character_context != 0x36 &&
-                object->character_context != 0x3a) {
-                angular_speed = (i32)(RotDiff(object->previous_movement_angle, api.field_0x276) / FRAMETIME);
-                if (WORLD->current_level == PLATFORM_LDATA && NeedsPretendAnim(object)) {
-                    u16 phase = (i32)(NuFmod(GameTimer.time_elapsed, 2.1f) / 2.1f * 65536.0f);
-                    angular_speed = (i32)(angular_speed + 4551.0f * NuTrigTable[((phase - 0x2000) >> 1) & 0x7fff]);
+            if (object->character_context != 0x2a) {
+                if (object->character_context != 0x36 && object->character_context != 0x3a) {
+                    angular_speed = (i32)(RotDiff(object->previous_movement_angle, api.field_0x276) / FRAMETIME);
+                    if (WORLD->current_level == PLATFORM_LDATA && NeedsPretendAnim(object)) {
+                        u16 phase = (i32)(NuFmod(GameTimer.time_elapsed, 2.1f) / 2.1f * 65536.0f);
+                        angular_speed = (i32)(angular_speed + 4551.0f * NuTrigTable[((phase - 0x2000) >> 1) & 0x7fff]);
+                    }
                 }
             }
             f32 rate = 8.0f;
@@ -4483,8 +4486,10 @@ void Move_VEHICLE(GameObject_s *object) {
     }
 
     if ((object->apiobj.character_data->game_character->flags_090 & 0x100000) != 0) {
-        if (Cheat_IsOn(7) != 0 && (pad->buttons_pressed & (GAMEPAD_ACTION | GAMEPAD_SPECIAL)) != 0) {
-            GameAudio_PlaySfx(0x4b, &object->apiobj.collision_position, 0, 0);
+        if (Cheat_IsOn(7) != 0) {
+            if ((pad->buttons_pressed & (GAMEPAD_ACTION | GAMEPAD_SPECIAL)) != 0) {
+                GameAudio_PlaySfx(0x4b, &object->apiobj.collision_position, 0, 0);
+            }
         }
         NUJOINTANIM_s &joint = object->joint_modifiers[0];
         joint.rotation.x = 0.0f;
@@ -4544,8 +4549,10 @@ void Move_VEHICLE(GameObject_s *object) {
         }
     }
 
-    if (GizmoBlowupCheckProximity(WORLD, object) != 0 && LEGO_SET_SLOWDOWNFN != NULL) {
-        LEGO_SET_SLOWDOWNFN(object);
+    if (GizmoBlowupCheckProximity(WORLD, object) != 0) {
+        if (LEGO_SET_SLOWDOWNFN != NULL) {
+            LEGO_SET_SLOWDOWNFN(object);
+        }
     }
 }
 
@@ -4808,9 +4815,11 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
             u16 angle = NuAtan2D(target->apiobj.position.x - object->apiobj.position.x,
                                  target->apiobj.position.z - object->apiobj.position.z);
             i32 difference = RotDiff(object->apiobj.movement_facing_angle, angle);
-            if (difference >= -0x2000 && difference <= 0x2000 && distance < nearest_distance) {
-                nearest = target;
-                nearest_distance = distance;
+            if (difference >= -0x2000) {
+                if (difference <= 0x2000 && distance < nearest_distance) {
+                    nearest = target;
+                    nearest_distance = distance;
+                }
             }
         }
         PlayerOpponent_Range2 = nearest_distance;
@@ -7055,8 +7064,10 @@ void MoveToMarker::Process(float frame_time) {
             }
         }
     }
-    if (target.Get() != NULL && target.Get()->GetObjectType() != 1) {
-        target.Get()->GetFloorTargetPos(position, -1);
+    if (target.Get() != NULL) {
+        if (target.Get()->GetObjectType() != 1) {
+            target.Get()->GetFloorTargetPos(position, -1);
+        }
     }
     rotation.Process(frame_time);
     scale.Process(frame_time);
@@ -8769,14 +8780,13 @@ void Glide_MoveCode(GameObject_s *object) {
 
     if (object->apiobj.field_0x27d == 0 && object->apiobj.field_0x218 != 2000000.0f &&
         (height = object->apiobj.collision_min.y - object->apiobj.field_0x218,
-         object->apiobj.field_0x1e0 <= height && height != object->apiobj.field_0x1e0)) {
-        if ((object->pad_gamepad->buttons_held & GAMEPAD_ACTION) != 0 &&
-            object->apiobj.character_model->model_data_b[0x21] != NULL) {
-            if (Slam_Start(object, SLAMJUMPSPEED) != 0) {
-                ResetAnimPacket(&object->apiobj.anim_packet, -1);
-                ResetMiniAnimPacket(&object->mini_animation, -1);
-                return;
-            }
+         object->apiobj.field_0x1e0 <= height && height != object->apiobj.field_0x1e0) &&
+        (object->pad_gamepad->buttons_held & GAMEPAD_ACTION) != 0 &&
+        object->apiobj.character_model->model_data_b[0x21] != NULL) {
+        if (Slam_Start(object, SLAMJUMPSPEED) != 0) {
+            ResetAnimPacket(&object->apiobj.anim_packet, -1);
+            ResetMiniAnimPacket(&object->mini_animation, -1);
+            return;
         }
     }
 
