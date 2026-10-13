@@ -1081,13 +1081,13 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
             case 1: {
                 const i32 selected = MiniTrooperRandomIndex(team);
                 i32 shot = 0;
-                if ((team->route_state & 0x10) != 0) {
-                    team->route_state &= ~0x10;
+                if (team->mode_changed) {
+                    team->mode_changed = 0;
                     if (team->path != NULL) {
-                        team->waypoint_state = (team->waypoint_state & 0xf8) | ((team->waypoint_state >> 3) & 7);
-                        const NUVEC &point = team->path->pts[team->waypoint_state & 7];
+                        team->waypoint_current = team->waypoint_index;
+                        const NUVEC &point = team->path->pts[team->waypoint_current];
                         team->facing_angle = NuAtan2D(point.x - team->origin_x, point.z - team->origin_z);
-                        team->formation_state = (team->formation_state & 0xf0) | (droid_hack != 0 ? 4 : 1);
+                        team->formation_shape = droid_hack != 0 ? 4 : 1;
                         GenerateTrooperTeamShape(team, 0);
                         trooper = team->troopers;
                         for (i32 i = 0; i < team->trooper_count; ++i, ++trooper)
@@ -1219,7 +1219,7 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
             }
         }
 
-        team->route_state = (team->route_state & 0xf0) | (team->formation_state >> 4);
+        team->previous_mode = team->formation_mode;
     }
 }
 
