@@ -887,10 +887,10 @@ static void cbPtlDataMenu(eduimenu_s *parent, eduiitem_s *, u32) {
 }
 
 static void cbPtlEmitMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     u32 disabled_colours[4] = {0x80303030, 0x80ff0000, 0x80808080, 0x80404040};
     if (!(edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)) {
         const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
-        const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
         ptlemitmenu = eduiMenuCreate(70, 70, 250, 300, ed_fnt, cbPtlCancelEmitMenu, "Emitter Settings");
         if (ptlemitmenu != NULL) {
             eduiMenuAddItem(ptlemitmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlEmitVelMenu, "Emitter Vel..."));

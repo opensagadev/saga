@@ -6729,6 +6729,7 @@ extern "C" {
         return height;
     }
     static __used__ i32 eduicbRenderTexturePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
+        u32 colours[2] = {0x807f7f7f, 0x807f7f7f};
         (void)menu;
         edui_texture_pick_s *picker = static_cast<edui_texture_pick_s *>(item);
         item->x = x;
@@ -6764,7 +6765,6 @@ extern "C" {
             else if (point_v[corner] > 1.0f)
                 point_v[corner] = 1.0f;
         }
-        u32 colours[2] = {0x807f7f7f, 0x807f7f7f};
         colours[picker->selected_corner] = 0x80ffffff;
         if (!edui_donotdraw) {
             NuRndrRectUV2di(x << 4, y << 3, width << 4, width << 3, origin_u, origin_v, origin_u + uv_span,

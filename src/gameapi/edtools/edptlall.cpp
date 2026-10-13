@@ -295,9 +295,9 @@ static void edptlcbSetGroup(eduimenu_s *, eduiitem_s *item, u32) {
     debkeydata[edpp_ptls[edpp_nearest].instance_id].render_group = render_group;
 }
 static void edptlcbStarMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0xc479c000, 0xc479c000, 0xc479c000, 0xc479c000};
     if (!(edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)) {
         debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
-        u32 colours[4] = {0xc479c000, 0xc479c000, 0xc479c000, 0xc479c000};
         edptl_star_menu = eduiMenuCreate(70, 70, 200, 300, ed_fnt, edptlcbCancelStarMenu, "Star Settings");
         if (edptl_star_menu == NULL)
             return;
@@ -318,9 +318,9 @@ static void edptlcbClearPage(eduimenu_s *, eduiitem_s *item, u32) {
     edppClearPage(static_cast<i8>(item->data));
 }
 static void edptlcbGhostMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0xc479c000, 0xc479c000, 0xc479c000, 0xc479c000};
     if (!(edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)) {
         debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
-        u32 colours[4] = {0xc479c000, 0xc479c000, 0xc479c000, 0xc479c000};
         edptl_ghost_menu = eduiMenuCreate(70, 70, 200, 300, ed_fnt, edptlcbCancelGhostMenu, "Particle Ghosts");
         if (edptl_ghost_menu == NULL)
             return;
@@ -711,10 +711,10 @@ static void edptlChangeRepeatBox(eduimenu_s *, eduiitem_s *item, u32) {
     }
 }
 static void edptlcbClipboardMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] __attribute__((aligned(16))) = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (edpp_create_type == -1)
         return;
 
-    const u32 colours[4] __attribute__((aligned(16))) = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     ptlclipmenu = eduiMenuCreate(70, 70, 300, 250, ed_fnt, edptlcbCancelClipboardMenu, "Clipboard Menu");
     if (ptlclipmenu == NULL)
         return;
