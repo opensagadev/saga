@@ -941,6 +941,33 @@ static void *GizTurrets_ReserveBufferSpace(void *world_ptr) {
     return turret_sys;
 }
 
+// Clears a turret slot (keeping its anim set) and applies the load defaults.
+static void GizTurret_Init(GIZTURRET_s *turret) {
+    if (turret == NULL) {
+        return;
+    }
+    GAMEANIMSET_s *anim_set = turret->anim_set;
+    turret->ClearMechObjectInterface();
+    memset(turret, 0, sizeof(*turret));
+    turret->anim_set = anim_set;
+    turret->flags &= static_cast<u8>(~1);
+    turret->runtime_flags &= static_cast<u8>(~GIZTURRET_RUNTIME_FLAG_ROTATION_SFX_PLAYING);
+    turret->fire_interval = 1.0f;
+    turret->pitch_turn_speed = 8.0f;
+    turret->yaw_turn_speed = 8.0f;
+    turret->field_0x140 = 0.2f;
+    turret->behavior_flags |= 0x802;
+    turret->field_0x12f = 1;
+    turret->field_0x131 = 1;
+    turret->field_0x12a = -1;
+    turret->field_0x126 = -1;
+    turret->field_0x138 = -1;
+    turret->field_0x130 = 1;
+    turret->blowup_type = -1;
+    turret->bolt_type_id = -1;
+    turret->field_0x120 = (WORLD->area != NULL && (WORLD->area->flags & 1) != 0) ? 12.0f : 1.75f;
+}
+
 static i32 GizTurrets_Load(void *world_ptr, void *system_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     GIZTURRETSYS_s *system = static_cast<GIZTURRETSYS_s *>(system_ptr);
@@ -952,26 +979,7 @@ static i32 GizTurrets_Load(void *world_ptr, void *system_ptr) {
 
     GIZTURRET_s *turret = system->turrets;
     for (i32 index = 0; index < system->count; ++index, ++turret) {
-        GAMEANIMSET_s *anim_set = turret->anim_set;
-        turret->ClearMechObjectInterface();
-        memset(turret, 0, sizeof(*turret));
-        turret->anim_set = anim_set;
-        turret->flags &= static_cast<u8>(~1);
-        turret->runtime_flags &= static_cast<u8>(~GIZTURRET_RUNTIME_FLAG_ROTATION_SFX_PLAYING);
-        turret->fire_interval = 1.0f;
-        turret->pitch_turn_speed = 8.0f;
-        turret->yaw_turn_speed = 8.0f;
-        turret->field_0x140 = 0.2f;
-        turret->behavior_flags |= 0x802;
-        turret->field_0x12f = 1;
-        turret->field_0x131 = 1;
-        turret->field_0x12a = -1;
-        turret->field_0x126 = -1;
-        turret->field_0x138 = -1;
-        turret->field_0x130 = 1;
-        turret->blowup_type = -1;
-        turret->bolt_type_id = -1;
-        turret->field_0x120 = (WORLD->area != NULL && (WORLD->area->flags & 1) != 0) ? 12.0f : 1.75f;
+        GizTurret_Init(turret);
 
         EdFileRead(turret->name, sizeof(turret->name));
         GizmoFileReadGameAnimSet(turret->anim_set, world_ptr, GizTurret_ReadAnimSetData, version,
@@ -1007,20 +1015,16 @@ static i32 GizTurrets_Load(void *world_ptr, void *system_ptr) {
         char name[256];
         if (version > 5) {
             turret->field_0x120 = EdFileReadFloat();
-            turret->field_0x12f = static_cast<u8>(EdFileReadChar());
         } else {
-            turret->field_0x12f = static_cast<u8>(EdFileReadChar());
+            turret->field_0x120 = (world->area != NULL && (world->area->flags & 1) != 0) ? 12.0f : 1.75f;
         }
-        if (!(version > 3)) {
-            if (GizmoFileReadName(name) != 0) {
-                turret->bolt_type_id = static_cast<i8>(BoltType_FindIDByName(name, world));
-            }
-        } else {
+        turret->field_0x12f = static_cast<u8>(EdFileReadChar());
+        if (version > 3) {
             turret->field_0x131 = static_cast<u8>(EdFileReadChar());
             turret->base_y_rotation = static_cast<i16>(EdFileReadShort());
-            if (GizmoFileReadName(name) != 0) {
-                turret->bolt_type_id = static_cast<i8>(BoltType_FindIDByName(name, world));
-            }
+        }
+        if (GizmoFileReadName(name) != 0) {
+            turret->bolt_type_id = static_cast<i8>(BoltType_FindIDByName(name, world));
         }
         if (GizmoFileReadName(name) != 0) {
             turret->field_0x12a = static_cast<i16>(GetSfxId(name));
@@ -1052,8 +1056,8 @@ static i32 GizTurrets_Load(void *world_ptr, void *system_ptr) {
                 object_data[1] = 1;
             } else if (object_index == 1) {
                 object_data[1] = 2;
-            } else {
-                object_data[1] = (object_data[0] & 1) != 0 ? 3 : 1;
+            } else if ((object_data[0] & 1) != 0) {
+                object_data[1] = 3;
             }
         }
     }
