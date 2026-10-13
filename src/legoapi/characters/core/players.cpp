@@ -1554,8 +1554,8 @@ i32 MakePlayerList(i32 count) {
                 unavailable = player->field_0xe32 != 0;
             }
         }
-        PlayerProgress[player_count].coins = player->coinpacket != NULL ? player->coinpacket->coins : 0;
         PlayerProgress[player_count].field_0x7 = unavailable;
+        PlayerProgress[player_count].coins = player->coinpacket != NULL ? player->coinpacket->coins : 0;
         PlayerProgress[player_count].field_0xb = player->field_0xe31 == 1;
 
         if (player->apiobj.field_0x287 != 0) {
