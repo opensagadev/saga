@@ -3038,7 +3038,8 @@ i32 edSpline_FindAllBeg(NUGSCN *scene, char *prefix, NUGSPLINE **results, i32 ca
 }
 
 i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end) {
-    splineStore = reinterpret_cast<NUGSPLINE *>(buf->void_ptr);
+    NUGSPLINE *store = reinterpret_cast<NUGSPLINE *>(buf->void_ptr);
+    splineStore = store;
     buf->addr = (buf->addr + 3) & ~static_cast<usize>(3);
 
     EdFileSetMedia(1);
@@ -3049,7 +3050,7 @@ i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end) {
 
     const i32 file_check_length = NuStrLen(EDSPLINE_FILECHECK);
     for (i32 i = 0; i < file_check_length; ++i) {
-        if (EdFileReadChar() != EDSPLINE_FILECHECK[i]) {
+        if (EDSPLINE_FILECHECK[i] != EdFileReadChar()) {
             EdFileClose();
             splineStore = NULL;
             return 0;
@@ -3061,7 +3062,7 @@ i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end) {
     i32 point_count = EdFileReadInt();
     i32 string_bytes = EdFileReadInt();
 
-    char *name_cursor = reinterpret_cast<char *>(splineStore + spline_count);
+    char *name_cursor = reinterpret_cast<char *>(store + spline_count);
     char *name_end = name_cursor + string_bytes;
     NUVEC *point_cursor = reinterpret_cast<NUVEC *>((reinterpret_cast<usize>(name_end) + 3) & ~static_cast<usize>(3));
     NUVEC *data_end = point_cursor + point_count;
@@ -3074,14 +3075,13 @@ i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end) {
     for (i32 i = 0; i < spline_count; ++i) {
         EdFileReadChar();
         i32 name_length = EdFileReadInt();
-        NUGSPLINE *spline = &splineStore[i];
-        spline->name = name_cursor;
-        spline->pt_size = sizeof(NUVEC);
-        spline->length = static_cast<i16>(EdFileReadInt());
-        spline->pts = point_cursor;
+        splineStore[i].name = name_cursor;
+        splineStore[i].pt_size = sizeof(NUVEC);
+        splineStore[i].length = static_cast<i16>(EdFileReadInt());
+        splineStore[i].pts = point_cursor;
 
         for (i32 j = 0; j < name_length; ++j) {
-            spline->name[j] = EdFileReadChar();
+            splineStore[i].name[j] = EdFileReadChar();
         }
         name_cursor += name_length;
         if (name_cursor > name_end) {
@@ -3093,12 +3093,13 @@ i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end) {
             return 0;
         }
 
-        for (i32 j = 0; j < spline->length; ++j) {
-            point_cursor[j].x = EdFileReadFloat();
-            point_cursor[j].y = EdFileReadFloat();
-            point_cursor[j].z = EdFileReadFloat();
+        for (i32 j = 0; j < splineStore[i].length; ++j) {
+            NUVEC *point = &splineStore[i].pts[j];
+            point->x = EdFileReadFloat();
+            point->y = EdFileReadFloat();
+            point->z = EdFileReadFloat();
         }
-        point_cursor += spline->length;
+        point_cursor += splineStore[i].length;
         if (point_cursor > data_end) {
             EdFileClose();
             splineStore = NULL;
@@ -3120,19 +3121,20 @@ i32 edSpline_FindAllSub(NUGSCN *scene, char *name, NUGSPLINE **results, i32 capa
     if (capacity <= 0)
         return 0;
     if (splineStore != NULL) {
-        for (i32 i = 0; i < numSplinesLoaded; ++i) {
-            if (NuStrIStr(splineStore[i].name, name) != NULL) {
-                results[count++] = &splineStore[i];
+        NUGSPLINE *spline = splineStore;
+        for (i32 i = 0; i < numSplinesLoaded; ++spline, ++i) {
+            if (NuStrIStr(spline->name, name) != NULL) {
+                results[count++] = spline;
                 if (count >= capacity)
                     return count;
             }
         }
     }
     if (scene != NULL) {
-        auto scene_numsplines = scene->numsplines;
-        for (i32 i = 0; i < scene_numsplines; ++i) {
-            if (NuStrIStr(scene->splines[i].name, name) != NULL) {
-                results[count++] = &scene->splines[i];
+        NUGSPLINE *spline = scene->splines;
+        for (i32 i = 0; i < scene->numsplines; ++spline, ++i) {
+            if (NuStrIStr(spline->name, name) != NULL) {
+                results[count++] = spline;
                 if (count >= capacity)
                     return count;
             }

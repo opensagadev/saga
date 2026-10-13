@@ -136,9 +136,39 @@ template <typename T, usize Offset> class NuEListOffset {
     }
 
   public:
+    typedef Links Link;
+
     T *begin;
     T *end;
     i32 length;
+
+    // Link-record iteration.  The original walks the embedded link records
+    // (a base subobject at Offset), so converting an entry pointer to its
+    // links is null-checked like a derived-to-base pointer conversion.
+    static Link *LinkOf(T *entry) {
+        return entry != nullptr ? GetLinks(entry) : nullptr;
+    }
+
+    static T *EntryOf(Link *link) {
+        return reinterpret_cast<T *>(reinterpret_cast<u8 *>(link) - Offset);
+    }
+
+    // Null-checked links-to-entry conversion (base-to-derived static_cast).
+    static T *CheckedEntryOf(Link *link) {
+        return link != nullptr ? EntryOf(link) : nullptr;
+    }
+
+    static Link *NextLink(Link *link) {
+        return LinkOf(link->next);
+    }
+
+    Link *FrontLink() const {
+        return LinkOf(Front());
+    }
+
+    Link *EndLink() const {
+        return LinkOf(end);
+    }
 
     NuEListOffset() {
         T *begin_entry = BeginSentinel();
@@ -173,13 +203,13 @@ template <typename T, usize Offset> class NuEListOffset {
     }
 
     bool PushBack(T *entry) {
-        Links *entry_links = GetLinks(entry);
-        Links *end_links = GetLinks(end);
-        T *previous = end_links->prev;
-        end_links->prev = entry;
-        entry_links->prev = previous;
-        GetLinks(previous)->next = entry;
-        entry_links->next = end;
+        Link *entry_link = LinkOf(entry);
+        Link *end_link = LinkOf(end);
+        Link *previous_link = LinkOf(end_link->prev);
+        end_link->prev = CheckedEntryOf(entry_link);
+        entry_link->prev = CheckedEntryOf(previous_link);
+        previous_link->next = EntryOf(entry_link);
+        entry_link->next = EntryOf(end_link);
         length++;
         return true;
     }

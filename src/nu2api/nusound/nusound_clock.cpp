@@ -20,10 +20,11 @@ void NuSoundClock::HandleCallbacks() {
     u64 ticks = GetTicks();
     u64 frequency = GetClockFrequency();
     u64 elapsed = ticks - previous_ticks;
-    Callback *callback = callbacks.Front();
-    Callback *end = callbacks.End();
-    for (; callback != end; callback = callback->intrusive_next) {
-        callback->OnCallback(elapsed, frequency);
+    typedef NuEListOffset<Callback, 4> CallbackList;
+    CallbackList::Link *link = callbacks.FrontLink();
+    CallbackList::Link *end = callbacks.EndLink();
+    for (; link != end; link = CallbackList::NextLink(link)) {
+        CallbackList::EntryOf(link)->OnCallback(elapsed, frequency);
     }
     previous_ticks = ticks;
 }

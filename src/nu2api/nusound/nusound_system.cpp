@@ -706,8 +706,11 @@ i32 NuSoundSystem::GetNumAvailableOutputDevices() {
 NuSoundVoice *NuSoundSystem::GetOldestVoice(NuSoundSample *sample, float &playback_position) {
     playback_position = -1.0f;
     NuSoundVoice *oldest = NULL;
-    NuSoundVoice *end = voice_list.End();
-    for (NuSoundVoice *voice = voice_list.Front(); voice != end; voice = voice->field_0x28) {
+    typedef NuEListOffset<NuSoundVoice, 0x24> VoiceList;
+    VoiceList::Link *link = voice_list.FrontLink();
+    VoiceList::Link *end = voice_list.EndLink();
+    for (; link != end; link = VoiceList::NextLink(link)) {
+        NuSoundVoice *voice = VoiceList::EntryOf(link);
         if (voice->GetState() != NuSoundVoice::PLAYSTATE_PLAYING ||
             voice->sound_source->GetName() != sample->GetName()) {
             continue;
@@ -737,8 +740,11 @@ NuSoundVoice *NuSoundSystem::GetQuietestVoice(NuSoundSample *sample, float &quie
     quietest_volume = -1.0f;
     NuSoundVoice *quietest = NULL;
 
-    NuSoundVoice *end = voice_list.End();
-    for (NuSoundVoice *voice = voice_list.Front(); voice != end; voice = voice->field_0x28) {
+    typedef NuEListOffset<NuSoundVoice, 0x24> VoiceList;
+    VoiceList::Link *link = voice_list.FrontLink();
+    VoiceList::Link *end = voice_list.EndLink();
+    for (; link != end; link = VoiceList::NextLink(link)) {
+        NuSoundVoice *voice = VoiceList::EntryOf(link);
         if (voice->GetState() != NuSoundVoice::PLAYSTATE_PLAYING ||
             voice->sound_source->GetName() != sample->GetName()) {
             continue;
@@ -783,15 +789,21 @@ bool NuSoundSystem::LoadSample(NuSoundSample *sample, void *data, i32 size, NuSo
 }
 
 void NuSoundSystem::PauseAllVoices() {
-    NuSoundVoice *end = voice_list.End();
-    for (NuSoundVoice *voice = voice_list.Front(); voice != end; voice = voice->field_0x28) {
+    typedef NuEListOffset<NuSoundVoice, 0x24> VoiceList;
+    VoiceList::Link *link = voice_list.FrontLink();
+    VoiceList::Link *end = voice_list.EndLink();
+    for (; link != end; link = VoiceList::NextLink(link)) {
+        NuSoundVoice *voice = VoiceList::EntryOf(link);
         voice->Pause();
     }
 }
 
 void NuSoundSystem::PauseVoices(i32 mask) {
-    NuSoundVoice *end = voice_list.End();
-    for (NuSoundVoice *voice = voice_list.Front(); voice != end; voice = voice->field_0x28) {
+    typedef NuEListOffset<NuSoundVoice, 0x24> VoiceList;
+    VoiceList::Link *link = voice_list.FrontLink();
+    VoiceList::Link *end = voice_list.EndLink();
+    for (; link != end; link = VoiceList::NextLink(link)) {
+        NuSoundVoice *voice = VoiceList::EntryOf(link);
         if ((voice->field131_0x148 & mask) != 0) {
             voice->Pause();
         }
@@ -893,15 +905,21 @@ void NuSoundSystem::RemoveListener(NuSoundListener *listener) {
 }
 
 void NuSoundSystem::ResumeAllVoices() {
-    NuSoundVoice *end = voice_list.End();
-    for (NuSoundVoice *voice = voice_list.Front(); voice != end; voice = voice->field_0x28) {
+    typedef NuEListOffset<NuSoundVoice, 0x24> VoiceList;
+    VoiceList::Link *link = voice_list.FrontLink();
+    VoiceList::Link *end = voice_list.EndLink();
+    for (; link != end; link = VoiceList::NextLink(link)) {
+        NuSoundVoice *voice = VoiceList::EntryOf(link);
         voice->Resume();
     }
 }
 
 void NuSoundSystem::ResumeVoices(i32 mask) {
-    NuSoundVoice *end = voice_list.End();
-    for (NuSoundVoice *voice = voice_list.Front(); voice != end; voice = voice->field_0x28) {
+    typedef NuEListOffset<NuSoundVoice, 0x24> VoiceList;
+    VoiceList::Link *link = voice_list.FrontLink();
+    VoiceList::Link *end = voice_list.EndLink();
+    for (; link != end; link = VoiceList::NextLink(link)) {
+        NuSoundVoice *voice = VoiceList::EntryOf(link);
         if ((voice->field131_0x148 & mask) != 0) {
             voice->Resume();
         }
@@ -920,42 +938,52 @@ void NuSoundSystem::SetMainThreadID(NuThread *) {
 }
 
 void NuSoundSystem::Shutdown() {
-    NuSoundVoice *voice = this->voice_list.Front();
-    NuSoundVoice *voice_end = this->voice_list.End();
-    while (voice != voice_end) {
-        NuSoundVoice *next = voice->field_0x28;
+    typedef NuEListOffset<NuSoundVoice, 0x24> VoiceList;
+    VoiceList::Link *link = this->voice_list.FrontLink();
+    VoiceList::Link *voice_end = this->voice_list.EndLink();
+    while (link != voice_end) {
+        NuSoundVoice *voice = VoiceList::EntryOf(link);
+        VoiceList::Link *next = VoiceList::NextLink(link);
         voice->Stop(false);
         this->ReleaseVoice(voice);
-        voice = next;
+        link = next;
     }
 
     this->UnloadAllSamples();
 
-    NuSoundDecoder *entry = this->decoder_list.Front();
-    while (entry != this->decoder_list.End()) {
-        NuSoundDecoder *next = *reinterpret_cast<NuSoundDecoder **>(reinterpret_cast<u8 *>(entry) + 0x24);
+    typedef NuEListOffset<NuSoundDecoder, 0x20> DecoderList;
+    DecoderList::Link *decoder_link = this->decoder_list.FrontLink();
+    DecoderList::Link *decoder_end = this->decoder_list.EndLink();
+    while (decoder_link != decoder_end) {
+        NuSoundDecoder *entry = DecoderList::EntryOf(decoder_link);
+        DecoderList::Link *next = DecoderList::NextLink(decoder_link);
         entry->~NuSoundDecoder();
         FreeMemory(MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(entry), 0);
-        entry = next;
+        // The reference advances twice per iteration here.
+        decoder_link = DecoderList::NextLink(next);
     }
 
     NuSoundBus *bus = this->bus_list.Front();
-    while (bus != this->bus_list.End()) {
+    NuSoundBus *bus_end = this->bus_list.End();
+    while (bus != bus_end) {
         NuSoundBus *next = reinterpret_cast<NuSoundBus **>(bus)[1];
         this->ReleaseBus(bus);
-        bus = next;
+        // The reference advances twice per iteration here as well.
+        bus = reinterpret_cast<NuSoundBus **>(next)[1];
     }
 
     FreeMemory(MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(this->samples), 0);
     this->samples = NULL;
 
-    if (s_mmDecoder != NULL) {
-        s_mmDecoder->~NuSoundMemoryManager();
-        NU_FREE(s_mmDecoder);
+    NuSoundMemoryManager *manager = s_mmSample;
+    if (manager != NULL) {
+        manager->~NuSoundMemoryManager();
+        NU_FREE(manager);
     }
-    if (s_mmSample != NULL) {
-        s_mmSample->~NuSoundMemoryManager();
-        NU_FREE(s_mmSample);
+    manager = s_mmDecoder;
+    if (manager != NULL) {
+        manager->~NuSoundMemoryManager();
+        NU_FREE(manager);
     }
 
     NuMemoryGet()->DestroyMemoryManager(sScratchMemMgr);
@@ -999,14 +1027,21 @@ template void NuSoundMemory::PushNuListNode<NuSoundEffect *>(NuList<NuSoundEffec
 template void NuMap<u32, NuSoundSystem::CurveData>::DeleteNodeLinks(NuMapNode<u32, NuSoundSystem::CurveData> *);
 
 void NuSoundSystem::StopAllVoices() {
-    NuSoundVoice *end = voice_list.End();
-    for (NuSoundVoice *voice = voice_list.Front(); voice != end; voice = voice->field_0x28) {
+    typedef NuEListOffset<NuSoundVoice, 0x24> VoiceList;
+    VoiceList::Link *link = voice_list.FrontLink();
+    VoiceList::Link *end = voice_list.EndLink();
+    for (; link != end; link = VoiceList::NextLink(link)) {
+        NuSoundVoice *voice = VoiceList::EntryOf(link);
         voice->Stop(true);
     }
 }
 
 void NuSoundSystem::StopVoices(NuSoundSource const &source) {
-    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+    typedef NuEListOffset<NuSoundVoice, 0x24> VoiceList;
+    VoiceList::Link *link = voice_list.FrontLink();
+    VoiceList::Link *end = voice_list.EndLink();
+    for (; link != end; link = VoiceList::NextLink(link)) {
+        NuSoundVoice *voice = VoiceList::EntryOf(link);
         if (voice->sound_source == &source) {
             voice->Stop(false);
         }
@@ -1014,7 +1049,11 @@ void NuSoundSystem::StopVoices(NuSoundSource const &source) {
 }
 
 void NuSoundSystem::StopVoices(i32 mask) {
-    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+    typedef NuEListOffset<NuSoundVoice, 0x24> VoiceList;
+    VoiceList::Link *link = voice_list.FrontLink();
+    VoiceList::Link *end = voice_list.EndLink();
+    for (; link != end; link = VoiceList::NextLink(link)) {
+        NuSoundVoice *voice = VoiceList::EntryOf(link);
         if ((voice->field131_0x148 & mask) != 0) {
             voice->Stop(false);
         }
@@ -1022,10 +1061,11 @@ void NuSoundSystem::StopVoices(i32 mask) {
 }
 
 void NuSoundSystem::UnloadAllSamples() {
-    NuSoundDecoder *entry = decoder_list.Front();
-    while (entry != decoder_list.End()) {
-        NuSoundSample *sample = reinterpret_cast<NuSoundSample *>(entry);
-        entry = *reinterpret_cast<NuSoundDecoder **>(reinterpret_cast<u8 *>(entry) + 0x24);
+    typedef NuEListOffset<NuSoundDecoder, 0x20> SampleList;
+    SampleList::Link *link = decoder_list.FrontLink();
+    SampleList::Link *end = decoder_list.EndLink();
+    for (; link != end; link = SampleList::NextLink(link)) {
+        NuSoundSample *sample = reinterpret_cast<NuSoundSample *>(SampleList::EntryOf(link));
         if (sample->GetLoadState() == NuSoundSample::LoadState::LOADED) {
             UnloadSample(sample);
         }
@@ -1058,10 +1098,12 @@ void NuSoundSystem::Update(f32 frametime) {
 
     // Pass 2: update the engine-side mix of every playing voice; stopped
     // auto-delete voices are released.
-    NuSoundVoice *voice = voice_list.Front();
-    NuSoundVoice *end = voice_list.End();
-    while (voice != end) {
-        NuSoundVoice *next = voice->field_0x28;
+    typedef NuEListOffset<NuSoundVoice, 0x24> VoiceList;
+    VoiceList::Link *link = voice_list.FrontLink();
+    VoiceList::Link *end = voice_list.EndLink();
+    while (link != end) {
+        NuSoundVoice *voice = VoiceList::EntryOf(link);
+        VoiceList::Link *next = VoiceList::NextLink(link);
 
         NuSoundVoice::PlayState state = voice->GetState();
         if (state == NuSoundVoice::PLAYSTATE_PLAYING) {
@@ -1072,7 +1114,7 @@ void NuSoundSystem::Update(f32 frametime) {
             this->ReleaseVoice(voice);
         }
 
-        voice = next;
+        link = next;
     }
 
     this->mutex.Unlock();
