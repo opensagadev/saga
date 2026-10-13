@@ -1134,10 +1134,19 @@ static void GizForces_Reset(void *world_ptr, void *data, void *progress_ptr) {
     GIZFORCE_s *force = force_sys->forces;
     for (i32 index = 0; index < force_sys->count; ++index, ++force) {
         force->field_0x3c = 0.0f;
-        force->progress_flags |= GIZFORCE_PROGRESS_ENABLED | GIZFORCE_PROGRESS_VISIBLE;
-        force->progress_flags &= 0x9f;
-        force->runtime_flags &= GIZFORCE_RUNTIME_PENDING_BLOWUP_TYPE;
-        force->field_0xaa &= 0xe2;
+        force->progress_enabled = 1;
+        force->progress_visible = 1;
+        force->progress_group_member = 0;
+        force->progress_animation_reversed = 0;
+        force->runtime_has_platform = 0;
+        force->runtime_reward_released = 0;
+        force->runtime_along_socket_hidden = 0;
+        force->runtime_offset_applied = 0;
+        force->runtime_force_range_complete = 0;
+        force->runtime_completion_released = 0;
+        force->runtime_pending_completion = 0;
+        force->state_destroyed_or_thrown = 0;
+        force->state_reset_bits = 0;
         force->animation_speed = 1.0f;
         force->field_0x48 = 0.0f;
         force->field_0x50 = 0.0f;
@@ -1145,9 +1154,6 @@ static void GizForces_Reset(void *world_ptr, void *data, void *progress_ptr) {
         if (force->anim_set != NULL) {
             for (GAMEANIMOBJ_s *object = force->anim_set->objects; object != NULL; object = object->next) {
                 GIZFORCEANIMDATA_s *object_data = static_cast<GIZFORCEANIMDATA_s *>(object->object_data);
-                if (object_data == NULL) {
-                    continue;
-                }
                 object_data->platform_id = -1;
                 if (world->terrain != NULL && (object_data->flags & 1) == 0 &&
                     NuSpecialExistsFn(&object->special) != 0) {
@@ -1168,33 +1174,19 @@ static void GizForces_Reset(void *world_ptr, void *data, void *progress_ptr) {
             GameAnimSet_EvaluateState(force->anim_set);
         }
 
-        if (progress != NULL && index < GIZFORCE_PROGRESS_CAPACITY) {
+        if (index < GIZFORCE_PROGRESS_CAPACITY && progress != NULL) {
+            const i32 word = index >> 5;
             const u32 bit = 1u << (index & 31);
-            const u32 word = static_cast<u32>(index) >> 5;
-            force->progress_flags =
-                static_cast<u8>((force->progress_flags & ~GIZFORCE_PROGRESS_VISIBLE) |
-                                ((progress->progress_flag_1[word] & bit) != 0 ? GIZFORCE_PROGRESS_VISIBLE : 0));
-            force->progress_flags =
-                static_cast<u8>((force->progress_flags & ~GIZFORCE_PROGRESS_ENABLED) |
-                                ((progress->progress_flag_0[word] & bit) != 0 ? GIZFORCE_PROGRESS_ENABLED : 0));
-            force->runtime_flags =
-                static_cast<u8>((force->runtime_flags & ~GIZFORCE_RUNTIME_REWARD_RELEASED) |
-                                ((progress->runtime_flag_1[word] & bit) != 0 ? GIZFORCE_RUNTIME_REWARD_RELEASED : 0));
-            force->runtime_flags = static_cast<u8>(
-                (force->runtime_flags & ~GIZFORCE_RUNTIME_ALONG_SOCKET_HIDDEN) |
-                ((progress->runtime_flag_3[word] & bit) != 0 ? GIZFORCE_RUNTIME_ALONG_SOCKET_HIDDEN : 0));
-            force->runtime_flags = static_cast<u8>(
-                (force->runtime_flags & ~GIZFORCE_RUNTIME_COMPLETION_RELEASED) |
-                ((progress->runtime_flag_6[word] & bit) != 0 ? GIZFORCE_RUNTIME_COMPLETION_RELEASED : 0));
-            force->runtime_flags = static_cast<u8>(
-                (force->runtime_flags & ~GIZFORCE_RUNTIME_PENDING_COMPLETION) |
-                ((progress->runtime_flag_7[word] & bit) != 0 ? GIZFORCE_RUNTIME_PENDING_COMPLETION : 0));
-            force->field_0xaa = static_cast<u8>(
-                (force->field_0xaa & ~GIZFORCE_STATE_DESTROYED_OR_THROWN) |
-                ((progress->field_aa_flag_0[word] & bit) != 0 ? GIZFORCE_STATE_DESTROYED_OR_THROWN : 0));
+            force->progress_visible = (progress->progress_flag_1[word] & bit) != 0;
+            force->progress_enabled = (progress->progress_flag_0[word] & bit) != 0;
+            force->runtime_reward_released = (progress->runtime_flag_1[word] & bit) != 0;
+            force->runtime_along_socket_hidden = (progress->runtime_flag_3[word] & bit) != 0;
+            force->runtime_completion_released = (progress->runtime_flag_6[word] & bit) != 0;
+            force->runtime_pending_completion = (progress->runtime_flag_7[word] & bit) != 0;
+            force->state_destroyed_or_thrown = (progress->field_aa_flag_0[word] & bit) != 0;
         }
 
-        if (force->group_index < 8) {
+        if (force->group_index >= 0 && force->group_index < 8) {
             force->group = &force_sys->groups[force->group_index];
             ++force->group->configured_count;
         } else {
@@ -1239,8 +1231,10 @@ static void GizForces_Reset(void *world_ptr, void *data, void *progress_ptr) {
                     force.progress_flags |= GIZFORCE_PROGRESS_GROUP_MEMBER;
                 }
 
-                NUVEC offset = {0.0f, GameAnimSet_GetCompletionRatio(force.anim_set) * force.group->combined_height,
-                                0.0f};
+                NUVEC offset;
+                offset.x = 0.0f;
+                offset.y = GameAnimSet_GetCompletionRatio(force.anim_set) * force.group->combined_height;
+                offset.z = 0.0f;
                 GameAnimSet_SetOffset(force.anim_set, &offset);
                 force.radius = 1.0f;
                 force.position = force.file_position;
@@ -1323,7 +1317,7 @@ static i32 GizForces_Load(void *world_ptr, void *data) {
             EdFileReadNuVec(&unused_position);
             EdFileReadShort();
             force.config_flags = static_cast<u32>(EdFileReadInt()) | GIZFORCE_CONFIG_LEGACY_ENABLED;
-            force.group_index = static_cast<u8>(EdFileReadChar());
+            force.group_index = static_cast<i8>(EdFileReadChar());
             force.activation_mode = static_cast<u8>(EdFileReadChar());
             EdFileReadChar();
         } else {
@@ -1334,11 +1328,11 @@ static i32 GizForces_Load(void *world_ptr, void *data) {
             force.interaction_radius = EdFileReadFloat();
             force.config_flags = static_cast<u32>(EdFileReadInt());
             if (version > 12) {
-                force.group_index = static_cast<u8>(EdFileReadChar());
+                force.group_index = static_cast<i8>(EdFileReadChar());
                 force.collision_mask = static_cast<u8>(EdFileReadChar());
             } else {
                 force.config_flags |= GIZFORCE_CONFIG_LEGACY_ENABLED;
-                force.group_index = static_cast<u8>(EdFileReadChar());
+                force.group_index = static_cast<i8>(EdFileReadChar());
                 if (version > 10) {
                     force.collision_mask = static_cast<u8>(EdFileReadChar());
                     if (version == 11 && force.collision_mask != 0) {

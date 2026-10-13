@@ -4341,7 +4341,7 @@ struct GIZFORCE_s {
     f32 horizontal_range;   // 0x74
     u32 config_flags;       // 0x78, GIZFORCE_CONFIG_FLAGS
     u32 field_0x7c;
-    u8 group_index;     // 0x80
+    i8 group_index;     // 0x80, negative when the force is ungrouped
     u8 collision_mask;  // 0x81
     u8 activation_mode; // 0x82
     u8 field_0x83;
@@ -4410,7 +4410,7 @@ struct GIZFORCE_s {
                 struct {
                     u8 state_destroyed_or_thrown : 1;
                     u8 state_debris_active : 1;
-                    u8 : 3;
+                    u8 state_reset_bits : 3; // cleared on reset, otherwise unused here
                     u8 state_being_used : 1;
                     u8 : 2;
                 };
