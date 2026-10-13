@@ -532,38 +532,32 @@ void PreResetCode(GameObject_s *obj) {
 
                 {
                     f32 t1 = obj->contact_normal.y;
-                    if (t1 <= NuTrigTable[0x4000]) {
+                    if (!(t1 > NuTrigTable[0x4000])) {
                         goto finish_dfd;
                     }
                     f32 t2 = NuTrigTable[0x3000];
-                    if (t2 <= t1) {
+                    if (!(t2 > t1)) {
                         goto finish_dfd;
                     }
                     t1 = obj->apiobj.field_0x1e0 / sPreResetDivF;
                     f32 diff = obj->apiobj.collision_min.y - obj->apiobj.field_0x218;
                     t1 *= sPreResetMulG;
-                    if (diff <= t1) {
+                    if (!(diff > t1)) {
                         goto finish_dfd;
                     }
-                    if (f28v <= 0.0f) {
-                        NUVEC_ALIGNED16 dir;
+                    NUVEC_ALIGNED16 dir;
+                    if (!(f28v > 0.0f)) {
                         dir.x = obj->apiobj.velocity.x;
                         dir.y = 0.0f;
                         dir.z = obj->apiobj.velocity.z;
                         NuVecNorm(&dir, &dir);
-                        if ((obj->contact_position.x - obj->apiobj.position.x) * dir.x +
-                                (obj->contact_position.z - obj->apiobj.position.z) * dir.z <=
-                            0.0f) {
-                            goto finish_dfd;
-                        }
                     } else {
-                        NUVEC_ALIGNED16 dir;
                         NuVecRotateY(&dir, &v001, obj->apiobj.movement_facing_angle);
-                        if ((obj->contact_position.x - obj->apiobj.position.x) * dir.x +
-                                (obj->contact_position.z - obj->apiobj.position.z) * dir.z <=
-                            0.0f) {
-                            goto finish_dfd;
-                        }
+                    }
+                    if (!((obj->contact_position.x - obj->apiobj.position.x) * dir.x +
+                              (obj->contact_position.z - obj->apiobj.position.z) * dir.z >
+                          0.0f)) {
+                        goto finish_dfd;
                     }
                     obj->fall_acceleration_timer = 0.1f;
                 }
@@ -582,9 +576,7 @@ void PreResetCode(GameObject_s *obj) {
             {
                 u8 v = obj->apiobj.character_data->player_config->variant;
                 if (v != 0xff) {
-                    if (static_cast<u8>(obj->apiobj.field_0x27c) == 0xff) {
-                        obj->blade_index = v;
-                    } else {
+                    if (static_cast<u8>(obj->apiobj.field_0x27c) != 0xff) {
                         if (Cheat_IsOn(0x19) != 0) {
                             obj->blade_index = 0x00;
                         } else if (static_cast<u8>(obj->apiobj.field_0x27c) != 0xff &&
@@ -593,6 +585,8 @@ void PreResetCode(GameObject_s *obj) {
                         } else {
                             obj->blade_index = obj->apiobj.character_data->player_config->variant;
                         }
+                    } else {
+                        obj->blade_index = v;
                     }
                 } else {
                     obj->blade_index = 0xff;
