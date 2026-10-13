@@ -83,25 +83,21 @@ static unsigned int Batarang_GetTargetPos(BATARANG_s *batarang, int index, nuvec
         }
         return 1;
     }
-    if (index < 0 || index >= 5 || index >= batarang->active)
+    if (index >= batarang->active)
         return 0;
     BATARANG_TARGET_s *target = &batarang->targets[index];
-    switch (target->type) {
-        case 0:
-            *position = static_cast<GameObject_s *>(target->object)->apiobj.collision_position;
-            return 1;
-        case 1:
-            *position = static_cast<DETONATOR_s *>(target->object)->field_0x0c;
-            return 1;
-        case 2:
-            *position = static_cast<GIZMOBLOWUP_s *>(target->object)->mid_position;
-            return 1;
-        case 3:
-            *position = *static_cast<NUVEC *>(target->object);
-            return 1;
-        default:
-            return 0;
+    if (target->type == 0) {
+        *position = static_cast<GameObject_s *>(target->object)->apiobj.collision_position;
+    } else if (target->type == 1) {
+        *position = static_cast<DETONATOR_s *>(target->object)->field_0x0c;
+    } else if (target->type == 2) {
+        *position = static_cast<GIZMOBLOWUP_s *>(target->object)->mid_position;
+    } else if (target->type == 3) {
+        *position = *static_cast<NUVEC *>(target->object);
+    } else {
+        return 0;
     }
+    return 1;
 }
 
 static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 automatic) {
