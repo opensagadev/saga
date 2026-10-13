@@ -117,7 +117,7 @@ i32 NuCameraClipHGobj(nugscn_s *scene, numtx_s *world_matrix, numtx_s *root_matr
     NUVEC min;
     NuVecNeg(&min, &half_extents);
 
-    NUMTX translated_world = *world_matrix;
+    NUMTX_ALIGNED16 translated_world = *world_matrix;
     NuMtxPreTranslate(&translated_world, NUMTX_GET_ROW_VEC(root_matrix, 3));
     return NuCameraClipTestExtents(&min, &half_extents, &translated_world, 0.0f, 0);
 }

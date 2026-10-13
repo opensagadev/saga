@@ -269,7 +269,7 @@ static void GizBuildIts_Draw(void *world_ptr, void *data, float) {
 
         while (object != NULL) {
             GIZBUILDITANIMDATA_s *object_data = static_cast<GIZBUILDITANIMDATA_s *>(object->object_data);
-            NUMTX draw_mtx = object_data->draw_mtx;
+            NUMTX_ALIGNED16 draw_mtx = object_data->draw_mtx;
             object_data->was_drawn = static_cast<u8>(NuSpecialDrawAt(&object->special, &draw_mtx));
 
             if ((buildit.state_flags & GIZBUILDIT_STATE_DRAW_REFLECTION) != 0 && (object->flags & 2) == 0) {
@@ -1102,7 +1102,7 @@ void GizBuildit_Reset(GIZBUILDIT_s *buildit, void *world_ptr) {
             GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(object->object_data);
             memset(data, 0, sizeof(*data));
 
-            NUMTX evaluated;
+            NUMTX_ALIGNED16 evaluated;
             EvalAnim(&object->special, object->start_frame, &evaluated, 1);
             data->start_mtx = evaluated;
             if (buildit->linked_buildit != NULL) {
