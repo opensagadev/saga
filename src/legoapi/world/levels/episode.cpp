@@ -350,14 +350,14 @@ i32 EpRedBrickTotal, EpRedBrickCount;
 i32 EpGoldBrickTotal, EpGoldBrickCount;
 
 i32 Episode_CountOpenAreas(i32 episode_index, i32 area_index, AREASAVE_s *saves) {
-    EpCompleteTotal = EpCompleteCount = 0;
-    EpMiniKitTotal = EpMiniKitCount = 0;
-    EpCharKitTotal = EpCharKitCount = 0;
-    EpBuildUpTotal = EpBuildUpCount = 0;
-    EpStoryBuildUpTotal = EpStoryBuildUpCount = 0;
-    EpFreePlayBuildUpTotal = EpFreePlayBuildUpCount = 0;
-    EpRedBrickTotal = EpRedBrickCount = 0;
-    EpGoldBrickTotal = EpGoldBrickCount = 0;
+    EpCompleteCount = EpCompleteTotal = 0;
+    EpMiniKitCount = EpMiniKitTotal = 0;
+    EpCharKitCount = EpCharKitTotal = 0;
+    EpBuildUpCount = EpBuildUpTotal = 0;
+    EpStoryBuildUpCount = EpStoryBuildUpTotal = 0;
+    EpFreePlayBuildUpCount = EpFreePlayBuildUpTotal = 0;
+    EpRedBrickCount = EpRedBrickTotal = 0;
+    EpGoldBrickCount = EpGoldBrickTotal = 0;
     if (episode_index == -1)
         return 0;
     if (GOLDBRICKFORSUPERSTORY != 0 && area_index == -1) {
@@ -374,38 +374,42 @@ i32 Episode_CountOpenAreas(i32 episode_index, i32 area_index, AREASAVE_s *saves)
         if (area == HUB_ADATA || (area->flags & 0x22) != 0)
             continue;
         if ((area->flags & 0x100) != 0) {
-            if (GOLDBRICKFORSUPERBONUS != 0) {
-                ++EpGoldBrickTotal;
-                if (saves[i].area_complete != 0)
-                    ++EpGoldBrickCount;
-            }
+            if (GOLDBRICKFORSUPERBONUS == 0)
+                continue;
+            ++EpGoldBrickTotal;
+            if (saves[i].area_complete == 0)
+                continue;
+            ++EpGoldBrickCount;
             continue;
         }
         if ((area->flags & 4) != 0)
             continue;
-        AREASAVE_s *save = &saves[id];
         ++EpCompleteTotal;
         EpMiniKitTotal += 10;
+        AREASAVE_s *save = &saves[id];
         if (save->complete != 0)
             ++open;
+        ++EpGoldBrickTotal;
         if (save->area_complete != 0) {
             ++EpCompleteCount;
             ++EpGoldBrickCount;
         }
-        ++EpGoldBrickTotal;
         if ((area->flags & 0x10) == 0)
             continue;
+        ++EpGoldBrickTotal;
         if (save->minikit_complete != 0)
             ++EpGoldBrickCount;
         EpMiniKitCount += save->field_0x5[0];
         if (BOTHTRUEJEDIGOLDBRICKS != 0) {
+            ++EpBuildUpTotal;
+            ++EpGoldBrickTotal;
             if (save->true_hero_complete[0] != 0) {
                 ++EpBuildUpCount;
                 ++EpGoldBrickCount;
                 ++EpStoryBuildUpCount;
             }
-            EpGoldBrickTotal += 3;
-            EpBuildUpTotal += 2;
+            ++EpBuildUpTotal;
+            ++EpGoldBrickTotal;
             if (save->true_hero_complete[1] != 0) {
                 ++EpBuildUpCount;
                 ++EpGoldBrickCount;
@@ -413,10 +417,10 @@ i32 Episode_CountOpenAreas(i32 episode_index, i32 area_index, AREASAVE_s *saves)
             }
         } else {
             ++EpBuildUpTotal;
-            EpGoldBrickTotal += 2;
+            ++EpGoldBrickTotal;
             if (save->true_hero_complete[0] != 0 || save->true_hero_complete[1] != 0) {
-                ++EpGoldBrickCount;
                 ++EpBuildUpCount;
+                ++EpGoldBrickCount;
             }
         }
         ++EpRedBrickTotal;

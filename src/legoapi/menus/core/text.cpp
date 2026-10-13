@@ -358,7 +358,7 @@ void Text_InitTable(TEXTENTRY *entry, i32 first, i32 last) {
         return;
 
     i32 index = 0;
-    while (entry->text_id != nullptr) {
+    while (entry != nullptr && entry->text_id != nullptr) {
         if (entry->value != -1) {
             index = entry->value;
             if (index >= first && index <= last)

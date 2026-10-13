@@ -850,11 +850,9 @@ void KaminoD_Init(WORLDINFO_s *world) {
         char buf[0x10];
         sprintf(buf, "DOT%i", i);
         GIZOBSTACLE_s *g = GizObstacle_FindByName(world->giz_obstacle_sys, buf);
-        if (g->field_0x3c != 0.0f) {
-            break;
+        if (g->field_0x3c == 4.5f) {
+            g->field_0x3c = 13.5f;
         }
-
-        g->field_0x3c = 13.5f;
     }
 
     GIZMOBLOWUP_s *target = GizmoBlowUp_FindByName(world, "target_a11");

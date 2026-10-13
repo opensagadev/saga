@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 79.09138,
+    "fuzzy_match_percent": 79.13296,
     "total_code": "4722419",
-    "matched_code": "610963",
-    "matched_code_percent": 12.937501,
+    "matched_code": "612490",
+    "matched_code_percent": 12.969836,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6766,
-    "matched_functions_percent": 50.271194,
+    "matched_functions": 6782,
+    "matched_functions_percent": 50.39007,
     "total_units": 1
   },
   "text": {
@@ -34338,7 +34338,7 @@
           "address": 3755280,
           "offset": 2865312,
           "size": 4406,
-          "match_percent": 59.775593
+          "match_percent": 60.235783
         },
         {
           "name": "eduicbRenderSlider",
@@ -48005,7 +48005,7 @@
           "address": 1361056,
           "offset": 471088,
           "size": 1017,
-          "match_percent": 41.25238
+          "match_percent": 44.22381
         },
         {
           "name": "_ZL7PooCodeP12GameObject_s",
@@ -48013,7 +48013,7 @@
           "address": 1364864,
           "offset": 474896,
           "size": 2334,
-          "match_percent": 83.35927
+          "match_percent": 83.17849
         },
         {
           "name": "_Z23VehicleTurnOrLoopOffsetP12GameObject_s",
@@ -48213,7 +48213,7 @@
           "address": 1410976,
           "offset": 521008,
           "size": 2148,
-          "match_percent": 37.689804
+          "match_percent": 45.0
         },
         {
           "name": "_ZL9SwipeCodeP12GameObject_sii",
@@ -48221,7 +48221,7 @@
           "address": 1413136,
           "offset": 523168,
           "size": 838,
-          "match_percent": 86.99451
+          "match_percent": 87.07692
         },
         {
           "name": "_ZL19LightSabreComboCodeP12GameObject_siiii",
@@ -48517,7 +48517,7 @@
           "address": 1500416,
           "offset": 610448,
           "size": 1469,
-          "match_percent": 70.41139
+          "match_percent": 70.94304
         },
         {
           "name": "_Z11Move_CANNONP12GameObject_s",
@@ -48565,7 +48565,7 @@
           "address": 1509024,
           "offset": 619056,
           "size": 628,
-          "match_percent": 78.16552
+          "match_percent": 76.751724
         },
         {
           "name": "_Z13PeriscodeCodeP12GameObject_s",
@@ -51781,7 +51781,7 @@
           "address": 4419584,
           "offset": 3529616,
           "size": 351,
-          "match_percent": 44.817307
+          "match_percent": 99.98077
         },
         {
           "name": "_Z33instNuGCutContainsInstancedRigidsP17instNUGCUTSCENE_s",
@@ -68598,7 +68598,7 @@
           "address": 4776448,
           "offset": 3886480,
           "size": 212,
-          "match_percent": 49.02778
+          "match_percent": 53.65278
         },
         {
           "name": "_Z27Text_InsertCommasIntoNumberPcS_i",
@@ -73952,7 +73952,7 @@
           "address": 3917007,
           "offset": 3027039,
           "size": 174,
-          "match_percent": 86.117645
+          "match_percent": 99.98039
         },
         {
           "name": "_ZL15DistanceToPlaneP7nuvec_sS0_S0_",
@@ -74064,7 +74064,7 @@
           "address": 3928892,
           "offset": 3038924,
           "size": 981,
-          "match_percent": 93.676155
+          "match_percent": 98.903915
         },
         {
           "name": "MoveSockPosition",
@@ -74096,7 +74096,7 @@
           "address": 3932758,
           "offset": 3042790,
           "size": 79,
-          "match_percent": 82.58064
+          "match_percent": 100.0
         },
         {
           "name": "SockBitSet",
@@ -74104,7 +74104,7 @@
           "address": 3932837,
           "offset": 3042869,
           "size": 74,
-          "match_percent": 85.6129
+          "match_percent": 100.0
         },
         {
           "name": "MidDistanceFromSockStart",
@@ -74128,7 +74128,7 @@
           "address": 3933194,
           "offset": 3043226,
           "size": 274,
-          "match_percent": 88.89011
+          "match_percent": 100.0
         },
         {
           "name": "EnforceSockYLimits",
@@ -74136,7 +74136,7 @@
           "address": 3933468,
           "offset": 3043500,
           "size": 120,
-          "match_percent": 93.425
+          "match_percent": 100.0
         },
         {
           "name": "_ZL14SockParCircuitP8nufpar_sPv",
@@ -74320,7 +74320,7 @@
           "address": 3935453,
           "offset": 3045485,
           "size": 113,
-          "match_percent": 53.060608
+          "match_percent": 100.0
         },
         {
           "name": "_ZL24SockParOffsetBlendXRatioP8nufpar_sPv",
@@ -74392,7 +74392,7 @@
           "address": 3936069,
           "offset": 3046101,
           "size": 157,
-          "match_percent": 80.913795
+          "match_percent": 100.0
         },
         {
           "name": "_ZL16SockParCamBehindP8nufpar_sPv",
@@ -74520,7 +74520,7 @@
           "address": 3937753,
           "offset": 3047785,
           "size": 65,
-          "match_percent": 75.666664
+          "match_percent": 100.0
         },
         {
           "name": "_ZL15SockCamATSTDISTP8nufpar_sPv",
@@ -74528,7 +74528,7 @@
           "address": 3937818,
           "offset": 3047850,
           "size": 65,
-          "match_percent": 75.666664
+          "match_percent": 100.0
         },
         {
           "name": "_ZL19SockCamATSTCAMRANGEP8nufpar_sPv",
@@ -74536,7 +74536,7 @@
           "address": 3937883,
           "offset": 3047915,
           "size": 65,
-          "match_percent": 75.666664
+          "match_percent": 100.0
         },
         {
           "name": "_ZL15SockCamATSTTILTP8nufpar_sPv",
@@ -74544,7 +74544,7 @@
           "address": 3937948,
           "offset": 3047980,
           "size": 65,
-          "match_percent": 75.666664
+          "match_percent": 100.0
         },
         {
           "name": "_ZL19SockCamATSTTILTRATEP8nufpar_sPv",
@@ -74552,7 +74552,7 @@
           "address": 3938013,
           "offset": 3048045,
           "size": 65,
-          "match_percent": 75.666664
+          "match_percent": 100.0
         },
         {
           "name": "_ZL24SockCamCAMERARAYTILTDISTP8nufpar_sPv",
@@ -74560,7 +74560,7 @@
           "address": 3938078,
           "offset": 3048110,
           "size": 65,
-          "match_percent": 75.666664
+          "match_percent": 100.0
         },
         {
           "name": "_ZL26SockCamCAMERARAYTILTHEIGHTP8nufpar_sPv",
@@ -74568,7 +74568,7 @@
           "address": 3938143,
           "offset": 3048175,
           "size": 65,
-          "match_percent": 75.666664
+          "match_percent": 100.0
         },
         {
           "name": "_ZL16SockManCam_MAX_XP8nufpar_sPv",
@@ -74576,7 +74576,7 @@
           "address": 3938208,
           "offset": 3048240,
           "size": 65,
-          "match_percent": 75.666664
+          "match_percent": 100.0
         },
         {
           "name": "_ZL16SockManCam_MAX_YP8nufpar_sPv",
@@ -74584,7 +74584,7 @@
           "address": 3938273,
           "offset": 3048305,
           "size": 65,
-          "match_percent": 75.666664
+          "match_percent": 100.0
         },
         {
           "name": "_ZL22SockTerrainCamInActiveP8nufpar_sPv",
@@ -74600,7 +74600,7 @@
           "address": 3938372,
           "offset": 3048404,
           "size": 518,
-          "match_percent": 79.00764
+          "match_percent": 99.137405
         },
         {
           "name": "SockSys_Configure",
@@ -74672,7 +74672,7 @@
           "address": 3953930,
           "offset": 3063962,
           "size": 3621,
-          "match_percent": 90.97487
+          "match_percent": 99.987434
         },
         {
           "name": "SockOn",
@@ -77323,7 +77323,7 @@
           "address": 3909214,
           "offset": 3019246,
           "size": 465,
-          "match_percent": 52.661766
+          "match_percent": 92.01471
         },
         {
           "name": "_ZL13edrtlDrawHelpv",
@@ -77601,7 +77601,7 @@
           "address": 3183552,
           "offset": 2293584,
           "size": 153,
-          "match_percent": 32.962265
+          "match_percent": 42.83019
         },
         {
           "name": "_ZNK19ShaderMtlDescFilter13hasDiffuseMapEi",
@@ -77609,7 +77609,7 @@
           "address": 3183712,
           "offset": 2293744,
           "size": 125,
-          "match_percent": 33.627453
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK19ShaderMtlDescFilter14getVertexFlagsEv",
@@ -83546,7 +83546,7 @@
           "address": 4691296,
           "offset": 3801328,
           "size": 1049,
-          "match_percent": 80.42085
+          "match_percent": 99.942085
         },
         {
           "name": "_Z17CountOpenEpisodesv",
@@ -84384,7 +84384,7 @@
           "address": 2141952,
           "offset": 1251984,
           "size": 811,
-          "match_percent": 86.243095
+          "match_percent": 99.878456
         },
         {
           "name": "_Z12KaminoE_InitP11WORLDINFO_s",
@@ -85118,7 +85118,7 @@
           "address": 2179200,
           "offset": 1289232,
           "size": 1011,
-          "match_percent": 76.64574
+          "match_percent": 93.26457
         },
         {
           "name": "_Z22MosEisleyC_PastBarrierP12GameObject_s",

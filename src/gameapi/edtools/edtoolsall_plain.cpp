@@ -6641,7 +6641,7 @@ extern "C" {
         item->y = y;
         item->x = x;
 
-        char letter[2] = {'0', '\0'};
+        char letter[2] = "0";
         if (picker->editing) {
             item_width = width > height * 10 ? width : height * 10;
             i32 total_height = (picker->keyboard_flags & 2) ? height * 6 : height * 5;

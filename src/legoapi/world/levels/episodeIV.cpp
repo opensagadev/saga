@@ -592,7 +592,8 @@ void MosEisleyB_Update(WORLDINFO_s *world) {
     if (third == NULL)
         return;
 
-    if (__builtin_expect(first->group != NULL && (first->group->field_0x24 & 2) != 0, 0)) {
+    GIZFORCEGROUP_s *group = first->group;
+    if (group != NULL && (group->field_0x24 & 2) != 0) {
         if (mosEisleyB_nodesNeedUpdating != 0)
             return;
         mosEisleyB_nodesNeedUpdating = 1;
@@ -617,10 +618,8 @@ void MosEisleyB_Update(WORLDINFO_s *world) {
         if (node3 == NULL)
             return;
 
-#define SET_STACK_NODE_POSITIONS(x0, z0, x1, z1, x2, z2, x3, z3)                                                       \
+#define SET_STACK_NODE_POSITIONS(x1, z1, x2, z2, x3, z3)                                                               \
     do {                                                                                                               \
-        node0->position.x = x0;                                                                                        \
-        node0->position.z = z0;                                                                                        \
         node1->position.x = x1;                                                                                        \
         node1->position.z = z1;                                                                                        \
         node2->position.x = x2;                                                                                        \
@@ -629,32 +628,42 @@ void MosEisleyB_Update(WORLDINFO_s *world) {
         node3->position.z = z3;                                                                                        \
     } while (0)
 
-        GIZFORCE_s *selected = first->group->forces[0];
+        GIZFORCE_s *selected = group->forces[0];
         if (selected != first) {
             if (selected == second) {
-                if (first->group->forces[1] == first)
-                    SET_STACK_NODE_POSITIONS(22.75f, -15.12f, 23.27f, -14.93f, 23.72f, -14.78f, 23.32f, -14.61f);
+                node0->position.x = 22.75f;
+                node0->position.z = -15.12f;
+                if (group->forces[1] == first)
+                    SET_STACK_NODE_POSITIONS(23.27f, -14.93f, 23.72f, -14.78f, 23.32f, -14.61f);
                 else
-                    SET_STACK_NODE_POSITIONS(22.75f, -15.12f, 23.27f, -14.93f, 23.27f, -14.62f, 23.66f, -14.73f);
+                    SET_STACK_NODE_POSITIONS(23.27f, -14.93f, 23.27f, -14.62f, 23.66f, -14.73f);
             } else if (selected == third) {
-                if (first->group->forces[1] == first)
-                    SET_STACK_NODE_POSITIONS(22.79f, -14.62f, 23.29f, -14.58f, 23.73f, -14.70f, 23.34f, -14.87f);
+                node0->position.x = 22.79f;
+                node0->position.z = -14.62f;
+                if (group->forces[1] == first)
+                    SET_STACK_NODE_POSITIONS(23.29f, -14.58f, 23.73f, -14.70f, 23.34f, -14.87f);
                 else
-                    SET_STACK_NODE_POSITIONS(22.79f, -14.62f, 23.29f, -14.58f, 23.27f, -14.85f, 23.63f, -14.76f);
+                    SET_STACK_NODE_POSITIONS(23.29f, -14.58f, 23.27f, -14.85f, 23.63f, -14.76f);
             }
         } else {
-            if (first->group->forces[1] == second)
-                SET_STACK_NODE_POSITIONS(24.12f, -14.69f, 23.75f, -14.78f, 23.32f, -14.91f, 23.32f, -14.63f);
+            node0->position.x = 24.12f;
+            node0->position.z = -14.69f;
+            if (group->forces[1] == second)
+                SET_STACK_NODE_POSITIONS(23.75f, -14.78f, 23.32f, -14.91f, 23.32f, -14.63f);
             else
-                SET_STACK_NODE_POSITIONS(24.12f, -14.69f, 23.75f, -14.78f, 23.34f, -14.57f, 23.34f, -14.84f);
+                SET_STACK_NODE_POSITIONS(23.75f, -14.78f, 23.34f, -14.57f, 23.34f, -14.84f);
         }
 #undef SET_STACK_NODE_POSITIONS
 
         if (world->ai_sys->path_sys != NULL && world->ai_sys->path_sys->active_path != NULL) {
-            AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path, node0);
-            AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path, node1);
-            AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path, node2);
-            AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path, node3);
+            AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path,
+                                static_cast<AIPATHNODE_s *>(LevAIPathNode[0]));
+            AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path,
+                                static_cast<AIPATHNODE_s *>(LevAIPathNode[1]));
+            AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path,
+                                static_cast<AIPATHNODE_s *>(LevAIPathNode[2]));
+            AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path,
+                                static_cast<AIPATHNODE_s *>(LevAIPathNode[3]));
         }
         return;
     }

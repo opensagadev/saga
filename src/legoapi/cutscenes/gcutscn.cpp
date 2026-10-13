@@ -33,10 +33,10 @@ void NewLevelFromMenu(LEVELDATA_s *, i32, i32, i32);
 
 void EvaluateJointOrientationMtx(nugscn_s *scene, i32 joint_index, numtx_s *matrix) {
     nuhgobj_s *object = reinterpret_cast<nuhgobj_s *>(scene);
-    NuMtxSetIdentity(matrix);
+    nuhgobjjoint_s *joint = &object->joints[joint_index];
+    *matrix = numtx_identity;
 
     while (true) {
-        nuhgobjjoint_s *joint = &object->joints[joint_index];
         NUMTX *bind_matrix = &joint->animation_bind_matrix;
         if (bind_matrix->m00 != 1.0f || bind_matrix->m11 != 1.0f || bind_matrix->m22 != 1.0f) {
             NuMtxMulVU0(matrix, bind_matrix, matrix);
@@ -45,7 +45,7 @@ void EvaluateJointOrientationMtx(nugscn_s *scene, i32 joint_index, numtx_s *matr
         if (joint->parent_index == 0xff) {
             break;
         }
-        joint_index = joint->parent_index;
+        joint = &object->joints[joint->parent_index];
     }
 
     matrix->m02 = -matrix->m02;

@@ -1576,8 +1576,7 @@ void Move_SPEEDERBIKE(GameObject_s *object) {
             for (i32 i = 0; i < 2; ++i) {
                 GameObject_s *player = Player[i];
                 if (player == NULL || !player->apiobj.player_controlled || player->field_0xcc0 == NULL ||
-                    ((object->apiobj.field_0x1e4 & player->apiobj.field_0x1ec) == 0 &&
-                     (object->apiobj.field_0x1e8 & player->apiobj.field_0x1f0) == 0) ||
+                    (object->apiobj.collision_identity_mask & player->apiobj.collision_contact_mask) == 0 ||
                     object->field_0x1024 > 0.0f)
                     continue;
                 NUVEC displacement;
@@ -4849,7 +4848,9 @@ finished:
     return result;
 }
 
-static inline void ComboJump(GameObject_s *object) {
+static inline i32 ComboJump(GameObject_s *object) {
+    if (object->apiobj.character_model->model_data_b[0x12] == NULL)
+        return 0;
     SetComboOpponent(object, 1.0f, 0, 1);
     object->jump_flags &= ~1;
     object->context_animation_timer = 0.0f;
@@ -4868,18 +4869,21 @@ static inline void ComboJump(GameObject_s *object) {
     ResetAnimPacket(&object->apiobj.anim_packet, object->context_animation);
     if (object->apiobj.player_controlled)
         object->field_0xef9 |= 8;
+    return 1;
+}
+
+static inline bool HasBlockAnims(void **animations) {
+    return animations[0x1a] != NULL || animations[0x1b] != NULL || animations[0x1c] != NULL;
 }
 
 static void FindIncomingThreats(GameObject_s *object) {
     void **animations = object->apiobj.character_model->model_data_b;
-    bool has_block = animations[0x1a] != NULL || animations[0x1b] != NULL || animations[0x1c] != NULL;
-    object->incoming_bolt = has_block ? FindIncomingBolt(object, 0, 0) : NULL;
+    object->incoming_bolt = HasBlockAnims(animations) ? FindIncomingBolt(object, 0, 0) : NULL;
     animations = object->apiobj.character_model->model_data_b;
-    has_block = animations[0x1a] != NULL || animations[0x1b] != NULL || animations[0x1c] != NULL;
     GameObject_s *melee = NULL;
-    if (has_block) {
-        for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-            GameObject_s *target = &Obj[i];
+    if (HasBlockAnims(animations)) {
+        GameObject_s *target = Obj;
+        for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
             if (target != object && (target->apiobj.field_0x1f8 & 0x1000) != 0 && target->apiobj.field_0x287 == 0 &&
                 target->character_context == 5 && (target->context_flags & 0xc) == 0 &&
                 target->force_target == object) {
@@ -4892,9 +4896,10 @@ static void FindIncomingThreats(GameObject_s *object) {
     GameObject_s *special = NULL;
     if (((object->apiobj.character_data->model_flags & 8) != 0 || object->id == id_BODYGUARD ||
          object->id == id_IMPERIALGUARD) &&
-        has_block) {
-        for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-            GameObject_s *target = &Obj[i];
+        HasBlockAnims(animations))
+    {
+        GameObject_s *target = Obj;
+        for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
             if (target != object && (target->apiobj.field_0x1f8 & 0x1000) != 0 && target->apiobj.field_0x287 == 0 &&
                 target->character_context == 0x26 && target->force_target == object &&
                 (target->id != id_GAMORREANGUARD || target->context_animation != 0x56 ||
@@ -4906,7 +4911,7 @@ static void FindIncomingThreats(GameObject_s *object) {
     }
     object->incoming_special = special;
     if (object->incoming_bolt == NULL && melee == NULL) {
-        if (object->apiobj.field_0x27c == -1 || !has_block)
+        if (object->apiobj.field_0x27c == -1 || !HasBlockAnims(animations))
             object->incoming_part = NULL;
         else {
             f32 radius = object->apiobj.field_0x1e0 > object->apiobj.field_0x1dc ? object->apiobj.field_0x1e0
@@ -4926,19 +4931,18 @@ static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pres
     if (object->character_context == 0xc) {
         GameObject_s *attacker = object->block_attacker;
         if (attacker != NULL) {
-            if (jump_pressed != 0 && object->apiobj.character_model->model_data_b[0x12] != NULL) {
-                ComboJump(object);
+            if (jump_pressed != 0 && ComboJump(object))
                 return;
-            }
             if (object->block_latch == 0 && object->blocked_attack_stage != 0) {
                 if ((attacker->apiobj.field_0x1f8 & 0x1000) != 0 && attacker->apiobj.field_0x287 == 0) {
-                    if ((object->field_0xe23 & 0x20) == 0) {
-                        if (attacker->character_context == 5 && attacker->combo_stage < object->blocked_attack_stage)
+                    if ((object->field_0xe23 & 0x20) != 0) {
+                        if (attacker->character_context == 0x26 &&
+                            attacker->context_animation == object->blocked_attack_stage &&
+                            (attacker->id != id_GAMORREANGUARD || attacker->context_animation != 0x56 ||
+                             (attacker->context_flags & 0x40) == 0))
                             return;
-                    } else if (attacker->character_context == 0x26 &&
-                               attacker->context_animation == object->blocked_attack_stage &&
-                               (attacker->id != id_GAMORREANGUARD || attacker->context_animation != 0x56 ||
-                                (attacker->context_flags & 0x40) == 0))
+                    } else if (attacker->character_context == 5 &&
+                               attacker->combo_stage < object->blocked_attack_stage)
                         return;
                 }
                 object->blocked_attack_stage = 0;
@@ -5102,8 +5106,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                     object->context_flags |= 2;
                     if (action_held != 0)
                         StartHold(object);
-                } else if (object->combo_stage < 2 && jump_pressed != 0 &&
-                           object->apiobj.character_model->model_data_b[0x12] != NULL) {
+                } else if (object->combo_stage < 2 && jump_pressed != 0) {
                     ComboJump(object);
                 }
             } else {
@@ -5961,8 +5964,7 @@ static void ForcePushed_MoveCode(GameObject_s *object) {
         (object->action_flags & 0x280) != 0)
         return;
     if (object->action_movement_state == 4 && Cheat_IsOn(0x13)) {
-        if ((source->apiobj.field_0x1e4 & object->apiobj.field_0x1ec) != 0 ||
-            (source->apiobj.field_0x1e8 & object->apiobj.field_0x1f0) != 0) {
+        if ((source->apiobj.collision_identity_mask & object->apiobj.collision_contact_mask) != 0) {
             i16 angle =
                 NuAtan2D(source->apiobj.pos_x - object->apiobj.pos_x, source->apiobj.pos_z - object->apiobj.pos_z);
             objhitobj_killparts_yrot = &angle;
@@ -5986,13 +5988,11 @@ static void ForcePushed_MoveCode(GameObject_s *object) {
             if (target->id == id_GONKDROID) {
                 if (target->character_context == 0x17)
                     continue;
-                if ((target->apiobj.field_0x1e4 & object->apiobj.field_0x1ec) == 0 &&
-                    (target->apiobj.field_0x1e8 & object->apiobj.field_0x1f0) == 0)
+                if ((target->apiobj.collision_identity_mask & object->apiobj.collision_contact_mask) == 0)
                     continue;
                 DeactivatePlayer(target, DEACTIVATEDTIME, NULL);
             } else {
-                if ((target->apiobj.field_0x1e4 & object->apiobj.field_0x1ec) == 0 &&
-                    (target->apiobj.field_0x1e8 & object->apiobj.field_0x1f0) == 0)
+                if ((target->apiobj.collision_identity_mask & object->apiobj.collision_contact_mask) == 0)
                     continue;
                 i16 angle =
                     NuAtan2D(target->apiobj.pos_x - object->apiobj.pos_x, target->apiobj.pos_z - object->apiobj.pos_z);

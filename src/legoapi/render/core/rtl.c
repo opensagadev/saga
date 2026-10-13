@@ -3749,14 +3749,22 @@ static void edrtlDrawBurnouts() {
         return;
     }
     for (i32 index = 0; index < 32; ++index) {
-        const bool selected = index == edrtl_edit_burnset->selected_index;
-        const i32 colour = selected ? 0xf0f0f0f0 : 0x60606060;
-        burnout_s *burnout = &edrtl_edit_burnset->burnouts[index];
-        const i32 segments = selected ? 48 : 16;
-        if (burnout->active) {
-            RndrOSphere(&burnout->position, burnout->field_1c, colour, segments, 0);
-            if (burnout->field_20 > 0.0f) {
-                RndrOSphere(&burnout->position, burnout->field_1c + burnout->field_20, colour, segments, 0);
+        i32 colour;
+        i32 segments;
+        if (edrtl_edit_burnset->selected_index == index) {
+            colour = 0xf0f0f0f0;
+            segments = 48;
+        } else {
+            colour = 0x60606060;
+            segments = 16;
+        }
+        if (edrtl_edit_burnset->burnouts[index].active) {
+            RndrOSphere(&edrtl_edit_burnset->burnouts[index].position, edrtl_edit_burnset->burnouts[index].field_1c,
+                        colour, segments, 0);
+            if (edrtl_edit_burnset->burnouts[index].field_20 > 0.0f) {
+                RndrOSphere(&edrtl_edit_burnset->burnouts[index].position,
+                            edrtl_edit_burnset->burnouts[index].field_1c + edrtl_edit_burnset->burnouts[index].field_20,
+                            colour, segments, 0);
             }
         }
     }
