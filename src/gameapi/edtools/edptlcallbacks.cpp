@@ -1779,27 +1779,45 @@ static void cbChangeTorusRad2(eduimenu_s *, eduiitem_s *item, u32) {
 }
 
 static void cbFileLoadEffects(eduimenu_s *parent, eduiitem_s *, u32) {
+    char original_directory[64] = "";
     edppDestroyAllPages();
-    char original_directory[64] = {};
     if (edbits_datapath[0] != '\0') {
         NuFileGetCurrentDirectory(original_directory);
         NuFileSetCurrentDirectory(edbits_datapath);
     }
 
+    char path[256];
     char general_directory[256];
     char general_name[256];
     char general_extension[256];
     char level_directory[256];
     char level_name[256];
-    char level_extension[264];
-    strcpy(general_directory, edbits_general_save_directory[0] ? edbits_general_save_directory : ".");
-    strcpy(general_name, edbits_general_save_name[0] ? edbits_general_save_name : "particle");
-    strcpy(general_extension, edbits_general_save_extension[0] ? edbits_general_save_extension : "ptl");
-    strcpy(level_directory, edbits_level_save_directory[0] ? edbits_level_save_directory : ".");
-    strcpy(level_name, edbits_level_save_name[0] ? edbits_level_save_name : "particle");
-    strcpy(level_extension, edbits_level_save_extension[0] ? edbits_level_save_extension : "ptl");
+    char level_extension[256];
+    if (!edbits_general_save_directory[0])
+        strcpy(general_directory, ".");
+    else
+        strcpy(general_directory, edbits_general_save_directory);
+    if (!edbits_general_save_name[0])
+        strcpy(general_name, "particle");
+    else
+        strcpy(general_name, edbits_general_save_name);
+    if (!edbits_general_save_extension[0])
+        strcpy(general_extension, "ptl");
+    else
+        strcpy(general_extension, edbits_general_save_extension);
+    if (!edbits_level_save_directory[0])
+        strcpy(level_directory, ".");
+    else
+        strcpy(level_directory, edbits_level_save_directory);
+    if (!edbits_level_save_name[0])
+        strcpy(level_name, "particle");
+    else
+        strcpy(level_name, edbits_level_save_name);
+    if (!edbits_level_save_extension[0])
+        strcpy(level_extension, "ptl");
+    else
+        strcpy(level_extension, edbits_level_save_extension);
 
-    char path[256];
     sprintf(path, "%s\\%s.%s", general_directory, general_name, general_extension);
     if (NuFileExists(path))
         edppLoadPage(path, 0, 0);
@@ -1811,7 +1829,7 @@ static void cbFileLoadEffects(eduimenu_s *parent, eduiitem_s *, u32) {
         edppLoadPage(path, 1, reinterpret_cast<usize>(edbits_base_scene));
     edppRestartAllEffectsInLevel();
 
-    const u32 colours[4] = {0x8000c000, 0x80ff0000, 0x80808080, 0x80404040};
+    u32 colours[4] = {0x8000c000, 0x80ff0000, 0x80808080, 0x80404040};
     messagemenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbCancelMessageMenu, "Message");
     if (messagemenu != NULL) {
         eduiMenuAddItem(messagemenu, eduiItemSelCreate(1, colours, 0, 0, NULL, "Loaded OK"));

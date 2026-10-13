@@ -73,12 +73,14 @@ static void UpdateTotalPtls(debinftype *effect);
 #include "gameapi/edtools/edptlcallbacks.cpp"
 
 void cbFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
-    char original_directory[64] = {};
+    char original_directory[64] = "";
     if (edbits_datapath[0] != '\0') {
         NuFileGetCurrentDirectory(original_directory);
         NuFileSetCurrentDirectory(edbits_datapath);
     }
 
+    char filename[256];
+    char backup[256];
     char general_directory[256];
     char general_name[256];
     char general_extension[256];
@@ -110,8 +112,6 @@ void cbFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     else
         strcpy(level_extension, edbits_level_save_extension);
 
-    char filename[256];
-    char backup[256];
     bool valid_page = true;
     const char *saved_name = NULL;
     if (edpp_effect_list == 0) {
