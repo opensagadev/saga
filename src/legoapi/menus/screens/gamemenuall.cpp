@@ -1904,6 +1904,17 @@ extern "C" {
             static_cast<i32>(static_cast<f32>(first) * amount + static_cast<f32>(second) * (1.0f - amount)));
     }
 
+    void MenuRememberCursor(MENU *menu) {
+        if (menu->menu == -1)
+            return;
+
+        MENUFNINFO &info = MenuInfo[menu->menu];
+        if (info.memory_x != -1)
+            info.memory_x = menu->selected_column;
+        if (info.memory_y != -1)
+            info.memory_y = menu->selected_row;
+    }
+
     // Both backup variants leave the current menu (calling its exit hook), reset
     // the parent's cursor state, queue the "back" sound unless another sound
     // is already pending, and restart the menu fade-in.
@@ -2289,17 +2300,6 @@ extern "C" {
         MENUSFX_MENUSELECT = select;
         MENUSFX_MENUBACK = back;
         MENUSFX_MENUNOENTRY = no_entry;
-    }
-
-    void MenuRememberCursor(MENU *menu) {
-        if (menu->menu == -1)
-            return;
-
-        MENUFNINFO &info = MenuInfo[menu->menu];
-        if (info.memory_x != -1)
-            info.memory_x = menu->selected_column;
-        if (info.memory_y != -1)
-            info.memory_y = menu->selected_row;
     }
 
     void MenuRepeat(i32 *held, i32 *repeat, f32 *repeat_time, u8 *repeat_count, f32 interval, f32 elapsed) {
