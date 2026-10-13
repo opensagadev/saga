@@ -573,11 +573,11 @@ static void cbPtlChangeZ(eduimenu_s *menu, eduiitem_s *item, u32) {
 }
 
 static void cbPtlColMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
         return;
 
     const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
-    const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     ptlcolmenu = eduiMenuCreate(70, 70, 250, 250, ed_fnt, cbPtlCancelColMenu, "Particle Colour");
     if (ptlcolmenu == NULL)
         return;
@@ -639,9 +639,9 @@ alpha_stages_done:
 }
 
 static void cbPtlJibMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (!(edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)) {
         const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
-        const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
         ptljibmenu = eduiMenuCreate(70, 70, 180, 300, ed_fnt, cbPtlCancelJibMenu, "Particle Jibber");
         if (ptljibmenu == NULL)
             return;
@@ -665,11 +665,11 @@ static void cbPtlJibMenu(eduimenu_s *parent, eduiitem_s *, u32) {
 }
 
 static void cbPtlRotMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
         return;
 
     const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
-    const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     ptlrotmenu = eduiMenuCreate(70, 70, 180, 300, ed_fnt, cbPtlCancelRotMenu, "Particle Rotation");
     if (ptlrotmenu == NULL)
         return;
@@ -769,11 +769,11 @@ static void cbPtlApplyRot(eduimenu_s *, eduiitem_s *, u32) {
 }
 
 static void cbPtlCollMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
         return;
 
     const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
-    const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     collmenu = eduiMenuCreate(70, 70, 180, 300, ed_fnt, cbPtlCancelCollMenu, "Collision Spheres");
     if (collmenu == NULL)
         return;
@@ -887,10 +887,10 @@ static void cbPtlDataMenu(eduimenu_s *parent, eduiitem_s *, u32) {
 }
 
 static void cbPtlEmitMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 disabled_colours[4] = {0x80303030, 0x80ff0000, 0x80808080, 0x80404040};
     if (!(edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)) {
         const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
         const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
-        const u32 disabled_colours[4] = {0x80303030, 0x80ff0000, 0x80808080, 0x80404040};
         ptlemitmenu = eduiMenuCreate(70, 70, 250, 300, ed_fnt, cbPtlCancelEmitMenu, "Emitter Settings");
         if (ptlemitmenu != NULL) {
             eduiMenuAddItem(ptlemitmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlEmitVelMenu, "Emitter Vel..."));
@@ -997,11 +997,11 @@ static void cbPtlSelGSort(eduimenu_s *menu, eduiitem_s *item, u32) {
 }
 
 static void cbPtlSizeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
         return;
 
     const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
-    const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     ptlsizemenu = eduiMenuCreate(70, 70, 220, 300, ed_fnt, cbPtlCancelSizeMenu, "Particle Size");
     if (ptlsizemenu == NULL)
         return;
@@ -1616,11 +1616,11 @@ static void cbPtlTextureMenu(eduimenu_s *menu, eduiitem_s *, u32) {
 }
 
 static void cbPtlVarEmitMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
         return;
 
     const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
-    const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     ptlvaremitmenu = eduiMenuCreate(70, 70, 180, 300, ed_fnt, cbPtlCancelVarEmitMenu, "Emitter Variation");
     if (ptlvaremitmenu != NULL) {
         const u8 generator = effect->generator_type;
@@ -1661,9 +1661,9 @@ static void cbPtlVarEmitMenu(eduimenu_s *parent, eduiitem_s *, u32) {
 }
 
 static void cbChangeETimeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (!(edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)) {
         const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
-        const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
         etimemenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbCancelChangeETimeMenu, "Particle Life");
         if (etimemenu == NULL)
             return;
@@ -1803,11 +1803,11 @@ static void cbPtlDeleteEffect(eduimenu_s *menu, eduiitem_s *, u32) {
 }
 
 static void cbPtlEmitTimeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
         return;
 
     const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
-    const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     emittimemenu = eduiMenuCreate(70, 70, 250, 300, ed_fnt, cbPtlCancelEmitTimeMenu, "Emitter Timing");
     if (emittimemenu == NULL)
         return;
@@ -1939,9 +1939,9 @@ static void cbPtlChangeEmitVel(eduimenu_s *, eduiitem_s *item, u32) {
 }
 
 static void cbChangeGenRateMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (!(edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)) {
         const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
-        const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
         changegenratemenu = eduiMenuCreate(70, 70, 250, 250, ed_fnt, cbCancelChangeGenRateMenu, "Particles per Second");
         if (changegenratemenu == NULL)
             return;
