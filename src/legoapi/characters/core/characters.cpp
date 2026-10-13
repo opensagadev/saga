@@ -1609,19 +1609,18 @@ void CollectCharcters_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
 }
 
 nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id) {
-    CHARSCENE_s *scene;
+    nuhspecial_s *special;
     if (CharScene_Area != NULL && CharScene_Area[character_id].scene != NULL) {
-        scene = &CharScene_Area[character_id];
+        special = &CharScene_Area[character_id].special_scene;
+    } else if (world->minikit.character_scenes[character_id].scene != NULL) {
+        special = &world->minikit.character_scenes[character_id].special_scene;
     } else {
-        scene = &world->minikit.character_scenes[character_id];
-        if (scene->scene == NULL) {
-            scene = NULL;
-        }
+        return NULL;
     }
-    if (scene != NULL && NuSpecialExistsFn(&scene->special_scene) == 0) {
-        scene = NULL;
+    if (NuSpecialExistsFn(special) == 0) {
+        special = NULL;
     }
-    return scene == NULL ? NULL : &scene->special_scene;
+    return special;
 }
 
 void PostAnimate_ASTROMECH(GameObject_s *object) {
