@@ -1699,65 +1699,29 @@ void SetToLastSafePos(GameObject_s *object) {
 }
 
 i32 AvailableToPlayer(u32 character_flags, i32 weapon_action, i32 context, i32 require_all) {
-    GameObject_s *object;
-#define CHECK_AVAILABLE_PLAYER(index, predicate)                                                                       \
-    ((object = Player[index]) != NULL && object->apiobj.character_data != NULL && (predicate))
-#define CHECK_AVAILABLE_PLAYERS(predicate)                                                                             \
-    if (CHECK_AVAILABLE_PLAYER(0, predicate) || CHECK_AVAILABLE_PLAYER(1, predicate) ||                                \
-        CHECK_AVAILABLE_PLAYER(2, predicate) || CHECK_AVAILABLE_PLAYER(3, predicate) ||                                \
-        CHECK_AVAILABLE_PLAYER(4, predicate) || CHECK_AVAILABLE_PLAYER(5, predicate) ||                                \
-        CHECK_AVAILABLE_PLAYER(6, predicate) || CHECK_AVAILABLE_PLAYER(7, predicate))                                  \
-    return 1
-#define PLAYER_HAS_FLAGS ((object->apiobj.character_data->model_flags & character_flags) == character_flags)
-#define PLAYER_HAS_WEAPON                                                                                              \
-    (static_cast<i8>(object->apiobj.character_data->game_character->uses_weapon_action) == weapon_action)
-#define PLAYER_HAS_CONTEXT (object->field_0x108e == context)
-
-    if (require_all == 0) {
-        if (character_flags == 0) {
-            if (context == 0) {
-                CHECK_AVAILABLE_PLAYERS(true);
-            } else if (weapon_action == -1) {
-                CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_CONTEXT);
-            } else {
-                CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_WEAPON || PLAYER_HAS_CONTEXT);
-            }
-        } else if (weapon_action == -1) {
-            if (context == 0) {
-                CHECK_AVAILABLE_PLAYERS(true);
-            } else {
-                CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_FLAGS || PLAYER_HAS_CONTEXT);
-            }
-        } else {
-            CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_FLAGS || PLAYER_HAS_WEAPON || context == 0 || PLAYER_HAS_CONTEXT);
-        }
-    } else {
+    for (i32 i = 0; i < 8; i++) {
+        GameObject_s *object = Player[i];
+        if (object == NULL || object->apiobj.character_data == NULL)
+            continue;
         if (character_flags != 0) {
-            if (weapon_action != -1) {
-                CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_FLAGS && PLAYER_HAS_WEAPON && (context == 0 || PLAYER_HAS_CONTEXT));
-            } else {
-                CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_FLAGS && (context == 0 || PLAYER_HAS_CONTEXT));
-            }
-        } else {
-            if (weapon_action == -1) {
-                if (context == 0) {
-                    CHECK_AVAILABLE_PLAYERS(true);
-                } else {
-                    CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_CONTEXT);
-                }
-            } else if (context == 0) {
-                CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_WEAPON);
-            } else {
-                CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_WEAPON && PLAYER_HAS_CONTEXT);
+            if ((object->apiobj.character_data->model_flags & character_flags) == character_flags) {
+                if (require_all == 0)
+                    return 1;
+            } else if (require_all != 0) {
+                continue;
             }
         }
+        if (weapon_action != -1) {
+            if (static_cast<i8>(object->apiobj.character_data->game_character->uses_weapon_action) == weapon_action) {
+                if (require_all == 0)
+                    return 1;
+            } else if (require_all != 0) {
+                continue;
+            }
+        }
+        if (context == 0 || object->field_0x108e == context)
+            return 1;
     }
-
-#undef PLAYER_HAS_CONTEXT
-#undef PLAYER_HAS_WEAPON
-#undef PLAYER_HAS_FLAGS
-#undef CHECK_AVAILABLE_PLAYERS
-#undef CHECK_AVAILABLE_PLAYER
 
     if (FreePlay != 0) {
         for (i32 index = 0; index < apicharsys->character_count; ++index) {
