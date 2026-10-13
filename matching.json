@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 78.3249,
+    "fuzzy_match_percent": 78.355446,
     "total_code": "4722419",
-    "matched_code": "603100",
-    "matched_code_percent": 12.770997,
+    "matched_code": "604206",
+    "matched_code_percent": 12.794417,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6718,
-    "matched_functions_percent": 49.91456,
+    "matched_functions": 6723,
+    "matched_functions_percent": 49.951706,
     "total_units": 1
   },
   "text": {
@@ -23484,7 +23484,7 @@
           "address": 1600496,
           "offset": 710528,
           "size": 993,
-          "match_percent": 81.738396
+          "match_percent": 86.37131
         },
         {
           "name": "_ZL17Action_SpinOnSpotP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -43643,7 +43643,7 @@
           "address": 1045808,
           "offset": 155840,
           "size": 1760,
-          "match_percent": 76.12308
+          "match_percent": 78.22051
         },
         {
           "name": "_Z19UpdateCharacterIdleP12GameObject_s",
@@ -46279,7 +46279,7 @@
           "address": 4631504,
           "offset": 3741536,
           "size": 365,
-          "match_percent": 54.14679
+          "match_percent": 76.56881
         },
         {
           "name": "_Z15Player_FindByIDi",
@@ -46565,7 +46565,7 @@
           "address": 1110000,
           "offset": 220032,
           "size": 23545,
-          "match_percent": 55.024525
+          "match_percent": 55.199554
         },
         {
           "name": "_Z24InitCameraTargetMaterialv",
@@ -57348,7 +57348,7 @@
           "address": 4890176,
           "offset": 4000208,
           "size": 194,
-          "match_percent": 67.830986
+          "match_percent": 99.97183
         },
         {
           "name": "_ZL27GizmoObstacle_GetOutputNameP7GIZMO_si",
@@ -58249,7 +58249,7 @@
           "address": 1903616,
           "offset": 1013648,
           "size": 462,
-          "match_percent": 99.30089
+          "match_percent": 99.168144
         },
         {
           "name": "_Z21Lever_FullyPulledDownP7LEVER_s",
@@ -58265,7 +58265,7 @@
           "address": 1904144,
           "offset": 1014176,
           "size": 144,
-          "match_percent": 19.522728
+          "match_percent": 100.0
         },
         {
           "name": "_Z17Lever_BeingPulledP7LEVER_s",
@@ -59897,7 +59897,7 @@
           "address": 1871600,
           "offset": 981632,
           "size": 300,
-          "match_percent": 51.376343
+          "match_percent": 94.92473
         },
         {
           "name": "_ZL16GizForces_UpdatePvS_f",
@@ -60676,7 +60676,7 @@
           "address": 4939776,
           "offset": 4049808,
           "size": 162,
-          "match_percent": 48.203705
+          "match_percent": 100.0
         },
         {
           "name": "_ZL20GizSpecial_AddGizmosP10GIZMOSYS_siPvS1_",
@@ -61633,7 +61633,7 @@
           "address": 5096800,
           "offset": 4206832,
           "size": 305,
-          "match_percent": 29.685392
+          "match_percent": 50.674156
         },
         {
           "name": "_Z14Collection_Goti",
@@ -69090,7 +69090,7 @@
           "address": 1141200,
           "offset": 251232,
           "size": 337,
-          "match_percent": 58.31081
+          "match_percent": 58.175674
         },
         {
           "name": "_Z15MenuExitOptionsP6MENU_s",
@@ -69122,7 +69122,7 @@
           "address": 1145120,
           "offset": 255152,
           "size": 183,
-          "match_percent": 59.326088
+          "match_percent": 58.673912
         },
         {
           "name": "_Z17MenuUpdateOptionsP6MENU_s",
@@ -69250,7 +69250,7 @@
           "address": 2451728,
           "offset": 1561760,
           "size": 1760,
-          "match_percent": 10.899729
+          "match_percent": 10.615176
         },
         {
           "name": "RemapAddr",
@@ -69538,7 +69538,7 @@
           "address": 4352000,
           "offset": 3462032,
           "size": 308,
-          "match_percent": 51.617645
+          "match_percent": 100.0
         },
         {
           "name": "_Z21MenuUpdateCardWarningP6MENU_s",
@@ -69554,7 +69554,7 @@
           "address": 4352560,
           "offset": 3462592,
           "size": 258,
-          "match_percent": 99.89091
+          "match_percent": 98.8
         },
         {
           "name": "_Z18MenuUpdateDeletingP6MENU_s",
@@ -69570,7 +69570,7 @@
           "address": 4352960,
           "offset": 3462992,
           "size": 160,
-          "match_percent": 91.818184
+          "match_percent": 91.47727
         },
         {
           "name": "_Z25MenuUpdateDoNotRemoveCardP6MENU_s",
@@ -69594,7 +69594,7 @@
           "address": 4353264,
           "offset": 3463296,
           "size": 276,
-          "match_percent": 80.36207
+          "match_percent": 100.0
         },
         {
           "name": "_Z22MenuUpdateFormatCancelP6MENU_s",
@@ -69634,7 +69634,7 @@
           "address": 4354304,
           "offset": 3464336,
           "size": 82,
-          "match_percent": 99.375
+          "match_percent": 100.0
         },
         {
           "name": "_Z16MenuUpdateSavingP6MENU_s",
@@ -69650,7 +69650,7 @@
           "address": 4354672,
           "offset": 3464704,
           "size": 170,
-          "match_percent": 99.63415
+          "match_percent": 100.0
         },
         {
           "name": "_Z21MenuUpdateFileCorruptP6MENU_s",
@@ -69682,7 +69682,7 @@
           "address": 4355456,
           "offset": 3465488,
           "size": 82,
-          "match_percent": 100.0
+          "match_percent": 99.25
         },
         {
           "name": "_Z22MenuUpdateNoMemoryCardP6MENU_s",
@@ -69714,7 +69714,7 @@
           "address": 4356000,
           "offset": 3466032,
           "size": 92,
-          "match_percent": 87.888885
+          "match_percent": 88.44444
         },
         {
           "name": "_Z15MenuIsAvailablev",
@@ -69802,7 +69802,7 @@
           "address": 4357984,
           "offset": 3468016,
           "size": 122,
-          "match_percent": 100.0
+          "match_percent": 93.125
         },
         {
           "name": "Draw_SPACENEEDED",
@@ -70090,7 +70090,7 @@
           "address": 4396112,
           "offset": 3506144,
           "size": 378,
-          "match_percent": 99.96296
+          "match_percent": 98.48148
         },
         {
           "name": "_Z21MenuDrawDeleteConfirmP6MENU_s",
@@ -73364,7 +73364,7 @@
           "address": 1944608,
           "offset": 1054640,
           "size": 168,
-          "match_percent": 88.58491
+          "match_percent": 100.0
         },
         {
           "name": "_ZL12Technos_DrawPvS_f",
@@ -75597,7 +75597,7 @@
           "address": 4762576,
           "offset": 3872608,
           "size": 1259,
-          "match_percent": 80.483444
+          "match_percent": 99.87749
         },
         {
           "name": "_Z13BackDrop_Dumpv",
@@ -80482,7 +80482,7 @@
           "address": 3477408,
           "offset": 2587440,
           "size": 6320,
-          "match_percent": 38.75241
+          "match_percent": 44.08119
         },
         {
           "name": "AddVariableShotDebrisEffectMtx4",
