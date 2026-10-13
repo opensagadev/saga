@@ -63,12 +63,16 @@ static void cbEdLevelSettingsMenu(eduimenu_s *, eduiitem_s *, u32);
 
 static inline i32 get_class_object_attribute(EdClass *ed_class, void *object, EdRef *reference, i32 attribute, i32 type,
                                              void *data, i32 size) {
-    if (reference != NULL && reference->GetAttributeData(object, attribute, type, data, size)) {
-        return 1;
+    if (reference != NULL) {
+        if (reference->GetAttributeData(object, attribute, type, data, size)) {
+            return 1;
+        }
     }
     EdMember member;
-    return ed_class->FindMember(&member, object, attribute, 1) &&
-           member.reference->GetAttributeData(member.object, attribute, type, data, size);
+    if (ed_class->FindMember(&member, object, attribute, 1)) {
+        return member.reference->GetAttributeData(member.object, attribute, type, data, size) != 0;
+    }
+    return 0;
 }
 
 extern EdRegistry theRegistry;
@@ -166,40 +170,44 @@ void CursorTool::Initialise(variptr_u &, variptr_u &, i32) {
 i32 CursorTool::Process(EdInputContext &input) {
     VuVec &origin = *reinterpret_cast<VuVec *>(input.reserved_00 + 0x20);
     VuVec &direction = *reinterpret_cast<VuVec *>(input.reserved_00 + 0x30);
-    const bool extend_selection = static_cast<i32>(input.GetHold(16)) != 0;
-    VuVec end = origin;
-    end.x += direction.x;
-    end.y += direction.y;
-    end.z += direction.z;
+    // The original keeps these locals in 16-byte aligned slots of a realigned frame.
+    ClassObject hover __attribute__((aligned(16))) = {NULL, NULL, NULL};
+    const f32 extend_selection = input.GetHold(16);
+    VuVec end __attribute__((aligned(16)));
+    end.x = origin.x + direction.x;
+    end.y = origin.y + direction.y;
+    end.z = origin.z + direction.z;
+    const i32 colour = NuRandInt();
     EdDrawBegin(0);
-    EdDrawLineSegment(origin, end, NuRandInt());
+    EdDrawLineSegment(origin, end, colour);
     EdDrawEnd();
     if (theLevelEditor.field_0x30 == 0)
         return 0;
 
-    ClassObject after = {NULL, NULL, NULL};
-    ClassObject hover = {NULL, NULL, NULL};
-    if (theClassEditor.selected_objects.first != NULL) {
+    ClassObject after __attribute__((aligned(16))) = {NULL, NULL, NULL};
+    if (theClassEditor.selected_objects.count > 0) {
         ClassObjectListEntry *first = theClassEditor.selected_objects.first;
-        after = {first->ed_class, first->object, first->reference};
+        after = *reinterpret_cast<ClassObject *>(&first->ed_class);
     }
     if (theClassEditor.FindNearestObject(origin, direction, hover, 1)) {
         theClassEditor.current_object = hover;
         if (input.GetPress(3) != 0.0f) {
             theClassEditor.FindNearestObject(origin, direction, hover, after, 1);
-            theClassEditor.SelectObject(hover, extend_selection ? 1 : 0);
+            theClassEditor.SelectObject(hover, static_cast<i32>(extend_selection) != 0);
         }
-        char name[128];
+        char text[128] __attribute__((aligned(16)));
+        char name[128] __attribute__((aligned(16)));
         if (!get_class_object_attribute(hover.ed_class, hover.object, hover.reference, 2, EdType_String, name,
                                         sizeof(name))) {
             theLevelEditor.AddInfoText(const_cast<char *>("object : no name"));
         } else {
-            char text[136];
             sprintf(text, "object : %s", name);
             theLevelEditor.AddInfoText(text);
         }
     } else {
-        theClassEditor.current_object = {NULL, NULL, NULL};
+        hover.ed_class = NULL;
+        hover.object = NULL;
+        theClassEditor.current_object = hover;
         if (input.GetPress(11) != 0.0f) {
             if (after.object != NULL)
                 theClassEditor.CreateObject(after);
@@ -210,8 +218,9 @@ i32 CursorTool::Process(EdInputContext &input) {
     if (input.GetPress(12) != 0.0f)
         theClassEditor.DestroySelectedObjects();
     if (hover.object == NULL && input.GetPress(3) != 0.0f) {
-        ClassObject none = {NULL, NULL, NULL};
-        theClassEditor.SelectObject(none, 0);
+        hover.ed_class = NULL;
+        hover.object = NULL;
+        theClassEditor.SelectObject(hover, 0);
     }
     return 0;
 }
@@ -261,7 +270,8 @@ void ClassEditor::AddMenuItems(eduimenu_s *menu) {
     eduiMenuAddItem(menu,
                     eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdClassDeleteObject, const_cast<char *>("Delete")));
 
-    EdClass *classes[32];
+    // The original keeps this class list 16-byte aligned.
+    EdClass *classes[32] __attribute__((aligned(16)));
     i32 class_count = 0;
     for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next) {
 
@@ -292,30 +302,35 @@ void *ClassEditor::CreateObject() {
 }
 
 i32 ClassEditor::CreateObject(ClassObject &source) {
-    ClassObject created = {source.ed_class, NULL, NULL};
+    // The original keeps the created object descriptor and the flags word in 16-byte aligned slots.
+    ClassObject created __attribute__((aligned(16))) = {source.ed_class, NULL, NULL};
     if (theLevelEditor.current_led_file == -1) {
         SelectLED(-1);
         return 1;
     }
     Placeable::CurrentLedFile = theLevelEditor.current_led_file;
-    EdClassInterface *interface = created.ed_class->interface;
-    void *object =
-        theRegistry.CreateObject(interface, (created.ed_class->flags & 0x04000000) ? source.object : NULL, 4, 0, 2);
-    if (object == NULL)
+    EdClassInterface *interface;
+    if (created.ed_class->flags & 0x04000000) {
+        created.object = theRegistry.CreateObject(created.ed_class->interface, source.object, 4, 0, 2);
+    } else {
+        created.object = theRegistry.CreateObject(created.ed_class->interface, NULL, 4, 0, 2);
+    }
+    if (created.object == NULL)
         return 0;
 
-    created.object = object;
     if (source.ed_class->flags & 0x04000000) {
-        i32 flags = 0x04000000;
-        if (created.reference == NULL || !created.reference->SetAttributeData(object, 1, EdType_Int, &flags, 0)) {
-            EdMember member;
-            if (created.ed_class->FindMember(&member, object, 1, 1))
-                member.reference->SetAttributeData(member.object, 1, EdType_Int, &flags, 0);
+        i32 flags __attribute__((aligned(16))) = 0x04000000;
+        i32 int_type = EdType_Int;
+        if (created.reference == NULL || !created.reference->SetAttributeData(created.object, 1, int_type, &flags, 0)) {
+            // The original keeps this member lookup in a 16-byte aligned slot.
+            EdMember member __attribute__((aligned(16)));
+            if (created.ed_class->FindMember(&member, created.object, 1, 1))
+                member.reference->SetAttributeData(member.object, 1, int_type, &flags, 0);
         }
     } else {
-        created.ed_class->CopyObject(object, source.object);
+        created.ed_class->CopyObject(created.object, source.object);
         interface = created.ed_class->interface;
-        interface->vtable->construct(interface, object, source.object);
+        interface->vtable->construct(interface, created.object, source.object);
     }
     InitialiseObject(created);
     theRegistry.NotifyCreateObject(created.object, created.ed_class, NULL, 0, 0, 0);
@@ -638,10 +653,11 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, i32 filter
         EdClassInterface *interface = ed_class->interface;
         for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
              object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
-            EdMember member;
+            // The original keeps the lookup and position in 16-byte aligned slots.
+            EdMember member __attribute__((aligned(16)));
             if (!ed_class->FindMember(&member, object, 8, 1))
                 continue;
-            VuVec position;
+            VuVec position __attribute__((aligned(16)));
             member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &position, 0);
             f32 dx = position.x - point.x;
             f32 dy = position.y - point.y;
@@ -656,9 +672,10 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, i32 filter
     }
     if (nearest_object != NULL && filter != 0) {
         f32 nearest_radius = NuFsqrt(nearest_distance);
-        f32 radius = 1.0f;
+        // The original keeps the radius and lookup in 16-byte aligned slots.
+        f32 radius __attribute__((aligned(16))) = 1.0f;
         if ((nearest_class->flags & 0x40) != 0) {
-            EdMember member;
+            EdMember member __attribute__((aligned(16)));
             if (nearest_class->FindMember(&member, nearest_object, 0x40, 1))
                 member.reference->GetAttributeData(member.object, 0x40, EdType_Float, &radius, 0);
         }
@@ -695,7 +712,8 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, ClassObjec
             f32 dy = position.y - point.y;
             f32 dz = position.z - point.z;
             f32 distance_squared = dx * dx + dy * dy + dz * dz;
-            f32 radius = 1.0f;
+            // The original keeps the radius in a 16-byte aligned slot.
+            f32 radius __attribute__((aligned(16))) = 1.0f;
             if (ed_class->FindMember(&member, object, 0x40, 1))
                 member.reference->GetAttributeData(member.object, 0x40, EdType_Float, &radius, 0);
             if (distance_squared < radius * radius && candidate_count < 16) {
@@ -734,7 +752,8 @@ i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject 
              object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
             if (!Editable(object, ed_class, -1))
                 continue;
-            EdRef *reference = NULL;
+            // The original keeps the hit reference in a 16-byte aligned slot.
+            EdRef *reference __attribute__((aligned(16))) = NULL;
             f32 distance = ed_class->interface->vtable->distance_to_ray(ed_class->interface, origin, direction, object,
                                                                         &reference);
             if (distance < nearest_distance) {
@@ -807,7 +826,8 @@ void ClassEditor::FocusSelected() {
 }
 
 void ClassEditor::InitialiseObject(ClassObject &created) {
-    EdMember member;
+    // The original keeps this member lookup in a 16-byte aligned slot.
+    EdMember member __attribute__((aligned(16)));
     if (created.ed_class->FindMember(&member, created.object, 2, 1)) {
         char name[128];
         char unique_name[128];
@@ -927,7 +947,9 @@ void ClassEditor::PreSaveInitialisation() {
 }
 
 void ClassEditor::SelectLED(i32 class_id) {
-    f32 x, y;
+    // The original keeps the cursor coordinates in 16-byte aligned slots.
+    f32 x __attribute__((aligned(16)));
+    f32 y __attribute__((aligned(16)));
     eduiGetCursorCoords(&x, &y);
     class_editor_create_pending = class_id;
     eduimenu_s *led_menu = eduiMenuCreate(static_cast<i32>(x * 640.0f), static_cast<i32>(y * 448.0f), 300, 250,
@@ -1671,7 +1693,8 @@ void ClassObject::Set(char *name) {
     char class_name[128];
     char object_name[128];
     char candidate_name[128];
-    EdMember member;
+    // The original keeps this member lookup in a 16-byte aligned slot.
+    EdMember member __attribute__((aligned(16)));
     *separator = '\0';
     NuStrCpy(class_name, name);
     *separator = '.';
@@ -1732,15 +1755,18 @@ char *LevelEditor::AddText(char *text) {
 }
 
 void LevelEditor::BeginMultiLoad(variptr_u *buffer, variptr_u *buffer_end) {
-    MemoryBuffer source = {buffer, buffer_end, 0, static_cast<u32>(buffer_end->addr - buffer->addr)};
+    // The original keeps these stream descriptors 16-byte aligned in a realigned frame.
+    MemoryBuffer source
+        __attribute__((aligned(16))) = {buffer, buffer_end, 0, static_cast<u32>(buffer_end->addr - buffer->addr)};
     if (editor_buffer_from_front == 0) {
         editor_buffer_end = *buffer_end;
         editor_buffer_begin.addr = buffer_end->addr - 0x20000;
     }
     multi_load_active = 1;
     editor_buffer_cursor = editor_buffer_begin;
-    MemoryBuffer scratch = {&editor_buffer_cursor, &editor_buffer_end, 0,
-                            static_cast<u32>(editor_buffer_end.addr - editor_buffer_begin.addr)};
+    MemoryBuffer scratch
+        __attribute__((aligned(16))) = {&editor_buffer_cursor, &editor_buffer_end, 0,
+                                        static_cast<u32>(editor_buffer_end.addr - editor_buffer_begin.addr)};
     theClassEditor.PreLoadInitialisation(&source, &scratch);
 }
 
@@ -1896,14 +1922,17 @@ void LevelEditor::Display(ThingRenderData *) {
 }
 
 void LevelEditor::EndMultiLoad(variptr_u *buffer, variptr_u *buffer_end) {
-    MemoryBuffer source = {buffer, buffer_end, 0, static_cast<u32>(buffer_end->addr - buffer->addr)};
+    // The original keeps these stream descriptors 16-byte aligned in a realigned frame.
+    MemoryBuffer source
+        __attribute__((aligned(16))) = {buffer, buffer_end, 0, static_cast<u32>(buffer_end->addr - buffer->addr)};
     if (editor_buffer_from_front == 0) {
         editor_buffer_end = *buffer_end;
         editor_buffer_begin.addr = buffer_end->addr - 0x20000;
     }
     editor_buffer_cursor = editor_buffer_begin;
-    MemoryBuffer scratch = {&editor_buffer_cursor, &editor_buffer_end, 0,
-                            static_cast<u32>(editor_buffer_end.addr - editor_buffer_begin.addr)};
+    MemoryBuffer scratch
+        __attribute__((aligned(16))) = {&editor_buffer_cursor, &editor_buffer_end, 0,
+                                        static_cast<u32>(editor_buffer_end.addr - editor_buffer_begin.addr)};
     theClassEditor.PostLoadInitialisation(&source, &scratch);
     current_led_file = -1;
     multi_load_active = 0;
@@ -2142,7 +2171,9 @@ LevelEditor::LevelEditor() {
 }
 
 i32 LevelEditor::Load(char *filename, variptr_u *buffer, variptr_u *buffer_end, i32 flags) {
-    MemoryBuffer source = {buffer, buffer_end, 0, static_cast<u32>(buffer_end->addr - buffer->addr)};
+    // The original keeps these stream descriptors 16-byte aligned in a realigned frame.
+    MemoryBuffer source
+        __attribute__((aligned(16))) = {buffer, buffer_end, 0, static_cast<u32>(buffer_end->addr - buffer->addr)};
     if (editor_buffer_from_front == 0) {
         editor_buffer_end = *buffer_end;
         editor_buffer_begin.addr = buffer_end->addr - 0x20000;
@@ -2163,8 +2194,9 @@ i32 LevelEditor::Load(char *filename, variptr_u *buffer, variptr_u *buffer_end, 
     }
 
     editor_buffer_cursor = editor_buffer_begin;
-    MemoryBuffer scratch = {&editor_buffer_cursor, &editor_buffer_end, 0,
-                            static_cast<u32>(editor_buffer_end.addr - editor_buffer_begin.addr)};
+    MemoryBuffer scratch
+        __attribute__((aligned(16))) = {&editor_buffer_cursor, &editor_buffer_end, 0,
+                                        static_cast<u32>(editor_buffer_end.addr - editor_buffer_begin.addr)};
     SetSaveFilename(filename);
     if (!multi_load_active) {
         theClassEditor.PreLoadInitialisation(&source, &scratch);
@@ -2352,7 +2384,8 @@ i32 LevelEditor::ReadStream(EdFileInputStream &stream) {
         stream.EndBlock();
     }
     if (stream.BeginBlock("Editors") != NULL) {
-        i32 count;
+        // The original keeps the editor count in a 16-byte aligned slot.
+        i32 count __attribute__((aligned(16)));
         stream.SerialiseBuffer(&count, sizeof(count), 1);
         for (i32 index = 0; index < count; ++index) {
             char const *name = stream.BeginBlock(NULL);
@@ -3024,10 +3057,11 @@ i32 ClassObjectList::GetAveragePosition(VuVec &average, float &radius) {
     average = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
     i32 position_count = 0;
     VuVec positions[64];
-    float radii[64];
+    // The original keeps these locals in 16-byte aligned slots of a realigned frame.
+    float radii[64] __attribute__((aligned(16)));
     for (ClassObjectListEntry *entry = first; entry != NULL && position_count < 64; entry = entry->next) {
         VuVec &position = positions[position_count];
-        EdMember member;
+        EdMember member __attribute__((aligned(16)));
         i32 position_type = EdType_VuVec;
         if (entry->reference != NULL &&
             entry->reference->GetAttributeData(entry->object, 8, position_type, &position, 0))
@@ -3218,7 +3252,8 @@ void EdClass::SerialiseObject(EdStream &stream, void *object) {
         return;
     }
     if (object != NULL) {
-        u8 data[256];
+        // The original keeps this scratch buffer 16-byte aligned.
+        u8 data[256] __attribute__((aligned(16)));
         for (EdRef *member = members; member != NULL; member = member->next) {
             if (!((stream.flags & 0x400000) != 0 ? (member->attributes & 0x400000) != 0
                                                  : (member->attributes & 0x10000000) != 0)) {
@@ -3246,7 +3281,8 @@ void EdClass::SerialiseObject(EdStream &stream, void *object) {
 }
 
 i32 EdClass::SerialiseObjectHeader(EdStream &stream, void *object) {
-    u8 present = 0;
+    // The original stores this flag in a 16-byte aligned slot of a realigned frame.
+    u8 present __attribute__((aligned(16))) = 0;
     if (stream.mode == 2 && object != NULL) {
         present = 1;
     }
@@ -3393,7 +3429,8 @@ void EdClass::SerialiseObject(EdStream &stream, void *object, EdClass *schema, E
         return;
     }
     if (object != NULL) {
-        u8 data[256];
+        // The original keeps this scratch buffer 16-byte aligned.
+        u8 data[256] __attribute__((aligned(16)));
         for (EdRef *source = schema->members; source != NULL; source = source->next) {
             EdRef *member = FindTypeRef(source->name, 0);
             if (member != NULL) {

@@ -4715,7 +4715,8 @@ i32 EdManipulator::AxisColour[8] = {
 };
 
 void EdManipulator::DrawAxis(VuVec &origin, VuMtx *matrix) {
-    VuVec points[8];
+    // The original keeps the locator array in a 16-byte aligned slot of a realigned frame.
+    VuVec points[8] __attribute__((aligned(16)));
     GetAxisLocators(origin, points, matrix);
     EdDrawBegin(1);
     EdDrawLineSphere(points[1], Scale * 0.25f, 1.0f,
@@ -4913,15 +4914,15 @@ i32 EdManipulator::Process(EdInputContext &input, ClassObjectList &selected) {
             Scale -= step * input.delta_time;
     }
 
-    VuVec average;
+    // The original keeps this vector in a 16-byte aligned slot of a realigned frame.
+    VuVec average __attribute__((aligned(16)));
     f32 distance = 0.0f;
     VuVec *ray_origin = reinterpret_cast<VuVec *>(input.reserved_00 + 0x20);
-    VuVec *ray_direction = reinterpret_cast<VuVec *>(input.reserved_00 + 0x30);
     if (selected.GetAveragePosition(average) != 0) {
         VuVec displacement = {average.x - ray_origin->x, average.y - ray_origin->y, average.z - ray_origin->z, 0.0f};
         distance = NuVecMag(reinterpret_cast<NUVEC *>(&displacement));
     }
-    VuVec direction = *ray_direction;
+    VuVec direction = *reinterpret_cast<VuVec *>(input.reserved_00 + 0x30);
     NuVecNorm(reinterpret_cast<NUVEC *>(&direction), reinterpret_cast<NUVEC *>(&direction));
     VuVec *last_point = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x30);
     VuVec point = {ray_origin->x + direction.x * distance, ray_origin->y + direction.y * distance,
@@ -4929,7 +4930,7 @@ i32 EdManipulator::Process(EdInputContext &input, ClassObjectList &selected) {
     VuVec *delta = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x40);
     VuVec *cursor = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x50);
     if (input.GetPress(3) != 0.0f) {
-        *delta = VuVec_Zero;
+        *delta = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
     } else {
         delta->x = point.x - last_point->x;
         delta->y = point.y - last_point->y;
@@ -4938,8 +4939,12 @@ i32 EdManipulator::Process(EdInputContext &input, ClassObjectList &selected) {
     }
     *last_point = point;
     last_point->w = 0.0f;
-    *cursor = *reinterpret_cast<VuVec *>(input.reserved_00);
-    if (EdTerrRay(*cursor, *ray_direction) == 0)
+    VuVec *ray_cursor = reinterpret_cast<VuVec *>(input.reserved_00);
+    cursor->x = ray_cursor->x;
+    cursor->y = ray_cursor->y;
+    cursor->z = ray_cursor->z;
+    cursor->w = ray_cursor->w;
+    if (EdTerrRay(*cursor, *reinterpret_cast<VuVec *>(input.reserved_00 + 0x30)) == 0)
         *cursor = *last_point;
     last_point->w = 1.0f;
     delta->w = 1.0f;

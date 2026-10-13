@@ -39,7 +39,8 @@ struct SHOPINPUT;
 
 extern f32 SpaceRumbleTimer;
 extern i32 LevFlag[4];
-spacelevel_scale_s STARFIGHTERDRAWSCALE;
+// The original keeps this scale in an aligned vector slot and copies it with movaps.
+static spacelevel_scale_s STARFIGHTERDRAWSCALE __attribute__((aligned(16)));
 NUVEC Jetpos = {0.15f, 0.08f, 0.32f};
 void DrawCross_Now(_vuv_s *position, f32 size, i32 colour, i32 mode);
 extern GameObject_s *Player[8];
