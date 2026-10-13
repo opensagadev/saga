@@ -3059,7 +3059,7 @@ static __used__ void Hub_UpdateSelectMode() {
     switch (selectmodemode) {
         case 1:
             selectmodetime += FRAMETIME;
-            if (selectmodetime < selectmodeduration) {
+            if (!(selectmodeduration <= selectmodetime)) {
                 return;
             }
             MakeFreePlayModelList(MenuPacket.player_model[0], MenuPacket.player_model[1],
@@ -3071,12 +3071,12 @@ static __used__ void Hub_UpdateSelectMode() {
             break;
         case 2:
             selectmodetime += FRAMETIME;
-            if (selectmodetime < selectmodeduration || NewLData != NULL) {
+            if (!(selectmodeduration <= selectmodetime) || NewLData != NULL) {
                 return;
             }
             NextArea_FreePlay = 0;
-            NewLData = &LDataList[hub_new_level];
             FreePlay = 0;
+            NewLData = &LDataList[hub_new_level];
             break;
         case 3:
             selectmodetime += FRAMETIME;
