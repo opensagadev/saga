@@ -1229,11 +1229,8 @@ namespace {
     void SyncPlayerSpawnPosition(GameObject_s *obj) {
         const NUVEC &position = obj->apiobj.position;
 
-        obj->apiobj.pos_x = position.x;
-        obj->apiobj.pos_y = position.y;
-        obj->apiobj.pos_z = position.z;
-
         obj->apiobj.initial_position = position;
+        obj->apiobj.collision_position = position;
         obj->apiobj.start_position = position;
 
         plr_lastpos = position;
@@ -1263,8 +1260,8 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
         ResetPlayerMoves(obj);
         SyncPlayerSpawnPosition(obj);
 
-        obj->apiobj.velocity = v000;
         obj->reset_velocity = v000;
+        obj->apiobj.velocity = v000;
 
         GetTopBot(obj);
         GameObjectDimensions(obj);
