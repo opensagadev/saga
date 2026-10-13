@@ -162,20 +162,6 @@ i32 AllMiniKitsDone(AREASAVE_s *save) {
 }
 
 char *LEGOASCII_BIGARROW = NULL;
-void GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s *, nuvec_s *,
-                                  float) __asm__("_ZL28GameMsg_Draw_MiniKitDetectorP13GAMEMESSAGE_sP7nuvec_sf")
-    __attribute__((visibility("hidden")));
-void MiniKitDetector(nuvec_s *position) {
-    ADDGAMEMSG message = AddGameMsg_Default;
-    message.text = LEGOASCII_BIGARROW != NULL ? LEGOASCII_BIGARROW : txt_UNKNOWN;
-    message.position = position;
-    message.flags = 0x40083;
-    message.scale = 0.6f;
-    message.field_0x44 = reinterpret_cast<void *>(GameMsg_Draw_MiniKitDetector);
-    message.field_0x4f = 4;
-    AddGameMsg(&message);
-}
-
 i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
 void CharMiniKit_Draw(i32 id, numtx_s *matrix, i32 reflection_axis, float reflection_plane, float reflection_height) {
     NUMTX draw_matrix;

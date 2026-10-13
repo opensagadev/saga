@@ -6,6 +6,10 @@
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "nu2api/nucore/nustring.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/render/core/render.h"
 
 #include "batman.h"
 #include "decomp.h"
@@ -252,6 +256,104 @@ namespace {
     }
 
 } // namespace
+
+extern char *LEGOASCII_UP, *LEGOASCII_DOWN;
+extern i32 LEGOOBJ_ICON_FRAME_NEUTRAL;
+extern f32 ICONSIZE;
+static void GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s *message, nuvec_s *position, float scale) {
+    NUVEC screen = *position;
+    i32 clipped = 0;
+    if (message->field_0xfb != 0) {
+        NuVecNeg(&screen, &screen);
+        screen.x = screen.x < 0.0f ? -0.825f : 0.825f;
+        if (screen.y < 0.0f)
+            screen.y = -0.825f;
+        else
+            screen.y = 0.825f;
+        clipped = 1;
+    }
+
+    f32 excess = 1.0e9f;
+    if (screen.x >= 0.825f) {
+        excess = screen.x - 0.825f;
+        screen.x = 0.825f;
+        NuStrCpy(message->text_buffer, ">");
+        clipped = 1;
+    } else if (screen.x <= -0.825f) {
+        excess = -0.825f - screen.x;
+        screen.x = -0.825f;
+        NuStrCpy(message->text_buffer, "<");
+        clipped = 1;
+    }
+    if (screen.y >= 0.825f) {
+        const f32 y = screen.y;
+        screen.y = 0.825f;
+        if (clipped == 0 || (excess != 1.0e9f && y - 0.825f > excess))
+            NuStrCpy(message->text_buffer, LEGOASCII_UP != NULL ? LEGOASCII_UP : "?");
+        clipped = 1;
+    } else if (screen.y <= -0.825f) {
+        const f32 y = screen.y;
+        screen.y = -0.825f;
+        if (clipped == 0 || (excess != 1.0e9f && -0.825f - y > excess))
+            NuStrCpy(message->text_buffer, LEGOASCII_DOWN != NULL ? LEGOASCII_DOWN : "?");
+        clipped = 1;
+    }
+
+    f32 distance = NuVecDist(&message->position, &GameCam->pos, NULL) /
+                   static_cast<f32>(static_cast<u32>(
+                       static_cast<u8>(WorldInfo_CurrentlyActive()->current_level->camera_judder_distance)));
+    if (distance > 1.0f)
+        distance = 1.0f;
+    i32 alpha = 64;
+    if (distance < 0.25f)
+        alpha = 128;
+    else if (distance < 0.75f)
+        alpha = static_cast<i32>((1.0f - 2.0f * (distance - 0.25f)) * 64.0f + 64.0f);
+
+    if (clipped != 0) {
+        message->red = 0xff;
+        message->green = message->field_0xfb == 0 ? 0xff : 0;
+        message->blue = message->green;
+        message->alpha = static_cast<u8>(alpha);
+        message->field_0xfc = 0;
+    } else {
+        message->red = 0;
+        message->green = 0xff;
+        message->blue = 0;
+        message->alpha = static_cast<u8>(alpha);
+        message->field_0xfc = 4;
+    }
+
+    if (message->icon != static_cast<u16>(-1)) {
+        LEVEL_OBJECT_RUNTIME *icon = &WorldInfo_CurrentlyActive()->lev_objs[static_cast<i16>(message->icon)];
+        if (icon->active != 0) {
+            f32 opacity = 1.0f;
+            if ((message->flags & 0x10000) != 0)
+                opacity = static_cast<f32>(static_cast<u32>(message->alpha)) * (1.0f / 128.0f);
+            DrawPanel3DObject(screen.x, screen.y, screen.z, scale, scale, scale, 0, 0, 0, &icon->special, 2, opacity);
+        }
+        return;
+    }
+    if (message->field_0xe4 != 0) {
+        DrawCharIcon(message->field_0xe4, screen.x, screen.y, 0.0f, ICONSIZE, LEGOOBJ_ICON_FRAME_NEUTRAL, 1.0f, 1.0f, 1,
+                     NULL);
+        return;
+    }
+    Text3DEx(message->text != NULL ? message->text : message->text_buffer, screen.x, screen.y, screen.z, scale, scale,
+             scale, message->field_0xfc, message->red, message->green, message->blue, message->alpha);
+}
+
+extern char *LEGOASCII_BIGARROW;
+void MiniKitDetector(nuvec_s *position) {
+    ADDGAMEMSG message = AddGameMsg_Default;
+    message.text = LEGOASCII_BIGARROW != NULL ? LEGOASCII_BIGARROW : txt_UNKNOWN;
+    message.position = position;
+    message.flags = 0x40083;
+    message.scale = 0.6f;
+    message.field_0x44 = reinterpret_cast<void *>(GameMsg_Draw_MiniKitDetector);
+    message.field_0x4f = 4;
+    AddGameMsg(&message);
+}
 
 static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count) {
     NUMTX matrix;
