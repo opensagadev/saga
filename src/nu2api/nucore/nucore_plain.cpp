@@ -3528,12 +3528,21 @@ extern "C" {
             return NULL;
 
         for (i32 render = 0; render < render_count; ++render) {
-            i32 node = render_indices == NULL ? 0 : render_indices[render];
-            if (node < 0)
-                continue;
-
-            NuLegacyDwaChunk *chunk = NuLegacyDwaGetChunk(animation, time.chunk);
-            nuanimcurveset_s *set = node < chunk->node_count ? chunk->curve_sets[node] : NULL;
+            i32 node = 0;
+            NuLegacyDwaChunk *chunk;
+            if (render_indices != NULL) {
+                node = render_indices[render];
+                if (node < 0)
+                    continue;
+                chunk = NuLegacyDwaGetChunk(animation, time.chunk);
+                if (node >= chunk->node_count) {
+                    weights_by_render[render] = NuRndrCreateBlendShapeDeformerWeightsArray(0);
+                    continue;
+                }
+            } else {
+                chunk = NuLegacyDwaGetChunk(animation, time.chunk);
+            }
+            nuanimcurveset_s *set = chunk->curve_sets[node];
             if (set == NULL) {
                 weights_by_render[render] = NuRndrCreateBlendShapeDeformerWeightsArray(0);
                 continue;
@@ -3595,7 +3604,7 @@ extern "C" {
             i32 curve_offset = animation->curve_count * node;
             i8 *types = reinterpret_cast<i8 *>(animation->curve_types) + curve_offset;
             nuanimcurve2_s *curves = animation->curves + curve_offset;
-            if (weights == NULL || curve_count <= 0) {
+            if (weights == NULL) {
                 continue;
             }
             for (i32 curve = 0; curve < curve_count; ++curve, ++curves) {
