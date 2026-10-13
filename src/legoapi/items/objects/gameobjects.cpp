@@ -5639,45 +5639,39 @@ void ThingManager::ExitLevelThings(ThingLevelData *data) {
 // Profiling flags select which things receive NuTimeBarSlotBegin/End calls.
 void ThingManager::ProcessThings(ThingProcessData *data) {
     const char *name = "PROC";
-    if (this->count <= 0) {
-        return;
-    }
     for (i32 i = 0; i < this->count; ++i) {
-        if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_PROCESS_EVEN_WHEN_PAUSED) != 0) {
-            continue;
-        }
-        if (this->things[i]->profiling_0xc != 0) {
-            _NuTimeBarSlotBegin(this->timebar, 0, name);
-        }
-        this->things[i]->ProcessEvenWhenPaused(data);
-        if (this->things[i]->profiling_0xc != 0) {
-            _NuTimeBarSlotEnd(this->timebar, 0);
+        if (this->things[i] != NULL && (this->things[i]->flags & THING_FLAG_SKIP_PROCESS_EVEN_WHEN_PAUSED) == 0) {
+            if (this->things[i]->profiling_0xc != 0) {
+                _NuTimeBarSlotBegin(this->timebar, 0, name);
+            }
+            this->things[i]->ProcessEvenWhenPaused(data);
+            if (this->things[i]->profiling_0xc != 0) {
+                _NuTimeBarSlotEnd(this->timebar, 0);
+            }
         }
     }
     if (data->paused == 0) {
         for (i32 i = 0; i < this->count; ++i) {
-            if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_PROCESS) != 0) {
-                continue;
-            }
-            if (this->things[i]->profiling_0xc != 0) {
-                _NuTimeBarSlotBegin(this->timebar, 0, name);
-            }
-            this->things[i]->Process(data);
-            if (this->things[i]->profiling_0xc != 0) {
-                _NuTimeBarSlotEnd(this->timebar, 0);
+            if (this->things[i] != NULL && (this->things[i]->flags & THING_FLAG_SKIP_PROCESS) == 0) {
+                if (this->things[i]->profiling_0xc != 0) {
+                    _NuTimeBarSlotBegin(this->timebar, 0, name);
+                }
+                this->things[i]->Process(data);
+                if (this->things[i]->profiling_0xc != 0) {
+                    _NuTimeBarSlotEnd(this->timebar, 0);
+                }
             }
         }
     } else {
         for (i32 i = 0; i < this->count; ++i) {
-            if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_PROCESS_ONLY_WHEN_PAUSED) != 0) {
-                continue;
-            }
-            if (this->things[i]->profiling_0xc != 0) {
-                _NuTimeBarSlotBegin(this->timebar, 0, name);
-            }
-            this->things[i]->ProcessOnlyWhenPaused(data);
-            if (this->things[i]->profiling_0xc != 0) {
-                _NuTimeBarSlotEnd(this->timebar, 0);
+            if (this->things[i] != NULL && (this->things[i]->flags & THING_FLAG_SKIP_PROCESS_ONLY_WHEN_PAUSED) == 0) {
+                if (this->things[i]->profiling_0xc != 0) {
+                    _NuTimeBarSlotBegin(this->timebar, 0, name);
+                }
+                this->things[i]->ProcessOnlyWhenPaused(data);
+                if (this->things[i]->profiling_0xc != 0) {
+                    _NuTimeBarSlotEnd(this->timebar, 0);
+                }
             }
         }
     }
