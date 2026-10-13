@@ -1125,31 +1125,28 @@ static void cbPtlAddEffect(eduimenu_s *menu, eduiitem_s *, u32) {
         return;
     }
 
-    i32 index = 1;
-    while (index < EDPP_MAX_TYPES && debtab[index] != NULL)
-        ++index;
-    if (index < EDPP_MAX_TYPES) {
-        debtab[index] = &effecttypes[index];
-        *debtab[index] = *debtab[0];
-        debtab[index]->status = 1;
-        sprintf(debtab[index]->name, "New%d", index);
-        debtab[index]->category = edpp_effect_list;
-        if (edpp_effect_list == 0) {
-            i32 page = edbits_particle_general_page;
-            debtab[index]->page = static_cast<u8>(page);
-            edpp_page_used[page] = 1;
-        } else if (edpp_effect_list == 5) {
-            i32 page = edbits_particle_char_page;
-            debtab[index]->page = static_cast<u8>(page);
-            edpp_page_used[page] = 1;
-        } else if (edpp_effect_list == 1) {
-            i32 page = edbits_particle_level_page;
-            debtab[index]->page = static_cast<u8>(page);
-            edpp_page_used[page] = 1;
+    for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
+        if (debtab[index] == NULL) {
+            debtab[index] = &effecttypes[index];
+            memcpy(debtab[index], debtab[0], sizeof(debinftype));
+            debtab[index]->status = 1;
+            sprintf(debtab[index]->name, "New%d", index);
+            debtab[index]->category = edpp_effect_list;
+            if (edpp_effect_list == 0) {
+                debtab[index]->page = edbits_particle_general_page;
+                edpp_page_used[edbits_particle_general_page] = 1;
+            } else if (edpp_effect_list == 5) {
+                debtab[index]->page = edbits_particle_char_page;
+                edpp_page_used[edbits_particle_char_page] = 1;
+            } else if (edpp_effect_list == 1) {
+                debtab[index]->page = edbits_particle_level_page;
+                edpp_page_used[edbits_particle_level_page] = 1;
+            }
+            edpp_create_type = index;
+            ++edpp_types_used;
+            UpdateTotalPtls(debtab[index]);
+            break;
         }
-        edpp_create_type = index;
-        ++edpp_types_used;
-        UpdateTotalPtls(debtab[index]);
     }
     eduimenu_s *parent = menu->parent;
     if (parent != NULL)
@@ -1394,26 +1391,26 @@ static void cbPtlCopyEffect(eduimenu_s *menu, eduiitem_s *, u32) {
     if (edpp_create_type == -1) {
         eduiCreateMessageMenu(menu, "No particle to copy", 0);
     } else {
-        i32 index = 1;
-        while (index < EDPP_MAX_TYPES && debtab[index] != NULL)
-            ++index;
-        if (index < EDPP_MAX_TYPES) {
-            debinftype *effect = &effecttypes[index];
-            debtab[index] = effect;
-            *effect = *debtab[edpp_create_type];
-            effect->native_data = NULL;
-            effect->last_render_time = 0.0f;
-            const char *source_name = debtab[edpp_create_type]->name;
-            char short_name[32];
-            size_t name_length = strlen(source_name);
-            if (name_length > 12) {
-                memcpy(short_name, source_name, name_length + 1);
-                short_name[12] = '\0';
-                source_name = short_name;
+        for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
+            if (debtab[index] == NULL) {
+                debtab[index] = &effecttypes[index];
+                memcpy(debtab[index], debtab[edpp_create_type], sizeof(debinftype));
+                debtab[index]->native_data = NULL;
+                debtab[index]->last_render_time = 0.0f;
+                char *source_name = debtab[edpp_create_type]->name;
+                size_t name_length = strlen(source_name);
+                if (name_length <= 12) {
+                    sprintf(debtab[index]->name, "%s%03d", source_name, index);
+                } else {
+                    char short_name[16];
+                    memcpy(short_name, source_name, name_length + 1);
+                    short_name[12] = '\0';
+                    sprintf(debtab[index]->name, "%s%03d", short_name, index);
+                }
+                ++edpp_types_used;
+                edpp_create_type = index;
+                break;
             }
-            sprintf(effect->name, "%s%03d", source_name, index);
-            ++edpp_types_used;
-            edpp_create_type = index;
         }
         eduimenu_s *parent = menu->parent;
         if (parent != NULL)
