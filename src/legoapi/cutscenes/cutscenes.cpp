@@ -75,7 +75,6 @@ extern "C" {
     void instNuGCutSceneDestroy(instNUGCUTSCENE_s *);
     void NuGCutSceneSysRender(i32);
     void NuGCutSceneSysUpdate(i32, i32, f32);
-    extern NUGCUTLOCATORFNENTRY_s cutscene_locatorfns[];
 }
 
 void SetLevelLights(void *, f32);
@@ -780,6 +779,37 @@ i32 CutScene_StartFn_LSW(CUTINFO *cut) {
     return 1;
 }
 
+extern "C" i32 NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
+extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
+extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
+
+static __used__ void LocatorFunction_Blaster(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
+                                             NUGCUTLOCATOR_s *locator, float frame, numtx_s *parent_mtx, int) {
+    nuanimtime_s time;
+    NuAnimData2CalcTime(locator->animation, frame, &time);
+    if (NuGCutLocatorIsVisble(locator, frame, &time, NULL, NULL) == 0) {
+        return;
+    }
+    // Retail realigns the frame (and esp,-16) for this matrix.
+    NUMTX_ALIGNED16 matrix;
+    NuGCutLocatorCalcMtx(locator, frame, &matrix, &time);
+    if ((locator->flags & 4) != 0) {
+        NuMtxPreTranslate(&matrix, &locator->pivot);
+    }
+    if (parent_mtx != NULL) {
+        NuMtxMul(&matrix, &matrix, parent_mtx);
+    }
+    if (CutSceneSys != NULL) {
+        Draw3DObjectMtx(NULL, CutSceneSys->blaster_object_0, &matrix);
+        Draw3DObjectMtx(NULL, CutSceneSys->blaster_object_1, &matrix);
+    }
+}
+
+static NUGCUTLOCATORFNENTRY_s cutscene_locatorfns[] = {
+    {"blaster", 0, 0, 0, LocatorFunction_Blaster},
+    {NULL, 0, 0, 0, NULL},
+};
+
 void CutScenes_InitSystem(CUTSCENESYS *system) {
     CutSceneSys = system;
     NuGCutSceneSysInit(cutscene_locatorfns);
@@ -1240,8 +1270,8 @@ static void CutScene_FindCharacters(NUGCUTSCENE_s *cutscene) {
     for (i32 i = 0; i < system->character_count; ++i) {
         NUGCUTCHAR_s *character = &system->characters[i];
         CUTSYS *cutscene_system = CS_cutsys;
-        NUGCUTLOCATORSYS_s *locator_system = cutscene->locator_system;
         character->flags |= 2;
+        NUGCUTLOCATORSYS_s *locator_system = cutscene->locator_system;
         char *name = character->name;
 
         i32 model_index;
@@ -1260,12 +1290,12 @@ static void CutScene_FindCharacters(NUGCUTSCENE_s *cutscene) {
         character->character_model = NULL;
 
     resolve_locators:
-        if (character->has_locator == 0 || reinterpret_cast<isize>(character->locator) > 0xfe) {
-            character->locator_index = 0xff;
-        } else {
+        if (character->has_locator != 0 && reinterpret_cast<isize>(character->locator) <= 0xfe) {
             isize locator_index = reinterpret_cast<isize>(character->locator);
             character->locator_index = static_cast<u8>(reinterpret_cast<usize>(character->locator));
             character->locator = &locator_system->locators[locator_index];
+        } else {
+            character->locator_index = 0xff;
         }
     }
 }

@@ -321,13 +321,11 @@ static void CS_tex_anim(NUFPAR *fp) {
     if (CS_texanimcount > 3) {
         return;
     }
-    CUTSCENETEXANIM *animation = &CS_CutInfo->texture_animations[CS_texanimcount];
-    animation->index = NuFParGetInt(fp);
-    if (animation->index == -1) {
+    // Retail re-reads the cut info and slot for each store.
+    if ((CS_CutInfo->texture_animations[CS_texanimcount].index = NuFParGetInt(fp)) == -1) {
         return;
     }
-    animation->frame = static_cast<f32>(NuFParGetInt(fp));
-    if (animation->frame >= 0.0f) {
+    if ((CS_CutInfo->texture_animations[CS_texanimcount].frame = static_cast<f32>(NuFParGetInt(fp))) >= 0.0f) {
         ++CS_texanimcount;
     }
 }
@@ -1809,35 +1807,6 @@ extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
 extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
                                         NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
 void Draw3DObjectMtx(WORLDINFO_s *, i32, numtx_s *);
-
-static __used__ void LocatorFunction_Blaster(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
-                                             NUGCUTLOCATOR_s *locator, float frame, numtx_s *parent_mtx, int) {
-    nuanimtime_s time;
-    NuAnimData2CalcTime(locator->animation, frame, &time);
-    if (NuGCutLocatorIsVisble(locator, frame, &time, NULL, NULL) == 0) {
-        return;
-    }
-    // Retail realigns the frame (and esp,-16) for this matrix.
-    NUMTX_ALIGNED16 matrix;
-    NuGCutLocatorCalcMtx(locator, frame, &matrix, &time);
-    if ((locator->flags & 4) != 0) {
-        NuMtxPreTranslate(&matrix, &locator->pivot);
-    }
-    if (parent_mtx != NULL) {
-        NuMtxMul(&matrix, &matrix, parent_mtx);
-    }
-    if (CutSceneSys != NULL) {
-        Draw3DObjectMtx(NULL, CutSceneSys->blaster_object_0, &matrix);
-        Draw3DObjectMtx(NULL, CutSceneSys->blaster_object_1, &matrix);
-    }
-}
-
-extern "C" {
-    __attribute__((weak)) NUGCUTLOCATORFNENTRY_s cutscene_locatorfns[] = {
-        {"blaster", 0, 0, 0, LocatorFunction_Blaster},
-        {NULL, 0, 0, 0, NULL},
-    };
-}
 
 void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance);
 void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance);
