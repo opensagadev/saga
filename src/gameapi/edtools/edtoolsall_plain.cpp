@@ -5050,13 +5050,14 @@ extern "C" {
         eduimenu_s *menu = interact->menu;
         edui_prop_s *property = static_cast<edui_prop_s *>(interact->item);
         u8 &property_flags = reinterpret_cast<u8 *>(property)[0x4c];
+        bool handled = false;
         if ((edui_cursor_buttons & EDUI_CURSOR_PRIMARY) && !(property_flags & 0x0a)) {
             if (property_flags & 1) {
                 if (edui_cursor_x >= interact->x + property->label_width + 1.0f && edui_cursor_y >= interact->y &&
                     edui_cursor_x < property->button_x && edui_cursor_y < interact->y + interact->height) {
                     property_flags |= 1;
                     eduiPropTextPos = -1;
-                    return 1;
+                    handled = true;
                 }
             } else {
                 f32 label_end = interact->x + property->label_width;
@@ -5091,11 +5092,11 @@ extern "C" {
                     property->button) {
                     property->button(menu, property, 0);
                     if (property_flags & 0x20)
-                        return 1;
+                        handled = true;
                 }
             }
         }
-        return (property_flags & 0x0b) != 0;
+        return handled || (property_flags & 0x0b);
     }
     static __used__ i32 eduicbInteractFilter(struct edui_interact_s *interact) {
         return eduicbInteractProp(interact);
