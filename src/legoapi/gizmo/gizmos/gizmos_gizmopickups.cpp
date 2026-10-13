@@ -42,27 +42,31 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
         return;
     }
 
-    if (static_cast<u32>(type_index - 2) < 2 && object != NULL) {
-        if (world->area == NULL || (world->area->flags & AREAFLAG_SUPER_BONUS_AREA) != AREAFLAG_BONUS_AREA) {
-            NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
-        } else {
+    if ((type_index == 2 || type_index == 3) && object != NULL) {
+        if (world->area != NULL && (world->area->flags & AREAFLAG_SUPER_BONUS_AREA) == AREAFLAG_BONUS_AREA) {
             NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
+        } else {
+            NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
         }
     }
 
-    PlaySfx(DoubleScoreTime > 0.0f || static_cast<u32>(type_index - 2) < 2 ? const_cast<char *>("PickupCoinB")
-                                                                           : const_cast<char *>("PickupCoin"),
-            position);
+    if (DoubleScoreTime > 0.0f || type_index == 2 || type_index == 3) {
+        PlaySfx(const_cast<char *>("PickupCoinB"), position);
+    } else {
+        PlaySfx(const_cast<char *>("PickupCoin"), position);
+    }
 
-    const bool main_total = CoinsGoToMainTotal() != 0;
+    i32 main_total;
     NUVEC target_position;
     f32 target_scale;
-    if (main_total) {
+    if (CoinsGoToMainTotal() != 0) {
+        main_total = 1;
         target_position.x = cointotal_x[player_index];
         target_position.y = STATSPOSY;
         DrawCoinTotalTime = 1.0f + COINMSGTIME;
         target_scale = COINTOTAL_COINSIZE;
     } else {
+        main_total = 0;
         target_position.x = player_index == 1 ? PANEL_COINX : -PANEL_COINX;
         target_position.y = STATSPOSY + PANEL_COINY;
         DrawBuildUpTime = 1.0f + COINMSGTIME;
@@ -94,7 +98,7 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
         message.icon = static_cast<i16>(model_id);
         message.extra_position = reinterpret_cast<nuvec_s *>(&world->lev_objs[model_id]);
         message.score = score;
-        if (main_total) {
+        if (main_total != 0) {
             message.update_fn = GameMsg_DrawAdjustNewPos_CoinToTotal;
         }
         message.end_fn = EndScoreMessage;

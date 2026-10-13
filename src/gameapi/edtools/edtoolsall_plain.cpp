@@ -5911,8 +5911,8 @@ extern "C" {
                                                                                    i32 x, i32 y, i32 width, i32) {
         i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 3;
         i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
-        item->x = x;
         item->y = y;
+        item->x = x;
         eduiDrawRect(x << 4, y << 3, width << 4, height << 3, item->colours[2], uimtls[ui_bgmtl]);
         eduiDrawFontSet(edui_font);
         eduiSetFontColour(edui_font, item->colours[item->highlighted]);
@@ -5922,13 +5922,16 @@ extern "C" {
         i32 left = ((x - height + width - 2) << 4) + 16;
         i32 right = left + ((height - 2) << 4) - 16;
         i32 bottom = top + ((height - 2) << 3) - 8;
-        i32 middle_y = (top + bottom) >> 1;
-        i32 quarter_x = (left + ((left + right) >> 1)) >> 1;
-        i32 lower_y = (bottom + middle_y) >> 1;
         if (item->highlighted) {
+            i32 middle_y = (top + bottom) >> 1;
+            i32 quarter_x = (left + ((left + right) >> 1)) >> 1;
+            i32 lower_y = (bottom + middle_y) >> 1;
             i32 points[8] = {left, middle_y, quarter_x, lower_y, quarter_x, bottom, right, top};
             eduiDrawTriStrip(points, NULL, 4, item->colours[0], uimtls[0]);
         } else {
+            i32 middle_y = (top + bottom) >> 1;
+            i32 quarter_x = (left + ((left + right) >> 1)) >> 1;
+            i32 lower_y = (bottom + middle_y) >> 1;
             i32 points[10] = {left, middle_y, quarter_x, lower_y, right, top, quarter_x, bottom, left, middle_y};
             eduiDrawLineStrip(points, NULL, 5, item->colours[0], uimtls[0]);
         }
@@ -6044,7 +6047,7 @@ extern "C" {
             i32 right = static_cast<i32>(1.0f * (width << 4));
             eduiDrawGradRect((x << 4) + left, top, right - left, height << 3, colours, uimtls[ui_bgmtl]);
         }
-        i32 bottom = (y + height * 2 - 1) << 3;
+        i32 bottom = (y + height + height - 1) << 3;
         {
             i32 marker = static_cast<i32>((x + 1) + slider->normalized_value * width) << 4;
             eduiDrawLine(marker, top, marker, bottom, item->colours[item->highlighted], uimtls[0]);
@@ -6061,9 +6064,12 @@ extern "C" {
     }
     static __used__ i32 eduicbRenderExpander(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
         edui_expander_s *expander = static_cast<edui_expander_s *>(item);
-        const u32 button_colours[2] = {0xff000000, 0xffffffff};
-        item->y = y;
+        u32 button_colours[2] = {0xff000000, 0xffffffff};
+        const f32 item_x = static_cast<f32>(x);
+        const f32 item_y = static_cast<f32>(y);
+        const f32 item_width = static_cast<f32>(width);
         item->x = x;
+        item->y = y;
         const bool over_button = edui_cursor_x >= expander->button_x && edui_cursor_y >= expander->button_y * 0.5f &&
                                  edui_cursor_x < expander->button_x + expander->button_size &&
                                  edui_cursor_y < (expander->button_y + expander->button_size) * 0.5f;
@@ -6076,48 +6082,47 @@ extern "C" {
             eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         }
         const f32 row_height = NuQFntHeight(edui_font) * 1.25f * 0.125f;
-        const i32 height = static_cast<i32>(row_height);
         const f32 baseline = (NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font)) * 0.125f;
         for (eduimenu_s *submenu = menu; submenu; submenu = submenu->child) {
             if (submenu == eduiGetActiveMenu()) {
-                eduiDrawRect(x << 4, y << 3, width << 4, static_cast<i32>(row_height * 8.0f),
+                eduiDrawRect(static_cast<i32>(item_x * 16.0f), static_cast<i32>(item_y * 8.0f),
+                             static_cast<i32>(item_width * 16.0f), static_cast<i32>(row_height * 8.0f),
                              item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
                 break;
             }
         }
         const f32 button_size = row_height - 2.0f;
         for (i32 depth = 0; depth < expander->depth; ++depth) {
-            {
-                const i32 guide_x =
-                    static_cast<i32>((static_cast<f32>(x) + (static_cast<f32>(depth) + 0.5f) * button_size) * 16.0f);
-                eduiDrawLine(guide_x, y << 3, guide_x, static_cast<i32>((static_cast<f32>(y) + row_height) * 8.0f),
-                             0xff000000, uimtls[0]);
+            if (!edui_donotdraw) {
+                const i32 guide_x = static_cast<i32>((item_x + (static_cast<f32>(depth) + 0.5f) * button_size) * 16.0f);
+                NuRndrLine2di(guide_x, static_cast<i32>(item_y * 8.0f), guide_x,
+                              static_cast<i32>((item_y + row_height) * 8.0f), 0xff000000, uimtls[0]);
             }
         }
-        const f32 button_x = static_cast<f32>(x) + static_cast<f32>(expander->depth) * button_size + 1.0f;
-        const f32 button_y = static_cast<f32>(y) + 1.0f;
         expander->button_size = button_size;
-        expander->button_x = button_x;
-        expander->button_y = button_y;
-        if (expander->first_child && !edui_donotdraw) {
-            const u32 button_line_colour = button_colours[expander->unknown_flags & 1];
-            NuRndrLineRect2di(static_cast<i32>(button_x * 16.0f), static_cast<i32>(button_y * 8.0f),
-                              static_cast<i32>(button_size * 16.0f), static_cast<i32>(button_size * 8.0f), 0xff000000,
-                              uimtls[ui_outmtl]);
-            const f32 mid_x = button_x + button_size * 0.5f;
-            const f32 mid_y = button_y + button_size * 0.5f;
-            NuRndrLine2di(static_cast<i32>((button_x + 2.0f) * 16.0f), static_cast<i32>(mid_y * 8.0f),
-                          static_cast<i32>((button_x + button_size - 2.0f) * 16.0f), static_cast<i32>(mid_y * 8.0f),
-                          button_line_colour, uimtls[0]);
-            if (!expander->open)
-                NuRndrLine2di(static_cast<i32>(mid_x * 16.0f), static_cast<i32>((button_y + 2.0f) * 8.0f),
-                              static_cast<i32>(mid_x * 16.0f), static_cast<i32>((button_y + button_size - 2.0f) * 8.0f),
-                              button_line_colour, uimtls[0]);
+        expander->button_x = item_x + static_cast<f32>(expander->depth) * button_size + 1.0f;
+        expander->button_y = item_y + 1.0f;
+        if (expander->first_child) {
+            eduiDrawLineRect(static_cast<i32>(expander->button_x * 16.0f), static_cast<i32>(expander->button_y * 8.0f),
+                             static_cast<i32>(expander->button_size * 16.0f),
+                             static_cast<i32>(expander->button_size * 8.0f), 0xff000000, uimtls[ui_outmtl]);
+            const u8 button_flags = *hover_flags;
+            eduiDrawLine(static_cast<i32>((expander->button_x + 2.0f) * 16.0f),
+                         static_cast<i32>((expander->button_y + expander->button_size * 0.5f) * 8.0f),
+                         static_cast<i32>((expander->button_x + expander->button_size - 2.0f) * 16.0f),
+                         static_cast<i32>((expander->button_y + expander->button_size * 0.5f) * 8.0f),
+                         button_colours[(button_flags >> 1) & 1], uimtls[0]);
+            if ((button_flags & 1) == 0 && !edui_donotdraw)
+                NuRndrLine2di(static_cast<i32>((expander->button_x + expander->button_size * 0.5f) * 16.0f),
+                              static_cast<i32>((expander->button_y + 2.0f) * 8.0f),
+                              static_cast<i32>((expander->button_x + expander->button_size * 0.5f) * 16.0f),
+                              static_cast<i32>((expander->button_y + expander->button_size - 2.0f) * 8.0f),
+                              button_colours[(button_flags >> 1) & 1], uimtls[0]);
         }
-        const f32 text_x = button_x + button_size + 2.0f;
-        eduiFntPrintClipEx(edui_font, text_x, static_cast<f32>(y) + baseline, 16, text_x,
-                           static_cast<f32>(width) - button_size + 2.0f, item->text);
-        return height;
+        const f32 text_x = expander->button_x + expander->button_size + 2.0f;
+        eduiFntPrintClipEx(edui_font, text_x, item_y + baseline, 16, text_x,
+                           item_width - (expander->button_size - 2.0f), item->text);
+        return static_cast<i32>(row_height);
     }
     static __used__ i32 eduicbRenderFilePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
         (void)menu;
@@ -6484,11 +6489,9 @@ extern "C" {
                                   static_cast<i32>(property->button_size * 16.0f),
                                   static_cast<i32>(property->button_size * 8.0f), fill_colour, uimtls[0]);
             }
-            if (!edui_donotdraw)
-                NuRndrLineRect2di(static_cast<i32>(property->button_x * 16.0f),
-                                  static_cast<i32>(property->button_y * 8.0f),
-                                  static_cast<i32>(property->button_size * 16.0f),
-                                  static_cast<i32>(property->button_size * 8.0f), 0xff000000, uimtls[ui_outmtl]);
+            eduiDrawLineRect(static_cast<i32>(property->button_x * 16.0f), static_cast<i32>(property->button_y * 8.0f),
+                             static_cast<i32>(property->button_size * 16.0f),
+                             static_cast<i32>(property->button_size * 8.0f), 0xff000000, uimtls[ui_outmtl]);
             i32 points[6];
             if (property->button_type == 1) {
                 points[0] = static_cast<i32>((property->button_x + property->button_size * 0.1f) * 16.0f);
@@ -6595,7 +6598,7 @@ extern "C" {
         eduiFntPrintEx(edui_font, (x * 2 + width) << 3, (y << 3) + baseline, 64, format, slider->value);
         if (slider->normalized_value >= 0.0f && slider->normalized_value <= 1.0f) {
             i32 top = (y + height) << 3;
-            i32 bottom = (y + height * 2 - 1) << 3;
+            i32 bottom = (y + height + height - 1) << 3;
             f32 span = width - 2;
             i32 marker_x = static_cast<i32>(x + 1 + slider->normalized_value * span) << 4;
             eduiDrawLine(marker_x, top, marker_x, bottom, item->colours[item->highlighted], uimtls[0]);
@@ -6620,7 +6623,7 @@ extern "C" {
         NuStrCat(format, slider->format);
         eduiFntPrintEx(edui_font, (x * 2 + width) << 3, (y << 3) + baseline, 64, format,
                        static_cast<i32>(slider->value));
-        i32 bottom = (y + height * 2 - 1) << 3;
+        i32 bottom = (y + height + height - 1) << 3;
         i32 top = (y + height) << 3;
         f32 span = width;
         i32 marker_x = static_cast<i32>(x + 1 + slider->normalized_value * span) << 4;

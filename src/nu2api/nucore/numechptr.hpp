@@ -48,11 +48,9 @@ template <class T, i32 Tag> class NuMechPtr {
     }
 
     NuMechPtr &operator=(const NuMechPtr &other) {
-        if (this != &other) {
-            T *value = other.object;
-            Unlink();
-            Attach(value);
-        }
+        T *value = other.object;
+        Unlink();
+        Attach(value);
         return *this;
     }
     void Reset() {

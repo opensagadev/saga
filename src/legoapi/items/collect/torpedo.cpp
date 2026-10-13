@@ -601,6 +601,26 @@ void TorpedoHitTarget(BOLT_s *bolt) {
 void DrawTorpedoTargetSprite(void *, unsigned char, float) {
 }
 
+// DrawTorpedos expands the Y rotation with the stored 32-bit angle; the trig
+// table index is taken from the untruncated value.
+static inline void Torpedo_RotateY(NUMTX *m, i32 a) {
+    f32 cosx = NU_COS_LUT(a);
+    f32 sinx = NU_SIN_LUT(a);
+    f32 m00 = m->m00;
+    f32 m10 = m->m10;
+    f32 m20 = m->m20;
+    f32 m30 = m->m30;
+
+    m->m00 = m00 * cosx + m->m02 * sinx;
+    m->m02 = m->m02 * cosx - m00 * sinx;
+    m->m10 = m10 * cosx + m->m12 * sinx;
+    m->m12 = m->m12 * cosx - m10 * sinx;
+    m->m20 = m20 * cosx + m->m22 * sinx;
+    m->m22 = m->m22 * cosx - m20 * sinx;
+    m->m30 = m30 * cosx + m->m32 * sinx;
+    m->m32 = m->m32 * cosx - m30 * sinx;
+}
+
 void DrawTorpedos(GameObject_s *object) {
     TORPEDOPACKET *packet = object->torpedo;
     if (packet == NULL)
@@ -612,17 +632,17 @@ void DrawTorpedos(GameObject_s *object) {
         return;
 
     for (i32 index = 0; index < packet->count; ++index) {
-        i32 x_rotation = -NUANG_90DEG - static_cast<u16>(packet->pickup_flags[index]);
+        u16 x_rotation = static_cast<u16>(-NUANG_90DEG - packet->pickup_flags[index]);
         if (packet->field_08 < 0.8f && index == packet->count - 1) {
-            x_rotation = static_cast<i32>(RotDiff(0, static_cast<u16>(x_rotation)) *
-                                          NU_SIN_LUT(packet->field_08 / 0.8f * 16384.0f));
+            x_rotation = static_cast<u16>(
+                static_cast<i32>(RotDiff(0, x_rotation) * NU_SIN_LUT(packet->field_08 / 0.8f * 16384.0f)));
         }
 
         NUMTX_ALIGNED16 matrix;
         NuMtxSetIdentity(&matrix);
-        NuMtxPreRotateX(&matrix, static_cast<u16>(x_rotation));
+        NuMtxPreRotateX(&matrix, x_rotation);
         packet = object->torpedo;
-        NuMtxRotateYInline(&matrix, static_cast<u16>(packet->pickup_data[index]));
+        Torpedo_RotateY(&matrix, static_cast<i32>(packet->pickup_data[index]));
         NuMtxTranslate(&matrix, &packet->pickup_positions[index]);
 
         packet = object->torpedo;

@@ -97,6 +97,19 @@ void TTNetwork::Display(ThingRenderData *) {
     stats->Draw(field_2154, field_2158, field_215c, field_2160, static_cast<NetSmallStats::eInfo>(0));
 }
 
+inline TTNetworkLogFile::~TTNetworkLogFile() {
+    if (mode == 2 && size > 0) {
+        NUFILE file = NuFileOpen(path, static_cast<NUFILEMODE>(open_mode));
+        if (file != 0) {
+            NuFileSeek(file, 0, NUFILE_SEEK_END);
+            NuFileWrite(file, data, size);
+            NuFileClose(file);
+            size = 0;
+            open_mode = NUFILE_APPEND;
+        }
+    }
+}
+
 TTNetwork::~TTNetwork() {
 }
 
@@ -152,7 +165,7 @@ void TTNetwork::ReliableSend(NetMessage message, unsigned char channel, NetPeer 
     peer.vtable->reliable_send(&peer, message, name, value);
 }
 
-TTNetwork::TTNetwork() : field_20(0), field_24(0), field_2140(0), my_address(), my_host_address() {
+TTNetwork::TTNetwork() : field_2140(0), my_address(), my_host_address() {
     field_2158 = -0.3f;
     field_215c = 0.5f;
     has_my_host_address = 0;

@@ -7484,13 +7484,12 @@ void ManageGameObjects() {
             if (!(object->timer_1014 >= object->field_0x1018))
                 continue;
             object->timer_1014 = object->field_0x1018;
-            u64 contact_mask = ~object->apiobj.collision_identity_mask;
-            u64 object_mask = ~(static_cast<u64>(1) << object->apiobj.field_0x289);
-            for (i32 j = 0; j < HIGHGAMEOBJECT; ++j) {
-                Obj[j].apiobj.collision_contact_mask &= contact_mask;
-                Obj[j].apiobj.ai_awareness_mask &= object_mask;
-                Obj[j].ai_seen_mask &= object_mask;
-                Obj[j].ai_opponent_exclusion_mask &= object_mask;
+            GameObject_s *other = Obj;
+            for (i32 j = 0; j < HIGHGAMEOBJECT; ++j, ++other) {
+                other->apiobj.collision_contact_mask &= ~object->apiobj.collision_identity_mask;
+                other->apiobj.ai_awareness_mask &= ~(1ULL << object->apiobj.field_0x289);
+                other->ai_seen_mask &= ~(1ULL << object->apiobj.field_0x289);
+                other->ai_opponent_exclusion_mask &= ~(1ULL << object->apiobj.field_0x289);
             }
             if ((object->apiobj.field_0x1f4 & 0x4000) != 0) {
                 if ((object->apiobj.field_0x1f4 & 0x400) == 0) {

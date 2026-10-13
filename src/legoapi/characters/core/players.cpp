@@ -1272,8 +1272,8 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
                         SOCK *sock = &WORLD->sock_sys->sock[obj->sock_position.location.sock];
                         if ((sock->flags & SOCK_FLAG_MISSING_C_OR_D) == 0) {
                             obj->apiobj.position = obj->sock_position.midpoint;
-                            if (Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 0x80) != 0 && Player[1] != NULL &&
-                                (Player[1]->apiobj.field_0x1f8 & 0x80) != 0) {
+                            if (Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[1] != NULL &&
+                                Player[1]->apiobj.player_controlled) {
                                 NUVEC offset;
                                 f32 side = obj == Player[0] ? 1.0f : -1.0f;
                                 NuVecNorm(&offset, &sock->segments[obj->sock_position.location.segment].planes[4]);

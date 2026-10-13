@@ -92,24 +92,25 @@ void SuperCarry_DrawObject(GameObject_s *object) {
     if (static_cast<i8>(object->field_0xe22) >= 0) {
         if (LEGOCONTEXT_SUPERCARRY == -1 || object->character_context != LEGOCONTEXT_SUPERCARRY)
             return;
-        switch (object->field_0x7a3) {
-            case 0:
-                if ((object->context_flags & 0x40) == 0)
-                    return;
-                break;
-            case 1:
-            case 4:
-            case 5:
-                if ((object->context_flags & 0x40) != 0)
-                    return;
-                break;
-            case 2:
-            case 3:
-            case 6:
-            case 7:
-                break;
-            default:
+        const u8 state = object->field_0x7a3;
+        if (state == 0) {
+            if ((object->context_flags & 0x40) == 0)
                 return;
+        } else if (state == 1) {
+            if ((object->context_flags & 0x40) != 0)
+                return;
+        } else if (state == 2) {
+        } else if (state == 3) {
+        } else if (state == 6) {
+        } else if (state == 7) {
+        } else if (state == 4) {
+            if ((object->context_flags & 0x40) != 0)
+                return;
+        } else if (state == 5) {
+            if ((object->context_flags & 0x40) != 0)
+                return;
+        } else {
+            return;
         }
     }
     NUMTX matrix;

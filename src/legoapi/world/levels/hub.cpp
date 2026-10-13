@@ -3597,20 +3597,30 @@ static void Hub_DrawSelectModeMenu(i32 selected, f32 alpha);
 void MenuDrawSelectMode(MENU_s *) {
     if (MenuStopDraw)
         return;
-    if (selectmodemode >= 1 && selectmodemode <= 3) {
-        if (FadeSys.fade > 0.0f)
-            return;
-    } else if (selectmodemode == 4) {
-        if (pFadeInfo->fade > 0.0f)
-            return;
+    switch (selectmodemode) {
+        case 1:
+        case 2:
+        case 3:
+            if (FadeSys.fade > 0.0f)
+                return;
+            break;
+        case 4:
+            if (pFadeInfo->fade > 0.0f)
+                return;
+            break;
     }
     f32 alpha = 1.0f;
-    if (selectmodemode >= 1 && selectmodemode <= 4) {
-        if (!(selectmodetime < 0.5f))
-            return;
-        alpha = 1.0f - NU_SIN_LUT(static_cast<i32>((selectmodetime / selectmodeduration) * 16384.0f));
-        if (!(alpha > 0.0f))
-            return;
+    switch (selectmodemode) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            if (!(selectmodetime < 0.5f))
+                return;
+            alpha = 1.0f - NU_SIN_LUT(static_cast<i32>((selectmodetime / selectmodeduration) * 16384.0f));
+            if (!(alpha > 0.0f))
+                return;
+            break;
     }
     AREADATA *area = &ADataList[last_hub_area];
     if (area->flags & 0x100)
@@ -3628,7 +3638,9 @@ void MenuDrawSelectMode(MENU_s *) {
         const f32 menu_alpha = 1.0f - NU_SIN_LUT(static_cast<i32>((1.0f - MainRenderTime) * 16384.0f + 16384.0f));
         Hub_DrawSelectModeMenu(0, menu_alpha * alpha);
     }
-    if (MainRenderTime <= 0.0f && selectmodemode == 0 && alpha == 1.0f)
+    if (MainRenderTime > 0.0f)
+        return;
+    if (selectmodemode == 0 && alpha == 1.0f)
         DrawPlayerIconPrompts(MenuPacket.active_player[0], tSELECT, 1.0f, -1, tBACK, -1, tSELECTING,
                               MenuPacket.active_player[1], tSELECT, 1.0f, -1, tBACK, -1, tSELECTING);
 }

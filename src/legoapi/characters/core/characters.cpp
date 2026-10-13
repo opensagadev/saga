@@ -1508,7 +1508,7 @@ static i32 playedappearsfx;
 static i32 playedmovesfx;
 
 void CollectCharcters_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
-    COLLECTION_s *collection = (packet->field_0xb0 & 0x80) != 0 ? &VehicleCollection : &CharacterCollection;
+    COLLECTION_s *collection = packet->vehicle_area ? &VehicleCollection : &CharacterCollection;
     if (active == 0)
         return;
     if (stage->field_0x14 == 0) {
@@ -1820,7 +1820,7 @@ i32 SetProtocolDroidFallAnim(GameObject_s *object) {
 }
 
 void CollectCharactersOff_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
-    COLLECTION_s *collection = (packet->field_0xb0 & 0x80) != 0 ? &VehicleCollection : &CharacterCollection;
+    COLLECTION_s *collection = packet->vehicle_area ? &VehicleCollection : &CharacterCollection;
     if (active == 0)
         return;
     f32 alpha = 1.0f;

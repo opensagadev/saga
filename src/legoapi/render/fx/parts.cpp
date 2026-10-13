@@ -594,8 +594,9 @@ static __used__ void PowerUp_EndMsg(GAMEMESSAGE_s *message) {
     GameAudio_PlaySfx(0x26, NULL, 0, 0);
     if (FindGameMsgsWithID(7, 0, message->player_index, message)) {
         NUVEC position;
-        position.x = message->player_index == 0 ? -ICONX : ICONX;
-        position.y = PowerUp_GetPanelY(message->player_index) + STATSPOSY;
+        const i32 player = message->player_index;
+        position.x = player == 0 ? -ICONX : ICONX;
+        position.y = PowerUp_GetPanelY(player) + STATSPOSY;
         position.z = 1.0f;
         ADDGAMEMSG_ALIGNED16 add = AddGameMsg_Default;
         add.icon = 0x35;

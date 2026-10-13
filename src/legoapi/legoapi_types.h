@@ -5944,11 +5944,25 @@ struct TELEPORT_s {
     MechObjectInterface *GetMechObjectInterface();
 };
 DECOMP_ASSERT(sizeof(TELEPORT_s) == 0x100, "TELEPORT_s size");
+// Buffered network log owned by TTNetwork at 0x20. Its inline destructor
+// appends any pending bytes to the log file when TTNetwork is destroyed.
+struct TTNetworkLogFile {
+    i32 mode;           // 0x000
+    char path[0x100];   // 0x004
+    i32 open_mode;      // 0x104
+    u8 reserved_108[8]; // 0x108
+    i32 size;           // 0x110
+    u8 data[0x2000];    // 0x114
+
+    TTNetworkLogFile() : mode(0) {
+        path[0] = '\0';
+    }
+    inline ~TTNetworkLogFile();
+};
+
 struct TTNetwork : NetTransporter, BaseThing {
   private:
-    i32 field_20;
-    u8 field_24;
-    u8 reserved_25[0x210f];
+    TTNetworkLogFile log_file;
     i32 field_2134;
     i32 field_2138;
     i32 field_213c;
