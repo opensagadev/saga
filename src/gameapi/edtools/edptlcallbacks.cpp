@@ -817,10 +817,40 @@ static void cbPtlCopySize(eduimenu_s *, eduiitem_s *item, u32) {
     debinftype *effect = debtab[debkeydata[instance].effect_index];
     edui_gradient_pick_s *gradient;
     if (item->data == 1) {
-        memcpy(effect->height_keys, effect->width_keys, sizeof(effect->height_keys));
+        effect->height_keys[0].time = effect->width_keys[0].time;
+        effect->height_keys[0].value = effect->width_keys[0].value;
+        effect->height_keys[1].time = effect->width_keys[1].time;
+        effect->height_keys[1].value = effect->width_keys[1].value;
+        effect->height_keys[2].time = effect->width_keys[2].time;
+        effect->height_keys[2].value = effect->width_keys[2].value;
+        effect->height_keys[3].time = effect->width_keys[3].time;
+        effect->height_keys[3].value = effect->width_keys[3].value;
+        effect->height_keys[4].time = effect->width_keys[4].time;
+        effect->height_keys[4].value = effect->width_keys[4].value;
+        effect->height_keys[5].time = effect->width_keys[5].time;
+        effect->height_keys[5].value = effect->width_keys[5].value;
+        effect->height_keys[6].time = effect->width_keys[6].time;
+        effect->height_keys[6].value = effect->width_keys[6].value;
+        effect->height_keys[7].time = effect->width_keys[7].time;
+        effect->height_keys[7].value = effect->width_keys[7].value;
         gradient = static_cast<edui_gradient_pick_s *>(grad_size_h_item);
     } else {
-        memcpy(effect->width_keys, effect->height_keys, sizeof(effect->width_keys));
+        effect->width_keys[0].time = effect->height_keys[0].time;
+        effect->width_keys[0].value = effect->height_keys[0].value;
+        effect->width_keys[1].time = effect->height_keys[1].time;
+        effect->width_keys[1].value = effect->height_keys[1].value;
+        effect->width_keys[2].time = effect->height_keys[2].time;
+        effect->width_keys[2].value = effect->height_keys[2].value;
+        effect->width_keys[3].time = effect->height_keys[3].time;
+        effect->width_keys[3].value = effect->height_keys[3].value;
+        effect->width_keys[4].time = effect->height_keys[4].time;
+        effect->width_keys[4].value = effect->height_keys[4].value;
+        effect->width_keys[5].time = effect->height_keys[5].time;
+        effect->width_keys[5].value = effect->height_keys[5].value;
+        effect->width_keys[6].time = effect->height_keys[6].time;
+        effect->width_keys[6].value = effect->height_keys[6].value;
+        effect->width_keys[7].time = effect->height_keys[7].time;
+        effect->width_keys[7].value = effect->height_keys[7].value;
         gradient = static_cast<edui_gradient_pick_s *>(grad_size_w_item);
     }
     while (gradient->first_stage)
