@@ -1365,7 +1365,7 @@ void RedBrick_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float el
     }
 }
 
-f32 nextsoundpercent;
+static f32 nextsoundpercent = 5.0f;
 void TrueHero_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
     static f32 spdelay;
     switch (stage->field_0x14) {
@@ -1378,8 +1378,8 @@ void TrueHero_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float el
             stage->field_0x18 += elapsed;
             if (stage->field_0x18 >= stage->field_0x1c) {
                 stage->field_0x14 = 2;
-                stage->field_0x1c = 3.0f;
                 stage->field_0x18 = 0.0f;
+                stage->field_0x1c = 3.0f;
                 nextsoundpercent = 5.0f;
                 packet->true_hero_percent = 0.0f;
             }
@@ -1388,8 +1388,9 @@ void TrueHero_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float el
             SetDrawGoldBrick(packet, packet->current_gold_brick);
             f32 percent = 100.0f;
             if ((packet->field_0xb0 & 4) == 0) {
-                const f32 ratio = packet->collected_score * 100.0f / packet->true_hero_target;
-                percent = ratio <= 99.0f ? ratio : 99.0f;
+                percent = packet->collected_score * 100.0f / packet->true_hero_target;
+                if (percent > 99.0f)
+                    percent = 99.0f;
             }
             stage->field_0x18 += elapsed;
             packet->true_hero_percent += (100.0f / stage->field_0x1c) * elapsed;
