@@ -308,32 +308,23 @@ static i32 Technos_Load(void *world_ptr, void *) {
         EdFileReadNuVec(&world->technos[index].position);
         world->technos[index].y_rotation = static_cast<i16>(EdFileReadShort());
 
-        if (version <= 1) {
-            world->technos[index].scale = 1.0f;
-            world->technos[index].output = 0;
-            continue;
+        if (version > 1) {
+            world->technos[index].target_mode = static_cast<u8>(EdFileReadChar());
+            const i32 target_name_length = EdFileReadInt();
+            EdFileRead(world->technos[index].target_object_name, target_name_length);
+            NuStrCpy(world->technos[index].target_name, world->technos[index].target_object_name);
+            if (version > 2) {
+                world->technos[index].enabled = static_cast<u8>(EdFileReadChar());
+            } else {
+                world->technos[index].enabled = 1;
+            }
         }
-
-        world->technos[index].target_mode = static_cast<u8>(EdFileReadChar());
-        const i32 target_name_length = EdFileReadInt();
-        EdFileRead(world->technos[index].target_object_name, target_name_length);
-        NuStrCpy(world->technos[index].target_name, world->technos[index].target_object_name);
-        if (version == 2) {
-            world->technos[index].enabled = 1;
+        if (version > 3) {
+            world->technos[index].scale = EdFileReadFloat();
+        } else {
             world->technos[index].scale = 1.0f;
-            world->technos[index].output = 0;
-            continue;
         }
-
-        world->technos[index].enabled = static_cast<u8>(EdFileReadChar());
-        if (version == 3) {
-            world->technos[index].scale = 1.0f;
-            world->technos[index].output = 0;
-            continue;
-        }
-
-        world->technos[index].scale = EdFileReadFloat();
-        if (version != 4) {
+        if (version > 4) {
             world->technos[index].output = EdFileReadInt();
         } else {
             world->technos[index].output = 0;

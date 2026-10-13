@@ -166,12 +166,11 @@ static i32 Tubes_Load(void *world_ptr, void *) {
         tube->radius = EdFileReadFloat();
 
         if (version > 1) {
-            const i32 directional = EdFileReadChar() != 0;
+            tube->directional = EdFileReadChar() != 0;
             tube->field_0x24 = 1.25f;
-            tube->flags = static_cast<u8>((tube->flags & ~TUBE_FLAG_DIRECTIONAL) | (directional << 2));
         } else {
             tube->field_0x24 = 1.25f;
-            tube->flags &= static_cast<u8>(~TUBE_FLAG_DIRECTIONAL);
+            tube->directional = 0;
         }
     }
 

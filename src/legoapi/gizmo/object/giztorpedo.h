@@ -22,7 +22,8 @@ typedef struct GIZTORPMACHINE_s {
         struct {
             u8 active : 1;
             u8 visible : 1;
-            u8 reserved_flags : 6;
+            u8 alternate_model : 1; // GIZTORPMACHINE_FLAG_ALTERNATE_MODEL
+            u8 reserved_flags : 5;
         };
     };
 } GIZTORPMACHINE;
