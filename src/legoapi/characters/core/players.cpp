@@ -268,12 +268,12 @@ void Players_InitPositions(WORLDINFO *world) {
     if (A != NULL) {
         NUVEC tmp;
         i32 n = ninit;
-        auto A_count = A->count;
         for (i32 i = 0; i < 8; i++) {
-            PlayerStart[i].pos = (NUVEC *)&A->positions[6 * n];
-            NuVecSub(&tmp, (NUVEC *)&A->positions[3 * (2 * n + 1)], (NUVEC *)&A->positions[6 * n]);
+            const i32 m = n * 2;
+            PlayerStart[i].pos = (NUVEC *)&A->positions[m * 3];
+            NuVecSub(&tmp, (NUVEC *)&A->positions[m * 3 + 3], PlayerStart[i].pos);
             PlayerStart[i].angle = NuAtan2D(tmp.x, tmp.z);
-            if (2 * n + 4 > A_count)
+            if (n * 2 + 4 > A->count)
                 n = ninit;
             else
                 n = n + 1;
@@ -1229,14 +1229,10 @@ namespace {
     void SyncPlayerSpawnPosition(GameObject_s *obj) {
         const NUVEC &position = obj->apiobj.position;
 
-        obj->apiobj.pos_x = position.x;
-        obj->apiobj.pos_y = position.y;
-        obj->apiobj.pos_z = position.z;
-
         obj->apiobj.initial_position = position;
-        obj->apiobj.start_position = position;
-
+        obj->apiobj.collision_position = position;
         plr_lastpos = position;
+        obj->apiobj.start_position = position;
     }
 
 } // namespace
@@ -1263,8 +1259,8 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
         ResetPlayerMoves(obj);
         SyncPlayerSpawnPosition(obj);
 
-        obj->apiobj.velocity = v000;
         obj->reset_velocity = v000;
+        obj->apiobj.velocity = v000;
 
         GetTopBot(obj);
         GameObjectDimensions(obj);
@@ -1372,12 +1368,8 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
         }
 
         ResetPlayerAI(obj);
-        obj->apiobj.previous_position[0] = obj->apiobj.position.x;
-        obj->apiobj.previous_position[1] = obj->apiobj.position.y;
-        obj->apiobj.previous_position[2] = obj->apiobj.position.z;
-        obj->field_0x10c8 = obj->apiobj.position.x;
-        obj->field_0x10cc = obj->apiobj.position.y;
-        obj->field_0x10d0 = obj->apiobj.position.z;
+        obj->apiobj.last_safe_position = obj->apiobj.position;
+        obj->saved_position = obj->apiobj.position;
         if ((obj->apiobj.character_data->model_flags & 0x2000) != 0) {
             obj->in_narrow_socket = ObjInNarrowSock(obj, WORLD->sock_sys, WORLD->level_idx);
             f32 speed = GetVehicleSpeedMul(obj, 0.0f);
@@ -1944,14 +1936,8 @@ bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, fl
         }                                                                                                              \
     } while (0)
 
-    if (!require_character_flags) {
-        for (i32 i = 0; i < 8; i++) {
-            CONSIDER_PLAYER_DISTANCE(i, false);
-        }
-    } else {
-        for (i32 i = 0; i < 8; i++) {
-            CONSIDER_PLAYER_DISTANCE(i, true);
-        }
+    for (i32 i = 0; i < 8; i++) {
+        CONSIDER_PLAYER_DISTANCE(i, require_character_flags);
     }
 
 #undef CONSIDER_PLAYER_DISTANCE
@@ -2012,14 +1998,8 @@ bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player
         }                                                                                                              \
     } while (0)
 
-    if (!require_character_flags) {
-        for (i32 i = 0; i < 8; i++) {
-            CONSIDER_PLAYER_DISTANCE(i, false);
-        }
-    } else {
-        for (i32 i = 0; i < 8; i++) {
-            CONSIDER_PLAYER_DISTANCE(i, true);
-        }
+    for (i32 i = 0; i < 8; i++) {
+        CONSIDER_PLAYER_DISTANCE(i, require_character_flags);
     }
 
 #undef CONSIDER_PLAYER_DISTANCE
