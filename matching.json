@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 79.745224,
+    "fuzzy_match_percent": 79.78949,
     "total_code": "4722419",
-    "matched_code": "626164",
-    "matched_code_percent": 13.259392,
+    "matched_code": "627711",
+    "matched_code_percent": 13.2921505,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6856,
-    "matched_functions_percent": 50.939896,
+    "matched_functions": 6858,
+    "matched_functions_percent": 50.954754,
     "total_units": 1
   },
   "text": {
@@ -15804,7 +15804,7 @@
           "address": 4471088,
           "offset": 3581120,
           "size": 1051,
-          "match_percent": 44.21933
+          "match_percent": 47.215614
         },
         {
           "name": "_ZN35MechTouchTaskPlannedDoubleClickGoTo17BackgroundProcessEv",
@@ -17074,7 +17074,7 @@
           "address": 4525808,
           "offset": 3635840,
           "size": 3444,
-          "match_percent": 61.115246
+          "match_percent": 63.14886
         },
         {
           "name": "_ZThn108_N36MechInputTouchGestureBasedController7OnClickER12GameObject_sR11TouchHolder",
@@ -17217,7 +17217,7 @@
           "address": 5251328,
           "offset": 4361360,
           "size": 3216,
-          "match_percent": 69.17036
+          "match_percent": 78.44122
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystem7ProcessER12GameObject_sRK16NuInputTouchData",
@@ -37035,7 +37035,7 @@
           "address": 928032,
           "offset": 38064,
           "size": 283,
-          "match_percent": 93.565216
+          "match_percent": 99.434784
         },
         {
           "name": "_ZN14NetInputStream10BeginBlockEPKc",
@@ -40193,14 +40193,6 @@
           "match_percent": 99.835976
         },
         {
-          "name": "_Z14StunGameObjectP12GameObject_sS0_fi",
-          "demangled_name": "StunGameObject(GameObject_s*, GameObject_s*, float, int)",
-          "address": 1263680,
-          "offset": 373712,
-          "size": 1093,
-          "match_percent": 49.42126
-        },
-        {
           "name": "_Z20ForceNextShootTargetR19MechObjectInterface",
           "demangled_name": "ForceNextShootTarget(MechObjectInterface&)",
           "address": 1367200,
@@ -40302,38 +40294,6 @@
           "offset": 30400,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_ZL15Collide2ObjectsP11APIOBJECT_sS0_",
-          "demangled_name": "Collide2Objects(APIOBJECT_s*, APIOBJECT_s*)",
-          "address": 1248096,
-          "offset": 358128,
-          "size": 998,
-          "match_percent": 59.186047
-        },
-        {
-          "name": "_Z18CollideGameObjectsP11WORLDINFO_s",
-          "demangled_name": "CollideGameObjects(WORLDINFO_s*)",
-          "address": 1254000,
-          "offset": 364032,
-          "size": 3522,
-          "match_percent": 80.803185
-        },
-        {
-          "name": "_Z12ObjHitShieldP12GameObject_sS0_iP6BOLT_s",
-          "demangled_name": "ObjHitShield(GameObject_s*, GameObject_s*, int, BOLT_s*)",
-          "address": 1287984,
-          "offset": 398016,
-          "size": 678,
-          "match_percent": 93.48921
-        },
-        {
-          "name": "_Z9ObjHitObjP12GameObject_sS0_itii",
-          "demangled_name": "ObjHitObj(GameObject_s*, GameObject_s*, int, unsigned short, int, int)",
-          "address": 1288672,
-          "offset": 398704,
-          "size": 6456,
-          "match_percent": 41.99199
         },
         {
           "name": "_Z8CheckColP7nutex_siiii",
@@ -42111,38 +42071,6 @@
           "match_percent": 56.52778
         },
         {
-          "name": "_Z20CreatureCrate_MoveFnP6PART_sf",
-          "demangled_name": "CreatureCrate_MoveFn(PART_s*, float)",
-          "address": 1243584,
-          "offset": 353616,
-          "size": 61,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z20CreatureCrate_DrawFnP6PART_s",
-          "demangled_name": "CreatureCrate_DrawFn(PART_s*)",
-          "address": 1243648,
-          "offset": 353680,
-          "size": 36,
-          "match_percent": 99.875
-        },
-        {
-          "name": "_Z18CreatureCrate_StopP6PART_s",
-          "demangled_name": "CreatureCrate_Stop(PART_s*)",
-          "address": 1249104,
-          "offset": 359136,
-          "size": 285,
-          "match_percent": 99.81967
-        },
-        {
-          "name": "_Z22SpawnCreatureFromCrateP12GameObject_sff",
-          "demangled_name": "SpawnCreatureFromCrate(GameObject_s*, float, float)",
-          "address": 1250112,
-          "offset": 360144,
-          "size": 506,
-          "match_percent": 89.96591
-        },
-        {
           "name": "_Z25AlertSurroundingCreaturesP12GameObject_sP7nuvec_s",
           "demangled_name": "AlertSurroundingCreatures(GameObject_s*, nuvec_s*)",
           "address": 1543488,
@@ -43892,14 +43820,6 @@
           "match_percent": 79.33125
         },
         {
-          "name": "_Z23RegisterGizmoTypes_IndyP9variptr_uS0_",
-          "demangled_name": "RegisterGizmoTypes_Indy(variptr_u*, variptr_u*)",
-          "address": 1855936,
-          "offset": 965968,
-          "size": 103,
-          "match_percent": 99.95652
-        },
-        {
           "name": "_Z25CollectCharactersOff_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
           "demangled_name": "CollectCharactersOff_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
           "address": 2019888,
@@ -44104,15 +44024,7 @@
           "address": 1031168,
           "offset": 141200,
           "size": 1761,
-          "match_percent": 98.23009
-        },
-        {
-          "name": "_ZL10CC_variantP8nufpar_s",
-          "demangled_name": "CC_variant(nufpar_s*)",
-          "address": 1536752,
-          "offset": 646784,
-          "size": 1208,
-          "match_percent": 99.58029
+          "match_percent": 97.84661
         },
         {
           "name": "_Z13LayerFromNameP19GAMECHARACTERDATA_sPc",
@@ -44160,7 +44072,7 @@
           "address": 4594640,
           "offset": 3704672,
           "size": 428,
-          "match_percent": 70.64616
+          "match_percent": 95.84615
         },
         {
           "name": "_Z17CharVariants_InitP11CHARVARIANTi",
@@ -44632,7 +44544,7 @@
           "address": 4599856,
           "offset": 3709888,
           "size": 277,
-          "match_percent": 99.69231
+          "match_percent": 100.0
         },
         {
           "name": "_ZL14CC_bsa_defaultP8nufpar_s",
@@ -45816,7 +45728,7 @@
           "address": 4626976,
           "offset": 3737008,
           "size": 1736,
-          "match_percent": 64.66585
+          "match_percent": 64.690414
         },
         {
           "name": "_Z21CanWearHatsInFreePlayi",
@@ -45975,7 +45887,7 @@
           "address": 4857024,
           "offset": 3967056,
           "size": 3117,
-          "match_percent": 47.527153
+          "match_percent": 51.095364
         },
         {
           "name": "_Z26Customiser_FindPieceByNameP10CUSTOMISERPcPiS2_",
@@ -45983,7 +45895,7 @@
           "address": 4860144,
           "offset": 3970176,
           "size": 200,
-          "match_percent": 100.0
+          "match_percent": 99.565216
         },
         {
           "name": "_Z18Customiser_GetIconP10CUSTOMISERP15CUSTOMISESAVE_si",
@@ -46007,22 +45919,6 @@
           "offset": 34800,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_Z22FindPlayerAndSetWeaponii",
-          "demangled_name": "FindPlayerAndSetWeapon(int, int)",
-          "address": 1265488,
-          "offset": 375520,
-          "size": 143,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z10LoseHelmetP12GameObject_sii",
-          "demangled_name": "LoseHelmet(GameObject_s*, int, int)",
-          "address": 1281840,
-          "offset": 391872,
-          "size": 409,
-          "match_percent": 99.80769
         },
         {
           "name": "_Z13ReleaseHeartsv",
@@ -46086,7 +45982,7 @@
           "address": 5190464,
           "offset": 4300496,
           "size": 315,
-          "match_percent": 82.64474
+          "match_percent": 82.8421
         },
         {
           "name": "_Z12SlowWeaponInP12GameObject_s",
@@ -46110,7 +46006,7 @@
           "address": 5192240,
           "offset": 4302272,
           "size": 747,
-          "match_percent": 81.39766
+          "match_percent": 81.48538
         },
         {
           "name": "_Z12KeepWeaponInP12GameObject_s",
@@ -46286,38 +46182,6 @@
           "offset": 201360,
           "size": 92,
           "match_percent": 99.96
-        },
-        {
-          "name": "_Z13PlayerTakeHitP12GameObject_sS0_",
-          "demangled_name": "PlayerTakeHit(GameObject_s*, GameObject_s*)",
-          "address": 1263152,
-          "offset": 373184,
-          "size": 526,
-          "match_percent": 88.76415
-        },
-        {
-          "name": "_Z16DeactivatePlayerP12GameObject_sfS0_",
-          "demangled_name": "DeactivatePlayer(GameObject_s*, float, GameObject_s*)",
-          "address": 1264784,
-          "offset": 374816,
-          "size": 546,
-          "match_percent": 99.9469
-        },
-        {
-          "name": "_Z14ActivatePlayerP12GameObject_s",
-          "demangled_name": "ActivatePlayer(GameObject_s*)",
-          "address": 1265344,
-          "offset": 375376,
-          "size": 142,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z10KillPlayerP12GameObject_siiP7nuvec_s",
-          "demangled_name": "KillPlayer(GameObject_s*, int, int, nuvec_s*)",
-          "address": 1287776,
-          "offset": 397808,
-          "size": 200,
-          "match_percent": 94.69811
         },
         {
           "name": "_Z12GetHoverPosYP12GameObject_s",
@@ -48102,22 +47966,6 @@
           "match_percent": 34.039246
         },
         {
-          "name": "_ZL13AtatPart_StopP6PART_s",
-          "demangled_name": "AtatPart_Stop(PART_s*)",
-          "address": 1243840,
-          "offset": 353872,
-          "size": 71,
-          "match_percent": 99.72222
-        },
-        {
-          "name": "_ZL15AtatPart_UpdateP6PART_s",
-          "demangled_name": "AtatPart_Update(PART_s*)",
-          "address": 1243920,
-          "offset": 353952,
-          "size": 1229,
-          "match_percent": 99.93916
-        },
-        {
           "name": "_ZL10ShieldCodeP12GameObject_s",
           "demangled_name": "ShieldCode(GameObject_s*)",
           "address": 1347920,
@@ -48155,7 +48003,7 @@
           "address": 1364864,
           "offset": 474896,
           "size": 2334,
-          "match_percent": 83.35927
+          "match_percent": 83.17849
         },
         {
           "name": "_Z23VehicleTurnOrLoopOffsetP12GameObject_s",
@@ -49287,6 +49135,29 @@
       ]
     },
     {
+      "name": "legoapi/core/config/config.cpp.o",
+      "source": "src/legoapi/core/config/config.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/config.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_config.cpp",
+          "demangled_name": "_GLOBAL__sub_I_config.cpp",
+          "address": 895872,
+          "offset": 5904,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_ZL10CC_variantP8nufpar_s",
+          "demangled_name": "CC_variant(nufpar_s*)",
+          "address": 1536752,
+          "offset": 646784,
+          "size": 1208,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
       "name": "legoapi/core/config/saveload.cpp.o",
       "source": "src/legoapi/core/config/saveload.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/saveload.o",
@@ -49638,15 +49509,15 @@
       ]
     },
     {
-      "name": "legoapi/core/input/gamepads.cpp.o",
-      "source": "src/legoapi/core/input/gamepads.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gamepads.o",
+      "name": "legoapi/core/input/Controllers.cpp.o",
+      "source": "src/legoapi/core/input/Controllers.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/Controllers.o",
       "functions": [
         {
-          "name": "_GLOBAL__sub_I_gamepads.cpp",
-          "demangled_name": "_GLOBAL__sub_I_gamepads.cpp",
-          "address": 918960,
-          "offset": 28992,
+          "name": "_GLOBAL__sub_I_Controllers.cpp",
+          "demangled_name": "_GLOBAL__sub_I_Controllers.cpp",
+          "address": 891984,
+          "offset": 2016,
           "size": 93,
           "match_percent": 99.35294
         },
@@ -49689,6 +49560,21 @@
           "offset": 43264,
           "size": 141,
           "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "legoapi/core/input/gamepads.cpp.o",
+      "source": "src/legoapi/core/input/gamepads.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gamepads.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_gamepads.cpp",
+          "demangled_name": "_GLOBAL__sub_I_gamepads.cpp",
+          "address": 918960,
+          "offset": 28992,
+          "size": 93,
+          "match_percent": 99.35294
         },
         {
           "name": "_Z23ObjLookingWithLeftStickP12GameObject_s",
@@ -52765,6 +52651,77 @@
       ]
     },
     {
+      "name": "legoapi/gizmo/base/gizgame.cpp.o",
+      "source": "src/legoapi/gizmo/base/gizgame.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizgame.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_gizgame.cpp",
+          "demangled_name": "_GLOBAL__sub_I_gizgame.cpp",
+          "address": 897024,
+          "offset": 7056,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_Z35GizObstacle_CheckExcludeFlagsFn_LSWP13GIZOBSTACLE_sP12GameObject_s",
+          "demangled_name": "GizObstacle_CheckExcludeFlagsFn_LSW(GIZOBSTACLE_s*, GameObject_s*)",
+          "address": 1855808,
+          "offset": 965840,
+          "size": 126,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z23RegisterGizmoTypes_IndyP9variptr_uS0_",
+          "demangled_name": "RegisterGizmoTypes_Indy(variptr_u*, variptr_u*)",
+          "address": 1855936,
+          "offset": 965968,
+          "size": 103,
+          "match_percent": 99.95652
+        },
+        {
+          "name": "_Z25RegisterGizmoTypes_BatmanP9variptr_uS0_",
+          "demangled_name": "RegisterGizmoTypes_Batman(variptr_u*, variptr_u*)",
+          "address": 1856048,
+          "offset": 966080,
+          "size": 127,
+          "match_percent": 99.95652
+        },
+        {
+          "name": "_Z22RegisterGizmoTypes_LSWP9variptr_uS0_",
+          "demangled_name": "RegisterGizmoTypes_LSW(variptr_u*, variptr_u*)",
+          "address": 1856176,
+          "offset": 966208,
+          "size": 127,
+          "match_percent": 99.95652
+        },
+        {
+          "name": "_Z26GizmoSys_SetBestBoltTargetP10GIZMOSYS_sPvP12GameObject_sP7nuvec_sS5_ffiii",
+          "demangled_name": "GizmoSys_SetBestBoltTarget(GIZMOSYS_s*, void*, GameObject_s*, nuvec_s*, nuvec_s*, float, float, int, int, int)",
+          "address": 1856304,
+          "offset": 966336,
+          "size": 840,
+          "match_percent": 86.41437
+        },
+        {
+          "name": "_Z16GizmoSys_BoltHitP10GIZMOSYS_sPvP6BOLT_sP7nuvec_sS5_S5_fPh",
+          "demangled_name": "GizmoSys_BoltHit(GIZMOSYS_s*, void*, BOLT_s*, nuvec_s*, nuvec_s*, nuvec_s*, float, unsigned char*)",
+          "address": 1857152,
+          "offset": 967184,
+          "size": 443,
+          "match_percent": 27.161291
+        },
+        {
+          "name": "_Z15GizmoSysSetGamev",
+          "demangled_name": "GizmoSysSetGame()",
+          "address": 1857600,
+          "offset": 967632,
+          "size": 26,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
       "name": "legoapi/gizmo/base/gizmessage.cpp.o",
       "source": "src/legoapi/gizmo/base/gizmessage.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizmessage.o",
@@ -52918,46 +52875,6 @@
           "address": 1388896,
           "offset": 498928,
           "size": 43,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z25RegisterGizmoTypes_BatmanP9variptr_uS0_",
-          "demangled_name": "RegisterGizmoTypes_Batman(variptr_u*, variptr_u*)",
-          "address": 1856048,
-          "offset": 966080,
-          "size": 127,
-          "match_percent": 99.95652
-        },
-        {
-          "name": "_Z22RegisterGizmoTypes_LSWP9variptr_uS0_",
-          "demangled_name": "RegisterGizmoTypes_LSW(variptr_u*, variptr_u*)",
-          "address": 1856176,
-          "offset": 966208,
-          "size": 127,
-          "match_percent": 99.95652
-        },
-        {
-          "name": "_Z26GizmoSys_SetBestBoltTargetP10GIZMOSYS_sPvP12GameObject_sP7nuvec_sS5_ffiii",
-          "demangled_name": "GizmoSys_SetBestBoltTarget(GIZMOSYS_s*, void*, GameObject_s*, nuvec_s*, nuvec_s*, float, float, int, int, int)",
-          "address": 1856304,
-          "offset": 966336,
-          "size": 840,
-          "match_percent": 87.1326
-        },
-        {
-          "name": "_Z16GizmoSys_BoltHitP10GIZMOSYS_sPvP6BOLT_sP7nuvec_sS5_S5_fPh",
-          "demangled_name": "GizmoSys_BoltHit(GIZMOSYS_s*, void*, BOLT_s*, nuvec_s*, nuvec_s*, nuvec_s*, float, unsigned char*)",
-          "address": 1857152,
-          "offset": 967184,
-          "size": 443,
-          "match_percent": 27.161291
-        },
-        {
-          "name": "_Z15GizmoSysSetGamev",
-          "demangled_name": "GizmoSysSetGame()",
-          "address": 1857600,
-          "offset": 967632,
-          "size": 26,
           "match_percent": 100.0
         },
         {
@@ -54214,7 +54131,7 @@
           "address": 4912112,
           "offset": 4022144,
           "size": 719,
-          "match_percent": 71.48624
+          "match_percent": 72.05963
         },
         {
           "name": "_Z26GizmoSysClearLevelProgressPvi",
@@ -57443,14 +57360,6 @@
           "offset": 300400,
           "size": 104,
           "match_percent": 99.916664
-        },
-        {
-          "name": "_Z35GizObstacle_CheckExcludeFlagsFn_LSWP13GIZOBSTACLE_sP12GameObject_s",
-          "demangled_name": "GizObstacle_CheckExcludeFlagsFn_LSW(GIZOBSTACLE_s*, GameObject_s*)",
-          "address": 1855808,
-          "offset": 965840,
-          "size": 126,
-          "match_percent": 100.0
         },
         {
           "name": "_ZL20GizmoObstacle_GetPosP7GIZMO_s",
@@ -64005,6 +63914,333 @@
       ]
     },
     {
+      "name": "legoapi/items/objects/game_obj.cpp.o",
+      "source": "src/legoapi/items/objects/game_obj.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/game_obj.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_game_obj.cpp",
+          "demangled_name": "_GLOBAL__sub_I_game_obj.cpp",
+          "address": 894864,
+          "offset": 4896,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_Z20CreatureCrate_MoveFnP6PART_sf",
+          "demangled_name": "CreatureCrate_MoveFn(PART_s*, float)",
+          "address": 1243584,
+          "offset": 353616,
+          "size": 61,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z20CreatureCrate_DrawFnP6PART_s",
+          "demangled_name": "CreatureCrate_DrawFn(PART_s*)",
+          "address": 1243648,
+          "offset": 353680,
+          "size": 36,
+          "match_percent": 99.875
+        },
+        {
+          "name": "_ZL16SpeederPart_DrawP6PART_s",
+          "demangled_name": "SpeederPart_Draw(PART_s*)",
+          "address": 1243696,
+          "offset": 353728,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL14TiePart_ImpactP6PART_s",
+          "demangled_name": "TiePart_Impact(PART_s*)",
+          "address": 1243712,
+          "offset": 353744,
+          "size": 63,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL12TiePart_KillP6PART_si",
+          "demangled_name": "TiePart_Kill(PART_s*, int)",
+          "address": 1243776,
+          "offset": 353808,
+          "size": 63,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL13AtatPart_StopP6PART_s",
+          "demangled_name": "AtatPart_Stop(PART_s*)",
+          "address": 1243840,
+          "offset": 353872,
+          "size": 71,
+          "match_percent": 99.72222
+        },
+        {
+          "name": "_ZL15AtatPart_UpdateP6PART_s",
+          "demangled_name": "AtatPart_Update(PART_s*)",
+          "address": 1243920,
+          "offset": 353952,
+          "size": 1229,
+          "match_percent": 99.93916
+        },
+        {
+          "name": "_ZL18SpeederPart_UpdateP6PART_s",
+          "demangled_name": "SpeederPart_Update(PART_s*)",
+          "address": 1245152,
+          "offset": 355184,
+          "size": 2804,
+          "match_percent": 91.86583
+        },
+        {
+          "name": "_ZL19TiePart_KillExplodeP6PART_si",
+          "demangled_name": "TiePart_KillExplode(PART_s*, int)",
+          "address": 1247968,
+          "offset": 358000,
+          "size": 113,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL15Collide2ObjectsP11APIOBJECT_sS0_",
+          "demangled_name": "Collide2Objects(APIOBJECT_s*, APIOBJECT_s*)",
+          "address": 1248096,
+          "offset": 358128,
+          "size": 998,
+          "match_percent": 59.186047
+        },
+        {
+          "name": "_Z18CreatureCrate_StopP6PART_s",
+          "demangled_name": "CreatureCrate_Stop(PART_s*)",
+          "address": 1249104,
+          "offset": 359136,
+          "size": 285,
+          "match_percent": 99.81967
+        },
+        {
+          "name": "_ZL17TieSpinZPart_MoveP6PART_sf",
+          "demangled_name": "TieSpinZPart_Move(PART_s*, float)",
+          "address": 1249392,
+          "offset": 359424,
+          "size": 443,
+          "match_percent": 99.920456
+        },
+        {
+          "name": "_ZL12TiePart_MoveP6PART_sf",
+          "demangled_name": "TiePart_Move(PART_s*, float)",
+          "address": 1249840,
+          "offset": 359872,
+          "size": 269,
+          "match_percent": 99.98182
+        },
+        {
+          "name": "_Z22SpawnCreatureFromCrateP12GameObject_sff",
+          "demangled_name": "SpawnCreatureFromCrate(GameObject_s*, float, float)",
+          "address": 1250112,
+          "offset": 360144,
+          "size": 506,
+          "match_percent": 93.045456
+        },
+        {
+          "name": "_Z17ManageGameObjectsv",
+          "demangled_name": "ManageGameObjects()",
+          "address": 1250624,
+          "offset": 360656,
+          "size": 3364,
+          "match_percent": 34.625668
+        },
+        {
+          "name": "_Z18CollideGameObjectsP11WORLDINFO_s",
+          "demangled_name": "CollideGameObjects(WORLDINFO_s*)",
+          "address": 1254000,
+          "offset": 364032,
+          "size": 3522,
+          "match_percent": 80.803185
+        },
+        {
+          "name": "_Z18GameObjectRotationP12GameObject_si",
+          "demangled_name": "GameObjectRotation(GameObject_s*, int)",
+          "address": 1257536,
+          "offset": 367568,
+          "size": 5608,
+          "match_percent": 52.924385
+        },
+        {
+          "name": "_Z13PlayerTakeHitP12GameObject_sS0_",
+          "demangled_name": "PlayerTakeHit(GameObject_s*, GameObject_s*)",
+          "address": 1263152,
+          "offset": 373184,
+          "size": 526,
+          "match_percent": 88.76415
+        },
+        {
+          "name": "_Z14StunGameObjectP12GameObject_sS0_fi",
+          "demangled_name": "StunGameObject(GameObject_s*, GameObject_s*, float, int)",
+          "address": 1263680,
+          "offset": 373712,
+          "size": 1093,
+          "match_percent": 49.38189
+        },
+        {
+          "name": "_Z16DeactivatePlayerP12GameObject_sfS0_",
+          "demangled_name": "DeactivatePlayer(GameObject_s*, float, GameObject_s*)",
+          "address": 1264784,
+          "offset": 374816,
+          "size": 546,
+          "match_percent": 99.99115
+        },
+        {
+          "name": "_Z14ActivatePlayerP12GameObject_s",
+          "demangled_name": "ActivatePlayer(GameObject_s*)",
+          "address": 1265344,
+          "offset": 375376,
+          "size": 142,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z22FindPlayerAndSetWeaponii",
+          "demangled_name": "FindPlayerAndSetWeapon(int, int)",
+          "address": 1265488,
+          "offset": 375520,
+          "size": 143,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z22GameObjectToCameraCodeP12GameObject_s",
+          "demangled_name": "GameObjectToCameraCode(GameObject_s*)",
+          "address": 1265632,
+          "offset": 375664,
+          "size": 443,
+          "match_percent": 85.35849
+        },
+        {
+          "name": "_Z17UpdateGameObjectsP11WORLDINFO_s",
+          "demangled_name": "UpdateGameObjects(WORLDINFO_s*)",
+          "address": 1266080,
+          "offset": 376112,
+          "size": 10082,
+          "match_percent": 68.83799
+        },
+        {
+          "name": "_Z14SetKillPartMomP7nuvec_s",
+          "demangled_name": "SetKillPartMom(nuvec_s*)",
+          "address": 1276176,
+          "offset": 386208,
+          "size": 101,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z20KillParts_TIEFIGHTERP9ADDPART_siiP12GameObject_sittP7nuvec_s",
+          "demangled_name": "KillParts_TIEFIGHTER(ADDPART_s*, int, int, GameObject_s*, int, unsigned short, unsigned short, nuvec_s*)",
+          "address": 1276288,
+          "offset": 386320,
+          "size": 557,
+          "match_percent": 83.045456
+        },
+        {
+          "name": "_Z13InitBikePartsv",
+          "demangled_name": "InitBikeParts()",
+          "address": 1276848,
+          "offset": 386880,
+          "size": 51,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z21KillParts_SpeederBikeP9ADDPART_siiP12GameObject_s",
+          "demangled_name": "KillParts_SpeederBike(ADDPART_s*, int, int, GameObject_s*)",
+          "address": 1276912,
+          "offset": 386944,
+          "size": 690,
+          "match_percent": 82.84568
+        },
+        {
+          "name": "_Z14KillParts_ATATP9ADDPART_siiP12GameObject_s",
+          "demangled_name": "KillParts_ATAT(ADDPART_s*, int, int, GameObject_s*)",
+          "address": 1277616,
+          "offset": 387648,
+          "size": 120,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z9KillPartsP12GameObject_siiifiPt",
+          "demangled_name": "KillParts(GameObject_s*, int, int, int, float, int, unsigned short*)",
+          "address": 1277744,
+          "offset": 387776,
+          "size": 3949,
+          "match_percent": 90.567764
+        },
+        {
+          "name": "_Z16InstantKillPartsP12GameObject_sif",
+          "demangled_name": "InstantKillParts(GameObject_s*, int, float)",
+          "address": 1281696,
+          "offset": 391728,
+          "size": 138,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z10LoseHelmetP12GameObject_sii",
+          "demangled_name": "LoseHelmet(GameObject_s*, int, int)",
+          "address": 1281840,
+          "offset": 391872,
+          "size": 409,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z14KillGameObjectP12GameObject_sii",
+          "demangled_name": "KillGameObject(GameObject_s*, int, int)",
+          "address": 1282256,
+          "offset": 392288,
+          "size": 5214,
+          "match_percent": 45.435616
+        },
+        {
+          "name": "_ZL16SpeederPart_KillP6PART_si",
+          "demangled_name": "SpeederPart_Kill(PART_s*, int)",
+          "address": 1287472,
+          "offset": 397504,
+          "size": 298,
+          "match_percent": 99.98462
+        },
+        {
+          "name": "_Z10KillPlayerP12GameObject_siiP7nuvec_s",
+          "demangled_name": "KillPlayer(GameObject_s*, int, int, nuvec_s*)",
+          "address": 1287776,
+          "offset": 397808,
+          "size": 200,
+          "match_percent": 94.13207
+        },
+        {
+          "name": "_Z12ObjHitShieldP12GameObject_sS0_iP6BOLT_s",
+          "demangled_name": "ObjHitShield(GameObject_s*, GameObject_s*, int, BOLT_s*)",
+          "address": 1287984,
+          "offset": 398016,
+          "size": 678,
+          "match_percent": 93.02158
+        },
+        {
+          "name": "_Z9ObjHitObjP12GameObject_sS0_itii",
+          "demangled_name": "ObjHitObj(GameObject_s*, GameObject_s*, int, unsigned short, int, int)",
+          "address": 1288672,
+          "offset": 398704,
+          "size": 6456,
+          "match_percent": 41.99199
+        },
+        {
+          "name": "_Z16TargetGameObjectP12GameObject_sP7nuvec_sS2_ffjiii",
+          "demangled_name": "TargetGameObject(GameObject_s*, nuvec_s*, nuvec_s*, float, float, unsigned int, int, int, int)",
+          "address": 1295136,
+          "offset": 405168,
+          "size": 1587,
+          "match_percent": 66.22727
+        },
+        {
+          "name": "_Z21ClearLastSafeTakeOverP12GameObject_s",
+          "demangled_name": "ClearLastSafeTakeOver(GameObject_s*)",
+          "address": 1296736,
+          "offset": 406768,
+          "size": 131,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
       "name": "legoapi/items/objects/gameobjects.cpp.o",
       "source": "src/legoapi/items/objects/gameobjects.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gameobjects.o",
@@ -64088,54 +64324,6 @@
           "offset": 344736,
           "size": 75,
           "match_percent": 100.0
-        },
-        {
-          "name": "_Z17ManageGameObjectsv",
-          "demangled_name": "ManageGameObjects()",
-          "address": 1250624,
-          "offset": 360656,
-          "size": 3364,
-          "match_percent": 34.665775
-        },
-        {
-          "name": "_Z18GameObjectRotationP12GameObject_si",
-          "demangled_name": "GameObjectRotation(GameObject_s*, int)",
-          "address": 1257536,
-          "offset": 367568,
-          "size": 5608,
-          "match_percent": 52.924385
-        },
-        {
-          "name": "_Z22GameObjectToCameraCodeP12GameObject_s",
-          "demangled_name": "GameObjectToCameraCode(GameObject_s*)",
-          "address": 1265632,
-          "offset": 375664,
-          "size": 443,
-          "match_percent": 85.07547
-        },
-        {
-          "name": "_Z17UpdateGameObjectsP11WORLDINFO_s",
-          "demangled_name": "UpdateGameObjects(WORLDINFO_s*)",
-          "address": 1266080,
-          "offset": 376112,
-          "size": 10082,
-          "match_percent": 68.79773
-        },
-        {
-          "name": "_Z14KillGameObjectP12GameObject_sii",
-          "demangled_name": "KillGameObject(GameObject_s*, int, int)",
-          "address": 1282256,
-          "offset": 392288,
-          "size": 5214,
-          "match_percent": 45.435616
-        },
-        {
-          "name": "_Z16TargetGameObjectP12GameObject_sP7nuvec_sS2_ffjiii",
-          "demangled_name": "TargetGameObject(GameObject_s*, nuvec_s*, nuvec_s*, float, float, unsigned int, int, int, int)",
-          "address": 1295136,
-          "offset": 405168,
-          "size": 1587,
-          "match_percent": 66.22727
         },
         {
           "name": "_ZL20LightSabreStreakCodeP12GameObject_sii",
@@ -64335,7 +64523,7 @@
           "address": 1543616,
           "offset": 653648,
           "size": 6109,
-          "match_percent": 65.08363
+          "match_percent": 65.07291
         },
         {
           "name": "_Z27MakeBaddiesForgetAboutPartyi",
@@ -66095,7 +66283,7 @@
           "address": 4348208,
           "offset": 3458240,
           "size": 86,
-          "match_percent": 99.5946
+          "match_percent": 100.0
         },
         {
           "name": "_ZN9BaseThing18RemoveDependanciesEP15ThingRemoveData",
@@ -66311,7 +66499,7 @@
           "address": 4647024,
           "offset": 3757056,
           "size": 233,
-          "match_percent": 100.0
+          "match_percent": 77.70175
         },
         {
           "name": "_Z16GameObjectOriginP12GameObject_s",
@@ -71538,14 +71726,6 @@
       "source": "src/legoapi/misc/legoapi_misc.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/legoapi_misc.o",
       "functions": [
-        {
-          "name": "_Z21ClearLastSafeTakeOverP12GameObject_s",
-          "demangled_name": "ClearLastSafeTakeOver(GameObject_s*)",
-          "address": 1296736,
-          "offset": 406768,
-          "size": 131,
-          "match_percent": 100.0
-        },
         {
           "name": "_Z12CurrentStartP12GameObject_sii",
           "demangled_name": "CurrentStart(GameObject_s*, int, int)",
@@ -77605,205 +77785,6 @@
       ]
     },
     {
-      "name": "legoapi/render/core/shader.cpp.o",
-      "source": "src/legoapi/render/core/shader.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/shader.o",
-      "functions": [
-        {
-          "name": "NuShaderManagerSetfv",
-          "demangled_name": "NuShaderManagerSetfv",
-          "address": 3182144,
-          "offset": 2292176,
-          "size": 54,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderManagerSetElementfv",
-          "demangled_name": "NuShaderManagerSetElementfv",
-          "address": 3182208,
-          "offset": 2292240,
-          "size": 62,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderManagerSetElementsfv",
-          "demangled_name": "NuShaderManagerSetElementsfv",
-          "address": 3182272,
-          "offset": 2292304,
-          "size": 70,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderManagerSetElementsfv_transpose",
-          "demangled_name": "NuShaderManagerSetElementsfv_transpose",
-          "address": 3182352,
-          "offset": 2292384,
-          "size": 70,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN19ShaderMtlDescFilter12internalInitEPK17nushadermtldesc_sPK7numtl_sii",
-          "demangled_name": "ShaderMtlDescFilter::internalInit(nushadermtldesc_s const*, numtl_s const*, int, int)",
-          "address": 3183168,
-          "offset": 2293200,
-          "size": 374,
-          "match_percent": 87.63441
-        },
-        {
-          "name": "_ZNK19ShaderMtlDescFilter8hasLayerEi",
-          "demangled_name": "ShaderMtlDescFilter::hasLayer(int) const",
-          "address": 3183552,
-          "offset": 2293584,
-          "size": 153,
-          "match_percent": 42.83019
-        },
-        {
-          "name": "_ZNK19ShaderMtlDescFilter13hasDiffuseMapEi",
-          "demangled_name": "ShaderMtlDescFilter::hasDiffuseMap(int) const",
-          "address": 3183712,
-          "offset": 2293744,
-          "size": 125,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZNK19ShaderMtlDescFilter14getVertexFlagsEv",
-          "demangled_name": "ShaderMtlDescFilter::getVertexFlags() const",
-          "address": 3183840,
-          "offset": 2293872,
-          "size": 318,
-          "match_percent": 89.908165
-        },
-        {
-          "name": "_ZN19ShaderManagerOpenGL12createShaderER19ShaderMtlDescFilterbP14NuShaderObjecti",
-          "demangled_name": "ShaderManagerOpenGL::createShader(ShaderMtlDescFilter&, bool, NuShaderObject*, int)",
-          "address": 3201024,
-          "offset": 2311056,
-          "size": 113,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN19ShaderManagerOpenGLD1Ev",
-          "demangled_name": "ShaderManagerOpenGL::~ShaderManagerOpenGL()",
-          "address": 3201152,
-          "offset": 2311184,
-          "size": 74,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN19ShaderManagerOpenGLD2Ev",
-          "demangled_name": "ShaderManagerOpenGL::~ShaderManagerOpenGL()",
-          "address": 3201152,
-          "offset": 2311184,
-          "size": 74,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN19ShaderManagerOpenGLD0Ev",
-          "demangled_name": "ShaderManagerOpenGL::~ShaderManagerOpenGL()",
-          "address": 3201232,
-          "offset": 2311264,
-          "size": 56,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN19ShaderManagerOpenGLC1ER21VirtualStackAllocator",
-          "demangled_name": "ShaderManagerOpenGL::ShaderManagerOpenGL(VirtualStackAllocator&)",
-          "address": 3201536,
-          "offset": 2311568,
-          "size": 190,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN19ShaderManagerOpenGLC2ER21VirtualStackAllocator",
-          "demangled_name": "ShaderManagerOpenGL::ShaderManagerOpenGL(VirtualStackAllocator&)",
-          "address": 3201536,
-          "offset": 2311568,
-          "size": 190,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN19ShaderManagerOpenGL5setfvE19SHADERSEMANTIC_enumPKf",
-          "demangled_name": "ShaderManagerOpenGL::setfv(SHADERSEMANTIC_enum, float const*)",
-          "address": 3202992,
-          "offset": 2313024,
-          "size": 67,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN19ShaderManagerOpenGL12setElementfvE19SHADERSEMANTIC_enumiPKf",
-          "demangled_name": "ShaderManagerOpenGL::setElementfv(SHADERSEMANTIC_enum, int, float const*)",
-          "address": 3203072,
-          "offset": 2313104,
-          "size": 67,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN19ShaderManagerOpenGL13setElementsfvE19SHADERSEMANTIC_enumiiPKf",
-          "demangled_name": "ShaderManagerOpenGL::setElementsfv(SHADERSEMANTIC_enum, int, int, float const*)",
-          "address": 3203152,
-          "offset": 2313184,
-          "size": 67,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN19ShaderManagerOpenGL23setElementsfv_transposeE19SHADERSEMANTIC_enumiiPKf",
-          "demangled_name": "ShaderManagerOpenGL::setElementsfv_transpose(SHADERSEMANTIC_enum, int, int, float const*)",
-          "address": 3203232,
-          "offset": 2313264,
-          "size": 67,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectE12createShaderER19ShaderMtlDescFilterbPS0_i",
-          "demangled_name": "ShaderManagerTemplate<NuShaderObject>::createShader(ShaderMtlDescFilter&, bool, NuShaderObject*, int)",
-          "address": 3203312,
-          "offset": 2313344,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectE12createShaderERK15ShaderObjectKeyPS0_i",
-          "demangled_name": "ShaderManagerTemplate<NuShaderObject>::createShader(ShaderObjectKey const&, NuShaderObject*, int)",
-          "address": 3203328,
-          "offset": 2313360,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectE35adaptShaderMaterialForShaderVersionEP17nushadermtldesc_s",
-          "demangled_name": "ShaderManagerTemplate<NuShaderObject>::adaptShaderMaterialForShaderVersion(nushadermtldesc_s*)",
-          "address": 3203344,
-          "offset": 2313376,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectED1Ev",
-          "demangled_name": "ShaderManagerTemplate<NuShaderObject>::~ShaderManagerTemplate()",
-          "address": 3203360,
-          "offset": 2313392,
-          "size": 74,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectED2Ev",
-          "demangled_name": "ShaderManagerTemplate<NuShaderObject>::~ShaderManagerTemplate()",
-          "address": 3203360,
-          "offset": 2313392,
-          "size": 74,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectED0Ev",
-          "demangled_name": "ShaderManagerTemplate<NuShaderObject>::~ShaderManagerTemplate()",
-          "address": 3203440,
-          "offset": 2313472,
-          "size": 111,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
       "name": "legoapi/render/core/terrain.cpp.o",
       "source": "src/legoapi/render/core/terrain.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/terrain.o",
@@ -79748,7 +79729,7 @@
           "address": 5576928,
           "offset": 4686960,
           "size": 975,
-          "match_percent": 57.931034
+          "match_percent": 60.24138
         },
         {
           "name": "_Z14BezierLineEvalR5VuVecS0_S0_S0_S0_f",
@@ -79923,7 +79904,7 @@
           "address": 3488176,
           "offset": 2598208,
           "size": 853,
-          "match_percent": 74.24286
+          "match_percent": 91.6
         },
         {
           "name": "DebrisSetTimeIncrement",
@@ -80200,7 +80181,7 @@
           "address": 1181616,
           "offset": 291648,
           "size": 3351,
-          "match_percent": 59.069878
+          "match_percent": 59.093166
         },
         {
           "name": "_Z14PartCollide_3DP6PART_s",
@@ -80225,110 +80206,6 @@
           "offset": 295312,
           "size": 630,
           "match_percent": 91.5137
-        },
-        {
-          "name": "_ZL16SpeederPart_DrawP6PART_s",
-          "demangled_name": "SpeederPart_Draw(PART_s*)",
-          "address": 1243696,
-          "offset": 353728,
-          "size": 12,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL14TiePart_ImpactP6PART_s",
-          "demangled_name": "TiePart_Impact(PART_s*)",
-          "address": 1243712,
-          "offset": 353744,
-          "size": 63,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL12TiePart_KillP6PART_si",
-          "demangled_name": "TiePart_Kill(PART_s*, int)",
-          "address": 1243776,
-          "offset": 353808,
-          "size": 63,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL18SpeederPart_UpdateP6PART_s",
-          "demangled_name": "SpeederPart_Update(PART_s*)",
-          "address": 1245152,
-          "offset": 355184,
-          "size": 2804,
-          "match_percent": 91.86583
-        },
-        {
-          "name": "_ZL19TiePart_KillExplodeP6PART_si",
-          "demangled_name": "TiePart_KillExplode(PART_s*, int)",
-          "address": 1247968,
-          "offset": 358000,
-          "size": 113,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL17TieSpinZPart_MoveP6PART_sf",
-          "demangled_name": "TieSpinZPart_Move(PART_s*, float)",
-          "address": 1249392,
-          "offset": 359424,
-          "size": 443,
-          "match_percent": 99.920456
-        },
-        {
-          "name": "_ZL12TiePart_MoveP6PART_sf",
-          "demangled_name": "TiePart_Move(PART_s*, float)",
-          "address": 1249840,
-          "offset": 359872,
-          "size": 269,
-          "match_percent": 99.98182
-        },
-        {
-          "name": "_Z14SetKillPartMomP7nuvec_s",
-          "demangled_name": "SetKillPartMom(nuvec_s*)",
-          "address": 1276176,
-          "offset": 386208,
-          "size": 101,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z13InitBikePartsv",
-          "demangled_name": "InitBikeParts()",
-          "address": 1276848,
-          "offset": 386880,
-          "size": 51,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z21KillParts_SpeederBikeP9ADDPART_siiP12GameObject_s",
-          "demangled_name": "KillParts_SpeederBike(ADDPART_s*, int, int, GameObject_s*)",
-          "address": 1276912,
-          "offset": 386944,
-          "size": 690,
-          "match_percent": 82.84568
-        },
-        {
-          "name": "_Z9KillPartsP12GameObject_siiifiPt",
-          "demangled_name": "KillParts(GameObject_s*, int, int, int, float, int, unsigned short*)",
-          "address": 1277744,
-          "offset": 387776,
-          "size": 3949,
-          "match_percent": 90.567764
-        },
-        {
-          "name": "_Z16InstantKillPartsP12GameObject_sif",
-          "demangled_name": "InstantKillParts(GameObject_s*, int, float)",
-          "address": 1281696,
-          "offset": 391728,
-          "size": 138,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL16SpeederPart_KillP6PART_si",
-          "demangled_name": "SpeederPart_Kill(PART_s*, int)",
-          "address": 1287472,
-          "offset": 397504,
-          "size": 298,
-          "match_percent": 99.98462
         },
         {
           "name": "_Z21PartImpact_BasketballP6PART_s",
@@ -80872,7 +80749,7 @@
           "address": 4320048,
           "offset": 3430080,
           "size": 850,
-          "match_percent": 91.0531
+          "match_percent": 91.11947
         },
         {
           "name": "SetPartRTLSet",
@@ -81835,7 +81712,7 @@
           "address": 2965856,
           "offset": 2075888,
           "size": 624,
-          "match_percent": 59.083332
+          "match_percent": 70.725
         },
         {
           "name": "NuVisiBoxTree",
@@ -84927,14 +84804,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z20KillParts_TIEFIGHTERP9ADDPART_siiP12GameObject_sittP7nuvec_s",
-          "demangled_name": "KillParts_TIEFIGHTER(ADDPART_s*, int, int, GameObject_s*, int, unsigned short, unsigned short, nuvec_s*)",
-          "address": 1276288,
-          "offset": 386320,
-          "size": 557,
-          "match_percent": 83.045456
-        },
-        {
           "name": "_ZL21PartKill_DrawCreatureP6PART_s",
           "demangled_name": "PartKill_DrawCreature(PART_s*)",
           "address": 2171664,
@@ -85300,14 +85169,6 @@
           "offset": 9744,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_Z14KillParts_ATATP9ADDPART_siiP12GameObject_s",
-          "demangled_name": "KillParts_ATAT(ADDPART_s*, int, int, GameObject_s*)",
-          "address": 1277616,
-          "offset": 387648,
-          "size": 120,
-          "match_percent": 100.0
         },
         {
           "name": "_Z15BobaRocket_KillP6PART_si",
@@ -87950,6 +87811,53 @@
           "offset": 88544,
           "size": 26,
           "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nu3d/ShaderMtlDescFilter.cpp.o",
+      "source": "src/nu2api/nu3d/ShaderMtlDescFilter.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/ShaderMtlDescFilter.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_ShaderMtlDescFilter.cpp",
+          "demangled_name": "_GLOBAL__sub_I_ShaderMtlDescFilter.cpp",
+          "address": 907280,
+          "offset": 17312,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_ZN19ShaderMtlDescFilter12internalInitEPK17nushadermtldesc_sPK7numtl_sii",
+          "demangled_name": "ShaderMtlDescFilter::internalInit(nushadermtldesc_s const*, numtl_s const*, int, int)",
+          "address": 3183168,
+          "offset": 2293200,
+          "size": 374,
+          "match_percent": 87.63441
+        },
+        {
+          "name": "_ZNK19ShaderMtlDescFilter8hasLayerEi",
+          "demangled_name": "ShaderMtlDescFilter::hasLayer(int) const",
+          "address": 3183552,
+          "offset": 2293584,
+          "size": 153,
+          "match_percent": 42.83019
+        },
+        {
+          "name": "_ZNK19ShaderMtlDescFilter13hasDiffuseMapEi",
+          "demangled_name": "ShaderMtlDescFilter::hasDiffuseMap(int) const",
+          "address": 3183712,
+          "offset": 2293744,
+          "size": 125,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZNK19ShaderMtlDescFilter14getVertexFlagsEv",
+          "demangled_name": "ShaderMtlDescFilter::getVertexFlags() const",
+          "address": 3183840,
+          "offset": 2293872,
+          "size": 318,
+          "match_percent": 89.908165
         }
       ]
     },
@@ -94550,6 +94458,38 @@
           "match_percent": 100.0
         },
         {
+          "name": "NuShaderManagerSetfv",
+          "demangled_name": "NuShaderManagerSetfv",
+          "address": 3182144,
+          "offset": 2292176,
+          "size": 54,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderManagerSetElementfv",
+          "demangled_name": "NuShaderManagerSetElementfv",
+          "address": 3182208,
+          "offset": 2292240,
+          "size": 62,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderManagerSetElementsfv",
+          "demangled_name": "NuShaderManagerSetElementsfv",
+          "address": 3182272,
+          "offset": 2292304,
+          "size": 70,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderManagerSetElementsfv_transpose",
+          "demangled_name": "NuShaderManagerSetElementsfv_transpose",
+          "address": 3182352,
+          "offset": 2292384,
+          "size": 70,
+          "match_percent": 100.0
+        },
+        {
           "name": "NuShaderManagerSetShininessFactor",
           "demangled_name": "NuShaderManagerSetShininessFactor",
           "address": 3182432,
@@ -94621,12 +94561,60 @@
           "match_percent": 43.231342
         },
         {
+          "name": "_ZN19ShaderManagerOpenGL12createShaderER19ShaderMtlDescFilterbP14NuShaderObjecti",
+          "demangled_name": "ShaderManagerOpenGL::createShader(ShaderMtlDescFilter&, bool, NuShaderObject*, int)",
+          "address": 3201024,
+          "offset": 2311056,
+          "size": 113,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN19ShaderManagerOpenGLD1Ev",
+          "demangled_name": "ShaderManagerOpenGL::~ShaderManagerOpenGL()",
+          "address": 3201152,
+          "offset": 2311184,
+          "size": 74,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN19ShaderManagerOpenGLD2Ev",
+          "demangled_name": "ShaderManagerOpenGL::~ShaderManagerOpenGL()",
+          "address": 3201152,
+          "offset": 2311184,
+          "size": 74,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN19ShaderManagerOpenGLD0Ev",
+          "demangled_name": "ShaderManagerOpenGL::~ShaderManagerOpenGL()",
+          "address": 3201232,
+          "offset": 2311264,
+          "size": 56,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z10LookupHashjPjP12HashRedirectj",
           "demangled_name": "LookupHash(unsigned int, unsigned int*, HashRedirect*, unsigned int)",
           "address": 3201296,
           "offset": 2311328,
           "size": 114,
           "match_percent": 89.4898
+        },
+        {
+          "name": "_ZN19ShaderManagerOpenGLC1ER21VirtualStackAllocator",
+          "demangled_name": "ShaderManagerOpenGL::ShaderManagerOpenGL(VirtualStackAllocator&)",
+          "address": 3201536,
+          "offset": 2311568,
+          "size": 190,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN19ShaderManagerOpenGLC2ER21VirtualStackAllocator",
+          "demangled_name": "ShaderManagerOpenGL::ShaderManagerOpenGL(VirtualStackAllocator&)",
+          "address": 3201536,
+          "offset": 2311568,
+          "size": 190,
+          "match_percent": 100.0
         },
         {
           "name": "_Z16LoadShaderSourcePPcPijb",
@@ -94651,6 +94639,86 @@
           "offset": 2312304,
           "size": 711,
           "match_percent": 95.8314
+        },
+        {
+          "name": "_ZN19ShaderManagerOpenGL5setfvE19SHADERSEMANTIC_enumPKf",
+          "demangled_name": "ShaderManagerOpenGL::setfv(SHADERSEMANTIC_enum, float const*)",
+          "address": 3202992,
+          "offset": 2313024,
+          "size": 67,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN19ShaderManagerOpenGL12setElementfvE19SHADERSEMANTIC_enumiPKf",
+          "demangled_name": "ShaderManagerOpenGL::setElementfv(SHADERSEMANTIC_enum, int, float const*)",
+          "address": 3203072,
+          "offset": 2313104,
+          "size": 67,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN19ShaderManagerOpenGL13setElementsfvE19SHADERSEMANTIC_enumiiPKf",
+          "demangled_name": "ShaderManagerOpenGL::setElementsfv(SHADERSEMANTIC_enum, int, int, float const*)",
+          "address": 3203152,
+          "offset": 2313184,
+          "size": 67,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN19ShaderManagerOpenGL23setElementsfv_transposeE19SHADERSEMANTIC_enumiiPKf",
+          "demangled_name": "ShaderManagerOpenGL::setElementsfv_transpose(SHADERSEMANTIC_enum, int, int, float const*)",
+          "address": 3203232,
+          "offset": 2313264,
+          "size": 67,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectE12createShaderER19ShaderMtlDescFilterbPS0_i",
+          "demangled_name": "ShaderManagerTemplate<NuShaderObject>::createShader(ShaderMtlDescFilter&, bool, NuShaderObject*, int)",
+          "address": 3203312,
+          "offset": 2313344,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectE12createShaderERK15ShaderObjectKeyPS0_i",
+          "demangled_name": "ShaderManagerTemplate<NuShaderObject>::createShader(ShaderObjectKey const&, NuShaderObject*, int)",
+          "address": 3203328,
+          "offset": 2313360,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectE35adaptShaderMaterialForShaderVersionEP17nushadermtldesc_s",
+          "demangled_name": "ShaderManagerTemplate<NuShaderObject>::adaptShaderMaterialForShaderVersion(nushadermtldesc_s*)",
+          "address": 3203344,
+          "offset": 2313376,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectED1Ev",
+          "demangled_name": "ShaderManagerTemplate<NuShaderObject>::~ShaderManagerTemplate()",
+          "address": 3203360,
+          "offset": 2313392,
+          "size": 74,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectED2Ev",
+          "demangled_name": "ShaderManagerTemplate<NuShaderObject>::~ShaderManagerTemplate()",
+          "address": 3203360,
+          "offset": 2313392,
+          "size": 74,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectED0Ev",
+          "demangled_name": "ShaderManagerTemplate<NuShaderObject>::~ShaderManagerTemplate()",
+          "address": 3203440,
+          "offset": 2313472,
+          "size": 111,
+          "match_percent": 100.0
         }
       ]
     },
@@ -113656,6 +113724,21 @@
       ]
     },
     {
+      "name": "nu2api/nusound/nusound_callback.cpp.o",
+      "source": "src/nu2api/nusound/nusound_callback.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nusound_callback.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_nusound_callback.cpp",
+          "demangled_name": "_GLOBAL__sub_I_nusound_callback.cpp",
+          "address": 910192,
+          "offset": 20224,
+          "size": 319,
+          "match_percent": 93.25862
+        }
+      ]
+    },
+    {
       "name": "nu2api/nusound/nusound_clock.cpp.o",
       "source": "src/nu2api/nusound/nusound_clock.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nusound_clock.o",
@@ -113929,7 +114012,7 @@
           "address": 3273104,
           "offset": 2383136,
           "size": 1243,
-          "match_percent": 37.30392
+          "match_percent": 66.90196
         },
         {
           "name": "_ZN19NuSoundDecodeThread13RequestDecodeER14NuSoundDecoderR13NuSoundBuffer14NuSoundWeakPtrI21NuSoundBufferCallbackEb",
@@ -113937,7 +114020,7 @@
           "address": 3274352,
           "offset": 2384384,
           "size": 1051,
-          "match_percent": 63.00372
+          "match_percent": 63.494423
         },
         {
           "name": "_ZN14NuSoundDecoder13RequestBufferEb14NuSoundWeakPtrI21NuSoundBufferCallbackE",
@@ -117480,7 +117563,7 @@
           "address": 3299520,
           "offset": 2409552,
           "size": 2539,
-          "match_percent": 69.29647
+          "match_percent": 71.58173
         },
         {
           "name": "_ZN15NuSoundStreamer11RequestFillEP22NuSoundStreamingSampleP13NuSoundBufferb14NuSoundWeakPtrI21NuSoundBufferCallbackE",
@@ -117488,7 +117571,7 @@
           "address": 3302064,
           "offset": 2412096,
           "size": 1115,
-          "match_percent": 58.716362
+          "match_percent": 60.22909
         },
         {
           "name": "_ZN22NuSoundStreamingSample13RequestBufferEb14NuSoundWeakPtrI21NuSoundBufferCallbackE",
@@ -117504,7 +117587,7 @@
           "address": 3303648,
           "offset": 2413680,
           "size": 357,
-          "match_percent": 71.82609
+          "match_percent": 74.652176
         },
         {
           "name": "_ZN15NuSoundStreamer11ShutdownAllEv",
@@ -117520,7 +117603,7 @@
           "address": 3304096,
           "offset": 2414128,
           "size": 361,
-          "match_percent": 72.25843
+          "match_percent": 77.33708
         },
         {
           "name": "_ZN15NuSoundStreamer12RequestCloseEP22NuSoundStreamingSample",
@@ -117528,7 +117611,7 @@
           "address": 3304464,
           "offset": 2414496,
           "size": 353,
-          "match_percent": 76.90804
+          "match_percent": 80.0
         },
         {
           "name": "_ZN15NuSoundStreamer10RequestCueEP22NuSoundStreamingSamplebfb",
@@ -117536,7 +117619,7 @@
           "address": 3304832,
           "offset": 2414864,
           "size": 385,
-          "match_percent": 78.76596
+          "match_percent": 80.38298
         },
         {
           "name": "_ZNK22NuSoundStreamingSample12IsStreamOpenEv",
@@ -122690,7 +122773,7 @@
       "candidate_units": [
         "nu2api/nusound/nusound3_include.cpp.o",
         "nu2api/nusound/nusound_buffer.cpp.o",
-        "nu2api/nusound/nusound_weakptr.cpp.o"
+        "nu2api/nusound/nusound_callback.cpp.o"
       ]
     },
     {
@@ -122703,7 +122786,7 @@
       "candidate_units": [
         "nu2api/nusound/nusound3_include.cpp.o",
         "nu2api/nusound/nusound_buffer.cpp.o",
-        "nu2api/nusound/nusound_weakptr.cpp.o"
+        "nu2api/nusound/nusound_callback.cpp.o"
       ]
     },
     {
@@ -124424,14 +124507,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_GLOBAL__sub_I_Controllers.cpp",
-      "demangled_name": "_GLOBAL__sub_I_Controllers.cpp",
-      "address": 891984,
-      "offset": 2016,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
       "name": "_GLOBAL__sub_I_squish_pch.cpp",
       "demangled_name": "_GLOBAL__sub_I_squish_pch.cpp",
       "address": 892080,
@@ -124472,34 +124547,10 @@
       "match_percent": 0.0
     },
     {
-      "name": "_GLOBAL__sub_I_game_obj.cpp",
-      "demangled_name": "_GLOBAL__sub_I_game_obj.cpp",
-      "address": 894864,
-      "offset": 4896,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_config.cpp",
-      "demangled_name": "_GLOBAL__sub_I_config.cpp",
-      "address": 895872,
-      "offset": 5904,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
       "name": "_GLOBAL__sub_I_gameaiscript.cpp",
       "demangled_name": "_GLOBAL__sub_I_gameaiscript.cpp",
       "address": 896064,
       "offset": 6096,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_gizgame.cpp",
-      "demangled_name": "_GLOBAL__sub_I_gizgame.cpp",
-      "address": 897024,
-      "offset": 7056,
       "size": 93,
       "match_percent": 0.0
     },
@@ -124536,27 +124587,11 @@
       "match_percent": 0.0
     },
     {
-      "name": "_GLOBAL__sub_I_ShaderMtlDescFilter.cpp",
-      "demangled_name": "_GLOBAL__sub_I_ShaderMtlDescFilter.cpp",
-      "address": 907280,
-      "offset": 17312,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
       "name": "_GLOBAL__sub_I_nusound.cpp",
       "demangled_name": "_GLOBAL__sub_I_nusound.cpp",
       "address": 909648,
       "offset": 19680,
       "size": 117,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_nusound_callback.cpp",
-      "demangled_name": "_GLOBAL__sub_I_nusound_callback.cpp",
-      "address": 910192,
-      "offset": 20224,
-      "size": 319,
       "match_percent": 0.0
     },
     {
@@ -128057,10 +128092,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 468,
+    "bazel_units": 473,
     "functions": 13454,
-    "assigned_functions": 12723,
+    "assigned_functions": 12729,
     "ambiguous_functions": 273,
-    "unassigned_functions": 458
+    "unassigned_functions": 452
   }
 }
