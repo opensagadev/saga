@@ -73,6 +73,8 @@ struct NOSFilter {
 };
 struct NetAddress {
     u32 value;
+
+    static NetAddress EmptyAddress;
 };
 struct NetSample {
     u32 values[4];

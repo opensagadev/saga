@@ -141,18 +141,11 @@ template <typename T> class NuSoundWeakPtr : public NuSoundWeakPtrListNode {
     NuSoundWeakPtr(const NuSoundWeakPtr &other) : obj(NULL) {
         this->prev = NULL;
         this->next = NULL;
-        // The source pointer must be read while the list lock is held.  The
-        // target wraps the generated weak-pointer copy in this outer lock;
-        // Set() and Link() take the same recursive lock again.
-        NuSoundWeakPtrListNode::sPtrListLock.Lock();
         Assign((T *)other.obj);
-        NuSoundWeakPtrListNode::sPtrListLock.Unlock();
     }
 
     NuSoundWeakPtr &operator=(const NuSoundWeakPtr &other) {
-        NuSoundWeakPtrListNode::sPtrListLock.Lock();
         Assign((T *)other.obj);
-        NuSoundWeakPtrListNode::sPtrListLock.Unlock();
         return *this;
     }
 

@@ -436,11 +436,13 @@ bool MechTouchTaskAttack::Update() {
         const u32 model_flags = object->apiobj.character_data->model_flags;
         f32 attack_range_squared;
         if ((model_flags & 0x40) == 0) {
-            f32 attack_range = radius + 0.2f;
+            const f32 attack_range = radius + 0.2f;
             if ((model_flags & 0x40000000) != 0) {
-                attack_range += object->apiobj.collision_radius * 1.25f;
+                const f32 extended_range = attack_range + object->apiobj.collision_radius * 1.25f;
+                attack_range_squared = extended_range * extended_range;
+            } else {
+                attack_range_squared = attack_range * attack_range;
             }
-            attack_range_squared = attack_range * attack_range;
         } else {
             attack_range_squared = 0.09f;
         }

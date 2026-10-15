@@ -547,7 +547,7 @@ void Customiser_ResetModelTextureIDs(CUSTOMISER *customiser) {
     customiser->model_texture_ids[17] = 0;
 }
 
-SCALAR_FN void Customiser_RestoreModelTextureIDs(CUSTOMISER *customiser) {
+void Customiser_RestoreModelTextureIDs(CUSTOMISER *customiser) {
     if (customiser == NULL)
         return;
     for (i32 character = 0; character < 2; ++character) {
@@ -568,7 +568,7 @@ SCALAR_FN void Customiser_RestoreModelTextureIDs(CUSTOMISER *customiser) {
     }
 }
 
-SCALAR_FN void Customiser_SaveModelTextureIDs(CUSTOMISER *customiser, CHARACTERMODEL_s *model) {
+void Customiser_SaveModelTextureIDs(CUSTOMISER *customiser, CHARACTERMODEL_s *model) {
     if (model == NULL || customiser == NULL) {
         return;
     }
@@ -637,7 +637,7 @@ void Customiser_CopyDefaultPiecesToSave(CUSTOMISER *customiser, CUSTOMISESAVE_s 
     save[1].pieces[8] = customiser->default_pieces[1][8];
 }
 
-SCALAR_FN CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32 first_character, i32 second_character,
+CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32 first_character, i32 second_character,
                                  i32 (*available)(CUSTOMPIECE *), void (*configure_piece)(CUSTOMPIECE *, nufpar_s *),
                                  i32 (*weapon_from_name)(char *), CUSTOMISESAVE_s *save, i16 *animations) {
     if (first_character == -1 && second_character == -1)

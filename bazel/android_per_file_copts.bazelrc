@@ -129,7 +129,7 @@ build:target --per_file_copt=^src/MechInputTouch/MechJumpAutopilotAddon\.cpp$@-O
 build:target --per_file_copt=^src/legoapi/render/core/render\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/core/screen\.cpp$@-O2
 # Shader material filters use optimized switch lowering and leaf epilogues.
-build:target --per_file_copt=^src/legoapi/render/core/shader\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nu3d/ShaderMtlDescFilter\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/fx/edsplines\.cpp$@-O3
 # The RefPack encoder uses the original vectorized table initialization and
 # optimized match-search loops.
@@ -141,6 +141,7 @@ build:target --per_file_copt=^src/gamelib/crc/crc\.cpp$@-O2
 build:target --per_file_copt=^src/gamelib/nuwind/nuwind\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/area\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/base/gizmo\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/gizmo/base/gizgame\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/base/gizactions\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/base/gizmessage\.cpp$@-O3
 # The flow-box initializer and remap helpers match the target better at -O3.
@@ -187,6 +188,7 @@ build:target --per_file_copt=^src/legoapi/items/collect/bolts\.cpp$@-O3
 # The original Shard gizmo and collection TU is optimized in the target.
 build:target --per_file_copt=^src/legoapi/items/collect/shard\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/objects/gameobjects\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/items/objects/game_obj\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/actions/character/legoapi_tag\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/objects/objectsall\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/props/doors/doors\.cpp$@-O3
@@ -195,6 +197,7 @@ build:target --per_file_copt=^src/legoapi/core/input/timer\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/core/input/timing\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/core/input/timing\.cpp$@-ftree-vectorize
 build:target --per_file_copt=^src/legoapi/core/input/gamepads\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/core/input/Controllers\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/episodeI\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/episodeII\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/pursuit\.cpp$@-O3
@@ -420,6 +423,7 @@ build:target --per_file_copt=^src/nu2api/nusound/nusound_voice\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_android\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_voice_android\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_weakptr\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nusound/nusound_callback\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nu3d/nuocclusion\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/light/occlusion\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_effect_doppler\.cpp$@-O3
@@ -507,6 +511,8 @@ build:target --per_file_copt=^src/legoapi/items/fx/ripples\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/collect/torpedo\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/characters/core/charconfig\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/characters/core/charconfig\.cpp$@-ftree-vectorize
+build:target --per_file_copt=^src/legoapi/core/config/config\.cpp$@-O2
+build:target --per_file_copt=^src/legoapi/core/config/config\.cpp$@-ftree-vectorize
 build:target --per_file_copt=^src/legoapi/characters/motion/move\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/characters/motion/move\.cpp$@-ftree-vectorize
 build:target --per_file_copt=^src/legoapi/props/objects/ledge\.cpp$@-O3

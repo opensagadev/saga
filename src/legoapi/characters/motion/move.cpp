@@ -7155,60 +7155,6 @@ void MoveToMarker::Render() {
 
 extern u8 show_lever_hint;
 
-void AtatPart_Stop(PART_s *part) __asm__("_ZL13AtatPart_StopP6PART_s") __attribute__((visibility("hidden")));
-void AtatPart_Update(PART_s *part) __asm__("_ZL15AtatPart_UpdateP6PART_s") __attribute__((visibility("hidden")));
-
-void AtatPart_Stop(PART_s *part) {
-    PlaySfx("EXPLODE1", &part->position);
-    PartStop_Flickerer(part);
-}
-
-void AtatPart_Update(PART_s *part) {
-    f32 choice = NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) * 100.0f + 1.0f;
-    if (part->scale_time < 1.0f) {
-        AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[118].effect, &part->position,
-                                          static_cast<i32>(part->scale_time * 20.0f), FRAMETIME, 0, 0, NULL);
-    } else if (part->scale_time < 2.0f) {
-        if (choice < 10.0f) {
-            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position,
-                                              static_cast<i32>(part->scale_time * 3.0f), FRAMETIME, qrand(), qrand(),
-                                              NULL);
-        } else if (choice > 90.0f) {
-            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position,
-                                              static_cast<i32>(part->scale_time * 15.0f), FRAMETIME, qrand(), qrand(),
-                                              NULL);
-        }
-    } else if (part->scale_time < 5.0f) {
-        if (choice < 10.0f) {
-            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position, 15, FRAMETIME,
-                                              qrand(), qrand(), NULL);
-        } else if (choice > 70.0f) {
-            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position, 30, FRAMETIME,
-                                              qrand(), qrand(), NULL);
-        }
-        if (choice < 30.0f) {
-            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 1, FRAMETIME,
-                                              qrand(), qrand(), NULL);
-        } else if (choice < 70.0f) {
-            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 3, FRAMETIME,
-                                              qrand(), qrand(), NULL);
-        } else {
-            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 20, FRAMETIME,
-                                              qrand(), qrand(), NULL);
-        }
-    } else if (part->scale_time < 10.0f) {
-        if (choice < 30.0f) {
-            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 1, FRAMETIME,
-                                              qrand(), qrand(), NULL);
-        } else if (choice < 70.0f) {
-            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 3, FRAMETIME,
-                                              qrand(), qrand(), NULL);
-        } else {
-            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, 20, FRAMETIME,
-                                              qrand(), qrand(), NULL);
-        }
-    }
-}
 
 i32 show_autojump_hint;
 

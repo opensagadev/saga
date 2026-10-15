@@ -281,7 +281,8 @@ void NuSoundDecodeThread::RequestDecode(NuSoundDecoder &decoder, NuSoundBuffer &
 void NuSoundDecodeThread::ThreadFunc(void *self_) {
     NuSoundDecodeThread *self = (NuSoundDecodeThread *)self_;
 
-    while (true) {
+    bool running;
+    do {
         self->semaphore.Wait();
 
         Loader &entry = *reinterpret_cast<Loader *>(&self->loaders[(i32)self->head_index % 128]);
@@ -293,45 +294,46 @@ void NuSoundDecodeThread::ThreadFunc(void *self_) {
         NuSoundBuffer *buffer = request.buffer;
         bool loop = request.loop;
 
-        // libTTapp.so 0x31f4d3: a closed decoder drops the request
-        // (pending count--) without decoding.
+        // libTTapp.so 0x31f4d3: an empty request is the shutdown marker; the
+        // request copy is still released at the end of the iteration.
         if (decoder == NULL) {
             NuSoundDecodeThread::sShutdownSemaphore.Signal();
-            return;
-        }
+            running = false;
+        } else {
+            if (decoder->closing == false) {
+                // Decode owns the destination buffer lock. ThreadFunc in the
+                // target dispatches directly through the decoder vtable here;
+                // it does not take a second NuSoundBuffer lock around that call.
+                decoder->Decode(*decoder->GetEncodedSource(), *buffer, loop);
+                decoder->buffers_started++;
 
-        if (decoder->closing == false) {
-            // Decode owns the destination buffer lock. ThreadFunc in the target
-            // dispatches directly through the decoder vtable here; it does not
-            // take a second NuSoundBuffer lock around that call.
-            decoder->Decode(*decoder->GetEncodedSource(), *buffer, loop);
-            decoder->buffers_started++;
-
-            NuSoundWeakPtrListNode::sPtrAccessLock.Lock();
-            NuSoundBufferCallback *callback = (NuSoundBufferCallback *)request.callback.obj;
-            if (callback != NULL) {
-                callback->SubmitBuffer(buffer);
+                NuSoundWeakPtrListNode::sPtrAccessLock.Lock();
+                NuSoundBufferCallback *callback = (NuSoundBufferCallback *)request.callback.obj;
+                if (callback != NULL) {
+                    callback->SubmitBuffer(buffer);
+                }
+                NuSoundWeakPtrListNode::sPtrAccessLock.Unlock();
             }
-            NuSoundWeakPtrListNode::sPtrAccessLock.Unlock();
-        }
 
-        // libTTapp.so 0x31f1c8: the request is complete; drop the pending
-        // count (a locked atomic sub on device) and raise the decode-done
-        // flag through the decoder's decode-sync pair (mutex +0xdc,
-        // cond +0xe0, done flag +0xe4). This never touches the decoder's
-        // lifetime lock mutex, which the owning voice holds.
-        __sync_fetch_and_sub(&decoder->field_0xd4, 1);
-        NuSoundMutexLock(&decoder->decode_mutex);
-        if (decoder->decode_done == false) {
-            decoder->decode_done = true;
-            if (!decoder->decode_broadcast) {
-                NuSoundConditionSignal(&decoder->decode_cond);
-            } else {
-                NuSoundConditionBroadcast(&decoder->decode_cond);
+            // libTTapp.so 0x31f1c8: the request is complete; drop the pending
+            // count (a locked atomic sub on device) and raise the decode-done
+            // flag through the decoder's decode-sync pair (mutex +0xdc,
+            // cond +0xe0, done flag +0xe4). This never touches the decoder's
+            // lifetime lock mutex, which the owning voice holds.
+            __sync_fetch_and_sub(&decoder->field_0xd4, 1);
+            NuSoundMutexLock(&decoder->decode_mutex);
+            if (decoder->decode_done == false) {
+                decoder->decode_done = true;
+                if (!decoder->decode_broadcast) {
+                    NuSoundConditionSignal(&decoder->decode_cond);
+                } else {
+                    NuSoundConditionBroadcast(&decoder->decode_cond);
+                }
             }
+            NuSoundMutexUnlock(&decoder->decode_mutex);
+            running = true;
         }
-        NuSoundMutexUnlock(&decoder->decode_mutex);
-    }
+    } while (running);
 }
 
 // libTTapp.so 0x31fc90.

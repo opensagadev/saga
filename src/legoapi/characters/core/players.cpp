@@ -736,57 +736,6 @@ float GetHoverPosY(GameObject_s *obj) {
     return 2000000.0f;
 }
 
-void PlayerTakeHit(GameObject_s *object, GameObject_s *attacker) {
-    if (object->apiobj.field_0x27c != -1)
-        return;
-
-    const u8 state = object->field_0xe31;
-    i32 animation;
-    void *animation_data;
-    if (state != 1) {
-        animation = 0x3d;
-        animation_data = object->apiobj.character_model->model_data_b[0x3d];
-    } else {
-        animation = 0x3e;
-        animation_data = object->apiobj.character_model->model_data_b[0x3e];
-    }
-    if (animation_data == NULL) {
-        if ((object->field_0xefb & 8) != 0) {
-            ResetAnimPacket(&object->apiobj.anim_packet, -1);
-            Player_ClearContext(object, 1);
-            Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
-        }
-        return;
-    }
-
-    if (object->field_0x7a5 == 0x1b && object->field_0x780 != NULL) {
-        GameObject_s *partner = static_cast<GameObject_s *>(object->field_0x780);
-        if (partner->field_0x7a5 == 0x1c)
-            partner->field_0x7a5 = 0xff;
-    }
-
-    object->context_animation = animation;
-    ResetAnimPacket(&object->apiobj.anim_packet, -1);
-    Player_ClearContext(object, 1);
-    Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
-    object->field_0x7a5 = 0x15;
-
-    f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
-    object->field_0xe31 = state;
-    object->context_animation_timer = duration;
-    if (duration <= 0.0f)
-        object->context_animation_timer = 1.0f;
-    SetFlicker(object, 0.4f);
-
-    if (attacker != NULL) {
-        const u16 angle = NuAtan2D(attacker->apiobj.collision_position.x - object->apiobj.collision_position.x,
-                                   attacker->apiobj.collision_position.z - object->apiobj.collision_position.z);
-        object->apiobj.field_0x276 = angle;
-        object->apiobj.movement_facing_angle = angle;
-        object->apiobj.facing_angle = angle;
-    }
-}
-
 void PlayerItem_Set(PLAYERITEM_s *item, PLAYERITEMTYPE_s *type) {
     item->type = type;
     if (type != NULL) {
@@ -1179,32 +1128,6 @@ void PlayerButton_OnClick_Callback_NextButton(MechTouchUIElement &element, Touch
 
 u32 (*CanPushObstaclesFn)(GameObject_s *) = NULL;
 
-i32 KillPlayer(GameObject_s *object, i32 reason, i32 ignore_spawn_protection, nuvec_s *) {
-    if (object->apiobj.field_0x287 != 0)
-        return 0;
-
-    if (ignore_spawn_protection != 0)
-        object->spawn_protection_timer = 0.0f;
-    else if (object->spawn_protection_timer > 0.0f)
-        return 0;
-
-    if (Arcade != 0) {
-        i32 other_player = 1;
-        if (object->apiobj.field_0x27c != 0) {
-            if (object->apiobj.field_0x27c != 1)
-                return KillGameObject(object, reason, 0);
-            other_player = 0;
-        }
-
-        i32 active = 0;
-        if (Player[other_player] != NULL)
-            active = (Player[other_player]->apiobj.field_0x1f4 >> 18) & 1;
-        Arcade_PlayerKilled(other_player, active);
-    }
-
-    return KillGameObject(object, reason, 0);
-}
-
 namespace {
 
     constexpr f32 kInvalidSurfaceHeight = 2000000.0f;
@@ -1590,17 +1513,6 @@ void ResetPlayerAI(GameObject_s *object) {
 
 void StarWars_AutoSetAICapabilities(GameObject_s *object);
 
-void ActivatePlayer(GameObject_s *object) {
-    object->character_context = -1;
-    if (object->apiobj.character_model->model_data_b[0x80] != NULL) {
-        object->character_context = 0x41;
-        object->context_animation = 0x80;
-        f32 duration = AnimDuration(object->id, 0x80, 0.0f, 0.0f, 1);
-        object->airborne_action_duration = 0.0f;
-        object->context_animation_timer = duration;
-    }
-}
-
 i32 MakePlayerList(i32 count) {
     i32 player_count = 0;
 
@@ -1656,41 +1568,6 @@ i32 MakePlayerList(i32 count) {
     }
     makeplayerlist_freeplay = 0;
     return player_count;
-}
-
-i32 DeactivatePlayer(GameObject_s *object, f32 duration, GameObject_s *source) {
-    if (object->character_context == 0x17 && !(duration > object->context_animation_timer))
-        return 0;
-    f32 model_state = object->field_0xd24;
-    Player_ClearContext(object, 1);
-    if (object->character_context == 0x3e)
-        return 0;
-    Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
-    object->character_context = 0x17;
-    object->field_0xd24 = model_state;
-    AISCRIPTPROCESS *process = reinterpret_cast<AISCRIPTPROCESS *>(&object->ai);
-    if (AIScriptSetBaseScriptStateByName(process, "BeenDeactivated")) {
-        AIScriptProcess(WORLD->ai_sys, &object->apiobj, &object->ai, process, FRAMETIME);
-    }
-    if (source != NULL && (source->apiobj.character_data->model_flags & 0x40) != 0 &&
-        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->field275_0x116 == 1 &&
-        object->apiobj.character_model->model_data_b[0x62] != NULL) {
-        duration = 4.0f;
-        object->context_animation = 0x62;
-    } else if (object->apiobj.character_model->model_data_b[0x81] != NULL &&
-               (static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[0x81])->flags & 2) == 0) {
-        object->context_animation = 0x81;
-    } else {
-        object->context_animation = object->apiobj.character_model->model_data_b[0x41] != NULL ? 0x41 : 1;
-    }
-    if ((object->apiobj.character_data->model_flags & 0x20) != 0)
-        SetProtocolDroidDeactivatedAction(object);
-    object->action_movement_state = 0;
-    object->context_animation_timer = duration;
-    object->airborne_action_duration = 0.0f;
-    object->field_0x768 = 0.0f;
-    NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
-    return 1;
 }
 
 void ResetPlayerPacket(PLAYERPACKET_s *, CHARACTERDATA_s *);

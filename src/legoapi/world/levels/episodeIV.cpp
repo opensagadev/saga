@@ -39,11 +39,6 @@ extern "C" AIPATHNODE_s *AIPathFindNode(AISYS_s *, AIPATH_s *, char *);
 extern "C" void AIPathNodeUpdatePos(AISYS_s *, AIPATH_s *, AIPATHNODE_s *);
 extern "C" i32 GetSfxId(const char *);
 extern "C" void PlaySfxByIdAndSetVolume(i32, NUVEC *, f32);
-void TiePart_Kill(PART_s *, i32) asm("_ZL12TiePart_KillP6PART_si") __attribute__((visibility("hidden")));
-void TiePart_Move(PART_s *, f32) asm("_ZL12TiePart_MoveP6PART_sf") __attribute__((visibility("hidden")));
-void TiePart_Impact(PART_s *) asm("_ZL14TiePart_ImpactP6PART_s") __attribute__((visibility("hidden")));
-void TiePart_KillExplode(PART_s *, i32) asm("_ZL19TiePart_KillExplodeP6PART_si") __attribute__((visibility("hidden")));
-void TieSpinZPart_Move(PART_s *, f32) asm("_ZL17TieSpinZPart_MoveP6PART_sf") __attribute__((visibility("hidden")));
 void TrenchMove(GameObject_s *) asm("_ZL10TrenchMoveP12GameObject_s") __attribute__((visibility("hidden")));
 void TrenchKilledCallback(GameObject_s *) asm("_ZL20TrenchKilledCallbackP12GameObject_s")
     __attribute__((visibility("hidden")));
@@ -988,62 +983,6 @@ void DeathStarEscapeB_AlwaysUpdate(WORLDINFO_s *) {
         else if (DEATHSTARESCAPEC_LDATA != NULL && socket_position.location.sock > 6)
             other_level_override = DEATHSTARESCAPEC_LDATA->idx;
     }
-}
-
-void KillParts_TIEFIGHTER(ADDPART_s *params, i32 part_index, i32 variant, GameObject_s *object, i32 mode, u16 xrot,
-                          u16 yrot, nuvec_s *velocity) {
-    params->flags = static_cast<u32>(variant) < 1 ? 0x400 : 0x10;
-    f32 speed_ratio =
-        object->apiobj.horizontal_velocity_magnitude / object->apiobj.character_data->game_character->run_speed;
-    if (speed_ratio <= 0.25f) {
-        params->flags = 0x90;
-        params->stop_fn = PartStop_Flickerer;
-        params->draw_fn = PartDraw_Flickerer;
-        params->gravity = -8.0f;
-        params->field_3c = PartImpact_Brick;
-        params->velocity = velocity;
-        AddPart(params);
-        return;
-    }
-
-    if (mode == 0) {
-        params->field_44 = TiePart_KillExplode;
-        params->flags = 0x111;
-        params->field_a4 = FRAMETIME;
-        params->velocity = &v000;
-        AddPart(params);
-        return;
-    }
-
-    if (__builtin_expect(mode == 1, 0)) {
-        NUVEC spin_velocity = {object->apiobj.velocity.x * 0.75f, object->apiobj.velocity.x * 0.75f,
-                               object->apiobj.velocity.z * 0.75f};
-        if (part_index == 5) {
-            NuVecRotateX(&spin_velocity, &spin_velocity, -static_cast<i32>(xrot));
-            NuVecRotateY(&spin_velocity, &spin_velocity, -static_cast<i32>(yrot));
-            params->move_fn = TiePart_Move;
-        } else {
-            NuVecRotateX(&spin_velocity, &spin_velocity, xrot);
-            NuVecRotateY(&spin_velocity, &spin_velocity, yrot);
-            params->move_fn = TieSpinZPart_Move;
-        }
-        params->flags = 0x111;
-        params->field_a4 = 2.0f;
-        params->field_44 = TiePart_Kill;
-        params->field_3c = TiePart_Impact;
-        params->velocity = &spin_velocity;
-        PlaySfx("Tie_Spins", &object->apiobj.collision_position);
-        AddPart(params);
-        return;
-    }
-
-    params->field_20 = 0.5f;
-    params->field_44 = TiePart_Kill;
-    params->flags = 0x91;
-    params->draw_fn = PartDraw_Flickerer;
-    params->field_3c = TiePart_Impact;
-    params->velocity = velocity;
-    AddPart(params);
 }
 
 // ===========================================================================

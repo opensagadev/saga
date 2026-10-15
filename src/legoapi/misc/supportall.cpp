@@ -104,6 +104,20 @@ extern "C" {
     extern u32 arcade_placed_stud_total;
 }
 
+// Scratch buffer descriptor; only its first two words are reset at start-up.
+struct BigBufferDesc {
+    void *data;
+    usize size;
+    usize used;
+    usize capacity;
+
+    BigBufferDesc() : data(NULL), size(0) {
+    }
+};
+
+MemoryManager theMemoryManager;
+BigBufferDesc BigBuffer;
+
 void CutScenes_Reset(WORLDINFO_s *);
 void ClearLevelProgress(i32, WORLDINFO_s *);
 void ResetScene(nugscn_s *, SCENEPROGRESS_s *);

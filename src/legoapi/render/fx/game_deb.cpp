@@ -673,6 +673,8 @@ void GenDebMomAdjFromPosRevTree(debkeydatatype_s *, debinftype *effect, uv1deb *
     particle->inverse_lifetime = 64.0f / (static_cast<f32>(lrand48()) * lifetime / 1503238528.0f + lifetime);
 }
 
+typedef f32 ClipBoxVec4 __attribute__((vector_size(16), aligned(4)));
+
 void DebrisDrawCalculateClipBoxes(debinftype *effect, debkeydatatype_s *key) {
     NUMTX matrix = key->effect_orientation;
     NuMtxTranslate(&matrix, &key->position);
@@ -692,8 +694,8 @@ void DebrisDrawCalculateClipBoxes(debinftype *effect, debkeydatatype_s *key) {
     if (extent.z < 0.0f)
         extent.z = -extent.z;
     f32 padding = 0.0001f * effect->max_size;
-    extent.x = (extent.x + padding) + 0.2f;
     extent.y = (extent.y + padding) + 0.2f;
+    extent.x = (extent.x + padding) + 0.2f;
     extent.z = (extent.z + padding) + 0.2f;
     NUVEC minimum = {-extent.x, -extent.y, -extent.z};
     if (effect->field_0a0 > 0.0f) {
@@ -703,18 +705,14 @@ void DebrisDrawCalculateClipBoxes(debinftype *effect, debkeydatatype_s *key) {
         f32 gravity_lifetime = effect->particle_lifetime;
         minimum.y = (effect->field_0a0 * gravity_lifetime) * gravity_lifetime - extent.y;
     }
-    f32 horizontal = extent.x > extent.z ? extent.x : extent.z;
-    f32 radius;
-    if (extent.y > -minimum.y)
-        radius = horizontal > extent.y ? horizontal : extent.y;
-    else if (horizontal > -minimum.y)
-        radius = horizontal;
-    else
-        radius = extent.y > -minimum.y ? extent.y : -minimum.y;
+    // Expanded from nested MAX macros, so each operand is re-evaluated.
+    f32 radius = (extent.x > extent.z ? extent.x : extent.z) > (extent.y > -minimum.y ? extent.y : -minimum.y)
+                     ? (extent.x > extent.z ? extent.x : extent.z)
+                     : (extent.y > -minimum.y ? extent.y : -minimum.y);
     key->clip_max = extent;
     key->clip_matrix = matrix;
-    key->clip_radius = radius;
-    key->clip_min = minimum;
+    // The radius and minimum corner are written together as one 4-float vector.
+    *reinterpret_cast<ClipBoxVec4 *>(&key->clip_radius) = (ClipBoxVec4){radius, minimum.x, minimum.y, minimum.z};
 }
 
 extern "C" {

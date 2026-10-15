@@ -1,8 +1,5 @@
 #include "nusound_weakptr.hpp"
 
-NuSoundCriticalSection NuSoundWeakPtrListNode::sPtrListLock;
-NuSoundCriticalSection NuSoundWeakPtrListNode::sPtrAccessLock;
-
 template <typename T> NuSoundWeakPtrObj<T>::~NuSoundWeakPtrObj() {
     NuSoundWeakPtrListNode::sPtrListLock.Lock();
 

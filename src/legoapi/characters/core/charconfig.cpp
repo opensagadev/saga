@@ -1983,57 +1983,6 @@ static void CC_untargetable(NUFPAR *parser) {
     }
 }
 
-static void CC_variant(NUFPAR *parser) {
-    if (NuFParGetWord(parser) == 0)
-        return;
-    if (NuStrICmp(parser->word_buf, "stormtrooper") == 0)
-        charconfig.runtime->field275_0x116 = 1;
-    else if (NuStrICmp(parser->word_buf, "fett") == 0)
-        charconfig.runtime->field275_0x116 = 2;
-    else if (NuStrICmp(parser->word_buf, "macewindu") == 0)
-        charconfig.runtime->field275_0x116 = 3;
-    else if (NuStrICmp(parser->word_buf, "battledroid") == 0)
-        charconfig.runtime->field275_0x116 = 4;
-    else if (NuStrICmp(parser->word_buf, "hoverdroid") == 0)
-        charconfig.runtime->field275_0x116 = 17;
-    else if (NuStrICmp(parser->word_buf, "walker2legs") == 0)
-        charconfig.runtime->field275_0x116 = 15;
-    else if (NuStrICmp(parser->word_buf, "walker4legs") == 0)
-        charconfig.runtime->field275_0x116 = 16;
-    else if (NuStrICmp(parser->word_buf, "wookiee") == 0)
-        charconfig.runtime->field275_0x116 = 5;
-    else if (NuStrICmp(parser->word_buf, "obiwankenobi") == 0)
-        charconfig.runtime->field275_0x116 = 6;
-    else if (NuStrICmp(parser->word_buf, "leia") == 0)
-        charconfig.runtime->field275_0x116 = 7;
-    else if (NuStrICmp(parser->word_buf, "clone") == 0)
-        charconfig.runtime->field275_0x116 = 8;
-    else if (NuStrICmp(parser->word_buf, "rebel") == 0)
-        charconfig.runtime->field275_0x116 = 9;
-    else if (NuStrICmp(parser->word_buf, "tie") == 0)
-        charconfig.runtime->field275_0x116 = 10;
-    else if (NuStrICmp(parser->word_buf, "lando") == 0)
-        charconfig.runtime->field275_0x116 = 11;
-    else if (NuStrICmp(parser->word_buf, "weirdo") == 0)
-        charconfig.runtime->field275_0x116 = 0;
-    else if (NuStrICmp(parser->word_buf, "luke") == 0)
-        charconfig.runtime->field275_0x116 = 12;
-    else if (NuStrICmp(parser->word_buf, "hansolo") == 0)
-        charconfig.runtime->field275_0x116 = 13;
-    else if (NuStrICmp(parser->word_buf, "padme") == 0)
-        charconfig.runtime->field275_0x116 = 14;
-    else if (NuStrICmp(parser->word_buf, "critter") == 0)
-        charconfig.runtime->field275_0x116 = 18;
-    else if (NuStrICmp(parser->word_buf, "naboostarfighter") == 0)
-        charconfig.runtime->field275_0x116 = 19;
-    else if (NuStrICmp(parser->word_buf, "pod") == 0)
-        charconfig.runtime->field275_0x116 = 20;
-    else if (NuStrICmp(parser->word_buf, "republicgunship") == 0)
-        charconfig.runtime->field275_0x116 = 21;
-    else if (NuStrICmp(parser->word_buf, "henchman") == 0)
-        charconfig.runtime->field275_0x116 = 22;
-}
-
 static void CC_vehicle(NUFPAR *parser) {
     charconfig.character->model_flags |= 0x2000;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
@@ -2268,11 +2217,6 @@ static NUFPCOMJMP ConfigChar_Keywords[] = {
     {NULL, NULL},
 };
 
-NUFPCOMJMP ConfigChar_GameKeywords[] = {
-    {"variant", CC_variant},
-    {NULL, NULL},
-};
-
 static CHARVARIANT *CharVariant;
 static i32 CHARVARIANTCOUNT;
 
@@ -2384,6 +2328,7 @@ i32 RandomIDFromFlags(u32 model_flags, u32 game_flags, i32 require_hat, APICHARA
                       i32 exclude_hidden) {
     i16 candidates[500];
     i32 count = 0;
+    const u32 big_head = model_flags & 8;
     CHARACTERDATA *character = CDataList;
     for (i32 id = 0; id < CHARCOUNT; ++id, ++character) {
         if (excluded != NULL && InModelList(excluded, id, NULL) != 0) {
@@ -2397,7 +2342,7 @@ i32 RandomIDFromFlags(u32 model_flags, u32 game_flags, i32 require_hat, APICHARA
         if (character->move_fn == Move_DEFAULT || (game_character->flags_090 & game_flags) != game_flags ||
             (character->model_flags & model_flags) != model_flags ||
             (exclude_hidden != 0 && (game_character->flags_094[1] & 0x40) != 0) ||
-            ((model_flags & 8) != 0 && (game_character->flags_094[1] & 0x80) != 0) || Collection_Got(id) == 0 ||
+            (big_head != 0 && (game_character->flags_094[1] & 0x80) != 0) || Collection_Got(id) == 0 ||
             (require_hat != 0 && CanWearHatsInFreePlay(id) == 0)) {
             continue;
         }
@@ -2408,10 +2353,10 @@ i32 RandomIDFromFlags(u32 model_flags, u32 game_flags, i32 require_hat, APICHARA
     if (count == 0) {
         return -1;
     }
-    if (count == 1) {
-        return candidates[0];
+    if (count != 1) {
+        return candidates[qrand() / (0xffff / count + 1)];
     }
-    return candidates[qrand() / (0xffff / count + 1)];
+    return candidates[0];
 }
 
 CHARCONFIG_s charconfig;

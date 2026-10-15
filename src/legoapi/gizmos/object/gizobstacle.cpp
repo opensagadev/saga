@@ -1189,17 +1189,6 @@ void GizObstacle_SetTechnoControlled(GIZOBSTACLE_s *obstacle, float speed) {
     obstacle->animation_speed = speed;
 }
 
-i32 GizObstacle_CheckExcludeFlagsFn_LSW(GIZOBSTACLE_s *obstacle, GameObject_s *object) {
-    if ((obstacle->field_0x6c & 1) != 0 &&
-        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->field275_0x116 != 10) {
-        return 1;
-    }
-    if ((obstacle->field_0x6c & 2) != 0 && object->apiobj.character_data->move_fn != Move_BEAST) {
-        return 1;
-    }
-    return 0;
-}
-
 void GizObstacle_EvalAveragePosAndRadius(GIZOBSTACLE_s *obstacle, i32 state) {
     obstacle->field_0x58 = 1.0f;
     obstacle->evaluated_position = obstacle->position;

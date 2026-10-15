@@ -1788,24 +1788,6 @@ void CollectCharcters_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, floa
     }
 }
 
-void RegisterGizmoTypes_Indy(variptr_u *buffer, variptr_u *buffer_end) {
-    REGISTERGIZMOTYPEFN gizmo_types[] = {
-        GizObstacles_RegisterGizmo, GizBuildIts_RegisterGizmo,
-        NewBlowup_RegisterGizmo,    GizmoPickups_RegisterGizmo,
-        Grapples_RegisterGizmo,     TightRopes_RegisterGizmo,
-        Levers_RegisterGizmo,       Spinner_RegisterGizmo,
-        Technos_RegisterGizmo,      MiniCut_RegisterGizmo,
-        Tubes_RegisterGizmo,        ZipUps_RegisterGizmo,
-        GizTurrets_RegisterGizmo,   AI_RegisterGizmo,
-        GizTimer_RegisterGizmo,     GizRandom_RegisterGizmo,
-        GizSpecial_RegisterGizmo,   Door_RegisterGizmo,
-        Plugs_RegisterGizmo,        GizAIMessage_RegisterGizmo,
-        Push_RegisterGizmo,         EdGizShadowMachine_RegisterGizmo,
-        Portal_RegisterGizmo,       NULL,
-    };
-    RegisterGizmoTypes(buffer, buffer_end, gizmo_types, 12);
-}
-
 i32 SetProtocolDroidFallAnim(GameObject_s *object) {
     switch (object->field_0xe38) {
         case 1:

@@ -397,14 +397,15 @@ void OcclusionManager::AddOccluder(nuvec_s const *center, float radius) {
     NUVEC right = {view->m00 * radius, view->m10 * radius, view->m20 * radius};
     NUVEC up = {view->m01 * radius, view->m11 * radius, view->m21 * radius};
     NUVEC forward = {view->m02 * radius, view->m12 * radius, radius * view->m22};
-    NUVEC4 a = {((center->x + up.x) - right.x) - forward.x, ((center->y + up.y) - right.y) - forward.y,
-                ((center->z + up.z) - right.z) - forward.z, 1.0f};
-    NUVEC4 b = {((center->x + up.x) + right.x) + forward.x, ((center->y + up.y) + right.y) + forward.y,
-                ((center->z + up.z) + right.z) + forward.z, 1.0f};
-    NUVEC4 c = {(right.x + (center->x - up.x)) + forward.x, (right.y + (center->y - up.y)) + forward.y,
-                (right.z + (center->z - up.z)) + forward.z, 1.0f};
-    NUVEC4 d = {((center->x - up.x) - right.x) - forward.x, ((center->y - up.y) - right.y) - forward.y,
-                ((center->z - up.z) - right.z) - forward.z, 1.0f};
+    NUVEC origin = *center;
+    NUVEC4 a = {((up.x + origin.x) - right.x) - forward.x, ((up.y + origin.y) - right.y) - forward.y,
+                ((up.z + origin.z) - right.z) - forward.z, 1.0f};
+    NUVEC4 b = {((up.x + origin.x) + right.x) + forward.x, ((up.y + origin.y) + right.y) + forward.y,
+                ((up.z + origin.z) + right.z) + forward.z, 1.0f};
+    NUVEC4 c = {(right.x + (origin.x - up.x)) + forward.x, (right.y + (origin.y - up.y)) + forward.y,
+                (right.z + (origin.z - up.z)) + forward.z, 1.0f};
+    NUVEC4 d = {((origin.x - up.x) - right.x) - forward.x, ((origin.y - up.y) - right.y) - forward.y,
+                ((origin.z - up.z) - right.z) - forward.z, 1.0f};
     AddOccluder(reinterpret_cast<NUVEC *>(&a), reinterpret_cast<NUVEC *>(&b), reinterpret_cast<NUVEC *>(&c),
                 reinterpret_cast<NUVEC *>(&d));
 }

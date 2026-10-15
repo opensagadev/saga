@@ -90,19 +90,6 @@ void ConstantRumble(GameObject_s *object, float strength, float phase) {
     }
 }
 
-void ClearLastSafeTakeOver(GameObject_s *object) {
-    if (object == NULL || (object->field_0xefa & 0x10) != 0) {
-        return;
-    }
-    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-        GameObject_s *candidate = &Obj[i];
-        if (candidate != NULL && (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
-            candidate->takeover_source == object) {
-            candidate->takeover_source = NULL;
-        }
-    }
-}
-
 void CatIToX(char *output, i32 value) {
     while (*output != '\0')
         ++output;

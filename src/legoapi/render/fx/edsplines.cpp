@@ -40,6 +40,11 @@ extern "C" {
 
 f32 BezierLineLength(VuVec &, VuVec &, VuVec &, VuVec &);
 
+// The original copies the aligned spline point to the caller's vector as
+// one unaligned 4-float vector store.
+typedef f32 BezierVec4 __attribute__((vector_size(16)));
+typedef f32 BezierVec4Unaligned __attribute__((vector_size(16), aligned(4)));
+
 i32 BezierLinePos(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, f32 distance) {
     f32 t = 0.5f;
     f32 step = 0.25f;
@@ -63,7 +68,7 @@ i32 BezierLinePos(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end,
         if (difference < 0.0f)
             difference = -difference;
         if (!(difference > 0.01f)) {
-            result = point;
+            *reinterpret_cast<BezierVec4Unaligned *>(&result) = *reinterpret_cast<BezierVec4 *>(&point);
             return 1;
         }
         if (distance < length)
@@ -72,7 +77,7 @@ i32 BezierLinePos(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end,
             t -= step;
         step *= 0.5f;
         if (count == 1) {
-            result = point;
+            *reinterpret_cast<BezierVec4Unaligned *>(&result) = *reinterpret_cast<BezierVec4 *>(&point);
             return 1;
         }
     }

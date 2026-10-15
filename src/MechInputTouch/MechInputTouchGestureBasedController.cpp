@@ -129,12 +129,9 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
     if (target != NULL && (target->GetObjectType() == 5 || target->GetObjectType() == 6)) {
         i32 flags = 0x1f4f;
         if (object.field_0xcc0 != NULL && object.field_0xcc0->id != id_YODA) {
-            if (TouchHacks::CanShoot(object)) {
-                flags = 0x5c05;
-            } else if (TouchHacks::CanPoo(object) || object.apiobj.character_data->move_fn == Move_BEAST) {
-                flags = 1;
-            } else {
-                flags = 0;
+            flags = TouchHacks::CanShoot(object) ? 0x5c05 : 0;
+            if (TouchHacks::CanPoo(object) || object.apiobj.character_data->move_fn == Move_BEAST) {
+                flags |= 1;
             }
         }
         target = MechInputTouchSystem::FindTargetObject(object, position, flags, NULL, NULL);

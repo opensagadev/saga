@@ -39,6 +39,10 @@ extern HashRedirect g_pixelShaderRedirects[602];
 extern LoadedUniqueShaderRecord g_loadedUniqueVertexShaders[368];
 extern LoadedUniqueShaderRecord g_loadedUniquePixelShaders[558];
 
+u32 g_cachedUniformMask[4];
+u32 g_textureSemanticMask[4];
+i32 g_shaderBufferCriticalSection = -1;
+
 void ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion(NUSHADERMTLDESC *desc) {
     u8 *vtx_desc = reinterpret_cast<u8 *>(&desc->vtx_desc);
     const u8 original_vtx_flags3 = vtx_desc[3];
@@ -117,7 +121,15 @@ void ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion(NUSHADERMTLDESC *d
     mobile_capabilities = (mobile_capabilities & 0xfb) | ((NuIOS_IsLowEndDevice() == 0) << 2);
 }
 
-extern i32 g_shaderBufferCriticalSection;
+bool ShaderManagerOpenGL::createShader(ShaderMtlDescFilter &filter, bool pixelStage, NuShaderObject *object, i32 id) {
+    ShaderObjectKey key = {0};
+    NuShaderObjectKeyGenerate3(&key.key, &filter, pixelStage);
+    return createShader(key, object, id);
+}
+
+ShaderManagerOpenGL::~ShaderManagerOpenGL() {
+}
+
 bool LookupHash(u32 key, u32 *value, HashRedirect *redirects, u32 count) {
     i32 upper = static_cast<i32>(count) - 1;
     if (upper < 0) {
@@ -149,6 +161,18 @@ bool LookupHash(u32 key, u32 *value, HashRedirect *redirects, u32 count) {
             return true;
         }
     }
+}
+
+ShaderManagerOpenGL::ShaderManagerOpenGL(VirtualStackAllocator &) {
+    g_cachedUniformMask[0] = 0;
+    g_cachedUniformMask[1] = 0xffe00000;
+    g_cachedUniformMask[3] = 0x1f;
+    g_cachedUniformMask[2] = 0xf900eb91;
+    g_textureSemanticMask[1] = 0;
+    g_textureSemanticMask[2] = 0;
+    g_textureSemanticMask[3] = 0;
+    g_textureSemanticMask[0] = 0x1fffff;
+    g_shaderBufferCriticalSection = NuThreadCreateCriticalSection();
 }
 
 bool LoadShaderSource(char **source, i32 *size, u32 key, bool pixel_stage) {
@@ -274,4 +298,39 @@ bool ShaderManagerOpenGL::createShader(const ::ShaderObjectKey &key, NuShaderObj
                        reinterpret_cast<const nushaderobjectkey_s *>(&key), param, static_cast<u32>(*vertexSlot),
                        static_cast<u32>(*pixelSlot), static_cast<eSHADERVERSION>(5));
     return true;
+}
+
+void ShaderManagerOpenGL::setfv(SHADERSEMANTIC_enum semantic, float const *values) {
+    nu2api::ShaderUniformRecord &uniform = nu2api::g_shaderUniforms[semantic];
+    const i32 count = static_cast<i32>(uniform.data.metadata[0]);
+    if (count <= 4) {
+        std::memcpy(uniform.data.values, values, static_cast<size_t>(count) << 4);
+    }
+}
+
+void ShaderManagerOpenGL::setElementfv(SHADERSEMANTIC_enum semantic, i32, float const *values) {
+    // The original Android implementation ignores the element range.
+    nu2api::ShaderUniformRecord &uniform = nu2api::g_shaderUniforms[semantic];
+    const i32 count = static_cast<i32>(uniform.data.metadata[0]);
+    if (count <= 4) {
+        std::memcpy(uniform.data.values, values, static_cast<size_t>(count) << 4);
+    }
+}
+
+void ShaderManagerOpenGL::setElementsfv(SHADERSEMANTIC_enum semantic, i32, i32, float const *values) {
+    // The original Android implementation ignores the element range.
+    nu2api::ShaderUniformRecord &uniform = nu2api::g_shaderUniforms[semantic];
+    const i32 count = static_cast<i32>(uniform.data.metadata[0]);
+    if (count <= 4) {
+        std::memcpy(uniform.data.values, values, static_cast<size_t>(count) << 4);
+    }
+}
+
+void ShaderManagerOpenGL::setElementsfv_transpose(SHADERSEMANTIC_enum semantic, i32, i32, float const *values) {
+    // The original Android implementation ignores the element range.
+    nu2api::ShaderUniformRecord &uniform = nu2api::g_shaderUniforms[semantic];
+    const i32 count = static_cast<i32>(uniform.data.metadata[0]);
+    if (count <= 4) {
+        std::memcpy(uniform.data.values, values, static_cast<size_t>(count) << 4);
+    }
 }

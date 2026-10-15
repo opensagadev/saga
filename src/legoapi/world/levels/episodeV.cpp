@@ -57,8 +57,6 @@ AILOCATOR_s *locator;
 GameObject_s *gameobj;
 extern u8 troopercannons_beenReset;
 void Asteroid_PartKill(PART_s *, i32);
-void AtatPart_Stop(PART_s *) __asm__("_ZL13AtatPart_StopP6PART_s") __attribute__((visibility("hidden")));
-void AtatPart_Update(PART_s *) __asm__("_ZL15AtatPart_UpdateP6PART_s") __attribute__((visibility("hidden")));
 void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *);
 void PartCollide_3D(PART_s *);
 void ResetTrooperCannons(WORLDINFO_s *, i32);
@@ -178,19 +176,6 @@ void DagobahC_Panel(WORLDINFO_s *) {
             DrawBossHitPoints(Vader_obj);
         }
     }
-}
-
-void KillParts_ATAT(ADDPART_s *params, i32, i32 variant, GameObject_s *) {
-    params->flags = static_cast<u32>(variant) < 1 ? 0x500 : 0x110;
-    params->velocity->z = 0.0f;
-    params->velocity->y = 0.0f;
-    params->velocity->x = 0.0f;
-    params->field_48 = AtatPart_Update;
-    params->stop_fn = AtatPart_Stop;
-    params->draw_fn = PartDraw_Flickerer;
-    PART_s *part = AddPart(params);
-    if (part != NULL)
-        part->field_100 = 10.0f;
 }
 
 f32 rocket_speed = 1.2f;
