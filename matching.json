@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 79.684006,
+    "fuzzy_match_percent": 79.687706,
     "total_code": "4722419",
-    "matched_code": "624386",
-    "matched_code_percent": 13.221741,
+    "matched_code": "625284",
+    "matched_code_percent": 13.240756,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
@@ -83532,70 +83532,6 @@
           "match_percent": 83.22222
         },
         {
-          "name": "_Z22Episodes_ConfigureListPcP9variptr_uS1_iPi",
-          "demangled_name": "Episodes_ConfigureList(char*, variptr_u*, variptr_u*, int, int*)",
-          "address": 4689712,
-          "offset": 3799744,
-          "size": 872,
-          "match_percent": 51.11739
-        },
-        {
-          "name": "_Z20Episode_ContainsAreaiPi",
-          "demangled_name": "Episode_ContainsArea(int, int*)",
-          "address": 4690592,
-          "offset": 3800624,
-          "size": 158,
-          "match_percent": 99.46429
-        },
-        {
-          "name": "_Z25Episode_FindAreaFromFlagsP11EPISODEDATAjj",
-          "demangled_name": "Episode_FindAreaFromFlags(EPISODEDATA*, unsigned int, unsigned int)",
-          "address": 4690752,
-          "offset": 3800784,
-          "size": 129,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18Episode_IsCompleteP11EPISODEDATAPi",
-          "demangled_name": "Episode_IsComplete(EPISODEDATA*, int*)",
-          "address": 4690896,
-          "offset": 3800928,
-          "size": 151,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18Episodes_Completedv",
-          "demangled_name": "Episodes_Completed()",
-          "address": 4691056,
-          "offset": 3801088,
-          "size": 111,
-          "match_percent": 99.47369
-        },
-        {
-          "name": "_Z20Episode_FindFromAreai",
-          "demangled_name": "Episode_FindFromArea(int)",
-          "address": 4691168,
-          "offset": 3801200,
-          "size": 121,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z22Episode_CountOpenAreasiiP10AREASAVE_s",
-          "demangled_name": "Episode_CountOpenAreas(int, int, AREASAVE_s*)",
-          "address": 4691296,
-          "offset": 3801328,
-          "size": 1049,
-          "match_percent": 99.942085
-        },
-        {
-          "name": "_Z17CountOpenEpisodesv",
-          "demangled_name": "CountOpenEpisodes()",
-          "address": 4692352,
-          "offset": 3802384,
-          "size": 103,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z10BossKilledi",
           "demangled_name": "BossKilled(int)",
           "address": 4815296,
@@ -86324,6 +86260,85 @@
           "offset": 1379856,
           "size": 61,
           "match_percent": 99.6875
+        }
+      ]
+    },
+    {
+      "name": "legoapi/world/levels/episodes.cpp.o",
+      "source": "src/legoapi/world/levels/episodes.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/episodes.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_episodes.cpp",
+          "demangled_name": "_GLOBAL__sub_I_episodes.cpp",
+          "address": 918384,
+          "offset": 28416,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_Z22Episodes_ConfigureListPcP9variptr_uS1_iPi",
+          "demangled_name": "Episodes_ConfigureList(char*, variptr_u*, variptr_u*, int, int*)",
+          "address": 4689712,
+          "offset": 3799744,
+          "size": 872,
+          "match_percent": 49.9
+        },
+        {
+          "name": "_Z20Episode_ContainsAreaiPi",
+          "demangled_name": "Episode_ContainsArea(int, int*)",
+          "address": 4690592,
+          "offset": 3800624,
+          "size": 158,
+          "match_percent": 99.46429
+        },
+        {
+          "name": "_Z25Episode_FindAreaFromFlagsP11EPISODEDATAjj",
+          "demangled_name": "Episode_FindAreaFromFlags(EPISODEDATA*, unsigned int, unsigned int)",
+          "address": 4690752,
+          "offset": 3800784,
+          "size": 129,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18Episode_IsCompleteP11EPISODEDATAPi",
+          "demangled_name": "Episode_IsComplete(EPISODEDATA*, int*)",
+          "address": 4690896,
+          "offset": 3800928,
+          "size": 151,
+          "match_percent": 99.73684
+        },
+        {
+          "name": "_Z18Episodes_Completedv",
+          "demangled_name": "Episodes_Completed()",
+          "address": 4691056,
+          "offset": 3801088,
+          "size": 111,
+          "match_percent": 99.47369
+        },
+        {
+          "name": "_Z20Episode_FindFromAreai",
+          "demangled_name": "Episode_FindFromArea(int)",
+          "address": 4691168,
+          "offset": 3801200,
+          "size": 121,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z22Episode_CountOpenAreasiiP10AREASAVE_s",
+          "demangled_name": "Episode_CountOpenAreas(int, int, AREASAVE_s*)",
+          "address": 4691296,
+          "offset": 3801328,
+          "size": 1049,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z17CountOpenEpisodesv",
+          "demangled_name": "CountOpenEpisodes()",
+          "address": 4692352,
+          "offset": 3802384,
+          "size": 103,
+          "match_percent": 100.0
         }
       ]
     },
@@ -95638,10 +95653,18 @@
       ]
     },
     {
-      "name": "nu2api/nu3d/nuwater_speed.cpp.o",
-      "source": "src/nu2api/nu3d/nuwater_speed.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuwater_speed.o",
+      "name": "nu2api/nu3d/nuwater.cpp.o",
+      "source": "src/nu2api/nu3d/nuwater.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuwater.o",
       "functions": [
+        {
+          "name": "_GLOBAL__sub_I_nuwater.cpp",
+          "demangled_name": "_GLOBAL__sub_I_nuwater.cpp",
+          "address": 903616,
+          "offset": 13648,
+          "size": 93,
+          "match_percent": 99.35294
+        },
         {
           "name": "NuWaterSpeed",
           "demangled_name": "NuWaterSpeed",
@@ -124350,14 +124373,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_GLOBAL__sub_I_nuwater.cpp",
-      "demangled_name": "_GLOBAL__sub_I_nuwater.cpp",
-      "address": 903616,
-      "offset": 13648,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
       "name": "_GLOBAL__sub_I_nueffecttex_android.cpp",
       "demangled_name": "_GLOBAL__sub_I_nueffecttex_android.cpp",
       "address": 906336,
@@ -124482,14 +124497,6 @@
       "demangled_name": "_GLOBAL__sub_I_worldinfo.cpp",
       "address": 918096,
       "offset": 28128,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_episodes.cpp",
-      "demangled_name": "_GLOBAL__sub_I_episodes.cpp",
-      "address": 918384,
-      "offset": 28416,
       "size": 93,
       "match_percent": 0.0
     },
@@ -128039,10 +128046,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 456,
+    "bazel_units": 457,
     "functions": 13454,
-    "assigned_functions": 12704,
+    "assigned_functions": 12706,
     "ambiguous_functions": 273,
-    "unassigned_functions": 477
+    "unassigned_functions": 475
   }
 }
