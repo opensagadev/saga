@@ -334,14 +334,10 @@ i32 Collection_GetIDList(COLLECTION_s *collection, u32 model_flag_mask, u32 requ
         }
         ++result_count;
 
-        if (first_id != NULL) {
-            i32 *selection = first_id;
-            if (*selection != -1) {
-                selection = second_id;
-            }
-            if (selection != NULL && *selection == -1) {
-                *selection = id;
-            }
+        if (first_id != NULL && *first_id == -1) {
+            *first_id = id;
+        } else if (second_id != NULL && *second_id == -1) {
+            *second_id = id;
         }
     }
 

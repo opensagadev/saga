@@ -54,6 +54,14 @@ void NuSoundDecoderOGG::OGGReadCallbacksDecoder::SetDecoder(NuSoundDecoderOGG *d
 }
 
 // libTTapp.so 0x32e1b0 / 0x32e1c0 / 0x32e1d0.
+// The decoder's weak callback pointers are set up in place rather than through
+// the out-of-line NuSoundWeakPtr::Set.
+static inline NuSoundWeakPtr<NuSoundBufferCallback> InlineWeakPtr(NuSoundBufferCallback *callback) {
+    NuSoundWeakPtr<NuSoundBufferCallback> pointer;
+    pointer.Assign(callback);
+    return pointer;
+}
+
 // The decoder datasource never seeks.  The original callback returns the
 // requested offset unchanged; vorbisfile ignores it on this streaming path.
 i32 NuSoundDecoderOGG::OGGReadCallbacksDecoder::Seek(i32 offset, u32 origin) {
@@ -127,7 +135,7 @@ int NuSoundDecoderOGG::OGGReadCallbacksDecoder::Read(void *dest, unsigned int si
         this->decoder->locked_buffer = this->decoder->encoded_buffers[this->decoder->ring_read_pos % 4];
         __sync_fetch_and_add(&this->decoder->ring_read_pos, 1);
 
-        this->decoder->source->RequestBuffer(false, NuSoundWeakPtr<NuSoundBufferCallback>(this->decoder));
+        this->decoder->source->RequestBuffer(false, InlineWeakPtr(this->decoder));
 
         this->decoder->locked_buffer->Lock();
         this->position = 0;
@@ -144,7 +152,7 @@ u64 NuSoundDecoderOGG::Decode(NuSoundSource &source, NuSoundBuffer &buffer, bool
 
     if (this->locked_buffer == NULL) {
         for (i32 i = 0; i < source.GetNumInitialBuffers(); i++) {
-            source.RequestBuffer(loop, NuSoundWeakPtr<NuSoundBufferCallback>(this));
+            source.RequestBuffer(loop, InlineWeakPtr(this));
         }
         this->locked_buffer = this->encoded_buffers[this->ring_read_pos % 4];
         __sync_fetch_and_add(&this->ring_read_pos, 1);

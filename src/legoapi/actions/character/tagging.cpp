@@ -66,48 +66,6 @@ i32 NuIOS_CanMakeInAppPurchases();
 
 i32 TagCode(GameObject_s *, GameObject_s *, i32, i32, i32);
 
-i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode) {
-    const auto available = [source](GameObject_s *candidate) {
-        return candidate != NULL && (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 && candidate != source &&
-               candidate->apiobj.field_0x287 == 0 && !candidate->apiobj.player_controlled &&
-               (candidate->tag_context_flags & 2) == 0;
-    };
-    if (!available(target)) {
-        if (available(Player[0]))
-            target = Player[0];
-        else if (available(Player[1]))
-            target = Player[1];
-        else if (available(Player[2]))
-            target = Player[2];
-        else if (available(Player[3]))
-            target = Player[3];
-        else if (available(Player[4]))
-            target = Player[4];
-        else if (available(Player[5]))
-            target = Player[5];
-        else if (available(Player[6]))
-            target = Player[6];
-        else if (available(Player[7]))
-            target = Player[7];
-        else
-            return 0;
-    }
-    const u8 target_active = target->apiobj.flags_low >> 7;
-    const u8 source_active = source->apiobj.flags_low >> 7;
-    const i32 result = TagCode(source, target, 0, 0, mode);
-    if (result == 2) {
-        const u8 flags = (source->tag_context_flags | 4) & ~8;
-        source->tag_target = target;
-        source->tag_context_timer = 3.0f;
-        source->tag_context_flags = flags;
-        return 0;
-    }
-    if (result == 0)
-        return 0;
-    target->apiobj.flags_low = (target->apiobj.flags_low & 0x7f) | (source_active << 7);
-    source->apiobj.flags_low = (source->apiobj.flags_low & 0x7f) | (target_active << 7);
-    return 1;
-}
 
 extern i16 id_TC14;
 extern i16 id_GRABCONTROL;

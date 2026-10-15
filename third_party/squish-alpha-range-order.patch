@@ -1,0 +1,17 @@
+--- a/alpha.cpp
++++ b/alpha.cpp
+@@ -245,12 +245,12 @@
+ 		int value = rgba[4*i + 3];
+ 		if( value < min7 )
+ 			min7 = value;
+-		if( value > max7 )
+-			max7 = value;
+ 		if( value != 0 && value < min5 )
+ 			min5 = value;
+ 		if( value != 255 && value > max5 )
+ 			max5 = value;
++		if( value > max7 )
++			max7 = value;
+ 	}
+ 	
+ 	// handle the case that no valid range was found

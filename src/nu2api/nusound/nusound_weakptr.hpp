@@ -145,13 +145,13 @@ template <typename T> class NuSoundWeakPtr : public NuSoundWeakPtrListNode {
         // target wraps the generated weak-pointer copy in this outer lock;
         // Set() and Link() take the same recursive lock again.
         NuSoundWeakPtrListNode::sPtrListLock.Lock();
-        Set((T *)other.obj);
+        Assign((T *)other.obj);
         NuSoundWeakPtrListNode::sPtrListLock.Unlock();
     }
 
     NuSoundWeakPtr &operator=(const NuSoundWeakPtr &other) {
         NuSoundWeakPtrListNode::sPtrListLock.Lock();
-        Set((T *)other.obj);
+        Assign((T *)other.obj);
         NuSoundWeakPtrListNode::sPtrListLock.Unlock();
         return *this;
     }
@@ -171,7 +171,11 @@ template <typename T> class NuSoundWeakPtr : public NuSoundWeakPtrListNode {
         this->obj = NULL;
     }
 
-    void Set(T *ptr) {
+    void Set(T *ptr);
+
+    // Copies, assignments and some direct updates expand the pointer update
+    // in place.
+    void Assign(T *ptr) {
         NuSoundWeakPtrListNode::sPtrListLock.Lock();
 
         if (this->obj != (void *)ptr) {
@@ -190,3 +194,24 @@ template <typename T> class NuSoundWeakPtr : public NuSoundWeakPtrListNode {
         NuSoundWeakPtrListNode::sPtrListLock.Unlock();
     }
 };
+
+// Defined outside the class so it is not implicitly inline: retail calls Set
+// out of line when a weak pointer is built from a raw pointer.
+template <typename T> void NuSoundWeakPtr<T>::Set(T *ptr) {
+    NuSoundWeakPtrListNode::sPtrListLock.Lock();
+
+    if (this->obj != (void *)ptr) {
+        if (this->obj != NULL) {
+            this->obj->Unlink(this);
+        }
+
+        if (ptr != NULL) {
+            // Register this weak pointer in the target's list.
+            ((NuSoundWeakPtrObj<T> *)ptr)->Link(this);
+        }
+
+        this->obj = (NuSoundWeakPtrObj<T> *)ptr;
+    }
+
+    NuSoundWeakPtrListNode::sPtrListLock.Unlock();
+}

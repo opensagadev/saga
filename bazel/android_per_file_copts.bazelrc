@@ -185,6 +185,7 @@ build:target --per_file_copt=^src/legoapi/items/collect/bolts\.cpp$@-O3
 # The original Shard gizmo and collection TU is optimized in the target.
 build:target --per_file_copt=^src/legoapi/items/collect/shard\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/objects/gameobjects\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/actions/character/legoapi_tag\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/objects/objectsall\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/props/doors/doors\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/actions/character/speederchase\.cpp$@-O3
@@ -194,6 +195,7 @@ build:target --per_file_copt=^src/legoapi/core/input/timing\.cpp$@-ftree-vectori
 build:target --per_file_copt=^src/legoapi/core/input/gamepads\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/episodeI\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/episodeII\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/world/levels/pursuit\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/episodeIII\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/episodeIV\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/episodeV\.cpp$@-O3

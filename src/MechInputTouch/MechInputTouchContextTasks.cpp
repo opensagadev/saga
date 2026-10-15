@@ -130,7 +130,9 @@ bool MechTouchTaskGoTo::Update() {
                     controller->button_was_pressed[2] = 1;
                 }
             } else if (!(field_44 < 0.000001f) && !(field_40 < 0.1f)) {
-                if (field_4c == 0 || !(field_40 > s_mechTouchMoveToWalkAlwaysDist)) {
+                if (field_4c != 0 && field_40 > s_mechTouchMoveToWalkAlwaysDist) {
+                    // Far targets keep running at full speed.
+                } else {
                     direction.x *= s_mechTouchMoveToWalkSpeed;
                     direction.z *= s_mechTouchMoveToWalkSpeed;
                     direction.y *= s_mechTouchMoveToWalkSpeed;
@@ -683,12 +685,8 @@ bool MechTouchTaskHatMachine::Update() {
 }
 
 void MechTouchTaskPlannedGoTo::AnalysePath() {
+    VuVec position = start_position;
     const i32 end = path_index + (MIN(2, path_count - path_index));
-    VuVec position;
-    position.x = start_position.x;
-    position.y = start_position.y;
-    position.z = start_position.z;
-    position.w = start_position.w;
     for (; path_index <= end;) {
         position.z += step_z;
         position.x += step_x;
@@ -981,7 +979,8 @@ bool MechTouchTaskPlannedGoTo::Update() {
     f32 velocity_x;
     f32 velocity_y;
     f32 velocity_z;
-    if (!(dx * dx + dy * dy + dz * dz > 1.4f * 1.4f) && !(dy > player->apiobj.scaled_height)) {
+    const bool double_jump = dx * dx + dy * dy + dz * dz > 1.4f * 1.4f || dy > player->apiobj.scaled_height;
+    if (!double_jump) {
         const VuVec velocity = TouchHacks::CalculateJumpVelToHitPoint(*player, waypoint.position);
         velocity_x = velocity.x;
         velocity_y = velocity.y;

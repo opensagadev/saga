@@ -27,6 +27,17 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 i32 only_process_this_hint_id = -1;
+f32 ICONXPOS_VIRTUALS = -0.61500001f;
+f32 ICONYPOS_VIRTUALS = 0.47f;
+f32 ICONYPOS_TOUCHYFEELY = -0.699999988f;
+f32 AlphaBlendTime = 1.0f;
+
+// The hint icon transitions and the touch icon x position are dynamically
+// initialized in this unit's static constructor in the reference.
+HintVectorTransition hintIconPos;
+HintScalarTransition hintIconScale;
+HintScalarTransition hintYPop;
+f32 ICONXPOS_TOUCHYFEELY = -ICONX;
 static __used__ i32 Attack_UpdateHint(HINT_s *) {
     if (player == NULL || player->field_0x7a5 != 0xff || VehicleArea != 0)
         return 0;

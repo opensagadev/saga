@@ -24,17 +24,13 @@
 LSW_HINTCONDITIONS_s LSW_HintConditions;
 HINTSYS_s hintsys = {};
 HINTUIBUTTON_s *hintUIButton = NULL;
-f32 AlphaBlendTime = 1.0f;
+extern f32 AlphaBlendTime;
 extern f32 ICONX;
-f32 ICONXPOS_TOUCHYFEELY = -ICONX;
-f32 ICONYPOS_TOUCHYFEELY = -0.699999988f;
-f32 ICONXPOS_VIRTUALS = -0.61500001f;
-f32 ICONYPOS_VIRTUALS = 0.47f;
+extern f32 ICONXPOS_TOUCHYFEELY;
+extern f32 ICONYPOS_TOUCHYFEELY;
+extern f32 ICONXPOS_VIRTUALS;
+extern f32 ICONYPOS_VIRTUALS;
 static NUVEC PercentHint_TriggerPos = {-28.421f, 0.0f, -52.462f};
-
-HintVectorTransition hintIconPos;
-HintScalarTransition hintIconScale;
-HintScalarTransition hintYPop;
 f32 (*Hint_AlphaTargetFn)();
 i32 (*Hub_PanelBusyFn)();
 extern i32 only_process_this_hint_id;

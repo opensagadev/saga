@@ -114,7 +114,11 @@ http_archive(
     build_file = "//third_party:squish.BUILD.bazel",
     # Retail uses subtract-and-select scalar math and double Vec4 rounding.
     # Vec3 integer rounding is used only after finite colour-grid clamping.
-    patches = ["//third_party:squish-scalar-math.patch"],
+    # CompressAlphaDxt5 updates the 7-alpha maximum after the 5-alpha range.
+    patches = [
+        "//third_party:squish-scalar-math.patch",
+        "//third_party:squish-alpha-range-order.patch",
+    ],
     patch_args = ["-p1"],
     sha256 = "aec3428badafdbb3b0ed1ea3a385a8029e65694282459f61b4a538963e8cada3",
     strip_prefix = "squish-1.10",

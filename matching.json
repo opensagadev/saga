@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 79.61805,
+    "fuzzy_match_percent": 79.684006,
     "total_code": "4722419",
-    "matched_code": "623623",
-    "matched_code_percent": 13.205584,
+    "matched_code": "624386",
+    "matched_code_percent": 13.221741,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6843,
-    "matched_functions_percent": 50.843304,
+    "matched_functions": 6846,
+    "matched_functions_percent": 50.86559,
     "total_units": 1
   },
   "text": {
@@ -15748,7 +15748,7 @@
           "address": 4467984,
           "offset": 3578016,
           "size": 996,
-          "match_percent": 48.82996
+          "match_percent": 75.7166
         },
         {
           "name": "_ZN18MechTouchTaskPanel6UpdateEv",
@@ -15900,7 +15900,7 @@
           "address": 4475776,
           "offset": 3585808,
           "size": 1000,
-          "match_percent": 66.46835
+          "match_percent": 70.51477
         },
         {
           "name": "_ZN24MechTouchTaskPlannedGoTo17GenerateWaypointsEv",
@@ -15916,7 +15916,7 @@
           "address": 4477920,
           "offset": 3587952,
           "size": 1024,
-          "match_percent": 50.7451
+          "match_percent": 89.867645
         },
         {
           "name": "_ZN35MechTouchTaskPlannedDoubleClickGoToC1ER36MechInputTouchGestureBasedControllerP19MechObjectInterface",
@@ -17145,7 +17145,7 @@
           "address": 5246592,
           "offset": 4356624,
           "size": 602,
-          "match_percent": 27.28387
+          "match_percent": 73.69678
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystem24UnregisterGestureTrackerER28MechInputTouchGestureTracker",
@@ -39271,6 +39271,141 @@
       ]
     },
     {
+      "name": "legoapi/actions/character/legoapi_tag.cpp.o",
+      "source": "src/legoapi/actions/character/legoapi_tag.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/legoapi_tag.o",
+      "functions": [
+        {
+          "name": "_ZL27Tag_FindGameObject_TRANSFERP12GameObject_s",
+          "demangled_name": "Tag_FindGameObject_TRANSFER(GameObject_s*)",
+          "address": 891081,
+          "offset": 1113,
+          "size": 461,
+          "match_percent": 99.82727
+        },
+        {
+          "name": "_GLOBAL__sub_I_legoapi_tag.cpp",
+          "demangled_name": "_GLOBAL__sub_I_legoapi_tag.cpp",
+          "address": 901056,
+          "offset": 11088,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_ZL14DrawPackButtonP13GAMEMESSAGE_sP7nuvec_sf",
+          "demangled_name": "DrawPackButton(GAMEMESSAGE_s*, nuvec_s*, float)",
+          "address": 2410720,
+          "offset": 1520752,
+          "size": 2511,
+          "match_percent": 98.025444
+        },
+        {
+          "name": "_ZL18TakeOver_SetActionP12GameObject_sS0_.isra.0",
+          "demangled_name": "TakeOver_SetAction(GameObject_s*, GameObject_s*) [clone .isra.0]",
+          "address": 2413232,
+          "offset": 1523264,
+          "size": 574,
+          "match_percent": 78.746376
+        },
+        {
+          "name": "_Z11Tag_SetModei",
+          "demangled_name": "Tag_SetMode(int)",
+          "address": 2413808,
+          "offset": 1523840,
+          "size": 24,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "_Z7TagCodeP12GameObject_sS0_iii",
+          "demangled_name": "TagCode(GameObject_s*, GameObject_s*, int, int, int)",
+          "address": 2413840,
+          "offset": 1523872,
+          "size": 2222,
+          "match_percent": 57.484093
+        },
+        {
+          "name": "_Z12TagCharacterP12GameObject_sS0_i",
+          "demangled_name": "TagCharacter(GameObject_s*, GameObject_s*, int)",
+          "address": 2416064,
+          "offset": 1526096,
+          "size": 1013,
+          "match_percent": 46.768867
+        },
+        {
+          "name": "_Z14GetTakeOverPosP12GameObject_sP7nuvec_s",
+          "demangled_name": "GetTakeOverPos(GameObject_s*, nuvec_s*)",
+          "address": 2417088,
+          "offset": 1527120,
+          "size": 106,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z15ReleaseTakeOverP12GameObject_si",
+          "demangled_name": "ReleaseTakeOver(GameObject_s*, int)",
+          "address": 2417200,
+          "offset": 1527232,
+          "size": 1175,
+          "match_percent": 85.556015
+        },
+        {
+          "name": "_Z19ReleaseAllTakeOversv",
+          "demangled_name": "ReleaseAllTakeOvers()",
+          "address": 2418384,
+          "offset": 1528416,
+          "size": 213,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z12TakeOverYodaP12GameObject_sS0_ii",
+          "demangled_name": "TakeOverYoda(GameObject_s*, GameObject_s*, int, int)",
+          "address": 2418608,
+          "offset": 1528640,
+          "size": 365,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z19TakeOverGameObject2P12GameObject_sS0_i",
+          "demangled_name": "TakeOverGameObject2(GameObject_s*, GameObject_s*, int)",
+          "address": 2418976,
+          "offset": 1529008,
+          "size": 309,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z14TakeOver2GetInP12GameObject_sS0_",
+          "demangled_name": "TakeOver2GetIn(GameObject_s*, GameObject_s*)",
+          "address": 2419296,
+          "offset": 1529328,
+          "size": 513,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z9Tag_CheckP12GameObject_s",
+          "demangled_name": "Tag_Check(GameObject_s*)",
+          "address": 2419824,
+          "offset": 1529856,
+          "size": 3425,
+          "match_percent": 68.77567
+        },
+        {
+          "name": "_Z18TakeOverGameObjectP12GameObject_sS0_ii",
+          "demangled_name": "TakeOverGameObject(GameObject_s*, GameObject_s*, int, int)",
+          "address": 2423264,
+          "offset": 1533296,
+          "size": 82,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z12TakeOverCodeP12GameObject_si",
+          "demangled_name": "TakeOverCode(GameObject_s*, int)",
+          "address": 2423360,
+          "offset": 1533392,
+          "size": 2162,
+          "match_percent": 77.09328
+        }
+      ]
+    },
+    {
       "name": "legoapi/actions/character/simpletons.cpp.o",
       "source": "src/legoapi/actions/character/simpletons.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/simpletons.o",
@@ -39923,14 +40058,6 @@
           "offset": 441776,
           "size": 532,
           "match_percent": 95.55046
-        },
-        {
-          "name": "_Z12TagCharacterP12GameObject_sS0_i",
-          "demangled_name": "TagCharacter(GameObject_s*, GameObject_s*, int)",
-          "address": 2416064,
-          "offset": 1526096,
-          "size": 1013,
-          "match_percent": 46.768867
         },
         {
           "name": "_Z18Tag_ResetTransfersv",
@@ -61681,7 +61808,7 @@
           "address": 5100672,
           "offset": 4210704,
           "size": 1076,
-          "match_percent": 54.490566
+          "match_percent": 67.66038
         }
       ]
     },
@@ -63860,14 +63987,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gameobjects.o",
       "functions": [
         {
-          "name": "_ZL27Tag_FindGameObject_TRANSFERP12GameObject_s",
-          "demangled_name": "Tag_FindGameObject_TRANSFER(GameObject_s*)",
-          "address": 891081,
-          "offset": 1113,
-          "size": 461,
-          "match_percent": 99.82727
-        },
-        {
           "name": "_GLOBAL__sub_I_gameobjects.cpp",
           "demangled_name": "_GLOBAL__sub_I_gameobjects.cpp",
           "address": 917712,
@@ -63953,7 +64072,7 @@
           "address": 1250624,
           "offset": 360656,
           "size": 3364,
-          "match_percent": 34.625668
+          "match_percent": 34.665775
         },
         {
           "name": "_Z18GameObjectRotationP12GameObject_si",
@@ -63977,7 +64096,7 @@
           "address": 1266080,
           "offset": 376112,
           "size": 10082,
-          "match_percent": 68.811935
+          "match_percent": 68.79773
         },
         {
           "name": "_Z14KillGameObjectP12GameObject_sii",
@@ -63985,7 +64104,7 @@
           "address": 1282256,
           "offset": 392288,
           "size": 5214,
-          "match_percent": 45.421917
+          "match_percent": 45.435616
         },
         {
           "name": "_Z16TargetGameObjectP12GameObject_sP7nuvec_sS2_ffjiii",
@@ -64177,7 +64296,7 @@
           "address": 1542512,
           "offset": 652544,
           "size": 298,
-          "match_percent": 99.76471
+          "match_percent": 99.98529
         },
         {
           "name": "_ZL27SpecialRouteCharacterTypeIDPc",
@@ -64273,7 +64392,7 @@
           "address": 1556320,
           "offset": 666352,
           "size": 686,
-          "match_percent": 87.46012
+          "match_percent": 86.88344
         },
         {
           "name": "_Z13GameAIProcessv",
@@ -65532,102 +65651,6 @@
           "match_percent": 99.99219
         },
         {
-          "name": "_ZL14DrawPackButtonP13GAMEMESSAGE_sP7nuvec_sf",
-          "demangled_name": "DrawPackButton(GAMEMESSAGE_s*, nuvec_s*, float)",
-          "address": 2410720,
-          "offset": 1520752,
-          "size": 2511,
-          "match_percent": 98.025444
-        },
-        {
-          "name": "_Z11Tag_SetModei",
-          "demangled_name": "Tag_SetMode(int)",
-          "address": 2413808,
-          "offset": 1523840,
-          "size": 24,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "_Z7TagCodeP12GameObject_sS0_iii",
-          "demangled_name": "TagCode(GameObject_s*, GameObject_s*, int, int, int)",
-          "address": 2413840,
-          "offset": 1523872,
-          "size": 2222,
-          "match_percent": 56.838634
-        },
-        {
-          "name": "_Z14GetTakeOverPosP12GameObject_sP7nuvec_s",
-          "demangled_name": "GetTakeOverPos(GameObject_s*, nuvec_s*)",
-          "address": 2417088,
-          "offset": 1527120,
-          "size": 106,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z15ReleaseTakeOverP12GameObject_si",
-          "demangled_name": "ReleaseTakeOver(GameObject_s*, int)",
-          "address": 2417200,
-          "offset": 1527232,
-          "size": 1175,
-          "match_percent": 85.53527
-        },
-        {
-          "name": "_Z19ReleaseAllTakeOversv",
-          "demangled_name": "ReleaseAllTakeOvers()",
-          "address": 2418384,
-          "offset": 1528416,
-          "size": 213,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z12TakeOverYodaP12GameObject_sS0_ii",
-          "demangled_name": "TakeOverYoda(GameObject_s*, GameObject_s*, int, int)",
-          "address": 2418608,
-          "offset": 1528640,
-          "size": 365,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z19TakeOverGameObject2P12GameObject_sS0_i",
-          "demangled_name": "TakeOverGameObject2(GameObject_s*, GameObject_s*, int)",
-          "address": 2418976,
-          "offset": 1529008,
-          "size": 309,
-          "match_percent": 99.39189
-        },
-        {
-          "name": "_Z14TakeOver2GetInP12GameObject_sS0_",
-          "demangled_name": "TakeOver2GetIn(GameObject_s*, GameObject_s*)",
-          "address": 2419296,
-          "offset": 1529328,
-          "size": 513,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z9Tag_CheckP12GameObject_s",
-          "demangled_name": "Tag_Check(GameObject_s*)",
-          "address": 2419824,
-          "offset": 1529856,
-          "size": 3425,
-          "match_percent": 68.77567
-        },
-        {
-          "name": "_Z18TakeOverGameObjectP12GameObject_sS0_ii",
-          "demangled_name": "TakeOverGameObject(GameObject_s*, GameObject_s*, int, int)",
-          "address": 2423264,
-          "offset": 1533296,
-          "size": 82,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z12TakeOverCodeP12GameObject_si",
-          "demangled_name": "TakeOverCode(GameObject_s*, int)",
-          "address": 2423360,
-          "offset": 1533392,
-          "size": 2162,
-          "match_percent": 77.09328
-        },
-        {
           "name": "_Z26RemoveChunkFromRenderStackP25particlechunkrendertype_sPS0_",
           "demangled_name": "RemoveChunkFromRenderStack(particlechunkrendertype_s*, particlechunkrendertype_s**)",
           "address": 3459328,
@@ -65953,7 +65976,7 @@
           "address": 4345552,
           "offset": 3455584,
           "size": 502,
-          "match_percent": 97.30357
+          "match_percent": 99.625
         },
         {
           "name": "_ZN12ThingManager15cbEdTrackCancelEP10eduimenu_sS1_",
@@ -66337,7 +66360,7 @@
           "address": 4664800,
           "offset": 3774832,
           "size": 267,
-          "match_percent": 100.0
+          "match_percent": 99.64706
         },
         {
           "name": "_Z10GameTimingP11WORLDINFO_sPf",
@@ -67355,7 +67378,7 @@
           "address": 900000,
           "offset": 10032,
           "size": 93,
-          "match_percent": 0.0
+          "match_percent": 99.35294
         },
         {
           "name": "_ZL19GameMsg_GetExtraObjP13GAMEMESSAGE_s",
@@ -67713,7 +67736,7 @@
           "address": 924960,
           "offset": 34992,
           "size": 219,
-          "match_percent": 22.76087
+          "match_percent": 99.71739
         },
         {
           "name": "_Z16Dodge_UpdateHintP6HINT_s",
@@ -70553,7 +70576,7 @@
           "address": 2429472,
           "offset": 1539504,
           "size": 6315,
-          "match_percent": 62.39624
+          "match_percent": 63.02169
         },
         {
           "name": "_Z16StatusIconsOnOfff",
@@ -84585,102 +84608,6 @@
           "offset": 1264080,
           "size": 96,
           "match_percent": 99.958336
-        },
-        {
-          "name": "_Z25BountyHunterPursuitA_InitP11WORLDINFO_s",
-          "demangled_name": "BountyHunterPursuitA_Init(WORLDINFO_s*)",
-          "address": 2358656,
-          "offset": 1468688,
-          "size": 173,
-          "match_percent": 99.44444
-        },
-        {
-          "name": "_Z26BountyHunterPursuitA_ResetP11WORLDINFO_s",
-          "demangled_name": "BountyHunterPursuitA_Reset(WORLDINFO_s*)",
-          "address": 2358832,
-          "offset": 1468864,
-          "size": 220,
-          "match_percent": 99.46429
-        },
-        {
-          "name": "_Z27BountyHunterPursuitA_UpdateP11WORLDINFO_s",
-          "demangled_name": "BountyHunterPursuitA_Update(WORLDINFO_s*)",
-          "address": 2359056,
-          "offset": 1469088,
-          "size": 287,
-          "match_percent": 99.968254
-        },
-        {
-          "name": "_Z25BountyHunterPursuitB_InitP11WORLDINFO_s",
-          "demangled_name": "BountyHunterPursuitB_Init(WORLDINFO_s*)",
-          "address": 2359344,
-          "offset": 1469376,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z26BountyHunterPursuitB_ResetP11WORLDINFO_s",
-          "demangled_name": "BountyHunterPursuitB_Reset(WORLDINFO_s*)",
-          "address": 2359360,
-          "offset": 1469392,
-          "size": 360,
-          "match_percent": 99.545456
-        },
-        {
-          "name": "_Z27BountyHunterPursuitB_UpdateP11WORLDINFO_s",
-          "demangled_name": "BountyHunterPursuitB_Update(WORLDINFO_s*)",
-          "address": 2359728,
-          "offset": 1469760,
-          "size": 276,
-          "match_percent": 93.953125
-        },
-        {
-          "name": "_Z25BountyHunterPursuitC_InitP11WORLDINFO_s",
-          "demangled_name": "BountyHunterPursuitC_Init(WORLDINFO_s*)",
-          "address": 2360016,
-          "offset": 1470048,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z26BountyHunterPursuitC_ResetP11WORLDINFO_s",
-          "demangled_name": "BountyHunterPursuitC_Reset(WORLDINFO_s*)",
-          "address": 2360032,
-          "offset": 1470064,
-          "size": 328,
-          "match_percent": 99.93507
-        },
-        {
-          "name": "_Z27BountyHunterPursuitC_UpdateP11WORLDINFO_s",
-          "demangled_name": "BountyHunterPursuitC_Update(WORLDINFO_s*)",
-          "address": 2360368,
-          "offset": 1470400,
-          "size": 412,
-          "match_percent": 94.239586
-        },
-        {
-          "name": "_Z25BountyHunterPursuitD_InitP11WORLDINFO_s",
-          "demangled_name": "BountyHunterPursuitD_Init(WORLDINFO_s*)",
-          "address": 2360784,
-          "offset": 1470816,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z26BountyHunterPursuitD_ResetP11WORLDINFO_s",
-          "demangled_name": "BountyHunterPursuitD_Reset(WORLDINFO_s*)",
-          "address": 2360800,
-          "offset": 1470832,
-          "size": 483,
-          "match_percent": 99.45378
-        },
-        {
-          "name": "_Z27BountyHunterPursuitD_UpdateP11WORLDINFO_s",
-          "demangled_name": "BountyHunterPursuitD_Update(WORLDINFO_s*)",
-          "address": 2361296,
-          "offset": 1471328,
-          "size": 1422,
-          "match_percent": 89.548294
         }
       ]
     },
@@ -86780,6 +86707,117 @@
           "offset": 1467536,
           "size": 9,
           "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "legoapi/world/levels/pursuit.cpp.o",
+      "source": "src/legoapi/world/levels/pursuit.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/pursuit.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_pursuit.cpp",
+          "demangled_name": "_GLOBAL__sub_I_pursuit.cpp",
+          "address": 900672,
+          "offset": 10704,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_Z25BountyHunterPursuitA_InitP11WORLDINFO_s",
+          "demangled_name": "BountyHunterPursuitA_Init(WORLDINFO_s*)",
+          "address": 2358656,
+          "offset": 1468688,
+          "size": 173,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z26BountyHunterPursuitA_ResetP11WORLDINFO_s",
+          "demangled_name": "BountyHunterPursuitA_Reset(WORLDINFO_s*)",
+          "address": 2358832,
+          "offset": 1468864,
+          "size": 220,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z27BountyHunterPursuitA_UpdateP11WORLDINFO_s",
+          "demangled_name": "BountyHunterPursuitA_Update(WORLDINFO_s*)",
+          "address": 2359056,
+          "offset": 1469088,
+          "size": 287,
+          "match_percent": 99.968254
+        },
+        {
+          "name": "_Z25BountyHunterPursuitB_InitP11WORLDINFO_s",
+          "demangled_name": "BountyHunterPursuitB_Init(WORLDINFO_s*)",
+          "address": 2359344,
+          "offset": 1469376,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z26BountyHunterPursuitB_ResetP11WORLDINFO_s",
+          "demangled_name": "BountyHunterPursuitB_Reset(WORLDINFO_s*)",
+          "address": 2359360,
+          "offset": 1469392,
+          "size": 360,
+          "match_percent": 99.60227
+        },
+        {
+          "name": "_Z27BountyHunterPursuitB_UpdateP11WORLDINFO_s",
+          "demangled_name": "BountyHunterPursuitB_Update(WORLDINFO_s*)",
+          "address": 2359728,
+          "offset": 1469760,
+          "size": 276,
+          "match_percent": 93.953125
+        },
+        {
+          "name": "_Z25BountyHunterPursuitC_InitP11WORLDINFO_s",
+          "demangled_name": "BountyHunterPursuitC_Init(WORLDINFO_s*)",
+          "address": 2360016,
+          "offset": 1470048,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z26BountyHunterPursuitC_ResetP11WORLDINFO_s",
+          "demangled_name": "BountyHunterPursuitC_Reset(WORLDINFO_s*)",
+          "address": 2360032,
+          "offset": 1470064,
+          "size": 328,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z27BountyHunterPursuitC_UpdateP11WORLDINFO_s",
+          "demangled_name": "BountyHunterPursuitC_Update(WORLDINFO_s*)",
+          "address": 2360368,
+          "offset": 1470400,
+          "size": 412,
+          "match_percent": 94.239586
+        },
+        {
+          "name": "_Z25BountyHunterPursuitD_InitP11WORLDINFO_s",
+          "demangled_name": "BountyHunterPursuitD_Init(WORLDINFO_s*)",
+          "address": 2360784,
+          "offset": 1470816,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z26BountyHunterPursuitD_ResetP11WORLDINFO_s",
+          "demangled_name": "BountyHunterPursuitD_Reset(WORLDINFO_s*)",
+          "address": 2360800,
+          "offset": 1470832,
+          "size": 483,
+          "match_percent": 99.4958
+        },
+        {
+          "name": "_Z27BountyHunterPursuitD_UpdateP11WORLDINFO_s",
+          "demangled_name": "BountyHunterPursuitD_Update(WORLDINFO_s*)",
+          "address": 2361296,
+          "offset": 1471328,
+          "size": 1422,
+          "match_percent": 89.548294
         }
       ]
     },
@@ -112844,7 +112882,7 @@
           "address": 3228928,
           "offset": 2338960,
           "size": 2933,
-          "match_percent": 41.989143
+          "match_percent": 37.868385
         },
         {
           "name": "_ZN14NuSoundWeakPtrI12NuSoundVoiceE5ClearEv",
@@ -112869,6 +112907,14 @@
           "offset": 2342064,
           "size": 114,
           "match_percent": 100.0
+        },
+        {
+          "name": "_ZN14NuSoundWeakPtrI12NuSoundVoiceE3SetEPS0_",
+          "demangled_name": "NuSoundWeakPtr<NuSoundVoice>::Set(NuSoundVoice*)",
+          "address": 3232208,
+          "offset": 2342240,
+          "size": 331,
+          "match_percent": 69.943184
         },
         {
           "name": "_ZN14NuSoundWeakPtrI12NuSoundVoiceED1Ev",
@@ -113663,7 +113709,7 @@
           "address": 3275408,
           "offset": 2385440,
           "size": 501,
-          "match_percent": 0.0
+          "match_percent": 46.05645
         },
         {
           "name": "_ZN19NuSoundDecodeThread8ShutdownEv",
@@ -117214,7 +117260,7 @@
           "address": 3303184,
           "offset": 2413216,
           "size": 459,
-          "match_percent": 10.991803
+          "match_percent": 71.94262
         },
         {
           "name": "_ZN15NuSoundStreamer14ShutdownThreadEv",
@@ -119075,7 +119121,7 @@
           "address": 3328320,
           "offset": 2438352,
           "size": 593,
-          "match_percent": 48.10811
+          "match_percent": 93.445946
         }
       ]
     },
@@ -119091,14 +119137,6 @@
           "offset": 2342576,
           "size": 201,
           "match_percent": 45.172413
-        },
-        {
-          "name": "_ZN14NuSoundWeakPtrI21NuSoundBufferCallbackE3SetEPS0_",
-          "demangled_name": "NuSoundWeakPtr<NuSoundBufferCallback>::Set(NuSoundBufferCallback*)",
-          "address": 3276544,
-          "offset": 2386576,
-          "size": 331,
-          "match_percent": 69.943184
         },
         {
           "name": "_ZN17NuSoundWeakPtrObjI21NuSoundBufferCallbackED1Ev",
@@ -122505,6 +122543,20 @@
       ]
     },
     {
+      "name": "_ZN14NuSoundWeakPtrI21NuSoundBufferCallbackE3SetEPS0_",
+      "demangled_name": "NuSoundWeakPtr<NuSoundBufferCallback>::Set(NuSoundBufferCallback*)",
+      "address": 3276544,
+      "offset": 2386576,
+      "size": 331,
+      "match_percent": 69.943184,
+      "candidate_units": [
+        "nu2api/nusound/nusound_decoder.cpp.o",
+        "nu2api/nusound/nusound_streamer.cpp.o",
+        "nu2api/nusound/nusound_voice_android.cpp.o",
+        "nu2api/nusound/nusound_weakptr.cpp.o"
+      ]
+    },
+    {
       "name": "_ZN14NuSoundWeakPtrI21NuSoundBufferCallbackED1Ev",
       "demangled_name": "NuSoundWeakPtr<NuSoundBufferCallback>::~NuSoundWeakPtr()",
       "address": 3276880,
@@ -124274,22 +124326,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_GLOBAL__sub_I_pursuit.cpp",
-      "demangled_name": "_GLOBAL__sub_I_pursuit.cpp",
-      "address": 900672,
-      "offset": 10704,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_legoapi_tag.cpp",
-      "demangled_name": "_GLOBAL__sub_I_legoapi_tag.cpp",
-      "address": 901056,
-      "offset": 11088,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
       "name": "_GLOBAL__sub_I_NuPhoneOSMessage.cpp",
       "demangled_name": "_GLOBAL__sub_I_NuPhoneOSMessage.cpp",
       "address": 902032,
@@ -124543,7 +124579,7 @@
       "address": 935392,
       "offset": 45424,
       "size": 11528,
-      "match_percent": 88.66199
+      "match_percent": 89.79932
     },
     {
       "name": "_ZN6squish19DecompressAlphaDxt5EPhPKv",
@@ -125042,14 +125078,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZL18TakeOver_SetActionP12GameObject_sS0_.isra.0",
-      "demangled_name": "TakeOver_SetAction(GameObject_s*, GameObject_s*) [clone .isra.0]",
-      "address": 2413232,
-      "offset": 1523264,
-      "size": 574,
-      "match_percent": 0.0
-    },
-    {
       "name": "atexit",
       "demangled_name": "atexit",
       "address": 2454608,
@@ -125351,14 +125379,6 @@
       "address": 3232160,
       "offset": 2342192,
       "size": 40,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN14NuSoundWeakPtrI12NuSoundVoiceE3SetEPS0_",
-      "demangled_name": "NuSoundWeakPtr<NuSoundVoice>::Set(NuSoundVoice*)",
-      "address": 3232208,
-      "offset": 2342240,
-      "size": 331,
       "match_percent": 0.0
     },
     {
@@ -128019,10 +128039,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 454,
+    "bazel_units": 456,
     "functions": 13454,
-    "assigned_functions": 12701,
-    "ambiguous_functions": 272,
-    "unassigned_functions": 481
+    "assigned_functions": 12704,
+    "ambiguous_functions": 273,
+    "unassigned_functions": 477
   }
 }

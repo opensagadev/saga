@@ -66,7 +66,7 @@ void NuSoundStreamer::RequestFill(NuSoundStreamingSample *sample, NuSoundBuffer 
     element.loop = loop;
     element.start_offset = 0.0f;
     element.buffer = buffer;
-    element.weak_ptr.Set((NuSoundBufferCallback *)callback.obj);
+    element.weak_ptr.Assign((NuSoundBufferCallback *)callback.obj);
     element.weak_flag = false;
 
     this->queue2.Push(element);

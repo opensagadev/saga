@@ -719,11 +719,13 @@ void InitStatusScreen(WORLDINFO_s *world) {
                 Game.area_save[area].true_hero_complete[0] = Game.area_save[area].true_hero_complete[1] = 1;
                 AddToCompletionPoints(POINTS_PER_TRUEJEDI);
                 AddStatusStage(&p, 1, AddGoldBrickMessage(&p, tTRUEHERO));
-                if (p.episode_id != -1 && p.chapter != -1)
+                if (p.episode_id != -1 && p.chapter != -1) {
                     sprintf(event, "truejedi_ep%i_ch%i_awarded", p.episode_id + 1, p.chapter + 1);
-                else
+                    NuIOS_RecordFlurryEvent(event);
+                } else {
                     sprintf(event, "truejedi_%s_awarded", p.area->file);
-                NuIOS_RecordFlurryEvent(event);
+                    NuIOS_RecordFlurryEvent(event);
+                }
             } else if (p.collected_score > 0.0f && (p.mode_flags & 8) == 0)
                 AddStatusStage(&p, 2, 0);
         }
