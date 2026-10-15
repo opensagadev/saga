@@ -2169,7 +2169,7 @@ void MovePlayer_ROLLING(GameObject_s *object) {
         NUVEC position;
         NUVEC velocity;
         NUMTX matrix;
-    } local;
+    } local __attribute__((aligned(16)));
     object->field_0xe23 &= ~0x10;
     object->target_velocity.y = ObjInTube(object) ? 1.25f : 0.0f;
     f32 seek_rate = object->id == id_DRAGBOMB && (object->field_0xf01 & 2)

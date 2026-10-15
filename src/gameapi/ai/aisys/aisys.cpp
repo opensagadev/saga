@@ -4694,7 +4694,7 @@ __used__ static i32 Action_CnxController(AISYS *sys, AISCRIPTPROCESS *processor,
         if (match == NULL) {
             continue;
         }
-        char range[64];
+        char range[64] __attribute__((aligned(16)));
         NuStrCpy(range, match + 10);
         char *separator = NuStrIStr(range, "to");
         if (separator == NULL) {

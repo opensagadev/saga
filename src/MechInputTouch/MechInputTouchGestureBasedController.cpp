@@ -124,7 +124,7 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
         return false;
     }
     holder.clicked = 1;
-    VuVec position(holder.down_position.x, holder.down_position.y, 0.0f, 1.0f);
+    VuVec position __attribute__((aligned(16)))(holder.down_position.x, holder.down_position.y, 0.0f, 1.0f);
     MechObjectInterface *target = holder.target_object.Get();
     if (target != NULL && (target->GetObjectType() == 5 || target->GetObjectType() == 6)) {
         i32 flags = 0x1f4f;
@@ -421,7 +421,7 @@ bool MechInputTouchGestureBasedController::OnHold(GameObject_s &object, TouchHol
     if (target == NULL || object.touch_task != NULL) {
         return false;
     }
-    VuVec position(holder.down_position.x, holder.down_position.y, 0.0f, 1.0f);
+    VuVec position __attribute__((aligned(16)))(holder.down_position.x, holder.down_position.y, 0.0f, 1.0f);
     if (holder.target_object->GetObjectType() == 12) {
         void *force_target = object.force_glow_object;
         if (force_target != NULL && holder.target_object->GetPart() == force_target) {
@@ -694,7 +694,8 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpOverGap(GameObject_s *
             object->apiobj.character_data->player_config != NULL
                 ? *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(object->apiobj.character_data->player_config) + 0x1c)
                 : 0.0f;
-        VuVec boosted_velocity(object->apiobj.velocity.x, object->apiobj.velocity.y, object->apiobj.velocity.z, 1.0f);
+        VuVec boosted_velocity __attribute__((aligned(16)))(object->apiobj.velocity.x, object->apiobj.velocity.y,
+                                                            object->apiobj.velocity.z, 1.0f);
         f32 magnitude_sq = boosted_velocity.x * boosted_velocity.x + boosted_velocity.y * boosted_velocity.y +
                            boosted_velocity.z * boosted_velocity.z;
         if (magnitude_sq < speed * speed) {
