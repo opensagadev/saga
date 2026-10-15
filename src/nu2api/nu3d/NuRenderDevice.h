@@ -69,6 +69,9 @@ class NuRenderDevice : NuRenderDeviceGen {
 
   public:
     NuRenderDevice();
+    ~NuRenderDevice() {
+        pthread_mutex_destroy(&mutex);
+    }
 
     void Initialize();
 

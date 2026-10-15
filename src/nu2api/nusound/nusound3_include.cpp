@@ -50,11 +50,6 @@ class NuSound3Stream {
     static NuSoundWeakPtr<NuSoundVoice> mVoice;
 };
 
-NuSoundWeakPtr<NuSoundVoice> NuSound3Stream::mVoice;
-
-DECOMP_ASSERT(sizeof(NuSound3Stream::mVoice) == 0x10, "NuSound3Stream voice pointer size");
-
-static NuSoundListener g_NuSoundListener;
 // The original focused the listener on the player object; the title screen
 // runs before gameplay, where it is NULL and the focus stays disabled.
 static nuvec_s g_NuSoundFocusPosition;
@@ -73,20 +68,10 @@ extern "C" NuSoundVoice *NuSound3FindQuietestVoice(i32 sample_index, f32 *playba
     return NuSound.GetQuietestVoice(sample, *playback_position);
 }
 
-extern "C" void NuSound3Listener(VuMtx *matrix) {
-    g_NuSoundListener.SetHeadMatrix(matrix);
-}
-
 static NuSoundStream *g_NuSoundStreams[2] = {0};
 
-extern "C" f32 NuSound3GetStreamPlaybackTime(i32 stream_index) {
-    if (g_NuSoundStreams[stream_index] != NULL && NuSound3Stream::mVoice.obj != NULL) {
-        return reinterpret_cast<NuSoundVoice *>(NuSound3Stream::mVoice.obj)->GetPlaybackPositionSeconds();
-    }
-    return 0.0f;
-}
-
 static NuSoundLoadTrigger g_NuSoundLoadTrigger;
+static NuSoundCriticalSection g_NuSoundLoadCriticalSection;
 
 // 0x44-byte voice wrapper the NuSound3 API keeps per playing source. The
 // elists link these while they are pending playback / active / pending
@@ -116,6 +101,9 @@ template <> class NuEList<NuSound3Voice, DefaultElist> {
     struct Links {
         NuSound3Voice *prev;
         NuSound3Voice *next;
+
+        Links() : prev(NULL), next(NULL) {
+        }
     };
 
     Links begin_sentinel;
@@ -126,15 +114,7 @@ template <> class NuEList<NuSound3Voice, DefaultElist> {
     NuSound3Voice *end;
     i32 length;
 
-    NuEList() {
-        begin_sentinel.prev = NULL;
-        end_sentinel.next = NULL;
-        begin = reinterpret_cast<NuSound3Voice *>(&begin_sentinel);
-        end = reinterpret_cast<NuSound3Voice *>(&end_sentinel);
-        begin_sentinel.next = reinterpret_cast<NuSound3Voice *>(&end_sentinel);
-        end_sentinel.prev = reinterpret_cast<NuSound3Voice *>(&begin_sentinel);
-        length = 0;
-    }
+    NuEList();
 
     ~NuEList() {
         while (length != 0) {
@@ -156,6 +136,16 @@ template <> class NuEList<NuSound3Voice, DefaultElist> {
         return end;
     }
 };
+
+// Defined out of line: the original emitted this constructor on its own and
+// called it from the static initialiser rather than inlining it.
+NuEList<NuSound3Voice, DefaultElist>::NuEList() {
+    begin = reinterpret_cast<NuSound3Voice *>(&begin_sentinel);
+    end = reinterpret_cast<NuSound3Voice *>(&end_sentinel);
+    begin_sentinel.next = reinterpret_cast<NuSound3Voice *>(&end_sentinel);
+    end_sentinel.prev = reinterpret_cast<NuSound3Voice *>(&begin_sentinel);
+    length = 0;
+}
 
 DECOMP_ASSERT(sizeof(NuEList<NuSound3Voice>) == 0x1c, "NuSound3Voice list size");
 
@@ -195,7 +185,26 @@ static NuEList<NuSound3Voice> g_NuSoundVoicesActive{};
 static NuEList<NuSound3Voice> g_NuSoundVoicesPendingDestruction{};
 static i32 g_NuSoundNumReplaceableVoices;
 
+NuSoundWeakPtr<NuSoundVoice> NuSound3Stream::mVoice;
+
+DECOMP_ASSERT(sizeof(NuSound3Stream::mVoice) == 0x10, "NuSound3Stream voice pointer size");
+
+
 static NuSoundBuffer g_NuSoundStreamBuffers[4];
+
+static NuSoundListener g_NuSoundListener;
+
+extern "C" void NuSound3Listener(VuMtx *matrix) {
+    g_NuSoundListener.SetHeadMatrix(matrix);
+}
+
+extern "C" f32 NuSound3GetStreamPlaybackTime(i32 stream_index) {
+    if (g_NuSoundStreams[stream_index] != NULL && NuSound3Stream::mVoice.obj != NULL) {
+        return reinterpret_cast<NuSoundVoice *>(NuSound3Stream::mVoice.obj)->GetPlaybackPositionSeconds();
+    }
+    return 0.0f;
+}
+
 
 static NuSoundStreamer *g_NuSoundStreamer = NULL;
 static i16 *ActionPairTab;
@@ -205,7 +214,6 @@ static u16 *g_NuSoundLoadBits = NULL;
 static u16 *g_NuSoundLoadBitsCache = NULL;
 static i32 g_NuSoundNumLoadBitShorts = 0;
 static NuThread *g_NuSoundLoadThread = NULL;
-static pthread_mutex_t g_NuSoundLoadCriticalSection = PTHREAD_MUTEX_INITIALIZER;
 
 extern "C" void NuSound3StopVoice(NuSoundVoice *voice) {
     if (voice == NULL) {
@@ -268,7 +276,7 @@ void NuSound3SampleLoadThread(void *arg) {
         pthread_mutex_unlock(&g_NuSoundLoadTrigger.mutex);
 
         if (g_NuSoundLoadBits != NULL) {
-            pthread_mutex_lock(&g_NuSoundLoadCriticalSection);
+            g_NuSoundLoadCriticalSection.Lock();
 
             for (u32 i = 0; i < g_NuSoundSamples.length; i++) {
                 nusound_filename_info_s &info = g_NuSoundSamples.data[i];
@@ -303,7 +311,7 @@ void NuSound3SampleLoadThread(void *arg) {
                 }
             }
 
-            pthread_mutex_unlock(&g_NuSoundLoadCriticalSection);
+            g_NuSoundLoadCriticalSection.Unlock();
         }
     }
 }

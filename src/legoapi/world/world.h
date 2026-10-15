@@ -574,6 +574,7 @@ i32 WorldInfo_OtherLevel(WORLDINFO *world);
 
 void WorldInfo_Register(WORLDINFO *world);
 
+void WorldInfo_Dump(WORLDINFO *world);
 void WorldInfo_ClearAllIfScreenFaded(void);
 
 void WorldInfo_LoadObjectAnimFile(WORLDINFO *world);

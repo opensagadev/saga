@@ -1,4 +1,5 @@
 #include "gamelib/util/CRC16.h"
+#include "nu2api/nucore/nuvuvec.hpp"
 
 CRC16 CRC16::instance;
 u32 CRC16::crcTable[256];

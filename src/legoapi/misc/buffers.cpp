@@ -13,7 +13,3 @@ extern NUMEMFILE memfiles[20];
 void StillMemRestore() {
     // No operation in the Android build.
 }
-
-void MemFileBoundsCheck(i32 file) {
-    i32 remaining = memfiles[file].end - memfiles[file].ptr + 1;
-}

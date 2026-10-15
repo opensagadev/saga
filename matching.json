@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 79.687706,
+    "fuzzy_match_percent": 79.72764,
     "total_code": "4722419",
-    "matched_code": "625284",
-    "matched_code_percent": 13.240756,
+    "matched_code": "626164",
+    "matched_code_percent": 13.259392,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6846,
-    "matched_functions_percent": 50.86559,
+    "matched_functions": 6856,
+    "matched_functions_percent": 50.939896,
     "total_units": 1
   },
   "text": {
@@ -17844,7 +17844,7 @@
           "address": 916320,
           "offset": 26352,
           "size": 105,
-          "match_percent": 54.31579
+          "match_percent": 99.42105
         },
         {
           "name": "_ZN38MechInputTouchVirtualConsoleControllerD1Ev",
@@ -36735,7 +36735,7 @@
           "address": 907760,
           "offset": 17792,
           "size": 241,
-          "match_percent": 24.444445
+          "match_percent": 99.30556
         },
         {
           "name": "_ZN5CRC16C1Ev",
@@ -42504,7 +42504,7 @@
           "address": 923728,
           "offset": 33760,
           "size": 271,
-          "match_percent": 52.18182
+          "match_percent": 99.40909
         },
         {
           "name": "_Z15SpaceAudioPointv",
@@ -71498,15 +71498,7 @@
           "address": 918000,
           "offset": 28032,
           "size": 93,
-          "match_percent": 29.411764
-        },
-        {
-          "name": "_Z18MemFileBoundsChecki",
-          "demangled_name": "MemFileBoundsCheck(int)",
-          "address": 2465451,
-          "offset": 1575483,
-          "size": 92,
-          "match_percent": 90.0
+          "match_percent": 99.35294
         },
         {
           "name": "_Z15StillMemRestorev",
@@ -71514,7 +71506,7 @@
           "address": 4770880,
           "offset": 3880912,
           "size": 9,
-          "match_percent": 24.444445
+          "match_percent": 100.0
         }
       ]
     },
@@ -71796,7 +71788,7 @@
           "address": 914400,
           "offset": 24432,
           "size": 146,
-          "match_percent": 47.28
+          "match_percent": 99.56
         },
         {
           "name": "_Z11SuperWeirdoP12GameObject_s",
@@ -87028,7 +87020,38 @@
           "address": 1222464,
           "offset": 332496,
           "size": 3109,
-          "match_percent": 80.052246
+          "match_percent": 80.008705
+        },
+        {
+          "name": "_Z27SaveSceneObjectAnimTFactorsP8nugscn_s",
+          "demangled_name": "SaveSceneObjectAnimTFactors(nugscn_s*)",
+          "address": 4800880,
+          "offset": 3910912,
+          "size": 86,
+          "match_percent": 33.085712
+        },
+        {
+          "name": "_Z20SetAreaPickupGravityii",
+          "demangled_name": "SetAreaPickupGravity(int, int)",
+          "address": 4984032,
+          "offset": 4094064,
+          "size": 128,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "legoapi/world/worldinfo.cpp.o",
+      "source": "src/legoapi/world/worldinfo.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/worldinfo.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_worldinfo.cpp",
+          "demangled_name": "_GLOBAL__sub_I_worldinfo.cpp",
+          "address": 918096,
+          "offset": 28128,
+          "size": 93,
+          "match_percent": 99.35294
         },
         {
           "name": "_Z18WorldInfo_InitOncev",
@@ -87068,7 +87091,7 @@
           "address": 4657264,
           "offset": 3767296,
           "size": 63,
-          "match_percent": 99.210526
+          "match_percent": 100.0
         },
         {
           "name": "_Z18WorldInfo_RegisterP11WORLDINFO_s",
@@ -87084,7 +87107,7 @@
           "address": 4657424,
           "offset": 3767456,
           "size": 198,
-          "match_percent": 99.74138
+          "match_percent": 100.0
         },
         {
           "name": "_Z28WorldInfo_LoadObjectAnimFileP11WORLDINFO_s",
@@ -87092,7 +87115,7 @@
           "address": 4657632,
           "offset": 3767664,
           "size": 158,
-          "match_percent": 99.84375
+          "match_percent": 100.0
         },
         {
           "name": "_Z14WorldInfo_InitP11WORLDINFO_s",
@@ -87132,7 +87155,7 @@
           "address": 4661072,
           "offset": 3771104,
           "size": 701,
-          "match_percent": 69.716125
+          "match_percent": 69.619354
         },
         {
           "name": "_Z21WorldInfo_StreamLevelP12bgprocinfo_s",
@@ -87148,22 +87171,6 @@
           "address": 4662048,
           "offset": 3772080,
           "size": 206,
-          "match_percent": 99.71154
-        },
-        {
-          "name": "_Z27SaveSceneObjectAnimTFactorsP8nugscn_s",
-          "demangled_name": "SaveSceneObjectAnimTFactors(nugscn_s*)",
-          "address": 4800880,
-          "offset": 3910912,
-          "size": 86,
-          "match_percent": 33.085712
-        },
-        {
-          "name": "_Z20SetAreaPickupGravityii",
-          "demangled_name": "SetAreaPickupGravity(int, int)",
-          "address": 4984032,
-          "offset": 4094064,
-          "size": 128,
           "match_percent": 100.0
         }
       ]
@@ -87624,7 +87631,7 @@
           "address": 903808,
           "offset": 13840,
           "size": 271,
-          "match_percent": 61.136364
+          "match_percent": 99.40909
         },
         {
           "name": "_ZN17NuRenderDeviceGenC1Ev",
@@ -87640,6 +87647,22 @@
           "address": 2779072,
           "offset": 1889104,
           "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN14NuRenderDeviceD1Ev",
+          "demangled_name": "NuRenderDevice::~NuRenderDevice()",
+          "address": 2779088,
+          "offset": 1889120,
+          "size": 37,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN14NuRenderDeviceD2Ev",
+          "demangled_name": "NuRenderDevice::~NuRenderDevice()",
+          "address": 2779088,
+          "offset": 1889120,
+          "size": 37,
           "match_percent": 100.0
         },
         {
@@ -87903,6 +87926,53 @@
           "address": 978512,
           "offset": 88544,
           "size": 26,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nu3d/ShaderObjectKey.cpp.o",
+      "source": "src/nu2api/nu3d/ShaderObjectKey.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/ShaderObjectKey.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_ShaderObjectKey.cpp",
+          "demangled_name": "_GLOBAL__sub_I_ShaderObjectKey.cpp",
+          "address": 907376,
+          "offset": 17408,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "NuShaderObjectKeyGenerate3",
+          "demangled_name": "NuShaderObjectKeyGenerate3",
+          "address": 3184160,
+          "offset": 2294192,
+          "size": 1201,
+          "match_percent": 53.977707
+        },
+        {
+          "name": "NuShaderObjectKeyGenerate2",
+          "demangled_name": "NuShaderObjectKeyGenerate2",
+          "address": 3185376,
+          "offset": 2295408,
+          "size": 104,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderObjectKeyGenerate4",
+          "demangled_name": "NuShaderObjectKeyGenerate4",
+          "address": 3185488,
+          "offset": 2295520,
+          "size": 249,
+          "match_percent": 63.666668
+        },
+        {
+          "name": "NuShaderObjectKeySetUberShaderHash",
+          "demangled_name": "NuShaderObjectKeySetUberShaderHash",
+          "address": 3185744,
+          "offset": 2295776,
+          "size": 186,
           "match_percent": 100.0
         }
       ]
@@ -94360,22 +94430,22 @@
           "offset": 2209472,
           "size": 92,
           "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderUniformGetByString",
-          "demangled_name": "NuShaderUniformGetByString",
-          "address": 3185936,
-          "offset": 2295968,
-          "size": 131,
-          "match_percent": 100.0
         }
       ]
     },
     {
-      "name": "nu2api/nu3d/nushadermanager_plain.cpp.o",
-      "source": "src/nu2api/nu3d/nushadermanager_plain.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nushadermanager_plain.o",
+      "name": "nu2api/nu3d/nushadermanager_gen.cpp.o",
+      "source": "src/nu2api/nu3d/nushadermanager_gen.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nushadermanager_gen.o",
       "functions": [
+        {
+          "name": "_GLOBAL__sub_I_nushadermanager_gen.cpp",
+          "demangled_name": "_GLOBAL__sub_I_nushadermanager_gen.cpp",
+          "address": 907184,
+          "offset": 17216,
+          "size": 93,
+          "match_percent": 99.35294
+        },
         {
           "name": "NuShaderManagerInit",
           "demangled_name": "NuShaderManagerInit",
@@ -94391,6 +94461,22 @@
           "offset": 2291728,
           "size": 86,
           "match_percent": 93.793106
+        },
+        {
+          "name": "NuShaderManagerLoadCompiledShaders",
+          "demangled_name": "NuShaderManagerLoadCompiledShaders",
+          "address": 3181792,
+          "offset": 2291824,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderManagerForceShader",
+          "demangled_name": "NuShaderManagerForceShader",
+          "address": 3181808,
+          "offset": 2291840,
+          "size": 9,
+          "match_percent": 100.0
         },
         {
           "name": "NuShaderManagerReleaseShader",
@@ -94441,6 +94527,30 @@
           "match_percent": 100.0
         },
         {
+          "name": "NuShaderManagerSetShininessFactor",
+          "demangled_name": "NuShaderManagerSetShininessFactor",
+          "address": 3182432,
+          "offset": 2292464,
+          "size": 28,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderManagerGetShininessFactor",
+          "demangled_name": "NuShaderManagerGetShininessFactor",
+          "address": 3182464,
+          "offset": 2292496,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderManagerGetInstance",
+          "demangled_name": "NuShaderManagerGetInstance",
+          "address": 3182496,
+          "offset": 2292528,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
           "name": "NuShaderManagerSetShaderSaveFolder",
           "demangled_name": "NuShaderManagerSetShaderSaveFolder",
           "address": 3182528,
@@ -94463,38 +94573,21 @@
           "offset": 2292688,
           "size": 78,
           "match_percent": 40.944443
-        },
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nu3d/nushadermanagerios.cpp.o",
+      "source": "src/nu2api/nu3d/nushadermanagerios.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nushadermanagerios.o",
+      "functions": [
         {
-          "name": "NuShaderObjectKeyGenerate3",
-          "demangled_name": "NuShaderObjectKeyGenerate3",
-          "address": 3184160,
-          "offset": 2294192,
-          "size": 1201,
-          "match_percent": 54.35987
-        },
-        {
-          "name": "NuShaderObjectKeyGenerate2",
-          "demangled_name": "NuShaderObjectKeyGenerate2",
-          "address": 3185376,
-          "offset": 2295408,
-          "size": 104,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderObjectKeyGenerate4",
-          "demangled_name": "NuShaderObjectKeyGenerate4",
-          "address": 3185488,
-          "offset": 2295520,
-          "size": 249,
-          "match_percent": 63.666668
-        },
-        {
-          "name": "NuShaderObjectKeySetUberShaderHash",
-          "demangled_name": "NuShaderObjectKeySetUberShaderHash",
-          "address": 3185744,
-          "offset": 2295776,
-          "size": 186,
-          "match_percent": 100.0
+          "name": "_GLOBAL__sub_I_nushadermanagerios.cpp",
+          "demangled_name": "_GLOBAL__sub_I_nushadermanagerios.cpp",
+          "address": 907664,
+          "offset": 17696,
+          "size": 93,
+          "match_percent": 99.35294
         },
         {
           "name": "_ZN19ShaderManagerOpenGL35adaptShaderMaterialForShaderVersionEP17nushadermtldesc_s",
@@ -95671,6 +95764,29 @@
           "address": 2776416,
           "offset": 1886448,
           "size": 9,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nu3d/shaderSemantics.cpp.o",
+      "source": "src/nu2api/nu3d/shaderSemantics.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/shaderSemantics.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_shaderSemantics.cpp",
+          "demangled_name": "_GLOBAL__sub_I_shaderSemantics.cpp",
+          "address": 907472,
+          "offset": 17504,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "NuShaderUniformGetByString",
+          "demangled_name": "NuShaderUniformGetByString",
+          "address": 3185936,
+          "offset": 2295968,
+          "size": 131,
           "match_percent": 100.0
         }
       ]
@@ -99207,54 +99323,6 @@
           "offset": 4530688,
           "size": 50,
           "match_percent": 100.0
-        },
-        {
-          "name": "_ZNK8NuNetEmu9PackStats4DrawEffffN13NetSmallStats5eInfoE",
-          "demangled_name": "NuNetEmu::PackStats::Draw(float, float, float, float, NetSmallStats::eInfo) const",
-          "address": 5618656,
-          "offset": 4728688,
-          "size": 928,
-          "match_percent": 99.9893
-        },
-        {
-          "name": "_ZN8NuNetEmu9EmuPacketC1EP11nunetaddr_s",
-          "demangled_name": "NuNetEmu::EmuPacket::EmuPacket(nunetaddr_s*)",
-          "address": 5620080,
-          "offset": 4730112,
-          "size": 113,
-          "match_percent": 94.56
-        },
-        {
-          "name": "_ZN8NuNetEmu9EmuPacketC2EP11nunetaddr_s",
-          "demangled_name": "NuNetEmu::EmuPacket::EmuPacket(nunetaddr_s*)",
-          "address": 5620080,
-          "offset": 4730112,
-          "size": 113,
-          "match_percent": 94.56
-        },
-        {
-          "name": "_ZN8NuNetEmu9EmuPacketD1Ev",
-          "demangled_name": "NuNetEmu::EmuPacket::~EmuPacket()",
-          "address": 5620208,
-          "offset": 4730240,
-          "size": 55,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN8NuNetEmu9EmuPacketD2Ev",
-          "demangled_name": "NuNetEmu::EmuPacket::~EmuPacket()",
-          "address": 5620208,
-          "offset": 4730240,
-          "size": 55,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN8NuNetEmu9EmuPacket10AddPayloadEPvi",
-          "demangled_name": "NuNetEmu::EmuPacket::AddPayload(void*, int)",
-          "address": 5621872,
-          "offset": 4731904,
-          "size": 124,
-          "match_percent": 100.0
         }
       ]
     },
@@ -99635,14 +99703,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nucore.o",
       "functions": [
         {
-          "name": "_GLOBAL__sub_I_nucore.cpp",
-          "demangled_name": "_GLOBAL__sub_I_nucore.cpp",
-          "address": 892976,
-          "offset": 3008,
-          "size": 93,
-          "match_percent": 31.764706
-        },
-        {
           "name": "_ZN6NuCore19GetApplicationStateEv",
           "demangled_name": "NuCore::GetApplicationState()",
           "address": 985968,
@@ -99720,7 +99780,7 @@
           "address": 3069200,
           "offset": 2179232,
           "size": 2485,
-          "match_percent": 74.994804
+          "match_percent": 74.99654
         },
         {
           "name": "_ZN14NuDynamicLight5cloneEP9variptr_uS0_",
@@ -99777,254 +99837,6 @@
           "offset": 2239472,
           "size": 45,
           "match_percent": 100.0
-        },
-        {
-          "name": "_ZN12NuPostFilter19initSharedResourcesEii",
-          "demangled_name": "NuPostFilter::initSharedResources(int, int)",
-          "address": 3142352,
-          "offset": 2252384,
-          "size": 2071,
-          "match_percent": 78.15072
-        },
-        {
-          "name": "_ZN12NuPostFilter13renderFrustumEP7numtx_s",
-          "demangled_name": "NuPostFilter::renderFrustum(numtx_s*)",
-          "address": 3144432,
-          "offset": 2254464,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN12NuMainFilter13initResourcesEv",
-          "demangled_name": "NuMainFilter::initResources()",
-          "address": 3144448,
-          "offset": 2254480,
-          "size": 75,
-          "match_percent": 84.44444
-        },
-        {
-          "name": "_ZN12NuMainFilterD1Ev",
-          "demangled_name": "NuMainFilter::~NuMainFilter()",
-          "address": 3144528,
-          "offset": 2254560,
-          "size": 29,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN12NuMainFilterD2Ev",
-          "demangled_name": "NuMainFilter::~NuMainFilter()",
-          "address": 3144528,
-          "offset": 2254560,
-          "size": 29,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN12NuMainFilterD0Ev",
-          "demangled_name": "NuMainFilter::~NuMainFilter()",
-          "address": 3144560,
-          "offset": 2254592,
-          "size": 45,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN14NuMotionFilter13initResourcesEv",
-          "demangled_name": "NuMotionFilter::initResources()",
-          "address": 3144608,
-          "offset": 2254640,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN14NuMotionFilterD1Ev",
-          "demangled_name": "NuMotionFilter::~NuMotionFilter()",
-          "address": 3144624,
-          "offset": 2254656,
-          "size": 29,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN14NuMotionFilterD2Ev",
-          "demangled_name": "NuMotionFilter::~NuMotionFilter()",
-          "address": 3144624,
-          "offset": 2254656,
-          "size": 29,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN14NuMotionFilterD0Ev",
-          "demangled_name": "NuMotionFilter::~NuMotionFilter()",
-          "address": 3144656,
-          "offset": 2254688,
-          "size": 45,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16NuDeferredFilter13initResourcesEv",
-          "demangled_name": "NuDeferredFilter::initResources()",
-          "address": 3144704,
-          "offset": 2254736,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16NuDeferredFilterD1Ev",
-          "demangled_name": "NuDeferredFilter::~NuDeferredFilter()",
-          "address": 3144720,
-          "offset": 2254752,
-          "size": 29,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16NuDeferredFilterD2Ev",
-          "demangled_name": "NuDeferredFilter::~NuDeferredFilter()",
-          "address": 3144720,
-          "offset": 2254752,
-          "size": 29,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16NuDeferredFilterD0Ev",
-          "demangled_name": "NuDeferredFilter::~NuDeferredFilter()",
-          "address": 3144752,
-          "offset": 2254784,
-          "size": 45,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN17NuSpeedBlurFilter13initResourcesEv",
-          "demangled_name": "NuSpeedBlurFilter::initResources()",
-          "address": 3144800,
-          "offset": 2254832,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN17NuSpeedBlurFilterD1Ev",
-          "demangled_name": "NuSpeedBlurFilter::~NuSpeedBlurFilter()",
-          "address": 3144816,
-          "offset": 2254848,
-          "size": 29,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN17NuSpeedBlurFilterD2Ev",
-          "demangled_name": "NuSpeedBlurFilter::~NuSpeedBlurFilter()",
-          "address": 3144816,
-          "offset": 2254848,
-          "size": 29,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN17NuSpeedBlurFilterD0Ev",
-          "demangled_name": "NuSpeedBlurFilter::~NuSpeedBlurFilter()",
-          "address": 3144848,
-          "offset": 2254880,
-          "size": 45,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN19NuMotionAccumFilter13initResourcesEv",
-          "demangled_name": "NuMotionAccumFilter::initResources()",
-          "address": 3144896,
-          "offset": 2254928,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN19NuMotionAccumFilterD1Ev",
-          "demangled_name": "NuMotionAccumFilter::~NuMotionAccumFilter()",
-          "address": 3144912,
-          "offset": 2254944,
-          "size": 29,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN19NuMotionAccumFilterD2Ev",
-          "demangled_name": "NuMotionAccumFilter::~NuMotionAccumFilter()",
-          "address": 3144912,
-          "offset": 2254944,
-          "size": 29,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN19NuMotionAccumFilterD0Ev",
-          "demangled_name": "NuMotionAccumFilter::~NuMotionAccumFilter()",
-          "address": 3144944,
-          "offset": 2254976,
-          "size": 45,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL9cbSortSegPKvS0_",
-          "demangled_name": "cbSortSeg(void const*, void const*)",
-          "address": 5618592,
-          "offset": 4728624,
-          "size": 55,
-          "match_percent": 63.0625
-        },
-        {
-          "name": "_ZN8NuNetEmu10FindPacketEP11nunetaddr_si",
-          "demangled_name": "NuNetEmu::FindPacket(nunetaddr_s*, int)",
-          "address": 5619584,
-          "offset": 4729616,
-          "size": 81,
-          "match_percent": 97.741936
-        },
-        {
-          "name": "_ZN8NuNetEmu8RecvFromEPviR11nunetaddr_s",
-          "demangled_name": "NuNetEmu::RecvFrom(void*, int, nunetaddr_s&)",
-          "address": 5619680,
-          "offset": 4729712,
-          "size": 391,
-          "match_percent": 64.5
-        },
-        {
-          "name": "_ZN8NuNetEmu15SplitSendPacketEPNS_9EmuPacketE",
-          "demangled_name": "NuNetEmu::SplitSendPacket(NuNetEmu::EmuPacket*)",
-          "address": 5620272,
-          "offset": 4730304,
-          "size": 890,
-          "match_percent": 91.753555
-        },
-        {
-          "name": "_ZN8NuNetEmu6UpdateEv",
-          "demangled_name": "NuNetEmu::Update()",
-          "address": 5621168,
-          "offset": 4731200,
-          "size": 691,
-          "match_percent": 77.375694
-        },
-        {
-          "name": "_ZN8NuNetEmu6SendToEPviP11nunetaddr_si",
-          "demangled_name": "NuNetEmu::SendTo(void*, int, nunetaddr_s*, int)",
-          "address": 5622000,
-          "offset": 4732032,
-          "size": 513,
-          "match_percent": 62.99286
-        },
-        {
-          "name": "_ZN8NuNetEmu13SetConditionsENS_11eConditionsE",
-          "demangled_name": "NuNetEmu::SetConditions(NuNetEmu::eConditions)",
-          "address": 5622528,
-          "offset": 4732560,
-          "size": 182,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN8NuNetEmuC1Ev",
-          "demangled_name": "NuNetEmu::NuNetEmu()",
-          "address": 5622720,
-          "offset": 4732752,
-          "size": 631,
-          "match_percent": 84.86598
-        },
-        {
-          "name": "_ZN8NuNetEmuC2Ev",
-          "demangled_name": "NuNetEmu::NuNetEmu()",
-          "address": 5622720,
-          "offset": 4732752,
-          "size": 631,
-          "match_percent": 84.86598
         }
       ]
     },
@@ -102019,6 +101831,53 @@
       ]
     },
     {
+      "name": "nu2api/nucore/nudeferredfilter.cpp.o",
+      "source": "src/nu2api/nucore/nudeferredfilter.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nudeferredfilter.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_nudeferredfilter.cpp",
+          "demangled_name": "_GLOBAL__sub_I_nudeferredfilter.cpp",
+          "address": 906896,
+          "offset": 16928,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_ZN16NuDeferredFilter13initResourcesEv",
+          "demangled_name": "NuDeferredFilter::initResources()",
+          "address": 3144704,
+          "offset": 2254736,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16NuDeferredFilterD1Ev",
+          "demangled_name": "NuDeferredFilter::~NuDeferredFilter()",
+          "address": 3144720,
+          "offset": 2254752,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16NuDeferredFilterD2Ev",
+          "demangled_name": "NuDeferredFilter::~NuDeferredFilter()",
+          "address": 3144720,
+          "offset": 2254752,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16NuDeferredFilterD0Ev",
+          "demangled_name": "NuDeferredFilter::~NuDeferredFilter()",
+          "address": 3144752,
+          "offset": 2254784,
+          "size": 45,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
       "name": "nu2api/nucore/nuerror.cpp.o",
       "source": "src/nu2api/nucore/nuerror.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuerror.o",
@@ -102984,6 +102843,53 @@
       ]
     },
     {
+      "name": "nu2api/nucore/numainfilter.cpp.o",
+      "source": "src/nu2api/nucore/numainfilter.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/numainfilter.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_numainfilter.cpp",
+          "demangled_name": "_GLOBAL__sub_I_numainfilter.cpp",
+          "address": 906704,
+          "offset": 16736,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_ZN12NuMainFilter13initResourcesEv",
+          "demangled_name": "NuMainFilter::initResources()",
+          "address": 3144448,
+          "offset": 2254480,
+          "size": 75,
+          "match_percent": 84.44444
+        },
+        {
+          "name": "_ZN12NuMainFilterD1Ev",
+          "demangled_name": "NuMainFilter::~NuMainFilter()",
+          "address": 3144528,
+          "offset": 2254560,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN12NuMainFilterD2Ev",
+          "demangled_name": "NuMainFilter::~NuMainFilter()",
+          "address": 3144528,
+          "offset": 2254560,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN12NuMainFilterD0Ev",
+          "demangled_name": "NuMainFilter::~NuMainFilter()",
+          "address": 3144560,
+          "offset": 2254592,
+          "size": 45,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
       "name": "nu2api/nucore/numem.c.o",
       "source": "src/nu2api/nucore/numem.c",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/0/numem.o",
@@ -103444,6 +103350,100 @@
       ]
     },
     {
+      "name": "nu2api/nucore/numotionaccumfilter.cpp.o",
+      "source": "src/nu2api/nucore/numotionaccumfilter.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/numotionaccumfilter.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_numotionaccumfilter.cpp",
+          "demangled_name": "_GLOBAL__sub_I_numotionaccumfilter.cpp",
+          "address": 907088,
+          "offset": 17120,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_ZN19NuMotionAccumFilter13initResourcesEv",
+          "demangled_name": "NuMotionAccumFilter::initResources()",
+          "address": 3144896,
+          "offset": 2254928,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN19NuMotionAccumFilterD1Ev",
+          "demangled_name": "NuMotionAccumFilter::~NuMotionAccumFilter()",
+          "address": 3144912,
+          "offset": 2254944,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN19NuMotionAccumFilterD2Ev",
+          "demangled_name": "NuMotionAccumFilter::~NuMotionAccumFilter()",
+          "address": 3144912,
+          "offset": 2254944,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN19NuMotionAccumFilterD0Ev",
+          "demangled_name": "NuMotionAccumFilter::~NuMotionAccumFilter()",
+          "address": 3144944,
+          "offset": 2254976,
+          "size": 45,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nucore/numotionfilter.cpp.o",
+      "source": "src/nu2api/nucore/numotionfilter.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/numotionfilter.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_numotionfilter.cpp",
+          "demangled_name": "_GLOBAL__sub_I_numotionfilter.cpp",
+          "address": 906800,
+          "offset": 16832,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_ZN14NuMotionFilter13initResourcesEv",
+          "demangled_name": "NuMotionFilter::initResources()",
+          "address": 3144608,
+          "offset": 2254640,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN14NuMotionFilterD1Ev",
+          "demangled_name": "NuMotionFilter::~NuMotionFilter()",
+          "address": 3144624,
+          "offset": 2254656,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN14NuMotionFilterD2Ev",
+          "demangled_name": "NuMotionFilter::~NuMotionFilter()",
+          "address": 3144624,
+          "offset": 2254656,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN14NuMotionFilterD0Ev",
+          "demangled_name": "NuMotionFilter::~NuMotionFilter()",
+          "address": 3144656,
+          "offset": 2254688,
+          "size": 45,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
       "name": "nu2api/nucore/numouse.cpp.o",
       "source": "src/nu2api/nucore/numouse.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/numouse.o",
@@ -103559,6 +103559,141 @@
           "offset": 1637549,
           "size": 10,
           "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nucore/nunetemu.cpp.o",
+      "source": "src/nu2api/nucore/nunetemu.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nunetemu.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_nunetemu.cpp",
+          "demangled_name": "_GLOBAL__sub_I_nunetemu.cpp",
+          "address": 929808,
+          "offset": 39840,
+          "size": 241,
+          "match_percent": 99.30556
+        },
+        {
+          "name": "_ZL9cbSortSegPKvS0_",
+          "demangled_name": "cbSortSeg(void const*, void const*)",
+          "address": 5618592,
+          "offset": 4728624,
+          "size": 55,
+          "match_percent": 63.0625
+        },
+        {
+          "name": "_ZNK8NuNetEmu9PackStats4DrawEffffN13NetSmallStats5eInfoE",
+          "demangled_name": "NuNetEmu::PackStats::Draw(float, float, float, float, NetSmallStats::eInfo) const",
+          "address": 5618656,
+          "offset": 4728688,
+          "size": 928,
+          "match_percent": 99.9893
+        },
+        {
+          "name": "_ZN8NuNetEmu10FindPacketEP11nunetaddr_si",
+          "demangled_name": "NuNetEmu::FindPacket(nunetaddr_s*, int)",
+          "address": 5619584,
+          "offset": 4729616,
+          "size": 81,
+          "match_percent": 97.741936
+        },
+        {
+          "name": "_ZN8NuNetEmu8RecvFromEPviR11nunetaddr_s",
+          "demangled_name": "NuNetEmu::RecvFrom(void*, int, nunetaddr_s&)",
+          "address": 5619680,
+          "offset": 4729712,
+          "size": 391,
+          "match_percent": 64.5
+        },
+        {
+          "name": "_ZN8NuNetEmu9EmuPacketC1EP11nunetaddr_s",
+          "demangled_name": "NuNetEmu::EmuPacket::EmuPacket(nunetaddr_s*)",
+          "address": 5620080,
+          "offset": 4730112,
+          "size": 113,
+          "match_percent": 94.56
+        },
+        {
+          "name": "_ZN8NuNetEmu9EmuPacketC2EP11nunetaddr_s",
+          "demangled_name": "NuNetEmu::EmuPacket::EmuPacket(nunetaddr_s*)",
+          "address": 5620080,
+          "offset": 4730112,
+          "size": 113,
+          "match_percent": 94.56
+        },
+        {
+          "name": "_ZN8NuNetEmu9EmuPacketD1Ev",
+          "demangled_name": "NuNetEmu::EmuPacket::~EmuPacket()",
+          "address": 5620208,
+          "offset": 4730240,
+          "size": 55,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN8NuNetEmu9EmuPacketD2Ev",
+          "demangled_name": "NuNetEmu::EmuPacket::~EmuPacket()",
+          "address": 5620208,
+          "offset": 4730240,
+          "size": 55,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN8NuNetEmu15SplitSendPacketEPNS_9EmuPacketE",
+          "demangled_name": "NuNetEmu::SplitSendPacket(NuNetEmu::EmuPacket*)",
+          "address": 5620272,
+          "offset": 4730304,
+          "size": 890,
+          "match_percent": 91.753555
+        },
+        {
+          "name": "_ZN8NuNetEmu6UpdateEv",
+          "demangled_name": "NuNetEmu::Update()",
+          "address": 5621168,
+          "offset": 4731200,
+          "size": 691,
+          "match_percent": 77.375694
+        },
+        {
+          "name": "_ZN8NuNetEmu9EmuPacket10AddPayloadEPvi",
+          "demangled_name": "NuNetEmu::EmuPacket::AddPayload(void*, int)",
+          "address": 5621872,
+          "offset": 4731904,
+          "size": 124,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN8NuNetEmu6SendToEPviP11nunetaddr_si",
+          "demangled_name": "NuNetEmu::SendTo(void*, int, nunetaddr_s*, int)",
+          "address": 5622000,
+          "offset": 4732032,
+          "size": 513,
+          "match_percent": 62.885715
+        },
+        {
+          "name": "_ZN8NuNetEmu13SetConditionsENS_11eConditionsE",
+          "demangled_name": "NuNetEmu::SetConditions(NuNetEmu::eConditions)",
+          "address": 5622528,
+          "offset": 4732560,
+          "size": 182,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN8NuNetEmuC1Ev",
+          "demangled_name": "NuNetEmu::NuNetEmu()",
+          "address": 5622720,
+          "offset": 4732752,
+          "size": 631,
+          "match_percent": 84.91753
+        },
+        {
+          "name": "_ZN8NuNetEmuC2Ev",
+          "demangled_name": "NuNetEmu::NuNetEmu()",
+          "address": 5622720,
+          "offset": 4732752,
+          "size": 631,
+          "match_percent": 84.91753
         }
       ]
     },
@@ -104726,6 +104861,37 @@
       ]
     },
     {
+      "name": "nu2api/nucore/nupostfilter.cpp.o",
+      "source": "src/nu2api/nucore/nupostfilter.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nupostfilter.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_nupostfilter.cpp",
+          "demangled_name": "_GLOBAL__sub_I_nupostfilter.cpp",
+          "address": 906608,
+          "offset": 16640,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_ZN12NuPostFilter19initSharedResourcesEii",
+          "demangled_name": "NuPostFilter::initSharedResources(int, int)",
+          "address": 3142352,
+          "offset": 2252384,
+          "size": 2071,
+          "match_percent": 78.5
+        },
+        {
+          "name": "_ZN12NuPostFilter13renderFrustumEP7numtx_s",
+          "demangled_name": "NuPostFilter::renderFrustum(numtx_s*)",
+          "address": 3144432,
+          "offset": 2254464,
+          "size": 9,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
       "name": "nu2api/nucore/nuptrblock.cpp.o",
       "source": "src/nu2api/nucore/nuptrblock.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuptrblock.o",
@@ -104986,10 +105152,65 @@
       ]
     },
     {
-      "name": "nu2api/nucore/nustring.cpp.o",
-      "source": "src/nu2api/nucore/nustring.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nustring.o",
+      "name": "nu2api/nucore/nuspeedblurfilter.cpp.o",
+      "source": "src/nu2api/nucore/nuspeedblurfilter.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuspeedblurfilter.o",
       "functions": [
+        {
+          "name": "_GLOBAL__sub_I_nuspeedblurfilter.cpp",
+          "demangled_name": "_GLOBAL__sub_I_nuspeedblurfilter.cpp",
+          "address": 906992,
+          "offset": 17024,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_ZN17NuSpeedBlurFilter13initResourcesEv",
+          "demangled_name": "NuSpeedBlurFilter::initResources()",
+          "address": 3144800,
+          "offset": 2254832,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN17NuSpeedBlurFilterD1Ev",
+          "demangled_name": "NuSpeedBlurFilter::~NuSpeedBlurFilter()",
+          "address": 3144816,
+          "offset": 2254848,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN17NuSpeedBlurFilterD2Ev",
+          "demangled_name": "NuSpeedBlurFilter::~NuSpeedBlurFilter()",
+          "address": 3144816,
+          "offset": 2254848,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN17NuSpeedBlurFilterD0Ev",
+          "demangled_name": "NuSpeedBlurFilter::~NuSpeedBlurFilter()",
+          "address": 3144848,
+          "offset": 2254880,
+          "size": 45,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nucore/nustring_c.cpp.o",
+      "source": "src/nu2api/nucore/nustring_c.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nustring_c.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_nustring_c.cpp",
+          "demangled_name": "_GLOBAL__sub_I_nustring_c.cpp",
+          "address": 909040,
+          "offset": 19072,
+          "size": 93,
+          "match_percent": 99.35294
+        },
         {
           "name": "_Z9NuStrCatCPcc",
           "demangled_name": "NuStrCatC(char*, char)",
@@ -105025,18 +105246,10 @@
       ]
     },
     {
-      "name": "nu2api/nucore/nustring_c.cpp.o",
-      "source": "src/nu2api/nucore/nustring_c.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nustring_c.o",
+      "name": "nu2api/nucore/nustring_plain.cpp.o",
+      "source": "src/nu2api/nucore/nustring_plain.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nustring_plain.o",
       "functions": [
-        {
-          "name": "_GLOBAL__sub_I_nustring_c.cpp",
-          "demangled_name": "_GLOBAL__sub_I_nustring_c.cpp",
-          "address": 909040,
-          "offset": 19072,
-          "size": 93,
-          "match_percent": 29.411764
-        },
         {
           "name": "NuStrCpyWC",
           "demangled_name": "NuStrCpyWC",
@@ -106308,53 +106521,6 @@
       ]
     },
     {
-      "name": "nu2api/nucore/pending_stubs.cpp.o",
-      "source": "src/nu2api/nucore/pending_stubs.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/pending_stubs.o",
-      "functions": [
-        {
-          "name": "NuShaderManagerLoadCompiledShaders",
-          "demangled_name": "NuShaderManagerLoadCompiledShaders",
-          "address": 3181792,
-          "offset": 2291824,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderManagerForceShader",
-          "demangled_name": "NuShaderManagerForceShader",
-          "address": 3181808,
-          "offset": 2291840,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderManagerSetShininessFactor",
-          "demangled_name": "NuShaderManagerSetShininessFactor",
-          "address": 3182432,
-          "offset": 2292464,
-          "size": 28,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderManagerGetShininessFactor",
-          "demangled_name": "NuShaderManagerGetShininessFactor",
-          "address": 3182464,
-          "offset": 2292496,
-          "size": 22,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderManagerGetInstance",
-          "demangled_name": "NuShaderManagerGetInstance",
-          "address": 3182496,
-          "offset": 2292528,
-          "size": 22,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
       "name": "nu2api/nucore/unref.cpp.o",
       "source": "src/nu2api/nucore/unref.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/unref.o",
@@ -106942,6 +107108,14 @@
           "address": 2465143,
           "offset": 1575175,
           "size": 308,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18MemFileBoundsChecki",
+          "demangled_name": "MemFileBoundsCheck(int)",
+          "address": 2465451,
+          "offset": 1575483,
+          "size": 92,
           "match_percent": 100.0
         },
         {
@@ -108026,7 +108200,7 @@
           "address": 909328,
           "offset": 19360,
           "size": 313,
-          "match_percent": 51.618183
+          "match_percent": 99.527275
         },
         {
           "name": "_ZN12NuFileDeviceD1Ev",
@@ -110887,6 +111061,14 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/1/nutrig.o",
       "functions": [
         {
+          "name": "NuTrigInit",
+          "demangled_name": "NuTrigInit",
+          "address": 2682487,
+          "offset": 1792519,
+          "size": 110,
+          "match_percent": 99.96667
+        },
+        {
           "name": "_ZL12NuSinApprox3i",
           "demangled_name": "NuSinApprox3(int)",
           "address": 2682597,
@@ -111011,15 +111193,7 @@
           "address": 927744,
           "offset": 37776,
           "size": 93,
-          "match_percent": 29.411764
-        },
-        {
-          "name": "NuTrigInit",
-          "demangled_name": "NuTrigInit",
-          "address": 2682487,
-          "offset": 1792519,
-          "size": 110,
-          "match_percent": 99.96667
+          "match_percent": 99.35294
         }
       ]
     },
@@ -112673,7 +112847,7 @@
           "address": 908112,
           "offset": 18144,
           "size": 721,
-          "match_percent": 51.271427
+          "match_percent": 99.72857
         },
         {
           "name": "_Z24NuSound3SampleLoadThreadPv",
@@ -112929,6 +113103,22 @@
           "address": 3232032,
           "offset": 2342064,
           "size": 114,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN7NuEListI13NuSound3Voice12DefaultElistEC1Ev",
+          "demangled_name": "NuEList<NuSound3Voice, DefaultElist>::NuEList()",
+          "address": 3232160,
+          "offset": 2342192,
+          "size": 40,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN7NuEListI13NuSound3Voice12DefaultElistEC2Ev",
+          "demangled_name": "NuEList<NuSound3Voice, DefaultElist>::NuEList()",
+          "address": 3232160,
+          "offset": 2342192,
+          "size": 40,
           "match_percent": 100.0
         },
         {
@@ -119542,7 +119732,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119570,11 +119759,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -119589,7 +119777,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119617,11 +119804,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -119636,7 +119822,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119664,11 +119849,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -119700,7 +119884,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119728,11 +119911,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -119784,7 +119966,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119812,11 +119993,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -119848,7 +120028,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119876,11 +120055,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -119912,7 +120090,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119940,11 +120117,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -119976,7 +120152,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120004,11 +120179,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120040,7 +120214,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120068,11 +120241,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120104,7 +120276,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120132,11 +120303,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120378,7 +120548,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120406,11 +120575,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120442,7 +120610,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120470,11 +120637,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120506,7 +120672,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120534,11 +120699,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120619,7 +120783,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120647,11 +120810,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120695,7 +120857,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120723,11 +120884,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120860,7 +121020,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120888,11 +121047,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120976,7 +121134,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121004,11 +121161,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -121092,7 +121248,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121120,11 +121275,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -121156,7 +121310,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121184,11 +121337,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -121220,7 +121372,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121248,11 +121399,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -121284,7 +121434,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121312,11 +121461,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -121374,7 +121522,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121402,11 +121549,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -121438,7 +121584,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121466,11 +121611,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -121514,7 +121658,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121542,11 +121685,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -121558,7 +121700,8 @@
       "match_percent": 100.0,
       "candidate_units": [
         "nu2api/nu3d/nu3d_includes.cpp.o",
-        "nu2api/nucore/nucore.cpp.o"
+        "nu2api/nucore/nucore.cpp.o",
+        "nu2api/nucore/numotionfilter.cpp.o"
       ]
     },
     {
@@ -121570,7 +121713,8 @@
       "match_percent": 100.0,
       "candidate_units": [
         "nu2api/nu3d/nu3d_includes.cpp.o",
-        "nu2api/nucore/nucore.cpp.o"
+        "nu2api/nucore/nucore.cpp.o",
+        "nu2api/nucore/numotionfilter.cpp.o"
       ]
     },
     {
@@ -121594,7 +121738,10 @@
       "match_percent": 100.0,
       "candidate_units": [
         "nu2api/nu3d/nu3d_includes.cpp.o",
-        "nu2api/nucore/nucore.cpp.o"
+        "nu2api/nucore/nucore.cpp.o",
+        "nu2api/nucore/numotionaccumfilter.cpp.o",
+        "nu2api/nucore/numotionfilter.cpp.o",
+        "nu2api/nucore/nuspeedblurfilter.cpp.o"
       ]
     },
     {
@@ -121606,7 +121753,12 @@
       "match_percent": 100.0,
       "candidate_units": [
         "nu2api/nu3d/nu3d_includes.cpp.o",
-        "nu2api/nucore/nucore.cpp.o"
+        "nu2api/nucore/nucore.cpp.o",
+        "nu2api/nucore/nudeferredfilter.cpp.o",
+        "nu2api/nucore/numainfilter.cpp.o",
+        "nu2api/nucore/numotionaccumfilter.cpp.o",
+        "nu2api/nucore/numotionfilter.cpp.o",
+        "nu2api/nucore/nuspeedblurfilter.cpp.o"
       ]
     },
     {
@@ -121618,7 +121770,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "nu2api/nu3d/nu3d_includes.cpp.o",
-        "nu2api/nucore/nucore.cpp.o"
+        "nu2api/nucore/numainfilter.cpp.o"
       ]
     },
     {
@@ -121630,7 +121782,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "nu2api/nu3d/nu3d_includes.cpp.o",
-        "nu2api/nucore/nucore.cpp.o"
+        "nu2api/nucore/nudeferredfilter.cpp.o"
       ]
     },
     {
@@ -121662,7 +121814,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121690,11 +121841,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -121739,7 +121889,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121767,11 +121916,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -121803,7 +121951,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121831,11 +121978,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -121887,7 +122033,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121915,11 +122060,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -121951,7 +122095,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121979,11 +122122,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -122015,7 +122157,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -122043,11 +122184,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -122079,7 +122219,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -122107,11 +122246,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -122206,7 +122344,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -122234,11 +122371,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -122270,7 +122406,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -122298,11 +122433,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -122334,7 +122468,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -122362,11 +122495,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -122533,6 +122665,7 @@
       "size": 34,
       "match_percent": 100.0,
       "candidate_units": [
+        "nu2api/nusound/nusound3_include.cpp.o",
         "nu2api/nusound/nusound_buffer.cpp.o",
         "nu2api/nusound/nusound_weakptr.cpp.o"
       ]
@@ -122545,6 +122678,7 @@
       "size": 34,
       "match_percent": 100.0,
       "candidate_units": [
+        "nu2api/nusound/nusound3_include.cpp.o",
         "nu2api/nusound/nusound_buffer.cpp.o",
         "nu2api/nusound/nusound_weakptr.cpp.o"
       ]
@@ -122784,7 +122918,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -122812,11 +122945,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -122896,7 +123028,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -122924,11 +123055,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -123008,7 +123138,6 @@
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -123036,11 +123165,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -123715,13 +123843,12 @@
       "address": 5418913,
       "offset": 4528945,
       "size": 373,
-      "match_percent": 99.7,
+      "match_percent": 0.0,
       "candidate_units": [
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -123749,11 +123876,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -123779,13 +123905,12 @@
       "address": 5419474,
       "offset": 4529506,
       "size": 373,
-      "match_percent": 99.7,
+      "match_percent": 0.0,
       "candidate_units": [
         "editor/creature_editor.cpp.o",
         "gameframework/saveload.c.o",
         "globals.cpp.o",
         "legoapi/items/base/apiobject.c.o",
-        "legoapi/misc/buffers.cpp.o",
         "legoapi/props/system/socksysall.c.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -123813,11 +123938,10 @@
         "nu2api/nucore/android/nuvideo_android.c.o",
         "nu2api/nucore/android/stubs_android.c.o",
         "nu2api/nucore/android/stubvideo.c.o",
-        "nu2api/nucore/nustring_c.cpp.o",
+        "nu2api/nucore/nustring_plain.cpp.o",
         "nu2api/nufile/numc.c.o",
         "nu2api/numath/nufloat_android.c.o",
-        "nu2api/numath/numaths.c.o",
-        "nu2api/numath/nutrig_gen.cpp.o"
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -124309,6 +124433,14 @@
       "match_percent": 0.0
     },
     {
+      "name": "_GLOBAL__sub_I_nucore.cpp",
+      "demangled_name": "_GLOBAL__sub_I_nucore.cpp",
+      "address": 892976,
+      "offset": 3008,
+      "size": 93,
+      "match_percent": 0.0
+    },
+    {
       "name": "_GLOBAL__sub_I_menu.cpp",
       "demangled_name": "_GLOBAL__sub_I_menu.cpp",
       "address": 894352,
@@ -124381,90 +124513,10 @@
       "match_percent": 0.0
     },
     {
-      "name": "_GLOBAL__sub_I_nupostfilter.cpp",
-      "demangled_name": "_GLOBAL__sub_I_nupostfilter.cpp",
-      "address": 906608,
-      "offset": 16640,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_numainfilter.cpp",
-      "demangled_name": "_GLOBAL__sub_I_numainfilter.cpp",
-      "address": 906704,
-      "offset": 16736,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_numotionfilter.cpp",
-      "demangled_name": "_GLOBAL__sub_I_numotionfilter.cpp",
-      "address": 906800,
-      "offset": 16832,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_nudeferredfilter.cpp",
-      "demangled_name": "_GLOBAL__sub_I_nudeferredfilter.cpp",
-      "address": 906896,
-      "offset": 16928,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_nuspeedblurfilter.cpp",
-      "demangled_name": "_GLOBAL__sub_I_nuspeedblurfilter.cpp",
-      "address": 906992,
-      "offset": 17024,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_numotionaccumfilter.cpp",
-      "demangled_name": "_GLOBAL__sub_I_numotionaccumfilter.cpp",
-      "address": 907088,
-      "offset": 17120,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_nushadermanager_gen.cpp",
-      "demangled_name": "_GLOBAL__sub_I_nushadermanager_gen.cpp",
-      "address": 907184,
-      "offset": 17216,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
       "name": "_GLOBAL__sub_I_ShaderMtlDescFilter.cpp",
       "demangled_name": "_GLOBAL__sub_I_ShaderMtlDescFilter.cpp",
       "address": 907280,
       "offset": 17312,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_ShaderObjectKey.cpp",
-      "demangled_name": "_GLOBAL__sub_I_ShaderObjectKey.cpp",
-      "address": 907376,
-      "offset": 17408,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_shaderSemantics.cpp",
-      "demangled_name": "_GLOBAL__sub_I_shaderSemantics.cpp",
-      "address": 907472,
-      "offset": 17504,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_nushadermanagerios.cpp",
-      "demangled_name": "_GLOBAL__sub_I_nushadermanagerios.cpp",
-      "address": 907664,
-      "offset": 17696,
       "size": 93,
       "match_percent": 0.0
     },
@@ -124489,14 +124541,6 @@
       "demangled_name": "_GLOBAL__sub_I_MechTouchUI.cpp",
       "address": 916432,
       "offset": 26464,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_worldinfo.cpp",
-      "demangled_name": "_GLOBAL__sub_I_worldinfo.cpp",
-      "address": 918096,
-      "offset": 28128,
       "size": 93,
       "match_percent": 0.0
     },
@@ -124554,14 +124598,6 @@
       "address": 928896,
       "offset": 38928,
       "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_nunetemu.cpp",
-      "demangled_name": "_GLOBAL__sub_I_nunetemu.cpp",
-      "address": 929808,
-      "offset": 39840,
-      "size": 241,
       "match_percent": 0.0
     },
     {
@@ -125189,22 +125225,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZN14NuRenderDeviceD1Ev",
-      "demangled_name": "NuRenderDevice::~NuRenderDevice()",
-      "address": 2779088,
-      "offset": 1889120,
-      "size": 37,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN14NuRenderDeviceD2Ev",
-      "demangled_name": "NuRenderDevice::~NuRenderDevice()",
-      "address": 2779088,
-      "offset": 1889120,
-      "size": 37,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZL29DisplayListProcessLightmappedP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_sPPvf.isra.34",
       "demangled_name": "DisplayListProcessLightmapped(numtl_s*, nudisplaylist_s*, nudisplaylistitem_s*, nudisplaylistitem_s**, numtx_s*, void**, float) [clone .isra.34]",
       "address": 2790880,
@@ -125370,22 +125390,6 @@
       "address": 3231968,
       "offset": 2342000,
       "size": 59,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN7NuEListI13NuSound3Voice12DefaultElistEC1Ev",
-      "demangled_name": "NuEList<NuSound3Voice, DefaultElist>::NuEList()",
-      "address": 3232160,
-      "offset": 2342192,
-      "size": 40,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN7NuEListI13NuSound3Voice12DefaultElistEC2Ev",
-      "demangled_name": "NuEList<NuSound3Voice, DefaultElist>::NuEList()",
-      "address": 3232160,
-      "offset": 2342192,
-      "size": 40,
       "match_percent": 0.0
     },
     {
@@ -128046,10 +128050,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 457,
+    "bazel_units": 467,
     "functions": 13454,
-    "assigned_functions": 12706,
+    "assigned_functions": 12721,
     "ambiguous_functions": 273,
-    "unassigned_functions": 475
+    "unassigned_functions": 460
   }
 }

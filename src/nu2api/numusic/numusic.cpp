@@ -28,8 +28,6 @@
 
 static NuMusic *the_music_player = NULL;
 
-NuMusic music_man;
-
 NUFPCOMJMPCTX NuMusic::top_jmp_tab[11] = {
     {"ALBUM", NuMusic::xsAlbum},
     {"ACTION", NuMusic::xsAction},

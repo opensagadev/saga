@@ -1,3 +1,4 @@
+#include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api_nufile_types.h"
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nucore/nuthread.h"

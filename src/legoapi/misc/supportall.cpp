@@ -77,6 +77,18 @@ void GameCameraMakeMiniCut(nugspline_s *, f32, f32, f32, f32, i32, i32);
 void CutScene_StartAudio();
 void oneAtOnce_SetNumAttackers(i32);
 void EffectOffProgress_Reset(LEVEL_PROGRESS_s *);
+// The reference defines these with dynamic initialization in this unit.
+MemoryManager theMemoryManager;
+struct BIGBUFFER_s {
+    void *start;
+    void *end;
+    u32 field_0x8[2];
+    BIGBUFFER_s() : start(NULL), end(NULL) {
+    }
+};
+BIGBUFFER_s BigBuffer;
+void *theThingManager = NULL;
+
 extern GameObject_s *alert_obj;
 extern f32 alert_timer;
 extern f32 LevelNameMul, LevelNameTime;

@@ -1270,12 +1270,10 @@ CHARVARIANT CharVariants_Game[23] = {
     {"walker_2legs"}, {"walker_4legs"}, {"hoverdroid"}, {"critter"},   {"naboostarfighter"},
     {"henchman"},     {NULL},           {NULL},
 };
-MemoryManager theMemoryManager;
 #include "legoapi/menus/core/lsw_text_data.inc"
 TEXTCRAWL_s TextCrawl_LSW = {&tCHAPTER, &tVEHICLEBONUS, &tCHARACTERBONUS, 3};
 
 void *theGameThings = NULL;
-void *theThingManager = NULL;
 
 NUGSCN *saveicon_scene = NULL;
 NUGSCN *button_scene = NULL;

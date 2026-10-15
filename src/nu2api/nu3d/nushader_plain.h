@@ -1,4 +1,4 @@
-// Shader-manager core types — see nushadermanager_plain.cpp.
+// Shader-manager core types — see nushadermanager_gen.cpp.
 #pragma once
 
 #include "decomp.h"

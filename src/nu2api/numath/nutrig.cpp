@@ -48,6 +48,12 @@ static u16 ang[ANG_COUNT] = {
 #define NU_ATAN2_LUT(y, x) ang[(y << 9) / x]
 #define NU_ATAN2F_LUT(y, x) ang[(i32)((y * 512.0f) / x)]
 
+void NuTrigInit(void) {
+    for (i32 i = 0; (unsigned char)(i <= NUTRIGTABLE_COUNT - 1); i++) {
+        NuTrigTable[i] = sin(i * NUTRIGTABLE_INTERVAL);
+    }
+}
+
 static f32 NuSinApprox3(i32 angle) {
     f32 x;
     angle &= 0xffff;

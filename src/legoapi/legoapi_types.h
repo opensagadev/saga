@@ -5354,6 +5354,10 @@ struct MemoryManager {
     usize remaining;
     void *free_lists[139];
 
+    // The reference constructs theMemoryManager dynamically, clearing these
+    // four fields in the supportall static constructor.
+    MemoryManager() : cursor_cell(NULL), end_cell(NULL), allocated(0), remaining(0) {
+    }
     void *AllocPool(u32, i32);
     void FreePool(void *, u32);
 };

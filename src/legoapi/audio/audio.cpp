@@ -33,6 +33,8 @@ static i32 MusicFindCut;
 static i32 MusicRestoreTrack;
 static i32 MusicOnFlag = 1;
 static i32 MusicPlrsHoldAttack;
+// The reference constructs the music manager in this unit's static constructor.
+NuMusic music_man;
 
 extern "C" void PlaySfxByIdAndSetVolume(i32 sfx_id, nuvec_s *position, f32 volume);
 extern "C" void SetPreSeekStartPoint(f32 start_point);

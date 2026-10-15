@@ -14,7 +14,13 @@ extern "C" i32 NuIOS_IsSmallScreen(void);
 i32 GetMenuID();
 extern FadeSystem FadeSys;
 i16 MechInputTouchVirtualConsoleController::s_textures[9];
-f32 MechInputTouchVirtualConsoleController::s_noInputTimer;
+// Seconds without input before the console fades out; the original set the
+// timer from a helper at static-init time rather than as constant data.
+static inline f32 NoInputTimeout() {
+    return 20.0f;
+}
+
+f32 MechInputTouchVirtualConsoleController::s_noInputTimer = NoInputTimeout();
 bool lookAtMeBlendDone;
 extern "C" {
     u8 hasDoneLoadPerm;

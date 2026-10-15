@@ -1576,14 +1576,6 @@ extern "C" void NuShaderGetDirtyMask(NUSHADERUSAGEMASK *mask, NUSHADEROBJECT *sh
         shader->last_camera_packet = camera_packet;
     }
 }
-extern "C" nu2api::ShaderUniformRecord *NuShaderUniformGetByString(const char *name) {
-    for (i32 i = 0; i < 101; ++i) {
-        if ((g_shaderUniforms[i].fragment_name && strcmp(g_shaderUniforms[i].fragment_name, name) == 0) ||
-            (g_shaderUniforms[i].vertex_name && strcmp(g_shaderUniforms[i].vertex_name, name) == 0))
-            return &g_shaderUniforms[i];
-    }
-    return NULL;
-}
 static void NuTexGenTexture(void) {
     STUBBED();
 }

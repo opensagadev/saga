@@ -1495,6 +1495,10 @@ NUFILE NuMemFileOpen(void *buf, i32 buf_size, NUFILEMODE mode) {
     return 0;
 }
 
+void MemFileBoundsCheck(i32 file) {
+    i32 remaining = memfiles[file].end - memfiles[file].ptr + 1;
+}
+
 void NuMemFileClose(NUFILE file) {
     if (file >= 0x2000) {
         do {
