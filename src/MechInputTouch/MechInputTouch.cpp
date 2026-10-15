@@ -444,7 +444,7 @@ void MechInputTouchSystem::FindTargetForce(WORLDINFO_s *world, GameObject_s &obj
                 if (radius <= 0.0f) {
                     radius = NuSpecialGetOriginRadius(&animation->special);
                 }
-                VuVec target_position(draw_position->x, draw_position->y, draw_position->z, 1.0f);
+                VuVec target_position __attribute__((aligned(16)))(draw_position->x, draw_position->y, draw_position->z, 1.0f);
                 f32 distance = CalcCapsuleIntersectDistance(start, direction, best_distance, target_position, radius);
                 if (best_distance > distance) {
                     best_distance = distance;
@@ -463,7 +463,7 @@ void MechInputTouchSystem::FindTargetForce(WORLDINFO_s *world, GameObject_s &obj
 
         f32 radius = force->strength_0x6c > 0.0f ? force->strength_0x6c : force->radius;
         radius = MAX(0.2f, radius);
-        VuVec target_position(force->position.x, force->position.y, force->position.z, 1.0f);
+        VuVec target_position __attribute__((aligned(16)))(force->position.x, force->position.y, force->position.z, 1.0f);
         f32 distance = CalcCapsuleIntersectDistance(start, direction, best_distance, target_position, radius);
         if (best_distance > distance) {
             best_distance = distance;

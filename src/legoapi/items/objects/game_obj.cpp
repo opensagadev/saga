@@ -233,12 +233,6 @@ void AtatPart_Update(PART_s *part) __asm__("_ZL15AtatPart_UpdateP6PART_s") __att
 
 static const u8 objhit_damage_joints[3] = {6, 8, 7};
 
-enum GAME_OBJECT_AI_UPDATE_FLAGS : u8 {
-    GAME_OBJECT_AI_UPDATE_PROCESS = 0x08,
-    GAME_OBJECT_AI_UPDATE_FORCED = 0x10,
-    GAME_OBJECT_AI_UPDATE_SPECIAL_STATE = 0x20,
-};
-
 struct BIKEPART_s {
     SPLINEPOS_s spline_position;
     u8 active;

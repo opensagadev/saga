@@ -73,4 +73,11 @@ void GameAnimSys_Update(GAMEANIMSYS_s *system);
 void GameAudio_SetActionMusicTimes(f32 fade_in_time, f32 fade_out_time);
 i32 GameAudio_GetPlrSfxBits(void *object);
 
+// GameObject_s AI update flag bits, shared by gameobjects.cpp and game_obj.cpp.
+enum GAME_OBJECT_AI_UPDATE_FLAGS : u8 {
+    GAME_OBJECT_AI_UPDATE_PROCESS = 0x08,
+    GAME_OBJECT_AI_UPDATE_FORCED = 0x10,
+    GAME_OBJECT_AI_UPDATE_SPECIAL_STATE = 0x20,
+};
+
 #endif

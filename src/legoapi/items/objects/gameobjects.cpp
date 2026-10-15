@@ -242,12 +242,6 @@ enum AI_GAME_OBJECT_TYPE : u8 {
     AI_GAME_OBJECT_TYPE_VEHICLE = 0x2b,
 };
 
-enum GAME_OBJECT_AI_UPDATE_FLAGS : u8 {
-    GAME_OBJECT_AI_UPDATE_PROCESS = 0x08,
-    GAME_OBJECT_AI_UPDATE_FORCED = 0x10,
-    GAME_OBJECT_AI_UPDATE_SPECIAL_STATE = 0x20,
-};
-
 // Enabled in the target data image.  Ordinary background characters are
 // staggered across frames; special movement states opt back into full-rate
 // processing through the forced-update path.
