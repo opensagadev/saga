@@ -257,6 +257,20 @@ extern "C" void NuIOS_SetVertexFormat(usize fmt) {
 
 // Helpers for the debris constant block (original walks the programme's
 // i16 param table: pairs of {semantic, loc|class}).
+// The reference unit clears the usage masks in its static constructor while
+// the packet pointers stay in initialized data.
+static inline NUSHADERUSAGEMASK EmptyShaderUsageMask() {
+    NUSHADERUSAGEMASK mask = {{0, 0, 0, 0}};
+    return mask;
+}
+
+extern "C" {
+    ShaderPacketStateMapping g_packetToShaderStateMappings[2] = {
+        {EmptyShaderUsageMask(), &g_boundLightPacket},
+        {EmptyShaderUsageMask(), &g_boundCameraPacket},
+    };
+}
+
 namespace {
     constexpr i16 kParamViewProj = 0;        // semantic 0
     constexpr i16 kParamView = 0x0c;         // semantic 12

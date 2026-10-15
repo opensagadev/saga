@@ -25,6 +25,10 @@
 #include "nu2api/nuplatform/nuplatform.h"
 #include <string.h>
 
+// The file is built with -ftree-vectorize for the VuVec initializers; the
+// functions below were compiled without it.
+#define SCALAR_FN __attribute__((optimize("omit-frame-pointer", "no-tree-vectorize")))
+
 DECOMP_ASSERT(sizeof(CUSTOMPIECERESOURCE) == 0x20, "CUSTOMPIECERESOURCE size");
 DECOMP_ASSERT(offsetof(CUSTOMPIECERESOURCE, texture_id) == 0x14, "Customiser texture offset");
 DECOMP_ASSERT(offsetof(CUSTOMPIECERESOURCE, character_model) == 0x1c, "Customiser model offset");
@@ -293,7 +297,7 @@ void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s 
     }
 }
 
-void Customiser_AddPartAccessories(CUSTOMISER *customiser, GameObject_s *object, i32 animation, i32 mode, float scale) {
+SCALAR_FN void Customiser_AddPartAccessories(CUSTOMISER *customiser, GameObject_s *object, i32 animation, i32 mode, float scale) {
     const i32 joint = object->apiobj.character_data->player_config->helmet_locator;
     if (customiser == NULL || joint == -1 || object->apiobj.character_model->points_of_interest[joint] == NULL)
         return;
@@ -414,7 +418,7 @@ void Customiser_DumpAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
     }
 }
 
-void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
+SCALAR_FN void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
     char converted_path[0x88];
     if (customiser == NULL) {
         return;
@@ -543,7 +547,7 @@ void Customiser_ResetModelTextureIDs(CUSTOMISER *customiser) {
     customiser->model_texture_ids[17] = 0;
 }
 
-void Customiser_RestoreModelTextureIDs(CUSTOMISER *customiser) {
+SCALAR_FN void Customiser_RestoreModelTextureIDs(CUSTOMISER *customiser) {
     if (customiser == NULL)
         return;
     for (i32 character = 0; character < 2; ++character) {
@@ -564,7 +568,7 @@ void Customiser_RestoreModelTextureIDs(CUSTOMISER *customiser) {
     }
 }
 
-void Customiser_SaveModelTextureIDs(CUSTOMISER *customiser, CHARACTERMODEL_s *model) {
+SCALAR_FN void Customiser_SaveModelTextureIDs(CUSTOMISER *customiser, CHARACTERMODEL_s *model) {
     if (model == NULL || customiser == NULL) {
         return;
     }
@@ -633,7 +637,7 @@ void Customiser_CopyDefaultPiecesToSave(CUSTOMISER *customiser, CUSTOMISESAVE_s 
     save[1].pieces[8] = customiser->default_pieces[1][8];
 }
 
-CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32 first_character, i32 second_character,
+SCALAR_FN CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32 first_character, i32 second_character,
                                  i32 (*available)(CUSTOMPIECE *), void (*configure_piece)(CUSTOMPIECE *, nufpar_s *),
                                  i32 (*weapon_from_name)(char *), CUSTOMISESAVE_s *save, i16 *animations) {
     if (first_character == -1 && second_character == -1)
@@ -820,7 +824,7 @@ CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32
     return customiser;
 }
 
-CUSTOMPIECE *Customiser_FindPieceByName(CUSTOMISER *customiser, char *name, i32 *category, i32 *index) {
+SCALAR_FN CUSTOMPIECE *Customiser_FindPieceByName(CUSTOMISER *customiser, char *name, i32 *category, i32 *index) {
     if (customiser != NULL) {
         for (i32 category_index = 0; category_index < 9; ++category_index) {
             for (i32 piece_index = 0; piece_index < customiser->piece_counts[category_index]; ++piece_index) {

@@ -4,7 +4,7 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/items/base/apiobject.h"
 
-HashedKey MechEdgeStopAddon::s_hashId("MechEdgeStopAddon");
+HashedKey MechEdgeStopAddon::s_hashId("MechEdgeStopAddon", HashedKey::kInlineHash);
 
 // Original constructor: 179 bytes, 0x500980.
 MechEdgeStopAddon::MechEdgeStopAddon(MechObjectInterface &object)

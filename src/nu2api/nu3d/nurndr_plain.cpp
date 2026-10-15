@@ -1545,10 +1545,6 @@ extern "C" void NuRndrWireTri(NUVEC *a, NUVEC *b, NUVEC *c, i32 colour) {
 // Shader / texture / vertex state
 extern "C" {
     void *g_boundCameraPacket;
-    ShaderPacketStateMapping g_packetToShaderStateMappings[2] = {
-        {{{0, 0, 0, 0}}, &g_boundLightPacket},
-        {{{0, 0, 0, 0}}, &g_boundCameraPacket},
-    };
 }
 extern "C" void NuShaderGetDirtyMask(NUSHADERUSAGEMASK *mask, NUSHADEROBJECT *shader) {
     memmove(mask, shader->usage_mask, sizeof(*mask));

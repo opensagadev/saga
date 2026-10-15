@@ -3,12 +3,29 @@
 #include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/nuvector.hpp"
-#include "nu2api/nucore/nuvuvec.hpp"
 
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+// The 16-byte type alignment supplies the trailing padding in the original 0x810-byte pool.
+struct __attribute__((aligned(16))) ShaderProgramPool {
+    NUSHADERPROGRAM programs[64];
+    u8 occupied[8];
+    i32 next;
+
+    ShaderProgramPool() : next(0) {
+        memset(occupied, 0, sizeof(occupied));
+    }
+};
+DECOMP_ASSERT(sizeof(ShaderProgramPool) == 0x810, "Shader program pool ABI");
+DECOMP_ASSERT(offsetof(ShaderProgramPool, occupied) == 0x800, "Shader program occupancy offset");
+DECOMP_ASSERT(offsetof(ShaderProgramPool, next) == 0x808, "Shader program cursor offset");
+static ShaderProgramPool programPool;
+
+// The reference constructs the program pool before the VuVec constants.
+#include "nu2api/nucore/nuvuvec.hpp"
 
 // Original Pair type identity only; its element layout is not used here.
 // These two named empty vectors require only the canonical scalar lifetime.
@@ -78,20 +95,6 @@ static i32 GetHLSLRegisterIndex(const char *source, const char *uniform_name, bo
     return -1;
 }
 
-// The 16-byte type alignment supplies the trailing padding in the original 0x810-byte pool.
-struct __attribute__((aligned(16))) ShaderProgramPool {
-    NUSHADERPROGRAM programs[64];
-    u8 occupied[8];
-    i32 next;
-
-    ShaderProgramPool() : next(0) {
-        memset(occupied, 0, sizeof(occupied));
-    }
-};
-DECOMP_ASSERT(sizeof(ShaderProgramPool) == 0x810, "Shader program pool ABI");
-DECOMP_ASSERT(offsetof(ShaderProgramPool, occupied) == 0x800, "Shader program occupancy offset");
-DECOMP_ASSERT(offsetof(ShaderProgramPool, next) == 0x808, "Shader program cursor offset");
-static ShaderProgramPool programPool;
 NUSHADERPROGRAM *g_currentShaderProgram = nullptr;
 extern "C" {
     NUSHADERPROGRAMPARAMETER g_uniformParameterRecordStorage[1024];

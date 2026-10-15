@@ -94,7 +94,7 @@ DECOMP_ASSERT(offsetof(nushaderobject_s, last_camera_packet) == 0x28, "Shader ca
 extern "C" {
     extern void *g_boundLightPacket;
     extern void *g_boundCameraPacket;
-    extern ShaderPacketStateMapping g_packetToShaderStateMappings[2];
+    extern ShaderPacketStateMapping g_packetToShaderStateMappings[2] __attribute__((aligned(16)));
     void NuShaderGetDirtyMask(NUSHADERUSAGEMASK *mask, NUSHADEROBJECT *shader);
 }
 

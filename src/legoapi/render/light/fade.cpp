@@ -17,6 +17,9 @@
 #include "nu2api/nucore/nuapi.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"
+// The file is built with -ftree-vectorize for the VuVec initializers; the
+// functions below were compiled without it.
+#define SCALAR_FN __attribute__((optimize("omit-frame-pointer", "no-tree-vectorize")))
 extern f32 FRAMETIME;
 extern i32 pause_rndr_on;
 extern i32 wait_till_next_frame;
@@ -173,7 +176,7 @@ void SetFramesToWait(u32 frames) {
     FRAMES_TO_WAIT = frames;
 }
 
-void FadeSystem::Init() {
+SCALAR_FN void FadeSystem::Init() {
     fades[0] = NULL;
     fades[1] = NULL;
     fades[2] = NULL;
@@ -228,7 +231,7 @@ i32 FadeSystem::AddFade(FadeBase *o) {
     return 1;
 }
 
-i32 FadeSystem::SetFade(FADETYPE const &t, u32 frames) {
+SCALAR_FN i32 FadeSystem::SetFade(FADETYPE const &t, u32 frames) {
     FADETYPE_VALUE type = t.type;
     if (type != FADE_TYPE_NONE && fades[type] != NULL) {
         direction = frames;
@@ -249,7 +252,7 @@ void FadeLoop_SetObj(nugscn_s *scene, char *name) {
     }
 }
 
-void FadeLoop_DrawObj(float alpha) {
+SCALAR_FN void FadeLoop_DrawObj(float alpha) {
     if (FadeLoop_ObjScene != NULL && NuSpecialExistsFn(&FadeLoop_ObjHSpecial)) {
         NUVEC scale = {0.125f, 0.125f, 0.125f};
         NUMTX_ALIGNED16 matrix;
@@ -259,7 +262,7 @@ void FadeLoop_DrawObj(float alpha) {
     }
 }
 
-i32 FadeLoop_UsingObj() {
+SCALAR_FN i32 FadeLoop_UsingObj() {
     return FadeLoop_ObjScene != NULL;
 }
 
@@ -298,7 +301,7 @@ void CreateFadeMaterials() {
     NuMtlUpdate(ScreenFadeMtl);
 }
 
-void FadeLoop(char *text, i32 direction, float duration, void (*draw)(float)) {
+SCALAR_FN void FadeLoop(char *text, i32 direction, float duration, void (*draw)(float)) {
     f32 alpha = 0.0f;
     f32 target = 1.0f;
     if (direction != 0) {

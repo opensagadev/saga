@@ -8,7 +8,7 @@
 #include "legoapi/render/core/terrain.h"
 #include "nu2api/numath/nutrig.h"
 
-HashedKey MechJumpAutoPilotAddon::s_hashId("MechJumpAutopilotAddon");
+HashedKey MechJumpAutoPilotAddon::s_hashId("MechJumpAutopilotAddon", HashedKey::kInlineHash);
 
 void MechJumpAutoPilotAddon::AnalyseJumpTrajectory() {
     float y = field_44.y;

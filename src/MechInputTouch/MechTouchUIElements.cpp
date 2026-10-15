@@ -33,7 +33,7 @@ extern i32 NewMode;
 extern i32 PANELOFF;
 extern i32 Paused;
 extern FadeSystem FadeSys;
-f32 TagButtonSize;
+f32 TagButtonSize = ICONSIZE;
 f32 BorderWidth = 0.02f;
 f32 RadMult = 0.7f;
 f32 GiveUpTime = 4.0f;

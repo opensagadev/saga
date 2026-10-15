@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 79.72764,
+    "fuzzy_match_percent": 79.745224,
     "total_code": "4722419",
     "matched_code": "626164",
     "matched_code_percent": 13.259392,
@@ -14593,7 +14593,7 @@
           "address": 926912,
           "offset": 36944,
           "size": 157,
-          "match_percent": 0.0
+          "match_percent": 99.725
         },
         {
           "name": "_ZN17MechEdgeStopAddon9OnProcessEN9MechAddon12ProcessStageEf",
@@ -18003,7 +18003,7 @@
           "address": 915872,
           "offset": 25904,
           "size": 157,
-          "match_percent": 0.0
+          "match_percent": 99.725
         },
         {
           "name": "_ZN22MechJumpAutoPilotAddonD1Ev",
@@ -18368,7 +18368,7 @@
           "address": 916528,
           "offset": 26560,
           "size": 113,
-          "match_percent": 78.28571
+          "match_percent": 99.47619
         },
         {
           "name": "_ZN28MechInputTouchGestureTracker6OnDownER12GameObject_sR11TouchHolder",
@@ -25856,6 +25856,37 @@
       ]
     },
     {
+      "name": "gameapi/edtools/edbobs.cpp.o",
+      "source": "src/gameapi/edtools/edbobs.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edbobs.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_edbobs.cpp",
+          "demangled_name": "_GLOBAL__sub_I_edbobs.cpp",
+          "address": 924288,
+          "offset": 34320,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_Z13edbobsDrawBoxP7nuvec_sS0_i",
+          "demangled_name": "edbobsDrawBox(nuvec_s*, nuvec_s*, int)",
+          "address": 5118736,
+          "offset": 4228768,
+          "size": 792,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z25edbobs_DrawCoordinateInfoP7nuvec_sii",
+          "demangled_name": "edbobs_DrawCoordinateInfo(nuvec_s*, int, int)",
+          "address": 5119536,
+          "offset": 4229568,
+          "size": 245,
+          "match_percent": 99.91071
+        }
+      ]
+    },
+    {
       "name": "gameapi/edtools/edbriall.cpp.o",
       "source": "src/gameapi/edtools/edbriall.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edbriall.o",
@@ -29036,22 +29067,6 @@
           "offset": 4019856,
           "size": 245,
           "match_percent": 86.03191
-        },
-        {
-          "name": "_Z13edbobsDrawBoxP7nuvec_sS0_i",
-          "demangled_name": "edbobsDrawBox(nuvec_s*, nuvec_s*, int)",
-          "address": 5118736,
-          "offset": 4228768,
-          "size": 792,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z25edbobs_DrawCoordinateInfoP7nuvec_sii",
-          "demangled_name": "edbobs_DrawCoordinateInfo(nuvec_s*, int, int)",
-          "address": 5119536,
-          "offset": 4229568,
-          "size": 245,
-          "match_percent": 99.91071
         },
         {
           "name": "_ZN24EdClassObjectNameControl6RenderEv",
@@ -45832,7 +45847,7 @@
           "address": 920752,
           "offset": 30784,
           "size": 93,
-          "match_percent": 0.0
+          "match_percent": 99.35294
         },
         {
           "name": "_ZL33Customiser_PieceAvailable_DefaultP11CUSTOMPIECE",
@@ -56884,10 +56899,18 @@
       ]
     },
     {
-      "name": "legoapi/gizmos/fx/edgizshadowmachine.cpp.o",
-      "source": "src/legoapi/gizmos/fx/edgizshadowmachine.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/edgizshadowmachine.o",
+      "name": "legoapi/gizmos/fx/edgizshadow.cpp.o",
+      "source": "src/legoapi/gizmos/fx/edgizshadow.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/edgizshadow.o",
       "functions": [
+        {
+          "name": "_GLOBAL__sub_I_edgizshadow.cpp",
+          "demangled_name": "_GLOBAL__sub_I_edgizshadow.cpp",
+          "address": 926336,
+          "offset": 36368,
+          "size": 93,
+          "match_percent": 99.35294
+        },
         {
           "name": "_ZL24edGizShadow_GetMaxGizmosPv",
           "demangled_name": "edGizShadow_GetMaxGizmos(void*)",
@@ -81207,7 +81230,7 @@
           "address": 926528,
           "offset": 36560,
           "size": 93,
-          "match_percent": 0.0
+          "match_percent": 99.35294
         },
         {
           "name": "_Z15FadeLoop_SetObjP8nugscn_sPc",
@@ -88933,7 +88956,7 @@
           "address": 902784,
           "offset": 12816,
           "size": 154,
-          "match_percent": 64.96154
+          "match_percent": 99.57692
         },
         {
           "name": "_Z13NuMtlCreatePSP7numtl_si",
@@ -90720,7 +90743,7 @@
           "address": 903232,
           "offset": 13264,
           "size": 377,
-          "match_percent": 80.62069
+          "match_percent": 99.39655
         },
         {
           "name": "_Z17LinkShaderProgramj",
@@ -124545,22 +124568,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_GLOBAL__sub_I_edbobs.cpp",
-      "demangled_name": "_GLOBAL__sub_I_edbobs.cpp",
-      "address": 924288,
-      "offset": 34320,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_edgizshadow.cpp",
-      "demangled_name": "_GLOBAL__sub_I_edgizshadow.cpp",
-      "address": 926336,
-      "offset": 36368,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
       "name": "_GLOBAL__sub_I_screengrab_android.cpp",
       "demangled_name": "_GLOBAL__sub_I_screengrab_android.cpp",
       "address": 927456,
@@ -128050,10 +128057,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 467,
+    "bazel_units": 468,
     "functions": 13454,
-    "assigned_functions": 12721,
+    "assigned_functions": 12723,
     "ambiguous_functions": 273,
-    "unassigned_functions": 460
+    "unassigned_functions": 458
   }
 }
