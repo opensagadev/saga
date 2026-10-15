@@ -978,6 +978,9 @@ bool MechInputTouchGestureBasedController::TriggerJumpTask(JumpTriggerPacket con
     return true;
 }
 
+// Retail clears the four stick values with one unaligned vector store.
+typedef f32 StickValuesVec4 __attribute__((vector_size(16), aligned(4)));
+
 void MechInputTouchGestureBasedController::Update(NuInputTouchData const *data) {
     if (player != NULL && NewMode == 0 && NewLData == NULL && FadeSys.fade == 0.0f && Paused == 0 && CUTSTOPGAME == 0 &&
         !MenuDisable() && TouchHacks::TouchControlsActive && GetMenuID() == -1 && MiniCutCam != 2 &&
@@ -986,7 +989,7 @@ void MechInputTouchGestureBasedController::Update(NuInputTouchData const *data) 
     } else {
         Deactivate();
     }
-    memset(stick_values, 0, sizeof(stick_values));
+    *reinterpret_cast<StickValuesVec4 *>(stick_values) = StickValuesVec4{0.0f, 0.0f, 0.0f, 0.0f};
     if (!active || data == NULL) {
         return;
     }

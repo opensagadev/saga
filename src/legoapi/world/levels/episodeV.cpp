@@ -1657,7 +1657,7 @@ void AsteroidChaseC_Update(WORLDINFO_s *) {
 
     mtxOrig = NuSpecialGetMtx(&finalAsteroid.special);
     if (mtxOrig != NULL) {
-        NUMTX matrix = *mtxOrig;
+        NUMTX_ALIGNED16 matrix = *mtxOrig;
         NUVEC position;
         NuMtxGetTranslation(&matrix, &position);
         NuMtxRotateY(&matrix, finalAsteroid.rotation_y);

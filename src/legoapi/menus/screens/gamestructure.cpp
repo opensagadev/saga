@@ -356,7 +356,9 @@ u8 restoring_bundle_list[16];
 f32 restoring_wait = 3.0f;
 
 void PauseGame(i32 pad_index) {
+    printf("Pause Game\n");
     Paused = 1;
+    printf("Pause game fades audio to 0.0f\n");
     music_man.SetFader(0.0f, 0.5f);
     music_man.PauseTrack(0x10);
     NuSound3StopRumble();
@@ -416,10 +418,12 @@ void NetworkSyncPause() {
 }
 
 void ResumeGame(i32 play_sound, i32 resume_music) {
+    printf("Resume Game\n");
     Paused = 0;
     NetPaused = 0;
     MenuRememberCursor(&GameMenu[GameMenuLevel]);
     MenuReset();
+    printf("Resume game fades audio to 1.0f\n");
     music_man.SetFader(1.0f, 0.5f);
     if (resume_music != 0) {
         music_man.ResumeTrack(0x10);
@@ -1109,13 +1113,18 @@ store_touch_selected:
         menu_i_bundle = StoreBundle_FindByName(menu_storepurchase_iap_name);
         NewMenu(LEGOMENU_STORE_PURCHASE, -1, -1);
 
+        const char *format;
+        char *item_name;
         if (menu_i_bundle != -1) {
-            sprintf(event, "bundle_%s_bought", StoreBundle[menu_i_bundle].name);
+            format = "bundle_%s_bought";
+            item_name = StoreBundle[menu_i_bundle].name;
         } else if (menu_i_pack != -1) {
-            sprintf(event, "pack_%s_bought", *reinterpret_cast<char **>(&StorePack[menu_i_pack].field1_0x4));
+            format = "pack_%s_bought";
+            item_name = *reinterpret_cast<char **>(&StorePack[menu_i_pack].field1_0x4);
         } else {
             return;
         }
+        sprintf(event, format, item_name);
         NuIOS_RecordFlurryEvent(event);
         return;
     }

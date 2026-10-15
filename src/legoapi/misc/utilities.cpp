@@ -847,8 +847,11 @@ static const i32 cubeEdgeIndices[12][2] = {
     {0, 1}, {1, 2}, {2, 3}, {3, 0}, {4, 5}, {5, 6}, {6, 7}, {7, 4}, {0, 4}, {1, 5}, {2, 6}, {3, 7},
 };
 
+// Retail copies a fully inside end point as one unaligned vector.
+typedef f32 RawClipVec4 __attribute__((vector_size(16), aligned(4)));
+
 i32 rawClip(VuVec const *input, VuVec *output, i32, VuVec const &plane) {
-    i32 count __attribute__((aligned(16))) = 0;
+    i32 count = 0;
     for (i32 edge = 0; edge < 12; ++edge) {
         VuVec const &a = input[cubeEdgeIndices[edge][0]];
         VuVec const &b = input[cubeEdgeIndices[edge][1]];
@@ -860,8 +863,8 @@ i32 rawClip(VuVec const *input, VuVec *output, i32, VuVec const &plane) {
             output[count].z = a.z;
             output[count].w = a.w;
             if (db > 0.0f) {
+                *reinterpret_cast<RawClipVec4 *>(&output[count + 1]) = *reinterpret_cast<const RawClipVec4 *>(&b);
                 count += 2;
-                output[count - 1] = b;
             } else {
                 count += 2;
                 f32 t = da / (da - db);

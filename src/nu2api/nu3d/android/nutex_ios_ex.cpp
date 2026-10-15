@@ -627,9 +627,12 @@ GLuint NuIOS_CreateGLTexFromPlatfomSpecificFile(const char *filename) {
     NuFileOpenSize(file);
     NuFileClose(file);
 
-    i32 width = 0;
-    i32 height = 0;
-    GLuint texture = NuIOS_CreateGLTexFromPlatformInMemory(buffer, &width, &height, false);
+    GLuint texture;
+    {
+        i32 width = 0;
+        i32 height = 0;
+        texture = NuIOS_CreateGLTexFromPlatformInMemory(buffer, &width, &height, false);
+    }
     NuThreadCriticalSectionEnd(g_textureLoadBufferCriticalSection);
     return texture;
 }

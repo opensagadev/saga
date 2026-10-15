@@ -854,6 +854,8 @@ i32 ClassEditor::IsSelectedObject(void *object, EdRef *reference) {
 }
 
 i32 ClassEditor::IsUniqueName(char *name) {
+    EdMember member;
+    char candidate_name[128];
     for (i32 i = 0; i < theRegistry.class_count; ++i) {
         EdClass *ed_class = &theRegistry.classes[i];
         EdClassInterface *interface = ed_class->interface;
@@ -865,8 +867,6 @@ i32 ClassEditor::IsUniqueName(char *name) {
         if (object == NULL)
             continue;
         do {
-            EdMember member;
-            char candidate_name[128];
             if (ed_class->FindMember(&member, object, 2, 1)) {
                 member.reference->GetAttributeData(member.object, 2, EdType_String, candidate_name, 128);
                 if (NuStrICmp(name, candidate_name) == 0) {

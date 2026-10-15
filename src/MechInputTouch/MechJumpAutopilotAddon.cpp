@@ -113,6 +113,9 @@ void MechJumpAutoPilotAddon::LookForLandingPoint() {
     }
 }
 
+// Retail stores each better landing spot as one unaligned four-float vector.
+typedef f32 LandingSpotVec4 __attribute__((vector_size(16), aligned(4)));
+
 bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
     // The centre is probed first, followed by eight directions at 45 degree
     // intervals. The near and far probes alternate between two radii.
@@ -165,7 +168,7 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
             const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
             if (score > best_score) {
                 best_score = score;
-                field_84 = hit;
+                *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
             }
             found = true;
         }
@@ -183,7 +186,7 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
             const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
             if (score > best_score) {
                 best_score = score;
-                field_84 = hit;
+                *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
             }
             found = true;
         }
@@ -201,7 +204,7 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
             const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
             if (score > best_score) {
                 best_score = score;
-                field_84 = hit;
+                *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
             }
             found = true;
         }
@@ -219,7 +222,7 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
             const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
             if (score > best_score) {
                 best_score = score;
-                field_84 = hit;
+                *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
             }
             found = true;
         }
@@ -237,7 +240,7 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
             const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
             if (score > best_score) {
                 best_score = score;
-                field_84 = hit;
+                *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
             }
             found = true;
         }
@@ -255,7 +258,7 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
             const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
             if (score > best_score) {
                 best_score = score;
-                field_84 = hit;
+                *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
             }
             found = true;
         }
@@ -273,7 +276,7 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
             const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
             if (score > best_score) {
                 best_score = score;
-                field_84 = hit;
+                *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
             }
             found = true;
         }
@@ -291,7 +294,7 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
             const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
             if (score > best_score) {
                 best_score = score;
-                field_84 = hit;
+                *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
             }
             found = true;
         }
@@ -309,7 +312,7 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
             const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
             if (score > best_score) {
                 best_score = score;
-                field_84 = hit;
+                *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
             }
             found = true;
         }

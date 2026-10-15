@@ -441,7 +441,25 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
                 matrix.m33 = 1.0f;
                 NuMtxTranslate(&matrix, &pickup.position);
             } else if ((type->flags & GIZMOPICKUP_TYPE_DRAW_Y_ROTATION) != 0) {
-                NuMtxSetRotationY(&matrix, pickup.draw_rotation);
+                const u16 y_rotation = pickup.draw_rotation;
+                matrix.m01 = 0.0f;
+                matrix.m03 = 0.0f;
+                matrix.m10 = 0.0f;
+                matrix.m11 = 1.0f;
+                matrix.m12 = 0.0f;
+                matrix.m13 = 0.0f;
+                matrix.m21 = 0.0f;
+                matrix.m23 = 0.0f;
+                matrix.m30 = 0.0f;
+                matrix.m31 = 0.0f;
+                matrix.m32 = 0.0f;
+                matrix.m33 = 1.0f;
+                const f32 cos_y = NU_COS_LUT(y_rotation);
+                const f32 sin_y = NU_SIN_LUT(y_rotation);
+                matrix.m00 = cos_y;
+                matrix.m02 = -sin_y;
+                matrix.m20 = sin_y;
+                matrix.m22 = cos_y;
                 NuMtxTranslate(&matrix, &pickup.position);
             } else {
                 NuMtxSetTranslation(&matrix, &pickup.position);

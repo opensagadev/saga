@@ -21,7 +21,7 @@ extern "C" void NuHGobjPOIMtxFromIX(nuhgobj_s *, u8) {
 }
 
 extern "C" i32 NuHGobjRndr(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices) {
-    NUMTX joint_matrices[256];
+    NUMTX_ALIGNED16 joint_matrices[256];
     NuHGobjEval(object, 0, NULL, joint_matrices);
     return NuHGobjRndrMtxDwa(object, world_matrix, render_count, render_indices, joint_matrices, NULL, 0);
 }

@@ -1584,7 +1584,7 @@ void DebrisCleanUpDmaDebTypeTables() {
 void xxxNuDisplayListUpdateSpecial(nuhspecial_s *special) {
     NUDLDLISTSCENE *scene = special->scene->display_list;
     NUDISPLAYSPECIAL *display = special->display_special;
-    NUMTX matrix = *NuSpecialGetDrawMtx(special);
+    NUMTX_ALIGNED16 matrix = *NuSpecialGetDrawMtx(special);
     NUVEC corners[8] = {
         {display->bounds_min.x, display->bounds_min.y, display->bounds_min.z},
         {display->bounds_max.x, display->bounds_max.y, display->bounds_max.z},

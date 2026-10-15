@@ -1313,7 +1313,7 @@ void NuMemoryManager::ClearBlockDebugContext(void *ptr) {
 }
 
 u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32 count, u32 total_bytes, u32 flags) {
-    char line[512];
+    char line[512] __attribute__((aligned(16)));
     char size_text[14];
     char address_text[19];
     u32 block_size = BLOCK_SIZE(header->value);
@@ -1335,14 +1335,11 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
         DebugHeader *debug = reinterpret_cast<DebugHeader *>(header);
         const char *debug_name = debug->name != NULL ? NuStrStripPath(debug->name) : "";
         category = debug->category;
-        char category_text[10];
+        char category_text[64] __attribute__((aligned(16)));
         if (category < category_count) {
-            const char *name = category_names[category];
-            u32 length = strlen(name);
-            if (length > 9)
-                length = 9;
-            memcpy(category_text, name, length);
-            memset(category_text + length, ' ', 9 - length);
+            strcpy(category_text, category_names[category]);
+            for (u32 i = strlen(category_text); i < 9; ++i)
+                category_text[i] = ' ';
             category_text[9] = '\0';
         } else {
             strcpy(category_text, "        ");
@@ -1390,7 +1387,7 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
 }
 
 void NuMemoryManager::DumpBlocksForContext(u32 dump_id, NuSymbolQuery *query, Context *context, u32 flags) {
-    char line[512];
+    char line[512] __attribute__((aligned(16)));
     char size_text[14];
 
     error_handler->Dump(this, dump_id,

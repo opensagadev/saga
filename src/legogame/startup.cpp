@@ -253,7 +253,7 @@ static void LoadPermData(BGPROCINFO *proc) {
         VARIPTR legal_tex_base;
         legal_tex_base.addr = legal_tex_end.addr - kLegalTextureReserve;
 
-        char legal_path[128];
+        char legal_path[128] __attribute__((aligned(16)));
         char legal_name[64];
         NuStrCpy(legal_path, "stuff\\legal\\");
         NuIOS_GetDeviceLanguage();

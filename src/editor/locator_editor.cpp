@@ -840,7 +840,7 @@ void locatorEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
         for (i32 index = 1; index <= 64 && set->locators[index - 1] != nullptr; ++index) {
             NUVEC current = set->locators[index - 1]->position;
             if (index != 1) {
-                NURND_VERTEX3D vertices[2] = {};
+                NURND_VERTEX3D vertices[2] __attribute__((aligned(16))) = {};
                 vertices[0].colour = 0x32323232;
                 vertices[1].colour = 0x32323232;
                 vertices[0].position = current;
