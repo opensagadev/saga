@@ -56,11 +56,21 @@ static STREAK_s *streaks_used;
 numtl_s *streakmtl;
 numtl_s *streakmtl_ref;
 
+// Retail only keeps the clone with both integer arguments propagated away;
+// it is local, so it takes result/start in registers and amount in xmm0.
+#if defined(__i386__)
+#define CALCULATE_BEZIER_POINT_ATTR __attribute__((noinline, noclone, regparm(2), sseregparm))
+#else
+#define CALCULATE_BEZIER_POINT_ATTR __attribute__((noinline, noclone))
+#endif
+static CALCULATE_BEZIER_POINT_ATTR void CalculateBezierPoint(NUVEC *result, NUVEC *start, NUVEC *end,
+                                                             NUVEC *start_tangent, NUVEC *end_tangent, f32 amount)
+    __asm__("_ZL20CalculateBezierPointP7nuvec_sS0_S0_S0_S0_iif.constprop.33");
 static void CalculateBezierPoint(NUVEC *result, NUVEC *start, NUVEC *end, NUVEC *start_tangent, NUVEC *end_tangent,
                                  f32 amount) {
+    NUVEC negative_tangent;
     NUVEC control_a;
     NUVEC control_b;
-    NUVEC negative_tangent;
     NuVecScale(&negative_tangent, end_tangent, -1.0f);
     NuVecAdd(&control_a, start, start_tangent);
     NuVecAdd(&control_b, end, &negative_tangent);

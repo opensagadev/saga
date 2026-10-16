@@ -515,14 +515,25 @@ void instGetLookAtLocatorInfo(instNUGCUTSCENE_s *instance, instNUGCUTLOOKAT_s *s
 
 // Steers a cutscene character's eyes towards a look-at locator and blinks its eyelids.
 // Only version-3 locator animations carry the look and blink channels.
-static void instNuGCutLookAtLocatorUpdate(NUGCUTLOCATORSYS_s *system, instNUGCUTLOCATOR_s *inst_locator,
-                                          NUGCUTLOCATOR_s *locator, f32 frame, NUMTX *parent_mtx,
-                                          instNUGCUTSCENE_s *instance) {
+// Retail only keeps the IPA-SRA clone: the system is dropped and the instance
+// locator is replaced by its effect handle slot.
+#if defined(__i386__)
+#define INST_LOOKAT_UPDATE_ATTR __attribute__((noinline, noclone, regparm(2), sseregparm))
+#else
+#define INST_LOOKAT_UPDATE_ATTR __attribute__((noinline, noclone))
+#endif
+static INST_LOOKAT_UPDATE_ATTR void instNuGCutLookAtLocatorUpdate(i32 *effect_handle, NUGCUTLOCATOR_s *locator,
+                                                                  f32 frame, NUMTX *parent_mtx,
+                                                                  instNUGCUTSCENE_s *instance)
+    __asm__("_ZL29instNuGCutLookAtLocatorUpdateP18NUGCUTLOCATORSYS_sP19instNUGCUTLOCATOR_sP15NUGCUTLOCATOR_"
+            "sfP7numtx_sP17instNUGCUTSCENE_s.isra.23");
+static void instNuGCutLookAtLocatorUpdate(i32 *effect_handle, NUGCUTLOCATOR_s *locator, f32 frame,
+                                          NUMTX *parent_mtx, instNUGCUTSCENE_s *instance) {
     if (*reinterpret_cast<u32 *>(locator->animation) - 0x414e4934U > 1) {
         return;
     }
     // The locator's instance slot holds the look-at record pointer.
-    GCutLookAtState *state = reinterpret_cast<GCutLookAtState *>(static_cast<uintptr_t>(inst_locator->effect_handle));
+    GCutLookAtState *state = reinterpret_cast<GCutLookAtState *>(static_cast<uintptr_t>(*effect_handle));
     instGetLookAtLocatorInfo(instance, reinterpret_cast<instNUGCUTLOOKAT_s *>(state));
     if (state->character_index == 0 || state->scene == NULL) {
         return;
@@ -726,7 +737,7 @@ extern "C" {
                     NuCutSceneSFXUpdate(system, inst_locator, locator, frame, parent_mtx, paused);
                 }
             } else if ((type_flags & 8) != 0 && paused == 0) {
-                instNuGCutLookAtLocatorUpdate(system, inst_locator, locator, frame, parent_mtx, instance);
+                instNuGCutLookAtLocatorUpdate(&inst_locator->effect_handle, locator, frame, parent_mtx, instance);
             }
         } else {
             if (paused != 0) {

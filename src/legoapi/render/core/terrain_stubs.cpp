@@ -659,14 +659,15 @@ extern "C" {
             scaled->last_used_time = partglobaltime;
             scaled->scale = requested_scale;
             scaled->field_174 = effect_index;
-            if (strlen(source->name) > 12) {
-                char shortened[16];
-                memcpy(shortened, source->name, strlen(source->name) + 1);
+            char shortened[16];
+            const char *base_name = source->name;
+            const size_t name_length = strlen(base_name);
+            if (name_length > 12) {
+                memcpy(shortened, base_name, name_length + 1);
                 shortened[12] = '\0';
-                sprintf(scaled->name, "%s%03d", shortened, i);
-            } else {
-                sprintf(scaled->name, "%s%03d", source->name, i);
+                base_name = shortened;
             }
+            sprintf(scaled->name, "%s%03d", base_name, i);
             ++part_types_used;
             return i != 0 ? i : closest_index;
         }

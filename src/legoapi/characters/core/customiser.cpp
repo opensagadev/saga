@@ -42,6 +42,27 @@ static CUSTOMPIECECATEGORY CustomSetData[9] = {
     {"leg", 0, 5, {2, 0}, NULL},
 };
 
+// Retail partially inlines this lookup: the first five names stay in each
+// caller and the remaining tail is the out-of-line .part.0 (regparm name).
+#if defined(__i386__)
+#define CUSTOMISER_FIND_SET_PART_ATTR __attribute__((noinline, noclone, optimize("Os"), regparm(1)))
+#else
+#define CUSTOMISER_FIND_SET_PART_ATTR __attribute__((noinline, noclone))
+#endif
+static CUSTOMISER_FIND_SET_PART_ATTR i32 Customiser_FindSetFromNamePart(char *name)
+    __asm__("_ZL26Customiser_FindSetFromNamePc.part.0");
+static i32 Customiser_FindSetFromNamePart(char *name) {
+    if (NuStrICmp(name, "hands") == 0)
+        return 4;
+    if (NuStrICmp(name, "weapon") == 0)
+        return 2;
+    if (NuStrICmp(name, "underpants") == 0)
+        return 7;
+    if (NuStrICmp(name, "legs") == 0)
+        return 8;
+    return -1;
+}
+
 static inline i32 Customiser_FindSetFromName(char *name) {
     if (NuStrICmp(name, "hathair") == 0)
         return 0;
@@ -53,15 +74,7 @@ static inline i32 Customiser_FindSetFromName(char *name) {
         return 6;
     if (NuStrICmp(name, "arms") == 0)
         return 3;
-    if (NuStrICmp(name, "hands") == 0)
-        return 4;
-    if (NuStrICmp(name, "weapon") == 0)
-        return 2;
-    if (NuStrICmp(name, "underpants") == 0)
-        return 7;
-    if (NuStrICmp(name, "legs") == 0)
-        return 8;
-    return -1;
+    return Customiser_FindSetFromNamePart(name);
 }
 
 static i32 Customiser_PieceAvailable_Default(CUSTOMPIECE *piece) {

@@ -351,22 +351,25 @@ static void CC_layer(NUFPAR *parser) {
     data->make_layer_list = MakeLayerList_Name;
 }
 
-static inline i32 ParseLayerMask(NUFPAR *parser, u32 *mask) {
+// Retail lays the named-layer loop out first with the numeric loop and the
+// mask updates as cold out-of-line blocks; always_inline keeps fnsplit from
+// outlining the numeric loop.
+static inline __attribute__((always_inline)) i32 ParseLayerMask(NUFPAR *parser, u32 *mask) {
     i32 count = 0;
     *mask = 0;
-    if (charconfig.named_layers != 0) {
+    if (__builtin_expect(charconfig.named_layers == 0, 0)) {
         while (NuFParGetWord(parser) != 0) {
-            const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
-            if (layer != -1) {
-                count++;
+            const u32 layer = NuAToI(parser->word_buf);
+            if (__builtin_expect(layer < 32, 0)) {
+                ++count;
                 *mask |= 1u << layer;
             }
         }
     } else {
         while (NuFParGetWord(parser) != 0) {
-            const u32 layer = NuAToI(parser->word_buf);
-            if (layer < 32) {
-                count++;
+            const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
+            if (__builtin_expect(layer != -1, 0)) {
+                ++count;
                 *mask |= 1u << layer;
             }
         }
@@ -375,29 +378,7 @@ static inline i32 ParseLayerMask(NUFPAR *parser, u32 *mask) {
 }
 
 static void CC_layers_special(NUFPAR *parser) {
-    u32 *mask = &charconfig.runtime->layer_mask_special;
-    *mask = 0;
-    i32 count = 0;
-    if (charconfig.named_layers != 0) {
-        while (NuFParGetWord(parser) != 0) {
-            const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
-            if (layer == -1) {
-                continue;
-            }
-            ++count;
-            *mask |= 1u << layer;
-        }
-    } else {
-        while (NuFParGetWord(parser) != 0) {
-            const u32 layer = NuAToI(parser->word_buf);
-            if (!(layer < 32)) {
-                continue;
-            }
-            ++count;
-            *mask |= 1u << layer;
-        }
-    }
-    if (count != 0) {
+    if (ParseLayerMask(parser, &charconfig.runtime->layer_mask_special) != 0) {
         const u32 special_mask = charconfig.runtime->layer_mask_special;
         charconfig.runtime->layer_mask_dead = special_mask;
         charconfig.runtime->layer_mask_low = special_mask;
@@ -1614,29 +1595,10 @@ static void CC_layers_dead(NUFPAR *parser) {
 }
 
 static void CC_layers_high(NUFPAR *parser) {
-    u32 *mask = &charconfig.runtime->layer_mask;
-    *mask = 0;
-    i32 count = 0;
-    if (charconfig.named_layers == 0) {
-        while (NuFParGetWord(parser) != 0) {
-            const u32 layer = NuAToI(parser->word_buf);
-            if (layer < 32) {
-                ++count;
-                *mask |= 1u << layer;
-            }
-        }
-    } else {
-        while (NuFParGetWord(parser) != 0) {
-            const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
-            if (layer != -1) {
-                ++count;
-                *mask |= 1u << layer;
-            }
-        }
-    }
-    if (count != 0) {
-        charconfig.runtime->layer_mask_low = *mask;
-        charconfig.runtime->layer_mask_medium = *mask;
+    if (ParseLayerMask(parser, &charconfig.runtime->layer_mask) != 0) {
+        const u32 high_mask = charconfig.runtime->layer_mask;
+        charconfig.runtime->layer_mask_low = high_mask;
+        charconfig.runtime->layer_mask_medium = high_mask;
     }
 }
 
@@ -1645,29 +1607,7 @@ static void CC_layers_low(NUFPAR *parser) {
 }
 
 static void CC_layers_medium(NUFPAR *parser) {
-    u32 *mask = &charconfig.runtime->layer_mask_medium;
-    *mask = 0;
-    i32 count = 0;
-    if (charconfig.named_layers == 0) {
-        while (NuFParGetWord(parser) != 0) {
-            const u32 layer = NuAToI(parser->word_buf);
-            if (!(layer < 32)) {
-                continue;
-            }
-            ++count;
-            *mask |= 1u << layer;
-        }
-    } else {
-        while (NuFParGetWord(parser) != 0) {
-            const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
-            if (layer == -1) {
-                continue;
-            }
-            ++count;
-            *mask |= 1u << layer;
-        }
-    }
-    if (count != 0) {
+    if (ParseLayerMask(parser, &charconfig.runtime->layer_mask_medium) != 0) {
         charconfig.runtime->layer_mask_low = charconfig.runtime->layer_mask_medium;
     }
 }
@@ -2368,7 +2308,16 @@ char MiniBuffer[0x4000];
 extern i32 CHARPAK;
 extern "C" char ConfigBuffer[0x10000];
 
-static i32 RedirectTextFile(char *text, char *filename, i32 strip_comments) {
+// Retail only keeps the clone with strip_comments fixed to 1 (regparm text, filename).
+#if defined(__i386__)
+#define REDIRECT_TEXT_FILE_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define REDIRECT_TEXT_FILE_ATTR __attribute__((noinline, noclone))
+#endif
+static REDIRECT_TEXT_FILE_ATTR i32 RedirectTextFile(char *text, char *filename)
+    __asm__("_ZL16RedirectTextFilePcS_i.constprop.54");
+static i32 RedirectTextFile(char *text, char *filename) {
+    const i32 strip_comments = 1;
     i32 result = 0;
     NUFPAR *parser = NuFParCreateMem("redirect", text, 0xffff);
     if (parser != NULL) {
@@ -2383,8 +2332,8 @@ static i32 RedirectTextFile(char *text, char *filename, i32 strip_comments) {
                     NuStrCpy(filename, parser->word_buf);
                 }
             } else if (result != 0) {
-                result = 2;
-                break;
+                NuFParDestroy(parser);
+                return 2;
             }
         }
         NuFParDestroy(parser);
@@ -2416,7 +2365,7 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
             SecondCharConfigure = 0;
             return 0;
         }
-        if (redirect != 0 && (redirected = RedirectTextFile(MiniBuffer, redirected_name, 1)) != 0) {
+        if (redirect != 0 && (redirected = RedirectTextFile(MiniBuffer, redirected_name)) != 0) {
             NuStrCpy(path, directory);
             NuStrCat(path, redirected_name);
             NuStrCat(path, ".txt");
@@ -2576,7 +2525,7 @@ void CharConfig_ConfigureAll(i32 permanent, NUFPCOMJMP *game_keywords) {
         text[size] = saved;
         if (length < 1)
             continue;
-        i32 redirected = RedirectTextFile(text, filename, 1);
+        i32 redirected = RedirectTextFile(text, filename);
         if (redirected != 0) {
             NuStrCat(filename, ".txt");
             NuStrCpy(path, directory);

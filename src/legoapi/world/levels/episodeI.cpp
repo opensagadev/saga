@@ -885,11 +885,15 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
                 pod->previous_displacement = direction;
             }
             object = pod->object;
-            if (world->current_level == PODRACEA_LDATA && object != NULL && pod->model_id == id_SEBULBASPOD &&
-                NuSpecialExistsFn(&minesys.mine_special) != 0) {
+            if (__builtin_expect(world->current_level == PODRACEA_LDATA && object != NULL &&
+                                     pod->model_id == id_SEBULBASPOD && NuSpecialExistsFn(&minesys.mine_special) != 0,
+                                 0)) {
                 object->special_move_timer -= FRAMETIME;
                 if (object->special_move_timer < 0.0f && player != NULL) {
-                    NUVEC origin = object->apiobj.position;
+                    NUVEC origin;
+                    origin.x = object->apiobj.position.x;
+                    origin.y = object->apiobj.position.y;
+                    origin.z = object->apiobj.position.z;
                     origin.y += 1.0f;
                     // The reference leaves the close-range velocity uninitialized.
                     // A stationary mine keeps that path deterministic and safe.
@@ -936,7 +940,7 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
         }
         pod->matrix.m33 = 1.0f;
         object = pod->object;
-        if (object != NULL) {
+        if (__builtin_expect(object != NULL, 0)) {
             object->vehicle_orientation = pod->matrix;
             object->apiobj.position = *NUMTX_GET_ROW_VEC(&pod->matrix, 3);
             object->saved_position = object->apiobj.position;
@@ -1421,7 +1425,10 @@ i32 Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **, 
                 if (CreatePodRaceMine(&object->apiobj.lower_position) != NULL)
                     packet->script_process.action_timer = 0.0f;
             } else if (NuSpecialExistsFn(&special) != 0) {
-                NUVEC origin = object->apiobj.position;
+                NUVEC origin;
+                origin.x = object->apiobj.position.x;
+                origin.y = object->apiobj.position.y;
+                origin.z = object->apiobj.position.z;
                 origin.y += 1.0f;
                 NUVEC target_delta;
                 NuVecSub(&target_delta, &target->apiobj.velocity, &target->apiobj.collision_position);

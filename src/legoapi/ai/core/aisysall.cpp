@@ -25,34 +25,53 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-static u32 CalculateRightIntersection(APIOBJECT *object, AIPATHCNX *first_connection, AIPATHCNX *second_connection,
-                                      i32 first_angle, i32 second_angle, AIPATHNODE *before, AIPATHNODE *shared,
+// Retail keeps several static helpers here only as GCC clones; these attributes
+// reproduce the clone names and register conventions.
+#if defined(__i386__)
+#define AISYSALL_CLONE_ATTR1 __attribute__((noinline, noclone, regparm(1)))
+#define AISYSALL_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
+#define AISYSALL_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
+#else
+#define AISYSALL_CLONE_ATTR1 __attribute__((noinline, noclone))
+#define AISYSALL_CLONE_ATTR2 __attribute__((noinline, noclone))
+#define AISYSALL_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
+#endif
+
+// IPA-SRA keeps only the fields this helper reads: values for those read before any call,
+// addresses for those read after one.
+static AISYSALL_CLONE_ATTR2_SSE u32 CalculateRightIntersection(f32 object_radius, f32 first_distance,
+                                                               f32 *second_distance, i32 first_angle,
+                                                               i32 second_angle, AIPATHNODE *before, f32 *shared_y,
+                                                               f32 shared_radius, AIPATHNODE *after, NUVEC *result)
+    __asm__("_ZL26CalculateRightIntersectionP11APIOBJECT_sP11AIPATHCNX_sS2_iiP12AIPATHNODE_sS4_S4_P7nuvec_s.isra.50");
+
+static u32 CalculateRightIntersection(f32 object_radius, f32 first_distance, f32 *second_distance, i32 first_angle,
+                                      i32 second_angle, AIPATHNODE *before, f32 *shared_y, f32 shared_radius,
                                       AIPATHNODE *after, NUVEC *result) {
-    f32 clearance = object->collision_radius + 0.05f;
+    f32 clearance = object_radius + 0.05f;
     f32 before_radius = before->radius - clearance;
     if (before_radius < 0.0f) {
         before_radius = 0.0f;
     }
-    f32 shared_radius = shared->radius - clearance;
-    if (shared_radius < 0.0f) {
-        shared_radius = 0.0f;
+    f32 shared_clear = shared_radius - clearance;
+    if (shared_clear < 0.0f) {
+        shared_clear = 0.0f;
     }
     f32 after_radius = after->radius - clearance;
     if (after_radius < 0.0f) {
         after_radius = 0.0f;
     }
     NUVEC first_start = {before_radius, 0.0f, 0.0f};
-    NUVEC first_end = {before_radius, 0.0f, first_connection->horizontal_distance};
-    NUANG angle =
-        NuAngAdd(first_angle, NuASin((shared_radius - before_radius) / first_connection->horizontal_distance));
+    NUVEC first_end = {before_radius, 0.0f, first_distance};
+    NUANG angle = NuAngAdd(first_angle, NuASin((shared_clear - before_radius) / first_distance));
     NuVecRotateY(&first_start, &first_start, angle);
     NuVecRotateY(&first_end, &first_end, angle);
     NuVecAdd(&first_start, &first_start, &before->position);
     NuVecAdd(&first_end, &first_end, &before->position);
 
     NUVEC second_start = {-after_radius, 0.0f, 0.0f};
-    NUVEC second_end = {-after_radius, 0.0f, second_connection->horizontal_distance};
-    angle = NuAngSub(second_angle, NuASin((shared_radius - after_radius) / second_connection->horizontal_distance));
+    NUVEC second_end = {-after_radius, 0.0f, *second_distance};
+    angle = NuAngSub(second_angle, NuASin((shared_clear - after_radius) / *second_distance));
     NuVecRotateY(&second_start, &second_start, angle);
     NuVecRotateY(&second_end, &second_end, angle);
     NuVecAdd(&second_start, &second_start, &after->position);
@@ -69,7 +88,7 @@ static u32 CalculateRightIntersection(APIOBJECT *object, AIPATHCNX *first_connec
     if (NuLineLineIntersect(&first_origin, &first_direction, &second_origin, &second_direction, &first_parameter,
                             &second_parameter) != 0 &&
         first_parameter >= 0.0f && second_parameter >= 0.0f && first_parameter <= 1.0f && second_parameter <= 1.0f) {
-        first_origin.y = shared->position.y * first_parameter + before->position.y * (1.0f - first_parameter);
+        first_origin.y = *shared_y * first_parameter + before->position.y * (1.0f - first_parameter);
         NuVecScale(&first_direction, &first_direction, first_parameter);
         NuVecAdd(result, &first_origin, &first_direction);
         return 1;
@@ -196,8 +215,10 @@ extern "C" i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AI
     return 1;
 }
 
-static u32 CalculateIntersection(AISYS *system, AIPACKET *packet, APIOBJECT *object, AIPATHCNX *current_connection,
-                                 AIPATHCNX *target_connection) {
+// Retail keeps this one whole: neither inlined nor reduced by IPA-SRA.
+static __attribute__((noinline, noclone)) u32 CalculateIntersection(AISYS *system, AIPACKET *packet, APIOBJECT *object,
+                                                                    AIPATHCNX *current_connection,
+                                                                    AIPATHCNX *target_connection) {
     if (packet->intersection_connection != current_connection ||
         packet->intersection_target_connection != target_connection) {
         packet->movement_flags &=
@@ -244,11 +265,15 @@ static u32 CalculateIntersection(AISYS *system, AIPACKET *packet, APIOBJECT *obj
                              packet->current_route, object->field_0x289, NULL, 0.0f, 1) != 0) {
             return 0;
         }
-        u32 right = CalculateRightIntersection(object, current_connection, target_connection, first_angle, second_angle,
-                                               before, shared, after, &packet->right_diversion);
+        u32 right = CalculateRightIntersection(object->collision_radius, current_connection->horizontal_distance,
+                                               &target_connection->horizontal_distance, first_angle, second_angle,
+                                               before, &shared->position.y, shared->radius, after,
+                                               &packet->right_diversion);
         packet->movement_flags = (packet->movement_flags & ~AIPACKET_MOVEMENT_DIVERSION_RIGHT) | ((right & 1) << 5);
-        u32 left = CalculateRightIntersection(object, target_connection, current_connection, second_angle, first_angle,
-                                              after, shared, before, &packet->left_diversion);
+        u32 left = CalculateRightIntersection(object->collision_radius, target_connection->horizontal_distance,
+                                              &current_connection->horizontal_distance, second_angle, first_angle,
+                                              after, &shared->position.y, shared->radius, before,
+                                              &packet->left_diversion);
         packet->movement_flags = (packet->movement_flags & ~AIPACKET_MOVEMENT_DIVERSION_LEFT) | ((left & 1) << 6);
     }
     return ((packet->movement_flags & AIPACKET_MOVEMENT_DIVERSION_RIGHT) != 0) |
@@ -291,18 +316,21 @@ i32 AIMoveCanReachPath(AISYS_s *system, AIPATH_s *path, AIPATH_s *destination) {
     return 0;
 }
 
-static void AIMoveFindDivertNode(AISYS *, AIPATH *path, AIPACKET *packet, NUVEC *destination) {
+static AISYSALL_CLONE_ATTR2 void AIMoveFindDivertNode(AIPATH *path, AIPACKET *packet, NUVEC *destination)
+    __asm__("_ZL20AIMoveFindDivertNodeP7AISYS_sP8AIPATH_sP10AIPACKET_sP7nuvec_s.isra.26");
+
+static void AIMoveFindDivertNode(AIPATH *path, AIPACKET *packet, NUVEC *destination) {
     if (path->special_route_count != 0 &&
         (packet->navigation_flags & AIPACKET_NAVIGATION_FLAG_USE_SPECIAL_ROUTES) != 0) {
         AIPATHNODELINK *links = path->special_routes;
-        if (packet->divert_node_index >= path->node_count) {
+        if (__builtin_expect(packet->divert_node_index >= path->node_count, 0)) {
             packet->divert_node_index = 0xff;
         }
         if (packet->divert_search_index >= path->special_route_count) {
             packet->divert_search_index = 0;
         }
         f32 nearest = FLT_MAX;
-        if (packet->divert_node_index < path->node_count) {
+        if (__builtin_expect(packet->divert_node_index < path->node_count, 0)) {
             nearest = NuVecDistSqr(&path->nodes[packet->divert_node_index].position, destination, NULL);
         }
         u8 initial_index = packet->divert_search_index;
@@ -348,11 +376,14 @@ static void AIMoveFindDivertNode(AISYS *, AIPATH *path, AIPACKET *packet, NUVEC 
     }
 }
 
-static i32 AIMoveAdjustDestinationPath(AISYS *system, AIPACKET *packet) {
+static AISYSALL_CLONE_ATTR1 i32 AIMoveAdjustDestinationPath(AIPACKET *packet)
+    __asm__("_ZL27AIMoveAdjustDestinationPathP7AISYS_sP10AIPACKET_s.isra.48");
+
+static i32 AIMoveAdjustDestinationPath(AIPACKET *packet) {
     if (packet->path_info.path == packet->fallback_path_info.path && packet->fallback_path_info.connection != NULL) {
         return 0;
     }
-    AIMoveFindDivertNode(system, packet->path_info.path, packet, &packet->fallback_destination);
+    AIMoveFindDivertNode(packet->path_info.path, packet, &packet->fallback_destination);
     if (packet->divert_node_index >= packet->path_info.path->node_count) {
         return -1;
     }
@@ -371,7 +402,11 @@ static i32 AIMoveAdjustDestinationPath(AISYS *system, AIPACKET *packet) {
     return 1;
 }
 
-static i32 AIMoveChooseExitNodePath(AISYS *system, AIPACKET *packet) {
+// IPA-SRA hands this clone the address of system->path_sys rather than the system.
+static AISYSALL_CLONE_ATTR2 i32 AIMoveChooseExitNodePath(AIPATHSYS **path_sys, AIPACKET *packet)
+    __asm__("_ZL24AIMoveChooseExitNodePathP7AISYS_sP10AIPACKET_s.isra.82");
+
+static i32 AIMoveChooseExitNodePath(AIPATHSYS **path_sys, AIPACKET *packet) {
     AIPATHNODE *first = &packet->path_info.path->nodes[packet->path_info.connection->node_indices[0]];
     AIPATHNODE *second = &packet->path_info.path->nodes[packet->path_info.connection->node_indices[1]];
     f32 distance = NuVecDistSqr(&packet->owner->apiobj.position, &first->position, NULL) - first->radius_squared;
@@ -382,7 +417,7 @@ static i32 AIMoveChooseExitNodePath(AISYS *system, AIPACKET *packet) {
         return 0;
     }
     AIPATHSPECIALROUTE *route =
-        &system->path_sys
+        &(*path_sys)
              ->special_routes[packet->path_info.path->special_routes[node->special_route_index].special_route_index];
     for (i32 index = 0; index < route->path_count; ++index) {
         if (route->paths[index] == packet->fallback_path_info.path) {
@@ -727,7 +762,7 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
     AIPATH *path = packet->path_info.path;
     i32 diverted = 0;
     if (path != packet->fallback_path_info.path || packet->fallback_path_info.connection == NULL) {
-        AIMoveFindDivertNode(system, path, packet, &packet->fallback_destination);
+        AIMoveFindDivertNode(path, packet, &packet->fallback_destination);
         if (packet->divert_node_index >= packet->path_info.path->node_count ||
             packet->path_info.path->nodes[packet->divert_node_index].connection_count == 0) {
             packet->movement_destination = packet->owner->apiobj.position;
@@ -751,8 +786,9 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
     AIPATHCNX *connection = packet->path_info.connection;
     NUVEC difference;
     f32 distance_squared = NuVecDistSqr(&packet->fallback_destination, &object->position, &difference);
-    if ((object->supporting_platform_id == -1 || (path->nodes[connection->node_indices[0]].has_special != 0 &&
-                                                  path->nodes[connection->node_indices[1]].has_special != 0)) &&
+    if ((object->supporting_platform_id == -1 ||
+         (path->nodes[connection->node_indices[0]].has_special != 0 &&
+          path->nodes[connection->node_indices[1]].has_special != 0)) &&
         packet->movement_parameter != 0.0f && difference.y < 0.5f && difference.y > -0.5f &&
         distance_squared < packet->movement_parameter * packet->movement_parameter) {
         if (diverted == 0) {
@@ -765,8 +801,8 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
             packet->movement_parameter = saved_parameter;
             packet->fallback_path_info = saved_path_info;
             packet->fallback_stopping_distance = saved_stopping_distance;
-            AIMoveChooseExitNodePath(system, packet);
-            AIMoveAdjustDestinationPath(system, packet);
+            AIMoveChooseExitNodePath(&system->path_sys, packet);
+            AIMoveAdjustDestinationPath(packet);
             path = packet->path_info.path;
             connection = packet->path_info.connection;
             destination_connection = packet->fallback_path_info.connection;
@@ -987,8 +1023,8 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
                 packet->fallback_destination = saved_destination;
                 packet->fallback_path_info = saved_path_info;
                 packet->fallback_stopping_distance = saved_stopping_distance;
-                AIMoveChooseExitNodePath(system, packet);
-                AIMoveAdjustDestinationPath(system, packet);
+                AIMoveChooseExitNodePath(&system->path_sys, packet);
+                AIMoveAdjustDestinationPath(packet);
             }
         }
         NuVecScale(&difference, &difference, packet->movement_parameter / NuFsqrt(distance_squared));

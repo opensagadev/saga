@@ -179,9 +179,9 @@ extern "C" {
         NUVEC corners[8];
         NUVEC view[8];
         u8 results[8];
-        if (far_clip == 0.0f)
+        if (__builtin_expect(far_clip == 0.0f, 0))
             far_clip = global_camera.far_clip;
-        if (world_mtx == NULL || world_mtx == &numtx_identity)
+        if (__builtin_expect(world_mtx == NULL || world_mtx == &numtx_identity, 0))
             transform = vmtx;
         else
             NuMtxMul(&transform, world_mtx, &vmtx);
@@ -894,7 +894,13 @@ extern "C" {
         // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
         // It appends the world transform, skin palette, and geometry calls as one
         // contiguous run in the material display list.
-        static void DisplayListProcessSkin(NUMTL *, NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
+        static __attribute__((noinline, noclone)) void
+        DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
+                               NUMTX *world_matrix, void **transform_packet, NUMTX *skin_matrices,
+                               DEFORMERWEIGHTSARRAY *deformer_weights, i32 shadow_caster)
+            __asm__("_ZL22DisplayListProcessSkinP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
+                    "sPPvS7_P22deformerweightsarray_si.isra.36");
+        static void DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
                                            NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix,
                                            void **transform_packet, NUMTX *skin_matrices,
                                            DEFORMERWEIGHTSARRAY *deformer_weights, i32 shadow_caster) {
@@ -931,7 +937,13 @@ extern "C" {
         // Lightmapped geometry carries an AE/AF/B0 setup command two entries before
         // its geometry command. Keep that setup command adjacent to the dynamic
         // transform and geometry entries when the special is submitted.
-        static void DisplayListProcessLightmapped(NUMTL *, NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
+        static __attribute__((noinline, noclone)) void
+        DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
+                                      NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix, void **transform_packet,
+                                      f32 alpha)
+            __asm__("_ZL29DisplayListProcessLightmappedP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
+                    "sPPvf.isra.34");
+        static void DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
                                                   NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix,
                                                   void **transform_packet, f32 alpha) {
             display_list_buffer->addr = ALIGN(display_list_buffer->addr, 0x10);
@@ -1054,7 +1066,7 @@ extern "C" {
                     NUDLDLISTSCENE *material_scene = list->dlist;
                     material_scene->flags |= NUDL_SCENE_FLAG_CLIP_MATERIALS;
                     const i32 used_material = list->mtl_id;
-                    u8 *used = material_scene->mtl_used[material_scene->render_buffer >> 7];
+                    u8 *used = material_scene->mtl_used[NuDisplaySceneCurrentBuffer(material_scene)];
                     used[used_material >> 3] |= static_cast<u8>(1U << (used_material & 7));
                     RndrStateSetConstAlphaTint(nuspecial_const_alpha_enabled, nuspecial_const_tint_enabled,
                                                nuspecial_const_alpha, &nuspecial_const_tint, material);
@@ -1079,12 +1091,12 @@ extern "C" {
                         DisplayListSetAlphaPS(first, last, distance_alpha);
                     } else if (skin_matrices != NULL) {
                         NUDISPLAYLISTITEM *first_and_last[3];
-                        DisplayListProcessSkin(material, list, geometry, first_and_last, mtx, &transform_packet,
+                        DisplayListProcessSkin(list, geometry, first_and_last, mtx, &transform_packet,
                                                skin_matrices, blend_values, shadow_caster);
                     } else if (static_cast<i32>(material->shader_desc.flags) < 0 && clip_object->indices[i] > 1 &&
                                (geometry[-2].type == 0xae || geometry[-2].type == 0xb0 || geometry[-2].type == 0xaf)) {
                         NUDISPLAYLISTITEM *first_and_last[3];
-                        DisplayListProcessLightmapped(material, list, geometry, first_and_last, mtx, &transform_packet,
+                        DisplayListProcessLightmapped(list, geometry, first_and_last, mtx, &transform_packet,
                                                       distance_alpha);
                     } else {
                         VARIPTR *buffer = NuDisplayListLinkItems(list, 2);
@@ -1142,14 +1154,14 @@ extern "C" {
                                 DisplayListSetAlphaPS(first, last, distance_alpha);
                             } else if (skin_matrices != NULL) {
                                 NUDISPLAYLISTITEM *first_and_last[3];
-                                DisplayListProcessSkin(material, shadow_list, geometry, first_and_last, mtx,
+                                DisplayListProcessSkin(shadow_list, geometry, first_and_last, mtx,
                                                        &transform_packet, skin_matrices, blend_values, 1);
                             } else if (static_cast<i32>(material->shader_desc.flags) < 0 &&
                                        clip_object->indices[i] > 1 &&
                                        (geometry[-2].type == 0xae || geometry[-2].type == 0xb0 ||
                                         geometry[-2].type == 0xaf)) {
                                 NUDISPLAYLISTITEM *first_and_last[3];
-                                DisplayListProcessLightmapped(material, shadow_list, geometry, first_and_last, mtx,
+                                DisplayListProcessLightmapped(shadow_list, geometry, first_and_last, mtx,
                                                               &transform_packet, distance_alpha);
                             } else {
                                 VARIPTR *buffer = NuDisplayListLinkItems(shadow_list, 2);

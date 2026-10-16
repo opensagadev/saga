@@ -879,6 +879,98 @@ anakin_door_setup_s DoorSetupList[15] = {
     {"", NULL, 0.0f, 0.0f, 0, {}, {0.0f, 0.0f, 0.0f}, 0.0f, 0.0f},
 };
 
+void DrawLine_Now(_vuv_s *, _vuv_s *, i32, i32);
+void CalcSplinePoint(flightspline_s *spline, _vuv_s *position, f32 along);
+
+#if defined(__i386__)
+#define CHRIS_REGPARM1 __attribute__((regparm(1)))
+#else
+#define CHRIS_REGPARM1
+#endif
+// Debug draw of a flight spline: the sampled curve, its roll axis at every
+// sample and the roll axis at every control point.  Retail only keeps the
+// clone with the four colours propagated (centre line, two axis halves and
+// the control-point marker), and nothing calls it.
+static __used__ __attribute__((noinline, noclone)) CHRIS_REGPARM1 void FlightSpline_Draw(flightspline_s *spline)
+    __asm__("_ZL17FlightSpline_DrawP14flightspline_siiii.constprop.39");
+static void FlightSpline_Draw(flightspline_s *spline) {
+    _vuv_s points[512];
+    _vuv_s direction;
+    _vuv_s axis;
+    _vuv_s plus;
+    _vuv_s minus;
+    const i32 count = spline->point_count * 8;
+    const i32 last = count - 1;
+    const f32 step = 1.0f / last;
+    points[0] = spline->points[0];
+    f32 along = step;
+    for (i32 i = 1; i < last; ++i) {
+        CalcSplinePoint(spline, &points[i], along);
+        along += step;
+    }
+    points[last] = spline->points[spline->point_count - 1];
+    for (i32 i = 1; i < count; ++i) {
+        DrawLine_Now(&points[i], &points[i - 1], 0xffffff, 1);
+        direction.x = points[i].x - points[i - 1].x;
+        direction.y = points[i].y - points[i - 1].y;
+        direction.z = points[i].z - points[i - 1].z;
+        const i16 yaw = static_cast<i16>(NuAtan2D(direction.x, direction.z));
+        NuVecRotateY(reinterpret_cast<NUVEC *>(&axis), reinterpret_cast<NUVEC *>(&direction), -yaw);
+        const i16 pitch = static_cast<i16>(NuAtan2D(axis.y, axis.z));
+        axis.x = 1.0f;
+        axis.y = 0.0f;
+        axis.z = 0.0f;
+        axis.w = 0.0f;
+        NuVecRotateZ(reinterpret_cast<NUVEC *>(&axis), reinterpret_cast<NUVEC *>(&axis),
+                     static_cast<i16>(static_cast<i32>(points[i].w)));
+        NuVecRotateX(reinterpret_cast<NUVEC *>(&axis), reinterpret_cast<NUVEC *>(&axis), -pitch);
+        NuVecRotateY(reinterpret_cast<NUVEC *>(&axis), reinterpret_cast<NUVEC *>(&axis), yaw);
+        plus.x = points[i].x + axis.x;
+        plus.y = points[i].y + axis.y;
+        plus.z = points[i].z + axis.z;
+        minus.x = points[i].x - axis.x;
+        minus.y = points[i].y - axis.y;
+        minus.z = points[i].z - axis.z;
+        DrawLine_Now(&plus, &points[i], 0x800080, 1);
+        DrawLine_Now(&points[i], &minus, 0x808080, 1);
+    }
+    for (i32 i = 0; i < spline->point_count; ++i) {
+        i32 from = static_cast<i32>(static_cast<f32>(i * count) / static_cast<f32>(spline->point_count - 1) - 0.5f);
+        i32 to;
+        if (from < 0) {
+            from = 0;
+            to = 1;
+        } else {
+            to = from + 1;
+            if (from >= last) {
+                from = count - 2;
+                to = last;
+            }
+        }
+        direction.x = points[to].x - points[from].x;
+        direction.y = points[to].y - points[from].y;
+        direction.z = points[to].z - points[from].z;
+        const i16 yaw = static_cast<i16>(NuAtan2D(direction.x, direction.z));
+        NuVecRotateY(reinterpret_cast<NUVEC *>(&axis), reinterpret_cast<NUVEC *>(&direction), -yaw);
+        const i16 pitch = static_cast<i16>(NuAtan2D(axis.y, axis.z));
+        axis.x = 2.0f;
+        axis.y = 0.0f;
+        axis.z = 0.0f;
+        axis.w = 0.0f;
+        NuVecRotateZ(reinterpret_cast<NUVEC *>(&axis), reinterpret_cast<NUVEC *>(&axis),
+                     static_cast<i16>(static_cast<i32>(spline->points[i].w)));
+        NuVecRotateX(reinterpret_cast<NUVEC *>(&axis), reinterpret_cast<NUVEC *>(&axis), -pitch);
+        NuVecRotateY(reinterpret_cast<NUVEC *>(&axis), reinterpret_cast<NUVEC *>(&axis), yaw);
+        plus.x = spline->points[i].x + axis.x;
+        plus.y = spline->points[i].y + axis.y;
+        plus.z = spline->points[i].z + axis.z;
+        minus.x = spline->points[i].x - axis.x;
+        minus.y = spline->points[i].y - axis.y;
+        minus.z = spline->points[i].z - axis.z;
+        DrawLine_Now(&plus, &minus, 0xff0000, 1);
+    }
+}
+
 static void DrawStarFighter(starfighter_s *starfighter) {
     NUMTX_ALIGNED16 matrices[2];
     NUMTX &scaled_special_matrix = matrices[0];

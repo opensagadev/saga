@@ -164,8 +164,9 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
     }
     if (selected != NULL) {
         GameObject_s *candidate = static_cast<GameObject_s *>(selected);
-        selected_position = candidate->apiobj.collision_position;
+        selected_position.x = candidate->apiobj.collision_position.x;
         selected_position.y = (candidate->apiobj.collision_position.y + candidate->apiobj.upper_position.y) * 0.5f;
+        selected_position.z = candidate->apiobj.collision_position.z;
         selected_type = 0;
     }
     if (automatic == 0) {
@@ -247,8 +248,10 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
     if (selected == NULL) {
         return 0;
     }
-    NUVEC origin = object->apiobj.collision_position;
-    origin.y = (origin.y + object->apiobj.upper_position.y) * 0.5f;
+    NUVEC origin;
+    origin.x = object->apiobj.collision_position.x;
+    origin.y = (object->apiobj.collision_position.y + object->apiobj.upper_position.y) * 0.5f;
+    origin.z = object->apiobj.collision_position.z;
     NUVEC ray;
     NuVecSub(&ray, &selected_position, &origin);
     if (GameRayCast(&origin, &ray, 0.0f, 0x1f) != 0) {

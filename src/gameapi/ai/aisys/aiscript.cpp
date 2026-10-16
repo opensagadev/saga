@@ -236,6 +236,16 @@ static void xActions(NUFPAR *parser) {
     }
 }
 
+#if defined(__i386__)
+#define AISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
+#else
+#define AISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone))
+#endif
+
+// Retail inlines the "goto" test into each caller; this is the remaining partial clone.
+static AISCRIPT_CLONE_ATTR2 void ConditionsParseFinalise(AICONDITION *cond, NUFPAR *parser)
+    __asm__("_ZL23ConditionsParseFinaliseP13AICONDITION_sP8nufpar_s.part.51");
+
 static void ConditionsParseFinalise(AICONDITION *cond, NUFPAR *parser) {
     *(reinterpret_cast<u8 *>(cond) + offsetof(AICONDITION, param_idx) + 1) &= static_cast<u8>(~2);
 
@@ -249,6 +259,10 @@ static void ConditionsParseFinalise(AICONDITION *cond, NUFPAR *parser) {
         *(reinterpret_cast<u8 *>(cond) + offsetof(AICONDITION, param_idx) + 1) |= 2;
     }
 }
+
+// Retail inlines the system test into its callers; this is the remaining partial clone.
+static AISCRIPT_CLONE_ATTR2 void AIScriptFindRefScripts(AISYS *sys, AISCRIPT *script)
+    __asm__("_ZL22AIScriptFindRefScriptsP7AISYS_sP10AISCRIPT_s.part.61");
 
 static void AIScriptFindRefScripts(AISYS *sys, AISCRIPT *script) {
     AIREFSCRIPT *ref;

@@ -200,9 +200,9 @@ extern "C" {
     static void DisplaySceneSetClipResult(NUDLDLISTSCENE *scene, i32 clip_index, i32 clip_result) {
         for (i32 i = 0; i < scene->clip_objects[clip_index].nmaterials; ++i) {
             const u32 material = scene->clip_objects[clip_index].material_ids[i];
-            scene->mtl_used[scene->render_buffer >> 7][material >> 3] |= static_cast<u8>(1U << (material & 7));
+            scene->mtl_used[NuDisplaySceneCurrentBuffer(scene)][material >> 3] |= static_cast<u8>(1U << (material & 7));
         }
-        scene->clip_used[scene->render_buffer >> 7][clip_index >> 2] |=
+        scene->clip_used[NuDisplaySceneCurrentBuffer(scene)][clip_index >> 2] |=
             static_cast<u8>(clip_result << ((clip_index & 3) * 2));
     }
 

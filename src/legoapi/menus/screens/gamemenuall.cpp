@@ -433,9 +433,9 @@ void MenuEnterSave(MENU_s *menu) {
         NewMenu(1020, -1, -1);
     } else if (saveload_cardformatted == 0) {
         NewMenu(1006, 1, -1);
-    } else if (saveload_savepresent == 0 && saveload_freespace < SAVESIZE) {
+    } else if (__builtin_expect(saveload_savepresent == 0, 1) && saveload_freespace < SAVESIZE) {
         NewMenu(1003, -1, -1);
-    } else if (Menu_InHeaderSave != 0) {
+    } else if (__builtin_expect(Menu_InHeaderSave != 0, 1)) {
         memcard_slot = -1;
         NewMenu(1008, 1, -1);
     }
@@ -458,9 +458,6 @@ void MenuStartSave() {
     memcard_savefailed = 0;
 }
 
-void RenderFileSel() {
-    RenderFileSel3(1);
-}
 
 
 
@@ -539,9 +536,6 @@ void MenuUpdateSave(MENU_s *menu) {
     }
 }
 
-void RenderFileSel3(i32) {
-    STUBBED();
-}
 
 
 static NUGSCN **IconScene;

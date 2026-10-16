@@ -782,9 +782,11 @@ static inline bool StatusRumbleTargetsPlayer(i32 player, i32 index) {
 void NewStatusRumbleBuzz(i32 player, float amount, float buzz, i32 priority) {
     if (amount > 0.0f) {
         if (StatusPacket.player0_active != 0 && StatusRumbleTargetsPlayer(player, 0)) {
-            if (StatusPacket.player0_rumble_time <= 0.0f ||
-                amount > StatusPacket.player0_rumble_time / StatusPacket.player0_rumble_duration *
-                             StatusPacket.player0_rumble_amount) {
+            if (__builtin_expect(StatusPacket.player0_rumble_time <= 0.0f, 0) ||
+                __builtin_expect(amount > StatusPacket.player0_rumble_time /
+                                              StatusPacket.player0_rumble_duration *
+                                              StatusPacket.player0_rumble_amount,
+                                 0)) {
                 StatusPacket.player0_rumble_amount = amount;
                 StatusPacket.player0_rumble_duration = amount;
                 StatusPacket.player0_rumble_time = amount;
@@ -797,9 +799,11 @@ void NewStatusRumbleBuzz(i32 player, float amount, float buzz, i32 priority) {
             }
         }
         if (StatusPacket.player1_active != 0 && StatusRumbleTargetsPlayer(player, 1)) {
-            if (StatusPacket.player1_rumble_time <= 0.0f ||
-                amount > StatusPacket.player1_rumble_time / StatusPacket.player1_rumble_duration *
-                             StatusPacket.player1_rumble_amount) {
+            if (__builtin_expect(StatusPacket.player1_rumble_time <= 0.0f, 0) ||
+                __builtin_expect(amount > StatusPacket.player1_rumble_time /
+                                              StatusPacket.player1_rumble_duration *
+                                              StatusPacket.player1_rumble_amount,
+                                 0)) {
                 StatusPacket.player1_rumble_amount = amount;
                 StatusPacket.player1_rumble_duration = amount;
                 StatusPacket.player1_rumble_time = amount;
@@ -869,7 +873,7 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
                     selected = 0;
                     moved_down = 0;
                     moved_up = 0;
-                    if (packet->player_active[player] != 0) {
+                    if (__builtin_expect(packet->player_active[player] != 0, 0)) {
                         if (GameMenuLevel > 0 && menu->queued_item != -1) {
                             status_prompt = menu->queued_item;
                             menu->queued_item = -1;
@@ -897,8 +901,11 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
                         }
                     }
                     ++player;
-                } while (selected == 0 && player < 2 && (moved_down | moved_up) == 0);
-                if (selected) {
+                    if (selected != 0) {
+                        break;
+                    }
+                } while (player < 2 && (moved_down | moved_up) == 0);
+                if (__builtin_expect(selected != 0, 0)) {
                     packet->prompt_choice = (packet->field_0xb0 & 8) != 0 && packet->next_area != -1 &&
                                                     (packet->area->flags & 2) == 0 &&
                                                     Game.area_save[packet->next_area].complete == 0
@@ -1075,46 +1082,47 @@ void UpdateStatusScreen(WORLDINFO_s *) {
     DrawGoldBrick_Phase = -1;
     DrawGoldBrick_Stage = -1;
     if (GAMEDEMO != 0) {
-        if (GAMEDEMO == 2) {
-            if (GameTimer.time_elapsed >= 8.0f) {
-                EndOfDemo(0);
-            }
-            return;
-        }
-        if (GAMEDEMO != 1 || FadeSys.fade != 0.0f || NewLData != NULL) {
-            return;
-        }
-        for (i32 player = 0; player < 2; ++player) {
-            if ((player == 0 ? StatusPacket.player0_active : StatusPacket.player1_active) == 0) {
-                continue;
-            }
-            if ((GamePad[player].buttons_pressed & GAMEPAD_MENUSELECT) != 0) {
-                GameAudio_PlaySfx(0x30, NULL, 0, 0);
-                if (gamedemo_option == 0) {
-                    new_level_from_menu = 1;
-                    NewLData = HUB_LDATA;
-                    GAMEDEMO = 2;
-                } else if (gamedemo_option == 1) {
-                    EndOfDemo(0);
-                }
+        if (GAMEDEMO == 1) {
+            if (FadeSys.fade != 0.0f || NewLData != NULL) {
                 return;
             }
-            const u32 navigation = GamePad[player].buttons_pressed | GamePad[player].left_directions;
-            if ((navigation & GAMEPAD_DUP) != 0) {
-                if (gamedemo_option > 0) {
-                    --gamedemo_option;
+            for (i32 player = 0; player < 2; ++player) {
+                if ((player == 0 ? StatusPacket.player0_active : StatusPacket.player1_active) == 0) {
+                    continue;
+                }
+                if ((GamePad[player].buttons_pressed & GAMEPAD_MENUSELECT) != 0) {
+                    GameAudio_PlaySfx(0x30, NULL, 0, 0);
+                    if (gamedemo_option == 0) {
+                        GAMEDEMO = 2;
+                        NewLData = HUB_LDATA;
+                        new_level_from_menu = 1;
+                    } else if (gamedemo_option == 1) {
+                        EndOfDemo(0);
+                    }
+                    return;
+                }
+                if (((GamePad[player].left_directions | GamePad[player].buttons_pressed) & GAMEPAD_DUP) != 0) {
+                    if (gamedemo_option > 0) {
+                        --gamedemo_option;
+                        GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+                    }
+                    return;
+                }
+                if ((GamePad[player].left_directions & GAMEPAD_DDOWN) == 0) {
+                    if ((GamePad[player].buttons_pressed & GAMEPAD_DDOWN) == 0) {
+                        continue;
+                    }
+                }
+                if (gamedemo_option < 1) {
+                    ++gamedemo_option;
                     GameAudio_PlaySfx(0x2f, NULL, 0, 0);
                 }
                 return;
             }
-            if ((navigation & GAMEPAD_DDOWN) == 0) {
-                continue;
+        } else if (GAMEDEMO == 2) {
+            if (GameTimer.time_elapsed >= 8.0f) {
+                EndOfDemo(0);
             }
-            if (gamedemo_option < 1) {
-                ++gamedemo_option;
-                GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-            }
-            return;
         }
         return;
     }
@@ -1323,13 +1331,13 @@ void FinishStatusPacket(i32 choice) {
         }
     } else if (choice == 0 && StatusPacket.next_area != -1) {
         NewLData = &LDataList[ADataList[StatusPacket.next_area].levels[0]];
-        if ((ADataList[StatusPacket.next_area].flags & 2) == 0) {
+        if ((ADataList[StatusPacket.next_area].flags & 2) != 0) {
+            grab_screen_image = 1;
+        } else {
             loadareacharacters_no_backdrop_reset = 1;
             if ((StatusPacket.mode_flags & 4) != 0) {
                 finishloop_backdroponly = 1;
             }
-        } else {
-            grab_screen_image = 1;
         }
     } else if ((StatusPacket.mode_flags & 4) != 0 ||
                ((StatusPacket.area->flags & 4) != 0 && (StatusPacket.field_0xb0 & 0x40) == 0)) {
@@ -1346,8 +1354,9 @@ void FinishStatusPacket(i32 choice) {
         OldBonusScore[0] = 0;
         OldBonusScore[1] = 0;
     } else {
-        OldBonusScore[0] = BonusScore[0];
-        OldBonusScore[1] = BonusScore[1];
+        for (i32 i = 0; i < 2; ++i) {
+            OldBonusScore[i] = BonusScore[i];
+        }
     }
     NuSound3StopRumble();
 }
@@ -1583,9 +1592,12 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
     }
 }
 
-void SuperStoryTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {
-    if (current == 0 || stage->field_0x14 < 1)
-        return;
+// Retail keeps this body as GCC's split-out clone; the inline head stays in
+// the caller.
+static __attribute__((noinline, noclone)) void SuperStoryTime_LSW_DrawBody(STATUS_STAGE_s *stage, STATUSPACKET_s *packet)
+    __asm__("_Z23SuperStoryTime_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si.part.12");
+
+static void SuperStoryTime_LSW_DrawBody(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
     char text[256], previous[256];
     const f32 time = stage->field_0x18;
     f32 alpha, coin_progress;
@@ -1625,6 +1637,12 @@ void SuperStoryTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 
     Text3DEx(previous, 0.0f, -0.2f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, static_cast<u8>(opacity / 2));
 }
 
+void SuperStoryTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {
+    if (current == 0 || stage->field_0x14 < 1)
+        return;
+    SuperStoryTime_LSW_DrawBody(stage, packet);
+}
+
 void SuperStoryTime_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
     *packet->score = packet->time_reward_score;
     NextStatusStage(packet);
@@ -1637,9 +1655,12 @@ void LSW_registerStatusScreen() {
     RegisterStatusScreen(StatusStages_LSW, NULL, &registration);
 }
 
-void SuperStoryScore_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {
-    if (current == 0)
-        return;
+// Retail keeps this body as GCC's split-out clone; the inline head stays in
+// the caller.
+static __attribute__((noinline, noclone)) void SuperStoryScore_LSW_DrawBody(STATUS_STAGE_s *stage, STATUSPACKET_s *packet)
+    __asm__("_Z24SuperStoryScore_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si.part.8");
+
+static void SuperStoryScore_LSW_DrawBody(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
     f32 coin_progress = 1.0f;
     if (stage->field_0x14 > 0) {
         char text[256], previous[256];
@@ -1678,6 +1699,12 @@ void SuperStoryScore_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32
                    (STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(coin_progress * 16384.0f) >> 1) & 0x7fff] +
                        STATSPOS2Y,
                    CoinTotalScale, 1, 1.0f, 255, 191, 0);
+}
+
+void SuperStoryScore_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {
+    if (__builtin_expect(current == 0, 0))
+        return;
+    SuperStoryScore_LSW_DrawBody(stage, packet);
 }
 
 void SuperStoryScore_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
@@ -1781,139 +1808,149 @@ extern i16 tOUTOFTIME, tYOUDIDNTCOLLECTALL10CANISTERS, tSTORYCLIPSUNLOCKED;
 extern i16 tEPISODEICOMPLETE, tEPISODEIICOMPLETE, tEPISODEIIICOMPLETE;
 extern i16 tEPISODEIVCOMPLETE, tEPISODEVCOMPLETE, tEPISODEVICOMPLETE;
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
-    if (active != 0) {
-        char text[256];
-        if (stage->field_0x14 > 0) {
-            f32 alpha = 1.0f;
-            if (stage->field_0x18 < 0.5f)
-                alpha = stage->field_0x18 + stage->field_0x18;
-            else if (!(stage->field_0x18 < 3.5f))
-                alpha = 1.0f - ((stage->field_0x18 - 3.5f) + (stage->field_0x18 - 3.5f));
-            if (alpha > 0.0f) {
-                const i32 opacity = alpha * 128.0f;
-                if (stage->type == 14) {
-                    strcpy(text, TTab[EDataList[packet->episode_id].text_id]);
-                    SmartTextEx(text, 0.0f, 0.1f, 1.0f, 0.525f, 0.525f, 0.525f, 0, STATUS_R, STATUS_G, STATUS_B, 1.7f,
-                                1, NULL, 0, opacity);
-                    SmartTextEx(TTab[tSUPERSTORYCOMPLETE], 0.0f, -0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+// Retail keeps the active-stage drawing as the split-out .part clone of
+// LevelComplete_LSW_Draw; the inline head only tests `active`.
+static __attribute__((noinline, noclone)) void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage,
+                                                                         STATUSPACKET_s *packet)
+    __asm__("_Z22LevelComplete_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si.part.27");
+
+static void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
+    char text[256];
+    if (stage->field_0x14 > 0) {
+        f32 alpha = 1.0f;
+        if (stage->field_0x18 < 0.5f)
+            alpha = stage->field_0x18 + stage->field_0x18;
+        else if (!(stage->field_0x18 < 3.5f))
+            alpha = 1.0f - ((stage->field_0x18 - 3.5f) + (stage->field_0x18 - 3.5f));
+        if (alpha > 0.0f) {
+            const i32 opacity = alpha * 128.0f;
+            if (stage->type == 14) {
+                strcpy(text, TTab[EDataList[packet->episode_id].text_id]);
+                SmartTextEx(text, 0.0f, 0.1f, 1.0f, 0.525f, 0.525f, 0.525f, 0, STATUS_R, STATUS_G, STATUS_B, 1.7f,
+                            1, NULL, 0, opacity);
+                SmartTextEx(TTab[tSUPERSTORYCOMPLETE], 0.0f, -0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                            STATUS_B, 1.7f, 1, NULL, 0, opacity);
+            } else if (stage->type == 13) {
+                if ((PODRACE_ADATA != NULL && packet->area == PODRACE_ADATA) ||
+                    (BONUS_GUNSHIP_ADATA != NULL && packet->area == BONUS_GUNSHIP_ADATA)) {
+                    SmartTextEx(TTab[tLEVELCOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
                                 STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                } else if (stage->type == 13) {
-                    if ((PODRACE_ADATA != NULL && packet->area == PODRACE_ADATA) ||
-                        (BONUS_GUNSHIP_ADATA != NULL && packet->area == BONUS_GUNSHIP_ADATA)) {
-                        SmartTextEx(TTab[tLEVELCOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
-                                    STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                    } else if (FreePlayUnlocked()) {
-                        SmartTextEx(TTab[tLEVELCOMPLETE], 0.0f, 0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
-                                    STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                        SmartTextEx(TTab[tFREEPLAYUNLOCKED], 0.0f, -0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
-                                    STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                    } else {
-                        SmartTextEx(TTab[tLEVELCOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
-                                    STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                    }
-                } else if (stage->type == 8) {
-                    SmartTextEx(TTab[tEPISODEVUNLOCKED], 0.0f, 0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                } else if (FreePlayUnlocked()) {
+                    SmartTextEx(TTab[tLEVELCOMPLETE], 0.0f, 0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
                                 STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                    SmartTextEx(TTab[tEPISODEVIUNLOCKED], 0.0f, -0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                    SmartTextEx(TTab[tFREEPLAYUNLOCKED], 0.0f, -0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
                                 STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                } else if (stage->type == 28) {
-                    SmartTextEx(TTab[tBONUSUNLOCKED], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
-                                STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                } else if (stage->type == 23) {
-                    if (packet->challenge_state == 2) {
-                        SmartTextEx(TTab[tCHALLENGECOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255,
-                                    1.7f, 1, NULL, 0, opacity);
-                    } else if (packet->challenge_state == 3) {
-                        SmartTextEx(TTab[tOUTOFTIME], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
-                                    STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                    } else {
-                        SmartTextEx(TTab[tYOUDIDNTCOLLECTALL10CANISTERS], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0,
-                                    STATUS_R, STATUS_G, STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                    }
-                } else if (stage->type == 26) {
-                    if (packet->mission_state == 2) {
-                        SmartTextEx(TTab[tMISSIONCOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, 1.7f,
-                                    1, NULL, 0, opacity);
-                    } else {
-                        SmartTextEx(TTab[tOUTOFTIME], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
-                                    STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                    }
                 } else {
-                    i16 label;
-                    if (stage->type == 29)
-                        label = tEPISODEICOMPLETE;
-                    else if (stage->type == 30)
-                        label = tEPISODEIICOMPLETE;
-                    else if (stage->type == 31)
-                        label = tEPISODEIIICOMPLETE;
-                    else if (stage->type == 32)
-                        label = tEPISODEIVCOMPLETE;
-                    else if (stage->type == 33)
-                        label = tEPISODEVCOMPLETE;
-                    else
-                        label = tEPISODEVICOMPLETE;
-                    SmartTextEx(TTab[label], 0.0f, 0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G, STATUS_B, 1.7f,
-                                1, NULL, 0, opacity);
-                    SmartTextEx(TTab[tSTORYCLIPSUNLOCKED], 0.0f, -0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                    SmartTextEx(TTab[tLEVELCOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
                                 STATUS_B, 1.7f, 1, NULL, 0, opacity);
                 }
+            } else if (stage->type == 8) {
+                SmartTextEx(TTab[tEPISODEVUNLOCKED], 0.0f, 0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                            STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                SmartTextEx(TTab[tEPISODEVIUNLOCKED], 0.0f, -0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                            STATUS_B, 1.7f, 1, NULL, 0, opacity);
+            } else if (stage->type == 28) {
+                SmartTextEx(TTab[tBONUSUNLOCKED], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                            STATUS_B, 1.7f, 1, NULL, 0, opacity);
+            } else if (stage->type == 23) {
+                if (packet->challenge_state == 2) {
+                    SmartTextEx(TTab[tCHALLENGECOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255,
+                                1.7f, 1, NULL, 0, opacity);
+                } else if (packet->challenge_state == 3) {
+                    SmartTextEx(TTab[tOUTOFTIME], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                                STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                } else {
+                    SmartTextEx(TTab[tYOUDIDNTCOLLECTALL10CANISTERS], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0,
+                                STATUS_R, STATUS_G, STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                }
+            } else if (stage->type == 26) {
+                if (packet->mission_state == 2) {
+                    SmartTextEx(TTab[tMISSIONCOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, 1.7f,
+                                1, NULL, 0, opacity);
+                } else {
+                    SmartTextEx(TTab[tOUTOFTIME], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                                STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                }
+            } else {
+                i16 label;
+                if (stage->type == 29)
+                    label = tEPISODEICOMPLETE;
+                else if (stage->type == 30)
+                    label = tEPISODEIICOMPLETE;
+                else if (stage->type == 31)
+                    label = tEPISODEIIICOMPLETE;
+                else if (stage->type == 32)
+                    label = tEPISODEIVCOMPLETE;
+                else if (stage->type == 33)
+                    label = tEPISODEVCOMPLETE;
+                else
+                    label = tEPISODEVICOMPLETE;
+                SmartTextEx(TTab[label], 0.0f, 0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G, STATUS_B, 1.7f,
+                            1, NULL, 0, opacity);
+                SmartTextEx(TTab[tSTORYCLIPSUNLOCKED], 0.0f, -0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                            STATUS_B, 1.7f, 1, NULL, 0, opacity);
             }
         }
-        if (stage->type != 23 && stage->type != 26)
+    }
+    if (stage->type != 23 && stage->type != 26)
+        return;
+    if (stage->field_0x14 == 0 || stage->field_0x18 < stage->field_0x1c - 0.5f)
+        iconalphaoverride = 0.0f;
+    else
+        iconalphaoverride = (stage->field_0x18 - (stage->field_0x1c - 0.5f)) * 2.0f;
+    if (stage->type == 26) {
+        if (packet->mission_state != 2)
             return;
-        if (stage->field_0x14 == 0 || stage->field_0x18 < stage->field_0x1c - 0.5f)
+        if (packet->previous_gold_bricks < Game.field_0x7c26[0])
             iconalphaoverride = 0.0f;
-        else
-            iconalphaoverride = (stage->field_0x18 - (stage->field_0x1c - 0.5f)) * 2.0f;
-        if (stage->type == 26) {
-            if (packet->mission_state != 2)
-                return;
-            if (packet->previous_gold_bricks < Game.field_0x7c26[0])
-                iconalphaoverride = 0.0f;
-        } else if (packet->challenge_state != 2)
-            return;
-        f32 progress, slide;
-        if (stage->field_0x18 < 0.75f) {
-            progress = 0.0f;
-            slide = stage->field_0x18 / 0.7f;
-        } else if (!(stage->field_0x18 < stage->field_0x1c - 0.75f)) {
-            progress = 1.0f;
-            slide = 1.0f - (stage->field_0x18 - (stage->field_0x1c - 0.75f)) / 0.75f;
-        } else {
-            progress = (stage->field_0x18 - 0.75f) / (stage->field_0x1c - 0.75f - 0.75f);
-            slide = 1.0f;
-        }
-        f32 coin_slide = slide;
-        if (stage->field_0x18 >= 0.75f)
-            coin_slide = 1.0f;
-        u32 score = packet->original_score;
-        IncreaseScore(&score,
-                      static_cast<i64>(static_cast<i32>(static_cast<f32>(packet->reward_score - score) * progress)), 0);
-        CoinTotal_Draw(score,
-                       (STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(coin_slide * 16384.0f) >> 1) & 0x7fff] +
-                           STATSPOS2Y,
-                       CoinTotalScale, 1, 1.0f, 255, 191, 0);
-        if (stage->type == 26) {
-            f32 remaining = static_cast<u16>(packet->mission->time) - packet->elapsed_time;
-            if (remaining < 0.0f)
-                remaining = 0.0f;
-            Text_MakeTime((1.0f - progress) * remaining, 0, 1, 1, text);
-            Text3D(text, 0.0f,
-                   -((STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(slide * 16384.0f) >> 1) & 0x7fff] +
-                     STATSPOS2Y),
-                   1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 191, 0);
-        }
-        if (stage->type == 23) {
-            f32 remaining = packet->area->challenge_trial_time - packet->elapsed_time;
-            if (remaining < 0.0f)
-                remaining = 0.0f;
-            Text_MakeTime((1.0f - progress) * remaining, 0, 1, 1, text);
-            Text3D(text, 0.0f,
-                   -((STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(slide * 16384.0f) >> 1) & 0x7fff] +
-                     STATSPOS2Y),
-                   1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 191, 0);
-        }
+    } else if (packet->challenge_state != 2)
+        return;
+    f32 progress, slide;
+    if (stage->field_0x18 < 0.75f) {
+        progress = 0.0f;
+        slide = stage->field_0x18 / 0.7f;
+    } else if (!(stage->field_0x18 < stage->field_0x1c - 0.75f)) {
+        progress = 1.0f;
+        slide = 1.0f - (stage->field_0x18 - (stage->field_0x1c - 0.75f)) / 0.75f;
+    } else {
+        progress = (stage->field_0x18 - 0.75f) / (stage->field_0x1c - 0.75f - 0.75f);
+        slide = 1.0f;
+    }
+    f32 coin_slide = slide;
+    if (stage->field_0x18 >= 0.75f)
+        coin_slide = 1.0f;
+    u32 score = packet->original_score;
+    IncreaseScore(&score,
+                  static_cast<i64>(static_cast<i32>(static_cast<f32>(packet->reward_score - score) * progress)), 0);
+    CoinTotal_Draw(score,
+                   (STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(coin_slide * 16384.0f) >> 1) & 0x7fff] +
+                       STATSPOS2Y,
+                   CoinTotalScale, 1, 1.0f, 255, 191, 0);
+    if (stage->type == 26) {
+        f32 remaining = static_cast<u16>(packet->mission->time) - packet->elapsed_time;
+        if (remaining < 0.0f)
+            remaining = 0.0f;
+        Text_MakeTime((1.0f - progress) * remaining, 0, 1, 1, text);
+        Text3D(text, 0.0f,
+               -((STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(slide * 16384.0f) >> 1) & 0x7fff] +
+                 STATSPOS2Y),
+               1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 191, 0);
+    }
+    if (stage->type == 23) {
+        f32 remaining = packet->area->challenge_trial_time - packet->elapsed_time;
+        if (remaining < 0.0f)
+            remaining = 0.0f;
+        Text_MakeTime((1.0f - progress) * remaining, 0, 1, 1, text);
+        Text3D(text, 0.0f,
+               -((STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(slide * 16384.0f) >> 1) & 0x7fff] +
+                 STATSPOS2Y),
+               1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 191, 0);
+    }
+}
+
+void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
+    if (active != 0) {
+        LevelComplete_LSW_DrawActive(stage, packet);
     } else {
         if (stage->field_0x12 != 0) {
             const f32 alpha = getFinishedStatusAlpha(packet);
@@ -2129,23 +2166,21 @@ void BonusTime_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {
 }
 void ChallangeCash_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 draw) {
     NUVEC position = {0.0f, -0.5f, 1.0f};
-    if (draw == 0) {
-        return;
-    }
-    if (stage->field_0x14 == 0) {
-        iconalphaoverride = 0.0f;
-        return;
-    }
-
-    const f32 time = stage->field_0x18;
-    iconalphaoverride = time < 0.5f ? time * 2.0f : 1.0f;
-    if (time < 2.0f && NuFmod(time, 0.2f) >= 0.1f) {
-        const bool left = (packet->field_0xb0 & 0x20) == 0;
-        SmartTextEx(TTab[tWINNER], left ? -0.675f : 0.675f, STATSPOSY, 1.0f, 0.7f, 0.7f, 0.7f, left ? 2 : 8, 0, 255,
-                    0, 0.35f, 1, NULL, 0, static_cast<i32>(iconalphaoverride * 128.0f));
-    }
-    if (stage->field_0x14 == 1) {
-        AddGameMessage(TTab[tCHALLENGECOMPLETE], &position, 0.7f, &position, 0.7f, 255, 0, 127, 0x4020, 2.0f);
+    if (draw != 0) {
+        if (stage->field_0x14 != 0) {
+            const f32 time = stage->field_0x18;
+            iconalphaoverride = time >= 0.5f ? 1.0f : time * 2.0f;
+            if (__builtin_expect(time < 2.0f, 0) && NuFmod(time, 0.2f) >= 0.1f) {
+                const bool right = (packet->field_0xb0 & 0x20) != 0;
+                SmartTextEx(TTab[tWINNER], right ? 0.675f : -0.675f, STATSPOSY, 1.0f, 0.7f, 0.7f, 0.7f, right ? 8 : 2,
+                            0, 255, 0, 0.35f, 1, NULL, 0, static_cast<i32>(iconalphaoverride * 128.0f));
+            }
+            if (stage->field_0x14 == 1) {
+                AddGameMessage(TTab[tCHALLENGECOMPLETE], &position, 0.7f, &position, 0.7f, 255, 0, 127, 0x4020, 2.0f);
+            }
+        } else {
+            iconalphaoverride = 0.0f;
+        }
     }
 }
 void ChallangeCash_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {

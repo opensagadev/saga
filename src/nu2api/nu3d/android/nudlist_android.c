@@ -218,8 +218,7 @@ extern "C" void NuDisplayListAddLightState(nudisplaylistitem_s *item, void *) {
     NuDisplayListSetItem(item, 0x87, 0, nullptr);
 }
 
-extern "C" void DisplayListCreatePS(void) {
-    STUBBED();
+extern "C" void DisplayListCreatePS(NUDLDLISTSCENE *, VARIPTR *, VARIPTR) {
 }
 
 extern "C" void NuDisplayListLinkItem(nudisplaylist_s *list, u8 type, void *call_addr) {

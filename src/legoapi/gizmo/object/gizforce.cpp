@@ -11,18 +11,18 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 NUVEC *GetZapOrigin(GameObject_s *object) {
-    NUVEC *origin = &object->apiobj.collision_position;
-    if (object->apiobj.field_0x288 != 0) {
+    if (__builtin_expect(object->apiobj.field_0x288 != 0, 0)) {
         PLAYERCHARACTERCONFIG_s *config = object->apiobj.character_data->player_config;
         i32 joint = config->weapon_shoot_joints[0];
-        if (joint == -1 || object->apiobj.character_model->points_of_interest[joint] == NULL) {
-            joint = config->weapon_joints[0];
-        }
         if (joint != -1 && object->apiobj.character_model->points_of_interest[joint] != NULL) {
-            origin = reinterpret_cast<NUVEC *>(&object->joint_matrices[joint].m30);
+            return reinterpret_cast<NUVEC *>(&object->joint_matrices[joint].m30);
+        }
+        joint = config->weapon_joints[0];
+        if (joint != -1 && object->apiobj.character_model->points_of_interest[joint] != NULL) {
+            return reinterpret_cast<NUVEC *>(&object->joint_matrices[joint].m30);
         }
     }
-    return origin;
+    return &object->apiobj.collision_position;
 }
 
 extern f32 ForceThrowGravity;

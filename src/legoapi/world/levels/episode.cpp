@@ -668,7 +668,10 @@ static inline void MiniTrooperSetWanderTarget(minisnowtrooper_s *trooper, i32 sh
 static const f32 trooperspeedtab[4] = {0.3f, 0.4f, 0.5f, 0.6f};
 
 static inline void MiniTrooperMove(minisnowtrooper_s *trooper) {
-    NUVEC movement = v001;
+    NUVEC movement;
+    movement.x = v001.x;
+    movement.y = v001.y;
+    movement.z = v001.z;
     const u8 speed = trooper->state_flags >> 4;
     movement.z = movement.z * FRAMETIME * trooperspeedtab[speed & 3];
     NuVecRotateY(&movement, &movement, trooper->rotation);

@@ -1228,10 +1228,10 @@ i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 rem
     // It can only overlap the sphere at the start of the sweep when it crosses
     // z = 0.
     if (horizontal_length_sq < 1.0e-12f) {
-        if ((query->transformed_vertices[first_vertex].z < 0.0f &&
-             query->transformed_vertices[second_vertex].z < 0.0f) ||
-            (query->transformed_vertices[first_vertex].z > 0.0f &&
-             query->transformed_vertices[second_vertex].z > 0.0f)) {
+        if (!((query->transformed_vertices[first_vertex].z <= 0.0f &&
+               query->transformed_vertices[second_vertex].z >= 0.0f) ||
+              (query->transformed_vertices[first_vertex].z >= 0.0f &&
+               query->transformed_vertices[second_vertex].z <= 0.0f))) {
             return 0;
         }
 
@@ -1550,6 +1550,9 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
 
     const NUVEC &primary_origin = surface->vectors[0];
     NUVEC &primary_normal = surface->normals[0];
+    const f32 primary_base_x = query->local_start.x - radius * primary_normal.x - primary_origin.x;
+    const f32 primary_base_y = query->local_start.y - radius * primary_normal.y - primary_origin.y;
+    const f32 primary_base_z = query->local_start.z - primary_normal.z * radius - primary_origin.z;
 
     i32 test_primary_face = 0;
     if (primary_start > 0.0f && primary_end < 0.0f) {
@@ -1578,9 +1581,8 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
             surface->vectors[2].y - primary_origin.y,
             surface->vectors[2].z - primary_origin.z,
         };
-        if (InsidePolLines(contact_point.x + (query->local_start.x - radius * primary_normal.x - primary_origin.x),
-                           contact_point.y + (query->local_start.y - radius * primary_normal.y - primary_origin.y),
-                           contact_point.z + (query->local_start.z - primary_normal.z * radius - primary_origin.z),
+        if (InsidePolLines(contact_point.x + primary_base_x, contact_point.y + primary_base_y,
+                           contact_point.z + primary_base_z,
                            edge_0_1.x, edge_0_1.y, edge_0_1.z, edge_0_2.x, edge_0_2.y, edge_0_2.z,
                            &primary_normal) != 0 &&
             candidate_time <= TerI->hit_time) {
@@ -1599,6 +1601,9 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
     NUVEC &secondary_normal = surface->normals[1];
     if (secondary_normal.y < no_secondary_normal) {
         const NUVEC &secondary_origin = surface->vectors[3];
+        const f32 secondary_base_x = query->local_start.x - radius * secondary_normal.x - secondary_origin.x;
+        const f32 secondary_base_y = query->local_start.y - radius * secondary_normal.y - secondary_origin.y;
+        const f32 secondary_base_z = query->local_start.z - secondary_normal.z * radius - secondary_origin.z;
 
         i32 test_secondary_face = 0;
         if (secondary_start > 0.0f && secondary_end < 0.0f) {
@@ -1629,9 +1634,8 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
                 surface->vectors[1].z - secondary_origin.z,
             };
             if (InsidePolLines(
-                    contact_point.x + (query->local_start.x - radius * secondary_normal.x - secondary_origin.x),
-                    contact_point.y + (query->local_start.y - radius * secondary_normal.y - secondary_origin.y),
-                    contact_point.z + (query->local_start.z - secondary_normal.z * radius - secondary_origin.z),
+                    contact_point.x + secondary_base_x, contact_point.y + secondary_base_y,
+                    contact_point.z + secondary_base_z,
                     edge_3_2.x, edge_3_2.y, edge_3_2.z, edge_3_1.x, edge_3_1.y, edge_3_1.z, &secondary_normal) != 0 &&
                 candidate_time < TerI->hit_time) {
                 query = TerI;
@@ -2657,12 +2661,20 @@ void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags) {
     ++*TerImpactDataCount;
 }
 
-static i32 TerrainKillPlayer(GameObject_s *object, i32 surface, NUVEC *normal) {
+// Retail only keeps the IPA-SRA clone, which takes &normal->y.
+#if defined(__i386__)
+#define TERRAIN_KILL_PLAYER_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define TERRAIN_KILL_PLAYER_ATTR __attribute__((noinline, noclone))
+#endif
+static TERRAIN_KILL_PLAYER_ATTR i32 TerrainKillPlayer(GameObject_s *object, i32 surface, const f32 *normal_y)
+    __asm__("_ZL17TerrainKillPlayerP12GameObject_siP7nuvec_s.isra.4");
+static i32 TerrainKillPlayer(GameObject_s *object, i32 surface, const f32 *normal_y) {
     const u32 flags = TerSurface[surface].flags;
     if ((flags & 1) != 0 ||
         ((flags & 0x4000) != 0 && (object->apiobj.character_data->model_flags & 0x10) == 0 &&
          (object->apiobj.character_data->game_character->flags_090 & 0x8000) == 0) ||
-        ((flags & 0x8000) != 0 && (object->apiobj.field_0x27c == -1 || normal->y > 0.0f))) {
+        ((flags & 0x8000) != 0 && (object->apiobj.field_0x27c == -1 || *normal_y > 0.0f))) {
         InstantKillParts(object, 1, 0.0f);
         if (object->apiobj.player_controlled && BonusWinner == -1) {
             const i32 coins = LoseCoins(object, 1);
@@ -3246,7 +3258,7 @@ void TerrainPlayer(GameObject_s *object) {
                             break;
                         }
                         if ((WORLD->area == NULL || WORLD->area != PODSPRINT_ADATA) &&
-                            TerrainKillPlayer(object, surface, normal) != 0) {
+                            TerrainKillPlayer(object, surface, &normal->y) != 0) {
                             if (WORLD->current_level == ASTEROIDCHASEC_LDATA) {
                                 GameCam_Blend(GameCam, 1.0f, 0.0f, 1);
                             }
@@ -3264,7 +3276,7 @@ void TerrainPlayer(GameObject_s *object) {
                 } else if (api.field_0x27d != 0 && (WORLD->area == NULL || WORLD->area != PODSPRINT_ADATA)) {
                     const i32 surface = static_cast<i8>(api.field_0x281);
                     if (static_cast<u32>(surface) <= 31) {
-                        TerrainKillPlayer(object, surface, &object->surface_normal);
+                        TerrainKillPlayer(object, surface, &object->surface_normal.y);
                     }
                 }
             }
@@ -6148,48 +6160,10 @@ f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
         TERRAIN_SHAPE **surfaces = reinterpret_cast<TERRAIN_SHAPE **>(scan + 4);
         f32 x = position->x - CurTerr->groups[group_index].origin.x;
         f32 z = position->z - CurTerr->groups[group_index].origin.z;
-        for (i32 i = 0; i < shape_count; i++) {
-            TERRAIN_SHAPE *surface = surfaces[i];
-            i32 facing = 0;
-            i32 plane = 0;
-#define CAST_LINE(a, b)                                                                                                \
-    InsideLineF(x, z, surface->vectors[a].x, surface->vectors[a].z, surface->vectors[b].x, surface->vectors[b].z)
-            if (surface->normals[1].y > 65535.0f) {
-                if (surface->normals[0].y > 0.0f) {
-                    if (CAST_LINE(1, 0) && CAST_LINE(0, 2) && CAST_LINE(2, 1)) {
-                        facing = 1;
-                    }
-                } else if (surface->normals[0].y < 0.0f) {
-                    if (CAST_LINE(0, 1) && CAST_LINE(2, 0) && CAST_LINE(1, 2)) {
-                        facing = 2;
-                    }
-                }
-            } else if (surface->normals[0].y > 0.0f) {
-                if (CAST_LINE(2, 1)) {
-                    if (CAST_LINE(1, 0) && CAST_LINE(0, 2)) {
-                        facing = 1;
-                    }
-                } else if (CAST_LINE(3, 1) && CAST_LINE(2, 3)) {
-                    facing = 1;
-                    plane = 1;
-                }
-            } else if (surface->normals[0].y < 0.0f) {
-                if (CAST_LINE(1, 2)) {
-                    if (CAST_LINE(0, 1) && CAST_LINE(2, 0)) {
-                        facing = 2;
-                    }
-                } else if (CAST_LINE(1, 3) && CAST_LINE(3, 2)) {
-                    facing = 2;
-                    plane = 1;
-                }
-            }
-#undef CAST_LINE
-            if (facing != 0) {
-                if (plane != 0 && surface->normals[1].y == 0.0f) {
-                    plane = 0;
-                }
-                NUVEC *normal = &surface->normals[plane];
-                NUVEC *corner = &surface->vectors[plane * 3];
+        TERRAIN_SHAPE **next_surface = surfaces;
+        for (i32 i = shape_count; i != 0; i--) {
+            TERRAIN_SHAPE *surface = *next_surface++;
+            auto record_hit = [&](const NUVEC *normal, const NUVEC *corner, i32 facing) {
                 f32 nx = normal->x;
                 f32 ny = normal->y;
                 f32 nz = normal->z;
@@ -6228,7 +6202,55 @@ f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
                         roof_group = group_index;
                     }
                 }
+            };
+#define CAST_LINE(a, b)                                                                                                \
+    InsideLineF(x, z, surface->vectors[a].x, surface->vectors[a].z, surface->vectors[b].x, surface->vectors[b].z)
+            if (__builtin_expect(surface->normals[1].y > 65535.0f, 1)) {
+                // Triangle: a single plane.
+                i32 facing = 0;
+                if (__builtin_expect(surface->normals[0].y > 0.0f, 1)) {
+                    if (__builtin_expect(CAST_LINE(1, 0) != 0, 0) && CAST_LINE(0, 2) && CAST_LINE(2, 1)) {
+                        facing = 1;
+                    }
+                } else if (surface->normals[0].y < 0.0f) {
+                    if (__builtin_expect(CAST_LINE(0, 1) != 0, 0) && CAST_LINE(2, 0) && CAST_LINE(1, 2)) {
+                        facing = 2;
+                    }
+                }
+                if (facing != 0) {
+                    record_hit(&surface->normals[0], &surface->vectors[0], facing);
+                }
+            } else {
+                // Quad: two planes sharing the 1-2 edge.
+                i32 facing = 0;
+                i32 plane = 0;
+                if (surface->normals[0].y > 0.0f) {
+                    if (CAST_LINE(2, 1)) {
+                        if (CAST_LINE(1, 0) && CAST_LINE(0, 2)) {
+                            facing = 1;
+                        }
+                    } else if (CAST_LINE(3, 1) && CAST_LINE(2, 3)) {
+                        facing = 1;
+                        plane = 1;
+                    }
+                } else if (__builtin_expect(surface->normals[0].y < 0.0f, 1)) {
+                    if (CAST_LINE(1, 2)) {
+                        if (CAST_LINE(0, 1) && CAST_LINE(2, 0)) {
+                            facing = 2;
+                        }
+                    } else if (CAST_LINE(1, 3) && CAST_LINE(3, 2)) {
+                        facing = 2;
+                        plane = 1;
+                    }
+                }
+                if (facing != 0) {
+                    if (plane != 0 && surface->normals[1].y == 0.0f) {
+                        plane = 0;
+                    }
+                    record_hit(&surface->normals[plane], &surface->vectors[plane * 3], facing);
+                }
             }
+#undef CAST_LINE
         }
         scan = reinterpret_cast<u8 *>(surfaces + shape_count);
         shape_count = *reinterpret_cast<i16 *>(scan);

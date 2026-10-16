@@ -1549,7 +1549,7 @@ extern "C" {
         NUVEC position;
         static i32 localframecount;
         float seconds;
-        if (NuVideoGetMode() == 3)
+        if (__builtin_expect(NuVideoGetMode() == 3, 1))
             seconds = elapsed / 50.0f;
         else
             seconds = elapsed / 60.0f;
@@ -1623,11 +1623,11 @@ extern "C" {
                 if (index == edanim_nearest_param_id && (edanim_particle_mode != 0 || edanim_sound_mode != 0))
                     animation->ltime = 1.0f;
             }
-            if (NuSpecialGetVisibilityFn(&special) != NULL) {
+            if (__builtin_expect(NuSpecialGetVisibilityFn(&special) != NULL, 1)) {
                 i32 particle_index = 0;
                 while (particle_index < AnimParams[index].effect_count) {
                     i32 effect = AnimParams[index].effect_ids[particle_index];
-                    if (effect != -1 && debtab[effect] != NULL) {
+                    if (__builtin_expect(effect != -1 && debtab[effect] != NULL, 0)) {
                         if (AnimParams[index].effect_flags[particle_index] == 0 ||
                             (animation != NULL && animation->playing)) {
                             NUMTX matrix;
@@ -5107,9 +5107,9 @@ extern "C" {
         edui_prop_s *property = static_cast<edui_prop_s *>(interact->item);
         u8 &property_flags = reinterpret_cast<u8 *>(property)[0x4c];
         bool handled = false;
-        if (edui_cursor_buttons & EDUI_CURSOR_PRIMARY) {
+        if (__builtin_expect(edui_cursor_buttons & EDUI_CURSOR_PRIMARY, 0)) {
             if (!(property_flags & 0x0a)) {
-                if (property_flags & 1) {
+                if (__builtin_expect(property_flags & 1, 0)) {
                     if (edui_cursor_x >= interact->x + property->label_width + 1.0f && edui_cursor_y >= interact->y &&
                         edui_cursor_x < property->button_x && edui_cursor_y < interact->y + interact->height) {
                         property_flags |= 1;
@@ -5117,14 +5117,14 @@ extern "C" {
                         handled = true;
                     }
                 } else {
-                    if (edui_cursor_x >= interact->x && edui_cursor_y >= interact->y &&
+                    if (__builtin_expect(edui_cursor_x >= interact->x, 0) && edui_cursor_y >= interact->y &&
                         edui_cursor_x < interact->x + property->label_width - 1.0f &&
                         edui_cursor_y < interact->y + interact->height && property->selected) {
                         property->selected(menu, property, 0);
                     }
-                    if (edui_cursor_x >= static_cast<edui_prop_s *>(interact->item)->label_width + interact->x - 1.0f &&
+                    if (edui_cursor_x >= interact->x + property->label_width - 1.0f &&
                         edui_cursor_y >= interact->y &&
-                        edui_cursor_x < static_cast<edui_prop_s *>(interact->item)->label_width + interact->x + 1.0f &&
+                        edui_cursor_x < interact->x + property->label_width + 1.0f &&
                         edui_cursor_y < interact->y + interact->height) {
                         property_flags |= 0x06;
                     }
@@ -5835,7 +5835,7 @@ extern "C" {
             }
         };
         auto insert_character = [&](char character) {
-            if (NuStrLen(picker->value) >= picker->max_length)
+            if (__builtin_expect(NuStrLen(picker->value) >= picker->max_length, 0))
                 return;
             // The original includes the cursor slot in the shift before
             // overwriting it. Read the enclosing object's bytes so cursor zero
@@ -5850,11 +5850,11 @@ extern "C" {
                 picker->keyboard_row = 0;
         };
         auto previous_row = [&]() {
-            if (--picker->keyboard_row < 0)
+            if (__builtin_expect(--picker->keyboard_row < 0, 1))
                 picker->keyboard_row = (picker->keyboard_flags & 2) ? 5 : 3;
         };
         auto next_column = [&]() {
-            if (picker->keyboard_row >= 4)
+            if (__builtin_expect(picker->keyboard_row >= 4, 0))
                 return;
             if (++picker->keyboard_column >= NuStrLen(textrow[picker->keyboard_row]))
                 picker->keyboard_column = 0;
@@ -5866,7 +5866,7 @@ extern "C" {
                 picker->keyboard_column = NuStrLen(textrow[picker->keyboard_row]) - 1;
         };
 
-        if (key != -1) {
+        if (__builtin_expect(key != -1, 1)) {
             switch (key) {
                 case 0xc8:
                     previous_row();
@@ -5886,7 +5886,7 @@ extern "C" {
                     break;
                 case 0x1c:
                 case 1:
-                    if (picker->callback)
+                    if (__builtin_expect(!!(picker->callback), 0))
                         picker->callback(menu, item, pad->digital_buttons);
                     break;
                 default: {
@@ -5905,7 +5905,7 @@ extern "C" {
 
         if (pad->digital_buttons_pressed & 0x4000)
             next_row();
-        if (pad->digital_buttons_pressed & 0x1000)
+        if (__builtin_expect(!!(pad->digital_buttons_pressed & 0x1000), 0))
             previous_row();
         if (pad->digital_buttons_pressed & 0x8000)
             previous_column();
@@ -5916,7 +5916,7 @@ extern "C" {
         if ((pad->digital_buttons & 0xc) == 0xc) {
             picker->cursor = 0;
             picker->value[0] = '\0';
-            if ((picker->keyboard_flags & 2) && TextPickCopyBuffer[0]) {
+            if (__builtin_expect((picker->keyboard_flags & 2) && TextPickCopyBuffer[0], 0)) {
                 NuStrNCpy(picker->value, TextPickCopyBuffer, picker->max_length - 1);
                 picker->value[picker->max_length - 1] = '\0';
                 picker->cursor = NuStrLen(picker->value);
@@ -5929,16 +5929,16 @@ extern "C" {
         if (pad->digital_buttons_pressed & 4)
             picker->cursor = picker->cursor > 0 ? picker->cursor - 1 : 0;
         if (pad->digital_buttons_pressed & 8) {
-            if (picker->cursor < NuStrLen(picker->value))
+            if (__builtin_expect(picker->cursor < NuStrLen(picker->value), 0))
                 ++picker->cursor;
             else
                 picker->cursor = NuStrLen(picker->value);
         }
         if (pad->digital_buttons_pressed & 0x40)
             insert_character(textrow[picker->keyboard_row][picker->keyboard_column]);
-        if (pad->digital_buttons_pressed & 0x80)
+        if (__builtin_expect(!!(pad->digital_buttons_pressed & 0x80), 1))
             delete_previous();
-        if (pad->digital_buttons_pressed & 0x20) {
+        if (__builtin_expect(!!(pad->digital_buttons_pressed & 0x20), 0)) {
             if (textrow[1] == const_cast<char *>("QWERTYUIOP")) {
                 textrow[0] = const_cast<char *>("1234567890");
                 textrow[1] = const_cast<char *>("qwertyuiop");

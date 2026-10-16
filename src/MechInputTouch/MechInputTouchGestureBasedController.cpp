@@ -736,7 +736,10 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpWhenStuck(GameObject_s
         return;
     }
     field_a6 = 1;
-    NUVEC probe = object.apiobj.position;
+    NUVEC probe;
+    probe.x = object.apiobj.position.x;
+    probe.y = object.apiobj.position.y;
+    probe.z = object.apiobj.position.z;
     VuVec intended(object.target_velocity.x, object.target_velocity.y, object.target_velocity.z, 1.0f);
     NuVecNorm(&intended.xyz, &intended.xyz);
     probe.x += intended.x * 0.5f;

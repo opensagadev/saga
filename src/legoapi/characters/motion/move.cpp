@@ -623,7 +623,20 @@ void Player_ResetContexts(PLAYERPACKET_s *);
 void PlayDieSfx(GameObject_s *);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
-static void CommunicateCode(GameObject_s *, i32, i32);
+// Retail keeps several of this file's static helpers only as GCC clones; these
+// declarations pin the clone names and register conventions.
+#if defined(__i386__)
+#define MOVE_CLONE_ATTR1 __attribute__((noinline, noclone, regparm(1)))
+#define MOVE_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
+#else
+#define MOVE_CLONE_ATTR1 __attribute__((noinline, noclone))
+#define MOVE_CLONE_ATTR2 __attribute__((noinline, noclone))
+#endif
+
+static MOVE_CLONE_ATTR2 void CommunicateCode(GameObject_s *, i32)
+    __asm__("_ZL15CommunicateCodeP12GameObject_sii.constprop.74");
+static MOVE_CLONE_ATTR1 void AwkwardShapeCode(GameObject_s *)
+    __asm__("_ZL16AwkwardShapeCodeP12GameObject_si.constprop.78");
 static void SelectOpponent(GameObject_s *, f32, f32, i32, i32);
 static void PunchCode(GameObject_s *, i32, i32, i32, i32, f32);
 static i32 ShootCode(GameObject_s *, i32, i32, i32, i32, i32);
@@ -632,14 +645,14 @@ static void DeactivatedCode(GameObject_s *);
 static void ZapCode(GameObject_s *, i32, i32);
 static void ShootThisFrame(GameObject_s *, i32, i32);
 static void FireCode(GameObject_s *, i32, i32, f32, i32);
-static void AwkwardShapeCode(GameObject_s *, i32);
 f32 FindGunshipHoverHeight(GameObject_s *);
 void Move_VEHICLE(GameObject_s *);
 void CableCode(GameObject_s *, i32, f32);
 void KillParts(GameObject_s *, i32, i32, i32, f32, i32, u16 *);
 extern "C" i16 id_BASKETCANNON;
-static void ForceCode(GameObject_s *, i32, i32, i32);
-static void SelfDestructCode(GameObject_s *, i32);
+// Retail keeps only the IPA-SRA clone of this function.
+static MOVE_CLONE_ATTR2 void ForceCode(GameObject_s *, i32, i32) __asm__("_ZL9ForceCodeP12GameObject_siii.isra.29");
+static inline void SelfDestructCode(GameObject_s *, i32);
 void JetPackCode(GameObject_s *, i32, i32, i32);
 void ChatterSfx(GameObject_s *, i32, f32);
 static void ShieldCode(GameObject_s *);
@@ -665,7 +678,6 @@ void CableCode(GameObject_s *, i32, float);
 extern f32 max_cable_length;
 void EngineNoiseCode(GameObject_s *, i32);
 void Buck_MoveCode(GameObject_s *, i32);
-static void AwkwardShapeCode(GameObject_s *, i32);
 static i32 getvehiclehoverheight_hothbattlehack;
 void CatchUpCode(GameObject_s *, f32, f32, i32);
 GRAPPLE *Grapple_AddDynamic(void *, i32);
@@ -1006,7 +1018,7 @@ void Move_CANNON(GameObject_s *object) {
             ShootCode(object, (GAMEPAD_ACTION | GAMEPAD_SPECIAL) & object->pad_gamepad->buttons_pressed, 0, 0, 0, 0);
         FireCode(object, GAMEPAD_ACTION & object->pad_gamepad->buttons_pressed, 0, 0.4f, 1);
     }
-    AwkwardShapeCode(object, 0);
+    AwkwardShapeCode(object);
     if (object->pad_gamepad->input_magnitude > 0.0f &&
         abs(RotDiff(object->previous_movement_angle, object->apiobj.field_0x276)) > 910.0f * FRAMETIME) {
         if (object->id == id_CATAPULT || object->id == id_BASKETCANNON)
@@ -1308,7 +1320,7 @@ void Move_GEONOSIAN(GameObject_s *object) {
     else if (object->id == id_WATTO)
         ZapCode(object, pressed & action_mask, 0);
     if (static_cast<i8>(object->apiobj.character_data->game_character->flags_094[0]) < 0)
-        CommunicateCode(object, special_pressed, 0);
+        CommunicateCode(object, special_pressed);
     CheckFallLand(object);
     HeadMovement(object);
     CloakMovement(object);
@@ -1558,7 +1570,7 @@ void Move_SPEEDERBIKE(GameObject_s *object) {
     }
 
     if (object->id == id_SPEEDERBIKE) {
-        AwkwardShapeCode(object, 0);
+        AwkwardShapeCode(object);
         if (object->current_hp <= 2) {
             const i32 effect = WORLD->debris_sys->entries[134].effect;
             if (effect != -1) {
@@ -2026,10 +2038,18 @@ static void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 fire_delay
     }
 }
 
-static void SelfDestructCode(GameObject_s *object, i32 pressed) {
+// Retail splits the guard off as an inline head; the rest is this partial clone.
+static MOVE_CLONE_ATTR1 void SelfDestructCodeBody(GameObject_s *object)
+    __asm__("_ZL16SelfDestructCodeP12GameObject_si.part.10");
+
+static inline void SelfDestructCode(GameObject_s *object, i32 pressed) {
     if (!object->apiobj.player_controlled || object->apiobj.field_0x287 != 0 || object->character_context == 0x0b ||
         object->character_context == 0x16 || object->character_context == 0x2b || pressed == 0)
         return;
+    SelfDestructCodeBody(object);
+}
+
+static void SelfDestructCodeBody(GameObject_s *object) {
     InstantKillParts(object, 1, 0.0f);
     EXPLOSION *explosion = Detonate(&object->apiobj.collision_position, 0);
     if (explosion != NULL && Arcade != 0 && static_cast<u8>(object->apiobj.field_0x27c) <= 1) {
@@ -2167,7 +2187,7 @@ zap:
         }
     }
     if (static_cast<i8>(object->apiobj.character_data->game_character->flags_094[0]) < 0)
-        CommunicateCode(object, GAMEPAD_SPECIAL & object->pad_gamepad->buttons_pressed, 0);
+        CommunicateCode(object, GAMEPAD_SPECIAL & object->pad_gamepad->buttons_pressed);
     if ((object->apiobj.character_data->model_flags & 0x20) != 0) {
         GizPanel_MoveCode(WORLD, object, (GAMEPAD_SPECIAL | GAMEPAD_ACTION) & object->pad_gamepad->buttons_pressed);
         if (WORLD->current_level == HOTHESCAPEB_LDATA)
@@ -4001,7 +4021,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
         if (in_tube) {
             object->target_velocity.y = 5.0f;
             api.velocity.y = SeekValF(api.velocity.y, object->target_velocity.y, 10.0f);
-        } else if ((api.character_data->game_character->field_0x94 & 0x20) != 0 &&
+        } else if (__builtin_expect((api.character_data->game_character->field_0x94 & 0x20) != 0, 0) &&
                    ((pad->buttons_held & GAMEPAD_JUMP) != 0 || object->character_context != 0x4b)) {
             object->target_velocity.y = (pad->buttons_held & GAMEPAD_JUMP) != 0
                                             ? api.character_data->game_character->run_speed * 0.7f
@@ -4227,7 +4247,7 @@ void Move_POD(GameObject_s *object) {
     if (WORLD->area != NULL && (WORLD->area == PODRACE_ADATA || WORLD->area == PODSPRINT_ADATA))
         CatchUpCode(object, 0.025f, 3.0f, 0);
     if (static_cast<i8>(object->apiobj.flags_low) < 0)
-        ForceCode(object, 0, 0, 0);
+        ForceCode(object, 0, 0);
     PodCollisionCode(object);
 
     i32 sound = vehicle->sfx_engine;
@@ -4480,7 +4500,7 @@ void Move_VEHICLE(GameObject_s *object) {
         }
     }
 
-    AwkwardShapeCode(object, 0);
+    AwkwardShapeCode(object);
     EngineNoiseCode(object, object->character_context == 0x17);
 
     if (((object->apiobj.player_controlled && object->current_hp == 1) ||
@@ -4592,7 +4612,7 @@ void Move_ATAT(GameObject_s *object) {
     DeactivatedCode(object);
     if (ShootCode(object, GAMEPAD_ACTION & pad->buttons_pressed, 0, 0, 0, 0))
         object->bolt_fire_phase = !object->bolt_fire_phase;
-    AwkwardShapeCode(object, 0);
+    AwkwardShapeCode(object);
     HeadMovement(object);
     if (CurrentAnim(&object->apiobj.anim_packet) == 0 && object->character_context != 0x17 &&
         object->character_context != 0x41)
@@ -4622,7 +4642,7 @@ void Move_JAWA(GameObject_s *object) {
     PushCode(object, 1);
     TakeOverCode(object, pressed & tag_mask);
     if (object->apiobj.player_controlled)
-        ForceCode(object, 0, 0, 0);
+        ForceCode(object, 0, 0);
     JumpCode(object, pressed & jump_mask, held & jump_mask, 0, 0, 0, -1);
     BuildIt_MoveCode(object);
     u32 special_pressed = pressed & special_mask;
@@ -5481,6 +5501,10 @@ static void JediLightCode(GameObject_s *object) {
     }
 }
 
+// Retail inlines the fade and step checks into each caller; this is the remaining partial clone.
+static MOVE_CLONE_ATTR2 void ForceGlowCode(GameObject_s *object, i32 model)
+    __asm__("_ZL13ForceGlowCodeP12GameObject_si.part.34");
+
 static void ForceGlowCode(GameObject_s *object, i32 model) {
     if (object->field_0xd80 == 0.0f &&
         (object->force_glow_previous == NULL || object->force_glow_previous == object->force_glow_candidate)) {
@@ -5704,7 +5728,7 @@ void LightSabreDebris(GameObject_s *object) {
     }
 }
 
-static void ForceCode(GameObject_s *object, i32 pressed, i32 held, i32) {
+static void ForceCode(GameObject_s *object, i32 pressed, i32 held) {
     u8 previous_force = object->force_repeat_requested;
     object->force_repeat_requested = 0;
     if (object->character_context == 8) {
@@ -5786,10 +5810,10 @@ static void ForceCode(GameObject_s *object, i32 pressed, i32 held, i32) {
     } else if ((object->apiobj.flags_low & 0x80) != 0)
         GizForce_FindBestForceTarget(WORLD->giz_force_sys, object);
     GIZFORCE_s *force = object->gizforce_target;
-    if (force != NULL && (object->apiobj.flags_low & 0x80) != 0 && (object->field_0xe22 & 2) == 0 &&
-        object->apiobj.field_0x27d != 0) {
+    if (force != NULL && __builtin_expect(static_cast<signed char>(object->apiobj.flags_low) < 0, 1) &&
+        __builtin_expect((object->field_0xe22 & 2) == 0, 1) && __builtin_expect(object->apiobj.field_0x27d != 0, 1)) {
         object->field_0xe22 |= 2;
-        if (object->gizforce_target_object == NULL) {
+        if (__builtin_expect(object->gizforce_target_object == NULL, 0)) {
             object->force_glow_candidate = force;
             object->force_glow_candidate_kind = 0;
             SetHeadTarget(object, &force->file_position, 1, 2.0f, 5.0f, 10.0f);
@@ -6276,9 +6300,16 @@ static void DrawLightningBolts(GameObject_s *object, GameObject_s *target, i32 l
     }
 }
 
-static void ForcePushCode(GameObject_s *object, i32 held, i32) {
-    if (object->character_context != 0x1b)
-        return;
+// Retail splits the context test off as an inline head; the rest is this partial clone.
+static MOVE_CLONE_ATTR2 void ForcePushCodeBody(GameObject_s *object, i32 held)
+    __asm__("_ZL13ForcePushCodeP12GameObject_sii.isra.32.part.33");
+
+static inline void ForcePushCode(GameObject_s *object, i32 held) {
+    if (object->character_context == 0x1b)
+        ForcePushCodeBody(object, held);
+}
+
+static void ForcePushCodeBody(GameObject_s *object, i32 held) {
     AlertSurroundingCreatures(object, &object->apiobj.collision_position);
     GameObject_s *initial_target = object->force_target;
     if ((object->pad_gamepad->allocated_5a & 0x10) != 0)
@@ -6302,7 +6333,7 @@ static void ForcePushCode(GameObject_s *object, i32 held, i32) {
     if (target != NULL) {
         SetObjAsHeadTarget(object, target, 2, 1.0f, 0.0f, 0.0f);
         SetObjAsHeadTarget(target, object, 2, 1.0f, 0.0f, 0.0f);
-        if ((object->field_0xe21 & 4) != 0) {
+        if (__builtin_expect((object->field_0xe21 & 4) != 0, 0)) {
             object->force_glow_candidate = target;
             object->force_glow_candidate_kind = 2;
             if ((object->field_0xe21 & 1) != 0)
@@ -6424,11 +6455,7 @@ static void ForcePushCode(GameObject_s *object, i32 held, i32) {
         object->airborne_action_duration -= FRAMETIME;
         if (object->airborne_action_duration <= 0.0f) {
             target = object->force_target;
-            if (object->context_animation_timer < 0.4f) {
-                ReleaseForce(object, 0);
-                if ((object->field_0xe20 & 0x80) == 0 || target == NULL)
-                    return;
-            } else {
+            if (object->context_animation_timer >= 0.4f) {
                 if (target == NULL) {
                     ReleaseForce(object, 0);
                     return;
@@ -6442,6 +6469,10 @@ static void ForcePushCode(GameObject_s *object, i32 held, i32) {
                 ReleaseForce(object, 0);
                 if ((object->field_0xe20 & 0x80) == 0)
                     return;
+            } else {
+                ReleaseForce(object, 0);
+                if ((object->field_0xe20 & 0x80) == 0 || target == NULL)
+                    return;
             }
             target->fall_animation_timer = 0.2f;
         }
@@ -6450,7 +6481,24 @@ static void ForcePushCode(GameObject_s *object, i32 held, i32) {
 
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 
-static void ForceThrowCode(GameObject_s *object, i32 pressed, i32) {
+static inline __attribute__((always_inline)) void ForceThrowConsiderTarget(GameObject_s *object, i32 i, f32 &distance) {
+    if (Player[i] == NULL || (Player[i]->apiobj.field_0x1f8 & 0x1001) != 0x1001 || Player[i]->apiobj.field_0x287 != 0 ||
+        (Player[i]->apiobj.character_data->model_flags & 0x80000) != 0)
+        return;
+    f32 next_distance = NuVecDistSqr(&object->apiobj.position, &Player[i]->apiobj.position, NULL);
+    if (object->force_throw_target == NULL ||
+        (((object->apiobj.flags_low & 0x80) != 0 || (object->force_throw_target->apiobj.flags_low & 0x80) == 0) &&
+         next_distance < distance)) {
+        object->force_throw_target = Player[i];
+        distance = next_distance;
+    }
+}
+
+// Retail keeps only the IPA-SRA clone of this function.
+static MOVE_CLONE_ATTR2 void ForceThrowCode(GameObject_s *object, i32 pressed)
+    __asm__("_ZL14ForceThrowCodeP12GameObject_sii.isra.13");
+
+static void ForceThrowCode(GameObject_s *object, i32 pressed) {
     if (object->character_context == 0x12) {
         AlertSurroundingCreatures(object, &object->apiobj.collision_position);
         if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL &&
@@ -6503,7 +6551,7 @@ static void ForceThrowCode(GameObject_s *object, i32 pressed, i32) {
                 NuAtan2D(part->position.x - object->apiobj.position.x, part->position.z - object->apiobj.position.z);
             SetHeadTarget(object, &part->position, 2, 1.0f, 0.0f, 0.0f);
         }
-        if (previous_time <= 1.0f || object->context_animation_timer > 1.0f)
+        if (!(previous_time > 1.0f) || !(object->context_animation_timer <= 1.0f))
             return;
         f32 speed, gravity;
         if (WORLD->current_level == MAULF_LDATA) {
@@ -6516,7 +6564,7 @@ static void ForceThrowCode(GameObject_s *object, i32 pressed, i32) {
             speed = ForceThrowSpeed;
             gravity = ForceThrowGravity;
         }
-        object->field_0x788 = GizForce_Throw(object, object->gizforce_target, speed, gravity, 0);
+        object->field_0x788 = GizForce_Throw(object, object->gizforce_target, speed, gravity, 1);
         object->context_flags |= 0x40;
         return;
     }
@@ -6534,120 +6582,120 @@ static void ForceThrowCode(GameObject_s *object, i32 pressed, i32) {
     object->field_0x788 = NULL;
     object->force_throw_target = NULL;
     object->context_animation_timer = 2.0f;
+    // Retail unrolls the scan over all eight player slots.
     f32 distance = 1.0e9f;
-    for (i32 i = 0; i < 8; ++i) {
-        GameObject_s *target = Player[i];
-        if (target == NULL || (target->apiobj.field_0x1f8 & 0x1001) != 0x1001 || target->apiobj.field_0x287 != 0 ||
-            (target->apiobj.character_data->model_flags & 0x80000) != 0)
-            continue;
-        f32 next_distance = NuVecDistSqr(&object->apiobj.position, &target->apiobj.position, NULL);
-        if (object->force_throw_target == NULL ||
-            (((object->apiobj.flags_low & 0x80) != 0 || (object->force_throw_target->apiobj.flags_low & 0x80) == 0) &&
-             next_distance < distance)) {
-            object->force_throw_target = target;
-            distance = next_distance;
-        }
-    }
+    ForceThrowConsiderTarget(object, 0, distance);
+    ForceThrowConsiderTarget(object, 1, distance);
+    ForceThrowConsiderTarget(object, 2, distance);
+    ForceThrowConsiderTarget(object, 3, distance);
+    ForceThrowConsiderTarget(object, 4, distance);
+    ForceThrowConsiderTarget(object, 5, distance);
+    ForceThrowConsiderTarget(object, 6, distance);
+    ForceThrowConsiderTarget(object, 7, distance);
     NewRumble(object->pad_gamepad->pad, 0.6f, 0);
     object->gizforce_target->using_object = object;
     GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
     object->force_heading = GizForces_AngleToForce(&object->apiobj.position, object->gizforce_target);
 }
 
-static void ForceDeflectCode(GameObject_s *object, i32 pressed, i32 held, i32) {
+// Retail keeps only the IPA-SRA clone of this function.
+static MOVE_CLONE_ATTR2 void ForceDeflectCode(GameObject_s *object, i32 pressed, i32 held)
+    __asm__("_ZL16ForceDeflectCodeP12GameObject_siii.isra.31");
+
+static void ForceDeflectCode(GameObject_s *object, i32 pressed, i32 held) {
     i32 waiting = objInNetWaitContext(object, 0x1d);
-    if (object->character_context == 0x1d) {
+    signed char context = object->character_context;
+    if (__builtin_expect(context != 0x1d, 1)) {
+        PART_s *assist = NULL;
+        if ((object->apiobj.flags_low & 0x80) == 0) {
+            if ((object->field_0xefd & 1) == 0 || player == NULL || player->force_part == NULL)
+                return;
+            assist = player->force_part;
+        }
+        if (object->apiobj.field_0x27d == 0)
+            return;
+        if (context != -1 && __builtin_expect((CInfo[context].flags & 4) == 0, 1) && context != 6 &&
+            object->character_context != 7 && !objInNetWaitContext(object, 0x1d))
+            return;
+        PART_s *part;
+        if (__builtin_expect(waiting, 0))
+            part = object->force_part;
+        else if (__builtin_expect(assist != NULL, 1))
+            part = assist;
+        else {
+            f32 range = TouchHacks::GetIncomingPartRange();
+            f32 radius = object->apiobj.field_0x1e0;
+            if (radius <= object->apiobj.field_0x1dc)
+                radius = object->apiobj.field_0x1dc;
+            part = FindIncomingPart(object, &object->apiobj.collision_position, radius, 0x800a, range);
+        }
+        if (part == NULL)
+            return;
         object->field_0xe22 |= 2;
-        object->context_animation_timer += FRAMETIME;
-        if ((object->apiobj.flags_low & 0x80) != 0)
-            NewRumble(object->pad_gamepad->pad, qrand() * 1.5259022e-05f * 0.6f, 0);
-        if (object->force_part != NULL) {
-            PART_s *part = object->force_part;
-            part->force_flags |= 1;
-            part->flags &= ~0x4000;
-            if (object->context_animation_timer < 0.2f)
-                part->velocity.y = SeekValF(part->velocity.y, 2.0f, 6.0f);
-            part = object->force_part;
-            NUVEC direction;
-            if (part->owner == NULL || part->owner->apiobj.field_0x27c != -1)
-                NuVecRotateY(&direction, &v001, object->apiobj.facing_angle);
-            else {
-                NuVecSub(&direction, &part->owner->apiobj.collision_position, &part->position);
-                NuVecNorm(&direction, &direction);
-            }
-            NUVEC velocity;
-            NuVecScale(&velocity, &direction, 4.0f);
-            SeekVec(&object->force_part->velocity, &object->force_part->velocity, &velocity, 3.0f);
-            object->force_glow_candidate = object->force_part;
-            object->force_glow_candidate_kind = 3;
-            SetHeadTarget(object, &object->force_part->position, 2, 1.0f, 0.0f, 0.0f);
-            part = object->force_part;
-            if (part->move_callback == BobaRocket_Move) {
-                part->move_callback = NULL;
-                part->update_callback = NULL;
-                part->flags = (part->flags & ~0x4000) | 0x80;
-                NewPartRotation(part);
-            } else if (part->move_callback == Boulder_Move && object->context_animation_timer >= 0.5f)
-                Boulder_Kill(part, 0);
-        }
-        if ((held != 0 || (object->field_0xefd & 1) != 0) && object->force_part != NULL &&
-            object->airborne_action_duration >= 0.2f && object->context_animation_timer < 1.5f) {
-            object->airborne_action_duration = object->airborne_action_duration - FRAMETIME > 0.2f
-                                                   ? object->airborne_action_duration - FRAMETIME
-                                                   : 0.2f;
+        object->force_glow_candidate = part;
+        object->force_glow_candidate_kind = 3;
+        SetHeadTarget(object, &part->position, 2, 1.0f, 0.0f, 0.0f);
+        if (assist == NULL && pressed == 0 && !waiting)
             return;
-        }
-        object->airborne_action_duration -= FRAMETIME;
-        if (object->airborne_action_duration <= 0.0f)
-            ReleaseForce(object, 0);
+        object->force_part = part;
+        part->flags |= 0x10000;
+        part->gravity = 0.0f;
+        object->context_animation_timer = 0.0f;
+        object->airborne_action_duration = 0.3f;
+        object->force_target = NULL;
+        object->blowup_target = NULL;
+        u8 mask = 1 << object->apiobj.field_0x27c;
+        object->character_context = 0x1d;
+        if (part->force_player_mask != -1)
+            mask |= part->force_player_mask;
+        part->force_player_mask = mask;
+        GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
+        PlaySfx("JForcePush", &object->apiobj.collision_position);
         return;
     }
-    PART_s *assist = NULL;
-    if ((object->apiobj.flags_low & 0x80) == 0) {
-        if ((object->field_0xefd & 1) == 0 || player == NULL || player->force_part == NULL)
-            return;
-        assist = player->force_part;
-    }
-    if (object->apiobj.field_0x27d == 0)
-        return;
-    i32 context = object->character_context;
-    if (context != -1 && (CInfo[context].flags & 4) == 0 && context != 6 && context != 7 &&
-        !objInNetWaitContext(object, 0x1d))
-        return;
-    PART_s *part;
-    if (waiting)
-        part = object->force_part;
-    else if (assist != NULL)
-        part = assist;
-    else {
-        f32 range = TouchHacks::GetIncomingPartRange();
-        f32 radius = object->apiobj.field_0x1e0;
-        if (radius <= object->apiobj.field_0x1dc)
-            radius = object->apiobj.field_0x1dc;
-        part = FindIncomingPart(object, &object->apiobj.collision_position, radius, 0x800a, range);
-    }
-    if (part == NULL)
-        return;
     object->field_0xe22 |= 2;
-    object->force_glow_candidate = part;
-    object->force_glow_candidate_kind = 3;
-    SetHeadTarget(object, &part->position, 2, 1.0f, 0.0f, 0.0f);
-    if (assist == NULL && pressed == 0 && !waiting)
+    object->context_animation_timer += FRAMETIME;
+    if ((object->apiobj.flags_low & 0x80) != 0)
+        NewRumble(object->pad_gamepad->pad, qrand() * 1.5259022e-05f * 0.6f, 0);
+    if (object->force_part != NULL) {
+        PART_s *part = object->force_part;
+        part->force_flags |= 1;
+        part->flags &= ~0x4000;
+        if (object->context_animation_timer < 0.2f)
+            part->velocity.y = SeekValF(part->velocity.y, 2.0f, 6.0f);
+        part = object->force_part;
+        NUVEC direction;
+        if (part->owner == NULL || part->owner->apiobj.field_0x27c != -1)
+            NuVecRotateY(&direction, &v001, object->apiobj.facing_angle);
+        else {
+            NuVecSub(&direction, &part->owner->apiobj.collision_position, &part->position);
+            NuVecNorm(&direction, &direction);
+        }
+        NUVEC velocity;
+        NuVecScale(&velocity, &direction, 4.0f);
+        SeekVec(&object->force_part->velocity, &object->force_part->velocity, &velocity, 3.0f);
+        object->force_glow_candidate = object->force_part;
+        object->force_glow_candidate_kind = 3;
+        SetHeadTarget(object, &object->force_part->position, 2, 1.0f, 0.0f, 0.0f);
+        part = object->force_part;
+        if (part->move_callback == BobaRocket_Move) {
+            part->move_callback = NULL;
+            part->update_callback = NULL;
+            part->flags = (part->flags & ~0x4000) | 0x80;
+            NewPartRotation(part);
+        } else if (part->move_callback == Boulder_Move && object->context_animation_timer >= 0.5f)
+            Boulder_Kill(part, 0);
+    }
+    if ((held != 0 || (object->field_0xefd & 1) != 0) && object->force_part != NULL &&
+        object->airborne_action_duration >= 0.2f && object->context_animation_timer < 1.5f) {
+        object->airborne_action_duration = object->airborne_action_duration - FRAMETIME > 0.2f
+                                               ? object->airborne_action_duration - FRAMETIME
+                                               : 0.2f;
         return;
-    object->force_part = part;
-    part->flags |= 0x10000;
-    part->gravity = 0.0f;
-    object->context_animation_timer = 0.0f;
-    object->airborne_action_duration = 0.3f;
-    object->force_target = NULL;
-    object->blowup_target = NULL;
-    u8 mask = 1u << (object->apiobj.field_0x27c & 31);
-    object->character_context = 0x1d;
-    if (part->force_player_mask != -1)
-        mask |= part->force_player_mask;
-    part->force_player_mask = mask;
-    GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
-    PlaySfx("JForcePush", &object->apiobj.collision_position);
+    }
+    object->airborne_action_duration -= FRAMETIME;
+    if (object->airborne_action_duration <= 0.0f)
+        ReleaseForce(object, 0);
 }
 
 void Move_WEIRDO(GameObject_s *object) {
@@ -6705,11 +6753,11 @@ void Move_WEIRDO(GameObject_s *object) {
         Grapple_MoveCode(object);
     BuildIt_MoveCode(object);
     if (has_sabre || SuperWeirdo(object)) {
-        ForceDeflectCode(object, special_pressed, special_held, 0);
-        ForcePushCode(object, special_held, 0);
+        ForceDeflectCode(object, special_pressed, special_held);
+        ForcePushCode(object, special_held);
         FindForcePushTarget(object, special_pressed, 1);
-        ForceThrowCode(object, special_pressed, 0);
-        ForceCode(object, special_pressed, special_held, 0);
+        ForceThrowCode(object, special_pressed);
+        ForceCode(object, special_pressed, special_held);
         FindForcePushTarget(object, special_pressed, 2);
         if (object->apiobj.field_0x287 == 0 && FadeSys.fade == 0.0f) {
             if (object->force_glow_step > 0.0f)
@@ -6754,7 +6802,7 @@ void Move_WEIRDO(GameObject_s *object) {
     }
     if (static_cast<i8>(static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_094[0]) <
         0) {
-        CommunicateCode(object, GAMEPAD_SPECIAL & object->pad_gamepad->buttons_pressed, 0);
+        CommunicateCode(object, GAMEPAD_SPECIAL & object->pad_gamepad->buttons_pressed);
     }
     if (object->character_context == 0x14) {
         f32 *frame = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
@@ -6874,11 +6922,11 @@ void Move_JEDI(GameObject_s *object) {
     BuildIt_MoveCode(object);
     Lever_MoveCode(WORLD, object);
     if ((static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_094[1] & 0x80) == 0) {
-        ForceDeflectCode(object, special_pressed, input.held & input.special_mask, 0);
-        ForcePushCode(object, input.held & input.special_mask, 0);
+        ForceDeflectCode(object, special_pressed, input.held & input.special_mask);
+        ForcePushCode(object, input.held & input.special_mask);
         FindForcePushTarget(object, special_pressed, 1);
-        ForceThrowCode(object, special_pressed, 0);
-        ForceCode(object, special_pressed, input.held & input.special_mask, 0);
+        ForceThrowCode(object, special_pressed);
+        ForceCode(object, special_pressed, input.held & input.special_mask);
         FindForcePushTarget(object, special_pressed, 2);
         if (object->apiobj.field_0x287 == 0 && FadeSys.fade == 0.0f) {
             if (object->force_glow_step > 0.0f)
@@ -6995,7 +7043,7 @@ void MovePlayer_NETWORK(GameObject_s *object) {
             glow_model = 0xdf;
     }
     Tag_Check(object);
-    ForcePushCode(object, 0, 0);
+    ForcePushCode(object, 0);
     object->field_0xd8c = 1.0f;
     if (api.field_0x287 == 0 && FadeSys.fade == 0.0f) {
         if (object->force_glow_step > 0.0f)
@@ -9508,9 +9556,15 @@ void StartTurn(GameObject_s *object) {
     PlaySfx("XWing_LoopDeLoop", &object->apiobj.collision_position);
 }
 
-static void GrabCode(GameObject_s *object) {
-    if (object->character_context != 0x38)
-        return;
+// Retail splits the context test off as an inline head; the rest is this partial clone.
+static MOVE_CLONE_ATTR1 void GrabCodeBody(GameObject_s *object) __asm__("_ZL8GrabCodeP12GameObject_s.part.15");
+
+static inline void GrabCode(GameObject_s *object) {
+    if (__builtin_expect(object->character_context == 0x38, 1))
+        GrabCodeBody(object);
+}
+
+static void GrabCodeBody(GameObject_s *object) {
     f32 previous_time = object->context_animation_timer;
     f32 time = FRAMETIME + previous_time;
     object->context_animation_timer = time;
@@ -9610,16 +9664,16 @@ static AWKWARDSHAPESPHERE_s AwkwardShapeSphere[] = {
     {&id_FIRETRUCK, 2, 1, 0.3f}, {NULL, 0, 0, 0.0f},
 };
 
-static void AwkwardShapeCode(GameObject_s *object, i32) {
+static void AwkwardShapeCode(GameObject_s *object) {
     i32 joints[8] = {};
     u32 flags[8] = {};
     f32 radii[8] = {};
     if (object->apiobj.field_0x288 == 0 || object->apiobj.model_draw_result == 0)
         return;
-    if (WORLD->area != NULL && (WORLD->area->flags & 1) != 0 && object->id == id_ATAT)
+    if (WORLD->area != NULL && __builtin_expect((WORLD->area->flags & 1) != 0, 0) && object->id == id_ATAT)
         return;
     i32 count = 0;
-    if (object->id == id_SPEEDERBIKE) {
+    if (__builtin_expect(object->id == id_SPEEDERBIKE, 0)) {
         if (WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks == 0)
             return;
         joints[0] = 2;
@@ -9660,7 +9714,7 @@ static void AwkwardShapeCode(GameObject_s *object, i32) {
     }
 }
 
-static void CommunicateCode(GameObject_s *object, i32 pressed, i32) {
+static void CommunicateCode(GameObject_s *object, i32 pressed) {
     i8 context = object->character_context;
     if (context != 0x1a) {
         if (pressed == 0)
@@ -10617,7 +10671,7 @@ void Move_CHARACTER(GameObject_s *object) {
         Batarang_MoveCode(object);
     if (static_cast<i8>(static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_094[0]) <
         0) {
-        CommunicateCode(object, GAMEPAD_SPECIAL & object->pad_gamepad->buttons_pressed, 0);
+        CommunicateCode(object, GAMEPAD_SPECIAL & object->pad_gamepad->buttons_pressed);
     }
     if (object->character_context == 0x14) {
         f32 *frame = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
@@ -10672,7 +10726,7 @@ void Move_CHARACTER(GameObject_s *object) {
     }
     GrabCode(object);
     if (object->id == id_RANCOR)
-        AwkwardShapeCode(object, 0);
+        AwkwardShapeCode(object);
     HeadMovement(object);
     CloakMovement(object);
     HairMovement(object);
@@ -10837,7 +10891,7 @@ void Move_BEAST(GameObject_s *object) {
     PunchCode(object, GAMEPAD_ACTION & object->pad_gamepad->buttons_pressed, 0, 0, 1,
               object->apiobj.player_controlled ? 1.0f : 2.0f);
     PooCode(object);
-    AwkwardShapeCode(object, 0);
+    AwkwardShapeCode(object);
     GizmoBlowupCheckProximity(WORLD, object);
 }
 

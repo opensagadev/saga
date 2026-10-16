@@ -388,6 +388,7 @@ extern "C" {
     void NuDisplayListDrawAll(void);
     NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *buffer, VARIPTR buffer_end);
     void NuDisplaySceneClonePS(NUDLDLISTSCENE *source, NUDLDLISTSCENE *destination, VARIPTR *buffer);
+    void DisplayListCreatePS(NUDLDLISTSCENE *scene, VARIPTR *buffer, VARIPTR buffer_end);
     void DisplayListCreateFxList(VARIPTR *buffer, VARIPTR end, i32 count);
     VARIPTR *NuDisplayListLinkItemVP(nudisplaylist_s *dl, u8 type, void *call_addr, VARIPTR *buf);
     void *NuDisplayListPrepareFaceonPS(VARIPTR *buffer, void *faceon, NUMTX *transform);
@@ -405,6 +406,17 @@ extern "C" {
         display_list_buffer->addr = ALIGN(display_list_buffer->addr, 0x10);
 
         return display_list_buffer;
+    }
+
+    // render_buffer bit 7 selects the current clip/mtl buffer. The original
+    // reads it as a one-bit field, which gives a byte-wide shift.
+    typedef struct nurenderbufferbits_s {
+        u8 other : 7;
+        u8 current : 1;
+    } NURENDERBUFFERBITS;
+
+    static inline u8 NuDisplaySceneCurrentBuffer(const NUDLDLISTSCENE *scene) {
+        return ((const NURENDERBUFFERBITS *)&scene->render_buffer)->current;
     }
 #ifdef __cplusplus
 }

@@ -531,7 +531,18 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
 // NuReadGraphicsData is a C++ static function in the original (GCC clones it,
 // hence the `.isra.NNN` suffix in the ROM symbol table).
 
-static NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path, char *, char *scene_data) {
+extern "C" void NuSevereWarning(const char *format, ...);
+
+// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
+#if defined(__i386__)
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
+#endif
+static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path,
+                                                             char *scene_data)
+    __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
+static NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path, char *scene_data) {
     NUGSCN *scene = reinterpret_cast<NUGSCN *>(scene_data);
     if (scene == NULL) {
         char converted_path[1033];
@@ -550,18 +561,30 @@ static NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path, ch
         NuFileClose(file);
     }
 
+    const i32 version = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(scene) + 8);
     void **fixed = (void **)NuPtrBlockFix((char *)scene + 0x18);
     NUGSCN *fixed_scene = (NUGSCN *)*fixed;
     if (fixed_scene != NULL) {
+        if (*reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(fixed_scene) + 0x168) > 0) {
+            if (version < 0 || version > 2) {
+                NuSevereWarning("Your Character version is %d, whereas the Engine only accepts Character versions "
+                                "from %d to %d",
+                                version, 0, 2);
+            }
+        } else if (version < 0 || version > 2) {
+            NuSevereWarning("Your Scene version is %d, whereas the Engine only accepts Scene versions from %d to %d",
+                            version, 0, 2);
+        }
+        if (version < 2) {
+            *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(fixed_scene) + 0x1f4) = 1;
+        }
         NuGScnCreatePS(fixed_scene, buf, buf_end);
 
-        i32 *texture_ids = fixed_scene->texture_ids;
-        NUNATIVETEX **textures = fixed_scene->textures;
         for (i32 i = 0; i < fixed_scene->ntextures; ++i) {
-            if (textures[i]->ref_count < 0) {
-                texture_ids[i] = 0xabcdabcd;
+            if (fixed_scene->textures[i]->ref_count < 0) {
+                fixed_scene->texture_ids[i] = 0xabcdabcd;
             } else {
-                texture_ids[i] = NuTexCreateNative(textures[i], true);
+                fixed_scene->texture_ids[i] = NuTexCreateNative(fixed_scene->textures[i], true);
             }
         }
         NuGScnFixupTIDs(fixed_scene);
@@ -576,7 +599,7 @@ static NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path, ch
             fixed_scene->texture_anim_ids[i] = fixed_scene->texture_ids[fixed_scene->texture_anim_ids[i]];
         }
         for (i32 i = 0; i < fixed_scene->num_texture_anims; ++i) {
-            nutexanim_s *anim = &animations[i];
+            nutexanim_s *anim = &static_cast<nutexanim_s *>(fixed_scene->texture_anims)[i];
             anim->flags = 0;
             anim->next = NULL;
             anim->previous = NULL;
@@ -603,7 +626,7 @@ static NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path, ch
 // --- Extern "C": NuGScn functions have C linkage in original ---
 extern "C" {
     NUGSCN *NuGScnReadForMultiRender(VARIPTR *buf, VARIPTR buf_end, char *path, i32 render_count) {
-        NUGSCN *scene = NuReadGraphicsData(buf, &buf_end, path, NULL, NULL);
+        NUGSCN *scene = NuReadGraphicsData(buf, &buf_end, path, NULL);
         if (scene != NULL && render_count > 1) {
             NUGSCN **additional_scenes = reinterpret_cast<NUGSCN **>(ALIGN(buf->addr, 32));
             buf->addr = reinterpret_cast<usize>(additional_scenes + render_count);
@@ -624,20 +647,20 @@ extern "C" {
     NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path) {
         RemoveDirectionalMaps = 1;
         RemoveNormalMaps = 1;
-        NUGSCN *scene = NuReadGraphicsData(buf, &buf_end, path, NULL, NULL);
+        NUGSCN *scene = NuReadGraphicsData(buf, &buf_end, path, NULL);
         RemoveNormalMaps = 0;
         RemoveDirectionalMaps = 0;
         return scene;
     }
     void NuGScnReadFromMemory(NUGSCN *scene) {
-        NuReadGraphicsData(NULL, NULL, NULL, NULL, reinterpret_cast<char *>(scene));
+        NuReadGraphicsData(NULL, NULL, NULL, reinterpret_cast<char *>(scene));
     }
     NUGSCN *NuGHGFixup(NUGSCN *scene, void *) {
-        return NuReadGraphicsData(NULL, NULL, NULL, NULL, reinterpret_cast<char *>(scene));
+        return NuReadGraphicsData(NULL, NULL, NULL, reinterpret_cast<char *>(scene));
     }
     nuhgobj_s *NuGHGRead(char *path, VARIPTR *buf, VARIPTR buf_end) {
         nuapi.loading_hgobj = 1;
-        nuhgobj_s *object = reinterpret_cast<nuhgobj_s *>(NuReadGraphicsData(buf, &buf_end, path, NULL, NULL));
+        nuhgobj_s *object = reinterpret_cast<nuhgobj_s *>(NuReadGraphicsData(buf, &buf_end, path, NULL));
         if (object != NULL && nuapi.force_shadows_on_characters != 0) {
             for (i32 i = 0; i != object->display_list->nspecials; ++i) {
                 object->display_list->visibility_flags[i] |= 0x20;
@@ -4016,14 +4039,16 @@ extern "C" {
                 continue;
             }
             if (portal_filter &&
-                (scene->visibility_flags[special->instance_ix] & NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) == 0 &&
+                __builtin_expect(
+                    (scene->visibility_flags[special->instance_ix] & NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) == 0, 1) &&
                 (visibility->portal_bits[special->instance_ix >> 3] & (1U << (special->instance_ix & 7))) == 0) {
                 continue;
             }
             NUMTX *draw_mtx = special->draw_mtx_ptr;
             if (draw_mtx == reinterpret_cast<NUMTX *>(-1)) {
-                NuDisplayListRndrSpecial(&special_handle, &special->draw_mtx, 0, NULL, NULL);
-            } else if (draw_mtx == NULL) {
+                draw_mtx = NULL;
+            }
+            if (draw_mtx == NULL) {
                 NuDisplayListRndrSpecial(&special_handle, &special->draw_mtx, 0, NULL, NULL);
             } else {
                 NuDisplayListRndrSpecial(&special_handle, draw_mtx, 0, NULL, NULL);

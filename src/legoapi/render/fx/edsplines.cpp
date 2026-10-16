@@ -218,14 +218,25 @@ f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &seco
     return BezierLineLength(start, first, point, first_middle);
 }
 
-static void SplinePointAngles(NUGSPLINE *spline, i32 index, i32 looping, u16 *pitch, u16 *angle) {
-    NUVEC *current = &spline->pts[index];
+// Retail only keeps the split-out body of the IPA-SRA clone, which takes
+// &spline->length and &spline->pts in place of the spline.
+#if defined(__i386__)
+#define SPLINE_POINT_ANGLES_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define SPLINE_POINT_ANGLES_ATTR __attribute__((noinline, noclone))
+#endif
+static SPLINE_POINT_ANGLES_ATTR void SplinePointAnglesBody(const i16 *length, NUVEC *const *pts, i32 index,
+                                                           i32 looping, u16 *pitch, u16 *angle)
+    __asm__("_ZL17SplinePointAnglesP11nugspline_siiPtS1_.isra.1.part.2");
+static void SplinePointAnglesBody(const i16 *length, NUVEC *const *pts, i32 index, i32 looping, u16 *pitch,
+                                  u16 *angle) {
+    NUVEC *current = &(*pts)[index];
     i32 previous_index = index - 1;
     NUVEC *previous = NULL;
     if (looping && previous_index < 0)
-        previous = &spline->pts[spline->length - 1];
+        previous = &(*pts)[*length - 1];
     else if (previous_index >= 0)
-        previous = &spline->pts[previous_index];
+        previous = &(*pts)[previous_index];
     NUVEC direction = {0.0f, 0.0f, 0.0f};
     if (previous != NULL) {
         direction.x += current->x - previous->x;
@@ -233,10 +244,10 @@ static void SplinePointAngles(NUGSPLINE *spline, i32 index, i32 looping, u16 *pi
         direction.z += current->z - previous->z;
     }
     NUVEC *next = NULL;
-    if (index + 1 < spline->length)
-        next = &spline->pts[index + 1];
+    if (index + 1 < *length)
+        next = &(*pts)[index + 1];
     else if (looping)
-        next = spline->pts;
+        next = *pts;
     if (next != NULL) {
         direction.x += next->x - current->x;
         direction.y += next->y - current->y;
@@ -246,6 +257,10 @@ static void SplinePointAngles(NUGSPLINE *spline, i32 index, i32 looping, u16 *pi
         *pitch = NuAtan2D(direction.y, NuFsqrt(direction.x * direction.x + direction.z * direction.z));
     if (angle != NULL)
         *angle = NuAtan2D(direction.x, direction.z);
+}
+
+static inline void SplinePointAngles(NUGSPLINE *spline, i32 index, i32 looping, u16 *pitch, u16 *angle) {
+    SplinePointAnglesBody(&spline->length, &spline->pts, index, looping, pitch, angle);
 }
 
 void FlightSpline_Init(WORLDINFO_s *world, flightspline_s *splines, i32 capacity) {

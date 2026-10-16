@@ -2043,8 +2043,22 @@ static AICONDITION *AIScriptFinishStateConditions(NULISTHDR *conditions, AIPACKE
     return condition;
 }
 
-static AICONDITION *AIScriptProcessStateConditions(AISYS *system, NULISTHDR *conditions, APIOBJECT *, AIPACKET *packet,
-                                                   AISCRIPTPROCESS *processor, f32, i32 stack_index) {
+#if defined(__i386__)
+#define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
+#else
+#define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone))
+#endif
+
+// Retail keeps only the IPA-SRA clone, without the unused object and elapsed time.
+static AI_SYS_STUBS_CLONE_ATTR2 AICONDITION *AIScriptProcessStateConditions(AISYS *system, NULISTHDR *conditions,
+                                                                           AIPACKET *packet,
+                                                                           AISCRIPTPROCESS *processor,
+                                                                           i32 stack_index)
+    __asm__("_ZL30AIScriptProcessStateConditionsP7AISYS_sP11nulisthdr_sP11APIOBJECT_s"
+            "P10AIPACKET_sP17AISCRIPTPROCESS_sfi.isra.77");
+
+static AICONDITION *AIScriptProcessStateConditions(AISYS *system, NULISTHDR *conditions, AIPACKET *packet,
+                                                   AISCRIPTPROCESS *processor, i32 stack_index) {
     if (processor == NULL || conditions == NULL) {
         return NULL;
     }
@@ -2151,8 +2165,7 @@ extern "C" {
         for (i32 index = 0; index < processor->active_ref_count; ++index) {
             AIREFSCRIPT *reference = processor->active_refs[index];
             if (NuLinkedListGetHead(&reference->conditions) != NULL &&
-                AIScriptProcessStateConditions(system, &reference->conditions, object, packet, processor, elapsed, 1) ==
-                    NULL) {
+                AIScriptProcessStateConditions(system, &reference->conditions, packet, processor, 1) == NULL) {
                 processor->active_ref_count = index;
                 if (index == 0) {
                     AICREATURE *creature = packet->field_0x134 != 0xff ? &system->creatures[packet->field_0x134] : NULL;
@@ -2268,8 +2281,7 @@ extern "C" {
                 processor->param_stack[1].force_complex_eval = 1;
 
                 if (NuLinkedListGetHead(&reference->conditions) != NULL &&
-                    AIScriptProcessStateConditions(system, &reference->conditions, object, packet, processor, elapsed,
-                                                   1) == NULL) {
+                    AIScriptProcessStateConditions(system, &reference->conditions, packet, processor, 1) == NULL) {
                     continue;
                 }
                 if (reference->script == NULL) {
@@ -2279,7 +2291,7 @@ extern "C" {
                 processor->param_stack[0].is_first_time_state = 1;
                 processor->param_stack[0].force_complex_eval = 1;
                 AICONDITION *entry_condition = AIScriptProcessStateConditions(
-                    system, &reference->script->base_state->conditions, object, packet, processor, elapsed, 0);
+                    system, &reference->script->base_state->conditions, packet, processor, 0);
                 if (entry_condition != NULL && entry_condition->next_state != reference->script->base_state) {
                     const i32 reference_index = processor->active_ref_count;
                     processor->active_refs[reference_index] = reference;
@@ -2299,8 +2311,7 @@ extern "C" {
                     processor->param_stack[1].force_complex_eval = 1;
 
                     if (NuLinkedListGetHead(&reference->conditions) != NULL &&
-                        AIScriptProcessStateConditions(system, &reference->conditions, object, packet, processor,
-                                                       elapsed, 1) == NULL) {
+                        AIScriptProcessStateConditions(system, &reference->conditions, packet, processor, 1) == NULL) {
                         continue;
                     }
                     if (reference->script == NULL) {
@@ -2310,7 +2321,7 @@ extern "C" {
                     processor->param_stack[0].is_first_time_state = 1;
                     processor->param_stack[0].force_complex_eval = 1;
                     AICONDITION *entry_condition = AIScriptProcessStateConditions(
-                        system, &reference->script->base_state->conditions, object, packet, processor, elapsed, 0);
+                        system, &reference->script->base_state->conditions, packet, processor, 0);
                     if (entry_condition != NULL && entry_condition->next_state != reference->script->base_state) {
                         const i32 reference_index = processor->active_ref_count;
                         processor->active_refs[reference_index] = reference;
@@ -2334,8 +2345,8 @@ extern "C" {
         }
 
         if (processor->state != NULL) {
-            AICONDITION *transition = AIScriptProcessStateConditions(system, &processor->state->conditions, object,
-                                                                     packet, processor, elapsed, 0);
+            AICONDITION *transition =
+                AIScriptProcessStateConditions(system, &processor->state->conditions, packet, processor, 0);
             if (transition != NULL) {
                 processor->unknown_flag_4 = transition->keep_blocked;
                 AIScriptSetState(processor, transition->next_state);

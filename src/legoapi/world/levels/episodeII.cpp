@@ -1245,7 +1245,7 @@ static i32 JediBInitLocatorBody(AISYS_s **ai_sys, nuvec_s *position, i32 angle, 
 }
 
 static inline i32 JediBInitLocator(WORLDINFO_s *world, nuvec_s *position, i32 angle, AILOCATOR *locator, f32 radius) {
-    if (netclient != 0) {
+    if (__builtin_expect(netclient != 0, 0)) {
         return 0;
     }
     return JediBInitLocatorBody(&world->ai_sys, position, angle, locator, radius);

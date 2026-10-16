@@ -2391,7 +2391,10 @@ eduimenu_s *routeEditor_Process(nupad_s *pad) {
         routeEditor_AddToRoute(nearest, path->current_node);
         if (change == 1 || change == -1) {
             path->current_node = nearest;
-            nuvec_s position = nearest->position;
+            nuvec_s position;
+            position.x = nearest->position.x;
+            position.y = nearest->position.y;
+            position.z = nearest->position.z;
             position.y = aieditor->cursor_position.y;
             edcamSetPos(&position);
             pressed = pad->digital_buttons_pressed;

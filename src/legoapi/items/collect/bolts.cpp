@@ -629,7 +629,7 @@ void Bolt_Debris_LSW(BOLT_s *bolt, nuvec_s *points, i32 point, nuvec_s *, i32 no
         if (!(bolt->flags & 0x10000000) && Player_HasDoubleBoltDamage_FromBolt(bolt))
             AddGameDebris(world->debris_sys, effect, &points[0]);
     }
-    if (point == -1 || point == 1) {
+    if (point == 1 || point == -1) {
         AddGameDebris(world->debris_sys, effect, &points[1]);
         if (!(bolt->flags & 0x10000000) && Player_HasDoubleBoltDamage_FromBolt(bolt))
             AddGameDebris(world->debris_sys, effect, &points[1]);
@@ -874,14 +874,14 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
     }
     if (message.data != NULL) {
         memmove(&object_index, message.data->bytes + message.read_offset, 2);
-        if (message.swap_endianness)
+        if (__builtin_expect(message.swap_endianness, 1))
             EdFileSwapEndianess16(&object_index);
         message.read_offset += 2;
     }
     for (i32 i = 0; i < 3; ++i) {
         if (message.data != NULL) {
             memmove(&points[i], message.data->bytes + message.read_offset, 12);
-            if (message.swap_endianness) {
+            if (__builtin_expect(message.swap_endianness, 1)) {
                 EdFileSwapEndianess32(&points[i].x);
                 EdFileSwapEndianess32(&points[i].y);
                 EdFileSwapEndianess32(&points[i].z);
@@ -891,13 +891,13 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
     }
     if (message.data != NULL) {
         memmove(&hit, message.data->bytes + message.read_offset, 4);
-        if (message.swap_endianness)
+        if (__builtin_expect(message.swap_endianness, 1))
             EdFileSwapEndianess32(&hit);
         message.read_offset += 4;
     }
     if (message.data != NULL) {
         memmove(&client, message.data->bytes + message.read_offset, 4);
-        if (message.swap_endianness)
+        if (__builtin_expect(message.swap_endianness, 1))
             EdFileSwapEndianess32(&client);
         message.read_offset += 4;
     }
@@ -1035,13 +1035,18 @@ finish:
     Bolt_End(bolt, 1);
 }
 
-static i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags, WORLDINFO_s *) {
+// Retail only has the IPA-SRA clone of Bolt_HitPlat(BOLT_s *, u8 *, WORLDINFO_s *), which drops the
+// unused world argument.
+static __attribute__((noinline, noclone)) i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags)
+    __asm__("_ZL12Bolt_HitPlatP6BOLT_sPhP11WORLDINFO_s.isra.38");
+
+static i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags) {
     u32 exclude = GetLevelExBlowupFlags();
     Bolt_PlayHitSfx(bolt);
     if ((bolt->hit_flags & 0x800) != 0 && GizmoSys_BoltHitPlat(WORLD->gizmo_sys, WORLD, bolt, hit_flags))
         return 1;
     GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindFromPlatID(WORLD, bolt->hit_platform);
-    if (blowup != NULL && (blowup->draw_flags & 0x8000) != 0) {
+    if (__builtin_expect(blowup != NULL, 1) && __builtin_expect((blowup->draw_flags & 0x8000) != 0, 1)) {
         GameObject_s *owner = bolt->owner;
         if (owner != NULL && (blowup->draw_flags & 0x80000) != 0) {
             if ((exclude & 1) != 0 && owner->apiobj.character_data->game_character->field_0x28 > 0.0f)
@@ -1263,7 +1268,7 @@ void Bolt_Init(void *storage, NetMessage &message) {
     message.Read16(owner_index);
     if (message.data != NULL) {
         memmove(&position, message.data->bytes + message.read_offset, 12);
-        if (message.swap_endianness) {
+        if (__builtin_expect(message.swap_endianness, 1)) {
             EdFileSwapEndianess32(&position.x);
             EdFileSwapEndianess32(&position.y);
             EdFileSwapEndianess32(&position.z);
@@ -1272,7 +1277,7 @@ void Bolt_Init(void *storage, NetMessage &message) {
     }
     if (message.data != NULL) {
         memmove(&orientation, message.data->bytes + message.read_offset, 64);
-        if (message.swap_endianness)
+        if (__builtin_expect(message.swap_endianness, 1))
             for (i32 i = 0; i < 16; ++i)
                 EdFileSwapEndianess32(reinterpret_cast<u8 *>(&orientation) + i * 4);
         message.read_offset += 64;
@@ -1290,7 +1295,7 @@ void Bolt_Init(void *storage, NetMessage &message) {
     addbolt_newsfx = -1;
     if (type == NULL || !NuSpecialExistsFn(type->pad_68))
         return;
-    if (bolt->active != 0) {
+    if (__builtin_expect(bolt->active != 0, 0)) {
         old_points[1] = bolt->position;
         if ((bolt->flags & 0x200) == 0) {
             NUVEC offset = {0.0f, 0.0f, bolt->collision_radius + bolt->collision_radius};
@@ -1315,7 +1320,7 @@ void Bolt_Init(void *storage, NetMessage &message) {
     bolt->scale = type->field_20;
     bolt->hit_debris = static_cast<i16>(static_cast<u32>(type->field_2c) >> 16);
     bolt->index = bolt - Bolt;
-    if (hit_flags == 0)
+    if (__builtin_expect(hit_flags == 0, 0))
         hit_flags = ObjHitObj_Flags(owner);
     bolt->hit_flags = hit_flags | 0x80;
     u32 flags = type->field_60;
@@ -1437,7 +1442,7 @@ void Bolt_Init(void *storage, NetMessage &message) {
                 bool hit = false;
                 if ((bolt->flags & 0x13) != 0 ||
                     (bolt->owner != NULL && ((bolt->owner->field_0xefb & 0x10) != 0 || bolt->owner->use_action == 5))) {
-                    hit = bolt->hit_platform != -1 && Bolt_HitPlat(bolt, NULL, world);
+                    hit = bolt->hit_platform != -1 && Bolt_HitPlat(bolt, NULL);
                     if (!hit)
                         hit = GizmoSys_BoltHit(world->gizmo_sys, world, bolt, points, &bolt->bounds_min,
                                                &bolt->bounds_max, bolt->collision_radius, NULL) != 0;
@@ -1515,7 +1520,7 @@ static __used__ void Bolt_Debris_Default(BOLT_s *bolt, nuvec_s *points, int poin
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     if (((bolt->flags & 0x40000200) == 0 && point == -1) || point == 0)
         AddGameDebris(world->debris_sys, bolt->hit_debris, &points[0]);
-    if (point == -1 || point == 1)
+    if (point == 1 || point == -1)
         AddGameDebris(world->debris_sys, bolt->hit_debris, &points[1]);
     if (((bolt->flags & 0x40000200) == 0 && point == -1) || point == 2)
         AddGameDebris(world->debris_sys, bolt->hit_debris, &points[2]);
@@ -1722,7 +1727,7 @@ void Bolts_Update(WORLDINFO_s *world) {
                                                                       static_cast<u8>(bolt->owner->use_action) == 5))) {
                 if (bolt->hit_platform != -1) {
                     if (Bolt_HitPlatFn == NULL || !Bolt_HitPlatFn(bolt))
-                        Bolt_HitPlat(bolt, processed, world);
+                        Bolt_HitPlat(bolt, processed);
                     handled = 1;
                 } else {
                     handled = Bolt_HitScenery(bolt, points, NULL, world);

@@ -819,7 +819,15 @@ static void SetLayers_BOB(GameObject_s *object) {
     object->field_0x1054 |= 1u << hands_layer[qrand() / 0x8000];
 }
 
-static void SetLayers_MOSEISLEYCITIZEN(GameObject_s *object) {
+// Retail keeps only the IPA-SRA clone, which receives &*layers.
+#if defined(__i386__)
+#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone, regparm(1)))
+#else
+#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
+#endif
+static MOSEISLEY_LAYERS_ATTR void SetLayers_MOSEISLEYCITIZEN(u32 *layers)
+    __asm__("_ZL26SetLayers_MOSEISLEYCITIZENP12GameObject_s.isra.2");
+static void SetLayers_MOSEISLEYCITIZEN(u32 *layers) {
     static const u8 hat_layers[5] = {0, 0, 0, 7, 14};
     static const u8 head_layers[5] = {20, 20, 8, 8, 4};
     static const u8 body_layers[3] = {3, 9, 19};
@@ -828,14 +836,14 @@ static void SetLayers_MOSEISLEYCITIZEN(GameObject_s *object) {
     static const u8 waist_layers[3] = {6, 10, 17};
     static const u8 leg_layers[3] = {5, 11, 18};
 
-    object->field_0x1054 = 0;
-    object->field_0x1054 |= LayerBit(hat_layers[qrand() / 0x3334]);
-    object->field_0x1054 |= LayerBit(head_layers[qrand() / 0x3334]);
-    object->field_0x1054 |= LayerBit(body_layers[qrand() / 0x5556]);
-    object->field_0x1054 |= LayerBit(arm_layers[qrand() / 0x5556]);
-    object->field_0x1054 |= LayerBit(hand_layers[qrand() / 0x5556]);
-    object->field_0x1054 |= LayerBit(waist_layers[qrand() / 0x5556]);
-    object->field_0x1054 |= LayerBit(leg_layers[qrand() / 0x5556]);
+    *layers = 0;
+    *layers |= LayerBit(hat_layers[qrand() / 0x3334]);
+    *layers |= LayerBit(head_layers[qrand() / 0x3334]);
+    *layers |= LayerBit(body_layers[qrand() / 0x5556]);
+    *layers |= LayerBit(arm_layers[qrand() / 0x5556]);
+    *layers |= LayerBit(hand_layers[qrand() / 0x5556]);
+    *layers |= LayerBit(waist_layers[qrand() / 0x5556]);
+    *layers |= LayerBit(leg_layers[qrand() / 0x5556]);
 }
 
 i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
@@ -919,7 +927,7 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
     game_character_data = obj->apiobj.character_data->game_character;
     obj->field_0xf01 = (obj->field_0xf01 & ~8) | (((game_character_data->flags_090 >> 17) & 1) << 3);
     if (obj->id == id_MOSEISLEYCITIZEN) {
-        SetLayers_MOSEISLEYCITIZEN(obj);
+        SetLayers_MOSEISLEYCITIZEN(&obj->field_0x1054);
     } else if (obj->id == id_CANTINAALIEN) {
         static const u8 head_layers[3] = {0, 3, 6};
         static const u8 body_layers[3] = {1, 4, 7};
@@ -1052,7 +1060,7 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     object->apiobj.minviewheight = minviewheight;
     object->field_0xf01 = (object->field_0xf01 & ~8) | (flags_090_bit17 << 3);
     if (object->id == id_MOSEISLEYCITIZEN) {
-        SetLayers_MOSEISLEYCITIZEN(object);
+        SetLayers_MOSEISLEYCITIZEN(&object->field_0x1054);
     } else if (object->id == id_CANTINAALIEN) {
         static const u8 head_layer[3] = {0, 3, 6};
         static const u8 body_layer[3] = {1, 4, 7};

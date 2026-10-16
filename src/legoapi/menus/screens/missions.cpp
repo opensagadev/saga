@@ -222,7 +222,7 @@ void MenuUpdateMissions(MENU_s *menu) {
                     right = 1;
             }
         }
-        if (MenuPacket.active_player[1]) {
+        if (__builtin_expect(MenuPacket.active_player[1] != 0, 1)) {
             const u32 pressed = GamePad[1].buttons_pressed;
             if (pressed & GAMEPAD_MENUSELECT) {
                 if (!MenuPacket.active_player[0]) {

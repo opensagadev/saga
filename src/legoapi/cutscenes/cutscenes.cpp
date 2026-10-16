@@ -162,7 +162,16 @@ static void bgLoadStreamCutScene(bgprocinfo_s *) {
     }
 }
 
-static i32 CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
+// Retail only keeps the split-out body of the IPA-SRA clone (the unused
+// cutscene index dropped), called with world and cut in registers.
+#if defined(__i386__)
+#define CUTSCENE_START_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define CUTSCENE_START_ATTR __attribute__((noinline, noclone))
+#endif
+static CUTSCENE_START_ATTR i32 CutScene_StartBody(WORLDINFO_s *world, CUTINFO *cut)
+    __asm__("_ZL14CutScene_StartP11WORLDINFO_sP7CUTINFOi.isra.24.part.25");
+static i32 CutScene_StartBody(WORLDINFO_s *world, CUTINFO *cut) {
     if (cut->music_handle != -1) {
         g_lastCutsceneTime = 0.0f;
         g_accumCutsceneTime = 0.0f;
@@ -214,15 +223,13 @@ static i32 CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
     CutFrame = 0;
     for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
         CUTINFO *other = world->cutscene_sys->cuts[i];
-        if (other == NULL || other->instance == NULL) {
-            continue;
-        }
         instNUGCUTSCENE_s *other_instance = static_cast<instNUGCUTSCENE_s *>(other->instance);
         if ((other_instance->flags_88 & 2) != 0) {
-            other_instance->rate = 0.0f;
             if (other == cut || (other->flags & 1) == 0) {
-                instNuGCutScenePause(other_instance, 1);
+                other_instance->rate = 0.0f;
+                instNuGCutScenePause(static_cast<instNUGCUTSCENE_s *>(world->cutscene_sys->cuts[i]->instance), 1);
             } else {
+                other_instance->rate = 0.0f;
                 instNuGCutSceneStop(other_instance);
             }
         }
@@ -244,6 +251,10 @@ static i32 CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
         }
     }
     return 1;
+}
+
+static inline i32 CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
+    return CutScene_StartBody(world, cut);
 }
 
 void CutScenes_End() {

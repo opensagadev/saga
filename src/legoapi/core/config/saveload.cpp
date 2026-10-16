@@ -12,6 +12,7 @@
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nucore/nutime.h"
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nucore/nupad.h"
@@ -410,6 +411,196 @@ void FS_MakeDateString(FS_FILEENTRYHDR *entry, char *output) {
 void FS_MakeTimeString(FS_FILEENTRYHDR *entry, char *output) {
     const u8 *date = reinterpret_cast<const u8 *>(entry);
     sprintf(output, " %.2d:%.2d:%.2d", date[3] - 'A', date[2] - 'A', date[1] - 'A');
+}
+
+extern "C" void NuRndrRect2d(f32 x, f32 y, f32 z, f32 width, f32 height, i32 colour, NUMTL *material);
+
+char *SortStrings[4] = {const_cast<char *>("A to Z"), const_cast<char *>("Z to A"), const_cast<char *>("Old to New"),
+                        const_cast<char *>("New To Old")};
+
+// Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
+// the exported function only tests FS_Active.
+static __attribute__((noinline, noclone)) void RenderFileSel3Body(i32 draw_title)
+    __asm__("_Z14RenderFileSel3i.part.38");
+
+static void RenderFileSel3Body(i32 draw_title) {
+    char buffer[256];
+    f32 x = FS_X;
+    f32 y = FS_Y;
+    const f32 width = FS_Width;
+    NuQFntPushPrintMode(2);
+    NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
+    NuQFntSet(system_qfont);
+    NuQFntSetPointSize(system_qfont, 1.0f, 1.0f);
+    const f32 height = NuQFntHeight(system_qfont);
+    const f32 baseline = NuQFntBaseline(system_qfont);
+    f32 full_width = width;
+    if (FS_NumFiles > 14) {
+        full_width = width + 8.0f;
+    }
+
+    f32 text_x;
+    if (draw_title) {
+        const f32 box_width = full_width + 4.0f;
+        const f32 box_height = height * 17.0f / 16.0f + 6.0f;
+        NuRndrRect2d(x, y, 0.0f, box_width, box_height, 0xff808080, NULL);
+        FS_W = box_width;
+        FS_H = box_height;
+        x += 2.0f;
+        text_x = (x + 4.0f) * 16.0f;
+        y += 1.0f;
+        const f32 title_height = height / 16.0f;
+        NuRndrRect2d(x, y, 0.0f, full_width, title_height, 0xff404040, NULL);
+        NuRndrLine3dDbg(x, y, 0.0f, width + x, y, 0.0f, 0xff808080);
+        const f32 title_y = y * 16.0f + baseline;
+        NuQFntSet(system_qfont);
+        NuQFntSetColour(system_qfont, 0x80808080);
+        NuQFntMove(system_qfont, text_x, title_y, 0.0f);
+        NuQFntPrintU(system_qfont, FS_Title);
+        y += title_height + 2.0f;
+    } else {
+        const f32 box_width = full_width + 4.0f;
+        const f32 box_height = height * 16.0f / 16.0f + 4.0f;
+        NuRndrRect2d(x, y, 0.0f, box_width, box_height, 0xff808080, NULL);
+        FS_W = box_width;
+        FS_H = box_height;
+        x += 2.0f;
+        text_x = (x + 4.0f) * 16.0f;
+        y += 1.0f;
+    }
+
+    const f32 line_height = height / 16.0f;
+    const f32 path_y = y * 16.0f + baseline;
+    NuRndrRect2d(x, y, 0.0f, full_width, line_height, 0x20202020, NULL);
+    char *text;
+    if (FS_ShowVolumes) {
+        NuStrCpy(buffer, "Volumes:-");
+        text = buffer;
+    } else {
+        text = FS_Path;
+        const f32 available = full_width - 8.0f;
+        f32 length = NuQFntPrintLenU(system_qfont, text) / 16.0f;
+        if (length > available) {
+            f32 scale = available / length;
+            if (__builtin_expect(scale < 0.5f, 0)) {
+                // Too long even at half width: keep the drive and first
+                // directory, then "\....", then the last directory.
+                char *first = NuStrChr(text, '\\');
+                if (first != NULL) {
+                    char *second = NuStrChr(first + 1, '\\');
+                    if (second == NULL) {
+                        second = first;
+                    }
+                    *second = '\0';
+                    NuStrCpy(buffer, text);
+                    *second = '\\';
+                    NuStrCat(buffer, "\\....");
+                    char *last;
+                    const i32 tail_length = NuStrLen(second);
+                    if (tail_length != 0 && second[tail_length - 1] == '\\') {
+                        second[tail_length - 1] = '\0';
+                        last = NuStrRChr(second, '\\');
+                        second[tail_length - 1] = '\\';
+                    } else {
+                        last = NuStrRChr(second, '\\');
+                    }
+                    if (second < last) {
+                        NuStrCat(buffer, last);
+                        text = buffer;
+                    }
+                }
+                length = NuQFntPrintLenU(system_qfont, text) / 16.0f;
+                if (!(length > available)) {
+                    goto path_done;
+                }
+                scale = available / length;
+            }
+            NuQFntSetPointSize(system_qfont, scale, 1.0f);
+        }
+    path_done:;
+    }
+    NuQFntSet(system_qfont);
+    NuQFntMove(system_qfont, text_x, path_y, 0.0f);
+    NuQFntSetColour(system_qfont, 0x80408080);
+    NuQFntPrintU(system_qfont, text);
+    NuQFntSetPointSize(system_qfont, 1.0f, 1.0f);
+
+    y += line_height + 2.0f;
+    const f32 list_height = height * 14.0f;
+    const f32 list_box_height = list_height / 16.0f;
+    NuRndrRect2d(x, y, 0.0f, width, list_box_height, 0x20202020, NULL);
+    if (FS_NumFiles > 14) {
+        NuRndrRect2d(width + x, y, 0.0f, 8.0f, list_box_height, 0xff646464, NULL);
+        f32 thumb = list_box_height / FS_NumFiles * 14.0f;
+        if (thumb < 5.0f) {
+            thumb = 5.0f;
+        }
+        NuRndrRect2d(width + x, (list_box_height - thumb) * FS_CurrentPosFileNum / (FS_NumFiles - 14) + y, 0.0f, 8.0f,
+                     thumb, 0xffc8c8c8, NULL);
+    }
+
+    f32 line_y = path_y + 32.0f;
+    char *entry = FS_CurrentPos;
+    for (i32 line = 0; line < 14; ++line) {
+        if (entry >= FS_FileListEnd) {
+            break;
+        }
+        line_y += height;
+        if (entry == FS_CurrentCursorPos) {
+            NuRndrRect2d(x, (line_y - baseline) / 16.0f, 0.0f, width, line_height, 0xff202060, NULL);
+        }
+        NuQFntSet(system_qfont);
+        NuQFntMove(system_qfont, text_x, line_y, 0.0f);
+        if (entry[0] == 'V') {
+            NuQFntSetColour(system_qfont, 0x80204080);
+        } else if (entry[0] == 'D') {
+            NuQFntSetColour(system_qfont, 0x80804020);
+        } else {
+            NuQFntSetColour(system_qfont, 0x80408080);
+        }
+        NuQFntSetPointSize(system_qfont, 1.0f, 1.0f);
+        char *name = entry + 7;
+        NuQFntPrintU(system_qfont, name);
+        if (entry[6] != '#') {
+            NuQFntSetPointSize(system_qfont, 0.8f, 1.0f);
+            FS_MakeTimeString(reinterpret_cast<FS_FILEENTRYHDR *>(entry), buffer);
+            f32 length = NuQFntPrintLenU(system_qfont, buffer);
+            NuQFntSetColour(system_qfont, 0x80208080);
+            const f32 time_x = (width + x) * 16.0f - length;
+            NuQFntMove(system_qfont, time_x, line_y, 0.0f);
+            NuQFntPrintU(system_qfont, buffer);
+            FS_MakeDateString(reinterpret_cast<FS_FILEENTRYHDR *>(entry), buffer);
+            length = NuQFntPrintLenU(system_qfont, buffer);
+            NuQFntSetColour(system_qfont, 0x80808020);
+            NuQFntMove(system_qfont, time_x - length, line_y, 0.0f);
+            NuQFntPrintU(system_qfont, buffer);
+        }
+        entry = name + NuStrLen(name) + 1;
+    }
+
+    const f32 footer_y = y * 16.0f + baseline + list_height;
+    NuQFntSet(system_qfont);
+    NuQFntSetPointSize(system_qfont, 1.0f, 1.0f);
+    NuQFntSetColour(system_qfont, 0x80808080);
+    NuQFntMove(system_qfont, x * 16.0f, footer_y, 0.0f);
+    NuQFntPrintU(system_qfont, FS_Filter);
+    NuQFntSetColour(system_qfont, 0x80000040);
+    const f32 sort_length = NuQFntPrintLenU(system_qfont, SortStrings[FS_SortMode]);
+    NuQFntMove(system_qfont, (full_width + x) * 16.0f - sort_length, footer_y, 0.0f);
+    NuQFntPrintU(system_qfont, SortStrings[FS_SortMode]);
+    NuQFntPopCoordinateSystem();
+    NuQFntPopPrintMode();
+}
+
+void RenderFileSel3(i32 draw_title) {
+    if (FS_Active == 0) {
+        return;
+    }
+    RenderFileSel3Body(draw_title);
+}
+
+void RenderFileSel() {
+    RenderFileSel3(1);
 }
 
 void FS_MoveCursorDown(i32 steps) {

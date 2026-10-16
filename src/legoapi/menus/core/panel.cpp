@@ -277,16 +277,19 @@ char *GameObj_GetName(i32 model, GameObject_s *object, char *buffer) {
     return TTab[CDataList[model].name_id];
 }
 
-static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, float alpha, i32 alignment, float, i32) {
-    if (object == NULL || WORLD == NULL) {
-        return;
-    }
+// Retail only has the constant-propagated clone of
+// DrawHitPoints(GameObject_s *, float, float, float, float, i32, float, i32); every caller passes 0.0f and 0
+// for the two trailing (unused) arguments, so the clone drops them.
+static __attribute__((noinline, noclone, hot, section(".text"))) void DrawHitPoints(GameObject_s *object, float x, float y, float scale,
+                                                             float alpha, i32 alignment)
+    __asm__("_ZL13DrawHitPointsP12GameObject_sffffifi.constprop.39");
 
+static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, float alpha, i32 alignment) {
+    // Retail has no NULL guards here; both callers pass a live object.
     i32 two_rows = 0;
-    if (SuperStory != 0 && WORLD->current_level == VADERC_LDATA && object->hitpoints == 10) {
+    if (__builtin_expect(SuperStory != 0, 0) && WORLD->current_level == VADERC_LDATA && object->hitpoints == 10) {
         two_rows = 1;
-    }
-    if ((object->field_0xefb & 8) != 0) {
+    } else if (__builtin_expect((object->field_0xefb & 8) != 0, 0)) {
         two_rows = drawbosshitpoints_2rows != 0;
         drawbosshitpoints_2rows = 0;
     }
@@ -305,14 +308,13 @@ static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, f
     } else {
         hitpoints = object->hitpoints;
         current_hp = static_cast<i8>(object->current_hp);
+        if ((PLAYERHITPOINTS_2HEARTSIN1 != 0 && object->apiobj.player_controlled) ||
+            WORLD->current_level == BOUNTYHUNTERPURSUITE_LDATA || WORLD->current_level == VADERC_LDATA) {
+            hitpoints = hitpoints / 2 + (hitpoints & 1);
+            current_hp = current_hp / 2 + (current_hp & 1);
+        }
     }
-
-    if ((PLAYERHITPOINTS_2HEARTSIN1 != 0 && object->apiobj.player_controlled) ||
-        WORLD->current_level == BOUNTYHUNTERPURSUITE_LDATA || WORLD->current_level == VADERC_LDATA) {
-        hitpoints = hitpoints / 2 + (hitpoints & 1);
-        current_hp = current_hp / 2 + (current_hp & 1);
-    }
-    if (hitpoints <= 1)
+    if (hitpoints <= 1 && two_rows == 1)
         two_rows = 0;
 
     i32 transitioning = 0;
@@ -329,45 +331,50 @@ static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, f
     if (widescreen) {
         spacing *= 0.85f;
     }
-    if (alignment == 8) {
-        spacing = -spacing;
-    } else if (alignment == 0) {
+    if (alignment == 0) {
         const i32 row_width = two_rows != 0 ? hitpoints / 2 : hitpoints;
         x -= static_cast<float>(row_width - 1) * spacing * 0.5f;
+    } else if (alignment == 8) {
+        spacing = -spacing;
     }
 
     float draw_x = x;
-    float draw_y = y * PANEL3DMULY;
-    const i32 split = hitpoints / 2;
+    NUVEC object_scale;
+    object_scale.z = scale;
+    NUVEC translation;
+    translation.y = y * PANEL3DMULY;
     for (i32 i = 0; i < hitpoints; ++i) {
-        if (two_rows == 1 && i >= split) {
+        if (two_rows == 1 && i >= hitpoints / 2) {
             two_rows = 2;
-            draw_y -= scale * 0.14f;
+            translation.y -= scale * 0.14f;
             draw_x = x;
         }
 
+        translation.z = 1.001f;
+        object_scale.y = scale;
+        object_scale.x = scale;
+        const i32 half_hp = (i + 1) * 2;
         float draw_alpha = 0.5f;
-        NUVEC object_scale = {scale, scale, scale};
-        float z = 1.001f;
         if (i < current_hp) {
             draw_alpha = 1.0f;
             if (PLAYERHITPOINTS_2HEARTSIN1 != 0 && object->apiobj.player_controlled && i == current_hp - 1 &&
-                static_cast<i8>(object->current_hp) < (i + 1) * 2) {
+                static_cast<i8>(object->current_hp) < half_hp) {
                 draw_alpha = 0.75f;
             }
-
-            if (transitioning == 0 && current_hp > 0 && i == current_hp - 1) {
+        }
+        if (transitioning == 0) {
+            if (current_hp > 0 && i == current_hp - 1) {
                 const float pulse = i == 0 && current_hp == 1 ? 0.5f : 0.2f;
                 const float pulse_scale = pulse - (NuFmod(GlobalTimer.time_elapsed, 0.5f) * 2.0f) * pulse + 1.0f;
+                translation.z = 0.999f;
                 object_scale.x *= pulse_scale;
                 object_scale.y *= pulse_scale;
-                z = 0.999f;
             }
         }
 
         NUMTX matrix;
         NuMtxSetScale(&matrix, &object_scale);
-        NUVEC translation = {draw_x * PANEL3DMULX, draw_y, z};
+        translation.x = draw_x * PANEL3DMULX;
         NuMtxTranslate(&matrix, &translation);
         DrawPanel3DObjectMtx(&WORLD->lev_objs[heart_object].special, &matrix, draw_alpha * alpha);
         draw_x += spacing;
@@ -396,7 +403,7 @@ void UpdateStats() {
     if ((WORLD->current_level->flags & LEVEL_GAMEPLAY) == 0)
         return;
     f32 stats_target = 0.0f;
-    if (FadeSys.fade == 0.0f && CUTSTOPGAME == 0 && newgamecam == 0) {
+    if (__builtin_expect(FadeSys.fade == 0.0f && CUTSTOPGAME == 0 && newgamecam == 0, 0)) {
         const bool hub_hidden = HUB_ADATA != NULL && WORLD->area == HUB_ADATA && GameCam->mode == 4;
         if (!hub_hidden && GetMenuID() != PANEL_MENU_EPISODE_I && GetMenuID() != PANEL_MENU_EPISODE_II &&
             GetMenuID() != PANEL_MENU_EPISODE_III && GetMenuID() != PANEL_MENU_EPISODE_IV)
@@ -1057,7 +1064,7 @@ void DrawPanel() {
                     }
                     if (object->apiobj.player_controlled) {
                         DrawHitPoints(object, -PANEL_HITPOINTSX, raised_hearts ? status_y : status_y + PANEL_HEARTY,
-                                      0.195f, alpha, 2, 0.0f, 0);
+                                      0.195f, alpha, 2);
                     } else if (!paused && !CUTSTOPGAME) {
                         i32 dropin_alpha = static_cast<i32>(DROPINALPHA * 128.0f);
                         if (dropin_alpha > 0) {
@@ -1190,7 +1197,7 @@ void DrawPanel() {
                 if (FadeSys.fade == 0.0f) {
                     f32 boss_alpha = statstime;
                     DrawCharIcon(boss->id, 0.0f, BOSSICONY, 0.0f, 0.16f, 0xa7, boss_alpha, boss_alpha, 1, NULL);
-                    DrawHitPoints(boss, 0.0f, 0.47f, 0.2f, boss_alpha, 0, 0.0f, 0);
+                    DrawHitPoints(boss, 0.0f, 0.47f, 0.2f, boss_alpha, 0);
                     hide_target = 1;
                 } else
                     drawbosshitpoints_2rows = 0;

@@ -44,42 +44,47 @@ void OccluderSet::Clear() {
     queries_prepared = false;
 }
 
+// The material setup is split out of Init by GCC (retail keeps it as Init.part.100).
+static __attribute__((noinline, noclone)) void OccluderSetInitMaterials() __asm__("_ZN11OccluderSet4InitEjP9variptr_uS0_.part.100");
+static void OccluderSetInitMaterials() {
+    OccluderSet::ms_pZOnlyMtl3D = NuMtlCreate3D(1);
+    OccluderSet::ms_pZOnlyMtl2D = NuMtlCreate(1);
+    OccluderSet::ms_pAlphaMtl2D = NuMtlCreate(1);
+    NUSHADERMTLDESC desc2d;
+    memset(&desc2d, 0, sizeof(desc2d));
+    desc2d.flags = 0x1000;
+    desc2d.vtx_desc.has_position = 1;
+    desc2d.vtx_desc.has_no_transform = 1;
+    NuMtlSetShaderDescPS(OccluderSet::ms_pZOnlyMtl2D, &desc2d);
+    OccluderSet::ms_pZOnlyMtl2D->attribs.alpha_mode = 13;
+    OccluderSet::ms_pZOnlyMtl2D->attribs.cull_mode = 2;
+    OccluderSet::ms_pZOnlyMtl2D->attribs.z_mode = 0;
+    OccluderSet::ms_pZOnlyMtl2D->attribs.unknown_2_8 = 0;
+    NuMtlUpdate(OccluderSet::ms_pZOnlyMtl2D);
+    NUSHADERMTLDESC desc3d;
+    memset(&desc3d, 0, sizeof(desc3d));
+    desc3d.flags = 0x1000;
+    desc3d.vtx_desc.has_position = 1;
+    NuMtlSetShaderDescPS(OccluderSet::ms_pZOnlyMtl3D, &desc3d);
+    OccluderSet::ms_pZOnlyMtl3D->attribs.alpha_mode = 13;
+    OccluderSet::ms_pZOnlyMtl3D->attribs.cull_mode = 2;
+    OccluderSet::ms_pZOnlyMtl3D->attribs.z_mode = 0;
+    OccluderSet::ms_pZOnlyMtl3D->attribs.unknown_2_8 = 0;
+    NuMtlUpdate(OccluderSet::ms_pZOnlyMtl3D);
+    OccluderSet::ms_pAlphaMtl2D->attribs.alpha_mode = 1;
+    OccluderSet::ms_pAlphaMtl2D->attribs.cull_mode = 2;
+    OccluderSet::ms_pAlphaMtl2D->attribs.z_mode = 1;
+    NuMtlUpdate(OccluderSet::ms_pAlphaMtl2D);
+}
+
 void OccluderSet::Init(u32 max_occluders, VARIPTR *buffer, VARIPTR buffer_end) {
     capacity = max_occluders;
     count = 0;
     occluders = reinterpret_cast<OccluderRecord *>((buffer->addr + 15) & ~(usize)15);
     indices = reinterpret_cast<u32 *>(occluders + max_occluders);
     buffer->addr = reinterpret_cast<usize>(indices + max_occluders);
-    if (ms_pZOnlyMtl3D == NULL) {
-        ms_pZOnlyMtl3D = NuMtlCreate3D(1);
-        ms_pZOnlyMtl2D = NuMtlCreate(1);
-        ms_pAlphaMtl2D = NuMtlCreate(1);
-        NUSHADERMTLDESC desc2d;
-        memset(&desc2d, 0, sizeof(desc2d));
-        desc2d.flags = 0x1000;
-        desc2d.vtx_desc.has_position = 1;
-        desc2d.vtx_desc.has_no_transform = 1;
-        NuMtlSetShaderDescPS(ms_pZOnlyMtl2D, &desc2d);
-        ms_pZOnlyMtl2D->attribs.alpha_mode = 13;
-        ms_pZOnlyMtl2D->attribs.cull_mode = 2;
-        ms_pZOnlyMtl2D->attribs.z_mode = 0;
-        ms_pZOnlyMtl2D->attribs.unknown_2_8 = 0;
-        NuMtlUpdate(ms_pZOnlyMtl2D);
-        NUSHADERMTLDESC desc3d;
-        memset(&desc3d, 0, sizeof(desc3d));
-        desc3d.flags = 0x1000;
-        desc3d.vtx_desc.has_position = 1;
-        NuMtlSetShaderDescPS(ms_pZOnlyMtl3D, &desc3d);
-        ms_pZOnlyMtl3D->attribs.alpha_mode = 13;
-        ms_pZOnlyMtl3D->attribs.cull_mode = 2;
-        ms_pZOnlyMtl3D->attribs.z_mode = 0;
-        ms_pZOnlyMtl3D->attribs.unknown_2_8 = 0;
-        NuMtlUpdate(ms_pZOnlyMtl3D);
-        ms_pAlphaMtl2D->attribs.alpha_mode = 1;
-        ms_pAlphaMtl2D->attribs.cull_mode = 2;
-        ms_pAlphaMtl2D->attribs.z_mode = 1;
-        NuMtlUpdate(ms_pAlphaMtl2D);
-    }
+    if (ms_pZOnlyMtl3D == NULL)
+        OccluderSetInitMaterials();
 }
 
 bool OccluderSet::IsOccludedOBB(nuvec_s const *minimum, nuvec_s const *maximum, numtx_s const *matrix) {

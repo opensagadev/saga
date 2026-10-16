@@ -330,7 +330,7 @@ locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *item, u32) {
         EDLOCATORSET_s *set = aieditor->current_locator_set;
         EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
         while (locator != nullptr) {
-            if (NuStrNICmp(aieditor->pending_locator_name, locator->name, -1) == 0) {
+            if (__builtin_expect(NuStrNICmp(aieditor->pending_locator_name, locator->name, -1) == 0, 0)) {
                 EDLOCATOR_s *before = nullptr;
                 for (i32 index = 0; index < 64 && set->locators[index] != nullptr; ++index) {
                     if (NuStrICmp(set->locators[index]->name, locator->name) > 0) {
@@ -404,21 +404,39 @@ static LOCATOR_SET_BODY_ATTR unsigned int
 AddLocatorToSetBody(EDLOCATORSET_s *set, EDLOCATOR_s *locator,
                     EDLOCATOR_s *before) __asm__("_ZL15AddLocatorToSetP14EDLOCATORSET_sP11EDLOCATOR_sS2_.part.5");
 
-static LOCATOR_SET_BODY_ATTR unsigned int AddLocatorToSetBody(EDLOCATORSET_s *set, EDLOCATOR_s *locator,
-                                                              EDLOCATOR_s *before) {
+static inline i32 LocatorSetContains(EDLOCATORSET_s *set, EDLOCATOR_s *locator) {
     for (i32 index = 0; index < 64 && set->locators[index] != nullptr; ++index) {
         if (set->locators[index] == locator) {
-            for (i32 move = index; move < 63; ++move) {
-                set->locators[move] = set->locators[move + 1];
-            }
-            set->locators[63] = nullptr;
-            break;
+            return 1;
         }
+    }
+    return 0;
+}
+
+static inline void LocatorSetRemove(EDLOCATORSET_s *set, EDLOCATOR_s *locator) {
+    for (i32 index = 0; index < 64 && set->locators[index] != nullptr; ++index) {
+        if (set->locators[index] == locator) {
+            for (; index < 64; ++index) {
+                if (index < 63) {
+                    set->locators[index] = set->locators[index + 1];
+                } else {
+                    set->locators[index] = nullptr;
+                }
+            }
+            return;
+        }
+    }
+}
+
+static LOCATOR_SET_BODY_ATTR unsigned int AddLocatorToSetBody(EDLOCATORSET_s *set, EDLOCATOR_s *locator,
+                                                              EDLOCATOR_s *before) {
+    if (LocatorSetContains(set, locator)) {
+        LocatorSetRemove(set, locator);
     }
     if (before != nullptr) {
         for (i32 index = 0; index < 64; ++index) {
             if (set->locators[index] == before) {
-                for (i32 move = 62; move > index; --move) {
+                for (i32 move = 62; move >= index; --move) {
                     set->locators[move + 1] = set->locators[move];
                 }
                 set->locators[index + 1] = locator;

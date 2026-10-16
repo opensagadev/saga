@@ -2240,13 +2240,24 @@ f32 timetogetlos;
 void GameCreatureOpponentSelection(AISYS_s *, i32, APIOBJECT **, i32, APIOBJECT **, i32, APIOBJECT **, u64, f32);
 void GizTurrets_OpponentSelection(GIZTURRETSYS_s *, i32, APIOBJECT **, i32, APIOBJECT **);
 
-static void TestWalkAround(APIOBJECT *object, APIOBJECT *other, NUVEC *difference, f32 radius) {
+#if defined(__i386__)
+#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
+#else
+#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
+#endif
+
+// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
+static GAMEOBJECTS_CLONE_ATTR2_SSE void TestWalkAround(APIOBJECT *object, f32 *other_x, f32 *other_z,
+                                                       NUVEC *difference, f32 radius)
+    __asm__("_ZL14TestWalkAroundP11APIOBJECT_sS0_P7nuvec_sf.isra.10");
+
+static void TestWalkAround(APIOBJECT *object, f32 *other_x, f32 *other_z, NUVEC *difference, f32 radius) {
     if (difference->x * difference->x + difference->z * difference->z < radius * radius) {
-        difference->x = object->position.x - other->position.x;
-        difference->z = object->position.z - other->position.z;
+        difference->x = object->position.x - *other_x;
+        difference->z = object->position.z - *other_z;
         i32 angle = NuAtan2D(difference->x, difference->z);
-        difference->x = object->ai->movement_destination.x - other->position.x;
-        difference->z = object->ai->movement_destination.z - other->position.z;
+        difference->x = object->ai->movement_destination.x - *other_x;
+        difference->z = object->ai->movement_destination.z - *other_z;
         i32 turn = NuAngSub(NuAtan2D(difference->x, difference->z), angle);
         i32 limit = static_cast<i32>((ai_moveradius / radius) * 10430.378f);
         if (turn > limit)
@@ -2258,9 +2269,9 @@ static void TestWalkAround(APIOBJECT *object, APIOBJECT *other, NUVEC *differenc
         difference->y = 0.0f;
         difference->z = radius;
         NuVecRotateY(difference, difference, angle);
-        object->ai->movement_position.x = difference->x + other->position.x;
+        object->ai->movement_position.x = difference->x + *other_x;
         object->ai->movement_position.y = object->ai->movement_destination.y;
-        object->ai->movement_position.z = difference->z + other->position.z;
+        object->ai->movement_position.z = difference->z + *other_z;
     }
 }
 
@@ -2907,16 +2918,16 @@ void GameAIProcess() {
                             first->resolved_collision_priority = second->collision_priority;
                             difference.x = -difference.x;
                             difference.z = -difference.z;
-                            TestWalkAround(second, first, &difference, radius);
+                            TestWalkAround(second, &first->position.x, &first->position.z, &difference, radius);
                         } else if (second->collision_priority > first->resolved_collision_priority) {
                             first->resolved_collision_priority = second->collision_priority;
-                            TestWalkAround(first, second, &difference, radius);
+                            TestWalkAround(first, &second->position.x, &second->position.z, &difference, radius);
                         }
                     } else if (first->collision_priority > second->resolved_collision_priority) {
                         second->resolved_collision_priority = first->collision_priority;
                         difference.x = -difference.x;
                         difference.z = -difference.z;
-                        TestWalkAround(second, first, &difference, radius);
+                        TestWalkAround(second, &first->position.x, &first->position.z, &difference, radius);
                     }
                     AIPACKET *first_ai = first->ai;
                     AIPACKET *second_ai = second->ai;

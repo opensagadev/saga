@@ -1792,7 +1792,9 @@ static void edpartInstanceOrientMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     edpart_instorient_menu->y = menu->y + 40;
 }
 
-static void edpartPartIndexMenu(eduimenu_s *menu, eduiitem_s *, u32) {
+// Retail only keeps the IPA-SRA clone, which takes just the parent menu.
+static __attribute__((noinline, noclone)) void edpartPartIndexMenu(eduimenu_s *menu) __asm__("_ZL19edpartPartIndexMenuP10eduimenu_sP10eduiitem_sj.isra.12");
+static void edpartPartIndexMenu(eduimenu_s *menu) {
     edpart_partindex_menu = eduiMenuCreate(70, 70, 250, 250, ed_fnt, edpartCancelPartIndexMenu, "Part Type");
     if (edpart_partindex_menu == NULL || edpart_nearest_type == NULL)
         return;
@@ -1818,7 +1820,7 @@ static void edpartPartIndexMenu(eduimenu_s *menu, eduiitem_s *, u32) {
 
 static void edpartLevelPartIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 value) {
     edpart_part_list = 1;
-    edpartPartIndexMenu(menu, item, value);
+    edpartPartIndexMenu(menu);
 }
 
 static void edpartThingsInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
@@ -2007,7 +2009,7 @@ static void edpartFileSaveEffectsLevel(eduimenu_s *parent, eduiitem_s *, u32) {
 
 static void edpartGeneralPartIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 value) {
     edpart_part_list = 0;
-    edpartPartIndexMenu(menu, item, value);
+    edpartPartIndexMenu(menu);
 }
 
 static void edpartInstanceSettingsMenu(eduimenu_s *menu, eduiitem_s *, u32) {
@@ -2032,39 +2034,34 @@ static void edpartInstanceSettingsMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     }
 }
 
-static void edpartDebrisIndexMenu(eduimenu_s *menu, eduiitem_s *, u32) {
+// Retail only keeps the IPA-SRA clone, which takes just the parent menu.
+static __attribute__((noinline, noclone)) void edpartDebrisIndexMenu(eduimenu_s *menu) __asm__("_ZL21edpartDebrisIndexMenuP10eduimenu_sP10eduiitem_sj.isra.13");
+static void edpartDebrisIndexMenu(eduimenu_s *menu) {
     edpart_debrisindex_menu = eduiMenuCreate(70, 70, 250, 250, ed_fnt, edpartCancelDebrisIndexMenu, "Debris Type");
     if (edpart_debrisindex_menu == NULL || edpart_nearest_type == NULL)
         return;
     i32 selected = -1;
-    switch (edpart_set_debris) {
-        case 0:
-            selected = edpart_nearest_type->trail_effects[0];
-            break;
-        case 1:
-            selected = edpart_nearest_type->trail_effects[1];
-            break;
-        case 2:
-            selected = edpart_nearest_type->attached_effect;
-            break;
-        case 3:
-            selected = edpart_nearest_type->impact_effect;
-            break;
-        case 4:
-            selected = edpart_nearest_type->kill_effect;
-            break;
-    }
-    bool found_selected = false;
+    if (edpart_set_debris == 0)
+        selected = edpart_nearest_type->trail_effects[0];
+    else if (edpart_set_debris == 1)
+        selected = edpart_nearest_type->trail_effects[1];
+    else if (edpart_set_debris == 2)
+        selected = edpart_nearest_type->attached_effect;
+    else if (edpart_set_debris == 3)
+        selected = edpart_nearest_type->impact_effect;
+    else if (edpart_set_debris == 4)
+        selected = edpart_nearest_type->kill_effect;
+    i32 found_selected = 0;
     for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
         debinftype *type = debtab[index];
-        if (type == NULL || type->category != edpart_particle_list)
+        if (type == NULL || static_cast<i8>(type->category) != edpart_particle_list)
             continue;
         eduiitem_s *item =
             eduiItemCheckCreate(index, edblack, index == selected, 1, edpartChangeDebrisIndex, type->name);
         eduiMenuAddItem(edpart_debrisindex_menu, item);
         if (index == selected) {
             edpart_debrisindex_menu->selected = edui_last_item;
-            found_selected = true;
+            found_selected = 1;
         }
     }
     eduiMenuSortItemsByTxt(edpart_debrisindex_menu);
@@ -2079,7 +2076,7 @@ static void edpartDebrisIndexMenu(eduimenu_s *menu, eduiitem_s *, u32) {
 
 static void edpartLevelDebrisIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 value) {
     edpart_particle_list = 1;
-    edpartDebrisIndexMenu(menu, item, value);
+    edpartDebrisIndexMenu(menu);
 }
 
 static void edpartCancelDebrisIndexMenu(eduimenu_s *, eduimenu_s *) {
@@ -2154,7 +2151,7 @@ static void edpartFileSaveEffectsGeneral(eduimenu_s *parent, eduiitem_s *, u32) 
 
 static void edpartGeneralDebrisIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 value) {
     edpart_particle_list = 0;
-    edpartDebrisIndexMenu(menu, item, value);
+    edpartDebrisIndexMenu(menu);
 }
 
 static void edpartCancelChangeGenRateMenu(eduimenu_s *, eduimenu_s *) {

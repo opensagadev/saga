@@ -299,7 +299,7 @@ enum HUB_AUDIO_EVENT {
 };
 
 enum {
-    HUB_VEHICLE_ID_CAPACITY = 346,
+    HUB_VEHICLE_ID_CAPACITY = 344,
 };
 
 struct HUBAREAINFO_s {
@@ -1880,18 +1880,15 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
     }
 
     f32 build_x = 0.0f;
-    if ((flags & 0x4000) != 0) {
+    if ((flags & 0x4000) != 0)
         build_x = 0.20100002f;
-        if ((flags & 0x800) == 0) {
-            const i32 gold_count = 1 + (save->true_hero_complete[0] || save->true_hero_complete[1]);
-            Hub_DrawImportantBrick(211, -0.20100002f, HUB_EPISODETITLEY, phase, gold_count, 2);
-        } else {
-            Hub_DrawImportantBrick(251, build_x, HUB_EPISODESUBTITLEY - 0.05f, phase, -1, -1);
-        }
-    } else if ((flags & 0x800) == 0) {
-        Hub_DrawImportantBrick(211, -0.0f, HUB_EPISODESUBTITLEY + 0.05f, phase, -1, -1);
-    } else {
+    if ((flags & 0x800) != 0) {
         Hub_DrawImportantBrick(251, build_x, HUB_EPISODESUBTITLEY - 0.05f, phase, -1, -1);
+    } else if ((flags & 0x4000) != 0) {
+        const i32 gold_count = 1 + (save->true_hero_complete[0] || save->true_hero_complete[1]);
+        Hub_DrawImportantBrick(211, -0.20100002f, HUB_EPISODETITLEY, phase, gold_count, 2);
+    } else {
+        Hub_DrawImportantBrick(211, -0.0f, HUB_EPISODESUBTITLEY + 0.05f, phase, -1, -1);
     }
     if ((area->flags & 0x4000) == 0) {
         return;
@@ -2292,7 +2289,7 @@ void Hub_DrawFreePlaySelect() {
                     DrawCharIcon(model, x, y, 0.0f, grow * size, 0xa6, opacity, opacity, 1, NULL);
                 }
                 if (model != -1 && progress > 0.0f) {
-                    char name[16];
+                    char name[64];
                     char *text = GameObj_GetName(model, NULL, name);
                     SmartTextEx(text, base_x, 0.475f, 1.0f, 0.45f, 0.45f, 0.45f, 1, 255, 191, 0, 1.25f, 2, NULL, 0,
                                 static_cast<i32>(opacity * 128.0f * progress));
@@ -3120,34 +3117,23 @@ static __used__ void Hub_UpdateSelectMode() {
             const u32 up_mask = GAMEPAD_DUP;
             const u32 down_mask = GAMEPAD_DDOWN;
             i32 confirm = 0, cancel = 0, up = 0, down = 0;
-            if (MenuPacket.active_player[0]) {
-                const u32 pressed = GamePad[0].buttons_pressed;
+            for (i32 i = 0; i < 2; ++i) {
+                if (!MenuPacket.active_player[i])
+                    continue;
+                const u32 pressed = GamePad[i].buttons_pressed;
                 if ((pressed & select_mask) != 0) {
                     confirm = true;
-                } else if ((pressed & cancel_mask) != 0) {
-                    cancel = true;
-                } else {
-                    const u32 directions = pressed | GamePad[0].left_directions;
-                    if ((directions & up_mask) != 0) {
-                        up = true;
-                    } else if ((directions & down_mask) != 0) {
-                        down = true;
-                    }
+                    break;
                 }
-            }
-            if (!confirm && !cancel && MenuPacket.active_player[1]) {
-                const u32 pressed = GamePad[1].buttons_pressed;
-                if ((pressed & select_mask) != 0) {
-                    confirm = true;
-                } else if ((pressed & cancel_mask) != 0) {
+                if ((pressed & cancel_mask) != 0) {
                     cancel = true;
-                } else {
-                    const u32 directions = pressed | GamePad[1].left_directions;
-                    if ((directions & up_mask) != 0) {
-                        up = true;
-                    } else if ((directions & down_mask) != 0) {
-                        down = true;
-                    }
+                    break;
+                }
+                const u32 directions = pressed | GamePad[i].left_directions;
+                if ((directions & up_mask) != 0) {
+                    up = true;
+                } else if ((directions & down_mask) != 0) {
+                    down = true;
                 }
             }
             if (menu->input_activity != 0) {
@@ -3546,7 +3532,7 @@ void MenuUpdateEpisodes(MENU_s *) {
                 else if (GamePad[0].pad->digital_buttons_pressed & GAMEPAD_MENUCANCEL)
                     cancel = 1;
             }
-            if (menu->confirm_pressed || confirm) {
+            if (confirm || menu->confirm_pressed) {
                 const i16 clip = clips[i_clip[i_episodes]];
                 GameAudio_PlaySfx(0x30, NULL, 0, 0);
                 CutScenePlayer_Start(clip, hub_new_level);
@@ -3613,19 +3599,14 @@ extern i16 tSELECT, tBACK, tSELECTING;
 static void Hub_DrawSelectModeMenu(i32 selected, f32 alpha);
 
 void MenuDrawSelectMode(MENU_s *) {
-    if (MenuStopDraw)
+    if (__builtin_expect(MenuStopDraw, 1))
         return;
-    switch (selectmodemode) {
-        case 1:
-        case 2:
-        case 3:
-            if (FadeSys.fade > 0.0f)
-                return;
-            break;
-        case 4:
-            if (pFadeInfo->fade > 0.0f)
-                return;
-            break;
+    if (__builtin_expect(selectmodemode >= 1 && selectmodemode <= 3, 0)) {
+        if (FadeSys.fade > 0.0f)
+            return;
+    } else if (selectmodemode == 4) {
+        if (pFadeInfo->fade > 0.0f)
+            return;
     }
     f32 alpha = 1.0f;
     switch (selectmodemode) {

@@ -219,7 +219,7 @@ extern void oneAtOnce_SetAttackersPerRow(i32);
 
 static i32 Action_EngageOpponent(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
-static i32 PartyMemberInWay(GameObject_s *, GameObject_s *);
+static inline i32 PartyMemberInWay(GameObject_s *, GameObject_s *);
 
 AILOCATOR *LocalGetRandomLocator(AILOCATOR **, i32, f32, NUVEC *, f32, i32, f32, f32);
 
@@ -679,7 +679,7 @@ __used__ static i32 Action_SetStateArea(AISYS *sys, AISCRIPTPROCESS *processor, 
                                         i32 param_4, i32 param_5, f32 param_6);
 __used__ static i32 Action_TriggerBlowUp(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                          i32 param_4, i32 param_5, f32 param_6);
-static i32 PartyMemberInWay(GameObject_s *object, GameObject_s *opponent);
+static inline i32 PartyMemberInWay(GameObject_s *object, GameObject_s *opponent);
 __used__ static i32 Action_SnapToPosition(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_4, i32 param_5, f32 param_6);
 __used__ static i32 Action_SetLocator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
@@ -5530,43 +5530,56 @@ __used__ static i32 Action_EnableSock(AISYS *sys, AISCRIPTPROCESS *processor, AI
     return 1;
 }
 
+#if defined(__i386__)
+#define GAMEAISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
+#else
+#define GAMEAISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone))
+#endif
+
+// Retail splits the first-time test off as the head; the rest is this partial clone.
+static GAMEAISCRIPT_CLONE_ATTR2 void Action_AddPartBody(AISCRIPTPROCESS *processor, char **params, i32 num_params)
+    __asm__("_ZL14Action_AddPartP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif.part.58");
+
 __used__ static i32 Action_AddPart(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *, char **params, i32 num_params,
                                    i32 first_time, f32) {
-    if (first_time) {
-        nuhspecial_s special = {};
-        NUVEC position;
-        for (i32 i = 0; i < num_params; i++) {
-            char *value = NuStrIStr(params[i], "name");
-            if (value != NULL)
-                NuSpecialFind(WORLD->current_gscn, &special, value + 5, 1);
-            else if ((value = NuStrIStr(params[i], "x")) != NULL)
-                position.x = AIParamToFloat(processor, value + 2);
-            else if ((value = NuStrIStr(params[i], "y")) != NULL)
-                position.y = AIParamToFloat(processor, value + 2);
-            else if ((value = NuStrIStr(params[i], "z")) != NULL)
-                position.z = AIParamToFloat(processor, value + 2);
-        }
-        if (NuSpecialExistsFn(&special)) {
-            NUVEC velocity;
-            NUMTX matrix;
-            MakeThrowVector(&velocity, &position, &player->apiobj.collision_position, &player->apiobj.velocity,
-                            ForceThrowSpeed, ForceThrowGravity);
-            NuMtxSetTranslation(&matrix, &position);
-            ADDPART_s part = Default_ADDPART;
-            part.velocity = &velocity;
-            part.field_40 = PartCollide_3D;
-            part.gravity = ForceThrowGravity;
-            part.special = &special;
-            part.matrix = &matrix;
-            part.field_14 = 0.1f;
-            part.field_18 = 0.1f;
-            part.time_step = FRAMETIME;
-            part.flags = 0x29b;
-            AddPart(&part);
-            NewRumble(player->pad_gamepad->pad, 0.5f, 0);
-        }
-    }
+    if (first_time)
+        Action_AddPartBody(processor, params, num_params);
     return 1;
+}
+
+static void Action_AddPartBody(AISCRIPTPROCESS *processor, char **params, i32 num_params) {
+    nuhspecial_s special = {};
+    NUVEC position;
+    for (i32 i = 0; i < num_params; i++) {
+        char *value = NuStrIStr(params[i], "name");
+        if (value != NULL)
+            NuSpecialFind(WORLD->current_gscn, &special, value + 5, 1);
+        else if ((value = NuStrIStr(params[i], "x")) != NULL)
+            position.x = AIParamToFloat(processor, value + 2);
+        else if ((value = NuStrIStr(params[i], "y")) != NULL)
+            position.y = AIParamToFloat(processor, value + 2);
+        else if ((value = NuStrIStr(params[i], "z")) != NULL)
+            position.z = AIParamToFloat(processor, value + 2);
+    }
+    if (NuSpecialExistsFn(&special)) {
+        NUVEC velocity;
+        NUMTX matrix;
+        MakeThrowVector(&velocity, &position, &player->apiobj.collision_position, &player->apiobj.velocity,
+                        ForceThrowSpeed, ForceThrowGravity);
+        NuMtxSetTranslation(&matrix, &position);
+        ADDPART_s part = Default_ADDPART;
+        part.velocity = &velocity;
+        part.field_40 = PartCollide_3D;
+        part.gravity = ForceThrowGravity;
+        part.special = &special;
+        part.matrix = &matrix;
+        part.field_14 = 0.1f;
+        part.field_18 = 0.1f;
+        part.time_step = FRAMETIME;
+        part.flags = 0x29b;
+        AddPart(&part);
+        NewRumble(player->pad_gamepad->pad, 0.5f, 0);
+    }
 }
 
 __used__ static i32 Action_Launch(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **, i32, i32 first_time, f32) {
@@ -5790,9 +5803,17 @@ __used__ static i32 Action_TriggerBlowUp(AISYS *sys, AISCRIPTPROCESS *processor,
 }
 
 // The original shooting action calls the out-of-line PartyMemberInWay clone.
-static i32 PartyMemberInWay(GameObject_s *object, GameObject_s *opponent) {
+// Retail splits the flag test off as an inline head; the rest is this partial clone.
+static GAMEAISCRIPT_CLONE_ATTR2 i32 PartyMemberInWayBody(GameObject_s *object, GameObject_s *opponent)
+    __asm__("_ZL16PartyMemberInWayP12GameObject_sS0_.part.65");
+
+static inline i32 PartyMemberInWay(GameObject_s *object, GameObject_s *opponent) {
     if ((object->apiobj.field_0x1f4 & 5) != 0)
         return false;
+    return PartyMemberInWayBody(object, opponent);
+}
+
+static i32 PartyMemberInWayBody(GameObject_s *object, GameObject_s *opponent) {
     NUVEC difference, direction;
     const f32 target_distance =
         NuVecDistSqr(&opponent->apiobj.collision_position, &object->apiobj.collision_position, &difference);

@@ -1,6 +1,7 @@
 #include "editor/edpath.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/nu3d/nuspecial.h"
 #include <float.h>
 #include <string.h>
 
@@ -71,13 +72,24 @@ static __used__ f32 **pathEditorCalculateDistanceTable(AIPATH_s *path, i32 route
 // The route records use a dense route index, while the editor keeps sixteen
 // independently switchable slots.  The original helper first marks both ends
 // of every route connection, then builds the compact node lookup and matrix.
-static void pathEditorCreateSpecialRouteData(AIPATH_s *path, i32, EDAIPATH_s *editor_path, VARIPTR *cursor,
+#if defined(__i386__)
+#define AIPATHBUILD_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
+#else
+#define AIPATHBUILD_CLONE_ATTR2 __attribute__((noinline, noclone))
+#endif
+// Retail keeps only the IPA-SRA clone, without the unused path index.
+static AIPATHBUILD_CLONE_ATTR2 void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s *editor_path,
+                                                                     VARIPTR *cursor, VARIPTR *end)
+    __asm__("_ZL32pathEditorCreateSpecialRouteDataP8AIPATH_siP10EDAIPATH_sP9variptr_uS4_.isra.81");
+
+static void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s *editor_path, VARIPTR *cursor,
                                              VARIPTR *end) {
     i32 route_indices[16] = {};
     u8 route_members[16][32] = {};
     for (i32 slot = 0; slot < 16; ++slot) {
         if (editor_path->routes[slot].flags & 1) {
-            route_indices[slot] = path->route_count++;
+            route_indices[slot] = path->route_count;
+            path->route_count++;
         }
     }
     if (path->route_count == 0) {
@@ -464,7 +476,7 @@ extern "C" {
                         }
                     }
                 }
-                pathEditorCreateSpecialRouteData(path, path_index, editor_path, &scratch, scratch_limit);
+                pathEditorCreateSpecialRouteData(path, editor_path, &scratch, scratch_limit);
             }
         }
         if (system->path_count > 1) {

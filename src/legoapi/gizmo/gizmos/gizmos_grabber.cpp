@@ -87,6 +87,10 @@ static void Grabber_SetVictimPos(GRABBER_s *grabber) {
 extern ADDPART_s Default_ADDPART;
 extern "C" PART_s *AddPart(ADDPART_s *);
 void PartKill_Grabber(PART_s *, i32);
+// Retail only has the IPA-SRA clone of this function.
+static __attribute__((noinline, noclone)) void Grabber_Drop(GRABBER_s *grabber, NUVEC *previous_position)
+    __asm__("_ZL12Grabber_DropP9GRABBER_sP7nuvec_s.isra.4");
+
 static void Grabber_Drop(GRABBER_s *grabber, NUVEC *previous_position) {
     grabber->flags_559 |= 2;
     if (grabber->victim != NULL) {
