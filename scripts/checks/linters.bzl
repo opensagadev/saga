@@ -41,6 +41,13 @@ _CXX_NAMED_C_SOURCES = [
     "src/legoapi/props/system/socksysall.c",
     "src/nu2api/nucore/android/stubs_android.c",
     "src/nu2api/nucore/android/stubvideo.c",
+    "src/nu2api/nucore/nucore_includes.c",
+    "src/nu2api/nucore/android/nuerror_android.c",
+    "src/nu2api/numath/numath_includes.c",
+    "src/nu2api/nu3d/nuvport.c",
+    "src/nu2api/nucore/listman.c",
+    "src/nu2api/nu3d/android/nubridge_android.c",
+    "src/gamelib/nuwind/nuwind.c",
 ]
 
 def _prefixed(values, prefix):
