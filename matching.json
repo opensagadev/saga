@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 80.021286,
+    "fuzzy_match_percent": 80.04797,
     "total_code": "4722419",
-    "matched_code": "630842",
-    "matched_code_percent": 13.35845,
+    "matched_code": "630436",
+    "matched_code_percent": 13.3498535,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6885,
-    "matched_functions_percent": 51.155357,
+    "matched_functions": 6883,
+    "matched_functions_percent": 51.1405,
     "total_units": 1
   },
   "text": {
@@ -16970,7 +16970,7 @@
           "address": 4513792,
           "offset": 3623824,
           "size": 1880,
-          "match_percent": 58.313175
+          "match_percent": 59.887688
         },
         {
           "name": "_ZThn108_N36MechInputTouchGestureBasedController6OnHoldER12GameObject_sR11TouchHolder",
@@ -25674,7 +25674,7 @@
           "address": 1687392,
           "offset": 797424,
           "size": 1448,
-          "match_percent": 60.669617
+          "match_percent": 88.02655
         },
         {
           "name": "_ZL14Action_SetSideP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -25794,7 +25794,7 @@
           "address": 1697920,
           "offset": 807952,
           "size": 543,
-          "match_percent": 91.49254
+          "match_percent": 89.850746
         },
         {
           "name": "_ZL20Action_SnapToLocatorP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -42606,7 +42606,7 @@
           "address": 1333968,
           "offset": 444000,
           "size": 12082,
-          "match_percent": 92.51273
+          "match_percent": 92.52045
         },
         {
           "name": "SOUND_SFXRequest_Table",
@@ -43667,7 +43667,7 @@
           "address": 1494192,
           "offset": 604224,
           "size": 869,
-          "match_percent": 92.15026
+          "match_percent": 99.81347
         },
         {
           "name": "_Z33SetProtocolDroidDeactivatedActionP12GameObject_s",
@@ -46175,7 +46175,7 @@
           "address": 4628720,
           "offset": 3738752,
           "size": 2774,
-          "match_percent": 84.669174
+          "match_percent": 84.68421
         },
         {
           "name": "_Z17RememberPlayerIDsiii",
@@ -48261,7 +48261,7 @@
           "address": 1445952,
           "offset": 555984,
           "size": 2473,
-          "match_percent": 70.30153
+          "match_percent": 76.471375
         },
         {
           "name": "_ZL9DodgeCodeP12GameObject_sii",
@@ -48293,7 +48293,7 @@
           "address": 1464480,
           "offset": 574512,
           "size": 2709,
-          "match_percent": 77.82872
+          "match_percent": 82.47232
         },
         {
           "name": "_Z18GetShootOrigin_LSWP12GameObject_sP7nuvec_s",
@@ -48453,7 +48453,7 @@
           "address": 1509024,
           "offset": 619056,
           "size": 628,
-          "match_percent": 76.751724
+          "match_percent": 78.16552
         },
         {
           "name": "_Z13PeriscodeCodeP12GameObject_s",
@@ -50654,7 +50654,7 @@
           "address": 4431664,
           "offset": 3541696,
           "size": 3581,
-          "match_percent": 65.10676
+          "match_percent": 65.34595
         },
         {
           "name": "NuGCutSceneSysUpdate",
@@ -51779,7 +51779,7 @@
           "address": 4841504,
           "offset": 3951536,
           "size": 755,
-          "match_percent": 98.0102
+          "match_percent": 98.061226
         },
         {
           "name": "_Z25CutScenePlayer_SetObjectsP7CUTINFO",
@@ -61079,7 +61079,7 @@
           "address": 3975686,
           "offset": 3085718,
           "size": 4233,
-          "match_percent": 94.36548
+          "match_percent": 95.22366
         },
         {
           "name": "APICharacterSysInit",
@@ -64086,7 +64086,7 @@
           "address": 1282256,
           "offset": 392288,
           "size": 5214,
-          "match_percent": 45.435616
+          "match_percent": 46.67854
         },
         {
           "name": "_ZL16SpeederPart_KillP6PART_si",
@@ -69734,7 +69734,7 @@
           "address": 4356256,
           "offset": 3466288,
           "size": 638,
-          "match_percent": 85.640526
+          "match_percent": 93.4902
         },
         {
           "name": "_Z13MenuStartLoadv",
@@ -71179,7 +71179,7 @@
           "address": 1137920,
           "offset": 247952,
           "size": 628,
-          "match_percent": 87.90683
+          "match_percent": 98.95652
         },
         {
           "name": "_Z15MenuDrawOptionsP6MENU_s",
@@ -71187,7 +71187,7 @@
           "address": 1138560,
           "offset": 248592,
           "size": 965,
-          "match_percent": 72.83817
+          "match_percent": 72.81743
         },
         {
           "name": "_Z22MenuDrawSelectControlsP6MENU_s",
@@ -71251,7 +71251,7 @@
           "address": 1141792,
           "offset": 251824,
           "size": 153,
-          "match_percent": 99.92105
+          "match_percent": 99.52631
         },
         {
           "name": "_ZL21MenuDrawBonusCompleteP6MENU_s",
@@ -71259,7 +71259,7 @@
           "address": 1141952,
           "offset": 251984,
           "size": 195,
-          "match_percent": 100.0
+          "match_percent": 99.63415
         },
         {
           "name": "_ZL16MenuDrawBonusWinP6MENU_s",
@@ -71267,7 +71267,7 @@
           "address": 1142160,
           "offset": 252192,
           "size": 211,
-          "match_percent": 100.0
+          "match_percent": 99.625
         },
         {
           "name": "_ZL19MenuUpdateHowToPlayP6MENU_s",
@@ -71350,6 +71350,14 @@
           "match_percent": 58.565216
         },
         {
+          "name": "_ZL19UpdateTitleSequenceP6MENU_s.isra.14",
+          "demangled_name": "UpdateTitleSequence(MENU_s*) [clone .isra.14]",
+          "address": 1145312,
+          "offset": 255344,
+          "size": 793,
+          "match_percent": 29.705202
+        },
+        {
           "name": "_ZL16MenuUpdateTitlesP6MENU_s",
           "demangled_name": "MenuUpdateTitles(MENU_s*)",
           "address": 1146112,
@@ -71363,7 +71371,7 @@
           "address": 1146336,
           "offset": 256368,
           "size": 1091,
-          "match_percent": 65.84291
+          "match_percent": 65.90038
         },
         {
           "name": "_Z17MenuUpdateNewGameP6MENU_s",
@@ -84985,7 +84993,7 @@
           "address": 2173680,
           "offset": 1283712,
           "size": 1921,
-          "match_percent": 85.234825
+          "match_percent": 85.12929
         },
         {
           "name": "_Z14TatooineA_InitP11WORLDINFO_s",
@@ -87486,7 +87494,7 @@
           "address": 1165552,
           "offset": 275584,
           "size": 5015,
-          "match_percent": 73.20729
+          "match_percent": 73.36852
         },
         {
           "name": "_ZL24GizBuildIt_FinishFn_GameP12GIZBUILDIT_s",
@@ -102409,7 +102417,7 @@
           "address": 2547970,
           "offset": 1658002,
           "size": 282,
-          "match_percent": 93.5
+          "match_percent": 99.875
         },
         {
           "name": "NuHasError",
@@ -125515,14 +125523,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZL19UpdateTitleSequenceP6MENU_s.isra.14",
-      "demangled_name": "UpdateTitleSequence(MENU_s*) [clone .isra.14]",
-      "address": 1145312,
-      "offset": 255344,
-      "size": 793,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZL13DrawHitPointsP12GameObject_sffffifi.constprop.39",
       "demangled_name": "DrawHitPoints(GameObject_s*, float, float, float, float, int, float, int) [clone .constprop.39]",
       "address": 1299760,
@@ -128534,8 +128534,8 @@
   "summary": {
     "bazel_units": 494,
     "functions": 13454,
-    "assigned_functions": 12761,
+    "assigned_functions": 12762,
     "ambiguous_functions": 273,
-    "unassigned_functions": 420
+    "unassigned_functions": 419
   }
 }

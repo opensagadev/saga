@@ -1459,14 +1459,15 @@ extern "C" {
             return;
 
         MenuValidated = 1;
-        f32 saved_button_baseline;
         f32 saved_baseline;
-        if (SmartTextFont != NULL) {
-            saved_baseline = SmartTextFont->baseline;
-            SmartTextFont->baseline = 0.0f;
-        } else if (QFont2D != NULL) {
-            saved_baseline = QFont2D->baseline;
-            QFont2D->baseline = 0.0f;
+        f32 saved_button_baseline;
+        vufnt_s *font = SmartTextFont;
+        if (font == NULL) {
+            font = QFont2D;
+        }
+        if (font != NULL) {
+            saved_baseline = font->baseline;
+            font->baseline = 0.0f;
         } else {
             saved_baseline = 0.0f;
         }
@@ -1478,15 +1479,16 @@ extern "C" {
             saved_button_baseline = 0.0f;
         }
 
-        MenuHeader[0] = '\0';
         menu->draw_item = menu->first_row;
-        menu->draw_x = 0.0f;
-        menu->item_scale = 1.0f;
-        menu->centre_offset = static_cast<f32>(menu->last_row - menu->first_row) * MENUDY * 0.5f;
-        menu->draw_y = -menu->centre_offset;
-        menu->field_a0 = 0.0f;
-        menu->draw_z = 1.0f;
+        f32 centre_offset = static_cast<f32>(menu->last_row - menu->first_row) * MENUDY * 0.5f;
         menu->paused = paused;
+        menu->item_scale = 1.0f;
+        MenuHeader[0] = '\0';
+        menu->field_a0 = 0.0f;
+        menu->centre_offset = centre_offset;
+        menu->draw_x = 0.0f;
+        menu->draw_y = -centre_offset;
+        menu->draw_z = 1.0f;
         if (predrawfn != NULL) {
             predrawfn(menu);
             menu_index = menu->menu;
@@ -1500,10 +1502,12 @@ extern "C" {
                                   MENUNORMALR, MENUNORMALG, MENUNORMALB, static_cast<u8>(MenuA));
         }
 
-        if (SmartTextFont != NULL) {
-            SmartTextFont->baseline = saved_baseline;
-        } else if (QFont2D != NULL) {
-            QFont2D->baseline = saved_baseline;
+        font = SmartTextFont;
+        if (font == NULL) {
+            font = QFont2D;
+        }
+        if (font != NULL) {
+            font->baseline = saved_baseline;
         }
         if (QFont2DButtons != NULL) {
             QFont2DButtons->baseline = saved_button_baseline;

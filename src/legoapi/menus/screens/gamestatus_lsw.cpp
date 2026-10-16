@@ -1047,7 +1047,7 @@ void TrueHero_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active
     alpha = alpha < 0.0f ? 0.0f : alpha > 1.0f ? 1.0f : alpha;
     NuStrCpy(text, TTab[tTRUEJEDI]);
     if (BOTHTRUEJEDIGOLDBRICKS != 0) {
-        NuStrCat(text, " ");
+        NuStrCat(text, " - ");
         NuStrCat(text, TTab[(packet->field_0xb0 & 0x40) != 0 ? tFREEPLAY : tSTORY]);
     }
     Text3DEx(text, 0.0f, STATUS_TITLE_Y, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 255, 255,

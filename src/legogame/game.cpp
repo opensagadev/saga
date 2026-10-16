@@ -756,6 +756,51 @@ GAMEAUDIO GameAudio_LSW = {
     {},
 };
 
+// Retail data @0x617200: common animations shared by the old and new characters.
+ANIMREDIRECT AnimRedirectList_LSW[] = {
+    {const_cast<char *>("ride_bantha_new_blasterchar"), 112, {0, 0}},
+    {const_cast<char *>("ride_bantha_new_jedichar"), 112, {0, 0}},
+    {const_cast<char *>("ride_bantha_old_blasterchar"), 112, {0, 0}},
+    {const_cast<char *>("ride_bantha_old_jedichar"), 112, {0, 0}},
+    {const_cast<char *>("ride_dewback_new_blasterchar"), 131, {0, 0}},
+    {const_cast<char *>("ride_dewback_new_jedichar"), 131, {0, 0}},
+    {const_cast<char *>("ride_dewback_old_blasterchar"), 131, {0, 0}},
+    {const_cast<char *>("ride_dewback_old_jedichar"), 131, {0, 0}},
+    {const_cast<char *>("ride_landspeeder_new_blasterchar"), 132, {0, 0}},
+    {const_cast<char *>("ride_landspeeder_new_jedichar"), 132, {0, 0}},
+    {const_cast<char *>("ride_landspeeder_old_blasterchar"), 132, {0, 0}},
+    {const_cast<char *>("ride_landspeeder_old_jedichar"), 132, {0, 0}},
+    {const_cast<char *>("ride_tauntaun_new_blasterchar"), 134, {0, 0}},
+    {const_cast<char *>("ride_tauntaun_new_jedichar"), 134, {0, 0}},
+    {const_cast<char *>("ride_tauntaun_old_blasterchar"), 134, {0, 0}},
+    {const_cast<char *>("ride_tauntaun_old_jedichar"), 134, {0, 0}},
+    {const_cast<char *>("ride_speederbike_new_blasterchar"), 192, {0, 0}},
+    {const_cast<char *>("ride_speederbike_new_jedichar"), 192, {0, 0}},
+    {const_cast<char *>("ride_speederbike_old_blasterchar"), 192, {0, 0}},
+    {const_cast<char *>("ride_speederbike_old_jedichar"), 192, {0, 0}},
+    {const_cast<char *>("ride_hrc_new_blasterchar"), 193, {0, 0}},
+    {const_cast<char *>("ride_hrc_new_jedichar"), 193, {0, 0}},
+    {const_cast<char *>("ride_hrc_old_blasterchar"), 193, {0, 0}},
+    {const_cast<char *>("ride_hrc_old_jedichar"), 193, {0, 0}},
+    {const_cast<char *>("throw_new_blasterchar"), 101, {0, 0}},
+    {const_cast<char *>("throw_new_jedichar"), 101, {0, 0}},
+    {const_cast<char *>("throw_old_blasterchar"), 101, {0, 0}},
+    {const_cast<char *>("throw_old_jedichar"), 101, {0, 0}},
+    {const_cast<char *>("ride_generic_new_blasterchar"), 108, {0, 0}},
+    {const_cast<char *>("ride_generic_new_jedichar"), 108, {0, 0}},
+    {const_cast<char *>("ride_generic_old_blasterchar"), 108, {0, 0}},
+    {const_cast<char *>("ride_generic_old_jedichar"), 108, {0, 0}},
+    {const_cast<char *>("splat_new_blasterchar"), 133, {0, 0}},
+    {const_cast<char *>("splat_new_jedichar"), 133, {0, 0}},
+    {const_cast<char *>("splat_old_blasterchar"), 133, {0, 0}},
+    {const_cast<char *>("splat_old_jedichar"), 133, {0, 0}},
+    {const_cast<char *>("ride_tcannon_new_blasterchar"), 194, {0, 0}},
+    {const_cast<char *>("ride_tcannon_new_jedichar"), 194, {0, 0}},
+    {const_cast<char *>("ride_tcannon_old_blasterchar"), 194, {0, 0}},
+    {const_cast<char *>("ride_tcannon_old_jedichar"), 194, {0, 0}},
+    {NULL, 0, {0, 0}},
+};
+
 void InitGameAfterConfig(void) {
     AREADATA *pAVar5 = ADataList;
 
@@ -957,7 +1002,8 @@ void InitGameAfterConfig(void) {
     extern i32 NuGCutDebFixUp_SearchAllPages;
     NuGCutDebFixUp_SearchAllPages = 1;
     NarrowSockExceptions_Init(NarrowSockException_LSW);
-    //  APIObjectRegisterAnimRedirect(RedirectAnim, AnimRedirectList_LSW, "chars\\commonanims");
+    APIObjectRegisterAnimRedirect(reinterpret_cast<ANIMREDIRECTFN>(RedirectAnim), AnimRedirectList_LSW,
+                                  const_cast<char *>("chars\\commonanims"));
     SurfaceMaskOff(reinterpret_cast<u32 *>(&TERRAINMASK_NONWEAPON));
     SurfaceMaskOn(reinterpret_cast<u32 *>(&TERRAINMASK_NONDROID));
     Hub_UsePlayerList = 1;

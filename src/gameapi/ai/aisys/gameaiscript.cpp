@@ -7764,8 +7764,8 @@ __used__ static i32 Action_SetOpponent(AISYS *sys, AISCRIPTPROCESS *processor, A
         GameObject_s *candidate = Player[slot];                                                                        \
         if (candidate != NULL && (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&                                 \
             (candidate->apiobj.field_0x287 == 0 || candidate->field_0x101c > 0.0f) &&                                  \
-            (candidate->field_0xeff & 1) == 0 && candidate->apiobj.character_data != NULL &&                           \
-            (candidate->apiobj.character_data->model_flags & 0x10) != 0 && droid_count < 10)                           \
+            (candidate->field_0xeff & 1) == 0 && (candidate->apiobj.character_data->model_flags & 0x10) != 0 &&             \
+            droid_count < 10)                                                                                          \
             droids[droid_count++] = candidate;                                                                         \
     }
             OPPONENT_DROID(0)
@@ -7779,8 +7779,8 @@ __used__ static i32 Action_SetOpponent(AISYS *sys, AISCRIPTPROCESS *processor, A
             GameObject_s *candidate = Player[7];
             if (candidate != NULL && (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
                 !(candidate->apiobj.field_0x287 != 0 && candidate->field_0x101c <= 0.0f) &&
-                (candidate->field_0xeff & 1) == 0 && candidate->apiobj.character_data != NULL &&
-                (candidate->apiobj.character_data->model_flags & 0x10) != 0 && droid_count < 10) {
+                (candidate->field_0xeff & 1) == 0 && (candidate->apiobj.character_data->model_flags & 0x10) != 0 &&
+                droid_count < 10) {
                 droids[droid_count++] = candidate;
             }
             // Retail accumulates candidates across parameters. Bound the
@@ -7798,9 +7798,9 @@ __used__ static i32 Action_SetOpponent(AISYS *sys, AISCRIPTPROCESS *processor, A
         } else if ((value = NuStrIStr(params[index], "opponentType")) != NULL) {
             i32 type = 0xff;
             if (LevelCharacterTypeIDFn != NULL && LevelCharacterGlobalIDFn != NULL) {
-                const i8 local_type = static_cast<i8>(LevelCharacterTypeIDFn(value + 13));
-                if (local_type != -1)
-                    type = LevelCharacterGlobalIDFn(static_cast<u8>(local_type));
+                const u8 local_type = static_cast<u8>(LevelCharacterTypeIDFn(value + 13));
+                if (local_type != 0xff)
+                    type = LevelCharacterGlobalIDFn(local_type);
             }
             for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index) {
                 if (Obj[object_index].id == type) {

@@ -622,12 +622,12 @@ static inline __used__ void MenuDrawPauseMain(MENU *menu) {
     dme_b = 0x3f;
 
     if (TestForController() != 0) {
-        DrawMenuEntryEx(menu, TTab[tCONTROLLERCONNECTED], MenuA / 2);
+        DrawMenuEntryEx(menu, TTab[tCONTROLLERCONNECTED], static_cast<u8>(MenuA / 2));
     } else {
         char controls[64];
         NuStrCpy(controls, TTab[tCONTROLS]);
         NuStrCat(controls, ": ");
-        char *control_name = TTab[MechInputTouchSystem::s_baseControlMode == 0 ? tCONSOLE : tTOUCH];
+        char *control_name = MechInputTouchSystem::s_baseControlMode != 0 ? TTab[tTOUCH] : TTab[tCONSOLE];
         NuStrCat(controls, control_name != NULL ? control_name : "?");
         GameDrawMenuEntry(menu, controls);
     }
@@ -635,7 +635,7 @@ static inline __used__ void MenuDrawPauseMain(MENU *menu) {
     GameDrawMenuEntry(menu, TTab[tHELPANDOPTIONS]);
 
     if (SuperStory != 0 || ChallengeMode != 0 || Mission_Active(NULL) != NULL) {
-        DrawMenuEntryEx(menu, TTab[tEXTRAS], static_cast<i32>(MenuA * 0.5f));
+        DrawMenuEntryEx(menu, TTab[tEXTRAS], static_cast<i32>(MenuA * 0.5f) & 0xff);
     } else {
         GameDrawMenuEntry(menu, TTab[tEXTRAS]);
     }
@@ -643,15 +643,17 @@ static inline __used__ void MenuDrawPauseMain(MENU *menu) {
         GameDrawMenuEntry(menu, TTab[tDROPOUT]);
     }
 
+    char *last_entry;
     if (WORLD->current_level != HUB_LDATA) {
         if (GAMEDEMO != 0) {
-            GameDrawMenuEntry(menu, TTab[tRESTARTDEMO]);
+            last_entry = TTab[tRESTARTDEMO];
         } else {
-            GameDrawMenuEntry(menu, TTab[tMAP]);
+            last_entry = TTab[tMAP];
         }
     } else {
-        GameDrawMenuEntry(menu, TTab[tQUIT]);
+        last_entry = TTab[tQUIT];
     }
+    GameDrawMenuEntry(menu, last_entry);
 }
 
 void MenuDrawOptions(MENU_s *menu) {

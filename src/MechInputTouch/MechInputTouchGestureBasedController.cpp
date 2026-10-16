@@ -457,8 +457,7 @@ bool MechInputTouchGestureBasedController::OnHold(GameObject_s &object, TouchHol
         holder.consumed = 1;
         return true;
     }
-    if (character->apiobj.character_data->player_config != NULL &&
-        (character->apiobj.character_data->player_config->flags_090 & 0x40) != 0 && character->field_0xcc0 == NULL &&
+    if ((character->apiobj.character_data->player_config->flags_090 & 0x40) != 0 && character->field_0xcc0 == NULL &&
         TouchHacks::CanTagVehicle(object, *character)) {
         StartNewTask(new MechTouchTaskTag(*this, *character), holder, true, true);
     } else if (VehicleArea == 0 && TouchHacks::CanTagTo(object, *character)) {
@@ -489,8 +488,7 @@ bool MechInputTouchGestureBasedController::OnHold(GameObject_s &object, TouchHol
         StartNewTask(new MechTouchTaskAttack(*this, target, position), holder, true, true);
     } else if (character == &object) {
         StartNewTask(new MechTouchTaskBlock(*this), holder, false, true);
-    } else if (dagobah_training != 0 && character->id == id_YODA && WORLD != NULL && WORLD->area == DAGOBAH_ADATA &&
-               character->apiobj.character_data->player_config != NULL) {
+    } else if (dagobah_training != 0 && character->id == id_YODA && WORLD->area == DAGOBAH_ADATA) {
         StartNewTask(new MechTouchTaskTag(*this, *character), holder, true, true);
     }
     holder.consumed = 1;

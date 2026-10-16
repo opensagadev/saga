@@ -1756,11 +1756,12 @@ static void ZapCode(GameObject_s *object, i32 pressed, i32 retract_weapon) {
         if ((object->context_flags & 0x40) != 0) {
             AddGameDebris(WORLD->debris_sys, object->id == id_R2Q5 ? 1 : 3, origin);
             NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
-            const i32 sfx_bits = GameAudio_GetPlrSfxBits(object);
-            GameAudio_PlaySfxById(object->apiobj.character_data->game_character->sfx_shoot == -1
-                                      ? GetSfxId("R2Zap")
-                                      : object->apiobj.character_data->game_character->sfx_shoot,
-                                  &object->apiobj.collision_position, sfx_bits, 1);
+            if (object->apiobj.character_data->game_character->sfx_shoot == -1)
+                GameAudio_PlaySfxById(GetSfxId("R2Zap"), &object->apiobj.collision_position,
+                                      GameAudio_GetPlrSfxBits(object), 1);
+            else
+                GameAudio_PlaySfxById(object->apiobj.character_data->game_character->sfx_shoot,
+                                      &object->apiobj.collision_position, GameAudio_GetPlrSfxBits(object), 1);
 
             if (target == NULL) {
                 AddGameDebris(WORLD->debris_sys, 0x58, origin);
@@ -1865,17 +1866,15 @@ static void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 fire_delay
     }
 
     const i8 context = object->character_context;
-    if (context == 0x2a || context == -1) {
+    if (context == -1 || context == 0x2a || context == 0x36) {
         if (object->apiobj.field_0x287 != 0) {
             return;
         }
-    } else if (context == 0x36) {
-        if (object->apiobj.field_0x287 != 0) {
-            return;
-        }
-        const f32 turn_progress = 1.0f - object->context_animation_timer / object->airborne_action_duration;
-        if (turn_progress > 0.2f && turn_progress < 0.666f) {
-            return;
+        if (context == 0x36) {
+            const f32 turn_progress = 1.0f - object->context_animation_timer / object->airborne_action_duration;
+            if (turn_progress > 0.2f && turn_progress < 0.666f) {
+                return;
+            }
         }
     } else if (context == 0x3a) {
         if (object->apiobj.field_0x287 != 0) {
@@ -1889,13 +1888,16 @@ static void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 fire_delay
         return;
     }
     if (pressed == 0) {
-        if (held == 0 || timer > 0.0f) {
+        if (held == 0 || !(timer <= 0.0f)) {
             return;
         }
     }
 
-    const i32 bolt_id =
-        BoltType_FindIDByCreature(object, (object->apiobj.character_data->model_flags & 0x04000000) == 0 ? 5 : 0x15);
+    i32 bolt_id;
+    if ((object->apiobj.character_data->model_flags & 0x04000000) != 0)
+        bolt_id = BoltType_FindIDByCreature(object, 0x15);
+    else
+        bolt_id = BoltType_FindIDByCreature(object, 5);
     BOLTTYPE_s *bolt_type = BoltType_FindByID(bolt_id, WORLD);
     const u32 target_flags = bolt_type->field_60;
 
@@ -1915,9 +1917,6 @@ static void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 fire_delay
         NUVEC origin;
         BoltSys->shoot_origin(object, &origin);
 
-        const i32 target_mode = ((target_flags >> 14) ^ 1) & 1;
-        const f32 range_squared = range * range;
-        const bool target_bolts = (bolt_type->field_60 & 0x800) == 0;
         const AREADATA_s *area = WORLD->area;
 
         if (area != NULL && area == BONUS_GUNSHIP_ADATA) {
@@ -1941,7 +1940,9 @@ static void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 fire_delay
                 object->field_0xe21 |= 8;
             }
         } else {
-            if (target_bolts && (area == NULL || area != DOGFIGHT_ADATA)) {
+            if ((bolt_type->field_60 & 0x800) == 0 && (area == NULL || area != DOGFIGHT_ADATA)) {
+                const i32 target_mode = ((target_flags >> 14) ^ 1) & 1;
+                const f32 range_squared = range * range;
                 GameObject_s *target =
                     TargetGameObject(object, &origin, &direction, range, range_squared, 0, target_mode, 0, bolt_id);
                 if (target != NULL) {
@@ -10748,7 +10749,7 @@ static void PooCode(GameObject_s *object) {
         object->force_use_volume = SeekLinearF(object->force_use_volume, part != NULL ? 1.0f : 0.0f, FRAMETIME);
         if (object->force_use_volume > 0.0f) {
             poopos[object->apiobj.field_0x27c] = position;
-            PlaySfxAndSetVolume("Lego_PLOP", &poopos[object->apiobj.field_0x27c], object->force_use_volume);
+            PlaySfxAndSetVolume("FliesLp", &poopos[object->apiobj.field_0x27c], object->force_use_volume);
         }
     }
 }

@@ -2405,7 +2405,9 @@ extern "C" {
                                     }
                                 }
                             }
-                        } else if ((effects->flags & 0x1000) != 0 || (effects->flags & 0x800) != 0) {
+                        } else if ((effects->flags & 0x1000) != 0) {
+                            AddGameDebris(debris_sys, effects->debris_id, &position);
+                        } else if ((effects->flags & 0x800) != 0) {
                             AddGameDebris(debris_sys, effects->debris_id, &position);
                         } else if (locator_count != 0) {
                             for (i32 i = 0; i < position_count; ++i) {

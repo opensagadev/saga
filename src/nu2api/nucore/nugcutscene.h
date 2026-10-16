@@ -347,7 +347,8 @@ struct instNUGCUTSCENE_s {
             union {
                 u8 flags_8c;
                 struct {
-                    u8 flags_8c_low : 6;
+                    u8 skip_delay : 4; // frames held paused after a skip
+                    u8 flags_8c_low : 2;
                     u8 wait_at_end : 1;
                     u8 flags_8c_high : 1;
                 };

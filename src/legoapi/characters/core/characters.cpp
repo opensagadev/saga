@@ -1609,9 +1609,12 @@ void PostAnimate_ASTROMECH(GameObject_s *object) {
             PlaySfxAndSetVolume(const_cast<char *>("R2Thrust"), &object->apiobj.collision_position,
                                 object->field_0xe31 == 3 ? 0.5f : 1.0f);
         }
-    } else if (context == -1 && object->pad_gamepad->input_magnitude > 0.0f && !(object->communicate_blend > 0.0f) &&
-               object->apiobj.field_0x27d != 0) {
-        PlaySfx(const_cast<char *>("R2Move"), &object->apiobj.upper_position);
+    } else if (context == -1 && object->pad_gamepad->input_magnitude > 0.0f) {
+        if (object->communicate_blend > 0.0f) {
+            PlaySfx(const_cast<char *>("drd_r2_mvt_water_lp"), &object->apiobj.upper_position);
+        } else if (object->apiobj.field_0x27d != 0) {
+            PlaySfx(const_cast<char *>("R2Move"), &object->apiobj.collision_position);
+        }
     }
 
     if (object->communicate_blend > 0.0f && object->communicate_blend < 1.0f) {

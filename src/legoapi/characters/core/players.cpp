@@ -237,8 +237,6 @@ void Players_Init(void) {
 
 // --- Helpers moved from world.cpp ---
 
-static char sMissionStartDoor[] = "mission_door";
-static char sArcadeStartDoor[] = "door_to_network";
 
 static NUVEC HubVehiclesDoorPos[2] = {{-24.21f, 0.0f, -25.36f}, {-23.63f, 0.0f, -25.68f}};
 static NUVEC HubMinikitDoorPos[2] = {{-27.14f, 0.0f, -24.92f}, {-26.77f, 0.0f, -24.94f}};
@@ -301,12 +299,12 @@ void Players_InitPositions(WORLDINFO *world) {
                     NuStrCpy(Door_ExitName, (char *)door);
                 }
             } else if (hub_from_mission != -1) {
-                void *door = Door_FindByName(world, sMissionStartDoor);
+                void *door = Door_FindByName(world, const_cast<char *>("mission_door"));
                 if (door != NULL) {
                     NuStrCpy(Door_ExitName, (char *)door);
                 }
             } else if (hub_from_arcade != -1) {
-                void *door = Door_FindByName(world, sArcadeStartDoor);
+                void *door = Door_FindByName(world, const_cast<char *>("door_to_network"));
                 if (door != NULL) {
                     NuStrCpy(Door_ExitName, (char *)door);
                 }

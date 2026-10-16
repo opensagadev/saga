@@ -1957,7 +1957,7 @@ void GoldBrick_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float e
                         if (id == tTRUEJEDI) {
                             NuStrCpy(text, TTab[id]);
                             if (BOTHTRUEJEDIGOLDBRICKS != 0) {
-                                NuStrCat(text, " ");
+                                NuStrCat(text, " - ");
                                 NuStrCat(text, TTab[(packet->field_0xb0 & 0x40) != 0 ? tFREEPLAY : tSTORY]);
                             }
                             label = text;

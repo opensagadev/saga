@@ -154,7 +154,7 @@ static void BlockadeRunnerD_EjectCreature(i32 eject_index) {
             NuMtxSetTranslation(&matrix, &eject_vec[eject_index]);
             i32 model = models[qrand() / 0x4000];
             LevGameObject[i] =
-                AddDynamicCreature(model, &eject_vec[eject_index], 0, "UST", NULL, NULL, 0, NULL, NULL, 0, 0);
+                AddDynamicCreature(model, &eject_vec[eject_index], 0, "default", NULL, NULL, 0, NULL, NULL, 0, 0);
             if (LevGameObject[i] != NULL) {
                 LevGameObject[i]->ai.animation_override_from = 0xe9;
                 LevGameObject[i]->ai.animation_override_to = 5;

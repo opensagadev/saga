@@ -1682,7 +1682,7 @@ extern "C" {
         }
         if (instance->skip_countdown != 0 && instance->stream_index == 0) {
             instance->flags_8b |= 0x40;
-            instance->flags_8c = (instance->flags_8c & 0xf0) | 0xa;
+            instance->skip_delay = 0xa;
         }
     }
 
@@ -2105,8 +2105,8 @@ static void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int s
         }
     }
     instance->flags_8b &= ~0x40U;
-    if (instance->skip_countdown != 0 && (instance->flags_88 & 1) == 0 && (instance->flags_8c & 0xf) != 0) {
-        instance->flags_8c = (instance->flags_8c & 0xf0) | ((instance->flags_8c - 1) & 0xf);
+    if (instance->skip_countdown != 0 && (instance->flags_88 & 1) == 0 && instance->skip_delay != 0) {
+        instance->skip_delay--;
         instance->flags_8b |= 0x40;
         paused = 1;
     }

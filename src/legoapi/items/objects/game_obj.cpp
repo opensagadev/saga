@@ -2420,13 +2420,14 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
             if (Cheat_IsOn(5)) {
                 debris[0] = 125;
                 debris[1] = 126;
+                PlaySfx("exp_thermalDet", &object->apiobj.collision_position);
             } else {
                 debris[0] = 82;
                 debris[1] = 83;
                 debris[2] = 84;
+                PlaySfx("exp_thermalDet", &object->apiobj.collision_position);
                 part_debris = 3;
             }
-            PlaySfx("exp_thermalDet", &object->apiobj.collision_position);
         } else if (object->id == id_WOMPRAT) {
             part_debris = 5;
         } else if (object->id == id_PROBEDROID) {
