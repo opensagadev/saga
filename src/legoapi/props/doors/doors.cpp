@@ -667,7 +667,7 @@ DOOR_s *Door_FindByIndex(WORLDINFO_s *world, i32 area, i32 level, NUVEC *positio
     for (i32 i = 0; i < world->door_count; ++i, ++door) {
         if ((door->flags & 4) != 0 || door->level == -1)
             continue;
-        if (!((level != -1 && door->level == level) || (area != -1 && LDataList[door->level].area_index == area)))
+        if (!((area != -1 && LDataList[door->level].area_index == area) || (level != -1 && door->level == level)))
             continue;
         if (position == NULL)
             return door;

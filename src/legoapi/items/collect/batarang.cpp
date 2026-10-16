@@ -103,9 +103,6 @@ static unsigned int Batarang_GetTargetPos(BATARANG_s *batarang, int index, nuvec
 static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 automatic) {
     NUVEC delta;
     BATARANG_s *batarang = static_cast<BATARANG_s *>(object->batarang);
-    if (batarang == NULL || batarang->active > 5) {
-        return 0;
-    }
     NUVEC forward;
     NuVecRotateY(&forward, &v001, object->apiobj.movement_facing_angle);
     void *selected = NULL;
@@ -117,9 +114,12 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
     GameObject_s *first_object = NULL;
     GameObject_s *candidate = Obj;
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++candidate) {
+        if ((candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
+            candidate->apiobj.field_0x287 != 0) {
+            continue;
+        }
         const i8 context = candidate->character_context;
-        if ((candidate->apiobj.object_flags & 0x1001) != 0x1001 || candidate->apiobj.field_0x287 != 0 ||
-            (CInfo[context].flags & 0x8000) != 0 || candidate->apiobj.model_draw_result == 0 || candidate == object ||
+        if ((CInfo[context].flags & 0x8000) != 0 || candidate->apiobj.model_draw_result == 0 || candidate == object ||
             candidate->apiobj.field_0x27c != -1 || (static_cast<u8>(context) & 0xfd) == 0x39 || context == 0x3c ||
             (object->apiobj.field_0x1f4 & 0x10004) != 0 ||
             ((object->apiobj.field_0x1f4 ^ candidate->apiobj.field_0x1f4) & 1) == 0) {
@@ -260,7 +260,7 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
         }
     }
     u8 count = batarang->active;
-    if (count == 5) {
+    if (__builtin_expect(count > 4, 0)) {
         if (static_cast<i32>(GameTimer.time_elapsed / 0.2f) == static_cast<i32>(GameTimer.last_time_elapsed / 0.2f)) {
             return 0;
         }

@@ -281,6 +281,8 @@ template <typename T> struct EdValueControl : EdControl {
     T minimum;
     T maximum;
 
+    EdValueControl() : minimum(0), maximum(0) {
+    }
     ~EdValueControl() override;
     static void operator delete(void *);
     void AddMenuItem(eduimenu_s *, EdRef *, void *) override;

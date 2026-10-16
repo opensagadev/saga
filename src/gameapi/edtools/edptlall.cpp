@@ -403,24 +403,15 @@ static void edptlcbSetDetail(eduimenu_s *, eduiitem_s *item, u32) {
     DebrisSetDetailLevels(instance_id, detail_levels);
 }
 void edppStartPage(i32 page) {
-    i32 index = 0;
-    edpp_particle_s *particle = edpp_ptls;
-    while (index != 512) {
-        while (particle->page != static_cast<i8>(page) || particle->instance_id != 99999) {
-            ++index;
-            ++particle;
-            if (index == 512)
-                goto page_started;
+    for (i32 index = 0; index < 512; ++index) {
+        if (edpp_ptls[index].page == static_cast<i8>(page) && edpp_ptls[index].instance_id == 99999) {
+            edpp_ptls[index].instance_id = -1;
+            edpp_ptls[index].effect_index = LookupDebrisEffectPage(edpp_ptls[index].name, static_cast<i8>(page));
+            edppStartSingleEffect(index);
+            if (edpp_ptls[index].instance_id == -1)
+                edpp_ptls[index].instance_id = 99999;
         }
-        particle->instance_id = -1;
-        particle->effect_index = LookupDebrisEffectPage(edpp_ptls[index].name, static_cast<i8>(page));
-        edppStartSingleEffect(index);
-        if (particle->instance_id == -1)
-            particle->instance_id = 99999;
-        ++index;
-        ++particle;
     }
-page_started:
     edpp_page_on[static_cast<i8>(page)] = 1;
 }
 static void edptlcbStartPage(eduimenu_s *, eduiitem_s *item, u32) {

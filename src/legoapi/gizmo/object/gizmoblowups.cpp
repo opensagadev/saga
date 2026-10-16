@@ -2050,16 +2050,15 @@ GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *object, NUVEC *points, i32 point_co
     }
     auto f0xcc0 = object->field_0xcc0;
     for (i32 index = 0; index < WORLD->gizmo_blowup_count; ++index, ++blowup) {
-        u32 properties = blowup->draw_flags;
         if ((blowup->status_flags & 0x804001) != 0x804000 ||
-            (exclude_flag_1 && (properties & 0x80000) && airborne_damage)) {
+            (exclude_flag_1 && (blowup->draw_flags & 0x80000) && airborne_damage)) {
             continue;
         }
-        if (exclude_flag_2 && (properties & 0x200000) && hit_type - 8 < 2 && BlowupExFunc != NULL &&
+        if (exclude_flag_2 && (blowup->draw_flags & 0x200000) && hit_type - 8 < 2 && BlowupExFunc != NULL &&
             BlowupExFunc(blowup, hit_type)) {
             continue;
         }
-        properties = blowup->draw_flags;
+        const u32 properties = blowup->draw_flags;
         if (bolt != NULL && (blowup->platform_id != -1 || (properties & 0x8000) == 0 ||
                              ((properties & 0x80000) && (object == NULL || f0xcc0 == NULL)))) {
             continue;

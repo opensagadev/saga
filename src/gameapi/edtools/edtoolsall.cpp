@@ -4633,14 +4633,13 @@ void EdEnumControl::Refresh() {
 static EdEnumControl *active_enum_control;
 
 void EdEnumControl::cbButton(eduimenu_s *menu, eduiitem_s *item, u32) {
-    EdEnumControl *control = static_cast<EdEnumControl *>(item->data_ptr);
-    active_enum_control = control;
+    active_enum_control = static_cast<EdEnumControl *>(item->data_ptr);
     eduimenu_s *choices =
         eduiMenuCreate(item->x + menu->width, item->y, 180, 250,
                        reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (choices == NULL)
         return;
-    for (Item *entry = control->items; entry != NULL && entry->name != NULL; ++entry)
+    for (Item *entry = active_enum_control->items; entry->name != NULL; ++entry)
         eduiMenuAddItem(
             choices, eduiItemSelCreate(reinterpret_cast<usize>(entry), item->colours, 0, 0, cbSelectItem, entry->name));
     choices->flags |= 1;
@@ -5675,13 +5674,15 @@ void EdMatrixControl::SetMenuItemAttr(i32 mask, eduiitem_s *menu_item, eduiiattr
 }
 
 void EdMatrixControl::cbButton(eduimenu_s *menu, eduiitem_s *item, u32 value) {
-    nupad_s *pad = EdControl::Input->pad;
     static_cast<edui_prop_s *>(item)->unknown_property_flags |= 0x20;
-    f32 current = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
+    nupad_s *pad = EdControl::Input->pad;
+    f32 changed = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
     f32 dx;
     f32 dy;
     eduiGetCursorDelta(&dx, &dy);
-    f32 changed = current - dy * 100.0f - eduiGetAnalougePadValue(pad);
+    changed -= dy * 100.0f;
+    dy = eduiGetAnalougePadValue(pad);
+    changed -= dy;
     char text[128];
     sprintf(text, "%.2f", changed);
     eduiItemPropSetText(static_cast<edui_prop_s *>(item), text);
@@ -6001,13 +6002,15 @@ void EdVectorControl::Refresh() {
 }
 
 void EdVectorControl::cbButton(eduimenu_s *menu, eduiitem_s *item, u32 value) {
-    nupad_s *pad = EdControl::Input->pad;
     static_cast<edui_prop_s *>(item)->unknown_property_flags |= 0x20;
-    f32 current = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
+    nupad_s *pad = EdControl::Input->pad;
+    f32 changed = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
     f32 dx;
     f32 dy;
     eduiGetCursorDelta(&dx, &dy);
-    f32 changed = current - dy * 100.0f - eduiGetAnalougePadValue(pad);
+    changed -= dy * 100.0f;
+    dy = eduiGetAnalougePadValue(pad);
+    changed -= dy;
     char text[128];
     sprintf(text, "%.2f", changed);
     eduiItemPropSetText(static_cast<edui_prop_s *>(item), text);
@@ -6460,11 +6463,12 @@ void EdSpecialObjectControl::cbSelectObject(eduimenu_s *, eduiitem_s *item, u32)
         return;
     nuhspecial_s selected;
     nuhspecial_s *choice;
-    if (item->data == -1) {
+    void *data = item->data_ptr;
+    if (reinterpret_cast<uintptr_t>(data) == static_cast<uintptr_t>(-1)) {
         NuSpecialClear(&selected);
         choice = &selected;
     } else {
-        choice = &static_cast<SpecialObject *>(item->data_ptr)->special;
+        choice = &static_cast<SpecialObject *>(data)->special;
         char *name = NuSpecialGetName(choice);
         if (name != NULL)
             eduiItemPropSetText(reinterpret_cast<edui_prop_s *>(active_special_object_control->item), name);
@@ -6615,10 +6619,12 @@ void EdClassObjectNameControl::cbSelectObject(eduimenu_s *menu, eduiitem_s *item
     if (control != NULL) {
         control->selected.object = item->data_ptr;
         char name[128];
-        const char *value = "None";
-        if (control->selected.object != NULL) {
+        const char *value;
+        if (__builtin_expect(control->selected.object != NULL, 1)) {
             control->selected.GetName(name, sizeof(name));
             value = name;
+        } else {
+            value = "None";
         }
         eduiItemPropSetText(static_cast<edui_prop_s *>(edClassObjectNameControl->item), const_cast<char *>(value));
         edClassObjectNameControl->SetVal(value);

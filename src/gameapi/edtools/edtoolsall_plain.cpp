@@ -2696,7 +2696,7 @@ extern "C" {
             for (i32 i = 0; i < 512; ++i) {
                 if (edpp_ptls[i].effect_index == index) {
                     i32 handle = edpp_ptls[i].instance_id;
-                    if (handle != 99999 && handle != -1)
+                    if (handle != -1 && handle != 99999)
                         debkeydata[handle].effect_index = replacement;
                     edpp_ptls[i].effect_index = replacement;
                 }
@@ -2806,24 +2806,24 @@ extern "C" {
         for (i32 index = 0; index < 512; ++index) {
             if (page != -1 && edpp_ptls[index].page != page)
                 continue;
-            if (edpp_ptls[index].instance_id == 99999 || edpp_ptls[index].instance_id == -1)
+            if (edpp_ptls[index].instance_id == -1 || edpp_ptls[index].instance_id == 99999)
                 continue;
             debkeydatatype_s *key = &debkeydata[edpp_ptls[index].instance_id];
             if (key->process_collision_sound == 0)
                 continue;
             debinftype *effect = debtab[key->effect_index];
             i32 output_index = count - skip;
-            if (output_index >= 0 && output_index < capacity) {
+            if (output_index < capacity && output_index >= 0) {
                 if (positions != NULL) {
                     positions[output_index].x = key->position.x;
                     positions[output_index].y = key->position.y;
                     positions[output_index].z = key->position.z;
                 }
                 if (sounds != NULL) {
-                    sounds[output_index][0] = effect->sound_data[0];
-                    sounds[output_index][1] = effect->sound_data[3];
-                    sounds[output_index][2] = effect->sound_data[6];
-                    sounds[output_index][3] = effect->sound_data[9];
+                    (*sounds)[output_index * 4 + 0] = effect->sound_data[0];
+                    (*sounds)[output_index * 4 + 1] = effect->sound_data[3];
+                    (*sounds)[output_index * 4 + 2] = effect->sound_data[6];
+                    (*sounds)[output_index * 4 + 3] = effect->sound_data[9];
                 }
             }
             ++count;
@@ -6971,28 +6971,26 @@ extern "C" {
         return width + height;
     }
     static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *item, u32 value) {
-        if (!dir_list || !filepick_item)
+        if (!dir_list)
             return;
-        if (item->data != 9999) {
-            auto *entries = static_cast<FilePickDirectoryEntry *>(dir_list);
-            FilePickDirectoryEntry &entry = entries[item->data];
-            if (entry.flags & 8) {
-                if (filepick_item->filename[0])
-                    NuStrCat(filepick_item->filename, const_cast<char *>("/"));
-                NuStrCat(filepick_item->filename, entry.name);
-                filepick_item->reopen_directory = 1;
-            } else {
-                NuStrCpy(filepick_item->name, entry.name);
-                if (filepick_item->changed)
-                    filepick_item->changed(filepick_menu, filepick_item, value);
-            }
-        } else {
+        if (item->data == 9999) {
             char *separator = NuStrRChr(filepick_item->filename, '/');
             if (separator)
                 *separator = '\0';
             else
                 filepick_item->filename[0] = '\0';
             filepick_item->reopen_directory = 1;
+        }
+        if (static_cast<FilePickDirectoryEntry *>(dir_list)[item->data].flags & 8) {
+            if (filepick_item->filename[0])
+                NuStrCat(filepick_item->filename, const_cast<char *>("/"));
+            NuStrCat(filepick_item->filename, static_cast<FilePickDirectoryEntry *>(dir_list)[item->data].name);
+            filepick_item->reopen_directory = 1;
+        }
+        if (!(static_cast<FilePickDirectoryEntry *>(dir_list)[item->data].flags & 8)) {
+            NuStrCpy(filepick_item->name, static_cast<FilePickDirectoryEntry *>(dir_list)[item->data].name);
+            if (filepick_item->changed)
+                filepick_item->changed(filepick_menu, filepick_item, value);
         }
         eduiMenuDetach(menu);
         eduiMenuDestroy(menu);

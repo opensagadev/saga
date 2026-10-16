@@ -612,7 +612,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
         }
         if (space->unknown_337c == 0) {
             space->action_timer -= FRAMETIME;
-            if (space->action_timer <= 0.0f)
+            if (__builtin_expect(space->action_timer <= 0.0f, 0))
                 space->unknown_337c = 4;
         }
     }
@@ -721,13 +721,13 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
         if (spline->point_count == 0 || !(spline->spawn_time > space->door_elapsed) ||
             !(spline->spawn_time <= space->door_countdown))
             continue;
-        if (g_lowEndLevelBehaviour == 0) {
+        if (__builtin_expect(g_lowEndLevelBehaviour == 0, 1)) {
             i32 j;
             for (j = 0; j != 96; ++j) {
                 if (space->queued_fighters[j].active == 0)
                     break;
             }
-            if (j != 96) {
+            if (__builtin_expect(j != 96, 1)) {
                 starfighter_s *fighter = &space->queued_fighters[j];
                 fighter->spawn_time = spline->spawn_time;
                 NuMtxSetIdentity(&fighter->matrix);
@@ -800,9 +800,9 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
     i32 door_index = -1;
 #define DOOR_REACHED(player_index, door_index)                                                                         \
     (Player[player_index]->field_0x68c > DogFightDoors.doors[door_index].distance)
-    if (Player[0] == NULL) {
+    if (__builtin_expect(Player[0] == NULL, 1)) {
         if (Player[1] != NULL) {
-            if (DOOR_REACHED(1, 6))
+            if (__builtin_expect(!!(DOOR_REACHED(1, 6)), 0))
                 door_index = 6;
             else if (DOOR_REACHED(1, 5))
                 door_index = 5;
@@ -810,7 +810,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
                 door_index = 4;
             else if (DOOR_REACHED(1, 3))
                 door_index = 3;
-            else if (DOOR_REACHED(1, 2))
+            else if (__builtin_expect(!!(DOOR_REACHED(1, 2)), 0))
                 door_index = 2;
             else if (DOOR_REACHED(1, 1))
                 door_index = 1;
@@ -843,7 +843,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
             }
         }
     }
-    if (WORLD->area == DOGFIGHT_ADATA)
+    if (__builtin_expect(WORLD->area == DOGFIGHT_ADATA, 0))
         SpaceRumbleProcess();
 }
 

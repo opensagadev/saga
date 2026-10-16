@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 82.052185,
+    "fuzzy_match_percent": 82.06815,
     "total_code": "4722419",
-    "matched_code": "643226",
-    "matched_code_percent": 13.620689,
+    "matched_code": "642533",
+    "matched_code_percent": 13.606015,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6987,
-    "matched_functions_percent": 51.91322,
+    "matched_functions": 6984,
+    "matched_functions_percent": 51.890926,
     "total_units": 1
   },
   "text": {
@@ -27347,7 +27347,7 @@
           "address": 5581168,
           "offset": 4691200,
           "size": 1951,
-          "match_percent": 89.2575
+          "match_percent": 89.24
         },
         {
           "name": "_ZN12SplineHelper4FindEPc",
@@ -28282,7 +28282,7 @@
           "address": 5473024,
           "offset": 4583056,
           "size": 367,
-          "match_percent": 85.45349
+          "match_percent": 85.62791
         },
         {
           "name": "_ZN13EdInputStream15SerialiseStringEPci",
@@ -28306,7 +28306,7 @@
           "address": 5475808,
           "offset": 4585840,
           "size": 277,
-          "match_percent": 75.098595
+          "match_percent": 99.97183
         },
         {
           "name": "_ZN15EdVectorControl8cbButtonEP10eduimenu_sP10eduiitem_sj",
@@ -28314,7 +28314,7 @@
           "address": 5477952,
           "offset": 4587984,
           "size": 275,
-          "match_percent": 86.509094
+          "match_percent": 99.8
         },
         {
           "name": "_ZN15EdColourControl16cbColourSelectedEP10eduimenu_sP10eduiitem_sj",
@@ -28378,7 +28378,7 @@
           "address": 5481344,
           "offset": 4591376,
           "size": 388,
-          "match_percent": 100.0
+          "match_percent": 99.63415
         },
         {
           "name": "_ZN17EdFileInputStream15SerialiseBufferEPvii",
@@ -28386,7 +28386,7 @@
           "address": 5481744,
           "offset": 4591776,
           "size": 188,
-          "match_percent": 100.0
+          "match_percent": 99.25
         },
         {
           "name": "_ZN22EdSpecialObjectControl14cbSelectObjectEP10eduimenu_sP10eduiitem_sj",
@@ -28394,7 +28394,7 @@
           "address": 5482192,
           "offset": 4592224,
           "size": 158,
-          "match_percent": 80.704544
+          "match_percent": 99.931816
         },
         {
           "name": "_ZN15EdMatrixControl7RefreshEv",
@@ -28402,7 +28402,7 @@
           "address": 5482800,
           "offset": 4592832,
           "size": 843,
-          "match_percent": 99.03415
+          "match_percent": 99.107315
         },
         {
           "name": "_ZN13EdInputStream15SerialiseStringEPPc",
@@ -28426,7 +28426,7 @@
           "address": 5485408,
           "offset": 4595440,
           "size": 275,
-          "match_percent": 86.509094
+          "match_percent": 99.8
         },
         {
           "name": "_ZN14EdInputContextC1Ev",
@@ -28578,7 +28578,7 @@
           "address": 5491264,
           "offset": 4601296,
           "size": 383,
-          "match_percent": 94.05825
+          "match_percent": 92.94175
         },
         {
           "name": "_ZN12EdBitControl12cbSelectItemEP10eduimenu_sP10eduiitem_sj",
@@ -29482,7 +29482,7 @@
           "address": 5560288,
           "offset": 4670320,
           "size": 204,
-          "match_percent": 78.68889
+          "match_percent": 84.13333
         },
         {
           "name": "_ZN24EdClassObjectNameControl9cbChangedEP10eduimenu_sP10eduiitem_sj",
@@ -30234,7 +30234,7 @@
           "address": 5613792,
           "offset": 4723824,
           "size": 357,
-          "match_percent": 66.561646
+          "match_percent": 90.58904
         },
         {
           "name": "_ZN14EdValueControlIfE7RefreshEv",
@@ -32865,7 +32865,7 @@
           "address": 3574432,
           "offset": 2684464,
           "size": 492,
-          "match_percent": 78.833336
+          "match_percent": 78.847824
         },
         {
           "name": "_ZL20cbPtlQuickDeleteTypeP10eduimenu_sP10eduiitem_sj",
@@ -32937,7 +32937,7 @@
           "address": 3592832,
           "offset": 2702864,
           "size": 182,
-          "match_percent": 80.320755
+          "match_percent": 88.28302
         },
         {
           "name": "_ZL16edptlcbStartPageP10eduimenu_sP10eduiitem_sj",
@@ -32993,7 +32993,7 @@
           "address": 3595488,
           "offset": 2705520,
           "size": 369,
-          "match_percent": 77.0
+          "match_percent": 93.489586
         },
         {
           "name": "_Z17edgraClumpDestroyi",
@@ -34513,7 +34513,7 @@
           "address": 3804720,
           "offset": 2914752,
           "size": 359,
-          "match_percent": 70.33735
+          "match_percent": 95.03615
         },
         {
           "name": "eduicbDestroyDirectoryList",
@@ -47186,7 +47186,7 @@
           "address": 2334272,
           "offset": 1444304,
           "size": 3813,
-          "match_percent": 59.98082
+          "match_percent": 64.98977
         },
         {
           "name": "_Z16DogFightARestartv",
@@ -47234,7 +47234,7 @@
           "address": 2338688,
           "offset": 1448720,
           "size": 216,
-          "match_percent": 99.04348
+          "match_percent": 96.434784
         },
         {
           "name": "_Z18ChrisAnakinBUpdatev",
@@ -56019,7 +56019,7 @@
           "address": 4970640,
           "offset": 4080672,
           "size": 1469,
-          "match_percent": 72.15134
+          "match_percent": 74.02967
         },
         {
           "name": "_Z21GizmoBlowup_HitBlowupP12GameObject_sP13GIZMOBLOWUP_siP6BOLT_sP7nuvec_sPhji",
@@ -56043,7 +56043,7 @@
           "address": 4972624,
           "offset": 4082656,
           "size": 117,
-          "match_percent": 100.0
+          "match_percent": 99.65909
         },
         {
           "name": "_Z18GizmoBlowUp_TargetP12GameObject_sP7nuvec_sS2_ffiii",
@@ -56051,7 +56051,7 @@
           "address": 4972752,
           "offset": 4082784,
           "size": 1456,
-          "match_percent": 88.99026
+          "match_percent": 88.83442
         },
         {
           "name": "_Z25GizmoBlowupCheckProximityP11WORLDINFO_sP12GameObject_s",
@@ -62529,7 +62529,7 @@
           "address": 1928720,
           "offset": 1038752,
           "size": 2439,
-          "match_percent": 54.55657
+          "match_percent": 59.107666
         },
         {
           "name": "_Z16Batarang_ReleaseP12GameObject_si",
@@ -73657,7 +73657,7 @@
           "address": 4750128,
           "offset": 3860160,
           "size": 864,
-          "match_percent": 57.52941
+          "match_percent": 58.23982
         },
         {
           "name": "_Z18Door_RegisterGizmoi",
