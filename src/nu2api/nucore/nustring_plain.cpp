@@ -14,7 +14,7 @@ i32 NuVSPrintf(char *dest, const char *format, va_list args) {
     return vsprintf(dest, format, args);
 }
 
-#if defined(ANDROID) && !defined(HOST_BUILD)
+#ifdef __ANDROID__
 // The original library supplies its own sprintf (NuSPrintf), which formats
 // through vsprintf and returns the resulting string length. Native hosts keep
 // their C library's sprintf.
