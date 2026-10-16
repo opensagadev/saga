@@ -316,7 +316,8 @@ struct instNUGCUTSCENE_s {
             union {
                 u8 flags_88;
                 struct {
-                    u8 flags_88_low : 2;
+                    u8 flags_88_bit0 : 1;
+                    u8 flags_88_bit1 : 1;
                     u8 paused : 1;
                     u8 flags_88_high : 5;
                 };

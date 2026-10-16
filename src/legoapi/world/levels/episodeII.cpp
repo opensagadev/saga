@@ -642,7 +642,7 @@ void KaminoE_AlwaysUpdate(WORLDINFO_s *) {
     object_switches[1] = v;
 }
 void KaminoE_Update(WORLDINFO_s *world) {
-    if (kamino_e.reset_turrets != NULL && kamino_e.reset_turrets->value == 1.0f) {
+    if (__builtin_expect(kamino_e.reset_turrets != NULL && kamino_e.reset_turrets->value == 1.0f, 0)) {
         kamino_e.active_turret = NULL;
         for (i32 i = 0; i < 4; ++i) {
             GIZMO *gizmo = GizmoFindByData(WORLD->gizmo_sys, gizpanel_gizmotype_id, kamino_e.panels[i]);
@@ -764,7 +764,7 @@ void KaminoE_Update(WORLDINFO_s *world) {
                     aim = *NuSpecialGetDrawPos(&kamino_e.active_turret->primary_anim_obj->special);
                     aim.y += 0.5f;
                     have_target = true;
-                } else if (kamino_e.can_fire->value == 1.0f) {
+                } else if (__builtin_expect(kamino_e.can_fire->value == 1.0f, 1)) {
                     GameObject_s *nearest = NULL;
                     f32 best = 1000000000.0f;
                     for (i32 i = 0; i < 8; ++i) {

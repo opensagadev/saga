@@ -3777,7 +3777,7 @@ void GameAnimSys_Update(GAMEANIMSYS_s *system) {
 
 CABLE_s cables[8];
 CABLE_s *GameObjIsCableTied(GameObject_s *object) {
-    if (cables[0].target != object)
+    if (__builtin_expect(cables[0].target != object, 1))
         return NULL;
 
     if ((cables[0].flags_1e9 & 1) != 0)
@@ -3992,7 +3992,7 @@ void GameObjectSetCanUse(GameObject_s *object, void *target, unsigned char actio
 
 CABLE_s *GameObjOwnsAnyCables(GameObject_s *object) {
     // The original checks the first cable's owner for the entire array.
-    if (cables[0].source != object)
+    if (__builtin_expect(cables[0].source != object, 1))
         return NULL;
 
     if ((cables[0].flags_1e9 & 1) != 0)

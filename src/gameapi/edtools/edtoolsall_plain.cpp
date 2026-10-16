@@ -4268,7 +4268,7 @@ extern "C" {
         }
     }
     i32 eduiMenuIsActive(eduimenu_s *menu) {
-        if (!eduiGetUsingMenuFocus())
+        if (__builtin_expect(!eduiGetUsingMenuFocus(), 1))
             return 1;
         if (eduiGetUsingMenuFocus() && active_menu == menu)
             return 1;
@@ -4484,7 +4484,7 @@ extern "C" {
         };
         const auto interact = [](i32 x, i32 y, i32 width, i32 height, eduimenu_s *menu, eduiitem_s *item,
                                  i32 (*callback)(edui_interact_s *), u32 buttons, i32 field_20) {
-            if (numInteracts < 64 && !eduiInteractLocked) {
+            if (__builtin_expect(numInteracts < 64 && !eduiInteractLocked, 0)) {
                 edui_interact_s *entry = &eduiInteracts[numInteracts];
                 entry->x = static_cast<f32>(x);
                 entry->menu = menu;
@@ -4545,7 +4545,7 @@ extern "C" {
             while (item) {
                 menu->field_10 = item;
                 i32 is_selected;
-                if (item != menu->selected) {
+                if (__builtin_expect(item != menu->selected, 0)) {
                     is_selected = 0;
                 } else {
                     find_selected = 0;
@@ -4575,7 +4575,7 @@ extern "C" {
                     continue;
                 }
                 const i32 scroll_height = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f);
-                if (!menu->child)
+                if (__builtin_expect(!menu->child, 1))
                     interact(x, y, menu->width, scroll_height, menu, NULL, cbInteractMenuScrollDown, 0x40, 0);
                 rect(x << 4, y << 3, menu->width << 4, scroll_height << 3, 0x80000000, uimtls[ui_bgmtl]);
                 const i32 bottom = ((y + scroll_height - 2) << 3);
@@ -6195,7 +6195,7 @@ extern "C" {
         i32 selected = static_cast<i32>(0x80000000u | (static_cast<i32>(blue * 255.0f) << 16) |
                                         (static_cast<i32>(green * 255.0f) << 8) | static_cast<i32>(red * 255.0f));
         i32 selected_colours[4] = {selected, selected, selected, selected};
-        if (!edui_donotdraw)
+        if (__builtin_expect(!edui_donotdraw, 0))
             NuRndrGradRect2di(x << 4, (saturation_y + bar_height) << 3, width << 4, bar_height << 3, selected_colours,
                               uimtls[ui_bgmtl]);
         return width;
@@ -6569,14 +6569,14 @@ extern "C" {
         *flags = (*flags & ~16u) | (highlighted << 4);
         if (__builtin_expect(!edui_donotdraw, 1))
             NuQFntSet(edui_font);
-        if (item->unknown_10 == 2) {
+        if (__builtin_expect(item->unknown_10 == 2, 0)) {
             if (!edui_donotdraw)
                 NuQFntSetColour(edui_font, 0xff006000);
-        } else if (item->unknown_10 == 3) {
+        } else if (__builtin_expect(item->unknown_10 == 3, 0)) {
             if (!edui_donotdraw)
                 NuQFntSetColour(edui_font, 0xff600000);
         } else if (item->unknown_10 == 1) {
-            if (!edui_donotdraw)
+            if (__builtin_expect(!edui_donotdraw, 0))
                 NuQFntSetColour(edui_font, 0xff000060);
         } else if (!edui_donotdraw) {
             NuQFntSetColour(edui_font, item->colours[item->highlighted]);
@@ -6599,7 +6599,7 @@ extern "C" {
                               static_cast<i32>((height - 4.0f) * 8.0f), 0xffffffff, uimtls[0]);
             for (i32 depth = 0; depth < property->depth; ++depth) {
                 f32 guide_x = draw_x + (depth + 0.5f) * indent_width;
-                if (!edui_donotdraw)
+                if (__builtin_expect(!edui_donotdraw, 1))
                     NuRndrLine2di(static_cast<i32>(guide_x * 16.0f), static_cast<i32>(draw_y * 8.0f),
                                   static_cast<i32>(guide_x * 16.0f), static_cast<i32>((draw_y + height) * 8.0f),
                                   0xff000000, uimtls[0]);
@@ -6667,7 +6667,7 @@ extern "C" {
                              static_cast<i32>(property->button_size * 16.0f),
                              static_cast<i32>(property->button_size * 8.0f), 0xff000000, uimtls[ui_outmtl]);
             i32 points[6];
-            if (property->button_type == 1) {
+            if (__builtin_expect(property->button_type == 1, 0)) {
                 points[0] = static_cast<i32>((property->button_x + property->button_size * 0.1f) * 16.0f);
                 points[1] = static_cast<i32>((property->button_y + property->button_size * 0.1f) * 8.0f);
                 points[2] = static_cast<i32>((property->button_x + property->button_size * 0.9f) * 16.0f);
@@ -6686,7 +6686,7 @@ extern "C" {
                 points[4] = static_cast<i32>((property->button_x + property->button_size * 0.9f) * 16.0f);
                 points[5] = static_cast<i32>((property->button_y + property->button_size * 0.45f) * 8.0f);
                 u32 colour = button_colours[(property->unknown_property_flags >> 4) & 1];
-                if (!edui_donotdraw)
+                if (__builtin_expect(!edui_donotdraw, 0))
                     NuRndrTriStrip2di(points, NULL, 3, colour, uimtls[0]);
                 points[0] = static_cast<i32>((property->button_x + property->button_size * 0.1f) * 16.0f);
                 points[1] = static_cast<i32>((property->button_y + property->button_size * 0.55f) * 8.0f);

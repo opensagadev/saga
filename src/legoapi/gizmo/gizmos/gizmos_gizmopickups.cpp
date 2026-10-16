@@ -27,12 +27,12 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
         player_index = object->apiobj.field_0x27c;
     } else {
         i32 player0_active = Player[0] == NULL ? 0 : Player[0]->apiobj.player_controlled;
-        if (Player[1] == NULL || !Player[1]->apiobj.player_controlled) {
+        if (__builtin_expect(Player[1] == NULL || !Player[1]->apiobj.player_controlled, 0)) {
             if (player0_active == 0) {
                 return;
             }
             player_index = 0;
-        } else if (player0_active == 0) {
+        } else if (__builtin_expect(player0_active == 0, 0)) {
             player_index = 1;
         } else {
             player_index = qrand() / 0x8000;
@@ -76,7 +76,7 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
 
     GIZMO_PICKUP_TYPE *type = &GizmoPickupType[type_index];
     const i32 model_id = static_cast<i16>(type->first_model_id) + model_variant;
-    if (model_id != -1 && world->lev_objs[model_id].active != 0) {
+    if (__builtin_expect(model_id != -1 && world->lev_objs[model_id].active != 0, 0)) {
 
         ADDGAMEMSG message = AddGameMsg_Default;
         message.target_scale = target_scale;

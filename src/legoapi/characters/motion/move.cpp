@@ -2597,7 +2597,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
     object->field_0xe23 &= ~0x10;
     if (MovingBackwards(object) != 0) {
         object->field_0xefd |= GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS;
-    } else if (static_cast<i8>(object->field_0xefd) < 0) {
+    } else if (__builtin_expect(static_cast<i8>(object->field_0xefd) < 0, 1)) {
         object->field_0xefd |= GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS;
     }
     if (object->character_context == 0x35) {
@@ -2705,7 +2705,8 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
         do {
             if (object->character_context == 0x46)
                 goto directional_heading_0x46;
-            if (api.player_controlled && object->character_context == 0x1b && (object->field_0xe21 & 2) == 0)
+            if (__builtin_expect(
+                    api.player_controlled && object->character_context == 0x1b && (object->field_0xe21 & 2) == 0, 0))
                 goto directional_heading_0x1b;
             if (object->character_context == 0x1c)
                 goto directional_heading_0x1c;
@@ -2792,7 +2793,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
             if (object->blocked_bolt != NULL) {
                 if (object->blocked_bolt->active != 0)
                     position = &object->blocked_bolt->position;
-            } else if (object->block_attacker != NULL) {
+            } else if (__builtin_expect(object->block_attacker != NULL, 0)) {
                 if ((object->block_attacker->apiobj.field_0x1f8 & 0x1000) != 0 &&
                     object->block_attacker->apiobj.field_0x287 == 0)
                     position = &object->block_attacker->apiobj.position;
@@ -2870,7 +2871,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
             heading_handled = SuperCarry_YRotation(object, input_angle);
             break;
         directional_heading_0x1b:
-            if (object->field_0x7a3 == 1)
+            if (__builtin_expect(object->field_0x7a3 == 1, 0))
                 api.movement_facing_angle = input_angle;
             else
                 FaceOpponent(object, NULL);

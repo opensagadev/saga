@@ -1245,7 +1245,7 @@ extern "C" {
             return;
         }
 
-        if (effect->time_group != 4) {
+        if (__builtin_expect(effect->time_group != 4, 1)) {
             // Retail realigns the frame (and esp,-16) and keeps both vectors 16-byte aligned.
             NUVEC_ALIGNED16 clipped_position;
             clipped_position.x = position->x;
@@ -1267,7 +1267,7 @@ extern "C" {
         if (emitter_orientation == NULL) {
             emitter_orientation = &numtx_identity;
         }
-        if (particle_orientation == NULL) {
+        if (__builtin_expect(particle_orientation == NULL, 0)) {
             particle_orientation = &numtx_identity;
         }
 
@@ -1375,7 +1375,7 @@ extern "C" {
                 const i32 total_chunk_count = debrischunks + debrischunksglass;                                        \
                 for (i32 i = 0; i < total_chunk_count; ++i) {                                                          \
                     particlechunkrendertype_s *render_chunk = &ParticleChunkToRender[i];                               \
-                    if (render_chunk->particle_chunk == NULL) {                                                        \
+                    if (__builtin_expect(render_chunk->particle_chunk == NULL, 1)) {                                                        \
                         render_chunk->particle_chunk = key->particle_chunks[0];                                        \
                         render_chunk->effect = effect;                                                                 \
                         render_chunk->key = key;                                                                       \
@@ -1416,7 +1416,7 @@ extern "C" {
                 key->emission_position.z = position->z;
                 key->emission_time = emission_time;
                 uv1deb *particle = key->generator(key, effect, emission_time);
-                if (effect->process_spheres != 0 && particle != NULL && i == 1) {
+                if (__builtin_expect(effect->process_spheres != 0 && particle != NULL && i == 1, 0)) {
                     DebrisProcessSpheres(particle, emission_time, effect, key, 1);
                 }
                 emission_time = key->emission_epoch + emission_interval;
@@ -1450,12 +1450,12 @@ extern "C" {
             ++key->controlled_chunk_count;
         }
 
-        if (key->controlled_chunk_count == key->allocated_chunk_count) {
+        if (__builtin_expect(key->controlled_chunk_count == key->allocated_chunk_count, 1)) {
             debris_chunk_control_s **stack = &debris_chunk_control_stack[control_stack_index];
             if (*stack != NULL) {
                 const dma_particle_chunk_s *last_chunk = key->particle_chunks[key->controlled_chunk_count - 1];
                 for (debris_chunk_control_s *control = *stack; control != NULL; control = control->next) {
-                    if (control->particle_chunk != last_chunk) {
+                    if (__builtin_expect(control->particle_chunk != last_chunk, 1)) {
                         continue;
                     }
                     RemoveChunkControlFromStack(control, stack);

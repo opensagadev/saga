@@ -579,7 +579,7 @@ static void CheckIfParentsFinished(GIZFLOW_s *system, FLOWBOX_s *box) {
         for (child_index = 0; child_index < parent->child_count; ++child_index) {
             FLOWBOX_s *child = parent->children[child_index];
             if ((child->state_flags_low & 0xc0) == 0) {
-                if ((child->state_flags_low & 1) != 0 && child != box) {
+                if (__builtin_expect((child->state_flags_low & 1) != 0 && child != box, 0)) {
                     break;
                 }
             } else {

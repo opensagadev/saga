@@ -1368,7 +1368,7 @@ static i32 GizForces_Load(void *world_ptr, void *data) {
             force.pickup_rotation_x = EdFileReadShort();
             force.pickup_rotation_y = EdFileReadShort();
             EdFileReadNuVec(&force.effect_position);
-        } else if (version > 4) {
+        } else if (__builtin_expect(version > 4, 0)) {
             const i32 name_length = static_cast<i8>(EdFileReadChar());
             if (name_length != 0) {
                 EdFileRead(blowup_name, name_length);
@@ -1393,7 +1393,7 @@ static i32 GizForces_Load(void *world_ptr, void *data) {
         force.start_sfx_id = -1;
         force.loop_sfx_id = -1;
         force.stop_sfx_id = -1;
-        if (version > 13) {
+        if (__builtin_expect(version > 13, 0)) {
             if (GizmoFileReadName(sfx_name) != 0) {
                 force.start_sfx_id = static_cast<i16>(GetSfxId(sfx_name));
             }
@@ -1404,7 +1404,7 @@ static i32 GizForces_Load(void *world_ptr, void *data) {
                 force.stop_sfx_id = static_cast<i16>(GetSfxId(sfx_name));
             }
         }
-        if (version == 14) {
+        if (__builtin_expect(version == 14, 0)) {
             force.start_sfx_id = -1;
             force.loop_sfx_id = -1;
             force.stop_sfx_id = -1;

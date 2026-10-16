@@ -287,14 +287,14 @@ extern "C" {
     }
 
     void instNuGCutSceneCreateCamTgtArray(instNUGCUTSCENE_s *instance, i32 count, VARIPTR *buf) {
-        if (count == 0 || instance->camera_instance == NULL) {
+        instNUGCUTSCENECAMERA_s *camera = instance->camera_instance;
+        if (count == 0 || camera == NULL) {
             return;
         }
-        instNUGCUTSCENECAMERA_s *camera = instance->camera_instance;
         camera->target_capacity = static_cast<u8>(count);
         buf->addr = ALIGN(buf->addr, 0x10);
         camera->targets = reinterpret_cast<instNUGCUTCAMTGT_s *>(buf->void_ptr);
-        buf->void_ptr = camera->targets + count;
+        buf->addr += count * sizeof(instNUGCUTCAMTGT_s);
         memset(camera->targets, 0, count * sizeof(instNUGCUTCAMTGT_s));
     }
 

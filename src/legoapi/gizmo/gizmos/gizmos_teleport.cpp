@@ -368,7 +368,7 @@ i32 Teleport_UpdateHints(HINT_s *hint) {
         return 0;
     for (i32 i = 0; i < 2; ++i) {
         GameObject_s *object = Player[i];
-        if (object == NULL || ((object->field_0xe24 & 0x20) == 0 && Teleport_Find(object, 1.5625f, NULL) == NULL))
+        if (__builtin_expect(object == NULL || ((object->field_0xe24 & 0x20) == 0 && Teleport_Find(object, 1.5625f, NULL) == NULL), 1))
             continue;
         if (hint->control_mode_ids[0] == 0x268)
             return AvailableToPlayer(0x40000, -1, 0, 1) != 0;

@@ -438,7 +438,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *anim, f32 frame, nuanim
     u32 quarter;
     f32 fraction;
     i32 key_offset;
-    if (anim->key_count == 1) {
+    if (__builtin_expect(anim->key_count == 1, 0)) {
         quarter = 0;
         fraction = 0.0f;
         key_offset = 0;
@@ -472,7 +472,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *anim, f32 frame, nuanim
             SkipAni4V4Curve(curve_types[1], keys, scale_min);
             SkipAni4V4Curve(curve_types[2], keys, scale_min);
         }
-        if (*node_flags & 1) {
+        if (__builtin_expect(!!(*node_flags & 1), 1)) {
             SkipAni4V4Curve(curve_types[3], keys, scale_min);
             SkipAni4V4Curve(curve_types[4], keys, scale_min);
             SkipAni4V4Curve(curve_types[5], keys, scale_min);
@@ -666,7 +666,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
         f32 key = (frame - anim->first_frame) * static_cast<f32>(last) / static_cast<f32>(anim->frame_count - 1);
         key = key < 0.0f ? 0.0f : key;
         i32 whole;
-        if (static_cast<f32>(last) <= key) {
+        if (__builtin_expect(static_cast<f32>(last) <= key, 0)) {
             whole = last;
             fraction = 0.0f;
         } else {
@@ -689,7 +689,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
             SkipAni4V4Curve(curve_types[1], keys, scale_min);
             SkipAni4V4Curve(curve_types[2], keys, scale_min);
         }
-        if (*skip_flags & 1) {
+        if (__builtin_expect(!!(*skip_flags & 1), 1)) {
             SkipAni4V4Curve(curve_types[3], keys, scale_min);
             SkipAni4V4Curve(curve_types[4], keys, scale_min);
             SkipAni4V4Curve(curve_types[5], keys, scale_min);
@@ -746,7 +746,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
                     NuQuatFromEulerXYZ(&second, static_cast<i32>(second_angles.x * 10430.378f),
                                        static_cast<i32>(second_angles.y * 10430.378f),
                                        static_cast<i32>(second_angles.z * 10430.378f));
-                    if (first.x * second.x + first.y * second.y + first.z * second.z + first.w * second.w < 0.0f) {
+                    if (__builtin_expect(first.x * second.x + first.y * second.y + first.z * second.z + first.w * second.w < 0.0f, 1)) {
                         second.x = -second.x;
                         second.y = -second.y;
                         second.z = -second.z;
@@ -800,12 +800,12 @@ i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3_animheader_s *anim, f32 frame, 
             SkipAni4V4Curve(curve_types[1], keys, scale_min);
             SkipAni4V4Curve(curve_types[2], keys, scale_min);
         }
-        if (*node_flags & 1) {
+        if (__builtin_expect(!!(*node_flags & 1), 1)) {
             SkipAni4V4Curve(curve_types[3], keys, scale_min);
             SkipAni4V4Curve(curve_types[4], keys, scale_min);
             SkipAni4V4Curve(curve_types[5], keys, scale_min);
         }
-        if (*node_flags & 8) {
+        if (__builtin_expect(!!(*node_flags & 8), 1)) {
             SkipAni4V4Curve(curve_types[6], keys, scale_min);
             SkipAni4V4Curve(curve_types[7], keys, scale_min);
             SkipAni4V4Curve(curve_types[8], keys, scale_min);
@@ -1008,7 +1008,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint(ani3_animheader_s *anim, f32 frame, n
         for (i32 group = 0; group < 3; ++group) {
             const u16 *group_types = curve_types;
             curve_types += 3;
-            if ((flags & CurveGroupMasks[group]) == 0) {
+            if (__builtin_expect((flags & CurveGroupMasks[group]) == 0, 0)) {
                 if (group == 2) {
                     group_values[0] = group_values[1] = group_values[2] = 1.0f;
                 } else {
@@ -1050,17 +1050,17 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend_EulerQuat(ani3_animheader_s *an
     const u16 *curve_types = anim->curve_types;
     const u8 *first_flags = node_flags + first_joint;
     for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
-        if (*skip_flags & 2) {
+        if (__builtin_expect(!!(*skip_flags & 2), 1)) {
             SkipAni4V4Curve(curve_types[0], keys, scale_min);
             SkipAni4V4Curve(curve_types[1], keys, scale_min);
             SkipAni4V4Curve(curve_types[2], keys, scale_min);
         }
-        if (*skip_flags & 1) {
+        if (__builtin_expect(!!(*skip_flags & 1), 1)) {
             SkipAni4V4Curve(curve_types[3], keys, scale_min);
             SkipAni4V4Curve(curve_types[4], keys, scale_min);
             SkipAni4V4Curve(curve_types[5], keys, scale_min);
         }
-        if (*skip_flags & 8) {
+        if (__builtin_expect(!!(*skip_flags & 8), 1)) {
             SkipAni4V4Curve(curve_types[6], keys, scale_min);
             SkipAni4V4Curve(curve_types[7], keys, scale_min);
             SkipAni4V4Curve(curve_types[8], keys, scale_min);
@@ -1138,7 +1138,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend_EulerQuat(ani3_animheader_s *an
                 NuQuatFromEulerXYZ(&second, static_cast<i32>(10430.378f * second_angles.x),
                                    static_cast<i32>(10430.378f * second_angles.y),
                                    static_cast<i32>(second_angles.z * 10430.378f));
-                if (first.x * second.x + first.y * second.y + first.z * second.z + first.w * second.w < 0.0f) {
+                if (__builtin_expect(first.x * second.x + first.y * second.y + first.z * second.z + first.w * second.w < 0.0f, 1)) {
                     second.x = -second.x;
                     second.y = -second.y;
                     second.z = -second.z;
@@ -1336,13 +1336,13 @@ i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s *anim, f32 frame,
     u8 *keys = anim->keys + (whole / 4) * key_stride;
     const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     const i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
-    if (first_joint != 0)
+    if (__builtin_expect(first_joint != 0, 1))
         root_translation = NULL;
     const u8 *first_flags = node_flags + first_joint;
     for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
         for (i32 group = 0; group < 3; ++group) {
             i32 components = group == 1 ? 4 : 3;
-            if (*skip_flags & CurveGroupMasks[group]) {
+            if (__builtin_expect(!!(*skip_flags & CurveGroupMasks[group]), 1)) {
                 for (i32 component = 0; component < components; ++component) {
                     SkipAni4V4Curve(*curve_types++, keys, scale_min);
                 }
@@ -1386,17 +1386,17 @@ i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s *anim, f32 frame,
                     output[2] = output[2] * inverse_blend + blend;
                 }
                 curve_types += group == 1 ? 4 : 3;
-            } else if (group != 1) {
+            } else if (__builtin_expect(group != 1, 1)) {
                 f32 sampled = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[0], quarter, fraction,
                                                     keys, scale_min);
                 f32 delta_x = sampled - output[0];
-                if (root_translation)
+                if (__builtin_expect(!!(root_translation), 0))
                     root_translation->x = sampled;
                 output[0] += delta_x * blend;
                 sampled = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[1], quarter, fraction, keys,
                                                 scale_min);
                 f32 delta_y = sampled - output[1];
-                if (root_translation)
+                if (__builtin_expect(!!(root_translation), 1))
                     root_translation->y = sampled;
                 output[1] += delta_y * blend;
                 sampled = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[2], quarter, fraction, keys,
@@ -1440,7 +1440,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s *anim, f32 frame,
 extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
                                                  i32 joint_count, i32 first_joint, NUVEC *root_translation) {
     if ((anim->format_flags & ANI3_FORMAT_QUATERNION_ROTATION) != 0) {
-        if ((anim->format_flags & ANI3_FORMAT_QUATERNION_STORES_W) != 0) {
+        if (__builtin_expect((anim->format_flags & ANI3_FORMAT_QUATERNION_STORES_W) != 0, 0)) {
             return ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(anim, frame, buffer, blend, joint_count, first_joint,
                                                             root_translation);
         } else {
@@ -1480,7 +1480,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 fr
             SkipAni4V4Curve(curve_types[1], keys, scale_min);
             SkipAni4V4Curve(curve_types[2], keys, scale_min);
         }
-        if ((flags & NUANIMBUFF_JOINT_ROTATION) != 0) {
+        if (__builtin_expect((flags & NUANIMBUFF_JOINT_ROTATION) != 0, 1)) {
             SkipAni4V4Curve(curve_types[3], keys, scale_min);
             SkipAni4V4Curve(curve_types[4], keys, scale_min);
             SkipAni4V4Curve(curve_types[5], keys, scale_min);

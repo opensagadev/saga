@@ -421,7 +421,7 @@ i32 instNuGCutGetNextRigidInfo(instNUGCUTSCENE_s *instance, float frame, i32 ind
 }
 
 i32 instNuGCutSceneSwapBuffers(instNUGCUTSCENE_s *instance, i32 force) {
-    if (static_cast<i8>(instance->flags_8c) >= 0 || force != 0) {
+    if (__builtin_expect(static_cast<i8>(instance->flags_8c) >= 0, 0) || force != 0) {
         if (instance->pending_stream_buffer == NULL) {
             u8 flags = instance->flags_8b;
             if ((flags & 0x10) != 0) {

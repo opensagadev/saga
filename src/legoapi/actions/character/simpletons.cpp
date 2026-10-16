@@ -140,13 +140,13 @@ void oneAtOnce_MaintainArray() {
     for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
         GameObject_s *object = &Obj[index];
         const u16 character_flags = APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER;
-        if (object == NULL || (object->apiobj.field_0x1f8 & character_flags) != character_flags ||
-            object->ai.opponent == NULL || (object->field_0xf01 & 0x20) == 0) {
+        if (__builtin_expect(object == NULL || (object->apiobj.field_0x1f8 & character_flags) != character_flags ||
+            object->ai.opponent == NULL || (object->field_0xf01 & 0x20) == 0, 0)) {
             continue;
         }
 
         const u8 old_player = object->one_at_once_player;
-        if (old_player != 0xff) {
+        if (__builtin_expect(old_player != 0xff, 1)) {
             previous_attackers[old_player][previous_count[old_player]++] = object;
         }
         object->one_at_once_player = 0xff;

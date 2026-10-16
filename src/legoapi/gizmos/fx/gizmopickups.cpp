@@ -1231,7 +1231,7 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
                 continue;
             }
             position = GizmoGetPos(world->gizmo_sys, item->special_gizmo);
-            if (position == NULL) {
+            if (__builtin_expect(position == NULL, 1)) {
                 continue;
             }
             NuMtxSetScale(&matrix, &scale);
@@ -1243,14 +1243,14 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
 
             nuinstanim_s *animation = static_cast<nuinstanim_s *>(item->inst_anim);
             bool draw = (item->flags & 1) != 0 || animation == NULL || item->anim_data == NULL;
-            if (!draw && (animation->flags & NUINSTANIM_FLAG_REPEATING) == 0) {
+            if (__builtin_expect(!draw && (animation->flags & NUINSTANIM_FLAG_REPEATING) == 0, 1)) {
                 draw = ((item->flags & 2) != 0 && animation->ltime <= 1.0f) ||
                        ((item->flags & 8) != 0 && item->end_frame <= animation->ltime);
             }
             if (!draw && (item->flags & 4) != 0 && (animation->flags & NUINSTANIM_FLAG_PLAYING) != 0) {
                 draw = true;
             }
-            if (!draw) {
+            if (__builtin_expect(!draw, 0)) {
                 continue;
             }
 

@@ -328,7 +328,7 @@ static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, f
     float spacing = scale * 0.35f;
     const bool widescreen = GetMenuID() == 4 ? TempOptions.field11_0xb != 0
                                              : Game_OptionsSave != NULL && Game_OptionsSave->field11_0xb != 0;
-    if (widescreen) {
+    if (__builtin_expect(!!(widescreen), 0)) {
         spacing *= 0.85f;
     }
     if (alignment == 0) {
@@ -355,7 +355,7 @@ static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, f
         object_scale.x = scale;
         const i32 half_hp = (i + 1) * 2;
         float draw_alpha = 0.5f;
-        if (i < current_hp) {
+        if (__builtin_expect(i < current_hp, 1)) {
             draw_alpha = 1.0f;
             if (PLAYERHITPOINTS_2HEARTSIN1 != 0 && object->apiobj.player_controlled && i == current_hp - 1 &&
                 static_cast<i8>(object->current_hp) < half_hp) {

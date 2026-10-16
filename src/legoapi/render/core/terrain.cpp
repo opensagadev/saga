@@ -1263,7 +1263,7 @@ i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 rem
         query = TerI;
         query->hit_time = overlap_time;
         f32 inverse_distance = 0.0f;
-        if (distance != 0.0f) {
+        if (__builtin_expect(distance != 0.0f, 1)) {
             inverse_distance = 1.0f / distance;
         }
         query->hit_type = TERRAIN_HIT_TYPE_CYLINDER | TERRAIN_HIT_TYPE_SECOND_NORMAL;
@@ -1289,7 +1289,7 @@ i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 rem
 
     const f32 edge_length = NuFsqrt(horizontal_length_sq + edge_direction.z * edge_direction.z);
     f32 inverse_edge_length = 0.0f;
-    if (edge_length != 0.0f) {
+    if (__builtin_expect(edge_length != 0.0f, 0)) {
         inverse_edge_length = 1.0f / edge_length;
     }
     edge_direction.x *= inverse_edge_length;
@@ -1336,7 +1336,7 @@ i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 rem
     }
 
     f32 hit_distance;
-    if (height_offset >= 0.0f) {
+    if (__builtin_expect(height_offset >= 0.0f, 0)) {
         hit_distance = closest_height - height_offset;
     } else {
         hit_distance = height_offset - negative_closest_height;
@@ -1350,7 +1350,7 @@ i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 rem
             if (hit_distance != 0.0f && query->movement_length != 0.0f) {
                 hit_time = hit_distance / query->movement_length;
             }
-            if (query->hit_time <= hit_time) {
+            if (__builtin_expect(query->hit_time <= hit_time, 0)) {
                 *vertex_mask &= remaining_vertex_mask;
                 return 0;
             }
@@ -1399,7 +1399,7 @@ i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 rem
     };
     const f32 distance_sq =
         edge_direction.x * edge_direction.x + edge_direction.y * edge_direction.y + edge_direction.z * edge_direction.z;
-    if (distance_sq >= query->collision_radius_sq) {
+    if (__builtin_expect(distance_sq >= query->collision_radius_sq, 0)) {
         return 0;
     }
 
@@ -1417,7 +1417,7 @@ i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 rem
         query = TerI;
         query->hit_time = overlap_time;
         f32 inverse_distance = 0.0f;
-        if (distance != 0.0f) {
+        if (__builtin_expect(distance != 0.0f, 0)) {
             inverse_distance = 1.0f / distance;
         }
         query->hit_type = TERRAIN_HIT_TYPE_CYLINDER | TERRAIN_HIT_TYPE_SECOND_NORMAL;
@@ -1561,7 +1561,7 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
         contact_point.x = query->movement.x * candidate_time;
         contact_point.z = query->movement.z * candidate_time;
         test_primary_face = 1;
-    } else if (primary_start <= 0.0f && primary_end <= 0.0f && primary_start >= -radius && primary_end >= -radius) {
+    } else if (__builtin_expect(primary_start <= 0.0f && primary_end <= 0.0f && primary_start >= -radius && primary_end >= -radius, 0)) {
         candidate_time = primary_start;
         const f32 projection_distance = -primary_start;
         contact_point.y = primary_normal.y * projection_distance;
@@ -1657,7 +1657,7 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
         DeRotateTerrain(surface);
 
         if (primary_start >= -radius) {
-            if (CheckCylinder(0, 1, &vertex_mask, 0xc) != 0) {
+            if (__builtin_expect(CheckCylinder(0, 1, &vertex_mask, 0xc) != 0, 0)) {
                 query = TerI;
                 query->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP) != 0;
                 query->hit_edge = TERRAIN_HIT_EDGE_0_1;
@@ -1722,7 +1722,7 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
         query->surface = surface;
     }
     query->unclamped_hit_time = query->hit_time;
-    if (query->hit_time < 0.0f) {
+    if (__builtin_expect(query->hit_time < 0.0f, 0)) {
         query->hit_time = 0.0f;
     }
     return collision_found;
@@ -3804,14 +3804,14 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
         scan_radius = NuFsqrt(reach + 1.0f);
     } else {
         f32 radius = query->collision_radius;
-        if (!(query->movement.x > 0.0f)) {
+        if (__builtin_expect(!(query->movement.x > 0.0f), 0)) {
             bounds.max_x = query->position.x + 0.02f + radius;
             bounds.min_x = (query->movement.x + query->position.x - 0.02f) - radius;
         } else {
             bounds.max_x = query->position.x + query->movement.x + 0.02f + radius;
             bounds.min_x = (query->position.x - 0.02f) - radius;
         }
-        if (!(query->movement.y > 0.0f)) {
+        if (__builtin_expect(!(query->movement.y > 0.0f), 0)) {
             bounds.max_y = query->position.y + 0.02f + radius;
             bounds.min_y = (query->movement.y + query->position.y - 0.02f) - radius;
         } else {
@@ -3842,7 +3842,7 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
     TERRAIN_PLATFORM *platform = &CurTerr->platforms[group->scene_index];
     NUMTX *matrix = static_cast<NUMTX *>(platform->scene_object);
     TerrainScanBounds local = bounds;
-    if (matrix != NULL) {
+    if (__builtin_expect(matrix != NULL, 1)) {
         if (platform->previous_matrix.m30 < matrix->m30)
             local.max_x += (matrix->m30 - platform->previous_matrix.m30) * 1.5f;
         else
@@ -3851,7 +3851,7 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
             local.max_y += (matrix->m31 - platform->previous_matrix.m31) * 1.5f;
         else
             local.min_y += (matrix->m31 - platform->previous_matrix.m31) * 1.5f;
-        if (!(matrix->m32 > platform->previous_matrix.m32))
+        if (__builtin_expect(!(matrix->m32 > platform->previous_matrix.m32), 0))
             local.min_z += (matrix->m32 - platform->previous_matrix.m32) * 1.5f;
         else
             local.max_z += (matrix->m32 - platform->previous_matrix.m32) * 1.5f;
@@ -3947,8 +3947,8 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
         const f32 x = (bounds.max_x + bounds.min_x) * 0.5f - group->origin.x;
         const f32 y = ((bounds.max_y + bounds.min_y) * 0.5f - group->origin.y) * query->inverse_object_scale;
         const f32 z = (bounds.max_z + bounds.min_z) * 0.5f - group->origin.z;
-        if (group->chunk_type != -1 &&
-            x * x + y * y + z * z < (scan_radius + group->radius) * (scan_radius + group->radius)) {
+        if (__builtin_expect(group->chunk_type != -1 &&
+            x * x + y * y + z * z < (scan_radius + group->radius) * (scan_radius + group->radius), 0)) {
             NUVEC4 *vertices = reinterpret_cast<NUVEC4 *>((reinterpret_cast<uintptr_t>(scratch) + 31) & ~uintptr_t(15));
             TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group->data);
             while (batch->marker >= 0) {
@@ -3973,7 +3973,7 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
                     vertices[2].w = 0.0f;
                     NuVec4MtxTransformVU0x3(vertices, vertices,
                                             static_cast<NUMTX *>(CurTerr->platforms[group->scene_index].scene_object));
-                    if (source->normals[1].y < 65535.0f) {
+                    if (__builtin_expect(source->normals[1].y < 65535.0f, 1)) {
                         vertices[3].x = source->vectors[3].x;
                         vertices[3].y = source->vectors[3].y;
                         vertices[3].z = source->vectors[3].z;
@@ -3992,8 +3992,8 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
                     if (vertices[0].z <= local.min_z && !(local.min_z < vertices[1].z) &&
                         vertices[2].z <= local.min_z && vertices[3].z <= local.min_z)
                         continue;
-                    if (!(vertices[0].z < local.max_z || vertices[1].z < local.max_z || vertices[2].z < local.max_z ||
-                          vertices[3].z < local.max_z))
+                    if (__builtin_expect(!(vertices[0].z < local.max_z || vertices[1].z < local.max_z || vertices[2].z < local.max_z ||
+                          vertices[3].z < local.max_z), 0))
                         continue;
                     TERRAIN_SHAPE *surface = &ScaleTerrain[scaled_count];
                     memcpy(surface->material, source->material, 4);
@@ -4099,7 +4099,7 @@ i32 HitWallSpline() {
     f32 hit = 0.0f;
     NUVEC normal;
     normal.y = 0.0f;
-    if (WallSplCount == 0)
+    if (__builtin_expect(WallSplCount == 0, 0))
         return hit;
     for (i32 i = 0; i < WallSplCount; i += 2) {
         TerrainQuery_s *query = TerI;
@@ -4118,7 +4118,7 @@ i32 HitWallSpline() {
                                  ((mz + pz) - WallSplList[i].position.z) * normal.z - radius;
         const f32 start_distance =
             (px - WallSplList[i].position.x) * normal.x + (pz - WallSplList[i].position.z) * normal.z - radius;
-        if ((end_distance < 0.0f || start_distance < 0.0f) && start_distance > -radius) {
+        if (__builtin_expect((end_distance < 0.0f || start_distance < 0.0f) && start_distance > -radius, 0)) {
             f32 time, x, z;
             if (start_distance < 0.0f) {
                 time = start_distance;
@@ -4160,12 +4160,12 @@ i32 HitWallSpline() {
         const f32 padded_radius = radius + 0.0005f;
         f32 time = 0.0f;
         bool penetrating = true;
-        if (along >= 0.0f) {
+        if (__builtin_expect(along >= 0.0f, 1)) {
             const f32 side_z = WallSplList[i].position.z - (direction.z * along + pz);
             const f32 side_x = WallSplList[i].position.x - (direction.x * along + px);
             const f32 side_x_sq = side_x * side_x;
             const f32 side_z_sq = side_z * side_z;
-            if (side_x_sq + side_z_sq <= padded_radius * padded_radius) {
+            if (__builtin_expect(side_x_sq + side_z_sq <= padded_radius * padded_radius, 0)) {
                 const f32 distance = along - NuFsqrt((radius * radius - side_x_sq) - side_z_sq);
                 const f32 movement_sq = mx * mx + mz * mz;
                 if (distance >= -0.0005f && movement_sq >= distance * distance) {
@@ -4726,15 +4726,15 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
     i32 platform_index = CurTerr->groups[old_query->terrain_group_index].scene_index;
     TERRAIN_PLATFORM *platform = &CurTerr->platforms[platform_index];
     NUMTX *matrix = static_cast<NUMTX *>(platform->scene_object);
-    if (matrix == NULL)
+    if (__builtin_expect(matrix == NULL, 0))
         return 1;
     NUMTX *previous = &platform->previous_matrix;
     if (previous->m30 == matrix->m30 && previous->m31 == matrix->m31 && previous->m32 == matrix->m32) {
         if (!(platform->flags & 1))
             return 1;
-        if (previous->m00 == matrix->m00 && previous->m01 == matrix->m01 && previous->m02 == matrix->m02 &&
+        if (__builtin_expect(previous->m00 == matrix->m00 && previous->m01 == matrix->m01 && previous->m02 == matrix->m02 &&
             previous->m10 == matrix->m10 && previous->m11 == matrix->m11 && previous->m12 == matrix->m12 &&
-            previous->m20 == matrix->m20 && previous->m21 == matrix->m21 && previous->m22 == matrix->m22)
+            previous->m20 == matrix->m20 && previous->m21 == matrix->m21 && previous->m22 == matrix->m22, 1))
             return 1;
     }
     i32 saved_sphere = curSphereter;
@@ -4835,7 +4835,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                         surface->vectors[3].y = vertices[3].y;
                         surface->vectors[3].z = vertices[3].z;
                     }
-                    if (!quad) {
+                    if (__builtin_expect(!quad, 0)) {
                         surface->normals[1].y = 65536.0f;
                     } else {
                         vertices[0].x = surface->vectors[1].x - surface->vectors[3].x;
@@ -4944,7 +4944,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                             (vertices[3].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
                         surface->vectors[3].z = vertices[3].z;
                     }
-                    if (!quad) {
+                    if (__builtin_expect(!quad, 1)) {
                         surface->normals[1].y = 65536.0f;
                     } else {
                         vertices[0].x = surface->vectors[1].x - surface->vectors[3].x;
@@ -4992,7 +4992,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                 i32 shape_count = batch->shape_count;
                 TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
                 for (i32 remaining = shape_count; remaining > 0; --remaining, ++source) {
-                    if (source->material[1] != 0)
+                    if (__builtin_expect(source->material[1] != 0, 0))
                         continue;
                     bool quad = source->normals[1].y < 65535.0f;
                     TERRAIN_SHAPE *surface = &ScaleTerrain[transformed_count];
@@ -5015,7 +5015,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                             (source->vectors[3].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
                         surface->vectors[3].z = source->vectors[3].z;
                     }
-                    if (quad) {
+                    if (__builtin_expect(!!(quad), 0)) {
                         NUVEC *normal = &source->normals[1];
                         f32 length = NuFsqrt(normal->x * normal->x + (normal->y * normal->y) * query->object_scale_sq +
                                              normal->z * normal->z);
@@ -5044,7 +5044,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
         }
     }
     i16 *header = reinterpret_cast<i16 *>(query->scan_list_storage);
-    if (count != 0) {
+    if (__builtin_expect(count != 0, 0)) {
         header[0] = count;
         header[1] = old_query->terrain_group_index;
         header = reinterpret_cast<i16 *>(cursor);
@@ -5055,7 +5055,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
     DerotateMovementVector();
     HitTerrain();
     TerrainImpactNorm();
-    if (TerrainImpactPlatform(flags) != 0) {
+    if (__builtin_expect(TerrainImpactPlatform(flags) != 0, 0)) {
         NuScratchRelease();
         NuScratchRelease();
         TerI = old_query;
@@ -5091,14 +5091,14 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
         TerI = old_query;
         query->start_position.y = query->position.y;
     }
-    if (!TerrainPlatformMoveCheck(&query->position, NULL, platform_index, 1, 1))
+    if (__builtin_expect(!TerrainPlatformMoveCheck(&query->position, NULL, platform_index, 1, 1), 0))
         flags[0] = 0;
     TerI->position = query->position;
     if (flags[0] != 0 && CurTerr->groups[castnum].chunk_type == 1) {
         TerI->hit_flags[1] = 1;
         PlatformConnect(reinterpret_cast<char *>(old_query->hit_flags), &old_query->movement, movement_delta,
                         CurTerr->groups[castnum].scene_index);
-    } else if (CurTrackInfo != NULL) {
+    } else if (__builtin_expect(CurTrackInfo != NULL, 0)) {
         CurTrackInfo->flags &= ~TERRAIN_TRACK_FLAG_CONNECTED;
     }
     NuScratchRelease();
@@ -5614,9 +5614,9 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
                 // Cache geometry independently of the requesting material mask.
                 const i32 group_index = group_indices[cell_group];
                 TERRAIN_GROUP &group = CurTerr->groups[group_index];
-                if (!(max_x >= group.bounds_min.x && max_z >= group.bounds_min.z && group.bounds_max.x >= min_x &&
+                if (__builtin_expect(!(max_x >= group.bounds_min.x && max_z >= group.bounds_min.z && group.bounds_max.x >= min_x &&
                       group.bounds_max.z > min_z) ||
-                    group.chunk_type == -1)
+                    group.chunk_type == -1, 0))
                     continue;
                 const f32 local_max_x = max_x - group.origin.x;
                 const f32 local_min_x = min_x - group.origin.x;
@@ -5679,9 +5679,9 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
             TERRAIN_SHAPE **shapes = reinterpret_cast<TERRAIN_SHAPE **>(entry + sizeof(TERRAIN_SHAPE *));
             entry = reinterpret_cast<u8 *>(shapes + count);
             TERRAIN_GROUP &group = CurTerr->groups[group_index];
-            if (!(max_x >= group.bounds_min.x && max_z >= group.bounds_min.z && group.bounds_max.x >= min_x &&
+            if (__builtin_expect(!(max_x >= group.bounds_min.x && max_z >= group.bounds_min.z && group.bounds_max.x >= min_x &&
                   group.bounds_max.z > min_z) ||
-                group.chunk_type == -1) {
+                group.chunk_type == -1, 1)) {
                 continue;
             }
 
@@ -5692,8 +5692,8 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
             TERRAIN_SHAPE **shape_entry = shapes;
             for (i32 remaining = count; remaining > 0; --remaining, ++shape_entry) {
                 TERRAIN_SHAPE *shape = *shape_entry;
-                if (!(local_max_x >= shape->min_x && shape->max_x > local_min_x && local_max_z >= shape->min_z &&
-                      shape->max_z > local_min_z)) {
+                if (__builtin_expect(!(local_max_x >= shape->min_x && shape->max_x > local_min_x && local_max_z >= shape->min_z &&
+                      shape->max_z > local_min_z), 0)) {
                     continue;
                 }
                 if (shape->material[1] != 0 && (shape->material[1] & terrain_mask) == 0) {
@@ -5723,7 +5723,7 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
             const i32 group_index = platform_groups[platform_index];
             TERRAIN_GROUP &group = CurTerr->groups[group_index];
             TERRAIN_PLATFORM &platform = CurTerr->platforms[group.scene_index];
-            if (platform.scene_transform != NULL) {
+            if (__builtin_expect(platform.scene_transform != NULL, 1)) {
                 const u8 visible_mask = (platform.flags & TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED) != 0 ? 2 : 1;
                 if ((*static_cast<u8 *>(platform.scene_transform) & visible_mask) == 0) {
                     continue;
@@ -5740,14 +5740,14 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
                     local_max_x = (matrix->m30 - platform.previous_matrix.m30) * 1.5f + max_x - group.origin.x;
                 else
                     local_min_x = (matrix->m30 - platform.previous_matrix.m30) * 1.5f + min_x - group.origin.x;
-                if (matrix->m32 > platform.previous_matrix.m32)
+                if (__builtin_expect(matrix->m32 > platform.previous_matrix.m32, 0))
                     local_max_z = (matrix->m32 - platform.previous_matrix.m32) * 1.5f + max_z - group.origin.z;
                 else
                     local_min_z = (matrix->m32 - platform.previous_matrix.m32) * 1.5f + min_z - group.origin.z;
             }
-            if (!ShadowBoundsOverlap(local_min_x, local_min_z, local_max_x, local_max_z, group.bounds_min,
+            if (__builtin_expect(!ShadowBoundsOverlap(local_min_x, local_min_z, local_max_x, local_max_z, group.bounds_min,
                                      group.bounds_max) ||
-                group.chunk_type == -1) {
+                group.chunk_type == -1, 0)) {
                 continue;
             }
 
@@ -6169,8 +6169,8 @@ f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
                 f32 nz = normal->z;
                 f32 y = corner->y + CurTerr->groups[group_index].origin.y +
                         ((x - corner->x) * nx + (z - corner->z) * nz) / -ny;
-                if (surface->material[1] != 0) {
-                    if (position->y >= y && y > efloor_y && facing == 1) {
+                if (__builtin_expect(surface->material[1] != 0, 0)) {
+                    if (__builtin_expect(position->y >= y && y > efloor_y && facing == 1, 0)) {
                         efloor_nx = nx;
                         efloor_ny = ny;
                         efloor_nz = nz;
@@ -6256,7 +6256,7 @@ f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
         shape_count = *reinterpret_cast<i16 *>(scan);
     }
 
-    if (eroof_y < 2000000.0f && eroof_ny < 0.0f && roof_range + position->y > eroof_y) {
+    if (__builtin_expect(eroof_y < 2000000.0f && eroof_ny < 0.0f && roof_range + position->y > eroof_y, 0)) {
         if (roof_y < 2000000.0f && roof_ny < 0.0f && roof_range + position->y > roof_y && eroof_y > roof_y) {
             EShadRoofPoly = NULL;
             EShadRoofY = 2000000.0f;
@@ -6324,7 +6324,7 @@ f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
         shadhit = 1;
         ShadPoly = roof_poly;
         castnum = roof_group;
-    } else if (floor_y > -2000000.0f) {
+    } else if (__builtin_expect(floor_y > -2000000.0f, 0)) {
         ShadNorm.x = floor_nx;
         ShadNorm.y = floor_ny;
         ShadNorm.z = floor_nz;
@@ -7469,14 +7469,14 @@ i16 *NewScanHandelFull(nuvec_s *position, nuvec_s *movement, f32 radius, i32 sca
     const f32 scan_radius = NuFsqrt(dx * dx + dy * dy + dz * dz + 0.05f);
     for (i32 cell_index = 0; cell_index < CurTerr->used_cell_count; ++cell_index) {
         const TERRAIN_CELL &cell = CurTerr->cells[cell_index];
-        if (!(bounds.max_x >= cell.min_x && bounds.max_z >= cell.min_z && cell.max_x >= bounds.min_x &&
-              cell.max_z >= bounds.min_z))
+        if (__builtin_expect(!(bounds.max_x >= cell.min_x && bounds.max_z >= cell.min_z && cell.max_x >= bounds.min_x &&
+              cell.max_z >= bounds.min_z), 1))
             continue;
         const i16 *indices = CurTerr->group_indices + static_cast<i16>(cell.first_group);
         for (i32 i = 0; i < static_cast<i16>(cell.group_count); ++i) {
             const i32 index = indices[i];
             TERRAIN_GROUP &group = CurTerr->groups[index];
-            if (!TerrainBoundsOverlap(bounds, group.bounds_min, group.bounds_max) || group.chunk_type == -1)
+            if (__builtin_expect(!TerrainBoundsOverlap(bounds, group.bounds_min, group.bounds_max) || group.chunk_type == -1, 0))
                 continue;
             TerrainScanBounds local = bounds;
             local.min_x -= group.origin.x;
@@ -7495,10 +7495,10 @@ i16 *NewScanHandelFull(nuvec_s *position, nuvec_s *movement, f32 radius, i32 sca
                     batch->max_z > local.min_z) {
                     for (i32 j = 0; j < shape_count; ++j) {
                         TERRAIN_SHAPE *shape = &shapes[j];
-                        if (local.max_x >= shape->min_x && shape->max_x > local.min_x && local.max_z >= shape->min_z &&
+                        if (__builtin_expect(local.max_x >= shape->min_x && shape->max_x > local.min_x && local.max_z >= shape->min_z &&
                             shape->max_z > local.min_z && local.max_y >= shape->min_y && shape->max_y > local.min_y &&
                             reinterpret_cast<u8 *>(writer.cursor) < writer.limit &&
-                            (shape->material[1] == 0 || (shape->material[1] & terrain_mask) != 0)) {
+                            (shape->material[1] == 0 || (shape->material[1] & terrain_mask) != 0), 0)) {
                             *writer.cursor++ = shape;
                             ++writer.group_shape_count;
                         }
@@ -7538,7 +7538,7 @@ i16 *NewScanHandelFull(nuvec_s *position, nuvec_s *movement, f32 radius, i32 sca
                     local.max_x = (matrix->m30 - platform.previous_matrix.m30) * 1.5f + bounds.max_x - group.origin.x;
                     local.min_x = bounds.min_x - group.origin.x;
                 }
-                if (matrix->m31 > platform.previous_matrix.m31) {
+                if (__builtin_expect(matrix->m31 > platform.previous_matrix.m31, 1)) {
                     local.max_y = (matrix->m31 - platform.previous_matrix.m31) * 1.5f + bounds.max_y - group.origin.y;
                     local.min_y = bounds.min_y - group.origin.y;
                 } else {
@@ -7650,7 +7650,7 @@ i16 *NewScanHandelFull(nuvec_s *position, nuvec_s *movement, f32 radius, i32 sca
                         if (shape->normals[1].y < 65535.0f) {
                             memcpy(&transformed->vectors[3], &vertices[3], sizeof(NUVEC));
                         }
-                        if (!quad)
+                        if (__builtin_expect(!quad, 0))
                             transformed->normals[1].y = 65536.0f;
                         if (quad) {
                             NUVEC a, b;
@@ -7756,14 +7756,14 @@ i16 *NewScanHandelSubset(i16 *subset, nuvec_s *position, nuvec_s *movement, f32 
                 local.min_x = (matrix->m30 - platform->previous_matrix.m30) * 1.5f + bounds.min_x - group.origin.x;
                 local.max_x = bounds.max_x - group.origin.x;
             }
-            if (matrix->m31 > platform->previous_matrix.m31) {
+            if (__builtin_expect(matrix->m31 > platform->previous_matrix.m31, 0)) {
                 local.max_y = (matrix->m31 - platform->previous_matrix.m31) * 1.5f + bounds.max_y - group.origin.y;
                 local.min_y = bounds.min_y - group.origin.y;
             } else {
                 local.min_y = (matrix->m31 - platform->previous_matrix.m31) * 1.5f + bounds.min_y - group.origin.y;
                 local.max_y = bounds.max_y - group.origin.y;
             }
-            if (matrix->m32 > platform->previous_matrix.m32) {
+            if (__builtin_expect(matrix->m32 > platform->previous_matrix.m32, 0)) {
                 local.max_z = (matrix->m32 - platform->previous_matrix.m32) * 1.5f + bounds.max_z - group.origin.z;
                 local.min_z = bounds.min_z - group.origin.z;
             } else {
@@ -7950,7 +7950,7 @@ void ScanTerrainHandel(i32 terrain_mask, i16 *handle) {
     TerI->scan_group_index = -1;
     TerrainScanBounds bounds;
     f32 scan_radius_sq;
-    if (TerI->scan_result == 1) {
+    if (__builtin_expect(TerI->scan_result == 1, 1)) {
         bounds = TerrainHandleBounds(TerI->position, TerI->movement, TerI->collision_radius);
         f32 dx = bounds.min_x - bounds.max_x;
         f32 dy = bounds.min_y - bounds.max_y;
@@ -8003,10 +8003,10 @@ void ScanTerrainHandel(i32 terrain_mask, i16 *handle) {
                 local.min_z = (matrix->m32 - platform->previous_matrix.m32) * 1.5f + bounds.min_z - group.origin.z;
                 local.max_z = bounds.max_z - group.origin.z;
             }
-            if (group.scene_index == TerrPlatDis)
+            if (__builtin_expect(group.scene_index == TerrPlatDis, 0))
                 continue;
             if ((platform->flags & TERRAIN_PLATFORM_FLAG_ROTATING) == 0) {
-                if (!TerrainBoundsOverlap(local, group.bounds_min, group.bounds_max))
+                if (__builtin_expect(!TerrainBoundsOverlap(local, group.bounds_min, group.bounds_max), 0))
                     continue;
                 for (i32 i = 0; i < count; ++i) {
                     TERRAIN_SHAPE *shape = shapes[i];
@@ -8024,10 +8024,10 @@ void ScanTerrainHandel(i32 terrain_mask, i16 *handle) {
                 const f32 y = ((bounds.min_y + bounds.max_y) * 0.5f - group.origin.y) * query->inverse_object_scale;
                 const f32 z = (bounds.min_z + bounds.max_z) * 0.5f - group.origin.z;
                 const f32 reach = scan_radius + group.radius;
-                if (!(reach * reach > x * x + y * y + z * z))
+                if (__builtin_expect(!(reach * reach > x * x + y * y + z * z), 1))
                     continue;
                 for (i32 i = 0; i < count; ++i) {
-                    if (reinterpret_cast<u8 *>(writer.cursor) < writer.limit) {
+                    if (__builtin_expect(reinterpret_cast<u8 *>(writer.cursor) < writer.limit, 0)) {
                         TERRAIN_SHAPE *shape = shapes[i];
                         if ((shape->material[1] == 0 || (shape->material[1] & terrain_mask) != 0) &&
                             TerrainHandleVerticesOverlap(local, *shape)) {
@@ -8038,7 +8038,7 @@ void ScanTerrainHandel(i32 terrain_mask, i16 *handle) {
                 }
             }
         } else {
-            if (!TerrainBoundsOverlap(bounds, group.bounds_min, group.bounds_max))
+            if (__builtin_expect(!TerrainBoundsOverlap(bounds, group.bounds_min, group.bounds_max), 0))
                 continue;
             const NUVEC origin = group.origin;
             for (i32 i = 0; i < count; ++i) {

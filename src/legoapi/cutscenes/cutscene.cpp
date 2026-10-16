@@ -1942,20 +1942,20 @@ void instNuGCutSceneEndFirstFrame(instNUGCUTSCENE_s *instance) {
     instance->flags_89 &= ~0x10U;
     instance->flags_8c &= ~0x40U;
 
-    f32 frame;
-    if ((instance->flags_8a & 4) == 0) {
-        frame = instance->current_frame;
+    if ((instance->flags_8a & 4) != 0) {
         if (cutscene->rigid_system != NULL) {
-            instNuGCutRigidSysEnd(instance, frame);
+            instNuGCutRigidSysEnd(instance, cutscene->duration - instance->current_frame);
         }
         if (instance->character_instance != NULL) {
-            NUGCUTCHARSYS_s *system = cutscene->character_system;
+            NUGCUTSCENE_s *scene = instance->cutscene;
+            const f32 frame = scene->duration - instance->current_frame;
+            NUGCUTCHARSYS_s *system = scene->character_system;
             for (i32 i = 0; i < system->character_count; ++i) {
                 instNUGCUTCHAR_s *inst_character = &instance->character_instance->characters[i];
                 NUGCUTCHAR_s *character = &system->characters[i];
                 if (inst_character->character_model != NULL) {
                     if ((character->flags & 2) == 0 && NuCutSceneCharacterEval != NULL) {
-                        NuCutSceneCharacterEval(instance, cutscene, inst_character, character, frame);
+                        NuCutSceneCharacterEval(instance, scene, inst_character, character, frame);
                     }
                     if (nu_current_thread_id == 0 && NuCutSceneCharacterRelease != NULL) {
                         NuCutSceneCharacterRelease(inst_character, character);
@@ -1964,18 +1964,19 @@ void instNuGCutSceneEndFirstFrame(instNUGCUTSCENE_s *instance) {
             }
         }
     } else {
-        frame = cutscene->duration - instance->current_frame;
         if (cutscene->rigid_system != NULL) {
-            instNuGCutRigidSysEnd(instance, frame);
+            instNuGCutRigidSysEnd(instance, instance->current_frame);
         }
         if (instance->character_instance != NULL) {
-            NUGCUTCHARSYS_s *system = cutscene->character_system;
+            NUGCUTSCENE_s *scene = instance->cutscene;
+            const f32 frame = instance->current_frame;
+            NUGCUTCHARSYS_s *system = scene->character_system;
             for (i32 i = 0; i < system->character_count; ++i) {
                 instNUGCUTCHAR_s *inst_character = &instance->character_instance->characters[i];
                 NUGCUTCHAR_s *character = &system->characters[i];
                 if (inst_character->character_model != NULL) {
                     if ((character->flags & 2) == 0 && NuCutSceneCharacterEval != NULL) {
-                        NuCutSceneCharacterEval(instance, cutscene, inst_character, character, frame);
+                        NuCutSceneCharacterEval(instance, scene, inst_character, character, frame);
                     }
                     if (nu_current_thread_id == 0 && NuCutSceneCharacterRelease != NULL) {
                         NuCutSceneCharacterRelease(inst_character, character);
@@ -1993,21 +1994,19 @@ void instNuGCutSceneEndFirstFrame(instNUGCUTSCENE_s *instance) {
 extern "C" void instNuGCutSceneJumpToEnd(instNUGCUTSCENE_s *instance) {
     NUGCUTSCENE_s *cutscene = instance->cutscene;
     f32 duration = cutscene->duration;
-    instance->flags_88 = (instance->flags_88 & ~2) | 1;
+    instance->flags_88_bit0 = 1;
+    instance->flags_88_bit1 = 0;
     instance->flags_89 |= 0x10;
     instance->flags_8c &= ~0x40;
     instance->current_frame = duration;
     ForcePlayEndFrame = 1;
-    f32 frame;
     if ((instance->flags_8a & 4) != 0) {
-        frame = cutscene->duration - instance->current_frame;
         if (cutscene->rigid_system != NULL) {
-            instNuGCutRigidSysEnd(instance, frame);
+            instNuGCutRigidSysEnd(instance, cutscene->duration - instance->current_frame);
         }
     } else {
-        frame = instance->current_frame;
         if (cutscene->rigid_system != NULL) {
-            instNuGCutRigidSysEnd(instance, frame);
+            instNuGCutRigidSysEnd(instance, instance->current_frame);
         }
     }
     if (instance->locator_instance != NULL) {
@@ -2025,16 +2024,13 @@ extern "C" void instNuGCutSceneJumpToLastFrame(instNUGCUTSCENE_s *instance) {
     instance->flags_8c |= 0x40;
     instance->current_frame = duration;
     ForcePlayEndFrame = 1;
-    f32 frame;
     if ((instance->flags_8a & 4) != 0) {
-        frame = cutscene->duration - instance->current_frame;
         if (cutscene->rigid_system != NULL) {
-            instNuGCutRigidSysEnd(instance, frame);
+            instNuGCutRigidSysEnd(instance, cutscene->duration - instance->current_frame);
         }
     } else {
-        frame = instance->current_frame;
         if (cutscene->rigid_system != NULL) {
-            instNuGCutRigidSysEnd(instance, frame);
+            instNuGCutRigidSysEnd(instance, instance->current_frame);
         }
     }
     if (instance->locator_instance != NULL) {
@@ -2055,20 +2051,20 @@ extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance) {
     instance->flags_8c &= ~0x40U;
     ForcePlayEndFrame = 1;
 
-    f32 frame;
-    if ((instance->flags_8a & 4) == 0) {
-        frame = instance->current_frame;
+    if ((instance->flags_8a & 4) != 0) {
         if (cutscene->rigid_system != NULL) {
-            instNuGCutRigidSysEnd(instance, frame);
+            instNuGCutRigidSysEnd(instance, instance->cutscene->duration - instance->current_frame);
         }
         if (instance->character_instance != NULL) {
-            NUGCUTCHARSYS_s *system = cutscene->character_system;
+            NUGCUTSCENE_s *scene = instance->cutscene;
+            const f32 frame = scene->duration - instance->current_frame;
+            NUGCUTCHARSYS_s *system = scene->character_system;
             for (i32 i = 0; i < system->character_count; ++i) {
                 NUGCUTCHAR_s *character = &system->characters[i];
                 instNUGCUTCHAR_s *inst_character = &instance->character_instance->characters[i];
                 if (inst_character->character_model != NULL) {
                     if ((character->flags & 2) == 0 && NuCutSceneCharacterEval != NULL) {
-                        NuCutSceneCharacterEval(instance, cutscene, inst_character, character, frame);
+                        NuCutSceneCharacterEval(instance, scene, inst_character, character, frame);
                     }
                     if (nu_current_thread_id == 0 && NuCutSceneCharacterRelease != NULL) {
                         NuCutSceneCharacterRelease(inst_character, character);
@@ -2077,18 +2073,19 @@ extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance) {
             }
         }
     } else {
-        frame = cutscene->duration - instance->current_frame;
         if (cutscene->rigid_system != NULL) {
-            instNuGCutRigidSysEnd(instance, frame);
+            instNuGCutRigidSysEnd(instance, instance->current_frame);
         }
         if (instance->character_instance != NULL) {
-            NUGCUTCHARSYS_s *system = cutscene->character_system;
+            NUGCUTSCENE_s *scene = instance->cutscene;
+            const f32 frame = instance->current_frame;
+            NUGCUTCHARSYS_s *system = scene->character_system;
             for (i32 i = 0; i < system->character_count; ++i) {
                 NUGCUTCHAR_s *character = &system->characters[i];
                 instNUGCUTCHAR_s *inst_character = &instance->character_instance->characters[i];
                 if (inst_character->character_model != NULL) {
                     if ((character->flags & 2) == 0 && NuCutSceneCharacterEval != NULL) {
-                        NuCutSceneCharacterEval(instance, cutscene, inst_character, character, frame);
+                        NuCutSceneCharacterEval(instance, scene, inst_character, character, frame);
                     }
                     if (nu_current_thread_id == 0 && NuCutSceneCharacterRelease != NULL) {
                         NuCutSceneCharacterRelease(inst_character, character);
@@ -2713,8 +2710,10 @@ static __used__ void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, flo
 }
 
 extern "C" void NuGCutSceneSysUpdate(i32 paused, i32 skip, f32 elapsed) {
-    if (++cutscene_synchro_counter > 0xff) {
+    if (__builtin_expect(cutscene_synchro_counter + 1 > 0xff, 0)) {
         cutscene_synchro_counter = 1;
+    } else {
+        cutscene_synchro_counter++;
     }
     cutscene_quit_prompt = 0;
     cutscene_has_quit = 0;
