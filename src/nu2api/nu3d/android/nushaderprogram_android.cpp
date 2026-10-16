@@ -79,9 +79,15 @@ static inline __attribute__((always_inline)) i32 GetHLSLRegisterIndexImpl(const 
     }
     // Bionic's NDEBUG inline isdigit, including its EOF test.
     const i32 digit = *number;
+#ifdef __ANDROID__
     if (digit == -1 || ((_ctype_ + 1)[static_cast<u8>(digit)] & 0x04) == 0) {
         return -1;
     }
+#else
+    if (digit < '0' || digit > '9') {
+        return -1;
+    }
+#endif
     i32 index = NuAToI(const_cast<char *>(number));
     const char *declaration = strstr(number, uniform_name + 1);
     if (declaration == NULL || declaration <= number) {

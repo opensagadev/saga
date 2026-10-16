@@ -277,7 +277,12 @@ extern "C" {
 
     // Retail partially inlines the clipping test into NuDisplaySceneRndr and
     // keeps the body as its stack-argument .part clone.
-    static __attribute__((noinline, noclone, regparm(0))) void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene)
+#if defined(__i386__)
+#define NUDISPLAYSCENERNDR_BODY_ATTR __attribute__((noinline, noclone, regparm(0)))
+#else
+#define NUDISPLAYSCENERNDR_BODY_ATTR __attribute__((noinline, noclone))
+#endif
+    static NUDISPLAYSCENERNDR_BODY_ATTR void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene)
         __asm__("NuDisplaySceneRndr.part.101");
 
     void NuDisplaySceneRndr(void *display_scene) {

@@ -2945,7 +2945,12 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
 
 // Retail keeps an unreferenced partial-inlining clone of pathEditorSetCamPos:
 // it moves the editor camera to a position at the cursor's height.
-static __attribute__((used, noinline, noclone, regparm(1))) void pathEditorSetCamPosBody(nuvec_s *position)
+#if defined(__i386__)
+#define PATHEDITOR_SETCAMPOS_BODY_ATTR __attribute__((used, noinline, noclone, regparm(1)))
+#else
+#define PATHEDITOR_SETCAMPOS_BODY_ATTR __attribute__((used, noinline, noclone))
+#endif
+static PATHEDITOR_SETCAMPOS_BODY_ATTR void pathEditorSetCamPosBody(nuvec_s *position)
     __asm__("_ZL19pathEditorSetCamPosP7nuvec_si.part.43");
 static void pathEditorSetCamPosBody(nuvec_s *position) {
     nuvec_s camera;

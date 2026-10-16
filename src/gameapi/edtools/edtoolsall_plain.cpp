@@ -40,7 +40,12 @@
 
 // Retail keeps an unreferenced partial-inlining clone of the old HSV2RGB
 // helper (the non-grey path) in this unit.
-static __attribute__((used, noinline, noclone, regparm(2), sseregparm)) void
+#if defined(__i386__)
+#define HSV2RGB_BODY_ATTR __attribute__((used, noinline, noclone, regparm(2), sseregparm))
+#else
+#define HSV2RGB_BODY_ATTR __attribute__((used, noinline, noclone))
+#endif
+static HSV2RGB_BODY_ATTR void
 HSV2RGBBody(f32 hue, f32 saturation, f32 value, f32 *red, f32 *green, f32 *blue) __asm__("_ZL7HSV2RGBfffPfS_S_.part.18");
 static void HSV2RGBBody(f32 hue, f32 saturation, f32 value, f32 *red, f32 *green, f32 *blue) {
     if (hue == 360.0f)
@@ -263,6 +268,17 @@ static __attribute__((noclone)) void eduiFntPrintExCentre(void *font, int x, int
                                                                     char *format, ...)
     __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.68");
 
+#if defined(__clang__)
+// Clang has no __builtin_va_arg_pack; format here and print the result.
+static void eduiFntPrintEx(void *font, int x, int y, int alignment, char *format, ...) {
+    char text[1024];
+    va_list arguments;
+    va_start(arguments, format);
+    NuVSPrintf(text, format, arguments);
+    va_end(arguments);
+    eduiFntPrintExGeneric(font, x, y, alignment, const_cast<char *>("%s"), text);
+}
+#else
 static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int x, int y, int alignment,
                                                                  char *format, ...) {
     if (__builtin_constant_p(alignment) && alignment == 16)
@@ -272,6 +288,7 @@ static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int
     else
         eduiFntPrintExGeneric(font, x, y, alignment, format, __builtin_va_arg_pack());
 }
+#endif
 
 static void eduiFntPrintEx(void *font, float x, float y, int alignment, char *format, ...) {
     va_list arguments;
