@@ -169,7 +169,7 @@ void GetNativeTextureFormat(NUTEXFORMAT inFormat, i32 &outBpp, u32 &outInternalF
             return;
     }
 
-    if (!NuIOS_TextureFormatSupported(formatToCheck)) {
+    if (__builtin_expect(!NuIOS_TextureFormatSupported(formatToCheck), 1)) {
         while (true) {
         }
     }

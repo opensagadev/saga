@@ -1179,7 +1179,7 @@ extern "C" void ANI_Ani3ExtractAllNodeCurves(ani3_animheader_s *anim, float fram
         stride = anim->key_stride;
         key_offset = (whole_key / 4) * stride;
     } else {
-        if (anim->key_count == 1) {
+        if (__builtin_expect(anim->key_count == 1, 0)) {
             quarter = 0;
             fraction = 0.0f;
             stride = anim->key_stride;
@@ -1191,7 +1191,7 @@ extern "C" void ANI_Ani3ExtractAllNodeCurves(ani3_animheader_s *anim, float fram
             if (key < 0.0f) {
                 key = 0.0f;
             }
-            if (last_key <= key) {
+            if (__builtin_expect(last_key <= key, 0)) {
                 i32 whole_key = static_cast<i32>(last_key);
                 fraction = last_key - static_cast<float>(whole_key);
                 quarter = static_cast<u32>(whole_key) & 3;
@@ -1255,7 +1255,7 @@ extern "C" void ANI_Ani3ExtractAllNodeCurves(ani3_animheader_s *anim, float fram
             }
             continue;
         }
-        if (curve_mask != NULL) {
+        if (__builtin_expect(curve_mask != NULL, 0)) {
             ++curve_mask;
         }
 
@@ -1287,7 +1287,7 @@ extern "C" void ANI_Ani3ExtractAllNodeCurves(ani3_animheader_s *anim, float fram
                 u32 next = *reinterpret_cast<u32 *>(keys + stride);
                 i32 next_value = next & 0xff;
                 float tangent0 = static_cast<float>((tangents >> quarter_shift) & 0x3f) * 0.01587302f;
-                if (quarter != 3) {
+                if (__builtin_expect(quarter != 3, 1)) {
                     float tangent1 = static_cast<float>((tangents >> (next_quarter_shift & 0x1f)) & 0x3f) * 0.01587302f;
                     float packed_value = (static_cast<float>(next_value) - static_cast<float>(first_value)) *
                                              ((tangent1 - tangent0) * key_fraction + tangent0) +

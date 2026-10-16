@@ -1892,7 +1892,7 @@ extern "C" {
 
         const u32 directions = 0xf000;
         u32 held = primary_held | alternate_held;
-        if ((primary_held & directions) != 0)
+        if (__builtin_expect((primary_held & directions) != 0, 1))
             held = primary_held;
         u32 pressed = primary_pressed | alternate_pressed;
         if ((primary_pressed & directions) != 0)
@@ -1947,7 +1947,7 @@ extern "C" {
             confirm_pressed = pressed & confirm_mask;
             cancel_pressed = pressed & cancel_mask;
         }
-        if (down_pressed != 0) {
+        if (__builtin_expect(down_pressed != 0, 1)) {
             if (up_pressed != 0)
                 up_pressed = down_pressed = 0;
         }
@@ -2026,7 +2026,7 @@ extern "C" {
                     menu->selected_row = last_row;
                     row_clamped = true;
                 } else if (down_pressed != 0 && (wrap || menu->selected_row < last_row)) {
-                    if (!wrap) {
+                    if (__builtin_expect(!wrap, 0)) {
                         ++menu->selected_row;
                     } else {
                         ++menu->selected_row;

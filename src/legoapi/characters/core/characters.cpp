@@ -1173,7 +1173,7 @@ static void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
         if ((info->flags & 0x10) == 0) {
             continue;
         }
-        if (alternate_idle == default_idle) {
+        if (__builtin_expect(alternate_idle == default_idle, 0)) {
             if ((info->flags & 0x800) != 0) {
                 candidates[candidate_count++] = animation;
             }
@@ -1182,7 +1182,7 @@ static void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
         }
     }
 
-    if (candidate_count == 0) {
+    if (__builtin_expect(candidate_count == 0, 0)) {
         ResetCharacterIdle(object, 0, default_idle);
         return;
     }

@@ -229,8 +229,8 @@ extern "C" void NuMtlSetRenderStatesPS(numtl_s *mtl) {
         g_alphaRef = 2;
     } else {
         u32 alphaSel = (u32)(mtl->attribs.alpha_test & 7); // (bytes[0x42]>>4)&7
-        if (alphaSel > 1) {
-            if (alphaSel != 5) {
+        if (__builtin_expect(alphaSel > 1, 1)) {
+            if (__builtin_expect(alphaSel != 5, 0)) {
                 g_alphaTestEnabled = 1; // GREATER
                 g_alphaFunc = 6;
                 g_alphaRef = 0;

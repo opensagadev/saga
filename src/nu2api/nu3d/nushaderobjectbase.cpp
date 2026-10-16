@@ -46,9 +46,9 @@ extern "C" void NuShaderObjectBaseUpdateWaterTable(NUSHADEROBJECT *shader, numtl
     i32 frame;
     memcpy(&frame, &nuapi.frame_count, sizeof(frame));
     const f32 *material = reinterpret_cast<const f32 *>(mtl);
-    if (frame != lastintsame)
+    if (__builtin_expect(frame != lastintsame, 0))
         theta = material[0x60 / 4] * water_theta_step + theta;
-    if (frame != lastintsame || mtl != prev_mtl) {
+    if (__builtin_expect(frame != lastintsame || mtl != prev_mtl, 1)) {
         NUMTX inverse;
         NuMtxInvR(&inverse, &global_camera.mtx);
         NuMtxScale(&inverse, &scale);

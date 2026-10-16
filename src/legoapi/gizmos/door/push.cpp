@@ -75,7 +75,7 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
             p->runtime_flags_0c8 |= 0x40;
         if ((p->runtime_flags_0c9 & 1) || (p->flags_0cb & 2))
             continue;
-        if (p->snap_positions) {
+        if (__builtin_expect(!!(p->snap_positions), 1)) {
             if (p->runtime_flags_0c9 & 2) {
                 if (p->snap_timer <= snap_time) {
                     f32 fraction = NU_SIN_LUT((i32)((p->snap_timer / snap_time) * 16384.0f + 49152.0f + 16384.0f));
@@ -144,13 +144,13 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
         if (p->runtime_flags_0c8 & 0x41) {
             i32 surface = p->terrain_info[0];
             bool same = p->terrain_info[1] == surface && p->terrain_info[2] == surface && p->terrain_info[3] == surface;
-            if (same) {
+            if (__builtin_expect(!!(same), 1)) {
                 if ((u32)surface <= 31 && (TerSurface[surface].flags & 0x20000))
                     p->runtime_flags_0c8 |= 0x40;
                 else
                     p->runtime_flags_0c8 &= ~0x40;
             }
-            if (p->pushing_object) {
+            if (__builtin_expect(!!(p->pushing_object), 1)) {
                 if (!(p->runtime_flags_0c8 & 0x40))
                     p->target_velocity.z = p->target_velocity.x = 0;
                 f32 x = p->pushing_object->target_velocity.x, z = p->pushing_object->target_velocity.z;
@@ -174,7 +174,7 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
                     p->velocity.z = p->target_velocity.z = 0;
                 }
             } else {
-                if (fabsf(p->velocity.x) <= 0.0001f) {
+                if (__builtin_expect(fabsf(p->velocity.x) <= 0.0001f, 0)) {
                     p->runtime_flags_0c8 &= 0x3f;
                     p->velocity.x = p->target_velocity.x = 0;
                 }
@@ -190,8 +190,8 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
     }
     for (i32 index = 0; index < world->push_block_count; ++index) {
         pushblock_s *p = &world->push_blocks[index];
-        if ((p->flags_0ca & 4) && !(p->packed_state_flags & 0x04000100) && !(p->flags_0cb & 2) &&
-            (p->runtime_flags_0c8 & 0x69))
+        if (__builtin_expect((p->flags_0ca & 4) && !(p->packed_state_flags & 0x04000100) && !(p->flags_0cb & 2) &&
+            (p->runtime_flags_0c8 & 0x69), 0))
             MoveBlocks(world, p, index, &p->velocity);
     }
     for (i32 index = 0; index < world->push_block_count; ++index) {
@@ -204,7 +204,7 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
         f32 back = fabsf(p->bounds_min.z) - 0.006f, front = fabsf(p->bounds_max.z) - 0.006f;
         NUVEC *position = p->position;
         f32 y = (position->y - fabsf(p->bounds_min.y) + 0.001f) + 0.025f;
-        if (p->ground_height > y)
+        if (__builtin_expect(p->ground_height > y, 0))
             y = p->ground_height + 0.25f;
         NUVEC corners[4] = {
             {position->x - left, y, position->z - back},
@@ -321,7 +321,7 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
         if (!(p->packed_state_flags & 0x220)) {
             i32 safe = 0;
             for (i32 i = 0; i < 4; ++i)
-                if (p->extra_terrain_info[i] == 8 || p->terrain_info[i] == 14)
+                if (__builtin_expect(p->extra_terrain_info[i] == 8 || p->terrain_info[i] == 14, 0))
                     ++safe;
             if (safe == 4) {
                 memcpy(&p->previous_extra_terrain_info, p->extra_terrain_info, 4);

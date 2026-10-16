@@ -1440,14 +1440,14 @@ void CutScenes_ConfigureList(char *filename, variptr_u *buffer, variptr_u) {
     char file[128];
 
     while (CUTCOUNT < 1000 && NuFParGetLine(parser) != 0) {
-        if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "cutscene_start") == 0) {
+        if (__builtin_expect(NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "cutscene_start") == 0, 0)) {
 
             directory[0] = '\0';
             file[0] = '\0';
             entries[CUTCOUNT].level = -1;
             while (NuFParGetLine(parser) != 0 && NuFParGetWord(parser) != 0) {
                 if (__builtin_expect(NuStrICmp(parser->word_buf, "cutscene_end") == 0, 1)) {
-                    if (directory[0] == '\0') {
+                    if (__builtin_expect(directory[0] == '\0', 0)) {
                         break;
                     }
                     if (file[0] == '\0') {
@@ -1459,7 +1459,7 @@ void CutScenes_ConfigureList(char *filename, variptr_u *buffer, variptr_u) {
 
                     i32 duplicate = 0;
                     for (i32 i = 0; i < CUTCOUNT; ++i) {
-                        if (duplicate != 0) {
+                        if (__builtin_expect(duplicate != 0, 0)) {
                             break;
                         }
                         if (NuStrICmp(directory, entries[i].directory) == 0 &&
@@ -1502,7 +1502,7 @@ void CutScenes_ConfigureList(char *filename, variptr_u *buffer, variptr_u) {
     }
 
     NuFParDestroy(parser);
-    if (CUTCOUNT > 0) {
+    if (__builtin_expect(CUTCOUNT > 0, 1)) {
         buffer->addr = ALIGN(reinterpret_cast<usize>(cursor), 4);
         CutList = reinterpret_cast<CutSceneListEntry *>(buffer->void_ptr);
         usize list_bytes = CUTCOUNT * sizeof(CutSceneListEntry);

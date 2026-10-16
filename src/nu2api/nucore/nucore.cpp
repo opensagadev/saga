@@ -269,7 +269,7 @@ void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
     i32 instance = 0;
     for (i32 lod = 0; lod < dl->nclip_objects; ++instance, ++lod) {
         if ((dl->visibility_flags[instance] & 0x21) == 0x21) {
-            if (dl->lod_ranges[lod] != 0.0f) {
+            if (__builtin_expect(dl->lod_ranges[lod] != 0.0f, 1)) {
                 f32 dx = global_camera.mtx.m30 - dl->clip_bounds[instance].center.x;
                 f32 dy = global_camera.mtx.m31 - dl->clip_bounds[instance].center.y;
                 f32 dz = global_camera.mtx.m32 - dl->clip_bounds[instance].center.z;
@@ -294,7 +294,7 @@ void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
                 f32 positive = (0.0f < projection ? 1.0f : 0.0f) * projection;
                 f32 t = (positive <= 1.0f ? 1.0f : 0.0f) * positive + (1.0f < positive ? 1.0f : 0.0f);
                 f32 distance = (ox * ox + oy * oy + oz * oz) + (length * t) * t - (dot + dot) * t;
-                if (distance > radius * radius)
+                if (__builtin_expect(distance > radius * radius, 0))
                     continue;
                 VuVec minimum, maximum;
                 minimum.x = box.first.x - box.second.x;

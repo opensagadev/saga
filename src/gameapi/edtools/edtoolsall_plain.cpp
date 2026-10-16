@@ -2748,7 +2748,7 @@ extern "C" {
                 } else if (time >= effect->collision_keys[1].time && time <= effect->collision_keys[2].time) {
                     first = 1;
                     next = 2;
-                } else if (time >= effect->collision_keys[2].time && time <= effect->collision_keys[3].time) {
+                } else if (__builtin_expect(time >= effect->collision_keys[2].time && time <= effect->collision_keys[3].time, 1)) {
                     first = 2;
                     next = 3;
                 } else if (time >= effect->collision_keys[3].time && time <= effect->collision_keys[4].time) {
@@ -2760,7 +2760,7 @@ extern "C" {
                 } else if (time >= effect->collision_keys[5].time && time <= effect->collision_keys[6].time) {
                     first = 5;
                     next = 6;
-                } else if (time >= effect->collision_keys[6].time && time <= effect->collision_keys[7].time) {
+                } else if (__builtin_expect(time >= effect->collision_keys[6].time && time <= effect->collision_keys[7].time, 0)) {
                     first = 6;
                     next = 7;
                 } else {
@@ -4361,7 +4361,7 @@ extern "C" {
             up_rept = 1.0f / 3.0f;
             up = 1;
         }
-        if ((buttons & up_button) && up_rept > 0.0f) {
+        if (__builtin_expect((buttons & up_button) && up_rept > 0.0f, 1)) {
             up_rept -= delta_time;
             if (up_rept <= 0.0f) {
                 up_rept = 1.0f / 6.0f;
@@ -4436,7 +4436,7 @@ extern "C" {
                     item = item->next;
                 menu->selected = item;
             } while (menu->selected->next && to_last);
-            if (to_last) {
+            if (__builtin_expect(!!(to_last), 0)) {
                 i32 count = 1;
                 for (eduiitem_s *item = menu->field_0c; item && item != menu->field_10; item = item->next)
                     ++count;
@@ -4697,14 +4697,14 @@ extern "C" {
     }
     i32 eduiProcessInteracts(eduimenu_s *menu, nupad_s *pad) {
         i32 result = 0;
-        if (edmainGetCursorEnabled()) {
+        if (__builtin_expect(!!(edmainGetCursorEnabled()), 0)) {
             if (eduiInteractLocked) {
-                if ((!eduiInteractLocked->menu || !eduiInteractLocked->item) && eduiInteractLocked->field_20)
+                if (__builtin_expect((!eduiInteractLocked->menu || !eduiInteractLocked->item) && eduiInteractLocked->field_20, 0))
                     eduiInteractLocked = NULL;
             }
             if (eduiInteractLocked) {
                 result = 1;
-                if (menu == eduiInteractLocked->menu || menu->parent == eduiInteractLocked->menu) {
+                if (__builtin_expect(menu == eduiInteractLocked->menu || menu->parent == eduiInteractLocked->menu, 0)) {
                     eduiInteractLocked = eduiInteractLocked->callback(eduiInteractLocked) ? eduiInteractLocked : NULL;
                     result = eduiInteractLocked != NULL;
                 }
@@ -5439,12 +5439,12 @@ extern "C" {
         auto *filter = static_cast<edui_filter_s *>(item);
         (void)delta_time;
         u8 *filter_flags = reinterpret_cast<u8 *>(filter) + 0x4c;
-        if (*filter_flags & 2) {
+        if (__builtin_expect(!!(*filter_flags & 2), 1)) {
             filter->label_width = edui_cursor_x - static_cast<f32>(item->x);
             if (filter->label_width < 5.0f)
                 filter->label_width = 5.0f;
             for (eduiitem_s *other = menu->first; other; other = other->next) {
-                if (other->type == 17 && other != item)
+                if (__builtin_expect(other->type == 17 && other != item, 0))
                     static_cast<edui_prop_s *>(other)->label_width = filter->label_width;
             }
             if (!(edui_cursor_buttons & EDUI_CURSOR_PRIMARY))
@@ -6031,7 +6031,7 @@ extern "C" {
         pick->uv_y[corner] = y;
         i32 left = pad->analog_l1 ? pad->analog_l1 : pad->analog_l2;
         i32 right = pad->analog_r1 ? pad->analog_r1 : pad->analog_r2;
-        if (left) {
+        if (__builtin_expect(!!(left), 0)) {
             f32 zoom = pick->zoom - left / 4192.0f;
             if (!(zoom < 1.0f)) {
                 pick->zoom = zoom;
@@ -6040,7 +6040,7 @@ extern "C" {
             }
             return 1;
         }
-        if (right) {
+        if (__builtin_expect(!!(right), 1)) {
             f32 zoom = pick->zoom + right / 4192.0f;
             pick->zoom = zoom > 16.0f ? 16.0f : zoom;
             return 1;

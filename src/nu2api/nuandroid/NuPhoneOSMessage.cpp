@@ -38,7 +38,7 @@ extern "C" void NuPhoneOSMessagePost(const NuPhoneOSMessage *message, i32 nonblo
                          __atomic_load_n(&s_phoneOSMessageQueue.write_count, __ATOMIC_RELAXED) + 1U, __ATOMIC_RELAXED);
         s_phoneOSMessageQueue.queued_items.Signal();
     } else {
-        if (!s_phoneOSMessageQueue.free_slots.TryWait())
+        if (__builtin_expect(!s_phoneOSMessageQueue.free_slots.TryWait(), 1))
             return;
         NuPhoneOSQueue::Record record = {*message, NuPhoneOSQueue::NO_TOKEN};
         s_phoneOSMessageQueue.records[__atomic_load_n(&s_phoneOSMessageQueue.write_count, __ATOMIC_RELAXED) & 127] =

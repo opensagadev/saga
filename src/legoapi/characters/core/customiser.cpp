@@ -167,7 +167,7 @@ void Customiser_DrawAccessories(CUSTOMISER *customiser, GameObject_s *object, nu
     do {
         CUSTOMPIECERESOURCE *resource = next_resource++;
         const i32 category = next_category++;
-        if (customiser->piece_counts[category] <= 0 || category == 2)
+        if (__builtin_expect(customiser->piece_counts[category] <= 0 || category == 2, 0))
             continue;
         if (category == 0) {
             const u16 *pieces = customiser->save[side].pieces;
@@ -178,12 +178,12 @@ void Customiser_DrawAccessories(CUSTOMISER *customiser, GameObject_s *object, nu
         }
 
         nuhspecial_s *special = &resource->special;
-        if (!NuSpecialExistsFn(special))
+        if (__builtin_expect(!NuSpecialExistsFn(special), 0))
             continue;
 
         // Retail keeps both draw matrices on a 16-byte-aligned stack.
 
-        if (matrices != NULL)
+        if (__builtin_expect(matrices != NULL, 1))
             matrix = matrices[joint];
         else
             matrix = object->joint_matrices[joint];

@@ -153,7 +153,7 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
             case 4:
                 break;
             default:
-                if (objInNetWaitContext(object, 15) == 0)
+                if (__builtin_expect(objInNetWaitContext(object, 15) == 0, 0))
                     return;
                 break;
         }
@@ -168,7 +168,7 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
         if (teleport == NULL)
             return;
 
-        if (objInNetWaitContext(object, 15) != 0) {
+        if (__builtin_expect(objInNetWaitContext(object, 15) != 0, 1)) {
             object->context_animation_timer -= FRAMETIME;
             if (object->context_animation_timer <= 0.0f) {
                 object->field_0x7a5 = 0xff;
@@ -177,7 +177,7 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
         }
 
         if (start_immediately == 0 && (objInNetWaitContext(object, 15) == 0 || object->big_jump_data == NULL)) {
-            if (object->apiobj.player_controlled)
+            if (__builtin_expect(!!(object->apiobj.player_controlled), 0))
                 object->field_0xe24 |= 0x20;
             return;
         }

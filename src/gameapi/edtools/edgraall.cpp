@@ -558,10 +558,10 @@ static void edgracbChangeInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
         nuhspecial_s special;
         const i32 selected = i == GrassClumps[edgra_nearest].special_index;
         NuGScnGetSpecial(&special, edbits_base_scene, i);
-        if (NuSpecialExistsFn(&special))
+        if (__builtin_expect(!!(NuSpecialExistsFn(&special)), 1))
             name = NuSpecialGetName(&special);
-        if (edgra_filter && NuStrNCmp(edgra_filter_string, name, NuStrLen(edgra_filter_string))) {
-            if (!selected)
+        if (__builtin_expect(edgra_filter && NuStrNCmp(edgra_filter_string, name, NuStrLen(edgra_filter_string)), 1)) {
+            if (__builtin_expect(!selected, 1))
                 continue;
             eduiMenuAddItem(edgra_changeinstance_menu,
                             eduiItemCheckCreate(i, edblack, selected, 1, edgracbChangeInstanceType, name));

@@ -2377,7 +2377,7 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
         NuStrCpy(path, directory);
         NuStrCat(path, filename);
         i32 size = NuFileLoadBuffer(path, MiniBuffer, sizeof(MiniBuffer));
-        if (size < 1) {
+        if (__builtin_expect(size < 1, 0)) {
             SecondCharConfigure = 0;
             return 0;
         }

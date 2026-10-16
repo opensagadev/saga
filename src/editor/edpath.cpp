@@ -669,7 +669,7 @@ static __used__ void pathEditor_cbSetShareNode(eduimenu_s *, eduiitem_s *item, u
         if (path == aieditor->current_path) {
             continue;
         }
-        if (item->data != 0 && path_number != item->data) {
+        if (__builtin_expect(item->data != 0 && path_number != item->data, 0)) {
             ++path_number;
             continue;
         }
@@ -736,7 +736,7 @@ static __used__ void pathEditor_cbSetShareNode(eduimenu_s *, eduiitem_s *item, u
     }
     for (i32 i = 0; i < match_count; ++i) {
         EDAIPATHNODE_s *node = matches[i];
-        if (node->shared_node != shared) {
+        if (__builtin_expect(node->shared_node != shared, 1)) {
             if (node->shared_node != nullptr) {
                 EDAISHAREDPATHNODE_s *old_shared = node->shared_node;
                 --old_shared->reference_count;
@@ -1007,7 +1007,7 @@ static __used__ void pathEditor_cbDisconnectPathNode(eduimenu_s *, eduiitem_s *i
             i32 i;
             i32 j;
 #define DISCONNECT_OTHER(J)                                                                                            \
-    if (other->connections[J].node == node) {                                                                          \
+    if (__builtin_expect(other->connections[J].node == node, 0)) {                                                                          \
         j = J;                                                                                                         \
         goto disconnect_found;                                                                                         \
     }
@@ -1167,7 +1167,7 @@ next_name:
 }
 
 static __used__ void routeEditor_cbDeleteRoute(eduimenu_s *parent, eduiitem_s *item, u32) {
-    if (item == nullptr) {
+    if (__builtin_expect(item == nullptr, 1)) {
         return;
     }
     switch (static_cast<u32>(item->data)) {
@@ -1186,7 +1186,7 @@ static __used__ void routeEditor_cbDeleteRoute(eduimenu_s *parent, eduiitem_s *i
         case 1: {
             EDAIPATH_s *path = aieditor->current_path;
             EDAIPATHROUTE_s *route = path->current_route;
-            if (route == nullptr) {
+            if (__builtin_expect(route == nullptr, 0)) {
                 return;
             }
             i32 index = route - path->routes;
@@ -1984,7 +1984,7 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
             } else if (path->nearest_node != nullptr) {
                 NuQFntPrintEx(system_qfont, screen_x, screen_y + 480, 16, "X - Select");
                 NuQFntPrintEx(system_qfont, screen_x, screen_y + 720, 16, "O - Link/unlink to selected");
-                if (EdGetCnxFlagNames != nullptr) {
+                if (__builtin_expect(EdGetCnxFlagNames != nullptr, 0)) {
                     path = aieditor->current_path;
                     if (path->nearest_node != nullptr && path->current_node != nullptr) {
                         EDAIPATHNODE_s *nearest = path->nearest_node;
@@ -2000,9 +2000,9 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
                             index = 3;
                         else if (current->connections[4].node == nearest)
                             index = 4;
-                        else if (current->connections[5].node == nearest)
+                        else if (__builtin_expect(current->connections[5].node == nearest, 1))
                             index = 5;
-                        else if (current->connections[6].node == nearest)
+                        else if (__builtin_expect(current->connections[6].node == nearest, 1))
                             index = 6;
                         else if (current->connections[7].node == nearest)
                             index = 7;
@@ -2027,8 +2027,8 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
         if (runtime_path != nullptr) {
             i32 current = aieditor->current_path->runtime_start;
             i32 end = aieditor->current_path->runtime_end;
-            if (current >= 0 && current < runtime_path->node_count && end >= 0 && end < runtime_path->node_count &&
-                current != end) {
+            if (__builtin_expect(current >= 0 && current < runtime_path->node_count && end >= 0 && end < runtime_path->node_count &&
+                current != end, 1)) {
                 AIPATHNODE_s *node = &runtime_path->nodes[current];
                 u8 edge = runtime_path->route_matrix[current][end];
                 while (edge != 0xff) {

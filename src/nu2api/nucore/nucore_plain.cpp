@@ -494,7 +494,7 @@ extern "C" {
             NuMtxMul(&vmtx, &vmtx, &camera_inverse);
         }
 
-        if (fast == 0) {
+        if (__builtin_expect(fast == 0, 0)) {
             NuCameraSetProjectionMtx(&pmtx, global_camera.fov, global_camera.aspect, global_camera.near_clip,
                                      global_camera.far_clip);
             pmtx.m00 *= global_camera.unknown_58;
@@ -1479,7 +1479,7 @@ extern "C" {
     // hierarchy matrices while carrying scale through the parent chain.
     void NuAnimBuffEvaluate_3(nuanimbuff_s *buffer, nuhgobj_s *object, NUMTX *matrices, ani3_animheader_s *animation,
                               NUHGOBJROOTFN root_fn, NUVEC *root_translation, void *root_data) {
-        if (buffer == NULL) {
+        if (__builtin_expect(buffer == NULL, 1)) {
             buffer = static_cast<nuanimbuff_s *>(globalbuffer);
         }
 
@@ -3609,7 +3609,7 @@ extern "C" {
             i32 curve_count = count_a < count_b ? count_b : count_a;
             f32 *weights = NuRndrCreateBlendShapeDeformerWeightsArray(curve_count);
             weights_by_render[render] = weights;
-            if (weights == NULL || curve_count <= 0)
+            if (__builtin_expect(weights == NULL || curve_count <= 0, 0))
                 continue;
             for (i32 curve = 0; curve < curve_count; ++curve) {
                 f32 value_a = 0.0f;
@@ -3827,11 +3827,11 @@ extern "C" {
     u32 NuWindRand(void);
     i32 NuHGobjRndrRandShadowSurfacePoints(nuhgobj_s *object, NUMTX *world_matrix, NUMTX *joint_matrices, i32 count,
                                            NUVEC *positions, i32 exclusion_mask) {
-        if (NuCameraClipTestExtents(&object->bounds_min, &object->bounds_max, world_matrix, 0.0f, 0) == 0) {
+        if (__builtin_expect(NuCameraClipTestExtents(&object->bounds_min, &object->bounds_max, world_matrix, 0.0f, 0) == 0, 0)) {
             return 0;
         }
         nuhgobjshadowgroup_s *groups = object->shadow_groups;
-        if (groups == NULL || object->suppress_shadow_surface_points != 0) {
+        if (__builtin_expect(groups == NULL || object->suppress_shadow_surface_points != 0, 0)) {
             return 1;
         }
         i32 total = 0;
@@ -3869,11 +3869,11 @@ extern "C" {
             }
             i32 matrix_ready = 0;
             for (i32 i = 0; i < group->ellipse_count; ++i) {
-                if (exclusion_mask != 0 && (*reinterpret_cast<u32 *>(&group->ellipses[i][4]) & exclusion_mask) != 0) {
+                if (__builtin_expect(exclusion_mask != 0 && (*reinterpret_cast<u32 *>(&group->ellipses[i][4]) & exclusion_mask) != 0, 0)) {
                     continue;
                 }
                 i32 n = counts[index];
-                if (n != 0) {
+                if (__builtin_expect(n != 0, 1)) {
                     if (matrix_ready == 0) {
                         NuMtxMulVU0(&combined, &joint_matrices[group->joint_index], world_matrix);
                     }
@@ -4377,7 +4377,7 @@ extern "C" {
             NUPLANE *plane = room->planes;
             for (i32 plane_index = 0; plane_index < room->plane_count; ++plane_index, ++plane) {
                 plane_distance = plane->a * position->x + plane->b * position->y + plane->c * position->z + plane->d;
-                if (plane_distance > 0.0f) {
+                if (__builtin_expect(plane_distance > 0.0f, 0)) {
                     break;
                 }
             }
@@ -4386,7 +4386,7 @@ extern "C" {
             }
 
             // Later matches do not change the selected pair; avoid overflowing the candidate slots.
-            if (candidate_count >= 3) {
+            if (__builtin_expect(candidate_count >= 3, 0)) {
                 continue;
             }
 
@@ -4394,7 +4394,7 @@ extern "C" {
             NUROOM &first = scene->rooms[candidates[0]];
             NUROOM &second = scene->rooms[candidates[1]];
             if (candidate_count == 2) {
-                if (!(first.priority < second.priority)) {
+                if (__builtin_expect(!(first.priority < second.priority), 1)) {
                     candidates[1] = static_cast<i16>(room_index);
                 } else {
                     candidates[0] = static_cast<i16>(room_index);
@@ -4404,7 +4404,7 @@ extern "C" {
             }
 
             candidates[candidate_count++] = static_cast<i16>(room_index);
-            if (candidate_count != 2) {
+            if (__builtin_expect(candidate_count != 2, 0)) {
                 continue;
             }
 
@@ -4413,7 +4413,7 @@ extern "C" {
             }
         }
 
-        if (candidate_count == 1) {
+        if (__builtin_expect(candidate_count == 1, 0)) {
             return static_cast<u16>(candidates[0]);
         }
         if (candidate_count == 0) {
@@ -4425,7 +4425,7 @@ extern "C" {
         for (i32 first_portal = 0; first_portal < first.portal_count; ++first_portal) {
             const i16 portal_index = first.portal_indices[first_portal];
             for (i32 second_portal = 0; second_portal < second.portal_count; ++second_portal) {
-                if (second.portal_indices[second_portal] == portal_index) {
+                if (__builtin_expect(second.portal_indices[second_portal] == portal_index, 0)) {
 
                     const NUPORTAL &portal = scene->portals[portal_index];
                     const f32 side = portal.plane.a * position->x + portal.plane.b * position->y +

@@ -429,7 +429,7 @@ extern "C" f32 partglobaltime;
 void edpartScaleType(i32 index, f32 scale);
 void *InitPartDebris(VARIPTR *buf, VARIPTR *, i32 capacity, i32 named_count, char **names, i32 page) {
     PARTDEBSYS_s *system = static_cast<PARTDEBSYS_s *>(BUFFER_ALLOC(buf, sizeof(PARTDEBSYS_s), 16));
-    if (system == NULL)
+    if (__builtin_expect(system == NULL, 0))
         return system;
     system->entries = NULL;
     system->capacity = capacity;
@@ -448,7 +448,7 @@ void *InitPartDebris(VARIPTR *buf, VARIPTR *, i32 capacity, i32 named_count, cha
     }
     for (i32 type = 0; type < 128 && i < system->capacity; ++type) {
         system->entries[i].type_id = -1;
-        if (part_types[type].variant_count > 0) {
+        if (__builtin_expect(part_types[type].variant_count > 0, 1)) {
             NuStrCpy(system->entries[i].name, part_types[type].name);
             system->entries[i].type_id = PARTLookupTypePageOnly(system->entries[i].name, page);
             ++i;
@@ -635,10 +635,10 @@ extern "C" {
         f32 ratio = requested_scale / part_types[effect_index].scale;
         f32 closest_distance = ratio <= 1.0f ? 1.0f - ratio : ratio - 1.0f;
         for (i32 i = 0; i < 128; ++i) {
-            if (part_types[i].effect_ids[0] != -1 && part_types[i].field_174 == static_cast<u32>(effect_index)) {
+            if (__builtin_expect(part_types[i].effect_ids[0] != -1 && part_types[i].field_174 == static_cast<u32>(effect_index), 1)) {
                 ratio = requested_scale / part_types[i].scale;
                 f32 distance = ratio <= 1.0f ? 1.0f - ratio : ratio - 1.0f;
-                if (distance < closest_distance) {
+                if (__builtin_expect(distance < closest_distance, 1)) {
                     closest_index = i;
                     closest_distance = distance;
                 }
@@ -662,7 +662,7 @@ extern "C" {
             char shortened[16];
             const char *base_name = source->name;
             const size_t name_length = strlen(base_name);
-            if (name_length > 12) {
+            if (__builtin_expect(name_length > 12, 1)) {
                 memcpy(shortened, base_name, name_length + 1);
                 shortened[12] = '\0';
                 base_name = shortened;
@@ -768,7 +768,7 @@ void DebrisTimeSlip(i32 group) {
     for (i32 i = 0; i < maxdebkeys; ++i) {
         debkeydatatype_s *key = &debkeydata[i];
         debinftype *effect = debtab[key->effect_index];
-        if (effect->time_group == 4) {
+        if (__builtin_expect(effect->time_group == 4, 1)) {
             if (group != 1)
                 continue;
         } else if (group != 0) {
@@ -1035,7 +1035,7 @@ extern "C" {
     i32 DebrisPreCheckCollisions(NUVEC *position, f32 radius) {
         numspherecolldata = 0;
         numtoruscolldata = 0;
-        if (debris_keystack == NULL)
+        if (__builtin_expect(debris_keystack == NULL, 0))
             return 0;
 
         for (debkeydatatype_s *key = debris_keystack; key != NULL;) {
@@ -1047,7 +1047,7 @@ extern "C" {
                 key->allocation_index = -1;
             }
             if (key->field_184 != 0) {
-                if (DebrisSingleCollisionCheckScaleYFlag(key_index, position, radius, 1.0f, 3) != 0) {
+                if (__builtin_expect(DebrisSingleCollisionCheckScaleYFlag(key_index, position, radius, 1.0f, 3) != 0, 0)) {
                     const i32 count = numspherecolldata;
                     u32 *entry = spherecolldata + count * 2;
                     entry[0] = key_index;
@@ -1242,10 +1242,10 @@ extern "C" {
             i32 group = effect->time_group == 4;
             i32 found = 0;
             for (i32 slot = 0; slot < 8; ++slot) {
-                if (effect->particle_keys[slot] == i)
+                if (__builtin_expect(effect->particle_keys[slot] == i, 1))
                     found = 1;
             }
-            if (found) {
+            if (__builtin_expect(!!(found), 1)) {
                 if (key->controlled_chunk_count != 0) {
                     for (i32 chunk = 0; chunk < key->controlled_chunk_count; ++chunk) {
                         for (debris_chunk_control_s *control = debris_chunk_control_stack[group]; control != NULL;

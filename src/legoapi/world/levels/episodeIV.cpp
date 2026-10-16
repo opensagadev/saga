@@ -1008,10 +1008,10 @@ void DeathStarBattleDUpdate(WORLDINFO_s *world) {
     if (netclient == 0) {
         trenchrun.position.y = -10.5f;
         trenchrun.position.x = player->apiobj.collision_position.x;
-        if (trenchrun.position.x < -500.0f) {
+        if (__builtin_expect(trenchrun.position.x < -500.0f, 1)) {
             trenchrun.position.y = trench_spawn_height - 10.5f;
             i32 &midtro = *reinterpret_cast<i32 *>(&trenchrun.reserved_0x18[0]);
-            if (FreePlay == 0 && midtro == 0) {
+            if (__builtin_expect(FreePlay == 0 && midtro == 0, 1)) {
                 if (trenchrun.objects[0] != NULL) {
                     KillGameObject(trenchrun.objects[0], 4, 0);
                     trenchrun.objects[0] = NULL;
@@ -1032,12 +1032,12 @@ void DeathStarBattleDUpdate(WORLDINFO_s *world) {
         trenchrun.position.z = player->apiobj.collision_position.z;
         f32 lower = trenchrun.objects[0] != NULL ? 62.0f : 60.0f;
         f32 upper = trenchrun.objects[2] != NULL ? 70.0f : 72.0f;
-        if (trenchrun.position.z < lower)
+        if (__builtin_expect(trenchrun.position.z < lower, 1))
             trenchrun.position.z = lower;
         else if (trenchrun.position.z > upper)
             trenchrun.position.z = upper;
 
-        if (aicreature_sets_alive[0] == 0) {
+        if (__builtin_expect(aicreature_sets_alive[0] == 0, 1)) {
             f32 &timer = *reinterpret_cast<f32 *>(&trenchrun.reserved_0x18[4]);
             timer -= FRAMETIME;
             if (timer <= 0.0f) {

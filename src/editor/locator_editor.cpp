@@ -782,7 +782,7 @@ void locatorEditor_Enter(void) {
         for (i32 index = 0; index < (*state)->ai_system->locator_set_count; ++index) {
             AILOCATORSET *source = &(*state)->ai_system->locator_sets[index];
             EDLOCATORSET_s *set = (EDLOCATORSET_s *)NuLinkedListGetHead(&(*state)->free_locator_sets);
-            if (set == nullptr) {
+            if (__builtin_expect(set == nullptr, 0)) {
                 continue;
             }
             NuLinkedListRemove(&(*state)->free_locator_sets, &set->link);

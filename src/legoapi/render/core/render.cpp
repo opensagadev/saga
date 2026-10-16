@@ -399,15 +399,15 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
     f32 frame = 0.0f;
     i32 i = 0;
     do {
-        if (instance_animation->anim_ix < gscn->num_instance_animation_data) {
+        if (__builtin_expect(instance_animation->anim_ix < gscn->num_instance_animation_data, 1)) {
             NUDISPLAYSPECIAL *display_special =
                 &static_cast<NUDISPLAYSPECIAL *>(display_list->specials)[instance_animation->instance_ix];
             const u32 display_flags = display_special->flags;
             nuanimendlookup_s *state_animation = NULL;
             nuanimdata_s *animation = NULL;
 
-            if ((instance_animation->end_frame_lookup_bits & NUINSTANIM_END_FRAME_LOOKUP_MASK) != 0 &&
-                gscn->animation_end_frames != NULL) {
+            if (__builtin_expect((instance_animation->end_frame_lookup_bits & NUINSTANIM_END_FRAME_LOOKUP_MASK) != 0 &&
+                gscn->animation_end_frames != NULL, 1)) {
                 const u16 lookup_index = instance_animation->end_frame_lookup_index;
                 state_animation = &gscn->animation_end_frames[lookup_index - 1];
                 animation = gscn->instance_animation_data[instance_animation->anim_ix];
@@ -424,7 +424,7 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
             f32 end_frame;
             if (animation != NULL) {
                 end_frame = NuAnimEndFrameOld(animation);
-            } else if (state_animation != NULL) {
+            } else if (__builtin_expect(state_animation != NULL, 0)) {
                 end_frame = static_cast<f32>(static_cast<u32>(state_animation->end_frame));
             } else {
                 goto next_animation;
@@ -438,7 +438,7 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
             if (instance_animation->playing != 0) {
                 instance_animation->ltime += frame_delta * instance_animation->tfactor;
                 if (instance_animation->waiting != 0) {
-                    if (!(instance_animation->ltime >= instance_animation->tfirst)) {
+                    if (__builtin_expect(!(instance_animation->ltime >= instance_animation->tfirst), 0)) {
                         goto evaluate_animation;
                     }
                     instance_animation->waiting = 0;
@@ -456,7 +456,7 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
                         frame = 1.0f;
                     }
                 } else {
-                    if (instance_animation->repeating != 0) {
+                    if (__builtin_expect(instance_animation->repeating != 0, 0)) {
                         const f32 repeat_length = interval_end - 1.0f;
                         const f32 repeats = NuFloor((instance_animation->ltime - 1.0f) / repeat_length);
                         const f32 live_repeat_length = instance_animation->tinterval + end_frame - 1.0f;
@@ -469,7 +469,7 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
                     }
                 }
 
-                if (instance_animation->backwards != 0) {
+                if (__builtin_expect(instance_animation->backwards != 0, 1)) {
                     frame = end_frame + 1.0f - frame;
                 }
             } else {
@@ -544,7 +544,7 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
     __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
 static NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path, char *scene_data) {
     NUGSCN *scene = reinterpret_cast<NUGSCN *>(scene_data);
-    if (scene == NULL) {
+    if (__builtin_expect(scene == NULL, 0)) {
         char converted_path[1033];
         NuFileExtConvert(converted_path, path);
         NUFILE file = NuFileOpen(converted_path, NUFILE_READ);
@@ -565,7 +565,7 @@ static NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path, ch
     void **fixed = (void **)NuPtrBlockFix((char *)scene + 0x18);
     NUGSCN *fixed_scene = (NUGSCN *)*fixed;
     if (fixed_scene != NULL) {
-        if (*reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(fixed_scene) + 0x168) > 0) {
+        if (__builtin_expect(*reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(fixed_scene) + 0x168) > 0, 0)) {
             if (version < 0 || version > 2) {
                 NuSevereWarning("Your Character version is %d, whereas the Engine only accepts Character versions "
                                 "from %d to %d",
@@ -2994,7 +2994,7 @@ void SwipeDecalRenderer::Render() {
     NuPrim2DBegin(1, 7, MechSystems::Get()->swipe_material);
     u32 colour = (static_cast<u32>(static_cast<i32>(alpha.value * 128.0f)) << 24) | 0x000080;
     if (style != static_cast<Style>(1)) {
-        if (style == static_cast<Style>(2))
+        if (__builtin_expect(style == static_cast<Style>(2), 0))
             colour = (static_cast<u32>(static_cast<i32>(alpha.value * 255.0f)) << 24) | 0x0000ff;
         else
             colour |= 0x808000;

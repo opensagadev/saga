@@ -1325,7 +1325,7 @@ void Bolt_Init(void *storage, NetMessage &message) {
     bolt->hit_flags = hit_flags | 0x80;
     u32 flags = type->field_60;
     if (owner != NULL) {
-        if ((owner->apiobj.flags_low & 0x80) != 0) {
+        if (__builtin_expect((owner->apiobj.flags_low & 0x80) != 0, 0)) {
             if (owner->apiobj.field_0x27c == 0)
                 flags |= 0x29;
             else
@@ -1428,11 +1428,11 @@ void Bolt_Init(void *storage, NetMessage &message) {
     NuVecAdd(&movement, &movement, &back);
     bolt->ray_radius = bolt->collision_radius;
     bolt->ray_time = 0.2f;
-    if ((bolt->flags & 4) == 0 && Bolt_RayCast(bolt, &start, &movement, bolt->ray_radius)) {
+    if (__builtin_expect((bolt->flags & 4) == 0 && Bolt_RayCast(bolt, &start, &movement, bolt->ray_radius), 0)) {
         f32 offset_time = (back_distance / (initial_speed * initial_lifetime)) * bolt->lifetime;
         bolt->lifetime = bolt->ray_time + offset_time;
         bolt->lifetime = NewRayCastGetTOFI() * bolt->lifetime - offset_time;
-        if (bolt->lifetime <= 0.0f) {
+        if (__builtin_expect(bolt->lifetime <= 0.0f, 0)) {
             NuVecAdd(&start, &start, &movement);
             AddGameDebris(world->debris_sys, bolt->hit_debris, &start);
             AddGameDebris(world->debris_sys, bolt->hit_debris, &bolt->position);

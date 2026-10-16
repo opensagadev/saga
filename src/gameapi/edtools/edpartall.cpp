@@ -1796,14 +1796,14 @@ static void edpartInstanceOrientMenu(eduimenu_s *menu, eduiitem_s *, u32) {
 static __attribute__((noinline, noclone)) void edpartPartIndexMenu(eduimenu_s *menu) __asm__("_ZL19edpartPartIndexMenuP10eduimenu_sP10eduiitem_sj.isra.12");
 static void edpartPartIndexMenu(eduimenu_s *menu) {
     edpart_partindex_menu = eduiMenuCreate(70, 70, 250, 250, ed_fnt, edpartCancelPartIndexMenu, "Part Type");
-    if (edpart_partindex_menu == NULL || edpart_nearest_type == NULL)
+    if (__builtin_expect(edpart_partindex_menu == NULL || edpart_nearest_type == NULL, 0))
         return;
     i32 selected = edpart_set_part == 3 ? edpart_nearest_type->impact_part : -1;
     eduiMenuAddItem(edpart_partindex_menu, eduiItemCheckCreate(static_cast<usize>(-1), edblack, selected == -1, 1,
                                                                edpartChangePartIndex, "None"));
     for (i32 index = 0; index < 128; ++index) {
         part_type_s *type = &part_types[index];
-        if (type->name[0] == '\0' || type->field_b3 != edpart_part_list)
+        if (__builtin_expect(type->name[0] == '\0' || type->field_b3 != edpart_part_list, 0))
             continue;
         bool current_type = index == edpart_nearest_emit->effect_id;
         eduiitem_s *item =
@@ -2054,12 +2054,12 @@ static void edpartDebrisIndexMenu(eduimenu_s *menu) {
     i32 found_selected = 0;
     for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
         debinftype *type = debtab[index];
-        if (type == NULL || static_cast<i8>(type->category) != edpart_particle_list)
+        if (__builtin_expect(type == NULL || static_cast<i8>(type->category) != edpart_particle_list, 0))
             continue;
         eduiitem_s *item =
             eduiItemCheckCreate(index, edblack, index == selected, 1, edpartChangeDebrisIndex, type->name);
         eduiMenuAddItem(edpart_debrisindex_menu, item);
-        if (index == selected) {
+        if (__builtin_expect(index == selected, 1)) {
             edpart_debrisindex_menu->selected = edui_last_item;
             found_selected = 1;
         }

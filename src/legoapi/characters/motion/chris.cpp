@@ -69,19 +69,19 @@ static void MakeWingFormation(_vuv_s *start, _vuv_s *target, f32 duration, i32 m
     i32 index;
     if (space->flight_groups[0].active == 0)
         index = 0;
-    else if (space->flight_groups[1].active == 0)
+    else if (__builtin_expect(space->flight_groups[1].active == 0, 0))
         index = 1;
-    else if (space->flight_groups[2].active == 0)
+    else if (__builtin_expect(space->flight_groups[2].active == 0, 0))
         index = 2;
-    else if (space->flight_groups[3].active == 0)
+    else if (__builtin_expect(space->flight_groups[3].active == 0, 0))
         index = 3;
-    else if (space->flight_groups[4].active == 0)
+    else if (__builtin_expect(space->flight_groups[4].active == 0, 0))
         index = 4;
     else if (space->flight_groups[5].active == 0)
         index = 5;
-    else if (space->flight_groups[6].active == 0)
+    else if (__builtin_expect(space->flight_groups[6].active == 0, 1))
         index = 6;
-    else if (space->flight_groups[7].active == 0)
+    else if (__builtin_expect(space->flight_groups[7].active == 0, 0))
         index = 7;
     else
         return;

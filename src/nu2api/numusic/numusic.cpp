@@ -241,7 +241,7 @@ void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_e
 
     NuFParSetInterpreterErrorHandler(0);
     nufpar_s *fpar = NuFParCreate(const_cast<char *>(file));
-    if (fpar != NULL) {
+    if (__builtin_expect(fpar != NULL, 1)) {
         NuFParPushComCTX(fpar, top_jmp_tab);
 
         while (NuFParGetLine(fpar), *fpar->line_buf != '\0') {
@@ -273,7 +273,7 @@ void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_e
 
     Album *albumPtr = this->albums;
     Album *album = (Album *)ALIGN((usize)this->string_pool_end, 4);
-    if (albumPtr == album) {
+    if (__builtin_expect(albumPtr == album, 0)) {
         tracksPtr = this->tracks;
         alloced = (Track *)ALIGN((usize)&albumPtr[count].name, 4);
         pTVar3 = tracksPtr;
@@ -294,7 +294,7 @@ void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_e
         if (pTVar3 == tracksPtr)
             goto LAB_003203e6;
         alloced = tracksPtr;
-        if (track_count != 0)
+        if (__builtin_expect(track_count != 0, 0))
             goto LAB_003204e0;
     }
 
@@ -788,7 +788,7 @@ i32 NuMusic::StopTrack(u32 clazz, i32 fade) {
             NuSound3StopStereoStream(voice->stream_index);                                                             \
             voice->SetStatusFn(VOICE_STATUS_NONE, 0x46a);                                                              \
             result = 1;                                                                                                \
-        } else if (static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1) {                                      \
+        } else if (__builtin_expect(static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1, 1)) {                                      \
             if (fading) {                                                                                              \
                 voice->fade_rate = 2.0f;                                                                               \
                 voice->flags |= 1u;                                                                                    \

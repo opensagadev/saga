@@ -1042,7 +1042,7 @@ i32 PodRace_InStartCountdown(WORLDINFO_s *world) {
 void PodRaceAUpdate(WORLDINFO_s *world) {
     UpdatePacemakerDisplay(world);
     PodRaceUpdate(world, FRAMETIME);
-    if (netclient == 0) {
+    if (__builtin_expect(netclient == 0, 0)) {
         if (Lap <= 3 && MiniCutCam == 0) {
             MINESYS_s *mines = &minesys;
             float t = mines->update_timer + FRAMETIME;
@@ -2014,7 +2014,7 @@ i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *
                     distance = second_distance - first_distance;
                     if (distance > sock_length * 0.5f)
                         distance -= sock_length;
-                    else if (distance < sock_length * -0.5f)
+                    else if (__builtin_expect(distance < sock_length * -0.5f, 0))
                         distance += sock_length;
 
                     GameObject_s *lead_player;
@@ -2063,7 +2063,7 @@ i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *
         } else {
             float base_speed = object->apiobj.character_data->game_character->run_speed;
             float target = base_speed;
-            if (ps->max_speed_msg != NULL && ps->min_speed_msg != NULL && ps->speed_step_msg != NULL) {
+            if (__builtin_expect(ps->max_speed_msg != NULL && ps->min_speed_msg != NULL && ps->speed_step_msg != NULL, 0)) {
                 float reduced_maximum =
                     ps->max_speed_msg->value - (float)*(i16 *)&ps->pad_0x8c[0] * ps->speed_step_msg->value;
                 target = ps->min_speed_msg->value > reduced_maximum ? ps->min_speed_msg->value : reduced_maximum;
@@ -2073,9 +2073,9 @@ i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *
     }
 done:
     if (object->movement_spline_finished != 0 && (ps->flags & 4) == 0) {
-        if (Player[0] != NULL && (i8)Player[0]->apiobj.field_0x1f8 < 0)
+        if (__builtin_expect(Player[0] != NULL && (i8)Player[0]->apiobj.field_0x1f8 < 0, 0))
             LoseCoins(Player[0], 1);
-        if (Player[1] != NULL && (i8)Player[1]->apiobj.field_0x1f8 < 0)
+        if (__builtin_expect(Player[1] != NULL && (i8)Player[1]->apiobj.field_0x1f8 < 0, 0))
             LoseCoins(Player[1], 1);
         ps->flags |= 4;
         ResetLevel(WORLD, "Ep1_Podsprint_OutOfTime", 1);

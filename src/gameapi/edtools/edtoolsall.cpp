@@ -4367,8 +4367,8 @@ __attribute__((force_align_arg_pointer)) i32 EdManRotate::RotateItem(EdInputCont
         if (entry->reference == NULL ||
             entry->reference->GetAttributeData(entry->object, 0x10, matrix_type, &matrix, 0) == 0) {
             EdMember member;
-            if (entry->ed_class->FindMember(&member, entry->object, 0x10, 1) == 0 ||
-                member.reference->GetAttributeData(member.object, 0x10, matrix_type, &matrix, 0) == 0)
+            if (__builtin_expect(entry->ed_class->FindMember(&member, entry->object, 0x10, 1) == 0 ||
+                member.reference->GetAttributeData(member.object, 0x10, matrix_type, &matrix, 0) == 0, 1))
                 continue;
         }
         switch (axis) {

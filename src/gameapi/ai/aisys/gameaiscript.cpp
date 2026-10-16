@@ -2356,7 +2356,7 @@ static i32 Action_SetAIOverrideControl(AISYS *system, AISCRIPTPROCESS *processor
                                        i32 param_count, i32 first_time, f32) {
     APIOBJECT *object;
     i32 enabled = 1;
-    if (!first_time) {
+    if (__builtin_expect(!first_time, 0)) {
         object = processor->override_control_object;
     } else {
         object = packet != NULL ? reinterpret_cast<APIOBJECT *>(packet->owner) : NULL;
@@ -2376,7 +2376,7 @@ static i32 Action_SetAIOverrideControl(AISYS *system, AISCRIPTPROCESS *processor
             GameObject_s *character = object->objptr;
             if (character != NULL) {
                 ResetAIOverrideCharacter(character);
-                if (character->field_0xcc0 != NULL)
+                if (__builtin_expect(character->field_0xcc0 != NULL, 0))
                     ResetAIOverrideCharacter(character->field_0xcc0);
             }
         }

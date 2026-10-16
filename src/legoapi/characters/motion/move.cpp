@@ -816,9 +816,9 @@ void MovePlayer(GameObject_s *object) {
     object->field_0xefd &= ~GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS;
     object->previous_movement_angle = api.field_0x276;
     object->field_0xf1c = api.model_draw_result == 0 ? object->field_0xf1c + FRAMETIME : 0.0f;
-    if (object->character_context == 0x2b)
+    if (__builtin_expect(object->character_context == 0x2b, 0))
         object->turn_braking += FRAMETIME;
-    if (object->field_0xf03 & 4) {
+    if (__builtin_expect(!!(object->field_0xf03 & 4), 0)) {
         APIObjectVelocities(object);
         GameObjectOrigin(object);
         return;
@@ -830,7 +830,7 @@ void MovePlayer(GameObject_s *object) {
     object->field_0x107a = -1;
     object->field_0xefd &= ~GAMEOBJECT_MOVEMENT_FLAG_FACE_REVERSED;
     const i32 menu_id = GetMenuID();
-    if ((api.field_0x1f8 & APIOBJECT_FLAG_AI_PLAYER_MASK) != APIOBJECT_FLAG_PLAYER_ACTIVE) {
+    if (__builtin_expect((api.field_0x1f8 & APIOBJECT_FLAG_AI_PLAYER_MASK) != APIOBJECT_FLAG_PLAYER_ACTIVE, 0)) {
         if (object->field_0xefc & 0x10) {
             pad->input_magnitude = 0.0f;
             object->pad_gamepad->buttons_held = 0;
@@ -908,9 +908,9 @@ void MovePlayer(GameObject_s *object) {
                     z = static_cast<f32>(analog_y) - 127.5f;
                     if (WORLD->current_level != DOGFIGHTA_LDATA)
                         z = -z;
-                    if (x * x + z * z < 1806.25f) {
+                    if (__builtin_expect(x * x + z * z < 1806.25f, 0)) {
                         x = z = 0.0f;
-                    } else if (x != 0.0f || z != 0.0f) {
+                    } else if (__builtin_expect(x != 0.0f || z != 0.0f, 1)) {
                         pad->input_mode = 2;
                     }
                 }
@@ -999,7 +999,7 @@ void MovePlayer(GameObject_s *object) {
         lift->apiobj.velocity.y = 0.0f;
         lift->apiobj.field_0x27d = 0;
         lift->field_0x105c = 0;
-        if (lift->character_context == 0x33)
+        if (__builtin_expect(lift->character_context == 0x33, 1))
             lift->character_context = -1;
     }
     api.field_0x1fa |= 1;
@@ -3712,7 +3712,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
             object->movement_lean_angle = 0;
             object->secondary_lean_angle = 0;
         }
-        if (WORLD->current_level == PLATFORM_LDATA)
+        if (__builtin_expect(WORLD->current_level == PLATFORM_LDATA, 0))
             return;
         goto vehicle_collision;
     }
@@ -3753,7 +3753,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                     (NuFsqrt(api.velocity.x * api.velocity.x + api.velocity.z * api.velocity.z) -
                      api.character_data->game_character->tiptoe_speed) /
                     (api.character_data->game_character->run_speed - api.character_data->game_character->tiptoe_speed);
-                if (ratio < 0.0f)
+                if (__builtin_expect(ratio < 0.0f, 0))
                     ratio = 0.0f;
                 if (ratio > 1.0f)
                     ratio = 1.0f;
@@ -3763,7 +3763,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                                      (api.character_data->game_character->field_0x78 -
                                       api.character_data->game_character->turn_rate) *
                                          ratio;
-                if (object->in_narrow_socket) {
+                if (__builtin_expect(!!(object->in_narrow_socket), 1)) {
                     rate *= -0.25f * object->field_0xdc8 + 1.0f;
                     if (turn_multiplier != 0.0f &&
                         !(__builtin_expect((api.flags_low & 0x80) != 0, 1) &&
@@ -3782,7 +3782,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                         degrees = (i32)(degrees * turn_multiplier);
                     i32 limit = static_cast<i32>(static_cast<u32>(degrees) << 16) / 360;
                     if (abs(delta) <= 0x4000) {
-                        if (delta < -limit)
+                        if (__builtin_expect(delta < -limit, 0))
                             api.movement_facing_angle = narrow_yaw - limit;
                         else if (delta > limit)
                             api.movement_facing_angle = narrow_yaw + limit;
@@ -3812,8 +3812,10 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
             u8 boundary_player = api.flags_low & 0x80;
             if (!(object->character_context == -1 && object->field_0x1084 &&
                   fabsf(object->contact_normal.y) < NuTrigTable[0x3aaa])) {
-                if (boundary_player != 0 && (api.character_data->game_character->flags_090 & 0x10000) == 0 &&
-                    (i8)object->field_0xf03 >= 0) {
+                if (__builtin_expect(boundary_player != 0 &&
+                                         (api.character_data->game_character->flags_090 & 0x10000) == 0 &&
+                                         (i8)object->field_0xf03 >= 0,
+                                     0)) {
                     i32 outside = OutSideSplineArea(&api.collision_position, WORLD->camera_splines[16], &a, &b, 0);
                     i32 inside = 0;
                     if (!outside)
@@ -3825,9 +3827,11 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                     }
                 }
             } else {
-                if (boundary_player != 0 && (PODSPRINT_ADATA == NULL || WORLD->area != PODSPRINT_ADATA) &&
-                    (api.character_data->game_character->flags_090 & 0x10000) == 0 &&
-                    WORLD->current_level != SPEEDERCHASEA_LDATA) {
+                if (__builtin_expect(boundary_player != 0 &&
+                                         (PODSPRINT_ADATA == NULL || WORLD->area != PODSPRINT_ADATA) &&
+                                         (api.character_data->game_character->flags_090 & 0x10000) == 0 &&
+                                         WORLD->current_level != SPEEDERCHASEA_LDATA,
+                                     1)) {
                     i32 normal_yaw = NuAtan2D(object->contact_normal.x, object->contact_normal.z);
                     if (requested_speed == 0.0f || abs(RotDiff(normal_yaw, object->current_input_angle)) > 0x4000) {
                         i32 delta = RotDiff(normal_yaw, api.field_0x276);
@@ -3897,13 +3901,13 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                                 ? 0.25f
                                 : api.character_data->game_character->field_0x80;
                 f32 desired;
-                if (WORLD->area == PODRACE_ADATA && object->field_0xee0 != 1.0e9f)
+                if (__builtin_expect(WORLD->area == PODRACE_ADATA && object->field_0xee0 != 1.0e9f, 0))
                     desired = GetVehicleSpeedMul(object, object->field_0xee0);
                 else if (player_vehicle != 0 && (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA) &&
                          object->in_narrow_socket) {
                     u32 buttons = pad->buttons_held & (GAMEPAD_JUMP | GAMEPAD_SPECIAL);
                     i32 mode = 0;
-                    if (buttons == GAMEPAD_JUMP)
+                    if (__builtin_expect(buttons == GAMEPAD_JUMP, 0))
                         mode = 1;
                     else if (buttons == GAMEPAD_SPECIAL)
                         mode = -1;
@@ -4388,7 +4392,7 @@ void Move_VEHICLE(GameObject_s *object) {
     if ((object->apiobj.character_data->model_flags & 0x10000000) != 0 &&
         (object->apiobj.character_data->game_character->flags_094[0] & 8) == 0) {
         if (object->id == id_STAP || object->id == id_STAP2) {
-            if (object->apiobj.character_model->model_data_b[0x16] == NULL) {
+            if (__builtin_expect(object->apiobj.character_model->model_data_b[0x16] == NULL, 1)) {
                 FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.25f, 1);
             } else {
                 ShootCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION, 0, 0, 0, 1);
@@ -4397,10 +4401,10 @@ void Move_VEHICLE(GameObject_s *object) {
             FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.15f, 0);
         }
     }
-    if (WORLD->current_level == DOGFIGHTA_LDATA) {
+    if (__builtin_expect(WORLD->current_level == DOGFIGHTA_LDATA, 0)) {
         CatchUpCode(object, 0.01f, 2.0f, 0);
     }
-    if ((object->apiobj.character_data->game_character->flags_090 & 0x400) != 0) {
+    if (__builtin_expect((object->apiobj.character_data->game_character->flags_090 & 0x400) != 0, 1)) {
         CableCode(object, pad->buttons_pressed & GAMEPAD_SPECIAL, 0.5f);
     }
     if (WORLD->area != NULL && (WORLD->area->flags & 1) != 0 && object->apiobj.player_controlled &&
@@ -4425,7 +4429,7 @@ void Move_VEHICLE(GameObject_s *object) {
             hover_height = object->ai.locator->position.y + test_hoverheight;
         } else {
             hover_height = GetHoverPosY(object);
-            if (hover_height == 2000000.0f) {
+            if (__builtin_expect(hover_height == 2000000.0f, 1)) {
                 hover_height = 0.0f;
             }
         }
@@ -4542,7 +4546,7 @@ void Move_VEHICLE(GameObject_s *object) {
     }
 
     if ((object->apiobj.character_data->game_character->flags_090 & 0x100000) != 0) {
-        if (Cheat_IsOn(7) != 0) {
+        if (__builtin_expect(Cheat_IsOn(7) != 0, 1)) {
             if ((pad->buttons_pressed & (GAMEPAD_ACTION | GAMEPAD_SPECIAL)) != 0) {
                 GameAudio_PlaySfx(0x4b, &object->apiobj.collision_position, 0, 0);
             }
@@ -4587,7 +4591,7 @@ void Move_VEHICLE(GameObject_s *object) {
                     } while (count != 0);
                 }
             }
-        } else if (object->field_0xcc0 != NULL && object->apiobj.field_0x27c == -1) {
+        } else if (__builtin_expect(object->field_0xcc0 != NULL && object->apiobj.field_0x27c == -1, 0)) {
             GameObject_s *player = Player[0];
             if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 && player->field_0xcc0 != NULL &&
                 ((object->apiobj.field_0x1e4 & player->apiobj.field_0x1ec) |
@@ -4987,7 +4991,7 @@ static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pres
         FindIncomingThreats(object);
     if (object->character_context == 0xc) {
         GameObject_s *attacker = object->block_attacker;
-        if (attacker != NULL) {
+        if (__builtin_expect(attacker != NULL, 1)) {
             if (jump_pressed != 0 && ComboJump(object))
                 return;
             if (object->block_latch == 0 && object->blocked_attack_stage != 0) {
@@ -5015,14 +5019,15 @@ static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pres
         }
         if (object->id == id_GAMORREANGUARD && (object->apiobj.flags_low & 0x80) == 0) {
             object->context_animation_timer -= FRAMETIME;
-            if (object->context_animation_timer <= 0.0f) {
+            if (__builtin_expect(object->context_animation_timer <= 0.0f, 1)) {
                 object->character_context = -1;
                 object->block_cooldown = 1.5f;
             }
             return;
         }
-        if (pressed == 0 || (object->incoming_bolt == NULL && object->incoming_melee == NULL &&
-                             object->incoming_special == NULL && object->incoming_part == NULL)) {
+        if (__builtin_expect(pressed == 0 || (object->incoming_bolt == NULL && object->incoming_melee == NULL &&
+                                              object->incoming_special == NULL && object->incoming_part == NULL),
+                             1)) {
             if (held != 0 && object->incoming_bolt != NULL) {
                 object->context_animation_timer = 0.2f;
                 return;
@@ -5030,9 +5035,11 @@ static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pres
             object->context_animation_timer -= FRAMETIME;
             if (object->context_animation_timer > 0.0f)
                 return;
-            if (held != 0 &&
-                (attacker == NULL || attacker->id != id_GAMORREANGUARD || attacker->character_context != 0x26 ||
-                 attacker->context_animation != 0x56 || (attacker->context_flags & 0x40) == 0)) {
+            if (__builtin_expect(held != 0 &&
+                                     (attacker == NULL || attacker->id != id_GAMORREANGUARD ||
+                                      attacker->character_context != 0x26 || attacker->context_animation != 0x56 ||
+                                      (attacker->context_flags & 0x40) == 0),
+                                 0)) {
                 StartHold(object);
                 return;
             }
@@ -5059,7 +5066,7 @@ static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pres
     object->character_context = 0xc;
     object->block_latch = 0;
     if (object->incoming_bolt == NULL) {
-        if (object->incoming_part != NULL) {
+        if (__builtin_expect(object->incoming_part != NULL, 1)) {
             object->block_attacker = NULL;
             object->blocked_bolt = NULL;
             object->blocked_part = object->incoming_part;
@@ -6031,10 +6038,11 @@ static void ForcePushed_MoveCode(GameObject_s *object) {
     if (object->character_context != 0x1c)
         return;
     GameObject_s *source = object->force_target;
-    if (source == NULL || source->character_context != 0x1b || (source->field_0xe21 & 1) != 0 ||
-        (object->action_flags & 0x280) != 0)
+    if (__builtin_expect(source == NULL || source->character_context != 0x1b || (source->field_0xe21 & 1) != 0 ||
+                             (object->action_flags & 0x280) != 0,
+                         1))
         return;
-    if (object->action_movement_state == 4 && Cheat_IsOn(0x13)) {
+    if (__builtin_expect(object->action_movement_state == 4 && Cheat_IsOn(0x13), 0)) {
         if ((source->apiobj.collision_identity_mask & object->apiobj.collision_contact_mask) != 0) {
             i16 angle =
                 NuAtan2D(source->apiobj.pos_x - object->apiobj.pos_x, source->apiobj.pos_z - object->apiobj.pos_z);
@@ -6045,7 +6053,7 @@ static void ForcePushed_MoveCode(GameObject_s *object) {
                 GameCam_HitJudder();
             }
         }
-    } else if (ForcePush_SuperPush) {
+    } else if (__builtin_expect(!!(ForcePush_SuperPush), 0)) {
         GameObject_s *target = Obj;
         for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
             if ((target->apiobj.field_0x1f8 & 0x1001) != 0x1001 || target->apiobj.field_0x287 != 0 ||
@@ -6621,14 +6629,15 @@ static void ForceDeflectCode(GameObject_s *object, i32 pressed, i32 held) {
     if (__builtin_expect(context != 0x1d, 1)) {
         PART_s *assist = NULL;
         if ((object->apiobj.flags_low & 0x80) == 0) {
-            if ((object->field_0xefd & 1) == 0 || player == NULL || player->force_part == NULL)
+            if (__builtin_expect((object->field_0xefd & 1) == 0 || player == NULL || player->force_part == NULL, 1))
                 return;
             assist = player->force_part;
         }
         if (object->apiobj.field_0x27d == 0)
             return;
-        if (context != -1 && __builtin_expect((CInfo[context].flags & 4) == 0, 1) && context != 6 &&
-            object->character_context != 7 && !objInNetWaitContext(object, 0x1d))
+        if (__builtin_expect(context != -1 && __builtin_expect((CInfo[context].flags & 4) == 0, 1) && context != 6 &&
+                                 object->character_context != 7 && !objInNetWaitContext(object, 0x1d),
+                             0))
             return;
         PART_s *part;
         if (__builtin_expect(waiting, 0))
@@ -6668,13 +6677,13 @@ static void ForceDeflectCode(GameObject_s *object, i32 pressed, i32 held) {
     }
     object->field_0xe22 |= 2;
     object->context_animation_timer += FRAMETIME;
-    if ((object->apiobj.flags_low & 0x80) != 0)
+    if (__builtin_expect((object->apiobj.flags_low & 0x80) != 0, 1))
         NewRumble(object->pad_gamepad->pad, qrand() * 1.5259022e-05f * 0.6f, 0);
     if (object->force_part != NULL) {
         PART_s *part = object->force_part;
         part->force_flags |= 1;
         part->flags &= ~0x4000;
-        if (object->context_animation_timer < 0.2f)
+        if (__builtin_expect(object->context_animation_timer < 0.2f, 0))
             part->velocity.y = SeekValF(part->velocity.y, 2.0f, 6.0f);
         part = object->force_part;
         NUVEC direction;
@@ -6691,7 +6700,7 @@ static void ForceDeflectCode(GameObject_s *object, i32 pressed, i32 held) {
         object->force_glow_candidate_kind = 3;
         SetHeadTarget(object, &object->force_part->position, 2, 1.0f, 0.0f, 0.0f);
         part = object->force_part;
-        if (part->move_callback == BobaRocket_Move) {
+        if (__builtin_expect(part->move_callback == BobaRocket_Move, 0)) {
             part->move_callback = NULL;
             part->update_callback = NULL;
             part->flags = (part->flags & ~0x4000) | 0x80;

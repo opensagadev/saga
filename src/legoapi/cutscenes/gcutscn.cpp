@@ -192,7 +192,7 @@ void CutScenePlayer_DrawGrid(COLLECTION_s *collection, i16 *ids, float x, float 
             COLLECTID *item = &collection->list[i];
             item->grid_y = y;
             item->grid_x = x;
-            if (alpha <= 0.0f)
+            if (__builtin_expect(alpha <= 0.0f, 0))
                 continue;
             i32 object = i == selected ? (menu_flash ? 168 : 166) : 167;
             f32 opacity = CutScenePlayer_CanStart(ids[i]) ? alpha : 0.375f * alpha;
@@ -204,7 +204,7 @@ void CutScenePlayer_DrawGrid(COLLECTION_s *collection, i16 *ids, float x, float 
             char text[32];
             sprintf(text, "%i", i + 1);
             i32 area = LDataList[player->clips[ids[i]].level_id].area_index;
-            if (area != previous_area) {
+            if (__builtin_expect(area != previous_area, 1)) {
                 previous_area = area;
                 if (++colour > 7)
                     colour = 7;

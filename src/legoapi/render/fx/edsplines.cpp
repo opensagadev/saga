@@ -362,9 +362,9 @@ void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle,
         *angle = 0;
     if (pitch != NULL)
         *pitch = 0;
-    if (spline == NULL)
+    if (__builtin_expect(spline == NULL, 0))
         return;
-    if (along > 1.0f)
+    if (__builtin_expect(along > 1.0f, 1))
         along = 1.0f;
     else if (along < 0.0f)
         along = 0.0f;
@@ -373,7 +373,7 @@ void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle,
     i32 index = fixed >> 16;
     NUVEC *current = &spline->pts[index];
     *position = *current;
-    if (pitch != NULL || angle != NULL)
+    if (__builtin_expect(pitch != NULL || angle != NULL, 1))
         SplinePointAngles(spline, index, looping, pitch, angle);
     index++;
     if (index >= spline->length) {
@@ -382,7 +382,7 @@ void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle,
         index = 0;
     }
     fixed &= 0xffff;
-    if (fixed == 0)
+    if (__builtin_expect(fixed == 0, 0))
         return;
     NUVEC *next = &spline->pts[index];
     f32 fraction = fixed * (1.0f / 65536.0f);
@@ -497,7 +497,7 @@ void GetNearestSplinePos(NUVEC *origin, SPLINEPOS_s *result, NUGSPLINE *spline, 
         i32 index = first_point;
         if (index < 0)
             index = 0;
-        else if (index >= logical_count)
+        else if (__builtin_expect(index >= logical_count, 0))
             return;
         i32 end = point_count;
         if (last_point >= 0 && last_point < end)
@@ -624,8 +624,8 @@ void LevelSplines_InitForLevel(WORLDINFO_s *world) {
 
     for (i32 i = 0; i < LEVELSPLINECOUNT; ++i) {
         LEVELSPLINE *entry = &LevSplList[i];
-        if ((entry->area != -1 && world->level_sub_id != entry->area) ||
-            (entry->level != -1 && world->level_idx != entry->level)) {
+        if (__builtin_expect((entry->area != -1 && world->level_sub_id != entry->area) ||
+            (entry->level != -1 && world->level_idx != entry->level), 0)) {
             continue;
         }
 
@@ -635,9 +635,9 @@ void LevelSplines_InitForLevel(WORLDINFO_s *world) {
             world->portal_places[i] = reinterpret_cast<PORTALPOS *>(spline);
             if (spline != NULL) {
                 const i32 point_count = spline->length;
-                if ((entry->min_points != 0 && point_count < entry->min_points) ||
+                if (__builtin_expect((entry->min_points != 0 && point_count < entry->min_points) ||
                     (entry->max_points != 0 && entry->min_points <= entry->max_points &&
-                     point_count > entry->max_points)) {
+                     point_count > entry->max_points), 1)) {
                     world->portal_places[i] = NULL;
                 }
             }

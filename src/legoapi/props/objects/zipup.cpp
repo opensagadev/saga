@@ -473,7 +473,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
             f32 *playing = NULL;
             if (info != NULL)
                 playing = AnimPlaying(&api.anim_packet, object->context_animation, 1, 0);
-            if (info == NULL || playing != NULL) {
+            if (__builtin_expect(info == NULL || playing != NULL, 1)) {
                 object->context_animation_timer += FRAMETIME;
                 if (object->context_animation_timer >= object->airborne_action_duration)
                     object->context_animation_timer = object->airborne_action_duration;
@@ -546,7 +546,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
         NUVEC *hook = &zipup->hook_origin;
         NUVEC *destination = object->field_0x7a3 == 0 ? &zipup->upper_position : &zipup->lower_position;
         if ((zipup->flags & 1) == 0) {
-            if (NuVecDistSqr(&api.position, hook, NULL) < 0.01f || object->context_animation_timer >= 5.0f) {
+            if (__builtin_expect(NuVecDistSqr(&api.position, hook, NULL) < 0.01f || object->context_animation_timer >= 5.0f, 0)) {
                 StartJump(object, 6);
                 PlaySfx("GrapDetach", &api.collision_position);
                 if ((api.flags_low & 0x80) != 0)
@@ -623,20 +623,20 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
     }
     if (!ObjLandReady(object) && !objInNetWaitContext(object, 0x47))
         return;
-    if ((api.flags_low & 0x80) != 0) {
+    if (__builtin_expect((api.flags_low & 0x80) != 0, 0)) {
         if ((api.character_data->model_flags & 0x100000) == 0 && !SuperWeirdo(object)) {
             if ((api.character_data->model_flags & 8) == 0 ||
                 (api.character_data->game_character->flags_094[1] & 0x80) != 0 || !Cheat_IsOn(13))
                 return;
         }
-    } else if (object->use_action != 4 || (api.character_data->model_flags & 0x100000) == 0) {
+    } else if (__builtin_expect(object->use_action != 4 || (api.character_data->model_flags & 0x100000) == 0, 0)) {
         return;
     }
     i32 endpoint;
     ZIPUP *zipup = ZipUp_FindNearest(WORLD, &api.lower_position, api.collision_radius, NULL, &endpoint, object, false);
     if (objInNetWaitContext(object, 0x47)) {
         object->context_animation_timer -= FRAMETIME;
-        if (object->context_animation_timer <= 0.0f)
+        if (__builtin_expect(object->context_animation_timer <= 0.0f, 0))
             object->character_context = -1;
     }
     if (zipup == NULL)
@@ -652,7 +652,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
             object->context_variant_flags |= 1;
         return;
     }
-    if ((api.flags_low & 0x80) != 0)
+    if (__builtin_expect((api.flags_low & 0x80) != 0, 0))
         Hint_SetComplete(0x262);
     object->field_0x788 = zipup;
     object->character_context = 0x47;
@@ -705,7 +705,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
     NUVEC *heading = start->x == hook->x && start->z == hook->z ? destination : hook;
     api.movement_facing_angle = NuAtan2D(heading->x - start->x, heading->z - start->z);
     api.velocity.y = 0.0f;
-    if (api.character_data->game_character->field275_0x116 == 2)
+    if (__builtin_expect(api.character_data->game_character->field275_0x116 == 2, 1))
         FastWeaponOut(object, 1);
     object->context_animation_timer = 0.0f;
     PlaySfx("GrapAttach", &api.upper_position);

@@ -490,13 +490,13 @@ static i32 Collide2Objects(APIOBJECT *first, APIOBJECT *second) {
         second->collision_contact_mask |= first->collision_identity_mask;
         return collision_result;
     }
-    if (WORLD->current_level == DOGFIGHTA_LDATA) {
+    if (__builtin_expect(WORLD->current_level == DOGFIGHTA_LDATA, 0)) {
         collision_result = APIObjectCollision(first, second);
     } else {
         collision_result = APIObjectCollision2D(first, second);
     }
 
-    if (collision_result == 2 && VehicleArea == 0) {
+    if (__builtin_expect(collision_result == 2 && VehicleArea == 0, 0)) {
         GAMECHARACTERDATA *second_data =
             static_cast<GAMECHARACTERDATA *>(second_object->apiobj.character_data->field11_0x24);
         GAMECHARACTERDATA *first_data =
@@ -506,8 +506,8 @@ static i32 Collide2Objects(APIOBJECT *first, APIOBJECT *second) {
             if ((second_data->flags_090 & 0x1000) != 0 &&
                 second->horizontal_velocity_magnitude > second_data->movement_speed * 0.5f) {
                 StartFlatten(second_object, first_object);
-            } else if (second_vertical_velocity < 0.0f && (first_data->flags_090 & 0x40) != 0 &&
-                       first_object->field_0x107c == -1) {
+            } else if (__builtin_expect(second_vertical_velocity < 0.0f && (first_data->flags_090 & 0x40) != 0 &&
+                       first_object->field_0x107c == -1, 0)) {
                 first->velocity.y += second_vertical_velocity * 0.5f;
             } else if (first_vertical_velocity < 0.0f && (second_data->flags_090 & 0x40) != 0 &&
                        second_object->field_0x107c == -1) {
@@ -1264,7 +1264,7 @@ i32 StunGameObject(GameObject_s *object, GameObject_s *attacker, float duration,
     void **animations = object->apiobj.character_model->model_data_b;
     i32 candidates[5];
     i32 candidate_count = 0;
-    if (animations[0xa7] != NULL && animations[0xaa] != NULL)
+    if (__builtin_expect(animations[0xa7] != NULL && animations[0xaa] != NULL, 0))
         candidates[candidate_count++] = 0xa7;
     if (animations[0xa8] != NULL && animations[0xab] != NULL)
         candidates[candidate_count++] = 0xa8;
@@ -1290,7 +1290,7 @@ i32 StunGameObject(GameObject_s *object, GameObject_s *attacker, float duration,
     if (object->context_animation != 0x3d && object->context_animation != 0xb9) {
         if (object->external_force.z <= 0.0f)
             object->external_force.z = 1.0f;
-        else if (object->external_force.z <= 0.8f)
+        else if (__builtin_expect(object->external_force.z <= 0.8f, 1))
             object->external_force.z = 0.8f;
     }
 
@@ -1310,9 +1310,9 @@ i32 StunGameObject(GameObject_s *object, GameObject_s *attacker, float duration,
     }
 
     const i16 stun_animation = object->context_animation;
-    if (object->apiobj.character_model->model_data_b[stun_animation] != NULL &&
+    if (__builtin_expect(object->apiobj.character_model->model_data_b[stun_animation] != NULL &&
         (static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[stun_animation])->flags & 2) !=
-            0) {
+            0, 0)) {
         object->context_animation_timer = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 0.5f + 1.0f;
     } else {
         object->context_animation_timer =

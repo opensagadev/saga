@@ -359,7 +359,7 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
             GameAnimSet_GetCurrentFrame(force->anim_set) > force->effect_scale && !GizForce_AnimComplete(force)) {
             goto seek_and_play;
         }
-        if (being_used && (Cheats_CheckFlags(0x400000) != 0 || user->field_0xdec > 0.0f)) {
+        if (__builtin_expect(being_used && (Cheats_CheckFlags(0x400000) != 0 || user->field_0xdec > 0.0f), 0)) {
             target_speed = 3.0f;
         seek_and_play:
             force->animation_speed = SeekValF(force->animation_speed, target_speed, 5.0f);
@@ -417,7 +417,7 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
         if (force->field_0x50 > 0.0f) {
 
             offset.x = qrand() * (1.0f / 65535.0f) * 0.05f - 0.025f;
-            if ((force->progress_flags & GIZFORCE_PROGRESS_GROUP_MEMBER) == 0) {
+            if (__builtin_expect((force->progress_flags & GIZFORCE_PROGRESS_GROUP_MEMBER) == 0, 1)) {
                 offset.y = 0.0f;
             } else {
                 offset.y = GameAnimSet_GetCompletionRatio(force->anim_set) * force->group->combined_height;
@@ -460,7 +460,7 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
                 }
             } else {
                 if (GizForce_AnimComplete(force)) {
-                    if (force->loop_sfx_id != -1)
+                    if (__builtin_expect(force->loop_sfx_id != -1, 0))
                         GameAudio_PlaySfxById(force->loop_sfx_id, &force->position, 0, 0);
                 } else if (force->anim_set->state != 4 && force->stop_sfx_id != -1) {
                     GameAudio_PlaySfxById(force->stop_sfx_id, &force->position, 0, 0);
@@ -494,7 +494,7 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
                         (force->config_flags & 0x40) != 0) &&
                        (force->runtime_flags & GIZFORCE_RUNTIME_COMPLETION_RELEASED) == 0) {
                 if (force->blowup_type != -1) {
-                    if ((force->config_flags & 0x20) == 0) {
+                    if (__builtin_expect((force->config_flags & 0x20) == 0, 0)) {
                         GizmoBlowUpTypeBlowUp(world, force->blowup_type, &force->position);
                     } else {
                         for (GAMEANIMOBJ_s *object = force->anim_set->objects; object != NULL; object = object->next) {

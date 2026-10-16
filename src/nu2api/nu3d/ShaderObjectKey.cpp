@@ -67,10 +67,10 @@ namespace nu2api {
 
         // Auxiliary texture ids: selected only when the base flag / threshold says
         // the texture is actually bound.
-        if (filter->variant == 0) {
+        if (__builtin_expect(filter->variant == 0, 0)) {
             const u8 baseFlag = descBytes[0x1b8];
             block[0x15] = ((baseFlag & 1) || (baseFlag & 2)) ? descBytes[0xa9] : 0;
-            if (filter->texture_id_threshold < *reinterpret_cast<const i32 *>(descBytes + 0x48)) {
+            if (__builtin_expect(filter->texture_id_threshold < *reinterpret_cast<const i32 *>(descBytes + 0x48), 0)) {
                 block[0x16] = descBytes[0xaa];
             } else {
                 block[0x16] = 0;
@@ -84,9 +84,9 @@ namespace nu2api {
         block[0x1a] = filter->hasDiffuseMap(3) ? descBytes[0xad] : 0;
 
         // Optional extra map id (0xae)
-        if (filter->variant == 0) {
+        if (__builtin_expect(filter->variant == 0, 1)) {
             const u8 b1 = descBytes[0x1b9];
-            if ((b1 & 0x20) || (b1 & 0x40)) {
+            if (__builtin_expect((b1 & 0x20) || (b1 & 0x40), 0)) {
                 block[0x1b] = descBytes[0xae];
             }
         }

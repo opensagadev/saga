@@ -545,7 +545,7 @@ bool HandleGroupLimit(i32 group_id) {
 extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch) {
     static nuvec_s pos;
 
-    if (sfx_id == -1) {
+    if (__builtin_expect(sfx_id == -1, 0)) {
         return;
     }
 
@@ -573,7 +573,7 @@ extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pit
     f32 falloff_near = g_soundInfo[sfx_id].falloff_near;
     f32 saved_fade_start = 0.0f;
     f32 saved_fade_end = 0.0f;
-    if (!(g_soundInfo[sfx_id].falloff_near != 0.0f || g_soundInfo[sfx_id].falloff_far != 0.0f)) {
+    if (__builtin_expect(!(g_soundInfo[sfx_id].falloff_near != 0.0f || g_soundInfo[sfx_id].falloff_far != 0.0f), 0)) {
         falloff_near = 2.0f;
         falloff_far = 15.0f;
     } else {
@@ -607,7 +607,7 @@ extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pit
     }
 
     f32 volume_scale;
-    if (volume != 1.0f) {
+    if (__builtin_expect(volume != 1.0f, 1)) {
         if (volume > 1.0f) {
             volume = 1.0f;
         }
@@ -624,7 +624,7 @@ extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pit
 
     if (g_soundInfo[sfx_id].pitch_rnd != 0.0f) {
         f32 pitch_variation = NuRandFloatSeeded(&seed) * g_soundInfo[sfx_id].pitch_rnd;
-        if ((NuRandIntSeeded(&seed) & 1) == 0) {
+        if (__builtin_expect((NuRandIntSeeded(&seed) & 1) == 0, 1)) {
             pitch_variation *= 0.5f;
             pitch_variation = 1.0f - pitch_variation;
         } else {
@@ -675,7 +675,7 @@ extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pit
         }
     }
 
-    if (g_soundInfo[sfx_id].falloff_near != 0.0f || g_soundInfo[sfx_id].falloff_far != 0.0f) {
+    if (__builtin_expect(g_soundInfo[sfx_id].falloff_near != 0.0f || g_soundInfo[sfx_id].falloff_far != 0.0f, 0)) {
         nusound_fade_start = saved_fade_start;
         nusound_fade_end = saved_fade_end;
     }

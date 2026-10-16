@@ -193,7 +193,7 @@ extern "C" NUSHADERPROGRAM *NuShaderProgramCreateIOS(const char *vertex_source, 
     glCompileShader(vertex_shader);
     GLint compiled = 0;
     glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &compiled);
-    if (compiled == 0) {
+    if (__builtin_expect(compiled == 0, 0)) {
         glDeleteShader(vertex_shader);
     }
 
@@ -215,7 +215,7 @@ extern "C" NUSHADERPROGRAM *NuShaderProgramCreateIOS(const char *vertex_source, 
     NuShaderObjectBindAttributeLocationsGLSL(program);
     NUSHADERPROGRAM *result = NULL;
     const i32 start = programPool.next;
-    if (start <= 63) {
+    if (__builtin_expect(start <= 63, 1)) {
         i32 slot = start;
         do {
             if ((programPool.occupied[slot / 8] & (1 << (slot & 7))) == 0) {

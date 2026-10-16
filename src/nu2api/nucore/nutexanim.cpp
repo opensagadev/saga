@@ -348,14 +348,14 @@ nutexanimprog_s *NuTexAnimProgParseFile(i32 file, VARIPTR *buffer, VARIPTR, i32)
     parprog = program;
     while (NuFParGetLine(parser) != 0) {
         i32 length = NuFParGetWord(parser);
-        if (length != 0 && NuFParInterpretWord(parser) == 0 && parser->word_buf[0] != '\0' &&
-            parser->word_buf[length - 1] == ':') {
+        if (__builtin_expect(length != 0 && NuFParInterpretWord(parser) == 0 && parser->word_buf[0] != '\0' &&
+            parser->word_buf[length - 1] == ':', 0)) {
             parser->word_buf[length - 1] = '\0';
             i32 label = NuTexAnimLabelIndex(parser->word_buf, labtab, &labtabcnt);
             nta_labels[label] = parprog->instruction_count;
         }
     }
-    if (buffer != NULL) {
+    if (__builtin_expect(buffer != NULL, 0)) {
         buffer->i16_ptr = program->instructions + program->instruction_count;
     }
     NuFParClose(parser);
@@ -555,7 +555,7 @@ extern "C" void NuTexAnimEnvProc(nutexanimenv_s *env) {
                 material->shader_desc.diffuse_map_tex_id[0] = *texture_id & 0x7fff;
                 env->instruction_index = next_instruction;
                 env->wait_remaining += env->wait_base;
-                if (env->wait_random != 0)
+                if (__builtin_expect(env->wait_random != 0, 1))
                     env->wait_remaining += NuRand(&texanim_rand) % env->wait_random;
                 if (env->wait_remaining < 0)
                     env->wait_remaining = 0;

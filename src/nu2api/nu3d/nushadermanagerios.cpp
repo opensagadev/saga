@@ -82,7 +82,7 @@ void ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion(NUSHADERMTLDESC *d
     desc->byte4 = mobile_flags1 & 0x9f;
 
     if ((original_shader_flags & 0x10000) == 0) {
-        if ((original_shader_flags & 0x20) != 0) {
+        if (__builtin_expect((original_shader_flags & 0x20) != 0, 0)) {
             mobile_flags0 &= 0xf4;
             desc->flags = original_shader_flags & 0xffff9ff4;
             desc->flagsbits_1b8 = mobile_flags0;
@@ -104,7 +104,7 @@ void ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion(NUSHADERMTLDESC *d
     desc->flagsbits_1bb = mobile_flags3 & 0x27;
     desc->flags = desc->flags & 0xf916fffb;
 
-    if (::RemoveNormalMaps != 0 && ::RemoveDirectionalMaps != 0) {
+    if (__builtin_expect(::RemoveNormalMaps != 0 && ::RemoveDirectionalMaps != 0, 0)) {
         vtx_desc[3] = original_vtx_flags3 & 0xfc;
         desc->normal_map_tid = 0;
         vtx_desc[0] &= 0x0f;

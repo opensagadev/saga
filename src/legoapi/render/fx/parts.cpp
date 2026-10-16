@@ -803,10 +803,10 @@ extern "C" {
 
     void AddFiniteShotDebrisEffect2(i32 *handle, i32 effect, NUVEC *position, NUVEC *emitter_momentum,
                                     NUVEC *particle_momentum, i32 count) {
-        if (debris_suspended != 0)
+        if (__builtin_expect(debris_suspended != 0, 0))
             return;
         AddDebrisEffect(handle, effect, position->x, position->y, position->z);
-        if (*handle == -1)
+        if (__builtin_expect(*handle == -1, 1))
             return;
         debkeydata[*handle].field_1d4 = count;
         const f32 now = debtab[effect]->time_group == 4 ? panelglobaltime : globaltime;
@@ -2493,7 +2493,7 @@ extern "C" {
 
     i32 edpartLoadPageEx(char *path, i8 mode, nugscn_s **scenes, i32 scene_count) {
         i32 page = 0;
-        if (mode != 0) {
+        if (__builtin_expect(mode != 0, 1)) {
             for (page = 1; page < 8; ++page) {
                 if (part_page_used[page] == 0)
                     break;
@@ -2590,7 +2590,7 @@ extern "C" {
             part_page_on[0] = 1;
         if (mode == 0)
             edbits_part_general_page = page;
-        else if (mode == 1)
+        else if (__builtin_expect(mode == 1, 1))
             edbits_part_level_page = page;
         return page;
     }

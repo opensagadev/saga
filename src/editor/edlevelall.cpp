@@ -592,7 +592,7 @@ void ClassEditor::DestroySelectedObjectsNow() {
 }
 
 void ClassEditor::DrawObjectSphere(ClassObject &selected, i32 colour) {
-    if (selected.object == NULL)
+    if (__builtin_expect(selected.object == NULL, 1))
         return;
     f32 radius;
     EdMember member;
@@ -1168,7 +1168,7 @@ void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
         }
         entry = next_entry;
     }
-    if (selected_objects.first == NULL)
+    if (__builtin_expect(selected_objects.first == NULL, 0))
         return;
     ClassObjectListEntry *entry = selected_objects.first;
     EdClassInterface *interface = entry->ed_class->interface;
@@ -1193,7 +1193,7 @@ void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
             if (Editable(current, entry_ed_class, -1))
                 previous = current;
             current = interface->vtable->get_next_object(interface, current);
-            if (current == NULL)
+            if (__builtin_expect(current == NULL, 1))
                 current = interface->vtable->get_next_object(interface, NULL);
             if (current == entry->object)
                 break;
@@ -2418,7 +2418,7 @@ void LevelEditor::Reset() {
 
 i32 __attribute__((optimize("no-partial-inlining"))) LevelEditor::Save() {
     i32 saved_any = 0;
-    if (active) {
+    if (__builtin_expect(!!(active), 1)) {
 #define EDLEVEL_SAVE_SCENE(index)                                                                                      \
     do {                                                                                                               \
         LevelEditorScene &scene = scenes[index];                                                                       \
@@ -2689,8 +2689,8 @@ PropertyMenu *PropertyTool::CreatePropertyMenu(ClassObject &object) {
     char title[128];
 
     i32 name_type = EdType_String;
-    if (object.reference == NULL ||
-        !object.reference->GetAttributeData(object.object, 2, name_type, name, sizeof(name))) {
+    if (__builtin_expect(object.reference == NULL ||
+        !object.reference->GetAttributeData(object.object, 2, name_type, name, sizeof(name)), 0)) {
         EdMember member;
         if (!object.ed_class->FindMember(&member, object.object, 2, 1) ||
             !member.reference->GetAttributeData(member.object, 2, name_type, name, sizeof(name)))

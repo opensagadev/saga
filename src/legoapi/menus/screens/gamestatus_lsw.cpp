@@ -332,7 +332,7 @@ NEWMINIPIECE_s NewMiniPiece[10];
 void InitStatusScreen(WORLDINFO_s *world) {
     STATUSPACKET_s &p = StatusPacket;
     char event[64];
-    if (p.lsw_packet == NULL) {
+    if (__builtin_expect(p.lsw_packet == NULL, 0)) {
         return;
     }
     for (i32 i = 0; StatusStages[i].type != -1; ++i) {
@@ -378,7 +378,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
         p.mission_state = 0;
     else
         p.mission_state = Mission_CurrentState(NULL);
-    if (from_save_and_exit != 0) {
+    if (__builtin_expect(from_save_and_exit != 0, 1)) {
         from_save_and_exit = 0;
         level_already_loaded = -1;
     }
@@ -398,7 +398,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
     p.bonus_mode = 0;
     p.super_bonus_mode = 0;
     i32 episode = -1;
-    if (area == -1) {
+    if (__builtin_expect(area == -1, 0)) {
         p.area = NULL;
         p.episode = NULL;
         p.chapter = -1;
@@ -414,7 +414,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
             p.vehicle_area = 1;
         if ((p.area->flags & AREAFLAG_BONUS_AREA) != 0)
             p.bonus_mode = 1;
-        if ((p.area->flags & 0x100) != 0)
+        if (__builtin_expect((p.area->flags & 0x100) != 0, 0))
             p.super_bonus_mode = 1;
     }
     if (p.init_callback(world, &p) != 0) {
@@ -445,7 +445,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
                 else
                     new_score = 0;
                 p.new_best_score = new_score;
-                if (Game.episode_save[episode].superstory_complete == 0) {
+                if (__builtin_expect(Game.episode_save[episode].superstory_complete == 0, 1)) {
                     Game.episode_save[episode].superstory_complete = 1;
                     AddToCompletionPoints(POINTS_PER_SUPERSTORY);
                     if (GOLDBRICKFORSUPERSTORY != 0)
@@ -567,7 +567,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
             i32 gold = 0;
             if (Game.area_save[p.area_id].field_0x5[2] == 0) {
                 AddToCompletionPoints(POINTS_PER_CHALLENGE);
-                if (GOLDBRICKFORCHALLENGE != 0)
+                if (__builtin_expect(GOLDBRICKFORCHALLENGE != 0, 1))
                     gold = AddGoldBrickMessage(&p, tCHALLENGECOMPLETE);
                 Game.area_save[p.area_id].field_0x5[2] = 1;
                 if (p.episode_id != -1 && p.chapter != -1) {

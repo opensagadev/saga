@@ -603,7 +603,7 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
             spinner = &world->spinners[index];
             for (GAMEANIMOBJ_s *object = spinner->anim_set->objects; object != NULL; object = object->next) {
                 if (spinner->primary_anim_obj == NULL) {
-                    if (object->animation != NULL) {
+                    if (__builtin_expect(object->animation != NULL, 0)) {
                         spinner->primary_anim_obj = object;
                         longest_duration = __builtin_fabsf(object->end_frame - object->start_frame);
                     }
@@ -635,7 +635,7 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
             } else {
                 spinner_field_98 = EdFileReadFloat();
                 spinner = &world->spinners[index];
-                if (version == 8) {
+                if (__builtin_expect(version == 8, 0)) {
                     initial_animation_point = animation_speed;
                 } else {
                     initial_animation_point = EdFileReadFloat();
@@ -647,7 +647,7 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
             if (spinner->anim_set != NULL && spinner->primary_anim_obj != NULL) {
                 const f32 start_frame = spinner->primary_anim_obj->start_frame;
                 const f32 duration = spinner->primary_anim_obj->end_frame - start_frame;
-                if (output_points > 0) {
+                if (__builtin_expect(output_points > 0, 1)) {
                     {
                         const f32 interval = duration / static_cast<f32>(output_points - 1);
                         for (i32 point = 0; point < output_points; ++point) {
@@ -961,18 +961,18 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
             angle += arm_angle;
             arm_count = spinner->type < 8 ? spinner->type : 8;
         }
-        if (GameAnimSet_GetVisibility(spinner->anim_set) == GAMEANIMSET_VISIBILITY_NONE)
+        if (__builtin_expect(GameAnimSet_GetVisibility(spinner->anim_set) == GAMEANIMSET_VISIBILITY_NONE, 1))
             spinner->flags |= SPINNER_RUNTIME_ANIMATION_HIDDEN;
         else if ((spinner->flags & SPINNER_RUNTIME_ANIMATION_HIDDEN) != 0)
             spinner->flags &= static_cast<u8>(~SPINNER_RUNTIME_ANIMATION_HIDDEN);
-        if ((spinner->flags & (GIZSPINNER_FLAG_HIDE_ARM | SPINNER_RUNTIME_ANIMATION_HIDDEN)) != 0) {
+        if (__builtin_expect((spinner->flags & (GIZSPINNER_FLAG_HIDE_ARM | SPINNER_RUNTIME_ANIMATION_HIDDEN)) != 0, 1)) {
             spinner->state_flags = (spinner->state_flags & ~SPINNER_STATE_ROTATING) | SPINNER_STATE_STOP_ANIMATION;
-            if ((spinner->flags & GIZSPINNER_FLAG_HIDE_BASE) == 0 && qrand() < 0x800 && WORLD != NULL &&
-                WORLD->debris_sys != NULL && WORLD->debris_sys->entries != NULL) {
+            if (__builtin_expect((spinner->flags & GIZSPINNER_FLAG_HIDE_BASE) == 0 && qrand() < 0x800 && WORLD != NULL &&
+                WORLD->debris_sys != NULL && WORLD->debris_sys->entries != NULL, 0)) {
                 NUVEC position = {spinner->position.x, spinner->position.y + 0.3f, spinner->position.z};
                 for (i32 effect = 0; effect < 2; ++effect) {
                     const i32 id = GizSpinnerGDeb_Fail[effect == 0 ? 0 : 2];
-                    if (id >= 0 && id < WORLD->debris_sys->named_count)
+                    if (__builtin_expect(id >= 0 && id < WORLD->debris_sys->named_count, 0))
                         AddVariableShotDebrisEffect(WORLD->debris_sys->entries[id].effect, &position, 2, 0, 0);
                 }
             }
@@ -1021,7 +1021,7 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
             output = candidate;
             break;
         }
-        if (output == -1 && frame < length + margin && length - margin < frame)
+        if (__builtin_expect(output == -1 && frame < length + margin && length - margin < frame, 0))
             output = last;
         if (output == -1) {
             spinner->flags &= static_cast<u8>(~SPINNER_RUNTIME_AT_OUTPUT);

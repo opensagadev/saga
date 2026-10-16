@@ -682,7 +682,7 @@ extern "C" i32 NuDisplayListAddRenderScene(void) {
                 pris[count++] = sp;
                 *reinterpret_cast<u8 *>(&sp->flags) |= 2;
             }
-        } else if ((sc->flags & 2) != 0) {
+        } else if (__builtin_expect((sc->flags & 2) != 0, 1)) {
             // Rebuild this sortpri's material chains into the stream buffer.
             nusortpri_s *new_sp = reinterpret_cast<nusortpri_s *>((buf->addr + 3U) & ~0x3U);
             nudisplaylistitem_s *area = reinterpret_cast<nudisplaylistitem_s *>(new_sp + 1);

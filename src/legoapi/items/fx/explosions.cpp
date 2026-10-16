@@ -134,7 +134,7 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
         GameObject_s *target = Obj;
         for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
             APIOBJECT_s *object = &target->apiobj;
-            if ((object->field_0x1f8 & 0x1001) != 0x1001 || object->field_0x287 != 0)
+            if (__builtin_expect((object->field_0x1f8 & 0x1001) != 0x1001 || object->field_0x287 != 0, 1))
                 continue;
             if ((CInfo[static_cast<i8>(target->character_context)].flags & 0x20008000) != 0)
                 continue;
@@ -148,9 +148,9 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
                 (((object->field_0x1e4 & explosion->field_0x00) | (object->field_0x1e8 & explosion->field_0x04)) != 0 ||
                  explosion->object == target))
                 continue;
-            if (object->collision_min.x > maximum.x || minimum.x > object->collision_max.x ||
+            if (__builtin_expect(object->collision_min.x > maximum.x || minimum.x > object->collision_max.x ||
                 object->collision_min.y > maximum.y || minimum.y > object->collision_max.y ||
-                object->collision_min.z > maximum.z || minimum.z > object->collision_max.z)
+                object->collision_min.z > maximum.z || minimum.z > object->collision_max.z, 0))
                 continue;
             if (!SphereSphereOverlapScaleY(&object->collision_position, object->field_0x1dc, object->field_0x1e0,
                                            &explosion->position, radius, radius))
@@ -195,7 +195,7 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
                     continue;
                 }
             }
-            if (CannotKill(target)) {
+            if (__builtin_expect(!!(CannotKill(target)), 0)) {
                 hit_character = 1;
                 continue;
             }
@@ -236,9 +236,9 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
             hit_character = 1;
         }
     }
-    if (!hit_character && (explosion->field_0x24 & 2) != 0) {
+    if (__builtin_expect(!hit_character && (explosion->field_0x24 & 2) != 0, 1)) {
         u32 hit_type;
-        if ((explosion->field_0x24 & 0x10) != 0)
+        if (__builtin_expect((explosion->field_0x24 & 0x10) != 0, 0))
             hit_type = 3;
         else if ((explosion->field_0x24 & 0x100) != 0)
             hit_type = 7;

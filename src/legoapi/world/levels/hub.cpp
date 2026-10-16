@@ -648,7 +648,7 @@ void Hub_Update(WORLDINFO_s *world) {
         hub_jabbaawake = 1.0f;
     } else if (hub_jabbaawake > 0.0f) {
         hub_jabbaawake -= FRAMETIME * 0.333f;
-        if (hub_jabbaawake < 0.0f) {
+        if (__builtin_expect(hub_jabbaawake < 0.0f, 0)) {
             hub_jabbaawake = 0.0f;
         }
     }
@@ -812,9 +812,9 @@ void Hub_Update(WORLDINFO_s *world) {
             }
             const i32 output = GizmoGetOutput(world->gizmo_sys, gizmo, 0, 0);
             gizmo = HubAreaInfo[i].bonus_gizmo;
-            if (output == 0) {
+            if (__builtin_expect(output == 0, 0)) {
                 GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(gizmo->object);
-                if (!(gold_bricks < buildit->anim_object_count)) {
+                if (__builtin_expect(!(gold_bricks < buildit->anim_object_count), 0)) {
                     if ((buildit->availability_flags & GIZBUILDIT_AVAILABILITY_ACTIVE) == 0) {
                         GizmoActivate(world->gizmo_sys, gizmo, 1, 0);
                     }
@@ -824,7 +824,7 @@ void Hub_Update(WORLDINFO_s *world) {
                         buildit = buildit->linked_buildit;
                     }
                     for (i32 piece = 0; piece < buildit->anim_object_count; ++piece) {
-                        if (buildit->anim_objects[piece] != NULL) {
+                        if (__builtin_expect(buildit->anim_objects[piece] != NULL, 0)) {
                             if (piece < gold_bricks)
                                 NuSpecialSetVisibility(&buildit->anim_objects[piece]->special, 1);
                             else
@@ -915,7 +915,7 @@ void Hub_Update(WORLDINFO_s *world) {
         static NUVEC minikit_hubpos = {-27.0f, 0.0f, -24.6f};
         if (E1VEHICLE_ADATA != NULL && NuVecXZDistSqr(&player->apiobj.position, &minikit_hubpos, NULL) < 0.25f) {
             selected_area = E1VEHICLE_ADATA->index;
-            if (!HubMinikitViewerUnlocked()) {
+            if (__builtin_expect(!HubMinikitViewerUnlocked(), 0)) {
                 if (GetHintFromUIButton() != NULL ||
                     (hintsys.active_hint != NULL && hintsys.active_hint->control_mode_ids[0] != 0x61b)) {
                     Hint_CancelCurrent();
@@ -981,10 +981,11 @@ void Hub_Update(WORLDINFO_s *world) {
     if (FadeSys.fade == 0.0f) {
         if (LevLock[4] == 0) {
             i32 selected_minikit = -1;
-            if (!(hub_episode != -1 && hub_episode_time > 0.0f) &&
-                !(hub_area != -1 && hub_area_time > 0.0f &&
-                  (E1VEHICLE_ADATA == NULL || hub_area != E1VEHICLE_ADATA->index)) &&
-                minikit_candidate != -1) {
+            if (__builtin_expect(!(hub_episode != -1 && hub_episode_time > 0.0f) &&
+                                     !(hub_area != -1 && hub_area_time > 0.0f &&
+                                       (E1VEHICLE_ADATA == NULL || hub_area != E1VEHICLE_ADATA->index)) &&
+                                     minikit_candidate != -1,
+                                 1)) {
                 const auto player_ready = [](GameObject_s *object) {
                     return object != NULL && object->apiobj.player_controlled &&
                            object->pad_gamepad->input_magnitude == 0.0f;
@@ -1036,7 +1037,7 @@ void Hub_Update(WORLDINFO_s *world) {
                 }
             }
         }
-        if (LevGizmo[0] != NULL) {
+        if (__builtin_expect(LevGizmo[0] != NULL, 1)) {
             if (selected_buildit == -1 && GizmoGetOutput(world->gizmo_sys, LevGizmo[0], 0, 0) == 0) {
                 if (Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[0]->field_0x7a5 != 0x2d &&
                     ((LevBuildIt[0]->availability_flags & GIZBUILDIT_AVAILABILITY_INTERACTING) != 0 ||
@@ -1796,7 +1797,7 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
                 subtitle = TTab[EDataList[i_episodes].text_id];
                 NuStrCpy(heading, TTab[EDataList[i_episodes].name_id]);
             }
-            if (lastepisodesmode == -1) {
+            if (__builtin_expect(lastepisodesmode == -1, 1)) {
                 fade = episodesmode == 2 && hub_new_level != -1 && LDataList[hub_new_level].episode_index != -1;
             } else {
                 fade = episodesmode != 1;
@@ -1878,7 +1879,7 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
         return;
     }
 
-    if (save->area_complete == 0) {
+    if (__builtin_expect(save->area_complete == 0, 1)) {
         return;
     }
 
@@ -2238,7 +2239,7 @@ void Hub_DrawFreePlaySelect() {
         f32 opacity = (MenuPacket.active_player[0] ? 1.0f : DROPINALPHA) * fade;
         if (freeplay_time[0] > 0.0f) {
             f32 progress = freeplay_time[0] / 0.75f;
-            if (freeplay_selected[0] == 0)
+            if (__builtin_expect(freeplay_selected[0] == 0, 0))
                 progress = 1.0f - progress;
             opacity *= progress;
         } else if (freeplay_selected[0] != 0) {
@@ -2246,7 +2247,7 @@ void Hub_DrawFreePlaySelect() {
         }
         if (opacity > 0.0f)
             DrawCharIcon(model, -ICONX, STATSPOSY, 0.0f, ICONSIZE, 0xa6, opacity, opacity, 1, NULL);
-        if (freeplaymode == 1 && MenuPacket.active_player[0] != 0) {
+        if (__builtin_expect(freeplaymode == 1 && MenuPacket.active_player[0] != 0, 0)) {
             const i32 selected = MenuPacket.player_model[0];
             model = Collection_Got(selected) ? selected : -1;
             opacity = MenuPacket.active_player[0] ? 1.0f : DROPINALPHA;
@@ -2260,7 +2261,7 @@ void Hub_DrawFreePlaySelect() {
             if (freeplay_time[0] > 0.0f || freeplay_selected[0] == 0) {
                 f32 eased = 0.0f;
                 f32 progress = 1.0f;
-                if (freeplay_time[0] > 0.0f) {
+                if (__builtin_expect(freeplay_time[0] > 0.0f, 0)) {
                     progress = freeplay_time[0] / 0.75f;
                     if (freeplay_selected[0] == 0)
                         progress = 1.0f - progress;
@@ -2360,7 +2361,7 @@ void Hub_DrawFreePlaySelect() {
     i16 second = MenuPacket.player_model[1];
     if (second == -1) {
         second = PlayerList[1];
-        if (second == list[0].model_id)
+        if (__builtin_expect(second == list[0].model_id, 0))
             second = -1;
     }
     if (second != -1)
@@ -2411,7 +2412,7 @@ void Hub_DrawFreePlaySelect() {
                 source_x = collection->list[index].grid_x;
                 source_y = collection->list[index].grid_y;
                 source_size = collection->field_10 * COLLECTION_ICONSIZE;
-                if (Game_OptionsSave != NULL && Game_OptionsSave->widescreen != 0)
+                if (__builtin_expect(Game_OptionsSave != NULL && Game_OptionsSave->widescreen != 0, 0))
                     source_size *= 0.875f;
                 opacity = 1.0f;
                 frame = 0xa7;
@@ -3937,7 +3938,7 @@ static void Hub_DrawBonusModeMenu(int selected, float alpha) {
         for (i32 i = 0; i < 3; ++i) {
             i16 *label;
             memcpy(&label, reinterpret_cast<const u8 *>(&ArcadeItem) + i * 8, sizeof(label));
-            if (label)
+            if (__builtin_expect(!!(label), 0))
                 NuStrCpy(text[0], TTab[*label]);
             else
                 text[0][0] = 0;
@@ -3955,7 +3956,7 @@ static void Hub_DrawBonusModeMenu(int selected, float alpha) {
                     NuStrCat(text[0], ": ");
                 char *mode_text = TTab[*Arcade_Mode[static_cast<i8>(ArcadeItem.field_c_0xc)].text];
                 NuStrCat(text[0], mode_text ? mode_text : "?");
-                if (area && Game_LevelSave && area->levels[0] != -1) {
+                if (__builtin_expect(area && Game_LevelSave && area->levels[0] != -1, 0)) {
                     const i32 level = area->levels[0];
                     if ((reinterpret_cast<LEVELSAVE_s *>(Game_LevelSave)[level].arcade_flags &
                          (1u << (static_cast<i8>(ArcadeItem.field_c_0xc) & 31))) != 0)

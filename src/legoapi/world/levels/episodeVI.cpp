@@ -921,7 +921,7 @@ void LegoCity_Reset(WORLDINFO_s *world) {
 }
 
 void LegoCity_Update(WORLDINFO_s *world) {
-    if (world == NULL || world->pickup_sys == NULL) {
+    if (__builtin_expect(world == NULL || world->pickup_sys == NULL, 0)) {
         return;
     }
     const u8 previousTractor = prevOnTractor;
@@ -962,7 +962,7 @@ void LegoCity_Update(WORLDINFO_s *world) {
     prevOnTaunTaun = onTaunTaun;
     prevOnTownCar = onTownCar;
     prevOnMoonCar = onMoonCar;
-    if (changed == 0) {
+    if (__builtin_expect(changed == 0, 0)) {
         return;
     }
     GIZMOPICKUP_s *pickup = world->pickup_sys->pickups;

@@ -32,7 +32,7 @@ extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMT
         *mtx = locator->base_matrix;
         return NULL;
     }
-    if (*reinterpret_cast<u32 *>(locator->animation) + 0xbeb1b6ccU < 2) {
+    if (__builtin_expect(*reinterpret_cast<u32 *>(locator->animation) + 0xbeb1b6ccU < 2, 0)) {
         return NuGCutLocatorCalcMtx_3(locator, mtx, frame);
     }
     nuanimdata2_s *animation = locator->animation;

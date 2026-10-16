@@ -323,10 +323,10 @@ void UpdateCutBorders() {
 
 void HandleStillRender() {
     GetMenuID();
-    if (pause_rndr_on != 0 && FadeSys.pending_type == FADE_TYPE_NONE) {
+    if (__builtin_expect(pause_rndr_on != 0 && FadeSys.pending_type == FADE_TYPE_NONE, 1)) {
         NuRndrBeginScene(-1);
         if (MainRenderTime < 1.0f) {
-            if (back_rgba[0] == back_rgba[1]) {
+            if (__builtin_expect(back_rgba[0] == back_rgba[1], 0)) {
                 NuRndrClear(0xf00, back_rgba[0], 1.0f);
             } else {
                 NuRndrGradClear(0xf00, back_rgba[0], back_rgba[1], 1.0f);
@@ -338,7 +338,7 @@ void HandleStillRender() {
         NuRndrEndScene();
     }
 
-    if (grab_screen_image != 2 && pause_rndr_on != 0 && pause_rt != 0 && FadeSys.pending_type == FADE_TYPE_NONE) {
+    if (__builtin_expect(grab_screen_image != 2 && pause_rndr_on != 0 && pause_rt != 0 && FadeSys.pending_type == FADE_TYPE_NONE, 0)) {
         DrawStillScreen(clear_screen_onstill);
     }
 

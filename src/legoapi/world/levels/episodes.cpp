@@ -47,12 +47,12 @@ EPISODEDATA *Episodes_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *b
         if (in_episode) {
             if (NuStrICmp(fp->word_buf, "episode_end") == 0) {
                 in_episode = 0;
-                if (episode->area_count != 0) {
+                if (__builtin_expect(episode->area_count != 0, 0)) {
                     count++;
                     episode++;
                 }
             } else if (NuStrICmp(fp->word_buf, "area") == 0) {
-                if (episode->area_count < 10 && NuFParGetWord(fp) != 0) {
+                if (__builtin_expect(episode->area_count < 10 && NuFParGetWord(fp) != 0, 0)) {
                     i32 area_index;
                     AREADATA *area = Area_FindByName(fp->word_buf, &area_index);
                     if (area_index != -1) {

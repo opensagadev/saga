@@ -790,7 +790,7 @@ void Grapple_MoveCode(GameObject_s *object) {
                            (GRAPPLE_CURRENT->ground_position.y +                                                       \
                             (object->apiobj.upper_position.y - object->apiobj.lower_position.y) + 0.1f);               \
         (result) = ground_limit;                                                                                       \
-        if ((GRAPPLE_CURRENT->flags & GRAPPLE_FLAG_DISABLED) != 0) {                                                   \
+        if (__builtin_expect((GRAPPLE_CURRENT->flags & GRAPPLE_FLAG_DISABLED) != 0, 0)) {                                                   \
             (result) = GRAPPLE_CURRENT->rope_length -                                                                  \
                        ((object->apiobj.upper_position.y - object->apiobj.lower_position.y) * 0.5f + 0.1f);            \
             (result) = MIN((result), ground_limit);                                                                    \
@@ -803,7 +803,7 @@ void Grapple_MoveCode(GameObject_s *object) {
         GameAudio_PlaySfx(0x45, &object->apiobj.collision_position, 0, 0);                                             \
         if (object->apiobj.player_controlled)                                                                          \
             Hint_SetComplete(LEGOHINT_GRAPPLE);                                                                        \
-        if (GRAPPLE_CURRENT != NULL && GRAPPLE_CURRENT->has_terrain_platform == 0 && object->field_0x7a3 == 1) {       \
+        if (__builtin_expect(GRAPPLE_CURRENT != NULL && GRAPPLE_CURRENT->has_terrain_platform == 0 && object->field_0x7a3 == 1, 0)) {       \
             const f32 height = (0.1f + GRAPPLE_CURRENT->position.y) - object->apiobj.lower_position.y;                 \
             if (height > 0.0f) {                                                                                       \
                 const f32 speed = NuFsqrt(-2.0f * object->apiobj.character_data->game_character->gravity * height);    \
@@ -824,8 +824,8 @@ void Grapple_MoveCode(GameObject_s *object) {
                 GRAPPLE_JUMP();
                 return;
             }
-            if (object->pad_gamepad->input_magnitude == 0.0f || object->pad_gamepad->input_angle < 0x6001 ||
-                object->pad_gamepad->input_angle > 0x9fff)
+            if (__builtin_expect(object->pad_gamepad->input_magnitude == 0.0f || object->pad_gamepad->input_angle < 0x6001 ||
+                object->pad_gamepad->input_angle > 0x9fff, 0))
                 return;
             object->airborne_action_duration = 0.0f;
             object->field_0x7a3 = 0;
@@ -857,7 +857,7 @@ void Grapple_MoveCode(GameObject_s *object) {
 
         const u16 input_angle = GamePad_InputAngle(object, object->pad_gamepad);
         if (object->pad_gamepad->input_magnitude == 0.0f && (GRAPPLE_CURRENT->flags & GRAPPLE_FLAG_DISABLED) == 0) {
-            if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0) {
+            if (__builtin_expect((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0, 1)) {
                 if ((object->context_variant_flags & 1) == 0) {
                     object->context_variant_flags |= 1;
                     object->apiobj.movement_facing_angle = static_cast<u16>(GRAPPLE_CURRENT->y_rotation + 0x8000);
@@ -912,7 +912,7 @@ void Grapple_MoveCode(GameObject_s *object) {
                 object->airborne_action_duration = 0.0f;
             else {
                 object->airborne_action_duration += FRAMETIME;
-                if (object->airborne_action_duration >= 0.5f) {
+                if (__builtin_expect(object->airborne_action_duration >= 0.5f, 0)) {
                     i16 animation = LEGOACT_GRAPPLE_HANG;
                     if (animation == -1 || object->apiobj.character_model->model_data_b[animation] == NULL)
                         animation = LEGOACT_LEDGE_IDLE;
@@ -930,8 +930,8 @@ void Grapple_MoveCode(GameObject_s *object) {
             }
         } else if (object->grapple_swing_degrees <= 15) {
             if (!down) {
-                if (object->pad_gamepad->input_magnitude == 0.0f &&
-                    (GRAPPLE_CURRENT->flags & GRAPPLE_FLAG_DISABLED) == 0 && object->field_0x768 < 0.1f) {
+                if (__builtin_expect(object->pad_gamepad->input_magnitude == 0.0f &&
+                    (GRAPPLE_CURRENT->flags & GRAPPLE_FLAG_DISABLED) == 0 && object->field_0x768 < 0.1f, 0)) {
                     object->field_0x768 += 0.75f * FRAMETIME;
                     if (object->field_0x768 > 0.1f)
                         object->field_0x768 = 0.1f;

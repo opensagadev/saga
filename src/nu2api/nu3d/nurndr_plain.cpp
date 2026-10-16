@@ -1392,9 +1392,9 @@ extern "C" void NuRndrSphere(NUVEC *centre, f32 radius, i32 colour, f32 vertical
         f32 upper_radius = radius * NU_SIN_LUT((band < 3 ? band + 1 : 7 - band) * 4096);
         f32 lower_y = NuFsqrt(radius_squared - lower_radius * lower_radius) * vertical_scale;
         f32 upper_y = NuFsqrt(radius_squared - upper_radius * upper_radius) * vertical_scale;
-        if (band > 4)
+        if (__builtin_expect(band > 4, 0))
             lower_y = -lower_y;
-        if (band > 3)
+        if (__builtin_expect(band > 3, 0))
             upper_y = -upper_y;
         lower_y += centre->y;
         upper_y += centre->y;

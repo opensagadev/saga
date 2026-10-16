@@ -108,7 +108,7 @@ void NuShaderObjectCreate(NUSHADEROBJECT *shader) {
 extern "C" void NuShaderObjectSetElementsfv_transpose(NUSHADEROBJECT *shader, i32 semantic, i32 first_element,
                                                       i32 count, const f32 *values) {
     GLSLParameter &parameter = shader->parameters[semantic];
-    if (parameter.location < 0) {
+    if (__builtin_expect(parameter.location < 0, 1)) {
         return;
     }
 
@@ -418,9 +418,9 @@ extern "C" void NuShaderObjectGLSLProbeSemantics(NUSHADEROBJECT *shader) {
             nushaderuniform_e uniform;
             const i32 semantic = NuShaderObjectGLSLGetSemanticIndex(uniformName, uniform);
             if (semantic == -1) {
-                if (type == GL_SAMPLER_2D) {
+                if (__builtin_expect(type == GL_SAMPLER_2D, 0)) {
                     i32 lightmap_unit = -1;
-                    if (NuStrCmp(uniformName, "_lightmap0") == 0) {
+                    if (__builtin_expect(NuStrCmp(uniformName, "_lightmap0") == 0, 0)) {
                         lightmap_unit = 0;
                     } else if (NuStrCmp(uniformName, "_lightmap1") == 0) {
                         lightmap_unit = 1;
@@ -449,7 +449,7 @@ extern "C" void NuShaderObjectGLSLProbeSemantics(NUSHADEROBJECT *shader) {
                 parameter.element_count = type_info->element_count;
             }
 
-            if (parameter.parameter_type == 4) {
+            if (__builtin_expect(parameter.parameter_type == 4, 0)) {
                 const GLint location = glGetUniformLocation(shader->glsl.program, uniformName);
                 glUseProgram(shader->glsl.program);
                 glUniform1i(location, sampler_count + 3);
@@ -466,7 +466,7 @@ extern "C" void NuShaderObjectGLSLProbeSemantics(NUSHADEROBJECT *shader) {
 
     shader->usage_mask = GetUsageMask(&usage_mask);
     EndCriticalSectionGL(source_path, 676);
-    if (bgProcIsBgThread()) {
+    if (__builtin_expect(!!(bgProcIsBgThread()), 0)) {
         NuIOS_YieldThread();
     }
 }

@@ -139,7 +139,7 @@ void UpdateCables() {
                     cable->total_length = length + cable->total_length;
                 }
             }
-            if (grounded)
+            if (__builtin_expect(!!(grounded), 0))
                 DestroyCable(cable);
             continue;
         }
@@ -162,7 +162,7 @@ void UpdateCables() {
             continue;
         }
         if (target->id != id_ATAT) {
-            if (target->id == id_DRAGBOMB) {
+            if (__builtin_expect(target->id == id_DRAGBOMB, 0)) {
                 target->character_context = 0x34;
                 cable->target->context_animation_timer = 0.0f;
             }

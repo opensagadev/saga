@@ -616,9 +616,9 @@ void PushCode(GameObject_s *object, i32 allow_push) {
              (LEGOACT_PUSH != -1 && object->apiobj.character_model->model_data_b[LEGOACT_PUSH] != NULL))) {
             if (!(object->field_0xdc4 >= 0.25f))
                 goto maintain;
-            if ((static_cast<u32>(surface) - 30) < 2 || (object->field_0xf02 & 2) != 0) {
+            if (__builtin_expect((static_cast<u32>(surface) - 30) < 2 || (object->field_0xf02 & 2) != 0, 0)) {
                 GIZSPINNER_s *spinner = NULL;
-                if (LEGOCONTEXT_PUSHSPINNER != -1)
+                if (__builtin_expect(LEGOCONTEXT_PUSHSPINNER != -1, 0))
                     spinner = GizSpinner_Find(WORLD, &object->apiobj.collision_position, 1);
                 if (spinner != NULL) {
                     if (((spinner->flags & 8) == 0 || ShadowMode != 0) && spinner->room_index == -1 &&
@@ -672,7 +672,7 @@ void PushCode(GameObject_s *object, i32 allow_push) {
             if ((character->flags_090 & 0x8000000) == 0 || LEGOCONTEXT_WALLJUMPWAIT == -1 ||
                 object->apiobj.supporting_platform_id != -1)
                 goto maintain;
-            if (static_cast<u32>(surface) <= 31 && (TerSurface[surface].flags & 0x10581) != 0)
+            if (__builtin_expect(static_cast<u32>(surface) <= 31 && (TerSurface[surface].flags & 0x10581) != 0, 0))
                 goto maintain;
             if (object->pad_gamepad->input_magnitude != character->run_speed && !jump_nine)
                 goto maintain;
@@ -704,7 +704,7 @@ void PushCode(GameObject_s *object, i32 allow_push) {
             object->apiobj.velocity = v000;
         }
     } else if (LEGOCONTEXT_WALLJUMPWAIT != -1 && object->character_context == LEGOCONTEXT_WALLJUMPWAIT) {
-        if ((object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP) != 0)
+        if (__builtin_expect((object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP) != 0, 0))
             object->landing_followup = 1;
         else if ((object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION) != 0)
             object->landing_followup = 3;
@@ -731,7 +731,7 @@ void PushCode(GameObject_s *object, i32 allow_push) {
                 StartEndOfJump(object);
         }
     } else {
-        if (pushing)
+        if (__builtin_expect(!!(pushing), 0))
             object->takeover_start_angle = wall_angle;
         if (object->field_0xdc4 <= 0.0f) {
             if (LEGOCONTEXT_PUSHOBSTACLE != -1 && object->character_context == LEGOCONTEXT_PUSHOBSTACLE)
@@ -830,7 +830,7 @@ finalize:
             PlayLandSfx(object, 0, 0);
         else
             PlayGruntSfx(object);
-        if (pushing)
+        if (__builtin_expect(!!(pushing), 0))
             object->takeover_start_angle = wall_angle;
     }
 }

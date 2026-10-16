@@ -394,11 +394,11 @@ void Customiser_SetUpCharacterData(CUSTOMISER *customiser) {
 
 void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
     const f32 frame_time = FRAMETIME;
-    if (customiser != NULL) {
+    if (__builtin_expect(customiser != NULL, 0)) {
         i32 active_side, active_count;
         Customiser_GetActiveWeirdoIndex(&active_side, &active_count);
         i32 preview_side = -1;
-        if (active_count == 1)
+        if (__builtin_expect(active_count == 1, 0))
             preview_side = MenuPacket.customise_other_player[active_side] != 0 ? active_side == 0 : active_side;
         const i32 colour = menu_flash == 0 ? 255 : 191;
         const u16 rotation_step = static_cast<i32>(10922.0f * frame_time);
@@ -421,7 +421,7 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
             CUSTOMPIECE *head = &customiser->piece_sets[0][static_cast<u16>(selection[0])];
             CUSTOMPIECE *torso = &customiser->piece_sets[1][static_cast<u16>(selection[1])];
             f32 no_hat = 0.0f;
-            if ((torso->availability_flags & 1) != 0) {
+            if (__builtin_expect((torso->availability_flags & 1) != 0, 1)) {
                 if ((torso->availability_flags & 4) != 0)
                     no_hat = (head->availability_flags & 8) != 0 ? 0.21f : 0.168f;
                 else
@@ -473,7 +473,7 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
                     f32 scale = 1.0f;
                     if (TestForController() == 0) {
                         const f32 idle = GlobalTimer.time_elapsed - (LastTouchTime + 1.0f);
-                        if (idle > 4.0f) {
+                        if (__builtin_expect(idle > 4.0f, 1)) {
                             const i32 phase = static_cast<i32>(NuFmod(idle, 4.0f) * 0.25f * 65536.0f);
                             const f32 pulse = NU_SIN_LUT(phase) - 0.8f;
                             if (!(pulse < 0.0f))
@@ -522,7 +522,7 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
                     category_data->material_tag == -1)
                     continue;
                 const i32 piece_index = static_cast<u16>(selection[category]);
-                if (resources[piece_index].texture_id == 0)
+                if (__builtin_expect(resources[piece_index].texture_id == 0, 0))
                     continue;
                 for (i32 material = 0; material < model->hierarchy->material_count; ++material) {
                     NUMTL *entry = model->hierarchy->materials[material];
@@ -850,7 +850,7 @@ void CustomiserMenu_Update(MENU_s *) {
     if (MenuPacket.active_player[1] != 0) {
         if ((GamePad[1].buttons_pressed & GAMEPAD_MENUSELECT) != 0)
             select[1] = 1;
-        else if ((GamePad[1].buttons_pressed & GAMEPAD_MENUCANCEL) != 0)
+        else if (__builtin_expect((GamePad[1].buttons_pressed & GAMEPAD_MENUCANCEL) != 0, 1))
             cancel = true;
     }
     if (cancel && CustomiseMode[0] != 1 && CustomiseMode[1] != 1) {
@@ -911,7 +911,7 @@ void CustomiserMenu_Update(MENU_s *) {
                 i32 left = pressed & GAMEPAD_DLEFT, right = pressed & GAMEPAD_DRIGHT;
                 i32 up_held = held & GAMEPAD_DUP, down_held = held & GAMEPAD_DDOWN;
                 i32 left_held = held & GAMEPAD_DLEFT, right_held = held & GAMEPAD_DRIGHT;
-                if (up != 0 && down != 0)
+                if (__builtin_expect(up != 0 && down != 0, 1))
                     up = down = 0;
                 if (left != 0 && right != 0)
                     left = right = 0;
@@ -959,14 +959,14 @@ void CustomiserMenu_Update(MENU_s *) {
                     char *name = Game.customizer[side].name;
                     const i32 old_x = CustomiseNameX[side], old_y = CustomiseNameY[side];
                     if (left != 0) {
-                        if (old_x > 0) {
+                        if (__builtin_expect(old_x > 0, 1)) {
                             name[old_x] = CustomiseLetter[old_y];
                             CustomiseNameX[side] = old_x - 1;
                             CustomiseNameY[side] = Customise_FindLetter(name[CustomiseNameX[side]]);
                         }
                     } else if (right != 0) {
                         NuStrLen(name);
-                        if (CustomiseNameX[side] < 14) {
+                        if (__builtin_expect(CustomiseNameX[side] < 14, 0)) {
                             name[CustomiseNameX[side]] = CustomiseLetter[CustomiseNameY[side]];
                             ++CustomiseNameX[side];
                             CustomiseNameY[side] = Customise_FindLetter(name[CustomiseNameX[side]]);
@@ -981,19 +981,19 @@ void CustomiserMenu_Update(MENU_s *) {
                         CustomiseNameLetterBlipScale[side] = 1.5f;
                     }
                 } else {
-                    if (up_held != 0 && category > 0)
+                    if (__builtin_expect(up_held != 0 && category > 0, 0))
                         BlipU[player] = 1.0f;
                     else if (down_held != 0 && category < 8)
                         BlipD[player] = 1.0f;
                     if (left_held != 0)
                         BlipL[player] = 1.0f;
-                    else if (right_held != 0)
+                    else if (__builtin_expect(right_held != 0, 0))
                         BlipR[player] = 1.0f;
                     i32 next_category = category;
                     u32 next_piece = old_piece;
                     bool category_changed = false, piece_changed = false;
-                    if (up != 0) {
-                        if (category > 0) {
+                    if (__builtin_expect(up != 0, 0)) {
+                        if (__builtin_expect(category > 0, 0)) {
                             --next_category;
                             category_changed = true;
                         }

@@ -172,10 +172,10 @@ static inline i32 DetonatorPlacementSlot(GameObject_s *object) {
 
 void Detonator_MoveCode(GameObject_s *object) {
     f32 oldest_time;
-    if (object->character_context != 0x48 && object->character_context != 0x49) {
-        if (WORLD->lev_objs[0xec].active == 0 || static_cast<i8>(object->apiobj.flags_low) >= 0 ||
+    if (__builtin_expect(object->character_context != 0x48 && object->character_context != 0x49, 1)) {
+        if (__builtin_expect(WORLD->lev_objs[0xec].active == 0 || static_cast<i8>(object->apiobj.flags_low) >= 0 ||
             (object->apiobj.field_0x27d == 0 && object->field_0xe31 != 1) ||
-            (ObjLandReady(object) == 0 && (CInfo[object->character_context].flags & 0x2000) == 0)) {
+            (ObjLandReady(object) == 0 && (CInfo[object->character_context].flags & 0x2000) == 0), 0)) {
             object->field_0xde0 = 0.0f;
             object->field_0xe21 |= 0x80;
             return;
@@ -186,7 +186,7 @@ void Detonator_MoveCode(GameObject_s *object) {
             }
             object->field_0xe21 |= 0x80;
             object->field_0xde0 += FRAMETIME;
-            if (object->field_0xde0 >= 0.3f && object->field_0xde0 >= 1.0f) {
+            if (__builtin_expect(object->field_0xde0 >= 0.3f && object->field_0xde0 >= 1.0f, 1)) {
                 oldest_time = -1.0f;
                 DETONATOR_s *oldest = NULL;
                 if (Detonator[0].active != 0) {
@@ -231,12 +231,12 @@ void Detonator_MoveCode(GameObject_s *object) {
                 object->context_destination.x = nearest->position.x - NU_SIN_LUT(angle) * 0.1684f;
                 object->context_destination.z = nearest->position.z - NU_COS_LUT(angle) * 0.1684f;
                 object->carried_object_angle = RotDiff(angle, nearest->rotation_y);
-            } else if (DetonatorPlacementSlot(object) != -1 && object->apiobj.field_0x218 != 2000000.0f &&
-                       object->apiobj.lower_position.y - object->apiobj.field_0x218 < 0.155f) {
+            } else if (__builtin_expect(DetonatorPlacementSlot(object) != -1 && object->apiobj.field_0x218 != 2000000.0f &&
+                       object->apiobj.lower_position.y - object->apiobj.field_0x218 < 0.155f, 1)) {
                 object->context_destination.x = object->apiobj.lower_position.x;
                 object->context_destination.y = object->apiobj.field_0x218;
                 object->context_destination.z = object->apiobj.lower_position.z;
-                if (Detonator_FindNearest(&object->context_destination, 0.155f, NULL) == NULL) {
+                if (__builtin_expect(Detonator_FindNearest(&object->context_destination, 0.155f, NULL) == NULL, 1)) {
                     object->field_0x7a3 = 0;
                     object->character_context = 0x48;
                     FastWeaponIn(object, 0);
@@ -288,13 +288,13 @@ void Detonator_MoveCode(GameObject_s *object) {
         if (object->field_0x7a3 != 0) {
             return;
         }
-        if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
+        if (__builtin_expect(object->apiobj.character_model->model_data_b[object->context_animation] != NULL, 0)) {
             const f32 marker = AnimListFrame(object->apiobj.character_model, object->context_animation,
                                              object->character_context == 0x49 ? 0 : 2);
             if (frame == NULL || !(*frame > 0.0f) || !(*frame >= marker)) {
                 return;
             }
-        } else if (!(object->context_animation_timer < 0.5f)) {
+        } else if (__builtin_expect(!(object->context_animation_timer < 0.5f), 1)) {
             return;
         }
         object->field_0x7a3 = 1;

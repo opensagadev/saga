@@ -307,7 +307,7 @@ i32 TrooperShoot(WORLDINFO_s *world, minitrooperteam_s *team, minisnowtrooper_s 
         if (static_cast<i8>(Player[0]->apiobj.flags_low) < 0)
             first_distance = NuVecDist(&Player[0]->apiobj.position, &shot_position, NULL);
         f32 second_distance = 9999.0f;
-        if (static_cast<i8>(Player[1]->apiobj.flags_low) < 0)
+        if (__builtin_expect(static_cast<i8>(Player[1]->apiobj.flags_low) < 0, 1))
             second_distance = NuVecDist(&Player[1]->apiobj.position, &shot_position, NULL);
 
         GameObject_s *target;

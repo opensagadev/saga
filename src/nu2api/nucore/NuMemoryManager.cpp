@@ -209,7 +209,7 @@ void *NuMemoryManager::_TryBlockAlloc(u32 size, u32 alignment, u32 flags, const 
             usize user = ALIGN(begin + m_headerSize, alignment);
             usize header_address = user - m_headerSize;
             u32 prefix_size = header_address - begin;
-            if (prefix_size != 0 && prefix_size < minimum_fragment_size) {
+            if (__builtin_expect(prefix_size != 0 && prefix_size < minimum_fragment_size, 1)) {
                 user = ALIGN(begin + m_headerSize + minimum_fragment_size, alignment);
                 header_address = user - m_headerSize;
                 prefix_size = header_address - begin;
@@ -270,7 +270,7 @@ void *NuMemoryManager::_TryBlockAlloc(u32 size, u32 alignment, u32 flags, const 
         allocated_size += suffix_size;
         suffix_size = 0;
     }
-    if (suffix_size != 0) {
+    if (__builtin_expect(suffix_size != 0, 0)) {
         FreeHeader *suffix = (FreeHeader *)(allocated_begin + allocated_size);
         suffix->block_header.value = suffix_size / 4;
         *END_TAG(suffix, suffix_size) = suffix->block_header.value;
@@ -303,9 +303,9 @@ void NuMemoryManager::ConvertToUsedBlock(FreeHeader *header, u32 alignment, u32 
     // Set the end tag of the block. This is used for detecting corruption and
     // clearing the block.
     end_tag = END_TAG(header, header_value * 4);
-    if ((align_mask & ALLOC_MASK) == 0) {
+    if (__builtin_expect((align_mask & ALLOC_MASK) == 0, 0)) {
         *end_tag = aligned & BLOCK_SIZE_MASK;
-    } else if (manager_idx > 0x1d) {
+    } else if (__builtin_expect(manager_idx > 0x1d, 0)) {
         *end_tag = aligned | HEADER_MGR_HI_MASK;
         *(u32 *)((usize)header + BLOCK_SIZE(header->block_header.value) - 8) = manager_idx;
     } else {
@@ -491,7 +491,7 @@ void NuMemoryManager::BlockFree(void *ptr, u32 flags) {
 }
 
 void *NuMemoryManager::_BlockReAlloc(void *ptr, u32 size, u32 alignment, u32 flags, const char *name, u16 category) {
-    if (ptr == NULL) {
+    if (__builtin_expect(ptr == NULL, 0)) {
         return _BlockAlloc(size, alignment, flags, name, category);
     }
     if (size == 0) {
@@ -526,7 +526,7 @@ void *NuMemoryManager::_BlockReAlloc(void *ptr, u32 size, u32 alignment, u32 fla
 
     const u32 old_alignment = 2U << ((header_value & ALLOC_MASK) >> 27);
     void *replacement = _BlockAlloc(new_size, old_alignment, flags, name, category);
-    if (replacement != NULL && (flags & 0x40) == 0) {
+    if (__builtin_expect(replacement != NULL && (flags & 0x40) == 0, 0)) {
         memcpy(replacement, ptr, MIN(old_size, new_size));
         BlockFree(ptr, flags);
     }
@@ -1349,10 +1349,10 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
         const bool flag_s = (debug->flags.alloc_flags & 4) != 0;
         const bool flag_c = (debug->flags.alloc_flags & 8) != 0;
 
-        if (count > 1 && (flags & 2) == 0) {
+        if (__builtin_expect(count > 1 && (flags & 2) == 0, 0)) {
             snprintf(line, sizeof(line), "| %s | %10u | %s | %c%c%c | %s | %s\r\n", address_text, count, size_text,
                      flag_a ? 'X' : '-', flag_s ? 'X' : '-', flag_c ? 'X' : '-', category_text, debug_name);
-        } else if ((debug->flags.alloc_flags & 4) != 0) {
+        } else if (__builtin_expect((debug->flags.alloc_flags & 4) != 0, 1)) {
             char value[257];
             block_size = BLOCK_SIZE(header->value);
             end_tag = END_TAG(header, block_size);
@@ -1467,7 +1467,7 @@ u32 NuMemoryManager::FindAndTouchMatchingBlocks(DebugHeader *reference, u32 *tot
         Header *end = reinterpret_cast<Header *>(page->end);
         auto page_first_header = page->first_header;
         for (Header *header = page_first_header; header != end;) {
-            if (header != &reference->block_header && (header->value & ALLOC_MASK) != 0) {
+            if (__builtin_expect(header != &reference->block_header && (header->value & ALLOC_MASK) != 0, 0)) {
                 DebugHeader *candidate = reinterpret_cast<DebugHeader *>(header);
                 u32 block_size = BLOCK_SIZE(header->value);
                 u32 reference_context = reference->flags.ctx_id;

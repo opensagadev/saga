@@ -1427,7 +1427,7 @@ extern "C" {
             NuQFntPushPrintMode(2);
         unsigned char decoded[512];
         TextDecode(text, decoded);
-        if (followon_line == 0)
+        if (__builtin_expect(followon_line == 0, 1))
             NuQFntSet(SmartTextFont != NULL ? SmartTextFont : QFont2D);
         draw_x_scale *= x_scale;
         draw_y_scale *= y_scale;
@@ -1443,7 +1443,7 @@ extern "C" {
         f32 draw_y = y - height * 0.5f;
         f32 button_scale = draw_x_scale;
         if (draw_x_scale != draw_y_scale) {
-            if (ButtonScaleMode == 1)
+            if (__builtin_expect(ButtonScaleMode == 1, 0))
                 button_scale = draw_x_scale;
             else if (ButtonScaleMode == 2)
                 button_scale = draw_y_scale;
@@ -1477,7 +1477,7 @@ extern "C" {
                                draw_y_scale * QFONTSCALEY);
                 normal_width = NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, normal_encoded);
             }
-            if (normal_width == 0.0f) {
+            if (__builtin_expect(normal_width == 0.0f, 1)) {
                 button_scale = draw_x_scale;
                 if (ButtonScaleMode == 2) {
                     width = draw_y_scale * width / draw_x_scale;
@@ -1529,7 +1529,7 @@ extern "C" {
                                  (static_cast<u32>(blue >> 1) << 16);
                 }
                 i += 2;
-                if (count != 0 && colour != current_rgba) {
+                if (__builtin_expect(count != 0 && colour != current_rgba, 0)) {
                     fragment[count] = 0;
                     x += TextPrintSubstring(fragment, x, draw_y, z, button_font ? button_scale : draw_x_scale,
                                             button_font ? button_scale : draw_y_scale, current_rgba, button_font);

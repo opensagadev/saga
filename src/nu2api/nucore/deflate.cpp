@@ -234,13 +234,13 @@ i32 DecodeDeflatedBlock(DEFLATECONTEXT *ctx) {
             symbol -= 257;
 
             i32 length = LengthBase[symbol];
-            if (LengthExtraBits[symbol] != 0) {
+            if (__builtin_expect(LengthExtraBits[symbol] != 0, 0)) {
                 length += READBITS(ctx, LengthExtraBits[symbol]);
             }
 
             symbol = CtxReadHuffmanSymbol(ctx, &ctx->distance_tree);
             i32 distance = DistanceBase[symbol];
-            if (DistanceExtraBits[symbol] != 0) {
+            if (__builtin_expect(DistanceExtraBits[symbol] != 0, 0)) {
                 distance += READBITS(ctx, DistanceExtraBits[symbol]);
             }
 
@@ -311,12 +311,12 @@ i32 DecodeDeflated(DEFLATECONTEXT *ctx) {
 
         switch (type) {
             default:
-                if (!DecompressHuffmanTrees(ctx)) {
+                if (__builtin_expect(!DecompressHuffmanTrees(ctx), 1)) {
                     return 0;
                 }
                 break;
             case BLOCK_FIXED_HUFFMAN:
-                if (DefaultDistances[0x1f] == '\0') {
+                if (__builtin_expect(DefaultDistances[0x1f] == '\0', 0)) {
                     InitHuffmanDefaults();
                 }
 
@@ -329,13 +329,13 @@ i32 DecodeDeflated(DEFLATECONTEXT *ctx) {
                 }
                 break;
             case BLOCK_UNCOMPRESSED:
-                if (!DecodeUncompressedBlock(ctx)) {
+                if (__builtin_expect(!DecodeUncompressedBlock(ctx), 1)) {
                     return 0;
                 }
                 continue;
         }
 
-        if (!DecodeDeflatedBlock(ctx)) {
+        if (__builtin_expect(!DecodeDeflatedBlock(ctx), 1)) {
             return 0;
         }
     } while (!is_final_block);
