@@ -675,7 +675,7 @@ i32 NuIOS_AreInAppPurchasesAvailable() {
 }
 
 GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_height) {
-    extern i32 comeFromHash;
+    extern bool comeFromHash;
     extern i32 g_loadDefaultTexture;
     extern i32 g_loadingCharacterInHub;
 
@@ -684,7 +684,7 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
         GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
     };
 
-    *reinterpret_cast<u8 *>(&comeFromHash) = 0;
+    comeFromHash = false;
 
     u8 *header = (u8 *)data;
     const u32 pixel_format = *(u32 *)(header + 0x08);

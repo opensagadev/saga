@@ -818,7 +818,10 @@ void Hub_Update(WORLDINFO_s *world) {
                     }
                     for (i32 piece = 0; piece < buildit->anim_object_count; ++piece) {
                         if (buildit->anim_objects[piece] != NULL) {
-                            NuSpecialSetVisibility(&buildit->anim_objects[piece]->special, piece < gold_bricks);
+                            if (piece < gold_bricks)
+                                NuSpecialSetVisibility(&buildit->anim_objects[piece]->special, 1);
+                            else
+                                NuSpecialSetVisibility(&buildit->anim_objects[piece]->special, 0);
                         }
                     }
                 }
@@ -2121,7 +2124,8 @@ void Hub_ActivateDoorMenu(LEVELDATA_s **level) {
     if (area != -1 && (ADataList[area].flags & AREAFLAG_BONUS_AREA) != 0) {
         menu_id = ADataList[area].episode_index != 0xff ? HUB_DOOR_MENU_EPISODE_BONUS : HUB_DOOR_MENU_BONUS;
     } else if (VEHICLES_ADATA != NULL && area == VEHICLES_ADATA->index) {
-        i16 vehicle_ids[HUB_VEHICLE_ID_CAPACITY];
+        // The original sizes this list for 340 vehicle ids.
+        i16 vehicle_ids[340];
         i32 vehicle_count;
         Collection_GetIDList(&VehicleCollection, HUB_VEHICLE_COLLECTION_ALLOWED, HUB_VEHICLE_COLLECTION_REQUIRED,
                              vehicle_ids, &vehicle_count, NULL, 0);

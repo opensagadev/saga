@@ -8,20 +8,15 @@
 // libTTapp.so used are reproduced below so the transcription stays faithful.
 
 #include "nu2api_nusound_types.h"
-
 #include "decomp.h"
-
 #include <new>
 #include <stdio.h>
 #include <string.h>
-
 #include "nu2api/nucore/nucore.hpp"
 #include "nu2api/nusound/nusound_android.hpp"
 #include "nu2api/nusound/opensles_abi.hpp"
 #include "nu2api/nusound/nusound_streamer.hpp"
-
 #include <math.h>
-
 namespace {
 
     // OpenSL interface vtable slots as used by libTTapp.so.
@@ -71,7 +66,6 @@ namespace {
 #define SL_SLOT(itf, fn_type, byte_offset) (*(fn_type *)((char *)(*(void **)(itf)) + (byte_offset)))
 
 } // namespace
-
 // ---------------------------------------------------------------------------
 // construction / destruction
 // ---------------------------------------------------------------------------
@@ -609,31 +603,4 @@ NuSoundVoice *NuSoundVoiceFactoryAndroid_PCM::CreateVoice(NuSoundSource *source,
         new (voice) NuVoiceAndroid(source, loop);
     }
     return voice;
-}
-
-NuSoundVoiceFactoryList::NuSoundVoiceFactoryList() {
-    factories = NULL;
-    length = 0;
-    capacity = 0;
-    NuSoundVoiceFactory **replacement =
-        static_cast<NuSoundVoiceFactory **>(NuMemoryGet()->GetThreadMem()->_BlockReAlloc(
-            factories, 16 * sizeof(NuSoundVoiceFactory *), 4, 0x41, "", NUMEMORY_CATEGORY_NONE));
-    if (replacement != factories) {
-        u32 previous_capacity = capacity;
-        for (u32 i = 0; i < previous_capacity; ++i) {
-            replacement[i] = factories[i];
-        }
-        NuMemoryGet()->GetThreadMem()->BlockFree(factories, 0);
-    }
-    length = 16;
-    factories = replacement;
-    capacity = 16;
-}
-
-void NuSoundVoiceFactoryList::RegisterFactory(NuSoundVoiceFactory *factory, NuSoundStreamDesc::DataFormat format) {
-    this->factories[(u32)format] = factory;
-}
-
-NuSoundVoiceFactory *NuSoundVoiceFactoryList::GetFactory(NuSoundStreamDesc::DataFormat format) {
-    return this->factories[(u32)format];
 }

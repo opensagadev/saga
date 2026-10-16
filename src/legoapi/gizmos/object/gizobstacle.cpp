@@ -533,11 +533,12 @@ static i32 *GizObstacles_GetBestBoltTarget(GIZMOSET *set, float *result_distance
     for (i32 i = 0; i < active_count; ++i) {
         GIZMO *gizmo = system->active_gizmos[i];
         GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(gizmo->object);
-        if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) == 0 ||
-            (obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_ENABLED) == 0 ||
-            (obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) != 0) {
+        if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) == 0)
             continue;
-        }
+        if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_ENABLED) == 0)
+            continue;
+        if ((obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) != 0)
+            continue;
         NUVEC *target_position = &obstacle->evaluated_position;
         if (target_position->x < min_x || target_position->x > max_x || target_position->z < min_z ||
             target_position->z > max_z) {
@@ -608,19 +609,20 @@ static i32 GizObstacles_BoltHit(void *world, void *data, void *attacker_ptr, NUV
     GameObject_s *attacker = static_cast<GameObject_s *>(attacker_ptr);
     GIZOBSTACLE_s *nearest = NULL;
     f32 nearest_distance = 1000000000.0f;
-    auto maximum_z = maximum->z;
-    for (i32 index = 0; index < system->active_gizmo_count; ++index) {
+    i32 index = 0;
+    do {
         GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(system->active_gizmos[index]->object);
-        if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) == 0 ||
-            (obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_ENABLED) == 0 ||
-            (obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) != 0) {
+        if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) == 0)
             continue;
-        }
+        if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_ENABLED) == 0)
+            continue;
+        if ((obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) != 0)
+            continue;
         const NUVEC &position = obstacle->evaluated_position;
         const f32 obstacle_radius = obstacle->field_0x58;
-        if (!(position.x - obstacle_radius <= maximum->x && minimum->x <= position.x + obstacle_radius &&
-              position.z - obstacle_radius <= maximum_z && minimum->z <= position.z + obstacle_radius &&
-              position.y - obstacle_radius <= maximum->y && minimum->y <= position.y + obstacle_radius)) {
+        if (position.x - obstacle_radius > maximum->x || minimum->x > position.x + obstacle_radius ||
+            position.z - obstacle_radius > maximum->z || minimum->z > position.z + obstacle_radius ||
+            position.y - obstacle_radius > maximum->y || minimum->y > position.y + obstacle_radius) {
             continue;
         }
         for (i32 point_index = point_count - 1; point_index >= 0; --point_index) {
@@ -638,7 +640,7 @@ static i32 GizObstacles_BoltHit(void *world, void *data, void *attacker_ptr, NUV
             }
             break;
         }
-    }
+    } while (system->active_gizmo_count > ++index);
     if (nearest == NULL) {
         return 0;
     }
@@ -1089,7 +1091,9 @@ GIZOBSTACLE_s *GizObstacle_FindNearest(GIZOBSTACLESYS_s *system, NUVEC *position
     for (i32 i = 0; i < system->count; ++i, ++obstacle) {
         if (mode != -1 && obstacle->mode != mode)
             continue;
-        if (!obstacle->progress_visible || !obstacle->progress_enabled)
+        if (!obstacle->progress_visible)
+            continue;
+        if (!obstacle->progress_enabled)
             continue;
         if ((obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) != 0)
             continue;
@@ -1250,11 +1254,12 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
 
             if ((obstacle->config_flags & GIZOBSTACLE_CONFIG_INVERT_PROXIMITY) == 0) {
                 for (i32 index = 0; index < ngizobstacletriggers; ++index) {
-                    NUVEC *trigger = gizobstacletriggers[index];
-                    const f32 distance_squared = NuVecDistSqr(&obstacle->secondary_position, trigger, NULL);
-                    trigger = gizobstacletriggers[index];
-                    if (distance_squared < closest_distance_squared &&
-                        (!OBSTACLE_USES_BOX_TRIGGER(obstacle) || GizObstacle_PosWithinBox(obstacle, trigger) != 0)) {
+                    const f32 distance_squared =
+                        NuVecDistSqr(&obstacle->secondary_position, gizobstacletriggers[index], NULL);
+                    if (distance_squared < closest_distance_squared) {
+                        if (OBSTACLE_USES_BOX_TRIGGER(obstacle) &&
+                            GizObstacle_PosWithinBox(obstacle, gizobstacletriggers[index]) == 0)
+                            continue;
                         closest_distance_squared = distance_squared;
                         closest_position = gizobstacletriggers[index];
                     }

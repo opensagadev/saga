@@ -917,9 +917,9 @@ void DeathStarEscapeA_Update(WORLDINFO_s *) {
     }
 }
 
-void DeathStarEscapeB_Update(WORLDINFO_s *world) {
-    nuanimdata_s *volatile data0 = NULL;
+__attribute__((force_align_arg_pointer)) void DeathStarEscapeB_Update(WORLDINFO_s *world) {
     nuanimdata_s *volatile data1 = NULL;
+    nuanimdata_s *volatile data0 = NULL;
     if (netclient == 0)
         *static_cast<u8 *>(deathstarescapeb_netpacket) = static_cast<u8>(static_cast<i32>(LevAIMessage[0]->value));
 

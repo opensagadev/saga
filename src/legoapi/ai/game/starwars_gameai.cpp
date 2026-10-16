@@ -480,10 +480,12 @@ i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
     }
     AIPATHCNX *connection = packet->path_info.connection;
     AIPATHNODE *source = &nodes[source_index];
-    if ((connection->traversal_flags[packet->path_info.direction] & 0x200) == 0 &&
+    const bool skip_to_destination =
+        (connection->traversal_flags[packet->path_info.direction] & 0x200) == 0 &&
         packet->inside_path_node != destination_index &&
         ((packet->path_info.path->previous_inside_node_bits[destination_index >> 3] >> (destination_index & 7)) & 1) !=
-            0) {
+            0;
+    if (skip_to_destination) {
         if (TryToTeleportToNextNode(owner, destination, 0) != 0) {
             return 1;
         }
@@ -529,11 +531,13 @@ i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
     switch (packet->path_connection_state) {
         case 1:
             if (ready != 0) {
-                if ((packet->path_info.connection->traversal_flags[packet->path_info.direction] & 0x200) == 0 &&
+                const bool skip_ahead =
+                    (packet->path_info.connection->traversal_flags[packet->path_info.direction] & 0x200) == 0 &&
                     packet->inside_path_node != destination_index &&
                     ((packet->path_info.path->previous_inside_node_bits[destination_index >> 3] >>
                       (destination_index & 7)) &
-                     1) != 0) {
+                     1) != 0;
+                if (skip_ahead) {
                     if (TryToTeleportToNextNode(owner, destination, 0) != 0) {
                         return 1;
                     }

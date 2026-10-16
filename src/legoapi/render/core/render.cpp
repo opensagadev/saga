@@ -955,76 +955,6 @@ extern const u8 HintRGB[5][3] = {
     {255, 0, 0}, {0, 255, 0}, {0, 127, 255}, {127, 0, 255}, {255, 255, 0},
 };
 
-void DrawHint_LSW(HINT_s *hint, i32 max_lines) {
-    if (hint == NULL || FadeSys.fade != 0.0f)
-        return;
-    const f32 alpha = CurrentHintAlpha();
-    if (!(alpha > 0.0f))
-        return;
-    if (alpha == 1.0f)
-        hint->flags |= 0x40;
-
-    f32 text_y = 0.0f;
-    if ((WORLD->current_level->flags & LEVEL_STATUS) == 0)
-        text_y = hint->control_mode_ids[0] == 0x164 ? -0.1f : -0.7f;
-
-    const bool mirrored = (hint->flags & 0x04) != 0;
-    const f32 text_x = mirrored ? 0.0f : 0.09f - ICONX;
-    const i32 text_lines = max_lines == -1 ? 3 : max_lines;
-    f32 icon_x = -ICONX;
-
-    const i32 control_mode = MechInputTouchSystem::s_baseControlMode;
-    char *hint_text = TTab[hint->control_mode_ids[control_mode]];
-    if (hint_text != NULL) {
-        char expanded[1024];
-        Text_ExpandAllButtonStrings(hint_text, expanded);
-
-        const u16 pulse_angle = static_cast<u16>(NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f);
-        const f32 colour_pulse = NU_SIN_LUT(pulse_angle) * 0.5f + 0.5f;
-        i32 colour_index = static_cast<i8>(hint->pad_0x05[0]);
-        if (colour_index == -1)
-            colour_index = hintsys.state;
-        u8 colours[3];
-        for (i32 channel = 0; channel < 3; ++channel) {
-            const f32 base = static_cast<f32>(HintRGB[colour_index][channel]);
-            colours[channel] = static_cast<u8>(static_cast<i32>(((base + 255.0f) * 0.5f - base) * colour_pulse + base));
-        }
-
-        g_buttonFontScalePulse = CurrentHintButtonScale();
-        const u8 text_alpha = static_cast<u8>(static_cast<i32>(alpha * 128.0f));
-        const f32 max_width = mirrored ? 1.4f : 2.0f - (1.0f + text_x) - 0.15f;
-        SmartTextEx(expanded, text_x, text_y, 1.0f, 0.5f, 0.5f, 0.5f, 0, colours[0], colours[1], colours[2], max_width,
-                    text_lines, NULL, 0, text_alpha);
-        if (mirrored)
-            icon_x = -0.5f * smarttextex_longestwidth - 0.075f;
-        g_buttonFontScalePulse = 1.0f;
-    }
-
-    LEVEL_OBJECT_RUNTIME *icon = &WORLD->lev_objs[0xd4];
-    if (icon->active == 0)
-        return;
-
-    const i32 slide_angle = static_cast<i32>(alpha * 16384.0f);
-    const f32 wave_x = (icon_x + 1.1f) * NU_SIN_LUT(slide_angle) - 1.1f;
-    if (hintIconPos.duration < 0.0f || hintIconPos.elapsed >= hintIconPos.duration + hintIconPos.delay)
-        hintIconPos.value.x = wave_x;
-
-    const u16 rotation = static_cast<u16>((NuFmod(GameTimer.time_elapsed, 2.5f) / 2.5f) * 65536.0f);
-    if ((hint->flags & HINT_DIRECT_DISPLAY) != 0) {
-        DrawPanel3DObjectNoAlpha(wave_x, text_y, 1.0f, 0.5f, 0.5f, 0.5f, 0, rotation, 0, &icon->special, 2);
-    } else {
-        const f32 bounce = NU_SIN_LUT(static_cast<i32>(hintYPop.value));
-        const f32 bounce_scale = TouchHacks::TouchControlsActive ? 0.2f : 0.8f;
-        const f32 scale = hintIconScale.value;
-        DrawPanel3DObjectNoAlpha(hintIconPos.value.x, hintIconPos.value.y + bounce_scale * bounce, hintIconPos.value.z,
-                                 scale, scale, scale, 0, rotation, 0, &icon->special, 2);
-    }
-    if (mirrored) {
-        const u16 mirrored_rotation = static_cast<u16>((NuFmod(GameTimer.time_elapsed, 2.5f) / 2.5f) * 65536.0f);
-        DrawPanel3DObjectNoAlpha(-wave_x, text_y, 1.0f, 0.5f, 0.5f, 0.5f, 0, mirrored_rotation, 0, &icon->special, 2);
-    }
-}
-
 void DrawLine_Now(_vuv_s *, _vuv_s *, i32, i32) {
 }
 
@@ -1306,84 +1236,6 @@ void DrawPauseFade() {
     pause_fade = static_cast<f32>(fade);
 }
 
-void DrawGameState(float x, float y, i32 highlight, i32 slot) {
-    const f32 text_scale = MENUTEXTSCALE;
-    char game_name[256];
-    if (slot == -1) {
-        NuStrCpy(game_name, TTab[tCURRENTGAME]);
-    } else {
-        sprintf(game_name, "%s %i", TTab[tGAME], slot + 1);
-    }
-
-    u8 red;
-    u8 green;
-    u8 blue;
-    if (highlight != 0) {
-        if (TestForController() == 0) {
-            if (menu_pulse > 0.0f) {
-                red = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
-                                                       static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse)));
-                green = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
-                                                         static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse)));
-                blue = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
-                                                        static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse)));
-            } else {
-                red = MENUENTRYR;
-                green = MENUENTRYG;
-                blue = MENUENTRYB;
-            }
-        } else {
-            if (menu_pulsate > 0.0f) {
-                red = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
-                                                       static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate)));
-                green = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
-                                                         static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate)));
-                blue = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
-                                                        static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate)));
-            } else if (menu_flash != 0) {
-                red = MENUFLASH0R;
-                green = MENUFLASH0G;
-                blue = MENUFLASH0B;
-            } else {
-                red = MENUFLASH1R;
-                green = MENUFLASH1G;
-                blue = MENUFLASH1B;
-            }
-        }
-    } else {
-        if (menu_pulse > 0.0f) {
-            red = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
-                                                   static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse)));
-            green = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
-                                                     static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse)));
-            blue = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
-                                                    static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse)));
-        } else {
-            red = MENUENTRYR;
-            green = MENUENTRYG;
-            blue = MENUENTRYB;
-        }
-    }
-    smarttextex_drawmessagebox = 2;
-    SmartTextEx(game_name, x, y, 1.0f, text_scale, text_scale, text_scale, 4, red, green, blue, 0.45f, 1, NULL, 0,
-                MenuA);
-
-    if (slot == -1 || saveload_slotused[slot] != 0) {
-        char progress[32];
-        const u32 completion = slot == -1 ? Game.completion : saveload_slotcode[slot];
-        sprintf(progress, "%.1f%%", static_cast<f32>(static_cast<i32>(completion * 100)) / COMPLETIONPOINTS);
-        Text_LocaliseDecimalPoint(progress);
-        Text3DEx(progress, x, y, 1.0f, text_scale, text_scale, text_scale, 1, 255, 191, 0, static_cast<u8>(MenuA));
-    } else {
-        if (saveload_freespace >= SAVESIZE_ADDITIONAL) {
-            SmartTextEx(TTab[tEMPTY], x, y, 1.0f, text_scale, text_scale, text_scale, 1, 0, 255, 0, 0.45f, 2, NULL, 0,
-                        MenuA);
-        } else {
-            SmartTextEx(TTab[tNOSPACE], x, y, 1.0f, text_scale, text_scale, text_scale, 1, 255, 0, 0, 0.45f, 2, NULL, 0,
-                        MenuA);
-        }
-    }
-}
 
 void DrawRippleSet(ripple_set_s *set) {
     if (set == NULL)
@@ -1397,33 +1249,6 @@ void DrawRippleSet(ripple_set_s *set) {
     }
 }
 
-void DrawSaveSlots(MENU_s *menu, float y) {
-    DrawGameState(-0.5f, y, menu->selected_row == menu->first_row && menu->selected_column == 0, 0);
-    menu->item_width[2] = text3d_width;
-    menu->item_column[2] = 0;
-    menu->item_y[2] = y;
-    menu->item_x[2] = -0.5f;
-    menu->item_height[2] = text3d_height * 2.0f;
-    menu->item_row[2] = 0;
-    y += 0.0f;
-
-    DrawGameState(0.0f, y, menu->selected_row == menu->first_row && menu->selected_column == 1, 1);
-    menu->item_width[3] = text3d_width;
-    menu->item_column[3] = 1;
-    menu->item_y[3] = y;
-    menu->item_x[3] = 0.0f;
-    menu->item_height[3] = text3d_height * 2.0f;
-    menu->item_row[3] = 0;
-    y = 0.0f + y;
-
-    DrawGameState(0.5f, y, menu->selected_row == menu->first_row && menu->selected_column == 2, 2);
-    menu->item_column[4] = 2;
-    menu->item_y[4] = y;
-    menu->item_row[4] = 0;
-    menu->item_width[4] = text3d_width;
-    menu->item_x[4] = 0.5f;
-    menu->item_height[4] = text3d_height * 2.0f;
-}
 
 static u8 cacheValues[256];
 
@@ -3963,37 +3788,6 @@ static void DrawParaphernalia(GameObject_s *object) {
                 DrawObjectOnCharacter(WORLD, object, 0xf9, NULL, 0, -1, &matrix, object->field_0x1088,
                                       object->field_0x1054, NULL, NULL, 1.0f, 1.0f);
             }
-        }
-    }
-}
-
-static __used__ void DisplayListMaterialClipUpdate(nudisplayscene_s *scene) {
-    if (scene == NULL || scene->mtls == NULL || scene->mtls[0] == NULL)
-        return;
-    u8 buffer = scene->render_buffer;
-    buffer >>= 7;
-    const u8 *current = scene->mtl_used[buffer];
-    const u8 *previous = scene->mtl_used[buffer ^ 1];
-    const u32 count = (scene->nmtls + 7) >> 3;
-    NUDISPLAYLIST **lists = scene->dlist_mtls;
-    for (u32 byte_index = 0, material_index = 0; byte_index < count; ++byte_index, material_index += 8) {
-        const u8 bits = current[byte_index];
-        if (previous[byte_index] == bits)
-            continue;
-        for (u32 bit = 0; bit < 8; ++bit) {
-            const i32 index = static_cast<i32>(material_index + bit);
-            u32 enabled = (bits >> bit) & 1;
-            NUDISPLAYLIST *list = lists[index];
-            NUMTL *material = scene->mtls[list->mtl_id];
-            if (enabled && material != NULL &&
-                *reinterpret_cast<const u32 *>(reinterpret_cast<const u8 *>(material) + 0xb0) != 0)
-                enabled = *reinterpret_cast<const u8 *>(reinterpret_cast<const u8 *>(material) + 0xf8) != 0xff;
-            if (enabled)
-                list->mtl_item->id = 0;
-            else
-                list->mtl_item->id = 1;
-            if (static_cast<i32>(scene->nmtls) <= index + 1)
-                return;
         }
     }
 }

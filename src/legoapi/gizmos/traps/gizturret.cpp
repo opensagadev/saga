@@ -627,9 +627,12 @@ static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *set, float *result_distance, 
         if (nextShootTarget.Get() != NULL && nextShootTarget.Get() != turret->GetMechObjectInterface()) {
             continue;
         }
-        if ((turret->flags & 6) != 6 || (turret->flags & 0x30) != 0 || turret->primary_anim_obj == NULL) {
+        if (!turret->visible)
             continue;
-        }
+        if (!turret->active)
+            continue;
+        if ((turret->flags & 0x30) != 0 || turret->primary_anim_obj == NULL)
+            continue;
         NUVEC *target_position = NuSpecialGetDrawPos(&turret->primary_anim_obj->special);
         if (target_position == NULL || target_position->x < min_x || target_position->x > max_x ||
             target_position->z < min_z || target_position->z > max_z) {
@@ -704,30 +707,31 @@ static i32 GizTurrets_BoltHit(void *world, void *system_ptr, void *object_ptr, N
     f32 nearest_distance = 1000000000.0f;
     i32 index = 0;
     do {
-        if (turret->visible)
-            if (turret->active)
-                if ((turret->flags & 0x30) == 0 && turret->primary_anim_obj != NULL &&
-                    (turret->runtime_flags & 2) == 0) {
-                    f32 extent = NuSpecialGetOriginRadius(&turret->primary_anim_obj->special);
-                    NUVEC *centre = NuSpecialGetDrawPos(&turret->primary_anim_obj->special);
-                    if (centre->x - extent > maximum->x || minimum->x > centre->x + extent ||
-                        centre->z - extent > maximum->z || minimum->z > centre->z + extent ||
-                        centre->y - extent > maximum->y || minimum->y > centre->y + extent) {
-                        continue;
-                    }
-                    for (i32 point = point_count; point > 0;) {
-                        --point;
-                        if (SphereSphereOverlap(centre, extent, &points[point], radius) != 0) {
-                            NUVEC *origin = object != NULL ? &object->apiobj.collision_position : &points[point];
-                            f32 distance = NuVecDistSqr(origin, centre, NULL);
-                            if (distance < nearest_distance) {
-                                nearest_distance = distance;
-                                nearest = turret;
-                            }
-                            break;
-                        }
-                    }
+        if (!turret->visible)
+            continue;
+        if (!turret->active)
+            continue;
+        if ((turret->flags & 0x30) != 0 || turret->primary_anim_obj == NULL || (turret->runtime_flags & 2) != 0)
+            continue;
+        f32 extent = NuSpecialGetOriginRadius(&turret->primary_anim_obj->special);
+        NUVEC *centre = NuSpecialGetDrawPos(&turret->primary_anim_obj->special);
+        if (centre->x - extent > maximum->x || minimum->x > centre->x + extent ||
+            centre->z - extent > maximum->z || minimum->z > centre->z + extent ||
+            centre->y - extent > maximum->y || minimum->y > centre->y + extent) {
+            continue;
+        }
+        for (i32 point = point_count; point > 0;) {
+            --point;
+            if (SphereSphereOverlap(centre, extent, &points[point], radius) != 0) {
+                NUVEC *origin = object != NULL ? &object->apiobj.collision_position : &points[point];
+                f32 distance = NuVecDistSqr(origin, centre, NULL);
+                if (distance < nearest_distance) {
+                    nearest_distance = distance;
+                    nearest = turret;
                 }
+                break;
+            }
+        }
     } while (++index, ++turret, index < system->count);
     if (nearest == NULL) {
         return 0;

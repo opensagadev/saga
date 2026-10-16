@@ -41,7 +41,7 @@
 #endif
 #include "nu2api/numath/nurand.h"
 
-EdRegistry theRegistry;
+extern EdRegistry theRegistry;
 extern "C" VuVec SpherePos1;
 extern "C" VuVec SpherePos2;
 VuVec SpherePos1;
@@ -99,17 +99,17 @@ void SerialiseNuVec(EdStream &, void *, i32);
 void SerialiseNuMtx(EdStream &, void *, i32);
 
 f32 EdManipulator::Scale = 2.0f;
-EdManipulator theDefaultManipulator;
-EdManMove theMoveManipulator;
-EdManRotate theRotateManipulator;
-EdManScale theScaleManipulator;
-SplineTool theSplineTool;
+extern EdManipulator theDefaultManipulator;
+extern EdManMove theMoveManipulator;
+extern EdManRotate theRotateManipulator;
+extern EdManScale theScaleManipulator;
+extern SplineTool theSplineTool;
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
-SplineHelper theSplineHelper;
-KnotHelper theKnotHelper;
+extern SplineHelper theSplineHelper;
+extern KnotHelper theKnotHelper;
 extern ClassEditor theClassEditor;
 i32 pad_disabled;
-EdSystem theEdSystem;
+extern EdSystem theEdSystem;
 eduimenu_s *edLevelPinnedMenu;
 
 void eduiSetPinnedMenu(eduimenu_s *menu) {

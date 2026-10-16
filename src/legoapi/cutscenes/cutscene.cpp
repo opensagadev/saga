@@ -620,18 +620,87 @@ static void CutScene_Configure(CUTINFO *cut, char *name, VARIPTR *buf, VARIPTR *
     }
 }
 
+static CUTSYS *CutScenes_LoadFromList(NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VARIPTR *buf, VARIPTR *buf_end,
+                                      i32 param2, i32 param3, WORLDINFO *world) {
+    CUTSYS *sys;
+    void *initial;
+    CUTINFO *cut;
+    CUTINFO *entries[32];
+    char full_path[128];
+    char config_name[128];
+
+    CS_area = param2;
+    initial = buf->void_ptr;
+    sys = (CUTSYS *)ALIGN((usize)initial, 4);
+    buf->void_ptr = sys + 1;
+    CS_cutsys = sys;
+    CS_worldinfo = world;
+    sys->character_bits = reinterpret_cast<u32 *>(buf->void_ptr);
+    buf->void_ptr = reinterpret_cast<char *>(buf->void_ptr) + ((CHARCOUNT + 0x1f) / 32) * 4;
+    for (i32 i = 0; i < CUTCOUNT; ++i) {
+        if (CutList[i].level != param3) {
+            continue;
+        }
+        void *saved = buf->void_ptr;
+        entries[sys->count] = reinterpret_cast<CUTINFO *>(saved);
+        buf->addr = ALIGN(buf->addr + sizeof(*cut), 4);
+        cut = entries[sys->count];
+        NuStrCpy(full_path, "cut\\");
+        NuStrCat(full_path, CutList[i].directory);
+        NuStrCat(full_path, "\\");
+        NuStrCat(full_path, CutList[i].filename);
+        NuStrCpy(config_name, full_path);
+        NuStrCat(config_name, ".txt");
+        CutScene_Configure(cut, config_name, buf, buf_end);
+        if ((cut->flags & 0x800) != 0 || InStory() != 0 ||
+            (LDataList[param3].flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) != 0) {
+            NuStrCpy(config_name, full_path);
+            NuStrCat(config_name, ".cu2");
+            cut->scene = NuGCutSceneLoad(config_name, buf, buf_end, 0);
+            if (cut->scene != NULL) {
+                NuStrCpy(cut->name, CutList[i].filename);
+                NuGCutSceneFixUp(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), gscn1, 0, param1);
+                NuGCutSceneFixUpExtra(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), gscn2);
+                cut->instance = instNuGCutSceneCreate(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), NULL, NULL,
+                                                      CutList[i].filename, buf, 0);
+                if (cut->instance != NULL) {
+                    reinterpret_cast<instNUGCUTSCENE_s *>(cut->instance)->rate =
+                        cut->frames_per_second * DEFAULTFRAMETIME;
+                    buf->addr = ALIGN(buf->addr, 0x10);
+                }
+                ++sys->count;
+                continue;
+            }
+        }
+        buf->void_ptr = saved;
+    }
+    if (sys->count <= 0) {
+        buf->void_ptr = initial;
+        return NULL;
+    }
+    sys->cuts = reinterpret_cast<CUTINFO **>(buf->void_ptr);
+    const usize table_size = sys->count * sizeof(CUTINFO *);
+    memmove(sys->cuts, entries, table_size);
+    buf->addr = ALIGN(buf->addr + table_size * sys->count, 4);
+    return sys;
+}
+
 void *CutScenes_Load(char *config, NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VARIPTR *buf, VARIPTR *buf_end, i32 param2,
                      i32 param3, WORLDINFO *world) {
     NUFPAR *fp;
     CUTSYS *sys;
     void *initial;
     CUTINFO *cut;
-    char name[128];
+    // Retail realigns the frame (and esp,-16) and keeps the name buffer in a 16-byte aligned slot.
+    char name[128] __attribute__((aligned(16)));
     CUTINFO *entries[32];
     char full_path[128];
     char config_name[128];
 
-    if (CutList == NULL || CUTCOUNT <= 0) {
+    if (CutList != NULL && CUTCOUNT > 0) {
+        return CutScenes_LoadFromList(gscn1, gscn2, param1, buf, buf_end, param2, param3, world);
+    }
+    {
         if (config == NULL) {
             return NULL;
         }
@@ -641,14 +710,14 @@ void *CutScenes_Load(char *config, NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VAR
             return NULL;
         }
 
+        CS_area = param2;
         initial = buf->void_ptr;
         sys = (CUTSYS *)ALIGN((usize)initial, 4);
-        sys->count = 0;
-        sys->character_bits = reinterpret_cast<u32 *>(sys + 1);
-        CS_area = param2;
-        CS_worldinfo = world;
+        buf->void_ptr = sys + 1;
         CS_cutsys = sys;
-        buf->void_ptr = reinterpret_cast<char *>(sys->character_bits) + ((CHARCOUNT + 0x1f) / 32) * 4;
+        CS_worldinfo = world;
+        sys->character_bits = reinterpret_cast<u32 *>(buf->void_ptr);
+        buf->void_ptr = reinterpret_cast<char *>(buf->void_ptr) + ((CHARCOUNT + 0x1f) / 32) * 4;
 
         while (NuFParGetLine(fp) != 0) {
             if (NuFParGetWord(fp) == 0 || NuStrICmp(fp->word_buf, "cutscene") != 0 || sys->count > 0x1f ||
@@ -660,12 +729,12 @@ void *CutScenes_Load(char *config, NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VAR
             entries[sys->count] = cut;
             buf->addr = ALIGN(buf->addr + sizeof(*cut), 4);
             NuStrLwr(name, fp->word_buf);
-            i32 len = NuStrLen(name);
-            while (len > 0 && name[len - 1] != '.') {
-                --len;
+            i32 dot = NuStrLen(name) - 1;
+            while (dot > 0 && name[dot] != '.') {
+                --dot;
             }
-            if (len > 0) {
-                name[len - 1] = '\0';
+            if (name[dot] == '.') {
+                name[dot] = '\0';
             }
 
             if (name[0] == 'c' && name[1] == 'u' && name[2] == 't' && name[3] == '\\') {
@@ -708,7 +777,7 @@ void *CutScenes_Load(char *config, NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VAR
                 --separator;
             }
             NuStrCpy(cut->name, name + separator + 1);
-            NuGCutSceneFixUp(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), gscn1, 0, static_cast<i8>(param1));
+            NuGCutSceneFixUp(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), gscn1, 0, param1);
             NuGCutSceneFixUpExtra(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), gscn2);
             cut->instance =
                 instNuGCutSceneCreate(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), NULL, NULL, name, buf, 0);
@@ -719,72 +788,15 @@ void *CutScenes_Load(char *config, NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VAR
             sys->count++;
         }
         NuFParDestroy(fp);
-        if (sys->count == 0) {
+        if (sys->count <= 0) {
             buf->void_ptr = initial;
             return NULL;
         }
-        buf->void_ptr = reinterpret_cast<void *>(ALIGN(buf->addr, 4));
         sys->cuts = reinterpret_cast<CUTINFO **>(buf->void_ptr);
-        memmove(sys->cuts, entries, sys->count * sizeof(CUTINFO *));
+        const usize table_size = sys->count * sizeof(CUTINFO *);
+        memmove(sys->cuts, entries, table_size);
         // Retail reserves count pointer-table rows after copying the count entries.
-        buf->addr = ALIGN(buf->addr + sys->count * sizeof(CUTINFO *) * sys->count, 4);
-        return sys;
-    } else {
-        initial = buf->void_ptr;
-        sys = (CUTSYS *)ALIGN(buf->addr, 4);
-        sys->count = 0;
-        sys->character_bits = reinterpret_cast<u32 *>(sys + 1);
-        CS_area = param2;
-        CS_worldinfo = world;
-        CS_cutsys = sys;
-        buf->void_ptr = reinterpret_cast<char *>(sys->character_bits) + ((CHARCOUNT + 0x1f) / 32) * 4;
-        for (i32 i = 0; i < CUTCOUNT; ++i) {
-            if (CutList[i].level != param3 || sys->count >= 32) {
-                continue;
-            }
-            // Preserve room for the prefix, separator, extension and terminator.
-            if (NuStrLen(CutList[i].directory) + NuStrLen(CutList[i].filename) > 118) {
-                continue;
-            }
-            cut = reinterpret_cast<CUTINFO *>(buf->void_ptr);
-            entries[sys->count] = cut;
-            buf->addr = ALIGN(buf->addr + sizeof(*cut), 4);
-            NuStrCpy(full_path, "cut\\");
-            NuStrCat(full_path, CutList[i].directory);
-            NuStrCat(full_path, "\\");
-            NuStrCat(full_path, CutList[i].filename);
-            NuStrCpy(config_name, full_path);
-            NuStrCat(config_name, ".txt");
-            CutScene_Configure(cut, config_name, buf, buf_end);
-            if ((cut->flags & 0x800) != 0 || InStory() != 0 ||
-                (LDataList[param3].flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) != 0) {
-                NuStrCpy(config_name, full_path);
-                NuStrCat(config_name, ".cu2");
-                cut->scene = NuGCutSceneLoad(config_name, buf, buf_end, 0);
-                if (cut->scene != NULL) {
-                    NuStrCpy(cut->name, CutList[i].filename);
-                    NuGCutSceneFixUp(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), gscn1, 0, static_cast<i8>(param1));
-                    NuGCutSceneFixUpExtra(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), gscn2);
-                    cut->instance = instNuGCutSceneCreate(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), NULL, NULL,
-                                                          CutList[i].filename, buf, 0);
-                    if (cut->instance != NULL) {
-                        reinterpret_cast<instNUGCUTSCENE_s *>(cut->instance)->rate =
-                            cut->frames_per_second * DEFAULTFRAMETIME;
-                        buf->addr = ALIGN(buf->addr, 0x10);
-                    }
-                    ++sys->count;
-                    continue;
-                }
-            }
-            buf->void_ptr = cut;
-        }
-        if (sys->count == 0) {
-            buf->void_ptr = initial;
-            return NULL;
-        }
-        sys->cuts = reinterpret_cast<CUTINFO **>(buf->void_ptr);
-        memmove(sys->cuts, entries, sys->count * sizeof(CUTINFO *));
-        buf->addr = ALIGN(buf->addr + sys->count * sizeof(CUTINFO *) * sys->count, 4);
+        buf->addr = ALIGN(buf->addr + table_size * sys->count, 4);
         return sys;
     }
 }
@@ -1739,33 +1751,35 @@ extern "C" {
         *dot++ = static_cast<char>('0' + units);
         NuStrCpy(dot, extension);
 
-        instNUGCUTSCENE_s *instance = cutscene_load_instance;
-        VARIPTR buffer = {instance->pending_stream_buffer};
-        instance->pending_stream_buffer = NULL;
+        // Retail realigns the frame (and esp,-16) and keeps both buffer cursors in 16-byte aligned slots.
+        VARIPTR buffer __attribute__((aligned(16)));
+        buffer.void_ptr = cutscene_load_instance->pending_stream_buffer;
+        cutscene_load_instance->pending_stream_buffer = NULL;
         if (buffer.void_ptr == NULL) {
             return;
         }
 
-        instance->flags_8c |= 0x80;
-        VARIPTR buffer_end;
-        buffer_end.addr = buffer.addr + instance->cutscene->stream_buffer_size;
+        cutscene_load_instance->stream_loading = 1;
+        VARIPTR buffer_end __attribute__((aligned(16)));
+        buffer_end.addr = buffer.addr + cutscene_load_instance->cutscene->stream_buffer_size;
         NuGCutSceneLoad(path, &buffer, &buffer_end, 1);
-        instance = cutscene_load_instance;
-        instance->flags_8b |= 8;
-        if (instance->stream_index == 0 && (instance->cutscene->flags & 8) != 0) {
-            instNuGCutSceneSwapBuffers(instance, 1);
-            instance = cutscene_load_instance;
+        cutscene_load_instance->stream_loaded = 1;
+        const bool swap_buffers =
+            cutscene_load_instance->stream_index == 0 && (cutscene_load_instance->cutscene->flags & 8) != 0;
+        if (swap_buffers) {
+            instNuGCutSceneSwapBuffers(cutscene_load_instance, 1);
             if (NumCommonStreamingBuffers > 1) {
-                instance->flags_8b |= 0x10;
-                NewCopyAnims(instance);
+                cutscene_load_instance->stream_common_copy = 1;
+                NewCopyAnims(cutscene_load_instance);
             } else {
-                copyAnims(instance->cutscene, static_cast<NUGCUTSCENE_s *>(instance->cutscene->stream_buffer_1));
+                copyAnims(cutscene_load_instance->cutscene,
+                          static_cast<NUGCUTSCENE_s *>(cutscene_load_instance->cutscene->stream_buffer_1));
             }
-            instance->cutscene->flags &= ~8U;
-            instance->flags_8b &= ~8U;
-            instance->stream_index = 1;
+            cutscene_load_instance->cutscene->swap_on_first_stream = 0;
+            cutscene_load_instance->stream_loaded = 0;
+            cutscene_load_instance->stream_index = 1;
         }
-        instance->flags_8c &= ~0x80U;
+        cutscene_load_instance->stream_loading = 0;
         cutscene_load_instance = NULL;
     }
 

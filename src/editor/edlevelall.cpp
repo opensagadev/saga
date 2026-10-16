@@ -75,7 +75,6 @@ static inline i32 get_class_object_attribute(EdClass *ed_class, void *object, Ed
     return 0;
 }
 
-extern EdRegistry theRegistry;
 extern ClassEditor theClassEditor;
 extern eduimenu_s *edLevelNextMenu;
 void eduiSetPinnedMenu(eduimenu_s *);
@@ -95,12 +94,7 @@ extern ClassEditor theClassEditor;
 extern LevelEditor theLevelEditor;
 ClassEditor theClassEditor;
 CursorTool theCursorTool;
-extern SplineTool theSplineTool;
 static i32 class_editor_create_pending = -1;
-extern EdManipulator theDefaultManipulator;
-extern EdManMove theMoveManipulator;
-extern EdManRotate theRotateManipulator;
-extern EdManScale theScaleManipulator;
 extern MemoryManager theMemoryManager;
 extern eduimenu_s *edLevelNextMenu;
 void eduiSetPinnedMenu(eduimenu_s *);
@@ -123,7 +117,18 @@ extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, NUMTL *);
 extern "C" void eduiSetCursorColour(u32);
 extern "C" void eduiSetFontScale(f32, f32);
 
+EdManipulator theDefaultManipulator;
+EdManMove theMoveManipulator;
+EdManRotate theRotateManipulator;
+EdManScale theScaleManipulator;
+PlaceableHelper thePlaceableHelper;
 PropertyTool thePropertyTool;
+EdRegistry theRegistry;
+SceneObjectHelper theSceneObjectHelper;
+SplineHelper theSplineHelper;
+KnotHelper theKnotHelper;
+SplineTool theSplineTool;
+EdSystem theEdSystem;
 PropertyMenuMetrics menu_startmetrics __attribute__((aligned(16))) = {20, 5, 200, 400};
 eduiiattr_s EdLevelAttr = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
 i32 EdLevelFnt;
@@ -2894,10 +2899,8 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
 }
 
 PropertyTool::PropertyTool() {
-    next = NULL;
     active_menu = NULL;
     last_menu = NULL;
-    previous = NULL;
     menu_count = 0;
     show_type_names = 1;
     menu_attr.background = 0x80000000;

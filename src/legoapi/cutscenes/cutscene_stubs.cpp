@@ -71,7 +71,6 @@ extern "C" {
             return;
         }
 
-#define CUT_MEMORY_FLOAT(value) (static_cast<f32>((value) >> 16) * 65536.0f + static_cast<f32>(static_cast<u16>(value)))
 #define CUT_MEMORY_VERTEX(x, y, normal_colour, bright_colour)                                                          \
     do {                                                                                                               \
         if (g_NuPrim_NeedsOverbrightening == 0) {                                                                      \
@@ -89,7 +88,7 @@ extern "C" {
         if (DefragInstBaseMem != NULL) {
             const u32 cut_span = static_cast<u32>(reinterpret_cast<usize>(DefragCutSceneEndMem) -
                                                   reinterpret_cast<usize>(DefragCutSceneBaseMem));
-            const f32 cut_scale = 580.0f / CUT_MEMORY_FLOAT(cut_span);
+            const f32 cut_scale = 580.0f / static_cast<f32>(cut_span);
             CUT_MEMORY_VERTEX(30.0f, 206.0f, 0x40000040u, 0x40000080u);
             CUT_MEMORY_VERTEX(610.0f, 208.0f, 0x40000040u, 0x40000080u);
 
@@ -103,15 +102,15 @@ extern "C" {
                 const u32 start =
                     static_cast<u32>(reinterpret_cast<usize>(scene) - reinterpret_cast<usize>(DefragCutSceneBaseMem));
                 const u32 end = start + scene->loaded_size;
-                const f32 start_x = CUT_MEMORY_FLOAT(start) * cut_scale + 30.0f;
-                const f32 end_x = CUT_MEMORY_FLOAT(end) * cut_scale + 30.0f;
+                const f32 start_x = static_cast<f32>(start) * cut_scale + 30.0f;
+                const f32 end_x = static_cast<f32>(end) * cut_scale + 30.0f;
                 CUT_MEMORY_VERTEX(start_x, 206.0f, 0x40004040u, 0x40008080u);
                 CUT_MEMORY_VERTEX(end_x, 208.0f, 0x40004040u, 0x40008080u);
             }
 
             const u32 inst_span = static_cast<u32>(reinterpret_cast<usize>(DefragInstEndMem) -
                                                    reinterpret_cast<usize>(DefragInstBaseMem));
-            const f32 inst_scale = 580.0f / CUT_MEMORY_FLOAT(inst_span);
+            const f32 inst_scale = 580.0f / static_cast<f32>(inst_span);
             CUT_MEMORY_VERTEX(30.0f, 209.0f, 0x40000030u, 0x40000060u);
             CUT_MEMORY_VERTEX(610.0f, 211.0f, 0x40000030u, 0x40000060u);
 
@@ -123,15 +122,15 @@ extern "C" {
                 const u32 start =
                     static_cast<u32>(reinterpret_cast<usize>(instance) - reinterpret_cast<usize>(DefragInstBaseMem));
                 const u32 end = start + instance->allocation_size;
-                const f32 start_x = CUT_MEMORY_FLOAT(start) * inst_scale + 30.0f;
-                const f32 end_x = CUT_MEMORY_FLOAT(end) * inst_scale + 30.0f;
+                const f32 start_x = static_cast<f32>(start) * inst_scale + 30.0f;
+                const f32 end_x = static_cast<f32>(end) * inst_scale + 30.0f;
                 CUT_MEMORY_VERTEX(start_x, 209.0f, 0x40400040u, 0x40800080u);
                 CUT_MEMORY_VERTEX(end_x, 211.0f, 0x40400040u, 0x40800080u);
             }
         } else {
             const u32 cut_span = static_cast<u32>(reinterpret_cast<usize>(DefragCutSceneEndMem) -
                                                   reinterpret_cast<usize>(DefragCutSceneBaseMem));
-            const f32 cut_scale = 580.0f / CUT_MEMORY_FLOAT(cut_span);
+            const f32 cut_scale = 580.0f / static_cast<f32>(cut_span);
             CUT_MEMORY_VERTEX(30.0f, 206.0f, 0x40000040u, 0x40000080u);
             CUT_MEMORY_VERTEX(610.0f, 210.0f, 0x40000040u, 0x40000080u);
 
@@ -145,16 +144,16 @@ extern "C" {
                 const u32 scene_start =
                     static_cast<u32>(reinterpret_cast<usize>(scene) - reinterpret_cast<usize>(DefragCutSceneBaseMem));
                 const u32 scene_end = scene_start + scene->loaded_size;
-                const f32 scene_start_x = CUT_MEMORY_FLOAT(scene_start) * cut_scale + 30.0f;
-                const f32 scene_end_x = CUT_MEMORY_FLOAT(scene_end) * cut_scale + 30.0f;
+                const f32 scene_start_x = static_cast<f32>(scene_start) * cut_scale + 30.0f;
+                const f32 scene_end_x = static_cast<f32>(scene_end) * cut_scale + 30.0f;
                 CUT_MEMORY_VERTEX(scene_start_x, 206.0f, 0x40004040u, 0x40008080u);
                 CUT_MEMORY_VERTEX(scene_end_x, 210.0f, 0x40004040u, 0x40008080u);
 
                 const u32 inst_start = static_cast<u32>(reinterpret_cast<usize>(instance) -
                                                         reinterpret_cast<usize>(DefragCutSceneBaseMem));
                 const u32 inst_end = inst_start + instance->allocation_size;
-                const f32 inst_start_x = CUT_MEMORY_FLOAT(inst_start) * cut_scale + 30.0f;
-                const f32 inst_end_x = CUT_MEMORY_FLOAT(inst_end) * cut_scale + 30.0f;
+                const f32 inst_start_x = static_cast<f32>(inst_start) * cut_scale + 30.0f;
+                const f32 inst_end_x = static_cast<f32>(inst_end) * cut_scale + 30.0f;
                 CUT_MEMORY_VERTEX(inst_start_x, 206.0f, 0x40400040u, 0x40800080u);
                 CUT_MEMORY_VERTEX(inst_end_x, 210.0f, 0x40400040u, 0x40800080u);
             }
@@ -164,7 +163,6 @@ extern "C" {
         NuPrimSetCoordinateSystem(NuPrimCoordSystemStack[--NuPrimCSPos]);
 
 #undef CUT_MEMORY_VERTEX
-#undef CUT_MEMORY_FLOAT
     }
 
     void PauseGameCut(void) {
@@ -631,28 +629,33 @@ static void instNuGCutLookAtLocatorUpdate(NUGCUTLOCATORSYS_s *system, instNUGCUT
 }
 
 extern "C" {
+    // Aligned four-float row used for retail's movaps matrix copies.
+    typedef f32 LocatorMtxRow __attribute__((vector_size(16)));
+
     void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *instance, NUGCUTLOCATORSYS_s *system,
                                  instNUGCUTLOCATOR_s *inst_locator, NUGCUTLOCATOR_s *locator, f32 frame,
                                  NUMTX *parent_mtx, i32 paused) {
         NUMTX matrix;
         NUGCUTLOCATORTYPE_s *type = &system->types[locator->type_index];
-        i32 effect_index = static_cast<i32>(static_cast<u16>(type->function_index));
-        debinftype *effect =
-            debtab != NULL && effect_index >= 0 && effect_index != 0xffff ? debtab[effect_index] : NULL;
+        const u8 type_flags = type->flags;
 
-        if ((type->flags & 1) != 0) {
-            if (paused != 0 || effect == NULL) {
+        if ((type_flags & 1) != 0) {
+            if (paused != 0) {
+                return;
+            }
+            const u16 effect_index = type->function_index;
+            if (effect_index == 0xffff || debtab[effect_index] == NULL) {
                 return;
             }
             nuanimtime_s time;
-            f32 scale = 0.0f;
-            f32 rate = 0.0f;
+            f32 scale;
+            f32 rate;
             if (locator->animation != NULL) {
                 NuAnimData2CalcTime(locator->animation, frame, &time);
             }
             i32 visible = NuGCutLocatorIsVisble(locator, frame, &time, &scale, &rate);
             if (visible != 0 && scale < 0.0f && (locator->flags & 0x10) == 0) {
-                scale = static_cast<f32>(effect->frequency) * -scale;
+                scale = static_cast<f32>(debtab[effect_index]->frequency) * -scale;
             }
             if (visible != 0 && scale > 0.1f) {
                 if ((locator->flags & 0x10) != 0 && inst_locator->effect_handle != 0) {
@@ -709,49 +712,63 @@ extern "C" {
             return;
         }
 
-        if ((type->flags & 2) != 0) {
-            if (effect_index >= 0 && locatorfns != NULL) {
-                NUGCUTLOCATORFN fn = locatorfns[effect_index].function;
+        if ((type_flags & 2) != 0) {
+            const u16 function_index = type->function_index;
+            if (function_index != 0xffff) {
+                NUGCUTLOCATORFN fn = locatorfns[function_index].function;
                 if (fn != NULL) {
                     fn(instance, system, inst_locator, locator, frame, parent_mtx, paused);
-                    return;
                 }
             }
-        } else if ((type->flags & 0x10) != 0 && paused == 0) {
-            if (TriggerLocatorVfxFn == NULL || ReleaseLocatorVfxFn == NULL || UpdateLocatorVfxFn == NULL) {
+        } else if ((type_flags & 0x10) == 0) {
+            if ((type_flags & 4) != 0) {
+                if (NuCutSceneSFXUpdate != NULL && instance->rate != 0.0f) {
+                    NuCutSceneSFXUpdate(system, inst_locator, locator, frame, parent_mtx, paused);
+                }
+            } else if ((type_flags & 8) != 0 && paused == 0) {
+                instNuGCutLookAtLocatorUpdate(system, inst_locator, locator, frame, parent_mtx, instance);
+            }
+        } else {
+            if (paused != 0) {
                 return;
             }
+            const u16 effect_index = type->function_index;
             f32 opacity = 0.0f;
+            if (TriggerLocatorVfxFn == NULL || ReleaseLocatorVfxFn == NULL) {
+                return;
+            }
             nuanimtime_s time;
             if (locator->animation != NULL) {
                 NuAnimData2CalcTime(locator->animation, frame, &time);
             }
-            if (!(NuGCutLocatorIsVisble(locator, frame, &time, &opacity, NULL) != 0 && !(opacity <= 0.1f))) {
+            if (NuGCutLocatorIsVisble(locator, frame, &time, &opacity, NULL) == 0 || !(opacity > 0.1f)) {
                 if (inst_locator->effect_handle >= 0) {
                     ReleaseLocatorVfxFn(inst_locator->effect_handle);
                 }
                 inst_locator->effect_handle = -1;
             } else {
-                VuMtx matrix;
-                NuGCutLocatorCalcMtx(locator, frame, &matrix.matrix, &time);
+                // Retail realigns the frame and copies the locator matrix into the VFX matrix with movaps.
+                VuMtx vfx_matrix __attribute__((aligned(16)));
+                NUMTX locator_mtx __attribute__((aligned(16)));
+                NuGCutLocatorCalcMtx(locator, frame, &locator_mtx, &time);
                 if ((locator->flags & 4) != 0) {
-                    NuMtxPreTranslate(&matrix.matrix, &locator->pivot);
+                    NuMtxPreTranslate(&locator_mtx, &locator->pivot);
                 }
                 if (parent_mtx != NULL) {
-                    NuMtxMul(&matrix.matrix, &matrix.matrix, parent_mtx);
+                    NuMtxMul(&locator_mtx, &locator_mtx, parent_mtx);
                 }
-                if (inst_locator->effect_handle < 0) {
-                    inst_locator->effect_handle = TriggerLocatorVfxFn(effect_index, &matrix);
+                const LocatorMtxRow *rows = reinterpret_cast<const LocatorMtxRow *>(&locator_mtx);
+                LocatorMtxRow *vfx_rows = reinterpret_cast<LocatorMtxRow *>(&vfx_matrix.matrix);
+                vfx_rows[0] = rows[0];
+                vfx_rows[1] = rows[1];
+                vfx_rows[2] = rows[2];
+                vfx_rows[3] = rows[3];
+                if (inst_locator->effect_handle >= 0 && UpdateLocatorVfxFn != NULL) {
+                    UpdateLocatorVfxFn(inst_locator->effect_handle, &vfx_matrix);
                 } else {
-                    UpdateLocatorVfxFn(inst_locator->effect_handle, &matrix);
+                    inst_locator->effect_handle = TriggerLocatorVfxFn(effect_index, &vfx_matrix);
                 }
             }
-        } else if ((type->flags & 4) != 0) {
-            if (NuCutSceneSFXUpdate != NULL) {
-                NuCutSceneSFXUpdate(system, inst_locator, locator, frame, parent_mtx, paused);
-            }
-        } else if ((type->flags & 8) != 0 && paused == 0) {
-            instNuGCutLookAtLocatorUpdate(system, inst_locator, locator, frame, parent_mtx, instance);
         }
     }
 

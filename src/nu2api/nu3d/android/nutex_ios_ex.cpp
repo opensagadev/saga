@@ -30,7 +30,7 @@ GLuint g_earlyColorMSAAFramebuffer;
 SAGA_HOST_WEAK GLuint g_earlyColorTexture = 0;
 
 u32 g_textureHash;
-i32 comeFromHash;
+bool comeFromHash;
 i32 g_logoTexture;
 const char *g_textureName;
 i32 g_fileSize;
@@ -717,10 +717,10 @@ load_android_texture:
 
 GLuint NuIOS_CreateGLTexFromHash(u32 hash) {
     char filename[0x10c];
-    GLuint texture = 0;
+    GLuint texture;
     const char *extension;
 
-    comeFromHash = 1;
+    comeFromHash = true;
     g_textureHash = hash;
     if (hash == 0x280145f0) {
         g_logoTexture = 1;
@@ -729,14 +729,14 @@ GLuint NuIOS_CreateGLTexFromHash(u32 hash) {
     switch (NuPlatform::Get()->GetCurrentPlatform()) {
         case IOS_PLATFORM:
         case ANDROID_PVRTC_PLATFORM:
-            snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.PVR", hash);
+            sprintf(filename, "SHAREDTEXTURES/0X%08X.%s", hash, "PVR");
             texture = NuIOS_CreateGLTexFromPlatfomSpecificFile(filename);
             break;
         case ANDROID_ATITC_PLATFORM:
-            snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0x%08x.atitc", hash);
+            sprintf(filename, "SHAREDTEXTURES/0x%08x.%s", hash, "atitc");
             texture = NuIOS_CreateGLTexFromPlatfomSpecificFile(filename);
             if (texture == 0) {
-                snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.PVRNC", hash);
+                sprintf(filename, "SHAREDTEXTURES/0X%08X.%s", hash, "PVRNC");
                 texture = NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(filename);
             }
             break;
@@ -746,19 +746,19 @@ GLuint NuIOS_CreateGLTexFromHash(u32 hash) {
         case ANDROID_ETC1_PLATFORM: {
             extension = "ETC1";
         load_dds_format:
-            snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.%s", hash, extension);
+            sprintf(filename, "SHAREDTEXTURES/0X%08X.%s", hash, extension);
             texture = NuIOS_CreateGLTexFromPlatfomSpecificFile(filename);
             if (texture == 0) {
-                snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.PVRNC", hash);
+                sprintf(filename, "SHAREDTEXTURES/0X%08X.%s", hash, "PVRNC");
                 texture = NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(filename);
             }
             break;
         }
         default:
-            snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.PVR", hash);
+            sprintf(filename, "SHAREDTEXTURES/0X%08X.%s", hash, "PVR");
             texture = NuIOS_CreateGLTexFromPlatfomSpecificFile(filename);
             if (texture == 0) {
-                snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.PVRNC", hash);
+                sprintf(filename, "SHAREDTEXTURES/0X%08X.%s", hash, "PVRNC");
                 texture = NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(filename);
             }
             break;

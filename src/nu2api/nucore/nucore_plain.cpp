@@ -2597,68 +2597,6 @@ extern "C" {
             currentScene.dof.enabled = 0;
         }
     }
-    void *NuEffectTexCreate1D(void) {
-        // Retail returns null.
-        return NULL;
-    }
-    void NuEffectTex360Create2D_aliased(void) {
-        // Retail no-op.
-    }
-    void NuEffectTex360Create3D_aliased(void) {
-        // Retail no-op.
-    }
-    void NuEffectTexCreateCube(void) {
-        // Retail no-op.
-    }
-    void NuEffectTexCreateCube_aliased(void) {
-        // Retail no-op.
-    }
-    void NuEffectTexCreateFromNativeTex(void) {
-        // Retail no-op.
-    }
-    void NuEffectTexGetDimension(nueffecttex_s *texture, i32 lod, i32 *width, i32 *height) {
-        const i16 *dimensions = reinterpret_cast<const i16 *>(texture);
-        *width = (dimensions[1] >> lod) & ~1;
-        *height = (dimensions[2] >> lod) & ~1;
-    }
-    struct NativeEffectTexture {
-        NUNATIVETEX native;
-        nueffecttex_s *effect;
-        i32 unknown_2c;
-    };
-    DECOMP_ASSERT(sizeof(NativeEffectTexture) == 0x30, "Native effect texture stride");
-    DECOMP_ASSERT(offsetof(NativeEffectTexture, effect) == 0x28, "Native effect texture link");
-
-    struct NativeEffectTexturePool {
-        NativeEffectTexture entries[32];
-        u8 unknown_600[16];
-    };
-    DECOMP_ASSERT(sizeof(NativeEffectTexturePool) == 0x610, "Native effect texture pool size");
-    static NativeEffectTexturePool nativeTexPool;
-
-    nueffecttex_s *NuEffectTexGetEffectFromNative(i32 tex_id) {
-        NativeEffectTexture *texture = (NativeEffectTexture *)NuTexGetNative(tex_id);
-        isize index = ((u8 *)texture - (u8 *)nativeTexPool.entries) / (isize)sizeof(NativeEffectTexture);
-        if ((u32)index < 32)
-            return texture->effect;
-        return NULL;
-    }
-    void *NuEffectTexGetLockedVP(void) {
-        // Retail returns null.
-        return NULL;
-    }
-    void NuEffectTexLockVP(void *buffer, void *buffer_end) {
-        (void)buffer;
-        (void)buffer_end;
-    }
-    void NuEffectTexMapNative(nueffecttex_s *texture) {
-        // Retail no-op.
-    }
-    void NuEffectTexUnlockVP(void) {
-    }
-    void NuEffectTexUnmapNative(void) {
-        // Retail no-op.
-    }
     i32 speedblur_enabled = 1;
     f32 NuLightsx, NuLightsy;
     void NuLightSpeedBlur(i32 reuse_camera, f32 scale) {

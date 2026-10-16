@@ -13,28 +13,7 @@ extern i32 GetMenuID(void);
 extern void SetBonusWinner(i32);
 extern void ResetGameMessages(void);
 extern GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
-void EndMission(MISSIONSYS *ms, i32 param1, i32 param2) {
-    if (netclient == 0 || param2 == 0) {
-        ms->field8_0x1d = (u8)param1;
-        SetBonusWinner(qrand() / 0x8000);
-        if (Player[BonusWinner] == NULL || !Player[BonusWinner]->apiobj.player_controlled) {
-            BonusWinner = (BonusWinner == 0);
-        }
-        BonusWinFlag = 0;
-        NewMenu(9, -1, -1);
-        ResetGameMessages();
-        if (param1 == 3) {
-            PlaySfx("MK-Panel", 0);
-        }
-    }
-}
 
-void InitMission(MISSIONSYS *ms, i32 idx) {
-    ms->field8_0x1d = 1;
-    ms->mission = &ms->missions[idx];
-    ResetTimer(&ms->timer, 0.0f);
-    Cheats_TurnOff(0);
-}
 
 void EndChallenge(i32 param1, i32 param2) {
     if (netclient == 0 || param2 == 0) {
@@ -84,47 +63,6 @@ MISSIONDATA *Mission_Active(MISSIONSYS *ms) {
     return ms->mission;
 }
 
-void CheckMissionEnd(MISSIONSYS *ms) {
-    GameObject_s *player;
-    GameObject_s *obj;
-    u32 lo;
-    u32 hi;
-    i32 i;
-
-    obj = FindGameObject((u32)ms->mission->find_char, 0, 0, 1, 0);
-    if (ms->timer.time_elapsed < 3.0f) {
-        return;
-    }
-    if (GetMenuID() == 9) {
-        return;
-    }
-
-    if (obj != NULL) {
-        lo = obj->apiobj.field_0x1e4;
-        hi = obj->apiobj.field_0x1e8;
-    } else {
-        lo = 0;
-        hi = 0;
-        for (i = 0; i < HIGHGAMEOBJECT; i++) {
-            GameObject_s *candidate = &Obj[i];
-            if ((candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 && candidate->apiobj.field_0x287 == 0 &&
-                (u8)candidate->apiobj.field_0x27c == 0xff) {
-                lo |= candidate->apiobj.field_0x1e4;
-                hi |= candidate->apiobj.field_0x1e8;
-            }
-        }
-    }
-
-    for (i = 0; i < 8; i++) {
-        player = Player[i];
-        if (player != NULL && *(i8 *)&player->apiobj.field_0x1f8 < 0) {
-            if ((lo & player->apiobj.field_0x1ec) | (hi & player->apiobj.field_0x1f0)) {
-                EndMission(ms, 2, 1);
-                return;
-            }
-        }
-    }
-}
 
 GameObject_s *Mission_FindTarget(MISSIONSYS *ms, u64 *target) {
     GameObject_s *obj;

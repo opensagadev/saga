@@ -48,7 +48,7 @@ __attribute__((weak)) void EdRefNosGuid::GetMemberData(void *object, i32 type, v
 
 static f32 NetworkFrameTime() {
     u32 time = UtilGetFrameStartTime();
-    return static_cast<f32>(time & 0xffff) + static_cast<f32>(time >> 16) * 65536.0f;
+    return static_cast<f32>(time);
 }
 
 static f32 ClampPrediction(NetPredictor const *predictor, f32 value) {
@@ -482,7 +482,7 @@ void NetChangedReplicator::CheckSumObject(EdClass const *object_class, void cons
             if (static_cast<u16>(member->replication_group) == replication_group) {
                 EdType *type = theRegistry.GetType(member->type_id);
                 i32 size = member->size > 0 ? member->size : type->size;
-                u8 data[256];
+                u8 data[256] __attribute__((aligned(16)));
                 member->GetMemberData(const_cast<void *>(object), member->type_id, data, sizeof(data));
                 CheckSum(data, static_cast<u32>(size), checksum);
             }
@@ -630,7 +630,7 @@ void NetworkObjectManager::ChangeContext(NOSContext &new_context) {
 }
 
 void NetworkObjectManager::ConstructObject(NetworkObject *object, NetworkObjectManager::NetPeerPush *peer_push) {
-    u8 constructor_data[256];
+    u8 constructor_data[256] __attribute__((aligned(16)));
     EdClassInterface *interface = object->object_class->interface;
     i16 size = static_cast<i16>(
         interface->vtable->get_constructor_data(interface, object->object, constructor_data, sizeof(constructor_data)));

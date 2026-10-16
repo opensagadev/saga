@@ -1045,7 +1045,10 @@ extern "C" {
 
             EdFileWrite(creature->name, 0x10);
             EdFileWrite(creature->script_name, 0x10);
-            EdFileWrite(character_name, aidata_version > 13 ? 0x20 : 0x10);
+            if (aidata_version > 13)
+                EdFileWrite(character_name, 0x20);
+            else
+                EdFileWrite(character_name, 0x10);
             EdFileWriteFloat(creature->position.x);
             EdFileWriteFloat(creature->position.y);
             EdFileWriteFloat(creature->position.z);
@@ -1330,7 +1333,7 @@ extern "C" {
 
 } // extern "C"
 
-__attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad) {
+__attribute__((optimize("O2"), force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupad_s *pad) {
     char base_name[0x10];
     if (pad->digital_buttons_pressed & 0x80) {
         eduimenu_s *menu =

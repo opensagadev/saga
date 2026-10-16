@@ -176,11 +176,11 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
     Player_ClearContext(object, 1);
     Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
 
-    GAMECHARACTERDATA *character = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-    object->hitpoints = character->hitpoints;
-    object->current_hp = character->hitpoints;
+    auto *character_data = object->apiobj.character_data;
+    object->hitpoints = static_cast<GAMECHARACTERDATA *>(character_data->field11_0x24)->hitpoints;
+    object->current_hp = object->hitpoints;
+    object->field_0xe37 = static_cast<GAMECHARACTERDATA *>(character_data->field11_0x24)->field_0xf5;
     object->field_0xe38 = 4;
-    object->field_0xe37 = character->field_0xf5;
 
     AICREATURE &creature = system->creatures[object->ai.field_0x134];
     object->ai.creature_set = creature.set;

@@ -59,7 +59,7 @@ build:target --per_file_copt=^src/nu2api/nufile/NuFileDeviceAndroidAPK\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/ai/aisys/aiscript\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/ai/aisys/aistate\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/ai/aisys/aisys\.cpp$@-O3
-build:target --per_file_copt=^src/gameapi/ai/aisys/gameai_actions\.cpp$@-O3
+build:target --per_file_copt=^src/gameapi/ai/aisys/gameaiscript\.cpp$@-O3
 # Teleport parser callbacks in the target use optimized leaf/control-flow code.
 build:target --per_file_copt=^src/legoapi/items/objects/grabber\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edfile\.cpp$@-O3
@@ -79,6 +79,8 @@ build:target --per_file_copt=^src/legoapi/menus/core/hint\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/menus/screens/gamestatus_lsw\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/menus/screens/gamestatus_lsw\.cpp$@-ftree-vectorize
 build:target --per_file_copt=^src/legoapi/menus/screens/gamemenuall\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/menus/screens/menu\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/menus/screens/missions\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/menus/screens/movies\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/menus/screens/menus\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/menus/screens/shop\.cpp$@-O3
@@ -161,6 +163,8 @@ build:target --per_file_copt=^src/legoapi/characters/motion/chris\.cpp$@-O2
 # The original keeps ResetSpaceLevel's full local symbol and passes its two
 # pointer arguments in eax/edx; disabling IPA-SRA reproduces that exact shape.
 build:target --per_file_copt=^src/legoapi/characters/motion/chris\.cpp$@-fno-ipa-sra
+# The retail static constructor stores its VuVec constants with movaps.
+build:target --per_file_copt=^src/legoapi/characters/motion/chris\.cpp$@-ftree-vectorize
 # Both pivot routines use optimized loop and vector lowering in the target.
 build:target --per_file_copt=^src/legoapi/characters/motion/charpivot\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/cutscenes/cutscene\.cpp$@-O2
@@ -418,6 +422,7 @@ build:target --per_file_copt=^src/nu2api/nusound/nusound_memorymanager\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_mixer\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_routing\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_system\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nusound/nusound\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_clock\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_voice\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_android\.cpp$@-O3
@@ -528,7 +533,7 @@ build:target --per_file_copt=^src/gamelib/util/TouchHacks\.cpp$@-O3
 # The unoptimized game API wrappers live in apiobject.c.
 build:target --per_file_copt=^src/legoapi/render/fx/game_deb\.cpp$@-O3
 
-build:target --per_file_copt=^src/nu2api/nuandroid/nuphoneos\.cpp$@-O2
+build:target --per_file_copt=^src/nu2api/nuandroid/NuPhoneOSMessage\.cpp$@-O2
 build:target --per_file_copt=^src/gameapi/edtools/edui\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edrender\.cpp$@-O3
 
@@ -556,3 +561,21 @@ build:target --per_file_copt=^src/legoapi/misc/stream\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/characters/motion/chris_stubs\.cpp$@-O2
 build:target --per_file_copt=^src/editor/creature_editor\.cpp$@-O0
 build:target --per_file_copt=^src/editor/creature_editor\.cpp$@-fomit-frame-pointer
+build --per_file_copt=^src/nu2api/nucore/nucore_includes\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/nucore/android/nuerror_android\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/numath/numath_includes\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/nu3d/nuvport\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/nucore/listman\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/nu3d/android/nubridge_android\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/gamelib/nuwind/nuwind\.c$@-x,c++,-std=gnu++11
+build:target --per_file_copt=^src/nu2api/nucore/android/NuEntryPoint_android\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nucore/android/nunew_android\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nucore/android/screengrab_android\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nu2api2013_stubs\.cpp$@-O3
+build:target --per_file_copt=^src/MechInputTouch/MechTouchUI\.cpp$@-O3
+build:target --per_file_copt=^src/gamelib/util/tm_client\.cpp$@-O3
+build:target --per_file_copt=^src/gamelib/util/tm_common\.cpp$@-O3
+build:target --per_file_copt=^src/gamelib/util/Nos\.cpp$@-O3
+build:target --per_file_copt=^src/gamelib/util/Refpack\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/squish_pch\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nu3d/android/nueffecttex_android\.cpp$@-O2

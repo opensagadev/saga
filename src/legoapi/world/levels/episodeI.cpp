@@ -264,7 +264,7 @@ static __used__ void PodRaceSnipersReset(void) {
     max_nsnipers = (g_lowEndLevelBehaviour != 0) ? 2 : 5;
     PodRace_nsnipers = 0;
     if (Lap != 0) {
-        char buf[0x18];
+        char buf[16];
         sprintf(buf, "Sniper%d", Lap);
         NUGSPLINE *spline = NuSplineFind(WORLD->current_gscn, buf);
         if (spline != NULL && spline->length > 0 && PodRace_nsnipers <= 9) {
@@ -277,7 +277,7 @@ static __used__ void PodRaceSnipersReset(void) {
                 dst->fire_timer = NuRandFloat() * PodRace_sniper_fire_time + half_time;
                 PodRace_snipers[PodRace_nsnipers++].state = 0.0f;
                 npts += 2;
-            } while (spline->length > npts && PodRace_nsnipers <= 9);
+            } while (npts < spline->length && PodRace_nsnipers <= 9);
         }
     }
 }
@@ -1199,7 +1199,7 @@ void PodRaceCUpdate(WORLDINFO_s *world) {
     PodRaceSnipersUpdate();
     if (LevFlag.podrace_state == 0) {
         CUTINFO *cs = CutScene_Find(world->cutscene_sys, "Ep1_Podrace_TuskenRaiders");
-        if (cs != NULL && cs->instance != NULL &&
+        if (cs != NULL &&
             (static_cast<instNUGCUTSCENE_s *>(cs->instance)->flags_89 & 0x10) != 0)
             LevFlag.podrace_state = 1;
     }
@@ -1499,15 +1499,14 @@ void PodRaceAReset(WORLDINFO_s *world) {
             break;
     }
     pod_pacemaker = 0;
-    MINESYS_s *mines = &minesys;
-    mines->spawn_timer = 1000000000.0f;
+    memset(minesys.mines, 0, sizeof(minesys.mines));
+    memset(&client_mines, 0, sizeof(client_mines));
+    minesys.spawn_timer = 1000000000.0f;
     clients_mines_bitfield[0] = 0;
     clients_mines_bitfield[1] = 0;
-    mines->update_timer = 0.0f;
+    minesys.update_timer = 0.0f;
     pod_mines_bitfield[0] = 0;
     pod_mines_bitfield[1] = 0;
-    memset(mines->mines, 0, sizeof(mines->mines));
-    memset(&client_mines, 0, sizeof(client_mines));
     mine_count = 0;
     if (Lap == 3 && nethost == 0 && netclient == 0)
         NewCutScene(NULL, world->cutscene_sys, "ep1_podrace_sebulba", 1);
@@ -1774,13 +1773,10 @@ speed_section:
                             StoreLevelProgress(world);
                             ResetLevel(world, "ep1_podsprint_sebulba", 1);
                         } else if ((i8)ps->ai_state > 3) {
-                            if (FreePlay != 0) {
+                            if (FreePlay != 0 ||
+                                (NewCutScene(NULL, WORLD->cutscene_sys, "Ep1_Podrace_Outro1", 1) == 0 &&
+                                 NewCutScene(NULL, WORLD->cutscene_sys, "Ep1_Podsprint_Outro1", 1) == 0)) {
                                 CompleteLevel(world);
-                            } else {
-                                if (NewCutScene(NULL, WORLD->cutscene_sys, "Ep1_Podrace_Outro1", 1) == 0 &&
-                                    NewCutScene(NULL, WORLD->cutscene_sys, "Ep1_Podsprint_Outro1", 1) == 0) {
-                                    CompleteLevel(world);
-                                }
                             }
                         }
                     }

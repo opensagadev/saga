@@ -15,6 +15,8 @@
 
 #include "decomp.h"
 
+#include <string.h>
+
 struct VuMtx;
 
 class NuSoundLoader;
@@ -348,6 +350,47 @@ class NuSoundVoiceFactoryList {
     NuSoundVoiceFactory *GetFactory(NuSoundStreamDesc::DataFormat format);
 };
 
+// The sound system's scratch memory manager callbacks: AllocatePage hands the
+// preallocated scratch block over once, and the dump hooks write to a file.
+class NuSoundSystemCallbacks : public NuMemoryManager::IEventHandler {
+  public:
+    NuSoundSystemCallbacks() : scratch(NULL) {
+    }
+
+    virtual bool AllocatePage(NuMemoryManager *manager, u32 size, u32 _unknown) {
+        (void)size;
+        (void)_unknown;
+        if (scratch == NULL) {
+            return false;
+        }
+        manager->AddPage(scratch, scratch_size, false);
+        scratch = NULL;
+        return true;
+    }
+    virtual bool ReleasePage(NuMemoryManager *manager, void *ptr, u32 _unknown) {
+        (void)manager;
+        (void)ptr;
+        (void)_unknown;
+        return false;
+    }
+    virtual bool OpenDump(NuMemoryManager *manager, const char *filename, u32 &id) {
+        (void)manager;
+        id = NuFileOpen(const_cast<char *>(filename), static_cast<NUFILEMODE>(1));
+        return id != 0;
+    }
+    virtual void CloseDump(NuMemoryManager *manager, u32 id) {
+        (void)manager;
+        NuFileClose(id);
+    }
+    virtual void Dump(NuMemoryManager *manager, u32 id, const char *msg) {
+        (void)manager;
+        NuFileWrite(id, const_cast<char *>(msg), strlen(msg));
+    }
+
+    void *scratch;
+    u32 scratch_size;
+};
+
 class NuSoundSystem {
   public:
     static void operator delete(void *allocation) {
@@ -437,28 +480,7 @@ class NuSoundSystem {
         return s_staticInstance;
     }
 
-    static struct : NuMemoryManager::IEventHandler {
-        u32 unknown;
-        void *scratch;
-        u32 scratch_size;
-
-        virtual bool AllocatePage(NuMemoryManager *manager, u32 size, u32 _unknown) {
-            (void)size;
-            (void)_unknown;
-            if (scratch == NULL) {
-                return false;
-            }
-            manager->AddPage(scratch, scratch_size, false);
-            scratch = NULL;
-            return true;
-        }
-        virtual bool ReleasePage(NuMemoryManager *manager, void *ptr, u32 _unknown) {
-            (void)manager;
-            (void)ptr;
-            (void)_unknown;
-            return false;
-        }
-    } g_handler;
+    static NuSoundSystemCallbacks g_handler;
 
     static NuMemoryManager *sScratchMemMgr;
 
@@ -690,3 +712,5 @@ class NuSoundOutOfMemCallback {
     virtual bool ReleaseMemory(u32 size) = 0;
     virtual bool CompactMemory(u32 size) = 0;
 };
+
+void NuSoundInitDefaultRoutingTables(void);

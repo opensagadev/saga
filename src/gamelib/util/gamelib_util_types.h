@@ -231,19 +231,33 @@ struct NetChangedReplicator : NetReplicator {
 struct NetConstReplicator : NetReplicator {
     i32 AllowPush(EdClass const *, void const *, ReplicatorData &, i32, i32) override;
 };
-struct NetMessage {
-    struct MessageData {
-        u8 bytes[0x4b0];
-        u32 references;
-    };
-    static MessageData sm_poolMessageData[512];
+template <u32 SIZE> struct TData {
+    u8 bytes[SIZE];
+    u32 references;
+
+    TData() : references(0) {}
+};
+template <typename T, u32 COUNT> struct TPool {
+    T items[COUNT];
+
+    ~TPool() {
+        for (T *entry = items; entry != items + COUNT; ++entry) {
+            if (entry->references != 0) {
+                entry->references = 0;
+            }
+        }
+    }
+};
+struct __attribute__((aligned(16))) NetMessage {
+    typedef TData<0x4b0> MessageData;
+    static TPool<MessageData, 512> sm_poolMessageData;
     i32 swap_endianness;
     MessageData *data;
     u32 read_offset;
     u32 write_offset;
 
     NetMessage() : swap_endianness(1), data(NULL), read_offset(0x20), write_offset(0x20) {
-        for (MessageData *entry = sm_poolMessageData; entry != sm_poolMessageData + 512; ++entry) {
+        for (MessageData *entry = sm_poolMessageData.items; entry != sm_poolMessageData.items + 512; ++entry) {
             if (entry->references == 0) {
                 data = entry;
                 entry->references = 1;

@@ -7,7 +7,7 @@
 #include <new>
 
 i16 Placeable::CurrentLedFile;
-PlaceableHelper thePlaceableHelper;
+extern PlaceableHelper thePlaceableHelper;
 extern ClassEditor theClassEditor;
 extern eduiiattr_s EdLevelAttr;
 extern i32 EdLevelFnt;

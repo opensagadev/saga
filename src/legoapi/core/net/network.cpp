@@ -14,8 +14,8 @@ extern EdRegistry theRegistry;
 static inline void CloneMessageData(NetMessage &message) {
     NetMessage::MessageData *new_data = NULL;
     for (i32 i = 0; i < 512; ++i) {
-        if (NetMessage::sm_poolMessageData[i].references == 0) {
-            new_data = &NetMessage::sm_poolMessageData[i];
+        if (NetMessage::sm_poolMessageData.items[i].references == 0) {
+            new_data = &NetMessage::sm_poolMessageData.items[i];
             new_data->references = 1;
             break;
         }

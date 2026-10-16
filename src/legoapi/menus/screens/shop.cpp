@@ -333,9 +333,10 @@ void SelectSubItem() {
 i32 SelectShopItem(shopitem_s *items, i32 index) {
     shopitem_s *item = &items[index];
     char event[128];
+    i32 id, area;
     switch (item->type) {
         case 0: {
-            const i32 id = static_cast<u16>(item->item_id);
+            id = static_cast<u16>(item->item_id);
             if (item->unlocked == 1 || item->price == 0)
                 return 1;
             if (!CheckCash(items, index))
@@ -343,11 +344,10 @@ i32 SelectShopItem(shopitem_s *items, i32 index) {
             AddToCompletionPoints(POINTS_PER_HINT);
             if (HINT_s *hint = Hint_FindHint(HintTab[id]))
                 hint->flags |= HINT_SHOP_PURCHASED;
-            BuyShopItem(items, index, 1);
-            return 1;
+            goto buy;
         }
         case 1: {
-            const i32 id = static_cast<u16>(item->item_id);
+            id = static_cast<u16>(item->item_id);
             if (item->unlocked == 1 || id >= CHARCOUNT)
                 return 0;
             if (!CollectIDUnlocked(id))
@@ -363,10 +363,10 @@ i32 SelectShopItem(shopitem_s *items, i32 index) {
             return 1;
         }
         case 2: {
-            const i32 id = static_cast<u16>(item->item_id);
+            id = static_cast<u16>(item->item_id);
             if (item->unlocked == 1 || ((Game.extra_purchased_bits[id >> 5] >> (id & 31)) & 1))
                 return 0;
-            const i32 area = static_cast<i8>(Cheat[id].area);
+            area = static_cast<i8>(Cheat[id].area);
             if (area != -1 && !Game.area_save[area].red_brick_collected)
                 goto locked;
             if (!CheckCash(items, index))
@@ -389,6 +389,7 @@ i32 SelectShopItem(shopitem_s *items, i32 index) {
             AddToGoldBricks();
             sprintf(event, "hubshop_buygoldbrick_%i", index + 1);
             NuIOS_RecordFlurryEvent(event);
+        buy:
             BuyShopItem(items, index, 1);
             return 1;
         case 5:

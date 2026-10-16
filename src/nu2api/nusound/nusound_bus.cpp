@@ -1,23 +1,9 @@
 #include "nu2api/nusound/nusound_bus.hpp"
-
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nusound/nusound_system.hpp"
-
 #include <string.h>
-
 const char *NuSoundBus::GetName() {
     return this->name;
-}
-
-NuSoundBus *NuSoundSystem::GetBus(const char *name) {
-    NuSoundBus *bus = bus_list.Front();
-    NuSoundBus *end = bus_list.End();
-    for (; bus != end; bus = reinterpret_cast<NuSoundBus **>(bus)[1]) {
-        if (NuStrICmp(bus->GetName(), name) == 0) {
-            return bus;
-        }
-    }
-    return NULL;
 }
 
 NuSoundBus::NuSoundBus(const char *name, bool is_master) {

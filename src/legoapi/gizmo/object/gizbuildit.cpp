@@ -356,9 +356,11 @@ GIZBUILDIT_s *GizBuildIt_FindNearest(WORLDINFO_s *world, GameObject_s *player, B
     GIZBUILDIT_s *buildit = system->buildits;
     for (i32 i = 0; i < world->giz_buildit_sys->count; ++i, ++buildit) {
         if (mode != BUILDIT_FIND_ANY) {
-            if ((buildit->availability_flags & GIZBUILDIT_AVAILABILITY_VISIBLE) == 0 ||
-                (buildit->availability_flags & GIZBUILDIT_AVAILABILITY_ACTIVE) == 0 ||
-                ((buildit->state_flags & 0x80) != 0 && shadow == 0))
+            if ((buildit->availability_flags & GIZBUILDIT_AVAILABILITY_VISIBLE) == 0)
+                continue;
+            if ((buildit->availability_flags & GIZBUILDIT_AVAILABILITY_ACTIVE) == 0)
+                continue;
+            if ((buildit->state_flags & 0x80) != 0 && shadow == 0)
                 continue;
             if (mode == BUILDIT_FIND_AVAILABLE) {
                 if (buildit->build_state != 0 || LEGOCONTEXT_BUILDIT == -1)

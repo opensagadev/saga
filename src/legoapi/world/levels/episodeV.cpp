@@ -1433,7 +1433,6 @@ static void Asteroids_Reset(WORLDINFO_s *world) {
                 i32 max_speed = maxrotspd[asteroid_type];
                 asteroid->rotation_speed_x = static_cast<i16>(qrand() / ~(0xffff / (max_speed * 2)) + max_speed);
                 asteroid->rotation_speed_y = static_cast<i16>(qrand() / ~(0xffff / (max_speed * 2)) + max_speed);
-                asteroid->rotation_speed_z = static_cast<i16>(qrand() / ~(0xffff / (max_speed * 2)) + max_speed);
                 ++nasteroids;
             }
         }

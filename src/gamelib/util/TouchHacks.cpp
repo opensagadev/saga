@@ -109,8 +109,12 @@ bool TouchHacks::CanThrowBountyBomb(GameObject_s &object) {
     return context == 6 || context == -1 || context == 7 || (CInfo[context].flags & 4) != 0;
 }
 
+// The original advances the probe position with one packed vector store.
+typedef f32 LandingProbeVec4 __attribute__((vector_size(16)));
+
 bool TouchHacks::CheckJumpForLandingSpot(GameObject_s &object, float maximum_drop) {
-    VuVec position(object.apiobj.position.x, object.apiobj.position.y, object.apiobj.position.z, 1.0f);
+    VuVec position __attribute__((aligned(16)))(object.apiobj.position.x, object.apiobj.position.y,
+                                                object.apiobj.position.z, 1.0f);
     const f32 minimum_height = object.apiobj.position.y - maximum_drop;
     const GAMECHARACTERDATA *character = object.apiobj.character_data->game_character;
     const f32 step_x = object.apiobj.velocity.x * 0.2f;
@@ -130,7 +134,7 @@ bool TouchHacks::CheckJumpForLandingSpot(GameObject_s &object, float maximum_dro
                 }
             }
         }
-        position = next;
+        *reinterpret_cast<LandingProbeVec4 *>(&position) = (LandingProbeVec4){next.x, next.y, next.z, 0.0f};
         vertical_velocity += character->gravity * 0.2f;
     }
     return false;

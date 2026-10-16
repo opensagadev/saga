@@ -235,7 +235,14 @@ struct NUGCUTSCENE_s {
     char *filename;
     NUGCUTSCENE_s *stream_buffer_0;
     NUGCUTSCENE_s *stream_buffer_1;
-    u32 flags;
+    union {
+        u32 flags;
+        struct {
+            u32 flags_low : 3;
+            u32 swap_on_first_stream : 1; // flags & 8
+            u32 flags_high : 28;
+        };
+    };
     i32 stream_buffer_size;
     union {
         u32 field_40;
@@ -328,19 +335,32 @@ struct instNUGCUTSCENE_s {
         struct {
             u32 flags_88_word_low : 13;
             i32 repeat_count : 5;
-            u32 flags_88_word_high : 14;
+            u32 flags_88_word_mid : 9;
+            // The background loader updates these through volatile word-sized read-modify-write accesses.
+            volatile u32 stream_loaded : 1;      // flags_8b & 0x08
+            volatile u32 stream_common_copy : 1; // flags_8b & 0x10
+            u32 flags_88_word_high : 3;
         };
     };
     union {
-        u8 flags_8c;
         struct {
-            u8 flags_8c_low : 6;
-            u8 wait_at_end : 1;
-            u8 flags_8c_high : 1;
+            union {
+                u8 flags_8c;
+                struct {
+                    u8 flags_8c_low : 6;
+                    u8 wait_at_end : 1;
+                    u8 flags_8c_high : 1;
+                };
+            };
+            u8 flags_8d;
+            u8 pad_8e[2];
+        };
+        struct {
+            u32 flags_8c_word_low : 7;
+            volatile u32 stream_loading : 1; // flags_8c & 0x80
+            u32 flags_8c_word_high : 24;
         };
     };
-    u8 flags_8d;
-    u8 pad_8e[2];
     f32 current_frame;
     f32 render_frame;
     f32 rate;

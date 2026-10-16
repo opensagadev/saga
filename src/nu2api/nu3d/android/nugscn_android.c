@@ -261,27 +261,30 @@ extern "C" void NuGScnRestoreTIDsPS(NUGSCN *scene) {
 }
 
 static void PreWarmGeomsAndBakeVAOs(nudisplayscene_s *scene, nunativegscene_s *) {
-    for (i32 clip_index = 0; clip_index < scene->nclip_objects; ++clip_index) {
-        u8 *clip = reinterpret_cast<u8 *>(&scene->clip_objects[clip_index]);
-        u32 *materials = *reinterpret_cast<u32 **>(clip + 4);
-        u32 nitems = *reinterpret_cast<u32 *>(clip);
-        i32 *items = *reinterpret_cast<i32 **>(clip + 8);
-        for (u32 item_index = 0; item_index < nitems; ++item_index) {
-            NUDISPLAYLISTITEM *item = &scene->items[items[item_index]];
+    for (u32 clip_index = 0; clip_index < static_cast<u32>(scene->nclip_objects); ++clip_index) {
+        NUCLIPOBJECT *clip = &scene->clip_objects[clip_index];
+        for (u32 item_index = 0; item_index < static_cast<u32>(clip->nmaterials); ++item_index) {
+            i32 material_index = clip->material_ids[item_index];
+            i32 list_index = clip->indices[item_index];
+            NUDISPLAYLISTITEM *item = &scene->items[list_index];
             if (item->type != 0x8f) {
-                g_boundMaterial = scene->mtls[materials[item_index]];
-                g_LastMtl = g_boundMaterial;
-                u8 vertex_flags = reinterpret_cast<u8 *>(&g_boundMaterial->shader_desc.vtx_desc)[2];
-                if ((vertex_flags & 0x10) != 0) {
+                void *geom = item->next;
+                BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x216);
+                numtl_s *mtl = scene->mtls[material_index];
+                g_boundMaterial = mtl;
+                g_LastMtl = mtl;
+                if (mtl->shader_desc.vtx_desc.unknown_2_16) {
                     g_boundVertexFormat = reinterpret_cast<usize>(g_nuDebrisVertexFormat);
+                } else if (mtl->shader_desc.vtx_desc.unknown_2_32) {
+                    g_boundVertexFormat = reinterpret_cast<usize>(g_nuFaceOnVertexFormat);
                 } else {
-                    if ((vertex_flags & 0x20) == 0) {
-                        NuIOS_SetVertexFormat(reinterpret_cast<usize>(g_boundMaterial->vertex_decl));
-                    } else {
-                        g_boundVertexFormat = reinterpret_cast<usize>(g_nuFaceOnVertexFormat);
-                    }
+                    NuIOS_SetVertexFormat(reinterpret_cast<usize>(mtl->vertex_decl));
                 }
-                NuIOSDLPreWarmGeomCallback(item->next);
+                NuIOSDLPreWarmGeomCallback(geom);
+                EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x22f);
+                if (bgProcIsBgThread() != 0) {
+                    NuIOS_YieldThread();
+                }
             }
         }
     }

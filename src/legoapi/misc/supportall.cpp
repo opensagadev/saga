@@ -1,3 +1,6 @@
+#if defined(__SSE__)
+#include <xmmintrin.h>
+#endif
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nuprim_internal.h"
 #include "legoapi/misc/supportall.h"
@@ -925,9 +928,13 @@ i32 RndrUnfilledCircle(f32 x, f32 y, f32 radius, f32 border_width, f32 aspect, i
     const f32 segments = progress * 360.0f;
     // Retail CVTTSS2SI returns integer-indefinite for unordered/out-of-range
     // inputs. The touch widgets actually pass packed colours as progress;
-    // preserve that no-segment result without an undefined C++ conversion.
+    // the intrinsic keeps that no-segment result well defined.
+#if defined(__SSE__)
+    const i32 segment_count = _mm_cvtt_ss2si(_mm_set_ss(segments));
+#else
     const i32 segment_count =
         segments >= -2147483648.0f && segments < 2147483648.0f ? static_cast<i32>(segments) : INT_MIN;
+#endif
     if (segment_count >= 0) {
         f32 angle = 0.0f;
         for (i32 segment = 0; segment <= segment_count; ++segment, angle += 0.017455555f) {

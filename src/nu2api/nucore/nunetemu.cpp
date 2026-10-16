@@ -261,8 +261,7 @@ i32 NuNetEmu::SplitSendPacket(NuNetEmu::EmuPacket *packet) {
 }
 
 static inline f32 NetEmuUnsignedFloat(u32 value) {
-    return static_cast<f32>(static_cast<i32>(value >> 16)) * 65536.0f +
-           static_cast<f32>(static_cast<i32>(value & 0xffff));
+    return static_cast<f32>(value);
 }
 
 void NuNetEmu::Update() {

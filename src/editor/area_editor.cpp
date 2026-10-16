@@ -233,9 +233,9 @@ void areaEditor_Render(i32 x, i32 y, f32, f32) {
     if (area_hovered() != NULL) {
         if (area_hovered() != area_selected()) {
             NuQFntPrintEx(system_qfont, text_x, (y + 30) * 8, 16, "X - Select area");
-            NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "SELECT - Goto nearest");
+            NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "SELECT - Select nearest");
         } else {
-            NuQFntPrintEx(system_qfont, text_x, (y + 30) * 8, 16, "X - Move selected");
+            NuQFntPrintEx(system_qfont, text_x, (y + 30) * 8, 16, "X - Move selected/Adjust size");
             if ((aieditor->pad_buttons & 0x40) != 0) {
                 if (area_hovered()->flags & 1) {
                     NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "LRIGHT/LLEFT - Adjust Radius");

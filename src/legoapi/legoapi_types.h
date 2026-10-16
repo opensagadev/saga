@@ -1098,6 +1098,9 @@ struct EdTool {
     virtual void Render() {
     }
 
+    EdTool() : next(NULL), previous(NULL) {
+    }
+
     EdTool *next;
     EdTool *previous;
 };
@@ -4048,14 +4051,6 @@ struct CursorTool : EdTool {
     i32 Process(EdInputContext &) override;
     void Render() override;
 };
-struct SplineTool : EdTool {
-    void Initialise(variptr_u &, variptr_u &, i32) override;
-    const char *GetName() override {
-        return "Spline Tool";
-    }
-    i32 Process(EdInputContext &) override;
-    void Render() override;
-};
 struct Fade : FadeBase {
     FADETYPE_VALUE GetFadeType() const override;
     void DrawFade();
@@ -5782,6 +5777,14 @@ struct PropertyTool : EdTool {
     void ediMenuRetrieveMetrics(eduimenu_s *);
     void ediMenuStoreMetrics(eduimenu_s *);
 };
+struct SplineTool : PropertyTool {
+    void Initialise(variptr_u &, variptr_u &, i32) override;
+    const char *GetName() override {
+        return "Spline Tool";
+    }
+    i32 Process(EdInputContext &) override;
+    void Render() override;
+};
 DECOMP_ASSERT(sizeof(PropertyTool) == 0x4c, "PropertyTool ABI");
 DECOMP_ASSERT(offsetof(PropertyTool, active_menu) == 0xc, "PropertyTool menu list offset");
 DECOMP_ASSERT(offsetof(PropertyTool, selected_attr) == 0x2c, "PropertyTool selected attributes offset");
@@ -5834,6 +5837,14 @@ struct SceneObjectHelper {
         class_interface.vtable = const_cast<EdClassInterfaceVTable *>(&sceneObjectHelperVTable.methods);
         *reinterpret_cast<void **>(&subsystem) =
             const_cast<void *>(static_cast<void const *>(&sceneObjectHelperVTable.subsystem_methods));
+        class_interface.object_class = NULL;
+        scene_id = -1;
+        subsystem.next = NULL;
+        subsystem.previous = NULL;
+        owned_first = NULL;
+        owned_last = NULL;
+        owned_object_count = 0;
+        show_hidden_wire = 1;
     }
     ~SceneObjectHelper();
 

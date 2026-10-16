@@ -4228,22 +4228,6 @@ void Game_WorldInfo_InitMenu(WORLDINFO_s *world, i32 *menu_id, i32 *) {
     }
 }
 
-void GameObjectToCameraDistances() {
-    const NUVEC camera_position = GameCam->pos;
-    GameObject_s *object = Obj;
-    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index, ++object) {
-        const u16 required_flags = APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER;
-        if ((object->apiobj.field_0x1f8 & required_flags) != required_flags) {
-            continue;
-        }
-
-        const f32 dx = camera_position.x - object->apiobj.position.x;
-        const f32 dy = camera_position.y - object->apiobj.position.y;
-        const f32 dz = camera_position.z - object->apiobj.position.z;
-        object->ai_update_distance = NuFsqrt(dx * dx + dy * dy + dz * dz);
-    }
-}
-
 extern GameObject_s *alert_obj;
 extern NUVEC alert_pos;
 extern f32 alert_timer;
@@ -6242,6 +6226,22 @@ i32 GameObjectNearFloor(GameObject_s *object, f32 height, f32 *distance) {
         *distance = no_floor_height;
     }
     return 0;
+}
+
+void GameObjectToCameraDistances() {
+    const NUVEC camera_position = GameCam->pos;
+    GameObject_s *object = Obj;
+    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index, ++object) {
+        const u16 required_flags = APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER;
+        if ((object->apiobj.field_0x1f8 & required_flags) != required_flags) {
+            continue;
+        }
+
+        const f32 dx = camera_position.x - object->apiobj.position.x;
+        const f32 dy = camera_position.y - object->apiobj.position.y;
+        const f32 dz = camera_position.z - object->apiobj.position.z;
+        object->ai_update_distance = NuFsqrt(dx * dx + dy * dy + dz * dz);
+    }
 }
 
 extern "C" {

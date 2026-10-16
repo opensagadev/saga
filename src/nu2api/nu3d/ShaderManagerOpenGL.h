@@ -66,6 +66,7 @@ template <typename T> struct ShaderManagerTemplate {
     }
     virtual void adaptShaderMaterialForShaderVersion(nushadermtldesc_s *) {
     }
+    void *retrieveShader(nushadermtldesc_s *desc, numtl_s *mtl, i32 variant, i32 flags_in, bool pixel_stage);
 };
 template <typename T> f32 ShaderManagerTemplate<T>::shininessFactor = 1.0f;
 

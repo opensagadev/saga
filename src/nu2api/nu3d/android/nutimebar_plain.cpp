@@ -270,8 +270,7 @@ extern "C" void NuQFntPrintEx(NUQFNT *font, i32 x, i32 y, i32 alignment, const c
 
 static f32 timebar_unsigned_float(u32 value) {
     // Preserve the retail conversion for values whose sign bit is set.
-    return static_cast<f32>(static_cast<i32>(value & 0xffff)) +
-           static_cast<f32>(static_cast<i32>(value >> 16)) * 65536.0f;
+    return static_cast<f32>(value);
 }
 
 extern "C" void NuTimeBarSetRenderHorizontal(i32 set) {

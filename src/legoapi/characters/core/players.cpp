@@ -209,9 +209,9 @@ void Players_Init(void) {
     if (p[0] != NULL) {
         COINPACKET *cp = p[0]->coinpacket = CoinPacket;
         cp->lastcoin = LEGOOBJ_DEFAULTLASTCOIN;
-        u32 coins = PlayerProgress[0].coins;
-        if (Area != last_area) {
-            coins = 0;
+        u32 coins = 0;
+        if (Area == last_area) {
+            coins = PlayerProgress[0].coins;
         }
         cp->coins = coins;
         p[0]->gizforce_los_info = GizForceLOSInfo;
@@ -230,8 +230,8 @@ void Players_Init(void) {
         memcpy(BackUpPlayers + 0x439, p[1], 0x439 * 4);
     }
 
-    i32 id0 = (p[0] != NULL) ? p[0]->id : -1;
     i32 id1 = (p[1] != NULL) ? p[1]->id : -1;
+    i32 id0 = (p[0] != NULL) ? p[0]->id : -1;
     RememberPlayerIDs(0, id0, id1);
 }
 

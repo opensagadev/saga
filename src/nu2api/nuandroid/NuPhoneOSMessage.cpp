@@ -1,4 +1,5 @@
 #include "nu2api/nuandroid/nuphoneos.h"
+#include "nu2api/nucore/nuvuvec.hpp"
 
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nuthreadqueue.h"

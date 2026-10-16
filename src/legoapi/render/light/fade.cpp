@@ -26,12 +26,12 @@ extern i32 wait_till_next_frame;
 extern void DrawFadeScreenWipe(void);
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 
+extern NUMTL *ScreenFadeMtl;
+extern NUMTL *FadeMtl2;
+extern NUMTL *FadeMtl;
+
 static u32 FRAMES_TO_WAIT = 1;
 
-// Material handles used by the original 2-D fade paths.
-NUMTL *ScreenFadeMtl;
-NUMTL *FadeMtl2;
-NUMTL *FadeMtl;
 
 void FadeStillWipe::DrawFade() {
     if (wait_till_next_frame != 0)
@@ -176,11 +176,8 @@ void SetFramesToWait(u32 frames) {
     FRAMES_TO_WAIT = frames;
 }
 
-SCALAR_FN void FadeSystem::Init() {
-    fades[0] = NULL;
-    fades[1] = NULL;
-    fades[2] = NULL;
-    fades[3] = NULL;
+void FadeSystem::Init() {
+    memset(fades, 0, sizeof(fades));
     field_28 = 1;
     pending_type = FADE_TYPE_NONE;
 }
@@ -240,102 +237,4 @@ SCALAR_FN i32 FadeSystem::SetFade(FADETYPE const &t, u32 frames) {
     }
     pending_type = FADE_TYPE_NONE;
     return 0;
-}
-
-nugscn_s *FadeLoop_ObjScene;
-nuhspecial_s FadeLoop_ObjHSpecial;
-
-void FadeLoop_SetObj(nugscn_s *scene, char *name) {
-    FadeLoop_ObjScene = scene;
-    if (scene != NULL && NuSpecialFind(scene, &FadeLoop_ObjHSpecial, name, 1) == 0) {
-        FadeLoop_ObjScene = NULL;
-    }
-}
-
-SCALAR_FN void FadeLoop_DrawObj(float alpha) {
-    if (FadeLoop_ObjScene != NULL && NuSpecialExistsFn(&FadeLoop_ObjHSpecial)) {
-        NUVEC scale = {0.125f, 0.125f, 0.125f};
-        NUMTX_ALIGNED16 matrix;
-        NuMtxSetScale(&matrix, &scale);
-        matrix.m32 = 1.0f;
-        NuSpecialDrawAtAlpha(&FadeLoop_ObjHSpecial, &matrix, alpha);
-    }
-}
-
-SCALAR_FN i32 FadeLoop_UsingObj() {
-    return FadeLoop_ObjScene != NULL;
-}
-
-void CreateFadeMaterials() {
-    FadeMtl = NuMtlCreate(1);
-    FadeMtl->attribs.z_mode = 3;
-    FadeMtl->attribs.alpha_mode = 3;
-    FadeMtl->attribs.unknown_2_1_2 = 2;
-    FadeMtl->attribs.unknown_1_1_2 = 1;
-    FadeMtl->attribs.unknown_1_4_8 = 1;
-    FadeMtl->attribs.unknown_2_4 = 1;
-    FadeMtl->attribs.filter_mode = 1;
-    NuMtlUpdate(FadeMtl);
-
-    FadeMtl2 = NuMtlCreate(1);
-    FadeMtl2->attribs.z_mode = 3;
-    FadeMtl2->attribs.alpha_mode = 1;
-    FadeMtl2->attribs.unknown_2_1_2 = 2;
-    FadeMtl2->attribs.unknown_1_1_2 = 1;
-    FadeMtl2->attribs.unknown_1_4_8 = 1;
-    FadeMtl2->attribs.unknown_2_4 = 1;
-    FadeMtl2->attribs.filter_mode = 1;
-    NuMtlUpdate(FadeMtl2);
-
-    ScreenFadeMtl = NuMtlCreate(1);
-    ScreenFadeMtl->opacity = 1.0f;
-    ScreenFadeMtl->tex_id = 0;
-    ScreenFadeMtl->sort_pri = 0x7ffe;
-    ScreenFadeMtl->attribs.z_mode = 3;
-    ScreenFadeMtl->attribs.unknown_1_1_2 = 1;
-    ScreenFadeMtl->attribs.unknown_2_1_2 = 2;
-    ScreenFadeMtl->attribs.unknown_2_4 = 1;
-    ScreenFadeMtl->attribs.unknown_1_4_8 = 1;
-    ScreenFadeMtl->attribs.alpha_mode = 1;
-    ScreenFadeMtl->attribs.filter_mode = 1;
-    NuMtlUpdate(ScreenFadeMtl);
-}
-
-SCALAR_FN void FadeLoop(char *text, i32 direction, float duration, void (*draw)(float)) {
-    f32 alpha = 0.0f;
-    f32 target = 1.0f;
-    if (direction != 0) {
-        alpha = 1.0f;
-        target = 0.0f;
-    }
-    f32 rate = 10.0f;
-    if (duration != 0.0f) {
-        rate = 1.0f / duration;
-    }
-    FRAMETIME = DEFAULTFRAMETIME;
-    while (alpha != target) {
-        NuFrameBegin();
-        alpha = SeekLinearF(alpha, target, rate * FRAMETIME);
-        NuRndrBeginScene(-1);
-        NuRndrClear(0xb00, 0, 1.0f);
-        if (FadeLoop_ObjScene != NULL) {
-            FadeLoop_DrawObj(alpha);
-        }
-        if (text != NULL) {
-            SetQFont2D();
-            Text3D(text, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0, static_cast<u8>(alpha * 0.0f),
-                   static_cast<u8>(alpha * 191.0f), static_cast<u8>(alpha * 255.0f));
-        }
-        if (draw != NULL) {
-            draw(alpha);
-        }
-        NuRndrEndScene();
-        edGraEnableTerrainSwap();
-        FRAMETIME = NuFrameEnd();
-        edGraDisableTerrainSwap();
-    }
-    if (direction == 1) {
-        FadeLoop_SetObj(NULL, NULL);
-        FinishLoop(2);
-    }
 }

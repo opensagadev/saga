@@ -30,7 +30,6 @@
 
 using nu2api::HashRedirect;
 using nu2api::LoadedUniqueShaderRecord;
-using nu2api::ShaderMtlDescFilterPlain;
 
 void *g_shaderManager = nullptr;
 char g_shaderSaveFolder[256] = "shaders";
@@ -65,9 +64,6 @@ namespace nu2api {
     inline ShaderManagerStorage *Manager() {
         return static_cast<ShaderManagerStorage *>(g_shaderManager);
     }
-    inline NUSHADEROBJECT *SlotPtr(i32 id) {
-        return &Manager()->slots[id];
-    }
     inline i32 &SlotRefCount(NUSHADEROBJECT *slot) {
         return slot->glsl.base.field1;
     }
@@ -77,9 +73,6 @@ namespace nu2api {
     inline GLuint &SlotGlProgram(NUSHADEROBJECT *slot) {
         return slot->glsl.program;
     }
-    inline i32 &ManagerLastAllocated() {
-        return Manager()->last_allocated;
-    }
     inline NUSHADEROBJECT *&ManagerBoundSlot() {
         return Manager()->bound_slot;
     }
@@ -88,211 +81,6 @@ namespace nu2api {
     extern "C" void glUniform2fv(GLint, GLsizei, const GLfloat *);
     extern "C" void glUniform3fv(GLint, GLsizei, const GLfloat *);
     extern "C" void glUniform4fv(GLint, GLsizei, const GLfloat *);
-
-} // namespace nu2api
-
-namespace nu2api {
-
-    // ---------------------------------------------------------------------------
-    // Material filter helpers
-    // ---------------------------------------------------------------------------
-
-    static bool FilterHasDiffuseMap(const ShaderMtlDescFilterPlain *filter, i32 which) {
-        const bool extended = (filter->variant == 0) || (filter->desc->unknown_1b4 != 0);
-        if (!extended) {
-            return false;
-        }
-        const i32 threshold = filter->param4;
-        switch (which) {
-            case 0:
-                return threshold < filter->desc->diffuse_map_tex_id[0];
-            case 1:
-                return threshold < filter->desc->diffuse_map_tex_id[1];
-            case 2:
-                return threshold < filter->desc->diffuse_map_tex_id[2];
-            case 3:
-                return threshold < filter->desc->diffuse_map_tex_id[3];
-            default:
-                return false;
-        }
-    }
-
-    static bool FilterHasLayer(const ShaderMtlDescFilterPlain *filter, i32 layer) {
-        const NUSHADERMTLDESC &d = *filter->desc;
-        if (filter->variant == 0) {
-            switch (layer) {
-                case 0:
-                    return true;
-                case 1:
-                    return (d.flagsbits_1b8 & 0x40) != 0 && d.blend_op2 != 0xff;
-                case 2:
-                    return (static_cast<i8>(d.flagsbits_1b8) < 0) && d.blend_op3 != 0xff;
-                case 3:
-                    return (d.byte4 & 1) != 0 && d.blend_op4 != 0xff;
-                default:
-                    return false;
-            }
-        }
-        // Variant path only cares about layer 0.
-        return layer == 0 && (d.unknown_1b4 & 1) != 0;
-    }
-
-    static u32 FilterGetVertexFlags(const ShaderMtlDescFilterPlain *filter) {
-        const NUSHADERMTLDESC *d = filter->desc;
-        const u8 *vb = reinterpret_cast<const u8 *>(&d->vtx_desc);
-
-        const u8 attr0 = vb[1]; // 0x13D – texture unit count + low bit
-        const u8 attr1 = vb[2]; // 0x13E – packed vertex attribute flags
-        const u8 attr2 = vb[3]; // 0x13F – additional attribute bits
-
-        const bool hasPackedPair = (attr1 & 3) != 0;
-        const bool hasExtendedPair = (attr1 & 0x40) != 0;
-        const u8 texUnitCount = (attr0 >> 1) & 3;
-        const bool extended = (filter->variant == 0) || (d->unknown_1b4 != 0);
-
-        u32 flags = (attr1 >> 2) & 1;
-        if (hasPackedPair && !hasExtendedPair) {
-            flags |= 2;
-        }
-
-        if (extended) {
-            if (texUnitCount != 0) {
-                flags |= 4;
-            }
-            if (texUnitCount >= 2) {
-                flags |= 8;
-            }
-            if (texUnitCount == 3) {
-                flags |= 0x10;
-            }
-        }
-
-        if (hasPackedPair && hasExtendedPair) {
-            flags |= 0x40;
-        }
-        if (attr1 & 8) {
-            flags |= 0x80;
-        }
-        if (attr2 & 1) {
-            flags |= 0x100;
-        }
-        if (attr2 & 2) {
-            flags |= 0x400;
-        }
-
-        if (extended) {
-            if (static_cast<i8>(d->flagsbits_1bb) < 0) {
-                flags |= 0x800;
-            }
-            if (attr0 & 1) {
-                flags |= 0x1000;
-            }
-        }
-        return flags;
-    }
-
-    // ---------------------------------------------------------------------------
-    // Filter initialisation
-    // ---------------------------------------------------------------------------
-
-    static void FilterInternalInit(ShaderMtlDescFilterPlain *filter, const NUSHADERMTLDESC *desc, const void *mtl,
-                                   i32 flagsIn, i32 param4) {
-        const u8 *mtlBytes = reinterpret_cast<const u8 *>(mtl);
-
-        filter->mtl = mtl;
-        filter->param4 = param4;
-        filter->desc = desc;
-        filter->flags_in = flagsIn;
-        filter->variant = flagsIn & 3;
-
-        const bool hasVtxFlag4 = (reinterpret_cast<const u8 *>(&desc->vtx_desc)[2] & 4) != 0;
-        const bool hasMtlFlag40 = (mtlBytes[0x41] & 0x40) != 0;
-        const bool specialVertexPath = hasVtxFlag4 || hasMtlFlag40;
-        const bool baseVariant = filter->variant == 0;
-        const bool flag10Path = baseVariant && (flagsIn & 0x10) != 0 && !specialVertexPath;
-
-        filter->field4_0x10 = flag10Path;
-        filter->field6_0x18 = !specialVertexPath;
-
-        const bool deferredPath = baseVariant && (flagsIn & 0x20) != 0 && !specialVertexPath;
-        filter->field5_0x14 = deferredPath;
-
-        i32 layerCount = 0;
-        if (baseVariant) {
-            layerCount = (!flag10Path && (desc->flagsbits_1ba & 1) == 0) ? 1 : 2;
-        }
-        if (filter->field6_0x18 != 0) {
-            ++layerCount;
-        }
-        if (deferredPath) {
-            ++layerCount;
-        }
-        filter->field7_0x1c = layerCount;
-    }
-
-} // namespace nu2api
-
-namespace nu2api {
-
-    // ---------------------------------------------------------------------------
-    // Program creation and cache lookup
-    // ---------------------------------------------------------------------------
-
-    // ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion.  Android uses
-    // shader version 5, whose generated programs deliberately discard material
-    // features unsupported by the mobile uber-shader before the key is built.
-
-    static void *RetrieveShader(void *manager, NUSHADERMTLDESC *desc, void *mtl, i32 variant, i32 flagsIn,
-                                bool pixelStage) {
-        static_cast<ShaderManagerOpenGL *>(manager)->adaptShaderMaterialForShaderVersion(desc);
-        ShaderMtlDescFilterPlain filter{};
-        FilterInternalInit(&filter, desc, mtl, variant, flagsIn);
-        filter.variant = 0;
-        filter.field4_0x10 = 0;
-        filter.field5_0x14 = 0;
-        filter.field7_0x1c = 1;
-
-        u32 rawKey[4] = {};
-        const ::ShaderMtlDescFilter keyFilter = {filter.desc,        static_cast<const numtl_s *>(filter.mtl),
-                                                 filter.flags_in,    filter.variant,
-                                                 filter.field4_0x10, filter.field5_0x14,
-                                                 filter.field6_0x18, filter.field7_0x1c,
-                                                 filter.param4};
-        NuShaderObjectKeyGenerate3(rawKey, &keyFilter, pixelStage ? 1 : 0);
-
-        ShaderObjectKey programKey{};
-        programKey.key[0] = rawKey[0];
-        LookupHash(programKey.key[0], &programKey.key[0], g_shaderProgramRedirects, 0x1a1);
-
-        ShaderManagerStorage *storage = static_cast<ShaderManagerStorage *>(manager);
-
-        // Cache hit: bump refcount and return existing slot.
-        for (u32 id = 0; id < 0x190; ++id) {
-            NUSHADEROBJECT *slot = &storage->slots[id];
-            if (SlotProgramKey(slot) == programKey.key[0]) {
-                SlotRefCount(slot)++;
-                return slot;
-            }
-        }
-
-        // Cache miss: round-robin over the fixed slot pool.
-        const i32 last = ManagerLastAllocated();
-        for (i32 step = 1; step <= 0x190; ++step) {
-            const i32 id = (last + step) % static_cast<i32>(kSlotCount);
-            NUSHADEROBJECT *slot = &storage->slots[id];
-            if (SlotRefCount(slot) > 0) {
-                continue;
-            }
-            ManagerLastAllocated() = id;
-            if (!storage->createShader(*reinterpret_cast<const ::ShaderObjectKey *>(&programKey),
-                                       static_cast<NuShaderObject *>(slot), id)) {
-                return nullptr;
-            }
-            SlotRefCount(slot)++;
-            return slot;
-        }
-        return nullptr;
-    }
 
 } // namespace nu2api
 
@@ -408,12 +196,69 @@ extern "C" void NuShaderManagerSetShaderSaveFolder(const char *folder) {
     std::strcpy(g_shaderSaveFolder, folder);
 }
 
+// ShaderManagerTemplate<NuShaderObject>::retrieveShader.  Android uses shader
+// version 5, whose adaptShaderMaterialForShaderVersion override discards
+// material features unsupported by the mobile uber-shader before the key is built.
+::ShaderObjectKey NuIOS_GetShaderProgramKey(::ShaderObjectKey const &key);
+
+template <typename T>
+void *ShaderManagerTemplate<T>::retrieveShader(nushadermtldesc_s *desc, numtl_s *mtl, i32 variant, i32 flags_in,
+                                               bool pixel_stage) {
+    using namespace nu2api;
+    adaptShaderMaterialForShaderVersion(desc);
+    ::ShaderMtlDescFilter filter __attribute__((aligned(16)));
+    filter.internalInit(desc, mtl, variant, flags_in);
+    filter.variant = 0;
+    filter.field_0x10 = 0;
+    filter.field_0x14 = 0;
+    filter.layer_count = 1;
+
+    ::ShaderObjectKey key;
+    key.key = 0;
+    NuShaderObjectKeyGenerate3(&key.key, &filter, pixel_stage);
+    const ::ShaderObjectKey program_key = NuIOS_GetShaderProgramKey(key);
+
+    // Cache hit: bump refcount and return existing slot.
+    for (i32 id = 0; id < 0x190; ++id) {
+        T *slot = &slots[id];
+        if (SlotProgramKey(slot) == program_key.key) {
+            SlotRefCount(slot)++;
+            return slot;
+        }
+    }
+
+    // Cache miss: search for a free slot after the last allocation, then wrap.
+    const i32 last = last_allocated;
+    i32 id;
+    T *slot;
+    for (id = last + 1; id < 0x190; ++id) {
+        slot = &slots[id];
+        if (SlotRefCount(slot) <= 0)
+            goto found;
+    }
+    for (id = 0; id < last; ++id) {
+        slot = &slots[id];
+        if (SlotRefCount(slot) <= 0)
+            goto found;
+    }
+    return nullptr;
+
+found:
+    last_allocated = id;
+    NuShaderObjectUnInit(slot);
+    if (!createShader(program_key, slot, id))
+        return nullptr;
+    SlotRefCount(slot)++;
+    return slot;
+}
+
 extern "C" void *NuShaderManagerRetrieveShaderVariant(NUSHADERMTLDESC *desc, void *mtl, i32 variant) {
-    return nu2api::RetrieveShader(g_shaderManager, desc, mtl, variant, 0, false);
+    return static_cast<ShaderManagerOpenGL *>(g_shaderManager)->retrieveShader(desc, static_cast<numtl_s *>(mtl), variant, 0,
+                                                                               false);
 }
 
 extern "C" void *NuShaderManagerRetrieveShader(NUSHADERMTLDESC *desc, void *mtl) {
-    return nu2api::RetrieveShader(g_shaderManager, desc, mtl, 0, 0, false);
+    return static_cast<ShaderManagerOpenGL *>(g_shaderManager)->retrieveShader(desc, static_cast<numtl_s *>(mtl), 0, 0, false);
 }
 
 // GL uniform dispatch table — matches the original .data at 0x65e0b8.

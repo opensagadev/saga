@@ -182,9 +182,6 @@ struct KAMINO_E_s {
 DECOMP_ASSERT(sizeof(KAMINO_E_s) == 120, "Kamino E state ABI");
 static KAMINO_E_s kamino_e;
 
-static i16 gunship_bolts[2];     // gun-ship bolt type ids
-static u8 gunship_flags[0xa];    // gun-ship weapon-select flags
-static void *gunship_weapons[4]; // gun-ship gizmo weapons
 
 
 extern i16 id_PADMECLAWED, id_BATTLEDROIDSECURITY, id_SUPERBATTLEDROID, id_JARJAR, id_LUMINARA, id_SHAAKTI,
@@ -1937,23 +1934,23 @@ void JediB_Update(WORLDINFO_s *world) {
 // ===========================================================================
 
 void GunshipA_Init(WORLDINFO_s *world) {
-    gunship_bolts[1] = (i16)BoltType_FindIDByName("trooper_green", world);
-    gunship_bolts[0] = (i16)BoltType_FindIDByName("trooper_red", world);
-    gunship_flags[0] = 0;
-    gunship_flags[1] = 0;
-    gunship_flags[2] = 0;
-    gunship_flags[3] = 0;
-    gunship_flags[4] = 0;
-    gunship_flags[5] = 1;
-    gunship_flags[6] = 1;
-    gunship_flags[7] = 1;
-    gunship_flags[8] = 1;
-    gunship_flags[9] = 1;
+    trooper_boltid[1] = BoltType_FindIDByName("trooper_green", world);
+    trooper_boltid[0] = BoltType_FindIDByName("trooper_red", world);
+    trooper_side[0] = 0;
+    trooper_side[1] = 0;
+    trooper_side[2] = 0;
+    trooper_side[3] = 0;
+    trooper_side[4] = 0;
+    trooper_side[5] = 1;
+    trooper_side[6] = 1;
+    trooper_side[7] = 1;
+    trooper_side[8] = 1;
+    trooper_side[9] = 1;
     InitMiniSnowTroopers(world, 0xa, 0x20, 0);
-    gunship_weapons[0] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "power_a11");
-    gunship_weapons[1] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "power_b11");
-    gunship_weapons[2] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "power_a21");
-    gunship_weapons[3] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "power_b21");
+    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "power_a11");
+    LevGizmo[1] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "power_b11");
+    LevGizmo[2] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "power_a21");
+    LevGizmo[3] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "power_b21");
 }
 
 void GunshipA_Update(WORLDINFO_s *world) {
@@ -1961,14 +1958,11 @@ void GunshipA_Update(WORLDINFO_s *world) {
 }
 
 void GunshipA_Draw(WORLDINFO_s *world) {
-    if (TimingBarSet != 5) {
-        DrawMiniSnowTroopers(world);
-        if (TimingBarSet == 5)
-            TBCLOSEFN("mini", 5);
-    } else {
+    if (TimingBarSet == 5)
         TBOPENFN("mini", 5);
-        DrawMiniSnowTroopers(world);
-    }
+    DrawMiniSnowTroopers(world);
+    if (TimingBarSet == 5)
+        TBCLOSEFN("mini", 5);
 }
 
 void GunshipB_Reset(WORLDINFO_s *world) {

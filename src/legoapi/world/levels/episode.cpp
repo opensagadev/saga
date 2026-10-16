@@ -513,49 +513,50 @@ void SetBobaRocketTarget(MechObjectInterface *target) {
 }
 
 bool FireBountyHunterRocket(GameObject_s *object) {
-    if (object->character_context == -1) {
-        characterdata_s *data = object->apiobj.character_data;
-        if ((data->model_flags & 0x01000000) != 0 || object->field_0x108e == 6) {
-            i32 locator = data->game_character->rocket_locator;
-            if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL &&
-                (object->apiobj.field_0x27c == -1 || (object->apiobj.player_controlled && Cheat_IsOn(39)))) {
-                if (object->timer_d5c == 2.0f) {
-                    object->timer_d5c = 0.0f;
-                    FindGameMsgsWithID(2, 1, -1, NULL);
-                }
-                object->context_animation = object->apiobj.field_0x27d == 0 ? 77 : 2;
-                object->context_animation_timer =
-                    AnimDuration(object->id, object->apiobj.field_0x27d == 0 ? 77 : 2, 0.0f, 0.0f, 1);
-                object->field_0xe22 &= ~4;
-                if (object->context_animation_timer > 0.0f) {
-                    object->character_context = 20;
-                }
-                return object->character_context == 20;
-            }
-        }
+    if (object->character_context != -1)
+        return false;
+    characterdata_s *data = object->apiobj.character_data;
+    if ((data->model_flags & 0x01000000) == 0 && object->field_0x108e != 6)
+        return false;
+    i32 locator = data->game_character->rocket_locator;
+    if (locator == -1 || object->apiobj.character_model->points_of_interest[locator] == NULL)
+        return false;
+    if (object->apiobj.field_0x27c != -1) {
+        if (!object->apiobj.player_controlled)
+            return false;
+        if (!Cheat_IsOn(39))
+            return false;
     }
-    return false;
+    if (object->timer_d5c == 2.0f) {
+        object->timer_d5c = 0.0f;
+        FindGameMsgsWithID(2, 1, -1, NULL);
+    }
+    const i32 animation = object->apiobj.field_0x27d == 0 ? 77 : 2;
+    object->context_animation = object->apiobj.field_0x27d == 0 ? 77 : 2;
+    object->context_animation_timer = AnimDuration(object->id, animation, 0.0f, 0.0f, 1);
+    object->field_0xe22 &= ~4;
+    if (object->context_animation_timer > 0.0f) {
+        object->character_context = 20;
+    }
+    return object->character_context == 20;
 }
 
 static __used__ void KilledTrooperCannon(GameObject_s *object) {
     if (netclient != 0)
         return;
 
-    i32 i;
-    for (i = 0; i < 4; ++i) {
-        if (troopercannons[i].object == object)
-            break;
-    }
-
-    if (i < 4) {
-        TROOPERCANNON_s &cannon = troopercannons[i];
-        DeactivateCharacter(cannon.character_name);
-        GizBuildIt_SetToStart(cannon.buildit, 0, 0);
-        GIZMO *gizmo = GizmoFindByData(WORLD->gizmo_sys, gizbuildit_gizmotype_id, cannon.buildit);
-        GizmoActivate(WORLD->gizmo_sys, gizmo, 1, 1);
-        GizBuildit_SetVisibility(cannon.buildit, 1);
-        cannon.rebuilding = 1;
-        WORLD->level_progress->destroyed_trooper_cannon_mask |= 1u << i;
+    for (i32 i = 0; i < 4; ++i) {
+        if (troopercannons[i].object == object) {
+            TROOPERCANNON_s &cannon = troopercannons[i];
+            DeactivateCharacter(cannon.character_name);
+            GizBuildIt_SetToStart(cannon.buildit, 0, 0);
+            GIZMO *gizmo = GizmoFindByData(WORLD->gizmo_sys, gizbuildit_gizmotype_id, cannon.buildit);
+            GizmoActivate(WORLD->gizmo_sys, gizmo, 1, 1);
+            GizBuildit_SetVisibility(cannon.buildit, 1);
+            cannon.rebuilding = 1;
+            WORLD->level_progress->destroyed_trooper_cannon_mask |= 1u << i;
+            return;
+        }
     }
 }
 

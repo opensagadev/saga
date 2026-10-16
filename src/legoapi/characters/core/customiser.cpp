@@ -25,10 +25,6 @@
 #include "nu2api/nuplatform/nuplatform.h"
 #include <string.h>
 
-// The file is built with -ftree-vectorize for the VuVec initializers; the
-// functions below were compiled without it.
-#define SCALAR_FN __attribute__((optimize("omit-frame-pointer", "no-tree-vectorize")))
-
 DECOMP_ASSERT(sizeof(CUSTOMPIECERESOURCE) == 0x20, "CUSTOMPIECERESOURCE size");
 DECOMP_ASSERT(offsetof(CUSTOMPIECERESOURCE, texture_id) == 0x14, "Customiser texture offset");
 DECOMP_ASSERT(offsetof(CUSTOMPIECERESOURCE, character_model) == 0x1c, "Customiser model offset");
@@ -297,7 +293,7 @@ void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s 
     }
 }
 
-SCALAR_FN void Customiser_AddPartAccessories(CUSTOMISER *customiser, GameObject_s *object, i32 animation, i32 mode, float scale) {
+void Customiser_AddPartAccessories(CUSTOMISER *customiser, GameObject_s *object, i32 animation, i32 mode, float scale) {
     const i32 joint = object->apiobj.character_data->player_config->helmet_locator;
     if (customiser == NULL || joint == -1 || object->apiobj.character_model->points_of_interest[joint] == NULL)
         return;
@@ -334,8 +330,9 @@ SCALAR_FN void Customiser_AddPartAccessories(CUSTOMISER *customiser, GameObject_
         params.field_18 = 0.1f;
         params.gravity = -5.0f;
         params.special = special;
-        params.lighting = Cheats_CheckFlags(1) ? reinterpret_cast<PARTLIGHTSOURCE_s *>(ZeroRTL)
-                                               : reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);
+        params.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);
+        if (Cheats_CheckFlags(1) != 0)
+            params.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(ZeroRTL);
         params.flags = mode == 0 ? 0x480 : 0x90;
         params.time_step = FRAMETIME;
         params.stop_fn = PartStop_Flickerer;
@@ -418,8 +415,7 @@ void Customiser_DumpAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
     }
 }
 
-SCALAR_FN void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
-    char converted_path[0x88];
+void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
     if (customiser == NULL) {
         return;
     }
@@ -432,7 +428,7 @@ SCALAR_FN void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
             world->customiser_resources[category_index] = NULL;
         } else {
             CUSTOMPIECECATEGORY *category = customiser->categories[category_index];
-            if (category == NULL || category->name == NULL) {
+            if (category->name == NULL) {
                 world->customiser_resources[category_index] = NULL;
             } else {
                 const usize bytes = piece_count * sizeof(CUSTOMPIECERESOURCE);
@@ -505,14 +501,15 @@ SCALAR_FN void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
             }
 
             if (texture_pack != NULL) {
-
-                NuFileExtConvert(converted_path, path);
+                char converted_path[0x80];
+                reinterpret_cast<i32 (*)(char *, char *, i32)>(&NuFileExtConvert)(converted_path, path,
+                                                                                   sizeof(converted_path));
                 i32 item = NuFilePakGetItem(texture_pack, converted_path);
                 void *texture_data;
                 i32 texture_size;
                 if (item != -1 && NuFilePakGetItemInfo(texture_pack, item, &texture_data, &texture_size) != 0) {
-                    resource->texture_id =
-                        NuTexCreateNative(static_cast<NUNATIVETEX *>(NuPtrBlockFix(texture_data)), true);
+                    texture_data = NuPtrBlockFix(texture_data);
+                    resource->texture_id = NuTexCreateNative(static_cast<NUNATIVETEX *>(texture_data), true);
                 }
             }
             if (resource->texture_id == 0) {
@@ -649,12 +646,13 @@ CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32
         return NULL;
 
     i32 locators[9], layers[9];
-    f32 x_offsets[9] = {}, y_offsets[9] = {};
+    f32 x_offsets[9], y_offsets[9] = {};
     u8 categories[440];
     CUSTOMPIECE pieces[440];
     for (i32 category = 0; category < 9; ++category) {
         locators[category] = -1;
         layers[category] = -1;
+        x_offsets[category] = 0.0f;
     }
     memset(pieces, 0, sizeof(pieces));
     char *names = buffer->char_ptr;
@@ -824,7 +822,7 @@ CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32
     return customiser;
 }
 
-SCALAR_FN CUSTOMPIECE *Customiser_FindPieceByName(CUSTOMISER *customiser, char *name, i32 *category, i32 *index) {
+CUSTOMPIECE *Customiser_FindPieceByName(CUSTOMISER *customiser, char *name, i32 *category, i32 *index) {
     if (customiser != NULL) {
         for (i32 category_index = 0; category_index < 9; ++category_index) {
             for (i32 piece_index = 0; piece_index < customiser->piece_counts[category_index]; ++piece_index) {

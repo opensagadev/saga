@@ -68,15 +68,17 @@ extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMT
     return NULL;
 }
 
+char CurveFilterLOCATORScale[] = {6, 7, 8, static_cast<char>(0xff)};
+char CurveFilterLOCATOR[] = {6, 7, static_cast<char>(0xff)};
+char CurveFilterSFX[] = {3, static_cast<char>(0xff)};
+
 i32 NuGCutLocatorIsVisble_3(NUGCUTLOCATOR_s *locator, float frame, float *scale, float *rate) {
-    static char locator_scale_filter[] = {6, 7, 8, static_cast<char>(0xff)};
-    static char locator_filter[] = {6, 7, static_cast<char>(0xff)};
-    static char sfx_filter[] = {3, static_cast<char>(0xff)};
-    ani3_animheader_s *animation = reinterpret_cast<ani3_animheader_s *>(locator->animation);
-    char *filter = animation->curve_count == 4 ? sfx_filter
-                                               : (animation->curve_count == 8 ? locator_filter : locator_scale_filter);
-    f32 *values = NuAnimCurveExtractAllNodeCurves_3(animation, 0, frame, filter);
-    if (animation->curve_count == 4) {
+    // The original rereads the locator's animation header for every test.
+    const u16 curve_count = reinterpret_cast<ani3_animheader_s *>(locator->animation)->curve_count;
+    char *filter = curve_count == 4 ? CurveFilterSFX : (curve_count == 8 ? CurveFilterLOCATOR : CurveFilterLOCATORScale);
+    f32 *values = NuAnimCurveExtractAllNodeCurves_3(reinterpret_cast<ani3_animheader_s *>(locator->animation), 0,
+                                                    frame, filter);
+    if (reinterpret_cast<ani3_animheader_s *>(locator->animation)->curve_count == 4) {
         f32 visible = values[3];
         return static_cast<i32>(visible < 0.0f ? visible - 0.5f : visible + 0.5f);
     }
@@ -86,7 +88,7 @@ i32 NuGCutLocatorIsVisble_3(NUGCUTLOCATOR_s *locator, float frame, float *scale,
         *scale = values[6];
     }
     if (rate != NULL) {
-        *rate = animation->curve_count < 9 ? 1.0f : values[8];
+        *rate = reinterpret_cast<ani3_animheader_s *>(locator->animation)->curve_count < 9 ? 1.0f : values[8];
     }
     return result;
 }

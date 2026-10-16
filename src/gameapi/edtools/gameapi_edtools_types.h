@@ -315,6 +315,8 @@ struct EdDefunctList {
     EdDefunctListEntry *last;
     i32 count;
 
+    EdDefunctList() : first(NULL), last(NULL), count(0) {
+    }
     void ReviveAll(i32);
 };
 struct EdEnumControl : EdControl {
@@ -721,6 +723,8 @@ struct EdSystem {
     EdSubSystem *last_subsystem;
     i32 subsystem_count;
 
+    EdSystem() : first_subsystem(NULL), last_subsystem(NULL), subsystem_count(0) {
+    }
     void Initalise(variptr_u &, variptr_u &, i32);
     void Process(float);
     void RegisterSubSystem(EdSubSystem *);
@@ -807,8 +811,7 @@ struct KnotHelper {
     EdRef *out_tangent_ref;
 
     KnotHelper()
-        : vtable(const_cast<EdClassInterfaceVTable *>(&knotHelperVTable.methods)), object_class(NULL),
-          position_ref(NULL), in_tangent_ref(NULL), out_tangent_ref(NULL) {
+        : vtable(const_cast<EdClassInterfaceVTable *>(&knotHelperVTable.methods)), object_class(NULL) {
     }
     ~KnotHelper();
     void Flush();
@@ -830,7 +833,7 @@ struct SplineHelper {
 
     SplineHelper()
         : vtable(const_cast<EdClassInterfaceVTable *>(&splineHelperVTable.methods)), object_class(NULL),
-          first_object(NULL), last_object(NULL), object_count(0), auto_generate_points(0) {
+          first_object(NULL), last_object(NULL), object_count(0), auto_generate_points(1) {
     }
     ~SplineHelper();
     void Flush();

@@ -813,6 +813,7 @@ void locatorEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
     if (aieditor->nearest_locator != nullptr) {
         if (aieditor->nearest_locator != aieditor->current_locator) {
             NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "X - Select locator");
+            NuQFntPrintEx(system_qfont, text_x, (y + 60) * 8, 16, "SELECT - Select nearest");
         } else {
             NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "X - Move selected");
             NuQFntPrintEx(system_qfont, text_x, (y + 60) * 8, 16, "TRI - Delete selected");

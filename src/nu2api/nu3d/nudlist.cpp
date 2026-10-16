@@ -594,33 +594,32 @@ extern "C" void NuDisplayListSwapBuffersBeginFrame(void) {
 #define MTL_BLEND_OP2(mtl) (*(const u8 *)((const u8 *)(mtl) + 0xf8))
 #define MTL_ATTRIB_DWORD1(mtl) (*(const u32 *)((const u8 *)(mtl) + 0x44))
 
-static void UpdateMaterialClipBits(nudisplayscene_s *scene) {
-    if (!scene || !scene->mtls || !scene->mtls[0]) {
+static void DisplayListMaterialClipUpdate(nudisplayscene_s *scene) {
+    if (scene == NULL || scene->mtls == NULL || scene->mtls[0] == NULL)
         return;
-    }
-    u8 buf = static_cast<u8>(scene->render_buffer >> 7);
-    const u8 *cur = scene->mtl_used[scene->render_buffer >> 7];
-    const u8 *other = scene->mtl_used[buf ^ 1];
-    u32 nbytes = (scene->nmtls + 7) >> 3;
-    if (nbytes == 0)
-        return;
-
-    for (u32 byte_i = 0; byte_i < nbytes; ++byte_i) {
-        u8 cur_byte = cur[byte_i];
-        if (other[byte_i] == cur_byte)
+    u8 buffer = scene->render_buffer;
+    buffer >>= 7;
+    const u8 *current = scene->mtl_used[buffer];
+    const u8 *previous = scene->mtl_used[buffer ^ 1];
+    const u32 count = (scene->nmtls + 7) >> 3;
+    NUDISPLAYLIST **lists = scene->dlist_mtls;
+    for (u32 byte_index = 0, material_index = 0; byte_index < count; ++byte_index, material_index += 8) {
+        const u8 bits = current[byte_index];
+        if (previous[byte_index] == bits)
             continue;
         for (u32 bit = 0; bit < 8; ++bit) {
-            i32 idx = static_cast<i32>(byte_i * 8 + bit);
-            if (idx >= static_cast<i32>(scene->nmtls))
+            const i32 index = static_cast<i32>(material_index + bit);
+            u32 enabled = (bits >> bit) & 1;
+            NUDISPLAYLIST *list = lists[index];
+            NUMTL *material = scene->mtls[list->mtl_id];
+            if (enabled && material != NULL && MTL_BLEND_FLAG(material) != 0)
+                enabled = MTL_BLEND_OP2(material) != 0xff;
+            if (enabled)
+                list->mtl_item->id = 0;
+            else
+                list->mtl_item->id = 1;
+            if (static_cast<i32>(scene->nmtls) <= index + 1)
                 return;
-            NUDISPLAYLIST *dl = scene->dlist_mtls[idx];
-            NUMTL *mtl = scene->mtls[dl->mtl_id];
-            bool enabled = (cur_byte >> bit) & 1;
-            // Materials with blend-op 0xff are never drawn via this path.
-            if (enabled && mtl && MTL_BLEND_FLAG(mtl) != 0 && MTL_BLEND_OP2(mtl) == 0xff) {
-                enabled = false;
-            }
-            dl->mtl_item->id = enabled ? kItemId_Cnt : kItemId_Next;
         }
     }
 }
@@ -1089,7 +1088,7 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
     NuThreadCriticalSectionBegin(mgr->loading_critical_section);
     DisplayListLinkDynamicMtls();
     DisplayListSwapBuffersPS();
-    UpdateMaterialClipBits(&mgr->dyn_mtl_dlist);
+    DisplayListMaterialClipUpdate(&mgr->dyn_mtl_dlist);
 
     for (i32 i = 0; i < mgr->ndisplay_lists; ++i) {
         nudisplayscene_s *sc = mgr->dlists[i];
@@ -1144,7 +1143,7 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
             flags = sc->flags;
         }
         if ((flags & 6) != 0) {
-            UpdateMaterialClipBits(sc);
+            DisplayListMaterialClipUpdate(sc);
         }
     }
 

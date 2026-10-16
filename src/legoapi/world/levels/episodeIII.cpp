@@ -481,9 +481,11 @@ void KashyyykD_Update(WORLDINFO_s *) {
     if (netclient != 0)
         return;
     if (BoulderWait <= 0.0f) {
-        if (boulder_part[i_boulder] != NULL)
+        i32 i = i_boulder;
+        if (boulder_part[i] != NULL)
             return;
-        if (LevInstAnim[i_boulder] != NULL && LevHSpecial[i_boulder].display_special != NULL) {
+        nuhspecial_s *special;
+        if (LevInstAnim[i] != NULL && (special = &LevHSpecial[i])->display_special != NULL) {
             ADDPART_s params = Default_ADDPART;
             params.matrix = &numtx_identity;
             params.velocity = &v000;
@@ -491,7 +493,7 @@ void KashyyykD_Update(WORLDINFO_s *) {
             params.field_14 = 0.3f;
             params.field_18 = 0.3f;
             params.gravity = 0.0f;
-            params.special = &LevHSpecial[i_boulder];
+            params.special = special;
             params.flags = 0x80861a;
             params.move_fn = Boulder_Move;
             params.field_40 = PartCollide_3D;
@@ -499,11 +501,11 @@ void KashyyykD_Update(WORLDINFO_s *) {
             params.time_step = FRAMETIME;
             PART_s *part = AddPart(&params);
             if (part != NULL)
-                boulder_part[i_boulder] = part;
-            LevInstAnim[i_boulder]->ltime = 1.0f;
-            LevInstAnim[i_boulder]->playing = 1;
-            LevInstAnim[i_boulder]->mtx = numtx_identity;
-            NuSpecialSetVisibility(&LevHSpecial[i_boulder], 1);
+                boulder_part[i] = part;
+            LevInstAnim[i]->ltime = 1.0f;
+            LevInstAnim[i]->playing = 1;
+            LevInstAnim[i]->mtx = numtx_identity;
+            NuSpecialSetVisibility(special, 1);
         }
         ++i_boulder;
         if (i_boulder == 2)
@@ -876,7 +878,7 @@ void VaderA_GoneThroughDoor(WORLDINFO_s *world, DOOR_s *door) {
         door->active = 1;
 }
 
-static __used__ void VaderA_StartCollapseStage(WORLDINFO_s *world) {
+static void VaderA_StartCollapseStage(WORLDINFO_s *world) {
     i32 path_index;
     nuhspecial_s specials[100];
     u32 *path_connection = static_cast<u32 *>(
@@ -886,10 +888,10 @@ static __used__ void VaderA_StartCollapseStage(WORLDINFO_s *world) {
         path_connection[path_index] |= 0x80000000;
     }
 
-    vader_a.forces[0] = GizForces_FindForce(world, "force4");
-    vader_a.forces[1] = GizForces_FindForce(world, "InControlRoom");
-    vader_a.forces[2] = GizForces_FindForce(world, "ceiling_collapse");
-    vader_a.forces[3] = GizForces_FindForce(world, "wobble");
+    vader_a.forces[0] = GizForces_FindForce(world, "force1");
+    vader_a.forces[1] = GizForces_FindForce(world, "force2");
+    vader_a.forces[2] = GizForces_FindForce(world, "force3");
+    vader_a.forces[3] = GizForces_FindForce(world, "force4");
     vader_a.count = 1;
     vader_a.timer = 30.0f;
     vader_a.in_control_room_message =

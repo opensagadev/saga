@@ -865,9 +865,7 @@ void DrawMessageBoxRGBA(f32 x, f32 y, f32 width, f32 height, u32 blue, u32 green
         pulse = (pulsetimerfn((1.0f - y) * 0.5f) - 1.0f) * 4.0f + 1.0f;
     }
 
-    i32 opacity = static_cast<i32>((static_cast<f32>(static_cast<i32>(alpha >> 16)) * 65536.0f +
-                                    static_cast<f32>(static_cast<i32>(alpha & 0xffff))) *
-                                   pulse);
+    i32 opacity = static_cast<i32>(static_cast<f32>(alpha) * pulse);
 
     const i32 box_width = static_cast<i32>(scaled_width * 10240.0f * 0.5f);
     const i32 box_height = static_cast<i32>(scaled_height * 3584.0f * 0.5f);

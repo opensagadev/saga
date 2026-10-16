@@ -1392,14 +1392,16 @@ void ChrisAnakinCUpdate() {
             continue;
 
         const f32 offset = door->offset - door->speed * FRAMETIME;
+        door->offset = offset;
         if (offset <= door->minimum_offset)
             door->offset = door->minimum_offset;
-        else
-            door->offset = offset;
 
         // The retail transform temporaries require a 16-byte-aligned stack.
-        NUVEC_ALIGNED16 translation = {door->direction.x * door->offset, door->direction.y * door->offset,
-                                       door->direction.z * door->offset};
+        NUVEC *direction = &door->direction;
+        NUVEC_ALIGNED16 translation;
+        translation.x = direction->x * door->offset;
+        translation.y = direction->y * door->offset;
+        translation.z = direction->z * door->offset;
         NUVEC_ALIGNED16 position;
         NuVecMtxTransform(&position, &translation, &door->original_matrix);
         memcpy(&door->matrix.m30, &position, sizeof(position));
