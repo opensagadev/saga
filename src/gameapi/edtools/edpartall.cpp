@@ -1165,11 +1165,11 @@ static void edpartFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     char path[256], backup[256];
     char general_directory[256], general_name[256], general_extension[256];
     char level_directory[256], level_name[256], level_extension[256];
-    if (!edbits_general_save_directory[0])
+    if (__builtin_expect(!edbits_general_save_directory[0], 1))
         __builtin_memcpy(general_directory, ".", 2);
     else
         strcpy(general_directory, edbits_general_save_directory);
-    if (!edbits_general_save_name[0])
+    if (__builtin_expect(!edbits_general_save_name[0], 0))
         __builtin_memcpy(general_name, "part", 5);
     else
         strcpy(general_name, edbits_general_save_name);

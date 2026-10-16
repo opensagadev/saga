@@ -3845,12 +3845,12 @@ void GameAISysStartFrame(AISYS_s *system) {
             for (i32 connection_index = 0; connection_index < path->connection_count; ++connection_index) {
                 AIPATHCNX *connection = &path->connections[connection_index];
                 AIPATHNODE *node = &path->nodes[connection->direction_a];
-                if (node->has_special != 0) {
+                if (__builtin_expect(node->has_special != 0, 0)) {
                     AIPathNodeUpdatePos(system, path, node);
                 }
                 path = system->path_sys->paths[path_index];
                 node = &path->nodes[connection->direction_b];
-                if (node->has_special != 0) {
+                if (__builtin_expect(node->has_special != 0, 0)) {
                     AIPathNodeUpdatePos(system, path, node);
                     path = system->path_sys->paths[path_index];
                 }
@@ -3861,7 +3861,7 @@ void GameAISysStartFrame(AISYS_s *system) {
     // Spread the object/area overlap work across frames. Area runtime flags
     // summarize the kinds of live characters inside it, while every object
     // retains a 64-area occupancy mask for script queries.
-    if (system->next_area_check < system->area_count) {
+    if (__builtin_expect(system->next_area_check < system->area_count, 0)) {
         AIAREA *area = &system->areas[system->next_area_check];
         const i32 area_index = static_cast<i32>(area - WORLD->ai_sys->areas);
         area->runtime_flags &= static_cast<u8>(
@@ -3910,7 +3910,7 @@ void GameAISysStartFrame(AISYS_s *system) {
         }
 
         ++system->next_area_check;
-        if (system->next_area_check >= system->area_count) {
+        if (__builtin_expect(system->next_area_check >= system->area_count, 0)) {
             system->next_area_check = 0;
         }
     }
@@ -4160,8 +4160,8 @@ i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUM
                 }
             }
         }
-    } else if (result != 0 && object != NULL && (object->field_0xeff & 4) == 0 &&
-               (object->apiobj.character_data->model_flags & 0x10000) == 0) {
+    } else if (__builtin_expect(result != 0 && object != NULL && (object->field_0xeff & 4) == 0 &&
+               (object->apiobj.character_data->model_flags & 0x10000) == 0, 0)) {
         draw_shadow = 1;
     }
     if (g_lowEndLevelBehaviour != 0 && object != NULL && (object->apiobj.flags_low & 0x80) == 0)
@@ -4176,7 +4176,7 @@ i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUM
                 special_matrix = *secondary_matrix;
                 NuSpecialDrawAtAlpha(&WORLD->lev_objs[0xa2].special, &special_matrix,
                                      object->shadow_opacity * object->surface_normal.y);
-            } else if (CHARSHADOWS_ON) {
+            } else if (__builtin_expect(!!(CHARSHADOWS_ON), 1)) {
                 PLAYERCHARACTERCONFIG_s *config = object->apiobj.character_data->player_config;
                 i32 alpha = config->blob_shadow_alpha;
                 if (alpha == 0xff)

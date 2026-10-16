@@ -403,7 +403,7 @@ void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle,
 i32 LineIntersectXY(NUVEC *, NUVEC *, NUVEC *, NUVEC *, NUVEC *, NUVEC *);
 
 i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end, nuvec_s *edge_start, i32 inside) {
-    if (spline == NULL || position == NULL)
+    if (__builtin_expect(spline == NULL || position == NULL, 0))
         return 0;
     NUVEC ray_start = {position->x, -position->z, position->y};
     NUVEC ray_end = {position->x, 100000.0f, position->y};
@@ -430,7 +430,7 @@ i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end,
         f32 dx = spline->pts[i].x - position->x;
         f32 dz = spline->pts[i].z - position_z;
         f32 distance = dx * dx + dz * dz;
-        if (distance < best)
+        if (__builtin_expect(distance < best, 1))
             closest_index = i;
         closest.x = distance < best ? spline->pts[i].x : closest.x;
         closest.y = distance < best ? spline->pts[i].y : closest.y;

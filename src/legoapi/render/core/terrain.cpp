@@ -4649,9 +4649,9 @@ i32 PlatformChecks(i32 count, nuvec_s *movement) {
     NUVEC previous_position = TerI->position;
     i32 clear = TerrainPlatformMoveCheck(&TerI->platform_position, &TerI->platform_normal, platform_index, 1, 0);
     bool opposing_contact = false;
-    if (TerI->hit_type != 0 && TerI->terrain_group_index >= 0) {
+    if (__builtin_expect(TerI->hit_type != 0 && TerI->terrain_group_index >= 0, 0)) {
         TERRAIN_GROUP *hit_group = &CurTerr->groups[TerI->terrain_group_index];
-        if (hit_group->chunk_type == 1)
+        if (__builtin_expect(hit_group->chunk_type == 1, 0))
             CurTrackInfo->platform_index = hit_group->scene_index;
         f32 dot = direction.x * TerI->platform_normal.x + direction.y * TerI->platform_normal.y +
                   direction.z * TerI->platform_normal.z;
@@ -6771,7 +6771,7 @@ extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_f
             }
         }
 
-        if (TerI->hit_type != TERRAIN_HIT_TYPE_NONE) {
+        if (__builtin_expect(TerI->hit_type != TERRAIN_HIT_TYPE_NONE, 0)) {
             const i16 group_index = TerI->terrain_group_index;
             if (group_index >= 0) {
                 ShadNorm = TerI->impact_normal;
@@ -6793,7 +6793,7 @@ extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_f
                     }
                 } else {
                     wall_limit = 1.1f;
-                    if (TerI->shape_adjusted == 0) {
+                    if (__builtin_expect(TerI->shape_adjusted == 0, 1)) {
                         wall_limit = -1.1f;
                     }
                 }
@@ -6801,7 +6801,7 @@ extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_f
                 if (wallover != 0.0f) {
                     wall_limit = wallover;
                 }
-                if (hit_class != TERRAIN_HIT_TYPE_FACE) {
+                if (__builtin_expect(hit_class != TERRAIN_HIT_TYPE_FACE, 0)) {
                     wall_limit = 0.707f;
                 }
                 if (TerI->surface != NULL &&
@@ -6817,7 +6817,7 @@ extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_f
             }
         }
 
-        if (TerrShapeAdjCnt != 0) {
+        if (__builtin_expect(TerrShapeAdjCnt != 0, 0)) {
             if (TerrShapeSideStep(position, movement, hit_flags) != 0) {
                 TerrainImpact(position, movement, hit_flags);
             }
@@ -6835,7 +6835,7 @@ extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_f
     impact_resolved:
         hit_type = TerI->hit_type;
         if (hit_type == TERRAIN_HIT_TYPE_NONE) {
-            if (scan_count > 3 && hit_flags[0] == 0 && hit_flags[1] == 0 && embedded_retry != 0) {
+            if (__builtin_expect(scan_count > 3 && hit_flags[0] == 0 && hit_flags[1] == 0 && embedded_retry != 0, 1)) {
                 TerI->position.x = position->x;
                 TerI->position.y = position->y * TerI->inverse_object_scale + TerI->collision_radius + 0.003f;
                 TerI->position.z = position->z;

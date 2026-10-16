@@ -3749,9 +3749,9 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
         for (ClassObjectListEntry *entry = selected.first; entry != NULL; entry = entry->next) {
             average = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
             matrix_type = EdType_VuMtx;
-            if (entry->reference == NULL ||
-                entry->reference->GetAttributeData(entry->object, 0x20, matrix_type, &transform, 0) == 0) {
-                if (entry->ed_class->FindMember(&member, entry->object, 0x20, 1) != 0)
+            if (__builtin_expect(entry->reference == NULL ||
+                entry->reference->GetAttributeData(entry->object, 0x20, matrix_type, &transform, 0) == 0, 0)) {
+                if (__builtin_expect(entry->ed_class->FindMember(&member, entry->object, 0x20, 1) != 0, 1))
                     member.reference->GetAttributeData(member.object, 0x20, matrix_type, &transform, 0);
             }
 

@@ -845,7 +845,7 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
             for (i32 piece_index = 0; piece_index < buildit.anim_object_count; ++piece_index) {
                 GAMEANIMOBJ_s *piece = buildit.anim_objects[piece_index];
                 GIZBUILDITANIMDATA_s *piece_data = static_cast<GIZBUILDITANIMDATA_s *>(piece->object_data);
-                if (buildit.linked_buildit != NULL) {
+                if (__builtin_expect(buildit.linked_buildit != NULL, 0)) {
                     finish_position.x = piece_data->end_mtx.m30;
                     finish_position.y = piece_data->end_mtx.m31;
                     finish_position.z = piece_data->end_mtx.m32;
@@ -918,7 +918,7 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
                     ((builder->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0 ||                                    \
                      (builder->apiobj.field_0x1f4 & 0x40000) != 0)) {                                                  \
                     builder->field_0xe21 ^= 0x40;                                                                      \
-                    if (builder->build_button_taps < 10) {                                                             \
+                    if (__builtin_expect(builder->build_button_taps < 10, 0)) {                                                             \
                         ++builder->build_button_taps;                                                                  \
                     }                                                                                                  \
                 } else {                                                                                               \
@@ -934,7 +934,7 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
             }                                                                                                          \
             if (automatic) {                                                                                           \
                 GizMoveAttractoBuildItPiece(&buildit, piece);                                                          \
-            } else if (buildit.linked_buildit == NULL) {                                                               \
+            } else if (__builtin_expect(buildit.linked_buildit == NULL, 0)) {                                                               \
                 NuSpecialSetVisibility(&piece->special, 0);                                                            \
             }                                                                                                          \
         }                                                                                                              \
@@ -955,7 +955,7 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
             } else {
                 if (GizBuildit_AutoBuildPosFn != NULL) {
                     u16 facing;
-                    if (GizBuildit_AutoBuildPosFn(world, &buildit.start_position, &centre, &facing) != 0) {
+                    if (__builtin_expect(GizBuildit_AutoBuildPosFn(world, &buildit.start_position, &centre, &facing) != 0, 1)) {
                         f32 radius;
                         u16 angle;
                         if (!(buildit.step_timer > 4.5f)) {
@@ -1046,7 +1046,7 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
         const f32 factor = 1.0f - (1.0f - NU_SIN_LUT(vertical * 16384.0f + 16384.0f)) * vertical;                      \
         NuMtxPreRotate##axis_name(&matrix, static_cast<i32>(static_cast<f32>(angle) * factor));                        \
     } while (0)
-                if (data->wobble_axis <= 1) {
+                if (__builtin_expect(data->wobble_axis <= 1, 1)) {
                     ROTATE_BUILDIT_WOBBLE(X);
                 } else if (data->wobble_axis <= 3) {
                     ROTATE_BUILDIT_WOBBLE(Y);

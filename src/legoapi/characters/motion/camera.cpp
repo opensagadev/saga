@@ -230,7 +230,7 @@ void GameCam_UpdateLookRot(GAMECAMERA_s *camera) {
         if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.flags_low) < 0 &&
             Player[0]->pad_gamepad->pad != NULL) {
             i32 look_source;
-            if (GameCam_ObjLookingWithLeftStick == NULL)
+            if (__builtin_expect(GameCam_ObjLookingWithLeftStick == NULL, 0))
                 goto player0_right_look;
             look_source = GameCam_ObjLookingWithLeftStick(Player[0]);
             if (look_source != 1 && look_source != 2)
@@ -247,7 +247,7 @@ void GameCam_UpdateLookRot(GAMECAMERA_s *camera) {
                     u32 vertical_buttons = buttons & (GAMEPAD_DUP | GAMEPAD_DDOWN);
                     if (vertical_buttons == GAMEPAD_DUP)
                         vertical = -look_pitch;
-                    else if (vertical_buttons == GAMEPAD_DDOWN)
+                    else if (__builtin_expect(vertical_buttons == GAMEPAD_DDOWN, 0))
                         vertical = look_pitch;
                 } else {
                     nupad_s *pad = Player[0]->pad_gamepad->pad;
@@ -1706,7 +1706,7 @@ void KeepOnScreen(GameObject_s *object) {
     KEEPONSCREEN_CHECK_CONTROLLER(6)
     KEEPONSCREEN_CHECK_CONTROLLER(7)
 #undef KEEPONSCREEN_CHECK_CONTROLLER
-    if (static_cast<i8>(object->apiobj.flags_low) >= 0) {
+    if (__builtin_expect(static_cast<i8>(object->apiobj.flags_low) >= 0, 0)) {
         if (controlled == 0)
             return;
     }
@@ -1739,7 +1739,7 @@ void KeepOnScreen(GameObject_s *object) {
         KEEPONSCREEN_GUNSHIP_PLANE(1, 0x2000)
         KEEPONSCREEN_GUNSHIP_PLANE(4, 0xe000)
 #undef KEEPONSCREEN_GUNSHIP_PLANE
-        if (count > 0.0f) {
+        if (__builtin_expect(count > 0.0f, 1)) {
             const f32 inverse_count = 1.0f / count;
             // The original retains the last response, then divides by the
             // number of intersected planes; it does not accumulate responses.
@@ -1749,7 +1749,7 @@ void KeepOnScreen(GameObject_s *object) {
         return;
     }
 
-    if (VehicleArea == 0) {
+    if (__builtin_expect(VehicleArea == 0, 0)) {
         GameObject_s *other_player = object == Player[0] ? Player[1] : object == Player[1] ? Player[0] : NULL;
         if (other_player != NULL &&
             (static_cast<i8>(other_player->apiobj.flags_low) >= 0 || other_player->character_context == 0x2b))
@@ -1763,8 +1763,8 @@ void KeepOnScreen(GameObject_s *object) {
     i32 constrained = 0;
 
     // Near plane has no object-size inset in the original.
-    if (OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[0].point, &PlayPlane[0].normal, NULL, 0.0f,
-                        NULL) != 0) {
+    if (__builtin_expect(OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[0].point, &PlayPlane[0].normal, NULL, 0.0f,
+                        NULL) != 0, 1)) {
         Surface_Deflect(&PlayPlane[0].normal, &constrained_movement, &constrained_movement, 0);
         constrained_movement.x += PlayPlane[0].normal.x * push_distance;
         constrained_movement.z += PlayPlane[0].normal.z * push_distance;
@@ -1787,8 +1787,8 @@ void KeepOnScreen(GameObject_s *object) {
         constrained = 1;
     }
 
-    if ((VehicleArea != 0 && (WORLD->area == NULL || WORLD->area != PODSPRINT_ADATA)) || KEEPONSCREEN_SIDESONLY == 0 ||
-        (two_players && abs(RotDiff(0, GameCam->pitch)) > 0x2000)) {
+    if (__builtin_expect((VehicleArea != 0 && (WORLD->area == NULL || WORLD->area != PODSPRINT_ADATA)) || KEEPONSCREEN_SIDESONLY == 0 ||
+        (two_players && abs(RotDiff(0, GameCam->pitch)) > 0x2000), 0)) {
         PLAYPLANE_s *depth_plane = NULL;
         if (OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[4].point, &PlayPlane[4].normal, NULL,
                             -object->apiobj.field_0x1e0, NULL) != 0) {
@@ -1811,7 +1811,7 @@ void KeepOnScreen(GameObject_s *object) {
         }
     }
 
-    if (constrained) {
+    if (__builtin_expect(!!(constrained), 0)) {
         object->apiobj.movement_direction.x = constrained_movement.x;
         object->apiobj.movement_direction.z = constrained_movement.z;
         object->field_0xda8 = previous_keep_time + FRAMETIME;

@@ -206,7 +206,7 @@ void Grabber_Update(WORLDINFO_s *world) {
                      g->direction_switches[0]->anim_set->state == 2;
         bool plus = g->direction_switches[1] && (g->direction_switches[1]->progress_flags & 2) &&
                     g->direction_switches[1]->anim_set->state == 2;
-        if (minus && !plus)
+        if (__builtin_expect(minus && !plus, 1))
             g->target_velocity.x = -g->speed;
         else if (plus && !minus)
             g->target_velocity.x = g->speed;
@@ -216,7 +216,7 @@ void Grabber_Update(WORLDINFO_s *world) {
                 g->direction_switches[3]->anim_set->state == 2;
         if (plus && !minus)
             g->target_velocity.z = g->speed;
-        else if (minus && !plus)
+        else if (__builtin_expect(minus && !plus, 0))
             g->target_velocity.z = -g->speed;
         if (!NuSpecialGetVisibilityFn(&g->special))
             g->target_velocity.z = g->target_velocity.x = 0.0f;
@@ -259,9 +259,9 @@ void Grabber_Update(WORLDINFO_s *world) {
         }
     }
     i32 moved = 0;
-    if (next.x != g->grab_position.x || next.y != g->grab_position.y || next.z != g->grab_position.z) {
-        if (world->current_level != JABBASPALACEB_LDATA &&
-            (g->target_velocity.x != 0.0f || g->target_velocity.y != 0.0f || g->target_velocity.z != 0.0f))
+    if (__builtin_expect(next.x != g->grab_position.x || next.y != g->grab_position.y || next.z != g->grab_position.z, 1)) {
+        if (__builtin_expect(world->current_level != JABBASPALACEB_LDATA &&
+            (g->target_velocity.x != 0.0f || g->target_velocity.y != 0.0f || g->target_velocity.z != 0.0f), 0))
             PlaySfx(const_cast<char *>(world->current_level == CLOUDCITYTRAPA_LDATA ? "CarbonFreezeCraneLp"
                                                                                     : "env_crane_mvt_lp"),
                     &g->grab_position);
@@ -271,7 +271,7 @@ void Grabber_Update(WORLDINFO_s *world) {
             NewTerrPlatformsOff();
         f32 height = GameShadow(NULL, &query, 5.0f, -1);
         i32 surface = -1;
-        if (height != 2000000.0f)
+        if (__builtin_expect(height != 2000000.0f, 1))
             surface = ShadowInfo();
         if (surface >= 0 && surface <= 31 && (TerSurface[surface].flags & 0x200)) {
             g->shadow_height = height;
@@ -288,7 +288,7 @@ void Grabber_Update(WORLDINFO_s *world) {
         } else {
             g->target_velocity = v000;
             g->velocity = v000;
-            if (world->current_level == JABBASPALACEB_LDATA)
+            if (__builtin_expect(world->current_level == JABBASPALACEB_LDATA, 1))
                 g->grab_position.y = next.y;
         }
     }
@@ -296,9 +296,9 @@ void Grabber_Update(WORLDINFO_s *world) {
     if (g->flags_559 & 8)
         g->yaw = SeekRot(g->yaw, g->target_yaw, 3.0f);
     matrix = g->matrix;
-    if (g->flags_559 & 8)
+    if (__builtin_expect(!!(g->flags_559 & 8), 0))
         NuMtxPreRotateY(&matrix, g->yaw);
-    if (g->scale != 1.0f) {
+    if (__builtin_expect(g->scale != 1.0f, 0)) {
         NUVEC scale = {g->scale, g->scale, g->scale};
         NuMtxPreScale(&matrix, &scale);
     }
@@ -309,7 +309,7 @@ void Grabber_Update(WORLDINFO_s *world) {
     NuSpecialUpdate(&g->special);
     switch (g->state) {
         case 0:
-            if (pad == NULL) {
+            if (__builtin_expect(pad == NULL, 0)) {
                 if ((g->flags_559 & 4) && g->action_switch && (g->action_switch->progress_flags & 2) &&
                     GameAnimSet_IsAnimationReset(g->action_switch->anim_set))
                     g->flags_559 &= ~4;
@@ -348,7 +348,7 @@ void Grabber_Update(WORLDINFO_s *world) {
                 g->state = 1;
                 g->animation_timer = AnimDuration(g->character_model->model_id, 102, 0, 0, 1);
                 g->flags_559 &= ~2;
-                if (!control)
+                if (__builtin_expect(!control, 0))
                     g->flags_559 |= 4;
                 NewRumbleAllPlayers(0, 0, 2, 0);
             }
@@ -356,7 +356,7 @@ void Grabber_Update(WORLDINFO_s *world) {
             break;
         case 1: {
             f32 *frame = AnimPlaying(&g->animation, 102, 1, 0);
-            if (!frame)
+            if (__builtin_expect(!frame, 1))
                 break;
             g->animation_timer -= FRAMETIME;
             if (g->animation_timer <= 0) {
@@ -489,7 +489,7 @@ void Grabber_Update(WORLDINFO_s *world) {
         bool found = false;
         for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
             GameObject_s *object = &Obj[i];
-            if ((object->apiobj.object_flags & 0x1001) != 0x1001)
+            if (__builtin_expect((object->apiobj.object_flags & 0x1001) != 0x1001, 0))
                 continue;
             if (object->apiobj.character_data->game_character->flags_090 & 0x8000)
                 found = true;

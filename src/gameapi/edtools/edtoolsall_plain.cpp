@@ -1452,7 +1452,7 @@ extern "C" {
             EdFileRead(name, 20);
             AnimParams[slot].instance_id = edanimLookupSpecial(name, scene);
             AnimParams[slot].effect_count = EdFileReadInt();
-            if (version > 1) {
+            if (__builtin_expect(version > 1, 0)) {
                 AnimParams[slot].sound_count = EdFileReadInt();
             } else {
                 AnimParams[slot].sound_count = 0;
@@ -1489,7 +1489,7 @@ extern "C" {
                 }
             }
             AnimParams[slot].field_17c = 0.99f;
-            if (version > 1) {
+            if (__builtin_expect(version > 1, 1)) {
                 if (AnimParams[slot].sound_count > 8)
                     AnimParams[slot].sound_count = 8;
                 for (i32 sound = 0; sound < AnimParams[slot].sound_count; ++sound) {
@@ -1645,7 +1645,7 @@ extern "C" {
                     case 6: {
                         animation->repeating = 1;
                         const f32 distance = edanimPlayerAnimDistance(index);
-                        if (AnimParams[index].field_014 > distance)
+                        if (__builtin_expect(AnimParams[index].field_014 > distance, 1))
                             animation->playing = 1;
                         break;
                     }
@@ -1669,8 +1669,8 @@ extern "C" {
                 while (particle_index < AnimParams[index].effect_count) {
                     i32 effect = AnimParams[index].effect_ids[particle_index];
                     if (__builtin_expect(effect != -1 && debtab[effect] != NULL, 0)) {
-                        if (AnimParams[index].effect_flags[particle_index] == 0 ||
-                            (animation != NULL && animation->playing)) {
+                        if (__builtin_expect(AnimParams[index].effect_flags[particle_index] == 0 ||
+                            (animation != NULL && animation->playing), 0)) {
                             NUMTX matrix;
                             NuMtxInvRSS(&matrix, NuSpecialGetMtx(&special));
                             NuMtxMul(&matrix, &matrix, NuSpecialGetDrawMtx(&special));
@@ -2111,7 +2111,7 @@ extern "C" {
     i32 edgraLoadPage(char *path, void *gscn, i32 terrain, void *buf, void *buf_end) {
         i32 page = -1;
         for (i32 index = 0; index < 8; ++index) {
-            if (edgra_page_used[index] != 0) {
+            if (__builtin_expect(edgra_page_used[index] != 0, 1)) {
                 continue;
             }
             page = index;
@@ -2123,7 +2123,7 @@ extern "C" {
 
         VARIPTR *buffer = static_cast<VARIPTR *>(buf);
         usize matrix_base;
-        if (edbits_editmode == 1 && edgra_mtxbuffer != NULL) {
+        if (__builtin_expect(edbits_editmode == 1 && edgra_mtxbuffer != NULL, 0)) {
             matrix_base = reinterpret_cast<usize>(edgra_mtxbuffer);
         } else {
             matrix_base = ALIGN(buffer->addr, 16);
@@ -2136,7 +2136,7 @@ extern "C" {
         }
         EdFileSetReadWrongEndianess(1);
         const i32 version = EdFileReadInt();
-        if (version < 1 || version > 9) {
+        if (__builtin_expect(version < 1 || version > 9, 0)) {
             EdFileSetReadWrongEndianess(0);
             EdFileClose();
             return -1;
@@ -2189,7 +2189,7 @@ extern "C" {
             } else {
                 clump->unknown_25 = EdFileReadChar();
                 clump->unknown_26 = EdFileReadChar();
-                if (version == 5) {
+                if (__builtin_expect(version == 5, 0)) {
                     clump->kind = 1;
                 } else {
                     clump->kind = EdFileReadChar();
@@ -2206,7 +2206,7 @@ extern "C" {
                 clump->field_30 = EdFileReadFloat();
             }
 
-            if (version < 5) {
+            if (__builtin_expect(version < 5, 0)) {
                 clump->rotation_z = 0;
                 clump->rotation_y = 0;
             } else {
@@ -5600,7 +5600,7 @@ extern "C" {
                 graph_item->graph->x_scale = scale < 0.01f ? 0.01f : scale;
                 return 1;
             }
-        } else if (right > 55) {
+        } else if (__builtin_expect(right > 55, 1)) {
             show_x_scale_help = 60;
             graph_item->graph->x_scale = right * 0.02f / 255.0f + graph_item->graph->x_scale;
             return 1;
@@ -5608,12 +5608,12 @@ extern "C" {
         left = pad->analog_l1;
         right = pad->analog_r1;
         if (left) {
-            if (right) {
+            if (__builtin_expect(!!(right), 0)) {
                 show_y_scale_help = 60;
                 graph_item->graph->y_scale = 1.0f;
                 return 1;
             }
-            if (left) {
+            if (__builtin_expect(!!(left), 0)) {
                 show_y_scale_help = 60;
                 f32 scale = graph_item->graph->y_scale - left * 0.02f / 255.0f;
                 graph_item->graph->y_scale = scale < 0.01f ? 0.01f : scale;
@@ -5635,7 +5635,7 @@ extern "C" {
             nugraphCalcCurve(graph_item->graph, 100);
             return 1;
         }
-        if ((pressed & 0x40) && graph_item->selected_point >= 0) {
+        if (__builtin_expect((pressed & 0x40) && graph_item->selected_point >= 0, 0)) {
             graph_item->cursor_x = graph_item->graph->x[graph_item->selected_point];
             graph_item->cursor_y = graph_item->graph->y[graph_item->selected_point];
         }
@@ -5869,7 +5869,7 @@ extern "C" {
         NuStrLen(picker->value);
 
         auto delete_previous = [&]() {
-            if (picker->cursor == 0)
+            if (__builtin_expect(picker->cursor == 0, 0))
                 return;
             if (picker->value[picker->cursor]) {
                 --picker->cursor;
@@ -5942,17 +5942,17 @@ extern "C" {
             }
         }
 
-        if (!picker || !picker->editing) {
+        if (__builtin_expect(!picker || !picker->editing, 0)) {
             if (pad->digital_buttons_pressed & 0x40)
                 eduiAddTextPickEnt(menu, item);
             return 0;
         }
 
-        if (pad->digital_buttons_pressed & 0x4000)
+        if (__builtin_expect(!!(pad->digital_buttons_pressed & 0x4000), 0))
             next_row();
         if (__builtin_expect(!!(pad->digital_buttons_pressed & 0x1000), 0))
             previous_row();
-        if (pad->digital_buttons_pressed & 0x8000)
+        if (__builtin_expect(!!(pad->digital_buttons_pressed & 0x8000), 1))
             previous_column();
         if (pad->digital_buttons_pressed & 0x2000)
             next_column();

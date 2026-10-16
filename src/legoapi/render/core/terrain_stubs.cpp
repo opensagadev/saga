@@ -518,7 +518,7 @@ extern "C" {
             return -1;
         }
 
-        if (debtab[effect_index]->scale != 1.0f) {
+        if (__builtin_expect(debtab[effect_index]->scale != 1.0f, 1)) {
             effect_index = debtab[effect_index]->unscaled_effect_index;
             if (debtab[effect_index] == NULL) {
                 return -1;
@@ -534,8 +534,8 @@ extern "C" {
 
         for (i32 i = 0; i < EDPP_SCALE_TYPES; ++i) {
             debscale_s &entry = debscale[i];
-            if (entry.unscaled_effect_index == effect_index && entry.scale == requested_scale &&
-                entry.scaled_effect_index != 0) {
+            if (__builtin_expect(entry.unscaled_effect_index == effect_index && entry.scale == requested_scale &&
+                entry.scaled_effect_index != 0, 0)) {
                 debinftype *scaled = debtab[entry.scaled_effect_index];
                 if (scaled != NULL && scaled->unscaled_effect_index == effect_index) {
                     return entry.scaled_effect_index;
@@ -551,7 +551,7 @@ extern "C" {
             if (candidate != NULL && candidate->unscaled_effect_index == effect_index) {
                 const f32 scale = candidate->scale;
                 f32 distance;
-                if (requested_scale == 0.0f || scale == 0.0f) {
+                if (__builtin_expect(requested_scale == 0.0f || scale == 0.0f, 0)) {
                     distance = 1.0f;
                 } else {
                     distance = ScaledEffectDistance(requested_scale, scale);

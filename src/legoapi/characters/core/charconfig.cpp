@@ -2548,7 +2548,7 @@ void CharConfig_ConfigureAll(i32 permanent, NUFPCOMJMP *game_keywords) {
         if (length < 1)
             continue;
         i32 redirected = RedirectTextFile(text, filename);
-        if (redirected != 0) {
+        if (__builtin_expect(redirected != 0, 0)) {
             NuStrCat(filename, ".txt");
             NuStrCpy(path, directory);
             NuStrCat(path, filename);
@@ -2577,7 +2577,7 @@ void CharConfig_ConfigureAll(i32 permanent, NUFPCOMJMP *game_keywords) {
             text[size] = 0;
             length = Text_StripComments(text, ConfigBuffer, 1);
             text[size] = saved;
-            if (length > 0) {
+            if (__builtin_expect(length > 0, 0)) {
                 SecondCharConfigure = 1;
                 CharConfig(id, NULL, NULL, &permbuffer_ptr, &permbuffer_end, 0, ConfigBuffer, length, 0, game_keywords);
             }

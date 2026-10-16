@@ -1970,7 +1970,7 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
     NUVEC new_size = {new_scale, new_scale, new_scale};
     NUVEC offset = v000;
     const u8 current_direction = pieces[currentminikit].direction;
-    if (current_direction <= 5) {
+    if (__builtin_expect(current_direction <= 5, 0)) {
         switch (current_direction) {
             case 0:
                 offset.x += 0.035f * NuTrigTable[(static_cast<i32>(slide * 32768.0f) >> 1) & 0x7fff];
@@ -1993,7 +1993,7 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
         }
     }
 
-    if (packet->minikit_max != 0 && WORLD->minikit.field_0x8 != 0 && count > 0) {
+    if (__builtin_expect(packet->minikit_max != 0 && WORLD->minikit.field_0x8 != 0 && count > 0, 1)) {
         i32 i = 0;
         do {
             HUBMINIKITPIECE_s &piece = pieces[i];
@@ -2008,7 +2008,7 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
                 const f32 oscillation = NuTrigTable[piece_angle];
                 const HUBMINIKITPIECE_s *animated_pieces = static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4);
                 const HUBMINIKITPIECE_s &animated_piece = animated_pieces[i];
-                if (animated_piece.direction <= 5) {
+                if (__builtin_expect(animated_piece.direction <= 5, 1)) {
                     switch (animated_piece.direction) {
                         case 0:
                             matrix.m30 -=
@@ -2155,9 +2155,9 @@ void DrawSubItemMenu2D() {
         i32 buyable = 0;
         i32 show_name = 0;
         if (items[ids[3]].type == 1) {
-            if (items[ids[3]].unlocked == 1)
+            if (__builtin_expect(items[ids[3]].unlocked == 1, 1))
                 show_name = 1;
-            else if (CollectIDUnlocked(static_cast<u16>(items[ids[3]].item_id)))
+            else if (__builtin_expect(!!(CollectIDUnlocked(static_cast<u16>(items[ids[3]].item_id))), 0))
                 buyable = show_name = 1;
             else {
                 f32 scale = 0.7f * ShopLockedScale;

@@ -539,7 +539,7 @@ static void instNuGCutLookAtLocatorUpdate(i32 *effect_handle, NUGCUTLOCATOR_s *l
     // The locator's instance slot holds the look-at record pointer.
     GCutLookAtState *state = reinterpret_cast<GCutLookAtState *>(static_cast<uintptr_t>(*effect_handle));
     instGetLookAtLocatorInfo(instance, reinterpret_cast<instNUGCUTLOOKAT_s *>(state));
-    if (state->character_index == 0 || state->scene == NULL) {
+    if (__builtin_expect(state->character_index == 0 || state->scene == NULL, 0)) {
         return;
     }
     NUGSCN *scene = state->scene;
@@ -549,7 +549,7 @@ static void instNuGCutLookAtLocatorUpdate(i32 *effect_handle, NUGCUTLOCATOR_s *l
     {
         NUMTX matrix;
         values = NuGCutLocatorCalcMtx(locator, frame, &matrix, NULL);
-        if ((locator->flags & 4) != 0) {
+        if (__builtin_expect((locator->flags & 4) != 0, 0)) {
             NuMtxPreTranslate(&matrix, &locator->pivot);
         }
         if (parent_mtx != NULL) {

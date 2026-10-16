@@ -181,7 +181,7 @@ void NuLgtArcLaserDraw(i32 paused) {
         vertices[5].z = laser->end.z;
         vertices[5].w = 1.0f;
         NuVec4MtxTransformVU0(&vertices[5], &vertices[5], clip);
-        if (!(vertices[4].w >= 0.5f) && !(vertices[5].w >= 0.5f))
+        if (__builtin_expect(!(vertices[4].w >= 0.5f) && !(vertices[5].w >= 0.5f), 0))
             continue;
         if (vertices[4].w < 0.5f) {
             f32 numerator = vertices[5].w - 0.5f;
@@ -199,7 +199,7 @@ void NuLgtArcLaserDraw(i32 paused) {
         f32 dy = vertices[6].y - laser->end.y;
         f32 dz = vertices[6].z - laser->end.z;
         sqrt((double)(dx * dx + dy * dy + dz * dz));
-        if (vertices[5].w < 0.5f) {
+        if (__builtin_expect(vertices[5].w < 0.5f, 1)) {
             f32 denominator = vertices[4].w - vertices[5].w;
             f32 numerator = vertices[4].w - 0.5f;
             vertices[7].x = (laser->end.x - laser->start.x) * numerator / denominator + laser->start.x;
@@ -226,7 +226,7 @@ void NuLgtArcLaserDraw(i32 paused) {
         vertices[7].w -= vertices[6].w;
         f32 length =
             NuFsqrt(vertices[7].x * vertices[7].x + vertices[7].y * vertices[7].y + vertices[7].z * vertices[7].z);
-        if (!(length > 0.0f))
+        if (__builtin_expect(!(length > 0.0f), 0))
             continue;
         vertices[10].x = laser->bend.x;
         vertices[10].y = laser->bend.y;
@@ -710,7 +710,7 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
             memcpy(&record, metadata, sizeof(record));
             metadata += sizeof(record);
             remaining -= sizeof(record);
-            if (record.data_size > remaining) {
+            if (__builtin_expect(record.data_size > remaining, 1)) {
                 break;
             }
             if (record.fourcc == 0x03525650 && record.key == 2 && record.data_size == 6) {
@@ -852,7 +852,7 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
     i32 bits_per_pixel = 0;
     bool compressed = false;
 
-    if (channel_bits == 0) {
+    if (__builtin_expect(channel_bits == 0, 0)) {
         static const GLenum compressed_formats[6] = {
             0x8c01, // GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG
             0x8c03, // GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG

@@ -978,7 +978,7 @@ extern "C" {
     i32 NuDisplayListRndrSpecial(nuhspecial_s *special_handle, NUMTX *mtx, i32 skinned, NUMTX *skin_matrices,
                                  DEFORMERWEIGHTSARRAY *blend_values) {
         (void)skinned;
-        if (special_handle == NULL || mtx == NULL)
+        if (__builtin_expect(special_handle == NULL || mtx == NULL, 0))
             return 0;
         NuSpecialHandleLayout *handle = reinterpret_cast<NuSpecialHandleLayout *>(special_handle);
         NuSpecialBoundsDisplayLayout *special = static_cast<NuSpecialBoundsDisplayLayout *>(handle->display_special);
@@ -1026,16 +1026,16 @@ extern "C" {
         }
 
         f32 distance_alpha = 1.0f;
-        if (scene->fade_ranges != NULL && (scene->visibility_flags[special->instance_ix] & 0x40) != 0) {
+        if (__builtin_expect(scene->fade_ranges != NULL && (scene->visibility_flags[special->instance_ix] & 0x40) != 0, 0)) {
             const f32 fade_end = scene->fade_ranges[special->instance_ix * 2 + 1];
             const f32 fade_start = scene->fade_ranges[special->instance_ix * 2];
-            if (fade_end <= fade_start) {
+            if (__builtin_expect(fade_end <= fade_start, 0)) {
                 if (distance_sqr <= fade_end * fade_end)
                     return 0;
                 distance_alpha = (NuFsqrt(distance_sqr) - fade_end) / (fade_start - fade_end);
                 if (distance_alpha > 1.0f)
                     distance_alpha = 1.0f;
-            } else if (!(distance_sqr <= fade_start * fade_start)) {
+            } else if (__builtin_expect(!(distance_sqr <= fade_start * fade_start), 0)) {
                 distance_alpha = (fade_end - NuFsqrt(distance_sqr)) / (fade_end - fade_start);
                 distance_alpha = distance_alpha >= 0.0f ? distance_alpha : 0.0f;
             }
@@ -1047,11 +1047,11 @@ extern "C" {
         for (u32 i = 0; i < static_cast<u32>(clip_object->nmaterials); ++i) {
             NUMTL *material = scene->mtls[clip_object->material_ids[i]];
             NUMTL *replacement = NULL;
-            if (nurndr_forced_mtl_table != NULL && material->unknown_9a[0] != 0)
+            if (__builtin_expect(nurndr_forced_mtl_table != NULL && material->unknown_9a[0] != 0, 0))
                 replacement = nurndr_forced_mtl_table[material->unknown_9a[0]];
             else
                 replacement = nurndr_forced_mtl;
-            if (replacement != NULL) {
+            if (__builtin_expect(replacement != NULL, 1)) {
                 if (material->shader_desc.vtx_desc.flags != replacement->shader_desc.vtx_desc.flags)
                     material = NuMtlFindVariantMtl(material, replacement);
                 else

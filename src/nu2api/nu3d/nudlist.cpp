@@ -840,7 +840,7 @@ void DisplayListLinkDynamicMtls(void) {
         // Find owning sortpri (last key match wins).
         i32 key = MtlSortKey(mtl);
         i32 sp_idx = -1;
-        if (mgr->dyn_mtl_dlist.nsort_pris >= 1) {
+        if (__builtin_expect(mgr->dyn_mtl_dlist.nsort_pris >= 1, 1)) {
             for (i32 j = 0; j < mgr->dyn_mtl_dlist.nsort_pris; ++j) {
                 if (key == mgr->dyn_mtl_dlist.sort_pris[j].sort_pri)
                     sp_idx = j;
@@ -882,7 +882,7 @@ void DisplayListLinkDynamicMtls(void) {
 
         {
             sp->nmtls--;
-            if (sp->nmtls == 0) {
+            if (__builtin_expect(sp->nmtls == 0, 1)) {
                 // Unlink empty sortpri.
                 if (mgr->sort_list != sp) {
                     nusortpri_s *cur = mgr->sort_list;
@@ -983,7 +983,7 @@ void DisplayListLinkDynamicMtls(void) {
         // Insertion position — before first used material with key >= ours.
         i32 insert = pos;
         for (i32 j = 0; j < static_cast<i32>(mgr->dyn_mtl_dlist.nmtls); ++j) {
-            if (mgr->material_used[j] != 0 && key <= MtlSortKey(mgr->dyn_mtl_dlist.mtls[j])) {
+            if (__builtin_expect(mgr->material_used[j] != 0 && key <= MtlSortKey(mgr->dyn_mtl_dlist.mtls[j]), 1)) {
                 insert = j;
                 break;
             }
@@ -1001,7 +1001,7 @@ void DisplayListLinkDynamicMtls(void) {
 
         {
             for (i32 i = 0; i < static_cast<i32>(mgr->dyn_mtl_dlist.nmtls); ++i) {
-                if (mgr->material_used[i] != 0) {
+                if (__builtin_expect(mgr->material_used[i] != 0, 1)) {
                     mgr->dyn_mtl_dlist.mtls[i]->display_list->mtl_id = i;
                 }
             }
@@ -1023,7 +1023,7 @@ void DisplayListLinkDynamicMtls(void) {
         nusortpri_s *sp;
         if (sp_idx != -1) {
             sp = &mgr->dyn_mtl_dlist.sort_pris[sp_idx];
-            if (insert != 0 && MtlSortKey(mgr->dyn_mtl_dlist.mtls[insert - 1]) == key) {
+            if (__builtin_expect(insert != 0 && MtlSortKey(mgr->dyn_mtl_dlist.mtls[insert - 1]) == key, 0)) {
                 // Splice after previous material's block.
                 auto *anchor = mgr->dyn_mtl_dlist.mtls[insert - 1]->display_list->mtl_item;
                 auto *follow = static_cast<nudisplaylistitem_s *>(anchor[7].next);
@@ -1056,7 +1056,7 @@ void DisplayListLinkDynamicMtls(void) {
                     prev = cur;
                     cur = cur->sys_next;
                 }
-                if (prev == nullptr) {
+                if (__builtin_expect(prev == nullptr, 0)) {
                     sp->sys_next = mgr->sort_list;
                     mgr->sort_list = sp;
                 } else {
@@ -1079,7 +1079,7 @@ void DisplayListLinkDynamicMtls(void) {
                 if (sp->nmtls == 0)
                     continue;
                 for (u32 k = 0; k < total; ++k) {
-                    if (MtlSortKey(mgr->dyn_mtl_dlist.mtls[k]) == sp->sort_pri) {
+                    if (__builtin_expect(MtlSortKey(mgr->dyn_mtl_dlist.mtls[k]) == sp->sort_pri, 0)) {
                         sp->mtl_first = static_cast<u16>(k);
                         break;
                     }
@@ -1156,13 +1156,13 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
         clip_done:
 
             // Alpha fade — patch alpha into every 0x82 geom item.
-            if (sc->alpha_values && sc->nclip_objects > 0) {
+            if (__builtin_expect(sc->alpha_values && sc->nclip_objects > 0, 0)) {
                 for (i32 o = 0; o < sc->nclip_objects; ++o) {
                     i32 *indices = sc->clip_objects[o].indices;
                     u16 cnt = sc->clip_counts[o];
                     for (i32 j = 0; j < cnt; ++j) {
                         auto *item = &sc->items[indices[j]];
-                        if (item->id != kItemId_Cnt && item->type == 0x82) {
+                        if (__builtin_expect(item->id != kItemId_Cnt && item->type == 0x82, 0)) {
                             DisplayListSetAlphaPS(item - 1, item, sc->alpha_values[o]);
                             cnt = sc->clip_counts[o];
                         }
@@ -1197,7 +1197,7 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
     nuglobalrndrstate_s *last_local = nullptr;
 
     auto linkSceneGeometry = [](NUDISPLAYLIST *dl) {
-        if (dl->scene_first[dl->scene_buffer] != dl->scene_next) {
+        if (__builtin_expect(dl->scene_first[dl->scene_buffer] != dl->scene_next, 0)) {
             dl->dyn_geom->next = dl->scene_first[dl->scene_buffer];
             dl->scene_next->type = kItemType_Link;
             dl->scene_next->next = dl->dyn_geom + 1;
@@ -1209,7 +1209,7 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
 
     auto copyMaterialGeometry = [&](NUDISPLAYLIST *dl, nudisplaylistitem_s *first, nudisplayscene_s *sc) {
         *dl->dyn_geom = *first;
-        if ((sc->flags & 4) == 0) {
+        if (__builtin_expect((sc->flags & 4) == 0, 0)) {
             dl->mtl_last->next = dl->mtl_item->next;
         } else if (dl->scene_first[dl->scene_buffer] != dl->scene_next) {
             dl->mtl_last->next = dl->scene_first[dl->scene_buffer];
@@ -1238,7 +1238,7 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
             NUMTL *mtl = sc->mtls[mi];
             nuglobalrndrstate_s *ls = sc->local_state;
 
-            if (ls && (sc->flags & 4) != 0) {
+            if (__builtin_expect(ls && (sc->flags & 4) != 0, 1)) {
                 if (dl->mtl_last != dl->first) {
                     DisplayListUpdateRenderState(dl, ls);
                     last_local = sc->local_state;
@@ -1249,7 +1249,7 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
             } else {
                 last_local = nullptr;
             }
-            if (dl->mtl_last == dl->first) {
+            if (__builtin_expect(dl->mtl_last == dl->first, 0)) {
                 linkSceneGeometry(dl);
             } else {
                 copyMaterialGeometry(dl, dl->first, sc);
@@ -1259,8 +1259,8 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
 
             // Visibility cull — hide materials that fail the scene's flag test.
             u16 scene_flags = *reinterpret_cast<const u16 *>(&sc->flags);
-            if ((scene_flags & 0x1fe0) != 0 &&
-                ((static_cast<u8>(scene_flags >> 5) & static_cast<u8>(MTL_ATTRIB_DWORD1(mtl) >> 0xe)) != 0)) {
+            if (__builtin_expect((scene_flags & 0x1fe0) != 0 &&
+                ((static_cast<u8>(scene_flags >> 5) & static_cast<u8>(MTL_ATTRIB_DWORD1(mtl) >> 0xe)) != 0), 1)) {
                 dl->mtl_item->id = kItemId_Next;
                 i32 mid = dl->mtl_id;
                 i32 word = (mid >= 0) ? mid >> 3 : (mid + 7) >> 3;

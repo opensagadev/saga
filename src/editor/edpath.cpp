@@ -2569,7 +2569,7 @@ static inline bool pathEditor_HasConnection(EDAIPATHNODE_s *node, EDAIPATHNODE_s
 eduimenu_s *pathEditor_Process(nupad_s *pad) {
     if (pad->digital_buttons_pressed & 0x80) {
         eduimenu_s *menu = eduiMenuCreate(200, 70, 240, 270, ed_fnt, aieditor_cbCancelMainMenu, "Options");
-        if (menu == NULL)
+        if (__builtin_expect(menu == NULL, 0))
             return NULL;
         eduiMenuAddItem(
             menu, eduiItemSelCreate(AIEDITOR_ROUTES, attr, 0, 0, aieditor_cvSelectEditorMode, "Select Editor Mode"));
@@ -2636,7 +2636,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
         return menu;
     }
     EDAIPATH_s *path = aieditor->current_path;
-    if (!path)
+    if (__builtin_expect(!path, 0))
         return NULL;
     EDAIPATHNODE_s *previous = path->current_node;
     if (!(path->flags & 1))
@@ -2660,17 +2660,17 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
         path->runtime_nearest = static_cast<i16>(nearest);
         if (pad->digital_buttons_pressed & 0x40) {
             path = aieditor->current_path;
-            if (path->runtime_nearest >= 0)
+            if (__builtin_expect(path->runtime_nearest >= 0, 0))
                 path->runtime_start = path->runtime_nearest;
         }
         if (pad->digital_buttons_pressed & 0x10) {
             path = aieditor->current_path;
-            if (path->runtime_nearest >= 0)
+            if (__builtin_expect(path->runtime_nearest >= 0, 1))
                 path->runtime_end = path->runtime_nearest;
         }
         if (pad->digital_buttons_pressed & 0x100) {
             path = aieditor->current_path;
-            if (path->runtime_nearest >= 0) {
+            if (__builtin_expect(path->runtime_nearest >= 0, 1)) {
                 path->runtime_start = path->runtime_nearest;
                 edcamSetPos(&aieditor->runtime_path->nodes[path->runtime_nearest].position);
                 path = aieditor->current_path;
@@ -2700,10 +2700,10 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
         }
         return NULL;
     }
-    if (pad->digital_buttons & 0x40) {
+    if (__builtin_expect(!!(pad->digital_buttons & 0x40), 1)) {
         EDAIPATHNODE_s *nearest = path->nearest_node;
         if (!nearest) {
-            if (pad->digital_buttons_pressed & 0x40) {
+            if (__builtin_expect(!!(pad->digital_buttons_pressed & 0x40), 1)) {
                 EDAIPATHNODE_s *node = NULL;
                 if (path->node_count <= 253) {
                     node = reinterpret_cast<EDAIPATHNODE_s *>(NuLinkedListGetHead(&aieditor->free_path_nodes));
@@ -2734,7 +2734,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
                         aieditor->current_path->current_node = previous;
                 }
             }
-        } else if (pad->digital_buttons_pressed & 0x40) {
+        } else if (__builtin_expect(!!(pad->digital_buttons_pressed & 0x40), 0)) {
             path->current_node = nearest;
             NUVEC position = {nearest->position.x, aieditor->cursor_position.y, nearest->position.z};
             edcamSetPos(&position);
@@ -2745,13 +2745,13 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
             locatorEditor_PathNodeMoved(aieditor->current_path->current_node);
             if (AIPathNodeDeletedFn)
                 AIPathNodeDeletedFn(aieditor->current_path->current_node);
-            if (pad->digital_buttons & 0x200) {
+            if (__builtin_expect(!!(pad->digital_buttons & 0x200), 1)) {
                 path = aieditor->current_path;
                 f32 dx = path->current_node->position.x - old_x, dz = path->current_node->position.z - old_z;
                 for (EDAIPATHNODE_s *node = reinterpret_cast<EDAIPATHNODE_s *>(NuLinkedListGetHead(&path->nodes)); node;
                      node = reinterpret_cast<EDAIPATHNODE_s *>(
                          NuLinkedListGetNext(&aieditor->current_path->nodes, &node->link))) {
-                    if (node != aieditor->current_path->current_node) {
+                    if (__builtin_expect(node != aieditor->current_path->current_node, 0)) {
                         node->position.x += dx;
                         node->position.z += dz;
                         locatorEditor_PathNodeMoved(node);
@@ -2911,7 +2911,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
     }
     if (direction) {
         path = aieditor->current_path;
-        if (path->current_node)
+        if (__builtin_expect(!!(path->current_node), 1))
             path->current_node = reinterpret_cast<EDAIPATHNODE_s *>(
                 direction > 0 ? NuLinkedListGetNext(&path->nodes, &path->current_node->link)
                               : NuLinkedListGetPrev(&path->nodes, &path->current_node->link));

@@ -1150,7 +1150,7 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
         if (position == NULL) {
             position = Player_StartPos(obj);
         }
-        if (position != NULL) {
+        if (__builtin_expect(position != NULL, 0)) {
             obj->apiobj.position = *position;
         }
 
@@ -1244,7 +1244,7 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
             surface_y = GetHoverPosY(obj);
         }
         if (snap_to_surface == 0 || (obj->apiobj.character_data->model_flags & 0x2000) != 0) {
-            if (surface_y != kInvalidSurfaceHeight) {
+            if (__builtin_expect(surface_y != kInvalidSurfaceHeight, 1)) {
                 obj->apiobj.position.y = surface_y;
                 SyncPlayerSpawnPosition(obj);
             }
@@ -1272,7 +1272,7 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
         ResetPlayerAI(obj);
         obj->apiobj.last_safe_position = obj->apiobj.position;
         obj->saved_position = obj->apiobj.position;
-        if ((obj->apiobj.character_data->model_flags & 0x2000) != 0) {
+        if (__builtin_expect((obj->apiobj.character_data->model_flags & 0x2000) != 0, 1)) {
             obj->in_narrow_socket = ObjInNarrowSock(obj, WORLD->sock_sys, WORLD->level_idx);
             f32 speed = GetVehicleSpeedMul(obj, 0.0f);
             obj->field_0xdc8 = speed;

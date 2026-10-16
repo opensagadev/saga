@@ -3199,11 +3199,11 @@ GameObject_s *TargetGameObject(GameObject_s *object, nuvec_s *position, nuvec_s 
     f32 nearest_distance = range_squared;
     i32 count = HIGHGAMEOBJECT;
     for (i32 i = 0; i < count; ++i, ++target) {
-        if (target == object || (target->apiobj.flags_high & 0x10) == 0 || target->apiobj.field_0x287 != 0 ||
-            (require_drawn != 0 && target->apiobj.model_draw_result == 0) || (target->field_0xf00 & 1) != 0)
+        if (__builtin_expect(target == object || (target->apiobj.flags_high & 0x10) == 0 || target->apiobj.field_0x287 != 0 ||
+            (require_drawn != 0 && target->apiobj.model_draw_result == 0) || (target->field_0xf00 & 1) != 0, 1))
             continue;
         i8 context = target->character_context;
-        if ((static_cast<u8>(context) & 0xfd) == 0x39 || context == 0x3c || (CInfo[context].flags & 0x8000) != 0)
+        if (__builtin_expect((static_cast<u8>(context) & 0xfd) == 0x39 || context == 0x3c || (CInfo[context].flags & 0x8000) != 0, 0))
             continue;
         if (model_mask != 0) {
             if ((target->apiobj.character_data->model_flags & model_mask) == 0)
@@ -3212,7 +3212,7 @@ GameObject_s *TargetGameObject(GameObject_s *object, nuvec_s *position, nuvec_s 
             continue;
         if (static_cast<u8>(context - 0x5f) <= 1)
             continue;
-        if (arcade == 0 && object->apiobj.player_controlled && (target->field_0xf02 & 0x80) == 0) {
+        if (__builtin_expect(arcade == 0 && object->apiobj.player_controlled && (target->field_0xf02 & 0x80) == 0, 0)) {
             u32 *mask = WORLD->api_object_sys->hostility_masks[object->apiobj.field_0x289];
             u64 hostility = static_cast<u64>(mask[0]) | (static_cast<u64>(mask[1]) << 32);
             if (((hostility >> target->apiobj.field_0x289) & 1) == 0)
@@ -3239,7 +3239,7 @@ GameObject_s *TargetGameObject(GameObject_s *object, nuvec_s *position, nuvec_s 
                             ? near_angle
                             : (mid_distance > distance ? mid_angle : far_angle);
             if (dot > NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff]) {
-                if (object->collision_target == target)
+                if (__builtin_expect(object->collision_target == target, 1))
                     previous = target;
                 else {
                     nearest_distance = distance;

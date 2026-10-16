@@ -936,7 +936,7 @@ extern "C" {
         if (scanned == MAXPARTS)
             return NULL;
         if ((part->active & 1) != 0) {
-            if (part->replace_callback != NULL)
+            if (__builtin_expect(part->replace_callback != NULL, 0))
                 part->replace_callback(part);
             KillPart(part, 0);
         }
@@ -996,7 +996,7 @@ extern "C" {
             }
         }
         part->source_special = params->special;
-        if (params->special != NULL)
+        if (__builtin_expect(params->special != NULL, 1))
             part->special = *params->special;
         else
             memset(&part->special, 0, sizeof(part->special));
@@ -1057,7 +1057,7 @@ extern "C" {
             part->lighting_template = params->lighting_template;
             *params->lighting_template = rtlDynamicAllocTemplate(PartRTL, params->field_84);
         }
-        if (++i_part == MAXPARTS)
+        if (__builtin_expect(++i_part == MAXPARTS, 1))
             i_part = 0;
         return part;
     }
@@ -2325,7 +2325,7 @@ void edpartLoadSingleType(part_typedesc_s *type, i32 version, i32 page) {
     for (i32 i = 0; i < variants; ++i) {
         EdFileRead(type->object_names[i], 16);
         type->effect_ids[i] = -1;
-        if (type->effect_pages[i] == 0 || type->effect_pages[i] == 1) {
+        if (__builtin_expect(type->effect_pages[i] == 0 || type->effect_pages[i] == 1, 1)) {
             const i32 scene_page = type->effect_pages[i] == 0 ? page : 0;
             for (i32 scene = 0; scene < 32; ++scene) {
                 if (part_scene_pageid[scene] == scene_page) {
@@ -2398,10 +2398,10 @@ void edpartLoadSingleType(part_typedesc_s *type, i32 version, i32 page) {
         type->trail_effects[0] = -1;
         type->trail_effects[1] = -1;
         type->attached_effect = -1;
-        if (version > 2) {
+        if (__builtin_expect(version > 2, 0)) {
             const char mode = EdFileReadChar();
             EdFileRead(name, 16);
-            if (mode == 0)
+            if (__builtin_expect(mode == 0, 0))
                 type->trail_effects[0] = edpartLookupDebrisEffect(name);
             else if (mode == 1)
                 type->attached_effect = edpartLookupDebrisEffect(name);

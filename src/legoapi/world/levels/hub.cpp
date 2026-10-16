@@ -574,7 +574,7 @@ void Hub_Update(WORLDINFO_s *world) {
                     continue;
                 }
                 const i32 id = *store_pack.id;
-                if (id == -1) {
+                if (__builtin_expect(id == -1, 0)) {
                     continue;
                 }
                 ++required;
@@ -590,7 +590,7 @@ void Hub_Update(WORLDINFO_s *world) {
 
     for (i32 pack = 0; pack < 11; ++pack) {
         STOREPACK &store_pack = StorePack[pack];
-        if (store_pack.id != NULL) {
+        if (__builtin_expect(store_pack.id != NULL, 1)) {
             const i32 id = *store_pack.id;
             if (id != -1 && Store_IsPackUnlocked(pack) == 0 &&
                 (store_pack.field44_0x32 == 0xff ||
@@ -607,7 +607,7 @@ void Hub_Update(WORLDINFO_s *world) {
                             locators[count++] = &world->ai_sys->locators[locator_set->locator_entries[i]];
                         }
                     }
-                    if (count != 0) {
+                    if (__builtin_expect(count != 0, 0)) {
                         AILOCATOR *locator = LocalGetNearestLocator(locators, count, 0.0f, &player->apiobj.position,
                                                                     1000000000.0f, 0, 1000000000.0f, 1000000000.0f);
                         if (locator != NULL) {
@@ -1126,7 +1126,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                 buildup_count += EpBuildUpCount;
                 buildup_total += EpBuildUpTotal;
                 both_true_jedi_bricks = BOTHTRUEJEDIGOLDBRICKS;
-                if (both_true_jedi_bricks) {
+                if (__builtin_expect(!!(both_true_jedi_bricks), 1)) {
                     story_total += EpStoryBuildUpTotal;
                     story_count += EpStoryBuildUpCount;
                     free_count += EpFreePlayBuildUpCount;
@@ -1209,7 +1209,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                     }
                 }
             }
-            if (!buildup_total) {
+            if (__builtin_expect(!buildup_total, 0)) {
                 f32 x = 0.0f;
                 if (Game.indy_unlocked) {
                     Hub_DrawImportantBrick(251, 0.1f, HUB_EPISODETITLEY - 0.225f, hub_episode_time, -1, -1);
@@ -1262,7 +1262,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                                        EpRedBrickTotal);
                 Hub_DrawImportantBrick(211, HUB_AREAPANELX[3], HUB_EPISODETITLEY, phase, EpGoldBrickCount,
                                        EpGoldBrickTotal);
-                if (Store_IsPackUnlocked(8)) {
+                if (__builtin_expect(!!(Store_IsPackUnlocked(8)), 0)) {
                     hub_drawminikitcount_charkit = 1;
                     Hub_DrawMiniKitCount(HUB_AREAPANELX[5], HUB_EPISODETITLEY, EpCharKitCount, EpCharKitTotal, phase);
                 }
@@ -1271,7 +1271,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                             HUB_EPISODETITLESIZE, HUB_EPISODETITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB,
                             1.7f, 1, NULL, 0, alpha);
             }
-            if (episode->text_id != -1)
+            if (__builtin_expect(episode->text_id != -1, 0))
                 SmartTextEx(TTab[episode->text_id], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, HUB_EPISODESUBTITLESIZE,
                             HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG,
                             HUB_EPISODEB, 1.7f, 1, NULL, 0, alpha);
@@ -1282,7 +1282,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
             i32 count = 0, total = 0;
             if (Game_AreaSave) {
                 for (i32 i = 0; i < AREACOUNT; ++i) {
-                    if ((ADataList[i].flags & 5) == 5) {
+                    if (__builtin_expect((ADataList[i].flags & 5) == 5, 0)) {
                         ++total;
                         if (Game_AreaSave[i].area_complete ||
                             static_cast<f32>(static_cast<i32>(ADataList[i].challenge_trial_time)) >
