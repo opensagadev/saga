@@ -20,27 +20,27 @@ void refpack_init() {
     constexpr usize hash_table_size = 0x40000;
     constexpr usize link_array_size = 0x10000;
 
-    HashTable = NULL;
+    i32 *hash_table = NULL;
     if (*theMemoryManager.end_cell - *theMemoryManager.cursor_cell > hash_table_size) {
-        usize allocation = ALIGN(*theMemoryManager.cursor_cell, 0x10);
-        *theMemoryManager.cursor_cell = allocation + hash_table_size;
-        HashTable = reinterpret_cast<i32 *>(allocation);
-        memset(HashTable, 0, hash_table_size);
+        hash_table = reinterpret_cast<i32 *>(ALIGN(*theMemoryManager.cursor_cell, 0x10));
+        *theMemoryManager.cursor_cell = reinterpret_cast<usize>(hash_table) + hash_table_size;
+        memset(hash_table, 0, hash_table_size);
         theMemoryManager.allocated += hash_table_size;
         theMemoryManager.remaining -= hash_table_size;
         theMemoryManager.high_water = *theMemoryManager.cursor_cell;
     }
+    HashTable = hash_table;
 
-    LinkArray = NULL;
+    i32 *link_array = NULL;
     if (*theMemoryManager.end_cell - *theMemoryManager.cursor_cell > link_array_size) {
-        usize allocation = ALIGN(*theMemoryManager.cursor_cell, 0x10);
-        *theMemoryManager.cursor_cell = allocation + link_array_size;
-        LinkArray = reinterpret_cast<i32 *>(allocation);
-        memset(LinkArray, 0, link_array_size);
+        link_array = reinterpret_cast<i32 *>(ALIGN(*theMemoryManager.cursor_cell, 0x10));
+        *theMemoryManager.cursor_cell = reinterpret_cast<usize>(link_array) + link_array_size;
+        memset(link_array, 0, link_array_size);
         theMemoryManager.allocated += link_array_size;
         theMemoryManager.remaining -= link_array_size;
         theMemoryManager.high_water = *theMemoryManager.cursor_cell;
     }
+    LinkArray = link_array;
 }
 
 i32 refpack(unsigned char *source, abi_long source_size, unsigned char *destination) {

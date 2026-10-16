@@ -795,7 +795,7 @@ void VaderC_Update(WORLDINFO_s *world) {
         }
     }
 
-    if (netclient != 0 && GameTimer.time_elapsed < 5.0f) {
+    if (__builtin_expect(netclient != 0 && GameTimer.time_elapsed < 5.0f, 0)) {
         GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, "obstacle20");
         if (gizmo != NULL && gizmo->object != NULL)
             static_cast<GIZOBSTACLE_s *>(gizmo->object)->progress_flags &= ~1;
@@ -822,7 +822,7 @@ void VaderC_Update(WORLDINFO_s *world) {
              (second_player->apiobj.field_0x1f8 & 0x80) == 0) &&
             (ChallengeMode == 0 || AreaGlobals.values.field_0x1c <= 9)) {
             vader_c.field_0x95 = 1;
-            if (vader_c.final_fight_message->value == 0.0f)
+            if (__builtin_expect(vader_c.final_fight_message->value == 0.0f, 1))
                 ResetLevel(NULL, NULL, 1);
         }
     }

@@ -1082,72 +1082,53 @@ static i32 UpdateTitleSequence(MENU *menu) {
         music_volume = GameGetMusicVolume(&TempOptions);
     }
 
-    switch (newgamefade) {
-        case 0:
-            legoSetMusicVolume(music_volume);
-            return 0;
+    if (newgamefade == 0) {
+        legoSetMusicVolume(music_volume);
+        return 0;
+    }
 
-        case 1:
-            if (newgamewait > 0.0f) {
-                newgamewait -= FRAMETIME;
-                legoSetMusicVolume(music_volume);
-                return 1;
-            }
-
+    if (newgamefade == 1) {
+        if (newgamewait > 0.0f) {
+            newgamewait -= FRAMETIME;
+        } else {
             newgamealpha += FRAMETIME * 2.0f;
             if (newgamealpha > 1.0f) {
                 newgamealpha = 1.0f;
                 newgamefade = 0;
             }
-            legoSetMusicVolume(music_volume);
-            return 1;
-
-        case 2:
-            if (newgamewait > 0.0f) {
-                newgamewait -= FRAMETIME;
-                legoSetMusicVolume(0.0f);
-                return 1;
+        }
+    } else if (newgamewait > 0.0f) {
+        newgamewait -= FRAMETIME;
+        music_volume = 0.0f;
+        if (newgamewait <= 0.0f) {
+            if (NOSOUND == 0) {
+                music_man.StopAll(0);
+                MusicClearAll();
+                SoundKillAll();
             }
 
-            newgamealpha -= FRAMETIME * 2.0f;
-            if (newgamealpha > 0.0f) {
-                legoSetMusicVolume(music_volume * newgamealpha);
-                return 1;
-            }
+            const f32 movie_volume = static_cast<f32>(static_cast<u32>(Game.options_save.field4_0x4)) / 10.0f;
+            Movie_Play(Trailer[0], &characterbuffer_ptr, &characterbuffer_end, DEFAULTFRAMETIME, NULL, movie_volume);
+            FinishLoop(2);
+            ResetTimer(&GameTimer, music_volume);
+            menu->menu_time = music_volume;
+            menu->unk = music_volume;
+            newgamefade = 1;
+            newgamealpha = music_volume;
+            newgamewait = 0.5f;
 
+            if (NOSOUND == 0 && NOMUSIC == 0) {
+                music_man.StopAll(0);
+                GamePlayMusic(WORLD->current_level, 0, &Game.options_save);
+            }
+        }
+    } else if (newgamefade == 2) {
+        newgamealpha -= FRAMETIME * 2.0f;
+        if (newgamealpha <= 0.0f) {
             newgamealpha = 0.0f;
             newgamewait = 0.1f;
-            legoSetMusicVolume(0.0f);
-            return 1;
-
-        default:
-            if (newgamewait > 0.0f) {
-                newgamewait -= FRAMETIME;
-                legoSetMusicVolume(0.0f);
-                return 1;
-            }
-            break;
-    }
-
-    if (NOSOUND == 0) {
-        music_man.StopAll(0);
-        MusicClearAll();
-        SoundKillAll();
-    }
-
-    const f32 movie_volume = static_cast<f32>(static_cast<u8>(Game.options_save.field4_0x4)) / 10.0f;
-    Movie_Play(Trailer[0], &characterbuffer_ptr, &characterbuffer_end, DEFAULTFRAMETIME, NULL, movie_volume);
-    FinishLoop(2);
-    ResetTimer(&GameTimer, music_volume);
-    menu->menu_time = music_volume;
-    menu->unk = music_volume;
-    newgamefade = 1;
-    newgamealpha = music_volume;
-    newgamewait = 0.5f;
-
-    if (NOSOUND == 0 && NOMUSIC == 0) {
-        music_man.StopAll(0);
-        GamePlayMusic(WORLD->current_level, 0, &Game.options_save);
+        }
+        music_volume *= newgamealpha;
     }
 
     legoSetMusicVolume(music_volume);
@@ -1520,8 +1501,7 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
                 if (PlayerProgress[0].active == 0)
                     pad = &GamePad[1];
             } else if (PlayerProgress[0].active == 0) {
-                readpads_always = 1;
-                both_pads = true;
+                goto no_player;
             }
         } else if (Player[0] != NULL && Player[1] != NULL) {
             const bool first_active =
@@ -1530,10 +1510,10 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
                 if (!first_active)
                     pad = Player[1]->pad_gamepad;
             } else if (!first_active) {
-                readpads_always = 1;
-                both_pads = true;
+                goto no_player;
             }
         } else {
+        no_player:
             readpads_always = 1;
             both_pads = true;
         }

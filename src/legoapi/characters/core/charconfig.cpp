@@ -902,18 +902,40 @@ static void CC_air_gravity(NUFPAR *parser) {
     charconfig.runtime->field_0x24 = NuFParGetFloat(parser);
 }
 
-static void CC_SetAnimFlags(NUFPAR *parser, CHARACTERANIM_s *animation, u32 flags) {
-    animation->flags |= flags;
+// Retail keeps only the IPA-SRA clones (taking the flags field directly),
+// mangled with the original ANIMLIST_s parameter type.
+#if defined(__i386__)
+#define CC_SET_ANIM_FLAGS_ATTR __attribute__((noinline, noclone, regparm(2)))
+// The u32 clone keeps retail's push-based prologue only when size-optimized.
+#define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone, optimize("Os"), regparm(2)))
+#else
+#define CC_SET_ANIM_FLAGS_ATTR __attribute__((noinline, noclone))
+#define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone))
+#endif
+static CC_SET_ANIM_FLAGS_OS_ATTR void CC_SetAnimFlagsField(NUFPAR *parser, u32 *field, u32 flags)
+    __asm__("_ZL15CC_SetAnimFlagsP8nufpar_sP10ANIMLIST_sj.isra.4");
+static void CC_SetAnimFlagsField(NUFPAR *parser, u32 *field, u32 flags) {
+    *field |= flags;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
-        animation->flags &= ~flags;
+        *field &= ~flags;
     }
 }
 
-static void CC_SetAnimMiscFlags(NUFPAR *parser, CHARACTERANIM_s *animation, u16 flags) {
-    animation->misc_flags |= flags;
+static CC_SET_ANIM_FLAGS_ATTR void CC_SetAnimMiscFlagsField(NUFPAR *parser, u16 *field, u16 flags)
+    __asm__("_ZL19CC_SetAnimMiscFlagsP8nufpar_sP10ANIMLIST_st.isra.5");
+static void CC_SetAnimMiscFlagsField(NUFPAR *parser, u16 *field, u16 flags) {
+    *field |= flags;
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
-        animation->misc_flags &= ~flags;
+        *field &= ~flags;
     }
+}
+
+static inline void CC_SetAnimFlags(NUFPAR *parser, CHARACTERANIM_s *animation, u32 flags) {
+    CC_SetAnimFlagsField(parser, &animation->flags, flags);
+}
+
+static inline void CC_SetAnimMiscFlags(NUFPAR *parser, CHARACTERANIM_s *animation, u16 flags) {
+    CC_SetAnimMiscFlagsField(parser, &animation->misc_flags, flags);
 }
 
 static void CC_anim_start(NUFPAR *parser) {

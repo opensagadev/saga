@@ -655,7 +655,13 @@ void ManageGameObjects() {
             }
             if (object->field_0x101c > 0.0f) {
                 object->field_0x101c -= FRAMETIME;
-                if (object->field_0x101c <= 0.0f) {
+                if (!(object->field_0x101c <= 0.0f)) {
+                    if (WORLD->current_level == PODSPRINTA_LDATA) {
+                        GameObject_s *other = GetOtherActivePlayer(object);
+                        if (other != NULL)
+                            object->apiobj.position = other->apiobj.position;
+                    }
+                } else {
                     object->field_0x101c = 0.0f;
                     GameObject_s *other = NULL;
                     if (WORLD->current_level == PODSPRINTA_LDATA)
@@ -697,10 +703,6 @@ void ManageGameObjects() {
                     if (object->apiobj.player_controlled && WORLD->current_level == SPEEDERCHASEA_LDATA &&
                         disable_narrow_socks == 0)
                         GameCam_Blend(GameCam, 0.5f, 0.0f, 0);
-                } else if (WORLD->current_level == PODSPRINTA_LDATA) {
-                    GameObject_s *other = GetOtherActivePlayer(object);
-                    if (other != NULL)
-                        object->apiobj.position = other->apiobj.position;
                 }
                 continue;
             }

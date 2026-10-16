@@ -602,43 +602,42 @@ i32 edbriFileSave(char *path) {
     EdFileWriteInt(1);
     EdFileWriteInt(count);
     for (i32 i = 0; i < 64; ++i) {
-        edbridge_s &bridge = edBridges[i];
-        if (bridge.connection_index == 0xff)
+        if (edBridges[i].connection_index == 0xff)
             continue;
-        EdFileWriteNuVec(&bridge.position);
-        EdFileWriteFloat(bridge.length);
-        EdFileWriteFloat(bridge.field_14);
-        EdFileWriteShort(bridge.rotation_z);
-        EdFileWriteShort(bridge.rotation_y);
-        EdFileWriteChar(bridge.field_1d);
-        EdFileWriteChar(bridge.field_1e);
+        EdFileWriteNuVec(&edBridges[i].position);
+        EdFileWriteFloat(edBridges[i].length);
+        EdFileWriteFloat(edBridges[i].field_14);
+        EdFileWriteShort(edBridges[i].rotation_z);
+        EdFileWriteShort(edBridges[i].rotation_y);
+        EdFileWriteChar(edBridges[i].field_1d);
+        EdFileWriteChar(edBridges[i].field_1e);
         char name[20];
-        if (bridge.special_20 == -1)
+        if (edBridges[i].special_20 == -1)
             name[0] = '\0';
         else {
             nuhspecial_s special;
-            NuGScnGetSpecial(&special, edbits_base_scene, bridge.special_20);
+            NuGScnGetSpecial(&special, edbits_base_scene, edBridges[i].special_20);
             strncpy(name, NuSpecialGetName(&special), sizeof(name));
         }
         EdFileWrite(name, sizeof(name));
-        if (bridge.special_24 == -1)
+        if (edBridges[i].special_24 == -1)
             name[0] = '\0';
         else {
             nuhspecial_s special;
-            NuGScnGetSpecial(&special, edbits_base_scene, bridge.special_24);
+            NuGScnGetSpecial(&special, edbits_base_scene, edBridges[i].special_24);
             strncpy(name, NuSpecialGetName(&special), sizeof(name));
         }
         EdFileWrite(name, sizeof(name));
-        EdFileWriteFloat(bridge.field_28);
-        EdFileWriteFloat(bridge.field_2c);
-        EdFileWriteFloat(bridge.field_30);
-        EdFileWriteFloat(bridge.field_34);
-        EdFileWriteFloat(bridge.field_38);
-        EdFileWriteFloat(bridge.field_3c);
-        EdFileWriteChar(bridge.red);
-        EdFileWriteChar(bridge.green);
-        EdFileWriteChar(bridge.blue);
-        EdFileWriteChar(bridge.field_43);
+        EdFileWriteFloat(edBridges[i].field_28);
+        EdFileWriteFloat(edBridges[i].field_2c);
+        EdFileWriteFloat(edBridges[i].field_30);
+        EdFileWriteFloat(edBridges[i].field_34);
+        EdFileWriteFloat(edBridges[i].field_38);
+        EdFileWriteFloat(edBridges[i].field_3c);
+        EdFileWriteChar(edBridges[i].red);
+        EdFileWriteChar(edBridges[i].green);
+        EdFileWriteChar(edBridges[i].blue);
+        EdFileWriteChar(edBridges[i].field_43);
     }
     EdFileClose();
     return 1;
@@ -732,46 +731,43 @@ i32 edgraFileSave(char *path) {
     EdFileWriteInt(element_count);
 
     for (i32 i = 0; i < EDGRA_MAX_CLUMPS; ++i) {
-        edgra_clump_s &clump = GrassClumps[i];
-        if (!clump.element_count)
+        if (!GrassClumps[i].element_count)
             continue;
         nuhspecial_s special;
-        NuGScnGetSpecial(&special, edbits_base_scene, clump.special_index);
+        NuGScnGetSpecial(&special, edbits_base_scene, GrassClumps[i].special_index);
         char name[20];
         strncpy(name, NuSpecialGetName(&special), sizeof(name));
         name[19] = '\0';
         EdFileWrite(name, sizeof(name));
-        EdFileWriteInt(clump.element_count);
-        EdFileWriteNuVec(&clump.position);
-        EdFileWriteFloat(clump.size);
-        EdFileWriteFloat(clump.field_18);
-        EdFileWriteInt(clump.flags);
-        EdFileWriteFloat(clump.field_20);
-        EdFileWriteChar(clump.unknown_25);
-        EdFileWriteChar(clump.unknown_26);
-        EdFileWriteChar(clump.kind);
-        EdFileWriteInt(clump.seed);
-        EdFileWriteFloat(clump.field_2c);
-        EdFileWriteFloat(clump.field_30);
-        EdFileWriteShort(clump.rotation_z);
-        EdFileWriteShort(clump.rotation_y);
-        EdFileWriteFloat(clump.near_distance);
-        EdFileWriteFloat(clump.far_distance);
-        EdFileWriteChar(clump.field_42);
-        EdFileWriteChar(clump.field_43);
-        EdFileWriteFloat(clump.field_44);
-        if (clump.kind == 3) {
-            for (i32 j = 0; j < clump.element_count; ++j) {
-                edgra_individual_s *individual = GetIndGrassClump(clump.individual_index, j);
-                EdFileWriteNuVec(&individual->position);
-                EdFileWriteFloat(individual->field_0c);
-                EdFileWriteShort(individual->field_10);
-                EdFileWriteShort(individual->field_12);
+        EdFileWriteInt(GrassClumps[i].element_count);
+        EdFileWriteNuVec(&GrassClumps[i].position);
+        EdFileWriteFloat(GrassClumps[i].size);
+        EdFileWriteFloat(GrassClumps[i].field_18);
+        EdFileWriteInt(GrassClumps[i].flags);
+        EdFileWriteFloat(GrassClumps[i].field_20);
+        EdFileWriteChar(GrassClumps[i].unknown_25);
+        EdFileWriteChar(GrassClumps[i].unknown_26);
+        EdFileWriteChar(GrassClumps[i].kind);
+        EdFileWriteInt(GrassClumps[i].seed);
+        EdFileWriteFloat(GrassClumps[i].field_2c);
+        EdFileWriteFloat(GrassClumps[i].field_30);
+        EdFileWriteShort(GrassClumps[i].rotation_z);
+        EdFileWriteShort(GrassClumps[i].rotation_y);
+        EdFileWriteFloat(GrassClumps[i].near_distance);
+        EdFileWriteFloat(GrassClumps[i].far_distance);
+        EdFileWriteChar(GrassClumps[i].field_42);
+        EdFileWriteChar(GrassClumps[i].field_43);
+        EdFileWriteFloat(GrassClumps[i].field_44);
+        if (GrassClumps[i].kind == 3) {
+            for (i32 j = 0; j < GrassClumps[i].element_count; ++j) {
+                EdFileWriteNuVec(&GetIndGrassClump(GrassClumps[i].individual_index, j)->position);
+                EdFileWriteFloat(GetIndGrassClump(GrassClumps[i].individual_index, j)->field_0c);
+                EdFileWriteShort(GetIndGrassClump(GrassClumps[i].individual_index, j)->field_10);
+                EdFileWriteShort(GetIndGrassClump(GrassClumps[i].individual_index, j)->field_12);
             }
         }
-        NUVEC *vectors = static_cast<NUVEC *>(clump.vector_buffer);
-        for (i32 j = 0; j < clump.element_count; ++j)
-            EdFileWriteNuVec(&vectors[j]);
+        for (i32 j = 0; j < GrassClumps[i].element_count; ++j)
+            EdFileWriteNuVec(&static_cast<NUVEC *>(GrassClumps[i].vector_buffer)[j]);
     }
 
     EdFileSetReadWrongEndianess(0);
@@ -851,40 +847,40 @@ i32 edanimFileSave(char *path) {
     EdFileWriteInt(6);
     EdFileWriteInt(parameter_count);
 
-    for (const auto &param : AnimParams) {
-        if (param.instance_id == -1) {
+    for (i32 i = 0; i < 64; ++i) {
+        if (AnimParams[i].instance_id == -1) {
             continue;
         }
         nuhspecial_s special;
-        NuGScnGetSpecial(&special, edbits_base_scene, param.instance_id);
+        NuGScnGetSpecial(&special, edbits_base_scene, AnimParams[i].instance_id);
         char name[20];
         strncpy(name, NuSpecialGetName(&special), sizeof(name));
         name[sizeof(name) - 1] = '\0';
         EdFileWrite(name, sizeof(name));
-        EdFileWriteInt(param.effect_count);
-        EdFileWriteInt(param.sound_count);
-        EdFileWriteInt(param.field_00c);
-        EdFileWriteInt(param.field_010);
-        EdFileWriteFloat(param.field_014);
-        EdFileWriteFloat(param.field_018);
+        EdFileWriteInt(AnimParams[i].effect_count);
+        EdFileWriteInt(AnimParams[i].sound_count);
+        EdFileWriteInt(AnimParams[i].field_00c);
+        EdFileWriteInt(AnimParams[i].field_010);
+        EdFileWriteFloat(AnimParams[i].field_014);
+        EdFileWriteFloat(AnimParams[i].field_018);
 
-        for (i32 effect = 0; effect < param.effect_count; ++effect) {
-            EdFileWrite(const_cast<char *>(param.effect_names[effect]), sizeof(param.effect_names[effect]));
-            EdFileWriteInt(param.effect_intervals[effect]);
-            EdFileWriteInt(param.effect_flags[effect]);
-            EdFileWriteNuVec(reinterpret_cast<NUVEC *>(const_cast<f32 *>(param.effect_positions[effect])));
-            EdFileWriteShort(param.effect_angles[effect]);
-            EdFileWriteShort(param.effect_angle_ranges[effect]);
+        for (i32 effect = 0; effect < AnimParams[i].effect_count; ++effect) {
+            EdFileWrite(const_cast<char *>(AnimParams[i].effect_names[effect]), sizeof(AnimParams[i].effect_names[effect]));
+            EdFileWriteInt(AnimParams[i].effect_intervals[effect]);
+            EdFileWriteInt(AnimParams[i].effect_flags[effect]);
+            EdFileWriteNuVec(reinterpret_cast<NUVEC *>(const_cast<f32 *>(AnimParams[i].effect_positions[effect])));
+            EdFileWriteShort(AnimParams[i].effect_angles[effect]);
+            EdFileWriteShort(AnimParams[i].effect_angle_ranges[effect]);
         }
-        for (i32 sound = 0; sound < param.sound_count; ++sound) {
-            EdFileWrite(const_cast<char *>(param.sound_names[sound]), sizeof(param.sound_names[sound]));
-            EdFileWriteInt(param.sound_flags[sound]);
-            EdFileWriteFloat(param.sound_values[sound]);
-            EdFileWriteNuVec(reinterpret_cast<NUVEC *>(const_cast<f32 *>(param.sound_positions[sound])));
+        for (i32 sound = 0; sound < AnimParams[i].sound_count; ++sound) {
+            EdFileWrite(const_cast<char *>(AnimParams[i].sound_names[sound]), sizeof(AnimParams[i].sound_names[sound]));
+            EdFileWriteInt(AnimParams[i].sound_flags[sound]);
+            EdFileWriteFloat(AnimParams[i].sound_values[sound]);
+            EdFileWriteNuVec(reinterpret_cast<NUVEC *>(const_cast<f32 *>(AnimParams[i].sound_positions[sound])));
         }
-        EdFileWriteFloat(param.bounce_impulse);
-        EdFileWriteFloat(param.bounce_spring);
-        EdFileWriteFloat(param.bounce_damping);
+        EdFileWriteFloat(AnimParams[i].bounce_impulse);
+        EdFileWriteFloat(AnimParams[i].bounce_spring);
+        EdFileWriteFloat(AnimParams[i].bounce_damping);
     }
 
     EdFileClose();
@@ -6262,17 +6258,18 @@ void EdFileInputStream::Open(i32 handle, i32) {
 
 i32 EdFileInputStream::SerialiseBuffer(void *data, i32 size, i32 count) {
     i32 result = NuFileRead(file, data, size * count);
-    if (swap_endianness && size > 1 && count > 0) {
-        if (size == 2) {
-            for (i32 i = 0; i < count; ++i) {
-                EdFileSwapEndianess16(data);
-                data = static_cast<u8 *>(data) + 2;
+    if (swap_endianness && size > 1) {
+        u8 *cursor = static_cast<u8 *>(data);
+        for (i32 i = 0; i < count; i++) {
+            switch (size) {
+                case 2:
+                    EdFileSwapEndianess16(cursor);
+                    break;
+                case 4:
+                    EdFileSwapEndianess32(cursor);
+                    break;
             }
-        } else if (size == 4) {
-            for (i32 i = 0; i < count; ++i) {
-                EdFileSwapEndianess32(data);
-                data = static_cast<u8 *>(data) + 4;
-            }
+            cursor += size;
         }
     }
     return result;
@@ -6314,25 +6311,30 @@ i32 EdFileOutputStream::SerialiseBuffer(void *data, i32 size, i32 count) {
     if (swap_endianness && size > 1) {
         u8 *cursor = static_cast<u8 *>(data);
         for (i32 i = 0; i < count; i++) {
-            if (size == 2) {
-                EdFileSwapEndianess16(cursor);
-                cursor += 2;
-            } else if (size == 4) {
-                EdFileSwapEndianess32(cursor);
-                cursor += 4;
+            switch (size) {
+                case 2:
+                    EdFileSwapEndianess16(cursor);
+                    break;
+                case 4:
+                    EdFileSwapEndianess32(cursor);
+                    break;
             }
+            cursor += size;
         }
     }
     i32 result = NuFileWrite(file, data, size * count);
-    if (swap_endianness) {
+    if (swap_endianness && size > 1) {
+        u8 *cursor = static_cast<u8 *>(data);
         for (i32 i = 0; i < count; i++) {
-            if (size == 2) {
-                EdFileSwapEndianess16(data);
-                data = static_cast<u8 *>(data) + 2;
-            } else if (size == 4) {
-                EdFileSwapEndianess32(data);
-                data = static_cast<u8 *>(data) + 4;
+            switch (size) {
+                case 2:
+                    EdFileSwapEndianess16(cursor);
+                    break;
+                case 4:
+                    EdFileSwapEndianess32(cursor);
+                    break;
             }
+            cursor += size;
         }
     }
     return result;

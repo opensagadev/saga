@@ -620,7 +620,7 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
     }
     if (LevFlag[0] != 0) {
         enginetimer -= FRAMETIME;
-        if (enginetimer <= 0.0f)
+        if (__builtin_expect(enginetimer <= 0.0f, 0))
             enginetimer = 0.1f;
         f32 offset = 1.0f - (NU_SIN_LUT(enginetimer * 10.0f * 32768.0f + 16384.0f) + 1.0f) * 0.5f;
         f32 z = lumppos.z + (offset * 0.01f - 0.005f);

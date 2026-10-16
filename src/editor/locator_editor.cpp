@@ -901,7 +901,7 @@ __attribute__((optimize("no-tree-vectorize"))) eduimenu_s *locatorEditor_Process
             sprintf(title, "Add locators \"%s\" to set \"%s\"?", aieditor->pending_locator_name,
                     aieditor->current_locator_set->name);
             eduimenu_s *menu = eduiMenuCreate(100, 70, 440, 270, ed_fnt, aieditor_cbCancelMainMenu, title);
-            if (menu != nullptr) {
+            if (__builtin_expect(menu != nullptr, 1)) {
                 eduiMenuAddItem(menu,
                                 eduiItemSelCreate(0, attr, 0, 0, locatorEditor_cbAddLocatorsByNameYesNo, (char *)"No"));
                 eduiMenuAddItem(
@@ -973,13 +973,13 @@ process_buttons:
 
             if (aieditor->current_locator_set != nullptr && NuStrLen(aieditor->current_locator_set->name) != 0) {
                 NuStrCpy(base, aieditor->current_locator_set->name);
-            } else if (previous != nullptr) {
+            } else if (__builtin_expect(previous != nullptr, 0)) {
                 NuStrCpy(base, previous->name);
             } else {
                 NuStrCpy(base, "Locator");
             }
             char *suffix = strrchr(base, '_');
-            if (suffix != nullptr) {
+            if (__builtin_expect(suffix != nullptr, 0)) {
                 *suffix = 0;
             }
             AIEDITOR_RENDER_STATE *context = aieditor;

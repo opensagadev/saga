@@ -423,7 +423,7 @@ void KaminoC_Update(WORLDINFO_s *world) {
             NUVEC *position = NuSpecialGetPos(&kaminodisco.pending[kaminodisco.first_tile]);
             for (i32 i = 0; i < 8; ++i) {
                 GameObject_s *object = Player[i];
-                if (KaminoDiscoOccupied(object, position)) {
+                if (__builtin_expect(!!(KaminoDiscoOccupied(object, position)), 0)) {
                     first_occupied = true;
                     if (object == player)
                         occupied_by_player = kaminodisco.first_tile;
@@ -439,7 +439,7 @@ void KaminoC_Update(WORLDINFO_s *world) {
             position = NuSpecialGetPos(&kaminodisco.pending[kaminodisco.second_tile]);
             for (i32 i = 0; i < 8; ++i) {
                 GameObject_s *object = Player[i];
-                if (KaminoDiscoOccupied(object, position)) {
+                if (__builtin_expect(!!(KaminoDiscoOccupied(object, position)), 0)) {
                     second_occupied = true;
                     if (object == player)
                         occupied_by_player = kaminodisco.second_tile;
@@ -467,7 +467,7 @@ void KaminoC_Update(WORLDINFO_s *world) {
                 break;
             }
             kaminodisco.timer += FRAMETIME;
-            if (kaminodisco.timer > 2.5f) {
+            if (__builtin_expect(kaminodisco.timer > 2.5f, 1)) {
                 kaminodisco.timer = 0.0f;
                 for (i32 i = 0; i < 2; ++i) {
                     i32 tile = KaminoDiscoChooseTile(-1, 3);
@@ -500,7 +500,7 @@ void KaminoC_Update(WORLDINFO_s *world) {
             for (i32 i = 0; i < kaminodisco.tile_count; ++i)
                 kaminodisco.tile_state[i] = 4;
             kaminodisco.timer += FRAMETIME;
-            if (kaminodisco.timer > 20.0f) {
+            if (__builtin_expect(kaminodisco.timer > 20.0f, 0)) {
                 KaminoC_Reset(world);
                 return;
             }

@@ -72,21 +72,18 @@ extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3) {
         }
     }
 
-    if (menu_index == -1) {
-        MENU *menu = &GameMenu[GameMenuLevel];
-        menu->field_bc = 0;
-        MenuRememberCursor(menu);
-        menu->menu = -1;
-        MenuA = 0;
-        MenuAlpha = 0.0f;
-        MenuValidated = 0;
-        return;
-    }
-
     MENU *previous = &GameMenu[GameMenuLevel];
     const i16 previous_menu = previous->menu;
     previous->field_bc = 0;
     MenuRememberCursor(previous);
+    if (menu_index == -1) {
+        GameMenu[GameMenuLevel].menu = -1;
+        MenuAlpha = 0.0f;
+        MenuA = 0;
+        MenuValidated = 0;
+        return;
+    }
+
     if (GameMenuLevel + 1 < 10) {
         ++GameMenuLevel;
     }

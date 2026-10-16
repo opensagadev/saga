@@ -1162,21 +1162,19 @@ static AILOCATOR *AISysLoadFindLocator(AISYS *system, char *name) {
     return NULL;
 }
 
-static AIAREA *AISysLoadAreaReference(AISYS *system) {
-    char name[16];
+static AIAREA *AISysLoadAreaReference(AISYS *system, char *name) {
     if (EdFileReadInt() == 0) {
         return NULL;
     }
-    EdFileRead(name, sizeof(name));
+    EdFileRead(name, 16);
     return AISysLoadFindArea(system, name);
 }
 
-static AILOCATOR *AISysLoadLocatorReference(AISYS *system) {
-    char name[16];
+static AILOCATOR *AISysLoadLocatorReference(AISYS *system, char *name) {
     if (EdFileReadInt() == 0) {
         return NULL;
     }
-    EdFileRead(name, sizeof(name));
+    EdFileRead(name, 16);
     return AISysLoadFindLocator(system, name);
 }
 
@@ -1273,7 +1271,7 @@ static void AISysLoadLocatorSets(AISYS *system, i32 version) {
     }
 }
 
-static void AISysLoadCreatures(AISYS *system, i32 version) {
+static void AISysLoadCreatures(AISYS *system, i32 version, char *character_name, char *area_name) {
     system->creature_count = EdFileReadInt();
     if (system->creature_count == 0) {
         return;
@@ -1289,7 +1287,6 @@ static void AISysLoadCreatures(AISYS *system, i32 version) {
         if (creature->script_name[0] == '\0') {
             strcpy(creature->script_name, "default");
         }
-        char character_name[32];
         if (version < 14)
             EdFileRead(character_name, 16);
         else
@@ -1325,13 +1322,13 @@ static void AISysLoadCreatures(AISYS *system, i32 version) {
         }
 
         if (version > 3) {
-            creature->area = AISysLoadAreaReference(system);
+            creature->area = AISysLoadAreaReference(system, area_name);
         }
         if (version > 5) {
-            creature->locator = AISysLoadLocatorReference(system);
+            creature->locator = AISysLoadLocatorReference(system, area_name);
         }
         if (version > 16) {
-            creature->respawn_locator = AISysLoadLocatorReference(system);
+            creature->respawn_locator = AISysLoadLocatorReference(system, area_name);
         }
 
         if (version > 7) {
@@ -1354,8 +1351,7 @@ static void AISysLoadCreatures(AISYS *system, i32 version) {
             creature->start_stagger = default_stagger_start;
         }
         if (creature->activate_type == 1) {
-            char area_name[16];
-            EdFileRead(area_name, sizeof(area_name));
+            EdFileRead(area_name, 16);
             creature->activate_area = AISysLoadFindArea(system, area_name);
         }
         if (version > 10) {
@@ -2943,6 +2939,8 @@ extern "C" {
         char ai2_path[128];
         char script_path[128];
         char packed_name[256];
+        char character_name[32];
+        char area_name[16];
 
         if (ai_usepackfile != 0) {
             sprintf(pak_path, "%sLevels\\%s\\%s\\ai.pak", AiLevelPathName, directory, parameter);
@@ -2992,7 +2990,7 @@ extern "C" {
                     AISysLoadLocators(system, version);
                     AISysLoadLocatorSets(system, version);
                 }
-                AISysLoadCreatures(system, version);
+                AISysLoadCreatures(system, version, character_name, area_name);
                 if (version > 12)
                     AISysLoadAntinodes(system, version, gscene, packed_name);
                 if (version > 6 && GameAILoadFn != NULL) {

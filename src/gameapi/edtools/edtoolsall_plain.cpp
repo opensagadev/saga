@@ -729,10 +729,11 @@ static void edgraRender() {
                 edbitsDrawDiagonalCross(clump.position.x, clump.position.y, clump.position.z, 0.125f, 0xffff0000,
                                         edgra_mtl);
                 if (edgra_nearest_instance != -1) {
-                    edgra_individual_s *individual = GetIndGrassClump(clump.individual_index, edgra_nearest_instance);
-                    edbitsDrawCross(clump.position.x + individual->position.x,
-                                    clump.position.y + individual->position.y,
-                                    clump.position.z + individual->position.z, 0.125f, 0xff80ffff, edgra_mtl);
+                    edbitsDrawCross(
+                        clump.position.x + GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->position.x,
+                        clump.position.y + GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->position.y,
+                        clump.position.z + GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->position.z,
+                        0.125f, 0xff80ffff, edgra_mtl);
                 }
             } else {
                 edbitsDrawDiagonalCross(clump.position.x, clump.position.y, clump.position.z, 0.125f, 0xff80ffff,
@@ -6934,12 +6935,9 @@ extern "C" {
             auto *entries = static_cast<FilePickDirectoryEntry *>(dir_list);
             FilePickDirectoryEntry &entry = entries[item->data];
             if (entry.flags & 8) {
-                if (!filepick_item->filename[0]) {
-                    NuStrCpy(filepick_item->filename, entry.name);
-                } else {
+                if (filepick_item->filename[0])
                     NuStrCat(filepick_item->filename, const_cast<char *>("/"));
-                    NuStrCat(filepick_item->filename, entry.name);
-                }
+                NuStrCat(filepick_item->filename, entry.name);
                 filepick_item->reopen_directory = 1;
             } else {
                 NuStrCpy(filepick_item->name, entry.name);

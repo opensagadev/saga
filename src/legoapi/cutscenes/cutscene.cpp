@@ -954,7 +954,7 @@ static inline __attribute__((always_inline)) void NuGCutSceneFixPtrs_Title(NUGCU
         NUGCUT_WORD(cutscene->locator_system) += cutscene->string_delta;
         NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
         NUGCUT_RELOCATE(system->locators, cutscene->string_delta);
-        if (system->locators != NULL && anim_delta != 0) {
+        if (system->locators != NULL && __builtin_expect(anim_delta != 0, 0)) {
             for (i32 i = 0; i < system->locator_count; ++i) {
                 NUGCUTLOCATOR_s *locator = &system->locators[i];
                 if (locator->animation != NULL) {
@@ -978,18 +978,27 @@ static inline __attribute__((always_inline)) void NuGCutSceneFixPtrs_Title(NUGCU
         NUGCUTRIGIDSYS_s *system = cutscene->rigid_system;
         NUGCUT_RELOCATE(system->rigids, cutscene->string_delta);
         if (system->rigids != NULL) {
-            for (i32 i = 0; i < system->count; ++i) {
-                NUGCUTRIGID_s *rigid = &system->rigids[i];
-                if (rigid->name != NULL) {
-                    rigid->name = reinterpret_cast<char *>(reinterpret_cast<isize>(rigid->name) +
-                                                           reinterpret_cast<isize>(cutscene->strings) - 1);
-                }
-                if (anim_delta != 0) {
+            // Retail unswitches this loop on anim_delta.
+            if (__builtin_expect(anim_delta != 0, 1)) {
+                for (i32 i = 0; i < system->count; ++i) {
+                    NUGCUTRIGID_s *rigid = &system->rigids[i];
+                    if (rigid->name != NULL) {
+                        rigid->name = reinterpret_cast<char *>(reinterpret_cast<isize>(rigid->name) +
+                                                               reinterpret_cast<isize>(cutscene->strings) - 1);
+                    }
                     if (rigid->animation != NULL) {
                         rigid->animation =
                             static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(rigid->animation, anim_delta, 0, 0));
                     }
                     rigid->state_animation = StateAnimFixPtrs(rigid->state_animation, anim_delta);
+                }
+            } else {
+                for (i32 i = 0; i < system->count; ++i) {
+                    NUGCUTRIGID_s *rigid = &system->rigids[i];
+                    if (rigid->name != NULL) {
+                        rigid->name = reinterpret_cast<char *>(reinterpret_cast<isize>(rigid->name) +
+                                                               reinterpret_cast<isize>(cutscene->strings) - 1);
+                    }
                 }
             }
         }
@@ -999,13 +1008,22 @@ static inline __attribute__((always_inline)) void NuGCutSceneFixPtrs_Title(NUGCU
         NUGCUTCHARSYS_s *system = cutscene->character_system;
         NUGCUT_RELOCATE(system->characters, cutscene->string_delta);
         if (system->characters != NULL) {
-            for (i32 i = 0; i < system->character_count; ++i) {
-                NUGCUTCHAR_s *character = &system->characters[i];
-                if (character->name != NULL) {
-                    character->name = reinterpret_cast<char *>(reinterpret_cast<isize>(character->name) +
-                                                               reinterpret_cast<isize>(cutscene->strings) - 1);
+            // Retail also unswitches the character loop on anim_delta.
+            if (anim_delta == 0) {
+                for (i32 i = 0; i < system->character_count; ++i) {
+                    NUGCUTCHAR_s *character = &system->characters[i];
+                    if (character->name != NULL) {
+                        character->name = reinterpret_cast<char *>(reinterpret_cast<isize>(character->name) +
+                                                                   reinterpret_cast<isize>(cutscene->strings) - 1);
+                    }
                 }
-                if (anim_delta != 0) {
+            } else {
+                for (i32 i = 0; i < system->character_count; ++i) {
+                    NUGCUTCHAR_s *character = &system->characters[i];
+                    if (character->name != NULL) {
+                        character->name = reinterpret_cast<char *>(reinterpret_cast<isize>(character->name) +
+                                                                   reinterpret_cast<isize>(cutscene->strings) - 1);
+                    }
                     if (character->animation != NULL) {
                         character->animation =
                             static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(character->animation, anim_delta, 0, 0));

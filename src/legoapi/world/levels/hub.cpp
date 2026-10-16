@@ -521,14 +521,14 @@ static void Hub_UpdatePackObstacle(i32 pack) {
     if (LevGizObst[12 - pack] == NULL) {
         return;
     }
-    if (Store_IsPackUnlocked(pack)) {
-        GIZOBSTACLE_s *obstacle = LevGizObst[12 - pack];
-        obstacle->progress_flags |= 1;
-        obstacle->runtime_flags &= static_cast<u8>(~8);
-    } else {
+    if (!Store_IsPackUnlocked(pack)) {
         GIZOBSTACLE_s *obstacle = LevGizObst[12 - pack];
         obstacle->progress_flags &= static_cast<u8>(~1);
         obstacle->runtime_flags |= 8;
+    } else {
+        GIZOBSTACLE_s *obstacle = LevGizObst[12 - pack];
+        obstacle->progress_flags |= 1;
+        obstacle->runtime_flags &= static_cast<u8>(~8);
     }
 }
 
@@ -668,8 +668,9 @@ void Hub_Update(WORLDINFO_s *world) {
     } else if (GetMenuID() != 12) {
         for (i32 player_index = 0; player_index < 2; ++player_index) {
             GameObject_s *player = Player[player_index];
-            if (player != NULL && player->apiobj.player_controlled && player->apiobj.field_0x27d != 0 &&
-                player->pad_gamepad->input_magnitude == 0.0f && player->pad_gamepad->previous_input_magnitude == 0.0f &&
+            if (player != NULL && player->apiobj.player_controlled &&
+                __builtin_expect(player->apiobj.field_0x27d != 0, 1) && player->pad_gamepad->input_magnitude == 0.0f &&
+                player->pad_gamepad->previous_input_magnitude == 0.0f &&
                 (player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0x32)) {
                 shop_available = player->apiobj.field_0x281 == 0x0e;
             }
@@ -708,8 +709,9 @@ void Hub_Update(WORLDINFO_s *world) {
     if (Customiser_MenuAvailable(CharacterCustomiser) != 0) {
         for (i32 player_index = 0; player_index < 2; ++player_index) {
             GameObject_s *player = Player[player_index];
-            if (player != NULL && player->apiobj.player_controlled && player->apiobj.field_0x27d != 0 &&
-                player->pad_gamepad->input_magnitude == 0.0f && player->pad_gamepad->previous_input_magnitude == 0.0f &&
+            if (player != NULL && player->apiobj.player_controlled &&
+                __builtin_expect(player->apiobj.field_0x27d != 0, 1) && player->pad_gamepad->input_magnitude == 0.0f &&
+                player->pad_gamepad->previous_input_magnitude == 0.0f &&
                 (player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0x32)) {
                 customiser_available = player->apiobj.field_0x281 == 0x0f;
             }
@@ -747,8 +749,9 @@ void Hub_Update(WORLDINFO_s *world) {
     if (missions_available != 0) {
         for (i32 player_index = 0; player_index < 2; ++player_index) {
             GameObject_s *player = Player[player_index];
-            if (player != NULL && player->apiobj.player_controlled && player->apiobj.field_0x27d != 0 &&
-                player->pad_gamepad->input_magnitude == 0.0f && player->pad_gamepad->previous_input_magnitude == 0.0f &&
+            if (player != NULL && player->apiobj.player_controlled &&
+                __builtin_expect(player->apiobj.field_0x27d != 0, 1) && player->pad_gamepad->input_magnitude == 0.0f &&
+                player->pad_gamepad->previous_input_magnitude == 0.0f &&
                 (player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0x32)) {
                 mission_menu_available = player->apiobj.field_0x281 == 0x14;
             }
@@ -2153,8 +2156,9 @@ bool HubCustomiserUnlocked() {
 // allows the compiler to specialize those constant arguments naturally.
 // Retail only keeps the player-one, full-alpha specialisation of the cursor
 // drawing body; its name records the partial-inlining and constprop clones.
-static __attribute__((noinline, noclone)) void Hub_DrawIconCursors(COLLECTION_s *collection, f32 scale)
-    __asm__("_ZL19Hub_DrawIconCursorsP12COLLECTION_siff.part.9.constprop.51");
+static __attribute__((noinline, noclone)) void
+Hub_DrawIconCursors(COLLECTION_s *collection,
+                    f32 scale) __asm__("_ZL19Hub_DrawIconCursorsP12COLLECTION_siff.part.9.constprop.51");
 static void Hub_DrawIconCursors(COLLECTION_s *collection, f32 scale) {
     const i32 player = 0;
     const f32 alpha = 1.0f;

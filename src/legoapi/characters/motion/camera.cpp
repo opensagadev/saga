@@ -1692,12 +1692,20 @@ void KeepOnScreen(GameObject_s *object) {
     if (newgamecam != 0 || (object->field_0xf03 & 0x10) != 0)
         return;
     i32 controlled = 0;
-    for (i32 index = 0; index < 8; ++index) {
-        GameObject_s *player = Player[index];
-        if (player != NULL && player->character_context == 0x51 && player->field_0x788 != NULL &&
-            static_cast<TECHNO *>(player->field_0x788)->controlled_object == object)
-            controlled = 1;
-    }
+    // The original checks all eight player slots in straight-line code.
+#define KEEPONSCREEN_CHECK_CONTROLLER(index)                                                                      \
+    if (Player[index] != NULL && Player[index]->character_context == 0x51 && Player[index]->field_0x788 != NULL && \
+        static_cast<TECHNO *>(Player[index]->field_0x788)->controlled_object == object)                           \
+        controlled = 1;
+    KEEPONSCREEN_CHECK_CONTROLLER(0)
+    KEEPONSCREEN_CHECK_CONTROLLER(1)
+    KEEPONSCREEN_CHECK_CONTROLLER(2)
+    KEEPONSCREEN_CHECK_CONTROLLER(3)
+    KEEPONSCREEN_CHECK_CONTROLLER(4)
+    KEEPONSCREEN_CHECK_CONTROLLER(5)
+    KEEPONSCREEN_CHECK_CONTROLLER(6)
+    KEEPONSCREEN_CHECK_CONTROLLER(7)
+#undef KEEPONSCREEN_CHECK_CONTROLLER
     if (static_cast<i8>(object->apiobj.flags_low) >= 0) {
         if (controlled == 0)
             return;
@@ -1715,20 +1723,22 @@ void KeepOnScreen(GameObject_s *object) {
         const f32 push_speed = object->apiobj.character_data->game_character->run_speed * 5.0f;
         f32 count = 0.0f;
         NUVEC response;
-        const i32 planes[4] = {3, 2, 1, 4};
-        const i32 rotations[4] = {0x6000, 0xa000, 0x2000, 0xe000};
-        for (i32 index = 0; index < 4; ++index) {
-            PLAYPLANE_s *plane = &PlayPlane[planes[index]];
-            if (OnOrInsidePlane(&object->apiobj.collision_position, &plane->point, &plane->normal, NULL, 0.0f, NULL) !=
-                0) {
-                NUVEC normal;
-                NuVecRotateY(&normal, &GunshipANorm, rotations[index]);
-                Surface_Deflect(&normal, &object->apiobj.velocity, &response, 0);
-                response.x += normal.x * push_speed;
-                response.z += normal.z * push_speed;
-                count += 1.0f;
-            }
-        }
+        NUVEC normal;
+#define KEEPONSCREEN_GUNSHIP_PLANE(plane_index, rotation)                                                         \
+    if (__builtin_expect(OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[plane_index].point,       \
+                                         &PlayPlane[plane_index].normal, NULL, 0.0f, NULL) != 0,                  \
+                         1)) {                                                                                    \
+        NuVecRotateY(&normal, &GunshipANorm, rotation);                                                           \
+        Surface_Deflect(&normal, &object->apiobj.velocity, &response, 0);                                         \
+        response.x += normal.x * push_speed;                                                                      \
+        response.z += normal.z * push_speed;                                                                      \
+        count += 1.0f;                                                                                            \
+    }
+        KEEPONSCREEN_GUNSHIP_PLANE(3, 0x6000)
+        KEEPONSCREEN_GUNSHIP_PLANE(2, 0xa000)
+        KEEPONSCREEN_GUNSHIP_PLANE(1, 0x2000)
+        KEEPONSCREEN_GUNSHIP_PLANE(4, 0xe000)
+#undef KEEPONSCREEN_GUNSHIP_PLANE
         if (count > 0.0f) {
             const f32 inverse_count = 1.0f / count;
             // The original retains the last response, then divides by the

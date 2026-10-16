@@ -866,6 +866,7 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
             if (stage->field_0x18 >= 0.5f) {
                 MENU *menu = &GameMenu[menu_level];
                 i32 player = 0;
+                auto *pad = &GamePad[0];
                 i32 selected;
                 i32 moved_down;
                 i32 moved_up;
@@ -879,7 +880,7 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
                             menu->queued_item = -1;
                             selected = 1;
                         }
-                        const u32 buttons = GamePad[player].buttons_pressed;
+                        const u32 buttons = pad->buttons_pressed;
                         if ((buttons & GAMEPAD_MENUSELECT) != 0) {
                             selected = 1;
                         } else if (((packet->field_0xb0 & 0x48) == 8 &&
@@ -888,12 +889,12 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
                                    (packet->mode_flags & 1) != 0 || packet->challenge_state != 0 ||
                                    packet->mission_state != 0) {
                             if (status_prompt < 1) {
-                                if (((buttons | GamePad[player].left_directions) & GAMEPAD_DDOWN) != 0) {
+                                if (((buttons | pad->left_directions) & GAMEPAD_DDOWN) != 0) {
                                     GameAudio_PlaySfx(0x2f, NULL, 0, 0);
                                     ++status_prompt;
                                     moved_down = 1;
                                 }
-                            } else if (((buttons | GamePad[player].left_directions) & GAMEPAD_DUP) != 0) {
+                            } else if (((buttons | pad->left_directions) & GAMEPAD_DUP) != 0) {
                                 GameAudio_PlaySfx(0x2f, NULL, 0, 0);
                                 --status_prompt;
                                 moved_up = 1;
@@ -901,6 +902,7 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
                         }
                     }
                     ++player;
+                    ++pad;
                     if (selected != 0) {
                         break;
                     }
@@ -1087,7 +1089,7 @@ void UpdateStatusScreen(WORLDINFO_s *) {
                 return;
             }
             for (i32 player = 0; player < 2; ++player) {
-                if ((player == 0 ? StatusPacket.player0_active : StatusPacket.player1_active) == 0) {
+                if (__builtin_expect((player == 0 ? StatusPacket.player0_active : StatusPacket.player1_active) == 0, 1)) {
                     continue;
                 }
                 if ((GamePad[player].buttons_pressed & GAMEPAD_MENUSELECT) != 0) {
@@ -1134,7 +1136,7 @@ void UpdateStatusScreen(WORLDINFO_s *) {
         if (skip) {
             MechInputTouchMenuController::AnyTouchesThisFrame = 0;
         } else {
-            const u32 button = Text_Language == 0 ? GAMEPAD_MENUSELECT : GAMEPAD_JUMP;
+            const u32 button = __builtin_expect(Text_Language != 0, 0) ? GAMEPAD_JUMP : GAMEPAD_MENUSELECT;
             skip = (StatusPacket.player0_active != 0 && (GamePad[0].buttons_pressed & button) != 0) ||
                    (StatusPacket.player1_active != 0 && (GamePad[1].buttons_pressed & button) != 0);
         }

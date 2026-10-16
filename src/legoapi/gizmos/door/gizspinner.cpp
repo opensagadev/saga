@@ -937,8 +937,7 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
 
 void GizSpinners_Update(void *world_ptr, void *, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world == NULL || world->spinners == NULL || world->current_level == NULL ||
-        world->current_level->max_spinners == 0)
+    if (world == NULL || world->spinners == NULL || world->current_level->max_spinners == 0)
         return;
     for (i32 index = 0; index < world->current_level->max_spinners; ++index) {
         GIZSPINNER_s *spinner = &world->spinners[index];

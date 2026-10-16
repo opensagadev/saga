@@ -1669,7 +1669,7 @@ void pathEditor_Enter(void) {
             return 5;
         if (node->connections[6].node == other)
             return 6;
-        if (node->connections[7].node == other)
+        if (__builtin_expect(node->connections[7].node == other, 0))
             return 7;
         return 8;
     };
@@ -1693,7 +1693,7 @@ void pathEditor_Enter(void) {
     memset(shared_nodes, 0, sizeof(shared_nodes));
     AIPATHSYS_s *runtime_system = aieditor->ai_system != nullptr ? aieditor->ai_system->path_sys : nullptr;
     bool rebuild_paths = aieditor->cached_path_system != runtime_system;
-    if (rebuild_paths) {
+    if (__builtin_expect(!!(rebuild_paths), 1)) {
         aieditor->cached_path_system = runtime_system;
     }
     if (rebuild_paths && runtime_system != nullptr && runtime_system->path_count != 0) {
@@ -1701,13 +1701,13 @@ void pathEditor_Enter(void) {
         for (i32 path_index = 0; path_index < runtime_system->path_count; ++path_index) {
             AIPATH_s *runtime_path = runtime_system->paths[path_index];
             EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->free_paths);
-            if (path == nullptr) {
+            if (__builtin_expect(path == nullptr, 0)) {
                 break;
             }
             NuLinkedListRemove(&aieditor->free_paths, &path->link);
             NuLinkedListAppend(&aieditor->paths, &path->link);
             strcpy(path->name, runtime_path->name);
-            if (NuStrICmp(path->name, "LevelPath") == 0) {
+            if (__builtin_expect(NuStrICmp(path->name, "LevelPath") == 0, 0)) {
                 path->flags |= 1;
             }
             for (i32 route_index = 0; route_index < runtime_path->route_count; ++route_index) {
@@ -1724,7 +1724,7 @@ void pathEditor_Enter(void) {
                     break;
                 }
                 EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&aieditor->free_path_nodes);
-                if (node == nullptr) {
+                if (__builtin_expect(node == nullptr, 0)) {
                     break;
                 }
                 NuLinkedListRemove(&aieditor->free_path_nodes, &node->link);
@@ -1753,9 +1753,9 @@ void pathEditor_Enter(void) {
                             shared_nodes[shared_index] = shared;
                         }
                     }
-                    if (shared != nullptr) {
+                    if (__builtin_expect(shared != nullptr, 0)) {
                         if (node->shared_node != shared) {
-                            if (node->shared_node != nullptr) {
+                            if (__builtin_expect(node->shared_node != nullptr, 0)) {
                                 EDAISHAREDPATHNODE_s *previous = node->shared_node;
                                 --previous->reference_count;
                                 if (previous->reference_count <= 1) {
@@ -1782,11 +1782,11 @@ void pathEditor_Enter(void) {
                             i32 free_node_slot = -1;
                             i32 free_other_slot = -1;
 #define FIND_FREE_OTHER(source_slot)                                                                                   \
-    if (other->connections[0].node == nullptr) {                                                                       \
+    if (__builtin_expect(other->connections[0].node == nullptr, 0)) {                                                                       \
         free_node_slot = source_slot;                                                                                  \
         free_other_slot = 0;                                                                                           \
         goto free_slots_found;                                                                                         \
-    } else if (other->connections[1].node == nullptr) {                                                                \
+    } else if (__builtin_expect(other->connections[1].node == nullptr, 0)) {                                                                \
         free_node_slot = source_slot;                                                                                  \
         free_other_slot = 1;                                                                                           \
         goto free_slots_found;                                                                                         \
@@ -1873,7 +1873,7 @@ void pathEditor_Enter(void) {
             path->flags |= 1;
         }
     }
-    if (aieditorsettings.current_path_name[0] != '\0') {
+    if (__builtin_expect(aieditorsettings.current_path_name[0] != '\0', 0)) {
         aieditor->current_path = pathEditor_GetPath(aieditorsettings.current_path_name);
     } else {
         aieditor->current_path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths);
@@ -2154,7 +2154,7 @@ eduimenu_s *routeEditor_Process(nupad_s *pad) {
     if (pressed & 0x80) {
         eduimenu_s *menu =
             eduiMenuCreate(200, 70, 240, 270, ed_fnt, aieditor_cbCancelMainMenu, const_cast<char *>("Options"));
-        if (menu == nullptr)
+        if (__builtin_expect(menu == nullptr, 1))
             return nullptr;
         eduiMenuAddItem(menu, eduiItemSelCreate(AIEDITOR_ROUTES, attr, 0, 0, aieditor_cvSelectEditorMode,
                                                 const_cast<char *>("Select Editor Mode")));
@@ -2186,7 +2186,7 @@ eduimenu_s *routeEditor_Process(nupad_s *pad) {
             if (index >= 16)
                 index = 0;
             path->current_route = &path->routes[index];
-            if (!(path->current_route->flags & 1)) {
+            if (__builtin_expect(!(path->current_route->flags & 1), 1)) {
                 ++index;
                 if (index >= 16)
                     index = 0;
@@ -2389,7 +2389,7 @@ eduimenu_s *routeEditor_Process(nupad_s *pad) {
         EDAIPATHNODE_s *nearest = path->nearest_node;
         i32 change = routeEditor_AddToRoute(path->current_node, nearest);
         routeEditor_AddToRoute(nearest, path->current_node);
-        if (change == 1 || change == -1) {
+        if (__builtin_expect(change == 1 || change == -1, 0)) {
             path->current_node = nearest;
             nuvec_s position;
             position.x = nearest->position.x;
@@ -2401,7 +2401,7 @@ eduimenu_s *routeEditor_Process(nupad_s *pad) {
             path = aieditor->current_path;
         }
     }
-    if ((pressed & 0x10) && path->nearest_node != nullptr) {
+    if (__builtin_expect((pressed & 0x10) && path->nearest_node != nullptr, 1)) {
         // The route toggle acts on the highlighted node, which may differ from the selected node.
         EDAIPATHNODE_s *node = path->nearest_node;
         i32 index = path->current_route - path->routes;

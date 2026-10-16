@@ -191,6 +191,11 @@ extern i32 memcard_autosavedisabled;
 static i32 header_r;
 static i32 header_g;
 static i32 header_b;
+// Retail clears these "fast repeat" latches but never sets them.
+static i32 fastup_lock;
+static i32 fastdown_lock;
+static i32 fastleft_lock;
+static i32 fastright_lock;
 void (*drawslotinfofn)(f32, f32, i32, i32) = APIMenuDrawGameState;
 void (*drawslotsfn)(MENU *, f32) = APIMenuDrawMemCardSlots;
 static i32 lastslot;
@@ -1893,7 +1898,7 @@ extern "C" {
         if ((primary_pressed & directions) != 0)
             pressed = primary_pressed;
 
-        if (MenuAlpha < 0.5f) {
+        if (__builtin_expect(MenuAlpha < 0.5f, 1)) {
             held = 0;
             pressed = 0;
         }
@@ -1902,19 +1907,60 @@ extern "C" {
         i32 up_pressed = pressed & 0x1000;
         i32 right_pressed = pressed & 0x2000;
         i32 left_pressed = pressed & 0x8000;
-        i32 down_held = held & 0x4000;
         i32 up_held = held & 0x1000;
-        i32 right_held = held & 0x2000;
+        if (fastup_lock != 0) {
+            if (up_held != 0)
+                up_held = 0;
+            else
+                fastup_lock = 0;
+        }
+        i32 down_held = held & 0x4000;
+        if (fastdown_lock != 0) {
+            if (down_held != 0)
+                down_held = 0;
+            else
+                fastdown_lock = 0;
+        }
         i32 left_held = held & 0x8000;
+        if (fastleft_lock != 0) {
+            if (left_held != 0)
+                left_held = 0;
+            else
+                fastleft_lock = 0;
+        }
+        i32 right_held = held & 0x2000;
+        if (fastright_lock != 0) {
+            if (right_held != 0)
+                right_held = 0;
+            else
+                fastright_lock = 0;
+        }
 
-        if (up_pressed != 0 && down_pressed != 0)
-            up_pressed = down_pressed = 0;
-        if (left_pressed != 0 && right_pressed != 0)
-            left_pressed = right_pressed = 0;
+        u32 action_04_pressed = pressed & 4;
+        u32 action_08_pressed = pressed & 8;
+        const u32 select_pressed = pressed & select_mask;
+        i32 confirm_pressed;
+        i32 cancel_pressed;
+        if (menu->unk == 0.0f) {
+            confirm_pressed = cancel_pressed = 0;
+        } else {
+            confirm_pressed = pressed & confirm_mask;
+            cancel_pressed = pressed & cancel_mask;
+        }
+        if (down_pressed != 0) {
+            if (up_pressed != 0)
+                up_pressed = down_pressed = 0;
+        }
+        if (right_pressed != 0) {
+            if (left_pressed != 0)
+                left_pressed = right_pressed = 0;
+        }
         if (up_held != 0 && down_held != 0)
             up_held = down_held = 0;
         if (left_held != 0 && right_held != 0)
             left_held = right_held = 0;
+        if (action_04_pressed != 0 && action_08_pressed != 0)
+            action_04_pressed = action_08_pressed = 0;
 
         menu->input_activity = 0;
         if (menu->move_left != 0) {
@@ -1938,17 +1984,7 @@ extern "C" {
             menu->input_activity = 1;
         }
 
-        i32 confirm_pressed = pressed & confirm_mask;
-        i32 cancel_pressed = pressed & cancel_mask;
         u32 start_pressed = pressed & start_mask;
-        const u32 select_pressed = pressed & select_mask;
-        u32 action_04_pressed = pressed & 4;
-        u32 action_08_pressed = pressed & 8;
-        if (action_04_pressed != 0 && action_08_pressed != 0)
-            action_04_pressed = action_08_pressed = 0;
-        if (menu->unk == 0.0f)
-            confirm_pressed = cancel_pressed = 0;
-
         const i32 output_up_pressed = up_pressed;
         const i32 output_down_pressed = down_pressed;
 

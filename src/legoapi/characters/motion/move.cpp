@@ -844,11 +844,15 @@ void MovePlayer(GameObject_s *object) {
         } else {
             f32 x = object->ai.movement_position.x - api.position.x;
             f32 z = object->ai.movement_position.z - api.position.z;
-            if ((x == 0.0f && z == 0.0f)) {
-                pad->input_magnitude = 0.0f;
-                pad->input_angle = 0;
-                pad->input_direction_z = pad->input_direction_x = 0.0f;
-            } else {
+            if (x == 0.0f) {
+                if (z == 0.0f) {
+                    pad->input_magnitude = 0.0f;
+                    pad->input_angle = 0;
+                    pad->input_direction_z = pad->input_direction_x = 0.0f;
+                    goto ai_input_done;
+                }
+            }
+            {
                 f32 distance = NuFsqrt(x * x + z * z);
                 f32 inverse = 1.0f / distance;
                 pad->input_magnitude = distance / ai_moveradius;
@@ -859,6 +863,7 @@ void MovePlayer(GameObject_s *object) {
                 pad->input_angle = NuAtan2D(pad->input_direction_x, pad->input_direction_z);
                 pad->input_angle = NuAngSub(pad->input_angle, GameCam->input_yaw);
             }
+        ai_input_done:
             pad->input_mode = 1;
         }
         if (object->context_target_position != NULL) {
@@ -955,7 +960,8 @@ void MovePlayer(GameObject_s *object) {
             pad->input_mode = 1;
         }
     }
-    if (static_cast<i8>(api.flags_low) < 0 && menu_id == 0x0e && (object == Player[0] || object == Player[1])) {
+    if (__builtin_expect(static_cast<i8>(api.flags_low) < 0, 1) && menu_id == 0x0e &&
+        (object == Player[0] || object == Player[1])) {
         i32 index = object == Player[0] ? 0 : 1;
         Hub_PadSpeed[index] = pad->input_magnitude;
         Hub_PadAngle[index] = pad->input_angle;
@@ -965,20 +971,22 @@ void MovePlayer(GameObject_s *object) {
     } else if (pad->input_magnitude > 0.0f) {
         pad->animation_input_magnitude = pad->input_magnitude;
     }
-    if (object->character_context == 0x3b || object->character_context == 0x39)
+    if (object->character_context == 0x3b)
+        return;
+    if (object->character_context == 0x39)
         return;
     object->field_0x1086 = 2;
     ShoveSystemCheckGameObject(object);
     if (object->id == id_DRAGBOMB) {
         MovePlayer_ROLLING(object);
-    } else if (MovePlayer_TWIST(object) == 0 && MovePlayer_CIRCLE(object) == 0 && MovePlayer_GUNSHIPIN(object) == 0 &&
-               MovePlayer_POD(object) == 0) {
+    } else if (__builtin_expect(MovePlayer_TWIST(object) == 0, 1) && __builtin_expect(MovePlayer_CIRCLE(object) == 0, 1) &&
+               __builtin_expect(MovePlayer_GUNSHIPIN(object) == 0, 1) && __builtin_expect(MovePlayer_POD(object) == 0, 1)) {
         if ((api.character_data->model_flags & 0x2000) == 0)
             MovePlayer_DIRECTIONAL(object);
         else
             MovePlayer_VEHICLEDIRECTIONAL(object);
     }
-    if (LIFTPLAYER != 0 && menu_id == -1 && api.field_0x287 == 0 && object->character_context != 0x2b &&
+    if (LIFTPLAYER != 0 && __builtin_expect(menu_id == -1, 1) && api.field_0x287 == 0 && object->character_context != 0x2b &&
         (api.character_data->game_character->flags_090 & 0x80) == 0 && api.player_controlled &&
         (pad->buttons_held & GAMEPAD_LIFT) != 0 && pad != ViewCamGetGamePad()) {
         GameObject_s *lift = object;
@@ -995,7 +1003,9 @@ void MovePlayer(GameObject_s *object) {
             lift->character_context = -1;
     }
     api.field_0x1fa |= 1;
-    api.previous_velocity = api.velocity;
+    api.previous_velocity.x = api.velocity.x;
+    api.previous_velocity.y = api.velocity.y;
+    api.previous_velocity.z = api.velocity.z;
     APIObjectVelocities(object);
     GameObjectOrigin(object);
 }
@@ -3727,7 +3737,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                        object->character_context != 0x23 && object->character_context != 0x24 &&
                        (object->character_context != 0x17 || (object->jump_input_flags & 1) != 0) &&
                        !AnimPlaying(&api.anim_packet, 12, 1, 1) && !AnimPlaying(&api.anim_packet, 6, 1, 1)) {
-                if ((object->in_narrow_socket && api.player_controlled &&
+                if ((__builtin_expect(object->in_narrow_socket, 1) && api.player_controlled &&
                      WORLD->current_level == DEATHSTARBATTLED_LDATA &&
                      ObjInNarrowSock(object, WORLD->sock_sys, WORLD->level_idx)) ||
                     (object->in_narrow_socket && (WORLD->current_level == DEATHSTAR2BATTLEE_LDATA ||
@@ -3755,7 +3765,8 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                 if (object->in_narrow_socket) {
                     rate *= -0.25f * object->field_0xdc8 + 1.0f;
                     if (turn_multiplier != 0.0f &&
-                        !((api.flags_low & 0x80) != 0 && (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA)))
+                        !(__builtin_expect((api.flags_low & 0x80) != 0, 1) &&
+                          (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA)))
                         rate *= turn_multiplier;
                 }
                 api.movement_facing_angle = TurnRot(api.movement_facing_angle, input_yaw, (i32)(rate * 65536.0f), NULL);
@@ -3783,8 +3794,9 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                     }
                 }
             } else if (object->in_narrow_socket &&
-                       (requested_speed == 0.0f || object->character_context == 0x2a ||
-                        object->character_context == 0x36 || object->character_context == 0x3a)) {
+                       __builtin_expect(requested_speed == 0.0f || object->character_context == 0x2a ||
+                                            object->character_context == 0x36 || object->character_context == 0x3a,
+                                        1)) {
                 u16 desired = narrow_yaw;
                 if (abs(RotDiff(narrow_yaw, api.movement_facing_angle)) > 0x4000)
                     desired += 0x8000;
@@ -3796,9 +3808,10 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                     rate *= 0.25f;
                 api.movement_facing_angle = TurnRot(api.movement_facing_angle, desired, (i32)(rate * 65536.0f), NULL);
             }
+            u8 boundary_player = api.flags_low & 0x80;
             if (!(object->character_context == -1 && object->field_0x1084 &&
                   fabsf(object->contact_normal.y) < NuTrigTable[0x3aaa])) {
-                if ((api.flags_low & 0x80) != 0 && (api.character_data->game_character->flags_090 & 0x10000) == 0 &&
+                if (boundary_player != 0 && (api.character_data->game_character->flags_090 & 0x10000) == 0 &&
                     (i8)object->field_0xf03 >= 0) {
                     i32 outside = OutSideSplineArea(&api.collision_position, WORLD->camera_splines[16], &a, &b, 0);
                     i32 inside = 0;
@@ -3811,7 +3824,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                     }
                 }
             } else {
-                if ((api.flags_low & 0x80) != 0 && (PODSPRINT_ADATA == NULL || WORLD->area != PODSPRINT_ADATA) &&
+                if (boundary_player != 0 && (PODSPRINT_ADATA == NULL || WORLD->area != PODSPRINT_ADATA) &&
                     (api.character_data->game_character->flags_090 & 0x10000) == 0 &&
                     WORLD->current_level != SPEEDERCHASEA_LDATA) {
                     i32 normal_yaw = NuAtan2D(object->contact_normal.x, object->contact_normal.z);
@@ -3955,7 +3968,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
             f32 speed = object->field_0xdc8 * ((PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA)
                                                    ? 35.0f
                                                    : api.character_data->game_character->run_speed);
-            if ((api.flags_low & 0x80) != 0 && WORLD->current_level == DEATHSTARBATTLED_LDATA &&
+            if (__builtin_expect((api.flags_low & 0x80) != 0, 1) && WORLD->current_level == DEATHSTARBATTLED_LDATA &&
                 ObjInNarrowSock(object, WORLD->sock_sys, WORLD->level_idx))
                 speed *= 2.0f;
             else if ((api.flags_low & 0x80) != 0 && (WORLD->current_level == DEATHSTAR2BATTLEE_LDATA ||
@@ -3999,8 +4012,8 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                          ? (object->field_0x7a3 == 0 ? 10.5f : -10.5f)
                          : (object->field_0x7a3 == 0 ? 0.4f : -0.4f) * api.character_data->game_character->run_speed);
                 NuVecRotateY(&object->target_velocity, &object->target_velocity, api.facing_angle);
-            } else if ((api.flags_low & 0x80) != 0 && (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA) &&
-                       object->in_narrow_socket) {
+            } else if (__builtin_expect((api.flags_low & 0x80) != 0, 1) &&
+                       (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA) && object->in_narrow_socket) {
                 special_lean = (i32)(8192.0f * pad->input_direction_z);
                 object->target_velocity.x =
                     PodSprint_InStartCountdown(WORLD) > 0.0f ? 0.0f : 35.0f * pad->input_direction_z * 0.25f;
@@ -4042,15 +4055,14 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
             object->movement_lean_angle = SeekRot(object->movement_lean_angle, special_lean, 3.0f);
         else if ((api.character_data->game_character->flags_090 & 1) != 0) {
             i32 angular_speed = 0;
-            if (object->character_context != 0x2a) {
-                if (object->character_context != 0x36 && object->character_context != 0x3a) {
-                    angular_speed = (i32)(RotDiff(object->previous_movement_angle, api.field_0x276) / FRAMETIME);
-                    if (WORLD->current_level == PLATFORM_LDATA) {
-                        if (NeedsPretendAnim(object)) {
-                            u16 phase = (i32)(NuFmod(GameTimer.time_elapsed, 2.1f) / 2.1f * 65536.0f);
-                            angular_speed =
-                                (i32)(angular_speed + 4551.0f * NuTrigTable[((phase - 0x2000) >> 1) & 0x7fff]);
-                        }
+            if (object->character_context != 0x36 && object->character_context != 0x2a &&
+                object->character_context != 0x3a) {
+                angular_speed = (i32)(RotDiff(object->previous_movement_angle, api.field_0x276) / FRAMETIME);
+                if (WORLD->current_level == PLATFORM_LDATA) {
+                    if (NeedsPretendAnim(object)) {
+                        u16 phase = (i32)(NuFmod(GameTimer.time_elapsed, 2.1f) / 2.1f * 65536.0f);
+                        angular_speed =
+                            (i32)(angular_speed + 4551.0f * NuTrigTable[((phase - 0x2000) >> 1) & 0x7fff]);
                     }
                 }
             }
@@ -5295,7 +5307,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
 
     {
         const i8 context = object->character_context;
-        if (action_pressed == 0 || (!player_active && cooldown > 0.0f) || context == 0x15 ||
+        if (__builtin_expect(action_pressed == 0, 0) || (!player_active && cooldown > 0.0f) || context == 0x15 ||
             context == 0x5a || context == 0x13 || context == 0x2e ||
             (!player_active && static_cast<u8>(context - 6) < 2) || context == 8 || context == 0x1b ||
             context == 0x2d || context == 0xf || context == 0x27 || context == 0x28 || context == 0x59 ||
@@ -5422,7 +5434,7 @@ combo_finished:
 }
 
 static void JediLightCode(GameObject_s *object) {
-    if (object->dynamic_light_id != -1) {
+    if (__builtin_expect(object->dynamic_light_id != -1, 1)) {
         NUVEC colour;
         NUVEC position;
         if (object->character_context == 0x1b && (object->field_0xe21 & 5) == 1 && object->force_target != NULL) {
@@ -5441,7 +5453,7 @@ static void JediLightCode(GameObject_s *object) {
             rtlDynamicSetPos(object->dynamic_light_id, &position);
             return;
         }
-        if (!(object->weapon_scale > 0.0f) || object->sabre_flags == 0)
+        if (__builtin_expect(!(object->weapon_scale > 0.0f) || object->sabre_flags == 0, 0))
             return;
         position = v000;
         if (object->apiobj.field_0x288 == 0)
@@ -8241,7 +8253,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
             if (frame > 0.0f) {
                 f32 *time = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
                 if (time != NULL && *time >= frame) {
-                    if ((object->apiobj.character_data->model_flags & 8) == 0)
+                    if (__builtin_expect((object->apiobj.character_data->model_flags & 8) == 0, 0))
                         Punch_Hit(object, object->force_target, PUNCHCHARGAP, PUNCHCHARGAP);
                     else
                         ComboHitFrame(object, 1);

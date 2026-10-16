@@ -148,11 +148,31 @@ void cbFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
             backup_succeeded = EdFileBackup(filename, backup);
         save_succeeded = edppSaveEffects(filename, edpp_effect_list);
     }
-    const char *message = "File Save Error";
-    if (save_succeeded != 0)
-        message = backup_succeeded != 0 ? "Saved OK" : "Saved OK - Backup Failed";
-    u32 colours[4] = {save_succeeded != 0 ? 0x8000c000u : 0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
-    messagemenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbCancelMessageMenu, "Message");
+    const char *message;
+    u32 colours[4];
+    // Each outcome builds its own message menu in the original.
+    if (save_succeeded == 0) {
+        colours[0] = 0x800000c0;
+        colours[1] = 0x80ff0000;
+        colours[2] = 0x80808080;
+        colours[3] = 0x80404040;
+        messagemenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbCancelMessageMenu, "Message");
+        message = "File Save Error";
+    } else if (backup_succeeded != 0) {
+        colours[0] = 0x8000c000;
+        colours[1] = 0x80ff0000;
+        colours[2] = 0x80808080;
+        colours[3] = 0x80404040;
+        messagemenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbCancelMessageMenu, "Message");
+        message = "Saved OK";
+    } else {
+        colours[0] = 0x8000c000;
+        colours[1] = 0x80ff0000;
+        colours[2] = 0x80808080;
+        colours[3] = 0x80404040;
+        messagemenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbCancelMessageMenu, "Message");
+        message = "Saved OK - Backup Failed";
+    }
     if (messagemenu != NULL) {
         eduiMenuAddItem(messagemenu, eduiItemSelCreate(1, colours, 0, 0, NULL, const_cast<char *>(message)));
         eduiMenuAttach(parent, messagemenu);

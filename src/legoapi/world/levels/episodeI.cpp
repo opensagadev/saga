@@ -1703,7 +1703,7 @@ void PodSprintA_Update(WORLDINFO_s *world) {
         goto speed_section;
     }
     // netclient == 0: react to cutscene / free-play flag.
-    if (CutScene_PlayingOrRequested(NULL))
+    if (__builtin_expect(!!(CutScene_PlayingOrRequested(NULL)), 0))
         return;
     if ((ps->flags & 0xc) != 0) {
         if (!(ps->flags & 0x10)) {
@@ -1756,7 +1756,7 @@ speed_section:
             ps->field_0x78 = GetNamedGameObject(world->ai_sys, "SebulbasPod");
         GameObject_s *pacemaker = static_cast<GameObject_s *>(ps->field_0x78);
         if (pacemaker != NULL && (pacemaker->apiobj.field_0x1f8 & 0x1000) != 0 && pacemaker->apiobj.field_0x287 == 0) {
-            if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
+            if (__builtin_expect(FadeSys.fade == 0.0f && pause_rndr_on == 0, 1)) {
                 ps->field_0x80 = FRAMETIME * 2.0f + ps->field_0x80;
                 if (ps->field_0x80 > 1.0f)
                     ps->field_0x80 = 1.0f;
@@ -1782,7 +1782,7 @@ speed_section:
                 ps->field_0x80 = 0.0f;
             }
         }
-        if (netclient != 0) {
+        if (__builtin_expect(netclient != 0, 1)) {
             PodRaceSnipersUpdate();
         } else {
             if (ps->finish_line != NULL && ps->halfway != NULL) {

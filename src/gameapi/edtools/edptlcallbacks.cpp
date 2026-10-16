@@ -2254,13 +2254,8 @@ static void cbPtlQuickDeleteMenu(eduimenu_s *menu, eduiitem_s *, u32) {
                     break;
                 }
             }
-            if (index < 512) {
-                eduiMenuAddItem(edptl_quickdel_menu,
-                                eduiItemSelCreate(type, edblack, 0, 1, cbPtlQuickDeleteType, effect->name));
-            } else {
-                eduiMenuAddItem(edptl_quickdel_menu,
-                                eduiItemSelCreate(type, eddarkred, 0, 1, cbPtlQuickDeleteType, effect->name));
-            }
+            eduiMenuAddItem(edptl_quickdel_menu, eduiItemSelCreate(type, index < 512 ? edblack : eddarkred, 0, 1,
+                                                                   cbPtlQuickDeleteType, effect->name));
         }
         eduiMenuAttach(menu, edptl_quickdel_menu);
         edptl_quickdel_menu->x = menu->x + 10;

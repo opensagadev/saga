@@ -626,10 +626,9 @@ void PushCode(GameObject_s *object, i32 allow_push) {
                         // A spinner can only be attached to one party member.
                         bool occupied = false;
                         for (i32 player_index = 0; player_index < 8; ++player_index) {
-                            GameObject_s *teammate = Player[player_index];
-                            if (teammate != NULL && teammate != object &&
-                                teammate->character_context == LEGOCONTEXT_PUSHSPINNER &&
-                                teammate->field_0x788 == spinner) {
+                            if (Player[player_index] != NULL && Player[player_index] != object &&
+                                Player[player_index]->character_context == LEGOCONTEXT_PUSHSPINNER &&
+                                Player[player_index]->field_0x788 == spinner) {
                                 occupied = true;
                                 break;
                             }

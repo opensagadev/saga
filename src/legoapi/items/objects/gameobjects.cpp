@@ -2373,6 +2373,7 @@ void GameAIProcess() {
     GameObject_s *active_player = player;
     APIOBJECT **volatile neutral_cursor = neutral_objects;
     APIOBJECT **volatile goody_cursor = goodies;
+    APIOBJECT **baddy_cursor = baddies;
     for (i32 index = 0; index < 8; ++index) {
         GameObject_s *object;
         if (index < 2 && (object = Player[1]) == active_player) {
@@ -2397,7 +2398,8 @@ void GameAIProcess() {
                 object->ai.pending_opponent_metric = 1.0e9f;
                 object->ai.field_0x1e5 &= ~0x10;
             } else if ((object->apiobj.field_0x1f4 & 1) != 0) {
-                baddies[baddy_count++] = &object->apiobj;
+                ++baddy_count;
+                *baddy_cursor++ = &object->apiobj;
             } else if ((object->apiobj.field_0x1f4 & 4) != 0) {
                 ++neutral_count;
                 *neutral_cursor++ = &object->apiobj;
@@ -2420,7 +2422,6 @@ void GameAIProcess() {
     u8 cleared_flag;
     object = Obj;
     APIOBJECT **interactive_cursor = interactive_objects;
-    APIOBJECT **baddy_cursor = baddies + baddy_count;
     for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
         NUVEC direction;
         i32 ground_checks;
