@@ -56,11 +56,11 @@ extern "C" {
     void NuMemDestroyDiscardable(NUMEMDISCARDABLE *buffer);
     i32 NuMemBlkSize(i32 element_size, i32 count, i32 alignment_mask);
     void *NuMemBlkAlloc(NUMEMBLK *pool);
-    NUMEMBLK *NuMemBlkCreateEx(u32 element_size, i32 count, u32 alignment_mask, void *storage);
+    NUMEMBLK *NuMemBlkCreateEx(i32 element_size, i32 count, u32 alignment_mask, void *storage);
     void NuMemBlkFree(NUMEMBLK *pool, void *block);
     void NuMemBlkDestroy(NUMEMBLK *pool);
-    NUMEMBLK *NuMemBlkCreate(u32 element_size, i32 count, u32 alignment_mask);
-    NUMEMBLK *NuMemBlkCreateVari(u32 element_size, i32 count, u32 alignment_mask, VARIPTR *buffer);
+    NUMEMBLK *NuMemBlkCreate(i32 element_size, i32 count, u32 alignment_mask);
+    NUMEMBLK *NuMemBlkCreateVari(i32 element_size, i32 count, u32 alignment_mask, VARIPTR *buffer);
     void *NuScratchAlloc32(i32 size);
     void *NuScratchAlloc64(i32 size);
     void *NuScratchAlloc128(i32 size);

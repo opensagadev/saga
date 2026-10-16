@@ -150,7 +150,7 @@ extern "C" void NuPostEffectEnd(void) {
     ResetProxyBuffer(&proxyDepthBuffer, kProxyKind_Depth);
 }
 
-extern "C" void NuPostEffectInit(u32 flags, void *buffer, void *buffer_end) {
+extern "C" void NuPostEffectInit(u32 flags, VARIPTR *buffer, VARIPTR buffer_end) {
     g_effectFlags = flags;
     if (flags & 0x0c)
         mainFilter = AllocatePostFilter<NuMainFilter>();
@@ -167,7 +167,7 @@ extern "C" void NuPostEffectInit(u32 flags, void *buffer, void *buffer_end) {
         g_posteffect_shaderEngineFlag |= 0x10;
     }
     copyFilter = AllocatePostFilter<NuCopyFilter>();
-    NuEffectTexLockVP(buffer, buffer_end);
+    NuEffectTexLockVP(buffer, buffer_end.void_ptr);
     NuPostFilterGen::initSharedTextureResources(100, 100);
     if (flags & 0x0c)
         mainFilter->initTextureResources(100, 100);
@@ -427,7 +427,7 @@ extern "C" void NuPostEffectEnable(i32 mask) {
     }
 }
 
-extern "C" void NuPostEffectDisable(u32 mask) {
+extern "C" void NuPostEffectDisable(i32 mask) {
     switch (mask) {
         case 4:
             if (mainFilter->bloom_enabled) {
@@ -441,13 +441,15 @@ extern "C" void NuPostEffectDisable(u32 mask) {
                 mainFilter->dof_enabled = false;
             }
             break;
-        // The original routes both 0x10 and 0x40 to motionFilter (0x2abaf8).
         case 0x10:
-        case 0x40:
             motionFilter->enabled = false;
             break;
         case 0x20:
             deferredFilter->enabled = false;
+            break;
+        // The original disables motionFilter here as well (0x2abaf8).
+        case 0x40:
+            motionFilter->enabled = false;
             break;
         case 0x80:
             speedBlurFilter->enabled = false;
@@ -455,7 +457,7 @@ extern "C" void NuPostEffectDisable(u32 mask) {
     }
 }
 
-extern "C" bool NuPostEffectIsEnabled(u32 mask) {
+extern "C" i32 NuPostEffectIsEnabled(i32 mask) {
     if ((g_effectFlags & mask) == 0)
         return false;
     switch (mask) {

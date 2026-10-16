@@ -178,7 +178,7 @@ extern "C" {
         NUMTX transform;
         NUVEC corners[8];
         NUVEC view[8];
-        char results[8];
+        u8 results[8];
         if (far_clip == 0.0f)
             far_clip = global_camera.far_clip;
         if (world_mtx == NULL || world_mtx == &numtx_identity)
@@ -1421,7 +1421,7 @@ extern "C" {
                                               first_joint, root_translation);
         }
     }
-    void *NuAnimBuffCreate(i32 max_joints, VARIPTR *buf) {
+    void *NuAnimBuffCreate(i32 max_joints, VARIPTR *buf, VARIPTR) {
         u32 *anim_buffer = reinterpret_cast<u32 *>(ALIGN(buf->addr, 0x10));
         buf->void_ptr = anim_buffer + 4;
         anim_buffer[2] = buf->addr;
@@ -1443,8 +1443,6 @@ extern "C" {
         nuanimbuff_s *global = static_cast<nuanimbuff_s *>(globalbuffer);
         buffer->joint_count = 0;
         buffer->max_joints = global->max_joints;
-        buffer->use_quaternions = 0;
-        buffer->pad_07 = 0;
         buffer->joints = static_cast<nuanimbuffjoint_s *>(NuScratchAlloc32((buffer->max_joints * 3 + 3) * 0x10));
         buffer->joints = reinterpret_cast<nuanimbuffjoint_s *>(ALIGN(reinterpret_cast<usize>(buffer->joints), 0x10));
         buffer->joint_flags = static_cast<u8 *>(NuScratchAlloc32(buffer->max_joints));
@@ -2087,12 +2085,16 @@ extern "C" {
         NuAnimCurve2SetApplyToMatrix_3(reinterpret_cast<ani3_animheader_s *>(animation), node, frame, matrix);
     }
     void NuAnimData2CalcTime(nuanimdata2_s *anim, f32 frame, nuanimtime_s *time) {
-        u32 magic = *reinterpret_cast<u32 *>(anim);
-        if (magic + 0xbeb1b6ccU < 2) {
+        union {
+            u32 magic;
+            f32 duration;
+        } header;
+        header.magic = reinterpret_cast<ani3_animheader_s *>(anim)->magic;
+        if (header.magic - 0x414e4934U <= 1) {
             ani3_animheader_s *ani3 = reinterpret_cast<ani3_animheader_s *>(anim);
             if (!(frame < 1.0f)) {
-                if (!(frame < static_cast<f32>(ani3->frame_count))) {
-                    time->time = static_cast<f32>(ani3->frame_count) - 0.01f;
+                if (frame >= ani3->frame_count) {
+                    time->time = static_cast<f32>(static_cast<u32>(ani3->frame_count)) - 0.01f;
                 } else {
                     time->time = frame;
                 }
@@ -2104,15 +2106,15 @@ extern "C" {
 
         f32 clamped_frame;
         i32 chunk;
-        if (anim->duration <= frame) {
-            if (anim->duration == 1.0f) {
+        if (header.duration <= frame) {
+            if (header.duration == 1.0f) {
                 time->time = 1.0f;
                 time->chunk = 0;
                 time->time_byte = 0;
                 time->time_mask = 1;
                 return;
             }
-            clamped_frame = anim->duration - 0.01f;
+            clamped_frame = header.duration - 0.01f;
             time->time = clamped_frame;
             chunk = (static_cast<i32>(clamped_frame) - 1) >> 5;
         } else if (frame < 1.0f) {
@@ -2125,16 +2127,15 @@ extern "C" {
             chunk = (static_cast<i32>(frame) - 1) >> 5;
         }
         time->chunk = chunk;
-        if (anim->chunk_count <= chunk) {
+        if (chunk >= anim->chunk_count) {
             chunk = anim->chunk_count - 1;
             time->chunk = chunk;
         }
         time->time_offset = clamped_frame - static_cast<f32>(chunk << 5);
         i32 chunk_frame = static_cast<i32>(NuFloor(time->time_offset)) - 1;
-        time->chunk_frame = static_cast<u32>(chunk_frame);
-        i32 byte_frame = chunk_frame < 0 ? chunk_frame + 7 : chunk_frame;
-        time->time_byte = static_cast<u32>((byte_frame >> 3) & 0xff);
-        time->time_mask = (1u << ((chunk_frame & 7) + 1)) - 1u;
+        time->chunk_frame = chunk_frame;
+        time->time_byte = (chunk_frame / 8) & 0xff;
+        time->time_mask = static_cast<u8>((1 << (chunk_frame % 8 + 1)) - 1);
     }
     void NuAnimDataCalcTime(void *animation, f32 frame, nuanimtime_s *time) {
         u8 *data = static_cast<u8 *>(animation);
@@ -2171,8 +2172,8 @@ extern "C" {
         time->time_offset = clamped_frame - static_cast<f32>(chunk << 5);
         const i32 chunk_frame = static_cast<i32>(NuFloor(time->time_offset)) - 1;
         time->chunk_frame = static_cast<u32>(chunk_frame);
-        time->time_byte = static_cast<u32>(((chunk_frame < 0 ? chunk_frame + 7 : chunk_frame) >> 3) & 0xff);
-        time->time_mask = (1u << ((chunk_frame % 8) + 1)) - 1u;
+        time->time_byte = (chunk_frame / 8) & 0xff;
+        time->time_mask = static_cast<u8>((1 << (chunk_frame % 8 + 1)) - 1);
     }
     void *NuAnimDataCreate(i32 chunk_count) {
         const u32 allocation_size = static_cast<u32>(chunk_count) * sizeof(void *) + 0x10;
@@ -2253,12 +2254,12 @@ extern "C" {
         return ForceEulerToQuat;
     }
     i32 NuAnimPushSetUseQuatsFlag(i32 enabled) {
-        const i32 previous = ForceEulerToQuat;
+        i32 previous = ForceEulerToQuat;
         if (NumQuatPushes > 3) {
             return 0;
         }
-        QuatPushes[NumQuatPushes++] = ForceEulerToQuat;
-        ForceEulerToQuat = static_cast<u8>(enabled);
+        QuatPushes[NumQuatPushes++] = previous;
+        ForceEulerToQuat = enabled;
         return previous;
     }
     i32 NuAnimSetUseQuatsFlag(i32 enabled) {
@@ -3441,7 +3442,7 @@ extern "C" {
     void NuHGobjEvalAnimBlend2Root(nuhgobj_s *object, ani3_animheader_s *animation_a, f32 time_a,
                                    ani3_animheader_s *animation_b, f32 time_b, f32 blend, i32 override_count,
                                    NUJOINTANIM_s *overrides, NUMTX *matrices, NUHGOBJROOTFN root_fn, void *root_data) {
-        if (animation_a == NULL || (animation_a->magic != 0x414e4934 && animation_a->magic != 0x414e4935)) {
+        if (animation_a->magic != 0x414e4934 && animation_a->magic != 0x414e4935) {
             return;
         }
         NuHGobjEvalAnimBlend2Root_3(reinterpret_cast<nugscn_s *>(object), animation_a, time_a, animation_b, time_b,

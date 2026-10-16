@@ -67,8 +67,8 @@ static void *edGizShadow_ReserveBufferSpace(void *world_ptr) {
     world->shadow_editor = reinterpret_cast<EDGIZSHADOW *>(world->giz_buffer.addr);
     world->giz_buffer.addr += sizeof(EDGIZSHADOW);
 
+    memset(world->shadow_editor, 0, sizeof(EDGIZSHADOW));
     EDGIZSHADOW *shadow = world->shadow_editor;
-    memset(shadow, 0, sizeof(*shadow));
     shadow->direction = {-2.0f, -10.0f, -2.0f};
     shadow->field_0x0c = 0.3f;
     shadow->field_0x10 = 2.0f;
@@ -77,6 +77,8 @@ static void *edGizShadow_ReserveBufferSpace(void *world_ptr) {
     shadow->field_0x1c = 0.01f;
     shadow->field_0x20 = 22.0f;
     shadow->field_0x24 = 0.5f;
+    shadow->field_0x28 = 0.0f;
+    shadow->field_0x2c = 0.0f;
     shadow->field_0x30 = -2.0f;
     shadow->preset = EDGIZSHADOW_PRESET_CUSTOM;
     return shadow;

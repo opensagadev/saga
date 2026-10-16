@@ -142,19 +142,17 @@ static i32 HatMachine_Load(void *world_ptr, void *) {
 static void *HatMachines_ReserveBufferSpace(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     world->hat_machine_sys = NULL;
-    if (world->current_level->max_levers == 0) {
-        return NULL;
+    if (world->current_level->max_levers != 0) {
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
+        world->hat_machine_sys = static_cast<HATMACHINESYS_s *>(world->giz_buffer.void_ptr);
+        world->giz_buffer.addr += sizeof(HATMACHINESYS_s);
+        memset(world->hat_machine_sys, 0, sizeof(*world->hat_machine_sys));
+
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 16);
+        world->hat_machine_sys->machines = static_cast<HATMACHINE *>(world->giz_buffer.void_ptr);
+        world->giz_buffer.addr += world->current_level->max_hat_machines * sizeof(HATMACHINE);
+        memset(world->hat_machine_sys->machines, 0, world->current_level->max_hat_machines * sizeof(HATMACHINE));
     }
-
-    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
-    world->hat_machine_sys = static_cast<HATMACHINESYS_s *>(world->giz_buffer.void_ptr);
-    world->giz_buffer.addr += sizeof(HATMACHINESYS_s);
-    memset(world->hat_machine_sys, 0, sizeof(*world->hat_machine_sys));
-
-    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 16);
-    world->hat_machine_sys->machines = static_cast<HATMACHINE *>(world->giz_buffer.void_ptr);
-    world->giz_buffer.addr += world->current_level->max_hat_machines * sizeof(HATMACHINE);
-    memset(world->hat_machine_sys->machines, 0, world->current_level->max_hat_machines * sizeof(HATMACHINE));
     return world->hat_machine_sys;
 }
 

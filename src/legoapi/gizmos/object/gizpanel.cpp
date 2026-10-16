@@ -527,19 +527,17 @@ static void GizPanels_Reset(void *world_ptr, void *, void *progress_ptr) {
 static void *GizPanels_ReserveBufferSpace(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     world->giz_panel_sys = NULL;
-    if (world->current_level->max_levers == 0) {
-        return NULL;
+    if (world->current_level->max_levers != 0) {
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 16);
+        world->giz_panel_sys = static_cast<GIZPANELSYS_s *>(world->giz_buffer.void_ptr);
+        world->giz_buffer.addr += sizeof(GIZPANELSYS_s);
+        memset(world->giz_panel_sys, 0, sizeof(*world->giz_panel_sys));
+
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 16);
+        world->giz_panel_sys->panels = static_cast<GIZPANEL *>(world->giz_buffer.void_ptr);
+        world->giz_buffer.addr += world->current_level->max_giz_panels * sizeof(GIZPANEL);
+        memset(world->giz_panel_sys->panels, 0, world->current_level->max_giz_panels * sizeof(GIZPANEL));
     }
-
-    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 16);
-    world->giz_panel_sys = static_cast<GIZPANELSYS_s *>(world->giz_buffer.void_ptr);
-    world->giz_buffer.addr += sizeof(GIZPANELSYS_s);
-    memset(world->giz_panel_sys, 0, sizeof(*world->giz_panel_sys));
-
-    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 16);
-    world->giz_panel_sys->panels = static_cast<GIZPANEL *>(world->giz_buffer.void_ptr);
-    world->giz_buffer.addr += world->current_level->max_giz_panels * sizeof(GIZPANEL);
-    memset(world->giz_panel_sys->panels, 0, world->current_level->max_giz_panels * sizeof(GIZPANEL));
     return world->giz_panel_sys;
 }
 

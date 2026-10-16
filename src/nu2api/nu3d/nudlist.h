@@ -42,6 +42,8 @@ typedef struct nudisplaylistitem_s {
 // Geometry packet referenced by the 0x82/0x98 display-list items.  Smooth
 // skins reuse the ordinary geometry packet, optionally replacing
 // dynamic_vertex_data with a deformed copy before the packet is submitted.
+struct NuVertexFormatPS;
+
 typedef struct nudisplaylistgeom_s {
     u32 primitive_type;              // 0x00
     i32 index_count;                 // 0x04
@@ -55,8 +57,11 @@ typedef struct nudisplaylistgeom_s {
     usize vertex_buffer;             // GL buffer handle or immediate-data pointer
     i32 immediate;                   // 0x28, deformer count; nonzero uses immediate vertices
     NUVEC **deformer_vertex_offsets; // 0x2c, one xyz delta array per shape
-    usize vertex_format;             // vertex declaration pointer
-    void *dynamic_vertex_data;       // 0x34
+    union {
+        usize vertex_format;           // 0x30, GL buffer handle for dynamic packets
+        NuVertexFormatPS *vertex_decl; // vertex declaration bound when the packet was prewarmed
+    };
+    void *dynamic_vertex_data; // 0x34
 } NUDISPLAYLISTGEOM;
 
 // The first word is retained by the renderer's allocation API; weights used

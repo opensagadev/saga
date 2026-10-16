@@ -603,23 +603,24 @@ void MechTouchUIPauseButton::Process(float dt) {
 }
 
 void MechTouchUIPauseButton::Render() {
-    if (NewMode != 0 || NewLData != NULL || editor_active != 0 || GameTimer.time_elapsed <= 0.0f ||
+    if (NewMode != 0 || NewLData != NULL || editor_active != 0 || !(GameTimer.time_elapsed > 0.0f) ||
         GameTimer.update_count == 0 || WORLD == NULL || WORLD->current_level == TITLES_LDATA ||
         WORLD->current_level == CREDITS_LDATA) {
         return;
     }
 
     if (Paused != 0) {
-        const i32 menu_id = GetMenuID();
-        DrawTouchPrompt(
-            const_cast<char *>(menu_id == LEGO_MENU_PAUSE_MAIN || menu_id == LEGO_MENU_PAUSE_CUTSCENE ? ">" : "<<"),
-            NULL, hovered != 0, true);
+        if (GetMenuID() == LEGO_MENU_PAUSE_MAIN || GetMenuID() == LEGO_MENU_PAUSE_CUTSCENE) {
+            DrawTouchPrompt(const_cast<char *>(">"), NULL, hovered != 0, true);
+        } else {
+            DrawTouchPrompt(const_cast<char *>("<<"), NULL, hovered != 0, true);
+        }
         return;
     }
 
-    if (GameMenu[GameMenuLevel].menu != -1 || CutSceneWaiting != 0 || MiniCutCam != 0 || memcard_autosavestarted != 0 ||
-        memcard_autosavepostdelay > 0.0f || memcard_autosavepredelay > 0.0f ||
-        (CUTSTOPGAME != 0 && CutScene_IsSkippable(static_cast<CUTINFO *>(CutStopInfo)) == 0)) {
+    if (GameMenu[GameMenuLevel].menu != -1 || CutSceneWaiting != 0 ||
+        (CUTSTOPGAME != 0 && CutScene_IsSkippable(static_cast<CUTINFO *>(CutStopInfo)) == 0) || MiniCutCam != 0 ||
+        memcard_autosavestarted != 0 || memcard_autosavepostdelay > 0.0f || memcard_autosavepredelay > 0.0f) {
         if (GetMenuID() != -1) {
             DrawTouchPrompt(const_cast<char *>("<<"), NULL, hovered != 0, true);
         }

@@ -19,7 +19,7 @@
 #include "nu2api/nuplatform/nuplatform.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 
-i32 g_currentTexUnit = -1;
+u32 g_currentTexUnit = -1;
 i32 g_loadDefaultTexture;
 GLuint g_lastBound2DTexIds[16];
 GLuint g_lastBoundCubeTexIds[16];

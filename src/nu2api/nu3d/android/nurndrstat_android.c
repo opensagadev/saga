@@ -165,24 +165,20 @@ extern "C" {
 
 void *RndrStateBuildKonstState(nuglobalrndrstate_s *state) {
     VARIPTR *buffer = NuDisplayListGetBuffer();
-    f32 *konst = static_cast<f32 *>(buffer->void_ptr);
-    f32 *result = konst;
+    void *result = buffer->void_ptr;
 
-    if (state->const_tint_enabled == 0) {
-        konst[0] = 1.0f;
-        konst[1] = 1.0f;
-        konst[2] = 1.0f;
+    if (state->const_tint_enabled != 0) {
+        *(*reinterpret_cast<NUCOLOUR3 **>(buffer))++ = state->const_tint;
     } else {
-        konst[0] = state->const_tint.r;
-        konst[1] = state->const_tint.g;
-        konst[2] = state->const_tint.b;
+        *buffer->f32_ptr++ = 1.0f;
+        *buffer->f32_ptr++ = 1.0f;
+        *buffer->f32_ptr++ = 1.0f;
     }
-    if (state->const_alpha_enabled == 0) {
-        konst[3] = 1.0f;
+    if (state->const_alpha_enabled != 0) {
+        *buffer->f32_ptr++ = state->const_alpha;
     } else {
-        konst[3] = state->const_alpha;
+        *buffer->f32_ptr++ = 1.0f;
     }
-    buffer->addr += sizeof(f32) * 4;
     return result;
 }
 
@@ -198,17 +194,12 @@ extern "C" {
         VARIPTR *buffer = NuDisplayListGetBuffer();
         void *result = buffer->void_ptr;
 
-        *buffer->u32_ptr = state->fog_enabled;
-        buffer->u32_ptr++;
+        *buffer->u32_ptr++ = state->fog_enabled;
         if (state->fog_enabled != 0) {
-            *buffer->u32_ptr = state->fog_rgba;
-            buffer->u32_ptr++;
-            *reinterpret_cast<f32 *>(buffer->u32_ptr) = state->fog_near;
-            buffer->u32_ptr++;
-            *reinterpret_cast<f32 *>(buffer->u32_ptr) = state->fog_far;
-            buffer->u32_ptr++;
-            *reinterpret_cast<f32 *>(buffer->u32_ptr) = state->fog_density;
-            buffer->u32_ptr++;
+            *buffer->u32_ptr++ = state->fog_rgba;
+            *buffer->f32_ptr++ = state->fog_near;
+            *buffer->f32_ptr++ = state->fog_far;
+            *buffer->f32_ptr++ = state->fog_density;
         }
         return result;
     }

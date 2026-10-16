@@ -460,7 +460,17 @@ struct AIPATHCNXCONTROLLER_s {
     u32 on_frames[32]; // 0x24, one bit per frame (maximum 1024)
     u8 target_type;    // 0xa4
     u8 path_index;     // 0xa5
-    u8 flags;          // 0xa6
+    union {
+        u8 flags; // 0xa6
+        struct {
+            u8 : 1;
+            u8 both_ways : 1;
+            u8 check_visible : 1;
+            u8 on_obstacle_open : 1;
+            u8 off_obstacle_open : 1;
+            u8 : 3;
+        };
+    };
     u8 padding_0xa7;
 };
 DECOMP_ASSERT(sizeof(AIPATHCNXCONTROLLER_s) == 0xa8, "AIPATHCNXCONTROLLER_s size");
@@ -3602,8 +3612,8 @@ struct nunativedebrisdata_s {
     u8 vertex_buffer_index; // 0x00
     u8 fields_001[3];
     i32 use_system_memory_vb; // 0x04
-    i32 first_vertex;         // 0x08
-    i32 vertex_count;         // 0x0c
+    u32 first_vertex;         // 0x08
+    u32 vertex_count;         // 0x0c
     numtl_s *material;        // 0x10
 };
 struct debris_vertex_s {

@@ -320,7 +320,7 @@ i32 LoseCoins(GameObject_s *object, i32 cause) {
         }
     }
     if (Cheats_CheckFlags(0x7c) != 0 || DoubleScoreTime > 0.0f) {
-        return 0;
+        lost = 0;
     }
     return static_cast<i32>(lost);
 }

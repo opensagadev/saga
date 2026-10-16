@@ -2647,10 +2647,10 @@ extern "C" {
 
         AIPATH *path = packet->path_info.path;
         if (path == NULL) {
-            path = (packet->navigation_flags & AIPACKET_NAVIGATION_FLAG_SEARCH_ALL_PATHS) != 0
-                       ? system->path_sys->paths[0]
-                       : system->path_sys->active_path;
-            AISysCharacterSetPath(packet, path);
+            if ((packet->navigation_flags & AIPACKET_NAVIGATION_FLAG_SEARCH_ALL_PATHS) != 0)
+                AISysCharacterSetPath(packet, system->path_sys->paths[0]);
+            else
+                AISysCharacterSetPath(packet, system->path_sys->active_path);
             AISysCharacterSetPathCnx(packet, &object->position, NULL, 0);
             packet->path_info.next_check = 0;
             packet->path_info.path_index = 0;

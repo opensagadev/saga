@@ -63,7 +63,7 @@ extern "C" NuSoundVoice *NuSound3FindQuietestVoice(i32 sample_index, f32 *playba
 }
 
 static NuSoundStream *g_NuSoundStreams[2] = {0};
-static NuSoundLoadTrigger g_NuSoundLoadTrigger;
+static NuThreadEvent g_NuSoundLoadTrigger;
 static NuSoundCriticalSection g_NuSoundLoadCriticalSection;
 // 0x44-byte voice wrapper the NuSound3 API keeps per playing source. The
 // elists link these while they are pending playback / active / pending

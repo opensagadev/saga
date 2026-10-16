@@ -509,7 +509,10 @@ static void Push_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
     }
 
     pushblock_s *push_block = world->push_blocks;
-    for (i32 index = 0; index < world->push_block_count && index != 16; ++index, ++push_block) {
+    for (i32 index = 0; index < world->push_block_count; ++index, ++push_block) {
+        if (index == 16) {
+            break;
+        }
         const i32 mask_index = index >> 5;
         const u32 mask = 1u << (index & 31);
         if ((push_block->flags_0ca & PUSHBLOCK_FLAG_VISIBLE) == 0) {

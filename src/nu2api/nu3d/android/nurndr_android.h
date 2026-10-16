@@ -31,7 +31,7 @@ struct nushaderprogram_s;
 extern nushaderprogram_s *g_currentShaderProgram;
 extern numtl_s *g_boundMaterial;
 extern numtl_s *g_LastMtl;
-extern usize g_boundVertexFormat;
+extern NuVertexFormatPS *g_boundVertexFormat;
 extern NuVertexFormatPS *g_nuPrimVertexFormat;
 extern NuVertexFormatPS *g_nuFaceOnVertexFormat;
 extern NuVertexFormatPS *g_nuDebrisVertexFormat;

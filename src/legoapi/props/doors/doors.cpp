@@ -365,15 +365,12 @@ void Doors_Init(WORLDINFO_s *world) {
 
 DOOR_s *Door_FindByName(WORLDINFO_s *world, char *name) {
     if (name != NULL && world->doors != NULL && world->door_count > 0) {
-        i32 i = 0;
         DOOR_s *b = world->doors;
-        do {
+        for (i32 i = 0; i < world->door_count; i++, b++) {
             if (NuStrICmp(name, (char *)b) == 0) {
                 return b;
             }
-            i++;
-            b++;
-        } while (i < world->door_count);
+        }
     }
     return NULL;
 }

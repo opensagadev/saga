@@ -194,37 +194,45 @@ extern i32 app_tbaiset;
 extern i32 app_tbdrawset;
 
 static inline void TBSTART(i32 slot, i32 type) {
+    i32 set;
     switch (type) {
         case 2:
-            _NuTimeBarSlotBegin(app_tbgameset, slot, NULL);
+            set = app_tbgameset;
             break;
         case 3:
-            _NuTimeBarSlotBegin(app_tbplayerset, slot, NULL);
+            set = app_tbplayerset;
             break;
         case 4:
-            _NuTimeBarSlotBegin(app_tbaiset, slot, NULL);
+            set = app_tbaiset;
             break;
         case 5:
-            _NuTimeBarSlotBegin(app_tbdrawset, slot, NULL);
+            set = app_tbdrawset;
             break;
+        default:
+            return;
     }
+    _NuTimeBarSlotBegin(set, slot, NULL);
 }
 
 static inline void TBEND(i32 slot, i32 type) {
+    i32 set;
     switch (type) {
         case 2:
-            _NuTimeBarSlotEnd(app_tbgameset, slot);
+            set = app_tbgameset;
             break;
         case 3:
-            _NuTimeBarSlotEnd(app_tbplayerset, slot);
+            set = app_tbplayerset;
             break;
         case 4:
-            _NuTimeBarSlotEnd(app_tbaiset, slot);
+            set = app_tbaiset;
             break;
         case 5:
-            _NuTimeBarSlotEnd(app_tbdrawset, slot);
+            set = app_tbdrawset;
             break;
+        default:
+            return;
     }
+    _NuTimeBarSlotEnd(set, slot);
 }
 
 f32 TargetDist_Near2;
@@ -490,7 +498,7 @@ void CheckResetBits() {
     Cheats_Reset();
     if (WORLD->level_progress != NULL) {
         ResetScene(WORLD->current_gscn, reinterpret_cast<SCENEPROGRESS_s *>(WORLD->level_progress));
-        WORLD->level_progress->flags |= 1;
+        WORLD->level_progress->flags_low |= 1;
     }
 
     GizmoBlowupVisibilityOverrides(WORLD);
@@ -597,24 +605,31 @@ void CheckResetBits() {
         ReStoreStatusTakeOverObjectSys(1);
         AIScriptInitConditions(WORLD->ai_sys);
 
-        auto WORLD_ai_sys = WORLD->ai_sys;
         for (i32 player_index = 0; player_index < 8; ++player_index) {
             if (Player[player_index] == NULL)
                 continue;
             InitPlayerAI(Player[player_index]);
             char script_name[32];
             if (FreePlay != 0) {
-                if (AIScriptFind(WORLD_ai_sys, const_cast<char *>("Freeplay"), 0, 1, 0) != NULL)
+                if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("Freeplay"), 0, 1, 0) != NULL) {
                     strcpy(script_name, "Freeplay");
-                else
-                    goto party_script;
+                } else {
+                    if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("party"), 0, 1, 0) != NULL)
+                        strcpy(script_name, "party");
+                    else
+                        strcpy(script_name, "GeneralParty");
+                }
             } else if (Mission_Active(NULL) != NULL) {
-                if (AIScriptFind(WORLD_ai_sys, const_cast<char *>("Mission"), 0, 1, 0) != NULL)
+                if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("Mission"), 0, 1, 0) != NULL) {
                     strcpy(script_name, "Mission");
-                else
-                    goto party_script;
+                } else {
+                    if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("party"), 0, 1, 0) != NULL)
+                        strcpy(script_name, "party");
+                    else
+                        strcpy(script_name, "GeneralParty");
+                }
             } else {
-                if (AIScriptFind(WORLD_ai_sys, Player[player_index]->apiobj.character_data->file, 0, 1, 0) != NULL) {
+                if (AIScriptFind(WORLD->ai_sys, Player[player_index]->apiobj.character_data->file, 0, 1, 0) != NULL) {
                     sprintf(script_name, Player[player_index]->apiobj.character_data->file);
                 } else {
                     if ((Player[player_index]->apiobj.character_data->model_flags & 8) != 0)
@@ -623,8 +638,8 @@ void CheckResetBits() {
                         strcpy(script_name, "Blaster");
                     else
                         strcpy(script_name, "NoWeapon");
-                    if (AIScriptFind(WORLD_ai_sys, script_name, 0, 1, 0) == NULL) {
-                        if (AIScriptFind(WORLD_ai_sys, const_cast<char *>("party"), 0, 1, 0) != NULL)
+                    if (AIScriptFind(WORLD->ai_sys, script_name, 0, 1, 0) == NULL) {
+                        if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("party"), 0, 1, 0) != NULL)
                             strcpy(script_name, "party");
                         else
                             strcpy(script_name, "GeneralParty");
@@ -633,12 +648,12 @@ void CheckResetBits() {
             }
             if (0) {
             party_script:
-                if (AIScriptFind(WORLD_ai_sys, const_cast<char *>("party"), 0, 1, 0) != NULL)
+                if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("party"), 0, 1, 0) != NULL)
                     strcpy(script_name, "party");
                 else
                     strcpy(script_name, "GeneralParty");
             }
-            AIScriptProcessorInit(WORLD_ai_sys, &Player[player_index]->ai,
+            AIScriptProcessorInit(WORLD->ai_sys, &Player[player_index]->ai,
                                   reinterpret_cast<AISCRIPTPROCESS *>(&Player[player_index]->ai), NULL, script_name,
                                   NULL, 1, NULL, NULL);
             if (FreePlay == 0 && Mission_Active(NULL) == NULL && Player[player_index]->field_0xcc0 == NULL &&
@@ -743,8 +758,8 @@ void CheckResetBits() {
     LookAtBoth = 0;
     oneAtOnce_SetNumAttackers(1);
     if (WORLD->level_progress != NULL) {
-        if ((WORLD->level_progress->flags & 2) != 0)
-            WORLD->field_0x5174 = (WORLD->level_progress->flags >> 2) & 1;
+        if ((WORLD->level_progress->flags_low & 2) != 0)
+            WORLD->field_0x5174 = (WORLD->level_progress->flags_low & 4) != 0;
         ResetGizFlow(WORLD->giz_flow, &WORLD->level_progress->giz_flow_progress);
     } else {
         ResetGizFlow(WORLD->giz_flow, NULL);
@@ -763,10 +778,11 @@ void CheckResetBits() {
     bonusmodearcade = 0;
     if (WORLD->area != NULL && (WORLD->area->flags & 0x10) != 0) {
         if (AreaGlobals.values.field_0x14 < AreaGlobals.values.field_0x0c) {
-            AreaGlobals.values.field_0x14 = AreaGlobals.values.field_0x0c < 11 ? AreaGlobals.values.field_0x0c : 10;
+            AreaGlobals.values.field_0x14 = AreaGlobals.values.field_0x0c > 10 ? 10 : AreaGlobals.values.field_0x0c;
         }
     }
-    arcade_placed_stud_total = ((GizmoPickups_TotalScore(WORLD) * 85u) / 100u) / 1000u * 1000u;
+    arcade_placed_stud_total = (GizmoPickups_TotalScore(WORLD) * 85u) / 100u;
+    arcade_placed_stud_total = arcade_placed_stud_total / 1000u * 1000u;
 }
 
 void RndrTexQuad3D(VuMtx const &matrix, i32 colour, numtl_s *material) {
@@ -1308,10 +1324,9 @@ i32 SolveQuadratic(f32, f32, f32, f32 *, f32 *);
 void DebrisProcessControlChunks(i32 panel_time) {
     const f32 now = panel_time == 1 ? panelglobaltime : globaltime;
 
+    debris_chunk_control_s *control = debris_chunk_control_stack[panel_time];
     DebrisGetControlStackLock();
-    while (debris_chunk_control_stack[panel_time] != NULL &&
-           debris_chunk_control_stack[panel_time]->expiry_time <= now) {
-        debris_chunk_control_s *control = debris_chunk_control_stack[panel_time];
+    for (; control != NULL && control->expiry_time <= now; control = debris_chunk_control_stack[panel_time]) {
         debris_chunk_control_stack[panel_time] = control->next;
         control->next = NULL;
 

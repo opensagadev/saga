@@ -114,7 +114,7 @@ extern "C" {
     void NuAnimCurve2SetApplyToMatrix_3(ani3_animheader_s *animation, i32 node, f32 frame, NUMTX *matrix);
     void NuAnimData2CalcMatrix(struct nuanimdata_s *animation, i32 node, f32 frame, struct numtx_s *matrix);
     void NuAnimBuffEvaluateCallback(NUANIMBUFFEVALUATECB callback, void **data, i32 *joints);
-    void *NuAnimBuffCreate(i32 max_joints, VARIPTR *buf);
+    void *NuAnimBuffCreate(i32 max_joints, VARIPTR *buf, VARIPTR buf_end);
     void NuAnimCurveSetDestroy(void *curve_set, i32 destroy_curves);
     extern NUANIMBUFFEVALUATECB AnimBuffEvalCB;
     extern void **AnimBuffEvalData;

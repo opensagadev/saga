@@ -1017,7 +1017,8 @@ namespace {
 } // namespace
 
 static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle);
-static i32 GizObstacle_SatisfyingTerrainChecks(GIZOBSTACLE_s *obstacle, GameObject_s *object);
+// Retail places this in .text.unlikely and never partially inlines it.
+__attribute__((cold)) static i32 GizObstacle_SatisfyingTerrainChecks(GIZOBSTACLE_s *obstacle, GameObject_s *object);
 
 static i32 GizObstacle_PosWithinBox(GIZOBSTACLE_s *obstacle, NUVEC *position) {
     if (obstacle == NULL || position == NULL) {
@@ -1118,18 +1119,17 @@ GIZOBSTACLE_s *GizObstacle_FindNearest(GIZOBSTACLESYS_s *system, NUVEC *position
 }
 
 GIZOBSTACLE_s *GizObstacle_FindByName(GIZOBSTACLESYS_s *system, char *name) {
-    if (system == NULL || name == NULL) {
-        return NULL;
-    }
-
-    for (i32 index = 0; index < system->count; ++index) {
-        GIZOBSTACLE_s *obstacle = &system->obstacles[index];
-        if (NuStrICmp(obstacle->name, name) == 0) {
-            return obstacle;
+    GIZOBSTACLE_s *obstacle = NULL;
+    if (name != NULL && system != NULL) {
+        obstacle = system->obstacles;
+        for (i32 index = 0; index < system->count; ++index, ++obstacle) {
+            if (NuStrICmp(obstacle->name, name) == 0) {
+                return obstacle;
+            }
         }
     }
-
-    return NULL;
+    // The original returns the end pointer when no obstacle has this name.
+    return obstacle;
 }
 
 void GizObstacle_JumpToStart(GIZOBSTACLE_s *obstacle) {

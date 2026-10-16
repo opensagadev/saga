@@ -1276,7 +1276,7 @@ static void *GizForces_ReserveBufferSpace(void *world_ptr) {
     return force_sys;
 }
 
-// Finds the "<prefix>AlongSock" special next to one of the force's animated objects.
+// Finds the "<prefix>b" special next to one of the force's animated objects.
 static void GizForce_FindAlongSocket(GIZFORCE_s *force) {
     force->along_socket = {};
     if ((force->config_flags & GIZFORCE_CONFIG_ALONG_SOCKET) == 0) {
@@ -1297,7 +1297,7 @@ static void GizForce_FindAlongSocket(GIZFORCE_s *force) {
                 break;
             }
         }
-        NuStrCat(along_socket_name, const_cast<char *>("AlongSock"));
+        NuStrCat(along_socket_name, const_cast<char *>("b"));
         if (NuSpecialFind(object->special.scene, &force->along_socket, along_socket_name, 1) != 0) {
             return;
         }
@@ -1573,13 +1573,12 @@ i32 GizForce_UpdateHint(HINT_s *) {
 
 GIZFORCE_s *GizForce_FindByName(GIZFORCESYS_s *force_sys, char *name) {
     GIZFORCE_s *force = NULL;
-    if (name == NULL || force_sys == NULL) {
-        return force;
-    }
-    force = force_sys->forces;
-    for (i32 index = 0; index < force_sys->count; ++index, ++force) {
-        if (NuStrICmp(force->name, name) == 0) {
-            return force;
+    if (name != NULL && force_sys != NULL) {
+        force = force_sys->forces;
+        for (i32 index = 0; index < force_sys->count; ++index, ++force) {
+            if (NuStrICmp(force->name, name) == 0) {
+                return force;
+            }
         }
     }
     return force;

@@ -11,20 +11,20 @@
 
 class NuSoundLoaderWAV;
 
-class NuSoundLoadTrigger {
+class NuThreadEvent {
   public:
     pthread_mutex_t mutex;
     pthread_cond_t cond;
     volatile bool a;
     volatile bool b;
 
-    NuSoundLoadTrigger() {
+    NuThreadEvent() {
         pthread_mutex_init(&mutex, NULL);
         pthread_cond_init(&cond, NULL);
         a = false;
         b = false;
     }
-    ~NuSoundLoadTrigger() {
+    ~NuThreadEvent() {
         pthread_mutex_destroy(&mutex);
         pthread_cond_destroy(&cond);
     }
@@ -89,9 +89,19 @@ struct FileHeaderWAV {
 
 DECOMP_ASSERT(sizeof(FileHeaderWAV) == 0x12, "FileHeaderWAV size");
 
+struct FileHeaderOGG;
+
+// Retail inserts this header-typed layer between NuSoundStreamDesc and the
+// concrete WAV/OGG descriptions; it only contributes its own destructors.
+template <typename Header, i32 HeaderSize> class NuSoundFileStreamDesc : public NuSoundStreamDesc {
+  public:
+    virtual ~NuSoundFileStreamDesc() {
+    }
+};
+
 // Stream desc for WAV / MIB files: raw PCM, encoded and decoded format are
 // identical, so these sources never need a decoder.
-class NuSoundHeaderWAV : public NuSoundStreamDesc {
+class NuSoundHeaderWAV : public NuSoundFileStreamDesc<FileHeaderWAV, 18> {
   public:
     u16 format_id;
     u16 num_channels;

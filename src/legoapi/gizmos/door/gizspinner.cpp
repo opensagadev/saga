@@ -184,9 +184,8 @@ static void *GizSpinner_ReserveBufferSpace(void *world_ptr) {
         }
 
         world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
-        return world->spinners;
     }
-    return NULL;
+    return world->spinners;
 }
 
 static void GizSpinner_StoreProgressData(void *world_ptr, void *, void *progress_ptr) {
@@ -367,15 +366,13 @@ static void GizSpinner_Draw(void *world_ptr, void *, float) {
 
 static void GizSpinner_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world->spinners != NULL && world->current_level->max_spinners != 0) {
-        i32 index = 0;
-        do {
+    if (world->spinners != NULL) {
+        for (i32 index = 0; index < world->current_level->max_spinners; ++index) {
             if ((world->spinners[index].flags & GIZSPINNER_FLAG_VALID) != 0 &&
                 NuStrLen(world->spinners[index].name) != 0) {
                 AddGizmo(gizmo_sys, type_id, NULL, &world->spinners[index]);
             }
-            ++index;
-        } while (world->current_level->max_spinners > index);
+        }
     }
 }
 

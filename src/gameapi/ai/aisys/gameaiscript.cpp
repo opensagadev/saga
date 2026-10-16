@@ -5117,7 +5117,7 @@ __used__ static i32 Action_PlayGizObstacle(AISYS *sys, AISCRIPTPROCESS *processo
             stay_open = true;
         } else if (NuStrICmp(params[index], "stayshut") == 0) {
             stay_shut = true;
-        } else if (NuStrICmp(params[index], "snap") == 0) {
+        } else if (NuStrICmp(params[index], "SNAP") == 0) {
             snap = true;
         }
     }
@@ -5246,123 +5246,123 @@ __used__ static i32 Action_CnxController(AISYS *sys, AISCRIPTPROCESS *processor,
     i32 gizmo_output = 0;
     u32 on_flags = 0;
     u32 off_flags = 0;
-    bool both_ways = false;
-    bool check_visible = false;
-    bool on_obstacle_open = false;
-    bool off_obstacle_open = false;
+    i32 both_ways = 0;
+    i32 check_visible = 0;
+    i32 on_obstacle_open = 0;
+    i32 off_obstacle_open = 0;
 
     for (i32 index = 0; index < param_count; ++index) {
-        char *param = params[index];
-        if (NuStrIStr(param, "on_frames") != NULL) {
+        if (NuStrIStr(params[index], "on_frames") != NULL) {
             continue;
         }
-        char *match = NuStrIStr(param, "from=");
+        char *match = NuStrIStr(params[index], "from=");
         if (match != NULL) {
             from = match + 5;
             continue;
         }
-        match = NuStrIStr(param, "to=");
+        match = NuStrIStr(params[index], "to=");
         if (match != NULL) {
             to = match + 3;
             continue;
         }
-        match = NuStrIStr(param, "pathname=");
+        match = NuStrIStr(params[index], "pathname=");
         if (match != NULL) {
             path = AISysFindPath(sys, match + 9);
             continue;
         }
-        if (NuStrIStr(param, "CheckVisible") != NULL) {
-            check_visible = true;
+        if (NuStrIStr(params[index], "CheckVisible") != NULL) {
+            check_visible = 1;
             continue;
         }
-        if (NuStrIStr(param, "bothways") != NULL) {
-            both_ways = true;
+        if (NuStrIStr(params[index], "bothways") != NULL) {
+            both_ways = 1;
             continue;
         }
 
-        match = NuStrIStr(param, "on_flag");
+        match = NuStrIStr(params[index], "on_flag");
         if (match != NULL) {
             char *value = match + 8;
-            if (NuStrIStr(param, "OBSTACLE_OPEN") != NULL) {
-                on_obstacle_open = true;
-            } else if (NuStrIStr(param, "OBSTACLE_CLOSED") != NULL) {
-                on_obstacle_open = false;
+            if (NuStrIStr(params[index], "OBSTACLE_OPEN") != NULL) {
+                on_obstacle_open = 1;
+            } else if (NuStrIStr(params[index], "OBSTACLE_CLOSED") != NULL) {
+                on_obstacle_open = 0;
             } else {
                 on_flags |= ParseAIPathCnxFlag(value);
             }
             continue;
         }
-        match = NuStrIStr(param, "off_flag");
+        match = NuStrIStr(params[index], "off_flag");
         if (match != NULL) {
             char *value = match + 9;
-            if (NuStrIStr(param, "OBSTACLE_OPEN") != NULL) {
-                off_obstacle_open = true;
-            } else if (NuStrIStr(param, "OBSTACLE_CLOSED") != NULL) {
-                off_obstacle_open = false;
+            if (NuStrIStr(params[index], "OBSTACLE_OPEN") != NULL) {
+                off_obstacle_open = 1;
+            } else if (NuStrIStr(params[index], "OBSTACLE_CLOSED") != NULL) {
+                off_obstacle_open = 0;
             } else {
                 off_flags |= ParseAIPathCnxFlag(value);
             }
             continue;
         }
 
-        if ((match = NuStrIStr(param, "obj=")) != NULL) {
+        if ((match = NuStrIStr(params[index], "obj=")) != NULL) {
             target_name = match + 4;
             target_type = 0;
             continue;
         }
-        if ((match = NuStrIStr(param, "cutscene=")) != NULL) {
+        if ((match = NuStrIStr(params[index], "cutscene=")) != NULL) {
             target_name = match + 9;
             target_type = 1;
             continue;
         }
-        if ((match = NuStrIStr(param, "buildit=")) != NULL) {
+        if ((match = NuStrIStr(params[index], "buildit=")) != NULL) {
             target_name = match + 8;
             target_type = 2;
             continue;
         }
-        match = NuStrIStr(param, "fakeanimid=");
+        match = NuStrIStr(params[index], "fakeanimid=");
         if (match != NULL) {
             fake_animation_id = static_cast<i32>(AIParamToFloat(processor, match + 11));
             target_type = 5;
             continue;
         }
-        match = NuStrIStr(param, "gizmo_output=");
+        match = NuStrIStr(params[index], "gizmo_output=");
         if (match != NULL) {
             gizmo_output = static_cast<i32>(AIParamToFloat(processor, match + 13));
             continue;
         }
-        if ((match = NuStrIStr(param, "gizmo=")) != NULL) {
+        if ((match = NuStrIStr(params[index], "gizmo=")) != NULL) {
             target_name = match + 6;
             target_type = 3;
-        } else if ((match = NuStrIStr(param, "flowbox=")) != NULL) {
+        } else if ((match = NuStrIStr(params[index], "flowbox=")) != NULL) {
             target_name = match + NuStrLen("flowbox=");
             target_type = 6;
-        } else if ((match = NuStrIStr(param, "blowup=")) != NULL) {
+        } else if ((match = NuStrIStr(params[index], "blowup=")) != NULL) {
             target_name = match + 7;
             target_type = 4;
-        } else if ((match = NuStrIStr(param, "force=")) != NULL) {
+        } else if ((match = NuStrIStr(params[index], "force=")) != NULL) {
             target_name = match + 6;
             target_type = 7;
-        } else if ((match = NuStrIStr(param, "obstacle=")) != NULL) {
+        } else if ((match = NuStrIStr(params[index], "obstacle=")) != NULL) {
             target_name = match + 9;
             target_type = 8;
-        } else if ((match = NuStrIStr(param, "zipup=")) != NULL) {
+        } else if ((match = NuStrIStr(params[index], "zipup=")) != NULL) {
             target_name = match + 6;
             target_type = 9;
         }
     }
 
-    WORLDINFO *world = WORLD;
-    AIPATHCNXCONTROLLER_s *controller = AIPathCnxControllerCreate(
-        world != NULL ? world->ai_path_cnx_control_sys : NULL, world != NULL ? world->ai_sys : sys, path, from, to,
-        target_type, target_name, fake_animation_id, gizmo_output);
+    AIPATHCNXCONTROLLER_s *controller =
+        AIPathCnxControllerCreate(WORLD->ai_path_cnx_control_sys, WORLD->ai_sys, path, from, to, target_type,
+                                  target_name, fake_animation_id, gizmo_output);
     if (controller == NULL) {
         return 1;
     }
+    controller->both_ways = both_ways;
     controller->on_flags = on_flags;
     controller->off_flags = off_flags;
-    controller->flags = static_cast<u8>((controller->flags & 0xe1) | (both_ways ? 2 : 0) | (check_visible ? 4 : 0) |
-                                        (on_obstacle_open ? 8 : 0) | (off_obstacle_open ? 0x10 : 0));
+    controller->check_visible = check_visible;
+    controller->on_obstacle_open = on_obstacle_open;
+    controller->off_obstacle_open = off_obstacle_open;
 
     for (i32 index = 0; index < param_count; ++index) {
         char *match = NuStrIStr(params[index], "on_frames");
@@ -6507,11 +6507,9 @@ __used__ static i32 Action_SetLastAttacker(AISYS *sys, AISCRIPTPROCESS *processo
         }
         value = NuStrIStr(params[index], "attacker=");
         if (value != NULL) {
-            if (NuStrICmp(value + NuStrLen("attacker="), "player") == 0) {
-                attacker = sys != NULL && sys->player_1 != NULL ? sys->player_1->objptr : NULL;
-            } else {
-                attacker = GetNamedGameObject(sys, value + 9);
-            }
+            attacker = GetNamedGameObject(sys, value + 9);
+        } else if (NuStrICmp(params[index], "attacker=player") == 0) {
+            attacker = sys->player_1->objptr;
         }
     }
     if (victim != NULL && attacker != NULL) {
@@ -7215,11 +7213,11 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
     AIAREA *area = NULL;
     i32 creature_set = 0;
     i32 all_ai = 0;
-    bool check_if_dead = false;
+    i32 check_if_dead = 0;
     i32 debris = 0;
-    bool parts_on = false;
+    i32 parts_on = 0;
     i32 respawn = 0;
-    bool respawn_at_origin = false;
+    i32 respawn_at_origin = 0;
 
     for (i32 index = 0; index < param_4; ++index) {
         char *value = NuStrIStr(params[index], "character");
@@ -7239,7 +7237,7 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
         }
         if (NuStrICmp(params[index], "respawn_at_origin") == 0) {
             respawn = 1;
-            respawn_at_origin = true;
+            respawn_at_origin = 1;
             continue;
         }
         value = NuStrIStr(params[index], "all_ai_except");
@@ -7287,8 +7285,8 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
         for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++candidate) {
             if (has_group_flags(candidate) && (candidate->apiobj.field_0x1f4 & 0x400u) != 0 && candidate != excluded &&
                 (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f))) {
-                candidate->field_0xefa =
-                    static_cast<u8>((candidate->field_0xefa & 0xcfu) | (respawn << 4) | (respawn_at_origin << 5));
+                candidate->respawnable = respawn;
+                candidate->respawn_at_origin = respawn_at_origin;
                 if (parts_on)
                     KillParts(candidate, -1, -1, 1, 0.0f, 0, NULL);
                 if (debris)
@@ -7305,8 +7303,8 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
             if (has_group_flags(candidate)) {
                 if (candidate->ai.creature_set == creature_set &&
                     (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f))) {
-                    candidate->field_0xefa =
-                        static_cast<u8>((candidate->field_0xefa & 0xcfu) | (respawn << 4) | (respawn_at_origin << 5));
+                    candidate->respawnable = respawn;
+                    candidate->respawn_at_origin = respawn_at_origin;
                     if (parts_on)
                         KillParts(candidate, -1, -1, 1, 0.0f, 0, NULL);
                     if (debris)
@@ -7331,8 +7329,8 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
                 continue;
             }
             if (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f)) {
-                candidate->field_0xefa =
-                    static_cast<u8>((candidate->field_0xefa & 0xcfu) | (respawn << 4) | (respawn_at_origin << 5));
+                candidate->respawnable = respawn;
+                candidate->respawn_at_origin = respawn_at_origin;
                 if (parts_on)
                     KillParts(candidate, -1, -1, 1, 0.0f, 0, NULL);
                 if (debris)
@@ -7346,15 +7344,15 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
 
     // An explicitly selected object is not subject to the group scan's
     // in-use/character flags; only check_if_dead gates this path.
-    if (object != NULL && (!check_if_dead || (object->apiobj.field_0x287 == 0 && !(object->field_0x101c > 0.0f)))) {
-        object->field_0xefa =
-            static_cast<u8>((object->field_0xefa & 0xcfu) | (respawn << 4) | (respawn_at_origin << 5));
+    if (object != NULL && (!check_if_dead || (object->apiobj.field_0x287 == 0 && object->field_0x101c <= 0.0f))) {
+        object->respawnable = respawn;
+        object->respawn_at_origin = respawn_at_origin;
         if (parts_on)
             KillParts(object, -1, -1, 1, 0.0f, 0, NULL);
-        if (debris)
-            KillGameObject(object, 2, 0);
-        else
+        if (!debris)
             KillGameObject(object, 4, 0);
+        else
+            KillGameObject(object, 2, 0);
     }
     return 1;
 }
@@ -7752,14 +7750,12 @@ __used__ static i32 Action_SetOpponent(AISYS *sys, AISCRIPTPROCESS *processor, A
         char *value;
         if (NuStrIStr(params[index], "opponent=droid") != NULL) {
             // The retail script action checks eight player slots explicitly.
-            // Keep its ordered float comparisons, including slot seven's
-            // inverted rejection test (which admits an unordered death timer).
 #define OPPONENT_DROID(slot)                                                                                           \
     {                                                                                                                  \
         GameObject_s *candidate = Player[slot];                                                                        \
         if (candidate != NULL && (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&                                 \
             (candidate->apiobj.field_0x287 == 0 || candidate->field_0x101c > 0.0f) &&                                  \
-            (candidate->field_0xeff & 1) == 0 && (candidate->apiobj.character_data->model_flags & 0x10) != 0 &&             \
+            (candidate->field_0xeff & 1) == 0 && (candidate->apiobj.character_data->model_flags & 0x10) != 0 &&        \
             droid_count < 10)                                                                                          \
             droids[droid_count++] = candidate;                                                                         \
     }
@@ -7770,14 +7766,8 @@ __used__ static i32 Action_SetOpponent(AISYS *sys, AISCRIPTPROCESS *processor, A
             OPPONENT_DROID(4)
             OPPONENT_DROID(5)
             OPPONENT_DROID(6)
+            OPPONENT_DROID(7)
 #undef OPPONENT_DROID
-            GameObject_s *candidate = Player[7];
-            if (candidate != NULL && (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
-                !(candidate->apiobj.field_0x287 != 0 && candidate->field_0x101c <= 0.0f) &&
-                (candidate->field_0xeff & 1) == 0 && (candidate->apiobj.character_data->model_flags & 0x10) != 0 &&
-                droid_count < 10) {
-                droids[droid_count++] = candidate;
-            }
             // Retail accumulates candidates across parameters. Bound the
             // original ten-entry array when malformed scripts repeat droid.
             if (droid_count != 0) {
@@ -7836,7 +7826,7 @@ __used__ static i32 Action_SetSide(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
             side = 2;
         } else if (NuStrICmp(params[index], "default") == 0) {
             side = 3;
-        } else if (char *value = NuStrIStr(params[index], "type=")) {
+        } else if (char *value = NuStrIStr(params[index], "type")) {
             if (LevelCharacterTypeIDFn != NULL && LevelCharacterGlobalIDFn != NULL) {
                 const u8 local_type = static_cast<u8>(LevelCharacterTypeIDFn(value + 5));
                 if (local_type != 0xff) {
@@ -7880,7 +7870,7 @@ __used__ static i32 Action_SetSide(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
             NuVecSub(&offset, &object->apiobj.position, &candidate->apiobj.position);
             distance_squared = offset.x * offset.x + offset.y * offset.y + offset.z * offset.z;
         }
-        if ((type_matches && (range_squared == 0.0f || distance_squared < range_squared)) ||
+        if ((type_matches == 1 && (range_squared == 0.0f || distance_squared < range_squared)) ||
             (type_count == 0 && distance_squared < range_squared)) {
             ActionApplySide(sys, candidate, side);
         }
@@ -8507,6 +8497,7 @@ __used__ static i32 Action_SetPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
     AIPATHSYS *path_system = sys->path_sys;
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
     AIPATH *path = NULL;
+
     for (i32 index = 0; index < param_4; ++index) {
         char *value = NuStrIStr(params[index], "character=");
         if (value != NULL) {
@@ -8530,9 +8521,10 @@ __used__ static i32 Action_SetPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
     if (object != NULL) {
         if (path != NULL) {
             AISysCharacterSetPath(&object->ai, path);
-            AISysGetCharacterPathPos(WORLD != NULL ? WORLD->ai_sys : sys, &object->apiobj, &object->ai, 0xff, 1);
+            AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, &object->ai, 0xff, 1);
         }
     }
+
     return 1;
 }
 

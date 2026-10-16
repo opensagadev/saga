@@ -24,9 +24,10 @@ extern "C" {
     f32 NuTimeGetFrameTime(void);
     void NuTimeForceFrameTime(f32 frame_time);
     void NuTimeWait(f32 milliseconds);
+    u32 NuTimeGetTime(void);
     void NuTimeStartFrame(void);
-    void NuTimeGetStartFrame(void);
-    void NuTimeGetSinceStartFrame(void);
+    u32 NuTimeGetStartFrame(void);
+    u32 NuTimeGetSinceStartFrame(void);
 
     f32 NuTimeSeconds(NUTIME *t);
     f32 NuTimeScanlines(NUTIME *t);

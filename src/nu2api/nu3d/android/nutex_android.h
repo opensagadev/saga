@@ -19,7 +19,7 @@ extern "C" {
     extern GLuint g_PhongEnvTexture;
     extern GLuint g_whiteTexture;
 
-    void NuTexSetTextureWithStagePS(struct nunativetex_s *tex, GLuint stage);
+    void NuTexSetTextureWithStagePS(struct nunativetex_s *tex, i32 stage);
     i32 NuTexGenTexture(struct nunativetex_s *tex);
 #ifdef __cplusplus
 }

@@ -44,7 +44,7 @@ static inline void PostBlurDrawQuad() {
         g_lastBoundVAO = 0;
     glBindBuffer(GL_ARRAY_BUFFER, NuPostFilter::m_fullscreenVertexBuffer);
     PostBlurVertexFormat *format = static_cast<PostBlurVertexFormat *>(g_nuFullscreenVertexFormat);
-    g_boundVertexFormat = reinterpret_cast<usize>(format);
+    g_boundVertexFormat = reinterpret_cast<NuVertexFormatPS *>(format);
     u32 active = format->mask;
     u32 disable = g_activeAttributes & ~active;
     u32 enable = active & ~g_activeAttributes;
@@ -72,7 +72,7 @@ static inline void PostMainDrawGrid() {
         g_lastBoundVAO = 0;
     glBindBuffer(GL_ARRAY_BUFFER, NuPostFilter::m_fullscreenGridVertexBuffer);
     PostBlurVertexFormat *format = static_cast<PostBlurVertexFormat *>(g_nuFullscreenVertexFormat);
-    g_boundVertexFormat = reinterpret_cast<usize>(format);
+    g_boundVertexFormat = reinterpret_cast<NuVertexFormatPS *>(format);
     u32 active = format->mask;
     u32 disable = g_activeAttributes & ~active;
     u32 enable = active & ~g_activeAttributes;

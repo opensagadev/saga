@@ -572,17 +572,11 @@ void MenuUpdateHints(MENU_s *menu) {
 
     const i32 mode = MechInputTouchSystem::s_baseControlMode;
     i32 count = 0;
-    if (mode == 0) {
-        for (HINT_s *hint = Hints_LSW; hint->control_mode_ids[0] != -1; ++hint) {
-            if ((hint->flags & 0x2c) == 0 && (hint->flags & 0x10) == 0 && TTab[hint->control_mode_ids[0]] != NULL)
-                ++count;
-        }
-    } else {
-        for (HINT_s *hint = Hints_LSW; hint->control_mode_ids[0] != -1; ++hint) {
-            if ((hint->flags & 0x2c) == 0 && hint->control_mode_ids[1] != -1 &&
-                TTab[hint->control_mode_ids[mode]] != NULL)
-                ++count;
-        }
+    for (HINT_s *hint = Hints_LSW; hint->control_mode_ids[0] != -1; ++hint) {
+        if ((hint->flags & 0x2c) == 0 &&
+            (mode == 0 ? (hint->flags & 0x10) == 0 : hint->control_mode_ids[1] != -1) &&
+            TTab[hint->control_mode_ids[mode]] != NULL)
+            ++count;
     }
     if (count <= updatehints_target_y[mode])
         updatehints_target_y[mode] = count - 1;

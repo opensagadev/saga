@@ -31,7 +31,6 @@ static void Tubes_Update(void *world_ptr, void *progress_ptr, float frame_time);
 
 static void *Tubes_ReserveBufferSpace(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    void *reserved_space = NULL;
     world->tubes = NULL;
     world->tube_count = 0;
 
@@ -39,9 +38,8 @@ static void *Tubes_ReserveBufferSpace(void *world_ptr) {
         world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 16);
         world->tubes = reinterpret_cast<TUBE *>(world->giz_buffer.addr);
         world->giz_buffer.addr += world->current_level->max_tubes * sizeof(TUBE);
-        reserved_space = world->tubes;
     }
-    return reserved_space;
+    return world->tubes;
 }
 
 static void Tube_Activate(GIZMO *gizmo, i32 active) {
@@ -207,9 +205,10 @@ static void Tubes_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
 TUBE *Tube_FindByName(WORLDINFO_s *world, char *name) {
     if (world == NULL || world->tubes == NULL)
         return NULL;
-    for (i32 index = 0; index < world->tube_count; ++index) {
-        if (NuStrICmp(world->tubes[index].name, name) == 0)
-            return &world->tubes[index];
+    TUBE *tube = world->tubes;
+    for (i32 index = 0; index < world->tube_count; ++index, ++tube) {
+        if (NuStrICmp(tube->name, name) == 0)
+            return tube;
     }
     return NULL;
 }

@@ -416,13 +416,13 @@ void MenuEnterSave(MENU_s *menu) {
             --menu->last_column;
         }
     }
-    menu->last_row = 1;
     menu->state = 2;
     lastslot = 0;
     slideleft = 0;
     slideright = 0;
 
     NuStrCpy(MenuHeader, apitxt_SAVEGAME);
+    menu->last_row = 1;
     header_r = MENUHEADERR;
     header_g = MENUHEADERG;
     header_b = MENUHEADERB;
@@ -506,25 +506,29 @@ void MenuUpdateLoad(MENU_s *menu) {
 }
 
 void MenuUpdateSave(MENU_s *menu) {
-    MenuInfo[menu->menu].wrap = Menu_DisableCancel == 0;
+    if (Menu_DisableCancel != 0) {
+        MenuInfo[menu->menu].cancel_prompt = 0;
+    } else {
+        MenuInfo[menu->menu].cancel_prompt = 1;
+    }
 
     if (memcard_cardchanged != 0 || saveload_cardtype != 2) {
         MenuEnterSave(menu);
     }
 
+    const i32 slot = menu->selected_column - menu->first_column;
     if (menu->confirm_pressed != 0) {
         MenuSFX = MENUSFX_MENUSELECT;
         if (menu->selected_row == 0) {
-            const i32 slot = menu->selected_column - menu->first_column;
             if (saveload_slotused[slot] != 0) {
                 memcard_slot = slot;
                 NewMenu(1008, 1, -1);
-            } else if (saveload_freespace < SAVESIZE_ADDITIONAL) {
-                MenuSFX = MENUSFX_MENUNOENTRY;
-            } else {
+            } else if (saveload_freespace >= SAVESIZE_ADDITIONAL) {
                 memcard_slot = slot;
                 MenuStartSave();
                 NewMenu(1009, 0, -1);
+            } else {
+                MenuSFX = MENUSFX_MENUNOENTRY;
             }
         } else if (menu->selected_row == menu->last_row && Menu_DisableCancel == 0) {
             BackupMenu();
@@ -659,7 +663,12 @@ void MenuInitFreePlay(MENU_s *menu) {
 
 
 void MenuUpdateNoData(MENU_s *menu) {
-    if (menu->confirm_pressed != 0 || menu->cancel_pressed != 0) {
+    if (menu->confirm_pressed != 0) {
+        MenuSFX = MENUSFX_MENUSELECT;
+        BackupMenuNoFn();
+        BackupMenu();
+    }
+    if (menu->cancel_pressed != 0) {
         MenuSFX = MENUSFX_MENUSELECT;
         BackupMenuNoFn();
         BackupMenu();
@@ -825,6 +834,9 @@ void MenuDrawFileCorrupt(MENU_s *) {
 
 void MenuDrawLoadConfirm(MENU_s *menu) {
     NuStrCpy(MenuHeader, apitxt_LOADGAME);
+    header_r = MENUHEADERR;
+    header_g = MENUHEADERG;
+    header_b = MENUHEADERB;
     MenuText3DEx(apitxt_CONFIRMLOAD, 0.0f, -0.3f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, MENUNORMALR,
                  MENUNORMALG, MENUNORMALB, MenuA);
     menu->draw_y = MENUBOTY - MENUDY;
@@ -1088,9 +1100,9 @@ void MenuUpdateCardWarning(MENU_s *menu) {
 
 void MenuUpdateFileCorrupt(MENU_s *menu) {
     if (MenuInfo[GameMenu[GameMenuLevel - 1].menu].id != 1019)
-        MenuInfo[menu->menu].wrap = 1;
+        MenuInfo[menu->menu].cancel_prompt = 1;
     else
-        MenuInfo[menu->menu].wrap = 0;
+        MenuInfo[menu->menu].cancel_prompt = 0;
     if (menu->confirm_pressed != 0) {
         MenuSFX = MENUSFX_MENUSELECT;
         if (MenuInfo[GameMenu[GameMenuLevel - 1].menu].id == 1000) {

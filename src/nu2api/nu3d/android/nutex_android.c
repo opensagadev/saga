@@ -203,7 +203,7 @@ void NuTexReadTex(void) {
     STUBBED();
 }
 
-void NuTexSetTextureWithStagePS(NUNATIVETEX *tex, GLuint stage) {
+void NuTexSetTextureWithStagePS(NUNATIVETEX *tex, i32 stage) {
     GLuint gl_tex;
 
     glActiveTexture(GL_TEXTURE0 + stage);
@@ -212,3 +212,14 @@ void NuTexSetTextureWithStagePS(NUNATIVETEX *tex, GLuint stage) {
 
     glBindTexture(GL_TEXTURE_2D, tex != NULL ? tex->platform.gl_tex : 0);
 }
+
+#ifdef __ANDROID__
+// The original build emitted an out-of-line weak copy of bionic's ctype inline.
+extern "C" __attribute__((weak)) int toupper(int c) {
+    if ((unsigned int)c > 255) {
+        return c;
+    }
+
+    return (_toupper_tab_ + 1)[c];
+}
+#endif

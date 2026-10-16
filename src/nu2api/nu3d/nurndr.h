@@ -139,7 +139,7 @@ extern "C" {
     extern i32 NuRndrShadowCnt;
     extern NURND_SHADOW_s NuRndrShadPolDat[128];
 
-    void NuRndrInitEx(i32 stream_buffer_size, VARIPTR *buffer);
+    void NuRndrInitEx(i32 stream_buffer_size, VARIPTR *buffer, VARIPTR buffer_end);
     i32 NuRndrSwapScreenEx(i32 mode, void (*callback)(void));
     void NuRndr3dLine(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, i32 colour);
     i32 NuRndrTri3dClip(NURND_VERTEX3D *vertices, i32 count, NUMTX *matrix, struct numtl_s *material);

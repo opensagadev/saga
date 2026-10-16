@@ -70,7 +70,7 @@ void NuStrFormatSize(char *buf, u32 buf_len, u32 size, bool align_left) {
 const char *NuStrStripPath(const char *string) {
     const char *cursor;
 
-    do {
+    for (;;) {
         cursor = string;
 
         while (*cursor != '/' && *cursor != '\\') {
@@ -81,8 +81,9 @@ const char *NuStrStripPath(const char *string) {
             cursor++;
         }
 
-        string = cursor + 1;
-    } while (*string != '\0');
-
-    return string;
+        if (*++cursor == '\0') {
+            return string;
+        }
+        string = cursor;
+    }
 }

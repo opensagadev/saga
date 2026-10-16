@@ -163,31 +163,31 @@ static void *GizMiniCut_ReserveBufferSpace(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     world->minicuts = NULL;
     world->minicut_count = 0;
-    if (world->current_level->max_minicuts == 0) {
-        return NULL;
-    }
+    if (world->current_level->max_minicuts != 0) {
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
+        world->minicuts = static_cast<MINICUT *>(world->giz_buffer.void_ptr);
+        world->giz_buffer.addr += world->current_level->max_minicuts * sizeof(MINICUT);
+        memset(world->minicuts, 0, world->current_level->max_minicuts * sizeof(MINICUT));
 
-    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
-    world->minicuts = static_cast<MINICUT *>(world->giz_buffer.void_ptr);
-    world->giz_buffer.addr += world->current_level->max_minicuts * sizeof(MINICUT);
-    memset(world->minicuts, 0, world->current_level->max_minicuts * sizeof(MINICUT));
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
+        world->minicut_parts = static_cast<MINICUTPART *>(world->giz_buffer.void_ptr);
+        world->giz_buffer.addr +=
+            world->current_level->max_minicuts * world->current_level->max_minicut_parts * sizeof(MINICUTPART);
+        memset(world->minicut_parts, 0,
+               world->current_level->max_minicuts * world->current_level->max_minicut_parts * sizeof(MINICUTPART));
 
-    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
-    world->minicut_parts = static_cast<MINICUTPART *>(world->giz_buffer.void_ptr);
-    const i32 part_capacity = world->current_level->max_minicuts * world->current_level->max_minicut_parts;
-    world->giz_buffer.addr += part_capacity * sizeof(MINICUTPART);
-    memset(world->minicut_parts, 0, part_capacity * sizeof(MINICUTPART));
-
-    for (i32 index = 0; index < world->current_level->max_minicuts; ++index) {
-        MINICUT *minicut = &world->minicuts[index];
-        minicut->field_0x24 = 2.5f;
-        minicut->field_0x28 = 2.5f;
-        minicut->field_0x20 = 10.0f;
-        minicut->field_0x2c = 10.0f;
-        minicut->field_0x1c = 0.0f;
-        minicut->parts = &world->minicut_parts[index * world->current_level->max_minicut_parts];
-        minicut->part_count = 0;
-        sprintf(minicut->name, "Minicut %i", index + 1);
+        for (i32 index = 0; index < world->current_level->max_minicuts; ++index) {
+            MINICUT *minicut = &world->minicuts[index];
+            MINICUTPART *parts = &world->minicut_parts[index * world->current_level->max_minicut_parts];
+            minicut->field_0x24 = 2.5f;
+            minicut->field_0x28 = 2.5f;
+            minicut->field_0x20 = 10.0f;
+            minicut->field_0x2c = 10.0f;
+            minicut->field_0x1c = 0.0f;
+            minicut->parts = parts;
+            minicut->part_count = 0;
+            sprintf(minicut->name, "Minicut %i", index + 1);
+        }
     }
     return world->minicuts;
 }

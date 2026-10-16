@@ -208,14 +208,16 @@ void MechAutoJumpManager::Process() {
                         continue;
                     }
                     u32 colour = static_cast<u32>(static_cast<u8>(testStreakAlpha)) << 24;
-                    bool allow_streak = (checks & 4) != 0;
-                    if (allow_streak) {
+                    bool allow_streak;
+                    if ((checks & 4) != 0) {
                         colour |= 0xff00;
+                        allow_streak = true;
                         if (show_autojump_hint == 0) {
                             show_autojump_hint = id_HINT_LSW_AUTOJUMP;
                         }
                     } else {
                         colour |= 0x808080;
+                        allow_streak = false;
                         show_autojump_hint = id_HINT_LSW_AUTOJUMP_FAIL;
                     }
                     if ((checks & 2) == 0) {

@@ -705,24 +705,21 @@ void Hint_SaveAllGameState() {
 void Hint_LoadAllGameState() {
     HINTSYS_s *system = &hintsys;
     HINT_s *hint = system->hints;
-    if (hint == NULL || system->save_bits == NULL || hint->control_mode_ids[0] == -1 || system->save_bit_count <= 0) {
+    if (hint == NULL || system->save_bits == NULL || hint->control_mode_ids[0] == -1) {
         return;
     }
 
-    i32 index = 0;
-    const i32 control_mode = MechInputTouchSystem::s_baseControlMode;
-    do {
-        if (HINT_COMPLETE(index) != 0) {
-            hint->completion_flags[control_mode] = 1;
+    for (i32 index = 0; (index >> 5) < system->save_bit_count; ++index) {
+        if (HINT_COMPLETE(index) == 0) {
+            hint->completion_flags[MechInputTouchSystem::s_baseControlMode] = 0;
         } else {
-            hint->completion_flags[control_mode] = 0;
+            hint->completion_flags[MechInputTouchSystem::s_baseControlMode] = 1;
         }
         ++hint;
         if (hint->control_mode_ids[0] == -1) {
             return;
         }
-        ++index;
-    } while ((index >> 5) < system->save_bit_count);
+    }
 }
 
 void Hint_ClearHintsAndDoneFlags() {

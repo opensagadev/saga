@@ -497,7 +497,6 @@ static void Grapples_Reset(void *world_ptr, void *, void *progress_ptr) {
 
 static void *Grapples_ReserveBufferSpace(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    void *reserved_space = NULL;
     world->grapples = NULL;
     world->grapple_count = 0;
 
@@ -505,9 +504,8 @@ static void *Grapples_ReserveBufferSpace(void *world_ptr) {
         world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
         world->grapples = reinterpret_cast<GRAPPLE *>(world->giz_buffer.addr);
         world->giz_buffer.addr += world->current_level->max_grapples * sizeof(GRAPPLE);
-        reserved_space = world->grapples;
     }
-    return reserved_space;
+    return world->grapples;
 }
 
 static i32 Grapples_Load(void *world_ptr, void *) {

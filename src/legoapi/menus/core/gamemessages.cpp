@@ -517,17 +517,17 @@ void TransformGameMessages(nuvec_s *camera_position, nuvec_s *camera_scale, nuve
                           (message->position.z - camera_position->z) * camera_direction->z;
         if (!(depth <= 0.0f)) {
             message->field_0xfb = 0;
+            if ((message->flags & 4) != 0) {
+                const f32 offset = message->field_0xb4;
+                NUVEC target = {message->position.x + offset * camera_scale->x,
+                                message->position.y + offset * camera_scale->y,
+                                message->position.z + offset * camera_scale->z};
+                NUVEC transformed;
+                NuCameraTransformScreenClip(&transformed, &target, 1, NULL);
+                message->field_0xb8 = __builtin_fabsf(message->start_position.x - transformed.x) * 0.525f;
+            }
         } else {
             message->field_0xfb = 1;
-        }
-        if (!(depth <= 0.0f) && (message->flags & 4) != 0) {
-            const f32 offset = message->field_0xb4;
-            NUVEC target = {message->position.x + offset * camera_scale->x,
-                            message->position.y + offset * camera_scale->y,
-                            message->position.z + offset * camera_scale->z};
-            NUVEC transformed;
-            NuCameraTransformScreenClip(&transformed, &target, 1, NULL);
-            message->field_0xb8 = __builtin_fabsf(message->start_position.x - transformed.x) * 0.525f;
         }
         if ((message->flags & 2) == 0) {
             message->field_0xf9 = 1;

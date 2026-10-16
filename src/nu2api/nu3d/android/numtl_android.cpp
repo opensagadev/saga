@@ -252,7 +252,7 @@ extern "C" void NuMtlSetRenderStatesPS(numtl_s *mtl) {
 
 // original 0x29c070
 extern "C" void NuIOS_SetVertexFormat(usize fmt) {
-    g_boundVertexFormat = fmt;
+    g_boundVertexFormat = reinterpret_cast<NuVertexFormatPS *>(fmt);
 }
 
 // Helpers for the debris constant block (original walks the programme's
@@ -344,7 +344,7 @@ void NuIOSDLMtlCallback(void *arg) {
         NUSHADERPROGRAM *program =
             DebrisGlassSelector(mtl) == kGlassDebrisMarker ? g_debrisGlassProgram : g_debrisProgram;
 
-        g_boundVertexFormat = ptrToUsize(g_nuDebrisVertexFormat);
+        g_boundVertexFormat = g_nuDebrisVertexFormat;
         NuShaderManagerBindShader(0);
 
         g_boundShader = program != nullptr ? program->program : 0;
@@ -401,7 +401,7 @@ void NuIOSDLMtlCallback(void *arg) {
     } else if (isFaceOn) {
         // ---- Face-on / billboard ----
         NuShaderManagerBindShader(0);
-        g_boundVertexFormat = ptrToUsize(g_nuFaceOnVertexFormat);
+        g_boundVertexFormat = g_nuFaceOnVertexFormat;
 
         char decalSel = FaceOnDecalSelector(mtl);
         NUSHADERPROGRAM *program = (decalSel == '\0') ? g_faceonProgram : g_faceonDecalProgram;

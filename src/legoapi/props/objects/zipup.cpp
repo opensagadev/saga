@@ -362,16 +362,14 @@ void ZipUps_Reset(void *world_ptr, void *, void *progress_ptr) {
 
 static void *ZipUps_ReserveBufferSpace(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    void *reserved_space = NULL;
     world->zipups = NULL;
     world->zipup_count = 0;
     if (world->current_level->max_zipups != 0) {
         world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
         world->zipups = reinterpret_cast<ZIPUP *>(world->giz_buffer.addr);
         world->giz_buffer.addr += world->current_level->max_zipups * sizeof(ZIPUP);
-        reserved_space = world->zipups;
     }
-    return reserved_space;
+    return world->zipups;
 }
 
 static i32 ZipUps_Load(void *world_ptr, void *) {

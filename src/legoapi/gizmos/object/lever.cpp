@@ -202,21 +202,16 @@ static i32 Levers_GetMaxGizmos(void *lever) {
 
 static void Levers_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world == NULL || world->levers == NULL) {
-        return;
-    }
-
     for (i32 index = 0; index < world->nlevers; ++index) {
-        LEVER_s &lever = world->levers[index];
-        if (NuStrLen(lever.name) != 0) {
-            AddGizmo(gizmo_sys, type_id, NULL, &lever);
+        if (NuStrLen(world->levers[index].name) != 0) {
+            AddGizmo(gizmo_sys, type_id, NULL, &world->levers[index]);
         }
     }
 }
 
 static void Levers_Update(void *world_ptr, void *, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world == NULL || world->levers == NULL) {
+    if (world->levers == NULL) {
         return;
     }
 
@@ -228,14 +223,15 @@ static void Levers_Update(void *world_ptr, void *, float) {
             continue;
         }
 
-        if ((lever.flags & LEVER_FLAG_BEING_PULLED) == 0) {
-            lever.flags |= LEVER_FLAG_BEING_PULLED;
+        if (!lever.being_pulled) {
+            lever.being_pulled = 1;
         }
         if (lever.auto_reset_timer > 0.0f) {
             lever.auto_reset_timer -= FRAMETIME;
             if (lever.auto_reset_timer <= 0.0f) {
-                lever.flags |= LEVER_FLAG_RETURNING | LEVER_FLAG_PULLED_DOWN;
-                lever.flags &= ~LEVER_FLAG_INTERACTION_FINISHED;
+                lever.returning = 1;
+                lever.interaction_finished = 0;
+                lever.pulled_down = 1;
                 lever.animation_frame = 0;
                 lever.auto_reset_timer = 0.0f;
                 lever.pull_progress = 0.6f;
@@ -246,14 +242,19 @@ static void Levers_Update(void *world_ptr, void *, float) {
         }
 
         if ((lever.flags & (LEVER_FLAG_RETURNING | LEVER_FLAG_PULLED_DOWN)) != 0) {
-            if ((lever.flags & LEVER_FLAG_RETURNING) == 0) {
-                lever.flags |= LEVER_FLAG_RETURNING;
+            if (!lever.returning) {
+                lever.returning = 1;
             }
             lever.pull_progress -= FRAMETIME;
             if (lever.pull_progress <= 0.0f) {
                 lever.pull_progress = 0.0f;
                 lever.auto_reset_timer = 0.0f;
-                lever.flags &= ~LEVER_FLAG_RETURN_RESET_MASK;
+                lever.interacting = 0;
+                lever.being_pulled = 0;
+                lever.goodie = 0;
+                lever.baddie = 0;
+                lever.returning = 0;
+                lever.pulled_down = 0;
                 lever.idle_animation_timer = 0.0f;
                 lever.animation_frame = 0;
                 continue;
@@ -515,18 +516,15 @@ static void Lever_SetVisibility(GIZMO *gizmo, i32 visible) {
     }
 
     LEVER_s *lever = static_cast<LEVER_s *>(gizmo->object);
-    const bool was_visible = (lever->flags & LEVER_FLAG_VISIBLE) != 0;
-    if (visible != 0) {
-        lever->flags |= LEVER_FLAG_VISIBLE;
+    const i32 was_visible = lever->visible;
+    lever->visible = visible != 0;
+    if (lever->visible) {
         if (!was_visible) {
             lever->platform_id = NewPlatPickupInst(lever, 3);
             PlatInstRotate(lever->platform_id, 1);
         }
-    } else {
-        lever->flags &= ~LEVER_FLAG_VISIBLE;
-        if (was_visible) {
-            DeletePlatinst(lever->platform_id);
-        }
+    } else if (was_visible) {
+        DeletePlatinst(lever->platform_id);
     }
 }
 

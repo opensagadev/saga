@@ -38,7 +38,7 @@ i32 NuRndIsShadowReceiveRenderGobj(void) {
     return global_GobjIsShadowReceive;
 }
 
-void NuRndrInitEx(i32 stream_buffer_size, VARIPTR *buffer) {
+void NuRndrInitEx(i32 stream_buffer_size, VARIPTR *buffer, VARIPTR buffer_end) {
     NuRndrStreamInit(stream_buffer_size, buffer);
 }
 

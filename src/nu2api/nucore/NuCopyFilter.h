@@ -1,11 +1,11 @@
 #pragma once
 
-#include "nu2api/nucore/NuPostFilterGen.h"
+#include "nu2api/nucore/NuPostFilter.h"
 
 struct nuframebuffer_s;
 struct nueffecttex_s;
 
-struct NuCopyFilter : NuPostFilterGen {
+struct NuCopyFilter : NuPostFilter {
     nuframebuffer_s *copy_fbo;
     nueffecttex_s *copy_texture;
 

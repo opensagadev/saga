@@ -6,7 +6,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    extern i32 g_currentTexUnit;
+    extern u32 g_currentTexUnit;
     extern GLuint g_lastBound2DTexIds[16];
     extern GLuint g_lastBoundCubeTexIds[16];
     extern GLuint g_earlyColorFramebuffer;

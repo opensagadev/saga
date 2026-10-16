@@ -1195,9 +1195,10 @@ void GizBlowup_DeleteSingleTerrain(GIZMOBLOWUP_s *blowup) {
 }
 
 void GizBlowup_DeleteTerrain() {
-    if (WORLD->gizmo_blowups != NULL) {
-        for (i32 i = 0; i < WORLD->gizmo_blowup_count; ++i) {
-            GizBlowup_DeleteSingleTerrain(&WORLD->gizmo_blowups[i]);
+    GIZMOBLOWUP_s *blowup = WORLD->gizmo_blowups;
+    if (blowup != NULL) {
+        for (i32 i = 0; i < WORLD->gizmo_blowup_count; ++i, ++blowup) {
+            GizBlowup_DeleteSingleTerrain(blowup);
         }
     }
 }

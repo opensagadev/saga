@@ -780,10 +780,11 @@ i32 edgraFileSave(char *path) {
 }
 
 void edppPtlShelve(i32 index) {
-    edpp_particle_s *particle = &edpp_ptls[index];
-    if (particle->instance_id != -1 && particle->instance_id != 99999) {
-        DebFreeInstantly(&particle->instance_id);
-        particle->instance_id = 99999;
+    if (edpp_ptls[index].instance_id != -1) {
+        if (edpp_ptls[index].instance_id != 99999) {
+            DebFreeInstantly(&edpp_ptls[index].instance_id);
+            edpp_ptls[index].instance_id = 99999;
+        }
     }
 }
 
@@ -1470,9 +1471,11 @@ void edgraDrawCursor() {
 }
 
 void edpartPtlShelve(i32 index) {
-    if (part_emits[index].instance_id != -1 && part_emits[index].instance_id != 99999) {
-        DebFreeInstantly(&part_emits[index].instance_id);
-        part_emits[index].instance_id = 99999;
+    if (part_emits[index].instance_id != -1) {
+        if (part_emits[index].instance_id != 99999) {
+            DebFreeInstantly(&part_emits[index].instance_id);
+            part_emits[index].instance_id = 99999;
+        }
     }
 }
 

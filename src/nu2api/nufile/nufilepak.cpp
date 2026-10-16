@@ -211,7 +211,7 @@ i32 NuFilePakCondense(void *hdr_ptr) {
 
     NUFILEPAKHDR *hdr = static_cast<NUFILEPAKHDR *>(hdr_ptr);
     NUFILEPAKITEM *items = GetItems(hdr);
-    char *data = static_cast<char *>(hdr_ptr);
+    i32 data = reinterpret_cast<i32>(hdr_ptr);
     i32 removed_size = 0;
     for (u32 i = 0; i < hdr->item_count; ++i) {
         if (!items[i].attr.removed) {
@@ -221,14 +221,15 @@ i32 NuFilePakCondense(void *hdr_ptr) {
                         removed_size &= -items[i].alignment;
                     }
                     if (removed_size != 0) {
-                        memmove(data + items[i].data_offset - removed_size, data + items[i].data_offset, items[i].size);
+                        memmove(reinterpret_cast<void *>(data + items[i].data_offset - removed_size),
+                                reinterpret_cast<void *>(data + items[i].data_offset), items[i].size);
                         items[i].data_offset -= removed_size;
                     }
                 }
             } else {
                 items[i].attr.removed = 1;
                 removed_size += items[i].size;
-                removed_size = (removed_size + items[i].alignment - 1) & -items[i].alignment;
+                removed_size = (removed_size + (items[i].alignment - 1)) & -items[i].alignment;
             }
         }
     }

@@ -287,11 +287,13 @@ void Save_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapse
     if (packet->save_state == 3) {
         stage->field_0x18 += elapsed;
         if (stage->field_0x18 >= stage->field_0x1c) {
-            if ((packet->mode_flags & 4) == 0 && packet->prompt_choice == 0 && (packet->field_0xb0 & 0x40) == 0 &&
-                packet->challenge_state == 0 && packet->mission_state == 0) {
+            if ((packet->mode_flags & 4) != 0 || packet->prompt_choice != 0 || (packet->field_0xb0 & 0x40) != 0 ||
+                packet->challenge_state != 0 || packet->mission_state != 0) {
+                NextStatusStage(packet);
+            } else {
                 packet->mode_flags |= 0x10;
+                NextStatusStage(packet);
             }
-            NextStatusStage(packet);
         }
     } else if (packet->save_state == 2) {
         if (MenuInMemoryCard() == 0)
@@ -773,54 +775,56 @@ void SetDrawGoldBrick(STATUSPACKET_s *packet, i32) {
     }
 }
 
-void NewStatusRumbleBuzz(i32 player, float amount, float buzz, i32 priority) {
-    if (!(amount > 0.0f)) {
-        if (StatusPacket.player0_active != 0 && (player == 0 || player == -1)) {
-            goto player0_buzz;
-        }
-        if (StatusPacket.player1_active != 0 && (player == 1 || player == -1)) {
-            goto player1_buzz;
-        }
-        return;
-    }
+static inline bool StatusRumbleTargetsPlayer(i32 player, i32 index) {
+    return player == index || player == -1;
+}
 
-    if (StatusPacket.player0_active != 0 && (player == 0 || player == -1)) {
-        if (StatusPacket.player0_rumble_time <= 0.0f || amount > StatusPacket.player0_rumble_time /
-                                                                     StatusPacket.player0_rumble_duration *
-                                                                     StatusPacket.player0_rumble_amount) {
-            StatusPacket.player0_rumble_amount = amount;
-            StatusPacket.player0_rumble_duration = amount;
-            StatusPacket.player0_rumble_time = amount;
-        }
-    player0_buzz:
-        if (buzz > StatusPacket.player0_buzz_amount) {
-            StatusPacket.player0_buzz_amount = buzz;
-        }
-        if (priority > 0) {
-            const i32 old_priority = StatusPacket.player0_rumble_priority;
-            ++priority;
-            if (priority > old_priority) {
+void NewStatusRumbleBuzz(i32 player, float amount, float buzz, i32 priority) {
+    if (amount > 0.0f) {
+        if (StatusPacket.player0_active != 0 && StatusRumbleTargetsPlayer(player, 0)) {
+            if (StatusPacket.player0_rumble_time <= 0.0f ||
+                amount > StatusPacket.player0_rumble_time / StatusPacket.player0_rumble_duration *
+                             StatusPacket.player0_rumble_amount) {
+                StatusPacket.player0_rumble_amount = amount;
+                StatusPacket.player0_rumble_duration = amount;
+                StatusPacket.player0_rumble_time = amount;
+            }
+            if (buzz > StatusPacket.player0_buzz_amount) {
+                StatusPacket.player0_buzz_amount = buzz;
+            }
+            if (priority > 0 && ++priority > StatusPacket.player0_rumble_priority) {
                 StatusPacket.player0_rumble_priority = static_cast<u8>(priority);
             }
         }
-    }
-
-    if (StatusPacket.player1_active != 0 && (player == 1 || player == -1)) {
-        if (StatusPacket.player1_rumble_time <= 0.0f || amount > StatusPacket.player1_rumble_time /
-                                                                     StatusPacket.player1_rumble_duration *
-                                                                     StatusPacket.player1_rumble_amount) {
-            StatusPacket.player1_rumble_amount = amount;
-            StatusPacket.player1_rumble_duration = amount;
-            StatusPacket.player1_rumble_time = amount;
+        if (StatusPacket.player1_active != 0 && StatusRumbleTargetsPlayer(player, 1)) {
+            if (StatusPacket.player1_rumble_time <= 0.0f ||
+                amount > StatusPacket.player1_rumble_time / StatusPacket.player1_rumble_duration *
+                             StatusPacket.player1_rumble_amount) {
+                StatusPacket.player1_rumble_amount = amount;
+                StatusPacket.player1_rumble_duration = amount;
+                StatusPacket.player1_rumble_time = amount;
+            }
+            if (buzz > StatusPacket.player1_buzz_amount) {
+                StatusPacket.player1_buzz_amount = buzz;
+            }
+            if (priority > 0 && ++priority > StatusPacket.player1_rumble_priority) {
+                StatusPacket.player1_rumble_priority = static_cast<u8>(priority);
+            }
         }
-    player1_buzz:
-        if (buzz > StatusPacket.player1_buzz_amount) {
-            StatusPacket.player1_buzz_amount = buzz;
+    } else {
+        if (StatusPacket.player0_active != 0 && StatusRumbleTargetsPlayer(player, 0)) {
+            if (buzz > StatusPacket.player0_buzz_amount) {
+                StatusPacket.player0_buzz_amount = buzz;
+            }
+            if (priority > 0 && ++priority > StatusPacket.player0_rumble_priority) {
+                StatusPacket.player0_rumble_priority = static_cast<u8>(priority);
+            }
         }
-        if (priority > 0) {
-            const i32 old_priority = StatusPacket.player1_rumble_priority;
-            ++priority;
-            if (priority > old_priority) {
+        if (StatusPacket.player1_active != 0 && StatusRumbleTargetsPlayer(player, 1)) {
+            if (buzz > StatusPacket.player1_buzz_amount) {
+                StatusPacket.player1_buzz_amount = buzz;
+            }
+            if (priority > 0 && ++priority > StatusPacket.player1_rumble_priority) {
                 StatusPacket.player1_rumble_priority = static_cast<u8>(priority);
             }
         }
@@ -1465,16 +1469,17 @@ void Hint_Draw(i32);
 
 f32 getFinishedStatusAlpha(STATUSPACKET_s *packet) {
     STATUS_STAGE_s *stage = packet->stage;
-    f32 alpha = 1.0f;
     if (stage->type == 11 || stage->type == 12) {
-        alpha = 0.0f;
-    } else if (stage->type == 10) {
+        return 0.0f;
+    }
+    if (stage->type == 10) {
         if (stage->field_0x18 < 1.0f) {
-            alpha = 1.0f - stage->field_0x18;
-        } else {
-            alpha = 0.0f;
+            return 1.0f - stage->field_0x18;
         }
-    } else if (stage->type == 19 && stage->field_0x14 != 0) {
+        return 0.0f;
+    }
+    f32 alpha = 1.0f;
+    if (stage->type == 19 && stage->field_0x14 != 0) {
         if (stage->field_0x18 < 1.0f) {
             alpha = 1.0f - stage->field_0x18;
         } else {

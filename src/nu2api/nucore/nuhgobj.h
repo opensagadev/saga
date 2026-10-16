@@ -149,7 +149,7 @@ extern "C" {
                                        NUJOINTANIM_s *overrides);
     nuhgobj_s *NuGHGRead(char *path, VARIPTR *buf, VARIPTR buf_end);
     void NuHGobjDestroy(nuhgobj_s *object);
-    nuhgobjpoi_s *NuHGobjGetPOI(nuhgobj_s *object, i32 index);
+    nuhgobjpoi_s *NuHGobjGetPOI(nuhgobj_s *object, u8 index);
     void NuHGobjPOILocalMtxFromIX(nuhgobj_s *object, u8 index, NUMTX *joint_matrices, NUMTX *result);
     void NuHGobjPOIMtxFromIX(nuhgobj_s *object, u8 index);
     void NuHGobjPOIMtx(nuhgobj_s *object, u8 index, NUMTX *world_matrix, NUMTX *joint_matrices, NUMTX *result);

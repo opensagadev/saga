@@ -399,7 +399,7 @@ extern "C" void NuTexAnimAddList(nutexanim_s *anim) {
     if (node != NULL) {
         if (node->next == NULL)
             NuSevereWarning("Ran out of texture anim slots!");
-        ntal_free = node->next;
+        ntal_free = ntal_free->next;
         node->previous = NULL;
         node->next = ntal_first;
         node->first = anim;

@@ -66,18 +66,16 @@ void GizRandom_Activate(GIZMO *gizmo, i32 active) {
 void *GizRandom_ReserveBufferSpace(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     world->giz_randoms = NULL;
-    if (world->current_level->max_giz_randoms == 0) {
-        return NULL;
+    if (world->current_level->max_giz_randoms != 0) {
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
+        GIZRANDOMSYS *random_system = reinterpret_cast<GIZRANDOMSYS *>(world->giz_buffer.addr);
+        world->giz_randoms = random_system;
+        world->giz_buffer.addr += sizeof(*random_system);
+        random_system->randoms = reinterpret_cast<GIZRANDOM *>(world->giz_buffer.addr);
+        world->giz_buffer.addr += world->current_level->max_giz_randoms * sizeof(GIZRANDOM);
+        random_system->capacity = world->current_level->max_giz_randoms;
     }
-
-    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
-    GIZRANDOMSYS *random_system = reinterpret_cast<GIZRANDOMSYS *>(world->giz_buffer.addr);
-    world->giz_randoms = random_system;
-    world->giz_buffer.addr += sizeof(*random_system);
-    random_system->randoms = reinterpret_cast<GIZRANDOM *>(world->giz_buffer.addr);
-    world->giz_buffer.addr += world->current_level->max_giz_randoms * sizeof(GIZRANDOM);
-    random_system->capacity = world->current_level->max_giz_randoms;
-    return random_system;
+    return world->giz_randoms;
 }
 
 ADDGIZMOTYPE *GizRandom_RegisterGizmo(i32 type_id) {

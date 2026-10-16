@@ -15,7 +15,8 @@ extern "C" f32 NuAnimEndFrame(void *animation_data) {
         return *static_cast<f32 *>(animation_data);
     }
 
-    return static_cast<f32>(animation->frame_count) + static_cast<f32>(animation->first_frame);
+    return static_cast<f32>(static_cast<u32>(animation->frame_count)) +
+           static_cast<f32>(static_cast<i32>(animation->first_frame));
 }
 
 extern "C" f32 NuAnimEndFrameOld(void *animation_data) {
@@ -31,9 +32,9 @@ extern "C" f32 NuAnimEndFrameOld(void *animation_data) {
     return static_cast<f32>(declared_end_frame);
 }
 
-void NuAnimBuffInit(i32 max_joints, variptr_u *buf, variptr_u) {
+void NuAnimBuffInit(i32 max_joints, variptr_u *buf, variptr_u buf_end) {
     MaxAnimJoints = max_joints;
-    globalbuffer = NuAnimBuffCreate(max_joints, buf);
+    globalbuffer = NuAnimBuffCreate(max_joints, buf, buf_end);
 }
 
 nuanimdatachunk_s *NuAnimDataChunkCreate(i32 curve_set_count) {

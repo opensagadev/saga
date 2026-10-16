@@ -360,7 +360,7 @@ void MiniKitDetector(nuvec_s *position) {
 
 static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count) {
     NUMTX matrix;
-    if (world == NULL || pickups == NULL || world->lev_objs == NULL || GameCam == NULL) {
+    if (world == NULL || pickups == NULL) {
         return;
     }
 
@@ -643,7 +643,7 @@ static void GizmoPickups_Update(void *world_ptr, void *, float) {
 
 static void GizmoPickups_Draw(void *world_ptr, void *, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world == NULL || world->gizmo_pickup_sys == NULL) {
+    if (world == NULL) {
         return;
     }
 
@@ -652,12 +652,18 @@ static void GizmoPickups_Draw(void *world_ptr, void *, float) {
         TBOPENFN(const_cast<char *>("Coins"), 5);
     }
 
-    GIZMOPICKUPRUNTIMESYS_s *pickup_sys = world->gizmo_pickup_sys;
-    if (pickup_sys->pickups != NULL && Missions_PickupsOff(MissionSys) == 0) {
-        GizmoPickups_DrawList(world, pickup_sys->pickups, pickup_sys->pickup_count);
+    GIZMOPICKUP_s *pickups = world->gizmo_pickup_sys->pickups;
+    const i32 pickup_count = world->gizmo_pickup_sys->pickup_count;
+    if (pickups != NULL) {
+        if (Missions_PickupsOff(MissionSys) != 0) {
+            // Mission pickups are hidden.
+        } else {
+            GizmoPickups_DrawList(world, pickups, pickup_count);
+        }
     }
-    if (pickup_sys->temporary_pickups != NULL && Missions_PickupsOff(MissionSys) == 0) {
-        GizmoPickups_DrawList(world, pickup_sys->temporary_pickups, GIZMOPICKUP_TEMPORARY_CAPACITY);
+    GIZMOPICKUP_s *temporary_pickups = world->gizmo_pickup_sys->temporary_pickups;
+    if (temporary_pickups != NULL && Missions_PickupsOff(MissionSys) == 0) {
+        GizmoPickups_DrawList(world, temporary_pickups, GIZMOPICKUP_TEMPORARY_CAPACITY);
     }
 
     if (TimingBarSet == 5) {

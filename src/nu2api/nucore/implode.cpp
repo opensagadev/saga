@@ -492,7 +492,8 @@ static i32 inlen;
 void *ImplodePutI(void *buf, u32 value, i32 size) {
     unsigned char *cursor = static_cast<unsigned char *>(buf);
     while (size != 0) {
-        *cursor = static_cast<unsigned char>(value);
+        i32 byte = value;
+        *cursor = byte;
         ++cursor;
         value >>= 8;
         --size;
@@ -505,7 +506,7 @@ void ImplodePutByteToMem(unsigned char value) {
 }
 
 usize ImplodeFReadMem(unsigned char *buffer, i32 size) {
-    usize count = size < inlen ? size : inlen;
+    i32 count = size < inlen ? size : inlen;
     memcpy(buffer, implode_inbuffer, count);
     implode_inbuffer += count;
     implode_origsize += count;
@@ -538,7 +539,7 @@ static void count_len(i32 node) {
 static void make_len(i32 root) {
     i32 i;
     u32 count;
-    i32 total;
+    u32 total;
     for (i = 0; i <= 16; ++i)
         len_cnt[i] = 0;
     count_len(root);

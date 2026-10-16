@@ -219,7 +219,7 @@ void NuMemBlkCheckFreeList(NUMEMBLK *pool) {
     }
 }
 
-NUMEMBLK *NuMemBlkCreate(u32 element_size, i32 count, u32 alignment_mask) {
+NUMEMBLK *NuMemBlkCreate(i32 element_size, i32 count, u32 alignment_mask) {
     NUMEMBLKLINK *link;
     i32 i;
     u32 header_size;
@@ -253,7 +253,7 @@ NUMEMBLK *NuMemBlkCreate(u32 element_size, i32 count, u32 alignment_mask) {
     return pool;
 }
 
-NUMEMBLK *NuMemBlkCreateVari(u32 element_size, i32 count, u32 alignment_mask, VARIPTR *buffer) {
+NUMEMBLK *NuMemBlkCreateVari(i32 element_size, i32 count, u32 alignment_mask, VARIPTR *buffer) {
     i32 size = NuMemBlkSize(element_size, count, alignment_mask);
     buffer->addr += alignment_mask;
     buffer->addr &= ~(usize)alignment_mask;
@@ -262,7 +262,7 @@ NUMEMBLK *NuMemBlkCreateVari(u32 element_size, i32 count, u32 alignment_mask, VA
     return pool;
 }
 
-NUMEMBLK *NuMemBlkCreateEx(u32 element_size, i32 count, u32 alignment_mask, void *storage) {
+NUMEMBLK *NuMemBlkCreateEx(i32 element_size, i32 count, u32 alignment_mask, void *storage) {
     NUMEMBLKLINK *link;
     i32 i;
     u32 header_size;

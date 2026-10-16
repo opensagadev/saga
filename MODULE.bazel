@@ -70,7 +70,10 @@ http_archive(
     name = "libogg",
     build_file = "//third_party:ogg.BUILD.bazel",
     patch_args = ["-p1"],
-    patches = ["//third_party:ogg-config-types.patch"],
+    patches = [
+        "//third_party:ogg-config-types.patch",
+        "//third_party:ogg-flush-fill.patch",
+    ],
     sha256 = "21e0a61e15e9dd294587bcd39d81fbe1998b27b1c525e15ecfaba94344f921b4",
     strip_prefix = "libogg-1.2.1",
     urls = ["https://ftp.osuosl.org/pub/xiph/releases/ogg/libogg-1.2.1.tar.xz"],

@@ -164,12 +164,15 @@ static void NuQTFixAddress(nuqthdr_s *header) {
     }
 }
 
-extern "C" nuqthdr_s *NuQTRead(char *path, u8 **cursor, u8 **end) {
-    nuqthdr_s *header = reinterpret_cast<nuqthdr_s *>((reinterpret_cast<usize>(*cursor) + 15) & ~usize(15));
-    *cursor = reinterpret_cast<u8 *>(header);
-    i32 size = NuFileLoadBuffer(path, *cursor, *end - *cursor);
+extern "C" nuqthdr_s *NuQTRead(char *path, VARIPTR *cursor, VARIPTR *end) {
+    nuqthdr_s *header;
+    i32 size;
+
+    cursor->addr = (cursor->addr + 15) & ~15;
+    header = reinterpret_cast<nuqthdr_s *>(cursor->void_ptr);
+    size = NuFileLoadBuffer(path, cursor->void_ptr, end->addr - cursor->addr);
     if (size != 0) {
-        *cursor += size;
+        cursor->addr += size;
         NuQTFixAddress(header);
         return header;
     }
@@ -192,29 +195,29 @@ extern "C" i32 NuQTWrite(char *path, nuqthdr_s *header) {
 }
 
 extern "C" i32 NuQTCreate(i32 entry_capacity, i32 data_capacity, i32 element_size, i32 field_34, i32 field_30,
-                          u32 field_04, u32 field_0c, u32 field_08, u32 field_10, u8 **cursor, u8 **end) {
-    *cursor = reinterpret_cast<u8 *>((reinterpret_cast<usize>(*cursor) + 15) & ~usize(15));
+                          f32 field_04, f32 field_0c, f32 field_08, f32 field_10, VARIPTR *cursor, VARIPTR *end) {
+    cursor->addr = (cursor->addr + 15) & ~15;
     i32 required_size = sizeof(nuqthdr_s) + sizeof(nuqtentry_s) * entry_capacity + 16 + data_capacity;
-    if (reinterpret_cast<usize>(*cursor) + required_size <= reinterpret_cast<usize>(*end)) {
-        nuqthdr_s *header = reinterpret_cast<nuqthdr_s *>(*cursor);
-        *cursor += sizeof(nuqthdr_s);
+    if (cursor->addr + required_size <= end->addr) {
+        nuqthdr_s *header = reinterpret_cast<nuqthdr_s *>(cursor->void_ptr);
+        cursor->addr += sizeof(nuqthdr_s);
         header->field_00[0] = 0;
         header->entry_count = 0;
         header->entry_capacity = entry_capacity;
         header->data_used = 0;
         header->data_capacity = data_capacity;
-        header->field_00[1] = field_04;
-        header->field_00[3] = field_0c;
-        header->field_00[2] = field_08;
-        header->field_00[4] = field_10;
+        header->bounds_values[1] = field_04;
+        header->bounds_values[3] = field_0c;
+        header->bounds_values[2] = field_08;
+        header->bounds_values[4] = field_10;
         header->element_size = element_size;
         header->field_34 = field_34;
         header->field_30 = field_30;
-        header->entries = reinterpret_cast<nuqtentry_s *>(*cursor);
-        *cursor += sizeof(nuqtentry_s) * entry_capacity;
-        *cursor = reinterpret_cast<u8 *>((reinterpret_cast<usize>(*cursor) + 15) & ~usize(15));
-        header->data = *cursor;
-        *cursor += data_capacity;
+        header->entries = reinterpret_cast<nuqtentry_s *>(cursor->void_ptr);
+        cursor->addr += sizeof(nuqtentry_s) * entry_capacity;
+        cursor->addr = (cursor->addr + 15) & ~15;
+        header->data = cursor->u8_ptr;
+        cursor->addr += data_capacity;
     }
     return 0;
 }

@@ -337,13 +337,13 @@ static i32 GizBombGens_Load(void *world_ptr, void *system_ptr) {
 }
 
 GIZBOMBGEN *GizBombGen_FindByName(GIZBOMBGENSYS_s *system, char *name) {
-    if (name == NULL || system == NULL) {
-        return NULL;
-    }
-    GIZBOMBGEN *generator = system->bomb_generators;
-    for (i32 index = 0; index < system->count; ++index, ++generator) {
-        if (NuStrICmp(generator->name, name) == 0) {
-            break;
+    GIZBOMBGEN *generator = NULL;
+    if (name != NULL && system != NULL) {
+        generator = system->bomb_generators;
+        for (i32 index = 0; index < system->count; ++index, ++generator) {
+            if (NuStrICmp(generator->name, name) == 0) {
+                return generator;
+            }
         }
     }
     // The original returns the end pointer when no generator has this name.

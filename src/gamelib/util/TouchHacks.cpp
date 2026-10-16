@@ -284,16 +284,16 @@ bool TouchHacks::CanTagTo(GameObject_s &source, GameObject_s &target) {
     }
 
     const i8 context = target.character_context;
-    if (context == 0x3d || context == 0x17 || context < 0 || (CInfo[context].flags & 0x8000) != 0) {
+    if (context == 0x17 || context == 0x3d || (CInfo[context].flags & 0x8000) != 0) {
         return false;
     }
-    if ((target.field_0xf00 & 2) != 0 && (player == NULL || player->id != id_LUKESKYWALKERDAGOBAH)) {
+    if ((target.field_0xf00 & 2) != 0 && player->id != id_LUKESKYWALKERDAGOBAH) {
         return false;
     }
     if (target.apiobj.model_draw_result == 0) {
         return false;
     }
-    if ((target.apiobj.field_0x1f4 & 5) != 0 && (HUB_ADATA == NULL || WORLD == NULL || WORLD->area != HUB_ADATA)) {
+    if ((target.apiobj.field_0x1f4 & 5) != 0 && (HUB_ADATA == NULL || WORLD->area != HUB_ADATA)) {
         return false;
     }
     if (static_cast<i32>(target.apiobj.field_0x1f4) < 0) {
@@ -309,7 +309,7 @@ bool TouchHacks::CanTagTo(GameObject_s &source, GameObject_s &target) {
     const f32 dx = source.apiobj.position.x - target.apiobj.position.x;
     const f32 dy = source.apiobj.position.y - target.apiobj.position.y;
     const f32 dz = source.apiobj.position.z - target.apiobj.position.z;
-    return dx * dx + dy * dy + dz * dz <= 4.0f;
+    return !(dx * dx + dy * dy + dz * dz > 4.0f);
 }
 
 void Move_DEFAULT(GameObject_s *);

@@ -5,7 +5,7 @@
 
 #include <vorbis/vorbisfile.h>
 
-class NuSoundHeaderOGG : public NuSoundStreamDesc {
+class NuSoundHeaderOGG : public NuSoundFileStreamDesc<FileHeaderOGG, 744> {
   public:
     u16 format_id;
     u16 num_channels;

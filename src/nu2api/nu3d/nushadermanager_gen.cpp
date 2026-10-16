@@ -101,7 +101,7 @@ extern "C" void NuShaderManagerDestroy(void) {
     ShaderManagerOpenGL *manager = static_cast<ShaderManagerOpenGL *>(g_shaderManager);
     for (i32 i = 0; i < nu2api::kSlotCount; ++i) {
         NUSHADEROBJECT *slot = &manager->slots[i];
-        if (slot->glsl.base.field1 >= 0) {
+        if (slot->glsl.base.field0 >= 0) {
             NuShaderObjectUnInit(slot);
         }
     }
@@ -124,7 +124,7 @@ extern "C" void NuShaderManagerDestroyShaders(void) {
     ShaderManagerOpenGL *manager = static_cast<ShaderManagerOpenGL *>(g_shaderManager);
     for (i32 i = 0; i < nu2api::kSlotCount; ++i) {
         NUSHADEROBJECT *slot = &manager->slots[i];
-        if (slot->glsl.base.field1 >= 0) {
+        if (slot->glsl.base.field0 >= 0) {
             NuShaderObjectUnInit(slot);
         }
     }
@@ -253,12 +253,13 @@ found:
 }
 
 extern "C" void *NuShaderManagerRetrieveShaderVariant(NUSHADERMTLDESC *desc, void *mtl, i32 variant) {
-    return static_cast<ShaderManagerOpenGL *>(g_shaderManager)->retrieveShader(desc, static_cast<numtl_s *>(mtl), variant, 0,
-                                                                               false);
+    return static_cast<ShaderManagerOpenGL *>(g_shaderManager)
+        ->retrieveShader(desc, static_cast<numtl_s *>(mtl), variant, 0, false);
 }
 
 extern "C" void *NuShaderManagerRetrieveShader(NUSHADERMTLDESC *desc, void *mtl) {
-    return static_cast<ShaderManagerOpenGL *>(g_shaderManager)->retrieveShader(desc, static_cast<numtl_s *>(mtl), 0, 0, false);
+    return static_cast<ShaderManagerOpenGL *>(g_shaderManager)
+        ->retrieveShader(desc, static_cast<numtl_s *>(mtl), 0, 0, false);
 }
 
 // GL uniform dispatch table — matches the original .data at 0x65e0b8.
@@ -270,4 +271,3 @@ extern "C" {
         reinterpret_cast<void (*)(u32, i32, const void *)>(nu2api::glUniform4fv),
     };
 }
-

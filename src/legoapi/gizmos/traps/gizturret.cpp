@@ -1172,7 +1172,7 @@ GIZTURRET_s *GizTurret_FindByName(GIZTURRETSYS_s *system, char *name) {
         turret = system->turrets;
         for (i32 i = 0; i < system->count; ++i, ++turret) {
             if (NuStrICmp(turret->name, name) == 0) {
-                break;
+                return turret;
             }
         }
     }

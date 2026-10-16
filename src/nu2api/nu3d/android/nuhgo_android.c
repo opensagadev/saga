@@ -26,14 +26,14 @@ extern "C" i32 NuHGobjRndr(nuhgobj_s *object, NUMTX *world_matrix, i32 render_co
     return NuHGobjRndrMtxDwa(object, world_matrix, render_count, render_indices, joint_matrices, NULL, 0);
 }
 
-extern "C" nuhgobjpoi_s *NuHGobjGetPOI(nuhgobj_s *object, i32 index) {
-    const u8 mapped_index = static_cast<u8>(index);
-    if (mapped_index >= object->point_of_interest_count) {
-        return NULL;
+extern "C" nuhgobjpoi_s *NuHGobjGetPOI(nuhgobj_s *object, u8 index) {
+    u8 point_index;
+
+    if (index < object->point_of_interest_count) {
+        point_index = object->point_of_interest_map[index];
+        if (point_index != 0xff) {
+            return &object->points_of_interest[point_index];
+        }
     }
-    const u8 point_index = object->point_of_interest_map[mapped_index];
-    if (point_index == 0xff) {
-        return NULL;
-    }
-    return &object->points_of_interest[point_index];
+    return NULL;
 }

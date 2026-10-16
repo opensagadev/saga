@@ -100,14 +100,12 @@ i32 NuGScnFixupTID(nugscn_s *scene, i32 tid) {
         return scene->texture_ids[tid];
     }
 
-    i32 resolved_tid = NuTexResolveReference(scene, tid);
-    if (resolved_tid != 0) {
-        return resolved_tid;
-    }
-
     extern i32 NuTexGetUnresolvedTextureTIDPS();
-    resolved_tid = NuTexGetUnresolvedTextureTIDPS();
-    NuTexAddReference(resolved_tid, scene);
+    i32 resolved_tid = NuTexResolveReference(scene, tid);
+    if (resolved_tid == 0) {
+        resolved_tid = NuTexGetUnresolvedTextureTIDPS();
+        NuTexAddReference(resolved_tid, scene);
+    }
     return resolved_tid;
 }
 

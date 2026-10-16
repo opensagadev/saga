@@ -217,15 +217,10 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
                 }
                 return true;
             }
-            character = target->GetCharacterObject();
-            if (character == NULL) {
+            if (target->GetCharacterObject() == NULL) {
                 return false;
             }
-            character = target->GetCharacterObject();
-            if (character == NULL) {
-                return false;
-            }
-            if (static_cast<i32>(character->apiobj.field_0x1f4) < 0) {
+            if (static_cast<i32>(target->GetCharacterObject()->apiobj.field_0x1f4) < 0) {
                 VuVec target_position;
                 target->GetPos(target_position, -1);
                 NUVEC direction = {player->apiobj.position.x - target_position.x, 0.0f,
@@ -241,8 +236,7 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
                 StartNewTask(task, holder, false, true);
                 return true;
             }
-            character = target->GetCharacterObject();
-            if (character == NULL || static_cast<i32>(character->apiobj.field_0x1f4) < 0)
+            if (static_cast<i32>(target->GetCharacterObject()->apiobj.field_0x1f4) < 0)
                 return false;
             StartNewTask(new MechTouchTaskAttack(*this, target, position), holder, false, true);
             return true;
@@ -570,7 +564,7 @@ bool MechInputTouchGestureBasedController::OnSwipe(GameObject_s &object, TouchHo
     }
 
     MechSystems::Get()->NewSwipeMarker(holder, index, static_cast<SwipeDecalRenderer::Style>(0));
-    JumpTriggerPacket packet = {};
+    JumpTriggerPacket packet;
     packet.player = &object;
     packet.type = 3;
     packet.touch_holder = &holder;
@@ -667,8 +661,9 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpOverGap(GameObject_s *
         if (holder == NULL) {
             return;
         }
-        JumpTriggerPacket packet = {};
+        JumpTriggerPacket packet;
         packet.player = object;
+
         packet.touch_holder = holder;
         packet.type = 1;
         packet.velocity = VuVec(object->apiobj.velocity.x, object->apiobj.velocity.y, object->apiobj.velocity.z, 1.0f);
@@ -689,32 +684,27 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpOverGap(GameObject_s *
             return;
         }
         f32 speed =
-            object->apiobj.character_data->player_config != NULL
-                ? *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(object->apiobj.character_data->player_config) + 0x1c)
-                : 0.0f;
+            *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(object->apiobj.character_data->player_config) + 0x1c);
         VuVec boosted_velocity __attribute__((aligned(16)))(object->apiobj.velocity.x, object->apiobj.velocity.y,
                                                             object->apiobj.velocity.z, 1.0f);
         f32 magnitude_sq = boosted_velocity.x * boosted_velocity.x + boosted_velocity.y * boosted_velocity.y +
                            boosted_velocity.z * boosted_velocity.z;
         if (magnitude_sq < speed * speed) {
             NuVecNorm(&boosted_velocity.xyz, &boosted_velocity.xyz);
-            speed = object->apiobj.character_data->player_config != NULL
-                        ? *reinterpret_cast<f32 *>(
-                              reinterpret_cast<u8 *>(object->apiobj.character_data->player_config) + 0x1c)
-                        : 0.0f;
+            speed =
+                *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(object->apiobj.character_data->player_config) + 0x1c);
             boosted_velocity.y *= speed;
             boosted_velocity.x *= speed;
             boosted_velocity.z *= speed;
         }
-        GameObject_s *backup_recipient = player != NULL ? player : object;
-        NUVEC previous_velocity = backup_recipient->apiobj.velocity;
-        NUVEC previous_target_velocity = backup_recipient->target_velocity;
+        NUVEC previous_velocity = player->apiobj.velocity;
+        NUVEC previous_target_velocity = player->target_velocity;
         object->apiobj.velocity = boosted_velocity.xyz;
         object->target_velocity = boosted_velocity.xyz;
         if (!TriggerJumpTask(packet, false, true, true)) {
-            GameObject_s *restore_recipient = player != NULL ? player : object;
-            restore_recipient->apiobj.velocity = previous_velocity;
-            restore_recipient->target_velocity = previous_target_velocity;
+            player->apiobj.velocity = previous_velocity;
+            player->target_velocity = previous_target_velocity;
+
         }
     }
 }
@@ -761,7 +751,7 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpWhenStuck(GameObject_s
     NUVEC previous_target_velocity = player->target_velocity;
     player->apiobj.velocity = velocity;
     player->target_velocity = velocity;
-    JumpTriggerPacket packet = {};
+    JumpTriggerPacket packet;
     packet.type = 1;
     packet.player = &object;
     packet.touch_holder = holder;

@@ -703,12 +703,12 @@ NUWCHAR8 *NuUTF8CharFromUnicode(NUWCHAR8 *dst, NUWCHAR16 character) {
     if (character <= 0x7f) {
         *dst++ = character;
     } else if (character <= 0x7ff) {
-        *dst++ = (character >> 6) | 0xc0;
-        *dst++ = (character & 0x3f) | 0x80;
+        *dst++ = static_cast<NUWCHAR8>(character >> 6) | 0xc0;
+        *dst++ = static_cast<NUWCHAR8>(character & 0x3fu) | 0x80u;
     } else {
-        *dst++ = (character >> 12) | 0xe0;
-        *dst++ = ((character >> 6) & 0x3f) | 0x80;
-        *dst++ = (character & 0x3f) | 0x80;
+        *dst++ = static_cast<NUWCHAR8>(character >> 12) | 0xe0;
+        *dst++ = static_cast<NUWCHAR8>((character >> 6) & 0x3fu) | 0x80u;
+        *dst++ = static_cast<NUWCHAR8>(character & 0x3fu) | 0x80u;
     }
     return dst;
 }
@@ -733,7 +733,6 @@ i32 GetLineW(u16 *line, i32 file) {
                 }
                 // Fall through.
             case '\0':
-            line_complete:
                 line[length] = 0;
                 return length;
 
@@ -744,51 +743,51 @@ i32 GetLineW(u16 *line, i32 file) {
                 break;
 
             case ';':
-                if (quoted != 0)
-                    goto append_character;
+                if (quoted == 0) {
+                    if (length == 0 || has_text == 0) {
+                        end_of_line = 0;
+                        do {
+                            character = NuFileReadWChar(file);
+                            switch (character) {
+                                case '\r':
+                                    NuFileReadWChar(file);
+                                    // Fall through.
+                                case '\n':
+                                case '\0':
+                                    end_of_line = 1;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        } while (end_of_line == 0);
+                        length = 0;
+                        has_text = 0;
+                        break;
+                    }
 
-                if (length == 0 || has_text == 0) {
-                    end_of_line = 0;
                     do {
                         character = NuFileReadWChar(file);
                         switch (character) {
-                            case '\n':
-                            case '\0':
-                                end_of_line = 1;
-                                break;
                             case '\r':
                                 NuFileReadWChar(file);
-                                end_of_line = 1;
+                                // Fall through.
+                            case '\n':
+                            case '\0':
+                                line[length] = 0;
+                                return length;
+                            default:
                                 break;
                         }
-                    } while (end_of_line == 0);
-                    length = 0;
-                    has_text = 0;
-                    break;
+                    } while (true);
                 }
-
-                do {
-                    character = NuFileReadWChar(file);
-                    switch (character) {
-                        case '\n':
-                        case '\0':
-                            goto line_complete;
-                        case '\r':
-                            NuFileReadWChar(file);
-                            goto line_complete;
-                    }
-                } while (true);
-
+                // Fall through.
+            default:
+                has_text = 1;
+                // Fall through.
             case ' ':
             case '\t':
                 if (has_text != 0)
                     line[length++] = character;
-                break;
-
-            default:
-            append_character:
-                has_text = 1;
-                line[length++] = character;
                 break;
         }
     }
@@ -951,6 +950,28 @@ i32 NuStrICmp(const char *a, const char *b) {
 
     return 0;
 }
+
+#ifdef __ANDROID__
+// The original library links its own byte-wise strstr over bionic's.
+extern "C" char *strstr(const char *haystack, const char *needle) {
+    while (*haystack != '\0') {
+        const char *haystack_cursor = haystack;
+        const char *needle_cursor = needle;
+        while (*needle_cursor != '\0') {
+            if (*haystack_cursor == '\0' || *haystack_cursor != *needle_cursor) {
+                break;
+            }
+            haystack_cursor++;
+            needle_cursor++;
+        }
+        if (*needle_cursor == '\0') {
+            return const_cast<char *>(haystack);
+        }
+        haystack++;
+    }
+    return NULL;
+}
+#endif
 
 char *NuStrIStr(char *str, char *sub) {
     char *str_cursor;

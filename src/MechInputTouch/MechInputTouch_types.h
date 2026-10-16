@@ -224,7 +224,7 @@ struct MechTouchUIElement : NuMechPtr<MechTouchUIElement, 4>::ManagedBase {
     MechTouchUICallback on_hold;
     MechTouchUICallback on_release;
     MechTouchUICallback on_leave;
-    u8 hovered;
+    bool hovered;
     u8 disabled;
     u8 visible;
     u8 rectangular;
@@ -414,6 +414,12 @@ struct MechInputTouchMainController : NuTouchInputElement {
     void ResetButtons();
     void Update(NuInputTouchData const *) override;
     void UpdateButtons();
+    float GetStickX() const override {
+        return stick_values[0];
+    }
+    float GetStickY() const override {
+        return stick_values[1];
+    }
     virtual i32 GetPlayerId() const {
         return player_id;
     }

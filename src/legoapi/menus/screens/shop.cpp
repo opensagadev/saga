@@ -177,11 +177,11 @@ extern void InitExtraList();
 extern HINT_s *Hint_FindHint(i32 hint_id);
 
 i32 DoShopMenu(MENU_s *menu) {
-    i32 result = 0;
+    i32 done = 0;
     if (menuptr != NULL) {
-        result = menuptr(menu);
+        i32 result = menuptr(menu);
         if (menu->cancel_pressed != 0) {
-            result = currentmenulevel < 1 ? 5 : 6;
+            result = currentmenulevel == 0 ? 5 : 6;
             for (i32 i = 4; i < 13; ++i) {
                 menu->item_width[i] = 0.0f;
             }
@@ -189,9 +189,8 @@ i32 DoShopMenu(MENU_s *menu) {
         }
 
         if (result == 5) {
-            return 1;
-        }
-        if (result == 6) {
+            done = 1;
+        } else if (result == 6) {
             GameCam_Blend(GameCam, 0.6f, 0.0f, 1);
             drawptr = NULL;
 
@@ -210,7 +209,7 @@ i32 DoShopMenu(MENU_s *menu) {
             }
         }
     }
-    return 0;
+    return done;
 }
 
 i32 BuyShopItem(shopitem_s *items, i32 index, i32 charge) {

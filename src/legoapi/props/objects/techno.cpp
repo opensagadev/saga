@@ -53,16 +53,14 @@ static f32 TechnoMoveSpeed[2];
 
 static void *Technos_ReserveBufferSpace(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    TECHNO *result = NULL;
     world->technos = NULL;
     world->ntechnos = 0;
     if (world->current_level->max_technos != 0) {
         world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
-        result = static_cast<TECHNO *>(world->giz_buffer.void_ptr);
-        world->technos = result;
+        world->technos = static_cast<TECHNO *>(world->giz_buffer.void_ptr);
         world->giz_buffer.addr += world->current_level->max_technos * sizeof(TECHNO);
     }
-    return result;
+    return world->technos;
 }
 
 static void Techno_SetVisibility(GIZMO *gizmo, i32 visible) {
