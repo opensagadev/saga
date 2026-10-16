@@ -286,24 +286,6 @@ static isize AIConditionArgumentValue(void *argument) {
     return condition_argument.value;
 }
 
-static u16 ActionAttackOverride(char *name) {
-    if (NuStrICmp(name, "PUNCH_1") == 0)
-        return 1;
-    if (NuStrICmp(name, "PUNCH_2") == 0)
-        return 2;
-    if (NuStrICmp(name, "PUNCH_3") == 0)
-        return 3;
-    if (NuStrICmp(name, "PUNCH_BEHIND") == 0)
-        return 4;
-    if (NuStrICmp(name, "PUNCH_SPECIAL") == 0)
-        return 5;
-    if (NuStrICmp(name, "BLOCK") == 0)
-        return 6;
-    if (NuStrICmp(name, "SHOOT") == 0)
-        return 7;
-    return 0;
-}
-
 static inline void ActionApplySide(AISYS *system, GameObject_s *object, i32 side) {
     if (object == NULL) {
         return;
@@ -3787,7 +3769,7 @@ __used__ static i32 Action_AttackOpponent(AISYS *sys, AISCRIPTPROCESS *processor
                                           i32 param_4, i32 param_5, f32 param_6) {
     (void)sys;
     (void)param_6;
-    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL || processor == NULL) {
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL) {
         return 1;
     }
 
@@ -3803,7 +3785,21 @@ __used__ static i32 Action_AttackOpponent(AISYS *sys, AISCRIPTPROCESS *processor
             } else if (NuStrICmp(params[index], "jediGoodie_attack") == 0) {
                 processor->action_data_2 = 1;
             } else if ((value = NuStrIStr(params[index], "attack_override")) != NULL) {
-                processor->action_data_6 = ActionAttackOverride(value + 16);
+                char *name = value + 16;
+                if (NuStrICmp(name, "PUNCH_1") == 0)
+                    processor->action_data_6 = 1;
+                else if (NuStrICmp(name, "PUNCH_2") == 0)
+                    processor->action_data_6 = 2;
+                else if (NuStrICmp(name, "PUNCH_3") == 0)
+                    processor->action_data_6 = 3;
+                else if (NuStrICmp(name, "PUNCH_BEHIND") == 0)
+                    processor->action_data_6 = 4;
+                else if (NuStrICmp(name, "PUNCH_SPECIAL") == 0)
+                    processor->action_data_6 = 5;
+                else if (NuStrICmp(name, "BLOCK") == 0)
+                    processor->action_data_6 = 6;
+                else
+                    processor->action_data_6 = NuStrICmp(name, "SHOOT") == 0 ? 7 : 0;
             }
         }
         processor->action_data_4 = 0.2f;
@@ -3813,8 +3809,7 @@ __used__ static i32 Action_AttackOpponent(AISYS *sys, AISCRIPTPROCESS *processor
         object->attack_override = static_cast<u8>(processor->action_data_6);
     }
 
-    if (packet->opponent_object == NULL || packet->opponent_object->ai == NULL ||
-        packet->opponent_object->objptr == NULL) {
+    if (packet->opponent_object == NULL || packet->opponent_object->ai == NULL) {
         return 0;
     }
     GameObject_s *opponent = packet->opponent_object->objptr;
@@ -3830,9 +3825,6 @@ __used__ static i32 Action_AttackOpponent(AISYS *sys, AISCRIPTPROCESS *processor
     const f32 distance_squared = NuVecDistSqr(&opponent->apiobj.position, &packet->owner->apiobj.position, &difference);
     if ((object->field_0xf01 & 0x20) != 0) {
         APIOBJECT *attack_opponent = static_cast<APIOBJECT *>(object->ai.opponent);
-        if (attack_opponent == NULL || attack_opponent->objptr == NULL) {
-            return 0;
-        }
         if (oneAtOnce_CanAttack(object, attack_opponent->objptr)) {
             packet->movement_instruction_parameter = 0.0f;
             processor->action_data_1 &= static_cast<u8>(~2u);
@@ -3863,9 +3855,7 @@ __used__ static i32 Action_AttackOpponent(AISYS *sys, AISCRIPTPROCESS *processor
     }
 
     if (!(processor->action_data_4 > 0.0f)) {
-        if (object->pad_gamepad != NULL) {
-            object->pad_gamepad->allocated_5a |= GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT;
-        }
+        object->pad_gamepad->allocated_5a |= GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT;
     } else {
         if (opponent->character_context == 0x5a) {
             return 0;
@@ -3877,9 +3867,8 @@ __used__ static i32 Action_AttackOpponent(AISYS *sys, AISCRIPTPROCESS *processor
             return 0;
         }
     }
-    if (object->pad_gamepad != NULL) {
-        object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
-    }
+    object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
+
     if (processor->action_data_2 != 0) {
         object->field_0xef9 |= 4;
     }
@@ -4162,39 +4151,32 @@ __used__ static i32 Action_GoToLevelPath(AISYS *sys, AISCRIPTPROCESS *processor,
     }
 
     if (param_5 != 0) {
-        if (sys == NULL || sys->path_sys == NULL || packet->path_info.path == NULL ||
-            packet->path_info.connection == NULL) {
+        if (sys == NULL || packet->path_info.path == NULL || packet->path_info.connection == NULL) {
             return 0;
         }
         if (packet->path_info.path != sys->path_sys->active_path) {
             AISysCharacterSetPath(packet, sys->path_sys->active_path);
-            AISysGetCharacterPathPos(WORLD != NULL ? WORLD->ai_sys : sys, &packet->owner->apiobj, packet, 0xff, 1);
+            AISysGetCharacterPathPos(WORLD->ai_sys, &packet->owner->apiobj, packet, 0xff, 1);
         }
         return 1;
     }
 
-    AIPATHNODE *node = processor != NULL ? static_cast<AIPATHNODE *>(processor->action_data_3) : NULL;
+    AIPATHNODE *node = static_cast<AIPATHNODE *>(processor->action_data_3);
     if (node == NULL) {
         return 0;
     }
-    if (NuVecXZDistSqr(&packet->owner->apiobj.position, &node->position, NULL) >= node->radius_squared) {
-        AIMoveInstruction(packet, &node->position, 0.0f, &processor->path_info, AIPACKET_MOVEMENT_TO_DESTINATION,
-                          packet->movement_instruction_parameter);
-        return 0;
-    }
-
-    memset(&packet->path_info, 0, sizeof(packet->path_info));
-    if (sys != NULL && sys->path_sys != NULL) {
+    if (NuVecXZDistSqr(&packet->owner->apiobj.position, &node->position, NULL) < node->radius_squared) {
+        memset(&packet->path_info, 0, sizeof(packet->path_info));
         AISysCharacterSetPath(packet, sys->path_sys->active_path);
-        if ((node->runtime_flags & 1) != 0 && packet->path_info.path != NULL) {
-            const u16 connection_index = static_cast<u16>(node->path_flags);
-            if (connection_index < packet->path_info.path->connection_count) {
-                AISysCharacterSetPathCnx(packet, &packet->owner->apiobj.position,
-                                         &packet->path_info.path->connections[connection_index], 0);
-            }
+        if ((node->runtime_flags & 1) != 0) {
+            AISysCharacterSetPathCnx(packet, &packet->owner->apiobj.position,
+                                     &packet->path_info.path->connections[static_cast<u16>(node->path_flags)], 0);
         }
+        return 1;
     }
-    return 1;
+    AIMoveInstruction(packet, &node->position, 0.0f, &processor->path_info, AIPACKET_MOVEMENT_TO_DESTINATION,
+                      packet->movement_instruction_parameter);
+    return 0;
 }
 
 static void *Condition_AreaCompleteInit(AISYS *, char *name, AISCRIPT *) {
@@ -5645,17 +5627,14 @@ static i32 Action_SelectRandomSpline(AISYS *, AISCRIPTPROCESS *, AIPACKET *, cha
 __used__ static i32 Action_SetScriptState(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_4, i32 param_5, f32 param_6) {
     (void)param_6;
-    if (param_5 == 0 || param_4 < 1) {
+    if (param_5 == 0) {
         return 1;
     }
 
-    APIOBJECT *target = packet != NULL && packet->owner != NULL ? &packet->owner->apiobj : NULL;
+    APIOBJECT *target = packet != NULL ? &packet->owner->apiobj : NULL;
     char *state_name = NULL;
     i32 creature_set = 0;
     for (i32 index = 0; index < param_4; ++index) {
-        if (params[index] == NULL) {
-            continue;
-        }
         char *value = NuStrIStr(params[index], "character=");
         if (value != NULL) {
             if (GetNamedAPIObjectFn != NULL) {
@@ -5678,29 +5657,22 @@ __used__ static i32 Action_SetScriptState(AISYS *sys, AISCRIPTPROCESS *processor
         return 1;
     }
 
-    const auto set_state = [sys, state_name](APIOBJECT *object) {
-        if (object == NULL || object->ai == NULL) {
-            return;
+    if (creature_set == 0) {
+        if (target == NULL || target->ai == NULL) {
+            return 1;
         }
-        AISCRIPTPROCESS *target_processor = reinterpret_cast<AISCRIPTPROCESS *>(object->ai);
+        AISCRIPTPROCESS *target_processor = reinterpret_cast<AISCRIPTPROCESS *>(target->ai);
         if (target_processor->base_script == NULL) {
-            return;
+            return 1;
         }
         AISTATE *state = AIStateFind(state_name, target_processor->base_script);
         if (state == NULL) {
-            return;
+            return 1;
         }
-        if (object->ai == NULL) {
-            return;
-        }
-        target_processor = reinterpret_cast<AISCRIPTPROCESS *>(object->ai);
+        target_processor = reinterpret_cast<AISCRIPTPROCESS *>(target->ai);
         target_processor->active_ref_count = 0;
-        AIScriptProcessorInit(sys, object->ai, target_processor, NULL, NULL, NULL, 0, target_processor->base_script,
+        AIScriptProcessorInit(sys, target->ai, target_processor, NULL, NULL, NULL, 0, target_processor->base_script,
                               state);
-    };
-
-    if (creature_set == 0) {
-        set_state(target);
         return 1;
     }
     GameObject_s *object = Obj;
@@ -5708,7 +5680,14 @@ __used__ static i32 Action_SetScriptState(AISYS *sys, AISCRIPTPROCESS *processor
         if ((object->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) ==
                 (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER) &&
             object->ai.creature_set == creature_set) {
-            set_state(&object->apiobj);
+            AISTATE *state =
+                AIStateFind(state_name, reinterpret_cast<AISCRIPTPROCESS *>(object->apiobj.ai)->base_script);
+            if (state != NULL) {
+                AISCRIPTPROCESS *target_processor = reinterpret_cast<AISCRIPTPROCESS *>(object->apiobj.ai);
+                target_processor->active_ref_count = 0;
+                AIScriptProcessorInit(sys, object->apiobj.ai, target_processor, NULL, NULL, NULL, 0,
+                                      target_processor->base_script, state);
+            }
         }
     }
     return 1;
@@ -5812,6 +5791,8 @@ __used__ static i32 Action_TriggerBlowUp(AISYS *sys, AISCRIPTPROCESS *processor,
 
 // The original shooting action calls the out-of-line PartyMemberInWay clone.
 static i32 PartyMemberInWay(GameObject_s *object, GameObject_s *opponent) {
+    if ((object->apiobj.field_0x1f4 & 5) != 0)
+        return false;
     NUVEC difference, direction;
     const f32 target_distance =
         NuVecDistSqr(&opponent->apiobj.collision_position, &object->apiobj.collision_position, &difference);
@@ -7535,7 +7516,7 @@ __used__ static i32 Action_ShootAtOpponent(AISYS *sys, AISCRIPTPROCESS *processo
         const f32 interval = processor->action_data_5;
         const f32 random = NuRandFloat();
         processor->action_timer = 0.5f * interval + random * interval;
-        if ((object->apiobj.field_0x1f4 & 5) != 0 || !PartyMemberInWay(object, opponent)) {
+        if (!PartyMemberInWay(object, opponent)) {
             object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
             object->script_fire_target = opponent;
         }
@@ -7583,7 +7564,21 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
             } else if (NuStrIStr(params[index], "instant") != NULL) {
                 initial_fire_fraction = 0.0f;
             } else if ((value = NuStrIStr(params[index], "attack_override")) != NULL) {
-                processor->action_data_6 = ActionAttackOverride(value + 16);
+                char *name = value + 16;
+                if (NuStrICmp(name, "PUNCH_1") == 0)
+                    processor->action_data_6 = 1;
+                else if (NuStrICmp(name, "PUNCH_2") == 0)
+                    processor->action_data_6 = 2;
+                else if (NuStrICmp(name, "PUNCH_3") == 0)
+                    processor->action_data_6 = 3;
+                else if (NuStrICmp(name, "PUNCH_BEHIND") == 0)
+                    processor->action_data_6 = 4;
+                else if (NuStrICmp(name, "PUNCH_SPECIAL") == 0)
+                    processor->action_data_6 = 5;
+                else if (NuStrICmp(name, "BLOCK") == 0)
+                    processor->action_data_6 = 6;
+                else
+                    processor->action_data_6 = NuStrICmp(name, "SHOOT") == 0 ? 7 : 0;
             }
         }
         if (LSW1 != 0) {
@@ -7713,7 +7708,7 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
             const f32 interval = processor->action_data_5;
             const f32 random = NuRandFloat();
             processor->action_timer = 0.5f * interval + random * interval;
-            if ((object->apiobj.field_0x1f4 & 5) != 0 || !PartyMemberInWay(object, opponent)) {
+            if (!PartyMemberInWay(object, opponent)) {
                 if (oneAtOnce_CanAttack(object, opponent))
                     object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
             }

@@ -624,13 +624,19 @@ void CheckResetBits() {
                     else
                         strcpy(script_name, "NoWeapon");
                     if (AIScriptFind(WORLD_ai_sys, script_name, 0, 1, 0) == NULL) {
-                    party_script:
                         if (AIScriptFind(WORLD_ai_sys, const_cast<char *>("party"), 0, 1, 0) != NULL)
                             strcpy(script_name, "party");
                         else
                             strcpy(script_name, "GeneralParty");
                     }
                 }
+            }
+            if (0) {
+            party_script:
+                if (AIScriptFind(WORLD_ai_sys, const_cast<char *>("party"), 0, 1, 0) != NULL)
+                    strcpy(script_name, "party");
+                else
+                    strcpy(script_name, "GeneralParty");
             }
             AIScriptProcessorInit(WORLD_ai_sys, &Player[player_index]->ai,
                                   reinterpret_cast<AISCRIPTPROCESS *>(&Player[player_index]->ai), NULL, script_name,

@@ -130,15 +130,15 @@ static i32 edGizShadow_Load(void *world_ptr, void *) {
             shadow->preset = static_cast<EDGIZSHADOW_PRESET>(EdFileReadInt());
         }
 
+        EDGIZSHADOW_PRESET preset;
         if (version <= 7 && world->area != NULL) {
-            if ((world->area->flags & 1) == 0) {
-                edGizShadow_SetPreset1(shadow);
-            } else {
-                edGizShadow_SetPreset2(shadow);
-            }
-        } else if (shadow->preset == EDGIZSHADOW_PRESET_1) {
+            preset = (world->area->flags & 1) != 0 ? EDGIZSHADOW_PRESET_2 : EDGIZSHADOW_PRESET_1;
+        } else {
+            preset = shadow->preset;
+        }
+        if (preset == EDGIZSHADOW_PRESET_1) {
             edGizShadow_SetPreset1(shadow);
-        } else if (shadow->preset == EDGIZSHADOW_PRESET_2) {
+        } else if (preset == EDGIZSHADOW_PRESET_2) {
             edGizShadow_SetPreset2(shadow);
         }
     }

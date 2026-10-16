@@ -435,9 +435,14 @@ void RippleEffects_Configure(WORLDINFO_s *world, char *config) {
                 effect->initial_size = 0.0f;
                 effect->end_size = 1.0f;
                 effect->texture_name[0] = 0;
-                effect->start_color.r = effect->start_color.g = effect->start_color.b = 64;
+                effect->start_color.r = 64;
+                effect->start_color.g = 64;
+                effect->start_color.b = 64;
                 effect->start_color.a = 255;
-                effect->end_color.value = 0;
+                effect->end_color.r = 0;
+                effect->end_color.g = 0;
+                effect->end_color.b = 0;
+                effect->end_color.a = 0;
                 effect->material = NULL;
                 RE_rippleeffect = effect;
                 active = 1;
@@ -445,13 +450,13 @@ void RippleEffects_Configure(WORLDINFO_s *world, char *config) {
         }
     }
     NuFParDestroy(parser);
-    if (world->ripple_effect_count <= 0) {
+    if (world->ripple_effect_count > 0) {
+        world->giz_buffer.addr = (reinterpret_cast<usize>(world->ripple_effects + world->ripple_effect_count) + 15) &
+                                 ~static_cast<usize>(15);
+        for (i32 i = 0; i < world->ripple_effect_count; ++i)
+            InitRippleMtl(world->ripple_effects[i].texture_name, &world->ripple_effects[i].material,
+                          &world->giz_buffer, &world->unknown_0108);
+    } else {
         world->ripple_effects = NULL;
-        return;
     }
-    world->giz_buffer.addr =
-        (reinterpret_cast<usize>(world->ripple_effects + world->ripple_effect_count) + 15) & ~static_cast<usize>(15);
-    for (i32 i = 0; i < world->ripple_effect_count; ++i)
-        InitRippleMtl(world->ripple_effects[i].texture_name, &world->ripple_effects[i].material, &world->giz_buffer,
-                      &world->unknown_0108);
 }
