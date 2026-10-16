@@ -491,7 +491,7 @@ extern "C" {
         }
         *reinterpret_cast<u32 *>(cursor) = 0;
         cursor = reinterpret_cast<u8 *>(reinterpret_cast<usize>(cursor) + sizeof(u32));
-        *size = reinterpret_cast<i32>(cursor) - reinterpret_cast<i32>(start);
+        *size = static_cast<i32>(reinterpret_cast<uintptr_t>(cursor)) - static_cast<i32>(reinterpret_cast<uintptr_t>(start));
         return reinterpret_cast<dma_particle_chunk_s *>(start);
     }
 

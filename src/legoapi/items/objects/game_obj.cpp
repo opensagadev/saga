@@ -1275,8 +1275,9 @@ i32 StunGameObject(GameObject_s *object, GameObject_s *attacker, float duration,
         return 0;
 
     object->context_animation = animation;
-    object->external_force.z = AnimSpeed(object->apiobj.character_model, animation);
-    if (animation != 0x3d && animation != 0xb9) {
+    const u8 saved_e31 = object->field_0xe31;
+    object->external_force.z = AnimSpeed(object->apiobj.character_model, object->context_animation);
+    if (object->context_animation != 0x3d && object->context_animation != 0xb9) {
         if (object->external_force.z <= 0.0f)
             object->external_force.z = 1.0f;
         else if (object->external_force.z <= 0.8f)
@@ -1298,14 +1299,14 @@ i32 StunGameObject(GameObject_s *object, GameObject_s *attacker, float duration,
         object->apiobj.facing_angle = angle;
     }
 
-    animation = object->context_animation;
-    animations = object->apiobj.character_model->model_data_b;
-    CHARACTERANIM_s *animation_data =
-        static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[animation]);
-    if (animations[animation] != NULL && (animation_data->flags & 2) != 0) {
+    const i16 stun_animation = object->context_animation;
+    if (object->apiobj.character_model->model_data_b[stun_animation] != NULL &&
+        (static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[stun_animation])->flags & 2) !=
+            0) {
         object->context_animation_timer = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 0.5f + 1.0f;
     } else {
-        object->context_animation_timer = AnimDuration(object->id, animation, 0.0f, 0.0f, animation != 0xb9);
+        object->context_animation_timer =
+            AnimDuration(object->id, stun_animation, 0.0f, 0.0f, stun_animation != 0xb9);
         if (object->context_animation_timer <= 0.0f)
             object->context_animation_timer = 0.6f;
     }
@@ -1316,7 +1317,7 @@ i32 StunGameObject(GameObject_s *object, GameObject_s *attacker, float duration,
                      -(object->apiobj.collision_position.z - attacker->apiobj.collision_position.z));
     }
 
-    object->field_0xe31 = object->field_0xe31;
+    object->field_0xe31 = saved_e31;
     return (object->context_animation == 0xb9) + 1;
 }
 

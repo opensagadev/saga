@@ -326,12 +326,15 @@ extern "C" {
     static void eduicbItemExpanderClose(edui_expander_s *);
     static i32 eduicbProcessFilter(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessFilePick(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
-    static void eduicbAttachDirectoryList(eduimenu_s *, edui_file_pick_s *);
+    // Retail only has IPA-SRA clones of these two helpers.
+    static __attribute__((noinline, noclone)) void
+    eduicbAttachDirectoryList(eduimenu_s *, edui_file_pick_s *) __asm__("eduicbAttachDirectoryList.isra.32");
     static void eduicbSelectDirectoryEntry(eduimenu_s *, eduiitem_s *, u32);
     static void eduicbSelectDirectoryExit(eduimenu_s *, eduiitem_s *, u32);
     static i32 eduicbProcessTextPick(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessProp(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
-    static i32 eduicbProcessPropKeyboard(eduimenu_s *, edui_prop_s *);
+    static __attribute__((noinline, noclone)) i32
+    eduicbProcessPropKeyboard(eduimenu_s *, edui_prop_s *) __asm__("eduicbProcessPropKeyboard.isra.27");
     static i32 eduicbRenderSel(eduimenu_s *, eduiitem_s *, i32, i32, i32, i32);
     static i32 eduicbRenderSelWithClipColour(eduimenu_s *, eduiitem_s *, i32, i32, i32, i32);
     static i32 eduicbRenderCheck(eduimenu_s *, eduiitem_s *, i32, i32, i32, i32);

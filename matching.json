@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 80.3053,
+    "fuzzy_match_percent": 80.38088,
     "total_code": "4722419",
     "matched_code": "639620",
     "matched_code_percent": 13.54433,
@@ -35067,12 +35067,20 @@
           "match_percent": 100.0
         },
         {
+          "name": "eduicbProcessPropKeyboard.isra.27",
+          "demangled_name": "eduicbProcessPropKeyboard.isra.27",
+          "address": 3783984,
+          "offset": 2894016,
+          "size": 610,
+          "match_percent": 42.15116
+        },
+        {
           "name": "eduicbProcessProp",
           "demangled_name": "eduicbProcessProp",
           "address": 3784608,
           "offset": 2894640,
           "size": 282,
-          "match_percent": 68.42353
+          "match_percent": 63.42353
         },
         {
           "name": "eduiItemPropCreateEx",
@@ -35200,7 +35208,7 @@
           "address": 3788320,
           "offset": 2898352,
           "size": 654,
-          "match_percent": 75.752686
+          "match_percent": 73.07527
         },
         {
           "name": "eduiItemFilterCreate",
@@ -35289,6 +35297,14 @@
           "offset": 2901120,
           "size": 1125,
           "match_percent": 82.70543
+        },
+        {
+          "name": "eduicbAttachDirectoryList.isra.32",
+          "demangled_name": "eduicbAttachDirectoryList.isra.32",
+          "address": 3792224,
+          "offset": 2902256,
+          "size": 1031,
+          "match_percent": 49.840637
         },
         {
           "name": "eduicbProcessFilePick",
@@ -59726,7 +59742,7 @@
           "address": 1863536,
           "offset": 973568,
           "size": 255,
-          "match_percent": 87.1875
+          "match_percent": 85.15625
         },
         {
           "name": "_ZL21GizForces_BoltHitPlatPvS_P6BOLT_sPh",
@@ -59758,7 +59774,7 @@
           "address": 1868528,
           "offset": 978560,
           "size": 1455,
-          "match_percent": 54.980717
+          "match_percent": 74.647385
         },
         {
           "name": "_Z17GizForce_ResetLOSP12GameObject_s",
@@ -63982,7 +63998,7 @@
           "address": 1263680,
           "offset": 373712,
           "size": 1093,
-          "match_percent": 49.38189
+          "match_percent": 57.062992
         },
         {
           "name": "_Z16DeactivatePlayerP12GameObject_sfS0_",
@@ -83719,6 +83735,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL22PodSprint_InitAISplineP11WORLDINFO_sP20PODSPRINT_AISPLINE_sPc.part.0",
+          "demangled_name": "PodSprint_InitAISpline(WORLDINFO_s*, PODSPRINT_AISPLINE_s*, char*) [clone .part.0]",
+          "address": 2077168,
+          "offset": 1187200,
+          "size": 203,
+          "match_percent": 29.704918
+        },
+        {
           "name": "_ZL18UpdatePodRaceMinesv",
           "demangled_name": "UpdatePodRaceMines()",
           "address": 2078240,
@@ -84028,7 +84052,7 @@
           "address": 2102688,
           "offset": 1212720,
           "size": 555,
-          "match_percent": 75.99259
+          "match_percent": 99.40741
         },
         {
           "name": "_Z16PodSprintA_ResetP11WORLDINFO_s",
@@ -84044,7 +84068,7 @@
           "address": 2103792,
           "offset": 1213824,
           "size": 2633,
-          "match_percent": 54.476364
+          "match_percent": 54.912727
         },
         {
           "name": "_Z16PodSprintA_PanelP11WORLDINFO_s",
@@ -86430,6 +86454,14 @@
           "offset": 837904,
           "size": 898,
           "match_percent": 94.08936
+        },
+        {
+          "name": "_ZL18Hub_DrawBonusStatsfiii.isra.3",
+          "demangled_name": "Hub_DrawBonusStats(float, int, int, int) [clone .isra.3]",
+          "address": 1728784,
+          "offset": 838816,
+          "size": 354,
+          "match_percent": 99.986115
         },
         {
           "name": "_Z16Hub_BonusBuildItP12GIZBUILDIT_s",
@@ -91326,6 +91358,14 @@
       "source": "src/nu2api/nu3d/android/nutimebar_plain.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nutimebar_plain.o",
       "functions": [
+        {
+          "name": "_ZL13CreateTimeBarP9variptr_uS_Pii.isra.40",
+          "demangled_name": "CreateTimeBar(variptr_u*, variptr_u, int*, int) [clone .isra.40]",
+          "address": 2791520,
+          "offset": 1901552,
+          "size": 1600,
+          "match_percent": 73.57641
+        },
         {
           "name": "NuTimeBarCreateSetEx",
           "demangled_name": "NuTimeBarCreateSetEx",
@@ -101588,6 +101628,14 @@
           "offset": 2091904,
           "size": 1627,
           "match_percent": 98.888885
+        },
+        {
+          "name": "_ZL12ClipInstTreeP16NuInstanceTree_siP16nudisplayscene_sPc.isra.92",
+          "demangled_name": "ClipInstTree(NuInstanceTree_s*, int, nudisplayscene_s*, char*) [clone .isra.92]",
+          "address": 2983504,
+          "offset": 2093536,
+          "size": 865,
+          "match_percent": 84.58527
         },
         {
           "name": "NuVisiInstTree",
@@ -125787,14 +125835,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZL18Hub_DrawBonusStatsfiii.isra.3",
-      "demangled_name": "Hub_DrawBonusStats(float, int, int, int) [clone .isra.3]",
-      "address": 1728784,
-      "offset": 838816,
-      "size": 354,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZL19Hub_DrawIconCursorsP12COLLECTION_siff.part.9.constprop.51",
       "demangled_name": "Hub_DrawIconCursors(COLLECTION_s*, int, float, float) [clone .part.9] [clone .constprop.51]",
       "address": 1729152,
@@ -125832,14 +125872,6 @@
       "address": 2039808,
       "offset": 1149840,
       "size": 3878,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZL22PodSprint_InitAISplineP11WORLDINFO_sP20PODSPRINT_AISPLINE_sPc.part.0",
-      "demangled_name": "PodSprint_InitAISpline(WORLDINFO_s*, PODSPRINT_AISPLINE_s*, char*) [clone .part.0]",
-      "address": 2077168,
-      "offset": 1187200,
-      "size": 203,
       "match_percent": 0.0
     },
     {
@@ -125963,14 +125995,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZL13CreateTimeBarP9variptr_uS_Pii.isra.40",
-      "demangled_name": "CreateTimeBar(variptr_u*, variptr_u, int*, int) [clone .isra.40]",
-      "address": 2791520,
-      "offset": 1901552,
-      "size": 1600,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZL22DisplayListBeforeFrameP16nudisplayscene_si.constprop.173",
       "demangled_name": "DisplayListBeforeFrame(nudisplayscene_s*, int) [clone .constprop.173]",
       "address": 2793120,
@@ -125992,14 +126016,6 @@
       "address": 2966816,
       "offset": 2076848,
       "size": 341,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZL12ClipInstTreeP16NuInstanceTree_siP16nudisplayscene_sPc.isra.92",
-      "demangled_name": "ClipInstTree(NuInstanceTree_s*, int, nudisplayscene_s*, char*) [clone .isra.92]",
-      "address": 2983504,
-      "offset": 2093536,
-      "size": 865,
       "match_percent": 0.0
     },
     {
@@ -126088,22 +126104,6 @@
       "address": 3739712,
       "offset": 2849744,
       "size": 1993,
-      "match_percent": 0.0
-    },
-    {
-      "name": "eduicbProcessPropKeyboard.isra.27",
-      "demangled_name": "eduicbProcessPropKeyboard.isra.27",
-      "address": 3783984,
-      "offset": 2894016,
-      "size": 610,
-      "match_percent": 0.0
-    },
-    {
-      "name": "eduicbAttachDirectoryList.isra.32",
-      "demangled_name": "eduicbAttachDirectoryList.isra.32",
-      "address": 3792224,
-      "offset": 2902256,
-      "size": 1031,
       "match_percent": 0.0
     },
     {
@@ -128582,8 +128582,8 @@
   "summary": {
     "bazel_units": 494,
     "functions": 13454,
-    "assigned_functions": 12767,
+    "assigned_functions": 12773,
     "ambiguous_functions": 284,
-    "unassigned_functions": 403
+    "unassigned_functions": 397
   }
 }

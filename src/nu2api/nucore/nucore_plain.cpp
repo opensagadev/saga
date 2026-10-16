@@ -4500,7 +4500,11 @@ extern "C" {
     DECOMP_ASSERT(offsetof(NuInstanceTree_s, far_clips) == 0x24, "instance tree far clips offset");
     NuVisibilityResult *myvisi;
     extern "C++" {
-        static void ClipInstTree(NuInstanceTree_s *tree, i32 tree_index, NUDLDLISTSCENE *, char *) {
+        // Retail only has the IPA-SRA clone (the unused scene and bits arguments dropped).
+        static __attribute__((noinline, noclone)) void
+        ClipInstTree(NuInstanceTree_s *tree,
+                     i32 tree_index) __asm__("_ZL12ClipInstTreeP16NuInstanceTree_siP16nudisplayscene_sPc.isra.92");
+        static void ClipInstTree(NuInstanceTree_s *tree, i32 tree_index) {
             NuInstanceTreeNode *pending[100];
             NuInstanceTreeNode **end = pending;
             *end++ = &tree->nodes[tree->roots[tree_index]];
@@ -4550,9 +4554,7 @@ extern "C" {
             BuildWorldSpaceClipPlanes();
             NuInstanceTree_s *tree = static_cast<NuInstanceTree_s *>(result->instance_tree);
             for (i32 i = tree->tree_count - 1; i >= 0; --i) {
-                ClipInstTree(static_cast<NuInstanceTree_s *>(result->instance_tree), i,
-                             reinterpret_cast<NUDLDLISTSCENE *>(scene->display_list),
-                             reinterpret_cast<char *>(result->instance_tree_bits));
+                ClipInstTree(static_cast<NuInstanceTree_s *>(result->instance_tree), i);
             }
         }
     }

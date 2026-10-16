@@ -211,7 +211,7 @@ i32 NuFilePakCondense(void *hdr_ptr) {
 
     NUFILEPAKHDR *hdr = static_cast<NUFILEPAKHDR *>(hdr_ptr);
     NUFILEPAKITEM *items = GetItems(hdr);
-    i32 data = reinterpret_cast<i32>(hdr_ptr);
+    i32 data = static_cast<i32>(reinterpret_cast<uintptr_t>(hdr_ptr));
     i32 removed_size = 0;
     for (u32 i = 0; i < hdr->item_count; ++i) {
         if (!items[i].attr.removed) {

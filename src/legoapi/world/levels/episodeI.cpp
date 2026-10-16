@@ -373,24 +373,39 @@ void Mine_Kill(PART_s *part, i32) {
         AddFiniteShotPART(minesys.mine_part, &part->position, 1);
 }
 
-static void PodSprint_InitAISpline(WORLDINFO_s *world, PODSPRINT_AISPLINE_s *ai, char *name) {
+// PodSprint_InitAISpline is partially inlined into PodSprintA_Init: the
+// clear, lookup and spline checks are inlined and the crossing scan is the
+// split-out body.
+#if defined(__i386__)
+#define PODSPRINT_AISPLINE_BODY_ATTR __attribute__((noinline, regparm(1)))
+#else
+#define PODSPRINT_AISPLINE_BODY_ATTR __attribute__((noinline))
+#endif
+static PODSPRINT_AISPLINE_BODY_ATTR void PodSprint_InitAISplineBody(PODSPRINT_AISPLINE_s *ai) __asm__(
+    "_ZL22PodSprint_InitAISplineP11WORLDINFO_sP20PODSPRINT_AISPLINE_sPc.part.0");
+
+static PODSPRINT_AISPLINE_BODY_ATTR void PodSprint_InitAISplineBody(PODSPRINT_AISPLINE_s *ai) {
+    i32 count = 0;
+    for (i32 i = 0; i < (i32)(i16)ai->spline->length - 1; i++) {
+        if (count > 5)
+            break;
+        NUVEC *pts = ai->spline->pts;
+        NUVEC *pts2 = ((count & 1) ? podsprint.finish_line : podsprint.halfway)->pts;
+        if (XZLinesIntersect(&pts[i], &pts[i + 1], &pts2[0], &pts2[1], NULL, NULL)) {
+            ai->vals[count] = (i16)i;
+            count++;
+        }
+    }
+    if (ai->vals[5] == 0)
+        ai->vals[5] = ai->spline->length;
+}
+#undef PODSPRINT_AISPLINE_BODY_ATTR
+
+static inline void PodSprint_InitAISpline(WORLDINFO_s *world, PODSPRINT_AISPLINE_s *ai, char *name) {
     memset(ai, 0, sizeof(*ai));
     ai->spline = NuSplineFind(world->current_gscn, name);
     if (ai->spline != NULL && podsprint.finish_line != NULL && podsprint.halfway != NULL) {
-        i32 count = 0;
-        auto ai_spline = ai->spline;
-        for (i32 i = 0; i < (i32)(i16)ai_spline->length - 1; i++) {
-            if (count > 5)
-                break;
-            NUVEC *pts = ai_spline->pts;
-            NUVEC *pts2 = ((count & 1) ? podsprint.finish_line : podsprint.halfway)->pts;
-            if (XZLinesIntersect(&pts[i], &pts[i + 1], &pts2[0], &pts2[1], NULL, NULL)) {
-                ai->vals[count] = (i16)i;
-                count++;
-            }
-        }
-        if (ai->vals[5] == 0)
-            ai->vals[5] = ai->spline->length;
+        PodSprint_InitAISplineBody(ai);
     }
 }
 
@@ -1199,8 +1214,7 @@ void PodRaceCUpdate(WORLDINFO_s *world) {
     PodRaceSnipersUpdate();
     if (LevFlag.podrace_state == 0) {
         CUTINFO *cs = CutScene_Find(world->cutscene_sys, "Ep1_Podrace_TuskenRaiders");
-        if (cs != NULL &&
-            (static_cast<instNUGCUTSCENE_s *>(cs->instance)->flags_89 & 0x10) != 0)
+        if (cs != NULL && (static_cast<instNUGCUTSCENE_s *>(cs->instance)->flags_89 & 0x10) != 0)
             LevFlag.podrace_state = 1;
     }
     if (LevFlag.podrace_state == 1) {

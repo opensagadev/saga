@@ -1216,28 +1216,7 @@ static void GizForces_Reset(void *world_ptr, void *data, void *progress_ptr) {
                     if (force.group == NULL || force.group->count >= 8) {
                         continue;
                     }
-                    if (force.group->count != 0) {
-                        GIZFORCE_s *previous = force.group->forces[force.group->count - 1];
-                        f32 minimum_y = 1.0e9f;
-                        f32 maximum_y = -1.0e9f;
-                        if (previous != NULL && previous->anim_set != NULL) {
-                            for (GAMEANIMOBJ_s *object = previous->anim_set->objects; object != NULL;
-                                 object = object->next) {
-                                NUVEC minimum;
-                                NUVEC maximum;
-                                NuSpecialGetBounds(&object->special, &minimum, &maximum);
-                                if (minimum.y < minimum_y) {
-                                    minimum_y = minimum.y;
-                                }
-                                if (maximum.y > maximum_y) {
-                                    maximum_y = maximum.y;
-                                }
-                            }
-                        }
-                        force.group->combined_height += maximum_y - minimum_y;
-                    }
-                    force.group->forces[force.group->count++] = &force;
-                    force.progress_flags |= GIZFORCE_PROGRESS_GROUP_MEMBER;
+                    GizForce_AddToGroup(&force);
                 }
 
                 NUVEC offset;

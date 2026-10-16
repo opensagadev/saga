@@ -231,7 +231,11 @@ static void Hub_DrawBonusModeMenu(i32, f32);
 static void Hub_DrawSelectModeMenu(i32, f32);
 void Collection_Draw(COLLECTION_s *, f32, f32, f32, APICHARACTERMODELLIST_s *, f32, i32);
 
-static void Hub_DrawBonusStats(f32 alpha, i32 area, i32 episode, i32) {
+// Retail only has the IPA-SRA clone (the unused fourth argument dropped).
+static __attribute__((noinline, noclone)) void
+Hub_DrawBonusStats(f32 alpha, i32 area, i32 episode) __asm__("_ZL18Hub_DrawBonusStatsfiii.isra.3");
+
+static void Hub_DrawBonusStats(f32 alpha, i32 area, i32 episode) {
     if (episode == -1 && area != -1)
         episode = static_cast<i8>(ADataList[area].episode_index);
     if (episode != -1) {
@@ -1296,7 +1300,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                 if (SENATE_ADATA && SENATE_ADATA->index == hub_area)
                     Hub_DrawArcadeStats(hub_area_time);
                 else
-                    Hub_DrawBonusStats(hub_area_time, hub_area, -1, -1);
+                    Hub_DrawBonusStats(hub_area_time, hub_area, -1);
             } else {
                 Hub_DrawAreaStats(hub_area_time, hub_area, -1);
             }
@@ -2200,7 +2204,7 @@ void Hub_DrawFreePlaySelect() {
                     if (bonusmodearcade != 0) {
                         Hub_DrawArcadeStats(alpha);
                     } else {
-                        Hub_DrawBonusStats(alpha, -1, hub_bonusepisode, -1);
+                        Hub_DrawBonusStats(alpha, -1, hub_bonusepisode);
                     }
                     Hub_DrawBonusModeMenu(0, alpha);
                 } else {
@@ -3634,7 +3638,7 @@ void MenuDrawSelectMode(MENU_s *) {
     if (area->flags & 0x100)
         Hub_DrawSuperBonusStats(area, alpha);
     else if (area->flags & 4)
-        Hub_DrawBonusStats(alpha, -1, hub_bonusepisode, -1);
+        Hub_DrawBonusStats(alpha, -1, hub_bonusepisode);
     else
         Hub_DrawAreaStats(alpha, last_hub_area, hub_selectmode);
 
@@ -3908,7 +3912,7 @@ void MenuDrawBonusMode(MENU_s *) {
     if (bonusmodearcade)
         Hub_DrawArcadeStats(alpha);
     else if (hub_bonusepisode != -1)
-        Hub_DrawBonusStats(alpha, -1, hub_bonusepisode, -1);
+        Hub_DrawBonusStats(alpha, -1, hub_bonusepisode);
     else
         Hub_DrawSuperBonusStats(hub_bonusarea == -1 ? NULL : &ADataList[hub_bonusarea], alpha);
 

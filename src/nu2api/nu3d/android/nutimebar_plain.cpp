@@ -64,8 +64,11 @@ template <typename T> static T *timebar_allocate_array(VARIPTR *buffer, i32 coun
     return static_cast<T *>(timebar_allocate(buffer, static_cast<usize>(count) * sizeof(T), alignof(T)));
 }
 
-static i32 CreateTimeBar(VARIPTR *buffer, VARIPTR unused_buffer, i32 *colours, i32 slot_count) {
-    (void)unused_buffer;
+// Retail only has the IPA-SRA clone (the unused end-of-buffer argument dropped).
+static __attribute__((noinline, noclone)) i32
+CreateTimeBar(VARIPTR *buffer, i32 *colours, i32 slot_count) __asm__("_ZL13CreateTimeBarP9variptr_uS_Pii.isra.40");
+
+static i32 CreateTimeBar(VARIPTR *buffer, i32 *colours, i32 slot_count) {
 
     TimeBarSet *timebar = timebar_allocate_array<TimeBarSet>(buffer, 1);
     std::memset(timebar, 0, sizeof(*timebar));
@@ -112,8 +115,11 @@ static i32 CreateTimeBar(VARIPTR *buffer, VARIPTR unused_buffer, i32 *colours, i
     return set;
 }
 
-extern "C" i32 NuTimeBarCreateSetEx(VARIPTR *buffer, VARIPTR unused_buffer, i32 *colours) {
-    return CreateTimeBar(buffer, unused_buffer, colours, 16);
+// Retail does not turn the clone call into a sibling call.
+extern "C" __attribute__((optimize("no-optimize-sibling-calls"))) i32 NuTimeBarCreateSetEx(VARIPTR *buffer,
+                                                                                           VARIPTR unused_buffer,
+                                                                                           i32 *colours) {
+    return CreateTimeBar(buffer, colours, 16);
 }
 
 extern "C" i32 NuTimeBarCreateSetEx2(VARIPTR *buffer, VARIPTR unused_buffer, i32 field_28) {
@@ -128,7 +134,7 @@ extern "C" i32 NuTimeBarCreateSet(i32 *colours) {
 
 extern "C" void NuTimeBarInitEx(VARIPTR *buffer, VARIPTR unused_buffer) {
     std::memset(NuTimeBar_SetList, 0, sizeof(NuTimeBar_SetList));
-    CreateTimeBar(buffer, unused_buffer, NULL, 7);
+    CreateTimeBar(buffer, NULL, 7);
     NuTimeBarCreateSetEx(buffer, unused_buffer, NULL);
 
     NuTimeBar_FrameOutMtl = NuMtlCreate(1);
