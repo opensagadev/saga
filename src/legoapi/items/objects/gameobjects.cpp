@@ -1302,7 +1302,7 @@ static f32 Condition_PlayerOnObject(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *
     if (player != NULL && platform != -1 && (player->apiobj.field_0x27d != 0 || player->apiobj.field_0x27e != 0)) {
         if (player->apiobj.supporting_platform_id == platform) {
             NUMTX *transform = static_cast<NUMTX *>(CurTerr->platforms[platform].scene_object);
-            result = player->apiobj.position.y >= transform->m31 ? 1.0f : 0.0f;
+            result = transform->m31 > player->apiobj.position.y ? 0.0f : 1.0f;
         }
     }
     return result;
@@ -4006,18 +4006,19 @@ void GameObjectDimensionsExtra_LSW(GameObject_s *object);
 
 void GameObjectDimensions(GameObject_s *object) {
     APIOBJECT &api = object->apiobj;
-    PLAYERCHARACTERCONFIG_s *config = api.character_data->player_config;
-    const i32 collision_origin_joint = config->collision_origin_joint;
-    if (object->use_model_origin != 0 && object->field_0xd24 == 1.0f && collision_origin_joint != -1 &&
-        api.character_model->points_of_interest[collision_origin_joint] != NULL && api.field_0x288 != 0) {
-        const f32 radius = object->field_0x1004 * config->collision_origin_radius;
+    if (object->use_model_origin != 0 && object->field_0xd24 == 1.0f &&
+        api.character_data->player_config->collision_origin_joint != -1 &&
+        api.character_model->points_of_interest[api.character_data->player_config->collision_origin_joint] != NULL &&
+        api.field_0x288 != 0) {
+        const f32 radius = object->field_0x1004 * api.character_data->player_config->collision_origin_radius;
         api.field_0x1dc = radius;
         api.field_0x1e0 = radius;
     } else {
-        api.field_0x1e0 = api.collision_height;
         api.field_0x1dc = api.collision_radius;
+        api.field_0x1e0 = api.collision_height;
     }
-    GameObjectDimensionsExtra_LSW(object);
+    if (GameObjectDimensionsExtraFn != NULL)
+        GameObjectDimensionsExtraFn(object);
 }
 
 void GameAntiNodeData_Init(GAMEANTINODEDATA_s *data, nuhspecial_s *special) {

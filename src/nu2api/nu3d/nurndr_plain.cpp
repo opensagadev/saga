@@ -275,10 +275,19 @@ extern "C" {
     i32 NuDynamicLightTestShadowExtrusionExtent(NuDynamicLight *light, const NUVEC *center, const NUVEC *extent,
                                                 i32 render_set);
 
+    // Retail partially inlines the clipping test into NuDisplaySceneRndr and
+    // keeps the body as its stack-argument .part clone.
+    static __attribute__((noinline, noclone, regparm(0))) void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene)
+        __asm__("NuDisplaySceneRndr.part.101");
+
     void NuDisplaySceneRndr(void *display_scene) {
         NUDLDLISTSCENE *scene = static_cast<NUDLDLISTSCENE *>(display_scene);
         if ((scene->flags & NUDL_SCENE_FLAG_CLIPPING) != 0)
             return;
+        NuDisplaySceneRndrBody(scene);
+    }
+
+    static void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene) {
 
         u8 visibility_context[0x2800];
         RndrStateCopyGlobalState(scene->local_state);

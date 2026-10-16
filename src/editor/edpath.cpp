@@ -175,18 +175,34 @@ void pathEditorDrawConnectionInfo(nuvec_s *position, float radius, nuvec_s *othe
 }
 
 static u32 attr[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
-static void DestroyAIPathNode(EDAIPATHNODE_s *, EDAIPATH_s *);
+// Retail splits the null checks into each caller and keeps the body as a
+// partial-inlining clone; its connection searches are fully peeled.
+static __attribute__((noinline, noclone, optimize("peel-loops"))) void DestroyAIPathNodeBody(EDAIPATHNODE_s *,
+                                                                                            EDAIPATH_s *)
+    __asm__("_ZL17DestroyAIPathNodeP14EDAIPATHNODE_sP10EDAIPATH_s.part.42");
+static inline void DestroyAIPathNode(EDAIPATHNODE_s *node, EDAIPATH_s *path) {
+    if (node == NULL || path == NULL)
+        return;
+    DestroyAIPathNodeBody(node, path);
+}
 static void pathEditor_DestroySharedNode(EDAISHAREDPATHNODE_s *);
 extern "C" void aieditor_ClearMainMenu(void);
 extern "C" AIEDITORPATHNODECALLBACK *AIPathNodeMovedFn;
 
-static inline void pathEditor_DisconnectNodes(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other) {
+static inline __attribute__((always_inline)) void pathEditor_DisconnectNodes(EDAIPATHNODE_s *node,
+                                                                           EDAIPATHNODE_s *other) {
     for (i32 i = 0; i < 8; ++i) {
         if (node->connections[i].node == other) {
             for (i32 j = 0; j < 8; ++j) {
                 if (other->connections[j].node == node) {
-                    memset(&node->connections[i], 0, sizeof(EDAIPATHCNX_s));
-                    memset(&other->connections[j], 0, sizeof(EDAIPATHCNX_s));
+                    node->connections[i].node = NULL;
+                    node->connections[i].flags = 0;
+                    node->connections[i].route_mask = 0;
+                    node->connections[i].unknown_0a = 0;
+                    other->connections[j].node = NULL;
+                    other->connections[j].flags = 0;
+                    other->connections[j].route_mask = 0;
+                    other->connections[j].unknown_0a = 0;
                     return;
                 }
             }
@@ -1220,7 +1236,7 @@ static __used__ void routeEditor_cbDeleteRoute(eduimenu_s *parent, eduiitem_s *i
     }
 }
 
-static __used__ void routeEditor_cbRenameRoute(eduimenu_s *, eduiitem_s *item, u32) {
+static __used__ __attribute__((optimize("peel-loops"))) void routeEditor_cbRenameRoute(eduimenu_s *, eduiitem_s *item, u32) {
     EDAIPATH_s *path = aieditor->current_path;
     if (path == nullptr || path->current_route == nullptr) {
         return;
@@ -1231,7 +1247,7 @@ static __used__ void routeEditor_cbRenameRoute(eduimenu_s *, eduiitem_s *item, u
     }
     auto input_name = input->name;
     for (i32 index = 0; index < 16; ++index) {
-        if (NuStrICmp(path->routes[index].name, input_name) == 0) {
+        if (NuStrICmp(aieditor->current_path->routes[index].name, input_name) == 0) {
             return;
         }
     }
@@ -2487,10 +2503,8 @@ static __used__ void pathEditor_DestroySharedNode(EDAISHAREDPATHNODE_s *shared) 
     }
 }
 
-static void DestroyAIPathNode(EDAIPATHNODE_s *node, EDAIPATH_s *path) {
-    if (node == NULL || path == NULL)
-        return;
-    if (node->shared_node != NULL) {
+static void DestroyAIPathNodeBody(EDAIPATHNODE_s *node, EDAIPATH_s *path) {
+    if (node != NULL && node->shared_node != NULL) {
         --node->shared_node->reference_count;
         if (node->shared_node->reference_count <= 1)
             pathEditor_DestroySharedNode(node->shared_node);
@@ -2927,4 +2941,16 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
     path = aieditor->current_path;
     path->nearest_node = pathEditor_GetNearestNode(path, 1);
     return NULL;
+}
+
+// Retail keeps an unreferenced partial-inlining clone of pathEditorSetCamPos:
+// it moves the editor camera to a position at the cursor's height.
+static __attribute__((used, noinline, noclone, regparm(1))) void pathEditorSetCamPosBody(nuvec_s *position)
+    __asm__("_ZL19pathEditorSetCamPosP7nuvec_si.part.43");
+static void pathEditorSetCamPosBody(nuvec_s *position) {
+    nuvec_s camera;
+    camera.x = position->x;
+    camera.y = aieditor->cursor_position.y;
+    camera.z = position->z;
+    edcamSetPos(&camera);
 }

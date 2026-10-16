@@ -665,22 +665,27 @@ void Bolt_Debris_LSW(BOLT_s *bolt, nuvec_s *points, i32 point, nuvec_s *, i32 no
 }
 
 i32 Bolt_HitPartMode(BOLT_s *bolt) {
-    GameObject_s *owner = bolt->owner;
-    if (owner == NULL)
-        return 3;
-    i8 player = owner->apiobj.field_0x27c;
-    if (player == 0)
-        return 4;
-    return 3 + 2 * (player == 1);
+    if (bolt->owner != NULL) {
+        switch (bolt->owner->apiobj.field_0x27c) {
+            case 0:
+                return 4;
+            case 1:
+                return 5;
+        }
+    }
+    return 3;
 }
 
 i32 Bolt_HitPart_LSW(BOLT_s *, PART_s *part) {
-    if (part->force_player_mask == 1) {
-        if (part->scale_time < 2.0f)
-            return 1;
-    } else if (part->force_player_mask == 2) {
-        if (part->scale_time < 1.0f)
-            return 1;
+    switch (part->force_player_mask) {
+        case 1:
+            if (part->scale_time < 2.0f)
+                return 1;
+            break;
+        case 2:
+            if (part->scale_time < 1.0f)
+                return 1;
+            break;
     }
     return 0;
 }
@@ -1525,8 +1530,8 @@ static __used__ void Bolt_GetShootOrigin_Default(GameObject_s *object, nuvec_s *
 static __used__ i32 Bolt_GetShootDirection_Default(GameObject_s *object, nuvec_s *direction) {
     u16 angle = object->apiobj.movement_facing_angle;
     if (direction != NULL) {
-        direction->y = 0.0f;
         direction->x = NuTrigTable[static_cast<u16>(angle / 2)];
+        direction->y = 0.0f;
         direction->z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff];
     }
     return angle;

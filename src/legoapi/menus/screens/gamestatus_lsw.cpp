@@ -422,9 +422,9 @@ void InitStatusScreen(WORLDINFO_s *world) {
     }
     if ((p.mode_flags & 4) != 0) {
         if (NewLData == STATUS_LDATA || WORLD->current_level == STATUS_LDATA) {
-            EPISODESAVE_s &save = Game.episode_save[episode];
-            p.previous_best_score = save.superstory_score_target;
-            p.previous_best_time = save.superstory_time_limit;
+            const u32 previous_score = Game.episode_save[episode].superstory_score_target;
+            p.previous_best_score = previous_score;
+            p.previous_best_time = Game.episode_save[episode].superstory_time_limit;
             p.superstory_time = SuperStoryTimer.time_elapsed;
             p.superstory_score = SuperStoryScore;
             i32 gold = 0;
@@ -434,19 +434,19 @@ void InitStatusScreen(WORLDINFO_s *world) {
                 p.time_reward_score = *p.score;
             } else {
                 f32 new_time = p.superstory_time;
-                if (p.previous_best_time <= new_time)
-                    new_time = 0.0f;
+                if (new_time < p.previous_best_time)
+                    Game.episode_save[episode].superstory_time_limit = new_time;
                 else
-                    save.superstory_time_limit = new_time;
+                    new_time = 0.0f;
                 p.new_best_time = new_time;
                 u32 new_score = p.superstory_score;
-                if (p.previous_best_score < new_score)
-                    save.superstory_score_target = new_score;
+                if (new_score > previous_score)
+                    Game.episode_save[episode].superstory_score_target = new_score;
                 else
                     new_score = 0;
                 p.new_best_score = new_score;
-                if (save.superstory_complete == 0) {
-                    save.superstory_complete = 1;
+                if (Game.episode_save[episode].superstory_complete == 0) {
+                    Game.episode_save[episode].superstory_complete = 1;
                     AddToCompletionPoints(POINTS_PER_SUPERSTORY);
                     if (GOLDBRICKFORSUPERSTORY != 0)
                         gold = AddGoldBrickMessage(&p, tSUPERSTORYCOMPLETE);
@@ -464,7 +464,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
             AddStatusStage(&p, 14, gold);
             AddStatusStage(&p, 15, 0);
             AddStatusStage(&p, 16, 0);
-            if (p.previous_gold_bricks < Game.field_0x7c26[0])
+            if (Game.field_0x7c26[0] > p.previous_gold_bricks)
                 AddStatusStage(&p, 19, 0);
             if (netclient == 0 && (p.new_best_time != 0.0f || p.new_best_score != 0 || p.superstory_score != 0)) {
                 AddStatusStage(&p, 11, 0);
@@ -512,7 +512,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
             gold = 0;
         }
         AddStatusStage(&p, 21, gold);
-        if (p.previous_gold_bricks < Game.field_0x7c26[0])
+        if (Game.field_0x7c26[0] > p.previous_gold_bricks)
             AddStatusStage(&p, 19, 0);
         AddStatusStage(&p, 9, 0);
         AddStatusStage(&p, 10, 0);
@@ -553,7 +553,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
             }
         }
         AddStatusStage(&p, 26, gold);
-        if (p.previous_gold_bricks < Game.field_0x7c26[0])
+        if (Game.field_0x7c26[0] > p.previous_gold_bricks)
             AddStatusStage(&p, 19, 0);
         AddStatusStage(&p, 9, 0);
         AddStatusStage(&p, 10, 0);
@@ -585,7 +585,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
                 AddStatusStage(&p, 25, 0);
         } else
             AddStatusStage(&p, 23, 0);
-        if (p.previous_gold_bricks < Game.field_0x7c26[0])
+        if (Game.field_0x7c26[0] > p.previous_gold_bricks)
             AddStatusStage(&p, 19, 0);
         AddStatusStage(&p, 9, 0);
         AddStatusStage(&p, 10, 0);
@@ -751,7 +751,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
             AddStatusStage(&p, 17, 0);
         }
     }
-    if (p.previous_gold_bricks < Game.field_0x7c26[0])
+    if (Game.field_0x7c26[0] > p.previous_gold_bricks)
         AddStatusStage(&p, 19, 0);
     if ((p.mode_flags & 8) == 0)
         AddStatusStage(&p, 9, 0);
@@ -832,7 +832,7 @@ void NewStatusRumbleBuzz(i32 player, float amount, float buzz, i32 priority) {
 }
 
 f32 StatusIconsOnOff(f32 progress) {
-    return NuTrigTable[(static_cast<i32>(progress * 16384.0f) >> 1) & 0x7fff] * (STATSPOSY - STATSPOS2Y) + STATSPOS2Y;
+    return (STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(progress * 16384.0f) >> 1) & 0x7fff] + STATSPOS2Y;
 }
 
 static inline void UpdateIconWibbleAxis(i32 i) {
@@ -931,10 +931,12 @@ i32 DrawPanel3DObjectNoAlpha(f32, f32, f32, f32, f32, f32, u16, u16, u16, nuhspe
 void RedBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
     if (active == 0 || stage->field_0x14 <= 0)
         return;
-    f32 blend = 1.0f;
+    f32 blend;
     if (stage->field_0x18 < 1.0f)
         blend = NuTrigTable[(static_cast<i32>(stage->field_0x18 * 16384.0f) >> 1) & 0x7fff];
-    else if (stage->field_0x18 >= stage->field_0x1c - 1.0f)
+    else if (stage->field_0x18 < stage->field_0x1c - 1.0f)
+        blend = 1.0f;
+    else
         blend =
             NuTrigTable[(static_cast<i32>((1.0f - (stage->field_0x18 - (stage->field_0x1c - 1.0f))) * 16384.0f) >> 1) &
                         0x7fff];
@@ -1499,7 +1501,10 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
     labels[1] = -1;
     MENU_s *menu = &GameMenu[GameMenuLevel];
     bool locked = false;
-    if ((packet->mode_flags & 1) != 0 || packet->challenge_state != 0 || packet->mission_state != 0) {
+    if ((packet->mode_flags & 1) != 0 || packet->challenge_state != 0) {
+        labels[0] = tRESTART;
+        labels[1] = tMAP;
+    } else if (packet->mission_state != 0) {
         labels[0] = tRESTART;
         labels[1] = tMAP;
     } else if ((packet->field_0xb0 & 0x40) != 0 ||
@@ -1539,7 +1544,7 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
         y += 0.075f;
     }
     for (i32 i = 0; i < count; ++i) {
-        u8 red, green, blue;
+        i32 red, green, blue;
         if (selected != 0 && status_prompt == i && TestForController()) {
             if (menu_pulsate > 0.0f) {
                 const f32 inverse = 1.0f - menu_pulsate;
@@ -1710,10 +1715,9 @@ void SuperStoryTime_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, fl
                 if (stage->field_0x18 >= 4.5f)
                     *packet->score = packet->time_reward_score;
                 else if (stage->field_0x18 >= 0.5f && stage->field_0x18 < 4.0f) {
-                    const f32 difference = static_cast<f32>(packet->time_reward_score - packet->original_score);
                     const i32 increase = static_cast<i32>(
-                        difference *
-                        NuTrigTable[(static_cast<i32>(((stage->field_0x18 - 0.5f) / 3.5f) * 16384.0f) >> 1) & 0x7fff]);
+                        NuTrigTable[(static_cast<i32>(((stage->field_0x18 - 0.5f) / 3.5f) * 16384.0f) >> 1) & 0x7fff] *
+                        static_cast<f32>(packet->time_reward_score - packet->original_score));
                     *packet->score = packet->original_score;
                     IncreaseScore(packet->score, static_cast<i64>(increase), 0);
                     if (static_cast<i32>(previous / 0.2f) != static_cast<i32>(stage->field_0x18 / 0.2f))
@@ -1755,12 +1759,13 @@ void SuperStoryScore_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, f
                 if (stage->field_0x18 >= 4.0f)
                     *packet->score = packet->final_reward_score;
                 else if (stage->field_0x18 >= 0.5f && stage->field_0x18 < 4.0f) {
+                    const u32 original = packet->original_score;
                     const f32 blend =
                         1.0f -
                         NuTrigTable[(static_cast<i32>(((stage->field_0x18 - 0.5f) / 3.5f) * 16384.0f + 16384.0f) >> 1) &
                                     0x7fff];
-                    const f32 difference = static_cast<f32>(packet->final_reward_score - packet->original_score);
-                    *packet->score = packet->original_score;
+                    const f32 difference = static_cast<f32>(packet->final_reward_score - original);
+                    *packet->score = original;
                     IncreaseScore(packet->score, static_cast<i64>(static_cast<i32>(difference * blend)), 0);
                     if (static_cast<i32>(previous / 0.2f) != static_cast<i32>(stage->field_0x18 / 0.2f))
                         PlaySfx(const_cast<char *>("PickupCoin"), NULL);
@@ -1921,74 +1926,72 @@ void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 a
 }
 
 void Coins_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
-    if (active == 0) {
-        if (stage->field_0x12 != 0) {
-            const f32 alpha = getFinishedStatusAlpha(packet);
-            CoinTotal_Draw(*packet->score,
-                           (STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(alpha * 16384.0f) >> 1) & 0x7fff] +
-                               STATSPOS2Y,
-                           CoinTotalScale, 1, 1.0f, 255, 191, 0);
-        }
-        return;
-    }
-    f32 alpha = 1.0f;
-    f32 coin_y = STATSPOS2Y;
-    f32 total_y = STATSPOS2Y;
-    f32 scale = 2.0f;
-    switch (stage->field_0x14) {
-        case 0:
-            alpha = 0.0f;
-            break;
-        case 1: {
-            alpha = stage->field_0x18;
-            f32 ratio = stage->field_0x18 / stage->field_0x1c;
-            const f32 blend =
-                1.0f - (NuTrigTable[(static_cast<i32>(ratio * 32768.0f + 16384.0f) >> 1) & 0x7fff] + 1.0f) * 0.5f;
-            if (stage->field_0x1c == 0.0f || stage->field_0x18 == 0.0f) {
-                ratio = 0.0f;
+    if (active != 0) {
+        f32 alpha = 1.0f;
+        f32 coin_y = STATSPOS2Y;
+        f32 total_y = STATSPOS2Y;
+        f32 scale = 2.0f;
+        switch (stage->field_0x14) {
+            case 0:
+                alpha = 0.0f;
+                break;
+            case 1: {
+                alpha = stage->field_0x18;
+                f32 ratio = stage->field_0x18 / stage->field_0x1c;
+                const f32 blend =
+                    1.0f - (NuTrigTable[(static_cast<i32>(ratio * 32768.0f + 16384.0f) >> 1) & 0x7fff] + 1.0f) * 0.5f;
+                if (stage->field_0x1c == 0.0f || stage->field_0x18 == 0.0f) {
+                    ratio = 0.0f;
+                }
+                icon_y = StatusIconsOnOff(ratio);
+                total_y = (0.3f - STATSPOS2Y) * blend + STATSPOS2Y;
+                coin_y = (STATSPOSY - STATSPOS2Y) * blend + STATSPOS2Y;
+                break;
             }
-            icon_y = StatusIconsOnOff(ratio);
-            total_y = (0.3f - STATSPOS2Y) * blend + STATSPOS2Y;
-            coin_y = (STATSPOSY - STATSPOS2Y) * blend + STATSPOS2Y;
-            break;
+            case 2:
+                total_y = 0.3f;
+                coin_y = STATSPOSY;
+                break;
+            case 3: {
+                alpha = 1.0f - stage->field_0x18;
+                const f32 blend =
+                    1.0f -
+                    (NuTrigTable[(static_cast<i32>((1.0f - stage->field_0x18 / stage->field_0x1c) * 32768.0f + 16384.0f) >>
+                                  1) &
+                                 0x7fff] +
+                     1.0f) *
+                        0.5f;
+                total_y = (0.3f - STATSPOSY) * blend + STATSPOSY;
+                coin_y = STATSPOS2Y + (STATSPOSY - STATSPOS2Y) * blend;
+                scale = (2.0f - CoinTotalScale) * blend + CoinTotalScale;
+                break;
+            }
         }
-        case 2:
-            total_y = 0.3f;
-            coin_y = STATSPOSY;
-            break;
-        case 3: {
-            alpha = 1.0f - stage->field_0x18;
-            const f32 blend =
-                1.0f -
-                (NuTrigTable[(static_cast<i32>((1.0f - stage->field_0x18 / stage->field_0x1c) * 32768.0f + 16384.0f) >>
-                              1) &
-                             0x7fff] +
-                 1.0f) *
-                    0.5f;
-            total_y = (0.3f - STATSPOSY) * blend + STATSPOSY;
-            coin_y = STATSPOS2Y + (STATSPOSY - STATSPOS2Y) * blend;
-            scale = (2.0f - CoinTotalScale) * blend + CoinTotalScale;
-            break;
+        if (stage->field_0x14 >= 1) {
+            const f32 player_alpha = packet->player0_active == 0 ? DROPINALPHA : 1.0f;
+            const u32 coins = packet->coins_remaining[0];
+            const f32 score_x = -PANEL_SCOREX;
+            const i32 object_index = coins > 999 ? 0xc3 : coins > 99 ? 0xbb : 0xb3;
+            if (WORLD->lev_objs[object_index].active != 0) {
+                DrawPanel3DObject(-PANEL_COINX, coin_y, 1.0f, PANEL_COINSCALE_END, PANEL_COINSCALE_END, PANEL_COINSCALE_END,
+                                  0, 0, 0, &WORLD->lev_objs[object_index].special, 0, player_alpha);
+            }
+            char text[256];
+            Text_MakeScore(packet->coins_remaining[0], text);
+            Text3DEx(text, score_x, coin_y, 1.0f, PANEL_SCORESCALE, PANEL_SCORESCALE, PANEL_SCORESCALE, 2, 255, 191, 0,
+                     static_cast<u8>(static_cast<i32>(player_alpha * 128.0f)));
+            CoinTotal_Draw(*packet->score, total_y, scale, 1, 1.0f, 255, 191, 0);
         }
+        alpha = alpha < 0.0f ? 0.0f : alpha > 1.0f ? 1.0f : alpha;
+        Text3DEx(TTab[tCOINTOTAL], 0.0f, STATUS_TITLE_Y, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 255, 255,
+                 static_cast<u8>(static_cast<i32>(alpha * 128.0f)));
+    } else if (stage->field_0x12 != 0) {
+        const f32 alpha = getFinishedStatusAlpha(packet);
+        CoinTotal_Draw(*packet->score,
+                       (STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(alpha * 16384.0f) >> 1) & 0x7fff] +
+                           STATSPOS2Y,
+                       CoinTotalScale, 1, 1.0f, 255, 191, 0);
     }
-    if (stage->field_0x14 >= 1) {
-        const f32 player_alpha = packet->player0_active == 0 ? DROPINALPHA : 1.0f;
-        const u32 coins = packet->coins_remaining[0];
-        const f32 score_x = -PANEL_SCOREX;
-        const i32 object_index = coins < 100 ? 0xb3 : coins < 1000 ? 0xbb : 0xc3;
-        if (WORLD->lev_objs[object_index].active != 0) {
-            DrawPanel3DObject(-PANEL_COINX, coin_y, 1.0f, PANEL_COINSCALE_END, PANEL_COINSCALE_END, PANEL_COINSCALE_END,
-                              0, 0, 0, &WORLD->lev_objs[object_index].special, 0, player_alpha);
-        }
-        char text[256];
-        Text_MakeScore(packet->coins_remaining[0], text);
-        Text3DEx(text, score_x, coin_y, 1.0f, PANEL_SCORESCALE, PANEL_SCORESCALE, PANEL_SCORESCALE, 2, 255, 191, 0,
-                 static_cast<u8>(static_cast<i32>(player_alpha * 128.0f)));
-        CoinTotal_Draw(*packet->score, total_y, scale, 1, 1.0f, 255, 191, 0);
-    }
-    alpha = alpha < 0.0f ? 0.0f : alpha > 1.0f ? 1.0f : alpha;
-    Text3DEx(TTab[tCOINTOTAL], 0.0f, STATUS_TITLE_Y, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 255, 255,
-             static_cast<u8>(static_cast<i32>(alpha * 128.0f)));
 }
 void Coins_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
     icon_y = StatusIconsOnOff(1.0f);
@@ -2028,8 +2031,11 @@ void Coins_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elaps
                     }
                     packet->coins_remaining[player] -= amount;
                     IncreaseScore(packet->score, static_cast<u64>(amount), 0);
+                    if (packet->coins_remaining[player] == 0)
+                        ++finished;
+                } else {
+                    ++finished;
                 }
-                finished += packet->coins_remaining[player] == 0;
             }
             PlaySfx("PickupCoin", 0);
             if (finished == 2) {
@@ -2061,22 +2067,20 @@ void BonusWin_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 curren
             iconalphaoverride = 0.0f;
         } else {
             const f32 time = stage->field_0x18;
-            if (stage->field_0x1c - 0.1f <= time) {
+            if (time >= stage->field_0x1c - 0.1f) {
                 iconalphaoverride = 0.0f;
-            } else if (time < stage->field_0x1c - 0.6f) {
-                if (!(time < 0.5f)) {
-                    iconalphaoverride = 1.0f;
-                } else {
-                    iconalphaoverride = time + time;
-                }
-            } else {
+            } else if (time >= stage->field_0x1c - 0.6f) {
                 const f32 fade = time - (stage->field_0x1c - 0.6f);
                 iconalphaoverride = 1.0f - (fade + fade);
+            } else if (time >= 0.5f) {
+                iconalphaoverride = 1.0f;
+            } else {
+                iconalphaoverride = time + time;
             }
             if (time < 2.0f && NuFmod(time, 0.2f) >= 0.1f) {
-                const i32 winner = (packet->field_0xb0 & 0x20) != 0;
-                SmartTextEx(TTab[tWINNER], winner ? 0.675f : -0.675f, STATSPOSY, 1.0f, 0.7f, 0.7f, 0.7f, winner ? 8 : 2,
-                            0, 255, 0, 0.35f, 1, NULL, 0, static_cast<i32>(iconalphaoverride * 128.0f));
+                const bool left = (packet->field_0xb0 & 0x20) == 0;
+                SmartTextEx(TTab[tWINNER], left ? -0.675f : 0.675f, STATSPOSY, 1.0f, 0.7f, 0.7f, 0.7f, left ? 2 : 8, 0,
+                            255, 0, 0.35f, 1, NULL, 0, static_cast<i32>(iconalphaoverride * 128.0f));
             }
             DrawBonusScore(STATSPOSY, StatusPacket.player0_active, StatusPacket.player1_active, iconalphaoverride,
                            BonusScore);
@@ -2136,9 +2140,9 @@ void ChallangeCash_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 draw)
     const f32 time = stage->field_0x18;
     iconalphaoverride = time < 0.5f ? time * 2.0f : 1.0f;
     if (time < 2.0f && NuFmod(time, 0.2f) >= 0.1f) {
-        const bool second_player = (packet->field_0xb0 & 0x20) != 0;
-        SmartTextEx(TTab[tWINNER], second_player ? 0.675f : -0.675f, STATSPOSY, 1.0f, 0.7f, 0.7f, 0.7f,
-                    second_player ? 8 : 2, 0, 255, 0, 0.35f, 1, NULL, 0, static_cast<i32>(iconalphaoverride * 128.0f));
+        const bool left = (packet->field_0xb0 & 0x20) == 0;
+        SmartTextEx(TTab[tWINNER], left ? -0.675f : 0.675f, STATSPOSY, 1.0f, 0.7f, 0.7f, 0.7f, left ? 2 : 8, 0, 255,
+                    0, 0.35f, 1, NULL, 0, static_cast<i32>(iconalphaoverride * 128.0f));
     }
     if (stage->field_0x14 == 1) {
         AddGameMessage(TTab[tCHALLENGECOMPLETE], &position, 0.7f, &position, 0.7f, 255, 0, 127, 0x4020, 2.0f);
@@ -2183,10 +2187,10 @@ void BonusTime_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float e
             if (stage->field_0x18 >= stage->field_0x1c)
                 NextStatusStage(packet);
             else if (previous < 0.5f && stage->field_0x18 >= 0.5f) {
-                if (packet->new_best_time == 0.0f)
-                    GameAudio_PlaySfx(0x32, NULL, 0, 0);
-                else
+                if (packet->new_best_time != 0.0f)
                     PlaySfx(const_cast<char *>("StatusAward"), NULL);
+                else
+                    GameAudio_PlaySfx(0x32, NULL, 0, 0);
                 NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
             }
             break;

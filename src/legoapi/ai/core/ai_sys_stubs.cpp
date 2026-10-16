@@ -1290,7 +1290,10 @@ static void AISysLoadCreatures(AISYS *system, i32 version) {
             strcpy(creature->script_name, "default");
         }
         char character_name[32];
-        EdFileRead(character_name, version < 14 ? 16 : 32);
+        if (version < 14)
+            EdFileRead(character_name, 16);
+        else
+            EdFileRead(character_name, 32);
         if (GlobalCharacterTypeIDFn != NULL)
             creature->type = static_cast<i16>(GlobalCharacterTypeIDFn(character_name));
 

@@ -123,7 +123,7 @@ i32 Tag_UpdateHint(HINT_s *hint) {
     const i16 tc14_id = id_TC14;
     i32 tc14 = LSW_HintConditions.tc14_present;
     auto check_tc14 = [&](GameObject_s *object) {
-        if (object != NULL && (object->apiobj.field_0x1f8 & 0x1080) == 0x1080 && object->id == tc14_id)
+        if (object != NULL && (object->apiobj.field_0x1f8 & 0x1080) == 0x1080 && tc14_id == object->id)
             tc14 = 1;
     };
     for (i32 i = 0; i < 8; ++i)
@@ -227,15 +227,18 @@ i32 Tag_UpdateHint(HINT_s *hint) {
                     return 1;
             }
             return 0;
-        case 654:
+        case 654: {
             if (VehicleArea == 0)
                 return 0;
-            for (i32 i = 0; i < 2; ++i) {
-                if (Player[i] != NULL && static_cast<i8>(Player[i]->apiobj.flags_low) < 0 &&
-                    Player[i]->apiobj.field_0x287 == 0 && (Player[i]->field_0xe24 & 0x10) != 0)
-                    return 1;
-            }
-            return 0;
+            i32 result;
+            i32 i = 0;
+            do {
+                result = Player[i] != NULL && static_cast<i8>(Player[i]->apiobj.flags_low) < 0 &&
+                         Player[i]->apiobj.field_0x287 == 0 && (Player[i]->field_0xe24 & 0x10) != 0;
+                ++i;
+            } while (result == 0 && i < 2);
+            return result;
+        }
         default:
             return 0;
     }

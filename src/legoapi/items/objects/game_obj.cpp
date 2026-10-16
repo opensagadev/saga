@@ -412,7 +412,9 @@ static __used__ void SpeederPart_Update(PART_s *part) {
                                           &bikeParts[static_cast<i32>(part->speeder_index)].spline_position.position, 5,
                                           FRAMETIME, pitch, yaw, NULL);
     } else {
-        previous_position = part->position;
+        previous_position.x = part->position.x;
+        previous_position.y = part->position.y;
+        previous_position.z = part->position.z;
         f32 tilt = fabsf(NU_SIN_LUT(static_cast<i32>(time * 32768.0f + 16384.0f)));
         i32 turn = static_cast<i32>(2730.0f - (1.0f - tilt) * 5461.0f);
         i32 spin =
@@ -1059,10 +1061,16 @@ void GameObjectRotation(GameObject_s *object, i32 mode) {
         }
         NUVEC normal = v000;
         for (i32 i = 0; i < 4; ++i) {
-            NUVEC a = points[i], b = points[(i + 1) & 3], c = points[(i + 2) & 3];
+            NUVEC a, b, c;
+            a.x = points[i].x;
             a.y = object->suspension[i].height;
+            a.z = points[i].z;
+            b.x = points[(i + 1) & 3].x;
             b.y = object->suspension[(i + 1) & 3].height;
+            b.z = points[(i + 1) & 3].z;
+            c.x = points[(i + 2) & 3].x;
             c.y = object->suspension[(i + 2) & 3].height;
+            c.z = points[(i + 2) & 3].z;
             NUVEC ab, ac;
             NuVecSub(&ab, &b, &a);
             NuVecSub(&ac, &c, &a);
@@ -2009,11 +2017,12 @@ void SetKillPartMom(nuvec_s *momentum) {
     NuVecRotateX(momentum, momentum, qrand());
 }
 
-void KillParts_TIEFIGHTER(ADDPART_s *params, i32 part_index, i32 variant, GameObject_s *object, i32 mode, u16 xrot,
-                          u16 yrot, nuvec_s *velocity) {
+void KillParts_TIEFIGHTER(ADDPART_s *params, i32 part_index, i32 variant, GameObject_s *object, i32 mode, u16 yrot,
+                          u16 xrot, nuvec_s *velocity) {
     params->flags = static_cast<u32>(variant) < 1 ? 0x400 : 0x10;
     f32 speed_ratio =
         object->apiobj.horizontal_velocity_magnitude / object->apiobj.character_data->game_character->run_speed;
+    NUVEC spin_velocity;
     if (speed_ratio <= 0.25f) {
         params->flags = 0x90;
         params->stop_fn = PartStop_Flickerer;
@@ -2021,22 +2030,15 @@ void KillParts_TIEFIGHTER(ADDPART_s *params, i32 part_index, i32 variant, GameOb
         params->gravity = -8.0f;
         params->field_3c = PartImpact_Brick;
         params->velocity = velocity;
-        AddPart(params);
-        return;
-    }
-
-    if (mode == 0) {
+    } else if (mode == 0) {
         params->field_44 = TiePart_KillExplode;
         params->flags = 0x111;
         params->field_a4 = FRAMETIME;
         params->velocity = &v000;
-        AddPart(params);
-        return;
-    }
-
-    if (__builtin_expect(mode == 1, 0)) {
-        NUVEC spin_velocity = {object->apiobj.velocity.x * 0.75f, object->apiobj.velocity.x * 0.75f,
-                               object->apiobj.velocity.z * 0.75f};
+    } else if (mode == 1) {
+        spin_velocity.x = object->apiobj.velocity.x * 0.75f;
+        spin_velocity.y = object->apiobj.velocity.x * 0.75f;
+        spin_velocity.z = object->apiobj.velocity.z * 0.75f;
         if (part_index == 5) {
             NuVecRotateX(&spin_velocity, &spin_velocity, -static_cast<i32>(xrot));
             NuVecRotateY(&spin_velocity, &spin_velocity, -static_cast<i32>(yrot));
@@ -2052,16 +2054,14 @@ void KillParts_TIEFIGHTER(ADDPART_s *params, i32 part_index, i32 variant, GameOb
         params->field_3c = TiePart_Impact;
         params->velocity = &spin_velocity;
         PlaySfx("Tie_Spins", &object->apiobj.collision_position);
-        AddPart(params);
-        return;
+    } else {
+        params->field_20 = 0.5f;
+        params->field_44 = TiePart_Kill;
+        params->flags = 0x91;
+        params->draw_fn = PartDraw_Flickerer;
+        params->field_3c = TiePart_Impact;
+        params->velocity = velocity;
     }
-
-    params->field_20 = 0.5f;
-    params->field_44 = TiePart_Kill;
-    params->flags = 0x91;
-    params->draw_fn = PartDraw_Flickerer;
-    params->field_3c = TiePart_Impact;
-    params->velocity = velocity;
     AddPart(params);
 }
 

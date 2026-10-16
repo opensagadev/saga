@@ -539,10 +539,14 @@ static u32 ShaderCountLeadingZeros(u32 value) {
     return value ? g_clzTable[((value + 1) * 0x07dcd629u) >> 27] : 32;
 }
 
-static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *glsl, NuShaderUsageMask_s &mask,
+// IPA-SRA passes only the two mask words the setter reads.
+static __attribute__((noinline, noclone)) void
+NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *glsl, u32 semantics0, u32 semantics1, numtl_s *mtl)
+    __asm__("_ZL43NuShaderObjectGLSLSetCustomSetterParametersP20nushaderobjectglsl_sR19NuShaderUsageMask_sP7numtl_s."
+            "isra.6");
+static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *glsl, u32 semantics0, u32 semantics1,
                                                         numtl_s *mtl) {
     NUSHADEROBJECT *shader = reinterpret_cast<NUSHADEROBJECT *>(glsl);
-    const NUSHADERUSAGEMASK *usage = &mask;
     auto unpackColour = [](u32 packed, f32 *colour) {
         colour[0] = static_cast<f32>(packed & 0xff) / 255.0f;
         colour[1] = static_cast<f32>((packed >> 8) & 0xff) / 255.0f;
@@ -584,7 +588,7 @@ static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *gl
     f32 values51[4];
     f32 values52[2];
     // Material semantics 21..52 occupy one shifted 32-bit mask.
-    u32 active = (usage->semantics[0] >> 21) | (usage->semantics[1] << 11);
+    u32 active = (semantics0 >> 21) | (semantics1 << 11);
     for (;;) {
         const u32 leading = ShaderCountLeadingZeros(active);
         if (leading > 31) {
@@ -934,7 +938,7 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
                 textures &= ~(1u << (31 - leading));
             }
 
-            NuShaderObjectGLSLSetCustomSetterParameters(&shader->glsl, dirty, mtl);
+            NuShaderObjectGLSLSetCustomSetterParameters(&shader->glsl, dirty.semantics[0], dirty.semantics[1], mtl);
             lastMtl = mtl;
             lastObject = shader;
             lastFrame = 0;

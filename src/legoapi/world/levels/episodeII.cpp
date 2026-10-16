@@ -182,8 +182,6 @@ struct KAMINO_E_s {
 DECOMP_ASSERT(sizeof(KAMINO_E_s) == 120, "Kamino E state ABI");
 static KAMINO_E_s kamino_e;
 
-
-
 extern i16 id_PADMECLAWED, id_BATTLEDROIDSECURITY, id_SUPERBATTLEDROID, id_JARJAR, id_LUMINARA, id_SHAAKTI,
     id_BATTLEDROIDGEONOSIAN;
 void RemoveGameObject(GameObject_s *, i32);
@@ -1203,13 +1201,17 @@ static JEDIB_PHASE_s jedi_b_phase3[8] = {
 // Pushes `position` out of any antinode it falls inside, then resolves it to a
 // path point and fills in `locator` for it. Returns 0 when the point is off the
 // arena or off the path network.
-static i32 JediBInitLocator(WORLDINFO_s *world, nuvec_s *position, i32 angle, AILOCATOR *locator, f32 radius) {
-    if (netclient != 0) {
-        return 0;
-    }
-    if (world->ai_sys != NULL) {
-        i32 count = world->ai_sys->antinode_count;
-        AIANTINODE *node = world->ai_sys->antinodes;
+// JediBInitLocator is inlined into JediB_Init apart from everything after
+// the network check, which retail keeps as the split-out body of the IPA-SRA
+// clone (it only needs &world->ai_sys).
+static __attribute__((noinline, noclone)) i32
+JediBInitLocatorBody(AISYS_s **ai_sys, nuvec_s *position, i32 angle, AILOCATOR *locator,
+                     f32 radius) __asm__("_ZL16JediBInitLocatorP11WORLDINFO_sP7nuvec_siP11AILOCATOR_sf.isra.5.part.6");
+
+static i32 JediBInitLocatorBody(AISYS_s **ai_sys, nuvec_s *position, i32 angle, AILOCATOR *locator, f32 radius) {
+    if ((*ai_sys) != NULL) {
+        i32 count = (*ai_sys)->antinode_count;
+        AIANTINODE *node = (*ai_sys)->antinodes;
         for (i32 index = 0; index < count; index++, node++) {
             if (node->radius != 0.0f) {
                 f32 dx = position->x - node->position.x;
@@ -1233,13 +1235,20 @@ static i32 JediBInitLocator(WORLDINFO_s *world, nuvec_s *position, i32 angle, AI
     if (floor_y != 2000000.0f) {
         position->y = floor_y;
     }
-    AISysGetPathPos(world->ai_sys, position, &locator->path_info, NULL, 0xff);
+    AISysGetPathPos((*ai_sys), position, &locator->path_info, NULL, 0xff);
     if ((locator->path_info.flags & AIPATHINFO_FLAG_ON_PATH) == 0) {
         return 0;
     }
     locator->position = *position;
     locator->direction = angle;
     return 1;
+}
+
+static inline i32 JediBInitLocator(WORLDINFO_s *world, nuvec_s *position, i32 angle, AILOCATOR *locator, f32 radius) {
+    if (netclient != 0) {
+        return 0;
+    }
+    return JediBInitLocatorBody(&world->ai_sys, position, angle, locator, radius);
 }
 
 // Killed-object callback installed on every generated Jedi_B combatant

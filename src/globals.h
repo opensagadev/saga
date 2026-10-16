@@ -81,6 +81,7 @@ extern i32 (*Slam_GetDebrisFn)(GameObject_s *, i32);
 extern i32 (*FindSlamOrigin_UseCPosFn)(GameObject_s *);
 extern void (*Jump_EndOfLandContextFn)(GameObject_s *);
 extern i32 (*LastSafePosExtraFn)(GameObject_s *);
+extern void (*GameObjectDimensionsExtraFn)(GameObject_s *);
 
 struct AREA_GLOBAL_VALUES {
     i32 field_0x00;

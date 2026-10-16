@@ -139,7 +139,6 @@ void BountyHunterPursuitB_Reset(WORLDINFO_s *world) {
     LevAIMessage[0] = CheckGizAIMessage(gizaimessagesys, "CompletedB", NULL);
 }
 
-
 void BountyHunterPursuitC_Reset(WORLDINFO_s *world) {
     zamarrow = {};
     zamarrow.object = GetNamedGameObject(world->ai_sys, const_cast<char *>("ai_zam"));
@@ -185,7 +184,32 @@ void BountyHunterPursuitD_Reset(WORLDINFO_s *world) {
     LevGameObject[0] = GetNamedGameObject(world->ai_sys, "ai_zam");
 }
 
-static void UpdateZamArrow(WORLDINFO_s *world) {
+// UpdateZamArrow is inlined into its callers apart from the message update,
+// which retail keeps as the split-out body of the IPA-SRA clone (it only needs
+// &world->lev_objs).
+static __attribute__((noinline, noclone)) void
+UpdateZamArrowBody(LEVEL_OBJECT_RUNTIME_s **lev_objs) __asm__("_ZL14UpdateZamArrowP11WORLDINFO_s.isra.5.part.6");
+
+static void UpdateZamArrowBody(LEVEL_OBJECT_RUNTIME_s **lev_objs) {
+    NUVEC position = zamarrow.object->apiobj.upper_position;
+    position.y += 1.0f;
+    GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
+        AddGameMessage(const_cast<char *>(" "), &position, 0.05f, NULL, 0.0f, 255, 63, 63, 0x10083, 0.0f));
+    if (message == NULL) {
+        return;
+    }
+
+    message->alpha = static_cast<u8>(NU_SIN_LUT(static_cast<i32>(zamarrow.timer * 16384.0f)) * 128.0f);
+    message->icon = 0x134;
+    PURSUIT_ARROW_COLOURS_s *colours = reinterpret_cast<PURSUIT_ARROW_COLOURS_s *>(*lev_objs);
+    if (colours->enabled != 0) {
+        message->color1 = colours->colour[0];
+        message->color2 = colours->colour[1];
+        message->color3 = colours->colour[2];
+    }
+}
+
+static inline void UpdateZamArrow(WORLDINFO_s *world) {
     if (zamarrow.object != NULL && (zamarrow.object->apiobj.field_0x1f8 & 0x1000) != 0 &&
         zamarrow.object->apiobj.field_0x287 == 0) {
         if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
@@ -194,22 +218,7 @@ static void UpdateZamArrow(WORLDINFO_s *world) {
                 zamarrow.timer = 1.0f;
             }
             if (0.1f > NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f)) {
-                NUVEC position = zamarrow.object->apiobj.upper_position;
-                position.y += 1.0f;
-                GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
-                    AddGameMessage(const_cast<char *>(" "), &position, 0.05f, NULL, 0.0f, 255, 63, 63, 0x10083, 0.0f));
-                if (message == NULL) {
-                    return;
-                }
-
-                message->icon = 0x134;
-                message->alpha = static_cast<u8>(NU_SIN_LUT(static_cast<i32>(zamarrow.timer * 16384.0f)) * 128.0f);
-                PURSUIT_ARROW_COLOURS_s *colours = reinterpret_cast<PURSUIT_ARROW_COLOURS_s *>(world->lev_objs);
-                if (colours->enabled != 0) {
-                    message->color1 = colours->colour[0];
-                    message->color2 = colours->colour[1];
-                    message->color3 = colours->colour[2];
-                }
+                UpdateZamArrowBody(&world->lev_objs);
             }
         } else {
             zamarrow.timer = 0.0f;

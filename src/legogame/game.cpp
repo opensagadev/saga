@@ -77,6 +77,7 @@ static i32 BoltInitSfx_LSW(GameObject_s *object) {
 extern i16 tALLEXTRASUNLOCKED;
 extern void (*BuckStartExtraFn)(GameObject_s *);
 void BuckStartExtra_LSW(GameObject_s *);
+void GameObjectDimensionsExtra_LSW(GameObject_s *);
 void AddFancyMessageRGB(char *, f32, f32, f32, f32, i32, u8, u8, u8);
 void BuyAllShopExtras();
 void ReCalculateCompletionPoints();
@@ -1037,7 +1038,7 @@ void InitGameAfterConfig(void) {
     REDBRICKPOSY = -0.5f;
     REDBRICKPOS2X = 1.25f;
     REDBRICKPOS2Y = 0.0f;
-    //  GameObjectDimensionsExtraFn = GameObjectDimensionsExtra_LSW;
+    GameObjectDimensionsExtraFn = GameObjectDimensionsExtra_LSW;
     Punch_GetDamageFn = Punch_GetDamage_LSW;
     Punch_HitHoldFn = Punch_HitHold;
     Punch_HitExtraCodeFn = Punch_HitExtraCode_LSW;

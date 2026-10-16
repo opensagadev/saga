@@ -151,27 +151,114 @@ static __used__ NUFRUSTRUM *buildFrustrum(NUVEC *minimum, NUVEC *maximum, i16 ro
     return frustum;
 }
 
-static void computePortalExtents(NUPORTAL *portal, NUVEC *minimum, NUVEC *maximum) {
-    NUMTX clip;
+// IPA-SRA passes the portal's vertex pointer and count fields by reference.
+static __attribute__((noinline, noclone)) void computePortalExtents(NUVEC **vertices, i16 *vertex_count,
+                                                                    NUVEC *maximum, NUVEC *minimum)
+    __asm__("_ZL20computePortalExtentsP10nuportal_sP7nuvec_sS2_.isra.89");
+static void computePortalExtents(NUVEC **vertices, i16 *vertex_count, NUVEC *maximum, NUVEC *minimum) {
+    static NUMTX clip;
+    static NUMTX inv_clip_mtx;
     NuCameraGetClipMtx(&clip, NULL);
-    NuVecMtxTransformH(minimum, &portal->vertices[0], &clip);
-    *maximum = *minimum;
-    for (i32 i = 1; i < portal->vertex_count; ++i) {
+    NuMtxInvH(&inv_clip_mtx, &clip);
+    NuVecMtxTransformH(maximum, &(*vertices)[0], &clip);
+    *minimum = *maximum;
+    for (i32 i = 1; i < *vertex_count; ++i) {
         NUVEC point;
-        NuVecMtxTransformH(&point, &portal->vertices[i], &clip);
+        NuVecMtxTransformH(&point, &(*vertices)[i], &clip);
         NuVecMax(maximum, maximum, &point);
         NuVecMin(minimum, minimum, &point);
     }
-    const NUVEC minus_one = {-1.0f, -1.0f, -1.0f};
-    const NUVEC one = {1.0f, 1.0f, 1.0f};
-    NuVecMin(maximum, maximum, const_cast<NUVEC *>(&one));
-    NuVecMax(maximum, maximum, const_cast<NUVEC *>(&minus_one));
-    NuVecMin(minimum, minimum, const_cast<NUVEC *>(&one));
-    NuVecMax(minimum, minimum, const_cast<NUVEC *>(&minus_one));
+    NuVecMin(maximum, maximum, &nuvec_one);
+    NuVecMax(maximum, maximum, &nuvec_minus_one);
+    NuVecMin(minimum, minimum, &nuvec_one);
+    NuVecMax(minimum, minimum, &nuvec_minus_one);
 }
 
 static f32 planeDistance(const NUPLANE &plane, const NUVEC &point) {
     return plane.a * point.x + plane.b * point.y + plane.c * point.z + plane.d;
+}
+
+struct NuPortalLineVertex2D {
+    f32 x, y;
+    f32 unused[2];
+    i32 colour;
+    f32 u, v;
+};
+extern "C" i32 NuRndrLineStrip2d(NuPortalLineVertex2D *vertices, struct numtl_s *material, i32 count);
+
+// Debug view of a clipped portal: its screen rectangle, the rectangle cast onto
+// the portal plane, and rays from there to the next room's walls.  Our
+// roomRecursive's estimated block frequencies make this call site look never
+// executed, so hot/.text keep the speed-optimised body retail has.
+static __attribute__((noinline, noclone, hot, section(".text"))) void drawClippedPortal(NUPORTAL *portal, NUPLANE **planes, u8 *plane_count,
+                                                                 NUVEC *minimum, NUVEC *maximum)
+    __asm__("_ZL17drawClippedPortalP10nuportal_sP8nuroom_sP7nuvec_sS4_i.isra.95");
+static void drawClippedPortal(NUPORTAL *portal, NUPLANE **planes, u8 *plane_count, NUVEC *minimum, NUVEC *maximum) {
+    if (draw_portals == 0)
+        return;
+
+    NUVEC rays[4];
+    NUVEC hits[4];
+    NuCameraRayCast(&rays[0], minimum->x, minimum->y);
+    NuCameraRayCast(&rays[1], minimum->x, maximum->y);
+    NuCameraRayCast(&rays[2], maximum->x, maximum->y);
+    NuCameraRayCast(&rays[3], maximum->x, minimum->y);
+    NuPlnLine3(&portal->plane, &world_campos, &rays[0], &hits[0]);
+    NuPlnLine3(&portal->plane, &world_campos, &rays[1], &hits[1]);
+    NuPlnLine3(&portal->plane, &world_campos, &rays[2], &hits[2]);
+    NuPlnLine3(&portal->plane, &world_campos, &rays[3], &hits[3]);
+    NuCameraUnlock();
+
+    const f32 left = minimum->x * 0.5f + 0.5f;
+    const f32 right = maximum->x * 0.5f + 0.5f;
+    const f32 top = 0.5f - minimum->y * 0.5f;
+    const f32 bottom = 0.5f - maximum->y * 0.5f;
+    NuPortalLineVertex2D lines[8];
+    lines[0].x = left;
+    lines[0].y = top;
+    lines[1].x = left;
+    lines[1].y = bottom;
+    lines[2].x = left;
+    lines[2].y = bottom;
+    lines[3].x = right;
+    lines[3].y = bottom;
+    lines[4].x = right;
+    lines[4].y = bottom;
+    lines[5].x = right;
+    lines[5].y = top;
+    lines[6].x = right;
+    lines[6].y = top;
+    lines[7].x = left;
+    lines[7].y = top;
+    for (i32 i = 0; i < 8; ++i) {
+        lines[i].unused[0] = 1.0f;
+        lines[i].colour = 0xff00;
+    }
+    NuRndrLineStrip2d(lines, NULL, 8);
+
+    NuRndrLine3dDbg(hits[0].x, hits[0].y, hits[0].z, hits[1].x, hits[1].y, hits[1].z, static_cast<i32>(0xff0000ffU));
+    NuRndrLine3dDbg(hits[1].x, hits[1].y, hits[1].z, hits[2].x, hits[2].y, hits[2].z, static_cast<i32>(0xff0000ffU));
+    NuRndrLine3dDbg(hits[2].x, hits[2].y, hits[2].z, hits[3].x, hits[3].y, hits[3].z, static_cast<i32>(0xff0000ffU));
+    NuRndrLine3dDbg(hits[3].x, hits[3].y, hits[3].z, hits[0].x, hits[0].y, hits[0].z, static_cast<i32>(0xff0000ffU));
+
+    NUVEC nearest_point;
+    for (i32 i = 0; i < 4; ++i) {
+        NuVecNorm(&rays[i], &rays[i]);
+        if (*plane_count != 0) {
+            f32 nearest_distance = FLT_MAX;
+            for (i32 plane_index = 0; plane_index < *plane_count; ++plane_index) {
+                NUVEC point;
+                const f32 distance = NuPlnLine3(&(*planes)[plane_index], &hits[i], &rays[i], &point);
+                if (distance > 0.0f && distance < nearest_distance) {
+                    nearest_point = point;
+                    nearest_distance = distance;
+                }
+            }
+        }
+        NuRndrLine3dDbg(nearest_point.x, nearest_point.y, nearest_point.z, hits[i].x, hits[i].y, hits[i].z,
+                        static_cast<i32>(0xff0000ffU));
+    }
+    NuCameraRelock();
 }
 
 static NUFRUSTRUM *buildPortalFrustrum(NUPORTAL *portal, i16 room_id) {
@@ -201,7 +288,7 @@ static NUFRUSTRUM *buildPortalFrustrum(NUPORTAL *portal, i16 room_id) {
         frustum->planes[i].d =
             -(normal.x * camera_position.x + normal.y * camera_position.y + normal.z * camera_position.z);
     }
-    computePortalExtents(portal, &frustum->minimum, &frustum->maximum);
+    computePortalExtents(&portal->vertices, &portal->vertex_count, &frustum->maximum, &frustum->minimum);
     transposeClipPlanes(frustum);
     return frustum;
 }
@@ -289,7 +376,7 @@ static __used__ void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_
             } else {
                 NUVEC portal_minimum;
                 NUVEC portal_maximum;
-                computePortalExtents(portal, &portal_minimum, &portal_maximum);
+                computePortalExtents(&portal->vertices, &portal->vertex_count, &portal_maximum, &portal_minimum);
                 if (frustum->minimum.x >= portal_maximum.x || frustum->minimum.y >= portal_maximum.y ||
                     portal_minimum.x >= frustum->maximum.x || portal_minimum.y >= frustum->maximum.y) {
                     continue;
@@ -298,6 +385,7 @@ static __used__ void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_
                 portal_minimum.y = MAX(portal_minimum.y, frustum->minimum.y);
                 portal_maximum.x = MIN(portal_maximum.x, frustum->maximum.x);
                 portal_maximum.y = MIN(portal_maximum.y, frustum->maximum.y);
+                drawClippedPortal(portal, &next->planes, &next->plane_count, &portal_minimum, &portal_maximum);
                 next_frustum = buildFrustrum(&portal_minimum, &portal_maximum, next_room);
             }
         } else {

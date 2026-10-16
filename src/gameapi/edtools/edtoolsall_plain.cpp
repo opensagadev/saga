@@ -38,6 +38,53 @@
 #include "nu2api/nucore/nuvideo.h"
 #include "nu2api/nufile/nufile.h"
 
+// Retail keeps an unreferenced partial-inlining clone of the old HSV2RGB
+// helper (the non-grey path) in this unit.
+static __attribute__((used, noinline, noclone, regparm(2), sseregparm)) void
+HSV2RGBBody(f32 hue, f32 saturation, f32 value, f32 *red, f32 *green, f32 *blue) __asm__("_ZL7HSV2RGBfffPfS_S_.part.18");
+static void HSV2RGBBody(f32 hue, f32 saturation, f32 value, f32 *red, f32 *green, f32 *blue) {
+    if (hue == 360.0f)
+        hue = 0.0f;
+    hue /= 60.0f;
+    i32 sector = static_cast<i32>(NuFloor(hue));
+    f32 fraction = hue - sector;
+    f32 low = (1.0f - saturation) * value;
+    f32 falling = (1.0f - fraction * saturation) * value;
+    f32 rising = (1.0f - (1.0f - fraction) * saturation) * value;
+    switch (sector) {
+    case 0:
+        *red = value;
+        *green = rising;
+        *blue = low;
+        break;
+    case 1:
+        *red = falling;
+        *green = value;
+        *blue = low;
+        break;
+    case 2:
+        *red = low;
+        *green = value;
+        *blue = rising;
+        break;
+    case 3:
+        *red = low;
+        *green = falling;
+        *blue = value;
+        break;
+    case 4:
+        *red = rising;
+        *green = low;
+        *blue = value;
+        break;
+    case 5:
+        *red = value;
+        *green = low;
+        *blue = falling;
+        break;
+    }
+}
+
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
@@ -178,7 +225,10 @@ static inline void eduiSetFontColour(NUQFNT *font, u32 colour) {
 
 // The original local font helpers read the same private draw state as the
 // editor callbacks, so they belong to this translation unit.
-static __used__ void eduiFntPrintEx(void *font, int x, int y, int alignment, char *format, ...) {
+static __used__ __attribute__((noclone)) void eduiFntPrintExGeneric(void *font, int x, int y,
+                                                                                int alignment, char *format, ...)
+    __asm__("_ZL14eduiFntPrintExPviiiPcz");
+static __used__ void eduiFntPrintExGeneric(void *font, int x, int y, int alignment, char *format, ...) {
     if (edui_donotdraw) {
         return;
     }
@@ -189,13 +239,38 @@ static __used__ void eduiFntPrintEx(void *font, int x, int y, int alignment, cha
     NuVSPrintf(text, format, arguments);
     va_end(arguments);
     i32 width = static_cast<i32>(NuQFntPrintLenU(font, text));
-    if (alignment == 32)
-        x -= width;
-    else if (alignment == 64)
-        x -= width / 2;
-    NuQFntMove(font, x, y, 0.0f);
+    i32 left = x;
+    switch (alignment) {
+    case 32:
+        left = x - width;
+        break;
+    case 64:
+        left = x - width / 2;
+        break;
+    }
+    NuQFntMove(font, left, y, 0.0f);
     NuQFntPrintU(font, text);
     NuQFntPopPrintMode();
+}
+
+// Left-aligned (16) specialisation of the integer print helper.
+static __attribute__((noclone)) void eduiFntPrintExLeft(void *font, int x, int y, int alignment,
+                                                                  char *format, ...)
+    __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.67");
+
+// Centred (64) specialisation of the integer print helper.
+static __attribute__((noclone)) void eduiFntPrintExCentre(void *font, int x, int y, int alignment,
+                                                                    char *format, ...)
+    __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.68");
+
+static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int x, int y, int alignment,
+                                                                 char *format, ...) {
+    if (__builtin_constant_p(alignment) && alignment == 16)
+        eduiFntPrintExLeft(font, x, y, alignment, format, __builtin_va_arg_pack());
+    else if (__builtin_constant_p(alignment) && alignment == 64)
+        eduiFntPrintExCentre(font, x, y, alignment, format, __builtin_va_arg_pack());
+    else
+        eduiFntPrintExGeneric(font, x, y, alignment, format, __builtin_va_arg_pack());
 }
 
 static void eduiFntPrintEx(void *font, float x, float y, int alignment, char *format, ...) {
@@ -204,6 +279,11 @@ static void eduiFntPrintEx(void *font, float x, float y, int alignment, char *fo
     eduiFntPrintEx(font, static_cast<i32>(x * 16.0f), static_cast<i32>(y * 8.0f), alignment, format, arguments);
     va_end(arguments);
 }
+
+// Only caller prints the property edit buffer left-aligned.
+static __attribute__((noinline, noclone)) void eduiFntPrintExEditBuffer(void *font, float x, float y, int alignment,
+                                                                        char *format, ...)
+    __asm__("_ZL14eduiFntPrintExPvffiPcz.constprop.66");
 
 static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignment, float clip_x, float clip_width,
                                         char *format, ...) {
@@ -239,36 +319,36 @@ static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignm
         NuQFntPopPrintMode();
     }
 }
-static void eduiFntPrintClipEx(void *font, i32 x, i32 y, i32 alignment, i32 clip_x, i32 clip_width, char *format, ...) {
-    if (edui_donotdraw)
-        return;
-
-    char text[1024];
-    NuQFntPushPrintMode(2);
+// Only eduiMenuRender calls the integer clip helper, always left-aligned.
+static __attribute__((noinline, noclone)) void eduiFntPrintClipEx(void *font, i32 x, i32 y, i32 alignment, i32 clip_x,
+                                                                  i32 clip_width, char *format, ...)
+    __asm__("_ZL18eduiFntPrintClipExPviiiiiPcz.constprop.70");
+static void eduiFntPrintClipEx(void *font, i32 x, i32 y, i32, i32 clip_x, i32 clip_width, char *format, ...) {
     va_list arguments;
-    va_start(arguments, format);
-    NuVSPrintf(text, format, arguments);
-    va_end(arguments);
-    i32 width = static_cast<i32>(NuQFntPrintLenU(font, text));
-    if (alignment == 32)
-        x -= width;
-    else if (alignment == 64)
-        x -= width / 2;
-    if (x < clip_x)
-        x = clip_x;
-    i32 length = NuStrLen(text);
-    if (width > clip_width) {
-        char *end = text + length - 1;
-        while (end > text) {
-            *end-- = '\0';
-            width = static_cast<i32>(NuQFntPrintLenU(font, text));
-            if (width <= clip_width)
-                break;
+    if (!edui_donotdraw) {
+        char text[1024] __attribute__((aligned(16)));
+        NuQFntPushPrintMode(2);
+
+        va_start(arguments, format);
+        NuVSPrintf(text, format, arguments);
+        va_end(arguments);
+        i32 width = static_cast<i32>(NuQFntPrintLenU(font, text));
+        if (x < clip_x)
+            x = clip_x;
+        i32 length = NuStrLen(text);
+        if (width > clip_width) {
+            char *end = text + length - 1;
+            if (end > text) {
+                do {
+                    *end-- = '\0';
+                    width = static_cast<i32>(NuQFntPrintLenU(font, text));
+                } while (width > clip_width && end != text);
+            }
         }
+        NuQFntMove(font, x, y, 0.0f);
+        NuQFntPrintU(font, text);
+        NuQFntPopPrintMode();
     }
-    NuQFntMove(font, static_cast<f32>(x), static_cast<f32>(y), 0.0f);
-    NuQFntPrintU(font, text);
-    NuQFntPopPrintMode();
 }
 static i32 show_x_scale_help;
 static i32 show_y_scale_help;
@@ -5940,32 +6020,58 @@ extern "C" {
         }
         return height;
     }
+    // Retail keeps this as the constant-propagated clone of the generic four-step
+    // gradient helper; only the hue/value colour picker band reaches it.
+    static void eduiDrawHueValueBand(i32 x, i32 y, i32 width, i32 height, f32 start, f32 end, u32 first, u32 second)
+        __asm__("_ZL19eduiDrawGrad4StepsViiiiffiiiii.constprop.59");
+    static i32 edui_grad_steps = 8;
     static void eduiDrawHueValueBand(i32 x, i32 y, i32 width, i32 height, f32 start, f32 end, u32 first, u32 second) {
         i32 left = (x << 4) + static_cast<i32>(start * static_cast<f32>(width << 4));
         i32 band_width = static_cast<i32>(end * static_cast<f32>(width << 4)) -
                          static_cast<i32>(start * static_cast<f32>(width << 4));
         i32 strip_height = (height << 3) / 8;
-        i32 colours[4] = {static_cast<i32>(0x80000000u), static_cast<i32>(0x80000000u), static_cast<i32>(0x80000000u),
-                          static_cast<i32>(0x80000000u)};
-        eduiDrawGradRect(left, y << 3, band_width, strip_height, colours, uimtls[ui_bgmtl]);
+        i32 first_red = first & 0xff;
+        i32 first_green = (first >> 8) & 0xff;
+        i32 first_blue = (first >> 16) & 0xff;
+        i32 first_alpha = static_cast<i32>(first >> 24) - 0x80;
+        i32 second_red = second & 0xff;
+        i32 second_green = (second >> 8) & 0xff;
+        i32 second_blue = (second >> 16) & 0xff;
+        i32 second_alpha = static_cast<i32>(second >> 24) - 0x80;
+        struct {
+            i32 top_left;
+            i32 top_right;
+            u8 bottom_left[4];
+            u8 bottom_right[4];
+        } colours;
+        colours.top_left = static_cast<i32>(0x80000000u);
+        colours.top_right = static_cast<i32>(0x80000000u);
 #define EDUI_DRAW_VALUE_STRIP(strip)                                                                                   \
     {                                                                                                                  \
-        colours[0] = colours[2];                                                                                       \
-        colours[1] = colours[3];                                                                                       \
-        u8 *bottom_left = reinterpret_cast<u8 *>(&colours[2]);                                                         \
-        u8 *bottom_right = reinterpret_cast<u8 *>(&colours[3]);                                                        \
-        bottom_left[0] = ((first & 0xff) * (strip)) / 8;                                                               \
-        bottom_left[1] = (((first >> 8) & 0xff) * (strip)) / 8;                                                        \
-        bottom_left[2] = (((first >> 16) & 0xff) * (strip)) / 8;                                                       \
-        bottom_left[3] = 0x80 + ((static_cast<i32>(first >> 24) - 0x80) * (strip)) / 8;                                \
-        bottom_right[0] = ((second & 0xff) * (strip)) / 8;                                                             \
-        bottom_right[1] = (((second >> 8) & 0xff) * (strip)) / 8;                                                      \
-        bottom_right[2] = (((second >> 16) & 0xff) * (strip)) / 8;                                                     \
-        bottom_right[3] = 0x80 + ((static_cast<i32>(second >> 24) - 0x80) * (strip)) / 8;                              \
-        if (!edui_donotdraw)                                                                                           \
-            NuRndrGradRect2di(left, (y << 3) + (strip) * strip_height, band_width, strip_height, colours,              \
-                              uimtls[ui_bgmtl]);                                                                       \
+        u8 *bottom_left = colours.bottom_left;                                                                         \
+        u8 *bottom_right = colours.bottom_right;                                                                       \
+        i32 first_red_step = first_red * (strip);                                                                      \
+        i32 first_green_step = first_green * (strip);                                                                  \
+        i32 first_blue_step = first_blue * (strip);                                                                    \
+        i32 first_alpha_step = first_alpha * (strip);                                                                  \
+        i32 second_red_step = second_red * (strip);                                                                    \
+        i32 second_green_step = second_green * (strip);                                                                \
+        i32 second_blue_step = second_blue * (strip);                                                                  \
+        i32 second_alpha_step = second_alpha * (strip);                                                                \
+        bottom_left[0] = first_red_step / edui_grad_steps;                                                                    \
+        bottom_left[1] = first_green_step / edui_grad_steps;                                                                  \
+        bottom_left[2] = first_blue_step / edui_grad_steps;                                                                   \
+        bottom_left[3] = 0x80 + first_alpha_step / edui_grad_steps;                                                           \
+        bottom_right[0] = second_red_step / edui_grad_steps;                                                                  \
+        bottom_right[1] = second_green_step / edui_grad_steps;                                                                \
+        bottom_right[2] = second_blue_step / edui_grad_steps;                                                                 \
+        bottom_right[3] = 0x80 + second_alpha_step / edui_grad_steps;                                                         \
+        eduiDrawGradRect(left, (y << 3) + (strip) * strip_height, band_width, strip_height,                            \
+                         reinterpret_cast<i32 *>(&colours), uimtls[ui_bgmtl]);                                         \
+        colours.top_left = *reinterpret_cast<i32 *>(colours.bottom_left);                                              \
+        colours.top_right = *reinterpret_cast<i32 *>(colours.bottom_right);                                            \
     }
+        EDUI_DRAW_VALUE_STRIP(0);
         EDUI_DRAW_VALUE_STRIP(1);
         EDUI_DRAW_VALUE_STRIP(2);
         EDUI_DRAW_VALUE_STRIP(3);
@@ -6441,7 +6547,7 @@ extern "C" {
                               static_cast<i32>((draw_y + height) * 8.0f), divider_colour, uimtls[0]);
             eduiFntPrintClipEx(edui_font, draw_x + indentation, draw_y + baseline, 16, draw_x - indentation,
                                property->label_width, item->text);
-            eduiFntPrintEx(edui_font, draw_x + property->label_width + 2.0f, draw_y + baseline, 16, eduiPropTextEdit);
+            eduiFntPrintExEditBuffer(edui_font, draw_x + property->label_width + 2.0f, draw_y + baseline, 16, eduiPropTextEdit);
 
             NuStrNCpy(prefix, eduiPropTextEdit, eduiPropTextPos + 1);
             prefix[eduiPropTextPos + 1] = '\0';
@@ -6543,11 +6649,11 @@ extern "C" {
         eduiDrawFontSet(edui_font);
         eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         if (item->text_alignment == 16)
-            eduiFntPrintEx(edui_font, x << 4, (y << 3) + baseline, 16, item->text);
+            eduiFntPrintExGeneric(edui_font, x << 4, (y << 3) + baseline, 16, item->text);
         else if (item->text_alignment == 32)
-            eduiFntPrintEx(edui_font, (x + width) << 4, (y << 3) + baseline, 32, item->text);
+            eduiFntPrintExGeneric(edui_font, (x + width) << 4, (y << 3) + baseline, 32, item->text);
         else
-            eduiFntPrintEx(edui_font, (x * 2 + width) << 3, (y << 3) + baseline, item->text_alignment, item->text);
+            eduiFntPrintExGeneric(edui_font, (x * 2 + width) << 3, (y << 3) + baseline, item->text_alignment, item->text);
         return height;
     }
     static __used__ i32 eduicbRenderSelWithClipColour(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width,
@@ -6835,4 +6941,45 @@ extern "C" {
         eduiMenuDetach(menu);
         eduiMenuDestroy(menu);
     }
+}
+
+static void eduiFntPrintExLeft(void *font, int x, int y, int, char *format, ...) {
+    if (edui_donotdraw) {
+        return;
+    }
+    char text[1024] __attribute__((aligned(16)));
+    NuQFntPushPrintMode(2);
+    va_list arguments;
+    va_start(arguments, format);
+    NuVSPrintf(text, format, arguments);
+    va_end(arguments);
+    NuQFntPrintLenU(font, text);
+    NuQFntMove(font, x, y, 0.0f);
+    NuQFntPrintU(font, text);
+    NuQFntPopPrintMode();
+}
+
+static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ...) {
+    if (edui_donotdraw) {
+        return;
+    }
+    char text[1024] __attribute__((aligned(16)));
+    NuQFntPushPrintMode(2);
+    va_list arguments;
+    va_start(arguments, format);
+    NuVSPrintf(text, format, arguments);
+    va_end(arguments);
+    i32 width = static_cast<i32>(NuQFntPrintLenU(font, text));
+    x -= width / 2;
+    NuQFntMove(font, x, y, 0.0f);
+    NuQFntPrintU(font, text);
+    NuQFntPopPrintMode();
+}
+
+static void eduiFntPrintExEditBuffer(void *font, float x, float y, int, char *format, ...) {
+    va_list arguments;
+    va_start(arguments, format);
+    eduiFntPrintExLeft(font, static_cast<i32>(x * 16.0f), static_cast<i32>(y * 8.0f), 16, eduiPropTextEdit,
+                       arguments);
+    va_end(arguments);
 }

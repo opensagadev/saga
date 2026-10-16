@@ -1890,6 +1890,7 @@ bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, fl
 }
 
 i32 (*LastSafePosExtraFn)(GameObject_s *) = NULL;
+void (*GameObjectDimensionsExtraFn)(GameObject_s *) = NULL;
 
 void CheckForPlayersTurnedOff() {
     for (i32 source_index = 0; source_index < 2; ++source_index) {

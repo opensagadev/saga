@@ -58,7 +58,8 @@ bool ValidateShaderProgram(u32 program) {
 }
 
 // Original specialized bodies: 360 bytes at 0x2a5390 and 412 bytes at 0x2a5500.
-static i32 GetHLSLRegisterIndex(const char *source, const char *uniform_name, bool texture) {
+static inline __attribute__((always_inline)) i32 GetHLSLRegisterIndexImpl(const char *source, const char *uniform_name,
+                                                                          bool texture) {
     char search_name[256];
     sprintf(search_name, "_%s ", uniform_name + 1);
     const char *constants = strstr(source, "//NU2API CONSTANTS :");
@@ -76,7 +77,9 @@ static i32 GetHLSLRegisterIndex(const char *source, const char *uniform_name, bo
     } else if (NuToUpper(static_cast<u8>(*number)) == 'C') {
         ++number;
     }
-    if (!isdigit(static_cast<unsigned char>(*number))) {
+    // Bionic's NDEBUG inline isdigit, including its EOF test.
+    const i32 digit = *number;
+    if (digit == -1 || ((_ctype_ + 1)[static_cast<u8>(digit)] & 0x04) == 0) {
         return -1;
     }
     i32 index = NuAToI(const_cast<char *>(number));
@@ -95,6 +98,23 @@ static i32 GetHLSLRegisterIndex(const char *source, const char *uniform_name, bo
     return -1;
 }
 
+// BuildRegisterIndexToUniformLocationMapping's static uniform name buffer;
+// both retail constprop clones read it directly.
+static char build_uniform_name[256]
+    __asm__("_ZZL42BuildRegisterIndexToUniformLocationMappingP17nushaderprogram_sPKcS2_E11uniformName");
+
+static __attribute__((noinline, noclone)) i32 GetHLSLConstantRegisterIndex(const char *source)
+    __asm__("_ZL20GetHLSLRegisterIndexPKcS0_b.constprop.25");
+static i32 GetHLSLConstantRegisterIndex(const char *source) {
+    return GetHLSLRegisterIndexImpl(source, build_uniform_name, false);
+}
+
+static __attribute__((noinline, noclone)) i32 GetHLSLUniformRegisterIndex(const char *source, bool texture)
+    __asm__("_ZL20GetHLSLRegisterIndexPKcS0_b.constprop.26");
+static i32 GetHLSLUniformRegisterIndex(const char *source, bool texture) {
+    return GetHLSLRegisterIndexImpl(source, build_uniform_name, texture);
+}
+
 NUSHADERPROGRAM *g_currentShaderProgram = nullptr;
 extern "C" {
     NUSHADERPROGRAMPARAMETER g_uniformParameterRecordStorage[1024];
@@ -107,7 +127,7 @@ template <typename First, typename Second> struct Pair {
 };
 static void BuildRegisterIndexToUniformLocationMapping(NUSHADERPROGRAM *result, const char *vertex_source,
                                                        const char *fragment_source) {
-    static char uniformName[256];
+    char *uniformName = build_uniform_name;
     glGetProgramiv(result->program, GL_ACTIVE_UNIFORMS, &result->parameter_count);
     if (result->parameter_count != 0) {
         result->parameters = &g_uniformParameterRecordStorage[g_uniformParameterRecordAllocator];
@@ -120,17 +140,17 @@ static void BuildRegisterIndexToUniformLocationMapping(NUSHADERPROGRAM *result, 
     for (i32 i = 0; i < result_parameter_count; ++i) {
         GLint count;
         GLenum type;
-        glGetActiveUniform(result->program, i, sizeof(uniformName), NULL, &count, &type, uniformName);
+        glGetActiveUniform(result->program, i, sizeof(build_uniform_name), NULL, &count, &type, uniformName);
         char *array_suffix = strchr(uniformName, '[');
         if (array_suffix != NULL) {
             *array_suffix = '\0';
         }
 
         NUSHADERPROGRAMPARAMETER *parameter = &result->parameters[i - removed];
-        i32 register_index = GetHLSLRegisterIndex(vertex_source, uniformName, false);
+        i32 register_index = GetHLSLConstantRegisterIndex(vertex_source);
         u16 stage_flag = 0;
         if (register_index == -1) {
-            register_index = GetHLSLRegisterIndex(fragment_source, uniformName, false);
+            register_index = GetHLSLConstantRegisterIndex(fragment_source);
             stage_flag = 0x8000;
         }
         parameter->register_index = stage_flag | static_cast<u16>(register_index);
@@ -139,7 +159,7 @@ static void BuildRegisterIndexToUniformLocationMapping(NUSHADERPROGRAM *result, 
         if (type_info == NULL) {
             ++removed;
         } else if (type_info->parameter_type == 4) {
-            const i32 texture_unit = GetHLSLRegisterIndex(fragment_source, uniformName, true);
+            const i32 texture_unit = GetHLSLUniformRegisterIndex(fragment_source, true);
             if (texture_unit != -1) {
                 const GLint location = glGetUniformLocation(result->program, uniformName);
                 glUseProgram(result->program);

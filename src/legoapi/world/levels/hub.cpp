@@ -2154,7 +2154,13 @@ bool HubCustomiserUnlocked() {
 
 // All recovered callers use player zero and full opacity. Keeping this private
 // allows the compiler to specialize those constant arguments naturally.
-static void Hub_DrawIconCursors(COLLECTION_s *collection, i32 player, f32 scale, f32 alpha) {
+// Retail only keeps the player-one, full-alpha specialisation of the cursor
+// drawing body; its name records the partial-inlining and constprop clones.
+static __attribute__((noinline, noclone)) void Hub_DrawIconCursors(COLLECTION_s *collection, f32 scale)
+    __asm__("_ZL19Hub_DrawIconCursorsP12COLLECTION_siff.part.9.constprop.51");
+static void Hub_DrawIconCursors(COLLECTION_s *collection, f32 scale) {
+    const i32 player = 0;
+    const f32 alpha = 1.0f;
     i32 model = MenuPacket.player_model[player];
     const i32 index = InCollectList_Index(model, collection->list, collection->count_y);
     if (index == -1)
@@ -2306,14 +2312,14 @@ void Hub_DrawFreePlaySelect() {
             (COLLECTION_Y_HUB + offset) * NU_SIN_LUT(static_cast<i32>((freeplaytime / freeplayduration) * 16384.0f)) -
             offset;
         Collection_Draw(collection, 0.0f, y, collection->field_10, list, 1.0f, 1);
-        Hub_DrawIconCursors(collection, 0, 1.0f, 1.0f);
+        Hub_DrawIconCursors(collection, 1.0f);
         return;
     }
     if (freeplaymode == 1) {
         list[0].model_id = MenuPacket.player_model[0];
         list[1].model_id = -1;
         Collection_Draw(collection, 0.0f, COLLECTION_Y_HUB, collection->field_10, list, 1.0f, 1);
-        Hub_DrawIconCursors(collection, 0, 1.0f, 1.0f);
+        Hub_DrawIconCursors(collection, 1.0f);
         i32 status = -1, select = -1, cancel = -1;
         if (freeplay_selected[0] == 0 && freeplay_time[0] <= 0.0f) {
             select = tSELECT;
@@ -2344,7 +2350,7 @@ void Hub_DrawFreePlaySelect() {
                 alpha = 1.0f - freeplaytime / (freeplayduration - 0.1f);
             Collection_Draw(collection, 0.0f, COLLECTION_Y_HUB, collection->field_10, list, alpha, 1);
             if (alpha >= 0.0f)
-                Hub_DrawIconCursors(collection, 0, alpha, 1.0f);
+                Hub_DrawIconCursors(collection, alpha);
         }
         return;
     }

@@ -108,7 +108,9 @@ void CalcSplinePointFromDist(flightspline_s *, _vuv_s *, float);
 
 // --- File-local layout types -----------------------------------------------
 
-static void RacePodAlign(racepod_s *pod, _vuv_s *direction, float amount, i32 mode);
+// Every caller passes mode 0, so retail keeps only this constprop clone.
+static __attribute__((noinline, noclone)) void RacePodAlign(racepod_s *pod, _vuv_s *direction, float amount)
+    __asm__("_ZL12RacePodAlignP9racepod_sP6_vuv_sfi.constprop.39");
 
 // Pacemaker display data stored at LevObjs[0] for the pacemaker object.
 struct PACEMAKERDATA_s {
@@ -328,7 +330,7 @@ static void *CreatePodRaceMine(nuvec_s *pos) {
     return entry;
 }
 
-static void RacePodAlign(racepod_s *pod, _vuv_s *direction, float blend, i32) {
+static void RacePodAlign(racepod_s *pod, _vuv_s *direction, float blend) {
     NUVEC local __attribute__((aligned(16)));
     NuVecInvMtxRotate(&local, (NUVEC *)direction, &pod->matrix);
     i32 yaw = (i16)NuAtan2D(local.x, local.z);
@@ -409,31 +411,41 @@ static inline void PodSprint_InitAISpline(WORLDINFO_s *world, PODSPRINT_AISPLINE
     }
 }
 
-static void UpdatePacemakerDisplay(WORLDINFO_s *world) {
+// UpdatePacemakerDisplay is inlined into its callers apart from the message
+// update, which retail keeps as the split-out body of the IPA-SRA clone (it
+// only needs &world->lev_objs).
+static __attribute__((noinline, noclone)) void UpdatePacemakerDisplayBody(LEVEL_OBJECT_RUNTIME_s **lev_objs) __asm__(
+    "_ZL22UpdatePacemakerDisplayP11WORLDINFO_s.isra.7.part.8");
+
+static void UpdatePacemakerDisplayBody(LEVEL_OBJECT_RUNTIME_s **lev_objs) {
+    GameObject_s *pacemaker = pod_pacemaker;
+    float v[3];
+    v[0] = pacemaker->apiobj.field_0x190;
+    v[1] = 0.75f + pacemaker->apiobj.field_0x194;
+    v[2] = pacemaker->apiobj.field_0x198;
+    GAMEMESSAGE_s *msg =
+        (GAMEMESSAGE_s *)AddGameMessage(" ", (nuvec_s *)v, 0.08f, NULL, 0.0f, 0xff, 0x3f, 0x3f, 0x10083, 0);
+    if (msg != NULL) {
+        i32 idx = ((i32)(16384.0f * pod_pacemaker_alpha) >> 1) & 0x7fff;
+        msg->alpha = (u8)(128.0f * pacemaker_alpha_table[idx]);
+        msg->icon = 0x134;
+        PACEMAKERDATA_s *data = (PACEMAKERDATA_s *)*lev_objs;
+        if (data->enabled != 0) {
+            msg->color1 = data->color1;
+            msg->color2 = data->color2;
+            msg->color3 = data->color3;
+        }
+    }
+}
+
+static inline void UpdatePacemakerDisplay(WORLDINFO_s *world) {
     if (pod_pacemaker != NULL) {
         if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
             pod_pacemaker_alpha += FRAMETIME + FRAMETIME;
             if (pod_pacemaker_alpha > 1.0f)
                 pod_pacemaker_alpha = 1.0f;
             if (NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f) {
-                GameObject_s *pacemaker = pod_pacemaker;
-                float v[3];
-                v[0] = pacemaker->apiobj.field_0x190;
-                v[1] = 0.75f + pacemaker->apiobj.field_0x194;
-                v[2] = pacemaker->apiobj.field_0x198;
-                GAMEMESSAGE_s *msg =
-                    (GAMEMESSAGE_s *)AddGameMessage(" ", (nuvec_s *)v, 0.08f, NULL, 0.0f, 0xff, 0x3f, 0x3f, 0x10083, 0);
-                if (msg != NULL) {
-                    i32 idx = ((i32)(16384.0f * pod_pacemaker_alpha) >> 1) & 0x7fff;
-                    msg->icon = 0x134;
-                    msg->alpha = (u8)(128.0f * pacemaker_alpha_table[idx]);
-                    PACEMAKERDATA_s *data = (PACEMAKERDATA_s *)world->lev_objs;
-                    if (data->enabled != 0) {
-                        msg->color1 = data->color1;
-                        msg->color2 = data->color2;
-                        msg->color3 = data->color3;
-                    }
-                }
+                UpdatePacemakerDisplayBody(&world->lev_objs);
             }
         } else {
             pod_pacemaker_alpha = 0.0f;
@@ -869,7 +881,7 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
                 pod->matrix.m30 += direction.x;
                 pod->matrix.m31 += direction.y;
                 pod->matrix.m32 += direction.z;
-                RacePodAlign(pod, &direction, length / 5.0f, 0);
+                RacePodAlign(pod, &direction, length / 5.0f);
                 pod->previous_displacement = direction;
             }
             object = pod->object;
@@ -1330,7 +1342,7 @@ i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **
     pod->matrix.m33 = position.w;
     _vuv_s direction __attribute__((aligned(16))) = {next_position.x - position.x, next_position.y - position.y,
                                                      next_position.z - position.z, 0.0f};
-    RacePodAlign(pod, &direction, 1.0f, 0);
+    RacePodAlign(pod, &direction, 1.0f);
     pod->previous_axis = {0.0f, 0.0f, 0.0f, 1.0f};
     pod->previous_position = position;
     pod->distance = start;

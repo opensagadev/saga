@@ -45,7 +45,7 @@ static void pathEditorCalcRouteIterator(AIPATH_s *path, f32 *distances, u8 *visi
 
 static __used__ f32 **pathEditorCalculateDistanceTable(AIPATH_s *path, i32 route_mask, variptr_u *cursor,
                                                        variptr_u *end) {
-    if (distance_tables == 0 || path->nodes == nullptr) {
+    if (distance_tables == 0 || path == nullptr || path->nodes == nullptr) {
         return nullptr;
     }
     f32 **table = (f32 **)AISysBufferAlloc(cursor, end, path->node_count * sizeof(f32 *));

@@ -897,10 +897,12 @@ void MovePlayer(GameObject_s *object) {
                         pad->input_mode = 2;
                     }
                 }
-                x *= 0.007843137718737125f;
-                z *= 0.007843137718737125f;
-                NUANG angle = NuAtan2D(x, z);
-                NUVEC input, axis = {0.0f, 0.0f, fabsf(x) > fabsf(z) ? fabsf(x) : fabsf(z)};
+                NUVEC input;
+                input.x = x * 0.007843137718737125f;
+                input.z = z * 0.007843137718737125f;
+                NUANG angle = NuAtan2D(input.x, input.z);
+                NUVEC axis = {0.0f, 0.0f,
+                              fabsf(input.x) > fabsf(input.z) ? fabsf(input.x) : fabsf(input.z)};
                 NuVecRotateY(&input, &axis, angle);
                 f32 magnitude = NuFsqrt(input.x * input.x + input.z * input.z);
                 ShiftPadDirectionHistory(object, pad);
@@ -1340,11 +1342,12 @@ void Move_HOVERDROID(GameObject_s *object) {
 void MovePlayerSpline(GameObject_s *object) {
     APIOBJECT_s &api = object->apiobj;
     api.field_0x214 = api.field_0x218;
+    GAMEPAD_s *pad = object->pad_gamepad;
     api.start_position = api.position;
     api.initial_position = api.collision_position;
     api.field_0x27e = api.field_0x27d;
-    object->pad_gamepad->previous_input_angle = object->pad_gamepad->input_angle;
-    object->pad_gamepad->previous_input_magnitude = object->pad_gamepad->input_magnitude;
+    pad->previous_input_angle = pad->input_angle;
+    pad->previous_input_magnitude = pad->input_magnitude;
     object->previous_movement_angle = api.field_0x276;
     object->field_0xefd &= ~0x40;
 
@@ -1519,6 +1522,7 @@ f32 speeder_offset_speed = 2.0f;
 extern f32 GetVehicleSpeedMul(GameObject_s *, f32);
 
 void Move_SPEEDERBIKE(GameObject_s *object) {
+    GAMEPAD_s *pad = object->pad_gamepad;
     PreResetCode(object);
     KeepWeaponOut(object);
     DropInOutCode(object);
@@ -1529,17 +1533,17 @@ void Move_SPEEDERBIKE(GameObject_s *object) {
     GAMECHARACTERDATA *vehicle = object->apiobj.character_data->game_character;
     if (vehicle->field_0x28 > 0.0f && (vehicle->flags_090 & 0x10000) == 0 &&
         (WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks == 0)) {
-        LoopCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP,
-                 object->pad_gamepad->buttons_held & GAMEPAD_JUMP, object->pad_gamepad, 1);
-        TurnCode(object, 0, object->pad_gamepad);
+        LoopCode(object, pad->buttons_pressed & GAMEPAD_JUMP,
+                 pad->buttons_held & GAMEPAD_JUMP, pad, 1);
+        TurnCode(object, 0, pad);
     }
     DeactivatedCode(object);
     if ((object->apiobj.character_data->model_flags & 0x10000000) != 0) {
-        FireCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION,
-                 object->pad_gamepad->buttons_held & GAMEPAD_ACTION, 0.2f, 0);
+        FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION,
+                 pad->buttons_held & GAMEPAD_ACTION, 0.2f, 0);
     }
 
-    f32 speed = GetVehicleSpeedMul(object, object->pad_gamepad->input_magnitude);
+    f32 speed = GetVehicleSpeedMul(object, pad->input_magnitude);
     f32 target = speed <= 1.0f ? speed * 0.75f + 0.75f : 1.5f;
     object->thrust_effect_scale =
         SeekValF(object->thrust_effect_scale, target, object->thrust_effect_scale < target ? 8.0f : 3.0f);
@@ -5109,10 +5113,18 @@ static void SwipeCode(GameObject_s *object, i32 pressed, i32 held) {
 static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 action_held, i32 jump_pressed,
                                 i32 buttons_pressed) {
     ANIMPACKET_s &animation = object->apiobj.anim_packet;
-    if ((object->apiobj.flags_low & 0x80) != 0)
-        object->ai_combo_cooldown = 0.0f;
-    else if (object->ai_combo_cooldown > 0.0f)
-        object->ai_combo_cooldown -= FRAMETIME;
+    const u8 player_active = object->apiobj.flags_low & 0x80;
+    f32 cooldown;
+    if (player_active != 0) {
+        cooldown = 0.0f;
+        object->ai_combo_cooldown = cooldown;
+    } else {
+        cooldown = object->ai_combo_cooldown;
+        if (cooldown > 0.0f) {
+            cooldown -= FRAMETIME;
+            object->ai_combo_cooldown = cooldown;
+        }
+    }
     const u8 previous_context_flags = object->context_flags;
     object->context_flags &= ~2;
     if (object->character_context == CHARACTER_CONTEXT_COMBO) {
@@ -5129,27 +5141,13 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                     ComboJump(object);
                 }
             } else {
-                const i32 stage = object->combo_stage == 1 ? 2 : 1;
-                SetComboOpponent(object, 1.0f, 1, 0);
-                object->combo_stage = stage;
-                object->context_flags &= ~4;
-                if (object->id != id_IMPERIALGUARD)
-                    PlaySabreSfx(NULL, object, NULL, 1);
-                if (stage == 2)
+                if (object->combo_stage == 1) {
+                    SetComboOpponent(object, 1.0f, 1, 0);
+                    object->context_flags &= ~4;
+                    object->combo_stage = 2;
+                    if (object->id != id_IMPERIALGUARD)
+                        PlaySabreSfx(NULL, object, NULL, 1);
                     NewRumble(object->pad_gamepad->pad, 0.35f, 0);
-                if (stage == 1) {
-                    object->combo_branch =
-                        (object->field_0xe20 & 0x40) != 0 &&
-                                JediHasAction(object, static_cast<JEDI_ACTION>(object->queued_context_animation + 2))
-                            ? 2
-                            : 1;
-                    if (object->combo_branch == 1)
-                        object->field_0xe20 &= ~0x40;
-                    NewRumble(object->pad_gamepad->pad, object->combo_branch == 2 ? 0.5f : 0.35f, 0);
-                    if (object->combo_branch == 2 && object->id != id_IMPERIALGUARD) {
-                        PlaySabreSfx("ComboSaber2", object, &object->apiobj.collision_position, 0);
-                    }
-                } else {
                     if (object->combo_branch == 1) {
                         object->combo_branch =
                             (object->field_0xe20 & 0x40) != 0 &&
@@ -5174,6 +5172,23 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                                 PlaySabreSfx("ComboSaber1", object, &object->apiobj.collision_position, 0);
                             }
                         }
+                    }
+                } else {
+                    SetComboOpponent(object, 1.0f, 1, 0);
+                    object->context_flags &= ~4;
+                    object->combo_stage = 1;
+                    if (object->id != id_IMPERIALGUARD)
+                        PlaySabreSfx(NULL, object, NULL, 1);
+                    if ((object->field_0xe20 & 0x40) != 0 &&
+                        JediHasAction(object, static_cast<JEDI_ACTION>(object->queued_context_animation + 2))) {
+                        object->combo_branch = 2;
+                        NewRumble(object->pad_gamepad->pad, 0.5f, 0);
+                        if (object->id != id_IMPERIALGUARD)
+                            PlaySabreSfx("ComboSaber2", object, &object->apiobj.collision_position, 0);
+                    } else {
+                        object->field_0xe20 &= ~0x40;
+                        object->combo_branch = 1;
+                        NewRumble(object->pad_gamepad->pad, 0.35f, 0);
                     }
                 }
                 object->context_animation = object->queued_context_animation + object->combo_branch;
@@ -5260,8 +5275,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
 
     {
         const i8 context = object->character_context;
-        const bool player_active = object->apiobj.player_controlled;
-        if (action_pressed == 0 || (!player_active && object->ai_combo_cooldown > 0.0f) || context == 0x15 ||
+        if (action_pressed == 0 || (!player_active && cooldown > 0.0f) || context == 0x15 ||
             context == 0x5a || context == 0x13 || context == 0x2e ||
             (!player_active && static_cast<u8>(context - 6) < 2) || context == 8 || context == 0x1b ||
             context == 0x2d || context == 0xf || context == 0x27 || context == 0x28 || context == 0x59 ||
@@ -5298,7 +5312,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
             } else {
                 FastWeaponOut(object, 1);
             }
-            goto combo_finished;
+            return;
         }
         if ((object->field_0xe20 & 4) != 0 || (!player_active && object->weapon_scale_state != 0) ||
             object->apiobj.field_0x27d == 0 ||
@@ -8152,7 +8166,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
 
     const u8 player_flag = object->apiobj.flags_low & 0x80;
     i32 flip_kind = 0;
-    bool force_flip = false;
+    i32 force_flip = -1; // set to 1 when a restarted jump should flip
     if (player_flag != 0 || (object->field_0xef9 & 1) != 0) {
         if (LEGOACT_BACKFLIP != -1 && object->apiobj.character_model->model_data_b[LEGOACT_BACKFLIP] != NULL)
             flip_kind = 1;
@@ -8291,7 +8305,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
             if (object->jump_reentry_timer <= 0.0f)
                 object->jump_sequence = 0;
             if (flip_kind == 0 ||
-                (!(object->delayed_turn_timer > 0.0f) && !force_flip && (object->field_0xef9 & 1) == 0)) {
+                (!(object->delayed_turn_timer > 0.0f) && force_flip != 1 && (object->field_0xef9 & 1) == 0)) {
                 object->action_movement_state = (animation_set & 4) != 0 ? 5 : 0;
                 if (UsingExtraActionsFn != NULL && UsingExtraActionsFn(object) && LEGOACT_EXTRA_JUMP != -1 &&
                     object->apiobj.character_model->model_data_b[LEGOACT_EXTRA_JUMP] != NULL)
@@ -8522,12 +8536,16 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
         const bool restart_jump = jump_held != 0 && (object->field_0xe22 & 0x10) == 0 &&
                                   object->action_movement_state != 3 && object->action_movement_state != 4 &&
                                   object->action_movement_state != 5 && object->action_movement_state != 8;
-        if (restart_jump && (object->action_movement_state == 1 || object->action_movement_state == 2) &&
-            object->pad_gamepad->input_magnitude > 0.0f && (object->field_0xe22 & 0x20) != 0) {
-            i32 difference = RotDiff(object->apiobj.movement_facing_angle, object->current_input_angle);
-            if (difference < 0)
-                difference = -difference;
-            force_flip = object->action_movement_state == 1 ? difference > 0x6aaa : difference < 0x1555;
+        if (restart_jump) {
+            if (object->action_movement_state == 1) {
+                if (object->pad_gamepad->input_magnitude > 0.0f && (object->field_0xe22 & 0x20) != 0 &&
+                    abs(RotDiff(object->apiobj.movement_facing_angle, object->current_input_angle)) > 0x6aaa)
+                    force_flip = 1;
+            } else if (object->action_movement_state == 2) {
+                if (object->pad_gamepad->input_magnitude > 0.0f && (object->field_0xe22 & 0x20) != 0 &&
+                    abs(RotDiff(object->apiobj.movement_facing_angle, object->current_input_angle)) < 0x1555)
+                    force_flip = 1;
+            }
         }
         {
             if (object->action_movement_state != 3) {
