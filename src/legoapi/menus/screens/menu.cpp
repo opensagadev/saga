@@ -457,7 +457,7 @@ static __used__ void MenuUpdatePauseCut(MENU *menu) {
 
 static __used__ void MenuDrawSelectLanguage(MENU *menu) {
     for (i32 i = 0; i < LANGUAGECOUNT; ++i) {
-        GameDrawMenuEntry(menu, reinterpret_cast<char *>(Text_LanguageList[i].unknown_04));
+        GameDrawMenuEntry(menu, Text_LanguageList[i].name);
     }
 }
 
@@ -552,7 +552,7 @@ static __used__ void MenuDrawPauseExit(MENU *menu) {
     char *warning;
     char *title;
     f32 spacing;
-    if (save_level != NULL) {
+    if (__builtin_expect(save_level != NULL, 0)) {
         title = TTab[tEXITTOMAP];
         warning = TTab[tALLLEVELPROGRESSWILLBELOST];
         spacing = 2.0f;
@@ -597,7 +597,7 @@ static __used__ void MenuDrawPauseExit(MENU *menu) {
                         MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, PauseMenus_Align, r, g, b, 1.7f, 1, NULL, 0, a);
         }
     }
-    if (save_level != NULL) {
+    if (__builtin_expect(save_level != NULL, 0)) {
         GameDrawMenuEntry(menu, TTab[tEXITWITHOUTSAVING]);
         GameDrawMenuEntry(menu, TTab[tSAVEANDEXIT]);
         GameDrawMenuEntry(menu, TTab[tCANCEL]);

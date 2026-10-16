@@ -249,7 +249,7 @@ static void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
             i32 first_index = node->index;
             i32 segments;
             u32 node_colour;
-            if (path == aieditor->current_path) {
+            if (__builtin_expect(path == aieditor->current_path, 0)) {
                 if (node == path->current_node) {
                     node_colour = 0xff0000ff;
                     segments = 32;
@@ -301,7 +301,7 @@ static void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
                 }
                 i32 second_index = other->index;
                 u32 connection_colour = colour;
-                if (node == path->current_node && other == path->other_node) {
+                if (__builtin_expect(node == path->current_node && other == path->other_node, 0)) {
                     connection_colour = 0xff00ffff;
                 }
                 pathEditorDrawConnectionInfo(&node->position, node->radius, &other->position,
@@ -313,8 +313,8 @@ static void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
                 drawn_connections[second_index][first_index / 8] |= 1 << (first_index % 8);
                 u32 edge_colour = colour;
                 if (path == aieditor->current_path) {
-                    if ((node == path->current_node && node->connections[slot].node == path->other_node) ||
-                        (node == path->other_node && node->connections[slot].node == path->current_node)) {
+                    if (__builtin_expect((node == path->current_node && node->connections[slot].node == path->other_node) ||
+                        (node == path->other_node && node->connections[slot].node == path->current_node), 1)) {
                         edge_colour = 0xff00ffff;
                     } else if (node == path->current_node || node->connections[slot].node == path->current_node) {
                         edge_colour = 0xff0000ff;
@@ -395,7 +395,7 @@ static void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
                     NUVEC direction;
                     other = node->connections[slot].node;
                     f32 distance = NuVecXZDist(&node->position, &other->position, &direction);
-                    if (distance > 0.0f) {
+                    if (__builtin_expect(distance > 0.0f, 0)) {
                         direction.x /= distance;
                         direction.z /= distance;
                     }

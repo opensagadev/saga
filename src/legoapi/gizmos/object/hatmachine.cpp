@@ -620,26 +620,12 @@ HATMACHINE *HatMachine_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameOb
 
     f32 nearest_distance = 1.0e9f;
     HATMACHINE_s *nearest = NULL;
-    if (world->hat_machine_sys->count > 0) {
-        if (object == NULL) {
-            for (i32 index = 0; index < world->hat_machine_sys->count; ++index) {
-                HATMACHINE_s *machine = &world->hat_machine_sys->machines[index];
-                const f32 candidate_distance = NuVecDistSqr(position, &machine->position, NULL);
-                if (candidate_distance < nearest_distance) {
-                    nearest_distance = candidate_distance;
-                    nearest = machine;
-                }
-            }
-        } else {
-            for (i32 index = 0; index < world->hat_machine_sys->count; ++index) {
-                HATMACHINE_s *machine = &world->hat_machine_sys->machines[index];
-                if ((machine->flags & (HATMACHINE_FLAG_ANIMATING | HATMACHINE_FLAG_FINISHED | HATMACHINE_FLAG_VISIBLE |
-                                       HATMACHINE_FLAG_ENABLED)) !=
-                        (HATMACHINE_FLAG_VISIBLE | HATMACHINE_FLAG_ENABLED) ||
-                    machine->player_position.y == 2000000.0f) {
-                    continue;
-                }
-
+    for (i32 index = 0; index < world->hat_machine_sys->count; ++index) {
+        HATMACHINE_s *machine = &world->hat_machine_sys->machines[index];
+        if (object != NULL) {
+            if ((machine->flags & (HATMACHINE_FLAG_ANIMATING | HATMACHINE_FLAG_FINISHED | HATMACHINE_FLAG_VISIBLE |
+                                   HATMACHINE_FLAG_ENABLED)) == (HATMACHINE_FLAG_VISIBLE | HATMACHINE_FLAG_ENABLED) &&
+                machine->player_position.y != 2000000.0f) {
                 NUVEC target_position;
                 Hat_GetAbsTargetPos(machine, &target_position);
                 const f32 candidate_distance = NuVecDistSqr(position, &target_position, NULL);
@@ -647,6 +633,12 @@ HATMACHINE *HatMachine_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameOb
                     nearest_distance = candidate_distance;
                     nearest = machine;
                 }
+            }
+        } else {
+            const f32 candidate_distance = NuVecDistSqr(position, &machine->position, NULL);
+            if (candidate_distance < nearest_distance) {
+                nearest_distance = candidate_distance;
+                nearest = machine;
             }
         }
     }

@@ -277,10 +277,11 @@ i32 GizmoSys_BoltHit(GIZMOSYS_s *gizmo_sys, void *world_info, BOLT_s *bolt, nuve
 
     GIZMOTYPE *type = gizmotypes->types;
     GIZMOSET *set = gizmo_sys->sets;
-    for (i32 index = 0; index < gizmotypes->count; ++index, ++type, ++set) {
+    for (i32 index = 0; index < gizmotypes->count; ++index, ++set, ++type) {
         if (type->fns.bolt_hit_fn != NULL &&
-            type->fns.bolt_hit_fn(world_info, set->unknown, bolt->owner, hit_points, hit_mode, radius, minimum, maximum,
-                                  bolt, 1, hit_flags) != 0) {
+            __builtin_expect(type->fns.bolt_hit_fn(world_info, set->unknown, bolt->owner, hit_points, hit_mode, radius,
+                                                   minimum, maximum, bolt, 1, hit_flags) != 0,
+                             0)) {
             BoltSys->debris(bolt, points, -1, NULL, 0);
             if (bolt->owner != NULL) {
                 NewRumble(bolt->owner->pad_gamepad->pad, 0.6f, 0);

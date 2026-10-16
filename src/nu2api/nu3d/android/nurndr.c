@@ -19,7 +19,8 @@ extern "C" {
     // Original 0x295fa9: private to this renderer translation unit.
     static void NuDisplayListResetBuffer(void) {
         display_list_buffer = reinterpret_cast<VARIPTR *>(&rndrstream_free);
-        display_list_buffer_end = reinterpret_cast<VARIPTR *>(rndrstream_end.addr);
+        // Retail copies the VARIPTR union as a whole into the end pointer.
+        *reinterpret_cast<VARIPTR *>(&display_list_buffer_end) = rndrstream_end;
     }
 
     // Original 0x295fd7.

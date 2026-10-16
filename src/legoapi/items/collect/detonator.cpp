@@ -336,42 +336,41 @@ void Detonator_MoveCode(GameObject_s *object) {
     PlaySfx(const_cast<char *>("imp_thermalDet_attach"), &detonator->position);
 }
 
-static inline void DetonatorConsiderNearest(DETONATOR_s *detonator, NUVEC *position, GameObject_s *owner,
-                                            f32 &nearest_distance, DETONATOR_s *&nearest) {
-    if (detonator->active != 0 && (owner == NULL || detonator->object == owner)) {
-        const f32 distance = NuVecDistSqr(position, &detonator->position, NULL);
-        if (distance < nearest_distance) {
-            nearest_distance = distance;
-            nearest = detonator;
-        }
+#define DETONATOR_CONSIDER_NEAREST(index, owner_test)                                                                  \
+    if (Detonator[index].active != 0 && (owner_test)) {                                                                \
+        const f32 distance = NuVecDistSqr(position, &Detonator[index].position, NULL);                                 \
+        if (distance < nearest_distance) {                                                                             \
+            nearest_distance = distance;                                                                               \
+            nearest = &Detonator[index];                                                                               \
+        }                                                                                                              \
     }
-}
 
 DETONATOR_s *Detonator_FindNearest(nuvec_s *position, float radius, GameObject_s *owner) {
     f32 nearest_distance = radius == 0.0f ? 1000000000.0f : radius * radius;
     DETONATOR_s *nearest = NULL;
     if (owner != NULL) {
-        DetonatorConsiderNearest(&Detonator[0], position, owner, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[1], position, owner, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[2], position, owner, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[3], position, owner, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[4], position, owner, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[5], position, owner, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[6], position, owner, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[7], position, owner, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[8], position, owner, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[9], position, owner, nearest_distance, nearest);
+        DETONATOR_CONSIDER_NEAREST(0, Detonator[0].object == owner)
+        DETONATOR_CONSIDER_NEAREST(1, Detonator[1].object == owner)
+        DETONATOR_CONSIDER_NEAREST(2, Detonator[2].object == owner)
+        DETONATOR_CONSIDER_NEAREST(3, Detonator[3].object == owner)
+        DETONATOR_CONSIDER_NEAREST(4, Detonator[4].object == owner)
+        DETONATOR_CONSIDER_NEAREST(5, Detonator[5].object == owner)
+        DETONATOR_CONSIDER_NEAREST(6, Detonator[6].object == owner)
+        DETONATOR_CONSIDER_NEAREST(7, Detonator[7].object == owner)
+        DETONATOR_CONSIDER_NEAREST(8, Detonator[8].object == owner)
+        DETONATOR_CONSIDER_NEAREST(9, Detonator[9].object == owner)
     } else {
-        DetonatorConsiderNearest(&Detonator[0], position, NULL, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[1], position, NULL, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[2], position, NULL, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[3], position, NULL, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[4], position, NULL, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[5], position, NULL, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[6], position, NULL, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[7], position, NULL, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[8], position, NULL, nearest_distance, nearest);
-        DetonatorConsiderNearest(&Detonator[9], position, NULL, nearest_distance, nearest);
+        DETONATOR_CONSIDER_NEAREST(0, true)
+        DETONATOR_CONSIDER_NEAREST(1, true)
+        DETONATOR_CONSIDER_NEAREST(2, true)
+        DETONATOR_CONSIDER_NEAREST(3, true)
+        DETONATOR_CONSIDER_NEAREST(4, true)
+        DETONATOR_CONSIDER_NEAREST(5, true)
+        DETONATOR_CONSIDER_NEAREST(6, true)
+        DETONATOR_CONSIDER_NEAREST(7, true)
+        DETONATOR_CONSIDER_NEAREST(8, true)
+        DETONATOR_CONSIDER_NEAREST(9, true)
     }
+#undef DETONATOR_CONSIDER_NEAREST
     return nearest;
 }

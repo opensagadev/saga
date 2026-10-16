@@ -552,22 +552,24 @@ static NUVEC *GizmoTurret_GetPos(GIZMO *gizmo) {
 
 static i32 GizTurrets_BoltHitPlat(void *world_ptr, void *system_ptr, BOLT *bolt, unsigned char *) {
     GIZTURRETSYS_s *system = static_cast<GIZTURRETSYS_s *>(system_ptr);
-    if (system == NULL || system->count == 0) {
+    if (system == NULL) {
         return 0;
     }
 
     GIZTURRET_s *turret = system->turrets;
     auto bolt_hit_platform = bolt->hit_platform;
     for (i32 index = 0; index < system->count; ++index, ++turret) {
-        if ((turret->flags & GIZTURRET_FLAG_VISIBLE) == 0 || (turret->flags & GIZTURRET_FLAG_ACTIVE) == 0 ||
-            (turret->flags & 0x30) != 0 || (turret->runtime_flags & 2) == 0) {
+        if (!turret->visible)
             continue;
-        }
+        if (!turret->active)
+            continue;
+        if ((turret->flags & 0x30) != 0 || (turret->runtime_flags & 2) == 0)
+            continue;
 
         GAMEANIMOBJ_s *object = turret->anim_set->objects;
         while (object != NULL) {
             GizTurretAnimObjectData *data = static_cast<GizTurretAnimObjectData *>(object->object_data);
-            if (data->platform_id == bolt_hit_platform) {
+            if (__builtin_expect(data->platform_id == bolt_hit_platform, 0)) {
                 BOLTTYPE_s *bolt_type = BoltType_FindByID(bolt->type_id, static_cast<WORLDINFO_s *>(world_ptr));
                 i32 player_index;
                 i32 damage;

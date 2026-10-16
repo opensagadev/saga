@@ -1299,10 +1299,6 @@ f32 global_pulse = 0.0f;
 // Original .data @0x667cb0 / @0x667cc0.
 i32 IntroText_TextID = -1;
 i32 LANGUAGECOUNT = 6;
-// Original .data @0x667ce0: default language list, entries of {language, 0}
-// (8 bytes per entry); Text_LanguageList points at it (@0x667d30).
-static LANGUAGEDATA Text_LanguageList_Default[6] = {{1, 0}, {2, 0}, {4, 0}, {5, 0}, {3, 0}, {8, 0}};
-LANGUAGEDATA *Text_LanguageList = Text_LanguageList_Default;
 // Original .data @0x667ca0/@0x667ca4.
 f32 INTROTEXT_Y = 0.175f;
 f32 INTROTEXT_SCALE = 0.79f;
@@ -1394,7 +1390,6 @@ i32 noscenespecials = 0;
 i32 portals_enabled = 1;
 i32 portal_special_objects = 1;
 u8 PortalVisiFlags[0x271] = {0};
-LANGUAGEDATA Game_LanguageList[7] = {{1, 0}, {2, 0}, {4, 0}, {5, 0}, {3, 0}, {8, 0}, {-1, 0}};
 OPTIONSSAVE *Game_OptionsSave = NULL;
 i32 (*GamePads_IgnoreInputFn)(void) = NULL;
 void (*PauseGame_ExtraCodeFn)(void) = NULL;

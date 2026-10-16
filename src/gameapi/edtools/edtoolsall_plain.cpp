@@ -228,6 +228,47 @@ static inline void eduiSetFontColour(NUQFNT *font, u32 colour) {
         NuQFntSetColour(font, colour);
 }
 
+// Some original callers expect the draw to happen and keep the renderer call on the fallthrough path.
+static inline void eduiDrawRectLikely(i32 x, i32 y, i32 width, i32 height, i32 colour, NUMTL *material) {
+    if (__builtin_expect(!edui_donotdraw, 1))
+        NuRndrRect2di(x, y, width, height, colour, material);
+}
+
+static inline void eduiDrawLineRectLikely(i32 x, i32 y, i32 width, i32 height, i32 colour, NUMTL *material) {
+    if (__builtin_expect(!edui_donotdraw, 1))
+        NuRndrLineRect2di(x, y, width, height, colour, material);
+}
+
+static inline void eduiDrawGradRectLikely(i32 x, i32 y, i32 width, i32 height, i32 *colours, NUMTL *material) {
+    if (__builtin_expect(!edui_donotdraw, 1))
+        NuRndrGradRect2di(x, y, width, height, colours, material);
+}
+
+static inline void eduiDrawLineLikely(i32 x0, i32 y0, i32 x1, i32 y1, i32 colour, NUMTL *material) {
+    if (__builtin_expect(!edui_donotdraw, 1))
+        NuRndrLine2di(x0, y0, x1, y1, colour, material);
+}
+
+static inline void eduiDrawLineStripLikely(i32 *points, f32 *uvs, i32 count, i32 colour, NUMTL *material) {
+    if (__builtin_expect(!edui_donotdraw, 1))
+        NuRndrLineStrip2di(points, uvs, count, colour, material);
+}
+
+static inline void eduiDrawTriStripLikely(i32 *points, f32 *uvs, i32 count, i32 colour, NUMTL *material) {
+    if (__builtin_expect(!edui_donotdraw, 1))
+        NuRndrTriStrip2di(points, uvs, count, colour, material);
+}
+
+static inline void eduiDrawFontSetLikely(NUQFNT *font) {
+    if (__builtin_expect(!edui_donotdraw, 1))
+        NuQFntSet(font);
+}
+
+static inline void eduiSetFontColourLikely(NUQFNT *font, u32 colour) {
+    if (__builtin_expect(!edui_donotdraw, 1))
+        NuQFntSetColour(font, colour);
+}
+
 // The original local font helpers read the same private draw state as the
 // editor callbacks, so they belong to this translation unit.
 static __used__ __attribute__((noclone)) void eduiFntPrintExGeneric(void *font, int x, int y,
@@ -3749,7 +3790,8 @@ extern "C" {
         i32 height = item->render(menu, item, x, y, width, selected);
         if (selected) {
             u32 colour = (item->flags & 4) ? eduiitem_context_outline_colour : eduiitem_selected_outline_colour;
-            eduiDrawLineRect(x << 4, (y << 3) + 8, item_width << 4, (height << 3) - 16, colour, uimtls[ui_outmtl]);
+            if (__builtin_expect(!edui_donotdraw, 1))
+                NuRndrLineRect2di(x << 4, (y << 3) + 8, item_width << 4, (height << 3) - 16, colour, uimtls[ui_outmtl]);
         }
         if (item->disabled) {
             i32 left = x << 4;
@@ -6223,7 +6265,7 @@ extern "C" {
         }
         const f32 button_size = row_height - 2.0f;
         for (i32 depth = 0; depth < expander->depth; ++depth) {
-            if (!edui_donotdraw) {
+            if (__builtin_expect(!edui_donotdraw, 1)) {
                 const i32 guide_x = static_cast<i32>((item_x + (static_cast<f32>(depth) + 0.5f) * button_size) * 16.0f);
                 NuRndrLine2di(guide_x, static_cast<i32>(item_y * 8.0f), guide_x,
                               static_cast<i32>((item_y + row_height) * 8.0f), 0xff000000, uimtls[0]);
@@ -6305,7 +6347,7 @@ extern "C" {
                               static_cast<i32>(stage_colour), static_cast<i32>(next->colour)};
             i32 left = static_cast<i32>(stage_time * (width << 4));
             i32 right = static_cast<i32>(next->time * (width << 4));
-            eduiDrawGradRect((x << 4) + left, (y + half_height) << 3, right - left, half_height << 3, colours,
+            eduiDrawGradRectLikely((x << 4) + left, (y + half_height) << 3, right - left, half_height << 3, colours,
                              uimtls[ui_bgmtl]);
             stage_time = next->time;
             stage_colour = next->colour;
@@ -6343,7 +6385,7 @@ extern "C" {
             eduiFntPrintEx(edui_font, (x + total_width) << 3, (y + total_height) << 2, 64, "Invalid Graph Pointer");
             return total_height;
         }
-        eduiDrawFontSet(edui_font);
+        eduiDrawFontSetLikely(edui_font);
         eduiSetFontColour(edui_font, 0x80808080);
         if (picker->x_scale > 0.0f) {
             f32 tick_count = picker->graph->x_extent * picker->graph->x_scale / picker->x_scale;
@@ -6523,7 +6565,7 @@ extern "C" {
         else
             highlighted = (*flags >> 3) & 1;
         *flags = (*flags & ~16u) | (highlighted << 4);
-        if (!edui_donotdraw)
+        if (__builtin_expect(!edui_donotdraw, 1))
             NuQFntSet(edui_font);
         if (item->unknown_10 == 2) {
             if (!edui_donotdraw)
@@ -6592,7 +6634,7 @@ extern "C" {
                 }
             }
             u32 divider_colour = divider_colours[(property->unknown_property_flags >> 2) & 1];
-            if (!edui_donotdraw)
+            if (__builtin_expect(!edui_donotdraw, 1))
                 NuRndrLine2di(static_cast<i32>((draw_x + property->label_width) * 16.0f),
                               static_cast<i32>(draw_y * 8.0f),
                               static_cast<i32>((draw_x + property->label_width) * 16.0f),
@@ -6667,7 +6709,7 @@ extern "C" {
         item->x = x;
         item->y = y;
         eduiDrawRect(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
-        eduiDrawFontSet(edui_font);
+        eduiDrawFontSetLikely(edui_font);
         eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         if (item->text_alignment == 16)
             eduiFntPrintExGeneric(edui_font, x << 4, (y << 3) + baseline, 16, item->text);
@@ -6800,7 +6842,7 @@ extern "C" {
                 draw_key(8);
                 draw_key(9);
             }
-            eduiDrawFontSet(edui_font);
+            eduiDrawFontSetLikely(edui_font);
             eduiSetFontColour(edui_font, item->colours[1]);
             i32 value_y = ((y + height * 4) << 3) + baseline;
             eduiFntPrintEx(edui_font, x << 4, value_y, 16, picker->value);
@@ -6840,11 +6882,11 @@ extern "C" {
                 return height;
             }
             {
-                eduiDrawRect(x << 4, y << 3, width << 4, height << 4, item->colours[2 + item->highlighted],
+                eduiDrawRectLikely(x << 4, y << 3, width << 4, height << 4, item->colours[2 + item->highlighted],
                              uimtls[ui_bgmtl]);
             }
-            eduiDrawFontSet(edui_font);
-            eduiSetFontColour(edui_font, item->colours[item->highlighted]);
+            eduiDrawFontSetLikely(edui_font);
+            eduiSetFontColourLikely(edui_font, item->colours[item->highlighted]);
             i32 centre = (x * 2 + width) << 3;
             eduiFntPrintEx(edui_font, centre, (y << 3) + baseline, 64, item->text);
             eduiFntPrintEx(edui_font, centre, ((y + height) << 3) + baseline, 64, picker->format, picker->value);

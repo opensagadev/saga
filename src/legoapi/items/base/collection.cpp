@@ -465,32 +465,11 @@ COLLECTID *CollectIDUnlocked(i32 id) {
 i32 Collection_GotAnyOfType(i32 type, u32 flags) {
     if (CollectList == NULL || CollectCount <= 0)
         return 0;
-    if (type == -1) {
-        if (flags == 0) {
-            for (i32 i = 0; i < CollectCount; ++i) {
-                if (Collection_Got(CollectList[i].id))
-                    return 1;
-            }
-        } else {
-            for (i32 i = 0; i < CollectCount; ++i) {
-                i32 id = CollectList[i].id;
-                if ((CDataList[id].model_flags & flags) == flags && Collection_Got(id))
-                    return 1;
-            }
-        }
-    } else if (flags == 0) {
-        for (i32 i = 0; i < CollectCount; ++i) {
-            i32 id = CollectList[i].id;
-            if ((signed char)GCDataList[id].field275_0x116 == type && Collection_Got(id))
-                return 1;
-        }
-    } else {
-        for (i32 i = 0; i < CollectCount; ++i) {
-            i32 id = CollectList[i].id;
-            if ((signed char)GCDataList[id].field275_0x116 == type && (CDataList[id].model_flags & flags) == flags &&
-                Collection_Got(id))
-                return 1;
-        }
+    for (i32 i = 0; i < CollectCount; ++i) {
+        i32 id = CollectList[i].id;
+        if ((type == -1 || (signed char)GCDataList[id].field275_0x116 == type) &&
+            (flags == 0 || (CDataList[id].model_flags & flags) == flags) && Collection_Got(id))
+            return 1;
     }
     return 0;
 }

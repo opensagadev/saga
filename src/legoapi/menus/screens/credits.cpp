@@ -120,18 +120,23 @@ void Credits_Load(WORLDINFO_s *, VARIPTR *buffer, VARIPTR *buffer_end) {
                         style_index = -1;
                     CREDIT_TYPE_s *type = style_index == -1 ? NULL : &CreditType[style_index];
                     if (type != NULL) {
-                        char *text = NuFParGetWord(parser) ? parser->word_buf : NULL;
-                        if (text != NULL && NuStrICmp(text, "colour") == 0) {
-                            for (i32 component = 0; component < 4; ++component) {
-                                if (NuFParGetWord(parser)) {
-                                    f32 value = NuAToF(parser->word_buf);
-                                    i32 maximum = component == 3 ? 128 : 255;
-                                    type->colour[component] = value > 1.0f   ? maximum
-                                                              : value < 0.0f ? 0
-                                                                             : static_cast<i32>(value * maximum);
+                        char *text = NULL;
+                        if (NuFParGetWord(parser) != 0) {
+                            text = parser->word_buf;
+                            if (NuStrICmp(text, "colour") == 0) {
+                                for (i32 component = 0; component < 4; ++component) {
+                                    if (NuFParGetWord(parser)) {
+                                        f32 value = NuAToF(parser->word_buf);
+                                        i32 maximum = component == 3 ? 128 : 255;
+                                        type->colour[component] = value > 1.0f   ? maximum
+                                                                  : value < 0.0f ? 0
+                                                                                 : static_cast<i32>(value * maximum);
+                                    }
                                 }
+                                goto next_line;
                             }
-                        } else if (CreditCount < 1000) {
+                        }
+                        if (CreditCount < 1000) {
                             credit->type = type->type;
                             switch (type->type) {
                                 case 0:
@@ -165,6 +170,7 @@ void Credits_Load(WORLDINFO_s *, VARIPTR *buffer, VARIPTR *buffer_end) {
                     }
                 }
             }
+        next_line:
             CreditsSize = y + 2.2f;
         }
         NuFParDestroy(parser);

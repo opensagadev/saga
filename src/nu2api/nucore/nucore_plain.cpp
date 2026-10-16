@@ -2776,7 +2776,7 @@ extern "C" {
             NuVec4ScaleXYZVU0(&vertices[5], &vertices[5], 1.0f / vertices[5].w);
             if (vertices[4].x < -1.0f && vertices[5].x < -1.0f)
                 continue;
-            if (vertices[4].x > 1.0f && vertices[5].x > 1.0f)
+            if (__builtin_expect(vertices[4].x > 1.0f && vertices[5].x > 1.0f, 0))
                 continue;
             if (vertices[4].y < -1.0f && vertices[5].y < -1.0f)
                 continue;
@@ -2834,7 +2834,7 @@ extern "C" {
                     vertices[5].y = next_fraction * vertices[7].y + vertices[6].y;
                     vertices[5].z = next_fraction * vertices[7].z + vertices[6].z;
                 } else {
-                    if (laser->arc)
+                    if (__builtin_expect(!!(laser->arc), 0))
                         end_alpha = 0;
                     vertices[5].x = vertices[6].x + vertices[7].x;
                     vertices[5].y = vertices[6].y + vertices[7].y;

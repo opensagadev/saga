@@ -1452,38 +1452,18 @@ GIZSPINNER_s *GizSpinner_FindNearest(nuvec_s *position, WORLDINFO_s *world, f32 
 
 GIZSPINNER_s *GizSpinner_Find(WORLDINFO_s *world, nuvec_s *position, i32 alternate) {
     GIZSPINNER_s *nearest = NULL;
-    if (world->current_level->max_spinners != 0) {
-        f32 nearest_distance = 1.5625f;
-        if (alternate == 0) {
-            i32 index = 0;
-            do {
-                GIZSPINNER_s *spinner = &world->spinners[index];
-                if ((spinner->flags & 0x27) == GIZSPINNER_FLAG_VALID && (spinner->state_flags & 8) == 0) {
-                    NUVEC spinner_position;
-                    GizSpinner_GetSpinnerPos(spinner, &spinner_position);
-                    f32 distance = NuVecDistSqr(position, &spinner_position, NULL);
-                    if (distance < nearest_distance) {
-                        nearest_distance = distance;
-                        nearest = spinner;
-                    }
-                }
-                ++index;
-            } while (world->current_level->max_spinners > index);
-        } else {
-            i32 index = 0;
-            do {
-                GIZSPINNER_s *spinner = &world->spinners[index];
-                if ((spinner->flags & 0x27) == GIZSPINNER_FLAG_VALID && (spinner->state_flags & 8) != 0) {
-                    NUVEC spinner_position;
-                    GizSpinner_GetSpinnerPos(spinner, &spinner_position);
-                    f32 distance = NuVecDistSqr(position, &spinner_position, NULL);
-                    if (distance < nearest_distance) {
-                        nearest_distance = distance;
-                        nearest = spinner;
-                    }
-                }
-                ++index;
-            } while (world->current_level->max_spinners > index);
+    f32 nearest_distance = 1.5625f;
+    for (i32 index = 0; index < world->current_level->max_spinners; ++index) {
+        GIZSPINNER_s *spinner = &world->spinners[index];
+        if ((spinner->flags & 0x27) == GIZSPINNER_FLAG_VALID &&
+            (alternate == 0 ? (spinner->state_flags & 8) == 0 : (spinner->state_flags & 8) != 0)) {
+            NUVEC spinner_position;
+            GizSpinner_GetSpinnerPos(spinner, &spinner_position);
+            f32 distance = NuVecDistSqr(position, &spinner_position, NULL);
+            if (distance < nearest_distance) {
+                nearest_distance = distance;
+                nearest = spinner;
+            }
         }
     }
     return nearest;

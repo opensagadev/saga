@@ -1134,7 +1134,7 @@ static void ResetSpaceLevel(WORLDINFO_s *world, spacelevel_s *space) {
 
 #define DOOR_REACHED(player_index, door_index)                                                                         \
     (Player[player_index]->field_0x68c > DogFightDoors.doors[door_index].distance)
-    if (Player[0] != NULL) {
+    if (__builtin_expect(Player[0] != NULL, 0)) {
         if (DOOR_REACHED(0, 6)) {
             goto door_6;
         }

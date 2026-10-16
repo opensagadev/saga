@@ -1048,6 +1048,7 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_CATEGORY_IS].eval_fn = Condition_CategoryIs;
             lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_CATEGORY_IS].eval_fn = Condition_PlayerCategoryIs;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_GOODIE_BADDIE].eval_fn = Condition_IAmAGoodieBaddie;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_OPPONENT_IS_A_THREAT].eval_fn = Condition_OpponentIsAThreat;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_GOODY].eval_fn = Condition_IAmAGoody;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_BADDY].eval_fn = Condition_IAmABaddy;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_NEUTRAL].eval_fn = Condition_IAmANeutral;
@@ -5962,8 +5963,9 @@ __used__ static i32 Action_SetLocator(AISYS *sys, AISCRIPTPROCESS *processor, AI
             // closest to the packet's terrain origin.
             f32 best_distance = 1.0e9f;
             NUVEC difference;
-            for (i32 index = 0;; ++index) {
-                sprintf(resolved_name, "%s_%d", locator_name, index);
+            i32 index = 0;
+            while (true) {
+                sprintf(resolved_name, "%s_%d", locator_name, index++);
                 AILOCATOR *candidate = AIPathFindLocator(sys, resolved_name);
                 if (candidate == NULL) {
                     break;
@@ -5975,11 +5977,10 @@ __used__ static i32 Action_SetLocator(AISYS *sys, AISCRIPTPROCESS *processor, AI
                 }
             }
         } else if (packet != NULL) {
-            GameObject_s *object = packet->owner;
-            if (indexed && static_cast<i8>(object->apiobj.field_0x27c) != -1) {
-                sprintf(resolved_name, "%s_%d", locator_name, static_cast<i8>(object->apiobj.field_0x27c));
-            } else if (personal && object->apiobj.character_data != NULL) {
-                sprintf(resolved_name, "%s_%s", locator_name, object->apiobj.character_data->file);
+            if (indexed && static_cast<i8>(packet->owner->apiobj.field_0x27c) != -1) {
+                sprintf(resolved_name, "%s_%d", locator_name, static_cast<i8>(packet->owner->apiobj.field_0x27c));
+            } else if (personal && packet->owner->apiobj.character_data != NULL) {
+                sprintf(resolved_name, "%s_%s", locator_name, packet->owner->apiobj.character_data->file);
             } else if (random_count != 0) {
                 sprintf(resolved_name, "%s_%d", locator_name, NuRand(0) % random_count);
             } else {
@@ -7090,19 +7091,49 @@ __used__ static i32 Action_DontPush(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
         return 1;
     }
 
+    i32 types[10];
+    i32 type_count = 0;
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
-    bool dont_push = true;
+    i32 dont_push = 1;
     for (i32 index = 0; index < param_4; ++index) {
-        char *value = NuStrIStr(params[index], "character=");
+        char *value = NuStrIStr(params[index], const_cast<char *>("type"));
         if (value != NULL) {
-            object = GetNamedGameObject(sys, value + NuStrLen("character="));
+            if (LevelCharacterTypeIDFn != NULL && LevelCharacterGlobalIDFn != NULL) {
+                const i32 local_type = static_cast<u8>(LevelCharacterTypeIDFn(value + 5));
+                if (local_type != 0xff) {
+                    const i32 global_type = LevelCharacterGlobalIDFn(local_type);
+                    if (global_type != -1 && type_count < 10) {
+                        types[type_count++] = global_type;
+                    }
+                }
+            }
+            continue;
+        }
+        value = NuStrIStr(params[index], const_cast<char *>("character="));
+        if (value != NULL) {
+            object = GetNamedGameObject(sys, value + 10);
         } else if (NuStrICmp(params[index], "FALSE") == 0) {
-            dont_push = false;
+            dont_push = 0;
         }
     }
-    if (object != NULL) {
-        object->apiobj.flags_low =
-            (object->apiobj.flags_low & static_cast<u8>(~2u)) | static_cast<u8>(dont_push ? 2 : 0);
+
+    if (type_count != 0) {
+        const i32 object_count = HIGHGAMEOBJECT;
+        GameObject_s *candidate = Obj;
+        for (i32 object_index = 0; object_index < object_count; ++object_index, ++candidate) {
+            if ((candidate->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) !=
+                    (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER) ||
+                (candidate->apiobj.field_0x1f4 & 0x400) == 0) {
+                continue;
+            }
+            for (i32 type_index = 0; type_index < type_count; ++type_index) {
+                if (candidate->id == types[type_index]) {
+                    candidate->apiobj.flags_low_bit1 = dont_push;
+                }
+            }
+        }
+    } else if (object != NULL) {
+        object->apiobj.flags_low_bit1 = dont_push;
     }
     return 1;
 }

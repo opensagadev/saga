@@ -337,25 +337,18 @@ static i32 Action_Idle(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, ch
 
 __used__ static i32 Action_DontPush(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                     i32 param_4, i32 param_5, f32 param_6) {
+    (void)sys;
     (void)processor;
     (void)param_6;
-    if (param_5 == 0) {
+    if (packet == NULL || packet->owner == NULL || param_5 == 0) {
         return 1;
     }
 
-    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
-    bool dont_push = true;
+    packet->owner->apiobj.flags_low |= 2;
     for (i32 index = 0; index < param_4; ++index) {
-        char *value = NuStrIStr(params[index], "character=");
-        if (value != NULL) {
-            object = GetNamedGameObject(sys, value + NuStrLen("character="));
-        } else if (NuStrICmp(params[index], "FALSE") == 0) {
-            dont_push = false;
+        if (NuStrICmp(params[index], "false") == 0) {
+            packet->owner->apiobj.flags_low &= static_cast<u8>(~2u);
         }
-    }
-    if (object != NULL) {
-        object->apiobj.flags_low =
-            (object->apiobj.flags_low & static_cast<u8>(~2u)) | static_cast<u8>(dont_push ? 2 : 0);
     }
     return 1;
 }
@@ -755,11 +748,12 @@ static i32 Action_ResetTimer(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *pack
 __used__ static i32 Action_SetLocator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                       i32 param_4, i32 param_5, f32 param_6) {
     (void)param_6;
-    if (param_5 == 0) {
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL ||
+        packet->path_info.path == NULL || packet->path_info.connection == NULL || param_5 == 0) {
         return 1;
     }
 
-    APIOBJECT *target = packet != NULL ? reinterpret_cast<APIOBJECT *>(packet->owner) : NULL;
+    processor->locator = NULL;
     if (param_4 == 0) {
         return 1;
     }
@@ -767,62 +761,35 @@ __used__ static i32 Action_SetLocator(AISYS *sys, AISCRIPTPROCESS *processor, AI
     char *locator_name = NULL;
     i32 personal = 0;
     i32 indexed = 0;
-    i32 nearest = 0;
     i32 random_count = 0;
     for (i32 index = 0; index < param_4; ++index) {
         char *value;
-        if ((value = NuStrIStr(params[index], "name=")) != NULL) {
+        if ((value = NuStrIStr(params[index], "name")) != NULL) {
             locator_name = value + 5;
-        } else if (NuStrICmp(params[index], "personal") == 0) {
+        } else if (NuStrIStr(params[index], "personal") != NULL) {
             personal = 1;
-        } else if (NuStrICmp(params[index], "indexed") == 0) {
+        } else if (NuStrIStr(params[index], "indexed") != NULL) {
             indexed = 1;
-        } else if (NuStrICmp(params[index], "nearest") == 0) {
-            nearest = 1;
-        } else if ((value = NuStrIStr(params[index], "random=")) != NULL) {
-            random_count = static_cast<i32>(AIParamToFloat(processor, value + 7));
-        } else if ((value = NuStrIStr(params[index], "character=")) != NULL && GetNamedAPIObjectFn != NULL) {
-            target = GetNamedAPIObjectFn(sys, value + 10);
+        } else if ((value = NuStrIStr(params[index], "random")) != NULL) {
+            random_count = static_cast<i32>(
+                AIParamToFloatEx(packet, reinterpret_cast<AISCRIPTPROCESS *>(packet), value + 7));
         }
+    }
+    if (locator_name == NULL) {
+        return 1;
     }
 
-    AILOCATOR *locator = NULL;
     char resolved_name[64];
-    if (locator_name != NULL) {
-        if (nearest) {
-            // Search the numbered locators NAME_0, NAME_1, ... for the one
-            // closest to the packet's terrain origin.
-            f32 best_distance = 1.0e9f;
-            NUVEC difference;
-            for (i32 index = 0;; ++index) {
-                sprintf(resolved_name, "%s_%d", locator_name, index);
-                AILOCATOR *candidate = AIPathFindLocator(sys, resolved_name);
-                if (candidate == NULL) {
-                    break;
-                }
-                const f32 distance = NuVecDistSqr(&packet->terrain_origin, &candidate->position, &difference);
-                if (distance < best_distance) {
-                    best_distance = distance;
-                    locator = candidate;
-                }
-            }
-        } else if (packet != NULL) {
-            GameObject_s *object = packet->owner;
-            if (indexed && static_cast<i8>(object->apiobj.field_0x27c) != -1) {
-                sprintf(resolved_name, "%s_%d", locator_name, static_cast<i8>(object->apiobj.field_0x27c));
-            } else if (personal && object->apiobj.character_data != NULL) {
-                sprintf(resolved_name, "%s_%s", locator_name, object->apiobj.character_data->file);
-            } else if (random_count != 0) {
-                sprintf(resolved_name, "%s_%d", locator_name, NuRand(0) % random_count);
-            } else {
-                sprintf(resolved_name, locator_name);
-            }
-            locator = AIPathFindLocator(sys, resolved_name);
-        }
+    if (indexed && static_cast<i8>(packet->owner->apiobj.field_0x27c) != -1) {
+        sprintf(resolved_name, "%s_%d", locator_name, static_cast<i8>(packet->owner->apiobj.field_0x27c));
+    } else if (personal && packet->owner->apiobj.character_data != NULL) {
+        sprintf(resolved_name, "%s_%s", locator_name, packet->owner->apiobj.character_data->file);
+    } else if (random_count != 0) {
+        sprintf(resolved_name, "%s_%d", locator_name, NuRand(0) % random_count);
+    } else {
+        sprintf(resolved_name, locator_name);
     }
-    if (target != NULL) {
-        target->ai->locator = locator;
-    }
+    processor->locator = AIPathFindLocator(sys, resolved_name);
     return 1;
 }
 
@@ -2287,7 +2254,10 @@ static void *Condition_OpponentInTriggerAreaInit(AISYS *sys, char *arg, AISCRIPT
 }
 
 static f32 Condition_OpponentIsAThreat(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
-    return packet != NULL ? static_cast<f32>(packet->opponent_is_threat) : 0.0f;
+    if (packet != NULL && packet->opponent_object != NULL && packet->opponent_is_threat) {
+        return 1.0f;
+    }
+    return 0.0f;
 }
 
 static f32 Condition_OpponentOnSamePath(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {

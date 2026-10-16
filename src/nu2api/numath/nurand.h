@@ -1,3 +1,5 @@
+#pragma once
+
 #include "nu2api/nucore/common.h"
 
 typedef struct nunrand_s {

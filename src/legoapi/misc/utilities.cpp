@@ -907,20 +907,6 @@ i32 findrange(nugscn_s *scene, i32 first_joint) {
     return end_joint - 1;
 }
 
-static __used__ i32 MatchExtension(char *candidate, char *extension, i32 remaining) {
-    while (*candidate != 0) {
-        --extension;
-        if (remaining == 0)
-            return 0;
-        char upper = toupper(static_cast<unsigned char>(*extension));
-        if (*candidate != upper)
-            return 0;
-        ++candidate;
-        --remaining;
-    }
-    return 1;
-}
-
 static __used__ int icomp(const void *left, const void *right) {
     const i32 *left_value = *static_cast<const i32 *const *>(left);
     const i32 *right_value = *static_cast<const i32 *const *>(right);

@@ -70,7 +70,7 @@ static NUDISPLAYLISTITEM *NuDisplayListAddItem(NUDISPLAYLIST *list, u8 type, voi
 // bind helpers; the geometry renderer's 0x293xxx copies remain in its TU.
 struct DebrisVertexAttribRecord {
     u32 gl_type;
-    u32 comp_count;
+    i32 comp_count;
     u8 normalized;
     u8 reserved[3];
     u32 pad;
@@ -78,8 +78,13 @@ struct DebrisVertexAttribRecord {
     u32 stride;
 };
 
+struct DebrisVertexFormat {
+    u32 mask;
+    DebrisVertexAttribRecord attributes[1];
+};
+
 extern "C" {
-    static void NuIOS_BindVertexAttributesInternal(isize data_addr, usize base_vertex, const u32 *format, u32 mask) {
+    static void NuIOS_BindVertexAttributesInternal(isize data_addr, i32 base_vertex, const u32 *format, u32 mask) {
         i32 location = 0;
         mask &= format[0];
         u32 disable = g_activeAttributes & ~mask;
@@ -88,34 +93,33 @@ extern "C" {
         do {
             if (mask & 1) {
                 const DebrisVertexAttribRecord *attribute =
-                    reinterpret_cast<const DebrisVertexAttribRecord *>(format + location * 6 + 1);
+                    &reinterpret_cast<const DebrisVertexFormat *>(format)->attributes[location];
                 if (enable & 1) {
                     glEnableVertexAttribArray(location);
                 }
-                const void *address = reinterpret_cast<const void *>(data_addr + attribute->byte_offset +
-                                                                     base_vertex * attribute->stride);
                 glVertexAttribPointer(location, attribute->comp_count, attribute->gl_type, attribute->normalized,
-                                      attribute->stride, address);
+                                      attribute->stride,
+                                      reinterpret_cast<const void *>(
+                                          data_addr + (attribute->byte_offset + attribute->stride * base_vertex)));
             } else if (disable & 1) {
                 glDisableVertexAttribArray(location);
             }
             ++location;
             mask >>= 1;
             enable >>= 1;
-            disable >>= 1;
-        } while ((mask | enable | disable) != 0);
+        } while ((mask | enable | (disable >>= 1)) != 0);
     }
 
-    static void NuIOS_BindVertexAttributes(isize, usize base_vertex) {
-        const u32 *format = reinterpret_cast<const u32 *>(g_boundVertexFormat);
-        NuIOS_BindVertexAttributesInternal(0, base_vertex, format, format[0]);
+    static void NuIOS_BindVertexAttributes(isize, i32 base_vertex) {
+        NuIOS_BindVertexAttributesInternal(0, base_vertex, reinterpret_cast<const u32 *>(g_boundVertexFormat),
+                                           *reinterpret_cast<const u32 *>(g_boundVertexFormat));
     }
 
     static void NuIOS_BindVertexAttributesImmediate(isize, isize data_addr) {
         NuIOSBindVAO(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        const u32 *format = reinterpret_cast<const u32 *>(g_boundVertexFormat);
-        NuIOS_BindVertexAttributesInternal(data_addr, 0, format, format[0]);
+        NuIOS_BindVertexAttributesInternal(data_addr, 0, reinterpret_cast<const u32 *>(g_boundVertexFormat),
+                                           *reinterpret_cast<const u32 *>(g_boundVertexFormat));
     }
 }
 

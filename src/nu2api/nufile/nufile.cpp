@@ -2170,7 +2170,11 @@ static i32 num_extensions;
 static i32 MatchExtension(char *extension, char *path_end, i32 path_len) {
     while (*extension != '\0') {
         --path_end;
-        if (path_len == 0 || *extension != NuToLower(*path_end)) {
+        if (path_len == 0) {
+            return 0;
+        }
+        char lower = NuToLower(*path_end);
+        if (*extension != lower) {
             return 0;
         }
         ++extension;

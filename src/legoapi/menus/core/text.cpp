@@ -45,6 +45,12 @@ char *apitxt_ITALIAN = const_cast<char *>("Italiano");
 char *apitxt_SPANISH = const_cast<char *>("Espa\xc3\xb1"
                                           "ol");
 char *apitxt_DANISH = const_cast<char *>("Dansk");
+
+// Original .data @0x667ce0; the names are filled in by the static initializer.
+static LANGUAGEDATA Text_LanguageList_Default[7] = {{1, apitxt_ENGLISH}, {2, apitxt_FRENCH},  {4, apitxt_GERMAN},
+                                                    {5, apitxt_ITALIAN}, {3, apitxt_SPANISH}, {8, apitxt_DANISH},
+                                                    {-1, NULL}};
+LANGUAGEDATA *Text_LanguageList = Text_LanguageList_Default;
 f32 text3d_height;
 f32 text3d_width;
 void (*buttonmapfn)(char *, char *);

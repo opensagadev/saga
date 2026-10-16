@@ -212,7 +212,7 @@ extern "C" void NuShaderProgramSetFragmentParamfv(NUSHADERPROGRAM *program, u32 
 //   [+6] stride (bytes between vertices)
 struct VertexAttribRecord {
     u32 gl_type;
-    u32 comp_count;
+    i32 comp_count;
     u8 normalized;
     u8 reserved[3];
     u32 pad;
@@ -220,9 +220,14 @@ struct VertexAttribRecord {
     u32 stride;
 };
 
+struct VertexAttribFormat {
+    u32 mask;
+    VertexAttribRecord attributes[1];
+};
+
 extern "C" {
     // Original 0x293841, 307 bytes.
-    static void NuIOS_BindVertexAttributesInternal(isize dataAddr, usize baseVertex, const u32 *fmtWords, u32 mask) {
+    static void NuIOS_BindVertexAttributesInternal(isize dataAddr, i32 baseVertex, const u32 *fmtWords, u32 mask) {
         i32 loc = 0;
         mask &= fmtWords[0];
         u32 toDisable = g_activeAttributes & ~mask;
@@ -230,15 +235,21 @@ extern "C" {
         g_activeAttributes = mask;
         do {
             if (mask & 1) {
-                const VertexAttribRecord *rec = reinterpret_cast<const VertexAttribRecord *>(fmtWords + loc * 6 + 1);
+                const VertexAttribRecord *rec =
+                    &reinterpret_cast<const VertexAttribFormat *>(fmtWords)->attributes[loc];
                 if (toEnable & 1) {
                     glEnableVertexAttribArray(loc);
                 }
-                const void *address =
-                    reinterpret_cast<const void *>(dataAddr + rec->byte_offset + baseVertex * rec->stride);
-                const GLenum type = NuIOS_PlatformVertexAttributeType(static_cast<GLenum>(rec->gl_type));
-                glVertexAttribPointer(loc, (GLint)rec->comp_count, type, (GLboolean)rec->normalized,
-                                      (GLsizei)rec->stride, address);
+#if defined(__ANDROID__)
+                glVertexAttribPointer(
+                    loc, rec->comp_count, rec->gl_type, rec->normalized, rec->stride,
+                    reinterpret_cast<const void *>(dataAddr + (rec->byte_offset + rec->stride * baseVertex)));
+#else
+                glVertexAttribPointer(
+                    loc, rec->comp_count, NuIOS_PlatformVertexAttributeType(static_cast<GLenum>(rec->gl_type)),
+                    rec->normalized, rec->stride,
+                    reinterpret_cast<const void *>(dataAddr + (rec->byte_offset + rec->stride * baseVertex)));
+#endif
             } else if (toDisable & 1) {
                 glDisableVertexAttribArray(loc);
             }
@@ -246,14 +257,13 @@ extern "C" {
             ++loc;
             mask >>= 1;
             toEnable >>= 1;
-            toDisable >>= 1;
-        } while ((mask | toEnable | toDisable) != 0);
+        } while ((mask | toEnable | (toDisable >>= 1)) != 0);
     }
 }
 
 // Original 0x2938f8: bind the current vertex format from a vertex buffer.
 extern "C" {
-    static void NuIOS_BindVertexAttributes(isize, usize baseVertex) {
+    static void NuIOS_BindVertexAttributes(isize, i32 baseVertex) {
         NuIOS_BindVertexAttributesInternal(0, baseVertex, reinterpret_cast<const u32 *>(g_boundVertexFormat),
                                            *reinterpret_cast<const u32 *>(g_boundVertexFormat));
     }

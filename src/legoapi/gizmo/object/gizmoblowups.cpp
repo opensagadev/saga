@@ -627,38 +627,30 @@ void GizmoBlowupTypeRemove(GIZMOBLOWUPTYPE_s *type, WORLDINFO_s *world) {
     }
 
     GIZMOBLOWUPTYPE_s *types = world->gizmo_blowup_types;
-    GIZMOBLOWUPTYPE_s *active_end = types + world->gizmo_blowup_type_count;
-    if (type < types || type >= active_end) {
+    if (type < types) {
+        return;
+    }
+    const i32 capacity = world->current_level->max_gizmo_blowup_types;
+    if (type > types + capacity) {
         return;
     }
 
-    i32 capacity =
-        world->current_level != NULL ? world->current_level->max_gizmo_blowup_types : world->gizmo_blowup_type_count;
-    // Preserve active-only handling when the level capacity is missing or inconsistent.
-    if (capacity < world->gizmo_blowup_type_count) {
-        capacity = world->gizmo_blowup_type_count;
-    }
-    GIZMOBLOWUPTYPE_s *last_type = active_end - 1;
     GIZMOBLOWUPTYPE_s *last_allocated_type = types + capacity - 1;
     if (type < last_allocated_type) {
         for (GIZMOBLOWUPTYPE_s *moved_type = type + 1; moved_type <= last_allocated_type; ++moved_type) {
-            if (world->gizmo_blowup_count <= 0) {
-                continue;
-            }
-            GIZMOBLOWUP_s *blowup = world->gizmo_blowups;
-            GIZMOBLOWUP_s *end = blowup + world->gizmo_blowup_count;
-            for (; blowup != end; ++blowup) {
-                if (blowup->type == moved_type) {
-                    blowup->type = moved_type - 1;
+            for (i32 i = 0; i < world->gizmo_blowup_count; ++i) {
+                if (world->gizmo_blowups[i].type == moved_type) {
+                    world->gizmo_blowups[i].type = moved_type - 1;
                 }
             }
         }
     }
-    while (type != last_type) {
-        *type = *(type + 1);
-        ++type;
+    GIZMOBLOWUPTYPE_s *slot = type;
+    while (slot != world->gizmo_blowup_types + world->gizmo_blowup_type_count - 1) {
+        *slot = *(slot + 1);
+        ++slot;
     }
-    memset(type, 0, sizeof(*type));
+    memset(slot, 0, sizeof(*slot));
     --world->gizmo_blowup_type_count;
 }
 

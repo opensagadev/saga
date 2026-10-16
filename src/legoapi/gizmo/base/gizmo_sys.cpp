@@ -28,7 +28,7 @@ GIZMOSYS *CreateGizmoSys(void *world, VARIPTR *buf, VARIPTR *buf_end) {
             if (gizmo_sys->sets != NULL) {
                 GIZMOSET *set = gizmo_sys->sets;
                 GIZMOTYPE *type = gizmotypes->types;
-                for (i32 type_index = 0; type_index < gizmotypes->count; ++type_index, ++type, ++set) {
+                for (i32 type_index = 0; type_index < gizmotypes->count; ++type_index, ++set, ++type) {
                     set->type = type;
 
                     if (type->fns.get_max_gizmos_fn != NULL) {
@@ -195,7 +195,7 @@ void GizmoSysAddGizmos(GIZMOSYS_s *gizmo_sys, GIZFLOW_s *giz_flow, void *world) 
     if (gizmotypes != NULL && gizmo_sys != NULL) {
         GIZMOTYPE *type = gizmotypes->types;
         GIZMOSET *set = gizmo_sys->sets;
-        for (i32 type_id = 0; type_id < gizmotypes->count; ++type_id, ++type, ++set) {
+        for (i32 type_id = 0; type_id < gizmotypes->count; ++type_id, ++set, ++type) {
             ResetGizmoType(gizmo_sys, type_id, NULL);
             if (type->fns.add_gizmos_fn != NULL) {
                 type->fns.add_gizmos_fn(gizmo_sys, type_id, world, set->unknown);

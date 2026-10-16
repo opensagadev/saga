@@ -1544,3 +1544,5 @@ void AIWander(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object, i32 chec
         packet->movement_target = NULL;
     }
 }
+
+#include "gameapi/ai/aisys/aisys.cpp"

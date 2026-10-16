@@ -2191,7 +2191,7 @@ DECOMP_ASSERT(offsetof(HOTHBATTLE_MELEE_s, creature_count) == 0xc4, "HOTHBATTLE 
 struct HashRedirect;
 struct LANGUAGEDATA {
     i32 language;   // 0x00
-    i32 unknown_04; // 0x04 (Game_LanguageList entries: {1,0},{2,0},{4,0},{5,0},{3,0},{8,0},{-1,0})
+    char *name;     // 0x04, the apitxt_* display name
 };
 struct LEVELDATADISPLAY;
 struct LEVELDATA_s;
