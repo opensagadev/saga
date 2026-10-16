@@ -269,7 +269,10 @@ static __attribute__((noclone)) void eduiFntPrintExCentre(void *font, int x, int
     __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.68");
 
 #if defined(__clang__)
-// Clang has no __builtin_va_arg_pack; format here and print the result.
+// Clang has no __builtin_va_arg_pack; format here and print the result. The
+// generic helper already owns this overload's mangled name, so rename it.
+static void eduiFntPrintEx(void *font, int x, int y, int alignment, char *format, ...)
+    __asm__("eduiFntPrintExFormatted");
 static void eduiFntPrintEx(void *font, int x, int y, int alignment, char *format, ...) {
     char text[1024];
     va_list arguments;

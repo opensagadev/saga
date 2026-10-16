@@ -1489,13 +1489,17 @@ extern "C" {
                 if (!visible)
                     continue;
                 matrix = key->effect_orientation;
-                position = key->position;
+                position.x = key->position.x;
+                position.y = key->position.y;
+                position.z = key->position.z;
             } else {
                 if (effect->sound_range > 0.0f && effect->use_explicit_clip_box == 0 &&
                     CameraEmitterDistance(&chunk->position) > effect->sound_range)
                     continue;
                 matrix = chunk->effect_orientation;
-                position = chunk->position;
+                position.x = chunk->position.x;
+                position.y = chunk->position.y;
+                position.z = chunk->position.z;
             }
             NuMtxTranslate(&matrix, &position);
             f32 render_time;

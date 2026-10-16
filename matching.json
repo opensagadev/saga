@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 80.665016,
+    "fuzzy_match_percent": 80.66566,
     "total_code": "4722419",
     "matched_code": "640665",
     "matched_code_percent": 13.566458,
@@ -80264,7 +80264,7 @@
           "address": 3502656,
           "offset": 2612688,
           "size": 2266,
-          "match_percent": 76.91322
+          "match_percent": 78.264465
         },
         {
           "name": "DebrisGlassParticlesActive",
