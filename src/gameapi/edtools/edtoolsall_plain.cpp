@@ -764,31 +764,30 @@ static void edgraRender() {
     edcamSet();
     edgraDrawCursor();
     if (edgra_nearest != -1) {
-        edgra_clump_s &clump = GrassClumps[edgra_nearest];
-        if (clump.kind == 3) {
+        if (GrassClumps[edgra_nearest].kind == 3) {
             if (edgra_editormode == 1) {
-                edbitsDrawDiagonalCross(clump.position.x, clump.position.y, clump.position.z, 0.125f, 0xffff0000,
+                edbitsDrawDiagonalCross(GrassClumps[edgra_nearest].position.x, GrassClumps[edgra_nearest].position.y, GrassClumps[edgra_nearest].position.z, 0.125f, 0xffff0000,
                                         edgra_mtl);
                 if (edgra_nearest_instance != -1) {
                     edbitsDrawCross(
-                        clump.position.x + GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->position.x,
-                        clump.position.y + GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->position.y,
-                        clump.position.z + GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->position.z,
+                        GrassClumps[edgra_nearest].position.x + GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, edgra_nearest_instance)->position.x,
+                        GrassClumps[edgra_nearest].position.y + GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, edgra_nearest_instance)->position.y,
+                        GrassClumps[edgra_nearest].position.z + GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, edgra_nearest_instance)->position.z,
                         0.125f, 0xff80ffff, edgra_mtl);
                 }
             } else {
-                edbitsDrawDiagonalCross(clump.position.x, clump.position.y, clump.position.z, 0.125f, 0xff80ffff,
+                edbitsDrawDiagonalCross(GrassClumps[edgra_nearest].position.x, GrassClumps[edgra_nearest].position.y, GrassClumps[edgra_nearest].position.z, 0.125f, 0xff80ffff,
                                         edgra_mtl);
             }
         } else {
-            edbitsDrawDiagonalCross(clump.position.x, clump.position.y, clump.position.z, 0.125f, 0xff80ffff,
+            edbitsDrawDiagonalCross(GrassClumps[edgra_nearest].position.x, GrassClumps[edgra_nearest].position.y, GrassClumps[edgra_nearest].position.z, 0.125f, 0xff80ffff,
                                     edgra_mtl);
-            if (static_cast<u8>(clump.unknown_25 - 3) < 2) {
-                edbitsDrawCube(clump.position.x, clump.position.y, clump.position.z, clump.size, 0.0f, clump.size, 0, 0,
-                               0, clump.rotation_z, clump.rotation_y, 0xff80ffff, edgra_mtl);
+            if (static_cast<u8>(GrassClumps[edgra_nearest].unknown_25 - 3) < 2) {
+                edbitsDrawCube(GrassClumps[edgra_nearest].position.x, GrassClumps[edgra_nearest].position.y, GrassClumps[edgra_nearest].position.z, GrassClumps[edgra_nearest].size, 0.0f, GrassClumps[edgra_nearest].size, 0, 0,
+                               0, GrassClumps[edgra_nearest].rotation_z, GrassClumps[edgra_nearest].rotation_y, 0xff80ffff, edgra_mtl);
             } else {
-                edbitsDrawCircleTilted(&clump.position, clump.size, 0xff80ffff, edgra_mtl, clump.rotation_z,
-                                       clump.rotation_y);
+                edbitsDrawCircleTilted(&GrassClumps[edgra_nearest].position, GrassClumps[edgra_nearest].size, 0xff80ffff, edgra_mtl, GrassClumps[edgra_nearest].rotation_z,
+                                       GrassClumps[edgra_nearest].rotation_y);
             }
         }
     }
@@ -3631,20 +3630,20 @@ extern "C" {
     eduiitem_s *eduiItemGradPickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text) {
         edui_gradient_pick_s *item =
             static_cast<edui_gradient_pick_s *>(NU_ALLOC(sizeof(edui_gradient_pick_s), 4, 1, "", 0));
-        if (!item)
-            return NULL;
-        memset(item, 0, sizeof(*item));
-        item->type = 7;
-        item->data = data;
-        memcpy(item->colours, colours, sizeof(item->colours));
-        item->process = eduicbProcessGradPick;
-        item->render = eduicbRenderGradPick;
-        item->destroy = eduicbItemGradPickDestroy;
-        item->text_alignment = 0x40;
-        item->selection_group = 0;
-        eduiItemSetText(item, text);
-        item->change_timer = 0;
-        item->changed = callback;
+        if (__builtin_expect(item != NULL, 1)) {
+            memset(item, 0, sizeof(*item));
+            item->type = 7;
+            item->data = data;
+            memcpy(item->colours, colours, sizeof(item->colours));
+            item->process = eduicbProcessGradPick;
+            item->render = eduicbRenderGradPick;
+            item->destroy = eduicbItemGradPickDestroy;
+            item->text_alignment = 0x40;
+            item->selection_group = 0;
+            eduiItemSetText(item, text);
+            item->change_timer = 0;
+            item->changed = callback;
+        }
         return item;
     }
     void eduiItemGraphAddOnionSkin(edui_graph_s *item, nugraph_s *graph) {
@@ -4181,15 +4180,21 @@ extern "C" {
             menu->y = padding;
     }
     void eduiMenuFitWidth(eduimenu_s *menu, i32 padding) {
+        eduiitem_s *first = menu->first;
         eduicbMenuOpenAllexpanders(menu);
         NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
         NuQFntSetScale(edui_font, edui_font_scale_x, edui_font_scale_y);
 
-        i32 width = menu->title ? static_cast<i32>(NuQFntPrintLenU(edui_font, menu->title)) >> 4 : 0;
+        i32 width = 0;
+        if (menu->title) {
+            i32 title_width = static_cast<i32>(NuQFntPrintLenU(edui_font, menu->title)) >> 4;
+            if (title_width > width)
+                width = title_width;
+        }
         i32 property_label_width = 0;
         i32 property_value_width = 0;
 
-        for (eduiitem_s *item = menu->first; item; item = item->next) {
+        for (eduiitem_s *item = first; item; item = item->next) {
             i32 item_text_width = 0;
             switch (item->type) {
                 case 1:
@@ -4205,11 +4210,11 @@ extern "C" {
                 case 17: {
                     edui_prop_s *property = static_cast<edui_prop_s *>(item);
                     i32 label_width = item->text ? static_cast<i32>(NuQFntPrintLenU(edui_font, item->text)) >> 4 : 30;
+                    if (label_width > property_label_width)
+                        property_label_width = label_width;
                     i32 value_width = property->property_text
                                           ? static_cast<i32>(NuQFntPrintLenU(edui_font, property->property_text)) >> 4
                                           : 30;
-                    if (label_width > property_label_width)
-                        property_label_width = label_width;
                     if (value_width > property_value_width)
                         property_value_width = value_width;
                     item_text_width = value_width;
@@ -4641,12 +4646,12 @@ extern "C" {
         }
     }
     void eduiMenuSortItemsByTxt(eduimenu_s *menu) {
-        eduiitem_s *first = menu->first;
-        if (first) {
+        eduiitem_s *item = menu->first;
+        if (item) {
             i32 sorted;
             do {
+                eduiitem_s *first = item;
                 sorted = 1;
-                eduiitem_s *item = first;
                 while (item->next && item->text && item->next->text) {
                     if (item->type != 20 && (item->next->type == 20 || NuStrICmp(item->text, item->next->text) > 0)) {
                         eduiMenuItemMoveDown(menu, item);
@@ -4657,6 +4662,7 @@ extern "C" {
                         item = item->next;
                     }
                 }
+                item = first;
             } while (!sorted);
         }
     }
@@ -4790,7 +4796,7 @@ extern "C" {
     void eduiSetActiveMenu(eduimenu_s *menu) {
         if (eduiGetUsingMenuFocus()) {
             if (menu) {
-                while (menu->child)
+                while (__builtin_expect(menu->child != NULL, 0))
                     menu = menu->child;
                 active_menu = menu;
             } else {
@@ -5125,7 +5131,7 @@ extern "C" {
     static __used__ i32 eduicbInteractExpander(edui_interact_s *interact) {
         eduimenu_s *menu = interact->menu;
         edui_expander_s *expander = static_cast<edui_expander_s *>(interact->item);
-        if (edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY) {
+        if (__builtin_expect(edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY, 1)) {
             if (expander->changed)
                 expander->changed(menu, expander, 0);
             if (edui_cursor_x >= expander->button_x && edui_cursor_y >= expander->button_y * 0.5f &&
@@ -5289,15 +5295,11 @@ extern "C" {
         pick->cursor_x = MIN(1.0f, (MAX(0.0f, pick->cursor_x)));
         pick->cursor_y = MIN(1.0f, (MAX(0.0f, pick->cursor_y)));
         if (pad->analog_l2) {
-            pick->saturation -= static_cast<u32>(pad->analog_l2) * delta_time * 0.005f;
-            if (pick->saturation < 0.0f)
-                pick->saturation = 0.0f;
+            pick->saturation = MAX(0.0f, pick->saturation - static_cast<u32>(pad->analog_l2) * delta_time * 0.005f);
             return 1;
         }
         if (pad->analog_r2) {
-            pick->saturation += static_cast<u32>(pad->analog_r2) * delta_time * 0.005f;
-            if (pick->saturation > 1.0f)
-                pick->saturation = 1.0f;
+            pick->saturation = MIN(1.0f, pick->saturation + static_cast<u32>(pad->analog_r2) * delta_time * 0.005f);
             return 1;
         }
         pick->hue = pick->cursor_x * 360.0f;
@@ -5352,8 +5354,8 @@ extern "C" {
                 rep_timer = 0;
             if (!rep_timer || (pad->digital_buttons_pressed & 0x08)) {
                 f32 value = slider->value + slider->granularity;
-                if (value > slider->minimum + slider->range)
-                    value = slider->minimum + slider->range;
+                f32 maximum = slider->minimum + slider->range;
+                value = maximum < value ? maximum : value;
                 f32 rounded = value > 0.0f ? value + slider->granularity * 0.5f : value - slider->granularity * 0.5f;
                 slider->value = static_cast<i32>(rounded / slider->granularity) * slider->granularity;
                 slider->normalized_value = (slider->value - slider->minimum) / slider->range;
@@ -6060,7 +6062,7 @@ extern "C" {
         item->y = y;
         item->x = x;
         eduiDrawRect(x << 4, y << 3, width << 4, height << 3, item->colours[2], uimtls[ui_bgmtl]);
-        eduiDrawFontSet(edui_font);
+        eduiDrawFontSetLikely(edui_font);
         eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         eduiFntPrintEx(edui_font, x << 4, (y << 3) + baseline, 16, item->text);
 

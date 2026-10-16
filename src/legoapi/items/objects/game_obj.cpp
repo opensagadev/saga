@@ -1889,7 +1889,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
                 f32 pulse = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f);
                 angle = static_cast<u16>((pulse + pulse) * 65536.0f);
                 message.alpha = static_cast<u8>(
-                    static_cast<i32>((24.0f * NuTrigTable[angle >> 1] + 104.0f) * object->interaction_arrow_blend));
+                    static_cast<i32>((24.0f * NuTrigTable[static_cast<u16>(angle) / 2] + 104.0f) * object->interaction_arrow_blend));
                 message.flags = 0x1083;
                 message.field_0x4f = 4;
                 AddGameMsg(&message);
@@ -1998,7 +1998,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         message.blue = PlayerRGB[i][2];                                                                                \
         f32 pulse = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f);                                                  \
         u16 angle = static_cast<u16>((pulse + pulse) * 65536.0f);                                                      \
-        message.alpha = static_cast<u8>(48.0f * NuTrigTable[angle >> 1] + 80.0f);                                      \
+        message.alpha = static_cast<u8>(48.0f * NuTrigTable[angle / 2] + 80.0f);                                      \
         message.flags = 0x83;                                                                                          \
         message.field_0x4f = 4;                                                                                        \
         AddGameMsg(&message);                                                                                          \
@@ -2256,8 +2256,8 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
                         momentum.y += object->reset_velocity.y * 0.75f;
                         momentum.z += object->reset_velocity.z * 0.75f;
                     } else if (angle_override != NULL) {
-                        momentum.z += NuTrigTable[((static_cast<u16>(*angle_override + 0x4000)) >> 1) & 0x7fff] * 2.0f;
-                        momentum.x += NuTrigTable[(*angle_override >> 1) & 0x7fff] * 2.0f;
+                        momentum.x += NuTrigTable[*angle_override / 2] * 2.0f;
+                        momentum.z += NuTrigTable[((*angle_override + 0x4000) >> 1) & 0x7fff] * 2.0f;
                     }
                     NuMtxMul(&matrix, &joint_matrices[joint], &object->apiobj.field_0xb8);
                     params = Default_ADDPART;

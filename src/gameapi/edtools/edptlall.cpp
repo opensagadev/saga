@@ -490,22 +490,21 @@ static void edptlcbSetSoundID(eduimenu_s *menu, eduiitem_s *item, u32) {
 
     for (i32 i = 0; i < 512; ++i) {
         i32 instance_id = edpp_ptls[i].instance_id;
-        if (instance_id == 99999 || instance_id == -1) {
+        if (instance_id == -1 || instance_id == 99999) {
             continue;
         }
 
-        debinftype *effect = debtab[debkeydata[instance_id].effect_index];
         debkeydata[instance_id].process_collision_sound = 0;
-        if (effect->sound_data[0] != -1) {
+        if (debtab[debkeydata[instance_id].effect_index]->sound_data[0] != -1) {
             debkeydata[instance_id].process_collision_sound = 1;
         }
-        if (effect->sound_data[3] != -1) {
+        if (debtab[debkeydata[instance_id].effect_index]->sound_data[3] != -1) {
             debkeydata[instance_id].process_collision_sound = 1;
         }
-        if (effect->sound_data[6] != -1) {
+        if (debtab[debkeydata[instance_id].effect_index]->sound_data[6] != -1) {
             debkeydata[instance_id].process_collision_sound = 1;
         }
-        if (effect->sound_data[9] != -1) {
+        if (debtab[debkeydata[instance_id].effect_index]->sound_data[9] != -1) {
             debkeydata[instance_id].process_collision_sound = 1;
         }
     }
@@ -996,7 +995,7 @@ static void edptlcbPasteClipboard(eduimenu_s *menu, eduiitem_s *, u32) {
 static void edptlcbResetParticles(eduimenu_s *, eduiitem_s *, u32) {
     for (i32 i = 0; i < 512; ++i) {
         i32 *instance_id = &edpp_ptls[i].instance_id;
-        if (*instance_id != 99999 && *instance_id != -1) {
+        if (*instance_id != -1 && *instance_id != 99999) {
             DebFreeInstantly(instance_id);
             *instance_id = 99999;
         }
@@ -1012,15 +1011,15 @@ static void edptlcbSetScaleFactor(eduimenu_s *, eduiitem_s *item, u32) {
 static void edptlcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     edptl_switchtype_menu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, edptlcbCancelSwitchTypeMenu, "Switch Type");
-    if (edptl_switchtype_menu == NULL)
-        return;
-    eduiMenuAddItem(edptl_switchtype_menu, eduiItemCheckCreate(0, colours, edpp_ptls[edpp_nearest].switch_type == 0, 1,
-                                                               edptlcbSetSwitchType, "None"));
-    eduiMenuAddItem(edptl_switchtype_menu, eduiItemCheckCreate(1, colours, edpp_ptls[edpp_nearest].switch_type == 1, 1,
-                                                               edptlcbSetSwitchType, "Global Switch"));
-    eduiMenuAttach(parent, edptl_switchtype_menu);
-    edptl_switchtype_menu->x = parent->x + 10;
-    edptl_switchtype_menu->y = parent->y + 40;
+    if (__builtin_expect(edptl_switchtype_menu != NULL, 1)) {
+        eduiMenuAddItem(edptl_switchtype_menu, eduiItemCheckCreate(0, colours, edpp_ptls[edpp_nearest].switch_type == 0,
+                                                                   1, edptlcbSetSwitchType, "None"));
+        eduiMenuAddItem(edptl_switchtype_menu, eduiItemCheckCreate(1, colours, edpp_ptls[edpp_nearest].switch_type == 1,
+                                                                   1, edptlcbSetSwitchType, "Global Switch"));
+        eduiMenuAttach(parent, edptl_switchtype_menu);
+        edptl_switchtype_menu->x = parent->x + 10;
+        edptl_switchtype_menu->y = parent->y + 40;
+    }
 }
 static void edptlcbTestDetailMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     edptl_testdetail_menu = eduiMenuCreate(70, 70, 250, 250, ed_fnt, edptlcbCancelTestDetailMenu, "Detail Level Test");

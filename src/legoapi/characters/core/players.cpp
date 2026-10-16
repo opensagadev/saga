@@ -722,7 +722,7 @@ float GetHoverPosY(GameObject_s *obj) {
 
     f32 height = obj->apiobj.field_0x218;
     if (height != 2000000.0f) {
-        if (obj->apiobj.water_height != 2000000.0f)
+        if (__builtin_expect(obj->apiobj.water_height != 2000000.0f, 1))
             height = MAX(obj->apiobj.water_height, height);
 
         f32 hover_height = WORLD->current_level->hover_height;
@@ -807,14 +807,12 @@ i32 Players_BothActive() {
 }
 
 PLAYERITEMTYPE_s *PlayerItemType_Find(i32 id) {
-    if (PlayerItemType != NULL && PLAYERITEMTYPECOUNT > 0) {
-        i32 i = 0;
-        while (PlayerItemType[i].id != id) {
-            i++;
-            if (i == PLAYERITEMTYPECOUNT)
-                return NULL;
+    PLAYERITEMTYPE_s *type = PlayerItemType;
+    if (type != NULL) {
+        for (i32 i = 0; i < PLAYERITEMTYPECOUNT; i++) {
+            if (type[i].id == id)
+                return &type[i];
         }
-        return &PlayerItemType[i];
     }
     return NULL;
 }
@@ -1532,7 +1530,7 @@ i32 MakePlayerList(i32 count) {
             PlayerList[player_count] = player->id;
         }
 
-        PlayerProgress[player_count].active = player->apiobj.flags_low >> 7;
+        PlayerProgress[player_count].active = player->apiobj.player_controlled;
 
         bool unavailable = false;
         if (player->field_0x7a5 != 6 && player->field_0xe32 != 2) {
@@ -1955,8 +1953,8 @@ void AveragePlayerCurrentSpeedMul() {
     } else {
         total += Player[1]->current_speed_mul;
         avg_currentspeed_mul = total;
-        if (count == 1) {
-            avg_currentspeed_mul *= 0.5f;
+        if (__builtin_expect(count == 1, 1)) {
+            avg_currentspeed_mul = total * 0.5f;
         }
     }
 }

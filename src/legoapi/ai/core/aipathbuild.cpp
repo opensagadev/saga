@@ -104,11 +104,14 @@ static void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s *editor_
         }
         AIPATHROUTE_s *route = &path->routes[route_indices[slot]];
         i32 name_length = strlen(editor_route->name);
-        if (name_length != 0) {
+        if (__builtin_expect(name_length != 0, 1)) {
             route->name = (char *)AISysBufferAlloc(cursor, end, name_length + 1);
             strcpy(route->name, editor_route->name);
         }
-        route->character_masks[0] = (editor_route->user_mask & (1ULL << 63)) ? ~0ULL : editor_route->user_mask;
+        route->character_masks[0] = editor_route->user_mask;
+        if (editor_route->user_mask & (1ULL << 63)) {
+            route->character_masks[0] = ~0ULL;
+        }
         route->character_masks[1] = editor_route->user_mask;
     }
 

@@ -3364,11 +3364,11 @@ static void DrawParaphernalia(GameObject_s *object) {
                 rotation.z = 0;
                 NuMtxSetRotationXYVU0(&matrix, &rotation);
                 matrix.m30 = object->apiobj.position.x +
-                             NuTrigTable[object->apiobj.field_0x276 >> 1] * object->apiobj.field_0x1dc * 1.75f;
+                             NuTrigTable[object->apiobj.field_0x276 / 2] * object->apiobj.field_0x1dc * 1.75f;
                 matrix.m31 = object->apiobj.collision_min.y +
                              (object->apiobj.collision_max.y - object->apiobj.collision_min.y) * 0.6f;
                 matrix.m32 = object->apiobj.position.z +
-                             NuTrigTable[static_cast<u16>(object->apiobj.field_0x276 + 0x4000) >> 1] *
+                             NU_COS_LUT(object->apiobj.field_0x276) *
                                  object->apiobj.field_0x1dc * 1.75f;
             }
             GameDrawCharacterModel(passenger->apiobj.character_model, &passenger->apiobj.anim_packet, &matrix, NULL,

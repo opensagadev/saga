@@ -193,7 +193,7 @@ void MechHintUIButton::Process(float elapsed) {
         scale = scale_to;
     }
     scale_elapsed = scale_duration;
-    if (!(slide_duration < 0.0f) && !(slide_elapsed >= slide_duration + slide_delay)) {
+    if (__builtin_expect(!(slide_duration < 0.0f) && !(slide_elapsed >= slide_duration + slide_delay), 0)) {
         slide_elapsed += elapsed;
         if (slide_elapsed > slide_duration + slide_delay)
             slide_elapsed = slide_duration + slide_delay;
@@ -201,15 +201,22 @@ void MechHintUIButton::Process(float elapsed) {
             *slide_target = ((slide_elapsed - slide_delay) / slide_duration) * (slide_to - slide_from) + slide_from;
     }
     position.x = slide;
-    if (next_hint != NULL && (slide_duration < 0.0f || slide_elapsed >= slide_duration + slide_delay)) {
+    if (next_hint != NULL && __builtin_expect(slide_duration < 0.0f || slide_elapsed >= slide_duration + slide_delay, 0)) {
         active_hint = next_hint;
         pending_hint = NULL;
         display_elapsed = 0.0f;
-        const bool touch = TouchHacks::TouchControlsActive || MechInputTouchSystem::s_actualTouchMode == 7;
-        position.y = touch ? ICONYPOS_TOUCHYFEELY : ICONYPOS_VIRTUALS;
-        const f32 blend = AlphaBlendTime;
-        slide_to = touch ? ICONXPOS_TOUCHYFEELY : ICONXPOS_VIRTUALS;
-        slide_from = *slide_target;
+        f32 blend;
+        if (TouchHacks::TouchControlsActive || MechInputTouchSystem::s_actualTouchMode == 7) {
+            position.y = ICONYPOS_TOUCHYFEELY;
+            blend = AlphaBlendTime;
+            slide_from = *slide_target;
+            slide_to = ICONXPOS_TOUCHYFEELY;
+        } else {
+            position.y = ICONYPOS_VIRTUALS;
+            blend = AlphaBlendTime;
+            slide_from = *slide_target;
+            slide_to = ICONXPOS_VIRTUALS;
+        }
         slide_elapsed = 0.0f;
         slide_delay = 0.0f;
         slide_duration = blend;
@@ -227,7 +234,7 @@ void MechHintUIButton::Process(float elapsed) {
     MechTouchUITexButton::Process(elapsed);
     if (visible) {
         visible = 0;
-        if (NewMode == 0 && NewLData == NULL && editor_active == 0 && GameTimer.time_elapsed > 0.0f &&
+        if (__builtin_expect(NewMode == 0, 0) && NewLData == NULL && editor_active == 0 && GameTimer.time_elapsed > 0.0f &&
             GameTimer.update_count != 0 && WORLD != NULL && WORLD->current_level != TITLES_LDATA &&
             CutSceneWaiting == 0 && Paused == 0 && CUTSTOPGAME == 0 && MiniCutCam == 0 && PANELOFF == 0 &&
             WORLD->current_level != STATUS_LDATA && (WORLD->current_level->flags & 0x400) == 0)

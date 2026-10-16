@@ -1579,7 +1579,7 @@ void JediB_Update(WORLDINFO_s *world) {
                 jedi_b.exclusion_mask |= 1ULL << player2->apiobj.field_0x289;
             }
         } else {
-            if (jedi_b.phase != 7) {
+            if (__builtin_expect(jedi_b.phase != 7, 1)) {
                 if (player->apiobj.pos_x * player->apiobj.pos_x + player->apiobj.pos_z * player->apiobj.pos_z >
                     jedib_safe_r * jedib_safe_r) {
                     jedi_b.exclusion_mask = 1ULL << player->apiobj.field_0x289;
@@ -1641,8 +1641,8 @@ void JediB_Update(WORLDINFO_s *world) {
                                 id = (chosen & 1) != 0 ? id_DROIDEKA : id_SUPERBATTLEDROID;
                             }
                             for (;;) {
-                                if (jedi_b.baddies[index].in_wave == 0 && jedi_b.baddies[index].random_type != 0 &&
-                                    jedi_b.baddies[index].id != id) {
+                                if (__builtin_expect(jedi_b.baddies[index].in_wave == 0 && jedi_b.baddies[index].random_type != 0 &&
+                                    jedi_b.baddies[index].id != id, 1)) {
                                     break;
                                 }
                                 index++;
@@ -1650,7 +1650,7 @@ void JediB_Update(WORLDINFO_s *world) {
                                     index = 0;
                                 }
                             }
-                            if (jedi_b.baddies[index].object != NULL) {
+                            if (__builtin_expect(jedi_b.baddies[index].object != NULL, 0)) {
                                 RemoveGameObject(jedi_b.baddies[index].object, 1);
                                 jedi_b.baddies[index].object = NULL;
                                 jedi_b.baddies[index].spawned_behind = 0;
@@ -1772,10 +1772,10 @@ void JediB_Update(WORLDINFO_s *world) {
                         break;
                     }
                     case 7:
-                        if (boss == NULL) {
+                        if (__builtin_expect(boss == NULL, 0)) {
                             boss = FindGameObject(id_JANGOFETT, 1, 1, 0, 0);
                             jedi_b.boss = boss;
-                            if (boss == NULL) {
+                            if (__builtin_expect(boss == NULL, 1)) {
                                 break;
                             }
                         }
@@ -1819,7 +1819,7 @@ void JediB_Update(WORLDINFO_s *world) {
                           (player->apiobj.objptr->id != id_JARJAR || player->apiobj.player_controlled) &&
                           (player->apiobj.character_data->game_character->uses_weapon_action != 4 ||
                            object->apiobj.character_data->game_character->uses_weapon_action != 4))) {
-                        if (object->ai.opponent == player) {
+                        if (__builtin_expect(object->ai.opponent == player, 1)) {
                             object->ai.opponent = NULL;
                         }
                         if (player2 != NULL) {

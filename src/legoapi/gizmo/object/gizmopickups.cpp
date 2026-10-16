@@ -131,16 +131,9 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
     if ((arcade_flags & 0x40) != 0)
         coins = torpedoes = 0;
     i32 to_panel;
-    if ((world->current_level->flags & LEVEL_PICKUPS_TO_PANEL) == 0) {
-        if (world->area != NULL && (world->area->flags & 0x100) != 0) {
-            player_id = qrand() / 32768;
-            to_panel = 1;
-        } else {
-            to_panel = player_id == -1 ? 0 : panel;
-        }
-    } else {
+    if ((world->current_level->flags & LEVEL_PICKUPS_TO_PANEL) != 0) {
         to_panel = 1;
-        if (player_id == -1) {
+        if (__builtin_expect(player_id == -1, 0)) {
             if (player2 != NULL)
                 player_id = qrand() / 32768;
             else if (Player[0] != NULL && Player[0]->apiobj.player_controlled)
@@ -148,6 +141,11 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
             else
                 player_id = 1;
         }
+    } else if (world->area != NULL && (world->area->flags & 0x100) != 0) {
+        player_id = qrand() / 32768;
+        to_panel = 1;
+    } else {
+        to_panel = player_id == -1 ? 0 : panel;
     }
     coins = ChallengeMode != 0 || Mission_Active(NULL) != NULL ? 0 : coins;
     if (speed == 1.0f)
@@ -180,7 +178,7 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
         if (silver > 1) {
             silver = 0;
             ++gold;
-            if (gold > 9) {
+            if (__builtin_expect(gold > 9, 0)) {
                 gold %= 10;
                 ++blue;
                 if (blue > 9) {
@@ -189,7 +187,7 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
                 }
             }
         }
-        if (gold > 4) {
+        if (__builtin_expect(gold > 4, 0)) {
             gold = qrand() / 32768;
             ++blue;
             if (blue > 9) {
@@ -197,7 +195,7 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
                 ++purple;
             }
         }
-        if (blue > 5) {
+        if (__builtin_expect(blue > 5, 0)) {
             blue = qrand() / 65536;
             ++purple;
         }

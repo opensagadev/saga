@@ -1338,7 +1338,7 @@ __attribute__((optimize("O2"), force_align_arg_pointer)) eduimenu_s *creatureEdi
     if (pad->digital_buttons_pressed & 0x80) {
         eduimenu_s *menu =
             eduiMenuCreate(200, 70, 240, 330, ed_fnt, aieditor_cbCancelMainMenu, const_cast<char *>("Options"));
-        if (menu == nullptr)
+        if (__builtin_expect(menu == nullptr, 0))
             return nullptr;
         eduiMenuAddItem(menu, eduiItemSelCreate(AIEDITOR_ROUTES, attr, 0, 0, aieditor_cvSelectEditorMode,
                                                 const_cast<char *>("Select Editor Mode")));
@@ -1350,7 +1350,7 @@ __attribute__((optimize("O2"), force_align_arg_pointer)) eduimenu_s *creatureEdi
         eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, creatureEditor_cbSelectType,
                                                 const_cast<char *>("Select Creature Type")));
         CreatureEditorRecord *creature = creatureEditor_Current();
-        if (creature != nullptr) {
+        if (__builtin_expect(creature != nullptr, 1)) {
             if (AIScriptNameFromIx(aieditor->ai_system, 0) != nullptr) {
                 eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, creatureEditor_cbSelectScript,
                                                         const_cast<char *>("Select Script")));
@@ -1406,7 +1406,7 @@ __attribute__((optimize("O2"), force_align_arg_pointer)) eduimenu_s *creatureEdi
                 return menu;
             }
             EDLOCATOR_s *locator = aieditor->nearest_locator;
-            if (selected != nullptr && locator != nullptr) {
+            if (__builtin_expect(selected != nullptr && locator != nullptr, 0)) {
                 if (selected->respawn_locator == locator)
                     selected->respawn_locator = nullptr;
                 else if (selected->path == locator->path)
@@ -1418,7 +1418,7 @@ __attribute__((optimize("O2"), force_align_arg_pointer)) eduimenu_s *creatureEdi
             CreatureEditorRecord *selected = creatureEditor_Current();
             EDLOCATOR_s *locator = aieditor->nearest_locator;
             if (selected != nullptr && locator != nullptr) {
-                if (selected->locator == locator)
+                if (__builtin_expect(selected->locator == locator, 1))
                     selected->locator = nullptr;
                 else if (selected->path == locator->path)
                     selected->locator = locator;
@@ -1436,7 +1436,7 @@ __attribute__((optimize("O2"), force_align_arg_pointer)) eduimenu_s *creatureEdi
                         aieditor->mode_selection_36930 =
                             reinterpret_cast<EditorNamedEntry *>(NuLinkedListGetTail(&aieditor->creatures));
                     change_selection = true;
-                } else if (pad->digital_buttons_pressed & 0x100) {
+                } else if (__builtin_expect(!!(pad->digital_buttons_pressed & 0x100), 1)) {
                     aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(creatureEditor_GetNearest(0));
                     change_selection = true;
                 }
@@ -1469,7 +1469,7 @@ __attribute__((optimize("O2"), force_align_arg_pointer)) eduimenu_s *creatureEdi
                     if (selected != nullptr && selected == hover)
                         aieditorsettings.area_rotation = selected->angle;
                     i32 &step = *reinterpret_cast<i32 *>(aieditor->unknown_36934);
-                    if (pad->digital_buttons_pressed & 0x8000)
+                    if (__builtin_expect(!!(pad->digital_buttons_pressed & 0x8000), 0))
                         step = 0x14;
                     else
                         step += 0x14;

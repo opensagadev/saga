@@ -27,7 +27,7 @@ f32 BlobShadowFade(NUVEC *position, f32 fade_start, f32 fade_end, f32 alpha) {
         camera_delta.x * camera_delta.x + camera_delta.y * camera_delta.y + camera_delta.z * camera_delta.z;
 
     if (distance_squared < fade_end * fade_end) {
-        if (distance_squared > fade_start * fade_start) {
+        if (__builtin_expect(distance_squared > fade_start * fade_start, 0)) {
             const f32 distance = NuFsqrt(distance_squared);
             return (1.0f - (distance - fade_start) / (fade_end - fade_start)) * alpha;
         }

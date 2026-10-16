@@ -857,11 +857,11 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
             return 1;
         }
 
-        if ((processor->action_data_1 & GO_TO_LOCATOR_IGNORE_PATH) == 0) {
-            AIMoveInstruction(packet, &locator->position, 0.0f, &locator->path_info, AIPACKET_MOVEMENT_TO_DESTINATION,
+        if ((processor->action_data_1 & GO_TO_LOCATOR_IGNORE_PATH) != 0) {
+            AIMoveInstruction(packet, &locator->position, 0.0f, &locator->path_info, AIPACKET_MOVEMENT_DIRECT,
                               packet->movement_instruction_parameter);
         } else {
-            AIMoveInstruction(packet, &locator->position, 0.0f, &locator->path_info, AIPACKET_MOVEMENT_DIRECT,
+            AIMoveInstruction(packet, &locator->position, 0.0f, &locator->path_info, AIPACKET_MOVEMENT_TO_DESTINATION,
                               packet->movement_instruction_parameter);
         }
 
@@ -877,14 +877,7 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
                                          : NuVecDistSqr(&packet->terrain_origin, &locator->position, &distance_vector);
         const f32 reach_distance = packet->movement_instruction_parameter + ai_moveradius +
                                    elapsed * packet->owner->apiobj.horizontal_velocity_magnitude;
-        if (!(reach_distance * reach_distance > distance_squared)) {
-            if ((packet->field_0x1e6 & 0x40) != 0 &&
-                (processor->action_data_1 & GO_TO_LOCATOR_MUST_REACH_DESTINATION) != 0 &&
-                AIBigJumpToDestinationFn != NULL) {
-                return AIBigJumpToDestinationFn(&packet->owner->apiobj, &locator->position) != 0;
-            }
-            return 0;
-        } else {
+        if (reach_distance * reach_distance > distance_squared) {
             if ((processor->action_data_1 & GO_TO_LOCATOR_FACE_OPPONENT) == 0 || packet->opponent_object == NULL) {
                 packet->movement_look_target = &processor->action_pos;
             }
@@ -897,6 +890,12 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
             }
             return 0;
         }
+        if ((packet->field_0x1e6 & 0x40) != 0 &&
+            (processor->action_data_1 & GO_TO_LOCATOR_MUST_REACH_DESTINATION) != 0 &&
+            AIBigJumpToDestinationFn != NULL) {
+            return AIBigJumpToDestinationFn(&packet->owner->apiobj, &locator->position) != 0;
+        }
+        return 0;
     }
 
     processor->action_data_1 = 0;
@@ -930,12 +929,14 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
 
                     processor->action_data_3 = AIPathFindLocator(sys, locator_name);
                 }
-                if (NuStrIStr(params[index - 1], "teleport") != NULL) {
+                if (__builtin_expect(NuStrIStr(params[index - 1], "teleport") != NULL, 0)) {
                     AILOCATOR *locator = static_cast<AILOCATOR *>(processor->action_data_3);
                     if (locator == NULL) {
                         return 1;
                     }
-                    packet->owner->apiobj.position = locator->position;
+                    packet->owner->apiobj.position.x = locator->position.x;
+                    packet->owner->apiobj.position.y = locator->position.y;
+                    packet->owner->apiobj.position.z = locator->position.z;
                     return 1;
                 }
                 continue;
@@ -1006,11 +1007,11 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
         return 1;
     }
 
-    if ((processor->action_data_1 & GO_TO_LOCATOR_IGNORE_PATH) == 0) {
-        AIMoveInstruction(packet, &locator->position, 0.0f, &locator->path_info, AIPACKET_MOVEMENT_TO_DESTINATION,
+    if ((processor->action_data_1 & GO_TO_LOCATOR_IGNORE_PATH) != 0) {
+        AIMoveInstruction(packet, &locator->position, 0.0f, &locator->path_info, AIPACKET_MOVEMENT_DIRECT,
                           packet->movement_instruction_parameter);
     } else {
-        AIMoveInstruction(packet, &locator->position, 0.0f, &locator->path_info, AIPACKET_MOVEMENT_DIRECT,
+        AIMoveInstruction(packet, &locator->position, 0.0f, &locator->path_info, AIPACKET_MOVEMENT_TO_DESTINATION,
                           packet->movement_instruction_parameter);
     }
 

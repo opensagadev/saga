@@ -267,35 +267,42 @@ void MechTouchUICharIcon::Process(float) {
     }
     field_0x46 = is_hovered;
 
+    const f32 dt = FRAMETIME;
     if (!(alpha_duration < 0.0f) && !(alpha_elapsed >= alpha_duration + alpha_delay)) {
-        alpha_elapsed += FRAMETIME;
-        if (alpha_elapsed > alpha_duration + alpha_delay) {
-            alpha_elapsed = alpha_duration + alpha_delay;
+        f32 elapsed = alpha_elapsed + dt;
+        if (elapsed > alpha_duration + alpha_delay) {
+            elapsed = alpha_duration + alpha_delay;
         }
-        if (alpha_elapsed >= alpha_delay) {
-            *alpha_target = ((alpha_elapsed - alpha_delay) / alpha_duration) * (alpha_end - alpha_start) + alpha_start;
+        alpha_elapsed = elapsed;
+        if (elapsed >= alpha_delay) {
+            *alpha_target = ((elapsed - alpha_delay) / alpha_duration) * (alpha_end - alpha_start) + alpha_start;
         }
     }
 
-    visible = player != NULL && NewMode == 0 && NewLData == NULL && editor_active == 0 &&
-              GameTimer.time_elapsed > 0.0f && GameTimer.update_count != 0 && WORLD != NULL &&
-              WORLD->current_level != TITLES_LDATA && Paused == 0 && GameMenu[GameMenuLevel].menu == -1 &&
-              CutSceneWaiting == 0 && CUTSTOPGAME == 0 && MiniCutCam == 0;
+    visible = 0;
     if (player == NULL) {
         return;
+    }
+    if (NewMode == 0 && NewLData == NULL && editor_active == 0 && GameTimer.time_elapsed > 0.0f &&
+        GameTimer.update_count != 0 && WORLD != NULL && WORLD->current_level != TITLES_LDATA && Paused == 0 &&
+        GameMenu[GameMenuLevel].menu == -1 && CutSceneWaiting == 0 && CUTSTOPGAME == 0 && MiniCutCam == 0) {
+        visible = 1;
     }
 
     const u8 was_disabled = disabled;
     SetupDisabled();
     if (field_0x45 == 0 && was_disabled != disabled) {
-        const f32 destination = disabled != 0 ? 0.3f : 1.0f;
-        if (alpha_duration < 0.0f || alpha_elapsed >= alpha_duration + alpha_delay) {
+        if (__builtin_expect(alpha_duration < 0.0f || alpha_elapsed >= alpha_duration + alpha_delay, 0)) {
+            const f32 destination = disabled != 0 ? 0.3f : 1.0f;
+            const f32 start = *alpha_target;
             alpha_elapsed = 0.0f;
             alpha_duration = 0.4f;
-            alpha_start = *alpha_target;
             alpha_delay = 0.0f;
+            alpha_start = start;
+            alpha_end = destination;
+        } else {
+            alpha_end = disabled == 0 ? 1.0f : 0.3f;
         }
-        alpha_end = destination;
     }
 }
 
@@ -524,21 +531,29 @@ MechTouchUITexButton::MechTouchUITexButton(VuVec const &pos, float radius) : Mec
 
 void MechTouchUITexButton::Process(float) {
     f32 frame_time = FRAMETIME;
-    if (!(scale_duration < 0.0f) && !(scale_elapsed >= scale_duration + scale_delay)) {
-        scale_elapsed += frame_time;
-        if (scale_elapsed > scale_duration + scale_delay)
-            scale_elapsed = scale_duration + scale_delay;
-        if (scale_elapsed >= scale_delay) {
-            *scale_target = ((scale_elapsed - scale_delay) / scale_duration) * (scale_to - scale_from) + scale_from;
+    if (!(scale_duration < 0.0f) && __builtin_expect(!(scale_elapsed >= scale_duration + scale_delay), 0)) {
+        f32 elapsed = scale_elapsed + frame_time;
+        if (elapsed > scale_duration + scale_delay) {
+            elapsed = scale_duration + scale_delay;
+            scale_elapsed = elapsed;
+        } else {
+            scale_elapsed = elapsed;
+        }
+        if (elapsed >= scale_delay) {
+            *scale_target = ((elapsed - scale_delay) / scale_duration) * (scale_to - scale_from) + scale_from;
             frame_time = FRAMETIME;
         }
     }
-    if (!(alpha_duration < 0.0f) && !(alpha_elapsed >= alpha_duration + alpha_delay)) {
-        alpha_elapsed += frame_time;
-        if (alpha_elapsed > alpha_duration + alpha_delay)
-            alpha_elapsed = alpha_duration + alpha_delay;
-        if (alpha_elapsed >= alpha_delay)
-            *alpha_target = ((alpha_elapsed - alpha_delay) / alpha_duration) * (alpha_to - alpha_from) + alpha_from;
+    if (!(alpha_duration < 0.0f) && __builtin_expect(!(alpha_elapsed >= alpha_duration + alpha_delay), 0)) {
+        f32 elapsed = alpha_elapsed + frame_time;
+        if (elapsed > alpha_duration + alpha_delay) {
+            elapsed = alpha_duration + alpha_delay;
+            alpha_elapsed = elapsed;
+        } else {
+            alpha_elapsed = elapsed;
+        }
+        if (elapsed >= alpha_delay)
+            *alpha_target = ((elapsed - alpha_delay) / alpha_duration) * (alpha_to - alpha_from) + alpha_from;
     }
     visible = alpha > 0.001f;
 }

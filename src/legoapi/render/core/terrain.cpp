@@ -6946,9 +6946,14 @@ extern "C" i32 NewRayCastScaleYMask(NUVEC *position, NUVEC *movement, f32 radius
     ScanTerrain(1, terrain_mask, scan_flags);
     TerI->position.y *= TerI->inverse_object_scale;
     TerI->movement.y *= TerI->inverse_object_scale;
-    ResolveRayCast(movement);
-    if (TerI->hit_type != 0)
+    DerotateMovementVector();
+    HitTerrain();
+    if (TerI->hit_type != 0) {
+        RayImpact(movement);
+        TerrainImpactNorm();
+        ShadNorm = TerI->movement_normal;
         movement->y *= TerI->object_scale;
+    }
     NuScratchRelease();
     return TerI->hit_type;
 }
@@ -7193,7 +7198,7 @@ extern "C" i32 NewRayCastSetHandel(NUVEC *position, NUVEC *movement, f32 radius,
     ScanTerrainHandel(scan_type, handle);
     DerotateMovementVector();
     HitTerrain();
-    if (TerI->hit_type != 0) {
+    if (__builtin_expect(TerI->hit_type != 0, 1)) {
         RayImpact(movement);
         TerrainImpactNorm();
         ShadNorm = TerI->movement_normal;

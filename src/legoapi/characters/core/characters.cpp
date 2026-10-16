@@ -1584,7 +1584,7 @@ void CollectCharcters_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
 
 nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id) {
     nuhspecial_s *special;
-    if (CharScene_Area != NULL && CharScene_Area[character_id].scene != NULL) {
+    if (__builtin_expect(CharScene_Area != NULL && CharScene_Area[character_id].scene != NULL, 1)) {
         special = &CharScene_Area[character_id].special_scene;
     } else if (world->minikit.character_scenes[character_id].scene != NULL) {
         special = &world->minikit.character_scenes[character_id].special_scene;

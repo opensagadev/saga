@@ -3355,7 +3355,7 @@ struct debkeydatatype_s {
     u8 field_2f6;
     u8 field_2f7;
     u8 timed_flags;
-    u8 field_2f9;
+    bool field_2f9;
     u8 field_2fa;
     u8 field_2fb;
     nugscn_s *gscene; // 0x2fc (target)
@@ -6041,7 +6041,9 @@ DECOMP_ASSERT(offsetof(TTNetwork, session) == 0x110f0, "TTNetwork session offset
 // (vptr+0x2c), EffectsThings (vptr+0x30). NuMain and PanelRender dispatch
 // through these slots, so the declarations must carry the same order.
 struct ThingManager {
-    virtual ~ThingManager();
+    virtual ~ThingManager() {
+    }
+    static void operator delete(void *, usize);
     virtual void AddThing(BaseThing *);
     virtual void AddThingAfterThis(BaseThing *);
     virtual void RemoveTemporaryThings();

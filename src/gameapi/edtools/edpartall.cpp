@@ -1015,7 +1015,7 @@ static void edpartSetScaleFactor(eduimenu_s *, eduiitem_s *item, u32) {
 }
 static void edpartSwitchTypeMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     edpart_switchtype_menu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, edpartCancelSwitchTypeMenu, "Switch Type");
-    if (edpart_switchtype_menu != NULL) {
+    if (__builtin_expect(edpart_switchtype_menu != NULL, 1)) {
         eduiMenuAddItem(edpart_switchtype_menu,
                         eduiItemCheckCreate(0, edblack, part_emits[edpart_nearest].switch_type == 0, 1,
                                             edpartSetSwitchType, "None"));

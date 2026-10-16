@@ -265,7 +265,7 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
         f32 min_x = block->bounds_min.x;
         if (top > max_y && bottom > max_y)
             continue;
-        if (min_y > top) {
+        if (__builtin_expect(min_y > top, 0)) {
             if (min_y > bottom)
                 continue;
         }

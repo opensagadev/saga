@@ -69,7 +69,7 @@ void FastWeaponIn(GameObject_s *object, i32 force_sound) {
     if (context != -1 && (context == LEGOCONTEXT_WEAPONIN || context == LEGOCONTEXT_WEAPONOUT)) {
         object->character_context = -1;
     }
-    if (force_sound != 0 && object->weapon_scale == 1.0f)
+    if (__builtin_expect(force_sound != 0, 1) && object->weapon_scale == 1.0f)
         FastWeaponInSfx(object);
     object->weapon_scale_rate = 5.0f;
     object->weapon_scale_state = WEAPON_SCALE_RETRACTING;
@@ -185,7 +185,7 @@ void FastWeaponOut(GameObject_s *object, i32 force_sound) {
     if (context != -1 && (context == LEGOCONTEXT_WEAPONIN || context == LEGOCONTEXT_WEAPONOUT)) {
         object->character_context = -1;
     }
-    if (force_sound != 0 && object->weapon_scale == 0.0f)
+    if (__builtin_expect(force_sound != 0, 1) && object->weapon_scale == 0.0f)
         FastWeaponOutSfx(object);
     object->weapon_scale_rate = 5.0f;
     object->weapon_out_timer = 0.0f;

@@ -812,7 +812,7 @@ i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s 
             NuVecAddScale(&spinner_position, &spinner_position, &spinner_direction, 0.5f);
             AIMoveInstruction(packet, &spinner_position, 0.0f, &target->path, 1, 0.0f);
         }
-    } else if (gizmo->type_id == grapple_gizmotype_id) {
+    } else if (__builtin_expect(gizmo->type_id == grapple_gizmotype_id, 1)) {
         GRAPPLE *grapple = static_cast<GRAPPLE *>(gizmo->object);
         if (object->character_context == LEGOCONTEXT_GRAPPLE && object->field_0x788 == grapple) {
             object->field_0x1094 = 5;
@@ -862,14 +862,18 @@ i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s 
         }
     } else if (gizmo->type_id == force_gizmotype_id) {
         GIZFORCE_s *force = static_cast<GIZFORCE_s *>(gizmo->object);
-        if (CharCategory_IsCategory(object, (force->config_flags & 0x10) != 0 ? 1 : 0) == 0)
+        if ((force->config_flags & 0x10) != 0) {
+            if (CharCategory_IsCategory(object, 1) == 0)
+                goto change_character;
+        } else if (CharCategory_IsCategory(object, 0) == 0) {
             goto change_character;
+        }
         if (NuVecXZDistSqr(&packet->terrain_origin, &target->position, &offset) < ai_moveradius * ai_moveradius) {
             packet->movement_look_target = &force->position;
             object->pad_gamepad->allocated_5a |= 4;
             object->gizforce_target = force;
         }
-    } else if (gizmo->type_id == grapple_gizmotype_id) {
+    } else if (__builtin_expect(gizmo->type_id == grapple_gizmotype_id, 1)) {
         GRAPPLE *grapple = static_cast<GRAPPLE *>(gizmo->object);
         if (processor->action_data_1 != 0) {
             if (object->character_context != 0) {
@@ -1000,7 +1004,7 @@ i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKE
     NUVEC *reference_position;
     if (use_player) {
         reference_position = &player->apiobj.position;
-    } else if (use_opponent && object->ai.opponent != NULL) {
+    } else if (__builtin_expect(use_opponent && object->ai.opponent != NULL, 0)) {
         reference_position = &static_cast<APIOBJECT *>(object->ai.opponent)->position;
     } else {
         reference_position = &target->position;

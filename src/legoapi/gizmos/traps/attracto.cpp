@@ -321,7 +321,7 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         NuVecAdd(&position, &position, &object->apiobj.position);
         GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
             AddGameMessage(text, &position, 1.3f, NULL, 0.0f, 255, 255, 255, 0x1087, 0.0f));
-        if (message != NULL)
+        if (__builtin_expect(message != NULL, 0))
             message->alpha = static_cast<i32>((0.2f * game_pulse + 0.6f) * 128.0f);
         available = true;
     }
@@ -332,7 +332,7 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         if ((object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0) {
             object->context_animation_timer += FRAMETIME;
             object->airborne_action_duration -= FRAMETIME;
-            if (!(object->airborne_action_duration <= 0.0f))
+            if (__builtin_expect(!(object->airborne_action_duration <= 0.0f), 1))
                 return;
             if (object->field_0x106e != 0) {
                 ATTRACTO_s *attracto = static_cast<ATTRACTO_s *>(object->field_0x788);
@@ -341,7 +341,7 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                     ++attracto->collected_count;
                     object->airborne_action_duration = 0.2f;
                     attracto = static_cast<ATTRACTO_s *>(object->field_0x788);
-                    if (attracto->collected_count == attracto->capacity)
+                    if (__builtin_expect(attracto->collected_count == attracto->capacity, 1))
                         attracto->filled = 1;
                     else if (object->field_0x106e != 0 && object->character_context != -1)
                         return;
@@ -355,7 +355,7 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         return;
     }
     if (object->character_context == 0x52) {
-        if ((object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) == 0 && !(object->context_animation_timer < 0.3f)) {
+        if (__builtin_expect((object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) == 0 && !(object->context_animation_timer < 0.3f), 0)) {
             object->character_context = -1;
             return;
         }

@@ -2144,10 +2144,10 @@ extern "C" i32 screendump;
 
 void GameTiming(WORLDINFO_s *world, float *game_time) {
     f32 level_name_target = 1.0f;
-    if (LevelNameTime <= 0.0f)
-        level_name_target = 0.0f;
-    else
+    if (LevelNameTime > 0.0f)
         LevelNameTime -= FRAMETIME;
+    else
+        level_name_target = 0.0f;
     LevelNameMul = SeekLinearF(LevelNameMul, level_name_target, FRAMETIME + FRAMETIME);
 
     if (Paused != 0) {
@@ -2206,9 +2206,9 @@ void GameTiming(WORLDINFO_s *world, float *game_time) {
     UpdateTimer(&GlobalTimer);
     menu_flash = NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f;
     f32 pulse_time = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f);
-    game_pulse = NuTrigTable[static_cast<u32>(static_cast<i32>((pulse_time + pulse_time) * 65536.0f)) >> 1 & 0x7fff];
+    game_pulse = NuTrigTable[static_cast<u16>(static_cast<i32>((pulse_time + pulse_time) * 65536.0f)) / 2];
     pulse_time = NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f);
-    global_pulse = NuTrigTable[static_cast<u32>(static_cast<i32>((pulse_time + pulse_time) * 65536.0f)) >> 1 & 0x7fff];
+    global_pulse = NuTrigTable[static_cast<u16>(static_cast<i32>((pulse_time + pulse_time) * 65536.0f)) / 2];
     MainRenderTime = SeekLinearF(MainRenderTime, MainRenderTargetTime, FRAMETIME);
     qrand();
 }
@@ -5454,7 +5454,9 @@ ThingManager::ThingManager(i32 max_things) {
     theThingManager = this;
 }
 
-ThingManager::~ThingManager() {
+// ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
+inline void ThingManager::operator delete(void *thing, usize size) {
+    theMemoryManager.FreePool(thing, size);
 }
 
 static eduimenu_s *edTimingMenu;

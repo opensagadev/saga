@@ -101,9 +101,15 @@ static void DrawHint_LSWBody(HINT_s *hint, i32 max_lines) {
     if ((WORLD->current_level->flags & LEVEL_STATUS) == 0)
         text_y = hint->control_mode_ids[0] == 0x164 ? -0.1f : -0.7f;
 
-    const bool mirrored = (hint->flags & 0x04) != 0;
-    const f32 text_x = mirrored ? 0.0f : 0.09f - ICONX;
-    const i32 text_lines = max_lines == -1 ? 3 : max_lines;
+    f32 text_x;
+    i32 justify;
+    if ((hint->flags & 0x04) != 0) {
+        text_x = 0.0f;
+        justify = 0;
+    } else {
+        text_x = 0.09f - ICONX;
+        justify = 2;
+    }
     f32 icon_x = -ICONX;
 
     const i32 control_mode = MechInputTouchSystem::s_baseControlMode;
@@ -115,20 +121,21 @@ static void DrawHint_LSWBody(HINT_s *hint, i32 max_lines) {
         const u16 pulse_angle = static_cast<u16>(NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f);
         const f32 colour_pulse = NU_SIN_LUT(pulse_angle) * 0.5f + 0.5f;
         i32 colour_index = static_cast<i8>(hint->pad_0x05[0]);
-        if (colour_index == -1)
+        if (static_cast<i8>(hint->pad_0x05[0]) == -1)
             colour_index = hintsys.state;
-        u8 colours[3];
+        i32 colours[3];
         for (i32 channel = 0; channel < 3; ++channel) {
             const f32 base = static_cast<f32>(HintRGB[colour_index][channel]);
-            colours[channel] = static_cast<u8>(static_cast<i32>(((base + 255.0f) * 0.5f - base) * colour_pulse + base));
+            colours[channel] = static_cast<i32>(((base + 255.0f) * 0.5f - base) * colour_pulse + base);
         }
 
+        const i32 text_lines = max_lines == -1 ? 3 : max_lines;
         g_buttonFontScalePulse = CurrentHintButtonScale();
         const u8 text_alpha = static_cast<u8>(static_cast<i32>(alpha * 128.0f));
-        const f32 max_width = mirrored ? 1.4f : 2.0f - (1.0f + text_x) - 0.15f;
-        SmartTextEx(expanded, text_x, text_y, 1.0f, 0.5f, 0.5f, 0.5f, 0, colours[0], colours[1], colours[2], max_width,
-                    text_lines, NULL, 0, text_alpha);
-        if (mirrored)
+        const f32 max_width = justify != 0 ? 2.0f - (1.0f + text_x) - 0.15f : 1.4f;
+        SmartTextEx(expanded, text_x, text_y, 1.0f, 0.5f, 0.5f, 0.5f, justify, colours[0], colours[1], colours[2],
+                    max_width, text_lines, NULL, 0, text_alpha);
+        if (justify == 0)
             icon_x = -0.5f * smarttextex_longestwidth - 0.075f;
         g_buttonFontScalePulse = 1.0f;
     }
@@ -142,17 +149,18 @@ static void DrawHint_LSWBody(HINT_s *hint, i32 max_lines) {
     if (hintIconPos.duration < 0.0f || hintIconPos.elapsed >= hintIconPos.duration + hintIconPos.delay)
         hintIconPos.value.x = wave_x;
 
-    const u16 rotation = static_cast<u16>((NuFmod(GameTimer.time_elapsed, 2.5f) / 2.5f) * 65536.0f);
     if ((hint->flags & HINT_DIRECT_DISPLAY) != 0) {
+        const u16 rotation = static_cast<u16>((NuFmod(GameTimer.time_elapsed, 2.5f) / 2.5f) * 65536.0f);
         DrawPanel3DObjectNoAlpha(wave_x, text_y, 1.0f, 0.5f, 0.5f, 0.5f, 0, rotation, 0, &icon->special, 2);
     } else {
-        const f32 bounce = NU_SIN_LUT(static_cast<i32>(hintYPop.value));
         const f32 bounce_scale = TouchHacks::TouchControlsActive ? 0.2f : 0.8f;
+        const u16 rotation = static_cast<u16>((NuFmod(GameTimer.time_elapsed, 2.5f) / 2.5f) * 65536.0f);
+        const f32 bounce = NU_SIN_LUT(static_cast<i32>(hintYPop.value));
         const f32 scale = hintIconScale.value;
         DrawPanel3DObjectNoAlpha(hintIconPos.value.x, hintIconPos.value.y + bounce_scale * bounce, hintIconPos.value.z,
                                  scale, scale, scale, 0, rotation, 0, &icon->special, 2);
     }
-    if (mirrored) {
+    if (justify == 0) {
         const u16 mirrored_rotation = static_cast<u16>((NuFmod(GameTimer.time_elapsed, 2.5f) / 2.5f) * 65536.0f);
         DrawPanel3DObjectNoAlpha(-wave_x, text_y, 1.0f, 0.5f, 0.5f, 0.5f, 0, mirrored_rotation, 0, &icon->special, 2);
     }

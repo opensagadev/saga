@@ -1237,13 +1237,13 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
         u32 players_not_satisfying_terrain = 0;
 
         const u8 initial_mode = obstacle->mode;
-        if (static_cast<u8>(initial_mode - 1) < 2 || initial_mode == 5 || initial_mode == 6) {
-            if ((initial_mode & 0xfb) == 1 && GameCam->mode != -1 &&
-                obstacle->trigger_mode == 0xff &&
+        if (__builtin_expect(static_cast<u8>(initial_mode - 1) < 2 || initial_mode == 5 || initial_mode == 6, 1)) {
+            if (__builtin_expect((initial_mode & 0xfb) == 1 && GameCam->mode != -1 &&
+                __builtin_expect(obstacle->trigger_mode == 0xff, 0) &&
                 (obstacle->config_flags &
                  (GIZOBSTACLE_CONFIG_INVERT_PROXIMITY | GIZOBSTACLE_CONFIG_EXCLUDE_NON_PLAYER |
                   GIZOBSTACLE_CONFIG_CHECK_SUPPORTING_PLATFORM | GIZOBSTACLE_CONFIG_REQUIRE_ACTIVE_PLAYER |
-                  GIZOBSTACLE_CONFIG_REQUIRE_LINKED_OBJECT | GIZOBSTACLE_CONFIG_REQUIRE_CHARACTER_DATA_FLAG_04)) == 0) {
+                  GIZOBSTACLE_CONFIG_REQUIRE_LINKED_OBJECT | GIZOBSTACLE_CONFIG_REQUIRE_CHARACTER_DATA_FLAG_04)) == 0, 0)) {
                 const f32 distance_squared = NuVecDistSqr(&GameCam->pos, &obstacle->secondary_position, NULL);
                 if (distance_squared < closest_distance_squared &&
                     (!OBSTACLE_USES_BOX_TRIGGER(obstacle) || GizObstacle_PosWithinBox(obstacle, &GameCam->pos) != 0)) {
@@ -1257,7 +1257,7 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
                     const f32 distance_squared =
                         NuVecDistSqr(&obstacle->secondary_position, gizobstacletriggers[index], NULL);
                     if (distance_squared < closest_distance_squared) {
-                        if (OBSTACLE_USES_BOX_TRIGGER(obstacle) &&
+                        if (__builtin_expect(OBSTACLE_USES_BOX_TRIGGER(obstacle), 0) &&
                             GizObstacle_PosWithinBox(obstacle, gizobstacletriggers[index]) == 0)
                             continue;
                         closest_distance_squared = distance_squared;
@@ -1279,7 +1279,7 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
 
             const i8 player_index = object->apiobj.field_0x27c;
             if (player_index == -1) {
-                if ((obstacle->config_flags & GIZOBSTACLE_CONFIG_EXCLUDE_NON_PLAYER) != 0) {
+                if (__builtin_expect((obstacle->config_flags & GIZOBSTACLE_CONFIG_EXCLUDE_NON_PLAYER) != 0, 1)) {
                     continue;
                 }
             } else {
@@ -1302,7 +1302,7 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
             const bool requires_obstacle_platform =
                 (obstacle->mode & 0xfb) == 2 && object->apiobj.field_0x27d == 0 &&
                 (object->field_0xf03 & GAMEOBJECT_F03_FLAG_OBSTACLE_TERRAIN_VALID) == 0 && object->field_0xe31 != 1;
-            if (requires_obstacle_platform) {
+            if (__builtin_expect(!!(requires_obstacle_platform), 1)) {
                 bool on_obstacle_platform = false;
                 if (obstacle->anim_set != NULL) {
                     for (GAMEANIMOBJ_s *anim_object = obstacle->anim_set->objects; anim_object != NULL;
@@ -1325,7 +1325,7 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
                 if ((!OBSTACLE_USES_BOX_TRIGGER(obstacle) ||
                      GizObstacle_PosWithinBox(obstacle, &object->apiobj.collision_position) != 0) &&
                     GizObstacle_SatisfyingTerrainChecks(obstacle, object) != 0) {
-                    if (object->apiobj.field_0x27c != -1) {
+                    if (__builtin_expect(object->apiobj.field_0x27c != -1, 0)) {
                         players_not_satisfying_terrain &= ~(1u << object->apiobj.field_0x27c);
                     }
                     closest_distance_squared = distance_squared;
@@ -1348,7 +1348,7 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
                 obstacle->proximity_output = 1;
                 obstacle->triggering_object = closest_object;
             }
-        } else if (closest_position == NULL) {
+        } else if (__builtin_expect(closest_position == NULL, 1)) {
             obstacle->proximity_output = 1;
             obstacle->triggering_object = closest_object;
         }

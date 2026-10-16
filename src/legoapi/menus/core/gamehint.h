@@ -15,7 +15,7 @@ struct HintScalarTransition {
     HintScalarTransition() : target(&value), elapsed(0.0f), duration(-1.0f), delay(0.0f) {
     }
     void Update(f32 dt) {
-        if (!(duration < 0.0f) && !(elapsed >= duration + delay)) {
+        if (__builtin_expect(!(duration < 0.0f) && !(elapsed >= duration + delay), 0)) {
             elapsed += dt;
             if (elapsed > duration + delay)
                 elapsed = duration + delay;
@@ -33,7 +33,7 @@ struct HintVectorTransition {
     HintVectorTransition() : target(&value), elapsed(0.0f), duration(-1.0f), delay(0.0f) {
     }
     void Update(f32 dt) {
-        if (!(duration < 0.0f) && !(elapsed >= duration + delay)) {
+        if (__builtin_expect(!(duration < 0.0f) && !(elapsed >= duration + delay), 0)) {
             elapsed += dt;
             if (elapsed > duration + delay)
                 elapsed = duration + delay;

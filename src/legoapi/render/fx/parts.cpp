@@ -467,37 +467,37 @@ static __used__ void PartStolen_Coin(PART_s *part) {
 
 extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 static __used__ void PartExtra_BlueCoin(PART_s *part) {
-    if ((part->render_flags & 2) == 0)
-        return;
-    i32 effect = WORLD->debris_sys->entries[56].effect;
-    if (effect == -1)
-        return;
-    f32 rate;
-    if (WORLD->area != NULL) {
-        rate = (WORLD->area->flags & 0x104) == 4 ? 2.5f : 5.0f;
-    } else {
-        rate = 5.0f;
+    if (__builtin_expect((part->render_flags & 2) != 0, 0)) {
+        i32 effect = WORLD->debris_sys->entries[56].effect;
+        if (effect == -1)
+            return;
+        f32 rate;
+        if (WORLD->area != NULL) {
+            rate = (WORLD->area->flags & 0x104) == 4 ? 2.5f : 5.0f;
+        } else {
+            rate = 5.0f;
+        }
+        i32 count = ParticlesPerSecond(rate, FRAMETIME);
+        if (count > 0)
+            AddVariableShotDebrisEffect(effect, &part->position, count, 0, 0);
     }
-    i32 count = ParticlesPerSecond(rate, FRAMETIME);
-    if (count > 0)
-        AddVariableShotDebrisEffect(effect, &part->position, count, 0, 0);
 }
 
 static __used__ void PartExtra_PurpleCoin(PART_s *part) {
-    if ((part->render_flags & 2) == 0)
-        return;
-    i32 effect = WORLD->debris_sys->entries[57].effect;
-    if (effect == -1)
-        return;
-    f32 rate;
-    if (WORLD->area != NULL) {
-        rate = (WORLD->area->flags & 0x104) == 4 ? 2.5f : 5.0f;
-    } else {
-        rate = 5.0f;
+    if (__builtin_expect((part->render_flags & 2) != 0, 0)) {
+        i32 effect = WORLD->debris_sys->entries[57].effect;
+        if (effect == -1)
+            return;
+        f32 rate;
+        if (WORLD->area != NULL) {
+            rate = (WORLD->area->flags & 0x104) == 4 ? 2.5f : 5.0f;
+        } else {
+            rate = 5.0f;
+        }
+        i32 count = ParticlesPerSecond(rate, FRAMETIME);
+        if (count > 0)
+            AddVariableShotDebrisEffect(effect, &part->position, count, 0, 0);
     }
-    i32 count = ParticlesPerSecond(rate, FRAMETIME);
-    if (count > 0)
-        AddVariableShotDebrisEffect(effect, &part->position, count, 0, 0);
 }
 
 void PowerUp_Particles(WORLDINFO_s *, NUVEC *);
@@ -539,10 +539,10 @@ static __used__ void PowerUp_UpdatePart(PART_s *part) {
 
 static __used__ void PowerUp_EndMsg(GAMEMESSAGE_s *message) {
     GameAudio_PlaySfx(0x26, NULL, 0, 0);
-    if (FindGameMsgsWithID(7, 0, message->player_index, message)) {
+    if (__builtin_expect(FindGameMsgsWithID(7, 0, message->player_index, message) != 0, 0)) {
         NUVEC position;
         const i32 player = message->player_index;
-        position.x = player == 0 ? -ICONX : ICONX;
+        position.x = player != 0 ? ICONX : -ICONX;
         position.y = PowerUp_GetPanelY(player) + STATSPOSY;
         position.z = 1.0f;
         ADDGAMEMSG_ALIGNED16 add = AddGameMsg_Default;
@@ -1855,8 +1855,8 @@ extern "C" {
         PART_s *part = Part;
         for (i32 index = 0; index < MAXPARTS; ++index, ++part) {
             if ((part->active & 1) != 0 && part->source_special != NULL && part->special.scene == scene) {
-                part->active &= ~1;
                 memset(&part->special, 0, sizeof(part->special));
+                part->active &= ~1;
                 part->source_special = NULL;
             }
         }

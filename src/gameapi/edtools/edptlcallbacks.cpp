@@ -273,11 +273,11 @@ static void edptlcbSetSoundControl(eduimenu_s *menu, eduiitem_s *item, u32) {
     if (edpp_nearest != -1 && edpp_ptls[edpp_nearest].instance_id != -1) {
         debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
         u32 sound_index = data >> 16;
-        effect->sound_data[sound_index * 3 + 1] = data - (sound_index << 16);
+        reinterpret_cast<i32(*)[3]>(effect->sound_data)[sound_index][1] = data - (sound_index << 16);
     }
     for (i32 i = 0; i < 512; ++i) {
         i32 instance_id = edpp_ptls[i].instance_id;
-        if (instance_id == 99999 || instance_id == -1) {
+        if (instance_id == -1 || instance_id == 99999) {
             continue;
         }
         debkeydatatype_s *key = &debkeydata[instance_id];
@@ -2282,7 +2282,7 @@ static void cbPtlQuickDeleteMenu(eduimenu_s *menu, eduiitem_s *, u32) {
             }
             i32 index;
             for (index = 0; index < 512; ++index) {
-                if (edpp_ptls[index].instance_id != 99999 && edpp_ptls[index].instance_id != -1 &&
+                if (edpp_ptls[index].instance_id != -1 && edpp_ptls[index].instance_id != 99999 &&
                     edpp_ptls[index].effect_index == type) {
                     break;
                 }
@@ -2444,7 +2444,6 @@ static void cbPtlInstanceSettingsMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
         return;
 
-    const edpp_particle_s &particle = edpp_ptls[edpp_nearest];
     edptl_instancesettings_menu =
         eduiMenuCreate(70, 70, 250, 300, ed_fnt, cbPtlCancelInstanceSettingsMenu, "Instance Settings");
     if (edptl_instancesettings_menu == NULL)
@@ -2452,13 +2451,13 @@ static void cbPtlInstanceSettingsMenu(eduimenu_s *parent, eduiitem_s *, u32) {
 
     eduiMenuAddItem(edptl_instancesettings_menu,
                     eduiItemSliderCreateInt(0, edblack, 0, cbPtlChangePriority, 0, 0xffff,
-                                            static_cast<u16>(particle.render_priority), "Base Priority"));
-    eduiMenuAddItem(edptl_instancesettings_menu, eduiItemToggleCreate(1, edblack, particle.dynamic_priority, 1,
+                                            static_cast<u16>(edpp_ptls[edpp_nearest].render_priority), "Base Priority"));
+    eduiMenuAddItem(edptl_instancesettings_menu, eduiItemToggleCreate(1, edblack, edpp_ptls[edpp_nearest].dynamic_priority, 1,
                                                                       cbPtlToggleDynamicPriority, "Dynamic Priority"));
     eduiMenuAddItem(edptl_instancesettings_menu,
                     eduiItemSelCreate(1, edblack, 0, 0, edptlcbScaleEffectMenu, "Scale Effect..."));
     eduiMenuAddItem(edptl_instancesettings_menu,
-                    eduiItemToggleCreate(0, edblack, particle.facing_mode, 2, cbPtlSetFacing, "Facing Enabled"));
+                    eduiItemToggleCreate(0, edblack, edpp_ptls[edpp_nearest].facing_mode, 2, cbPtlSetFacing, "Facing Enabled"));
     eduiMenuAttach(parent, edptl_instancesettings_menu);
     edptl_instancesettings_menu->x = parent->x + 10;
     edptl_instancesettings_menu->y = parent->y + 40;
