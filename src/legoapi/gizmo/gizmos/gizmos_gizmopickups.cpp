@@ -15,8 +15,8 @@
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
 
-extern i32 DoubleScore;
-extern TIMER BonusTimer;
+extern "C" i32 DoubleScore;
+extern "C" TIMER BonusTimer;
 
 void NewBuzz(nupad_s *pad, f32 amount, i32 flags);
 

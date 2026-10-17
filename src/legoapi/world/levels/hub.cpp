@@ -92,7 +92,7 @@ extern i32 qrand();
 extern void Door_GoThrough(WORLDINFO_s *, DOOR_s *, i32);
 extern GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
 extern void BackDrop_ResetColours();
-extern f32 MainRenderTargetTime;
+extern "C" f32 MainRenderTargetTime;
 extern void MakeFreePlayModelList(i32 first_model, i32 second_model, i32 area, i32 level, i32 include_bonus);
 extern void GameDrawMenuEntry(MENU *menu, char *text);
 extern i32 GameAudio_GetSfxId(i32 sfx);
@@ -3059,7 +3059,7 @@ static void Hub_MakeFreePlayList(i32 first_model, i32 second_model) {
     }
 }
 
-extern f32 MainRenderTime;
+extern "C" f32 MainRenderTime;
 
 static __used__ void Hub_UpdateSelectMode() {
     i16 ids[HUB_VEHICLE_ID_CAPACITY];
@@ -3344,7 +3344,7 @@ void MenuInitEpisodes(MENU_s *) {
     }
 }
 
-extern f32 MainRenderTime;
+extern "C" f32 MainRenderTime;
 extern i16 tSELECT, tBACK, tSELECTING;
 extern "C" void MenuRepeat(i32 *, i32 *, f32 *, u8 *, f32, f32);
 void WipeBackToHub();
@@ -3599,7 +3599,7 @@ void MenuUpdateSelectMode(MENU_s *) {
     Hub_UpdateSelectMode();
 }
 
-extern f32 MainRenderTime;
+extern "C" f32 MainRenderTime;
 extern i16 tSELECT, tBACK, tSELECTING;
 static void Hub_DrawSelectModeMenu(i32 selected, f32 alpha);
 

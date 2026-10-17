@@ -52,7 +52,7 @@ struct TouchHolder;
 
 void CheckForPlayersTurnedOff();
 
-extern NUVEC plr_lastpos;
+extern "C" NUVEC plr_lastpos;
 
 extern void GetTopBot(GameObject_s *obj);
 extern f32 FindGunshipHoverHeight(GameObject_s *obj);

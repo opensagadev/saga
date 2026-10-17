@@ -219,7 +219,7 @@ void UpdateRippleSet(ripple_set_s *set) {
     erasecount = 0;
 }
 
-extern ripple_set_s *ripples;
+extern "C" ripple_set_s *ripples;
 void VecRotateAxis(NUVEC *, u16, NUVEC *);
 void AddRipple(ripple_set_s *, NUMTX *, float, float, float, float, RGBA, RGBA, i32, numtl_s *, NUVEC *);
 

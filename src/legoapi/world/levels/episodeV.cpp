@@ -47,7 +47,7 @@
 #include <string.h>
 #include <stdio.h>
 
-extern i32 dagobah_training;
+extern "C" i32 dagobah_training;
 extern i32 obstacle_gizmotype_id;
 extern u8 LevFlag[16];
 extern MechWeakPtr<MechObjectInterface, 4> BobaRocketTarget;

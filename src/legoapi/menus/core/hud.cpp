@@ -54,9 +54,9 @@ u8 HudRadarPulse::IsFinished() {
     return 0;
 }
 
-extern i32 NewMode;
-extern i32 editor_active;
-extern i32 CutSceneWaiting;
+extern "C" i32 NewMode;
+extern "C" i32 editor_active;
+extern "C" i32 CutSceneWaiting;
 extern "C" i32 Paused;
 void HudRadarPulse::Process(float delta) {
     if (active) {

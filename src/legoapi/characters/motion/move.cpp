@@ -705,7 +705,7 @@ void Boulder_Move(PART_s *, f32);
 void Boulder_Kill(PART_s *, i32);
 extern "C" void NewPartRotation(PART_s *);
 void PlayGruntSfx(GameObject_s *);
-extern i32 dagobah_training;
+extern "C" i32 dagobah_training;
 extern i16 id_LUKESKYWALKERDAGOBAH;
 extern i32 newgamecam;
 extern f32 newgamecamtime;

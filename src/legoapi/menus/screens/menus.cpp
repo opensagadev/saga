@@ -42,9 +42,9 @@ extern u32 GAMEPAD_MENUSELECT;
 extern u32 GAMEPAD_MENUCANCEL;
 extern u32 GAMEPAD_TOGGLELEFT;
 extern u32 GAMEPAD_TOGGLERIGHT;
-extern GAMEPAD_s GamePad[64];
+extern "C" GAMEPAD_s GamePad[64];
 extern i32 readpads_always;
-extern i32 reset_area;
+extern "C" i32 reset_area;
 extern i32 MenuSFX;
 
 eduimenu_s *GetMenuActiveChild(eduimenu_s *menu) {

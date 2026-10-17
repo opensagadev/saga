@@ -99,8 +99,8 @@ extern i16 id_CHEWBACCA;
 extern i16 id_EWOK;
 extern i16 id_GAMORREANGUARD;
 extern i16 id_WICKET;
-extern f32 chattersfxwait;
-extern i32 DoubleScore;
+extern "C" f32 chattersfxwait;
+extern "C" i32 DoubleScore;
 
 static GAMEAUDIO GameAudio_Default;
 static GAMEAUDIO *GameAudio = &GameAudio_Default;

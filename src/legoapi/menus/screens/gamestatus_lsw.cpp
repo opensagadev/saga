@@ -46,8 +46,8 @@ extern "C" i32 NewMode;
 extern "C" i32 reset_load;
 extern "C" i32 Paused;
 extern FadeSystem FadeSys;
-extern i32 screendump;
-extern STATUSPACKET_s StatusPacket;
+extern "C" i32 screendump;
+extern "C" STATUSPACKET_s StatusPacket;
 extern AREADATA *NEGOTIATIONS_ADATA;
 
 extern "C" i32 MenuInMemoryCard();
@@ -311,7 +311,7 @@ void Save_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapse
 }
 
 extern i32 from_save_and_exit;
-extern TIMER BonusTimer;
+extern "C" TIMER BonusTimer;
 extern i16 id_SLAVE1;
 extern i16 tSUPERSTORYCOMPLETE, tNEWBESTTIME, tLEVELCOMPLETE, tMISSIONCOMPLETE;
 extern i16 tNONEWBESTTIME;
@@ -1301,9 +1301,9 @@ void DrawStatusScreen(WORLDINFO_s *) {
     }
 }
 
-extern STATUSPACKET_s StatusPacket;
+extern "C" STATUSPACKET_s StatusPacket;
 extern FadeSystem FadeSys;
-extern i32 reset_area;
+extern "C" i32 reset_area;
 extern i32 grab_screen_image;
 void InitChallenge(i32);
 void InitMission(MISSIONSYS_s *, i32);

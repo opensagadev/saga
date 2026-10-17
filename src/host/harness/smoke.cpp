@@ -19,7 +19,7 @@
 #include "gameapi/gui/apimenu.h"
 
 extern i32 LEVELCOUNT;
-extern i32 NewMode;
+extern "C" i32 NewMode;
 extern i32 Paused;
 extern "C" void __real__Z7EndPermv();
 extern "C" void __real__Z8LoadPermv();

@@ -141,7 +141,7 @@ void ReadPads(void);
 extern i16 id_DEFAULTCHARACTER[2];
 extern i16 id_QUIGONJINN;
 extern i16 id_OBIWANKENOBI;
-extern GAMEPAD_s GamePad[64]; // gamepads.cpp, bss @0x127a500
+extern "C" GAMEPAD_s GamePad[64]; // gamepads.cpp, bss @0x127a500
 extern i32 readpads_always;
 extern u8 RAP_WARNING_R, RAP_WARNING_G, RAP_WARNING_B;
 

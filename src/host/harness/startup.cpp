@@ -5,7 +5,7 @@
 #include "legoapi/characters/core/players.h"
 
 extern i32 GAMEDEMO;
-extern i32 NewMode;
+extern "C" i32 NewMode;
 
 void HostLoadPermImmediately(void (*load_perm)()) {
     // Keep permanent asset setup while skipping the startup screen loop.

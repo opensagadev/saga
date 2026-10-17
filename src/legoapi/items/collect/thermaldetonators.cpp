@@ -49,7 +49,7 @@ void PartKill_ThermalDetonator(PART_s *part, i32 reason);
 i32 PartDraw_ThermalDetonator(PART_s *part);
 i32 GameRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 mask);
 extern i32 TERRAINMASK_NONWEAPON;
-extern f32 brickimpactwait;
+extern "C" f32 brickimpactwait;
 
 void ThermalDetonator_Throw(GameObject_s *object) {
     NUVEC movement;

@@ -269,7 +269,7 @@ extern void PodSprint_GetIAlongVals(nugspline_s *spline, i16 *first_point, i16 *
 
 extern void TakeOverGameObject(GameObject_s *rider, GameObject_s *mount, i32 seat, i32 immediate);
 
-extern NUVEC plr_lastpos;
+extern "C" NUVEC plr_lastpos;
 
 enum AI_CREATURE_SET : isize {
     AI_CREATURE_SET_CURRENT = -1,

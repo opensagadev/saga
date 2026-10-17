@@ -104,7 +104,7 @@ void PartCollide_3D(PART_s *);
 void ConfigureComplexShadow(GameObject_s *);
 f32 DropInOutScale(GameObject_s *);
 extern f32 rocket_speed;
-extern f32 sabrerubwait;
+extern "C" f32 sabrerubwait;
 NUVEC *GetZapOrigin(GameObject_s *);
 void PlaySabreSfx(char *, GameObject_s *, NUVEC *, i32);
 i32 testlaser_type;
@@ -2067,7 +2067,7 @@ static i32 SpecialRouteCharacterTypeID(char *name) {
 }
 
 extern i32 TimingBarSet;
-extern i32 SHADOWCALLS;
+extern "C" i32 SHADOWCALLS;
 extern u32 LAYER_HOVERIGNORE;
 
 f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 terrain_mask) {
@@ -2118,8 +2118,8 @@ f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 te
     return shadow_height;
 }
 
-extern f32 MainRenderTime;
-extern f32 MainRenderTargetTime;
+extern "C" f32 MainRenderTime;
+extern "C" f32 MainRenderTargetTime;
 extern f32 backdrop_top_r;
 extern f32 backdrop_top_g;
 extern f32 backdrop_top_b;
@@ -2135,7 +2135,7 @@ struct CUTSCENEPLAYERCLIP;
 extern CUTSCENEPLAYERCLIP *CutScenePlayer_Active();
 
 void UpdateGameMessages();
-extern i32 DoubleScore;
+extern "C" i32 DoubleScore;
 extern FadeSystem FadeSys;
 extern f32 LevelNameTime, LevelNameMul;
 extern i32 pause_rndr_on;
@@ -2214,7 +2214,7 @@ void GameTiming(WORLDINFO_s *world, float *game_time) {
 }
 
 extern "C" i32 NewRayCastScaleYMask(NUVEC *, NUVEC *, f32, f32, i32, u32);
-extern i32 RAYCASTCALLS;
+extern "C" i32 RAYCASTCALLS;
 
 i32 GameRayCast(NUVEC *position, NUVEC *displacement, f32 radius, i32 mask) {
     i32 hit = NewRayCastScaleYMask(position, displacement, radius, 1.0f, 0, mask);
@@ -2226,7 +2226,7 @@ f32 draw_attention_distance = 2.0f;
 extern f32 party_follow_offsets[8];
 extern i32 active_neutral_count;
 extern "C" i32 party_under_cover;
-extern i32 party_cant_be_under_cover;
+extern "C" i32 party_cant_be_under_cover;
 extern AREADATA *VADER_ADATA;
 extern GameObject_s *alert_obj;
 void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system);
@@ -3262,7 +3262,7 @@ void GameAISysReset(AISYS_s *system) {
 }
 
 extern "C" i32 party_under_cover;
-extern i32 party_cant_be_under_cover;
+extern "C" i32 party_cant_be_under_cover;
 extern GameObject_s *alert_obj;
 extern f32 alert_timer;
 extern AREADATA *VADER_ADATA;
@@ -5870,7 +5870,7 @@ void SetToLastSafePos(GameObject_s *);
 GameObject_s *GetOtherActivePlayer(GameObject_s *);
 void TakeOverGameObject(GameObject_s *, GameObject_s *, i32, i32);
 
-extern i32 adaptivedifficulty[3];
+extern "C" i32 adaptivedifficulty[3];
 extern i8 (*adtab)[4];
 f32 Hub_PadSpeed[2];
 u16 Hub_PadAngle[2];
@@ -5888,7 +5888,7 @@ f32 CurrentSpeed = 10.0f;
 f32 BaseCurrentSpeed = 10.0f;
 extern AREADATA *PODSPRINT_ADATA;
 extern i16 id_ANAKINSNEWPOD, id_ANAKINSNEWPODGREEN, id_SEBULBASPOD;
-extern f32 tieonsfxwait, tieoffsfxwait;
+extern "C" f32 tieonsfxwait, tieoffsfxwait;
 void MovePlayer_NETWORK(GameObject_s *);
 void UpdateRumble(RUMBLEPACKET *);
 void Player_ToggleCharacter(GameObject_s *, i32, i32);

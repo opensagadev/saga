@@ -51,7 +51,7 @@ extern char **TTab;
 extern i16 tCANCEL;
 extern i32 menu_flash;
 extern i16 tOUTOFTIME;
-extern TIMER BonusTimer;
+extern "C" TIMER BonusTimer;
 extern "C" void PlaySfx(char *, NUVEC *);
 extern i32 GetMenuID(void);
 extern void SetBonusWinner(i32);

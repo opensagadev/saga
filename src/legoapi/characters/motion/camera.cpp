@@ -498,7 +498,7 @@ f32 getPodRoll(i32);
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 f32 PodSprint_InStartCountdown(WORLDINFO_s *);
 i32 PodRace_InStartCountdown(WORLDINFO_s *);
-extern i32 editor_active;
+extern "C" i32 editor_active;
 extern "C" void NuSpeedBlurSetMotionFactors(f32 pan, f32 pull, f32 clamp);
 extern "C" void NuLightSpeedBlur(i32 reuse_camera, f32 scale);
 i32 Players_AveragePos(NUVEC *, SOCKPOSITION_s *);

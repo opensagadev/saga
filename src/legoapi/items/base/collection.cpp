@@ -9,7 +9,7 @@
 #include "legoapi/characters/core/players.h"
 
 u32 GizmoBlowups_TotalScore(void *world);
-extern i32 DoubleScore;
+extern "C" i32 DoubleScore;
 
 #include "decomp.h"
 #include "globals.h"

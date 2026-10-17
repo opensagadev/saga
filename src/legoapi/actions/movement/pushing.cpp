@@ -204,7 +204,7 @@ void Player_ClearContext(GameObject_s *, i32);
 void Player_ResetContexts(PLAYERPACKET_s *);
 i32 SuperWeirdo(GameObject_s *);
 void GameCam_HitRoll(void);
-extern i32 dagobah_training;
+extern "C" i32 dagobah_training;
 extern AREADATA *EMPERORFIGHT_ADATA;
 extern i16 id_GAMORREANGUARD;
 

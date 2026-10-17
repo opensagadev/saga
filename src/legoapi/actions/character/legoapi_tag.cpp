@@ -157,7 +157,7 @@ DECOMP_ASSERT(offsetof(GameObject_s, current_hp) == 0x108b, "Tag signed health A
 
 
 extern i32 VehicleArea;
-extern i32 menu_i_pack;
+extern "C" i32 menu_i_pack;
 extern char *ASCII_DOWN;
 void CollideGameObjects(WORLDINFO_s *world);
 i32 GetMenuID();

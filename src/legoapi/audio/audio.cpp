@@ -15,7 +15,7 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern i32 DoubleScore;
+extern "C" i32 DoubleScore;
 extern i32 Paused;
 i32 (*GameAudio_ActionMusicFn)(void) = NULL;
 static f32 sticky_attack_timeout[2] = {1.0f, 6.0f};

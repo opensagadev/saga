@@ -34,7 +34,7 @@ void EnableShadowMapRendering(i32 enabled);
 void ResetShadowMapRendering();
 void SetWeaponIn(GameObject_s *object);
 
-extern i32 editor_active;
+extern "C" i32 editor_active;
 extern NUMTL *SolidMtl3D;
 
 i32 grapple_gizmotype_id = -1;

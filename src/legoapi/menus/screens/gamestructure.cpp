@@ -85,7 +85,7 @@ struct STORE_PRODUCT_s {
 };
 DECOMP_ASSERT(sizeof(STORE_PRODUCT_s) == 0x304, "STORE_PRODUCT_s size");
 static STOREIAP_s StoreIAP[3];
-extern i32 menu_i_pack;
+extern "C" i32 menu_i_pack;
 i32 menu_i_bundle = -1;
 static char *menu_storepurchase_iap_name;
 i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode);

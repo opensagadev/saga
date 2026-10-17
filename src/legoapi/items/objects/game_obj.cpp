@@ -146,17 +146,17 @@
 
 extern f32 AIFireIntervalMul, BaseCurrentSpeed, CurrentSpeed, CurrentSpeedOverride, GhostLightMul, GhostLightTargetMul;
 extern f32 DEFENDTIME, SHIELDFLICKERTIME, Hub_PadSpeed[2];
-extern f32 tieonsfxwait, tieoffsfxwait;
+extern "C" f32 tieonsfxwait, tieoffsfxwait;
 extern char *ASCII_DOWN;
 extern GameObject_s *CarWashHack;
-extern i32 DoubleScore;
+extern "C" i32 DoubleScore;
 extern EXPLOSION Explosion[8];
 extern i32 FalconDebKey[2];
 extern i32 timebase_updates;
 extern AREADATA_s *SPEEDERCHASE_ADATA;
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;
-extern i32 adaptivedifficulty[3];
+extern "C" i32 adaptivedifficulty[3];
 extern i8 (*adtab)[4];
 extern i32 do_player_tag;
 extern f32 player_tag_timer;

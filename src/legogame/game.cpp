@@ -530,7 +530,7 @@ extern AREADATA *DEATHSTARRESCUE_ADATA;
 extern AREADATA *HOTHESCAPE_ADATA;
 extern AREADATA *JABBASPALACE_ADATA;
 extern "C" i32 CruiserD_LiftChase;
-extern i32 DoubleScore;
+extern "C" i32 DoubleScore;
 i32 Players_AveragePos(nuvec_s *position, SOCKPOSITION_s *socket_position);
 i32 Hub_Outside(void);
 i32 KaminoInside(void);

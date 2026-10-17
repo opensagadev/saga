@@ -50,11 +50,11 @@ extern i32 ACTIVECUTCOUNT;
 extern "C" i32 CUTDRAWWORLD;
 extern "C" i32 Paused;
 extern i32 CUTCAM;
-extern i32 CutSceneWaiting;
+extern "C" i32 CutSceneWaiting;
 extern i32 CUTCAMONLY;
 extern i32 cut_waiting_for_new_level;
 extern volatile i32 waiting_for_level;
-extern i32 newlevel_resumecutaudio;
+extern "C" i32 newlevel_resumecutaudio;
 extern CUTSYS *CS_cutsys;
 extern FadeSystem FadeSys;
 CUTSCENESYS *CutSceneSys;
@@ -140,7 +140,7 @@ extern i32 CUTSKIPLOCK;
 f32 LevelNameMul;
 f32 LevelNameTime;
 
-extern i32 drawcharactermodel_nobsa;
+extern "C" i32 drawcharactermodel_nobsa;
 extern "C" i32 NewMode;
 void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
 

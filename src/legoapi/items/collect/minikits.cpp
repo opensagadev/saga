@@ -44,8 +44,8 @@ struct SHOPINPUT;
 
 HUBMINIKITPIECES_s **Char_MiniKit;
 static VARIPTR minikits_savecharacterbufferptr;
-extern VARIPTR characterbuffer_ptr;
-extern VARIPTR characterbuffer_end;
+extern "C" VARIPTR characterbuffer_ptr;
+extern "C" VARIPTR characterbuffer_end;
 
 void MiniKits_Init(variptr_u *buffer, variptr_u *) {
     const usize aligned = (buffer->addr + 3) & ~static_cast<usize>(3);

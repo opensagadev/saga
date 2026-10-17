@@ -29,7 +29,7 @@ void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation);
 i32 (*Fighting_WeaponInActionFn)(GameObject_s *) = NULL;
 i32 (*Fighting_WeaponOutActionFn)(GameObject_s *) = NULL;
 
-extern i32 adaptivedifficulty[3];
+extern "C" i32 adaptivedifficulty[3];
 extern f32 DEFENDTIME;
 
 extern i8 (*adtab)[4];

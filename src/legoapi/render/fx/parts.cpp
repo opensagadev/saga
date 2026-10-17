@@ -170,7 +170,7 @@ extern "C" {
 
     extern part_type_s part_types[128];
     extern NUGSCN *part_scene[32];
-    extern part_emit_s part_emits[512];
+    extern part_emit_s part_emits[40];
     extern i32 part_emits_used;
     void CheckPartCount();
     i32 AddPARTEffect(i32, NUVEC *);
@@ -420,7 +420,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
 }
 
 
-extern f32 coinimpactwait;
+extern "C" f32 coinimpactwait;
 extern i32 GAMEDEMO;
 extern "C" void PlaySfxAndSetVolume(char *, NUVEC *, f32);
 
@@ -1778,7 +1778,7 @@ extern "C" {
     }
 
     part_type_s part_types[128];
-    extern part_emit_s part_emits[512];
+    extern part_emit_s part_emits[40];
     extern i32 part_page_on[8];
     extern i32 part_page_used[8];
     i32 part_types_used;
@@ -3175,7 +3175,7 @@ void PartCleanupTypes() {
     }
 }
 
-extern f32 brickimpactwait;
+extern "C" f32 brickimpactwait;
 extern "C" i32 GetSfxId(const char *);
 extern "C" void PlaySfxByIdAndSetVolume(i32, NUVEC *, f32);
 

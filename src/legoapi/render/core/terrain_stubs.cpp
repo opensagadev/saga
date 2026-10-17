@@ -1192,7 +1192,7 @@ extern "C" {
             debkeydata[handle].render_group = group;
     }
 
-    void DebrisSetPriority(i32 handle, i16 priority, u8 automatic) {
+    void DebrisSetPriority(i32 handle, u16 priority, u8 automatic) {
         if (handle != -1) {
             debkeydatatype_s *key = &debkeydata[handle];
             key->timed_flags = automatic;

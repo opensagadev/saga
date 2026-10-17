@@ -27,10 +27,10 @@
 
 void RndrTexQuad(f32, f32, f32, f32, i32, numtl_s *, i32);
 
-extern i32 CutSceneWaiting;
-extern i32 editor_active;
-extern i32 NewMode;
-extern i32 PANELOFF;
+extern "C" i32 CutSceneWaiting;
+extern "C" i32 editor_active;
+extern "C" i32 NewMode;
+extern "C" i32 PANELOFF;
 extern i32 Paused;
 extern FadeSystem FadeSys;
 f32 TagButtonSize = ICONSIZE;

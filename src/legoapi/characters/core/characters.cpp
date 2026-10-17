@@ -120,8 +120,8 @@ char *TexAnimList_LSW[32] = {
 void InitRipples(ripple_set_s **, VARIPTR *, VARIPTR *, i32);
 void CreateFadeMaterials();
 void CreateUsefulMaterials();
-extern ripple_set_s *ripples;
-extern NUMTL *ShadowMat;
+extern "C" ripple_set_s *ripples;
+extern "C" NUMTL *ShadowMat;
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -137,9 +137,9 @@ extern i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count);
 extern i32 Collection_Got(i32 id);
 extern void Customiser_SaveModelTextureIDs(CUSTOMISER *customiser, CHARACTERMODEL_s *model);
 extern CUSTOMISER *CharacterCustomiser;
-extern VARIPTR characterbuffer_ptr;
-extern VARIPTR characterbuffer_end;
-extern i32 waiting_for_character;
+extern "C" VARIPTR characterbuffer_ptr;
+extern "C" VARIPTR characterbuffer_end;
+extern "C" i32 waiting_for_character;
 extern f32 WaitingForCharacterTime;
 
 extern "C" {
@@ -729,7 +729,7 @@ void ResetAICreature(GameObject_s *, AISYS_s *);
 void LightGameObject(GameObject_s *, void *);
 void InitSurfaceInfo(GameObject_s *);
 i32 SetObjOnSurface(GameObject_s *, i32);
-extern NUVEC plr_lastpos;
+extern "C" NUVEC plr_lastpos;
 
 void FinishWeirdoNames(i32 which) {
     if (which != 1) {
@@ -1484,7 +1484,7 @@ void UpdateCharacterLoad() {
     bgPostRequest(LoadSingleCharacter, NULL, NULL, 0);
 }
 
-extern VARIPTR characterbuffer_base;
+extern "C" VARIPTR characterbuffer_base;
 extern i32 CHARACTERBUFFERSIZE;
 extern i32 Area;
 extern i32 last_area;
@@ -1851,7 +1851,7 @@ void CollectCharactersOff_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, 
     }
 }
 
-extern i32 dagobah_training;
+extern "C" i32 dagobah_training;
 
 i32 TakeOverYodaSeekDistanceHack(GameObject_s *object, GameObject_s *luke, nuvec_s *offset) {
     if ((object->field_0xf00 & 2) == 0 || dagobah_training == 0 || object->field_0xcc0 != NULL || luke == NULL ||

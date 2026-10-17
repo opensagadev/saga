@@ -35,7 +35,7 @@ CABLE_s *GameObjOwnsAnyCables(GameObject_s *);
 void ReleaseCable(CABLE_s *, i32);
 extern "C" i16 id_WATTO;
 extern i16 id_YODA;
-extern i32 dagobah_training;
+extern "C" i32 dagobah_training;
 extern AREADATA *DAGOBAH_ADATA;
 void ForceNextLungeTarget(MechObjectInterface *);
 bool FireBountyHunterRocket(GameObject_s *);

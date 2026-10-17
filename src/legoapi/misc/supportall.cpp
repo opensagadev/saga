@@ -159,7 +159,7 @@ void oneAtOnce_SetNumAttackers(i32);
 void SetSoundFadeDist(WORLDINFO_s *, OPTIONSSAVE_s *);
 void EffectOffProgress_Reset(LEVEL_PROGRESS_s *);
 extern GAMECAMERA_s *GameCam;
-extern ripple_set_s *ripples;
+extern "C" ripple_set_s *ripples;
 extern "C" void ResetParts(void);
 extern "C" void NuSound3StopRumble(void);
 extern "C" f32 chattersfxwait;
@@ -803,7 +803,7 @@ void bgprocUnFreeze() {
 extern AREADATA_s *PODRACE_ADATA;
 extern AREADATA_s *BONUS_GUNSHIP_ADATA;
 extern AREADATA_s *GUNSHIP_ADATA;
-extern i16 id_LANDSPEEDER;
+extern "C" i16 id_LANDSPEEDER;
 void PodDust(WORLDINFO_s *, GameObject_s *);
 extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 

@@ -37,7 +37,7 @@ extern i32 only_process_this_hint_id;
 f32 SeekLinearF(f32, f32, f32);
 void Hint_SetHint(HINT_s *, i32, i32);
 
-extern i32 NewMode, Paused, editor_active, CutSceneWaiting, PANELOFF;
+extern "C" i32 NewMode, Paused, editor_active, CutSceneWaiting, PANELOFF;
 extern FadeSystem FadeSys;
 i32 GetMenuID();
 void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);

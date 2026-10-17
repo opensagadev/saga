@@ -20,8 +20,8 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 extern NUGLOBALRNDRSTATE render_state;
-extern i32 back_rgba[2];
-extern f32 MainRenderTime;
+extern "C" i32 back_rgba[2];
+extern "C" f32 MainRenderTime;
 i32 draw_octree = 1;
 void BackDrop_Draw(f32 alpha, i32 flags);
 extern "C" {

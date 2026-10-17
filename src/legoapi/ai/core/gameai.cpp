@@ -25,7 +25,7 @@ struct ADAPTIVEDIFFICULTY_s {
     f32 elapsed;
 };
 
-extern i32 adaptivedifficulty[3];
+extern "C" i32 adaptivedifficulty[3];
 
 i8 adtabentries[9][4] = {{-1, -1, -1, -1}, {-1, -1, -1, 0}, {-1, -1, 0, 0}, {-1, 0, 0, 0}, {0, 0, 0, 0},
                          {1, 0, 0, 0},     {1, 1, 0, 0},    {1, 1, 1, 0},   {1, 1, 1, 1}};

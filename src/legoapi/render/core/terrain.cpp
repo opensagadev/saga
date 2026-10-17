@@ -659,7 +659,9 @@ char *debris_name[400] = {
     "PUNCH_1",        "PUNCH_2",       "GUNSHIP_01",    "GUNSHIP_02",    "SandBlast",      "BULLET1",
     "BULLET2",        "BULLET_HIT",    "POD_SPARK",
 };
+extern "C" {
 i32 Grass_Available;
+}
 
 extern "C" void TerrainSetImpactData(void *impact_data, i32 *impact_count, i32 maximum_impacts) {
     TerImpactData = impact_data;
