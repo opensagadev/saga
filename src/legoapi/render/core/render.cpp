@@ -819,50 +819,7 @@ void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets
     g_NuVpRegion = saved_region;
 }
 
-void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_control, numtl_s *material, i32 colour) {
-    static i32 bezier_draw_depth;
-
-    const f32 camera_y = global_camera.mtx.m31;
-    const f32 camera_x = global_camera.mtx.m30;
-    const f32 camera_z = global_camera.mtx.m32;
-    const f32 start_y = start.y - camera_y;
-    const f32 start_z = start.z - camera_z;
-    const f32 start_x = start.x - camera_x;
-    const f32 start_distance = start_x * start_x + start_y * start_y + start_z * start_z;
-    const f32 end_x = end.x - camera_x;
-    const f32 end_y = end.y - camera_y;
-    const f32 end_z = end.z - camera_z;
-    const f32 end_distance = end_x * end_x + end_y * end_y + end_z * end_z;
-    const f32 distance = end_distance < start_distance ? end_distance : start_distance;
-    const f32 threshold = distance < 5.5f ? 5.5f * 0.001f : distance * 0.001f;
-
-    const f32 chord_y = end.y - start.y;
-    const f32 chord_x = end.x - start.x;
-    const f32 chord_z = end.z - start.z;
-    if (!(chord_x * chord_x + chord_y * chord_y + chord_z * chord_z > threshold) || bezier_draw_depth > 15) {
-        EdDrawLineSegment(start, end, colour);
-        return;
-    }
-
-    ++bezier_draw_depth;
-    const f32 end_control_x = end_control.x;
-    const f32 end_control_y = end_control.y;
-    const f32 control_x = start_control.x;
-    const f32 end_control_z = end_control.z;
-    VuVec second = {(control_x + end_control_x) * 0.5f, (end_control_y + start_control.y) * 0.5f,
-                    (end_control_z + start_control.z) * 0.5f, 0.0f};
-    VuVec first = {(start.x + control_x) * 0.5f, (start.y + start_control.y) * 0.5f, (start_control.z + start.z) * 0.5f,
-                   0.0f};
-    VuVec third = {(end.x + end_control_x) * 0.5f, (end.y + end_control_y) * 0.5f, (end.z + end_control_z) * 0.5f,
-                   0.0f};
-    VuVec fourth = {(first.x + second.x) * 0.5f, (first.y + second.y) * 0.5f, (first.z + second.z) * 0.5f, 0.0f};
-    VuVec fifth = {(third.x + second.x) * 0.5f, (third.y + second.y) * 0.5f, (third.z + second.z) * 0.5f, 0.0f};
-    VuVec midpoint = {(fifth.x + fourth.x) * 0.5f, (fifth.y + fourth.y) * 0.5f, (fifth.z + fourth.z) * 0.5f, 0.0f};
-
-    DrawBezierLine(start, first, midpoint, fourth, material, colour);
-    DrawBezierLine(midpoint, fifth, end, third, material, colour);
-    --bezier_draw_depth;
-}
+void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_control, numtl_s *material, i32 colour);
 
 void DrawCutBorders(i32 widescreen);
 

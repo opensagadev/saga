@@ -50,7 +50,6 @@ build:target --per_file_copt=^src/nu2api/nufile/NuFileDeviceAndroidAPK\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/ai/aisys/gameaiscript\.cpp$@-O3
 # Teleport parser callbacks in the target use optimized leaf/control-flow code.
 build:target --per_file_copt=^src/legoapi/items/objects/grabber\.cpp$@-O3
-build:target --per_file_copt=^src/gameapi/edtools/edsplines\.cpp$@-O3
 # The click-to-start tracker is an optimized, frameless leaf in the original.
 build:target --per_file_copt=^src/legoapi/menus/core/panel\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/menus/core/text\.cpp$@-O3
@@ -155,8 +154,6 @@ build:target --per_file_copt=^src/legoapi/ai/game/aipathcnxhelper\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/core/config/cheats\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/base/collection\.cpp$@-O3
 # Game-object initialization uses optimized pointer-induction loops in the target.
-build:target --per_file_copt=^src/legoapi/items/base/scene\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/items/base/sceneobject\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/collect/bolt\.cpp$@-O3
 # The bolts initializer and core helpers retain their exact matches at -O3.
 build:target --per_file_copt=^src/legoapi/items/collect/bolts\.cpp$@-O3
@@ -404,9 +401,6 @@ build:target --per_file_copt=^src/legoapi/actions/character/tagging\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/actions/character/tagging\.cpp$@-ftree-vectorize
 build:target --per_file_copt=^src/legoapi/ai/core/gameai\.cpp$@-O3
 # Full-TU O2 restores the retail file-selector jump padding and frameless PIC ABI.
-build:target --per_file_copt=^src/legoapi/core/config/saveload\.cpp$@-O2
-build:target --per_file_copt=^src/legoapi/core/config/saveload\.cpp$@-ftree-vectorize
-build:target --per_file_copt=^src/legoapi/core/config/saveload\.cpp$@-fomit-frame-pointer
 build:target --per_file_copt=^src/legoapi/ai/game/lsw_hub_ai\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/cutscenes/minicamcut\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/cutscenes/minicamcut\.cpp$@-ftree-vectorize
@@ -416,7 +410,6 @@ build:target --per_file_copt=^src/legoapi/items/collect/detonator\.cpp$@-ftree-v
 build:target --per_file_copt=^src/legoapi/items/collect/thermaldetonators\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/fx/explosions\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/fx/pulses\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/items/objects/placeable\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/menus/screens/credits\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/menus/screens/customise\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/menus/screens/customise\.cpp$@-ftree-vectorize

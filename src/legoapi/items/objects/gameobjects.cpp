@@ -145,90 +145,24 @@ extern "C" {
                                 NULL};
 }
 
-i32 SpecialObject::Exists() const {
-    return NuSpecialExistsFn(const_cast<nuhspecial_s *>(&special));
-}
 
-i32 SpecialObject::GetCollision() const {
-    return NuSpecialGetCollision(const_cast<nuhspecial_s *>(&special)) != 0;
-}
 
-VuVec const *SpecialObject::GetCurrentPosition() const {
-    return reinterpret_cast<VuVec const *>(NuSpecialGetDrawPos(const_cast<nuhspecial_s *>(&special)));
-}
 
-VuMtx const *SpecialObject::GetCurrentTransform() const {
-    return reinterpret_cast<VuMtx const *>(NuSpecialGetDrawMtx(const_cast<nuhspecial_s *>(&special)));
-}
 
-VuVec const *SpecialObject::GetInitialPosition() const {
-    return reinterpret_cast<VuVec const *>(NuSpecialGetPos(const_cast<nuhspecial_s *>(&special)));
-}
 
-VuMtx const *SpecialObject::GetInitialTransform() const {
-    return reinterpret_cast<VuMtx const *>(NuSpecialGetMtx(const_cast<nuhspecial_s *>(&special)));
-}
 
-numtl_s *SpecialObject::GetMtl(i32 index) const {
-    return NuSpecialGetMtl(const_cast<nuhspecial_s *>(&special), index);
-}
 
-char const *SpecialObject::GetName() const {
-    return NuSpecialGetName(const_cast<nuhspecial_s *>(&special));
-}
 
-i32 SpecialObject::GetNumMtls() const {
-    return NuSpecialNumMtls(const_cast<nuhspecial_s *>(&special));
-}
 
-f32 SpecialObject::GetRadius() const {
-    f32 radius = 1.0f;
-    NUVEC position;
-    if (NuSpecialExistsFn(const_cast<nuhspecial_s *>(&special))) {
-        NuSpecialGetRadius(const_cast<nuhspecial_s *>(&special), &position, &radius);
-    }
-    return radius;
-}
 
-i32 SpecialObject::GetVisibility() const {
-    return NuSpecialGetVisibilityFn(const_cast<nuhspecial_s *>(&special));
-}
 
-void SpecialObject::Render(VuMtx const *matrix) const {
-    if (matrix != NULL) {
-        NuSpecialDrawAt(const_cast<nuhspecial_s *>(&special), reinterpret_cast<NUMTX *>(const_cast<VuMtx *>(matrix)));
-    } else {
-        NuSpecialDrawAt(const_cast<nuhspecial_s *>(&special),
-                        NuSpecialGetDrawMtx(const_cast<nuhspecial_s *>(&special)));
-    }
-}
 
-void SpecialObject::SetCollision(i32 enabled) {
-    NuSpecialSetCollision(&special, enabled);
-}
 
-void SpecialObject::SetCurrentPosition(VuVec const *position) {
-    NuSpecialSetDrawPos(&special, reinterpret_cast<NUVEC *>(const_cast<VuVec *>(position)));
-}
 
-void SpecialObject::SetCurrentTransform(VuMtx const *matrix) {
-    NuSpecialSetDrawMtx(&special, reinterpret_cast<NUMTX *>(const_cast<VuMtx *>(matrix)));
-}
 
-void SpecialObject::SetInitialPosition(VuVec const *) {
-}
 
-void SpecialObject::SetInitialTransform(VuMtx const *matrix) {
-    NuSpecialSetMtx(&special, reinterpret_cast<NUMTX *>(const_cast<VuMtx *>(matrix)));
-}
 
-void SpecialObject::SetVisibility(i32 enabled) {
-    NuSpecialSetVisibility(&special, enabled);
-}
 
-SpecialObject::SpecialObject() {
-    NuSpecialClear(&special);
-}
 
 i32 BaseThing::RemoveDependancies(ThingRemoveData *) {
     return 1;
@@ -324,9 +258,6 @@ static __used__ void SurfaceInfo_ExtraReflect(GameObject_s *object);
 
 static __used__ void PauseGame_ExtraCode();
 
-static __used__ i32 SpecialObjectFilter(void *object) {
-    return theSceneObjectHelper.scene_id == static_cast<SpecialObject *>(object)->scene_id;
-}
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 

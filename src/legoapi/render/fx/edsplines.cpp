@@ -25,7 +25,6 @@
 #include <stdio.h>
 
 // The original translation unit exports this internal counter under its unmangled C name.
-static i32 bezierline_depth asm("bezierline_depth");
 
 f32 BezierLineLength(VuVec &, VuVec &, VuVec &, VuVec &);
 
@@ -34,106 +33,13 @@ f32 BezierLineLength(VuVec &, VuVec &, VuVec &, VuVec &);
 typedef f32 BezierVec4 __attribute__((vector_size(16)));
 typedef f32 BezierVec4Unaligned __attribute__((vector_size(16), aligned(4)));
 
-i32 BezierLinePos(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, f32 distance) {
-    f32 t = 0.5f;
-    f32 step = 0.25f;
-    for (i32 count = 256; count != 0; --count) {
-        f32 complement = 1.0f - t;
-        VuVec middle{second_control.x * complement + first_control.x * t,
-                     second_control.y * complement + first_control.y * t,
-                     second_control.z * complement + first_control.z * t, 0.0f};
-        VuVec first{first_control.x * complement + start.x * t, first_control.y * complement + start.y * t,
-                    first_control.z * complement + start.z * t, 0.0f};
-        VuVec last{end.x * complement + second_control.x * t, end.y * complement + second_control.y * t,
-                   end.z * complement + second_control.z * t, 0.0f};
-        VuVec first_middle{middle.x * complement + first.x * t, middle.y * complement + first.y * t,
-                           middle.z * complement + first.z * t, 0.0f};
-        VuVec middle_last{last.x * complement + middle.x * t, last.y * complement + middle.y * t,
-                          last.z * complement + middle.z * t, 0.0f};
-        VuVec point{middle_last.x * complement + first_middle.x * t, middle_last.y * complement + first_middle.y * t,
-                    middle_last.z * complement + first_middle.z * t, 1.0f};
-        f32 length = BezierLineLength(start, first, point, first_middle);
-        f32 difference = distance - length;
-        if (difference < 0.0f)
-            difference = -difference;
-        if (!(difference > 0.01f)) {
-            *reinterpret_cast<BezierVec4Unaligned *>(&result) = *reinterpret_cast<BezierVec4 *>(&point);
-            return 1;
-        }
-        if (distance < length)
-            t += step;
-        else
-            t -= step;
-        step *= 0.5f;
-        if (count == 1) {
-            *reinterpret_cast<BezierVec4Unaligned *>(&result) = *reinterpret_cast<BezierVec4 *>(&point);
-            return 1;
-        }
-    }
-    return 1;
-}
+i32 BezierLinePos(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, f32 distance);
 
-void BezierLineEval(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, float along) {
-    const f32 complement = 1.0f - along;
-    const f32 complement_squared = complement * complement;
-    const f32 squared = along * along;
-    const f32 start_weight = complement_squared * complement;
-    const f32 first_weight = (along * 3.0f) * complement_squared;
-    const f32 second_weight = (3.0f * squared) * complement;
-    const f32 end_weight = along * squared;
-    const f32 z = end.z * end_weight +
-                  ((first_control.z * first_weight + start.z * start_weight) + second_control.z * second_weight);
-    const f32 y = end.y * end_weight +
-                  (second_control.y * second_weight + (first_control.y * first_weight + start.y * start_weight));
-    const f32 x = end_weight * end.x +
-                  (second_weight * second_control.x + (first_weight * first_control.x + start_weight * start.x));
-    result.w = 0.0f;
-    result.y = y;
-    result.z = z;
-    result.x = x;
-}
+void BezierLineEval(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, float along);
 
-f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control) {
-    VuVec first{(start.x + first_control.x) * 0.5f, (start.y + first_control.y) * 0.5f,
-                (start.z + first_control.z) * 0.5f, 0.0f};
-    VuVec middle{(first_control.x + second_control.x) * 0.5f, (first_control.y + second_control.y) * 0.5f,
-                 (first_control.z + second_control.z) * 0.5f, 0.0f};
-    VuVec last{(second_control.x + end.x) * 0.5f, (second_control.y + end.y) * 0.5f, (second_control.z + end.z) * 0.5f,
-               0.0f};
-    VuVec first_middle{(first.x + middle.x) * 0.5f, (first.y + middle.y) * 0.5f, (first.z + middle.z) * 0.5f, 0.0f};
-    VuVec middle_last{(middle.x + last.x) * 0.5f, (middle.y + last.y) * 0.5f, (middle.z + last.z) * 0.5f, 0.0f};
-    VuVec midpoint{(first_middle.x + middle_last.x) * 0.5f, (first_middle.y + middle_last.y) * 0.5f,
-                   (first_middle.z + middle_last.z) * 0.5f, 0.0f};
-    NUVEC error{(start.x + end.x) * 0.5f - midpoint.x, (start.y + end.y) * 0.5f - midpoint.y,
-                (start.z + end.z) * 0.5f - midpoint.z};
-    if (!(NuVecMag(&error) < 0.01f) && bezierline_depth < 2) {
-        ++bezierline_depth;
-        f32 first_length = BezierLineLength(start, first, midpoint, first_middle);
-        f32 second_length = BezierLineLength(midpoint, middle_last, end, last);
-        --bezierline_depth;
-        return first_length + second_length;
-    }
-    NUVEC chord{start.x - end.x, start.y - end.y, start.z - end.z};
-    return NuVecMag(&chord);
-}
+f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control);
 
-f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, f32 t) {
-    f32 complement = 1.0f - t;
-    VuVec middle{second_control.x * complement + first_control.x * t,
-                 second_control.y * complement + first_control.y * t,
-                 second_control.z * complement + first_control.z * t, 0.0f};
-    VuVec first{first_control.x * complement + start.x * t, first_control.y * complement + start.y * t,
-                first_control.z * complement + start.z * t, 0.0f};
-    VuVec last{end.x * complement + second_control.x * t, end.y * complement + second_control.y * t,
-               end.z * complement + second_control.z * t, 0.0f};
-    VuVec first_middle{middle.x * complement + first.x * t, middle.y * complement + first.y * t,
-                       middle.z * complement + first.z * t, 0.0f};
-    VuVec middle_last{last.x * complement + middle.x * t, last.y * complement + middle.y * t,
-                      last.z * complement + middle.z * t, 0.0f};
-    VuVec point{middle_last.x * complement + first_middle.x * t, middle_last.y * complement + first_middle.y * t,
-                middle_last.z * complement + first_middle.z * t, 0.0f};
-    return BezierLineLength(start, first, point, first_middle);
-}
+f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, f32 t);
 
 // Retail only keeps the split-out body of the IPA-SRA clone, which takes
 // &spline->length and &spline->pts in place of the spline.

@@ -1,8 +1,9 @@
+// The original translation unit's functions now live with their address range;
+// its static constructor (header VuVec constants) stays here in link order.
 #include "decomp.h"
 #include "batman.h"
 #include "gamelib/crc/crc.h"
 #include <string.h>
-
 #include "gameapi/gui/apimenu.h"
 #include "globals.h"
 #include "legoapi/characters/core/players.h"
@@ -25,32 +26,3 @@
 #include "nu2api/numusic/numusic.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
-
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
-extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3);
-extern "C" bool TestForController(void);
-i32 GetMenuID(void);
-extern u32 GAMEPAD_START;
-extern u32 GAMEPAD_SELECT;
-extern u32 GAMEPAD_MENUSELECT;
-extern u32 GAMEPAD_MENUCANCEL;
-extern u32 GAMEPAD_TOGGLELEFT;
-extern u32 GAMEPAD_TOGGLERIGHT;
-extern "C" GAMEPAD_s GamePad[64];
-extern "C" i32 reset_area;
-
-eduimenu_s *GetMenuActiveChild(eduimenu_s *menu) {
-    if (menu == NULL) {
-        return NULL;
-    }
-    if (menu->child != NULL)
-        return GetMenuActiveChild(menu->child);
-    return menu;
-}
-void ResizePauseScreenTexture(i32, i32);
-
-extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3);

@@ -113,15 +113,7 @@ static inline u8 Text_MenuColourLerp(u8 first, u8 second, f32 amount) {
         static_cast<i32>(static_cast<f32>(first) * amount + static_cast<f32>(second) * (1.0f - amount)));
 }
 
-abi_ulong GetMatchLength(unsigned char *first, unsigned char *second, abi_ulong maximum) {
-    abi_ulong length = 0;
-    if (maximum != 0 && *second == *first) {
-        do {
-            ++length;
-        } while (length != maximum && first[length] == second[length]);
-    }
-    return length;
-}
+abi_ulong GetMatchLength(unsigned char *first, unsigned char *second, abi_ulong maximum);
 extern "C" void Text3DStringEncode(char *src, u16 *dst);
 extern "C" void SetQFont2D(void);
 
