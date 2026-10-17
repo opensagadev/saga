@@ -85,7 +85,7 @@ extern "C" {
         return NuIOS_GetAspectRatio() > 1.5f;
     }
 
-extern "C" i32 NuMain(i32 argc, char **argv) {
+extern "C" __attribute__((optimize("O2"))) i32 NuMain(i32 argc, char **argv) {
     static i32 frameCount = 0;
     static f32 pastFrameTimes[8] = {-1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f};
 

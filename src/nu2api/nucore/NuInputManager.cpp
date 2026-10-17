@@ -2834,7 +2834,7 @@ const NuInputDevice *NuInputManager::GetDevice(u32 port) const {
 NuInputDevice::~NuInputDevice() {
 }
 
-void NuInputDevice::SetDisconnected(void) {
+__attribute__((optimize("O2"))) void NuInputDevice::SetDisconnected(void) {
     this->motor_1 = 0.0f;
     this->motor_2 = 0.0f;
 
@@ -2854,7 +2854,7 @@ void NuInputDevice::SetDisconnected(void) {
     this->volume = 0.0f;
 }
 
-void NuInputDevice::Clear(void) {
+__attribute__((optimize("O2"))) void NuInputDevice::Clear(void) {
     i32 i;
 
     this->button_states = 0;
@@ -2868,7 +2868,7 @@ void NuInputDevice::Clear(void) {
     memset(&this->mouse_data, 0, sizeof(NuInputMouseData));
 }
 
-NuInputDevice::NuInputDevice(u32 port) {
+__attribute__((optimize("O2"))) NuInputDevice::NuInputDevice(u32 port) {
     this->port = port;
     this->is_rumble_killed = false;
 
@@ -2905,7 +2905,7 @@ NuInputManager::NuInputManager() {
     }
 }
 
-void NuInputDevice::DeadZone(NUPADANALOGVALUE input, f32 dead_zone) {
+__attribute__((optimize("O2"))) void NuInputDevice::DeadZone(NUPADANALOGVALUE input, f32 dead_zone) {
     f32 value;
     f32 new_value;
 
@@ -2922,12 +2922,12 @@ void NuInputDevice::DeadZone(NUPADANALOGVALUE input, f32 dead_zone) {
     this->analog_values[input] = new_value;
 }
 
-void NuInputDevice::AddTranslator(NuInputDeviceTranslator *translator) {
+__attribute__((optimize("O2"))) void NuInputDevice::AddTranslator(NuInputDeviceTranslator *translator) {
     this->translators[this->translator_count] = translator;
     this->translator_count++;
 }
 
-void NuInputDevice::ProcessTouchData() {
+__attribute__((optimize("O2"))) void NuInputDevice::ProcessTouchData() {
     if (!(caps & 0x400))
         return;
 
@@ -2969,7 +2969,7 @@ void NuInputDevice::ProcessTouchData() {
     touch_data.touch_count = count + added;
 }
 
-void NuInputDevice::SetIndexByType(u32 idx_by_type) {
+__attribute__((optimize("O2"))) void NuInputDevice::SetIndexByType(u32 idx_by_type) {
     this->idx_by_type = idx_by_type;
     this->prev_valid_idx_by_type = idx_by_type;
 }
@@ -2978,7 +2978,7 @@ u32 NuInputDevice::GetPort() const {
     return port;
 }
 
-NUPADTYPE NuInputDevice::GetType(void) const {
+__attribute__((optimize("O2"))) NUPADTYPE NuInputDevice::GetType(void) const {
     return this->type;
 }
 
@@ -3014,11 +3014,11 @@ u32 NuInputDevice::GetLastValidIndexByType() const {
     return prev_valid_idx_by_type;
 }
 
-NUPADATTACHMENTTYPE NuInputDevice::GetAttachmentType() const {
+__attribute__((optimize("O2"))) NUPADATTACHMENTTYPE NuInputDevice::GetAttachmentType() const {
     return attch_type;
 }
 
-u32 NuInputDevice::GetCaps() const {
+__attribute__((optimize("O2"))) u32 NuInputDevice::GetCaps() const {
     return caps;
 }
 
@@ -3026,7 +3026,7 @@ bool NuInputDevice::SupportsCaps(u32 mask) const {
     return (GetCaps() & mask) != 0;
 }
 
-bool NuInputDevice::IsConnected(void) const {
+__attribute__((optimize("O2"))) bool NuInputDevice::IsConnected(void) const {
     return this->is_connected;
 }
 
@@ -3044,7 +3044,7 @@ bool NuInputDevice::IsButtonPressed(u32 buttons) const {
     return IsConnected() && (button_states & buttons) != 0;
 }
 
-u32 NuInputDevice::GetButtons(void) const {
+__attribute__((optimize("O2"))) u32 NuInputDevice::GetButtons(void) const {
     if (IsConnected()) {
         return this->button_states;
     }
@@ -3052,7 +3052,7 @@ u32 NuInputDevice::GetButtons(void) const {
     return 0;
 }
 
-f32 NuInputDevice::GetAnalogValue(NUPADANALOGVALUE input) const {
+__attribute__((optimize("O2"))) f32 NuInputDevice::GetAnalogValue(NUPADANALOGVALUE input) const {
     if (IsConnected()) {
         return this->analog_values[input];
     }
@@ -3095,7 +3095,7 @@ f32 NuInputDevice::GetVolume() const {
     return volume;
 }
 
-void NuInputDevice::ConvertToEmulatedTouchFromMouse(void) {
+__attribute__((optimize("O2"))) void NuInputDevice::ConvertToEmulatedTouchFromMouse(void) {
     type = NUPADTYPE_TOUCH;
     prev_valid_type = NUPADTYPE_TOUCH;
     idx_by_type = 0;
@@ -3125,7 +3125,7 @@ void NuInputDevice::ConvertToEmulatedTouchFromMouse(void) {
     caps = 0x400;
 }
 
-void NuInputDevice::Update(f32 delta_time, bool emulate_touch) {
+__attribute__((optimize("O2"))) void NuInputDevice::Update(f32 delta_time, bool emulate_touch) {
     u32 i;
 
     f32 raw_motion_values[20];

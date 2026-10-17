@@ -10,7 +10,7 @@
 # their VuVec static initializers use SLP-merged movaps stores, and their
 # loops and adjacent float stores keep the vectorizer's instruction shapes.
 
-build:target --per_file_copt=^src/main\.cpp$@-O2
+build:target --per_file_copt=^src/main\.cpp$@-O3
 # The original numaths.c has C++ linkage and constructs per-TU VuVec constants.
 build --per_file_copt=^src/nu2api/numath/numaths\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/numath/nufloat_android\.c$@-x,c++,-std=gnu++11
@@ -277,7 +277,7 @@ build:target --per_file_copt=^src/nu2api/nu3d/android/nutex_ios_ex\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nuandroid/ios_device\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nuandroid/ios_graphics\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/NuInputDevice\.cpp$@-O2
-build:target --per_file_copt=^src/nu2api/nucore/NuInputManager\.cpp$@-O2
+build:target --per_file_copt=^src/nu2api/nucore/NuInputManager\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/NuMemoryManager\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/NuMemoryPool\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/hashedkey\.cpp$@-O2
