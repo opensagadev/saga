@@ -30,17 +30,8 @@ extern "C" {
     i32 NuDisplayListRndrSpecial(nuhspecial_s *special, NUMTX *matrix, i32 skinned, NUMTX *skin_matrices,
                                  DEFORMERWEIGHTSARRAY *deformer_weights);
 
-    f32 FmvTimePS(void) {
-        return 0.0f;
-    }
+f32 FmvTimePS(void);
 
-    void PerspectMidPoint(NUVEC *result, NUVEC *first, NUVEC *second, NUVEC *camera_position) {
-        f32 first_distance = NuVecDist(camera_position, first, NULL);
-        f32 second_distance = NuVecDist(camera_position, second, NULL);
-        f32 ratio = first_distance / (first_distance + second_distance);
-        result->x = first->x + (second->x - first->x) * ratio;
-        result->y = first->y + (second->y - first->y) * ratio;
-        result->z = first->z + (second->z - first->z) * ratio;
-    }
+void PerspectMidPoint(NUVEC *result, NUVEC *first, NUVEC *second, NUVEC *camera_position);
 
 } // extern "C"

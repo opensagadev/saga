@@ -182,8 +182,7 @@ i32 NuTexReserve(i32 size) {
     return -1;
 }
 
-void NuTexUnReserve() {
-}
+void NuTexUnReserve();
 
 NUTEXBITMAP *NuTexReadBitmap(char *) {
     STUBBED();
