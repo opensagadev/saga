@@ -84,17 +84,8 @@ void Player_ClearContext(GameObject_s *object, i32 context);
 void Player_ResetContexts(PLAYERPACKET_s *packet);
 void InitSurfaceInfo(GameObject_s *object);
 i32 SetObjOnSurface(GameObject_s *object, i32 mode);
-enum AI_CREATURE_FLAGS : i32 {
-    AI_CREATURE_FLAG_FORMATION_REVERSED = 0x01,
-    AI_CREATURE_FLAG_SKIP_LOW_END = 0x20,
-};
+#include "legoapi/ai/game/creature_types.h"
 
-enum AI_CREATURE_RESET_MODE : u8 {
-    AI_CREATURE_RESET_READY = 0,
-    AI_CREATURE_RESET_STAGGERED = 1,
-    AI_CREATURE_RESET_ACTIVE = 2,
-    AI_CREATURE_RESET_DISABLED = 4,
-};
 
 void InitAICreatures(AISYS_s *system) {
     if (Mission_Active(NULL) != NULL || netclient != 0 || system == NULL) {
@@ -440,17 +431,9 @@ i32 SpawnMeleeCreatureType(i32 type) {
     return 1;
 }
 
-GameObject_s *alert_obj;
-NUVEC alert_pos;
-f32 alert_timer;
-f32 alert_time = 10.0f;
+extern GameObject_s * alert_obj;
+extern NUVEC alert_pos;
+extern f32 alert_timer;
+extern f32 alert_time;
 
-void AlertSurroundingCreatures(GameObject_s *object, nuvec_s *position) {
-    if (object != NULL &&
-        ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || (object->apiobj.field_0x1f4 & 5) != 0 ||
-         (static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_090 & 0x8000) != 0))
-        return;
-    alert_obj = object;
-    alert_pos = *position;
-    alert_timer = alert_time;
-}
+void AlertSurroundingCreatures(GameObject_s *object, nuvec_s *position);

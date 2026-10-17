@@ -100,22 +100,7 @@ static __attribute__((noinline, noclone)) u32 CalculateIntersection(AISYS *syste
                                                                     AIPATHCNX *target_connection);
 
 void AISysGetPathPos2(AISYS_s *system, nuvec_s *position, AIPATHINFO_s *path_info, nuvec_s *path_position, AIPATH_s *,
-                      i32) {
-    if (position != NULL && system != NULL && path_info != NULL) {
-        APIOBJECT object;
-        AIPACKET packet;
-        memset(&object, 0, sizeof(object));
-        memset(&packet, 0, sizeof(packet));
-        object.ai = &packet;
-        object.position = *position;
-        packet.terrain_origin = *position;
-        AISysGetCharacterPathPos(system, &object, &packet, 0xff, 1);
-        *path_info = packet.path_info;
-        if (path_position != NULL) {
-            *path_position = packet.last_path_position;
-        }
-    }
-}
+                      i32);
 
 i32 AIMoveCanReachPath(AISYS_s *system, AIPATH_s *path, AIPATH_s *destination);
 
@@ -354,7 +339,7 @@ void AIWander(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object, i32 chec
 
 extern i32 Hub_GetRandomCharType();
 
-extern void *perm_debrissys;
+extern "C" void *perm_debrissys;
 
 void SetHeadTarget(GameObject_s *object, NUVEC *position, i8 priority, f32 time, f32 minimum_delay, f32 maximum_delay);
 
@@ -1262,7 +1247,7 @@ static AICONDITIONDEF *AIConditionFind(char *name) {
 
 static void AIScriptCopyConditions(NULISTHDR *src, NULISTHDR *dst, VARIPTR *buf, VARIPTR *buf_end);
 
-enum { EQ = 0, LT = 1, GT = 2, LT_EQ = 3, GT_EQ = 4, NEQ = 5 };
+#include "legoapi/ai/core/aisysall_types.h"
 
 static void xConditions(NUFPAR *parser);
 
@@ -2328,17 +2313,6 @@ void *QueryLocalMessage(void *context, void *message);
 
 struct nupad_s;
 
-// The editor keeps 64 editable area records ahead of its two lists.
-struct EDAIAREA_s {
-    NULISTLNK link;
-    char name[16];
-    NUVEC position;
-    NUVEC size;
-    i16 rotation;
-    u8 unknown_32;
-    u8 flags;
-    u8 unknown_34[16];
-};
 DECOMP_ASSERT(sizeof(EDAIAREA_s) == 0x44, "area editor record size");
 
 static inline EDAIAREA_s *&area_selected() {
@@ -2578,12 +2552,6 @@ extern "C" {
     f32 default_path_node_radius = .25f;
     extern char *(*SpecialRouteCharacterNameFn)(u8);
 }
-struct AIPATHCNXTYPE_s {
-    u32 connection_flag;
-    void *context;
-    char name[0x40];
-    u32 flags;
-};
 DECOMP_ASSERT(sizeof(AIPATHCNXTYPE_s) == 0x4c, "editor path connection type size");
 DECOMP_ASSERT(offsetof(AIPATHCNXTYPE_s, flags) == 0x48, "editor path connection options offset");
 static AIPATHCNXTYPE_s aipathcnxtypes[32];
@@ -2639,12 +2607,6 @@ struct eduiitem_s;
 struct nuvec_s;
 struct nupad_s;
 
-struct EdUiNameInputItem : eduiitem_s {
-    u32 unknown_48;
-    char name[0x40];
-    u8 unknown_08c[0x15a - 0x8c];
-    i16 max_name_length;
-};
 DECOMP_ASSERT(offsetof(EdUiNameInputItem, name) == 0x4c, "editor name input offset");
 DECOMP_ASSERT(offsetof(EdUiNameInputItem, max_name_length) == 0x15a, "editor name input limit offset");
 
@@ -2904,12 +2866,6 @@ static i16 disable_cylinder_check;
 extern "C" {
     extern void *ed_fnt;
 }
-struct EditorItemColours {
-    u32 normal;
-    u32 selected;
-    u32 disabled;
-    u32 background;
-};
 
 char *antinode_types[3] = {const_cast<char *>("Circle"), const_cast<char *>("Ellipse"),
                            const_cast<char *>("Rectangle")};
@@ -3056,47 +3012,6 @@ void aieditor_cvSelectEditorMode(eduimenu_s *parent, eduiitem_s *, u32);
 struct EDCREATURE_s;
 struct AIPATHSYS_s;
 
-// Private view of the fields accessed by creature editor callbacks.
-struct CreatureEditorRecord {
-    NULISTLNK link;
-    char name[0x10];
-    char script_name[0x10];
-    NUVEC position;
-    i32 angle;
-    union {
-        u8 path_check[0x1c];
-        struct {
-            u8 unknown_38[0x3c - 0x38];
-            void *path;
-            u8 unknown_40[0x54 - 0x40];
-        };
-    };
-    u32 valid_positions;
-    i16 character_type;
-    u8 set;
-    u8 group_count;
-    u8 across_count;
-    u8 unknown_5d[3];
-    f32 x_spacing;
-    f32 z_spacing;
-    u32 flags;
-    void *activation_area;
-    f32 script_params[4];
-    void *trigger_area;
-    void *locator;
-    void *respawn_locator;
-    u8 difficulty;
-    u8 min_respawns;
-    u8 max_respawns;
-    u8 activation;
-    f32 min_respawn_time;
-    f32 max_respawn_time;
-    f32 stagger_start;
-    f32 view_distance;
-    f32 hear_distance;
-    f32 max_view_height;
-    f32 negative_min_view_height;
-};
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, valid_positions) == 0x54, "creature valid position mask offset");
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, position) == 0x28, "creature position offset");
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, script_name) == 0x18, "creature script name offset");

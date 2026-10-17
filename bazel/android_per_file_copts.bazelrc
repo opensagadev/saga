@@ -216,7 +216,6 @@ build:target --per_file_copt=^src/legoapi/world/levelstreaming\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/world/levelstreaming\.cpp$@-ftree-vectorize
 build:target --per_file_copt=^src/legoapi/world/mission\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/missions\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/gizmos/trigger/ai\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/traps/attracto\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/fx/edgizshadow\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/traps/gizbombgen\.cpp$@-O3

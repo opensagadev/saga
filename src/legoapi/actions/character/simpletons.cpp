@@ -18,24 +18,7 @@ extern "C" {
     extern i16 id_RIDDLER_GOON, id_RIDDLER_GOON_GUN;
 }
 
-i16 GetGenericGoon(i32 armed) {
-    if (armed) {
-        if (id_PENGUIN_GOON_GUN != -1 && APICharacterLoaded(id_PENGUIN_GOON_GUN))
-            return id_PENGUIN_GOON_GUN;
-        if (id_JOKER_GOON_GUN != -1 && APICharacterLoaded(id_JOKER_GOON_GUN))
-            return id_JOKER_GOON_GUN;
-        if (id_RIDDLER_GOON_GUN != -1 && APICharacterLoaded(id_RIDDLER_GOON_GUN))
-            return id_RIDDLER_GOON_GUN;
-    } else {
-        if (id_PENGUIN_GOON != -1 && APICharacterLoaded(id_PENGUIN_GOON))
-            return id_PENGUIN_GOON;
-        if (id_JOKER_GOON != -1 && APICharacterLoaded(id_JOKER_GOON))
-            return id_JOKER_GOON;
-        if (id_RIDDLER_GOON != -1 && APICharacterLoaded(id_RIDDLER_GOON))
-            return id_RIDDLER_GOON;
-    }
-    return -1;
-}
+i16 GetGenericGoon(i32 armed);
 
 static NARROWSOCKEXCEPTION *NarrowSockException;
 
@@ -81,152 +64,16 @@ i32 objInNetWaitContext(GameObject_s *object, i32 context) {
     return false;
 }
 
-struct AtOnceAttacker {
-    GameObject_s *object;
-    f32 distance;
-};
+#include "legoapi/actions/character/simpletons_types.h"
 
-static AtOnceAttacker AtOnce_attackingPlayer[8][17];
-static i32 AtOnce_attackersPerRow = 32;
-static f32 AtOnce_InitialRowDist = 0.75f;
-static f32 AtOnce_RowDist = 0.75f;
-static i32 AtOnce_maxAttackers = 1;
 
-i32 oneAtOnce_CanAttack(GameObject_s *object, GameObject_s *opponent) {
-    if (object == NULL) {
-        return 0;
-    }
-    if ((object->field_0xf01 & 0x20) == 0) {
-        return 1;
-    }
-    if (object->one_at_once_player == 0xff) {
-        return 0;
-    }
-    return Player[object->one_at_once_player] == opponent;
-}
+i32 oneAtOnce_CanAttack(GameObject_s *object, GameObject_s *opponent);
 
-f32 oneAtOnce_GetHoldRange(GameObject_s *object) {
-    APIOBJECT *opponent = object->ai.opponent_object;
-    const i32 player_index = opponent->field_0x27c;
-    if (static_cast<u32>(player_index) > 8) {
-        return 0.75f;
-    }
+f32 oneAtOnce_GetHoldRange(GameObject_s *object);
 
-    AtOnceAttacker *attackers = AtOnce_attackingPlayer[player_index];
-    i32 unassigned_in_row = 0;
-    i32 row = 0;
-    i32 index = 0;
-    GameObject_s *candidate = attackers[index].object;
-    while (candidate != NULL && index < 17) {
-        if (candidate == object) {
-            return static_cast<f32>(row) * AtOnce_RowDist + AtOnce_InitialRowDist;
-        }
-        unassigned_in_row += candidate->one_at_once_player == 0xff;
-        if (unassigned_in_row >= AtOnce_attackersPerRow) {
-            ++row;
-            unassigned_in_row = 0;
-        }
-        ++index;
-        candidate = attackers[index].object;
-    }
-    return AtOnce_InitialRowDist;
-}
+void oneAtOnce_MaintainArray();
 
-void oneAtOnce_MaintainArray() {
-    GameObject_s *previous_attackers[8][4];
-    i32 previous_count[8] = {};
-    i32 attacker_count[8] = {};
-
-    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
-        GameObject_s *object = &Obj[index];
-        const u16 character_flags = APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER;
-        if (__builtin_expect(object == NULL || (object->apiobj.field_0x1f8 & character_flags) != character_flags ||
-            object->ai.opponent == NULL || (object->field_0xf01 & 0x20) == 0, 0)) {
-            continue;
-        }
-
-        const u8 old_player = object->one_at_once_player;
-        if (__builtin_expect(old_player != 0xff, 1)) {
-            previous_attackers[old_player][previous_count[old_player]++] = object;
-        }
-        object->one_at_once_player = 0xff;
-
-        APIOBJECT *opponent_api = static_cast<APIOBJECT *>(object->ai.opponent);
-        GameObject_s *opponent = opponent_api != NULL ? opponent_api->objptr : NULL;
-        i32 player_index = -1;
-        for (i32 player = 0; player < 8; ++player) {
-            if (Player[player] != opponent) {
-                continue;
-            }
-            player_index = player;
-            break;
-        }
-        if (player_index < 0) {
-            continue;
-        }
-
-        const i32 slot = attacker_count[player_index];
-        AtOnce_attackingPlayer[player_index][slot].object = object;
-        AtOnce_attackingPlayer[player_index][slot].distance =
-            NuVecDistSqr(&opponent->apiobj.collision_position, &object->apiobj.collision_position, NULL);
-        ++attacker_count[player_index];
-    }
-
-    for (i32 player = 0; player < 8; ++player) {
-        const i32 count = attacker_count[player];
-        AtOnce_attackingPlayer[player][count].object = NULL;
-        AtOnce_attackingPlayer[player][count].distance = 1.0e9f;
-    }
-
-    for (i32 player = 0; player < 8; ++player) {
-        if (Player[player] == NULL) {
-            continue;
-        }
-        const i32 count = attacker_count[player];
-        for (i32 slot = 0; slot < count && AtOnce_attackingPlayer[player][slot].object != NULL; ++slot) {
-            if (previous_count[player] > 0 &&
-                AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][0]) {
-                AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
-            }
-            if (previous_count[player] > 1 &&
-                AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][1]) {
-                AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
-            }
-            if (previous_count[player] > 2 &&
-                AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][2]) {
-                AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
-            }
-            if (previous_count[player] > 3 &&
-                AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][3]) {
-                AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
-            }
-            for (i32 adjacent = 1; adjacent <= count - slot; ++adjacent) {
-                if (AtOnce_attackingPlayer[player][adjacent].distance <
-                    AtOnce_attackingPlayer[player][adjacent - 1].distance) {
-                    GameObject_s *object = AtOnce_attackingPlayer[player][adjacent - 1].object;
-                    const f32 distance = AtOnce_attackingPlayer[player][adjacent - 1].distance;
-                    AtOnce_attackingPlayer[player][adjacent - 1].object =
-                        AtOnce_attackingPlayer[player][adjacent].object;
-                    AtOnce_attackingPlayer[player][adjacent - 1].distance =
-                        AtOnce_attackingPlayer[player][adjacent].distance;
-                    AtOnce_attackingPlayer[player][adjacent].object = object;
-                    AtOnce_attackingPlayer[player][adjacent].distance = distance;
-                }
-            }
-        }
-
-        if (Player[player] != NULL) {
-            const i32 attack_limit = AtOnce_maxAttackers < count ? AtOnce_maxAttackers : count;
-            for (i32 slot = 0; slot < attack_limit && AtOnce_attackingPlayer[player][slot].object != NULL; ++slot) {
-                AtOnce_attackingPlayer[player][slot].object->one_at_once_player = static_cast<u8>(player);
-            }
-        }
-    }
-}
-
-void oneAtOnce_SetDistPerRow(float distance) {
-    AtOnce_RowDist = MAX(0.0f, distance);
-}
+void oneAtOnce_SetDistPerRow(float distance);
 
 void NarrowSockExceptions_Init(NARROWSOCKEXCEPTION *exceptions) {
     i32 level_index __attribute__((aligned(16)));
@@ -239,21 +86,8 @@ void NarrowSockExceptions_Init(NARROWSOCKEXCEPTION *exceptions) {
     }
 }
 
-void oneAtOnce_SetNumAttackers(i32 attackers) {
-    if (attackers < 0) {
-        AtOnce_maxAttackers = 0;
-        return;
-    }
-    if (attackers >= 5) {
-        attackers = 4;
-    }
-    AtOnce_maxAttackers = attackers;
-}
+void oneAtOnce_SetNumAttackers(i32 attackers);
 
-void oneAtOnce_SetInitDistPerRow(float distance) {
-    AtOnce_InitialRowDist = MAX(0.0f, distance);
-}
+void oneAtOnce_SetInitDistPerRow(float distance);
 
-void oneAtOnce_SetAttackersPerRow(i32 attackers) {
-    AtOnce_attackersPerRow = MAX(0, attackers);
-}
+void oneAtOnce_SetAttackersPerRow(i32 attackers);

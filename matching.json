@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 83.08599,
+    "fuzzy_match_percent": 83.08145,
     "total_code": "4722419",
-    "matched_code": "653201",
-    "matched_code_percent": 13.831915,
+    "matched_code": "653533",
+    "matched_code_percent": 13.838945,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 7023,
-    "matched_functions_percent": 52.180695,
+    "matched_functions": 7034,
+    "matched_functions_percent": 52.262424,
     "total_units": 1
   },
   "text": {
@@ -20846,6 +20846,46 @@
           "match_percent": 65.95238
         },
         {
+          "name": "_ZL28Condition_ObstacleLockedShutP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_ObstacleLockedShut(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1579088,
+          "offset": 689120,
+          "size": 19,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL28Condition_ObstacleLockedOpenP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_ObstacleLockedOpen(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1579120,
+          "offset": 689152,
+          "size": 19,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL32Condition_ObstacleOpenedByPlayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_ObstacleOpenedByPlayer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1579152,
+          "offset": 689184,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL38Condition_ObstacleOpenedByEitherPlayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_ObstacleOpenedByEitherPlayer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1579232,
+          "offset": 689264,
+          "size": 59,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23Condition_IsVisibleInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_IsVisibleInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1579296,
+          "offset": 689328,
+          "size": 11,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL15Condition_MySetP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
           "demangled_name": "Condition_MySet(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
           "address": 1579312,
@@ -20854,11 +20894,35 @@
           "match_percent": 99.933334
         },
         {
+          "name": "_ZL26Condition_ForcePushingInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_ForcePushingInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1579376,
+          "offset": 689408,
+          "size": 60,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL22Condition_ForcePushingP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_ForcePushing(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1579440,
+          "offset": 689472,
+          "size": 77,
+          "match_percent": 85.71429
+        },
+        {
           "name": "_ZL21Condition_TurretAliveP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
           "demangled_name": "Condition_TurretAlive(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
           "address": 1579520,
           "offset": 689552,
           "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL28Condition_IAmAPartyCharacterP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_IAmAPartyCharacter(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1579552,
+          "offset": 689584,
+          "size": 35,
           "match_percent": 100.0
         },
         {
@@ -20942,6 +21006,70 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL20Condition_IAmPlayer2P7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_IAmPlayer2(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1580208,
+          "offset": 690240,
+          "size": 120,
+          "match_percent": 79.28571
+        },
+        {
+          "name": "_ZL31Condition_PlayerOnForcePlatformP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_PlayerOnForcePlatform(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1580336,
+          "offset": 690368,
+          "size": 178,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL37Condition_EitherPlayerOnForcePlatformP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_EitherPlayerOnForcePlatform(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1580528,
+          "offset": 690560,
+          "size": 347,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL24Condition_ForceBeingUsedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_ForceBeingUsed(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1580880,
+          "offset": 690912,
+          "size": 35,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL30Condition_PlayerDeflectingPartP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_PlayerDeflectingPart(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1580928,
+          "offset": 690960,
+          "size": 43,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL35Condition_EitherPlayerWearingHelmetP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_EitherPlayerWearingHelmet(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1580976,
+          "offset": 691008,
+          "size": 37,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL28Condition_ForceStackCompleteP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_ForceStackComplete(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1581024,
+          "offset": 691056,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL35Condition_ForceStackCompleteInOrderP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_ForceStackCompleteInOrder(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1581056,
+          "offset": 691088,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL25Condition_BuildItCompleteP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
           "demangled_name": "Condition_BuildItComplete(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
           "address": 1581088,
@@ -20966,12 +21094,52 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL31Condition_AIOverrideControlInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_AIOverrideControlInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1581360,
+          "offset": 691392,
+          "size": 60,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL27Condition_AIOverrideControlP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_AIOverrideControl(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1581424,
+          "offset": 691456,
+          "size": 56,
+          "match_percent": 92.0
+        },
+        {
+          "name": "_ZL24Condition_IsOnScreenInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_IsOnScreenInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1581488,
+          "offset": 691520,
+          "size": 60,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL20Condition_IsOnScreenP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_IsOnScreen(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1581552,
+          "offset": 691584,
+          "size": 56,
+          "match_percent": 92.0
+        },
+        {
           "name": "_ZL24Condition_OffScreenTimerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
           "demangled_name": "Condition_OffScreenTimer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
           "address": 1581616,
           "offset": 691648,
           "size": 47,
-          "match_percent": 99.166664
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL24Condition_PlayerOnGroundP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_PlayerOnGround(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1581664,
+          "offset": 691696,
+          "size": 43,
+          "match_percent": 100.0
         },
         {
           "name": "_ZL18Condition_OnGroundP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
@@ -20987,7 +21155,15 @@
           "address": 1581760,
           "offset": 691792,
           "size": 43,
-          "match_percent": 99.0
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL24Condition_PlayerOnObjectP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_PlayerOnObject(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1581808,
+          "offset": 691840,
+          "size": 151,
+          "match_percent": 52.73171
         },
         {
           "name": "_ZL30Condition_EitherPlayerOnObjectP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
@@ -21006,12 +21182,28 @@
           "match_percent": 47.0
         },
         {
+          "name": "_ZL30Condition_OnSameObjectAsPlayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_OnSameObjectAsPlayer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1582336,
+          "offset": 692368,
+          "size": 113,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL20Condition_SpawnCountP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
           "demangled_name": "Condition_SpawnCount(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
           "address": 1582464,
           "offset": 692496,
           "size": 71,
           "match_percent": 99.94444
+        },
+        {
+          "name": "_ZL18Condition_BlockingP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_Blocking(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1582544,
+          "offset": 692576,
+          "size": 92,
+          "match_percent": 100.0
         },
         {
           "name": "_ZL17Condition_BeenHitP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
@@ -21030,6 +21222,22 @@
           "match_percent": 99.96154
         },
         {
+          "name": "_ZL19Condition_HitPointsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_HitPoints(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1582848,
+          "offset": 692880,
+          "size": 84,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL31Condition_CollidingWithOpponentP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_CollidingWithOpponent(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1582944,
+          "offset": 692976,
+          "size": 68,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL19Condition_CollidingP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
           "demangled_name": "Condition_Colliding(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
           "address": 1583024,
@@ -21043,7 +21251,7 @@
           "address": 1583072,
           "offset": 693104,
           "size": 47,
-          "match_percent": 99.166664
+          "match_percent": 100.0
         },
         {
           "name": "_ZL14Condition_YPosP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
@@ -21051,7 +21259,7 @@
           "address": 1583120,
           "offset": 693152,
           "size": 47,
-          "match_percent": 99.166664
+          "match_percent": 100.0
         },
         {
           "name": "_ZL14Condition_ZPosP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
@@ -21062,12 +21270,60 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL20Condition_IsSetAliveP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_IsSetAlive(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1583216,
+          "offset": 693248,
+          "size": 59,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23Condition_NumInSetAliveP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_NumInSetAlive(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1583280,
+          "offset": 693312,
+          "size": 93,
+          "match_percent": 99.958336
+        },
+        {
           "name": "_ZL17Condition_ContextP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
           "demangled_name": "Condition_Context(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
           "address": 1583376,
           "offset": 693408,
           "size": 85,
           "match_percent": 99.958336
+        },
+        {
+          "name": "_ZL19Condition_InContextP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_InContext(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1583472,
+          "offset": 693504,
+          "size": 53,
+          "match_percent": 75.95238
+        },
+        {
+          "name": "_ZL25Condition_OpponentContextP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_OpponentContext(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1583536,
+          "offset": 693568,
+          "size": 53,
+          "match_percent": 74.75
+        },
+        {
+          "name": "_ZL26Condition_OnDynamicGrappleP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_OnDynamicGrapple(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1583600,
+          "offset": 693632,
+          "size": 79,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23Condition_Player2ActiveP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_Player2Active(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1583680,
+          "offset": 693712,
+          "size": 35,
+          "match_percent": 100.0
         },
         {
           "name": "_ZL24Condition_NumBaddiesInitP7AISYS_sPcP10AISCRIPT_s",
@@ -21086,6 +21342,14 @@
           "match_percent": 99.51219
         },
         {
+          "name": "_ZL25Condition_NumForceObjectsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_NumForceObjects(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1583872,
+          "offset": 693904,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL21Condition_BeenToLevelP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
           "demangled_name": "Condition_BeenToLevel(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
           "address": 1583888,
@@ -21094,11 +21358,227 @@
           "match_percent": 51.545456
         },
         {
+          "name": "_ZL19Condition_LastLevelP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_LastLevel(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1583984,
+          "offset": 694016,
+          "size": 51,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL17Condition_MessageP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_Message(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584048,
+          "offset": 694080,
+          "size": 19,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL21Condition_ScriptParamP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_ScriptParam(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584080,
+          "offset": 694112,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL24Condition_RigidAnimFrameP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_RigidAnimFrame(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584112,
+          "offset": 694144,
+          "size": 19,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL25Condition_CutSceneStartedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_CutSceneStarted(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584144,
+          "offset": 694176,
+          "size": 35,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL24Condition_CutSceneExistsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_CutSceneExists(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584192,
+          "offset": 694224,
+          "size": 19,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL25Condition_CutScenePlayingP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_CutScenePlaying(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584224,
+          "offset": 694256,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL22Condition_PlayerInSockP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_PlayerInSock(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584240,
+          "offset": 694272,
+          "size": 86,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL33Condition_PlayerDistanceAlongSockP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_PlayerDistanceAlongSock(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584336,
+          "offset": 694368,
+          "size": 35,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL41Condition_FurthestPlayerDistanceAlongSockP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_FurthestPlayerDistanceAlongSock(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584384,
+          "offset": 694416,
+          "size": 93,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL24Condition_FinishedSplineP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_FinishedSpline(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584480,
+          "offset": 694512,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL18Condition_FreeplayP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_Freeplay(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584560,
+          "offset": 694592,
+          "size": 38,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL14Condition_IndyP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_Indy(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584608,
+          "offset": 694640,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL20Condition_MissionWonP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_MissionWon(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584624,
+          "offset": 694656,
+          "size": 37,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23Condition_ChallengeModeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_ChallengeMode(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584672,
+          "offset": 694704,
+          "size": 35,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL13Condition_PSPP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_PSP(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584720,
+          "offset": 694752,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL35Condition_BoltsDontGetDeflectedBackP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_BoltsDontGetDeflectedBack(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584736,
+          "offset": 694768,
+          "size": 35,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23Condition_CheatProgressP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_CheatProgress(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584784,
+          "offset": 694816,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL25Condition_BigJumpCompleteP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_BigJumpComplete(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584800,
+          "offset": 694832,
+          "size": 49,
+          "match_percent": 68.1579
+        },
+        {
+          "name": "_ZL26Condition_RespawnLocatorIsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_RespawnLocatorIs(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584864,
+          "offset": 694896,
+          "size": 37,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL25Condition_DropBackInTimerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_DropBackInTimer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584912,
+          "offset": 694944,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL25Condition_PartyUnderCoverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
           "demangled_name": "Condition_PartyUnderCover(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
           "address": 1584944,
           "offset": 694976,
           "size": 35,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL37Condition_NumBaddiesThatCanSeePlayersP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_NumBaddiesThatCanSeePlayers(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1584992,
+          "offset": 695024,
+          "size": 38,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL26Condition_HelpWithTriggersP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_HelpWithTriggers(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1585040,
+          "offset": 695072,
+          "size": 99,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL29Condition_PartyContainsDroidsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_PartyContainsDroids(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1585152,
+          "offset": 695184,
+          "size": 545,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL32Condition_CannotReachDestinationP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_CannotReachDestination(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1585712,
+          "offset": 695744,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL36Condition_EitherPlayerPushingSpinnerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_EitherPlayerPushingSpinner(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1585744,
+          "offset": 695776,
+          "size": 107,
+          "match_percent": 99.08572
+        },
+        {
+          "name": "_ZL21Condition_BeenSpawnedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_BeenSpawned(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1585856,
+          "offset": 695888,
+          "size": 51,
           "match_percent": 100.0
         },
         {
@@ -21110,12 +21590,108 @@
           "match_percent": 96.25
         },
         {
+          "name": "_ZL37Condition_EitherPlayerInMyTriggerAreaP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_EitherPlayerInMyTriggerArea(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1586080,
+          "offset": 696112,
+          "size": 204,
+          "match_percent": 95.86885
+        },
+        {
+          "name": "_ZL29Condition_AreaContainsBaddiesP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_AreaContainsBaddies(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1586288,
+          "offset": 696320,
+          "size": 57,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL29Condition_AreaContainsGoodiesP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_AreaContainsGoodies(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1586352,
+          "offset": 696384,
+          "size": 57,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL33Condition_AreaContainsPartyMemberP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_AreaContainsPartyMember(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1586416,
+          "offset": 696448,
+          "size": 57,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL25Condition_PlayerTakenOverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_PlayerTakenOver(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1586480,
+          "offset": 696512,
+          "size": 51,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23Condition_BeenTakenOverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_BeenTakenOver(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1586544,
+          "offset": 696576,
+          "size": 63,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23Condition_OnSpeederBikeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_OnSpeederBike(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1586608,
+          "offset": 696640,
+          "size": 96,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL28Condition_UnderPlayerControlP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_UnderPlayerControl(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1586704,
+          "offset": 696736,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL25Condition_CharacterExistsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
           "demangled_name": "Condition_CharacterExists(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
           "address": 1586736,
           "offset": 696768,
           "size": 19,
-          "match_percent": 98.333336
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL29Condition_CharacterTypeExistsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_CharacterTypeExists(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1586768,
+          "offset": 696800,
+          "size": 102,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL36Condition_LastAttackerIsActivePlayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_LastAttackerIsActivePlayer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1586880,
+          "offset": 696912,
+          "size": 51,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL25Condition_GotLocatorInSetP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_GotLocatorInSet(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1586944,
+          "offset": 696976,
+          "size": 110,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL24Condition_GotOpponentLOSP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_GotOpponentLOS(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1587056,
+          "offset": 697088,
+          "size": 174,
+          "match_percent": 83.958336
         },
         {
           "name": "_ZL21Condition_HasTakeOverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
@@ -21190,12 +21766,36 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL17Condition_RaceLapP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_RaceLap(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1587808,
+          "offset": 697840,
+          "size": 38,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL17Condition_MusicOnP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_MusicOn(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1587856,
+          "offset": 697888,
+          "size": 35,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL22Condition_AreaCompleteP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
           "demangled_name": "Condition_AreaComplete(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
           "address": 1587904,
           "offset": 697936,
           "size": 65,
           "match_percent": 100.0
+        },
+        {
+          "name": "_ZL30Condition_ShouldAttackOpponentP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_ShouldAttackOpponent(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1587984,
+          "offset": 698016,
+          "size": 143,
+          "match_percent": 99.98039
         },
         {
           "name": "_ZL17Condition_InSwampP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
@@ -21323,7 +21923,7 @@
           "address": 1589184,
           "offset": 699216,
           "size": 149,
-          "match_percent": 95.723404
+          "match_percent": 95.510635
         },
         {
           "name": "_ZL28Action_CanCollideWithObjectsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21339,7 +21939,7 @@
           "address": 1589504,
           "offset": 699536,
           "size": 149,
-          "match_percent": 95.723404
+          "match_percent": 95.40426
         },
         {
           "name": "_ZL25Action_UseTimeBasedUpdateP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21347,7 +21947,7 @@
           "address": 1589664,
           "offset": 699696,
           "size": 234,
-          "match_percent": 90.15493
+          "match_percent": 89.73239
         },
         {
           "name": "_ZL25Action_DisableNarrowSocksP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21355,7 +21955,7 @@
           "address": 1589904,
           "offset": 699936,
           "size": 88,
-          "match_percent": 99.96429
+          "match_percent": 99.42857
         },
         {
           "name": "_ZL18Action_RespawnableP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21379,7 +21979,7 @@
           "address": 1590384,
           "offset": 700416,
           "size": 149,
-          "match_percent": 95.510635
+          "match_percent": 95.19149
         },
         {
           "name": "_ZL14Action_CanTurnP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21387,7 +21987,7 @@
           "address": 1590544,
           "offset": 700576,
           "size": 149,
-          "match_percent": 95.19149
+          "match_percent": 95.723404
         },
         {
           "name": "_ZL25Action_CannotBeForcedBackP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21403,7 +22003,7 @@
           "address": 1590864,
           "offset": 700896,
           "size": 149,
-          "match_percent": 90.82979
+          "match_percent": 89.55319
         },
         {
           "name": "_ZL24Action_IgnoreShoveSystemP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21563,7 +22163,7 @@
           "address": 1594128,
           "offset": 704160,
           "size": 206,
-          "match_percent": 99.96774
+          "match_percent": 99.72581
         },
         {
           "name": "_ZL19Action_CanOpenDoorsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21574,12 +22174,36 @@
           "match_percent": 99.48387
         },
         {
+          "name": "_ZL41Condition_AngleAboutMyLocatorToPlayerInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_AngleAboutMyLocatorToPlayerInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1594544,
+          "offset": 704576,
+          "size": 64,
+          "match_percent": 99.73684
+        },
+        {
+          "name": "_ZL19Condition_TakenOverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_TakenOver(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1594608,
+          "offset": 704640,
+          "size": 234,
+          "match_percent": 89.22535
+        },
+        {
           "name": "_ZL27Action_SetAIOverrideControlP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
           "demangled_name": "Action_SetAIOverrideControl(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
           "address": 1594848,
           "offset": 704880,
           "size": 553,
-          "match_percent": 64.51095
+          "match_percent": 64.72993
+        },
+        {
+          "name": "_ZL29Condition_NumForceObjectsInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_NumForceObjectsInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1595408,
+          "offset": 705440,
+          "size": 124,
+          "match_percent": 99.324326
         },
         {
           "name": "_ZL19Action_SetWalkSpeedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21598,12 +22222,36 @@
           "match_percent": 92.184
         },
         {
+          "name": "_ZL32Condition_SockDistanceToOpponentP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_SockDistanceToOpponent(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1596176,
+          "offset": 706208,
+          "size": 223,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL30Condition_SockDistanceToPlayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_SockDistanceToPlayer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1596400,
+          "offset": 706432,
+          "size": 223,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL22Condition_BehindCameraP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
           "demangled_name": "Condition_BehindCamera(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
           "address": 1596624,
           "offset": 706656,
           "size": 185,
           "match_percent": 100.0
+        },
+        {
+          "name": "_ZL31Condition_SockXDistanceToPlayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_SockXDistanceToPlayer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1596816,
+          "offset": 706848,
+          "size": 257,
+          "match_percent": 90.46154
         },
         {
           "name": "_ZL19Action_RaceOpponentP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21619,7 +22267,15 @@
           "address": 1597904,
           "offset": 707936,
           "size": 358,
-          "match_percent": 99.9901
+          "match_percent": 99.69307
+        },
+        {
+          "name": "_ZL32Condition_PickupBeenTurnedOnInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_PickupBeenTurnedOnInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1598272,
+          "offset": 708304,
+          "size": 60,
+          "match_percent": 100.0
         },
         {
           "name": "_ZL29Condition_GizmoVisibilityInitP7AISYS_sPcP10AISCRIPT_s",
@@ -21654,11 +22310,75 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL27Condition_ForceCompleteInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_ForceCompleteInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1598624,
+          "offset": 708656,
+          "size": 76,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL25Condition_TurretAliveInitP7AISYS_sPcP10AISCRIPT_s",
           "demangled_name": "Condition_TurretAliveInit(AISYS_s*, char*, AISCRIPT_s*)",
           "address": 1598704,
           "offset": 708736,
           "size": 76,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL29Condition_OnForcePlatformInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_OnForcePlatformInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1598784,
+          "offset": 708816,
+          "size": 96,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL24Condition_UsingForceInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_UsingForceInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1598880,
+          "offset": 708912,
+          "size": 76,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19Condition_ForceInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_ForceInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1598960,
+          "offset": 708992,
+          "size": 64,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL36Condition_ObstacleOpenedByPlayerInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_ObstacleOpenedByPlayerInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1599024,
+          "offset": 709056,
+          "size": 76,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL24Condition_GizSpecialInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_GizSpecialInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1599104,
+          "offset": 709136,
+          "size": 64,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL22Condition_ObstacleInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_ObstacleInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1599168,
+          "offset": 709200,
+          "size": 64,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL30Condition_RespawnLocatorIsInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_RespawnLocatorIsInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1599232,
+          "offset": 709264,
+          "size": 52,
           "match_percent": 100.0
         },
         {
@@ -21675,7 +22395,7 @@
           "address": 1599408,
           "offset": 709440,
           "size": 294,
-          "match_percent": 75.481926
+          "match_percent": 75.12048
         },
         {
           "name": "_ZL19Action_GoToNewLevelP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21683,7 +22403,7 @@
           "address": 1599712,
           "offset": 709744,
           "size": 350,
-          "match_percent": 97.14
+          "match_percent": 96.99
         },
         {
           "name": "_ZL24Action_DrawBossHitPointsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21702,11 +22422,43 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL37Condition_AreaContainsPartyMemberInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_AreaContainsPartyMemberInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1600192,
+          "offset": 710224,
+          "size": 52,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL33Condition_AreaContainsGoodiesInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_AreaContainsGoodiesInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1600256,
+          "offset": 710288,
+          "size": 52,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL33Condition_AreaContainsBaddiesInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_AreaContainsBaddiesInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1600320,
+          "offset": 710352,
+          "size": 52,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL41Condition_TakeOverTargetInTriggerAreaInitP7AISYS_sPcP10AISCRIPT_s",
           "demangled_name": "Condition_TakeOverTargetInTriggerAreaInit(AISYS_s*, char*, AISCRIPT_s*)",
           "address": 1600384,
           "offset": 710416,
           "size": 52,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL29Condition_GotLocatorInSetInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_GotLocatorInSetInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1600448,
+          "offset": 710480,
+          "size": 42,
           "match_percent": 100.0
         },
         {
@@ -21731,7 +22483,23 @@
           "address": 1602256,
           "offset": 712288,
           "size": 471,
-          "match_percent": 89.650406
+          "match_percent": 89.162605
+        },
+        {
+          "name": "_ZL30Condition_OpponentPathPosRangeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_OpponentPathPosRange(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1602736,
+          "offset": 712768,
+          "size": 100,
+          "match_percent": 99.96774
+        },
+        {
+          "name": "_ZL31Condition_OpponentToPlayerRangeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_OpponentToPlayerRange(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1602848,
+          "offset": 712880,
+          "size": 108,
+          "match_percent": 99.97059
         },
         {
           "name": "_ZL23Condition_TakeOverRangeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
@@ -21742,12 +22510,28 @@
           "match_percent": 99.96667
         },
         {
+          "name": "_ZL27Condition_LastAttackerRangeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_LastAttackerRange(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1603072,
+          "offset": 713104,
+          "size": 92,
+          "match_percent": 99.965515
+        },
+        {
+          "name": "_ZL24Condition_CharacterRangeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_CharacterRange(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1603168,
+          "offset": 713200,
+          "size": 92,
+          "match_percent": 99.96429
+        },
+        {
           "name": "_ZL21Action_ForceLightningP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
           "demangled_name": "Action_ForceLightning(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
           "address": 1603264,
           "offset": 713296,
           "size": 914,
-          "match_percent": 94.941444
+          "match_percent": 95.00901
         },
         {
           "name": "_ZL21Action_ThrowDetonatorP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21774,6 +22558,14 @@
           "match_percent": 69.76033
         },
         {
+          "name": "_ZL21Condition_MessageInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_MessageInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1605552,
+          "offset": 715584,
+          "size": 80,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL42Condition_InSameTriggerAreaAsNearestPlayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
           "demangled_name": "Condition_InSameTriggerAreaAsNearestPlayer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
           "address": 1605632,
@@ -21796,6 +22588,14 @@
           "offset": 716080,
           "size": 281,
           "match_percent": 89.763885
+        },
+        {
+          "name": "_Z23Action_GameFollowPlayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_GameFollowPlayer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 1606336,
+          "offset": 716368,
+          "size": 837,
+          "match_percent": 86.59091
         },
         {
           "name": "_ZL17Action_FaceCameraP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21838,6 +22638,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL26Condition_PlayerInSockInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_PlayerInSockInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1608848,
+          "offset": 718880,
+          "size": 52,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL22Action_UseCurrentSpeedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
           "demangled_name": "Action_UseCurrentSpeed(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
           "address": 1608912,
@@ -21867,7 +22675,7 @@
           "address": 1612000,
           "offset": 722032,
           "size": 992,
-          "match_percent": 99.92405
+          "match_percent": 99.98734
         },
         {
           "name": "_ZL22Action_FollowDirectionP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21891,7 +22699,7 @@
           "address": 1615120,
           "offset": 725152,
           "size": 498,
-          "match_percent": 91.746376
+          "match_percent": 91.78261
         },
         {
           "name": "_ZL14Action_ExplodeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21907,7 +22715,15 @@
           "address": 1615696,
           "offset": 725728,
           "size": 920,
-          "match_percent": 77.73094
+          "match_percent": 77.70852
+        },
+        {
+          "name": "_ZL23Condition_ForceCompleteP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_ForceComplete(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1616624,
+          "offset": 726656,
+          "size": 56,
+          "match_percent": 100.0
         },
         {
           "name": "_ZL20Action_ReleaseVictimP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21931,7 +22747,7 @@
           "address": 1616816,
           "offset": 726848,
           "size": 1177,
-          "match_percent": 76.09653
+          "match_percent": 76.173744
         },
         {
           "name": "_ZL21Action_AttackOpponentP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -21971,7 +22787,7 @@
           "address": 1620544,
           "offset": 730576,
           "size": 1718,
-          "match_percent": 84.720985
+          "match_percent": 84.881485
         },
         {
           "name": "_ZL23Action_GoToOriginalPathP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22022,6 +22838,30 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL28Condition_PickupBeenTurnedOnP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_PickupBeenTurnedOn(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1624064,
+          "offset": 734096,
+          "size": 55,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL37Condition_AngleAboutMyLocatorToPlayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_AngleAboutMyLocatorToPlayer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1624128,
+          "offset": 734160,
+          "size": 267,
+          "match_percent": 93.30882
+        },
+        {
+          "name": "_ZL27Condition_MaulShouldRunAwayP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_MaulShouldRunAway(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1624400,
+          "offset": 734432,
+          "size": 401,
+          "match_percent": 99.906975
+        },
+        {
           "name": "_ZL25Condition_GizmoVisibilityP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
           "demangled_name": "Condition_GizmoVisibility(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
           "address": 1624816,
@@ -22070,11 +22910,195 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL20Condition_ForceAtEndP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_ForceAtEnd(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1625440,
+          "offset": 735472,
+          "size": 88,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL22Condition_ForceAtStartP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_ForceAtStart(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1625536,
+          "offset": 735568,
+          "size": 88,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23Condition_ObstacleAtEndP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_ObstacleAtEnd(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1625632,
+          "offset": 735664,
+          "size": 88,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL25Condition_ObstacleAtStartP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_ObstacleAtStart(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1625728,
+          "offset": 735760,
+          "size": 88,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL20Condition_ShopActiveP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
           "demangled_name": "Condition_ShopActive(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
           "address": 1625824,
           "offset": 735856,
           "size": 50,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19Condition_IsVisibleP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_IsVisible(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1625888,
+          "offset": 735920,
+          "size": 131,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL40Condition_EitherPlayerPushingSpinnerInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_EitherPlayerPushingSpinnerInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1626032,
+          "offset": 736064,
+          "size": 46,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL21Condition_MissionModeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_MissionMode(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1626080,
+          "offset": 736112,
+          "size": 48,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL22Condition_HintCompleteP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_HintComplete(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1626128,
+          "offset": 736160,
+          "size": 56,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL27Condition_HintAvailableInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_HintAvailableInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1626192,
+          "offset": 736224,
+          "size": 44,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL25Condition_ScriptParamInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_ScriptParamInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1626240,
+          "offset": 736272,
+          "size": 180,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23Condition_HintAvailableP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_HintAvailable(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1626432,
+          "offset": 736464,
+          "size": 56,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23Condition_CurrentHintIdP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_CurrentHintId(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1626496,
+          "offset": 736528,
+          "size": 41,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL28Condition_RigidAnimFrameInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_RigidAnimFrameInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1626544,
+          "offset": 736576,
+          "size": 94,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL31Condition_AnimationFinishedInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_AnimationFinishedInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1626640,
+          "offset": 736672,
+          "size": 94,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL29Condition_CutScenePlayingInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_CutScenePlayingInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1626736,
+          "offset": 736768,
+          "size": 52,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL28Condition_CutSceneExistsInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_CutSceneExistsInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1626800,
+          "offset": 736832,
+          "size": 52,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL30Condition_CutSceneFinishedInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_CutSceneFinishedInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1626864,
+          "offset": 736896,
+          "size": 52,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL29Condition_CutSceneStartedInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_CutSceneStartedInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1626928,
+          "offset": 736960,
+          "size": 52,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL26Condition_CutSceneFinishedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_CutSceneFinished(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1626992,
+          "offset": 737024,
+          "size": 64,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL27Condition_CanFightLikeAJediP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_CanFightLikeAJedi(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1627056,
+          "offset": 737088,
+          "size": 72,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23Condition_ForceFinishedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_ForceFinished(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1627136,
+          "offset": 737168,
+          "size": 56,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL20Condition_UsingForceP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_UsingForce(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1627200,
+          "offset": 737232,
+          "size": 64,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL26Condition_PlayerUsingForceP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_PlayerUsingForce(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1627264,
+          "offset": 737296,
+          "size": 64,
           "match_percent": 100.0
         },
         {
@@ -22094,12 +23118,108 @@
           "match_percent": 80.5873
         },
         {
+          "name": "_ZL22Condition_OnObjectInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_OnObjectInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1627648,
+          "offset": 737680,
+          "size": 133,
+          "match_percent": 99.57143
+        },
+        {
+          "name": "_Z16Action_PullLeverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_PullLever(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 1627792,
+          "offset": 737824,
+          "size": 809,
+          "match_percent": 76.01596
+        },
+        {
+          "name": "_Z16Action_UseTechnoP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_UseTechno(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 1628608,
+          "offset": 738640,
+          "size": 684,
+          "match_percent": 82.2381
+        },
+        {
+          "name": "_Z15Action_UsePanelP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_UsePanel(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 1629296,
+          "offset": 739328,
+          "size": 693,
+          "match_percent": 98.409355
+        },
+        {
+          "name": "_Z23Action_HelpWithTriggersP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_HelpWithTriggers(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 1630000,
+          "offset": 740032,
+          "size": 1996,
+          "match_percent": 44.610847
+        },
+        {
+          "name": "_Z20Action_UseTriggerSetP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_UseTriggerSet(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 1632000,
+          "offset": 742032,
+          "size": 366,
+          "match_percent": 95.57143
+        },
+        {
+          "name": "_Z21GuidedMissile_DeflectP6PART_s",
+          "demangled_name": "GuidedMissile_Deflect(PART_s*)",
+          "address": 1632368,
+          "offset": 742400,
+          "size": 51,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18GuidedMissile_KillP6PART_si",
+          "demangled_name": "GuidedMissile_Kill(PART_s*, int)",
+          "address": 1632432,
+          "offset": 742464,
+          "size": 215,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18GuidedMissile_MoveP6PART_sf",
+          "demangled_name": "GuidedMissile_Move(PART_s*, float)",
+          "address": 1632656,
+          "offset": 742688,
+          "size": 947,
+          "match_percent": 70.94301
+        },
+        {
+          "name": "_ZL25Condition_OnForcePlatformP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_OnForcePlatform(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1633616,
+          "offset": 743648,
+          "size": 170,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19Condition_InMiniCutP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_InMiniCut(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1633792,
+          "offset": 743824,
+          "size": 51,
+          "match_percent": 98.333336
+        },
+        {
+          "name": "_ZL31Condition_EitherPlayerTakenOverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_EitherPlayerTakenOver(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1633856,
+          "offset": 743888,
+          "size": 82,
+          "match_percent": 99.4
+        },
+        {
           "name": "_ZL26Action_ClearTakeOverTargetP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
           "demangled_name": "Action_ClearTakeOverTarget(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
           "address": 1633952,
           "offset": 743984,
           "size": 60,
-          "match_percent": 99.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL27Action_PartyCanBeUnderCoverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22107,7 +23227,7 @@
           "address": 1634016,
           "offset": 744048,
           "size": 118,
-          "match_percent": 93.63158
+          "match_percent": 99.97369
         },
         {
           "name": "_ZL21Action_DontRaycastLOSP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22126,12 +23246,44 @@
           "match_percent": 99.53125
         },
         {
+          "name": "_ZL23Condition_EmptyTakeOverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_EmptyTakeOver(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1634512,
+          "offset": 744544,
+          "size": 266,
+          "match_percent": 90.177216
+        },
+        {
+          "name": "_ZL33Condition_CharacterTypeExistsInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_CharacterTypeExistsInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1634784,
+          "offset": 744816,
+          "size": 134,
+          "match_percent": 99.70588
+        },
+        {
+          "name": "_ZL23Condition_LastLevelInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_LastLevelInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1634928,
+          "offset": 744960,
+          "size": 150,
+          "match_percent": 99.19643
+        },
+        {
           "name": "_ZL25Condition_BeenToLevelInitP7AISYS_sPcP10AISCRIPT_s",
           "demangled_name": "Condition_BeenToLevelInit(AISYS_s*, char*, AISCRIPT_s*)",
           "address": 1635088,
           "offset": 745120,
           "size": 150,
-          "match_percent": 99.72222
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23Condition_InContextInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_InContextInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1635248,
+          "offset": 745280,
+          "size": 369,
+          "match_percent": 99.39561
         },
         {
           "name": "_ZL25Condition_OpponentIsAInitP7AISYS_sPcP10AISCRIPT_s",
@@ -22155,7 +23307,7 @@
           "address": 1635920,
           "offset": 745952,
           "size": 206,
-          "match_percent": 84.09677
+          "match_percent": 83.854836
         },
         {
           "name": "_ZL26Action_SetZeroAccelerationP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22163,7 +23315,7 @@
           "address": 1636128,
           "offset": 746160,
           "size": 321,
-          "match_percent": 96.792076
+          "match_percent": 96.84158
         },
         {
           "name": "_ZL25Action_SetLastSafePathPosP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22171,7 +23323,7 @@
           "address": 1636464,
           "offset": 746496,
           "size": 239,
-          "match_percent": 99.55556
+          "match_percent": 99.97222
         },
         {
           "name": "_ZL30Action_SetDefaultMovementRangeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22179,7 +23331,7 @@
           "address": 1636704,
           "offset": 746736,
           "size": 93,
-          "match_percent": 100.0
+          "match_percent": 99.09091
         },
         {
           "name": "_ZL26Action_SetMaxMovementRangeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22187,7 +23339,7 @@
           "address": 1636800,
           "offset": 746832,
           "size": 604,
-          "match_percent": 95.42384
+          "match_percent": 95.22517
         },
         {
           "name": "_ZL21Action_SetScriptParamP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22195,7 +23347,7 @@
           "address": 1637408,
           "offset": 747440,
           "size": 742,
-          "match_percent": 99.71875
+          "match_percent": 99.640625
         },
         {
           "name": "_ZL15Action_AddToSetP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22203,7 +23355,15 @@
           "address": 1638160,
           "offset": 748192,
           "size": 222,
-          "match_percent": 91.77778
+          "match_percent": 91.85714
+        },
+        {
+          "name": "_Z19Action_EndCameraCutP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_EndCameraCut(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 1638384,
+          "offset": 748416,
+          "size": 238,
+          "match_percent": 99.17911
         },
         {
           "name": "_ZL19Action_TurnOnPickupP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22211,7 +23371,7 @@
           "address": 1638624,
           "offset": 748656,
           "size": 168,
-          "match_percent": 99.09615
+          "match_percent": 99.38461
         },
         {
           "name": "_ZL25Action_CanTriggerObstacleP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22219,7 +23379,7 @@
           "address": 1638800,
           "offset": 748832,
           "size": 279,
-          "match_percent": 97.696205
+          "match_percent": 98.07595
         },
         {
           "name": "_ZL28Action_AlwaysTriggerObstacleP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22227,7 +23387,7 @@
           "address": 1639088,
           "offset": 749120,
           "size": 295,
-          "match_percent": 98.223404
+          "match_percent": 98.54256
         },
         {
           "name": "_ZL25Action_GizmoSetVisibilityP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22235,7 +23395,7 @@
           "address": 1639392,
           "offset": 749424,
           "size": 276,
-          "match_percent": 99.57333
+          "match_percent": 99.973335
         },
         {
           "name": "_ZL20Action_GizmoActivateP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22254,12 +23414,20 @@
           "match_percent": 76.06857
         },
         {
+          "name": "_Z19Action_PlayCutSceneP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_PlayCutScene(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 1640592,
+          "offset": 750624,
+          "size": 160,
+          "match_percent": 99.666664
+        },
+        {
           "name": "_ZL20Action_CompleteLevelP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
           "demangled_name": "Action_CompleteLevel(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
           "address": 1640752,
           "offset": 750784,
           "size": 437,
-          "match_percent": 79.86154
+          "match_percent": 79.746155
         },
         {
           "name": "_ZL18Action_InitRowDistP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22275,7 +23443,7 @@
           "address": 1641328,
           "offset": 751360,
           "size": 117,
-          "match_percent": 99.875
+          "match_percent": 99.5
         },
         {
           "name": "_ZL25Action_SetAttackersPerRowP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22299,7 +23467,7 @@
           "address": 1641712,
           "offset": 751744,
           "size": 144,
-          "match_percent": 99.97727
+          "match_percent": 99.295456
         },
         {
           "name": "_ZL25Action_AddScriptProcessorP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22307,7 +23475,7 @@
           "address": 1641856,
           "offset": 751888,
           "size": 1285,
-          "match_percent": 95.27778
+          "match_percent": 89.90523
         },
         {
           "name": "_ZL18Action_CopyMessageP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22315,7 +23483,7 @@
           "address": 1643152,
           "offset": 753184,
           "size": 337,
-          "match_percent": 98.32184
+          "match_percent": 98.14942
         },
         {
           "name": "_ZL17Action_SetMessageP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22323,7 +23491,7 @@
           "address": 1643504,
           "offset": 753536,
           "size": 478,
-          "match_percent": 71.2619
+          "match_percent": 71.02381
         },
         {
           "name": "_ZL22Action_AddGameMsgCountP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22331,7 +23499,7 @@
           "address": 1643984,
           "offset": 754016,
           "size": 765,
-          "match_percent": 74.46316
+          "match_percent": 74.594734
         },
         {
           "name": "_ZL23Action_SetObstacleToEndP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22339,7 +23507,7 @@
           "address": 1644752,
           "offset": 754784,
           "size": 174,
-          "match_percent": 99.13207
+          "match_percent": 99.98113
         },
         {
           "name": "_ZL21Action_PlayGizSpecialP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22355,7 +23523,7 @@
           "address": 1645504,
           "offset": 755536,
           "size": 526,
-          "match_percent": 91.289856
+          "match_percent": 91.18116
         },
         {
           "name": "_ZL16Action_CnxHelperP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22379,7 +23547,7 @@
           "address": 1646880,
           "offset": 756912,
           "size": 1968,
-          "match_percent": 86.56965
+          "match_percent": 86.6632
         },
         {
           "name": "_ZL24Condition_CategoryIsInitP7AISYS_sPcP10AISCRIPT_s",
@@ -22395,7 +23563,7 @@
           "address": 1648912,
           "offset": 758944,
           "size": 1035,
-          "match_percent": 99.876
+          "match_percent": 99.816
         },
         {
           "name": "_ZL22Action_ResetGameCameraP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22411,7 +23579,7 @@
           "address": 1650016,
           "offset": 760048,
           "size": 353,
-          "match_percent": 99.82417
+          "match_percent": 99.49451
         },
         {
           "name": "_ZL23Action_JudderGameCameraP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22427,7 +23595,7 @@
           "address": 1650768,
           "offset": 760800,
           "size": 401,
-          "match_percent": 92.7193
+          "match_percent": 92.32456
         },
         {
           "name": "_ZL14Action_AddPartP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif.part.58",
@@ -22459,7 +23627,15 @@
           "address": 1652000,
           "offset": 762032,
           "size": 714,
-          "match_percent": 76.76617
+          "match_percent": 76.99005
+        },
+        {
+          "name": "_ZL33Condition_RandomMapCharsAvailableP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_RandomMapCharsAvailable(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1652720,
+          "offset": 762752,
+          "size": 59,
+          "match_percent": 100.0
         },
         {
           "name": "_ZL21Action_SetScriptStateP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22467,7 +23643,7 @@
           "address": 1652784,
           "offset": 762816,
           "size": 704,
-          "match_percent": 97.308105
+          "match_percent": 97.36216
         },
         {
           "name": "_ZL19Action_SetStateAreaP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22475,7 +23651,7 @@
           "address": 1653488,
           "offset": 763520,
           "size": 905,
-          "match_percent": 79.53636
+          "match_percent": 79.55909
         },
         {
           "name": "_ZL20Action_TriggerBlowUpP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22499,7 +23675,63 @@
           "address": 1656304,
           "offset": 766336,
           "size": 878,
-          "match_percent": 90.47222
+          "match_percent": 90.49537
+        },
+        {
+          "name": "_ZL24Condition_IsSetAliveInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_IsSetAliveInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1658192,
+          "offset": 768224,
+          "size": 100,
+          "match_percent": 99.82758
+        },
+        {
+          "name": "_ZL32Condition_EitherPlayerUsingForceP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_EitherPlayerUsingForce(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1658304,
+          "offset": 768336,
+          "size": 111,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL27Condition_AnimationFinishedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_AnimationFinished(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1658416,
+          "offset": 768448,
+          "size": 120,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z20Action_SetVisibilityP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_SetVisibility(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 1658544,
+          "offset": 768576,
+          "size": 320,
+          "match_percent": 77.193184
+        },
+        {
+          "name": "_ZL37Condition_EitherPlayerUsingHatMachineP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_EitherPlayerUsingHatMachine(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1658864,
+          "offset": 768896,
+          "size": 173,
+          "match_percent": 99.44444
+        },
+        {
+          "name": "_ZL34Condition_EitherPlayerPullingLeverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_EitherPlayerPullingLever(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1659040,
+          "offset": 769072,
+          "size": 173,
+          "match_percent": 99.44444
+        },
+        {
+          "name": "_ZL32Condition_EitherPlayerUsingPanelP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
+          "demangled_name": "Condition_EitherPlayerUsingPanel(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
+          "address": 1659216,
+          "offset": 769248,
+          "size": 173,
+          "match_percent": 99.44444
         },
         {
           "name": "_ZL21Action_SetPathCnxFlagP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22507,7 +23739,23 @@
           "address": 1659392,
           "offset": 769424,
           "size": 797,
-          "match_percent": 74.921295
+          "match_percent": 75.12963
+        },
+        {
+          "name": "_Z14GetGenericGooni",
+          "demangled_name": "GetGenericGoon(int)",
+          "address": 1660192,
+          "offset": 770224,
+          "size": 237,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18GetNamedGameObjectP7AISYS_sPc",
+          "demangled_name": "GetNamedGameObject(AISYS_s*, char*)",
+          "address": 1660432,
+          "offset": 770464,
+          "size": 68,
+          "match_percent": 100.0
         },
         {
           "name": "_ZL24Action_SetTechnoCompleteP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22515,7 +23763,7 @@
           "address": 1660512,
           "offset": 770544,
           "size": 486,
-          "match_percent": 93.92969
+          "match_percent": 94.359375
         },
         {
           "name": "_ZL22Action_SetUseOneAtOnceP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22523,7 +23771,7 @@
           "address": 1661008,
           "offset": 771040,
           "size": 471,
-          "match_percent": 96.77857
+          "match_percent": 96.814285
         },
         {
           "name": "_ZL15Action_SetLayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22531,7 +23779,7 @@
           "address": 1661488,
           "offset": 771520,
           "size": 398,
-          "match_percent": 99.5045
+          "match_percent": 99.54955
         },
         {
           "name": "_ZL26Action_SplineFollowTerrainP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22539,7 +23787,7 @@
           "address": 1661888,
           "offset": 771920,
           "size": 277,
-          "match_percent": 99.675
+          "match_percent": 99.55
         },
         {
           "name": "_ZL25Action_IgnoreSlideTerrainP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22547,7 +23795,7 @@
           "address": 1662176,
           "offset": 772208,
           "size": 277,
-          "match_percent": 99.8625
+          "match_percent": 99.55
         },
         {
           "name": "_ZL27Action_AwkwardShapeOverrideP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22555,7 +23803,7 @@
           "address": 1662464,
           "offset": 772496,
           "size": 303,
-          "match_percent": 99.5119
+          "match_percent": 99.57143
         },
         {
           "name": "_ZL28Action_IgnoreLastSafePathPosP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22563,7 +23811,7 @@
           "address": 1662768,
           "offset": 772800,
           "size": 295,
-          "match_percent": 99.49383
+          "match_percent": 99.55556
         },
         {
           "name": "_ZL19Action_CanBeCarriedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22571,7 +23819,7 @@
           "address": 1663072,
           "offset": 773104,
           "size": 303,
-          "match_percent": 96.92857
+          "match_percent": 97.34524
         },
         {
           "name": "_ZL21Action_AddMiscPickupsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22579,7 +23827,7 @@
           "address": 1663376,
           "offset": 773408,
           "size": 411,
-          "match_percent": 74.13043
+          "match_percent": 74.17391
         },
         {
           "name": "_ZL24Action_SetTakeOverTargetP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22587,7 +23835,7 @@
           "address": 1663792,
           "offset": 773824,
           "size": 937,
-          "match_percent": 99.604935
+          "match_percent": 98.6749
         },
         {
           "name": "_ZL29Action_RegisterTakeOverObjectP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22595,7 +23843,7 @@
           "address": 1664736,
           "offset": 774768,
           "size": 197,
-          "match_percent": 99.333336
+          "match_percent": 99.166664
         },
         {
           "name": "_ZL22Action_ReleaseTakeOverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22603,7 +23851,7 @@
           "address": 1664944,
           "offset": 774976,
           "size": 213,
-          "match_percent": 99.84127
+          "match_percent": 99.44444
         },
         {
           "name": "_ZL15Action_TakeOverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22611,7 +23859,7 @@
           "address": 1665168,
           "offset": 775200,
           "size": 709,
-          "match_percent": 69.19577
+          "match_percent": 69.22222
         },
         {
           "name": "_ZL29Action_LinkTurretToControllerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22619,7 +23867,7 @@
           "address": 1665888,
           "offset": 775920,
           "size": 276,
-          "match_percent": 99.87342
+          "match_percent": 99.303795
         },
         {
           "name": "_ZL22Action_SetLastAttackerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22627,7 +23875,7 @@
           "address": 1666176,
           "offset": 776208,
           "size": 385,
-          "match_percent": 99.40367
+          "match_percent": 99.54128
         },
         {
           "name": "_ZL21Action_AlertCreaturesP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22635,7 +23883,7 @@
           "address": 1666576,
           "offset": 776608,
           "size": 205,
-          "match_percent": 99.09836
+          "match_percent": 99.18033
         },
         {
           "name": "_ZL22Action_FollowCharacterP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22643,7 +23891,7 @@
           "address": 1666784,
           "offset": 776816,
           "size": 466,
-          "match_percent": 99.57462
+          "match_percent": 99.649254
         },
         {
           "name": "_ZL20Action_FaceCharacterP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22651,7 +23899,7 @@
           "address": 1667264,
           "offset": 777296,
           "size": 262,
-          "match_percent": 96.96203
+          "match_percent": 96.83544
         },
         {
           "name": "_ZL19Action_SetForceBackP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22659,7 +23907,7 @@
           "address": 1667536,
           "offset": 777568,
           "size": 657,
-          "match_percent": 94.41243
+          "match_percent": 94.44068
         },
         {
           "name": "_ZL14Action_PlaySfxP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22675,7 +23923,7 @@
           "address": 1668944,
           "offset": 778976,
           "size": 608,
-          "match_percent": 83.358025
+          "match_percent": 83.388885
         },
         {
           "name": "_ZL18Action_NoIdleSpeedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22683,7 +23931,7 @@
           "address": 1669552,
           "offset": 779584,
           "size": 277,
-          "match_percent": 91.703705
+          "match_percent": 91.765434
         },
         {
           "name": "_ZL20Action_AddPartDebrisP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22691,7 +23939,7 @@
           "address": 1669840,
           "offset": 779872,
           "size": 691,
-          "match_percent": 90.72727
+          "match_percent": 90.75401
         },
         {
           "name": "_ZL25Action_SetShieldHitPointsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22699,7 +23947,7 @@
           "address": 1670544,
           "offset": 780576,
           "size": 290,
-          "match_percent": 98.10976
+          "match_percent": 99.939026
         },
         {
           "name": "_ZL19Action_SetHitPointsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22707,7 +23955,7 @@
           "address": 1670848,
           "offset": 780880,
           "size": 481,
-          "match_percent": 98.5969
+          "match_percent": 99.52713
         },
         {
           "name": "_ZL22Action_SetCurrentSpeedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22715,7 +23963,7 @@
           "address": 1671344,
           "offset": 781376,
           "size": 534,
-          "match_percent": 95.32374
+          "match_percent": 95.35971
         },
         {
           "name": "_ZL28Action_CreateSplineCreaturesP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22723,7 +23971,7 @@
           "address": 1671888,
           "offset": 781920,
           "size": 3030,
-          "match_percent": 97.1946
+          "match_percent": 97.72727
         },
         {
           "name": "_ZL25Action_DontAvoidCharacterP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22731,7 +23979,7 @@
           "address": 1674928,
           "offset": 784960,
           "size": 357,
-          "match_percent": 96.65656
+          "match_percent": 96.252525
         },
         {
           "name": "_ZL22Action_SetInvulnerableP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22739,7 +23987,7 @@
           "address": 1675952,
           "offset": 785984,
           "size": 808,
-          "match_percent": 79.398056
+          "match_percent": 79.252426
         },
         {
           "name": "_ZL25Action_DontSetStoppedFlagP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22763,7 +24011,7 @@
           "address": 1677344,
           "offset": 787376,
           "size": 4428,
-          "match_percent": 74.0998
+          "match_percent": 74.10479
         },
         {
           "name": "_ZL16Action_ForcePushP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22771,7 +24019,7 @@
           "address": 1681776,
           "offset": 791808,
           "size": 712,
-          "match_percent": 76.213905
+          "match_percent": 76.29412
         },
         {
           "name": "_ZL17Action_GrabVictimP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22779,7 +24027,7 @@
           "address": 1682496,
           "offset": 792528,
           "size": 245,
-          "match_percent": 85.26316
+          "match_percent": 84.67105
         },
         {
           "name": "_ZL22Action_ShootAtOpponentP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22787,7 +24035,7 @@
           "address": 1682752,
           "offset": 792784,
           "size": 1407,
-          "match_percent": 59.19077
+          "match_percent": 59.206154
         },
         {
           "name": "_ZL21Action_EngageOpponentP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22795,7 +24043,7 @@
           "address": 1684160,
           "offset": 794192,
           "size": 2968,
-          "match_percent": 53.2054
+          "match_percent": 53.190403
         },
         {
           "name": "_ZL17Action_ProbeDroidP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22819,7 +24067,7 @@
           "address": 1688848,
           "offset": 798880,
           "size": 1922,
-          "match_percent": 84.116486
+          "match_percent": 84.13846
         },
         {
           "name": "_ZL19Action_TagCharacterP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22827,7 +24075,7 @@
           "address": 1690784,
           "offset": 800816,
           "size": 279,
-          "match_percent": 99.620255
+          "match_percent": 99.87342
         },
         {
           "name": "_ZL17Action_TakeDamageP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22835,7 +24083,7 @@
           "address": 1691072,
           "offset": 801104,
           "size": 757,
-          "match_percent": 94.94
+          "match_percent": 95.065
         },
         {
           "name": "_ZL19Action_NotWithPartyP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22843,7 +24091,7 @@
           "address": 1691840,
           "offset": 801872,
           "size": 279,
-          "match_percent": 95.5375
+          "match_percent": 95.7875
         },
         {
           "name": "_ZL16Action_CanAttackP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22851,7 +24099,7 @@
           "address": 1692128,
           "offset": 802160,
           "size": 279,
-          "match_percent": 96.37037
+          "match_percent": 96.4321
         },
         {
           "name": "_ZL19Action_CannotDropInP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22859,7 +24107,7 @@
           "address": 1692416,
           "offset": 802448,
           "size": 325,
-          "match_percent": 97.93617
+          "match_percent": 97.989365
         },
         {
           "name": "_ZL23Action_CatchUpForbiddenP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22867,7 +24115,7 @@
           "address": 1692752,
           "offset": 802784,
           "size": 279,
-          "match_percent": 96.27848
+          "match_percent": 96.341774
         },
         {
           "name": "_ZL18Action_SetTaggableP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22875,7 +24123,7 @@
           "address": 1693040,
           "offset": 803072,
           "size": 473,
-          "match_percent": 85.175575
+          "match_percent": 85.44275
         },
         {
           "name": "_ZL19Action_ResetContextP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22883,7 +24131,7 @@
           "address": 1693520,
           "offset": 803552,
           "size": 207,
-          "match_percent": 99.590164
+          "match_percent": 99.91803
         },
         {
           "name": "_ZL20Action_SnapWeaponOutP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22891,7 +24139,7 @@
           "address": 1693728,
           "offset": 803760,
           "size": 469,
-          "match_percent": 96.26717
+          "match_percent": 96.30534
         },
         {
           "name": "_ZL20Action_KeepWeaponOutP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22899,7 +24147,7 @@
           "address": 1694208,
           "offset": 804240,
           "size": 277,
-          "match_percent": 91.775
+          "match_percent": 91.8375
         },
         {
           "name": "_ZL29Action_SetDoomedEscapeLocatorP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22907,7 +24155,7 @@
           "address": 1694496,
           "offset": 804528,
           "size": 793,
-          "match_percent": 97.74227
+          "match_percent": 97.53608
         },
         {
           "name": "_ZL14Action_BigJumpP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22915,7 +24163,7 @@
           "address": 1695296,
           "offset": 805328,
           "size": 1340,
-          "match_percent": 89.216125
+          "match_percent": 89.37742
         },
         {
           "name": "_ZL23Action_BigJumpToLocatorP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22923,7 +24171,7 @@
           "address": 1696640,
           "offset": 806672,
           "size": 1273,
-          "match_percent": 89.28814
+          "match_percent": 91.49152
         },
         {
           "name": "_ZL19Action_SnapToOriginP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22931,7 +24179,7 @@
           "address": 1697920,
           "offset": 807952,
           "size": 543,
-          "match_percent": 91.49254
+          "match_percent": 91.716415
         },
         {
           "name": "_ZL20Action_SnapToLocatorP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22939,7 +24187,7 @@
           "address": 1698464,
           "offset": 808496,
           "size": 1185,
-          "match_percent": 98.881294
+          "match_percent": 99.45324
         },
         {
           "name": "_ZL14Action_SetPathP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22947,7 +24195,7 @@
           "address": 1699664,
           "offset": 809696,
           "size": 558,
-          "match_percent": 90.41216
+          "match_percent": 90.445946
         },
         {
           "name": "_ZL17Action_DeActivateP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22955,7 +24203,7 @@
           "address": 1700224,
           "offset": 810256,
           "size": 437,
-          "match_percent": 99.37008
+          "match_percent": 99.92126
         },
         {
           "name": "_ZL15Action_ActivateP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -22963,7 +24211,7 @@
           "address": 1700672,
           "offset": 810704,
           "size": 580,
-          "match_percent": 99.64375
+          "match_percent": 99.89375
         },
         {
           "name": "_ZL29Condition_CharacterExistsInitP7AISYS_sPcP10AISCRIPT_s",
@@ -22974,10 +24222,66 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL32Condition_UnderPlayerControlInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_UnderPlayerControlInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1701328,
+          "offset": 811360,
+          "size": 64,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL27Condition_OnSpeederBikeInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_OnSpeederBikeInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1701392,
+          "offset": 811424,
+          "size": 64,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL27Condition_BeenTakenOverInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_BeenTakenOverInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1701456,
+          "offset": 811488,
+          "size": 64,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23Condition_TakenOverInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_TakenOverInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1701520,
+          "offset": 811552,
+          "size": 64,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL28Condition_CharacterRangeInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_CharacterRangeInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1701584,
+          "offset": 811616,
+          "size": 64,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL20Condition_XYZPosInitP7AISYS_sPcP10AISCRIPT_s",
           "demangled_name": "Condition_XYZPosInit(AISYS_s*, char*, AISCRIPT_s*)",
           "address": 1701648,
           "offset": 811680,
+          "size": 64,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL30Condition_OnDynamicGrappleInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_OnDynamicGrappleInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1701712,
+          "offset": 811744,
+          "size": 64,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23Condition_HitPointsInitP7AISYS_sPcP10AISCRIPT_s",
+          "demangled_name": "Condition_HitPointsInit(AISYS_s*, char*, AISCRIPT_s*)",
+          "address": 1701776,
+          "offset": 811808,
           "size": 64,
           "match_percent": 100.0
         },
@@ -22998,12 +24302,68 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z24Action_GetLocatorFromSetP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_GetLocatorFromSet(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 1701968,
+          "offset": 812000,
+          "size": 2719,
+          "match_percent": 47.06096
+        },
+        {
+          "name": "_Z25Action_AssignLocatorInSetP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_AssignLocatorInSet(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 1704688,
+          "offset": 814720,
+          "size": 613,
+          "match_percent": 61.65318
+        },
+        {
+          "name": "_Z21Action_ReleaseLocatorP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_ReleaseLocator(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 1705312,
+          "offset": 815344,
+          "size": 197,
+          "match_percent": 99.91525
+        },
+        {
+          "name": "_Z23Action_DynamicCameraCutP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_DynamicCameraCut(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 1705520,
+          "offset": 815552,
+          "size": 3808,
+          "match_percent": 93.03129
+        },
+        {
+          "name": "_Z16Action_CameraCutP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_CameraCut(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 1709328,
+          "offset": 819360,
+          "size": 2451,
+          "match_percent": 82.640625
+        },
+        {
+          "name": "_Z21LocalGetRandomLocatorPP11AILOCATOR_sifP7nuvec_sfiff",
+          "demangled_name": "LocalGetRandomLocator(AILOCATOR_s**, int, float, nuvec_s*, float, int, float, float)",
+          "address": 1711792,
+          "offset": 821824,
+          "size": 570,
+          "match_percent": 99.96795
+        },
+        {
+          "name": "_Z22LocalGetNearestLocatorPP11AILOCATOR_sifP7nuvec_sfiff",
+          "demangled_name": "LocalGetNearestLocator(AILOCATOR_s**, int, float, nuvec_s*, float, int, float, float)",
+          "address": 1712368,
+          "offset": 822400,
+          "size": 1147,
+          "match_percent": 77.33758
+        },
+        {
           "name": "_ZL22Action_CreateCreaturesP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
           "demangled_name": "Action_CreateCreatures(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
           "address": 1713520,
           "offset": 823552,
           "size": 6967,
-          "match_percent": 88.256035
+          "match_percent": 87.90131
         },
         {
           "name": "_Z23GameAIScriptAddLevelSfxP11WORLDINFO_sP11nulisthdr_s",
@@ -23011,7 +24371,7 @@
           "address": 1720496,
           "offset": 830528,
           "size": 337,
-          "match_percent": 91.03125
+          "match_percent": 90.71875
         }
       ]
     },
@@ -31696,70 +33056,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z19oneAtOnce_CanAttackP12GameObject_sS0_",
-          "demangled_name": "oneAtOnce_CanAttack(GameObject_s*, GameObject_s*)",
-          "address": 1559312,
-          "offset": 669344,
-          "size": 76,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z22oneAtOnce_GetHoldRangeP12GameObject_s",
-          "demangled_name": "oneAtOnce_GetHoldRange(GameObject_s*)",
-          "address": 1559392,
-          "offset": 669424,
-          "size": 211,
-          "match_percent": 99.90625
-        },
-        {
-          "name": "_Z25oneAtOnce_SetNumAttackersi",
-          "demangled_name": "oneAtOnce_SetNumAttackers(int)",
-          "address": 1559616,
-          "offset": 669648,
-          "size": 49,
-          "match_percent": 83.78571
-        },
-        {
-          "name": "_Z28oneAtOnce_SetAttackersPerRowi",
-          "demangled_name": "oneAtOnce_SetAttackersPerRow(int)",
-          "address": 1559680,
-          "offset": 669712,
-          "size": 29,
-          "match_percent": 99.875
-        },
-        {
-          "name": "_Z23oneAtOnce_SetDistPerRowf",
-          "demangled_name": "oneAtOnce_SetDistPerRow(float)",
-          "address": 1559712,
-          "offset": 669744,
-          "size": 29,
-          "match_percent": 99.833336
-        },
-        {
-          "name": "_Z27oneAtOnce_SetInitDistPerRowf",
-          "demangled_name": "oneAtOnce_SetInitDistPerRow(float)",
-          "address": 1559744,
-          "offset": 669776,
-          "size": 29,
-          "match_percent": 99.833336
-        },
-        {
-          "name": "_Z23oneAtOnce_MaintainArrayv",
-          "demangled_name": "oneAtOnce_MaintainArray()",
-          "address": 1559776,
-          "offset": 669808,
-          "size": 1215,
-          "match_percent": 51.5979
-        },
-        {
-          "name": "_Z14GetGenericGooni",
-          "demangled_name": "GetGenericGoon(int)",
-          "address": 1660192,
-          "offset": 770224,
-          "size": 237,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z25NarrowSockExceptions_InitP19NARROWSOCKEXCEPTION",
           "demangled_name": "NarrowSockExceptions_Init(NARROWSOCKEXCEPTION*)",
           "address": 5080960,
@@ -33301,14 +34597,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/ai_sys.o",
       "functions": [
         {
-          "name": "_Z25AIPathCnxControlSysCreateP9variptr_uS0_i",
-          "demangled_name": "AIPathCnxControlSysCreate(variptr_u*, variptr_u*, int)",
-          "address": 1556080,
-          "offset": 666112,
-          "size": 237,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z20CreateClimbObjectSysP9variptr_uS0_i",
           "demangled_name": "CreateClimbObjectSys(variptr_u*, variptr_u*, int)",
           "address": 5188544,
@@ -33338,14 +34626,6 @@
           "offset": 24240,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_Z16AISysGetPathPos2P7AISYS_sP7nuvec_sP12AIPATHINFO_sS2_P8AIPATH_si",
-          "demangled_name": "AISysGetPathPos2(AISYS_s*, nuvec_s*, AIPATHINFO_s*, nuvec_s*, AIPATH_s*, int)",
-          "address": 1578000,
-          "offset": 688032,
-          "size": 371,
-          "match_percent": 100.0
         },
         {
           "name": "_ZL27AiParseExpressionNameLoopupPcPfPi",
@@ -37235,6 +38515,14 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gameai.o",
       "functions": [
         {
+          "name": "_ZL14TestWalkAroundP11APIOBJECT_sS0_P7nuvec_sf.isra.10",
+          "demangled_name": "TestWalkAround(APIOBJECT_s*, APIOBJECT_s*, nuvec_s*, float) [clone .isra.10]",
+          "address": 890716,
+          "offset": 748,
+          "size": 365,
+          "match_percent": 99.98837
+        },
+        {
           "name": "_GLOBAL__sub_I_gameai.cpp",
           "demangled_name": "_GLOBAL__sub_I_gameai.cpp",
           "address": 895968,
@@ -37256,7 +38544,287 @@
           "address": 1396960,
           "offset": 506992,
           "size": 1224,
-          "match_percent": 62.199234
+          "match_percent": 61.149426
+        },
+        {
+          "name": "_ZL18LevelCharacterNameh",
+          "demangled_name": "LevelCharacterName(unsigned char)",
+          "address": 1537968,
+          "offset": 648000,
+          "size": 67,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL22LevelCharacterGlobalIDh",
+          "demangled_name": "LevelCharacterGlobalID(unsigned char)",
+          "address": 1538048,
+          "offset": 648080,
+          "size": 46,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19GlobalCharacterNamei",
+          "demangled_name": "GlobalCharacterName(int)",
+          "address": 1538096,
+          "offset": 648128,
+          "size": 51,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL20GlobalCharacterHGobji",
+          "demangled_name": "GlobalCharacterHGobj(int)",
+          "address": 1538160,
+          "offset": 648192,
+          "size": 60,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL12GetViewRangei",
+          "demangled_name": "GetViewRange(int)",
+          "address": 1538224,
+          "offset": 648256,
+          "size": 51,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL15GetHearDistancei",
+          "demangled_name": "GetHearDistance(int)",
+          "address": 1538288,
+          "offset": 648320,
+          "size": 51,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL16GetMaxViewHeighti",
+          "demangled_name": "GetMaxViewHeight(int)",
+          "address": 1538352,
+          "offset": 648384,
+          "size": 51,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL16GetMinViewHeighti",
+          "demangled_name": "GetMinViewHeight(int)",
+          "address": 1538416,
+          "offset": 648448,
+          "size": 51,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z22GameAPIOBJECTFromObjIDh",
+          "demangled_name": "GameAPIOBJECTFromObjID(unsigned char)",
+          "address": 1538480,
+          "offset": 648512,
+          "size": 115,
+          "match_percent": 99.965515
+        },
+        {
+          "name": "_ZL15AI_GetMaxGizmosPv",
+          "demangled_name": "AI_GetMaxGizmos(void*)",
+          "address": 1538608,
+          "offset": 648640,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL12AI_GetOutputP7GIZMO_sii",
+          "demangled_name": "AI_GetOutput(GIZMO_s*, int, int)",
+          "address": 1538624,
+          "offset": 648656,
+          "size": 35,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL16AI_GetNumOutputsP7GIZMO_s",
+          "demangled_name": "AI_GetNumOutputs(GIZMO_s*)",
+          "address": 1538672,
+          "offset": 648704,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16AI_GetOutputNameP7GIZMO_si",
+          "demangled_name": "AI_GetOutputName(GIZMO_s*, int)",
+          "address": 1538688,
+          "offset": 648720,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z11AI_ActivateP7GIZMO_si",
+          "demangled_name": "AI_Activate(GIZMO_s*, int)",
+          "address": 1538720,
+          "offset": 648752,
+          "size": 40,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL15AI_GetGizmoNameP7GIZMO_s",
+          "demangled_name": "AI_GetGizmoName(GIZMO_s*)",
+          "address": 1538768,
+          "offset": 648800,
+          "size": 495,
+          "match_percent": 56.507812
+        },
+        {
+          "name": "_ZL12AI_AddGizmosP10GIZMOSYS_siPvS1_",
+          "demangled_name": "AI_AddGizmos(GIZMOSYS_s*, int, void*, void*)",
+          "address": 1539264,
+          "offset": 649296,
+          "size": 132,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19GetAICreatureOriginP7AISYS_sP10AIPACKET_s",
+          "demangled_name": "GetAICreatureOrigin(AISYS_s*, AIPACKET_s*)",
+          "address": 1539408,
+          "offset": 649440,
+          "size": 327,
+          "match_percent": 99.96342
+        },
+        {
+          "name": "_ZL17GetNamedAPIObjectP7AISYS_sPc",
+          "demangled_name": "GetNamedAPIObject(AISYS_s*, char*)",
+          "address": 1539744,
+          "offset": 649776,
+          "size": 850,
+          "match_percent": 82.96957
+        },
+        {
+          "name": "_ZL21GlobalCharacterTypeIDPc",
+          "demangled_name": "GlobalCharacterTypeID(char*)",
+          "address": 1540608,
+          "offset": 650640,
+          "size": 112,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL32GameFindAlternativeSpecialObjectP7AISYS_sP12nuhspecial_s",
+          "demangled_name": "GameFindAlternativeSpecialObject(AISYS_s*, nuhspecial_s*)",
+          "address": 1540720,
+          "offset": 650752,
+          "size": 43,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL10GameAILoadP7AISYS_siP8nugscn_sP9variptr_uS4_",
+          "demangled_name": "GameAILoad(AISYS_s*, int, nugscn_s*, variptr_u*, variptr_u*)",
+          "address": 1540768,
+          "offset": 650800,
+          "size": 252,
+          "match_percent": 82.766235
+        },
+        {
+          "name": "_ZL21GlobalCharacterRenderP7nuvec_ssiiP12EDCREATURE_s",
+          "demangled_name": "GlobalCharacterRender(nuvec_s*, short, int, int, EDCREATURE_s*)",
+          "address": 1541024,
+          "offset": 651056,
+          "size": 309,
+          "match_percent": 94.475
+        },
+        {
+          "name": "_ZL21GetCharacterGoalSpeedP11APIOBJECT_s",
+          "demangled_name": "GetCharacterGoalSpeed(APIOBJECT_s*)",
+          "address": 1541344,
+          "offset": 651376,
+          "size": 186,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL22GameAIActionParseSpeedPcPh",
+          "demangled_name": "GameAIActionParseSpeed(char*, unsigned char*)",
+          "address": 1541536,
+          "offset": 651568,
+          "size": 168,
+          "match_percent": 99.67391
+        },
+        {
+          "name": "_ZL25SpecialRouteCharacterNameh",
+          "demangled_name": "SpecialRouteCharacterName(unsigned char)",
+          "address": 1541712,
+          "offset": 651744,
+          "size": 281,
+          "match_percent": 99.94505
+        },
+        {
+          "name": "_ZL20LevelCharacterTypeIDPc",
+          "demangled_name": "LevelCharacterTypeID(char*)",
+          "address": 1542000,
+          "offset": 652032,
+          "size": 199,
+          "match_percent": 81.52631
+        },
+        {
+          "name": "_ZL22AIBigJumpToDestinationP11APIOBJECT_sP7nuvec_s",
+          "demangled_name": "AIBigJumpToDestination(APIOBJECT_s*, nuvec_s*)",
+          "address": 1542208,
+          "offset": 652240,
+          "size": 297,
+          "match_percent": 92.04878
+        },
+        {
+          "name": "_ZL15AIRespawnOnPathP11APIOBJECT_s",
+          "demangled_name": "AIRespawnOnPath(APIOBJECT_s*)",
+          "address": 1542512,
+          "offset": 652544,
+          "size": 298,
+          "match_percent": 99.76471
+        },
+        {
+          "name": "_ZL27SpecialRouteCharacterTypeIDPc",
+          "demangled_name": "SpecialRouteCharacterTypeID(char*)",
+          "address": 1542816,
+          "offset": 652848,
+          "size": 664,
+          "match_percent": 95.29444
+        },
+        {
+          "name": "_Z25AlertSurroundingCreaturesP12GameObject_sP7nuvec_s",
+          "demangled_name": "AlertSurroundingCreatures(GameObject_s*, nuvec_s*)",
+          "address": 1543488,
+          "offset": 653520,
+          "size": 124,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z29GameCreatureOpponentSelectionP7AISYS_siPP11APIOBJECT_siS3_iS3_yf",
+          "demangled_name": "GameCreatureOpponentSelection(AISYS_s*, int, APIOBJECT_s**, int, APIOBJECT_s**, int, APIOBJECT_s**, unsigned long long, float)",
+          "address": 1543616,
+          "offset": 653648,
+          "size": 6109,
+          "match_percent": 65.07291
+        },
+        {
+          "name": "_Z27MakeBaddiesForgetAboutPartyi",
+          "demangled_name": "MakeBaddiesForgetAboutParty(int)",
+          "address": 1549728,
+          "offset": 659760,
+          "size": 3217,
+          "match_percent": 84.938354
+        },
+        {
+          "name": "_Z14GameAttackInitv",
+          "demangled_name": "GameAttackInit()",
+          "address": 1552960,
+          "offset": 662992,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z17CanFightLikeAJediP12GameObject_s",
+          "demangled_name": "CanFightLikeAJedi(GameObject_s*)",
+          "address": 1552976,
+          "offset": 663008,
+          "size": 111,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z19GameAISysStartFrameP7AISYS_s",
+          "demangled_name": "GameAISysStartFrame(AISYS_s*)",
+          "address": 1553088,
+          "offset": 663120,
+          "size": 1352,
+          "match_percent": 58.564247
         },
         {
           "name": "_Z14CheckPosAIAreaP8AIAREA_sP7nuvec_sf",
@@ -37265,36 +38833,46 @@
           "offset": 664480,
           "size": 263,
           "match_percent": 99.97143
-        }
-      ]
-    },
-    {
-      "name": "legoapi/ai/core/legoai.cpp.o",
-      "source": "src/legoapi/ai/core/legoai.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/legoai.o",
-      "functions": [
+        },
         {
-          "name": "_GLOBAL__sub_I_legoai.cpp",
-          "demangled_name": "_GLOBAL__sub_I_legoai.cpp",
-          "address": 926432,
-          "offset": 36464,
-          "size": 93,
-          "match_percent": 99.35294
-        }
-      ]
-    },
-    {
-      "name": "legoapi/ai/game/aipathcnxhelper.cpp.o",
-      "source": "src/legoapi/ai/game/aipathcnxhelper.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/aipathcnxhelper.o",
-      "functions": [
+          "name": "_Z16GameAISysSetGamev",
+          "demangled_name": "GameAISysSetGame()",
+          "address": 1554720,
+          "offset": 664752,
+          "size": 39,
+          "match_percent": 100.0
+        },
         {
-          "name": "_GLOBAL__sub_I_aipathcnxhelper.cpp",
-          "demangled_name": "_GLOBAL__sub_I_aipathcnxhelper.cpp",
-          "address": 926816,
-          "offset": 36848,
-          "size": 93,
-          "match_percent": 99.35294
+          "name": "_Z13GameAISysInitv",
+          "demangled_name": "GameAISysInit()",
+          "address": 1554768,
+          "offset": 664800,
+          "size": 451,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z23TryToTeleportToNextNodeP12GameObject_sP12AIPATHNODE_si",
+          "demangled_name": "TryToTeleportToNextNode(GameObject_s*, AIPATHNODE_s*, int)",
+          "address": 1555232,
+          "offset": 665264,
+          "size": 537,
+          "match_percent": 94.163795
+        },
+        {
+          "name": "_Z14SetSpecialMoveP12GameObject_sP12AIPATHNODE_sS2_c",
+          "demangled_name": "SetSpecialMove(GameObject_s*, AIPATHNODE_s*, AIPATHNODE_s*, char)",
+          "address": 1555776,
+          "offset": 665808,
+          "size": 52,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16ClearSpecialMoveP12GameObject_s",
+          "demangled_name": "ClearSpecialMove(GameObject_s*)",
+          "address": 1555840,
+          "offset": 665872,
+          "size": 66,
+          "match_percent": 100.0
         },
         {
           "name": "_Z24AIPathCnxControlSysResetP21AIPATHCNXCONTROLSYS_s",
@@ -37303,6 +38881,22 @@
           "offset": 665952,
           "size": 150,
           "match_percent": 64.54717
+        },
+        {
+          "name": "_Z25AIPathCnxControlSysCreateP9variptr_uS0_i",
+          "demangled_name": "AIPathCnxControlSysCreate(variptr_u*, variptr_u*, int)",
+          "address": 1556080,
+          "offset": 666112,
+          "size": 237,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z14GameAISysResetP7AISYS_s",
+          "demangled_name": "GameAISysReset(AISYS_s*)",
+          "address": 1556320,
+          "offset": 666352,
+          "size": 686,
+          "match_percent": 86.79141
         },
         {
           "name": "_Z25AIPathCnxControllerCreateP21AIPATHCNXCONTROLSYS_sP7AISYS_sP8AIPATH_sPcS5_iS5_ii",
@@ -37337,6 +38931,132 @@
           "match_percent": 54.274193
         },
         {
+          "name": "_Z19oneAtOnce_CanAttackP12GameObject_sS0_",
+          "demangled_name": "oneAtOnce_CanAttack(GameObject_s*, GameObject_s*)",
+          "address": 1559312,
+          "offset": 669344,
+          "size": 76,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z22oneAtOnce_GetHoldRangeP12GameObject_s",
+          "demangled_name": "oneAtOnce_GetHoldRange(GameObject_s*)",
+          "address": 1559392,
+          "offset": 669424,
+          "size": 211,
+          "match_percent": 99.90625
+        },
+        {
+          "name": "_Z25oneAtOnce_SetNumAttackersi",
+          "demangled_name": "oneAtOnce_SetNumAttackers(int)",
+          "address": 1559616,
+          "offset": 669648,
+          "size": 49,
+          "match_percent": 83.78571
+        },
+        {
+          "name": "_Z28oneAtOnce_SetAttackersPerRowi",
+          "demangled_name": "oneAtOnce_SetAttackersPerRow(int)",
+          "address": 1559680,
+          "offset": 669712,
+          "size": 29,
+          "match_percent": 99.875
+        },
+        {
+          "name": "_Z23oneAtOnce_SetDistPerRowf",
+          "demangled_name": "oneAtOnce_SetDistPerRow(float)",
+          "address": 1559712,
+          "offset": 669744,
+          "size": 29,
+          "match_percent": 99.833336
+        },
+        {
+          "name": "_Z27oneAtOnce_SetInitDistPerRowf",
+          "demangled_name": "oneAtOnce_SetInitDistPerRow(float)",
+          "address": 1559744,
+          "offset": 669776,
+          "size": 29,
+          "match_percent": 99.833336
+        },
+        {
+          "name": "_Z23oneAtOnce_MaintainArrayv",
+          "demangled_name": "oneAtOnce_MaintainArray()",
+          "address": 1559776,
+          "offset": 669808,
+          "size": 1215,
+          "match_percent": 51.5979
+        },
+        {
+          "name": "_Z13GameAIProcessv",
+          "demangled_name": "GameAIProcess()",
+          "address": 1560992,
+          "offset": 671024,
+          "size": 14477,
+          "match_percent": 51.86566
+        },
+        {
+          "name": "_Z18AddDynamicCreatureiP7nuvec_siPcP12AIPATHINFO_sP9AIGROUP_siP11nugspline_sS0_ii",
+          "demangled_name": "AddDynamicCreature(int, nuvec_s*, int, char*, AIPATHINFO_s*, AIGROUP_s*, int, nugspline_s*, nuvec_s*, int, int)",
+          "address": 1575472,
+          "offset": 685504,
+          "size": 2528,
+          "match_percent": 79.65761
+        },
+        {
+          "name": "_Z16AISysGetPathPos2P7AISYS_sP7nuvec_sP12AIPATHINFO_sS2_P8AIPATH_si",
+          "demangled_name": "AISysGetPathPos2(AISYS_s*, nuvec_s*, AIPATHINFO_s*, nuvec_s*, AIPATH_s*, int)",
+          "address": 1578000,
+          "offset": 688032,
+          "size": 371,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16AI_RegisterGizmoi",
+          "demangled_name": "AI_RegisterGizmo(int)",
+          "address": 1578384,
+          "offset": 688416,
+          "size": 356,
+          "match_percent": 99.245285
+        },
+        {
+          "name": "_Z17GameAI_TotalScorev",
+          "demangled_name": "GameAI_TotalScore()",
+          "address": 1578752,
+          "offset": 688784,
+          "size": 134,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "legoapi/ai/core/legoai.cpp.o",
+      "source": "src/legoapi/ai/core/legoai.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/legoai.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_legoai.cpp",
+          "demangled_name": "_GLOBAL__sub_I_legoai.cpp",
+          "address": 926432,
+          "offset": 36464,
+          "size": 93,
+          "match_percent": 99.35294
+        }
+      ]
+    },
+    {
+      "name": "legoapi/ai/game/aipathcnxhelper.cpp.o",
+      "source": "src/legoapi/ai/game/aipathcnxhelper.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/aipathcnxhelper.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_aipathcnxhelper.cpp",
+          "demangled_name": "_GLOBAL__sub_I_aipathcnxhelper.cpp",
+          "address": 926816,
+          "offset": 36848,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
           "name": "_Z23AIPathCnxHelperSysResetP11WORLDINFO_sP20AIPATHCNXHELPERSYS_s",
           "demangled_name": "AIPathCnxHelperSysReset(WORLDINFO_s*, AIPATHCNXHELPERSYS_s*)",
           "address": 5244144,
@@ -37350,7 +39070,7 @@
           "address": 5244272,
           "offset": 4354304,
           "size": 220,
-          "match_percent": 68.2
+          "match_percent": 68.3875
         },
         {
           "name": "_Z23AIPathCnxHelperSys_FindP20AIPATHCNXHELPERSYS_sP12GameObject_sP11AIPATHCNX_shhPFiP17AIPATHCNXHELPER_sS2_S4_hhE",
@@ -37493,14 +39213,6 @@
           "offset": 154688,
           "size": 589,
           "match_percent": 56.52778
-        },
-        {
-          "name": "_Z25AlertSurroundingCreaturesP12GameObject_sP7nuvec_s",
-          "demangled_name": "AlertSurroundingCreatures(GameObject_s*, nuvec_s*)",
-          "address": 1543488,
-          "offset": 653520,
-          "size": 124,
-          "match_percent": 100.0
         },
         {
           "name": "_Z22SpawnMeleeCreatureTypei",
@@ -38714,22 +40426,6 @@
           "offset": 617024,
           "size": 46,
           "match_percent": 99.90909
-        },
-        {
-          "name": "_Z21LocalGetRandomLocatorPP11AILOCATOR_sifP7nuvec_sfiff",
-          "demangled_name": "LocalGetRandomLocator(AILOCATOR_s**, int, float, nuvec_s*, float, int, float, float)",
-          "address": 1711792,
-          "offset": 821824,
-          "size": 570,
-          "match_percent": 99.96795
-        },
-        {
-          "name": "_Z22LocalGetNearestLocatorPP11AILOCATOR_sifP7nuvec_sfiff",
-          "demangled_name": "LocalGetNearestLocator(AILOCATOR_s**, int, float, nuvec_s*, float, int, float, float)",
-          "address": 1712368,
-          "offset": 822400,
-          "size": 1147,
-          "match_percent": 77.33758
         },
         {
           "name": "_Z17FinishWeirdoNamesi",
@@ -49370,124 +51066,12 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizmos_gizactions.o",
       "functions": [
         {
-          "name": "_Z23Action_GameFollowPlayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_GameFollowPlayer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 1606336,
-          "offset": 716368,
-          "size": 837,
-          "match_percent": 86.568184
-        },
-        {
-          "name": "_Z16Action_PullLeverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_PullLever(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 1627792,
-          "offset": 737824,
-          "size": 809,
-          "match_percent": 76.14893
-        },
-        {
-          "name": "_Z16Action_UseTechnoP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_UseTechno(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 1628608,
-          "offset": 738640,
-          "size": 684,
-          "match_percent": 82.2381
-        },
-        {
-          "name": "_Z15Action_UsePanelP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_UsePanel(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 1629296,
-          "offset": 739328,
-          "size": 693,
-          "match_percent": 98.23392
-        },
-        {
-          "name": "_Z23Action_HelpWithTriggersP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_HelpWithTriggers(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 1630000,
-          "offset": 740032,
-          "size": 1996,
-          "match_percent": 44.610847
-        },
-        {
-          "name": "_Z20Action_UseTriggerSetP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_UseTriggerSet(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 1632000,
-          "offset": 742032,
-          "size": 366,
-          "match_percent": 95.52381
-        },
-        {
-          "name": "_Z19Action_EndCameraCutP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_EndCameraCut(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 1638384,
-          "offset": 748416,
-          "size": 238,
-          "match_percent": 99.17911
-        },
-        {
-          "name": "_Z19Action_PlayCutSceneP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_PlayCutScene(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 1640592,
-          "offset": 750624,
-          "size": 160,
-          "match_percent": 99.25
-        },
-        {
-          "name": "_Z20Action_SetVisibilityP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_SetVisibility(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 1658544,
-          "offset": 768576,
-          "size": 320,
-          "match_percent": 71.35227
-        },
-        {
-          "name": "_Z24Action_GetLocatorFromSetP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_GetLocatorFromSet(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 1701968,
-          "offset": 812000,
-          "size": 2719,
-          "match_percent": 49.027576
-        },
-        {
-          "name": "_Z25Action_AssignLocatorInSetP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_AssignLocatorInSet(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 1704688,
-          "offset": 814720,
-          "size": 613,
-          "match_percent": 62.69942
-        },
-        {
-          "name": "_Z21Action_ReleaseLocatorP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_ReleaseLocator(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 1705312,
-          "offset": 815344,
-          "size": 197,
-          "match_percent": 99.32204
-        },
-        {
-          "name": "_Z23Action_DynamicCameraCutP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_DynamicCameraCut(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 1705520,
-          "offset": 815552,
-          "size": 3808,
-          "match_percent": 92.61613
-        },
-        {
-          "name": "_Z16Action_CameraCutP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_CameraCut(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 1709328,
-          "offset": 819360,
-          "size": 2451,
-          "match_percent": 82.50174
-        },
-        {
           "name": "_Z21Action_BoulderSectionP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
           "demangled_name": "Action_BoulderSection(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
           "address": 2161584,
           "offset": 1271616,
           "size": 972,
-          "match_percent": 57.476597
+          "match_percent": 56.53617
         }
       ]
     },
@@ -55310,77 +56894,6 @@
       ]
     },
     {
-      "name": "legoapi/gizmos/trigger/ai.cpp.o",
-      "source": "src/legoapi/gizmos/trigger/ai.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/ai.o",
-      "functions": [
-        {
-          "name": "_ZL15AI_GetMaxGizmosPv",
-          "demangled_name": "AI_GetMaxGizmos(void*)",
-          "address": 1538608,
-          "offset": 648640,
-          "size": 12,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL12AI_GetOutputP7GIZMO_sii",
-          "demangled_name": "AI_GetOutput(GIZMO_s*, int, int)",
-          "address": 1538624,
-          "offset": 648656,
-          "size": 35,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL16AI_GetNumOutputsP7GIZMO_s",
-          "demangled_name": "AI_GetNumOutputs(GIZMO_s*)",
-          "address": 1538672,
-          "offset": 648704,
-          "size": 12,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z16AI_GetOutputNameP7GIZMO_si",
-          "demangled_name": "AI_GetOutputName(GIZMO_s*, int)",
-          "address": 1538688,
-          "offset": 648720,
-          "size": 22,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z11AI_ActivateP7GIZMO_si",
-          "demangled_name": "AI_Activate(GIZMO_s*, int)",
-          "address": 1538720,
-          "offset": 648752,
-          "size": 40,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL15AI_GetGizmoNameP7GIZMO_s",
-          "demangled_name": "AI_GetGizmoName(GIZMO_s*)",
-          "address": 1538768,
-          "offset": 648800,
-          "size": 495,
-          "match_percent": 56.429688
-        },
-        {
-          "name": "_ZL12AI_AddGizmosP10GIZMOSYS_siPvS1_",
-          "demangled_name": "AI_AddGizmos(GIZMOSYS_s*, int, void*, void*)",
-          "address": 1539264,
-          "offset": 649296,
-          "size": 132,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z16AI_RegisterGizmoi",
-          "demangled_name": "AI_RegisterGizmo(int)",
-          "address": 1578384,
-          "offset": 688416,
-          "size": 356,
-          "match_percent": 99.245285
-        }
-      ]
-    },
-    {
       "name": "legoapi/gizmos/trigger/gizminicut.cpp.o",
       "source": "src/legoapi/gizmos/trigger/gizminicut.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizminicut.o",
@@ -57336,30 +58849,6 @@
           "match_percent": 92.016396
         },
         {
-          "name": "_Z21GuidedMissile_DeflectP6PART_s",
-          "demangled_name": "GuidedMissile_Deflect(PART_s*)",
-          "address": 1632368,
-          "offset": 742400,
-          "size": 51,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18GuidedMissile_KillP6PART_si",
-          "demangled_name": "GuidedMissile_Kill(PART_s*, int)",
-          "address": 1632432,
-          "offset": 742464,
-          "size": 215,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18GuidedMissile_MoveP6PART_sf",
-          "demangled_name": "GuidedMissile_Move(PART_s*, float)",
-          "address": 1632656,
-          "offset": 742688,
-          "size": 947,
-          "match_percent": 70.65803
-        },
-        {
           "name": "_Z16FindIncomingBoltP12GameObject_sii",
           "demangled_name": "FindIncomingBolt(GameObject_s*, int, int)",
           "address": 4717760,
@@ -59188,14 +60677,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gameobjects.o",
       "functions": [
         {
-          "name": "_ZL14TestWalkAroundP11APIOBJECT_sS0_P7nuvec_sf.isra.10",
-          "demangled_name": "TestWalkAround(APIOBJECT_s*, APIOBJECT_s*, nuvec_s*, float) [clone .isra.10]",
-          "address": 890716,
-          "offset": 748,
-          "size": 365,
-          "match_percent": 99.98837
-        },
-        {
           "name": "_GLOBAL__sub_I_gameobjects.cpp",
           "demangled_name": "_GLOBAL__sub_I_gameobjects.cpp",
           "address": 917712,
@@ -59217,7 +60698,7 @@
           "address": 1079344,
           "offset": 189376,
           "size": 3212,
-          "match_percent": 74.1218
+          "match_percent": 74.09925
         },
         {
           "name": "_ZL20LEGO_AllGoldBricksFnv",
@@ -59290,1486 +60771,6 @@
           "offset": 565760,
           "size": 8481,
           "match_percent": 52.37095
-        },
-        {
-          "name": "_ZL18LevelCharacterNameh",
-          "demangled_name": "LevelCharacterName(unsigned char)",
-          "address": 1537968,
-          "offset": 648000,
-          "size": 67,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL22LevelCharacterGlobalIDh",
-          "demangled_name": "LevelCharacterGlobalID(unsigned char)",
-          "address": 1538048,
-          "offset": 648080,
-          "size": 46,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL19GlobalCharacterNamei",
-          "demangled_name": "GlobalCharacterName(int)",
-          "address": 1538096,
-          "offset": 648128,
-          "size": 51,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20GlobalCharacterHGobji",
-          "demangled_name": "GlobalCharacterHGobj(int)",
-          "address": 1538160,
-          "offset": 648192,
-          "size": 60,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL12GetViewRangei",
-          "demangled_name": "GetViewRange(int)",
-          "address": 1538224,
-          "offset": 648256,
-          "size": 51,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL15GetHearDistancei",
-          "demangled_name": "GetHearDistance(int)",
-          "address": 1538288,
-          "offset": 648320,
-          "size": 51,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL16GetMaxViewHeighti",
-          "demangled_name": "GetMaxViewHeight(int)",
-          "address": 1538352,
-          "offset": 648384,
-          "size": 51,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL16GetMinViewHeighti",
-          "demangled_name": "GetMinViewHeight(int)",
-          "address": 1538416,
-          "offset": 648448,
-          "size": 51,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z22GameAPIOBJECTFromObjIDh",
-          "demangled_name": "GameAPIOBJECTFromObjID(unsigned char)",
-          "address": 1538480,
-          "offset": 648512,
-          "size": 115,
-          "match_percent": 99.965515
-        },
-        {
-          "name": "_ZL19GetAICreatureOriginP7AISYS_sP10AIPACKET_s",
-          "demangled_name": "GetAICreatureOrigin(AISYS_s*, AIPACKET_s*)",
-          "address": 1539408,
-          "offset": 649440,
-          "size": 327,
-          "match_percent": 99.96342
-        },
-        {
-          "name": "_ZL17GetNamedAPIObjectP7AISYS_sPc",
-          "demangled_name": "GetNamedAPIObject(AISYS_s*, char*)",
-          "address": 1539744,
-          "offset": 649776,
-          "size": 850,
-          "match_percent": 82.44782
-        },
-        {
-          "name": "_ZL21GlobalCharacterTypeIDPc",
-          "demangled_name": "GlobalCharacterTypeID(char*)",
-          "address": 1540608,
-          "offset": 650640,
-          "size": 112,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL32GameFindAlternativeSpecialObjectP7AISYS_sP12nuhspecial_s",
-          "demangled_name": "GameFindAlternativeSpecialObject(AISYS_s*, nuhspecial_s*)",
-          "address": 1540720,
-          "offset": 650752,
-          "size": 43,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL10GameAILoadP7AISYS_siP8nugscn_sP9variptr_uS4_",
-          "demangled_name": "GameAILoad(AISYS_s*, int, nugscn_s*, variptr_u*, variptr_u*)",
-          "address": 1540768,
-          "offset": 650800,
-          "size": 252,
-          "match_percent": 82.766235
-        },
-        {
-          "name": "_ZL21GlobalCharacterRenderP7nuvec_ssiiP12EDCREATURE_s",
-          "demangled_name": "GlobalCharacterRender(nuvec_s*, short, int, int, EDCREATURE_s*)",
-          "address": 1541024,
-          "offset": 651056,
-          "size": 309,
-          "match_percent": 94.475
-        },
-        {
-          "name": "_ZL21GetCharacterGoalSpeedP11APIOBJECT_s",
-          "demangled_name": "GetCharacterGoalSpeed(APIOBJECT_s*)",
-          "address": 1541344,
-          "offset": 651376,
-          "size": 186,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL22GameAIActionParseSpeedPcPh",
-          "demangled_name": "GameAIActionParseSpeed(char*, unsigned char*)",
-          "address": 1541536,
-          "offset": 651568,
-          "size": 168,
-          "match_percent": 99.67391
-        },
-        {
-          "name": "_ZL25SpecialRouteCharacterNameh",
-          "demangled_name": "SpecialRouteCharacterName(unsigned char)",
-          "address": 1541712,
-          "offset": 651744,
-          "size": 281,
-          "match_percent": 99.83517
-        },
-        {
-          "name": "_ZL20LevelCharacterTypeIDPc",
-          "demangled_name": "LevelCharacterTypeID(char*)",
-          "address": 1542000,
-          "offset": 652032,
-          "size": 199,
-          "match_percent": 81.52631
-        },
-        {
-          "name": "_ZL22AIBigJumpToDestinationP11APIOBJECT_sP7nuvec_s",
-          "demangled_name": "AIBigJumpToDestination(APIOBJECT_s*, nuvec_s*)",
-          "address": 1542208,
-          "offset": 652240,
-          "size": 297,
-          "match_percent": 92.231705
-        },
-        {
-          "name": "_ZL15AIRespawnOnPathP11APIOBJECT_s",
-          "demangled_name": "AIRespawnOnPath(APIOBJECT_s*)",
-          "address": 1542512,
-          "offset": 652544,
-          "size": 298,
-          "match_percent": 99.98529
-        },
-        {
-          "name": "_ZL27SpecialRouteCharacterTypeIDPc",
-          "demangled_name": "SpecialRouteCharacterTypeID(char*)",
-          "address": 1542816,
-          "offset": 652848,
-          "size": 664,
-          "match_percent": 95.29444
-        },
-        {
-          "name": "_Z29GameCreatureOpponentSelectionP7AISYS_siPP11APIOBJECT_siS3_iS3_yf",
-          "demangled_name": "GameCreatureOpponentSelection(AISYS_s*, int, APIOBJECT_s**, int, APIOBJECT_s**, int, APIOBJECT_s**, unsigned long long, float)",
-          "address": 1543616,
-          "offset": 653648,
-          "size": 6109,
-          "match_percent": 67.389565
-        },
-        {
-          "name": "_Z27MakeBaddiesForgetAboutPartyi",
-          "demangled_name": "MakeBaddiesForgetAboutParty(int)",
-          "address": 1549728,
-          "offset": 659760,
-          "size": 3217,
-          "match_percent": 84.938354
-        },
-        {
-          "name": "_Z14GameAttackInitv",
-          "demangled_name": "GameAttackInit()",
-          "address": 1552960,
-          "offset": 662992,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z17CanFightLikeAJediP12GameObject_s",
-          "demangled_name": "CanFightLikeAJedi(GameObject_s*)",
-          "address": 1552976,
-          "offset": 663008,
-          "size": 111,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z19GameAISysStartFrameP7AISYS_s",
-          "demangled_name": "GameAISysStartFrame(AISYS_s*)",
-          "address": 1553088,
-          "offset": 663120,
-          "size": 1352,
-          "match_percent": 58.564247
-        },
-        {
-          "name": "_Z16GameAISysSetGamev",
-          "demangled_name": "GameAISysSetGame()",
-          "address": 1554720,
-          "offset": 664752,
-          "size": 39,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z13GameAISysInitv",
-          "demangled_name": "GameAISysInit()",
-          "address": 1554768,
-          "offset": 664800,
-          "size": 451,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z23TryToTeleportToNextNodeP12GameObject_sP12AIPATHNODE_si",
-          "demangled_name": "TryToTeleportToNextNode(GameObject_s*, AIPATHNODE_s*, int)",
-          "address": 1555232,
-          "offset": 665264,
-          "size": 537,
-          "match_percent": 94.42242
-        },
-        {
-          "name": "_Z14SetSpecialMoveP12GameObject_sP12AIPATHNODE_sS2_c",
-          "demangled_name": "SetSpecialMove(GameObject_s*, AIPATHNODE_s*, AIPATHNODE_s*, char)",
-          "address": 1555776,
-          "offset": 665808,
-          "size": 52,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z16ClearSpecialMoveP12GameObject_s",
-          "demangled_name": "ClearSpecialMove(GameObject_s*)",
-          "address": 1555840,
-          "offset": 665872,
-          "size": 66,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z14GameAISysResetP7AISYS_s",
-          "demangled_name": "GameAISysReset(AISYS_s*)",
-          "address": 1556320,
-          "offset": 666352,
-          "size": 686,
-          "match_percent": 86.88344
-        },
-        {
-          "name": "_Z13GameAIProcessv",
-          "demangled_name": "GameAIProcess()",
-          "address": 1560992,
-          "offset": 671024,
-          "size": 14477,
-          "match_percent": 51.84231
-        },
-        {
-          "name": "_Z18AddDynamicCreatureiP7nuvec_siPcP12AIPATHINFO_sP9AIGROUP_siP11nugspline_sS0_ii",
-          "demangled_name": "AddDynamicCreature(int, nuvec_s*, int, char*, AIPATHINFO_s*, AIGROUP_s*, int, nugspline_s*, nuvec_s*, int, int)",
-          "address": 1575472,
-          "offset": 685504,
-          "size": 2528,
-          "match_percent": 80.409424
-        },
-        {
-          "name": "_Z17GameAI_TotalScorev",
-          "demangled_name": "GameAI_TotalScore()",
-          "address": 1578752,
-          "offset": 688784,
-          "size": 134,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL28Condition_ObstacleLockedShutP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_ObstacleLockedShut(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1579088,
-          "offset": 689120,
-          "size": 19,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL28Condition_ObstacleLockedOpenP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_ObstacleLockedOpen(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1579120,
-          "offset": 689152,
-          "size": 19,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL32Condition_ObstacleOpenedByPlayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_ObstacleOpenedByPlayer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1579152,
-          "offset": 689184,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL38Condition_ObstacleOpenedByEitherPlayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_ObstacleOpenedByEitherPlayer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1579232,
-          "offset": 689264,
-          "size": 59,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23Condition_IsVisibleInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_IsVisibleInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1579296,
-          "offset": 689328,
-          "size": 11,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL26Condition_ForcePushingInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_ForcePushingInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1579376,
-          "offset": 689408,
-          "size": 60,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL22Condition_ForcePushingP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_ForcePushing(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1579440,
-          "offset": 689472,
-          "size": 77,
-          "match_percent": 85.71429
-        },
-        {
-          "name": "_ZL20Condition_IAmPlayer2P7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_IAmPlayer2(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1580208,
-          "offset": 690240,
-          "size": 120,
-          "match_percent": 79.28571
-        },
-        {
-          "name": "_ZL31Condition_PlayerOnForcePlatformP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_PlayerOnForcePlatform(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1580336,
-          "offset": 690368,
-          "size": 178,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL37Condition_EitherPlayerOnForcePlatformP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_EitherPlayerOnForcePlatform(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1580528,
-          "offset": 690560,
-          "size": 347,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL24Condition_ForceBeingUsedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_ForceBeingUsed(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1580880,
-          "offset": 690912,
-          "size": 35,
-          "match_percent": 98.92857
-        },
-        {
-          "name": "_ZL30Condition_PlayerDeflectingPartP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_PlayerDeflectingPart(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1580928,
-          "offset": 690960,
-          "size": 43,
-          "match_percent": 98.92857
-        },
-        {
-          "name": "_ZL35Condition_EitherPlayerWearingHelmetP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_EitherPlayerWearingHelmet(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1580976,
-          "offset": 691008,
-          "size": 37,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL28Condition_ForceStackCompleteP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_ForceStackComplete(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1581024,
-          "offset": 691056,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL35Condition_ForceStackCompleteInOrderP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_ForceStackCompleteInOrder(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1581056,
-          "offset": 691088,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL31Condition_AIOverrideControlInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_AIOverrideControlInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1581360,
-          "offset": 691392,
-          "size": 60,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL27Condition_AIOverrideControlP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_AIOverrideControl(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1581424,
-          "offset": 691456,
-          "size": 56,
-          "match_percent": 91.25
-        },
-        {
-          "name": "_ZL24Condition_IsOnScreenInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_IsOnScreenInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1581488,
-          "offset": 691520,
-          "size": 60,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20Condition_IsOnScreenP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_IsOnScreen(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1581552,
-          "offset": 691584,
-          "size": 56,
-          "match_percent": 92.0
-        },
-        {
-          "name": "_ZL24Condition_PlayerOnGroundP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_PlayerOnGround(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1581664,
-          "offset": 691696,
-          "size": 43,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL24Condition_PlayerOnObjectP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_PlayerOnObject(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1581808,
-          "offset": 691840,
-          "size": 151,
-          "match_percent": 52.73171
-        },
-        {
-          "name": "_ZL30Condition_OnSameObjectAsPlayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_OnSameObjectAsPlayer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1582336,
-          "offset": 692368,
-          "size": 113,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL18Condition_BlockingP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_Blocking(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1582544,
-          "offset": 692576,
-          "size": 92,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL19Condition_HitPointsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_HitPoints(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1582848,
-          "offset": 692880,
-          "size": 84,
-          "match_percent": 99.42308
-        },
-        {
-          "name": "_ZL31Condition_CollidingWithOpponentP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_CollidingWithOpponent(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1582944,
-          "offset": 692976,
-          "size": 68,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20Condition_IsSetAliveP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_IsSetAlive(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1583216,
-          "offset": 693248,
-          "size": 59,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23Condition_NumInSetAliveP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_NumInSetAlive(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1583280,
-          "offset": 693312,
-          "size": 93,
-          "match_percent": 99.958336
-        },
-        {
-          "name": "_ZL19Condition_InContextP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_InContext(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1583472,
-          "offset": 693504,
-          "size": 53,
-          "match_percent": 75.95238
-        },
-        {
-          "name": "_ZL25Condition_OpponentContextP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_OpponentContext(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1583536,
-          "offset": 693568,
-          "size": 53,
-          "match_percent": 74.75
-        },
-        {
-          "name": "_ZL26Condition_OnDynamicGrappleP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_OnDynamicGrapple(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1583600,
-          "offset": 693632,
-          "size": 79,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23Condition_Player2ActiveP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_Player2Active(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1583680,
-          "offset": 693712,
-          "size": 35,
-          "match_percent": 98.63636
-        },
-        {
-          "name": "_ZL25Condition_NumForceObjectsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_NumForceObjects(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1583872,
-          "offset": 693904,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL19Condition_LastLevelP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_LastLevel(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1583984,
-          "offset": 694016,
-          "size": 51,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL17Condition_MessageP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_Message(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584048,
-          "offset": 694080,
-          "size": 19,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL21Condition_ScriptParamP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_ScriptParam(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584080,
-          "offset": 694112,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL24Condition_RigidAnimFrameP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_RigidAnimFrame(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584112,
-          "offset": 694144,
-          "size": 19,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL25Condition_CutSceneStartedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_CutSceneStarted(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584144,
-          "offset": 694176,
-          "size": 35,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL24Condition_CutSceneExistsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_CutSceneExists(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584192,
-          "offset": 694224,
-          "size": 19,
-          "match_percent": 98.333336
-        },
-        {
-          "name": "_ZL25Condition_CutScenePlayingP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_CutScenePlaying(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584224,
-          "offset": 694256,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL22Condition_PlayerInSockP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_PlayerInSock(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584240,
-          "offset": 694272,
-          "size": 86,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL33Condition_PlayerDistanceAlongSockP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_PlayerDistanceAlongSock(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584336,
-          "offset": 694368,
-          "size": 35,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL41Condition_FurthestPlayerDistanceAlongSockP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_FurthestPlayerDistanceAlongSock(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584384,
-          "offset": 694416,
-          "size": 93,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL24Condition_FinishedSplineP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_FinishedSpline(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584480,
-          "offset": 694512,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL18Condition_FreeplayP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_Freeplay(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584560,
-          "offset": 694592,
-          "size": 38,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL14Condition_IndyP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_Indy(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584608,
-          "offset": 694640,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20Condition_MissionWonP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_MissionWon(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584624,
-          "offset": 694656,
-          "size": 37,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23Condition_ChallengeModeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_ChallengeMode(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584672,
-          "offset": 694704,
-          "size": 35,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL13Condition_PSPP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_PSP(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584720,
-          "offset": 694752,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL35Condition_BoltsDontGetDeflectedBackP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_BoltsDontGetDeflectedBack(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584736,
-          "offset": 694768,
-          "size": 35,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23Condition_CheatProgressP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_CheatProgress(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584784,
-          "offset": 694816,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL25Condition_BigJumpCompleteP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_BigJumpComplete(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584800,
-          "offset": 694832,
-          "size": 49,
-          "match_percent": 68.1579
-        },
-        {
-          "name": "_ZL26Condition_RespawnLocatorIsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_RespawnLocatorIs(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584864,
-          "offset": 694896,
-          "size": 37,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL25Condition_DropBackInTimerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_DropBackInTimer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584912,
-          "offset": 694944,
-          "size": 22,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL37Condition_NumBaddiesThatCanSeePlayersP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_NumBaddiesThatCanSeePlayers(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1584992,
-          "offset": 695024,
-          "size": 38,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL26Condition_HelpWithTriggersP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_HelpWithTriggers(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1585040,
-          "offset": 695072,
-          "size": 99,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL29Condition_PartyContainsDroidsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_PartyContainsDroids(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1585152,
-          "offset": 695184,
-          "size": 545,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL32Condition_CannotReachDestinationP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_CannotReachDestination(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1585712,
-          "offset": 695744,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL36Condition_EitherPlayerPushingSpinnerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_EitherPlayerPushingSpinner(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1585744,
-          "offset": 695776,
-          "size": 107,
-          "match_percent": 99.08572
-        },
-        {
-          "name": "_ZL21Condition_BeenSpawnedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_BeenSpawned(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1585856,
-          "offset": 695888,
-          "size": 51,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL37Condition_EitherPlayerInMyTriggerAreaP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_EitherPlayerInMyTriggerArea(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1586080,
-          "offset": 696112,
-          "size": 204,
-          "match_percent": 95.86885
-        },
-        {
-          "name": "_ZL29Condition_AreaContainsBaddiesP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_AreaContainsBaddies(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1586288,
-          "offset": 696320,
-          "size": 57,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL29Condition_AreaContainsGoodiesP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_AreaContainsGoodies(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1586352,
-          "offset": 696384,
-          "size": 57,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL33Condition_AreaContainsPartyMemberP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_AreaContainsPartyMember(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1586416,
-          "offset": 696448,
-          "size": 57,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL25Condition_PlayerTakenOverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_PlayerTakenOver(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1586480,
-          "offset": 696512,
-          "size": 51,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23Condition_BeenTakenOverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_BeenTakenOver(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1586544,
-          "offset": 696576,
-          "size": 63,
-          "match_percent": 99.375
-        },
-        {
-          "name": "_ZL23Condition_OnSpeederBikeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_OnSpeederBike(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1586608,
-          "offset": 696640,
-          "size": 96,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL28Condition_UnderPlayerControlP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_UnderPlayerControl(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1586704,
-          "offset": 696736,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL29Condition_CharacterTypeExistsP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_CharacterTypeExists(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1586768,
-          "offset": 696800,
-          "size": 102,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL36Condition_LastAttackerIsActivePlayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_LastAttackerIsActivePlayer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1586880,
-          "offset": 696912,
-          "size": 51,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL25Condition_GotLocatorInSetP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_GotLocatorInSet(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1586944,
-          "offset": 696976,
-          "size": 110,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL24Condition_GotOpponentLOSP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_GotOpponentLOS(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1587056,
-          "offset": 697088,
-          "size": 174,
-          "match_percent": 83.958336
-        },
-        {
-          "name": "_ZL17Condition_RaceLapP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_RaceLap(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1587808,
-          "offset": 697840,
-          "size": 38,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL17Condition_MusicOnP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_MusicOn(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1587856,
-          "offset": 697888,
-          "size": 35,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL30Condition_ShouldAttackOpponentP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_ShouldAttackOpponent(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1587984,
-          "offset": 698016,
-          "size": 143,
-          "match_percent": 99.98039
-        },
-        {
-          "name": "_ZL41Condition_AngleAboutMyLocatorToPlayerInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_AngleAboutMyLocatorToPlayerInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1594544,
-          "offset": 704576,
-          "size": 64,
-          "match_percent": 99.47369
-        },
-        {
-          "name": "_ZL19Condition_TakenOverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_TakenOver(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1594608,
-          "offset": 704640,
-          "size": 234,
-          "match_percent": 89.15493
-        },
-        {
-          "name": "_ZL29Condition_NumForceObjectsInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_NumForceObjectsInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1595408,
-          "offset": 705440,
-          "size": 124,
-          "match_percent": 99.054054
-        },
-        {
-          "name": "_ZL32Condition_SockDistanceToOpponentP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_SockDistanceToOpponent(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1596176,
-          "offset": 706208,
-          "size": 223,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL30Condition_SockDistanceToPlayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_SockDistanceToPlayer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1596400,
-          "offset": 706432,
-          "size": 223,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL31Condition_SockXDistanceToPlayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_SockXDistanceToPlayer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1596816,
-          "offset": 706848,
-          "size": 257,
-          "match_percent": 90.46154
-        },
-        {
-          "name": "_ZL32Condition_PickupBeenTurnedOnInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_PickupBeenTurnedOnInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1598272,
-          "offset": 708304,
-          "size": 60,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL27Condition_ForceCompleteInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_ForceCompleteInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1598624,
-          "offset": 708656,
-          "size": 76,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL29Condition_OnForcePlatformInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_OnForcePlatformInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1598784,
-          "offset": 708816,
-          "size": 96,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL24Condition_UsingForceInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_UsingForceInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1598880,
-          "offset": 708912,
-          "size": 76,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL19Condition_ForceInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_ForceInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1598960,
-          "offset": 708992,
-          "size": 64,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL36Condition_ObstacleOpenedByPlayerInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_ObstacleOpenedByPlayerInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1599024,
-          "offset": 709056,
-          "size": 76,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL24Condition_GizSpecialInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_GizSpecialInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1599104,
-          "offset": 709136,
-          "size": 64,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL22Condition_ObstacleInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_ObstacleInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1599168,
-          "offset": 709200,
-          "size": 64,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL30Condition_RespawnLocatorIsInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_RespawnLocatorIsInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1599232,
-          "offset": 709264,
-          "size": 52,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL37Condition_AreaContainsPartyMemberInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_AreaContainsPartyMemberInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1600192,
-          "offset": 710224,
-          "size": 52,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL33Condition_AreaContainsGoodiesInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_AreaContainsGoodiesInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1600256,
-          "offset": 710288,
-          "size": 52,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL33Condition_AreaContainsBaddiesInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_AreaContainsBaddiesInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1600320,
-          "offset": 710352,
-          "size": 52,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL29Condition_GotLocatorInSetInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_GotLocatorInSetInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1600448,
-          "offset": 710480,
-          "size": 42,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL30Condition_OpponentPathPosRangeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_OpponentPathPosRange(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1602736,
-          "offset": 712768,
-          "size": 100,
-          "match_percent": 99.96774
-        },
-        {
-          "name": "_ZL31Condition_OpponentToPlayerRangeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_OpponentToPlayerRange(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1602848,
-          "offset": 712880,
-          "size": 108,
-          "match_percent": 99.97059
-        },
-        {
-          "name": "_ZL27Condition_LastAttackerRangeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_LastAttackerRange(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1603072,
-          "offset": 713104,
-          "size": 92,
-          "match_percent": 99.965515
-        },
-        {
-          "name": "_ZL24Condition_CharacterRangeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_CharacterRange(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1603168,
-          "offset": 713200,
-          "size": 92,
-          "match_percent": 99.96429
-        },
-        {
-          "name": "_ZL21Condition_MessageInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_MessageInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1605552,
-          "offset": 715584,
-          "size": 80,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL26Condition_PlayerInSockInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_PlayerInSockInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1608848,
-          "offset": 718880,
-          "size": 52,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23Condition_ForceCompleteP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_ForceComplete(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1616624,
-          "offset": 726656,
-          "size": 56,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL28Condition_PickupBeenTurnedOnP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_PickupBeenTurnedOn(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1624064,
-          "offset": 734096,
-          "size": 55,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL37Condition_AngleAboutMyLocatorToPlayerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_AngleAboutMyLocatorToPlayer(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1624128,
-          "offset": 734160,
-          "size": 267,
-          "match_percent": 93.30882
-        },
-        {
-          "name": "_ZL27Condition_MaulShouldRunAwayP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_MaulShouldRunAway(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1624400,
-          "offset": 734432,
-          "size": 401,
-          "match_percent": 99.906975
-        },
-        {
-          "name": "_ZL20Condition_ForceAtEndP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_ForceAtEnd(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1625440,
-          "offset": 735472,
-          "size": 88,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL22Condition_ForceAtStartP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_ForceAtStart(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1625536,
-          "offset": 735568,
-          "size": 88,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23Condition_ObstacleAtEndP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_ObstacleAtEnd(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1625632,
-          "offset": 735664,
-          "size": 88,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL25Condition_ObstacleAtStartP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_ObstacleAtStart(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1625728,
-          "offset": 735760,
-          "size": 88,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL19Condition_IsVisibleP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_IsVisible(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1625888,
-          "offset": 735920,
-          "size": 131,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL40Condition_EitherPlayerPushingSpinnerInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_EitherPlayerPushingSpinnerInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1626032,
-          "offset": 736064,
-          "size": 46,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL21Condition_MissionModeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_MissionMode(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1626080,
-          "offset": 736112,
-          "size": 48,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL22Condition_HintCompleteP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_HintComplete(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1626128,
-          "offset": 736160,
-          "size": 56,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL27Condition_HintAvailableInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_HintAvailableInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1626192,
-          "offset": 736224,
-          "size": 44,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL25Condition_ScriptParamInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_ScriptParamInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1626240,
-          "offset": 736272,
-          "size": 180,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23Condition_HintAvailableP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_HintAvailable(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1626432,
-          "offset": 736464,
-          "size": 56,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23Condition_CurrentHintIdP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_CurrentHintId(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1626496,
-          "offset": 736528,
-          "size": 41,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL28Condition_RigidAnimFrameInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_RigidAnimFrameInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1626544,
-          "offset": 736576,
-          "size": 94,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL31Condition_AnimationFinishedInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_AnimationFinishedInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1626640,
-          "offset": 736672,
-          "size": 94,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL29Condition_CutScenePlayingInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_CutScenePlayingInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1626736,
-          "offset": 736768,
-          "size": 52,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL28Condition_CutSceneExistsInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_CutSceneExistsInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1626800,
-          "offset": 736832,
-          "size": 52,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL30Condition_CutSceneFinishedInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_CutSceneFinishedInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1626864,
-          "offset": 736896,
-          "size": 52,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL29Condition_CutSceneStartedInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_CutSceneStartedInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1626928,
-          "offset": 736960,
-          "size": 52,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL26Condition_CutSceneFinishedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_CutSceneFinished(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1626992,
-          "offset": 737024,
-          "size": 64,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL27Condition_CanFightLikeAJediP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_CanFightLikeAJedi(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1627056,
-          "offset": 737088,
-          "size": 72,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23Condition_ForceFinishedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_ForceFinished(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1627136,
-          "offset": 737168,
-          "size": 56,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20Condition_UsingForceP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_UsingForce(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1627200,
-          "offset": 737232,
-          "size": 64,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL26Condition_PlayerUsingForceP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_PlayerUsingForce(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1627264,
-          "offset": 737296,
-          "size": 64,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL22Condition_OnObjectInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_OnObjectInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1627648,
-          "offset": 737680,
-          "size": 133,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL25Condition_OnForcePlatformP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_OnForcePlatform(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1633616,
-          "offset": 743648,
-          "size": 170,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL19Condition_InMiniCutP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_InMiniCut(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1633792,
-          "offset": 743824,
-          "size": 51,
-          "match_percent": 99.166664
-        },
-        {
-          "name": "_ZL31Condition_EitherPlayerTakenOverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_EitherPlayerTakenOver(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1633856,
-          "offset": 743888,
-          "size": 82,
-          "match_percent": 99.4
-        },
-        {
-          "name": "_ZL23Condition_EmptyTakeOverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_EmptyTakeOver(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1634512,
-          "offset": 744544,
-          "size": 266,
-          "match_percent": 90.177216
-        },
-        {
-          "name": "_ZL33Condition_CharacterTypeExistsInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_CharacterTypeExistsInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1634784,
-          "offset": 744816,
-          "size": 134,
-          "match_percent": 99.70588
-        },
-        {
-          "name": "_ZL23Condition_LastLevelInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_LastLevelInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1634928,
-          "offset": 744960,
-          "size": 150,
-          "match_percent": 99.19643
-        },
-        {
-          "name": "_ZL23Condition_InContextInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_InContextInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1635248,
-          "offset": 745280,
-          "size": 369,
-          "match_percent": 99.39561
-        },
-        {
-          "name": "_ZL33Condition_RandomMapCharsAvailableP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_RandomMapCharsAvailable(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1652720,
-          "offset": 762752,
-          "size": 59,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL24Condition_IsSetAliveInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_IsSetAliveInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1658192,
-          "offset": 768224,
-          "size": 100,
-          "match_percent": 99.655174
-        },
-        {
-          "name": "_ZL32Condition_EitherPlayerUsingForceP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_EitherPlayerUsingForce(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1658304,
-          "offset": 768336,
-          "size": 111,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL27Condition_AnimationFinishedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_AnimationFinished(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1658416,
-          "offset": 768448,
-          "size": 120,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL37Condition_EitherPlayerUsingHatMachineP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_EitherPlayerUsingHatMachine(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1658864,
-          "offset": 768896,
-          "size": 173,
-          "match_percent": 99.44444
-        },
-        {
-          "name": "_ZL34Condition_EitherPlayerPullingLeverP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_EitherPlayerPullingLever(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1659040,
-          "offset": 769072,
-          "size": 173,
-          "match_percent": 99.44444
-        },
-        {
-          "name": "_ZL32Condition_EitherPlayerUsingPanelP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-          "demangled_name": "Condition_EitherPlayerUsingPanel(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-          "address": 1659216,
-          "offset": 769248,
-          "size": 173,
-          "match_percent": 99.44444
-        },
-        {
-          "name": "_Z18GetNamedGameObjectP7AISYS_sPc",
-          "demangled_name": "GetNamedGameObject(AISYS_s*, char*)",
-          "address": 1660432,
-          "offset": 770464,
-          "size": 68,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL32Condition_UnderPlayerControlInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_UnderPlayerControlInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1701328,
-          "offset": 811360,
-          "size": 64,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL27Condition_OnSpeederBikeInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_OnSpeederBikeInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1701392,
-          "offset": 811424,
-          "size": 64,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL27Condition_BeenTakenOverInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_BeenTakenOverInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1701456,
-          "offset": 811488,
-          "size": 64,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23Condition_TakenOverInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_TakenOverInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1701520,
-          "offset": 811552,
-          "size": 64,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL28Condition_CharacterRangeInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_CharacterRangeInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1701584,
-          "offset": 811616,
-          "size": 64,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL30Condition_OnDynamicGrappleInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_OnDynamicGrappleInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1701712,
-          "offset": 811744,
-          "size": 64,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23Condition_HitPointsInitP7AISYS_sPcP10AISCRIPT_s",
-          "demangled_name": "Condition_HitPointsInit(AISYS_s*, char*, AISCRIPT_s*)",
-          "address": 1701776,
-          "offset": 811808,
-          "size": 64,
-          "match_percent": 100.0
         },
         {
           "name": "_Z36GameMsg_DrawAdjustNewPos_CoinToTotalP13GAMEMESSAGE_s",
@@ -60905,7 +60906,7 @@
           "address": 4641632,
           "offset": 3751664,
           "size": 178,
-          "match_percent": 99.34884
+          "match_percent": 99.69768
         },
         {
           "name": "_ZN12GameObject_s22GetMechObjectInterfaceEv",
@@ -61025,7 +61026,7 @@
           "address": 4648576,
           "offset": 3758608,
           "size": 401,
-          "match_percent": 100.0
+          "match_percent": 99.34344
         },
         {
           "name": "_Z19GameObjectSetCanUseP12GameObject_sPvhhf",
@@ -61073,7 +61074,7 @@
           "address": 4664800,
           "offset": 3774832,
           "size": 267,
-          "match_percent": 99.64706
+          "match_percent": 100.0
         },
         {
           "name": "_Z10GameTimingP11WORLDINFO_sPf",
@@ -61097,7 +61098,7 @@
           "address": 4765568,
           "offset": 3875600,
           "size": 1877,
-          "match_percent": 88.93158
+          "match_percent": 88.813156
         },
         {
           "name": "_Z19GameDisplaySettingsP16LEVELDATADISPLAYPi",
@@ -61129,7 +61130,7 @@
           "address": 4789696,
           "offset": 3899728,
           "size": 536,
-          "match_percent": 95.44927
+          "match_percent": 95.666664
         },
         {
           "name": "_Z15GameBufferAllocP9variptr_uS0_i",
@@ -120572,18 +120573,6 @@
       ]
     },
     {
-      "name": "_ZL28Condition_IAmAPartyCharacterP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
-      "demangled_name": "Condition_IAmAPartyCharacter(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
-      "address": 1579552,
-      "offset": 689584,
-      "size": 35,
-      "match_percent": 100.0,
-      "candidate_units": [
-        "gameapi/ai/aisys/gameaiscript.cpp.o",
-        "legoapi/items/objects/gameobjects.cpp.o"
-      ]
-    },
-    {
       "name": "_ZL27Condition_OpponentIsAThreatP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
       "demangled_name": "Condition_OpponentIsAThreat(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
       "address": 1579728,
@@ -120613,7 +120602,7 @@
       "address": 1657184,
       "offset": 767216,
       "size": 1003,
-      "match_percent": 98.161705,
+      "match_percent": 98.204254,
       "candidate_units": [
         "gameapi/ai/aisys/gameaiscript.cpp.o",
         "legoapi/ai/core/aisysall.cpp.o"
@@ -120625,7 +120614,7 @@
       "address": 1675296,
       "offset": 785328,
       "size": 645,
-      "match_percent": 96.83422,
+      "match_percent": 97.02139,
       "candidate_units": [
         "gameapi/ai/aisys/gameaiscript.cpp.o",
         "legoapi/ai/core/aisysall.cpp.o"
@@ -129699,10 +129688,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 466,
+    "bazel_units": 465,
     "functions": 13454,
-    "assigned_functions": 12840,
-    "ambiguous_functions": 287,
+    "assigned_functions": 12841,
+    "ambiguous_functions": 286,
     "unassigned_functions": 327
   }
 }

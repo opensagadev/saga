@@ -148,9 +148,7 @@ extern "C" {
 
 APICHARACTERMODELLIST_s PermModelList[] = {{-1, 0}};
 
-enum LegoObjectId : i16 {
-    LEGO_OBJECT_FLOOR_TARGET = 0x55,
-};
+#include "legoapi/characters/core/characters_types.h"
 
 void LSW_SetIndy(i32) {
     LedgeTerrain_On = 0;
@@ -1090,10 +1088,6 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     return 1;
 }
 
-struct DefaultIdleCharacterData {
-    u8 pad[0x116];
-    u8 use_standard_idle;
-};
 
 i32 GetDefaultIdle(GameObject_s *obj) {
     CHARACTERDATA *character = obj->apiobj.character_data;
@@ -1644,105 +1638,10 @@ void PostAnimate_ASTROMECH(GameObject_s *object) {
 }
 
 AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
-                                   f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y) {
-    i32 candidates[64] __attribute__((aligned(16)));
-    if (count > 64) {
-        count = 64;
-    }
-    i32 candidate_count = 0;
-    for (i32 i = 0; i < count; ++i) {
-        if (locators[i] == NULL) {
-            continue;
-        }
-        bool valid = false;
-        if (outside_camera != 0) {
-            if (NuCameraClipTestSphere(&locators[i]->position, 0.0f, &numtx_identity) == 0) {
-                valid = true;
-            }
-        } else {
-            valid = true;
-            if (clip_radius > 0.0f) {
-                if (NuCameraClipTestSphere(&locators[i]->position, clip_radius, &numtx_identity) == 0) {
-                    const i16 room = static_cast<i16>(NuPortalWhichRoom(WORLD->current_gscn, &locators[i]->position));
-                    valid = false;
-                    if (room >= 0 && WORLD->rooms_visible_ptr[room] == 0) {
-                        valid = true;
-                    }
-                }
-            }
-        }
-        if (valid != 0) {
-            if (max_distance == 1000000000.0f) {
-                candidates[candidate_count++] = i;
-            } else {
-                NUVEC delta __attribute__((aligned(16)));
-                const f32 distance = NuVecDistSqr(position, &locators[i]->position, &delta);
-                if (min_delta_y != 1000000000.0f && min_delta_y > delta.y) {
-                    continue;
-                }
-                if (max_delta_y != 1000000000.0f && delta.y > max_delta_y) {
-                    continue;
-                }
-                if (max_distance * max_distance > distance) {
-                    candidates[candidate_count++] = i;
-                }
-            }
-        }
-    }
-    if (candidate_count == 0) {
-        return NULL;
-    }
-    const i32 selected = qrand() / (65535 / candidate_count + 1);
-    AILOCATOR_s *result = locators[candidates[selected]];
-    locators[candidates[selected]] = NULL;
-    return result;
-}
+                                   f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y);
 
 AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
-                                    f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y) {
-    f32 nearest_distance = max_distance == 1000000000.0f ? 1000000000.0f : max_distance * max_distance;
-    i32 candidates[64];
-    i32 candidate_count = 0;
-    if (count > 64) {
-        count = 64;
-    }
-    for (i32 i = 0; i < count; ++i) {
-        if (locators[i] == NULL) {
-            continue;
-        }
-        if (outside_camera != 0) {
-            if (NuCameraClipTestSphere(&locators[i]->position, 0.0f, &numtx_identity) != 0) {
-                continue;
-            }
-        } else if (clip_radius > 0.0f &&
-                   NuCameraClipTestSphere(&locators[i]->position, clip_radius, &numtx_identity) == 0) {
-            continue;
-        }
-        candidates[candidate_count++] = i;
-    }
-    i32 nearest = -1;
-    for (i32 i = 0; i < candidate_count; ++i) {
-        NUVEC delta;
-        const f32 distance = NuVecDistSqr(position, &locators[candidates[i]]->position, &delta);
-        if (min_delta_y != 1000000000.0f && min_delta_y > delta.y) {
-            continue;
-        }
-        if (max_delta_y != 1000000000.0f && delta.y > max_delta_y) {
-            continue;
-        }
-        if (!(nearest_distance > distance)) {
-            continue;
-        }
-        nearest_distance = distance;
-        nearest = i;
-    }
-    if (nearest == -1) {
-        return NULL;
-    }
-    AILOCATOR_s *result = locators[candidates[nearest]];
-    locators[candidates[nearest]] = NULL;
-    return result;
-}
+                                    f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y);
 
 i32 newCharactersCollected(STATUSPACKET_s *) {
     i32 count = 0;

@@ -19,20 +19,7 @@ extern "C" void *AISysLoadEx(void *buf, void *buf_end, i32 size, void *gscn, cha
                              char *load_dir);
 
 extern "C" void *AISysLoad(void *buf, void *buf_end, i32 size, void *gscn, char *dir, char *name, char *param);
-void *AIPathCnxControlSysCreate(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
-    AIPATHCNXCONTROLSYS_s *system =
-        static_cast<AIPATHCNXCONTROLSYS_s *>(AISysBufferAlloc(buf, buf_end, sizeof(AIPATHCNXCONTROLSYS_s)));
-    if (system != NULL) {
-        memset(system, 0, sizeof(*system));
-        system->controllers = static_cast<AIPATHCNXCONTROLLER_s *>(
-            AISysBufferAlloc(buf, buf_end, static_cast<u32>(count) * sizeof(AIPATHCNXCONTROLLER_s)));
-        if (system->controllers != NULL) {
-            system->controller_count = count;
-            AIPathCnxControlSysReset(system);
-        }
-    }
-    return system;
-}
+void *AIPathCnxControlSysCreate(VARIPTR *buf, VARIPTR *buf_end, i32 count);
 void *AIPathCnxHelperSysCreate(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
     if (count == 0) {
         return NULL;

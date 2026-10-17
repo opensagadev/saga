@@ -61,66 +61,11 @@ BOLT_s *FindIncomingBolt(GameObject_s *object, i32 exclude_players, i32 mark_dir
     return nearest;
 }
 
-void GuidedMissile_Kill(PART_s *part, i32 reason) {
-    AddGameDebris(WORLD->debris_sys, 0x7d, &part->position);
-    AddGameDebris(WORLD->debris_sys, 0x21, &part->position);
-    GameCam_Judder(GameCam, 0.2f, 0, NULL);
-    Game_KillPart(part, reason);
-    NewRumbleAllPlayers(0.7f, 0.1f, 0, 0);
-}
+void GuidedMissile_Kill(PART_s *part, i32 reason);
 
-void GuidedMissile_Move(PART_s *part, float time) {
-    GameObject_s *recipient = part->recipient;
-    if (part->scale_time > guided_life) {
-        part->field_124[3] = static_cast<i32>(SeekValF(static_cast<f32>(part->field_124[3]), 0.0f, 2.0f));
-    } else if (recipient != NULL && part->scale_time > guided_start_time) {
-        NUVEC direction;
-        NuVecSub(&direction, &recipient->apiobj.collision_position, &part->position);
-        i32 yaw = NuAtan2D(direction.x, direction.z);
-        NuVecRotateY(&direction, &direction, -yaw);
-        direction.y = recipient->apiobj.collision_position.y + 0.5f - part->position.y;
-        i32 pitch = -NuAtan2D(direction.y, direction.z);
-        part->rotation_x = SeekRot(part->rotation_x, static_cast<u16>(pitch), 1.0f);
-        part->rotation_y = SeekRot(part->rotation_y, static_cast<u16>(yaw), 3.0f);
-        part->field_124[3] = guided_rotate_speed;
-    } else {
-        part->field_124[3] = guided_rotate_speed;
-    }
+void GuidedMissile_Move(PART_s *part, float time);
 
-    part->field_13c += static_cast<i32>(static_cast<f32>(part->field_124[3]) * FRAMETIME);
-
-    part->velocity.x = 0.0f;
-    part->velocity.y = 0.0f;
-    part->velocity.z = guided_speed;
-    NuVecRotateX(&part->velocity, &part->velocity, part->rotation_x);
-    NuVecRotateY(&part->velocity, &part->velocity, part->rotation_y);
-
-    NUVEC position;
-    position.x = part->position.x + part->velocity.x * time;
-    position.y = part->position.y + part->velocity.y * time + part->gravity * time;
-    position.z = part->position.z + part->velocity.z * time;
-
-    NuMtxSetRotationX(&part->transform, NuAngAdd(part->rotation_x, 0x4000));
-    NuMtxRotateY(&part->transform, part->rotation_y);
-    NuMtxPreRotateY(&part->transform, part->field_13c);
-    NuMtxTranslate(&part->transform, &position);
-
-    if (part->scale_time < 0.2f) {
-        NUVEC scale = {part->scale_time / 0.2f, part->scale_time / 0.2f, part->scale_time / 0.2f};
-        NuMtxPreScale(&part->transform, &scale);
-    }
-    if (static_cast<i8>(part->active) < 0) {
-        i32 count = ParticlesPerFrame(1.0f, FRAMETIME);
-        NUVEC momentum = {-part->velocity.x, -part->velocity.y, -part->velocity.z};
-        AddGameDebrisMom(WORLD->debris_sys, 0xb, &position, count, &momentum);
-    }
-}
-
-void GuidedMissile_Deflect(PART_s *part) {
-    part->flags &= ~0x4000;
-    part->flags |= 0x80;
-    NewPartRotation(part);
-}
+void GuidedMissile_Deflect(PART_s *part);
 
 extern "C" i16 id_SPEEDERBIKE;
 i32 InitBolt_AddMomentumType_LSW(BOLT_s *bolt, GameObject_s *object, NUVEC *momentum) {
