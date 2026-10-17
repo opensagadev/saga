@@ -18187,32 +18187,12 @@ extern "C" {
                                   sphere->momentum.y * time + time * time * effect->field_0a0 + sphere->position.y,
                                   sphere->momentum.z * time + sphere->position.z};
                 time /= effect->particle_lifetime;
-                i32 first, next;
-                if (time >= effect->collision_keys[0].time && time <= effect->collision_keys[1].time) {
-                    first = 0;
-                    next = 1;
-                } else if (time >= effect->collision_keys[1].time && time <= effect->collision_keys[2].time) {
-                    first = 1;
-                    next = 2;
-                } else if (__builtin_expect(time >= effect->collision_keys[2].time && time <= effect->collision_keys[3].time, 1)) {
-                    first = 2;
-                    next = 3;
-                } else if (time >= effect->collision_keys[3].time && time <= effect->collision_keys[4].time) {
-                    first = 3;
-                    next = 4;
-                } else if (time >= effect->collision_keys[4].time && time <= effect->collision_keys[5].time) {
-                    first = 4;
-                    next = 5;
-                } else if (time >= effect->collision_keys[5].time && time <= effect->collision_keys[6].time) {
-                    first = 5;
-                    next = 6;
-                } else if (__builtin_expect(time >= effect->collision_keys[6].time && time <= effect->collision_keys[7].time, 0)) {
-                    first = 6;
-                    next = 7;
-                } else {
-                    first = 7;
-                    next = 8;
+                i32 first;
+                for (first = 0; first < 7; ++first) {
+                    if (time >= effect->collision_keys[first].time && time <= effect->collision_keys[first + 1].time)
+                        break;
                 }
+                const i32 next = first + 1;
                 f32 radius = ((time - effect->collision_keys[first].time) /
                               (effect->collision_keys[next].time - effect->collision_keys[first].time)) *
                                  (effect->collision_keys[next].value - effect->collision_keys[first].value) +
