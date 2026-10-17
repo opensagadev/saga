@@ -3,7 +3,6 @@
 #include "gamelib/util/gamelib_util_types.h"
 #include "globals.h"
 #include "legoapi/characters/motion.h"
-#include "legoapi/gizmos/traps/gizturrets.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/world.h"

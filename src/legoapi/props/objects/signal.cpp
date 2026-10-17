@@ -19,13 +19,11 @@
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuvec.h"
 
 #include <string.h>
-#include "nu2api/nu3d/nu3d_includes.h"
 
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 

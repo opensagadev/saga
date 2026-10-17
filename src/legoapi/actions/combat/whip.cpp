@@ -11,7 +11,6 @@
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/items/base/animpacket.h"
 #include "legoapi/legoapi_types.h"
-#include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 #include "legoapi/actions/movement/climbing.h"

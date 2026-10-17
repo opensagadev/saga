@@ -1,11 +1,9 @@
 #include "decomp.h"
-#include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/legoapi_types.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "gamelib/util/Utilities.h"
 #include "nu2api/nucore/NuNetEmu.h"
 #include "nu2api/nucore/nupad.h"
-#include "nu2api/numath/nufloat.h"
 #include <string.h>
 #include "gamelib/util/Refpack.h"
 

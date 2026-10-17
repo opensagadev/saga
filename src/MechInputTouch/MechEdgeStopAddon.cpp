@@ -1,7 +1,6 @@
 #include "MechInputTouch_types.h"
 #include "globals.h"
 #include "gamelib/util/gamelib_util_types.h"
-#include "legoapi/characters/motion.h"
 #include "legoapi/items/base/apiobject.h"
 
 HashedKey MechEdgeStopAddon::s_hashId("MechEdgeStopAddon", HashedKey::kInlineHash);

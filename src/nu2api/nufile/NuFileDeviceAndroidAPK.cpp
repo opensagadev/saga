@@ -11,10 +11,7 @@
 #include <unistd.h>
 
 #include "decomp.h"
-#include "nu2api/nuandroid/ios_graphics.h"
-#include "nu2api/nucore/nuapi.h"
 #include "nu2api/nucore/nustring.h"
-#include "nu2api/nucore/nuthread.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nufile/tmclient.h"
 #include "java/asset_manager.h"

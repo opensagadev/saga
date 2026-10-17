@@ -5,18 +5,11 @@
 #include "legoapi/world/world.h"
 #include "legoapi/items/base/apiobject.h"
 #include "gameapi/ai/aisys/aisys.h"
-#include "gameapi/edtools/edfile.h"
-#include "editor/aieditor_state.h"
-#include "editor/aieditor_settings.h"
-#include "editor/antinode_editor_private.h"
-#include "legoapi/render/core/render.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nuspecial.h"
 #include <string.h>
 #include "legoapi/ai/core/gameai.h"
 

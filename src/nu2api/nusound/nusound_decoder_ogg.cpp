@@ -2,7 +2,6 @@
 #include "nusound_decoder_ogg.hpp"
 
 #include "nu2api/nuandroid/ios_graphics.h"
-#include "nu2api/nucore/nucore.hpp"
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nusound/nusound_buffer.hpp"
 #include "nu2api/nusound/nusound_system.hpp"

@@ -4,7 +4,6 @@
 // The original unit constructs the homogeneous VuVec header constants.
 #include "nu2api/nucore/nuvuvec.hpp"
 
-#include "nu2api/nucore/nuvideo.h"
 
 #include "nu2api/nu3d/nupostresources.h"
 #include "nu2api/nufile/nufile.h"

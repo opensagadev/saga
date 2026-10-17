@@ -13,7 +13,6 @@
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nutrig.h"
 
 #include <string.h>

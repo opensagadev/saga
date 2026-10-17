@@ -19,11 +19,8 @@
 #include <string.h>
 #include <limits.h>
 #include "nu2api/numath/numtx_inline.h"
-#include "nu2api/nu3d/nucamera.h"
 #include "nu2api/numath/nuplane.h"
 #include "nu2api/numath/nurand.h"
-#include "gamelib/nuwind/nuwind.h"
-#include "nu2api/nu3d/nuspecial.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/nuang.h"

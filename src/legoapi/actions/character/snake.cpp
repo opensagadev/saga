@@ -3,11 +3,9 @@
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "legoapi/render/fx/parts.h"
-#include "legoapi/characters/motion/gameanim.h"
 #include "globals.h"
 #include <string.h>
 #include "legoapi/legoapi_types.h"
-#include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nufloat.h"
 #include "legoapi/characters/motion.h"

@@ -1,15 +1,12 @@
 #include "decomp.h"
 #include "nu2api/nucore/nuvuvec.hpp"
-#include "nu2api/nucore/nuapi.h"
 #include "nu2api/nu3d/android/nutex_android.h"
 #include "nu2api/nu3d/ShaderManagerOpenGL.h"
 #include "gamelib/util/CRC16.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include <new>
 #include "nushader_plain.h"
-#include "nu2api/nu3d/nu2api_nu3d_types.h"
 #include "nushader.h"
-#include "nushader_internal.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
@@ -18,12 +15,8 @@
 #include <cstring>
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nucore/nustring.h"
-#include "nu2api/nuandroid/ios_graphics.h"
-#include "nu2api/nucore/nuthread.h"
 #include "nudlist_tables_gen.inc"
-#include "nu2api/nu3d/nu3d_includes.h"
 #include "nu2api/nu3d/nushadermanagerios.h"
-#include "nu2api/nucore/nucore_includes.h"
 /*
  * Shader manager.
  *

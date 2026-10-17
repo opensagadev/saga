@@ -2,7 +2,6 @@
 #include "legoapi/gizmo/object/gizmoblowups.h"
 
 #include "nu2api/numath/nuquat.h"
-#include "decomp.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion.h"
@@ -10,14 +9,12 @@
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/legoapi_types.h"
-#include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"
 #include "legoapi/characters/motion/move.h"
-#include "legoapi/misc/utilities.h"
 
 struct AIROW_s;
 struct nunativegscene_s;

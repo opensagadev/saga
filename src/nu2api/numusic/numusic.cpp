@@ -21,8 +21,6 @@
 #include "decomp.h"
 
 #include "nu2api/nufile/nufpar.h"
-#include "legoapi/audio/audio.h"
-#include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/numusic/numusic.h"
 #include "nu2api/nusound/nusound.h"
 

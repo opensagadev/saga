@@ -1,20 +1,13 @@
 #include "nu2api/nu3d/nuhspecial.h"
 #include <stdio.h>
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/nu3d/nuvport.h"
 
 #include <float.h>
 #include <string.h>
 #include "nu2api/nu3d/nuprim_internal.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nuvec.h"
 
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
-#include "nu2api/nucore/nucore.hpp"
-#include "globals.h"
 #include "nu2api/nu3d/nutexanm.h"
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nucore/common.h"
@@ -24,15 +17,8 @@
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurndrstat.h"
-#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nushader.h"
-#include "nu2api/nucore/nuapi.h"
-#include "nu2api/nuandroid/ios_graphics.h"
-#include "nu2api/nu3d/android/nuptl_android.h"
-#include "nu2api/nu3d/nurndr_plain_types.h"
-#include "nu2api/nu3d/android/numtl_android.h"
-#include "nu2api/nu3d/android/nurenderthread.h"
 #include "nu2api/nu3d/nu3d_includes.h"
 
 extern "C" {

@@ -1,45 +1,26 @@
 #include "decomp.h"
 #include "legoapi/actions/combat/hits.h"
 #include "legoapi/world/world_shared.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/render/core/terrain_internal.h"
-#include "legoapi/render/light/surfaces.h"
-#include "legoapi/ai/core/legoai.h"
-#include "legoapi/render/core/gameliball.h"
 
 #include <stdio.h>
 #include <new>
 
-#include "gameapi/edtools/edstubs.h"
-#include "gameapi/edtools/edgra.h"
-#include "gameapi/gui/apimenu.h"
 #include "globals.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/characters/core/players.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/core/input/qrand.h"
-#include "legoapi/props/objects/techno.h"
 #include "legoapi/props/doors/door.h"
-#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/level.h"
 #include "nu2api/nucore/numemory.h"
-#include "nu2api/nucore/numem.h"
-#include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufile.h"
-#include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuang.h"
-#include "nu2api/nuplatform/nudevicespecs.hpp"
 #include "nu2api/numath/numtx.h"
-#include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/nuvec4.h"
 
 #include <limits.h>
 #include <math.h>
 #include <string.h>
-#include "legoapi/lib/camera.h"
 
 struct tertype;
 struct terrsitu_s;
@@ -49,7 +30,6 @@ struct pushblock_s;
 extern i16 id_SNAKE;
 
 namespace {
-#include "legoapi/render/core/terrain_types.h"
 
 
 

@@ -2,16 +2,9 @@
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
-#include "legoapi/ai/core/ai_sys_stubs.h"
 #include "legoapi/gizmo/base/gizmo.h"
-#include "legoapi/gizmos/door/zipups.h"
-#include "legoapi/gizmos/object/gizobstacles.h"
-#include "legoapi/gizmos/object/newblowup.h"
-#include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nuanim3.h"
 
 #include <string.h>

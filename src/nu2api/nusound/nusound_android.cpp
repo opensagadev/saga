@@ -51,7 +51,6 @@ namespace {
 
     // OpenSL interface vtable slots as used by libTTapp.so.
 
-#include "nu2api/nusound/nusound_voice_android_types.h"
 
 } // namespace
 

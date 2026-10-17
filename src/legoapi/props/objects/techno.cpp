@@ -18,7 +18,6 @@
 #include "legoapi/world/world.h"
 #include "legoapi/world/world_shared.h"
 #include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/numtx.h"

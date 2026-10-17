@@ -15,7 +15,6 @@
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
-#include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/misc/supportall.h"
 #include "legoapi/misc/utilities.h"

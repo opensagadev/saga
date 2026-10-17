@@ -10,10 +10,7 @@
 #include "nu2api/nu3d/numtl.h"
 
 #include "legoapi/cutscenes/cutscenes.h"
-#include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
-#include "legoapi/world/levels/episode.h"
-#include "legoapi/world/levels/levels.h"
 #include "legoapi/world/world.h"
 
 #include <string.h>
@@ -21,13 +18,7 @@
 #include "nu2api/nufile/nufpar.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspecial.h"
-#include "legoapi/menus/core/text.h"
 #include "legoapi/menus/screens/store.h"
-#include "legoapi/items/base/collection.h"
-#include "legoapi/render/core/render.h"
-#include "gameapi/gui/apimenu.h"
-#include "legoapi/menus/screens/gamestructure.h"
-#include "legoapi/audio/audio.h"
 #include "legoapi/cutscenes/cutscene_defrag.h"
 #include "legoapi/world/world_shared.h"
 #include <math.h>
@@ -37,7 +28,6 @@
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuquat.h"
-#include "nu2api/numusic/numusic.h"
 #include "nu2api/numusic/sfx.h"
 #include "legoapi/cutscenes/cutscene_types.h"
 #include "nu2api/nucore/NuDynamicLight.h"
@@ -50,72 +40,36 @@
 #include <cfloat>
 #include "gameapi/edtools/edanim_internal.h"
 #include "gameapi/edtools/gameapi_edtools_types.h"
-#include "nu2api/nu3d/nulgtlaser.h"
-#include "nu2api/nucore/nuonline.h"
 #include <stdarg.h>
 #include <float.h>
 #include <GLES2/gl2.h>
-#include "nu2api/nucore/numem.h"
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
-#include "nu2api/nu3d/nuqfnt.h"
-#include "java/android.h"
-#include "java/java.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nuanim3.h"
-#include "nu2api/nucore/nuapi.h"
 #include "nu2api/nucore/nupad.h"
-#include "nu2api/nucore/NuInputDevice.h"
-#include "nu2api/nucore/NuInputManager.h"
 #include "nu2api/nucore/bgproc.h"
-#include "nu2api/nucore/nuptrblock.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nu3d/nuspecial_internal.h"
-#include "nu2api/nu3d/nupostresources.h"
-#include "nu2api/nu3d/android/nutimebar_plain.h"
-#include "nu2api/nu3d/nuvport.h"
-#include "nu2api/nu3d/nuocclusion.h"
-#include "nu2api/nu3d/nurendercontext.h"
-#include "nu2api/nu3d/nuscreen.hpp"
-#include "nu2api/nu3d/NuRenderDevice.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/numath/numtx.h"
-#include "legoapi/gizmos/object/gizbuildits.h"
 #include "gameapi/edtools/edfile.h"
 #include "legoapi/core/config/cheat.h"
-#include "legoapi/core/input/qrand.h"
 #include "legoapi/characters/core/players.h"
-#include "legoapi/characters/motion.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/items/base/apiobject.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "nu2api/numath/nurand.h"
-#include "legoapi/characters/motion/gameanim_types.h"
-#include "editor/edpath.h"
-#include "legoapi/ai/core/ai_sys_stubs.h"
 #include "editor/aieditor_state.h"
-#include "editor/antinode_editor_private.h"
 #include "gameapi/ai/aisys/aisys.h"
-#include "nu2api/nufile/nufilepak.h"
 #include "nu2api/numath/nuang.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/nuplane.h"
-#include "legoapi/ai/core/ai_pathgeometry.h"
-#include "legoapi/render/light/surfaces.h"
-#include "legoapi/audio/sfx.h"
 #include "MechInputTouch/MechInputTouch_types.h"
-#include "legoapi/menus/core/panel.h"
 #include "legoapi/props/doors/door.h"
-#include "legoapi/render/light/shadow.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/render/fx/parts.h"
-#include "legoapi/render/core/screen.h"
-#include "nu2api/nuandroid/ios_graphics.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/cutscenes/gcutscn.h"
 #include "legoapi/render/core/gameliball.h"
@@ -504,7 +458,6 @@ extern "C" {
     // Gobj / hierarchy / scene graph
     // ---------------------------------------------------------------------------
 
-#include "nu2api/nucore/nucore_plain_types.h"
 
     // ---------------------------------------------------------------------------
     // Input / pad / key / mouse
@@ -571,7 +524,6 @@ extern "C" {
 } // extern "C"
 
 extern "C" {
-#include "legoapi/ai/core/ai_sys_stubs_types.h"
 } // extern "C"
 
 #if defined(__i386__)

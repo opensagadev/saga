@@ -16,7 +16,6 @@
 #include "nu2api/nusound/nusound.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/menus/core/lsw_text_data.inc"
-#include "legoapi/menus/screens/gamemenuall.h"
 
 struct CUSTOMISER;
 struct GIZAIMESSAGESYS_s;

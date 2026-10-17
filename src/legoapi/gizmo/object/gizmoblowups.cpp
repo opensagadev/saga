@@ -30,7 +30,6 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nurndrstat.h"
-#include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/nucore/nuanim3.h"
@@ -38,7 +37,6 @@
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nurand.h"
 #include "legoapi/core/input/qrand.h"
 
 #include <string.h>

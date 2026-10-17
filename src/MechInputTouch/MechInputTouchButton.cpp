@@ -4,7 +4,6 @@
 #include "MechInputTouch_types.h"
 #include "nu2api/nucore/NuInputDevice.h"
 #include "nu2api/nu3d/nurndr.h"
-#include "MechInputTouch/MechInputTouchMainController.h"
 #include "nu2api/nu3d/nu3d_includes.h"
 
 u32 colourWhite = 0xffffffff;

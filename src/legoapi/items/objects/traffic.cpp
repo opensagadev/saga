@@ -15,7 +15,6 @@
 #include "nu2api/nu3d/nuportal.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numath/nurand.h"
-#include "nu2api/nu3d/nutex.h"
 
 #include <string.h>
 

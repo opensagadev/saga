@@ -12,7 +12,6 @@
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nufile/tmclient.h"
 #include "java/asset_manager.h"
-#include "java/android.h"
 
 char g_datfileMode = 1;
 

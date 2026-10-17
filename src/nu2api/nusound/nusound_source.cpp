@@ -1,5 +1,4 @@
 #include "nu2api/nusound/nusound_source.hpp"
-#include "nu2api/nusound/nusound_weakptr.hpp"
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nusound/nusound_loader.hpp"
 #include "globals.h"

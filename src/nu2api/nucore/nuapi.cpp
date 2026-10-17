@@ -3,22 +3,10 @@
 #include <stdarg.h>
 #include <string.h>
 #include "decomp.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nupostresources.h"
-#include "nu2api/nu3d/nuvport.h"
 #include "nu2api/nu3d/nutex.h"
-#include "nu2api/nufile/nufile.h"
 #include "nu2api/nucore/nuanim3.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/nu3d/nuqfnt.h"
-#include "nu2api/nu3d/nuocclusion.h"
-#include "nu2api/nu3d/android/nutimebar_plain.h"
-#include "nu2api/nucore/nuonline.h"
-#include "nu2api/nucore/nucore_includes.h"
 
 extern "C" i32 Nu360GetCommandLine(char **arguments, i32 capacity) {
     i32 i;

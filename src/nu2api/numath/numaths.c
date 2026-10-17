@@ -8,7 +8,6 @@
 #include "nu2api/numath/nuplane.h"
 #include "nu2api/numath/nuquat.h"
 #include "nu2api/numath/nutrig.h"
-#include "nu2api/nu3d/nucamera.h"
 
 #include <stdlib.h>
 

@@ -3,29 +3,19 @@
 
 #include "decomp.h"
 #include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nuwater.h"
 
 // The original unit constructs its six homogeneous vectors.
 #include "nu2api/nucore/nuvuvec.hpp"
-#include "nu2api/nucore/nuvideo.h"
 #include "nu2api/nucore/nuapi.h"
 #include "legoapi/world/world_shared.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/items/base/apiobject.h"
 #include "nu2api/numath/numtx.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nu3d/android/nurndr_android.h"
-#include "nu2api/nu3d/android/nufmv_android.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nudlist.h"
-#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nurndrstat.h"
-#include "nu2api/nu3d/nuvport.h"
 #include "globals.h"
 #include <string.h>
-#include "nu2api/nu3d/android/nutex_android.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <GLES2/gl2.h>
@@ -34,7 +24,6 @@
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nufile/nufile.h"
-#include "nu2api/nuplatform/nuplatform.h"
 
 struct nugobj_s;
 struct nugscn_s;

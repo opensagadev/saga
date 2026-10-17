@@ -1,13 +1,10 @@
 #include "decomp.h"
 #include "nu2api/nucore/nuvuvec.hpp"
-#include "nu2api/nucore/nuapi.h"
 #include "nu2api/nu3d/ShaderManagerOpenGL.h"
 #include "gamelib/util/CRC16.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "nushader_plain.h"
-#include "nu2api/nu3d/nu2api_nu3d_types.h"
 #include "nushader.h"
-#include "nushader_internal.h"
 
 // Shader object key generation (retail ShaderObjectKey.cpp): the 104-byte
 // material block hashed with the forward/inverse CRC-16 pair.

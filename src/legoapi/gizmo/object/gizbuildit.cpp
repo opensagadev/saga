@@ -36,7 +36,6 @@
 #include "legoapi/characters/core/character.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numath/nuquat.h"
-#include "nu2api/nu3d/nutex.h"
 
 f32 GIZBUILDITWOBBLEJUMPHEIGHT = 0.05f;
 i16 GizBuilditGDeb[6] = {0x4c, 0x4d, 0x4e, 0x4f, 0x50, 0x51};

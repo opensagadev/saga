@@ -1,6 +1,5 @@
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
-#include "nu2api/nu3d/nutex.h"
 #include "legoapi/world/world.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/gizmo/base/gizmo.h"

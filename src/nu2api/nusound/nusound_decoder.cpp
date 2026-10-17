@@ -3,7 +3,6 @@
 
 #include "nu2api/nucore/nucore.hpp"
 #include "nu2api/nusound/nusound_buffer.hpp"
-#include "nu2api/nusound/nusound_sample.hpp"
 #include "nu2api/nusound/nusound_voice.hpp"
 #include "nu2api/nusound/nusound_system.hpp"
 

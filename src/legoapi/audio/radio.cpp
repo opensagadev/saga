@@ -9,7 +9,6 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"

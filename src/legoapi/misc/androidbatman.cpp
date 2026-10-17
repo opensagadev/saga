@@ -24,7 +24,6 @@
 #include "nu2api/nu3d/android/nutimebar_plain.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nutex.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nuandroid/nuphoneos.h"
 #include "nu2api/nucore/bgproc.h"
@@ -36,7 +35,6 @@
 #include "nu2api/nucore/nuvideo.h"
 #include "nu2api/nusound/nusound.h"
 #include "nu2api/numath/nuvec4.h"
-#include "nu2api/numath/nufloat.h"
 
 extern "C" {
     void *DVD = NULL;

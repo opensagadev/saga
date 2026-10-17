@@ -3,8 +3,6 @@
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/actions/combat/hits.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/core/input/gamepads.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/characters/motion.h"
 #include "nu2api/numath/nutrig.h"
@@ -13,7 +11,6 @@
 #include <string.h>
 
 #include "legoapi/actions/character/specialmoves_types.h"
-#include "legoapi/actions/movement/jumping.h"
 static SPECIALMOVE_s *SpecialMove;
 static i32 SpecialMoveCount;
 

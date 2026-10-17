@@ -8,7 +8,6 @@
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion.h"
-#include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/items/base/apiobject.h"

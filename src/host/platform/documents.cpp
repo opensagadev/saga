@@ -1,6 +1,4 @@
-#include "nu2api/nuandroid/ios_graphics.h"
 
-#include "host/platform/graphics.hpp"
 
 #include <stdio.h>
 

@@ -1,4 +1,3 @@
-#include "decomp.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/nucore/NuMainFilter.h"
 #include "nu2api/nucore/NuMainFilterGen.h"

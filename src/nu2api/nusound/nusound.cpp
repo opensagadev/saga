@@ -7,14 +7,12 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/nusound/nusound_bus.hpp"
-#include "nu2api/nusound/nusound_android.hpp"
 #include "nu2api/nusound/nusound_decoder.hpp"
 #include "nu2api/nusound/nusound_decoder_ogg.hpp"
 #include "nu2api/nusound/nusound_loader.hpp"
 #include "nu2api/nusound/nusound_loader_ogg.hpp"
 #include "nu2api/nusound/nusound_streamer.hpp"
 #include "nu2api/nusound/nusound_voice.hpp"
-#include "nu2api_nusound_types.h"
 
 #include "decomp.h"
 

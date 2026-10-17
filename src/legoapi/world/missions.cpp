@@ -2,8 +2,6 @@
 // Functions are defined in original address order.
 
 #include "decomp.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/characters/core/players.h"

@@ -10,7 +10,6 @@
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nucore/nustring.h"
-#include "nu2api/nu3d/nutex.h"
 #include "nu2api/nufile/nufpar.h"
 #include "legoapi/gizmos/trigger/giztimer.h"
 #include "legoapi/gizmos/trigger/gizrandom.h"

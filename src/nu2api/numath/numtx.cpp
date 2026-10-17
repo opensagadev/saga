@@ -1,13 +1,10 @@
 #include <limits.h>
 
 #include "nu2api/numath/numtx.h"
-#include "nu2api/numath/numtx_inline.h"
 
 #include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nuquat.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
-#include "nu2api/nu3d/nucamera.h"
 
 // clang-format off
 // clang-format on

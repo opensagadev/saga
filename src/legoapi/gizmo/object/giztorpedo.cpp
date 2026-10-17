@@ -8,7 +8,6 @@
 #include "gameapi/edtools/edfile.h"
 #include "globals.h"
 #include "legoapi/core/input/timer.h"
-#include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/world/level.h"

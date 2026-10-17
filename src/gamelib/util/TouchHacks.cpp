@@ -9,7 +9,6 @@
 #include "legoapi/audio/sfx.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion.h"
-#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/items/objects/gameobjects.h"

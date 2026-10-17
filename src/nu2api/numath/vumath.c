@@ -1,8 +1,6 @@
 #include "decomp.h"
 
-#include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/numtx.h"
-#include "nu2api/numath/nuquat.h"
 #include "nu2api/numath/nuvec.h"
 
 static void VuVecMtxMul(NUVEC *out, NUVEC *v, NUMTX *m) {

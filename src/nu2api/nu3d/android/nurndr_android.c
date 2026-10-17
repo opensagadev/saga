@@ -20,7 +20,6 @@
 
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
-#include "nu2api/nu3d/NuRenderDevice.h"
 #include "nu2api/nu3d/android/nutex_android.h"
 #include "nu2api/nu3d/android/nudlist_callbacks.h"
 #include "nu2api/nu3d/android/nugscn_android.h"
@@ -33,7 +32,6 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nutex.h"
-#include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nuapi.h"
 #include "nu2api/nucore/numemory.h"

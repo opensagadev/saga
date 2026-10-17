@@ -4,13 +4,9 @@
 #include "nu2api/nucore/NuPostFilter.h"
 #include "nu2api/nucore/NuPostFilterGen.h"
 #include "nu2api/nucore/numemory.h"
-#include "nu2api/nucore/nuthread.h"
-#include "nu2api/nu3d/nupostresources.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nushader.h"
-#include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nu3d/android/nupostshaders.h"
-#include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nu3d/NuRenderDevice.h"
 
 // NuPostFilter shared resources (retail nu3d/android/nupostfilter.cpp; the

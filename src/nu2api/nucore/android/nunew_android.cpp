@@ -8,7 +8,6 @@
 
 #include "nu2api/nucore/NuMemoryManager.h"
 #include "nu2api/nucore/numemory.h"
-#include "nu2api/nucore/android/nunew_android.h"
 
 void *operator new(std::size_t size, const std::nothrow_t &) noexcept;
 

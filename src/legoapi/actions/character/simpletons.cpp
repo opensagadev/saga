@@ -10,31 +10,19 @@
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
 
-#include "legoapi/actions/character/simpletons_types.h"
 
-#include "legoapi/world/levels/episode.h"
 
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "gameapi/edtools/edstubs.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/charconfig.h"
-#include "legoapi/characters/core/playeritems.h"
-#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/core/input/qrand.h"
-#include "legoapi/gizmo/object/gizmoblowups.h"
-#include "legoapi/gizmo/object/gizmopickup.h"
-#include "legoapi/gizmos/object/gizbuildits.h"
-#include "legoapi/gizmos/object/gizobstacles.h"
-#include "legoapi/menus/core/gamemessages.h"
-#include "legoapi/menus/core/text.h"
 #include "legoapi/misc/utilities.h"
 #include "legoapi/menus/screens/store.h"
-#include "legoapi/render/core/render.h"
 #include "legoapi/render/fx.h"
-#include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/mission.h"
@@ -42,7 +30,6 @@
 #include "nu2api/nufile/nufpar.h"
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/numtx_inline.h"
@@ -50,7 +37,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "legoapi/world/levels/episode_types.h"
 #include "legoapi/actions/character/simpletons.h"
 
 i32 droid_hack;

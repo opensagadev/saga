@@ -5,7 +5,6 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/characters/motion.h"
-#include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmos/object/gizbuildits.h"

@@ -20,9 +20,6 @@
 
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/render/light/surfaces.h"
-#include "nu2api/nu3d/nutex.h"
 
 struct LEDGEPROGRESS {
     i32 state[8];

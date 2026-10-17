@@ -2,7 +2,6 @@
 // Functions are defined in original address order.
 
 #include "decomp.h"
-#include "gameapi/edtools/edui.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -15,11 +14,8 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/core/config/cheat.h"
-#include "legoapi/core/config/fileselect.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/menus/screens/gamemenuall.h"
-#include "legoapi/menus/screens/gamestructure.h"
-#include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world.h"
@@ -29,8 +25,6 @@
 #include "legoapi/render/core/render.h"
 #include "legoapi/menus/core/panel.h"
 #include "nu2api/nu3d/nugscn.h"
-#include "nu2api/nu3d/nuqfnt.h"
-#include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nucore/nustring.h"
@@ -38,7 +32,6 @@
 #include "nu2api/numath/nufloat.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/timer.h"
-#include "legoapi/items/base/collection.h"
 #include "legoapi/world/world_shared.h"
 #include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/menus/screens/missions.h"

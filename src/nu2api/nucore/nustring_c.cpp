@@ -1,5 +1,4 @@
 #include "decomp.h"
-#include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 
 #include <stdio.h>

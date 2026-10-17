@@ -3,14 +3,10 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/render/core/terrain.h"
-#include "legoapi/render/light/surfaces.h"
 #include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufpar.h"
-#include "nu2api/numath/nufloat.h"
 #include <string.h>
-#include "legoapi/misc/utilities.h"
 
 struct AIROW_s;
 struct nunativegscene_s;

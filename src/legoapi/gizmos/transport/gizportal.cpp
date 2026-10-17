@@ -7,10 +7,8 @@
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nuportal.h"
-#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/nucore/nustring.h"
-#include "nu2api/nufile/nufpar.h"
 
 i32 portal_gizmotype_id;
 

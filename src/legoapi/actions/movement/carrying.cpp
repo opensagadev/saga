@@ -27,7 +27,6 @@
 #include "legoapi/core/input/timer.h"
 #include "nu2api/numath/nufloat.h"
 #include "legoapi/legoapi_types.h"
-#include "legoapi/ai/game/creature.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/gizmo/object/takeoverobjects.h"
 #include "legoapi/items/objects/gameobjects.h"

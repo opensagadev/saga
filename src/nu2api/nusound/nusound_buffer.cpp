@@ -1,6 +1,5 @@
 #include "nu2api/nusound/nusound_buffer.hpp"
 
-#include "nu2api/nucore/nuthread.h"
 
 NuSoundCriticalSection NuSoundBuffer::sCriticalSection;
 

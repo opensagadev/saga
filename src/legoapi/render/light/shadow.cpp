@@ -7,9 +7,6 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/items/base/apiobject.h"
 #include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/numath/nufloat.h"
-#include "legoapi/render/light/lighting.h"
 
 struct AIROW_s;
 struct nunativegscene_s;

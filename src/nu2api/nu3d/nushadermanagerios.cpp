@@ -3,7 +3,6 @@
 
 #include "decomp.h"
 #include "nu2api/nucore/nuvuvec.hpp"
-#include "nu2api/nucore/nuapi.h"
 #include "nu2api/nu3d/android/nutex_android.h"
 #include "nu2api/nu3d/ShaderManagerOpenGL.h"
 #include "gamelib/util/gamelib_util_types.h"
@@ -12,7 +11,6 @@
 #include "nu2api/nu3d/nushader.h"
 #include "nu2api/nu3d/nushader_internal.h"
 #include "nu2api/nu3d/nutex.h"
-#include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 
 #include <GLES2/gl2.h>

@@ -12,7 +12,6 @@
 #include <new>
 #include <stdio.h>
 #include <string.h>
-#include "nu2api/nucore/nucore.hpp"
 #include "nu2api/nusound/nusound_android.hpp"
 #include "nu2api/nusound/opensles_abi.hpp"
 #include "nu2api/nusound/nusound_streamer.hpp"

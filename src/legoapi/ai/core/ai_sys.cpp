@@ -3,9 +3,7 @@
 #include "legoapi/items/base/apiobject.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "gameapi/ai/aisys/aiscript_types.h"
-#include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/nuvec.h"
-#include "nu2api/numath/nutrig.h"
 
 #include <string.h>
 struct nuhspecial_s;

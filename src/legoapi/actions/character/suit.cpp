@@ -1,5 +1,4 @@
 #include "globals.h"
-#include "legoapi/actions/character/suit.h"
 #include "legoapi/characters/core/character.h"
 
 SUIT_s Suit[10] = {

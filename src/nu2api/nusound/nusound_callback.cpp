@@ -1,4 +1,3 @@
-#include "decomp.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "nusound_weakptr.hpp"
 

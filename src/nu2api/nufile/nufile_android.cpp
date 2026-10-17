@@ -3,6 +3,4 @@
 #include "nu2api_nufile_types.h"
 #include <stdio.h>
 #include <string.h>
-#include "java/asset_manager.h"
-#include "java/android.h"
 #include "nu2api/nucore/nuvuvec.hpp"

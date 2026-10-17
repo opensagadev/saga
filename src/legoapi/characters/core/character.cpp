@@ -4,17 +4,10 @@
 
 #include "legoapi/characters/core/CharacterObjectInterface.h"
 #include "legoapi/characters/core/players.h"
-#include "legoapi/audio/sfx.h"
 #include "legoapi/core/config/cheat.h"
-#include "legoapi/world/area.h"
-#include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/nucore/nuhgobj.h"
-#include "nu2api/nucore/nuptrblock.h"
-#include "nu2api/nufile/nufpar.h"
-#include "nu2api/nufile/nufilepak.h"
 #include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numusic/sfx.h"
 
