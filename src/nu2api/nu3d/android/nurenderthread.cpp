@@ -166,6 +166,17 @@ extern "C" void NuRenderThreadStartRender(void) {
 
 }
 
+void NuIOS_CopyBackbufferToTexture(nunativetex_s *texture, bool) {
+    texture->height = g_backingHeight;
+    texture->width = g_backingWidth;
+    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nurenderthread.cpp", 0x128);
+    glActiveTexture(GL_TEXTURE0);
+    g_currentTexUnit = 0;
+    glBindTexture(GL_TEXTURE_2D, texture->platform.gl_tex);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, g_backingWidth, g_backingHeight, 0);
+    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nurenderthread.cpp", 299);
+}
+
 // original 0x2a61a0 — runs on the RENDER thread. Drains the safe scene list:
 // invalidates post-effect slots whose effects are not initialised, feeds the
 // dynamic lights to the post-effect system, binds the early-colour (MSAA)

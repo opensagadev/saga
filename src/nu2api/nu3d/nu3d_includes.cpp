@@ -15643,6 +15643,13 @@ i32 NuDynamicLight::testShadowExtrusions(const VuVec &minimum, const VuVec &maxi
     return result;
 }
 
+struct nudynamiclight_s;
+
+void NuDynamicLightTestShadowExtrusions(nudynamiclight_s *light, _vuv_s const *first, _vuv_s const *second, i32 *) {
+    reinterpret_cast<NuDynamicLight *>(light)->testShadowExtrusions(*reinterpret_cast<const VuVec *>(first),
+                                                                    *reinterpret_cast<const VuVec *>(second));
+}
+
 extern "C" {
     void NuDynamicLightTestShadowExtrusionsExtent(NuDynamicLight *light, const NUVEC *center, const NUVEC *extent) {
         VuVec minimum;
@@ -21737,6 +21744,32 @@ extern "C" void NuTexAnimProcessEx(f32 frame_time, u16 mask) {
         }
     }
 
+extern "C++" {
+// Original @0x2ce760.
+void NuHGobjEvalAnimBlend2Root_3(nugscn_s *scene, ani3_animheader_s *animation_a, f32 time_a,
+                                 ani3_animheader_s *animation_b, f32 time_b, f32 blend, i32 override_count,
+                                 NUJOINTANIM_s *overrides, NUMTX *matrices, NUHGOBJROOTFN root_fn, void *root_data) {
+    nuhgobj_s *object = reinterpret_cast<nuhgobj_s *>(scene);
+    nuanimbuff_s buffer;
+    NUVEC root_a = {0.0f, 0.0f, 0.0f};
+    NUVEC root_b = {0.0f, 0.0f, 0.0f};
+    NUVEC root_translation = {0.0f, 0.0f, 0.0f};
+
+    NuAnimBuffCreateScratch(&buffer);
+    const i32 use_quaternions = NuAnimGetUseQuatsFlag() | ((animation_a->format_flags | animation_b->format_flags) &
+                                                           ANI3_FORMAT_QUATERNION_ROTATION);
+    NuAnimPushSetUseQuatsFlag(use_quaternions);
+    NuAnimBuffAccumulate_3(&buffer, animation_a, time_a, 1, 0.0f, 0, object, &root_a);
+    NuAnimBuffAccumulate_3(&buffer, animation_b, time_b, 0, blend, 0, object, &root_b);
+    if (override_count != 0 && JointProcAnimFn != NULL) {
+        JointProcAnimFn(&buffer, object, override_count, overrides);
+    }
+    NuAnimBuffEvaluate_3(&buffer, object, matrices, animation_a, root_fn, &root_translation, root_data);
+    NuAnimBuffDestroyScratch(&buffer);
+    NuAnimPopUseQuatsFlag();
+}
+}
+
     // Original @0x2ce8e0. ANI4/ANI5 are the only accepted animation formats.
     void NuHGobjEvalAnimBlend2Root(nuhgobj_s *object, ani3_animheader_s *animation_a, f32 time_a,
                                    ani3_animheader_s *animation_b, f32 time_b, f32 blend, i32 override_count,
@@ -22205,6 +22238,28 @@ extern "C" void NuTextureBlendEffect(i32 arg0, i32 arg1, NUVEC4 *parameters) {
                 break;
         }
     }
+
+extern "C++" {
+enum nudeferredshadingenum_e : i32 {
+    NU_DEFERRED_SHADING_PARAMETER_0 = 0,
+    NU_DEFERRED_SHADING_PARAMETER_1 = 1,
+    NU_DEFERRED_SHADING_PARAMETER_2 = 2,
+};
+
+void NuDynamicLightingGetParameterfv(nudeferredshadingenum_e parameter, float *out) {
+    switch (parameter) {
+        case NU_DEFERRED_SHADING_PARAMETER_0:
+            *out = currentScene.unknown_4c;
+            break;
+        case NU_DEFERRED_SHADING_PARAMETER_1:
+            *out = currentScene.unknown_50;
+            break;
+        case NU_DEFERRED_SHADING_PARAMETER_2:
+            *out = currentScene.unknown_54;
+            break;
+    }
+}
+}
 
     void NuLightSpeedBlurOldCameraPos(const NUMTX *camera) {
         currentScene.speed_blur.current = *camera;
@@ -22981,6 +23036,19 @@ extern "C" {
         for (; world < end; ++world, ++screen)
             NuVecMtxTransformH(screen, world, &transform);
     }
+
+extern "C++" {
+void NuCameraTransformScissorClip(nuvec_s *screen, nuvec_s *world, i32 count, numtx_s *matrix) {
+    NUVEC *end = world + count;
+    NUMTX transform;
+    if (matrix == NULL)
+        transform = vpc_sci_mtx;
+    else
+        NuMtxMulH(&transform, matrix, &vpc_sci_mtx);
+    while (world < end)
+        NuVecMtxTransformH(screen++, world++, &transform);
+}
+}
 
     void NuCameraTransformScreen(NUVEC *screen, NUVEC *world, i32 count, NUMTX *matrix) {
         NUMTX transform;
@@ -24619,6 +24687,25 @@ extern "C" {
 
 }
 
+// Original @0x2da1a0. The public type is nugscn_s in the mangled symbol, but
+// GHG objects carry the hierarchy layout consumed here.
+i32 NuCameraClipHGobj(nugscn_s *scene, numtx_s *world_matrix, numtx_s *root_matrix) {
+    nuhgobj_s *object = reinterpret_cast<nuhgobj_s *>(scene);
+    if (CutSceneBoundingBoxTrackRoot == 0) {
+        return NuCameraClipTestExtents(&object->bounds_min, &object->bounds_max, world_matrix, 0.0f, 0);
+    }
+
+    NUVEC half_extents;
+    NuVecSub(&half_extents, &object->bounds_max, &object->bounds_min);
+    NuVecScale(&half_extents, &half_extents, 0.5f);
+    NUVEC min;
+    NuVecNeg(&min, &half_extents);
+
+    NUMTX_ALIGNED16 translated_world = *world_matrix;
+    NuMtxPreTranslate(&translated_world, NUMTX_GET_ROW_VEC(root_matrix, 3));
+    return NuCameraClipTestExtents(&min, &half_extents, &translated_world, 0.0f, 0);
+}
+
 void NuGScnMtlLayerMask(nugscn_s *scene, unsigned char mask) {
     NUDLDLISTSCENE *display_list = scene->display_list;
     display_list->material_layer_mask = mask;
@@ -25000,6 +25087,25 @@ void NuViewPortSet(f32 left, f32 top, f32 right, f32 bottom) {
     vp.height = bottom - top;
     NuVpSetCurrent2(&vp);
     NuVpUpdate();
+}
+
+void NuVpSetSourceRect(float left, float top, float right, float bottom) {
+    const float width = static_cast<float>(PS2_VREZ_W);
+    const float height = static_cast<float>(PS2_VREZ_H);
+    const float source_width = right - left;
+    const float source_height = bottom - top;
+    const float scaled_width = (width / source_width) * width;
+    float position_scale_x = scaled_width / source_width;
+    const float scaled_height = (height / source_height) * height;
+    const float position_x = -left * position_scale_x * 0.5f;
+    const float position_y = -top * (scaled_height / source_height) * 0.5f;
+    NuVpSetPosition2(position_x, position_y);
+    NuVpSetSize2(scaled_width, scaled_height);
+}
+
+void NuVpSetDestRect(float left, float top, float right, float bottom) {
+    NuVpSetPosition2(left, top);
+    NuVpSetSize2(right - left, bottom - top);
 }
 
 void NuVpGetRegions(f32 *source_x, f32 *source_y, f32 *source_right, f32 *source_bottom, f32 *dest_x, f32 *dest_y,
@@ -26544,6 +26650,11 @@ void NuRndrInitEx(i32 stream_buffer_size, VARIPTR *buffer, VARIPTR buffer_end) {
     NuRndrStreamInit(stream_buffer_size, buffer);
 }
 
+i32 NuLgtRand() {
+    NuLgtSeed = (NuLgtSeed * 0x24cd + 1) & 0xffff;
+    return NuLgtSeed;
+}
+
 extern "C" {
     void NuLgtLaser(i32 type, f32 width, f32 segment_length, f32 width_wobble, NUVEC *start, NUVEC *delta, u32 colour,
                     f32 end_width, f32 length) {
@@ -26771,6 +26882,11 @@ extern "C" {
         NuLgtLaserCnt = 0;
         NuScratchRelease();
     }
+
+extern "C++" {
+void NuLightMotionBlurEffect(i32, float) {
+}
+}
 
     void NuLightSpeedBlurScale(f32 x, f32 y) {
         NuLightsx = x;
@@ -28733,6 +28849,196 @@ extern "C" void NuRndrEndSceneEx(i32) {
     NuRndrEndScene();
 }
 
+}
+
+static u16 NuLgtArcHalf(f32 value) {
+    union {
+        f32 value;
+        u32 bits;
+    } conversion = {value};
+    i32 sign = conversion.bits >> 31;
+    i32 exponent = (conversion.bits >> 23) & 0xff;
+    i32 mantissa = conversion.bits & 0x7fffff;
+    // Preserve the original truncation and exponent clamp, including subnormals.
+    exponent -= 112;
+    if (exponent < 0)
+        exponent = 0;
+    if (exponent > 31)
+        exponent = 31;
+    return (sign << 15) | ((exponent & 31) << 10) | (mantissa >> 13);
+}
+
+static inline void NuLgtArcVertex(NUVEC4 *position, i32 colour, f32 u, f32 v) {
+    g_NuPrim_StreamBufferPtr->u32_ptr[3] =
+        g_NuPrim_NeedsOverbrightening ? colour : ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000);
+    if (g_NuPrim_NeedsHalfUVs) {
+        ((u16 *)g_NuPrim_StreamBufferPtr->u8_ptr)[8] = NuLgtArcHalf(u);
+        ((u16 *)g_NuPrim_StreamBufferPtr->u8_ptr)[9] = NuLgtArcHalf(v);
+    } else {
+        g_NuPrim_StreamBufferPtr->f32_ptr[4] = u;
+        g_NuPrim_StreamBufferPtr->f32_ptr[5] = v;
+    }
+    NuPrim2DAddXYZ(position->x, position->y, position->z);
+}
+
+__attribute__((optimize("O2", "tree-vectorize"))) void NuLgtArcLaserDraw(i32 paused) {
+    f32 v0 = NuLgtArcMtl[0].v0, v1 = NuLgtArcMtl[0].v1;
+    if (paused)
+        NuLgtArcLaserCnt = NuLgtArcLaserOldCnt;
+    if (!NuLgtArcMtl[0].material || NuLgtArcLaserCnt == 0) {
+        NuLgtArcLaserOldCnt = 0;
+        return;
+    }
+    NUVEC4 *vertices = (NUVEC4 *)NuScratchAlloc32(0xc0);
+    NUMTX *clip = NuCameraGetVPCSMtx();
+    if (!NuRndrBeginSceneEx(-1, -2, 0)) {
+        NuScratchRelease();
+        return;
+    }
+    ++NuPrimCSPos;
+    NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_PS2);
+    NuPrim2DBegin(0, 5, NuLgtArcMtl[0].material);
+    NULGTARCLASER *laser = NuLgtArcLaserData;
+    for (i32 i = 0; i < NuLgtArcLaserCnt; ++i, ++laser) {
+        vertices[4].x = laser->start.x;
+        vertices[4].y = laser->start.y;
+        vertices[4].z = laser->start.z;
+        vertices[4].w = 1.0f;
+        NuVec4MtxTransformVU0(&vertices[4], &vertices[4], clip);
+        vertices[5].x = laser->end.x;
+        vertices[5].y = laser->end.y;
+        vertices[5].z = laser->end.z;
+        vertices[5].w = 1.0f;
+        NuVec4MtxTransformVU0(&vertices[5], &vertices[5], clip);
+        if (__builtin_expect(!(vertices[4].w >= 0.5f) && !(vertices[5].w >= 0.5f), 0))
+            continue;
+        if (vertices[4].w < 0.5f) {
+            f32 numerator = vertices[5].w - 0.5f;
+            f32 denominator = vertices[5].w - vertices[4].w;
+            vertices[6].x = (laser->start.x - laser->end.x) * numerator / denominator + laser->end.x;
+            vertices[6].y = (laser->start.y - laser->end.y) * numerator / denominator + laser->end.y;
+            vertices[6].z = (laser->start.z - laser->end.z) * numerator / denominator + laser->end.z;
+        } else {
+            vertices[6].x = laser->start.x;
+            vertices[6].y = laser->start.y;
+            vertices[6].z = laser->start.z;
+        }
+        vertices[6].w = 1.0f;
+        f32 dx = vertices[6].x - laser->end.x;
+        f32 dy = vertices[6].y - laser->end.y;
+        f32 dz = vertices[6].z - laser->end.z;
+        sqrt((double)(dx * dx + dy * dy + dz * dz));
+        if (__builtin_expect(vertices[5].w < 0.5f, 1)) {
+            f32 denominator = vertices[4].w - vertices[5].w;
+            f32 numerator = vertices[4].w - 0.5f;
+            vertices[7].x = (laser->end.x - laser->start.x) * numerator / denominator + laser->start.x;
+            vertices[7].y = (laser->end.y - laser->start.y) * numerator / denominator + laser->start.y;
+            vertices[7].z = (laser->end.z - laser->start.z) * numerator / denominator + laser->start.z;
+        } else {
+            vertices[7].x = laser->end.x;
+            vertices[7].y = laser->end.y;
+            vertices[7].z = laser->end.z;
+        }
+        vertices[7].w = 1.0f;
+        NuVec4MtxTransformVU0(&vertices[4], &vertices[6], clip);
+        NuVec4ScaleXYZVU0(&vertices[4], &vertices[4], 1.0f / vertices[4].w);
+        NuVec4MtxTransformVU0(&vertices[5], &vertices[7], clip);
+        NuVec4ScaleXYZVU0(&vertices[5], &vertices[5], 1.0f / vertices[5].w);
+        NUVEC perpendicular = {(vertices[5].y - vertices[4].y) * ((f32)nurndr_pixel_width / 240.0f),
+                               vertices[4].x - vertices[5].x, 0.0f};
+        NuVecNorm(&perpendicular, &perpendicular);
+        perpendicular.x *= (((f32)nurndr_pixel_width * 150.0f) / 240.0f) * laser->width;
+        perpendicular.y *= laser->width * 150.0f;
+        vertices[7].x -= vertices[6].x;
+        vertices[7].y -= vertices[6].y;
+        vertices[7].z -= vertices[6].z;
+        vertices[7].w -= vertices[6].w;
+        f32 length =
+            NuFsqrt(vertices[7].x * vertices[7].x + vertices[7].y * vertices[7].y + vertices[7].z * vertices[7].z);
+        if (__builtin_expect(!(length > 0.0f), 0))
+            continue;
+        vertices[10].x = laser->bend.x;
+        vertices[10].y = laser->bend.y;
+        vertices[10].z = laser->bend.z;
+        f32 factor =
+            vertices[10].x * vertices[10].x + vertices[10].y * vertices[10].y + vertices[10].z * vertices[10].z;
+        if (factor > 0.0f)
+            factor = laser->bend_amount / NuFsqrt(factor);
+        vertices[10].x *= factor;
+        vertices[10].y *= factor;
+        vertices[10].z *= factor;
+        NuLgtSeed = laser->seed;
+        f32 step = laser->segment_length / length;
+        step = 1.0f < step ? 1.0f : step;
+        f32 u = NuLgtArcMtl[0].u0, u1 = NuLgtArcMtl[0].u1;
+        vertices[4].w = 1.0f;
+        vertices[4].x = vertices[6].x;
+        vertices[4].y = vertices[6].y;
+        vertices[4].z = vertices[6].z;
+        NuVec4MtxTransformVU0(&vertices[4], &vertices[4], clip);
+        NuVec4ScaleXYZVU0(&vertices[4], &vertices[4], 1.0f / vertices[4].w);
+        vertices[1].x = vertices[3].x = vertices[4].x;
+        vertices[1].y = vertices[3].y = vertices[4].y;
+        vertices[1].z = vertices[3].z = vertices[4].z;
+        f32 progress = 0.0f;
+        auto laser_wobble = laser->wobble;
+        do {
+            f32 next = progress + step;
+            if (!(next >= 1.0f)) {
+                i32 angle = ((i32)(32768.0f * next) >> 1) & 0x7fff;
+                vertices[5].x = next * vertices[7].x + vertices[6].x + vertices[10].x * NuTrigTable[angle];
+                vertices[5].y = next * vertices[7].y + vertices[6].y + vertices[10].y * NuTrigTable[angle];
+                vertices[5].z = next * vertices[7].z + vertices[6].z + vertices[10].z * NuTrigTable[angle];
+            } else {
+                vertices[5].x = vertices[6].x + vertices[7].x;
+                vertices[5].y = vertices[6].y + vertices[7].y;
+                vertices[5].z = vertices[6].z + vertices[7].z;
+                u = NuLgtArcMtl[0].u1 + (1.0f - progress) * (NuLgtArcMtl[0].u0 - NuLgtArcMtl[0].u1) / step;
+            }
+            vertices[5].w = 1.0f;
+            NuVec4MtxTransformVU0(&vertices[5], &vertices[5], clip);
+            f32 reciprocal = 1.0f / vertices[5].w;
+            NuVec4ScaleXYZVU0(&vertices[5], &vertices[5], reciprocal);
+            f32 jitter_x = 0.0f, jitter_y = 0.0f;
+            if (1.0f - 1.5f * step > progress && NuLgtSeed != 0) {
+                f32 random = (f32)((NuLgtRand() & 0xff) - 128);
+                jitter_x = perpendicular.x * random * laser_wobble * reciprocal;
+                jitter_y = perpendicular.y * random * laser_wobble * reciprocal;
+            }
+            vertices[0].x = vertices[5].x - perpendicular.x * reciprocal + jitter_x;
+            vertices[0].y = vertices[5].y - perpendicular.y * reciprocal + jitter_y;
+            vertices[0].z = vertices[5].z;
+            vertices[2].x = perpendicular.x * reciprocal + vertices[5].x + jitter_x;
+            vertices[2].y = perpendicular.y * reciprocal + vertices[5].y + jitter_y;
+            vertices[2].z = vertices[5].z;
+            if (!(vertices[0].x < -50.0f && vertices[1].x < 50.0f) &&
+                !(vertices[0].x > 700.0f && vertices[1].x > 700.0f) &&
+                !(vertices[0].y < -50.0f && vertices[1].y < -50.0f) &&
+                !(vertices[0].y > 530.0f && vertices[1].y > 530.0f)) {
+                NuLgtArcVertex(&vertices[0], laser->colour, u, v0);
+                NuLgtArcVertex(&vertices[1], laser->colour, u1, v0);
+                NuLgtArcVertex(&vertices[2], laser->colour, u, v1);
+                NuLgtArcVertex(&vertices[1], laser->colour, u1, v0);
+                NuLgtArcVertex(&vertices[3], laser->colour, u1, v1);
+                NuLgtArcVertex(&vertices[2], laser->colour, u, v1);
+            }
+            vertices[1].x = vertices[0].x;
+            vertices[1].y = vertices[0].y;
+            vertices[1].z = vertices[0].z;
+            vertices[3].x = vertices[2].x;
+            vertices[3].y = vertices[2].y;
+            vertices[3].z = vertices[2].z;
+            progress = next;
+        } while (1.0f > progress);
+    }
+    NuPrim2DEnd();
+    NuPrimSetCoordinateSystem(NuPrimCoordSystemStack[--NuPrimCSPos]);
+    NuRndrEndSceneEx(0);
+    NuLgtArcLaserOldCnt = NuLgtArcLaserCnt;
+    NuLgtArcLaserCnt = 0;
+    if (!paused)
+        ++NuLgtArcLaserFrame;
+    NuScratchRelease();
 }
 
 void DisplayListCreateDynMtlList(variptr_u *buffer, variptr_u buffer_end) {

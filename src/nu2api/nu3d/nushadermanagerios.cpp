@@ -174,6 +174,18 @@ bool LookupHash(u32 key, u32 *value, HashRedirect *redirects, u32 count) {
     }
 }
 
+extern HashRedirect g_shaderProgramRedirects[417];
+
+ShaderObjectKey NuIOS_GetShaderProgramKey(ShaderObjectKey const &key) {
+    ShaderObjectKey result;
+    u32 redirected_key __attribute__((aligned(16)));
+    if (LookupHash(key.key, &redirected_key, g_shaderProgramRedirects, 417))
+        result.key = redirected_key;
+    else
+        result.key = key.key;
+    return result;
+}
+
 ShaderManagerOpenGL::ShaderManagerOpenGL(VirtualStackAllocator &) {
     g_cachedUniformMask[0] = 0;
     g_cachedUniformMask[1] = 0xffe00000;

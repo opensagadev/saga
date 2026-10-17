@@ -17,18 +17,6 @@
 struct TERRSET;
 extern TERRSET *CurTerr;
 
-namespace {
-    struct SpecialPlatform {
-        u8 pad_00[0x4a];
-        i16 scene_object_index;
-        u8 pad_4c[0x20];
-    };
-    struct SpecialTerrain {
-        u8 pad_00[0x68];
-        SpecialPlatform *platforms;
-    };
-    DECOMP_ASSERT(sizeof(SpecialPlatform) == 0x6c, "terrain platform stride for special lookup");
-} // namespace
 
 extern "C" {
     i32 NuRndrBeginSceneEx(i32, i32, i32);
@@ -71,358 +59,26 @@ extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
 extern "C" f32 NuAnimCurve2CalcValEx(nuanimcurve2_s *, nuanimtime_s *, u32);
 void NuGCutRigidCalcMtx_3(NUGCUTRIGID_s *, f32, numtx_s *);
 
-i32 GetIntCurveVal(ani3_animheader_s *animation, f32 *values, i32 curve) {
-    if (__builtin_expect(animation->curve_types[curve] == 10, 0)) {
-        return reinterpret_cast<i32 *>(values)[curve];
-    }
-    const f32 value = values[curve];
-    return static_cast<i32>(value < 0.0f ? value - 0.5f : value + 0.5f);
-}
 
 extern "C" void NuAnimBuffCreateScratch(nuanimbuff_s *buffer);
 extern "C" void NuAnimBuffDestroyScratch(nuanimbuff_s *buffer);
 extern nurenderscene_s currentScene;
 extern HashRedirect g_shaderProgramRedirects[417];
 
-void NuErrorPrint(char *message) {
-    printf("%s", message);
-}
 
-void NuWarningPrint(char *message) {
-    printf("%s", message);
-}
 
-void NuDebugMsgPrint(char *message) {
-    printf("%s", message);
-}
 
-void NuVpSetDestRect(float left, float top, float right, float bottom) {
-    NuVpSetPosition2(left, top);
-    NuVpSetSize2(right - left, bottom - top);
-}
 
 extern "C" u8 CutSceneBoundingBoxTrackRoot;
 
-// Original @0x2da1a0. The public type is nugscn_s in the mangled symbol, but
-// GHG objects carry the hierarchy layout consumed here.
-i32 NuCameraClipHGobj(nugscn_s *scene, numtx_s *world_matrix, numtx_s *root_matrix) {
-    nuhgobj_s *object = reinterpret_cast<nuhgobj_s *>(scene);
-    if (CutSceneBoundingBoxTrackRoot == 0) {
-        return NuCameraClipTestExtents(&object->bounds_min, &object->bounds_max, world_matrix, 0.0f, 0);
-    }
-
-    NUVEC half_extents;
-    NuVecSub(&half_extents, &object->bounds_max, &object->bounds_min);
-    NuVecScale(&half_extents, &half_extents, 0.5f);
-    NUVEC min;
-    NuVecNeg(&min, &half_extents);
-
-    NUMTX_ALIGNED16 translated_world = *world_matrix;
-    NuMtxPreTranslate(&translated_world, NUMTX_GET_ROW_VEC(root_matrix, 3));
-    return NuCameraClipTestExtents(&min, &half_extents, &translated_world, 0.0f, 0);
-}
 
 // NuIOS_SetCullMode is transcribed in android/nuiosdl_gl.cpp (original 0x29c110).
 
-static u16 NuLgtArcHalf(f32 value) {
-    union {
-        f32 value;
-        u32 bits;
-    } conversion = {value};
-    i32 sign = conversion.bits >> 31;
-    i32 exponent = (conversion.bits >> 23) & 0xff;
-    i32 mantissa = conversion.bits & 0x7fffff;
-    // Preserve the original truncation and exponent clamp, including subnormals.
-    exponent -= 112;
-    if (exponent < 0)
-        exponent = 0;
-    if (exponent > 31)
-        exponent = 31;
-    return (sign << 15) | ((exponent & 31) << 10) | (mantissa >> 13);
-}
-static inline void NuLgtArcVertex(NUVEC4 *position, i32 colour, f32 u, f32 v) {
-    g_NuPrim_StreamBufferPtr->u32_ptr[3] =
-        g_NuPrim_NeedsOverbrightening ? colour : ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000);
-    if (g_NuPrim_NeedsHalfUVs) {
-        ((u16 *)g_NuPrim_StreamBufferPtr->u8_ptr)[8] = NuLgtArcHalf(u);
-        ((u16 *)g_NuPrim_StreamBufferPtr->u8_ptr)[9] = NuLgtArcHalf(v);
-    } else {
-        g_NuPrim_StreamBufferPtr->f32_ptr[4] = u;
-        g_NuPrim_StreamBufferPtr->f32_ptr[5] = v;
-    }
-    NuPrim2DAddXYZ(position->x, position->y, position->z);
-}
-void NuLgtArcLaserDraw(i32 paused) {
-    f32 v0 = NuLgtArcMtl[0].v0, v1 = NuLgtArcMtl[0].v1;
-    if (paused)
-        NuLgtArcLaserCnt = NuLgtArcLaserOldCnt;
-    if (!NuLgtArcMtl[0].material || NuLgtArcLaserCnt == 0) {
-        NuLgtArcLaserOldCnt = 0;
-        return;
-    }
-    NUVEC4 *vertices = (NUVEC4 *)NuScratchAlloc32(0xc0);
-    NUMTX *clip = NuCameraGetVPCSMtx();
-    if (!NuRndrBeginSceneEx(-1, -2, 0)) {
-        NuScratchRelease();
-        return;
-    }
-    ++NuPrimCSPos;
-    NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_PS2);
-    NuPrim2DBegin(0, 5, NuLgtArcMtl[0].material);
-    NULGTARCLASER *laser = NuLgtArcLaserData;
-    for (i32 i = 0; i < NuLgtArcLaserCnt; ++i, ++laser) {
-        vertices[4].x = laser->start.x;
-        vertices[4].y = laser->start.y;
-        vertices[4].z = laser->start.z;
-        vertices[4].w = 1.0f;
-        NuVec4MtxTransformVU0(&vertices[4], &vertices[4], clip);
-        vertices[5].x = laser->end.x;
-        vertices[5].y = laser->end.y;
-        vertices[5].z = laser->end.z;
-        vertices[5].w = 1.0f;
-        NuVec4MtxTransformVU0(&vertices[5], &vertices[5], clip);
-        if (__builtin_expect(!(vertices[4].w >= 0.5f) && !(vertices[5].w >= 0.5f), 0))
-            continue;
-        if (vertices[4].w < 0.5f) {
-            f32 numerator = vertices[5].w - 0.5f;
-            f32 denominator = vertices[5].w - vertices[4].w;
-            vertices[6].x = (laser->start.x - laser->end.x) * numerator / denominator + laser->end.x;
-            vertices[6].y = (laser->start.y - laser->end.y) * numerator / denominator + laser->end.y;
-            vertices[6].z = (laser->start.z - laser->end.z) * numerator / denominator + laser->end.z;
-        } else {
-            vertices[6].x = laser->start.x;
-            vertices[6].y = laser->start.y;
-            vertices[6].z = laser->start.z;
-        }
-        vertices[6].w = 1.0f;
-        f32 dx = vertices[6].x - laser->end.x;
-        f32 dy = vertices[6].y - laser->end.y;
-        f32 dz = vertices[6].z - laser->end.z;
-        sqrt((double)(dx * dx + dy * dy + dz * dz));
-        if (__builtin_expect(vertices[5].w < 0.5f, 1)) {
-            f32 denominator = vertices[4].w - vertices[5].w;
-            f32 numerator = vertices[4].w - 0.5f;
-            vertices[7].x = (laser->end.x - laser->start.x) * numerator / denominator + laser->start.x;
-            vertices[7].y = (laser->end.y - laser->start.y) * numerator / denominator + laser->start.y;
-            vertices[7].z = (laser->end.z - laser->start.z) * numerator / denominator + laser->start.z;
-        } else {
-            vertices[7].x = laser->end.x;
-            vertices[7].y = laser->end.y;
-            vertices[7].z = laser->end.z;
-        }
-        vertices[7].w = 1.0f;
-        NuVec4MtxTransformVU0(&vertices[4], &vertices[6], clip);
-        NuVec4ScaleXYZVU0(&vertices[4], &vertices[4], 1.0f / vertices[4].w);
-        NuVec4MtxTransformVU0(&vertices[5], &vertices[7], clip);
-        NuVec4ScaleXYZVU0(&vertices[5], &vertices[5], 1.0f / vertices[5].w);
-        NUVEC perpendicular = {(vertices[5].y - vertices[4].y) * ((f32)nurndr_pixel_width / 240.0f),
-                               vertices[4].x - vertices[5].x, 0.0f};
-        NuVecNorm(&perpendicular, &perpendicular);
-        perpendicular.x *= (((f32)nurndr_pixel_width * 150.0f) / 240.0f) * laser->width;
-        perpendicular.y *= laser->width * 150.0f;
-        vertices[7].x -= vertices[6].x;
-        vertices[7].y -= vertices[6].y;
-        vertices[7].z -= vertices[6].z;
-        vertices[7].w -= vertices[6].w;
-        f32 length =
-            NuFsqrt(vertices[7].x * vertices[7].x + vertices[7].y * vertices[7].y + vertices[7].z * vertices[7].z);
-        if (__builtin_expect(!(length > 0.0f), 0))
-            continue;
-        vertices[10].x = laser->bend.x;
-        vertices[10].y = laser->bend.y;
-        vertices[10].z = laser->bend.z;
-        f32 factor =
-            vertices[10].x * vertices[10].x + vertices[10].y * vertices[10].y + vertices[10].z * vertices[10].z;
-        if (factor > 0.0f)
-            factor = laser->bend_amount / NuFsqrt(factor);
-        vertices[10].x *= factor;
-        vertices[10].y *= factor;
-        vertices[10].z *= factor;
-        NuLgtSeed = laser->seed;
-        f32 step = laser->segment_length / length;
-        step = 1.0f < step ? 1.0f : step;
-        f32 u = NuLgtArcMtl[0].u0, u1 = NuLgtArcMtl[0].u1;
-        vertices[4].w = 1.0f;
-        vertices[4].x = vertices[6].x;
-        vertices[4].y = vertices[6].y;
-        vertices[4].z = vertices[6].z;
-        NuVec4MtxTransformVU0(&vertices[4], &vertices[4], clip);
-        NuVec4ScaleXYZVU0(&vertices[4], &vertices[4], 1.0f / vertices[4].w);
-        vertices[1].x = vertices[3].x = vertices[4].x;
-        vertices[1].y = vertices[3].y = vertices[4].y;
-        vertices[1].z = vertices[3].z = vertices[4].z;
-        f32 progress = 0.0f;
-        auto laser_wobble = laser->wobble;
-        do {
-            f32 next = progress + step;
-            if (!(next >= 1.0f)) {
-                i32 angle = ((i32)(32768.0f * next) >> 1) & 0x7fff;
-                vertices[5].x = next * vertices[7].x + vertices[6].x + vertices[10].x * NuTrigTable[angle];
-                vertices[5].y = next * vertices[7].y + vertices[6].y + vertices[10].y * NuTrigTable[angle];
-                vertices[5].z = next * vertices[7].z + vertices[6].z + vertices[10].z * NuTrigTable[angle];
-            } else {
-                vertices[5].x = vertices[6].x + vertices[7].x;
-                vertices[5].y = vertices[6].y + vertices[7].y;
-                vertices[5].z = vertices[6].z + vertices[7].z;
-                u = NuLgtArcMtl[0].u1 + (1.0f - progress) * (NuLgtArcMtl[0].u0 - NuLgtArcMtl[0].u1) / step;
-            }
-            vertices[5].w = 1.0f;
-            NuVec4MtxTransformVU0(&vertices[5], &vertices[5], clip);
-            f32 reciprocal = 1.0f / vertices[5].w;
-            NuVec4ScaleXYZVU0(&vertices[5], &vertices[5], reciprocal);
-            f32 jitter_x = 0.0f, jitter_y = 0.0f;
-            if (1.0f - 1.5f * step > progress && NuLgtSeed != 0) {
-                f32 random = (f32)((NuLgtRand() & 0xff) - 128);
-                jitter_x = perpendicular.x * random * laser_wobble * reciprocal;
-                jitter_y = perpendicular.y * random * laser_wobble * reciprocal;
-            }
-            vertices[0].x = vertices[5].x - perpendicular.x * reciprocal + jitter_x;
-            vertices[0].y = vertices[5].y - perpendicular.y * reciprocal + jitter_y;
-            vertices[0].z = vertices[5].z;
-            vertices[2].x = perpendicular.x * reciprocal + vertices[5].x + jitter_x;
-            vertices[2].y = perpendicular.y * reciprocal + vertices[5].y + jitter_y;
-            vertices[2].z = vertices[5].z;
-            if (!(vertices[0].x < -50.0f && vertices[1].x < 50.0f) &&
-                !(vertices[0].x > 700.0f && vertices[1].x > 700.0f) &&
-                !(vertices[0].y < -50.0f && vertices[1].y < -50.0f) &&
-                !(vertices[0].y > 530.0f && vertices[1].y > 530.0f)) {
-                NuLgtArcVertex(&vertices[0], laser->colour, u, v0);
-                NuLgtArcVertex(&vertices[1], laser->colour, u1, v0);
-                NuLgtArcVertex(&vertices[2], laser->colour, u, v1);
-                NuLgtArcVertex(&vertices[1], laser->colour, u1, v0);
-                NuLgtArcVertex(&vertices[3], laser->colour, u1, v1);
-                NuLgtArcVertex(&vertices[2], laser->colour, u, v1);
-            }
-            vertices[1].x = vertices[0].x;
-            vertices[1].y = vertices[0].y;
-            vertices[1].z = vertices[0].z;
-            vertices[3].x = vertices[2].x;
-            vertices[3].y = vertices[2].y;
-            vertices[3].z = vertices[2].z;
-            progress = next;
-        } while (1.0f > progress);
-    }
-    NuPrim2DEnd();
-    NuPrimSetCoordinateSystem(NuPrimCoordSystemStack[--NuPrimCSPos]);
-    NuRndrEndSceneEx(0);
-    NuLgtArcLaserOldCnt = NuLgtArcLaserCnt;
-    NuLgtArcLaserCnt = 0;
-    if (!paused)
-        ++NuLgtArcLaserFrame;
-    NuScratchRelease();
-}
 
-void NuVpSetSourceRect(float left, float top, float right, float bottom) {
-    const float width = static_cast<float>(PS2_VREZ_W);
-    const float height = static_cast<float>(PS2_VREZ_H);
-    const float source_width = right - left;
-    const float source_height = bottom - top;
-    const float scaled_width = (width / source_width) * width;
-    float position_scale_x = scaled_width / source_width;
-    const float scaled_height = (height / source_height) * height;
-    const float position_x = -left * position_scale_x * 0.5f;
-    const float position_y = -top * (scaled_height / source_height) * 0.5f;
-    NuVpSetPosition2(position_x, position_y);
-    NuVpSetSize2(scaled_width, scaled_height);
-}
 
-void NuGCutRigidCalcMtx(NUGCUTRIGID_s *rigid, float frame, numtx_s *mtx) {
-    if (rigid->animation != NULL) {
-        if (*reinterpret_cast<u32 *>(rigid->animation) + 0xbeb1b6ccU < 2) {
-            NuGCutRigidCalcMtx_3(rigid, frame, mtx);
-            return;
-        }
-
-        nuanimdata2_s *animation = rigid->animation;
-        nuanimcurve2_s *curves = animation->curves;
-        // The reference sign-extends curve type bytes before passing them to the evaluator.
-        i8 *curve_types = reinterpret_cast<i8 *>(animation->curve_types);
-        u8 flags = *animation->node_flags;
-        nuanimtime_s time;
-        NUVEC translation;
-        // The reference aligns its stack to 16 bytes and places this vector at esp+0x50.
-        NUVEC_ALIGNED16 scale;
-        NUANGVEC angles;
-        NuAnimData2CalcTime(animation, frame, &time);
-
-        if ((flags & 1) != 0) {
-            f32 rx =
-                (curve_types[3] ? NuAnimCurve2CalcValEx(curves + 3, &time, curve_types[3]) : curves[3].data.constant);
-            f32 ry =
-                (curve_types[4] ? NuAnimCurve2CalcValEx(curves + 4, &time, curve_types[4]) : curves[4].data.constant);
-            f32 rz =
-                (curve_types[5] ? NuAnimCurve2CalcValEx(curves + 5, &time, curve_types[5]) : curves[5].data.constant);
-            angles.x = static_cast<NUANG>(rx * 10430.378f);
-            angles.y = static_cast<NUANG>(ry * 10430.378f);
-            angles.z = static_cast<NUANG>(rz * 10430.378f);
-            NuMtxSetRotateXYZ(mtx, &angles);
-        } else {
-            NuMtxSetIdentity(mtx);
-        }
-        if ((flags & 8) != 0) {
-            scale.x =
-                (curve_types[6] ? NuAnimCurve2CalcValEx(curves + 6, &time, curve_types[6]) : curves[6].data.constant);
-            scale.y =
-                (curve_types[7] ? NuAnimCurve2CalcValEx(curves + 7, &time, curve_types[7]) : curves[7].data.constant);
-            scale.z =
-                (curve_types[8] ? NuAnimCurve2CalcValEx(curves + 8, &time, curve_types[8]) : curves[8].data.constant);
-            NuMtxPreScale(mtx, &scale);
-        }
-        translation.x =
-            (curve_types[0] ? NuAnimCurve2CalcValEx(curves + 0, &time, curve_types[0]) : curves[0].data.constant);
-        translation.y =
-            (curve_types[1] ? NuAnimCurve2CalcValEx(curves + 1, &time, curve_types[1]) : curves[1].data.constant);
-        translation.z =
-            (curve_types[2] ? NuAnimCurve2CalcValEx(curves + 2, &time, curve_types[2]) : curves[2].data.constant);
-        NuMtxTranslate(mtx, &translation);
-        mtx->m02 = -mtx->m02;
-        mtx->m12 = -mtx->m12;
-        mtx->m20 = -mtx->m20;
-        mtx->m21 = -mtx->m21;
-        mtx->m23 = -mtx->m23;
-        mtx->m32 = -mtx->m32;
-        NuMtxTranslate(mtx, reinterpret_cast<NUVEC *>(&rigid->base_matrix.m30));
-    } else {
-        *mtx = rigid->base_matrix;
-    }
-}
 
 // NuIOSDLMtlCallback is transcribed in android/nuiosdl_gl.cpp (original 0x29c480).
 
-void NuGCutRigidCalcMtx_3(NUGCUTRIGID_s *rigid, float frame, numtx_s *mtx) {
-    ani3_animheader_s *animation = reinterpret_cast<ani3_animheader_s *>(rigid->animation);
-    f32 *values = NuAnimCurveExtractAllNodeCurves_3(animation, 0, frame, NULL);
-    // Curve extraction can replace the animation; the reference reloads it before reading flags.
-    u8 flags = *reinterpret_cast<ani3_animheader_s *>(rigid->animation)->node_flags;
-    NUVEC translation;
-    NUANGVEC angles;
-    NUVEC scale;
-    if ((flags & 1) != 0) {
-        angles.x = static_cast<NUANG>(values[3] * 10430.378f);
-        angles.y = static_cast<NUANG>(values[4] * 10430.378f);
-        angles.z = static_cast<NUANG>(values[5] * 10430.378f);
-        NuMtxSetRotateXYZ(mtx, &angles);
-    } else {
-        NuMtxSetIdentity(mtx);
-    }
-    if ((flags & 8) != 0) {
-        scale.x = values[6];
-        scale.y = values[7];
-        scale.z = values[8];
-        NuMtxPreScale(mtx, &scale);
-    }
-    translation.x = values[0];
-    translation.y = values[1];
-    translation.z = values[2];
-    NuMtxTranslate(mtx, &translation);
-    mtx->m02 = -mtx->m02;
-    mtx->m12 = -mtx->m12;
-    mtx->m20 = -mtx->m20;
-    mtx->m21 = -mtx->m21;
-    mtx->m23 = -mtx->m23;
-    mtx->m32 = -mtx->m32;
-    NuMtxTranslate(mtx, reinterpret_cast<NUVEC *>(&rigid->base_matrix.m30));
-}
 
 // NuIOSDLGeom2DCallback is transcribed in android/nuiosdl_gl.cpp (original 0x29d1a0).
 
@@ -430,105 +86,11 @@ i32 NuIOS_GetInAppProduct(i32, NuIOS_InAppProduct *) {
     return 0;
 }
 
-void NuGCutCharAnimProcess_3(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
-                             f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask) {
-    ani3_animheader_s *animation = reinterpret_cast<ani3_animheader_s *>(character->animation);
-    f32 *values = NuAnimCurveExtractAllNodeCurves_3(animation, 0, frame, NULL);
-    const u8 node_flags = animation->node_flags[0];
-    const u16 curve_count = animation->curve_count;
-
-    if (curve_count > 6) {
-        const f32 value = values[6];
-        if (value < 0.0f) {
-            *visible = static_cast<i32>(value - 0.5f);
-        } else {
-            *visible = static_cast<i32>(value + 0.5f);
-        }
-    } else {
-        *visible = character->flags & 1;
-    }
-    if (animation_index == NULL) {
-        if (animation_start_frame != NULL) {
-            *animation_start_frame = 0.0f;
-        }
-    } else {
-        if (curve_count > 7) {
-            const f32 value = values[7];
-            if (value < 0.0f) {
-                *animation_index = static_cast<i32>(value - 0.5f);
-            } else {
-                *animation_index = static_cast<i32>(value + 0.5f);
-            }
-        } else {
-            *animation_index = character->animation_index;
-        }
-        if (animation_start_frame != NULL) {
-            if (*animation_index == 0) {
-                *animation_start_frame = 0.0f;
-            } else if (*animation_index == 0xff) {
-                *animation_start_frame = 0.0f;
-            } else {
-                if (curve_count > 10) {
-                    *animation_start_frame = values[10];
-                } else {
-                    *animation_start_frame = static_cast<f32>(character->animation_start_frame);
-                }
-            }
-        }
-    }
-    if (*visible != 0) {
-        if (layer_mask != NULL) {
-            if (curve_count > 11) {
-                *layer_mask = GetIntCurveVal(animation, values, 11);
-            } else {
-                *layer_mask = -1;
-            }
-        }
-
-        if ((node_flags & NUANIM_NODE_HAS_ROTATION) != 0) {
-            NUANGVEC rotation = {
-                static_cast<NUANG>(values[3] * 10430.378f),
-                static_cast<NUANG>(values[4] * 10430.378f),
-                static_cast<NUANG>(values[5] * 10430.378f),
-            };
-            NuMtxSetRotateXYZ(matrix, &rotation);
-        } else {
-            NuMtxSetIdentity(matrix);
-        }
-        NuMtxTranslate(matrix, reinterpret_cast<NUVEC *>(values));
-        matrix->m02 = -matrix->m02;
-        matrix->m12 = -matrix->m12;
-        matrix->m20 = -matrix->m20;
-        matrix->m21 = -matrix->m21;
-        matrix->m23 = -matrix->m23;
-        matrix->m32 = -matrix->m32;
-
-        NUVEC scale;
-        scale = NuMtxGetScale(&character->base_matrix);
-        NuMtxPreScale(matrix, &scale);
-        if (animation_rate != NULL) {
-            if (animation->curve_count > 9) {
-                *animation_rate = values[9];
-            } else {
-                *animation_rate = character->animation_rate;
-            }
-        }
-        if (blend_time != NULL) {
-            if (animation->curve_count > 8) {
-                *blend_time = values[8];
-            } else {
-                *blend_time = static_cast<f32>(character->blend_time);
-            }
-        }
-    }
-}
 
 i32 NuIOS_GetPurchaseResult() {
     return 0;
 }
 
-void NuLightMotionBlurEffect(i32, float) {
-}
 
 void NuIOS_DisplaySystemAlert(char const *) {
 }
@@ -537,47 +99,12 @@ i32 NuIOS_IsProductPurchased(char *) {
     return 0;
 }
 
-void NuGCutRigidForceInstanced(NUGCUTSCENE_s *scene) {
-    NUGCUTRIGIDSYS_s *system = scene->rigid_system;
-    for (i32 i = 0; i < system->count; ++i) {
-        system->rigids[i].flags |= 2;
-    }
-}
 
 i32 NuIOS_GetInAppProductByID(char *, NuIOS_InAppProduct *) {
     return 0;
 }
 
-ShaderObjectKey NuIOS_GetShaderProgramKey(ShaderObjectKey const &key) {
-    ShaderObjectKey result;
-    u32 redirected_key __attribute__((aligned(16)));
-    if (LookupHash(key.key, &redirected_key, g_shaderProgramRedirects, 417))
-        result.key = redirected_key;
-    else
-        result.key = key.key;
-    return result;
-}
 
-i32 NuSpecialFindByPlatformID(nugscn_s *scene, nuhspecial_s *result, i32 platform_id) {
-    result->scene = NULL;
-    result->special = NULL;
-    result->display_special = NULL;
-    if (scene == NULL || CurTerr == NULL || platform_id == -1)
-        return 0;
-
-    const i32 special_count = NuGScnNumSpecials(scene);
-    const auto *terrain = reinterpret_cast<const SpecialTerrain *>(CurTerr);
-    const i32 instance_index = terrain->platforms[platform_id].scene_object_index;
-    for (i32 index = 0; index < special_count; ++index) {
-        nuhspecial_s candidate;
-        NuGScnGetSpecial(&candidate, scene, index);
-        if (NuSpecialGetInstanceix(&candidate) == instance_index) {
-            *result = candidate;
-            return 1;
-        }
-    }
-    return 0;
-}
 
 void NuIOS_GetNumInAppPurchases() {
 }
@@ -586,29 +113,6 @@ i32 NuIOS_PurchaseInAppProduct(char *) {
     return 0;
 }
 
-// Original @0x2ce760.
-void NuHGobjEvalAnimBlend2Root_3(nugscn_s *scene, ani3_animheader_s *animation_a, f32 time_a,
-                                 ani3_animheader_s *animation_b, f32 time_b, f32 blend, i32 override_count,
-                                 NUJOINTANIM_s *overrides, NUMTX *matrices, NUHGOBJROOTFN root_fn, void *root_data) {
-    nuhgobj_s *object = reinterpret_cast<nuhgobj_s *>(scene);
-    nuanimbuff_s buffer;
-    NUVEC root_a = {0.0f, 0.0f, 0.0f};
-    NUVEC root_b = {0.0f, 0.0f, 0.0f};
-    NUVEC root_translation = {0.0f, 0.0f, 0.0f};
-
-    NuAnimBuffCreateScratch(&buffer);
-    const i32 use_quaternions = NuAnimGetUseQuatsFlag() | ((animation_a->format_flags | animation_b->format_flags) &
-                                                           ANI3_FORMAT_QUATERNION_ROTATION);
-    NuAnimPushSetUseQuatsFlag(use_quaternions);
-    NuAnimBuffAccumulate_3(&buffer, animation_a, time_a, 1, 0.0f, 0, object, &root_a);
-    NuAnimBuffAccumulate_3(&buffer, animation_b, time_b, 0, blend, 0, object, &root_b);
-    if (override_count != 0 && JointProcAnimFn != NULL) {
-        JointProcAnimFn(&buffer, object, override_count, overrides);
-    }
-    NuAnimBuffEvaluate_3(&buffer, object, matrices, animation_a, root_fn, &root_translation, root_data);
-    NuAnimBuffDestroyScratch(&buffer);
-    NuAnimPopUseQuatsFlag();
-}
 
 i32 NuIOS_CanMakeInAppPurchases() {
     return 0;
@@ -617,29 +121,9 @@ i32 NuIOS_CanMakeInAppPurchases() {
 void NuIOS_RestoreInAppPurchases() {
 }
 
-void NuCameraTransformScissorClip(nuvec_s *screen, nuvec_s *world, i32 count, numtx_s *matrix) {
-    NUVEC *end = world + count;
-    NUMTX transform;
-    if (matrix == NULL)
-        transform = vpc_sci_mtx;
-    else
-        NuMtxMulH(&transform, matrix, &vpc_sci_mtx);
-    while (world < end)
-        NuVecMtxTransformH(screen++, world++, &transform);
-}
 
 // NuDebrisRendererFlushBuffers is transcribed in android/nuptl_android.c (original 0x296f35).
 
-void NuIOS_CopyBackbufferToTexture(nunativetex_s *texture, bool) {
-    texture->height = g_backingHeight;
-    texture->width = g_backingWidth;
-    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nurenderthread.cpp", 0x128);
-    glActiveTexture(GL_TEXTURE0);
-    g_currentTexUnit = 0;
-    glBindTexture(GL_TEXTURE_2D, texture->platform.gl_tex);
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, g_backingWidth, g_backingHeight, 0);
-    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nurenderthread.cpp", 299);
-}
 
 i32 NuIOS_IsProductPurchasedByNum(i32) {
     return 0;
@@ -648,19 +132,6 @@ i32 NuIOS_IsProductPurchasedByNum(i32) {
 void NuIOS_CateInAppPurchaseManager() {
 }
 
-void NuDynamicLightingGetParameterfv(nudeferredshadingenum_e parameter, float *out) {
-    switch (parameter) {
-        case NU_DEFERRED_SHADING_PARAMETER_0:
-            *out = currentScene.unknown_4c;
-            break;
-        case NU_DEFERRED_SHADING_PARAMETER_1:
-            *out = currentScene.unknown_50;
-            break;
-        case NU_DEFERRED_SHADING_PARAMETER_2:
-            *out = currentScene.unknown_54;
-            break;
-    }
-}
 
 i32 NuIOS_GetInAppProductIdentifier(i32, NuIOS_InAppProduct *) {
     return 0;
@@ -674,326 +145,13 @@ i32 NuIOS_AreInAppPurchasesAvailable() {
     return 0;
 }
 
-GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_height) {
-    extern bool comeFromHash;
-    extern i32 g_loadDefaultTexture;
-    extern i32 g_loadingCharacterInHub;
 
-    GLenum cube_faces[6] = {
-        GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-        GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
-    };
 
-    comeFromHash = false;
-
-    u8 *header = (u8 *)data;
-    const u32 pixel_format = *(u32 *)(header + 0x08);
-    u8 *pixels = header + 0x34 + *(u32 *)(header + 0x30);
-    const u32 channel_bits = *(u32 *)(header + 0x0c);
-    const i32 &height = *(i32 *)(header + 0x18);
-    const i32 &width = *(i32 *)(header + 0x1c);
-    const u32 &depth = *(u32 *)(header + 0x20);
-    const u32 &surfaces = *(u32 *)(header + 0x24);
-    const u32 &faces = *(u32 *)(header + 0x28);
-    const u32 &mip_count = *(u32 *)(header + 0x2c);
-
-    if (faces == 6) {
-        struct PVRMetadataHeader {
-            u32 fourcc;
-            u32 key;
-            u32 data_size;
-        };
-        const u8 *metadata = header + 0x34;
-        usize remaining = *(u32 *)(header + 0x30);
-        while (remaining >= sizeof(PVRMetadataHeader)) {
-            PVRMetadataHeader record;
-            memcpy(&record, metadata, sizeof(record));
-            metadata += sizeof(record);
-            remaining -= sizeof(record);
-            if (__builtin_expect(record.data_size > remaining, 1)) {
-                break;
-            }
-            if (record.fourcc == 0x03525650 && record.key == 2 && record.data_size == 6) {
-
-                switch (metadata[0]) {
-                    case 'X':
-                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-                        break;
-                    case 'x':
-                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
-                        break;
-                    case 'Y':
-                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
-                        break;
-                    case 'y':
-                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
-                        break;
-                    case 'Z':
-                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
-                        break;
-                    case 'z':
-                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
-                        break;
-                }
-
-                switch (metadata[1]) {
-                    case 'X':
-                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-                        break;
-                    case 'x':
-                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
-                        break;
-                    case 'Y':
-                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
-                        break;
-                    case 'y':
-                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
-                        break;
-                    case 'Z':
-                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
-                        break;
-                    case 'z':
-                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
-                        break;
-                }
-
-                switch (metadata[2]) {
-                    case 'X':
-                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-                        break;
-                    case 'x':
-                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
-                        break;
-                    case 'Y':
-                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
-                        break;
-                    case 'y':
-                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
-                        break;
-                    case 'Z':
-                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
-                        break;
-                    case 'z':
-                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
-                        break;
-                }
-
-                switch (metadata[3]) {
-                    case 'X':
-                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-                        break;
-                    case 'x':
-                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
-                        break;
-                    case 'Y':
-                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
-                        break;
-                    case 'y':
-                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
-                        break;
-                    case 'Z':
-                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
-                        break;
-                    case 'z':
-                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
-                        break;
-                }
-
-                switch (metadata[4]) {
-                    case 'X':
-                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-                        break;
-                    case 'x':
-                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
-                        break;
-                    case 'Y':
-                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
-                        break;
-                    case 'y':
-                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
-                        break;
-                    case 'Z':
-                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
-                        break;
-                    case 'z':
-                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
-                        break;
-                }
-
-                switch (metadata[5]) {
-                    case 'X':
-                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-                        break;
-                    case 'x':
-                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
-                        break;
-                    case 'Y':
-                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
-                        break;
-                    case 'y':
-                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
-                        break;
-                    case 'Z':
-                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
-                        break;
-                    case 'z':
-                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
-                        break;
-                }
-            }
-            remaining -= record.data_size;
-            metadata += record.data_size;
-        }
-    }
-
-    GLenum internal_format = 0;
-    GLenum format = 0;
-    GLenum type = 0;
-    i32 bits_per_pixel = 0;
-    bool compressed = false;
-
-    if (__builtin_expect(channel_bits == 0, 0)) {
-        static const GLenum compressed_formats[6] = {
-            0x8c01, // GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG
-            0x8c03, // GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG
-            0x8c00, // GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG
-            0x8c02, // GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG
-            0x9137, // GL_COMPRESSED_RGBA_PVRTC_2BPPV2_IMG
-            0x9138, // GL_COMPRESSED_RGBA_PVRTC_4BPPV2_IMG
-        };
-        if (pixel_format >= 6) {
-            return 0;
-        }
-        bits_per_pixel = pixel_format < 2 ? 2 : 4;
-        internal_format = compressed_formats[pixel_format];
-        compressed = true;
-    } else if (pixel_format == 0x61626772 && channel_bits == 0x08080808) { // "rgba", 8 bits each
-        internal_format = GL_RGBA;
-        format = GL_RGBA;
-        type = GL_UNSIGNED_BYTE;
-        bits_per_pixel = 32;
-    } else if (pixel_format == 0x61626772 && channel_bits == 0x04040404) { // "rgba", 4 bits each
-        internal_format = GL_RGBA;
-        format = GL_RGBA;
-        type = GL_UNSIGNED_SHORT_4_4_4_4;
-        bits_per_pixel = 16;
-    }
-
-    if (out_width != NULL) {
-        *out_width = width;
-    }
-    if (out_height != NULL) {
-        *out_height = height;
-    }
-
-    const GLenum texture_target = faces > 1 ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
-    GLuint texture = 0;
-    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 0x2e7);
-    glGenTextures(1, &texture);
-    if (faces <= 1) {
-        glActiveTexture(GL_TEXTURE0);
-        g_currentTexUnit = 0;
-        glBindTexture(GL_TEXTURE_2D, texture);
-    } else {
-        if (g_currentTexUnit != 0) {
-            glActiveTexture(GL_TEXTURE0);
-            g_currentTexUnit = 0;
-        }
-        if (g_lastBoundCubeTexIds[0] != texture) {
-            glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
-            g_lastBoundCubeTexIds[0] = texture;
-        }
-    }
-    glTexParameteri(texture_target, GL_TEXTURE_MIN_FILTER, mip_count < 2 ? GL_LINEAR : GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(texture_target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    if (faces > 1) {
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    }
-    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 0x2fe);
-
-    if (g_loadingCharacterInHub != 0 && bgProcIsBgThread() != 0) {
-        NuIOS_YieldThread();
-    }
-
-    usize offset = 0;
-    for (u32 mip = 0; mip < mip_count; ++mip) {
-        const i32 mip_height = height >> mip;
-        const i32 mip_width = width >> mip;
-        usize mip_size = (usize)mip_width * (usize)mip_height * (usize)bits_per_pixel / 8;
-        if (mip_size < 0x20) {
-            mip_size = 0x20;
-        }
-
-        for (u32 surface = 0; surface < surfaces; ++surface) {
-            for (u32 face = 0; face < faces; ++face) {
-                const GLenum target = faces > 1 ? cube_faces[face] : GL_TEXTURE_2D;
-                for (u32 z = 0; z < depth; ++z) {
-                    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp",
-                                           0x31d);
-                    if (faces <= 1) {
-                        glActiveTexture(GL_TEXTURE0);
-                        g_currentTexUnit = 0;
-                        glBindTexture(GL_TEXTURE_2D, texture);
-                    } else {
-                        if (g_currentTexUnit != 0) {
-                            glActiveTexture(GL_TEXTURE0);
-                            g_currentTexUnit = 0;
-                        }
-                        if (g_lastBoundCubeTexIds[0] != texture) {
-                            glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
-                            g_lastBoundCubeTexIds[0] = texture;
-                        }
-                    }
-
-                    if (compressed) {
-                        if ((NuPlatform::Get()->GetCurrentPlatform() == IOS_PLATFORM ||
-                             NuPlatform::Get()->GetCurrentPlatform() == ANDROID_PVRTC_PLATFORM) &&
-                            g_loadDefaultTexture == 0) {
-                            glCompressedTexImage2D(target, mip, internal_format, mip_width, mip_height, 0, mip_size,
-                                                   pixels + offset);
-                        } else {
-                            loadDefaultTexture(texture, mip, mip_width, target, target);
-                        }
-                    } else {
-                        glTexImage2D(target, mip, internal_format, mip_width, mip_height, 0, format, type,
-                                     pixels + offset);
-                    }
-                    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp",
-                                         0x341);
-
-                    if (bgProcIsBgThread() != 0) {
-                        NuIOS_YieldThread();
-                    }
-                    offset += mip_size;
-                }
-            }
-        }
-    }
-
-    return texture;
-}
-void NuDynamicLightTestShadowExtrusions(nudynamiclight_s *light, _vuv_s const *first, _vuv_s const *second, i32 *) {
-    reinterpret_cast<NuDynamicLight *>(light)->testShadowExtrusions(*reinterpret_cast<const VuVec *>(first),
-                                                                    *reinterpret_cast<const VuVec *>(second));
-}
-
-f32 NuATanf(f32 value) {
-    return atanf(value);
-}
-
-f32 NuATan2f(f32 y, f32 x) {
-    return atan2f(y, x);
-}
 
 extern "C" {
     u32 NuLgtSeed = 12345;
 }
 
-i32 NuLgtRand() {
-    NuLgtSeed = (NuLgtSeed * 0x24cd + 1) & 0xffff;
-    return NuLgtSeed;
-}
 
 void NuMemory::MemErrorHandler::CloseDump(NuMemoryManager *, u32) {
 }

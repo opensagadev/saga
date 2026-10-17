@@ -370,6 +370,306 @@ GLuint loadDefaultTexture(GLuint texture, GLint level, GLsizei size, GLenum text
     return textures[0];
 }
 
+GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_height) {
+    extern bool comeFromHash;
+    extern i32 g_loadDefaultTexture;
+    extern i32 g_loadingCharacterInHub;
+
+    GLenum cube_faces[6] = {
+        GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+        GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
+    };
+
+    comeFromHash = false;
+
+    u8 *header = (u8 *)data;
+    const u32 pixel_format = *(u32 *)(header + 0x08);
+    u8 *pixels = header + 0x34 + *(u32 *)(header + 0x30);
+    const u32 channel_bits = *(u32 *)(header + 0x0c);
+    const i32 &height = *(i32 *)(header + 0x18);
+    const i32 &width = *(i32 *)(header + 0x1c);
+    const u32 &depth = *(u32 *)(header + 0x20);
+    const u32 &surfaces = *(u32 *)(header + 0x24);
+    const u32 &faces = *(u32 *)(header + 0x28);
+    const u32 &mip_count = *(u32 *)(header + 0x2c);
+
+    if (faces == 6) {
+        struct PVRMetadataHeader {
+            u32 fourcc;
+            u32 key;
+            u32 data_size;
+        };
+        const u8 *metadata = header + 0x34;
+        usize remaining = *(u32 *)(header + 0x30);
+        while (remaining >= sizeof(PVRMetadataHeader)) {
+            PVRMetadataHeader record;
+            memcpy(&record, metadata, sizeof(record));
+            metadata += sizeof(record);
+            remaining -= sizeof(record);
+            if (__builtin_expect(record.data_size > remaining, 1)) {
+                break;
+            }
+            if (record.fourcc == 0x03525650 && record.key == 2 && record.data_size == 6) {
+
+                switch (metadata[0]) {
+                    case 'X':
+                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+                        break;
+                    case 'x':
+                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+                        break;
+                    case 'Y':
+                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+                        break;
+                    case 'y':
+                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+                        break;
+                    case 'Z':
+                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+                        break;
+                    case 'z':
+                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+                        break;
+                }
+
+                switch (metadata[1]) {
+                    case 'X':
+                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+                        break;
+                    case 'x':
+                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+                        break;
+                    case 'Y':
+                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+                        break;
+                    case 'y':
+                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+                        break;
+                    case 'Z':
+                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+                        break;
+                    case 'z':
+                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+                        break;
+                }
+
+                switch (metadata[2]) {
+                    case 'X':
+                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+                        break;
+                    case 'x':
+                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+                        break;
+                    case 'Y':
+                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+                        break;
+                    case 'y':
+                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+                        break;
+                    case 'Z':
+                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+                        break;
+                    case 'z':
+                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+                        break;
+                }
+
+                switch (metadata[3]) {
+                    case 'X':
+                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+                        break;
+                    case 'x':
+                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+                        break;
+                    case 'Y':
+                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+                        break;
+                    case 'y':
+                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+                        break;
+                    case 'Z':
+                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+                        break;
+                    case 'z':
+                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+                        break;
+                }
+
+                switch (metadata[4]) {
+                    case 'X':
+                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+                        break;
+                    case 'x':
+                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+                        break;
+                    case 'Y':
+                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+                        break;
+                    case 'y':
+                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+                        break;
+                    case 'Z':
+                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+                        break;
+                    case 'z':
+                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+                        break;
+                }
+
+                switch (metadata[5]) {
+                    case 'X':
+                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+                        break;
+                    case 'x':
+                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+                        break;
+                    case 'Y':
+                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+                        break;
+                    case 'y':
+                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+                        break;
+                    case 'Z':
+                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+                        break;
+                    case 'z':
+                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+                        break;
+                }
+            }
+            remaining -= record.data_size;
+            metadata += record.data_size;
+        }
+    }
+
+    GLenum internal_format = 0;
+    GLenum format = 0;
+    GLenum type = 0;
+    i32 bits_per_pixel = 0;
+    bool compressed = false;
+
+    if (__builtin_expect(channel_bits == 0, 0)) {
+        static const GLenum compressed_formats[6] = {
+            0x8c01, // GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG
+            0x8c03, // GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG
+            0x8c00, // GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG
+            0x8c02, // GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG
+            0x9137, // GL_COMPRESSED_RGBA_PVRTC_2BPPV2_IMG
+            0x9138, // GL_COMPRESSED_RGBA_PVRTC_4BPPV2_IMG
+        };
+        if (pixel_format >= 6) {
+            return 0;
+        }
+        bits_per_pixel = pixel_format < 2 ? 2 : 4;
+        internal_format = compressed_formats[pixel_format];
+        compressed = true;
+    } else if (pixel_format == 0x61626772 && channel_bits == 0x08080808) { // "rgba", 8 bits each
+        internal_format = GL_RGBA;
+        format = GL_RGBA;
+        type = GL_UNSIGNED_BYTE;
+        bits_per_pixel = 32;
+    } else if (pixel_format == 0x61626772 && channel_bits == 0x04040404) { // "rgba", 4 bits each
+        internal_format = GL_RGBA;
+        format = GL_RGBA;
+        type = GL_UNSIGNED_SHORT_4_4_4_4;
+        bits_per_pixel = 16;
+    }
+
+    if (out_width != NULL) {
+        *out_width = width;
+    }
+    if (out_height != NULL) {
+        *out_height = height;
+    }
+
+    const GLenum texture_target = faces > 1 ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
+    GLuint texture = 0;
+    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 0x2e7);
+    glGenTextures(1, &texture);
+    if (faces <= 1) {
+        glActiveTexture(GL_TEXTURE0);
+        g_currentTexUnit = 0;
+        glBindTexture(GL_TEXTURE_2D, texture);
+    } else {
+        if (g_currentTexUnit != 0) {
+            glActiveTexture(GL_TEXTURE0);
+            g_currentTexUnit = 0;
+        }
+        if (g_lastBoundCubeTexIds[0] != texture) {
+            glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+            g_lastBoundCubeTexIds[0] = texture;
+        }
+    }
+    glTexParameteri(texture_target, GL_TEXTURE_MIN_FILTER, mip_count < 2 ? GL_LINEAR : GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(texture_target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    if (faces > 1) {
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
+    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 0x2fe);
+
+    if (g_loadingCharacterInHub != 0 && bgProcIsBgThread() != 0) {
+        NuIOS_YieldThread();
+    }
+
+    usize offset = 0;
+    for (u32 mip = 0; mip < mip_count; ++mip) {
+        const i32 mip_height = height >> mip;
+        const i32 mip_width = width >> mip;
+        usize mip_size = (usize)mip_width * (usize)mip_height * (usize)bits_per_pixel / 8;
+        if (mip_size < 0x20) {
+            mip_size = 0x20;
+        }
+
+        for (u32 surface = 0; surface < surfaces; ++surface) {
+            for (u32 face = 0; face < faces; ++face) {
+                const GLenum target = faces > 1 ? cube_faces[face] : GL_TEXTURE_2D;
+                for (u32 z = 0; z < depth; ++z) {
+                    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp",
+                                           0x31d);
+                    if (faces <= 1) {
+                        glActiveTexture(GL_TEXTURE0);
+                        g_currentTexUnit = 0;
+                        glBindTexture(GL_TEXTURE_2D, texture);
+                    } else {
+                        if (g_currentTexUnit != 0) {
+                            glActiveTexture(GL_TEXTURE0);
+                            g_currentTexUnit = 0;
+                        }
+                        if (g_lastBoundCubeTexIds[0] != texture) {
+                            glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+                            g_lastBoundCubeTexIds[0] = texture;
+                        }
+                    }
+
+                    if (compressed) {
+                        if ((NuPlatform::Get()->GetCurrentPlatform() == IOS_PLATFORM ||
+                             NuPlatform::Get()->GetCurrentPlatform() == ANDROID_PVRTC_PLATFORM) &&
+                            g_loadDefaultTexture == 0) {
+                            glCompressedTexImage2D(target, mip, internal_format, mip_width, mip_height, 0, mip_size,
+                                                   pixels + offset);
+                        } else {
+                            loadDefaultTexture(texture, mip, mip_width, target, target);
+                        }
+                    } else {
+                        glTexImage2D(target, mip, internal_format, mip_width, mip_height, 0, format, type,
+                                     pixels + offset);
+                    }
+                    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp",
+                                         0x341);
+
+                    if (bgProcIsBgThread() != 0) {
+                        NuIOS_YieldThread();
+                    }
+                    offset += mip_size;
+                }
+            }
+        }
+    }
+
+    return texture;
+}
+
 char const *GetNativeTextureFormatName(NUTEXFORMAT format) {
     switch (format) {
         case NUTEX_DXT1:
