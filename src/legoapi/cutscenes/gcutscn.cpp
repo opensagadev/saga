@@ -320,7 +320,6 @@ static INST_LOOKAT_UPDATE_ATTR void instNuGCutLookAtLocatorUpdate(i32 *effect_ha
             "sfP7numtx_sP17instNUGCUTSCENE_s.isra.23");
 
 extern "C" {
-    // Aligned four-float row used for retail's movaps matrix copies.
     typedef f32 LocatorMtxRow __attribute__((vector_size(16)));
 } // extern "C"
 
@@ -339,37 +338,7 @@ extern "C" {
 }
 
 extern "C" {
-    // ---------------------------------------------------------------------------
-    // Display-list bootstrap (original nucore TU file-statics)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Redirected symbols — real bodies live elsewhere (kept as comments)
-    // ---------------------------------------------------------------------------
-
-    // Nu360_dxClear(u32,u32) is implemented in ios_graphics.cpp (original 0x317070).
-    // NuDisplayListSwapBuffersBeginFrame / EndFrame are transcribed in full
-    // in nudlist.cpp (originals 0x2eb5d0 / 0x2eaef0).
-    // NuHtmlBegin(void*) is transcribed in legoapi/misc/supportall.cpp (original 0x2d5ca0).
-    // NuIOS_SetVertexFormat is transcribed in nuiosdl_gl.cpp (original 0x29c070).
-    // NuIOS_WaitForRenderThreadCompletion is transcribed in ios_graphics.cpp (original 0xe34b0).
-    // NuIOS_WakeRenderThread is transcribed in ios_graphics.cpp (original 0xe3590).
-    // NuRenderContextSetZFunc is transcribed below (original 0x2a3860).
-
-    // ---------------------------------------------------------------------------
-    // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Display list — faithful helpers + pending stubs
-    // ---------------------------------------------------------------------------
-} // extern "C"
-
-extern "C" {
     extern "C++" {
-        // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
-        // It appends the world transform, skin palette, and geometry calls as one
-        // contiguous run in the material display list.
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
                                NUMTX *world_matrix, void **transform_packet, NUMTX *skin_matrices,
@@ -377,10 +346,6 @@ extern "C" {
             __asm__("_ZL22DisplayListProcessSkinP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
                     "sPPvS7_P22deformerweightsarray_si.isra.36");
 
-        // Original local helper cloned as DisplayListProcessLightmapped.isra.34.
-        // Lightmapped geometry carries an AE/AF/B0 setup command two entries before
-        // its geometry command. Keep that setup command adjacent to the dynamic
-        // transform and geometry entries when the special is submitted.
         static __attribute__((noinline, noclone)) void
         DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
                                       NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix, void **transform_packet,
@@ -388,84 +353,6 @@ extern "C" {
             __asm__("_ZL29DisplayListProcessLightmappedP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
                     "sPPvf.isra.34");
     }
-
-    // ---------------------------------------------------------------------------
-    // Scene / render-scene
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Frame lifecycle (NuFrameEnd is faithful; neighbours are stubs)
-    // ---------------------------------------------------------------------------
-
-    // Per-frame animation/pad update hooks (originals take the frame time).
-
-    // Frame-end callbacks (original bss @0x6bdaec/0x6bdaf0/0x6bdad0).
-
-    // Faithful transcription of the original frame-end pump. Waits for the
-    // target frame interval, ticks material/tex/wind anims, swaps screens
-    // via NuRndrSwapScreenEx, then advances nuapi clocks and pad state.
-
-    // ---------------------------------------------------------------------------
-    // iOS / platform
-    // ---------------------------------------------------------------------------
-
-    // Locale string is owned by the Android/JNI TU; cache only its index here.
-
-    // ---------------------------------------------------------------------------
-    // Animation / curves / data
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Bridge / file / heap / memory
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Math / geometry
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Rendering / materials / effects (host has GL paths elsewhere)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Light / wind / particles / debris
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Gobj / hierarchy / scene graph
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Input / pad / key / mouse
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Culling / visibility / portals / occlusion
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Viewport
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Strings / conversion / Unicode
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Containers / lists / params
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Debug / error / profiling
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Thread / misc OS
-    // ---------------------------------------------------------------------------
 
 #ifndef ANDROID
     void NuGetCurrentThreadId(void) {
@@ -477,17 +364,6 @@ extern "C" {
         STUBBED();
     }
 #endif
-    // ---------------------------------------------------------------------------
-    // Spline / online / net / other gameplay support
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Rendering extras
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // PS2 / Xbox legacy shims
-    // ---------------------------------------------------------------------------
 } // extern "C"
 
 union variptr_u;
@@ -495,12 +371,6 @@ union variptr_u;
 char CurveFilterLOCATORScale[] = {6, 7, 8, static_cast<char>(0xff)};
 char CurveFilterLOCATOR[] = {6, 7, static_cast<char>(0xff)};
 char CurveFilterSFX[] = {3, static_cast<char>(0xff)};
-
-extern "C" {
-    // Original @0x2c17d0. The non-quaternion ANI4 player uses a compact
-    // four-samples-per-word curve stream. Only groups enabled by the node's
-    // translation/rotation/scale flags occupy space in that stream.
-} // extern "C"
 
 // Callback storage is declared in reverse linked-BSS order because the
 // original GCC 4.7 -O3 object emits these definitions in reverse source order.

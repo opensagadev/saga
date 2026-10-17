@@ -432,12 +432,6 @@ extern i16 id_MINIATST, id_MINIATTE;
 
 extern i16 id_PENGUIN, id_UMBRELLA, id_GLIDEPACK;
 
-extern "C" {
-    // Original @0x2c17d0. The non-quaternion ANI4 player uses a compact
-    // four-samples-per-word curve stream. Only groups enabled by the node's
-    // translation/rotation/scale flags occupy space in that stream.
-} // extern "C"
-
 i32 GizmoFileReadGameAnimSet(GAMEANIMSET_s *set, void *world_ptr,
                              void (*read_object_data)(GAMEANIMOBJ_s *, unsigned char), unsigned char version,
                              char *prefix, char *suffix);

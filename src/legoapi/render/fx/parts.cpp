@@ -46,16 +46,7 @@
 #include "legoapi/items/objects/objectsall.h"
 #include "legoapi/misc/utilities.h"
 
-extern "C" {
-    // Shared suspend flag consulted by all timed debris emitters.
-
-}
-
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
-
-extern "C" {
-    // The editor loader clears these page IDs with aligned vector stores.
-} // extern "C"
 
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;

@@ -174,11 +174,6 @@ static __attribute__((noinline, noclone, hot, section(".text"))) void DrawHitPoi
                                                              float alpha, i32 alignment)
     __asm__("_ZL13DrawHitPointsP12GameObject_sffffifi.constprop.39");
 
-extern "C" {
-    // Shared suspend flag consulted by all timed debris emitters.
-
-}
-
 static __used__ void PartImpact_Coin(PART_s *part);
 static __used__ void PartStolen_Coin(PART_s *part);
 static __used__ void PartExtra_BlueCoin(PART_s *part);

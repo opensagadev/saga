@@ -144,15 +144,6 @@ void (*Jump_EndOfLandContextFn)(GameObject_s *) = NULL;
 
 extern i32 LevFlag[4];
 
-extern "C" {
-    // Shared suspend flag consulted by all timed debris emitters.
-
-}
-
-extern "C" {
-    // The editor loader clears these page IDs with aligned vector stores.
-} // extern "C"
-
 extern i16 id_GAMORREANGUARD;
 
 extern "C" {

@@ -895,12 +895,6 @@ static inline i16 JediWeaponIdle(GameObject_s *object) {
     return CHARACTER_ANIMATION_WEAPON_IDLE;
 }
 
-extern "C" {
-    // Original @0x2c17d0. The non-quaternion ANI4 player uses a compact
-    // four-samples-per-word curve stream. Only groups enabled by the node's
-    // translation/rotation/scale flags occupy space in that stream.
-} // extern "C"
-
 i32 GizmoFileReadGameAnimSet(GAMEANIMSET_s *set, void *world_ptr,
                              void (*read_object_data)(GAMEANIMOBJ_s *, unsigned char), unsigned char version,
                              char *prefix, char *suffix);
@@ -917,19 +911,10 @@ f32 rocket_speed = 1.2f;
 
 struct rtlset;
 
-extern "C" {
-    // Shared suspend flag consulted by all timed debris emitters.
-
-}
-
 struct spacelevel_s;
 struct quickboltinfo;
 
 extern f32 ForceThrowSpeed, ForceThrowGravity;
-
-extern "C" {
-    // The editor loader clears these page IDs with aligned vector stores.
-} // extern "C"
 
 PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f32 range);
 
@@ -1030,15 +1015,6 @@ extern "C" {
 struct JEDIBNETPACKET_s;
 
 // Jedi_B tuning and spawn tables (unmangled globals in the original).
-extern "C" {
-    // Facing angle applied to each restrained hero when it is teleported.
-    // Radius around the arena centre inside which a player still draws baddies.
-    // Grid spacing of the initial spawn sweep, in world units.
-    // Distance from a goody at which its surrounding baddies are placed.
-    // Random jitter applied to each grid point.
-    // Only grid points between these radii from the arena centre are used.
-    // Seed the arena's own random stream starts from, so a level lays out the same way each time.
-}
 
 extern "C" {
     void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *); // original name keeps the typo

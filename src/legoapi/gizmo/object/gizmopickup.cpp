@@ -205,11 +205,6 @@ ADDPART_s Default_ADDPART = {NULL,
 
 struct rtlset;
 
-extern "C" {
-    // Shared suspend flag consulted by all timed debris emitters.
-
-}
-
 struct spacelevel_s;
 
 static __used__ void PartImpact_Coin(PART_s *part);
@@ -224,10 +219,6 @@ static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *message);
 static __used__ i32 PartDraw_VehicleHeart(PART_s *part);
 static __used__ void PartMove_VehicleHeart(PART_s *part, f32);
 static __used__ void PartMove_VehiclePickup(PART_s *part, f32);
-
-extern "C" {
-    // The editor loader clears these page IDs with aligned vector stores.
-} // extern "C"
 
 struct AIROW_s;
 struct nuqthdr_s;

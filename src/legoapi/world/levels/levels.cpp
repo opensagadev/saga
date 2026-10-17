@@ -458,7 +458,6 @@ struct instNUGCUTRIGID_s;
 extern void (*CutScene_OverrideConfigFileNameFn)(char *, i32, i32);
 
 typedef isize __attribute__((may_alias)) NuGCutWord;
-#define NUGCUT_WORD(field) (*reinterpret_cast<NuGCutWord *>(&(field)))
 
 struct instNUGCUTSCENE_s;
 struct NUGCUTLOCATORSYS_s;
@@ -618,17 +617,8 @@ extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
 
 struct rtlset;
 
-extern "C" {
-    // Shared suspend flag consulted by all timed debris emitters.
-
-}
-
 struct spacelevel_s;
 struct quickboltinfo;
-
-extern "C" {
-    // The editor loader clears these page IDs with aligned vector stores.
-} // extern "C"
 
 static __attribute__((used)) void edanimcbCubeMap(eduimenu_s *, eduiitem_s *, u32);
 static __attribute__((used)) void edanimcbFileLoad(eduimenu_s *menu, eduiitem_s *, u32);
@@ -736,19 +726,6 @@ static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int
 #endif
 
 extern "C" {
-    // Retail only has IPA-SRA clones of these two helpers.
-
-    // GCC 4.7 emits these file-scope objects in reverse declaration order, so
-    // each group below mirrors the original linked order in reverse.
-
-}
-
-extern "C" {
-    // Shared editor font; edmainInit receives and stores the font handle.
-
-    // The editor UI callbacks share this translation unit with their cursor,
-    // menu, and interaction state in the original binary.
-
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
@@ -785,8 +762,6 @@ static __used__ i32 eduicbProcessTextPick(eduimenu_s *menu, eduiitem_s *item, f3
 static __used__ i32 eduicbProcessTexturePick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 __attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(eduimenu_s *, eduiitem_s *item,
                                                                                    i32 x, i32 y, i32 width, i32);
-    // Retail keeps this as the constant-propagated clone of the generic four-step
-    // gradient helper; only the hue/value colour picker band reaches it.
 static __used__ i32 eduicbRenderColourPick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
 static __used__ i32 eduicbRenderColourSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
 static __used__ i32 eduicbRenderExpander(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
@@ -887,19 +862,6 @@ extern "C" {
 }
 
 extern "C" {
-    // Retail only has IPA-SRA clones of these two helpers.
-
-    // GCC 4.7 emits these file-scope objects in reverse declaration order, so
-    // each group below mirrors the original linked order in reverse.
-
-}
-
-extern "C" {
-    // Shared editor font; edmainInit receives and stores the font handle.
-
-    // The editor UI callbacks share this translation unit with their cursor,
-    // menu, and interaction state in the original binary.
-
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
@@ -936,8 +898,6 @@ static __used__ i32 eduicbProcessTextPick(eduimenu_s *menu, eduiitem_s *item, f3
 static __used__ i32 eduicbProcessTexturePick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 __attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(eduimenu_s *, eduiitem_s *item,
                                                                                    i32 x, i32 y, i32 width, i32);
-    // Retail keeps this as the constant-propagated clone of the generic four-step
-    // gradient helper; only the hue/value colour picker band reaches it.
 static __used__ i32 eduicbRenderColourPick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
 static __used__ i32 eduicbRenderColourSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
 static __used__ i32 eduicbRenderExpander(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
@@ -979,37 +939,7 @@ struct ani3_animheader_s;
 void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
 
 extern "C" {
-    // ---------------------------------------------------------------------------
-    // Display-list bootstrap (original nucore TU file-statics)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Redirected symbols — real bodies live elsewhere (kept as comments)
-    // ---------------------------------------------------------------------------
-
-    // Nu360_dxClear(u32,u32) is implemented in ios_graphics.cpp (original 0x317070).
-    // NuDisplayListSwapBuffersBeginFrame / EndFrame are transcribed in full
-    // in nudlist.cpp (originals 0x2eb5d0 / 0x2eaef0).
-    // NuHtmlBegin(void*) is transcribed in legoapi/misc/supportall.cpp (original 0x2d5ca0).
-    // NuIOS_SetVertexFormat is transcribed in nuiosdl_gl.cpp (original 0x29c070).
-    // NuIOS_WaitForRenderThreadCompletion is transcribed in ios_graphics.cpp (original 0xe34b0).
-    // NuIOS_WakeRenderThread is transcribed in ios_graphics.cpp (original 0xe3590).
-    // NuRenderContextSetZFunc is transcribed below (original 0x2a3860).
-
-    // ---------------------------------------------------------------------------
-    // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Display list — faithful helpers + pending stubs
-    // ---------------------------------------------------------------------------
-} // extern "C"
-
-extern "C" {
     extern "C++" {
-        // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
-        // It appends the world transform, skin palette, and geometry calls as one
-        // contiguous run in the material display list.
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
                                NUMTX *world_matrix, void **transform_packet, NUMTX *skin_matrices,
@@ -1017,10 +947,6 @@ extern "C" {
             __asm__("_ZL22DisplayListProcessSkinP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
                     "sPPvS7_P22deformerweightsarray_si.isra.36");
 
-        // Original local helper cloned as DisplayListProcessLightmapped.isra.34.
-        // Lightmapped geometry carries an AE/AF/B0 setup command two entries before
-        // its geometry command. Keep that setup command adjacent to the dynamic
-        // transform and geometry entries when the special is submitted.
         static __attribute__((noinline, noclone)) void
         DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
                                       NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix, void **transform_packet,
@@ -1030,85 +956,7 @@ extern "C" {
     }
 
     // ---------------------------------------------------------------------------
-    // Scene / render-scene
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Frame lifecycle (NuFrameEnd is faithful; neighbours are stubs)
-    // ---------------------------------------------------------------------------
-
-    // Per-frame animation/pad update hooks (originals take the frame time).
-
-    // Frame-end callbacks (original bss @0x6bdaec/0x6bdaf0/0x6bdad0).
-
-    // Faithful transcription of the original frame-end pump. Waits for the
-    // target frame interval, ticks material/tex/wind anims, swaps screens
-    // via NuRndrSwapScreenEx, then advances nuapi clocks and pad state.
-
-    // ---------------------------------------------------------------------------
-    // iOS / platform
-    // ---------------------------------------------------------------------------
-
-    // Locale string is owned by the Android/JNI TU; cache only its index here.
-
-    // ---------------------------------------------------------------------------
-    // Animation / curves / data
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Bridge / file / heap / memory
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Math / geometry
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Rendering / materials / effects (host has GL paths elsewhere)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Light / wind / particles / debris
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Gobj / hierarchy / scene graph
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Input / pad / key / mouse
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
     // Culling / visibility / portals / occlusion
-    // ---------------------------------------------------------------------------
-
-    extern "C++" {
-        // Retail only has the IPA-SRA clone (the unused scene and bits arguments dropped).
-    }
-
-    // ---------------------------------------------------------------------------
-    // Viewport
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Strings / conversion / Unicode
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Containers / lists / params
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Debug / error / profiling
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Thread / misc OS
     // ---------------------------------------------------------------------------
 
 #ifndef ANDROID
@@ -1121,17 +969,6 @@ extern "C" {
         STUBBED();
     }
 #endif
-    // ---------------------------------------------------------------------------
-    // Spline / online / net / other gameplay support
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Rendering extras
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // PS2 / Xbox legacy shims
-    // ---------------------------------------------------------------------------
 } // extern "C"
 
 struct nuframebuffer_s;
@@ -1161,37 +998,7 @@ extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter
 void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
 
 extern "C" {
-    // ---------------------------------------------------------------------------
-    // Display-list bootstrap (original nucore TU file-statics)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Redirected symbols — real bodies live elsewhere (kept as comments)
-    // ---------------------------------------------------------------------------
-
-    // Nu360_dxClear(u32,u32) is implemented in ios_graphics.cpp (original 0x317070).
-    // NuDisplayListSwapBuffersBeginFrame / EndFrame are transcribed in full
-    // in nudlist.cpp (originals 0x2eb5d0 / 0x2eaef0).
-    // NuHtmlBegin(void*) is transcribed in legoapi/misc/supportall.cpp (original 0x2d5ca0).
-    // NuIOS_SetVertexFormat is transcribed in nuiosdl_gl.cpp (original 0x29c070).
-    // NuIOS_WaitForRenderThreadCompletion is transcribed in ios_graphics.cpp (original 0xe34b0).
-    // NuIOS_WakeRenderThread is transcribed in ios_graphics.cpp (original 0xe3590).
-    // NuRenderContextSetZFunc is transcribed below (original 0x2a3860).
-
-    // ---------------------------------------------------------------------------
-    // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Display list — faithful helpers + pending stubs
-    // ---------------------------------------------------------------------------
-} // extern "C"
-
-extern "C" {
     extern "C++" {
-        // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
-        // It appends the world transform, skin palette, and geometry calls as one
-        // contiguous run in the material display list.
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
                                NUMTX *world_matrix, void **transform_packet, NUMTX *skin_matrices,
@@ -1199,10 +1006,6 @@ extern "C" {
             __asm__("_ZL22DisplayListProcessSkinP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
                     "sPPvS7_P22deformerweightsarray_si.isra.36");
 
-        // Original local helper cloned as DisplayListProcessLightmapped.isra.34.
-        // Lightmapped geometry carries an AE/AF/B0 setup command two entries before
-        // its geometry command. Keep that setup command adjacent to the dynamic
-        // transform and geometry entries when the special is submitted.
         static __attribute__((noinline, noclone)) void
         DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
                                       NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix, void **transform_packet,
@@ -1211,101 +1014,7 @@ extern "C" {
                     "sPPvf.isra.34");
     }
 
-    // ---------------------------------------------------------------------------
-    // Scene / render-scene
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Frame lifecycle (NuFrameEnd is faithful; neighbours are stubs)
-    // ---------------------------------------------------------------------------
-
-    // Per-frame animation/pad update hooks (originals take the frame time).
-
-    // Frame-end callbacks (original bss @0x6bdaec/0x6bdaf0/0x6bdad0).
-
-    // Faithful transcription of the original frame-end pump. Waits for the
-    // target frame interval, ticks material/tex/wind anims, swaps screens
-    // via NuRndrSwapScreenEx, then advances nuapi clocks and pad state.
-
-    // ---------------------------------------------------------------------------
-    // iOS / platform
-    // ---------------------------------------------------------------------------
-
-    // Locale string is owned by the Android/JNI TU; cache only its index here.
-
-    // ---------------------------------------------------------------------------
-    // Animation / curves / data
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Bridge / file / heap / memory
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Math / geometry
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Rendering / materials / effects (host has GL paths elsewhere)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Light / wind / particles / debris
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Gobj / hierarchy / scene graph
-    // ---------------------------------------------------------------------------
-
 #include "nu2api/nucore/nucore_plain_types.h"
-
-    // ---------------------------------------------------------------------------
-    // Input / pad / key / mouse
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Culling / visibility / portals / occlusion
-    // ---------------------------------------------------------------------------
-
-    extern "C++" {
-        // Retail only has the IPA-SRA clone (the unused scene and bits arguments dropped).
-    }
-
-    // ---------------------------------------------------------------------------
-    // Viewport
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Strings / conversion / Unicode
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Containers / lists / params
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Debug / error / profiling
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Thread / misc OS
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Spline / online / net / other gameplay support
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Rendering extras
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // PS2 / Xbox legacy shims
-    // ---------------------------------------------------------------------------
 } // extern "C"
 
 extern NUMTL *DebMat[10];
@@ -1335,15 +1044,6 @@ extern "C" {
 extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
 } // extern "C"
 
-extern "C" {
-    // Shared suspend flag consulted by all timed debris emitters.
-
-}
-
-extern "C" {
-    // The editor loader clears these page IDs with aligned vector stores.
-} // extern "C"
-
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
@@ -1353,19 +1053,6 @@ extern "C" {
 }
 
 extern "C" {
-    // Retail only has IPA-SRA clones of these two helpers.
-
-    // GCC 4.7 emits these file-scope objects in reverse declaration order, so
-    // each group below mirrors the original linked order in reverse.
-
-}
-
-extern "C" {
-    // Shared editor font; edmainInit receives and stores the font handle.
-
-    // The editor UI callbacks share this translation unit with their cursor,
-    // menu, and interaction state in the original binary.
-
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
@@ -1402,8 +1089,6 @@ static __used__ i32 eduicbProcessTextPick(eduimenu_s *menu, eduiitem_s *item, f3
 static __used__ i32 eduicbProcessTexturePick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 __attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(eduimenu_s *, eduiitem_s *item,
                                                                                    i32 x, i32 y, i32 width, i32);
-    // Retail keeps this as the constant-propagated clone of the generic four-step
-    // gradient helper; only the hue/value colour picker band reaches it.
 static __used__ i32 eduicbRenderColourPick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
 static __used__ i32 eduicbRenderColourSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
 static __used__ i32 eduicbRenderExpander(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
@@ -1441,19 +1126,6 @@ extern "C" {
 }
 
 extern "C" {
-    // Retail only has IPA-SRA clones of these two helpers.
-
-    // GCC 4.7 emits these file-scope objects in reverse declaration order, so
-    // each group below mirrors the original linked order in reverse.
-
-}
-
-extern "C" {
-    // Shared editor font; edmainInit receives and stores the font handle.
-
-    // The editor UI callbacks share this translation unit with their cursor,
-    // menu, and interaction state in the original binary.
-
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
@@ -1490,8 +1162,6 @@ static __used__ i32 eduicbProcessTextPick(eduimenu_s *menu, eduiitem_s *item, f3
 static __used__ i32 eduicbProcessTexturePick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 __attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(eduimenu_s *, eduiitem_s *item,
                                                                                    i32 x, i32 y, i32 width, i32);
-    // Retail keeps this as the constant-propagated clone of the generic four-step
-    // gradient helper; only the hue/value colour picker band reaches it.
 static __used__ i32 eduicbRenderColourPick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
 static __used__ i32 eduicbRenderColourSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
 static __used__ i32 eduicbRenderExpander(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
@@ -1519,37 +1189,7 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
 
 extern "C" {
-    // ---------------------------------------------------------------------------
-    // Display-list bootstrap (original nucore TU file-statics)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Redirected symbols — real bodies live elsewhere (kept as comments)
-    // ---------------------------------------------------------------------------
-
-    // Nu360_dxClear(u32,u32) is implemented in ios_graphics.cpp (original 0x317070).
-    // NuDisplayListSwapBuffersBeginFrame / EndFrame are transcribed in full
-    // in nudlist.cpp (originals 0x2eb5d0 / 0x2eaef0).
-    // NuHtmlBegin(void*) is transcribed in legoapi/misc/supportall.cpp (original 0x2d5ca0).
-    // NuIOS_SetVertexFormat is transcribed in nuiosdl_gl.cpp (original 0x29c070).
-    // NuIOS_WaitForRenderThreadCompletion is transcribed in ios_graphics.cpp (original 0xe34b0).
-    // NuIOS_WakeRenderThread is transcribed in ios_graphics.cpp (original 0xe3590).
-    // NuRenderContextSetZFunc is transcribed below (original 0x2a3860).
-
-    // ---------------------------------------------------------------------------
-    // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Display list — faithful helpers + pending stubs
-    // ---------------------------------------------------------------------------
-} // extern "C"
-
-extern "C" {
     extern "C++" {
-        // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
-        // It appends the world transform, skin palette, and geometry calls as one
-        // contiguous run in the material display list.
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
                                NUMTX *world_matrix, void **transform_packet, NUMTX *skin_matrices,
@@ -1557,10 +1197,6 @@ extern "C" {
             __asm__("_ZL22DisplayListProcessSkinP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
                     "sPPvS7_P22deformerweightsarray_si.isra.36");
 
-        // Original local helper cloned as DisplayListProcessLightmapped.isra.34.
-        // Lightmapped geometry carries an AE/AF/B0 setup command two entries before
-        // its geometry command. Keep that setup command adjacent to the dynamic
-        // transform and geometry entries when the special is submitted.
         static __attribute__((noinline, noclone)) void
         DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
                                       NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix, void **transform_packet,
@@ -1569,101 +1205,7 @@ extern "C" {
                     "sPPvf.isra.34");
     }
 
-    // ---------------------------------------------------------------------------
-    // Scene / render-scene
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Frame lifecycle (NuFrameEnd is faithful; neighbours are stubs)
-    // ---------------------------------------------------------------------------
-
-    // Per-frame animation/pad update hooks (originals take the frame time).
-
-    // Frame-end callbacks (original bss @0x6bdaec/0x6bdaf0/0x6bdad0).
-
-    // Faithful transcription of the original frame-end pump. Waits for the
-    // target frame interval, ticks material/tex/wind anims, swaps screens
-    // via NuRndrSwapScreenEx, then advances nuapi clocks and pad state.
-
-    // ---------------------------------------------------------------------------
-    // iOS / platform
-    // ---------------------------------------------------------------------------
-
-    // Locale string is owned by the Android/JNI TU; cache only its index here.
-
-    // ---------------------------------------------------------------------------
-    // Animation / curves / data
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Bridge / file / heap / memory
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Math / geometry
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Rendering / materials / effects (host has GL paths elsewhere)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Light / wind / particles / debris
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Gobj / hierarchy / scene graph
-    // ---------------------------------------------------------------------------
-
 #include "nu2api/nucore/nucore_plain_types.h"
-
-    // ---------------------------------------------------------------------------
-    // Input / pad / key / mouse
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Culling / visibility / portals / occlusion
-    // ---------------------------------------------------------------------------
-
-    extern "C++" {
-        // Retail only has the IPA-SRA clone (the unused scene and bits arguments dropped).
-    }
-
-    // ---------------------------------------------------------------------------
-    // Viewport
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Strings / conversion / Unicode
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Containers / lists / params
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Debug / error / profiling
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Thread / misc OS
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Spline / online / net / other gameplay support
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Rendering extras
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // PS2 / Xbox legacy shims
-    // ---------------------------------------------------------------------------
 } // extern "C"
 
 extern "C" {
@@ -1675,37 +1217,7 @@ extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter
 void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
 
 extern "C" {
-    // ---------------------------------------------------------------------------
-    // Display-list bootstrap (original nucore TU file-statics)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Redirected symbols — real bodies live elsewhere (kept as comments)
-    // ---------------------------------------------------------------------------
-
-    // Nu360_dxClear(u32,u32) is implemented in ios_graphics.cpp (original 0x317070).
-    // NuDisplayListSwapBuffersBeginFrame / EndFrame are transcribed in full
-    // in nudlist.cpp (originals 0x2eb5d0 / 0x2eaef0).
-    // NuHtmlBegin(void*) is transcribed in legoapi/misc/supportall.cpp (original 0x2d5ca0).
-    // NuIOS_SetVertexFormat is transcribed in nuiosdl_gl.cpp (original 0x29c070).
-    // NuIOS_WaitForRenderThreadCompletion is transcribed in ios_graphics.cpp (original 0xe34b0).
-    // NuIOS_WakeRenderThread is transcribed in ios_graphics.cpp (original 0xe3590).
-    // NuRenderContextSetZFunc is transcribed below (original 0x2a3860).
-
-    // ---------------------------------------------------------------------------
-    // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Display list — faithful helpers + pending stubs
-    // ---------------------------------------------------------------------------
-} // extern "C"
-
-extern "C" {
     extern "C++" {
-        // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
-        // It appends the world transform, skin palette, and geometry calls as one
-        // contiguous run in the material display list.
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
                                NUMTX *world_matrix, void **transform_packet, NUMTX *skin_matrices,
@@ -1713,10 +1225,6 @@ extern "C" {
             __asm__("_ZL22DisplayListProcessSkinP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
                     "sPPvS7_P22deformerweightsarray_si.isra.36");
 
-        // Original local helper cloned as DisplayListProcessLightmapped.isra.34.
-        // Lightmapped geometry carries an AE/AF/B0 setup command two entries before
-        // its geometry command. Keep that setup command adjacent to the dynamic
-        // transform and geometry entries when the special is submitted.
         static __attribute__((noinline, noclone)) void
         DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
                                       NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix, void **transform_packet,
@@ -1725,101 +1233,7 @@ extern "C" {
                     "sPPvf.isra.34");
     }
 
-    // ---------------------------------------------------------------------------
-    // Scene / render-scene
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Frame lifecycle (NuFrameEnd is faithful; neighbours are stubs)
-    // ---------------------------------------------------------------------------
-
-    // Per-frame animation/pad update hooks (originals take the frame time).
-
-    // Frame-end callbacks (original bss @0x6bdaec/0x6bdaf0/0x6bdad0).
-
-    // Faithful transcription of the original frame-end pump. Waits for the
-    // target frame interval, ticks material/tex/wind anims, swaps screens
-    // via NuRndrSwapScreenEx, then advances nuapi clocks and pad state.
-
-    // ---------------------------------------------------------------------------
-    // iOS / platform
-    // ---------------------------------------------------------------------------
-
-    // Locale string is owned by the Android/JNI TU; cache only its index here.
-
-    // ---------------------------------------------------------------------------
-    // Animation / curves / data
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Bridge / file / heap / memory
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Math / geometry
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Rendering / materials / effects (host has GL paths elsewhere)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Light / wind / particles / debris
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Gobj / hierarchy / scene graph
-    // ---------------------------------------------------------------------------
-
 #include "nu2api/nucore/nucore_plain_types.h"
-
-    // ---------------------------------------------------------------------------
-    // Input / pad / key / mouse
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Culling / visibility / portals / occlusion
-    // ---------------------------------------------------------------------------
-
-    extern "C++" {
-        // Retail only has the IPA-SRA clone (the unused scene and bits arguments dropped).
-    }
-
-    // ---------------------------------------------------------------------------
-    // Viewport
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Strings / conversion / Unicode
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Containers / lists / params
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Debug / error / profiling
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Thread / misc OS
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Spline / online / net / other gameplay support
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Rendering extras
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // PS2 / Xbox legacy shims
-    // ---------------------------------------------------------------------------
 } // extern "C"
 
 extern "C" {
@@ -1840,44 +1254,10 @@ extern void *(*DefragCreateInstFn)(void *, NUGCUTSCENE_s *, VARIPTR *);
 
 }
 
-extern "C" {
-    // Aligned four-float row used for retail's movaps matrix copies.
-} // extern "C"
-
 void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
 
 extern "C" {
-    // ---------------------------------------------------------------------------
-    // Display-list bootstrap (original nucore TU file-statics)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Redirected symbols — real bodies live elsewhere (kept as comments)
-    // ---------------------------------------------------------------------------
-
-    // Nu360_dxClear(u32,u32) is implemented in ios_graphics.cpp (original 0x317070).
-    // NuDisplayListSwapBuffersBeginFrame / EndFrame are transcribed in full
-    // in nudlist.cpp (originals 0x2eb5d0 / 0x2eaef0).
-    // NuHtmlBegin(void*) is transcribed in legoapi/misc/supportall.cpp (original 0x2d5ca0).
-    // NuIOS_SetVertexFormat is transcribed in nuiosdl_gl.cpp (original 0x29c070).
-    // NuIOS_WaitForRenderThreadCompletion is transcribed in ios_graphics.cpp (original 0xe34b0).
-    // NuIOS_WakeRenderThread is transcribed in ios_graphics.cpp (original 0xe3590).
-    // NuRenderContextSetZFunc is transcribed below (original 0x2a3860).
-
-    // ---------------------------------------------------------------------------
-    // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Display list — faithful helpers + pending stubs
-    // ---------------------------------------------------------------------------
-} // extern "C"
-
-extern "C" {
     extern "C++" {
-        // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
-        // It appends the world transform, skin palette, and geometry calls as one
-        // contiguous run in the material display list.
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
                                NUMTX *world_matrix, void **transform_packet, NUMTX *skin_matrices,
@@ -1885,10 +1265,6 @@ extern "C" {
             __asm__("_ZL22DisplayListProcessSkinP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
                     "sPPvS7_P22deformerweightsarray_si.isra.36");
 
-        // Original local helper cloned as DisplayListProcessLightmapped.isra.34.
-        // Lightmapped geometry carries an AE/AF/B0 setup command two entries before
-        // its geometry command. Keep that setup command adjacent to the dynamic
-        // transform and geometry entries when the special is submitted.
         static __attribute__((noinline, noclone)) void
         DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
                                       NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix, void **transform_packet,
@@ -1897,107 +1273,7 @@ extern "C" {
                     "sPPvf.isra.34");
     }
 
-    // ---------------------------------------------------------------------------
-    // Scene / render-scene
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Frame lifecycle (NuFrameEnd is faithful; neighbours are stubs)
-    // ---------------------------------------------------------------------------
-
-    // Per-frame animation/pad update hooks (originals take the frame time).
-
-    // Frame-end callbacks (original bss @0x6bdaec/0x6bdaf0/0x6bdad0).
-
-    // Faithful transcription of the original frame-end pump. Waits for the
-    // target frame interval, ticks material/tex/wind anims, swaps screens
-    // via NuRndrSwapScreenEx, then advances nuapi clocks and pad state.
-
-    // ---------------------------------------------------------------------------
-    // iOS / platform
-    // ---------------------------------------------------------------------------
-
-    // Locale string is owned by the Android/JNI TU; cache only its index here.
-
-    // ---------------------------------------------------------------------------
-    // Animation / curves / data
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Bridge / file / heap / memory
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Math / geometry
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Rendering / materials / effects (host has GL paths elsewhere)
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Light / wind / particles / debris
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Gobj / hierarchy / scene graph
-    // ---------------------------------------------------------------------------
-
 #include "nu2api/nucore/nucore_plain_types.h"
-
-    // ---------------------------------------------------------------------------
-    // Input / pad / key / mouse
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Culling / visibility / portals / occlusion
-    // ---------------------------------------------------------------------------
-
-    extern "C++" {
-        // Retail only has the IPA-SRA clone (the unused scene and bits arguments dropped).
-    }
-
-    // ---------------------------------------------------------------------------
-    // Viewport
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Strings / conversion / Unicode
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Containers / lists / params
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Debug / error / profiling
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Thread / misc OS
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Spline / online / net / other gameplay support
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // Rendering extras
-    // ---------------------------------------------------------------------------
-
-    // ---------------------------------------------------------------------------
-    // PS2 / Xbox legacy shims
-    // ---------------------------------------------------------------------------
-} // extern "C"
-
-extern "C" {
-    // Original @0x2c17d0. The non-quaternion ANI4 player uses a compact
-    // four-samples-per-word curve stream. Only groups enabled by the node's
-    // translation/rotation/scale flags occupy space in that stream.
 } // extern "C"
 
 i32 GizmoFileReadGameAnimSet(GAMEANIMSET_s *set, void *world_ptr,

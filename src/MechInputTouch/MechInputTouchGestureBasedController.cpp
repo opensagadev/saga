@@ -136,15 +136,6 @@ typedef f32 StickValuesVec4 __attribute__((vector_size(16), aligned(4)));
 extern i32 LevFlag[4];
 
 extern "C" {
-    // Shared suspend flag consulted by all timed debris emitters.
-
-}
-
-extern "C" {
-    // The editor loader clears these page IDs with aligned vector stores.
-} // extern "C"
-
-extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
     static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,

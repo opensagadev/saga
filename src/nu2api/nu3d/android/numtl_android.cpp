@@ -162,8 +162,6 @@ DECOMP_ASSERT(offsetof(NUMTL, shader_desc) + offsetof(NUSHADERMTLDESC, vtx_desc)
               "Material override vertex descriptor offset");
 
 extern "C" {
-    // Retail partially inlines the clipping test into NuDisplaySceneRndr and
-    // keeps the body as its stack-argument .part clone.
 #if defined(__i386__)
 #define NUDISPLAYSCENERNDR_BODY_ATTR __attribute__((noinline, noclone, regparm(0)))
 #else

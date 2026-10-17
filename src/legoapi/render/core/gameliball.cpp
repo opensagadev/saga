@@ -375,10 +375,6 @@ extern "C" {
         0,                                        // unscaled_effect_index
     };
     void NuRegisterEndFrameCallBackFn(void (*callback)(void));
-
-    // InitGameDebris @0x3ca2d0. Carves a typed debris system and its entries
-    // from the world's particle bump buffer. Pointer-sized fields and sizeof
-    // keep the host layout valid without changing the original 32-bit layout.
 } // extern "C"
 
 extern "C" {
@@ -861,7 +857,6 @@ static i32 edanimProc(f32 delta_time, nupad_s *pad);
 static void edanimRender();
 
 extern "C" {
-    // Retail only has IPA-SRA clones of these two helpers.
     typedef void (*EDBITSPLAYSOUNDCALLBACK)(NUVEC *, i32);
     typedef i32 (*EDBITSREQUESTSOUNDCALLBACK)(char *);
 
@@ -1095,18 +1090,12 @@ extern "C" {
     i32 *edbits_editor_enabled = &edbits_local_editor_enabled;
 
     i32 edbitsSfxVol = 100;
-    // Shared editor font; edmainInit receives and stores the font handle.
 
     extern f32 globaltime;
 
     i32 edqseed = 12345;
 eduiitem_s *eduiItemColourPickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text);
 
-    // The editor UI callbacks share this translation unit with their cursor,
-    // menu, and interaction state in the original binary.
-
-    // Retail keeps this as the constant-propagated clone of the generic four-step
-    // gradient helper; only the hue/value colour picker band reaches it.
 }
 
 extern "C" {
@@ -1426,10 +1415,6 @@ extern void *(*DefragCreateInstFn)(void *, NUGCUTSCENE_s *, VARIPTR *);
 
 }
 
-extern "C" {
-    // Aligned four-float row used for retail's movaps matrix copies.
-} // extern "C"
-
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
@@ -1598,10 +1583,6 @@ void AddChunkToRenderStack(particlechunkrendertype_s *, particlechunkrendertype_
 
 struct spacelevel_s;
 struct quickboltinfo;
-
-extern "C" {
-    // The editor loader clears these page IDs with aligned vector stores.
-} // extern "C"
 
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;

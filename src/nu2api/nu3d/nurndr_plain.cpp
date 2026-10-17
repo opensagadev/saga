@@ -25,10 +25,6 @@ extern "C" {
     // Scene currently being built.  Size is 0x218 bytes; original lives in BSS
     // and is referenced as a plain object by all render/present code.
 extern struct nurenderscene_s currentScene;
-
-    // Deferred ring: NuRndrEndScene copies the completed scene here; the render
-    // thread drains it.  Stride is 0x218, 16 slots (0x2180 bytes total) in the
-    // original.
 } // extern "C"
 
 // Swap/present pacing flags (original BSS).
@@ -48,8 +44,6 @@ class NuDynamicLight;
 extern "C" {
     extern nurenderscene_s currentScene;
 
-    // Retail partially inlines the clipping test into NuDisplaySceneRndr and
-    // keeps the body as its stack-argument .part clone.
 #if defined(__i386__)
 #define NUDISPLAYSCENERNDR_BODY_ATTR __attribute__((noinline, noclone, regparm(0)))
 #else
