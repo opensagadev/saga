@@ -122,11 +122,11 @@ void Tag_SetMode(i32 mode);
 u32 TotalLevelCoinTally(WORLDINFO_s *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *);
 void GameCameraMakeMiniCut(nugspline_s *, f32, f32, f32, f32, i32, i32);
 extern i32 bonusmodearcade;
-u32 arcade_placed_stud_total = 0;
+extern u32 arcade_placed_stud_total;
 extern f32 DEFAULT_MOVE_RANGE;
 extern f32 drop_back_in_timer;
 extern i32 last_chatter_sfx;
-i32 FalconDebKey[2] = {-1, -1};
+extern i32 FalconDebKey[2];
 extern f32 LevelNameTime;
 extern f32 LevelNameMul;
 extern rtldata_s lev_rtldata;
@@ -228,16 +228,16 @@ static inline void TBEND(i32 slot, i32 type) {
     _NuTimeBarSlotEnd(set, slot);
 }
 
-f32 TargetDist_Near2;
-f32 TargetDist_Mid2;
-u16 TargetDeg_Near;
-u16 TargetDeg_Mid;
-u16 TargetDeg_Far;
+extern f32 TargetDist_Near2;
+extern f32 TargetDist_Mid2;
+extern u16 TargetDeg_Near;
+extern u16 TargetDeg_Mid;
+extern u16 TargetDeg_Far;
 extern i32 party_under_cover;
-i32 makebaddiesforgetinresetbits;
+extern i32 makebaddiesforgetinresetbits;
 void MakeBaddiesForgetAboutParty(i32);
 extern i32 nbaddies_can_see_players;
-i32 reset_reimport;
+extern i32 reset_reimport;
 
 void CatchUpCode(GameObject_s *object, f32 divisor, f32 maximum, i32 mode);
 
@@ -401,300 +401,7 @@ static inline void TexQuadSubmit3D(f32 x, f32 y, i32 colour, i32 u, i32 v) {
     ++g_NuPrim_VertexCount;
 }
 
-void CheckResetBits() {
-    if ((ResetBits & RESETBIT_CLEAR_LEVEL_PROGRESS) != 0 && WORLD->current_level->area_level_index != -1) {
-        ClearLevelProgress(WORLD->current_level->area_level_index, WORLD);
-    }
-
-    Cheats_Reset();
-    if (WORLD->level_progress != NULL) {
-        ResetScene(WORLD->current_gscn, reinterpret_cast<SCENEPROGRESS_s *>(WORLD->level_progress));
-        WORLD->level_progress->flags_low |= 1;
-    }
-
-    GizmoBlowupVisibilityOverrides(WORLD);
-    texanimbits = 0;
-    SetTexAnimSignals();
-    SetTexAnimSignals();
-    CutScenes_Reset(WORLD);
-
-    if (NOSOUND == 0) {
-        if ((ResetBits & RESETBIT_USE_CUSTOMISER_SETUP) == 0) {
-            InitGameMode();
-        }
-        if (NOSOUND == 0) {
-            Customiser_SetUpCharacterData(CharacterCustomiser);
-        }
-    }
-
-    Surfaces_Reset();
-    ResetStreaks();
-    Bolts_Reset();
-    Batarangs_Reset();
-    Detonators_Reset();
-    ResetParts();
-    ResetExplosions();
-    ShoveObjectSysReset();
-    Panel_Clear();
-    GameCam_Reset(GameCam);
-    ResetGameMessages();
-    Tag_ResetTransfers();
-    Hint_Reset();
-    Hint_CancelCurrent();
-    Teleports_Reset(WORLD);
-    TrafficAnimSys_Reset(WORLD->trafficanim_sys);
-    Pulses_Reset(WORLD->pulses_sys);
-    NuSound3StopRumble();
-    ResetTimer(&GameTimer, 0.0f);
-    ResetTimer(&GamePlayTimer, 0.0f);
-    ResetTimer(&PauseTimer, 0.0f);
-    ResetTimer(&JoinInTimer, 0.0f);
-    if ((ResetBits & RESETBIT_CLEAR_LEVEL_PROGRESS) != 0 && MissionSys != NULL) {
-        ResetTimer(&MissionSys->timer, 0.0f);
-    }
-    Hint_SetHintFromId(-1, 0, 0);
-    ResetRepeatSfx();
-    DEFAULT_MOVE_RANGE = 0.0f;
-    alert_obj = NULL;
-    alert_timer = 0.0f;
-    drop_back_in_timer = 0.0f;
-    ResetRippleSet(ripples);
-    Grabber_Reset(WORLD);
-    Faders_Reset(WORLD);
-    chattersfxwait = 3.0f;
-    last_chatter_sfx = -1;
-    tieonsfxwait = 1.0f;
-    tieoffsfxwait = 1.0f;
-    FalconDebKey[0] = -1;
-    FalconDebKey[1] = -1;
-    LevelNameMul = 0.0f;
-    LevelNameTime = LevelChange != 0 ? 3.0f : 0.0f;
-    memset(&lev_rtldata, 0, sizeof(lev_rtldata));
-    if (VehicleArea != 0) {
-        if (WORLD->current_level == ASTEROIDCHASED_LDATA || WORLD->current_level == DEATHSTAR2BATTLEA_LDATA) {
-            TargetDist_Near2 = 6.25f;
-            TargetDist_Mid2 = 100.0f;
-            TargetDeg_Near = 0x38e3;
-            TargetDeg_Mid = 0x31c7;
-            TargetDeg_Far = 0x2aaa;
-        } else {
-            TargetDist_Near2 = 6.25f;
-            TargetDist_Mid2 = 100.0f;
-            TargetDeg_Near = 0x2aaa;
-            TargetDeg_Mid = 0x1c71;
-            TargetDeg_Far = 0x0e38;
-        }
-    } else {
-        TargetDist_Near2 = 0.25f;
-        TargetDist_Mid2 = 1.0f;
-        TargetDeg_Near = 0x2aaa;
-        TargetDeg_Mid = 0x2000;
-        TargetDeg_Far = 0x1555;
-    }
-    party_under_cover = 0;
-    nbaddies_can_see_players = 0;
-    if (reset_restart != 0) {
-        LevTime[0] = 0.0f;
-        LevTime[1] = 0.0f;
-        BonusCoinTotal = 0;
-    }
-
-    if (WORLD->api_object_sys != NULL)
-        WORLD->api_object_sys->flags_210 &= ~1;
-    if ((ResetBits & RESETBIT_CLEAR_LEVEL_PROGRESS) != 0) {
-        GizmoSysClearLevelProgress(WORLD, WORLD->current_level->area_level_index);
-    }
-
-    GameAnimSys_ReStoreProgress(WORLD->game_anim_sys, WORLD->current_level->area_level_index);
-    GizmoSysReset(WORLD->gizmo_sys, WORLD, WORLD->current_level->area_level_index);
-
-    if ((ResetBits & RESETBIT_REINITIALISE_LEVEL) != 0) {
-        DrawBossHitPoints(NULL);
-        ResetForceBack();
-        ClearAICreatures();
-        GameAISysReset(WORLD->ai_sys);
-        ReStoreStatusTakeOverObjectSys(1);
-        AIScriptInitConditions(WORLD->ai_sys);
-
-        for (i32 player_index = 0; player_index < 8; ++player_index) {
-            if (Player[player_index] == NULL)
-                continue;
-            InitPlayerAI(Player[player_index]);
-            char script_name[32];
-            if (FreePlay != 0) {
-                if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("Freeplay"), 0, 1, 0) != NULL) {
-                    strcpy(script_name, "Freeplay");
-                } else {
-                    if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("party"), 0, 1, 0) != NULL)
-                        strcpy(script_name, "party");
-                    else
-                        strcpy(script_name, "GeneralParty");
-                }
-            } else if (Mission_Active(NULL) != NULL) {
-                if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("Mission"), 0, 1, 0) != NULL) {
-                    strcpy(script_name, "Mission");
-                } else {
-                    if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("party"), 0, 1, 0) != NULL)
-                        strcpy(script_name, "party");
-                    else
-                        strcpy(script_name, "GeneralParty");
-                }
-            } else {
-                if (AIScriptFind(WORLD->ai_sys, Player[player_index]->apiobj.character_data->file, 0, 1, 0) != NULL) {
-                    sprintf(script_name, Player[player_index]->apiobj.character_data->file);
-                } else {
-                    if ((Player[player_index]->apiobj.character_data->model_flags & 8) != 0)
-                        strcpy(script_name, "Jedi");
-                    else if ((Player[player_index]->apiobj.character_data->model_flags & 0x80) != 0)
-                        strcpy(script_name, "Blaster");
-                    else
-                        strcpy(script_name, "NoWeapon");
-                    if (AIScriptFind(WORLD->ai_sys, script_name, 0, 1, 0) == NULL) {
-                        if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("party"), 0, 1, 0) != NULL)
-                            strcpy(script_name, "party");
-                        else
-                            strcpy(script_name, "GeneralParty");
-                    }
-                }
-            }
-            if (0) {
-            party_script:
-                if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("party"), 0, 1, 0) != NULL)
-                    strcpy(script_name, "party");
-                else
-                    strcpy(script_name, "GeneralParty");
-            }
-            AIScriptProcessorInit(WORLD->ai_sys, &Player[player_index]->ai,
-                                  reinterpret_cast<AISCRIPTPROCESS *>(&Player[player_index]->ai), NULL, script_name,
-                                  NULL, 1, NULL, NULL);
-            if (FreePlay == 0 && Mission_Active(NULL) == NULL && Player[player_index]->field_0xcc0 == NULL &&
-                AIScriptSetBaseScriptStateByName(reinterpret_cast<AISCRIPTPROCESS *>(&Player[player_index]->ai),
-                                                 const_cast<char *>("InActive")) != 0) {
-                Player[player_index]->apiobj.flags_high &= ~0x10;
-            }
-        }
-    } else {
-        ReStoreStatusTakeOverObjectSys(0);
-    }
-
-    if (makebaddiesforgetinresetbits != 0)
-        MakeBaddiesForgetAboutParty(0);
-    if ((ResetBits & 2) != 0) {
-        for (i32 i = 0; i < 8; ++i) {
-            if (Player[i] != NULL)
-                Player[i]->field_0xe38 = 4;
-        }
-    }
-    if ((ResetBits & 4) != 0) {
-        for (i32 i = 0; i < 8; ++i) {
-            if (Player[i] != NULL) {
-                if (Player[i]->apiobj.player_controlled)
-                    Player[i]->spawn_protection_timer = 2.5f;
-                else
-                    Player[i]->spawn_protection_timer = 0.0f;
-            }
-        }
-    }
-    ResetRadios();
-    SpecialMiniKits_Reset(WORLD);
-    SuperCounters_FixUpGizmos(WORLD);
-    AITriggerSetSysReset(WORLD->ai_trigger_set_sys);
-    AITriggerSysAutoSetUp(WORLD, WORLD->ai_trigger_set_sys);
-    if ((ResetBits & 0x10) != 0) {
-        if (Player[0] != NULL)
-            ResetPlayer(Player[0], 1, NULL, 0);
-        if (Player[1] != NULL)
-            ResetPlayer(Player[1], 1, NULL, 0);
-        if (Player[2] != NULL)
-            ResetPlayer(Player[2], 1, NULL, 0);
-        if (Player[3] != NULL)
-            ResetPlayer(Player[3], 1, NULL, 0);
-        if (Player[4] != NULL)
-            ResetPlayer(Player[4], 1, NULL, 0);
-        if (Player[5] != NULL)
-            ResetPlayer(Player[5], 1, NULL, 0);
-        if (Player[6] != NULL)
-            ResetPlayer(Player[6], 1, NULL, 0);
-        if (Player[7] != NULL)
-            ResetPlayer(Player[7], 1, NULL, 0);
-        VehicleAreaRememberSpeed = GetVehicleAreaRememberSpeed();
-    }
-
-    LevHSpecialExists = 0;
-    for (i32 i = 0; i < 88; ++i) {
-        if (NuSpecialExistsFn(&LevHSpecial[i]) != 0) {
-            LevHSpecialExists |= static_cast<u64>(1) << i;
-        }
-    }
-    WORLD->field_0x50d0 = 0;
-    if (WORLD->current_level->reset_fn != NULL) {
-        WORLD->current_level->reset_fn(WORLD);
-    }
-    CharPlatforms_Reset(WORLD->char_platform_sys);
-    SetSoundFadeDist(WORLD, &Game.options_save);
-    TempOptions.field3_0x3 = Game.options_save.field3_0x3;
-    TempOptions.field4_0x4 = Game.options_save.field4_0x4;
-    TempOptions.field5_0x5 = Game.options_save.field5_0x5;
-
-    if (WORLD->level_progress != NULL && (WORLD->level_progress->flags & 2) == 0) {
-        nugspline_s *spline = reinterpret_cast<nugspline_s *>(WORLD->portal_places[1]);
-        if (spline != NULL && gone_through_door_to_new_mode == 0 && gone_through_door_to_new_level == 0 &&
-            come_from_an_editor == 0) {
-            GameCameraMakeMiniCut(spline, 0.0f, 2.0f, 0.0f, 1.0f, 0, 1);
-        }
-    }
-    gone_through_door_to_new_mode = 0;
-    come_from_an_editor = 0;
-    if (newmode_cutinfo != NULL) {
-        NewCutScene(newmode_cutinfo, WORLD->cutscene_sys, NULL, 0);
-        newmode_cutinfo = NULL;
-    }
-
-    if (BonusArea != 0)
-        Cheats_TurnOff(1);
-    BonusCoinTarget = TotalLevelCoinTally(WORLD, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-    if (BonusCoinTarget > 1000000u || (BonusArea != 0 && VehicleArea != 0 && BonusCoinTarget != 1000000u))
-        BonusCoinTarget = 1000000u;
-    if (netclient != 0)
-        BonusCoinTarget = 1000000u;
-
-    // Reset requests are edge-triggered. Leaving the bits set would rebuild the
-    // level's AI and gizmo state again on every frame through Batman().
-    ResetBits = 0;
-    reset_reimport = 0;
-    reset_restart = 0;
-    CutScene_StartAudio();
-    if (NOSOUND == 0)
-        WORLD->reset_flags = 1;
-    LookAtBoth = 0;
-    oneAtOnce_SetNumAttackers(1);
-    if (WORLD->level_progress != NULL) {
-        if ((WORLD->level_progress->flags_low & 2) != 0)
-            WORLD->field_0x5174 = (WORLD->level_progress->flags_low & 4) != 0;
-        ResetGizFlow(WORLD->giz_flow, &WORLD->level_progress->giz_flow_progress);
-    } else {
-        ResetGizFlow(WORLD->giz_flow, NULL);
-    }
-    EffectOffProgress_Reset(WORLD->level_progress);
-    if (HUB_ADATA != NULL && WORLD->area == HUB_ADATA) {
-        Tag_SetMode(3);
-    } else {
-        Tag_SetMode(1);
-    }
-    if (WORLD->area != NULL && WORLD->area == JEDI_ADATA) {
-        WeaponInOut_NoAIJediSfx = 1;
-    } else {
-        WeaponInOut_NoAIJediSfx = 0;
-    }
-    bonusmodearcade = 0;
-    if (WORLD->area != NULL && (WORLD->area->flags & 0x10) != 0) {
-        if (AreaGlobals.values.field_0x14 < AreaGlobals.values.field_0x0c) {
-            AreaGlobals.values.field_0x14 = AreaGlobals.values.field_0x0c > 10 ? 10 : AreaGlobals.values.field_0x0c;
-        }
-    }
-    arcade_placed_stud_total = (GizmoPickups_TotalScore(WORLD) * 85u) / 100u;
-    arcade_placed_stud_total = arcade_placed_stud_total / 1000u * 1000u;
-}
+void CheckResetBits();
 
 void RndrTexQuad3D(VuMtx const &matrix, i32 colour, numtl_s *material) {
     NuPrim3DBegin(1, 7, material, reinterpret_cast<NUMTX *>(const_cast<VuMtx *>(&matrix)));

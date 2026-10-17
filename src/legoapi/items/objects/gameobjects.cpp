@@ -884,18 +884,7 @@ void GameFog_Reset() {
     GameFogTime = 0.0f;
 }
 
-void Game_KillPart(PART_s *part, i32 reason) {
-    if (reason == 1 && part->force_player_mask != -1) {
-        if ((part->force_player_mask & 1) != 0 && Player[0] != NULL) {
-            NewBuzz(Player[0]->pad_gamepad->pad, 0.2f, 0);
-            NewRumble(Player[0]->pad_gamepad->pad, 0.8f, 0);
-        }
-        if ((part->force_player_mask & 2) != 0 && Player[1] != NULL) {
-            NewBuzz(Player[1]->pad_gamepad->pad, 0.2f, 0);
-            NewRumble(Player[1]->pad_gamepad->pad, 0.8f, 0);
-        }
-    }
-}
+void Game_KillPart(PART_s *part, i32 reason);
 
 void GameAISysReset(AISYS_s *system);
 
@@ -1475,24 +1464,7 @@ i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUM
 
 extern i16 id_ANAKINJEDISCARRED;
 
-void GameBlowUpBlownUpFn_LSW(GIZMOBLOWUP_s *blowup) {
-    extern AREADATA *MOSEISLEY_ADATA;
-    extern AREADATA *TATOOINE_ADATA;
-    if (blowup == NULL || blowup->type == NULL || WORLD->area == NULL || netclient != 0)
-        return;
-    if (WORLD->area == MOSEISLEY_ADATA || WORLD->area == HUB_ADATA) {
-        char *name = NuSpecialGetName(&blowup->type->special);
-        if (name == NULL || NuStrIStr(name, "bin_lid") != NULL || NuStrIStr(name, "bin") == NULL || qrand() >= 49200)
-            return;
-    } else if (WORLD->area == TATOOINE_ADATA) {
-        char *name = NuSpecialGetName(&blowup->type->special);
-        if (name == NULL || NuStrIStr(name, "womp_gen") == NULL)
-            return;
-    } else {
-        return;
-    }
-    AddDynamicCreature(id_WOMPRAT, &blowup->position, 0, "spawned_womprat", NULL, NULL, 1, NULL, NULL, 0, 16);
-}
+void GameBlowUpBlownUpFn_LSW(GIZMOBLOWUP_s *blowup);
 
 void GameLoadCharacterModels(APICHARACTERMODELLIST_s *list, i32 append, VARIPTR *buf, VARIPTR *buf_end, i32 area_models,
                              i32 area) {

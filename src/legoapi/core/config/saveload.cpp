@@ -85,8 +85,7 @@ extern f32 memcard_result_delay;
 extern i32 memcard_justformatted;
 extern i32 saveload_autosavedisabled;
 
-void InitMemCard() {
-}
+void InitMemCard();
 
 i32 SaveGizmoSys(GIZMOSYS_s *, char *, char *) {
     return 0;

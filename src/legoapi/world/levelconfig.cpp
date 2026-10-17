@@ -142,164 +142,77 @@ static __used__ void LC_AL_waterripple_startcol_r(nufpar_s *fp) {
     levelconfig_ldata->unknown_0b8 = (u8)NuFParGetInt(fp);
 }
 
-static __used__ void LC_BL_max_attractos(nufpar_s *fp) {
-    levelconfig_ldata->max_attractos = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_attractos(nufpar_s *fp);
 
-static __used__ void LC_BL_max_bombgen_objects(nufpar_s *fp) {
-    levelconfig_ldata->max_bombgen_objs = (i16)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_bombgen_objects(nufpar_s *fp);
 
-static __used__ void LC_BL_max_bombgens(nufpar_s *fp) {
-    levelconfig_ldata->max_bombgens = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_bombgens(nufpar_s *fp);
 
-static __used__ void LC_BL_max_bridges(nufpar_s *fp) {
-    levelconfig_ldata->max_bridges = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_bridges(nufpar_s *fp);
 
-static __used__ void LC_BL_max_buildit_objects(nufpar_s *fp) {
-    levelconfig_ldata->max_buildit_objs = (i16)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_buildit_objects(nufpar_s *fp);
 
-static __used__ void LC_BL_max_buildits(nufpar_s *fp) {
-    levelconfig_ldata->max_buildits = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_buildits(nufpar_s *fp);
 
-static __used__ void LC_BL_max_climb_objects(nufpar_s *fp) {
-    levelconfig_ldata->max_climb_objs = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_climb_objects(nufpar_s *fp);
 
-static __used__ void LC_BL_max_doors(nufpar_s *fp) {
-    levelconfig_ldata->max_doors = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_doors(nufpar_s *fp);
 
-static __used__ void LC_BL_max_force(nufpar_s *fp) {
-    levelconfig_ldata->max_force = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_force(nufpar_s *fp);
 
-static __used__ void LC_BL_max_force_objects(nufpar_s *fp) {
-    levelconfig_ldata->max_force_objs = (i16)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_force_objects(nufpar_s *fp);
 
-static __used__ void LC_BL_max_gameantinodes(nufpar_s *fp) {
-    levelconfig_ldata->max_antinodes = (i16)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_gameantinodes(nufpar_s *fp);
 
-static __used__ void LC_BL_max_gizmoblowups(nufpar_s *fp) {
-    levelconfig_ldata->max_gizmo_blowups = (i16)NuFParGetInt(fp);
-    if (levelconfig_ldata->max_gizmo_blowups > 512) {
-        levelconfig_ldata->max_gizmo_blowups = 512;
-    }
-}
+static __used__ void LC_BL_max_gizmoblowups(nufpar_s *fp);
 
-static __used__ void LC_BL_max_gizmoblowuptypes(nufpar_s *fp) {
-    levelconfig_ldata->max_gizmo_blowup_types = (i16)NuFParGetInt(fp);
-    if (levelconfig_ldata->max_gizmo_blowup_types > 255) {
-        levelconfig_ldata->max_gizmo_blowup_types = 255;
-    }
-}
+static __used__ void LC_BL_max_gizmoblowuptypes(nufpar_s *fp);
 
-static __used__ void LC_BL_max_gizpanels(nufpar_s *fp) {
-    levelconfig_ldata->max_giz_panels = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_gizpanels(nufpar_s *fp);
 
-static __used__ void LC_BL_max_gizrandoms(nufpar_s *fp) {
-    levelconfig_ldata->max_giz_randoms = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_gizrandoms(nufpar_s *fp);
 
-static __used__ void LC_BL_max_gizspecials(nufpar_s *fp) {
-    levelconfig_ldata->max_giz_specials = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_gizspecials(nufpar_s *fp);
 
-static __used__ void LC_BL_max_grapples(nufpar_s *fp) {
-    levelconfig_ldata->max_grapples = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_grapples(nufpar_s *fp);
 
-static __used__ void LC_BL_max_guidelines(nufpar_s *fp) {
-    levelconfig_ldata->max_guidelines = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_guidelines(nufpar_s *fp);
 
-static __used__ void LC_BL_max_hatmachines(nufpar_s *fp) {
-    levelconfig_ldata->max_hat_machines = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_hatmachines(nufpar_s *fp);
 
-static __used__ void LC_BL_max_ledges(nufpar_s *fp) {
-    levelconfig_ldata->max_ledges = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_ledges(nufpar_s *fp);
 
-static __used__ void LC_BL_max_levers(nufpar_s *fp) {
-    levelconfig_ldata->max_levers = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_levers(nufpar_s *fp);
 
-static __used__ void LC_BL_max_minicutParts(nufpar_s *fp) {
-    levelconfig_ldata->max_minicut_parts = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_minicutParts(nufpar_s *fp);
 
-static __used__ void LC_BL_max_minicuts(nufpar_s *fp) {
-    levelconfig_ldata->max_minicuts = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_minicuts(nufpar_s *fp);
 
-static __used__ void LC_BL_max_obstacle_objects(nufpar_s *fp) {
-    levelconfig_ldata->max_obstacle_objs = (i16)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_obstacle_objects(nufpar_s *fp);
 
-static __used__ void LC_BL_max_obstacles(nufpar_s *fp) {
-    levelconfig_ldata->max_obstacles = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_obstacles(nufpar_s *fp);
 
-static __used__ void LC_BL_max_pickups(nufpar_s *fp) {
-    levelconfig_ldata->max_pickups = (i16)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_pickups(nufpar_s *fp);
 
-static __used__ void LC_BL_max_plugs(nufpar_s *fp) {
-    levelconfig_ldata->max_plugs = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_plugs(nufpar_s *fp);
 
-static __used__ void LC_BL_max_pushblock_endpos(nufpar_s *fp) {
-    levelconfig_ldata->max_push_block_end_pos = (u8)NuFParGetInt(fp);
-    if (levelconfig_ldata->max_push_block_end_pos > 64) {
-        levelconfig_ldata->max_push_block_end_pos = 64;
-    }
-}
+static __used__ void LC_BL_max_pushblock_endpos(nufpar_s *fp);
 
-static __used__ void LC_BL_max_pushblocks(nufpar_s *fp) {
-    levelconfig_ldata->max_push_blocks = (u8)NuFParGetInt(fp);
-    if (levelconfig_ldata->max_push_blocks > 16) {
-        levelconfig_ldata->max_push_blocks = 16;
-    }
-}
+static __used__ void LC_BL_max_pushblocks(nufpar_s *fp);
 
-static __used__ void LC_BL_max_securitydoors(nufpar_s *fp) {
-    levelconfig_ldata->max_security_doors = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_securitydoors(nufpar_s *fp);
 
-static __used__ void LC_BL_max_shards(nufpar_s *fp) {
-    levelconfig_ldata->max_shards = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_shards(nufpar_s *fp);
 
-static __used__ void LC_BL_max_signals(nufpar_s *fp) {
-    levelconfig_ldata->max_signals = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_signals(nufpar_s *fp);
 
-static __used__ void LC_BL_max_spinneranim_objs(nufpar_s *fp) {
-    levelconfig_ldata->max_spinner_anim_objs = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_spinneranim_objs(nufpar_s *fp);
 
-static __used__ void LC_BL_max_spinners(nufpar_s *fp) {
-    levelconfig_ldata->max_spinners = (u8)NuFParGetInt(fp);
-    if (levelconfig_ldata->max_spinners > 8) {
-        levelconfig_ldata->max_spinners = 8;
-    }
-}
+static __used__ void LC_BL_max_spinners(nufpar_s *fp);
 
-static __used__ void LC_BL_max_technos(nufpar_s *fp) {
-    levelconfig_ldata->max_technos = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_technos(nufpar_s *fp);
 
-static __used__ void LC_BL_max_teleports(nufpar_s *fp) {
-    levelconfig_ldata->max_teleports = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_teleports(nufpar_s *fp);
 
 static __used__ void LC_BL_max_ter_groups(nufpar_s *fp) {
     levelconfig_ldata->max_ter_groups = (i16)NuFParGetInt(fp);
@@ -309,91 +222,29 @@ static __used__ void LC_BL_max_ter_platforms(nufpar_s *fp) {
     levelconfig_ldata->max_ter_platforms = (i16)NuFParGetInt(fp);
 }
 
-static __used__ void LC_BL_max_tightropes(nufpar_s *fp) {
-    levelconfig_ldata->max_tightropes = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_tightropes(nufpar_s *fp);
 
-static __used__ void LC_BL_max_timers(nufpar_s *fp) {
-    levelconfig_ldata->max_giz_timers = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_timers(nufpar_s *fp);
 
-static __used__ void LC_BL_max_torpmachines(nufpar_s *fp) {
-    levelconfig_ldata->max_torp_machines = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_torpmachines(nufpar_s *fp);
 
-static __used__ void LC_BL_max_tubes(nufpar_s *fp) {
-    levelconfig_ldata->max_tubes = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_tubes(nufpar_s *fp);
 
-static __used__ void LC_BL_max_turrets(nufpar_s *fp) {
-    levelconfig_ldata->max_turrets = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_turrets(nufpar_s *fp);
 
-static __used__ void LC_BL_max_zipups(nufpar_s *fp) {
-    levelconfig_ldata->max_zipups = (u8)NuFParGetInt(fp);
-}
+static __used__ void LC_BL_max_zipups(nufpar_s *fp);
 
 static __used__ void LC_BL_mipmapmode(nufpar_s *fp) {
     levelconfig_ldata->mipmap_mode = (u8)NuFParGetInt(fp);
 }
 
-static __used__ void LC_BL_wind_size(nufpar_s *fp) {
-    levelconfig_ldata->wind_size = NuFParGetFloat(fp);
-}
+static __used__ void LC_BL_wind_size(nufpar_s *fp);
 
-static __used__ void LC_BL_wind_speed(nufpar_s *fp) {
-    levelconfig_ldata->wind_speed = NuFParGetFloat(fp);
-}
+static __used__ void LC_BL_wind_speed(nufpar_s *fp);
 
 // Game-specific pre-load limits. These must be applied before WorldInfo
 // reserves each level's fixed-size gameplay systems.
-NUFPCOMJMP LevelConfigKeywords_BeforeLoad[] = {
-    {const_cast<char *>("max_tightropes"), LC_BL_max_tightropes},
-    {const_cast<char *>("max_signals"), LC_BL_max_signals},
-    {const_cast<char *>("max_levers"), LC_BL_max_levers},
-    {const_cast<char *>("max_technos"), LC_BL_max_technos},
-    {const_cast<char *>("max_zipups"), LC_BL_max_zipups},
-    {const_cast<char *>("max_grapples"), LC_BL_max_grapples},
-    {const_cast<char *>("max_obstacles"), LC_BL_max_obstacles},
-    {const_cast<char *>("max_obstacle_objects"), LC_BL_max_obstacle_objects},
-    {const_cast<char *>("max_turrets"), LC_BL_max_turrets},
-    {const_cast<char *>("max_buildits"), LC_BL_max_buildits},
-    {const_cast<char *>("max_buildit_objects"), LC_BL_max_buildit_objects},
-    {const_cast<char *>("max_spinneranim_objs"), LC_BL_max_spinneranim_objs},
-    {const_cast<char *>("max_shards"), LC_BL_max_shards},
-    {const_cast<char *>("max_spinners"), LC_BL_max_spinners},
-    {const_cast<char *>("max_minicuts"), LC_BL_max_minicuts},
-    {const_cast<char *>("max_minicut_stages"), LC_BL_max_minicutParts},
-    {const_cast<char *>("maxgizmoblowuptypes"), LC_BL_max_gizmoblowuptypes},
-    {const_cast<char *>("maxgizmoblowups"), LC_BL_max_gizmoblowups},
-    {const_cast<char *>("max_climb_objects"), LC_BL_max_climb_objects},
-    {const_cast<char *>("max_attractos"), LC_BL_max_attractos},
-    {const_cast<char *>("max_timers"), LC_BL_max_timers},
-    {const_cast<char *>("max_guidelines"), LC_BL_max_guidelines},
-    {const_cast<char *>("max_ledges"), LC_BL_max_ledges},
-    {const_cast<char *>("max_securitydoors"), LC_BL_max_securitydoors},
-    {const_cast<char *>("max_tubes"), LC_BL_max_tubes},
-    {const_cast<char *>("max_pickups"), LC_BL_max_pickups},
-    {const_cast<char *>("max_gameantinodes"), LC_BL_max_gameantinodes},
-    {const_cast<char *>("max_gizpanels"), LC_BL_max_gizpanels},
-    {const_cast<char *>("max_force"), LC_BL_max_force},
-    {const_cast<char *>("max_force_objects"), LC_BL_max_force_objects},
-    {const_cast<char *>("max_pushblocks"), LC_BL_max_pushblocks},
-    {const_cast<char *>("max_pushblock_endpos"), LC_BL_max_pushblock_endpos},
-    {const_cast<char *>("max_gizspecials"), LC_BL_max_gizspecials},
-    {const_cast<char *>("max_hatmachines"), LC_BL_max_hatmachines},
-    {const_cast<char *>("max_doors"), LC_BL_max_doors},
-    {const_cast<char *>("max_teleports"), LC_BL_max_teleports},
-    {const_cast<char *>("max_gizrandoms"), LC_BL_max_gizrandoms},
-    {const_cast<char *>("max_torpmachines"), LC_BL_max_torpmachines},
-    {const_cast<char *>("max_bridges"), LC_BL_max_bridges},
-    {const_cast<char *>("max_plugs"), LC_BL_max_plugs},
-    {const_cast<char *>("max_bombgen_objects"), LC_BL_max_bombgen_objects},
-    {const_cast<char *>("max_bombgens"), LC_BL_max_bombgens},
-    {const_cast<char *>("windspeed"), LC_BL_wind_speed},
-    {const_cast<char *>("windsize"), LC_BL_wind_size},
-    {NULL, NULL},
-};
+extern NUFPCOMJMP LevelConfigKeywords_BeforeLoad[45];
 
 static u8 load_conditionParam;
 

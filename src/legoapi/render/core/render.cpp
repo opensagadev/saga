@@ -1240,8 +1240,7 @@ void Draw_LOADFAILED();
 
 void DrawAreaCylinder(nuvec_s *centre, nuvec_s *size, i32 colour);
 
-void DrawCameraTarget(nuvec_s *) {
-}
+void DrawCameraTarget(nuvec_s *);
 
 void DrawGameMessages() {
     extern GAMEMESSAGE_s GameMessage[128];
@@ -1421,8 +1420,7 @@ i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u
     return 0;
 }
 
-void DrawCameraTarget2(nuvec_s *) {
-}
+void DrawCameraTarget2(nuvec_s *);
 
 i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
                       u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order, float alpha) {

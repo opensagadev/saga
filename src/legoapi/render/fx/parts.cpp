@@ -182,144 +182,7 @@ void ReleasePush(GameObject_s *);
 void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
 i32 CannotKill(GameObject_s *);
 
-static void PartCollide(PART_s *part, i32 three_dimensional) {
-    const f32 radius = part->field_0e4;
-    NUVEC minimum = part->position;
-    NUVEC maximum = part->position;
-    minimum.x -= radius;
-    maximum.x += radius;
-    minimum.y -= radius;
-    maximum.y += radius;
-    minimum.z -= radius;
-    maximum.z += radius;
-    GameObject_s *object = Obj;
-    i8 force_player_mask = part->force_player_mask;
-    auto part_pickup_type = part->pickup_type;
-    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
-        APIOBJECT_s *api = &object->apiobj;
-        if ((api->field_0x1f8 & 0x1001) != 0x1001 || api->field_0x287 != 0)
-            continue;
-        i8 context = static_cast<i8>(object->character_context);
-        if ((CInfo[context].flags & 0x8000) != 0 || (object->field_0xe20 & 0x20) != 0)
-            continue;
-        if (force_player_mask == 0) {
-            if (part->owner == object) {
-                if (part->scale_time < 0.5f)
-                    continue;
-            } else if (api->field_0x27c != -1 && part->scale_time < 0.25f)
-                continue;
-        } else if ((part->flags & 0x8000) == 0 && part->owner == object)
-            continue;
-        if (context == 0x39 || context == 0x3b || context == 0x3c)
-            continue;
-        if ((part->flags & 0x4000) != 0 && part->field_207 == api->field_0x289)
-            continue;
-        if ((part->flags & 4) != 0 && (api->flags_low & 0x80) == 0)
-            continue;
-        if (minimum.x > api->collision_max.x || api->collision_min.x > maximum.x || minimum.z > api->collision_max.z ||
-            api->collision_min.z > maximum.z)
-            continue;
-        if (three_dimensional != 0) {
-            if ((api->character_data->model_flags & 0x2000) != 0 && (part->flags & 0x40) != 0)
-                goto collect_pickup;
-            if (minimum.y > api->collision_max.y || api->collision_min.y > maximum.y)
-                continue;
-        }
-        if ((part->flags & 0x40) == 0) {
-            GAMECHARACTERDATA_s *character = static_cast<GAMECHARACTERDATA_s *>(api->character_data->field11_0x24);
-            if ((character->flags_090 & 0x8000) != 0)
-                continue;
-            if (!SphereSphereOverlapScaleY(&part->position, part->field_0e4, part->field_0e4, &api->collision_position,
-                                           api->collision_radius, api->field_0x1e0))
-                continue;
-            if (!((part->active & 2) != 0 && (part->flags & 0x1000008) == 0x1000008))
-                KillPart(part, 1);
-            if ((part->flags & 8) != 0 && !((part->flags & 0x1000000) != 0 && (part->active & 2) != 0) &&
-                ((api->flags_low & 0x80) != 0 || (part->flags & 0x800000) == 0)) {
-                u32 flags = CInfo[static_cast<i8>(object->character_context)].flags;
-                if ((flags & 0x4000000) != 0 || ((flags & 0x8000000) != 0 && (object->jump_flags & 2) != 0)) {
-                    i32 effect = -1;
-                    if (object->id == id_BOB)
-                        effect = (object->field_0xefd & 2) != 0 ? 2 : 3;
-                    else if (object->blade_index != -1)
-                        effect = BladeTab[object->blade_index].hit_effect;
-                    DeflectPart(part, object, ForceThrowSpeed, ForceThrowGravity, 0, effect);
-                } else {
-                    GameCam_Judder(GameCam, 0.2f, 0, NULL);
-                    ReleaseBuildIt(object, 0);
-                    ReleasePush(object);
-                    if (object->field_0xd24 >= 1.0f)
-                        ObjHitShield(part->owner, object, object->field_0xe37, NULL);
-                    else if (!CannotKill(object)) {
-                        ObjHitObj((part->flags & 0x10000) != 0 ? NULL : part->owner, object, part->field_204,
-                                  static_cast<u16>(part->force_flags), 0, 1);
-                    } else if (part->owner != NULL) {
-                        NewRumble(part->owner->pad_gamepad->pad, 0.5f, 0);
-                        NewRumble(object->pad_gamepad->pad, 0.5f, 0);
-                    }
-                }
-            }
-            if (api->field_0x287 != 0 || (api->flags_low & 2) != 0)
-                continue;
-            if ((part->active & 1) == 0) {
-                f32 speed = static_cast<GAMECHARACTERDATA_s *>(api->character_data->field11_0x24)->run_speed;
-                if (api->scaled_radius > 1.0f)
-                    speed /= api->scaled_radius;
-                NUVEC direction;
-                NuVecNorm(&direction, &part->velocity);
-                api->velocity.x += direction.x * speed;
-                api->velocity.z += direction.z * speed;
-            }
-            if ((part->flags & 0x2000000) != 0 && ((part->flags & 0x4000000) == 0 || (part->active & 2) != 0)) {
-                u16 angle = NuAtan2D(api->position.x - part->position.x, api->position.z - part->position.z);
-                f32 speed = static_cast<GAMECHARACTERDATA_s *>(api->character_data->field11_0x24)->run_speed;
-                api->field_0x1fc = NU_SIN_LUT(angle) * speed;
-                api->field_0x204 = NU_COS_LUT(angle) * speed;
-            }
-        } else {
-        collect_pickup:
-            if ((part->active & 2) == 0) {
-                if (part_pickup_type == 0xcb) {
-                    if (!(part->scale_time >= 0.5f))
-                        continue;
-                    if (VehicleArea == 0 && (static_cast<i8>(object->current_hp) <= 0 ||
-                                             static_cast<i8>(object->current_hp) >= object->hitpoints))
-                        continue;
-                } else if (!(part->scale_time >= 0.1f))
-                    continue;
-            }
-            if ((api->field_0x1f4 & 0x40000) != 0) {
-                KillPart(part, 2);
-                continue;
-            }
-            if (part_pickup_type == 0xcb) {
-                CollectHitPoint(object, &part->position, 1);
-                KillPart(part, 2);
-            } else if (part_pickup_type == 0xd0) {
-                CollectPowerUp(object, &part->position, part->rotation_y, 1);
-                KillPart(part, 2);
-            } else if (force_player_mask == 3) {
-                if ((api->character_data->model_flags & 0x2000) == 0 || object->torpedo == NULL)
-                    continue;
-                if (object->torpedo->count < getMaxTorpedos(object)) {
-                    TORPEDOPACKET_s *packet = object->torpedo;
-                    packet->pickup_positions[packet->count] = part->position;
-                    packet->pickup_data[packet->count] = part->field_10c[0];
-                    packet->pickup_flags[packet->count] = part->field_10c[1];
-                    ++packet->count;
-                    object->torpedo->field_08 = 0.0f;
-                    object->torpedo->field_03 = 0;
-                    KillPart(part, 2);
-                }
-            } else {
-                GIZMOPICKUP_s pickup;
-                SetCoinType(part_pickup_type, &pickup);
-                GizmoPickup_CollectCoin(WORLD, &part->position, pickup.type_index, pickup.model_variant, object, 1);
-                KillPart(part, 2);
-            }
-        }
-    }
-}
+static void PartCollide(PART_s *part, i32 three_dimensional);
 
 
 extern "C" f32 coinimpactwait;
@@ -692,13 +555,9 @@ void MakePartVector(NUVEC *velocity, NUVEC *direction, f32 scale) {
     }
 }
 
-void PartCollide_2D(PART_s *part) {
-    PartCollide(part, 0);
-}
+void PartCollide_2D(PART_s *part);
 
-void PartCollide_3D(PART_s *part) {
-    PartCollide(part, 1);
-}
+void PartCollide_3D(PART_s *part);
 
 WORLDINFO_s *WorldInfo_CurrentlyActive();
 extern f32 FRAMETIME;
@@ -804,38 +663,7 @@ i32 PartDraw_Flickerer(PART_s *part) {
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 
-void PartKill_ForceThrow(PART_s *part, i32) {
-    LEVELDATA *level = WorldInfo_CurrentlyActive()->current_level;
-    i32 debris = -1;
-    i32 part_debris = -1;
-    if (level == CLOUDCITYTRAPB_LDATA) {
-        debris = 0x75;
-        part_debris = 8;
-    } else if (level == MAULA_LDATA) {
-        debris = 0x2d;
-        part_debris = 9;
-    } else if (level == MAULF_LDATA) {
-        i32 type = 11;
-        if (NuSpecialExistsFn(&LevHSpecial[0]) && NuSpecialCompare(&LevHSpecial[0], &part->special))
-            type = 11;
-        else if (NuSpecialExistsFn(&LevHSpecial[1]) && NuSpecialCompare(&LevHSpecial[1], &part->special))
-            type = 12;
-        else if (NuSpecialExistsFn(&LevHSpecial[2]) && NuSpecialCompare(&LevHSpecial[2], &part->special))
-            type = 13;
-        part_debris = type;
-    } else if (level == DOOKUC_LDATA) {
-        debris = 0x34;
-        part_debris = 10;
-    }
-    if (debris != -1)
-        AddGameDebris(WORLD->debris_sys, debris, &part->position);
-    if (part_debris != -1)
-        AddPartDebris(WORLD->part_debris_sys, part_debris, &part->position);
-    NewRumbleAllPlayers(0.7f, 0.0f, 0, 0);
-    GameCam_Judder(GameCam, qrand() > 0x7fff ? -0.4f : 0.4f, 2, NULL);
-    GameCam_NewShake(GameCam, 0.6f, 0.6f, 1.0f);
-    PlaySfx("Explode1", &part->position);
-}
+void PartKill_ForceThrow(PART_s *part, i32);
 
 void PartImpact_Basketball(PART_s *part);
 

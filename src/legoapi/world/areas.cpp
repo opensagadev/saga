@@ -62,52 +62,7 @@ static void AddToModelList(APICHARACTERMODELLIST_s *list, i32 *count, i32 capaci
     }
 }
 
-void Areas_OpenAll(i32 mode) {
-    i32 area_index;
-
-    if (mode != 0 && !Store_IsPackUnlocked(STORE_PACK_CHALLENGE)) {
-        return;
-    }
-
-    for (area_index = 0; area_index < AREACOUNT; area_index++) {
-        if ((ADataList[area_index].flags & AREAFLAG_MINIKIT) != 0) {
-            if ((ADataList[area_index].episode_index == AREA_EPISODE_II &&
-                 !Store_IsPackUnlocked(STORE_PACK_EPISODE_II)) ||
-                (ADataList[area_index].episode_index == AREA_EPISODE_III &&
-                 !Store_IsPackUnlocked(STORE_PACK_EPISODE_III)) ||
-                (ADataList[area_index].episode_index == AREA_EPISODE_IV &&
-                 !Store_IsPackUnlocked(STORE_PACK_EPISODE_IV)) ||
-                (ADataList[area_index].episode_index == AREA_EPISODE_V &&
-                 !Store_IsPackUnlocked(STORE_PACK_EPISODE_V)) ||
-                (ADataList[area_index].episode_index == AREA_EPISODE_VI &&
-                 !Store_IsPackUnlocked(STORE_PACK_EPISODE_VI))) {
-                continue;
-            }
-        } else if ((ADataList[area_index].flags & (AREAFLAG_VEHICLE_AREA | AREAFLAG_SUPER_BONUS_AREA)) ==
-                       AREAFLAG_BONUS_AREA &&
-                   ADataList[area_index].episode_index != AREA_EPISODE_NONE &&
-                   !Store_IsPackUnlocked(STORE_PACK_ARCADE)) {
-            continue;
-        }
-
-        if (mode != 0) {
-            Game.area_save[area_index].reserved_0x7 = 1;
-        } else {
-            Game.area_save[area_index].complete = 1;
-            Game.area_save[area_index].area_complete = 1;
-            if (ADataList[area_index].challenge_trial_time != 0) {
-                Game.area_save[area_index].challenge_trial_time =
-                    static_cast<f32>(static_cast<u32>(ADataList[area_index].challenge_trial_time)) - 0.5f;
-            }
-        }
-    }
-
-    Game.field_0x2[1] = 1;
-    if (WORLD != NULL && WORLD->current_level == HUB_LDATA) {
-        Hub_LockUnlockDoors(WORLD);
-    }
-    ReCalculateCompletionPoints();
-}
+void Areas_OpenAll(i32 mode);
 
 AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd, i32 count, i32 *countDest) {
     nufpar_s *fp = NuFParCreate(file);

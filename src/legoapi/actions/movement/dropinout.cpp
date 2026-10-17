@@ -94,37 +94,7 @@ f32 DropInOutScale(GameObject_s *object) {
     return 1.0f;
 }
 
-i32 FreePlay_DropInToPlayerPos(GameObject_s *object) {
-    i32 result = 0;
-    if ((WORLD == NULL || WORLD->current_level != FACTORYF_LDATA) && player != NULL && FreePlay != 0 &&
-        drop_in_teleport > 1 && VehicleArea == 0 && (Arcade != 0 || teleport_all_freeplay_modes != 0) &&
-        object->field_0xcc0 == NULL && (CInfo[static_cast<i8>(object->character_context)].flags & 0x8000) == 0 &&
-        object->character_context != 0x2b && object->apiobj.model_draw_result == 0 && (object->tag_flags & 2) == 0) {
-        NUVEC position = player->apiobj.last_safe_position;
-        if (position.x == player->apiobj.position.x && position.y == player->apiobj.position.y &&
-            position.z == player->apiobj.position.z) {
-            position.z += 0.01f;
-        }
-
-        if (NuCameraClipTestSphere(&position, object->apiobj.field_0x1e0, &numtx_identity) == 0) {
-            ResetPlayerMoves(object);
-            Player_ClearContext(object, 1);
-            Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
-            object->apiobj.start_position = position;
-            object->apiobj.position = position;
-            object->apiobj.velocity = v000;
-            object->apiobj.field_0x276 = player->apiobj.field_0x276;
-            ResetPlayerMoves(object);
-            object->apiobj.movement_stuck_time = 0.0f;
-            InitSurfaceInfo(object);
-            SetObjOnSurface(object, 1);
-            GameObjectOrigin(object);
-            AddGameDebris(WORLD->debris_sys, 0x5c, &object->apiobj.collision_position);
-            result = 1;
-        }
-    }
-    return result;
-}
+i32 FreePlay_DropInToPlayerPos(GameObject_s *object);
 
 void DropOut(i32 player_index, i32 resume, i32 silent, i32) {
     GameObject_s *object = Player[player_index];

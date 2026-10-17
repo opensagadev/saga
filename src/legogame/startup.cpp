@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 // Startup / permanent-data loading.
 //
 // This TU owns the permanent arena bootstrap and the loading-screen frame
@@ -222,6 +225,349 @@ static NUMTL *legal_mtl;   // material wrapping the legal texture
 // Permanent-data initialisation (background thread entry).
 // ---------------------------------------------------------------------------
 
+static void LoadPermData(BGPROCINFO *proc);
+
+// ---------------------------------------------------------------------------
+// Public permutations — thin wrappers that set up the arena.
+// ---------------------------------------------------------------------------
+
+void StartPerm(void) {
+    permbuffer_ptr.addr = permbuffer_base.addr;
+    permbuffer_end.addr = superbuffer_end.addr;
+}
+
+void LoadPerm(void);
+
+// libTTapp.so 0x470de0: close the permbuffer, carve out the character
+// buffer, and split the remaining superbuffer in half between the two world
+// bump buffers. This is what gives each WORLDINFO its buffer_start /
+// giz_buffer / buffer_end cursors that WorldInfo_Reset restores.
+void EndPerm(void) {
+    usize aligned = ALIGN(permbuffer_ptr.addr, 4);
+    permbuffer_end.addr = aligned;
+    permbuffer_size = (i32)(aligned - permbuffer_base.addr);
+
+    characterbuffer_ptr.addr = aligned;
+    characterbuffer_base.addr = aligned;
+    usize world_start = aligned + static_cast<usize>(CHARACTERBUFFERSIZE);
+    characterbuffer_end.addr = world_start;
+    superbuffer_ptr.addr = world_start;
+    superbuffer_base.addr = world_start;
+
+    usize half = (superbuffer_end.addr - world_start) >> 1;
+    WorldInfo[0].giz_buffer.addr = world_start;
+    WorldInfo[0].buffer_start = reinterpret_cast<void *>(world_start);
+    WorldInfo[0].unknown_0108.addr = world_start + half;
+    WorldInfo[1].giz_buffer.addr = world_start + half;
+    WorldInfo[1].buffer_start = reinterpret_cast<void *>(world_start + half);
+    WorldInfo[1].unknown_0108.addr = superbuffer_end.addr;
+    editbuffer_end.addr = superbuffer_end.addr - static_cast<usize>(EDITBUFFERENDSIZE);
+}
+
+// ==== src/legoapi/characters/core/players.cpp: declarations ====
+#include "decomp.h"
+#include "legoapi/world/world.h"
+struct HINT_s;
+
+#include <stdio.h>
+#include <string.h>
+
+#include "gameapi/edtools/edstubs.h"
+#include "gameapi/gui/apimenu.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "globals.h"
+#include "legoapi/world/area.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/charconfig.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/gizmos/transport/gizportal.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/world/levels/episode.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/world/level.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/props/system/socksys.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/render/light/lighting.h"
+#include "legoapi/core/input/timer.h"
+#include "legogame/game.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nucore/nutime.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/nufile/nufpar.h"
+#include "nu2api/numath/nutrig.h"
+
+struct MechTouchUIElement;
+struct PLAYERITEM_s;
+struct PLAYERITEMTYPE_s;
+struct PLAYERPACKET_s;
+struct SOCKPOSITION_s;
+struct TouchHolder;
+
+void CheckForPlayersTurnedOff();
+
+extern "C" NUVEC plr_lastpos;
+
+extern void GetTopBot(GameObject_s *obj);
+extern f32 FindGunshipHoverHeight(GameObject_s *obj);
+extern f32 GetVehicleSpeedMul(GameObject_s *obj, f32 input);
+extern i32 ObjInNarrowSock(GameObject_s *obj, SOCKSYS *socks, i32 level);
+extern i32 complexsockposition_forcesock;
+extern i32 movegamecamera_forcesock;
+extern AREADATA *BONUS_GUNSHIP_ADATA;
+extern AREADATA *BATTLEOVERCORUSCANT_ADATA;
+extern i32 LevFlag[4];
+extern void GameObjectDimensions(GameObject_s *obj);
+extern void GameObjectOrigin(GameObject_s *obj);
+extern void ResetRumble(RUMBLEPACKET *packet);
+extern void CurrentStart(GameObject_s *obj, i32 mode, i32 start);
+extern void InitSurfaceInfo(GameObject_s *obj);
+extern i32 SetObjOnSurface(GameObject_s *obj, i32 mode);
+extern void GizForce_ResetLOS(GameObject_s *obj);
+void Arcade_PlayerKilled(i32 player, i32 active);
+void ResetPlayerAI(GameObject_s *obj);
+void ResetPlayerMoves(GameObject_s *obj);
+void SetProtocolDroidDeactivatedAction(GameObject_s *);
+i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode);
+void NewBuzz(nupad_s *, f32, i32);
+void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
+f32 VehicleTurnOrLoopOffset(GameObject_s *object);
+void Player_ClearContext(GameObject_s *object, i32 mode);
+void Player_ResetContexts(PLAYERPACKET_s *packet);
+extern "C" f32 chattersfxwait;
+
+void Players_Init(void);
+
+// --- Helpers moved from world.cpp ---
+
+
+
+void Players_InitPositions(WORLDINFO *world);
+
+
+extern i8 BoltType_FindIDByName(char *name, WORLDINFO *world);
+
+void PlayerItemTypes_Reset(WORLDINFO *world);
+
+GameObject_s *AddCreature(i32 id, i32 param);
+
+
+void PreResetCode(GameObject_s *obj);
+
+void PostResetCode(GameObject_s *obj);
+
+void SetHitPoints(GameObject_s *obj, i32 hp);
+
+void RememberPlayerIDs(i32 a, i32 b, i32 c);
+
+// ---- Player start spawn entries ----
+extern PLAYERSTARTENTRY PlayerStart[8];
+
+// ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
+
+void *CutScenePlayer_Available(void);
+
+void ChatterSfx(GameObject_s *g, i32 a, float b);
+
+void DrawOffsetCode(GameObject_s *obj, i32 param);
+
+float GetHoverPosY(GameObject_s *obj);
+
+void PlayerItem_Set(PLAYERITEM_s *item, PLAYERITEMTYPE_s *type);
+
+GameObject_s *Player_FindByID(i32 id);
+
+NUVEC *Player_StartPos(GameObject_s *obj);
+
+i32 PlayersDropInOut();
+
+i32 PlayerItem_GotAmmo(PLAYERITEM_s *item);
+
+i32 Players_AveragePos(nuvec_s *position, SOCKPOSITION_s *socket_position);
+
+i32 Players_BothActive();
+
+PLAYERITEMTYPE_s *PlayerItemType_Find(i32 id);
+
+extern void (*Player_ClearContextFn)(GameObject_s *, i32);
+void Whip_Release(GameObject_s *);
+i32 SpecialMove_ReleaseVictim(GameObject_s *);
+
+void Player_ClearContext(GameObject_s *object, i32 mode);
+
+i32 Player_HasFastBuild(GameObject_s *player);
+
+void PlayerItemTypes_Init(PLAYERITEMTYPE_s *types);
+
+void Player_ResetContexts(PLAYERPACKET_s *packet);
+
+void Player_CopyEssentials(GameObject_s *source, GameObject_s *destination);
+
+i32 Player_HasDeflectBolts(GameObject_s *object);
+
+extern i32 FULLDEBUGTOGGLE;
+extern i32 LIFTPLAYER;
+extern f32 TOGGLEREPEATTIME;
+extern i32 (*Player_ToggleSubCharacterFn)(GameObject_s *, i32, i32);
+extern void (*Player_ToggledCharacterFn)(GameObject_s *, i32);
+extern FadeSystem FadeSys;
+extern i32 LEGOHINT_FREEPLAYTOGGLE;
+void Hint_SetComplete(i32 hint_id);
+void Move_DEFAULT(GameObject_s *object);
+void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode);
+void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
+
+void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound);
+
+i32 Player_HasInvincibility(GameObject_s *object);
+
+i32 Player_HasDoubleBoltDamage(GameObject_s *object);
+
+void PlayerButton_OnHold_Callback(MechTouchUIElement &element, TouchHolder &);
+
+i32 Player_HasDoubleWeaponDamage(GameObject_s *object);
+
+void PlayerButton_OnLeave_Callback(MechTouchUIElement &element, TouchHolder &holder);
+
+i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *bolt);
+
+void PlayerButton_OnClick_Callback_NextButton(MechTouchUIElement &element, TouchHolder &);
+
+extern u32 (*CanPushObstaclesFn)(GameObject_s *);
+
+namespace {
+
+
+
+} // namespace
+
+void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap_to_surface);
+
+void StarWars_AutoSetAICapabilities(GameObject_s *object);
+i32 CanPullLevers(i32 id);
+extern f32 DEFAULT_MOVE_RANGE;
+
+void SetFlicker(GameObject_s *object, float duration);
+
+#include "legoapi/characters/core/players_types.h"
+
+
+void InitPlayerAI(GameObject_s *object);
+
+void ResetPlayerAI(GameObject_s *object);
+
+void StarWars_AutoSetAICapabilities(GameObject_s *object);
+
+i32 MakePlayerList(i32 count);
+
+void ResetPlayerPacket(PLAYERPACKET_s *, CHARACTERDATA_s *);
+void ResetCharacterIdle(GameObject_s *, i32, i32);
+void SetGameObjectCharacterData(GameObject_s *);
+void ResetCoinPacket(COINPACKET_s *);
+
+void ResetPlayerMoves(GameObject_s *object);
+
+void SetToLastSafePos(GameObject_s *object);
+
+i32 AvailableToPlayer(u32 character_flags, i32 weapon_action, i32 context, i32 require_all);
+
+i32 GetNumLocalPlayers();
+
+i32 UnderPlayerControl(GameObject_s *object);
+
+i32 ActivePlayerInRange(nuvec_s *position, float range_squared, float *distance_squared);
+
+GameObject_s *GetOtherActivePlayer(GameObject_s *object);
+
+
+DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
+
+
+i32 Player_HasPurpleForce(GameObject_s *obj);
+
+void FixUpLayers();
+
+u32 AdjustLayerBits(u32 mask, GameObject_s *object);
+
+void SetPlayerGroupPosition(f32 x, f32 y, f32 z);
+
+bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, float &distance_squared,
+                            bool require_character_flags, u32 character_flags);
+
+extern i32 (*LastSafePosExtraFn)(GameObject_s *);
+extern void (*GameObjectDimensionsExtraFn)(GameObject_s *);
+
+void CheckForPlayersTurnedOff();
+
+bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player, float &distance_squared,
+                               bool require_character_flags, u32 character_flags);
+
+void AveragePlayerCurrentSpeedMul();
+
+void SetPlayer();
+
+// ==== src/legoapi/actions/movement/dropinout.cpp: declarations ====
+#include "decomp.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/action_info.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/menus/screens/gamestructure.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/world/world.h"
+#include "globals.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nucore/nupad.h"
+#include "nu2api/numath/nutrig.h"
+
+struct AIROW_s;
+struct nuqthdr_s;
+struct nunativegscene_s;
+struct SHOPINPUT;
+
+extern i32 drop_in_teleport;
+extern i32 teleport_all_freeplay_modes;
+
+void ResetPlayerMoves(GameObject_s *object);
+void Player_ClearContext(GameObject_s *object, i32 mode);
+void Player_ResetContexts(PLAYERPACKET_s *packet);
+void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
+void ReleaseEat(GameObject_s *object);
+void AICreatureResumeScript(GameObject_s *object);
+
+void StartDropIn(GameObject_s *object);
+
+void StartDropOut(GameObject_s *object);
+
+void DropInOutCode(GameObject_s *object);
+
+f32 DropInOutScale(GameObject_s *object);
+
+i32 FreePlay_DropInToPlayerPos(GameObject_s *object);
+
+void DropOut(i32 player_index, i32 resume, i32 silent, i32);
+
+// ==== functions in original address order ====
+
 static void LoadPermData(BGPROCINFO *proc) {
     InitMemCard();
 
@@ -386,15 +732,6 @@ static void LoadPermData(BGPROCINFO *proc) {
 
     permbuffer_ptr.addr = ALIGN(permbuffer_ptr.addr, 0x10);
     PermDataLoaded = 1;
-}
-
-// ---------------------------------------------------------------------------
-// Public permutations — thin wrappers that set up the arena.
-// ---------------------------------------------------------------------------
-
-void StartPerm(void) {
-    permbuffer_ptr.addr = permbuffer_base.addr;
-    permbuffer_end.addr = superbuffer_end.addr;
 }
 
 void LoadPerm(void) {
@@ -695,28 +1032,69 @@ void LoadPerm(void) {
     WORLD = saved_world;
 }
 
-// libTTapp.so 0x470de0: close the permbuffer, carve out the character
-// buffer, and split the remaining superbuffer in half between the two world
-// bump buffers. This is what gives each WORLDINFO its buffer_start /
-// giz_buffer / buffer_end cursors that WorldInfo_Reset restores.
-void EndPerm(void) {
-    usize aligned = ALIGN(permbuffer_ptr.addr, 4);
-    permbuffer_end.addr = aligned;
-    permbuffer_size = (i32)(aligned - permbuffer_base.addr);
+void CheckForPlayersTurnedOff() {
+    for (i32 source_index = 0; source_index < 2; ++source_index) {
+        GameObject_s *source = Player[source_index];
+        if (source != NULL && (source->apiobj.flags_high & APIOBJECT_HIGH_FLAG_CHARACTER) == 0) {
+            for (i32 target_index = 2; target_index < 8; ++target_index) {
+                GameObject_s *target = Player[target_index];
+                if (target == NULL || (target->tag_flags & 2) != 0 || (target->field_0xefb & 4) != 0 ||
+                    target->character_context == 0x24 || target->character_context == 0x1f) {
+                    continue;
+                }
 
-    characterbuffer_ptr.addr = aligned;
-    characterbuffer_base.addr = aligned;
-    usize world_start = aligned + static_cast<usize>(CHARACTERBUFFERSIZE);
-    characterbuffer_end.addr = world_start;
-    superbuffer_ptr.addr = world_start;
-    superbuffer_base.addr = world_start;
-
-    usize half = (superbuffer_end.addr - world_start) >> 1;
-    WorldInfo[0].giz_buffer.addr = world_start;
-    WorldInfo[0].buffer_start = reinterpret_cast<void *>(world_start);
-    WorldInfo[0].unknown_0108.addr = world_start + half;
-    WorldInfo[1].giz_buffer.addr = world_start + half;
-    WorldInfo[1].buffer_start = reinterpret_cast<void *>(world_start + half);
-    WorldInfo[1].unknown_0108.addr = superbuffer_end.addr;
-    editbuffer_end.addr = superbuffer_end.addr - static_cast<usize>(EDITBUFFERENDSIZE);
+                if (target->apiobj.field_0x27d != 0 ||
+                    (target->field_0xe31 == 1 && target->apiobj.character_data->game_character->field_0x28 > 0.0f)) {
+                    TagCharacter(Player[source_index], target, 1);
+                }
+            }
+        }
+    }
 }
+
+i32 GetNumLocalPlayers() {
+    i32 count = 0;
+    if (Player[0] != NULL)
+        count = static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0;
+    if (Player[1] != NULL && Player[1]->apiobj.player_controlled)
+        count++;
+    return count;
+}
+
+i32 FreePlay_DropInToPlayerPos(GameObject_s *object) {
+    i32 result = 0;
+    if ((WORLD == NULL || WORLD->current_level != FACTORYF_LDATA) && player != NULL && FreePlay != 0 &&
+        drop_in_teleport > 1 && VehicleArea == 0 && (Arcade != 0 || teleport_all_freeplay_modes != 0) &&
+        object->field_0xcc0 == NULL && (CInfo[static_cast<i8>(object->character_context)].flags & 0x8000) == 0 &&
+        object->character_context != 0x2b && object->apiobj.model_draw_result == 0 && (object->tag_flags & 2) == 0) {
+        NUVEC position = player->apiobj.last_safe_position;
+        if (position.x == player->apiobj.position.x && position.y == player->apiobj.position.y &&
+            position.z == player->apiobj.position.z) {
+            position.z += 0.01f;
+        }
+
+        if (NuCameraClipTestSphere(&position, object->apiobj.field_0x1e0, &numtx_identity) == 0) {
+            ResetPlayerMoves(object);
+            Player_ClearContext(object, 1);
+            Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
+            object->apiobj.start_position = position;
+            object->apiobj.position = position;
+            object->apiobj.velocity = v000;
+            object->apiobj.field_0x276 = player->apiobj.field_0x276;
+            ResetPlayerMoves(object);
+            object->apiobj.movement_stuck_time = 0.0f;
+            InitSurfaceInfo(object);
+            SetObjOnSurface(object, 1);
+            GameObjectOrigin(object);
+            AddGameDebris(WORLD->debris_sys, 0x5c, &object->apiobj.collision_position);
+            result = 1;
+        }
+    }
+    return result;
+}
+
+i32 PlayersDropInOut() {
+    CheckForPlayersTurnedOff();
+    return 0;
+}
+

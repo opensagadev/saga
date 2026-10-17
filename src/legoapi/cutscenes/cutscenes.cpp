@@ -102,12 +102,6 @@ extern AREADATA_s *BONUS_GUNSHIP_ADATA;
 extern AREADATA_s *GUNSHIP_ADATA;
 extern AREADATA_s *BATTLEOVERCORUSCANT_ADATA;
 
-static NUVEC PodRaceADiePos = {350.0f, 0.25f, -15.0f};
-static NUVEC PodRaceBDiePos = {138.0f, 0.15f, 178.0f};
-static NUVEC PodRaceCDiePos = {140.0f, -7.2f, 52.0f};
-static NUVEC GunshipADiePos = {10.0f, -1.0f, -20.0f};
-static NUVEC GunshipBDiePos = {0.0f, -1.0f, -150.0f};
-static NUVEC PodAvalanchePeakPos = {-110.0f, -10.0f, -455.0f};
 static u8 CutBlobShadowAlpha;
 static f32 CutBlobShadowFadeNear;
 static f32 CutBlobShadowFadeFar;
@@ -750,41 +744,7 @@ i32 CutScene_IsSkippable(CUTINFO *cut) {
     return FadeSys.fade == 0.0f && cut != NULL && (cut != CutStopInfo || CutSceneWaiting == 0 || cutaudiopaused == 0);
 }
 
-i32 CutScene_StartFn_LSW(CUTINFO *cut) {
-    LOG_INFO("cutscene start requested cut=%p world=%p", (void *)cut, (void *)WORLD);
-    if (PODRACE_ADATA != NULL && PODRACE_ADATA == WORLD->area) {
-        if (cut != game_cutscenes.podrace_pod_explode && cut != game_cutscenes.podrace_out_of_time) {
-            return 0;
-        }
-        NUMTX matrix;
-        NUVEC *position;
-        NUANG rotation;
-        if (WORLD->current_level == PODRACEA_LDATA) {
-            position = &PodRaceADiePos;
-            rotation = 0;
-        } else {
-            rotation = 0x4000;
-            position = WORLD->current_level == PODRACEB_LDATA ? &PodRaceBDiePos : &PodRaceCDiePos;
-        }
-
-        NuMtxSetRotationY(&matrix, rotation);
-        NuMtxTranslate(&matrix, position);
-        instNuGCutSceneSetMtx(static_cast<instNUGCUTSCENE_s *>(cut->instance), &matrix);
-        return 1;
-    }
-
-    if (BONUS_GUNSHIP_ADATA == NULL || BONUS_GUNSHIP_ADATA != WORLD->area ||
-        cut != game_cutscenes.bonus_gunship_cavalry_explode) {
-        return 0;
-    }
-
-    NUMTX matrix;
-    NUVEC *position = WORLD->current_level == BONUS_GUNSHIPA_LDATA ? &GunshipADiePos : &GunshipBDiePos;
-    NuMtxSetRotationY(&matrix, 0);
-    NuMtxTranslate(&matrix, position);
-    instNuGCutSceneSetMtx(static_cast<instNUGCUTSCENE_s *>(cut->instance), &matrix);
-    return 1;
-}
+i32 CutScene_StartFn_LSW(CUTINFO *cut);
 
 extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
 extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
@@ -1402,20 +1362,7 @@ void CutScene_DrawSubtitles() {
 }
 #undef CUT_STOP
 
-void CutScene_StoppedFn_LSW(CUTINFO *cut) {
-    LOG_INFO("cutscene stopped cut=%p world=%p", (void *)cut, (void *)WORLD);
-    if (cut != game_cutscenes.cutscene) {
-        return;
-    }
-
-    for (i32 i = 50; i <= 51; ++i) {
-        nuhspecial_s *special = &LevHSpecial[i];
-        if (NuSpecialExistsFn(special) != 0) {
-            AddPartDebris(WORLD->part_debris_sys, 0x10, NuSpecialGetDrawPos(special));
-            NuSpecialSetVisibility(special, 0);
-        }
-    }
-}
+void CutScene_StoppedFn_LSW(CUTINFO *cut);
 
 void CutScenes_BGLoadManager() {
     if (cutscene_load_instance != NULL && stream_cut_issued == 0) {
@@ -1511,29 +1458,9 @@ void CutScenes_ConfigureList(char *filename, variptr_u *buffer, variptr_u) {
     }
 }
 
-void CutScene_PreUpdateFn_LSW(CUTINFO *cut) {
-    if (cut != game_cutscenes.podrace_avalanche && cut != game_cutscenes.cutscene) {
-        return;
-    }
+void CutScene_PreUpdateFn_LSW(CUTINFO *cut);
 
-    instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
-    f32 intensity = 111.0f - instance->current_frame;
-    if (-110.0f > intensity) {
-        intensity = 110.0f;
-    }
-    intensity = 1.0f - __builtin_fabsf(intensity) / 110.0f;
-
-    f32 distance = NuVecDist(&GameCam->pos, &PodAvalanchePeakPos, NULL);
-    if (distance < 750.0f) {
-        intensity *= 1.0f - distance / 750.0f;
-    }
-
-    NewRumbleAllPlayers(static_cast<f32>(qrand()) * (1.0f / 65535.0f) * intensity, 0.0f, 0, 0);
-    GameCam_NewShake(GameCam, intensity + intensity, 0.1f, 1.25f);
-}
-
-void CutScene_PostUpdateFn_LSW() {
-}
+void CutScene_PostUpdateFn_LSW();
 
 i32 CutScene_PlayingOrRequested(CUTINFO *cut) {
     if (cut == NULL) {
@@ -1550,64 +1477,7 @@ i32 CutScene_PlayingOrRequested(CUTINFO *cut) {
     return 0;
 }
 
-i32 CutScene_ReplaceCharacterModelFn_LSW(CUTINFO *cut, NUGCUTCHAR_s *character) {
-    if (character == NULL || cut == NULL) {
-        return -1;
-    }
-
-    if (PODRACE_ADATA != NULL && PODRACE_ADATA == WORLD->area) {
-        if (cut != game_cutscenes.podrace_pod_explode && cut != game_cutscenes.podrace_out_of_time &&
-            cut != game_cutscenes.podrace_sebulba) {
-            return -1;
-        }
-        if (id_ANAKINSPOD == -1 || NuStrICmp(apicharsys->char_data[id_ANAKINSPOD].file, character->name) != 0) {
-            return -1;
-        }
-        GameObject_s *vehicle = CutDeadVehiclePlayer != NULL ? CutDeadVehiclePlayer : player;
-        if (vehicle != NULL && vehicle->id == id_ANAKINSPODGREEN) {
-            return vehicle->id;
-        }
-        return -1;
-    }
-
-    if (WORLD->current_level == PODSPRINTA_LDATA) {
-        if (cut != game_cutscenes.podsprint_out_of_time && cut != game_cutscenes.podsprint_sebulba) {
-            return -1;
-        }
-        if (id_ANAKINSNEWPOD == -1 || NuStrICmp(apicharsys->char_data[id_ANAKINSNEWPOD].file, character->name) != 0) {
-            return -1;
-        }
-        GameObject_s *vehicle = CutDeadVehiclePlayer != NULL ? CutDeadVehiclePlayer : player;
-        if (vehicle != NULL && vehicle->id == id_ANAKINSNEWPODGREEN) {
-            return vehicle->id;
-        }
-        return id_ANAKINSNEWPOD;
-    }
-
-    if (BONUS_GUNSHIP_ADATA != NULL && BONUS_GUNSHIP_ADATA == WORLD->area) {
-        if (cut == game_cutscenes.bonus_gunship_cavalry_explode && player != NULL &&
-            player->id == id_REPUBLICGUNSHIP_GREEN) {
-            return player->id;
-        }
-        return -1;
-    }
-
-    if (GUNSHIP_ADATA != NULL && GUNSHIP_ADATA == WORLD->area) {
-        if (cut != game_cutscenes.bonus_gunship_cavalry_explode) {
-            return -1;
-        }
-        if (player != NULL && player->id == id_NEW_REPUBLIC_GUNSHIP_GREEN) {
-            return player->id;
-        }
-        return id_NEW_REPUBLIC_GUNSHIP;
-    }
-
-    if (BATTLEOVERCORUSCANT_ADATA != NULL && BATTLEOVERCORUSCANT_ADATA == WORLD->area &&
-        cut == game_cutscenes.dogfight_die && player != NULL && player->id == id_JEDISTARFIGHTERYELLOWEP3) {
-        return player->id;
-    }
-    return -1;
-}
+i32 CutScene_ReplaceCharacterModelFn_LSW(CUTINFO *cut, NUGCUTCHAR_s *character);
 
 CUTINFO *NewCutScene(CUTINFO *cut, CUTSYS *system, char *name, i32) {
     if (cut == NULL) {

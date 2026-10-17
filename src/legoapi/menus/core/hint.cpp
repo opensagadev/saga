@@ -109,48 +109,7 @@ i32 SmartBomb_UpdateHint(HINT_s *);
 
 extern AREADATA *JABBASPALACE_ADATA;
 
-i32 ShinyMetal_UpdateHint(HINT_s *hint) {
-    if (player == NULL)
-        return 0;
-    if (hint->control_mode_ids[0] == 0x283 && JABBASPALACE_ADATA != NULL &&
-        WORLD->current_level == JABBASPALACEB_LDATA && Game.area_save[JABBASPALACE_ADATA->index].area_complete == 0 &&
-        Mission_Active(NULL) == NULL && (LevGizObst[0] == NULL || LevGizObst[0]->anim_set->state != 0) &&
-        LevBlowUp[0] != NULL && (LevBlowUp[0]->status_flags & 1) == 0) {
-        if (player != NULL &&
-            NuVecDistSqr(&player->apiobj.collision_position, &LevBlowUp[0]->mid_position, NULL) < 25.0f)
-            return 1;
-        if (player2 != NULL &&
-            NuVecDistSqr(&player2->apiobj.collision_position, &LevBlowUp[0]->mid_position, NULL) < 25.0f)
-            return 1;
-    }
-    if (FreePlay == 0) {
-        if (hint->control_mode_ids[0] != 0x2b8) {
-            if (hint->control_mode_ids[0] != 0x283 || AvailableToPlayer(0x1000000, -1, 6, 1) == 0) {
-                return 0;
-            }
-        } else {
-            if ((player->apiobj.character_data->model_flags & 0x1000000) == 0 && player->field_0x108e != 6)
-                return 0;
-        }
-    }
-    GIZMOBLOWUP_s *blowup = WORLD->gizmo_blowups;
-    if (blowup == NULL)
-        return 0;
-    i32 count = WORLD->gizmo_blowup_count;
-    for (i32 i = 0; i < count; ++i, ++blowup) {
-        if ((blowup->draw_flags & 2) == 0 || (blowup->status_flags & 0x804001) != 0x804000)
-            continue;
-        if (NuVecDistSqr(&player->apiobj.position, &blowup->mid_position, NULL) < 4.0f) {
-            if ((player->apiobj.character_data->model_flags & 0x1000000) != 0 || player->field_0x108e == 6)
-                return hint->control_mode_ids[0] == 0x2b8;
-            if (AvailableToPlayer(0x1000000, -1, FreePlay == 0 ? 6 : 0, 1) != 0)
-                return hint->control_mode_ids[0] == 0x283;
-            return hint->control_mode_ids[0] == 0x61d;
-        }
-        count = WORLD->gizmo_blowup_count;
-    }
-    return 0;
-}
+i32 ShinyMetal_UpdateHint(HINT_s *hint);
 
 f32 CurrentHintButtonScale();
 

@@ -346,10 +346,7 @@ NUVEC *Player_StartPos(GameObject_s *obj) {
     return PlayerStart[index].pos != NULL ? PlayerStart[index].pos : PlayerStart[0].pos;
 }
 
-i32 PlayersDropInOut() {
-    CheckForPlayersTurnedOff();
-    return 0;
-}
+i32 PlayersDropInOut();
 
 i32 PlayerItem_GotAmmo(PLAYERITEM_s *item) {
     if (item != NULL && item->type != NULL && item->type->field_0x8 == 2)
@@ -738,14 +735,7 @@ void SetToLastSafePos(GameObject_s *object) {
 
 i32 AvailableToPlayer(u32 character_flags, i32 weapon_action, i32 context, i32 require_all);
 
-i32 GetNumLocalPlayers() {
-    i32 count = 0;
-    if (Player[0] != NULL)
-        count = static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0;
-    if (Player[1] != NULL && Player[1]->apiobj.player_controlled)
-        count++;
-    return count;
-}
+i32 GetNumLocalPlayers();
 
 i32 UnderPlayerControl(GameObject_s *object) {
     return object->apiobj.player_controlled ||
@@ -801,25 +791,7 @@ bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, fl
 i32 (*LastSafePosExtraFn)(GameObject_s *) = NULL;
 void (*GameObjectDimensionsExtraFn)(GameObject_s *) = NULL;
 
-void CheckForPlayersTurnedOff() {
-    for (i32 source_index = 0; source_index < 2; ++source_index) {
-        GameObject_s *source = Player[source_index];
-        if (source != NULL && (source->apiobj.flags_high & APIOBJECT_HIGH_FLAG_CHARACTER) == 0) {
-            for (i32 target_index = 2; target_index < 8; ++target_index) {
-                GameObject_s *target = Player[target_index];
-                if (target == NULL || (target->tag_flags & 2) != 0 || (target->field_0xefb & 4) != 0 ||
-                    target->character_context == 0x24 || target->character_context == 0x1f) {
-                    continue;
-                }
-
-                if (target->apiobj.field_0x27d != 0 ||
-                    (target->field_0xe31 == 1 && target->apiobj.character_data->game_character->field_0x28 > 0.0f)) {
-                    TagCharacter(Player[source_index], target, 1);
-                }
-            }
-        }
-    }
-}
+void CheckForPlayersTurnedOff();
 
 bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player, float &distance_squared,
                                bool require_character_flags, u32 character_flags) {

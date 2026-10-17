@@ -49,25 +49,9 @@ u32 GizObstacles_TotalScore(void *world) {
 
 namespace {
 
-    enum : i32 {
-        GIZOBSTACLE_PROGRESS_CAPACITY = 128,
-        GIZOBSTACLE_PROGRESS_WORDS = GIZOBSTACLE_PROGRESS_CAPACITY / 32,
-    };
+#include "legoapi/gizmos/object/gizobstacle_types.h"
 
-    enum GIZOBSTACLE_ACTIVATE_REVERSE_FLAGS : u32 {
-        GIZOBSTACLE_ACTIVATE_REVERSE_VALIDATE = 0x01,
-        GIZOBSTACLE_ACTIVATE_REVERSE_ALLOW_MATCHING_STATE = 0x04,
-    };
 
-    struct GIZOBSTACLEPROGRESS_s {
-        u32 progress_flag_0[GIZOBSTACLE_PROGRESS_WORDS];
-        u32 progress_flag_1[GIZOBSTACLE_PROGRESS_WORDS];
-        u32 runtime_flag_0[GIZOBSTACLE_PROGRESS_WORDS];
-        u32 runtime_flag_2[GIZOBSTACLE_PROGRESS_WORDS];
-        u32 runtime_flag_3[GIZOBSTACLE_PROGRESS_WORDS];
-        u32 runtime_flag_6[GIZOBSTACLE_PROGRESS_WORDS];
-        u32 runtime_flag_7[GIZOBSTACLE_PROGRESS_WORDS];
-    };
 
     DECOMP_ASSERT(sizeof(GIZOBSTACLEPROGRESS_s) == 0x70, "GIZOBSTACLE progress ABI");
 
@@ -1002,11 +986,6 @@ ADDGIZMOTYPE *GizObstacles_RegisterGizmo(i32 type_id) {
 
 namespace {
 
-    struct OBSTACLE_CHARACTER_DATA_FLAGS_s {
-        u32 flags_0x00;
-        u8 flags_0x04;
-        u8 flags_0x05;
-    };
 
 // Box-trigger and character-flag tests are expanded in place, as in the reference.
 #define OBSTACLE_USES_BOX_TRIGGER(obstacle) ((obstacle)->mode == 5 || (obstacle)->mode == 6)
@@ -1182,11 +1161,7 @@ void GizObstacle_SetPushControlled(GIZOBSTACLE_s *obstacle, GameObject_s *object
     obstacle->animation_speed = speed;
 }
 
-void GizObstacle_SetDefaultSFXFn_LSW(void *, GIZOBSTACLE_s *obstacle) {
-    if (obstacle->mode == 2 && obstacle->trigger_radius < 0.25f) {
-        obstacle->start_sfx_id = static_cast<i16>(GetSfxId("SwPPad"));
-    }
-}
+void GizObstacle_SetDefaultSFXFn_LSW(void *, GIZOBSTACLE_s *obstacle);
 
 void GizObstacle_SetTechnoControlled(GIZOBSTACLE_s *obstacle, float speed) {
     obstacle->progress_external_control = 1;

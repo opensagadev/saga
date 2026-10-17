@@ -36,15 +36,13 @@ extern i16 tSPANISH;
 extern i16 tDANISH;
 extern i16 tPLAYER1, tPLAYER2, tIOSAUTOSAVEWARNING, tLOADING, tSAVING;
 extern char *apitxt_AUTOSAVE_WARNING, *apitxt_LOADING, *apitxt_SAVING;
-char *txt_NULL = const_cast<char *>("?");
-char *apitxt_ENGLISH = const_cast<char *>("English");
-char *apitxt_FRENCH = const_cast<char *>("Fran\xc3\xa7"
-                                         "ais");
-char *apitxt_GERMAN = const_cast<char *>("Deutsch");
-char *apitxt_ITALIAN = const_cast<char *>("Italiano");
-char *apitxt_SPANISH = const_cast<char *>("Espa\xc3\xb1"
-                                          "ol");
-char *apitxt_DANISH = const_cast<char *>("Dansk");
+extern char * txt_NULL;
+extern char * apitxt_ENGLISH;
+extern char * apitxt_FRENCH;
+extern char * apitxt_GERMAN;
+extern char * apitxt_ITALIAN;
+extern char * apitxt_SPANISH;
+extern char * apitxt_DANISH;
 
 // Original .data @0x667ce0; the names are filled in by the static initializer.
 static LANGUAGEDATA Text_LanguageList_Default[7] = {{1, apitxt_ENGLISH}, {2, apitxt_FRENCH},  {4, apitxt_GERMAN},
@@ -338,23 +336,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
     }
     NuQFntPopPrintMode();
 }
-f32 TextPulseTimer(f32 delay) {
-    if (TestForController()) {
-        return 1.0f;
-    }
-
-    f32 elapsed = GlobalTimer.time_elapsed - (LastTouchTime + delay * 4.0f);
-    if (elapsed > 4.0f) {
-        elapsed = NuFmod(elapsed, 4.0f);
-        const i32 angle = static_cast<i32>(elapsed * 0.25f * 65536.0f);
-        f32 pulse = NuTrigTable[(angle >> 1) & 0x7fff] - 0.8f;
-        if (0.0f > pulse) {
-            return 1.0f;
-        }
-        return pulse + 1.0f;
-    }
-    return 1.0f;
-}
+f32 TextPulseTimer(f32 delay);
 static char **TTab_Original;
 static i32 Text_MaxStrings_Overall;
 static u32 *Text_StringBits;
@@ -397,31 +379,7 @@ void Text_MakeScore(u32 score, char *text) {
     Text_InsertCommasIntoNumber(first, text, static_cast<i32>(end - first));
 }
 extern i16 tALONGTIMEAGO;
-void Text_LoadStrings(variptr_u *buf, variptr_u *buf_end) {
-    unsigned char *string_buffer = buf->u8_ptr;
-    char language[32];
-    char path[256];
-
-    TextRegisterButtonMapFn(Text_DecodeButtons);
-    TextRegisterPulseTimerFn(TextPulseTimer);
-    NuStrCpy(language, Text_GetLanguagePath(Text_Language));
-    NuStrCpy(path, "stuff\\text\\");
-    NuStrCat(path, language);
-    NuStrCat(path, ".txt");
-    Text_LoadAndFixUpStrings(reinterpret_cast<unsigned char *>(path), &string_buffer, TTab, 0x70d);
-    IntroText_SetTextID(tALONGTIMEAGO);
-    buf->addr = ALIGN(reinterpret_cast<usize>(string_buffer), 4);
-    if (TTab[tPLAYER1] != NULL)
-        NuStrCpy(Game.customizer[0].name, TTab[tPLAYER1]);
-    if (TTab[tPLAYER2] != NULL)
-        NuStrCpy(Game.customizer[1].name, TTab[tPLAYER2]);
-    FinishWeirdoNames(-1);
-    Customiser_InitNames(CharacterCustomiser);
-    MenuLoadTechnicalStrings(const_cast<char *>("stuff\\text\\trc.csv"), language, buf, *buf_end);
-    apitxt_AUTOSAVE_WARNING = TTab[tIOSAUTOSAVEWARNING];
-    apitxt_LOADING = TTab[tLOADING];
-    apitxt_SAVING = TTab[tSAVING];
-}
+void Text_LoadStrings(variptr_u *buf, variptr_u *buf_end);
 void Text_SetLanguage(i32 language) {
     if (language == -1) {
         language = Text_Language;
@@ -453,11 +411,7 @@ extern i32 ButtonScaleMode;
 
 f32 TextPrintSubstring(unsigned char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, i32 colour,
                        i32 button_font);
-void Text_DecodeButtons(char *source, char *destination) {
-    if (NuStrICmp(source, "wibble") == 0) {
-        NuStrCpy(destination, "cross");
-    }
-}
+void Text_DecodeButtons(char *source, char *destination);
 char *txtpath_JAPANESE = const_cast<char *>("japanese");
 char *txtpath_DANISH = const_cast<char *>("danish");
 char *txtpath_SPANISH = const_cast<char *>("spanish");
@@ -508,49 +462,9 @@ void Text_InitLanguageList(LANGUAGEDATA *language_list) {
         ++LANGUAGECOUNT;
     }
 }
-void Text_SetLanguage_Game(i32 language) {
-    switch (language) {
-        case 0:
-            INTROTEXT_Y = 0.0f;
-            INTROTEXT_SCALE = 1.8f;
-            break;
-        case 2:
-            INTROTEXT_Y = 0.115f;
-            INTROTEXT_SCALE = 0.5f;
-            break;
-        case 3:
-            INTROTEXT_Y = 0.14f;
-            INTROTEXT_SCALE = 0.61f;
-            break;
-        case 4:
-            INTROTEXT_Y = 0.13f;
-            INTROTEXT_SCALE = 0.575f;
-            break;
-        case 5:
-            INTROTEXT_Y = 0.17f;
-            INTROTEXT_SCALE = 0.76f;
-            break;
-        case 8:
-            INTROTEXT_Y = 0.15f;
-            INTROTEXT_SCALE = 0.67f;
-            break;
-        default:
-            INTROTEXT_Y = 0.175f;
-            INTROTEXT_SCALE = 0.79f;
-            break;
-    }
-}
+void Text_SetLanguage_Game(i32 language);
 void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font);
-void Text_InitDefaultStrings() {
-    TTab[tNULL] = txt_NULL;
-    TTab[tUNKNOWN] = txt_UNKNOWN;
-    TTab[tENGLISH] = apitxt_ENGLISH;
-    TTab[tFRENCH] = apitxt_FRENCH;
-    TTab[tGERMAN] = apitxt_GERMAN;
-    TTab[tITALIAN] = apitxt_ITALIAN;
-    TTab[tSPANISH] = apitxt_SPANISH;
-    TTab[tDANISH] = apitxt_DANISH;
-}
+void Text_InitDefaultStrings();
 void Text_LoadAndFixUpStrings(unsigned char *filename, unsigned char **buffer, char **table, i32 count) {
     unsigned char *out = *buffer;
     NUFPAR *parser = NuFParCreate(reinterpret_cast<char *>(filename));
@@ -682,8 +596,7 @@ void Text_ExpandAllButtonStrings(char *input, char *output) {
     }
     *output = '\0';
 }
-void Text_FillInExtendedSaveInfo() {
-}
+void Text_FillInExtendedSaveInfo();
 void Text_InsertCommasIntoNumber(char *number, char *text, i32 length) {
     char separator;
     if (Text_Language == 2) {

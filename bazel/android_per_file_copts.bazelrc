@@ -212,7 +212,6 @@ build:target --per_file_copt=^src/legoapi/gizmos/traps/attracto\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/fx/edgizshadow\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/traps/gizbombgen\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/gizmoblowups\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/gizmo/object/gizmopickups\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/traps/gizforce\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/object/gizpanel\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/fx/gizmopickups\.cpp$@-O3
