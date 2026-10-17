@@ -11,7 +11,7 @@ cc_test(
         "//src:gamelib/util/VirtualStackAllocator.cpp",
         "//src:legoapi/characters/motion/gameanim.cpp",
         "//src:nu2api/nu3d/nu3d_includes.cpp",
-        "//src:nu2api/nucore/nuptrblock.cpp",
+        "//src:nu2api/nucore/nucore_includes.c",
     ],
     additional_compiler_inputs = ["//src:all_source_files"],
     copts = [

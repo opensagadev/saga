@@ -8,6 +8,4 @@ i32 NuInitHardwareFirst(i32, variptr_u *, i32 *, i32) {
 
 void NuDisplayListSetInstSurfGeom(void *);
 
-void NuTerminateHardware() {
-    STUBBED();
-}
+void NuTerminateHardware();

@@ -65,7 +65,4 @@ extern "C" i32 NuMcGetSlotMax(void) {
     return 0;
 }
 
-i32 NuMcFileOpenSize(NUFILE file) {
-    file -= 0x1000;
-    return NuMcOpenSize(file);
-}
+i32 NuMcFileOpenSize(NUFILE file);

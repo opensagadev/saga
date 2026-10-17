@@ -74,318 +74,33 @@ extern "C" {
 void NuRndrInitGeneric(void); // nurndr.cpp (C++ linkage)
 void bgProcInit(void);        // bgproc_android.cpp
 
-NUAPI nuapi;
+extern NUAPI nuapi;
 
-i32 nuapi_use_target_manager;
-char *nuapi_target_manager_mac_address;
-i32 nuapi_deferspotfxload;
-i32 nuapi_use_target_manager_for_sound;
+extern i32 nuapi_use_target_manager;
+extern char * nuapi_target_manager_mac_address;
+extern i32 nuapi_deferspotfxload;
+extern i32 nuapi_use_target_manager_for_sound;
 
 // Frame-end hooks (original bss @0x6bdaec / 0x6bdaf0 / 0x6bdad0).
 void (*preRenderFlashingHack)(void) = NULL;
 void (*postRenderFlashingHack)(void) = NULL;
 void (*nuapi_endframe_callbackfn)(void) = NULL;
 
-float nuapi_forced_frame_time;
-i32 nuapi_max_fps = 60;
+extern float nuapi_forced_frame_time;
+extern i32 nuapi_max_fps;
 
-static i32 NUAPI_PADREC_DEFAULT_BUFFERSIZE = 0x500000;
 // The Android command-line provider is empty. These are still the original
 // private cursors consumed by ParseCommandLine, not host process arguments.
 static i32 argc;
 static char **argv;
 
-void NuAPIInit(void) {
-    memset(&nuapi, 0, sizeof(NUAPI));
-
-    nuapi.fps = 60.0f;
-    nuapi.video_mode = NUVIDEOMODE_NTSC;
-    nuapi.video_swap_mode = NUVIDEO_SWAPMODE_ROLLING;
-    nuapi.language = 1;
-    nuapi.video_aspect = 0;
-    nuapi.disable_os_menu_freeze = 0;
-    nuapi.forced_frame_time = nuapi_forced_frame_time;
-    nuapi.max_fps = nuapi_max_fps;
-
-    NuTimeGet(&nuapi.time);
-
-    nuapi.pad_record.buf_size = NUAPI_PADREC_DEFAULT_BUFFERSIZE;
-    nuapi.pad_record.end_record_buttons = 0;
-    nuapi.pad_record.end_play_buttons = 0;
-
-    NuWindInitialise(nuapi.wind);
-}
+void NuAPIInit(void);
 
 void NuCommandLine(i32 *argc, char ***argv) {
 }
 
-void NuDisableOSMenuFreeze(void) {
-    nuapi.disable_os_menu_freeze = 1;
-}
+void NuDisableOSMenuFreeze(void);
 
-void ParseCommandLine() {
-    while (argc > 0) {
-        if (*argv == NULL) {
-            break;
-        }
-        if (NuStrICmp(*argv, "PADRECORD") == 0) {
-            ++argv;
-            --argc;
-            nuapi.pad_record.filepath = *argv;
-            nuapi.pad_record.mode = NUPAD_RECORD;
-        } else if (NuStrICmp(*argv, "PADPLAY") == 0) {
-            ++argv;
-            --argc;
-            nuapi.pad_record.filepath = *argv;
-            nuapi.pad_record.mode = NUPAD_PLAY;
-        }
-        ++argv;
-        --argc;
-    }
-}
+void ParseCommandLine();
 
-i32 NuInitHardware(VARIPTR *buf, VARIPTR *buf_end, i32 heap_size, ...) {
-    static char *dfs_name = "";
-    static char *sfxdfs_name = NULL;
-    i32 texture_count = 3000;
-    i32 material_count = 512;
-    i32 hostfs = 0;
-    i32 streamsize = 0x200000;
-    NUPAD **pad0 = NULL;
-    NUPAD **pad1 = NULL;
-    NUPAD **pad2 = NULL;
-    NUPAD **pad3 = NULL;
-    i32 video_mode_argument = 2;
-    i32 audio_channels = 4;
-    i32 audio_buffer_size = 4096;
-    i32 *cd_status = NULL;
-    i32 resolution_x = 0;
-    i32 resolution_y = 0;
-    i32 audio_enabled = 1;
-    i32 video_mode = 2;
-    i32 unused = 0;
-    u32 framebuffer_format = 0;
-    i32 flags = 0;
-    i32 occlusion_capacity = 0;
-    i32 animation_count = 160;
-    NUVIDEO_SWAPMODE swapmode = static_cast<NUVIDEO_SWAPMODE>(3);
-    i32 framebuffer_flags;
-    i32 setup_tok;
-    i32 audio_arg;
-    i32 dummy;
-    i32 reserved;
-    i32 audio_first;
-    i32 file_status;
-    NUDATHDR *dat;
-    va_list args;
-    VARIPTR buffer_end;
-
-    swapmode = NUVIDEO_SWAPMODE_FIELDSYNC;
-    NuAPIInit();
-    ParseCommandLine();
-    va_start(args, heap_size);
-    do {
-        setup_tok = va_arg(args, i32);
-        switch (setup_tok) {
-            case NUAPI_SETUP_HOSTFS:
-                hostfs = va_arg(args, i32);
-                break;
-            case 0x16:
-                dfs_name = va_arg(args, char *);
-                break;
-            case 0x19:
-                sfxdfs_name = va_arg(args, char *);
-                break;
-            case NUAPI_SETUP_STREAMSIZE:
-                streamsize = va_arg(args, i32);
-                break;
-            case NUAPI_SETUP_PAD0:
-                pad0 = va_arg(args, NUPAD **);
-                break;
-            case NUAPI_SETUP_PAD1:
-                pad1 = va_arg(args, NUPAD **);
-                break;
-            case 0x10:
-                pad2 = va_arg(args, NUPAD **);
-                break;
-            case 0x11:
-                pad3 = va_arg(args, NUPAD **);
-                break;
-            case NUAPI_SETUP_VIDEOMODE:
-                video_mode_argument = va_arg(args, i32);
-                break;
-            case NUAPI_SETUP_SWAPMODE:
-                swapmode = static_cast<NUVIDEO_SWAPMODE>(va_arg(args, i32));
-                break;
-            case NUAPI_SETUP_RESOLUTION:
-                resolution_x = va_arg(args, i32);
-                resolution_y = va_arg(args, i32);
-                break;
-            case 9:
-                audio_arg = va_arg(args, i32);
-                dummy = va_arg(args, i32);
-                break;
-            case NUAPI_SETUP_AUDIO_DISABLED:
-                audio_enabled = 0;
-                dummy = va_arg(args, i32);
-                dummy = va_arg(args, i32);
-                dummy = va_arg(args, i32);
-                dummy = va_arg(args, i32);
-                break;
-            case 0x1a:
-                texture_count = va_arg(args, i32);
-                break;
-            case 0x1e:
-                audio_channels = va_arg(args, i32);
-                audio_buffer_size = va_arg(args, i32);
-                break;
-            case 0x25:
-                material_count = va_arg(args, i32);
-                break;
-            case 0x3e:
-                nuapi_deferspotfxload = va_arg(args, i32);
-                break;
-            case 0x41:
-                nuapi_use_target_manager = va_arg(args, i32);
-                break;
-            case 0x42:
-                nuapi_use_target_manager = va_arg(args, i32);
-                nuapi_target_manager_mac_address = va_arg(args, char *);
-                break;
-            case 0x43:
-                nuapi_use_target_manager_for_sound = va_arg(args, i32);
-                break;
-            case 0x44:
-                animation_count = va_arg(args, i32);
-                break;
-            case 0x52:
-                NuPadSetMaxGamePads(va_arg(args, i32));
-                break;
-            case 0x45:
-                switch (va_arg(args, i32)) {
-                    case 1:
-                        framebuffer_format = 0;
-                        break;
-                    case 2:
-                        framebuffer_format = 1;
-                        break;
-                    case 4:
-                        framebuffer_format = 2;
-                        break;
-                }
-                break;
-            case NUAPI_SETUP_0x46:
-                flags |= va_arg(args, i32) != 0 ? 4 : 0;
-                break;
-            case NUAPI_SETUP_0x47:
-                flags |= va_arg(args, i32) != 0 ? 8 : 0;
-                break;
-            case 0x48:
-                flags |= va_arg(args, i32) != 0 ? 16 : 0;
-                break;
-            case NUAPI_SETUP_0x49:
-                flags |= va_arg(args, i32) != 0 ? 32 : 0;
-                break;
-            case 0x4a:
-                flags |= va_arg(args, i32) != 0 ? 64 : 0;
-                break;
-            case NUAPI_SETUP_0x4b:
-                flags |= va_arg(args, i32) != 0 ? 128 : 0;
-                break;
-            case 0x4c:
-                occlusion_capacity = va_arg(args, i32);
-                break;
-            case 0x4d:
-                reserved = va_arg(args, i32);
-                break;
-            default:
-                if (NuInitHardwareParseArgsPS(setup_tok, &args) == 0) {
-                    switch (setup_tok) {
-                        case 0x14:
-                            dummy = va_arg(args, i32);
-                            dummy = va_arg(args, i32);
-                            break;
-                        case NUAPI_SETUP_GLASSRPLANE:
-                            dummy = va_arg(args, i32);
-                            break;
-                        case NUAPI_SETUP_AUDIO:
-                            audio_first = va_arg(args, i32);
-                            dummy = va_arg(args, i32);
-                            dummy = va_arg(args, i32);
-                            dummy = va_arg(args, i32);
-                            break;
-                        case NUAPI_SETUP_CDDVDMODE:
-                            dummy = va_arg(args, i32);
-                            break;
-                        case 6:
-                            dummy = va_arg(args, i32);
-                            break;
-                    }
-                }
-                break;
-            case NUAPI_SETUP_END:
-                break;
-        }
-    } while (setup_tok != NUAPI_SETUP_END);
-    va_end(args);
-
-    NuVideoSetMode(video_mode);
-    NuVideoSetSwapMode(swapmode);
-    NuVideoSetResolution(resolution_x, resolution_y);
-    NuInitHardwarePS(buf, buf_end, heap_size);
-    buffer_end = *buf_end;
-    nuapi.video_aspect = NuVideoGetAspectPS();
-    NuVideoSetBrightness(1.0f);
-    file_status = NuFileInitEx(hostfs, 0, 0);
-    if (cd_status != NULL) {
-        if (file_status == -1) {
-            *cd_status = 1;
-        }
-        if (file_status == -2) {
-            *cd_status = 0;
-        }
-    }
-    NuTrigInit();
-    NuRndrInitEx(streamsize, buf, buffer_end);
-    NuPrimInit(buf, buffer_end);
-    NuVpInit();
-    NuTexInitEx(buf, texture_count);
-    NuDisplayListInit(buf, buffer_end);
-    framebuffer_flags = 1;
-    if ((flags & 32) != 0)
-        framebuffer_flags |= 2;
-    if ((flags & 16) != 0)
-        framebuffer_flags |= 4;
-    if ((flags & 12) != 0)
-        framebuffer_flags |= 8;
-    NuFramebufferInitEx(framebuffer_flags, framebuffer_format, buf, buffer_end);
-    NuPostEffectInit(flags | 1, buf, buffer_end);
-    NuMtlInitEx(buf, material_count);
-    NuRndrInitGeneric();
-    NuAnimInit(animation_count, buf, buffer_end);
-    if (dfs_name != NULL && *dfs_name != '\0') {
-        dat = NuDatOpen(dfs_name, buf, NULL);
-        NuDatSet(dat);
-    }
-    NuPadInit();
-    NuOnlineInit();
-    if (pad0 != NULL)
-        *pad0 = NuPadOpen(0, 0);
-    if (pad1 != NULL)
-        *pad1 = NuPadOpen(1, 0);
-    if (pad2 != NULL)
-        *pad2 = NuPadOpen(2, 0);
-    if (pad3 != NULL)
-        *pad3 = NuPadOpen(3, 0);
-    NuQFntInit(buf, buffer_end);
-    NuTimeBarInitEx(buf, buffer_end);
-    NuTimeInitPS();
-    NuOcclusionManagerInit(occlusion_capacity, buf, buffer_end);
-    NuRndrBeginScene(-1);
-    NuRndrClear(0xb00, 0, 1.0f);
-    NuRndrEndScene();
-    NuRndrSwapScreen(0);
-    NuMtlInitOverride(128, buf, &buffer_end);
-    bgProcInit();
-    return 1;
-}
+i32 NuInitHardware(VARIPTR *buf, VARIPTR *buf_end, i32 heap_size, ...);

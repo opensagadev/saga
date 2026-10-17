@@ -14,7 +14,7 @@ extern "C" {
     i32 NuWindWave;
     i32 NuWindDir;
     i32 NuWindDir2;
-    u32 NuWindQS = 0x1365;
+extern u32 NuWindQS;
 
     NuWindGType *NuWindCreateMtx(u32 *source, NUMTX *matrices, i16 count, f32 value20, f32 value24, i32 flags,
                                  f32 near_distance, f32 far_distance) {
@@ -117,10 +117,7 @@ extern "C" {
         }
     }
 
-    u32 NuWindRand(void) {
-        NuWindQS = (NuWindQS * 0x24cd + 1) & 0xffff;
-        return NuWindQS;
-    }
+u32 NuWindRand(void);
 
     extern "C++" NuWindGType *NuWindAllocateGrp() {
         for (i32 index = 0; index < maxgroups; ++index) {

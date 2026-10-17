@@ -12,7 +12,7 @@ cc_test(
         "//src:legoapi/misc/utilities.cpp",
         "//src:legoapi/render/light/lighting.cpp",
         "//src:nu2api/numath/nufloat_android.c",
-        "//src:nu2api/numath/nuvec.cpp",
+        "//src:nu2api/numath/numath_includes.c",
     ],
     additional_compiler_inputs = ["//src:all_source_files"],
     defines = ["ANDROID"],

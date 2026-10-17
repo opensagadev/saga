@@ -319,7 +319,7 @@ struct __attribute__((aligned(16))) NetMessage {
     }
     void Read(void *value, u32 size) {
         if (data != NULL) {
-            memmove(value, data->bytes + read_offset, size);
+            memmove(value, data->bytes + read_offset, static_cast<size_t>(size));
             read_offset += size;
         }
     }
@@ -348,7 +348,7 @@ struct __attribute__((aligned(16))) NetMessage {
     }
     void Write(void const *value, u32 size) {
         if (data != NULL) {
-            memmove(data->bytes + write_offset, value, size);
+            memmove(data->bytes + write_offset, value, static_cast<size_t>(size));
             write_offset += size;
         }
     }

@@ -737,9 +737,7 @@ void NuPause(i32 paused);
 
 void NuSplineList(void);
     extern void (*nuapi_endframe_callbackfn)(void);
-    void NuRegisterEndFrameCallBackFn(void (*callback)(void)) {
-        nuapi_endframe_callbackfn = callback;
-    }
+void NuRegisterEndFrameCallBackFn(void (*callback)(void));
 
     // ---------------------------------------------------------------------------
     // Rendering extras
