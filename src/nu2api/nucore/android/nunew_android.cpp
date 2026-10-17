@@ -1,2 +1,114 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 // The original unit constructs the homogeneous VuVec header constants.
 #include "nu2api/nucore/nuvuvec.hpp"
+
+// ==== src/nu2api/nucore/nunew.cpp: all remaining content ====
+#include <new>
+
+#include "nu2api/nucore/NuMemoryManager.h"
+#include "nu2api/nucore/numemory.h"
+
+void *operator new(std::size_t size);
+
+void *operator new(std::size_t size, u32 alignment);
+
+void *operator new(std::size_t size, const std::nothrow_t &) noexcept;
+
+void *operator new(std::size_t size, u32 alignment, const std::nothrow_t &) noexcept;
+
+void *operator new[](std::size_t size);
+
+void *operator new[](std::size_t size, u32 alignment);
+
+void *operator new[](std::size_t size, const std::nothrow_t &) noexcept;
+
+void *operator new[](std::size_t size, u32 alignment, const std::nothrow_t &) noexcept;
+
+void operator delete(void *ptr) noexcept;
+
+void operator delete(void *ptr, const std::nothrow_t &) noexcept;
+
+void operator delete[](void *ptr) noexcept;
+
+void operator delete[](void *ptr, const std::nothrow_t &) noexcept;
+
+// ==== functions in original address order ====
+
+void *operator new(std::size_t size) {
+    if (g_disallowGlobalNew != false) {
+        g_disallowGlobalNew = false;
+    }
+
+    return NuMemoryGet()->GetThreadMem()->_BlockAlloc(size, 0x10, NuMemoryManager::MEM_ALLOC_SET_TO_ZERO, "_new",
+                                                      NUMEMORY_CATEGORY_NONE);
+}
+
+void *operator new(std::size_t size, u32 alignment) {
+    if (g_disallowGlobalNew != false) {
+        g_disallowGlobalNew = false;
+    }
+
+    return NuMemoryGet()->GetThreadMem()->_BlockAlloc(size, alignment, NuMemoryManager::MEM_ALLOC_SET_TO_ZERO, "_new",
+                                                      NUMEMORY_CATEGORY_NONE);
+}
+
+void *operator new(std::size_t size, const std::nothrow_t &) noexcept {
+    if (g_disallowGlobalNew != false) {
+        g_disallowGlobalNew = false;
+    }
+
+    return NuMemoryGet()->GetThreadMem()->_BlockAlloc(size, 0x10, NuMemoryManager::MEM_ALLOC_SET_TO_ZERO, "_new",
+                                                      NUMEMORY_CATEGORY_NONE);
+}
+
+void *operator new(std::size_t size, u32 alignment, const std::nothrow_t &) noexcept {
+    if (g_disallowGlobalNew != false) {
+        g_disallowGlobalNew = false;
+    }
+
+    return NuMemoryGet()->GetThreadMem()->_BlockAlloc(size, alignment, NuMemoryManager::MEM_ALLOC_SET_TO_ZERO, "_new",
+                                                      NUMEMORY_CATEGORY_NONE);
+}
+
+void *operator new[](std::size_t size) {
+    return NuMemoryGet()->GetThreadMem()->_BlockAlloc(
+        size, 0x10, NuMemoryManager::MEM_ALLOC_SET_TO_ZERO | NuMemoryManager::MEM_ALLOC_ARRAY, "_new",
+        NUMEMORY_CATEGORY_NONE);
+}
+
+void *operator new[](std::size_t size, u32 alignment) {
+    return NuMemoryGet()->GetThreadMem()->_BlockAlloc(
+        size, alignment, NuMemoryManager::MEM_ALLOC_SET_TO_ZERO | NuMemoryManager::MEM_ALLOC_ARRAY, "_new",
+        NUMEMORY_CATEGORY_NONE);
+}
+
+void *operator new[](std::size_t size, const std::nothrow_t &) noexcept {
+    return NuMemoryGet()->GetThreadMem()->_BlockAlloc(
+        size, 0x10, NuMemoryManager::MEM_ALLOC_SET_TO_ZERO | NuMemoryManager::MEM_ALLOC_ARRAY, "_new",
+        NUMEMORY_CATEGORY_NONE);
+}
+
+void *operator new[](std::size_t size, u32 alignment, const std::nothrow_t &) noexcept {
+    return NuMemoryGet()->GetThreadMem()->_BlockAlloc(
+        size, alignment, NuMemoryManager::MEM_ALLOC_SET_TO_ZERO | NuMemoryManager::MEM_ALLOC_ARRAY, "_new",
+        NUMEMORY_CATEGORY_NONE);
+}
+
+void operator delete(void *ptr) noexcept {
+    NuMemoryGet()->GetThreadMem()->BlockFree(ptr, 0);
+}
+
+void operator delete(void *ptr, const std::nothrow_t &) noexcept {
+    NuMemoryGet()->GetThreadMem()->BlockFree(ptr, 0);
+}
+
+void operator delete[](void *ptr) noexcept {
+    NuMemoryGet()->GetThreadMem()->BlockFree(ptr, NuMemoryManager::MEM_ALLOC_ARRAY);
+}
+
+void operator delete[](void *ptr, const std::nothrow_t &) noexcept {
+    NuMemoryGet()->GetThreadMem()->BlockFree(ptr, NuMemoryManager::MEM_ALLOC_ARRAY);
+}
+

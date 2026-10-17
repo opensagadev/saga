@@ -24,7 +24,6 @@ build --per_file_copt=^src/nu2api/nucore/android/nutime_android\.c$@-x,c++,-std=
 build --per_file_copt=^src/nu2api/nucore/android/nuthread\.c$@-x,c++,-std=gnu++11
 # Route, creature, and antinode editor callbacks use optimized frameless PIC control flow.
 # Recovered Android entry points; -O3 also reproduces the static initializer.
-build:target --per_file_copt=^src/java/android\.cpp$@-O3
 # Original OBB lookup uses optimized inlined strlen/strcat and omits leaf frames.
 build:target --per_file_copt=^src/gamelib/util/AndroidOBBUtils\.cpp$@-O3
 # The original cable bodies are optimized; UpdateCables also has the -O3
@@ -299,7 +298,6 @@ build:target --per_file_copt=^src/nu2api/nu3d/nu3d_includes\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/NuApplicationState\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/numemory\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/nupad_interface\.cpp$@-O3
-build:target --per_file_copt=^src/nu2api/nucore/nunew\.cpp$@-O2
 build:target --per_file_copt=^src/nu2api/nucore/nustring_c\.cpp$@-O3
 # Recovered ClassInitPS and UpdateAllPS require the original vectorization and
 # ten-touch loop unrolling: -O3 reproduces both bodies above 99%.

@@ -37,7 +37,6 @@ _ENGINE_DIRS = [
 _ENGINE_ROOT_SRCS = [
     "main.cpp",
     "globals.cpp",
-    "java/android.cpp",
 ]
 
 _ENGINE_SRCS = _ENGINE_ROOT_SRCS + glob(
@@ -47,10 +46,10 @@ _ENGINE_SRCS = _ENGINE_ROOT_SRCS + glob(
 )
 
 _HOST_EXCLUDES = [
-    "java/android.cpp",
     "nu2api/nu3d/android/NuGLES2Extensions.cpp",
+    "nu2api/nucore/android/NuEntryPoint_android.cpp",
     "nu2api/nucore/android/NuInputDevice_android.cpp",
-    "nu2api/nucore/nunew.cpp",
+    "nu2api/nucore/android/nunew_android.cpp",
 ]
 
 _HOST_COMMON_SRCS = [source for source in _ENGINE_SRCS if source not in _HOST_EXCLUDES] + [
