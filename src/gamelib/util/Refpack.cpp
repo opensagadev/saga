@@ -689,7 +689,6 @@ static __used__ void pathEditor_DestroySharedNode(EDAISHAREDPATHNODE_s *shared);
 // ==== src/editor/creature_editor.cpp: all remaining content ====
 
 #include "editor/edpath_types.h"
-#pragma GCC optimize("O2", "omit-frame-pointer")
 
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, valid_positions) == 0x54, "creature valid position mask offset");
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, position) == 0x28, "creature position offset");
@@ -3901,7 +3900,6 @@ extern AIEDITOR_RENDER_STATE * aieditor;
 
 // ==== src/editor/creature_editor.cpp: all remaining content ====
 
-#pragma GCC optimize("O2", "omit-frame-pointer")
 
 // ==== src/editor/locator_editor.cpp: all remaining content ====
 
@@ -4371,7 +4369,6 @@ extern AIEDITOR_RENDER_STATE * aieditor;
 
 // ==== src/editor/creature_editor.cpp: all remaining content ====
 
-#pragma GCC optimize("O2", "omit-frame-pointer")
 
 // ==== src/editor/locator_editor.cpp: all remaining content ====
 
@@ -5465,7 +5462,6 @@ extern AIEDITOR_RENDER_STATE * aieditor;
 
 // ==== src/editor/creature_editor.cpp: all remaining content ====
 
-#pragma GCC optimize("O2", "omit-frame-pointer")
 
 // ==== src/editor/locator_editor.cpp: all remaining content ====
 

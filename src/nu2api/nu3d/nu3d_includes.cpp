@@ -2339,7 +2339,6 @@ static __used__ void pathEditor_DestroySharedNode(EDAISHAREDPATHNODE_s *shared);
 // ==== src/editor/creature_editor.cpp: all remaining content ====
 
 #include "editor/edpath_types.h"
-#pragma GCC optimize("O2", "omit-frame-pointer")
 struct EDCREATURE_s;
 
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, valid_positions) == 0x54, "creature valid position mask offset");
@@ -4104,7 +4103,6 @@ extern AIEDITOR_RENDER_STATE * aieditor;
 
 // ==== src/editor/creature_editor.cpp: all remaining content ====
 
-#pragma GCC optimize("O2", "omit-frame-pointer")
 
 // ==== src/editor/locator_editor.cpp: all remaining content ====
 
@@ -4741,7 +4739,6 @@ extern AIEDITOR_RENDER_STATE * aieditor;
 
 // ==== src/editor/creature_editor.cpp: all remaining content ====
 
-#pragma GCC optimize("O2", "omit-frame-pointer")
 
 // ==== src/editor/locator_editor.cpp: all remaining content ====
 
@@ -7084,7 +7081,6 @@ extern AIEDITOR_RENDER_STATE * aieditor;
 
 // ==== src/editor/creature_editor.cpp: all remaining content ====
 
-#pragma GCC optimize("O2", "omit-frame-pointer")
 
 // ==== src/editor/locator_editor.cpp: all remaining content ====
 
@@ -9929,7 +9925,6 @@ extern AIEDITOR_RENDER_STATE * aieditor;
 
 // ==== src/editor/creature_editor.cpp: all remaining content ====
 
-#pragma GCC optimize("O2", "omit-frame-pointer")
 
 // ==== src/editor/locator_editor.cpp: all remaining content ====
 
@@ -10338,9 +10333,9 @@ extern "C" {
     // Retail partially inlines the clipping test into NuDisplaySceneRndr and
     // keeps the body as its stack-argument .part clone.
 #if defined(__i386__)
-#define NUDISPLAYSCENERNDR_BODY_ATTR __attribute__((noinline, noclone, regparm(0)))
+#define NUDISPLAYSCENERNDR_BODY_ATTR __attribute__((noinline, noclone, regparm(0), optimize("O2", "omit-frame-pointer")))
 #else
-#define NUDISPLAYSCENERNDR_BODY_ATTR __attribute__((noinline, noclone))
+#define NUDISPLAYSCENERNDR_BODY_ATTR __attribute__((noinline, noclone, optimize("O2", "omit-frame-pointer")))
 #endif
     static NUDISPLAYSCENERNDR_BODY_ATTR void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene)
         __asm__("NuDisplaySceneRndr.part.101");
@@ -12976,7 +12971,6 @@ extern AIEDITOR_RENDER_STATE * aieditor;
 
 // ==== src/editor/creature_editor.cpp: all remaining content ====
 
-#pragma GCC optimize("O2", "omit-frame-pointer")
 
 // ==== src/editor/locator_editor.cpp: all remaining content ====
 

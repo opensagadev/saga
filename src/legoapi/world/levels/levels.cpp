@@ -3443,7 +3443,6 @@ void AISysSetPathCylinderCheck(i32 enabled);
 #include <float.h>
 #include <stdio.h>
 #include <string.h>
-#pragma GCC optimize("O2", "omit-frame-pointer")
 struct AIPATHSYS_s;
 
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, valid_positions) == 0x54, "creature valid position mask offset");
