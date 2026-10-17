@@ -642,23 +642,6 @@ static char *edpp_save_names[6];
 static i32 edptl_count;
 static NUVEC entry_position;
 
-static inline i32 edppCurveSegment(const debris_float_key_s *keys, f32 time) {
-    if (time >= keys[0].time && time <= keys[1].time)
-        return 0;
-    if (time >= keys[1].time && time <= keys[2].time)
-        return 1;
-    if (time >= keys[2].time && time <= keys[3].time)
-        return 2;
-    if (time >= keys[3].time && time <= keys[4].time)
-        return 3;
-    if (time >= keys[4].time && time <= keys[5].time)
-        return 4;
-    if (time >= keys[5].time && time <= keys[6].time)
-        return 5;
-    if (time >= keys[6].time && time <= keys[7].time)
-        return 6;
-    return 7;
-}
 
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
 #include "decomp.h"
@@ -1223,12 +1206,13 @@ static void edptlcbTestDetailMenu(eduimenu_s *parent, eduiitem_s *, u32);
 // ---- end src/gameapi/edtools/edptlall.cpp ----
 
 static inline f32 edppInterpolateTorusCurve(const debris_float_key_s *keys, f32 time) {
-    i32 index = edppCurveSegment(keys, time);
-    if (index == 7)
-        return 0.0f;
-    return ((time - keys[index].time) / (keys[index + 1].time - keys[index].time)) *
-               (keys[index + 1].value - keys[index].value) +
-           keys[index].value;
+    for (i32 index = 0; index < 7; ++index) {
+        if (time >= keys[index].time && time <= keys[index + 1].time)
+            return ((time - keys[index].time) / (keys[index + 1].time - keys[index].time)) *
+                       (keys[index + 1].value - keys[index].value) +
+                   keys[index].value;
+    }
+    return 0.0f;
 }
 
 void edppDoInput(nupad_s *pad);
