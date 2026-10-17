@@ -882,7 +882,6 @@ extern NUQFNT *system_qfont;
 #include "nu2api/nu3d/nurendercontext.h"
 #include "nu2api/nu3d/nuscreen.hpp"
 #include "nu2api/numath/nuquat.h"
-#include "nu2api/nu3d/NuRenderDevice.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 
 // C++-linkage helpers defined in sibling TUs.
