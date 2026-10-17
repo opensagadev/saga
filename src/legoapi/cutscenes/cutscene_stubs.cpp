@@ -200,7 +200,7 @@ extern "C" {
     }
 
     f32 instCutSceneTimeElapsed(instNUGCUTSCENE_s *instance) {
-        if (instance == NULL || instance->cutscene == NULL) {
+        if (__builtin_expect(instance == NULL || instance->cutscene == NULL, 0)) {
             return 0.0f;
         }
         f32 rate = instance->rate;

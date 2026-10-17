@@ -993,9 +993,9 @@ void PodRacePanel(WORLDINFO_s *world) {
 }
 
 void UpdatePodRaceLapDisplay(float arg) {
-    if (FadeSys.fade == 0.0f && MiniCutCam == 0 && CUTSTOPGAME == 0) {
+    if (__builtin_expect(FadeSys.fade == 0.0f && MiniCutCam == 0 && CUTSTOPGAME == 0, 1)) {
         float target = 0.0f;
-        if (Paused != 0)
+        if (__builtin_expect(Paused != 0, 1))
             target = 1.0f;
         else if (WORLD->current_level == PODRACEB_LDATA && GameTimer.time_elapsed >= 1.0f &&
                  GameTimer.time_elapsed < 6.0f)
@@ -1007,14 +1007,14 @@ void UpdatePodRaceLapDisplay(float arg) {
         podstartracealpha = 0.0f;
     }
     i32 oldhurry = podhurry_i;
-    if (Paused == 0 && PodRace != NULL && PodRace->lap_display < 10.0f) {
+    if (__builtin_expect(Paused == 0 && PodRace != NULL && PodRace->lap_display < 10.0f, 1)) {
         podhurry_i = (i32)PodRace->lap_display;
         if (podhurryalpha < 1.0f) {
             podhurryalpha += arg + arg;
             if (podhurryalpha > 1.0f)
                 podhurryalpha = 1.0f;
         }
-        if (podhurry_i > 0 && oldhurry != podhurry_i)
+        if (__builtin_expect(podhurry_i > 0 && oldhurry != podhurry_i, 0))
             TickTockSfx();
     } else {
         podhurryalpha = 0.0f;

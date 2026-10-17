@@ -585,7 +585,7 @@ void SplineHelper::SerialiseObject(EdStream &stream, void *object) {
                 spline->knots.last->next = knot;
             const bool had_first = spline->knots.first != NULL;
             spline->knots.last = knot;
-            if (!had_first)
+            if (__builtin_expect(!had_first, 1))
                 spline->knots.first = knot;
             ++spline->knots.count;
         }
@@ -839,7 +839,7 @@ void SplineObject::ReverseKnots() {
         while (true) {
             SplineKnot *prior = knot->previous;
             SplineKnot *next = knot->next;
-            if (next != NULL)
+            if (__builtin_expect(next != NULL, 1))
                 next->previous = prior;
             if (prior != NULL)
                 prior->next = next;
@@ -865,7 +865,7 @@ void SplineObject::ReverseKnots() {
         SplineKnot *next = old_first->next;
         if (next != NULL)
             next->previous = old_first->previous;
-        if (old_first->previous != NULL)
+        if (__builtin_expect(old_first->previous != NULL, 0))
             old_first->previous->next = next;
         old_first->next = NULL;
         old_first->previous = NULL;

@@ -222,7 +222,7 @@ void *NuMemoryPool::PageAlloc(u32 size, const char *name) {
     page_list_stable = false;
 
     Page *page = pages;
-    if (page != NULL && size > page->size - page->offset) {
+    if (__builtin_expect(page != NULL && size > page->size - page->offset, 0)) {
         Page *previous = page;
         candidate = page->next;
         while (candidate != NULL) {

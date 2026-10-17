@@ -1828,7 +1828,7 @@ void NuMemoryManager::ValidateBlock(void *ptr) {
 }
 
 void NuMemoryManager::ValidateBlockDeferredContent(NuMemoryManager::Header *header, char const *caller) {
-    if ((m_flags & MEM_MANAGER_DEBUG) == 0)
+    if (__builtin_expect((m_flags & MEM_MANAGER_DEBUG) == 0, 0))
         return;
     DebugHeader *debug = reinterpret_cast<DebugHeader *>(header);
     if ((debug->flags.alloc_flags & 0x20) == 0)
@@ -1839,13 +1839,13 @@ void NuMemoryManager::ValidateBlockDeferredContent(NuMemoryManager::Header *head
     u8 *data = reinterpret_cast<u8 *>(header) + m_headerSize;
     u32 *end_tag = reinterpret_cast<u32 *>(reinterpret_cast<u8 *>(header) + block_size - 4);
     u32 tag = *end_tag >> 27;
-    if (tag == 31)
+    if (__builtin_expect(tag == 31, 1))
         tag = *(end_tag - 1);
     else
         --tag;
     u32 count = tag > 29 ? payload_size - 6 : payload_size - 5;
     count >>= 2;
-    if (count == 0)
+    if (__builtin_expect(count == 0, 0))
         return;
 
     u32 i = 0;

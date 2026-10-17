@@ -379,7 +379,7 @@ disable:
 static void HatMachine_Draw(void *world_ptr, void *, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     HATMACHINESYS_s *system;
-    if (world == NULL || (system = world->hat_machine_sys) == NULL || system->count == 0) {
+    if (__builtin_expect(world == NULL || (system = world->hat_machine_sys) == NULL || system->count == 0, 0)) {
         return;
     }
 
@@ -451,7 +451,7 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
         }
 
         if ((machine->flags & HATMACHINE_FLAG_ENABLED) != 0) {
-            if (world->lev_objs[286].active != 0) {
+            if (__builtin_expect(world->lev_objs[286].active != 0, 0)) {
                 NuSpecialDrawAt(&world->lev_objs[286].special, &machine->transform);
             }
         } else {
@@ -569,7 +569,7 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
                 const f32 hat_scale = 1.0f - (1.0f - (hat_sine + 1.0f) * 0.5f);
                 hat_position.y += (1.0f - hat_scale) * 0.1f;
 
-                if (machine->animation_state <= 2) {
+                if (__builtin_expect(machine->animation_state <= 2, 1)) {
                     f32 bob_scale = 0.01f;
                     if (animation_frame != 0.0f) {
                         const f32 frame_fade = animation_frame / 50.0f;

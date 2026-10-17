@@ -297,12 +297,12 @@ i32 CutScenePlayer_CountEpisodeClips(i32 episode, i32 include_guests, i16 *ids) 
     CUTSCENEPLAYER_s *player = CutScenePlayer;
     if (player != NULL) {
         i32 clip_count = player->clip_count;
-        if (clip_count != 0) {
+        if (__builtin_expect(clip_count != 0, 1)) {
             LEVELDATA *levels = LDataList;
             CUTSCENEPLAYERCLIP *clip = player->clips;
             for (i32 i = 0; i < clip_count; ++i, ++clip) {
-                if (levels[clip->level_id].episode_index == episode ||
-                    (include_guests != 0 && clip->guest_episode == episode)) {
+                if (__builtin_expect(levels[clip->level_id].episode_index == episode ||
+                    (include_guests != 0 && clip->guest_episode == episode), 1)) {
                     if (ids != NULL) {
                         ids[count++] = i;
                         clip_count = player->clip_count;

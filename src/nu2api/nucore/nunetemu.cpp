@@ -164,12 +164,12 @@ NuNetEmu::EmuPacket *NuNetEmu::FindPacket(nunetaddr_s *, i32 size) {
 }
 
 i32 NuNetEmu::RecvFrom(void *data, i32 size, nunetaddr_s &address) {
-    if (field_10 == 0) {
+    if (__builtin_expect(field_10 == 0, 0)) {
         return NuNetSessionRecvFrom(data, size, &address);
     }
 
     i32 received = 0;
-    if (field_17b0 >= field_17b4) {
+    if (__builtin_expect(field_17b0 >= field_17b4, 0)) {
         received = NuNetSessionRecvFrom(packed_buffer, 0xbb8, &address);
         if (received > 0) {
             packet_stats.total.values[1] += received;

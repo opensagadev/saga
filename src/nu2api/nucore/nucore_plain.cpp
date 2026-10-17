@@ -2476,7 +2476,7 @@ extern "C" {
         vsprintf(text, format, arguments);
         va_end(arguments);
         i32 width = static_cast<i32>(NuQFntPrintLenU(font, text));
-        if (alignment == 0x20) {
+        if (__builtin_expect(alignment == 0x20, 1)) {
             x -= width;
         } else if (alignment == 0x40) {
             x -= width / 2;
@@ -3093,7 +3093,7 @@ extern "C" {
         NuMtxSetOrthoBlend(&light->projection, left, right, bottom, top, near_plane, far_plane);
     }
     void NuDynamicLightSetEnabled(NuDynamicLight *light, i32 enabled) {
-        if (enabled != 0 && light->enabled == 0 && light->render_set_count > 0) {
+        if (__builtin_expect(enabled != 0 && light->enabled == 0 && light->render_set_count > 0, 0)) {
             NuDynamicLight::RenderSet *set = light->render_sets;
             NuDynamicLight::RenderSet *end = set + light->render_set_count;
             do {

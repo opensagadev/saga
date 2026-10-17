@@ -1681,7 +1681,7 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
     i32 super_force = 1;
     if (__builtin_expect(SuperWeirdo(object) == 0, 0)) {
         super_force = 0;
-        if ((object->apiobj.flags_low & 0x80) != 0)
+        if (__builtin_expect((object->apiobj.flags_low & 0x80) != 0, 1))
             super_force = Cheat_IsOn(25);
     }
     object->gizforce_target = NULL;
@@ -1691,7 +1691,7 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
     i32 count = 0;
     for (i32 index = 0; index < force_sys->visible_force_count; ++index) {
         GIZFORCE_s *force = force_sys->visible_forces[index];
-        if (force->using_object != NULL || force->field_0x3c_bits != 0) {
+        if (__builtin_expect(force->using_object != NULL || force->field_0x3c_bits != 0, 1)) {
             continue;
         }
         if ((force->config_flags & 0x10) != 0 && (object->apiobj.character_data->model_flags & 4) == 0 && !super_force)
@@ -1760,7 +1760,7 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
                 oldest = &possible_forcetargets[i];
             }
         }
-        if (oldest != NULL) {
+        if (__builtin_expect(oldest != NULL, 1)) {
             i32 index = oldest->index;
             los->words[index + 12] = LevelTimer.update_count;
             if ((oldest->force->config_flags & 0x800) != 0) {
@@ -1800,8 +1800,8 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
     los = object->gizforce_los_info;
     for (i32 i = 0; i < count; ++i) {
         ForceTarget *target = &possible_forcetargets[i];
-        if (los != NULL && (target->force == NULL || (target->force->field_0xaa & 0x80) == 0) && target->index != -1 &&
-            (los->words[target->index >> 5] & (1u << (target->index & 31))) == 0)
+        if (__builtin_expect(los != NULL && (target->force == NULL || (target->force->field_0xaa & 0x80) == 0) && target->index != -1 &&
+            (los->words[target->index >> 5] & (1u << (target->index & 31))) == 0, 0))
             continue;
         f32 distance = target->distance;
         if (object->force_glow_previous != NULL &&

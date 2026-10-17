@@ -369,7 +369,7 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
     f32 shadow_distance_squared;
     if (g_lowEndLevelBehaviour != 0) {
         shadow_distance_squared = 0.0f;
-        if (CharClipToBlobShadows != 0 && maximum_distance > world->current_level->blob_shadow_fade_far) {
+        if (__builtin_expect(CharClipToBlobShadows != 0 && maximum_distance > world->current_level->blob_shadow_fade_far, 0)) {
             maximum_distance = static_cast<f32>(world->current_level->blob_shadow_fade_far);
         }
     } else {
@@ -468,7 +468,7 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
                 NuMtxPreScaleU(&matrix, AreaPickupScale);
             }
 
-            if ((pickup.config_flags & GIZMOPICKUP_CONFIG_DISABLE_SHADOW_MAP) != 0) {
+            if (__builtin_expect((pickup.config_flags & GIZMOPICKUP_CONFIG_DISABLE_SHADOW_MAP) != 0, 1)) {
                 ResetShadowMapRendering();
             }
             const i32 drawn = NuSpecialDrawAt(&model.special, &matrix);

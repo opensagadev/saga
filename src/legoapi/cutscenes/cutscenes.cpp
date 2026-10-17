@@ -888,9 +888,9 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
         use_low_detail = (cut->flags & 0x10000) != 0 && g_isLowEndDevice != 0;
         NuGCutCharAnimProcess(character, frame, &world_matrix, &visible, &animation_index, &animation_rate, &blend_time,
                               &animation_start_frame, &layer_mask);
-        if (cut->low_end_distance > 0.0f && g_isLowEndDevice != 0 &&
+        if (__builtin_expect(cut->low_end_distance > 0.0f && g_isLowEndDevice != 0 &&
             NuVecDistSqr(reinterpret_cast<NUVEC *>(&world_matrix.m30), reinterpret_cast<NUVEC *>(&pNuCam->mtx.m30),
-                         NULL) > cut->low_end_distance * cut->low_end_distance) {
+                         NULL) > cut->low_end_distance * cut->low_end_distance, 1)) {
             return;
         }
     } else {
@@ -937,13 +937,13 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
 
     i16 render_indices[32];
     const i32 render_count = game_data->make_layer_list(model, render_indices, static_cast<u32>(layer_mask));
-    if (render_count < 1) {
+    if (__builtin_expect(render_count < 1, 1)) {
         return;
     }
 
     if (instance->field_15 != animation_index) {
         const u8 requested_animation = static_cast<u8>(animation_index);
-        if (!(blend_time > 0.0f) || instance->field_15 == 0xff) {
+        if (__builtin_expect(!(blend_time > 0.0f) || instance->field_15 == 0xff, 0)) {
             instance->animation_frame_a = !(animation_start_frame > 1.0f) ? 1.0f : animation_start_frame;
             instance->field_16 = requested_animation;
         } else {
@@ -985,7 +985,7 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
             blending = false;
         } else {
             instance->blend_progress += (1.0f / blend_time) * (FRAMETIME * 60.0f);
-            if (instance->blend_progress >= 1.0f) {
+            if (__builtin_expect(instance->blend_progress >= 1.0f, 0)) {
                 instance->blend_progress = 0;
                 animation_a_index = instance->field_17;
                 instance->field_16 = instance->field_17;
@@ -1034,13 +1034,13 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
                                   instance->animation_frame_b, instance->blend_progress, 0, NULL, joint_matrices);
         } else if (animation_b != NULL) {
             NuHGobjEvalAnim2(hierarchy, animation_b, instance->animation_frame_b, 0, NULL, joint_matrices);
-        } else if (animation_a != NULL) {
+        } else if (__builtin_expect(animation_a != NULL, 0)) {
             NuHGobjEvalAnim2(hierarchy, animation_a, instance->animation_frame_a, 0, NULL, joint_matrices);
         } else {
             NuHGobjEval(hierarchy, 0, NULL, joint_matrices);
         }
 
-        if (dwa_animation_a != NULL && dwa_animation_b != NULL) {
+        if (__builtin_expect(dwa_animation_a != NULL && dwa_animation_b != NULL, 1)) {
             dwa = NuHGobjEvalDwaBlend2(render_count, render_indices, dwa_animation_a, instance->animation_frame_a,
                                        dwa_animation_b, instance->animation_frame_b, instance->blend_progress);
         }
@@ -1053,7 +1053,7 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
             if (instance->animation_frame_b > end_frame) {
                 CHARACTERANIM_s *animation_info =
                     static_cast<CHARACTERANIM_s *>(model->model_data_a[current_animation]);
-                if ((animation_info->flags & 2) == 0) {
+                if (__builtin_expect((animation_info->flags & 2) == 0, 0)) {
                     instance->animation_frame_b = end_frame;
                 } else {
                     instance->animation_frame_b = instance->animation_frame_b - end_frame + 1.0f;
@@ -1133,7 +1133,7 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
                                                CutBlobShadowFadeFar, 1.0f);
                     if (alpha > 0.0f) {
                         for (i32 i = 0; i < 16; ++i) {
-                            if ((game_data->shadow_locators & (1 << i)) != 0 && model->points_of_interest[i] != NULL) {
+                            if (__builtin_expect((game_data->shadow_locators & (1 << i)) != 0 && model->points_of_interest[i] != NULL, 0)) {
                                 NUVEC shadow_position;
                                 shadow_position.x = locator_positions[i].x;
                                 f32 locator_ground = GameShadow(NULL, &locator_positions[i], 5.0f, -1);

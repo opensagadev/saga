@@ -442,7 +442,7 @@ i32 TagCode(GameObject_s *source, GameObject_s *destination, i32 takeover, i32 b
     }
     if (takeover != 0) {
         AISCRIPTPROCESS *processor = reinterpret_cast<AISCRIPTPROCESS *>(&destination->ai);
-        if (AIScriptSetBaseScriptStateByName(processor, const_cast<char *>("JustBeenTakenOver")) != 0)
+        if (__builtin_expect(AIScriptSetBaseScriptStateByName(processor, const_cast<char *>("JustBeenTakenOver")) != 0, 1))
             AIScriptProcess(WORLD->ai_sys, &destination->apiobj, &destination->ai, processor, FRAMETIME);
         destination_script.processor.unknown_b0 = destination_set;
         memcpy(&source->ai, &destination_script, sizeof(destination_script));
@@ -457,7 +457,7 @@ i32 TagCode(GameObject_s *source, GameObject_s *destination, i32 takeover, i32 b
         ReleaseBuildIt(source, 0);
         ReleasePush(source);
         Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(source->player_packet));
-        if ((source->field_0xef8 & 0x10) == 0)
+        if (__builtin_expect((source->field_0xef8 & 0x10) == 0, 1))
             SetWeaponIn(source);
         source->field_0xcc0 = destination;
         source->takeover_target = NULL;
@@ -744,7 +744,7 @@ void Tag_Check(GameObject_s *object) {
                     object->hud_icon_timer = 2.0f;
             } else {
                 if (Arcade == 0 && Tag_Mode == 3 && GetMenuID() == -1) {
-                    if (FindGameMsgsWithID(-1, 0, -1, NULL) == 0) {
+                    if (__builtin_expect(FindGameMsgsWithID(-1, 0, -1, NULL) == 0, 1)) {
                         f32 nearest = 0.7f * 0.7f * 2.0f;
                         i32 pack_index = -1;
 
@@ -836,7 +836,7 @@ void Tag_Check(GameObject_s *object) {
                         }
                         if (target != NULL) {
                             no_target = 0;
-                            if ((target->field_0xf00 & 2) != 0) {
+                            if (__builtin_expect((target->field_0xf00 & 2) != 0, 0)) {
                                 TakeOver2GetIn(target, object);
                             } else if (!object->apiobj.player_controlled || !target->apiobj.player_controlled) {
                                 result = TagCode(object, target, 0, 0, 1);
@@ -877,12 +877,12 @@ void Tag_Check(GameObject_s *object) {
     if (result == 1) {
         object->tag_flags &= ~4;
         GameAudio_PlaySfx(0x21, &object->apiobj.collision_position, 0, 0);
-        if (target->apiobj.model_draw_result != 0)
+        if (__builtin_expect(target->apiobj.model_draw_result != 0, 1))
             GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
         else
             GameCam_Reset(GameCam);
         RememberPlayerIDs(0, Player[0] != NULL ? Player[0]->id : -1, Player[1] != NULL ? Player[1]->id : -1);
-        if ((Tag_Mode & ~2) == 1)
+        if (__builtin_expect((Tag_Mode & ~2) == 1, 0))
             Tag_NewTransfer(object, target);
         if (static_cast<u8>(object->apiobj.field_0x27c) < 2 && static_cast<u8>(target->apiobj.field_0x27c) < 2)
             ResetTimer(&JoinInTimer, 0.0f);

@@ -1157,7 +1157,7 @@ void LoadGrassFile(WORLDINFO *world) {
         return;
     }
 
-    if (Grass_Available != 0) {
+    if (__builtin_expect(Grass_Available != 0, 1)) {
         sprintf(path, "%s.gra", config);
         if (NuFileExists(path)) {
             i32 page = edgraLoadPage(path, world->current_gscn, *(i32 *)&world->terrain, &world->giz_buffer,
@@ -1795,7 +1795,7 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
         scan_radius = NuFsqrt(dx * dx + dy * dy + dz * dz);
     }
     scan_query = TerI;
-    if (scan_query->object_scale > 1.0f)
+    if (__builtin_expect(scan_query->object_scale > 1.0f, 1))
         scan_radius += (scan_query->object_scale - 1.0f) * scan_query->collision_radius;
 
     for (i32 cell_index = 0; cell_index < CurTerr->used_cell_count; ++cell_index) {
@@ -1881,10 +1881,10 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
         local_bounds_max_y -= group.origin.y;
         local_bounds_min_z -= group.origin.z;
         local_bounds_max_z -= group.origin.z;
-        if (!(local_bounds_max_x >= group.bounds_min.x && local_bounds_max_y >= group.bounds_min.y &&
+        if (__builtin_expect(!(local_bounds_max_x >= group.bounds_min.x && local_bounds_max_y >= group.bounds_min.y &&
               local_bounds_max_z >= group.bounds_min.z && group.bounds_max.x >= local_bounds_min_x &&
               group.bounds_max.y > local_bounds_min_y && group.bounds_max.z > local_bounds_min_z) ||
-            group.chunk_type == -1) {
+            group.chunk_type == -1, 0)) {
             continue;
         }
 
@@ -1892,8 +1892,8 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
         while (batch->marker >= 0) {
             TERRAIN_SHAPE *shapes = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
             const i32 shape_count = batch->shape_count;
-            if (local_bounds_max_x >= batch->min_x && batch->max_x > local_bounds_min_x &&
-                local_bounds_max_z >= batch->min_z && batch->max_z > local_bounds_min_z) {
+            if (__builtin_expect(local_bounds_max_x >= batch->min_x && batch->max_x > local_bounds_min_x &&
+                local_bounds_max_z >= batch->min_z && batch->max_z > local_bounds_min_z, 0)) {
                 TERRAIN_SHAPE *shape_cursor = shapes;
                 for (i32 remaining = shape_count; remaining > 0; --remaining, ++shape_cursor) {
                     TERRAIN_SHAPE *candidate = shape_cursor;
@@ -1906,7 +1906,7 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
                     if (candidate->material[1] != 0 && (candidate->material[1] & terrain_mask) == 0) {
                         continue;
                     }
-                    if ((candidate->flags & scan_flags) == 0x40) {
+                    if (__builtin_expect((candidate->flags & scan_flags) == 0x40, 1)) {
                         continue;
                     }
 
@@ -1968,7 +1968,7 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
                         local_max_x = (matrix->m30 - platform.previous_matrix.m30) + bounds.max_x - group.origin.x;
                         local_min_x = bounds.min_x - group.origin.x;
                     }
-                    if (matrix->m31 > platform.previous_matrix.m31) {
+                    if (__builtin_expect(matrix->m31 > platform.previous_matrix.m31, 0)) {
                         local_max_y = (matrix->m31 - platform.previous_matrix.m31) + bounds.max_y - group.origin.y;
                         local_min_y = bounds.min_y - group.origin.y;
                     } else {
@@ -1991,7 +1991,7 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
                     local_max_z = bounds.max_z - group.origin.z;
                 }
                 const bool rotating = (platform.flags & TERRAIN_PLATFORM_FLAG_ROTATING) != 0;
-                if (rotating) {
+                if (__builtin_expect(!!(rotating), 1)) {
                     const f32 x = (bounds.max_x + bounds.min_x) * 0.5f - group.origin.x;
                     const f32 y = (bounds.max_y + bounds.min_y) * 0.5f - group.origin.y;
                     const f32 z = (bounds.max_z + bounds.min_z) * 0.5f - group.origin.z;
@@ -2002,9 +2002,9 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
                     if (!(reach * reach > distance_sq) || matrix == NULL)
                         continue;
                 } else {
-                    if (!(local_max_x >= group.bounds_min.x && local_max_y >= group.bounds_min.y &&
+                    if (__builtin_expect(!(local_max_x >= group.bounds_min.x && local_max_y >= group.bounds_min.y &&
                           local_max_z >= group.bounds_min.z && group.bounds_max.x >= local_min_x &&
-                          group.bounds_max.y > local_min_y && group.bounds_max.z > local_min_z))
+                          group.bounds_max.y > local_min_y && group.bounds_max.z > local_min_z), 0))
                         continue;
                     if (group.chunk_type == -1)
                         continue;
@@ -2041,11 +2041,11 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
                                         NuVec4MtxTransformVU0(&vertices[3], &vertices[3], matrix);
                                     } else
                                         vertices[3] = vertices[2];
-                                    if (!(vertices[0].x > local_min_x || vertices[1].x > local_min_x ||
-                                          vertices[2].x > local_min_x || vertices[3].x > local_min_x))
+                                    if (__builtin_expect(!(vertices[0].x > local_min_x || vertices[1].x > local_min_x ||
+                                          vertices[2].x > local_min_x || vertices[3].x > local_min_x), 0))
                                         continue;
-                                    if (!(vertices[0].x < local_max_x || vertices[1].x < local_max_x ||
-                                          vertices[2].x < local_max_x || vertices[3].x < local_max_x))
+                                    if (__builtin_expect(!(vertices[0].x < local_max_x || vertices[1].x < local_max_x ||
+                                          vertices[2].x < local_max_x || vertices[3].x < local_max_x), 0))
                                         continue;
                                     if (!(vertices[0].z > local_min_z || vertices[1].z > local_min_z ||
                                           vertices[2].z > local_min_z || vertices[3].z > local_min_z))

@@ -45,7 +45,7 @@ i32 NuSpecialFind(NUGSCN *scene, nuhspecial_s *dest, char *name, i32 flags) {
     (void)flags; // Present in the exported ABI; unused by the original body.
 
     nuhspecial_s *handle = dest;
-    if (name != NULL && scene != NULL) {
+    if (__builtin_expect(name != NULL && scene != NULL, 1)) {
         NUDLDLISTSCENE *display_scene = reinterpret_cast<NUDLDLISTSCENE *>(scene->display_list);
         if (display_scene != NULL) {
             NUDISPLAYSPECIAL *special = static_cast<NUDISPLAYSPECIAL *>(display_scene->specials);
@@ -141,7 +141,7 @@ extern "C" i32 NuSpecialFindMulti(NUGSCN *scene, nuhspecial_s *dest, char *name,
         } else {
             NuSpecialLegacyLayout *special = reinterpret_cast<NuSpecialLegacyLayout *>(scene->specials);
             for (i32 i = 0; i < scene->numspecial; ++special, ++i) {
-                if (NuStrIStr(special->name, name) != NULL) {
+                if (__builtin_expect(NuStrIStr(special->name, name) != NULL, 0)) {
                     ++count;
                     dest->scene = scene;
                     dest->special = special;
@@ -272,7 +272,7 @@ extern "C" void NuSpecialMtlMap(i32 count, NUMTL **materials) {
 }
 
 extern "C" void NuSpecialForceMtl(NUMTL *material) {
-    if (material != NULL) {
+    if (__builtin_expect(material != NULL, 1)) {
         nuspecial_draw_state |= NUSPECIAL_DRAW_FORCE_MATERIAL;
     } else {
         nuspecial_draw_state &= ~NUSPECIAL_DRAW_FORCE_MATERIAL;

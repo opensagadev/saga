@@ -1754,11 +1754,11 @@ i32 newCharactersCollected(STATUSPACKET_s *) {
             ++previous;
         }
         if (previous == count) {
-            if (Game_CharacterSave != NULL && (Game_CharacterSave[id] & 1) != 0) {
+            if (__builtin_expect(Game_CharacterSave != NULL && (Game_CharacterSave[id] & 1) != 0, 1)) {
                 continue;
             }
             const i32 index = InCollectList_Index(id, MasterCollection.list, MasterCollection.count_y);
-            if (index != -1 && MasterCollection.list[index].can_buy == 0) {
+            if (__builtin_expect(index != -1 && MasterCollection.list[index].can_buy == 0, 0)) {
                 StatusCollectList.ids[count++] = player;
                 if (MasterCollection.list[index].field5_0x9 != 0) {
                     AddToCompletionPoints(POINTS_PER_CHARACTER);

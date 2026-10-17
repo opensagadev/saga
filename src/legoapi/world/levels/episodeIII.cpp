@@ -846,7 +846,7 @@ void VaderC_Update(WORLDINFO_s *world) {
 }
 
 void VaderA_DrawPanel(WORLDINFO_s *) {
-    if (vader_a.count <= 2) {
+    if (__builtin_expect(vader_a.count <= 2, 0)) {
         if (vader_a.count != 0) {
             DrawTimer((i32)vader_a.timer + 1, vader_a.subtitle, 0);
             vader_a.subtitle = 0;

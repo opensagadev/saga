@@ -210,7 +210,7 @@ extern "C" i32 NuTexResolveReference(NUGSCN *scene, i32 tex_id) {
     if ((tex_id & 0x4000) == 0) {
         return scene->texture_ids[tex_id];
     }
-    if (max_textures == 0) {
+    if (__builtin_expect(max_textures == 0, 0)) {
         return 0;
     }
 

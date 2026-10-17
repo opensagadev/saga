@@ -83,7 +83,7 @@ WORLDINFO *WorldInfo_CurrentlyLoading(void) {
 void WorldInfo_ReArrangeBuffers(i32 area1, i32 area2) {
     VARIPTR *bufferEnd = (VARIPTR *)&WorldInfo[1].unknown_0108;
 
-    if (area1 == area2 || area1 == -1) {
+    if (__builtin_expect(area1 == area2 || area1 == -1, 0)) {
         if (area1 != -1 && (ADataList[area1].flags & AREAFLAG_SINGLE_BUFFER) != 0) {
             return;
         }

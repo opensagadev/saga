@@ -7497,7 +7497,7 @@ __used__ static i32 Action_ShootAtOpponent(AISYS *sys, AISCRIPTPROCESS *processo
     if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL)
         return 1;
     GameObject_s *object = packet->owner->apiobj.objptr;
-    if (param_5 != 0) {
+    if (__builtin_expect(param_5 != 0, 1)) {
         processor->action_data_5 = engagefiretime;
         f32 fraction = NuRandFloat();
         bool explicit_range = false;
@@ -7506,9 +7506,9 @@ __used__ static i32 Action_ShootAtOpponent(AISYS *sys, AISCRIPTPROCESS *processo
             if ((value = NuStrIStr(params[index], "firerange")) != NULL) {
                 processor->action_data_4 = AIParamToFloat(processor, value + 10);
                 explicit_range = true;
-            } else if (NuStrIStr(params[index], "offscreen") != NULL) {
+            } else if (__builtin_expect(NuStrIStr(params[index], "offscreen") != NULL, 1)) {
                 processor->action_data_1 |= 1;
-            } else if (NuStrIStr(params[index], "no_fire_in_minicut") != NULL) {
+            } else if (__builtin_expect(NuStrIStr(params[index], "no_fire_in_minicut") != NULL, 0)) {
                 processor->action_data_1 |= 4;
             } else if ((value = NuStrIStr(params[index], "fireinterval")) != NULL) {
                 processor->action_data_5 = AIParamToFloat(processor, value + 13);
@@ -7521,14 +7521,15 @@ __used__ static i32 Action_ShootAtOpponent(AISYS *sys, AISCRIPTPROCESS *processo
             }
         }
         processor->action_timer = fraction * processor->action_data_5;
-        if (!explicit_range)
+        if (__builtin_expect(!explicit_range, 1))
             processor->action_data_4 = packet->movement_instruction_parameter == 0.0f
                                            ? 9999.9f
                                            : packet->movement_instruction_parameter + aitol;
     }
     GameObject_s *opponent = static_cast<GameObject_s *>(processor->action_data_3);
-    if (opponent == NULL || (opponent->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
-        (opponent->apiobj.field_0x287 != 0 && !(opponent->field_0x101c > 0.0f))) {
+    if (__builtin_expect(opponent == NULL || (opponent->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
+                             (opponent->apiobj.field_0x287 != 0 && !(opponent->field_0x101c > 0.0f)),
+                         0)) {
         if (packet->opponent_object == NULL || packet->opponent_object->ai == NULL ||
             packet->opponent_object->objptr == NULL)
             return 0;

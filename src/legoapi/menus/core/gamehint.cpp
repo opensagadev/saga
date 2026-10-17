@@ -161,7 +161,7 @@ void MechHintUIButton::Render() {
 }
 
 void MechHintUIButton::Process(float elapsed) {
-    if (active_hint != NULL) {
+    if (__builtin_expect(active_hint != NULL, 0)) {
         display_elapsed += elapsed;
         if (MechSystems::Get()->PlayerButton().selector != NULL ||
             (active_hint->display_duration > 0.0f && display_elapsed >= active_hint->display_duration)) {
@@ -195,13 +195,13 @@ void MechHintUIButton::Process(float elapsed) {
     scale_elapsed = scale_duration;
     if (__builtin_expect(!(slide_duration < 0.0f) && !(slide_elapsed >= slide_duration + slide_delay), 0)) {
         slide_elapsed += elapsed;
-        if (slide_elapsed > slide_duration + slide_delay)
+        if (__builtin_expect(slide_elapsed > slide_duration + slide_delay, 0))
             slide_elapsed = slide_duration + slide_delay;
         if (slide_elapsed >= slide_delay)
             *slide_target = ((slide_elapsed - slide_delay) / slide_duration) * (slide_to - slide_from) + slide_from;
     }
     position.x = slide;
-    if (next_hint != NULL && __builtin_expect(slide_duration < 0.0f || slide_elapsed >= slide_duration + slide_delay, 0)) {
+    if (__builtin_expect(next_hint != NULL && __builtin_expect(slide_duration < 0.0f || slide_elapsed >= slide_duration + slide_delay, 0), 1)) {
         active_hint = next_hint;
         pending_hint = NULL;
         display_elapsed = 0.0f;
@@ -228,7 +228,7 @@ void MechHintUIButton::Process(float elapsed) {
     }
     if (was_pulsing) {
         pulse_remaining -= elapsed;
-        if (0.0f >= pulse_remaining)
+        if (__builtin_expect(0.0f >= pulse_remaining, 0))
             StartPulse();
     }
     MechTouchUITexButton::Process(elapsed);

@@ -72,7 +72,7 @@ extern "C" f32 NuAnimCurve2CalcValEx(nuanimcurve2_s *, nuanimtime_s *, u32);
 void NuGCutRigidCalcMtx_3(NUGCUTRIGID_s *, f32, numtx_s *);
 
 i32 GetIntCurveVal(ani3_animheader_s *animation, f32 *values, i32 curve) {
-    if (animation->curve_types[curve] == 10) {
+    if (__builtin_expect(animation->curve_types[curve] == 10, 0)) {
         return reinterpret_cast<i32 *>(values)[curve];
     }
     const f32 value = values[curve];

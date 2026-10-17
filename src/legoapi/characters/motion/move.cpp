@@ -2292,7 +2292,7 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
                     i16 previous = position->segment;
                     position->segment++;
                     if (position->segment >= segments) {
-                        if (!position->looping) {
+                        if (__builtin_expect(!position->looping, 0)) {
                             position->reached_end = 1;
                             position->position =
                                 *(NUVEC *)((u8 *)spline->pts + position->segment * (i16)spline->pt_size);
@@ -2316,7 +2316,7 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
             } else if (position->segment >= 0 && distance < 0.0f) {
                 for (;;) {
                     position->segment_distance += distance;
-                    if (!(position->segment_distance < 0.0f))
+                    if (__builtin_expect(!(position->segment_distance < 0.0f), 0))
                         break;
                     distance = position->segment_distance;
                     i16 previous = position->segment;
@@ -4814,12 +4814,13 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
     object->blowup_target = NULL;
     bool searched;
     i32 result;
-    if (object->apiobj.player_controlled && mode == 0 && object->pad_gamepad->input_magnitude > 0.0f) {
+    if (__builtin_expect(object->apiobj.player_controlled && mode == 0 && object->pad_gamepad->input_magnitude > 0.0f,
+                         1)) {
         object->force_target = ObjOpponent(object, range, 0.0f, 0, 0, 1);
         searched = true;
         if (object->force_target != NULL) {
             result = 1;
-            if ((object->apiobj.flags_low & 0x80) != 0)
+            if (__builtin_expect((object->apiobj.flags_low & 0x80) != 0, 1))
                 goto finished;
             goto nonplayer_target;
         }
@@ -4844,7 +4845,7 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
         }
         goto finished;
     }
-    if (!searched) {
+    if (__builtin_expect(!searched, 1)) {
         object->force_target = ObjOpponent(object, range, 0.0f, 0, 0, 1);
         if (object->force_target != NULL) {
             result = 1;
@@ -4891,14 +4892,14 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
         }
         PlayerOpponent_Range2 = nearest_distance;
         object->force_target = nearest;
-        if (nearest != NULL) {
+        if (__builtin_expect(nearest != NULL, 0)) {
             ComboOpponent_Range2 = nearest_distance;
             result = 2;
             goto finished;
         }
     }
     result = 0;
-    if (!searched) {
+    if (__builtin_expect(!searched, 0)) {
         object->force_target = ObjOpponent(object, range, 0.0f, 0, 0, 1);
         result = object->force_target != NULL;
     }
@@ -5204,7 +5205,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                                                   static_cast<JEDI_ACTION>(object->queued_context_animation + 6))
                                 ? 6
                                 : 5;
-                        if (object->combo_branch == 5)
+                        if (__builtin_expect(object->combo_branch == 5, 1))
                             object->field_0xe20 &= ~0x40;
                         else {
                             NewRumble(object->pad_gamepad->pad, 0.6f, 0);
@@ -5223,7 +5224,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                         JediHasAction(object, static_cast<JEDI_ACTION>(object->queued_context_animation + 2))) {
                         object->combo_branch = 2;
                         NewRumble(object->pad_gamepad->pad, 0.5f, 0);
-                        if (object->id != id_IMPERIALGUARD)
+                        if (__builtin_expect(object->id != id_IMPERIALGUARD, 0))
                             PlaySabreSfx("ComboSaber2", object, &object->apiobj.collision_position, 0);
                     } else {
                         object->field_0xe20 &= ~0x40;
@@ -5303,7 +5304,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
             if (can_queue)
                 object->field_0xe22 |= 8;
         }
-        if (action_pressed != 0 && object->combo_input_latched == 0) {
+        if (__builtin_expect(action_pressed != 0 && object->combo_input_latched == 0, 0)) {
             if (can_queue)
                 object->combo_input_latched = 1;
             else
@@ -9690,13 +9691,13 @@ static void AwkwardShapeCode(GameObject_s *object) {
     i32 joints[8] = {};
     u32 flags[8] = {};
     f32 radii[8] = {};
-    if (object->apiobj.field_0x288 == 0 || object->apiobj.model_draw_result == 0)
+    if (__builtin_expect(object->apiobj.field_0x288 == 0 || object->apiobj.model_draw_result == 0, 0))
         return;
     if (WORLD->area != NULL && __builtin_expect((WORLD->area->flags & 1) != 0, 0) && object->id == id_ATAT)
         return;
     i32 count = 0;
     if (__builtin_expect(object->id == id_SPEEDERBIKE, 0)) {
-        if (WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks == 0)
+        if (__builtin_expect(WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks == 0, 0))
             return;
         joints[0] = 2;
         radii[0] = 0.325f;
@@ -9711,7 +9712,7 @@ static void AwkwardShapeCode(GameObject_s *object) {
             }
         }
     }
-    if (count != 0) {
+    if (__builtin_expect(count != 0, 0)) {
         for (i32 i = 0; i < count; ++i) {
             if (object->apiobj.character_model->points_of_interest[joints[i]] != NULL) {
                 f32 radius = radii[i];
@@ -9814,7 +9815,7 @@ static void CommunicateCode(GameObject_s *object, i32 pressed) {
 }
 
 static void SelectOpponent(GameObject_s *object, f32 range, f32 extra_radius, i32 mode, i32 gizmo_first) {
-    if (forceNextAttackOpponent.Get() != NULL && object->apiobj.player_controlled) {
+    if (__builtin_expect(forceNextAttackOpponent.Get() != NULL && object->apiobj.player_controlled, 1)) {
         object->force_target = forceNextAttackOpponent->GetCharacterObject();
         object->blowup_target = forceNextAttackOpponent->GetGizBlowup();
         return;
@@ -9828,7 +9829,7 @@ static void SelectOpponent(GameObject_s *object, f32 range, f32 extra_radius, i3
             return;
     }
     if (gizmo_first == 0 && !object->apiobj.player_controlled) {
-        if (object->blowup_target == NULL)
+        if (__builtin_expect(object->blowup_target == NULL, 1))
             object->force_target = ObjOpponent(object, range, extra_radius, 1, mode, 2);
         return;
     }

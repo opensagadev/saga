@@ -90,7 +90,7 @@ i32 NuMusic::ClassToIX(u32 i) {
         return 2;
     if (i == TRACK_CLASS_8)
         return 3;
-    if (i == TRACK_CLASS_CUTSCENE)
+    if (__builtin_expect(i == TRACK_CLASS_CUTSCENE, 0))
         return 4;
     if (i == TRACK_CLASS_NOMUSIC)
         return 5;

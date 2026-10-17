@@ -199,7 +199,7 @@ void MenuUpdateMissions(MENU_s *menu) {
                     start = 1;
                     goto collected_input;
                 }
-                if (!MenuPacket.reserved_1[0]) {
+                if (__builtin_expect(!MenuPacket.reserved_1[0], 1)) {
                     MenuPacket.reserved_1[0] = 1;
                     if (MenuPacket.reserved_1[1]) {
                         start = 1;
@@ -302,7 +302,7 @@ collected_input:
         const u8 *mission_count = &MissionSys->count;
         for (i32 i = 0; i < *mission_count; ++i) {
             f32 x = 0.0f;
-            if (i < hub_mission)
+            if (__builtin_expect(i < hub_mission, 0))
                 x = -0.035f - (hub_mission - i) * 0.12f;
             else if (i != hub_mission)
                 x = 0.035f + (i - hub_mission) * 0.12f;

@@ -557,7 +557,7 @@ void ClassEditor::DestroySelectedObjects() {
     eduimenu_s *confirm_menu =
         eduiMenuCreate(static_cast<i32>(x * 640.0f), static_cast<i32>(y * 448.0f), 300, 50,
                        reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbDestroyMenu, title);
-    if (confirm_menu == NULL)
+    if (__builtin_expect(confirm_menu == NULL, 0))
         return;
     eduiMenuAddItem(confirm_menu, eduiItemSelCreate(1, &EdLevelAttr, 0, 0, cbDestroyObject, const_cast<char *>("Yes")));
     eduiMenuAddItem(confirm_menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbDestroyObject, const_cast<char *>("No")));
@@ -1458,13 +1458,13 @@ void ClassEditor::cbEdClassSetMode(eduimenu_s *menu, eduiitem_s *item, u32) {
 void ClassEditor::cbEdClassSetPinned(eduimenu_s *menu, eduiitem_s *item, u32) {
     menu->flags ^= 4;
     item->highlighted = !item->highlighted;
-    if (menu->flags & 4) {
+    if (__builtin_expect(!!(menu->flags & 4), 0)) {
         eduiMenuDetach(menu);
         eduiSetPinnedMenu(menu);
     } else {
         eduiMenuDetach(menu);
         eduiMenuDestroy(menu);
-        if (edLevelActiveMenu == menu) {
+        if (__builtin_expect(edLevelActiveMenu == menu, 1)) {
             edLevelActiveMenu = NULL;
         }
         eduiSetPinnedMenu(NULL);
@@ -1478,7 +1478,7 @@ void ClassEditor::cbEdClassSetSnap(eduimenu_s *menu, eduiitem_s *item, u32) {
 
 void ClassEditor::cbEdClassSetView(eduimenu_s *menu, eduiitem_s *item, u32) {
     i32 index = item->data;
-    if (index == 1) {
+    if (__builtin_expect(index == 1, 0)) {
         theClassEditor.class_filter = 0;
     } else if (static_cast<u32>(index) < 1) {
         theClassEditor.class_filter = -1;
@@ -2011,23 +2011,23 @@ void LevelEditor::Exit() {
 }
 
 i32 LevelEditor::FindSceneId(char *name) {
-    if (NuStrICmp(scenes[0].name, name) == 0)
+    if (__builtin_expect(NuStrICmp(scenes[0].name, name) == 0, 0))
         return 0;
-    if (NuStrICmp(scenes[1].name, name) == 0)
+    if (__builtin_expect(NuStrICmp(scenes[1].name, name) == 0, 0))
         return 1;
-    if (NuStrICmp(scenes[2].name, name) == 0)
+    if (__builtin_expect(NuStrICmp(scenes[2].name, name) == 0, 0))
         return 2;
-    if (NuStrICmp(scenes[3].name, name) == 0)
+    if (__builtin_expect(NuStrICmp(scenes[3].name, name) == 0, 0))
         return 3;
     if (NuStrICmp(scenes[4].name, name) == 0)
         return 4;
-    if (NuStrICmp(scenes[5].name, name) == 0)
+    if (__builtin_expect(NuStrICmp(scenes[5].name, name) == 0, 0))
         return 5;
-    if (NuStrICmp(scenes[6].name, name) == 0)
+    if (__builtin_expect(NuStrICmp(scenes[6].name, name) == 0, 0))
         return 6;
-    if (NuStrICmp(scenes[7].name, name) == 0)
+    if (__builtin_expect(NuStrICmp(scenes[7].name, name) == 0, 0))
         return 7;
-    if (NuStrICmp(scenes[8].name, name) == 0)
+    if (__builtin_expect(NuStrICmp(scenes[8].name, name) == 0, 0))
         return 8;
     // The original's unsigned carry test accepts only an exact match here.
     return (NuStrICmp(scenes[9].name, name) == 0) * 10 - 1;
@@ -2615,7 +2615,7 @@ void PropertyTool::AutoLocateMenu(PropertyMenu *property_menu) {
     bool use_stored_metrics = true;
     PropertyMenu *other = active_menu;
     while (other != NULL) {
-        if (other->menu != menu) {
+        if (__builtin_expect(other->menu != menu, 1)) {
             if (menu->x + menu->width >= other->menu->x && other->menu->x + other->menu->width >= menu->x) {
                 menu->x += 10;
                 if (static_cast<float>(menu->x + menu->width) > 590.0f) {
@@ -2631,7 +2631,7 @@ void PropertyTool::AutoLocateMenu(PropertyMenu *property_menu) {
         }
         other = other->next;
     }
-    if (use_stored_metrics) {
+    if (__builtin_expect(!!(use_stored_metrics), 1)) {
         ediMenuRetrieveMetrics(menu);
     }
     if (static_cast<float>(menu->x + menu->width) > 590.0f) {
@@ -3418,7 +3418,7 @@ i32 EdClass::GetStreamClasses(EdStream &stream, i32 *classes, i32 &count, i32 ca
 EdRef *EdClass::FindTypeRef(char *member_name, i32 recursive) {
     for (EdRef *member = members; member != NULL; member = member->next) {
         if (recursive == 0 || member->attributes >= 0) {
-            if (NuStrICmp(member->name, member_name) == 0) {
+            if (__builtin_expect(NuStrICmp(member->name, member_name) == 0, 0)) {
                 return member;
             }
         } else {

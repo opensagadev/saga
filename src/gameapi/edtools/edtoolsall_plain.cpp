@@ -349,7 +349,7 @@ static __attribute__((noinline, noclone)) void eduiFntPrintExEditBuffer(void *fo
 static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignment, float clip_x, float clip_width,
                                         char *format, ...) {
     va_list arguments;
-    if (!edui_donotdraw) {
+    if (__builtin_expect(!edui_donotdraw, 1)) {
         char text[1024];
         i32 screen_x = static_cast<i32>(x * 16.0f);
         i32 screen_y = static_cast<i32>(y * 8.0f);
@@ -3111,7 +3111,7 @@ extern "C" {
         return 0;
     }
     i32 eduiCheckForPadMenuCancel(eduimenu_s *menu, nupad_s *pad) {
-        if (!pad || !(pad->digital_buttons_pressed & 0x10))
+        if (__builtin_expect(!pad || !(pad->digital_buttons_pressed & 0x10), 1))
             return 0;
 
         eduimenu_s *parent = menu->parent;
@@ -4983,7 +4983,7 @@ extern "C" {
 
     static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32) {
         ed_curr = static_cast<ed_module_s *>(selected->data_ptr);
-        if (!ed_curr->reserved) {
+        if (__builtin_expect(!ed_curr->reserved, 1)) {
             ed_module_active = 1;
             if (ed_curr->activate)
                 ed_curr->activate();
@@ -5761,7 +5761,7 @@ extern "C" {
         (void)delta_time;
         edui_prop_s *property = static_cast<edui_prop_s *>(item);
         u8 *property_flags = reinterpret_cast<u8 *>(property) + 0x4c;
-        if (*property_flags & 2) {
+        if (__builtin_expect(!!(*property_flags & 2), 1)) {
             property->label_width = edui_cursor_x - static_cast<f32>(item->x);
             if (property->label_width < 1.0f)
                 property->label_width = 1.0f;

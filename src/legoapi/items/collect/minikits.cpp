@@ -261,7 +261,7 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
             case 2: {
                 const f32 duration = stage->field_0x1c - 0.25f;
                 f32 size;
-                if (stage->field_0x18 < duration) {
+                if (__builtin_expect(stage->field_0x18 < duration, 0)) {
                     i32 angle = 0;
                     if (duration != 0.0f && stage->field_0x18 != 0.0f)
                         angle =
@@ -315,7 +315,7 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
                 i32 angle = 0x2000;
                 if (stage->field_0x18 < 1.0f)
                     angle = (static_cast<i32>(title_alpha * 32768.0f + 16384.0f) >> 1) & 0x7fff;
-                if (stage->field_0x18 < stage->field_0x1c) {
+                if (__builtin_expect(stage->field_0x18 < stage->field_0x1c, 1)) {
                     DrawMiniKitCount(1.0f - (NuTrigTable[angle] + 1.0f) * 0.5f, 1.0f,
                                      Game.area_save[packet->area->index].field_0x5[0], packet->minikit_max);
                     DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, 1.0f, Game.area_save[packet->area->index].field_0x5[0],

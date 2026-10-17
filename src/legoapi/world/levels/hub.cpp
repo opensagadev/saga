@@ -2524,7 +2524,7 @@ void Hub_UpdateFreePlaySelect() {
     switch (freeplaymode) {
         case 0:
             freeplaytime += FRAMETIME;
-            if (freeplaytime >= freeplayduration) {
+            if (__builtin_expect(freeplaytime >= freeplayduration, 1)) {
                 freeplaytime = 0.0f;
                 freeplaymode = 1;
                 freeplayduration = 0.0f;
@@ -2533,7 +2533,7 @@ void Hub_UpdateFreePlaySelect() {
                     freeplay_i[0] = 0;
                 freeplay_selected[0] = 0;
                 freeplay_i[1] = InCollectList_Index(MenuPacket.player_model[1], collection->list, collection->count_y);
-                if (freeplay_i[1] == -1)
+                if (__builtin_expect(freeplay_i[1] == -1, 1))
                     freeplay_i[1] = freeplay_i[0] == 1 ? 0 : 1;
                 freeplay_selected[1] = 0;
             }
@@ -2548,9 +2548,9 @@ void Hub_UpdateFreePlaySelect() {
                 const i32 previous = freeplay_i[player];
                 i32 index = previous;
                 bool select = false, cancel = false;
-                if (menu_input_activity != 0 && player == 0) {
+                if (__builtin_expect(menu_input_activity != 0 && player == 0, 1)) {
                     if (menu->confirm_pressed != 0) {
-                        if (menu->selected_item == 9999)
+                        if (__builtin_expect(menu->selected_item == 9999, 0))
                             select = 1;
                         else
                             index = menu->selected_item;
@@ -2562,7 +2562,7 @@ void Hub_UpdateFreePlaySelect() {
                         select = 1;
                     } else if ((GamePad[player].pad->digital_buttons_pressed & GAMEPAD_MENUCANCEL) != 0) {
                         cancel = 1;
-                    } else if (freeplay_selected[player] == 0) {
+                    } else if (__builtin_expect(freeplay_selected[player] == 0, 0)) {
                         const u32 pressed = GamePad[player].buttons_pressed | GamePad[player].left_directions;
                         const u32 held = GamePad[player].buttons_held | GamePad[player].buttons_released;
                         i32 up = pressed & GAMEPAD_DUP, down = pressed & GAMEPAD_DDOWN;
@@ -2591,7 +2591,7 @@ void Hub_UpdateFreePlaySelect() {
                             index = previous;
                             do {
                                 index -= columns;
-                                if (index < 0) {
+                                if (__builtin_expect(index < 0, 1)) {
                                     index += span;
                                     if (index >= count)
                                         index -= columns;
@@ -2610,7 +2610,7 @@ void Hub_UpdateFreePlaySelect() {
                                     index -= span;
                                 }
                             } while (collection->list[index].id == MenuPacket.player_model[other]);
-                        } else if (left) {
+                        } else if (__builtin_expect(!!(left), 0)) {
                             const i32 count = collection->count_y;
                             const i32 columns = collection_count_x;
                             index = previous;
@@ -2642,7 +2642,7 @@ void Hub_UpdateFreePlaySelect() {
                 if (freeplay_selected[player] == 1 && freeplay_time[player] < 0.0f) {
                     freeplay_selected[player] = 2;
                 } else if (select && freeplay_time[player] <= 0.0f) {
-                    if (freeplay_selected[player] == 0) {
+                    if (__builtin_expect(freeplay_selected[player] == 0, 1)) {
                         if (Collection_Got(collection->list[freeplay_i[player]].id) == 0) {
                             GameAudio_PlaySfx(0x32, NULL, 0, 0);
                         } else {
@@ -2728,7 +2728,7 @@ void Hub_UpdateFreePlaySelect() {
         }
         case 2:
             freeplaytime += FRAMETIME;
-            if (freeplaytime >= freeplayduration)
+            if (__builtin_expect(freeplaytime >= freeplayduration, 1))
                 WipeBackToHub();
             break;
         case 3:
@@ -2753,14 +2753,14 @@ void Hub_UpdateFreePlaySelect() {
                 if (hub_freeplaysource == 0) {
                     if (hub_selectmode == 2)
                         InitChallenge(NewLData->area_index);
-                } else if (hub_freeplaysource == 1 && bonusmodearcade != 0) {
+                } else if (__builtin_expect(hub_freeplaysource == 1 && bonusmodearcade != 0, 0)) {
                     Arcade = 1;
                     Arcade_Points[0] = Arcade_Points[1] = 0;
                 }
             }
             break;
     }
-    if (freeplaymode == 1)
+    if (__builtin_expect(freeplaymode == 1, 1))
         BigIconAlpha[0] = SeekLinearF(BigIconAlpha[0], 1.0f, FRAMETIME + FRAMETIME);
     else
         BigIconAlpha[0] = 0.0f;
@@ -3360,10 +3360,10 @@ void MenuUpdateEpisodes(MENU_s *) {
         case 0: {
             i32 up = 0, down = 0, left = 0, right = 0, confirm = 0, cancel = 0;
             for (i32 player = 0; player < 2; ++player) {
-                if (!MenuPacket.active_player[player])
+                if (__builtin_expect(!MenuPacket.active_player[player], 0))
                     continue;
                 const u32 pressed = GamePad[player].buttons_pressed;
-                if (pressed & GAMEPAD_MENUSELECT) {
+                if (__builtin_expect(!!(pressed & GAMEPAD_MENUSELECT), 0)) {
                     confirm = 1;
                     break;
                 }
@@ -3388,7 +3388,7 @@ void MenuUpdateEpisodes(MENU_s *) {
                     else
                         i_episodes = menu->selected_item;
                 }
-                if (menu->cancel_pressed)
+                if (__builtin_expect(!!(menu->cancel_pressed), 0))
                     cancel = 1;
             }
             if (confirm) {
@@ -3431,7 +3431,7 @@ void MenuUpdateEpisodes(MENU_s *) {
         case 2: {
             const i32 all = hub_new_level == -1 || LDataList[hub_new_level].episode_index == -1;
             const u16 count = CutScenePlayer_CountEpisodeClips(i_episodes, all, clips);
-            if (i_clip[i_episodes] >= count)
+            if (__builtin_expect(i_clip[i_episodes] >= count, 1))
                 i_clip[i_episodes] = count - 1;
             const i32 previous = i_clip[i_episodes];
             bool confirm = false, cancel = false;
@@ -3459,7 +3459,7 @@ void MenuUpdateEpisodes(MENU_s *) {
                     MenuRepeat(&down_held, &down, downrepeattime, downrepeatcount, 0.1f, FRAMETIME);
                     MenuRepeat(&left_held, &left, leftrepeattime, leftrepeatcount, 0.1f, FRAMETIME);
                     MenuRepeat(&right_held, &right, rightrepeattime, rightrepeatcount, 0.1f, FRAMETIME);
-                    if (!up) {
+                    if (__builtin_expect(!up, 0)) {
                         if (down) {
                             i32 next = previous + 7;
                             if (next >= count) {
@@ -3467,7 +3467,7 @@ void MenuUpdateEpisodes(MENU_s *) {
                                 next = (next < rows * 7 ? previous + 14 : next) - rows * 7;
                             }
                             i_clip[i_episodes] = next;
-                        } else if (left) {
+                        } else if (__builtin_expect(!!(left), 0)) {
                             i32 column = previous % 7 - 1;
                             if (column < 0)
                                 column += 7;
@@ -3489,7 +3489,7 @@ void MenuUpdateEpisodes(MENU_s *) {
                         }
                     } else {
                         i32 next = previous - 7;
-                        if (next < 0) {
+                        if (__builtin_expect(next < 0, 0)) {
                             next += (count / 7 + 1) * 7;
                             if (next >= count)
                                 next -= 7;
@@ -3499,7 +3499,7 @@ void MenuUpdateEpisodes(MENU_s *) {
                 }
             }
             if (menu->input_activity && menu->confirm_pressed) {
-                if (menu->selected_item == i_clip[i_episodes])
+                if (__builtin_expect(menu->selected_item == i_clip[i_episodes], 0))
                     confirm = true;
                 else
                     i_clip[i_episodes] = menu->selected_item;
@@ -3520,7 +3520,7 @@ void MenuUpdateEpisodes(MENU_s *) {
                 lastepisodesmode = episodesmode;
                 episodesmode = 0;
                 episodesduration = 0.6f;
-                if (hub_new_level != -1 && LDataList[hub_new_level].episode_index != -1)
+                if (__builtin_expect(hub_new_level != -1 && LDataList[hub_new_level].episode_index != -1, 0))
                     episodesmode = 1;
             } else if (previous != i_clip[i_episodes]) {
                 GameAudio_PlaySfx(0x2f, NULL, 0, 0);

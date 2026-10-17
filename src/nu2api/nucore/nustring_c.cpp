@@ -74,14 +74,14 @@ const char *NuStrStripPath(const char *string) {
         cursor = string;
 
         while (*cursor != '/' && *cursor != '\\') {
-            if (*cursor == '\0') {
+            if (__builtin_expect(*cursor == '\0', 0)) {
                 return string;
             }
 
             cursor++;
         }
 
-        if (*++cursor == '\0') {
+        if (__builtin_expect(*++cursor == '\0', 1)) {
             return string;
         }
         string = cursor;

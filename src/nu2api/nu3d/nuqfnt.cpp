@@ -746,7 +746,7 @@ void NuQFntPopPrintMode(void) {
 i32 UnicodeToIndexFast(vucharidx_s *map, i32 count, u16 unicode) {
     if (count <= 0 || map[count - 1].unicode < unicode)
         return -1;
-    if (count == 1)
+    if (__builtin_expect(count == 1, 0))
         return map[0].unicode == unicode ? map[0].index : -1;
 
     i32 low = 0;
@@ -754,8 +754,8 @@ i32 UnicodeToIndexFast(vucharidx_s *map, i32 count, u16 unicode) {
     i32 middle = count / 2;
     u16 middle_unicode = map[middle].unicode;
     while (middle_unicode != unicode) {
-        if (low + 1 == high) {
-            if (map[high].unicode == unicode)
+        if (__builtin_expect(low + 1 == high, 0)) {
+            if (__builtin_expect(map[high].unicode == unicode, 1))
                 return map[high].index;
             if (map[low].unicode == unicode)
                 return map[low].index;

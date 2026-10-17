@@ -253,7 +253,7 @@ void Tag_UpdateTransfers(i32 effect0, i32 effect1, i32 count) {
     if (!(Tag_Transfer[0].time < Tag_TransferResetTimer))
         goto second_player;
     Tag_Transfer[0].time += FRAMETIME;
-    if (Tag_Transfer[0].time > Tag_TransferResetTimer) {
+    if (__builtin_expect(Tag_Transfer[0].time > Tag_TransferResetTimer, 0)) {
         Tag_Transfer[0].time = Tag_TransferResetTimer;
         goto second_player;
     }
@@ -313,7 +313,7 @@ void Tag_UpdateTransfers(i32 effect0, i32 effect1, i32 count) {
         }
     }
 second_player:
-    if (Player[1] == NULL) {
+    if (__builtin_expect(Player[1] == NULL, 0)) {
         Tag_Transfer[1].time = Tag_TransferResetTimer;
         return;
     }

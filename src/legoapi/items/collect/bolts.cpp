@@ -313,8 +313,8 @@ void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
     NUVEC delta, target_velocity, origin, direction;
     BoltSys->shoot_origin(object, &origin);
     u16 heading = BoltSys->shoot_direction(object, &direction);
-    if (object->character_context != -1 && object->context_animation != -1) {
-        if (object->context_animation == LEGOACT_SHOOTRIGHT)
+    if (__builtin_expect(object->character_context != -1 && object->context_animation != -1, 1)) {
+        if (__builtin_expect(object->context_animation == LEGOACT_SHOOTRIGHT, 0))
             heading += 0x4000;
         else if (object->context_animation == LEGOACT_SHOOTLEFT)
             heading -= 0x4000;
@@ -349,7 +349,7 @@ void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
                 adjusted_position.y += Bolt_ObjTargetPosYAdjust(target);
                 target_position = &adjusted_position;
             }
-        } else if ((object->field_0xe21 & 8) != 0) {
+        } else if (__builtin_expect((object->field_0xe21 & 8) != 0, 0)) {
             target_position = intercept_position = &aimed_position;
         }
     } else {
@@ -372,7 +372,7 @@ void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
             continue;
         NUVEC *shot_position;
         if (index == 4) {
-            if (used_locator != 0)
+            if (__builtin_expect(used_locator != 0, 0))
                 break;
             shot_position = &origin;
         } else {
@@ -382,7 +382,7 @@ void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
             i32 locator = data->weapon_shoot_joints[index];
             if (locator == -1 || object->apiobj.character_model->points_of_interest[locator] == NULL) {
                 locator = data->weapon_joints[index];
-                if (locator == -1 || object->apiobj.character_model->points_of_interest[locator] == NULL)
+                if (__builtin_expect(locator == -1 || object->apiobj.character_model->points_of_interest[locator] == NULL, 0))
                     continue;
             }
             used_locator = 1;

@@ -189,7 +189,7 @@ static __used__ CREATURE_EDITOR_REGPARM2 void *CreateCreature(i32 type, nuvec_s 
     creature->view_distance = GetViewRangeFn != nullptr ? GetViewRangeFn(type) : 1.0f;
     creature->hear_distance = GetHearDistanceFn != nullptr ? GetHearDistanceFn(type) : 1.0f;
     creature->max_view_height = GetMaxViewHeightFn != nullptr ? GetMaxViewHeightFn(type) : 1.0f;
-    if (GetMinViewHeightFn != nullptr) {
+    if (__builtin_expect(GetMinViewHeightFn != nullptr, 0)) {
         creature->negative_min_view_height = GetMinViewHeightFn(type);
     } else {
         creature->negative_min_view_height = 1.0f;
@@ -199,7 +199,7 @@ static __used__ CREATURE_EDITOR_REGPARM2 void *CreateCreature(i32 type, nuvec_s 
     creature->max_respawns = default_max_n_respawns;
     creature->min_respawn_time = default_min_t_respawn;
     creature->max_respawn_time = default_max_t_respawn;
-    if (position != nullptr) {
+    if (__builtin_expect(position != nullptr, 1)) {
         creature->position = *position;
         creature->angle = angle;
     }
@@ -424,12 +424,12 @@ static __used__ void creatureEditor_cbGroupMenu(eduimenu_s *parent, eduiitem_s *
 static __used__ void creatureEditor_cbRenameCreature(eduimenu_s *, eduiitem_s *item, unsigned int) {
     CreatureEditorRecord *creature = creatureEditor_Current();
     const char *name = reinterpret_cast<edui_textpicker_s *>(item)->value;
-    if (creature == nullptr || name[0] == '\0')
+    if (__builtin_expect(creature == nullptr || name[0] == '\0', 0))
         return;
     NULISTHDR *list = &aieditor->creatures;
     for (NULISTLNK *link = NuLinkedListGetHead(list); link != nullptr; link = NuLinkedListGetNext(list, link)) {
         CreatureEditorRecord *other = reinterpret_cast<CreatureEditorRecord *>(link);
-        if (NuStrICmp(other->name, name) == 0)
+        if (__builtin_expect(NuStrICmp(other->name, name) == 0, 0))
             return;
     }
     strcpy(creature->name, name);
@@ -627,7 +627,7 @@ static __used__ void creatureEditor_cbSelectScript(eduimenu_s *parent, eduiitem_
 
 static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbSetScript(eduimenu_s *, eduiitem_s *item,
                                                                                          unsigned int) {
-    if (item == nullptr || creatureEditor_Current() == nullptr)
+    if (__builtin_expect(item == nullptr || creatureEditor_Current() == nullptr, 1))
         return;
     char *name = AIScriptNameFromIx(aieditor->ai_system, item->data);
     if (name == nullptr)
@@ -649,7 +649,7 @@ static __used__ void creatureEditor_cbSetScriptParam(eduimenu_s *menu, eduiitem_
         return;
     i32 index = item->data;
     f32 value = reinterpret_cast<edui_slider_s *>(item)->value;
-    if (value == aieditorsettings.current_script_params[index])
+    if (__builtin_expect(value == aieditorsettings.current_script_params[index], 1))
         return;
     aieditorsettings.current_script_params[index] = value;
     u32 bit = static_cast<u32>(u64(2) << (index & 63));
@@ -729,7 +729,7 @@ static __used__ void creatureEditor_cbSetType(eduimenu_s *, eduiitem_s *item, un
 }
 
 static __used__ void creatureEditor_cbSetAreaActivation(eduimenu_s *, eduiitem_s *item, unsigned int) {
-    if (item == nullptr || creatureEditor_Current() == nullptr)
+    if (__builtin_expect(item == nullptr || creatureEditor_Current() == nullptr, 0))
         return;
     NULISTLNK *area = creatureEditor_ListItem(creatureEditor_AreaList(), item->data);
     if (area != nullptr) {

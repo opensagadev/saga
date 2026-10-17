@@ -2291,7 +2291,7 @@ i32 edpartLookupObjectInScene(char *name, nugscn_s *scene) {
         i32 i;
         for (i = 0; i < count; ++i) {
             NuGScnGetSpecial(&special, scene, i);
-            if (NuSpecialExistsFn(&special) && NuStrNCmp(name, NuSpecialGetName(&special), 16) == 0)
+            if (__builtin_expect(NuSpecialExistsFn(&special) && NuStrNCmp(name, NuSpecialGetName(&special), 16) == 0, 0))
                 break;
         }
         if (i < count)

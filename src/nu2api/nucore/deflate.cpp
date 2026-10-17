@@ -254,7 +254,7 @@ i32 DecodeDeflatedBlock(DEFLATECONTEXT *ctx) {
 
 i32 DecodeUncompressedBlock(DEFLATECONTEXT *ctx) {
     i32 alignment = ctx->num_bits_available & 7;
-    if (alignment > 0) {
+    if (__builtin_expect(alignment > 0, 0)) {
         if (ctx->num_bits_available < alignment) {
             FillBits(ctx);
         }

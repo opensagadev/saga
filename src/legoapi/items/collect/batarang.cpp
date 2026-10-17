@@ -127,7 +127,7 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
         }
         i32 target;
         for (target = 0; target < batarang->active; ++target) {
-            if (batarang->targets[target].object != candidate) {
+            if (__builtin_expect(batarang->targets[target].object != candidate, 0)) {
                 continue;
             }
             break;
@@ -142,7 +142,7 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
             if (!(delta.x * forward.x + delta.z * forward.z > 0.0f)) {
                 continue;
             }
-            if (distance < nearest_distance) {
+            if (__builtin_expect(distance < nearest_distance, 0)) {
                 nearest_distance = distance;
                 nearest_object = candidate;
             }
@@ -229,7 +229,7 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
             if (!(delta.x * forward.x + delta.z * forward.z > 0.0f)) {
                 continue;
             }
-            if (distance < nearest_distance) {
+            if (__builtin_expect(distance < nearest_distance, 0)) {
                 nearest_distance = distance;
                 nearest_blowup = candidate;
             }
@@ -610,7 +610,7 @@ void Batarang_GetSightInfo(i32 character, i32 *red, i32 *green, i32 *blue, char 
 void Batarang_MoveCode(GameObject_s *object) {
     i32 colour[3];
     BATARANG_s *batarang = static_cast<BATARANG_s *>(object->batarang);
-    if (batarang == NULL || batarang->field_0x7d != 0) {
+    if (__builtin_expect(batarang == NULL || batarang->field_0x7d != 0, 0)) {
         return;
     }
     if (object->character_context == 0x50) {
@@ -639,10 +639,10 @@ void Batarang_MoveCode(GameObject_s *object) {
     }
     if (object->character_context != 0x4d) {
         GAMECHARACTERDATA *runtime = object->apiobj.character_data->game_character;
-        if (!object->apiobj.player_controlled || (runtime->flags_090 & 0x20000000) == 0 ||
+        if (__builtin_expect(!object->apiobj.player_controlled || (runtime->flags_090 & 0x20000000) == 0 ||
             object->use_model_origin == 0 || (object->field_0xe24 & 8) == 0 || object->apiobj.model_draw_result == 0 ||
             !(object->field_0xc54 > 0.0f) || !(object->hold_timer >= 0.25f) || object->apiobj.field_0x27d == 0 ||
-            ObjLandReady(object) == 0) {
+            ObjLandReady(object) == 0, 1)) {
             return;
         }
         object->field_0xe22 |= 0x40;
@@ -655,7 +655,7 @@ void Batarang_MoveCode(GameObject_s *object) {
     if (object->field_0x7a3 == 0) {
         object->field_0xe22 |= 0x40;
         object->jump_flags |= 2;
-        if ((object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP) != 0) {
+        if (__builtin_expect((object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP) != 0, 0)) {
             StartJump(object, 0);
             return;
         }
@@ -679,8 +679,8 @@ void Batarang_MoveCode(GameObject_s *object) {
                 object->character_context = -1;
             }
         } else {
-            if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
-                AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) != NULL) {
+            if (__builtin_expect(object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
+                AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) != NULL, 1)) {
                 GAMEPAD_s *pad = object->pad_gamepad;
                 object->context_animation_timer += FRAMETIME;
                 f32 x = pad->input_direction_z * 1.25f;
@@ -738,7 +738,7 @@ void Batarang_MoveCode(GameObject_s *object) {
             object->landing_followup = 1;
         }
         if ((object->context_flags & 0x40) != 0) {
-            if (object->landing_followup == 1 && 0.2f <= object->context_animation_timer) {
+            if (__builtin_expect(object->landing_followup == 1 && 0.2f <= object->context_animation_timer, 1)) {
                 StartJump(object, 0);
                 object->movement_runtime_flags |= 0x10;
                 goto finish;

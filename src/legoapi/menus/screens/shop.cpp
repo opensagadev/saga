@@ -1079,7 +1079,7 @@ i32 CodeMenu(MENU_s *) {
     if (timer >= 0.0f)
         timer -= FRAMETIME;
     itemchanged = 0;
-    if (easesubin) {
+    if (__builtin_expect(!!(easesubin), 1)) {
         f32 factor = 1.0f - ShopSinePhase(1.0f - 8.0f * slidetimer);
         if (easesubin == 1)
             inoutscale = 0.0f + ShopClamp01(factor);
@@ -1094,9 +1094,9 @@ i32 CodeMenu(MENU_s *) {
         else if (input.right_held)
             right = 1;
         else if (input.down_held) {
-            if (timer <= 0.0f)
+            if (__builtin_expect(timer <= 0.0f, 0))
                 down = 1;
-            else if (input.down_pressed)
+            else if (__builtin_expect(!!(input.down_pressed), 0))
                 down = 1;
         } else if (input.up_held) {
             if (timer <= 0.0f)
@@ -1128,14 +1128,14 @@ i32 CodeMenu(MENU_s *) {
         if (left) {
             lastitem = col;
             --col;
-            if (col < 0)
+            if (__builtin_expect(col < 0, 0))
                 col = 0;
             codevalid = 0;
             if (!usercode[col])
                 codechar = 0;
             else
                 for (i32 i = 0; i < 36; ++i) {
-                    if (usercode[col] != codechars[i]) {
+                    if (__builtin_expect(usercode[col] != codechars[i], 1)) {
                         continue;
                     }
                     codechar = i;
@@ -1189,7 +1189,7 @@ i32 CodeMenu(MENU_s *) {
             u32 crc = CRC_ProcessStringIgnoreCase(code);
             i32 i;
             for (i = 0; i < 144; ++i)
-                if (codelist[i] && codelist[i] == crc)
+                if (__builtin_expect(codelist[i] && codelist[i] == crc, 0))
                     break;
             if (i == 144) {
                 PlaySfx("Shop_NotEnufMuny", &SubShelfPos[3]);
@@ -1232,7 +1232,7 @@ i32 CodeMenu(MENU_s *) {
     if (slidetimer >= 0.0f) {
         f32 factor = 1.0f - ShopSinePhase(1.0f - 8.0f * slidetimer);
         if (lastitem != -1) {
-            if (easesubin == 1) {
+            if (__builtin_expect(easesubin == 1, 0)) {
                 factor = ShopClamp01(factor);
                 codemenuscale[lastitem] =
                     codeshelfscale[lastitem] + (codebigscale[lastitem] - codeshelfscale[lastitem]) * factor;
@@ -1247,7 +1247,7 @@ i32 CodeMenu(MENU_s *) {
             }
         }
         if (col != -1) {
-            if (easesubin == -1) {
+            if (__builtin_expect(easesubin == -1, 0)) {
                 factor = ShopClamp01(factor);
                 codemenuscale[col] = codebigscale[col] + (codeshelfscale[col] - codebigscale[col]) * factor;
                 factor = ShopClamp01(factor);

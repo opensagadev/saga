@@ -263,7 +263,7 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
                 if (hide_selected != 0)
                     continue;
                 opacity = 0.25f;
-                if (model_index == 0 || model_index == 1) {
+                if (__builtin_expect(model_index == 0 || model_index == 1, 1)) {
                     opacity =
                         NuTrigTable[(static_cast<i32>(GlobalTimer.time_elapsed_mod_seconds * 65536.0f) >> 1) & 0x7fff] *
                             0.125f +
@@ -272,7 +272,7 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
                 }
             }
             const i32 unlocked = valid != NULL ? valid(collection, index) : Collection_Got(id);
-            if (unlocked == 0) {
+            if (__builtin_expect(unlocked == 0, 0)) {
                 opacity *= 0.25f;
                 id = -1;
             }
@@ -281,7 +281,7 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
                 continue;
             const u32 neighbours = Collection_NeighbourFlags(col, row, selected_x[0], selected_y[0]) |
                                    Collection_NeighbourFlags(col, row, selected_x[1], selected_y[1]);
-            if ((neighbours & 1) != 0)
+            if (__builtin_expect((neighbours & 1) != 0, 0))
                 opacity *= 0.333f;
             else if ((neighbours & 2) != 0)
                 opacity *= 0.5f;

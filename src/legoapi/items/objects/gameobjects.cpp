@@ -1299,8 +1299,8 @@ static f32 Condition_IAmPlayer2(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *pack
 static f32 Condition_PlayerOnObject(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     i32 platform = reinterpret_cast<intptr_t>(argument);
     f32 result = 0.0f;
-    if (player != NULL && platform != -1 && (player->apiobj.field_0x27d != 0 || player->apiobj.field_0x27e != 0)) {
-        if (player->apiobj.supporting_platform_id == platform) {
+    if (__builtin_expect(player != NULL && platform != -1 && (player->apiobj.field_0x27d != 0 || player->apiobj.field_0x27e != 0), 0)) {
+        if (__builtin_expect(player->apiobj.supporting_platform_id == platform, 0)) {
             NUMTX *transform = static_cast<NUMTX *>(CurTerr->platforms[platform].scene_object);
             result = transform->m31 > player->apiobj.position.y ? 0.0f : 1.0f;
         }
@@ -1841,7 +1841,7 @@ static i32 GameFindAlternativeSpecialObject(AISYS *, nuhspecial_s *special) {
 }
 
 static void GameAILoad(AISYS *system, i32 version, NUGSCN *, VARIPTR *, VARIPTR *) {
-    if (version < 12 && system->path_sys != NULL && system->path_sys->path_count != 0) {
+    if (__builtin_expect(version < 12 && system->path_sys != NULL && system->path_sys->path_count != 0, 1)) {
         AIPATHSYS *path_system = system->path_sys;
         AIPATH **paths = path_system->paths;
         for (i32 path_index = 0; path_index < path_system->path_count; ++path_index) {
@@ -1858,7 +1858,7 @@ static void GameAILoad(AISYS *system, i32 version, NUGSCN *, VARIPTR *, VARIPTR 
     }
 
     i32 tag_length = static_cast<i8>(EdFileReadChar());
-    if (tag_length <= 8 && tag_length != 0) {
+    if (__builtin_expect(tag_length <= 8 && tag_length != 0, 0)) {
         char tag[16];
         EdFileRead(tag, tag_length);
         if (NuStrICmp(tag, "LEGO") == 0) {

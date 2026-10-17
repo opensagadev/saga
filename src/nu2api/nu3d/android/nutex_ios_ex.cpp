@@ -573,7 +573,7 @@ GLuint NuIOS_CreateGLTexFromMemoryDDS(void *ddsPointer, i32 *out_width, i32 *out
 GLuint NuIOS_CreateGLTexFromPlatformInMemory(void *data, i32 *width, i32 *height, bool is_pvrtc) {
     const PLATFORMS_SUPPORTED platform = NuPlatform::Get()->GetCurrentPlatform();
     GLuint texture = 0;
-    if (is_pvrtc) {
+    if (__builtin_expect(!!(is_pvrtc), 1)) {
         texture = NuIOS_CreateGLTexFromPVRInMemory(data, width, height);
     } else {
         switch (platform) {

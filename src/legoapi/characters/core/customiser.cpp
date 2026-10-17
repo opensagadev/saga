@@ -130,7 +130,7 @@ i32 Customiser_NextPieceLeft(CUSTOMISER *customiser, i32 index, i32 count, i32 u
                     CUSTOMPIECERESOURCE *resources = world->customiser_resources[category];
                     if (resources) {
                         CUSTOMPIECERESOURCE *resource = &resources[index];
-                        if (customiser->categories[category]->uses_special)
+                        if (__builtin_expect(!!(customiser->categories[category]->uses_special), 0))
                             available = NuSpecialExistsFn(&resource->special) != 0;
                         else
                             available = resource->model != NULL;
