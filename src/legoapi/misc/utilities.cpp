@@ -4750,7 +4750,7 @@ void EvaluateSplineXZIntersection(nugspline_s *first, i32 first_looping, SPLINEP
     }
 }
 
-i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end, nuvec_s *edge_start, i32 inside) {
+__attribute__((optimize("O3"))) i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end, nuvec_s *edge_start, i32 inside) {
     if (__builtin_expect(spline == NULL || position == NULL, 0))
         return 0;
     NUVEC ray_start = {position->x, -position->z, position->y};

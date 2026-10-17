@@ -5320,7 +5320,7 @@ static void edpartCancelInstanceSettingsMenu(eduimenu_s *, eduimenu_s *) {
     edpart_instancesettings_menu = NULL;
 }
 
-static void edpartCancelInstanceOrphansMenu(eduimenu_s *, eduimenu_s *) {
+__attribute__((optimize("O2"))) static void edpartCancelInstanceOrphansMenu(eduimenu_s *, eduimenu_s *) {
     if (edpart_nearest_type->variant_count == 0) {
         edpart_nearest_type->effect_pages[0] = 1;
         edpart_nearest_type->effect_ids[1] = -1;
@@ -5759,7 +5759,7 @@ static void edpartInstanceFlagsMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     }
 }
 
-static void edpartInstanceOrphansMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+__attribute__((optimize("O2"))) static void edpartInstanceOrphansMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     edpart_which_scene = 1;
     edpart_instanceorphans_menu =
         eduiMenuCreate(70, 70, 250, 250, ed_fnt, edpartCancelInstanceOrphansMenu, "Instance Orphans/Dupes");
@@ -6464,7 +6464,7 @@ static void edpartGeneralPartIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 v
     edpartPartIndexMenu(menu);
 }
 
-static void edpartDebrisIndexMenu(eduimenu_s *menu) {
+__attribute__((optimize("O2"))) static void edpartDebrisIndexMenu(eduimenu_s *menu) {
     edpart_debrisindex_menu = eduiMenuCreate(70, 70, 250, 250, ed_fnt, edpartCancelDebrisIndexMenu, "Debris Type");
     if (edpart_debrisindex_menu == NULL || edpart_nearest_type == NULL)
         return;

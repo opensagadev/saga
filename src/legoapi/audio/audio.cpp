@@ -8566,7 +8566,7 @@ static i16 *AmbientPairTab;
 
 // ==== functions in original address order ====
 
-void GameAudio_Reset() {
+__attribute__((optimize("O3"))) void GameAudio_Reset() {
     memset(&GameAudio_Default, 0, sizeof(GameAudio_Default));
     GameAudio = &GameAudio_Default;
     memset(GameAudio_Default.sfx_names, 0, sizeof(GameAudio_Default.sfx_names));

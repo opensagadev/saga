@@ -255,7 +255,7 @@ static void Ledges_Reset(void *world_info, void *, void *progress_data) {
     }
 }
 
-static void Ledges_ClearProgress(void *, void *progress_data) {
+__attribute__((optimize("O2"))) static void Ledges_ClearProgress(void *, void *progress_data) {
     LEDGEPROGRESS *progress = (LEDGEPROGRESS *)progress_data;
     if (progress == NULL) {
         return;
@@ -425,7 +425,7 @@ static i32 Ledges_Load(void *world_info, void *) {
     return 1;
 }
 
-static void Ledges_StoreProgress(void *world_info, void *, void *progress_data) {
+__attribute__((optimize("O2"))) static void Ledges_StoreProgress(void *world_info, void *, void *progress_data) {
     LEDGEPROGRESS *progress = static_cast<LEDGEPROGRESS *>(progress_data);
     if (progress == NULL)
         return;

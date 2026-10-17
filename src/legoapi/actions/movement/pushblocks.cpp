@@ -3955,7 +3955,7 @@ void ResetSinglePushBlockHeight(WORLDINFO_s *world, pushblock_s *block, i32 inde
     }
 }
 
-void MoveBlocksOverBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, nuvec_s *velocity) {
+__attribute__((optimize("O2", "tree-vectorize"))) void MoveBlocksOverBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, nuvec_s *velocity) {
     if (block->runtime_flags_0c9 & 4)
         return;
     f32 xmin = block->bounds_min.x + block->position->x, xmax = block->position->x + block->bounds_max.x;

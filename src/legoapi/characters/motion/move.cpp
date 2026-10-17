@@ -7579,7 +7579,7 @@ static void JumpAnimCode(GameObject_s *object) {
     }
 }
 
-static void MoveAnim_Check(GameObject_s *object) {
+__attribute__((optimize("O2", "tree-vectorize"))) static void MoveAnim_Check(GameObject_s *object) {
     if (GetAnimBlendMode() == 1)
         return;
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
@@ -16347,7 +16347,7 @@ start_turn:
     StartTurn(object);
 }
 
-void Animate_CHARACTER(GameObject_s *object) {
+__attribute__((optimize("O2", "tree-vectorize"))) void Animate_CHARACTER(GameObject_s *object) {
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
     if (object->id == id_JABBA && WORLD != NULL && WORLD->current_level == HUB_LDATA) {
         packet.requested_animation = CHARACTER_ANIMATION_IDLE;
@@ -16583,7 +16583,7 @@ void Animate_SPEEDERBIKE(GameObject_s *object) {
             : CHARACTER_ANIMATION_IDLE;
 }
 
-void Animate_BEAST(GameObject_s *object) {
+__attribute__((optimize("O2", "tree-vectorize"))) void Animate_BEAST(GameObject_s *object) {
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
     GAMEPAD_s *pad = object->pad_gamepad;
 
@@ -16661,7 +16661,7 @@ void Animate_CANNON(GameObject_s *object) {
             : CHARACTER_ANIMATION_IDLE;
 }
 
-void Animate_WEIRDO(GameObject_s *object) {
+__attribute__((optimize("O2", "tree-vectorize"))) void Animate_WEIRDO(GameObject_s *object) {
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
     if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
         packet.requested_animation = object->context_animation;
@@ -16894,7 +16894,7 @@ void Animate_JEDI(GameObject_s *object) {
     PlaySfxByIdAndSetVolume(GetSfxId(loop_sfx), &object->apiobj.collision_position, object->weapon_scale);
 }
 
-void Animate_ASTROMECH(GameObject_s *object) {
+__attribute__((optimize("O2", "tree-vectorize"))) void Animate_ASTROMECH(GameObject_s *object) {
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
     if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) == 0) {
         if (object->context_target_position != NULL) {
@@ -18020,7 +18020,7 @@ void Move_SUPERBATTLEDROID(GameObject_s *object) {
     GizmoBlowupCheckProximity(WORLD, object);
 }
 
-void Animate_SUPERBATTLEDROID(GameObject_s *object) {
+__attribute__((optimize("O2", "tree-vectorize"))) void Animate_SUPERBATTLEDROID(GameObject_s *object) {
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
     if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) == 0) {
         if (object->context_target_position != NULL) {

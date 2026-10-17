@@ -3616,7 +3616,7 @@ void CutScenes_ConfigureList(char *filename, variptr_u *buffer, variptr_u) {
     }
 }
 
-void *CutScenes_Load(char *config, NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VARIPTR *buf, VARIPTR *buf_end, i32 param2,
+__attribute__((optimize("O2", "tree-vectorize"))) void *CutScenes_Load(char *config, NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VARIPTR *buf, VARIPTR *buf_end, i32 param2,
                      i32 param3, WORLDINFO *world) {
     NUFPAR *fp;
     CUTSYS *sys;

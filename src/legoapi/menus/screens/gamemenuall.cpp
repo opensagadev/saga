@@ -7169,7 +7169,7 @@ i32 ChecksumSaveData(void *buffer, i32 size) {
 }
 
 extern "C" {
-    void UpdateSaveSlots(void) {
+    __attribute__((optimize("O2", "tree-vectorize"))) void UpdateSaveSlots(void) {
         const f32 elapsed = NuTimeGetFrameTime();
         if (memcard_autosavecanceldelay > 0.0f)
             memcard_autosavecanceldelay -= elapsed;

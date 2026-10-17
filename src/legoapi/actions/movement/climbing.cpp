@@ -4990,6 +4990,17 @@ found_normal:
     object->normal = ShadNorm;
 }
 
+// Retail keeps the tail of LedgeTerrain_Attach split out by partial inlining;
+// the contact checks stay inline in each caller.
+#if defined(__i386__)
+#define LEDGE_ATTACH_PART_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define LEDGE_ATTACH_PART_ATTR __attribute__((noinline, noclone))
+#endif
+static LEDGE_ATTACH_PART_ATTR i32 LedgeTerrain_AttachPart(GameObject_s *object, u16 facing, NUVEC *position,
+                                                          u16 *wall_angle)
+    __asm__("_ZL19LedgeTerrain_AttachP12GameObject_stP7nuvec_sPt.part.0");
+
 static inline i32 LedgeTerrain_Attach(GameObject_s *object, u16 facing, NUVEC *position, u16 *wall_angle) {
     if (!object->field_0x1084)
         return 0;
@@ -4999,6 +5010,11 @@ static inline i32 LedgeTerrain_Attach(GameObject_s *object, u16 facing, NUVEC *p
     if (object->apiobj.collision_position.y - 0.05f >= object->contact_position.y ||
         fabsf(object->contact_normal.y) > NuTrigTable[0x3000])
         return 0;
+    return LedgeTerrain_AttachPart(object, facing, position, wall_angle);
+}
+
+static LEDGE_ATTACH_PART_ATTR i32 LedgeTerrain_AttachPart(GameObject_s *object, u16 facing, NUVEC *position,
+                                                          u16 *wall_angle) {
     *wall_angle = NuAtan2D(object->contact_normal.x, object->contact_normal.z);
     i32 difference = RotDiff(facing, *wall_angle);
     if (difference < 0)

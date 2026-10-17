@@ -2942,7 +2942,7 @@ void ScaleGameObject(GameObject_s *object) {
     object->apiobj.scaled_height = (character->field16_0x38 - character->field15_0x34) * object->field_0x1004;
 }
 
-void GetTopBot(GameObject_s *object) {
+__attribute__((optimize("O2", "tree-vectorize"))) void GetTopBot(GameObject_s *object) {
     CHARACTERDATA *character = object->apiobj.character_data;
     const f32 bottom = character->field15_0x34;
     const f32 top = character->field16_0x38;

@@ -24341,7 +24341,7 @@ extern "C" {
         return old_value != new_value;
     }
 
-    i32 StateAnimEvaluate(StateAnim *state, u8 *index, u8 *value, f32 frame) {
+    __attribute__((optimize("O2", "tree-vectorize"))) i32 StateAnimEvaluate(StateAnim *state, u8 *index, u8 *value, f32 frame) {
         u8 next = *index;
         if (next < state->count) {
             i32 changed = 0;
@@ -26955,7 +26955,7 @@ extern "C" {
 
 }
 
-void NuDisplayListSetInstSurfGeom(void *) {
+__attribute__((optimize("O2"))) void NuDisplayListSetInstSurfGeom(void *) {
     STUBBED();
 }
 

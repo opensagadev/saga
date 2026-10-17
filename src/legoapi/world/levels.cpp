@@ -8015,7 +8015,7 @@ extern void GizmoTypeStoreProgress(GIZMOSYS_s *, void *, i32, i32, char *);
 
 // ==== functions in original address order ====
 
-void LevelStreaming_Update(WORLDINFO_s *world) {
+__attribute__((optimize("O2", "tree-vectorize"))) void LevelStreaming_Update(WORLDINFO_s *world) {
     if (LOADEROFF == 0 && BGLOAD != 0 && world->area != NULL && (world->area->flags & 8) == 0 && NewLData == NULL &&
         Mission_Active(NULL) == NULL) {
 

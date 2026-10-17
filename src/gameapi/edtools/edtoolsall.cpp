@@ -4597,7 +4597,7 @@ extern "C" {
         }
     }
 
-    static __used__ i32 eduicbInteractSel(edui_interact_s *interact) {
+    __attribute__((optimize("O2", "tree-vectorize"))) static __used__ i32 eduicbInteractSel(edui_interact_s *interact) {
         eduimenu_s *menu = interact->menu;
         edui_sel_s *item = static_cast<edui_sel_s *>(interact->item);
         if (interact->callback) {
@@ -5343,7 +5343,7 @@ extern "C" {
         return height * 2;
     }
 
-    static __used__ i32 eduicbRenderTexturePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
+    __attribute__((optimize("O2", "tree-vectorize"))) static __used__ i32 eduicbRenderTexturePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
         u32 colours[2] = {0x807f7f7f, 0x807f7f7f};
         (void)menu;
         edui_texture_pick_s *picker = static_cast<edui_texture_pick_s *>(item);
@@ -5438,7 +5438,7 @@ extern "C" {
         return height;
     }
 
-    static __used__ i32 eduicbRenderGraph(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32 selected) {
+    __attribute__((optimize("O2", "tree-vectorize"))) static __used__ i32 eduicbRenderGraph(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32 selected) {
         (void)menu;
         edui_graph_s *picker = static_cast<edui_graph_s *>(item);
         f32 cursor_y = picker->cursor_y;
@@ -6079,7 +6079,7 @@ extern "C" {
         return pick->dragging_colour || pick->dragging_saturation;
     }
 
-    static __used__ i32 eduicbRenderColourPick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
+    __attribute__((optimize("O2", "tree-vectorize"))) static __used__ i32 eduicbRenderColourPick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
         (void)menu;
         edui_colour_pick_s *picker = static_cast<edui_colour_pick_s *>(item);
         item->y = y;

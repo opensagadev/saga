@@ -5126,7 +5126,7 @@ AILOCATOR_s *getSpawnLocator(float clip_radius, char *name) {
                                  1000000000.0f, 0, 1000000000.0f, 1000000000.0f);
 }
 
-i32 SpawnMeleeCreatureType(i32 type) {
+__attribute__((optimize("O2", "tree-vectorize"))) i32 SpawnMeleeCreatureType(i32 type) {
     u8 active_count = melee.waves[type].reserved_1a;
     f32 radius = apicharsys->char_data[melee.waves[type].character_id].collision_radius;
 

@@ -4446,7 +4446,7 @@ void NuSound3PauseStereoStream(i32 stream_index) {
     }
 }
 
-i32 NuMusic::PauseTrack(u32 clazz) {
+__attribute__((optimize("O2"))) i32 NuMusic::PauseTrack(u32 clazz) {
     if (this == NULL || the_music_player == NULL || this->album == NULL) {
         return 0;
     }
@@ -4489,7 +4489,7 @@ void NuSound3ResumeStereoStream(i32 stream_index) {
     }
 }
 
-i32 NuMusic::ResumeTrack(u32 clazz) {
+__attribute__((optimize("O2"))) i32 NuMusic::ResumeTrack(u32 clazz) {
     if (this == NULL || the_music_player == NULL || this->album == NULL) {
         return 0;
     }
@@ -5124,7 +5124,7 @@ void NuMusic::Voice::Cue() {
     Play();
 }
 
-i32 NuMusic::StopTrack(u32 clazz, i32 fade) {
+__attribute__((optimize("O2"))) i32 NuMusic::StopTrack(u32 clazz, i32 fade) {
     if (this == NULL || the_music_player == NULL || this->album == NULL) {
         return 0;
     }
@@ -5230,7 +5230,7 @@ i32 NuMusic::StopAll(i32 toggle) {
     return 1;
 }
 
-void NuMusic::Process(f32 delta) {
+__attribute__((optimize("O2"))) void NuMusic::Process(f32 delta) {
     if (this == NULL || the_music_player == NULL) {
         return;
     }

@@ -19293,7 +19293,7 @@ extern "C" {
         }
     }
 
-    void antinodeEditorDrawAntinodes(void) {
+    __attribute__((optimize("O2"))) void antinodeEditorDrawAntinodes(void) {
         i32 solid = aieditorsettings.solid_antinode_display;
         NULISTHDR *list = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94);
         for (EDANTINODE_s *node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetHead(list)); node != nullptr;
@@ -20190,7 +20190,7 @@ static void pathEditor_PathNodeMoved(EDAIPATHNODE_s *node) {
     }
 }
 
-eduimenu_s *pathEditor_Process(nupad_s *pad) {
+__attribute__((optimize("O2", "tree-vectorize"))) eduimenu_s *pathEditor_Process(nupad_s *pad) {
     if (pad->digital_buttons_pressed & 0x80) {
         eduimenu_s *menu = eduiMenuCreate(200, 70, 240, 270, ed_fnt, aieditor_cbCancelMainMenu, "Options");
         if (__builtin_expect(menu == NULL, 0))

@@ -2210,7 +2210,7 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
     }
 }
 
-void GoldBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
+__attribute__((optimize("O3"))) void GoldBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
     if (active == 0)
         return;
     if (stage->field_0x14 > 0) {

@@ -9546,7 +9546,7 @@ void Hub_ClearStats() {
     goldbricktime = 0.0f;
 }
 
-i32 Percent_UpdateHint(HINT_s *hint) {
+__attribute__((optimize("O2", "tree-vectorize"))) i32 Percent_UpdateHint(HINT_s *hint) {
     i32 control_mode = MechInputTouchSystem::s_baseControlMode;
     if (hint->completion_flags[control_mode] != 0 || WORLD->current_level != HUB_LDATA || FadeSys.fade != 0.0f ||
         Game_CompletionSave == NULL || Game_CompletionSave[0] < COMPLETIONPOINTS)
