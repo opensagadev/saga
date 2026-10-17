@@ -820,7 +820,7 @@ bool NuMusic::SelectTrackByHandle(TRACK_CLASS clazz, i32 trackHandle) {
                 // the album being selected (see header note on handle packing).
                 if ((((i32)((char *)album - (char *)this->albums) >> 2) * (u32)0x38e38e39 - (trackHandle >> 0xb) ==
                      0) &&
-                    ((trackHandle & 0x7ff) < (u32)album->tracks_count)) {
+                    ((trackHandle & 0x7ff) < album->tracks_count)) {
                     album->tracks[index] = &album->tracks_source[trackHandle & 0x7ff];
                     return true;
                 }
@@ -2272,7 +2272,7 @@ void NuSound3StopStereoStream(i32 stream_index) {
     if (NuSound3Stream::mVoice.obj != NULL && stream->field_0xd != 0) {
         ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->Stop(true);
         NuSound.ReleaseVoice((NuSoundVoice *)NuSound3Stream::mVoice.obj);
-        NuSound3Stream::mVoice.Set(NULL);
+        NuSound3Stream::mVoice.Assign(NULL);
         stream->field_0xd = 0;
     }
 

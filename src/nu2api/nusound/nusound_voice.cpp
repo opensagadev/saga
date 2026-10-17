@@ -210,22 +210,18 @@ void NuSoundVoice::Pause() {
 }
 
 void NuSoundVoice::Resume() {
-    u8 flags = this->flags;
-    if ((flags & 0xf) != 0) {
-        flags = (u8)(flags & 0xf0 | (flags & 0xf) + 0xf & 0xf);
-        this->flags = flags;
+    if (this->playback_flags.pause_count > 0) {
+        this->playback_flags.pause_count--;
     }
-    if ((flags & 0xf) != 0) {
-        return;
-    }
+    if (this->playback_flags.pause_count == 0) {
+        if (this->GetState() == PLAYSTATE_PAUSED) {
+            this->Update(0.0f);
+            this->ResumeHardwareVoice();
+            this->SetState(PLAYSTATE_PLAYING);
+        }
 
-    if (this->GetState() == PLAYSTATE_PAUSED) {
-        this->Update(0.0f);
-        this->ResumeHardwareVoice();
-        this->SetState(PLAYSTATE_PLAYING);
+        this->playback_flags.pause_count = 0;
     }
-
-    this->playback_flags.pause_count = 0;
 }
 
 void NuSoundVoice::Stop(bool with_effects) {
@@ -326,9 +322,9 @@ void NuSoundVoice::CalculatePositionalMix() {
             return;
         }
 
+        NuSoundListener *second_real_listener = NULL;
         f32 real_distance = real_listener->GetHeadDistance(CopySoundPosition(this->position));
         f32 second_real_distance = 0.0f;
-        NuSoundListener *second_real_listener = NULL;
         NuSoundListener *listener = this->listeners->Front();
         NuSoundListener *end = this->listeners->End();
         while (listener != end) {

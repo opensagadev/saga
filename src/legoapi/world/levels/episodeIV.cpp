@@ -957,10 +957,10 @@ void TatooineD_Init(WORLDINFO_s *world) {
 }
 
 void TatooineD_Update(WORLDINFO_s *world) {
-    AIPATHNODE_s *node = static_cast<AIPATHNODE_s *>(LevAIPathNode[0]);
-    if (node != NULL && NuSpecialExistsFn(&LevHSpecial[0])) {
+    if (LevAIPathNode[0] != NULL && NuSpecialExistsFn(&LevHSpecial[0])) {
         NUVEC *position = NuSpecialGetDrawPos(&LevHSpecial[0]);
         if (position != NULL) {
+            AIPATHNODE_s *node = static_cast<AIPATHNODE_s *>(LevAIPathNode[0]);
             node->position.x = position->x - 0.75f;
             node->position.z = position->z;
             if (world->ai_sys->path_sys != NULL && world->ai_sys->path_sys->active_path != NULL)
@@ -968,10 +968,10 @@ void TatooineD_Update(WORLDINFO_s *world) {
         }
     }
 
-    AIPATHCNX_s *first = static_cast<AIPATHCNX_s *>(LevPathCnx[0]);
-    AIPATHCNX_s *second = static_cast<AIPATHCNX_s *>(LevPathCnx[1]);
-    if (first != NULL && second != NULL) {
-        i32 direction = LevPathCnxDir;
+    if (LevPathCnx[0] != NULL && LevPathCnx[1] != NULL) {
+        AIPATHCNX_s *first = static_cast<AIPATHCNX_s *>(LevPathCnx[0]);
+        AIPATHCNX_s *second = static_cast<AIPATHCNX_s *>(LevPathCnx[1]);
+        u32 direction = LevPathCnxDir;
         if (second->traversal_flags[(direction >> 1) & 1] & 0x08000000)
             first->traversal_flags[direction & 1] |= 0x80000000;
         else
@@ -1369,30 +1369,17 @@ i32 DeathStarShieldDown() {
     if (blowup->output_flags & 1)
         return 1;
     if (__builtin_expect(static_cast<i8>(blowup->state_flags) < 0, 1)) {
-        GameObject_s **players = Player;
-        GameObject_s *player = players[0];
-        if (player != NULL) {
-            if (WORLD->current_level != DEATHSTARBATTLED_LDATA ||
-                !ObjInNarrowSock(player, WORLD->sock_sys, WORLD->level_idx)) {
-                TORPEDOPACKET_s *packet = player->torpedo;
-                if (packet != NULL) {
-                    if (packet->count != 0 || (packet->field_0x1 & 2) != 0)
-                        return 1;
-                }
-            }
+        if (Player[0] != NULL && (WORLD->current_level != DEATHSTARBATTLED_LDATA ||
+                                  !ObjInNarrowSock(Player[0], WORLD->sock_sys, WORLD->level_idx))) {
+            TORPEDOPACKET_s *packet = Player[0]->torpedo;
+            if (packet != NULL && (packet->count != 0 || (packet->field_0x1 & 2) != 0))
+                return 1;
         }
-
-        player = players[1];
-        if (player != NULL) {
-            if (WORLD->current_level != DEATHSTARBATTLED_LDATA ||
-                !ObjInNarrowSock(player, WORLD->sock_sys, WORLD->level_idx)) {
-                TORPEDOPACKET_s *packet = player->torpedo;
-                if (packet != NULL) {
-                    if (packet->count != 0)
-                        return 1;
-                    return (packet->field_0x1 >> 1) & 1;
-                }
-            }
+        if (Player[1] != NULL && (WORLD->current_level != DEATHSTARBATTLED_LDATA ||
+                                  !ObjInNarrowSock(Player[1], WORLD->sock_sys, WORLD->level_idx))) {
+            TORPEDOPACKET_s *packet = Player[1]->torpedo;
+            if (packet != NULL && (packet->count != 0 || (packet->field_0x1 & 2) != 0))
+                return 1;
         }
     }
     return 0;

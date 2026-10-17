@@ -1680,15 +1680,18 @@ static f32 Condition_Player2Is(AISYS *sys, AISCRIPTPROCESS *, AIPACKET *, char *
 }
 
 static f32 Condition_IAmPlayer2(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
-    f32 result = 0.0f;
     if (packet != NULL && packet->owner != NULL) {
         if (player == Player[0]) {
-            result = packet->owner->apiobj.objptr == Player[1] ? 1.0f : 0.0f;
+            if (packet->owner->apiobj.objptr == Player[1]) {
+                return 1.0f;
+            }
         } else if (player == Player[1]) {
-            result = packet->owner->apiobj.objptr == Player[0] ? 1.0f : 0.0f;
+            if (packet->owner->apiobj.objptr == Player[0]) {
+                return 1.0f;
+            }
         }
     }
-    return result;
+    return 0.0f;
 }
 
 static f32 Condition_PlayerOnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
@@ -2778,9 +2781,9 @@ static i32 Action_UseTimeBasedUpdate(AISYS *, AISCRIPTPROCESS *, AIPACKET *packe
                 else if (NuStrICmp(params[index], "FALSE") == 0)
                     enabled = 0;
             }
-            disabled = (enabled ^ 1) & 1;
+            disabled = enabled ^ 1;
         }
-        object->field_0xf00 = (object->field_0xf00 & ~0x20) | (disabled << 5);
+        object->time_based_update_disabled = disabled;
     }
     return 1;
 }
@@ -5742,7 +5745,13 @@ i32 Action_UseTechno(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *
         }
     }
     TECHNO *techno = static_cast<TECHNO *>(processor->action_data_3);
-    if (techno == NULL || !techno->active || !techno->visible || techno->complete)
+    if (techno == NULL)
+        return 1;
+    if (!techno->active)
+        return 1;
+    if (!techno->visible)
+        return 1;
+    if (techno->complete)
         return 1;
     AIMoveInstruction(packet, &processor->action_pos, 0.0f, &processor->path_info, 1, 0.0f);
     if (GizTechno_CanUseTechno(object, techno) == 0) {
@@ -6241,7 +6250,7 @@ static i32 Action_SetZeroAcceleration(AISYS *, AISCRIPTPROCESS *, AIPACKET *pack
                 enabled = 0;
         }
         if (object != NULL)
-            object->ai.runtime_flags = (object->ai.runtime_flags & ~4u) | ((enabled & 1) << 2);
+            object->ai.zero_acceleration = enabled;
     }
     return 1;
 }
@@ -6317,10 +6326,9 @@ static i32 Action_SetMaxMovementRange(AISYS *, AISCRIPTPROCESS *processor, AIPAC
     if (object != NULL) {
         object->ai.movement_target_radius = range;
         if (range > 0.0f)
-            object->ai.movement_event_flags =
-                (object->ai.movement_event_flags & 0xf3u) | (static_cast<u8>(range_type) << 2);
+            object->ai.movement_range_mode = range_type;
         else
-            object->ai.movement_event_flags &= 0xf3u;
+            object->ai.movement_range_mode = 0;
     }
     return 1;
 }
@@ -6448,7 +6456,7 @@ static i32 Action_CanTriggerObstacle(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s 
         }
     }
     if (obstacle != NULL) {
-        obstacle->runtime_flags = static_cast<u8>((obstacle->runtime_flags & ~8u) | ((blocked & 1) << 3));
+        obstacle->runtime_blocked = blocked;
     }
     return 1;
 }
@@ -6472,7 +6480,7 @@ static i32 Action_AlwaysTriggerObstacle(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET
         }
     }
     if (obstacle != NULL) {
-        obstacle->runtime_flags = static_cast<u8>((obstacle->runtime_flags & ~4u) | ((enabled & 1) << 2));
+        obstacle->runtime_ai_active = enabled;
     }
     return 1;
 }
@@ -6989,13 +6997,13 @@ __used__ static i32 Action_PlayGizObstacle(AISYS *sys, AISCRIPTPROCESS *processo
                 obstacle = static_cast<GIZOBSTACLE *>(gizmo->object);
             }
         } else if (NuStrICmp(params[index], "backwards") == 0) {
-            backwards = true;
+            backwards = 1;
         } else if (NuStrICmp(params[index], "stayopen") == 0) {
-            stay_open = true;
+            stay_open = 1;
         } else if (NuStrICmp(params[index], "stayshut") == 0) {
-            stay_shut = true;
+            stay_shut = 1;
         } else if (NuStrICmp(params[index], "SNAP") == 0) {
-            snap = true;
+            snap = 1;
         }
     }
 
@@ -7011,10 +7019,8 @@ __used__ static i32 Action_PlayGizObstacle(AISYS *sys, AISCRIPTPROCESS *processo
         } else {
             GizObstacle_PlayForwards(obstacle);
         }
-        u32 runtime_flags = obstacle->runtime_flags & 0xf3u;
-        runtime_flags |= static_cast<u32>(stay_shut) << 3;
-        runtime_flags |= static_cast<u32>(stay_open) << 2;
-        obstacle->runtime_flags = static_cast<u8>(runtime_flags);
+        obstacle->runtime_ai_active = stay_open;
+        obstacle->runtime_blocked = stay_shut;
     }
     return 1;
 }
@@ -7392,9 +7398,7 @@ __used__ static i32 Action_EnableSock(AISYS *sys, AISCRIPTPROCESS *processor, AI
                 if (sock != NULL) {
                     sock_index = sock - WORLD->sock_sys->sock;
                 }
-            } else if (NuStrIStr(params[index], "FALSE") == NULL) {
-                enabled = 1;
-            } else {
+            } else if (NuStrIStr(params[index], "FALSE") != NULL) {
                 enabled = 0;
             }
         }
@@ -8024,7 +8028,7 @@ __used__ static i32 Action_SetUseOneAtOnce(AISYS *sys, AISCRIPTPROCESS *processo
             }
         }
         if (object != NULL) {
-            object->field_0xf01 = static_cast<u8>((object->field_0xf01 & ~0x20u) | ((enabled & 1) << 5));
+            object->use_one_at_once = enabled;
         }
     }
     return 1;
@@ -8191,7 +8195,7 @@ __used__ static i32 Action_CanBeCarried(AISYS *sys, AISCRIPTPROCESS *processor, 
             if (object->character_context == 0x3c || object->field_0xcc0 != NULL) {
                 Player_ClearContext(object, 1);
             }
-            object->field_0xf00 = static_cast<u8>((object->field_0xf00 & ~2u) | (static_cast<u8>(enabled) << 1));
+            object->can_be_carried = enabled;
         }
     }
     return 1;
@@ -8548,7 +8552,9 @@ __used__ static i32 Action_SetForceBack(AISYS *sys, AISCRIPTPROCESS *processor, 
             object = GetNamedGameObject(sys, value + 10);
         } else if ((value = NuStrIStr(params[index], "locator=")) != NULL) {
             AILOCATOR *locator = AIPathFindLocator(sys, value + 8);
-            position = locator != NULL ? &locator->position : NULL;
+            if (locator != NULL) {
+                position = &locator->position;
+            }
         } else if ((value = NuStrIStr(params[index], "radius=")) != NULL) {
             radius = AIParamToFloat(processor, value + 7);
         } else if (NuStrICmp(params[index], "FALSE") == 0) {
@@ -8576,6 +8582,7 @@ __used__ static i32 Action_PlaySfx(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
                                    i32 param_5, f32 param_6) {
     (void)packet;
     (void)param_6;
+    NUVEC position = {1.0e9f, 1.0e9f, 1.0e9f};
     if (param_5 == 0) {
         return 1;
     }
@@ -8583,7 +8590,6 @@ __used__ static i32 Action_PlaySfx(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
         return 1;
     }
 
-    NUVEC position = {1.0e9f, 1.0e9f, 1.0e9f};
     NUVEC *position_ptr = NULL;
     char *name = NULL;
     char play_count = 1;
@@ -8697,7 +8703,7 @@ __used__ static i32 Action_NoIdleSpeed(AISYS *sys, AISCRIPTPROCESS *processor, A
                 }
             }
             if (object != NULL) {
-                object->field_0xf03 = static_cast<u8>((object->field_0xf03 & ~2u) | ((enabled & 1) << 1));
+                object->no_idle_speed = enabled;
             }
         }
     }
@@ -9034,7 +9040,6 @@ __used__ static i32 Action_SetInvulnerable(AISYS *sys, AISCRIPTPROCESS *processo
     if (type_count != 0) {
         const i32 object_count = HIGHGAMEOBJECT;
         GameObject_s *candidate = Obj;
-        still_take_hit = (still_take_hit & 1) << 4;
         for (i32 object_index = 0; object_index < object_count; ++object_index, ++candidate) {
             if ((candidate->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) !=
                     (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER) ||
@@ -9045,7 +9050,7 @@ __used__ static i32 Action_SetInvulnerable(AISYS *sys, AISCRIPTPROCESS *processo
                 for (i32 type_index = 0; type_index < type_count; ++type_index) {
                     if (candidate->id == types[type_index]) {
                         candidate->field_0xefe |= 0x40;
-                        candidate->field_0xefd = static_cast<u8>((candidate->field_0xefd & ~0x10u) | still_take_hit);
+                        candidate->still_take_hit = still_take_hit;
                     }
                 }
             } else {
@@ -9058,9 +9063,8 @@ __used__ static i32 Action_SetInvulnerable(AISYS *sys, AISCRIPTPROCESS *processo
         }
     } else if (object != NULL && (object->apiobj.field_0x1f4 & 0x400) != 0) {
         if (enabled) {
-            still_take_hit = (still_take_hit & 1) << 4;
             object->field_0xefe |= 0x40;
-            object->field_0xefd = static_cast<u8>((object->field_0xefd & ~0x10u) | still_take_hit);
+            object->still_take_hit = still_take_hit;
         } else {
             object->field_0xefe &= static_cast<u8>(~0x40u);
         }
@@ -9081,7 +9085,7 @@ static i32 Action_DontSetStoppedFlag(AISYS *system, AISCRIPTPROCESS *, AIPACKET 
                 enabled = 0;
         }
         if (object != NULL)
-            object->field_0xefc = (object->field_0xefc & ~0x20u) | ((enabled & 1) << 5);
+            object->dont_set_stopped_flag = enabled;
     }
     return 1;
 }
@@ -9103,7 +9107,7 @@ __used__ static i32 Action_SetDontMove(AISYS *sys, AISCRIPTPROCESS *processor, A
             }
         }
         if (object != NULL) {
-            object->field_0xefc = static_cast<u8>((object->field_0xefc & ~0x10u) | ((enabled & 1) << 4));
+            object->dont_move = enabled;
         }
     }
     return 1;
@@ -9885,7 +9889,7 @@ __used__ static i32 Action_NotWithParty(AISYS *sys, AISCRIPTPROCESS *processor, 
             }
         }
         if (object != NULL) {
-            object->field_0xeff = static_cast<u8>((object->field_0xeff & ~1u) | (enabled & 1));
+            object->not_with_party = enabled;
         }
     }
     return 1;
@@ -9907,7 +9911,7 @@ __used__ static i32 Action_CanAttack(AISYS *sys, AISCRIPTPROCESS *processor, AIP
             }
         }
         if (object != NULL) {
-            object->field_0xef9 = static_cast<u8>((object->field_0xef9 & ~2u) | ((enabled & 1) << 1));
+            object->can_attack = enabled;
         }
     }
     return 1;
@@ -9933,7 +9937,7 @@ __used__ static i32 Action_CannotDropIn(AISYS *sys, AISCRIPTPROCESS *processor, 
             }
         }
         if (object != NULL) {
-            object->field_0xefb = static_cast<u8>((object->field_0xefb & ~4u) | ((enabled & 1) << 2));
+            object->cannot_drop_in = enabled;
         }
     }
     return 1;
@@ -9957,7 +9961,7 @@ __used__ static i32 Action_CatchUpForbidden(AISYS *sys, AISCRIPTPROCESS *process
             }
         }
         if (object != NULL) {
-            object->field_0xefb = static_cast<u8>((object->field_0xefb & ~2u) | ((forbidden & 1) << 1));
+            object->catch_up_forbidden = forbidden;
         }
     }
     return 1;
@@ -9987,7 +9991,7 @@ __used__ static i32 Action_SetTaggable(AISYS *sys, AISCRIPTPROCESS *processor, A
         }
     }
     if (object != NULL) {
-        bool set_disabled = false;
+        i32 set_disabled = 0;
         if (disabled != 0) {
             if (object->apiobj.player_controlled) {
                 if (object->field_0xcc0 != NULL) {
@@ -10001,8 +10005,7 @@ __used__ static i32 Action_SetTaggable(AISYS *sys, AISCRIPTPROCESS *processor, A
                 set_disabled = disabled;
             }
         }
-        u8 *tag_flags = reinterpret_cast<u8 *>(object) + 0x7b5;
-        *tag_flags = static_cast<u8>((*tag_flags & ~2u) | (static_cast<u8>(set_disabled) << 1));
+        object->tag_disabled = set_disabled;
     }
     return 1;
 }
@@ -10058,8 +10061,7 @@ __used__ static i32 Action_SnapWeaponOut(AISYS *sys, AISCRIPTPROCESS *processor,
             object->field_0xe22 |= GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION;
             object->weapon_scale = 1.0f;
             if (keep_out != -1) {
-                object->field_0xef8 = static_cast<u8>((object->field_0xef8 & ~GAMEOBJECT_EF8_FLAG_KEEP_WEAPON_OUT) |
-                                                      (keep_out ? GAMEOBJECT_EF8_FLAG_KEEP_WEAPON_OUT : 0));
+                object->keep_weapon_out = keep_out;
             }
         } else {
             object->weapon_scale = 0.0f;
@@ -10093,8 +10095,7 @@ __used__ static i32 Action_KeepWeaponOut(AISYS *sys, AISCRIPTPROCESS *processor,
         }
     }
     if (object != NULL) {
-        object->field_0xef8 = (object->field_0xef8 & static_cast<u8>(~GAMEOBJECT_EF8_FLAG_KEEP_WEAPON_OUT)) |
-                              static_cast<u8>(keep_out ? GAMEOBJECT_EF8_FLAG_KEEP_WEAPON_OUT : 0);
+        object->keep_weapon_out = keep_out;
     }
     return 1;
 }
@@ -10410,31 +10411,32 @@ __used__ static i32 Action_SetPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
     AIPATH *path = NULL;
 
-    for (i32 index = 0; index < param_4; ++index) {
-        char *value = NuStrIStr(params[index], "character=");
-        if (value != NULL) {
-            object = GetNamedGameObject(sys, value + 10);
-            continue;
-        }
-        if (NuStrIStr(params[index], "path=LevelPath") != NULL) {
-            path = sys->path_sys->active_path;
-            continue;
-        }
-        value = NuStrIStr(params[index], "path");
-        if (value != NULL) {
-            for (i32 path_index = 0; path_index < path_system->path_count; ++path_index) {
-                if (NuStrICmp(path_system->paths[path_index]->name, value + 5) == 0) {
-                    path = path_system->paths[path_index];
-                    break;
+    if (param_4 != 0) {
+        for (i32 index = 0; index < param_4; ++index) {
+            char *value = NuStrIStr(params[index], "character=");
+            if (value != NULL) {
+                object = GetNamedGameObject(sys, value + 10);
+                continue;
+            }
+            if (NuStrIStr(params[index], "path=LevelPath") != NULL) {
+                path = sys->path_sys->active_path;
+                continue;
+            }
+            value = NuStrIStr(params[index], "path");
+            if (value != NULL) {
+                value += 5;
+                for (i32 path_index = 0; path_index < path_system->path_count; ++path_index) {
+                    if (NuStrICmp(path_system->paths[path_index]->name, value) == 0) {
+                        path = path_system->paths[path_index];
+                        break;
+                    }
                 }
             }
         }
     }
-    if (object != NULL) {
-        if (path != NULL) {
-            AISysCharacterSetPath(&object->ai, path);
-            AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, &object->ai, 0xff, 1);
-        }
+    if (object != NULL && path != NULL) {
+        AISysCharacterSetPath(&object->ai, path);
+        AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, &object->ai, 0xff, 1);
     }
 
     return 1;
@@ -10801,7 +10803,9 @@ i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *pac
 
     for (i32 index = 0; index < param_count; ++index) {
         if (NuStrICmp(params[index], "locator=mylocator") == 0) {
-            locator = object != NULL ? object->ai.locator : NULL;
+            if (object != NULL) {
+                locator = object->ai.locator;
+            }
             continue;
         }
         char *value = NuStrIStr(params[index], "locator");
@@ -10812,7 +10816,7 @@ i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *pac
         value = NuStrIStr(params[index], "character");
         if (value != NULL) {
             object = GetNamedGameObject(sys, value + NuStrLen("character") + 1);
-            assignment = object != NULL ? object->apiobj.field_0x289 : 0xff;
+            assignment = object->apiobj.field_0x289;
             continue;
         }
         value = NuStrIStr(params[index], "set");
@@ -10828,12 +10832,14 @@ i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *pac
     if (locator == NULL || locator_set == NULL) {
         return 1;
     }
-    for (i32 index = 0; index < locator_set->locator_count; ++index) {
+    // Retail writes the slot after the search even when the locator is not in the set.
+    i32 index;
+    for (index = 0; index < locator_set->locator_count; ++index) {
         if (&sys->locators[locator_set->locator_entries[index]] == locator) {
-            locator_set->assigned[index] = assignment;
             break;
         }
     }
+    locator_set->assigned[index] = assignment;
     return 1;
 }
 

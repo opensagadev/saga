@@ -177,7 +177,7 @@ void Grabber_Configure(WORLDINFO_s *world, char *config) {
     world->grabber = grabber;
     Grab_grabber = grabber;
     world->giz_buffer.addr += sizeof(*grabber);
-    grabber->special = special;
+    Grab_grabber->special = special;
 
     NUFPAR *parser = NuFParCreateMem("grabbers", config, 0xffff);
     if (parser == NULL) {
@@ -195,40 +195,40 @@ void Grabber_Configure(WORLDINFO_s *world, char *config) {
                     NuFParInterpretWord(parser);
                 }
             } else {
-                grabber->radius = 0.5f;
-                grabber->move_xy = 0;
-                grabber->flags_559 = (grabber->flags_559 & ~0x08) | 0x10;
-                grabber->invert_x = 0;
-                grabber->speed = 1.0f;
-                grabber->character_id = id_GRABMACHINE;
-                grabber->scale = 1.0f;
+                Grab_grabber->radius = 0.5f;
+                Grab_grabber->move_xy = 0;
+                Grab_grabber->flags_559 = (Grab_grabber->flags_559 & ~0x08) | 0x10;
+                Grab_grabber->invert_x = 0;
+                Grab_grabber->speed = 1.0f;
+                Grab_grabber->character_id = id_GRABMACHINE;
+                Grab_grabber->scale = 1.0f;
                 active = 1;
             }
         }
     }
     NuFParDestroy(parser);
 
-    if (grabber->character_id != -1) {
-        grabber->character_model = APICharacterLoaded(grabber->character_id);
+    if (Grab_grabber->character_id != -1) {
+        Grab_grabber->character_model = APICharacterLoaded(Grab_grabber->character_id);
     } else {
-        grabber->character_model = NULL;
+        Grab_grabber->character_model = NULL;
     }
 
-    if (grabber->character_model == NULL) {
-        NuSpecialSetVisibility(&grabber->special, 1);
-        grabber->character_id = -1;
+    if (Grab_grabber->character_model == NULL) {
+        NuSpecialSetVisibility(&Grab_grabber->special, 1);
+        Grab_grabber->character_id = -1;
     } else {
-        NuSpecialSetVisibility(&grabber->special, 0);
+        NuSpecialSetVisibility(&Grab_grabber->special, 0);
     }
 
-    grabber->matrix = *NuSpecialGetDrawMtx(&grabber->special);
+    Grab_grabber->matrix = *NuSpecialGetDrawMtx(&Grab_grabber->special);
     if (world->current_level == DEATHSTARRESCUEA_LDATA) {
-        grabber->matrix.m31 -= 0.3f;
+        Grab_grabber->matrix.m31 -= 0.3f;
     }
 
-    memmove(&grabber->initial_position, &grabber->position, sizeof(grabber->position));
-    NuSpecialFind(world->current_gscn, &grabber->shadow_special, "grabber_shadow", 1);
-    grabber->platform_id = -1;
+    memmove(&Grab_grabber->initial_position, &Grab_grabber->position, sizeof(Grab_grabber->position));
+    NuSpecialFind(world->current_gscn, &Grab_grabber->shadow_special, "grabber_shadow", 1);
+    Grab_grabber->platform_id = -1;
 }
 
 // Original 0x22aae0, 264 bytes.

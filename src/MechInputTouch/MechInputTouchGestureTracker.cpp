@@ -287,7 +287,7 @@ void MechInputTouchGestureTrackingSystem::Update(NuInputTouchData const *data) {
     if (data == NULL) {
         return;
     }
-    GameObject_s *object = Player[0];
+    GameObject_s *object = player;
     if (object == NULL) {
         object = Obj;
     }

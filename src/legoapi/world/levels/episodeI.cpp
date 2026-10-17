@@ -411,8 +411,7 @@ static void UpdatePacemakerDisplayBody(LEVEL_OBJECT_RUNTIME_s **lev_objs) {
     GAMEMESSAGE_s *msg =
         (GAMEMESSAGE_s *)AddGameMessage(" ", (nuvec_s *)v, 0.08f, NULL, 0.0f, 0xff, 0x3f, 0x3f, 0x10083, 0);
     if (msg != NULL) {
-        i32 idx = ((i32)(16384.0f * pod_pacemaker_alpha) >> 1) & 0x7fff;
-        msg->alpha = (u8)(128.0f * pacemaker_alpha_table[idx]);
+        msg->alpha = (u8)(128.0f * NU_SIN_LUT(16384.0f * pod_pacemaker_alpha));
         msg->icon = 0x134;
         PACEMAKERDATA_s *data = (PACEMAKERDATA_s *)*lev_objs;
         if (data->enabled != 0) {
@@ -2312,15 +2311,12 @@ void RetakeG_Update(WORLDINFO_s *world) {
         RetakeG_GuardsToRescue_msg->value = (float)retakeg_netpacket->guard_b;
         RetakeG_TotalGuards_msg->value = (float)retakeg_netpacket->guard_a;
     }
-    GIZFORCE_s *g0 = LevGizForce[0];
-    GIZFORCE_s *g1 = LevGizForce[1];
-    if (g0 != NULL && g0->group != NULL && g1 != NULL && g1->group != NULL) {
+    if (LevGizForce[0] != NULL && LevGizForce[0]->group != NULL && LevGizForce[1] != NULL &&
+        LevGizForce[1]->group != NULL) {
         for (i32 i = 0; i < 6; i++) {
-            GIZFORCE_s *obj = (i < 3) ? g0 : g1;
-            GIZFORCEOBJ_s *obj40 = (GIZFORCEOBJ_s *)obj->group;
             PATHCNXDATA_s *cnx = (PATHCNXDATA_s *)LevPathCnx[i];
             if (cnx != NULL) {
-                if (obj40->flags & 4) {
+                if (((GIZFORCEOBJ_s *)LevGizForce[i / 3]->group)->flags & 4) {
                     cnx->flags0 &= 0x7fffffff;
                     cnx->flags4 &= 0x7fffffff;
                 } else {

@@ -11,6 +11,7 @@
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/audio/audio.h"
 #include "legoapi/menus/screens/gamestatus_lsw.h"
+#include "legoapi/menus/screens/gamemenuall.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -1034,20 +1035,18 @@ static void Titles_Draw(WORLDINFO *) {
 }
 
 static void Titles_Update(WORLDINFO *) {
+    extrasavealpha = 1.0f;
     if (NuSpecialExistsFn(&LevHSpecial[0]) != 0) {
         i32 menu_id = GetMenuID();
         f32 target =
-            (MenuLoadOccurred == 0 && MenuSaveOccurred == 0 && (static_cast<u32>(menu_id + 1) < 2 || menu_id == 1))
+            (MenuLoadOccurred == 0 && MenuSaveOccurred == 0 && (menu_id == -1 || menu_id == 0 || menu_id == 1))
                 ? 1.0f
                 : 0.0f;
         LevAlpha = SeekLinearF(LevAlpha, target, FRAMETIME + FRAMETIME);
     }
 
     TitlesAlpha = SeekLinearF(TitlesAlpha, 1.0f, FRAMETIME + FRAMETIME);
-    LevTime[1] = 0.0f;
-    if (GetMenuID() == 0 && !(GameTimer.time_elapsed < 4.0f)) {
-        LevTime[1] = 1.0f;
-    }
+    LevTime[1] = (GetMenuID() == 0 && GameTimer.time_elapsed >= 4.0f) ? 1.0f : 0.0f;
     LevTime[0] = SeekLinearF(LevTime[0], LevTime[1], FRAMETIME + FRAMETIME);
 }
 

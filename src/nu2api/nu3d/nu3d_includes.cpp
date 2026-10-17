@@ -4369,7 +4369,7 @@ void NuMainFilterGen::preprocessDofMotionBlur(nueffecttex_s *) {
 }
 
 void NuMainFilterGen::preprocessBlurTextures(nueffecttex_s *color, nueffecttex_s *normal) {
-    i32 width = color->width;
+    i16 width = color->width;
     i16 height = color->height;
     if (!dof_enabled && !bloom_enabled)
         return;
@@ -4377,13 +4377,11 @@ void NuMainFilterGen::preprocessBlurTextures(nueffecttex_s *color, nueffecttex_s
         copy(color, 1, color, 0, programs[16], normal);
     else
         copy(color, 1, color, 0, copyTexProgram, NULL);
-    i32 levels = downsample_lod;
-    if (dof_enabled) {
-        if (width < height)
-            levels = static_cast<i32>(NuLog2(static_cast<f32>(width))) - 6;
-        else
-            levels = static_cast<i32>(NuLog2(static_cast<f32>(height))) - 6;
-    }
+    i32 levels;
+    if (dof_enabled)
+        levels = static_cast<i32>(NuLog2(static_cast<f32>(width < height ? width : height))) - 6;
+    else
+        levels = downsample_lod;
     blur7x7Loopback(color, 1, color, 2, 1, levels, true, 1.0f, blur7x7Program);
     if (bloom_enabled) {
         f32 threshold[4] = {bloom->threshold < 0 ? 0 : (bloom->threshold > 1 ? 1 : bloom->threshold), 0, 0, 0};
@@ -16707,15 +16705,14 @@ void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *bend, f32 width,
     i32 index = NuLgtArcLaserCnt;
     if (index >= 16)
         return;
-    NULGTARCLASER *laser = &NuLgtArcLaserData[index];
-    laser->type = (u8)type;
-    laser->start = *start;
-    laser->end = *end;
-    laser->bend = *bend;
-    laser->width = width;
-    laser->wobble = wobble;
-    laser->bend_amount = bend_amount;
-    laser->segment_length = segment_length;
+    NuLgtArcLaserData[index].type = (u8)type;
+    NuLgtArcLaserData[index].start = *start;
+    NuLgtArcLaserData[index].end = *end;
+    NuLgtArcLaserData[index].bend = *bend;
+    NuLgtArcLaserData[index].width = width;
+    NuLgtArcLaserData[index].wobble = wobble;
+    NuLgtArcLaserData[index].bend_amount = bend_amount;
+    NuLgtArcLaserData[index].segment_length = segment_length;
     u32 green = ((u32)colour & 0xff00) * 2;
     u32 red = ((u32)colour & 0xff) * 2;
     u32 alpha = ((u32)colour >> 24) * 2;
@@ -16728,9 +16725,9 @@ void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *bend, f32 width,
         blue = 255;
     if (alpha > 255)
         alpha = 255;
-    laser->colour = (blue | (red << 16)) | (green | (alpha << 24));
-    laser->flags = flags;
-    if ((NuLgtArcLaserFrame & 1) == 0 || laser->seed == 0)
+    NuLgtArcLaserData[index].colour = (blue | (red << 16)) | (green | (alpha << 24));
+    NuLgtArcLaserData[index].flags = flags;
+    if ((NuLgtArcLaserFrame & 1) == 0 || NuLgtArcLaserData[index].seed == 0)
         NuLgtArcLaserData[index].seed = NuLgtRand();
     for (i32 i = 0; i < 6; ++i)
         NuLgtRand();

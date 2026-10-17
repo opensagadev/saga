@@ -311,13 +311,13 @@ i32 NuSoundSystem::GenerateHash(const char *str) {
     char buf[0x100];
     NuStrUpr(buf, str);
 
-    byte hash = 0x5;
+    i32 hash = 0x5;
 
-    for (char *c = buf; *c != '\0'; c++) {
+    for (i8 *c = (i8 *)buf; *c != '\0'; c++) {
         hash = (hash * 0x21) + *c;
     }
 
-    return hash;
+    return (u8)hash;
 }
 
 void NuSoundSystem::ReleaseSample(NuSoundSample *sample) {

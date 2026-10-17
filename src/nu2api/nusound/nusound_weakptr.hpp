@@ -152,7 +152,7 @@ template <typename T> class NuSoundWeakPtr : public NuSoundWeakPtrListNode {
         this->obj = NULL;
     }
 
-    void Set(T *ptr);
+    __attribute__((noinline)) void Set(T *ptr);
 
     // Copies, assignments and some direct updates expand the pointer update
     // in place.

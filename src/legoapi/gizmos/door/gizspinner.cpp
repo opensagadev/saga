@@ -1431,7 +1431,10 @@ GIZSPINNER_s *GizSpinner_FindNearest(nuvec_s *position, WORLDINFO_s *world, f32 
         auto world_current_level = world->current_level;
         for (i32 index = 0; index < world_current_level->max_spinners; ++index) {
             GIZSPINNER_s *spinner = &world->spinners[index];
-            if ((spinner->flags & GIZSPINNER_FLAG_VALID) == 0 || (spinner->flags & 0x26) != 0) {
+            if ((spinner->flags & GIZSPINNER_FLAG_VALID) == 0) {
+                continue;
+            }
+            if ((spinner->flags & 0x26) != 0) {
                 continue;
             }
 

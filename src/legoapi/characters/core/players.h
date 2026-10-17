@@ -73,7 +73,7 @@ extern PLAYERSTARTENTRY PlayerStart[8];
 
 // ---- Globals used by Players_Init ----
 
-extern GameObject_s *Player[8];
+extern GameObject_s *Player[];
 extern i32 PLAYERCOUNT;
 extern i32 netclient;
 extern i32 UsePlayerList;

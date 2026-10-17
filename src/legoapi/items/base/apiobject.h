@@ -357,13 +357,20 @@ typedef struct AIPACKET_s {
             u8 circle_clockwise : 1;
             u8 circle_active : 1;
             u8 opponent_is_threat : 1;
-            u8 packet_flags_1e5_4_6 : 3;
+            u8 field_0x1e5_bit4 : 1;
+            u8 field_0x1e5_bit5 : 1;
+            u8 field_0x1e5_bit6 : 1;
             u8 antinode_clockwise : 1;
         };
     };
     union {
         u8 runtime_flags;
         u8 field_0x1e6;
+        struct {
+            u8 : 2;
+            u8 zero_acceleration : 1;
+            u8 : 5;
+        };
     };
     union {
         u8 movement_event_flags;
@@ -1284,8 +1291,22 @@ typedef struct GameObject_s {
     f32 field_0xeec; // 0x0eec
     f32 field_0xef0;
     f32 pause_context_state; // 0x0ef4, icon timer, also cleared when entering pause
-    u8 field_0xef8;          // 0x0ef8
-    u8 field_0xef9;          // 0x0ef9
+    union {
+        u8 field_0xef8; // 0x0ef8, GAMEOBJECT_EF8_FLAGS
+        struct {
+            u8 : 4;
+            u8 keep_weapon_out : 1;
+            u8 : 3;
+        };
+    };
+    union {
+        u8 field_0xef9; // 0x0ef9
+        struct {
+            u8 : 1;
+            u8 can_attack : 1;
+            u8 : 6;
+        };
+    };
     union {
         u8 field_0xefa; // 0x0efa
         struct {
@@ -1295,28 +1316,56 @@ typedef struct GameObject_s {
             u8 : 2;
         };
     };
-    u8 field_0xefb; // 0x0efb, bit 3 requests the two-row hit-point layout
+    union {
+        u8 field_0xefb; // 0x0efb, bit 3 requests the two-row hit-point layout
+        struct {
+            u8 : 1;
+            u8 catch_up_forbidden : 1;
+            u8 cannot_drop_in : 1;
+            u8 : 5;
+        };
+    };
     union {
         u32 field_0xefc_word;
         struct {
-            u8 field_0xefc; // 0x0efc
+            union {
+                u8 field_0xefc; // 0x0efc
+                struct {
+                    u8 : 4;
+                    u8 dont_move : 1;
+                    u8 dont_set_stopped_flag : 1;
+                    u8 : 2;
+                };
+            };
             union {
                 u8 field_0xefd;
                 struct {
                     u8 : 1;
                     u8 random_layer_variant : 1;
                     u8 snap_facing : 1;
-                    u8 : 5;
+                    u8 : 1;
+                    u8 still_take_hit : 1;
+                    u8 : 3;
                 };
             }; // 0x0efd
             u8 field_0xefe; // 0x0efe
-            u8 field_0xeff; // 0x0eff
+            union {
+                u8 field_0xeff; // 0x0eff
+                struct {
+                    u8 not_with_party : 1;
+                    u8 : 7;
+                };
+            };
         };
     };
     union {
         u8 field_0xf00; // 0x0f00
         struct {
-            u8 : 7;
+            u8 : 1;
+            u8 can_be_carried : 1;
+            u8 : 3;
+            u8 time_based_update_disabled : 1;
+            u8 : 1;
             u8 awkward_shape_override : 1;
         };
     };
@@ -1325,9 +1374,10 @@ typedef struct GameObject_s {
         struct {
             u8 : 2;
             u8 ignore_slide_terrain : 1;
-            u8 : 1;
+            u8 is_female : 1;
             u8 spline_follow_terrain : 1;
-            u8 : 3;
+            u8 use_one_at_once : 1;
+            u8 : 2;
         };
     };
     union {
@@ -1338,7 +1388,14 @@ typedef struct GameObject_s {
             u8 : 3;
         };
     };
-    u8 field_0xf03; // GAMEOBJECT_F03_FLAGS
+    union {
+        u8 field_0xf03; // GAMEOBJECT_F03_FLAGS
+        struct {
+            u8 : 1;
+            u8 no_idle_speed : 1;
+            u8 : 6;
+        };
+    };
     union {
         u8 field_0xf04;
         u8 jump_input_flags; // 0x0f04, buffered airborne action inputs

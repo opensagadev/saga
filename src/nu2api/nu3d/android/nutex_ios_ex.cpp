@@ -252,14 +252,12 @@ void DecompressTextureToRGBA(unsigned char *ddsData, u32 size, unsigned char *&o
     i32 faceLimit = isCubemap ? 6 : 1;
 
     for (i32 face = 0; face < faceLimit; face++) {
-        if (tex.mips != 0) {
-            for (i32 mip = 0; mip < tex.mips; mip++) {
-                i32 mipWidth = tex.width >> mip;
-                i32 mipHeight = tex.height >> mip;
-                i32 mipOffset = GetMipOffset(&tex, mip, face, NUTEX_UNKNOWN);
-                i32 rgbaOffset = GetMipOffset(&tex, mip, face, NUTEX_RGBA32);
-                squish::DecompressImage(outBuffer + rgbaOffset, mipWidth, mipHeight, ddsData + mipOffset, squishFlags);
-            }
+        for (u32 mip = 0; mip < tex.mips; mip++) {
+            i32 mipWidth = tex.width >> mip;
+            i32 mipHeight = tex.height >> mip;
+            i32 mipOffset = GetMipOffset(&tex, mip, face, NUTEX_UNKNOWN);
+            i32 rgbaOffset = GetMipOffset(&tex, mip, face, NUTEX_RGBA32);
+            squish::DecompressImage(outBuffer + rgbaOffset, mipWidth, mipHeight, ddsData + mipOffset, squishFlags);
         }
     }
 }

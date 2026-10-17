@@ -3464,7 +3464,7 @@ extern "C" {
 
 void MenuDrawFileCorrupt(MENU_s *) {
     char message[1024];
-    sprintf(message, apitxt_NODATAAVAILABLE, apiGameName);
+    sprintf(message, apitxt_CORRUPTLOAD);
     MenuSmartTextEx(message, 0.0f, 0.0f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, MENUNORMALR, MENUNORMALG,
                     MENUNORMALB, 1.3f, 3, NULL, 0, MenuA);
 }

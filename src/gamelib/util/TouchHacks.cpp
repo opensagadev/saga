@@ -182,26 +182,24 @@ bool TouchHacks::CheckForAboutToRunOffAnEdge(GameObject_s &object, float time) {
 }
 
 bool TouchHacks::SolveRoot(float a, float b, float c, float &root1, float &root2) {
-    if (a == 0.0f) {
-        return false;
+    if (a != 0.0f) {
+        const f32 discriminant = b * b - 4.0f * a * c;
+        if (discriminant >= 0.0f) {
+            const f32 square_root = NuFsqrt(discriminant);
+            const f32 denominator = a + a;
+            root1 = (-b - square_root) / denominator;
+            root2 = (square_root - b) / denominator;
+            return true;
+        }
     }
-
-    const f32 discriminant = b * b - 4.0f * a * c;
-    if (discriminant < 0.0f) {
-        return false;
-    }
-
-    const f32 square_root = NuFsqrt(discriminant);
-    const f32 denominator = a + a;
-    root1 = (-b - square_root) / denominator;
-    root2 = (square_root - b) / denominator;
-    return true;
+    return false;
 }
 
 VuVec TouchHacks::CalculateJumpVelToHitPoint(GameObject_s &object, VuVec const &target) {
     const GAMECHARACTERDATA *character = object.apiobj.character_data->game_character;
-    const VuVec position(object.apiobj.position.x, object.apiobj.position.y, object.apiobj.position.z, 1.0f);
-    return CalculateXZVelForArcToHitPoint(position, target, character->jump_speed, character->gravity);
+    return CalculateXZVelForArcToHitPoint(
+        VuVec(object.apiobj.position.x, object.apiobj.position.y, object.apiobj.position.z, 1.0f), target,
+        character->jump_speed, character->gravity);
 }
 
 VuVec TouchHacks::CalculateJumpVelToHitPointDblJump(GameObject_s &object, VuVec const &target) {
@@ -274,10 +272,11 @@ bool TouchHacks::CanShoot(GameObject_s &object) {
 }
 
 bool TouchHacks::InParty(GameObject_s &object) {
-    return (Player[0] != NULL && Player[0] == &object) || (Player[1] != NULL && Player[1] == &object) ||
-           (Player[2] != NULL && Player[2] == &object) || (Player[3] != NULL && Player[3] == &object) ||
-           (Player[4] != NULL && Player[4] == &object) || (Player[5] != NULL && Player[5] == &object) ||
-           (Player[6] != NULL && Player[6] == &object) || (Player[7] != NULL && Player[7] == &object);
+    for (i32 i = 0; i < 8; ++i) {
+        if (Player[i] != NULL && &object == Player[i])
+            return true;
+    }
+    return false;
 }
 
 bool TouchHacks::CanTagTo(GameObject_s &source, GameObject_s &target) {
@@ -383,8 +382,10 @@ bool TouchHacks::CanUseZipup(GameObject_s &object) {
         return false;
     if ((object.apiobj.character_data->model_flags & 0x100000) != 0 || SuperWeirdo(&object))
         return true;
-    return (object.apiobj.character_data->model_flags & 8) != 0 &&
-           (object.apiobj.character_data->game_character->flags_094[1] & 0x80) == 0 && Cheat_IsOn(13) != 0;
+    if ((object.apiobj.character_data->model_flags & 8) != 0 &&
+        (object.apiobj.character_data->game_character->flags_094[1] & 0x80) == 0 && Cheat_IsOn(13) != 0)
+        return true;
+    return false;
 }
 
 bool TouchHacks::ShouldKeepWeaponOut(GameObject_s &object) {

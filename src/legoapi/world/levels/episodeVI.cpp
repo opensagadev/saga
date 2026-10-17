@@ -1632,7 +1632,7 @@ void SarlaccPitC_Reset(WORLDINFO_s *world) {
         gizmoblowuptarget[gizmoblowuptargetcount] = blowup;
         blowup->field_0x9f |= 8;
         ++gizmoblowuptargetcount;
-        UpdateMidPos(blowup);
+        UpdateMidPos(static_cast<GIZMOBLOWUP_s *>(gizmo->object));
     }
     sprintf(name, "cover_%d", 2);
     NuSpecialFind(world->current_gscn, &LevHSpecial[17], name, 1);
@@ -1643,23 +1643,21 @@ void SarlaccPitC_Reset(WORLDINFO_s *world) {
         gizmoblowuptarget[gizmoblowuptargetcount] = blowup;
         blowup->field_0x9f |= 8;
         ++gizmoblowuptargetcount;
-        UpdateMidPos(blowup);
+        UpdateMidPos(static_cast<GIZMOBLOWUP_s *>(gizmo->object));
     }
     sprintf(name, "spinner%d_null_1", 1);
     gizmo = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, name);
     if (gizmo != NULL) {
-        GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(gizmo->object);
-        gizmoblowuptarget[gizmoblowuptargetcount] = blowup;
+        gizmoblowuptarget[gizmoblowuptargetcount] = static_cast<GIZMOBLOWUP_s *>(gizmo->object);
         ++gizmoblowuptargetcount;
-        UpdateMidPos(blowup);
+        UpdateMidPos(static_cast<GIZMOBLOWUP_s *>(gizmo->object));
     }
     sprintf(name, "spinner%d_null_1", 2);
     gizmo = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, name);
     if (gizmo != NULL) {
-        GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(gizmo->object);
-        gizmoblowuptarget[gizmoblowuptargetcount] = blowup;
+        gizmoblowuptarget[gizmoblowuptargetcount] = static_cast<GIZMOBLOWUP_s *>(gizmo->object);
         ++gizmoblowuptargetcount;
-        UpdateMidPos(blowup);
+        UpdateMidPos(static_cast<GIZMOBLOWUP_s *>(gizmo->object));
     }
 
 #define FIND_SHOT(index, format, number)                                                                               \

@@ -1079,23 +1079,18 @@ i32 GetDefaultIdle(GameObject_s *obj) {
     DefaultIdleCharacterData *game_character = static_cast<DefaultIdleCharacterData *>(character->field11_0x24);
 
     i32 animation;
-    i32 table_offset;
     if (game_character->use_standard_idle != 0) {
         animation = 25;
-        table_offset = 100;
     } else {
-        const u32 alternate = character->model_flags & 0x80;
-        table_offset = alternate != 0 ? 472 : 100;
-        animation = alternate != 0 ? 118 : 25;
+        animation = (character->model_flags & 0x80) != 0 ? 118 : 25;
     }
     if (obj->batarang != NULL && *(reinterpret_cast<u8 *>(obj->batarang) + 0x7d) != 0) {
         return 151;
     }
 
-    u8 *animation_table = reinterpret_cast<u8 *>(obj->apiobj.character_model->model_data_b);
-    void *entry = *reinterpret_cast<void **>(animation_table + table_offset);
-    if ((*reinterpret_cast<i32 *>(animation_table + 4) == 0 || (obj->field_0xe22 & 1) != 0 || obj->field_0xe32 == 1) &&
-        entry != NULL) {
+    void **animations = obj->apiobj.character_model->model_data_b;
+    if ((animations[1] == NULL || (obj->field_0xe22 & 1) != 0 || obj->field_0xe32 == 1) &&
+        animations[animation] != NULL) {
         return animation;
     }
     return 1;
@@ -1276,7 +1271,7 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
     obj->saved_position = obj->apiobj.position;
 
     game_character_data = obj->apiobj.character_data->game_character;
-    obj->field_0xf01 = (obj->field_0xf01 & ~8) | (((game_character_data->flags_090 >> 17) & 1) << 3);
+    obj->is_female = (game_character_data->flags_090 >> 17) & 1;
     if (obj->id == id_MOSEISLEYCITIZEN) {
         SetLayers_MOSEISLEYCITIZEN(&obj->field_0x1054);
     } else if (obj->id == id_CANTINAALIEN) {
@@ -1295,7 +1290,7 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
         obj->field_0x1054 |= LayerBit(head_layers[qrand() / 0x5556]);
         obj->field_0x1054 |= LayerBit(body_layers[qrand() / 0x5556]);
         obj->field_0x1054 |= LayerBit(leg_layers[qrand() / 0x5556]);
-        obj->field_0xf01 = (obj->field_0xf01 & ~8) | (((obj->field_0x1054 >> 7) & 1) << 3);
+        obj->is_female = (obj->field_0x1054 >> 7) & 1;
     } else if (obj->id == id_BOB) {
         SetLayers_BOB(obj);
     } else if (obj->id == id_GEONOSIAN) {
@@ -1394,7 +1389,7 @@ void InitAICreatures(AISYS_s *system) {
 }
 
 void Players_Init(void) {
-    memset(Player, 0, sizeof(Player));
+    memset(Player, 0, 8 * sizeof(Player[0]));
     GameObject_s **p = Player;
 
     if (netclient != 0) {
@@ -4021,12 +4016,10 @@ void FixUpLayers() {
         }
     }
 
-    SPECIAL_LAYER_s *layer = SpecialLayer;
-    SPECIAL_LAYER_s *layer_end = SpecialLayer + sizeof(SpecialLayer) / sizeof(SpecialLayer[0]);
-    for (; layer != layer_end; ++layer) {
-        layer->mask = 0;
-        if (layer->character_id != NULL && *layer->character_id != -1) {
-            layer->mask = 1 << LayerFromName(&GCDataList[*layer->character_id], layer->name);
+    for (u32 i = 0; i < sizeof(SpecialLayer) / sizeof(SpecialLayer[0]); ++i) {
+        SpecialLayer[i].mask = 0;
+        if (SpecialLayer[i].character_id != NULL && *SpecialLayer[i].character_id != -1) {
+            SpecialLayer[i].mask = 1 << LayerFromName(&GCDataList[*SpecialLayer[i].character_id], SpecialLayer[i].name);
         }
     }
 }

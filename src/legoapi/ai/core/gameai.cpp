@@ -2678,17 +2678,18 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
     object->ai.pending_nearest_metric = 1000000000.0f;
     object->ai.pending_opponent_metric = 1000000000.0f;
     object->field_0xef8 &= static_cast<u8>(~1u);
-    object->ai.field_0x1e5 &= static_cast<u8>(~0x50u);
+    object->ai.field_0x1e5_bit4 = 0;
+    object->ai.nearest_opponent = NULL;
+    object->ai.pending_nearest_opponent = NULL;
+    object->ai.opponent = NULL;
+    object->ai.pending_opponent = NULL;
+    object->ai.antinode_timer = 0.0f;
     object->apiobj.ai_awareness_mask = 0;
     object->ai_seen_mask = 0;
     object->field_0xecc = 0;
     object->field_0xed0 = 0;
     object->field_0xed8 = 0;
-    object->ai.nearest_opponent = NULL;
-    object->ai.pending_nearest_opponent = NULL;
-    object->ai.pending_opponent = NULL;
-    object->ai.opponent = NULL;
-    object->ai.antinode_timer = 0.0f;
+    object->ai.field_0x1e5_bit6 = 0;
     InitPlayerAI(object);
 
     if (spline != NULL) {

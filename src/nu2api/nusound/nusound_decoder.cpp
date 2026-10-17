@@ -339,7 +339,7 @@ void NuSoundDecodeThread::ThreadFunc(void *self_) {
 // libTTapp.so 0x31fc90.
 void NuSoundDecodeThread::Shutdown() {
     // An empty request tells the worker to exit.
-    Loader request{NULL, NULL, NULL, false};
+    Loader request{NULL, NULL, {}, false};
     LoaderSlot &slot = this->loaders[(i32)this->tail_index % 128];
     new (&slot) Loader(request);
     __sync_fetch_and_add(&this->tail_index, 1);

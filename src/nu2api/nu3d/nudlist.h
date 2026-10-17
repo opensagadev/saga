@@ -204,7 +204,8 @@ extern "C" {
             struct {
                 u16 : 1;
                 u16 clip_materials : 1; // NUDL_SCENE_FLAG_CLIP_MATERIALS
-                u16 : 13;
+                u16 : 12;
+                u16 center_extent_bounds : 1; // NUDL_SCENE_RENDER_FLAG_CENTER_EXTENT_BOUNDS
                 u16 current_buffer : 1; // 0x75 bit7, the double-buffer index
             };
         };

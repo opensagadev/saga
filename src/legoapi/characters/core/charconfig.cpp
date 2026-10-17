@@ -1454,7 +1454,7 @@ static void CC_weapon(NUFPAR *parser) {
 static void CC_icon(NUFPAR *parser) {
     if (NuFParGetWord(parser) != 0) {
         charconfig.character->field20_0x42 = static_cast<i16>(LevelObject_FindIndexFromName(parser->word_buf));
-        if (charconfig.character->field20_0x42 == -1 && (charconfig.flags & 0x40) != 0) {
+        if (charconfig.character->field20_0x42 == -1 && configureallcharacters_perm != 0) {
             if (LevelObject_AddExtra(parser->word_buf, 3) != 0) {
                 charconfig.character->field20_0x42 = static_cast<i16>(LevelObject_FindIndexFromName(parser->word_buf));
                 NuStrCat(parser->word_buf, "1");

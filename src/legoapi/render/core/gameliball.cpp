@@ -5816,9 +5816,8 @@ static void edbricbRopeColourMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     if (!edbri_ropecolour_menu)
         return;
     eduiMenuAddItem(edbri_ropecolour_menu, eduiItemColourPickCreate(0, edblack, edbricbSetRopeColour, "Rope Colour"));
-    edbridge_s &bridge = edBridges[edbri_nearest];
-    eduiItemColourPickSetRGB(static_cast<edui_colour_pick_s *>(edui_last_item), bridge.red / 255.0f,
-                             bridge.green / 255.0f, bridge.blue / 255.0f);
+    eduiItemColourPickSetRGB(static_cast<edui_colour_pick_s *>(edui_last_item), edBridges[edbri_nearest].red / 255.0f,
+                             edBridges[edbri_nearest].green / 255.0f, edBridges[edbri_nearest].blue / 255.0f);
     eduiMenuAttach(parent, edbri_ropecolour_menu);
     edbri_ropecolour_menu->x = parent->x + 10;
     edbri_ropecolour_menu->y = parent->y + 40;
@@ -8790,15 +8789,17 @@ extern "C" {
     void DebReAlloc(debkeydatatype_s *key, i32 particle_count) {
         debinftype *effect = debtab[key->effect_index];
         key->previous_particle_count = static_cast<i16>(particle_count);
-        i32 chunk_count = effect->particle_type == 7 ? (particle_count + 11) / 12 : (particle_count + 31) / 32;
-        if (chunk_count > 32) {
-            chunk_count = 32;
+        if (effect->particle_type == 7)
+            key->previous_allocated_chunk_count = static_cast<i16>((particle_count + 11) / 12);
+        else
+            key->previous_allocated_chunk_count = static_cast<i16>((particle_count + 31) / 32);
+        if (key->previous_allocated_chunk_count > 32) {
+            key->previous_allocated_chunk_count = 32;
             key->previous_particle_count = effect->particle_type == 7 ? 0x180 : 0x400;
         }
-        key->previous_allocated_chunk_count = static_cast<i16>(chunk_count);
-        if (key->allocated_chunk_count == chunk_count) {
+        if (key->allocated_chunk_count == key->previous_allocated_chunk_count) {
             key->particle_count = key->previous_particle_count;
-        } else if (chunk_count != 0 && key->allocated_chunk_count == 0) {
+        } else if (key->previous_allocated_chunk_count != 0 && key->allocated_chunk_count == 0) {
             DebReAlloc2(key);
         }
     }
@@ -8806,8 +8807,8 @@ extern "C" {
 }
 
 static void UpdateTotalPtls(debinftype *effect) {
-    f32 elapsed_time = 0.0f;
     f32 active_time = 0.0f;
+    f32 elapsed_time = 0.0f;
     while (effect->particle_lifetime > elapsed_time) {
         f32 remaining_time = effect->particle_lifetime - elapsed_time;
         f32 emission_time = effect->emission_period_random + effect->emission_pause;
@@ -9401,7 +9402,7 @@ extern "C" {
         }
     }
 
-    void DebrisSetFacing(i32 handle, u8 enabled, i16 x_angle, i16 y_angle) {
+    void DebrisSetFacing(i32 handle, i8 enabled, i16 x_angle, i16 y_angle) {
         if (handle == -1)
             return;
         debkeydata[handle].field_2fa = enabled;
@@ -10928,48 +10929,34 @@ extern "C" {
 
     // LookupDebrisEffectPageIgnore @0x355d30. Search the requested page first,
     // then the two permanent pages, then every other active page.
-    i32 LookupDebrisEffectPageIgnore(char *name, i32 page, i32 ignore) {
+    i32 LookupDebrisEffectPageIgnore(char *name, char page, i32 ignore) {
         if (name == NULL) {
             return -1;
         }
 
-        i32 bound;
-        const u8 requested_page = static_cast<u8>(page);
-        if (requested_page < 8 && edpp_page_used[requested_page] != 0) {
-            bound = EDPP_MAX_TYPES;
-            for (i32 i = 1; i < bound; ++i) {
-                debinftype *effect = debtab[i];
-                if (i != ignore && effect != NULL && effect->page == requested_page) {
-                    if (NuStrICmp(effect->name, name) == 0) {
-                        return i;
-                    }
-                    bound = EDPP_MAX_TYPES;
-                }
-            }
-        } else {
-            bound = EDPP_MAX_TYPES;
-        }
-
-        for (i32 i = 1; i < bound; ++i) {
-            debinftype *effect = debtab[i];
-            if (!(i != ignore && effect != NULL &&
-                  ((effect->page == 0 && edpp_page_used[0] != 0) || (effect->page == 1 && edpp_page_used[1] != 0)))) {
-                continue;
-            }
-            if (NuStrICmp(effect->name, name) == 0) {
-                return i;
-            }
-            bound = EDPP_MAX_TYPES;
-        }
-
-        for (i32 i = 1; i < bound; ++i) {
-            debinftype *effect = debtab[i];
-            if (i != ignore && effect != NULL && edpp_page_used[static_cast<i8>(effect->page)] != 0) {
-                if (NuStrICmp(effect->name, name) == 0) {
+        if (static_cast<u8>(page) < 8 && edpp_page_used[static_cast<i32>(page)] != 0) {
+            for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
+                if (i == ignore || debtab[i] == NULL || debtab[i]->page != page)
+                    continue;
+                if (NuStrICmp(debtab[i]->name, name) == 0)
                     return i;
-                }
-                bound = EDPP_MAX_TYPES;
             }
+        }
+
+        for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
+            if (i == ignore || debtab[i] == NULL)
+                continue;
+            if (!((debtab[i]->page == 0 && edpp_page_used[0] != 0) || (debtab[i]->page == 1 && edpp_page_used[1] != 0)))
+                continue;
+            if (NuStrICmp(debtab[i]->name, name) == 0)
+                return i;
+        }
+
+        for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
+            if (i == ignore || debtab[i] == NULL || edpp_page_used[static_cast<i8>(debtab[i]->page)] == 0)
+                continue;
+            if (NuStrICmp(debtab[i]->name, name) == 0)
+                return i;
         }
         return -1;
     }
@@ -12383,14 +12370,13 @@ extern "C" void edbitsDrawDiagonalCross(f32 x, f32 y, f32 z, f32 radius, i32 col
 }
 
 void edanimRenderSoundEmitters(i32 parameter_index) {
-    auto &param = AnimParams[parameter_index];
     nuhspecial_s special;
-    NuGScnGetSpecial(&special, edbits_base_scene, param.instance_id);
+    NuGScnGetSpecial(&special, edbits_base_scene, AnimParams[parameter_index].instance_id);
     const NUVEC *base_position = NuSpecialGetPos(&special);
     const auto *offset_cursor = AnimParams[parameter_index].sound_positions;
-    for (i32 sound = 0; sound < param.sound_count; ++sound, ++offset_cursor) {
+    for (i32 sound = 0; sound < AnimParams[parameter_index].sound_count; ++sound, ++offset_cursor) {
         // The original skips sounds by their flags slot rather than the sound id.
-        if (param.sound_flags[sound] == -1) {
+        if (AnimParams[parameter_index].sound_flags[sound] == -1) {
             continue;
         }
         const i32 colour = edanim_sound_mode && edanim_nearest_sound == sound ? 0xffff0000 : 0xffffffff;
@@ -12771,15 +12757,14 @@ void edanimDrawCursor() {
 }
 
 void edanimSoundCreate(nuvec_s *position) {
-    edanim_param_s &params = AnimParams[edanim_nearest_param_id];
-    i32 sound_index = params.sound_count;
+    i32 sound_index = AnimParams[edanim_nearest_param_id].sound_count;
     if (sound_index != 8 && edanim_sound_type != -1) {
         edanimSoundPlace(sound_index, position);
-        params.sound_ids[sound_index] = edanim_sound_type;
-        params.sound_flags[sound_index] = 1;
-        strcpy(params.sound_names[sound_index], edbitsGetSoundName(edanim_sound_type));
-        params.sound_count++;
-        params.sound_values[sound_index] = 50.0f;
+        AnimParams[edanim_nearest_param_id].sound_ids[sound_index] = edanim_sound_type;
+        AnimParams[edanim_nearest_param_id].sound_flags[sound_index] = 1;
+        strcpy(AnimParams[edanim_nearest_param_id].sound_names[sound_index], edbitsGetSoundName(edanim_sound_type));
+        AnimParams[edanim_nearest_param_id].sound_count++;
+        AnimParams[edanim_nearest_param_id].sound_values[sound_index] = 50.0f;
     }
 }
 
@@ -13193,48 +13178,45 @@ extern "C" i32 edbriLoadPage(char *path, void *gscn) {
     if (count + edbri_bridges_used > 64)
         count = 64 - edbri_bridges_used;
     i32 index = 0;
-    if (count > 0) {
-        for (i32 i = 0; i != count; ++i) {
-            // Retail tests the slot before the bound, so a full table reads one
-            // entry past edBridges before the loop stops.
-            while (edBridges[index].connection_index != 0xff && index < 64)
-                ++index;
-            if (index >= 64)
-                continue;
-            edbridge_s &bridge = edBridges[index];
-            bridge.instance_id = -1;
-            EdFileReadNuVec(&bridge.position);
-            bridge.length = EdFileReadFloat();
-            bridge.field_14 = EdFileReadFloat();
-            bridge.rotation_z = EdFileReadShort();
-            bridge.rotation_y = EdFileReadShort();
-            bridge.connection_index = page;
-            bridge.field_1d = EdFileReadChar();
-            bridge.field_1e = EdFileReadChar();
-            char name[20];
-            EdFileRead(name, 20);
-            if (name[0])
-                bridge.special_20 = edbitsLookupInstance(name, static_cast<NUGSCN *>(gscn));
-            else
-                bridge.special_20 = -1;
-            EdFileRead(name, 20);
-            if (name[0]) {
-                bridge.special_24 = edbitsLookupInstance(name, static_cast<NUGSCN *>(gscn));
-            } else {
-                bridge.special_24 = -1;
-            }
-            bridge.field_28 = EdFileReadFloat();
-            bridge.field_2c = EdFileReadFloat();
-            bridge.field_30 = EdFileReadFloat();
-            bridge.field_34 = EdFileReadFloat();
-            bridge.field_38 = EdFileReadFloat();
-            bridge.field_3c = EdFileReadFloat();
-            bridge.red = EdFileReadChar();
-            bridge.green = EdFileReadChar();
-            bridge.blue = EdFileReadChar();
-            bridge.field_43 = EdFileReadChar();
-            ++edbri_bridges_used;
+    for (i32 i = 0; i < count; ++i) {
+        // Retail tests the slot before the bound, so a full table reads one
+        // entry past edBridges before the loop stops.
+        while (edBridges[index].connection_index != 0xff && index < 64)
+            ++index;
+        if (index >= 64)
+            continue;
+        edBridges[index].instance_id = -1;
+        EdFileReadNuVec(&edBridges[index].position);
+        edBridges[index].length = EdFileReadFloat();
+        edBridges[index].field_14 = EdFileReadFloat();
+        edBridges[index].rotation_z = EdFileReadShort();
+        edBridges[index].rotation_y = EdFileReadShort();
+        edBridges[index].connection_index = page;
+        edBridges[index].field_1d = EdFileReadChar();
+        edBridges[index].field_1e = EdFileReadChar();
+        char name[20];
+        EdFileRead(name, 20);
+        if (name[0])
+            edBridges[index].special_20 = edbitsLookupInstance(name, static_cast<NUGSCN *>(gscn));
+        else
+            edBridges[index].special_20 = -1;
+        EdFileRead(name, 20);
+        if (name[0]) {
+            edBridges[index].special_24 = edbitsLookupInstance(name, static_cast<NUGSCN *>(gscn));
+        } else {
+            edBridges[index].special_24 = -1;
         }
+        edBridges[index].field_28 = EdFileReadFloat();
+        edBridges[index].field_2c = EdFileReadFloat();
+        edBridges[index].field_30 = EdFileReadFloat();
+        edBridges[index].field_34 = EdFileReadFloat();
+        edBridges[index].field_38 = EdFileReadFloat();
+        edBridges[index].field_3c = EdFileReadFloat();
+        edBridges[index].red = EdFileReadChar();
+        edBridges[index].green = EdFileReadChar();
+        edBridges[index].blue = EdFileReadChar();
+        edBridges[index].field_43 = EdFileReadChar();
+        ++edbri_bridges_used;
     }
     EdFileClose();
     edbri_nearest = -1;
@@ -13275,10 +13257,9 @@ void edbriBridgeUpdate(i32 index, NUGSCN *scene) {
 
 static void edbricbSetRopeColour(eduimenu_s *menu, eduiitem_s *item, u32) {
     edui_colour_pick_s *colour = static_cast<edui_colour_pick_s *>(item);
-    edbridge_s &bridge = edBridges[edbri_nearest];
-    bridge.red = static_cast<u8>(colour->red * 255.0f);
-    bridge.green = static_cast<u8>(colour->green * 255.0f);
-    bridge.blue = static_cast<u8>(colour->blue * 255.0f);
+    edBridges[edbri_nearest].red = static_cast<u8>(colour->red * 255.0f);
+    edBridges[edbri_nearest].green = static_cast<u8>(colour->green * 255.0f);
+    edBridges[edbri_nearest].blue = static_cast<u8>(colour->blue * 255.0f);
     edbriBridgeUpdate(edbri_nearest, edbits_base_scene);
     eduimenu_s *parent = menu->parent;
     eduiMenuDetach(menu);
@@ -13526,15 +13507,14 @@ void edbriDoInput(nupad_s *pad) {
         if (edbri_nearest != -1) {
             edbridge_s &bridge = edBridges[edbri_nearest];
             edcamSetPos(&bridge.position);
-            edbridge_s &selected_bridge = edBridges[edbri_nearest];
-            edbri_rotz = selected_bridge.rotation_z;
-            edbri_roty = selected_bridge.rotation_y;
-            edbri_length = selected_bridge.length;
-            edbri_width = selected_bridge.field_14;
-            edbri_planks = selected_bridge.field_1d;
-            edbri_post_interval = selected_bridge.field_1e;
-            edbri_plank_instance_type = selected_bridge.special_20;
-            edbri_post_instance_type = selected_bridge.special_24;
+            edbri_rotz = edBridges[edbri_nearest].rotation_z;
+            edbri_roty = edBridges[edbri_nearest].rotation_y;
+            edbri_length = edBridges[edbri_nearest].length;
+            edbri_width = edBridges[edbri_nearest].field_14;
+            edbri_planks = edBridges[edbri_nearest].field_1d;
+            edbri_post_interval = edBridges[edbri_nearest].field_1e;
+            edbri_plank_instance_type = edBridges[edbri_nearest].special_20;
+            edbri_post_instance_type = edBridges[edbri_nearest].special_24;
         }
     }
     edcamGetPosAng(&edbri_cam_pos, &edbri_cam_ax, &edbri_cam_ay);
@@ -14306,24 +14286,25 @@ i32 edppPtlCreate(NUVEC *position, i32 effect_index) {
         edpp_ptls[index].render_priority = 20000;
     else if (particle_type == 7)
         edpp_ptls[index].render_priority = 10000;
-    edpp_particle_s *particle = &edpp_ptls[index];
-    particle->dynamic_priority = 0;
-    particle->facing_mode = 0;
-    particle->facing_rotation_x = 0;
-    particle->facing_rotation_y = 0;
-    strcpy(particle->name, debtab[particle->effect_index]->name);
-    DebrisOrientation(particle->instance_id, particle->rotation_z, particle->rotation_y);
-    DebrisEmitterOrientation(particle->instance_id, particle->emitter_rotation_z, particle->emitter_rotation_y,
-                             particle->emitter_rotation_x);
-    DebrisStartOffset(particle->instance_id, particle->start_offset);
-    DebrisReflectionOrientation(particle->instance_id, particle->reflection_rotation_z, particle->reflection_rotation_y,
-                                particle->reflection_offset, particle->reflection_bounce);
-    DebrisSetFacing(particle->instance_id, particle->facing_mode, particle->facing_rotation_x,
-                    particle->facing_rotation_y);
-    DebrisSetGroupID(particle->instance_id, particle->render_group);
-    DebrisSetPriority(particle->instance_id, particle->render_priority, particle->dynamic_priority);
-    DebrisSetRoomID(particle->instance_id, 0);
-    DebrisSetDetailLevels(particle->instance_id, particle->detail_levels);
+    edpp_ptls[index].dynamic_priority = 0;
+    edpp_ptls[index].facing_mode = 0;
+    edpp_ptls[index].facing_rotation_x = 0;
+    edpp_ptls[index].facing_rotation_y = 0;
+    strcpy(edpp_ptls[index].name, debtab[edpp_ptls[index].effect_index]->name);
+    DebrisOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].rotation_z, edpp_ptls[index].rotation_y);
+    DebrisEmitterOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].emitter_rotation_z,
+                             edpp_ptls[index].emitter_rotation_y, edpp_ptls[index].emitter_rotation_x);
+    DebrisStartOffset(edpp_ptls[index].instance_id, edpp_ptls[index].start_offset);
+    DebrisReflectionOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].reflection_rotation_z,
+                                edpp_ptls[index].reflection_rotation_y, edpp_ptls[index].reflection_offset,
+                                edpp_ptls[index].reflection_bounce);
+    DebrisSetFacing(edpp_ptls[index].instance_id, edpp_ptls[index].facing_mode, edpp_ptls[index].facing_rotation_x,
+                    edpp_ptls[index].facing_rotation_y);
+    DebrisSetGroupID(edpp_ptls[index].instance_id, edpp_ptls[index].render_group);
+    DebrisSetPriority(edpp_ptls[index].instance_id, edpp_ptls[index].render_priority,
+                      edpp_ptls[index].dynamic_priority);
+    DebrisSetRoomID(edpp_ptls[index].instance_id, 0);
+    DebrisSetDetailLevels(edpp_ptls[index].instance_id, edpp_ptls[index].detail_levels);
     ++edpp_instances_used;
     edpp_page_used[edbits_particle_level_page] = 1;
     edpp_page_on[edbits_particle_level_page] = 1;
@@ -14338,58 +14319,57 @@ i32 edppPtlCreateCopy(NUVEC *position, i32 source_index) {
     i32 index = 0;
     while (edpp_ptls[index].instance_id != -1)
         ++index;
-    edpp_particle_s *source = &edpp_ptls[source_index];
-    AddDebrisEffect(&edpp_ptls[index].instance_id, source->effect_index, position->x, position->y, position->z);
-    edpp_particle_s *particle = &edpp_ptls[index];
-    if (particle->instance_id == -1)
+    AddDebrisEffect(&edpp_ptls[index].instance_id, edpp_ptls[source_index].effect_index, position->x, position->y,
+                    position->z);
+    if (edpp_ptls[index].instance_id == -1)
         return -1;
-    debkeydata[particle->instance_id].field_2f9 = 0;
-    particle->effect_index = source->effect_index;
-    particle->rotation_z = source->rotation_z;
-    particle->rotation_y = source->rotation_y;
-    particle->position = *position;
-    particle->emitter_rotation_y = source->emitter_rotation_y;
-    particle->emitter_rotation_z = source->emitter_rotation_z;
-    particle->start_offset = source->start_offset;
-    particle->switch_type = source->switch_type;
-    particle->switch_id = source->switch_id;
-    particle->switch_variable = source->switch_variable;
-    particle->reflection_offset = source->reflection_offset;
-    particle->reflection_bounce = source->reflection_bounce;
-    particle->page = source->page;
-    particle->render_group = source->render_group;
-    particle->detail_levels = source->detail_levels;
-    particle->facing_mode = source->facing_mode;
-    particle->facing_rotation_x = source->facing_rotation_x;
-    particle->facing_rotation_y = source->facing_rotation_y;
-    strcpy(edpp_ptls[index].name, debtab[particle->effect_index]->name);
-    DebrisOrientation(particle->instance_id, particle->rotation_z, particle->rotation_y);
-    DebrisEmitterOrientation(particle->instance_id, particle->emitter_rotation_z, particle->emitter_rotation_y,
-                             particle->emitter_rotation_x);
-    DebrisStartOffset(particle->instance_id, particle->start_offset);
-    DebrisReflectionOrientation(particle->instance_id, particle->reflection_rotation_z, particle->reflection_rotation_y,
-                                particle->reflection_offset, particle->reflection_bounce);
-    DebrisSetFacing(particle->instance_id, particle->facing_mode, particle->facing_rotation_x,
-                    particle->facing_rotation_y);
-    DebrisSetGroupID(particle->instance_id, particle->render_group);
-    DebrisSetRoomID(particle->instance_id, reinterpret_cast<NUGSCN *>(edpp_page_scene[particle->page]));
-    DebrisSetDetailLevels(particle->instance_id, particle->detail_levels);
+    debkeydata[edpp_ptls[index].instance_id].field_2f9 = 0;
+    edpp_ptls[index].effect_index = edpp_ptls[source_index].effect_index;
+    edpp_ptls[index].rotation_z = edpp_ptls[source_index].rotation_z;
+    edpp_ptls[index].rotation_y = edpp_ptls[source_index].rotation_y;
+    edpp_ptls[index].position = *position;
+    edpp_ptls[index].emitter_rotation_y = edpp_ptls[source_index].emitter_rotation_y;
+    edpp_ptls[index].emitter_rotation_z = edpp_ptls[source_index].emitter_rotation_z;
+    edpp_ptls[index].start_offset = edpp_ptls[source_index].start_offset;
+    edpp_ptls[index].switch_type = edpp_ptls[source_index].switch_type;
+    edpp_ptls[index].switch_id = edpp_ptls[source_index].switch_id;
+    edpp_ptls[index].switch_variable = edpp_ptls[source_index].switch_variable;
+    edpp_ptls[index].reflection_offset = edpp_ptls[source_index].reflection_offset;
+    edpp_ptls[index].reflection_bounce = edpp_ptls[source_index].reflection_bounce;
+    edpp_ptls[index].page = edpp_ptls[source_index].page;
+    edpp_ptls[index].render_group = edpp_ptls[source_index].render_group;
+    edpp_ptls[index].detail_levels = edpp_ptls[source_index].detail_levels;
+    edpp_ptls[index].facing_mode = edpp_ptls[source_index].facing_mode;
+    edpp_ptls[index].facing_rotation_x = edpp_ptls[source_index].facing_rotation_x;
+    edpp_ptls[index].facing_rotation_y = edpp_ptls[source_index].facing_rotation_y;
+    strcpy(edpp_ptls[index].name, debtab[edpp_ptls[index].effect_index]->name);
+    DebrisOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].rotation_z, edpp_ptls[index].rotation_y);
+    DebrisEmitterOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].emitter_rotation_z,
+                             edpp_ptls[index].emitter_rotation_y, edpp_ptls[index].emitter_rotation_x);
+    DebrisStartOffset(edpp_ptls[index].instance_id, edpp_ptls[index].start_offset);
+    DebrisReflectionOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].reflection_rotation_z,
+                                edpp_ptls[index].reflection_rotation_y, edpp_ptls[index].reflection_offset,
+                                edpp_ptls[index].reflection_bounce);
+    DebrisSetFacing(edpp_ptls[index].instance_id, edpp_ptls[index].facing_mode, edpp_ptls[index].facing_rotation_x,
+                    edpp_ptls[index].facing_rotation_y);
+    DebrisSetGroupID(edpp_ptls[index].instance_id, edpp_ptls[index].render_group);
+    DebrisSetRoomID(edpp_ptls[index].instance_id, reinterpret_cast<NUGSCN *>(edpp_page_scene[edpp_ptls[index].page]));
+    DebrisSetDetailLevels(edpp_ptls[index].instance_id, edpp_ptls[index].detail_levels);
     ++edpp_instances_used;
     return index;
 }
 
 i32 edppPtlPlace(i32 index, NUVEC *position) {
-    edpp_particle_s *particle = &edpp_ptls[index];
-    DebrisEmitterPos(particle->instance_id, position->x, position->y, position->z);
-    DebrisOrientation(particle->instance_id, edpp_rotz, edpp_roty);
-    DebrisEmitterOrientation(particle->instance_id, edpp_emitrotz, edpp_emitroty, edpp_emitrotx);
-    DebrisReflectionOrientation(particle->instance_id, edpp_refrotz, edpp_refroty, particle->reflection_offset,
-                                particle->reflection_bounce);
-    if (particle->facing_mode != 0) {
-        particle->facing_rotation_y = edpp_facroty;
-        particle->facing_rotation_x = edpp_facrotx;
-        DebrisSetFacing(particle->instance_id, particle->facing_mode, particle->facing_rotation_x,
-                        particle->facing_rotation_y);
+    DebrisEmitterPos(edpp_ptls[index].instance_id, position->x, position->y, position->z);
+    DebrisOrientation(edpp_ptls[index].instance_id, edpp_rotz, edpp_roty);
+    DebrisEmitterOrientation(edpp_ptls[index].instance_id, edpp_emitrotz, edpp_emitroty, edpp_emitrotx);
+    DebrisReflectionOrientation(edpp_ptls[index].instance_id, edpp_refrotz, edpp_refroty,
+                                edpp_ptls[index].reflection_offset, edpp_ptls[index].reflection_bounce);
+    if (edpp_ptls[index].facing_mode != 0) {
+        edpp_ptls[index].facing_rotation_x = edpp_facrotx;
+        edpp_ptls[index].facing_rotation_y = edpp_facroty;
+        DebrisSetFacing(edpp_ptls[index].instance_id, edpp_ptls[index].facing_mode,
+                        edpp_ptls[index].facing_rotation_x, edpp_ptls[index].facing_rotation_y);
     }
     edpp_ptls[index].position = *position;
     edpp_ptls[index].emitter_rotation_z = edpp_emitrotz;
@@ -14463,10 +14443,9 @@ void edppMultipleCopyPaste() {
         NuVecAdd(&position, &edpp_cam_pos, &offset);
         const i32 index = edppPtlCreateCopy(&position, edpp_copy_source[source]);
         if (index != -1) {
-            edpp_particle_s &particle = edpp_ptls[index];
-            particle.emitter_rotation_y += static_cast<i16>(edpp_copyroty);
-            DebrisEmitterOrientation(particle.instance_id, particle.emitter_rotation_z, particle.emitter_rotation_y,
-                                     particle.emitter_rotation_x);
+            edpp_ptls[index].emitter_rotation_y += static_cast<i16>(edpp_copyroty);
+            DebrisEmitterOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].emitter_rotation_z,
+                                     edpp_ptls[index].emitter_rotation_y, edpp_ptls[index].emitter_rotation_x);
         }
     }
 }
@@ -14748,10 +14727,9 @@ void edppDrawCursor() {
             if (edpp_nearest == -1) {
                 NuQFntPrintEx(system_qfont, 0x1720, 0xc30, 0x10, "Highlight: <none>");
             } else {
-                edpp_particle_s &particle = edpp_ptls[edpp_nearest];
-                debkeydatatype_s &key = debkeydata[particle.instance_id];
+                debkeydatatype_s &key = debkeydata[edpp_ptls[edpp_nearest].instance_id];
                 debinftype *effect = debtab[key.effect_index];
-                i32 instance_id = particle.instance_id;
+                i32 instance_id = edpp_ptls[edpp_nearest].instance_id;
                 if (effect->generator_type == 0) {
                     edbitsDrawCube(edpp_cam_pos.x, edpp_cam_pos.y, edpp_cam_pos.z, effect->field_058, effect->field_05c,
                                    effect->field_060, edpp_emitrotz, edpp_emitroty, edpp_emitrotx, rotation_z,
@@ -14794,8 +14772,7 @@ void edppDrawCursor() {
         if (edpp_nearest == -1) {
             NuQFntPrintEx(system_qfont, 0x1720, 0xa50, 0x10, "Highlight: <none>");
         } else {
-            edpp_particle_s &particle = edpp_ptls[edpp_nearest];
-            debkeydatatype_s &key = debkeydata[particle.instance_id];
+            debkeydatatype_s &key = debkeydata[edpp_ptls[edpp_nearest].instance_id];
             NuQFntPrintEx(system_qfont, 0x1720, 0xa50, 0x10, "Highlight: %s", debtab[key.effect_index]->name);
             NuQFntPrintEx(system_qfont, 0x1720, 0xaf0, 0x10, "XYZ: %0.2f %0.2f %0.2f", key.position.x, key.position.y,
                           key.position.z);
@@ -15449,8 +15426,11 @@ i32 edppSaveEffects(char *filename, char page) {
         EdFileWriteFloat(effecttypes[index].torus_keys3[7].time);
         EdFileWriteFloat(effecttypes[index].torus_keys3[7].value);
 
-        i32 sound_count = (effecttypes[index].sound_data[0] != -1) + (effecttypes[index].sound_data[3] != -1) +
-                          (effecttypes[index].sound_data[6] != -1) + (effecttypes[index].sound_data[9] != -1);
+        i32 sound_count = 0;
+        for (i32 i = 0; i < 4; ++i) {
+            if (effecttypes[index].sound_data[i * 3] != -1)
+                ++sound_count;
+        }
         EdFileWriteInt(sound_count);
         if (effecttypes[index].sound_data[0] != -1) {
             EdFileWrite(const_cast<char *>(g_soundInfo[effecttypes[index].sound_data[0]].sfx_name), 16);
@@ -15486,31 +15466,32 @@ i32 edppSaveEffects(char *filename, char page) {
             instance_count += edpp_ptls[index].instance_id != -1;
         EdFileWriteInt(instance_count);
         for (i32 index = 0; index < 512; ++index) {
-            edpp_particle_s *particle = &edpp_ptls[index];
-            if (particle->instance_id == -1)
+            if (edpp_ptls[index].instance_id == -1)
                 continue;
-            EdFileWriteNuVec(&particle->position);
-            EdFileWriteShort(particle->rotation_z);
-            EdFileWriteShort(particle->rotation_y);
-            EdFileWriteShort(particle->emitter_rotation_z);
-            EdFileWriteShort(particle->emitter_rotation_y);
-            EdFileWriteShort(particle->emitter_rotation_x);
-            EdFileWriteFloat(particle->start_offset);
-            EdFileWrite(particle->effect_index == -1 ? particle->name : debtab[particle->effect_index]->name, 16);
-            EdFileWriteInt(particle->switch_type);
-            EdFileWriteInt(particle->switch_id);
-            EdFileWriteFloat(particle->switch_variable);
-            EdFileWriteShort(particle->reflection_rotation_z);
-            EdFileWriteShort(particle->reflection_rotation_y);
-            EdFileWriteFloat(particle->reflection_offset);
-            EdFileWriteFloat(particle->reflection_bounce);
-            EdFileWriteShort(particle->render_group);
-            EdFileWriteUnsignedShort(particle->render_priority);
-            EdFileWriteChar(particle->dynamic_priority);
-            EdFileWriteChar(particle->detail_levels);
-            EdFileWriteChar(particle->facing_mode);
-            EdFileWriteShort(particle->facing_rotation_x);
-            EdFileWriteShort(particle->facing_rotation_y);
+            EdFileWriteNuVec(&edpp_ptls[index].position);
+            EdFileWriteShort(edpp_ptls[index].rotation_z);
+            EdFileWriteShort(edpp_ptls[index].rotation_y);
+            EdFileWriteShort(edpp_ptls[index].emitter_rotation_z);
+            EdFileWriteShort(edpp_ptls[index].emitter_rotation_y);
+            EdFileWriteShort(edpp_ptls[index].emitter_rotation_x);
+            EdFileWriteFloat(edpp_ptls[index].start_offset);
+            EdFileWrite(edpp_ptls[index].effect_index == -1 ? edpp_ptls[index].name
+                                                            : debtab[edpp_ptls[index].effect_index]->name,
+                        16);
+            EdFileWriteInt(edpp_ptls[index].switch_type);
+            EdFileWriteInt(edpp_ptls[index].switch_id);
+            EdFileWriteFloat(edpp_ptls[index].switch_variable);
+            EdFileWriteShort(edpp_ptls[index].reflection_rotation_z);
+            EdFileWriteShort(edpp_ptls[index].reflection_rotation_y);
+            EdFileWriteFloat(edpp_ptls[index].reflection_offset);
+            EdFileWriteFloat(edpp_ptls[index].reflection_bounce);
+            EdFileWriteShort(edpp_ptls[index].render_group);
+            EdFileWriteUnsignedShort(edpp_ptls[index].render_priority);
+            EdFileWriteChar(edpp_ptls[index].dynamic_priority);
+            EdFileWriteChar(edpp_ptls[index].detail_levels);
+            EdFileWriteChar(edpp_ptls[index].facing_mode);
+            EdFileWriteShort(edpp_ptls[index].facing_rotation_x);
+            EdFileWriteShort(edpp_ptls[index].facing_rotation_y);
         }
     }
     EdFileSetReadWrongEndianess(0);
@@ -15631,7 +15612,12 @@ void FileLoadSingleEffectType(debinftype *effect, i32 version, char category) {
     effect->category = static_cast<u8>(category);
     if (version < 28) {
         const i16 rate = EdFileReadShort();
-        effect->frequency = rate > 0 ? static_cast<i16>(rate * 60) : rate == 0 ? 0 : static_cast<i16>(-60 / rate);
+        if (rate > 0)
+            effect->frequency = rate * 60;
+        else if (rate == 0)
+            effect->frequency = 0;
+        else
+            effect->frequency = -60 / rate;
         effect->max_particles = EdFileReadShort();
         effect->emission_period = static_cast<f32>(EdFileReadShort()) / 60.0f;
         effect->emission_period_random = static_cast<f32>(EdFileReadShort()) / 60.0f;
@@ -15647,9 +15633,10 @@ void FileLoadSingleEffectType(debinftype *effect, i32 version, char category) {
         effect->emission_pause_random = EdFileReadFloat();
         effect->start_offset_random = EdFileReadFloat();
     }
-    if (effect->frequency != 0) {
-        const f32 minimum_period = 1.0f / static_cast<f32>(effect->frequency);
-        if (effect->emission_period_random <= minimum_period && effect->emission_period_random != minimum_period)
+    const f32 frequency = static_cast<f32>(effect->frequency);
+    if (frequency != 0.0f) {
+        const f32 minimum_period = 1.0f / frequency;
+        if (minimum_period > effect->emission_period_random)
             effect->emission_period_random = minimum_period;
     }
 
@@ -15830,12 +15817,14 @@ void FileLoadSingleEffectType(debinftype *effect, i32 version, char category) {
         effect->repeat_box.x = 1.0f;
         effect->repeat_box.z = 1.0f;
     }
-    if (version >= 36)
-        effect->thinning = EdFileReadFloat();
-    else
+    if (version >= 36) {
+        const f32 thinning = EdFileReadFloat();
+        effect->thinning = thinning;
+        if (version == 36 && thinning < 4.0f)
+            effect->thinning = 4.0f;
+    } else {
         effect->thinning = 4.0f;
-    if (version == 36 && effect->thinning < 4.0f)
-        effect->thinning = 4.0f;
+    }
     if (!(version >= 30)) {
         effect->torus_radius1 = 1.0f;
         effect->torus_radius2 = 0.1f;
@@ -15888,22 +15877,15 @@ void FileLoadSingleEffectType(debinftype *effect, i32 version, char category) {
             effect->sound_data[11] = EdFileReadInt();
         }
     } else {
-        const i32 stored_sound_count = EdFileReadInt();
-        const i32 sound_count = MAX(0, stored_sound_count);
+        const i32 sound_count = EdFileReadInt();
         for (i32 i = 0; i < sound_count; ++i) {
             char sound_name[16];
             EdFileRead(sound_name, sizeof(sound_name));
-            if (i < 4) {
-                effect->sound_data[i * 3] = GetSfxIdN(sound_name, sizeof(sound_name));
-                effect->sound_data[i * 3 + 1] = EdFileReadInt();
-                effect->sound_data[i * 3 + 2] = EdFileReadInt();
-            } else {
-                GetSfxIdN(sound_name, sizeof(sound_name));
-                EdFileReadInt();
-                EdFileReadInt();
-            }
+            effect->sound_data[i * 3] = GetSfxIdN(sound_name, sizeof(sound_name));
+            effect->sound_data[i * 3 + 1] = EdFileReadInt();
+            effect->sound_data[i * 3 + 2] = EdFileReadInt();
         }
-        for (i32 i = MIN(sound_count, 4); i < 4; ++i)
+        for (i32 i = sound_count; i < 4; ++i)
             effect->sound_data[i * 3] = -1;
     }
     if (version >= 16) {
@@ -16152,26 +16134,28 @@ static void edptlcbResetParticles(eduimenu_s *, eduiitem_s *, u32) {
 }
 
 void edppStartSingleEffect(i32 index) {
-    edpp_particle_s &particle = edpp_ptls[index];
-    if (particle.instance_id != -1)
+    if (edpp_ptls[index].instance_id != -1)
         return;
-    AddDebrisEffect(&particle.instance_id, particle.effect_index, particle.position.x, particle.position.y,
-                    particle.position.z);
-    if (particle.instance_id == -1)
+    AddDebrisEffect(&edpp_ptls[index].instance_id, edpp_ptls[index].effect_index, edpp_ptls[index].position.x,
+                    edpp_ptls[index].position.y, edpp_ptls[index].position.z);
+    if (edpp_ptls[index].instance_id == -1)
         return;
 
-    debkeydata[particle.instance_id].field_2f9 = 0;
-    DebrisOrientation(particle.instance_id, particle.rotation_z, particle.rotation_y);
-    DebrisEmitterOrientation(particle.instance_id, particle.emitter_rotation_z, particle.emitter_rotation_y,
-                             particle.emitter_rotation_x);
-    DebrisStartOffset(particle.instance_id, particle.start_offset);
-    DebrisSetTrigger(particle.instance_id, particle.switch_type, particle.switch_id, particle.switch_variable);
-    DebrisReflectionOrientation(particle.instance_id, particle.reflection_rotation_z, particle.reflection_rotation_y,
-                                particle.reflection_offset, particle.reflection_bounce);
-    DebrisSetFacing(particle.instance_id, particle.facing_mode, particle.facing_rotation_x, particle.facing_rotation_y);
-    DebrisSetGroupID(particle.instance_id, particle.render_group);
-    DebrisSetRoomID(particle.instance_id, reinterpret_cast<NUGSCN *>(edpp_page_scene[particle.page]));
-    DebrisSetDetailLevels(particle.instance_id, particle.detail_levels);
+    debkeydata[edpp_ptls[index].instance_id].field_2f9 = 0;
+    DebrisOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].rotation_z, edpp_ptls[index].rotation_y);
+    DebrisEmitterOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].emitter_rotation_z,
+                             edpp_ptls[index].emitter_rotation_y, edpp_ptls[index].emitter_rotation_x);
+    DebrisStartOffset(edpp_ptls[index].instance_id, edpp_ptls[index].start_offset);
+    DebrisSetTrigger(edpp_ptls[index].instance_id, edpp_ptls[index].switch_type, edpp_ptls[index].switch_id,
+                     edpp_ptls[index].switch_variable);
+    DebrisReflectionOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].reflection_rotation_z,
+                                edpp_ptls[index].reflection_rotation_y, edpp_ptls[index].reflection_offset,
+                                edpp_ptls[index].reflection_bounce);
+    DebrisSetFacing(edpp_ptls[index].instance_id, edpp_ptls[index].facing_mode, edpp_ptls[index].facing_rotation_x,
+                    edpp_ptls[index].facing_rotation_y);
+    DebrisSetGroupID(edpp_ptls[index].instance_id, edpp_ptls[index].render_group);
+    DebrisSetRoomID(edpp_ptls[index].instance_id, reinterpret_cast<NUGSCN *>(edpp_page_scene[edpp_ptls[index].page]));
+    DebrisSetDetailLevels(edpp_ptls[index].instance_id, edpp_ptls[index].detail_levels);
 }
 
 static void edptlcbSetDrawflag(eduimenu_s *, eduiitem_s *item, u32) {
@@ -23297,10 +23281,11 @@ static __attribute__((used)) void edanimcbSetBouncyDamping(eduimenu_s *, eduiite
     if (edanim_nearest == -1) {
         return;
     }
-    auto &param = AnimParams[edanim_nearest_param_id];
-    param.bounce_damping = static_cast<edui_slider_s *>(item)->value;
-    if (param.platform_id != -1) {
-        PlatInstBounce(param.platform_id, param.bounce_impulse, param.bounce_spring, param.bounce_damping);
+    AnimParams[edanim_nearest_param_id].bounce_damping = static_cast<edui_slider_s *>(item)->value;
+    if (AnimParams[edanim_nearest_param_id].platform_id != -1) {
+        PlatInstBounce(
+            AnimParams[edanim_nearest_param_id].platform_id, AnimParams[edanim_nearest_param_id].bounce_impulse,
+            AnimParams[edanim_nearest_param_id].bounce_spring, AnimParams[edanim_nearest_param_id].bounce_damping);
     }
 }
 
@@ -23308,10 +23293,11 @@ static __attribute__((used)) void edanimcbSetBouncyTension(eduimenu_s *, eduiite
     if (edanim_nearest == -1) {
         return;
     }
-    auto &param = AnimParams[edanim_nearest_param_id];
-    param.bounce_spring = static_cast<edui_slider_s *>(item)->value;
-    if (param.platform_id != -1) {
-        PlatInstBounce(param.platform_id, param.bounce_impulse, param.bounce_spring, param.bounce_damping);
+    AnimParams[edanim_nearest_param_id].bounce_spring = static_cast<edui_slider_s *>(item)->value;
+    if (AnimParams[edanim_nearest_param_id].platform_id != -1) {
+        PlatInstBounce(
+            AnimParams[edanim_nearest_param_id].platform_id, AnimParams[edanim_nearest_param_id].bounce_impulse,
+            AnimParams[edanim_nearest_param_id].bounce_spring, AnimParams[edanim_nearest_param_id].bounce_damping);
     }
 }
 
@@ -23319,10 +23305,11 @@ static __attribute__((used)) void edanimcbSetBouncyPlayerGrav(eduimenu_s *, edui
     if (edanim_nearest == -1) {
         return;
     }
-    auto &param = AnimParams[edanim_nearest_param_id];
-    param.bounce_impulse = static_cast<edui_slider_s *>(item)->value;
-    if (param.platform_id != -1) {
-        PlatInstBounce(param.platform_id, param.bounce_impulse, param.bounce_spring, param.bounce_damping);
+    AnimParams[edanim_nearest_param_id].bounce_impulse = static_cast<edui_slider_s *>(item)->value;
+    if (AnimParams[edanim_nearest_param_id].platform_id != -1) {
+        PlatInstBounce(
+            AnimParams[edanim_nearest_param_id].platform_id, AnimParams[edanim_nearest_param_id].bounce_impulse,
+            AnimParams[edanim_nearest_param_id].bounce_spring, AnimParams[edanim_nearest_param_id].bounce_damping);
     }
 }
 
