@@ -50,64 +50,12 @@ extern "C" void AiRndrLine3dDbg(f32, f32, f32, f32, f32, f32, u32);
 extern "C" void edDrawCross(NUVEC *centre, u8 red, u8 green, u8 blue);
 
 extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
-                                              f32 upper_y, u32 colour, i32, i32 segments) {
-    NURND_VERTEX3D vertices[2];
-    NURND_VERTEX3D &first = vertices[0];
-    NURND_VERTEX3D &second = vertices[1];
-    second.position.x = 0.0f;
-    second.position.y = 0.0f;
-    second.position.z = radius_z;
-    NuVecRotateY(&second.position, &second.position, rotation);
-    NuVecAdd(&second.position, &second.position, centre);
-    first.colour = colour;
-    second.colour = colour;
-    for (i32 i = 1; i <= segments; ++i) {
-        first.position = second.position;
-        second.position = *centre;
-        i32 angle = (i * 65536) / segments;
-        NUVEC offset = {radius_x * NU_SIN_LUT(angle), 0.0f, radius_z * NU_COS_LUT(angle)};
-        NuVecRotateY(&offset, &offset, rotation);
-        NuVecAdd(&second.position, centre, &offset);
-        first.position.y = lower_y;
-        second.position.y = lower_y;
-        AiRndrLine3dDbg(first.position.x, first.position.y, first.position.z, second.position.x, second.position.y,
-                        second.position.z, colour);
-        first.position.y = upper_y;
-        second.position.y = upper_y;
-        AiRndrLine3dDbg(first.position.x, first.position.y, first.position.z, second.position.x, second.position.y,
-                        second.position.z, colour);
-        first.position = second.position;
-        first.position.y = lower_y;
-        AiRndrLine3dDbg(first.position.x, first.position.y, first.position.z, second.position.x, second.position.y,
-                        second.position.z, colour);
-    }
-}
+                                              f32 upper_y, u32 colour, i32, i32 segments);
 
-extern "C" void LocaledbitsDrawCircleXY(NUVEC *centre, f32 radius, u32 colour, i32, i32 segments) {
-    NUVEC previous = {centre->x, centre->y, centre->z + radius};
-    for (i32 i = 1; i <= segments; ++i) {
-        i32 angle = (i * 65536) / segments;
-        NUVEC next = {centre->x + NU_SIN_LUT(angle) * radius, centre->y, centre->z + NU_COS_LUT(angle) * radius};
-        AiRndrLine3dDbg(previous.x, previous.y, previous.z, next.x, next.y, next.z, colour);
-        previous = next;
-    }
-}
+extern "C" void LocaledbitsDrawCircleXY(NUVEC *centre, f32 radius, u32 colour, i32, i32 segments);
 
 extern "C" void LocaledbitsDrawSolidCircleXY(NUVEC *centre, f32 radius, f32 lower_y, f32 upper_y, u32 colour, i32,
-                                             i32 segments) {
-    f32 previous_x = centre->x;
-    f32 previous_z = centre->z + radius;
-    for (i32 i = 1; i <= segments; ++i) {
-        i32 angle = (i * 65536) / segments;
-        f32 next_x = centre->x + radius * NU_SIN_LUT(angle);
-        f32 next_z = centre->z + NU_COS_LUT(angle) * radius;
-        AiRndrLine3dDbg(previous_x, lower_y, previous_z, next_x, lower_y, next_z, colour);
-        AiRndrLine3dDbg(previous_x, upper_y, previous_z, next_x, upper_y, next_z, colour);
-        AiRndrLine3dDbg(next_x, lower_y, next_z, next_x, upper_y, next_z, colour);
-        previous_x = next_x;
-        previous_z = next_z;
-    }
-}
+                                             i32 segments);
 
 extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour);
 
@@ -737,75 +685,18 @@ void DrawRipple(ripple_node_s *node) {
     NuRndrTriStrip3dClip(vertices, 4, &matrix, node->material);
 }
 
-void DrawAreaBox(nuvec_s *position, nuvec_s *size, i32 rotation, i32 colour) {
-    f32 local_x[4] __attribute__((aligned(16))) = {-size->x, -size->x, size->x, size->x};
-    f32 rotated_x[4] __attribute__((aligned(16)));
-    f32 local_z[4] __attribute__((aligned(16))) = {-size->z, size->z, size->z, -size->z};
-    f32 rotated_z[4] __attribute__((aligned(16)));
-    const f32 cosine = NU_COS_LUT(rotation);
-    const f32 sine = NU_SIN_LUT(rotation);
-    for (i32 i = 0; i < 4; ++i) {
-        rotated_x[i] = cosine * local_x[i] + sine * local_z[i];
-        rotated_z[i] = cosine * local_z[i] - sine * local_x[i];
-    }
-#define DRAW_AREA_BOX_EDGE(a, b, y0, y1)                                                                               \
-    AiRndrLine3dDbg(position->x + rotated_x[a], y0, position->z + rotated_z[a], position->x + rotated_x[b], y1,        \
-                    position->z + rotated_z[b], colour)
-    DRAW_AREA_BOX_EDGE(0, 1, position->y, position->y);
-    DRAW_AREA_BOX_EDGE(1, 2, position->y, position->y);
-    DRAW_AREA_BOX_EDGE(2, 3, position->y, position->y);
-    DRAW_AREA_BOX_EDGE(3, 0, position->y, position->y);
-    DRAW_AREA_BOX_EDGE(0, 0, position->y, position->y + size->y);
-    DRAW_AREA_BOX_EDGE(1, 1, position->y, position->y + size->y);
-    DRAW_AREA_BOX_EDGE(2, 2, position->y, position->y + size->y);
-    DRAW_AREA_BOX_EDGE(3, 3, position->y, position->y + size->y);
-    DRAW_AREA_BOX_EDGE(0, 1, position->y + size->y, position->y + size->y);
-    DRAW_AREA_BOX_EDGE(1, 2, position->y + size->y, position->y + size->y);
-    DRAW_AREA_BOX_EDGE(2, 3, position->y + size->y, position->y + size->y);
-    DRAW_AREA_BOX_EDGE(3, 0, position->y + size->y, position->y + size->y);
-#undef DRAW_AREA_BOX_EDGE
-}
+void DrawAreaBox(nuvec_s *position, nuvec_s *size, i32 rotation, i32 colour);
 
 void DrawBox_Now(_vuv_s *, _vuv_s *, i32, i32) {
 }
 
 extern "C" {
-    f32 aiEditor_DrawYOffset = 0.25f;
+extern f32 aiEditor_DrawYOffset;
     f32 aiEditor_LocatorWidth = 0.25f;
     void AiRndrLine3d(NURND_VERTEX3D *, NUMTL *, NUMTX *);
 }
 
-void DrawLocator(nuvec_s *position, float radius, i32 rotation, i32 colour) {
-    NURND_VERTEX3D vertices[2];
-    vertices[0].colour = colour;
-    vertices[1].colour = colour;
-    NUVEC centre = *position;
-    centre.y += aiEditor_DrawYOffset;
-    NUVEC axis = {radius, 0.0f, 0.0f};
-    NuVecRotateY(&axis, &axis, rotation);
-    NuVecAdd(&vertices[0].position, &centre, &axis);
-    NuVecSub(&vertices[1].position, &centre, &axis);
-    AiRndrLine3d(vertices, NULL, NULL);
-    vertices[0].position.x = centre.x;
-    vertices[1].position.x = centre.x;
-    vertices[0].position.y = centre.y - radius;
-    vertices[0].position.z = centre.z;
-    vertices[1].position.z = centre.z;
-    vertices[1].position.y = centre.y + radius;
-    AiRndrLine3d(vertices, NULL, NULL);
-    axis.x = 0.0f;
-    axis.z = radius;
-    axis.y = 0.0f;
-    NuVecRotateY(&axis, &axis, rotation);
-    NuVecAdd(&vertices[0].position, &centre, &axis);
-    NuVecSub(&vertices[1].position, &centre, &axis);
-    AiRndrLine3d(vertices, NULL, NULL);
-    NUVEC arrow = {-axis.z * 0.2f, 0.0f, axis.x * 0.2f};
-    NuVecAdd(&vertices[1].position, &centre, &arrow);
-    AiRndrLine3d(vertices, NULL, NULL);
-    NuVecSub(&vertices[1].position, &centre, &arrow);
-    AiRndrLine3d(vertices, NULL, NULL);
-}
+void DrawLocator(nuvec_s *position, float radius, i32 rotation, i32 colour);
 
 void Draw_LOADED() {
     MenuSmartTextEx(apitxt_GAMELOADED, 0.0f, -0.4f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, MENUNORMALR,
@@ -1662,9 +1553,7 @@ void Draw_LOADFAILED() {
                     MENUNORMALG, MENUNORMALB, 1.5f, 3, NULL, 0, MenuA);
 }
 
-void DrawAreaCylinder(nuvec_s *centre, nuvec_s *size, i32 colour) {
-    LocaledbitsDrawSolidCircleXY(centre, NuFmin(size->x, size->z), centre->y, centre->y + size->y, colour, 0, 16);
-}
+void DrawAreaCylinder(nuvec_s *centre, nuvec_s *size, i32 colour);
 
 void DrawCameraTarget(nuvec_s *) {
 }

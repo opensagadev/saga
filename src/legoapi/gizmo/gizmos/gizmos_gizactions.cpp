@@ -30,20 +30,7 @@
 #include "legoapi/render/fx/parts.h"
 
 i32 Action_SetState(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char **params, i32 param_count,
-                    i32 is_first_time, float) {
-    if (is_first_time == 0 || param_count == 0) {
-        return 0;
-    }
-
-    processor->next_state = AIStateFind(params[0], processor->script);
-    processor->unknown_flag_4 = 0;
-    for (i32 param_index = 1; param_index < param_count; ++param_index) {
-        if (NuStrICmp(params[param_index], "KeepBlockedMessages") == 0) {
-            processor->unknown_flag_4 = 1;
-        }
-    }
-    return 0;
-}
+                    i32 is_first_time, float);
 
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 void AISysGetPathPos2(AISYS_s *, NUVEC *, AIPATHINFO_s *, NUVEC *, AIPATH_s *, i32);
@@ -367,32 +354,7 @@ i32 Action_PlayCutScene(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **par
 }
 
 i32 Action_FollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
-                        i32 first_time, float) {
-    if (packet == NULL) {
-        return 1;
-    }
-
-    if (first_time != 0) {
-        for (i32 index = 0; index < param_count; ++index) {
-            if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[index], &packet->goal_speed_mode) != 0) {
-                continue;
-            }
-            if (NuStrICmp(params[index], "ignore_radius") == 0) {
-                processor->action_data_1 |= 2;
-            } else if (NuStrICmp(params[index], "can_go_off_path") == 0) {
-                processor->action_data_1 |= 1;
-            } else {
-                packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[index]);
-            }
-        }
-    }
-
-    if (sys->player_1 != NULL && sys->player_1->ai != NULL) {
-        FollowAPIObject(&packet->owner->apiobj, sys->player_1, processor->action_data_1,
-                        packet->movement_instruction_parameter);
-    }
-    return 0;
-}
+                        i32 first_time, float);
 
 i32 Action_SetVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params, i32 param_count, i32 first_time,
                          float) {
@@ -1156,13 +1118,7 @@ i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *pac
 }
 
 namespace {
-    struct GizmosAIRegistryCallbacks {
-        GizmosAIRegistryCallbacks() {
-            lego_aiactiondefs[LEGO_AI_ACTION_RELEASE_LOCATOR].eval_fn = Action_ReleaseLocator;
-            lego_aiactiondefs[LEGO_AI_ACTION_ASSIGN_LOCATOR].eval_fn = Action_AssignLocatorInSet;
-            lego_aiactiondefs[LEGO_AI_ACTION_GET_LOCATOR_FROM_SET].eval_fn = Action_GetLocatorFromSet;
-        }
-    };
+#include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
 
     GizmosAIRegistryCallbacks gizmos_ai_registry_callbacks;
 } // namespace

@@ -279,18 +279,7 @@ void ComboHitFrame(GameObject_s *object, i32 damage) {
     BlockSfx(object);
 }
 
-i32 IsFacingTarget(nuvec_s *first, nuvec_s *second, i32 facing_angle, i32 arc_degrees) {
-    const i32 arc = (arc_degrees << 15) / 360;
-    NUVEC direction;
-    NuVecSub(&direction, first, second);
-
-    i32 angle_difference = (NuAtan2D(direction.x, direction.z) - facing_angle) & 0xffff;
-    if (angle_difference >= 0x8000)
-        angle_difference -= 0x10000;
-    angle_difference = abs(angle_difference);
-
-    return arc > angle_difference;
-}
+i32 IsFacingTarget(nuvec_s *first, nuvec_s *second, i32 facing_angle, i32 arc_degrees);
 
 void ComboRotateCode(GameObject_s *object, i32 action_held) {
     if (object->character_context != 9) {

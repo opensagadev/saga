@@ -1637,33 +1637,32 @@ extern "C" {
     f32 default_min_t_respawn;
     f32 default_max_t_respawn;
 
-    CHARACTERNAMEFN *LevelCharacterNameFn;
-    CHARACTERNAMEFN *SpecialRouteCharacterNameFn;
-    CHARACTERGLOBALIDFN *LevelCharacterGlobalIDFn;
-    GLOBALCHARACTERNAMEFN *GlobalCharacterNameFn;
-    CHARACTERHGOBJFN *GlobalCharacterHGobjFn;
-    CHARACTERRENDERFN *GlobalCharacterRenderFn;
-    CHARACTERGOALSPEEDFN *GetCharacterGoalSpeedFn;
-    CHARACTERTYPEIDFN *LevelCharacterTypeIDFn;
+extern CHARACTERNAMEFN * LevelCharacterNameFn;
+extern CHARACTERNAMEFN * SpecialRouteCharacterNameFn;
+extern CHARACTERGLOBALIDFN * LevelCharacterGlobalIDFn;
+extern GLOBALCHARACTERNAMEFN * GlobalCharacterNameFn;
+extern CHARACTERHGOBJFN * GlobalCharacterHGobjFn;
+extern CHARACTERRENDERFN * GlobalCharacterRenderFn;
+extern CHARACTERGOALSPEEDFN * GetCharacterGoalSpeedFn;
+extern CHARACTERTYPEIDFN * LevelCharacterTypeIDFn;
 
-    AICHARACTERTYPEID *GlobalCharacterTypeIDFn;
-    AISPECIALROUTECHARACTERTYPEID *SpecialRouteCharacterTypeIDFn;
-    AICHARACTERDISTANCE *GetViewRangeFn;
-    AICHARACTERDISTANCE *GetHearDistanceFn;
-    AICHARACTERDISTANCE *GetMaxViewHeightFn;
-    AICHARACTERDISTANCE *GetMinViewHeightFn;
-    GAMEAILOAD *GameAILoadFn;
-    AIACTIONPARSESPEED *AIActionParseSpeedFn;
-    AIBIGJUMPTODESTINATION *AIBigJumpToDestinationFn;
-    AIRESPAWNONPATH *AIRespawnOnPathFn;
-    AICLEARCREATURES *ClearAICreaturesFn;
-    APIOBJECTFROMOBJID *APIOBJECTFromObjIDFn;
-    AIFINDALTERNATIVESPECIALOBJECT *FindAlternativeSpecialObjectFn;
+extern AICHARACTERTYPEID * GlobalCharacterTypeIDFn;
+extern AISPECIALROUTECHARACTERTYPEID * SpecialRouteCharacterTypeIDFn;
+extern AICHARACTERDISTANCE * GetViewRangeFn;
+extern AICHARACTERDISTANCE * GetHearDistanceFn;
+extern AICHARACTERDISTANCE * GetMaxViewHeightFn;
+extern AICHARACTERDISTANCE * GetMinViewHeightFn;
+extern GAMEAILOAD * GameAILoadFn;
+extern AIACTIONPARSESPEED * AIActionParseSpeedFn;
+extern AIBIGJUMPTODESTINATION * AIBigJumpToDestinationFn;
+extern AIRESPAWNONPATH * AIRespawnOnPathFn;
+extern AICLEARCREATURES * ClearAICreaturesFn;
+extern APIOBJECTFROMOBJID * APIOBJECTFromObjIDFn;
+extern AIFINDALTERNATIVESPECIALOBJECT * FindAlternativeSpecialObjectFn;
     AIGETNAMEDAPIOBJECT *GetNamedAPIObjectFn;
-    AIGETCREATUREORIGIN *GetAICreatureOriginFn;
+extern AIGETCREATUREORIGIN * GetAICreatureOriginFn;
 }
 
-static SCRIPT_ERROR_LEVEL ScriptErrorLevel;
 
 // The special-route list reserves the first ten ids for suit characters.  The
 // remaining ids enumerate the current story list while omitting variants that
@@ -2960,105 +2959,53 @@ void GameAIProcess() {
 }
 
 extern "C" {
-    void InitFn_LevelCharacterTypeID(CHARACTERTYPEIDFN *function) {
-        LevelCharacterTypeIDFn = function;
-        SpecialRouteCharacterTypeIDFn = function;
-    }
+void InitFn_LevelCharacterTypeID(CHARACTERTYPEIDFN *function);
 
-    void InitFn_SpecialRouteCharacterTypeID(CHARACTERTYPEIDFN *function) {
-        SpecialRouteCharacterTypeIDFn = function;
-    }
+void InitFn_SpecialRouteCharacterTypeID(CHARACTERTYPEIDFN *function);
 
-    void InitFn_LevelCharacterName(CHARACTERNAMEFN *function) {
-        LevelCharacterNameFn = function;
-        SpecialRouteCharacterNameFn = function;
-    }
+void InitFn_LevelCharacterName(CHARACTERNAMEFN *function);
 
-    void InitFn_SpecialRouteCharacterName(CHARACTERNAMEFN *function) {
-        SpecialRouteCharacterNameFn = function;
-    }
+void InitFn_SpecialRouteCharacterName(CHARACTERNAMEFN *function);
 
-    void InitFn_LevelCharacterGlobalID(CHARACTERGLOBALIDFN *function) {
-        LevelCharacterGlobalIDFn = function;
-    }
+void InitFn_LevelCharacterGlobalID(CHARACTERGLOBALIDFN *function);
 
-    void InitFn_GlobalCharacterTypeID(CHARACTERTYPEIDFN *function) {
-        GlobalCharacterTypeIDFn = function;
-    }
+void InitFn_GlobalCharacterTypeID(CHARACTERTYPEIDFN *function);
 
-    void InitFn_GlobalCharacterName(GLOBALCHARACTERNAMEFN *function) {
-        GlobalCharacterNameFn = function;
-    }
+void InitFn_GlobalCharacterName(GLOBALCHARACTERNAMEFN *function);
 
-    void InitFn_GlobalCharacterRender(CHARACTERRENDERFN *function) {
-        GlobalCharacterRenderFn = function;
-    }
+void InitFn_GlobalCharacterRender(CHARACTERRENDERFN *function);
 
-    void InitFn_GlobalCharacterHGobj(CHARACTERHGOBJFN *function) {
-        GlobalCharacterHGobjFn = function;
-    }
+void InitFn_GlobalCharacterHGobj(CHARACTERHGOBJFN *function);
 
-    void InitFn_ClearAICreatures(AICLEARCREATURES *function) {
-        ClearAICreaturesFn = function;
-    }
+void InitFn_ClearAICreatures(AICLEARCREATURES *function);
 
-    void InitFn_GetCharacterGoalSpeedFn(CHARACTERGOALSPEEDFN *function) {
-        GetCharacterGoalSpeedFn = function;
-    }
+void InitFn_GetCharacterGoalSpeedFn(CHARACTERGOALSPEEDFN *function);
 
-    void InitFn_GetViewRange(CHARACTERDISTANCEFN *function) {
-        GetViewRangeFn = function;
-    }
+void InitFn_GetViewRange(CHARACTERDISTANCEFN *function);
 
-    void InitFn_GetHearDistance(CHARACTERDISTANCEFN *function) {
-        GetHearDistanceFn = function;
-    }
+void InitFn_GetHearDistance(CHARACTERDISTANCEFN *function);
 
-    void InitFn_GlobalGetMaxViewHeight(CHARACTERDISTANCEFN *function) {
-        GetMaxViewHeightFn = function;
-    }
+void InitFn_GlobalGetMaxViewHeight(CHARACTERDISTANCEFN *function);
 
-    void InitFn_GlobalGetMinViewHeight(CHARACTERDISTANCEFN *function) {
-        GetMinViewHeightFn = function;
-    }
+void InitFn_GlobalGetMinViewHeight(CHARACTERDISTANCEFN *function);
 
-    void InitFn_GameAILoad(GAMEAILOAD *function) {
-        GameAILoadFn = function;
-    }
+void InitFn_GameAILoad(GAMEAILOAD *function);
 
-    void InitFn_AIActionParseSpeed(AIACTIONPARSESPEED *function) {
-        AIActionParseSpeedFn = function;
-    }
+void InitFn_AIActionParseSpeed(AIACTIONPARSESPEED *function);
 
-    void InitFn_AIRespawnOnPath(AIRESPAWNONPATH *function) {
-        AIRespawnOnPathFn = function;
-    }
+void InitFn_AIRespawnOnPath(AIRESPAWNONPATH *function);
 
-    void InitFn_AIBigJumpToDestination(AIBIGJUMPTODESTINATION *function) {
-        AIBigJumpToDestinationFn = function;
-    }
+void InitFn_AIBigJumpToDestination(AIBIGJUMPTODESTINATION *function);
 
-    void InitFn_FindAlternativeSpecialObjectFn(AIFINDALTERNATIVESPECIALOBJECT *function) {
-        FindAlternativeSpecialObjectFn = function;
-    }
+void InitFn_FindAlternativeSpecialObjectFn(AIFINDALTERNATIVESPECIALOBJECT *function);
 
-    void InitFn_APIOBJECTFromObjIDFn(APIOBJECTFROMOBJID *function) {
-        APIOBJECTFromObjIDFn = function;
-    }
+void InitFn_APIOBJECTFromObjIDFn(APIOBJECTFROMOBJID *function);
 
-    void InitFn_GetNamedAPIObject(AIGETNAMEDAPIOBJECT *function) {
-        GetNamedAPIObjectFn = function;
-    }
+void InitFn_GetNamedAPIObject(AIGETNAMEDAPIOBJECT *function);
 
-    void InitFn_GetAICreatureOrigin(AIGETCREATUREORIGIN *function) {
-        GetAICreatureOriginFn = function;
-    }
+void InitFn_GetAICreatureOrigin(AIGETCREATUREORIGIN *function);
 
-    void SetScriptErrorLevel(SCRIPT_ERROR_LEVEL level) {
-        if (level < SCRIPT_ERROR_LEVEL_COUNT) {
-            ScriptErrorLevel = level;
-        }
-    }
+void SetScriptErrorLevel(SCRIPT_ERROR_LEVEL level);
 }
 
 extern f32 OFFSCREEN_CATCHUP_TIME;

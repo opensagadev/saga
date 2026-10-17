@@ -23,16 +23,9 @@ build --per_file_copt=^src/nu2api/nu3d/android/nurain_android\.c$@-x,c++,-std=gn
 build --per_file_copt=^src/nu2api/nucore/android/nutime_android\.c$@-x,c++,-std=gnu++11
 # The original nuthread.c also uses C++ linkage and VuVec constructors.
 build --per_file_copt=^src/nu2api/nucore/android/nuthread\.c$@-x,c++,-std=gnu++11
-# Editor path callbacks in the original use optimized frameless PIC call sequences.
-build:target --per_file_copt=^src/editor/edpath\.cpp$@-O2
-build:target --per_file_copt=^src/editor/edpath\.cpp$@-ftree-vectorize
-# Area editor pool and menu routines use optimized PIC control flow.
-build:target --per_file_copt=^src/editor/area_editor\.cpp$@-O2
 # Route, creature, and antinode editor callbacks use optimized frameless PIC control flow.
 build:target --per_file_copt=^src/editor/edtoolsall\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edpartall\.cpp$@-O2
-# Locator pool initialization and draw loops in the original use -O3 vectorization.
-build:target --per_file_copt=^src/editor/locator_editor\.cpp$@-O3
 # Recovered Android entry points; -O3 also reproduces the static initializer.
 build:target --per_file_copt=^src/java/android\.cpp$@-O3
 # Original OBB lookup uses optimized inlined strlen/strcat and omits leaf frames.
@@ -56,9 +49,6 @@ build:target --per_file_copt=^src/gamelib/util/Transporter\.cpp$@-O3
 # APK constructor/CreateNuFile and SetCurrentDir bodies apart from relocation.
 build:target --per_file_copt=^src/nu2api/nufile/nufiledevice\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nufile/NuFileDeviceAndroidAPK\.cpp$@-O3
-build:target --per_file_copt=^src/gameapi/ai/aisys/aiscript\.cpp$@-O3
-build:target --per_file_copt=^src/gameapi/ai/aisys/aistate\.cpp$@-O3
-build:target --per_file_copt=^src/gameapi/ai/aisys/aisys\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/ai/aisys/gameaiscript\.cpp$@-O3
 # Teleport parser callbacks in the target use optimized leaf/control-flow code.
 build:target --per_file_copt=^src/legoapi/items/objects/grabber\.cpp$@-O3
@@ -174,7 +164,6 @@ build:target --per_file_copt=^src/legoapi/actions/movement/dropinout\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/ai/game/creature\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/ai/game/creature\.cpp$@-ftree-vectorize
 build:target --per_file_copt=^src/legoapi/ai/game/gameantinode\.cpp$@-O3
-build:target --per_file_copt=^src/editor/antinode_editor\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/ai/core/ai_sys_stubs\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/ai/core/ai_sys_stubs\.cpp$@-fno-ipa-sra
 build:target --per_file_copt=^src/legoapi/ai/core/aisysall\.cpp$@-O3
@@ -449,7 +438,6 @@ build:target --per_file_copt=^src/MechInputTouch/MechInputTouchBonusCavalryContr
 build:target --per_file_copt=^src/MechInputTouch/MechSystems\.cpp$@-O3
 build:target --per_file_copt=^src/MechInputTouch/MechAutofireAddon\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechTouchUIElements\.cpp$@-O3
-build:target --per_file_copt=^src/editor/aieditor\.cpp$@-O3
 build:target --per_file_copt=^src/editor/edlevelall\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edptlall\.cpp$@-O2
 build:target --per_file_copt=^src/gameapi/edtools/edtoolsall\.cpp$@-O3
@@ -546,11 +534,8 @@ build:target --per_file_copt=^src/MechInputTouch/MechObjectInterface\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/misc/legoapi_status\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/objects/things\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/misc/supportall_stubs\.cpp$@-O2
-build:target --per_file_copt=^src/legoapi/actions/character/starwars\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/misc/stream\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/characters/motion/chris_stubs\.cpp$@-O2
-build:target --per_file_copt=^src/editor/creature_editor\.cpp$@-O0
-build:target --per_file_copt=^src/editor/creature_editor\.cpp$@-fomit-frame-pointer
 build --per_file_copt=^src/nu2api/nucore/nucore_includes\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/nucore/android/nuerror_android\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/numath/numath_includes\.c$@-x,c++,-std=gnu++11

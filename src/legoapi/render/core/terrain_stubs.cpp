@@ -32,7 +32,7 @@ i16 TerrImpact;
 i32 terrhitflags;
 i32 TERRAINMASK_NONWEAPON = 0x20;
 i32 TERRAINMASK_NONDROID;
-i32 geom;
+extern i32 geom;
 NUVEC TerrImpactPos;
 NUVEC TerrImpactNormal;
 NUVEC ShadNorm;
@@ -197,24 +197,13 @@ void Particles_Load(WORLDINFO *world, char **debris_name, i32 count, i32 flags) 
 
 extern "C" {
 
-    void AITerrInit(void) {
-    }
+void AITerrInit(void);
 
-    f32 AITerrShadow(NUVEC *position, f32 height_above, f32 height_below, i32 terrain_mask) {
-        f32 height = 0.0f;
-        if (geom == 0)
-            height = NewShadow(position, height_above, height_below, terrain_mask);
-        return height;
-    }
+f32 AITerrShadow(NUVEC *position, f32 height_above, f32 height_below, i32 terrain_mask);
 
     i32 NewShadowOnPlatform(void);
 
-    i32 AITerrShadowOnPlatform(void) {
-        i32 platform = -1;
-        if (geom == 0)
-            platform = NewShadowOnPlatform();
-        return platform;
-    }
+i32 AITerrShadowOnPlatform(void);
 
 i32 CheckForPlatInst(i32 instance);
 

@@ -44,8 +44,6 @@ _ENGINE_SRCS = _ENGINE_ROOT_SRCS + glob(
     [directory + "/**/*.c" for directory in _ENGINE_DIRS] +
     [directory + "/**/*.cpp" for directory in _ENGINE_DIRS],
     exclude = [
-        "legoapi/ai/core/aipathbuild.cpp",
-        "gameapi/ai/aisys/aisys.cpp",
         "gameapi/edtools/edanimall.cpp",
         "gameapi/edtools/edmenucallbacks.cpp",
         "gameapi/edtools/edptlall.cpp",
@@ -127,8 +125,6 @@ _PUBLIC_HEADERS = glob(
 _TEXTUAL_HEADERS = [
     "nu2api/nu3d/nudynamiclight.cpp",
     "nu2api/nu3d/nupostfilter_generic.cpp",
-    "legoapi/ai/core/aipathbuild.cpp",
-    "gameapi/ai/aisys/aisys.cpp",
     "nu2api/nu3d/android/nupostfilter.cpp",
     "gameapi/edtools/edanimall.cpp",
     "gameapi/edtools/edmenucallbacks.cpp",

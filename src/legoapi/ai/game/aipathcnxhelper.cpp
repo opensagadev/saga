@@ -32,72 +32,13 @@ extern "C" {
     void LocaledbitsDrawSolidCircleXY(NUVEC *, f32, f32, f32, u32, i32, i32);
 }
 
-void AIPathCalcExtents(AIPATH *path) {
-    const f32 max_float = 3.402823466e+38f;
-    path->bounds_min.x = max_float;
-    path->bounds_min.y = max_float;
-    path->bounds_min.z = max_float;
-    path->bounds_max.x = -max_float;
-    path->bounds_max.y = -max_float;
-    path->bounds_max.z = -max_float;
+void AIPathCalcExtents(AIPATH *path);
 
-    for (i32 node_index = 0; node_index < path->node_count; ++node_index) {
-        AIPATHNODE &node = path->nodes[node_index];
-        const f32 x = node.position.x;
-        const f32 radius = node.radius;
-        const f32 min_x = x - radius;
-        const f32 min_z = node.position.z - radius;
-        const f32 min_height = node.min_height;
-
-        if (min_x < path->bounds_min.x) {
-            path->bounds_min.x = min_x;
-        }
-        if (min_height < path->bounds_min.y) {
-            path->bounds_min.y = min_height;
-        }
-        if (min_z < path->bounds_min.z) {
-            path->bounds_min.z = min_z;
-        }
-        const f32 max_x = x + radius;
-        const f32 max_z = node.position.z + radius;
-        if (max_x > path->bounds_max.x) {
-            path->bounds_max.x = max_x;
-        }
-        if (node.max_height > path->bounds_max.y) {
-            path->bounds_max.y = node.max_height;
-        }
-        if (max_z > path->bounds_max.z) {
-            path->bounds_max.z = max_z;
-        }
-    }
-
-    NUVEC margin;
-    NuVecSub(&margin, &path->bounds_max, &path->bounds_min);
-    NuVecScale(&margin, &margin, 0.1f);
-    NuVecSub(&path->bounds_min, &path->bounds_min, &margin);
-    NuVecAdd(&path->bounds_max, &path->bounds_max, &margin);
-}
-
-i32 AIPathCheckExtents(AIPATH *path, NUVEC *position) {
-    if (path->bounds_min.x > position->x || path->bounds_min.y > position->y || path->bounds_min.z > position->z ||
-        position->x > path->bounds_max.x || position->y > path->bounds_max.y) {
-        return 0;
-    }
-    return !(position->z > path->bounds_max.z);
-}
+i32 AIPathCheckExtents(AIPATH *path, NUVEC *position);
 
 __attribute__((force_align_arg_pointer)) void pathEditorDrawNode(nuvec_s *position, float radius, float lower_height,
                                                                  float upper_height, u32 colour, numtl_s *material,
-                                                                 i32 segments, i32 solid) {
-    NUVEC centre = {position->x, position->y + aiEditor_DrawYOffset, position->z};
-    if (solid != 0) {
-        LocaledbitsDrawSolidCircleXY(&centre, radius, lower_height, upper_height, colour,
-                                     static_cast<i32>(reinterpret_cast<uintptr_t>(material)), segments);
-    } else {
-        LocaledbitsDrawCircleXY(&centre, radius, colour, static_cast<i32>(reinterpret_cast<uintptr_t>(material)),
-                                segments);
-    }
-}
+                                                                 i32 segments, i32 solid);
 
 void (*AIPathCnxHelperSysInitFn)(WORLDINFO_s *) = NULL;
 
@@ -375,34 +316,7 @@ void AIPathCnxControllerDestroy(AIPATHCNXCONTROLSYS_s *system, AIPATHCNXCONTROLL
     NuLinkedListAppend(&system->available_controllers, &controller->links);
 }
 
-void AIPathCnxSetTemporaryBlock(AIPATH_s *path, char *from_name, char *to_name, i32 blocked) {
-    if (from_name == NULL || path == NULL || to_name == NULL) {
-        return;
-    }
-    AIPATHNODE *from = AIPathFindNode(NULL, path, from_name);
-    AIPATHNODE *to = AIPathFindNode(NULL, path, to_name);
-    if (to == NULL || from == NULL) {
-        return;
-    }
-    const i32 to_index = to - path->nodes;
-    for (i32 index = 0; index < from->connection_count; ++index) {
-        AIPATHCNX *connection = from->connections[index];
-        i32 direction;
-        if (connection->node_indices[0] == to_index) {
-            direction = 1;
-        } else if (connection->node_indices[1] == to_index) {
-            direction = 0;
-        } else {
-            continue;
-        }
-        if (blocked != 0) {
-            connection->traversal_flags[direction] |= 0x80000000u;
-        } else {
-            connection->traversal_flags[direction] &= 0x7fffffffu;
-        }
-        return;
-    }
-}
+void AIPathCnxSetTemporaryBlock(AIPATH_s *path, char *from_name, char *to_name, i32 blocked);
 
 AIPATHCNXHELPER_s *AIPathCnxHelperSys_AddHelper(AIPATHCNXHELPERSYS_s *system, AIPATHCNX_s *connection, u8 direction,
                                                 void *target, u8 type) {
