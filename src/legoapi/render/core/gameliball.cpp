@@ -6862,7 +6862,7 @@ static void edptlcbDrawflagMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     edptl_drawflag_menu->y = parent->y + 40;
 }
 
-static void edptlcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+static __attribute__((optimize("O2", "tree-vectorize"))) void edptlcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     edptl_switchtype_menu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, edptlcbCancelSwitchTypeMenu, "Switch Type");
     if (__builtin_expect(edptl_switchtype_menu != NULL, 1)) {
@@ -10178,7 +10178,7 @@ static void cbCancelChangeNameMenu(eduimenu_s *menu, eduimenu_s *) {
     }
 }
 
-void CRC_Init(VARIPTR *buffer_start) {
+__attribute__((optimize("O2"))) void CRC_Init(VARIPTR *buffer_start) {
     if (g_crc_initialised) {
         return;
     }
