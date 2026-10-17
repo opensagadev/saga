@@ -65,31 +65,7 @@ extern i16 id_GAMORREANGUARD, id_PRINCESSLEIASLAVE, id_LAMASU, id_TAUNWE;
 extern i16 id_PENGUIN, id_UMBRELLA, id_GLIDEPACK;
 extern f32 hub_jabbaawake;
 
-enum CHARACTER_ANIMATION : i16 {
-    CHARACTER_ANIMATION_WALK = 0,
-    CHARACTER_ANIMATION_IDLE = 1,
-    CHARACTER_ANIMATION_RUN = 3,
-    CHARACTER_ANIMATION_TIPTOE = 4,
-    CHARACTER_ANIMATION_FALL = 5,
-    CHARACTER_ANIMATION_WEAPON_IDLE = 11,
-    CHARACTER_ANIMATION_ALT_IDLE = 25,
-    CHARACTER_ANIMATION_SABER_RUN = 23,
-    CHARACTER_ANIMATION_ALT_WEAPON_IDLE = 39,
-    CHARACTER_ANIMATION_FALL_VARIANT_40 = 40,
-    CHARACTER_ANIMATION_SABER_TIPTOE = 63,
-    CHARACTER_ANIMATION_SABER_WALK = 64,
-    CHARACTER_ANIMATION_FALL_VARIANT_75 = 75,
-    CHARACTER_ANIMATION_FALL_VARIANT_76 = 76,
-    CHARACTER_ANIMATION_BACKWARDS = 80,
-    CHARACTER_ANIMATION_EXTRA_TIPTOE = 113,
-    CHARACTER_ANIMATION_EXTRA_WALK = 114,
-    CHARACTER_ANIMATION_EXTRA_RUN = 115,
-    CHARACTER_ANIMATION_EXTRA_FALL = 116,
-    CHARACTER_ANIMATION_EXTRA_IDLE = 117,
-    CHARACTER_ANIMATION_SUIT_TIPTOE = 198,
-    CHARACTER_ANIMATION_SUIT_WALK = 199,
-    CHARACTER_ANIMATION_SUIT_RUN = 200,
-};
+#include "legoapi/characters/motion/gameanim_types.h"
 
 static void MoveAnim_Check(GameObject_s *object) {
     if (GetAnimBlendMode() == 1)
@@ -2358,15 +2334,7 @@ i32 GetAnimDirection(nuinstanim_s *animation) {
     return animation->tfactor < 0.0f ? 1 : 0;
 }
 
-i32 FindTexAnimFromMtl(nugscn_s *scene, numtl_s *material) {
-    nutexanim_s *animations = static_cast<nutexanim_s *>(scene->texture_anims);
-    for (i32 animation_index = 0; animation_index < scene->num_texture_anims; ++animation_index) {
-        if (animations[animation_index].material == material) {
-            return animation_index + 1;
-        }
-    }
-    return 0;
-}
+i32 FindTexAnimFromMtl(nugscn_s *scene, numtl_s *material);
 
 static char **TexAnimList;
 

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 83.08008,
+    "fuzzy_match_percent": 83.08599,
     "total_code": "4722419",
     "matched_code": "653201",
     "matched_code_percent": 13.831915,
@@ -33327,21 +33327,6 @@
       ]
     },
     {
-      "name": "legoapi/ai/core/ai_sys_stubs.cpp.o",
-      "source": "src/legoapi/ai/core/ai_sys_stubs.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/ai_sys_stubs.o",
-      "functions": [
-        {
-          "name": "CalculateLocatorDirection",
-          "demangled_name": "CalculateLocatorDirection",
-          "address": 4419264,
-          "offset": 3529296,
-          "size": 305,
-          "match_percent": 99.96774
-        }
-      ]
-    },
-    {
       "name": "legoapi/ai/core/aisysall.cpp.o",
       "source": "src/legoapi/ai/core/aisysall.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/aisysall.o",
@@ -39583,7 +39568,7 @@
           "address": 4601712,
           "offset": 3711744,
           "size": 5542,
-          "match_percent": 96.403656
+          "match_percent": 96.39985
         },
         {
           "name": "_ZL22CC_set_timebaseupdate2P8nufpar_s",
@@ -42470,14 +42455,6 @@
           "match_percent": 99.62264
         },
         {
-          "name": "_Z18FindTexAnimFromMtlP8nugscn_sP7numtl_s",
-          "demangled_name": "FindTexAnimFromMtl(nugscn_s*, numtl_s*)",
-          "address": 4418816,
-          "offset": 3528848,
-          "size": 68,
-          "match_percent": 93.10345
-        },
-        {
           "name": "_Z8EvalAnimP12nuhspecial_sfP7numtx_si",
           "demangled_name": "EvalAnim(nuhspecial_s*, float, numtx_s*, int)",
           "address": 4799696,
@@ -42659,7 +42636,7 @@
           "address": 4885536,
           "offset": 3995568,
           "size": 850,
-          "match_percent": 93.91747
+          "match_percent": 93.65048
         },
         {
           "name": "_Z28GameAnimSet_IsAnimationResetP13GAMEANIMSET_s",
@@ -45252,318 +45229,6 @@
           "match_percent": 99.45238
         },
         {
-          "name": "_ZL9copyAnimsP13NUGCUTSCENE_sS0_",
-          "demangled_name": "copyAnims(NUGCUTSCENE_s*, NUGCUTSCENE_s*)",
-          "address": 4401120,
-          "offset": 3511152,
-          "size": 356,
-          "match_percent": 91.33562
-        },
-        {
-          "name": "_ZL26instNuGCutTriggerSysUpdateP17instNUGCUTSCENE_sf",
-          "demangled_name": "instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s*, float)",
-          "address": 4401488,
-          "offset": 3511520,
-          "size": 184,
-          "match_percent": 90.3
-        },
-        {
-          "name": "_ZL23instNuGCutSceneClipTestP17instNUGCUTSCENE_s",
-          "demangled_name": "instNuGCutSceneClipTest(instNUGCUTSCENE_s*)",
-          "address": 4401680,
-          "offset": 3511712,
-          "size": 194,
-          "match_percent": 78.85714
-        },
-        {
-          "name": "_ZL23instNuGCutLocatorSysEndP22instNUGCUTLOCATORSYS_sP18NUGCUTLOCATORSYS_sf.isra.8",
-          "demangled_name": "instNuGCutLocatorSysEnd(instNUGCUTLOCATORSYS_s*, NUGCUTLOCATORSYS_s*, float) [clone .isra.8]",
-          "address": 4401888,
-          "offset": 3511920,
-          "size": 371,
-          "match_percent": 96.63367
-        },
-        {
-          "name": "_ZL18NuGCutSceneFixPtrsP13NUGCUTSCENE_sii.constprop.43",
-          "demangled_name": "NuGCutSceneFixPtrs(NUGCUTSCENE_s*, int, int) [clone .constprop.43]",
-          "address": 4402272,
-          "offset": 3512304,
-          "size": 736,
-          "match_percent": 67.13525
-        },
-        {
-          "name": "_ZL18NuGCutSceneFixPtrsP13NUGCUTSCENE_sii.constprop.44",
-          "demangled_name": "NuGCutSceneFixPtrs(NUGCUTSCENE_s*, int, int) [clone .constprop.44]",
-          "address": 4403008,
-          "offset": 3513040,
-          "size": 1476,
-          "match_percent": 49.86755
-        },
-        {
-          "name": "NuGCutSceneSysBackgroundFlush",
-          "demangled_name": "NuGCutSceneSysBackgroundFlush",
-          "address": 4404496,
-          "offset": 3514528,
-          "size": 26,
-          "match_percent": 99.875
-        },
-        {
-          "name": "NuGCutSceneSysInit",
-          "demangled_name": "NuGCutSceneSysInit",
-          "address": 4404528,
-          "offset": 3514560,
-          "size": 44,
-          "match_percent": 99.75
-        },
-        {
-          "name": "_Z21NuGCutSceneSysInitVfxPFiPKcEPFiiP5VuMtxEPFviEPFviS4_E",
-          "demangled_name": "NuGCutSceneSysInitVfx(int (*)(char const*), int (*)(int, VuMtx*), void (*)(int), void (*)(int, VuMtx*))",
-          "address": 4404576,
-          "offset": 3514608,
-          "size": 60,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z35NuGCutSceneRemapFocusIdToLocaterNumP13NUGCUTSCENE_sP9variptr_u",
-          "demangled_name": "NuGCutSceneRemapFocusIdToLocaterNum(NUGCUTSCENE_s*, variptr_u*)",
-          "address": 4404688,
-          "offset": 3514720,
-          "size": 132,
-          "match_percent": 75.86
-        },
-        {
-          "name": "NuGCutSceneLoad",
-          "demangled_name": "NuGCutSceneLoad",
-          "address": 4404832,
-          "offset": 3514864,
-          "size": 687,
-          "match_percent": 70.86413
-        },
-        {
-          "name": "NuGCutSceneLoadAddr",
-          "demangled_name": "NuGCutSceneLoadAddr",
-          "address": 4405520,
-          "offset": 3515552,
-          "size": 113,
-          "match_percent": 91.97436
-        },
-        {
-          "name": "NuGCutSceneDestroy",
-          "demangled_name": "NuGCutSceneDestroy",
-          "address": 4405648,
-          "offset": 3515680,
-          "size": 50,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuGCutSceneFixUp",
-          "demangled_name": "NuGCutSceneFixUp",
-          "address": 4405712,
-          "offset": 3515744,
-          "size": 954,
-          "match_percent": 66.2972
-        },
-        {
-          "name": "NuGCutSceneFixUpExtra",
-          "demangled_name": "NuGCutSceneFixUpExtra",
-          "address": 4406672,
-          "offset": 3516704,
-          "size": 190,
-          "match_percent": 92.30159
-        },
-        {
-          "name": "NuGCutSceneSysPostBackgroundLoad",
-          "demangled_name": "NuGCutSceneSysPostBackgroundLoad",
-          "address": 4406864,
-          "offset": 3516896,
-          "size": 76,
-          "match_percent": 99.82609
-        },
-        {
-          "name": "PetesHackOfDeath",
-          "demangled_name": "PetesHackOfDeath",
-          "address": 4406944,
-          "offset": 3516976,
-          "size": 26,
-          "match_percent": 99.875
-        },
-        {
-          "name": "instNuGCutSceneCreate",
-          "demangled_name": "instNuGCutSceneCreate",
-          "address": 4406976,
-          "offset": 3517008,
-          "size": 2103,
-          "match_percent": 27.744486
-        },
-        {
-          "name": "instNuGCutSceneReset",
-          "demangled_name": "instNuGCutSceneReset",
-          "address": 4409936,
-          "offset": 3519968,
-          "size": 808,
-          "match_percent": 91.16818
-        },
-        {
-          "name": "instNuGCutSceneStart",
-          "demangled_name": "instNuGCutSceneStart",
-          "address": 4410800,
-          "offset": 3520832,
-          "size": 512,
-          "match_percent": 93.98658
-        },
-        {
-          "name": "instNuGCutScenePause",
-          "demangled_name": "instNuGCutScenePause",
-          "address": 4411584,
-          "offset": 3521616,
-          "size": 34,
-          "match_percent": 100.0
-        },
-        {
-          "name": "instNuGCutSceneFind",
-          "demangled_name": "instNuGCutSceneFind",
-          "address": 4412912,
-          "offset": 3522944,
-          "size": 92,
-          "match_percent": 99.97222
-        },
-        {
-          "name": "_Z12NewCopyAnimsP17instNUGCUTSCENE_s",
-          "demangled_name": "NewCopyAnims(instNUGCUTSCENE_s*)",
-          "address": 4413104,
-          "offset": 3523136,
-          "size": 652,
-          "match_percent": 77.96774
-        },
-        {
-          "name": "NuGCutSceneIsBackgroundLoading",
-          "demangled_name": "NuGCutSceneIsBackgroundLoading",
-          "address": 4413760,
-          "offset": 3523792,
-          "size": 12,
-          "match_percent": 100.0
-        },
-        {
-          "name": "instNuGCutScenePreload",
-          "demangled_name": "instNuGCutScenePreload",
-          "address": 4413776,
-          "offset": 3523808,
-          "size": 44,
-          "match_percent": 100.0
-        },
-        {
-          "name": "instNuGCutSceneServiceLoad",
-          "demangled_name": "instNuGCutSceneServiceLoad",
-          "address": 4413936,
-          "offset": 3523968,
-          "size": 506,
-          "match_percent": 52.796875
-        },
-        {
-          "name": "_ZL22instNuGCutCamSysUpdateP17instNUGCUTSCENE_sf",
-          "demangled_name": "instNuGCutCamSysUpdate(instNUGCUTSCENE_s*, float)",
-          "address": 4415904,
-          "offset": 3525936,
-          "size": 2100,
-          "match_percent": 76.263885
-        },
-        {
-          "name": "_ZL21instNuGCutRigidSysEndP17instNUGCUTSCENE_sf",
-          "demangled_name": "instNuGCutRigidSysEnd(instNUGCUTSCENE_s*, float)",
-          "address": 4421536,
-          "offset": 3531568,
-          "size": 413,
-          "match_percent": 67.91304
-        },
-        {
-          "name": "instNuGCutSceneJumpToEnd",
-          "demangled_name": "instNuGCutSceneJumpToEnd",
-          "address": 4421952,
-          "offset": 3531984,
-          "size": 203,
-          "match_percent": 92.68
-        },
-        {
-          "name": "_Z28instNuGCutSceneEndFirstFrameP17instNUGCUTSCENE_s",
-          "demangled_name": "instNuGCutSceneEndFirstFrame(instNUGCUTSCENE_s*)",
-          "address": 4422160,
-          "offset": 3532192,
-          "size": 640,
-          "match_percent": 83.5977
-        },
-        {
-          "name": "instNuGCutSceneEnd",
-          "demangled_name": "instNuGCutSceneEnd",
-          "address": 4422800,
-          "offset": 3532832,
-          "size": 656,
-          "match_percent": 83.46667
-        },
-        {
-          "name": "instNuGCutSceneDestroy",
-          "demangled_name": "instNuGCutSceneDestroy",
-          "address": 4423456,
-          "offset": 3533488,
-          "size": 223,
-          "match_percent": 85.88158
-        },
-        {
-          "name": "instNuGCutSceneJumpToLastFrame",
-          "demangled_name": "instNuGCutSceneJumpToLastFrame",
-          "address": 4423680,
-          "offset": 3533712,
-          "size": 195,
-          "match_percent": 85.30612
-        },
-        {
-          "name": "_ZL24instNuGCutRigidSysRenderP17instNUGCUTSCENE_sfi",
-          "demangled_name": "instNuGCutRigidSysRender(instNUGCUTSCENE_s*, float, int)",
-          "address": 4430384,
-          "offset": 3540416,
-          "size": 678,
-          "match_percent": 77.33708
-        },
-        {
-          "name": "_ZL24instNuGCutRigidSysUpdateP17instNUGCUTSCENE_sfi",
-          "demangled_name": "instNuGCutRigidSysUpdate(instNUGCUTSCENE_s*, float, int)",
-          "address": 4431072,
-          "offset": 3541104,
-          "size": 580,
-          "match_percent": 85.26752
-        },
-        {
-          "name": "_ZL21instNuGCutSceneUpdateP17instNUGCUTSCENE_siif",
-          "demangled_name": "instNuGCutSceneUpdate(instNUGCUTSCENE_s*, int, int, float)",
-          "address": 4431664,
-          "offset": 3541696,
-          "size": 3581,
-          "match_percent": 65.48784
-        },
-        {
-          "name": "NuGCutSceneSysUpdate",
-          "demangled_name": "NuGCutSceneSysUpdate",
-          "address": 4435248,
-          "offset": 3545280,
-          "size": 196,
-          "match_percent": 80.54717
-        },
-        {
-          "name": "NuGCutSceneSysRender",
-          "demangled_name": "NuGCutSceneSysRender",
-          "address": 4435456,
-          "offset": 3545488,
-          "size": 1013,
-          "match_percent": 78.614815
-        },
-        {
-          "name": "instNuGCutSceneCleanUp",
-          "demangled_name": "instNuGCutSceneCleanUp",
-          "address": 4438912,
-          "offset": 3548944,
-          "size": 594,
-          "match_percent": 76.82123
-        },
-        {
           "name": "_ZL9CS_no_fogP8nufpar_s",
           "demangled_name": "CS_no_fog(nufpar_s*)",
           "address": 4819024,
@@ -45897,7 +45562,7 @@
           "address": 4832848,
           "offset": 3942880,
           "size": 562,
-          "match_percent": 96.31343
+          "match_percent": 96.27612
         },
         {
           "name": "_ZL6CS_sfxP8nufpar_s",
@@ -45913,7 +45578,7 @@
           "address": 4835040,
           "offset": 3945072,
           "size": 2344,
-          "match_percent": 75.48956
+          "match_percent": 75.61798
         }
       ]
     },
@@ -45937,214 +45602,6 @@
           "offset": 2329376,
           "size": 9,
           "match_percent": 100.0
-        },
-        {
-          "name": "instNuGCutSceneStop",
-          "demangled_name": "instNuGCutSceneStop",
-          "address": 4409088,
-          "offset": 3519120,
-          "size": 294,
-          "match_percent": 85.752686
-        },
-        {
-          "name": "instNuGCutSceneIsFinished",
-          "demangled_name": "instNuGCutSceneIsFinished",
-          "address": 4409392,
-          "offset": 3519424,
-          "size": 21,
-          "match_percent": 100.0
-        },
-        {
-          "name": "instNuGCutSceneTimeLeft",
-          "demangled_name": "instNuGCutSceneTimeLeft",
-          "address": 4409424,
-          "offset": 3519456,
-          "size": 193,
-          "match_percent": 99.96429
-        },
-        {
-          "name": "instCutSceneTimeElapsed",
-          "demangled_name": "instCutSceneTimeElapsed",
-          "address": 4409632,
-          "offset": 3519664,
-          "size": 152,
-          "match_percent": 82.2381
-        },
-        {
-          "name": "instNuGCutSceneTotalTime",
-          "demangled_name": "instNuGCutSceneTotalTime",
-          "address": 4409792,
-          "offset": 3519824,
-          "size": 143,
-          "match_percent": 99.97727
-        },
-        {
-          "name": "instNuGCutScenePlay",
-          "demangled_name": "instNuGCutScenePlay",
-          "address": 4411312,
-          "offset": 3521344,
-          "size": 261,
-          "match_percent": 99.94444
-        },
-        {
-          "name": "instNuGCutSceneEnable",
-          "demangled_name": "instNuGCutSceneEnable",
-          "address": 4411712,
-          "offset": 3521744,
-          "size": 16,
-          "match_percent": 100.0
-        },
-        {
-          "name": "instNuGCutSceneDisable",
-          "demangled_name": "instNuGCutSceneDisable",
-          "address": 4411728,
-          "offset": 3521760,
-          "size": 16,
-          "match_percent": 100.0
-        },
-        {
-          "name": "instNuGCutSceneSetPos",
-          "demangled_name": "instNuGCutSceneSetPos",
-          "address": 4411744,
-          "offset": 3521776,
-          "size": 191,
-          "match_percent": 89.04444
-        },
-        {
-          "name": "instNuGCutSceneTranslate",
-          "demangled_name": "instNuGCutSceneTranslate",
-          "address": 4411936,
-          "offset": 3521968,
-          "size": 215,
-          "match_percent": 99.98039
-        },
-        {
-          "name": "instNuGCutSceneSetMtx",
-          "demangled_name": "instNuGCutSceneSetMtx",
-          "address": 4412160,
-          "offset": 3522192,
-          "size": 255,
-          "match_percent": 99.98572
-        },
-        {
-          "name": "instNuGCutSceneSetRepeat",
-          "demangled_name": "instNuGCutSceneSetRepeat",
-          "address": 4412416,
-          "offset": 3522448,
-          "size": 46,
-          "match_percent": 100.0
-        },
-        {
-          "name": "instNuGCutSceneWaitAtEnd",
-          "demangled_name": "instNuGCutSceneWaitAtEnd",
-          "address": 4412464,
-          "offset": 3522496,
-          "size": 34,
-          "match_percent": 100.0
-        },
-        {
-          "name": "instNuGCutSceneChain",
-          "demangled_name": "instNuGCutSceneChain",
-          "address": 4412512,
-          "offset": 3522544,
-          "size": 17,
-          "match_percent": 100.0
-        },
-        {
-          "name": "instNuGCutSceneSetEndCallback",
-          "demangled_name": "instNuGCutSceneSetEndCallback",
-          "address": 4412544,
-          "offset": 3522576,
-          "size": 17,
-          "match_percent": 100.0
-        },
-        {
-          "name": "instNuGCutSceneRotateY",
-          "demangled_name": "instNuGCutSceneRotateY",
-          "address": 4412576,
-          "offset": 3522608,
-          "size": 191,
-          "match_percent": 89.04444
-        },
-        {
-          "name": "instNuGCutSceneCreateCamTgtArray",
-          "demangled_name": "instNuGCutSceneCreateCamTgtArray",
-          "address": 4412768,
-          "offset": 3522800,
-          "size": 123,
-          "match_percent": 100.0
-        },
-        {
-          "name": "instNuGCutSoundStream",
-          "demangled_name": "instNuGCutSoundStream",
-          "address": 4412896,
-          "offset": 3522928,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "instNuGCutSceneAddCamTgt",
-          "demangled_name": "instNuGCutSceneAddCamTgt",
-          "address": 4413008,
-          "offset": 3523040,
-          "size": 92,
-          "match_percent": 100.0
-        },
-        {
-          "name": "instNuGCutSceneCharGetStartMtx",
-          "demangled_name": "instNuGCutSceneCharGetStartMtx",
-          "address": 4414480,
-          "offset": 3524512,
-          "size": 219,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL29instNuGCutLookAtLocatorUpdateP18NUGCUTLOCATORSYS_sP19instNUGCUTLOCATOR_sP15NUGCUTLOCATOR_sfP7numtx_sP17instNUGCUTSCENE_s.isra.23",
-          "demangled_name": "instNuGCutLookAtLocatorUpdate(NUGCUTLOCATORSYS_s*, instNUGCUTLOCATOR_s*, NUGCUTLOCATOR_s*, float, numtx_s*, instNUGCUTSCENE_s*) [clone .isra.23]",
-          "address": 4427152,
-          "offset": 3537184,
-          "size": 1546,
-          "match_percent": 71.94785
-        },
-        {
-          "name": "instNuGCutLocatorUpdate",
-          "demangled_name": "instNuGCutLocatorUpdate",
-          "address": 4428704,
-          "offset": 3538736,
-          "size": 1665,
-          "match_percent": 64.084366
-        },
-        {
-          "name": "instNuGCutSceneCalculateAverageCentre",
-          "demangled_name": "instNuGCutSceneCalculateAverageCentre",
-          "address": 4436960,
-          "offset": 3546992,
-          "size": 354,
-          "match_percent": 92.09574
-        },
-        {
-          "name": "instNuGCutSceneResetCleanUp",
-          "demangled_name": "instNuGCutSceneResetCleanUp",
-          "address": 4437328,
-          "offset": 3547360,
-          "size": 134,
-          "match_percent": 100.0
-        },
-        {
-          "name": "instNuGCutSceneAddCleanUpItem",
-          "demangled_name": "instNuGCutSceneAddCleanUpItem",
-          "address": 4437472,
-          "offset": 3547504,
-          "size": 119,
-          "match_percent": 100.0
-        },
-        {
-          "name": "DisplayCutSceneMemory",
-          "demangled_name": "DisplayCutSceneMemory",
-          "address": 4439520,
-          "offset": 3549552,
-          "size": 2000,
-          "match_percent": 79.64932
         }
       ]
     },
@@ -46264,14 +45721,6 @@
           "offset": 1145856,
           "size": 1047,
           "match_percent": 92.676926
-        },
-        {
-          "name": "_Z16RelocateCutSceneP13NUGCUTSCENE_sP9variptr_u",
-          "demangled_name": "RelocateCutScene(NUGCUTSCENE_s*, variptr_u*)",
-          "address": 4437600,
-          "offset": 3547632,
-          "size": 1307,
-          "match_percent": 77.72539
         },
         {
           "name": "_ZL32CutScene_CreateCharacterInstanceP12NUGCUTCHAR_sP16instNUGCUTCHAR_sP9variptr_u",
@@ -46545,11 +45994,235 @@
           "match_percent": 71.96911
         },
         {
+          "name": "_ZL9copyAnimsP13NUGCUTSCENE_sS0_",
+          "demangled_name": "copyAnims(NUGCUTSCENE_s*, NUGCUTSCENE_s*)",
+          "address": 4401120,
+          "offset": 3511152,
+          "size": 356,
+          "match_percent": 91.33562
+        },
+        {
+          "name": "_ZL26instNuGCutTriggerSysUpdateP17instNUGCUTSCENE_sf",
+          "demangled_name": "instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s*, float)",
+          "address": 4401488,
+          "offset": 3511520,
+          "size": 184,
+          "match_percent": 90.3
+        },
+        {
+          "name": "_ZL23instNuGCutSceneClipTestP17instNUGCUTSCENE_s",
+          "demangled_name": "instNuGCutSceneClipTest(instNUGCUTSCENE_s*)",
+          "address": 4401680,
+          "offset": 3511712,
+          "size": 194,
+          "match_percent": 78.85714
+        },
+        {
+          "name": "_ZL23instNuGCutLocatorSysEndP22instNUGCUTLOCATORSYS_sP18NUGCUTLOCATORSYS_sf.isra.8",
+          "demangled_name": "instNuGCutLocatorSysEnd(instNUGCUTLOCATORSYS_s*, NUGCUTLOCATORSYS_s*, float) [clone .isra.8]",
+          "address": 4401888,
+          "offset": 3511920,
+          "size": 371,
+          "match_percent": 96.63367
+        },
+        {
+          "name": "_ZL18NuGCutSceneFixPtrsP13NUGCUTSCENE_sii.constprop.43",
+          "demangled_name": "NuGCutSceneFixPtrs(NUGCUTSCENE_s*, int, int) [clone .constprop.43]",
+          "address": 4402272,
+          "offset": 3512304,
+          "size": 736,
+          "match_percent": 67.196724
+        },
+        {
+          "name": "_ZL18NuGCutSceneFixPtrsP13NUGCUTSCENE_sii.constprop.44",
+          "demangled_name": "NuGCutSceneFixPtrs(NUGCUTSCENE_s*, int, int) [clone .constprop.44]",
+          "address": 4403008,
+          "offset": 3513040,
+          "size": 1476,
+          "match_percent": 48.93819
+        },
+        {
+          "name": "NuGCutSceneSysBackgroundFlush",
+          "demangled_name": "NuGCutSceneSysBackgroundFlush",
+          "address": 4404496,
+          "offset": 3514528,
+          "size": 26,
+          "match_percent": 99.875
+        },
+        {
+          "name": "NuGCutSceneSysInit",
+          "demangled_name": "NuGCutSceneSysInit",
+          "address": 4404528,
+          "offset": 3514560,
+          "size": 44,
+          "match_percent": 99.75
+        },
+        {
+          "name": "_Z21NuGCutSceneSysInitVfxPFiPKcEPFiiP5VuMtxEPFviEPFviS4_E",
+          "demangled_name": "NuGCutSceneSysInitVfx(int (*)(char const*), int (*)(int, VuMtx*), void (*)(int), void (*)(int, VuMtx*))",
+          "address": 4404576,
+          "offset": 3514608,
+          "size": 60,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z27instNuGCutSceneResetCamLockP17instNUGCUTSCENE_s",
           "demangled_name": "instNuGCutSceneResetCamLock(instNUGCUTSCENE_s*)",
           "address": 4404640,
           "offset": 3514672,
           "size": 45,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z35NuGCutSceneRemapFocusIdToLocaterNumP13NUGCUTSCENE_sP9variptr_u",
+          "demangled_name": "NuGCutSceneRemapFocusIdToLocaterNum(NUGCUTSCENE_s*, variptr_u*)",
+          "address": 4404688,
+          "offset": 3514720,
+          "size": 132,
+          "match_percent": 75.86
+        },
+        {
+          "name": "NuGCutSceneLoad",
+          "demangled_name": "NuGCutSceneLoad",
+          "address": 4404832,
+          "offset": 3514864,
+          "size": 687,
+          "match_percent": 70.86413
+        },
+        {
+          "name": "NuGCutSceneLoadAddr",
+          "demangled_name": "NuGCutSceneLoadAddr",
+          "address": 4405520,
+          "offset": 3515552,
+          "size": 113,
+          "match_percent": 91.97436
+        },
+        {
+          "name": "NuGCutSceneDestroy",
+          "demangled_name": "NuGCutSceneDestroy",
+          "address": 4405648,
+          "offset": 3515680,
+          "size": 50,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuGCutSceneFixUp",
+          "demangled_name": "NuGCutSceneFixUp",
+          "address": 4405712,
+          "offset": 3515744,
+          "size": 954,
+          "match_percent": 68.97902
+        },
+        {
+          "name": "NuGCutSceneFixUpExtra",
+          "demangled_name": "NuGCutSceneFixUpExtra",
+          "address": 4406672,
+          "offset": 3516704,
+          "size": 190,
+          "match_percent": 92.53968
+        },
+        {
+          "name": "NuGCutSceneSysPostBackgroundLoad",
+          "demangled_name": "NuGCutSceneSysPostBackgroundLoad",
+          "address": 4406864,
+          "offset": 3516896,
+          "size": 76,
+          "match_percent": 99.82609
+        },
+        {
+          "name": "PetesHackOfDeath",
+          "demangled_name": "PetesHackOfDeath",
+          "address": 4406944,
+          "offset": 3516976,
+          "size": 26,
+          "match_percent": 99.875
+        },
+        {
+          "name": "instNuGCutSceneCreate",
+          "demangled_name": "instNuGCutSceneCreate",
+          "address": 4406976,
+          "offset": 3517008,
+          "size": 2103,
+          "match_percent": 27.626839
+        },
+        {
+          "name": "instNuGCutSceneStop",
+          "demangled_name": "instNuGCutSceneStop",
+          "address": 4409088,
+          "offset": 3519120,
+          "size": 294,
+          "match_percent": 97.19355
+        },
+        {
+          "name": "instNuGCutSceneIsFinished",
+          "demangled_name": "instNuGCutSceneIsFinished",
+          "address": 4409392,
+          "offset": 3519424,
+          "size": 21,
+          "match_percent": 100.0
+        },
+        {
+          "name": "instNuGCutSceneTimeLeft",
+          "demangled_name": "instNuGCutSceneTimeLeft",
+          "address": 4409424,
+          "offset": 3519456,
+          "size": 193,
+          "match_percent": 99.96429
+        },
+        {
+          "name": "instCutSceneTimeElapsed",
+          "demangled_name": "instCutSceneTimeElapsed",
+          "address": 4409632,
+          "offset": 3519664,
+          "size": 152,
+          "match_percent": 82.2381
+        },
+        {
+          "name": "instNuGCutSceneTotalTime",
+          "demangled_name": "instNuGCutSceneTotalTime",
+          "address": 4409792,
+          "offset": 3519824,
+          "size": 143,
+          "match_percent": 99.97727
+        },
+        {
+          "name": "instNuGCutSceneReset",
+          "demangled_name": "instNuGCutSceneReset",
+          "address": 4409936,
+          "offset": 3519968,
+          "size": 808,
+          "match_percent": 91.99545
+        },
+        {
+          "name": "gcutSetSoundVol",
+          "demangled_name": "gcutSetSoundVol",
+          "address": 4410752,
+          "offset": 3520784,
+          "size": 36,
+          "match_percent": 100.0
+        },
+        {
+          "name": "instNuGCutSceneStart",
+          "demangled_name": "instNuGCutSceneStart",
+          "address": 4410800,
+          "offset": 3520832,
+          "size": 512,
+          "match_percent": 93.98658
+        },
+        {
+          "name": "instNuGCutScenePlay",
+          "demangled_name": "instNuGCutScenePlay",
+          "address": 4411312,
+          "offset": 3521344,
+          "size": 261,
+          "match_percent": 99.94444
+        },
+        {
+          "name": "instNuGCutScenePause",
+          "demangled_name": "instNuGCutScenePause",
+          "address": 4411584,
+          "offset": 3521616,
+          "size": 34,
           "match_percent": 100.0
         },
         {
@@ -46561,12 +46234,212 @@
           "match_percent": 100.0
         },
         {
+          "name": "instNuGCutSceneEnable",
+          "demangled_name": "instNuGCutSceneEnable",
+          "address": 4411712,
+          "offset": 3521744,
+          "size": 16,
+          "match_percent": 100.0
+        },
+        {
+          "name": "instNuGCutSceneDisable",
+          "demangled_name": "instNuGCutSceneDisable",
+          "address": 4411728,
+          "offset": 3521760,
+          "size": 16,
+          "match_percent": 100.0
+        },
+        {
+          "name": "instNuGCutSceneSetPos",
+          "demangled_name": "instNuGCutSceneSetPos",
+          "address": 4411744,
+          "offset": 3521776,
+          "size": 191,
+          "match_percent": 89.04444
+        },
+        {
+          "name": "instNuGCutSceneTranslate",
+          "demangled_name": "instNuGCutSceneTranslate",
+          "address": 4411936,
+          "offset": 3521968,
+          "size": 215,
+          "match_percent": 99.98039
+        },
+        {
+          "name": "instNuGCutSceneSetMtx",
+          "demangled_name": "instNuGCutSceneSetMtx",
+          "address": 4412160,
+          "offset": 3522192,
+          "size": 255,
+          "match_percent": 99.98572
+        },
+        {
+          "name": "instNuGCutSceneSetRepeat",
+          "demangled_name": "instNuGCutSceneSetRepeat",
+          "address": 4412416,
+          "offset": 3522448,
+          "size": 46,
+          "match_percent": 100.0
+        },
+        {
+          "name": "instNuGCutSceneWaitAtEnd",
+          "demangled_name": "instNuGCutSceneWaitAtEnd",
+          "address": 4412464,
+          "offset": 3522496,
+          "size": 34,
+          "match_percent": 100.0
+        },
+        {
+          "name": "instNuGCutSceneChain",
+          "demangled_name": "instNuGCutSceneChain",
+          "address": 4412512,
+          "offset": 3522544,
+          "size": 17,
+          "match_percent": 100.0
+        },
+        {
+          "name": "instNuGCutSceneSetEndCallback",
+          "demangled_name": "instNuGCutSceneSetEndCallback",
+          "address": 4412544,
+          "offset": 3522576,
+          "size": 17,
+          "match_percent": 100.0
+        },
+        {
+          "name": "instNuGCutSceneRotateY",
+          "demangled_name": "instNuGCutSceneRotateY",
+          "address": 4412576,
+          "offset": 3522608,
+          "size": 191,
+          "match_percent": 89.04444
+        },
+        {
+          "name": "instNuGCutSceneCreateCamTgtArray",
+          "demangled_name": "instNuGCutSceneCreateCamTgtArray",
+          "address": 4412768,
+          "offset": 3522800,
+          "size": 123,
+          "match_percent": 100.0
+        },
+        {
+          "name": "instNuGCutSoundStream",
+          "demangled_name": "instNuGCutSoundStream",
+          "address": 4412896,
+          "offset": 3522928,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "instNuGCutSceneFind",
+          "demangled_name": "instNuGCutSceneFind",
+          "address": 4412912,
+          "offset": 3522944,
+          "size": 92,
+          "match_percent": 99.97222
+        },
+        {
+          "name": "instNuGCutSceneAddCamTgt",
+          "demangled_name": "instNuGCutSceneAddCamTgt",
+          "address": 4413008,
+          "offset": 3523040,
+          "size": 92,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z12NewCopyAnimsP17instNUGCUTSCENE_s",
+          "demangled_name": "NewCopyAnims(instNUGCUTSCENE_s*)",
+          "address": 4413104,
+          "offset": 3523136,
+          "size": 652,
+          "match_percent": 77.96774
+        },
+        {
+          "name": "NuGCutSceneIsBackgroundLoading",
+          "demangled_name": "NuGCutSceneIsBackgroundLoading",
+          "address": 4413760,
+          "offset": 3523792,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "instNuGCutScenePreload",
+          "demangled_name": "instNuGCutScenePreload",
+          "address": 4413776,
+          "offset": 3523808,
+          "size": 44,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z26instNuGCutSceneSwapBuffersP17instNUGCUTSCENE_si",
           "demangled_name": "instNuGCutSceneSwapBuffers(instNUGCUTSCENE_s*, int)",
           "address": 4413824,
           "offset": 3523856,
           "size": 107,
           "match_percent": 100.0
+        },
+        {
+          "name": "instNuGCutSceneServiceLoad",
+          "demangled_name": "instNuGCutSceneServiceLoad",
+          "address": 4413936,
+          "offset": 3523968,
+          "size": 506,
+          "match_percent": 52.796875
+        },
+        {
+          "name": "NuGCutSetCutAudioStream",
+          "demangled_name": "NuGCutSetCutAudioStream",
+          "address": 4414448,
+          "offset": 3524480,
+          "size": 24,
+          "match_percent": 99.166664
+        },
+        {
+          "name": "instNuGCutSceneCharGetStartMtx",
+          "demangled_name": "instNuGCutSceneCharGetStartMtx",
+          "address": 4414480,
+          "offset": 3524512,
+          "size": 219,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z22NuGCutLocatorCalcMtx_3P15NUGCUTLOCATOR_sP7numtx_sf",
+          "demangled_name": "NuGCutLocatorCalcMtx_3(NUGCUTLOCATOR_s*, numtx_s*, float)",
+          "address": 4414704,
+          "offset": 3524736,
+          "size": 352,
+          "match_percent": 81.90804
+        },
+        {
+          "name": "NuGCutLocatorCalcMtx",
+          "demangled_name": "NuGCutLocatorCalcMtx",
+          "address": 4415056,
+          "offset": 3525088,
+          "size": 845,
+          "match_percent": 79.74561
+        },
+        {
+          "name": "_ZL22instNuGCutCamSysUpdateP17instNUGCUTSCENE_sf",
+          "demangled_name": "instNuGCutCamSysUpdate(instNUGCUTSCENE_s*, float)",
+          "address": 4415904,
+          "offset": 3525936,
+          "size": 2100,
+          "match_percent": 76.263885
+        },
+        {
+          "name": "_Z23NuGCutLocatorIsVisble_3P15NUGCUTLOCATOR_sfPfS1_",
+          "demangled_name": "NuGCutLocatorIsVisble_3(NUGCUTLOCATOR_s*, float, float*, float*)",
+          "address": 4418016,
+          "offset": 3528048,
+          "size": 313,
+          "match_percent": 91.73684
+        },
+        {
+          "name": "NuGCutLocatorIsVisble",
+          "demangled_name": "NuGCutLocatorIsVisble",
+          "address": 4418336,
+          "offset": 3528368,
+          "size": 373,
+          "match_percent": 96.24
         },
         {
           "name": "_Z14FindMtlInHGObjP8nugscn_si",
@@ -46577,6 +46450,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z18FindTexAnimFromMtlP8nugscn_sP7numtl_s",
+          "demangled_name": "FindTexAnimFromMtl(nugscn_s*, numtl_s*)",
+          "address": 4418816,
+          "offset": 3528848,
+          "size": 68,
+          "match_percent": 93.10345
+        },
+        {
           "name": "_Z24instGetLookAtLocatorInfoP17instNUGCUTSCENE_sP18instNUGCUTLOOKAT_s",
           "demangled_name": "instGetLookAtLocatorInfo(instNUGCUTSCENE_s*, instNUGCUTLOOKAT_s*)",
           "address": 4418896,
@@ -46585,12 +46466,68 @@
           "match_percent": 100.0
         },
         {
+          "name": "CalculateLocatorDirection",
+          "demangled_name": "CalculateLocatorDirection",
+          "address": 4419264,
+          "offset": 3529296,
+          "size": 305,
+          "match_percent": 99.96774
+        },
+        {
           "name": "_Z27EvaluateJointOrientationMtxP8nugscn_siP7numtx_s",
           "demangled_name": "EvaluateJointOrientationMtx(nugscn_s*, int, numtx_s*)",
           "address": 4419584,
           "offset": 3529616,
           "size": 351,
-          "match_percent": 99.98077
+          "match_percent": 97.86539
+        },
+        {
+          "name": "_ZL21instNuGCutRigidSysEndP17instNUGCUTSCENE_sf",
+          "demangled_name": "instNuGCutRigidSysEnd(instNUGCUTSCENE_s*, float)",
+          "address": 4421536,
+          "offset": 3531568,
+          "size": 413,
+          "match_percent": 99.13043
+        },
+        {
+          "name": "instNuGCutSceneJumpToEnd",
+          "demangled_name": "instNuGCutSceneJumpToEnd",
+          "address": 4421952,
+          "offset": 3531984,
+          "size": 203,
+          "match_percent": 92.98
+        },
+        {
+          "name": "_Z28instNuGCutSceneEndFirstFrameP17instNUGCUTSCENE_s",
+          "demangled_name": "instNuGCutSceneEndFirstFrame(instNUGCUTSCENE_s*)",
+          "address": 4422160,
+          "offset": 3532192,
+          "size": 640,
+          "match_percent": 83.54023
+        },
+        {
+          "name": "instNuGCutSceneEnd",
+          "demangled_name": "instNuGCutSceneEnd",
+          "address": 4422800,
+          "offset": 3532832,
+          "size": 656,
+          "match_percent": 83.46667
+        },
+        {
+          "name": "instNuGCutSceneDestroy",
+          "demangled_name": "instNuGCutSceneDestroy",
+          "address": 4423456,
+          "offset": 3533488,
+          "size": 223,
+          "match_percent": 85.06579
+        },
+        {
+          "name": "instNuGCutSceneJumpToLastFrame",
+          "demangled_name": "instNuGCutSceneJumpToLastFrame",
+          "address": 4423680,
+          "offset": 3533712,
+          "size": 195,
+          "match_percent": 85.30612
         },
         {
           "name": "_Z33instNuGCutContainsInstancedRigidsP17instNUGCUTSCENE_s",
@@ -46607,6 +46544,238 @@
           "offset": 3534000,
           "size": 209,
           "match_percent": 100.0
+        },
+        {
+          "name": "NuGCutCharAnimProcess",
+          "demangled_name": "NuGCutCharAnimProcess",
+          "address": 4425232,
+          "offset": 3535264,
+          "size": 1918,
+          "match_percent": 89.30534
+        },
+        {
+          "name": "_ZL29instNuGCutLookAtLocatorUpdateP18NUGCUTLOCATORSYS_sP19instNUGCUTLOCATOR_sP15NUGCUTLOCATOR_sfP7numtx_sP17instNUGCUTSCENE_s.isra.23",
+          "demangled_name": "instNuGCutLookAtLocatorUpdate(NUGCUTLOCATORSYS_s*, instNUGCUTLOCATOR_s*, NUGCUTLOCATOR_s*, float, numtx_s*, instNUGCUTSCENE_s*) [clone .isra.23]",
+          "address": 4427152,
+          "offset": 3537184,
+          "size": 1546,
+          "match_percent": 71.944786
+        },
+        {
+          "name": "instNuGCutLocatorUpdate",
+          "demangled_name": "instNuGCutLocatorUpdate",
+          "address": 4428704,
+          "offset": 3538736,
+          "size": 1665,
+          "match_percent": 63.957817
+        },
+        {
+          "name": "_ZL24instNuGCutRigidSysRenderP17instNUGCUTSCENE_sfi",
+          "demangled_name": "instNuGCutRigidSysRender(instNUGCUTSCENE_s*, float, int)",
+          "address": 4430384,
+          "offset": 3540416,
+          "size": 678,
+          "match_percent": 77.19663
+        },
+        {
+          "name": "_ZL24instNuGCutRigidSysUpdateP17instNUGCUTSCENE_sfi",
+          "demangled_name": "instNuGCutRigidSysUpdate(instNUGCUTSCENE_s*, float, int)",
+          "address": 4431072,
+          "offset": 3541104,
+          "size": 580,
+          "match_percent": 99.36306
+        },
+        {
+          "name": "_ZL21instNuGCutSceneUpdateP17instNUGCUTSCENE_siif",
+          "demangled_name": "instNuGCutSceneUpdate(instNUGCUTSCENE_s*, int, int, float)",
+          "address": 4431664,
+          "offset": 3541696,
+          "size": 3581,
+          "match_percent": 65.46757
+        },
+        {
+          "name": "NuGCutSceneSysUpdate",
+          "demangled_name": "NuGCutSceneSysUpdate",
+          "address": 4435248,
+          "offset": 3545280,
+          "size": 196,
+          "match_percent": 80.54717
+        },
+        {
+          "name": "NuGCutSceneSysRender",
+          "demangled_name": "NuGCutSceneSysRender",
+          "address": 4435456,
+          "offset": 3545488,
+          "size": 1013,
+          "match_percent": 78.614815
+        },
+        {
+          "name": "NuSetGetHGObjFromIndxFn",
+          "demangled_name": "NuSetGetHGObjFromIndxFn",
+          "address": 4436480,
+          "offset": 3546512,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneCharacterProcessFn",
+          "demangled_name": "NuSetCutSceneCharacterProcessFn",
+          "address": 4436512,
+          "offset": 3546544,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneCharacterRenderFn",
+          "demangled_name": "NuSetCutSceneCharacterRenderFn",
+          "address": 4436544,
+          "offset": 3546576,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneCharacterEvalFn",
+          "demangled_name": "NuSetCutSceneCharacterEvalFn",
+          "address": 4436576,
+          "offset": 3546608,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneCharacterReleaseFn",
+          "demangled_name": "NuSetCutSceneCharacterReleaseFn",
+          "address": 4436608,
+          "offset": 3546640,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneFindCharactersFn",
+          "demangled_name": "NuSetCutSceneFindCharactersFn",
+          "address": 4436640,
+          "offset": 3546672,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneDestroyCharactersFn",
+          "demangled_name": "NuSetCutSceneDestroyCharactersFn",
+          "address": 4436672,
+          "offset": 3546704,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneResetCharactersFn",
+          "demangled_name": "NuSetCutSceneResetCharactersFn",
+          "address": 4436704,
+          "offset": 3546736,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneCharacterCreateDataFn",
+          "demangled_name": "NuSetCutSceneCharacterCreateDataFn",
+          "address": 4436736,
+          "offset": 3546768,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneCharacterDestroyDataFn",
+          "demangled_name": "NuSetCutSceneCharacterDestroyDataFn",
+          "address": 4436768,
+          "offset": 3546800,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneRigidCollisionCheckFn",
+          "demangled_name": "NuSetCutSceneRigidCollisionCheckFn",
+          "address": 4436800,
+          "offset": 3546832,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneSFXFixUpFn",
+          "demangled_name": "NuSetCutSceneSFXFixUpFn",
+          "address": 4436832,
+          "offset": 3546864,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneSFXUpdateFn",
+          "demangled_name": "NuSetCutSceneSFXUpdateFn",
+          "address": 4436864,
+          "offset": 3546896,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneRequestSFXFn",
+          "demangled_name": "NuSetCutSceneRequestSFXFn",
+          "address": 4436896,
+          "offset": 3546928,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneRigidPostRenderFn",
+          "demangled_name": "NuSetCutSceneRigidPostRenderFn",
+          "address": 4436928,
+          "offset": 3546960,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "instNuGCutSceneCalculateAverageCentre",
+          "demangled_name": "instNuGCutSceneCalculateAverageCentre",
+          "address": 4436960,
+          "offset": 3546992,
+          "size": 354,
+          "match_percent": 92.25532
+        },
+        {
+          "name": "instNuGCutSceneResetCleanUp",
+          "demangled_name": "instNuGCutSceneResetCleanUp",
+          "address": 4437328,
+          "offset": 3547360,
+          "size": 134,
+          "match_percent": 100.0
+        },
+        {
+          "name": "instNuGCutSceneAddCleanUpItem",
+          "demangled_name": "instNuGCutSceneAddCleanUpItem",
+          "address": 4437472,
+          "offset": 3547504,
+          "size": 119,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16RelocateCutSceneP13NUGCUTSCENE_sP9variptr_u",
+          "demangled_name": "RelocateCutScene(NUGCUTSCENE_s*, variptr_u*)",
+          "address": 4437600,
+          "offset": 3547632,
+          "size": 1307,
+          "match_percent": 80.044044
+        },
+        {
+          "name": "instNuGCutSceneCleanUp",
+          "demangled_name": "instNuGCutSceneCleanUp",
+          "address": 4438912,
+          "offset": 3548944,
+          "size": 594,
+          "match_percent": 76.82123
+        },
+        {
+          "name": "DisplayCutSceneMemory",
+          "demangled_name": "DisplayCutSceneMemory",
+          "address": 4439520,
+          "offset": 3549552,
+          "size": 2000,
+          "match_percent": 79.61539
         },
         {
           "name": "_Z24CutScenePlayer_ConfigurePcP9variptr_uS1_PsS2_S2_S2_S2_",
@@ -101168,7 +101337,7 @@
           "address": 2562672,
           "offset": 1672704,
           "size": 3282,
-          "match_percent": 53.112793
+          "match_percent": 53.133427
         },
         {
           "name": "NuSysDirOpen",
@@ -102883,22 +103052,6 @@
           "match_percent": 99.32836
         },
         {
-          "name": "NuGCutSetCutAudioStream",
-          "demangled_name": "NuGCutSetCutAudioStream",
-          "address": 4414448,
-          "offset": 3524480,
-          "size": 24,
-          "match_percent": 99.166664
-        },
-        {
-          "name": "NuGCutCharAnimProcess",
-          "demangled_name": "NuGCutCharAnimProcess",
-          "address": 4425232,
-          "offset": 3535264,
-          "size": 1918,
-          "match_percent": 89.362595
-        },
-        {
           "name": "NuMemAllocFn",
           "demangled_name": "NuMemAllocFn",
           "address": 5420144,
@@ -103119,172 +103272,6 @@
           "offset": 1658306,
           "size": 26,
           "match_percent": 99.85714
-        }
-      ]
-    },
-    {
-      "name": "nu2api/nucore/nugcutscene.cpp.o",
-      "source": "src/nu2api/nucore/nugcutscene.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nugcutscene.o",
-      "functions": [
-        {
-          "name": "NuSetGetHGObjFromIndxFn",
-          "demangled_name": "NuSetGetHGObjFromIndxFn",
-          "address": 4436480,
-          "offset": 3546512,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneCharacterProcessFn",
-          "demangled_name": "NuSetCutSceneCharacterProcessFn",
-          "address": 4436512,
-          "offset": 3546544,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneCharacterRenderFn",
-          "demangled_name": "NuSetCutSceneCharacterRenderFn",
-          "address": 4436544,
-          "offset": 3546576,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneCharacterEvalFn",
-          "demangled_name": "NuSetCutSceneCharacterEvalFn",
-          "address": 4436576,
-          "offset": 3546608,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneCharacterReleaseFn",
-          "demangled_name": "NuSetCutSceneCharacterReleaseFn",
-          "address": 4436608,
-          "offset": 3546640,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneFindCharactersFn",
-          "demangled_name": "NuSetCutSceneFindCharactersFn",
-          "address": 4436640,
-          "offset": 3546672,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneDestroyCharactersFn",
-          "demangled_name": "NuSetCutSceneDestroyCharactersFn",
-          "address": 4436672,
-          "offset": 3546704,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneResetCharactersFn",
-          "demangled_name": "NuSetCutSceneResetCharactersFn",
-          "address": 4436704,
-          "offset": 3546736,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneCharacterCreateDataFn",
-          "demangled_name": "NuSetCutSceneCharacterCreateDataFn",
-          "address": 4436736,
-          "offset": 3546768,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneCharacterDestroyDataFn",
-          "demangled_name": "NuSetCutSceneCharacterDestroyDataFn",
-          "address": 4436768,
-          "offset": 3546800,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneRigidCollisionCheckFn",
-          "demangled_name": "NuSetCutSceneRigidCollisionCheckFn",
-          "address": 4436800,
-          "offset": 3546832,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneSFXFixUpFn",
-          "demangled_name": "NuSetCutSceneSFXFixUpFn",
-          "address": 4436832,
-          "offset": 3546864,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneSFXUpdateFn",
-          "demangled_name": "NuSetCutSceneSFXUpdateFn",
-          "address": 4436864,
-          "offset": 3546896,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneRequestSFXFn",
-          "demangled_name": "NuSetCutSceneRequestSFXFn",
-          "address": 4436896,
-          "offset": 3546928,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneRigidPostRenderFn",
-          "demangled_name": "NuSetCutSceneRigidPostRenderFn",
-          "address": 4436928,
-          "offset": 3546960,
-          "size": 24,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
-      "name": "nu2api/nucore/nugcutscene_anim.cpp.o",
-      "source": "src/nu2api/nucore/nugcutscene_anim.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nugcutscene_anim.o",
-      "functions": [
-        {
-          "name": "_Z22NuGCutLocatorCalcMtx_3P15NUGCUTLOCATOR_sP7numtx_sf",
-          "demangled_name": "NuGCutLocatorCalcMtx_3(NUGCUTLOCATOR_s*, numtx_s*, float)",
-          "address": 4414704,
-          "offset": 3524736,
-          "size": 352,
-          "match_percent": 81.90804
-        },
-        {
-          "name": "NuGCutLocatorCalcMtx",
-          "demangled_name": "NuGCutLocatorCalcMtx",
-          "address": 4415056,
-          "offset": 3525088,
-          "size": 845,
-          "match_percent": 79.74561
-        },
-        {
-          "name": "_Z23NuGCutLocatorIsVisble_3P15NUGCUTLOCATOR_sfPfS1_",
-          "demangled_name": "NuGCutLocatorIsVisble_3(NUGCUTLOCATOR_s*, float, float*, float*)",
-          "address": 4418016,
-          "offset": 3528048,
-          "size": 313,
-          "match_percent": 91.73684
-        },
-        {
-          "name": "NuGCutLocatorIsVisble",
-          "demangled_name": "NuGCutLocatorIsVisble",
-          "address": 4418336,
-          "offset": 3528368,
-          "size": 373,
-          "match_percent": 96.24
         }
       ]
     },
@@ -113688,21 +113675,6 @@
           "address": 988720,
           "offset": 98752,
           "size": 83,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
-      "name": "nu2api/nusound/nu2api_nusound_plain.cpp.o",
-      "source": "src/nu2api/nusound/nu2api_nusound_plain.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nu2api_nusound_plain.o",
-      "functions": [
-        {
-          "name": "gcutSetSoundVol",
-          "demangled_name": "gcutSetSoundVol",
-          "address": 4410752,
-          "offset": 3520784,
-          "size": 36,
           "match_percent": 100.0
         }
       ]
@@ -129727,7 +129699,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 470,
+    "bazel_units": 466,
     "functions": 13454,
     "assigned_functions": 12840,
     "ambiguous_functions": 287,

@@ -81,7 +81,7 @@ nuanimdatachunk_s *NuAnimDataChunkCreate(i32 curve_set_count);
 extern "C" {
 
     u8 CutSceneBoundingBoxTrackRoot = 0;
-    i32 NuGCutAudioStream = 0;
+extern i32 NuGCutAudioStream;
     NUANIMBUFFEVALUATECB AnimBuffEvalCB = NULL;
     void **AnimBuffEvalData = NULL;
     i32 *AnimBuffEvalJoint = NULL;
@@ -3912,123 +3912,10 @@ void NuPartResetGlobalTime(void);
     void NuHGobjToVideoMem(NUHGOBJVIDEOMEMFN callback) {
         hgobj_to_video_mem = callback;
     }
-    void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
-                               f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask) {
-        nuanimdata2_s *animation = character->animation;
-        if (animation != NULL) {
-            const u32 magic = *reinterpret_cast<u32 *>(animation);
-            if (magic == ANI3_MAGIC_VERSION_4 || magic == ANI3_MAGIC_VERSION_5) {
-                NuGCutCharAnimProcess_3(character, frame, matrix, visible, animation_index, animation_rate, blend_time,
-                                        animation_start_frame, layer_mask);
-                return;
-            }
-
-            nuanimtime_s time;
-            NuAnimData2CalcTime(animation, frame, &time);
-            animation = character->animation;
-            nuanimcurve2_s *curves = animation->curves;
-            i8 *types = reinterpret_cast<i8 *>(animation->curve_types);
-            const u8 node_flags = animation->node_flags[0];
-#define NUGCUT_CURVE_VALUE(curve)                                                                                      \
-    (types[curve] == 0 ? curves[curve].data.constant : NuAnimCurve2CalcValEx(&curves[curve], &time, types[curve]))
-
-            if (static_cast<i16>(character->animation->curve_count) > 6) {
-                *visible = static_cast<i32>(NUGCUT_CURVE_VALUE(6));
-            } else {
-                *visible = character->flags & 1;
-            }
-            if (animation_index != NULL) {
-                if (static_cast<i16>(character->animation->curve_count) > 7) {
-                    const f32 value = NUGCUT_CURVE_VALUE(7);
-                    if (value < 0.0f) {
-                        *animation_index = 0xff;
-                    } else {
-                        *animation_index = static_cast<i32>(value);
-                    }
-                } else {
-                    *animation_index = character->animation_index;
-                }
-                if (animation_start_frame != NULL) {
-                    if (*animation_index != 0 && *animation_index != 0xff) {
-                        if (static_cast<i16>(character->animation->curve_count) > 10) {
-                            *animation_start_frame = NUGCUT_CURVE_VALUE(10);
-                        } else {
-                            *animation_start_frame = static_cast<f32>(character->animation_start_frame);
-                        }
-                    } else {
-                        *animation_start_frame = 0.0f;
-                    }
-                }
-            } else if (animation_start_frame != NULL) {
-                *animation_start_frame = 0.0f;
-            }
-            if (*visible == 0) {
-                return;
-            }
-            if (layer_mask != NULL) {
-                if (static_cast<i16>(character->animation->curve_count) > 11) {
-                    *layer_mask = static_cast<i32>(NUGCUT_CURVE_VALUE(11));
-                } else {
-                    *layer_mask = -1;
-                }
-            }
-
-            if ((node_flags & NUANIM_NODE_HAS_ROTATION) != 0) {
-                const f32 rx = NUGCUT_CURVE_VALUE(3);
-                const f32 ry = NUGCUT_CURVE_VALUE(4);
-                const f32 rz = NUGCUT_CURVE_VALUE(5);
-                NUANGVEC rotation = {
-                    static_cast<NUANG>(rx * 10430.378f),
-                    static_cast<NUANG>(ry * 10430.378f),
-                    static_cast<NUANG>(rz * 10430.378f),
-                };
-                NuMtxSetRotateXYZ(matrix, &rotation);
-            } else {
-                NuMtxSetIdentity(matrix);
-            }
-            NUVEC translation = {NUGCUT_CURVE_VALUE(0), NUGCUT_CURVE_VALUE(1), NUGCUT_CURVE_VALUE(2)};
-            NuMtxTranslate(matrix, &translation);
-            matrix->m02 = -matrix->m02;
-            matrix->m12 = -matrix->m12;
-            matrix->m20 = -matrix->m20;
-            matrix->m21 = -matrix->m21;
-            matrix->m23 = -matrix->m23;
-            matrix->m32 = -matrix->m32;
-            NUVEC scale;
-            scale = NuMtxGetScale(&character->base_matrix);
-            NuMtxPreScale(matrix, &scale);
-            if (animation_rate != NULL) {
-                if (static_cast<i16>(character->animation->curve_count) > 9) {
-                    *animation_rate = NUGCUT_CURVE_VALUE(9);
-                } else {
-                    *animation_rate = character->animation_rate;
-                }
-            }
-            if (blend_time != NULL) {
-                if (static_cast<i16>(character->animation->curve_count) > 8) {
-                    *blend_time = NUGCUT_CURVE_VALUE(8);
-                } else {
-                    *blend_time = static_cast<f32>(character->blend_time);
-                }
-            }
-        } else {
-            *visible = character->flags & 1;
-            if (animation_index != NULL) {
-                *animation_index = character->animation_index;
-            }
-            *matrix = character->base_matrix;
-            if (animation_rate != NULL) {
-                *animation_rate = character->animation_rate;
-            }
-            if (blend_time != NULL) {
-                *blend_time = static_cast<f32>(character->blend_time);
-            }
-        }
-    }
+void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
+                               f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask);
 #undef NUGCUT_CURVE_VALUE
-    void NuGCutSetCutAudioStream(i32 stream) {
-        NuGCutAudioStream = stream;
-    }
+void NuGCutSetCutAudioStream(i32 stream);
     void NuTexAnimRemoveList(void *texture_anims);
     void NuGHGPreRelocateFixupPS(NUGSCN *scene);
     void NuGHGPostRelocateFixupPS(NUGSCN *scene, i32 delta);
