@@ -596,16 +596,7 @@ u32 TotalLevelCoinTally(WORLDINFO_s *world, u32 *pickups, u32 *blowups, u32 *bui
     return total;
 }
 
-COLLECTION_s *GetFreePlayCollection(i32 area) {
-    const u16 area_flags = ADataList[area].flags;
-    if ((area_flags & AREAFLAG_VEHICLE_AREA) == 0) {
-        return &CharacterCollection;
-    }
-    if ((area_flags & AREAFLAG_BONUS_AREA) != 0) {
-        return &MiniKitCollection;
-    }
-    return &VehicleCollection;
-}
+COLLECTION_s *GetFreePlayCollection(i32 area);
 
 extern i32 POINTS_PER_HINT;
 extern i32 SHOPHINTCOUNT;

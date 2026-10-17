@@ -89,9 +89,7 @@ void Status_DrawPromptMenu(STATUSPACKET_s *, i32, f32);
 f32 getFinishedStatusAlpha(STATUSPACKET_s *);
 f32 STATUS_TITLE_Y = 0.5f;
 
-u16 hub_iconang[4] = {};
-static f32 hub_icontime[4] = {};
-static i32 hub_icondang[4] = {};
+extern u16 hub_iconang[4];
 STATUS_STAGE_s *StatusStages;
 f32 iconalphaoverride;
 f32 icon_y;
@@ -268,16 +266,7 @@ void Prompt_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) 
     }
 }
 
-void ResetIconWibble() {
-    hub_iconang[0] = static_cast<u16>(qrand());
-    hub_icontime[0] = 0.0f;
-    hub_iconang[1] = static_cast<u16>(qrand());
-    hub_icontime[1] = 0.0f;
-    hub_iconang[2] = static_cast<u16>(qrand());
-    hub_icontime[2] = 0.0f;
-    hub_iconang[3] = static_cast<u16>(qrand());
-    hub_icontime[3] = 0.0f;
-}
+void ResetIconWibble();
 
 void Save_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
     if (packet->save_state == 3) {
@@ -835,21 +824,8 @@ f32 StatusIconsOnOff(f32 progress) {
     return (STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(progress * 16384.0f) >> 1) & 0x7fff] + STATSPOS2Y;
 }
 
-static inline void UpdateIconWibbleAxis(i32 i) {
-    hub_icontime[i] -= FRAMETIME;
-    if (hub_icontime[i] <= 0.0f) {
-        hub_icondang[i] = static_cast<i32>(QRAND_FLOAT() * 262144.0f - 131072.0f);
-        hub_icontime[i] = QRAND_FLOAT() * 2.0f + 1.0f;
-    }
-    hub_iconang[i] = static_cast<u16>(static_cast<i32>(hub_iconang[i] + hub_icondang[i] * FRAMETIME));
-}
 
-void UpdateIconWibble() {
-    UpdateIconWibbleAxis(0);
-    UpdateIconWibbleAxis(1);
-    UpdateIconWibbleAxis(2);
-    UpdateIconWibbleAxis(3);
-}
+void UpdateIconWibble();
 
 void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
     switch (stage->field_0x14) {

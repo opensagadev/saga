@@ -242,15 +242,13 @@ void MenuExitLoad(MENU_s *);
 
 void MenuExitSave(MENU_s *);
 
-void MenuDrawClips(MENU_s *) {
-}
+void MenuDrawClips(MENU_s *);
 
 void MenuEnterLoad(MENU_s *menu);
 
 void MenuEnterSave(MENU_s *menu);
 
-void MenuInitClips(MENU_s *) {
-}
+void MenuInitClips(MENU_s *);
 
 void MenuStartLoad();
 
@@ -330,25 +328,15 @@ void MenuDrawLoading(MENU_s *);
 
 i32 MenuIsAvailable();
 
-void MenuUpdateClips(MENU_s *) {
-}
+void MenuUpdateClips(MENU_s *);
 
 void MenuDrawDeleting(MENU_s *);
 
-void MenuDrawFreePlay(MENU_s *) {
-    if (MenuStopDraw == 0) {
-        Hub_DrawFreePlaySelect();
-    }
-}
+void MenuDrawFreePlay(MENU_s *);
 
 
 
-void MenuInitFreePlay(MENU_s *menu) {
-    menu->first_row = 0;
-    menu->last_row = 2;
-    menu->selected_row = 0;
-    menu->selected_item = 0;
-}
+void MenuInitFreePlay(MENU_s *menu);
 
 
 
@@ -378,9 +366,7 @@ void MenuDrawSaveCancel(MENU_s *menu);
 
 void MenuUpdateDeleting(MENU_s *);
 
-void MenuUpdateFreePlay(MENU_s *) {
-    Hub_UpdateFreePlaySelect();
-}
+void MenuUpdateFreePlay(MENU_s *);
 
 
 void MenuDrawCardWarning(MENU_s *);

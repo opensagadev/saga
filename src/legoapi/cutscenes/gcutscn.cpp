@@ -144,56 +144,7 @@ i32 CutScenePlayer_CanStart(i32 clip_id) {
     return 0;
 }
 
-void CutScenePlayer_DrawGrid(COLLECTION_s *collection, i16 *ids, float x, float y, i32 selected, float alpha) {
-    if (FadeSys.fade > 0.0f || !WORLD->lev_objs[167].active)
-        return;
-    if (alpha > 1.0f)
-        alpha = 1.0f;
-    const i32 rows = collection->count_y / collection->count_x;
-    const f32 scale = ICONSIZE * 1.2f;
-    NUVEC minimum, maximum;
-    NuSpecialGetBounds(&WORLD->lev_objs[167].special, &minimum, &maximum);
-    const f32 dx = (maximum.x - minimum.x) * scale / PANEL3DMULX;
-    const f32 dy = -(maximum.y - minimum.y) * scale / PANEL3DMULY;
-    y -= rows * dy * 0.5f;
-    const f32 first_x = x - (collection->count_x - 1) * dx * 0.5f;
-    CUTSCENEPLAYER_s *player = static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available());
-    MENU *menu = &GameMenu[GameMenuLevel];
-    i32 previous_area = -1, colour = -1;
-    static const u8 colours[8][3] = {{255, 63, 0},  {255, 127, 0},  {255, 223, 0},  {0, 255, 63},
-                                     {0, 127, 255}, {191, 31, 255}, {255, 31, 191}, {255, 255, 255}};
-    for (i32 row = 0; row <= rows; ++row, y += dy) {
-        x = first_x;
-        for (i32 column = 0; column < collection->count_x; ++column, x += dx) {
-            const i32 i = row * collection->count_x + column;
-            if (i >= collection->count_y)
-                continue;
-            COLLECTID *item = &collection->list[i];
-            item->grid_y = y;
-            item->grid_x = x;
-            if (__builtin_expect(alpha <= 0.0f, 0))
-                continue;
-            i32 object = i == selected ? (menu_flash ? 168 : 166) : 167;
-            f32 opacity = CutScenePlayer_CanStart(ids[i]) ? alpha : 0.375f * alpha;
-            DrawPanel3DObject(x, y, 1.0f, scale, scale, scale, 0, 0, 0, &WORLD->lev_objs[object].special, 0, opacity);
-            menu->item_x[i] = x;
-            menu->item_y[i] = y;
-            menu->item_width[i] = scale * 0.5f;
-            menu->item_height[i] = 0.0f;
-            char text[32];
-            sprintf(text, "%i", i + 1);
-            i32 area = LDataList[player->clips[ids[i]].level_id].area_index;
-            if (__builtin_expect(area != previous_area, 1)) {
-                previous_area = area;
-                if (++colour > 7)
-                    colour = 7;
-            }
-            const f32 text_scale = scale * 3.5f;
-            Text3DEx(text, x, y, 1.0f, text_scale * 0.925f, text_scale, text_scale, 0, colours[colour][0],
-                     colours[colour][1], colours[colour][2], static_cast<u8>(static_cast<i32>(opacity * 128.0f)));
-        }
-    }
-}
+void CutScenePlayer_DrawGrid(COLLECTION_s *collection, i16 *ids, float x, float y, i32 selected, float alpha);
 
 void CutScenePlayer_Configure(char *file, VARIPTR *buffer, VARIPTR *, i16 *clip_text, i16 *intro, i16 *midtro,
                               i16 *outro, i16 *ending) {

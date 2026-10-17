@@ -381,15 +381,7 @@ f32 CurrentHintButtonScale() {
 void initGameHintSys_Batman() {
 }
 
-i32 IndyUnlocked_UpdateHint(HINT_s *hint) {
-    i32 control_mode = MechInputTouchSystem::s_baseControlMode;
-    if (hint->completion_flags[control_mode] != 0 || WORLD->current_level != HUB_LDATA)
-        return 0;
-    if (FadeSys.fade != 0.0f || Game.indy_unlocked == 0)
-        return 0;
-    hint->pad_0x05[0] = 4;
-    return 1;
-}
+i32 IndyUnlocked_UpdateHint(HINT_s *hint);
 
 static __used__ i32 Sith_UpdateHint(HINT_s *) {
     if (FreePlay == 0 || (WORLD->area != NULL && WORLD->area == HUB_ADATA) || player == NULL ||

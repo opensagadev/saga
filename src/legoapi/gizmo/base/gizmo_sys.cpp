@@ -106,33 +106,7 @@ void LoadGizmoSys(GIZMOSYS_s *gizmo_sys, void *world, char *config_file) {
         gizmo_sys->flags &= ~GIZMOSYS_FLAG_LOADING;
     }
 }
-void Hub_LoadAndFixUpMiniKits(WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end) {
-    buf->addr = ALIGN(buf->addr, 4);
-    world->hub_minikits = reinterpret_cast<HUBMINIKIT_s *>(buf->addr);
-    buf->addr = ALIGN(buf->addr + static_cast<usize>(AREACOUNT) * sizeof(HUBMINIKIT_s), 4);
-    world->minikit_pieces_buf = reinterpret_cast<HUBMINIKITPIECES_s **>(buf->addr);
-    memset(world->minikit_pieces_buf, 0, static_cast<usize>(AREACOUNT) * sizeof(*world->minikit_pieces_buf));
-    buf->addr += static_cast<usize>(AREACOUNT) * sizeof(*world->minikit_pieces_buf);
-
-    for (i32 i = 0; i < AREACOUNT; ++i) {
-        world->minikit_pieces_buf[i] = NULL;
-        if ((ADataList[i].flags & AREAFLAG_MINIKIT) == 0 || ADataList[i].minikit_id == -1) {
-            continue;
-        }
-        world->minikit_pieces_buf[i] = reinterpret_cast<HUBMINIKITPIECES_s *>(buf->addr);
-        buf->addr += 0x18;
-        MiniKit_Load(reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[i]), ADataList[i].minikit_id, buf, buf_end,
-                     NULL);
-        MINIKIT *minikit = reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[i]);
-        if (minikit->gscn == NULL) {
-            world->minikit_pieces_buf[i] = NULL;
-            buf->addr -= 0x18;
-        } else {
-            MiniKit_InitPieces(minikit, 10, buf, buf_end);
-            minikit->field_0x9 = static_cast<i8>(i);
-        }
-    }
-}
+void Hub_LoadAndFixUpMiniKits(WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end);
 void MiniKit_Load(MINIKIT *minikit, i32 id, VARIPTR *buf, VARIPTR *buf_end, void *param) {
     (void)param;
     minikit->gscn = NULL;

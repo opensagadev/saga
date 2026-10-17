@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 82.9144,
+    "fuzzy_match_percent": 82.91158,
     "total_code": "4722419",
-    "matched_code": "651902",
-    "matched_code_percent": 13.804409,
+    "matched_code": "652045",
+    "matched_code_percent": 13.807437,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
@@ -47962,14 +47962,6 @@
           "match_percent": 99.60919
         },
         {
-          "name": "_Z23CutScenePlayer_DrawGridP12COLLECTION_sPsffif",
-          "demangled_name": "CutScenePlayer_DrawGrid(COLLECTION_s*, short*, float, float, int, float)",
-          "address": 1778832,
-          "offset": 888864,
-          "size": 1273,
-          "match_percent": 71.96911
-        },
-        {
           "name": "_ZL9copyAnimsP13NUGCUTSCENE_sS0_",
           "demangled_name": "copyAnims(NUGCUTSCENE_s*, NUGCUTSCENE_s*)",
           "address": 4401120,
@@ -51283,14 +51275,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizmo_sys.o",
       "functions": [
         {
-          "name": "_Z24Hub_LoadAndFixUpMiniKitsP11WORLDINFO_sP9variptr_uS2_",
-          "demangled_name": "Hub_LoadAndFixUpMiniKits(WORLDINFO_s*, variptr_u*, variptr_u*)",
-          "address": 1740416,
-          "offset": 850448,
-          "size": 383,
-          "match_percent": 48.59406
-        },
-        {
           "name": "_Z12MiniKit_LoadP7MINIKITiP9variptr_uS2_Pv",
           "demangled_name": "MiniKit_Load(MINIKIT*, int, variptr_u*, variptr_u*, void*)",
           "address": 4806192,
@@ -51328,7 +51312,7 @@
           "address": 4916048,
           "offset": 4026080,
           "size": 182,
-          "match_percent": 94.166664
+          "match_percent": 100.0
         }
       ]
     },
@@ -58288,14 +58272,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z21GetFreePlayCollectioni",
-          "demangled_name": "GetFreePlayCollection(int)",
-          "address": 1732848,
-          "offset": 842880,
-          "size": 63,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z19TotalLevelCoinTallyP11WORLDINFO_sPjS1_S1_S1_S1_S1_S1_",
           "demangled_name": "TotalLevelCoinTally(WORLDINFO_s*, unsigned int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*)",
           "address": 1988416,
@@ -63865,14 +63841,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z18Percent_UpdateHintP6HINT_s",
-          "demangled_name": "Percent_UpdateHint(HINT_s*)",
-          "address": 1761280,
-          "offset": 871312,
-          "size": 344,
-          "match_percent": 84.08889
-        },
-        {
           "name": "_Z33MechHintUIButton_OnClick_CallbackR18MechTouchUIElementR11TouchHolder",
           "demangled_name": "MechHintUIButton_OnClick_Callback(MechTouchUIElement&, TouchHolder&)",
           "address": 5139808,
@@ -64213,14 +64181,6 @@
           "offset": 640592,
           "size": 9,
           "match_percent": 100.0
-        },
-        {
-          "name": "_Z23IndyUnlocked_UpdateHintP6HINT_s",
-          "demangled_name": "IndyUnlocked_UpdateHint(HINT_s*)",
-          "address": 1761632,
-          "offset": 871664,
-          "size": 140,
-          "match_percent": 94.74359
         },
         {
           "name": "_Z21ShinyMetal_UpdateHintP6HINT_s",
@@ -64934,109 +64894,6 @@
       ]
     },
     {
-      "name": "legoapi/menus/screens/arcade.cpp.o",
-      "source": "src/legoapi/menus/screens/arcade.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/arcade.o",
-      "functions": [
-        {
-          "name": "_Z24Arcade_BothPlayersActivev",
-          "demangled_name": "Arcade_BothPlayersActive()",
-          "address": 1730384,
-          "offset": 840416,
-          "size": 12,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z14Arcade_GetModePj",
-          "demangled_name": "Arcade_GetMode(unsigned int*)",
-          "address": 1730400,
-          "offset": 840432,
-          "size": 95,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z17Arcade_ResetPanelv",
-          "demangled_name": "Arcade_ResetPanel()",
-          "address": 1730496,
-          "offset": 840528,
-          "size": 26,
-          "match_percent": 99.875
-        },
-        {
-          "name": "_Z18Arcade_UpdatePaneli",
-          "demangled_name": "Arcade_UpdatePanel(int)",
-          "address": 1730528,
-          "offset": 840560,
-          "size": 190,
-          "match_percent": 99.931816
-        },
-        {
-          "name": "_Z16Arcade_DrawPaneli",
-          "demangled_name": "Arcade_DrawPanel(int)",
-          "address": 1730720,
-          "offset": 840752,
-          "size": 327,
-          "match_percent": 99.888885
-        },
-        {
-          "name": "_Z17Arcade_AwardPointiii",
-          "demangled_name": "Arcade_AwardPoint(int, int, int)",
-          "address": 1731056,
-          "offset": 841088,
-          "size": 338,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z19Arcade_PlayerKilledii",
-          "demangled_name": "Arcade_PlayerKilled(int, int)",
-          "address": 1731408,
-          "offset": 841440,
-          "size": 149,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z15Arcade_AIKilledi",
-          "demangled_name": "Arcade_AIKilled(int)",
-          "address": 1731568,
-          "offset": 841600,
-          "size": 389,
-          "match_percent": 99.27907
-        },
-        {
-          "name": "_Z20Arcade_CoinCollectediPjj",
-          "demangled_name": "Arcade_CoinCollected(int, unsigned int*, unsigned int)",
-          "address": 1731968,
-          "offset": 842000,
-          "size": 369,
-          "match_percent": 99.35107
-        },
-        {
-          "name": "_Z11Arcade_Killii",
-          "demangled_name": "Arcade_Kill(int, int)",
-          "address": 1732352,
-          "offset": 842384,
-          "size": 102,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z20Arcade_UpdateEndMenuP6MENU_s",
-          "demangled_name": "Arcade_UpdateEndMenu(MENU_s*)",
-          "address": 1732464,
-          "offset": 842496,
-          "size": 153,
-          "match_percent": 99.92105
-        },
-        {
-          "name": "_Z18Arcade_DrawEndMenuP6MENU_s",
-          "demangled_name": "Arcade_DrawEndMenu(MENU_s*)",
-          "address": 1732624,
-          "offset": 842656,
-          "size": 209,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
       "name": "legoapi/menus/screens/credits.cpp.o",
       "source": "src/legoapi/menus/screens/credits.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/credits.o",
@@ -65256,54 +65113,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z13MenuInitClipsP6MENU_s",
-          "demangled_name": "MenuInitClips(MENU_s*)",
-          "address": 1790096,
-          "offset": 900128,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z15MenuUpdateClipsP6MENU_s",
-          "demangled_name": "MenuUpdateClips(MENU_s*)",
-          "address": 1790112,
-          "offset": 900144,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z13MenuDrawClipsP6MENU_s",
-          "demangled_name": "MenuDrawClips(MENU_s*)",
-          "address": 1790128,
-          "offset": 900160,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z16MenuInitFreePlayP6MENU_s",
-          "demangled_name": "MenuInitFreePlay(MENU_s*)",
-          "address": 1795136,
-          "offset": 905168,
-          "size": 9,
-          "match_percent": 33.333332
-        },
-        {
-          "name": "_Z18MenuUpdateFreePlayP6MENU_s",
-          "demangled_name": "MenuUpdateFreePlay(MENU_s*)",
-          "address": 1795152,
-          "offset": 905184,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z16MenuDrawFreePlayP6MENU_s",
-          "demangled_name": "MenuDrawFreePlay(MENU_s*)",
-          "address": 1795184,
-          "offset": 905216,
-          "size": 39,
-          "match_percent": 100.0
-        },
-        {
           "name": "RemapAddr",
           "demangled_name": "RemapAddr",
           "address": 2926464,
@@ -65485,7 +65294,7 @@
           "address": 4351104,
           "offset": 3461136,
           "size": 314,
-          "match_percent": 99.95522
+          "match_percent": 99.283585
         },
         {
           "name": "_Z13MenuEnterSaveP6MENU_s",
@@ -66613,22 +66422,6 @@
           "offset": 8976,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_Z15ResetIconWibblev",
-          "demangled_name": "ResetIconWibble()",
-          "address": 1732912,
-          "offset": 842944,
-          "size": 117,
-          "match_percent": 99.818184
-        },
-        {
-          "name": "_Z16UpdateIconWibblev",
-          "demangled_name": "UpdateIconWibble()",
-          "address": 1735600,
-          "offset": 845632,
-          "size": 689,
-          "match_percent": 99.70588
         },
         {
           "name": "_Z20InitStatusScreen_LSWP11WORLDINFO_sP14STATUSPACKET_s",
@@ -87059,6 +86852,118 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z24Arcade_BothPlayersActivev",
+          "demangled_name": "Arcade_BothPlayersActive()",
+          "address": 1730384,
+          "offset": 840416,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z14Arcade_GetModePj",
+          "demangled_name": "Arcade_GetMode(unsigned int*)",
+          "address": 1730400,
+          "offset": 840432,
+          "size": 95,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z17Arcade_ResetPanelv",
+          "demangled_name": "Arcade_ResetPanel()",
+          "address": 1730496,
+          "offset": 840528,
+          "size": 26,
+          "match_percent": 99.875
+        },
+        {
+          "name": "_Z18Arcade_UpdatePaneli",
+          "demangled_name": "Arcade_UpdatePanel(int)",
+          "address": 1730528,
+          "offset": 840560,
+          "size": 190,
+          "match_percent": 99.931816
+        },
+        {
+          "name": "_Z16Arcade_DrawPaneli",
+          "demangled_name": "Arcade_DrawPanel(int)",
+          "address": 1730720,
+          "offset": 840752,
+          "size": 327,
+          "match_percent": 99.888885
+        },
+        {
+          "name": "_Z17Arcade_AwardPointiii",
+          "demangled_name": "Arcade_AwardPoint(int, int, int)",
+          "address": 1731056,
+          "offset": 841088,
+          "size": 338,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z19Arcade_PlayerKilledii",
+          "demangled_name": "Arcade_PlayerKilled(int, int)",
+          "address": 1731408,
+          "offset": 841440,
+          "size": 149,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z15Arcade_AIKilledi",
+          "demangled_name": "Arcade_AIKilled(int)",
+          "address": 1731568,
+          "offset": 841600,
+          "size": 389,
+          "match_percent": 99.27907
+        },
+        {
+          "name": "_Z20Arcade_CoinCollectediPjj",
+          "demangled_name": "Arcade_CoinCollected(int, unsigned int*, unsigned int)",
+          "address": 1731968,
+          "offset": 842000,
+          "size": 369,
+          "match_percent": 99.35107
+        },
+        {
+          "name": "_Z11Arcade_Killii",
+          "demangled_name": "Arcade_Kill(int, int)",
+          "address": 1732352,
+          "offset": 842384,
+          "size": 102,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z20Arcade_UpdateEndMenuP6MENU_s",
+          "demangled_name": "Arcade_UpdateEndMenu(MENU_s*)",
+          "address": 1732464,
+          "offset": 842496,
+          "size": 153,
+          "match_percent": 99.92105
+        },
+        {
+          "name": "_Z18Arcade_DrawEndMenuP6MENU_s",
+          "demangled_name": "Arcade_DrawEndMenu(MENU_s*)",
+          "address": 1732624,
+          "offset": 842656,
+          "size": 209,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z21GetFreePlayCollectioni",
+          "demangled_name": "GetFreePlayCollection(int)",
+          "address": 1732848,
+          "offset": 842880,
+          "size": 63,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z15ResetIconWibblev",
+          "demangled_name": "ResetIconWibble()",
+          "address": 1732912,
+          "offset": 842944,
+          "size": 117,
+          "match_percent": 99.818184
+        },
+        {
           "name": "_Z22Hub_InitFreePlaySelectiii",
           "demangled_name": "Hub_InitFreePlaySelect(int, int, int)",
           "address": 1733040,
@@ -87075,12 +86980,20 @@
           "match_percent": 67.81642
         },
         {
+          "name": "_Z16UpdateIconWibblev",
+          "demangled_name": "UpdateIconWibble()",
+          "address": 1735600,
+          "offset": 845632,
+          "size": 689,
+          "match_percent": 99.70588
+        },
+        {
           "name": "_Z24Hub_UpdateFreePlaySelectv",
           "demangled_name": "Hub_UpdateFreePlaySelect()",
           "address": 1736304,
           "offset": 846336,
           "size": 4058,
-          "match_percent": 60.43561
+          "match_percent": 60.452408
         },
         {
           "name": "_Z8Hub_LoadP11WORLDINFO_sP9variptr_uS2_",
@@ -87091,12 +87004,20 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z24Hub_LoadAndFixUpMiniKitsP11WORLDINFO_sP9variptr_uS2_",
+          "demangled_name": "Hub_LoadAndFixUpMiniKits(WORLDINFO_s*, variptr_u*, variptr_u*)",
+          "address": 1740416,
+          "offset": 850448,
+          "size": 383,
+          "match_percent": 48.59406
+        },
+        {
           "name": "_Z16Hub_InitMiniKitsP11WORLDINFO_s",
           "demangled_name": "Hub_InitMiniKits(WORLDINFO_s*)",
           "address": 1740800,
           "offset": 850832,
           "size": 479,
-          "match_percent": 99.37838
+          "match_percent": 99.78378
         },
         {
           "name": "_Z18Hub_UpdateMiniKitsP11WORLDINFO_s",
@@ -87176,7 +87097,7 @@
           "address": 1759792,
           "offset": 869824,
           "size": 700,
-          "match_percent": 90.844826
+          "match_percent": 92.05173
         },
         {
           "name": "_Z9Hub_ResetP11WORLDINFO_s",
@@ -87193,6 +87114,22 @@
           "offset": 871264,
           "size": 45,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z18Percent_UpdateHintP6HINT_s",
+          "demangled_name": "Percent_UpdateHint(HINT_s*)",
+          "address": 1761280,
+          "offset": 871312,
+          "size": 344,
+          "match_percent": 78.4
+        },
+        {
+          "name": "_Z23IndyUnlocked_UpdateHintP6HINT_s",
+          "demangled_name": "IndyUnlocked_UpdateHint(HINT_s*)",
+          "address": 1761632,
+          "offset": 871664,
+          "size": 140,
+          "match_percent": 94.74359
         },
         {
           "name": "_Z15HubShopUnlockedv",
@@ -87224,7 +87161,7 @@
           "address": 1761824,
           "offset": 871856,
           "size": 4330,
-          "match_percent": 99.9217
+          "match_percent": 99.93848
         },
         {
           "name": "_Z10Hub_InMenuv",
@@ -87240,7 +87177,7 @@
           "address": 1766272,
           "offset": 876304,
           "size": 10455,
-          "match_percent": 49.840157
+          "match_percent": 49.837692
         },
         {
           "name": "_Z14Hub_ResetPanelv",
@@ -87256,7 +87193,15 @@
           "address": 1776848,
           "offset": 886880,
           "size": 1979,
-          "match_percent": 84.28175
+          "match_percent": 84.57044
+        },
+        {
+          "name": "_Z23CutScenePlayer_DrawGridP12COLLECTION_sPsffif",
+          "demangled_name": "CutScenePlayer_DrawGrid(COLLECTION_s*, short*, float, float, int, float)",
+          "address": 1778832,
+          "offset": 888864,
+          "size": 1273,
+          "match_percent": 71.96911
         },
         {
           "name": "_ZL16DrawEpisodesMenuif",
@@ -87264,7 +87209,7 @@
           "address": 1780112,
           "offset": 890144,
           "size": 5526,
-          "match_percent": 70.65147
+          "match_percent": 70.72547
         },
         {
           "name": "_Z16MenuInitEpisodesP6MENU_s",
@@ -87272,7 +87217,7 @@
           "address": 1785648,
           "offset": 895680,
           "size": 264,
-          "match_percent": 85.253525
+          "match_percent": 85.46479
         },
         {
           "name": "_Z18MenuUpdateEpisodesP6MENU_s",
@@ -87280,7 +87225,7 @@
           "address": 1785920,
           "offset": 895952,
           "size": 3429,
-          "match_percent": 53.75033
+          "match_percent": 53.77036
         },
         {
           "name": "_Z16MenuDrawEpisodesP6MENU_s",
@@ -87291,12 +87236,36 @@
           "match_percent": 85.803925
         },
         {
+          "name": "_Z13MenuInitClipsP6MENU_s",
+          "demangled_name": "MenuInitClips(MENU_s*)",
+          "address": 1790096,
+          "offset": 900128,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z15MenuUpdateClipsP6MENU_s",
+          "demangled_name": "MenuUpdateClips(MENU_s*)",
+          "address": 1790112,
+          "offset": 900144,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z13MenuDrawClipsP6MENU_s",
+          "demangled_name": "MenuDrawClips(MENU_s*)",
+          "address": 1790128,
+          "offset": 900160,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z18MenuInitSelectModeP6MENU_s",
           "demangled_name": "MenuInitSelectMode(MENU_s*)",
           "address": 1790144,
           "offset": 900176,
           "size": 214,
-          "match_percent": 99.655174
+          "match_percent": 96.206894
         },
         {
           "name": "_Z20MenuUpdateSelectModeP6MENU_s",
@@ -87312,7 +87281,7 @@
           "address": 1790384,
           "offset": 900416,
           "size": 903,
-          "match_percent": 70.101524
+          "match_percent": 75.045685
         },
         {
           "name": "_Z17MenuInitBonusModeP6MENU_s",
@@ -87328,7 +87297,7 @@
           "address": 1791440,
           "offset": 901472,
           "size": 2720,
-          "match_percent": 54.934067
+          "match_percent": 54.906593
         },
         {
           "name": "_Z17MenuDrawBonusModeP6MENU_s",
@@ -87336,7 +87305,31 @@
           "address": 1794160,
           "offset": 904192,
           "size": 974,
-          "match_percent": 88.446075
+          "match_percent": 88.37255
+        },
+        {
+          "name": "_Z16MenuInitFreePlayP6MENU_s",
+          "demangled_name": "MenuInitFreePlay(MENU_s*)",
+          "address": 1795136,
+          "offset": 905168,
+          "size": 9,
+          "match_percent": 33.333332
+        },
+        {
+          "name": "_Z18MenuUpdateFreePlayP6MENU_s",
+          "demangled_name": "MenuUpdateFreePlay(MENU_s*)",
+          "address": 1795152,
+          "offset": 905184,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16MenuDrawFreePlayP6MENU_s",
+          "demangled_name": "MenuDrawFreePlay(MENU_s*)",
+          "address": 1795184,
+          "offset": 905216,
+          "size": 39,
+          "match_percent": 98.75
         },
         {
           "name": "_Z20Hub_ActivateDoorMenuPP11LEVELDATA_s",
@@ -87352,7 +87345,7 @@
           "address": 1795760,
           "offset": 905792,
           "size": 9054,
-          "match_percent": 43.330948
+          "match_percent": 41.350502
         },
         {
           "name": "_Z17Hub_MakeModelListv",
@@ -126037,6 +126030,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126055,6 +126049,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126073,6 +126068,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126091,6 +126087,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126109,6 +126106,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126127,6 +126125,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126145,6 +126144,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126163,6 +126163,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126181,6 +126182,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126199,6 +126201,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126217,6 +126220,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126235,6 +126239,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126253,6 +126258,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126271,6 +126277,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126289,6 +126296,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126307,6 +126315,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126325,6 +126334,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126343,6 +126353,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126361,6 +126372,7 @@
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126947,6 +126959,7 @@
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126962,6 +126975,7 @@
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126977,6 +126991,7 @@
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -127005,6 +127020,7 @@
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -127020,6 +127036,7 @@
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -127035,6 +127052,7 @@
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/world/level.cpp.o",
+        "legoapi/world/levels/hub.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -129695,7 +129713,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 460,
+    "bazel_units": 459,
     "functions": 13454,
     "assigned_functions": 12843,
     "ambiguous_functions": 284,

@@ -30,7 +30,6 @@ extern f32 ICONXPOS_TOUCHYFEELY;
 extern f32 ICONYPOS_TOUCHYFEELY;
 extern f32 ICONXPOS_VIRTUALS;
 extern f32 ICONYPOS_VIRTUALS;
-static NUVEC PercentHint_TriggerPos = {-28.421f, 0.0f, -52.462f};
 f32 (*Hint_AlphaTargetFn)();
 i32 (*Hub_PanelBusyFn)();
 extern i32 only_process_this_hint_id;
@@ -725,31 +724,7 @@ static __used__ nuhspecial_s *GameMsg_GetExtraObj(GAMEMESSAGE_s *message);
 
 static __used__ void GameMsg_EndDelay_Game(GAMEMESSAGE_s *message);
 
-i32 Percent_UpdateHint(HINT_s *hint) {
-    i32 control_mode = MechInputTouchSystem::s_baseControlMode;
-    if (hint->completion_flags[control_mode] != 0 || WORLD->current_level != HUB_LDATA || FadeSys.fade != 0.0f ||
-        Game_CompletionSave == NULL || Game_CompletionSave[0] < COMPLETIONPOINTS)
-        return 0;
-
-    i32 active_players = 0;
-    i32 nearby_players = 0;
-    GameObject_s *object = Player[0];
-    if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0) {
-        active_players++;
-        if (NuVecXZDistSqr(&object->apiobj.position, &PercentHint_TriggerPos, NULL) < 4.0f)
-            nearby_players++;
-    }
-    object = Player[1];
-    if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0) {
-        active_players++;
-        if (NuVecXZDistSqr(&object->apiobj.position, &PercentHint_TriggerPos, NULL) < 4.0f)
-            nearby_players++;
-    }
-    if (active_players != nearby_players || active_players <= 0)
-        return 0;
-    hint->pad_0x05[0] = 4;
-    return 1;
-}
+i32 Percent_UpdateHint(HINT_s *hint);
 
 void RegisterWithHintSys(void (*update_fn)(HINT_s *, i32), HINT_s *hints, u32 *save_bits, i32 save_bit_count) {
     hintsys.update_fn = update_fn;
