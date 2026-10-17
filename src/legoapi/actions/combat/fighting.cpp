@@ -46,9 +46,7 @@ BLADE_s BladeTab[4] = {
     {107, 227, 4, 62, 67, {200, 0, 255}, {0, 0, 0}},
 };
 
-bool IsDownSwipe(NuVec2 const &start, NuVec2 const &end) {
-    return abs(RotDiff(NuAtan2D(end.x - start.x, end.y - start.y), 0x8000)) < 0x1c72;
-}
+bool IsDownSwipe(NuVec2 const &start, NuVec2 const &end);
 
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");

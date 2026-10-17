@@ -1,5 +1,8 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
-#include "MechInputTouch_types.h"
+#include "MechInputTouch/MechInputTouch_types.h"
 #include "gameapi/gui/apimenu.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/items/base/collection.h"
@@ -18,6 +21,107 @@ f32 MechInputTouchMenuController::PackButtonY = 0.0f;
 bool MechInputTouchMenuController::PackButtonActive = false;
 NuVec2 MechInputTouchMenuController::LastTouchPos = {0.0f, 0.0f};
 
+// ==== src/legoapi/core/startup/virtual.cpp: declarations ====
+#include "legoapi/legoapi_types.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/numath/nutrig.h"
+
+i32 GetMenuID();
+
+// ==== src/legoapi/core/input/gamepads.cpp: declarations ====
+
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/misc/androidbatman.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/menus/screens/gamestructure.h"
+#include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/items/collect/spacelevel.h"
+#include "nu2api/numusic/numusic.h"
+#include "legoapi/props/system/socksys.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/world.h"
+#include "nu2api/nucore/NuInputDevice.h"
+#include "nu2api/nucore/nupad.h"
+
+#include <string.h>
+
+// Original bss @0x127a500: 64 pads x 0x60 bytes.
+// Original bss @0x127a4e0.
+
+// Two frames of direction history for each local player.  MovePlayer shifts
+// these before accepting the new input; GamePad_Rotate then reports a stable
+// angular velocity only when both consecutive turns agree.
+
+f32 GamePad_Rotate(GameObject_s *object);
+
+// ==== src/legoapi/misc/legoapi_misc.cpp: declarations ====
+#include "gameframework/saveload.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/misc/utilities.h"
+#include "legoapi/world/levels/episode.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/nufloat.h"
+
+// ==== src/legoapi/actions/combat/hits.cpp: declarations ====
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/actions/character/speederchase.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/items/base/apiobject.h"
+
+#include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/world/world_shared.h"
+#include "legoapi/render/core/terrain.h"
+#include "nu2api/numath/nuang.h"
+#include "legoapi/audio/sfx.h"
+#include <stdio.h>
+
+// ==== src/legoapi/core/net/netplay.cpp: declarations ====
+#include "legoapi/core/net/netplay.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/render/core/screen.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/world/mission.h"
+#include "nu2api/nusound/nusound.h"
+
+// ==== functions in original address order ====
+
+// ==== functions in original address order ====
+
+void MechInputTouchMenuController::Update(NuInputTouchData const *input) {
+    for (i32 index = 0; index < 4; ++index) {
+        stick_values[index] = 0.0f;
+    }
+    if (input != NULL) {
+        i32 *counter = &AnyTouchesThisFrame;
+        i32 zero = 0;
+        i32 remaining = *counter - 1;
+        if (remaining < 0) {
+            *counter = zero;
+        } else {
+            *counter = remaining;
+        }
+    }
+}
+
+void MechInputTouchMenuController::Render() {
+}
+
+bool MechInputTouchMenuController::OnDoubleClick(GameObject_s &, TouchHolder &) {
+    return false;
+}
+
+bool MechInputTouchMenuController::OnSwipe(GameObject_s &, TouchHolder &, i32) {
+    return false;
+}
+
 void MechInputTouchMenuController::Activate() {
     MechSystems::Get()->gesture_tracking_system.RegisterGestureTracker(*this, 50);
 }
@@ -26,65 +130,15 @@ void MechInputTouchMenuController::Deactivate() {
     MechSystems::Get()->gesture_tracking_system.UnregisterGestureTracker(*this);
 }
 
-MechInputTouchMenuController::MechInputTouchMenuController(i32 player_id)
-    : MechInputTouchMainController(player_id), field_70(0), field_74(0), field_78(0) {
-    MechSystems::Get()->gesture_tracking_system.RegisterGestureTracker(*this, 50);
+void MechInputTouchMenuController::UpdateButtons(i32 button) {
+    bool pressed = button < 0;
+    if (!pressed && backButtonPressedLastFrame) {
+        PerformPauseButtonStuff();
+    }
+    backButtonPressedLastFrame = pressed;
 }
 
-bool MechInputTouchMenuController::OnClick(GameObject_s &, TouchHolder &holder) {
-    const volatile NuVec2 &touch = holder.touch_position;
-    const f32 touch_y = touch.y;
-    const f32 touch_x = touch.x;
-    if (!PackButtonActive) {
-        return false;
-    }
-    PackButtonActive = false;
-    NUVEC delta = {touch_x - PackButtonX, touch_y - PackButtonY, 0.0f};
-    delta.x /= GetAspectRatio();
-    if (NuVecMag(&delta) < PackButtonW) {
-        PackButtonPressed = true;
-        return true;
-    }
-    return false;
-}
-
-bool MechInputTouchMenuController::OnDoubleClick(GameObject_s &, TouchHolder &) {
-    return false;
-}
-
-bool MechInputTouchMenuController::OnDown(GameObject_s &, TouchHolder &holder) {
-    if (field_70 != NULL) {
-        return false;
-    }
-
-    MENU &menu = GameMenu[GameMenuLevel];
-    const volatile NuVec2 &touch_position = holder.down_position;
-    const f32 touch_y = touch_position.y;
-    const f32 touch_x = touch_position.x;
-    LastTouchTime = GlobalTimer.time_elapsed;
-    if (GetMenuID() == 17) {
-        COLLECTION_s *collection = GetFreePlayCollection(hub_freeplay_area);
-        const f32 radius = fabsf(0.5f * collection->field_14);
-        for (i32 index = 0; index < collection->count_y; ++index) {
-            const COLLECTID &item = collection->list[index];
-            NUVEC delta = {touch_x - item.grid_x, touch_y - item.grid_y, 0.0f};
-            delta.x /= GetAspectRatio();
-            if (NuVecMag(&delta) < radius) {
-                menu.queued_item = index;
-                return true;
-            }
-        }
-    }
-
-    field_74 = &menu;
-    field_70 = &holder;
-    field_78 = GetMenuID() == 12;
-    if (!PackButtonActive) {
-        return false;
-    }
-    NUVEC delta = {touch_x - PackButtonX, touch_y - PackButtonY, 0.0f};
-    delta.x /= GetAspectRatio();
-    return NuVecMag(&delta) < PackButtonW;
+MechInputTouchMenuController::~MechInputTouchMenuController() {
 }
 
 bool MechInputTouchMenuController::OnHold(GameObject_s &, TouchHolder &holder) {
@@ -244,36 +298,115 @@ bool MechInputTouchMenuController::OnRelease(GameObject_s &, TouchHolder &holder
     return false;
 }
 
-bool MechInputTouchMenuController::OnSwipe(GameObject_s &, TouchHolder &, i32) {
+bool MechInputTouchMenuController::OnClick(GameObject_s &, TouchHolder &holder) {
+    const volatile NuVec2 &touch = holder.touch_position;
+    const f32 touch_y = touch.y;
+    const f32 touch_x = touch.x;
+    if (!PackButtonActive) {
+        return false;
+    }
+    PackButtonActive = false;
+    NUVEC delta = {touch_x - PackButtonX, touch_y - PackButtonY, 0.0f};
+    delta.x /= GetAspectRatio();
+    if (NuVecMag(&delta) < PackButtonW) {
+        PackButtonPressed = true;
+        return true;
+    }
     return false;
 }
 
-void MechInputTouchMenuController::Render() {
-}
-
-void MechInputTouchMenuController::Update(NuInputTouchData const *input) {
-    for (i32 index = 0; index < 4; ++index) {
-        stick_values[index] = 0.0f;
+bool MechInputTouchMenuController::OnDown(GameObject_s &, TouchHolder &holder) {
+    if (field_70 != NULL) {
+        return false;
     }
-    if (input != NULL) {
-        i32 *counter = &AnyTouchesThisFrame;
-        i32 zero = 0;
-        i32 remaining = *counter - 1;
-        if (remaining < 0) {
-            *counter = zero;
-        } else {
-            *counter = remaining;
+
+    MENU &menu = GameMenu[GameMenuLevel];
+    const volatile NuVec2 &touch_position = holder.down_position;
+    const f32 touch_y = touch_position.y;
+    const f32 touch_x = touch_position.x;
+    LastTouchTime = GlobalTimer.time_elapsed;
+    if (GetMenuID() == 17) {
+        COLLECTION_s *collection = GetFreePlayCollection(hub_freeplay_area);
+        const f32 radius = fabsf(0.5f * collection->field_14);
+        for (i32 index = 0; index < collection->count_y; ++index) {
+            const COLLECTID &item = collection->list[index];
+            NUVEC delta = {touch_x - item.grid_x, touch_y - item.grid_y, 0.0f};
+            delta.x /= GetAspectRatio();
+            if (NuVecMag(&delta) < radius) {
+                menu.queued_item = index;
+                return true;
+            }
         }
     }
-}
 
-void MechInputTouchMenuController::UpdateButtons(i32 button) {
-    bool pressed = button < 0;
-    if (!pressed && backButtonPressedLastFrame) {
-        PerformPauseButtonStuff();
+    field_74 = &menu;
+    field_70 = &holder;
+    field_78 = GetMenuID() == 12;
+    if (!PackButtonActive) {
+        return false;
     }
-    backButtonPressedLastFrame = pressed;
+    NUVEC delta = {touch_x - PackButtonX, touch_y - PackButtonY, 0.0f};
+    delta.x /= GetAspectRatio();
+    return NuVecMag(&delta) < PackButtonW;
 }
 
-MechInputTouchMenuController::~MechInputTouchMenuController() {
+MechInputTouchMenuController::MechInputTouchMenuController(i32 player_id)
+    : MechInputTouchMainController(player_id), field_70(0), field_74(0), field_78(0) {
+    MechSystems::Get()->gesture_tracking_system.RegisterGestureTracker(*this, 50);
 }
+
+void VirtualControlDPad_LockButton::Process(float) {
+    const f32 button_radius_x = radius_x;
+    const f32 button_radius_y = radius_y;
+    position = dpad->position;
+    const f32 desired_y = dpad->position.y - (dpad->position.w * 0.75f + button_radius_y);
+    const f32 desired_x = dpad->position.z * 0.75f + button_radius_x + dpad->position.x;
+    position.x = MAX(button_radius_x - 0.975f, MIN(desired_x, 0.1f));
+    position.y = MAX(button_radius_y - 0.975f, MIN(desired_y, 1.0f - button_radius_y));
+    alpha = alpha_to = hovered != 0 ? 1.0f : 0.4f;
+    alpha_elapsed = alpha_duration;
+    scale = scale_to = hovered != 0 ? 1.2f : 1.0f;
+    scale_elapsed = scale_duration;
+}
+
+void VirtualControlDPad_OnDown_Callback(MechTouchUIElement &element, TouchHolder &touch) {
+    f32 *offset = reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(&element) + 0x80);
+    offset[0] = element.position.x - touch.down_position.x;
+    offset[1] = element.position.y - touch.down_position.y;
+}
+
+void VirtualControlButton_OnDown_Callback(MechTouchUIElement &, TouchHolder &) {
+}
+
+void VirtualControlButtonMover_OnDown_Callback(MechTouchUIElement &element, TouchHolder &touch) {
+    f32 *offset = reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(&element) + 0x7c);
+    offset[0] = element.position.x - touch.down_position.x;
+    offset[1] = element.position.y - touch.down_position.y;
+}
+
+void VirtualControlButton::Render() {
+    MechTouchUITexButton::Render();
+}
+
+void VirtualControlDPad_LockButton::Render() {
+    MechTouchUITexButton::Render();
+}
+
+void VirtualControlButton::Process(float) {
+    if (hovered != 0 && GetMenuID() != 25) {
+        MechSystems::Get()->gesture_controller->button_was_pressed[button_type] = 1;
+        MechInputTouchVirtualConsoleController::s_noInputTimer = 20.0f;
+    }
+
+    alpha = alpha_to = hovered != 0 || MechInputTouchVirtualConsoleController::s_noInputTimer < 0.0f ? 1.0f : 0.4f;
+    alpha_elapsed = alpha_duration;
+    scale = scale_to = hovered != 0 ? 1.2f : 1.0f;
+    scale_elapsed = scale_duration;
+    if (MechInputTouchVirtualConsoleController::s_noInputTimer < 0.0f) {
+        const f32 pulse =
+            1.0f +
+            0.05f * NU_SIN_LUT(static_cast<i32>(MechInputTouchVirtualConsoleController::s_noInputTimer * 65536.0f));
+        scale = scale_to = scale * pulse;
+    }
+}
+

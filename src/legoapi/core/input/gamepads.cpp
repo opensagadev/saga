@@ -78,33 +78,13 @@ void NewBuzzFrames(nupad_s *pad, i32 frames, i32);
 
 void NewRumbleAllPlayers(float strength, float duration, i32 frames, i32);
 
-void VirtualControlDPad_OnDown_Callback(MechTouchUIElement &element, TouchHolder &touch) {
-    f32 *offset = reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(&element) + 0x80);
-    offset[0] = element.position.x - touch.down_position.x;
-    offset[1] = element.position.y - touch.down_position.y;
-}
+void VirtualControlDPad_OnDown_Callback(MechTouchUIElement &element, TouchHolder &touch);
 
-void VirtualControlButton_OnDown_Callback(MechTouchUIElement &, TouchHolder &) {
-}
+void VirtualControlButton_OnDown_Callback(MechTouchUIElement &, TouchHolder &);
 
-void VirtualControlButtonMover_OnDown_Callback(MechTouchUIElement &element, TouchHolder &touch) {
-    f32 *offset = reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(&element) + 0x7c);
-    offset[0] = element.position.x - touch.down_position.x;
-    offset[1] = element.position.y - touch.down_position.y;
-}
+void VirtualControlButtonMover_OnDown_Callback(MechTouchUIElement &element, TouchHolder &touch);
 
-void VirtualControlDPad_LockButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &) {
-    GameAudio_PlaySfx(0x30, NULL, 0, 0);
-    if (SuperOptions.dpad_locked == 0) {
-        SuperOptions.dpad_locked = 1;
-        static_cast<MechTouchUITexButton &>(element).UpdateTexture(
-            MechInputTouchVirtualConsoleController::s_textures[7]);
-    } else {
-        SuperOptions.dpad_locked = 0;
-        static_cast<MechTouchUITexButton &>(element).UpdateTexture(
-            MechInputTouchVirtualConsoleController::s_textures[6]);
-    }
-}
+void VirtualControlDPad_LockButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
 i32 NoPad(i32 port, i32 require_game_input);
 
