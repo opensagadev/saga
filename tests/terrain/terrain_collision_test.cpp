@@ -3,12 +3,11 @@
 // sections are discarded by the diagnostic linker. Collision and square-root
 // logic is real.
 #ifndef TERRAIN_SOURCE
-#define TERRAIN_SOURCE "legoapi/render/core/terrain.cpp"
+#define TERRAIN_SOURCE "legoapi/render/core/gameliball.cpp"
 #endif
 #include TERRAIN_SOURCE
 #include "nu2api/numath/nufloat_android.c"
 
-TERRSET *CurTerr;
 i32 terrhitflags;
 f32 NuTrigTable[NUTRIGTABLE_COUNT];
 static unsigned failures, checks, cases;

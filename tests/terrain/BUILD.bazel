@@ -1,6 +1,7 @@
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
 
-# Actual terrain implementation with bounded query fixtures, no engine assets.
+# Actual terrain implementation (inside the gameliball.cpp unit) with bounded
+# query fixtures, no engine assets.
 # Linux i686 diagnostic; requires a 32-bit C++ toolchain and GLES2 headers.
 cc_test(
     name = "terrain_collision_test",
@@ -23,6 +24,8 @@ cc_test(
         "-Wl,--gc-sections",
     ],
     target_compatible_with = ["@platforms//os:linux"],
+    # The rebuilt gameliball.cpp unit pulls in the sound types.
+    deps = ["@libvorbis//:vorbis_headers"],
 )
 
 cc_test(
@@ -51,7 +54,10 @@ cc_test(
 cc_test(
     name = "terrain_impact_test",
     size = "small",
-    srcs = ["terrain_impact_test.cpp"],
+    srcs = [
+        "terrain_impact_alloc.cpp",
+        "terrain_impact_test.cpp",
+    ],
     additional_compiler_inputs = ["//src:all_source_files"],
     defines = ["ANDROID"],
     copts = [
@@ -70,4 +76,5 @@ cc_test(
         "-Wl,--gc-sections",
     ],
     target_compatible_with = ["@platforms//os:linux"],
+    deps = ["@libvorbis//:vorbis_headers"],
 )

@@ -37,3 +37,15 @@ cc_library(
         allow_empty = True,
     ),
 )
+
+# Header-only view for host diagnostics that compile engine sources but link
+# no audio code.
+cc_library(
+    name = "ogg_headers",
+    hdrs = [
+        "include/ogg/config_types.h",
+        "include/ogg/ogg.h",
+        "include/ogg/os_types.h",
+    ],
+    includes = ["include"],
+)

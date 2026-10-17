@@ -1,17 +1,20 @@
 // Exercise production impact dispatch and deflection with controlled track allocation.
 // The allocation fixture can replace TerI, exposing stale query-pointer reads.
 #ifndef TERRAIN_SOURCE
-#define TERRAIN_SOURCE "legoapi/render/core/terrain.cpp"
+#define TERRAIN_SOURCE "legoapi/render/core/gameliball.cpp"
 #endif
+// The engine allocator lives in the same unit as the impact code, so it is made
+// weak here and terrain_impact_alloc.cpp supplies the fixture allocator.
+struct TERRAIN_TRACK_SLOT;
+TERRAIN_TRACK_SLOT *AllocTerrId() __attribute__((weak));
 #include TERRAIN_SOURCE
 #include "nu2api/numath/nufloat_android.c"
-TERRSET *CurTerr;
 i32 terrhitflags;
 f32 NuTrigTable[NUTRIGTABLE_COUNT];
 static TERRAIN_TRACK_SLOT allocated;
 static TerrainQuery_s swapped;
 static bool swap_query;
-TERRAIN_TRACK_SLOT *AllocTerrId() {
+TERRAIN_TRACK_SLOT *ImpactFixtureAllocTerrId() {
     if (swap_query)
         TerI = &swapped;
     return &allocated;
