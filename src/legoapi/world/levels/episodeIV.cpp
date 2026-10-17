@@ -62,7 +62,7 @@ struct BLOCKADERUNNERD_LEVFLAG_s {
 
 static_assert(sizeof(BLOCKADERUNNERD_LEVFLAG_s) == 0x10, "LevFlag size");
 extern i32 LevFlag[4];
-#define LevFlag_BR (*reinterpret_cast<BLOCKADERUNNERD_LEVFLAG_s *>(LevFlag))
+#define LEV_FLAG_BR (*reinterpret_cast<BLOCKADERUNNERD_LEVFLAG_s *>(LevFlag))
 i32 test_tb = 1;
 void *deathstarescapeb_netpacket;
 u8 tatooineA_nodesNeedUpdating = 1;
@@ -9431,8 +9431,8 @@ void BlockadeRunnerC_Init(WORLDINFO_s *world) {
 void BlockadeRunnerD_Reset(WORLDINFO_s *world) {
     LevGizmo[0] = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, "obstacle15");
     LevGizmo[1] = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, "obstacle14");
-    LevFlag_BR.obstacle15_active = 0;
-    LevFlag_BR.obstacle14_active = 0;
+    LEV_FLAG_BR.obstacle15_active = 0;
+    LEV_FLAG_BR.obstacle14_active = 0;
 }
 
 void BlockadeRunnerD_Update(WORLDINFO_s *world) {
@@ -9460,21 +9460,21 @@ void BlockadeRunnerD_Update(WORLDINFO_s *world) {
     }
 
     if (GizmoGetOutput(world->gizmo_sys, LevGizmo[0], 1, 1) != 0) {
-        if (LevFlag_BR.obstacle15_active == 0) {
-            LevFlag_BR.obstacle15_active = 1;
+        if (LEV_FLAG_BR.obstacle15_active == 0) {
+            LEV_FLAG_BR.obstacle15_active = 1;
             BlockadeRunnerD_EjectCreature(0);
         }
     } else {
-        LevFlag_BR.obstacle15_active = 0;
+        LEV_FLAG_BR.obstacle15_active = 0;
     }
 
     if (GizmoGetOutput(world->gizmo_sys, LevGizmo[1], 1, 1) != 0) {
-        if (LevFlag_BR.obstacle14_active == 0) {
-            LevFlag_BR.obstacle14_active = 1;
+        if (LEV_FLAG_BR.obstacle14_active == 0) {
+            LEV_FLAG_BR.obstacle14_active = 1;
             BlockadeRunnerD_EjectCreature(1);
         }
     } else {
-        LevFlag_BR.obstacle14_active = 0;
+        LEV_FLAG_BR.obstacle14_active = 0;
     }
 }
 

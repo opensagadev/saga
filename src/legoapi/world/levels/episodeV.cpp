@@ -53,7 +53,7 @@
 extern "C" i32 dagobah_training;
 extern i32 obstacle_gizmotype_id;
 extern i32 LevFlag[4];
-#define LevFlag_u8 (reinterpret_cast<u8 *>(LevFlag))
+#define LEV_FLAG_U8 (reinterpret_cast<u8 *>(LevFlag))
 extern MechWeakPtr<MechObjectInterface, 4> BobaRocketTarget;
 extern "C" i16 id_PROBEDROID, id_ATST_LOWRES, id_ATAT;
 GIZPANEL_s *LevGizPanel;
@@ -6502,7 +6502,7 @@ void AsteroidChaseB_Init(WORLDINFO_s *world) {
             classicBlowups[count++] = blowup;
         }
     }
-    LevFlag_u8[0] = 0;
+    LEV_FLAG_U8[0] = 0;
     LevArea[0] = AISysFindArea(WORLD->ai_sys, "In_Cave");
     drawLights = 0;
     LevTime[0] = 0.0f;
@@ -6528,12 +6528,12 @@ void AsteroidChaseB_Update(WORLDINFO_s *world) {
         if (blowup != NULL) {
             const i32 mask = 1 << index;
             if ((blowup->output_flags & 1) != 0) {
-                if ((LevFlag_u8[0] & mask) == 0) {
-                    LevFlag_u8[0] |= mask;
+                if ((LEV_FLAG_U8[0] & mask) == 0) {
+                    LEV_FLAG_U8[0] |= mask;
                     AddMiscPickups(&blowup->position, -1, -1, 1);
                 }
-            } else if ((LevFlag_u8[0] & mask) != 0) {
-                LevFlag_u8[0] &= ~mask;
+            } else if ((LEV_FLAG_U8[0] & mask) != 0) {
+                LEV_FLAG_U8[0] &= ~mask;
             }
         }
     }
@@ -6853,7 +6853,7 @@ void CloudCityTrapC_Panel(WORLDINFO_s *) {
 
 void CloudCityEscapeA_Init(WORLDINFO_s *world) {
     LevAIMessage[0] = CheckGizAIMessage(gizaimessagesys, "BobaFightStarted", NULL);
-    LevFlag_u8[0] = 0;
+    LEV_FLAG_U8[0] = 0;
     NuSpecialFind(world->current_gscn, &LevHSpecial[1], "gas_1", 1);
     NuSpecialFind(world->current_gscn, &LevHSpecial[2], "gas_2", 1);
     NuSpecialFind(world->current_gscn, &LevHSpecial[3], "gas_3", 1);
@@ -6894,9 +6894,9 @@ void CloudCityEscapeA_Reset(WORLDINFO_s *world) {
 }
 
 void CloudCityEscapeA_Update(WORLDINFO_s *) {
-    if (LevFlag_u8[0] == 0 && NuSpecialGetVisibilityFn(&LevHSpecial[0]) != 0) {
+    if (LEV_FLAG_U8[0] == 0 && NuSpecialGetVisibilityFn(&LevHSpecial[0]) != 0) {
         PlaySfx("env_ctrl_desk_on", NuSpecialGetDrawPos(&LevHSpecial[0]));
-        LevFlag_u8[0] = 1;
+        LEV_FLAG_U8[0] = 1;
     }
     TerSurface[14].flags = 0x2002;
     if (LevGizPanel == NULL || !LevGizPanel->state) {
