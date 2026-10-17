@@ -15,6 +15,7 @@
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/nusound/nusound.h"
 #include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/menus/core/lsw_text_data.inc"
 
 struct CUSTOMISER;
 struct GIZAIMESSAGESYS_s;
@@ -1268,7 +1269,6 @@ CHARVARIANT CharVariants_Game[23] = {
     {"walker_2legs"}, {"walker_4legs"}, {"hoverdroid"}, {"critter"},   {"naboostarfighter"},
     {"henchman"},     {NULL},           {NULL},
 };
-#include "legoapi/menus/core/lsw_text_data.inc"
 TEXTCRAWL_s TextCrawl_LSW = {&tCHAPTER, &tVEHICLEBONUS, &tCHARACTERBONUS, 3};
 
 void *theGameThings = NULL;

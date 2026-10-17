@@ -13,6 +13,26 @@
 #include "nu2api/nufile/nufpar.h"
 
 #include <string.h>
+#include "decomp.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/render/light/surfaces.h"
+#include "nu2api/numath/nutrig.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/items/collect/minikits.h"
+#include "legoapi/world/level.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/core/rtl.h"
+#include "nu2api/numath/numtx.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/render/fx.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nu3d/nurndr.h"
 
 GRABBER_s *Grab_grabber;
 
@@ -32,35 +52,17 @@ static NUFPCOMJMP Grabber_ConfigKeywords[] = {
 
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_grabber.cpp: all remaining content ====
-#include <string.h>
-#include "decomp.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/gizmo/object/gizmoblowups.h"
-#include "legoapi/items/objects/grabber.h"
-#include "legoapi/render/light/surfaces.h"
-#include "nu2api/nu3d/nuspecial.h"
 extern "C++" float FRAMETIME;
-#include "nu2api/numath/nutrig.h"
 extern "C" {
     struct nuvec_s;
     void PlaySfx(char *, nuvec_s *);
 }
-#include "legoapi/legoapi_types.h"
-#include "legoapi/gizmos/fx/gizmopickups.h"
-#include "legoapi/gizmo/object/gizmopickup.h"
-#include "legoapi/items/collect/minikits.h"
-#include "legoapi/world/level.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/render/core/rtl.h"
-#include "nu2api/numath/numtx.h"
 
 NUVEC *Grabber_GetGrabPos(GRABBER_s *grabber, numtx_s *matrix);
 
 
 // Static grabber victim-pos helper. Moved from gizmisc_stubs.cpp.
 
-static void Grabber_SetVictimPos(GRABBER_s *grabber);
 
 extern ADDPART_s Default_ADDPART;
 extern "C" PART_s *AddPart(ADDPART_s *);
@@ -69,10 +71,7 @@ void PartKill_Grabber(PART_s *, i32);
 static __attribute__((noinline, noclone)) void Grabber_Drop(GRABBER_s *grabber, NUVEC *previous_position)
     __asm__("_ZL12Grabber_DropP9GRABBER_sP7nuvec_s.isra.4");
 
-static void Grabber_Drop(GRABBER_s *grabber, NUVEC *previous_position);
 
-#include "gameapi/ai/aisys/aisys.h"
-#include "legoapi/characters/motion/gameanim.h"
 extern "C" {
     extern i16 id_GRABCONTROL, id_GRABR2CONTROL, id_GRABMACHINE;
     void PlaySfxAndSetPitch(char *, NUVEC *, f32);
@@ -93,19 +92,13 @@ void ConstantRumble(GameObject_s *, f32, f32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 void Hint_SetComplete(i32);
 GIZMOBLOWUP_s *FindNearestGizmoBlowUp(WORLDINFO_s *, NUVEC *, f32);
-static i32 IsGrabbable(GameObject_s *object);
 
-#include "legoapi/gizmo/base/gizmo.h"
 extern i32 obstacle_gizmotype_id;
 
-#include "legoapi/render/fx.h"
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 void PartKill_Grabber(PART_s *part, i32);
 
-#include "legoapi/characters/core/character.h"
-#include "nu2api/nucore/nuhgobj.h"
-#include "nu2api/nu3d/nurndr.h"
 extern i32 CHARSHADOWS_ON, Paused;
 extern MAKELAYERLISTFN MakeLayerList;
 void EnableShadowMapRendering(i32);

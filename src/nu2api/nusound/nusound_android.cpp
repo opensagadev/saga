@@ -15,6 +15,12 @@
 #include "nu2api/nucore/nucore.hpp"
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nusound/opensles_abi.hpp"
+#include "nu2api/nusound/nu2api_nusound_types.h"
+#include <new>
+#include <stdio.h>
+#include <string.h>
+#include "nu2api/nusound/nusound_streamer.hpp"
+#include <math.h>
 
 NuSoundAndroid NuSound;
 i32 NuSoundAndroid::m_workerThreadCount = 0;
@@ -42,12 +48,6 @@ namespace {
 // original drove OpenSL through its interface vtables; the exact slots
 // libTTapp.so used are reproduced below so the transcription stays faithful.
 
-#include "nu2api/nusound/nu2api_nusound_types.h"
-#include <new>
-#include <stdio.h>
-#include <string.h>
-#include "nu2api/nusound/nusound_streamer.hpp"
-#include <math.h>
 namespace {
 
     // OpenSL interface vtable slots as used by libTTapp.so.

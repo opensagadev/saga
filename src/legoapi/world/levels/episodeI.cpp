@@ -49,6 +49,22 @@
 #include "nu2api/numath/nuvec.h"
 
 #include "legoapi/world/levels/episodeI_types.h"
+#include "legoapi/core/net/netplay.h"
+#include "legoapi/render/core/screen.h"
+#include "legoapi/world/mission.h"
+#include "nu2api/nusound/nusound.h"
+#include "legogame/game.h"
+#include "legoapi/actions/character/speederchase.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/items/collect/spacelevel.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "gameapi/edtools/edcam.h"
+#include "gameapi/edtools/edui.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "legoapi/actions/character/speederchase_types.h"
 static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 extern struct LEVFLAGBYTES_s LevFlag;
 
@@ -167,9 +183,7 @@ static __used__ void PodRaceSnipersUpdate(void);
 
 static __used__ void PodRaceSnipersReset(void);
 
-static void *CreatePodRaceMine(nuvec_s *pos);
 
-static void RacePodAlign(racepod_s *pod, _vuv_s *direction, float blend);
 
 void Mine_Kill(PART_s *part, i32);
 
@@ -184,7 +198,6 @@ void Mine_Kill(PART_s *part, i32);
 static PODSPRINT_AISPLINE_BODY_ATTR void PodSprint_InitAISplineBody(PODSPRINT_AISPLINE_s *ai) __asm__(
     "_ZL22PodSprint_InitAISplineP11WORLDINFO_sP20PODSPRINT_AISPLINE_sPc.part.0");
 
-static PODSPRINT_AISPLINE_BODY_ATTR void PodSprint_InitAISplineBody(PODSPRINT_AISPLINE_s *ai);
 
 static inline void PodSprint_InitAISpline(WORLDINFO_s *world, PODSPRINT_AISPLINE_s *ai, char *name) {
     memset(ai, 0, sizeof(*ai));
@@ -200,7 +213,6 @@ static inline void PodSprint_InitAISpline(WORLDINFO_s *world, PODSPRINT_AISPLINE
 static __attribute__((noinline, noclone)) void UpdatePacemakerDisplayBody(LEVEL_OBJECT_RUNTIME_s **lev_objs) __asm__(
     "_ZL22UpdatePacemakerDisplayP11WORLDINFO_s.isra.7.part.8");
 
-static void UpdatePacemakerDisplayBody(LEVEL_OBJECT_RUNTIME_s **lev_objs);
 
 static inline void UpdatePacemakerDisplay(WORLDINFO_s *world) {
     if (pod_pacemaker != NULL) {
@@ -388,21 +400,6 @@ void SetPodMergeAnims(ANIMPACKET_s *packet, i32 index) {
 }
 
 // ==== src/legoapi/core/net/netplay.cpp: declarations ====
-#include "decomp.h"
-#include "legoapi/core/net/netplay.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/core/input/qrand.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/numath/nuvec.h"
-#include "globals.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/render/core/screen.h"
-#include "legoapi/world/world.h"
-#include "legoapi/world/area.h"
-#include "legoapi/world/level.h"
-#include "legoapi/world/levels/levels.h"
-#include "legoapi/world/mission.h"
-#include "nu2api/nusound/nusound.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
@@ -410,49 +407,10 @@ struct nunativegscene_s;
 
 
 // ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/nucore/nustring.h"
-#include "legoapi/core/input/qrand.h"
-#include "legoapi/audio/sfx.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/render/core/render.h"
-#include "legoapi/menus/core/gamehint.h"
-#include "legoapi/menus/core/panel.h"
-#include "legoapi/world/levels/levels.h"
-#include "legogame/game.h"
-#include "decomp.h"
-#include "legoapi/actions/character/speederchase.h"
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "globals.h"
-#include "legoapi/gizmo/base/gizmo.h"
-#include "legoapi/items/base/apiobject.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/actions/combat/hits.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/items/collect/spacelevel.h"
-#include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
-#include "legoapi/gizmos/object/gizobstacles.h"
-#include "legoapi/gizmo/object/gizmoblowups.h"
-#include "legoapi/world/level.h"
-#include "legoapi/world/world.h"
-#include "legoapi/world/world_shared.h"
-#include "gameapi/edtools/edcam.h"
-#include "gameapi/edtools/edui.h"
-#include "nu2api/numath/nuvec.h"
-#include "nu2api/numath/nurand.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "nu2api/nucore/nuanim3.h"
-#include "nu2api/nu3d/nutex.h"
-#include <string.h>
 
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 static i32 PodRaceKey[8] __attribute__((aligned(16))) = {-1, -1, -1, -1, -1, -1, -1, -1};
 
-#include "legoapi/actions/character/speederchase_types.h"
 
 
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");

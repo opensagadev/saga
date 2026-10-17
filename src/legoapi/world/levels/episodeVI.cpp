@@ -28,14 +28,9 @@
 #include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nutrig.h"
 #include "legoapi/core/input/qrand.h"
-extern "C" i32 GetSfxId(const char *);
-extern i32 testlaser_type;
-extern f32 testlaser_sizew, testlaser_sizel, testlaser_sizewab, testlaser_endw;
 #include "nu2api/nucore/nustring.h"
-#include "gameapi/ai/aisys/aisys.h"
 #include <stdio.h>
 #include <string.h>
-#include "legoapi/world/level.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
 #include "decomp.h"
@@ -49,6 +44,9 @@ extern f32 testlaser_sizew, testlaser_sizel, testlaser_sizewab, testlaser_endw;
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
+extern "C" i32 GetSfxId(const char *);
+extern i32 testlaser_type;
+extern f32 testlaser_sizew, testlaser_sizel, testlaser_sizewab, testlaser_endw;
 
 struct AIROW_s;
 struct nunativegscene_s;

@@ -43,6 +43,50 @@
 #include "legoapi/world/level.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nuportal.h"
+#include "legoapi/actions/character/suit.h"
+#include "legoapi/actions/character/streaks.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "legoapi/world/world_shared.h"
+#include "nu2api/nu3d/nulgtlaser.h"
+#include "legoapi/characters/core/charconfig.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/gizmos/object/lever.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmo/base/gizmessage.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/object/newblowup.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/transport/grapples.h"
+#include "legoapi/props/objects/tightrope.h"
+#include "legoapi/gizmos/door/spinner.h"
+#include "legoapi/gizmos/trigger/minicut.h"
+#include "legoapi/gizmos/transport/tubes.h"
+#include "legoapi/gizmos/traps/gizturrets.h"
+#include "legoapi/gizmos/trigger/ai.h"
+#include "legoapi/gizmos/trigger/giztimer.h"
+#include "legoapi/gizmos/trigger/gizrandom.h"
+#include "legoapi/gizmos/trigger/gizspecial.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/gizmos/door/plugs.h"
+#include "legoapi/gizmos/door/push.h"
+#include "legoapi/gizmos/fx/edgizshadowmachine.h"
+#include "legoapi/gizmos/transport/gizportal.h"
+#include "legoapi/props/objects/techno.h"
+#include "legoapi/world/areas.h"
+#include "legoapi/world/mission.h"
+#include "gameapi/edtools/edstubs.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nu3d/nudlist.h"
+#include <math.h>
+#include "legoapi/actions/character/specialmoves.h"
+#include "nu2api/numusic/numusic.h"
+#include "legoapi/characters/core/characters_types.h"
 
 f32 CustomiseMenuTime[2];
 GAMESAVE_s OldCustomiseGame = {};
@@ -88,7 +132,6 @@ void Hub_ClearStats();
 void Text_FillInExtendedSaveInfo();
 extern i16 tPLAYER1, tPLAYER2;
 
-static void UpdateCustomPieceAnim(CUSTOMPIECEANIM *anim, u16 minimum, u16 maximum);
 
 // Animations the customiser cycles through on the game's character preview, terminated by -1.
 i16 CustomiserActionList_Game[] = {97, 190, 98, 99, -1};
@@ -201,78 +244,7 @@ static i32 Customise_FindLetter(char character) {
 void Customiser_SetNameAndIcon(CUSTOMISER *customiser, i32 index);
 
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
-#include "nu2api/nu3d/nuportal.h"
-#include "decomp.h"
-#include "legoapi/actions/character/suit.h"
-#include "legoapi/actions/character/streaks.h"
-#include "gameapi/ai/aisys/aisys.h"
-#include "globals.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/world/world_shared.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/nulgtlaser.h"
-#include "nu2api/nu3d/nutex.h"
-#include "legoapi/core/input/qrand.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/characters/core/charconfig.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/items/base/collection.h"
-#include "legoapi/items/base/apiobject.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/menus/screens/store.h"
-#include "legoapi/menus/screens/gamestructure.h"
-#include "legoapi/menus/screens/shop.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/render/light/lighting.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/gizmos/object/lever.h"
-#include "legoapi/gizmos/door/zipups.h"
-#include "legoapi/gizmo/base/gizmo.h"
-#include "legoapi/gizmo/base/gizmessage.h"
-#include "legoapi/gizmos/object/gizobstacles.h"
-#include "legoapi/gizmos/object/gizbuildits.h"
-#include "legoapi/gizmos/object/newblowup.h"
-#include "legoapi/gizmos/fx/gizmopickups.h"
-#include "legoapi/gizmos/transport/grapples.h"
-#include "legoapi/props/objects/tightrope.h"
-#include "legoapi/gizmos/door/spinner.h"
-#include "legoapi/gizmos/trigger/minicut.h"
-#include "legoapi/gizmos/transport/tubes.h"
-#include "legoapi/gizmos/traps/gizturrets.h"
-#include "legoapi/gizmos/trigger/ai.h"
-#include "legoapi/gizmos/trigger/giztimer.h"
-#include "legoapi/gizmos/trigger/gizrandom.h"
-#include "legoapi/gizmos/trigger/gizspecial.h"
-#include "legoapi/props/doors/door.h"
-#include "legoapi/gizmos/door/plugs.h"
-#include "legoapi/gizmos/door/push.h"
-#include "legoapi/gizmos/fx/edgizshadowmachine.h"
-#include "legoapi/gizmos/transport/gizportal.h"
-#include "legoapi/props/objects/techno.h"
-#include "legoapi/world/level.h"
-#include "legoapi/world/areas.h"
-#include "legoapi/world/world.h"
-#include "legoapi/world/mission.h"
-#include "gameapi/ai/aisys/aisys.h"
-#include "gameapi/edtools/edstubs.h"
-#include "nu2api/nucore/bgproc.h"
-#include "nu2api/nu3d/nudlist.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nucore/nustring.h"
 
-#include <string.h>
-#include <stdio.h>
-#include <math.h>
-#include "legoapi/menus/core/text.h"
-#include "legoapi/actions/character/specialmoves.h"
-#include "legoapi/audio/audio.h"
-#include "legoapi/characters/core/customiser.h"
-#include "nu2api/numusic/numusic.h"
-#include "nu2api/numath/nutrig.h"
 
 // LoadPerm1 is one of the few game-level entry points which wires together
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
@@ -302,7 +274,6 @@ extern "C" i32 waiting_for_character;
 extern "C" {
 }
 
-#include "legoapi/characters/core/characters_types.h"
 
 
 

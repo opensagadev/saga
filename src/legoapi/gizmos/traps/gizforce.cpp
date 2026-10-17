@@ -2,20 +2,6 @@
 #include "legoapi/gizmo/base/GizForceObjectInterface.h"
 #include "legoapi/world/world.h"
 #include "legoapi/legoapi_types.h"
-
-u32 GizForce_TotalScore(void *world) {
-    GIZFORCESYS_s *system = static_cast<WORLDINFO_s *>(world)->giz_force_sys;
-    u32 total = 0;
-    if (system != NULL) {
-        GIZFORCE_s *item = system->forces;
-        if (item != NULL) {
-            for (i32 i = 0; i < system->count; ++i, ++item)
-                total += item->completion_score;
-        }
-    }
-    return total;
-}
-
 #include "batman.h"
 #include "decomp.h"
 #include "globals.h"
@@ -37,9 +23,7 @@ u32 GizForce_TotalScore(void *world) {
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/legoapi_types.h"
 #include "legoapi/world/area.h"
-#include "legoapi/world/world.h"
 #include "legoapi/world/level.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nuportal.h"
@@ -50,8 +34,22 @@ u32 GizForce_TotalScore(void *world) {
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numusic/sfx.h"
 #include "nu2api/nufile/nufpar.h"
-
 #include <string.h>
+
+u32 GizForce_TotalScore(void *world) {
+    GIZFORCESYS_s *system = static_cast<WORLDINFO_s *>(world)->giz_force_sys;
+    u32 total = 0;
+    if (system != NULL) {
+        GIZFORCE_s *item = system->forces;
+        if (item != NULL) {
+            for (i32 i = 0; i < system->count; ++i, ++item)
+                total += item->completion_score;
+        }
+    }
+    return total;
+}
+
+
 
 i32 force_gizmotype_id = -1;
 

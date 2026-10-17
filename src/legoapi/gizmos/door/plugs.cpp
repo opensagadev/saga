@@ -9,6 +9,13 @@
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/numtx.h"
+#include "legoapi/world/world_shared.h"
+#include "legoapi/items/base/apiobject.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "gameapi/ai/aisys/aiscript_types.h"
+#include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nutrig.h"
+#include <string.h>
 
 struct PLUGPROGRESS {
     i32 visible_mask[1];
@@ -18,49 +25,25 @@ struct PLUGPROGRESS {
 
 i32 plug_gizmotype_id = -1;
 
-static i32 Plugs_GetMaxGizmos(void *world_ptr);
 
-static void Plugs_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *);
 
-static void Plugs_Update(void *, void *, float);
 
-static void Plugs_Draw(void *, void *, float);
 
-static char *Plug_GetGizmoName(GIZMO *gizmo);
 
-static i32 Plug_GetOutput(GIZMO *gizmo, i32, i32);
 
-static char *Plug_GetOutputName(GIZMO *, i32);
 
-static i32 Plug_GetNumOutputs(GIZMO *);
 
-static void Plug_Activate(GIZMO *gizmo, i32 active);
 
-static void Plug_SetVisibility(GIZMO *gizmo, i32 visible);
 
-static NUVEC *Plug_GetPos(GIZMO *gizmo);
 
-static void *Plugs_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end);
 
-static void Plugs_ClearProgress(void *, void *progress_ptr);
 
-static void Plugs_StoreProgress(void *world_ptr, void *, void *progress_ptr);
 
-static void Plugs_Reset(void *world_ptr, void *, void *progress_ptr);
 
-static void *Plugs_ReserveBufferSpace(void *world_ptr);
 
-static i32 Plugs_Load(void *world_ptr, void *);
 
 // ==== src/legoapi/ai/core/ai_sys.cpp: declarations ====
-#include "legoapi/world/world_shared.h"
-#include "legoapi/items/base/apiobject.h"
-#include "gameapi/ai/aisys/aisys.h"
-#include "gameapi/ai/aisys/aiscript_types.h"
-#include "nu2api/numath/nuvec.h"
-#include "nu2api/numath/nutrig.h"
 
-#include <string.h>
 
 // ==== functions in original address order ====
 

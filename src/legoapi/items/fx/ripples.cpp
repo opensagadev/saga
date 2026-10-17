@@ -17,35 +17,6 @@
 
 #include <string.h>
 #include "nu2api/nu3d/nutex.h"
-
-static RIPPLEEFFECT_s *RE_rippleeffect;
-static WORLDINFO_s *RE_worldinfo;
-static ripple_node_s **eraselist;
-static i32 erasecount;
-
-void InitRippleMtl(char *name, numtl_s **result, variptr_u *buffer, variptr_u *buffer_end);
-
-extern "C" void NuMtlDestroy(numtl_s *);
-
-i32 LookupRippleEffectIndex(char *name);
-
-static void RE_end_radius(NUFPAR *parser);
-static void RE_start_radius(NUFPAR *parser);
-static void RE_life(NUFPAR *parser);
-static void RE_start_colour(NUFPAR *parser);
-static void RE_end_colour(NUFPAR *parser);
-static void RE_texture_name(NUFPAR *parser);
-static void RE_effect_type(NUFPAR *parser);
-static NUFPCOMJMP RippleEffect_ConfigKeywords[] = {{"texture_name", RE_texture_name},
-                                                   {"effect_type", RE_effect_type},
-                                                   {"start_colour", RE_start_colour},
-                                                   {"end_colour", RE_end_colour},
-                                                   {"life", RE_life},
-                                                   {"start_radius", RE_start_radius},
-                                                   {"end_radius", RE_end_radius},
-                                                   {NULL, NULL}};
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 #include "gameapi/edtools/edbri_internal.h"
 #include "gameapi/edtools/edstubs.h"
 #include "legoapi/render/core/render.h"
@@ -79,11 +50,9 @@ static NUFPCOMJMP RippleEffect_ConfigKeywords[] = {{"texture_name", RE_texture_n
 #include "legoapi/cutscenes/cutscenes.h"
 #include <stdio.h>
 #include <math.h>
-
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/numath/nutrig.h"
-
 #include "gameapi/gui/apimenu.h"
 #include "gameframework/saveload.h"
 #include "legoapi/characters/motion/gameanim.h"
@@ -99,7 +68,6 @@ static NUFPCOMJMP RippleEffect_ConfigKeywords[] = {{"texture_name", RE_texture_n
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world_shared.h"
 #include "nu2api/nu3d/nutexanm.h"
-
 #include "legoapi/render/core/SwipeDecalRenderer.h"
 #include "nu2api/nu3d/nuprim_internal.h"
 #include "nu2api/nu3d/nudlist.h"
@@ -118,6 +86,40 @@ static NUFPCOMJMP RippleEffect_ConfigKeywords[] = {{"texture_name", RE_texture_n
 #include "nu2api/numath/numath.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nupostparams.h"
+
+static RIPPLEEFFECT_s *RE_rippleeffect;
+static WORLDINFO_s *RE_worldinfo;
+static ripple_node_s **eraselist;
+static i32 erasecount;
+
+void InitRippleMtl(char *name, numtl_s **result, variptr_u *buffer, variptr_u *buffer_end);
+
+extern "C" void NuMtlDestroy(numtl_s *);
+
+i32 LookupRippleEffectIndex(char *name);
+
+static void RE_end_radius(NUFPAR *parser);
+static void RE_start_radius(NUFPAR *parser);
+static void RE_life(NUFPAR *parser);
+static void RE_start_colour(NUFPAR *parser);
+static void RE_end_colour(NUFPAR *parser);
+static void RE_texture_name(NUFPAR *parser);
+static void RE_effect_type(NUFPAR *parser);
+static NUFPCOMJMP RippleEffect_ConfigKeywords[] = {{"texture_name", RE_texture_name},
+                                                   {"effect_type", RE_effect_type},
+                                                   {"start_colour", RE_start_colour},
+                                                   {"end_colour", RE_end_colour},
+                                                   {"life", RE_life},
+                                                   {"start_radius", RE_start_radius},
+                                                   {"end_radius", RE_end_radius},
+                                                   {NULL, NULL}};
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+
+
+
 
 struct ripple_node_s;
 struct ripple_set_s;
@@ -144,8 +146,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
 
 void DrawRipple(ripple_node_s *node);
 
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/nu3d/nupostparams.h"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \

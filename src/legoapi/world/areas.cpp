@@ -36,15 +36,6 @@
 #include "nu2api/nufile/nufpar.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numusic/numusic.h"
-
-i32 openlevels = 0;
-
-static void AddToModelList(APICHARACTERMODELLIST_s *list, i32 *count, i32 capacity, i32 character_id, i32 load_model,
-                           EXTRAMODEL *extra_models);
-
-
-
-// ==== src/editor/edlevelall.cpp: declarations ====
 #include "gameapi/edtools/edcam.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "gameapi/edtools/gameapi_edtools_types.h"
@@ -57,19 +48,38 @@ static void AddToModelList(APICHARACTERMODELLIST_s *list, i32 *count, i32 capaci
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nucore/NuDynamicLight.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nurand.h"
+#include "nu2api/nufile/nufile.h"
+#include <new>
+#include <float.h>
+#include <stdio.h>
+#include "legoapi/render/core/screen.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/render/core/render.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/nusound/nusound.h"
+#include "legoapi/world/world.h"
+
+i32 openlevels = 0;
+
+
+
+
+// ==== src/editor/edlevelall.cpp: declarations ====
 #if defined(__i386__) && defined(__SSE__)
 #include <xmmintrin.h>
 #endif
 #if defined(__i386__) && defined(__SSE2__)
 #include <emmintrin.h>
 #endif
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nurand.h"
-#include "nu2api/nufile/nufile.h"
-#include <new>
-#include <float.h>
 
-#include <stdio.h>
 
 extern eduiiattr_s EdLevelAttr;
 
@@ -91,19 +101,7 @@ DECOMP_ASSERT(offsetof(EdMember, reference) == 0x04, "EdMember reference offset"
 
 
 // ==== src/legoapi/world/area.cpp: all remaining content ====
-#include "legoapi/render/core/screen.h"
 
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/core/input/timer.h"
-#include "legoapi/menus/core/text.h"
-#include "legoapi/render/core/render.h"
-#include "nu2api/nucore/nuapi.h"
-#include "nu2api/nucore/bgproc.h"
-#include "nu2api/nu3d/nudlist.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/nusound/nusound.h"
-#include "legoapi/world/world.h"
 
 struct APICHARACTERMODELLIST_s;
 

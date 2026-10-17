@@ -12,7 +12,6 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/motion/animlist.h"
 #include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/characters/motion.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/gizmo/base/HatMachineObjectInterface.h"
@@ -23,7 +22,6 @@
 #include "legoapi/render/light/shadow.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
-#include "legoapi/menus/core/gamehint.h"
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -65,42 +63,25 @@ struct HATMACHINEPROGRESS {
 
 i32 hatmachine_gizmotype_id = -1;
 
-static void HatMachine_Reset(HATMACHINE_s *machine);
 
-static i32 HatMachine_GetMaxGizmos(void *world_ptr);
 
-static char *HatMachine_GetGizmoName(GIZMO *gizmo);
 
-static i32 HatMachine_GetOutput(GIZMO *gizmo, i32, i32);
 
-static char *HatMachine_GetOutputName(GIZMO *, i32 output_index);
 
-static i32 HatMachine_GetNumOutputs(GIZMO *);
 
-static i32 HatMachine_Load(void *world_ptr, void *);
 
-static void *HatMachines_ReserveBufferSpace(void *world_ptr);
 
-static void HatMachines_ClearProgress(void *, void *progress_data);
 
-static void HatMachine_Update(void *world_ptr, void *, float elapsed);
 
-static void *HatMachines_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end);
 
-static void HatMachine_SetVisibility(GIZMO *gizmo, i32 visible);
 
-static void HatMachine_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *);
 
-static void HatMachines_StoreProgress(void *world_ptr, void *, void *progress_ptr);
 
 void Hat_GetAbsTargetPos(HATMACHINE_s *machine, NUVEC *position);
 
 
-static void HatMachines_Reset(void *world_ptr, void *, void *progress_ptr);
 
-static void HatMachine_Activate(GIZMO *gizmo, i32 enabled);
 
-static void HatMachine_Draw(void *world_ptr, void *, float);
 
 
 

@@ -15,6 +15,42 @@
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
+#include "legoapi/world/level.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/light/surfaces.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/world_shared.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/items/collect/bolts.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/characters/motion/chris.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nufile/nufpar.h"
+#include "legoapi/core/input/qrand.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "gameapi/edtools/edfile.h"
+#include "nu2api/numusic/sfx.h"
+#include "nu2api/numath/numtx_inline.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include <string.h>
+#include <stdio.h>
+#include "gameapi/edtools/gameapi_edtools_types.h"
+#include "gameframework/saveload.h"
+#include "legoapi/core/config/fileselect.h"
+#include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/world/mission.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nucore/nutime.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nucore/nupad.h"
+#include "nu2api/nufile/nufile.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
@@ -24,50 +60,13 @@ bool LineIntersectCircle(NUVEC *, NUVEC *, NUVEC *, f32);
 
 BOLT_s *FindIncomingBolt(GameObject_s *object, i32 exclude_players, i32 mark_direct_hit);
 
-void GuidedMissile_Kill(PART_s *part, i32 reason);
 
 void GuidedMissile_Move(PART_s *part, float time);
 
-void GuidedMissile_Deflect(PART_s *part);
 
 extern "C" i16 id_SPEEDERBIKE;
 
 // ==== src/legoapi/items/collect/bolts.cpp: declarations ====
-#include "legoapi/legoapi_types.h"
-#include "legoapi/world/world.h"
-#include "legoapi/world/level.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/render/light/surfaces.h"
-#include "legoapi/render/fx/parts.h"
-#include "globals.h"
-#include "legoapi/world/area.h"
-#include "legoapi/world/world_shared.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/gizmos/fx/gizmopickups.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/items/collect/bolts.h"
-#include "legoapi/items/collect/torpedo.h"
-#include "decomp.h"
-#include "legoapi/characters/motion/chris.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nufile/nufpar.h"
-#include "legoapi/core/input/qrand.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "gameapi/edtools/edfile.h"
-#include "gamelib/util/gamelib_util_types.h"
-#include "nu2api/numusic/sfx.h"
-#include "nu2api/numath/numtx.h"
-#include "nu2api/numath/numtx_inline.h"
-#include "nu2api/numath/nuvec.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/gizmo/base/gizmo.h"
-#include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
-#include "legoapi/gizmo/object/gizmoblowups.h"
-#include <string.h>
 
 struct spacelevel_s;
 
@@ -129,27 +128,7 @@ extern "C" {
 i8 BoltType_FindIDByName(char *name, WORLDINFO *world);
 
 // ==== src/legoapi/core/config/saveload.cpp: declarations ====
-#include "decomp.h"
-#include <stdio.h>
-#include <string.h>
 
-#include "gameapi/edtools/gameapi_edtools_types.h"
-#include "gameframework/saveload.h"
-#include "globals.h"
-#include "legoapi/core/config/fileselect.h"
-#include "legoapi/cutscenes/cutscenes.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/world/area.h"
-#include "legoapi/world/mission.h"
-#include "legoapi/world/world.h"
-#include "nu2api/nu3d/nuqfnt.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nucore/nutime.h"
-#include "nu2api/nucore/numemory.h"
-#include "nu2api/nucore/nupad.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/nu3d/nuspecial.h"
 
 extern void (*FS_Callback)(char *, char *);
 

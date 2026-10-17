@@ -40,7 +40,6 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/ai/core/ai_sys_stubs.h"
 #include "legoapi/world/level.h"
-#include "legoapi/world/mission.h"
 #include "legoapi/props/objects/techno.h"
 #include "legoapi/world/world.h"
 #include "legoapi/characters/motion.h"
@@ -65,7 +64,6 @@
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/core/input/timing.h"
-#include "legoapi/gizmos/transport/grapples.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nuqfnt.h"
@@ -79,7 +77,6 @@
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nulgtlaser.h"
-#include "nu2api/nu3d/nucamera.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/nugcutscene.h"
@@ -146,9 +143,7 @@ extern f32 text3d_height;
 void GameCam_HitRoll();
 void Tag_NewTransfer(GameObject_s *, GameObject_s *);
 
-static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
 
-static void TakeOver_SetAction(GameObject_s *rider, GameObject_s *vehicle);
 
 // GCC otherwise rewrites this once-called helper; the original has a separate local body.
 static __attribute__((noinline)) GameObject_s *Tag_FindGameObject_TRANSFER(GameObject_s *object) {

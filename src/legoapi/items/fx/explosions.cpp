@@ -15,28 +15,6 @@
 #include "nu2api/nu3d/nutex.h"
 
 #include <string.h>
-
-extern EXPLOSION Explosion[8];
-extern i32 i_explosion;
-
-void UpdateExplosion_Generic(EXPLOSION *);
-
-extern WORLDINFO_s *WORLD;
-extern "C" i32 ParticlesPerSecond(f32, f32);
-extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, u16, u16);
-i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
-PART_s *Bolt_HitParts(BOLT_s *, NUVEC *, NUVEC *, NUVEC *, f32, i32);
-i32 CannotKill(GameObject_s *);
-void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
-void NewBuzz(nupad_s *, f32, i32);
-void NewRumble(nupad_s *, f32, i32);
-void NewRumbleAllPlayers(f32, f32, i32, i32);
-void GameCam_HitJudder();
-GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
-
-void UpdateExplosion_Generic(EXPLOSION *explosion);
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 #include "gameapi/edtools/edbri_internal.h"
 #include "gameapi/edtools/edstubs.h"
 #include "legoapi/render/core/render.h"
@@ -71,10 +49,8 @@ void UpdateExplosion_Generic(EXPLOSION *explosion);
 #include "legoapi/cutscenes/cutscenes.h"
 #include <stdio.h>
 #include <math.h>
-
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nucamera.h"
-
 #include "gameapi/gui/apimenu.h"
 #include "gameframework/saveload.h"
 #include "legoapi/characters/motion/gameanim.h"
@@ -89,7 +65,6 @@ void UpdateExplosion_Generic(EXPLOSION *explosion);
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world_shared.h"
 #include "nu2api/nu3d/nutexanm.h"
-
 #include "legoapi/render/core/SwipeDecalRenderer.h"
 #include "nu2api/nu3d/nuprim_internal.h"
 #include "nu2api/nu3d/nudlist.h"
@@ -109,6 +84,30 @@ void UpdateExplosion_Generic(EXPLOSION *explosion);
 #include "nu2api/numath/numath.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nupostparams.h"
+
+extern EXPLOSION Explosion[8];
+extern i32 i_explosion;
+
+void UpdateExplosion_Generic(EXPLOSION *);
+
+extern WORLDINFO_s *WORLD;
+extern "C" i32 ParticlesPerSecond(f32, f32);
+extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, u16, u16);
+i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
+PART_s *Bolt_HitParts(BOLT_s *, NUVEC *, NUVEC *, NUVEC *, f32, i32);
+i32 CannotKill(GameObject_s *);
+void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
+void GameCam_HitJudder();
+GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
+
+void UpdateExplosion_Generic(EXPLOSION *explosion);
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+
+
+
 
 // Camera zoom state
 
@@ -130,8 +129,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
 
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/nu3d/nupostparams.h"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \

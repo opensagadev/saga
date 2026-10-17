@@ -51,11 +51,8 @@ i32 app_tbdrawset;
 
 static u8 s_SystemPausedTracks[2];
 
-static void SystemDidBecomeActiveCallback(const NuPhoneOSMessageData *);
 
-static void SystemPauseCallback(const NuPhoneOSMessageData *);
 
-static void TouchCallback(const NuPhoneOSMessageData *message);
 
 
 

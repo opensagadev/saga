@@ -5,6 +5,9 @@
 #include "nu2api/nu3d/nuvport.h"
 
 #include <string.h>
+#include "nu2api/numath/vuvec_internal.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nuspecial.h"
 
 extern "C" {
     NUGLOBALRNDRSTATE render_state = {};
@@ -15,9 +18,6 @@ extern "C" {
     }
 }
 
-#include "nu2api/numath/vuvec_internal.h"
-#include "nu2api/nu3d/nudlist.h"
-#include "nu2api/nu3d/nuspecial.h"
 
 extern "C" {
     static void RndrStateClear(NUGLOBALRNDRSTATE *state) {

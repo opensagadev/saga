@@ -12,7 +12,6 @@
 #include "legoapi/world/world_shared.h"
 #include "legoapi/render/fx.h"
 #include "nu2api/nucore/nustring.h"
-#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/core/input/qrand.h"
@@ -28,6 +27,153 @@
 #include "nu2api/nufile/nufile.h"
 
 #include <string.h>
+#include "gameapi/edtools/gameapi_edtools_types.h"
+#include "gameapi/edtools/edpart_internal.h"
+#include "gameapi/edtools/edui.h"
+#include "gameapi/edtools/edcam.h"
+#include "gameapi/edtools/edstubs.h"
+#include "gameapi/edtools/edfile.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/numusic/sfx.h"
+#include <stdio.h>
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/core/terrain_internal.h"
+#include "legoapi/render/core/gameliball.h"
+#include "legoapi/render/fx/game_deb.h"
+#include "gameapi/edtools/edpp_internal.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/numtx_inline.h"
+#include "nu2api/numath/nurand.h"
+#include "nu2api/nu3d/nuportal.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
+#include "nu2api/nu3d/android/nurain_android.h"
+#include "nu2api/nu3d/android/nuptl_android.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nurndr.h"
+#include <math.h>
+#include <stddef.h>
+#include "legoapi/render/core/terrain_stubs_types.h"
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "gameapi/gui/apimenu.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/render/core/rtl.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/gizmo/object/giztorpedo.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/world/world.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/core/customiser.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/world/levels/levels.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "legoapi/render/fx/edsplines.h"
+#include <float.h>
+#include "gameapi/edtools/edanim_internal.h"
+#include "gameapi/edtools/edgra.h"
+#include "gameapi/edtools/edui_colour.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nucore/numouse.h"
+#include "nu2api/nucore/nukeyboard.h"
+#include "nu2api/nucore/nupad.h"
+#include "gameapi/edtools/edbri_internal.h"
+#include "gameapi/edtools/edrender.h"
+#include "gameapi/edtools/edgra_internal.h"
+#include "nu2api/nucore/nutime.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/android/nuobject_android.h"
+#include "nu2api/nucore/nuvideo.h"
+#include <stdlib.h>
+#include "gameframework/saveload.h"
+#include <cstdio>
+#include "gameapi/edtools/edtools_types.h"
+#include "legoapi/misc/utilities.h"
+#include "nu2api/nucore/NuDynamicLight.h"
+#include "nu2api/nu3d/nuspline.h"
+#include <new>
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "gameapi/gui/apimenu_internal.h"
+#include "legoapi/core/config/fileselect.h"
+#include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/menus/screens/gamestructure.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/render/core/render.h"
+#include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/nulgtlaser.h"
+#include "nu2api/numath/nuvec4.h"
+#include "nu2api/nucore/nuonline.h"
+#include <stdarg.h>
+#include <GLES2/gl2.h>
+#include "nu2api/nucore/numem.h"
+#include "nu2api/nu3d/nutexanm.h"
+#include "nu2api/nu3d/android/nutex_ios_ex.h"
+#include "java/android.h"
+#include "java/java.h"
+#include "nu2api/nucore/common.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/NuInputDevice.h"
+#include "nu2api/nucore/NuInputManager.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nuspecial_internal.h"
+#include "nu2api/nu3d/nupostresources.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nu3d/nuocclusion.h"
+#include "nu2api/nu3d/nurendercontext.h"
+#include "nu2api/nu3d/nuscreen.hpp"
+#include "nu2api/numath/nuquat.h"
+#include "nu2api/nu3d/NuRenderDevice.h"
+#include "nu2api/nucore/nuvuvec.hpp"
+#include "legoapi/menus/core/gamehint.h"
+#include "legogame/game.h"
+#include "legoapi/actions/character/speederchase.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/items/collect/spacelevel.h"
+#include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/actions/character/speederchase_types.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/props/system/socksys.h"
+#include "legoapi/render/fx/spline_position.h"
+#include "nu2api/numath/nuang.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "legoapi/gizmos/object/newblowup.h"
+#include "legoapi/cutscenes/minicamcut.h"
+#include "legoapi/props/objects/techno.h"
+#include "legoapi/characters/motion/camera_types.h"
+#include "nu2api/nufile/nufilepak.h"
+#include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/actions/character/transform.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/actions/character/snake.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "legoapi/render/light/fade_material.h"
+#include "nu2api/nu3d/android/nuportal_android.h"
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/world/levels/episode.h"
+#include "legoapi/render/core/SwipeDecalRenderer.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
+#include "nu2api/nu3d/android/nugscn_android.h"
+#include "nu2api/numath/numath.h"
+#include "nu2api/nu3d/nupostparams.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
@@ -35,10 +181,8 @@ struct SHOPINPUT;
 
 extern f32 BUCK_RIDERJUMPCLEARANCE;
 extern void (*BuckStartExtraFn)(GameObject_s *);
-void NewRumble(nupad_s *, f32, i32);
 
 
-f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
 pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, pushblock_s **support);
@@ -56,22 +200,7 @@ void LevelObjects_InitForLevel(WORLDINFO_s *world);
 void EquivalentObjects_Configure(WORLDINFO_s *world, char *config);
 
 // ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
-#include "decomp.h"
-#include "gameapi/edtools/gameapi_edtools_types.h"
-#include "gameapi/edtools/edpart_internal.h"
-#include "gameapi/edtools/edui.h"
-#include "legoapi/legoapi_types.h"
-#include "gameapi/edtools/edcam.h"
-#include "gameapi/edtools/edstubs.h"
-#include "gameapi/edtools/edfile.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/numusic/sfx.h"
 
-#include <stdio.h>
-#include <string.h>
 
 void edpartDoInput(nupad_s *pad);
 void edpartDetermineNearest(f32 distance);
@@ -126,7 +255,6 @@ extern "C" {
     extern part_emit_s *edpart_nearest_emit;
     extern part_type_s part_types[128];
     extern part_emit_s part_emits[40];
-    extern i32 EDPP_MAX_TYPES;
     extern i32 part_types_used;
     extern i32 part_emits_used;
     extern i32 part_platimpactcnt;
@@ -134,7 +262,6 @@ extern "C" {
     extern i32 part_page_used[8];
     extern NUGSCN *part_scene[32];
     extern i32 part_scene_pageid[32];
-    extern NUGSCN *edbits_base_scene;
     extern NUGSCN *edbits_things_scene;
     extern char edbits_general_save_directory[256], edbits_general_save_name[256], edbits_general_save_extension[256];
     extern char edbits_level_save_directory[256], edbits_level_save_name[256], edbits_level_save_extension[256];
@@ -257,7 +384,6 @@ static i32 edpart_count;
 static i32 edpart_superscale = 1;
 static NUVEC edpart_entry_position;
 extern "C" {
-    extern void *ed_fnt;
     extern u32 edblack[4];
     extern u32 edgrey[4];
     extern eduimenu_s *edpart_sscale_menu;
@@ -274,55 +400,9 @@ extern "C" {
     extern part_typedesc_s part_types[128];
 }
 
-static void edpartChangeCutOff(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeSScale(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeInstanceFlag(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeIvalOn(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeIvalOnRan(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeIvalOff(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeIvalOffRan(eduimenu_s *, eduiitem_s *, u32);
-static void edpartSetScaleFactor(eduimenu_s *, eduiitem_s *, u32);
 static void edpartApplyScaleType(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeDebrisScale(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeInstanceScale(eduimenu_s *, eduiitem_s *, u32);
-static void edpartCancelCutOffMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelSScaleMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelEmitTimeMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelScaleTypeMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelDebrisScaleMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelInstanceScaleMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelChangeGenRateMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelChangeNameMenu(eduimenu_s *, eduimenu_s *);
 
-static void edpartChangeGrav(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeBounce(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeTintR(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeTintG(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeTintB(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeEmitVel(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeVarEmit(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeVarStart(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeMaxLife(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeRanMaxLife(eduimenu_s *, eduiitem_s *, u32);
-static void edpartCancelGravMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelTintMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelEmitVelMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelVarEmitMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelVarStartMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelChangeMaxLifeMenu(eduimenu_s *, eduimenu_s *);
 static void edpartSoundIDMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edpartSoundControlMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edpartCancelSoundXMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelSoundsMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelSoundIDMenu(eduimenu_s *, eduimenu_s *);
-static void edpartSwitchTypeMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edpartSetSwitchId(eduimenu_s *, eduiitem_s *, u32);
-static void edpartCancelSwitchMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelSwitchTypeMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelSoundControlMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelDataMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelEmitMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelDebrisSettingsMenu(eduimenu_s *, eduimenu_s *);
 static void edpartChangeNameMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartDeleteType(eduimenu_s *, eduiitem_s *, u32);
 static void edpartMoveList(eduimenu_s *, eduiitem_s *, u32);
@@ -341,36 +421,12 @@ static void edpartGeneralTypeMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartLevelTypeMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartAddGeneralType(eduimenu_s *, eduiitem_s *, u32);
 static void edpartAddLevelType(eduimenu_s *, eduiitem_s *, u32);
-static void edpartCancelTypeMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelGeneralTypeMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelLevelTypeMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelInstanceSettingsMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelImpactPartMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelDieDebrisMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelImpactDebrisMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelEmitterDebrisMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelTrail1DebrisMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelTrail2DebrisMenu(eduimenu_s *, eduimenu_s *);
 static void edpartGeneralPartIndexMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartLevelPartIndexMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartGeneralDebrisIndexMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartLevelDebrisIndexMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeDebrisPerSec(eduimenu_s *, eduiitem_s *, u32);
-static void edpartCancelPartIndexMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelDebrisIndexMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelInstanceOrientMenu(eduimenu_s *, eduimenu_s *);
-static void edpartChangeInstanceRot(eduimenu_s *, eduiitem_s *, u32);
-static void edpartChangeInstanceVarRot(eduimenu_s *, eduiitem_s *, u32);
-static void edpartCancelInstanceFlagsMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelInstanceMenu(eduimenu_s *, eduimenu_s *);
-static void edpartSetInstanceType(eduimenu_s *, eduiitem_s *, u32);
-static void edpartSetDistribution(eduimenu_s *, eduiitem_s *, u32);
 static void edpartWorldInstanceMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartThingsInstanceMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edpartInstanceOrphansMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edpartCancelWorldInstanceMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelThingsInstanceMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelInstanceOrphansMenu(eduimenu_s *, eduimenu_s *);
 static void edpartCancelMessageMenu(eduimenu_s *, eduimenu_s *);
 static void edpartDeleteInstanceOrphan(eduimenu_s *, eduiitem_s *, u32);
 static void edpartDeleteAllInstanceOrphans(eduimenu_s *, eduiitem_s *, u32);
@@ -406,60 +462,12 @@ static void edpartApply();
 static void edpartClose();
 static void edpartEnter();
 static void edpartRender();
-static void edpartSelType(eduimenu_s *menu, eduiitem_s *item, u32);
 static void edpartCopyType(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartDataMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartEmitMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartGravMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartMoveList(eduimenu_s *menu, eduiitem_s *, u32);
 static void edpartTintMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartTypeMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartChangeGrav(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartChangeName(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartCutOffMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartDeleteType(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartSScaleMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartSetSoundID(eduimenu_s *menu, eduiitem_s *item, u32);
 static void edpartSoundXMenu(eduimenu_s *menu, eduiitem_s *item, u32);
-static void edpartSoundsMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartSwitchMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartChangeTintB(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartChangeTintG(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartChangeTintR(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartEmitVelMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartSetSwitchId(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartSoundIDMenu(eduimenu_s *menu, eduiitem_s *item, u32);
-static void edpartVarEmitMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartAddLevelType(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartChangeBounce(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartChangeCutOff(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartChangeIvalOn(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartChangeSScale(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartEmitTimeMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartInstanceMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartToggleFilter(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartVarStartMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartCancelOptMenu(eduimenu_s *, eduimenu_s *);
-static void edpartChangeEmitVel(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartChangeGenRate(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartChangeIvalOff(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartChangeMaxLife(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartChangeVarEmit(eduimenu_s *, eduiitem_s *item, u32);
 static void edpartDieDebrisMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartLevelTypeMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartScaleTypeMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartSetSwitchType(eduimenu_s *menu, eduiitem_s *item, u32);
-static void edpartAddGeneralType(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartApplyScaleType(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartChangeNameMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartChangeVarStart(eduimenu_s *, eduiitem_s *item, u32);
 static void edpartImpactPartMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartSetScaleFactor(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartSwitchTypeMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartChangeIvalOnRan(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartChangePartIndex(eduimenu_s *, eduiitem_s *item, u32);
 static void edpartDebrisScaleMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartFileLoadEffects(eduimenu_s *parent, eduiitem_s *, u32);
 static inline void edpartSavePath(char *path, char *backup, bool level) {
     char directory[256], name[256], extension[256];
     char *save_directory = level ? edbits_level_save_directory : edbits_general_save_directory;
@@ -492,33 +500,20 @@ static inline void edpartSaveMessage(eduimenu_s *parent, const char *message, bo
     }
 }
 
-static void edpartFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32);
-static void edpartGeneralTypeMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartSetDistribution(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartSetInstanceType(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartSetSoundControl(eduimenu_s *menu, eduiitem_s *item, u32);
 
-static void edpartChangeFilterName(eduimenu_s *, eduiitem_s *item, u32);
 
-static void edpartChangeIvalOffRan(eduimenu_s *, eduiitem_s *item, u32);
 
-static void edpartChangeRanMaxLife(eduimenu_s *, eduiitem_s *item, u32);
 
 static void edpartImpactDebrisMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
-static void edpartSoundControlMenu(eduimenu_s *menu, eduiitem_s *item, u32);
 
 static void edpartTrail1DebrisMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
 static void edpartTrail2DebrisMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
-static void edpartChangeDebrisIndex(eduimenu_s *, eduiitem_s *item, u32);
 
-static void edpartChangeDebrisScale(eduimenu_s *, eduiitem_s *item, u32);
 
-static void edpartChangeGenRateMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
-static void edpartChangeInstanceRot(eduimenu_s *, eduiitem_s *item, u32);
 
 static void edpartChangeMaxLifeMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
@@ -528,47 +523,30 @@ static void edpartInstanceFlagsMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
 static void edpartInstanceScaleMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
-static void edpartWorldInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
-static void edpartChangeDebrisPerSec(eduimenu_s *, eduiitem_s *item, u32);
 
-static void edpartChangeInstanceFlag(eduimenu_s *, eduiitem_s *item, u32);
 
-static void edpartDebrisSettingsMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
 static void edpartInstanceOrientMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
 static __attribute__((noinline, noclone)) void edpartPartIndexMenu(eduimenu_s *menu) __asm__("_ZL19edpartPartIndexMenuP10eduimenu_sP10eduiitem_sj.isra.12");
-static void edpartPartIndexMenu(eduimenu_s *menu);
 
-static void edpartLevelPartIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 value);
 
-static void edpartThingsInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
-static void edpartChangeInstanceScale(eduimenu_s *, eduiitem_s *item, u32);
 
-static void edpartInstanceOrphansMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
-static void edpartChangeInstanceVarRot(eduimenu_s *, eduiitem_s *item, u32);
 
 static __attribute__((optimize("O3"))) void edpartDeleteInstanceOrphan(eduimenu_s *menu, eduiitem_s *item, u32);
 
-static void edpartFileSaveEffectsLevel(eduimenu_s *parent, eduiitem_s *, u32);
 
-static void edpartGeneralPartIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 value);
 
-static void edpartInstanceSettingsMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
 static __attribute__((noinline, noclone)) void edpartDebrisIndexMenu(eduimenu_s *menu) __asm__("_ZL21edpartDebrisIndexMenuP10eduimenu_sP10eduiitem_sj.isra.13");
-static void edpartDebrisIndexMenu(eduimenu_s *menu);
 
-static void edpartLevelDebrisIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 value);
 
-static void edpartFileSaveEffectsGeneral(eduimenu_s *parent, eduiitem_s *, u32);
 
-static void edpartGeneralDebrisIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 value);
 
 static __attribute__((optimize("O3"))) void edpartDeleteAllInstanceOrphans(eduimenu_s *menu, eduiitem_s *, u32);
 
@@ -580,52 +558,20 @@ extern "C" {
 }
 
 // ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
-#include "legoapi/world/world_shared.h"
-#include "decomp.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/render/core/terrain_internal.h"
-#include "legoapi/render/core/gameliball.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/render/fx/game_deb.h"
-#include "gameapi/edtools/edpp_internal.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/numtx.h"
-#include "nu2api/numath/numtx_inline.h"
-#include "nu2api/numath/nurand.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/nu3d/nuportal.h"
-#include "nu2api/nu3d/android/nutimebar_plain.h"
-#include "nu2api/nu3d/android/nurain_android.h"
-#include "nu2api/nu3d/android/nuptl_android.h"
-#include "gameapi/edtools/edstubs.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nucore/nustring.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include <stddef.h>
 
 // Runtime-selected groups appended after the fixed terrain allocation.
 extern "C" {
 }
-#include "legoapi/render/core/terrain_stubs_types.h"
 
 
 
 extern "C" {
-    void *NuScratchAlloc32(i32 size);
-    void NuScratchRelease(void);
 }
 
 void RayImpact(NUVEC *);
 
 extern "C" {
-    extern i32 EDPP_MAX_TYPES;
     extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
 }
 
@@ -680,7 +626,6 @@ i32 NewRayCastScaleY(NUVEC *position, NUVEC *movement, f32 radius, f32 scale_y, 
 
 f32 NewShadow(NUVEC *position, f32 height_above, f32 height_below, i32 terrain_mask);
 
-void PlatInstBounce(i32 index, f32 impulse, f32 spring, f32 damping);
 
 
 
@@ -691,64 +636,7 @@ extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
 } // extern "C"
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
-#include "decomp.h"
-#include "legoapi/actions/combat/hits.h"
-#include "legoapi/audio/sfx.h"
-#include "legoapi/render/fx/parts.h"
-#include "legoapi/gizmos/object/gizbuildits.h"
-#include "legoapi/legoapi_types.h"
-#include "globals.h"
-#include "gamelib/util/gamelib_util_types.h"
-#include "gameapi/edtools/edfile.h"
-#include "gameapi/edtools/edpart_internal.h"
-#include "gameapi/edtools/edpp_internal.h"
-#include "gameapi/edtools/edstubs.h"
-#include "gameapi/gui/apimenu.h"
-#include "legoapi/menus/core/gamemessages.h"
-#include "legoapi/menus/core/panel.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/render/core/rtl.h"
-#include "legoapi/core/input/qrand.h"
-#include "legoapi/gizmos/fx/gizmopickups.h"
-#include "legoapi/gizmo/object/gizmopickup.h"
-#include "legoapi/gizmo/object/giztorpedo.h"
-#include "legoapi/gizmo/object/gizmoblowups.h"
-#include "legoapi/items/collect/torpedo.h"
-#include "legoapi/world/world.h"
-#include "legoapi/world/world_shared.h"
-#include "legoapi/world/level.h"
-#include "legoapi/world/area.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/characters/core/customiser.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "nu2api/nu3d/nuportal.h"
-#include "nu2api/numath/numtx_inline.h"
-#include "nu2api/nu3d/android/nuptl_android.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/items/base/apiobject.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/world/levels/levels.h"
-#include "nu2api/numath/numtx.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nurand.h"
-#include "nu2api/numath/nuvec.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nurndrstat.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nufile/nufile.h"
-#include "legoapi/render/fx/edsplines.h"
 
-#include <float.h>
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
 
 
 struct rtlset;
@@ -764,7 +652,6 @@ static NUVEC PartNorm;
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    extern i32 EDPP_MAX_TYPES;
     extern f32 partglobaltime;
     void PlaySfxById(i32, NUVEC *);
     i32 CreateScaledPARTEffect(i32, f32);
@@ -942,45 +829,6 @@ void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 void NewPartOrderedRotation(PART_s *part);
 
 // ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
-#include "decomp.h"
-#include "gameapi/edtools/edanim_internal.h"
-#include "gameapi/edtools/edgra.h"
-#include "gameapi/edtools/edui.h"
-#include "gameapi/edtools/edui_colour.h"
-#include "nu2api/nucore/numemory.h"
-#include "nu2api/nucore/numouse.h"
-#include "nu2api/nucore/nukeyboard.h"
-#include "nu2api/nucore/nupad.h"
-#include "gameapi/edtools/gameapi_edtools_types.h"
-#include "gameapi/edtools/edfile.h"
-#include "gameapi/edtools/edcam.h"
-#include "gameapi/edtools/edbri_internal.h"
-#include "gameapi/edtools/edrender.h"
-#include "gameapi/edtools/edgra_internal.h"
-#include "gameapi/edtools/edpp_internal.h"
-#include "gameapi/edtools/edstubs.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/render/fx/game_deb.h"
-#include "legoapi/world/levels/levels.h"
-#include "nu2api/nucore/nutime.h"
-#include "nu2api/nucore/nuthread.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/nu3d/nuprim_internal.h"
-#include "nu2api/nu3d/nuqfnt.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/android/nuobject_android.h"
-#include "nu2api/numath/numtx.h"
-#include "nu2api/numath/nuvec.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nurand.h"
-#include "nu2api/nucore/nuvideo.h"
-#include "nu2api/nufile/nufile.h"
 
 // Retail keeps an unreferenced partial-inlining clone of the old HSV2RGB
 // helper (the non-grey path) in this unit.
@@ -990,22 +838,9 @@ void NewPartOrderedRotation(PART_s *part);
 #define HSV2RGB_BODY_ATTR __attribute__((used, noinline, noclone))
 #endif
 
-#include <string.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 // The original animation editor callbacks and lifecycle share file-local state.
 // ---- begin src/gameapi/edtools/edanimall.cpp ----
-#include "decomp.h"
-#include "gameapi/edtools/gameapi_edtools_types.h"
-#include "gameapi/edtools/edanim_internal.h"
-#include "gameapi/edtools/edstubs.h"
-#include "gameapi/edtools/edui.h"
-#include "legoapi/legoapi_types.h"
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "gameframework/saveload.h"
 
 // Animation editor subsystem stubs (static, internal linkage).
 
@@ -1127,10 +962,6 @@ static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, edu
 
 // ---- end src/gameapi/edtools/edanimall.cpp ----
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
-#include "decomp.h"
-#include "gameapi/edtools/gameapi_edtools_types.h"
-#include "gameapi/edtools/edui.h"
-#include <cstdio>
 
 extern "C" i32 PS2_REZ_H;
 
@@ -1142,15 +973,6 @@ extern "C" void edgraClumpsReset(void);
 extern "C" i32 NuRndrDoingScreenGrab;
 
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
-#include "decomp.h"
-#include "gameapi/edtools/gameapi_edtools_types.h"
-#include "gameapi/edtools/edpp_internal.h"
-#include "gameapi/edtools/edstubs.h"
-#include "gameapi/edtools/edui.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/render/fx.h"
-#include "nu2api/numusic/sfx.h"
-#include <stdio.h>
 
 extern "C" {
     extern u32 edblack[4];
@@ -1162,15 +984,6 @@ extern "C" {
 
 // The original particle editor's private callbacks and menu state share this TU.
 // ---- begin src/gameapi/edtools/edptlcallbacks.cpp ----
-#include "decomp.h"
-#include "gameapi/edtools/gameapi_edtools_types.h"
-#include "gameapi/edtools/edpp_internal.h"
-#include "gameapi/edtools/edui.h"
-#include "legoapi/render/fx/game_deb.h"
-#include "nu2api/nu3d/android/nuptl_android.h"
-#include "nu2api/nu3d/numtl.h"
-#include <stdio.h>
-#include <string.h>
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
@@ -1239,7 +1052,6 @@ static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int
 
 // Only eduiMenuRender calls the integer clip helper, always left-aligned.
 
-#include "gameapi/edtools/edtools_types.h"
 
 extern "C" {
     // Retail only has IPA-SRA clones of these two helpers.
@@ -1446,48 +1258,9 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 // Original translation unit reconstructed from the reference address map.
 // Functions are defined in original address order.
 
-#include "decomp.h"
-#include "gameapi/edtools/gameapi_edtools_types.h"
-#include "gameapi/edtools/edanim_internal.h"
-#include "gameapi/edtools/edbri_internal.h"
-#include "gameapi/edtools/edcam.h"
-#include "gameapi/edtools/edfile.h"
-#include "gameapi/edtools/edgra_internal.h"
-#include "gameapi/edtools/edrender.h"
-#include "gameapi/edtools/edpp_internal.h"
-#include "gameapi/edtools/edstubs.h"
-#include "gameapi/edtools/edgra.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/misc/utilities.h"
-#include "legoapi/render/fx.h"
-#include "nu2api/nucore/NuDynamicLight.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nuspline.h"
-#include "nu2api/nu3d/nuprim_internal.h"
-#include "nu2api/nucore/NuDynamicLight.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nucore/nukeyboard.h"
-#include "nu2api/nucore/nupad.h"
-#include "nu2api/nucore/numouse.h"
-#include "nu2api/nucore/numemory.h"
-#include "nu2api/nucore/nuvideo.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nuqfnt.h"
-#include "nu2api/numath/nuvec.h"
-#include "nu2api/numath/numtx.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/numusic/sfx.h"
-#include <stdio.h>
-#include <string.h>
-#include <new>
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
-#include "nu2api/numath/nurand.h"
 
 extern EdInputContext * Input;
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, NUMTL *);
@@ -1607,45 +1380,6 @@ inline void EdBitControl::operator delete(void *memory) {
 }
 
 // ==== src/gameapi/edtools/edtoolsall_plain.cpp: declarations ====
-#include "decomp.h"
-#include "gameapi/edtools/edanim_internal.h"
-#include "gameapi/edtools/edgra.h"
-#include "gameapi/edtools/edui.h"
-#include "gameapi/edtools/edui_colour.h"
-#include "nu2api/nucore/numemory.h"
-#include "nu2api/nucore/numouse.h"
-#include "nu2api/nucore/nukeyboard.h"
-#include "nu2api/nucore/nupad.h"
-#include "gameapi/edtools/gameapi_edtools_types.h"
-#include "gameapi/edtools/edfile.h"
-#include "gameapi/edtools/edcam.h"
-#include "gameapi/edtools/edbri_internal.h"
-#include "gameapi/edtools/edrender.h"
-#include "gameapi/edtools/edgra_internal.h"
-#include "gameapi/edtools/edpp_internal.h"
-#include "gameapi/edtools/edstubs.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/render/fx/game_deb.h"
-#include "legoapi/world/levels/levels.h"
-#include "nu2api/nucore/nutime.h"
-#include "nu2api/nucore/nuthread.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/nu3d/nuprim_internal.h"
-#include "nu2api/nu3d/nuqfnt.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/android/nuobject_android.h"
-#include "nu2api/numath/numtx.h"
-#include "nu2api/numath/nuvec.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nurand.h"
-#include "nu2api/nucore/nuvideo.h"
-#include "nu2api/nufile/nufile.h"
 
 // Retail keeps an unreferenced partial-inlining clone of the old HSV2RGB
 // helper (the non-grey path) in this unit.
@@ -1655,22 +1389,9 @@ inline void EdBitControl::operator delete(void *memory) {
 #define HSV2RGB_BODY_ATTR __attribute__((used, noinline, noclone))
 #endif
 
-#include <string.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 // The original animation editor callbacks and lifecycle share file-local state.
 // ---- begin src/gameapi/edtools/edanimall.cpp ----
-#include "decomp.h"
-#include "gameapi/edtools/gameapi_edtools_types.h"
-#include "gameapi/edtools/edanim_internal.h"
-#include "gameapi/edtools/edstubs.h"
-#include "gameapi/edtools/edui.h"
-#include "legoapi/legoapi_types.h"
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "gameframework/saveload.h"
 
 // Animation editor subsystem stubs (static, internal linkage).
 
@@ -1678,25 +1399,12 @@ inline void EdBitControl::operator delete(void *memory) {
 
 // ---- end src/gameapi/edtools/edanimall.cpp ----
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
-#include "decomp.h"
-#include "gameapi/edtools/gameapi_edtools_types.h"
-#include "gameapi/edtools/edui.h"
-#include <cstdio>
 
 // Editor UI callbacks retained in the original editor's menu code.
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
-#include "decomp.h"
-#include "gameapi/edtools/gameapi_edtools_types.h"
-#include "gameapi/edtools/edpp_internal.h"
-#include "gameapi/edtools/edstubs.h"
-#include "gameapi/edtools/edui.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/render/fx.h"
-#include "nu2api/numusic/sfx.h"
-#include <stdio.h>
 
 extern "C" {
     extern u32 edblack[4];
@@ -1708,15 +1416,6 @@ extern "C" {
 
 // The original particle editor's private callbacks and menu state share this TU.
 // ---- begin src/gameapi/edtools/edptlcallbacks.cpp ----
-#include "decomp.h"
-#include "gameapi/edtools/gameapi_edtools_types.h"
-#include "gameapi/edtools/edpp_internal.h"
-#include "gameapi/edtools/edui.h"
-#include "legoapi/render/fx/game_deb.h"
-#include "nu2api/nu3d/android/nuptl_android.h"
-#include "nu2api/nu3d/numtl.h"
-#include <stdio.h>
-#include <string.h>
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
@@ -1757,7 +1456,6 @@ extern "C" {
 
 // Only eduiMenuRender calls the integer clip helper, always left-aligned.
 
-#include "gameapi/edtools/edtools_types.h"
 
 extern "C" {
     // Retail only has IPA-SRA clones of these two helpers.
@@ -1885,41 +1583,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 // Text-picker commit callbacks. Retail keeps them unmangled and local.
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
-#include "decomp.h"
-#include "gameapi/edtools/edui.h"
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "gameapi/gui/apimenu_internal.h"
-#include "gameframework/saveload.h"
-#include "globals.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/core/config/fileselect.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/menus/screens/gamemenuall.h"
-#include "legoapi/menus/screens/gamestructure.h"
-#include "legoapi/world/area.h"
-#include "legoapi/world/level.h"
-#include "legoapi/world/mission.h"
-#include "legoapi/world/world.h"
-#include "legoapi/audio/audio.h"
-#include "legoapi/audio/sfx.h"
-#include "legoapi/menus/core/text.h"
-#include "legoapi/render/core/render.h"
-#include "legoapi/menus/core/panel.h"
-#include "nu2api/nu3d/nugscn.h"
-#include "nu2api/nu3d/nuqfnt.h"
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nufloat.h"
 
 extern f32 ICONSIZE, ICONX, DROPINALPHA, HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING, tEXIT, tCANCEL;
@@ -1988,70 +1651,15 @@ extern "C" {
 
 // ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
 // Temporary C-linkage compatibility surface for unresolved engine owners.
-#include "nu2api/nu3d/nulgtlaser.h"
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/numath/nuvec4.h"
 extern "C" {
 }
-#include "nu2api/nucore/nuonline.h"
 //
 // This file collects functions whose original TU has not yet been
 // reconstructed. Domain families move to their evidenced owner as complete
 // groups; this file is not itself evidence of one original nucore TU.
 
-#include <string.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <math.h>
-#include <float.h>
-#include <GLES2/gl2.h>
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nucore/numem.h"
-#include "nu2api/nucore/numemory.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/nu3d/nutexanm.h"
-#include "nu2api/nu3d/android/nutex_ios_ex.h"
-#include "nu2api/nu3d/nuqfnt.h"
 
 
-#include "decomp.h"
-#include "java/android.h"
-#include "java/java.h"
-#include "nu2api/nucore/common.h"
-#include "nu2api/nucore/nuanim3.h"
-#include "nu2api/nucore/nuapi.h"
-#include "nu2api/nucore/nuhgobj.h"
-#include "nu2api/nucore/nugcutscene.h"
-#include "nu2api/nucore/nupad.h"
-#include "nu2api/nucore/NuInputDevice.h"
-#include "nu2api/nucore/NuInputManager.h"
-#include "nu2api/nucore/nuthread.h"
-#include "nu2api/nucore/bgproc.h"
-#include "nu2api/nucore/nuptrblock.h"
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/nu3d/nudlist.h"
-#include "nu2api/nu3d/nugscn.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/nurndrstat.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nuspecial_internal.h"
-#include "nu2api/nu3d/nupostresources.h"
-#include "nu2api/nu3d/android/nutimebar_plain.h"
-#include "nu2api/nu3d/nuvport.h"
-#include "nu2api/nu3d/nuocclusion.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nurendercontext.h"
-#include "nu2api/nu3d/nuscreen.hpp"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nuquat.h"
-#include "nu2api/nu3d/NuRenderDevice.h"
-#include "nu2api/nucore/NuDynamicLight.h"
-#include "nu2api/nucore/nuvuvec.hpp"
-#include "nu2api/numath/numtx.h"
-#include "globals.h"
 
 struct ani3_animheader_s;
 
@@ -2149,7 +1757,6 @@ extern "C" {
     // iOS / platform
     // ---------------------------------------------------------------------------
 
-void NuIOS_DeallocateSystemFramebuffers(void);
     // Locale string is owned by the Android/JNI TU; cache only its index here.
 
     // ---------------------------------------------------------------------------
@@ -2286,7 +1893,6 @@ void NuLgtSetArcMatEx(i32 type, numtl_s *material, f32 u0, f32 v0, f32 u1, f32 v
 
 
 // ==== src/gameapi/edtools/edui.cpp: all remaining content ====
-#include "gameapi/edtools/edui.h"
 
 extern "C" {
 
@@ -2296,48 +1902,9 @@ extern "C" {
 extern "C" void eduiMenuDestroyItems(eduimenu_s *menu);
 
 // ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/nucore/nustring.h"
-#include "legoapi/core/input/qrand.h"
-#include "legoapi/audio/sfx.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/render/core/render.h"
-#include "legoapi/menus/core/gamehint.h"
-#include "legoapi/menus/core/panel.h"
-#include "legoapi/world/levels/levels.h"
-#include "legogame/game.h"
-#include "decomp.h"
-#include "legoapi/actions/character/speederchase.h"
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "globals.h"
-#include "legoapi/gizmo/base/gizmo.h"
-#include "legoapi/items/base/apiobject.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/actions/combat/hits.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/items/collect/spacelevel.h"
-#include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
-#include "legoapi/gizmos/object/gizobstacles.h"
-#include "legoapi/gizmo/object/gizmoblowups.h"
-#include "legoapi/world/level.h"
-#include "legoapi/world/world.h"
-#include "legoapi/world/world_shared.h"
-#include "gameapi/edtools/edcam.h"
-#include "gameapi/edtools/edui.h"
-#include "nu2api/numath/nuvec.h"
-#include "nu2api/numath/nurand.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "nu2api/nucore/nuanim3.h"
-#include "nu2api/nu3d/nutex.h"
-#include <string.h>
 
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 
-#include "legoapi/actions/character/speederchase_types.h"
 
 
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
@@ -2363,43 +1930,8 @@ extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);
 extern "C" f32 pod_roll[2];
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
-#include "decomp.h"
-#include "legoapi/world/area.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/menus/screens/shop.h"
-#include "legoapi/props/system/socksys.h"
-#include "legoapi/render/fx/spline_position.h"
-#include "nu2api/numath/nuang.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/nuandroid/ios_graphics.h"
-#include "legoapi/menus/screens/gamemenuall.h"
-#include "legoapi/world/levels/levels.h"
-#include "legoapi/gizmos/object/newblowup.h"
-#include "globals.h"
-#include <stdlib.h>
-#include "legoapi/characters/core/character.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/cutscenes/minicamcut.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/core/input/qrand.h"
-#include "legoapi/props/objects/techno.h"
-#include "legoapi/items/base/apiobject.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/world/world.h"
-#include "nu2api/nucore/nupad.h"
-#include "nu2api/nucore/nukeyboard.h"
-#include "nu2api/nucore/numouse.h"
-#include "nu2api/nucore/numouse.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nurndrstat.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/numtx.h"
-#include "nu2api/numath/nuvec.h"
 
 
-#include "legoapi/characters/motion/camera_types.h"
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
 DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
@@ -2437,13 +1969,8 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 void do_Pad_flymode_camera(edcam_s *camera, float delta_time, nupad_s *pad);
 
 // ==== src/gameapi/edtools/edfile.cpp: all remaining content ====
-#include "decomp.h"
-#include "gameapi/edtools/edfile.h"
 
-#include <string.h>
 
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/nufile/nufilepak.h"
 
 
 
@@ -2474,27 +2001,7 @@ void do_Pad_flymode_camera(edcam_s *camera, float delta_time, nupad_s *pad);
 
 
 // ==== src/legoapi/core/config/saveload.cpp: declarations ====
-#include "decomp.h"
-#include <stdio.h>
-#include <string.h>
 
-#include "gameapi/edtools/gameapi_edtools_types.h"
-#include "gameframework/saveload.h"
-#include "globals.h"
-#include "legoapi/core/config/fileselect.h"
-#include "legoapi/cutscenes/cutscenes.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/world/area.h"
-#include "legoapi/world/mission.h"
-#include "legoapi/world/world.h"
-#include "nu2api/nu3d/nuqfnt.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nucore/nutime.h"
-#include "nu2api/nucore/numemory.h"
-#include "nu2api/nucore/nupad.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/nu3d/nuspecial.h"
 
 extern void (*FS_Callback)(char *, char *);
 
@@ -2524,50 +2031,9 @@ extern "C" {
 } // extern "C"
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
-#include "decomp.h"
-#include "gameapi/edtools/edbri_internal.h"
-#include "gameapi/edtools/edstubs.h"
-#include "legoapi/render/core/render.h"
-#include "legoapi/items/collect/torpedo.h"
-#include "legoapi/actions/character/transform.h"
-#include "legoapi/actions/movement/carrying.h"
-#include "legoapi/actions/character/snake.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/gizmos/object/gizbuildits.h"
-#include "legoapi/gizmos/fx/gizmopickups.h"
-#include "legoapi/gizmos/door/zipups.h"
-#include "legoapi/menus/core/text.h"
-#include "legoapi/menus/core/gamehint.h"
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "gamelib/util/gamelib_util_types.h"
-#include "legoapi/menus/core/panel.h"
-#include "legoapi/menus/core/gamemessages.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/menus/screens/gamemenuall.h"
-#include "legoapi/menus/screens/arcade.h"
-#include "legoapi/render/light/fade_material.h"
-#include "legoapi/render/fx/edsplines.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/world/levels/levels.h"
-#include "legoapi/world/level.h"
-#include "legoapi/world/world.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/nurndrstat.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nuandroid/ios_graphics.h"
-#include "nu2api/nu3d/android/nuportal_android.h"
-#include "nu2api/nu3d/nuvport.h"
-#include "nu2api/nucore/nuvuvec.hpp"
-#include "legoapi/cutscenes/cutscenes.h"
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
 
 extern "C" void edbriStartAllPages(void);
 
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/numath/nutrig.h"
 
 extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
                                               f32 upper_y, u32 colour, i32, i32 segments);
@@ -2583,62 +2049,11 @@ extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments,
 
 extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments);
 
-#include "gameapi/gui/apimenu.h"
-#include "gameframework/saveload.h"
-#include "legoapi/menus/core/text.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/characters/motion/animlist.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/world/level.h"
-#include "legoapi/core/input/timer.h"
-#include "legoapi/gizmo/base/gizmo.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/items/base/collection.h"
-#include "legoapi/menus/screens/shop.h"
-#include "legoapi/world/area.h"
-#include "legoapi/world/levels/episode.h"
-#include "legoapi/world/mission.h"
-#include "legoapi/world/world_shared.h"
-#include "globals.h"
-#include "nu2api/nu3d/nutexanm.h"
 struct starfighter_s;
 struct rtl_s;
 struct rtlidata_s;
 
-#include "legoapi/render/core/SwipeDecalRenderer.h"
-#include "nu2api/nu3d/nuprim_internal.h"
-#include "nu2api/nu3d/nudlist.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/nuqfnt.h"
-#include "nu2api/nu3d/nurndrstat.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nuvport.h"
-#include "nu2api/nu3d/NuRenderDevice.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/android/nurndr_android.h"
-#include "nu2api/nu3d/android/nugscn_android.h"
-#include "nu2api/nuandroid/ios_graphics.h"
-#include "nu2api/nucore/bgproc.h"
-#include "nu2api/nucore/nuapi.h"
-#include "nu2api/nucore/nuanim3.h"
-#include "nu2api/nucore/nugcutscene.h"
-#include "nu2api/nucore/nuhgobj.h"
-#include "nu2api/nucore/nuptrblock.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nucore/nuthread.h"
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/numath/numath.h"
-#include "nu2api/numath/numtx.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nuvec.h"
 
-#include <string.h>
 
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
@@ -2695,9 +2110,6 @@ i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_
 
 
 
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/nu3d/nuprim_internal.h"
-#include "nu2api/nu3d/nupostparams.h"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -2794,9 +2206,6 @@ void Transform_DrawTarget(NUVEC *, f32, f32);
 extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBACCA, id_WOOKIEE, id_TWOFACE;
 extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
 
-#include "legoapi/legoapi_types.h"
-#include "nu2api/numath/numtx.h"
-#include "nu2api/nu3d/nurndr.h"
 
 extern f32 SeekLinearF(f32, f32, f32);
 
@@ -3007,69 +2416,14 @@ extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour);
 
 // ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
 // Temporary C-linkage compatibility surface for unresolved engine owners.
-#include "nu2api/nu3d/nulgtlaser.h"
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/numath/nuvec4.h"
 extern "C" {
 }
-#include "nu2api/nucore/nuonline.h"
 //
 // This file collects functions whose original TU has not yet been
 // reconstructed. Domain families move to their evidenced owner as complete
 // groups; this file is not itself evidence of one original nucore TU.
 
-#include <string.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <math.h>
-#include <float.h>
-#include <GLES2/gl2.h>
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nucore/numem.h"
-#include "nu2api/nucore/numemory.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/nu3d/nutexanm.h"
-#include "nu2api/nu3d/android/nutex_ios_ex.h"
-#include "nu2api/nu3d/nuqfnt.h"
 
-#include "decomp.h"
-#include "java/android.h"
-#include "java/java.h"
-#include "nu2api/nucore/common.h"
-#include "nu2api/nucore/nuanim3.h"
-#include "nu2api/nucore/nuapi.h"
-#include "nu2api/nucore/nuhgobj.h"
-#include "nu2api/nucore/nugcutscene.h"
-#include "nu2api/nucore/nupad.h"
-#include "nu2api/nucore/NuInputDevice.h"
-#include "nu2api/nucore/NuInputManager.h"
-#include "nu2api/nucore/nuthread.h"
-#include "nu2api/nucore/bgproc.h"
-#include "nu2api/nucore/nuptrblock.h"
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/nu3d/nudlist.h"
-#include "nu2api/nu3d/nugscn.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/nurndrstat.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nuspecial_internal.h"
-#include "nu2api/nu3d/nupostresources.h"
-#include "nu2api/nu3d/android/nutimebar_plain.h"
-#include "nu2api/nu3d/nuvport.h"
-#include "nu2api/nu3d/nuocclusion.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nurendercontext.h"
-#include "nu2api/nu3d/nuscreen.hpp"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nuquat.h"
-#include "nu2api/nu3d/NuRenderDevice.h"
-#include "nu2api/nucore/NuDynamicLight.h"
-#include "nu2api/nucore/nuvuvec.hpp"
-#include "nu2api/numath/numtx.h"
-#include "globals.h"
 
 extern "C" {
 

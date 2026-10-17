@@ -6,6 +6,27 @@
 
 // The original unit constructs its six homogeneous vectors.
 #include "nu2api/nucore/nuvuvec.hpp"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/render/core/terrain.h"
+#include <stdio.h>
+#include <string.h>
+#include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nuquat.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nufile/nufpar.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "legoapi/world/world_shared.h"
+#include "legoapi/legoapi_types.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
+#include "nu2api/nu3d/android/nufmv_android.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "globals.h"
 f32 CalculateDistanceToSpecificSideOrEnd(i32, NUVEC *, SOCKPOSITION *, i32, SOCKSYS *);
 void TurnOffAllSocksExcept(SOCKSYS *, i32);
 void RestoreLastSocksTurnoff(SOCKSYS *);
@@ -15,19 +36,8 @@ struct SOCKCAMERARESULT {
     f32 blend, position_seek, angle_seek, shake, separation;
 };
 DECOMP_ASSERT(sizeof(SOCKCAMERARESULT) == 0x64, "Socket camera result ABI");
-#include "legoapi/items/base/apiobject.h"
-#include "legoapi/render/core/terrain.h"
 
-#include <stdio.h>
-#include <string.h>
 
-#include "nu2api/numath/nuvec.h"
-#include "nu2api/numath/nuquat.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nufile/nufpar.h"
-#include "nu2api/nu3d/nuspecial.h"
 
 // The Android build is gnu++11, where `register` still steers -O0 allocation; C++17 tooling rejects it.
 #if __cplusplus >= 201703L
@@ -182,7 +192,6 @@ static const char *tSockLATERAL = "sock_lateral_";
 static const char *tSockTRACKIN = "sock_trackin_";
 static const char *tSockLIMIT = "sock_limit_";
 
-static void AdjustMinMaxBox(NUVEC *pnt, NUVEC *min, NUVEC *max);
 
 extern "C" {
 
@@ -191,13 +200,9 @@ extern "C" {
 
 static __used__ void SockDataError();
 
-static i32 RotDiff(u16 from, u16 to);
 
-static void SockEdgeAnglesXY(NUVEC *from, NUVEC *to, u16 *x, u16 *y);
 
-static SOCKROT *SockRailAngles(SOCK *sock, NUGSPLINE *spline, SOCKROT *rotations);
 
-static f32 SplineLength(NUGSPLINE *spline, i32 closed);
 
 SOCKPOSITION TempSPosList[4];
 SOCKPOSITION *TempBestSPos;
@@ -210,7 +215,6 @@ i32 complexsockposition_forcesock = -1;
 static NUVEC temp_sockmidpos;
 static NUVEC temp_sockcampos;
 
-static i32 OnOrOutsidePlane(NUVEC *point, NUVEC *plane_point, NUVEC *normal);
 
 static i32 InsideLineXZ(f32 x, f32 z, f32 x0, f32 z0, f32 x1, f32 z1) {
     if ((x - x0) * (z1 - z0) + (x0 - x1) * (z - z0) >= 0.0f)
@@ -218,7 +222,6 @@ static i32 InsideLineXZ(f32 x, f32 z, f32 x0, f32 z0, f32 x1, f32 z1) {
     return 0;
 }
 
-static f32 DistanceToPlane(NUVEC *point, NUVEC *plane_point, NUVEC *normal);
 
 f32 RatioBetweenPlanes(NUVEC *point, NUVEC *point_a, NUVEC *normal_a, NUVEC *point_b, NUVEC *normal_b);
 
@@ -239,11 +242,8 @@ static f32 RatioBetweenEdgesXZ(NUVEC *point, NUVEC *edge_a0, NUVEC *edge_a1, NUV
     return distance_a / (distance_a + distance_b);
 }
 
-static void SockSysPointAlongMID(SOCK *sock, SOCKPOSITION *position, NUVEC *result);
 
-static void FillSockPosition(SOCKSYS *sock_sys, SOCKPOSITION *position);
 
-static f32 BestSockPosition(SOCKSYS *sock_sys, NUVEC *point, SOCKPOSITION *result, i32 sock_index, i32 prior_segment);
 
 extern "C" {
 
@@ -275,16 +275,6 @@ void TurnOffAllSocksExcept(SOCKSYS *system, i32 exception);
 void RestoreLastSocksTurnoff(SOCKSYS *system);
 
 // ==== src/legoapi/render/core/render_stubs.cpp: declarations ====
-#include "legoapi/world/world_shared.h"
-#include "legoapi/legoapi_types.h"
-#include "nu2api/numath/numtx.h"
-#include "nu2api/nu3d/android/nurndr_android.h"
-#include "nu2api/nu3d/android/nufmv_android.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/nudlist.h"
-#include "nu2api/nu3d/nurndrstat.h"
-#include "nu2api/nu3d/nuvport.h"
-#include "globals.h"
 
 extern "C" {
 

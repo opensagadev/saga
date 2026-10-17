@@ -6,16 +6,6 @@
 
 #include "globals.h"
 #include "nu2api/numath/nufloat.h"
-
-// Original bss @0x127a164.
-TIMER GlobalTimer;
-f32 LastTouchTime;
-
-// ==== src/legoapi/misc/supportall.cpp: declarations ====
-
-#if defined(__SSE__)
-#include <xmmintrin.h>
-#endif
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nuprim_internal.h"
 #include "legoapi/misc/supportall.h"
@@ -71,9 +61,69 @@ f32 LastTouchTime;
 #include "legoapi/world/world.h"
 #include "legoapi/items/base/collection.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "legoapi/misc/supportall_types.h"
+#include "legoapi/ai/core/legoai.h"
+#include "legoapi/items/objects/objectsall.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/gizmos/transport/grapples.h"
+#include "legoapi/gizmos/transport/gizportal.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "gameapi/edtools/edfile.h"
+#include "gameapi/edtools/edui.h"
+#include "gameapi/gui/apimenu.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/light/lighting.h"
+#include "legoapi/render/light/shadow.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/render/fx/spline_position.h"
+#include "nu2api/nucore/nupad.h"
+#include "legoapi/ai/core/ai_sys_stubs.h"
+#include "legoapi/props/objects/techno.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/core/CharacterObjectInterface.h"
+#include "legoapi/characters/core/charconfig.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/trigger/gizspecial.h"
+#include "legoapi/gizmos/traps/gizforce.h"
+#include "legoapi/gizmos/door/spinner.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/menus/screens/store.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/input/timing.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/numusic/sfx.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nu3d/nuportal.h"
+#include "legoapi/audio/sfx.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nu3d/nulgtlaser.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "legoapi/items/objects/gameobjects_types.h"
+
+// Original bss @0x127a164.
+TIMER GlobalTimer;
+f32 LastTouchTime;
+
+// ==== src/legoapi/misc/supportall.cpp: declarations ====
+
+#if defined(__SSE__)
+#include <xmmintrin.h>
+#endif
 
 // The reference defines these with dynamic initialization in this unit.
-#include "legoapi/misc/supportall_types.h"
 
 static i32 TBGAMECOUNT;
 static i32 TBDRAWCOUNT;
@@ -147,59 +197,9 @@ extern "C" void NuHtmlWrite(const char *text, ...);
 extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-#include "legoapi/ai/core/legoai.h"
-#include "legoapi/items/objects/objectsall.h"
-#include "legoapi/items/collect/torpedo.h"
-#include "legoapi/actions/movement/carrying.h"
-#include "legoapi/gizmos/object/gizbuildits.h"
-#include "legoapi/gizmo/object/gizmoblowups.h"
-#include "legoapi/audio/audio.h"
-#include "legoapi/gizmos/transport/grapples.h"
-#include "legoapi/gizmos/transport/gizportal.h"
-#include "legoapi/gizmos/door/zipups.h"
-#include "legoapi/menus/screens/arcade.h"
-#include "gameapi/edtools/edfile.h"
-#include "gameapi/edtools/edui.h"
-#include "gameapi/gui/apimenu.h"
-#include "gamelib/util/gamelib_util_types.h"
-#include "legoapi/cutscenes/cutscenes.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/render/light/lighting.h"
-#include "legoapi/render/light/shadow.h"
-#include "legoapi/render/fx/parts.h"
-#include "legoapi/render/fx/spline_position.h"
-#include "nu2api/nucore/nupad.h"
-#include "legoapi/ai/core/ai_sys_stubs.h"
-#include "legoapi/props/objects/techno.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/characters/core/CharacterObjectInterface.h"
-#include "legoapi/characters/core/charconfig.h"
-#include "legoapi/menus/core/gamehint.h"
-#include "legoapi/menus/core/gamemessages.h"
-#include "legoapi/gizmos/object/gizobstacles.h"
-#include "legoapi/gizmos/trigger/gizspecial.h"
-#include "legoapi/gizmos/traps/gizforce.h"
-#include "legoapi/gizmos/door/spinner.h"
-#include "legoapi/menus/screens/shop.h"
-#include "legoapi/menus/screens/store.h"
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/core/input/timing.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nuqfnt.h"
-#include "nu2api/numusic/sfx.h"
-#include "nu2api/nucore/numemory.h"
-#include "nu2api/nu3d/nuportal.h"
-#include "legoapi/audio/sfx.h"
-#include "nu2api/nuandroid/ios_graphics.h"
-#include "nu2api/nu3d/nulgtlaser.h"
-#include "nu2api/numath/numtx.h"
-#include "nu2api/nucore/nugcutscene.h"
-#include "nu2api/nucore/nuhgobj.h"
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
 
-#include "legoapi/items/objects/gameobjects_types.h"
 
 // Enabled in the target data image.  Ordinary background characters are
 // staggered across frames; special movement states opt back into full-rate

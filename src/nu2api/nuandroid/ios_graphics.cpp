@@ -16,6 +16,52 @@
 #include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nucore/nuvuvec.hpp"
+#include "nu2api/nu3d/nulgtlaser.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/numath/nuvec4.h"
+#include "nu2api/nucore/nuonline.h"
+#include <stdarg.h>
+#include <math.h>
+#include <float.h>
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/numem.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/nutexanm.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "java/java.h"
+#include "nu2api/nucore/common.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/nupad.h"
+#include "nu2api/nucore/NuInputDevice.h"
+#include "nu2api/nucore/NuInputManager.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nuspecial_internal.h"
+#include "nu2api/nu3d/nupostresources.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nu3d/nuocclusion.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nurendercontext.h"
+#include "nu2api/nu3d/nuscreen.hpp"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nuquat.h"
+#include "nu2api/nucore/NuDynamicLight.h"
+#include "nu2api/numath/numtx.h"
+#include "globals.h"
 
 // ---------------------------------------------------------------------------
 // ios_graphics — iOS/Android GLES2 platform glue
@@ -74,58 +120,12 @@ SAGA_HOST_WEAK void NuIOS_AllocateSystemFramebuffers(void);
 
 // ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
 // Temporary C-linkage compatibility surface for unresolved engine owners.
-#include "nu2api/nu3d/nulgtlaser.h"
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/numath/nuvec4.h"
-#include "nu2api/nucore/nuonline.h"
 //
 // This file collects functions whose original TU has not yet been
 // reconstructed. Domain families move to their evidenced owner as complete
 // groups; this file is not itself evidence of one original nucore TU.
 
-#include <stdarg.h>
-#include <math.h>
-#include <float.h>
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nucore/numem.h"
-#include "nu2api/nucore/numemory.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/nu3d/nutexanm.h"
-#include "nu2api/nu3d/nuqfnt.h"
 
-#include "java/java.h"
-#include "nu2api/nucore/common.h"
-#include "nu2api/nucore/nuanim3.h"
-#include "nu2api/nucore/nuapi.h"
-#include "nu2api/nucore/nuhgobj.h"
-#include "nu2api/nucore/nugcutscene.h"
-#include "nu2api/nucore/nupad.h"
-#include "nu2api/nucore/NuInputDevice.h"
-#include "nu2api/nucore/NuInputManager.h"
-#include "nu2api/nucore/nuthread.h"
-#include "nu2api/nucore/bgproc.h"
-#include "nu2api/nucore/nuptrblock.h"
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/nu3d/nudlist.h"
-#include "nu2api/nu3d/nugscn.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/nurndrstat.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nuspecial_internal.h"
-#include "nu2api/nu3d/nupostresources.h"
-#include "nu2api/nu3d/android/nutimebar_plain.h"
-#include "nu2api/nu3d/nuvport.h"
-#include "nu2api/nu3d/nuocclusion.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nurendercontext.h"
-#include "nu2api/nu3d/nuscreen.hpp"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nuquat.h"
-#include "nu2api/nucore/NuDynamicLight.h"
-#include "nu2api/numath/numtx.h"
-#include "globals.h"
 
 extern "C" {
 

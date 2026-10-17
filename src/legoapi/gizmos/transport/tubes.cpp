@@ -17,6 +17,28 @@
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/legoapi_types.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "legoapi/world/area.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "nu2api/numath/nuvec.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/transport/teleport.h"
+#include "legoapi/menus/core/panel.h"
+#include "nu2api/nu3d/nutex.h"
+#include "legoapi/characters/core/players.h"
+#include "gameapi/gui/apimenu.h"
+#include "legoapi/world/levels/levels.h"
 
 static const i32 TUBE_AUDIO_EVENT = 0x2e;
 static const u32 CHARACTER_MODEL_FLAG_TUBE_USER = 0x10;
@@ -32,64 +54,31 @@ struct TUBEPROGRESS {
 
 static void Tubes_Update(void *world_ptr, void *progress_ptr, float frame_time);
 
-static void *Tubes_ReserveBufferSpace(void *world_ptr);
-
-static void Tube_Activate(GIZMO *gizmo, i32 active);
-
-static i32 Tube_ActivateRev(GIZMO *gizmo, i32 reverse, i32 check_only);
-
-static void Tube_SetVisibility(GIZMO *gizmo, i32 visible);
-
-static void Tubes_Reset(void *world_ptr, void *, void *progress_ptr);
-
-static void Tubes_Draw(void *, void *, float);
-
-static i32 Tubes_GetMaxGizmos(void *world_ptr);
-
-static char *Tube_GetGizmoName(GIZMO *gizmo);
-
-static i32 Tube_GetOutput(GIZMO *gizmo, i32, i32);
-
-static char *Tube_GetOutputName(GIZMO *, i32);
-
-static i32 Tube_GetNumOutputs(GIZMO *);
-
-static NUVEC *Tube_GetPos(GIZMO *gizmo);
-
-static void Tubes_ClearProgress(void *, void *progress_ptr);
-
-static void *Tubes_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end);
-
-static void Tubes_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *);
-
-static i32 Tubes_Load(void *world_ptr, void *);
-
-static void Tubes_StoreProgress(void *world_ptr, void *, void *progress_ptr);
 
 
 
 
-static void Tubes_Update(void *world_ptr, void *, float frame_time);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ==== src/legoapi/menus/core/gamehint.cpp: declarations ====
 
-#include "legoapi/characters/motion.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/core/input/qrand.h"
-#include "legoapi/gizmos/fx/gizmopickups.h"
-#include "legoapi/legoapi_types.h"
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "legoapi/world/area.h"
-#include "legoapi/core/input/timer.h"
-#include "legoapi/render/core/render.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/menus/core/text.h"
-#include "legoapi/menus/core/gamehint.h"
-#include "nu2api/numath/nuvec.h"
-#include "legoapi/world/mission.h"
 
 extern f32 AlphaBlendTime;
-extern f32 ICONX;
 extern f32 ICONXPOS_TOUCHYFEELY;
 extern f32 ICONYPOS_TOUCHYFEELY;
 
@@ -105,14 +94,6 @@ void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder 
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
 
 // ==== src/legoapi/menus/core/hint.cpp: declarations ====
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/gizmos/object/gizbuildits.h"
-#include "legoapi/gizmos/transport/teleport.h"
-#include "legoapi/menus/core/panel.h"
-#include "nu2api/nu3d/nutex.h"
-#include "legoapi/characters/core/players.h"
-#include "gameapi/gui/apimenu.h"
-#include "legoapi/world/levels/levels.h"
 
 // The hint icon transitions and the touch icon x position are dynamically
 // initialized in this unit's static constructor in the reference.

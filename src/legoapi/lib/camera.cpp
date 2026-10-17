@@ -36,24 +36,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
-
-void GameCam_ResetLookRot(GAMECAMERA_s *camera);
-
 #include "legoapi/characters/motion/camera_types.h"
-extern VIEWCAM_s ViewCam;
-// Original data symbol testmovef is float0.005 at 0x617cb0.
-extern f32 testmovef;
-
-DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
-
-void GameCam_Judder(GAMECAMERA_s *camera, float amount, i32 axis, nuvec_s *source);
-
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 #include "gameapi/edtools/edbri_internal.h"
 #include "gameapi/edtools/edstubs.h"
 #include "legoapi/render/core/render.h"
@@ -84,7 +67,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-
 #include "gameapi/gui/apimenu.h"
 #include "gameframework/saveload.h"
 #include "legoapi/characters/motion/gameanim.h"
@@ -97,7 +79,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world_shared.h"
 #include "nu2api/nu3d/nutexanm.h"
-
 #include "legoapi/render/core/SwipeDecalRenderer.h"
 #include "nu2api/nu3d/nuprim_internal.h"
 #include "nu2api/nu3d/nudlist.h"
@@ -116,6 +97,43 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/numath.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nupostparams.h"
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/core/terrain_internal.h"
+#include "legoapi/render/light/surfaces.h"
+#include "legoapi/ai/core/legoai.h"
+#include "legoapi/render/core/gameliball.h"
+#include <new>
+#include "gameapi/edtools/edgra.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nucore/numem.h"
+#include "nu2api/nuplatform/nudevicespecs.hpp"
+#include "nu2api/numath/nuvec4.h"
+#include <limits.h>
+#include "legoapi/actions/character/simpletons_types.h"
+
+void GameCam_ResetLookRot(GAMECAMERA_s *camera);
+
+extern VIEWCAM_s ViewCam;
+// Original data symbol testmovef is float0.005 at 0x617cb0.
+extern f32 testmovef;
+
+DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
+DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
+DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
+
+void GameCam_Judder(GAMECAMERA_s *camera, float amount, i32 axis, nuvec_s *source);
+
+DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
+DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+
+
 
 
 // Camera zoom state
@@ -135,8 +153,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
 
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/nu3d/nupostparams.h"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -198,24 +214,9 @@ extern f32 SeekLinearF(f32, f32, f32);
 // ==== functions in original address order ====
 
 // ==== src/legoapi/render/core/terrain.cpp: declarations ====
-#include "legoapi/actions/combat/hits.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/render/core/terrain_internal.h"
-#include "legoapi/render/light/surfaces.h"
-#include "legoapi/ai/core/legoai.h"
-#include "legoapi/render/core/gameliball.h"
 
-#include <new>
 
-#include "gameapi/edtools/edgra.h"
-#include "legoapi/props/doors/door.h"
-#include "legoapi/gizmo/object/gizmopickup.h"
-#include "nu2api/nucore/numemory.h"
-#include "nu2api/nucore/numem.h"
-#include "nu2api/nuplatform/nudevicespecs.hpp"
-#include "nu2api/numath/nuvec4.h"
 
-#include <limits.h>
 
 struct GAMECAMERA_s;
 
@@ -489,7 +490,6 @@ static inline i32 NarrowSockPositionAllowed(GameObject_s *object, SOCKSYS *syste
     return 1;
 }
 
-#include "legoapi/actions/character/simpletons_types.h"
 
 // ==== functions in original address order ====
 

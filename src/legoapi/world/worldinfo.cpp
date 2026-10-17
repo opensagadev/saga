@@ -27,7 +27,6 @@
 #include "legoapi/characters/core/charconfig.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/core/input/qrand.h"
-#include "legoapi/world/level.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/ai/game/creature.h"

@@ -14,11 +14,9 @@
 #include "legoapi/menus/core/gamehint.h"
 #include "legoapi/items/collect/bolts.h"
 #include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/legoapi_types.h"
 #include "legoapi/misc/utilities.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/world/area.h"
-#include "legoapi/world/world.h"
 #include "legoapi/world/level.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nuportal.h"
@@ -36,10 +34,10 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include <stdlib.h>
-f32 gizturret_rapid_fire_rate = 0.2f;
-i32 gizturret_test_ang = 3640;
 #include "nu2api/numath/nurand.h"
 #include "legoapi/core/input/qrand.h"
+f32 gizturret_rapid_fire_rate = 0.2f;
+i32 gizturret_test_ang = 3640;
 
 struct GizTurretAnimObjectData {
     u8 flags;

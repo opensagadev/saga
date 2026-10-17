@@ -25,7 +25,6 @@
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/world/area.h"
-#include "legoapi/world/world.h"
 
 i32 SuperWeirdo(GameObject_s *);
 i32 GizForce_StoodOnForce(GIZFORCE_s *, GameObject_s *);

@@ -34,6 +34,91 @@
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "nu2api/numusic/numusic.h"
 #include <string.h>
+#include "gameapi/edtools/edbri_internal.h"
+#include "gameapi/edtools/edstubs.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/actions/character/transform.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/actions/character/snake.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "legoapi/render/light/fade_material.h"
+#include "legoapi/render/fx/edsplines.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/world/level.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nu3d/android/nuportal_android.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nucore/nuvuvec.hpp"
+#include "legoapi/cutscenes/cutscenes.h"
+#include <stdio.h>
+#include <math.h>
+#include "nu2api/nu3d/nurndr.h"
+#include "gameapi/gui/apimenu.h"
+#include "gameframework/saveload.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/world/levels/episode.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/world/world_shared.h"
+#include "nu2api/nu3d/nutexanm.h"
+#include "legoapi/render/core/SwipeDecalRenderer.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/NuRenderDevice.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
+#include "nu2api/nu3d/android/nugscn_android.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/numath/numath.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nuvec.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nupostparams.h"
+#include "gameapi/edtools/edfile.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/misc/utilities.h"
+#include "legoapi/render/fx/spline_position.h"
+#include "nu2api/nu3d/nuspline.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/items/base/apiobject.h"
+#include "nu2api/numusic/sfx.h"
+#include "legoapi/misc/androidbatman.h"
+#include "legoapi/menus/screens/gamestructure.h"
+#include "nu2api/nucore/NuInputDevice.h"
+#include "nu2api/nucore/nupad.h"
+#include "legogame/game.h"
+#include "legoapi/actions/character/speederchase.h"
+#include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "gameapi/edtools/edcam.h"
+#include "gameapi/edtools/edui.h"
+#include "legoapi/actions/character/speederchase_types.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -59,16 +144,12 @@ static NUVEC4 RadialMoveCentre;
 static __used__ f32 RadialPlayerRadius[2];
 static __used__ f32 MaxRadialCamY;
 
-static void MakeWingFormation(_vuv_s *start, _vuv_s *target, f32 duration, i32 mode);
 
-static void StarFighterAlign(starfighter_s *fighter, _vuv_s *direction, f32 distance, i32 mode);
 
 f32 MissileDist = -3.0f;
 static NUVEC4 PlayerPos, PlayerVel;
 
-static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info);
 
-static void ProcessSpaceLevel(spacelevel_s *space);
 
 void ChrisAnakinAUpdate(WORLDINFO_s *);
 
@@ -106,7 +187,6 @@ void DrawLine_Now(_vuv_s *, _vuv_s *, i32, i32);
 // the control-point marker), and nothing calls it.
 static __used__ __attribute__((noinline, noclone)) CHRIS_REGPARM1 void FlightSpline_Draw(flightspline_s *spline)
     __asm__("_ZL17FlightSpline_DrawP14flightspline_siiii.constprop.39");
-static void FlightSpline_Draw(flightspline_s *spline);
 
 static void DrawStarFighter(starfighter_s *starfighter);
 
@@ -175,7 +255,6 @@ static inline void DrawSpaceJet(i32 player_index, i32 key_index, bool left) {
     }
 }
 
-static void DrawSpaceLevel(spacelevel_s *space);
 
 void ChrisAnakinADraw();
 
@@ -183,7 +262,6 @@ void ChrisAnakinDDraw();
 
 void ChrisDogFightADraw(WORLDINFO_s *world);
 
-static void ResetSpaceLevel(WORLDINFO_s *world, spacelevel_s *space);
 
 void ChrisRadialCam(nuvec_s *position, nuvec_s *target);
 
@@ -220,64 +298,21 @@ void ChrisAnakinDUpdate(WORLDINFO_s *);
 
 void ChrisAfterBurnerCam(nuvec_s *, nuvec_s *camera);
 
-void ChrisAllocLevelStuff(WORLDINFO_s *world);
 
 void ChrisDogFightAInit(WORLDINFO_s *world);
 
 i32 DidBoltHitChrisJobby(WORLDINFO_s *, BOLT_s *);
 
 
-static i32 CollideBoltStarFighter(BOLT_s *bolt, starfighter_s *fighter, _vuv_s *position, _vuv_s *velocity);
 
 
 
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
-#include "decomp.h"
-#include "gameapi/edtools/edbri_internal.h"
-#include "gameapi/edtools/edstubs.h"
-#include "legoapi/render/core/render.h"
-#include "legoapi/items/collect/torpedo.h"
-#include "legoapi/actions/character/transform.h"
-#include "legoapi/actions/movement/carrying.h"
-#include "legoapi/actions/character/snake.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/gizmos/object/gizbuildits.h"
-#include "legoapi/gizmos/fx/gizmopickups.h"
-#include "legoapi/gizmos/door/zipups.h"
-#include "legoapi/menus/core/text.h"
-#include "legoapi/menus/core/gamehint.h"
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "gamelib/util/gamelib_util_types.h"
-#include "legoapi/menus/core/panel.h"
-#include "legoapi/menus/core/gamemessages.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/menus/screens/gamemenuall.h"
-#include "legoapi/menus/screens/arcade.h"
-#include "legoapi/render/light/fade_material.h"
-#include "legoapi/render/fx/edsplines.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/world/levels/levels.h"
-#include "legoapi/world/level.h"
-#include "legoapi/world/world.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/nurndrstat.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nuandroid/ios_graphics.h"
-#include "nu2api/nu3d/android/nuportal_android.h"
-#include "nu2api/nu3d/nuvport.h"
-#include "nu2api/nucore/nuvuvec.hpp"
-#include "legoapi/cutscenes/cutscenes.h"
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
 
 
 extern "C" void edbriStartAllPages(void);
 
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/numath/nutrig.h"
 
 
 
@@ -295,62 +330,11 @@ extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments,
 
 extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments);
 
-#include "gameapi/gui/apimenu.h"
-#include "gameframework/saveload.h"
-#include "legoapi/menus/core/text.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/characters/motion/animlist.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/world/level.h"
-#include "legoapi/core/input/timer.h"
-#include "legoapi/gizmo/base/gizmo.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/items/base/collection.h"
-#include "legoapi/menus/screens/shop.h"
-#include "legoapi/world/area.h"
-#include "legoapi/world/levels/episode.h"
-#include "legoapi/world/mission.h"
-#include "legoapi/world/world_shared.h"
-#include "globals.h"
-#include "nu2api/nu3d/nutexanm.h"
 struct starfighter_s;
 struct rtl_s;
 struct rtlidata_s;
 
-#include "legoapi/render/core/SwipeDecalRenderer.h"
-#include "nu2api/nu3d/nuprim_internal.h"
-#include "nu2api/nu3d/nudlist.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/nuqfnt.h"
-#include "nu2api/nu3d/nurndrstat.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nuvport.h"
-#include "nu2api/nu3d/NuRenderDevice.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/android/nurndr_android.h"
-#include "nu2api/nu3d/android/nugscn_android.h"
-#include "nu2api/nuandroid/ios_graphics.h"
-#include "nu2api/nucore/bgproc.h"
-#include "nu2api/nucore/nuapi.h"
-#include "nu2api/nucore/nuanim3.h"
-#include "nu2api/nucore/nugcutscene.h"
-#include "nu2api/nucore/nuhgobj.h"
-#include "nu2api/nucore/nuptrblock.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nucore/nuthread.h"
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/numath/numath.h"
-#include "nu2api/numath/numtx.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nuvec.h"
 
-#include <string.h>
 
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
@@ -434,9 +418,6 @@ i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_
 
 
 
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/nu3d/nuprim_internal.h"
-#include "nu2api/nu3d/nupostparams.h"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -593,9 +574,6 @@ extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBAC
 extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
 
 
-#include "legoapi/legoapi_types.h"
-#include "nu2api/numath/numtx.h"
-#include "nu2api/nu3d/nurndr.h"
 
 extern f32 SeekLinearF(f32, f32, f32);
 
@@ -620,32 +598,7 @@ void DisplaySceneRndrSpecials(NUDLDLISTSCENE *scene, i32, void *visibility_conte
 }
 
 // ==== src/legoapi/render/fx/edsplines.cpp: declarations ====
-#include "decomp.h"
-#include "globals.h"
-#include "gameapi/edtools/edfile.h"
-#include "legoapi/characters/motion.h"
-#include "nu2api/numath/nufloat.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/misc/utilities.h"
-#include "legoapi/render/fx/spline_position.h"
-#include "legoapi/menus/screens/shop.h"
-#include "legoapi/world/world.h"
-#include "legoapi/cutscenes/cutscenes.h"
-#include "legoapi/world/mission.h"
-#include "legoapi/world/area.h"
-#include "legoapi/world/levels/podrace.h"
-#include "legoapi/world/levels/levels.h"
-#include "legoapi/world/area.h"
-#include "legoapi/world/mission.h"
-#include "legoapi/cutscenes/cutscenes.h"
-#include "nu2api/nu3d/nuspline.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nutrig.h"
 
-#include <string.h>
-#include <stdio.h>
 
 
 // The original translation unit exports this internal counter under its unmangled C name.
@@ -695,17 +648,6 @@ void CalcSplinePointFromDist(flightspline_s *spline, _vuv_s *result, float dista
 void LevelSplines_InitForLevel(WORLDINFO_s *world);
 
 // ==== src/legoapi/audio/audio.cpp: declarations ====
-#include "decomp.h"
-#include "globals.h"
-#include "legoapi/audio/audio.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/items/base/apiobject.h"
-#include "legoapi/items/collect/spacelevel.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/world/level.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/numusic/numusic.h"
-#include "nu2api/numusic/sfx.h"
 
 
 // The reference constructs the music manager in this unit's static constructor.
@@ -738,28 +680,7 @@ i32 MusicState(void);
 i32 GamePlayMusic(LEVELDATA_s *level, i32 check, OPTIONSSAVE_s *options);
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
-#include "decomp.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/misc/androidbatman.h"
-#include "gameapi/gui/apimenu.h"
-#include "globals.h"
-#include "legoapi/audio/audio.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/menus/screens/gamestructure.h"
-#include "legoapi/cutscenes/cutscenes.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/items/collect/spacelevel.h"
-#include "nu2api/numusic/numusic.h"
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "legoapi/props/system/socksys.h"
-#include "legoapi/world/area.h"
-#include "legoapi/world/level.h"
-#include "legoapi/world/world.h"
-#include "nu2api/nucore/NuInputDevice.h"
-#include "nu2api/nucore/nupad.h"
 
-#include <string.h>
 
 extern "C" void BackupMenu(void);
 extern WORLDINFO_s *WORLD;
@@ -827,49 +748,10 @@ void NewBuzz(nupad_s *pad, float duration, i32);
 void NewRumble(nupad_s *pad, float strength, i32);
 
 // ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/nucore/nustring.h"
-#include "legoapi/core/input/qrand.h"
-#include "legoapi/audio/sfx.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/render/core/render.h"
-#include "legoapi/menus/core/gamehint.h"
-#include "legoapi/menus/core/panel.h"
-#include "legoapi/world/levels/levels.h"
-#include "legogame/game.h"
-#include "decomp.h"
-#include "legoapi/actions/character/speederchase.h"
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "globals.h"
-#include "legoapi/gizmo/base/gizmo.h"
-#include "legoapi/items/base/apiobject.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/actions/combat/hits.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/items/collect/spacelevel.h"
-#include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
-#include "legoapi/gizmos/object/gizobstacles.h"
-#include "legoapi/gizmo/object/gizmoblowups.h"
-#include "legoapi/world/level.h"
-#include "legoapi/world/world.h"
-#include "legoapi/world/world_shared.h"
-#include "gameapi/edtools/edcam.h"
-#include "gameapi/edtools/edui.h"
-#include "nu2api/numath/nuvec.h"
-#include "nu2api/numath/nurand.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "nu2api/nucore/nuanim3.h"
-#include "nu2api/nu3d/nutex.h"
-#include <string.h>
 
 
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 
-#include "legoapi/actions/character/speederchase_types.h"
 
 
 
@@ -918,13 +800,6 @@ extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 extern "C" f32 pod_roll[2];
 
 // ==== src/legoapi/characters/motion/chris_stubs.cpp: all remaining content ====
-#include "decomp.h"
-#include "legoapi/items/collect/spacelevel.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/world/world.h"
-#include "nu2api/numath/nurand.h"
-#include "nu2api/nu3d/nutex.h"
-#include <string.h>
 
 
 anakin_door_s *volatile AnakinC = NULL;

@@ -1,6 +1,5 @@
 #include "decomp.h"
 #include "nu2api/nucore/nuvuvec.hpp"
-#include "decomp.h"
 #include "legoapi/ai/game/creature.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
@@ -138,7 +137,6 @@
 #include "legoapi/gizmos/traps/gizbombgen.h"
 #include "legoapi/gizmos/traps/gizturrets.h"
 #include "nu2api/nucore/numechptr.hpp"
-#include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/nu3d/nuspline.h"
 #include "gameframework/saveload.h"
 
@@ -248,9 +246,7 @@ static BIKEPART_s bikeParts[8];
 
 void KillParts_TIEFIGHTER(ADDPART_s *, i32, i32, GameObject_s *, i32, u16, u16, NUVEC *);
 void KillParts_ATAT(ADDPART_s *, i32, i32, GameObject_s *);
-static i32 SpeederPart_Draw(PART_s *);
 static void SpeederPart_Kill(PART_s *, i32);
-static void SpeederPart_Update(PART_s *);
 
 static i32 lastrandkillmode;
 

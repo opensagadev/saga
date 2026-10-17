@@ -19,6 +19,35 @@
 #include "nu2api/nu3d/nushader_plain.h"
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nucore/nuapi.h"
+#include "nu2api/nu3d/android/nuios_shader_sources.inc"
+#include "nu2api/nu3d/android/nublend_internal.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nucore/common.h"
+#include "nu2api/nucore/nulst.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/nufile/nu2api_nufile_types.h"
+#include "nu2api/nu3d/numtl_types.h"
+#include "nu2api/nu3d/nuhspecial.h"
+#include <stdio.h>
+#include "nu2api/nu3d/nuvport.h"
+#include <float.h>
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nurand.h"
+#include "nu2api/numath/nuvec.h"
+#include "nu2api/nucore/nucore.hpp"
+#include "globals.h"
+#include "nu2api/nu3d/nutexanm.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nu3d/android/nuptl_android.h"
+#include "nu2api/nu3d/nurndr_plain_types.h"
 
 u8 DebrisGlassIOS_Tex[] = {
     0x50, 0x56, 0x52, 0x03, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -86,7 +115,6 @@ static NUSHADERPROGRAM *g_faceonDecalProgram = nullptr; // _ZL20g_faceonDecalPro
 static NUSHADERPROGRAM *g_debrisProgram = nullptr;      // _ZL15g_debrisProgram
 static NUSHADERPROGRAM *g_debrisGlassProgram = nullptr;
 
-#include "nu2api/nu3d/android/nuios_shader_sources.inc"
 
 // Refraction texture used by glass debris — lazily allocated.
 static i32 NuIOSDLMtlCallback_refractionRT = 0;                 // @0x99b480
@@ -121,7 +149,6 @@ static inline char DebrisGlassSelector(const numtl_s *mtl) {
 static constexpr char kGlassDebrisMarker = (char)-0x69; // 0x97
 
 
-#include "nu2api/nu3d/android/nublend_internal.h"
 
 extern "C" void NuMtlSetRenderStatesPS(numtl_s *mtl);
 
@@ -153,23 +180,13 @@ namespace {
 
 // ==== src/nu2api/nu3d/numtl.cpp: declarations ====
 
-#include "gamelib/util/gamelib_util_types.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nucore/common.h"
-#include "nu2api/nucore/nulst.h"
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/nufile/nu2api_nufile_types.h"
 
-#include "nu2api/nu3d/numtl_types.h"
 DECOMP_ASSERT(sizeof(MTL_OVERRIDE_RECORD) == 12, "Material override payload ABI");
 DECOMP_ASSERT(offsetof(NUMTL, shader_desc) + offsetof(NUSHADERMTLDESC, vtx_desc) == 0x1f0,
               "Material override vertex descriptor offset");
 
 
 // ==== src/nu2api/nu3d/nurndr_plain.cpp: declarations ====
-#include "nu2api/nu3d/nuhspecial.h"
-#include <stdio.h>
-#include "nu2api/nu3d/nuvport.h"
 // nurndr_plain.cpp — Host "plain" renderer backend.
 //
 // This TU is the host replacement for the PS2 rendering TU (nurndr).
@@ -188,23 +205,7 @@ DECOMP_ASSERT(offsetof(NUMTL, shader_desc) + offsetof(NUSHADERMTLDESC, vtx_desc)
 // subsystems are transcribed. Their signatures are not yet recovered, so
 // they are left as `void(void)`.
 
-#include <float.h>
-#include "nu2api/nu3d/nuprim_internal.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nurand.h"
-#include "nu2api/numath/nuvec.h"
 
-#include "nu2api/nucore/nucore.hpp"
-#include "globals.h"
-#include "nu2api/nu3d/nutexanm.h"
-#include "nu2api/nucore/nuthread.h"
-#include "nu2api/nu3d/nugscn.h"
-#include "nu2api/nu3d/nudlist.h"
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nuandroid/ios_graphics.h"
-#include "nu2api/nu3d/android/nuptl_android.h"
 
 // ---------------------------------------------------------------------------
 // Scene state — mirrors original BSS layout
@@ -267,7 +268,6 @@ extern "C" void NuDisplayListAnimateMtls(f32 frame_time);
 
 // Debug / visualisation geometry
 
-#include "nu2api/nu3d/nurndr_plain_types.h"
 
 // Shader / texture / vertex state
 extern "C" {

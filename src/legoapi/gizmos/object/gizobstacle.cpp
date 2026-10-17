@@ -1,20 +1,6 @@
 #include "legoapi/gizmos/object/gizobstacles.h"
 #include "legoapi/world/world.h"
 #include "legoapi/legoapi_types.h"
-
-u32 GizObstacles_TotalScore(void *world) {
-    GIZOBSTACLESYS_s *system = static_cast<WORLDINFO_s *>(world)->giz_obstacle_sys;
-    u32 total = 0;
-    if (system != NULL) {
-        GIZOBSTACLE_s *item = system->obstacles;
-        if (item != NULL) {
-            for (i32 i = 0; i < system->count; ++i, ++item)
-                total += item->completion_score;
-        }
-    }
-    return total;
-}
-
 #include "decomp.h"
 #include "gameapi/edtools/edfile.h"
 #include "globals.h"
@@ -34,18 +20,30 @@ u32 GizObstacles_TotalScore(void *world) {
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/collect/bolts.h"
 #include "legoapi/misc/utilities.h"
-#include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/gamemessage.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
-#include "legoapi/world/world.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nuportal.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numusic/sfx.h"
+
+u32 GizObstacles_TotalScore(void *world) {
+    GIZOBSTACLESYS_s *system = static_cast<WORLDINFO_s *>(world)->giz_obstacle_sys;
+    u32 total = 0;
+    if (system != NULL) {
+        GIZOBSTACLE_s *item = system->obstacles;
+        if (item != NULL) {
+            for (i32 i = 0; i < system->count; ++i, ++item)
+                total += item->completion_score;
+        }
+    }
+    return total;
+}
+
 
 namespace {
 

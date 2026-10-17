@@ -32,7 +32,6 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
-#include "legoapi/characters/core/character.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmo/base/gizflow.h"
@@ -52,7 +51,6 @@
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/areas.h"
-#include "legoapi/world/mission.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/numtl.h"
@@ -61,18 +59,15 @@
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/nurand.h"
-#include "nu2api/numath/nuvec.h"
 #include "legoapi/world/world.h"
-#include "legoapi/world/mission.h"
-#include "legoapi/world/levels/levels.h"
-#include "legoapi/characters/core/character.h"
 #include "legoapi/items/base/collection.h"
-#include "legoapi/gizmos/fx/gizmopickups.h"
 #include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nupostparams.h"
+#include "legoapi/misc/supportall_types.h"
+#include "nu2api/numath/numtx.h"
+#include "legoapi/audio/sfx.h"
+#include "nu2api/nufile/nufpar.h"
 
 // The reference defines these with dynamic initialization in this unit.
-#include "legoapi/misc/supportall_types.h"
 
 void ClearLevelProgress(i32, WORLDINFO_s *);
 extern "C" ripple_set_s *ripples;
@@ -132,22 +127,7 @@ void RndrArrow(float x, float y, float scale, i32 angle, i32 colour);
 
 
 // ==== src/legoapi/items/fx/ripples.cpp: declarations ====
-#include "decomp.h"
-#include "legoapi/legoapi_types.h"
-#include "globals.h"
-#include "nu2api/numath/numtx.h"
-#include "legoapi/items/base/apiobject.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/world/world.h"
-#include "legoapi/core/input/qrand.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/audio/sfx.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nufile/nufpar.h"
 
-#include <string.h>
-#include "nu2api/nu3d/nutex.h"
 
 void NewRumble(nupad_s *pad, f32 strength, i32 mode);
 void NewBuzzFrames(nupad_s *pad, i32 frames, i32 mode);

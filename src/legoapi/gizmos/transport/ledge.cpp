@@ -20,6 +20,9 @@
 
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/render/light/surfaces.h"
+#include "nu2api/nu3d/nutex.h"
 
 struct LEDGEPROGRESS {
     i32 state[8];
@@ -45,37 +48,22 @@ static LEDGEPIECE LedgePiece[6] = {
 };
 DECOMP_ASSERT(sizeof(LEDGEPIECE) == 0x20, "LEDGEPIECE ABI");
 
-static void *Ledges_ReserveBufferSpace(void *world_info);
 
-static void Ledge_SetVisibility(GIZMO *gizmo, i32 visible);
 
-static void Ledge_Activate(GIZMO *gizmo, i32 active);
 
-static i32 Ledges_GetMaxGizmos(void *world_info);
 
-static char *Ledge_GetGizmoName(GIZMO *gizmo);
 
-static i32 Ledge_GetOutput(GIZMO *gizmo, i32, i32);
 
-static char *Ledge_GetOutputName(GIZMO *gizmo, i32 output_index);
 
-static i32 Ledge_GetNumOutputs(GIZMO *gizmo);
 
-static void Ledges_Reset(void *world_info, void *, void *progress_data);
 
-static void Ledges_ClearProgress(void *, void *progress_data);
 
-static void *Ledges_AllocateProgressData(VARIPTR *buffer, VARIPTR *end);
 
-static void Ledges_Draw(void *world_info, void *, float);
 
-static void Ledges_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_info, void *);
 
 static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *bounds_min, NUVEC *bounds_max, u16 *angle);
 
-static i32 Ledges_Load(void *world_info, void *);
 
-static void Ledges_StoreProgress(void *world_info, void *, void *progress_data);
 
 
 static inline void Ledge_TryAttach(WORLDINFO_s *world, GameObject_s *object) {
@@ -113,20 +101,6 @@ static inline void Ledge_UpdateUnattached(WORLDINFO_s *world, GameObject_s *obje
 }
 
 // ==== src/legoapi/props/objects/ledgeterrain.cpp: declarations ====
-#include "decomp.h"
-#include "legoapi/actions/movement/jumping.h"
-#include "globals.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/gizmos/transport/ledges.h"
-#include "legoapi/render/light/surfaces.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/core/input/gamepads.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nuvec.h"
-#include "legoapi/legoapi_types.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/nu3d/nutex.h"
 
 struct AIROW_s;
 struct nunativegscene_s;

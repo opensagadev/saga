@@ -7,16 +7,16 @@
 #include "nu2api/nucore/NuInputDevice.h"
 
 #include <string.h>
+#include <stddef.h>
+#include "nu2api/nu3d/nurndr.h"
 
 u32 colourPurple = 0xffff00ff;
 f32 s_mechTouchTapFrequency = 0.4f;
 
 // ==== src/MechInputTouch/MechInputTouchButton_stubs.cpp: all remaining content ====
-#include <stddef.h>
 
 // ==== src/MechInputTouch/MechInputTouchButton.cpp: declarations ====
 
-#include "nu2api/nu3d/nurndr.h"
 
 extern u32 colourPurple;
 

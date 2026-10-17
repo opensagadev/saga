@@ -35,22 +35,93 @@
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nurndr.h"
+#include <string.h>
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/world/world_shared.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/fx/game_deb.h"
+#include "gameapi/edtools/edpp_internal.h"
+#include "legoapi/gizmos/transport/teleport.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/render/light/lighting.h"
+#include "legoapi/render/light/surfaces.h"
+#include <stdio.h>
+#include "gamelib/util/gamelib_util_types.h"
+#include "gameapi/edtools/edstubs.h"
+#include "gameapi/gui/apimenu.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/charconfig.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/ai/game/creature.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmo/base/gizflow.h"
+#include "legoapi/items/objects/grabber.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/menus/screens/store.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/props/system/socksys.h"
+#include "legogame/game.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nuportal.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nucore/nutime.h"
+#include "nu2api/nucore/NuDeviceSpecs.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/nufile/nufpar.h"
+#include "nu2api/nusound/nusound.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "gameapi/edtools/edgra.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/traps/gizforce.h"
+#include "legoapi/world/levels/episode.h"
+#include "legoapi/menus/screens/gamestructure.h"
+#include "legoapi/menus/screens/gamemenuall.h"
+#include <stdlib.h>
+#include "legoapi/characters/core/customiser.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/misc.h"
+#include "legoapi/render/light/fade_material.h"
+#include "legoapi/render/fx/edsplines.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/nucore/nupad.h"
+#include "legoapi/actions/combat/hits.h"
+#include "gameapi/edtools/edpart_internal.h"
+#include "legoapi/render/core/rtl.h"
+#include "legoapi/gizmo/object/giztorpedo.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "nu2api/numath/numtx_inline.h"
+#include "nu2api/nu3d/android/nuptl_android.h"
+#include "legoapi/core/input/gamepads.h"
+#include "nu2api/numath/nurand.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include <float.h>
+#include <math.h>
+#include "legoapi/render/core/terrain_internal.h"
+#include "legoapi/render/core/gameliball.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
+#include "nu2api/nu3d/android/nurain_android.h"
+#include <stddef.h>
+#include "legoapi/render/core/terrain_stubs_types.h"
 
 f32 COINMAGNETSCALE = 3.0f;
 f32 COINMSGTIME = 1.0f;
 f32 (*GizmoPickups_Collide2DFn)(GameObject_s *) = NULL;
 static GIZMOPICKUPSYS_s *GizmoPickupSys = &GizmoPickupSys_Game;
 
-static GIZMOPICKUP_s *GizmoPickups_CollideList(GameObject_s *, GIZMOPICKUP_s *, i32);
 
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nurndr.h"
 
-#include <string.h>
 
 extern "C" {
     i32 NuPortalWhichRoom(NUGSCN *scene, NUVEC *position);
-    void NewTerrPlatformsOff(void);
 }
 
 extern u8 CharClipToBlobShadows;
@@ -113,19 +184,15 @@ namespace {
 } // namespace
 
 extern char *LEGOASCII_UP, *LEGOASCII_DOWN;
-extern i32 LEGOOBJ_ICON_FRAME_NEUTRAL;
-static void GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
 
 extern char *LEGOASCII_BIGARROW;
 
-static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count);
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
 static __attribute__((noinline, noclone)) void GizmoPickups_UpdateListBody(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count, i32 play_nearby_sfx)
     __asm__("_ZL23GizmoPickups_UpdateListP11WORLDINFO_sP13GIZMOPICKUP_sii.part.9");
 
-static void GizmoPickups_UpdateListBody(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count, i32 play_nearby_sfx);
 
 static inline void GizmoPickups_UpdateList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count, i32 play_nearby_sfx) {
     if (world == NULL || pickups == NULL) {
@@ -140,84 +207,30 @@ i32 PickUpFlickerTest = 3;
 i32 PickUpFlickerFrames = 6;
 i32 PickupFlickerFrame;
 
-static i32 GizmoPickups_GetMaxGizmos(void *pickup);
 
-static void GizmoPickups_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *data, void *);
 
 static void GizmoPickups_Update(void *world_ptr, void *, float);
 
-static void GizmoPickups_Draw(void *world_ptr, void *, float);
 
-static char *GizmoPickup_GetGizmoName(GIZMO *gizmo);
 
-static i32 GizmoPickup_GetOutput(GIZMO *gizmo, i32, i32);
 
-static char *GizmoPickup_GetOutputName(GIZMO *, i32);
 
-static i32 GizmoPickup_GetNumOutputs(GIZMO *);
 
-static void GizmoPickup_Activate(GIZMO *gizmo, i32 activate);
 
-static void GizmoPickup_SetVisibility(GIZMO *gizmo, i32 visible);
 
-static NUVEC *GizmoPickup_GetPos(GIZMO *gizmo);
 
-static GIZMOPICKUP_s *GizmoPickups_CollideList(GameObject_s *object, GIZMOPICKUP_s *pickups, i32 count);
 
-static void *GizmoPickups_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end);
 
-static void GizmoPickups_ClearProgress(void *, void *progress_ptr);
 
-static void GizmoPickups_StoreProgress(void *world_ptr, void *, void *progress_ptr);
 
-static void GizmoPickups_Reset(void *world_ptr, void *, void *progress_ptr);
 
-static void *GizmoPickups_ReserveBufferSpace(void *world_ptr);
 
-static i32 GizmoPickups_Load(void *world_ptr, void *);
 
 void GizmoPickups_PostLoad(void *, void *);
 
 // ==== src/legoapi/world/world.cpp: declarations ====
-#include "legoapi/world/levels/levels.h"
-#include "legoapi/world/world_shared.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/render/fx/game_deb.h"
-#include "gameapi/edtools/edpp_internal.h"
-#include "legoapi/gizmos/transport/teleport.h"
-#include "legoapi/render/fx/parts.h"
-#include "legoapi/render/light/lighting.h"
-#include "legoapi/render/light/surfaces.h"
 
-#include <stdio.h>
 
-#include "gamelib/util/gamelib_util_types.h"
-#include "gameapi/edtools/edstubs.h"
-#include "gameapi/gui/apimenu.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/characters/core/charconfig.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/ai/game/creature.h"
-#include "legoapi/gizmo/base/gizmo.h"
-#include "legoapi/gizmo/base/gizflow.h"
-#include "legoapi/items/objects/grabber.h"
-#include "legoapi/items/base/collection.h"
-#include "legoapi/menus/screens/store.h"
-#include "legoapi/items/base/apiobject.h"
-#include "legoapi/props/system/socksys.h"
-#include "legogame/game.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/nu3d/nudlist.h"
-#include "nu2api/nu3d/nuportal.h"
-#include "nu2api/nuandroid/ios_graphics.h"
-#include "nu2api/nucore/nutime.h"
-#include "nu2api/nucore/NuDeviceSpecs.h"
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/nufile/nufpar.h"
-#include "nu2api/nusound/nusound.h"
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "gameapi/edtools/edgra.h"
 
 // Globals shared across world loading — defined here until moved to globals.cpp
 
@@ -234,16 +247,10 @@ void GizmoPickups_PostLoad(void *, void *);
 extern WORLDINFO WorldInfo[2];
 
 // ==== src/legoapi/items/base/collection.cpp: declarations ====
-#include "legoapi/gizmos/object/gizobstacles.h"
-#include "legoapi/gizmos/traps/gizforce.h"
 
 extern "C" i32 DoubleScore;
 
-#include "legoapi/world/levels/episode.h"
-#include "legoapi/menus/screens/gamestructure.h"
-#include "legoapi/menus/screens/gamemenuall.h"
 
-#include <stdlib.h>
 struct GIZMOPICKUP_s;
 struct PART_s;
 
@@ -252,17 +259,6 @@ void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
 static __used__ void Collection_GetSelectingPlayerIDs(i16 *ids);
 
 // ==== src/legoapi/menus/core/panel.cpp: declarations ====
-#include "legoapi/characters/core/customiser.h"
-#include "legoapi/menus/core/panel.h"
-#include "legoapi/menus/screens/arcade.h"
-#include "legoapi/props/doors/door.h"
-#include "legoapi/misc.h"
-#include "legoapi/render/light/fade_material.h"
-#include "legoapi/render/fx/edsplines.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/nu3d/nuprim_internal.h"
-#include "nu2api/nucore/nupad.h"
 
 namespace {
 #include "legoapi/menus/core/panel_types.h"
@@ -278,19 +274,7 @@ static __attribute__((noinline, noclone, hot, section(".text"))) void DrawHitPoi
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 
-#include "legoapi/actions/combat/hits.h"
-#include "gameapi/edtools/edpart_internal.h"
-#include "legoapi/render/core/rtl.h"
-#include "legoapi/gizmo/object/giztorpedo.h"
-#include "legoapi/items/collect/torpedo.h"
-#include "nu2api/numath/numtx_inline.h"
-#include "nu2api/nu3d/android/nuptl_android.h"
-#include "legoapi/core/input/gamepads.h"
-#include "nu2api/numath/nurand.h"
-#include "nu2api/nu3d/nurndrstat.h"
 
-#include <float.h>
-#include <math.h>
 
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
@@ -348,16 +332,9 @@ WORLDINFO_s *WorldInfo_CurrentlyActive();
         PlaySfxById(type->sounds[slot], &emitter->position);
 
 // ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
-#include "legoapi/render/core/terrain_internal.h"
-#include "legoapi/render/core/gameliball.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/android/nutimebar_plain.h"
-#include "nu2api/nu3d/android/nurain_android.h"
 
-#include <stddef.h>
 
 // Runtime-selected groups appended after the fixed terrain allocation.
-#include "legoapi/render/core/terrain_stubs_types.h"
 
 // NuFileExists @nufile (nucore_plain.cpp).
 extern "C" i32 NuFileExists(char *name);

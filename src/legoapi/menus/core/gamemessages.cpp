@@ -23,32 +23,7 @@
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/nutrig.h"
-
-void AddFancyMessageRGB(char *, float, float, float, float, i32, unsigned char, unsigned char, unsigned char);
-
-GAMEMESSAGE_s GameMessage[128] = {};
-
-static i32 GameMessageIndex;
-
 #include "legoapi/menus/core/gamemessages_types.h"
-
-static_assert(sizeof(GAME_MESSAGE_DATA) == sizeof(GAMEMESSAGE_s), "game message backing layout");
-static_assert(offsetof(GAME_MESSAGE_DATA, tick_fn) == offsetof(GAMEMESSAGE_s, tick_fn),
-              "game message backing callback offset");
-
-ADDGAMEMSG AddGameMsg_Default = {
-    NULL, &v000, &v000, 1.0f, 1.0f, 0xff, 0xff, 0xff, 0x80, 0,  1.0f, 0.0f, 0, -1,
-    NULL, 0,     0.0f,  0.0f, NULL, NULL, NULL, NULL, NULL, -1, 0,    0xff, 0,
-};
-
-
-void *AddGameMessage(char *text, nuvec_s *position, float scale, nuvec_s *target_position, float target_scale,
-                     unsigned char red, unsigned char green, unsigned char blue, u32 flags, float duration);
-
-void AddFancyMessageRGB(char *text, float x, float y, float scale, float duration, i32 message_id, unsigned char red,
-                        unsigned char green, unsigned char blue);
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 #include "gameapi/edtools/edbri_internal.h"
 #include "gameapi/edtools/edstubs.h"
 #include "legoapi/render/core/render.h"
@@ -81,9 +56,7 @@ void AddFancyMessageRGB(char *text, float x, float y, float scale, float duratio
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-
 #include "nu2api/nu3d/nurndr.h"
-
 #include "gameframework/saveload.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion/gameanim.h"
@@ -98,7 +71,6 @@ void AddFancyMessageRGB(char *text, float x, float y, float scale, float duratio
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world_shared.h"
 #include "nu2api/nu3d/nutexanm.h"
-
 #include "legoapi/render/core/SwipeDecalRenderer.h"
 #include "nu2api/nu3d/nuprim_internal.h"
 #include "nu2api/nu3d/nudlist.h"
@@ -117,6 +89,36 @@ void AddFancyMessageRGB(char *text, float x, float y, float scale, float duratio
 #include "nu2api/numath/numath.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nufloat.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nupostparams.h"
+
+void AddFancyMessageRGB(char *, float, float, float, float, i32, unsigned char, unsigned char, unsigned char);
+
+GAMEMESSAGE_s GameMessage[128] = {};
+
+static i32 GameMessageIndex;
+
+
+static_assert(sizeof(GAME_MESSAGE_DATA) == sizeof(GAMEMESSAGE_s), "game message backing layout");
+static_assert(offsetof(GAME_MESSAGE_DATA, tick_fn) == offsetof(GAMEMESSAGE_s, tick_fn),
+              "game message backing callback offset");
+
+ADDGAMEMSG AddGameMsg_Default = {
+    NULL, &v000, &v000, 1.0f, 1.0f, 0xff, 0xff, 0xff, 0x80, 0,  1.0f, 0.0f, 0, -1,
+    NULL, 0,     0.0f,  0.0f, NULL, NULL, NULL, NULL, NULL, -1, 0,    0xff, 0,
+};
+
+
+void *AddGameMessage(char *text, nuvec_s *position, float scale, nuvec_s *target_position, float target_scale,
+                     unsigned char red, unsigned char green, unsigned char blue, u32 flags, float duration);
+
+void AddFancyMessageRGB(char *text, float x, float y, float scale, float duration, i32 message_id, unsigned char red,
+                        unsigned char green, unsigned char blue);
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+
+
+
 
 struct GAMEMESSAGE_s;
 struct nuhspecial_s;
@@ -143,8 +145,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
 
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/nu3d/nupostparams.h"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \

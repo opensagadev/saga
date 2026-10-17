@@ -7,19 +7,8 @@
 
 // The original unit constructs its six homogeneous vectors.
 #include "nu2api/nucore/nuvuvec.hpp"
-
-struct nugobj_s;
-struct nugscn_s;
-struct numtx_s;
-struct nupad_s;
-struct rndrstream_s;
-
-// ==== src/nu2api/nucore/nuvideo.cpp: all remaining content ====
 #include "nu2api/nucore/nuvideo.h"
-
 #include "nu2api/nucore/nuapi.h"
-
-// ==== src/legoapi/render/core/render_stubs.cpp: declarations ====
 #include "legoapi/world/world_shared.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/items/base/apiobject.h"
@@ -35,23 +24,34 @@ struct rndrstream_s;
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nu3d/nuvport.h"
 #include "globals.h"
-
 #include <string.h>
-
-// ==== src/nu2api/nu3d/android/nutex_android.c: declarations ====
 #include "nu2api/nu3d/android/nutex_android.h"
-
 #include <ctype.h>
 #include <stdio.h>
-
 #include <GLES2/gl2.h>
-
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nuplatform/nuplatform.h"
+
+struct nugobj_s;
+struct nugscn_s;
+struct numtx_s;
+struct nupad_s;
+struct rndrstream_s;
+
+// ==== src/nu2api/nucore/nuvideo.cpp: all remaining content ====
+
+
+// ==== src/legoapi/render/core/render_stubs.cpp: declarations ====
+
+
+// ==== src/nu2api/nu3d/android/nutex_android.c: declarations ====
+
+
+
 
 #define TEX_PATH "mnt/sdcard/TTGames/com.wb.lego.tcs/files/androidTextures/"
 

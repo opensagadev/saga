@@ -14,6 +14,73 @@
 #include <string.h>
 
 #include "nu2api/nucore/common.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nu3d/nuocclusion.h"
+#include "nu2api/nu3d/nuportal.h"
+#include "nu2api/nu3d/nuwater.h"
+#include "nu2api/nucore/nukeyboard.h"
+#include "nu2api/nucore/numouse.h"
+#include "nu2api/nucore/numem.h"
+#include "nu2api/nucore/nuheap.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nucore/numem_types.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/nucore/deflate.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/nuplatform/nuplatform.h"
+#include "nu2api/nufile/nufilepak.h"
+#include "nu2api/nufile/nufpar.h"
+#include "nu2api/nu3d/nutexanm.h"
+#include "nu2api/nucore/nurdp.h"
+#include "nu2api/nucore/nulist.h"
+#include <stddef.h>
+#include "nu2api/nucore/nuqt.h"
+#include "nu2api/nucore/nutime.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nupostresources.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
+#include "nu2api/nucore/nuonline.h"
+#include "gamelib/nuwind/nuwind.h"
+#include "nu2api/nu3d/nulgtlaser.h"
+#include "nu2api/numath/nuvec4.h"
+#include <math.h>
+#include <float.h>
+#include <GLES2/gl2.h>
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/nu3d/android/nutex_ios_ex.h"
+#include "java/android.h"
+#include "java/java.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/nupad.h"
+#include "nu2api/nucore/NuInputDevice.h"
+#include "nu2api/nucore/NuInputManager.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nuspecial_internal.h"
+#include "nu2api/nu3d/nurendercontext.h"
+#include "nu2api/nu3d/nuscreen.hpp"
+#include "nu2api/numath/nuquat.h"
+#include "nu2api/nu3d/NuRenderDevice.h"
+#include "nu2api/nucore/NuDynamicLight.h"
+#include "nu2api/numath/numtx.h"
+#include "globals.h"
+#include "nu2api/nu3d/android/nudlist_callbacks.h"
+#include "nu2api/nucore/NuMemoryManager.h"
+#include "nu2api/nucore/nuvideo.h"
 
 static i32 gExplodeInitialised = 1;
 
@@ -61,12 +128,10 @@ static u32 blocksize;
 static u16 offset_table[0x100];
 static u8 offset_len[0x13];
 
-static void read_offset_len(i32 table_size, i32 bit_count, i32 zero_value);
 
 static u16 literal_table[0x1000];
 static u8 literal_len[0x1fe];
 
-static void read_literal_len();
 
 u16 implode_left[0x3fb];
 u16 implode_right[0x3fb];
@@ -98,33 +163,18 @@ static u16 *sortptr;
 static u16 len_cnt[17];
 static unsigned char *len;
 
-static void count_len(i32 node);
 
-static void make_len(i32 root);
 
-static void downheap(i32 parent);
 
-static void make_code(i32 symbols, unsigned char *lengths, u16 *codes);
 
 // ==== src/nu2api/nucore/nuapi.c: all remaining content ====
-#include "nu2api/nucore/nuapi.h"
-#include "nu2api/nu3d/nuocclusion.h"
-#include "nu2api/nu3d/nuportal.h"
-#include "nu2api/nu3d/nuwater.h"
-#include "nu2api/nucore/nukeyboard.h"
-#include "nu2api/nucore/numouse.h"
 
 extern "C" {
-static void NuPrimReset();
 }
 
 
 // ==== src/nu2api/nucore/numem.cpp: declarations ====
-#include "nu2api/nucore/numem.h"
-#include "nu2api/nucore/nuheap.h"
-#include "nu2api/nucore/numemory.h"
 
-#include "nu2api/nucore/numem_types.h"
 
 static NUMEMALLOCATION *alloc_list;
 
@@ -162,47 +212,26 @@ struct NUHEAP {
 
 enum NUHEAPBLOCKFLAGS { NUHEAPBLOCK_IN_USE = 0x80000000u, NUHEAPBLOCK_SIZE_MASK = 0x7fffffffu };
 
-static u32 NuHeapBlock_GetSize(NUHEAPBLOCK *block);
-
-static NUHEAPBLOCK *NuHeapBlock_GetNextFree(NUHEAPBLOCK *block);
-
-static void NuHeapBlock_SetInUse(NUHEAPBLOCK *block, u32 in_use);
-
-static void NuHeapBlock_SetSize(NUHEAPBLOCK *block, u32 size);
-
-static void NuHeapBlock_SetNextFree(NUHEAPBLOCK *block, NUHEAPBLOCK *next);
-
-static void NuHeapBlock_SetPrevFree(NUHEAPBLOCK *block, NUHEAPBLOCK *previous);
-
-static void NuHeapBlock_WriteFooter(NUHEAPBLOCK *block);
-
-static void NuHeapBlock_SetName(NUHEAPBLOCK *block, char *name);
-
-static u32 NuHeapBlock_GetInUse(NUHEAPBLOCK *block);
-
-static NUHEAPBLOCK *NuHeapBlock_GetNext(NUHEAPBLOCK *block);
-
-static NUHEAPBLOCK *NuHeapBlock_GetPrev(NUHEAPBLOCK *block);
-
-static void NuHeapBlock_RemoveFromFreeList(NUHEAPBLOCK *block);
-
-static void *NuHeapBlock_GetUsableMemory(NUHEAPBLOCK *block);
-
-static void NuHeapBlock_SplitFreeBlock(NUHEAPBLOCK *block, u32 *size, NUHEAPBLOCK **allocated, NUHEAPBLOCK **remainder,
-                                       u32 alignment);
 
 
 
 
-static void NuHeap_PrintAllocations(void *heap);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ==== src/nu2api/nufile/nufile.cpp: all remaining content ====
-#include "nu2api/nufile/nufile.h"
 
-#include "nu2api/nucore/deflate.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nucore/nuthread.h"
-#include "nu2api/nuplatform/nuplatform.h"
 
 #ifdef ANDROID
 #include "nu2api/nufile/android/nufile_android.h"
@@ -248,7 +277,6 @@ NUFILE_DEVICE *default_device = &host_device;
 static i32 file_time_count;
 static FILEBUFF file_buff[4];
 
-static void AquireFileBuffer(FILEINFO *info);
 
 i32 numdevices = 0;
 
@@ -275,9 +303,7 @@ i32 DontDoFileUpperCaseHack;
 
 i32 NuFile_SwapEndianOnWrite;
 
-static void NuFileEndianSwap16(void *value);
 
-static void NuFileEndianSwap32(void *value);
 
 
 
@@ -295,18 +321,13 @@ static char read_buffer[0x40000];
 static volatile i32 read_buffer_size;
 static volatile i32 read_buffer_decoded_size;
 
-static void NuDatFileDecodeInit();
-
-static void NuDatFileDecodeNewFile(NUDATFILEINFO *file, NUDATOPENFILEINFO *open_file);
-
-static void NuDatFileDecodeNext();
-
-static void APIEndianSwap(void *data, i32 count, i32 size);
 
 
 
 
-static i32 OpenDatFileBase(NUDATHDR *hdr, i32 file_idx);
+
+
+
 
 
 
@@ -355,11 +376,8 @@ extern "C" void NuPPUnpack(void *source, void *destination);
 static FILEEXTINFO extensions[64];
 static i32 num_extensions;
 
-static i32 MatchExtension(char *extension, char *path_end, i32 path_len);
 
-static FILEEXTINFO *NuFileExtGetInfo(char *path, i32 path_len);
 
-static void AddExtension(char *extension, i32 type, i32 platform);
 
 static void NuFileExtInit(void);
 
@@ -421,7 +439,6 @@ extern "C" i32 NuMcFormat(i32 port, i32 slot);
 
 // ==== src/nu2api/nufile/nudatfile.cpp: all remaining content ====
 
-static u32 NameToHash(char *name);
 
 isize BinarySearch(u32 element, u32 *array, usize length);
 
@@ -434,23 +451,16 @@ i32 NuDatFileFindTree(nudathdr_s *header, char *name);
 i64 NuDatCalcPos(nudathdr_s *header, i32 index);
 
 // ==== src/nu2api/nufile/nufilepak.cpp: all remaining content ====
-#include "nu2api/nufile/nufilepak.h"
 
 static NUFILEPAK_ERROR fpk_err;
 
-static u32 CalcChecksum(void *data, i32 len);
-
-static void DecryptData(NUFILEPAKHDR *hdr, u32 data_len, unsigned char *key, i32 key_len);
 
 
-static NUFILEPAKITEM *GetItems(NUFILEPAKHDR *hdr);
+
 
 // ==== src/nu2api/nufile/nufpar.cpp: all remaining content ====
-#include "nu2api/nufile/nufpar.h"
 
-#include "nu2api/nu3d/nutexanm.h"
 
-#include "nu2api/nucore/nurdp.h"
 
 #define PARSER_COUNT 4
 #define PARSER_BUF_SIZE 0x1000
@@ -461,9 +471,7 @@ static char _fparbuffers[PARSER_COUNT * PARSER_BUF_SIZE];
 static NUFPAR *fpars;
 static char *fparbuffers;
 
-static NUFPAR *NuAllocFPar();
 
-static void NuFreeFPar(NUFPAR *parser);
 
 
 
@@ -485,9 +493,7 @@ nufpcomfn *fnInterpreterError;
 
 
 // ==== src/nu2api/nucore/nulist.cpp: all remaining content ====
-#include "nu2api/nucore/nulist.h"
 
-#include <stddef.h>
 
 
 
@@ -502,21 +508,13 @@ struct NUMEMHIGHBLOCK {
 static NUMEMHIGHBLOCK *freep;
 
 // ==== src/nu2api/nucore/nuqt.cpp: all remaining content ====
-#include "nu2api/nucore/nuqt.h"
 
-static int ElOverlaps(nuqtdim_s *a, nuqtdim_s *b);
 
-static i32 InsertData(nuqthdr_s *header, i32 index, void *item);
 
-static void RemoveData(nuqthdr_s *header, char *data, i32 count);
 
-static i32 AddNode(nuqthdr_s *header, i32 child);
 
-static i32 AddElementR(nuqthdr_s *header, i32 index, nuqtdim_s *bounds, nuqtdim_s *item_bounds, void *item, i32 depth);
 
-static void NuQTUnfixAddress(nuqthdr_s *header);
 
-static void NuQTFixAddress(nuqthdr_s *header);
 
 // ==== src/nu2api/nucore/nurdpf.cpp: all remaining content ====
 
@@ -541,15 +539,11 @@ enum {
     TOK_CNT = 9,
 };
 
-static i32 isnumordot(char c);
 
-static void get_tok(RDPFCTXT *ctx);
 
 static f32 f_expr(RDPFCTXT *ctx);
 
-static f32 prim_rdpf(RDPFCTXT *ctx);
 
-static f32 term_rdpf(RDPFCTXT *ctx);
 
 
 
@@ -605,15 +599,11 @@ static u16 bad_fluff[] = {'!', 0xffa3, '$', '%', '^', '&', '*', '(', ')', '_', '
 static NUWCHAR **BadWords;
 static i32 NumBadWords;
 
-static i32 NuStringCharEquiv(u16 a, u16 b);
 
-static i32 NuStringIsFluff(u16 character);
 
-static u16 *NuStringBadSubString(const u16 *text, const u16 *word, i32 *length, i32 whole_word);
 
 
 // ==== src/nu2api/nucore/nutime.cpp: all remaining content ====
-#include "nu2api/nucore/nutime.h"
 
 
 static u32 frameStartTime;
@@ -630,18 +620,6 @@ static u32 frameStartTime;
 
 // ==== src/nu2api/nucore/nuapi.cpp: declarations ====
 
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/nu3d/nudlist.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nupostresources.h"
-#include "nu2api/nu3d/nuvport.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/nucore/nuanim3.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/nu3d/nuqfnt.h"
-#include "nu2api/nu3d/android/nutimebar_plain.h"
-#include "nu2api/nucore/nuonline.h"
 
 // Nucore bootstrap helpers; display-list and framebuffer initialization are
 // declared by their owning public headers.
@@ -674,7 +652,6 @@ static char **argv;
 
 
 // ==== src/nu2api/nucore/nucore_frame.cpp: all remaining content ====
-#include "gamelib/nuwind/nuwind.h"
 void bgSuspendMain(i32);
 
 extern "C" {
@@ -695,41 +672,13 @@ void NuErrorSleep(void);
 
 // ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
 // Temporary C-linkage compatibility surface for unresolved engine owners.
-#include "nu2api/nu3d/nulgtlaser.h"
-#include "nu2api/numath/nuvec4.h"
 //
 // This file collects functions whose original TU has not yet been
 // reconstructed. Domain families move to their evidenced owner as complete
 // groups; this file is not itself evidence of one original nucore TU.
 
-#include <math.h>
-#include <float.h>
-#include <GLES2/gl2.h>
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/nu3d/android/nutex_ios_ex.h"
 
 
-#include "java/android.h"
-#include "java/java.h"
-#include "nu2api/nucore/nuhgobj.h"
-#include "nu2api/nucore/nugcutscene.h"
-#include "nu2api/nucore/nupad.h"
-#include "nu2api/nucore/NuInputDevice.h"
-#include "nu2api/nucore/NuInputManager.h"
-#include "nu2api/nucore/bgproc.h"
-#include "nu2api/nucore/nuptrblock.h"
-#include "nu2api/nu3d/nugscn.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/nurndrstat.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nuspecial_internal.h"
-#include "nu2api/nu3d/nurendercontext.h"
-#include "nu2api/nu3d/nuscreen.hpp"
-#include "nu2api/numath/nuquat.h"
-#include "nu2api/nu3d/NuRenderDevice.h"
-#include "nu2api/nucore/NuDynamicLight.h"
-#include "nu2api/numath/numtx.h"
-#include "globals.h"
 
 // C++-linkage helpers defined in sibling TUs.
 void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
@@ -927,11 +876,9 @@ void NuQFntPrintV(NUQFNT *font, const char *format, va_list arguments);
 union variptr_u;
 
 // ==== src/nu2api/nucore/nu2api_nucore_misc_stubs.cpp: declarations ====
-#include "nu2api/nu3d/android/nudlist_callbacks.h"
 
 // ==== src/nu2api/nucore/nupad.cpp: all remaining content ====
 
-#include "nu2api/nucore/NuMemoryManager.h"
 
 #define MAX_GAME_PAD_COUNT 2
 
@@ -955,13 +902,10 @@ extern "C" void NuPadSetStatus(i32 pad, i32 status);
 
 
 
-static void DeadZoneValueXYProper(i32 *x_value, i32 *y_value, i32 deadzone);
 
-static void DeadZoneValueXY(i32 *x_value, i32 *y_value, i32 deadzone);
 
 static f32 ramp_vals[][2] = {{0.0f, 0.0f}, {0.5f, 0.1f}, {0.75f, 0.25f}, {0.85f, 0.5f}, {1.0f, 1.0f}};
 
-static f32 CalcRamp(f32 ramp);
 
 static f32 ramp_rate = 0.1f;
 
@@ -985,7 +929,6 @@ enum {
 
 
 // ==== src/nu2api/nucore/nuvideo.cpp: declarations ====
-#include "nu2api/nucore/nuvideo.h"
 
 
 
@@ -1032,19 +975,13 @@ enum {
     TOKI_CNT = 22,
 };
 
-static i32 ishexnum(char c);
 
-static i32 hexcodetoint(char c);
 
-static i32 isnum(char c);
 
-static void get_tok_rdpi(RDPICTXT *ctx);
 
 static i32 i_expr(RDPICTXT *ctx);
 
-static i32 prim(RDPICTXT *ctx);
 
-static i32 term(RDPICTXT *ctx);
 
 
 
@@ -1072,13 +1009,9 @@ extern "C" {
 void NuErrorCheck(void);
 
     extern "C++" {
-static void NuDebugMsgFunctionTTY(i32 channel, char *format, ...);
 
-static void NuWarningFunction(char *format, ...);
 
-static void NuDebugMsgFunction(char *format, ...);
 
-static void NuErrorFunction(char *format, ...);
     }
 
 void NuClearError(void);

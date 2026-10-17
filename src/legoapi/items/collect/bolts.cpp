@@ -36,6 +36,21 @@
 #include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include <string.h>
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/items/base/apiobject.h"
+#include "nu2api/nu3d/nutex.h"
+#include <stdio.h>
+#include "gameapi/edtools/gameapi_edtools_types.h"
+#include "gameframework/saveload.h"
+#include "legoapi/core/config/fileselect.h"
+#include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/world/mission.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nucore/nutime.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nucore/nupad.h"
+#include "nu2api/nufile/nufile.h"
 
 
 static void Bolt_Debris_Default(BOLT_s *, NUVEC *, i32, NUVEC *, i32);
@@ -132,7 +147,6 @@ i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
 void Bolt_PlayHitSfx(BOLT_s *bolt);
-void NewRumble(nupad_s *, f32, i32);
 
 PART_s *Bolt_HitParts(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maximum, f32 radius, i32 reason);
 
@@ -157,7 +171,6 @@ i32 CannotKill(GameObject_s *);
 i32 NewBlockAction(GameObject_s *);
 void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
 i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
-void NewBuzz(nupad_s *, f32, i32);
 
 __attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction, nuvec_s *normal,
                                                                     unsigned char *processed);
@@ -168,13 +181,11 @@ void Bolt_HitGameObjectRC(NetMessage &message);
 static __attribute__((noinline, noclone)) i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags)
     __asm__("_ZL12Bolt_HitPlatP6BOLT_sPhP11WORLDINFO_s.isra.38");
 
-static i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags);
 
 
 void Bolt_Init(void *, NetMessage &);
 
 
-static i32 Bolt_RayCast(BOLT_s *, NUVEC *, NUVEC *, f32);
 i32 GizmoSys_BoltHit(GIZMOSYS_s *, void *, BOLT_s *, NUVEC *, NUVEC *, NUVEC *, f32, u8 *);
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
 // The original caller appears to treat this u16-returning function as i32;
@@ -186,7 +197,6 @@ i32 (*BoltInitSfxFn)(GameObject_s *);
 void Bolt_Init(void *storage, NetMessage &message);
 
 
-static i32 Bolt_RayCast(BOLT_s *bolt, NUVEC *start, NUVEC *movement, f32 radius);
 
 static __used__ void Bolt_Debris_Default(BOLT_s *bolt, nuvec_s *points, int point, nuvec_s *, int);
 
@@ -222,9 +232,6 @@ static inline i32 Bolt_HitScenery(BOLT_s *bolt, NUVEC *points, u8 *processed, WO
 
 // ==== src/legoapi/items/collect/bolt.cpp: declarations ====
 
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/items/base/apiobject.h"
-#include "nu2api/nu3d/nutex.h"
 
 i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 bool LineIntersectCircle(NUVEC *, NUVEC *, NUVEC *, f32);
@@ -244,19 +251,7 @@ extern "C" {
 }
 
 // ==== src/legoapi/core/config/saveload.cpp: declarations ====
-#include <stdio.h>
 
-#include "gameapi/edtools/gameapi_edtools_types.h"
-#include "gameframework/saveload.h"
-#include "legoapi/core/config/fileselect.h"
-#include "legoapi/cutscenes/cutscenes.h"
-#include "legoapi/world/mission.h"
-#include "nu2api/nu3d/nuqfnt.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nucore/nutime.h"
-#include "nu2api/nucore/numemory.h"
-#include "nu2api/nucore/nupad.h"
-#include "nu2api/nufile/nufile.h"
 
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;

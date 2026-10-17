@@ -10,6 +10,9 @@
 
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nucore/numemory.h"
+#include "legoapi/legoapi_types.h"
+#include <stdlib.h>
+#include <string.h>
 
 namespace {
     struct OGGCallbacksVTable {
@@ -83,9 +86,6 @@ void *NuSoundHeaderOGG::GetExtendedData() const {
 }
 
 // ==== src/legoapi/audio/gamelib_ogg.cpp: all remaining content ====
-#include "legoapi/legoapi_types.h"
-#include <stdlib.h>
-#include <string.h>
 
 // ==== functions in original address order ====
 

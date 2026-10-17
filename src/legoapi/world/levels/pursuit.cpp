@@ -109,7 +109,6 @@ void BountyHunterPursuitD_Reset(WORLDINFO_s *world);
 static __attribute__((noinline, noclone)) void
 UpdateZamArrowBody(LEVEL_OBJECT_RUNTIME_s **lev_objs) __asm__("_ZL14UpdateZamArrowP11WORLDINFO_s.isra.5.part.6");
 
-static void UpdateZamArrowBody(LEVEL_OBJECT_RUNTIME_s **lev_objs);
 
 static inline void UpdateZamArrow(WORLDINFO_s *world) {
     if (zamarrow.object != NULL && (zamarrow.object->apiobj.field_0x1f8 & 0x1000) != 0 &&

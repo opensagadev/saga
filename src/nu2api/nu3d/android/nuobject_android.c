@@ -5,6 +5,7 @@
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/core/terrain_internal.h"
 #include <string.h>
+#include "nu2api/numath/vuvec_internal.h"
 
 struct NuFadeObjGType {
     i16 active;
@@ -37,7 +38,6 @@ extern "C" {
     i32 stopfadeup;
 }
 
-#include "nu2api/numath/vuvec_internal.h"
 
 static void (*NuFadeObjGlobalSetLightsFn)(void);
 static void (*NuFadeObjSetLightsFn)(void);

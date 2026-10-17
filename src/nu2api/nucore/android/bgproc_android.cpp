@@ -12,31 +12,6 @@
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nucore/nuvuvec.hpp"
-
-NuThreadBase *g_bgProcThread;
-i32 bgproc_frozen;
-i32 bgproc_freeze;
-
-static NULSTHDR *procinfo_pool;
-static i32 g_bgCritSec;
-
-i32 multithreaded = 1;
-
-i32 g_performingBgProcWorkCritSec = -1;
-
-char *g_CrashDumpId = "CRASHDUMP_ID=LEGOSAGAANDROID_ANDROID_Feb_17_2014_01_01_01$";
-
-static char dummyBuf[0x80];
-static BGPROCINFO *cur_pi;
-
-static NuThreadSemaphore events[2] = {
-    NuThreadSemaphore(1),
-    NuThreadSemaphore(1),
-};
-
-static void bgThreadMain(void *data);
-
-// ==== src/legoapi/core/startup/finishloop.cpp: all remaining content ====
 #include "legoapi/core/startup/main.h"
 #include "decomp.h"
 #include "globals.h"
@@ -47,12 +22,6 @@ static void bgThreadMain(void *data);
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/nu3d/nutex.h"
-
-// ==== src/legoapi/misc/supportall.cpp: declarations ====
-
-#if defined(__SSE__)
-#include <xmmintrin.h>
-#endif
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nuprim_internal.h"
 #include "legoapi/misc/supportall.h"
@@ -99,26 +68,7 @@ static void bgThreadMain(void *data);
 #include "legoapi/world/world.h"
 #include "legoapi/items/base/collection.h"
 #include "nu2api/nu3d/nuspecial.h"
-
-// The reference defines these with dynamic initialization in this unit.
 #include "legoapi/misc/supportall_types.h"
-
-DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
-
-// Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
-// Transcribed from the original C-linkage symbols:
-//   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
-//   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
-
-void NuHtmlFlush(i32 force);
-
-extern "C" void NuHtmlBegin(void *file);
-
-extern "C" void NuHtmlWrite(const char *text, ...);
-
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 #include "legoapi/ai/core/legoai.h"
 #include "legoapi/items/objects/objectsall.h"
 #include "legoapi/items/collect/torpedo.h"
@@ -167,10 +117,59 @@ extern "C" void NuHtmlHeading1(const char *fmt, ...);
 #include "nu2api/nu3d/nulgtlaser.h"
 #include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/nucore/nuhgobj.h"
+#include "legoapi/items/objects/gameobjects_types.h"
+
+NuThreadBase *g_bgProcThread;
+i32 bgproc_frozen;
+i32 bgproc_freeze;
+
+static NULSTHDR *procinfo_pool;
+static i32 g_bgCritSec;
+
+i32 multithreaded = 1;
+
+i32 g_performingBgProcWorkCritSec = -1;
+
+char *g_CrashDumpId = "CRASHDUMP_ID=LEGOSAGAANDROID_ANDROID_Feb_17_2014_01_01_01$";
+
+static char dummyBuf[0x80];
+static BGPROCINFO *cur_pi;
+
+static NuThreadSemaphore events[2] = {
+    NuThreadSemaphore(1),
+    NuThreadSemaphore(1),
+};
+
+
+// ==== src/legoapi/core/startup/finishloop.cpp: all remaining content ====
+
+// ==== src/legoapi/misc/supportall.cpp: declarations ====
+
+#if defined(__SSE__)
+#include <xmmintrin.h>
+#endif
+
+// The reference defines these with dynamic initialization in this unit.
+
+DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
+
+// Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
+// Transcribed from the original C-linkage symbols:
+//   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
+//   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
+
+void NuHtmlFlush(i32 force);
+
+extern "C" void NuHtmlBegin(void *file);
+
+extern "C" void NuHtmlWrite(const char *text, ...);
+
+extern "C" void NuHtmlHeading1(const char *fmt, ...);
+
+// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
 
-#include "legoapi/items/objects/gameobjects_types.h"
 
 // Enabled in the target data image.  Ordinary background characters are
 // staggered across frames; special movement states opt back into full-rate

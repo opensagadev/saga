@@ -64,6 +64,20 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/CharacterObjectInterface.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/world/area.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nufile/nufpar.h"
+#include "nu2api/nufile/nufilepak.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/numusic/sfx.h"
 
 DECOMP_ASSERT(sizeof(GIZMOTYPES) == 0xc, "Gizmo type-table header ABI");
 DECOMP_ASSERT(offsetof(GIZMOTYPES, types) == 8, "Gizmo type-table pointer offset");
@@ -78,21 +92,7 @@ f32 hackFlashTimer;
 GAMEANIMSET_s *hackFlashingGameAnimSet;
 
 // ==== src/legoapi/characters/core/character.cpp: declarations ====
-#include "legoapi/characters/core/character.h"
 
-#include "legoapi/characters/core/CharacterObjectInterface.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/world/area.h"
-#include "nu2api/nucore/nuanim3.h"
-#include "nu2api/nucore/nuhgobj.h"
-#include "nu2api/nucore/nuptrblock.h"
-#include "nu2api/nufile/nufpar.h"
-#include "nu2api/nufile/nufilepak.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/numusic/sfx.h"
 
 // Forward declarations for local (static) character/gameplay helper stubs.
 struct nuvec_s;

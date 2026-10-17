@@ -259,7 +259,6 @@ static bool MenuCheatAvailable(i32 cheat) {
 static void MenuDrawTitles(MENU *);
 static void MenuUpdateTitles(MENU *);
 static void MenuEnterTitles(MENU *);
-static i32 UpdateTitleSequence(MENU *);
 static void MenuDrawBonusComplete(MENU *);
 static void MenuDrawBonusWin(MENU *);
 static void MenuDrawHowToPlay(MENU *);

@@ -11,6 +11,23 @@
 #include "decomp.h"
 #include "nu2api/nucore/common.h"
 #include <float.h>
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nuquat.h"
+#include "nu2api/numath/nuvec.h"
+#include <stddef.h>
+#include "nu2api/numath/nuvec4.h"
+#include "nu2api/nucore/numemory.h"
+#include <string.h>
+#include <limits.h>
+#include "nu2api/numath/numtx_inline.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/numath/nuplane.h"
+#include "nu2api/numath/nurand.h"
+#include "gamelib/nuwind/nuwind.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "legoapi/legoapi_types.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/numath/nuang.h"
 
 static f32 fetol = 0.01f;
 
@@ -20,9 +37,7 @@ static f32 fetol = 0.01f;
 #ifdef __cplusplus
 extern "C" {
 #endif
-static f32 NuTrunc(f32 a);
 
-static f32 NuFsel(f32 a, f32 b, f32 c);
 #ifdef __cplusplus
 }
 #endif
@@ -59,37 +74,27 @@ extern "C" {
 
 // ==== src/nu2api/numath/vumath.c: declarations ====
 
-#include "nu2api/numath/numtx.h"
-#include "nu2api/numath/nuquat.h"
-#include "nu2api/numath/nuvec.h"
 
 extern "C" {
-static void VuQuatCopy(NUQUAT *dst, NUQUAT *src);
 }
 
 extern "C" {
-static void VuQuatBlend(NUQUAT *out, NUQUAT *a, NUQUAT *b, f32 t, f32 w);
 }
 
 extern "C" {
-static f32 VuQuatDot(NUQUAT *a, NUQUAT *b);
 }
 
 extern "C" {
-static void VuQuatLerp(NUQUAT *out, NUQUAT *a, NUQUAT *b, f32 t);
 }
 
 extern "C" {
-static void VuQuatNeg2(NUQUAT *out, NUQUAT *in);
 }
 
 extern "C" {
-static void VuQuatNormalise(NUQUAT *out, NUQUAT *in);
 }
 
 // ==== src/nu2api/numath/nuvec.cpp: all remaining content ====
 
-#include <stddef.h>
 
 NUVEC v000 = {0};
 NUVEC nuvec_zero = {0};
@@ -120,9 +125,6 @@ void NuVecInvMtxTransform(NUVEC *out, NUVEC *v, NUMTX *m);
 
 // ==== src/nu2api/numath/numaths_plain.cpp: all remaining content ====
 
-#include "nu2api/numath/nuvec4.h"
-#include "nu2api/nucore/numemory.h"
-#include <string.h>
 
 extern "C" {
 
@@ -139,11 +141,8 @@ f32 NuExp10(f32 x);
 
 
 // ==== src/nu2api/numath/numtx.cpp: declarations ====
-#include <limits.h>
 
-#include "nu2api/numath/numtx_inline.h"
 
-#include "nu2api/nu3d/nucamera.h"
 
 NUMTX numtx_zero = {0};
 
@@ -174,7 +173,6 @@ NUMTX numtx_identity = {
 
 
 // ==== src/nu2api/numath/nuplane.cpp: all remaining content ====
-#include "nu2api/numath/nuplane.h"
 
 
 
@@ -187,7 +185,6 @@ NUMTX numtx_identity = {
 
 
 // ==== src/nu2api/numath/nurand.cpp: all remaining content ====
-#include "nu2api/numath/nurand.h"
 
 u32 fseed;
 
@@ -197,8 +194,6 @@ static NURAND global_rand = {1};
 
 
 // ==== src/gamelib/nuwind/nuwind_groups.cpp: declarations ====
-#include "gamelib/nuwind/nuwind.h"
-#include "nu2api/nu3d/nuspecial.h"
 
 // The legacy wind-group routines have unoptimized code in the reference.
 extern "C" {
@@ -207,8 +202,6 @@ extern "C" {
 }
 
 // ==== src/legoapi/render/core/nugraph.cpp: all remaining content ====
-#include "legoapi/legoapi_types.h"
-#include "nu2api/nufile/nufile.h"
 
 static i32 curve_points;
 static nuvec_s *curve;
@@ -279,7 +272,6 @@ void nugraph_linear(i32 segment_count, nuvec_s *control_points, nuvec_s *output,
 
 // ==== src/nu2api/numath/nutrig.cpp: all remaining content ====
 
-#include "nu2api/numath/nuang.h"
 
 #define ANG_COUNT 513
 static u16 ang[ANG_COUNT] = {
@@ -324,17 +316,11 @@ static u16 ang[ANG_COUNT] = {
 #define NU_ATAN2_LUT(y, x) ang[(y << 9) / x]
 #define NU_ATAN2F_LUT(y, x) ang[(i32)((y * 512.0f) / x)]
 
-static f32 NuSinApprox3(i32 angle);
 
-static u16 xy(u32 dx, u32 dy);
 
-static u16 fxyd(f32 dx, f32 dy);
 
-static u16 fxyda(f32 dx, f32 dy);
 
-static f32 fxydaf(f32 dx, f32 dy);
 
-static f32 fxy(u32 dx, u32 dy);
 
 
 

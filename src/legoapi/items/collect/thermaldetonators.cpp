@@ -26,6 +26,17 @@
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nutrig.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/transport/teleport.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/characters/core/players.h"
+#include "nu2api/numath/nuvec.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/mission.h"
+#include "gameapi/gui/apimenu.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/world/levels/levels.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
@@ -48,29 +59,6 @@ extern "C" f32 brickimpactwait;
 void PartKill_ThermalDetonator(PART_s *part, i32);
 
 // ==== src/legoapi/menus/core/hint.cpp: declarations ====
-#include "decomp.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/gizmos/object/gizbuildits.h"
-#include "legoapi/gizmos/transport/teleport.h"
-#include "legoapi/menus/core/gamehint.h"
-#include "legoapi/menus/core/panel.h"
-#include "globals.h"
-#include "legoapi/legoapi_types.h"
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/numath/nutrig.h"
-#include "legoapi/characters/core/players.h"
-#include "nu2api/numath/nuvec.h"
-#include "legoapi/world/area.h"
-#include "legoapi/world/mission.h"
-#include "legoapi/core/input/gamepads.h"
-#include "gamelib/util/gamelib_util_types.h"
-#include "gameapi/gui/apimenu.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/menus/core/text.h"
-#include "legoapi/render/core/render.h"
-#include "legoapi/world/level.h"
-#include "legoapi/world/levels/levels.h"
 
 // The hint icon transitions and the touch icon x position are dynamically
 // initialized in this unit's static constructor in the reference.

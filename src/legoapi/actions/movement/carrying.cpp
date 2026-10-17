@@ -27,6 +27,15 @@
 #include "legoapi/core/input/timer.h"
 #include "nu2api/numath/nufloat.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/ai/game/creature.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/gizmo/object/takeoverobjects.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/level.h"
+#include "nu2api/nucore/nustring.h"
+#include <string.h>
 
 f32 SUPERCARRY_THROWSPEED_XZ = 3.0f;
 f32 SUPERCARRY_THROWSPEED_Y = 3.0f;
@@ -43,11 +52,9 @@ u32 (*CanSuperCarryFn)(GameObject_s *) = NULL;
 i32 SuperCarry_UseActionButton = 0;
 i32 SuperCarry_PutDownDrop = 1;
 f32 SUPERCARRY_JUMPSPEED = 1.4f;
-static void SuperCarry_PartImpact(PART_s *part);
 
 static __used__ i32 SuperCarry_TurnBlowupBackOn(GIZMOBLOWUP_s *blowup, NUVEC *position, u16 angle, i32 keep_matrix);
 
-static void SuperCarry_PartKill(PART_s *part, i32);
 
 void SuperCarry_GetObjectPos(GameObject_s *object, NUVEC *position, NUVEC *secondary_position);
 
@@ -57,16 +64,7 @@ void SuperCarry_GetObjectPos(GameObject_s *object, NUVEC *position, NUVEC *secon
 
 
 // ==== src/legoapi/gizmo/object/takeoverobjects.cpp: all remaining content ====
-#include "legoapi/ai/game/creature.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/gizmo/object/takeoverobjects.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/props/doors/door.h"
-#include "legoapi/world/area.h"
-#include "legoapi/world/level.h"
-#include "nu2api/nucore/nustring.h"
 
-#include <string.h>
 
 TAKEOVEROBJECT_s takeoverobjects[8];
 i32 num_takeoverobjects;

@@ -22,6 +22,101 @@
 #include "nu2api/nu3d/nutex.h"
 
 #include <stdio.h>
+#include "gameapi/edtools/edui.h"
+#include "gameapi/edtools/edfile.h"
+#include "gameapi/edtools/edcam.h"
+#include "gameapi/edtools/gameapi_edtools_types.h"
+#include "legoapi/render/core/render.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
+#include "nu2api/nu3d/nupostparams.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/nucore/nulst.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nucore/nupad.h"
+#include "nu2api/numath/nurand.h"
+#include <math.h>
+#include <float.h>
+#include <string.h>
+#include "legoapi/render/core/rtl_types.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "legoapi/characters/core/customiser.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/render/fx/particles.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nukeyboard.h"
+#include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nucore/NuDynamicLight.h"
+#include <new>
+#include "legoapi/world/area.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/props/system/socksys.h"
+#include "legoapi/render/fx/spline_position.h"
+#include "nu2api/numath/nuang.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/gizmos/object/newblowup.h"
+#include <stdlib.h>
+#include "legoapi/characters/core/players.h"
+#include "legoapi/cutscenes/minicamcut.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/props/objects/techno.h"
+#include "nu2api/nucore/numouse.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nuvec.h"
+#include "legoapi/characters/motion/camera_types.h"
+#include "gameapi/edtools/edbri_internal.h"
+#include "gameapi/edtools/edstubs.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/actions/character/transform.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/actions/character/snake.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "legoapi/render/light/fade_material.h"
+#include "legoapi/render/fx/edsplines.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/world/level.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/android/nuportal_android.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nucore/nuvuvec.hpp"
+#include "legoapi/cutscenes/cutscenes.h"
+#include "gameapi/gui/apimenu.h"
+#include "gameframework/saveload.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/world/levels/episode.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/world/world_shared.h"
+#include "nu2api/nu3d/nutexanm.h"
+#include "legoapi/render/core/SwipeDecalRenderer.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/NuRenderDevice.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
+#include "nu2api/nu3d/android/nugscn_android.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/numath/numath.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "legoapi/render/light/shadow.h"
 
 extern "C" {
     NULIGHTINGSTATE NuRndrLightingStateCurrent = {};
@@ -52,26 +147,8 @@ void SetZeroLights();
 
 // ==== src/legoapi/render/core/rtl.c: declarations ====
 // Original RTL TU basename is rtl.c; the source is compiled as C++.
-#include "gameapi/edtools/edui.h"
-#include "gameapi/edtools/edfile.h"
-#include "gameapi/edtools/edcam.h"
-#include "gameapi/edtools/gameapi_edtools_types.h"
-#include "legoapi/render/core/render.h"
-#include "nu2api/nu3d/nuqfnt.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/android/nutimebar_plain.h"
-#include "nu2api/nu3d/nupostparams.h"
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/nucore/nulst.h"
-#include "nu2api/nucore/numemory.h"
-#include "nu2api/nucore/nupad.h"
-#include "nu2api/numath/nurand.h"
 
-#include <math.h>
-#include <float.h>
-#include <string.h>
 
-#include "legoapi/render/core/rtl_types.h"
 DECOMP_ASSERT(sizeof(rtlindex_s) == 0x28, "RTL index size");
 
 extern "C" {
@@ -120,21 +197,12 @@ extern "C" burnset_s *edrtlBurnoutLoad(char *filename, VARIPTR *buffer, i32);
 // The original editor keeps a separate help-text start line, initialized to 190.
 
 // ==== src/editor/edlevelall.cpp: declarations ====
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "legoapi/characters/core/customiser.h"
-#include "legoapi/items/base/apiobject.h"
-#include "legoapi/render/fx/particles.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nucore/nukeyboard.h"
-#include "nu2api/nu3d/nugscn.h"
-#include "nu2api/nucore/NuDynamicLight.h"
 #if defined(__i386__) && defined(__SSE__)
 #include <xmmintrin.h>
 #endif
 #if defined(__i386__) && defined(__SSE2__)
 #include <emmintrin.h>
 #endif
-#include <new>
 
 extern eduiiattr_s EdLevelAttr;
 
@@ -157,25 +225,7 @@ DECOMP_ASSERT(offsetof(EdMember, reference) == 0x04, "EdMember reference offset"
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
-#include "legoapi/world/area.h"
-#include "legoapi/menus/screens/shop.h"
-#include "legoapi/props/system/socksys.h"
-#include "legoapi/render/fx/spline_position.h"
-#include "nu2api/numath/nuang.h"
-#include "nu2api/nuandroid/ios_graphics.h"
-#include "legoapi/menus/screens/gamemenuall.h"
-#include "legoapi/world/levels/levels.h"
-#include "legoapi/gizmos/object/newblowup.h"
-#include <stdlib.h>
-#include "legoapi/characters/core/players.h"
-#include "legoapi/cutscenes/minicamcut.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/props/objects/techno.h"
-#include "nu2api/nucore/numouse.h"
-#include "nu2api/numath/numtx.h"
-#include "nu2api/numath/nuvec.h"
 
-#include "legoapi/characters/motion/camera_types.h"
 extern VIEWCAM_s ViewCam;
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 extern f32 testmovef;
@@ -188,57 +238,9 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context pat
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
-#include "gameapi/edtools/edbri_internal.h"
-#include "gameapi/edtools/edstubs.h"
-#include "legoapi/items/collect/torpedo.h"
-#include "legoapi/actions/character/transform.h"
-#include "legoapi/actions/movement/carrying.h"
-#include "legoapi/actions/character/snake.h"
-#include "legoapi/gizmos/object/gizbuildits.h"
-#include "legoapi/gizmos/fx/gizmopickups.h"
-#include "legoapi/gizmos/door/zipups.h"
-#include "legoapi/menus/core/text.h"
-#include "legoapi/menus/core/gamehint.h"
-#include "legoapi/menus/core/panel.h"
-#include "legoapi/menus/core/gamemessages.h"
-#include "legoapi/menus/screens/arcade.h"
-#include "legoapi/render/light/fade_material.h"
-#include "legoapi/render/fx/edsplines.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/world/level.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/android/nuportal_android.h"
-#include "nu2api/nu3d/nuvport.h"
-#include "nu2api/nucore/nuvuvec.hpp"
-#include "legoapi/cutscenes/cutscenes.h"
 
-#include "gameapi/gui/apimenu.h"
-#include "gameframework/saveload.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/characters/motion/animlist.h"
-#include "legoapi/gizmo/base/gizmo.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/items/base/collection.h"
-#include "legoapi/world/levels/episode.h"
-#include "legoapi/world/mission.h"
-#include "legoapi/world/world_shared.h"
-#include "nu2api/nu3d/nutexanm.h"
 struct rtlidata_s;
 
-#include "legoapi/render/core/SwipeDecalRenderer.h"
-#include "nu2api/nu3d/nuprim_internal.h"
-#include "nu2api/nu3d/nudlist.h"
-#include "nu2api/nu3d/NuRenderDevice.h"
-#include "nu2api/nu3d/android/nurndr_android.h"
-#include "nu2api/nu3d/android/nugscn_android.h"
-#include "nu2api/nucore/bgproc.h"
-#include "nu2api/nucore/nuapi.h"
-#include "nu2api/nucore/nuanim3.h"
-#include "nu2api/nucore/nugcutscene.h"
-#include "nu2api/nucore/nuhgobj.h"
-#include "nu2api/nucore/nuptrblock.h"
-#include "nu2api/nucore/nuthread.h"
-#include "nu2api/numath/numath.h"
 
 // Camera zoom state
 
@@ -257,7 +259,6 @@ struct rtlidata_s;
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
 
-#include "nu2api/nu3d/nuprim.h"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -320,7 +321,6 @@ extern f32 SeekLinearF(f32, f32, f32);
 
 // ==== src/legoapi/render/light/shadow.cpp: declarations ====
 
-#include "legoapi/render/light/shadow.h"
 
 
 

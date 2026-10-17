@@ -37,7 +37,6 @@ f32 SeekValF(f32, f32, f32);
 i32 Batarang_SeekToTarget(BATARANG_s *);
 i32 Batarang_StartTargetting(GameObject_s *);
 i32 Batarang_GetObjectFromCharID(i32);
-static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 automatic);
 
 static unsigned int Batarang_GetTargetPos(BATARANG_s *batarang, int index, nuvec_s *position) {
     if (batarang->field_0x7d != 0 && batarang->active != 0 && batarang->active == index) {

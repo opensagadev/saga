@@ -17,6 +17,7 @@
 #include "nu2api/numath/nutrig.h"
 
 #include <string.h>
+#include "legoapi/items/collect/detonator_types.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
@@ -27,7 +28,6 @@ void Detonator_Detonate(DETONATOR_s *);
 DETONATOR_s *Detonator_FindNearest(nuvec_s *, float, GameObject_s *);
 void FastWeaponIn(GameObject_s *, i32);
 
-#include "legoapi/items/collect/detonator_types.h"
 
 void Detonators_Draw() {
     if (!WORLD->lev_objs[0xec].active) {

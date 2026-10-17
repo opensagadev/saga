@@ -559,7 +559,6 @@ static void CheckIfParentsFinished(GIZFLOW_s *system, FLOWBOX_s *box) {
     }
 }
 
-static void ProcessFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
 
 static void ResetForLoopEx(GIZFLOW_s *flow, FLOWBOX_s *root, FLOWBOX_s *box, i32 checksum) {
     if (box != root && box->loop_checksum != checksum) {

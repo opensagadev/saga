@@ -24,6 +24,8 @@
 #include "nu2api/nu3d/ShaderManagerOpenGL.h"
 
 #include <string.h>
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nu3d/nurndr.h"
 
 // Local statics owned by this TU (original symbols _ZL8frameout,
 // _ZL14frameout_count, _ZL19NuSoundAppTerminatev).
@@ -34,7 +36,6 @@ static i64 frameout_count;
 namespace {
 }
 // NuSoundSystem::Shutdown() is the original callback target
-static void NuSoundAppTerminate(void);
 
 // Original mutable digest immediately precedes its embedded shader text.
 // Key generation consumes its first eight bytes; the public setter copies all 16.
@@ -59,8 +60,6 @@ extern "C" i32 NuMain(i32 argc, char **argv);
 
 
 // ==== src/nu2api/nucore/nuios_metrics.cpp: all remaining content ====
-#include "nu2api/nuandroid/ios_graphics.h"
-#include "nu2api/nu3d/nurndr.h"
 
 extern "C" {
 

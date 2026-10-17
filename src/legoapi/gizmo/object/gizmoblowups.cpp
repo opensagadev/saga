@@ -42,6 +42,7 @@
 #include "legoapi/core/input/qrand.h"
 
 #include <string.h>
+#include "legoapi/gizmo/object/gizmoblowups_types.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -82,22 +83,10 @@ void Bolt_AddDeflectedBolt(BOLT_s *, nuvec_s *, nuvec_s *, unsigned char *);
 void Bolt_End(BOLT_s *, i32);
 void Bolt_PlayHitSfx(BOLT_s *);
 
-static i32 Blowup_GetMaxGizmos(void *world_ptr);
-static void Blowup_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *);
 void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float);
 void GizmoBlowupLateUpdate(void *world_ptr, void *, float);
 void GizmoBlowupBurstDraw(void *world_ptr, void *, float);
-static char *Blowup_GetGizmoName(GIZMO *gizmo);
-static i32 Blowup_GetOutput(GIZMO *gizmo, i32 output_index, i32);
-static char *Blowup_GetOutputName(GIZMO *gizmo, i32 output_index);
-static i32 Blowup_GetNumOutputs(GIZMO *gizmo);
-static void Blowup_Activate(GIZMO *gizmo, i32 enabled);
-static void Blowup_SetVisibility(GIZMO *gizmo, i32 visible);
 i32 Blowup_GetVisibility(GIZMO *gizmo);
-static NUVEC *GizmoBlowup_GetPos(GIZMO *gizmo);
-static void *Blowup_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end);
-static void Blowup_ClearProgress(void *, void *progress_ptr);
-static void Blowup_StoreProgress(void *world_ptr, void *, void *progress_ptr);
 static void Blowups_Reset(void *world_ptr, void *, void *progress_ptr);
 void *gizmoblowup_reservebuffers(void *world_ptr);
 i32 gizmoblowup_Load(void *world_ptr, void *);
@@ -123,7 +112,6 @@ extern "C" {
 void GameAntiNodeData_Init(GAMEANTINODEDATA_s *data, nuhspecial_s *special);
 void GameAntiNodeData_Read(GAMEANTINODEDATA_s *data);
 
-#include "legoapi/gizmo/object/gizmoblowups_types.h"
 
 static char *Blowup_OutputName[] = {"Blownup", "Punched", "Plugging"};
 

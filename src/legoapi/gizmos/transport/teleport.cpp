@@ -13,6 +13,19 @@
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/nufile/nufpar.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/misc/supportall.h"
+#include "globals.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/core/players.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nutrig.h"
+#include "legoapi/gizmo/base/TeleportObjectInterface.h"
 
 i32 teleport_gizmotype_id = -1;
 
@@ -36,41 +49,17 @@ static NUFPCOMJMP Teleport_ConfigKeywords[] = {
     {"flap1", Tel_flap},    {"flap2", Tel_flap},          {"name", Tel_name},          {NULL, NULL}};
 
 
-static i32 Teleport_ActivateRev(GIZMO *gizmo, i32 activate, i32 flags);
 
-static void Teleport_Activate(GIZMO *gizmo, i32 activate);
 
-static i32 Teleport_GetMaxGizmos(void *world_ptr);
 
-static void Teleport_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *);
 
-static char *Teleport_GetGizmoName(GIZMO *gizmo);
 
-static i32 Teleport_GetOutput(GIZMO *gizmo, i32, i32);
 
 char *Teleport_GetOutputName(GIZMO *, i32);
 
-static i32 Teleport_GetNumOutputs(GIZMO *);
 
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_teleport.cpp: all remaining content ====
-#include "decomp.h"
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "legoapi/audio/sfx.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/menus/core/gamehint.h"
-#include "legoapi/misc/supportall.h"
-#include "legoapi/world/world.h"
-#include "globals.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/characters/core/players.h"
-#include "nu2api/numath/numtx.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nuspline.h"
 
 static i32 FindTeleport_Direction;
 
@@ -129,7 +118,6 @@ TELEPORT_s *Teleport_Find(GameObject_s *object, float range_squared, VuVec *posi
 
 
 
-#include "legoapi/gizmo/base/TeleportObjectInterface.h"
 
 
 

@@ -18,7 +18,6 @@ i32 PS2_VREZ_W = 640;
 i32 PS2_VREZ_H = 224;
 
 
-static void NuVpSetClippingMtx(void);
 
 // ==== functions in original address order ====
 

@@ -57,6 +57,17 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include "legoapi/render/core/terrain_internal.h"
+#include "legoapi/render/core/gameliball.h"
+#include "legoapi/render/fx/game_deb.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
+#include "nu2api/nu3d/android/nurain_android.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nurndr.h"
+#include <stddef.h>
+#include "legoapi/render/core/terrain_stubs_types.h"
 
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
@@ -114,20 +125,9 @@ extern "C" i32 GetSfxId(const char *);
 extern "C" void PlaySfxByIdAndSetVolume(i32, NUVEC *, f32);
 
 // ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
-#include "legoapi/render/core/terrain_internal.h"
-#include "legoapi/render/core/gameliball.h"
-#include "legoapi/render/fx/game_deb.h"
-#include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/nu3d/android/nutimebar_plain.h"
-#include "nu2api/nu3d/android/nurain_android.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/nurndr.h"
 
-#include <stddef.h>
 
 // Runtime-selected groups appended after the fixed terrain allocation.
-#include "legoapi/render/core/terrain_stubs_types.h"
 
 // NuFileExists @nufile (nucore_plain.cpp).
 extern "C" i32 NuFileExists(char *name);

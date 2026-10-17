@@ -26,6 +26,14 @@
 #include "nu2api/numath/nuvec.h"
 
 #include <string.h>
+#include "legoapi/menus/screens/gamestructure.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/world/world_shared.h"
+#include "legoapi/world/mission.h"
+#include "nu2api/numusic/sfx.h"
+#include "legoapi/gizmo/base/GizPanelObjectInterface.h"
 
 struct GIZPANELPROGRESS {
     i32 state;
@@ -42,59 +50,25 @@ extern "C" {
 
 void FindAnglesXY(NUVEC *direction, u16 *x_rotation, u16 *y_rotation);
 
-static void GizPanel_CreateTerrain(GIZPANEL *panel);
 
-static i32 GizPanel_GetMaxGizmos(void *world_ptr);
 
-static void GizPanel_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *);
 
-static void GizPanel_Update(void *world_ptr, void *, float delta_time);
 
-static void GizPanel_Draw(void *world_ptr, void *, float);
 
-static char *GizPanel_GetGizmoName(GIZMO *gizmo);
 
-static i32 GizPanel_GetOutput(GIZMO *gizmo, i32, i32);
 
-static char *GizPanel_GetOutputName(GIZMO *, i32 output_index);
 
-static i32 GizPanel_GetNumOutputs(GIZMO *);
 
-static void GizPanel_Activate(GIZMO *gizmo, i32 active);
 
-static void GizPanel_SetVisibility(GIZMO *gizmo, i32 visible);
 
-static void *GizPanels_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end);
 
-static void GizPanels_ClearProgress(void *, void *progress_data);
 
-static void GizPanels_StoreProgress(void *world_ptr, void *, void *progress_ptr);
 
-static void GizPanels_Reset(void *world_ptr, void *, void *progress_ptr);
 
-static void *GizPanels_ReserveBufferSpace(void *world_ptr);
 
-static i32 GizPanel_Load(void *world_ptr, void *);
 
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizpanel.cpp: all remaining content ====
-#include "decomp.h"
-#include "globals.h"
-#include "legoapi/menus/screens/gamestructure.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/gizmos/object/gizpanel.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/menus/core/gamehint.h"
-#include "legoapi/world/world_shared.h"
-#include "legoapi/world/mission.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/numath/numtx.h"
-#include "nu2api/numath/nuvec.h"
-#include "nu2api/numusic/sfx.h"
 
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 extern "C" void PlaySfx(char *, nuvec_s *);
@@ -130,7 +104,6 @@ GIZPANEL_s *GizPanel_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObje
 
 void GizPanel_GetAbsPlayerPos(GIZPANEL_s *panel, nuvec_s *position);
 
-#include "legoapi/gizmo/base/GizPanelObjectInterface.h"
 
 // ==== functions in original address order ====
 

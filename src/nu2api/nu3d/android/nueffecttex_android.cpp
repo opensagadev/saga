@@ -5,6 +5,17 @@
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/nupostresources.h"
+#include "nu2api/nu3d/nutexanm.h"
+#include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/android/nutex_android.h"
+#include "nu2api/nucore/common.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/nucore/nustring.h"
+#include <pthread.h>
+#include <string.h>
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/nu3d/nutex_types.h"
 
 struct NativeEffectTexture {
     NUNATIVETEX native;
@@ -42,19 +53,8 @@ static EffectTexturePool texturePool;
 // ==== src/nu2api/nucore/android/nupostresource_create.cpp: all remaining content ====
 
 // ==== src/nu2api/nu3d/nutex.cpp: declarations ====
-#include "nu2api/nu3d/nutexanm.h"
-#include "nu2api/nu3d/nugscn.h"
 
-#include "nu2api/nu3d/android/nutex_android.h"
-#include "nu2api/nucore/common.h"
-#include "nu2api/nucore/nuthread.h"
-#include "nu2api/nucore/nustring.h"
-#include <pthread.h>
-#include <string.h>
-#include "nu2api/nucore/numemory.h"
-#include "nu2api/numath/nufloat.h"
 
-#include "nu2api/nu3d/nutex_types.h"
 
 
 // ==== functions in original address order ====

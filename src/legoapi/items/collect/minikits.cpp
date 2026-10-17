@@ -39,27 +39,9 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-
-HUBMINIKITPIECES_s **Char_MiniKit;
-static VARIPTR minikits_savecharacterbufferptr;
-extern "C" VARIPTR characterbuffer_ptr;
-extern "C" VARIPTR characterbuffer_end;
-
-extern f32 KITPOSX, PANEL_MINIKITY, PANEL_MINIKITSCALE;
-
-char *LEGOASCII_BIGARROW = NULL;
-i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
-
-extern i32 LEGOOBJ_MINIKIT, LEGOOBJ_CHARKIT;
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
-
-// ==== src/legoapi/gizmo/base/gizmo_sys.cpp: declarations ====
 #include "gameapi/edtools/edfile.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmo/base/gizflow.h"
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 #include "gameapi/edtools/edbri_internal.h"
 #include "gameapi/edtools/edstubs.h"
 #include "legoapi/items/collect/torpedo.h"
@@ -84,9 +66,7 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 #include "nu2api/nu3d/nuvport.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "legoapi/cutscenes/cutscenes.h"
-
 #include "nu2api/nu3d/nucamera.h"
-
 #include "gameapi/gui/apimenu.h"
 #include "gameframework/saveload.h"
 #include "legoapi/characters/motion/gameanim.h"
@@ -97,7 +77,6 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 #include "legoapi/world/levels/episode.h"
 #include "legoapi/world/mission.h"
 #include "nu2api/nu3d/nutexanm.h"
-
 #include "legoapi/render/core/SwipeDecalRenderer.h"
 #include "nu2api/nu3d/nuprim_internal.h"
 #include "nu2api/nu3d/nudlist.h"
@@ -115,6 +94,29 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/numath.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nupostparams.h"
+
+HUBMINIKITPIECES_s **Char_MiniKit;
+static VARIPTR minikits_savecharacterbufferptr;
+extern "C" VARIPTR characterbuffer_ptr;
+extern "C" VARIPTR characterbuffer_end;
+
+extern f32 KITPOSX, PANEL_MINIKITY, PANEL_MINIKITSCALE;
+
+char *LEGOASCII_BIGARROW = NULL;
+i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
+
+extern i32 LEGOOBJ_MINIKIT, LEGOOBJ_CHARKIT;
+void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+
+// ==== src/legoapi/gizmo/base/gizmo_sys.cpp: declarations ====
+
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+
+
+
 
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
@@ -144,8 +146,6 @@ extern "C" {
 
 } // extern "C"
 
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/nu3d/nupostparams.h"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \

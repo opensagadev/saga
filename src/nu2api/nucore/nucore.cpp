@@ -20,7 +20,6 @@
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nuportal.h"
 #include "nu2api/nu3d/numtl.h"
-extern "C" void DisplaySceneRndrSpecials(NUDLDLISTSCENE *, i32, void *);
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurendercontext.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -50,6 +49,7 @@ extern "C" void DisplaySceneRndrSpecials(NUDLDLISTSCENE *, i32, void *);
 #include "nu2api/numath/nuvec4.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/nucore/nuvuvectype.hpp"
+extern "C" void DisplaySceneRndrSpecials(NUDLDLISTSCENE *, i32, void *);
 
 extern const f32 nuvec4_one[4];
 extern "C" void NuShaderManagerSetfv(i32, const f32 *);

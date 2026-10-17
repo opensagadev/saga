@@ -39,6 +39,7 @@
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/nu3d/nutex.h"
 #include <string.h>
+#include "legoapi/actions/character/speederchase_types.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
@@ -47,7 +48,6 @@ struct nunativegscene_s;
 static i32 snaphack[2];
 static i32 snaphacktimer[2];
 
-#include "legoapi/actions/character/speederchase_types.h"
 
 SPEEDERCHASEANETPACKET_s *speederchasea_netpacket;
 

@@ -33,6 +33,29 @@
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
+#include "legoapi/ai/game/gameantinode.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "nu2api/nu3d/nucamera.h"
+#include <string.h>
+#include "legoapi/items/collect/detonator_types.h"
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/render/light/surfaces.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/transport/teleport.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/mission.h"
+#include "gameapi/gui/apimenu.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/world/levels/levels.h"
 
 struct ZIPUPPROGRESS {
     // One bit per zip-up; 32 zip-ups fit in a single word.
@@ -44,39 +67,23 @@ i32 zipup_gizmotype_id = -1;
 static char zipup_outputName[] = "Active";
 static NUVEC ZipUpHookOffset = {0.0f, -0.1143f, -0.0859f};
 
-static i32 ZipUps_GetMaxGizmos(void *world_ptr);
 
-static void ZipUps_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *);
 
-static void ZipUps_Update(void *world_ptr, void *, float);
 
-static void ZipUps_Draw(void *world_ptr, void *, float);
 
-static char *ZipUp_GetGizmoName(GIZMO *gizmo);
 
-static i32 ZipUp_GetOutput(GIZMO *gizmo, i32, i32);
 
-static char *ZipUp_GetOutputName(GIZMO *, i32);
 
-static i32 ZipUp_GetNumOutputs(GIZMO *);
 
-static void ZipUp_Activate(GIZMO *gizmo, i32 active);
 
-static i32 ZipUp_ActivateRev(GIZMO *gizmo, i32 active, i32 query);
 
-static void ZipUp_SetVisibility(GIZMO *gizmo, i32 visible);
 
-static void *ZipUps_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end);
 
-static void ZipUps_ClearProgress(void *, void *progress_data);
 
-static void ZipUps_StoreProgress(void *world_ptr, void *, void *progress_ptr);
 
 void ZipUps_Reset(void *world_ptr, void *, void *progress_ptr);
 
-static void *ZipUps_ReserveBufferSpace(void *world_ptr);
 
-static i32 ZipUps_Load(void *world_ptr, void *);
 
 
 struct AIROW_s;
@@ -87,11 +94,9 @@ struct SHOPINPUT;
 i32 SuperWeirdo(GameObject_s *);
 void SetWeaponIn(GameObject_s *);
 void FastWeaponOut(GameObject_s *, i32);
-void Hint_SetComplete(i32);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void PlayJumpSfx(GameObject_s *, i32);
 
-static void ZipUp_GetStartPoint(GameObject_s *object, NUVEC *position);
 
 numtl_s *ropemtl;
 
@@ -183,27 +188,8 @@ ZIPUP *ZipUp_FindNearest(WORLDINFO_s *world, nuvec_s *position, float radius, fl
                          GameObject_s *object, bool touch);
 
 // ==== src/legoapi/items/collect/detonator.cpp: declarations ====
-#include "decomp.h"
-#include "globals.h"
-#include "legoapi/ai/game/gameantinode.h"
-#include "legoapi/audio/audio.h"
-#include "legoapi/audio/sfx.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/characters/motion/animlist.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/core/input/qrand.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/items/base/apiobject.h"
-#include "legoapi/gizmos/fx/gizmopickups.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/numath/nutrig.h"
 
-#include <string.h>
 
-#include "legoapi/items/collect/detonator_types.h"
 
 
 
@@ -220,31 +206,6 @@ ZIPUP *ZipUp_FindNearest(WORLDINFO_s *world, nuvec_s *position, float radius, fl
 // Original translation unit reconstructed from the reference address map.
 // Functions are defined in original address order.
 
-#include "decomp.h"
-#include "globals.h"
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "gamelib/util/gamelib_util_types.h"
-#include "legoapi/audio/sfx.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/core/input/qrand.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/actions/combat/hits.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/menus/core/gamehint.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/render/light/surfaces.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/render/fx/parts.h"
-#include "legoapi/world/world.h"
-#include "legoapi/world/level.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/numath/nutrig.h"
 
 EXPLOSION *AddExplosion(nuvec_s *, f32, f32, GameObject_s *, i32, i32);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
@@ -254,29 +215,6 @@ i32 SuperWeirdo(GameObject_s *object);
 extern "C" f32 brickimpactwait;
 
 // ==== src/legoapi/menus/core/hint.cpp: declarations ====
-#include "decomp.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/gizmos/object/gizbuildits.h"
-#include "legoapi/gizmos/transport/teleport.h"
-#include "legoapi/menus/core/gamehint.h"
-#include "legoapi/menus/core/panel.h"
-#include "globals.h"
-#include "legoapi/legoapi_types.h"
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/numath/nutrig.h"
-#include "legoapi/characters/core/players.h"
-#include "nu2api/numath/nuvec.h"
-#include "legoapi/world/area.h"
-#include "legoapi/world/mission.h"
-#include "legoapi/core/input/gamepads.h"
-#include "gamelib/util/gamelib_util_types.h"
-#include "gameapi/gui/apimenu.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/menus/core/text.h"
-#include "legoapi/render/core/render.h"
-#include "legoapi/world/level.h"
-#include "legoapi/world/levels/levels.h"
 
 // The hint icon transitions and the touch icon x position are dynamically
 // initialized in this unit's static constructor in the reference.

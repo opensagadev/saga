@@ -26,6 +26,97 @@
 #include "legoapi/items/base/collection.h"
 #include "legoapi/render/core/render.h"
 #include "gameapi/gui/apimenu.h"
+#include "legoapi/menus/screens/gamestructure.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/cutscenes/cutscene_defrag.h"
+#include "legoapi/world/world_shared.h"
+#include <math.h>
+#include "legoapi/characters/core/character.h"
+#include "legoapi/render/fx.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nuquat.h"
+#include "nu2api/numusic/numusic.h"
+#include "nu2api/numusic/sfx.h"
+#include "legoapi/cutscenes/cutscene_types.h"
+#include "nu2api/nucore/NuDynamicLight.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nuvec4.h"
+#include "nu2api/nu3d/nutexanm.h"
+#include "nu2api/nusound/nusound.h"
+#include <cfloat>
+#include "gameapi/edtools/edanim_internal.h"
+#include "gameapi/edtools/gameapi_edtools_types.h"
+#include "nu2api/nu3d/nulgtlaser.h"
+#include "nu2api/nucore/nuonline.h"
+#include <stdarg.h>
+#include <float.h>
+#include <GLES2/gl2.h>
+#include "nu2api/nucore/numem.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/android/nutex_ios_ex.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "java/android.h"
+#include "java/java.h"
+#include "nu2api/nucore/common.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/nupad.h"
+#include "nu2api/nucore/NuInputDevice.h"
+#include "nu2api/nucore/NuInputManager.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nu3d/nuspecial_internal.h"
+#include "nu2api/nu3d/nupostresources.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nu3d/nuocclusion.h"
+#include "nu2api/nu3d/nurendercontext.h"
+#include "nu2api/nu3d/nuscreen.hpp"
+#include "nu2api/nu3d/NuRenderDevice.h"
+#include "nu2api/nucore/nuvuvec.hpp"
+#include "nu2api/numath/numtx.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "gameapi/edtools/edfile.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmo/base/gizactions.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "nu2api/numath/nurand.h"
+#include "legoapi/characters/motion/gameanim_types.h"
+#include "editor/edpath.h"
+#include "legoapi/ai/core/ai_sys_stubs.h"
+#include "editor/aieditor_state.h"
+#include "editor/antinode_editor_private.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "nu2api/nufile/nufilepak.h"
+#include "nu2api/numath/nuang.h"
+#include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nuplane.h"
+#include "legoapi/ai/core/ai_pathgeometry.h"
+#include "legoapi/render/light/surfaces.h"
+#include "legoapi/audio/sfx.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/render/light/shadow.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/render/core/screen.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "legoapi/world/mission.h"
 
 
 
@@ -40,27 +131,13 @@ void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance);
 void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance);
 
 // ==== src/legoapi/cutscenes/cutscene.cpp: declarations ====
-#include "legoapi/menus/screens/gamestructure.h"
-#include "legoapi/audio/audio.h"
-#include "legoapi/cutscenes/cutscene_defrag.h"
-#include "legoapi/world/world_shared.h"
 
-#include <math.h>
 
-#include "legoapi/characters/core/character.h"
-#include "legoapi/render/fx.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nucore/nuthread.h"
-#include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nuquat.h"
-#include "nu2api/numusic/numusic.h"
-#include "nu2api/numusic/sfx.h"
 struct instNUGCUTCHAR_s;
 struct NUGCUTCHAR_s;
 struct NUGCUTRIGID_s;
 struct instNUGCUTRIGID_s;
 
-static void copyAnims(NUGCUTSCENE_s *, NUGCUTSCENE_s *);
 void NewCopyAnims(instNUGCUTSCENE_s *);
 i32 instNuGCutSceneSwapBuffers(instNUGCUTSCENE_s *, i32);
 NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *, VARIPTR *);
@@ -87,7 +164,6 @@ extern "C" {
 }
 void NuGCutRigidCalcMtx(NUGCUTRIGID_s *, f32, numtx_s *);
 
-#include "legoapi/cutscenes/cutscene_types.h"
 DECOMP_ASSERT(sizeof(CutSceneTriggerNameEntry) == 0x34, "cutscene trigger name entry stride");
 DECOMP_ASSERT(offsetof(CutSceneTriggerNameTable, entries) == 0x0c, "cutscene trigger name table entries offset");
 
@@ -261,10 +337,8 @@ static inline __attribute__((always_inline)) void NuGCutSceneFixPtrs_Title(NUGCU
 #endif
 static NUGCUT_FIXPTRS_ATTR(2) void NuGCutSceneFixPtrsAnims(NUGCUTSCENE_s *cutscene, isize anim_delta)
     __asm__("_ZL18NuGCutSceneFixPtrsP13NUGCUTSCENE_sii.constprop.44");
-static void NuGCutSceneFixPtrsAnims(NUGCUTSCENE_s *cutscene, isize anim_delta);
 static NUGCUT_FIXPTRS_ATTR(1) void NuGCutSceneFixPtrsNoAnims(NUGCUTSCENE_s *cutscene)
     __asm__("_ZL18NuGCutSceneFixPtrsP13NUGCUTSCENE_sii.constprop.43");
-static void NuGCutSceneFixPtrsNoAnims(NUGCUTSCENE_s *cutscene);
 
 
 extern "C" {
@@ -296,7 +370,6 @@ extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s 
 
 extern "C" void DebFreeInstantly(i32 *handle);
 
-static void instNuGCutRigidSysEnd(instNUGCUTSCENE_s *instance, float frame);
 
 // Retail only keeps the IPA-SRA clone, which drops the unused frame argument.
 #if defined(__i386__)
@@ -307,16 +380,11 @@ static void instNuGCutRigidSysEnd(instNUGCUTSCENE_s *instance, float frame);
 static INST_LOCATOR_SYS_END_ATTR void instNuGCutLocatorSysEnd(instNUGCUTLOCATORSYS_s *instance,
                                                               NUGCUTLOCATORSYS_s *system)
     __asm__("_ZL23instNuGCutLocatorSysEndP22instNUGCUTLOCATORSYS_sP18NUGCUTLOCATORSYS_sf.isra.8");
-static void instNuGCutLocatorSysEnd(instNUGCUTLOCATORSYS_s *instance, NUGCUTLOCATORSYS_s *system);
 
 void instNuGCutSceneEndFirstFrame(instNUGCUTSCENE_s *instance);
 
 extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
 
-static void instNuGCutRigidSysUpdate(instNUGCUTSCENE_s *, float, int);
-static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *, float);
-static void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *, float);
-static void instNuGCutSceneClipTest(instNUGCUTSCENE_s *);
 
 static inline u8 instNuGCutSceneLastStream(instNUGCUTSCENE_s *instance) {
     return instance->cutscene_copy->last_stream;
@@ -327,32 +395,18 @@ static inline NUGCUTSCENE_s *instNuGCutSceneCurrentStreamBuffer(instNUGCUTSCENE_
     return (&instance->stream_buffer_0)[(static_cast<u32>(instance->flags_8b) >> 4) & 1];
 }
 
-static void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int skip, float elapsed);
 
-static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame);
 
-static void instNuGCutSceneClipTest(instNUGCUTSCENE_s *instance);
 
-static void instNuGCutRigidSysRender(instNUGCUTSCENE_s *instance, float frame, int paused);
 
-static void instNuGCutRigidSysUpdate(instNUGCUTSCENE_s *instance, float frame, int paused);
 
 static __used__ void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame);
 
 void NewCopyAnims(instNUGCUTSCENE_s *instance);
 
-static void copyAnims(NUGCUTSCENE_s *destination, NUGCUTSCENE_s *source);
 
 // ==== src/legoapi/cutscenes/cutscene_stubs.cpp: declarations ====
-#include "nu2api/nucore/NuDynamicLight.h"
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nuvec4.h"
-#include "nu2api/nu3d/nutexanm.h"
-#include "nu2api/nusound/nusound.h"
 
-#include <cfloat>
 
 void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *);
 
@@ -399,8 +453,6 @@ static INST_LOOKAT_UPDATE_ATTR void instNuGCutLookAtLocatorUpdate(i32 *effect_ha
                                                                   instNUGCUTSCENE_s *instance)
     __asm__("_ZL29instNuGCutLookAtLocatorUpdateP18NUGCUTLOCATORSYS_sP19instNUGCUTLOCATOR_sP15NUGCUTLOCATOR_"
             "sfP7numtx_sP17instNUGCUTSCENE_s.isra.23");
-static void instNuGCutLookAtLocatorUpdate(i32 *effect_handle, NUGCUTLOCATOR_s *locator, f32 frame,
-                                          NUMTX *parent_mtx, instNUGCUTSCENE_s *instance);
 
 extern "C" {
     // Aligned four-float row used for retail's movaps matrix copies.
@@ -413,8 +465,6 @@ void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *instance, NUGCUTLOCATORSYS_s *sy
 } // extern "C"
 
 // ==== src/nu2api/nusound/nu2api_nusound_plain.cpp: all remaining content ====
-#include "gameapi/edtools/edanim_internal.h"
-#include "gameapi/edtools/gameapi_edtools_types.h"
 
 extern "C" {
     i32 g_NuSoundMaxVoicesPerSample = 3;
@@ -426,45 +476,12 @@ extern "C" {
 
 // ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
 // Temporary C-linkage compatibility surface for unresolved engine owners.
-#include "nu2api/nu3d/nulgtlaser.h"
-#include "nu2api/nucore/nuonline.h"
 //
 // This file collects functions whose original TU has not yet been
 // reconstructed. Domain families move to their evidenced owner as complete
 // groups; this file is not itself evidence of one original nucore TU.
 
-#include <stdarg.h>
-#include <float.h>
-#include <GLES2/gl2.h>
-#include "nu2api/nucore/numem.h"
-#include "nu2api/nucore/numemory.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/nu3d/android/nutex_ios_ex.h"
-#include "nu2api/nu3d/nuqfnt.h"
 
-#include "java/android.h"
-#include "java/java.h"
-#include "nu2api/nucore/common.h"
-#include "nu2api/nucore/nuanim3.h"
-#include "nu2api/nucore/nuapi.h"
-#include "nu2api/nucore/nupad.h"
-#include "nu2api/nucore/NuInputDevice.h"
-#include "nu2api/nucore/NuInputManager.h"
-#include "nu2api/nucore/bgproc.h"
-#include "nu2api/nucore/nuptrblock.h"
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/nu3d/nudlist.h"
-#include "nu2api/nu3d/nurndrstat.h"
-#include "nu2api/nu3d/nuspecial_internal.h"
-#include "nu2api/nu3d/nupostresources.h"
-#include "nu2api/nu3d/android/nutimebar_plain.h"
-#include "nu2api/nu3d/nuvport.h"
-#include "nu2api/nu3d/nuocclusion.h"
-#include "nu2api/nu3d/nurendercontext.h"
-#include "nu2api/nu3d/nuscreen.hpp"
-#include "nu2api/nu3d/NuRenderDevice.h"
-#include "nu2api/nucore/nuvuvec.hpp"
-#include "nu2api/numath/numtx.h"
 
 struct ani3_animheader_s;
 
@@ -669,23 +686,10 @@ extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *locator, float frame, nuan
                                      float *rate);
 
 // ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
-#include "legoapi/gizmos/object/gizbuildits.h"
-#include "gameapi/edtools/edfile.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/core/input/qrand.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/gizmo/base/gizmo.h"
-#include "legoapi/gizmo/base/gizactions.h"
-#include "legoapi/items/base/apiobject.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "nu2api/numath/nurand.h"
 
 // Retail uses translation-unit-local helpers with compiler-inferred private
 // calling conventions; keep their shared animation-mode call sites intact.
 
-#include "legoapi/characters/motion/gameanim_types.h"
 
 extern "C" {
 
@@ -702,17 +706,7 @@ StateAnim *StateAnimFixPtrs(StateAnim *state, isize delta);
 i32 FindTexAnimFromMtl(nugscn_s *scene, numtl_s *material);
 
 // ==== src/legoapi/ai/core/ai_sys_stubs.cpp: all remaining content ====
-#include "editor/edpath.h"
-#include "legoapi/ai/core/ai_sys_stubs.h"
-#include "editor/aieditor_state.h"
-#include "editor/antinode_editor_private.h"
-#include "gameapi/ai/aisys/aisys.h"
-#include "nu2api/nufile/nufilepak.h"
-#include "nu2api/numath/nuang.h"
-#include "nu2api/numath/nuvec.h"
-#include "nu2api/numath/nuplane.h"
 
-#include "legoapi/ai/core/ai_pathgeometry.h"
 
 extern "C" {
 
@@ -756,18 +750,7 @@ extern "C" {
 } // extern "C"
 
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
-#include "legoapi/render/light/surfaces.h"
-#include "legoapi/audio/sfx.h"
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "legoapi/menus/core/panel.h"
-#include "legoapi/props/doors/door.h"
-#include "legoapi/render/light/shadow.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/render/fx/parts.h"
-#include "legoapi/render/core/screen.h"
-#include "nu2api/nuandroid/ios_graphics.h"
 
-#include "legoapi/world/mission.h"
 
 extern "C" {
     void instNuGCutSceneStart(instNUGCUTSCENE_s *);

@@ -30,9 +30,22 @@
 #include "nu2api/numath/nutrig.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/actions/character/speederchase.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/nufloat.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/world/world_shared.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/audio/sfx.h"
+#include <stdio.h>
 
 extern i16 id_RANCOR, id_ANAKINJEDI;
-i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
 bool CalculateRayBoxIntersection(VuVec const &, VuVec const &, VuVec const &, VuVec const &, f32, f32 &);
 extern "C" void NewRayCastGetImpactNormal(NUVEC *);
 f32 CalcCapsuleIntersectDistance(VuVec const &, VuVec const &, f32, VuVec const &, f32);
@@ -69,21 +82,7 @@ static inline void AppendMainControls(NuButtonLayout &layout, MechInputTouchMain
 }
 
 // ==== src/legoapi/actions/combat/hits.cpp: declarations ====
-#include "legoapi/actions/combat/hits.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/actions/character/speederchase.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/items/collect/torpedo.h"
-#include "legoapi/gizmo/object/gizmopickup.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/numath/nufloat.h"
 
-#include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/world/world_shared.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/audio/sfx.h"
-#include <stdio.h>
 
 extern i32 disable_narrow_socks, players_cannot_exit_speeder, BuildUpDone;
 

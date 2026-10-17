@@ -76,9 +76,7 @@ static f32 teamswitchtimer;
 // Shared gameplay helpers
 // ===========================================================================
 
-static void GenerateTrooperTeamShape(minitrooperteam_s *team, i32 initialize_rotation);
 
-static void TrooperTeamSetStateCode(minitrooperteam_s *team);
 
 i32 TrooperShoot(WORLDINFO_s *world, minitrooperteam_s *team, minisnowtrooper_s *trooper, u16 *shot_angle,
                  i32 team_index);

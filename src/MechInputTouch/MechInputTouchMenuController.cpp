@@ -10,25 +10,9 @@
 #include "globals.h"
 #include "nu2api/numath/nuvec.h"
 #include <math.h>
-
-void PerformPauseButtonStuff();
-extern i32 hub_freeplay_area;
-bool backButtonPressedLastFrame = false;
-
-f32 MechInputTouchMenuController::PackButtonW = 0.0f;
-f32 MechInputTouchMenuController::PackButtonX = 0.0f;
-f32 MechInputTouchMenuController::PackButtonY = 0.0f;
-bool MechInputTouchMenuController::PackButtonActive = false;
-NuVec2 MechInputTouchMenuController::LastTouchPos = {0.0f, 0.0f};
-
-// ==== src/legoapi/core/startup/virtual.cpp: declarations ====
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/numath/nutrig.h"
-
-
-// ==== src/legoapi/core/input/gamepads.cpp: declarations ====
-
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/misc/androidbatman.h"
 #include "legoapi/audio/audio.h"
@@ -44,8 +28,51 @@ NuVec2 MechInputTouchMenuController::LastTouchPos = {0.0f, 0.0f};
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/NuInputDevice.h"
 #include "nu2api/nucore/nupad.h"
-
 #include <string.h>
+#include "gameframework/saveload.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/misc/utilities.h"
+#include "legoapi/world/levels/episode.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/nufloat.h"
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/actions/character/speederchase.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/items/base/apiobject.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/world/world_shared.h"
+#include "legoapi/render/core/terrain.h"
+#include "nu2api/numath/nuang.h"
+#include "legoapi/audio/sfx.h"
+#include <stdio.h>
+#include "legoapi/core/net/netplay.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/render/core/screen.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/world/mission.h"
+#include "nu2api/nusound/nusound.h"
+
+void PerformPauseButtonStuff();
+extern i32 hub_freeplay_area;
+bool backButtonPressedLastFrame = false;
+
+f32 MechInputTouchMenuController::PackButtonW = 0.0f;
+f32 MechInputTouchMenuController::PackButtonX = 0.0f;
+f32 MechInputTouchMenuController::PackButtonY = 0.0f;
+bool MechInputTouchMenuController::PackButtonActive = false;
+NuVec2 MechInputTouchMenuController::LastTouchPos = {0.0f, 0.0f};
+
+// ==== src/legoapi/core/startup/virtual.cpp: declarations ====
+
+
+// ==== src/legoapi/core/input/gamepads.cpp: declarations ====
+
+
 
 // Original bss @0x127a500: 64 pads x 0x60 bytes.
 // Original bss @0x127a4e0.
@@ -56,38 +83,11 @@ NuVec2 MechInputTouchMenuController::LastTouchPos = {0.0f, 0.0f};
 
 
 // ==== src/legoapi/misc/legoapi_misc.cpp: declarations ====
-#include "gameframework/saveload.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/misc/utilities.h"
-#include "legoapi/world/levels/episode.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/numath/nufloat.h"
 
 // ==== src/legoapi/actions/combat/hits.cpp: declarations ====
-#include "legoapi/actions/combat/hits.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/actions/character/speederchase.h"
-#include "legoapi/gizmos/object/gizbuildits.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/items/collect/torpedo.h"
-#include "legoapi/gizmo/object/gizmopickup.h"
-#include "legoapi/items/base/apiobject.h"
 
-#include "gamelib/util/gamelib_util_types.h"
-#include "legoapi/world/world_shared.h"
-#include "legoapi/render/core/terrain.h"
-#include "nu2api/numath/nuang.h"
-#include "legoapi/audio/sfx.h"
-#include <stdio.h>
 
 // ==== src/legoapi/core/net/netplay.cpp: declarations ====
-#include "legoapi/core/net/netplay.h"
-#include "legoapi/core/input/qrand.h"
-#include "legoapi/render/core/screen.h"
-#include "legoapi/world/levels/levels.h"
-#include "legoapi/world/mission.h"
-#include "nu2api/nusound/nusound.h"
 
 // ==== functions in original address order ====
 

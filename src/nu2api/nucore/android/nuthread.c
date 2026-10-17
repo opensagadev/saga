@@ -4,13 +4,13 @@
 #include <pthread.h>
 
 #include "nu2api/nucore/common.h"
+#include "nu2api/nucore/nuvuvec.hpp"
 
 #ifdef ANDROID
 pthread_key_t g_currentThreadSpecificKey;
 #endif
 
 // The original nuthread.c constructs this TU's six homogeneous vectors.
-#include "nu2api/nucore/nuvuvec.hpp"
 
 u32 nu_current_thread_id;
 

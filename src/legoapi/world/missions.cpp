@@ -9,17 +9,17 @@
 #include "legoapi/characters/core/players.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/world/world_shared.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/world/level.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nufile/nufpar.h"
+#include <string.h>
 
 extern GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
 
 // ==== src/legoapi/world/mission.cpp: all remaining content ====
 
-#include "legoapi/characters/core/character.h"
-#include "legoapi/world/level.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nufile/nufpar.h"
 
-#include <string.h>
 
 MISSIONSYS *MissionSys = NULL;
 

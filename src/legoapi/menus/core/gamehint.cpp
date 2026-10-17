@@ -23,12 +23,20 @@
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/nucore/nustring.h"
 #include "legoapi/world/mission.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/transport/teleport.h"
+#include "legoapi/menus/core/panel.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/nutrig.h"
+#include "legoapi/characters/core/players.h"
+#include "gameapi/gui/apimenu.h"
+#include "legoapi/world/levels/levels.h"
 
 LSW_HINTCONDITIONS_s LSW_HintConditions;
 HINTSYS_s hintsys = {};
 extern HINTUIBUTTON_s * hintUIButton;
 extern f32 AlphaBlendTime;
-extern f32 ICONX;
 extern f32 ICONXPOS_TOUCHYFEELY;
 extern f32 ICONYPOS_TOUCHYFEELY;
 extern f32 ICONXPOS_VIRTUALS;
@@ -40,8 +48,6 @@ f32 SeekLinearF(f32, f32, f32);
 void Hint_SetHint(HINT_s *, i32, i32);
 
 extern "C" i32 NewMode, Paused, editor_active, CutSceneWaiting, PANELOFF;
-extern FadeSystem FadeSys;
-i32 GetMenuID();
 void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 #include "legoapi/menus/core/gamehint_types.h"
@@ -191,29 +197,6 @@ void Hint_ClearHintsAndDoneFlags();
 void RegisterWithHintSys(void (*update_fn)(HINT_s *, i32), HINT_s *hints, u32 *save_bits, i32 save_bit_count);
 
 // ==== src/legoapi/menus/core/hint.cpp: declarations ====
-#include "decomp.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/gizmos/object/gizbuildits.h"
-#include "legoapi/gizmos/transport/teleport.h"
-#include "legoapi/menus/core/gamehint.h"
-#include "legoapi/menus/core/panel.h"
-#include "globals.h"
-#include "legoapi/legoapi_types.h"
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/numath/nutrig.h"
-#include "legoapi/characters/core/players.h"
-#include "nu2api/numath/nuvec.h"
-#include "legoapi/world/area.h"
-#include "legoapi/world/mission.h"
-#include "legoapi/core/input/gamepads.h"
-#include "gamelib/util/gamelib_util_types.h"
-#include "gameapi/gui/apimenu.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/menus/core/text.h"
-#include "legoapi/render/core/render.h"
-#include "legoapi/world/level.h"
-#include "legoapi/world/levels/levels.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
@@ -232,7 +215,6 @@ u8 show_unlock_minikitviewer_hint = 0;
 static __attribute__((noinline, noclone)) void DrawHint_LSWBody(HINT_s *hint, i32 max_lines)
     __asm__("_Z12DrawHint_LSWP6HINT_si.part.19");
 
-static void DrawHint_LSWBody(HINT_s *hint, i32 max_lines);
 
 void DrawHint_LSW(HINT_s *hint, i32 max_lines);
 

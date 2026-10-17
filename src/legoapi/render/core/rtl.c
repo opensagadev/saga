@@ -28,11 +28,11 @@
 #include <float.h>
 #include <stdio.h>
 #include <string.h>
+#include "legoapi/render/core/rtl_types.h"
 
 struct nuqtdim_s;
 struct nuqthdr_s;
 struct rtl_s;
-#include "legoapi/render/core/rtl_types.h"
 DECOMP_ASSERT(sizeof(rtlindex_s) == 0x28, "RTL index size");
 struct NUFRUSTRUM;
 

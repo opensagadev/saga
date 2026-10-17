@@ -24,27 +24,6 @@
 #include "gameapi/gui/apimenu.h"
 
 #include "legoapi/actions/character/tagging_types.h"
-DECOMP_ASSERT(sizeof(TAGTRANSFER_s) == 0x38, "tag transfer size");
-static TAGTRANSFER_s Tag_Transfer[2];
-
-static const f32 Tag_TransferResetTimer = 0.5f;
-
-extern i32 (*Tag_NoHiddenIconFn)(GameObject_s *);
-extern char * LEGOASCII_UP;
-extern ADDGAMEMSG AddGameMsg_Default;
-GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message);
-extern char *ASCII_DOWN;
-
-// The original keeps this search out of line and passes the object in EAX.
-
-void Tag_DrawIcon_LSW(GameObject_s *object);
-
-void Tag_DrawIcon_Batman(GameObject_s *object);
-
-extern "C" void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
-
-// ==== src/legoapi/items/objects/objectsall.cpp: declarations ====
-
 #include "nu2api/nu3d/nuspecial.h"
 #include "legoapi/actions/movement/jumping.h"
 #include "legoapi/items/objects/objectsall.h"
@@ -59,14 +38,7 @@ extern "C" void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/audio/sfx.h"
 #include "nu2api/nufile/nufile.h"
-
 #include <string.h>
-
-f32 BUCK_RIDERJUMPCLEARANCE = 1.0f;
-void (*BuckStartExtraFn)(GameObject_s *) = NULL;
-
-
-// ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
 #include "gameapi/edtools/gameapi_edtools_types.h"
 #include "gameapi/edtools/edpart_internal.h"
 #include "gameapi/edtools/edui.h"
@@ -75,15 +47,7 @@ void (*BuckStartExtraFn)(GameObject_s *) = NULL;
 #include "gameapi/edtools/edfile.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/numusic/sfx.h"
-
 #include <stdio.h>
-
-extern "C" {
-}
-
-// Retail only keeps the IPA-SRA clone, which takes just the parent menu.
-
-// ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/core/terrain_internal.h"
 #include "legoapi/render/core/gameliball.h"
@@ -98,17 +62,9 @@ extern "C" {
 #include "nu2api/nu3d/android/nuptl_android.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurndr.h"
-
 #include <math.h>
 #include <stddef.h>
-
-// Runtime-selected groups appended after the fixed terrain allocation.
 #include "legoapi/render/core/terrain_stubs_types.h"
-
-// NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
-
-// ==== src/legoapi/render/fx/parts.cpp: declarations ====
 #include "legoapi/actions/combat/hits.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "gamelib/util/gamelib_util_types.h"
@@ -124,8 +80,146 @@ extern "C" i32 NuFileExists(char *name);
 #include "legoapi/items/objects/gameobjects.h"
 #include "nu2api/nu3d/nurndrstat.h"
 #include "legoapi/render/fx/edsplines.h"
-
 #include <float.h>
+#include "gameapi/edtools/edanim_internal.h"
+#include "gameapi/edtools/edgra.h"
+#include "gameapi/edtools/edui_colour.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nucore/numouse.h"
+#include "nu2api/nucore/nukeyboard.h"
+#include "nu2api/nucore/nupad.h"
+#include "gameapi/edtools/edbri_internal.h"
+#include "gameapi/edtools/edrender.h"
+#include "gameapi/edtools/edgra_internal.h"
+#include "nu2api/nucore/nutime.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/android/nuobject_android.h"
+#include "nu2api/nucore/nuvideo.h"
+#include <stdlib.h>
+#include "gameframework/saveload.h"
+#include <cstdio>
+#include "gameapi/edtools/edtools_types.h"
+#include "legoapi/misc/utilities.h"
+#include "nu2api/nucore/NuDynamicLight.h"
+#include "nu2api/nu3d/nuspline.h"
+#include <new>
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "gameapi/gui/apimenu_internal.h"
+#include "legoapi/core/config/fileselect.h"
+#include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/menus/screens/gamestructure.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/render/core/render.h"
+#include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/nulgtlaser.h"
+#include "nu2api/numath/nuvec4.h"
+#include "nu2api/nucore/nuonline.h"
+#include <stdarg.h>
+#include <GLES2/gl2.h>
+#include "nu2api/nucore/numem.h"
+#include "nu2api/nu3d/nutexanm.h"
+#include "nu2api/nu3d/android/nutex_ios_ex.h"
+#include "java/android.h"
+#include "java/java.h"
+#include "nu2api/nucore/common.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/NuInputDevice.h"
+#include "nu2api/nucore/NuInputManager.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nuspecial_internal.h"
+#include "nu2api/nu3d/nupostresources.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nu3d/nuocclusion.h"
+#include "nu2api/nu3d/nurendercontext.h"
+#include "nu2api/nu3d/nuscreen.hpp"
+#include "nu2api/numath/nuquat.h"
+#include "nu2api/nu3d/NuRenderDevice.h"
+#include "nu2api/nucore/nuvuvec.hpp"
+#include "legoapi/menus/core/gamehint.h"
+#include "legogame/game.h"
+#include "legoapi/actions/character/speederchase.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/items/collect/spacelevel.h"
+#include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/actions/character/speederchase_types.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/props/system/socksys.h"
+#include "legoapi/render/fx/spline_position.h"
+#include "nu2api/numath/nuang.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "legoapi/gizmos/object/newblowup.h"
+#include "legoapi/cutscenes/minicamcut.h"
+#include "legoapi/props/objects/techno.h"
+#include "legoapi/characters/motion/camera_types.h"
+#include "nu2api/nufile/nufilepak.h"
+#include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/actions/character/transform.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/actions/character/snake.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "legoapi/render/light/fade_material.h"
+#include "nu2api/nu3d/android/nuportal_android.h"
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/world/levels/episode.h"
+#include "legoapi/render/core/SwipeDecalRenderer.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
+#include "nu2api/nu3d/android/nugscn_android.h"
+#include "nu2api/numath/numath.h"
+#include "nu2api/nu3d/nupostparams.h"
+DECOMP_ASSERT(sizeof(TAGTRANSFER_s) == 0x38, "tag transfer size");
+static TAGTRANSFER_s Tag_Transfer[2];
+
+static const f32 Tag_TransferResetTimer = 0.5f;
+
+extern i32 (*Tag_NoHiddenIconFn)(GameObject_s *);
+extern char * LEGOASCII_UP;
+
+// The original keeps this search out of line and passes the object in EAX.
+
+void Tag_DrawIcon_LSW(GameObject_s *object);
+
+void Tag_DrawIcon_Batman(GameObject_s *object);
+
+extern "C" void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+
+// ==== src/legoapi/items/objects/objectsall.cpp: declarations ====
+
+
+
+f32 BUCK_RIDERJUMPCLEARANCE = 1.0f;
+void (*BuckStartExtraFn)(GameObject_s *) = NULL;
+
+
+// ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
+
+
+extern "C" {
+}
+
+// Retail only keeps the IPA-SRA clone, which takes just the parent menu.
+
+// ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
+
+
+// Runtime-selected groups appended after the fixed terrain allocation.
+
+// NuFileExists @nufile (nucore_plain.cpp).
+extern "C" i32 NuFileExists(char *name);
+
+// ==== src/legoapi/render/fx/parts.cpp: declarations ====
+
 
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
@@ -164,23 +258,6 @@ extern "C" {
         PlaySfxById(type->sounds[slot], &emitter->position);
 
 // ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
-#include "gameapi/edtools/edanim_internal.h"
-#include "gameapi/edtools/edgra.h"
-#include "gameapi/edtools/edui_colour.h"
-#include "nu2api/nucore/numemory.h"
-#include "nu2api/nucore/numouse.h"
-#include "nu2api/nucore/nukeyboard.h"
-#include "nu2api/nucore/nupad.h"
-#include "gameapi/edtools/edbri_internal.h"
-#include "gameapi/edtools/edrender.h"
-#include "gameapi/edtools/edgra_internal.h"
-#include "nu2api/nucore/nutime.h"
-#include "nu2api/nucore/nuthread.h"
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/nu3d/nuprim_internal.h"
-#include "nu2api/nu3d/nuqfnt.h"
-#include "nu2api/nu3d/android/nuobject_android.h"
-#include "nu2api/nucore/nuvideo.h"
 
 // Retail keeps an unreferenced partial-inlining clone of the old HSV2RGB
 // helper (the non-grey path) in this unit.
@@ -190,11 +267,9 @@ extern "C" {
 #define HSV2RGB_BODY_ATTR __attribute__((used, noinline, noclone))
 #endif
 
-#include <stdlib.h>
 
 // The original animation editor callbacks and lifecycle share file-local state.
 // ---- begin src/gameapi/edtools/edanimall.cpp ----
-#include "gameframework/saveload.h"
 
 // Animation editor subsystem stubs (static, internal linkage).
 
@@ -316,7 +391,6 @@ static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, edu
 
 // ---- end src/gameapi/edtools/edanimall.cpp ----
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
-#include <cstdio>
 
 // Editor UI callbacks retained in the original editor's menu code.
 
@@ -378,7 +452,6 @@ static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int
 
 // Only eduiMenuRender calls the integer clip helper, always left-aligned.
 
-#include "gameapi/edtools/edtools_types.h"
 
 extern "C" {
 
@@ -467,10 +540,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 // ==== src/gameapi/edtools/edtoolsall.cpp: declarations ====
 
-#include "legoapi/misc/utilities.h"
-#include "nu2api/nucore/NuDynamicLight.h"
-#include "nu2api/nu3d/nuspline.h"
-#include <new>
 
 extern EdInputContext * Input;
 extern "C" void PlaySfxById(i32, nuvec_s *);
@@ -529,7 +598,6 @@ inline void EdBitControl::operator delete(void *memory) {
 }
 
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
-#include <cstdio>
 
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
@@ -607,16 +675,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 }
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "gameapi/gui/apimenu_internal.h"
-#include "legoapi/core/config/fileselect.h"
-#include "legoapi/menus/screens/gamemenuall.h"
-#include "legoapi/menus/screens/gamestructure.h"
-#include "legoapi/world/mission.h"
-#include "legoapi/audio/audio.h"
-#include "legoapi/menus/core/text.h"
-#include "legoapi/render/core/render.h"
-#include "nu2api/nu3d/nugscn.h"
 
 extern f32 ICONSIZE, ICONX, DROPINALPHA, HUB_EPISODETITLEY;
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
@@ -626,41 +684,12 @@ extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
 // Temporary C-linkage compatibility surface for unresolved engine owners.
-#include "nu2api/nu3d/nulgtlaser.h"
-#include "nu2api/numath/nuvec4.h"
-#include "nu2api/nucore/nuonline.h"
 //
 // This file collects functions whose original TU has not yet been
 // reconstructed. Domain families move to their evidenced owner as complete
 // groups; this file is not itself evidence of one original nucore TU.
 
-#include <stdarg.h>
-#include <GLES2/gl2.h>
-#include "nu2api/nucore/numem.h"
-#include "nu2api/nu3d/nutexanm.h"
-#include "nu2api/nu3d/android/nutex_ios_ex.h"
 
-#include "java/android.h"
-#include "java/java.h"
-#include "nu2api/nucore/common.h"
-#include "nu2api/nucore/nuanim3.h"
-#include "nu2api/nucore/nuapi.h"
-#include "nu2api/nucore/nuhgobj.h"
-#include "nu2api/nucore/nugcutscene.h"
-#include "nu2api/nucore/NuInputDevice.h"
-#include "nu2api/nucore/NuInputManager.h"
-#include "nu2api/nucore/bgproc.h"
-#include "nu2api/nucore/nuptrblock.h"
-#include "nu2api/nu3d/nudlist.h"
-#include "nu2api/nu3d/nuspecial_internal.h"
-#include "nu2api/nu3d/nupostresources.h"
-#include "nu2api/nu3d/nuvport.h"
-#include "nu2api/nu3d/nuocclusion.h"
-#include "nu2api/nu3d/nurendercontext.h"
-#include "nu2api/nu3d/nuscreen.hpp"
-#include "nu2api/numath/nuquat.h"
-#include "nu2api/nu3d/NuRenderDevice.h"
-#include "nu2api/nucore/nuvuvec.hpp"
 
 // C++-linkage helpers defined in sibling TUs.
 
@@ -840,32 +869,15 @@ struct nupad_s;
 // ==== src/gameapi/edtools/edui.cpp: all remaining content ====
 
 // ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
-#include "legoapi/menus/core/gamehint.h"
-#include "legogame/game.h"
-#include "legoapi/actions/character/speederchase.h"
-#include "legoapi/gizmo/base/gizmo.h"
-#include "legoapi/items/collect/spacelevel.h"
-#include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
-#include "legoapi/gizmos/object/gizobstacles.h"
 
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 
-#include "legoapi/actions/character/speederchase_types.h"
 
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
-#include "legoapi/menus/screens/shop.h"
-#include "legoapi/props/system/socksys.h"
-#include "legoapi/render/fx/spline_position.h"
-#include "nu2api/numath/nuang.h"
-#include "nu2api/nuandroid/ios_graphics.h"
-#include "legoapi/gizmos/object/newblowup.h"
-#include "legoapi/cutscenes/minicamcut.h"
-#include "legoapi/props/objects/techno.h"
 
-#include "legoapi/characters/motion/camera_types.h"
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
 DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
@@ -877,11 +889,9 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 // ==== src/gameapi/edtools/edfile.cpp: all remaining content ====
 
-#include "nu2api/nufile/nufilepak.h"
 
 // ==== src/legoapi/core/config/saveload.cpp: declarations ====
 
-#include "legoapi/cutscenes/cutscenes.h"
 
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
@@ -889,21 +899,8 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
-#include "legoapi/actions/character/transform.h"
-#include "legoapi/actions/movement/carrying.h"
-#include "legoapi/actions/character/snake.h"
-#include "legoapi/gizmos/door/zipups.h"
-#include "legoapi/menus/screens/arcade.h"
-#include "legoapi/render/light/fade_material.h"
-#include "nu2api/nu3d/android/nuportal_android.h"
 
-#include "legoapi/characters/motion/animlist.h"
-#include "legoapi/world/levels/episode.h"
 
-#include "legoapi/render/core/SwipeDecalRenderer.h"
-#include "nu2api/nu3d/android/nurndr_android.h"
-#include "nu2api/nu3d/android/nugscn_android.h"
-#include "nu2api/numath/numath.h"
 
 
 struct GAMEMESSAGE_s;
@@ -925,7 +922,6 @@ struct GAMEMESSAGE_s;
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
 
-#include "nu2api/nu3d/nupostparams.h"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \

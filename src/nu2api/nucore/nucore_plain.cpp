@@ -2,14 +2,7 @@
 #include "nu2api/nu3d/nulgtlaser.h"
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/numath/nuvec4.h"
-extern "C" {
-}
 #include "nu2api/nucore/nuonline.h"
-//
-// This file collects functions whose original TU has not yet been
-// reconstructed. Domain families move to their evidenced owner as complete
-// groups; this file is not itself evidence of one original nucore TU.
-
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -24,8 +17,6 @@ extern "C" {
 #include "nu2api/nu3d/nutexanm.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nu3d/nuqfnt.h"
-
-
 #include "decomp.h"
 #include "java/android.h"
 #include "java/java.h"
@@ -56,13 +47,21 @@ extern "C" {
 #include "nu2api/nu3d/nurendercontext.h"
 #include "nu2api/nu3d/nuscreen.hpp"
 #include "nu2api/numath/nutrig.h"
-#include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuquat.h"
 #include "nu2api/nu3d/NuRenderDevice.h"
 #include "nu2api/nucore/NuDynamicLight.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/numath/numtx.h"
 #include "globals.h"
+extern "C" {
+}
+//
+// This file collects functions whose original TU has not yet been
+// reconstructed. Domain families move to their evidenced owner as complete
+// groups; this file is not itself evidence of one original nucore TU.
+
+
+
 
 extern NuInputManager *inputManager;
 extern bool used_touch_IDs[10];

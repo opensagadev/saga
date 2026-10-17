@@ -10,20 +10,6 @@
 #include "legoapi/cutscenes/minicamcut.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/numath/nuvec.h"
-
-void FindAnglesXY(nuvec_s *, u16 *, u16 *);
-MINICAM_s MiniCam = {};
-
-void Minicam_AddDeltas(float duration);
-
-
-
-
-
-
-
-// ==== src/legoapi/characters/motion/camera.cpp: declarations ====
-
 #include "decomp.h"
 #include "legoapi/world/area.h"
 #include "legoapi/core/config/cheat.h"
@@ -50,34 +36,7 @@ void Minicam_AddDeltas(float duration);
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/numtx.h"
-
-void Hint_CancelCurrent(void);
-
 #include "legoapi/characters/motion/camera_types.h"
-extern VIEWCAM_s ViewCam;
-// Original data symbol testmovef is float0.005 at 0x617cb0.
-extern f32 testmovef;
-
-DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
-
-void GameCameraMakeMiniCut(nugspline_s *spline, f32 start, f32 end, f32 blend_in, f32 blend_out, i32 borders,
-                           i32 hold_until_players_move);
-
-extern nugspline_s ObstacleCamCutSpline;
-extern i32 ObstacleCamTargetGuid;
-extern NUVEC ObstacleCamCutPts[2];
-
-void GameCameraMakeMiniCut2(nuvec_s *camera, nuvec_s *target, i32 target_guid, float start, float end, float blend_in,
-                            float blend_out, i32 follow_target, i32 follow_camera, i32 borders);
-
-nugspline_s ObstacleCamCutSpline;
-i32 ObstacleCamTargetGuid;
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 #include "gameapi/edtools/edbri_internal.h"
 #include "gameapi/edtools/edstubs.h"
 #include "legoapi/render/core/render.h"
@@ -107,7 +66,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 #include "legoapi/cutscenes/cutscenes.h"
 #include <stdio.h>
 #include <math.h>
-
 #include "gameapi/gui/apimenu.h"
 #include "gameframework/saveload.h"
 #include "legoapi/characters/motion/gameanim.h"
@@ -120,7 +78,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world_shared.h"
 #include "nu2api/nu3d/nutexanm.h"
-
 #include "legoapi/render/core/SwipeDecalRenderer.h"
 #include "nu2api/nu3d/nuprim_internal.h"
 #include "nu2api/nu3d/nudlist.h"
@@ -139,6 +96,51 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/numath.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nupostparams.h"
+
+void FindAnglesXY(nuvec_s *, u16 *, u16 *);
+MINICAM_s MiniCam = {};
+
+void Minicam_AddDeltas(float duration);
+
+
+
+
+
+
+
+// ==== src/legoapi/characters/motion/camera.cpp: declarations ====
+
+
+void Hint_CancelCurrent(void);
+
+extern VIEWCAM_s ViewCam;
+// Original data symbol testmovef is float0.005 at 0x617cb0.
+extern f32 testmovef;
+
+DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
+DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
+DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
+
+void GameCameraMakeMiniCut(nugspline_s *spline, f32 start, f32 end, f32 blend_in, f32 blend_out, i32 borders,
+                           i32 hold_until_players_move);
+
+extern nugspline_s ObstacleCamCutSpline;
+extern i32 ObstacleCamTargetGuid;
+extern NUVEC ObstacleCamCutPts[2];
+
+void GameCameraMakeMiniCut2(nuvec_s *camera, nuvec_s *target, i32 target_guid, float start, float end, float blend_in,
+                            float blend_out, i32 follow_target, i32 follow_camera, i32 borders);
+
+nugspline_s ObstacleCamCutSpline;
+i32 ObstacleCamTargetGuid;
+DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
+DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+
+
 
 
 // Camera zoom state
@@ -158,8 +160,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
 
-#include "nu2api/nu3d/nuprim.h"
-#include "nu2api/nu3d/nupostparams.h"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \

@@ -35,21 +35,19 @@
 #include "nu2api/nu3d/nutexanm.h"
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nucore/common.h"
-#include "nu2api/numath/nufloat.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nuprim.h"
-#include "nu2api/nu3d/nuvport.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nushader.h"
 #include "nu2api/nucore/nuapi.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nu3d/android/nuptl_android.h"
+#include "nu2api/nu3d/nurndr_plain_types.h"
 
 // ---------------------------------------------------------------------------
 // Scene state — mirrors original BSS layout
@@ -213,7 +211,6 @@ static inline u32 NuRndrPrimColour(u32 colour) {
 extern "C" void NuRndrGradRect2di(i32 x, i32 y, i32 w, i32 h, i32 *colour, numtl_s *mtl);
 extern "C" void NuRndrGradRectUV2di(i32 x, i32 y, i32 w, i32 h, f32 u0, f32 v0, f32 u1, f32 v1, u32 *colours,
                                     numtl_s *mtl);
-#include "nu2api/nu3d/nurndr_plain_types.h"
 extern "C" void NuRndrScreenGrabTileInit(void *, i32, f32, f32, f32);
 extern "C" void NuRndrScreenGrabTileDeInit(void *);
 extern "C" void NuRndrScreenGrabTileBegin(void **);

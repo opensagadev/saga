@@ -27,6 +27,7 @@
 #include <string.h>
 #include <math.h>
 #include <stddef.h>
+#include "legoapi/render/core/terrain_stubs_types.h"
 
 i16 TerrImpact;
 i32 terrhitflags;
@@ -46,7 +47,6 @@ i32 WallSplinesOnly;
 extern "C" {
     i32 IgnoreWallSplines;
 }
-#include "legoapi/render/core/terrain_stubs_types.h"
 
 
 

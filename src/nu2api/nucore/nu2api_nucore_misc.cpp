@@ -13,14 +13,6 @@
 #include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/nucore/nuapi.h"
 #include "nu2api/nu3d/nugscn.h"
-
-struct TERRSET;
-extern TERRSET *CurTerr;
-
-
-extern "C" {
-}
-
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nu3d/android/nutex_android.h"
 #include "nu2api/nu3d/nudlist.h"
@@ -36,11 +28,19 @@ extern "C" {
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuquat.h"
 #include "nu2api/nuplatform/nuplatform.h"
-
 #include <GLES2/gl2.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+
+struct TERRSET;
+extern TERRSET *CurTerr;
+
+
+extern "C" {
+}
+
+
 
 extern "C" void BeginCriticalSectionGL(const char *, i32);
 extern "C" void EndCriticalSectionGL(const char *, i32);

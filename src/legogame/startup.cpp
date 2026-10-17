@@ -56,6 +56,39 @@
 #include "nu2api/numusic/numusic.h"
 #include "nu2api/numusic/sfx.h"
 #include "nu2api/nusound/nusound.h"
+#include "decomp.h"
+#include "legoapi/world/world.h"
+#include <stdio.h>
+#include "gameapi/edtools/edstubs.h"
+#include "gameapi/gui/apimenu.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "legoapi/characters/core/charconfig.h"
+#include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/gizmos/transport/gizportal.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/world/level.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/props/system/socksys.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/render/light/lighting.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nucore/nutime.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/nufile/nufpar.h"
+#include "nu2api/numath/nutrig.h"
+#include "legoapi/characters/core/players_types.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/characters/motion/action_info.h"
+#include "legoapi/menus/screens/gamestructure.h"
+#include "nu2api/nucore/nupad.h"
 
 // ---------------------------------------------------------------------------
 // Engine symbols defined in other TUs (declared here to avoid pulling large
@@ -66,17 +99,14 @@
 
 extern "C" {
     // nucore / nurndr plain stubs and editor helpers (extern "C" TUs).
-    f32 NuIOS_GetAspectRatio(void);
     i32 NuIOS_GetDeviceLanguage(void);
     void NuLanguageSet(i32 language);
     void NuFrameBegin(void);
     f32 NuFrameEnd(void);
-    void NewMenu(i32 menu_id, i32 menu_y, i32 param3);
     void edGraEnableTerrainSwap(void);
     void edGraDisableTerrainSwap(void);
     void SetProceduralAnimationFn(void *fn);
     void DrawMenu(i32 menu_id);
-    extern i32 GameMenuLevel;
 }
 
 // C++ linkage — defined in their own TUs.
@@ -97,7 +127,6 @@ void initGameHintSys_LSW(void);
 void Movies_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end);
 void CharScenes_Init(VARIPTR *buf, VARIPTR *buf_end);
 void FixUpCharacters(CHARFIXUP *fixup);
-void CharCategories_Init(CHARCATEGORY *cat);
 void NewGame(void);
 GIZAIMESSAGESYS_s *CreateGizAIMessageSys(VARIPTR *buf, VARIPTR *buf_end, i32 size);
 
@@ -115,7 +144,6 @@ void RegisterHelpers(void);
 void UpdateGameMenu(GAMEPAD_s *pad, i32 a2);
 void SetBackgroundMusic(i32 track);
 void IntroText_Draw(f32 alpha);
-void ReadPads(void);
 
 // Globals / objects declared elsewhere.
 extern i16 id_DEFAULTCHARACTER[2];
@@ -137,7 +165,6 @@ extern CHARFIXUP CharFixUp[222]; // characters.cpp
 i32 CutScene_StartFn_LSW(CUTINFO *);
 void CutScene_PreUpdateFn_LSW(CUTINFO *);
 void CutScene_PostUpdateFn_LSW(void);
-void CutScene_StoppedFn_LSW(CUTINFO *);
 i32 CutScene_ReplaceCharacterModelFn_LSW(CUTINFO *, NUGCUTCHAR_s *);
 i32 InitBolt_AddMomentumType_LSW(BOLT_s *, GameObject_s *, nuvec_s *);
 i32 Bolt_HitPlatFn_LSW(BOLT_s *);
@@ -201,7 +228,6 @@ static NUMTL *legal_mtl;   // material wrapping the legal texture
 // Permanent-data initialisation (background thread entry).
 // ---------------------------------------------------------------------------
 
-static void LoadPermData(BGPROCINFO *proc);
 
 // ---------------------------------------------------------------------------
 // Public permutations — thin wrappers that set up the arena.
@@ -240,50 +266,9 @@ void EndPerm(void) {
 }
 
 // ==== src/legoapi/characters/core/players.cpp: declarations ====
-#include "decomp.h"
-#include "legoapi/world/world.h"
 struct HINT_s;
 
-#include <stdio.h>
-#include <string.h>
 
-#include "gameapi/edtools/edstubs.h"
-#include "gameapi/gui/apimenu.h"
-#include "gameapi/ai/aisys/aisys.h"
-#include "globals.h"
-#include "legoapi/world/area.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/characters/core/charconfig.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/cutscenes/cutscenes.h"
-#include "legoapi/gizmos/transport/gizportal.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/items/base/collection.h"
-#include "legoapi/world/levels/episode.h"
-#include "legoapi/world/levels/levels.h"
-#include "legoapi/menus/screens/shop.h"
-#include "legoapi/world/level.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/actions/movement/carrying.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/props/doors/door.h"
-#include "legoapi/core/input/qrand.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/props/system/socksys.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/render/light/lighting.h"
-#include "legoapi/core/input/timer.h"
-#include "legogame/game.h"
-#include "nu2api/nu3d/nutex.h"
-#include "nu2api/nuandroid/ios_graphics.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nucore/nuhgobj.h"
-#include "nu2api/nucore/nutime.h"
-#include "nu2api/nufile/nufile.h"
-#include "nu2api/nufile/nufpar.h"
-#include "nu2api/numath/nutrig.h"
 
 struct MechTouchUIElement;
 struct PLAYERITEM_s;
@@ -346,7 +331,6 @@ namespace {
 
 void SetFlicker(GameObject_s *object, float duration);
 
-#include "legoapi/characters/core/players_types.h"
 
 
 
@@ -372,24 +356,6 @@ bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player
                                bool require_character_flags, u32 character_flags);
 
 // ==== src/legoapi/actions/movement/dropinout.cpp: declarations ====
-#include "decomp.h"
-#include "legoapi/audio/audio.h"
-#include "legoapi/characters/core/players.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/characters/motion/action_info.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/menus/screens/gamestructure.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/world/levels/levels.h"
-#include "legoapi/world/world.h"
-#include "globals.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nucore/nupad.h"
-#include "nu2api/numath/nutrig.h"
 
 struct AIROW_s;
 struct nunativegscene_s;

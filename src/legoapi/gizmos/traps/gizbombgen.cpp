@@ -25,37 +25,21 @@ struct GIZBOMBGENPROGRESS {
     u32 visible_masks[3];
 };
 
-static i32 GizBombGens_GetMaxGizmos(void *world_ptr);
 
-static void GizBombGens_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *, void *system_ptr);
 
-static void GizBombGens_Update(void *world_ptr, void *system_ptr, float);
 
-static char *GizmoBombGen_GetGizmoName(GIZMO *gizmo);
 
-static i32 GizmoBombGen_GetOutput(GIZMO *gizmo, i32, i32);
 
-static char *GizmoBombGen_GetOutputName(GIZMO *, i32);
 
-static i32 GizmoBombGen_GetNumOutputs(GIZMO *);
 
-static void GizmoBombGen_Activate(GIZMO *gizmo, i32 active);
 
-static void GizmoBombGen_SetVisibility(GIZMO *gizmo, i32 visible);
 
-static NUVEC *GizmoBombGen_GetPos(GIZMO *gizmo);
 
-static void *GizBombGens_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end);
 
-static void GizBombGens_ClearProgress(void *, void *progress_ptr);
 
-static void GizBombGens_StoreProgress(void *, void *system_ptr, void *progress_ptr);
 
-static void GizBombGens_SetResetFlag(void *world_ptr, void *system_ptr, void *progress_ptr);
 
-static void *GizBombGens_ReserveBufferSpace(void *world_ptr);
 
-static i32 GizBombGens_Load(void *world_ptr, void *system_ptr);
 
 
 
