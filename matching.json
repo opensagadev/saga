@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 83.08145,
+    "fuzzy_match_percent": 82.92358,
     "total_code": "4722419",
-    "matched_code": "653533",
-    "matched_code_percent": 13.838945,
+    "matched_code": "652474",
+    "matched_code_percent": 13.816521,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 7034,
-    "matched_functions_percent": 52.262424,
+    "matched_functions": 7035,
+    "matched_functions_percent": 52.26986,
     "total_units": 1
   },
   "text": {
@@ -39167,12 +39167,148 @@
           "match_percent": 99.35294
         },
         {
+          "name": "_ZL26DrawWeapon_SetSabreObjectsP12GameObject_siiiiPiS1_",
+          "demangled_name": "DrawWeapon_SetSabreObjects(GameObject_s*, int, int, int, int, int*, int*)",
+          "address": 1028928,
+          "offset": 138960,
+          "size": 505,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL13SetLayers_BOBP12GameObject_s",
+          "demangled_name": "SetLayers_BOB(GameObject_s*)",
+          "address": 1029440,
+          "offset": 139472,
+          "size": 415,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z19LoadSingleCharacterP12bgprocinfo_s",
+          "demangled_name": "LoadSingleCharacter(bgprocinfo_s*)",
+          "address": 1029856,
+          "offset": 139888,
+          "size": 428,
+          "match_percent": 96.21495
+        },
+        {
+          "name": "_ZL26SetLayers_MOSEISLEYCITIZENP12GameObject_s.isra.2",
+          "demangled_name": "SetLayers_MOSEISLEYCITIZEN(GameObject_s*) [clone .isra.2]",
+          "address": 1030288,
+          "offset": 140320,
+          "size": 266,
+          "match_percent": 99.91954
+        },
+        {
+          "name": "_ZL17TerrainKillPlayerP12GameObject_siP7nuvec_s.isra.4",
+          "demangled_name": "TerrainKillPlayer(GameObject_s*, int, nuvec_s*) [clone .isra.4]",
+          "address": 1030560,
+          "offset": 140592,
+          "size": 339,
+          "match_percent": 99.988235
+        },
+        {
+          "name": "_Z15FixUpCharactersP9CHARFIXUP",
+          "demangled_name": "FixUpCharacters(CHARFIXUP*)",
+          "address": 1030912,
+          "offset": 140944,
+          "size": 245,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z30ExtraCharacterFixUpAfterConfigv",
+          "demangled_name": "ExtraCharacterFixUpAfterConfig()",
+          "address": 1031168,
+          "offset": 141200,
+          "size": 1761,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z17ResetPlayerPacketP14PLAYERPACKET_sP15CHARACTERDATA_s",
+          "demangled_name": "ResetPlayerPacket(PLAYERPACKET_s*, CHARACTERDATA_s*)",
+          "address": 1032944,
+          "offset": 142976,
+          "size": 644,
+          "match_percent": 79.80612
+        },
+        {
+          "name": "_Z10SetFlickerP12GameObject_sf",
+          "demangled_name": "SetFlicker(GameObject_s*, float)",
+          "address": 1033600,
+          "offset": 143632,
+          "size": 26,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z13ResetPlayerAIP12GameObject_s",
+          "demangled_name": "ResetPlayerAI(GameObject_s*)",
+          "address": 1033632,
+          "offset": 143664,
+          "size": 384,
+          "match_percent": 97.1831
+        },
+        {
+          "name": "_Z12InitPlayerAIP12GameObject_s",
+          "demangled_name": "InitPlayerAI(GameObject_s*)",
+          "address": 1034016,
+          "offset": 144048,
+          "size": 1416,
+          "match_percent": 66.853745
+        },
+        {
+          "name": "_Z20DeactivateGameObjectP12GameObject_s",
+          "demangled_name": "DeactivateGameObject(GameObject_s*)",
+          "address": 1035440,
+          "offset": 145472,
+          "size": 246,
+          "match_percent": 99.98148
+        },
+        {
+          "name": "_Z19DeactivateCharacterPc",
+          "demangled_name": "DeactivateCharacter(char*)",
+          "address": 1035696,
+          "offset": 145728,
+          "size": 117,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z26SetGameObjectCharacterDataP12GameObject_s",
+          "demangled_name": "SetGameObjectCharacterData(GameObject_s*)",
+          "address": 1035824,
+          "offset": 145856,
+          "size": 89,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z12SetHitPointsP12GameObject_si",
+          "demangled_name": "SetHitPoints(GameObject_s*, int)",
+          "address": 1035920,
+          "offset": 145952,
+          "size": 40,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z14MakePlayerListi",
+          "demangled_name": "MakePlayerList(int)",
+          "address": 1035968,
+          "offset": 146000,
+          "size": 877,
+          "match_percent": 68.25551
+        },
+        {
+          "name": "_Z21Player_CopyEssentialsP12GameObject_sS0_",
+          "demangled_name": "Player_CopyEssentials(GameObject_s*, GameObject_s*)",
+          "address": 1036848,
+          "offset": 146880,
+          "size": 118,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z16ClearAICreaturesv",
           "demangled_name": "ClearAICreatures()",
           "address": 1036976,
           "offset": 147008,
           "size": 137,
-          "match_percent": 89.64286
+          "match_percent": 100.0
         },
         {
           "name": "_Z24StoreProgressAICharacterP16LEVEL_PROGRESS_s",
@@ -39191,12 +39327,68 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z14GetDefaultIdleP12GameObject_s",
+          "demangled_name": "GetDefaultIdle(GameObject_s*)",
+          "address": 1037440,
+          "offset": 147472,
+          "size": 177,
+          "match_percent": 86.31579
+        },
+        {
+          "name": "_Z18ResetCharacterIdleP12GameObject_sii",
+          "demangled_name": "ResetCharacterIdle(GameObject_s*, int, int)",
+          "address": 1037632,
+          "offset": 147664,
+          "size": 357,
+          "match_percent": 92.39024
+        },
+        {
+          "name": "_ZL16NewCharacterIdleP12GameObject_si",
+          "demangled_name": "NewCharacterIdle(GameObject_s*, int)",
+          "address": 1038000,
+          "offset": 148032,
+          "size": 650,
+          "match_percent": 54.072918
+        },
+        {
+          "name": "_Z12InitCreatureP12GameObject_sii",
+          "demangled_name": "InitCreature(GameObject_s*, int, int)",
+          "address": 1038656,
+          "offset": 148688,
+          "size": 1537,
+          "match_percent": 86.85714
+        },
+        {
+          "name": "_Z11AddCreatureii",
+          "demangled_name": "AddCreature(int, int)",
+          "address": 1040208,
+          "offset": 150240,
+          "size": 116,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z15InitAICreaturesP7AISYS_s",
           "demangled_name": "InitAICreatures(AISYS_s*)",
           "address": 1040336,
           "offset": 150368,
           "size": 682,
-          "match_percent": 87.26667
+          "match_percent": 90.55556
+        },
+        {
+          "name": "_Z12Players_Initv",
+          "demangled_name": "Players_Init()",
+          "address": 1041024,
+          "offset": 151056,
+          "size": 1719,
+          "match_percent": 50.81768
+        },
+        {
+          "name": "_Z16ResetPlayerMovesP12GameObject_s",
+          "demangled_name": "ResetPlayerMoves(GameObject_s*)",
+          "address": 1042752,
+          "offset": 152784,
+          "size": 328,
+          "match_percent": 71.61972
         },
         {
           "name": "_Z15ResetAICreatureP12GameObject_sP7AISYS_s",
@@ -39212,7 +39404,231 @@
           "address": 1044656,
           "offset": 154688,
           "size": 589,
-          "match_percent": 56.52778
+          "match_percent": 51.5
+        },
+        {
+          "name": "_Z17ActivateCharacterPcP7nuvec_si",
+          "demangled_name": "ActivateCharacter(char*, nuvec_s*, int)",
+          "address": 1045248,
+          "offset": 155280,
+          "size": 548,
+          "match_percent": 99.75397
+        },
+        {
+          "name": "_Z18NewPlayerCharacterP12GameObject_siii",
+          "demangled_name": "NewPlayerCharacter(GameObject_s*, int, int, int)",
+          "address": 1045808,
+          "offset": 155840,
+          "size": 1760,
+          "match_percent": 77.49487
+        },
+        {
+          "name": "_Z11ResetPlayerP12GameObject_siP7nuvec_si",
+          "demangled_name": "ResetPlayer(GameObject_s*, int, nuvec_s*, int)",
+          "address": 1047568,
+          "offset": 157600,
+          "size": 2198,
+          "match_percent": 79.93348
+        },
+        {
+          "name": "_Z22SetPlayerGroupPositionfff",
+          "demangled_name": "SetPlayerGroupPosition(float, float, float)",
+          "address": 1049776,
+          "offset": 159808,
+          "size": 215,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z19UpdateCharacterIdleP12GameObject_s",
+          "demangled_name": "UpdateCharacterIdle(GameObject_s*)",
+          "address": 1050000,
+          "offset": 160032,
+          "size": 494,
+          "match_percent": 74.93805
+        },
+        {
+          "name": "_Z12KeepOnScreenP12GameObject_s",
+          "demangled_name": "KeepOnScreen(GameObject_s*)",
+          "address": 1050496,
+          "offset": 160528,
+          "size": 2970,
+          "match_percent": 78.70973
+        },
+        {
+          "name": "_Z16MovePlayerSplineP12GameObject_s",
+          "demangled_name": "MovePlayerSpline(GameObject_s*)",
+          "address": 1053472,
+          "offset": 163504,
+          "size": 1752,
+          "match_percent": 87.03315
+        },
+        {
+          "name": "_Z10MovePlayerP12GameObject_s",
+          "demangled_name": "MovePlayer(GameObject_s*)",
+          "address": 1055232,
+          "offset": 165264,
+          "size": 3219,
+          "match_percent": 45.1032
+        },
+        {
+          "name": "_Z13TerrainPlayerP12GameObject_s",
+          "demangled_name": "TerrainPlayer(GameObject_s*)",
+          "address": 1058464,
+          "offset": 168496,
+          "size": 12323,
+          "match_percent": 15.067366
+        },
+        {
+          "name": "_Z13AnimatePlayerP12GameObject_s",
+          "demangled_name": "AnimatePlayer(GameObject_s*)",
+          "address": 1070800,
+          "offset": 180832,
+          "size": 996,
+          "match_percent": 49.6758
+        },
+        {
+          "name": "_Z22DrawGameObjectsProcessv",
+          "demangled_name": "DrawGameObjectsProcess()",
+          "address": 1071808,
+          "offset": 181840,
+          "size": 7204,
+          "match_percent": 85.56335
+        },
+        {
+          "name": "_Z16AnakinGreenSabreP12GameObject_s",
+          "demangled_name": "AnakinGreenSabre(GameObject_s*)",
+          "address": 1079024,
+          "offset": 189056,
+          "size": 117,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z22ConfigureComplexShadowP12GameObject_s",
+          "demangled_name": "ConfigureComplexShadow(GameObject_s*)",
+          "address": 1079152,
+          "offset": 189184,
+          "size": 178,
+          "match_percent": 99.92105
+        },
+        {
+          "name": "_Z22GameDrawCharacterModelP16CHARACTERMODEL_sP12ANIMPACKET_sP7numtx_sS4_S4_S4_P12GameObject_sj",
+          "demangled_name": "GameDrawCharacterModel(CHARACTERMODEL_s*, ANIMPACKET_s*, numtx_s*, numtx_s*, numtx_s*, numtx_s*, GameObject_s*, unsigned int)",
+          "address": 1079344,
+          "offset": 189376,
+          "size": 3212,
+          "match_percent": 74.09925
+        },
+        {
+          "name": "_ZL24DrawCharacterAttachmentsP12GameObject_sP7numtx_s",
+          "demangled_name": "DrawCharacterAttachments(GameObject_s*, numtx_s*)",
+          "address": 1082560,
+          "offset": 192592,
+          "size": 1009,
+          "match_percent": 88.25327
+        },
+        {
+          "name": "_Z19UpdateCharacterLoadv",
+          "demangled_name": "UpdateCharacterLoad()",
+          "address": 1083584,
+          "offset": 193616,
+          "size": 868,
+          "match_percent": 61.269566
+        },
+        {
+          "name": "_Z19ActivePlayerInRangeP7nuvec_sfPf",
+          "demangled_name": "ActivePlayerInRange(nuvec_s*, float, float*)",
+          "address": 1084464,
+          "offset": 194496,
+          "size": 724,
+          "match_percent": 95.0
+        },
+        {
+          "name": "_Z17AvailableToPlayerjiii",
+          "demangled_name": "AvailableToPlayer(unsigned int, int, int, int)",
+          "address": 1085200,
+          "offset": 195232,
+          "size": 4312,
+          "match_percent": 91.77101
+        },
+        {
+          "name": "_Z20GetOtherActivePlayerP12GameObject_s",
+          "demangled_name": "GetOtherActivePlayer(GameObject_s*)",
+          "address": 1089520,
+          "offset": 199552,
+          "size": 69,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z15AdjustLayerBitsjP12GameObject_s",
+          "demangled_name": "AdjustLayerBits(unsigned int, GameObject_s*)",
+          "address": 1089600,
+          "offset": 199632,
+          "size": 1295,
+          "match_percent": 45.757763
+        },
+        {
+          "name": "_Z11FixUpLayersv",
+          "demangled_name": "FixUpLayers()",
+          "address": 1090896,
+          "offset": 200928,
+          "size": 265,
+          "match_percent": 94.93507
+        },
+        {
+          "name": "_Z23ObjLookingWithLeftStickP12GameObject_s",
+          "demangled_name": "ObjLookingWithLeftStick(GameObject_s*)",
+          "address": 1091168,
+          "offset": 201200,
+          "size": 55,
+          "match_percent": 74.3125
+        },
+        {
+          "name": "_Z11SuperWeirdoP12GameObject_s",
+          "demangled_name": "SuperWeirdo(GameObject_s*)",
+          "address": 1091232,
+          "offset": 201264,
+          "size": 95,
+          "match_percent": 68.07692
+        },
+        {
+          "name": "_Z21Player_HasPurpleForceP12GameObject_s",
+          "demangled_name": "Player_HasPurpleForce(GameObject_s*)",
+          "address": 1091328,
+          "offset": 201360,
+          "size": 92,
+          "match_percent": 99.96
+        },
+        {
+          "name": "_ZL11DrawWeaponsP12GameObject_sif",
+          "demangled_name": "DrawWeapons(GameObject_s*, int, float)",
+          "address": 1091424,
+          "offset": 201456,
+          "size": 4100,
+          "match_percent": 70.47619
+        },
+        {
+          "name": "_ZL17DrawParaphernaliaP12GameObject_s",
+          "demangled_name": "DrawParaphernalia(GameObject_s*)",
+          "address": 1095536,
+          "offset": 205568,
+          "size": 12138,
+          "match_percent": 19.297644
+        },
+        {
+          "name": "_Z19DrawGameObjectsDrawi",
+          "demangled_name": "DrawGameObjectsDraw(int)",
+          "address": 1107680,
+          "offset": 217712,
+          "size": 586,
+          "match_percent": 85.723404
+        },
+        {
+          "name": "_Z15DrawGameObjectsv",
+          "demangled_name": "DrawGameObjects()",
+          "address": 1108272,
+          "offset": 218304,
+          "size": 138,
+          "match_percent": 99.935486
         },
         {
           "name": "_Z22SpawnMeleeCreatureTypei",
@@ -39220,7 +39636,7 @@
           "address": 2222272,
           "offset": 1332304,
           "size": 1236,
-          "match_percent": 63.615383
+          "match_percent": 57.923077
         }
       ]
     },
@@ -40252,118 +40668,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_ZL13SetLayers_BOBP12GameObject_s",
-          "demangled_name": "SetLayers_BOB(GameObject_s*)",
-          "address": 1029440,
-          "offset": 139472,
-          "size": 415,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z19LoadSingleCharacterP12bgprocinfo_s",
-          "demangled_name": "LoadSingleCharacter(bgprocinfo_s*)",
-          "address": 1029856,
-          "offset": 139888,
-          "size": 428,
-          "match_percent": 96.21495
-        },
-        {
-          "name": "_ZL26SetLayers_MOSEISLEYCITIZENP12GameObject_s.isra.2",
-          "demangled_name": "SetLayers_MOSEISLEYCITIZEN(GameObject_s*) [clone .isra.2]",
-          "address": 1030288,
-          "offset": 140320,
-          "size": 266,
-          "match_percent": 99.91954
-        },
-        {
-          "name": "_Z15FixUpCharactersP9CHARFIXUP",
-          "demangled_name": "FixUpCharacters(CHARFIXUP*)",
-          "address": 1030912,
-          "offset": 140944,
-          "size": 245,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z19DeactivateCharacterPc",
-          "demangled_name": "DeactivateCharacter(char*)",
-          "address": 1035696,
-          "offset": 145728,
-          "size": 117,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z26SetGameObjectCharacterDataP12GameObject_s",
-          "demangled_name": "SetGameObjectCharacterData(GameObject_s*)",
-          "address": 1035824,
-          "offset": 145856,
-          "size": 89,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z14GetDefaultIdleP12GameObject_s",
-          "demangled_name": "GetDefaultIdle(GameObject_s*)",
-          "address": 1037440,
-          "offset": 147472,
-          "size": 177,
-          "match_percent": 86.31579
-        },
-        {
-          "name": "_Z18ResetCharacterIdleP12GameObject_sii",
-          "demangled_name": "ResetCharacterIdle(GameObject_s*, int, int)",
-          "address": 1037632,
-          "offset": 147664,
-          "size": 357,
-          "match_percent": 93.60976
-        },
-        {
-          "name": "_ZL16NewCharacterIdleP12GameObject_si",
-          "demangled_name": "NewCharacterIdle(GameObject_s*, int)",
-          "address": 1038000,
-          "offset": 148032,
-          "size": 650,
-          "match_percent": 54.072918
-        },
-        {
-          "name": "_Z12InitCreatureP12GameObject_sii",
-          "demangled_name": "InitCreature(GameObject_s*, int, int)",
-          "address": 1038656,
-          "offset": 148688,
-          "size": 1537,
-          "match_percent": 90.4846
-        },
-        {
-          "name": "_Z17ActivateCharacterPcP7nuvec_si",
-          "demangled_name": "ActivateCharacter(char*, nuvec_s*, int)",
-          "address": 1045248,
-          "offset": 155280,
-          "size": 548,
-          "match_percent": 99.75397
-        },
-        {
-          "name": "_Z18NewPlayerCharacterP12GameObject_siii",
-          "demangled_name": "NewPlayerCharacter(GameObject_s*, int, int, int)",
-          "address": 1045808,
-          "offset": 155840,
-          "size": 1760,
-          "match_percent": 78.22051
-        },
-        {
-          "name": "_Z19UpdateCharacterIdleP12GameObject_s",
-          "demangled_name": "UpdateCharacterIdle(GameObject_s*)",
-          "address": 1050000,
-          "offset": 160032,
-          "size": 494,
-          "match_percent": 81.06195
-        },
-        {
-          "name": "_Z19UpdateCharacterLoadv",
-          "demangled_name": "UpdateCharacterLoad()",
-          "address": 1083584,
-          "offset": 193616,
-          "size": 868,
-          "match_percent": 61.269566
-        },
-        {
           "name": "_Z11LSW_SetIndyi",
           "demangled_name": "LSW_SetIndy(int)",
           "address": 1170576,
@@ -40385,7 +40689,7 @@
           "address": 1212112,
           "offset": 322144,
           "size": 1310,
-          "match_percent": 97.87109
+          "match_percent": 89.609375
         },
         {
           "name": "_Z16PostAnimate_FETTP12GameObject_s",
@@ -40401,7 +40705,7 @@
           "address": 1494192,
           "offset": 604224,
           "size": 869,
-          "match_percent": 99.89119
+          "match_percent": 99.81347
         },
         {
           "name": "_Z33SetProtocolDroidDeactivatedActionP12GameObject_s",
@@ -40457,7 +40761,7 @@
           "address": 2022944,
           "offset": 1132976,
           "size": 1409,
-          "match_percent": 86.647484
+          "match_percent": 86.70144
         },
         {
           "name": "_Z21CollectCharcters_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
@@ -40489,7 +40793,7 @@
           "address": 2213824,
           "offset": 1323856,
           "size": 197,
-          "match_percent": 99.113205
+          "match_percent": 99.962265
         },
         {
           "name": "_Z18UpdateCharacterIDsv",
@@ -40553,7 +40857,7 @@
           "address": 4587728,
           "offset": 3697760,
           "size": 400,
-          "match_percent": 90.19266
+          "match_percent": 90.100914
         },
         {
           "name": "_Z22CharScene_FindHSpecialP11WORLDINFO_si",
@@ -40593,7 +40897,7 @@
           "address": 4591040,
           "offset": 3701072,
           "size": 2469,
-          "match_percent": 100.0
+          "match_percent": 96.13737
         },
         {
           "name": "_Z12HeadMovementP12GameObject_s",
@@ -40601,7 +40905,7 @@
           "address": 4652112,
           "offset": 3762144,
           "size": 3390,
-          "match_percent": 60.209698
+          "match_percent": 60.22936
         },
         {
           "name": "_Z12HairMovementP12GameObject_s",
@@ -40649,14 +40953,6 @@
           "offset": 27552,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_Z30ExtraCharacterFixUpAfterConfigv",
-          "demangled_name": "ExtraCharacterFixUpAfterConfig()",
-          "address": 1031168,
-          "offset": 141200,
-          "size": 1761,
-          "match_percent": 97.84661
         },
         {
           "name": "_Z13LayerFromNameP19GAMECHARACTERDATA_sPc",
@@ -42688,142 +42984,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z10SetFlickerP12GameObject_sf",
-          "demangled_name": "SetFlicker(GameObject_s*, float)",
-          "address": 1033600,
-          "offset": 143632,
-          "size": 26,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z13ResetPlayerAIP12GameObject_s",
-          "demangled_name": "ResetPlayerAI(GameObject_s*)",
-          "address": 1033632,
-          "offset": 143664,
-          "size": 384,
-          "match_percent": 97.1831
-        },
-        {
-          "name": "_Z12InitPlayerAIP12GameObject_s",
-          "demangled_name": "InitPlayerAI(GameObject_s*)",
-          "address": 1034016,
-          "offset": 144048,
-          "size": 1416,
-          "match_percent": 66.853745
-        },
-        {
-          "name": "_Z12SetHitPointsP12GameObject_si",
-          "demangled_name": "SetHitPoints(GameObject_s*, int)",
-          "address": 1035920,
-          "offset": 145952,
-          "size": 40,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z14MakePlayerListi",
-          "demangled_name": "MakePlayerList(int)",
-          "address": 1035968,
-          "offset": 146000,
-          "size": 877,
-          "match_percent": 65.977974
-        },
-        {
-          "name": "_Z21Player_CopyEssentialsP12GameObject_sS0_",
-          "demangled_name": "Player_CopyEssentials(GameObject_s*, GameObject_s*)",
-          "address": 1036848,
-          "offset": 146880,
-          "size": 118,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z11AddCreatureii",
-          "demangled_name": "AddCreature(int, int)",
-          "address": 1040208,
-          "offset": 150240,
-          "size": 116,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z12Players_Initv",
-          "demangled_name": "Players_Init()",
-          "address": 1041024,
-          "offset": 151056,
-          "size": 1719,
-          "match_percent": 50.30939
-        },
-        {
-          "name": "_Z16ResetPlayerMovesP12GameObject_s",
-          "demangled_name": "ResetPlayerMoves(GameObject_s*)",
-          "address": 1042752,
-          "offset": 152784,
-          "size": 328,
-          "match_percent": 71.61972
-        },
-        {
-          "name": "_Z11ResetPlayerP12GameObject_siP7nuvec_si",
-          "demangled_name": "ResetPlayer(GameObject_s*, int, nuvec_s*, int)",
-          "address": 1047568,
-          "offset": 157600,
-          "size": 2198,
-          "match_percent": 81.95279
-        },
-        {
-          "name": "_Z22SetPlayerGroupPositionfff",
-          "demangled_name": "SetPlayerGroupPosition(float, float, float)",
-          "address": 1049776,
-          "offset": 159808,
-          "size": 215,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z19ActivePlayerInRangeP7nuvec_sfPf",
-          "demangled_name": "ActivePlayerInRange(nuvec_s*, float, float*)",
-          "address": 1084464,
-          "offset": 194496,
-          "size": 724,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z17AvailableToPlayerjiii",
-          "demangled_name": "AvailableToPlayer(unsigned int, int, int, int)",
-          "address": 1085200,
-          "offset": 195232,
-          "size": 4312,
-          "match_percent": 91.77101
-        },
-        {
-          "name": "_Z20GetOtherActivePlayerP12GameObject_s",
-          "demangled_name": "GetOtherActivePlayer(GameObject_s*)",
-          "address": 1089520,
-          "offset": 199552,
-          "size": 69,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z15AdjustLayerBitsjP12GameObject_s",
-          "demangled_name": "AdjustLayerBits(unsigned int, GameObject_s*)",
-          "address": 1089600,
-          "offset": 199632,
-          "size": 1295,
-          "match_percent": 45.757763
-        },
-        {
-          "name": "_Z11FixUpLayersv",
-          "demangled_name": "FixUpLayers()",
-          "address": 1090896,
-          "offset": 200928,
-          "size": 265,
-          "match_percent": 94.74026
-        },
-        {
-          "name": "_Z21Player_HasPurpleForceP12GameObject_s",
-          "demangled_name": "Player_HasPurpleForce(GameObject_s*)",
-          "address": 1091328,
-          "offset": 201360,
-          "size": 92,
-          "match_percent": 99.96
-        },
-        {
           "name": "_Z12GetHoverPosYP12GameObject_s",
           "demangled_name": "GetHoverPosY(GameObject_s*)",
           "address": 1368032,
@@ -42925,7 +43085,7 @@
           "address": 4631504,
           "offset": 3741536,
           "size": 365,
-          "match_percent": 76.56881
+          "match_percent": 77.2844
         },
         {
           "name": "_Z15Player_FindByIDi",
@@ -42989,7 +43149,7 @@
           "address": 4636528,
           "offset": 3746560,
           "size": 1978,
-          "match_percent": 77.89783
+          "match_percent": 77.930435
         },
         {
           "name": "_Z22Player_ToggleCharacterP12GameObject_sii",
@@ -43150,14 +43310,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/camera.o",
       "functions": [
         {
-          "name": "_Z12KeepOnScreenP12GameObject_s",
-          "demangled_name": "KeepOnScreen(GameObject_s*)",
-          "address": 1050496,
-          "offset": 160528,
-          "size": 2970,
-          "match_percent": 79.494415
-        },
-        {
           "name": "_ZL12PlayerCamPosP12GameObject_sP7nuvec_sS2_",
           "demangled_name": "PlayerCamPos(GameObject_s*, nuvec_s*, nuvec_s*)",
           "address": 1108416,
@@ -43243,7 +43395,7 @@
           "address": 1191024,
           "offset": 301056,
           "size": 236,
-          "match_percent": 99.7619
+          "match_percent": 100.0
         },
         {
           "name": "_Z19KeepVehicleOnScreenP12GameObject_siii",
@@ -43895,14 +44047,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z13AnimatePlayerP12GameObject_s",
-          "demangled_name": "AnimatePlayer(GameObject_s*)",
-          "address": 1070800,
-          "offset": 180832,
-          "size": 996,
-          "match_percent": 49.6758
-        },
-        {
           "name": "_ZL15MoveAnim_ManageP12GameObject_sfii",
           "demangled_name": "MoveAnim_Manage(GameObject_s*, float, int, int)",
           "address": 1346064,
@@ -44532,22 +44676,6 @@
           "offset": 5360,
           "size": 437,
           "match_percent": 99.67088
-        },
-        {
-          "name": "_Z16MovePlayerSplineP12GameObject_s",
-          "demangled_name": "MovePlayerSpline(GameObject_s*)",
-          "address": 1053472,
-          "offset": 163504,
-          "size": 1752,
-          "match_percent": 94.709946
-        },
-        {
-          "name": "_Z10MovePlayerP12GameObject_s",
-          "demangled_name": "MovePlayer(GameObject_s*)",
-          "address": 1055232,
-          "offset": 165264,
-          "size": 3219,
-          "match_percent": 46.15116
         },
         {
           "name": "_ZL10ShieldCodeP12GameObject_s",
@@ -46009,14 +46137,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z23ObjLookingWithLeftStickP12GameObject_s",
-          "demangled_name": "ObjLookingWithLeftStick(GameObject_s*)",
-          "address": 1091168,
-          "offset": 201200,
-          "size": 55,
-          "match_percent": 74.3125
-        },
-        {
           "name": "_Z20SpaceResetAudioPointv",
           "demangled_name": "SpaceResetAudioPoint()",
           "address": 2332784,
@@ -46346,14 +46466,6 @@
           "offset": 35312,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_Z17ResetPlayerPacketP14PLAYERPACKET_sP15CHARACTERDATA_s",
-          "demangled_name": "ResetPlayerPacket(PLAYERPACKET_s*, CHARACTERDATA_s*)",
-          "address": 1032944,
-          "offset": 142976,
-          "size": 644,
-          "match_percent": 79.80612
         },
         {
           "name": "_Z22FinishStatusPacket_LSWP11WORLDINFO_sP14STATUSPACKET_si",
@@ -60685,22 +60797,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z20DeactivateGameObjectP12GameObject_s",
-          "demangled_name": "DeactivateGameObject(GameObject_s*)",
-          "address": 1035440,
-          "offset": 145472,
-          "size": 246,
-          "match_percent": 99.98148
-        },
-        {
-          "name": "_Z22GameDrawCharacterModelP16CHARACTERMODEL_sP12ANIMPACKET_sP7numtx_sS4_S4_S4_P12GameObject_sj",
-          "demangled_name": "GameDrawCharacterModel(CHARACTERMODEL_s*, ANIMPACKET_s*, numtx_s*, numtx_s*, numtx_s*, numtx_s*, GameObject_s*, unsigned int)",
-          "address": 1079344,
-          "offset": 189376,
-          "size": 3212,
-          "match_percent": 74.09925
-        },
-        {
           "name": "_ZL20LEGO_AllGoldBricksFnv",
           "demangled_name": "LEGO_AllGoldBricksFn()",
           "address": 1155584,
@@ -60746,7 +60842,7 @@
           "address": 1190016,
           "offset": 300048,
           "size": 352,
-          "match_percent": 99.77273
+          "match_percent": 99.60227
         },
         {
           "name": "_Z23Game_WorldInfo_InitMenuP11WORLDINFO_sPiS1_",
@@ -68535,14 +68631,6 @@
           "offset": 24432,
           "size": 146,
           "match_percent": 99.56
-        },
-        {
-          "name": "_Z11SuperWeirdoP12GameObject_s",
-          "demangled_name": "SuperWeirdo(GameObject_s*)",
-          "address": 1091232,
-          "offset": 201264,
-          "size": 95,
-          "match_percent": 68.07692
         },
         {
           "name": "_Z14CheckResetBitsv",
@@ -78825,62 +78913,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/render.o",
       "functions": [
         {
-          "name": "_ZL26DrawWeapon_SetSabreObjectsP12GameObject_siiiiPiS1_",
-          "demangled_name": "DrawWeapon_SetSabreObjects(GameObject_s*, int, int, int, int, int*, int*)",
-          "address": 1028928,
-          "offset": 138960,
-          "size": 505,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z22DrawGameObjectsProcessv",
-          "demangled_name": "DrawGameObjectsProcess()",
-          "address": 1071808,
-          "offset": 181840,
-          "size": 7204,
-          "match_percent": 86.55505
-        },
-        {
-          "name": "_ZL24DrawCharacterAttachmentsP12GameObject_sP7numtx_s",
-          "demangled_name": "DrawCharacterAttachments(GameObject_s*, numtx_s*)",
-          "address": 1082560,
-          "offset": 192592,
-          "size": 1009,
-          "match_percent": 88.187775
-        },
-        {
-          "name": "_ZL11DrawWeaponsP12GameObject_sif",
-          "demangled_name": "DrawWeapons(GameObject_s*, int, float)",
-          "address": 1091424,
-          "offset": 201456,
-          "size": 4100,
-          "match_percent": 74.36808
-        },
-        {
-          "name": "_ZL17DrawParaphernaliaP12GameObject_s",
-          "demangled_name": "DrawParaphernalia(GameObject_s*)",
-          "address": 1095536,
-          "offset": 205568,
-          "size": 12138,
-          "match_percent": 63.84711
-        },
-        {
-          "name": "_Z19DrawGameObjectsDrawi",
-          "demangled_name": "DrawGameObjectsDraw(int)",
-          "address": 1107680,
-          "offset": 217712,
-          "size": 586,
-          "match_percent": 87.24823
-        },
-        {
-          "name": "_Z15DrawGameObjectsv",
-          "demangled_name": "DrawGameObjects()",
-          "address": 1108272,
-          "offset": 218304,
-          "size": 138,
-          "match_percent": 99.935486
-        },
-        {
           "name": "_Z16DrawCameraTargetP7nuvec_s",
           "demangled_name": "DrawCameraTarget(nuvec_s*)",
           "address": 1133568,
@@ -81261,22 +81293,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/terrain.o",
       "functions": [
         {
-          "name": "_ZL17TerrainKillPlayerP12GameObject_siP7nuvec_s.isra.4",
-          "demangled_name": "TerrainKillPlayer(GameObject_s*, int, nuvec_s*) [clone .isra.4]",
-          "address": 1030560,
-          "offset": 140592,
-          "size": 339,
-          "match_percent": 99.988235
-        },
-        {
-          "name": "_Z13TerrainPlayerP12GameObject_s",
-          "demangled_name": "TerrainPlayer(GameObject_s*)",
-          "address": 1058464,
-          "offset": 168496,
-          "size": 12323,
-          "match_percent": 25.137152
-        },
-        {
           "name": "_Z15LoadTerrainFileP11WORLDINFO_s",
           "demangled_name": "LoadTerrainFile(WORLDINFO_s*)",
           "address": 4665072,
@@ -81290,7 +81306,7 @@
           "address": 4665376,
           "offset": 3775408,
           "size": 455,
-          "match_percent": 99.46602
+          "match_percent": 99.61165
         },
         {
           "name": "_Z14LoadBridgeFileP11WORLDINFO_s",
@@ -81322,7 +81338,7 @@
           "address": 5210256,
           "offset": 4320288,
           "size": 447,
-          "match_percent": 92.2619
+          "match_percent": 92.14286
         }
       ]
     },
@@ -82655,14 +82671,6 @@
           "offset": 8208,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_Z22ConfigureComplexShadowP12GameObject_s",
-          "demangled_name": "ConfigureComplexShadow(GameObject_s*)",
-          "address": 1079152,
-          "offset": 189184,
-          "size": 178,
-          "match_percent": 99.52631
         },
         {
           "name": "_Z14Shadow_SetModev",
@@ -85364,14 +85372,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z16AnakinGreenSabreP12GameObject_s",
-          "demangled_name": "AnakinGreenSabre(GameObject_s*)",
-          "address": 1079024,
-          "offset": 189056,
-          "size": 117,
-          "match_percent": 100.0
-        },
-        {
           "name": "_ZL25VaderA_StartCollapseStageP11WORLDINFO_s",
           "demangled_name": "VaderA_StartCollapseStage(WORLDINFO_s*)",
           "address": 2154144,
@@ -85561,7 +85561,7 @@
           "address": 2161056,
           "offset": 1271088,
           "size": 517,
-          "match_percent": 99.23729
+          "match_percent": 99.644066
         },
         {
           "name": "_Z12TempleA_InitP11WORLDINFO_s",
@@ -85585,7 +85585,7 @@
           "address": 2163024,
           "offset": 1273056,
           "size": 145,
-          "match_percent": 99.97222
+          "match_percent": 99.55556
         },
         {
           "name": "_Z11VaderA_InitP11WORLDINFO_s",

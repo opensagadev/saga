@@ -336,13 +336,7 @@ void RndrTexQuad(f32 x, f32 y, f32 width, f32 height, i32 colour, numtl_s *mater
     NuPrim2DEnd();
 }
 
-i32 SuperWeirdo(GameObject_s *object) {
-    if ((object->apiobj.flags_low & 0x80) != 0 && (Game.field_0x7c26[1] & 1) != 0 && CharacterCustomiser != NULL &&
-        (object->id == CharacterCustomiser->character_ids[0] || object->id == CharacterCustomiser->character_ids[1])) {
-        return 1;
-    }
-    return 0;
-}
+i32 SuperWeirdo(GameObject_s *object);
 
 void bgProcClose() {
 }

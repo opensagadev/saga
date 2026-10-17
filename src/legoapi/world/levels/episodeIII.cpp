@@ -57,19 +57,7 @@ i32 boulder_blowup_type = -1;
 
 void Boulder_Move(PART_s *, f32);
 void Boulder_Kill(PART_s *, i32);
-struct VADERA_s {
-    GIZAIMESSAGE_s *in_control_room_message;
-    GIZAIMESSAGE_s *ceiling_collapse_message;
-    GIZAIMESSAGE_s *timer_message;
-    f32 timer;
-    u16 count;
-    i16 subtitle;
-    GIZFORCE_s *forces[4];
-    AILOCATOR_s *big_jump_locator;
-    i32 collapse_started;
-    u8 reset_flag;
-    u8 reserved_2d[0x03];
-};
+#include "legoapi/world/levels/episodeIII_types.h"
 DECOMP_ASSERT(sizeof(VADERA_s) == 0x30, "VADERA_s size");
 DECOMP_ASSERT(offsetof(VADERA_s, big_jump_locator) == 0x24, "VADERA_s locator offset");
 
@@ -79,18 +67,7 @@ static u8 vader_b_playersDead;               // Vader B player-death flag
 
 static void VaderA_StartCollapseStage(WORLDINFO_s *world);
 
-struct CRUISERCNETPACKET_s {
-    i16 free_palpatine;
-    i16 dooku_fight;
-};
 
-struct CRUISERC_s {
-    GIZAIMESSAGE_s *dooku_fight;
-    GameObject_s *count_dooku;
-    GIZAIMESSAGE_s *free_palpatine;
-    GameObject_s *palpatine;
-    AILOCATOR_s *palpatine_locator;
-};
 DECOMP_ASSERT(offsetof(CRUISERC_s, count_dooku) == 4, "CRUISERC_s Dooku offset");
 
 extern "C" {
@@ -98,11 +75,6 @@ extern "C" {
 }
 static CRUISERC_s cruiser_c;
 
-struct CRUISERDNETPACKET_s {
-    f32 frame;
-    f32 speed;
-    u32 flags;
-};
 DECOMP_ASSERT(sizeof(CRUISERDNETPACKET_s) == 12, "Cruiser D packet size");
 
 extern "C" {
@@ -459,14 +431,7 @@ void KashyyykD_Reset(WORLDINFO_s *world) {
     }
 }
 
-i32 AnakinGreenSabre(GameObject_s *obj) {
-    i32 result = 0;
-    if (FreePlay == 0 && obj->id == id_ANAKINPADAWAN && WORLD->area != NULL) {
-        if (WORLD->area == JEDI_ADATA || WORLD->area == DOOKU_ADATA)
-            result = 1;
-    }
-    return result;
-}
+i32 AnakinGreenSabre(GameObject_s *obj);
 
 void KashyyykA_Update(WORLDINFO_s *) {
 }
@@ -564,11 +529,6 @@ void TempleC_AlwaysUpdate(WORLDINFO_s *) {
 
 void *vadera_netpacket;
 
-struct VADERANETPACKET_s {
-    u16 count;
-    i16 subtitle;
-    f32 timer;
-};
 
 static NUVEC vadar_cam_pos = {0.0f, 0.88f, -12.4f};
 static NUVEC vadar_cam_tgt = {0.0f, 2.0f, -17.4f};

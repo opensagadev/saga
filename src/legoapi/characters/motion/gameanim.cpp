@@ -487,72 +487,7 @@ static void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_
     }
 }
 
-void AnimatePlayer(GameObject_s *object) {
-    ANIMPACKET_s &packet = object->apiobj.anim_packet;
-    packet.previous_animation = packet.animation_index;
-    object->mini_animation.previous_animation = object->mini_animation.animation_index;
-    CHARACTERMODEL_s *model = object->apiobj.character_model;
-
-    if ((object->apiobj.field_0x1f4 & APIOBJECT_STATE_FLAG_IGNORE_DOORS) == 0) {
-        object->apiobj.character_data->animate_fn(object);
-    }
-
-    if (object->ai.animation_override_from != -1 &&
-        ((object->ai.animation_override_from == 0xe9 && object->character_context != 0x1c) ||
-         object->ai.animation_override_from == packet.requested_animation)) {
-        packet.requested_animation = object->ai.animation_override_to;
-    }
-
-    if (model == NULL ||
-        (object->apiobj.field_0x287 != 0 && (object->field_0x1018 == 0.0f || object->apiobj.field_0x287 == 1))) {
-        return;
-    }
-
-    const f32 direction = (object->field_0xefd & GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS) != 0 ? -1.0f : 1.0f;
-    f32 movement_speed;
-    if (object->apiobj.character_model->model_data_b[1] != NULL) {
-        movement_speed = object->pad_gamepad->animation_input_magnitude;
-        if (movement_speed > 0.0f && object->id == id_GONKDROID && Cheat_IsOn(8) == 0)
-            movement_speed = object->apiobj.character_data->game_character->walk_speed;
-    } else if ((object->apiobj.character_data->game_character->flags_090 &
-                GAMECHARACTER_FLAG_ANIMATION_SPEED_FROM_VELOCITY) != 0) {
-        const f32 forward_speed = object->apiobj.velocity.x * object->facing_direction.x +
-                                  object->apiobj.velocity.z * object->facing_direction.z;
-        movement_speed = forward_speed < 0.0f ? 0.0f : forward_speed;
-    } else {
-        movement_speed = object->pad_gamepad->input_magnitude;
-    }
-
-    // The original passes signed movement into UpdateAnimPacket.  Clips with
-    // CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT (including the acrobatic
-    // jump clips) start at their end frame and play backwards while the
-    // character is travelling backwards.
-    f32 time_multiplier = 1.0f;
-    if (object->character_context == 0x2d && object->field_0x788 != NULL)
-        time_multiplier = GizBuildItMul(object);
-    UpdateAnimPacket(model, &packet, (FRAMETIME * 30.0f) * time_multiplier, movement_speed * direction,
-                     time_multiplier * FRAMETIME,
-                     object->apiobj.character_data->game_character->backwards_speed_multiplier);
-    if ((packet.flags & ANIMPACKET_FLAG_ANIMATION_CHANGED) != 0 &&
-        (packet.blending != 0 ? packet.blend_animation_b : packet.animation_index) == 0x5f) {
-        f32 *time = packet.blending != 0 ? &packet.blend_target_time : &packet.current_time;
-        const f32 duration = AnimDuration(object->id, 0x5f, 0.0f, 0.0f, 0);
-        i32 count = static_cast<i32>(duration / 0.3f);
-        if (NuFmod(duration, 3.0f) > 0.15f)
-            ++count;
-        const i32 phase = qrand() / (0xffff / count + 1);
-        CHARACTERMODEL_s *current_model = object->apiobj.character_model;
-        const f32 start =
-            static_cast<f32>(phase) *
-                (0.3f * static_cast<CHARACTERANIM_s *>(current_model->model_data_a[0x5f])->playback_rate) +
-            1.0f;
-        if (NuAnimEndFrame(current_model->model_data_b[0x5f]) > start)
-            *time = start;
-        object->field_0xe21 = (object->field_0xe21 & ~0x40) | ((phase & 1) << 6);
-    }
-    AutoWeaponOnOff(object);
-    AddFootSteps(object);
-}
+void AnimatePlayer(GameObject_s *object);
 
 void Animate_BEAST(GameObject_s *object) {
     ANIMPACKET_s &packet = object->apiobj.anim_packet;

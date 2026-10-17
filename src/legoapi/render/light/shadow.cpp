@@ -62,19 +62,7 @@ void InitShadowLights() {
 void RenderShadowLights(i32) {
 }
 
-void ConfigureComplexShadow(GameObject_s *object) {
-    NUVEC shadow_direction;
-    if (object != NULL) {
-        shadow_direction.x = 65536.0f;
-        shadow_direction.y = object->apiobj.collision_position.y;
-        shadow_direction.z = object->apiobj.field_0x218 - 0.1f;
-    } else {
-        shadow_direction = {0.0f, -6.25f, 0.0f};
-    }
-
-    const f32 shadow_distance = VehicleArea != 0 ? 150.0f : 30.0f;
-    NuRndrShadowDirCol(&shadow_direction, 0x17000000, shadow_distance, shadow_distance);
-}
+void ConfigureComplexShadow(GameObject_s *object);
 
 void ResetShadowMapRendering() {
 }

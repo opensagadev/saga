@@ -350,12 +350,7 @@ void NewRumbleAllPlayers(float strength, float duration, i32 frames, i32) {
     }
 }
 
-i32 ObjLookingWithLeftStick(GameObject_s *object) {
-    if (object->character_id_0x7a5 == 0x4d) {
-        return object->field_0x7a3 == 0 ? 2 : 1;
-    }
-    return object->character_id_0x7a5 == 0x52 ? 2 : 1;
-}
+i32 ObjLookingWithLeftStick(GameObject_s *object);
 
 void PerformPauseButtonStuff() {
     if (WORLD == NULL) {

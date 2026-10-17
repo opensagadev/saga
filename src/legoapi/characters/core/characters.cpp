@@ -143,7 +143,7 @@ extern "C" i32 waiting_for_character;
 extern f32 WaitingForCharacterTime;
 
 extern "C" {
-    i32 hub_character_ready = -1;
+extern i32 hub_character_ready;
 }
 
 APICHARACTERMODELLIST_s PermModelList[] = {{-1, 0}};
@@ -668,31 +668,7 @@ extern "C" {
 void Move_CHARACTER(GameObject_s *);
 void Animate_CHARACTER(GameObject_s *);
 
-void FixUpCharacters(CHARFIXUP *fixup) {
-    for (i32 i = 0; i < CHARCOUNT; ++i) {
-        GCDataList[i] = GCDATA_DEFAULT;
-
-        CHARACTERDATA &character = CDataList[i];
-        if (character.field0_0x0 == -1) {
-            character.field0_0x0 = tUNKNOWN;
-        }
-        if (character.move_fn == NULL) {
-            character.move_fn = Move_CHARACTER;
-        }
-        if (character.animate_fn == NULL) {
-            character.animate_fn = Animate_CHARACTER;
-        }
-    }
-
-    if (fixup != NULL) {
-        while (fixup->name != NULL) {
-            if (fixup->id != NULL) {
-                *fixup->id = (i16)CharIDFromName(fixup->name);
-            }
-            ++fixup;
-        }
-    }
-}
+void FixUpCharacters(CHARFIXUP *fixup);
 
 void PostAnimate_FETT(GameObject_s *object) {
     if (object->apiobj.field_0x287 != 0) {
@@ -749,43 +725,7 @@ void FinishWeirdoNames(i32 which) {
     Game.customizer[1].name[15] = '\0';
 }
 
-GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle) {
-    if (Mission_Active(NULL) != NULL)
-        return NULL;
-    if (name == NULL)
-        return NULL;
-    GameObject_s *object = GetNamedGameObject(WORLD->ai_sys, name);
-    if (object == NULL || (object->apiobj.flags_high & 0x10) != 0)
-        return NULL;
-    if (FreePlay != 0 && (object->apiobj.field_0x1f4 & 0x400) == 0)
-        return NULL;
-    if (object->ai.field_0x134 != 0xff) {
-        ResetAICreature(object, WORLD->ai_sys);
-    } else {
-        object->apiobj.flags_high |= 0x10;
-        AIScriptSetBaseScriptStateByName(reinterpret_cast<AISCRIPTPROCESS *>(&object->ai), const_cast<char *>("Base"));
-        if (position != NULL) {
-            object->apiobj.position = *position;
-            object->apiobj.field_0x276 = angle;
-            object->apiobj.facing_angle = angle;
-            object->apiobj.movement_facing_angle = angle;
-            AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, &object->ai, 0xff, 1);
-            object->apiobj.initial_position = object->apiobj.position;
-            object->apiobj.collision_position = object->apiobj.position;
-            plr_lastpos = object->apiobj.position;
-            object->apiobj.start_position = object->apiobj.position;
-            object->apiobj.respawn_position = object->apiobj.position;
-            object->apiobj.last_safe_position = object->apiobj.position;
-            object->saved_position = object->apiobj.position;
-            object->reset_velocity = v000;
-            object->apiobj.velocity = v000;
-            InitSurfaceInfo(object);
-            SetObjOnSurface(object, 0);
-        }
-    }
-    LightGameObject(object, WORLD->rtl_set);
-    return object;
-}
+GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle);
 
 extern i32 addcreature_override_id_check;
 
@@ -797,25 +737,8 @@ extern void GameObjectOrigin(GameObject_s *obj);
 extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
 extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 
-static u32 LayerBit(u8 layer) {
-    return 1u << layer;
-}
 
-static void SetLayers_BOB(GameObject_s *object) {
-    i32 head_layer[6] = {1, 2, 3, 21, 22, 23};
-    i32 body_layer[8] = {5, 6, 7, 8, 9, 10, 16, 17};
-    i32 legs_layer[3] = {11, 12, 15};
-    i32 arms_layer[2] = {13, 14};
-    i32 hands_layer[2] = {19, 20};
-    object->random_layer_variant = qrand() <= 0x7fff;
-    qrand();
-    object->field_0x1054 = 1;
-    object->field_0x1054 |= 1u << head_layer[qrand() / 0x2aab];
-    object->field_0x1054 |= 1u << body_layer[qrand() / 0x2000];
-    object->field_0x1054 |= 1u << legs_layer[qrand() / 0x5556];
-    object->field_0x1054 |= 1u << arms_layer[qrand() / 0x8000];
-    object->field_0x1054 |= 1u << hands_layer[qrand() / 0x8000];
-}
+static void SetLayers_BOB(GameObject_s *object);
 
 // Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
@@ -825,137 +748,9 @@ static void SetLayers_BOB(GameObject_s *object) {
 #endif
 static MOSEISLEY_LAYERS_ATTR void SetLayers_MOSEISLEYCITIZEN(u32 *layers)
     __asm__("_ZL26SetLayers_MOSEISLEYCITIZENP12GameObject_s.isra.2");
-static void SetLayers_MOSEISLEYCITIZEN(u32 *layers) {
-    static const u8 hat_layers[5] = {0, 0, 0, 7, 14};
-    static const u8 head_layers[5] = {20, 20, 8, 8, 4};
-    static const u8 body_layers[3] = {3, 9, 19};
-    static const u8 arm_layers[3] = {1, 12, 15};
-    static const u8 hand_layers[3] = {2, 13, 16};
-    static const u8 waist_layers[3] = {6, 10, 17};
-    static const u8 leg_layers[3] = {5, 11, 18};
+static void SetLayers_MOSEISLEYCITIZEN(u32 *layers);
 
-    *layers = 0;
-    *layers |= LayerBit(hat_layers[qrand() / 0x3334]);
-    *layers |= LayerBit(head_layers[qrand() / 0x3334]);
-    *layers |= LayerBit(body_layers[qrand() / 0x5556]);
-    *layers |= LayerBit(arm_layers[qrand() / 0x5556]);
-    *layers |= LayerBit(hand_layers[qrand() / 0x5556]);
-    *layers |= LayerBit(waist_layers[qrand() / 0x5556]);
-    *layers |= LayerBit(leg_layers[qrand() / 0x5556]);
-}
-
-i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
-    addcreature_override_id_check = 0;
-    if (id < 0) {
-        return 0;
-    }
-    if (id > 0x153 || apicharsys->playermodelids[id] == -1) {
-        return 0;
-    }
-
-    CHARACTERDATA *character_data = &apicharsys->char_data[id];
-    obj->apiobj.character_data = character_data;
-    GAMECHARACTERDATA *game_character_data = static_cast<GAMECHARACTERDATA *>(character_data->field11_0x24);
-    obj->field_0x1054 = game_character_data->layer_mask;
-    obj->apiobj.field_0x1f4 = 0;
-    obj->field_0x107c = -1;
-    memset(obj->player_packet, 0, 0x798);
-    obj->apiobj.field_0x27c = -1;
-
-    const NUVEC start_position = *Player_StartPos(obj);
-    if (param != 0) {
-        obj->apiobj.field_0x1f4 |= 0x4002;
-    } else {
-        obj->apiobj.field_0x1f4 |= 2;
-    }
-    if ((WORLD->current_level->flags & 0x40000) == 0) {
-        obj->apiobj.field_0x1f4 |= 0x40;
-    }
-
-    obj->pad_gamepad = GamePad_Allocate();
-    obj->pad_gamepad->input_mode = 1;
-    const u8 hitpoints = obj->apiobj.character_data->game_character->hitpoints;
-    obj->hitpoints = hitpoints;
-    obj->current_hp = hitpoints;
-    ResetPlayerPacket(reinterpret_cast<PLAYERPACKET_s *>(obj->player_packet),
-                      reinterpret_cast<CHARACTERDATA_s *>(obj->apiobj.character_data));
-
-    obj->apiobj.movement_direction = v000;
-    const u8 field_0xf5 = obj->apiobj.character_data->game_character->field_0xf5;
-    obj->field_0xe38 = 4;
-    obj->field_0xe37 = field_0xf5;
-    obj->id = static_cast<i16>(id);
-    obj->apiobj.character_model = &apicharsys->models[apicharsys->playermodelids[id]];
-    obj->suit = Suit_GetDefault(id);
-    obj->ai.field_0x134 = 0xff;
-    SetGameObjectCharacterData(obj);
-
-    obj->apiobj.start_position = start_position;
-    obj->apiobj.position = obj->apiobj.start_position;
-    obj->field_0x1018 = 0.5f;
-    obj->apiobj.initial_position = start_position;
-    obj->apiobj.collision_position = obj->apiobj.initial_position;
-
-    GetTopBot(obj);
-    GameObjectDimensions(obj);
-    obj->apiobj.anim_packet.animation_index = 1;
-
-    i32 reset_animation = 1;
-    if (obj->apiobj.character_model != NULL) {
-        void **animation_table = obj->apiobj.character_model->model_data_b;
-        if (animation_table[1] == NULL) {
-            for (i32 i = 0; i < 0xe9; i++) {
-                if (animation_table[i] != NULL) {
-                    obj->apiobj.anim_packet.animation_index = static_cast<u16>(i);
-                    reset_animation = i;
-                    break;
-                }
-            }
-        }
-    }
-    ResetAnimPacket(&obj->apiobj.anim_packet, reset_animation);
-    ResetCharacterIdle(obj, 2, GetDefaultIdle(obj));
-    ResetLights(&obj->apiobj.position, &obj->light_data, WORLD->rtl_set);
-
-    obj->ai.mover_height = obj->apiobj.field_0x1dc + default_mover_extra;
-    GameObjectOrigin(obj);
-    obj->apiobj.last_safe_position = obj->apiobj.position;
-    obj->saved_position = obj->apiobj.position;
-
-    game_character_data = obj->apiobj.character_data->game_character;
-    obj->field_0xf01 = (obj->field_0xf01 & ~8) | (((game_character_data->flags_090 >> 17) & 1) << 3);
-    if (obj->id == id_MOSEISLEYCITIZEN) {
-        SetLayers_MOSEISLEYCITIZEN(&obj->field_0x1054);
-    } else if (obj->id == id_CANTINAALIEN) {
-        static const u8 head_layers[3] = {0, 3, 6};
-        static const u8 body_layers[3] = {1, 4, 7};
-        static const u8 leg_layers[3] = {2, 5, 8};
-        obj->field_0x1054 = 0;
-        obj->field_0x1054 |= LayerBit(head_layers[qrand() / 0x5556]);
-        obj->field_0x1054 |= LayerBit(body_layers[qrand() / 0x5556]);
-        obj->field_0x1054 |= LayerBit(leg_layers[qrand() / 0x5556]);
-    } else if (obj->id == id_CLOUDCITYCITIZEN) {
-        static const u8 head_layers[3] = {1, 5, 7};
-        static const u8 body_layers[3] = {2, 3, 6};
-        static const u8 leg_layers[3] = {0, 4, 8};
-        obj->field_0x1054 = 0;
-        obj->field_0x1054 |= LayerBit(head_layers[qrand() / 0x5556]);
-        obj->field_0x1054 |= LayerBit(body_layers[qrand() / 0x5556]);
-        obj->field_0x1054 |= LayerBit(leg_layers[qrand() / 0x5556]);
-        obj->field_0xf01 = (obj->field_0xf01 & ~8) | (((obj->field_0x1054 >> 7) & 1) << 3);
-    } else if (obj->id == id_BOB) {
-        SetLayers_BOB(obj);
-    } else if (obj->id == id_GEONOSIAN) {
-        obj->random_layer_variant = qrand() <= 0x7fff;
-    }
-
-    if ((obj->apiobj.character_data->game_character->flags_090 & 0x8000) != 0) {
-        obj->apiobj.field_0x1f4 |= 0x20000;
-    } else {
-        obj->apiobj.field_0x1f4 &= ~0x20000;
-    }
-    return 1;
-}
+i32 InitCreature(GameObject_s *obj, i32 id, i32 param);
 
 void Shards_HandleLostObj(WORLDINFO_s *, GameObject_s *);
 void LoseHelmet(GameObject_s *, i32, i32);
@@ -969,301 +764,16 @@ i32 SetObjOnSurface(GameObject_s *, i32);
 void GizForce_ResetLOS(GameObject_s *);
 i32 StartSlide(GameObject_s *, i32);
 
-i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
-    if (id == old_id)
-        return 0;
-    if (id < 0 || id >= CHARCOUNT || apicharsys->playermodelids[id] == -1)
-        return 0;
-    Shards_HandleLostObj(WORLD, object);
-    if (VehicleArea == 0)
-        AddGameDebris(WORLD->debris_sys, 0x5c, &object->apiobj.collision_position);
-    i8 context = object->character_context;
-    i16 lean = object->movement_lean_angle;
-    u32 lean_enabled = object->apiobj.character_data->model_flags & 0x2000;
-    LoseHelmet(object, 0, 1);
-    DestroySnakeBody(object);
-    object->id = id;
-    u8 health = object->current_hp;
-    NUVEC velocity = object->apiobj.velocity;
-    u8 hitpoints = object->hitpoints;
-    u8 saved_flags = (object->apiobj.flags_high >> 5) & 1;
-    object->apiobj.character_model = &apicharsys->models[apicharsys->playermodelids[id]];
-    object->apiobj.character_data = &apicharsys->char_data[id];
-    object->takeover_source = NULL;
-    object->suit = Suit_GetDefault(id);
-    u32 saved_f14 = object->field_0xf14;
-    u32 saved_f20 = object->field_0xf20;
-    u8 saved_efe = (object->field_0xefe >> 5) & 1;
-    u8 route = object->ai.current_route;
-    u8 next_route = object->ai.next_route;
-    AIPATHINFO path = object->ai.path_info;
-    u32 frame_state = object->ai.frame_state;
-    InitPlayerAI(object);
-    object->field_0xefe = (object->field_0xefe & ~0x20) | (saved_efe << 5);
-    object->field_0xf20 = saved_f20;
-    object->ai.next_route = next_route;
-    object->ai.path_info = path;
-    object->field_0xf14 = saved_f14;
-    object->field_0x1004 = 1.0f;
-    object->ai.current_route = route;
-    object->ai.frame_state = frame_state;
-    GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
-    object->field_0x1054 = data->layer_mask;
-    object->field_0xe37 = data->field_0xf5;
-    object->field_0xe38 = 4;
-    Player_ClearContext(object, 1);
-    ResetPlayerMoves(object);
-    SetGameObjectCharacterData(object);
-    ResetAnimPacket(&object->apiobj.anim_packet, -1);
-    Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
-    GetTopBot(object);
-    GameObjectDimensions(object);
-    object->hud_icon_timer = 2.0f;
-    object->input_toggle_hold_time = TOGGLEHOLDTIME;
-    object->field_0xefc |= 0x80;
-    InitSurfaceInfo(object);
-    i32 on_surface = SetObjOnSurface(object, 1);
-    GizForce_ResetLOS(object);
-    object->field_0xefe &= ~8;
-    object->current_hp = health;
-    object->hitpoints = hitpoints;
-    object->field_0xef0 = 0;
-    object->pause_context_state = 0;
-    object->apiobj.flags_high = (object->apiobj.flags_high & ~0x20) | (saved_flags << 5);
-    ResetMiniAnimPacket(&object->mini_animation, -1);
-    object->weapon_scale = (object->field_0xe22 & 1) != 0 ? 1.0f : 0.0f;
-    object->field_0xe32 = 0;
-    if (!on_surface)
-        object->apiobj.velocity.y = velocity.y;
-    else
-        object->ground_contact_grace_timer = 0.2f;
-    if (context == 0x33 && StartSlide(object, 0)) {
-        object->apiobj.velocity.x = velocity.x;
-        object->apiobj.velocity.z = velocity.z;
-    }
-    if (object->apiobj.velocity.y == 0.0f)
-        object->apiobj.velocity.y = -0.1f;
-    if (lean_enabled && (object->apiobj.character_data->model_flags & 0x2000) != 0)
-        object->movement_lean_angle = lean;
-    data = apicharsys->char_data[object->id].game_character;
-    // Read everything before the stores so the four-float copy vectorizes like retail.
-    const f32 viewdistance = data->viewdistance;
-    const f32 heardistance = data->heardistance;
-    const f32 maxviewheight = data->maxviewheight;
-    const f32 minviewheight = data->minviewheight;
-    const u32 flags_090_bit17 = (object->apiobj.character_data->game_character->flags_090 >> 17) & 1;
-    object->apiobj.viewdistance = viewdistance;
-    object->apiobj.heardistance = heardistance;
-    object->apiobj.maxviewheight = maxviewheight;
-    object->apiobj.minviewheight = minviewheight;
-    object->field_0xf01 = (object->field_0xf01 & ~8) | (flags_090_bit17 << 3);
-    if (object->id == id_MOSEISLEYCITIZEN) {
-        SetLayers_MOSEISLEYCITIZEN(&object->field_0x1054);
-    } else if (object->id == id_CANTINAALIEN) {
-        static const u8 head_layer[3] = {0, 3, 6};
-        static const u8 body_layer[3] = {1, 4, 7};
-        static const u8 legs_layer[3] = {2, 5, 8};
-        object->field_0x1054 = 0;
-        object->field_0x1054 |= LayerBit(head_layer[qrand() / 0x5556]);
-        object->field_0x1054 |= LayerBit(body_layer[qrand() / 0x5556]);
-        object->field_0x1054 |= LayerBit(legs_layer[qrand() / 0x5556]);
-    } else if (object->id == id_CLOUDCITYCITIZEN) {
-        static const u8 head_layer[3] = {1, 5, 7};
-        static const u8 body_layer[3] = {2, 3, 6};
-        static const u8 legs_layer[3] = {0, 4, 8};
-        object->field_0x1054 = 0;
-        object->field_0x1054 |= LayerBit(head_layer[qrand() / 0x5556]);
-        object->field_0x1054 |= LayerBit(body_layer[qrand() / 0x5556]);
-        object->field_0x1054 |= LayerBit(legs_layer[qrand() / 0x5556]);
-        object->field_0xf01 = (object->field_0xf01 & ~8) | (((object->field_0x1054 >> 7) & 1) << 3);
-    } else if (object->id == id_BOB) {
-        SetLayers_BOB(object);
-    } else if (object->id == id_GEONOSIAN) {
-        object->random_layer_variant = qrand() <= 0x7fff;
-    }
-    if ((object->apiobj.character_data->game_character->flags_090 & 0x8000) != 0)
-        object->apiobj.field_0x1f4 |= 0x20000;
-    else
-        object->apiobj.field_0x1f4 &= ~0x20000;
-    return 1;
-}
+i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32);
 
 
-i32 GetDefaultIdle(GameObject_s *obj) {
-    CHARACTERDATA *character = obj->apiobj.character_data;
-    DefaultIdleCharacterData *game_character = static_cast<DefaultIdleCharacterData *>(character->field11_0x24);
+i32 GetDefaultIdle(GameObject_s *obj);
 
-    i32 animation;
-    i32 table_offset;
-    if (game_character->use_standard_idle != 0) {
-        animation = 25;
-        table_offset = 100;
-    } else {
-        const u32 alternate = character->model_flags & 0x80;
-        table_offset = alternate != 0 ? 472 : 100;
-        animation = alternate != 0 ? 118 : 25;
-    }
-    if (obj->batarang != NULL && *(reinterpret_cast<u8 *>(obj->batarang) + 0x7d) != 0) {
-        return 151;
-    }
+void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation);
 
-    u8 *animation_table = reinterpret_cast<u8 *>(obj->apiobj.character_model->model_data_b);
-    void *entry = *reinterpret_cast<void **>(animation_table + table_offset);
-    if ((*reinterpret_cast<i32 *>(animation_table + 4) == 0 || (obj->field_0xe22 & 1) != 0 || obj->field_0xe32 == 1) &&
-        entry != NULL) {
-        return animation;
-    }
-    return 1;
-}
+static void NewCharacterIdle(GameObject_s *object, i32 default_idle);
 
-void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation) {
-    // Animation 151 belongs to the held-batarang override and deliberately
-    // leaves the ordinary idle scheduler untouched.
-    if (animation == 151) {
-        return;
-    }
-
-    object->idle_animation = static_cast<i16>(animation);
-    object->idle_animation_time = 0.0f;
-
-    CHARACTERMODEL_s *model = object->apiobj.character_model;
-    CHARACTERANIM_s *animation_info;
-    i32 repetitions;
-    // The signed > 0 test (rather than != 0) keeps the retail branch layout.
-    if (model->model_data_b[object->idle_animation] != NULL &&
-        (animation_info = static_cast<CHARACTERANIM_s *>(model->model_data_a[object->idle_animation]),
-         repetitions = static_cast<u8>(animation_info->minimum_repetitions)) > 0) {
-        const i32 maximum = static_cast<u8>(animation_info->maximum_repetitions);
-        if (repetitions < maximum) {
-            repetitions += qrand() / (0xffff / (maximum - repetitions) + 1);
-        }
-        object->idle_animation_limit =
-            AnimDuration(object->id, object->idle_animation, 0.0f, 0.0f, 0) * repetitions - animduration_blendouttime;
-    } else {
-        object->idle_animation_limit = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 7.0f + 8.0f;
-    }
-
-    if (mode > 0) {
-        object->idle_total_time = 0.0f;
-        if (mode != 1) {
-            object->previous_idle_animation = -1;
-        }
-    }
-}
-
-static void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
-    CHARACTERDATA *character = object->apiobj.character_data;
-    GAMECHARACTERDATA *game_character = static_cast<GAMECHARACTERDATA *>(character->field11_0x24);
-    const i32 alternate_idle = game_character->field275_0x116 == 0 && (character->model_flags & 0x80) != 0 ? 118 : 25;
-
-    i32 candidates[233];
-    i32 candidate_count = 0;
-    CHARACTERMODEL_s *model = object->apiobj.character_model;
-    for (i32 animation = 0; animation < 233; ++animation) {
-        if (model->model_data_b[animation] == NULL) {
-            continue;
-        }
-        CHARACTERANIM_s *info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
-        if ((info->flags & 0x10) == 0) {
-            continue;
-        }
-        if (__builtin_expect(alternate_idle == default_idle, 0)) {
-            if ((info->flags & 0x800) != 0) {
-                candidates[candidate_count++] = animation;
-            }
-        } else if ((info->flags & 0x800) == 0) {
-            candidates[candidate_count++] = animation;
-        }
-    }
-
-    if (__builtin_expect(candidate_count == 0, 0)) {
-        ResetCharacterIdle(object, 0, default_idle);
-        return;
-    }
-
-    if (candidate_count != 1) {
-        do {
-            object->idle_animation = static_cast<i16>(candidates[qrand() / (0xffff / candidate_count + 1)]);
-        } while (object->idle_animation == object->previous_idle_animation);
-    } else {
-        object->idle_animation = static_cast<i16>(candidates[0]);
-    }
-
-    CHARACTERANIM_s *info =
-        static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[object->idle_animation]);
-    i32 repetitions = static_cast<u8>(info->minimum_repetitions);
-    if (repetitions == 0) {
-        repetitions = 1;
-    } else {
-        const i32 maximum = static_cast<u8>(info->maximum_repetitions);
-        if (maximum != 0 && maximum > repetitions) {
-            repetitions += qrand() / (0xffff / (maximum - repetitions) + 1);
-        }
-    }
-    object->previous_idle_animation = object->idle_animation;
-    if (repetitions > 1 &&
-        (static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[object->idle_animation])->flags &
-         2) == 0) {
-        repetitions = 1;
-    }
-
-    object->idle_animation_time = 0.0f;
-    const f32 duration = AnimDuration(object->id, object->idle_animation, 0.0f, 0.0f, 0);
-    object->idle_animation_limit = duration * repetitions - animduration_blendouttime;
-}
-
-void UpdateCharacterIdle(GameObject_s *object) {
-    if (object->apiobj.character_model == NULL) {
-        return;
-    }
-
-    CHARACTERDATA *character = object->apiobj.character_data;
-    GAMECHARACTERDATA *game_character = static_cast<GAMECHARACTERDATA *>(character->field11_0x24);
-    const i32 alternate_idle = game_character->field275_0x116 == 0 && (character->model_flags & 0x80) != 0 ? 118 : 25;
-    ANIMPACKET_s &packet = object->apiobj.anim_packet;
-    const i16 requested = packet.requested_animation;
-
-    i32 idle;
-    if (requested == 1 && packet.previous_animation == alternate_idle) {
-        idle = 1;
-    } else if (requested == alternate_idle && packet.previous_animation == 1) {
-        idle = alternate_idle;
-    } else if (requested != 1 && requested != alternate_idle) {
-        idle = GetDefaultIdle(object);
-    } else {
-        idle = -1;
-    }
-    if (idle != -1) {
-        ResetCharacterIdle(object, 1, idle);
-        return;
-    }
-
-    if (packet.requested_animation == 1) {
-        object->idle_total_time += FRAMETIME;
-        object->idle_animation_time += FRAMETIME;
-        if (object->idle_animation_time >= object->idle_animation_limit) {
-            if (object->idle_animation == 1) {
-                NewCharacterIdle(object, 1);
-            } else {
-                ResetCharacterIdle(object, 1, 1);
-            }
-        }
-    } else if (packet.requested_animation == alternate_idle) {
-        object->idle_total_time += FRAMETIME;
-        object->idle_animation_time += FRAMETIME;
-        if (object->idle_animation_time >= object->idle_animation_limit) {
-            if (object->idle_animation == alternate_idle) {
-                NewCharacterIdle(object, alternate_idle);
-            } else {
-                ResetCharacterIdle(object, 1, alternate_idle);
-            }
-        }
-    } else {
-        ResetCharacterIdle(object, 1, GetDefaultIdle(object));
-        return;
-    }
-    packet.requested_animation = object->idle_animation;
-}
+void UpdateCharacterIdle(GameObject_s *object);
 
 void UpdateCharacterIDs() {
     const u16 count = ShopCollection.count_y;
@@ -1336,48 +846,9 @@ void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 g
 
 void DeactivateGameObject(GameObject_s *);
 
-void DeactivateCharacter(char *name) {
-    if (Mission_Active(NULL) != NULL || name == NULL)
-        return;
-    GameObject_s *object = GetNamedGameObject(WORLD->ai_sys, name);
-    if (object != NULL && (FreePlay == 0 || (object->apiobj.field_0x1f4 & 0x400) != 0)) {
-        DeactivateGameObject(object);
-    }
-}
+void DeactivateCharacter(char *name);
 
-void LoadSingleCharacter(bgprocinfo_s *) {
-    APICHARACTERMODELLIST_s list[2] = {
-        {static_cast<i16>(waiting_for_character), 1},
-        {-1, 0},
-    };
-
-    apiloadcharactermodels_append = 1;
-    apiloadcharactermodels_nopakfile = CHARPAK == 0;
-    APILoadCharacterModels(list, 0, &characterbuffer_ptr, characterbuffer_end, 1);
-    IconScenes_Load(list, 0, &characterbuffer_ptr, &characterbuffer_end);
-
-    NUGSCN *icon_scene = IconScene_FindById(list[0].model_id);
-    if (icon_scene != NULL && LEVELOBJECTCOUNT > 0) {
-        for (i32 i = 0; i < LEVELOBJECTCOUNT; ++i) {
-            if (ObjTab[i].kind != 3) {
-                continue;
-            }
-
-            if (WORLD->lev_objs[i].active != 0) {
-                continue;
-            }
-
-            if (NuSpecialFind(icon_scene, &WORLD->lev_objs[i].special, ObjTab[i].name, 1) != 0) {
-                WORLD->lev_objs[i].active = 1;
-            }
-        }
-    }
-
-    Customiser_SaveModelTextureIDs(CharacterCustomiser, APICharacterLoaded(list[0].model_id));
-    hub_character_ready = waiting_for_character;
-    waiting_for_character = -1;
-    g_loadingCharacterInHub = 0;
-}
+void LoadSingleCharacter(bgprocinfo_s *);
 
 void CharScenes_LevelDump(WORLDINFO_s *world) {
     CHARSCENE_s *scenes = world->minikit.character_scenes;
@@ -1391,92 +862,7 @@ void CharScenes_LevelDump(WORLDINFO_s *world) {
     }
 }
 
-void UpdateCharacterLoad() {
-    const i32 menu_id = GetMenuID();
-    if (menu_id == 13) {
-        return;
-    }
-    if (menu_id >= 15 && menu_id <= 19) {
-        return;
-    }
-
-    if (LOADEROFF != 0 || BGLOAD == 0 || waiting_for_character != -1 || hub_character_ready != -1 ||
-        bgGetProcActive() != NULL || global_dlist_manager.ndisplay_lists > 0xfd) {
-        return;
-    }
-
-    const i32 required_buffer =
-        (static_cast<i32>((static_cast<f32>(CHARACTERBUFFERSIZE) / 7077888.0f) * 1048576.0f) + 0x3ff) & ~0x3ff;
-    if (required_buffer > static_cast<i32>(characterbuffer_end.addr - characterbuffer_ptr.addr)) {
-        return;
-    }
-
-    i32 candidates[0x154] __attribute__((aligned(16)));
-    i32 candidate_count = 0;
-
-    if (id_BARMAN != -1 && APICharacterLoaded(id_BARMAN) == NULL) {
-        candidates[candidate_count++] = id_BARMAN;
-    } else if (id_CANTINABAND != -1 && APICharacterLoaded(id_CANTINABAND) == NULL) {
-        candidates[candidate_count++] = id_CANTINABAND;
-    } else if (id_WEIRDO1 != -1 && APICharacterLoaded(id_WEIRDO1) == NULL) {
-        candidates[candidate_count++] = id_WEIRDO1;
-    } else if (id_WEIRDO2 != -1 && APICharacterLoaded(id_WEIRDO2) == NULL) {
-        candidates[candidate_count++] = id_WEIRDO2;
-    } else if (id_JABBA != -1 && APICharacterLoaded(id_JABBA) == NULL) {
-        candidates[candidate_count++] = id_JABBA;
-    } else if (id_MOSEISLEYCITIZEN != -1 && APICharacterLoaded(id_MOSEISLEYCITIZEN) == NULL) {
-        candidates[candidate_count++] = id_MOSEISLEYCITIZEN;
-    } else if (id_CANTINAALIEN != -1 && APICharacterLoaded(id_CANTINAALIEN) == NULL) {
-        candidates[candidate_count++] = id_CANTINAALIEN;
-    } else if (id_WOMPRAT != -1 && APICharacterLoaded(id_WOMPRAT) == NULL) {
-        candidates[candidate_count++] = id_WOMPRAT;
-    } else {
-        i32 pack_index = 0;
-        for (STOREPACK *pack = StorePack; pack != StorePack + 11; ++pack, ++pack_index) {
-            if (g_lowEndLevelBehaviour != 0 && Hub_LowEnd_IconsInsteadOfModels != 0) {
-                continue;
-            }
-            if (Store_IsPackUnlocked(pack_index) != 0 || pack->id == NULL) {
-                continue;
-            }
-
-            const i32 id = *pack->id;
-            if (id != -1 && APICharacterLoaded(id) == NULL) {
-                candidates[candidate_count++] = id;
-                break;
-            }
-        }
-
-        if (candidate_count == 0) {
-            for (i32 id = 0; id < CHARCOUNT; ++id) {
-                if (id == id_DROIDEKA || (CDataList[id].model_flags & 0x04002000) != 0 ||
-                    APICharacterLoaded(id) != NULL) {
-                    continue;
-                }
-                if (static_cast<i32>(CDataList[id].field5_0x14) + apicharsys->loaded_animation_count >
-                    apicharsys->animation_capacity) {
-                    continue;
-                }
-                if (InCollectList_Index(id, NULL, 0) == -1 || Collection_Got(id) == 0) {
-                    continue;
-                }
-                candidates[candidate_count++] = id;
-            }
-        }
-    }
-
-    if (candidate_count == 0) {
-        return;
-    }
-
-    i32 candidate = 0;
-    if (candidate_count != 1) {
-        candidate = qrand() / ((0xffff / candidate_count) + 1);
-    }
-    waiting_for_character = candidates[candidate];
-    WaitingForCharacterTime = 0.0f;
-    bgPostRequest(LoadSingleCharacter, NULL, NULL, 0);
-}
+void UpdateCharacterLoad();
 
 extern "C" VARIPTR characterbuffer_base;
 extern i32 CHARACTERBUFFERSIZE;
@@ -1726,14 +1112,7 @@ void CollectCharactersOff_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {
 
 void ScaleGameObject(GameObject_s *obj);
 
-void SetGameObjectCharacterData(GameObject_s *obj) {
-    CHARACTERDATA *data = obj->apiobj.character_data;
-    obj->apiobj.field_0xa8 = data->field17_0x3c;
-    obj->field_0x1008 = data->field14_0x30;
-    obj->field_0xffc = data->field15_0x34;
-    obj->field_0x1000 = data->field16_0x38;
-    ScaleGameObject(obj);
-}
+void SetGameObjectCharacterData(GameObject_s *obj);
 
 void CollectCharactersOff_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
     switch (stage->field_0x14) {

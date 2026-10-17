@@ -82,158 +82,7 @@ void Player_ClearContext(GameObject_s *object, i32 mode);
 void Player_ResetContexts(PLAYERPACKET_s *packet);
 extern "C" f32 chattersfxwait;
 
-void Players_Init(void) {
-    memset(Player, 0, sizeof(Player));
-    GameObject_s **p = Player;
-
-    if (netclient != 0) {
-        return;
-    }
-
-    PLAYERCOUNT = 0;
-
-    if ((WORLD->current_level->flags & 2) != 0) {
-        i16 *list;
-        i16 list0;
-
-        if (FreePlay == 0 && (Hub_UsePlayerList == 0 || HUB_ADATA == NULL || HUB_ADATA != WORLD->area) &&
-            (UsePlayerList != 1 ||
-             (PlayerList[0] != -1 && (apicharsys->playermodelids[PlayerList[0]] == -1 ||
-                                      (PlayerList[1] != -1 && apicharsys->playermodelids[PlayerList[1]] == -1))))) {
-            list = Area_PlayerIDList;
-            list0 = Area_PlayerIDList[0];
-        } else {
-            list = PlayerList;
-            list0 = PlayerList[0];
-        }
-
-        if (LevelChangesInArea == 0 && UsePlayerList != 0 && PlayerProgress[0].active == 0 &&
-            PlayerProgress[1].active != 0 && FreePlay == 0 && (WORLD->area->flags & 5) == 1 && list0 != -1 &&
-            list0 == Area_StoryModelList[0].model_id && list[1] != -1 && list[1] == Area_StoryModelList[2].model_id &&
-            list0 != list[1]) {
-            list[0] = list[1];
-            list[1] = list0;
-        }
-
-        i32 idx = 0;
-        while (list[idx] != -1 && idx != 8) {
-            GameObject_s *g = AddCreature(list[idx], 1);
-            if (g != NULL) {
-                i32 pi;
-                u8 slot;
-                GAMECHARACTERDATA *cd;
-
-                PreResetCode(g);
-                PostResetCode(g);
-
-                pi = PLAYERCOUNT;
-                g->oldpos = &OldPlrSPos[PLAYERCOUNT];
-                p[PLAYERCOUNT] = g;
-                p[pi]->batarang = &Batarang[pi];
-                g->apiobj.field_0x27c = (char)pi;
-                p[pi]->torpedo = GetTorpedoPacket();
-
-                g->field_0x1050 |= 1;
-                g->field_0x108e = 0;
-                PLAYERCOUNT = PLAYERCOUNT + 1;
-                g->hitpoints = DEFAULT_PLAYERHITPOINTS;
-
-                if (UsePlayerList != 0) {
-                    char c = g->apiobj.field_0x27c;
-                    *(u8 *)&g->apiobj.field_0x1f8 =
-                        (u8)((*(u8 *)&g->apiobj.field_0x1f8 & 0x7f) | (PlayerProgress[c].active << 7));
-
-                    if (Area == last_area) {
-                        if (UsePlayerList == 1) {
-                            g->field_0xe22 = (u8)((g->field_0xe22 & 0xfe) | (PlayerProgress[c].field_0x7 & 1));
-                            SetHitPoints(g, PlayerProgress[c].hitpoints);
-                            c = g->apiobj.field_0x27c;
-                            g->field_0x108e = PlayerProgress[c].field_0xa;
-                            g->field_0x106e = PlayerProgress[c].field_0x4;
-                            g->field_0xdec = PlayerProgress[c].field_0xc;
-                            g->suit = PlayerSuit[c];
-                            if (g->torpedo != NULL) {
-                                g->torpedo->count = PlayerTorpedoCount[c];
-                            }
-                        }
-                    } else {
-                        g->field_0xe22 &= 0xfe;
-                        g->field_0x106e = 0;
-                    }
-                } else {
-                    slot = g->apiobj.field_0x289;
-                    *(u8 *)&g->apiobj.field_0x1f8 = (u8)((*(u8 *)&g->apiobj.field_0x1f8 & 0x7f) | ((slot == 0) << 7));
-                    PlayerProgress[slot].hitpoints = g->current_hp;
-                    g->field_0x106e = 0;
-                }
-
-                cd = (GAMECHARACTERDATA *)apicharsys->char_data[g->id].field11_0x24;
-                g->apiobj.viewdistance = cd->viewdistance;
-                g->apiobj.heardistance = cd->heardistance;
-                g->apiobj.maxviewheight = cd->maxviewheight;
-                g->apiobj.minviewheight = cd->minviewheight;
-
-                {
-                    g->ai.nearest_opponent = NULL;
-                    g->ai.field_0xdc = 0;
-                    g->ai.opponent = NULL;
-                    g->ai.field_0xec = 0;
-                    g->ai.field_0xe0 = 0x4e6e6b28;
-                    g->ai.field_0xf0 = 0x4e6e6b28;
-                    g->apiobj.field387_0x2a0 = 0;
-                    g->apiobj.field388_0x2a4 = 0;
-                    g->field_0xebc = 0;
-                    g->field_0xec0 = 0;
-                    g->opponent = NULL;
-                    g->last_attacker = NULL;
-                    g->field_0xecc = 0;
-                    g->field_0xed0 = 0;
-                    g->ai.antinode_timer = 0.0f;
-                    g->field_0xec4 = 0;
-                    g->field_0xed8 = 0;
-                    g->field_0xec8 = 0;
-                    g->ai.field_0x1e5 &= 0xaf;
-                    g->field_0xef9 &= 0xf7;
-                    g->field_0xf00 |= 0x40;
-                    g->field_0xef8 &= 0xfe;
-                }
-            }
-            idx++;
-            if (bonusmodearcade != 0 || (HUB_ADATA != NULL && HUB_ADATA == WORLD->area) || VehicleArea != 0)
-                break;
-        }
-    }
-
-    UsePlayerList = 0;
-
-    if (p[0] != NULL) {
-        COINPACKET *cp = p[0]->coinpacket = CoinPacket;
-        cp->lastcoin = LEGOOBJ_DEFAULTLASTCOIN;
-        u32 coins = 0;
-        if (Area == last_area) {
-            coins = PlayerProgress[0].coins;
-        }
-        cp->coins = coins;
-        p[0]->gizforce_los_info = GizForceLOSInfo;
-        memcpy(BackUpPlayers, p[0], 0x439 * 4);
-    }
-
-    if (p[1] != NULL) {
-        COINPACKET *cp = p[1]->coinpacket = CoinPacket + 1;
-        cp->lastcoin = LEGOOBJ_DEFAULTLASTCOIN;
-        u32 coins = 0;
-        if (Area == last_area) {
-            coins = PlayerProgress[1].coins;
-        }
-        cp->coins = coins;
-        p[1]->gizforce_los_info = &GizForceLOSInfo[1];
-        memcpy(BackUpPlayers + 0x439, p[1], 0x439 * 4);
-    }
-
-    i32 id1 = (p[1] != NULL) ? p[1]->id : -1;
-    i32 id0 = (p[0] != NULL) ? p[0]->id : -1;
-    RememberPlayerIDs(0, id0, id1);
-}
+void Players_Init(void);
 
 // --- Helpers moved from world.cpp ---
 
@@ -410,20 +259,7 @@ void PlayerItemTypes_Reset(WORLDINFO *world) {
     }
 }
 
-GameObject_s *AddCreature(i32 id, i32 param) {
-    if ((u32)id >= 0x154) {
-        return NULL;
-    }
-    if (apicharsys->playermodelids[id] == -1) {
-        return NULL;
-    }
-    GameObject_s *g = AddGameObject(id);
-    if (g == NULL) {
-        return NULL;
-    }
-    InitCreature(g, id, param);
-    return g;
-}
+GameObject_s *AddCreature(i32 id, i32 param);
 
 static f32 sPreResetMulA = 1.0f / 65535.0f;
 static f32 sPreResetMulB = 0.03f;
@@ -624,12 +460,7 @@ void PostResetCode(GameObject_s *obj) {
     }
 }
 
-void SetHitPoints(GameObject_s *obj, i32 hp) {
-    obj->current_hp = (u8)hp;
-    if ((i8)hp > (i32)(u32)obj->hitpoints) {
-        obj->current_hp = obj->hitpoints;
-    }
-}
+void SetHitPoints(GameObject_s *obj, i32 hp);
 
 void RememberPlayerIDs(i32 a, i32 b, i32 c) {
     if (VehicleArea != 0 || GAMEDEMO != 0) {
@@ -896,17 +727,7 @@ void Player_ResetContexts(PLAYERPACKET_s *packet) {
     packet->linked_object = NULL;
 }
 
-void Player_CopyEssentials(GameObject_s *source, GameObject_s *destination) {
-    destination->pad_gamepad = source->pad_gamepad;
-    destination->coinpacket = source->coinpacket;
-    destination->gizforce_los_info = source->gizforce_los_info;
-    destination->batarang = source->batarang;
-    destination->torpedo = source->torpedo;
-    destination->oldpos = source->oldpos;
-    destination->hitpoints = source->hitpoints;
-    destination->field_0xeb4 = source->field_0xeb4;
-    destination->apiobj.field_0x1f4 = source->apiobj.field_0x1f4;
-}
+void Player_CopyEssentials(GameObject_s *source, GameObject_s *destination);
 
 i32 Player_HasDeflectBolts(GameObject_s *object) {
     return Cheats_CheckFlags(0x80000) != 0 || (object != NULL && object->field_0xdec > 0.0f);
@@ -1126,476 +947,35 @@ u32 (*CanPushObstaclesFn)(GameObject_s *) = NULL;
 
 namespace {
 
-    constexpr f32 kInvalidSurfaceHeight = 2000000.0f;
 
-    void SyncPlayerSpawnPosition(GameObject_s *obj) {
-        const NUVEC &position = obj->apiobj.position;
-
-        obj->apiobj.initial_position = position;
-        obj->apiobj.collision_position = position;
-        plr_lastpos = position;
-        obj->apiobj.start_position = position;
-    }
 
 } // namespace
 
-void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap_to_surface) {
-    if (obj == NULL) {
-        return;
-    }
-
-    const bool restore_hitpoints = obj->apiobj.field_0x27c != -1 && obj->field_0x7a5 == 0x2b;
-
-    if (reset_moves != 0) {
-        if (position == NULL) {
-            position = Player_StartPos(obj);
-        }
-        if (__builtin_expect(position != NULL, 0)) {
-            obj->apiobj.position = *position;
-        }
-
-        if (obj->apiobj.field_0x27c != -1) {
-            obj->field_0xf00 |= 0x40;
-        }
-
-        ResetPlayerMoves(obj);
-        SyncPlayerSpawnPosition(obj);
-
-        obj->reset_velocity = v000;
-        obj->apiobj.velocity = v000;
-
-        GetTopBot(obj);
-        GameObjectDimensions(obj);
-        obj->field_0xe23 &= static_cast<u8>(~8u);
-        obj->use_model_origin = 0;
-        obj->apiobj.field_0x288 = 0;
-        GameObjectOrigin(obj);
-
-        ResetRumble(&obj->pad_gamepad->rumble_packet);
-        ResetLights(&obj->apiobj.position, &obj->light_data, WORLD->rtl_set);
-        ResetMiniAnimPacket(&obj->mini_animation, -1);
-
-        obj->sock_position.location.sock = -1;
-        obj->sock_position.location.segment = -1;
-        f32 surface_y = kInvalidSurfaceHeight;
-        if (WORLD->sock_sys != NULL) {
-            if (Door_NextSock != -1 && WORLD->sock_sys->sock[Door_NextSock].valid != 0) {
-                complexsockposition_forcesock = Door_NextSock;
-                movegamecamera_forcesock = Door_NextSock;
-            }
-            ComplexSockPosition(WORLD->sock_sys, &obj->apiobj.position, -1, -1, &obj->sock_position);
-            ComplexSockAngles(&obj->sock_angles);
-            if (obj->apiobj.field_0x27c < 2 && obj->sock_position.location.sock != -1) {
-                if (!(BONUS_GUNSHIP_ADATA != NULL && BONUS_GUNSHIP_ADATA == WORLD->area)) {
-                    if (BATTLEOVERCORUSCANT_ADATA != NULL && BATTLEOVERCORUSCANT_ADATA == WORLD->area) {
-                        SOCK *sock = &WORLD->sock_sys->sock[obj->sock_position.location.sock];
-                        if ((sock->flags & SOCK_FLAG_MISSING_C_OR_D) == 0) {
-                            obj->apiobj.position = obj->sock_position.midpoint;
-                            if (Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[1] != NULL &&
-                                Player[1]->apiobj.player_controlled) {
-                                NUVEC offset;
-                                f32 side = obj == Player[0] ? 1.0f : -1.0f;
-                                NuVecNorm(&offset, &sock->segments[obj->sock_position.location.segment].planes[4]);
-                                NuVecScale(&offset, &offset, side);
-                                NuVecAdd(&obj->apiobj.position, &obj->apiobj.position, &offset);
-                            }
-                            SyncPlayerSpawnPosition(obj);
-                        }
-                        snap_to_surface = 0;
-                    }
-                } else {
-                    obj->apiobj.position = obj->sock_position.midpoint;
-                    surface_y = FindGunshipHoverHeight(obj);
-                    if (WORLD->current_level == BONUS_GUNSHIPA_LDATA && reinterpret_cast<u8 *>(LevFlag)[0] != 0) {
-                        obj->apiobj.position.x = 12.0f + obj->apiobj.position.x;
-                    }
-                    snap_to_surface = 0;
-                }
-            }
-        }
-
-        u8 player_index = static_cast<u8>(obj->apiobj.field_0x27c);
-        if (player_index > 7) {
-            player_index = obj->apiobj.field_0x289;
-        }
-        player_index &= 7;
-
-        const u16 facing = static_cast<u16>(PlayerStart[player_index].angle);
-        obj->apiobj.roll_angle = 0;
-        obj->apiobj.pitch_angle = 0;
-        obj->apiobj.movement_facing_angle = facing;
-        obj->apiobj.facing_angle = facing;
-        obj->apiobj.field_0x276 = facing;
-        NuVecRotateYValZ(&obj->facing_direction, 1.0f, facing);
-
-        obj->field_0xc34 = 0x3f800000;
-        obj->field_0xc38 = 0.0f;
-        CurrentStart(obj, 0, 1);
-        obj->field_0xe23 &= static_cast<u8>(~8u);
-        obj->field_0xefe &= static_cast<u8>(~4u);
-        obj->field_0xeff &= static_cast<u8>(~2u);
-        obj->apiobj.model_draw_result = 1;
-        obj->use_model_origin = 0;
-        obj->apiobj.field_0x288 = 0;
-        obj->field_0x1084 = 0;
-
-        InitSurfaceInfo(obj);
-        if (surface_y == kInvalidSurfaceHeight) {
-            surface_y = GetHoverPosY(obj);
-        }
-        if (snap_to_surface == 0 || (obj->apiobj.character_data->model_flags & 0x2000) != 0) {
-            if (__builtin_expect(surface_y != kInvalidSurfaceHeight, 1)) {
-                obj->apiobj.position.y = surface_y;
-                SyncPlayerSpawnPosition(obj);
-            }
-        } else {
-            SetObjOnSurface(obj, 0);
-        }
-
-        GizForce_ResetLOS(obj);
-        PortalGameObject(obj, 1, 1, -1, WORLD->current_gscn);
-
-        if ((ResetBits & 2) != 0 || obj->apiobj.field_0x287 != 0 || restore_hitpoints) {
-            SetHitPoints(obj, DEFAULT_PLAYERHITPOINTS);
-            obj->field_0xe38 = 4;
-        }
-        if ((ResetBits & 8) != 0) {
-            const i32 progress_index = static_cast<i8>(obj->apiobj.field_0x27c);
-            if (progress_index >= 0 && progress_index < 8) {
-                if (PlayerProgress[progress_index].field_0xb != 0) {
-                    obj->field_0xe31 = 1;
-                }
-                obj->field_0xe38 = PlayerProgress[progress_index].field_0x9;
-            }
-        }
-
-        ResetPlayerAI(obj);
-        obj->apiobj.last_safe_position = obj->apiobj.position;
-        obj->saved_position = obj->apiobj.position;
-        if (__builtin_expect((obj->apiobj.character_data->model_flags & 0x2000) != 0, 1)) {
-            obj->in_narrow_socket = ObjInNarrowSock(obj, WORLD->sock_sys, WORLD->level_idx);
-            f32 speed = GetVehicleSpeedMul(obj, 0.0f);
-            obj->field_0xdc8 = speed;
-            if (speed > 0.0f) {
-                obj->apiobj.velocity.x = NU_SIN_LUT(obj->apiobj.facing_angle) * speed;
-                obj->apiobj.velocity.z = speed * NU_COS_LUT(obj->apiobj.facing_angle);
-            }
-        } else {
-            obj->field_0xdc8 = 0.0f;
-        }
-    } else {
-        obj->field_0xdc8 = 0.0f;
-    }
-
-    obj->field_0x1004 = 1.0f;
-    obj->field_0x101c = 0.0f;
-    obj->field_0xda8 = 0.0f;
-    obj->field_0xd78 = 1.0f;
-    obj->apiobj.field_0x214 = kInvalidSurfaceHeight;
-    obj->field_0xdbc = 0.0f;
-    obj->field_0xf1c = 0.0f;
-    obj->field_0xc54 = -1.0f;
-    obj->field_0xde0 = 0.0f;
-    obj->apiobj.field_0x287 = 0;
-    obj->field_0xe36 = 0;
-    obj->apiobj.field_0x285 = 0;
-    obj->apiobj.field_0x1f8 &= 0xfa83;
-    obj->apiobj.field_0x1fa &= static_cast<u8>(~2u);
-    obj->apiobj.field_0x1f4 &= ~0x100u;
-    obj->field_0xefc |= 0x80;
-    obj->field_0xe21 |= 0x80;
-}
+void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap_to_surface);
 
 void StarWars_AutoSetAICapabilities(GameObject_s *object);
 i32 CanPullLevers(i32 id);
 extern f32 DEFAULT_MOVE_RANGE;
 
-void SetFlicker(GameObject_s *object, float duration) {
-    object->field_0x1024 = duration;
-    object->flicker_flags &= ~7;
-}
+void SetFlicker(GameObject_s *object, float duration);
 
-// Single-bit view of the AI flag bytes; the original resets them one field at a time.
-struct PlayerAIFlagBits {
-    u8 bit0 : 1;
-    u8 bit1 : 1;
-    u8 bit2 : 1;
-    u8 bit3 : 1;
-    u8 bit4 : 1;
-    u8 bit5 : 1;
-    u8 bit6 : 1;
-    u8 bit7 : 1;
-};
+#include "legoapi/characters/core/players_types.h"
 
-static inline PlayerAIFlagBits *PlayerAIFlags(u8 *object, i32 offset) {
-    return reinterpret_cast<PlayerAIFlagBits *>(object + offset);
-}
 
-void InitPlayerAI(GameObject_s *object) {
-    StarWars_AutoSetAICapabilities(object);
-    u8 *b = reinterpret_cast<u8 *>(object);
-    i32 can_pull_levers = CanPullLevers(object->id);
-    b[0xefe] = (b[0xefe] & 0x7f) | (can_pull_levers << 7);
-    b[0x4a6] &= 0xfe;
-    object->ai.character_type_mask_low = 0;
-    object->ai.character_type_mask_high = 0;
-    if (FreePlay && !(object->apiobj.field_0x1f4 & 0x400)) {
-        object->ai.character_type_mask = _0xffffffffffffffff;
-    } else if (SpecialRouteCharacterTypeIDFn) {
-        u8 *row = *reinterpret_cast<u8 **>(b + 0xcac);
-        char *name = row ? *reinterpret_cast<char **>(row + 4) : object->apiobj.character_data->file;
-        u8 type = SpecialRouteCharacterTypeIDFn(name);
-        if (type != 0xff) {
-            u64 mask = type <= 63 ? u64(1) << type : _0xffffffffffffffff;
-            object->ai.character_type_mask_high = static_cast<u32>(mask >> 32);
-            object->ai.character_type_mask_low = static_cast<u32>(mask);
-        }
-    }
-    b[0x370] = 0;
-    PlayerAIFlagBits *flags_ef8 = PlayerAIFlags(b, 0xef8);
-    PlayerAIFlagBits *flags_ef9 = PlayerAIFlags(b, 0xef9);
-    PlayerAIFlagBits *flags_efa = PlayerAIFlags(b, 0xefa);
-    PlayerAIFlagBits *flags_efb = PlayerAIFlags(b, 0xefb);
-    PlayerAIFlagBits *flags_efc = PlayerAIFlags(b, 0xefc);
-    PlayerAIFlagBits *flags_efd = PlayerAIFlags(b, 0xefd);
-    PlayerAIFlagBits *flags_eff = PlayerAIFlags(b, 0xeff);
-    PlayerAIFlagBits *flags_f00 = PlayerAIFlags(b, 0xf00);
-    PlayerAIFlagBits *flags_f01 = PlayerAIFlags(b, 0xf01);
-    PlayerAIFlagBits *flags_f02 = PlayerAIFlags(b, 0xf02);
-    PlayerAIFlagBits *flags_f03 = PlayerAIFlags(b, 0xf03);
-    PlayerAIFlagBits *flags_f04 = PlayerAIFlags(b, 0xf04);
-    PlayerAIFlagBits *flags_4a5 = PlayerAIFlags(b, 0x4a5);
-    PlayerAIFlagBits *flags_4a7 = PlayerAIFlags(b, 0x4a7);
-    PlayerAIFlagBits *flags_7b5 = PlayerAIFlags(b, 0x7b5);
-    flags_ef8->bit1 = 1;
-    object->doomed_escape_locator = NULL;
-    flags_ef8->bit2 = (object->apiobj.character_data->model_flags >> 7) & 1;
-    flags_ef8->bit3 = 1;
-    flags_ef8->bit4 = 0;
-    flags_ef8->bit6 = 0;
-    flags_ef8->bit7 = 0;
-    flags_eff->bit3 = 0;
-    flags_eff->bit4 = 0;
-    flags_eff->bit5 = 0;
-    flags_efc->bit0 = 0;
-    flags_efc->bit1 = 0;
-    flags_efc->bit2 = 0;
-    flags_efc->bit3 = 0;
-    flags_efc->bit4 = 0;
-    flags_efc->bit5 = 0;
-    flags_efd->bit0 = 0;
-    flags_efd->bit3 = 0;
-    flags_efd->bit4 = 0;
-    flags_ef9->bit0 = 0;
-    flags_ef9->bit1 = 0;
-    flags_f01->bit1 = 0;
-    flags_f01->bit2 = 0;
-    flags_f01->bit4 = 0;
-    flags_efb->bit1 = 0;
-    flags_efb->bit3 = 0;
-    flags_efb->bit4 = 0;
-    flags_efb->bit6 = 0;
-    flags_efb->bit7 = 0;
-    flags_f00->bit0 = 0;
-    flags_f00->bit1 = 0;
-    flags_f00->bit5 = 0;
-    flags_f00->bit7 = 0;
-    flags_f03->bit1 = 0;
-    flags_f03->bit2 = 0;
-    flags_f03->bit3 = 0;
-    flags_f03->bit6 = 0;
-    flags_f03->bit7 = 0;
-    object->run_speed_override = 1000000000.0f;
-    object->walk_speed_override = 1000000000.0f;
-    // The original scale-override sentinel; zero would hide the character.
-    object->hover_height_override = 1000000000.0f;
-    object->field_0x1038 = 1000000000.0f;
-    flags_f04->bit0 = 0;
-    flags_f04->bit1 = 0;
-    flags_f02->bit2 = ((object->apiobj.field_0x1f4 >> 10) & 1) == 0;
-    flags_f02->bit3 = 0;
-    *reinterpret_cast<u32 *>(b + 0x1058) = 0;
-    *reinterpret_cast<f32 *>(b + 0x4ac) = DEFAULT_MOVE_RANGE;
-    flags_4a7->bit2 = DEFAULT_MOVE_RANGE > 0.0f;
-    flags_4a7->bit3 = 0;
-    flags_4a7->bit4 = 0;
-    flags_f02->bit5 = 0;
-    flags_f02->bit7 = 0;
-    flags_ef8->bit0 = 0;
-    flags_f03->bit0 = 0;
-    flags_efa->bit2 = 0;
-    flags_efa->bit3 = 0;
-    flags_efa->bit4 = (object->apiobj.character_data->model_flags >> 27) & 1;
-    flags_efa->bit5 = 0;
-    flags_7b5->bit1 = 0;
-    *reinterpret_cast<u32 *>(b + 0xecc) = 0;
-    *reinterpret_cast<u32 *>(b + 0x394) = 0;
-    *reinterpret_cast<u32 *>(b + 0x39c) = 0;
-    flags_efb->bit0 = 0;
-    flags_efb->bit2 = 0;
-    flags_eff->bit0 = 0;
-    *reinterpret_cast<f32 *>(b + 0xed4) = 1.0f;
-    *reinterpret_cast<f32 *>(b + 0xed0) = 0.0f;
-    *reinterpret_cast<f32 *>(b + 0x3a0) = 1000000000.0f;
-    flags_4a5->bit4 = 0;
-    flags_4a5->bit6 = 0;
-    *reinterpret_cast<u32 *>(b + 0x3a4) = 0;
-    *reinterpret_cast<u32 *>(b + 0x3ac) = 0;
-    *reinterpret_cast<u32 *>(b + 0x2a0) = 0;
-    *reinterpret_cast<u32 *>(b + 0x2a4) = 0;
-    flags_ef9->bit3 = 0;
-    *reinterpret_cast<u32 *>(b + 0xebc) = 0;
-    *reinterpret_cast<f32 *>(b + 0x3b0) = 1000000000.0f;
-    *reinterpret_cast<u32 *>(b + 0xec0) = 0;
-    *reinterpret_cast<u32 *>(b + 0x10b0) = 0;
-    *reinterpret_cast<u32 *>(b + 0x10b4) = 0;
-    *reinterpret_cast<u32 *>(b + 0xec4) = 0;
-    *reinterpret_cast<f32 *>(b + 0x448) = 0.0f;
-    *reinterpret_cast<u32 *>(b + 0xec8) = 0;
-    *reinterpret_cast<f32 *>(b + 0xed8) = 0.0f;
-    memset(b + 0xf48, 0, 0x68);
-    b[0x1089] = 0;
-    *reinterpret_cast<u32 *>(b + 0xfe4) = 0;
-    *reinterpret_cast<u32 *>(b + 0x3b4) = 0;
-    *reinterpret_cast<u32 *>(b + 0x294) = 0;
-    *reinterpret_cast<u32 *>(b + 0x298) = 0;
-    *reinterpret_cast<u32 *>(b + 0x29c) = 0;
-    bool special = (object->apiobj.character_data->model_flags & 0x4000) &&
-                   (b[0x27c] == 0xff || *reinterpret_cast<void **>(b + 0xcc0));
-    b[0x1f8] = (b[0x1f8] & 0xfd) | (special << 1);
-    u8 *config = reinterpret_cast<u8 *>(object->apiobj.character_data->player_config);
-    b[0x1f9] &= 0xf7;
-    b[0x1fa] &= 0xe7;
-    flags_f00->bit2 = 0;
-    b[0xefe] &= 0xbf;
-    flags_eff->bit2 = 0;
-    flags_eff->bit7 = (*reinterpret_cast<u32 *>(config + 0x90) >> 13) & 1;
-    b[0x108f] = 0;
-    *reinterpret_cast<u32 *>(b + 0x10c0) = 0;
-    *reinterpret_cast<u32 *>(b + 0x10d8) = 0;
-    *reinterpret_cast<f32 *>(b + 0x1040) = 1.0f;
-    *reinterpret_cast<u32 *>(b + 0x1044) = 0;
-    flags_f04->bit2 = 0;
-    flags_f04->bit3 = 0;
-    flags_f04->bit7 = PlayerAIFlags(reinterpret_cast<u8 *>(object->apiobj.character_data->player_config), 0x98)->bit7;
-    ResetPlayerAI(object);
-}
+void InitPlayerAI(GameObject_s *object);
 
-void ResetPlayerAI(GameObject_s *object) {
-    object->ai.movement_flags &= 0x9f;
-    object->field_0xefe &= 0xdf;
-    object->ai.field_0x1e5 &= 0xfd;
-    object->ai.intersection_connection = NULL;
-    object->ai.intersection_target_connection = NULL;
-    object->ai.animation_override_from = -1;
-    object->ai.animation_override_to = -1;
-    object->ai.field_0x180 = NULL;
-    object->field_0x1092 = 0;
-    object->field_0x1093 = 0;
-    object->field_0x1098 = 0;
-    object->field_0x1094 = 0;
-    object->field_0xf08 = 0;
-    object->field_0xf0c = 0;
-    object->field_0xf10 = 0;
-    object->ai.frame_state = 0;
-    object->field_0xf14 = 0;
-    object->field_0x109c = 0;
-    memset(&object->ai.path_info, 0, sizeof(object->ai.path_info));
-    object->ai.current_route = 0xff;
-    object->ai.next_route = 0;
-    object->ai.inside_path_node = -1;
-    AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, &object->ai, 0xff, 1);
-}
+void ResetPlayerAI(GameObject_s *object);
 
 void StarWars_AutoSetAICapabilities(GameObject_s *object);
 
-i32 MakePlayerList(i32 count) {
-    i32 player_count = 0;
-
-    for (i32 i = 0; i < count; i++) {
-        GameObject_s *player = Player[i];
-        if (player == NULL) {
-            if (makeplayerlist_freeplay == 1 && player_count == 1 && WORLD != NULL &&
-                WORLD->current_level == HUB_LDATA && HUB_LDATA != NewLData) {
-                PlayerList[1] = FreePlayModelList[i].model_id;
-                PlayerProgress[1].active = 0;
-                player_count = 2;
-            }
-            continue;
-        }
-
-        if (makeplayerlist_freeplay == 1) {
-            PlayerList[player_count] = FreePlayModelList[i].model_id;
-        } else if (makeplayerlist_freeplay != 2) {
-            PlayerList[player_count] = player->id;
-        }
-
-        PlayerProgress[player_count].active = player->apiobj.player_controlled;
-
-        bool unavailable = false;
-        if (player->field_0x7a5 != 6 && player->field_0xe32 != 2) {
-            unavailable = true;
-            if ((player->field_0xe22 & 1) == 0) {
-                unavailable = player->field_0xe32 != 0;
-            }
-        }
-        PlayerProgress[player_count].field_0x7 = unavailable;
-        PlayerProgress[player_count].coins = player->coinpacket != NULL ? player->coinpacket->coins : 0;
-        PlayerProgress[player_count].field_0xb = player->field_0xe31 == 1;
-
-        if (player->apiobj.field_0x287 != 0) {
-            PlayerProgress[player_count].hitpoints = player->hitpoints;
-            PlayerProgress[player_count].field_0x9 = 4;
-        } else {
-            PlayerProgress[player_count].hitpoints = player->current_hp;
-            PlayerProgress[player_count].field_0x9 = player->field_0xe38;
-        }
-        PlayerProgress[player_count].field_0xa = player->field_0x108e;
-        PlayerProgress[player_count].field_0x4 = player->field_0x106e;
-        PlayerProgress[player_count].field_0xc = player->field_0xdec;
-
-        PlayerSuit[player_count] = player->suit;
-        PlayerTorpedoCount[player_count] = player->torpedo != NULL ? player->torpedo->count : 0;
-        player_count++;
-    }
-
-    for (i32 i = player_count; i < 8; i++) {
-        PlayerList[i] = -1;
-    }
-    makeplayerlist_freeplay = 0;
-    return player_count;
-}
+i32 MakePlayerList(i32 count);
 
 void ResetPlayerPacket(PLAYERPACKET_s *, CHARACTERDATA_s *);
 void ResetCharacterIdle(GameObject_s *, i32, i32);
 void SetGameObjectCharacterData(GameObject_s *);
 void ResetCoinPacket(COINPACKET_s *);
 
-void ResetPlayerMoves(GameObject_s *object) {
-    ResetPlayerPacket(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet),
-                      reinterpret_cast<CHARACTERDATA_s *>(object->apiobj.character_data));
-    object->fall_acceleration_timer = 0.0f;
-    object->pause_input_state = 0;
-    object->apiobj.movement_direction = v000;
-    object->input_toggle_hold_time = TOGGLEHOLDTIME;
-    object->field_0xefc |= 0x80;
-    ResetCharacterIdle(object, 2, GetDefaultIdle(object));
-    if (object->apiobj.character_model->model_data_b[1] != NULL) {
-        ResetAnimPacket(&object->apiobj.anim_packet, 1);
-        SetAnimTimeRandom(object->apiobj.character_model, &object->apiobj.anim_packet);
-    } else {
-        ResetAnimPacket(&object->apiobj.anim_packet, -1);
-    }
-    object->apiobj.field_0x27e = 0;
-    object->apiobj.field_0x27d = 0;
-    SetGameObjectCharacterData(object);
-    object->spawn_protection_timer = 0.0f;
-    SetFlicker(object, 0.0f);
-    ResetCoinPacket(object->coinpacket);
-    object->apiobj.respawn_timer = 0.0f;
-    object->apiobj.flags_high &= 0xdf;
-    DrawOffsetCode(object, 1);
-}
+void ResetPlayerMoves(GameObject_s *object);
 
 void SetToLastSafePos(GameObject_s *object) {
     NUVEC position = {object->apiobj.last_safe_position.x, object->apiobj.last_safe_position.y,
@@ -1604,53 +984,7 @@ void SetToLastSafePos(GameObject_s *object) {
     object->saved_position = object->apiobj.position = object->apiobj.start_position;
 }
 
-i32 AvailableToPlayer(u32 character_flags, i32 weapon_action, i32 context, i32 require_all) {
-    for (i32 i = 0; i < 8; i++) {
-        GameObject_s *object = Player[i];
-        if (object == NULL || object->apiobj.character_data == NULL)
-            continue;
-        if (character_flags != 0) {
-            if ((object->apiobj.character_data->model_flags & character_flags) == character_flags) {
-                if (require_all == 0)
-                    return 1;
-            } else if (require_all != 0) {
-                continue;
-            }
-        }
-        if (weapon_action != -1) {
-            if (static_cast<i8>(object->apiobj.character_data->game_character->uses_weapon_action) == weapon_action) {
-                if (require_all == 0)
-                    return 1;
-            } else if (require_all != 0) {
-                continue;
-            }
-        }
-        if (context == 0 || object->field_0x108e == context)
-            return 1;
-    }
-
-    if (FreePlay != 0) {
-        for (i32 index = 0; index < apicharsys->character_count; ++index) {
-            i32 model = apicharsys->playermodelids[index];
-            if (model == -1 || FreePlay == 0 || (apicharsys->models[model].flags & 1) == 0)
-                continue;
-            if (!((Game_CharacterSave != NULL && (Game_CharacterSave[index] & 1) != 0) ||
-                  (static_cast<i32>(GCDataList[index].flags_090) < 0 && Cheats_CheckFlags(0x100) != 0)))
-                continue;
-            if (character_flags != 0) {
-                if ((CDataList[index].model_flags & character_flags) == character_flags) {
-                    if (require_all == 0)
-                        return 1;
-                } else if (require_all != 0) {
-                    continue;
-                }
-            }
-            if (weapon_action == -1 || static_cast<i8>(GCDataList[index].uses_weapon_action) == weapon_action)
-                return 1;
-        }
-    }
-    return 0;
-}
+i32 AvailableToPlayer(u32 character_flags, i32 weapon_action, i32 context, i32 require_all);
 
 i32 GetNumLocalPlayers() {
     i32 count = 0;
@@ -1666,196 +1000,21 @@ i32 UnderPlayerControl(GameObject_s *object) {
            (object->field_0xcc0 != NULL && object->field_0xcc0->apiobj.player_controlled);
 }
 
-i32 ActivePlayerInRange(nuvec_s *position, float range_squared, float *distance_squared) {
-    for (i32 i = 0; i < 8; i++) {
-        if (Player[i] != NULL && Player[i]->apiobj.player_controlled) {
-            const f32 distance = NuVecDistSqr(&Player[i]->apiobj.collision_position, position, NULL);
-            if (distance < range_squared) {
-                if (distance_squared != NULL) {
-                    *distance_squared = distance;
-                }
-                return 1;
-            }
-        }
-    }
-    return 0;
-}
+i32 ActivePlayerInRange(nuvec_s *position, float range_squared, float *distance_squared);
 
-GameObject_s *GetOtherActivePlayer(GameObject_s *object) {
-    GameObject_s *other;
-    if (Player[0] == object)
-        other = Player[1];
-    else if (Player[1] == object)
-        other = Player[0];
-    else
-        return NULL;
-    if (other != NULL && static_cast<i8>(other->apiobj.field_0x1f8) < 0)
-        return other;
-    return NULL;
-}
+GameObject_s *GetOtherActivePlayer(GameObject_s *object);
 
-struct SPECIAL_LAYER_s {
-    i16 *character_id;
-    char *name;
-    u32 mask;
-};
 
 DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 
-static SPECIAL_LAYER_s SpecialLayer[] = {
-    {&id_BATMAN, "bombbackpack", 0},       {&id_BATMAN, "sonargun", 0},          {&id_BATMAN, "infrared_goggles", 0},
-    {&id_BATMAN, "mask_black", 0},         {&id_BATMAN, "mask_blue", 0},         {&id_BATMAN, "mask_red", 0},
-    {&id_BATMAN, "cape_black", 0},         {&id_BATMAN, "cape_blue", 0},         {&id_BATMAN, "body_grey_nextgen", 0},
-    {&id_BATMAN, "body_grey_high", 0},     {&id_BATMAN, "body_grey_low", 0},     {&id_BATMAN, "body_black_nextgen", 0},
-    {&id_BATMAN, "body_black_high", 0},    {&id_BATMAN, "body_black_low", 0},    {&id_BATMAN, "body_blue_nextgen", 0},
-    {&id_BATMAN, "body_blue_high", 0},     {&id_BATMAN, "body_blue_low", 0},     {&id_BATMAN, "face_hands_black", 0},
-    {&id_BATMAN, "face_hands_blue", 0},    {&id_BATMAN, "face_hands_red", 0},    {&id_BATMAN, "hips_black_nextgen", 0},
-    {&id_BATMAN, "hips_black_high", 0},    {&id_BATMAN, "hips_blue_nextgen", 0}, {&id_BATMAN, "hips_blue_high", 0},
-    {&id_BATMAN, "hips_red_nextgen", 0},   {&id_BATMAN, "hips_red_high", 0},     {&id_ROBIN, "magnetic_boots", 0},
-    {&id_ROBIN, "scuba_gear", 0},          {&id_ROBIN, "hack_pack", 0},          {&id_ROBIN, "vacuum_gun", 0},
-    {&id_ROBIN, "nextgen_limbs_green", 0}, {&id_ROBIN, "hires_limbs_green", 0},  {&id_ROBIN, "lowres_limbs_green", 0},
-    {&id_ROBIN, "nextgen_limbs_white", 0}, {&id_ROBIN, "hires_limbs_white", 0},  {&id_ROBIN, "lowres_limbs_white", 0},
-    {&id_ROBIN, "nextgen_limbs_grey", 0},  {&id_ROBIN, "hires_limbs_grey", 0},   {&id_ROBIN, "lowres_limbs_grey", 0},
-    {&id_ROBIN, "nextgen_limbs_blue", 0},  {&id_ROBIN, "hires_limbs_blue", 0},   {&id_ROBIN, "lowres_limbs_blue", 0},
-};
 
-i32 Player_HasPurpleForce(GameObject_s *obj) {
-    if (Cheat_IsOn(0x1c))
-        return 1;
-    return obj != NULL && obj->field_0xdec > 0.0f;
-}
+i32 Player_HasPurpleForce(GameObject_s *obj);
 
-void FixUpLayers() {
-    for (i32 model_index = 0; model_index < apicharsys->loaded_model_count; ++model_index) {
-        CHARACTERMODEL_s *model = &apicharsys->models[model_index];
-        GAMECHARACTERDATA_s *character = &GCDataList[model->model_id];
+void FixUpLayers();
 
-        for (i32 layer_index = 0; layer_index < character->layer_count; ++layer_index) {
-            GAMECHARACTERLAYER_s *layer = &character->layers[layer_index];
-            layer->hierarchy_layer_index = NuHGobjGetLayerIndex(layer->name, model->hierarchy);
-        }
-    }
+u32 AdjustLayerBits(u32 mask, GameObject_s *object);
 
-    SPECIAL_LAYER_s *layer = SpecialLayer;
-    SPECIAL_LAYER_s *layer_end = SpecialLayer + sizeof(SpecialLayer) / sizeof(SpecialLayer[0]);
-    for (; layer != layer_end; ++layer) {
-        layer->mask = 0;
-        if (layer->character_id != NULL && *layer->character_id != -1) {
-            layer->mask = 1 << LayerFromName(&GCDataList[*layer->character_id], layer->name);
-        }
-    }
-}
-
-// Shares the original translation-unit-local layer table with FixUpLayers.
-u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
-    GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-    u32 cape = 0;
-    i32 cape_layer = data->cape_layer;
-    if (cape_layer != -1)
-        cape = 1u << cape_layer;
-    u32 hair = 0;
-    i32 hair_layer = data->hair_layer;
-    if (hair_layer != -1)
-        hair = 1u << hair_layer;
-    if (object->field_0x108e != 0)
-        mask &= ~hair;
-    SUIT_s *suit = static_cast<SUIT_s *>(object->suit);
-    if (suit != NULL && object->id == id_BATMAN) {
-        if ((suit->flags & 4) != 0) {
-            mask = (mask & ~cape) | SpecialLayer[0].mask;
-            mask = (mask & ~SpecialLayer[3].mask) | SpecialLayer[5].mask;
-            if ((mask & SpecialLayer[20].mask) != 0)
-                mask = (mask & ~SpecialLayer[20].mask) | SpecialLayer[24].mask;
-            else if ((mask & SpecialLayer[21].mask) != 0)
-                mask = (mask & ~SpecialLayer[21].mask) | SpecialLayer[25].mask;
-            mask = (mask & ~SpecialLayer[17].mask) | SpecialLayer[19].mask;
-        } else if ((suit->flags & 2) != 0) {
-            mask &= ~cape;
-        } else if ((suit->flags & 8) != 0) {
-            mask = (mask & ~cape) | SpecialLayer[1].mask | SpecialLayer[7].mask;
-            mask = (mask & ~SpecialLayer[3].mask) | SpecialLayer[4].mask;
-            if ((mask & SpecialLayer[20].mask) != 0)
-                mask = (mask & ~SpecialLayer[20].mask) | SpecialLayer[22].mask;
-            else if ((mask & SpecialLayer[21].mask) != 0)
-                mask = (mask & ~SpecialLayer[21].mask) | SpecialLayer[23].mask;
-            mask = (mask & ~SpecialLayer[17].mask) | SpecialLayer[18].mask;
-            if ((mask & SpecialLayer[8].mask) != 0)
-                mask = (mask & ~SpecialLayer[8].mask) | SpecialLayer[14].mask;
-            else if ((mask & SpecialLayer[9].mask) != 0)
-                mask = (mask & ~SpecialLayer[9].mask) | SpecialLayer[15].mask;
-            else if ((mask & SpecialLayer[10].mask) != 0)
-                mask = (mask & ~SpecialLayer[10].mask) | SpecialLayer[16].mask;
-        } else if ((suit->flags & 1) != 0) {
-            mask |= SpecialLayer[2].mask;
-            if ((mask & SpecialLayer[8].mask) != 0)
-                mask = (mask & ~SpecialLayer[8].mask) | SpecialLayer[11].mask;
-            else if ((mask & SpecialLayer[9].mask) != 0)
-                mask = (mask & ~SpecialLayer[9].mask) | SpecialLayer[12].mask;
-            else if ((mask & SpecialLayer[10].mask) != 0)
-                mask = (mask & ~SpecialLayer[10].mask) | SpecialLayer[13].mask;
-        }
-    } else if (suit != NULL && object->id == id_ROBIN) {
-        if ((suit->flags & 0x10) != 0) {
-            mask = (mask & ~(hair | cape)) | SpecialLayer[27].mask;
-            if ((mask & SpecialLayer[30].mask) != 0)
-                mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[39].mask;
-            else if ((mask & SpecialLayer[31].mask) != 0)
-                mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[40].mask;
-            else if ((mask & SpecialLayer[32].mask) != 0)
-                mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[41].mask;
-        } else if ((suit->flags & 0x40) != 0) {
-            mask = (mask & ~cape) | SpecialLayer[26].mask;
-            if ((mask & SpecialLayer[30].mask) != 0)
-                mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[36].mask;
-            else if ((mask & SpecialLayer[31].mask) != 0)
-                mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[37].mask;
-            else if ((mask & SpecialLayer[32].mask) != 0)
-                mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[38].mask;
-        } else if ((suit->flags & 0x20) != 0) {
-            mask = (mask & ~cape) | SpecialLayer[28].mask;
-            if ((mask & SpecialLayer[30].mask) != 0)
-                mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[33].mask;
-            else if ((mask & SpecialLayer[31].mask) != 0)
-                mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[34].mask;
-            else if ((mask & SpecialLayer[32].mask) != 0)
-                mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[35].mask;
-        } else if ((suit->flags & 0x80) != 0) {
-            mask = (mask & ~cape) | SpecialLayer[29].mask;
-        }
-    }
-    if (object->id == id_BODYGUARD) {
-        if (object->current_hp <= 1)
-            mask &= ~0x10u;
-    } else if (object->id == id_GEONOSIAN) {
-        if ((object->field_0xefd & 2) != 0)
-            mask |= 0x20;
-        else
-            mask |= 0x40;
-    } else if (CharacterCustomiser != NULL && object->id == CharacterCustomiser->character_ids[0]) {
-        if ((CharacterCustomiser->pieces[static_cast<u16>(Game.customizer[0].pieces[5])].layer_flags & 0x40) == 0)
-            mask |= cape;
-    } else if (CharacterCustomiser != NULL && object->id == CharacterCustomiser->character_ids[1]) {
-        if ((CharacterCustomiser->pieces[static_cast<u16>(Game.customizer[1].pieces[5])].layer_flags & 0x40) == 0)
-            mask |= cape;
-    } else if (object->id == id_CHEWBACCA) {
-        if (Cheat_IsOn(4) != 0)
-            mask |= 0xc0;
-        data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-    }
-    if (data->ride_layers_off != 0 && object->field_0xcc0 != NULL && object->field_0x7a5 == 0x3b)
-        mask &= ~data->ride_layers_off;
-    return mask;
-}
-
-void SetPlayerGroupPosition(f32 x, f32 y, f32 z) {
-    NUVEC offset = {0.0f, 0.0f, 0.2f};
-    for (i32 i = 0; i < PLAYERCOUNT; i++) {
-        NUVEC position = {x, y, z};
-        NuVecAdd(&position, &position, &offset);
-        ResetPlayer(Player[i], 1, &position, 1);
-        NuVecRotateY(&offset, &offset, 0x2000);
-    }
-}
+void SetPlayerGroupPosition(f32 x, f32 y, f32 z);
 
 bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, float &distance_squared,
                             bool require_character_flags, u32 character_flags) {
