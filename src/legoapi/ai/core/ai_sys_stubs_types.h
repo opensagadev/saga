@@ -1,5 +1,7 @@
 #pragma once
 
+#include "decomp.h"
+
 // Types shared by legoapi/ai/core/ai_sys_stubs.cpp and legoapi/ai/core/aisysall.cpp.
 
 extern "C" {
@@ -37,3 +39,8 @@ extern "C" {
         f32 negative_min_view_height;
     };
 }
+
+DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation) == 0x8f, "editor creature activation offset");
+DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation_area) == 0x6c, "editor creature area offset");
+DECOMP_ASSERT(offsetof(RebuildEditorCreature, path_check) == 0x38, "editor creature path offset");
+DECOMP_ASSERT(sizeof(RebuildEditorCreature) == 0xac, "editor creature rebuild stride");

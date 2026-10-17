@@ -163,9 +163,6 @@ set_flags:
 }
 
 #include "legoapi/gizmo/base/gizflow_types.h"
-DECOMP_ASSERT(sizeof(FLOWREMAP) == 0x70, "Flow remap ABI");
-DECOMP_ASSERT(offsetof(FLOWREMAP, children) == 0x20, "Flow remap children offset");
-DECOMP_ASSERT(offsetof(FLOWREMAP, parent_outputs) == 0x60, "Flow remap output offset");
 static FLOWREMAP *remap;
 static i32 numRemaps;
 static i32 load_nparents;
@@ -275,7 +272,6 @@ static const FLOWCONDITIONTYPE ConditionTypes[] = {
     {0, "All", NULL},  {1, "Any", NULL},           {2, "None", NULL}, {3, "Sum", loadSumBox},
     {4, "loop", NULL}, {5, "exactly", loadSumBox}, {-1, NULL, NULL},
 };
-DECOMP_ASSERT(sizeof(FLOWCONDITIONTYPE) == 12, "Flow condition type ABI");
 
 static void xConditionType(nufpar_s *parser) {
     NuFParGetWord(parser);

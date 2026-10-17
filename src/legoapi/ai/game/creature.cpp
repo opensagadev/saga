@@ -419,18 +419,9 @@ i32 testshadowfix = 1;
 
 namespace {
 #include "legoapi/render/core/terrain_types.h"
-    DECOMP_ASSERT(sizeof(TERRAIN_SCENE_OBJECT) == 0x50, "TERRAIN_SCENE_OBJECT ABI");
 
-    DECOMP_ASSERT(sizeof(TERRAIN_DISPLAY_OBJECT) == 0xd0, "TERRAIN_DISPLAY_OBJECT ABI");
-    DECOMP_ASSERT(offsetof(TERRAIN_DISPLAY_OBJECT, transform) == 0xb8, "TERRAIN_DISPLAY_OBJECT transform offset");
-    DECOMP_ASSERT(offsetof(TERRAIN_DISPLAY_OBJECT, scene_object_index) == 0xc0,
-                  "TERRAIN_DISPLAY_OBJECT scene_object_index offset");
 
-    DECOMP_ASSERT(offsetof(TERRAIN_DISPLAY_SCENE, object_count) == 0x6c, "TERRAIN_DISPLAY_SCENE object_count offset");
 
-    DECOMP_ASSERT(offsetof(TERRAIN_GSCENE, object_count) == 0x1c, "TERRAIN_GSCENE object_count offset");
-    DECOMP_ASSERT(offsetof(TERRAIN_GSCENE, object_map_present) == 0x58, "TERRAIN_GSCENE object_map_present offset");
-    DECOMP_ASSERT(offsetof(TERRAIN_GSCENE, display_scene) == 0x110, "TERRAIN_GSCENE display_scene offset");
 
 } // namespace
 
@@ -603,7 +594,6 @@ namespace {
 
 namespace {
 
-    DECOMP_ASSERT(sizeof(TERRAIN_IMPACT_RECORD) == 0x1c, "TERRAIN_IMPACT_RECORD ABI");
 
 } // namespace
 
@@ -616,7 +606,6 @@ namespace {
 static TERRAIN_KILL_PLAYER_ATTR i32 TerrainKillPlayer(GameObject_s *object, i32 surface, const f32 *normal_y)
     __asm__("_ZL17TerrainKillPlayerP12GameObject_siP7nuvec_s.isra.4");
 
-DECOMP_ASSERT(sizeof(TERRAIN_DEBUG_RECORD) == 100, "Terrain debug record ABI");
 
 namespace {
 
@@ -688,7 +677,6 @@ static inline PlayerAIFlagBits *PlayerAIFlags(u8 *object, i32 offset) {
     return reinterpret_cast<PlayerAIFlagBits *>(object + offset);
 }
 
-DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 
 static SPECIAL_LAYER_s SpecialLayer[] = {
     {&id_BATMAN, "bombbackpack", 0},       {&id_BATMAN, "sonargun", 0},          {&id_BATMAN, "infrared_goggles", 0},
@@ -754,17 +742,12 @@ GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 
 
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
-DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
                                     i32 (*)(GameObject_s *), bool);
 
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 
 // The retail move.cpp initializer owns these four managed references.
 extern MechWeakPtr<MechObjectInterface, 4> nextShootTarget;
@@ -826,8 +809,6 @@ extern "C" {
     extern i16 id_MINIATST, id_MINIATTE;
 }
 
-DECOMP_ASSERT(sizeof(AWKWARDSHAPESPHERE_s) == 12, "Awkward shape sphere size");
-DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere radius offset");
 
 extern i16 id_MINIATST, id_MINIATTE;
 
@@ -852,12 +833,8 @@ extern "C" {
 
 extern i16 id_WOOKIEE;
 
-DECOMP_ASSERT(sizeof(VADERA_s) == 0x30, "VADERA_s size");
-DECOMP_ASSERT(offsetof(VADERA_s, big_jump_locator) == 0x24, "VADERA_s locator offset");
 
-DECOMP_ASSERT(offsetof(CRUISERC_s, count_dooku) == 4, "CRUISERC_s Dooku offset");
 
-DECOMP_ASSERT(sizeof(CRUISERDNETPACKET_s) == 12, "Cruiser D packet size");
 
 // Dogfight (Dogfight_A)
 
@@ -879,7 +856,6 @@ void UpdateRumble(RUMBLEPACKET *packet);
 
 // The reference defines these with dynamic initialization in this unit.
 
-DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
 // Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
 // Transcribed from the original C-linkage symbols:
@@ -894,8 +870,6 @@ extern "C" {
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-    static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
-                  "complete game AI condition registry");
 
 }
 

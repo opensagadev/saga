@@ -1,5 +1,7 @@
 #pragma once
 
+#include "decomp.h"
+
 // Types shared by legoapi/world/levels/hub.cpp and legoapi/ai/game/lsw_hub_ai.cpp.
 
 enum HUB_DOOR_MENU_ID {
@@ -54,3 +56,8 @@ struct ARCADE_LEVEL_s {
     AREADATA **area;
     i16 *character_id;
 };
+
+DECOMP_ASSERT(offsetof(HUBAREAINFO_s, area) == 0x20, "HUBAREAINFO_s area offset");
+DECOMP_ASSERT(offsetof(HUBAREAINFO_s, force_open) == 0x1d, "HUBAREAINFO_s force_open offset");
+DECOMP_ASSERT(sizeof(HUBAREAINFO_s) == 0x3c, "HUBAREAINFO_s size");
+DECOMP_ASSERT(sizeof(HUBEPISODEINFO_s) == 0x34, "HUBEPISODEINFO_s size");

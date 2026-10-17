@@ -1,5 +1,7 @@
 #pragma once
 
+#include "decomp.h"
+
 // Types shared by legoapi/world/levels/episodeIII.cpp and legoapi/ai/game/creature.cpp.
 
 struct VADERA_s {
@@ -36,3 +38,8 @@ struct VADERANETPACKET_s {
     i16 subtitle;
     f32 timer;
 };
+
+DECOMP_ASSERT(offsetof(CRUISERC_s, count_dooku) == 4, "CRUISERC_s Dooku offset");
+DECOMP_ASSERT(offsetof(VADERA_s, big_jump_locator) == 0x24, "VADERA_s locator offset");
+DECOMP_ASSERT(sizeof(CRUISERDNETPACKET_s) == 12, "Cruiser D packet size");
+DECOMP_ASSERT(sizeof(VADERA_s) == 0x30, "VADERA_s size");

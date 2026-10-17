@@ -129,7 +129,6 @@ static i32 TBDRAWCOUNT;
 static i32 TBPLAYERCOUNT;
 static i32 TBAICOUNT;
 
-DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
 static TIMINGBAR_LABEL GameTB[12];
 static TIMINGBAR_LABEL PlayerTB[12];

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "decomp.h"
+
 // Types shared by legoapi/world/levels/episodeII.cpp and legoapi/characters/motion/move.cpp.
 
 // This level's view of the shared 16-byte LevFlag scratch. byte0 holds the
@@ -159,3 +161,11 @@ struct JEDIBNETPACKET_s {
     i16 ids[8];      // 0x08
     char spawned[8]; // 0x18
 };
+
+DECOMP_ASSERT(sizeof(DOOKU_C_s) == 20, "Dooku C state ABI");
+DECOMP_ASSERT(sizeof(JEDIBNETPACKET_s) == 0x20, "JEDIBNETPACKET_s ABI");
+DECOMP_ASSERT(sizeof(JEDIB_CREATURE_s) == 0x60, "JEDIB_CREATURE_s ABI");
+DECOMP_ASSERT(sizeof(JEDIB_s) == 0x63ec, "JEDIB_s ABI");
+DECOMP_ASSERT(sizeof(KAMINODISCO_s) == 1000, "Kamino disco original layout");
+DECOMP_ASSERT(sizeof(KAMINO_E_s) == 120, "Kamino E state ABI");
+static_assert(sizeof(struct GUNSHIP_LEVFLAG_s) == 16, "LevFlag must be 16 bytes");

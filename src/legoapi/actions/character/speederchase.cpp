@@ -72,7 +72,6 @@ f32 speeder_kill_dist = 75.0f;
 f32 speeder_midrange_time = 10.0f;
 f32 speeder_ahead_time = 15.0f;
 f32 speeder_mode_ahead_timer;
-DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 i32 objopponent_ignoreaiopponent;

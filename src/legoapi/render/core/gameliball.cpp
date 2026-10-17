@@ -214,7 +214,6 @@ static u8 *crashdata;
 
 namespace {
 
-    DECOMP_ASSERT(sizeof(TERRAIN_FILE_CHUNK) == 0x34, "TERRAIN_FILE_CHUNK ABI");
 
     inline void BuildTerrainSpatialBounds(TERRAIN_SPATIAL_NODE *node) {
         // Every block covers sixteen terrain cells and therefore seventeen
@@ -1608,7 +1607,6 @@ SoundGroup g_groups[128];
 i32 g_lenGroupBuffer;
 i16 g_groupBuffer[512];
 
-DECOMP_ASSERT(sizeof(SoundGroup) == 8, "SoundGroup size");
 
 NUSOUNDINFO *g_soundInfo;
 NUSOUNDINFO *g_revertSoundInfo;
@@ -1651,7 +1649,6 @@ static inline char CRC_ToUpper(char c) {
     return c;
 }
 
-DECOMP_ASSERT(sizeof(RepeatSfx) == 0x10, "RepeatSfx size");
 
 static f32 MusicVolume = 1.0f;
 static f32 CutVolume = 0.8f;
@@ -1731,7 +1728,6 @@ extern "C" {
 #include <xmmintrin.h>
 #endif
 
-DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
 // Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
 // Transcribed from the original C-linkage symbols:
@@ -1933,17 +1929,12 @@ extern "C" {
 
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
-DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
                                     i32 (*)(GameObject_s *), bool);
 
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 
 #if defined(__SSE__)
 #include <xmmintrin.h>
@@ -1957,7 +1948,6 @@ extern "C" i32 edbri_rotz, edbri_roty, edbri_planks, edbri_post_interval;
 extern "C" i32 edbri_plank_instance_type, edbri_post_instance_type, edbri_bridges_used;
 
 extern f32 Scale;
-DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
 extern "C" {
     i32 edgra_mode = 1;
@@ -2098,18 +2088,9 @@ static i32 TerrShapeAdjCnt;
 
 namespace {
 #include "legoapi/render/core/terrain_types.h"
-    DECOMP_ASSERT(sizeof(TERRAIN_SCENE_OBJECT) == 0x50, "TERRAIN_SCENE_OBJECT ABI");
 
-    DECOMP_ASSERT(sizeof(TERRAIN_DISPLAY_OBJECT) == 0xd0, "TERRAIN_DISPLAY_OBJECT ABI");
-    DECOMP_ASSERT(offsetof(TERRAIN_DISPLAY_OBJECT, transform) == 0xb8, "TERRAIN_DISPLAY_OBJECT transform offset");
-    DECOMP_ASSERT(offsetof(TERRAIN_DISPLAY_OBJECT, scene_object_index) == 0xc0,
-                  "TERRAIN_DISPLAY_OBJECT scene_object_index offset");
 
-    DECOMP_ASSERT(offsetof(TERRAIN_DISPLAY_SCENE, object_count) == 0x6c, "TERRAIN_DISPLAY_SCENE object_count offset");
 
-    DECOMP_ASSERT(offsetof(TERRAIN_GSCENE, object_count) == 0x1c, "TERRAIN_GSCENE object_count offset");
-    DECOMP_ASSERT(offsetof(TERRAIN_GSCENE, object_map_present) == 0x58, "TERRAIN_GSCENE object_map_present offset");
-    DECOMP_ASSERT(offsetof(TERRAIN_GSCENE, display_scene) == 0x110, "TERRAIN_GSCENE display_scene offset");
 
 } // namespace
 
@@ -2334,7 +2315,6 @@ i16 debug_index;
 
 namespace {
 
-    DECOMP_ASSERT(sizeof(TERRAIN_IMPACT_RECORD) == 0x1c, "TERRAIN_IMPACT_RECORD ABI");
 
 } // namespace
 
@@ -2345,7 +2325,6 @@ namespace {
 #define TERRAIN_KILL_PLAYER_ATTR __attribute__((noinline, noclone))
 #endif
 
-DECOMP_ASSERT(sizeof(TERRAIN_DEBUG_RECORD) == 100, "Terrain debug record ABI");
 
 static inline void ResetRayCastState() {
     plathitid = -1;

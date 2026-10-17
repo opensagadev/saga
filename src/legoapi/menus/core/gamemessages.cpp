@@ -96,9 +96,6 @@ GAMEMESSAGE_s GameMessage[128] = {};
 
 static i32 GameMessageIndex;
 
-static_assert(sizeof(GAME_MESSAGE_DATA) == sizeof(GAMEMESSAGE_s), "game message backing layout");
-static_assert(offsetof(GAME_MESSAGE_DATA, tick_fn) == offsetof(GAMEMESSAGE_s, tick_fn),
-              "game message backing callback offset");
 
 ADDGAMEMSG AddGameMsg_Default = {
     NULL, &v000, &v000, 1.0f, 1.0f, 0xff, 0xff, 0xff, 0x80, 0,  1.0f, 0.0f, 0, -1,

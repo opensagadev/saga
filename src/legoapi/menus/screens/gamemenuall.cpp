@@ -943,7 +943,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 extern EdInputContext * Input;
 
 extern f32 Scale;
-DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
 extern EdEnumControl::Item OpenClosedItems[3];
 extern EdEnumControl::Item OnOffItems[3];
@@ -1150,8 +1149,6 @@ extern "C" {
     // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
-    DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -1242,12 +1239,6 @@ extern "C" {
     // Culling / visibility / portals / occlusion
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, nodes) == 0x14, "instance tree nodes offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, roots) == 0x20, "instance tree roots offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, far_clips) == 0x24, "instance tree far clips offset");
     extern "C++" {
         // Retail only has the IPA-SRA clone (the unused scene and bits arguments dropped).
     }
@@ -1302,22 +1293,16 @@ union variptr_u;
 
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 
-DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
-DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
                                     i32 (*)(GameObject_s *), bool);
 
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 
 #if defined(__i386__)
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
@@ -1407,8 +1392,6 @@ extern "C" {
     // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
-    DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -1499,12 +1482,6 @@ extern "C" {
     // Culling / visibility / portals / occlusion
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, nodes) == 0x14, "instance tree nodes offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, roots) == 0x20, "instance tree roots offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, far_clips) == 0x24, "instance tree far clips offset");
     extern "C++" {
         // Retail only has the IPA-SRA clone (the unused scene and bits arguments dropped).
     }

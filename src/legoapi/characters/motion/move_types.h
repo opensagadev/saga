@@ -1,5 +1,7 @@
 #pragma once
 
+#include "decomp.h"
+
 // Types shared by legoapi/characters/motion/move.cpp and legoapi/ai/game/creature.cpp.
 
 enum JEDI_ACTION : i16 {
@@ -12,3 +14,6 @@ struct AWKWARDSHAPESPHERE_s {
     u16 flags;
     f32 radius;
 };
+
+DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere radius offset");
+DECOMP_ASSERT(sizeof(AWKWARDSHAPESPHERE_s) == 12, "Awkward shape sphere size");

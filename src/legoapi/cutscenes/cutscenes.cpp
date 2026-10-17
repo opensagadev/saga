@@ -531,8 +531,6 @@ static CUTSYS *CutScenes_LoadFromList(NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, 
 
 // --- Extern "C" block: functions with confirmed C linkage in original libTTapp.so ---
 
-DECOMP_ASSERT(sizeof(CutSceneTriggerNameEntry) == 0x34, "cutscene trigger name entry stride");
-DECOMP_ASSERT(offsetof(CutSceneTriggerNameTable, entries) == 0x0c, "cutscene trigger name table entries offset");
 
 // The relocation tables are patched as plain words, so every fixup aliases
 // cutscene->string_delta and re-reads it.
@@ -618,8 +616,6 @@ extern "C" {
     // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
-    DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -710,12 +706,6 @@ extern "C" {
     // Culling / visibility / portals / occlusion
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, nodes) == 0x14, "instance tree nodes offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, roots) == 0x20, "instance tree roots offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, far_clips) == 0x24, "instance tree far clips offset");
 
     // ---------------------------------------------------------------------------
     // Viewport
@@ -765,10 +755,6 @@ union variptr_u;
 
 extern "C" {
 #include "legoapi/ai/core/ai_sys_stubs_types.h"
-    DECOMP_ASSERT(sizeof(RebuildEditorCreature) == 0xac, "editor creature rebuild stride");
-    DECOMP_ASSERT(offsetof(RebuildEditorCreature, path_check) == 0x38, "editor creature path offset");
-    DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation_area) == 0x6c, "editor creature area offset");
-    DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation) == 0x8f, "editor creature activation offset");
 } // extern "C"
 
 #if defined(__i386__)
@@ -788,7 +774,6 @@ namespace {
 
 } // namespace
 
-DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 
 // Forward declarations for local (static) character/gameplay helper stubs.
 struct nuvec_s;
@@ -1154,7 +1139,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 extern EdInputContext * Input;
 
-DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
 inline EdMatrixControl::~EdMatrixControl() {
     Destroy();
@@ -1371,19 +1355,13 @@ extern "C" {
 
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 
-DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
-DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \

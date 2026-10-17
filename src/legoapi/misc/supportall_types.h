@@ -1,5 +1,7 @@
 #pragma once
 
+#include "decomp.h"
+
 // Types shared by legoapi/misc/supportall.cpp and legoapi/render/core/gameliball.cpp.
 
 struct BIGBUFFER_s {
@@ -21,3 +23,5 @@ struct TexQuadVertex {
         u16 half_uv[4];
     };
 };
+
+DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");

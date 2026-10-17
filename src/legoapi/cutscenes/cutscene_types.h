@@ -1,5 +1,7 @@
 #pragma once
 
+#include "decomp.h"
+
 // Types shared by legoapi/cutscenes/cutscene.cpp and legoapi/cutscenes/gcutscn.cpp.
 
 // Name table passed as NuGCutSceneFixUp's third argument: count at +0x08 and 0x34-byte entries at +0x0c
@@ -13,3 +15,6 @@ struct CutSceneTriggerNameTable {
     i32 count;
     CutSceneTriggerNameEntry *entries;
 };
+
+DECOMP_ASSERT(offsetof(CutSceneTriggerNameTable, entries) == 0x0c, "cutscene trigger name table entries offset");
+DECOMP_ASSERT(sizeof(CutSceneTriggerNameEntry) == 0x34, "cutscene trigger name entry stride");

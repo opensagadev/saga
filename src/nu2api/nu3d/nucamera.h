@@ -1,5 +1,7 @@
 #pragma once
 
+#include "decomp.h"
+
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/nuvec4.h"
@@ -195,3 +197,6 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
+DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");

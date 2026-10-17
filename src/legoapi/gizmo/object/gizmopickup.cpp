@@ -322,9 +322,6 @@ struct SHOPINPUT;
 
 extern void IncreaseScore(u32 *, u64, i32);
 
-static_assert(sizeof(GAME_MESSAGE_DATA) == sizeof(GAMEMESSAGE_s), "game message backing layout");
-static_assert(offsetof(GAME_MESSAGE_DATA, tick_fn) == offsetof(GAMEMESSAGE_s, tick_fn),
-              "game message backing callback offset");
 
 void IncreaseScore(u32 *, u64, i32);
 

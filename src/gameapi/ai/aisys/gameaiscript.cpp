@@ -1797,8 +1797,6 @@ extern "C" {
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-    static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
-                  "complete game AI condition registry");
 
     AIGETNAMEDAPIOBJECT *GetNamedAPIObjectFn;
 }

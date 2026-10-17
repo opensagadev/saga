@@ -211,7 +211,6 @@ namespace {
 
 } // namespace
 
-DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 
 extern "C" {
     extern "C++" FadeSystem FadeSys;
@@ -289,7 +288,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
 
 // The reference defines these with dynamic initialization in this unit.
 
-DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
 static inline void TexQuadSubmit(NUVEC const &point, i32 colour, i32 u, i32 v) {
     TexQuadVertex *vertex = static_cast<TexQuadVertex *>(g_NuPrim_StreamBufferPtr->void_ptr);

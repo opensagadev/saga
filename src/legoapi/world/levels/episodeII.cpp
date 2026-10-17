@@ -157,7 +157,6 @@ extern nuhspecial_s disco_on_spin[3], walllights_disco[2], walllights[2], stripl
     discorm_wall_off, discorm_wall_on;
 extern GIZMO *disco_off_spina[3], *gizTurrets[2];
 
-static_assert(sizeof(struct GUNSHIP_LEVFLAG_s) == 16, "LevFlag must be 16 bytes");
 extern struct GUNSHIP_LEVFLAG_s LevFlag;
 
 // --- Cross-file entry points / id globals ---
@@ -198,17 +197,14 @@ extern "C" {
 
 // --- File-local statics (original _ZL... symbols; not renamed) ---------------
 
-DECOMP_ASSERT(sizeof(KAMINODISCO_s) == 1000, "Kamino disco original layout");
 static KAMINODISCO_s kaminodisco;
 KAMINOC_PACKET_s *kaminoc_netpacket;
 
 nuhspecial_s disco_on_spin[3];
 GIZMO *disco_off_spina[3];
 
-DECOMP_ASSERT(sizeof(DOOKU_C_s) == 20, "Dooku C state ABI");
 static DOOKU_C_s dooku_c;
 
-DECOMP_ASSERT(sizeof(KAMINO_E_s) == 120, "Kamino E state ABI");
 static KAMINO_E_s kamino_e;
 
 // Kamino
@@ -255,13 +251,10 @@ f32 FactoryBConveyorStopFrame = 28.0f;
 
 // Jedi (Jedi_B)
 
-DECOMP_ASSERT(sizeof(JEDIB_CREATURE_s) == 0x60, "JEDIB_CREATURE_s ABI");
 
-DECOMP_ASSERT(sizeof(JEDIB_s) == 0x63ec, "JEDIB_s ABI");
 
 static JEDIB_s jedi_b;
 
-DECOMP_ASSERT(sizeof(JEDIBNETPACKET_s) == 0x20, "JEDIBNETPACKET_s ABI");
 
 static JEDIB_PHASE_s jedi_b_phase1[8] = {
     {&id_DROIDEKA, "phase_droids"},
@@ -402,8 +395,6 @@ extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
 struct FLOWBOX_s;
 
-DECOMP_ASSERT(sizeof(GIZMOTYPES) == 0xc, "Gizmo type-table header ABI");
-DECOMP_ASSERT(offsetof(GIZMOTYPES, types) == 8, "Gizmo type-table pointer offset");
 
 i32 PAINTPUZZLESTAGE;
 i32 played_sound;

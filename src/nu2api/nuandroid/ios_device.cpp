@@ -125,8 +125,6 @@ extern "C" {
     // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
-    DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -226,12 +224,6 @@ static void DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM
     // Culling / visibility / portals / occlusion
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, nodes) == 0x14, "instance tree nodes offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, roots) == 0x20, "instance tree roots offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, far_clips) == 0x24, "instance tree far clips offset");
     extern "C++" {
         // Retail only has the IPA-SRA clone (the unused scene and bits arguments dropped).
         static __attribute__((noinline, noclone)) void

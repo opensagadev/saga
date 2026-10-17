@@ -553,9 +553,6 @@ static __used__ void BackDrop_Alpha(float *alpha);
 static __used__ float GizmoPickups_Collide2D(GameObject_s *object);
 
 #include "legoapi/menus/core/gamehint_types.h"
-DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
-DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
-DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
 
@@ -616,8 +613,6 @@ extern void (*CutScene_OverrideConfigFileNameFn)(char *, i32, i32);
 
 // --- Extern "C" block: functions with confirmed C linkage in original libTTapp.so ---
 
-DECOMP_ASSERT(sizeof(CutSceneTriggerNameEntry) == 0x34, "cutscene trigger name entry stride");
-DECOMP_ASSERT(offsetof(CutSceneTriggerNameTable, entries) == 0x0c, "cutscene trigger name table entries offset");
 
 // The relocation tables are patched as plain words, so every fixup aliases
 // cutscene->string_delta and re-reads it.
@@ -736,10 +731,6 @@ extern "C" {
 void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
 
 #include "legoapi/ai/core/ai_sys_stubs_types.h"
-    DECOMP_ASSERT(sizeof(RebuildEditorCreature) == 0xac, "editor creature rebuild stride");
-    DECOMP_ASSERT(offsetof(RebuildEditorCreature, path_check) == 0x38, "editor creature path offset");
-    DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation_area) == 0x6c, "editor creature area offset");
-    DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation) == 0x8f, "editor creature activation offset");
 } // extern "C"
 
 #if defined(__i386__)
@@ -750,10 +741,7 @@ void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *
 
 struct nupad_s;
 
-DECOMP_ASSERT(sizeof(EDAIAREA_s) == 0x44, "area editor record size");
 
-DECOMP_ASSERT(sizeof(AIPATHCNXTYPE_s) == 0x4c, "editor path connection type size");
-DECOMP_ASSERT(offsetof(AIPATHCNXTYPE_s, flags) == 0x48, "editor path connection options offset");
 
 // Retail splits the null checks into each caller and keeps the body as a
 // partial-inlining clone; its connection searches are fully peeled.
@@ -763,8 +751,6 @@ struct AIPATH_s;
 struct eduimenu_s;
 struct eduiitem_s;
 
-DECOMP_ASSERT(offsetof(EdUiNameInputItem, name) == 0x4c, "editor name input offset");
-DECOMP_ASSERT(offsetof(EdUiNameInputItem, max_name_length) == 0x15a, "editor name input limit offset");
 
 static __used__ void pathEditor_cbCancelRenamePathMenu(eduimenu_s *, eduimenu_s *);
 static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *, eduimenu_s *);
@@ -813,21 +799,6 @@ static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s 
 
 struct AIPATHSYS_s;
 
-DECOMP_ASSERT(offsetof(CreatureEditorRecord, valid_positions) == 0x54, "creature valid position mask offset");
-DECOMP_ASSERT(offsetof(CreatureEditorRecord, position) == 0x28, "creature position offset");
-DECOMP_ASSERT(offsetof(CreatureEditorRecord, script_name) == 0x18, "creature script name offset");
-DECOMP_ASSERT(offsetof(CreatureEditorRecord, script_params) == 0x70, "creature script params offset");
-DECOMP_ASSERT(offsetof(CreatureEditorRecord, angle) == 0x34, "creature angle offset");
-DECOMP_ASSERT(offsetof(CreatureEditorRecord, character_type) == 0x58, "creature character type offset");
-DECOMP_ASSERT(offsetof(CreatureEditorRecord, path) == 0x3c, "creature path offset");
-DECOMP_ASSERT(offsetof(CreatureEditorRecord, set) == 0x5a, "creature set offset");
-DECOMP_ASSERT(offsetof(CreatureEditorRecord, flags) == 0x68, "creature flags offset");
-DECOMP_ASSERT(offsetof(CreatureEditorRecord, activation_area) == 0x6c, "creature activation area offset");
-DECOMP_ASSERT(offsetof(CreatureEditorRecord, trigger_area) == 0x80, "creature trigger area offset");
-DECOMP_ASSERT(offsetof(CreatureEditorRecord, activation) == 0x8f, "creature activation offset");
-DECOMP_ASSERT(offsetof(CreatureEditorRecord, view_distance) == 0x9c, "creature view distance offset");
-DECOMP_ASSERT(offsetof(CreatureEditorRecord, negative_min_view_height) == 0xa8, "creature min view height offset");
-DECOMP_ASSERT(sizeof(CreatureEditorRecord) == 0xac, "editor creature record size");
 
 #if defined(__i386__)
 #define CREATURE_EDITOR_REGPARM2 __attribute__((regparm(2)))
@@ -897,8 +868,6 @@ extern i32 nbaddies_can_see_players;
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-    static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
-                  "complete game AI condition registry");
 
 }
 
@@ -919,10 +888,6 @@ namespace {
 
 } // namespace
 
-DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
-DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
-DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_flags) == 0xe2f, "Quick shoot flags offset");
-DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot bolt ID offset");
 
 #if defined(__i386__)
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
@@ -1298,7 +1263,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 extern EdInputContext * Input;
 
 extern f32 Scale;
-DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
 extern EdEnumControl::Item OpenClosedItems[3];
 extern EdEnumControl::Item OnOffItems[3];
@@ -1502,8 +1466,6 @@ extern "C" {
     // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
-    DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -1594,12 +1556,6 @@ extern "C" {
     // Culling / visibility / portals / occlusion
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, nodes) == 0x14, "instance tree nodes offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, roots) == 0x20, "instance tree roots offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, far_clips) == 0x24, "instance tree far clips offset");
     extern "C++" {
         // Retail only has the IPA-SRA clone (the unused scene and bits arguments dropped).
     }
@@ -1653,24 +1609,18 @@ union variptr_u;
 
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 
-DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 extern i16 id_GAMORREANGUARD;
 
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
-DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
                                     i32 (*)(GameObject_s *), bool);
 
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 
 extern void (*FS_Callback)(char *, char *);
 
@@ -1768,8 +1718,6 @@ extern "C" {
     // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
-    DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -1860,12 +1808,6 @@ extern "C" {
     // Culling / visibility / portals / occlusion
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, nodes) == 0x14, "instance tree nodes offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, roots) == 0x20, "instance tree roots offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, far_clips) == 0x24, "instance tree far clips offset");
     extern "C++" {
         // Retail only has the IPA-SRA clone (the unused scene and bits arguments dropped).
     }
@@ -2238,8 +2180,6 @@ extern "C" {
     // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
-    DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -2330,12 +2270,6 @@ extern "C" {
     // Culling / visibility / portals / occlusion
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, nodes) == 0x14, "instance tree nodes offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, roots) == 0x20, "instance tree roots offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, far_clips) == 0x24, "instance tree far clips offset");
     extern "C++" {
         // Retail only has the IPA-SRA clone (the unused scene and bits arguments dropped).
     }
@@ -2461,8 +2395,6 @@ extern "C" {
     // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
-    DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -2553,12 +2485,6 @@ extern "C" {
     // Culling / visibility / portals / occlusion
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, nodes) == 0x14, "instance tree nodes offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, roots) == 0x20, "instance tree roots offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, far_clips) == 0x24, "instance tree far clips offset");
     extern "C++" {
         // Retail only has the IPA-SRA clone (the unused scene and bits arguments dropped).
     }
@@ -2642,7 +2568,6 @@ i32 FalconDebKey[2] = {-1, -1};
 extern f32 LevelNameTime;
 extern f32 LevelNameMul;
 
-DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
 f32 TargetDist_Near2;
 f32 TargetDist_Mid2;
@@ -2671,8 +2596,6 @@ extern i32 nbaddies_can_see_players;
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-    static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
-                  "complete game AI condition registry");
 
 }
 
@@ -2720,8 +2643,6 @@ extern i32 nbaddies_can_see_players;
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-    static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
-                  "complete game AI condition registry");
 
 }
 
@@ -2735,9 +2656,6 @@ extern "C" {
 extern i32 party_under_cover;
 }
 
-DECOMP_ASSERT(sizeof(TROOPERCANNON_s) == 0x30, "Trooper cannon state size");
-DECOMP_ASSERT(offsetof(TROOPERCANNON_s, character_name) == 0x0c, "Trooper cannon name offset");
-DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon rebuilding offset");
 
 #define NUGCUT_WORD(field) (*reinterpret_cast<NuGCutWord *>(&(field)))
 #define NUGCUT_RELOCATE(field, delta) \
@@ -2798,8 +2716,6 @@ extern "C" {
     // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
-    DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -2890,12 +2806,6 @@ extern "C" {
     // Culling / visibility / portals / occlusion
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, nodes) == 0x14, "instance tree nodes offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, roots) == 0x20, "instance tree roots offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, far_clips) == 0x24, "instance tree far clips offset");
     extern "C++" {
         // Retail only has the IPA-SRA clone (the unused scene and bits arguments dropped).
     }
@@ -2957,10 +2867,6 @@ extern "C" {
 void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
 
 #include "legoapi/ai/core/ai_sys_stubs_types.h"
-    DECOMP_ASSERT(sizeof(RebuildEditorCreature) == 0xac, "editor creature rebuild stride");
-    DECOMP_ASSERT(offsetof(RebuildEditorCreature, path_check) == 0x38, "editor creature path offset");
-    DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation_area) == 0x6c, "editor creature area offset");
-    DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation) == 0x8f, "editor creature activation offset");
 } // extern "C"
 
 #if defined(__i386__)
@@ -3020,7 +2926,6 @@ namespace {
 
 #include "legoapi/gizmos/object/gizobstacle_types.h"
 
-    DECOMP_ASSERT(sizeof(GIZOBSTACLEPROGRESS_s) == 0x70, "GIZOBSTACLE progress ABI");
 
 } // namespace
 

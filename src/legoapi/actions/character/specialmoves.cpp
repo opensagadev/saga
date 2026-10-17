@@ -14,9 +14,6 @@
 
 #include "legoapi/actions/character/specialmoves_types.h"
 #include "legoapi/actions/movement/jumping.h"
-DECOMP_ASSERT(sizeof(SPECIALMOVE_s) == 0x10, "SPECIALMOVE size");
-DECOMP_ASSERT(offsetof(SPECIALMOVE_s, victim_animation) == 8, "SPECIALMOVE victim animation offset");
-DECOMP_ASSERT(offsetof(SPECIALMOVE_s, flags) == 10, "SPECIALMOVE flags offset");
 static SPECIALMOVE_s *SpecialMove;
 static i32 SpecialMoveCount;
 

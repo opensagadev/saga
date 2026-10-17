@@ -78,8 +78,6 @@
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numusic/sfx.h"
 
-DECOMP_ASSERT(sizeof(GIZMOTYPES) == 0xc, "Gizmo type-table header ABI");
-DECOMP_ASSERT(offsetof(GIZMOTYPES, types) == 8, "Gizmo type-table pointer offset");
 
 extern "C" {
     extern f32 hackFlashTimer;

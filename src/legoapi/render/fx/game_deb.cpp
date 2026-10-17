@@ -80,7 +80,6 @@ extern "C" ripple_set_s *ripples;
 struct AIROW_s;
 struct nunativegscene_s;
 
-DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
 extern "C" i16 id_LANDSPEEDER;
 

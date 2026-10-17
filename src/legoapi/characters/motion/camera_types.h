@@ -1,5 +1,7 @@
 #pragma once
 
+#include "decomp.h"
+
 // Types shared by legoapi/characters/motion/camera.cpp and legoapi/render/core/gameliball.cpp.
 
 // Replaces VIEWCAM_s's five unresolved words without changing its target ABI.
@@ -25,3 +27,9 @@ struct CAMERA_CONTEXT_FOCUS_s {
     u8 reserved_00[0x28];
     NUVEC focus;
 };
+
+DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
+DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
+DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
+DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
+DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");

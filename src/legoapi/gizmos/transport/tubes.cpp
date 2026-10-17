@@ -56,9 +56,6 @@ struct TUBEPROGRESS {
 static void Tubes_Update(void *world_ptr, void *progress_ptr, float frame_time);
 
 #include "legoapi/menus/core/gamehint_types.h"
-DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
-DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
-DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
 // Each control mode retains its own requested and interpolated hint row.
 

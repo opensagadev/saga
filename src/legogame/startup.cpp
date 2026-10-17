@@ -241,7 +241,6 @@ namespace {
 
 } // namespace
 
-DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 
 struct AIROW_s;
 struct nunativegscene_s;

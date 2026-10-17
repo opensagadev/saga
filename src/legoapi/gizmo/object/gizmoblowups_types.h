@@ -1,5 +1,7 @@
 #pragma once
 
+#include "decomp.h"
+
 // Types shared by legoapi/gizmo/object/gizmoblowups.cpp and legoapi/characters/motion/move.cpp.
 
 enum GIZMOBLOWUP_OUTPUT_FLAGS : u8 {
@@ -40,3 +42,5 @@ struct BLOWUPPROGRESS_s {
     u32 visible[16];
     u32 secondary_output[16];
 };
+
+DECOMP_ASSERT(sizeof(BLOWUPPROGRESS_s) == 0x100, "BLOWUPPROGRESS_s ABI");

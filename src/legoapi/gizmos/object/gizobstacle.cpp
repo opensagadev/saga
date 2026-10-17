@@ -48,7 +48,6 @@ namespace {
 
 #include "legoapi/gizmos/object/gizobstacle_types.h"
 
-    DECOMP_ASSERT(sizeof(GIZOBSTACLEPROGRESS_s) == 0x70, "GIZOBSTACLE progress ABI");
 
     static void ClearObstacleProgress(GIZOBSTACLEPROGRESS_s *progress) {
         if (progress == NULL) {

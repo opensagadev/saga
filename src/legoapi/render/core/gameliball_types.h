@@ -1,5 +1,7 @@
 #pragma once
 
+#include "decomp.h"
+
 // Types shared by legoapi/render/core/gameliball.cpp and nu2api/nu3d/nu3d_includes.cpp.
 
 namespace {
@@ -23,3 +25,6 @@ struct SoundGroup {
     i16 field_0x4;
     i16 field_0x6;
 };
+
+DECOMP_ASSERT(sizeof(SoundGroup) == 8, "SoundGroup size");
+DECOMP_ASSERT(sizeof(TERRAIN_FILE_CHUNK) == 0x34, "TERRAIN_FILE_CHUNK ABI");

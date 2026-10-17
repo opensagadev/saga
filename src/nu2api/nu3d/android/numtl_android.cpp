@@ -171,7 +171,6 @@ namespace {
 
 } // namespace
 
-DECOMP_ASSERT(sizeof(MTL_OVERRIDE_RECORD) == 12, "Material override payload ABI");
 DECOMP_ASSERT(offsetof(NUMTL, shader_desc) + offsetof(NUSHADERMTLDESC, vtx_desc) == 0x1f0,
               "Material override vertex descriptor offset");
 

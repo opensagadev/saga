@@ -1,5 +1,7 @@
 #pragma once
 
+#include "decomp.h"
+
 // Types shared by nu2api/nusound/nusound3_include.cpp and legoapi/audio/audio.cpp.
 
 // Stereo stream slot (0x10 bytes in the original):
@@ -83,3 +85,7 @@ template <> class NuEList<NuSound3Voice, DefaultElist> {
         return end;
     }
 };
+
+DECOMP_ASSERT(sizeof(NuSound3Stream::mVoice) == 0x10, "NuSound3Stream voice pointer size");
+DECOMP_ASSERT(sizeof(NuSound3Voice) == 0x44, "NuSound3Voice size");
+DECOMP_ASSERT(sizeof(NuSoundStream) == 0x10, "NuSoundStream size");

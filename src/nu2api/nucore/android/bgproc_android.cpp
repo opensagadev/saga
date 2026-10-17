@@ -147,7 +147,6 @@ static NuThreadSemaphore events[2] = {
 
 // The reference defines these with dynamic initialization in this unit.
 
-DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];

@@ -36,7 +36,6 @@
 struct nuqtdim_s;
 struct nuqthdr_s;
 struct rtl_s;
-DECOMP_ASSERT(sizeof(rtlindex_s) == 0x28, "RTL index size");
 struct NUFRUSTRUM;
 
 static NULSTHDR *rtl_dynamic_pool;

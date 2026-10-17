@@ -138,8 +138,6 @@ u8 set_cutscenecammtx = 0;
 
 // --- Extern "C" block: functions with confirmed C linkage in original libTTapp.so ---
 
-DECOMP_ASSERT(sizeof(CutSceneTriggerNameEntry) == 0x34, "cutscene trigger name entry stride");
-DECOMP_ASSERT(offsetof(CutSceneTriggerNameTable, entries) == 0x0c, "cutscene trigger name table entries offset");
 
 static instNUGCUTSCENE_s *background_cutscene_instances;
 static instNUGCUTSCENE_s *active_cutscene_instances;
@@ -426,8 +424,6 @@ extern "C" {
     // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
-    DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -518,12 +514,6 @@ extern "C" {
     // Culling / visibility / portals / occlusion
     // ---------------------------------------------------------------------------
 
-    DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
-    DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, nodes) == 0x14, "instance tree nodes offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, roots) == 0x20, "instance tree roots offset");
-    DECOMP_ASSERT(offsetof(NuInstanceTree_s, far_clips) == 0x24, "instance tree far clips offset");
 
     // ---------------------------------------------------------------------------
     // Viewport
@@ -582,10 +572,6 @@ extern "C" {
 
 extern "C" {
 #include "legoapi/ai/core/ai_sys_stubs_types.h"
-    DECOMP_ASSERT(sizeof(RebuildEditorCreature) == 0xac, "editor creature rebuild stride");
-    DECOMP_ASSERT(offsetof(RebuildEditorCreature, path_check) == 0x38, "editor creature path offset");
-    DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation_area) == 0x6c, "editor creature area offset");
-    DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation) == 0x8f, "editor creature activation offset");
 } // extern "C"
 
 #if defined(__i386__)

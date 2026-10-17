@@ -128,7 +128,6 @@ struct AIROW_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
 void bgProcClose() {
 }

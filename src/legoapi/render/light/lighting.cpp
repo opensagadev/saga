@@ -139,7 +139,6 @@ extern f32 GhostLightMul;
 
 // Original RTL TU basename is rtl.c; the source is compiled as C++.
 
-DECOMP_ASSERT(sizeof(rtlindex_s) == 0x28, "RTL index size");
 
 #if defined(__i386__) && defined(__SSE__)
 #include <xmmintrin.h>
@@ -156,22 +155,10 @@ DECOMP_ASSERT(sizeof(rtlindex_s) == 0x28, "RTL index size");
                                                        ClassEditor::cbEdFilterLED, scene->name));                      \
     } while (0)
 
-DECOMP_ASSERT(offsetof(EdClass, flags) == 0x04, "EdClass flags offset");
-DECOMP_ASSERT(offsetof(EdClass, members) == 0x08, "EdClass members offset");
-DECOMP_ASSERT(offsetof(EdClass, last_member) == 0x0c, "EdClass last member offset");
-DECOMP_ASSERT(offsetof(EdClass, member_count) == 0x10, "EdClass member count offset");
-DECOMP_ASSERT(offsetof(EdClass, interface) == 0x14, "EdClass interface offset");
-DECOMP_ASSERT(sizeof(EdMember) == 0x08, "EdMember size");
-DECOMP_ASSERT(offsetof(EdMember, reference) == 0x04, "EdMember reference offset");
 
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
-DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 
 struct rtlidata_s;
 

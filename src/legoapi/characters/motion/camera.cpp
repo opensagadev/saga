@@ -111,9 +111,6 @@ VIEWCAM_s ViewCam = {0, {1000000000.0f, 0.0f, 0.0f}, -8192, -29500, 2.66f, 0.0f,
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 f32 testmovef = 0.005f;
 
-DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
 void GameCam_HitRoll();
 
@@ -140,8 +137,6 @@ NUVEC ObstacleCamCutPts[2];
 f32 EMPERORFIGHTA_CAMDYHACK = 0.35f;
 i32 movegamecamera_forcesock = -1;
 NUMTX CutCamMtx;
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
-DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 i32 Grapple_LookAtPos(GameObject_s *, NUVEC *);
 
 void MoveGameCamera(GAMECAMERA_s *camera);

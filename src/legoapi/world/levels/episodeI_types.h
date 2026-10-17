@@ -33,3 +33,5 @@ struct WORLDLEVOBJ_s {
     u8 enabled; // 0x0e
     char pad_0x0f[1];
 };
+
+static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");

@@ -44,9 +44,6 @@
 #include "decomp.h"
 #include "nu2api/nu3d/nutex.h"
 #include "legoapi/actions/character/simpletons.h"
-DECOMP_ASSERT(sizeof(TROOPERCANNON_s) == 0x30, "Trooper cannon state size");
-DECOMP_ASSERT(offsetof(TROOPERCANNON_s, character_name) == 0x0c, "Trooper cannon name offset");
-DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon rebuilding offset");
 
 struct AIROW_s;
 struct nunativegscene_s;

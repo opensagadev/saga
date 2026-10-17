@@ -1,5 +1,7 @@
 #pragma once
 
+#include "decomp.h"
+
 #include "legoapi/gizmos/trigger/ai.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nuhspecial.h"
@@ -586,3 +588,5 @@ void WorldInfo_ReArrangeBuffers(i32 area1, i32 area2);
 void StoreLevelProgressFn(WORLDINFO *world, LEVEL_PROGRESS_s *progress, i32 area_progress);
 
 #endif
+
+DECOMP_ASSERT(offsetof(WORLDINFO_s, blowup_target_candidates) == 0x50d4, "Blowup target candidate-list ABI");

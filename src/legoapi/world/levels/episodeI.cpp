@@ -68,7 +68,6 @@
 #include "legoapi/ai/core/gameai.h"
 #include "legoapi/characters/motion/chris.h"
 #include "legoapi/world/levels/episodeI.h"
-static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 extern struct LEVFLAGBYTES_s LevFlag;
 
 extern "C" {
@@ -250,7 +249,6 @@ struct nunativegscene_s;
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 static i32 PodRaceKey[8] __attribute__((aligned(16))) = {-1, -1, -1, -1, -1, -1, -1, -1};
 
-DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 static __used__ void PodRaceSnipersUpdate(void) {

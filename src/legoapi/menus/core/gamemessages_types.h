@@ -51,3 +51,6 @@ struct GAME_MESSAGE_DATA {
     void *field_0x10c;
     void (*end_fn)(GAMEMESSAGE_s *);
 };
+
+static_assert(offsetof(GAME_MESSAGE_DATA, tick_fn) == offsetof(GAMEMESSAGE_s, tick_fn), "game message backing callback offset");
+static_assert(sizeof(GAME_MESSAGE_DATA) == sizeof(GAMEMESSAGE_s), "game message backing layout");

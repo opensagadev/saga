@@ -1,5 +1,7 @@
 #pragma once
 
+#include "decomp.h"
+
 // Types shared by legoapi/render/core/rtl.c and legoapi/render/light/lighting.cpp.
 
 struct rtlindex_s {
@@ -20,3 +22,5 @@ struct nuvtx_tc1_s {
     i32 colour;     // 0x18
     f32 uv[2];      // 0x1c
 };
+
+DECOMP_ASSERT(sizeof(rtlindex_s) == 0x28, "RTL index size");

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "decomp.h"
+
 // Types shared by nu2api/nucore/nucore_plain.cpp and gameapi/edtools/edtoolsall.cpp.
 
 extern "C" {
@@ -56,3 +58,10 @@ extern "C" {
         u8 **cells;
     };
 }
+
+DECOMP_ASSERT(offsetof(NuInstanceTree_s, far_clips) == 0x24, "instance tree far clips offset");
+DECOMP_ASSERT(offsetof(NuInstanceTree_s, nodes) == 0x14, "instance tree nodes offset");
+DECOMP_ASSERT(offsetof(NuInstanceTree_s, roots) == 0x20, "instance tree roots offset");
+DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
+DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
+DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "decomp.h"
+
 // Types shared by legoapi/gizmos/object/gizobstacle.cpp and legogame/game.cpp.
 
 namespace {
@@ -26,3 +28,5 @@ namespace {
         u8 flags_0x05;
     };
 }
+
+DECOMP_ASSERT(sizeof(GIZOBSTACLEPROGRESS_s) == 0x70, "GIZOBSTACLE progress ABI");

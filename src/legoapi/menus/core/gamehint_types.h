@@ -1,5 +1,7 @@
 #pragma once
 
+#include "decomp.h"
+
 // Types shared by legoapi/menus/core/gamehint.cpp and legogame/game.cpp.
 
 struct MechHintUIButton : MechTouchUITexButton {
@@ -32,3 +34,7 @@ struct MechHintUIButton : MechTouchUITexButton {
             MechSystems::Get()->NewRadarPulse(position, false);
     }
 };
+
+DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
+DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
+DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");

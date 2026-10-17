@@ -45,9 +45,6 @@ HINTSYS_s hintsys = {};
 extern "C" i32 editor_active, CutSceneWaiting, PANELOFF;
 
 #include "legoapi/menus/core/gamehint_types.h"
-DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
-DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
-DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
 void MechHintUIButton::Render() {
     if (NewMode != 0 || NewLData != NULL)
