@@ -41,6 +41,13 @@ py_binary(
 )
 
 py_binary(
+    name = "tu_layout",
+    srcs = ["tu_layout.py"],
+    env = _PYTHON_ENV,
+    main = "tu_layout.py",
+)
+
+py_binary(
     name = "pre_commit",
     srcs = ["pre_commit.py"],
     args = ["$(location //scripts/checks:clang_format)"],

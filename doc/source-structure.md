@@ -47,6 +47,25 @@ Do not reference a contributor's `/tmp` file as a canonical list. If a durable
 original-basename inventory becomes necessary, generate and commit it from the
 command above.
 
+## Original TU layout from addresses
+
+The target and the original are both compiled without `-ffunction-sections`,
+so every original translation unit occupies one contiguous `.text` range.
+Static initializers (`.text.startup`) and weak COMDAT functions are the
+exceptions. The original address map is therefore direct evidence of TU
+boundaries and of definition order inside each TU.
+
+```bash
+bazel run //scripts:tu_layout                       # fragmented units and stray groups
+bazel run //scripts:tu_layout -- --unit src/nu2api/nufile/nufile.cpp
+```
+
+A current unit whose functions fall into several original runs is
+fragmented. At `-O2`/`-O3` its functions cannot be expected to match fully,
+because inlining, IPA clones and clone ordinals depend on the whole TU. Before
+moving a stray into the unit it sits in, follow the restructuring checklist
+below.
+
 ## Current source hierarchy
 
 The current layout is domain-oriented. Important roots are:

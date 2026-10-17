@@ -44,6 +44,7 @@ Saga submodule. Templates, styling, and browser applications are owned there.
 | `generate_bazel_objdiff_report.py` | `bazel run //scripts:generate_bazel_objdiff_report` | Generates the custom whole-binary matching data and README progress table. Calls Bazel and external `objdiff-cli`; writes `matching.json` and the marked section of `README.md`. |
 | `generate_objdiff_gui_config.py` | `bazel run //scripts:generate_objdiff_gui_config` | Generates the ignored root `objdiff.json` for the completely optional visual objdiff GUI, with one source/object unit per Bazel compile action. Builds the target and configures GUI rebuilds through Bazel; it is not part of reports, hooks, or CI. |
 | `objdiff-cli.py` | `bazel run //scripts:objdiff_cli -- SYMBOL` | Primary compact diff for one symbol. Calls external `objdiff-cli` and resolves the target-config library through Bazel. |
+| `tu_layout.py` | `bazel run //scripts:tu_layout [-- --unit src/PATH.cpp]` | Compares current source ownership in the committed `matching.json` with the original's contiguous per-translation-unit `.text` layout and lists fragmented units and stray functions. Standard library only; needs neither a build nor the original binary. |
 | `wasm_server.py` | `bazel run --config=wasm //scripts:wasm_server` | Serves the minimal Bazel WASM host shell and optional local OBB with isolation headers. Standard library only. |
 
 ## Checks and launchers
