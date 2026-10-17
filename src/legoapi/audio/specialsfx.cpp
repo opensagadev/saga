@@ -408,7 +408,7 @@ i32 SpecialSfxLoad(char *path, WORLDINFO_s *world) {
         name[length] = '\0';
         NuSpecialFind(world->current_gscn, &entry->special, name, 1);
         entry->event_count = EdFileReadChar();
-        if (version == 2) {
+        if (version >= 2) {
             const i32 flags = EdFileReadChar();
             entry->flags = (entry->flags & 0xf0) | (flags & 0xf);
         }
@@ -530,8 +530,8 @@ void UpdateSpecialSfx(WORLDINFO_s *world) {
                     if (frame < end_frame && (event->flags & 2) == 0) {
                         event->previous_frame = 0.0f;
                     }
-                    event = event->next;
                 }
+                event = event->next;
             }
             entry->animation_playing = 0;
             continue;
@@ -540,45 +540,40 @@ void UpdateSpecialSfx(WORLDINFO_s *world) {
         NUVEC *position = NuSpecialGetDrawPos(&entry->special);
         i32 direction = GetAnimDirection(animation);
         for (i32 j = 0; j < entry->event_count; j++) {
-            if (event == NULL) {
-                continue;
-            }
-
-            bool play = false;
-            u8 flags = event->flags;
-            f32 previous = event->previous_frame;
-            f32 trigger = event->trigger_frame;
-            if ((flags & 2) != 0) {
-                if ((direction == 0 && (flags & 4) != 0) || (flags & 0xc) == 0xc) {
-                    if (trigger <= frame && frame <= previous) {
+            if (event != NULL) {
+                bool play = false;
+                if ((event->flags & 2) != 0) {
+                    if ((direction == 0 && (event->flags & 4) != 0) || (event->flags & 0xc) == 0xc) {
+                        if (event->trigger_frame <= frame && frame <= event->previous_frame) {
+                            play = true;
+                        }
+                    } else if (direction == 1 && (event->flags & 8) != 0 && frame <= event->trigger_frame &&
+                               frame >= event->previous_frame) {
                         play = true;
                     }
-                } else if (direction == 1 && (flags & 8) != 0 && frame <= trigger && frame >= previous) {
-                    play = true;
+                } else if ((event->flags & 0xc) == 0xc) {
+                    if ((event->previous_frame < event->trigger_frame && event->trigger_frame <= frame) ||
+                        (event->trigger_frame < event->previous_frame && frame <= event->trigger_frame)) {
+                        play = true;
+                    }
+                } else if ((event->flags & 4) != 0) {
+                    if ((event->previous_frame < event->trigger_frame && event->trigger_frame <= frame) ||
+                        (event->previous_frame == 0.0f && event->trigger_frame == 1.0f)) {
+                        play = true;
+                    }
+                } else if ((event->flags & 8) != 0) {
+                    if ((event->trigger_frame < event->previous_frame && frame <= event->trigger_frame) ||
+                        (end_frame == event->previous_frame && end_frame == event->trigger_frame)) {
+                        play = true;
+                    }
                 }
-            } else if ((flags & 0xc) == 0xc) {
-                if ((previous < trigger && trigger <= frame) || (trigger < previous && frame <= trigger)) {
-                    play = true;
-                }
-            } else if ((flags & 4) != 0) {
-                if ((previous < trigger && trigger <= frame) || (previous == 0.0f && trigger == 1.0f)) {
-                    play = true;
-                }
-            } else if ((flags & 8) != 0) {
-                if ((trigger < previous && frame <= trigger) || (end_frame == previous && end_frame == trigger)) {
-                    play = true;
-                }
-            }
 
-            if (play) {
-                GameAudio_PlaySfxById(event->sfx_id, position, 0, 0);
-                if ((event->flags & 2) != 0) {
-                    event = event->next;
-                    continue;
+                if (play) {
+                    GameAudio_PlaySfxById(event->sfx_id, position, 0, 0);
                 }
-            }
-            if ((event->flags & 2) == 0) {
-                event->previous_frame = frame;
+                if ((event->flags & 2) == 0) {
+                    event->previous_frame = frame;
+                }
             }
             event = event->next;
         }

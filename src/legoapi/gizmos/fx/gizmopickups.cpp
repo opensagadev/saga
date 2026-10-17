@@ -656,10 +656,9 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
                                                  (drawn != 0 ? GIZMOPICKUP_STATE_DRAWN : 0));
 
             if (drawn != 0 && type->overlay_model_id != -1) {
-                LEVEL_OBJECT_RUNTIME_s &overlay = world->lev_objs[type->overlay_model_id];
-                if (overlay.active != 0) {
+                if (world->lev_objs[type->overlay_model_id].active != 0) {
                     ResetShadowMapRendering();
-                    NuSpecialDrawAt(&overlay.special, &matrix);
+                    NuSpecialDrawAt(&world->lev_objs[type->overlay_model_id].special, &matrix);
                     EnableShadowMapRendering(0);
                 }
             }

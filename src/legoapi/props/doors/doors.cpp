@@ -323,33 +323,33 @@ void Doors_Init(WORLDINFO_s *world) {
     world->start_door = NULL;
 
     DOOR_s *door = world->doors;
-    auto world_door_count = world->door_count;
-    for (i32 i = 0; door != NULL && i < world_door_count; i++, door++) {
-        NUVEC *points = door->spline->pts;
-
-        NuVecAdd(&door->pos, &points[0], &points[1]);
-        NuVecAdd(&door->pos, &door->pos, &points[2]);
-        NuVecAdd(&door->pos, &door->pos, &points[3]);
+    if (door == NULL)
+        return;
+    for (i32 i = 0; i < world->door_count; i++, door++) {
+        NuVecAdd(&door->pos, &door->spline->pts[0], &door->spline->pts[1]);
+        NuVecAdd(&door->pos, &door->pos, &door->spline->pts[2]);
+        NuVecAdd(&door->pos, &door->pos, &door->spline->pts[3]);
         NuVecScale(&door->pos, &door->pos, 0.25f);
 
-        door->radius = NuVecDist(&door->pos, &points[0], NULL);
+        door->radius = NuVecDist(&door->pos, &door->spline->pts[0], NULL);
         for (i32 point = 1; point < 4; point++) {
-            f32 distance = NuVecDist(&door->pos, &points[point], NULL);
+            f32 distance = NuVecDist(&door->pos, &door->spline->pts[point], NULL);
             if (distance > door->radius) {
                 door->radius = distance;
             }
         }
         door->radius *= 1.01f;
 
-        NuVecSurfaceNormal(&door->normal, &points[0], &points[1], &points[3]);
-        door->point0 = points[0];
-        door->point1 = points[1];
-        door->point3 = points[3];
+        NuVecSurfaceNormal(&door->normal, &door->spline->pts[0], &door->spline->pts[1], &door->spline->pts[3]);
+        door->point0 = door->spline->pts[0];
+        door->point1 = door->spline->pts[1];
+        door->point3 = door->spline->pts[3];
         NuVecAdd(&door->opposite_midpoint, &door->point1, &door->point3);
         NuVecScale(&door->opposite_midpoint, &door->opposite_midpoint, 0.5f);
         NuVecSub(&door->opposite_midpoint, &door->opposite_midpoint, &door->point0);
         NuVecScale(&door->opposite_midpoint, &door->opposite_midpoint, 2.0f);
         NuVecAdd(&door->opposite_midpoint, &door->opposite_midpoint, &door->point0);
+        NuVecSurfaceNormal(&door->normal, &door->point0, &door->point1, &door->point3);
         NuPlnEqn(&door->plane, &door->point0, &door->point1, &door->point3);
 
         if (world->start_door == NULL && (door->flags & DOOR_FLAG_USE_AS_START) != 0 && door->spline->length > 5) {
@@ -389,104 +389,37 @@ void Door_SetCutCam(DOOR_s *door) {
     Door_CutLookAtPlayers = door->flags & DOOR_FLAG_CAMERA_LOOK_AT_PLAYERS;
 }
 
-void StartDoorPositions(void) {
+i32 StartDoorPositions(void) {
     Door_Start = 0;
     if (Door_ExitName[0] == '\0') {
-        return;
+        return 0;
     }
     DOOR_s *a = WORLD->doors;
     if (a != NULL && WORLD->door_count > 0) {
         i32 i = 0;
         do {
             if (a->spline != NULL && NuStrICmp(a->name, Door_ExitName) == 0) {
-                if (a->spline->length < 6) {
-                    PlayerStart[0].pos = OldPlrSPos[7].door_fallback.position;
-                    PlayerStart[0].angle = OldPlrSPos[7].door_fallback.angle;
-                } else {
-                    NUVEC tmp;
-                    NUVEC *arr = a->spline->pts;
-                    NuVecSub(&tmp, &arr[5], &arr[4]);
-                    PlayerStart[0].pos = &arr[4];
-                    PlayerStart[0].angle = NuAtan2D(tmp.x, tmp.z);
-                }
-                if (a->spline->length < 8) {
-                    PlayerStart[1].pos = PlayerStart[0].pos;
-                    PlayerStart[1].angle = PlayerStart[0].angle;
-                } else {
-                    NUVEC tmp;
-                    NUVEC *arr = a->spline->pts;
-                    NuVecSub(&tmp, &arr[7], &arr[6]);
-                    PlayerStart[1].pos = &arr[6];
-                    PlayerStart[1].angle = NuAtan2D(tmp.x, tmp.z);
-                }
-                if (a->spline->length < 10) {
-                    PlayerStart[2].pos = PlayerStart[1].pos;
-                    PlayerStart[2].angle = PlayerStart[1].angle;
-                } else {
-                    NUVEC tmp;
-                    NUVEC *arr = a->spline->pts;
-                    NuVecSub(&tmp, &arr[9], &arr[8]);
-                    PlayerStart[2].pos = &arr[8];
-                    PlayerStart[2].angle = NuAtan2D(tmp.x, tmp.z);
-                }
-                if (a->spline->length < 12) {
-                    PlayerStart[3].pos = PlayerStart[2].pos;
-                    PlayerStart[3].angle = PlayerStart[2].angle;
-                } else {
-                    NUVEC tmp;
-                    NUVEC *arr = a->spline->pts;
-                    NuVecSub(&tmp, &arr[11], &arr[10]);
-                    PlayerStart[3].pos = &arr[10];
-                    PlayerStart[3].angle = NuAtan2D(tmp.x, tmp.z);
-                }
-                if (a->spline->length < 14) {
-                    PlayerStart[4].pos = PlayerStart[3].pos;
-                    PlayerStart[4].angle = PlayerStart[3].angle;
-                } else {
-                    NUVEC tmp;
-                    NUVEC *arr = a->spline->pts;
-                    NuVecSub(&tmp, &arr[13], &arr[12]);
-                    PlayerStart[4].pos = &arr[12];
-                    PlayerStart[4].angle = NuAtan2D(tmp.x, tmp.z);
-                }
-                if (a->spline->length < 16) {
-                    PlayerStart[5].pos = PlayerStart[4].pos;
-                    PlayerStart[5].angle = PlayerStart[4].angle;
-                } else {
-                    NUVEC tmp;
-                    NUVEC *arr = a->spline->pts;
-                    NuVecSub(&tmp, &arr[15], &arr[14]);
-                    PlayerStart[5].pos = &arr[14];
-                    PlayerStart[5].angle = NuAtan2D(tmp.x, tmp.z);
-                }
-                if (a->spline->length < 18) {
-                    PlayerStart[6].pos = PlayerStart[5].pos;
-                    PlayerStart[6].angle = PlayerStart[5].angle;
-                } else {
-                    NUVEC tmp;
-                    NUVEC *arr = a->spline->pts;
-                    NuVecSub(&tmp, &arr[17], &arr[16]);
-                    PlayerStart[6].pos = &arr[16];
-                    PlayerStart[6].angle = NuAtan2D(tmp.x, tmp.z);
-                }
-                if (a->spline->length < 20) {
-                    PlayerStart[7].pos = PlayerStart[6].pos;
-                    PlayerStart[7].angle = PlayerStart[6].angle;
-                } else {
-                    NUVEC tmp;
-                    NUVEC *arr = a->spline->pts;
-                    NuVecSub(&tmp, &arr[19], &arr[18]);
-                    PlayerStart[7].pos = &arr[18];
-                    PlayerStart[7].angle = NuAtan2D(tmp.x, tmp.z);
+                for (i32 player = 0; player < 8; player++) {
+                    if (a->spline->length < player * 2 + 6) {
+                        // The first player falls back to the record just before PlayerStart.
+                        PlayerStart[player].pos = PlayerStart[player - 1].pos;
+                        PlayerStart[player].angle = PlayerStart[player - 1].angle;
+                    } else {
+                        NUVEC direction;
+                        PlayerStart[player].pos = &a->spline->pts[player * 2 + 4];
+                        NuVecSub(&direction, &a->spline->pts[player * 2 + 5], &a->spline->pts[player * 2 + 4]);
+                        PlayerStart[player].angle = NuAtan2D(direction.x, direction.z);
+                    }
                 }
                 Door_Start = 1;
-                return;
+                return 1;
             }
             i++;
             a++;
         } while (i < WORLD->door_count);
     }
     Door_ExitName[0] = '\0';
+    return 0;
 }
 
 void Doors_SetLastDoor(DOOR_s *door) {
@@ -545,13 +478,17 @@ void Door_GoThrough(WORLDINFO_s *world, DOOR_s *door, i32 player_triggered) {
                 }
             }
         }
-    } else if (door_cutscenesnap == 0) {
-        newmode_cutinfo = static_cast<CUTINFO *>(door->cutscene);
-        StartDoorPositions();
-        NewGameMode();
     } else {
-        WORLDINFO_s *active_world = WorldInfo_CurrentlyActive();
-        NewCutScene(static_cast<CUTINFO *>(door->cutscene), active_world->cutscene_sys, NULL, 0);
+        CUTINFO *cutscene = static_cast<CUTINFO *>(door->cutscene);
+        if (cutscene != NULL) {
+            if (door_cutscenesnap != 0) {
+                NewCutScene(cutscene, WorldInfo_CurrentlyActive()->cutscene_sys, NULL, 0);
+            } else {
+                newmode_cutinfo = cutscene;
+                StartDoorPositions();
+                NewGameMode();
+            }
+        }
     }
 
     Door_NextSock = static_cast<i8>(door->next_sock);
@@ -662,15 +599,15 @@ DOOR_s *Door_FindByIndex(WORLDINFO_s *world, i32 area, i32 level, NUVEC *positio
     for (i32 i = 0; i < world->door_count; ++i, ++door) {
         if ((door->flags & 4) != 0 || door->level == -1)
             continue;
-        if (!((area != -1 && LDataList[door->level].area_index == area) || (level != -1 && door->level == level)))
-            continue;
-        if (position == NULL)
-            return door;
-        f32 distance = NuVecDistSqr(position, &door->pos, NULL);
-        if (!(distance < best_distance))
-            continue;
-        best_distance = distance;
-        best = door;
+        if ((area != -1 && LDataList[door->level].area_index == area) || (level != -1 && door->level == level)) {
+            if (position == NULL)
+                return door;
+            f32 distance = NuVecDistSqr(position, &door->pos, NULL);
+            if (distance < best_distance) {
+                best_distance = distance;
+                best = door;
+            }
+        }
     }
     return best;
 }

@@ -603,7 +603,6 @@ void MenuDrawExtras(MENU_s *menu) {
     char value[64];
     menu->draw_y = -updateextras_current_y * MENUDY * menu->item_scale;
     for (i32 cheat = 0; cheat < 44; ++cheat) {
-        CHEAT &entry = Cheat[cheat];
         f32 alpha = 0.5f;
         bool locked = false;
 
@@ -612,8 +611,8 @@ void MenuDrawExtras(MENU_s *menu) {
             if (BonusArea == 0 || Cheat_CheckFlags(cheat, 0x200000) == 0) {
                 alpha = 1.0f;
             }
-        } else if (cheat < 8 || static_cast<i8>(entry.area) == -1 ||
-                   Game.area_save[static_cast<i8>(entry.area)].field_0x5[1] != 0) {
+        } else if (cheat < 8 || static_cast<i8>(Cheat[cheat].area) == -1 ||
+                   Game.area_save[static_cast<i8>(Cheat[cheat].area)].field_0x5[1] != 0) {
             NuStrCpy(value, TTab[tAVAILABLETOBUY]);
         } else {
             NuStrCpy(text, TTab[tPOWERBRICK]);
@@ -623,7 +622,7 @@ void MenuDrawExtras(MENU_s *menu) {
             locked = true;
         }
         if (!locked) {
-            sprintf(text, "%s: %s", TTab[*entry.text_id], value);
+            sprintf(text, "%s: %s", TTab[*Cheat[cheat].text_id], value);
         }
 
         dme_sy = menu->item_scale;

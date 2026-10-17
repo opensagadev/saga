@@ -29,6 +29,52 @@ class NuSoundVoice;
 class NuThread;
 class NuSoundOutOfMemCallback;
 
+// A voice's membership in a listener's circular voice ring.  The voice embeds
+// one link for its nearest real listener and one for its focus listener; the
+// links detach themselves when the voice is destroyed.
+struct NuSoundVoiceListenerLink {
+    NuSoundListener *listener;
+    NuSoundVoiceListenerLink *previous;
+    NuSoundVoiceListenerLink *next;
+
+    ~NuSoundVoiceListenerLink() {
+        Detach();
+    }
+
+    void Detach();
+};
+
+// The owning end of a ring of listener links: clears every link still in the
+// ring when the owner goes away.
+struct NuSoundVoiceListenerRing {
+    NuSoundVoiceListenerLink *anchor;
+
+    NuSoundVoiceListenerRing() : anchor(NULL) {
+    }
+
+    ~NuSoundVoiceListenerRing() {
+        NuSoundVoiceListenerLink *anchor = this->anchor;
+        if (anchor == NULL) {
+            return;
+        }
+
+        NuSoundVoiceListenerLink *link = anchor->previous;
+        while (link != anchor) {
+            NuSoundVoiceListenerLink *previous = link->previous;
+            link->listener = NULL;
+            anchor->previous = previous;
+            link->next = NULL;
+            link->previous = NULL;
+            link = anchor->previous;
+        }
+
+        anchor->listener = NULL;
+        anchor->next = NULL;
+        anchor->previous = NULL;
+        this->anchor = NULL;
+    }
+};
+
 class NuSoundEffect {
     friend class NuSoundBus;
     friend class NuSoundSystem;
@@ -57,7 +103,7 @@ class NuSoundEffect {
     };
 
   protected:
-    void *field_0x04;
+    NuSoundVoiceListenerRing listener_links;
     EffectProcessStage process_stage;
     u32 stop_effect;
     u32 state;
@@ -68,18 +114,18 @@ class NuSoundEffect {
     f32 pitch_mix;
     bool keep_attached;
     u8 padding_0x25[3];
-    NuList<void *> attachments;
+    NuList<NuSoundVoiceListenerLink> attachments;
 
   protected:
-    NuSoundEffect(EffectType type, EffectProcessStage stage) : field_0x04(NULL) {
+    NuSoundEffect(EffectType type, EffectProcessStage stage) {
         this->type = type;
         process_stage = stage;
         stop_effect = 0;
         state = 1;
-        keep_attached = false;
         output_mix = 1.0f;
-        enabled = true;
         pitch_mix = 1.0f;
+        keep_attached = false;
+        enabled = true;
     }
 
   public:
@@ -173,6 +219,29 @@ class NuSoundListener {
 };
 
 DECOMP_ASSERT(sizeof(NuSoundListener) == 0x34, "NuSoundListener size");
+
+inline void NuSoundVoiceListenerLink::Detach() {
+    NuSoundListener *listener = this->listener;
+    if (listener == NULL) {
+        return;
+    }
+
+    NuSoundVoiceListenerLink *previous = this->previous;
+    if (previous == this) {
+        listener->field_0x8 = NULL;
+    } else {
+        NuSoundVoiceListenerLink *next = this->next;
+        previous->next = next;
+        next->previous = previous;
+        if (listener->field_0x8 == this) {
+            listener->field_0x8 = previous;
+        }
+    }
+
+    this->listener = NULL;
+    this->previous = NULL;
+    this->next = NULL;
+}
 
 class NuSoundEffectAttenuation : public NuSoundEffect {
     f32 attenuation;
@@ -650,13 +719,25 @@ class NuSoundRoutingTable {
 
 DECOMP_ASSERT(sizeof(NuSoundMixMatrix) == 0x10, "NuSoundMixMatrix size");
 DECOMP_ASSERT(sizeof(NuSoundRoutingTable) == 0xc0, "NuSoundRoutingTable size");
+
+class NuSoundHandle;
+
+// Observers attached to a handle; notified when it is destroyed, rebound to a voice or moved.
+class NuSoundHandleCallback {
+  public:
+    virtual void OnHandleAttached(NuSoundHandle *handle) = 0;
+    virtual void OnHandleDestroyed(NuSoundHandle *handle) = 0;
+    virtual void OnHandleVoiceChanged(NuSoundHandle *handle) = 0;
+    virtual void OnHandleMoved(NuSoundHandle *handle, NuSoundHandle *from) = 0;
+};
+
 class NuSoundHandle {
     friend class NuSoundVoice;
 
     NuSoundHandle *intrusive_prev;
     NuSoundHandle *intrusive_next;
     NuSoundVoice *voice;
-    NuList<NuSoundEffect *> effects;
+    NuList<NuSoundHandleCallback *> callbacks;
 
   public:
     static NuCriticalSection sCriticalSection;

@@ -127,7 +127,7 @@ class NuSoundHeaderWAV : public NuSoundFileStreamDesc<FileHeaderWAV, 18> {
         return this->encoded_length_bytes;
     }
     u64 GetLengthSamples() const override {
-        return GetEncodedLengthBytes() / ((GetBitsPerChannel() + 7) / 8);
+        return GetEncodedLengthBytes() / (static_cast<i32>(GetBitsPerChannel()) / 8);
     }
     f32 GetLengthSeconds() const override {
         return (f32)GetLengthSamples() / (f32)(i32)GetSampleRate();

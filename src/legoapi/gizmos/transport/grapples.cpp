@@ -752,11 +752,10 @@ GRAPPLE *Grapple_AddDynamic(void *attached_object, i32 retain_attachment) {
 
     for (i32 index = 0; index < 4; ++index) {
         if (DynamicGrapple[index].attached_object == NULL) {
-            GRAPPLE *grapple = &DynamicGrapple[index];
-            grapple->attached_object = static_cast<GameObject_s *>(attached_object);
-            grapple->retain_attachment = static_cast<u8>(retain_attachment);
-            grapple->flags |= GRAPPLE_FLAG_VISIBLE;
-            return grapple;
+            DynamicGrapple[index].attached_object = static_cast<GameObject_s *>(attached_object);
+            DynamicGrapple[index].retain_attachment = static_cast<u8>(retain_attachment);
+            DynamicGrapple[index].flags |= GRAPPLE_FLAG_VISIBLE;
+            return &DynamicGrapple[index];
         }
     }
     return NULL;

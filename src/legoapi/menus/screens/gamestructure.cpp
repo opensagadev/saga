@@ -675,21 +675,20 @@ i32 Store_FindPack(i32 id, char *name) {
 
 void Store_HubInitFloorTargets(WORLDINFO_s *world) {
     for (i32 i = 0; i < 11; ++i) {
-        STOREPACK &pack = StorePack[i];
-        pack.floor_target_door = Door_FindByName(world, pack.floor_target_door_name);
-        if (pack.floor_target_door != NULL) {
-            NUVEC *points = pack.floor_target_door->spline->pts;
+        StorePack[i].floor_target_door = Door_FindByName(world, StorePack[i].floor_target_door_name);
+        if (StorePack[i].floor_target_door != NULL) {
+            NUVEC *points = StorePack[i].floor_target_door->spline->pts;
             NUVEC direction;
             NuVecSub(&direction, &points[6], &points[4]);
-            pack.custodian_angle = static_cast<u16>(NuAtan2D(direction.x, direction.z) + 0x4000);
-            NuVecAdd(&pack.custodian_position, &points[4], &points[6]);
-            NuVecScale(&pack.custodian_position, &pack.custodian_position, 0.5f);
-            if (pack.offset_floor_target != 0) {
-                pack.custodian_position.x += NU_SIN_LUT(pack.custodian_angle) * 0.5f;
-                pack.custodian_position.z += NU_COS_LUT(pack.custodian_angle) * 0.5f;
+            StorePack[i].custodian_angle = static_cast<u16>(NuAtan2D(direction.x, direction.z) + 0x4000);
+            NuVecAdd(&StorePack[i].custodian_position, &points[4], &points[6]);
+            NuVecScale(&StorePack[i].custodian_position, &StorePack[i].custodian_position, 0.5f);
+            if (StorePack[i].offset_floor_target != 0) {
+                StorePack[i].custodian_position.x += NU_SIN_LUT(StorePack[i].custodian_angle) * 0.5f;
+                StorePack[i].custodian_position.z += NU_COS_LUT(StorePack[i].custodian_angle) * 0.5f;
             }
         }
-        pack.custodian_position.y = NewShadowEx(&pack.custodian_position, 0, 1.0f, 1.0f, 0) + 0.005f;
+        StorePack[i].custodian_position.y = NewShadowEx(&StorePack[i].custodian_position, 0, 1.0f, 1.0f, 0) + 0.005f;
     }
 }
 
@@ -721,37 +720,36 @@ void Store_HubDrawFloorTargets(WORLDINFO_s *world) {
     const f32 frame_alpha = NU_SIN_LUT(alpha_angle) * 0.2f + 0.8f;
 
     for (i32 i = 0; i < 11; ++i) {
-        STOREPACK &pack = StorePack[i];
-        if (pack.floor_target_door == NULL && (pack.id == NULL || *pack.id == -1)) {
+        if (StorePack[i].floor_target_door == NULL && (StorePack[i].id == NULL || *StorePack[i].id == -1)) {
             continue;
         }
         if (Store_IsPackUnlocked(i) ||
-            (pack.field44_0x32 != 0xff && pack.field44_0x32 != GameCam->sock_position.location.sock)) {
+            (StorePack[i].field44_0x32 != 0xff && StorePack[i].field44_0x32 != GameCam->sock_position.location.sock)) {
             continue;
         }
 
         const u16 frame_rotation = static_cast<u16>(NuFmod(GameTimer.time_elapsed, 1.5f) / 1.5f * 65536.0f);
-        Draw3DObjectAlpha(world, LEGOOBJ_ICON_FRAME_GREEN, &pack.custodian_position, 0x4000, frame_rotation, 0, 0.9f,
-                          0.9f, 0.9f, 0, frame_alpha);
+        Draw3DObjectAlpha(world, LEGOOBJ_ICON_FRAME_GREEN, &StorePack[i].custodian_position, 0x4000, frame_rotation, 0,
+                          0.9f, 0.9f, 0.9f, 0, frame_alpha);
 
-        if (g_lowEndLevelBehaviour == 0 || Hub_LowEnd_IconsInsteadOfModels == 0 || pack.id == NULL ||
-            APICharacterLoaded(*pack.id) != NULL || big_icon_scene == NULL) {
+        if (g_lowEndLevelBehaviour == 0 || Hub_LowEnd_IconsInsteadOfModels == 0 || StorePack[i].id == NULL ||
+            APICharacterLoaded(*StorePack[i].id) != NULL || big_icon_scene == NULL) {
             continue;
         }
 
-        const i32 object_id = CDataList[*pack.id].field20_0x42;
+        const i32 object_id = CDataList[*StorePack[i].id].field20_0x42;
         if (object_id == -1) {
             continue;
         }
 
         NUVEC position;
-        position.x = pack.custodian_position.x;
+        position.x = StorePack[i].custodian_position.x;
         position.x +=
             NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.3f) / 2.3f * 65536.0f) + i * 0x2000) * 0.01f;
-        position.y = CDataList[*pack.id].bounds_max_y * 0.75f + pack.custodian_position.y - 0.01f;
+        position.y = CDataList[*StorePack[i].id].bounds_max_y * 0.75f + StorePack[i].custodian_position.y - 0.01f;
         position.y +=
             NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f) + i * 0x2aaa) * 0.01f;
-        position.z = pack.custodian_position.z;
+        position.z = StorePack[i].custodian_position.z;
         position.z +=
             NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.4f) / 2.4f * 65536.0f) + i * 0x2000 + 0x4000) *
             0.01f;
@@ -936,11 +934,10 @@ void MenuDrawStore(MENU_s *) {
 
     i32 slot = 1;
     for (i32 bundle_index = 0; bundle_index < 3; ++bundle_index) {
-        STOREBUNDLE &bundle = StoreBundle[bundle_index];
-        if ((bundle.pack_mask & (1u << menu_i_pack)) == 0) {
+        if ((StoreBundle[bundle_index].pack_mask & (1u << menu_i_pack)) == 0) {
             continue;
         }
-        if (NuIOS_IsProductPurchased(bundle.name) != 0 ||
+        if (NuIOS_IsProductPurchased(StoreBundle[bundle_index].name) != 0 ||
             (SuperOptions.store_bundle_flags & (1u << bundle_index)) != 0) {
             StoreIAP[0].text[0] = 'x';
             return;
@@ -949,14 +946,14 @@ void MenuDrawStore(MENU_s *) {
         product.description[0] = 0;
         product.price_text[0] = 0;
         product.price = 0.0f;
-        NuIOS_GetInAppProductByID(bundle.name, reinterpret_cast<NuIOS_InAppProduct *>(&product));
+        NuIOS_GetInAppProductByID(StoreBundle[bundle_index].name, reinterpret_cast<NuIOS_InAppProduct *>(&product));
         const f32 bundle_price = product.price;
         f32 separate_price = 0.0f;
         i32 character_ids[11];
         i32 already_owned[11];
         i32 count = 0;
 #define ADD_BUNDLE_PACK(INDEX)                                                                                         \
-    if ((bundle.pack_mask & (1u << INDEX)) != 0) {                                                                     \
+    if ((StoreBundle[bundle_index].pack_mask & (1u << INDEX)) != 0) {                                                  \
         character_ids[count] = *StorePack[INDEX].id;                                                                   \
         if (Store_IsPackUnlocked(INDEX)) {                                                                             \
             already_owned[count] = 1;                                                                                  \
@@ -1005,7 +1002,8 @@ void MenuDrawStore(MENU_s *) {
             x += step;
         }
         y -= 0.1f;
-        sprintf(line, "%s ~0%.2f~~", TTab[static_cast<i16>(bundle.text_index)], static_cast<double>(bundle_price));
+        sprintf(line, "%s ~0%.2f~~", TTab[static_cast<i16>(StoreBundle[bundle_index].text_index)],
+                static_cast<double>(bundle_price));
         Text3DEx(line, 0.0f, y, 1.0f, 0.4f, 0.4f, 0.4f, 1, 255, 191, 0, static_cast<u8>(MenuA));
         StoreIAP[slot].title_y = y;
         y += text3d_height;
@@ -1023,7 +1021,7 @@ void MenuDrawStore(MENU_s *) {
             }
         }
         sprintf(discount, "~0%.2f~~", static_cast<double>(separate_price - bundle_price));
-        const i16 save_text = bundle.pack_mask == 0xffffffffu ? tSAVE_SUPERBUNDLE : tSAVE_BUNDLE;
+        const i16 save_text = StoreBundle[bundle_index].pack_mask == 0xffffffffu ? tSAVE_SUPERBUNDLE : tSAVE_BUNDLE;
         sprintf(line, TTab[save_text], discount);
         SmartTextEx(line, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 1, 0, 191, 255, 1.9f, 1, &text_box, 0, MenuA);
         y += text3d_height;

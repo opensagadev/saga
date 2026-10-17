@@ -1824,10 +1824,9 @@ extern "C" {
     static __used__ i32 eduicbRenderSeparator(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
         NuQFntHeight(edui_font);
         NuQFntBaseline(edui_font);
-        numtl_s *background_material = uimtls[ui_bgmtl];
         item->y = y;
         item->x = x;
-        eduiDrawRect(x << 4, y << 3, width << 4, 64, item->colours[2 + item->highlighted], background_material);
+        eduiDrawRect(x << 4, y << 3, width << 4, 64, item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
         eduiDrawLine((x + 4) << 4, (y << 3) + 32, ((x + width) << 4) - 64, (y << 3) + 32, 0xff000000, uimtls[ui_bgmtl]);
         return 8;
     }
@@ -2019,7 +2018,6 @@ extern "C" {
         (void)menu;
         edui_graph_s *picker = static_cast<edui_graph_s *>(item);
         f32 cursor_y = picker->cursor_y;
-        f32 cursor_x = picker->cursor_x;
         item->x = x;
         item->y = y;
         i32 total_width = picker->width;
@@ -2085,7 +2083,7 @@ extern "C" {
         i32 cursor_line_y = static_cast<i32>(plot_y + (1.0f - cursor_y) * graph_height) << 3;
         eduiDrawLine(plot_x << 4, cursor_line_y, (plot_x + graph_width - 1) << 4, cursor_line_y, cursor_colour,
                      uimtls[0]);
-        i32 cursor_line_x = static_cast<i32>(plot_x + cursor_x * graph_width) << 4;
+        i32 cursor_line_x = static_cast<i32>(plot_x + picker->cursor_x * graph_width) << 4;
         eduiDrawLine(cursor_line_x, plot_y << 3, cursor_line_x, (plot_bottom << 3) - 8, cursor_colour, uimtls[0]);
         picker->selected_point = -1;
         f32 closest = 1.0f;
@@ -4457,9 +4455,8 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
         u8 right2 = pad->analog_r2;
         u8 left2 = pad->analog_l2;
         u8 left1 = pad->analog_l1;
-        u8 right1 = pad->analog_r1;
         i32 decrease = left1 ? left1 : left2;
-        i32 increase = right1 ? right1 : right2;
+        i32 increase = pad->analog_r1 ? pad->analog_r1 : right2;
         if (!(increase && !decrease)) {
             if (decrease) {
                 f32 time = stage->time - static_cast<f32>(decrease) / 15360.0f;

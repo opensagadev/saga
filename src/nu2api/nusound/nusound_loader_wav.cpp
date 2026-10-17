@@ -32,13 +32,13 @@ u32 NuSoundLoaderWAV::MakeFourCC(char *cc) {
 }
 
 void NuSoundLoaderWAV::EndianFlipWAVHeader(FileHeaderWAV *header) {
-    header->format = (header->format << 8) | (header->format >> 8);
-    header->num_channels = (header->num_channels << 8) | (header->num_channels >> 8);
+    header->format = (header->format >> 8) | (header->format << 8);
+    header->num_channels = (header->num_channels >> 8) | (header->num_channels << 8);
     header->sample_rate = __builtin_bswap32(header->sample_rate);
     header->byte_rate = __builtin_bswap32(header->byte_rate);
-    header->block_size = (header->block_size << 8) | (header->block_size >> 8);
-    header->bits_per_channel = (header->bits_per_channel << 8) | (header->bits_per_channel >> 8);
-    header->extended_size = (header->extended_size << 8) | (header->extended_size >> 8);
+    header->block_size = (header->block_size >> 8) | (header->block_size << 8);
+    header->bits_per_channel = (header->bits_per_channel >> 8) | (header->bits_per_channel << 8);
+    header->extended_size = (header->extended_size >> 8) | (header->extended_size << 8);
 }
 
 u32 NuSoundLoaderWAV::ReadRIFFHeaderChunk(i32 file, NuSoundStreamDesc *desc, const ChunkInfo &info,
@@ -127,37 +127,24 @@ u32 NuSoundLoaderWAV::FindChunk(i32 file, u32 id, ChunkInfo &info) {
 }
 
 i32 NuSoundLoaderWAV::ReadHeader(NuSoundStreamDesc *desc) {
-    static u32 riffId = 0;
-    static u32 waveId = 0;
-    static u32 formatId = 0;
-    static u32 dataId = 0;
-    static u32 seekId = 0;
-
-    if (riffId == 0) {
-        riffId = MakeFourCC((char *)"RIFF");
-    }
-    if (waveId == 0) {
-        waveId = MakeFourCC((char *)"WAVE");
-    }
-    if (formatId == 0) {
-        formatId = MakeFourCC((char *)"fmt ");
-    }
-    if (dataId == 0) {
-        dataId = MakeFourCC((char *)"data");
-    }
-    if (seekId == 0) {
-        seekId = MakeFourCC((char *)"seek");
-    }
+    static u32 riffId = MakeFourCC((char *)"RIFF");
+    static u32 waveId = MakeFourCC((char *)"WAVE");
+    static u32 formatId = MakeFourCC((char *)"fmt ");
+    static u32 dataId = MakeFourCC((char *)"data");
+    static u32 seekId = MakeFourCC((char *)"seek");
 
     u32 read_id = 0;
-    if (NuFileRead(this->file, &read_id, 4) != 4 || read_id != riffId) {
+    NuFileRead(this->file, &read_id, 4);
+    if (read_id != riffId) {
         return 3;
     }
 
-    u32 unused = 0;
-    NuFileRead(this->file, &unused, 4);
+    u32 riff_size = 0;
+    NuFileRead(this->file, &riff_size, 4);
 
-    if (NuFileRead(this->file, &read_id, 4) != 4 || read_id != waveId) {
+    read_id = 0;
+    NuFileRead(this->file, &read_id, 4);
+    if (read_id != waveId) {
         return 3;
     }
 

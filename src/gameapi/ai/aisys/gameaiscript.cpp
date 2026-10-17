@@ -2996,11 +2996,9 @@ static i32 Action_PressSpecialButton(AISYS *, AISCRIPTPROCESS *processor, AIPACK
     if (object == NULL)
         return 1;
     if (first_time) {
-        if (param_count != 0) {
-            for (i32 index = 0; index < param_count; ++index) {
-                if (NuStrICmp(params[index], "hold_button") == 0)
-                    processor->hold_special_button = 1;
-            }
+        for (i32 index = 0; index < param_count; ++index) {
+            if (NuStrICmp(params[index], "hold_button") == 0)
+                processor->hold_special_button = 1;
         }
     }
     object->pad_gamepad->buttons_pressed |= GAMEPAD_SPECIAL;
@@ -5106,7 +5104,7 @@ __used__ static i32 Action_SetAnimation(AISYS *sys, AISCRIPTPROCESS *processor, 
     if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL && param_5 != 0 &&
         param_4 == 1) {
         GameObject_s *object = packet->owner->apiobj.objptr;
-        const i32 animation = FindAnimIX(object->apiobj.character_data, params[0]);
+        const i16 animation = FindAnimIX(object->apiobj.character_data, params[0]);
         if (animation != -1) {
             ResetAnimPacket(&object->apiobj.anim_packet, animation);
         }
@@ -7092,22 +7090,22 @@ __used__ static i32 Action_CnxHelper(AISYS *sys, AISCRIPTPROCESS *processor, AIP
     return 1;
 }
 
-static u32 ParseAIPathCnxFlag(char *name) {
-    u32 flag = StarWars_ParseAIPathCnxFlag(name);
+static i32 ParseAIPathCnxFlag(char *name) {
+    i32 flag = StarWars_ParseAIPathCnxFlag(name);
     if (flag != 0) {
         return flag;
     }
     if (NuStrICmp(name, "BLOCK") == 0) {
-        return 0x80000000u;
+        return static_cast<i32>(0x80000000u);
     }
     if (NuStrICmp(name, "BIGJUMP") == 0) {
-        return static_cast<u32>(LEGO_AIPATHCNX_BIGJUMP);
+        return LEGO_AIPATHCNX_BIGJUMP;
     }
     if (NuStrICmp(name, "REQUIRESPERMISSION") == 0) {
-        return static_cast<u32>(LEGO_AIPATHCNX_REQUIRESPERMISSION);
+        return LEGO_AIPATHCNX_REQUIRESPERMISSION;
     }
     if (NuStrICmp(name, "NO_DESTINATION_CHECK") == 0) {
-        return static_cast<u32>(LEGO_AIPATHCNX_NO_DESTINATION_CHECK);
+        return LEGO_AIPATHCNX_NO_DESTINATION_CHECK;
     }
     return 0;
 }

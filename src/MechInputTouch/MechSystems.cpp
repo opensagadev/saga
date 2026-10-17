@@ -354,19 +354,18 @@ void HudRadarPulse::Process(float delta) {
             active = 1;
     }
     for (i32 i = 0; i < 3; ++i) {
-        HudRadarPulseStage &pulse = pulses[i];
-        if (!pulse.delay_finished) {
-            pulse.delay -= delta;
-            if (pulse.delay <= 0.0f)
-                pulse.delay_finished = 1;
+        if (!pulses[i].delay_finished) {
+            pulses[i].delay -= delta;
+            if (pulses[i].delay <= 0.0f)
+                pulses[i].delay_finished = 1;
         }
-        if (pulse.delay_finished && !pulse.finished) {
-            pulse.radius += pulse.speed * delta;
-            float speed = pulse.speed - 0.4f * delta;
-            pulse.speed = speed > 0.0f ? speed : 0.0f;
-            pulse.angle += static_cast<i32>(32768.0f * delta);
-            if (pulse.angle > 0x7fff)
-                pulse.finished = 1;
+        if (pulses[i].delay_finished && !pulses[i].finished) {
+            pulses[i].radius += pulses[i].speed * delta;
+            float speed = pulses[i].speed - 0.4f * delta;
+            pulses[i].speed = speed > 0.0f ? speed : 0.0f;
+            pulses[i].angle += static_cast<i32>(32768.0f * delta);
+            if (pulses[i].angle > 0x7fff)
+                pulses[i].finished = 1;
         }
     }
 }

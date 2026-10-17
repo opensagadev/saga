@@ -11,9 +11,8 @@ i32 GetMenuID();
 
 TouchHolder *MechInputTouchGestureTrackingSystem::GetTouch(NuInputTouch const &touch) {
     for (i32 index = 0; index < 10; ++index) {
-        TouchHolder *holder = &holders[index];
-        if (holder->touch_id == static_cast<i32>(touch.unknown_14)) {
-            return holder;
+        if (holders[index].touch_id == static_cast<i32>(touch.unknown_14)) {
+            return &holders[index];
         }
     }
     for (i32 index = 0; index < 10; ++index) {
@@ -131,10 +130,9 @@ void MechInputTouchGestureTrackingSystem::LookForSwipe(GameObject_s &object) {
             }
             if (sample_index > 0 && elapsed < 0.2f) {
                 previous_index = sample_index - 1;
-                TouchSwipeSample &previous = holder.swipe_samples[previous_index];
-                elapsed += previous.time - sample.time;
-                f32 dy = sample.position.y - previous.position.y;
-                f32 dx = sample.position.x - previous.position.x;
+                elapsed += holder.swipe_samples[previous_index].time - sample.time;
+                f32 dy = sample.position.y - holder.swipe_samples[previous_index].position.y;
+                f32 dx = sample.position.x - holder.swipe_samples[previous_index].position.x;
                 squared_path += dx * dx + dy * dy;
             }
         }

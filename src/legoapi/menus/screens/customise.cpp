@@ -648,7 +648,6 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
             const i32 saber_colour = LightSabre_ColourFromObj(weapon->weapon_model, NULL);
             if (customiser->animation_state[side] != 0)
                 --customiser->animation_state[side];
-            ANIMPACKET_s *packet = &customiser->animation_packets[side];
             const i32 intro = saber_colour == -1 ? 0x62 : 0x61;
             if (customiser->animation_active[side] == 0 && model->model_data_b[intro] != NULL) {
                 if (customiser->animation_values[side] == 0.0f) {
@@ -661,12 +660,15 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
             } else {
                 customiser->animation_active[side] = 1;
             }
-            packet->previous_animation = packet->animation_index;
+            customiser->animation_packets[side].previous_animation =
+                customiser->animation_packets[side].animation_index;
             if (saber_colour == -1)
-                packet->requested_animation = customiser->animation_active[side] == 0 ? 0x62 : 0x63;
+                customiser->animation_packets[side].requested_animation =
+                    customiser->animation_active[side] == 0 ? 0x62 : 0x63;
             else
-                packet->requested_animation = customiser->animation_active[side] == 0 ? 0x61 : 0xbe;
-            UpdateAnimPacket(model, packet, FRAMETIME * 30.0f, 0.0f, FRAMETIME, 0.0f);
+                customiser->animation_packets[side].requested_animation =
+                    customiser->animation_active[side] == 0 ? 0x61 : 0xbe;
+            UpdateAnimPacket(model, &customiser->animation_packets[side], FRAMETIME * 30.0f, 0.0f, FRAMETIME, 0.0f);
             const u16 angle = CustomiseYRot[side] + 0xc000;
             for (i32 category = 0; category < 9; ++category) {
                 const i32 selected = CustomiseMenuY[side];

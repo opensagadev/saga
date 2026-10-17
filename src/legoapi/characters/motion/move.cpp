@@ -3691,9 +3691,9 @@ void CurrentStart(GameObject_s *object, i32 require_twist_level, i32 use_socket_
         (require_twist_level == 0 && TwistLevel(world->current_level) == 0))
         return;
 
-    SOCK &socket = world->sock_sys->sock[static_cast<i8>(object->field_0x661)];
-    NUVEC current = {0.0f, 0.0f, socket.current_speed};
-    *reinterpret_cast<f32 *>(&object->field_0xc3c) = socket.current_speed;
+    NUVEC current = {0.0f, 0.0f, world->sock_sys->sock[static_cast<i8>(object->field_0x661)].current_speed};
+    *reinterpret_cast<f32 *>(&object->field_0xc3c) =
+        world->sock_sys->sock[static_cast<i8>(object->field_0x661)].current_speed;
     const f32 multiplier =
         (object->field_0xf02 & 0x20) == 0 ? object->current_speed_mul : object->current_speed_multiplier;
     current.z *= multiplier;
@@ -7540,12 +7540,15 @@ void StartQuickShoot(GameObject_s *object, i32 action) {
     ResetAnimPacket(&object->apiobj.anim_packet, -1);
     object->apiobj.anim_packet.flags |= 0x10;
     i32 fire_now = !(AnimListFrame(object->apiobj.character_model, object->context_animation, 1) > 1.0f);
-    bolt_id = BoltType_FindIDByCreature(object, 0);
     i32 flags = 1 + 2 * fire_now;
+    bolt_id = BoltType_FindIDByCreature(object, 0);
     if (object == Player[0] && nextShootTarget.Get() != NULL)
         nextShootTarget = NuMechPtr<MechObjectInterface, 4>();
     if ((object->apiobj.field_0x1f4 & 0x40000) == 0 || object->apiobj.field_0x27c == -1) {
-        NewBuzzFrames(object->pad_gamepad->pad, (object->apiobj.character_data->model_flags & 0x2000) != 0 ? 1 : 2, 0);
+        if ((object->apiobj.character_data->model_flags & 0x2000) != 0)
+            NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
+        else
+            NewBuzzFrames(object->pad_gamepad->pad, 2, 0);
         object->quick_shoot_flags = flags;
         object->quick_shoot_bolt_id = bolt_id;
         object->field_0xef9 |= 8;
@@ -8335,19 +8338,19 @@ void GameObjectStuffAfterAnimation() {
             }
         }
         if (VehicleArea != 0 && static_cast<u8>(object->apiobj.field_0x27c) <= 1) {
-            i32 *key = &FalconDebKey[static_cast<u8>(object->apiobj.field_0x27c)];
             if (object->id == id_MILLENNIUMFALCON && object->apiobj.player_controlled &&
                 (object->field_0xe24 & 8) != 0 && object->apiobj.character_model->points_of_interest[2] != NULL &&
                 object->apiobj.field_0xa8 == 1.0f) {
-                if (*key == -1)
-                    AddDebrisEffect(key, WORLD->debris_sys->entries[136].effect, 0.0f, 0.0f, 0.0f);
+                if (FalconDebKey[static_cast<u8>(object->apiobj.field_0x27c)] == -1)
+                    AddDebrisEffect(&FalconDebKey[static_cast<u8>(object->apiobj.field_0x27c)],
+                                    WORLD->debris_sys->entries[136].effect, 0.0f, 0.0f, 0.0f);
                 else {
                     matrix = object->joint_matrices[2];
                     NuMtxPreRotateX(&matrix, 0x4000);
-                    DebrisPosOrientationMtx(*key, &matrix);
+                    DebrisPosOrientationMtx(FalconDebKey[static_cast<u8>(object->apiobj.field_0x27c)], &matrix);
                 }
             } else
-                DebFreeInstantly(key);
+                DebFreeInstantly(&FalconDebKey[static_cast<u8>(object->apiobj.field_0x27c)]);
         }
         if (object->field_0xdec > 0.0f && object->apiobj.field_0x287 == 0) {
             f32 radius = object->apiobj.field_0x1dc * (0.5f + 0.5f * (static_cast<f32>(qrand()) * (1.0f / 65535.0f)));
@@ -10128,10 +10131,11 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Animate_CHARACTER(GameObj
         i16 model_id = apicharsys->playermodelids[id_UMBRELLA];
         if (model_id == -1)
             return;
-        CHARACTERMODEL_s *model = &apicharsys->models[model_id];
         object->mini_animation.requested_animation_id =
-            animation == -1 || model->model_data_b[animation] == NULL ? CHARACTER_ANIMATION_IDLE : animation;
-        UpdateMiniAnimPacket(model, &object->mini_animation, FRAMETIME * 30.0f, 0.0f, FRAMETIME);
+            animation == -1 || apicharsys->models[model_id].model_data_b[animation] == NULL ? CHARACTER_ANIMATION_IDLE
+                                                                                            : animation;
+        UpdateMiniAnimPacket(&apicharsys->models[model_id], &object->mini_animation, FRAMETIME * 30.0f, 0.0f,
+                             FRAMETIME);
     }
 }
 

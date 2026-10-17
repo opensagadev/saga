@@ -809,11 +809,10 @@ void CharScenes_AreaDump() {
         return;
     }
     for (i32 i = 0; i < CHARCOUNT; ++i) {
-        CHARSCENE_s &entry = CharScene_Area[i];
-        if (entry.scene != NULL) {
-            NuGScnRemove(entry.scene);
+        if (CharScene_Area[i].scene != NULL) {
+            NuGScnRemove(CharScene_Area[i].scene);
         }
-        entry.scene = NULL;
+        CharScene_Area[i].scene = NULL;
     }
 }
 

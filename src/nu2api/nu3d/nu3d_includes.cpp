@@ -13629,9 +13629,7 @@ extern "C" void BuildWorldSpaceClipPlanes(void) {
     NuMtxMulH(&ScissorPlanes, &vmtx, &CamSpaceScissorPlanes);
     f32 dot = global_camera.mtx.m30 * global_camera.mtx.m20 + global_camera.mtx.m31 * global_camera.mtx.m21 +
               global_camera.mtx.m32 * global_camera.mtx.m22;
-    NearPlane.x = global_camera.mtx.m20;
-    NearPlane.y = global_camera.mtx.m21;
-    NearPlane.z = global_camera.mtx.m22;
+    NearPlane = *reinterpret_cast<NUVEC4 *>(&global_camera.mtx.m20);
     NearPlane.w = -dot;
     AbsNearPlane.x = NuFabs(NearPlane.x);
     AbsNearPlane.y = NuFabs(NearPlane.y);

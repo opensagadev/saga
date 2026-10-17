@@ -15,10 +15,10 @@ NuSoundHandle::~NuSoundHandle() {
         }
         voice->UnregisterHandle(this);
     }
-    NuListNodeBase *node = effects.Head();
-    NuListNodeBase *end = effects.Tail();
+    NuListNodeBase *node = callbacks.Head();
+    NuListNodeBase *end = callbacks.Tail();
     for (; node != end; node = node->next) {
-        static_cast<NuListNode<NuSoundEffect *> *>(node)->value->Shutdown();
+        static_cast<NuListNode<NuSoundHandleCallback *> *>(node)->value->OnHandleDestroyed(this);
     }
     pthread_mutex_unlock(&sCriticalSection.mutex);
 }
@@ -173,10 +173,10 @@ NuSoundEffect *NuSoundHandle::GetEffect(NuSoundEffect::EffectType type) {
 }
 
 void NuSoundHandle::ResetFrameCount() {
-    NuListNodeBase *node = effects.Head();
-    NuListNodeBase *end = effects.Tail();
+    NuListNodeBase *node = callbacks.Head();
+    NuListNodeBase *end = callbacks.Tail();
     for (; node != end; node = node->next) {
-        static_cast<NuListNode<NuSoundEffect *> *>(node)->value->Enable();
+        static_cast<NuListNode<NuSoundHandleCallback *> *>(node)->value->OnHandleVoiceChanged(this);
     }
 }
 
@@ -205,27 +205,28 @@ NuSoundHandle &NuSoundHandle::operator=(NuSoundHandle &other) {
         voice->RegisterHandle(this);
     }
 
-    NuListNodeBase *node = other.effects.Head();
-    NuListNodeBase *end = other.effects.Tail();
+    NuListNodeBase *node = other.callbacks.Head();
+    NuListNodeBase *end = other.callbacks.Tail();
     for (; node != end; node = node->next) {
-        NuSoundEffect *effect = static_cast<NuListNode<NuSoundEffect *> *>(node)->value;
-        effect->Disable();
-        NuListNode<NuSoundEffect *> *copy =
-            static_cast<NuListNode<NuSoundEffect *> *>(NuMemoryGet()->GetThreadMem()->_BlockAlloc(
-                sizeof(NuListNode<NuSoundEffect *>), alignof(NuListNode<NuSoundEffect *>),
+        NuSoundHandleCallback *callback = static_cast<NuListNode<NuSoundHandleCallback *> *>(node)->value;
+        callback->OnHandleMoved(this, &other);
+        NuListNode<NuSoundHandleCallback *> *copy =
+            static_cast<NuListNode<NuSoundHandleCallback *> *>(NuMemoryGet()->GetThreadMem()->_BlockAlloc(
+                sizeof(NuListNode<NuSoundHandleCallback *>), alignof(NuListNode<NuSoundHandleCallback *>),
                 NuMemoryManager::MEM_ALLOC_SET_TO_ZERO, "", NUMEMORY_CATEGORY_NONE));
         if (copy != NULL) {
-            new (copy) NuListNode<NuSoundEffect *>(NULL, NULL, static_cast<NuListNode<NuSoundEffect *> *>(node)->value);
+            new (copy) NuListNode<NuSoundHandleCallback *>(
+                NULL, NULL, static_cast<NuListNode<NuSoundHandleCallback *> *>(node)->value);
         }
-        effects.Append(copy);
+        callbacks.Append(copy);
     }
-    while (other.effects.Head() != other.effects.Tail()) {
-        other.effects.Remove(other.effects.Head());
+    while (other.callbacks.Head() != other.callbacks.Tail()) {
+        other.callbacks.Remove(other.callbacks.Head());
     }
     return *this;
 }
 
-NuSoundHandle::NuSoundHandle(NuSoundHandle &other) : intrusive_prev(NULL), intrusive_next(NULL), effects() {
+NuSoundHandle::NuSoundHandle(NuSoundHandle &other) : intrusive_prev(NULL), intrusive_next(NULL), callbacks() {
     *this = other;
 }
 

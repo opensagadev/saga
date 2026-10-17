@@ -10582,16 +10582,11 @@ extern "C" AIPATHCNX *AIPathFindPathCnxFromIX(AISYS *system, AIPATH *path, u8 fr
 }
 
     void AIPathNodeUpdatePos(AISYS *system, AIPATH *path, AIPATHNODE *node) {
-        if (node->has_special == 0) {
-            return;
-        }
-
         const i32 node_index = static_cast<i32>(node - path->nodes);
-        u8 &updated_nodes = path->updated_node_bits[node_index / 8];
-        if (((updated_nodes >> (node_index % 8)) & 1) != 0) {
+        if (node->has_special == 0 || (path->updated_node_bits[node_index / 8] & (1 << (node_index % 8))) != 0) {
             return;
         }
-        updated_nodes |= 1 << (node_index % 8);
+        path->updated_node_bits[node_index / 8] |= 1 << (node_index % 8);
 
         nuhspecial_s *special = &node->special_handle;
         if ((node->runtime_flags & AIPATHNODE_RUNTIME_SPECIAL_UNAVAILABLE) != 0) {

@@ -4703,15 +4703,14 @@ void ClassEditor::cbEdClassRemoveDuplicates(eduimenu_s *, eduiitem_s *, u32) {
         if (!(NuVecMag(&first_position) > 0.1f))
             continue;
         for (i32 second = first + 1; second < count; ++second) {
-            Placeable *other = objects[second];
-            if (other != NULL) {
-                char const *other_name = other->GetName();
-                VuVec const *other_position = other->GetInitialPosition();
+            if (objects[second] != NULL) {
+                char const *other_name = objects[second]->GetName();
+                VuVec const *other_position = objects[second]->GetInitialPosition();
                 NUVEC second_position = {other_position->x, other_position->y, other_position->z};
                 i32 other_type = 0;
                 for (; other_type < thePlaceableHelper.object_type_count; ++other_type) {
                     void *interface = thePlaceableHelper.object_types[other_type].interface;
-                    if (reinterpret_cast<i32 *>(interface)[2] == other->scene_id)
+                    if (reinterpret_cast<i32 *>(interface)[2] == objects[second]->scene_id)
                         break;
                 }
                 if (!(NuVecMag(&first_position) > 0.1f))
@@ -4722,7 +4721,7 @@ void ClassEditor::cbEdClassRemoveDuplicates(eduimenu_s *, eduiitem_s *, u32) {
                     (strstr(name, other_name) != NULL || strstr(other_name, name) != NULL)) {
                     EdClassInterface *interface =
                         reinterpret_cast<EdClassInterface *>(thePlaceableHelper.object_types[object_type].interface);
-                    interface->vtable->destroy_object(interface, other, 0);
+                    interface->vtable->destroy_object(interface, objects[second], 0);
                     objects[second] = NULL;
                 }
             }
@@ -6695,17 +6694,11 @@ i32 ClassObjectList::GetAveragePosition(VuVec &average) {
     average = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
     i32 position_count = 0;
     for (ClassObjectListEntry *entry = first; entry != NULL; entry = entry->next) {
-        EdMember member;
         // The original's local vector is 16-byte aligned.
         VuVec position __attribute__((aligned(16)));
         i32 position_type = EdType_VuVec;
-        bool found = entry->reference != NULL &&
-                     entry->reference->GetAttributeData(entry->object, 8, position_type, &position, 0) != 0;
-        if (!found) {
-            found = entry->ed_class->FindMember(&member, entry->object, 8, 1) != 0 &&
-                    member.reference->GetAttributeData(member.object, 8, position_type, &position, 0) != 0;
-        }
-        if (found) {
+        if (get_class_object_attribute(entry->ed_class, entry->object, entry->reference, 8, position_type, &position,
+                                       0)) {
             average.x += position.x;
             average.y += position.y;
             average.z += position.z;
@@ -6740,28 +6733,18 @@ i32 ClassObjectList::GetAveragePosition(VuVec &average, float &radius) {
     float radii[64] __attribute__((aligned(16)));
     for (ClassObjectListEntry *entry = first; entry != NULL && position_count < 64; entry = entry->next) {
         VuVec &position = positions[position_count];
-        EdMember member __attribute__((aligned(16)));
         i32 position_type = EdType_VuVec;
-        if (entry->reference != NULL &&
-            entry->reference->GetAttributeData(entry->object, 8, position_type, &position, 0))
-            goto position_found;
-        if (!entry->ed_class->FindMember(&member, entry->object, 8, 1))
-            continue;
-        if (!member.reference->GetAttributeData(member.object, 8, position_type, &position, 0))
-            continue;
-    position_found:
-        average.x += position.x;
-        average.y += position.y;
-        average.z += position.z;
-        radii[position_count] = 1.0f;
-        i32 radius_type = EdType_Float;
-        if (entry->reference != NULL &&
-            entry->reference->GetAttributeData(entry->object, 64, radius_type, &radii[position_count], 0))
-            goto radius_found;
-        if (entry->ed_class->FindMember(&member, entry->object, 64, 1))
-            member.reference->GetAttributeData(member.object, 64, radius_type, &radii[position_count], 0);
-    radius_found:
-        ++position_count;
+        if (get_class_object_attribute(entry->ed_class, entry->object, entry->reference, 8, position_type, &position,
+                                       0)) {
+            average.x += position.x;
+            average.y += position.y;
+            average.z += position.z;
+            radii[position_count] = 1.0f;
+            i32 radius_type = EdType_Float;
+            get_class_object_attribute(entry->ed_class, entry->object, entry->reference, 64, radius_type,
+                                       &radii[position_count], 0);
+            ++position_count;
+        }
     }
     if (position_count != 0) {
         float scale = 1.0f / position_count;
@@ -7209,11 +7192,7 @@ void PropertyTool::RenderMenu(PropertyMenu *property_menu) {
                     (static_cast<f32>(menu->y) + static_cast<f32>(menu->height) * 0.125f) / 448.0f, &start.xyz,
                     &end.xyz, NULL);
     ClassObject &object = property_menu->objects[0];
-    if (object.reference == NULL || !object.reference->GetAttributeData(object.object, 8, EdType_VuVec, &end, 0)) {
-        EdMember member;
-        if (object.ed_class->FindMember(&member, object.object, 8, 1))
-            member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &end, 0);
-    }
+    get_class_object_attribute(object.ed_class, object.object, object.reference, 8, EdType_VuVec, &end, 0);
     EdDrawBegin(0);
     EdDrawLineSegment(start, end, static_cast<i32>(reinterpret_cast<usize>(&selected_attr)));
     EdDrawEnd();
@@ -8764,7 +8743,6 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
     if (!editors_entered) {
         return;
     }
-    f32 delta_time = data->t;
     nupad_s *pad = data->pads[0];
     text_length = 0;
     memset(info_text, 0, sizeof(info_text));
@@ -8822,7 +8800,7 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
     if (field_0x28 != 0) {
         camera = edmainGetCamera();
     }
-    input.Update(camera, pad, delta_time, thePropertyTool.HasActiveMenu());
+    input.Update(camera, pad, data->t, thePropertyTool.HasActiveMenu());
     if (edmainGetCursorEnabled()) {
         eduiProcessCursor(0.0f, pad);
     }
@@ -8845,7 +8823,7 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
     if (edLevelActiveMenu != NULL) {
         NuFntSet(EdLevelFnt);
         NuFntScale(EdLevelFntScale, EdLevelFntScale);
-        if (eduiMenuProcess(edLevelActiveMenu, delta_time, pad) != 0) {
+        if (eduiMenuProcess(edLevelActiveMenu, data->t, pad) != 0) {
             input.Clear(3);
         } else if (edLevelActiveMenu != edLevelPinnedMenu) {
             if (input.GetPress(3) != 0.0f) {
@@ -8863,7 +8841,7 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
     } else if (edLevelPinnedMenu != NULL && !thePropertyTool.HasActiveMenu()) {
         NuFntSet(EdLevelFnt);
         NuFntScale(EdLevelFntScale, EdLevelFntScale);
-        if (eduiMenuProcess(edLevelPinnedMenu, delta_time, pad) != 0) {
+        if (eduiMenuProcess(edLevelPinnedMenu, data->t, pad) != 0) {
             return;
         }
     }

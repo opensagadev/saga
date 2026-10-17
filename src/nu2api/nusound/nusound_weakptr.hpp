@@ -196,3 +196,12 @@ template <typename T> void NuSoundWeakPtr<T>::Set(T *ptr) {
 
     NuSoundWeakPtrListNode::sPtrListLock.Unlock();
 }
+
+// Builds a weak pointer whose target is registered in place (Assign) rather
+// than through the out-of-line Set; used when a temporary callback pointer is
+// handed straight to RequestBuffer.
+template <typename T> inline NuSoundWeakPtr<T> NuSoundMakeWeakPtr(T *ptr) {
+    NuSoundWeakPtr<T> pointer;
+    pointer.Assign(ptr);
+    return pointer;
+}

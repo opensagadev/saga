@@ -511,33 +511,27 @@ static NUVEC *GetAICreatureOrigin(AISYS *system, AIPACKET *packet) {
 }
 
 static APIOBJECT *GetNamedAPIObject(AISYS *system, char *name) {
+    APIOBJECT *found = NULL;
     if (system != NULL) {
         for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
             if ((Obj[index].apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) == 0) {
                 continue;
             }
-
             if ((Obj[index].apiobj.field_0x1f4 & 0x400) != 0 && Obj[index].ai.field_0x134 != 0xff) {
-                usize creature_address =
-                    reinterpret_cast<usize>(system->creatures) + Obj[index].ai.field_0x134 * sizeof(*system->creatures);
-                auto *creature = reinterpret_cast<decltype(system->creatures)>(creature_address);
+                auto *creature = &system->creatures[Obj[index].ai.field_0x134];
                 if (creature != NULL && NuStrICmp(creature->name, name) == 0) {
-                    usize result_address = reinterpret_cast<usize>(Obj) + index * sizeof(*Obj);
-                    if (result_address == 0) {
-                        break;
-                    }
-                    return reinterpret_cast<APIOBJECT *>(result_address);
+                    found = &Obj[index].apiobj;
+                    break;
                 }
             }
-            if (NuStrICmp(Obj[index].apiobj.character_data->file, name) != 0) {
-                continue;
-            }
-            usize result_address = reinterpret_cast<usize>(Obj) + index * sizeof(*Obj);
-            if (result_address == 0) {
+            if (NuStrICmp(Obj[index].apiobj.character_data->file, name) == 0) {
+                found = &Obj[index].apiobj;
                 break;
             }
-            return reinterpret_cast<APIOBJECT *>(result_address);
         }
+    }
+    if (found != NULL) {
+        return found;
     }
 
     if (NuStrICmp(name, "player") == 0) {
@@ -1113,8 +1107,8 @@ void MakeBaddiesForgetAboutParty(i32 check_hostility) {
     }
     if (check_hostility != 0) {
         for (i32 i = 0; i < baddie_count; ++i) {
-            u64 mask = u64(1) << baddies[i]->apiobj.field_0x289;
             for (i32 j = 0; j < party_count; ++j) {
+                u64 mask = u64(1) << baddies[i]->apiobj.field_0x289;
                 APIOBJECT *object = &party[j]->apiobj;
                 u64 hostile = u64(object->field387_0x2a0) | (u64(object->field388_0x2a4) << 32);
                 if ((hostile & mask) != 0) {
@@ -1127,8 +1121,8 @@ void MakeBaddiesForgetAboutParty(i32 check_hostility) {
     }
     for (i32 i = 0; i < baddie_count; ++i) {
         APIOBJECT *baddie = &baddies[i]->apiobj;
-        u64 mask = ~(u64(1) << baddie->field_0x289);
         for (i32 j = 0; j < party_count; ++j) {
+            u64 mask = ~(u64(1) << baddie->field_0x289);
             APIOBJECT *member = &party[j]->apiobj;
             member->field387_0x2a0 &= static_cast<u32>(mask);
             member->field388_0x2a4 &= static_cast<u32>(mask >> 32);

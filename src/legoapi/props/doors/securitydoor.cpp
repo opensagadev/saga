@@ -290,13 +290,12 @@ static void SecurityDoors_StoreProgress(void *world_data, void *, void *progress
     if (world == NULL || world->security_doors == NULL) {
         return;
     }
-    const i32 count = world->security_door_count;
-    if (count <= 0) {
+    if (world->security_door_count <= 0) {
         return;
     }
 
     SECURITYDOOR *door = world->security_doors;
-    for (i32 i = 0; i != count && i != 32; ++i, ++door) {
+    for (i32 i = 0; i != world->security_door_count && i != 32; ++i, ++door) {
         const i32 word = i >> 5;
         const u32 mask = 1U << i;
         if (!door->visible) {
@@ -392,14 +391,13 @@ static void *SecurityDoors_ReserveBufferSpace(void *world_data) {
     world->security_doors = NULL;
     world->security_door_count = 0;
 
-    const i32 count = world->current_level->max_security_doors;
-    if (count == 0) {
+    if (world->current_level->max_security_doors == 0) {
         return NULL;
     }
 
     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 16);
     world->security_doors = static_cast<SECURITYDOOR *>(world->giz_buffer.void_ptr);
-    world->giz_buffer.addr += sizeof(SECURITYDOOR) * count;
+    world->giz_buffer.addr += sizeof(SECURITYDOOR) * world->current_level->max_security_doors;
     return world->security_doors;
 }
 

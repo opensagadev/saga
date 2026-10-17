@@ -221,9 +221,11 @@ static inline void IncrementMinikitCounterFor(WORLDINFO_s *world, NUVEC *average
         NuVecAdd(&camera, &camera, &pickup->position);
         GameCameraMakeMiniCut2(&camera, &pickup->position, 0, 0.0f, 4.0f, 0.0f, 0.0f, 0, 0, 0);
         GizmoActivate(world->gizmo_sys, LevGizmo[gizmo_index], 1, 1);
+        // ORIG_BUG: the completion message is placed at a position that is never set.
+        NUVEC message_pos;
+        AddGameMsgCount(&message_pos, *counter, 10, 200, 100, 30, 0.75f);
+        return;
     }
-    // The reference's completion branch passes an uninitialized temporary.
-    // Keep the message at the same valid averaged position as earlier counts.
     AddGameMsgCount(average, *counter, 10, 200, 100, 30, 0.75f);
 }
 
@@ -521,13 +523,12 @@ static __used__ void KilledTrooperCannon(GameObject_s *object) {
 
     for (i32 i = 0; i < 4; ++i) {
         if (troopercannons[i].object == object) {
-            TROOPERCANNON_s &cannon = troopercannons[i];
-            DeactivateCharacter(cannon.character_name);
-            GizBuildIt_SetToStart(cannon.buildit, 0, 0);
-            GIZMO *gizmo = GizmoFindByData(WORLD->gizmo_sys, gizbuildit_gizmotype_id, cannon.buildit);
+            DeactivateCharacter(troopercannons[i].character_name);
+            GizBuildIt_SetToStart(troopercannons[i].buildit, 0, 0);
+            GIZMO *gizmo = GizmoFindByData(WORLD->gizmo_sys, gizbuildit_gizmotype_id, troopercannons[i].buildit);
             GizmoActivate(WORLD->gizmo_sys, gizmo, 1, 1);
-            GizBuildit_SetVisibility(cannon.buildit, 1);
-            cannon.rebuilding = 1;
+            GizBuildit_SetVisibility(troopercannons[i].buildit, 1);
+            troopercannons[i].rebuilding = 1;
             WORLD->level_progress->destroyed_trooper_cannon_mask |= 1u << i;
             return;
         }

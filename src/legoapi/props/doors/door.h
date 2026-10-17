@@ -74,7 +74,7 @@ extern i32 gone_through_door_to_new_mode;
 extern i32 gone_through_door_to_new_level;
 extern DOOR_s *Door_Last;
 
-void StartDoorPositions(void);
+i32 StartDoorPositions(void);
 
 void Door_Reset(void);
 void Doors_Init(WORLDINFO_s *world);

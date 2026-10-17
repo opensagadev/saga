@@ -1044,59 +1044,59 @@ NuSoundEffect *NuSoundSystem::CreateEffect(NuSoundEffect::EffectType type) {
 
     switch (type) {
         case NuSoundEffect::EffectType::ATTENUATION: {
-            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectAttenuation), 4,
-                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1094");
-            if (memory != NULL)
-                effect = new (memory) NuSoundEffectAttenuation();
+            effect = static_cast<NuSoundEffect *>(_AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectAttenuation), 4,
+                                                                       "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1094"));
+            if (effect != NULL)
+                new (effect) NuSoundEffectAttenuation();
             break;
         }
         case NuSoundEffect::EffectType::PITCH: {
-            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectPitch), 4,
-                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1100");
-            if (memory != NULL)
-                effect = new (memory) NuSoundEffectPitch();
+            effect = static_cast<NuSoundEffect *>(_AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectPitch), 4,
+                                                                       "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1100"));
+            if (effect != NULL)
+                new (effect) NuSoundEffectPitch();
             break;
         }
         case NuSoundEffect::EffectType::FADER: {
-            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectFader), 4,
-                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1106");
-            if (memory != NULL)
-                effect = new (memory) NuSoundEffectFader();
+            effect = static_cast<NuSoundEffect *>(_AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectFader), 4,
+                                                                       "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1106"));
+            if (effect != NULL)
+                new (effect) NuSoundEffectFader();
             break;
         }
         case NuSoundEffect::EffectType::PITCH_RAMP: {
-            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectPitchRamp), 4,
-                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1112");
-            if (memory != NULL)
-                effect = new (memory) NuSoundEffectPitchRamp();
+            effect = static_cast<NuSoundEffect *>(_AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectPitchRamp), 4,
+                                                                       "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1112"));
+            if (effect != NULL)
+                new (effect) NuSoundEffectPitchRamp();
             break;
         }
         case NuSoundEffect::EffectType::RANDOM_VOLUME: {
-            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectRandomVolume), 4,
-                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1118");
-            if (memory != NULL)
-                effect = new (memory) NuSoundEffectRandomVolume();
+            effect = static_cast<NuSoundEffect *>(_AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectRandomVolume), 4,
+                                                                       "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1118"));
+            if (effect != NULL)
+                new (effect) NuSoundEffectRandomVolume();
             break;
         }
         case NuSoundEffect::EffectType::RANDOM_PITCH: {
-            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectRandomPitch), 4,
-                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1124");
-            if (memory != NULL)
-                effect = new (memory) NuSoundEffectRandomPitch();
+            effect = static_cast<NuSoundEffect *>(_AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectRandomPitch), 4,
+                                                                       "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1124"));
+            if (effect != NULL)
+                new (effect) NuSoundEffectRandomPitch();
             break;
         }
         case NuSoundEffect::EffectType::REPEAT: {
-            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectRepeat), 4,
-                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1136");
-            if (memory != NULL)
-                effect = new (memory) NuSoundEffectRepeat();
+            effect = static_cast<NuSoundEffect *>(_AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectRepeat), 4,
+                                                                       "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1136"));
+            if (effect != NULL)
+                new (effect) NuSoundEffectRepeat();
             break;
         }
         case NuSoundEffect::EffectType::DOPPLER: {
-            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectDoppler), 4,
-                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1130");
-            if (memory != NULL)
-                effect = new (memory) NuSoundEffectDoppler();
+            effect = static_cast<NuSoundEffect *>(_AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectDoppler), 4,
+                                                                       "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1130"));
+            if (effect != NULL)
+                new (effect) NuSoundEffectDoppler();
             break;
         }
         default:
@@ -1215,7 +1215,7 @@ void NuSoundEffectAttenuation::ProcessVoice(NuSoundVoice *voice, f32) {
 
     if (voice->GetSurroundMode() != NuSoundSystem::SurroundMode::TWO) {
         for (NuListNodeBase *node = attachments.Head(); node != attachments.Tail(); node = node->GetNext()) {
-            void *listener = static_cast<NuListNode<void *> *>(node)->value;
+            NuSoundListener *listener = static_cast<NuListNode<NuSoundVoiceListenerLink> *>(node)->value.listener;
             if (listener != NULL && listener == voice->focus_listener_link.listener) {
                 output_mix = attenuation;
                 return;

@@ -225,9 +225,8 @@ static void *Blowup_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end) {
 static void Blowup_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     for (i32 index = 0; index < world->gizmo_blowup_count; ++index) {
-        GIZMOBLOWUP_s *blowup = &world->gizmo_blowups[index];
-        if (NuStrLen(blowup->name) != 0) {
-            AddGizmo(gizmo_sys, type_id, NULL, blowup);
+        if (NuStrLen(world->gizmo_blowups[index].name) != 0) {
+            AddGizmo(gizmo_sys, type_id, NULL, &world->gizmo_blowups[index]);
         }
     }
 }
@@ -425,25 +424,25 @@ ADDGIZMOTYPE *NewBlowup_RegisterGizmo(i32 type_id) {
     addtype.name = "blowup";
     addtype.prefix = "";
     addtype.fns.unknown1 = 0x100;
-    addtype.fns.early_update_fn = GizmoBlowupEarlyUpdate;
-    addtype.fns.panel_draw_fn = NULL;
     addtype.fns.get_max_gizmos_fn = Blowup_GetMaxGizmos;
-    addtype.fns.get_visibility_fn = Blowup_GetVisibility;
-    addtype.fns.get_pos_fn = GizmoBlowup_GetPos;
-    addtype.fns.using_special_fn = NULL;
     addtype.fns.add_gizmos_fn = Blowup_AddGizmos;
-    addtype.fns.bolt_hit_plat_fn = NULL;
-    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.early_update_fn = GizmoBlowupEarlyUpdate;
     addtype.fns.late_update_fn = GizmoBlowupLateUpdate;
-    addtype.fns.bolt_hit_fn = NULL;
+    addtype.fns.draw_fn = GizmoBlowupBurstDraw;
+    addtype.fns.panel_draw_fn = NULL;
     addtype.fns.get_gizmo_name_fn = Blowup_GetGizmoName;
     addtype.fns.get_output_fn = Blowup_GetOutput;
     addtype.fns.get_output_name_fn = Blowup_GetOutputName;
-    addtype.fns.draw_fn = GizmoBlowupBurstDraw;
     addtype.fns.get_num_outputs_fn = Blowup_GetNumOutputs;
     addtype.fns.activate_fn = Blowup_Activate;
     addtype.fns.activate_rev_fn = NULL;
     addtype.fns.set_visibility_fn = Blowup_SetVisibility;
+    addtype.fns.get_visibility_fn = Blowup_GetVisibility;
+    addtype.fns.get_pos_fn = GizmoBlowup_GetPos;
+    addtype.fns.using_special_fn = NULL;
+    addtype.fns.bolt_hit_plat_fn = NULL;
+    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.bolt_hit_fn = NULL;
     addtype.fns.allocate_progress_data_fn = Blowup_AllocateProgressData;
     addtype.fns.clear_progress_fn = Blowup_ClearProgress;
     addtype.fns.store_progress_fn = Blowup_StoreProgress;

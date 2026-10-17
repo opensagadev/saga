@@ -378,11 +378,11 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                                     sound_muzzle = qrand() / (65535 / turret->field_0x130 + 1);
                                 turret->fired_this_frame = 1;
                                 for (i32 muzzle = 0; muzzle < turret->field_0x130; ++muzzle) {
-                                    NUVEC *offset = &turret->field_0x74[muzzle];
                                     NUMTX muzzle_matrix = *primary_draw;
-                                    if (offset->x != 0.0f || offset->y != 0.0f || offset->z != 0.0f) {
+                                    if (turret->field_0x74[muzzle].x != 0.0f || turret->field_0x74[muzzle].y != 0.0f ||
+                                        turret->field_0x74[muzzle].z != 0.0f) {
                                         NuMtxPreRotateY(&muzzle_matrix, 0x8000);
-                                        NuMtxPreTranslate(&muzzle_matrix, offset);
+                                        NuMtxPreTranslate(&muzzle_matrix, &turret->field_0x74[muzzle]);
                                     }
                                     NUMTX direction_matrix = *primary_draw;
                                     if (turret->behavior_flags & 0x40)

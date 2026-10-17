@@ -328,18 +328,18 @@ struct __attribute__((aligned(16))) NetMessage {
             data->bytes[write_offset++] = value;
         }
     }
-    void Write16(i16 value) {
+    void Write16(i16 const &value) {
         if (data != NULL) {
-            memcpy(data->bytes + write_offset, &value, 2);
+            memmove(data->bytes + write_offset, &value, 2);
             if (swap_endianness) {
                 EdFileSwapEndianess16(data->bytes + write_offset);
             }
             write_offset += 2;
         }
     }
-    void Write32(i32 value) {
+    void Write32(i32 const &value) {
         if (data != NULL) {
-            memcpy(data->bytes + write_offset, &value, 4);
+            memmove(data->bytes + write_offset, &value, 4);
             if (swap_endianness) {
                 EdFileSwapEndianess32(data->bytes + write_offset);
             }

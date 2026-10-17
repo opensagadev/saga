@@ -188,11 +188,11 @@ void NuSoundVoice::Play() {
     if (this->queued_buffers == 0) {
         // Ask the source for the initial buffers; the streamer (or the sample
         // itself) hands them back through SubmitBuffer.
-        for (i32 i = 0; i < this->sound_source->GetNumInitialBuffers(); i++) {
-            if (!this->source_flags.looping && this->source_flags.last_buffer_queued) {
-                break;
-            }
-            this->sound_source->RequestBuffer(this->source_flags.looping, this);
+        for (i32 i = 0; i < this->sound_source->GetNumInitialBuffers() &&
+                        (this->source_flags.looping || !this->source_flags.last_buffer_queued);
+             i++) {
+            this->sound_source->RequestBuffer(this->source_flags.looping,
+                                              NuSoundMakeWeakPtr<NuSoundBufferCallback>(this));
         }
     }
 
