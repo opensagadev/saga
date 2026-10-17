@@ -18,6 +18,3 @@
 
 #include "decomp.h"
 
-struct AIROW_s;
-struct nunativegscene_s;
-

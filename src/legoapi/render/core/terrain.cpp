@@ -22,16 +22,8 @@
 #include <math.h>
 #include <string.h>
 
-struct tertype;
-struct terrsitu_s;
-struct PLATSKININFO;
-struct GAMECAMERA_s;
 struct pushblock_s;
 extern i16 id_SNAKE;
-
-namespace {
-
-} // namespace
 
 namespace {
 
@@ -229,17 +221,9 @@ extern i32 Grass_Available;
 
 #undef TERRAIN_SCALE_SCAN_SHAPE
 
-namespace {
-
-} // namespace
-
 i32 TerrainBlockOnBlock(WORLDINFO_s *world, pushblock_s *block, nuvec_s *points, float *heights);
 
 #undef TERRAIN_GET_SCAN_BOUNDS
-
-namespace {
-
-} // namespace
 
 namespace {
 
@@ -249,13 +233,5 @@ namespace {
 
 // Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
 
-namespace {
-
-} // namespace
-
 #undef TERRAIN_COLLECT_WALL_SPLINES
-
-namespace {
-
-} // namespace
 

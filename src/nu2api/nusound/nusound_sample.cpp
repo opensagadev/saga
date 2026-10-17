@@ -154,11 +154,11 @@ void NuSoundSample::RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBufferCallbac
     // In-memory samples hand their whole buffer to the requesting voice
     // immediately; the streaming sample overrides this with the double-buffer
     // pump.
-    pthread_mutex_lock(&NuSoundWeakPtrListNode::sPtrAccessLock.mutex);
+    pthread_mutex_lock(&NuSoundWeakPtrListNode::sPtrAccessLock.critical_section.mutex);
     if (callback.obj != NULL) {
         ((NuSoundBufferCallback *)callback.obj)->SubmitBuffer(&this->buffer);
     }
-    pthread_mutex_unlock(&NuSoundWeakPtrListNode::sPtrAccessLock.mutex);
+    pthread_mutex_unlock(&NuSoundWeakPtrListNode::sPtrAccessLock.critical_section.mutex);
 }
 
 bool NuSoundSample::IsStreamOpen() const {

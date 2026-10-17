@@ -62,11 +62,6 @@ i32 zipup_gizmotype_id = -1;
 static char zipup_outputName[] = "Active";
 static NUVEC ZipUpHookOffset = {0.0f, -0.1143f, -0.0859f};
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 i32 SuperWeirdo(GameObject_s *);
 
 numtl_s *ropemtl;

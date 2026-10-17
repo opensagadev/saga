@@ -233,9 +233,6 @@ void SetPodMergeAnims(ANIMPACKET_s *packet, i32 index) {
     a->field_0x44 = fabsf(pod_roll[index]);
 }
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 static i32 PodRaceKey[8] __attribute__((aligned(16))) = {-1, -1, -1, -1, -1, -1, -1, -1};
 

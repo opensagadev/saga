@@ -24,11 +24,6 @@
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 void Hub_ActivateDoorMenu(LEVELDATA_s **level);
 
 namespace {

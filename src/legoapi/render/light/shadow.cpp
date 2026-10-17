@@ -8,9 +8,6 @@
 #include "legoapi/items/base/apiobject.h"
 #include "nu2api/nu3d/nucamera.h"
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 void RenderShadowLights(i32);
 
 void Shadow_SetMode() {

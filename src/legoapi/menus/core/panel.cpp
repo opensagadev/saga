@@ -37,11 +37,6 @@
 #include "nu2api/numath/nutrig.h"
 #include <stdio.h>
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 void TimingBars(void);
 
 static f32 redbrickslidetime;
@@ -274,9 +269,9 @@ static __attribute__((noinline, noclone, hot, section(".text"))) void DrawHitPoi
 static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, float alpha, i32 alignment) {
     // Retail has no NULL guards here; both callers pass a live object.
     i32 two_rows = 0;
-    if (__builtin_expect(SuperStory != 0, 0) && WORLD->current_level == VADERC_LDATA && object->hitpoints == 10) {
+    if (SuperStory != 0 && WORLD->current_level == VADERC_LDATA && object->hitpoints == 10) {
         two_rows = 1;
-    } else if (__builtin_expect((object->field_0xefb & 8) != 0, 0)) {
+    } else if ((object->field_0xefb & 8) != 0) {
         two_rows = drawbosshitpoints_2rows != 0;
         drawbosshitpoints_2rows = 0;
     }
@@ -342,7 +337,7 @@ static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, f
         object_scale.x = scale;
         const i32 half_hp = (i + 1) * 2;
         float draw_alpha = 0.5f;
-        if (__builtin_expect(i < current_hp, 1)) {
+        if (i < current_hp) {
             draw_alpha = 1.0f;
             if (PLAYERHITPOINTS_2HEARTSIN1 != 0 && object->apiobj.player_controlled && i == current_hp - 1 &&
                 static_cast<i8>(object->current_hp) < half_hp) {
@@ -390,7 +385,7 @@ void UpdateStats() {
     if ((WORLD->current_level->flags & LEVEL_GAMEPLAY) == 0)
         return;
     f32 stats_target = 0.0f;
-    if (__builtin_expect(FadeSys.fade == 0.0f && CUTSTOPGAME == 0 && newgamecam == 0, 0)) {
+    if (__builtin_expect(FadeSys.fade == 0.0f && CUTSTOPGAME == 0 && newgamecam == 0, 1)) {
         const bool hub_hidden = HUB_ADATA != NULL && WORLD->area == HUB_ADATA && GameCam->mode == 4;
         if (!hub_hidden && GetMenuID() != PANEL_MENU_EPISODE_I && GetMenuID() != PANEL_MENU_EPISODE_II &&
             GetMenuID() != PANEL_MENU_EPISODE_III && GetMenuID() != PANEL_MENU_EPISODE_IV)

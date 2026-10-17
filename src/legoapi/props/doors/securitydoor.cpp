@@ -20,11 +20,6 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 void SecurityDoor_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     if (object->character_context == 0x5c) {
         f32 *playing = NULL;

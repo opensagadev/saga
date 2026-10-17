@@ -31,10 +31,7 @@
 #include "legoapi/render/light/lighting.h"
 #include "nu2api/nu3d/nu3d_includes.h"
 
-struct nuqtdim_s;
-struct nuqthdr_s;
 struct rtl_s;
-struct NUFRUSTRUM;
 
 static NULSTHDR *rtl_dynamic_pool;
 static i32 rtl_dynamic_lights_enabled = 1;

@@ -2,6 +2,7 @@
 #include <float.h>
 #include "nu2api/nucore/nucore.hpp"
 #include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/nuvuvec.hpp"
 
 #include <new>
 #include <stddef.h>

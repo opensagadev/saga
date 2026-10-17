@@ -16,9 +16,6 @@
 #include "nu2api/numath/nutrig.h"
 #include "legoapi/characters/motion/move.h"
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 void Transform_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     ResetForceGlow(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
     if (object->character_context != 86) {

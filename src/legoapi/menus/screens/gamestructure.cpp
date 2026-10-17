@@ -46,7 +46,6 @@
 #include "nu2api/nucore/nu2api_nucore_misc.h"
 
 struct GameObject_s;
-struct LEVEL_PROGRESS_s;
 struct WORLDINFO_s;
 struct NuIOS_InAppProduct;
 i32 NuIOS_AreInAppPurchasesAvailable();

@@ -603,7 +603,7 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
             spinner = &world->spinners[index];
             for (GAMEANIMOBJ_s *object = spinner->anim_set->objects; object != NULL; object = object->next) {
                 if (spinner->primary_anim_obj == NULL) {
-                    if (__builtin_expect(object->animation != NULL, 0)) {
+                    if (object->animation != NULL) {
                         spinner->primary_anim_obj = object;
                         longest_duration = __builtin_fabsf(object->end_frame - object->start_frame);
                     }
@@ -965,10 +965,10 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
             spinner->flags |= SPINNER_RUNTIME_ANIMATION_HIDDEN;
         else if ((spinner->flags & SPINNER_RUNTIME_ANIMATION_HIDDEN) != 0)
             spinner->flags &= static_cast<u8>(~SPINNER_RUNTIME_ANIMATION_HIDDEN);
-        if (__builtin_expect((spinner->flags & (GIZSPINNER_FLAG_HIDE_ARM | SPINNER_RUNTIME_ANIMATION_HIDDEN)) != 0, 1)) {
+        if ((spinner->flags & (GIZSPINNER_FLAG_HIDE_ARM | SPINNER_RUNTIME_ANIMATION_HIDDEN)) != 0) {
             spinner->state_flags = (spinner->state_flags & ~SPINNER_STATE_ROTATING) | SPINNER_STATE_STOP_ANIMATION;
-            if (__builtin_expect((spinner->flags & GIZSPINNER_FLAG_HIDE_BASE) == 0 && qrand() < 0x800 && WORLD != NULL &&
-                WORLD->debris_sys != NULL && WORLD->debris_sys->entries != NULL, 0)) {
+            if ((spinner->flags & GIZSPINNER_FLAG_HIDE_BASE) == 0 && qrand() < 0x800 && WORLD != NULL &&
+                WORLD->debris_sys != NULL && WORLD->debris_sys->entries != NULL) {
                 NUVEC position = {spinner->position.x, spinner->position.y + 0.3f, spinner->position.z};
                 for (i32 effect = 0; effect < 2; ++effect) {
                     const i32 id = GizSpinnerGDeb_Fail[effect == 0 ? 0 : 2];

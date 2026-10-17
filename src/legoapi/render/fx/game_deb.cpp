@@ -51,9 +51,6 @@
 
 extern "C" ripple_set_s *ripples;
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 extern "C" i16 id_LANDSPEEDER;
 
 void NewRumble(nupad_s *pad, f32 strength, i32 mode);

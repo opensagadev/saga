@@ -47,10 +47,6 @@ namespace {
 // original drove OpenSL through its interface vtables; the exact slots
 // libTTapp.so used are reproduced below so the transcription stays faithful.
 
-namespace {
-
-} // namespace
-
 // ---------------------------------------------------------------------------
 // voice factory
 // ---------------------------------------------------------------------------

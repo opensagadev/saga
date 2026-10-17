@@ -68,11 +68,6 @@ static AIPATHBUILD_CLONE_ATTR2 void pathEditorCreateSpecialRouteData(AIPATH_s *p
                                                                      VARIPTR *cursor, VARIPTR *end)
     __asm__("_ZL32pathEditorCreateSpecialRouteDataP8AIPATH_siP10EDAIPATH_sP9variptr_uS4_.isra.81");
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 #if defined(__i386__)
 #define AISYSALL_CLONE_ATTR1 __attribute__((noinline, noclone, regparm(1)))
 #define AISYSALL_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
@@ -2121,7 +2116,7 @@ __attribute__((optimize("O3"))) void creatureEditor_Enter();
 #define CREATURE_EDITOR_REGPARM1
 #endif
 static __used__
-    __attribute__((always_inline)) CREATURE_EDITOR_REGPARM1 void creatureEditor_Updated(EDCREATURE_s *creature);
+    CREATURE_EDITOR_REGPARM1 void creatureEditor_Updated(EDCREATURE_s *creature);
 
 static __used__ void creatureEditor_cbActivationMenu(eduimenu_s *parent, eduiitem_s *, unsigned int);
 static __used__ void creatureEditor_cbCancelMenu(eduimenu_s *menu, eduimenu_s *);
@@ -2191,7 +2186,7 @@ __attribute__((optimize("O2", "omit-frame-pointer"), force_align_arg_pointer)) v
     creatureEditor_RenderAllCreatures(void);
 } // extern "C"
 
-__attribute__((optimize("O2"), force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupad_s *pad);
+__attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupad_s *pad);
 
 #include "decomp.h"
 #include "editor/edpath_types.h"
@@ -2295,9 +2290,9 @@ static inline void LocatorSetRemove(EDLOCATORSET_s *set, EDLOCATOR_s *locator) {
 static __used__ unsigned int AddLocatorToSet(EDLOCATORSET_s *set, EDLOCATOR_s *locator, EDLOCATOR_s *before);
 
 #if defined(__i386__)
-static __attribute__((noinline, optimize("no-tree-vectorize"), regparm(2))) unsigned int
+static __attribute__((noinline, regparm(2))) unsigned int
 #else
-static __attribute__((noinline, optimize("no-tree-vectorize"))) unsigned int
+static __attribute__((noinline)) unsigned int
 #endif
 AddLocatorToSetAtEnd(EDLOCATORSET_s *set, EDLOCATOR_s *locator) __asm__(
     "_ZL15AddLocatorToSetP14EDLOCATORSET_sP11EDLOCATOR_sS2_.constprop.131");
@@ -2429,8 +2424,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 static SCRIPT_ERROR_LEVEL ScriptErrorLevel;
 
-struct CUTSCENEPLAYERCLIP;
-
 extern f32 LevelNameTime, LevelNameMul;
 
 extern "C" {
@@ -2503,12 +2496,6 @@ void RemoveChunkFromRenderStack(particlechunkrendertype_s *chunk, particlechunkr
 #include "nu2api/nu3d/nuspline.h"
 #include "legoapi/render/fx/spline_position.h"
 #include "legoapi/render/fx/parts.h"
-
-struct GIZSPINNER_s;
-
-namespace {
-
-} // namespace
 
 #include "decomp.h"
 #include "legoapi/actions/combat/hits.h"
@@ -2583,7 +2570,6 @@ AIPATHCNXHELPER_s *AIPathCnxHelperSys_Find(AIPATHCNXHELPERSYS_s *system, GameObj
 
 #include <string.h>
 struct nuhspecial_s;
-struct minitrooperteam_s;
 
 #include "legoapi/legoapi_types.h"
 #include "decomp.h"
@@ -2663,9 +2649,6 @@ void GameAntinode_FindGridPosition(WORLDINFO_s *world, NUVEC *position, f32 radi
 #include "legoapi/world/world_shared.h"
 #include "globals.h"
 #include "nu2api/nu3d/nutexanm.h"
-struct starfighter_s;
-struct rtl_s;
-struct rtlidata_s;
 
 #include "legoapi/render/core/SwipeDecalRenderer.h"
 #include "nu2api/nu3d/nudlist.h"
@@ -2694,18 +2677,6 @@ struct rtlidata_s;
 #include "nu2api/numath/nuvec.h"
 
 #include <string.h>
-
-struct GAMEMESSAGE_s;
-struct HINT_s;
-struct MENU_s;
-struct NuBloomParameters;
-struct STATUSPACKET_s;
-struct TouchHolder;
-struct _vum_s;
-struct _vuv_s;
-struct ripple_node_s;
-struct ripple_set_s;
-struct VuVec;
 
 extern "C" {
     f32 aiEditor_DrawYOffset = 0.25f;
@@ -2736,8 +2707,6 @@ extern "C" {
 struct AIPACKET_s;
 struct APIOBJECT_s;
 struct AISYS_s;
-struct AIGROUP_s;
-struct nufpar_s;
 
 typedef i32 (*MIDSPECIALMOVEFN)(AISYS_s *, AIPACKET_s *, APIOBJECT_s *);
 
@@ -8952,7 +8921,7 @@ static void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s *editor_
     memset(path->routes, 0, path->route_count * sizeof(AIPATHROUTE_s));
     for (i32 slot = 0; slot < 16; ++slot) {
         EDAIPATHROUTE_s *editor_route = &editor_path->routes[slot];
-        if (__builtin_expect(!(editor_route->flags & 1), 1)) {
+        if (!(editor_route->flags & 1)) {
             continue;
         }
         AIPATHROUTE_s *route = &path->routes[route_indices[slot]];
@@ -8961,20 +8930,23 @@ static void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s *editor_
             route->name = (char *)AISysBufferAlloc(cursor, end, name_length + 1);
             strcpy(route->name, editor_route->name);
         }
-        route->character_masks[0] = editor_route->user_mask;
-        if (editor_route->user_mask & (1ULL << 63)) {
+        u64 mask = editor_route->user_mask;
+        route->character_masks[0] = mask;
+        if (mask & (1ULL << 63)) {
             route->character_masks[0] = ~0ULL;
         }
-        route->character_masks[1] = editor_route->user_mask;
+        route->character_masks[1] = mask;
     }
 
     for (EDAIPATHNODE_s *editor_node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&editor_path->nodes);
          editor_node != nullptr;
          editor_node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&editor_path->nodes, &editor_node->link)) {
         AIPATHNODE_s *runtime_node = &path->nodes[editor_node->index];
-        for (i32 slot = 0; slot < 16; ++slot) {
-            if (editor_node->route_mask & (1ULL << slot)) {
-                runtime_node->route_boundary_mask |= 1ULL << route_indices[slot];
+        if (editor_node->route_mask != 0) {
+            for (i32 slot = 0; slot < 16; ++slot) {
+                if (editor_node->route_mask & (1ULL << slot)) {
+                    runtime_node->route_boundary_mask |= 1ULL << route_indices[slot];
+                }
             }
         }
         for (i32 slot = 0; slot < 8; ++slot) {
@@ -8982,21 +8954,22 @@ static void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s *editor_
             if (editor_connection->node == nullptr || editor_connection->route_mask == 0) {
                 continue;
             }
+            const i32 other_index = editor_connection->node->index;
+            const u16 connection_routes = editor_connection->route_mask;
             for (i32 edge = 0; edge < runtime_node->connection_count; ++edge) {
                 AIPATHCNX_s *connection = runtime_node->connections[edge];
-                if (connection->node_indices[0] != editor_connection->node->index &&
-                    connection->node_indices[1] != editor_connection->node->index) {
+                if (connection->node_indices[0] != other_index && connection->node_indices[1] != other_index) {
                     continue;
                 }
                 for (i32 route_slot = 0; route_slot < 16; ++route_slot) {
-                    if (editor_connection->route_mask & (1ULL << route_slot)) {
+                    if (connection_routes & (1u << route_slot)) {
                         i32 route_index = route_indices[route_slot];
                         u64 bit = 1ULL << route_index;
                         if ((connection->route_mask & bit) == 0) {
                             connection->route_mask |= bit;
                             for (i32 endpoint = 0; endpoint < 2; ++endpoint) {
-                                u8 node_index = connection->node_indices[endpoint];
-                                route_members[route_index][node_index >> 3] |= 1u << (node_index & 7);
+                                route_members[route_index][connection->node_indices[endpoint] / 8] |=
+                                    1 << (connection->node_indices[endpoint] & 7);
                             }
                         }
                     }
@@ -9034,12 +9007,13 @@ static void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s *editor_
             if (!(route_members[route_index][node >> 3] & (1u << (node & 7)))) {
                 continue;
             }
-            route->node_routes[node] = member_index;
             path->nodes[node].route_membership_mask |= 1ULL << route_indices[route_index];
-            route->node_directions[member_index++] = node;
-            if ((path->nodes[node].route_boundary_mask >> route_indices[route_index]) & 1ULL) {
+            route->node_routes[node] = member_index;
+            route->node_directions[member_index] = node;
+            if (path->nodes[node].route_boundary_mask & (1ULL << route_indices[route_index])) {
                 route->exit_nodes[exit_index++] = node;
             }
+            ++member_index;
         }
         if (route->route_count == 0) {
             continue;
@@ -10637,9 +10611,8 @@ extern "C" AIPATHCNX *AIPathFindPathCnxFromIX(AISYS *system, AIPATH *path, u8 fr
                     connection->traversal_flags[1] &= ~AIPATH_CONNECTION_FLAG_SPECIAL_UNAVAILABLE;
                 }
             }
-        } else {
-            if (NuSpecialGetVisibilityFn(special) == 0 &&
-                (FindAlternativeSpecialObjectFn == NULL || FindAlternativeSpecialObjectFn(system, special) == 0)) {
+        } else if (NuSpecialGetVisibilityFn(special) == 0) {
+            if (FindAlternativeSpecialObjectFn == NULL || FindAlternativeSpecialObjectFn(system, special) == 0) {
                 node->runtime_flags |= AIPATHNODE_RUNTIME_SPECIAL_UNAVAILABLE;
                 for (i32 index = 0; index < node->connection_count; ++index) {
                     AIPATHCNX *connection = node->connections[index];
@@ -18456,7 +18429,7 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
 }
 
 static __used__
-    __attribute__((always_inline)) CREATURE_EDITOR_REGPARM1 void creatureEditor_Updated(EDCREATURE_s *creature) {
+    CREATURE_EDITOR_REGPARM1 void creatureEditor_Updated(EDCREATURE_s *creature) {
     CreatureEditorRecord *record = reinterpret_cast<CreatureEditorRecord *>(creature);
     record->valid_positions = 1;
     for (i32 i = 1; i < record->group_count; ++i) {
@@ -18499,7 +18472,7 @@ static __used__ void creatureEditor_cb_ngroup(eduimenu_s *, eduiitem_s *item, un
     }
 }
 
-__attribute__((optimize("O2"), force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupad_s *pad) {
+__attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupad_s *pad) {
     char base_name[0x10];
     if (pad->digital_buttons_pressed & 0x80) {
         eduimenu_s *menu =

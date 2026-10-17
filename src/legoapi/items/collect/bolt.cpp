@@ -37,11 +37,6 @@
 #include "legoapi/items/fx/explosions.h"
 #include "legoapi/props/objects/zipup.h"
 
-struct AIROW_s;
-struct nunativegscene_s;
-
-struct spacelevel_s;
-
 static void UpdateBolt_Geonosian(BOLT_s *);
 static void EndBolt_EwokTorpedo(BOLT_s *);
 
@@ -51,9 +46,6 @@ extern "C" void PlaySfx(char *, NUVEC *);
 
 __attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction, nuvec_s *normal,
                                                                     unsigned char *processed);
-
-static __attribute__((noinline, noclone)) i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags)
-    __asm__("_ZL12Bolt_HitPlatP6BOLT_sPhP11WORLDINFO_s.isra.38");
 
 static __used__ void UpdateBolt_Geonosian(BOLT_s *bolt);
 static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt);

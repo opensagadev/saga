@@ -882,9 +882,9 @@ void NuSoundSystem::Update(f32 frametime) {
 
         NuSoundVoice::PlayState state = voice->GetState();
         if (state == NuSoundVoice::PLAYSTATE_PLAYING) {
-            pthread_mutex_lock(&NuSoundWeakPtrListNode::sPtrAccessLock.mutex);
+            pthread_mutex_lock(&NuSoundWeakPtrListNode::sPtrAccessLock.critical_section.mutex);
             voice->Update(frametime);
-            pthread_mutex_unlock(&NuSoundWeakPtrListNode::sPtrAccessLock.mutex);
+            pthread_mutex_unlock(&NuSoundWeakPtrListNode::sPtrAccessLock.critical_section.mutex);
         } else if (state == NuSoundVoice::PLAYSTATE_STOPPED && voice->GetAutoDelete()) {
             this->ReleaseVoice(voice);
         }

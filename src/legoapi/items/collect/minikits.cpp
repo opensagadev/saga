@@ -70,15 +70,6 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 struct GAMEMESSAGE_s;
 struct nuhspecial_s;
 
-#if defined(__i386__)
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
-#endif
-static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path,
-                                                             char *scene_data)
-    __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
-
 f32 KITPOSX = -0.725f;
 f32 KITPOSY = -0.7f;
 f32 KITPOS2X = -1.275f;

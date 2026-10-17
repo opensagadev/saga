@@ -153,32 +153,26 @@ MechInputTouchButtonFaker::MechInputTouchButtonFaker(i32 index, u32 id, float x,
 }
 
 void MechInputTouchButtonFaker::Render() {
-    if (is_pressed) {
-        if (index == 0x800) {
-            goto special_button;
-        }
-        NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width, width / height, 0x40,
-                     0.0f, 0.0f, 0.0f, 0.0f, colourWhite, g_nuMtlHandleNull);
-        NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width * 0.8f, width / height, 0x40,
-                     0.0f, 0.0f, 0.0f, 0.0f, colourWhite, g_nuMtlHandleNull);
+    u32 colour = colourWhite;
+    if (!is_pressed)
+        colour = id;
+    if (index == 0x800) {
+        NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width * 0.9f, width / height, 0x40, 0.0f, 0.0f, 0.0f, 0.0f,
+                     colourWhite, g_nuMtlHandleNull);
+        NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width * 0.7f, width / height, 0x40, 0.0f, 0.0f, 0.0f, 0.0f,
+                     is_pressed ? colourRed : colourBlack, g_nuMtlHandleNull);
+        NuRndrRect(x + width * 0.3f, y + height * 0.25f, 0.0f, width * 0.15f, height * 0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
+                   colourWhite, g_nuMtlHandleNull);
+        NuRndrRect(x + width * 0.6f, y + height * 0.25f, 0.0f, width * 0.15f, height * 0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
+                   colourWhite, g_nuMtlHandleNull);
         return;
     }
-    if (index == 0x800) {
-        goto special_button;
+    if (is_pressed) {
+        NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width, width / height, 0x40, 0.0f, 0.0f, 0.0f, 0.0f,
+                     colourWhite, g_nuMtlHandleNull);
     }
-    NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width * 0.8f, width / height, 0x40,
-                 0.0f, 0.0f, 0.0f, 0.0f, id, g_nuMtlHandleNull);
-    return;
-
-special_button:
-    NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width * 0.9f, width / height, 0x40,
-                 0.0f, 0.0f, 0.0f, 0.0f, colourWhite, g_nuMtlHandleNull);
-    NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width * 0.7f, width / height, 0x40,
-                 0.0f, 0.0f, 0.0f, 0.0f, is_pressed ? colourRed : colourBlack, g_nuMtlHandleNull);
-    NuRndrRect(x + width * 0.3f, y + height * 0.25f, 0.0f, width * 0.15f, height * 0.5f,
-               0.0f, 0.0f, 0.0f, 0.0f, colourWhite, g_nuMtlHandleNull);
-    NuRndrRect(x + width * 0.6f, y + height * 0.25f, 0.0f, width * 0.15f, height * 0.5f,
-               0.0f, 0.0f, 0.0f, 0.0f, colourWhite, g_nuMtlHandleNull);
+    NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width * 0.8f, width / height, 0x40, 0.0f, 0.0f, 0.0f, 0.0f, colour,
+                 g_nuMtlHandleNull);
 }
 
 void MechInputTouchButtonFaker::Update(NuInputTouchData const *data) {

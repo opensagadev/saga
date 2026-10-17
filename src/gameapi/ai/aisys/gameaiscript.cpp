@@ -120,6 +120,7 @@
 #include "legoapi/props/objects/zipup.h"
 #include "legoapi/render/core/gameliball.h"
 #include "legoapi/world/levels/episodeI.h"
+#include "legoapi/world/levels/episodeIII.h"
 #include "legoapi/world/levels/hub.h"
 #include "legogame/game.h"
 
@@ -779,9 +780,9 @@ extern "C" {
         {"FormationMove", Action_FormationMove, 0, 0, 0},
         {"CreateCreatures", Action_CreateCreatures, 0, 0, 0},
         {"SelectRandomSpline", Action_SelectRandomSpline, 0, 0, 0},
-        {"CreateSplineCreatures", NULL, 0, 0, 0},
+        {"CreateSplineCreatures", Action_CreateSplineCreatures, 0, 0, 0},
         {"Launch", Action_Launch, 0, 0, 0},
-        {"SetCurrentSpeed", NULL, 0, 0, 0},
+        {"SetCurrentSpeed", Action_SetCurrentSpeed, 0, 0, 0},
         {"SetRunSpeed", Action_SetRunSpeed, 0, 0, 0},
         {"SetWalkSpeed", Action_SetWalkSpeed, 0, 0, 0},
         {"SetHitPoints", Action_SetHitPoints, 1, 0, 0},
@@ -791,12 +792,12 @@ extern "C" {
         {"SetScriptParam", Action_SetScriptParam, 0, 0, 0},
         {"AddPart", Action_AddPart, 0, 0, 0},
         {"AddPartDebris", Action_AddPartDebris, 0, 0, 0},
-        {"LaunchGuidedMissile", NULL, 0, 0, 0},
+        {"LaunchGuidedMissile", Action_LaunchGuidedMissile, 0, 0, 0},
         {"SetHoverPhase", Action_SetHoverPhase, 0, 0, 0},
-        {"UseCurrentSpeed", NULL, 0, 0, 0},
-        {"SetMaxMovementRange", NULL, 0, 0, 0},
-        {"SetDefaultMovementRange", NULL, 0, 0, 0},
-        {"SetGravityHeight", NULL, 0, 0, 0},
+        {"UseCurrentSpeed", Action_UseCurrentSpeed, 0, 0, 0},
+        {"SetMaxMovementRange", Action_SetMaxMovementRange, 0, 0, 0},
+        {"SetDefaultMovementRange", Action_SetDefaultMovementRange, 0, 0, 0},
+        {"SetGravityHeight", Action_SetGravityHeight, 0, 0, 0},
         {"ApplyGravity", Action_ApplyGravity, 0, 0, 0},
         {"IgnoreShoveSystem", Action_IgnoreShoveSystem, 0, 0, 0},
         {"CannotBeSeen", Action_CannotBeSeen, 0, 0, 0},
@@ -808,7 +809,7 @@ extern "C" {
         {"AddDebris", Action_AddDebris, 0, 0, 0},
         {"JudderGameCamera", Action_JudderGameCamera, 0, 0, 0},
         {"CameraShake", Action_CameraShake, 0, 0, 0},
-        {"ResetGameCamera", NULL, 1, 0, 0},
+        {"ResetGameCamera", Action_ResetGameCamera, 1, 0, 0},
         {"PlayCutScene", Action_PlayCutScene, 1, 0, 0},
         {"SetLevelPath", Action_SetLevelPath, 0, 0, 0},
         {"ImmuneToKillTerrain", Action_ImmuneToKillTerrain, 0, 0, 0},
@@ -823,24 +824,24 @@ extern "C" {
         {"CnxHelper", Action_CnxHelper, 0, 0, 0},
         {"PlaySfx", Action_PlaySfx, 0, 0, 0},
         {"CameraCut", Action_CameraCut, 1, 0, 0},
-        {"DynamicCameraCut", NULL, 1, 0, 0},
+        {"DynamicCameraCut", Action_DynamicCameraCut, 1, 0, 0},
         {"EndCameraCut", Action_EndCameraCut, 1, 0, 0},
         {"DontRaycastLOS", Action_DontRaycastLOS, 0, 0, 0},
         {"SetForceBack", Action_SetForceBack, 1, 0, 0},
         {"FaceCamera", Action_FaceCamera, 0, 0, 0},
         {"FaceCharacter", Action_FaceCharacter, 0, 0, 0},
         {"SpinOnSpot", Action_SpinOnSpot, 0, 0, 0},
-        {"FollowCharacter", NULL, 0, 0, 0},
-        {"FollowPlayer", NULL, 0, 0, 0},
-        {"MoveForward", NULL, 0, 0, 0},
+        {"FollowCharacter", Action_FollowCharacter, 0, 0, 0},
+        {"FollowPlayer", Action_GameFollowPlayer, 0, 0, 0},
+        {"MoveForward", Action_MoveForward, 0, 0, 0},
         {"SetFormationCommander", Action_SetFormationCommander, 0, 0, 0},
         {"RemoveThrownForceObjects", Action_RemoveThrownForceObjects, 0, 0, 0},
         {"AlwaysTriggerObstacle", Action_AlwaysTriggerObstacle, 0, 0, 0},
         {"CanTriggerObstacle", Action_CanTriggerObstacle, 0, 0, 0},
-        {"PlayGizObstacle", NULL, 1, 0, 0},
-        {"PlayObstacle", NULL, 1, 0, 0},
+        {"PlayGizObstacle", Action_PlayGizObstacle, 1, 0, 0},
+        {"PlayObstacle", Action_PlayGizObstacle, 1, 0, 0},
         {"PlayGizSpecial", Action_PlayGizSpecial, 1, 0, 0},
-        {"SetObstacleToEnd", NULL, 1, 0, 0},
+        {"SetObstacleToEnd", Action_SetObstacleToEnd, 1, 0, 0},
         {"HelpWithTriggers", Action_HelpWithTriggers, 0, 0, 0},
         {"UseTriggerSet", Action_UseTriggerSet, 0, 0, 0},
         {"PullLever", Action_PullLever, 0, 0, 0},
@@ -849,10 +850,10 @@ extern "C" {
         {"ReleaseLocator", Action_ReleaseLocator, 0, 0, 0},
         {"AssignLocator", Action_AssignLocatorInSet, 0, 0, 0},
         {"GetLocatorFromSet", Action_GetLocatorFromSet, 0, 0, 0},
-        {"MoveAwayFromLastAttacker", NULL, 0, 0, 0},
+        {"MoveAwayFromLastAttacker", Action_MoveAwayFromLastAttacker, 0, 0, 0},
         {"ProbeDroid", Action_ProbeDroid, 0, 0, 0},
         {"AlertCreatures", Action_AlertCreatures, 0, 0, 0},
-        {"SetLastAttacker", NULL, 0, 0, 0},
+        {"SetLastAttacker", Action_SetLastAttacker, 0, 0, 0},
         {"LinkTurretToController", Action_LinkTurretToController, 0, 0, 0},
         {"TakeOver", Action_TakeOver, 1, 0, 0},
         {"ReleaseTakeOver", Action_ReleaseTakeOver, 1, 0, 0},
@@ -869,16 +870,16 @@ extern "C" {
         {"SplineFollowTerrain", Action_SplineFollowTerrain, 0, 0, 0},
         {"SetLayer", Action_SetLayer, 0, 0, 0},
         {"CreateRider", Action_CreateRider, 0, 0, 0},
-        {"AddTorpedoPacket", NULL, 1, 0, 0},
+        {"AddTorpedoPacket", Action_AddTorpedoPacket, 1, 0, 0},
         {"SpeederBeingChased", Action_SpeederBeingChased, 0, 0, 0},
         {"ThrowDetonator", Action_ThrowDetonator, 0, 0, 0},
-        {"SetScaleOverride", NULL, 0, 0, 0},
+        {"SetScaleOverride", Action_SetScaleOverride, 0, 0, 0},
         {"DisableNarrowSocks", Action_DisableNarrowSocks, 1, 0, 0},
         {"UseTimeBasedUpdate", Action_UseTimeBasedUpdate, 0, 0, 0},
         {"ForceLightning", Action_ForceLightning, 0, 0, 0},
         {"WalkBackwards", Action_WalkBackwards, 0, 0, 0},
         {"AddScriptProcessor", Action_AddScriptProcessor, 0, 0, 0},
-        {"SetUseOneAtOnce", NULL, 0, 0, 0},
+        {"SetUseOneAtOnce", Action_SetUseOneAtOnce, 0, 0, 0},
         {"SetAO_MaxAttackers", Action_SetAttackersAtOnce, 0, 0, 0},
         {"SetAO_AttackersPerRow", Action_SetAttackersPerRow, 0, 0, 0},
         {"SetAO_RowDist", Action_SetAtOnceRowDistance, 0, 0, 0},
@@ -896,17 +897,17 @@ extern "C" {
         {"CanCollideWithObjects", Action_CanCollideWithObjects, 0, 0, 0},
         {"SetShootOpponents", Action_SetShootOpponents, 0, 0, 0},
         {"PartyCanBeUnderCover", Action_PartyCanBeUnderCover, 0, 0, 0},
-        {"SetLapTime", NULL, 0, 0, 0},
-        {"CreatePod", NULL, 0, 0, 0},
-        {"MushroomCollapse", NULL, 0, 0, 0},
-        {"BoulderSection", NULL, 0, 0, 0},
+        {"SetLapTime", Action_SetLapTime, 0, 0, 0},
+        {"CreatePod", Action_CreatePod, 0, 0, 0},
+        {"MushroomCollapse", Action_MushroomCollapse, 0, 0, 0},
+        {"BoulderSection", Action_BoulderSection, 0, 0, 0},
         {"RaceOpponent", Action_RaceOpponent, 0, 0, 0},
-        {"Sebulba", NULL, 0, 0, 0},
+        {"Sebulba", Action_Sebulba, 0, 0, 0},
         {"IgnoreTurnAroundSpline", Action_IgnoreTurnAroundSpline, 0, 0, 0},
         {"CanMoveWhenDeactivated", Action_CanMoveWhenDeactivated, 0, 0, 0},
         {"DontAttack", Action_DontAttack, 0, 0, 0},
         {"CanPullLevers", Action_CanPullLevers, 0, 0, 0},
-        {"NewSebulba", NULL, 0, 0, 0},
+        {"NewSebulba", Action_NewSebulba, 0, 0, 0},
         {NULL, NULL, 0, 0, 0},
     };
 }
@@ -922,131 +923,6 @@ extern "C" {
     f32 debug_condition;
 }
 
-namespace {
-    struct AISysRegistryCallbacks {
-        AISysRegistryCallbacks() {
-
-            lego_aiconditiondefs[LEGO_AI_CONDITION_CATEGORY_IS].eval_fn = Condition_CategoryIs;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_CATEGORY_IS].eval_fn = Condition_PlayerCategoryIs;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_GOODIE_BADDIE].eval_fn = Condition_IAmAGoodieBaddie;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_OPPONENT_IS_A_THREAT].eval_fn = Condition_OpponentIsAThreat;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_GOODY].eval_fn = Condition_IAmAGoody;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_BADDY].eval_fn = Condition_IAmABaddy;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_NEUTRAL].eval_fn = Condition_IAmANeutral;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_PARTY_CHARACTER].eval_fn = Condition_IAmAPartyCharacter;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_LOCATOR_ON_SCREEN].eval_fn = Condition_LocatorOnScreen;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_TURRET_ALIVE].eval_fn = Condition_TurretAlive;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_ACTIVE].eval_fn = Condition_Active;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_DEBUG].eval_fn = Condition_Debug;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_GLYN_TEST].eval_fn = Condition_GlynTest;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_HOVER_PHASE].eval_fn = Condition_HoverPhase;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_SPAWN_COUNT].eval_fn = Condition_SpawnCount;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_ALERTED].eval_fn = Condition_BeenAlerted;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_ON_GROUND].eval_fn = Condition_OnGround;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_COLLIDING].eval_fn = Condition_Colliding;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_GOT_VICTIM].eval_fn = Condition_GotVictim;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_MY_SET].eval_fn = Condition_MySet;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_BEING_TOWED].eval_fn = Condition_BeingTowed;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_HIT].eval_fn = Condition_BeenHit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_IS_ALIVE].eval_fn = Condition_IsAlive;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_IS_ALIVE].init_fn = Condition_IsAliveInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_HIT].init_fn = Condition_BeenHitInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_ON_OBJECT].eval_fn = Condition_OnObject;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_CONTEXT].eval_fn = Condition_Context;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_IN_SWAMP].eval_fn = Condition_InSwamp;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_GOT_GUN].eval_fn = Condition_GotGun;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_SIDE].eval_fn = Condition_Side;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_SIDE].init_fn = Condition_SideInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_X_POS].eval_fn = Condition_XPos;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_X_POS].init_fn = Condition_XYZPosInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_Y_POS].eval_fn = Condition_YPos;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_Y_POS].init_fn = Condition_XYZPosInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_Z_POS].eval_fn = Condition_ZPos;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_Z_POS].init_fn = Condition_XYZPosInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_RANGE].eval_fn = Condition_TakeOverRange;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_HAS_TAKE_OVER].eval_fn = Condition_HasTakeOver;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].eval_fn = Condition_OffScreenTimer;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].init_fn = Condition_OffScreenTimerInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_BUILD_IT_COMPLETE].eval_fn = Condition_BuildItComplete;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_BUILD_IT_COMPLETE].init_fn = Condition_BuildItCompleteInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_CHARACTER_EXISTS].eval_fn = Condition_CharacterExists;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_CHARACTER_EXISTS].init_fn = Condition_CharacterExistsInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].init_fn = Condition_BeenToLevelInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_EITHER_PLAYER_ON_OBJECT].eval_fn = Condition_EitherPlayerOnObject;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_IS_LOW_END_DEVICE].eval_fn = Condition_IsLowEndDevice;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_CHARACTER_LOADED].eval_fn = Condition_CharacterLoaded;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_CHARACTER_LOADED].init_fn = Condition_CharacterLoadedInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_CATEGORY_IS].init_fn = Condition_CategoryIsInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_CATEGORY_IS].init_fn = Condition_CategoryIsInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_EITHER_PLAYER_LOCATOR_RANGE_XZ].eval_fn =
-                Condition_EitherPlayerLocatorRangeXZ;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_EITHER_PLAYER_LOCATOR_RANGE_XZ].init_fn = Condition_LocatorRangeInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_IN_SAME_TRIGGER_AREA_AS_NEAREST_PLAYER].eval_fn =
-                Condition_InSameTriggerAreaAsNearestPlayer;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_TARGET_IN_TRIGGER_AREA].eval_fn =
-                Condition_TakeOverTargetInTriggerArea;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_TARGET_IN_TRIGGER_AREA].init_fn =
-                Condition_TakeOverTargetInTriggerAreaInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_SHOP_ACTIVE].eval_fn = Condition_ShopActive;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_SCREEN_WIPE].eval_fn = Condition_ScreenWipe;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_CAN_HEAR_RADIO].eval_fn = Condition_CanHearRadio;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_BEHIND_CAMERA].eval_fn = Condition_BehindCamera;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_NUM_BADDIES].eval_fn = Condition_NumBaddies;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_BLOWUP_BLOWNUP].eval_fn = Condition_BlowupBlownup;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_BLOWUP_BLOWNUP].init_fn = Condition_BlowupInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_ANIM_SPEED_MUL].eval_fn = Condition_AnimSpeedMul;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_TURRET_ALIVE].init_fn = Condition_TurretAliveInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_0].eval_fn = Condition_GizmoOutput0;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_0].init_fn = Condition_GizmoOutputInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_1].eval_fn = Condition_GizmoOutput1;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_1].init_fn = Condition_GizmoOutputInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_2].eval_fn = Condition_GizmoOutput2;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_2].init_fn = Condition_GizmoOutputInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_3].eval_fn = Condition_GizmoOutput3;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_3].init_fn = Condition_GizmoOutputInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_LOCATOR_ON_SCREEN].init_fn = Condition_LocatorOnScreenInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_VISIBILITY].eval_fn = Condition_GizmoVisibility;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_VISIBILITY].init_fn = Condition_GizmoVisibilityInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_FLOW_BOX_COMPLETE].eval_fn = Condition_FlowBoxComplete;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_FLOW_BOX_COMPLETE].init_fn = Condition_FlowBoxCompleteInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_AREA_COMPLETE].eval_fn = Condition_AreaComplete;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_AREA_COMPLETE].init_fn = Condition_AreaCompleteInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A].eval_fn = Condition_IAmA;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_PARTY_UNDER_COVER].eval_fn = Condition_PartyUnderCover;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_PREFERS_BRAWLING].eval_fn = Condition_PrefersBrawling;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_NEAREST_PARTY_RANGE].eval_fn = Condition_NearestPartyRange;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_NEAREST_PARTY_XZ_RANGE].eval_fn = Condition_NearestPartyXZRange;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A].init_fn = Condition_IAmAInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_OPPONENT_IS_A].eval_fn = Condition_OpponentIsA;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_OPPONENT_IS_A].init_fn = Condition_OpponentIsAInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_1_IS].eval_fn = Condition_Player1Is;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_1_IS].init_fn = Condition_EitherPlayerIsInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_2_IS].eval_fn = Condition_Player2Is;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_2_IS].init_fn = Condition_EitherPlayerIsInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_EITHER_PLAYER_IS].eval_fn = Condition_EitherPlayerIs;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_EITHER_PLAYER_IS].init_fn = Condition_EitherPlayerIsInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].eval_fn = Condition_BeenToLevel;
-
-            lego_aiactiondefs[LEGO_AI_ACTION_SET_CURRENT_SPEED].eval_fn = Action_SetCurrentSpeed;
-            lego_aiactiondefs[LEGO_AI_ACTION_USE_CURRENT_SPEED].eval_fn = Action_UseCurrentSpeed;
-            lego_aiactiondefs[LEGO_AI_ACTION_SET_MAX_MOVEMENT_RANGE].eval_fn = Action_SetMaxMovementRange;
-            lego_aiactiondefs[LEGO_AI_ACTION_SET_DEFAULT_MOVEMENT_RANGE].eval_fn = Action_SetDefaultMovementRange;
-            lego_aiactiondefs[LEGO_AI_ACTION_SET_GRAVITY_HEIGHT].eval_fn = Action_SetGravityHeight;
-            lego_aiactiondefs[LEGO_AI_ACTION_PLAY_GIZ_OBSTACLE].eval_fn = Action_PlayGizObstacle;
-            lego_aiactiondefs[LEGO_AI_ACTION_PLAY_OBSTACLE].eval_fn = Action_PlayGizObstacle;
-            lego_aiactiondefs[LEGO_AI_ACTION_SET_OBSTACLE_TO_END].eval_fn = Action_SetObstacleToEnd;
-            lego_aiactiondefs[LEGO_AI_ACTION_MOVE_AWAY_FROM_LAST_ATTACKER].eval_fn = Action_MoveAwayFromLastAttacker;
-            lego_aiactiondefs[LEGO_AI_ACTION_SET_LAST_ATTACKER].eval_fn = Action_SetLastAttacker;
-            lego_aiactiondefs[LEGO_AI_ACTION_SET_USE_ONE_AT_ONCE].eval_fn = Action_SetUseOneAtOnce;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_CATEGORY_IS].eval_fn = Condition_CategoryIs;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_BLOWUP_BLOWNUP].eval_fn = Condition_BlowupBlownup;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_BLOWUP_BLOWNUP].init_fn = Condition_BlowupInit;
-        }
-    };
-
-    AISysRegistryCallbacks aisys_registry_callbacks;
-} // namespace
-
 NUVEC test_launch = {0.0f, 0.0f, 1.0f};
 
 f32 test_missile_scale = 8.0f;
@@ -1058,19 +934,6 @@ f32 guided_start_time = 0.5f;
 f32 guided_life = 8.0f;
 
 f32 guided_speed = 30.0f;
-
-namespace {
-    struct GameAIRegistryCallbacks {
-        GameAIRegistryCallbacks() {
-            lego_aiactiondefs[LEGO_AI_ACTION_CREATE_SPLINE_CREATURES].eval_fn = Action_CreateSplineCreatures;
-            lego_aiactiondefs[LEGO_AI_ACTION_FOLLOW_CHARACTER].eval_fn = Action_FollowCharacter;
-            lego_aiactiondefs[LEGO_AI_ACTION_FOLLOW_PLAYER].eval_fn = Action_GameFollowPlayer;
-            lego_aiactiondefs[LEGO_AI_ACTION_MOVE_FORWARD].eval_fn = Action_MoveForward;
-        }
-    };
-
-    GameAIRegistryCallbacks game_ai_registry_callbacks;
-} // namespace
 
 static f32 Condition_IAmAPartyCharacter(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
     return packet != NULL && packet->owner != NULL && static_cast<i8>(packet->owner->apiobj.field_0x27c) != -1 ? 1.0f
@@ -1425,35 +1288,35 @@ static f32 Condition_EmptyTakeOver(AISYS_s *system, AISCRIPTPROCESS_s *, AIPACKE
 
 extern "C" {
     AICONDITIONDEF lego_aiconditiondefs[] = {
-        {"GlynTest", NULL, NULL},
-        {"Debug", NULL, NULL},
-        {"Active", NULL, NULL},
-        {"GotGun", NULL, NULL},
-        {"PrefersBrawling", NULL, NULL},
-        {"IsAlive", NULL, NULL},
+        {"GlynTest", Condition_GlynTest, NULL},
+        {"Debug", Condition_Debug, NULL},
+        {"Active", Condition_Active, NULL},
+        {"GotGun", Condition_GotGun, NULL},
+        {"PrefersBrawling", Condition_PrefersBrawling, NULL},
+        {"IsAlive", Condition_IsAlive, Condition_IsAliveInit},
         {"IsOnScreen", Condition_IsOnScreen, Condition_IsOnScreenInit},
-        {"OffScreenTimer", NULL, NULL},
-        {"OnObject", NULL, Condition_OnObjectInit},
+        {"OffScreenTimer", Condition_OffScreenTimer, Condition_OffScreenTimerInit},
+        {"OnObject", Condition_OnObject, Condition_OnObjectInit},
         {"OnSameObjectAsPlayer", Condition_OnSameObjectAsPlayer, NULL},
         {"PlayerOnObject", Condition_PlayerOnObject, Condition_OnObjectInit},
-        {"EitherPlayerOnObject", NULL, Condition_OnObjectInit},
-        {"EitherPlayerLocatorRangeXZ", NULL, NULL},
-        {"OnGround", NULL, NULL},
-        {"BeenAlerted", NULL, NULL},
+        {"EitherPlayerOnObject", Condition_EitherPlayerOnObject, Condition_OnObjectInit},
+        {"EitherPlayerLocatorRangeXZ", Condition_EitherPlayerLocatorRangeXZ, Condition_LocatorRangeInit},
+        {"OnGround", Condition_OnGround, NULL},
+        {"BeenAlerted", Condition_BeenAlerted, NULL},
         {"PlayerOnGround", Condition_PlayerOnGround, NULL},
-        {"SpawnCount", NULL, NULL},
-        {"BehindCamera", NULL, NULL},
-        {"LocatorOnScreen", NULL, NULL},
+        {"SpawnCount", Condition_SpawnCount, NULL},
+        {"BehindCamera", Condition_BehindCamera, NULL},
+        {"LocatorOnScreen", Condition_LocatorOnScreen, Condition_LocatorOnScreenInit},
         {"Blocking", Condition_Blocking, NULL},
-        {"BeenHit", NULL, NULL},
-        {"HoverPhase", NULL, NULL},
+        {"BeenHit", Condition_BeenHit, Condition_BeenHitInit},
+        {"HoverPhase", Condition_HoverPhase, NULL},
         {"HitPoints", Condition_HitPoints, Condition_HitPointsInit},
         {"OnDynamicGrapple", Condition_OnDynamicGrapple, Condition_OnDynamicGrappleInit},
-        {"XPos", NULL, NULL},
-        {"YPos", NULL, NULL},
-        {"ZPos", NULL, NULL},
+        {"XPos", Condition_XPos, Condition_XYZPosInit},
+        {"YPos", Condition_YPos, Condition_XYZPosInit},
+        {"ZPos", Condition_ZPos, Condition_XYZPosInit},
         {"CollidingWithOpponent", Condition_CollidingWithOpponent, NULL},
-        {"Colliding", NULL, NULL},
+        {"Colliding", Condition_Colliding, NULL},
         {"ObstacleAtStart", Condition_ObstacleAtStart, Condition_ObstacleInit},
         {"ObstacleAtEnd", Condition_ObstacleAtEnd, Condition_ObstacleInit},
         {"SpecialAtStart", Condition_ObstacleAtStart, Condition_GizSpecialInit},
@@ -1469,7 +1332,7 @@ extern "C" {
         {"EitherPlayerUsingHatMachine", Condition_EitherPlayerUsingHatMachine, NULL},
         {"EitherPlayerUsingPanel", Condition_EitherPlayerUsingPanel, NULL},
         {"EitherPlayerWearingHelmet", Condition_EitherPlayerWearingHelmet, NULL},
-        {"PartyUnderCover", NULL, NULL},
+        {"PartyUnderCover", Condition_PartyUnderCover, NULL},
         {"NumBaddiesThatCanSeePlayers", Condition_NumBaddiesThatCanSeePlayers, NULL},
         {"PlayerUsingForce", Condition_PlayerUsingForce, Condition_UsingForceInit},
         {"EitherPlayerUsingForce", Condition_EitherPlayerUsingForce, Condition_UsingForceInit},
@@ -1479,37 +1342,37 @@ extern "C" {
         {"EitherPlayerOnForcePlatform", Condition_EitherPlayerOnForcePlatform, Condition_OnForcePlatformInit},
         {"ForceBeingUsed", Condition_ForceBeingUsed, Condition_UsingForceInit},
         {"ForcePushing", Condition_ForcePushing, Condition_ForcePushingInit},
-        {"TurretAlive", NULL, NULL},
+        {"TurretAlive", Condition_TurretAlive, Condition_TurretAliveInit},
         {"PlayerDeflectingPart", Condition_PlayerDeflectingPart, NULL},
         {"ForceComplete", Condition_ForceComplete, Condition_ForceCompleteInit},
         {"ForceFinished", Condition_ForceFinished, Condition_ForceCompleteInit},
         {"ForceStackComplete", Condition_ForceStackComplete, Condition_ForceCompleteInit},
         {"ForceStackCompleteInOrder", Condition_ForceStackCompleteInOrder, Condition_ForceCompleteInit},
-        {"BuildItComplete", NULL, NULL},
-        {"BlowupBlownup", NULL, NULL},
-        {"IAmA", NULL, NULL},
-        {"OpponentIsA", NULL, NULL},
-        {"OpponentIsAThreat", NULL, NULL},
+        {"BuildItComplete", Condition_BuildItComplete, Condition_BuildItCompleteInit},
+        {"BlowupBlownup", Condition_BlowupBlownup, Condition_BlowupInit},
+        {"IAmA", Condition_IAmA, Condition_IAmAInit},
+        {"OpponentIsA", Condition_OpponentIsA, Condition_OpponentIsAInit},
+        {"OpponentIsAThreat", Condition_OpponentIsAThreat, NULL},
         {"CanFightLikeAJedi", Condition_CanFightLikeAJedi, NULL},
-        {"IAmAGoody", NULL, NULL},
-        {"IAmABaddy", NULL, NULL},
-        {"IAmANeutral", NULL, NULL},
-        {"IAmAGoodyBaddy", NULL, NULL},
+        {"IAmAGoody", Condition_IAmAGoody, NULL},
+        {"IAmABaddy", Condition_IAmABaddy, NULL},
+        {"IAmANeutral", Condition_IAmANeutral, NULL},
+        {"IAmAGoodyBaddy", Condition_IAmAGoodieBaddie, NULL},
         {"IAmAPartyCharacter", Condition_IAmAPartyCharacter, NULL},
-        {"CategoryIs", NULL, NULL},
-        {"PlayerCategoryIs", NULL, NULL},
-        {"EitherPlayerIs", NULL, NULL},
-        {"Player1Is", NULL, NULL},
-        {"Player2Is", NULL, NULL},
+        {"CategoryIs", Condition_CategoryIs, Condition_CategoryIsInit},
+        {"PlayerCategoryIs", Condition_PlayerCategoryIs, Condition_CategoryIsInit},
+        {"EitherPlayerIs", Condition_EitherPlayerIs, Condition_EitherPlayerIsInit},
+        {"Player1Is", Condition_Player1Is, Condition_EitherPlayerIsInit},
+        {"Player2Is", Condition_Player2Is, Condition_EitherPlayerIsInit},
         {"IsSetAlive", Condition_IsSetAlive, Condition_IsSetAliveInit},
         {"NumInSetAlive", Condition_NumInSetAlive, Condition_IsSetAliveInit},
-        {"Context", NULL, NULL},
+        {"Context", Condition_Context, NULL},
         {"InContext", Condition_InContext, Condition_InContextInit},
         {"OpponentContext", Condition_OpponentContext, Condition_InContextInit},
         {"Player2Active", Condition_Player2Active, NULL},
-        {"NumBaddies", NULL, NULL},
+        {"NumBaddies", Condition_NumBaddies, Condition_NumBaddiesInit},
         {"NumForceObjects", Condition_NumForceObjects, Condition_NumForceObjectsInit},
-        {"BeenToLevel", NULL, NULL},
+        {"BeenToLevel", Condition_BeenToLevel, Condition_BeenToLevelInit},
         {"LastLevel", Condition_LastLevel, Condition_LastLevelInit},
         {"Message", Condition_Message, Condition_MessageInit},
         {"ScriptParam", Condition_ScriptParam, Condition_ScriptParamInit},
@@ -1556,52 +1419,51 @@ extern "C" {
         {"BeenTakenOver", Condition_BeenTakenOver, Condition_BeenTakenOverInit},
         {"OnSpeederBike", Condition_OnSpeederBike, Condition_OnSpeederBikeInit},
         {"UnderPlayerControl", Condition_UnderPlayerControl, Condition_UnderPlayerControlInit},
-        {"CharacterExists", NULL, NULL},
+        {"CharacterExists", Condition_CharacterExists, Condition_CharacterExistsInit},
         {"CharacterTypeExists", Condition_CharacterTypeExists, Condition_CharacterTypeExistsInit},
         {"GotLocatorInSet", Condition_GotLocatorInSet, Condition_GotLocatorInSetInit},
         {"GotOpponentLOS", Condition_GotOpponentLOS, NULL},
         {"EmptyTakeOver", Condition_EmptyTakeOver, NULL},
-        {"HasTakeOverTarget", NULL, NULL},
-        {"TakeOverRange", NULL, NULL},
-        {"TakeOverTargetInTriggerArea", NULL, NULL},
+        {"HasTakeOverTarget", Condition_HasTakeOver, NULL},
+        {"TakeOverRange", Condition_TakeOverRange, NULL},
+        {"TakeOverTargetInTriggerArea", Condition_TakeOverTargetInTriggerArea, Condition_TakeOverTargetInTriggerAreaInit},
         {"EitherPlayerInMyTriggerArea", Condition_EitherPlayerInMyTriggerArea, NULL},
         {"AreaContainsBaddies", Condition_AreaContainsBaddies, Condition_AreaContainsBaddiesInit},
         {"AreaContainsGoodies", Condition_AreaContainsGoodies, Condition_AreaContainsGoodiesInit},
         {"AreaContainsPartyMember", Condition_AreaContainsPartyMember, Condition_AreaContainsPartyMemberInit},
-        {"GotVictim", NULL, NULL},
+        {"GotVictim", Condition_GotVictim, NULL},
         {"IsVisible", Condition_IsVisible, Condition_IsVisibleInit},
-        {"MySet", NULL, NULL},
-        {"ScreenWipe", NULL, NULL},
+        {"MySet", Condition_MySet, NULL},
+        {"ScreenWipe", Condition_ScreenWipe, NULL},
         {"IAmPlayer2", Condition_IAmPlayer2, NULL},
-        {"HeadTurnRestricted", NULL, NULL},
-        {"ShopActive", NULL, NULL},
-        {"Side", NULL, NULL},
-        {"NearestPartyRange", NULL, NULL},
-        {"NearestPartyXZRange", NULL, NULL},
+        {"HeadTurnRestricted", Condition_HeadTurnRestricted, NULL},
+        {"ShopActive", Condition_ShopActive, NULL},
+        {"Side", Condition_Side, Condition_SideInit},
+        {"NearestPartyRange", Condition_NearestPartyRange, NULL},
+        {"NearestPartyXZRange", Condition_NearestPartyXZRange, NULL},
         {"OpponentToPlayerRange", Condition_OpponentToPlayerRange, NULL},
         {"OpponentPathPosRange", Condition_OpponentPathPosRange, NULL},
-        {"GizmoOutput0", NULL, NULL},
-        {"GizmoOutput1", NULL, NULL},
-        {"GizmoOutput2", NULL, NULL},
-        {"GizmoOutput3", NULL, NULL},
-        {"GizmoVisibility", NULL, NULL},
-        {"AngleAboutMyLocatorToPlayer", Condition_AngleAboutMyLocatorToPlayer,
-         Condition_AngleAboutMyLocatorToPlayerInit},
-        {"AnimSpeedMul", NULL, NULL},
+        {"GizmoOutput0", Condition_GizmoOutput0, Condition_GizmoOutputInit},
+        {"GizmoOutput1", Condition_GizmoOutput1, Condition_GizmoOutputInit},
+        {"GizmoOutput2", Condition_GizmoOutput2, Condition_GizmoOutputInit},
+        {"GizmoOutput3", Condition_GizmoOutput3, Condition_GizmoOutputInit},
+        {"GizmoVisibility", Condition_GizmoVisibility, Condition_GizmoVisibilityInit},
+        {"AngleAboutMyLocatorToPlayer", Condition_AngleAboutMyLocatorToPlayer, Condition_AngleAboutMyLocatorToPlayerInit},
+        {"AnimSpeedMul", Condition_AnimSpeedMul, NULL},
         {"PickupBeenTurnedOn", Condition_PickupBeenTurnedOn, Condition_PickupBeenTurnedOnInit},
-        {"FlowBoxComplete", NULL, NULL},
-        {"CanHearRadio", NULL, NULL},
-        {"BeingTowed", NULL, NULL},
+        {"FlowBoxComplete", Condition_FlowBoxComplete, Condition_FlowBoxCompleteInit},
+        {"CanHearRadio", Condition_CanHearRadio, NULL},
+        {"BeingTowed", Condition_BeingTowed, NULL},
         {"RaceLap", Condition_RaceLap, NULL},
         {"MusicOn", Condition_MusicOn, NULL},
-        {"CharacterLoaded", NULL, NULL},
-        {"AreaComplete", NULL, NULL},
+        {"CharacterLoaded", Condition_CharacterLoaded, Condition_CharacterLoadedInit},
+        {"AreaComplete", Condition_AreaComplete, Condition_AreaCompleteInit},
         {"ShouldAttackOpponent", Condition_ShouldAttackOpponent, NULL},
-        {"InSwamp", NULL, NULL},
-        {"InSameTriggerAreaAsNearestPlayer", NULL, NULL},
-        {"NetworkGameOnGoing", NULL, NULL},
+        {"InSwamp", Condition_InSwamp, NULL},
+        {"InSameTriggerAreaAsNearestPlayer", Condition_InSameTriggerAreaAsNearestPlayer, NULL},
+        {"NetworkGameOnGoing", Condition_NetworkGameOnGoing, NULL},
         {"InHubArea", &Condition_InHubArea, &Condition_InHubAreaInit},
-        {"IsLowEndDevice", NULL, NULL},
+        {"IsLowEndDevice", Condition_IsLowEndDevice, NULL},
         {"RandomMapCharsAvailable", Condition_RandomMapCharsAvailable, NULL},
         {NULL, NULL, NULL},
     };
@@ -1615,8 +1477,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
     AIGETNAMEDAPIOBJECT *GetNamedAPIObjectFn;
 }
-
-struct CUTSCENEPLAYERCLIP;
 
 extern f32 LevelNameTime, LevelNameMul;
 
@@ -1661,15 +1521,6 @@ void GameCameraMakeMiniCut3(u32, float, i32, i32, i32, void *, i32, NUVEC *, flo
 f32 party_follow_offsets[8];
 
 struct GIZSPINNER_s;
-
-namespace {
-
-} // namespace
-
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
 
 extern "C" {
     extern i16 id_PENGUIN_GOON, id_PENGUIN_GOON_GUN;
@@ -8026,8 +7877,8 @@ __used__ static i32 Action_SetPathCnxFlag(AISYS *sys, AISCRIPTPROCESS *processor
     char *to = NULL;
     u32 add_flags = 0;
     u32 remove_flags = 0;
-    bool set = true;
-    bool both_ways = false;
+    i32 set = 1;
+    i32 both_ways = 0;
     for (i32 index = 0; index < param_count; ++index) {
         char *match = NuStrIStr(params[index], "from=");
         if (match != NULL) {
@@ -8047,19 +7898,19 @@ __used__ static i32 Action_SetPathCnxFlag(AISYS *sys, AISCRIPTPROCESS *processor
             } else if (flag == static_cast<u32>(LEGO_AIPATHCNX_DONT_JUMP_NOW)) {
                 remove_flags |= static_cast<u32>(LEGO_AIPATHCNX_JUMP_NOW);
             } else if (flag == 0x20000000u) {
-                both_ways = true;
+                both_ways = 1;
             }
             continue;
         }
         if (NuStrICmp(params[index], "bothways") == 0) {
-            both_ways = true;
+            both_ways = 1;
         } else if (NuStrICmp(params[index], "FALSE") == 0) {
-            set = false;
+            set = 0;
         }
     }
 
     if (from != NULL && to != NULL) {
-        i32 direction = 0;
+        i32 direction;
         AIPATHCNX *connection =
             static_cast<AIPATHCNX *>(AIPAthFindPathCnx(sys, sys->path_sys->active_path, from, to, &direction));
         if (connection != NULL) {
@@ -8067,13 +7918,13 @@ __used__ static i32 Action_SetPathCnxFlag(AISYS *sys, AISCRIPTPROCESS *processor
                 connection->traversal_flags[direction] =
                     (connection->traversal_flags[direction] | add_flags) & ~remove_flags;
                 if (both_ways) {
-                    connection->traversal_flags[direction ^ 1] =
-                        (connection->traversal_flags[direction ^ 1] | add_flags) & ~remove_flags;
+                    connection->traversal_flags[direction == 0] =
+                        (connection->traversal_flags[direction == 0] | add_flags) & ~remove_flags;
                 }
             } else {
                 connection->traversal_flags[direction] &= ~add_flags;
                 if (both_ways) {
-                    connection->traversal_flags[direction ^ 1] &= ~add_flags;
+                    connection->traversal_flags[direction == 0] &= ~add_flags;
                 }
             }
         }

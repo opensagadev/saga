@@ -130,36 +130,22 @@ ShaderManagerOpenGL::~ShaderManagerOpenGL() {
 }
 
 bool LookupHash(u32 key, u32 *value, HashRedirect *redirects, u32 count) {
-    i32 upper = static_cast<i32>(count) - 1;
-    if (upper < 0) {
-        return false;
-    }
-
-    i32 index = upper / 2;
-    HashRedirect *redirect = &redirects[index];
-    if (redirect->key == key) {
-        *value = redirect->value;
-        return true;
-    }
-
     i32 lower = 0;
-    while (true) {
+    i32 upper = static_cast<i32>(count) - 1;
+    while (lower <= upper) {
+        const i32 index = (lower + upper) / 2;
+        HashRedirect *redirect = &redirects[index];
+        if (redirect->key == key) {
+            *value = redirect->value;
+            return true;
+        }
         if (key > redirect->key) {
             lower = index + 1;
         } else {
             upper = index - 1;
         }
-        if (lower > upper) {
-            return false;
-        }
-
-        index = (lower + upper) / 2;
-        redirect = &redirects[index];
-        if (redirect->key == key) {
-            *value = redirect->value;
-            return true;
-        }
     }
+    return false;
 }
 
 extern HashRedirect g_shaderProgramRedirects[417];
@@ -224,36 +210,22 @@ bool LoadShaderSource(char **source, i32 *size, u32 key, bool pixel_stage) {
 }
 
 bool LookupPreloadedShaderObject(u32 key, u32 **shader, LoadedUniqueShaderRecord *records, u32 count) {
-    i32 upper = static_cast<i32>(count) - 1;
-    if (upper < 0) {
-        return false;
-    }
-
-    i32 index = upper / 2;
-    LoadedUniqueShaderRecord *record = &records[index];
-    if (record->key == key) {
-        *shader = &record->gl_shader;
-        return true;
-    }
-
     i32 lower = 0;
-    while (true) {
+    i32 upper = static_cast<i32>(count) - 1;
+    while (lower <= upper) {
+        const i32 index = (lower + upper) / 2;
+        LoadedUniqueShaderRecord *record = &records[index];
+        if (record->key == key) {
+            *shader = &record->gl_shader;
+            return true;
+        }
         if (key > record->key) {
             lower = index + 1;
         } else {
             upper = index - 1;
         }
-        if (lower > upper) {
-            return false;
-        }
-
-        index = (lower + upper) / 2;
-        record = &records[index];
-        if (record->key == key) {
-            *shader = &record->gl_shader;
-            return true;
-        }
     }
+    return false;
 }
 
 bool ShaderManagerOpenGL::createShader(const ::ShaderObjectKey &key, NuShaderObject *outObject, i32 param) {

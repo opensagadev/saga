@@ -31,7 +31,6 @@ TIMER LevelTimer;
 
 void (*WorldInfo_InitMenuFn)(WORLDINFO *, i32 *, i32 *) = NULL;
 void (*WorldInfo_InitLastFn)(WORLDINFO *) = NULL;
-void *things_scene_terrain = NULL;
 
 // --- Players globals ---
 // NOTE: `WORLD` (WORLDINFO) field offsets in world.h are an approximation; the

@@ -66,11 +66,6 @@ USING_EXTRA_ACTIONS_FN UsingExtraActionsFn = NULL;
 // Super buffer / memory arena
 // ------------------------------------------------------------------------
 i32 SUPERBUFFERSIZE = 0x2EB8EEB;
-VARIPTR permbuffer_base;
-VARIPTR original_permbuffer_base;
-VARIPTR superbuffer_end;
-VARIPTR permbuffer_ptr;
-VARIPTR permbuffer_end;
 
 // ------------------------------------------------------------------------
 // Title & display strings
@@ -251,7 +246,6 @@ i32 texanimbits = 0;
 // ------------------------------------------------------------------------
 // Group scenes (NUGSCN)
 // ------------------------------------------------------------------------
-NUGSCN *vehicle_scene = NULL;
 
 // ------------------------------------------------------------------------
 // Gameplay timers & area state
@@ -347,14 +341,7 @@ i32 Area_FreePlayModelCount = 0;
 i16 Area_FreePlayModelList[104] = {0};
 i32 Area_MissionModelCount = 0;
 APICHARACTERMODELLIST_s Area_MissionModelList[49] = {0};
-VARIPTR characterbuffer_ptr = {0};
-VARIPTR characterbuffer_end = {0};
 i32 CHARACTERBUFFERSIZE = 0x800000;
-i32 permbuffer_size = 0;
-VARIPTR superbuffer_base = {0};
-VARIPTR superbuffer_ptr = {0};
-i32 EDITBUFFERENDSIZE = 0;
-VARIPTR editbuffer_end = {0};
 APICHARACTERMODELLIST_s FreePlayModelList[52] = {0};
 APICHARACTERMODELLIST_s Hub_ModelList[6] = {0};
 i32 FreePlayModelCount = 0;
@@ -1274,9 +1261,6 @@ TEXTCRAWL_s TextCrawl_LSW = {&tCHAPTER, &tVEHICLEBONUS, &tCHARACTERBONUS, 3};
 
 void *theGameThings = NULL;
 
-NUGSCN *saveicon_scene = NULL;
-NUGSCN *button_scene = NULL;
-
 FadeSystem *pFadeInfo = NULL;
 
 // Cut-scene / gameplay hook wiring (original .data function pointers).
@@ -1369,7 +1353,6 @@ TIMER JoinInTimer = {0};
 TIMER PauseTimer = {0};
 f32 brickimpactwait = 0.0f;
 i32 BURNOUTON = 1;
-VARIPTR characterbuffer_base = {0};
 f32 chattersfxwait = 0.0f;
 i32 clear_screen_onstill = 1;
 f32 coinimpactwait = 0.0f;

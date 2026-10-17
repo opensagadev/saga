@@ -45,11 +45,6 @@
 #include "legoapi/items/fx/explosions.h"
 #include "legoapi/render/fx/edsplines.h"
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 i32 GizmoBlowup_HitMultiplier = 1;
 void (*GameBlowUpBlownUpFn)(GIZMOBLOWUP_s *) = NULL;
 u32 EXBLOWUPFLAGS = 0;
@@ -510,8 +505,7 @@ GIZMOBLOWUPTYPE_s *GizmoBlowupTypeAdd(WORLDINFO_s *world, nuhspecial_s *special,
     type->particle_types[3] = -1;
     type->effect_flags = 100;
     type->field_0xfb = 1;
-    type->type_flags = ((flags < 1) ? -1 : 0) & 0xffffe000;
-    type->type_flags += 0xe000;
+    type->type_flags = flags != 0 ? 0xe000 : 0xc000;
 
     nuinstanim_s *animation = NuSpecialGetInstAnim(animated_special);
     if (animation != NULL) {

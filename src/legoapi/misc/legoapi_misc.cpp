@@ -9,9 +9,6 @@
 #include <math.h>
 #include <string.h>
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 extern "C" {
     extern i32 CutSceneWaiting;
     extern i32 editor_active;

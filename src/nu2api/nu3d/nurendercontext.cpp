@@ -57,17 +57,15 @@ extern "C" {
         static NUMTX scale;
         static NUMTX translate;
         static NUMTX proj;
+        NUVEC translation = {0.0f, 0.0f, 0.0f};
         NUVEC scale_vector = {
             g_NuVpRegion.projection_x_scale,
             g_NuVpRegion.projection_y_scale,
             1.0f,
         };
         NuMtxSetScale(&scale, &scale_vector);
-        NUVEC translation = {
-            g_NuVpRegion.projection_x_offset,
-            g_NuVpRegion.projection_y_offset,
-            0.0f,
-        };
+        translation.x = g_NuVpRegion.projection_x_offset;
+        translation.y = g_NuVpRegion.projection_y_offset;
         NuMtxSetTranslation(&translate, &translation);
         NuMtxMulH(&proj, projection, &scale);
         NuMtxMulH(&proj, &proj, &translate);
@@ -90,9 +88,12 @@ extern "C" {
 
         // OpenGL's clip-space depth is [-w,+w], while the engine camera
         // packet contains the original D3D-style [0,+w] projection.
-        NUMTX depth_remap = numtx_identity;
-        depth_remap.m22 = 2.0f;
-        depth_remap.m32 = -1.0f;
+        NUMTX depth_remap = {
+            1.0f, 0.0f, 0.0f,  0.0f, //
+            0.0f, 1.0f, 0.0f,  0.0f, //
+            0.0f, 0.0f, 2.0f,  0.0f, //
+            0.0f, 0.0f, -1.0f, 1.0f, //
+        };
         NuMtxMulH(reinterpret_cast<NUMTX *>(g_renderContext_viewProj),
                   reinterpret_cast<NUMTX *>(g_renderContext_viewProj), &depth_remap);
 

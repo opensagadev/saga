@@ -446,8 +446,6 @@ void NuQFntPrintV(NUQFNT *font, const char *format, va_list arguments);
     extern void (*nuapi_endframe_callbackfn)(void);
 } // extern "C"
 
-union variptr_u;
-
 #define MAX_GAME_PAD_COUNT 2
 
 #define ANALOG_CENTER 0x80

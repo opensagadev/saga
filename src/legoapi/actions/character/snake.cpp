@@ -10,9 +10,6 @@
 #include "nu2api/numath/nufloat.h"
 #include "legoapi/characters/motion.h"
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 extern "C" {
     SNAKEBODY_s snakebodies[4];
 }

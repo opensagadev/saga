@@ -213,24 +213,9 @@ void EndPerm(void) {
     editbuffer_end.addr = superbuffer_end.addr - static_cast<usize>(EDITBUFFERENDSIZE);
 }
 
-struct HINT_s;
-
-struct MechTouchUIElement;
-struct PLAYERITEM_s;
-struct PLAYERITEMTYPE_s;
 struct PLAYERPACKET_s;
-struct SOCKPOSITION_s;
-struct TouchHolder;
 
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
-
-namespace {
-
-} // namespace
-
-struct AIROW_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
 
 // ---------------------------------------------------------------------------
 // Permanent-data initialisation (background thread entry).

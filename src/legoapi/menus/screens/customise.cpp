@@ -204,13 +204,6 @@ static i32 Customise_FindLetter(char character) {
     return letter == 38 ? 0 : letter;
 }
 
-struct AISYS_s;
-
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 static void UpdateCustomPieceAnim(CUSTOMPIECEANIM *anim, u16 minimum, u16 maximum) {
     if (anim->elapsed < anim->duration) {
         anim->elapsed += FRAMETIME;
@@ -613,7 +606,7 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
 
 void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
     const f32 frame_time = FRAMETIME;
-    if (__builtin_expect(customiser != NULL, 0)) {
+    if (__builtin_expect(customiser != NULL, 1)) {
         i32 active_side, active_count;
         Customiser_GetActiveWeirdoIndex(&active_side, &active_count);
         i32 preview_side = -1;
@@ -640,7 +633,7 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
             CUSTOMPIECE *head = &customiser->piece_sets[0][static_cast<u16>(selection[0])];
             CUSTOMPIECE *torso = &customiser->piece_sets[1][static_cast<u16>(selection[1])];
             f32 no_hat = 0.0f;
-            if (__builtin_expect((torso->availability_flags & 1) != 0, 1)) {
+            if ((torso->availability_flags & 1) != 0) {
                 if ((torso->availability_flags & 4) != 0)
                     no_hat = (head->availability_flags & 8) != 0 ? 0.21f : 0.168f;
                 else
@@ -741,7 +734,7 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
                     category_data->material_tag == -1)
                     continue;
                 const i32 piece_index = static_cast<u16>(selection[category]);
-                if (__builtin_expect(resources[piece_index].texture_id == 0, 0))
+                if (resources[piece_index].texture_id == 0)
                     continue;
                 for (i32 material = 0; material < model->hierarchy->material_count; ++material) {
                     NUMTL *entry = model->hierarchy->materials[material];
@@ -963,7 +956,7 @@ void CustomiserMenu_Update(MENU_s *) {
     if (MenuPacket.active_player[1] != 0) {
         if ((GamePad[1].buttons_pressed & GAMEPAD_MENUSELECT) != 0)
             select[1] = 1;
-        else if (__builtin_expect((GamePad[1].buttons_pressed & GAMEPAD_MENUCANCEL) != 0, 1))
+        else if ((GamePad[1].buttons_pressed & GAMEPAD_MENUCANCEL) != 0)
             cancel = true;
     }
     if (cancel && CustomiseMode[0] != 1 && CustomiseMode[1] != 1) {

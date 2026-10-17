@@ -37,9 +37,6 @@
 #include "legoapi/characters/motion/camera.h"
 #include "legoapi/world/levels/episodeV.h"
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 static i32 snaphack[2];
 static i32 snaphacktimer[2];
 

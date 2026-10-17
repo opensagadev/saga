@@ -45,7 +45,7 @@ static CUSTOMPIECECATEGORY CustomSetData[9] = {
 // Retail partially inlines this lookup: the first five names stay in each
 // caller and the remaining tail is the out-of-line .part.0 (regparm name).
 #if defined(__i386__)
-#define CUSTOMISER_FIND_SET_PART_ATTR __attribute__((noinline, noclone, optimize("Os"), regparm(1)))
+#define CUSTOMISER_FIND_SET_PART_ATTR __attribute__((noinline, noclone, regparm(1)))
 #else
 #define CUSTOMISER_FIND_SET_PART_ATTR __attribute__((noinline, noclone))
 #endif

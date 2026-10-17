@@ -22,9 +22,6 @@
 #include "legoapi/items/collect/detonator.h"
 #include "legoapi/props/objects/zipup.h"
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 void Detonators_Draw() {
     if (!WORLD->lev_objs[0xec].active) {
         return;

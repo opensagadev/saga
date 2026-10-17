@@ -8,9 +8,6 @@
 #include "nu2api/nufile/nufpar.h"
 #include <string.h>
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 void CharPlatforms_Reset(CHARPLATFORMSYS_s *system) {
     if (system == NULL) {
         return;

@@ -106,9 +106,6 @@ i32 codevalid;
 i32 codechar;
 char codechars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
 struct SHOPINPUT;
 
 shopitem_s TopShelf[6] = {};
@@ -235,10 +232,6 @@ static f32 ShopSinePhase(f32 phase) {
 
 extern i16 tSELECT, tBACK, tBUY, tPLAY, tSELECTING;
 
-struct starfighter_s;
-struct rtl_s;
-struct rtlidata_s;
-
 extern i16 tHINTS;
 extern i16 tCHARACTERS;
 extern i16 tEXTRAS;
@@ -249,18 +242,9 @@ extern i16 tENTERCODE;
 f32 HUB_EPISODESUBTITLEY = -0.745f;
 f32 HUB_EPISODETITLEY = -0.595f;
 
-struct GAMEMESSAGE_s;
 struct HINT_s;
 struct MENU_s;
-struct NuBloomParameters;
-struct STATUSPACKET_s;
-struct TouchHolder;
-struct _vum_s;
-struct _vuv_s;
 struct nuhspecial_s;
-struct ripple_node_s;
-struct ripple_set_s;
-struct VuVec;
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
@@ -280,8 +264,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-struct CUTSCENEPLAYERCLIP;
-
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
@@ -297,8 +279,6 @@ GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 
 SAGA_HOST_WEAK void InitStillRender(variptr_u *, variptr_u);
 
 void FadeLoop(char *text, i32 direction, float duration, void (*draw)(float));
-
-struct AISYS_s;
 
 static void Shop_GetInput(SHOPINPUT *input) {
     memset(input, 0, sizeof(*input));

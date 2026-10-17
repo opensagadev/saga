@@ -126,11 +126,6 @@
 #include "nu2api/nu3d/android/nubridge_android.h"
 #include "nu2api/nu3d/nu3d_includes.h"
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 static u8 *crashdata;
 
 namespace {
@@ -1540,8 +1535,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-struct CUTSCENEPLAYERCLIP;
-
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
 GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
@@ -1563,8 +1556,6 @@ extern "C" {
     extern "C++" void AddChunkToRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
 } // extern "C"
 
-struct rtlset;
-
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
     i32 debris_suspended = 0;
@@ -1580,9 +1571,6 @@ extern "C" {
 }
 
 void AddChunkToRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
-
-struct spacelevel_s;
-struct quickboltinfo;
 
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
@@ -1617,21 +1605,7 @@ extern EdEnumControl::Item YesNoItems[3];
 extern i32 AxisColour[8];
 extern f32 MouseScale;
 
-struct starfighter_s;
-struct rtl_s;
-struct rtlidata_s;
-
-struct GAMEMESSAGE_s;
-struct HINT_s;
-struct MENU_s;
-struct NuBloomParameters;
-struct STATUSPACKET_s;
-struct TouchHolder;
-struct _vum_s;
-struct _vuv_s;
 struct nuhspecial_s;
-struct ripple_node_s;
-struct ripple_set_s;
 struct VuVec;
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
@@ -1642,8 +1616,6 @@ extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 struct tertype;
 struct terrsitu_s;
 struct PLATSKININFO;
-struct GAMECAMERA_s;
-struct pushblock_s;
 extern i16 id_SNAKE;
 static void *TerImpactData;
 static i32 *TerImpactDataCount;
@@ -1885,10 +1857,6 @@ i16 debug_index;
 
 #define IS_SNAN(x) (*(u32 *)&(x) == 0xffc00000)
 
-namespace {
-
-} // namespace
-
 static inline void ResetRayCastState() {
     plathitid = -1;
     TerrPolyObj = -1;
@@ -1959,10 +1927,6 @@ namespace {
         writer->cursor = reinterpret_cast<TERRAIN_SHAPE **>(writer->group_header + sizeof(TERRAIN_SHAPE *));
         writer->shape_count = 0;
     }
-
-} // namespace
-
-namespace {
 
 } // namespace
 
@@ -3350,7 +3314,7 @@ static void edptlcbDrawflagMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     edptl_drawflag_menu->y = parent->y + 40;
 }
 
-static __attribute__((optimize("O2", "tree-vectorize"))) void edptlcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+static void edptlcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     edptl_switchtype_menu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, edptlcbCancelSwitchTypeMenu, "Switch Type");
     if (__builtin_expect(edptl_switchtype_menu != NULL, 1)) {
@@ -6666,7 +6630,7 @@ static void cbCancelChangeNameMenu(eduimenu_s *menu, eduimenu_s *) {
     }
 }
 
-__attribute__((optimize("O2"))) void CRC_Init(VARIPTR *buffer_start) {
+void CRC_Init(VARIPTR *buffer_start) {
     if (g_crc_initialised) {
         return;
     }

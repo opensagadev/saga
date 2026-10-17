@@ -12,13 +12,6 @@
 #include "nu2api/numusic/sfx.h"
 
 #include <string.h>
-struct numtx_s;
-struct APICHARACTERMODELLIST_s;
-struct EXTRAMODEL;
-
-struct nuvec_s;
-struct EDCREATURE_s;
-struct APIOBJECT_s;
 
 extern "C" {
     i16 id_WEIRDO1 = -1;

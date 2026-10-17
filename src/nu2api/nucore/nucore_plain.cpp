@@ -35,7 +35,6 @@
 // reconstructed. Domain families move to their evidenced owner as complete
 // groups; this file is not itself evidence of one original nucore TU.
 
-struct ani3_animheader_s;
 struct nuanimdatachunk_s;
 
 extern "C" {
@@ -156,9 +155,4 @@ static void ClipInstTree(NuInstanceTree_s *tree, i32 tree_index);
     extern void (*nuapi_endframe_callbackfn)(void);
 void NuRegisterEndFrameCallBackFn(void (*callback)(void));
 } // extern "C"
-
-struct nupad_s;
-struct nuframebuffer_s;
-struct nushaderobject_s;
-union variptr_u;
 

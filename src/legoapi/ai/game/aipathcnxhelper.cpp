@@ -11,9 +11,6 @@
 #include <stdint.h>
 #include "nu2api/nucore/nulist.h"
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
 
 void (*AIPathCnxHelperSysInitFn)(WORLDINFO_s *) = NULL;

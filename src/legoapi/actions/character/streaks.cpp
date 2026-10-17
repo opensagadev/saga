@@ -10,11 +10,6 @@
 
 extern f32 FRAMETIME;
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 struct STREAK_s {
     STREAK_s *next;
     STREAK_s *prev;

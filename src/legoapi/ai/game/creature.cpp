@@ -135,30 +135,9 @@
 #include "legoapi/lib/camera.h"
 #include "legoapi/misc/utilities.h"
 
-struct AIROW_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
-struct starfighter_s;
-struct rtl_s;
-struct rtlidata_s;
-
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
 i32 draw_para = 1;
-
-struct GAMEMESSAGE_s;
-struct HINT_s;
-struct MENU_s;
-struct NuBloomParameters;
-struct STATUSPACKET_s;
-struct TouchHolder;
-struct _vum_s;
-struct _vuv_s;
-struct nuhspecial_s;
-struct ripple_node_s;
-struct ripple_set_s;
-struct VuVec;
 
 // These rotations are also used by the shop translation unit. Keep them local
 // so the compiler can inline the matrix arithmetic at each call site.
@@ -252,11 +231,6 @@ static u32 LayerBit(u8 layer) {
 static MOSEISLEY_LAYERS_ATTR void SetLayers_MOSEISLEYCITIZEN(u32 *layers)
     __asm__("_ZL26SetLayers_MOSEISLEYCITIZENP12GameObject_s.isra.2");
 
-struct tertype;
-struct terrsitu_s;
-struct PLATSKININFO;
-struct GAMECAMERA_s;
-struct pushblock_s;
 i32 NOTERRAINSTOP;
 extern "C" i16 id_SNAKE;
 
@@ -264,14 +238,6 @@ i32 testshadowfix = 1;
 
 namespace {
 #include "legoapi/render/core/terrain_types.h"
-
-} // namespace
-
-namespace {
-
-} // namespace
-
-namespace {
 
 } // namespace
 
@@ -283,29 +249,9 @@ namespace {
 static TERRAIN_KILL_PLAYER_ATTR i32 TerrainKillPlayer(GameObject_s *object, i32 surface, const f32 *normal_y)
     __asm__("_ZL17TerrainKillPlayerP12GameObject_siP7nuvec_s.isra.4");
 
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
-
 // Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
 
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
-
-struct MechTouchUIElement;
-struct PLAYERITEM_s;
-struct PLAYERITEMTYPE_s;
 struct PLAYERPACKET_s;
-struct SOCKPOSITION_s;
 
 extern i32 complexsockposition_forcesock;
 extern i32 movegamecamera_forcesock;
@@ -364,8 +310,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
                   "complete game AI condition registry");
 
 }
-
-struct CUTSCENEPLAYERCLIP;
 
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 extern i16 id_ANAKINJEDISCARRED;

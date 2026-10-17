@@ -9,8 +9,8 @@ struct NuDataPortManager {
         i32 references;
     } entries[256];
     NuDataPortManager() {
-        for (Entry *entry = entries; entry != entries + 256; ++entry)
-            entry->references = 0;
+        for (i32 i = 0; i < 256; ++i)
+            entries[i].references = 0;
     }
     ~NuDataPortManager() {
     }

@@ -2,6 +2,8 @@
 
 #include <pthread.h>
 
+#include "nu2api/nucore/nuthread.h"
+
 typedef pthread_mutex_t NuSoundMutex;
 typedef pthread_cond_t NuSoundCondition;
 
@@ -42,21 +44,16 @@ static inline void NuSoundConditionBroadcast(NuSoundCondition *condition) {
 
 class NuSoundCriticalSection {
   public:
-    NuSoundMutex mutex;
+    NuCriticalSection critical_section;
 
-    NuSoundCriticalSection() {
-        NuSoundMutexInitRecursive(&mutex);
-    }
-
-    ~NuSoundCriticalSection() {
-        NuSoundMutexDestroy(&mutex);
+    NuSoundCriticalSection() : critical_section("NuSoundCriticalSection::mCriticalSection") {
     }
 
     void Lock() {
-        NuSoundMutexLock(&mutex);
+        critical_section.Lock();
     }
 
     void Unlock() {
-        NuSoundMutexUnlock(&mutex);
+        critical_section.Unlock();
     }
 };

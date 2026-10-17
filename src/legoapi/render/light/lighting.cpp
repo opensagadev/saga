@@ -88,8 +88,6 @@ extern f32 GhostLightMul;
 #include <emmintrin.h>
 #endif
 
-struct rtlidata_s;
-
 void SetLights(NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC *direction1, NUCOLOUR3 *colour2,
                NUVEC *direction2, NUVEC *ambient) {
     NuRndrLightingStateCurrent.direction[0] = *direction0;

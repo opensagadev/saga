@@ -17,6 +17,18 @@ NuFileDevice::PathRule NuFileDevice::sm_Rules[32];
 NuFileDevice::DirectoryHandle NuFileDevice::sm_DirectoryHandles[16];
 NuCriticalSection NuFileDevice::sm_CriticalSection(NULL);
 
+// The original's NuMemory.h string duplicate, allocated from the thread heap.
+static inline char *DuplicateString(const char *string) {
+    if (string == NULL) {
+        return NULL;
+    }
+    char *copy = static_cast<char *>(NuMemoryGet()->GetThreadMem()->_BlockAlloc(
+        std::strlen(string) + 1, 4, 4,
+        "i:/SagaTouch-Android_9176564/nu2api.saga/../nu2api.2013/numemory/NuMemory.h:340", 0));
+    std::strcpy(copy, string);
+    return copy;
+}
+
 void NuFileDevice::AddDevice(NuFileDevice *device) {
     device->device_id = sm_NumDevices;
     sm_Devices[sm_NumDevices++] = device;
@@ -26,23 +38,11 @@ i32 NuFileDevice::AllocDirectoryHandle(char const *path) {
     pthread_mutex_lock(&sm_CriticalSection.mutex);
     i32 handle = 0;
     for (i32 i = 1; i < 16; ++i) {
-        if (sm_DirectoryHandles[i].device) {
-            continue;
-        }
-        handle = i;
-        break;
-    }
-    if (handle) {
-        DirectoryHandle &entry = sm_DirectoryHandles[handle];
-        entry.device = this;
-        if (path) {
-            char *copy = static_cast<char *>(NuMemoryGet()->GetThreadMem()->_BlockAlloc(
-                std::strlen(path) + 1, 4, 4,
-                "i:/SagaTouch-Android_9176564/nu2api.saga/../nu2api.2013/numemory/NuMemory.h:340", 0));
-            std::strcpy(copy, path);
-            entry.path = copy;
-        } else {
-            entry.path = NULL;
+        if (sm_DirectoryHandles[i].device == NULL) {
+            sm_DirectoryHandles[i].device = this;
+            sm_DirectoryHandles[i].path = DuplicateString(path);
+            handle = i;
+            break;
         }
     }
     pthread_mutex_unlock(&sm_CriticalSection.mutex);
@@ -50,21 +50,12 @@ i32 NuFileDevice::AllocDirectoryHandle(char const *path) {
 }
 
 void NuFileDevice::AddPathRule(NuFileDeviceType type, char const *path) {
-    if (sm_NumRules >= 32)
-        return;
-    PathRule &rule = sm_Rules[sm_NumRules];
-    rule.device_type = type;
-    if (path) {
-        char *copy = static_cast<char *>(NuMemoryGet()->GetThreadMem()->_BlockAlloc(
-            std::strlen(path) + 1, 4, 4,
-            "i:/SagaTouch-Android_9176564/nu2api.saga/../nu2api.2013/numemory/NuMemory.h:340", 0));
-        std::strcpy(copy, path);
-        rule.path = copy;
-    } else {
-        rule.path = NULL;
+    if (sm_NumRules < 32) {
+        sm_Rules[sm_NumRules].device_type = type;
+        sm_Rules[sm_NumRules].path = DuplicateString(path);
+        sm_Rules[sm_NumRules].path_length = NuStrLen(path);
+        sm_NumRules++;
     }
-    rule.path_length = NuStrLen(path);
-    ++sm_NumRules;
 }
 
 void NuFileDevice::ClearPathRules() {
@@ -169,30 +160,42 @@ NuFileDevice *NuFileDevice::GetDeviceFromDirectoryHandle(i32 handle) {
 }
 
 NuFileDevice *NuFileDevice::GetDeviceFromPath(char const *path) {
-    if (((path[0] | 0x20) >= 'a' && (path[0] | 0x20) <= 'z') && path[1] == ':' && (path[2] == '/' || path[2] == '\\'))
+    const char drive = path[0] & ~0x20;
+    if (drive >= 'A' && drive <= 'Z' && path[1] == ':' && (path[2] == '/' || path[2] == '\\'))
         return sm_DefaultDevice;
     if (path[0] == 'h' && path[1] == 'o' && path[2] == 's' && path[3] == 't' && path[4] == ':')
         return sm_HostDevice;
 
+    NuFileDevice *device = NULL;
+    bool labelled = false;
     for (i32 i = 0; i < 8; ++i) {
-        if (path[i] != ':')
-            continue;
-        for (i32 j = 0; j < sm_NumDevices; ++j) {
-            NuFileDevice *device = sm_Devices[j];
-            if (device && *device->label && NuStrNICmp(path, device->label, NuStrLen(device->label)) == 0)
-                return device;
+        if (path[i] == ':') {
+            labelled = true;
+            break;
         }
-        return NULL;
     }
 
-    NuFileDevice *device = sm_DefaultDevice;
+    if (labelled) {
+        for (i32 i = 0; i < sm_NumDevices; ++i) {
+            NuFileDevice *candidate = sm_Devices[i];
+            if (candidate && *candidate->label &&
+                NuStrNICmp(path, candidate->label, NuStrLen(candidate->label)) == 0) {
+                device = candidate;
+                break;
+            }
+        }
+        if (device == NULL)
+            return NULL;
+    } else {
+        device = sm_DefaultDevice;
+    }
+
     if (sm_NumRules > 0) {
         char normalized[512];
         NuFileNormalise(normalized, sizeof(normalized), path);
-        PathRule *rule = sm_Rules;
-        for (i32 i = 0; i < sm_NumRules; ++i, ++rule) {
-            if (NuStrNICmp(normalized, rule->path, rule->path_length) == 0)
-                device = GetDeviceByType(rule->device_type);
+        for (i32 i = 0; i < sm_NumRules; ++i) {
+            if (NuStrNICmp(normalized, sm_Rules[i].path, sm_Rules[i].path_length) == 0)
+                device = GetDeviceByType(sm_Rules[i].device_type);
         }
     }
     return device;

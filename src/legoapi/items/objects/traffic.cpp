@@ -18,9 +18,6 @@
 
 #include <string.h>
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 static TRAFFICANIM_s reference_trafficanim;
 static TRAFFICANIM_s *parse_trafficanim;
 static TRAFFICANIMSYS_s *parse_trafficanimsys;

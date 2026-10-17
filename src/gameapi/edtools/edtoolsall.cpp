@@ -364,75 +364,6 @@ inline void EdBitControl::operator delete(void *memory) {
 static HSV2RGB_BODY_ATTR void
 HSV2RGBBody(f32 hue, f32 saturation, f32 value, f32 *red, f32 *green, f32 *blue) __asm__("_ZL7HSV2RGBfffPfS_S_.part.18");
 
-static __attribute__((used)) void edanimcbCubeMap(eduimenu_s *, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbFileLoad(eduimenu_s *menu, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbFileSave(eduimenu_s *menu, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbSoundMenu(eduimenu_s *, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbBouncyMenu(eduimenu_s *, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbSwitchMenu(eduimenu_s *, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbSetSwitchId(eduimenu_s *, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbMCTBCardType(eduimenu_s *menu, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbParticleMenu(eduimenu_s *, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbSetSoundType(eduimenu_s *menu, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbSetSwitchVar(eduimenu_s *, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbCancelOptMenu(eduimenu_s *, eduimenu_s *);
-static __attribute__((used)) void edanimcbSetSwitchType(eduimenu_s *menu, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbSoundTypeMenu(eduimenu_s *, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbCancelMCTBMenu(eduimenu_s *, eduimenu_s *);
-static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbMCTBCardFormat(eduimenu_s *menu, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbSetSoundTiming(eduimenu_s *, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbSetSwitchDelay(eduimenu_s *, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *, eduiitem_s *, u32);
-
-static __attribute__((used)) void edanimcbCancelSoundMenu(eduimenu_s *, eduimenu_s *);
-static __attribute__((used)) void edanimcbMCTBCardPresent(eduimenu_s *menu, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbSetParticleRate(eduimenu_s *, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbSetParticleType(eduimenu_s *menu, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbToggleSoundType(eduimenu_s *menu, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbCancelBouncyMenu(eduimenu_s *, eduimenu_s *);
-static __attribute__((used)) void edanimcbCancelSwitchMenu(eduimenu_s *, eduimenu_s *);
-static __attribute__((used)) void edanimcbMCTBCardLoadSlot(eduimenu_s *menu, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbMCTBCardSaveSlot(eduimenu_s *menu, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbMCTBCardUnFormat(eduimenu_s *menu, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbParticleTypeMenu(eduimenu_s *, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbSetBouncyDamping(eduimenu_s *, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbSetBouncyTension(eduimenu_s *, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbLocalParticleMenu(eduimenu_s *, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbMCTBCardFreeSpace(eduimenu_s *menu, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbMCTBCardSlotsUsed(eduimenu_s *menu, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbSetLocalSoundType(eduimenu_s *menu, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbCancelParticleMenu(eduimenu_s *, eduimenu_s *);
-static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbMCTBCardDeleteSlot(eduimenu_s *menu, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbCancelSoundTypeMenu(eduimenu_s *, eduimenu_s *);
-static __attribute__((used)) void edanimcbMCTBCardCheckFormat(eduimenu_s *menu, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbSetBouncyPlayerGrav(eduimenu_s *, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbCancelLocalSoundMenu(eduimenu_s *, eduimenu_s *);
-static __attribute__((used)) void edanimcbCancelSwitchTypeMenu(eduimenu_s *, eduimenu_s *);
-static __attribute__((used)) void edanimcbMCTBCardCheckKeyCard(eduimenu_s *menu, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbMCTBCardWriteKeyCard(eduimenu_s *menu, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbSetLocalParticleType(eduimenu_s *menu, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbToggleParticleSwitch(eduimenu_s *, eduiitem_s *item, u32);
-static __attribute__((used)) void edanimcbLocalParticleTypeMenu(eduimenu_s *, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbCancelParticleTypeMenu(eduimenu_s *, eduimenu_s *);
-static __attribute__((used)) void edanimcbCancelLocalParticleMenu(eduimenu_s *, eduimenu_s *);
-static __attribute__((used)) void edanimcbCancelLocalSoundTypeMenu(eduimenu_s *, eduimenu_s *);
-static __attribute__((used)) void edanimcbCancelLocalParticleTypeMenu(eduimenu_s *, eduimenu_s *);
-static __attribute__((used)) void edanimcbBouncyMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbSoundMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbParticleMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbSwitchMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbLocalParticleMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbSoundTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbLocalParticleTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbParticleTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 // Editor UI callbacks retained in the original editor's menu code.
 #pragma GCC push_options
 #pragma GCC optimize("O2", "omit-frame-pointer")
@@ -526,27 +457,6 @@ extern "C" {
 }
 
 void cbFileSaveEffects(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbClipboardMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbOrphanListMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbDeleteOrphans(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbGhostMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbStarMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbChangeDistortX(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbChangeDistortY(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbSetScaleFactor(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbSoundIDMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlChangeGenRate(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlChangeETime(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlRepeatBoxMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbChangeRampTime(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbSetSwitchType(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbCutClipboard(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbPasteClipboard(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbEmptyClipboard(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlChangeIvalOn(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlChangeIvalOnRan(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlChangeIvalOff(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlChangeIvalOffRan(eduimenu_s *, eduiitem_s *, u32);
 
 #if defined(__SSE__)
 #include <xmmintrin.h>
@@ -557,16 +467,6 @@ extern "C" {
     extern NUMTL *DebMat[];
 }
 
-static void cbPtlChangeGrav(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlChangeEmitVel(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlChangeSScale(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlSelReadout(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlChangeDamageFlags(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlDamageFlagMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlTorusMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbCancelChangeNameMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlChangeTextureSelect(eduimenu_s *, eduiitem_s *, u32);
-
 extern "C" {
     extern u32 edblack[4];
     extern u32 edgrey[4];
@@ -575,150 +475,13 @@ extern "C" {
     extern DEBRISMOMENTUMADJUSTER gencodetab[7];
 }
 
-static void cbPtlQuickDeleteType(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlSelTextureType(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlTextureSelectMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlAddEffect(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlCopyEffect(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlDeleteEffect(eduimenu_s *, eduiitem_s *, u32);
-static void cbChangeNameMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlQuickDeleteMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlReadoutMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbFileLoadEffects(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlSelType(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlChangePriority(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlToggleDynamicPriority(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlSetFacing(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbScaleEffectMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlEmitVelMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlGravMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlVarStartMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlStartVelMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlVarEmitMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbChangeGenRateMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbChangeETimeMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlEmitTimeMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlCutOffMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlCopySize(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbApplyScaleFactor(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlChangeRepeatFlag(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlChangeCutOff(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlChangeCutOn(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlChangeDrawCutOff(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlChangeSoundCutOff(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlChangeCameraCutOff(eduimenu_s *, eduiitem_s *, u32);
-static void cbChangeNumCollSpheres(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlDefaultCollEnv(eduimenu_s *, eduiitem_s *, u32);
-static void cbChangeTorusLife(eduimenu_s *, eduiitem_s *, u32);
-static void cbChangeTorusRad1(eduimenu_s *, eduiitem_s *, u32);
-static void cbChangeTorusRad2(eduimenu_s *, eduiitem_s *, u32);
-
 // Particle-list editor UI/menu callbacks.
-
-static void edptlcbScaleEffectMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void edptlcbApplyScaleFactor(eduimenu_s *menu, eduiitem_s *, u32);
 
 // Particle editor UI/menu callbacks.
 
-static void cbPtlSelType(eduimenu_s *menu, eduiitem_s *item, u32);
-static void cbPtlCopySize(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlGravMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void cbPtlAddEffect(eduimenu_s *menu, eduiitem_s *, u32);
-static void cbPtlSetFacing(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlTorusMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void cbPtlChangeGrav(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlCopyEffect(eduimenu_s *menu, eduiitem_s *, u32);
-static void cbPtlCutOffMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void cbPtlSelReadout(eduimenu_s *, eduiitem_s *item, u32);
-static void cbChangeNameMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void cbPtlChangeCutOn(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlEmitVelMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void cbPtlReadoutMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void cbPtlVarEmitMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void cbChangeETimeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void cbChangeTorusLife(eduimenu_s *, eduiitem_s *item, u32);
-static void cbChangeTorusRad1(eduimenu_s *, eduiitem_s *item, u32);
-static void cbChangeTorusRad2(eduimenu_s *, eduiitem_s *item, u32);
-static void cbFileLoadEffects(eduimenu_s *parent, eduiitem_s *, u32);
-static void cbPtlChangeCutOff(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlChangeSScale(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlDeleteEffect(eduimenu_s *menu, eduiitem_s *, u32);
-static void cbPtlEmitTimeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void cbPtlStartVelMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void cbPtlVarStartMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void cbPtlChangeEmitVel(eduimenu_s *, eduiitem_s *item, u32);
-static void cbChangeGenRateMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void cbPtlChangePriority(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlDamageFlagMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void cbPtlDefaultCollEnv(eduimenu_s *menu, eduiitem_s *, u32);
-static void cbPtlSelTextureType(eduimenu_s *menu, eduiitem_s *item, u32);
-static void cbPtlQuickDeleteMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void cbPtlQuickDeleteType(eduimenu_s *menu, eduiitem_s *item, u32);
-static void cbPtlChangeDrawCutOff(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlChangeRepeatFlag(eduimenu_s *, eduiitem_s *item, u32);
-static void cbChangeNumCollSpheres(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlChangeDamageFlags(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlChangeSoundCutOff(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlTextureSelectMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void cbPtlChangeCameraCutOff(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlChangeTextureSelect(eduimenu_s *menu, eduiitem_s *item, u32);
-static void cbPtlToggleDynamicPriority(eduimenu_s *, eduiitem_s *item, u32);
-static void cbCancelChangeNameMenu(eduimenu_s *menu, eduimenu_s *);
-
 void cbFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32);
 
-static void edptlChangeRepeatBox(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbDrawflagMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbApplyStarRatio(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbApplyGhostTime(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbApplyNumGhosts(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbSetMasterGroup(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbSetMaxThin(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbTestDetailMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbSetSwitchId(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbSetSwitchVar(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbSwitchTypeMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbStartPage(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbStopPage(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbClearPage(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlRepeatBoxMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 // Particle list editor subsystem stubs (static, internal linkage).
-
-static void edptlcbStarMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void edptlcbStopPage(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlcbClearPage(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlcbGhostMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void edptlcbStartPage(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlcbSetMaxThin(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlcbSetSwitchId(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlcbSoundIDMenu(eduimenu_s *parent, eduiitem_s *item, u32);
-static void edptlcbCutClipboard(eduimenu_s *menu, eduiitem_s *, u32);
-static void edptlcbDrawflagMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void edptlcbSetSwitchVar(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlChangeRepeatBox(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlcbClipboardMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void edptlcbDeleteOrphans(eduimenu_s *menu, eduiitem_s *, u32);
-static void edptlcbSetSwitchType(eduimenu_s *menu, eduiitem_s *item, u32);
-static void edptlcbApplyGhostTime(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlcbApplyNumGhosts(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlChangeIvalOffRan(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlChangeIvalOff(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlChangeIvalOnRan(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlChangeIvalOn(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlChangeETime(eduimenu_s *, eduiitem_s *item, u32);
-static void cbPtlChangeGenRate(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlcbApplyStarRatio(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlcbChangeDistortX(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlcbChangeDistortY(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlcbChangeRampTime(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlcbEmptyClipboard(eduimenu_s *menu, eduiitem_s *, u32);
-static void edptlcbOrphanListMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void edptlcbPasteClipboard(eduimenu_s *menu, eduiitem_s *, u32);
-static void edptlcbSetMasterGroup(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlcbSetScaleFactor(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void edptlcbTestDetailMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
 extern "C" {
     __attribute__((visibility("hidden"))) void tpentOnEnter(eduimenu_s *, eduiitem_s *, u32);
@@ -1129,11 +892,6 @@ __attribute__((visibility("hidden"), optimize("O3"))) void tpentPropOnEnter(edui
                                                                                 unsigned int buttons);
 }
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 extern f32 HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING;
 extern "C" void NuIOS_RecordFlurryEvent(char *event_name);
@@ -1166,7 +924,6 @@ void MenuSetPreDrawFn(void (*draw_fn)(MENU *));
 void MenuSetHeaderDrawFn(void (*draw_fn)(void));
 } // extern "C"
 
-struct ani3_animheader_s;
 struct nuanimdatachunk_s;
 
 extern "C" {
@@ -1273,8 +1030,6 @@ void NuRegisterEndFrameCallBackFn(void (*callback)(void));
 } // extern "C"
 
 struct nupad_s;
-struct nuframebuffer_s;
-struct nushaderobject_s;
 union variptr_u;
 
 extern "C" {
@@ -1393,23 +1148,8 @@ void SaveSystemInitialiseEx(i32 slots, void *makeSaveHash, void *save, i32 saveS
 void SetSaveSuccessFn(void (*callback)(void));
 } // extern "C"
 
-struct starfighter_s;
-struct rtl_s;
-struct rtlidata_s;
-
 extern f32 HUB_EPISODETITLEY;
 
-struct GAMEMESSAGE_s;
-struct HINT_s;
-struct MENU_s;
-struct NuBloomParameters;
-struct STATUSPACKET_s;
-struct TouchHolder;
-struct _vum_s;
-struct _vuv_s;
-struct nuhspecial_s;
-struct ripple_node_s;
-struct ripple_set_s;
 struct VuVec;
 
 extern f32 MENUBOTY;

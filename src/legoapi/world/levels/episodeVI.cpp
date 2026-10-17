@@ -51,8 +51,6 @@
 #include "legoapi/world/levels/episodeVI.h"
 extern f32 testlaser_sizew, testlaser_sizel, testlaser_sizewab, testlaser_endw;
 
-struct AIROW_s;
-struct nunativegscene_s;
 extern u8 LevFlag[16];
 struct SarlaccBattlePacket {
     f32 height;

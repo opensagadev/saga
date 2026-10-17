@@ -161,31 +161,12 @@ extern WORLDINFO WorldInfo[2];
 struct GIZMOPICKUP_s;
 struct PART_s;
 
-static __used__ void Collection_GetSelectingPlayerIDs(i16 *ids);
-
-namespace {
-
-} // namespace
-
 // Retail only has the constant-propagated clone of
 // DrawHitPoints(GameObject_s *, float, float, float, float, i32, float, i32); every caller passes 0.0f and 0
 // for the two trailing (unused) arguments, so the clone drops them.
 static __attribute__((noinline, noclone, hot, section(".text"))) void DrawHitPoints(GameObject_s *object, float x, float y, float scale,
                                                              float alpha, i32 alignment)
     __asm__("_ZL13DrawHitPointsP12GameObject_sffffifi.constprop.39");
-
-static __used__ void PartImpact_Coin(PART_s *part);
-static __used__ void PartStolen_Coin(PART_s *part);
-static __used__ void PartExtra_BlueCoin(PART_s *part);
-static __used__ void PartExtra_PurpleCoin(PART_s *part);
-static __used__ i32 PowerUp_DrawPart(PART_s *part);
-static __used__ void PowerUp_ImpactPart(PART_s *part);
-static __used__ void PowerUp_UpdatePart(PART_s *part);
-static __used__ void PowerUp_EndMsg(GAMEMESSAGE_s *message);
-static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *message);
-static __used__ i32 PartDraw_VehicleHeart(PART_s *part);
-static __used__ void PartMove_VehicleHeart(PART_s *part, f32);
-static __used__ void PartMove_VehiclePickup(PART_s *part, f32);
 
 // NuFileExists @nufile (nucore_plain.cpp).
 

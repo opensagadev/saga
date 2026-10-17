@@ -512,7 +512,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                                   (world->current_level == CLOUDCITYESCAPEA_LDATA && index == 0) || VehicleArea;
                     f32 distance;
                     bool hit;
-                    if (!!!__builtin_expect(sphere, 0)) {
+                    if (!!!__builtin_expect(sphere, 1)) {
                         // bounds preserve the original special's fourth lanes.
                         VuVec minimum, maximum;
                         minimum.x = special->display_special->bounds_min.x + mid_z[-2];

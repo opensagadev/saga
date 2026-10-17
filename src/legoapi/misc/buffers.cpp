@@ -1,0 +1,24 @@
+#include "nu2api/nucore/common.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/nuvuvec.hpp"
+
+VARIPTR original_permbuffer_base;
+VARIPTR permbuffer_base;
+VARIPTR permbuffer_ptr;
+VARIPTR permbuffer_end;
+i32 permbuffer_size;
+NUGSCN *things_scene;
+void *things_scene_terrain;
+NUGSCN *saveicon_scene;
+NUGSCN *button_scene;
+VARIPTR characterbuffer_base;
+VARIPTR characterbuffer_ptr;
+VARIPTR characterbuffer_end;
+NUGSCN *vehicle_scene;
+NUGSCN *area_scene;
+NUGSCN *big_icon_scene;
+VARIPTR superbuffer_base;
+VARIPTR superbuffer_ptr;
+VARIPTR superbuffer_end;
+VARIPTR editbuffer_end;
+i32 EDITBUFFERENDSIZE;

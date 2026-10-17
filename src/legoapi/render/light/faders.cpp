@@ -9,11 +9,6 @@
 #include "nu2api/numath/nuvec.h"
 #include "globals.h"
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 // Retail realigns this stack frame before copying the matrix local.
 void __attribute__((force_align_arg_pointer)) Faders_Draw(WORLDINFO_s *world) {
     if (world->faders == NULL) {

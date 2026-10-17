@@ -16,11 +16,6 @@
 
 #include <string.h>
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 void AITriggerSetSysReset(AITRIGGERSETSYS_s *system) {
     if (system == NULL) {
         return;

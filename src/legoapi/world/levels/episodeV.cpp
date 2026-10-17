@@ -134,11 +134,6 @@ static GIZAIMESSAGE_s *Vader_ai_message;
 static u8 turretAliveCount;
 nuhspecial_s specialIcon;
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 extern "C" {
     GIZBOMBGEN *HothBattleC_BombGenerator = NULL;
     HOTHBATTLE_MELEE_s melee;
@@ -199,11 +194,6 @@ static inline void AsteroidChaseD_SetTurretTarget(i32 index, NUVEC *position) {
     }
 }
 
-struct rtlset;
-
-struct spacelevel_s;
-struct quickboltinfo;
-
 TROOPERCANNON_s troopercannons[4];
 
 static __used__ void KilledTrooperCannon(GameObject_s *object);
@@ -237,76 +227,18 @@ static inline void IncrementMinikitCounterFor(WORLDINFO_s *world, NUVEC *average
     AddGameMsgCount(average, *counter, 10, 200, 100, 30, 0.75f);
 }
 
-struct starfighter_s;
-struct rtl_s;
-struct rtlidata_s;
-
-struct GAMEMESSAGE_s;
-struct HINT_s;
-struct MENU_s;
-struct NuBloomParameters;
-struct STATUSPACKET_s;
-struct TouchHolder;
-struct _vum_s;
-struct _vuv_s;
 struct nuhspecial_s;
-struct ripple_node_s;
-struct ripple_set_s;
-struct VuVec;
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
-struct tertype;
-struct terrsitu_s;
-struct PLATSKININFO;
-struct GAMECAMERA_s;
-struct pushblock_s;
 extern "C" i16 id_SNAKE;
-
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
 
 // Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
 
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
-
-struct MechTouchUIElement;
-struct PLAYERITEM_s;
-struct PLAYERITEMTYPE_s;
-struct PLAYERPACKET_s;
-struct SOCKPOSITION_s;
-
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
-
-namespace {
-
-} // namespace
 
 extern i16 id_GAMORREANGUARD;
 
@@ -321,8 +253,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
                   "complete game AI condition registry");
 
 }
-
-struct CUTSCENEPLAYERCLIP;
 
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
@@ -1315,7 +1245,7 @@ void DagobahA_Update(WORLDINFO_s *world) {
         return;
 
     GIZFORCEGROUP_s *group = first->group;
-    if (__builtin_expect(group != NULL && (group->field_0x24 & 2) != 0, 0)) {
+    if (__builtin_expect(group != NULL && (group->field_0x24 & 2) != 0, 1)) {
         if (dagobahA_nodesNeedUpdating != 0)
             return;
         dagobahA_nodesNeedUpdating = 1;

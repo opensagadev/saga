@@ -17,9 +17,6 @@
 #include <string.h>
 #include "legoapi/gizmo/object/gizmoblowups.h"
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 struct RadioEntry {
     union {
         GIZMOBLOWUP_s *blowup;

@@ -79,11 +79,6 @@
 #include "legoapi/render/core/gameliball.h"
 #include "legoapi/world/levels/episodeI.h"
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 extern i32 LevFlag[4];
 // The original keeps this scale in an aligned vector slot and copies it with movaps.
 static spacelevel_scale_s STARFIGHTERDRAWSCALE __attribute__((aligned(16)));
@@ -197,21 +192,10 @@ static inline void DrawSpaceJet(i32 player_index, i32 key_index, bool left) {
 }
 
 struct starfighter_s;
-struct rtl_s;
-struct rtlidata_s;
 
-struct GAMEMESSAGE_s;
-struct HINT_s;
-struct MENU_s;
-struct NuBloomParameters;
-struct STATUSPACKET_s;
-struct TouchHolder;
 struct _vum_s;
 struct _vuv_s;
 struct nuhspecial_s;
-struct ripple_node_s;
-struct ripple_set_s;
-struct VuVec;
 
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 

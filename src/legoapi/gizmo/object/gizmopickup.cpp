@@ -142,8 +142,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-struct CUTSCENEPLAYERCLIP;
-
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
@@ -203,10 +201,6 @@ ADDPART_s Default_ADDPART = {NULL,
                              0,
                              {0, 0, 0}};
 
-struct rtlset;
-
-struct spacelevel_s;
-
 static __used__ void PartImpact_Coin(PART_s *part);
 static __used__ void PartStolen_Coin(PART_s *part);
 static __used__ void PartExtra_BlueCoin(PART_s *part);
@@ -220,11 +214,6 @@ static __used__ i32 PartDraw_VehicleHeart(PART_s *part);
 static __used__ void PartMove_VehicleHeart(PART_s *part, f32);
 static __used__ void PartMove_VehiclePickup(PART_s *part, f32);
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 extern void IncreaseScore(u32 *, u64, i32);
 
 void IncreaseScore(u32 *, u64, i32);
@@ -235,9 +224,6 @@ u32 GizmoBlowups_TotalScore(void *world);
 
 struct GIZMOPICKUP_s;
 struct PART_s;
-struct starfighter_s;
-
-struct APICHARACTERMODELLIST_s;
 
 u32 GizmoBlowups_TotalScore(void *);
 

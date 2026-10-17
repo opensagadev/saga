@@ -34,8 +34,11 @@ void *GameAntnode_CreateSys(WORLDINFO_s *world, variptr_u *buf, variptr_u *buf_e
     system->world = world;
     system->free = system->nodes;
     // The original links count - 1 pool entries, leaving the final entry unused.
-    for (i32 i = 0; i < count - 2; ++i)
-        system->nodes[i].next = &system->nodes[i + 1];
+    GAMEANTINODE_s *node = system->nodes;
+    for (i32 i = 1; i < count - 1; ++i) {
+        node->next = &system->nodes[i];
+        node = node->next;
+    }
     buf->u8_ptr += node_bytes;
     return system;
 }
@@ -63,15 +66,14 @@ void GameAntinode_Update(GAMEANTINODESYS_s *system) {
     }
     for (GAMEANTINODE_s *node = system->active, *next; node != NULL; node = next) {
         next = node->next;
-        if (!(node->remaining_time <= 0.0f)) {
+        if (node->remaining_time > 0.0f) {
             node->remaining_time -= FRAMETIME;
-            if (!(node->remaining_time > 0.0f)) {
+            if (node->remaining_time <= 0.0f) {
                 GameAntinode_UnregisterAntiNode(system, node);
                 continue;
             }
         }
-        auto node_grid_max_x = node->grid_max_x;
-        for (i32 x = 0; x <= node_grid_max_x - node->grid_min_x; ++x) {
+        for (i32 x = 0; x <= node->grid_max_x - node->grid_min_x; ++x) {
             for (i32 z = 0; z <= node->grid_max_z - node->grid_min_z; ++z) {
                 if (((GameAntinode_grid[node->grid_min_x + x] >> (node->grid_min_z + z)) & 1) != 0) {
                     AIANTINODE_s *active = AIAntinodeCreateSingleFrame(&node->position, node->radius);

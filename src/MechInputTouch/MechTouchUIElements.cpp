@@ -138,26 +138,12 @@ struct TouchHolder;
 
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
 
-namespace {
-
-} // namespace
-
 extern "C" {
     extern "C++" FadeSystem FadeSys;
     extern i32 CutSceneWaiting;
 }
 
-struct nuhspecial_s;
 struct VuVec;
-
-#if defined(__i386__)
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
-#endif
-static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path,
-                                                             char *scene_data)
-    __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
 
 #if defined(__SSE__)
 #include <xmmintrin.h>

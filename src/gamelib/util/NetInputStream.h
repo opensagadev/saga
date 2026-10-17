@@ -30,12 +30,15 @@ struct NetInputStream : EdInputStream {
             if (input.swap_endianness && size > 1) {
                 u8 *next = static_cast<u8 *>(buffer);
                 for (i32 i = 0; i < count; ++i) {
-                    if (size == 2) {
-                        EdFileSwapEndianess16(next);
-                        next += 2;
-                    } else if (size == 4) {
-                        EdFileSwapEndianess32(next);
-                        next += 4;
+                    switch (size) {
+                        case 2:
+                            EdFileSwapEndianess16(next);
+                            next += 2;
+                            break;
+                        case 4:
+                            EdFileSwapEndianess32(next);
+                            next += 4;
+                            break;
                     }
                 }
             }
