@@ -28,13 +28,9 @@ static WORLDINFO_s *parse_worldinfo;
 i32 traffic_portalling = 1;
 
 static void Traffic_tfactor(NUFPAR *parser);
-
 static void Traffic_rand_interval(NUFPAR *parser);
-
 static void Traffic_frame_interval(NUFPAR *parser);
-
 static void TrafficAnim_yoffset(NUFPAR *parser);
-
 static void Traffic_vehicle(NUFPAR *parser);
 
 static NUFPCOMJMP TrafficAnim_ConfigKeywords[] = {

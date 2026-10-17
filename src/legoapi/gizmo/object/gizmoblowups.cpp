@@ -71,7 +71,6 @@ void Bolt_AddDeflectedBolt(BOLT_s *, nuvec_s *, nuvec_s *, unsigned char *);
 void Bolt_End(BOLT_s *, i32);
 
 static void Blowups_Reset(void *world_ptr, void *, void *progress_ptr);
-
 static i32 gizmoblowupnametable_numids;
 static char gizmoblowupnametable[32][32];
 

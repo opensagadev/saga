@@ -88,19 +88,12 @@
 #include "legogame/game.h"
 
 static void Pup_CollectCharKit(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32);
-
 static void Pup_CollectRedBrick(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32);
-
 static void Pup_UpdatePurpleCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup);
-
 static void Pup_UpdateBlueCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup);
-
 static void Pup_UpdatePowerUp(WORLDINFO_s *world, GIZMOPICKUP_s *pickup);
-
 static void Pup_CollectPowerUp(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 flags);
-
 static void Pup_CollectMinikit(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 type);
-
 static void Pup_CollectHeart(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 flags);
 
 u8 CoinTab[4] = {0, 1, 2, 3};
@@ -235,27 +228,16 @@ struct spacelevel_s;
 // local `t` symbols matching res/libTTapp.so.
 
 static __used__ void PartImpact_Coin(PART_s *part);
-
 static __used__ void PartStolen_Coin(PART_s *part);
-
 static __used__ void PartExtra_BlueCoin(PART_s *part);
-
 static __used__ void PartExtra_PurpleCoin(PART_s *part);
-
 static __used__ i32 PowerUp_DrawPart(PART_s *part);
-
 static __used__ void PowerUp_ImpactPart(PART_s *part);
-
 static __used__ void PowerUp_UpdatePart(PART_s *part);
-
 static __used__ void PowerUp_EndMsg(GAMEMESSAGE_s *message);
-
 static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *message);
-
 static __used__ i32 PartDraw_VehicleHeart(PART_s *part);
-
 static __used__ void PartMove_VehicleHeart(PART_s *part, f32);
-
 static __used__ void PartMove_VehiclePickup(PART_s *part, f32);
 
 extern "C" {

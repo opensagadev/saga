@@ -174,7 +174,6 @@ f32 fireSpeedScale;
 f32 fireDeltaPos;
 i32 fire_clip_dist = 1000;
 extern i32 objhitobj_nohurtsfx, objhitobj_noimpactsfx;
-
 static f32 slowDownTimer[2];
 
 void DeathStar2BattleFire_SetSlowDownMul(GameObject_s *object) {

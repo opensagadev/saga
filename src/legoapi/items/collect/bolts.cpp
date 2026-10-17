@@ -156,9 +156,7 @@ NUVEC addbolt_newpos;
 i32 (*BoltInitSfxFn)(GameObject_s *);
 
 static __used__ void Bolt_Debris_Default(BOLT_s *bolt, nuvec_s *points, int point, nuvec_s *, int);
-
 static __used__ void Bolt_GetShootOrigin_Default(GameObject_s *object, nuvec_s *position);
-
 static __used__ i32 Bolt_GetShootDirection_Default(GameObject_s *object, nuvec_s *direction);
 
 void FindAnglesZX(NUVEC *, u16 *, u16 *);

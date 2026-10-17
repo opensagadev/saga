@@ -564,7 +564,6 @@ extern "C" {
 #define CUT_STOP static_cast<CUTINFO *>(CutStopInfo)
 
 static __used__ __attribute__((noinline)) void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame);
-
 static __attribute__((noinline)) void instNuGCutSceneClipTest(instNUGCUTSCENE_s *instance);
 
 static void copyAnims(NUGCUTSCENE_s *destination, NUGCUTSCENE_s *source) {

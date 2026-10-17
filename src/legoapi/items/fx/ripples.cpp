@@ -54,7 +54,6 @@ static RIPPLEEFFECT_s *RE_rippleeffect;
 static WORLDINFO_s *RE_worldinfo;
 static ripple_node_s **eraselist;
 static i32 erasecount;
-
 static void RE_end_radius(NUFPAR *parser);
 static void RE_start_radius(NUFPAR *parser);
 static void RE_life(NUFPAR *parser);

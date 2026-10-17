@@ -34,7 +34,6 @@ i32 teleport_gizmotype_id = -1;
 
 static TELEPORT_s *Tel_teleport;
 static WORLDINFO_s *Tel_worldinfo;
-
 static void Tel_1_way(nufpar_s *);
 static void Tel_crawl(nufpar_s *);
 static void Tel_duration(nufpar_s *parser);

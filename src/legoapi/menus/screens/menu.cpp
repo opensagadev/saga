@@ -125,7 +125,6 @@ extern i16 tGAME;
 extern i16 tNOSPACE;
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern "C" void PlaySfx(char *, NUVEC *);
-
 static f32 newgamewait;
 static u32 buttons_store[15];
 // Initialised by the unit's static constructor; nothing in the retail binary reads it.

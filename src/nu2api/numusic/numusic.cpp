@@ -25,7 +25,6 @@
 #include "nu2api/nusound/nusound.h"
 
 extern NUFPCOMJMPCTX top_jmp_tab[11];
-
 extern NUFPCOMJMPCTX track_jmp_tab[15];
 
 // Globals driving GamePlayMusic. The original keeps these in the batman TU.

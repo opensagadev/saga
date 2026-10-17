@@ -114,7 +114,6 @@ static i32 goldbrickmsgcount;
 STATUS_STAGE_s *StatusStages;
 static i32 DrawGoldBrick_Stage;
 static i32 DrawGoldBrick_Phase;
-
 extern "C" TIMER BonusTimer;
 extern i16 tSUPERSTORYCOMPLETE, tNEWBESTTIME, tLEVELCOMPLETE, tMISSIONCOMPLETE;
 extern i16 tNONEWBESTTIME;
@@ -131,9 +130,7 @@ static inline bool StatusRumbleTargetsPlayer(i32 player, i32 index) {
 }
 
 extern i16 tTRUEJEDI, tSTORY, tFREEPLAY;
-
 extern "C" i32 reset_area;
-
 extern i16 tMAP, tRESTART, tFINISHSTORY, tCONTINUESTORY, tFINALCHAPTERLOCKED, tNEXTCHAPTERLOCKED;
 
 // Retail keeps the active-stage drawing as the split-out .part clone of
@@ -211,7 +208,6 @@ extern i16 tNONEWBESTTIME, tNEWBESTTIME;
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
-
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -255,12 +251,9 @@ struct AISYS_s;
 extern i16 tLEVELCOMPLETE, tFREEPLAYUNLOCKED, tSUPERSTORYCOMPLETE, tBONUSUNLOCKED;
 extern i16 tEPISODEVUNLOCKED, tEPISODEVIUNLOCKED, tCHALLENGECOMPLETE, tOUTOFTIME;
 extern i16 tYOUDIDNTCOLLECTALL10CANISTERS, tMISSIONCOMPLETE, tSTORYCLIPSUNLOCKED;
-
 extern i32 currentminikit, newminikitcount;
 extern i16 tMINIKIT;
-
 extern i16 tALLMINIKITSBUILT;
-
 extern NUCOLOUR3 panelcol[3], panelamb;
 
 #if defined(__i386__)

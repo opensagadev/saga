@@ -13,7 +13,6 @@
 i32 gizspecial_gizmotype_id = -1;
 
 static char gizSpec_prefix[] = "qaz_";
-
 static const i32 GIZSPECIAL_PROGRESS_WORD_COUNT = 8;
 
 struct GIZSPECIALPROGRESS {

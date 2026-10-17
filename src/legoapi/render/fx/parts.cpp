@@ -59,7 +59,6 @@ extern "C" {
 
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;
-
 static i32 PDEBCOUNT;
 static char **PDebNameList;
 

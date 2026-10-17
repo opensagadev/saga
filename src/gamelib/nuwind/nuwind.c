@@ -22,7 +22,6 @@ extern "C" {
     i32 NuWindDir2;
 
 extern "C++" NuWindGType *NuWindAllocateGrp();
-
 extern "C++" void NuWindFreeGrp(NuWindGType *group);
 
 void NuWindUpdateArray(NUVEC **positions);

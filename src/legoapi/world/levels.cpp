@@ -198,95 +198,50 @@ static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *, eduiitem_
 // Remaining animation-editor UI/menu callbacks.
 
 static __attribute__((used)) void edanimcbCancelSoundMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbMCTBCardPresent(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSetParticleRate(eduimenu_s *, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbSetParticleType(eduimenu_s *menu, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbToggleSoundType(eduimenu_s *menu, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbCancelBouncyMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbCancelSwitchMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbMCTBCardLoadSlot(eduimenu_s *menu, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbMCTBCardSaveSlot(eduimenu_s *menu, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbMCTBCardUnFormat(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbParticleTypeMenu(eduimenu_s *, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSetBouncyDamping(eduimenu_s *, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbSetBouncyTension(eduimenu_s *, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbLocalParticleMenu(eduimenu_s *, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbMCTBCardFreeSpace(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbMCTBCardSlotsUsed(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSetLocalSoundType(eduimenu_s *menu, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbCancelParticleMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbMCTBCardDeleteSlot(eduimenu_s *menu, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbCancelSoundTypeMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbMCTBCardCheckFormat(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSetBouncyPlayerGrav(eduimenu_s *, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbCancelLocalSoundMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbCancelSwitchTypeMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbMCTBCardCheckKeyCard(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbMCTBCardWriteKeyCard(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSetLocalParticleType(eduimenu_s *menu, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbToggleParticleSwitch(eduimenu_s *, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbLocalParticleTypeMenu(eduimenu_s *, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbCancelParticleTypeMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbCancelLocalParticleMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbCancelLocalSoundTypeMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbCancelLocalParticleTypeMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbBouncyMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSoundMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbParticleMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSwitchMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbLocalParticleMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSoundTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbLocalParticleTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbParticleTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
 // The original particle editor's private callbacks and menu state share this TU.
@@ -335,20 +290,13 @@ extern "C" {
     // menu, and interaction state in the original binary.
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
-
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
-
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
 static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
 static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
 static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
@@ -361,7 +309,6 @@ static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
 static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
 static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
@@ -405,7 +352,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 }
 
 static void eduiFntPrintExLeft(void *font, int x, int y, int, char *format, ...);
-
 static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ...);
 
 // Text-picker commit callbacks. Retail keeps them unmangled and local.
@@ -466,20 +412,13 @@ inline void EdBitControl::operator delete(void *memory) {
 
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
-
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
-
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
 static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
 static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
 static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
@@ -492,7 +431,6 @@ static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
 static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
 static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
@@ -1050,20 +988,13 @@ struct AISYS_s;
 
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
-
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
-
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
 static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
 static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
 static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
@@ -1076,7 +1007,6 @@ static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
 static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
 static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
@@ -1119,20 +1049,13 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
-
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
-
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
 static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
 static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
 static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
@@ -1145,7 +1068,6 @@ static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
 static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
 static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
@@ -1615,7 +1537,6 @@ extern "C" {
 // decompiled. Each stub matches the mangled symbol of the original binary.
 
 extern AIACTIONDEF api_aiactiondefs[55];
-
 extern AICONDITIONDEF api_aiconditiondefs[50];
 
 DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
@@ -1653,26 +1574,16 @@ static __used__ void pathEditor_cbCancelRenamePathMenu(eduimenu_s *, eduimenu_s 
 static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *, eduimenu_s *);
 static __used__ void pathEditor_cbCancelSelectMenu(eduimenu_s *, eduimenu_s *);
 static __used__ void pathEditor_cbSetCurrentPath(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ void pathEditor_cbSetCurrentPath(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void pathEditor_cbCancelSelectMenu(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void pathEditor_cbCancelRenamePathMenu(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void routeEditor_cbCancelRouteUsers(eduimenu_s *, eduimenu_s *);
 static __used__ void routeEditor_cbSetRouteUsers(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ __attribute__((optimize("peel-loops"))) void routeEditor_cbRenameRoute(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void routeEditor_cbCancelRenameRouteMenu(eduimenu_s *, eduimenu_s *);
-
 static __used__ void routeEditor_cbSetRouteUsers(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void routeEditor_cbCancelRouteUsers(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void routeEditor_cbCancelRenameRouteMenu(eduimenu_s *menu, eduimenu_s *);
 
 static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other) __asm__(
@@ -2150,78 +2061,44 @@ namespace {
 } // namespace
 
 static __used__ void LC_AL_backb(nufpar_s *fp);
-
 static __used__ void LC_AL_backb_bottom(nufpar_s *fp);
-
 static __used__ void LC_AL_backb_top(nufpar_s *fp);
-
 static __used__ void LC_AL_backg(nufpar_s *fp);
-
 static __used__ void LC_AL_backg_bottom(nufpar_s *fp);
-
 static __used__ void LC_AL_backg_top(nufpar_s *fp);
-
 static __used__ void LC_AL_backr(nufpar_s *fp);
-
 static __used__ void LC_AL_backr_bottom(nufpar_s *fp);
-
 static __used__ void LC_AL_backr_top(nufpar_s *fp);
-
 static __used__ void LC_AL_blobshadow_alpha(nufpar_s *fp);
-
 static __used__ void LC_AL_blobshadow_fadefar(nufpar_s *fp);
-
 static __used__ void LC_AL_blobshadow_fadenear(nufpar_s *fp);
-
 static __used__ void LC_AL_cam_tilt(nufpar_s *fp);
-
 static __used__ void LC_AL_camang_seek(nufpar_s *fp);
-
 static __used__ void LC_AL_campos_seek(nufpar_s *fp);
-
 static __used__ void LC_AL_conveyor(nufpar_s *fp);
-
 static __used__ void LC_AL_hover_height(nufpar_s *fp);
-
 static __used__ void LC_AL_plat_scan_dist(nufpar_s *fp);
-
 static __used__ void LC_AL_raycaststep(nufpar_s *fp);
-
 static __used__ void LC_AL_reflect_range(nufpar_s *fp);
-
 static __used__ void LC_AL_reflect_y(nufpar_s *fp);
-
 static __used__ void LC_AL_sfx_ambient(nufpar_s *fp);
-
 static __used__ void LC_AL_waterripple_endcol_a(nufpar_s *fp);
-
 static __used__ void LC_AL_waterripple_endcol_b(nufpar_s *fp);
-
 static __used__ void LC_AL_waterripple_endcol_g(nufpar_s *fp);
-
 static __used__ void LC_AL_waterripple_endcol_r(nufpar_s *fp);
-
 static __used__ void LC_AL_waterripple_life(nufpar_s *fp);
-
 static __used__ void LC_AL_waterripple_startcol_a(nufpar_s *fp);
-
 static __used__ void LC_AL_waterripple_startcol_b(nufpar_s *fp);
-
 static __used__ void LC_AL_waterripple_startcol_g(nufpar_s *fp);
-
 static __used__ void LC_AL_waterripple_startcol_r(nufpar_s *fp);
-
 static __used__ void LC_BL_max_ter_groups(nufpar_s *fp);
-
 static __used__ void LC_BL_max_ter_platforms(nufpar_s *fp);
-
 static __used__ void LC_BL_mipmapmode(nufpar_s *fp);
 
 // Game-specific pre-load limits. These must be applied before WorldInfo
 // reserves each level's fixed-size gameplay systems.
 
 static u8 load_conditionParam;
-
 static __used__ void LC_AL_metal(nufpar_s *fp);
 static __used__ void LC_AL_music(nufpar_s *fp);
 static __used__ void LC_AL_music_other(nufpar_s *fp);
@@ -2333,7 +2210,6 @@ extern char ConfigBuffer[65536];
 // --- World-module helpers (kept with the WorldInfo API) ---
 
 extern WORLDINFO WorldInfo[2];
-
 extern "C++" volatile i32 abort_load;
 
 struct bgprocinfo_s;
@@ -2516,20 +2392,13 @@ namespace {
 
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
-
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
-
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
 static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
 static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
 static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
@@ -2542,7 +2411,6 @@ static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
 static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
 static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
@@ -2585,20 +2453,13 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
-
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
-
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
 static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
 static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
 static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
@@ -2611,7 +2472,6 @@ static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
 static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
 static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
@@ -2956,20 +2816,13 @@ namespace {
 
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
-
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
-
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
 static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
 static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
 static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
@@ -2982,7 +2835,6 @@ static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
 static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
 static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
@@ -3025,20 +2877,13 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
-
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
-
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
 static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
 static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
 static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
@@ -3051,7 +2896,6 @@ static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
 static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
 static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
@@ -3468,7 +3312,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 LEVELSPLINE *LevSplList;
 static i32 levspl_i_start = -1;
 static i32 levspl_i_startcam = -1;
-
 static i32 LEVELOBJECTMAX;
 static char *ExtraLevelObject_NameTable;
 static i32 ExtraLevelObject_NameTableSize;
@@ -3623,20 +3466,13 @@ namespace {
 
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
-
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
-
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
 static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
 static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
 static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
@@ -3649,7 +3485,6 @@ static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
 static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
 static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
@@ -3692,20 +3527,13 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
-
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
-
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
 static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
 static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
 static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
@@ -3718,7 +3546,6 @@ static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
 static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
 static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
@@ -4063,20 +3890,13 @@ namespace {
 
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
-
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
-
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
 static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
 static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
 static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
@@ -4089,7 +3909,6 @@ static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
 static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
 static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
@@ -4132,20 +3951,13 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
-
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
-
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
 static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
 static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
 static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
@@ -4158,7 +3970,6 @@ static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
 static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
 static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);

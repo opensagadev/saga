@@ -697,7 +697,6 @@ static bool JediHasAction(const GameObject_s *object, JEDI_ACTION action) {
 static i32 ComboOpponent_Behind;
 static f32 ComboOpponent_Range2;
 static f32 PlayerOpponent_Range2;
-
 static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, i32 mode);
 
 static inline i32 ComboJump(GameObject_s *object) {
@@ -890,9 +889,7 @@ static AWKWARDSHAPESPHERE_s AwkwardShapeSphere[] = {
 };
 
 extern i16 id_MINIATST, id_MINIATTE;
-
 extern i16 id_SKELETON;
-
 static NUVEC poopos[2];
 
 // Retail uses translation-unit-local helpers with compiler-inferred private
@@ -1178,7 +1175,6 @@ extern "C" void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from, 
 // decompiled. Each stub matches the mangled symbol of the original binary.
 
 extern AIACTIONDEF api_aiactiondefs[55];
-
 extern AICONDITIONDEF api_aiconditiondefs[50];
 
 DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
@@ -1224,26 +1220,16 @@ static __used__ void pathEditor_cbCancelRenamePathMenu(eduimenu_s *, eduimenu_s 
 static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *, eduimenu_s *);
 static __used__ void pathEditor_cbCancelSelectMenu(eduimenu_s *, eduimenu_s *);
 static __used__ void pathEditor_cbSetCurrentPath(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ void pathEditor_cbSetCurrentPath(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void pathEditor_cbCancelSelectMenu(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void pathEditor_cbCancelRenamePathMenu(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void routeEditor_cbCancelRouteUsers(eduimenu_s *, eduimenu_s *);
 static __used__ void routeEditor_cbSetRouteUsers(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ __attribute__((optimize("peel-loops"))) void routeEditor_cbRenameRoute(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void routeEditor_cbCancelRenameRouteMenu(eduimenu_s *, eduimenu_s *);
-
 static __used__ void routeEditor_cbSetRouteUsers(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void routeEditor_cbCancelRouteUsers(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void routeEditor_cbCancelRenameRouteMenu(eduimenu_s *menu, eduimenu_s *);
 
 static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other) __asm__(
@@ -1417,7 +1403,6 @@ struct VuVec;
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
-
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -1583,7 +1568,6 @@ static inline void RotateForceGlowMatrix(NUMTX *matrix, i32 angle) {
 // Shared gameplay helpers
 
 extern BATARANG_s Batarang[8];
-
 extern i32 (*BlowupExFunc)(GIZMOBLOWUP_s *, i32);
 extern void (*GizmoBlowUp_SfxFn)(GIZMOBLOWUP_s *, NUVEC *);
 extern i32 (*GizmoBlowUp_NoTargetFn)(WORLDINFO_s *, GameObject_s *);

@@ -66,11 +66,9 @@ typedef void (*HUBCALLBACK)(WORLDINFO_s *);
 
 extern "C" void InitFn_PreparingForSpecialMove(PREPARINGSPECIALMOVEFN);
 extern "C" void InitFn_MidSpecialMove(MIDSPECIALMOVEFN);
-
 extern HUBCALLBACK Hub_InitAIFn;
 extern HUBCALLBACK Hub_ResetAIFn;
 extern HUBCALLBACK Hub_UpdateAIFn;
-
 extern "C" i16 id_SNAKE;
 
 enum STARWARS_AI_CAPABILITY : u32 {
@@ -91,13 +89,9 @@ enum STARWARS_AI_CAPABILITY : u32 {
 };
 
 static i32 StarWars_PrepareTakeOverJump(AIPACKET_s *packet, APIOBJECT_s *object, i32);
-
 static i32 StarWars_PrepareObstacle(AIPACKET_s *packet, APIOBJECT_s *object, i32);
-
 static __used__ i32 StarWars_PrepareHoverTube(AIPACKET_s *packet, APIOBJECT_s *apiobject, i32);
-
 static i32 StarWars_PrepareBigJump(AIPACKET_s *packet, APIOBJECT_s *object, i32);
-
 static i32 StarWars_PrepareHatch(AIPACKET_s *packet, APIOBJECT_s *object, i32);
 
 struct STARWARS_PREPARE_SPECIAL_MOVE {
@@ -115,13 +109,9 @@ STARWARS_PREPARE_SPECIAL_MOVE starwars_prepareforspecialmove[] = {
 };
 
 static i32 StarWars_MidSpecialMove_BigJump(AISYS_s *, AIPACKET_s *, APIOBJECT_s *object);
-
 static i32 StarWars_MidSpecialMove_UseHatch(AISYS_s *, AIPACKET_s *, APIOBJECT_s *object);
-
 static i32 StarWars_MidSpecialMove_StartJump(AISYS_s *, AIPACKET_s *, APIOBJECT_s *object);
-
 extern TERRSET *CurTerr;
-
 static i32 StarWars_MidSpecialMove_Default(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object);
 
 MIDSPECIALMOVEFN starwars_midspecialmovefns[] = {
@@ -203,7 +193,6 @@ struct VuVec;
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
-
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \

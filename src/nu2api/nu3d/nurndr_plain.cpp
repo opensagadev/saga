@@ -43,7 +43,6 @@ using NUGSCNVIDEOMEMFN = void (*)(NUGSCN *);
 
 extern NUGSCNVIDEOMEMFN gscene_to_video_mem;
 extern NUGSCNVIDEOMEMFN video_mem_to_gscene;
-
 extern "C" void NuGScnFromVideoMem(NUGSCNVIDEOMEMFN callback);
 class NuDynamicLight;
 extern "C" {
@@ -79,13 +78,9 @@ static void NuMtlSetRenderStatesPS(void) {
 // Debug / visualisation geometry
 static inline void NuRndrPrimSetColour(i32 colour);
 static inline void NuRndrPrimUV(f32 u, f32 v);
-
 static inline void NuRndrPrimSetColour(i32 colour);
-
 static inline void NuRndrPrimSetColour(i32 colour);
-
 static inline void NuRndrPrimSetColour(i32 colour);
-
 static inline void NuRndrPrimSetColour(i32 colour);
 static inline void NuRndrPrimUV(f32 u, f32 v);
 extern "C" __attribute__((force_align_arg_pointer)) i32 NuRndrCircle(f32 x, f32 y, f32 radius, f32 aspect, i32 count, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour,

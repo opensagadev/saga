@@ -151,9 +151,7 @@ DECOMP_ASSERT(offsetof(BIKEPART_s, active) == 0x20, "BIKEPART active offset");
 DECOMP_ASSERT(offsetof(BIKEPART_s, rider) == 0x24, "BIKEPART rider offset");
 DECOMP_ASSERT(offsetof(BIKEPART_s, rider_position) == 0x28, "BIKEPART rider position offset");
 static BIKEPART_s bikeParts[8];
-
 static void SpeederPart_Kill(PART_s *, i32);
-
 static i32 lastrandkillmode;
 
 static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) {

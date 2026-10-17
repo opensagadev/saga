@@ -169,17 +169,11 @@ static __attribute__((noinline, noclone)) void DrawHint_LSWBody(HINT_s *hint, i3
 
 // Original local callbacks referenced by Hints_LSW.
 extern u8 show_lever_hint;
-
 static __used__ i32 Jump_UpdateHint(HINT_s *hint);
-
 static __used__ i32 Move_UpdateHint(HINT_s *hint);
-
 static __used__ i32 Lever_UpdateHint(HINT_s *);
-
 static __used__ i32 AutoJump_UpdateHint(HINT_s *hint);
-
 static __used__ i32 VehicleStuff_UpdateHint(HINT_s *hint);
-
 static __used__ i32 HoldTag_UpdateHint(HINT_s *);
 
 u8 show_hatmachine_hint;
@@ -191,11 +185,8 @@ i32 id_HINT_LSW_AUTOJUMP = -1;
 i32 id_HINT_LSW_AUTOJUMP_FAIL = -1;
 
 static __used__ i32 Sith_UpdateHint(HINT_s *);
-
 static __used__ void PlayerButton_PlayHint(HINT_s *);
-
 static __used__ i32 UnlockHubStuff_UpdateHint(HINT_s *hint);
-
 static __used__ i32 PlayerButton_UpdateHint(HINT_s *hint);
 
 i32 GizForce_UpdateHint(HINT_s *);

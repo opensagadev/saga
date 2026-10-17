@@ -13,7 +13,6 @@
 #include "legoapi/actions/character/specialmoves_types.h"
 static SPECIALMOVE_s *SpecialMove;
 static i32 SpecialMoveCount;
-
 extern i32 objhitobj_throwkillpartsup;
 
 i32 SpecialMove_Check(GameObject_s *attacker, GameObject_s *victim) {

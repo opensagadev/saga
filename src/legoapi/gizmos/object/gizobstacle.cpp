@@ -67,7 +67,6 @@ namespace {
 } // namespace
 
 static void Gizobstacle_ReadAnimSetData(GAMEANIMOBJ_s *object, unsigned char version);
-
 static NUVEC *gizobstacletriggers[16];
 static i32 ngizobstacletriggers;
 

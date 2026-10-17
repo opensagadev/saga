@@ -45,7 +45,6 @@ extern i16 tOUTOFTIME;
 extern "C" TIMER BonusTimer;
 extern void SetBonusWinner(i32);
 extern GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
-
 static f32 MissionsAlpha;
 static i32 hub_mission;
 static f32 MissionIconScale[20];

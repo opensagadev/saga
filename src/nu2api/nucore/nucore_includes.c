@@ -78,11 +78,8 @@ usize implode_origsize;
 usize implode_compsize;
 
 static i32 bytes_to_copy;
-
 static void decode_start();
-
 static void decode(u32 size, unsigned char *buf);
-
 static unsigned char buffer[0x2000];
 
 static u32 getmasktbl[5] = {0, 0xff, 0xffff, 0xffffff, 0xffffffff};
@@ -109,10 +106,8 @@ static u32 getmasktbl[5] = {0, 0xff, 0xffff, 0xffffff, 0xffffffff};
     })
 
 static u32 blocksize;
-
 static u16 offset_table[0x100];
 static u8 offset_len[0x13];
-
 static u16 literal_table[0x1000];
 static u8 literal_len[0x1fe];
 
@@ -135,9 +130,7 @@ static u16 *freq;
 static u16 *sortptr;
 static u16 len_cnt[17];
 static unsigned char *len;
-
 static NUMEMALLOCATION *alloc_list;
-
 static NUMEMEXTERNAL *memexternal;
 static NUMEMEXTERNAL memext;
 static NUMEMDISCARDABLE *discardbuff;
@@ -258,7 +251,6 @@ union NUPPADDR {
 
 static FILEEXTINFO extensions[64];
 static i32 num_extensions;
-
 static void NuFileExtInit(void);
 
 char *iop_image_name = "ioprp300.img";
@@ -304,10 +296,8 @@ static NUFILEPAK_ERROR fpk_err;
 
 static NUFPAR _fpars[PARSER_COUNT];
 static char _fparbuffers[PARSER_COUNT * PARSER_BUF_SIZE];
-
 static NUFPAR *fpars;
 static char *fparbuffers;
-
 static i32 old_line_pos;
 
 #define CLAMP_LINE(pos) pos &(parser->line_buf_size - 1)
@@ -361,7 +351,6 @@ static u16 bad_fluff[] = {'!', 0xffa3, '$', '%', '^', '&', '*', '(', ')', '_', '
                           '{', '}',    '[', ']', '@', '~', '#', '?', '<', '>', ',', '.', ' '};
 static NUWCHAR **BadWords;
 static i32 NumBadWords;
-
 static u32 frameStartTime;
 
 // Nucore bootstrap helpers; display-list and framebuffer initialization are

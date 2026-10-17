@@ -173,7 +173,6 @@ i32 picked = 1;
 i32 subpicked = 0;
 i32 subitemselected = 0;
 static void (*drawptr)() = NULL;
-
 static f32 scale2 = 0.0f;
 static f32 scalenorm;
 static f32 scalepicked;
@@ -316,7 +315,6 @@ struct VuVec;
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
-
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -332,7 +330,6 @@ extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
     } while (false)
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
-
 extern i16 id_GAMORREANGUARD;
 
 extern "C" {

@@ -67,7 +67,6 @@ static NUVEC SpeederChaseATATExitLandPos = {-159.0f, 6.869999885559082f, -17.600
 extern i16 id_BUGGY, id_GYROCOPTER, id_BOMARRMONK;
 extern i16 id_LANDSPEEDER;
 extern i16 id_HEAVYREPEATINGCANNON, id_TROOPERCANNON;
-
 extern GameObject_s *player_tag_to;
 extern GameObject_s *player_tag_from;
 static i32 Tag_Mode = 2;

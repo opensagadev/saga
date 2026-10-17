@@ -96,7 +96,6 @@ extern f32 TimerScale, TimerAlpha;
 extern nuhspecial_s disco_on_spin[3], walllights_disco[2], walllights[2], striplights[2], discolights[2],
     discorm_wall_off, discorm_wall_on;
 extern GIZMO *disco_off_spina[3], *gizTurrets[2];
-
 extern struct GUNSHIP_LEVFLAG_s LevFlag;
 
 // --- Cross-file entry points / id globals ---
@@ -144,7 +143,6 @@ nuhspecial_s disco_on_spin[3];
 GIZMO *disco_off_spina[3];
 
 static DOOKU_C_s dooku_c;
-
 static KAMINO_E_s kamino_e;
 
 // Kamino
@@ -316,7 +314,6 @@ struct VuVec;
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
-
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \

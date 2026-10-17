@@ -156,7 +156,6 @@ static struct {
 // Sniper turrets (shared by PodRace C and PodSprint A)
 
 static __used__ void PodRaceSnipersUpdate(void);
-
 static __used__ void PodRaceSnipersReset(void);
 
 // PodSprint_InitAISpline is partially inlined into PodSprintA_Init: the

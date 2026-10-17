@@ -98,7 +98,6 @@ static __used__ void SockParTurnOff(nufpar_s *, void *);
 static __used__ void SockParName(nufpar_s *parser, void *);
 static __used__ void SockParObj(nufpar_s *parser, void *);
 static __used__ void SockParBlend(nufpar_s *parser, void *);
-
 static __used__ void SockCamATSTLIFT(nufpar_s *parser, void *);
 static __used__ void SockCamATSTDIST(nufpar_s *parser, void *);
 static __used__ void SockCamATSTCAMRANGE(nufpar_s *parser, void *);
@@ -185,7 +184,6 @@ static const char *tSockLOOK = "sock_look_";
 static const char *tSockLATERAL = "sock_lateral_";
 static const char *tSockTRACKIN = "sock_trackin_";
 static const char *tSockLIMIT = "sock_limit_";
-
 static __used__ void SockDataError();
 
 SOCKPOSITION TempSPosList[4];

@@ -104,87 +104,46 @@
 #include "legoapi/render/light/surfaces.h"
 
 static void CC_CharClipToBlobShadows(NUFPAR *parser);
-
 static void CC_already_got_hat(NUFPAR *parser);
-
 static void CC_always_stop_to_shoot(NUFPAR *parser);
-
 static void CC_atatheadmovement(NUFPAR *parser);
-
 static void CC_backwards_factor(NUFPAR *parser);
-
 static void CC_baddie(NUFPAR *parser);
-
 static void CC_beast(NUFPAR *parser);
-
 static void CC_blobshadow_alpha(NUFPAR *parser);
-
 static void CC_blobshadow_size(NUFPAR *parser);
-
 static void CC_bypass_security(NUFPAR *parser);
-
 static void CC_can_communicate(NUFPAR *parser);
-
 static void CC_can_drag_bombs(NUFPAR *parser);
-
 static void CC_can_open_doors(NUFPAR *parser);
-
 static void CC_can_shoot_offscreen(NUFPAR *parser);
-
 static void CC_cannon(NUFPAR *parser);
-
 static void CC_cape_layer_index(NUFPAR *parser);
-
 static void CC_choke(NUFPAR *parser);
-
 static void CC_clear_sfx_misc(NUFPAR *parser);
-
 static void CC_cloak_down_angle(NUFPAR *parser);
-
 static void CC_cloak_up_angle(NUFPAR *parser);
-
 static void CC_collision_locator(NUFPAR *parser);
-
 static void CC_complex_shadow(NUFPAR *parser);
-
 static void CC_deflect_bolts_in_minikit_bonus(NUFPAR *parser);
-
 static void CC_die_usecurrentlayers(NUFPAR *parser);
-
 static void CC_dont_draw_rider(NUFPAR *parser);
-
 static void CC_dont_move_out_of_way(NUFPAR *parser);
-
 static void CC_double_jump_hover(NUFPAR *parser);
-
 static void CC_droid(NUFPAR *parser);
-
 static void CC_extra_character_locator(NUFPAR *parser);
-
 static void CC_ghost(NUFPAR *parser);
-
 static void CC_grapple_locator(NUFPAR *parser);
-
 static void CC_hair_layer_index(NUFPAR *parser);
-
 static void CC_has_scene_element(NUFPAR *parser);
-
 static void CC_hazard_protection(NUFPAR *parser);
-
 static void CC_helmet_locator(NUFPAR *parser);
-
 static void CC_hover_over_mud(NUFPAR *parser);
-
 static void CC_icon(NUFPAR *parser);
-
 static void CC_immune_to_forcepush(NUFPAR *parser);
-
 static void CC_immune_to_magnets(NUFPAR *parser);
-
 static void CC_jedi(NUFPAR *parser);
-
 static void CC_jump_move_speed_scale(NUFPAR *parser);
-
 static void CC_layer(NUFPAR *parser);
 
 // Retail lays the named-layer loop out first with the numeric loop and the
@@ -214,127 +173,66 @@ static inline __attribute__((always_inline)) i32 ParseLayerMask(NUFPAR *parser, 
 }
 
 static void CC_layers_special(NUFPAR *parser);
-
 static void CC_lowres_swapdist(NUFPAR *parser);
-
 static void CC_mass(NUFPAR *parser);
-
 static void CC_max_viewheight(NUFPAR *parser);
-
 static void CC_maxy(NUFPAR *parser);
-
 static void CC_mediumres_swapdist(NUFPAR *parser);
-
 static void CC_min_viewheight(NUFPAR *parser);
-
 static void CC_minikit_noscenewhenplayable(NUFPAR *parser);
-
 static void CC_minikit_with_scene(NUFPAR *parser);
-
 static void CC_miny(NUFPAR *parser);
-
 static void CC_no_offpath_teleport(NUFPAR *parser);
-
 static void CC_no_start_punch_sfx(NUFPAR *parser);
-
 static void CC_no_weapon_draw(NUFPAR *parser);
-
 static void CC_oldheadmovement(NUFPAR *parser);
-
 static void CC_only_active_when_taken_over(NUFPAR *parser);
-
 static void CC_prefers_brawling(NUFPAR *parser);
-
 static void CC_punch_weapon_out(NUFPAR *parser);
-
 static void CC_put_weapon_away_on_shoot(NUFPAR *parser);
-
 static void CC_radius(NUFPAR *parser);
-
 static void CC_ride_layersoff(NUFPAR *parser);
-
 static void CC_rocket_locator(NUFPAR *parser);
-
 static void CC_scale(NUFPAR *parser);
-
 static void CC_second_shot_only(NUFPAR *parser);
-
 static void CC_set_timebaseupdate1(NUFPAR *parser);
-
 static void CC_set_timebaseupdate2(NUFPAR *parser);
-
 static void CC_set_timebaseupdate3(NUFPAR *parser);
-
 static void CC_set_timebaseupdate4(NUFPAR *parser);
-
 static void CC_shadow_locators(NUFPAR *parser);
-
 static void CC_shadow_orientation(NUFPAR *parser);
-
 static void CC_shield_hit_points(NUFPAR *parser);
-
 static void CC_shield_locator(NUFPAR *parser);
-
 static void CC_single_jump_slam(NUFPAR *parser);
-
 static void CC_slide_orientation(NUFPAR *parser);
-
 static void CC_slow_down_time(NUFPAR *parser);
-
 static void CC_streak(NUFPAR *parser);
-
 static void CC_streak_1_locators(NUFPAR *parser);
-
 static void CC_streak_2_locators(NUFPAR *parser);
-
 static void CC_streak_3_locators(NUFPAR *parser);
-
 static void CC_streak_4_locators(NUFPAR *parser);
-
 static void CC_super_strength(NUFPAR *parser);
-
 static void CC_thingy_locator(NUFPAR *parser);
-
 static void CC_thrust_locators(NUFPAR *parser);
-
 static void CC_tightrope_tilt(NUFPAR *parser);
-
 static void CC_tightrope_walk(NUFPAR *parser);
-
 static void CC_toggle_if_in_minikit_bonus(NUFPAR *parser);
-
 static void CC_toggle_if_not_in_collection(NUFPAR *parser);
-
 static void CC_transformatron(NUFPAR *parser);
-
 static void CC_turning_circle(NUFPAR *parser);
-
 static void CC_wait_for_weapon_in_out(NUFPAR *parser);
-
 static void CC_weapon(NUFPAR *parser);
-
 static void CC_weapon_locator_1(NUFPAR *parser);
-
 static void CC_weapon_locator_2(NUFPAR *parser);
-
 static void CC_weapon_locator_3(NUFPAR *parser);
-
 static void CC_weapon_locator_4(NUFPAR *parser);
-
 static void CC_weapon_shoot_locator_1(NUFPAR *parser);
-
 static void CC_weapon_shoot_locator_2(NUFPAR *parser);
-
 static void CC_weapon_shoot_locator_3(NUFPAR *parser);
-
 static void CC_weapon_shoot_locator_4(NUFPAR *parser);
-
 static void CC_white_lightning(NUFPAR *parser);
-
 static void CC_zipup(NUFPAR *parser);
-
 static void CC_acceleration(NUFPAR *parser);
-
 static void CC_air_gravity(NUFPAR *parser);
 
 // Retail keeps only the IPA-SRA clones (taking the flags field directly),
@@ -374,199 +272,102 @@ static inline void CC_SetAnimMiscFlags(NUFPAR *parser, CHARACTERANIM_s *animatio
 }
 
 static void CC_anim_start(NUFPAR *parser);
-
 static void CC_astromech(NUFPAR *parser);
-
 static void CC_banking(NUFPAR *parser);
-
 static void CC_blaster(NUFPAR *parser);
-
 static void CC_bounty_hunter(NUFPAR *parser);
-
 static void CC_bsa_default(NUFPAR *parser);
-
 static void CC_buck_rider(NUFPAR *parser);
-
 static void CC_can_fire(NUFPAR *parser);
-
 static void CC_can_flatten(NUFPAR *parser);
-
 static void CC_cannotbigjump(NUFPAR *parser);
-
 static void CC_cannot_kill(NUFPAR *parser);
-
 static void CC_can_poo(NUFPAR *parser);
-
 static void CC_can_take_over(NUFPAR *parser);
-
 static void CC_can_zap(NUFPAR *parser);
-
 static void CC_cape_layer(NUFPAR *parser);
-
 static void CC_car_wheels(NUFPAR *parser);
-
 static void CC_chatter_delay(NUFPAR *parser);
-
 static void CC_cloak_joint(NUFPAR *parser);
-
 static void CC_cloak_joint2(NUFPAR *parser);
-
 static void CC_coin_value(NUFPAR *parser);
-
 static void CC_combat_roll(NUFPAR *parser);
-
 static void CC_dontmove(NUFPAR *parser);
-
 static void CC_dontpush(NUFPAR *parser);
-
 static void CC_dont_turn(NUFPAR *parser);
-
 static void CC_extra_toggle(NUFPAR *parser);
-
 static void CC_fixed_layers(NUFPAR *parser);
-
 static void CC_glide_anytime(NUFPAR *parser);
-
 static void CC_got_batarang(NUFPAR *parser);
-
 static void CC_hair_layer(NUFPAR *parser);
-
 static void CC_hand_locators(NUFPAR *parser);
-
 static void CC_has_grapple(NUFPAR *parser);
-
 static void CC_has_no_turn(NUFPAR *parser);
-
 static void CC_has_whip(NUFPAR *parser);
-
 static void CC_head_joint(NUFPAR *parser);
-
 static void CC_head_locator(NUFPAR *parser);
-
 static void CC_headrotrate(NUFPAR *parser);
-
 static void CC_heardistance(NUFPAR *parser);
-
 static void CC_high_jump(NUFPAR *parser);
-
 static void CC_hit_points(NUFPAR *parser);
-
 static void CC_hover_height(NUFPAR *parser);
-
 static void CC_hover_time(NUFPAR *parser);
-
 static void CC_hover_wings(NUFPAR *parser);
-
 static void CC_idle_speed(NUFPAR *parser);
-
 static void CC_is_a_boy(NUFPAR *parser);
-
 static void CC_is_a_girl(NUFPAR *parser);
-
 static void CC_jetpack(NUFPAR *parser);
-
 static void CC_jump_2_speed(NUFPAR *parser);
-
 static void CC_jump_speed(NUFPAR *parser);
-
 static void CC_layers_dead(NUFPAR *parser);
-
 static void CC_layers_high(NUFPAR *parser);
-
 static void CC_layers_low(NUFPAR *parser);
-
 static void CC_layers_medium(NUFPAR *parser);
-
 static void CC_lift_hover(NUFPAR *parser);
-
 static void CC_lightning(NUFPAR *parser);
-
 static void CC_loop_height(NUFPAR *parser);
-
 static void CC_maxheadtilt(NUFPAR *parser);
-
 static void CC_maxheadturn(NUFPAR *parser);
-
 static void CC_minikit(NUFPAR *parser);
-
 static void CC_name_id(NUFPAR *parser);
-
 static void CC_neutral(NUFPAR *parser);
-
 static void CC_no_category(NUFPAR *parser);
-
 static void CC_no_force(NUFPAR *parser);
-
 static void CC_no_jump(NUFPAR *parser);
-
 static void CC_no_jump_fire(NUFPAR *parser);
-
 static void CC_no_kill_parts(NUFPAR *parser);
-
 static void CC_non_stick(NUFPAR *parser);
-
 static void CC_no_shoot(NUFPAR *parser);
-
 static void CC_not_got_hat(NUFPAR *parser);
-
 static void CC_no_tiptoe(NUFPAR *parser);
-
 static void CC_orientate(NUFPAR *parser);
-
 static void CC_place_locator(NUFPAR *parser);
-
 static void CC_poo_locator(NUFPAR *parser);
-
 static void CC_protocol(NUFPAR *parser);
-
 static void CC_resist_zap(NUFPAR *parser);
-
 static void CC_respawn(NUFPAR *parser);
-
 static void CC_ride_locator(NUFPAR *parser);
-
 static void CC_run_speed(NUFPAR *parser);
-
 static void CC_sfx_chatter(NUFPAR *parser);
-
 static void CC_sfx_die(NUFPAR *parser);
-
 static void CC_sfx_engine(NUFPAR *parser);
-
 static void CC_sfx_footstep(NUFPAR *parser);
-
 static void CC_sfx_grunt(NUFPAR *parser);
-
 static void CC_sfx_hurt(NUFPAR *parser);
-
 static void CC_sfx_misc(NUFPAR *parser);
-
 static void CC_sfx_sabre(NUFPAR *parser);
-
 static void CC_sfx_shoot(NUFPAR *parser);
-
 static void CC_speed_up_time(NUFPAR *parser);
-
 static void CC_stop_speed(NUFPAR *parser);
-
 static void CC_teleport(NUFPAR *parser);
-
 static void CC_throw_locator(NUFPAR *parser);
-
 static void CC_tiptoe_speed(NUFPAR *parser);
-
 static void CC_turn_rate(NUFPAR *parser);
-
 static void CC_turn_rate_2(NUFPAR *parser);
-
 static void CC_untargetable(NUFPAR *parser);
-
 static void CC_vehicle(NUFPAR *parser);
-
 static void CC_viewrange(NUFPAR *parser);
-
 static void CC_walk_speed(NUFPAR *parser);
-
 static void CC_wall_jump(NUFPAR *parser);
 
 static NUFPCOMJMP ConfigChar_Keywords[] = {
@@ -924,95 +725,50 @@ static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *, eduiitem_
 // Remaining animation-editor UI/menu callbacks.
 
 static __attribute__((used)) void edanimcbCancelSoundMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbMCTBCardPresent(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSetParticleRate(eduimenu_s *, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbSetParticleType(eduimenu_s *menu, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbToggleSoundType(eduimenu_s *menu, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbCancelBouncyMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbCancelSwitchMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbMCTBCardLoadSlot(eduimenu_s *menu, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbMCTBCardSaveSlot(eduimenu_s *menu, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbMCTBCardUnFormat(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbParticleTypeMenu(eduimenu_s *, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSetBouncyDamping(eduimenu_s *, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbSetBouncyTension(eduimenu_s *, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbLocalParticleMenu(eduimenu_s *, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbMCTBCardFreeSpace(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbMCTBCardSlotsUsed(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSetLocalSoundType(eduimenu_s *menu, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbCancelParticleMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbMCTBCardDeleteSlot(eduimenu_s *menu, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbCancelSoundTypeMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbMCTBCardCheckFormat(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSetBouncyPlayerGrav(eduimenu_s *, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbCancelLocalSoundMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbCancelSwitchTypeMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbMCTBCardCheckKeyCard(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbMCTBCardWriteKeyCard(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSetLocalParticleType(eduimenu_s *menu, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbToggleParticleSwitch(eduimenu_s *, eduiitem_s *item, u32);
-
 static __attribute__((used)) void edanimcbLocalParticleTypeMenu(eduimenu_s *, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbCancelParticleTypeMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbCancelLocalParticleMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbCancelLocalSoundTypeMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbCancelLocalParticleTypeMenu(eduimenu_s *, eduimenu_s *);
-
 static __attribute__((used)) void edanimcbBouncyMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSoundMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbParticleMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSwitchMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbLocalParticleMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSoundTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbLocalParticleTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbParticleTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
 // The original particle editor's private callbacks and menu state share this TU.
@@ -1061,20 +817,13 @@ extern "C" {
     // menu, and interaction state in the original binary.
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
-
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
-
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
 static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
 static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
 static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
@@ -1087,7 +836,6 @@ static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
 static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
 static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
@@ -1131,7 +879,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 }
 
 static void eduiFntPrintExLeft(void *font, int x, int y, int, char *format, ...);
-
 static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ...);
 
 // Text-picker commit callbacks. Retail keeps them unmangled and local.
@@ -1192,20 +939,13 @@ inline void EdBitControl::operator delete(void *memory) {
 
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
-
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
-
 static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
-
 static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
-
 static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
 static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
-
 static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
 static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
 static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
@@ -1218,7 +958,6 @@ static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
 static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
 static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
 static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
 static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);

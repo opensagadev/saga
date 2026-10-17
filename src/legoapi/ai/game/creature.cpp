@@ -269,7 +269,6 @@ static inline void ShopRotateZ(NUMTX *m, NUANG a) {
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
-
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 u8 CharClipToBlobShadows;
@@ -642,7 +641,6 @@ struct CUTSCENEPLAYERCLIP;
 #endif
 
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
-
 extern i16 id_ANAKINJEDISCARRED;
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).

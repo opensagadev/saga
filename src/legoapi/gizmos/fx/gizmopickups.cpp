@@ -188,27 +188,16 @@ extern "C" {
 // local `t` symbols matching res/libTTapp.so.
 
 static __used__ void PartImpact_Coin(PART_s *part);
-
 static __used__ void PartStolen_Coin(PART_s *part);
-
 static __used__ void PartExtra_BlueCoin(PART_s *part);
-
 static __used__ void PartExtra_PurpleCoin(PART_s *part);
-
 static __used__ i32 PowerUp_DrawPart(PART_s *part);
-
 static __used__ void PowerUp_ImpactPart(PART_s *part);
-
 static __used__ void PowerUp_UpdatePart(PART_s *part);
-
 static __used__ void PowerUp_EndMsg(GAMEMESSAGE_s *message);
-
 static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *message);
-
 static __used__ i32 PartDraw_VehicleHeart(PART_s *part);
-
 static __used__ void PartMove_VehicleHeart(PART_s *part, f32);
-
 static __used__ void PartMove_VehiclePickup(PART_s *part, f32);
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.

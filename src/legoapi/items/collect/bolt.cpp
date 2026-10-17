@@ -61,9 +61,7 @@ static __attribute__((noinline, noclone)) i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit
 // correcting this declaration lowers its match.
 
 static __used__ void UpdateBolt_Geonosian(BOLT_s *bolt);
-
 static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt);
-
 extern void (*FS_Callback)(char *, char *);
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;

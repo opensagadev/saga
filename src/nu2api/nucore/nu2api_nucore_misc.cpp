@@ -25,7 +25,6 @@
 
 struct TERRSET;
 extern TERRSET *CurTerr;
-
 extern "C" void BeginCriticalSectionGL(const char *, i32);
 extern "C" void EndCriticalSectionGL(const char *, i32);
 extern i32 bgProcIsBgThread(void);
@@ -33,7 +32,6 @@ struct MemoryManager;
 extern MemoryManager theMemoryManager;
 extern "C" void *MemoryManagerAllocPool(MemoryManager *, u32, i32) asm("_ZN13MemoryManager9AllocPoolEji");
 extern "C" void MemoryManagerFreePool(MemoryManager *, void *, u32) asm("_ZN13MemoryManager8FreePoolEPvj");
-
 extern nurenderscene_s currentScene;
 extern HashRedirect g_shaderProgramRedirects[417];
 

@@ -143,9 +143,7 @@ i32 currentminikit;
 
 extern i32 STATUS_R, STATUS_G, STATUS_B;
 extern i16 tUNLOCKED;
-
 extern i16 tTRUEJEDI, tSTORY, tFREEPLAY;
-
 static f32 nextsoundpercent = 5.0f;
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
@@ -241,9 +239,7 @@ extern i16 tNONEWBESTTIME, tNEWBESTTIME;
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
 extern i32 currentminikit;
-
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
-
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -294,10 +290,8 @@ extern i32 STATUS_B;
 extern i16 tLEVELCOMPLETE, tFREEPLAYUNLOCKED, tSUPERSTORYCOMPLETE, tBONUSUNLOCKED;
 extern i16 tEPISODEVUNLOCKED, tEPISODEVIUNLOCKED, tCHALLENGECOMPLETE, tOUTOFTIME;
 extern i16 tYOUDIDNTCOLLECTALL10CANISTERS, tMISSIONCOMPLETE, tSTORYCLIPSUNLOCKED;
-
 extern i32 currentminikit, newminikitcount;
 extern i16 tMINIKIT;
-
 extern i16 tALLMINIKITSBUILT;
 
 i32 InitStatusScreen_LSW(WORLDINFO_s *, STATUSPACKET_s *) {
