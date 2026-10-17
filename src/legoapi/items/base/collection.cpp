@@ -562,39 +562,7 @@ u32 GizTurrets_TotalScore(void *);
 u32 GameAI_TotalScore();
 
 u32 TotalLevelCoinTally(WORLDINFO_s *world, u32 *pickups, u32 *blowups, u32 *buildits, u32 *forces, u32 *obstacles,
-                        u32 *turrets, u32 *characters) {
-    u32 value = GizmoPickups_TotalScore(world);
-    u32 total = value;
-    if (pickups != NULL)
-        *pickups = value;
-    value = GizmoBlowups_TotalScore(world);
-    total += value;
-    if (blowups != NULL)
-        *blowups = value;
-    value = GizBuildIts_TotalScore(world);
-    total += value;
-    if (buildits != NULL)
-        *buildits = value;
-    value = GizForce_TotalScore(world);
-    total += value;
-    if (forces != NULL)
-        *forces = value;
-    value = GizObstacles_TotalScore(world);
-    total += value;
-    if (obstacles != NULL)
-        *obstacles = value;
-    value = GizTurrets_TotalScore(world);
-    total += value;
-    if (turrets != NULL)
-        *turrets = value;
-    value = 0;
-    if (world->area != NULL && (world->area->flags & 0x100) != 0)
-        value = GameAI_TotalScore();
-    total += value;
-    if (characters != NULL)
-        *characters = value;
-    return total;
-}
+                        u32 *turrets, u32 *characters);
 
 COLLECTION_s *GetFreePlayCollection(i32 area);
 

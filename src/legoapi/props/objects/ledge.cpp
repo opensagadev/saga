@@ -56,27 +56,7 @@ static inline i32 LedgeTerrain_Attach(GameObject_s *object, u16 facing, NUVEC *p
     return 1;
 }
 
-LEDGE *Ledge_FindNearest(WORLDINFO_s *world, NUVEC *position, GameObject_s *object, f32 *distance_squared) {
-    LEDGE *nearest = NULL;
-    f32 best_distance = 1000000000.0f;
-    LEDGE *ledge = static_cast<LEDGE *>(world->ledges);
-    for (i32 i = 0; i < world->ledge_count; ++i, ++ledge) {
-        if (object != NULL) {
-            if ((ledge->state_flags & 3) != 3)
-                continue;
-            if ((ledge->flags & 1) && ShadowMode == 0)
-                continue;
-        }
-        f32 distance = NuVecDistSqr(position, &ledge->position, NULL);
-        if (distance < best_distance) {
-            nearest = ledge;
-            best_distance = distance;
-        }
-    }
-    if (distance_squared != NULL)
-        *distance_squared = best_distance;
-    return nearest;
-}
+LEDGE *Ledge_FindNearest(WORLDINFO_s *world, NUVEC *position, GameObject_s *object, f32 *distance_squared);
 
 void LedgeTerrain_MoveCode(GameObject_s *object) {
     if (LEGOCONTEXT_LEDGETERRAIN == -1)

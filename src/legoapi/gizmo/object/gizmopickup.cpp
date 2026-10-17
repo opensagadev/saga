@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
 #include "legoapi/audio/audio.h"
 #include "legoapi/audio/sfx.h"
@@ -15,6 +18,2109 @@
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
 #include "globals.h"
+
+static void Pup_CollectCharKit(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32);
+
+static void EndRedBrickMessage(GAMEMESSAGE_s *);
+
+static void Pup_CollectRedBrick(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32);
+
+static void Pup_UpdatePurpleCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup);
+
+static void Pup_UpdateBlueCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup);
+
+static void Pup_UpdatePowerUp(WORLDINFO_s *world, GIZMOPICKUP_s *pickup);
+
+static void Pup_CollectPowerUp(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 flags);
+
+void Pup_CollectCoin(WORLDINFO_s *world, GIZMOPICKUP_s *pickup, i32 type, GameObject_s *object, i32 arg);
+
+static void Pup_CollectMinikit(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 type);
+
+static void Pup_CollectHeart(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 flags);
+
+u8 CoinTab[4] = {0, 1, 2, 3};
+
+GIZMO_PICKUP_TYPE GizmoPickupType[10] = {
+    {"Silver Coin", NULL, NULL, 's', 4, GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00b7, 10, 0.045f, 0.045f, 10.0f, 0.0f, NULL,
+     Pup_CollectCoin, -1, -1, 0.0f, 0.0f},
+    {"Gold Coin", NULL, NULL, 'g', 4, GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00bf, 100, 0.045f, 0.045f, 10.0f, 0.0f, NULL,
+     Pup_CollectCoin, -1, -1, 0.0f, 0.0f},
+    {"Blue Coin", "PickupCoinB", NULL, 'b', 4, GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00c7, 1000, 0.045f, 0.045f, 6.0f, 0.0f,
+     Pup_UpdateBlueCoin, Pup_CollectCoin, 8, -1, 0.0f, 0.0f},
+    {"Purple Coin", "PickupCoinB", NULL, 'p', 4, GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00d5, 10000, 0.045f, 0.045f, 6.0f, 0.0f,
+     Pup_UpdatePurpleCoin, Pup_CollectCoin, 8, -1, 0.0f, 0.0f},
+    {"Minikit", "MK-Appear", NULL, 'm', 0,
+     GIZMOPICKUP_TYPE_DRAW_TUMBLING | GIZMOPICKUP_TYPE_MINIKIT_DETECTOR | GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00ce, 0,
+     0.125f, 0.15f, 2.0f, 0.05f, NULL, Pup_CollectMinikit, 20, -1, 0.0f, 0.0f},
+    {"Heart", NULL, NULL, 'h', 0, GIZMOPICKUP_TYPE_DRAW_Y_ROTATION, 0, 0x00cb, 0, 0.1f, 0.08f, 4.0f, 0.0f, NULL,
+     Pup_CollectHeart, -1, -1, 0.0f, 0.0f},
+    {"Red Brick", "MK-Appear", NULL, 'r', 0,
+     GIZMOPICKUP_TYPE_DRAW_TUMBLING | GIZMOPICKUP_TYPE_RED_BRICK_DETECTOR | GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00d2, 0,
+     0.12f, 0.06f, 2.0f, 0.1f, NULL, Pup_CollectRedBrick, 99, -1, 0.0f, 0.0f},
+    {"Charkit", "MK-Appear", "MK-Pickup", 'c', 0,
+     GIZMOPICKUP_TYPE_DRAW_TUMBLING | GIZMOPICKUP_TYPE_CHALLENGE_MODE_FILTER, 0, 0x00cf, 0, 0.125f, 0.15f, 2.0f, 0.05f,
+     NULL, Pup_CollectCharKit, 20, -1, 0.0f, 0.0f},
+    {"Torpedo", NULL, NULL, 't', 0, GIZMOPICKUP_TYPE_DRAW_Y_ROTATION, 0, 0x0079, 0, 0.1f, 0.1f, 5.0f, 0.0f, NULL, NULL,
+     -1, -1, 0.0f, 0.0f},
+    {"Power Up", "MK-Appear", NULL, 'u', 0, GIZMOPICKUP_TYPE_DRAW_TUMBLING, 0, 0x00d0, 0, 0.125f, 0.125f, 2.0f, 0.05f,
+     Pup_UpdatePowerUp, Pup_CollectPowerUp, -1, 0x00d1, 0.0f, 0.0f},
+};
+
+GIZMOPICKUPSYS_s GizmoPickupSys_Game = {
+    GizmoPickupType, CoinTab, 10, 4, 4, 2, 0, 0,
+};
+
+// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/ai/core/legoai.h"
+#include "legoapi/items/objects/objectsall.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/actions/character/streaks.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/render/core/rtl.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/gizmos/transport/grapples.h"
+#include "legoapi/gizmos/transport/gizportal.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "decomp.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "gameapi/edtools/edfile.h"
+#include "gameapi/edtools/edui.h"
+#include "gameapi/gui/apimenu.h"
+#include "globals.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/light/lighting.h"
+#include "legoapi/render/light/shadow.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/render/fx/spline_position.h"
+#include "nu2api/nucore/nupad.h"
+#include "nu2api/numath/nuvec.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/ai/core/ai_sys_stubs.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/props/objects/techno.h"
+#include "legoapi/world/world.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/CharacterObjectInterface.h"
+#include "legoapi/characters/core/charconfig.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/trigger/gizspecial.h"
+#include "legoapi/gizmos/traps/gizforce.h"
+#include "legoapi/gizmos/door/spinner.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/menus/screens/store.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/props/system/socksys.h"
+#include "legoapi/world/area.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/core/input/timing.h"
+#include "legoapi/gizmos/transport/grapples.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numusic/sfx.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nu3d/nuportal.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "legoapi/audio/sfx.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nulgtlaser.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/nuhgobj.h"
+
+#include <stdio.h>
+#include <string.h>
+
+void SetObjAsHeadTarget(GameObject_s *, GameObject_s *, i8, f32, f32, f32);
+void SetBallooningHeight(GameObject_s *, f32);
+void GameObjectSetCanUse(GameObject_s *, void *, u8, u8, f32);
+i32 Suit_GetIndex(SUIT_s *);
+BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
+void Bolt_Shoot(GameObject_s *, i32, i32);
+void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
+void PartUpdate_Basketball(PART_s *);
+void PartImpact_Basketball(PART_s *);
+void AddSlamDebris(GameObject_s *);
+void Batarang_Release(GameObject_s *, i32);
+void ThermalDetonator_Throw(GameObject_s *);
+void BobaRocket_Kill(PART_s *, i32);
+void BobaRocket_Move(PART_s *, f32);
+void BobaRocket_Deflect(PART_s *);
+void PartCollide_3D(PART_s *);
+void ConfigureComplexShadow(GameObject_s *);
+f32 DropInOutScale(GameObject_s *);
+extern f32 rocket_speed;
+extern "C" f32 sabrerubwait;
+NUVEC *GetZapOrigin(GameObject_s *);
+void PlaySabreSfx(char *, GameObject_s *, NUVEC *, i32);
+extern i32 testlaser_type;
+extern i32 lightning_type;
+extern f32 testlaser_endw;
+extern f32 testlaser_sizewab;
+extern f32 testlaser_sizel;
+extern f32 testlaser_sizew;
+extern i16 id_YODA, id_YODAGHOST, id_GAMORREANGUARD, id_JANGOFETT;
+extern i16 id_MOUSEDROID;
+extern i32 LEGO_AIPATHCNX_WALLSHUFFLE;
+extern i32 VehicleArea;
+extern i32 TERRAINMASK_NONWEAPON, TERRAINMASK_NONDROID;
+extern f32 DEFENDTIME;
+extern f32 jump_stuck_time;
+extern i32 teleport_all_freeplay_modes;
+extern i32 drop_in_teleport;
+
+
+extern "C" {
+    void AddToAIGroup(AIGROUP_s *group, APIOBJECT_s *object);
+    extern NUVEC plr_lastpos;
+    extern i16 id_BAT;
+    extern i16 id_SNAKE;
+    extern i16 id_GRIEVOUS;
+    extern i16 id_BODYGUARD;
+    extern i16 id_IMPERIALGUARD;
+    extern i16 id_JAWA;
+    extern i16 id_UGNAUGHT;
+    extern i16 id_ATAT;
+    extern i16 id_GONKDROID;
+    extern i16 id_BASKETCANNON;
+    extern i16 id_R2Q5;
+    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    extern i32 FalconDebKey[2];
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+    void DebrisPosOrientationMtx(i32, NUMTX *);
+    void DebFreeInstantly(i32 *);
+    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+}
+
+// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
+extern void *theThingManager;
+extern void oneAtOnce_MaintainArray();
+
+void legoSetMusicVolume(float);
+void MovePlayer(GameObject_s *object);
+void AnimatePlayer(GameObject_s *object);
+void TerrainPlayer(GameObject_s *object);
+void KeepOnScreen(GameObject_s *object);
+void SetPlayer();
+void InitPlayerAI(GameObject_s *object);
+void ResetPlayerMoves(GameObject_s *object);
+void MovePlayerSpline(GameObject_s *object);
+void GetTopBot(GameObject_s *object);
+void ResetRumble(RUMBLEPACKET *packet);
+void InitSurfaceInfo(GameObject_s *object);
+i32 TightRope_SnapTo(GameObject_s *object, NUVEC *position);
+void Player_ClearContext(GameObject_s *object, i32 mode);
+void Player_ResetContexts(PLAYERPACKET_s *packet);
+i32 SetObjOnSurface(GameObject_s *object, i32 mode);
+void StarWars_GameAISysInit();
+void GameAISysSetGame();
+void ClearAICreatures();
+void CollideGameObjects(WORLDINFO_s *world);
+void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode);
+i32 TagCode(GameObject_s *source, GameObject_s *target, i32 takeover, i32 blend, i32 mode);
+extern i32 do_player_tag;
+extern f32 player_tag_timer;
+extern GameObject_s *player_tag_from;
+extern GameObject_s *player_tag_to;
+APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id);
+i32 EquivalentObject_Find(WORLDINFO_s *world, nuhspecial_s *special);
+void AIPathCnxControlSysReset(AIPATHCNXCONTROLSYS_s *system);
+void AIPathCnxHelperSysReset(WORLDINFO_s *world, AIPATHCNXHELPERSYS_s *system);
+void InitAICreatures(AISYS_s *system);
+void ResetAICreatures(AISYS_s *system);
+void LevelScriptReStoreProgress(WORLDINFO_s *world, LEVELSCRIPTPROCESS_s *process);
+void GizmoSysAddGizmos(GIZMOSYS_s *gizmo_sys, GIZFLOW_s *giz_flow, void *world);
+void UpdateCoinPacket(COINPACKET_s *packet, i32 active, i32 player_index);
+void ResetCoinPacket(COINPACKET_s *packet);
+GIZMOPICKUP_s *GizmoPickups_Collide(WORLDINFO_s *world, GameObject_s *object, i32 arg);
+
+f32 Condition_InHubArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+void *Condition_InHubAreaInit(AISYS_s *, char *, AISCRIPT_s *);
+
+extern i32 LEGO_AIPATHCNX_BLOCKAGE;
+
+extern "C" i32 AISysSetLevelPath(AISYS_s *system, char *path_name);
+
+extern GAMEFOG_STATE GameFog;
+extern f32 dof_fstop;
+
+
+#include "legoapi/items/objects/gameobjects_types.h"
+
+
+
+
+
+
+// Enabled in the target data image.  Ordinary background characters are
+// staggered across frames; special movement states opt back into full-rate
+// processing through the forced-update path.
+extern i32 timebase_updates;
+
+
+extern TERRSET *CurTerr;
+
+static f32 Condition_OnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument);
+
+static f32 Condition_PlayerOnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static f32 Condition_EitherPlayerOnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_OnForcePlatformInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static void *Condition_ForcePushingInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_ForcePushing(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument);
+
+static f32 Condition_EitherPlayerUsingForce(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static f32 Condition_PlayerUsingForce(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static f32 Condition_UsingForce(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument);
+
+static void *Condition_UsingForceInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static f32 Condition_ForceBeingUsed(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_ForceInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static f32 Condition_ForceAtStart(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static f32 Condition_ForceAtEnd(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static f32 Condition_NumForceObjects(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static void *Condition_NumForceObjectsInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_ForceStackComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static f32 Condition_ForceStackCompleteInOrder(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static f32 Condition_ForceComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static f32 Condition_ForceFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_ForceCompleteInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static f32 Condition_ObstacleOpenedByPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static f32 Condition_ObstacleOpenedByEitherPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *,
+                                                  void *argument);
+
+static void *Condition_ObstacleOpenedByPlayerInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static f32 Condition_ObstacleLockedOpen(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static f32 Condition_ObstacleLockedShut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_GizSpecialInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static void *Condition_ObstacleInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static f32 Condition_ObstacleAtStart(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static f32 Condition_ObstacleAtEnd(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_OnSpeederBikeInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_OnSpeederBike(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument);
+
+static f32 Condition_Player2Active(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static void *Condition_TakenOverInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_TakenOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *name, void *argument);
+
+static void *Condition_LastLevelInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_LastLevel(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_IsVisibleInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static f32 Condition_Indy(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_PSP(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_CheatProgress(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_ChallengeMode(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_Freeplay(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_MissionMode(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_MissionWon(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_NumInSetAlive(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument);
+
+static f32 Condition_IsSetAlive(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *);
+
+extern "C" i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *cutscene);
+
+static f32 Condition_SockXDistanceToPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_PlayerDeflectingPart(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_CollidingWithOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_OpponentPathPosRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_OpponentToPlayerRange(AISYS_s *system, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_SockDistanceToPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_SockDistanceToOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_FurthestPlayerDistanceAlongSock(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_PlayerDistanceAlongSock(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_PlayerInSock(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_PlayerInSockInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+extern "C" f32 NuAnimEndFrameOld(void *animation);
+
+extern i32 Hub_GetRandomCharType();
+extern u8 hub_custodians_finished_loading;
+extern "C" {
+extern i32 nbaddies_can_see_players;
+}
+
+static f32 Condition_NumBaddiesThatCanSeePlayers(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_OnSameObjectAsPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_RandomMapCharsAvailable(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_EitherPlayerWearingHelmet(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_AreaContainsPartyMember(AISYS_s *system, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *,
+                                             void *argument);
+
+static void *Condition_AreaContainsPartyMemberInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_CharacterTypeExists(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_CharacterTypeExistsInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_EitherPlayerInMyTriggerArea(AISYS_s *system, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *,
+                                                 void *);
+
+static f32 Condition_OnDynamicGrapple(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument);
+
+static void *Condition_OnDynamicGrappleInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_AngleAboutMyLocatorToPlayer(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *packet, char *,
+                                                 void *argument);
+
+static void *Condition_AngleAboutMyLocatorToPlayerInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static f32 Condition_EitherPlayerUsingHatMachine(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *);
+
+static f32 Condition_EitherPlayerPullingLever(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *);
+
+static f32 Condition_EitherPlayerUsingPanel(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *);
+
+static f32 Condition_AreaContainsBaddies(AISYS_s *system, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *,
+                                         void *argument);
+
+static void *Condition_AreaContainsBaddiesInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_AreaContainsGoodies(AISYS_s *system, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *,
+                                         void *argument);
+
+static void *Condition_AreaContainsGoodiesInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_PickupBeenTurnedOn(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_PickupBeenTurnedOnInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static f32 Condition_AnimationFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_AnimationFinishedInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static f32 Condition_RigidAnimFrame(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_RigidAnimFrameInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static f32 Condition_FinishedSpline(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_CutSceneFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_CutSceneFinishedInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static f32 Condition_CutSceneStarted(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_CutSceneStartedInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static f32 Condition_CutSceneExists(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_CutSceneExistsInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static f32 Condition_CutScenePlaying(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static void *Condition_CutScenePlayingInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static f32 Condition_Message(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_MessageInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_ScriptParam(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_ScriptParamInit(AISYS_s *, char *name, AISCRIPT_s *script);
+
+static f32 Condition_Blocking(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_RaceLap(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_MusicOn(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_GotOpponentLOS(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_GotLocatorInSet(AISYS_s *system, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *,
+                                     void *argument);
+
+static void *Condition_GotLocatorInSetInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+i32 CanFightLikeAJedi(GameObject_s *object);
+
+static f32 Condition_CanFightLikeAJedi(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_EitherPlayerPushingSpinner(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_EitherPlayerPushingSpinnerInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static f32 Condition_CharacterRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument);
+
+static void *Condition_CharacterRangeInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_MaulShouldRunAway(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_BeenTakenOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument);
+
+static void *Condition_BeenTakenOverInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_LastAttackerRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_LastAttackerIsActivePlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_CannotReachDestination(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_BeenSpawned(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_ShouldAttackOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_RespawnLocatorIs(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument);
+
+static void *Condition_RespawnLocatorIsInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_BoltsDontGetDeflectedBack(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_DropBackInTimer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_InMiniCut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *arg, void *);
+
+static f32 Condition_BigJumpComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_AIOverrideControl(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument);
+
+static void *Condition_AIOverrideControlInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_IsOnScreen(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument);
+
+static void *Condition_IsOnScreenInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_IAmPlayer2(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
+
+static f32 Condition_PlayerOnObject(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_OnObjectInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static f32 Condition_PlayerOnGround(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_UnderPlayerControl(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static void *Condition_UnderPlayerControlInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_PlayerTakenOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_EitherPlayerTakenOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_PartyContainsDroids(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static f32 Condition_OpponentContext(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument);
+
+static void *Condition_InContextInit(AISYS_s *, char *name, AISCRIPT_s *);
+
+static f32 Condition_InContext(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument);
+
+static void *Condition_HitPointsInit(AISYS_s *system, char *name, AISCRIPT_s *);
+
+static f32 Condition_HitPoints(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument);
+
+static f32 Condition_CurrentHintId(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
+
+static void *Condition_HintAvailableInit(AISYS_s *, char *argument, AISCRIPT_s *);
+
+static f32 Condition_HintAvailable(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static f32 Condition_HintComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
+
+static f32 Condition_EmptyTakeOver(AISYS_s *system, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *);
+
+extern "C" {
+extern AICONDITIONDEF lego_aiconditiondefs[178];
+
+    static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
+                  "complete game AI condition registry");
+
+extern f32 default_path_heighttol;
+extern u8 default_activate_difficulty;
+extern u8 default_min_n_respawns;
+extern u8 default_max_n_respawns;
+extern f32 default_min_t_respawn;
+extern f32 default_max_t_respawn;
+
+extern CHARACTERNAMEFN * LevelCharacterNameFn;
+extern CHARACTERNAMEFN * SpecialRouteCharacterNameFn;
+extern CHARACTERGLOBALIDFN * LevelCharacterGlobalIDFn;
+extern GLOBALCHARACTERNAMEFN * GlobalCharacterNameFn;
+extern CHARACTERHGOBJFN * GlobalCharacterHGobjFn;
+extern CHARACTERRENDERFN * GlobalCharacterRenderFn;
+extern CHARACTERGOALSPEEDFN * GetCharacterGoalSpeedFn;
+extern CHARACTERTYPEIDFN * LevelCharacterTypeIDFn;
+
+extern AICHARACTERTYPEID * GlobalCharacterTypeIDFn;
+extern AISPECIALROUTECHARACTERTYPEID * SpecialRouteCharacterTypeIDFn;
+extern AICHARACTERDISTANCE * GetViewRangeFn;
+extern AICHARACTERDISTANCE * GetHearDistanceFn;
+extern AICHARACTERDISTANCE * GetMaxViewHeightFn;
+extern AICHARACTERDISTANCE * GetMinViewHeightFn;
+extern GAMEAILOAD * GameAILoadFn;
+extern AIACTIONPARSESPEED * AIActionParseSpeedFn;
+extern AIBIGJUMPTODESTINATION * AIBigJumpToDestinationFn;
+extern AIRESPAWNONPATH * AIRespawnOnPathFn;
+extern AICLEARCREATURES * ClearAICreaturesFn;
+extern APIOBJECTFROMOBJID * APIOBJECTFromObjIDFn;
+extern AIFINDALTERNATIVESPECIALOBJECT * FindAlternativeSpecialObjectFn;
+extern AIGETNAMEDAPIOBJECT * GetNamedAPIObjectFn;
+extern AIGETCREATUREORIGIN * GetAICreatureOriginFn;
+}
+
+
+// The special-route list reserves the first ten ids for suit characters.  The
+// remaining ids enumerate the current story list while omitting variants that
+// are represented by those dedicated routes.
+
+static char *LevelCharacterName(u8 character_index);
+
+static i32 LevelCharacterGlobalID(u8 character_index);
+
+static char *GlobalCharacterName(i32 character_type);
+
+static void *GlobalCharacterHGobj(i32 character_type);
+
+static f32 GetViewRange(i32 character_type);
+
+static f32 GetHearDistance(i32 character_type);
+
+static f32 GetMaxViewHeight(i32 character_type);
+
+static f32 GetMinViewHeight(i32 character_type);
+
+static NUVEC *GetAICreatureOrigin(AISYS *system, AIPACKET *packet);
+
+static APIOBJECT *GetNamedAPIObject(AISYS *system, char *name);
+
+static i32 GlobalCharacterTypeID(char *name);
+
+static i32 GameFindAlternativeSpecialObject(AISYS *, nuhspecial_s *special);
+
+static void GameAILoad(AISYS *system, i32 version, NUGSCN *, VARIPTR *, VARIPTR *);
+
+static void GlobalCharacterRender(NUVEC *position, i16 angle, i32 character, i32, EDCREATURE_s *);
+
+static f32 GetCharacterGoalSpeed(APIOBJECT *object);
+
+static i32 GameAIActionParseSpeed(char *name, u8 *speed);
+
+static char *SpecialRouteCharacterName(u8 route_id);
+
+static i32 LevelCharacterTypeID(char *name);
+
+static u32 AIBigJumpToDestination(APIOBJECT *object, NUVEC *destination);
+
+static u32 AIRespawnOnPath(APIOBJECT *object);
+
+static i32 SpecialRouteCharacterTypeID(char *name);
+
+extern i32 TimingBarSet;
+extern "C" i32 SHADOWCALLS;
+extern u32 LAYER_HOVERIGNORE;
+
+f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 terrain_mask);
+
+extern "C" f32 MainRenderTime;
+extern "C" f32 MainRenderTargetTime;
+extern f32 backdrop_top_r;
+extern f32 backdrop_top_g;
+extern f32 backdrop_top_b;
+extern f32 backdrop_bot_r;
+extern f32 backdrop_bot_g;
+extern f32 backdrop_bot_b;
+extern void (*BackDrop_AlphaFn)(f32 *alpha);
+extern void BackDrop_UpdateColours(i32 instant);
+extern i32 Paused;
+extern f32 PauseMenus_X;
+extern i32 PauseMenus_Align;
+struct CUTSCENEPLAYERCLIP;
+extern CUTSCENEPLAYERCLIP *CutScenePlayer_Active();
+
+void UpdateGameMessages();
+extern "C" i32 DoubleScore;
+extern FadeSystem FadeSys;
+extern f32 LevelNameTime, LevelNameMul;
+extern i32 pause_rndr_on;
+extern "C" TIMER BonusTimer;
+extern "C" i32 screendump;
+
+void GameTiming(WORLDINFO_s *world, float *game_time);
+
+extern "C" i32 NewRayCastScaleYMask(NUVEC *, NUVEC *, f32, f32, i32, u32);
+extern "C" i32 RAYCASTCALLS;
+
+i32 GameRayCast(NUVEC *position, NUVEC *displacement, f32 radius, i32 mask);
+
+extern f32 draw_attention_distance;
+extern f32 party_follow_offsets[8];
+extern i32 active_neutral_count;
+extern "C" i32 party_under_cover;
+extern "C" i32 party_cant_be_under_cover;
+extern AREADATA *VADER_ADATA;
+extern GameObject_s *alert_obj;
+void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system);
+i32 Hub_InMenu();
+extern i32 test_new_interaction;
+extern i32 debug_ignore_players;
+extern i32 WALKSTEALTH;
+extern i32 active_goody_count;
+extern i32 active_baddy_count;
+extern f32 timetogetlos;
+void GameCreatureOpponentSelection(AISYS_s *, i32, APIOBJECT **, i32, APIOBJECT **, i32, APIOBJECT **, u64, f32);
+void GizTurrets_OpponentSelection(GIZTURRETSYS_s *, i32, APIOBJECT **, i32, APIOBJECT **);
+
+#if defined(__i386__)
+#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
+#else
+#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
+#endif
+
+// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
+static GAMEOBJECTS_CLONE_ATTR2_SSE void TestWalkAround(APIOBJECT *object, f32 *other_x, f32 *other_z,
+                                                       NUVEC *difference, f32 radius)
+    __asm__("_ZL14TestWalkAroundP11APIOBJECT_sS0_P7nuvec_sf.isra.10");
+
+
+void GameAIProcess();
+
+extern "C" {
+void InitFn_LevelCharacterTypeID(CHARACTERTYPEIDFN *function);
+
+void InitFn_SpecialRouteCharacterTypeID(CHARACTERTYPEIDFN *function);
+
+void InitFn_LevelCharacterName(CHARACTERNAMEFN *function);
+
+void InitFn_SpecialRouteCharacterName(CHARACTERNAMEFN *function);
+
+void InitFn_LevelCharacterGlobalID(CHARACTERGLOBALIDFN *function);
+
+void InitFn_GlobalCharacterTypeID(CHARACTERTYPEIDFN *function);
+
+void InitFn_GlobalCharacterName(GLOBALCHARACTERNAMEFN *function);
+
+void InitFn_GlobalCharacterRender(CHARACTERRENDERFN *function);
+
+void InitFn_GlobalCharacterHGobj(CHARACTERHGOBJFN *function);
+
+void InitFn_ClearAICreatures(AICLEARCREATURES *function);
+
+void InitFn_GetCharacterGoalSpeedFn(CHARACTERGOALSPEEDFN *function);
+
+void InitFn_GetViewRange(CHARACTERDISTANCEFN *function);
+
+void InitFn_GetHearDistance(CHARACTERDISTANCEFN *function);
+
+void InitFn_GlobalGetMaxViewHeight(CHARACTERDISTANCEFN *function);
+
+void InitFn_GlobalGetMinViewHeight(CHARACTERDISTANCEFN *function);
+
+void InitFn_GameAILoad(GAMEAILOAD *function);
+
+void InitFn_AIActionParseSpeed(AIACTIONPARSESPEED *function);
+
+void InitFn_AIRespawnOnPath(AIRESPAWNONPATH *function);
+
+void InitFn_AIBigJumpToDestination(AIBIGJUMPTODESTINATION *function);
+
+void InitFn_FindAlternativeSpecialObjectFn(AIFINDALTERNATIVESPECIALOBJECT *function);
+
+void InitFn_APIOBJECTFromObjIDFn(APIOBJECTFROMOBJID *function);
+
+void InitFn_GetNamedAPIObject(AIGETNAMEDAPIOBJECT *function);
+
+void InitFn_GetAICreatureOrigin(AIGETCREATUREORIGIN *function);
+
+void SetScriptErrorLevel(SCRIPT_ERROR_LEVEL level);
+}
+
+extern f32 OFFSCREEN_CATCHUP_TIME;
+extern f32 drop_back_in_timer;
+
+i32 TryToTeleportToNextNode(GameObject_s *object, AIPATHNODE_s *node, i32 tightrope);
+
+void SetSpecialMove(GameObject_s *object, AIPATHNODE_s *target, AIPATHNODE_s *node, char move);
+
+void ClearSpecialMove(GameObject_s *object);
+
+void GameAISysInit();
+
+void GameFog_Reset();
+
+void Game_KillPart(PART_s *part, i32 reason);
+
+void GameAISysReset(AISYS_s *system);
+
+extern "C" i32 party_under_cover;
+extern "C" i32 party_cant_be_under_cover;
+extern GameObject_s *alert_obj;
+extern f32 alert_timer;
+extern AREADATA *VADER_ADATA;
+
+void MakeBaddiesForgetAboutParty(i32 check_hostility);
+
+void GameAttackInit();
+
+extern "C" void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry);
+i32 GameAudio_GetSfxId(i32 sfx);
+void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
+
+void GameFog_Update(WORLDINFO_s *world);
+
+void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size);
+
+void GameAISysSetGame();
+
+void GameAudio_AddSfx(i32 sfx, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
+
+void GameObjectOrigin(GameObject_s *object);
+
+void PortalGameObject(GameObject_s *object, i32 enabled, i32 update_room, i16 room, nugscn_s *scene);
+
+void SnapCreaturePos(GameObject_s *object, NUVEC *position, i32 angle, AIPATHINFO_s *path_info, i32 set_on_surface);
+
+i32 Game_IgnoreInput();
+
+extern i16 id_GONKDROID;
+u32 GameAI_TotalScore();
+
+void GameDrawMenuEntry(MENU_s *menu, char *text);
+
+void GameAnimSys_Update(GAMEANIMSYS_s *system);
+
+extern CABLE_s cables[8];
+CABLE_s *GameObjIsCableTied(GameObject_s *object);
+
+void FindAnglesZX(NUVEC *, u16 *, u16 *);
+f32 GetVehicleHoverHeight(GameObject_s *, f32 *);
+u16 SeekRot(u16, u16, f32);
+i32 RotDiff(u16, u16);
+extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER, id_ATST;
+
+f32 GameGetMusicVolume(OPTIONSSAVE_s *options);
+
+f32 GameSetMusicVolume(OPTIONSSAVE_s *options);
+
+void GameAISysStartFrame(AISYS_s *system);
+
+void GameDisplaySettings(LEVELDATADISPLAY *display, i32 *background_colours);
+
+extern u8 grapple_attach_frames;
+void GameObjectSetCanUse(GameObject_s *object, void *target, unsigned char action, unsigned char, float parameter);
+
+CABLE_s *GameObjOwnsAnyCables(GameObject_s *object);
+
+void GameObjectDimensionsExtra_LSW(GameObject_s *object);
+
+void GameObjectDimensions(GameObject_s *object);
+
+void GameAntiNodeData_Init(GAMEANTINODEDATA_s *data, nuhspecial_s *special);
+
+void GameAntiNodeData_Read(GAMEANTINODEDATA_s *data);
+
+APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id);
+
+i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *secondary_matrix,
+                           NUMTX *reflection_matrix, NUMTX *auxiliary_matrix, GameObject_s *object, u32 flags);
+
+extern i16 id_ANAKINJEDISCARRED;
+
+void GameBlowUpBlownUpFn_LSW(GIZMOBLOWUP_s *blowup);
+
+void GameLoadCharacterModels(APICHARACTERMODELLIST_s *list, i32 append, VARIPTR *buf, VARIPTR *buf_end, i32 area_models,
+                             i32 area);
+
+void Game_WorldInfo_InitMenu(WORLDINFO_s *world, i32 *menu_id, i32 *);
+
+extern GameObject_s *alert_obj;
+extern NUVEC alert_pos;
+extern f32 alert_timer;
+extern "C" {
+extern i32 party_under_cover;
+}
+i32 ZapTarget(GameObject_s *object);
+
+void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **objects, i32 goody_count,
+                                   APIOBJECT_s **goodies, i32 baddy_count, APIOBJECT_s **baddies, u64 awareness,
+                                   float);
+
+void GameObjectDimensionsExtra_LSW(GameObject_s *object);
+
+i32 AnakinGreenSabre(GameObject_s *object);
+extern "C" i16 id_THEEMPEROR, id_IMPERIALGUARD, id_BODYGUARD;
+i32 CannotKill(GameObject_s *object);
+i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
+GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
+void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
+extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, u16, u16);
+extern f32 ForceThrowSpeed, ForceThrowGravity;
+void DeflectPart(PART_s *, GameObject_s *, f32, f32, i32, i32);
+
+static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect);
+
+void GameObjectStuffAfterAnimation();
+
+void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *message);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
+inline void ThingManager::operator delete(void *thing, usize size) {
+    theMemoryManager.FreePool(thing, size);
+}
+
+
+
+
+
+
+
+
+extern "C" {
+extern ed_module_s edTimingDesc;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+extern CUSTOMISER *CharacterCustomiser;
+extern CUSTOMPIECE *Customiser_FindPieceByName(CUSTOMISER *, char *, i32 *, i32 *);
+extern void Customiser_Set100PercentPieces(CUSTOMISER *);
+
+static __used__ void LEGO_100PercentFn();
+static __used__ void LEGO_AllGoldBricksFn();
+
+i32 NoLayerKill(GameObject_s *object);
+
+
+
+void InitExtraList();
+
+GameObject_s *FindGameObject(i32 character_id, u32 required_flags, i32 alive_only, i32 vehicle_only,
+                             i32 non_level_only);
+
+extern "C" void NuSound3ClearLoopHold(NUVEC *, i32);
+void Grapple_RemoveDynamic(void *);
+void Shards_HandleLostObj(WORLDINFO_s *, GameObject_s *);
+void DestroySnakeBody(GameObject_s *);
+void BlowUpSnakeBody(GameObject_s *);
+void PlayDieSfx(GameObject_s *);
+void DieRumble(GameObject_s *);
+void GetTakeOverPos(GameObject_s *, NUVEC *);
+void SetToLastSafePos(GameObject_s *);
+void ReleaseLever(GameObject_s *);
+void Batarangs_CheckLostData(void *);
+i32 SpecialMove_ReleaseVictim(GameObject_s *);
+void ReleaseEat(GameObject_s *);
+void ReleasePush(GameObject_s *);
+void ReleaseForce(GameObject_s *, i32);
+void LoseHelmet(GameObject_s *, i32, i32);
+EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
+extern EXPLOSION Explosion[8];
+extern i32 speeder_hitpoints_lost;
+extern i16 id_MOUSEDROID;
+
+void ConstantRumble(GameObject_s *object, f32 strength, f32 phase);
+
+void PowerUp_Update(GameObject_s *object);
+
+
+extern GameObject_s * player_tag_to;
+extern GameObject_s * player_tag_from;
+extern f32 player_tag_timer;
+extern i32 do_player_tag;
+i32 TakeOverYodaSeekDistanceHack(GameObject_s *, GameObject_s *, NUVEC *);
+extern char *ASCII_DOWN;
+
+
+
+void ScaleGameObject(GameObject_s *object);
+
+void DestroySnakeBody(GameObject_s *obj);
+
+void RemoveGameObject(GameObject_s *obj, i32);
+
+extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
+extern f32 TargetDist_Near2, TargetDist_Mid2;
+BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
+
+extern i32 nethost;
+extern i16 id_PKDROID;
+void ResetAICreature(GameObject_s *, AISYS_s *);
+void SpawnCreatureFromCrate(GameObject_s *, f32, f32);
+void SetToLastSafePos(GameObject_s *);
+GameObject_s *GetOtherActivePlayer(GameObject_s *);
+void TakeOverGameObject(GameObject_s *, GameObject_s *, i32, i32);
+
+extern "C" i32 adaptivedifficulty[3];
+extern i8 (*adtab)[4];
+extern f32 Hub_PadSpeed[2];
+extern u16 Hub_PadAngle[2];
+extern GameObject_s * CarWashHack;
+extern f32 AIFireIntervalMul;
+extern f32 GhostLightMul;
+extern f32 GhostLightTargetMul;
+extern f32 CurrentSpeedOverride;
+extern f32 lightning_sizew[2];
+extern f32 lightning_sizel[2];
+extern f32 lightning_sizewab[2];
+extern f32 lightning_endw[2];
+extern u32 lightning_col[2];
+extern f32 CurrentSpeed;
+extern f32 BaseCurrentSpeed;
+extern AREADATA *PODSPRINT_ADATA;
+extern i16 id_ANAKINSNEWPOD, id_ANAKINSNEWPODGREEN, id_SEBULBASPOD;
+extern "C" f32 tieonsfxwait, tieoffsfxwait;
+void MovePlayer_NETWORK(GameObject_s *);
+void UpdateRumble(RUMBLEPACKET *);
+void Player_ToggleCharacter(GameObject_s *, i32, i32);
+void AveragePlayerCurrentSpeedMul();
+void RegenerateHearts(GameObject_s *);
+void AddSurfaceRipples(GameObject_s *);
+void AddSurfaceDebris(GameObject_s *);
+
+void GameAntinode_Update(GAMEANTINODESYS_s *system);
+
+GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *script_name, AIPATHINFO_s *path_info,
+                                 AIGROUP_s *group, i32 set_on_surface, nugspline_s *spline, nuvec_s *spline_offset,
+                                 i32 spline_mode, i32 creature_set);
+
+GameObject_s *GetNamedGameObject(AISYS_s *system, char *name);
+
+void TakeOverGameObject2(GameObject_s *, GameObject_s *, i32);
+
+
+void RegisterTakeOverObject(GameObject_s *object);
+
+
+void DeactivateGameObject(GameObject_s *object);
+
+i32 EquivalentObject_Find(WORLDINFO_s *world, nuhspecial_s *special);
+
+GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
+                                    f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
+                                    f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
+                                    bool first_match);
+
+i32 GameObjectNearFloor(GameObject_s *object, f32 height, f32 *distance);
+
+void GameObjectToCameraDistances();
+
+extern "C" {
+    extern debris_chunk_control_s *debris_chunk_control_stack[2];
+    extern debris_chunk_control_s **freechunkcontrols;
+    extern i32 freechunkcontrolsptr;
+}
+void RemoveChunkControlFromStack(debris_chunk_control_s *, debris_chunk_control_s **);
+void RemoveAnyChunkControls(i32 *chunk);
+
+void RemoveChunkFromRenderStack(particlechunkrendertype_s *chunk, particlechunkrendertype_s **stack);
+
+void RemoveChunkControlFromStack(debris_chunk_control_s *control, debris_chunk_control_s **stack);
+
+extern "C" debkeydatatype_s *debris_keystack;
+
+void RemoveDebrisEffectFromStack(debkeydatatype_s *key);
+
+// ==== src/legoapi/render/fx/parts.cpp: declarations ====
+#include "decomp.h"
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/legoapi_types.h"
+#include "globals.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "gameapi/edtools/edfile.h"
+#include "gameapi/edtools/edpart_internal.h"
+#include "gameapi/edtools/edpp_internal.h"
+#include "gameapi/edtools/edstubs.h"
+#include "gameapi/gui/apimenu.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/core/rtl.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/gizmo/object/giztorpedo.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/world/world.h"
+#include "legoapi/world/world_shared.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/area.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/core/customiser.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "nu2api/nu3d/nuportal.h"
+#include "nu2api/numath/numtx_inline.h"
+#include "nu2api/nu3d/android/nuptl_android.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/world/levels/levels.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nurand.h"
+#include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nufile/nufile.h"
+#include "legoapi/render/fx/edsplines.h"
+
+#include <float.h>
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+
+ADDPART_s Default_ADDPART = {NULL,
+                             0,
+                             NULL,
+                             0,
+                             0,
+                             0.1f,
+                             0.1f,
+                             -5.0f,
+                             0.75f,
+                             NULL,
+                             -1,
+                             0,
+                             NULL,
+                             NULL,
+                             NULL,
+                             NULL,
+                             NULL,
+                             NULL,
+                             NULL,
+                             NULL,
+                             NULL,
+                             NULL,
+                             -1,
+                             NULL,
+                             -1,
+                             -1,
+                             60.0f,
+                             60.0f,
+                             -1,
+                             -1,
+                             -1,
+                             1.0f,
+                             0,
+                             -1,
+                             2000000.0f,
+                             1.0f / 60.0f,
+                             -1,
+                             0,
+                             1.0f,
+                             1.0f,
+                             1.0f,
+                             0.0f,
+                             {0, 0, 0, 0, 0, 0},
+                             1.0f,
+                             0,
+                             {0, 0, 0}};
+
+struct rtlset;
+extern rtlset * PartRTL;
+extern f32 PARTSCALEUPTIME;
+void NewPartOrderedRotation(PART_s *);
+void PartTimeSlip();
+void PartCleanupTypes();
+void UpdatePartEmits(f32);
+
+extern "C" {
+    void DebFreeInstantly(i32 *handle);
+    // Shared suspend flag consulted by all timed debris emitters.
+extern i32 debris_suspended;
+
+    extern debkeydatatype_s *debkeydata;
+    extern debinftype **debtab;
+    extern i32 EDPP_MAX_TYPES;
+    extern DEBRISGENERATOR gensorttab[13];
+    extern DEBRISMOMENTUMADJUSTER gencodetab[7];
+    extern f32 globaltime;
+    extern f32 partglobaltime;
+    extern f32 panelglobaltime;
+    extern f32 timeincrement;
+    f32 CameraEmitterDistance(NUVEC *);
+    void SetSfxBit_On(i32);
+    void PlaySfxById(i32, NUVEC *);
+    void DebrisEmitterMomentum(i32, f32, f32, f32);
+    void DebrisParticleMomentum(i32, f32, f32, f32);
+    void AddFiniteShotDebrisEffect2(i32 *, i32, NUVEC *, NUVEC *, NUVEC *, i32);
+    void AddVariableShotDebrisEffectMtx3(i32, NUVEC *, NUVEC *, i32, NUMTX *, NUMTX *);
+    void DebrisSetUserData(i32, void *);
+    i32 CreateScaledPARTEffect(i32, f32);
+    extern i32 debris_suspended;
+    extern f32 debris_thinning_level;
+    extern i32 forced_debris_thinning;
+    extern i32 freedebkeyptr;
+    extern i32 maxdebkeys;
+    extern i32 debrischunks;
+    extern i32 debrischunksglass;
+    extern i32 freedebchkptr;
+    extern i32 freedebchkptrg;
+    extern dma_particle_chunk_s **freedebchunks;
+    extern dma_particle_chunk_s **freedebchunksglass;
+    extern particlechunkrendertype_s *ParticleChunkToRender;
+    extern particlechunkrendertype_s *ParticleChunkRenderStack[5];
+    extern debris_chunk_control_s **freechunkcontrols;
+    extern i32 freechunkcontrolsptr;
+    extern debris_chunk_control_s *debris_chunk_control_stack[2];
+    extern u32 partseed;
+    extern NUGSCN *part_scene[32];
+
+void NuPartEnableRayCasts(i32 enabled);
+
+u32 NuPartGetSeed(void);
+
+void NuPartSetSeed(i32 seed);
+
+    extern part_type_s part_types[128];
+    extern NUGSCN *part_scene[32];
+    extern part_emit_s part_emits[40];
+    extern i32 part_emits_used;
+    void CheckPartCount();
+    i32 AddPARTEffect(i32, NUVEC *);
+    void PARTStartOffset(i32, f32);
+
+    void ResetParts(void);
+
+    i32 DebAlloc(void);
+    void DebrisStartOffset(i32, f32);
+    void DebrisEmitterPos(i32, f32, f32, f32);
+    void DebrisEmitterOrientation(i32, i16, i16, i16);
+    void DebrisOrientation(i32, i16, i16);
+    void DebrisOrientationMtx(i32, NUMTX *);
+    void DebrisReflectionOrientation(i32, i16, i16, f32, f32);
+    void DebrisSetTrigger(i32, i32, i32, f32);
+    void DebrisEmitterOrientationMtx(i32, NUMTX *);
+    i32 CreateScaledEffect(i32, f32);
+    i32 NuCameraClipTestExtentsAxisAligned(NUVEC *, NUVEC *, f32);
+    void NuVecAddScale(NUVEC *, NUVEC *, NUVEC *, f32);
+    void AddVariableShotDebrisEffectTimed3(i32, NUVEC *, NUVEC *, i32, f32, NUMTX *, NUMTX *);
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+}
+
+void AddDebrisEffectToStack(debkeydatatype_s *);
+void AddChunkToRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
+void AddChunkControlToStack(debris_chunk_control_s *, debris_chunk_control_s **);
+void RemoveChunkControlFromStack(debris_chunk_control_s *, debris_chunk_control_s **);
+void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
+void DebrisGetControlStackLock();
+void DebrisReleaseControlStackLock();
+void FindAnglesZX(NUVEC *, u16 *, u16 *);
+extern f32 AreaPickupGravity;
+extern i16 temp_xrot;
+extern i16 temp_zrot;
+
+// Forward declarations for local (static) part/gizmo helper stubs.
+struct spacelevel_s;
+struct quickboltinfo;
+
+
+
+// Local (static) part (PART_s), pickup (GIZMOPICKUP_s), gizmo flow
+// (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
+// local `t` symbols matching res/libTTapp.so.
+
+extern GameObject_s *Obj;
+extern i32 HIGHGAMEOBJECT, VehicleArea;
+extern WORLDINFO_s *WORLD;
+extern GAMECAMERA_s *GameCam;
+extern f32 ForceThrowSpeed, ForceThrowGravity;
+extern "C" void KillPart(PART_s *, i32);
+i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
+void DeflectPart(PART_s *, GameObject_s *, f32, f32, i32, i32);
+void SetCoinType(i32 model, GIZMOPICKUP_s *pickup);
+u16 GameCam_GetAdjustedYRot(GAMECAMERA_s *camera);
+void CollectPowerUp(GameObject_s *, NUVEC *, u16, i32);
+void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+void NewBuzz(nupad_s *, f32, i32);
+void CollectHitPoint(GameObject_s *object, NUVEC *position, i32);
+void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
+void ReleasePush(GameObject_s *);
+void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
+i32 CannotKill(GameObject_s *);
+
+
+
+extern "C" f32 coinimpactwait;
+extern i32 GAMEDEMO;
+extern "C" void PlaySfxAndSetVolume(char *, NUVEC *, f32);
+
+static __used__ void PartImpact_Coin(PART_s *part);
+
+static __used__ void PartStolen_Coin(PART_s *part);
+
+extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+static __used__ void PartExtra_BlueCoin(PART_s *part);
+
+static __used__ void PartExtra_PurpleCoin(PART_s *part);
+
+void PowerUp_Particles(WORLDINFO_s *, NUVEC *);
+
+static __used__ i32 PowerUp_DrawPart(PART_s *part);
+
+static __used__ void PowerUp_ImpactPart(PART_s *part);
+
+static __used__ void PowerUp_UpdatePart(PART_s *part);
+
+static __used__ void PowerUp_EndMsg(GAMEMESSAGE_s *message);
+
+static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *message);
+
+void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32);
+
+extern WORLDINFO_s *WORLD;
+extern AREADATA_s *PODRACE_ADATA;
+extern AREADATA_s *BONUS_GUNSHIP_ADATA;
+extern AREADATA_s *GUNSHIP_ADATA;
+
+static __used__ i32 PartDraw_VehicleHeart(PART_s *part);
+
+static __used__ void PartMove_VehicleHeart(PART_s *part, f32);
+
+static __used__ void PartMove_VehiclePickup(PART_s *part, f32);
+
+extern "C" {
+
+void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z);
+
+void AddFiniteShotDebrisEffect(i32 *handle, i32 effect, NUVEC *position, i32 count);
+
+void AddFiniteShotDebrisEffect2(i32 *handle, i32 effect, NUVEC *position, NUVEC *emitter_momentum,
+                                    NUVEC *particle_momentum, i32 count);
+
+void AddFiniteShotDebrisEffectUserData(i32 *handle, i32 effect, NUVEC *position, i32 count, void *user_data);
+
+i32 AddFiniteShotPART(i32 effect, NUVEC *position, i32 count);
+
+    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+
+i32 AddPARTEffect(i32 effect, NUVEC *position);
+
+    void KillPart(PART_s *, i32);
+    void NewPartRotation(PART_s *);
+    void DebrisPopulateInstance(i32, f32);
+    i32 rtlDynamicAllocTemplate(rtlset *, i32);
+
+PART_s *AddPart(ADDPART_s *params);
+
+void AddRotatedDebrisEffect(i32 *handle, i32 effect, f32 x, f32 y, f32 z, i16 rotation_x, i16 rotation_y);
+
+void AddScaledFiniteShotDebrisEffect(i32 *key, i32 effect, NUVEC *position, NUVEC *orientation, NUVEC *momentum,
+                                         i32 count, f32 scale);
+
+i32 AddScaledFiniteShotPART(i32 effect, NUVEC *position, i32 count, f32 scale);
+
+i32 AddScaledVariableShotDebrisEffect(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
+                                          i16 y_rotation, f32 scale);
+
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+
+i32 AddScaledVariableShotDebrisEffect1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
+                                           i16 y_rotation, NUMTX *orientation, f32 scale);
+
+i32 AddScaledVariableShotDebrisEffect2(i32 effect_index, NUVEC *position, i32 count, f32 time,
+                                           NUMTX *emitter_orientation, NUMTX *particle_orientation, f32 scale);
+
+i32 AddScaledVariableShotDebrisEffect3(i32 effect, NUVEC *position, NUVEC *momentum, i32 count, f32 time,
+                                           NUMTX *emitter_orientation, NUMTX *particle_orientation, f32 scale);
+
+i32 AddScaledVariableShotDebrisEffect4(i32 effect, NUVEC *position, NUVEC *momentum, i32 count, i32 time,
+                                           NUMTX *emitter_orientation, NUMTX *particle_orientation, u16 priority,
+                                           i8 flags, f32 scale);
+
+i32 AddScaledVariableShotDebrisEffect5(i32 effect, NUVEC *position, NUVEC *momentum, NUVEC *position_delta,
+                                           i32 count, f32 time, NUMTX *emitter_orientation, NUMTX *particle_orientation,
+                                           u16 priority, i8 flags, f32 scale);
+
+void AddScaledVariableShotPARTEffect(i32 effect, NUVEC *position, f32 rate, f32 time, NUMTX *orientation,
+                                         f32 scale);
+
+    void AddVariableShotDebrisEffectMtx(i32, NUVEC *, i32, i16, i16, NUMTX *);
+
+void AddVariableShotDebrisEffect(i32 effect, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation);
+
+void AddVariableShotDebrisEffectMtx(i32 effect, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation,
+                                        NUMTX *particle_orientation);
+
+void AddVariableShotDebrisEffectMtx3(i32 effect, NUVEC *position, NUVEC *momentum, i32 count,
+                                         NUMTX *emitter_orientation, NUMTX *particle_orientation);
+
+void AddVariableShotDebrisEffectMtx4(i32 effect, NUVEC *position, NUVEC *momentum, i32 count,
+                                         NUMTX *emitter_orientation, NUMTX *particle_orientation, u16 priority,
+                                         i8 flags);
+
+    void AddVariableShotDebrisEffectTimed3(i32, NUVEC *, NUVEC *, i32, f32, NUMTX *, NUMTX *);
+
+void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
+                                           i16 y_rotation, NUMTX *particle_orientation);
+
+void AddVariableShotDebrisEffectTimed3(i32 effect_index, NUVEC *position, NUVEC *momentum, i32 count, f32 time,
+                                           NUMTX *emitter_orientation, NUMTX *particle_orientation);
+
+void AddVariableShotDebrisEffectTimed5(i32 effect_index, NUVEC *position, NUVEC *momentum, NUVEC *position_delta,
+                                           i32 count, f32 duration, NUMTX *emitter_orientation,
+                                           NUMTX *particle_orientation, u16 render_priority, i8 timed_flags);
+
+void AddVariableShotPARTEffect(i32 effect_index, NUVEC *position, f32 rate, f32 duration, NUMTX *orientation);
+
+i32 PartRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 flags);
+
+i32 PartPlatId();
+
+void CastPart(PART_s *part, f32 time);
+
+void CheckPartCount(void);
+
+void DrawParts(i32 keep_offscreen);
+
+PART_s *FindPart(NUVEC *position, i32 player, GameObject_s *owner);
+
+void SetPartRTLSet(usize rtl_set);
+
+i32 GetMaxPartTypes(void);
+
+i32 GetPartCount(void);
+
+char *GetPartName(i32 index);
+
+extern part_type_s part_types[128];
+    extern part_emit_s part_emits[40];
+    extern i32 part_page_on[8];
+    extern i32 part_page_used[8];
+extern i32 part_types_used;
+extern i32 part_emits_used;
+extern NUGSCN * part_scene[32];
+    // The editor loader clears these page IDs with aligned vector stores.
+extern i32 part_scene_pageid[32];
+extern i32 part_platimpactcnt;
+extern i16 part_platimpactlist[4];
+    void ResetParts(void);
+
+void InitParts(i32 count, VARIPTR *buffer, VARIPTR *);
+
+void KillAllParts(void);
+
+    void DebFreeInstantly(i32 *);
+    void rtlDynamicFree(i32);
+
+void KillPart(PART_s *part, i32 reason);
+
+void KillPartsByScene(NUGSCN *scene);
+
+void NewPartRotation(PART_s *part);
+
+void PARTEmitterOrientation(i32 index, i16 x_rotation, i16 y_rotation, i16 z_rotation);
+
+void PARTEmitterPos(i32 index, f32 x, f32 y, f32 z);
+
+f32 PARTGetTotalOffTime(i32 index);
+
+f32 PARTGetTotalOnTime(i32 index);
+
+i32 PARTLookupType(char *name);
+
+extern i32 edpart_load_particle_page;
+
+void edpartSetParticlePage(i32 page);
+
+void edpartStartPage(i8 page);
+
+void edpartStopPage(i8 page);
+
+i32 PARTLookupTypePageOnly(char *name, i32 page);
+
+void PARTStartOffset(i32 index, f32 offset);
+
+void ParticleReset(void);
+
+void RemovePARTEffect(i32 index);
+
+void ResetParts(void);
+
+    void DebrisStatusAlwaysOff(i32 *);
+    i32 rtlDynamicSetPos(i32, NUVEC *);
+
+void UpdateParts(f32 time);
+
+} // extern "C"
+
+extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
+extern f32 TargetDist_Near2, TargetDist_Mid2;
+BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
+PART_s *TargetPart(GameObject_s *object, nuvec_s *position, nuvec_s *direction, f32 radius, f32 range_squared,
+                   i32 directional, i32 bolt_id);
+
+extern "C" i32 NuGScnNumSpecials(nugscn_s *);
+i32 edpartLookupObjectInScene(char *name, nugscn_s *scene);
+i32 edpartLookupDebrisEffect(char *name);
+extern "C" i32 GetSfxIdN(char *, i32);
+
+void edpartLoadSingleType(part_typedesc_s *type, i32 version, i32 page);
+
+extern "C" {
+extern i32 edpart_nearest;
+extern NUVEC edpart_cam_pos;
+extern part_emit_s * edpart_nearest_emit;
+extern part_typedesc_s * edpart_nearest_type;
+}
+
+void edpartDetermineNearest(f32 distance);
+extern "C" {
+extern i32 edbits_part_level_page;
+
+i32 edpartLoadPageEx(char *path, i8 mode, nugscn_s **scenes, i32 scene_count);
+
+i32 edpartLoadPage(char *path, i32 mode, void *scene);
+}
+
+void PartTimeSlip();
+
+extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f32 radius, NUVEC *minimum,
+                            NUVEC *maximum, u32 flags);
+
+
+void InitPartTable(char **names);
+
+void LoadPartFile(WORLDINFO *world);
+
+void AddPartDebris(PARTDEBSYS_s *system, i32 index, nuvec_s *position);
+
+i32 SetPartTarget(GameObject_s *object, PART_s *target);
+
+WORLDINFO_s *WorldInfo_CurrentlyActive();
+extern f32 FRAMETIME;
+void PartCollide_3D(PART_s *);
+void PartCollide_2D(PART_s *);
+void PartUpdate_Heart(PART_s *);
+void PartStop_Flickerer(PART_s *);
+i32 PartDraw_Flickerer(PART_s *);
+
+void AddTorpedoAsPart(nuvec_s *position, nuvec_s *velocity, float scale, float lifetime);
+
+void AddHeartAsPart(GameObject_s *recipient, nuvec_s *position, nuvec_s *velocity, float scale, float lifetime);
+
+void PowerUp_AddPart(NUVEC *position, NUVEC *velocity, f32 scale, f32 lifetime);
+
+void PowerUp_Particles(WORLDINFO_s *world, NUVEC *position);
+
+i32 FindPartDebris(PARTDEBSYS_s *system, char *name);
+
+void MakePartVector(NUVEC *velocity, NUVEC *direction, f32 scale);
+
+void PartCollide_2D(PART_s *part);
+
+void PartCollide_3D(PART_s *part);
+
+WORLDINFO_s *WorldInfo_CurrentlyActive();
+extern f32 FRAMETIME;
+void PartStop_Coin(PART_s *part);
+
+void AddCoinsAsParts(i32 type_id, nuvec_s *position, nuvec_s *velocity, float lifetime, float scale);
+
+// The original repeats the per-sound emitter checks for each of the four sound slots.
+#define PART_EMIT_SOUND_ON(slot)                                                                                       \
+    if (type->sounds[slot] != -1) {                                                                                    \
+        SetSfxBit_On(type->sounds[slot]);                                                                              \
+        if (type->sound_modes[slot] == 4)                                                                              \
+            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
+    }
+#define PART_EMIT_SOUND(slot, mode)                                                                                    \
+    if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
+        PlaySfxById(type->sounds[slot], &emitter->position);
+
+void UpdatePartEmits(f32 time);
+
+i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
+
+PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f32 range);
+
+void edpartDestroy(i32 index);
+
+void PartCleanupTypes();
+
+extern "C" f32 brickimpactwait;
+extern "C" i32 GetSfxId(const char *);
+extern "C" void PlaySfxByIdAndSetVolume(i32, NUVEC *, f32);
+
+void PartImpact_Brick(PART_s *part);
+
+void PartUpdate_Heart(PART_s *part);
+
+void Asteroid_PartKill(PART_s *part, i32 reason);
+
+void PartStop_Flickerer(PART_s *part);
+
+i32 PartDraw_Flickerer(PART_s *part);
+
+void NewRumbleAllPlayers(f32, f32, i32, i32);
+void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
+
+void PartKill_ForceThrow(PART_s *part, i32);
+
+void PartImpact_Basketball(PART_s *part);
+
+void PartUpdate_Basketball(PART_s *part);
+
+PART_s *Part_FindFromHSpecial(nuhspecial_s *special);
+
+void NewPartOrderedRotation(PART_s *part);
+
+// ==== src/legoapi/menus/core/gamemessages.cpp: declarations ====
+#include <cstdio>
+
+#include "decomp.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/menus/screens/store.h"
+#include "globals.h"
+#include "gameapi/gui/apimenu.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/world.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nutrig.h"
+
+struct AIROW_s;
+struct nuqthdr_s;
+struct nunativegscene_s;
+struct SHOPINPUT;
+
+extern void IncreaseScore(u32 *, u64, i32);
+extern void SetBonusWinner(i32);
+extern void Arcade_CoinCollected(i32, u32 *, u32);
+extern void PlayRepeatSfx(char *, i32, f32, char, f32, nuvec_s *);
+void ResetGameMessages();
+void AddFancyMessageRGB(char *, float, float, float, float, i32, unsigned char, unsigned char, unsigned char);
+
+extern GAMEMESSAGE_s GameMessage[128];
+
+
+#include "legoapi/menus/core/gamemessages_types.h"
+
+static_assert(sizeof(GAME_MESSAGE_DATA) == sizeof(GAMEMESSAGE_s), "game message backing layout");
+static_assert(offsetof(GAME_MESSAGE_DATA, tick_fn) == offsetof(GAMEMESSAGE_s, tick_fn),
+              "game message backing callback offset");
+
+extern ADDGAMEMSG AddGameMsg_Default;
+
+GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message);
+
+void *AddGameMessage(char *text, nuvec_s *position, float scale, nuvec_s *target_position, float target_scale,
+                     unsigned char red, unsigned char green, unsigned char blue, u32 flags, float duration);
+
+void AddFancyMessage(char *text, float x, float y, float scale, float duration, i32 message_id, i32 colour_type);
+
+void EndScoreMessage(GAMEMESSAGE_s *message);
+
+void ResetGameMessages();
+
+i32 FindGameMsgsWithID(i32 id, i32 remove, i32 player, GAMEMESSAGE_s *exclude);
+
+void AddGameMsgCount(nuvec_s *position, i32 count, i32 total, unsigned char red, unsigned char green,
+                     unsigned char blue, float field_0xd4);
+
+void AddFancyMessageRGB(char *text, float x, float y, float scale, float duration, i32 message_id, unsigned char red,
+                        unsigned char green, unsigned char blue);
+
+void UpdateGameMessages();
+
+void TransformGameMessages(nuvec_s *camera_position, nuvec_s *camera_scale, nuvec_s *camera_direction);
+
+// ==== src/legoapi/gizmo/gizmos/gizmos_gizmopickups.cpp: all remaining content ====
+#include "decomp.h"
+#include "globals.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/world.h"
+
+extern "C" i32 DoubleScore;
+extern "C" TIMER BonusTimer;
+
+void NewBuzz(nupad_s *pad, f32 amount, i32 flags);
+
+void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_index, i32 model_variant,
+                             GameObject_s *object, i32);
+
+static __used__ float GizmoPickups_Collide2D(GameObject_s *object);
+
+// ==== src/legoapi/items/collect/minikits.cpp: declarations ====
+#include "decomp.h"
+#include "legoapi/items/collect/minikits.h"
+#include "globals.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/world.h"
+#include "legoapi/world/world_shared.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nucore/nustring.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/gamestatus_lsw.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/misc/utilities.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/render/light/lighting.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+
+struct AIROW_s;
+struct nuqthdr_s;
+struct nunativegscene_s;
+struct SHOPINPUT;
+
+extern HUBMINIKITPIECES_s ** Char_MiniKit;
+extern "C" VARIPTR characterbuffer_ptr;
+extern "C" VARIPTR characterbuffer_end;
+
+void MiniKits_Init(variptr_u *buffer, variptr_u *);
+
+void CharacterMiniKits_Load(COLLECTION_s *collection, WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end);
+
+extern f32 KITPOSX, PANEL_MINIKITY, PANEL_MINIKITSCALE;
+void MiniKit_GameMsg_Update(GAMEMESSAGE_s *message);
+void MiniKit_GameMsg_End(GAMEMESSAGE_s *message);
+void Hint_SetHintFromId(i32, i32, i32);
+
+void CollectMinikit(nuvec_s *position, char *name, i32);
+
+i32 AllMiniKitsDone(AREASAVE_s *save);
+
+extern char * LEGOASCII_BIGARROW;
+i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
+void CharMiniKit_Draw(i32 id, numtx_s *matrix, i32 reflection_axis, float reflection_plane, float reflection_height);
+
+extern i32 currentminikit, newminikitcount;
+extern f32 slideseek;
+extern f32 pop_timer;
+extern f32 jibberlen;
+extern f32 slidetime;
+void NextStatusStage(STATUSPACKET_s *);
+void SetDrawGoldBrick(STATUSPACKET_s *, i32);
+void IncreaseScore(u32 *, u64, i32);
+void NewStatusRumbleBuzz(i32, f32, f32, i32);
+extern "C" void PlaySfx(char *, nuvec_s *);
+void AddStatusMiniKitParts();
+void DrawStatusMiniKit(f32, f32, f32, f32, f32, i32, STATUSPACKET_s *, f32);
+void DrawMiniKitCount(f32, f32, i32, i32);
+f32 getFinishedStatusAlpha(STATUSPACKET_s *);
+extern f32 STATUS_TITLE_Y;
+extern i16 tMINIKIT;
+
+void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+
+void MiniKit_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
+
+void CollectAllMiniKits(AREASAVE_s *save);
+
+i32 UpdateNewMiniKits(STATUSPACKET_s *, STATUS_STAGE_s *stage);
+
+void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+extern i32 LEGOOBJ_MINIKIT, LEGOOBJ_CHARKIT;
+void EndChallenge(i32, i32);
+void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
+void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+void MiniKit_GameMsg_End(GAMEMESSAGE_s *message);
+
+void ResetMinikitCounter();
+
+extern i16 id_SLAVE1, tALLMINIKITSBUILT;
+extern i32 STATUS_R, STATUS_G, STATUS_B;
+
+void AllMiniKits_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+
+void AllMiniKits_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+
+extern rtldata_s KitPartRTL;
+extern NUCOLOUR3 panelcol[3], panelamb;
+extern NUVEC paneldir[3];
+
+void AllMiniKits_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void AddStatusMiniKitParts();
+
+void CharacterMiniKits_Dump(WORLDINFO_s *world);
+
+void MiniKit_GameMsg_Update(GAMEMESSAGE_s *message);
+
+void SetEffectVisibility(char *, i32);
+
+void EffectOffProgress_Reset(LEVEL_PROGRESS_s *progress);
+
+
+void IncrementMinikitCounter(GameObject_s *);
+
+i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible);
+
+// ==== src/legoapi/items/base/collection.cpp: declarations ====
+#include "legoapi/items/base/collection.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/traps/gizforce.h"
+#include "legoapi/gizmos/traps/gizturrets.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/core/players.h"
+
+u32 GizmoBlowups_TotalScore(void *world);
+extern "C" i32 DoubleScore;
+
+#include "decomp.h"
+#include "globals.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/levels/episode.h"
+#include "legoapi/world/world.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/gamestructure.h"
+#include "legoapi/menus/screens/gamemenuall.h"
+#include "gameapi/gui/apimenu.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nufile/nufpar.h"
+
+#include <string.h>
+#include <stdlib.h>
+#include "legoapi/characters/motion.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nufloat.h"
+struct GIZMOPICKUP_s;
+struct PART_s;
+struct starfighter_s;
+
+struct APICHARACTERMODELLIST_s;
+
+extern COLLECTID * TempCollectID;
+
+extern i32 COLLECTION_COMPLETIONCOUNT;
+
+i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count);
+
+i32 Collection_Got(i32 id);
+
+void Collection_Configure(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd);
+
+extern f32 COLLECTION_DX;
+extern f32 COLLECTION_DY;
+extern f32 COLLECTION_ICONSIZE;
+extern i32 LEGOOBJ_ICON_FRAME_NEUTRAL;
+extern i32 LEGOOBJ_ICON_FRAME_BLUE;
+extern i32 LEGOOBJ_ICON_FRAME_GREEN;
+extern nuhspecial_s * collection_draw_hspecial;
+extern i32 (*collection_draw_IsValidFn)(COLLECTION_s *, i32);
+extern void (*Collection_GetSelectingPlayerIDsFn)(i16 *);
+void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
+extern FadeSystem FadeSys;
+
+
+void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, APICHARACTERMODELLIST_s *models,
+                     float alpha, i32 hide_selected);
+
+void Collection_GetPos(COLLECTION_s *collection, i32 id, float *x, float *y);
+
+i32 Collection_GetIDList(COLLECTION_s *collection, u32 model_flag_mask, u32 required_model_flags, i16 *ids,
+                         i32 *first_id, i32 *second_id, i32 unused);
+
+void Collection_CreateMaster(char *file, i16 *idlist, COLLECTION_s *collection, i32 param4, float param5);
+
+void Collection_CreateCustom(char *name, i16 *id_list, COLLECTION_s *collection, u32 required_model_flags,
+                             u32 excluded_model_flags, u32 required_game_flags, i32 require_buyable, i32 columns,
+                             VARIPTR *buffer, VARIPTR *, i32 use_all_characters, f32 scale);
+
+COLLECTID *CollectIDUnlocked(i32 id);
+
+i32 Collection_GotAnyOfType(i32 type, u32 flags);
+
+i32 AddToCollection(i32 id);
+void CollectAllCharacters(i32 only_story);
+
+extern i32 freeplaymode;
+extern i32 freeplay_selected[2];
+static __used__ void Collection_GetSelectingPlayerIDs(i16 *ids);
+
+void ReleaseEat(GameObject_s *object);
+
+i32 AddToCollection(i32 id);
+
+void ResetCoinPacket(COINPACKET_s *packet);
+
+void UpdateCoinPacket(COINPACKET_s *packet, i32 active, i32 player_index);
+
+u32 GizmoBlowups_TotalScore(void *);
+u32 GizForce_TotalScore(void *);
+u32 GizObstacles_TotalScore(void *);
+u32 GizTurrets_TotalScore(void *);
+u32 GameAI_TotalScore();
+
+u32 TotalLevelCoinTally(WORLDINFO_s *world, u32 *pickups, u32 *blowups, u32 *buildits, u32 *forces, u32 *obstacles,
+                        u32 *turrets, u32 *characters);
+
+COLLECTION_s *GetFreePlayCollection(i32 area);
+
+extern i32 POINTS_PER_HINT;
+extern i32 SHOPHINTCOUNT;
+extern i16 HintTab[24];
+
+void ReCalculateCompletionPoints();
+
+// ==== src/legoapi/characters/core/playeritems.cpp: declarations ====
+#include "decomp.h"
+#include "globals.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/world.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/numath/nuvec.h"
+
+struct AIROW_s;
+struct nuqthdr_s;
+struct nunativegscene_s;
+struct SHOPINPUT;
+
+void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
+void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation);
+extern i32 (*Fighting_WeaponInActionFn)(GameObject_s *);
+extern i32 (*Fighting_WeaponOutActionFn)(GameObject_s *);
+
+extern "C" i32 adaptivedifficulty[3];
+extern f32 DEFENDTIME;
+
+extern i8 (*adtab)[4];
+
+void SetWeaponIn(GameObject_s *object);
+
+
+void FastWeaponIn(GameObject_s *object, i32 force_sound);
+
+void KeepWeaponIn(GameObject_s *object);
+
+void SetWeaponOut(GameObject_s *object);
+
+void SlowWeaponIn(GameObject_s *object);
+
+void WeaponInCode(GameObject_s *object);
+
+
+void FastWeaponOut(GameObject_s *object, i32 force_sound);
+
+void KeepWeaponOut(GameObject_s *object);
+
+i32 ReleaseHearts();
+
+void SlowWeaponOut(GameObject_s *object);
+
+void WeaponOutCode(GameObject_s *object);
+
+void AutoWeaponOnOff(GameObject_s *object);
+
+extern "C" i32 ParticlesPerSecond(f32 rate, f32 elapsed);
+
+void RegenerateHearts(GameObject_s *object);
+
+void WeaponScalingCode(GameObject_s *object);
+
+// ==== functions in original address order ====
+
+void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *message) {
+    message->target_position.x = cointotal_x[message->player_index];
+}
 
 static void Pup_CollectCharKit(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32) {
     NewBuzz(object->pad_gamepad->pad, 0.2f, 0);
@@ -49,6 +2155,177 @@ static void EndRedBrickMessage(GAMEMESSAGE_s *) {
     GameAudio_PlaySfx(0x26, NULL, 0, 0);
     NewRumbleAllPlayers(0.6f, 0.0f, 0, 0);
     GameCam_Judder(GameCam, -0.2f, 0, NULL);
+}
+
+static __used__ void PartMove_VehiclePickup(PART_s *part, f32) {
+    f32 gain;
+    if (part->field_104 == 0.0f) {
+        gain = 0.0f;
+    } else if (part->scale_time != 0.0f) {
+        gain = 1.0f - part->scale_time / part->field_104;
+    } else {
+        gain = 1.0f;
+    }
+    if (gain <= 0.0f) {
+        part->active |= 2;
+        if (part->stop_callback != NULL)
+            part->stop_callback(part);
+        return;
+    }
+    GameObject_s *object =
+        FindNearestGameObject(&part->position, NULL, 0, 0.0f, 0.0f, -1, -1, 99, NULL, 0, NULL, false);
+    if (object != NULL)
+        part->velocity.y = SeekValF(part->velocity.y, (object->apiobj.position.y - part->position.y) * 3.0f, 3.0f);
+    part->position.x += part->velocity.x * gain * FRAMETIME;
+    part->position.y += part->velocity.y * gain * FRAMETIME;
+    part->position.z += part->velocity.z * gain * FRAMETIME;
+}
+
+static __used__ void PowerUp_ImpactPart(PART_s *part) {
+    f32 scale = AreaPickupScale;
+    f32 maximum = 2.5f * scale;
+    f32 speed = NuVecMag(&part->velocity);
+    f32 volume;
+    if (speed >= maximum) {
+        volume = 1.0f;
+    } else {
+        f32 minimum = 0.1f * scale;
+        if (!(speed >= minimum))
+            return;
+        volume = (speed - minimum) / (maximum - minimum);
+    }
+    if (volume > 0.0f)
+        PlaySfxAndSetVolume("Gungan_BlueOrbBounce", &part->position, volume);
+}
+
+static __used__ i32 PartDraw_VehicleHeart(PART_s *part) {
+    f32 scale;
+    if (PODRACE_ADATA != NULL && WORLD->area == PODRACE_ADATA)
+        scale = 4.0f;
+    else if (BONUS_GUNSHIP_ADATA != NULL && WORLD->area == BONUS_GUNSHIP_ADATA)
+        scale = 7.5f;
+    else if (GUNSHIP_ADATA != NULL && WORLD->area == GUNSHIP_ADATA)
+        scale = 7.5f;
+    else
+        scale = 5.0f;
+    NUVEC scaling;
+    scaling.x = (1.0f - part->field_100) * scale;
+    if (scaling.x > 0.0f) {
+        scaling.y = scaling.z = scaling.x;
+        NUMTX_ALIGNED16 matrix = part->transform;
+        NuMtxPreScale(&matrix, &scaling);
+        if (NuSpecialDrawAt(&part->special, &matrix) != 0)
+            part->render_flags |= 6;
+    }
+    return 0;
+}
+
+static __used__ void PartMove_VehicleHeart(PART_s *part, f32) {
+    GameObject_s *recipient = part->recipient;
+    f32 progress = 1.0f - part->field_100;
+    NUVEC start;
+    f32 height;
+    if (PODRACE_ADATA != NULL && WORLD->area == PODRACE_ADATA) {
+        NuVecAdd(&start, &recipient->apiobj.position, &part->initial_position);
+        height = 2.0f;
+    } else {
+        start = part->initial_position;
+        height = 3.0f;
+    }
+    part->position.x = start.x + (recipient->apiobj.position.x - start.x) * progress;
+    part->position.y = start.y + (recipient->apiobj.position.y - start.y) * progress +
+                       NU_SIN_LUT(static_cast<i32>(progress * 32768.0f)) * height;
+    part->position.z = start.z + (recipient->apiobj.position.z - start.z) * progress;
+}
+
+void EndScoreMessage(GAMEMESSAGE_s *message) {
+    GAME_MESSAGE_DATA *data = reinterpret_cast<GAME_MESSAGE_DATA *>(message);
+    if (CoinsGoToMainTotal() != 0) {
+        i32 icon = static_cast<i16>(data->icon);
+        if (data->icon != 0xffff) {
+            if (static_cast<u32>(icon - 0xb7) < 4) {
+                icon -= 4;
+            } else if (static_cast<u32>(icon - 0xbf) < 4) {
+                icon -= 4;
+            } else if (static_cast<u32>(icon - 0xc7) < 4) {
+                icon -= 4;
+            } else if (static_cast<u32>(icon - 0xd5) < 4) {
+                icon += 4;
+            }
+            cointotal_i_obj[static_cast<i8>(data->field_0xfd)] = icon;
+        }
+        CoinTotalScale = 1.5f;
+
+        if (SuperStory != 0) {
+            IncreaseScore(&SuperStoryScore, data->score, 0);
+        } else {
+            WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+            if (world->area != NULL && (world->area->flags & 0x100) != 0) {
+                if (static_cast<u32>(BonusCoinTotal) < BonusCoinTarget) {
+                    IncreaseScore(reinterpret_cast<u32 *>(&BonusCoinTotal), data->score, 0);
+                    if (static_cast<u32>(BonusCoinTotal) >= BonusCoinTarget) {
+                        BonusCoinTotal = static_cast<i32>(BonusCoinTarget);
+                        SetBonusWinner(static_cast<i8>(data->field_0xfd));
+                        BonusWinFlag = 0;
+                        NewMenu(32, -1, -1);
+                        PlaySfx("MK-Panel", NULL);
+                        ResetGameMessages();
+                    }
+                }
+            } else {
+                IncreaseScore(&Game.coins, data->score, 1);
+            }
+        }
+    } else {
+        const i8 player_index = static_cast<i8>(data->field_0xfd);
+        if (static_cast<u8>(player_index) > 1 || Player[player_index] == NULL ||
+            Player[player_index]->coinpacket == NULL) {
+            goto play_counter_sound;
+        }
+
+        GameObject_s *object = Player[player_index];
+        COINPACKET *packet = object->coinpacket;
+        const u32 old_coins = packet->coins;
+        if (static_cast<i16>(data->icon) != -1) {
+            packet->lastcoin = data->icon;
+        }
+
+        if (BonusWinner == -1) {
+            IncreaseScore(&packet->coins, data->score, 1);
+            packet = object->coinpacket;
+            packet->scale = 1.5f;
+        }
+        if (BuildUpDone == 0) {
+            BuildUpScale = 1.5f;
+        }
+        if (Arcade != 0) {
+            Arcade_CoinCollected(static_cast<i8>(data->field_0xfd), &packet->coins, old_coins);
+            goto play_counter_sound;
+        }
+        if (BonusArea == 0 || BonusWinner != -1 || packet->coins <= 999999) {
+            goto play_counter_sound;
+        }
+
+        packet->coins = 1000000;
+        SetBonusWinner(static_cast<i8>(data->field_0xfd));
+        BonusWinFlag = 0;
+        NewMenu(31, -1, -1);
+        PlaySfx("MK-Panel", NULL);
+        ResetGameMessages();
+    }
+
+play_counter_sound:
+    if (DoubleScoreTime > 0.0f) {
+        PlayRepeatSfx("Counter", -1, 0.0f, 2, 0.1f, NULL);
+    } else {
+        PlaySfx("Counter", NULL);
+    }
+}
+
+static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *message) {
+    message->rotation_y += 16384.0f * FRAMETIME;
+    if (static_cast<u8>(message->player_index) <= 1)
+        message->target_position.y = PowerUp_GetPanelY(message->player_index) + STATSPOSY;
 }
 
 static void Pup_CollectRedBrick(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32) {
@@ -94,6 +2371,71 @@ static void Pup_UpdatePurpleCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup) {
     }
 }
 
+static __used__ void PartImpact_Coin(PART_s *part) {
+    if (coinimpactwait <= 0.0f) {
+        f32 speed = NuVecMag(&part->velocity);
+        if (speed > 0.0f) {
+            i32 angle;
+            if (speed > 1.5f)
+                angle = 0x4000;
+            else
+                angle = static_cast<i32>((1.5f - speed) / 1.5f * 16384.0f + 16384.0f);
+            f32 volume = NU_SIN_LUT(angle);
+            if (GAMEDEMO != 0) {
+                PlaySfxAndSetVolume("PickupCoin", &part->position, volume);
+                coinimpactwait = 0.1f;
+            } else if (static_cast<u16>(part->pickup_type - 0xb7) <= 3) {
+                PlaySfxAndSetVolume("CoinDropS", &part->position, volume);
+            } else {
+                PlaySfxAndSetVolume("CoinDropG", &part->position, volume);
+            }
+        }
+    }
+}
+
+static __used__ i32 PowerUp_DrawPart(PART_s *part) {
+    i32 draw = PartDraw_Flickerer(part);
+    if (draw && WORLD->lev_objs[0xd1].active != 0) {
+        NUMTX_ALIGNED16 matrix = part->transform;
+        NuSpecialDrawAt(&WORLD->lev_objs[0xd1].special, &matrix);
+    }
+    return draw;
+}
+
+static __used__ void PartExtra_BlueCoin(PART_s *part) {
+    if (__builtin_expect((part->render_flags & 2) != 0, 0)) {
+        i32 effect = WORLD->debris_sys->entries[56].effect;
+        if (effect == -1)
+            return;
+        f32 rate;
+        if (WORLD->area != NULL) {
+            rate = (WORLD->area->flags & 0x104) == 4 ? 2.5f : 5.0f;
+        } else {
+            rate = 5.0f;
+        }
+        i32 count = ParticlesPerSecond(rate, FRAMETIME);
+        if (count > 0)
+            AddVariableShotDebrisEffect(effect, &part->position, count, 0, 0);
+    }
+}
+
+static __used__ void PartExtra_PurpleCoin(PART_s *part) {
+    if (__builtin_expect((part->render_flags & 2) != 0, 0)) {
+        i32 effect = WORLD->debris_sys->entries[57].effect;
+        if (effect == -1)
+            return;
+        f32 rate;
+        if (WORLD->area != NULL) {
+            rate = (WORLD->area->flags & 0x104) == 4 ? 2.5f : 5.0f;
+        } else {
+            rate = 5.0f;
+        }
+        i32 count = ParticlesPerSecond(rate, FRAMETIME);
+        if (count > 0)
+            AddVariableShotDebrisEffect(effect, &part->position, count, 0, 0);
+    }
+}
+
 static void Pup_UpdateBlueCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup) {
     if ((pickup->state_flags & 0x30) != 0x30) {
         return;
@@ -112,17 +2454,248 @@ static void Pup_UpdateBlueCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup) {
     }
 }
 
+static __used__ void PowerUp_EndMsg(GAMEMESSAGE_s *message) {
+    GameAudio_PlaySfx(0x26, NULL, 0, 0);
+    if (__builtin_expect(FindGameMsgsWithID(7, 0, message->player_index, message) != 0, 0)) {
+        NUVEC position;
+        const i32 player = message->player_index;
+        position.x = player != 0 ? ICONX : -ICONX;
+        position.y = PowerUp_GetPanelY(player) + STATSPOSY;
+        position.z = 1.0f;
+        ADDGAMEMSG_ALIGNED16 add = AddGameMsg_Default;
+        add.icon = 0x35;
+        add.special = &WORLD->lev_objs[0x35].special;
+        add.flags = 0x20;
+        add.position = &position;
+        add.scale = 0.6f;
+        add.target_scale = 0.0f;
+        add.duration = 0.3f;
+        AddGameMsg(&add);
+    }
+}
+
+void PowerUp_Particles(WORLDINFO_s *world, NUVEC *position) {
+    if (VehicleArea == 0 && ParticlesPerSecond(10.0f, FRAMETIME) > 0)
+        AddGameDebris(world->debris_sys, GizBuilditGDeb[qrand() / 10923], position);
+}
+
 static void Pup_UpdatePowerUp(WORLDINFO_s *world, GIZMOPICKUP_s *pickup) {
     PowerUp_Particles(world, &pickup->position);
     PlaySfx("Grv_GuardWeaponLp", &pickup->position);
+}
+
+static __used__ void PowerUp_UpdatePart(PART_s *part) {
+    NUVEC position = part->position;
+    part->rotation_y = NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f;
+    NuMtxSetRotationY(&part->transform, part->rotation_y);
+    NuMtxTranslate(&part->transform, &position);
+    PowerUp_Particles(WorldInfo_CurrentlyActive(), &position);
+    PlaySfx("Grv_GuardWeaponLp", &position);
+}
+
+void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32) {
+    if (object == NULL || static_cast<u8>(object->apiobj.field_0x27c) >= 2) {
+        return;
+    }
+
+    if (ONEPLAYERPOWERUPS != 0) {
+        const u16 camera_rotation = GameCam_GetAdjustedYRot(NULL);
+        const u16 panel_rotation = rotation - RotDiff(0, camera_rotation);
+        NUVEC target_position;
+        target_position.x = object->apiobj.field_0x27c == 0 ? -ICONX : ICONX;
+        target_position.y = PowerUp_GetPanelY(object->apiobj.field_0x27c) + STATSPOSY;
+        target_position.z = 1.0f;
+
+        ADDGAMEMSG message;
+        if (object->field_0xdec > 0.0f) {
+            NUVEC icon_position;
+            const i32 player = object->apiobj.field_0x27c;
+            icon_position.x = player == 0 ? -ICONX : ICONX;
+            icon_position.y = PowerUp_GetPanelY(player) + STATSPOSY;
+            icon_position.z = 1.0f;
+            message = AddGameMsg_Default;
+            message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0x35]);
+            message.icon = 0x35;
+            message.position = &icon_position;
+            message.scale = 0.6f;
+            message.target_scale = 0.0f;
+            message.duration = 0.3f;
+            message.flags = 0x20;
+            AddGameMsg(&message);
+        }
+
+        message = AddGameMsg_Default;
+        message.icon = 0xd0;
+        message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0xd0]);
+        message.position = position;
+        message.field_0x4d = 1;
+        message.scale = AreaPickupScale;
+        message.target_position = &target_position;
+        message.flags = 0x2112d;
+        message.target_scale = POWERUPOBJSIZE;
+        message.tick_fn = PowerUp_UpdateMsg;
+        message.end_fn = PowerUp_EndMsg;
+        message.field_0x4e = 7;
+        message.player_index = object->apiobj.field_0x27c;
+        message.duration = 1.0f;
+        GAMEMESSAGE_s *game_message = AddGameMsg(&message);
+        if (game_message != NULL) {
+            game_message->rotation_y = panel_rotation;
+            PowerUp_PanelYRot[object->apiobj.field_0x27c] = panel_rotation;
+        }
+    }
+
+    Cheat_StartPowerUp(position, object);
+    NewRumble(object->pad_gamepad->pad, 1.0f, 0);
+    NewBuzz(object->pad_gamepad->pad, 0.2f, 0);
 }
 
 static void Pup_CollectPowerUp(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 flags) {
     CollectPowerUp(object, &pickup->position, pickup->draw_rotation, flags);
 }
 
+void PowerUp_Update(GameObject_s *object) {
+    if (object->field_0xdec > 0.0f) {
+        object->field_0xdec -= FRAMETIME;
+        if (object->field_0xdec <= 0.0f) {
+            GameAudio_PlaySfx(0x52, NULL, 0, 0);
+        } else {
+            GameAudio_PlaySfx(0x51, NULL, 0, 0);
+            ConstantRumble(object, (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) * 0.5f, 0.0f);
+        }
+    }
+}
+
+void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_index, i32 model_variant,
+                             GameObject_s *object, i32) {
+    i32 player_index;
+    if (object != NULL) {
+        player_index = object->apiobj.field_0x27c;
+    } else {
+        i32 player0_active = Player[0] == NULL ? 0 : Player[0]->apiobj.player_controlled;
+        if (__builtin_expect(Player[1] == NULL || !Player[1]->apiobj.player_controlled, 0)) {
+            if (player0_active == 0) {
+                return;
+            }
+            player_index = 0;
+        } else if (__builtin_expect(player0_active == 0, 0)) {
+            player_index = 1;
+        } else {
+            player_index = qrand() / 0x8000;
+        }
+    }
+    if (static_cast<u32>(player_index) > 1) {
+        return;
+    }
+
+    if ((type_index == 2 || type_index == 3) && object != NULL) {
+        if (world->area != NULL && (world->area->flags & AREAFLAG_SUPER_BONUS_AREA) == AREAFLAG_BONUS_AREA) {
+            NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
+        } else {
+            NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
+        }
+    }
+
+    if (DoubleScoreTime > 0.0f || type_index == 2 || type_index == 3) {
+        PlaySfx(const_cast<char *>("PickupCoinB"), position);
+    } else {
+        PlaySfx(const_cast<char *>("PickupCoin"), position);
+    }
+
+    i32 main_total;
+    NUVEC target_position;
+    f32 target_scale;
+    if (CoinsGoToMainTotal() != 0) {
+        main_total = 1;
+        target_position.x = cointotal_x[player_index];
+        target_position.y = STATSPOSY;
+        DrawCoinTotalTime = 1.0f + COINMSGTIME;
+        target_scale = COINTOTAL_COINSIZE;
+    } else {
+        main_total = 0;
+        target_position.x = player_index == 1 ? PANEL_COINX : -PANEL_COINX;
+        target_position.y = STATSPOSY + PANEL_COINY;
+        DrawBuildUpTime = 1.0f + COINMSGTIME;
+        target_scale = PANEL_COINSCALE_END;
+    }
+    target_position.z = 1.0f;
+
+    GIZMO_PICKUP_TYPE *type = &GizmoPickupType[type_index];
+    const i32 model_id = static_cast<i16>(type->first_model_id) + model_variant;
+    if (__builtin_expect(model_id != -1 && world->lev_objs[model_id].active != 0, 0)) {
+
+        ADDGAMEMSG message = AddGameMsg_Default;
+        message.target_scale = target_scale;
+        u32 score = type->score;
+        if (object != NULL && object->coinpacket != NULL) {
+            if (((DoubleScore >> player_index) & 1) != 0) {
+                score *= 2;
+            }
+            if (object->field_0xdec > 0.0f) {
+                score *= 2;
+            }
+        }
+
+        message.target_position = &target_position;
+        message.position = position;
+        message.scale = PANEL_COINSCALE_START * AreaPickupScale;
+        message.flags = 0x2012d;
+        message.duration = COINMSGTIME;
+        message.icon = static_cast<i16>(model_id);
+        message.extra_position = reinterpret_cast<nuvec_s *>(&world->lev_objs[model_id]);
+        message.score = score;
+        if (main_total != 0) {
+            message.update_fn = GameMsg_DrawAdjustNewPos_CoinToTotal;
+        }
+        message.end_fn = EndScoreMessage;
+        message.player_index = static_cast<i8>(player_index);
+        AddGameMsg(&message);
+    }
+}
+
 void Pup_CollectCoin(WORLDINFO_s *world, GIZMOPICKUP_s *pickup, i32 type, GameObject_s *object, i32 arg) {
     GizmoPickup_CollectCoin(world, &pickup->position, type, pickup->model_variant, object, arg);
+}
+
+void CollectMinikit(nuvec_s *position, char *name, i32) {
+    if (WORLD->lev_objs[0xce].active != 0) {
+        NUVEC target_position = {KITPOSX, KITPOSY + PANEL_MINIKITY, 1.0f};
+        const i32 area_id = WORLD->level_sub_id;
+        ADDGAMEMSG message = AddGameMsg_Default;
+        message.position = position;
+        message.target_position = &target_position;
+        message.scale = AreaPickupScale;
+        message.target_scale = PANEL_MINIKITSCALE;
+        message.flags = 0x2112d;
+        message.duration = 1.0f;
+        message.icon = 0xce;
+        message.special = &WORLD->lev_objs[0xce].special;
+        message.tick_fn = MiniKit_GameMsg_Update;
+        message.end_fn = MiniKit_GameMsg_End;
+        message.field_0x4d = 1;
+        AddGameMsg(&message);
+        DrawMiniKitTime = 2.0f;
+
+        if (area_id != -1 && Game.area_save[area_id].minikit_count < 10) {
+            if (NuStrLen(name) <= 8) {
+                NuStrCpy(NewMiniPiece[AreaGlobals.values.field_0x10].name, name);
+            } else {
+                NewMiniPiece[AreaGlobals.values.field_0x10].name[0] = '\0';
+            }
+            NewMiniPiece[AreaGlobals.values.field_0x10].level = WORLD->level_idx;
+            ++AreaGlobals.values.field_0x10;
+            ++AreaGlobals.values.field_0x0c;
+            if (GAMEDEMO != 0) {
+                if (AreaGlobals.values.field_0x0c == 1) {
+                    Hint_SetHintFromId(0x26d, 0, 0);
+                } else if (AreaGlobals.values.field_0x0c == 10) {
+                    Hint_SetHintFromId(0x26e, 0, 0);
+                }
+            }
+        }
+        AddGameDebris(WORLD->debris_sys, 0x13, position);
+        GameAudio_PlaySfxById(GetSfxId(const_cast<char *>("MK-Pickup")), position, 3, 0);
+    }
 }
 
 static void Pup_CollectMinikit(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 type) {
@@ -130,38 +2703,315 @@ static void Pup_CollectMinikit(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameOb
     NewBuzz(object->pad_gamepad->pad, 0.2f, 0);
 }
 
+void AddTorpedoAsPart(nuvec_s *position, nuvec_s *velocity, float scale, float lifetime) {
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    ADDPART_ALIGNED16 params = Default_ADDPART;
+    params.position = position;
+    params.velocity = velocity;
+    f32 torpedo_scale = 0.1f * WORLD->giz_torp_machine_sys->scale;
+    params.field_14 = torpedo_scale * GizmoPickupType[8].shadow_radius_x;
+    params.field_18 = torpedo_scale * GizmoPickupType[8].shadow_extent_x;
+    params.special = &world->lev_objs[0x79].special;
+    params.field_28 = 0x79;
+    params.gravity = AreaPickupGravity;
+    if (params.gravity == 0.0f)
+        params.field_a4 = 15.0f;
+    params.stop_fn = PartStop_Flickerer;
+    params.field_40 = FreePlay != 0 && WORLD->current_level == ANAKINSFLIGHTB_LDATA ? PartCollide_2D : PartCollide_3D;
+    params.field_88 = lifetime;
+    params.draw_fn = PartDraw_Torp;
+    params.field_48 = NULL;
+    params.flags = 0x256;
+    if (params.gravity == 0.0f)
+        params.move_fn = PartMove_VehiclePickup;
+    params.time_step = FRAMETIME;
+    params.field_c0 = scale;
+    PART_s *part = AddPart(&params);
+    if (part != NULL) {
+        part->rotation_y = qrand();
+        part->force_player_mask = 3;
+        part->field_214 = 0.1f * WORLD->giz_torp_machine_sys->scale * NU_SIN_LUT(0x4000);
+    }
+}
+
+void AddHeartAsPart(GameObject_s *recipient, nuvec_s *position, nuvec_s *velocity, float scale, float lifetime) {
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    if (recipient == NULL)
+        return;
+    ADDPART_ALIGNED16 params = Default_ADDPART;
+    params.position = position;
+    params.velocity = velocity;
+    params.field_28 = 0xcb;
+    params.flags = 0x256;
+    params.field_18 = params.field_14 = scale * GizmoPickupType[5].shadow_radius_x;
+    params.gravity = AreaPickupGravity;
+    params.special = &world->lev_objs[0xcb].special;
+    params.field_88 = lifetime;
+    params.field_40 = PartCollide_3D;
+    params.field_48 = PartUpdate_Heart;
+    if ((world->current_level->flags & LEVEL_PICKUPS_TO_PANEL) != 0) {
+        params.field_a4 = 1.0f;
+        params.move_fn = PartMove_VehicleHeart;
+        params.flags |= 0x400;
+        params.recipient = recipient;
+        params.draw_fn = PartDraw_VehicleHeart;
+    } else {
+        params.stop_fn = PartStop_Flickerer;
+        params.draw_fn = PartDraw_Flickerer;
+        if (params.gravity == 0.0f)
+            params.move_fn = PartMove_VehiclePickup;
+    }
+    params.time_step = FRAMETIME;
+    params.field_c0 = scale;
+    PART_s *part = AddPart(&params);
+    if (part != NULL)
+        part->rotation_y = qrand();
+}
+
+void PowerUp_AddPart(NUVEC *position, NUVEC *velocity, f32 scale, f32 lifetime) {
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    ADDPART_ALIGNED16 params = Default_ADDPART;
+    params.position = position;
+    params.velocity = velocity;
+    params.field_18 = params.field_14 = scale * GizmoPickupType[9].shadow_radius_x;
+    params.gravity = AreaPickupGravity;
+    params.special = &world->lev_objs[0xd0].special;
+    params.field_40 = PartCollide_3D;
+    params.field_48 = PowerUp_UpdatePart;
+    params.field_3c = PowerUp_ImpactPart;
+    params.stop_fn = PartStop_Flickerer;
+    params.draw_fn = PowerUp_DrawPart;
+    params.field_28 = 0xd0;
+    params.flags = 0x256;
+    params.field_88 = lifetime;
+    if (params.gravity == 0.0f)
+        params.move_fn = PartMove_VehiclePickup;
+    params.time_step = FRAMETIME;
+    params.field_c0 = scale;
+    PART_s *part = AddPart(&params);
+    if (part != NULL)
+        part->rotation_y = NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f;
+}
+
+void AddCoinsAsParts(i32 type_id, nuvec_s *position, nuvec_s *velocity, float lifetime, float scale) {
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    GIZMO_PICKUP_TYPE *type = &GizmoPickupType[type_id];
+    i32 model = static_cast<i16>(type->first_model_id);
+    if (type->random_model_count != 0)
+        model += qrand() / (65535 / type->random_model_count + 1);
+    LEVEL_OBJECT_RUNTIME_s *object = &world->lev_objs[model];
+    if (object->active == 0)
+        return;
+    ADDPART_ALIGNED16 params = Default_ADDPART;
+    params.field_28 = model;
+    params.velocity = velocity;
+    params.position = position;
+    params.special = &object->special;
+    params.field_14 = params.field_18 = scale * type->shadow_radius_x;
+    params.flags = 0x56;
+    params.gravity = AreaPickupGravity;
+    if (static_cast<u32>(model - 0xd5) <= 3) {
+        params.flags |= 0x200;
+    } else if (static_cast<u32>(model - 0xc7) <= 3) {
+        params.flags |= 0x200;
+        params.field_30 = PartExtra_BlueCoin;
+    } else {
+        params.replace_fn = PartStolen_Coin;
+    }
+    params.field_88 = lifetime;
+    params.field_40 = PartCollide_3D;
+    params.stop_fn = PartStop_Coin;
+    params.field_3c = PartImpact_Coin;
+    params.time_step = FRAMETIME;
+    params.field_c0 = scale;
+    PART_s *part = AddPart(&params);
+    if (part != NULL) {
+        part->field_100 = 30.0f;
+        if (params.gravity == 0.0f) {
+            part->move_callback = PartMove_VehiclePickup;
+            part->field_104 = static_cast<f32>(qrand()) * (1.0f / 65535.0f) + 4.0f;
+        }
+    }
+}
+
+u32 TotalLevelCoinTally(WORLDINFO_s *world, u32 *pickups, u32 *blowups, u32 *buildits, u32 *forces, u32 *obstacles,
+                        u32 *turrets, u32 *characters) {
+    u32 value = GizmoPickups_TotalScore(world);
+    u32 total = value;
+    if (pickups != NULL)
+        *pickups = value;
+    value = GizmoBlowups_TotalScore(world);
+    total += value;
+    if (blowups != NULL)
+        *blowups = value;
+    value = GizBuildIts_TotalScore(world);
+    total += value;
+    if (buildits != NULL)
+        *buildits = value;
+    value = GizForce_TotalScore(world);
+    total += value;
+    if (forces != NULL)
+        *forces = value;
+    value = GizObstacles_TotalScore(world);
+    total += value;
+    if (obstacles != NULL)
+        *obstacles = value;
+    value = GizTurrets_TotalScore(world);
+    total += value;
+    if (turrets != NULL)
+        *turrets = value;
+    value = 0;
+    if (world->area != NULL && (world->area->flags & 0x100) != 0)
+        value = GameAI_TotalScore();
+    total += value;
+    if (characters != NULL)
+        *characters = value;
+    return total;
+}
+
+void CollectHitPoint(GameObject_s *object, NUVEC *position, i32) {
+    if (static_cast<i8>(object->current_hp) > 0 && static_cast<i8>(object->current_hp) < object->hitpoints) {
+        object->current_hp += TouchHacks::TouchControlsActive ? 2 : 1;
+        if (static_cast<i8>(object->current_hp) > object->hitpoints)
+            object->current_hp = object->hitpoints;
+    }
+    if (object->field_0xe38 < 4) {
+        object->field_0xe38 += TouchHacks::TouchControlsActive ? 2 : 1;
+        if (object->field_0xe38 == 5)
+            object->field_0xe38 = 4;
+    }
+    if (object->apiobj.character_data->model_flags & 0x2000) {
+        NUVEC momentum;
+        NuVecScale(&momentum, &object->apiobj.velocity, 0.5f);
+        AddGameDebrisMom(WORLD->debris_sys, 0x10, position, 15, &momentum);
+    } else {
+        AddGameDebris(WORLD->debris_sys, 0x0f, position);
+    }
+    GameAudio_PlaySfx(0x27, position, 0, 0);
+    NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
+}
+
 static void Pup_CollectHeart(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 flags) {
     CollectHitPoint(object, &pickup->position, flags);
 }
 
-u8 CoinTab[4] = {0, 1, 2, 3};
+i32 ReleaseHearts() {
+    GameObject_s *player = Player[0];
+    i32 missing_hitpoints;
+    i32 total_hitpoints;
+    if (player != NULL && player->apiobj.field_0x287 == 0) {
+        total_hitpoints = player->hitpoints;
+        const i32 current_hitpoints = static_cast<i8>(player->current_hp);
+        missing_hitpoints = total_hitpoints != 0 ? total_hitpoints - current_hitpoints : 0;
+    } else {
+        total_hitpoints = 0;
+        missing_hitpoints = 0;
+    }
 
-GIZMO_PICKUP_TYPE GizmoPickupType[10] = {
-    {"Silver Coin", NULL, NULL, 's', 4, GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00b7, 10, 0.045f, 0.045f, 10.0f, 0.0f, NULL,
-     Pup_CollectCoin, -1, -1, 0.0f, 0.0f},
-    {"Gold Coin", NULL, NULL, 'g', 4, GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00bf, 100, 0.045f, 0.045f, 10.0f, 0.0f, NULL,
-     Pup_CollectCoin, -1, -1, 0.0f, 0.0f},
-    {"Blue Coin", "PickupCoinB", NULL, 'b', 4, GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00c7, 1000, 0.045f, 0.045f, 6.0f, 0.0f,
-     Pup_UpdateBlueCoin, Pup_CollectCoin, 8, -1, 0.0f, 0.0f},
-    {"Purple Coin", "PickupCoinB", NULL, 'p', 4, GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00d5, 10000, 0.045f, 0.045f, 6.0f, 0.0f,
-     Pup_UpdatePurpleCoin, Pup_CollectCoin, 8, -1, 0.0f, 0.0f},
-    {"Minikit", "MK-Appear", NULL, 'm', 0,
-     GIZMOPICKUP_TYPE_DRAW_TUMBLING | GIZMOPICKUP_TYPE_MINIKIT_DETECTOR | GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00ce, 0,
-     0.125f, 0.15f, 2.0f, 0.05f, NULL, Pup_CollectMinikit, 20, -1, 0.0f, 0.0f},
-    {"Heart", NULL, NULL, 'h', 0, GIZMOPICKUP_TYPE_DRAW_Y_ROTATION, 0, 0x00cb, 0, 0.1f, 0.08f, 4.0f, 0.0f, NULL,
-     Pup_CollectHeart, -1, -1, 0.0f, 0.0f},
-    {"Red Brick", "MK-Appear", NULL, 'r', 0,
-     GIZMOPICKUP_TYPE_DRAW_TUMBLING | GIZMOPICKUP_TYPE_RED_BRICK_DETECTOR | GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00d2, 0,
-     0.12f, 0.06f, 2.0f, 0.1f, NULL, Pup_CollectRedBrick, 99, -1, 0.0f, 0.0f},
-    {"Charkit", "MK-Appear", "MK-Pickup", 'c', 0,
-     GIZMOPICKUP_TYPE_DRAW_TUMBLING | GIZMOPICKUP_TYPE_CHALLENGE_MODE_FILTER, 0, 0x00cf, 0, 0.125f, 0.15f, 2.0f, 0.05f,
-     NULL, Pup_CollectCharKit, 20, -1, 0.0f, 0.0f},
-    {"Torpedo", NULL, NULL, 't', 0, GIZMOPICKUP_TYPE_DRAW_Y_ROTATION, 0, 0x0079, 0, 0.1f, 0.1f, 5.0f, 0.0f, NULL, NULL,
-     -1, -1, 0.0f, 0.0f},
-    {"Power Up", "MK-Appear", NULL, 'u', 0, GIZMOPICKUP_TYPE_DRAW_TUMBLING, 0, 0x00d0, 0, 0.125f, 0.125f, 2.0f, 0.05f,
-     Pup_UpdatePowerUp, Pup_CollectPowerUp, -1, 0x00d1, 0.0f, 0.0f},
-};
+    player = Player[1];
+    if (player != NULL && player->apiobj.field_0x287 == 0) {
+        i32 current_hitpoints = static_cast<i8>(player->current_hp);
+        i32 hitpoints = player->hitpoints;
+        if (hitpoints != 0) {
+            total_hitpoints += hitpoints;
+            missing_hitpoints += hitpoints - current_hitpoints;
+        } else if (total_hitpoints == 0) {
+            return 0;
+        }
+    } else if (total_hitpoints == 0) {
+        return 0;
+    }
 
-GIZMOPICKUPSYS_s GizmoPickupSys_Game = {
-    GizmoPickupType, CoinTab, 10, 4, 4, 2, 0, 0,
-};
+    if (missing_hitpoints > 0 && MAXPARTS > 0) {
+        PART_s *part = Part;
+        PART_s *end = part + MAXPARTS;
+        do {
+            if ((part->active & 1) != 0 && part->type_id == 0xcb) {
+                --missing_hitpoints;
+            }
+            ++part;
+        } while (part != end);
+    }
+
+    missing_hitpoints -= Game.save_version;
+    if (Game.save_version <= 5) {
+        missing_hitpoints += 8;
+    } else {
+        missing_hitpoints += 9;
+    }
+
+    i32 release_threshold = total_hitpoints;
+    if (missing_hitpoints <= total_hitpoints)
+        release_threshold = missing_hitpoints < 0 ? 0 : missing_hitpoints;
+
+    i32 release_chance = (release_threshold << 16) / total_hitpoints;
+    const i32 difficulty_adjustment = static_cast<i8>(adtab[adaptivedifficulty[0]][1]);
+    if (difficulty_adjustment == 1) {
+        release_chance >>= 1;
+    } else if (difficulty_adjustment == -1) {
+        release_chance += release_chance;
+    }
+    return release_chance > qrand();
+}
+
+void SetCoinType(i32 model, GIZMOPICKUP_s *pickup) {
+    if (static_cast<u32>(model - 0xb7) <= 3) {
+        pickup->type_index = 0;
+        pickup->model_variant = model - 0xb7;
+    } else if (static_cast<u32>(model - 0xbf) <= 3) {
+        pickup->type_index = 1;
+        pickup->model_variant = model - 0xbf;
+    } else if (static_cast<u32>(model - 0xc7) <= 3) {
+        pickup->type_index = 2;
+        pickup->model_variant = model - 0xc7;
+    } else {
+        pickup->type_index = 3;
+        pickup->model_variant = model - 0xd5;
+    }
+    u8 count = GizmoPickupType[pickup->type_index].random_model_count;
+    pickup->model_variant = count ? pickup->model_variant % count : 0;
+}
+
+static __used__ void PartStolen_Coin(PART_s *part) {
+    if (netclient != 0 || (part->render_flags & 2) == 0)
+        return;
+    GameObject_s *recipient = Player[0];
+    i32 first_active = recipient != NULL && static_cast<i8>(recipient->apiobj.flags_low) < 0;
+    if (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.flags_low) < 0) {
+        recipient = Player[1];
+        if (first_active)
+            recipient = Player[qrand() / 0x8000];
+    } else if (!first_active) {
+        return;
+    }
+    if (recipient != NULL) {
+        GIZMOPICKUP_s pickup;
+        SetCoinType(part->pickup_type, &pickup);
+        GizmoPickup_CollectCoin(WORLD, &part->position, pickup.type_index, pickup.model_variant, recipient, 1);
+    }
+}
+
+void PartStop_Coin(PART_s *part) {
+    if (netclient == 0) {
+        WORLDINFO_s *world = WORLD;
+        GIZMOPICKUPRUNTIMESYS_s *system = world->gizmo_pickup_sys;
+        GIZMOPICKUP_s *pickup = &system->temporary_pickups[system->field_0x0c];
+        if (++system->field_0x0c > 63)
+            system->field_0x0c = 0;
+        if (pickup->state_flags & 1)
+            GizmoPickup_CollectCoin(world, &pickup->position, pickup->type_index, pickup->model_variant, NULL, 1);
+        SetCoinType(part->pickup_type, pickup);
+        pickup->state_flags = (pickup->state_flags & 0xe0) | 0x17;
+        pickup->position = part->position;
+        pickup->draw_rotation = 0;
+        pickup->room_index =
+            WORLD->current_gscn != NULL ? NuPortalWhichRoom(WORLD->current_gscn, &pickup->position) : -1;
+        pickup->floor_height = 2000000.0f;
+        pickup->remaining_visible_time = 5.0f;
+        pickup->shadow_x_rotation = 0;
+        pickup->shadow_z_rotation = 0;
+        pickup->state_flags = (pickup->state_flags | 0x20) & ~0x40;
+    }
+    part->active &= ~1;
+}
+

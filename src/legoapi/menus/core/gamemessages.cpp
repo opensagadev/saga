@@ -37,55 +37,7 @@ GAMEMESSAGE_s GameMessage[128] = {};
 
 static i32 GameMessageIndex;
 
-/* The public game-message type intentionally only exposes the fields used by
- * callers.  This is the backing layout consumed by the original message
- * queue; its first 0x7c bytes are either a text pointer or inline text. */
-struct GAME_MESSAGE_DATA {
-    char *text;
-    char text_buffer[0x78];
-    nuvec_s position_a; // 0x7c
-    nuvec_s target_position;
-    nuvec_s position;
-    nuvec_s start_position;
-    f32 field_0xac;
-    f32 target_scale;
-    f32 field_0xb4;
-    f32 field_0xb8;
-    f32 elapsed;
-    f32 duration;
-    f32 field_0xc4;
-    f32 field_0xc8;
-    f32 field_0xcc;
-    f32 field_0xd0;
-    f32 field_0xd4;
-    u32 flags;
-    u32 score;
-    u16 field_0xe0;
-    u16 field_0xe2;
-    u16 field_0xe4;
-    u16 icon;
-    union {
-        nuvec_s color;
-        nuhspecial_s special;
-    };
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-    u8 active;
-    u8 field_0xf9;
-    u8 field_0xfa;
-    u8 field_0xfb;
-    u8 field_0xfc;
-    u8 field_0xfd;
-    u8 field_0xfe;
-    u8 field_0xff;
-    void (*delay_fn)(GAMEMESSAGE_s *);
-    void (*tick_fn)(GAMEMESSAGE_s *);
-    void (*update_fn)(GAMEMESSAGE_s *);
-    void *field_0x10c;
-    void (*end_fn)(GAMEMESSAGE_s *);
-};
+#include "legoapi/menus/core/gamemessages_types.h"
 
 static_assert(sizeof(GAME_MESSAGE_DATA) == sizeof(GAMEMESSAGE_s), "game message backing layout");
 static_assert(offsetof(GAME_MESSAGE_DATA, tick_fn) == offsetof(GAMEMESSAGE_s, tick_fn),
@@ -260,89 +212,7 @@ void AddFancyMessage(char *text, float x, float y, float scale, float duration, 
     AddFancyMessageRGB(text, x, y, scale, duration, message_id, red, green, blue);
 }
 
-void EndScoreMessage(GAMEMESSAGE_s *message) {
-    GAME_MESSAGE_DATA *data = reinterpret_cast<GAME_MESSAGE_DATA *>(message);
-    if (CoinsGoToMainTotal() != 0) {
-        i32 icon = static_cast<i16>(data->icon);
-        if (data->icon != 0xffff) {
-            if (static_cast<u32>(icon - 0xb7) < 4) {
-                icon -= 4;
-            } else if (static_cast<u32>(icon - 0xbf) < 4) {
-                icon -= 4;
-            } else if (static_cast<u32>(icon - 0xc7) < 4) {
-                icon -= 4;
-            } else if (static_cast<u32>(icon - 0xd5) < 4) {
-                icon += 4;
-            }
-            cointotal_i_obj[static_cast<i8>(data->field_0xfd)] = icon;
-        }
-        CoinTotalScale = 1.5f;
-
-        if (SuperStory != 0) {
-            IncreaseScore(&SuperStoryScore, data->score, 0);
-        } else {
-            WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-            if (world->area != NULL && (world->area->flags & 0x100) != 0) {
-                if (static_cast<u32>(BonusCoinTotal) < BonusCoinTarget) {
-                    IncreaseScore(reinterpret_cast<u32 *>(&BonusCoinTotal), data->score, 0);
-                    if (static_cast<u32>(BonusCoinTotal) >= BonusCoinTarget) {
-                        BonusCoinTotal = static_cast<i32>(BonusCoinTarget);
-                        SetBonusWinner(static_cast<i8>(data->field_0xfd));
-                        BonusWinFlag = 0;
-                        NewMenu(32, -1, -1);
-                        PlaySfx("MK-Panel", NULL);
-                        ResetGameMessages();
-                    }
-                }
-            } else {
-                IncreaseScore(&Game.coins, data->score, 1);
-            }
-        }
-    } else {
-        const i8 player_index = static_cast<i8>(data->field_0xfd);
-        if (static_cast<u8>(player_index) > 1 || Player[player_index] == NULL ||
-            Player[player_index]->coinpacket == NULL) {
-            goto play_counter_sound;
-        }
-
-        GameObject_s *object = Player[player_index];
-        COINPACKET *packet = object->coinpacket;
-        const u32 old_coins = packet->coins;
-        if (static_cast<i16>(data->icon) != -1) {
-            packet->lastcoin = data->icon;
-        }
-
-        if (BonusWinner == -1) {
-            IncreaseScore(&packet->coins, data->score, 1);
-            packet = object->coinpacket;
-            packet->scale = 1.5f;
-        }
-        if (BuildUpDone == 0) {
-            BuildUpScale = 1.5f;
-        }
-        if (Arcade != 0) {
-            Arcade_CoinCollected(static_cast<i8>(data->field_0xfd), &packet->coins, old_coins);
-            goto play_counter_sound;
-        }
-        if (BonusArea == 0 || BonusWinner != -1 || packet->coins <= 999999) {
-            goto play_counter_sound;
-        }
-
-        packet->coins = 1000000;
-        SetBonusWinner(static_cast<i8>(data->field_0xfd));
-        BonusWinFlag = 0;
-        NewMenu(31, -1, -1);
-        PlaySfx("MK-Panel", NULL);
-        ResetGameMessages();
-    }
-
-play_counter_sound:
-    if (DoubleScoreTime > 0.0f) {
-        PlayRepeatSfx("Counter", -1, 0.0f, 2, 0.1f, NULL);
-    } else {
-        PlaySfx("Counter", NULL);
-    }
-}
+void EndScoreMessage(GAMEMESSAGE_s *message);
 
 void ResetGameMessages() {
     for (i32 i = 0; i < 128; i++) {

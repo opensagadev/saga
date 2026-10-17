@@ -196,7 +196,6 @@ build:target --per_file_copt=^src/legoapi/world/levels/episode\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/episode\.cpp$@-fno-ipa-sra
 build:target --per_file_copt=^src/legoapi/world/levels/episodes\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_gizactions\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_gizmopickups\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/gizbuildit\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/gizbuildit\.cpp$@-fno-ipa-sra
 # Turret lookup and hint traversal use the same optimized leaf/loop forms as
@@ -220,9 +219,7 @@ build:target --per_file_copt=^src/legoapi/gizmos/traps/gizbombgen\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/gizmoblowups\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/gizmopickups\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/traps/gizforce\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_gizpanel\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/gizmos/object/gizpanel\.cpp$@-O2
-build:target --per_file_copt=^src/legoapi/gizmos/object/gizpanel\.cpp$@-ftree-vectorize
+build:target --per_file_copt=^src/legoapi/gizmos/object/gizpanel\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/fx/gizmopickups\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/object/gizobstacle\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/transport/gizportal\.cpp$@-O3
@@ -236,7 +233,7 @@ build:target --per_file_copt=^src/legoapi/gizmos/fx/guidelines\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/object/hatmachine\.cpp$@-O3
 # Ledge progress, loading, and attachment code use the target's compact O2
 # lowering; this also preserves the unit's already-exact registration leaves.
-build:target --per_file_copt=^src/legoapi/gizmos/transport/ledges\.cpp$@-O2
+build:target --per_file_copt=^src/legoapi/gizmos/transport/ledges\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/object/lever\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/trigger/gizminicut\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/door/plugs\.cpp$@-O3

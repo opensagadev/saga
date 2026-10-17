@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 82.911476,
+    "fuzzy_match_percent": 82.916275,
     "total_code": "4722419",
-    "matched_code": "652311",
-    "matched_code_percent": 13.813069,
+    "matched_code": "652387",
+    "matched_code_percent": 13.814679,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 7036,
-    "matched_functions_percent": 52.277287,
+    "matched_functions": 7035,
+    "matched_functions_percent": 52.26986,
     "total_units": 1
   },
   "text": {
@@ -42577,14 +42577,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z13ReleaseHeartsv",
-          "demangled_name": "ReleaseHearts()",
-          "address": 1989104,
-          "offset": 1099136,
-          "size": 352,
-          "match_percent": 86.03636
-        },
-        {
           "name": "_Z16RegenerateHeartsP12GameObject_s",
           "demangled_name": "RegenerateHearts(GameObject_s*)",
           "address": 4814992,
@@ -51324,132 +51316,6 @@
       ]
     },
     {
-      "name": "legoapi/gizmo/gizmos/gizmos_gizmopickups.cpp.o",
-      "source": "src/legoapi/gizmo/gizmos/gizmos_gizmopickups.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizmos_gizmopickups.o",
-      "functions": [
-        {
-          "name": "_Z23GizmoPickup_CollectCoinP11WORLDINFO_sP7nuvec_siiP12GameObject_si",
-          "demangled_name": "GizmoPickup_CollectCoin(WORLDINFO_s*, nuvec_s*, int, int, GameObject_s*, int)",
-          "address": 1984864,
-          "offset": 1094896,
-          "size": 973,
-          "match_percent": 49.692642
-        }
-      ]
-    },
-    {
-      "name": "legoapi/gizmo/gizmos/gizmos_gizpanel.cpp.o",
-      "source": "src/legoapi/gizmo/gizmos/gizmos_gizpanel.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizmos_gizpanel.o",
-      "functions": [
-        {
-          "name": "_Z24GizPanel_GetAbsTargetPosP10GIZPANEL_sP7nuvec_si",
-          "demangled_name": "GizPanel_GetAbsTargetPos(GIZPANEL_s*, nuvec_s*, int)",
-          "address": 2000336,
-          "offset": 1110368,
-          "size": 272,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z24GizPanel_GetAbsPlayerPosP10GIZPANEL_sP7nuvec_s",
-          "demangled_name": "GizPanel_GetAbsPlayerPos(GIZPANEL_s*, nuvec_s*)",
-          "address": 2003952,
-          "offset": 1113984,
-          "size": 94,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z14GizPanel_ResetP10GIZPANEL_s",
-          "demangled_name": "GizPanel_Reset(GIZPANEL_s*)",
-          "address": 2004048,
-          "offset": 1114080,
-          "size": 374,
-          "match_percent": 84.822784
-        },
-        {
-          "name": "_Z20GizPanel_CanUsePanelP12GameObject_sP10GIZPANEL_s",
-          "demangled_name": "GizPanel_CanUsePanel(GameObject_s*, GIZPANEL_s*)",
-          "address": 2004720,
-          "offset": 1114752,
-          "size": 378,
-          "match_percent": 93.945656
-        },
-        {
-          "name": "_ZN10GIZPANEL_s22GetMechObjectInterfaceEv",
-          "demangled_name": "GIZPANEL_s::GetMechObjectInterface()",
-          "address": 2005104,
-          "offset": 1115136,
-          "size": 99,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN10GIZPANEL_s24ClearMechObjectInterfaceEv",
-          "demangled_name": "GIZPANEL_s::ClearMechObjectInterface()",
-          "address": 2005216,
-          "offset": 1115248,
-          "size": 31,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z19GizPanel_FindByNameP11WORLDINFO_sPc",
-          "demangled_name": "GizPanel_FindByName(WORLDINFO_s*, char*)",
-          "address": 2005248,
-          "offset": 1115280,
-          "size": 125,
-          "match_percent": 99.6875
-        },
-        {
-          "name": "_Z20GizPanel_FindNearestP11WORLDINFO_sP7nuvec_sP12GameObject_sPfi",
-          "demangled_name": "GizPanel_FindNearest(WORLDINFO_s*, nuvec_s*, GameObject_s*, float*, int)",
-          "address": 2005376,
-          "offset": 1115408,
-          "size": 769,
-          "match_percent": 69.21978
-        },
-        {
-          "name": "_Z18GizPanel_BeingUsedP10GIZPANEL_s",
-          "demangled_name": "GizPanel_BeingUsed(GIZPANEL_s*)",
-          "address": 2006160,
-          "offset": 1116192,
-          "size": 14,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z16GizPanel_PlaySfxPcP7nuvec_si",
-          "demangled_name": "GizPanel_PlaySfx(char*, nuvec_s*, int)",
-          "address": 2006576,
-          "offset": 1116608,
-          "size": 266,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z12GizPanel_UseR12GameObject_sR10GIZPANEL_s",
-          "demangled_name": "GizPanel_Use(GameObject_s&, GIZPANEL_s&)",
-          "address": 2006848,
-          "offset": 1116880,
-          "size": 737,
-          "match_percent": 98.87248
-        },
-        {
-          "name": "_Z17GizPanel_MoveCodeP11WORLDINFO_sP12GameObject_si",
-          "demangled_name": "GizPanel_MoveCode(WORLDINFO_s*, GameObject_s*, int)",
-          "address": 2007600,
-          "offset": 1117632,
-          "size": 1188,
-          "match_percent": 96.72481
-        },
-        {
-          "name": "_Z19GizPanel_UpdateHintP6HINT_s",
-          "demangled_name": "GizPanel_UpdateHint(HINT_s*)",
-          "address": 2008800,
-          "offset": 1118832,
-          "size": 2049,
-          "match_percent": 77.64128
-        }
-      ]
-    },
-    {
       "name": "legoapi/gizmo/gizmos/gizmos_grabber.cpp.o",
       "source": "src/legoapi/gizmo/gizmos/gizmos_grabber.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizmos_grabber.o",
@@ -52508,6 +52374,14 @@
           "match_percent": 99.35294
         },
         {
+          "name": "_Z36GameMsg_DrawAdjustNewPos_CoinToTotalP13GAMEMESSAGE_s",
+          "demangled_name": "GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s*)",
+          "address": 1977936,
+          "offset": 1087968,
+          "size": 44,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL18Pup_CollectCharKitP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
           "demangled_name": "Pup_CollectCharKit(WORLDINFO_s*, GIZMOPICKUP_s*, int, GameObject_s*, int)",
           "address": 1977984,
@@ -52524,12 +52398,60 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL22PartMove_VehiclePickupP6PART_sf",
+          "demangled_name": "PartMove_VehiclePickup(PART_s*, float)",
+          "address": 1978576,
+          "offset": 1088608,
+          "size": 434,
+          "match_percent": 99.89888
+        },
+        {
+          "name": "_ZL18PowerUp_ImpactPartP6PART_s",
+          "demangled_name": "PowerUp_ImpactPart(PART_s*)",
+          "address": 1979024,
+          "offset": 1089056,
+          "size": 200,
+          "match_percent": 99.8
+        },
+        {
+          "name": "_ZL21PartDraw_VehicleHeartP6PART_s",
+          "demangled_name": "PartDraw_VehicleHeart(PART_s*)",
+          "address": 1979232,
+          "offset": 1089264,
+          "size": 381,
+          "match_percent": 99.94949
+        },
+        {
+          "name": "_ZL21PartMove_VehicleHeartP6PART_sf",
+          "demangled_name": "PartMove_VehicleHeart(PART_s*, float)",
+          "address": 1979616,
+          "offset": 1089648,
+          "size": 321,
+          "match_percent": 98.13043
+        },
+        {
+          "name": "_Z15EndScoreMessageP13GAMEMESSAGE_s",
+          "demangled_name": "EndScoreMessage(GAMEMESSAGE_s*)",
+          "address": 1979952,
+          "offset": 1089984,
+          "size": 936,
+          "match_percent": 93.95049
+        },
+        {
+          "name": "_ZL17PowerUp_UpdateMsgP13GAMEMESSAGE_s",
+          "demangled_name": "PowerUp_UpdateMsg(GAMEMESSAGE_s*)",
+          "address": 1980896,
+          "offset": 1090928,
+          "size": 145,
+          "match_percent": 99.969696
+        },
+        {
           "name": "_ZL19Pup_CollectRedBrickP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
           "demangled_name": "Pup_CollectRedBrick(WORLDINFO_s*, GIZMOPICKUP_s*, int, GameObject_s*, int)",
           "address": 1981056,
           "offset": 1091088,
           "size": 415,
-          "match_percent": 88.55056
+          "match_percent": 88.60674
         },
         {
           "name": "_ZL20Pup_UpdatePurpleCoinP11WORLDINFO_sP13GIZMOPICKUP_s",
@@ -52540,12 +52462,60 @@
           "match_percent": 90.62963
         },
         {
+          "name": "_ZL15PartImpact_CoinP6PART_s",
+          "demangled_name": "PartImpact_Coin(PART_s*)",
+          "address": 1981712,
+          "offset": 1091744,
+          "size": 314,
+          "match_percent": 99.95946
+        },
+        {
+          "name": "_ZL16PowerUp_DrawPartP6PART_s",
+          "demangled_name": "PowerUp_DrawPart(PART_s*)",
+          "address": 1982032,
+          "offset": 1092064,
+          "size": 243,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL18PartExtra_BlueCoinP6PART_s",
+          "demangled_name": "PartExtra_BlueCoin(PART_s*)",
+          "address": 1982288,
+          "offset": 1092320,
+          "size": 226,
+          "match_percent": 78.94118
+        },
+        {
+          "name": "_ZL20PartExtra_PurpleCoinP6PART_s",
+          "demangled_name": "PartExtra_PurpleCoin(PART_s*)",
+          "address": 1982528,
+          "offset": 1092560,
+          "size": 226,
+          "match_percent": 78.94118
+        },
+        {
           "name": "_ZL18Pup_UpdateBlueCoinP11WORLDINFO_sP13GIZMOPICKUP_s",
           "demangled_name": "Pup_UpdateBlueCoin(WORLDINFO_s*, GIZMOPICKUP_s*)",
           "address": 1982768,
           "offset": 1092800,
           "size": 226,
           "match_percent": 90.62963
+        },
+        {
+          "name": "_ZL14PowerUp_EndMsgP13GAMEMESSAGE_s",
+          "demangled_name": "PowerUp_EndMsg(GAMEMESSAGE_s*)",
+          "address": 1983008,
+          "offset": 1093040,
+          "size": 320,
+          "match_percent": 90.81944
+        },
+        {
+          "name": "_Z17PowerUp_ParticlesP11WORLDINFO_sP7nuvec_s",
+          "demangled_name": "PowerUp_Particles(WORLDINFO_s*, nuvec_s*)",
+          "address": 1983328,
+          "offset": 1093360,
+          "size": 142,
+          "match_percent": 100.0
         },
         {
           "name": "_ZL17Pup_UpdatePowerUpP11WORLDINFO_sP13GIZMOPICKUP_s",
@@ -52556,12 +52526,44 @@
           "match_percent": 99.947365
         },
         {
+          "name": "_ZL18PowerUp_UpdatePartP6PART_s",
+          "demangled_name": "PowerUp_UpdatePart(PART_s*)",
+          "address": 1983552,
+          "offset": 1093584,
+          "size": 200,
+          "match_percent": 99.933334
+        },
+        {
+          "name": "_Z14CollectPowerUpP12GameObject_sP7nuvec_sti",
+          "demangled_name": "CollectPowerUp(GameObject_s*, nuvec_s*, unsigned short, int)",
+          "address": 1983760,
+          "offset": 1093792,
+          "size": 819,
+          "match_percent": 91.44633
+        },
+        {
           "name": "_ZL18Pup_CollectPowerUpP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
           "demangled_name": "Pup_CollectPowerUp(WORLDINFO_s*, GIZMOPICKUP_s*, int, GameObject_s*, int)",
           "address": 1984592,
           "offset": 1094624,
           "size": 61,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z14PowerUp_UpdateP12GameObject_s",
+          "demangled_name": "PowerUp_Update(GameObject_s*)",
+          "address": 1984656,
+          "offset": 1094688,
+          "size": 201,
+          "match_percent": 99.95122
+        },
+        {
+          "name": "_Z23GizmoPickup_CollectCoinP11WORLDINFO_sP7nuvec_siiP12GameObject_si",
+          "demangled_name": "GizmoPickup_CollectCoin(WORLDINFO_s*, nuvec_s*, int, int, GameObject_s*, int)",
+          "address": 1984864,
+          "offset": 1094896,
+          "size": 973,
+          "match_percent": 49.692642
         },
         {
           "name": "_Z15Pup_CollectCoinP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
@@ -52572,6 +52574,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z14CollectMinikitP7nuvec_sPci",
+          "demangled_name": "CollectMinikit(nuvec_s*, char*, int)",
+          "address": 1985920,
+          "offset": 1095952,
+          "size": 667,
+          "match_percent": 86.95652
+        },
+        {
           "name": "_ZL18Pup_CollectMinikitP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
           "demangled_name": "Pup_CollectMinikit(WORLDINFO_s*, GIZMOPICKUP_s*, int, GameObject_s*, int)",
           "address": 1986592,
@@ -52580,12 +52590,92 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z16AddTorpedoAsPartP7nuvec_sS0_ff",
+          "demangled_name": "AddTorpedoAsPart(nuvec_s*, nuvec_s*, float, float)",
+          "address": 1986688,
+          "offset": 1096720,
+          "size": 439,
+          "match_percent": 95.70526
+        },
+        {
+          "name": "_Z14AddHeartAsPartP12GameObject_sP7nuvec_sS2_ff",
+          "demangled_name": "AddHeartAsPart(GameObject_s*, nuvec_s*, nuvec_s*, float, float)",
+          "address": 1987136,
+          "offset": 1097168,
+          "size": 363,
+          "match_percent": 99.987656
+        },
+        {
+          "name": "_Z15PowerUp_AddPartP7nuvec_sS0_ff",
+          "demangled_name": "PowerUp_AddPart(nuvec_s*, nuvec_s*, float, float)",
+          "address": 1987504,
+          "offset": 1097536,
+          "size": 359,
+          "match_percent": 98.44304
+        },
+        {
+          "name": "_Z15AddCoinsAsPartsiP7nuvec_sS0_ff",
+          "demangled_name": "AddCoinsAsParts(int, nuvec_s*, nuvec_s*, float, float)",
+          "address": 1987872,
+          "offset": 1097904,
+          "size": 535,
+          "match_percent": 91.309525
+        },
+        {
+          "name": "_Z19TotalLevelCoinTallyP11WORLDINFO_sPjS1_S1_S1_S1_S1_S1_",
+          "demangled_name": "TotalLevelCoinTally(WORLDINFO_s*, unsigned int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*)",
+          "address": 1988416,
+          "offset": 1098448,
+          "size": 225,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z15CollectHitPointP12GameObject_sP7nuvec_si",
+          "demangled_name": "CollectHitPoint(GameObject_s*, nuvec_s*, int)",
+          "address": 1988656,
+          "offset": 1098688,
+          "size": 374,
+          "match_percent": 96.84524
+        },
+        {
           "name": "_ZL16Pup_CollectHeartP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
           "demangled_name": "Pup_CollectHeart(WORLDINFO_s*, GIZMOPICKUP_s*, int, GameObject_s*, int)",
           "address": 1989040,
           "offset": 1099072,
           "size": 53,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z13ReleaseHeartsv",
+          "demangled_name": "ReleaseHearts()",
+          "address": 1989104,
+          "offset": 1099136,
+          "size": 352,
+          "match_percent": 86.03636
+        },
+        {
+          "name": "_Z11SetCoinTypeiP13GIZMOPICKUP_s",
+          "demangled_name": "SetCoinType(int, GIZMOPICKUP_s*)",
+          "address": 1989456,
+          "offset": 1099488,
+          "size": 161,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL15PartStolen_CoinP6PART_s",
+          "demangled_name": "PartStolen_Coin(PART_s*)",
+          "address": 1989632,
+          "offset": 1099664,
+          "size": 255,
+          "match_percent": 90.83077
+        },
+        {
+          "name": "_Z13PartStop_CoinP6PART_s",
+          "demangled_name": "PartStop_Coin(PART_s*)",
+          "address": 1989888,
+          "offset": 1099920,
+          "size": 316,
+          "match_percent": 94.871796
         }
       ]
     },
@@ -54486,7 +54576,7 @@
           "address": 1996736,
           "offset": 1106768,
           "size": 3181,
-          "match_percent": 51.927406
+          "match_percent": 51.88296
         },
         {
           "name": "_ZL18GizPanel_AddGizmosP10GIZMOSYS_siPvS1_",
@@ -54494,7 +54584,7 @@
           "address": 1999920,
           "offset": 1109952,
           "size": 152,
-          "match_percent": 95.29412
+          "match_percent": 95.0
         },
         {
           "name": "_ZL23GizPanels_StoreProgressPvS_S_",
@@ -54510,6 +54600,14 @@
           "address": 2000256,
           "offset": 1110288,
           "size": 75,
+          "match_percent": 99.375
+        },
+        {
+          "name": "_Z24GizPanel_GetAbsTargetPosP10GIZPANEL_sP7nuvec_si",
+          "demangled_name": "GizPanel_GetAbsTargetPos(GIZPANEL_s*, nuvec_s*, int)",
+          "address": 2000336,
+          "offset": 1110368,
+          "size": 272,
           "match_percent": 100.0
         },
         {
@@ -54518,7 +54616,23 @@
           "address": 2000608,
           "offset": 1110640,
           "size": 3337,
-          "match_percent": 35.285267
+          "match_percent": 42.36207
+        },
+        {
+          "name": "_Z24GizPanel_GetAbsPlayerPosP10GIZPANEL_sP7nuvec_s",
+          "demangled_name": "GizPanel_GetAbsPlayerPos(GIZPANEL_s*, nuvec_s*)",
+          "address": 2003952,
+          "offset": 1113984,
+          "size": 94,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z14GizPanel_ResetP10GIZPANEL_s",
+          "demangled_name": "GizPanel_Reset(GIZPANEL_s*)",
+          "address": 2004048,
+          "offset": 1114080,
+          "size": 374,
+          "match_percent": 84.822784
         },
         {
           "name": "_ZL15GizPanels_ResetPvS_S_",
@@ -54526,7 +54640,7 @@
           "address": 2004432,
           "offset": 1114464,
           "size": 197,
-          "match_percent": 98.48485
+          "match_percent": 98.93939
         },
         {
           "name": "_ZL17GizPanel_ActivateP7GIZMO_si",
@@ -54537,12 +54651,92 @@
           "match_percent": 44.782608
         },
         {
+          "name": "_Z20GizPanel_CanUsePanelP12GameObject_sP10GIZPANEL_s",
+          "demangled_name": "GizPanel_CanUsePanel(GameObject_s*, GIZPANEL_s*)",
+          "address": 2004720,
+          "offset": 1114752,
+          "size": 378,
+          "match_percent": 93.945656
+        },
+        {
+          "name": "_ZN10GIZPANEL_s22GetMechObjectInterfaceEv",
+          "demangled_name": "GIZPANEL_s::GetMechObjectInterface()",
+          "address": 2005104,
+          "offset": 1115136,
+          "size": 99,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN10GIZPANEL_s24ClearMechObjectInterfaceEv",
+          "demangled_name": "GIZPANEL_s::ClearMechObjectInterface()",
+          "address": 2005216,
+          "offset": 1115248,
+          "size": 31,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z19GizPanel_FindByNameP11WORLDINFO_sPc",
+          "demangled_name": "GizPanel_FindByName(WORLDINFO_s*, char*)",
+          "address": 2005248,
+          "offset": 1115280,
+          "size": 125,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z20GizPanel_FindNearestP11WORLDINFO_sP7nuvec_sP12GameObject_sPfi",
+          "demangled_name": "GizPanel_FindNearest(WORLDINFO_s*, nuvec_s*, GameObject_s*, float*, int)",
+          "address": 2005376,
+          "offset": 1115408,
+          "size": 769,
+          "match_percent": 69.3022
+        },
+        {
+          "name": "_Z18GizPanel_BeingUsedP10GIZPANEL_s",
+          "demangled_name": "GizPanel_BeingUsed(GIZPANEL_s*)",
+          "address": 2006160,
+          "offset": 1116192,
+          "size": 14,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z22GizPanel_RegisterGizmoi",
           "demangled_name": "GizPanel_RegisterGizmo(int)",
           "address": 2006176,
           "offset": 1116208,
           "size": 386,
           "match_percent": 99.50769
+        },
+        {
+          "name": "_Z16GizPanel_PlaySfxPcP7nuvec_si",
+          "demangled_name": "GizPanel_PlaySfx(char*, nuvec_s*, int)",
+          "address": 2006576,
+          "offset": 1116608,
+          "size": 266,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z12GizPanel_UseR12GameObject_sR10GIZPANEL_s",
+          "demangled_name": "GizPanel_Use(GameObject_s&, GIZPANEL_s&)",
+          "address": 2006848,
+          "offset": 1116880,
+          "size": 737,
+          "match_percent": 98.87248
+        },
+        {
+          "name": "_Z17GizPanel_MoveCodeP11WORLDINFO_sP12GameObject_si",
+          "demangled_name": "GizPanel_MoveCode(WORLDINFO_s*, GameObject_s*, int)",
+          "address": 2007600,
+          "offset": 1117632,
+          "size": 1188,
+          "match_percent": 96.72481
+        },
+        {
+          "name": "_Z19GizPanel_UpdateHintP6HINT_s",
+          "demangled_name": "GizPanel_UpdateHint(HINT_s*)",
+          "address": 2008800,
+          "offset": 1118832,
+          "size": 2049,
+          "match_percent": 77.58116
         }
       ]
     },
@@ -55481,7 +55675,7 @@
           "address": 1961200,
           "offset": 1071232,
           "size": 847,
-          "match_percent": 80.81776
+          "match_percent": 85.990654
         },
         {
           "name": "_ZL20Ledges_ClearProgressPvS_",
@@ -55489,7 +55683,7 @@
           "address": 1962048,
           "offset": 1072080,
           "size": 66,
-          "match_percent": 100.0
+          "match_percent": 24.928572
         },
         {
           "name": "_ZL27Ledges_AllocateProgressDataP9variptr_uS0_",
@@ -55521,7 +55715,7 @@
           "address": 1962608,
           "offset": 1072640,
           "size": 1749,
-          "match_percent": 75.83879
+          "match_percent": 77.45088
         },
         {
           "name": "_ZL11Ledges_LoadPvS_",
@@ -55537,7 +55731,15 @@
           "address": 1964704,
           "offset": 1074736,
           "size": 182,
-          "match_percent": 93.43636
+          "match_percent": 65.98182
+        },
+        {
+          "name": "_Z17Ledge_FindNearestP11WORLDINFO_sP7nuvec_sP12GameObject_sPf",
+          "demangled_name": "Ledge_FindNearest(WORLDINFO_s*, nuvec_s*, GameObject_s*, float*)",
+          "address": 1964896,
+          "offset": 1074928,
+          "size": 373,
+          "match_percent": 90.15455
         },
         {
           "name": "_Z20Ledges_RegisterGizmoi",
@@ -55545,7 +55747,7 @@
           "address": 1965280,
           "offset": 1075312,
           "size": 372,
-          "match_percent": 99.409836
+          "match_percent": 99.491806
         },
         {
           "name": "_Z14Ledge_MoveCodeP11WORLDINFO_sP12GameObject_s",
@@ -55553,7 +55755,7 @@
           "address": 1965664,
           "offset": 1075696,
           "size": 1578,
-          "match_percent": 72.100914
+          "match_percent": 72.02141
         }
       ]
     },
@@ -58264,14 +58466,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z19TotalLevelCoinTallyP11WORLDINFO_sPjS1_S1_S1_S1_S1_S1_",
-          "demangled_name": "TotalLevelCoinTally(WORLDINFO_s*, unsigned int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*)",
-          "address": 1988416,
-          "offset": 1098448,
-          "size": 225,
-          "match_percent": 88.5
-        },
-        {
           "name": "_Z15ResetCoinPacketP12COINPACKET_s",
           "demangled_name": "ResetCoinPacket(COINPACKET_s*)",
           "address": 4988336,
@@ -59592,14 +59786,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z14CollectMinikitP7nuvec_sPci",
-          "demangled_name": "CollectMinikit(nuvec_s*, char*, int)",
-          "address": 1985920,
-          "offset": 1095952,
-          "size": 667,
-          "match_percent": 87.10145
-        },
-        {
           "name": "_Z20AllMiniKits_LSW_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
           "demangled_name": "AllMiniKits_LSW_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
           "address": 2020352,
@@ -59645,7 +59831,7 @@
           "address": 2048304,
           "offset": 1158336,
           "size": 2863,
-          "match_percent": 66.38368
+          "match_percent": 66.31424
         },
         {
           "name": "_Z19ResetMinikitCounterv",
@@ -59693,7 +59879,7 @@
           "address": 4808448,
           "offset": 3918480,
           "size": 488,
-          "match_percent": 84.28788
+          "match_percent": 83.22727
         },
         {
           "name": "_Z22CharacterMiniKits_LoadP12COLLECTION_sP11WORLDINFO_sP9variptr_uS4_",
@@ -60821,22 +61007,6 @@
           "offset": 300048,
           "size": 352,
           "match_percent": 99.60227
-        },
-        {
-          "name": "_Z36GameMsg_DrawAdjustNewPos_CoinToTotalP13GAMEMESSAGE_s",
-          "demangled_name": "GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s*)",
-          "address": 1977936,
-          "offset": 1087968,
-          "size": 44,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z14PowerUp_UpdateP12GameObject_s",
-          "demangled_name": "PowerUp_Update(GameObject_s*)",
-          "address": 1984656,
-          "offset": 1094688,
-          "size": 201,
-          "match_percent": 99.95122
         },
         {
           "name": "_Z20GameObjOwnsAnyCablesP12GameObject_s",
@@ -64070,14 +64240,6 @@
           "offset": 31168,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_Z15EndScoreMessageP13GAMEMESSAGE_s",
-          "demangled_name": "EndScoreMessage(GAMEMESSAGE_s*)",
-          "address": 1979952,
-          "offset": 1089984,
-          "size": 936,
-          "match_percent": 93.876236
         },
         {
           "name": "_Z17ResetGameMessagesv",
@@ -69619,14 +69781,6 @@
           "offset": 8400,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_Z17Ledge_FindNearestP11WORLDINFO_sP7nuvec_sP12GameObject_sPf",
-          "demangled_name": "Ledge_FindNearest(WORLDINFO_s*, nuvec_s*, GameObject_s*, float*)",
-          "address": 1964896,
-          "offset": 1074928,
-          "size": 373,
-          "match_percent": 90.01818
         },
         {
           "name": "_ZL19LedgeTerrain_AttachP12GameObject_stP7nuvec_sPt.part.0",
@@ -81304,7 +81458,7 @@
           "address": 1181616,
           "offset": 291648,
           "size": 3351,
-          "match_percent": 59.093166
+          "match_percent": 59.11646
         },
         {
           "name": "_Z14PartCollide_3DP6PART_s",
@@ -81329,174 +81483,6 @@
           "offset": 295312,
           "size": 630,
           "match_percent": 91.5137
-        },
-        {
-          "name": "_ZL22PartMove_VehiclePickupP6PART_sf",
-          "demangled_name": "PartMove_VehiclePickup(PART_s*, float)",
-          "address": 1978576,
-          "offset": 1088608,
-          "size": 434,
-          "match_percent": 99.89888
-        },
-        {
-          "name": "_ZL18PowerUp_ImpactPartP6PART_s",
-          "demangled_name": "PowerUp_ImpactPart(PART_s*)",
-          "address": 1979024,
-          "offset": 1089056,
-          "size": 200,
-          "match_percent": 99.8
-        },
-        {
-          "name": "_ZL21PartDraw_VehicleHeartP6PART_s",
-          "demangled_name": "PartDraw_VehicleHeart(PART_s*)",
-          "address": 1979232,
-          "offset": 1089264,
-          "size": 381,
-          "match_percent": 99.94949
-        },
-        {
-          "name": "_ZL21PartMove_VehicleHeartP6PART_sf",
-          "demangled_name": "PartMove_VehicleHeart(PART_s*, float)",
-          "address": 1979616,
-          "offset": 1089648,
-          "size": 321,
-          "match_percent": 98.13043
-        },
-        {
-          "name": "_ZL17PowerUp_UpdateMsgP13GAMEMESSAGE_s",
-          "demangled_name": "PowerUp_UpdateMsg(GAMEMESSAGE_s*)",
-          "address": 1980896,
-          "offset": 1090928,
-          "size": 145,
-          "match_percent": 99.969696
-        },
-        {
-          "name": "_ZL15PartImpact_CoinP6PART_s",
-          "demangled_name": "PartImpact_Coin(PART_s*)",
-          "address": 1981712,
-          "offset": 1091744,
-          "size": 314,
-          "match_percent": 99.824326
-        },
-        {
-          "name": "_ZL16PowerUp_DrawPartP6PART_s",
-          "demangled_name": "PowerUp_DrawPart(PART_s*)",
-          "address": 1982032,
-          "offset": 1092064,
-          "size": 243,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL18PartExtra_BlueCoinP6PART_s",
-          "demangled_name": "PartExtra_BlueCoin(PART_s*)",
-          "address": 1982288,
-          "offset": 1092320,
-          "size": 226,
-          "match_percent": 78.94118
-        },
-        {
-          "name": "_ZL20PartExtra_PurpleCoinP6PART_s",
-          "demangled_name": "PartExtra_PurpleCoin(PART_s*)",
-          "address": 1982528,
-          "offset": 1092560,
-          "size": 226,
-          "match_percent": 78.94118
-        },
-        {
-          "name": "_ZL14PowerUp_EndMsgP13GAMEMESSAGE_s",
-          "demangled_name": "PowerUp_EndMsg(GAMEMESSAGE_s*)",
-          "address": 1983008,
-          "offset": 1093040,
-          "size": 320,
-          "match_percent": 90.81944
-        },
-        {
-          "name": "_Z17PowerUp_ParticlesP11WORLDINFO_sP7nuvec_s",
-          "demangled_name": "PowerUp_Particles(WORLDINFO_s*, nuvec_s*)",
-          "address": 1983328,
-          "offset": 1093360,
-          "size": 142,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL18PowerUp_UpdatePartP6PART_s",
-          "demangled_name": "PowerUp_UpdatePart(PART_s*)",
-          "address": 1983552,
-          "offset": 1093584,
-          "size": 200,
-          "match_percent": 99.933334
-        },
-        {
-          "name": "_Z14CollectPowerUpP12GameObject_sP7nuvec_sti",
-          "demangled_name": "CollectPowerUp(GameObject_s*, nuvec_s*, unsigned short, int)",
-          "address": 1983760,
-          "offset": 1093792,
-          "size": 819,
-          "match_percent": 91.36158
-        },
-        {
-          "name": "_Z16AddTorpedoAsPartP7nuvec_sS0_ff",
-          "demangled_name": "AddTorpedoAsPart(nuvec_s*, nuvec_s*, float, float)",
-          "address": 1986688,
-          "offset": 1096720,
-          "size": 439,
-          "match_percent": 95.70526
-        },
-        {
-          "name": "_Z14AddHeartAsPartP12GameObject_sP7nuvec_sS2_ff",
-          "demangled_name": "AddHeartAsPart(GameObject_s*, nuvec_s*, nuvec_s*, float, float)",
-          "address": 1987136,
-          "offset": 1097168,
-          "size": 363,
-          "match_percent": 99.987656
-        },
-        {
-          "name": "_Z15PowerUp_AddPartP7nuvec_sS0_ff",
-          "demangled_name": "PowerUp_AddPart(nuvec_s*, nuvec_s*, float, float)",
-          "address": 1987504,
-          "offset": 1097536,
-          "size": 359,
-          "match_percent": 98.44304
-        },
-        {
-          "name": "_Z15AddCoinsAsPartsiP7nuvec_sS0_ff",
-          "demangled_name": "AddCoinsAsParts(int, nuvec_s*, nuvec_s*, float, float)",
-          "address": 1987872,
-          "offset": 1097904,
-          "size": 535,
-          "match_percent": 91.309525
-        },
-        {
-          "name": "_Z15CollectHitPointP12GameObject_sP7nuvec_si",
-          "demangled_name": "CollectHitPoint(GameObject_s*, nuvec_s*, int)",
-          "address": 1988656,
-          "offset": 1098688,
-          "size": 374,
-          "match_percent": 96.84524
-        },
-        {
-          "name": "_Z11SetCoinTypeiP13GIZMOPICKUP_s",
-          "demangled_name": "SetCoinType(int, GIZMOPICKUP_s*)",
-          "address": 1989456,
-          "offset": 1099488,
-          "size": 161,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL15PartStolen_CoinP6PART_s",
-          "demangled_name": "PartStolen_Coin(PART_s*)",
-          "address": 1989632,
-          "offset": 1099664,
-          "size": 255,
-          "match_percent": 90.6
-        },
-        {
-          "name": "_Z13PartStop_CoinP6PART_s",
-          "demangled_name": "PartStop_Coin(PART_s*)",
-          "address": 1989888,
-          "offset": 1099920,
-          "size": 316,
-          "match_percent": 94.52564
         },
         {
           "name": "_Z17Asteroid_PartKillP6PART_si",
@@ -81592,7 +81578,7 @@
           "address": 4865392,
           "offset": 3975424,
           "size": 133,
-          "match_percent": 100.0
+          "match_percent": 98.645836
         },
         {
           "name": "_Z16PartUpdate_HeartP6PART_s",
@@ -129713,7 +129699,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 459,
+    "bazel_units": 457,
     "functions": 13454,
     "assigned_functions": 12843,
     "ambiguous_functions": 284,

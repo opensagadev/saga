@@ -199,64 +199,7 @@ void KeepWeaponOut(GameObject_s *object) {
     object->field_0xef8 |= GAMEOBJECT_EF8_FLAG_KEEP_WEAPON_OUT;
 }
 
-i32 ReleaseHearts() {
-    GameObject_s *player = Player[0];
-    i32 missing_hitpoints;
-    i32 total_hitpoints;
-    if (player != NULL && player->apiobj.field_0x287 == 0) {
-        total_hitpoints = player->hitpoints;
-        const i32 current_hitpoints = static_cast<i8>(player->current_hp);
-        missing_hitpoints = total_hitpoints != 0 ? total_hitpoints - current_hitpoints : 0;
-    } else {
-        total_hitpoints = 0;
-        missing_hitpoints = 0;
-    }
-
-    player = Player[1];
-    if (player != NULL && player->apiobj.field_0x287 == 0) {
-        i32 current_hitpoints = static_cast<i8>(player->current_hp);
-        i32 hitpoints = player->hitpoints;
-        if (hitpoints != 0) {
-            total_hitpoints += hitpoints;
-            missing_hitpoints += hitpoints - current_hitpoints;
-        } else if (total_hitpoints == 0) {
-            return 0;
-        }
-    } else if (total_hitpoints == 0) {
-        return 0;
-    }
-
-    if (missing_hitpoints > 0 && MAXPARTS > 0) {
-        PART_s *part = Part;
-        PART_s *end = part + MAXPARTS;
-        do {
-            if ((part->active & 1) != 0 && part->type_id == 0xcb) {
-                --missing_hitpoints;
-            }
-            ++part;
-        } while (part != end);
-    }
-
-    missing_hitpoints -= Game.save_version;
-    if (Game.save_version <= 5) {
-        missing_hitpoints += 8;
-    } else {
-        missing_hitpoints += 9;
-    }
-
-    i32 release_threshold = total_hitpoints;
-    if (missing_hitpoints <= total_hitpoints)
-        release_threshold = missing_hitpoints < 0 ? 0 : missing_hitpoints;
-
-    i32 release_chance = (release_threshold << 16) / total_hitpoints;
-    const i32 difficulty_adjustment = static_cast<i8>(adtab[adaptivedifficulty[0]][1]);
-    if (difficulty_adjustment == 1) {
-        release_chance >>= 1;
-    } else if (difficulty_adjustment == -1) {
-        release_chance += release_chance;
-    }
-    return release_chance > qrand();
-}
+i32 ReleaseHearts();
 
 void SlowWeaponOut(GameObject_s *object) {
     if (LEGOCONTEXT_WEAPONOUT != -1 && Fighting_WeaponOutActionFn != NULL) {

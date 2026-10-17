@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "legoapi/gizmos/transport/ledges.h"
 
 #include "decomp.h"
@@ -41,6 +44,109 @@ static LEDGEPIECE LedgePiece[6] = {
     {80, 'e', 1, {-0.03048f, 0.0f, 0.0f}, {0.03048f, 0.0f, 0.0f}, 0, 0},
 };
 DECOMP_ASSERT(sizeof(LEDGEPIECE) == 0x20, "LEDGEPIECE ABI");
+
+static void *Ledges_ReserveBufferSpace(void *world_info);
+
+static void Ledge_SetVisibility(GIZMO *gizmo, i32 visible);
+
+static void Ledge_Activate(GIZMO *gizmo, i32 active);
+
+static i32 Ledges_GetMaxGizmos(void *world_info);
+
+static char *Ledge_GetGizmoName(GIZMO *gizmo);
+
+static i32 Ledge_GetOutput(GIZMO *gizmo, i32, i32);
+
+static char *Ledge_GetOutputName(GIZMO *gizmo, i32 output_index);
+
+static i32 Ledge_GetNumOutputs(GIZMO *gizmo);
+
+static void Ledges_Reset(void *world_info, void *, void *progress_data);
+
+static void Ledges_ClearProgress(void *, void *progress_data);
+
+static void *Ledges_AllocateProgressData(VARIPTR *buffer, VARIPTR *end);
+
+static void Ledges_Draw(void *world_info, void *, float);
+
+static void Ledges_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_info, void *);
+
+static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *bounds_min, NUVEC *bounds_max, u16 *angle);
+
+static i32 Ledges_Load(void *world_info, void *);
+
+static void Ledges_StoreProgress(void *world_info, void *, void *progress_data);
+
+ADDGIZMOTYPE *Ledges_RegisterGizmo(i32 type_id);
+
+static inline void Ledge_TryAttach(WORLDINFO_s *world, GameObject_s *object) {
+    if (object->character_context != 0x43 && object->character_context != -1) {
+        if (object->character_context != 0 || !(object->context_animation_timer >= 0.1f))
+            return;
+    }
+    if (!(!object->apiobj.player_controlled && !(object->field_0xf01 & 0x80))) {
+        f32 radius = 3.0f * object->apiobj.field_0x1dc;
+        NUVEC minimum = {object->apiobj.collision_position.x - radius, object->apiobj.collision_position.y,
+                         object->apiobj.collision_position.z - radius};
+        NUVEC maximum = {object->apiobj.collision_position.x + radius, object->apiobj.upper_position.y,
+                         object->apiobj.collision_position.z + radius};
+        NUVEC position = {(maximum.x + minimum.x) * 0.5f, (maximum.y + minimum.y) * 0.5f,
+                          (maximum.z + minimum.z) * 0.5f};
+        u16 angle;
+        if (Ledge_AttachPoint(world, &position, &minimum, &maximum, &angle) == NULL)
+            return;
+        object->character_context = 0x5b;
+        object->context_animation = 0x9d;
+        object->apiobj.velocity = v000;
+        object->external_force = position;
+        object->apiobj.movement_facing_angle = angle + 0x8000;
+        object->launch_origin.x =
+            object->external_force.x - NU_SIN_LUT(object->apiobj.movement_facing_angle) * object->apiobj.field_0x1dc;
+        object->launch_origin.y = object->external_force.y;
+        object->launch_origin.z =
+            object->external_force.z - NU_COS_LUT(object->apiobj.movement_facing_angle) * object->apiobj.field_0x1dc;
+    }
+}
+
+static inline void Ledge_UpdateUnattached(WORLDINFO_s *world, GameObject_s *object) {
+    if (object->apiobj.field_0x27d == 0 && object->apiobj.velocity.y <= 0.0f)
+        Ledge_TryAttach(world, object);
+}
+
+void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object);
+
+// ==== src/legoapi/props/objects/ledge.cpp: declarations ====
+#include "decomp.h"
+#include "legoapi/actions/movement/jumping.h"
+#include "globals.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/gizmos/transport/ledges.h"
+#include "legoapi/render/light/surfaces.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/core/input/gamepads.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nuvec.h"
+#include "legoapi/legoapi_types.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/nu3d/nutex.h"
+
+struct AIROW_s;
+struct nuqthdr_s;
+struct nunativegscene_s;
+struct SHOPINPUT;
+
+extern f32 LEDGETERRAINLOOKAHEAD;
+extern i32 LedgeTerrain_CheckAnims;
+
+
+LEDGE *Ledge_FindNearest(WORLDINFO_s *world, NUVEC *position, GameObject_s *object, f32 *distance_squared);
+
+void LedgeTerrain_MoveCode(GameObject_s *object);
+
+i32 LedgeTerrain_SetTargetMom(GameObject_s *object);
+
+// ==== functions in original address order ====
 
 static void *Ledges_ReserveBufferSpace(void *world_info) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_info);
@@ -348,6 +454,28 @@ static void Ledges_StoreProgress(void *world_info, void *, void *progress_data) 
     }
 }
 
+LEDGE *Ledge_FindNearest(WORLDINFO_s *world, NUVEC *position, GameObject_s *object, f32 *distance_squared) {
+    LEDGE *nearest = NULL;
+    f32 best_distance = 1000000000.0f;
+    LEDGE *ledge = static_cast<LEDGE *>(world->ledges);
+    for (i32 i = 0; i < world->ledge_count; ++i, ++ledge) {
+        if (object != NULL) {
+            if ((ledge->state_flags & 3) != 3)
+                continue;
+            if ((ledge->flags & 1) && ShadowMode == 0)
+                continue;
+        }
+        f32 distance = NuVecDistSqr(position, &ledge->position, NULL);
+        if (distance < best_distance) {
+            nearest = ledge;
+            best_distance = distance;
+        }
+    }
+    if (distance_squared != NULL)
+        *distance_squared = best_distance;
+    return nearest;
+}
+
 ADDGIZMOTYPE *Ledges_RegisterGizmo(i32 type_id) {
     static ADDGIZMOTYPE addtype;
 
@@ -384,40 +512,6 @@ ADDGIZMOTYPE *Ledges_RegisterGizmo(i32 type_id) {
     addtype.fns.add_level_sfx_fn = NULL;
 
     return &addtype;
-}
-
-static inline void Ledge_TryAttach(WORLDINFO_s *world, GameObject_s *object) {
-    if (object->character_context != 0x43 && object->character_context != -1) {
-        if (object->character_context != 0 || !(object->context_animation_timer >= 0.1f))
-            return;
-    }
-    if (!(!object->apiobj.player_controlled && !(object->field_0xf01 & 0x80))) {
-        f32 radius = 3.0f * object->apiobj.field_0x1dc;
-        NUVEC minimum = {object->apiobj.collision_position.x - radius, object->apiobj.collision_position.y,
-                         object->apiobj.collision_position.z - radius};
-        NUVEC maximum = {object->apiobj.collision_position.x + radius, object->apiobj.upper_position.y,
-                         object->apiobj.collision_position.z + radius};
-        NUVEC position = {(maximum.x + minimum.x) * 0.5f, (maximum.y + minimum.y) * 0.5f,
-                          (maximum.z + minimum.z) * 0.5f};
-        u16 angle;
-        if (Ledge_AttachPoint(world, &position, &minimum, &maximum, &angle) == NULL)
-            return;
-        object->character_context = 0x5b;
-        object->context_animation = 0x9d;
-        object->apiobj.velocity = v000;
-        object->external_force = position;
-        object->apiobj.movement_facing_angle = angle + 0x8000;
-        object->launch_origin.x =
-            object->external_force.x - NU_SIN_LUT(object->apiobj.movement_facing_angle) * object->apiobj.field_0x1dc;
-        object->launch_origin.y = object->external_force.y;
-        object->launch_origin.z =
-            object->external_force.z - NU_COS_LUT(object->apiobj.movement_facing_angle) * object->apiobj.field_0x1dc;
-    }
-}
-
-static inline void Ledge_UpdateUnattached(WORLDINFO_s *world, GameObject_s *object) {
-    if (object->apiobj.field_0x27d == 0 && object->apiobj.velocity.y <= 0.0f)
-        Ledge_TryAttach(world, object);
 }
 
 void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
@@ -494,3 +588,4 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         previous.z == object->external_force.z)
         object->context_animation = 0x9d;
 }
+

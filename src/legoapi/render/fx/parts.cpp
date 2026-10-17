@@ -57,52 +57,7 @@
 #include <stdio.h>
 #include <string.h>
 
-ADDPART_s Default_ADDPART = {NULL,
-                             0,
-                             NULL,
-                             0,
-                             0,
-                             0.1f,
-                             0.1f,
-                             -5.0f,
-                             0.75f,
-                             NULL,
-                             -1,
-                             0,
-                             NULL,
-                             NULL,
-                             NULL,
-                             NULL,
-                             NULL,
-                             NULL,
-                             NULL,
-                             NULL,
-                             NULL,
-                             NULL,
-                             -1,
-                             NULL,
-                             -1,
-                             -1,
-                             60.0f,
-                             60.0f,
-                             -1,
-                             -1,
-                             -1,
-                             1.0f,
-                             0,
-                             -1,
-                             2000000.0f,
-                             1.0f / 60.0f,
-                             -1,
-                             0,
-                             1.0f,
-                             1.0f,
-                             1.0f,
-                             0.0f,
-                             {0, 0, 0, 0, 0, 0},
-                             1.0f,
-                             0,
-                             {0, 0, 0}};
+extern ADDPART_s Default_ADDPART;
 
 struct rtlset;
 extern rtlset * PartRTL;
@@ -216,48 +171,12 @@ extern f32 ForceThrowSpeed, ForceThrowGravity;
 extern "C" void KillPart(PART_s *, i32);
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
 void DeflectPart(PART_s *, GameObject_s *, f32, f32, i32, i32);
-void SetCoinType(i32 model, GIZMOPICKUP_s *pickup) {
-    if (static_cast<u32>(model - 0xb7) <= 3) {
-        pickup->type_index = 0;
-        pickup->model_variant = model - 0xb7;
-    } else if (static_cast<u32>(model - 0xbf) <= 3) {
-        pickup->type_index = 1;
-        pickup->model_variant = model - 0xbf;
-    } else if (static_cast<u32>(model - 0xc7) <= 3) {
-        pickup->type_index = 2;
-        pickup->model_variant = model - 0xc7;
-    } else {
-        pickup->type_index = 3;
-        pickup->model_variant = model - 0xd5;
-    }
-    u8 count = GizmoPickupType[pickup->type_index].random_model_count;
-    pickup->model_variant = count ? pickup->model_variant % count : 0;
-}
+void SetCoinType(i32 model, GIZMOPICKUP_s *pickup);
 u16 GameCam_GetAdjustedYRot(GAMECAMERA_s *camera);
 void CollectPowerUp(GameObject_s *, NUVEC *, u16, i32);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void NewBuzz(nupad_s *, f32, i32);
-void CollectHitPoint(GameObject_s *object, NUVEC *position, i32) {
-    if (static_cast<i8>(object->current_hp) > 0 && static_cast<i8>(object->current_hp) < object->hitpoints) {
-        object->current_hp += TouchHacks::TouchControlsActive ? 2 : 1;
-        if (static_cast<i8>(object->current_hp) > object->hitpoints)
-            object->current_hp = object->hitpoints;
-    }
-    if (object->field_0xe38 < 4) {
-        object->field_0xe38 += TouchHacks::TouchControlsActive ? 2 : 1;
-        if (object->field_0xe38 == 5)
-            object->field_0xe38 = 4;
-    }
-    if (object->apiobj.character_data->model_flags & 0x2000) {
-        NUVEC momentum;
-        NuVecScale(&momentum, &object->apiobj.velocity, 0.5f);
-        AddGameDebrisMom(WORLD->debris_sys, 0x10, position, 15, &momentum);
-    } else {
-        AddGameDebris(WORLD->debris_sys, 0x0f, position);
-    }
-    GameAudio_PlaySfx(0x27, position, 0, 0);
-    NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
-}
+void CollectHitPoint(GameObject_s *object, NUVEC *position, i32);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
 void ReleasePush(GameObject_s *);
 void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
@@ -407,270 +326,39 @@ extern "C" f32 coinimpactwait;
 extern i32 GAMEDEMO;
 extern "C" void PlaySfxAndSetVolume(char *, NUVEC *, f32);
 
-static __used__ void PartImpact_Coin(PART_s *part) {
-    if (coinimpactwait <= 0.0f) {
-        f32 speed = NuVecMag(&part->velocity);
-        if (speed > 0.0f) {
-            i32 angle;
-            if (speed > 1.5f)
-                angle = 0x4000;
-            else
-                angle = static_cast<i32>((1.5f - speed) / 1.5f * 16384.0f + 16384.0f);
-            f32 volume = NU_SIN_LUT(angle);
-            if (GAMEDEMO != 0) {
-                PlaySfxAndSetVolume("PickupCoin", &part->position, volume);
-                coinimpactwait = 0.1f;
-            } else if (static_cast<u16>(part->pickup_type - 0xb7) <= 3) {
-                PlaySfxAndSetVolume("CoinDropS", &part->position, volume);
-            } else {
-                PlaySfxAndSetVolume("CoinDropG", &part->position, volume);
-            }
-        }
-    }
-}
+static __used__ void PartImpact_Coin(PART_s *part);
 
-static __used__ void PartStolen_Coin(PART_s *part) {
-    if (netclient != 0 || (part->render_flags & 2) == 0)
-        return;
-    GameObject_s *recipient = Player[0];
-    i32 first_active = recipient != NULL && static_cast<i8>(recipient->apiobj.flags_low) < 0;
-    if (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.flags_low) < 0) {
-        recipient = Player[1];
-        if (first_active)
-            recipient = Player[qrand() / 0x8000];
-    } else if (!first_active) {
-        return;
-    }
-    if (recipient != NULL) {
-        GIZMOPICKUP_s pickup;
-        SetCoinType(part->pickup_type, &pickup);
-        GizmoPickup_CollectCoin(WORLD, &part->position, pickup.type_index, pickup.model_variant, recipient, 1);
-    }
-}
+static __used__ void PartStolen_Coin(PART_s *part);
 
 extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
-static __used__ void PartExtra_BlueCoin(PART_s *part) {
-    if (__builtin_expect((part->render_flags & 2) != 0, 0)) {
-        i32 effect = WORLD->debris_sys->entries[56].effect;
-        if (effect == -1)
-            return;
-        f32 rate;
-        if (WORLD->area != NULL) {
-            rate = (WORLD->area->flags & 0x104) == 4 ? 2.5f : 5.0f;
-        } else {
-            rate = 5.0f;
-        }
-        i32 count = ParticlesPerSecond(rate, FRAMETIME);
-        if (count > 0)
-            AddVariableShotDebrisEffect(effect, &part->position, count, 0, 0);
-    }
-}
+static __used__ void PartExtra_BlueCoin(PART_s *part);
 
-static __used__ void PartExtra_PurpleCoin(PART_s *part) {
-    if (__builtin_expect((part->render_flags & 2) != 0, 0)) {
-        i32 effect = WORLD->debris_sys->entries[57].effect;
-        if (effect == -1)
-            return;
-        f32 rate;
-        if (WORLD->area != NULL) {
-            rate = (WORLD->area->flags & 0x104) == 4 ? 2.5f : 5.0f;
-        } else {
-            rate = 5.0f;
-        }
-        i32 count = ParticlesPerSecond(rate, FRAMETIME);
-        if (count > 0)
-            AddVariableShotDebrisEffect(effect, &part->position, count, 0, 0);
-    }
-}
+static __used__ void PartExtra_PurpleCoin(PART_s *part);
 
 void PowerUp_Particles(WORLDINFO_s *, NUVEC *);
 
-static __used__ i32 PowerUp_DrawPart(PART_s *part) {
-    i32 draw = PartDraw_Flickerer(part);
-    if (draw && WORLD->lev_objs[0xd1].active != 0) {
-        NUMTX_ALIGNED16 matrix = part->transform;
-        NuSpecialDrawAt(&WORLD->lev_objs[0xd1].special, &matrix);
-    }
-    return draw;
-}
+static __used__ i32 PowerUp_DrawPart(PART_s *part);
 
-static __used__ void PowerUp_ImpactPart(PART_s *part) {
-    f32 scale = AreaPickupScale;
-    f32 maximum = 2.5f * scale;
-    f32 speed = NuVecMag(&part->velocity);
-    f32 volume;
-    if (speed >= maximum) {
-        volume = 1.0f;
-    } else {
-        f32 minimum = 0.1f * scale;
-        if (!(speed >= minimum))
-            return;
-        volume = (speed - minimum) / (maximum - minimum);
-    }
-    if (volume > 0.0f)
-        PlaySfxAndSetVolume("Gungan_BlueOrbBounce", &part->position, volume);
-}
+static __used__ void PowerUp_ImpactPart(PART_s *part);
 
-static __used__ void PowerUp_UpdatePart(PART_s *part) {
-    NUVEC position = part->position;
-    part->rotation_y = NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f;
-    NuMtxSetRotationY(&part->transform, part->rotation_y);
-    NuMtxTranslate(&part->transform, &position);
-    PowerUp_Particles(WorldInfo_CurrentlyActive(), &position);
-    PlaySfx("Grv_GuardWeaponLp", &position);
-}
+static __used__ void PowerUp_UpdatePart(PART_s *part);
 
-static __used__ void PowerUp_EndMsg(GAMEMESSAGE_s *message) {
-    GameAudio_PlaySfx(0x26, NULL, 0, 0);
-    if (__builtin_expect(FindGameMsgsWithID(7, 0, message->player_index, message) != 0, 0)) {
-        NUVEC position;
-        const i32 player = message->player_index;
-        position.x = player != 0 ? ICONX : -ICONX;
-        position.y = PowerUp_GetPanelY(player) + STATSPOSY;
-        position.z = 1.0f;
-        ADDGAMEMSG_ALIGNED16 add = AddGameMsg_Default;
-        add.icon = 0x35;
-        add.special = &WORLD->lev_objs[0x35].special;
-        add.flags = 0x20;
-        add.position = &position;
-        add.scale = 0.6f;
-        add.target_scale = 0.0f;
-        add.duration = 0.3f;
-        AddGameMsg(&add);
-    }
-}
+static __used__ void PowerUp_EndMsg(GAMEMESSAGE_s *message);
 
-static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *message) {
-    message->rotation_y += 16384.0f * FRAMETIME;
-    if (static_cast<u8>(message->player_index) <= 1)
-        message->target_position.y = PowerUp_GetPanelY(message->player_index) + STATSPOSY;
-}
+static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *message);
 
-void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32) {
-    if (object == NULL || static_cast<u8>(object->apiobj.field_0x27c) >= 2) {
-        return;
-    }
-
-    if (ONEPLAYERPOWERUPS != 0) {
-        const u16 camera_rotation = GameCam_GetAdjustedYRot(NULL);
-        const u16 panel_rotation = rotation - RotDiff(0, camera_rotation);
-        NUVEC target_position;
-        target_position.x = object->apiobj.field_0x27c == 0 ? -ICONX : ICONX;
-        target_position.y = PowerUp_GetPanelY(object->apiobj.field_0x27c) + STATSPOSY;
-        target_position.z = 1.0f;
-
-        ADDGAMEMSG message;
-        if (object->field_0xdec > 0.0f) {
-            NUVEC icon_position;
-            const i32 player = object->apiobj.field_0x27c;
-            icon_position.x = player == 0 ? -ICONX : ICONX;
-            icon_position.y = PowerUp_GetPanelY(player) + STATSPOSY;
-            icon_position.z = 1.0f;
-            message = AddGameMsg_Default;
-            message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0x35]);
-            message.icon = 0x35;
-            message.position = &icon_position;
-            message.scale = 0.6f;
-            message.target_scale = 0.0f;
-            message.duration = 0.3f;
-            message.flags = 0x20;
-            AddGameMsg(&message);
-        }
-
-        message = AddGameMsg_Default;
-        message.icon = 0xd0;
-        message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0xd0]);
-        message.position = position;
-        message.field_0x4d = 1;
-        message.scale = AreaPickupScale;
-        message.target_position = &target_position;
-        message.flags = 0x2112d;
-        message.target_scale = POWERUPOBJSIZE;
-        message.tick_fn = PowerUp_UpdateMsg;
-        message.end_fn = PowerUp_EndMsg;
-        message.field_0x4e = 7;
-        message.player_index = object->apiobj.field_0x27c;
-        message.duration = 1.0f;
-        GAMEMESSAGE_s *game_message = AddGameMsg(&message);
-        if (game_message != NULL) {
-            game_message->rotation_y = panel_rotation;
-            PowerUp_PanelYRot[object->apiobj.field_0x27c] = panel_rotation;
-        }
-    }
-
-    Cheat_StartPowerUp(position, object);
-    NewRumble(object->pad_gamepad->pad, 1.0f, 0);
-    NewBuzz(object->pad_gamepad->pad, 0.2f, 0);
-}
+void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32);
 
 extern WORLDINFO_s *WORLD;
 extern AREADATA_s *PODRACE_ADATA;
 extern AREADATA_s *BONUS_GUNSHIP_ADATA;
 extern AREADATA_s *GUNSHIP_ADATA;
 
-static __used__ i32 PartDraw_VehicleHeart(PART_s *part) {
-    f32 scale;
-    if (PODRACE_ADATA != NULL && WORLD->area == PODRACE_ADATA)
-        scale = 4.0f;
-    else if (BONUS_GUNSHIP_ADATA != NULL && WORLD->area == BONUS_GUNSHIP_ADATA)
-        scale = 7.5f;
-    else if (GUNSHIP_ADATA != NULL && WORLD->area == GUNSHIP_ADATA)
-        scale = 7.5f;
-    else
-        scale = 5.0f;
-    NUVEC scaling;
-    scaling.x = (1.0f - part->field_100) * scale;
-    if (scaling.x > 0.0f) {
-        scaling.y = scaling.z = scaling.x;
-        NUMTX_ALIGNED16 matrix = part->transform;
-        NuMtxPreScale(&matrix, &scaling);
-        if (NuSpecialDrawAt(&part->special, &matrix) != 0)
-            part->render_flags |= 6;
-    }
-    return 0;
-}
+static __used__ i32 PartDraw_VehicleHeart(PART_s *part);
 
-static __used__ void PartMove_VehicleHeart(PART_s *part, f32) {
-    GameObject_s *recipient = part->recipient;
-    f32 progress = 1.0f - part->field_100;
-    NUVEC start;
-    f32 height;
-    if (PODRACE_ADATA != NULL && WORLD->area == PODRACE_ADATA) {
-        NuVecAdd(&start, &recipient->apiobj.position, &part->initial_position);
-        height = 2.0f;
-    } else {
-        start = part->initial_position;
-        height = 3.0f;
-    }
-    part->position.x = start.x + (recipient->apiobj.position.x - start.x) * progress;
-    part->position.y = start.y + (recipient->apiobj.position.y - start.y) * progress +
-                       NU_SIN_LUT(static_cast<i32>(progress * 32768.0f)) * height;
-    part->position.z = start.z + (recipient->apiobj.position.z - start.z) * progress;
-}
+static __used__ void PartMove_VehicleHeart(PART_s *part, f32);
 
-static __used__ void PartMove_VehiclePickup(PART_s *part, f32) {
-    f32 gain;
-    if (part->field_104 == 0.0f) {
-        gain = 0.0f;
-    } else if (part->scale_time != 0.0f) {
-        gain = 1.0f - part->scale_time / part->field_104;
-    } else {
-        gain = 1.0f;
-    }
-    if (gain <= 0.0f) {
-        part->active |= 2;
-        if (part->stop_callback != NULL)
-            part->stop_callback(part);
-        return;
-    }
-    GameObject_s *object =
-        FindNearestGameObject(&part->position, NULL, 0, 0.0f, 0.0f, -1, -1, 99, NULL, 0, NULL, false);
-    if (object != NULL)
-        part->velocity.y = SeekValF(part->velocity.y, (object->apiobj.position.y - part->position.y) * 3.0f, 3.0f);
-    part->position.x += part->velocity.x * gain * FRAMETIME;
-    part->position.y += part->velocity.y * gain * FRAMETIME;
-    part->position.z += part->velocity.z * gain * FRAMETIME;
-}
+static __used__ void PartMove_VehiclePickup(PART_s *part, f32);
 
 extern "C" {
 
@@ -967,100 +655,13 @@ void PartUpdate_Heart(PART_s *);
 void PartStop_Flickerer(PART_s *);
 i32 PartDraw_Flickerer(PART_s *);
 
-void AddTorpedoAsPart(nuvec_s *position, nuvec_s *velocity, float scale, float lifetime) {
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    ADDPART_ALIGNED16 params = Default_ADDPART;
-    params.position = position;
-    params.velocity = velocity;
-    f32 torpedo_scale = 0.1f * WORLD->giz_torp_machine_sys->scale;
-    params.field_14 = torpedo_scale * GizmoPickupType[8].shadow_radius_x;
-    params.field_18 = torpedo_scale * GizmoPickupType[8].shadow_extent_x;
-    params.special = &world->lev_objs[0x79].special;
-    params.field_28 = 0x79;
-    params.gravity = AreaPickupGravity;
-    if (params.gravity == 0.0f)
-        params.field_a4 = 15.0f;
-    params.stop_fn = PartStop_Flickerer;
-    params.field_40 = FreePlay != 0 && WORLD->current_level == ANAKINSFLIGHTB_LDATA ? PartCollide_2D : PartCollide_3D;
-    params.field_88 = lifetime;
-    params.draw_fn = PartDraw_Torp;
-    params.field_48 = NULL;
-    params.flags = 0x256;
-    if (params.gravity == 0.0f)
-        params.move_fn = PartMove_VehiclePickup;
-    params.time_step = FRAMETIME;
-    params.field_c0 = scale;
-    PART_s *part = AddPart(&params);
-    if (part != NULL) {
-        part->rotation_y = qrand();
-        part->force_player_mask = 3;
-        part->field_214 = 0.1f * WORLD->giz_torp_machine_sys->scale * NU_SIN_LUT(0x4000);
-    }
-}
+void AddTorpedoAsPart(nuvec_s *position, nuvec_s *velocity, float scale, float lifetime);
 
-void AddHeartAsPart(GameObject_s *recipient, nuvec_s *position, nuvec_s *velocity, float scale, float lifetime) {
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (recipient == NULL)
-        return;
-    ADDPART_ALIGNED16 params = Default_ADDPART;
-    params.position = position;
-    params.velocity = velocity;
-    params.field_28 = 0xcb;
-    params.flags = 0x256;
-    params.field_18 = params.field_14 = scale * GizmoPickupType[5].shadow_radius_x;
-    params.gravity = AreaPickupGravity;
-    params.special = &world->lev_objs[0xcb].special;
-    params.field_88 = lifetime;
-    params.field_40 = PartCollide_3D;
-    params.field_48 = PartUpdate_Heart;
-    if ((world->current_level->flags & LEVEL_PICKUPS_TO_PANEL) != 0) {
-        params.field_a4 = 1.0f;
-        params.move_fn = PartMove_VehicleHeart;
-        params.flags |= 0x400;
-        params.recipient = recipient;
-        params.draw_fn = PartDraw_VehicleHeart;
-    } else {
-        params.stop_fn = PartStop_Flickerer;
-        params.draw_fn = PartDraw_Flickerer;
-        if (params.gravity == 0.0f)
-            params.move_fn = PartMove_VehiclePickup;
-    }
-    params.time_step = FRAMETIME;
-    params.field_c0 = scale;
-    PART_s *part = AddPart(&params);
-    if (part != NULL)
-        part->rotation_y = qrand();
-}
+void AddHeartAsPart(GameObject_s *recipient, nuvec_s *position, nuvec_s *velocity, float scale, float lifetime);
 
-void PowerUp_AddPart(NUVEC *position, NUVEC *velocity, f32 scale, f32 lifetime) {
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    ADDPART_ALIGNED16 params = Default_ADDPART;
-    params.position = position;
-    params.velocity = velocity;
-    params.field_18 = params.field_14 = scale * GizmoPickupType[9].shadow_radius_x;
-    params.gravity = AreaPickupGravity;
-    params.special = &world->lev_objs[0xd0].special;
-    params.field_40 = PartCollide_3D;
-    params.field_48 = PowerUp_UpdatePart;
-    params.field_3c = PowerUp_ImpactPart;
-    params.stop_fn = PartStop_Flickerer;
-    params.draw_fn = PowerUp_DrawPart;
-    params.field_28 = 0xd0;
-    params.flags = 0x256;
-    params.field_88 = lifetime;
-    if (params.gravity == 0.0f)
-        params.move_fn = PartMove_VehiclePickup;
-    params.time_step = FRAMETIME;
-    params.field_c0 = scale;
-    PART_s *part = AddPart(&params);
-    if (part != NULL)
-        part->rotation_y = NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f;
-}
+void PowerUp_AddPart(NUVEC *position, NUVEC *velocity, f32 scale, f32 lifetime);
 
-void PowerUp_Particles(WORLDINFO_s *world, NUVEC *position) {
-    if (VehicleArea == 0 && ParticlesPerSecond(10.0f, FRAMETIME) > 0)
-        AddGameDebris(world->debris_sys, GizBuilditGDeb[qrand() / 10923], position);
-}
+void PowerUp_Particles(WORLDINFO_s *world, NUVEC *position);
 
 i32 FindPartDebris(PARTDEBSYS_s *system, char *name) {
     if (system != NULL) {
@@ -1101,70 +702,9 @@ void PartCollide_3D(PART_s *part) {
 
 WORLDINFO_s *WorldInfo_CurrentlyActive();
 extern f32 FRAMETIME;
-void PartStop_Coin(PART_s *part) {
-    if (netclient == 0) {
-        WORLDINFO_s *world = WORLD;
-        GIZMOPICKUPRUNTIMESYS_s *system = world->gizmo_pickup_sys;
-        GIZMOPICKUP_s *pickup = &system->temporary_pickups[system->field_0x0c];
-        if (++system->field_0x0c > 63)
-            system->field_0x0c = 0;
-        if (pickup->state_flags & 1)
-            GizmoPickup_CollectCoin(world, &pickup->position, pickup->type_index, pickup->model_variant, NULL, 1);
-        SetCoinType(part->pickup_type, pickup);
-        pickup->state_flags = (pickup->state_flags & 0xe0) | 0x17;
-        pickup->position = part->position;
-        pickup->draw_rotation = 0;
-        pickup->room_index =
-            WORLD->current_gscn != NULL ? NuPortalWhichRoom(WORLD->current_gscn, &pickup->position) : -1;
-        pickup->floor_height = 2000000.0f;
-        pickup->remaining_visible_time = 5.0f;
-        pickup->shadow_x_rotation = 0;
-        pickup->shadow_z_rotation = 0;
-        pickup->state_flags = (pickup->state_flags | 0x20) & ~0x40;
-    }
-    part->active &= ~1;
-}
+void PartStop_Coin(PART_s *part);
 
-void AddCoinsAsParts(i32 type_id, nuvec_s *position, nuvec_s *velocity, float lifetime, float scale) {
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    GIZMO_PICKUP_TYPE *type = &GizmoPickupType[type_id];
-    i32 model = static_cast<i16>(type->first_model_id);
-    if (type->random_model_count != 0)
-        model += qrand() / (65535 / type->random_model_count + 1);
-    LEVEL_OBJECT_RUNTIME_s *object = &world->lev_objs[model];
-    if (object->active == 0)
-        return;
-    ADDPART_ALIGNED16 params = Default_ADDPART;
-    params.field_28 = model;
-    params.velocity = velocity;
-    params.position = position;
-    params.special = &object->special;
-    params.field_14 = params.field_18 = scale * type->shadow_radius_x;
-    params.flags = 0x56;
-    params.gravity = AreaPickupGravity;
-    if (static_cast<u32>(model - 0xd5) <= 3) {
-        params.flags |= 0x200;
-    } else if (static_cast<u32>(model - 0xc7) <= 3) {
-        params.flags |= 0x200;
-        params.field_30 = PartExtra_BlueCoin;
-    } else {
-        params.replace_fn = PartStolen_Coin;
-    }
-    params.field_88 = lifetime;
-    params.field_40 = PartCollide_3D;
-    params.stop_fn = PartStop_Coin;
-    params.field_3c = PartImpact_Coin;
-    params.time_step = FRAMETIME;
-    params.field_c0 = scale;
-    PART_s *part = AddPart(&params);
-    if (part != NULL) {
-        part->field_100 = 30.0f;
-        if (params.gravity == 0.0f) {
-            part->move_callback = PartMove_VehiclePickup;
-            part->field_104 = static_cast<f32>(qrand()) * (1.0f / 65535.0f) + 4.0f;
-        }
-    }
-}
+void AddCoinsAsParts(i32 type_id, nuvec_s *position, nuvec_s *velocity, float lifetime, float scale);
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \

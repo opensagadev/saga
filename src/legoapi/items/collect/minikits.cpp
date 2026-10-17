@@ -107,46 +107,7 @@ void MiniKit_GameMsg_Update(GAMEMESSAGE_s *message);
 void MiniKit_GameMsg_End(GAMEMESSAGE_s *message);
 void Hint_SetHintFromId(i32, i32, i32);
 
-void CollectMinikit(nuvec_s *position, char *name, i32) {
-    if (WORLD->lev_objs[0xce].active != 0) {
-        NUVEC target_position = {KITPOSX, KITPOSY + PANEL_MINIKITY, 1.0f};
-        const i32 area_id = WORLD->level_sub_id;
-        ADDGAMEMSG message = AddGameMsg_Default;
-        message.position = position;
-        message.target_position = &target_position;
-        message.scale = AreaPickupScale;
-        message.target_scale = PANEL_MINIKITSCALE;
-        message.flags = 0x2112d;
-        message.duration = 1.0f;
-        message.icon = 0xce;
-        message.special = &WORLD->lev_objs[0xce].special;
-        message.tick_fn = MiniKit_GameMsg_Update;
-        message.end_fn = MiniKit_GameMsg_End;
-        message.field_0x4d = 1;
-        AddGameMsg(&message);
-        DrawMiniKitTime = 2.0f;
-
-        if (area_id != -1 && Game.area_save[area_id].minikit_count < 10) {
-            if (NuStrLen(name) <= 8) {
-                NuStrCpy(NewMiniPiece[AreaGlobals.values.field_0x10].name, name);
-            } else {
-                NewMiniPiece[AreaGlobals.values.field_0x10].name[0] = '\0';
-            }
-            NewMiniPiece[AreaGlobals.values.field_0x10].level = WORLD->level_idx;
-            ++AreaGlobals.values.field_0x10;
-            ++AreaGlobals.values.field_0x0c;
-            if (GAMEDEMO != 0) {
-                if (AreaGlobals.values.field_0x0c == 1) {
-                    Hint_SetHintFromId(0x26d, 0, 0);
-                } else if (AreaGlobals.values.field_0x0c == 10) {
-                    Hint_SetHintFromId(0x26e, 0, 0);
-                }
-            }
-        }
-        AddGameDebris(WORLD->debris_sys, 0x13, position);
-        GameAudio_PlaySfxById(GetSfxId(const_cast<char *>("MK-Pickup")), position, 3, 0);
-    }
-}
+void CollectMinikit(nuvec_s *position, char *name, i32);
 
 i32 AllMiniKitsDone(AREASAVE_s *save) {
     if (save == NULL) {

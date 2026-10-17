@@ -1576,9 +1576,7 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect);
 
 void GameObjectStuffAfterAnimation();
 
-void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *message) {
-    message->target_position.x = cointotal_x[message->player_index];
-}
+void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *message);
 
 void GameObject_s::ClearAddons() {
     delete addons;
@@ -1886,17 +1884,7 @@ extern i16 id_MOUSEDROID;
 
 void ConstantRumble(GameObject_s *object, f32 strength, f32 phase);
 
-void PowerUp_Update(GameObject_s *object) {
-    if (object->field_0xdec > 0.0f) {
-        object->field_0xdec -= FRAMETIME;
-        if (object->field_0xdec <= 0.0f) {
-            GameAudio_PlaySfx(0x52, NULL, 0, 0);
-        } else {
-            GameAudio_PlaySfx(0x51, NULL, 0, 0);
-            ConstantRumble(object, (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) * 0.5f, 0.0f);
-        }
-    }
-}
+void PowerUp_Update(GameObject_s *object);
 
 
 GameObject_s *player_tag_to;
