@@ -2881,7 +2881,6 @@ void aieditor_cvSelectEditorMode(eduimenu_s *parent, eduiitem_s *, u32);
 #include <float.h>
 #include <stdio.h>
 #include <string.h>
-#pragma GCC optimize("O2", "omit-frame-pointer")
 struct EDCREATURE_s;
 struct AIPATHSYS_s;
 

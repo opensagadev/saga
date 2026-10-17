@@ -411,7 +411,6 @@ static __used__ void aieditor_cbCancelSaveMenu(eduimenu_s *, eduiitem_s *, unsig
 // ==== src/editor/creature_editor.cpp: all remaining content ====
 
 #include "editor/edpath_types.h"
-#pragma GCC optimize("O2", "omit-frame-pointer")
 struct EDCREATURE_s;
 
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, valid_positions) == 0x54, "creature valid position mask offset");
