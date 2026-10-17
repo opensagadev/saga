@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 83.07477,
+    "fuzzy_match_percent": 83.07672,
     "total_code": "4722419",
     "matched_code": "649748",
     "matched_code_percent": 13.758797,
@@ -59647,38 +59647,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z14AddWaterSplashP12GameObject_sP7nuvec_s",
-          "demangled_name": "AddWaterSplash(GameObject_s*, nuvec_s*)",
-          "address": 1534464,
-          "offset": 644496,
-          "size": 185,
-          "match_percent": 99.975
-        },
-        {
-          "name": "_Z13InitRippleMtlPcPP7numtl_sP9variptr_uS4_",
-          "demangled_name": "InitRippleMtl(char*, numtl_s**, variptr_u*, variptr_u*)",
-          "address": 1534880,
-          "offset": 644912,
-          "size": 256,
-          "match_percent": 99.98529
-        },
-        {
-          "name": "_Z14BuildRippleMtxP7numtx_sP7nuvec_sS2_tt",
-          "demangled_name": "BuildRippleMtx(numtx_s*, nuvec_s*, nuvec_s*, unsigned short, unsigned short)",
-          "address": 1535136,
-          "offset": 645168,
-          "size": 126,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z17AddSurfaceRipplesP12GameObject_s",
-          "demangled_name": "AddSurfaceRipples(GameObject_s*)",
-          "address": 1535264,
-          "offset": 645296,
-          "size": 1298,
-          "match_percent": 95.0
-        },
-        {
           "name": "_ZL13RE_end_radiusP8nufpar_s",
           "demangled_name": "RE_end_radius(nufpar_s*)",
           "address": 5122432,
@@ -68206,38 +68174,6 @@
           "match_percent": 91.95652
         },
         {
-          "name": "_Z17DebrisKillPlayersv",
-          "demangled_name": "DebrisKillPlayers()",
-          "address": 1530736,
-          "offset": 640768,
-          "size": 2689,
-          "match_percent": 81.07213
-        },
-        {
-          "name": "_Z16AddSurfaceDebrisP12GameObject_s",
-          "demangled_name": "AddSurfaceDebris(GameObject_s*)",
-          "address": 1533440,
-          "offset": 643472,
-          "size": 1009,
-          "match_percent": 72.625
-        },
-        {
-          "name": "_Z13AddSlamDebrisP12GameObject_s",
-          "demangled_name": "AddSlamDebris(GameObject_s*)",
-          "address": 1534656,
-          "offset": 644688,
-          "size": 212,
-          "match_percent": 99.916664
-        },
-        {
-          "name": "_Z12BurnoutApplyi",
-          "demangled_name": "BurnoutApply(int)",
-          "address": 1536576,
-          "offset": 646608,
-          "size": 175,
-          "match_percent": 99.977776
-        },
-        {
           "name": "_Z18RndrUnfilledCirclefffffiffP7numtl_s",
           "demangled_name": "RndrUnfilledCircle(float, float, float, float, float, int, float, float, numtl_s*)",
           "address": 2567216,
@@ -68363,7 +68299,7 @@
           "address": 2973520,
           "offset": 2083552,
           "size": 294,
-          "match_percent": 99.6875
+          "match_percent": 99.453125
         },
         {
           "name": "_Z11NuHtmlTitlePc",
@@ -81102,6 +81038,85 @@
           "offset": 4687936,
           "size": 272,
           "match_percent": 85.49254
+        }
+      ]
+    },
+    {
+      "name": "legoapi/render/fx/game_deb.cpp.o",
+      "source": "src/legoapi/render/fx/game_deb.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/game_deb.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_game_deb.cpp",
+          "demangled_name": "_GLOBAL__sub_I_game_deb.cpp",
+          "address": 895776,
+          "offset": 5808,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_Z17DebrisKillPlayersv",
+          "demangled_name": "DebrisKillPlayers()",
+          "address": 1530736,
+          "offset": 640768,
+          "size": 2689,
+          "match_percent": 81.07213
+        },
+        {
+          "name": "_Z16AddSurfaceDebrisP12GameObject_s",
+          "demangled_name": "AddSurfaceDebris(GameObject_s*)",
+          "address": 1533440,
+          "offset": 643472,
+          "size": 1009,
+          "match_percent": 72.675
+        },
+        {
+          "name": "_Z14AddWaterSplashP12GameObject_sP7nuvec_s",
+          "demangled_name": "AddWaterSplash(GameObject_s*, nuvec_s*)",
+          "address": 1534464,
+          "offset": 644496,
+          "size": 185,
+          "match_percent": 99.975
+        },
+        {
+          "name": "_Z13AddSlamDebrisP12GameObject_s",
+          "demangled_name": "AddSlamDebris(GameObject_s*)",
+          "address": 1534656,
+          "offset": 644688,
+          "size": 212,
+          "match_percent": 99.916664
+        },
+        {
+          "name": "_Z13InitRippleMtlPcPP7numtl_sP9variptr_uS4_",
+          "demangled_name": "InitRippleMtl(char*, numtl_s**, variptr_u*, variptr_u*)",
+          "address": 1534880,
+          "offset": 644912,
+          "size": 256,
+          "match_percent": 99.98529
+        },
+        {
+          "name": "_Z14BuildRippleMtxP7numtx_sP7nuvec_sS2_tt",
+          "demangled_name": "BuildRippleMtx(numtx_s*, nuvec_s*, nuvec_s*, unsigned short, unsigned short)",
+          "address": 1535136,
+          "offset": 645168,
+          "size": 126,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z17AddSurfaceRipplesP12GameObject_s",
+          "demangled_name": "AddSurfaceRipples(GameObject_s*)",
+          "address": 1535264,
+          "offset": 645296,
+          "size": 1298,
+          "match_percent": 95.05639
+        },
+        {
+          "name": "_Z12BurnoutApplyi",
+          "demangled_name": "BurnoutApply(int)",
+          "address": 1536576,
+          "offset": 646608,
+          "size": 175,
+          "match_percent": 99.977776
         }
       ]
     },
@@ -127253,14 +127268,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_GLOBAL__sub_I_game_deb.cpp",
-      "demangled_name": "_GLOBAL__sub_I_game_deb.cpp",
-      "address": 895776,
-      "offset": 5808,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZN6squish17CompressAlphaDxt3EPKhiPv",
       "demangled_name": "squish::CompressAlphaDxt3(unsigned char const*, int, void*)",
       "address": 933632,
@@ -129870,10 +129877,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 486,
+    "bazel_units": 487,
     "functions": 13454,
-    "assigned_functions": 12844,
+    "assigned_functions": 12845,
     "ambiguous_functions": 282,
-    "unassigned_functions": 328
+    "unassigned_functions": 327
   }
 }

@@ -347,17 +347,7 @@ void bgProcClose() {
 extern "C" void edrtlCalculateBurnoutEx(burnset_s *set, NuBloomParameters *parameters, NUVEC *camera_position,
                                         f32 frame_time);
 
-void BurnoutApply(i32 paused) {
-    NuBloomParameters parameters = {};
-    CUTINFO *cut = static_cast<CUTINFO *>(CutStopInfo);
-    if (cut != NULL && (cut->flags & 0x80) != 0)
-        return;
-    if (WORLD->burnset == NULL)
-        return;
-    edrtlCalculateBurnoutEx(WORLD->burnset, &parameters, reinterpret_cast<NUVEC *>(&global_camera.mtx.m30), FRAMETIME);
-    if (parameters.intensity > 0.0f)
-        NuPostBloom(paused, &parameters);
-}
+void BurnoutApply(i32 paused);
 
 void bgprocFreeze() {
 }
@@ -365,23 +355,7 @@ void bgprocFreeze() {
 void FindSlamOrigin(GameObject_s *, NUVEC *, NUVEC *);
 EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 
-void AddSlamDebris(GameObject_s *object) {
-    NUVEC position;
-    FindSlamOrigin(object, &position, NULL);
-    f32 radius = 0.6f;
-    f32 strength = 0.3f;
-    i32 damage = 1;
-    i32 flags = 0x17;
-    if ((object->apiobj.flags_low & 0x80) != 0 && Cheat_IsOn(0x16)) {
-        radius = 1.0f;
-        strength = 0.5f;
-        flags = 0x37;
-        damage = 2;
-    }
-    EXPLOSION *explosion = AddExplosion(&position, radius, strength, object, object->slam_debris_effect, flags);
-    if (explosion != NULL)
-        explosion->field_0x32 = damage;
-}
+void AddSlamDebris(GameObject_s *object);
 
 void CloakMovement(GameObject_s *object) {
     const u8 index = object->field_0x1089;
@@ -796,79 +770,7 @@ i32 bgprocIsFreezing() {
     return freezing;
 }
 
-void AddSurfaceDebris(GameObject_s *object) {
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (object->field_0x7a5 == 0x2b)
-        return;
-    i32 layer = static_cast<i8>(object->apiobj.field_0x27f);
-    if (layer != -1 && (TerLayer[layer].flags & 1) != 0)
-        return;
-    f32 surface_y = object->apiobj.field_0x218;
-    if (surface_y == 2000000.0f)
-        return;
-    if ((PODRACE_ADATA != NULL && world->area == PODRACE_ADATA) || world->current_level == PODSPRINTA_LDATA) {
-        PodDust(world, object);
-        return;
-    }
-    i32 effect;
-    f32 height;
-    f32 rate;
-    f32 minimum_rate;
-    if (object->id == id_LANDSPEEDER) {
-        effect = 102;
-        rate = 20.0f;
-        minimum_rate = 0.0f;
-        height = 0.0f;
-    } else if (WORLD->area != NULL && WORLD->area == HOTHBATTLE_ADATA) {
-        effect = 86;
-        rate = 100.0f;
-        minimum_rate = 10.0f;
-        height = 3.0f;
-    } else if ((BONUS_GUNSHIP_ADATA != NULL && world->area == BONUS_GUNSHIP_ADATA) ||
-               (GUNSHIP_ADATA != NULL && world->area == GUNSHIP_ADATA)) {
-        effect = 141;
-        rate = 75.0f;
-        minimum_rate = 0.0f;
-        height = 0.0f;
-    } else {
-        return;
-    }
-    f32 speed = object->apiobj.horizontal_velocity_magnitude;
-    f32 run_speed = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->run_speed;
-    if (world->debris_sys->entries[effect].effect == -1 || run_speed <= 0.0f)
-        return;
-    f32 height_scale = 1.0f;
-    if (height > 0.0f) {
-        height_scale = 1.0f - (object->apiobj.collision_min.y - surface_y) * (1.0f / height);
-        if (height_scale <= 0.0f)
-            return;
-        if (height_scale > 1.0f)
-            height_scale = 1.0f;
-    }
-    f32 emission_rate = (speed / run_speed) * rate;
-    if (emission_rate < minimum_rate)
-        emission_rate = minimum_rate;
-    emission_rate *= height_scale;
-    NUVEC current = {object->apiobj.position.x, surface_y, object->apiobj.position.z};
-    NUVEC previous;
-    if (object->apiobj.field_0x214 == 2000000.0f) {
-        previous = current;
-    } else {
-        previous.x = object->apiobj.start_position.x;
-        previous.y = object->apiobj.field_0x214;
-        previous.z = object->apiobj.start_position.z;
-    }
-    i32 count = ParticlesPerSecond(emission_rate, FRAMETIME);
-    if (count <= 0)
-        return;
-    NUVEC delta = {current.x - previous.x, current.y - previous.y, current.z - previous.z};
-    do {
-        f32 fraction = qrand() * (1.0f / 65535.0f);
-        NUVEC position = {previous.x + delta.x * fraction, previous.y + delta.y * fraction,
-                          previous.z + delta.z * fraction};
-        AddVariableShotDebrisEffect(world->debris_sys->entries[effect].effect, &position, 1, 0, 0);
-    } while (--count != 0);
-}
+void AddSurfaceDebris(GameObject_s *object);
 
 extern "C" void DebFree(i32 *);
 void DebFreeWithoutKey(debkeydatatype_s *key);
@@ -878,38 +780,7 @@ extern "C" i32 DebrisPreCheckCollisions(NUVEC *position, f32 radius);
 extern "C" i32 DebrisCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale);
 extern "C" i32 DebrisTorusCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale);
 
-void DebrisKillPlayers() {
-    DebrisPreCheckCollisions(&GameCam->pos, 50.0f);
-#define CHECK_DEBRIS_PLAYER(player_index)                                                                              \
-    do {                                                                                                               \
-        GameObject_s *player = Player[player_index];                                                                   \
-        if (player == NULL || (player->apiobj.flags_high & 0x10) == 0 || player->apiobj.field_0x287 != 0 ||            \
-            !(player->field_0x1024 <= 0.0f) || !(player->spawn_protection_timer <= 0.0f) ||                            \
-            (player->field_0xefe & 0x40) != 0 || CannotKill(player) != 0 || Player_HasInvincibility(player) != 0 ||    \
-            (player->apiobj.character_data->game_character->flags_090 & 0x04008000) != 0) {                            \
-            break;                                                                                                     \
-        }                                                                                                              \
-        if (DebrisCollisionCheckScaleY(&player->apiobj.collision_position, player->apiobj.collision_radius,            \
-                                       player->collision_y_scale) != -1) {                                             \
-            ObjHitObj(NULL, player, 1, 0, 0, 1);                                                                       \
-        }                                                                                                              \
-        if (DebrisTorusCollisionCheckScaleY(&player->apiobj.collision_position, player->apiobj.collision_radius,       \
-                                            player->collision_y_scale) != -1) {                                        \
-            ObjHitObj(NULL, player, 1, 0, 0, 1);                                                                       \
-        }                                                                                                              \
-    } while (0)
-
-    CHECK_DEBRIS_PLAYER(0);
-    CHECK_DEBRIS_PLAYER(1);
-    CHECK_DEBRIS_PLAYER(2);
-    CHECK_DEBRIS_PLAYER(3);
-    CHECK_DEBRIS_PLAYER(4);
-    CHECK_DEBRIS_PLAYER(5);
-    CHECK_DEBRIS_PLAYER(6);
-    CHECK_DEBRIS_PLAYER(7);
-
-#undef CHECK_DEBRIS_PLAYER
-}
+void DebrisKillPlayers();
 
 i32 RndrUnfilledCircle(f32 x, f32 y, f32 radius, f32 border_width, f32 aspect, i32 colour, f32 progress, f32 z,
                        numtl_s *material) {

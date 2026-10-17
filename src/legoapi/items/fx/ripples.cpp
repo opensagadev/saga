@@ -72,47 +72,16 @@ void InitRipples(ripple_set_s **result, variptr_u *buf, variptr_u *, i32 count) 
     (*result)->field_0x10 = NULL;
 }
 
-void InitRippleMtl(char *name, numtl_s **result, variptr_u *buffer, variptr_u *buffer_end) {
-    char filename[64] = "stuff\\";
-    if (name != NULL) {
-        NuStrCat(filename, name);
-        buffer->addr = (buffer->addr + 15) & ~static_cast<usize>(15);
-        NuStrCat(filename, ".tex");
-        i32 texture = NuTexRead(filename, buffer, *buffer_end);
-        if (texture != 0) {
-            numtl_s *material = NuMtlCreateEx3D(1, 1);
-            *result = material;
-            material->tex_id = static_cast<i16>(texture);
-            material->opacity = 1.0f;
-            u8 *attributes = reinterpret_cast<u8 *>(&material->attribs);
-            attributes[1] = (attributes[1] & 0x30) | 0x40;
-            attributes[0] = (attributes[0] & 0xc0) | 0x12;
-            attributes[2] = (attributes[2] & 0xfc) | 2;
-            NuMtlUpdate(material);
-            return;
-        }
-    }
-    *result = NULL;
-}
+void InitRippleMtl(char *name, numtl_s **result, variptr_u *buffer, variptr_u *buffer_end);
 
 void NewRumble(nupad_s *pad, f32 strength, i32 mode);
 void NewBuzzFrames(nupad_s *pad, i32 frames, i32 mode);
 
-void AddWaterSplash(GameObject_s *object, nuvec_s *position) {
-    AddGameDebrisXYZ(WORLD->debris_sys, 13, position->x, object->apiobj.water_height, position->z);
-    PlaySfx("FS_WaterJump", &object->apiobj.collision_position);
-    NewRumble(object->pad_gamepad->pad, 0.5f, 0);
-    NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
-}
+void AddWaterSplash(GameObject_s *object, nuvec_s *position);
 
 void FindAnglesXY(NUVEC *, u16 *, u16 *);
 
-void BuildRippleMtx(numtx_s *matrix, nuvec_s *normal, nuvec_s *position, u16, u16) {
-    FindAnglesXY(normal, NULL, NULL);
-    NuMtxSetRotationX(matrix, static_cast<u16>(temp_xrot));
-    NuMtxRotateY(matrix, static_cast<u16>(temp_yrot));
-    NuMtxTranslate(matrix, position);
-}
+void BuildRippleMtx(numtx_s *matrix, nuvec_s *normal, nuvec_s *position, u16, u16);
 
 void ResetRippleSet(ripple_set_s *set) {
     u16 count = set->count;
@@ -223,68 +192,7 @@ extern "C" ripple_set_s *ripples;
 void VecRotateAxis(NUVEC *, u16, NUVEC *);
 void AddRipple(ripple_set_s *, NUMTX *, float, float, float, float, RGBA, RGBA, i32, numtl_s *, NUVEC *);
 
-void AddSurfaceRipples(GameObject_s *object) {
-
-    if (!(WORLD->ripple_effects == NULL || object->apiobj.field_0x287 != 0)) {
-        NUVEC position;
-        if (object->field_0x1084 != 1) {
-            if (!object->apiobj.intersects_water || !object->apiobj.model_draw_result)
-                return;
-            GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-            f32 rate = (object->pad_gamepad->input_magnitude / data->run_speed) * 20.0f;
-            if (rate < 1.0f)
-                rate = 1.0f;
-            i32 count = ParticlesPerSecond(rate, FRAMETIME);
-            if (count <= 0)
-                return;
-            NUVEC position = {0.0f, 0.0f, 0.0f};
-            NUMTX matrix;
-            BuildRippleMtx(&matrix, &v010, &position, 0, 0);
-            f32 size = 0.5f * object->apiobj.field_0x1dc;
-            static f32 randrad = 0.15f;
-            for (i32 i = 0; i < count; ++i) {
-                matrix.m30 = object->apiobj.collision_position.x + (qrand() * (1.0f / 65535.0f) - 0.5f) * 0.15f;
-                matrix.m31 = 0.001f + object->apiobj.water_height;
-                matrix.m32 = object->apiobj.collision_position.z + (qrand() * (1.0f / 65535.0f) - 0.5f) * 0.15f;
-                RIPPLEEFFECT_s *effect = &WORLD->ripple_effects[WORLD->water_ripple_effect];
-                randrad = object->apiobj.field_0x1dc + object->apiobj.field_0x1dc + object->apiobj.field_0x1dc;
-                AddRipple(ripples, &matrix, size, randrad, effect->lifetime, 0.0f, effect->start_color,
-                          effect->end_color, 7, effect->material, NULL);
-            }
-            return;
-        }
-        if (static_cast<u8>(object->field_0x6b0 - 12) <= 1) {
-            GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-            f32 rate = (object->pad_gamepad->input_magnitude / data->run_speed) * 100.0f;
-            if (rate < 0.5f)
-                rate = 0.5f;
-            i32 count = ParticlesPerSecond(rate, FRAMETIME);
-
-            if (count > 0) {
-                position = object->contact_position;
-                NUVEC normal = object->contact_normal;
-                NUMTX matrix;
-                BuildRippleMtx(&matrix, &normal, &position, 0, 0);
-                const NUVEC seed = {normal.y * FRAMETIME, -(normal.z * FRAMETIME), -(normal.x * FRAMETIME)};
-                for (i32 i = 0; i < count; ++i) {
-                    u16 angle = static_cast<u16>(qrand());
-                    NUVEC velocity = seed;
-                    VecRotateAxis(&velocity, angle, &normal);
-                    RIPPLEEFFECT_s *effect = &WORLD->ripple_effects[WORLD->sabre_ripple_effect];
-                    AddRipple(ripples, &matrix, effect->initial_size, effect->end_size, effect->lifetime, 0.0f,
-                              effect->start_color, effect->end_color, 15, effect->material, &velocity);
-                }
-            }
-            // The original only initializes the sound position when particles are emitted.
-            if (object->sabre_contact_sfx_timer <= 0.0f) {
-                PlaySfx("SabFField", &position);
-                object->sabre_contact_sfx_timer = 0.5f;
-            }
-        }
-        if (object->sabre_contact_sfx_timer > 0.0f)
-            object->sabre_contact_sfx_timer -= FRAMETIME;
-    }
-}
+void AddSurfaceRipples(GameObject_s *object);
 
 extern "C" void NuMtlDestroy(numtl_s *);
 
