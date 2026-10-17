@@ -230,14 +230,14 @@ void DebrisSetTimeIncrement(f32 increment);
     i32 EDPP_MAX_DMADEBTYPES = 0x40;
     i32 freeDmaDebType = 0;
     i32 debris_setup_called = 0;
-    usize debris_trash_space = 0;
+    void *debris_trash_space = NULL;
     usize debris_trash_size = 0;
     u32 *spherecolldata = NULL;
     u32 *toruscolldata = NULL;
     NUVEC debris_collide_pt;
     debscale_s *debscale = NULL;
-    i32 debrischunks = 0;
-    i32 debrischunksglass = 0;
+    i32 debrischunks = 256;
+    i32 debrischunksglass = 32;
     i32 freedebchkptr = 0;
     i32 freedebchkptrg = 0;
     debris_chunk_control_s *debris_chunk_controls = NULL;
@@ -3068,7 +3068,7 @@ extern "C" {
     extern i32 globalframes;
     extern i32 update_debris_enabled;
     extern i32 debris_setup_called;
-    extern usize debris_trash_space;
+    extern void *debris_trash_space;
     extern usize debris_trash_size;
     extern i32 debrischunks;
     extern i32 debrischunksglass;
@@ -11904,13 +11904,13 @@ NUMTL *CreateCopyMat(NUMTL *source, i32 enable_uv_mode, i32 alpha_mode, i32 dept
 
 extern "C" {
     void DebrisReserveTrashableSpace(VARIPTR *buffer, VARIPTR, i32 chunk_count, i32 glass_chunk_count) {
-        if (debris_trash_space == 0) {
+        if (debris_trash_space == NULL) {
             buffer->addr = ALIGN(buffer->addr, 0x80);
-            debris_trash_space = buffer->addr;
+            debris_trash_space = buffer->void_ptr;
             debrischunks = chunk_count;
             debrischunksglass = glass_chunk_count;
             buffer->addr += chunk_count * 0x430 + glass_chunk_count * 0x1b0 + EDPP_MAX_DMADEBTYPES * 0xa4c;
-            debris_trash_size = buffer->addr - debris_trash_space;
+            debris_trash_size = buffer->addr - reinterpret_cast<usize>(debris_trash_space);
         }
     }
 
@@ -11919,13 +11919,13 @@ extern "C" {
             return;
         }
 
-        usize cursor = debris_trash_space;
-        if (cursor == 0) {
+        u8 *cursor = static_cast<u8 *>(debris_trash_space);
+        if (cursor == NULL) {
             if (buffer == NULL) {
                 return;
             }
             buffer->addr = ALIGN(buffer->addr, 0x10);
-            cursor = buffer->addr;
+            cursor = buffer->u8_ptr;
         }
 
         memset(debris_chunk_controls, 0,
@@ -11939,25 +11939,25 @@ extern "C" {
 
         i32 size;
         for (i32 i = 0; i < debrischunks; ++i) {
-            freedebchunks[i] = CreateDmaParticleSet(reinterpret_cast<void *>(cursor), &size);
-            cursor += static_cast<usize>(size);
+            freedebchunks[i] = CreateDmaParticleSet(cursor, &size);
+            cursor += size;
         }
         for (i32 i = 0; i < debrischunksglass; ++i) {
-            freedebchunksglass[i] = CreateDmaParticleSetGlass(reinterpret_cast<void *>(cursor), &size);
-            cursor += static_cast<usize>(size);
+            freedebchunksglass[i] = CreateDmaParticleSetGlass(cursor, &size);
+            cursor += size;
         }
 
         freedebchkptr = 0;
         freedebchkptrg = 0;
         for (i32 i = 0; i < EDPP_MAX_DMADEBTYPES; ++i) {
-            DmaDebTypes[i] = CreateDmaPartEffectList(reinterpret_cast<void *>(cursor), &size);
-            cursor += static_cast<usize>(size);
+            DmaDebTypes[i] = CreateDmaPartEffectList(cursor, &size);
+            cursor += size;
         }
 
-        if (debris_trash_space == 0) {
-            debris_trash_space = buffer->addr;
-            debris_trash_size = cursor - buffer->addr;
-            buffer->addr = cursor;
+        if (debris_trash_space == NULL) {
+            debris_trash_space = buffer->void_ptr;
+            debris_trash_size = static_cast<usize>(cursor - buffer->u8_ptr);
+            buffer->u8_ptr = cursor;
         }
 
         const i32 chunk_count = debrischunks + debrischunksglass;
@@ -11983,7 +11983,7 @@ extern "C" {
 
     void DebrisSetup2(VARIPTR *buffer, VARIPTR buffer_end, VARIPTR *trash_buffer, VARIPTR trash_end, char *texture_name,
                       i32 chunk_count, i32 glass_chunk_count, i32 key_count, i32 effect_count) {
-        if (debris_trash_space == 0) {
+        if (debris_trash_space == NULL) {
             debrischunksglass = glass_chunk_count;
             debrischunks = chunk_count;
         }
