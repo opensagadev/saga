@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 83.08242,
+    "fuzzy_match_percent": 83.08008,
     "total_code": "4722419",
-    "matched_code": "652839",
-    "matched_code_percent": 13.82425,
+    "matched_code": "653201",
+    "matched_code_percent": 13.831915,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 7019,
-    "matched_functions_percent": 52.150978,
+    "matched_functions": 7023,
+    "matched_functions_percent": 52.180695,
     "total_units": 1
   },
   "text": {
@@ -28499,29 +28499,6 @@
       "functions": []
     },
     {
-      "name": "gameapi/gui/apimenu.cpp.o",
-      "source": "src/gameapi/gui/apimenu.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/apimenu.o",
-      "functions": [
-        {
-          "name": "MenuLoadTechnicalStrings",
-          "demangled_name": "MenuLoadTechnicalStrings",
-          "address": 4358976,
-          "offset": 3469008,
-          "size": 1236,
-          "match_percent": 99.06029
-        },
-        {
-          "name": "_Z20APIMenuDrawGameStateffii",
-          "demangled_name": "APIMenuDrawGameState(float, float, int, int)",
-          "address": 4390272,
-          "offset": 3500304,
-          "size": 1440,
-          "match_percent": 99.87539
-        }
-      ]
-    },
-    {
       "name": "gameframework/saveload.c.o",
       "source": "src/gameframework/saveload.c",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameframework/saveload.o",
@@ -28756,45 +28733,6 @@
           "address": 3181500,
           "offset": 2291532,
           "size": 29,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
-      "name": "gameframework/savesystem.cpp.o",
-      "source": "src/gameframework/savesystem.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameframework/savesystem.o",
-      "functions": [
-        {
-          "name": "SaveSystemInitialise",
-          "demangled_name": "SaveSystemInitialise",
-          "address": 4364160,
-          "offset": 3474192,
-          "size": 296,
-          "match_percent": 99.98649
-        },
-        {
-          "name": "ChecksumSaveData",
-          "demangled_name": "ChecksumSaveData",
-          "address": 4364800,
-          "offset": 3474832,
-          "size": 264,
-          "match_percent": 100.0
-        },
-        {
-          "name": "TriggerExtraDataSave",
-          "demangled_name": "TriggerExtraDataSave",
-          "address": 4368080,
-          "offset": 3478112,
-          "size": 141,
-          "match_percent": 100.0
-        },
-        {
-          "name": "TriggerExtraDataLoad",
-          "demangled_name": "TriggerExtraDataLoad",
-          "address": 4368224,
-          "offset": 3478256,
-          "size": 152,
           "match_percent": 100.0
         }
       ]
@@ -44216,54 +44154,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "SaveSystemInitialiseEx",
-          "demangled_name": "SaveSystemInitialiseEx",
-          "address": 4364464,
-          "offset": 3474496,
-          "size": 297,
-          "match_percent": 99.98649
-        },
-        {
-          "name": "SetSaveSuccessFn",
-          "demangled_name": "SetSaveSuccessFn",
-          "address": 4364768,
-          "offset": 3474800,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "UpdateSaveSlots",
-          "demangled_name": "UpdateSaveSlots",
-          "address": 4365072,
-          "offset": 3475104,
-          "size": 2782,
-          "match_percent": 69.6624
-        },
-        {
-          "name": "loadsaveCallEachFrame",
-          "demangled_name": "loadsaveCallEachFrame",
-          "address": 4367856,
-          "offset": 3477888,
-          "size": 134,
-          "match_percent": 63.0
-        },
-        {
-          "name": "TriggerAutoSave",
-          "demangled_name": "TriggerAutoSave",
-          "address": 4368000,
-          "offset": 3478032,
-          "size": 78,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18getsaveload_statusv",
-          "demangled_name": "getsaveload_status()",
-          "address": 4368384,
-          "offset": 3478416,
-          "size": 22,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z12SaveGizmoSysP10GIZMOSYS_sPcS1_",
           "demangled_name": "SaveGizmoSys(GIZMOSYS_s*, char*, char*)",
           "address": 4913216,
@@ -44468,14 +44358,6 @@
           "offset": 1443360,
           "size": 929,
           "match_percent": 99.910995
-        },
-        {
-          "name": "TestForController",
-          "demangled_name": "TestForController",
-          "address": 4360224,
-          "offset": 3470256,
-          "size": 51,
-          "match_percent": 99.0625
         },
         {
           "name": "_Z34VirtualControlDPad_OnDown_CallbackR18MechTouchUIElementR11TouchHolder",
@@ -63239,22 +63121,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_Z13FindNextBreakPhi",
-          "demangled_name": "FindNextBreak(unsigned char*, int)",
-          "address": 4378816,
-          "offset": 3488848,
-          "size": 352,
-          "match_percent": 63.51695
-        },
-        {
-          "name": "_Z16FindNearestBreakPhi",
-          "demangled_name": "FindNearestBreak(unsigned char*, int)",
-          "address": 4379168,
-          "offset": 3489200,
-          "size": 654,
-          "match_percent": 61.82412
-        },
-        {
           "name": "_Z27EquivalentObjects_ConfigureP11WORLDINFO_sPc",
           "demangled_name": "EquivalentObjects_Configure(WORLDINFO_s*, char*)",
           "address": 4664400,
@@ -64643,7 +64509,7 @@
           "address": 1332288,
           "offset": 442320,
           "size": 70,
-          "match_percent": 99.68421
+          "match_percent": 99.947365
         },
         {
           "name": "_Z14TextPulseTimerf",
@@ -64684,278 +64550,6 @@
           "offset": 443072,
           "size": 445,
           "match_percent": 99.9375
-        },
-        {
-          "name": "_Z22Text3DStringEncodeFontPhPtPv",
-          "demangled_name": "Text3DStringEncodeFont(unsigned char*, unsigned short*, void*)",
-          "address": 4368416,
-          "offset": 3478448,
-          "size": 245,
-          "match_percent": 84.42857
-        },
-        {
-          "name": "Text3DStringEncode",
-          "demangled_name": "Text3DStringEncode",
-          "address": 4368672,
-          "offset": 3478704,
-          "size": 74,
-          "match_percent": 100.0
-        },
-        {
-          "name": "TextRegisterButtonMapFn",
-          "demangled_name": "TextRegisterButtonMapFn",
-          "address": 4368752,
-          "offset": 3478784,
-          "size": 28,
-          "match_percent": 100.0
-        },
-        {
-          "name": "TextRegisterPulseTimerFn",
-          "demangled_name": "TextRegisterPulseTimerFn",
-          "address": 4368784,
-          "offset": 3478816,
-          "size": 28,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18TextDecodeCodewordPcS_",
-          "demangled_name": "TextDecodeCodeword(char*, char*)",
-          "address": 4368816,
-          "offset": 3478848,
-          "size": 2017,
-          "match_percent": 99.31984
-        },
-        {
-          "name": "TextDecode",
-          "demangled_name": "TextDecode",
-          "address": 4370848,
-          "offset": 3480880,
-          "size": 516,
-          "match_percent": 60.985817
-        },
-        {
-          "name": "_Z18TextPrintSubstringPhfffffii",
-          "demangled_name": "TextPrintSubstring(unsigned char*, float, float, float, float, float, int, int)",
-          "address": 4371376,
-          "offset": 3481408,
-          "size": 515,
-          "match_percent": 78.34821
-        },
-        {
-          "name": "Text3DEx",
-          "demangled_name": "Text3DEx",
-          "address": 4371936,
-          "offset": 3481968,
-          "size": 3480,
-          "match_percent": 56.52221
-        },
-        {
-          "name": "Text3D",
-          "demangled_name": "Text3D",
-          "address": 4375424,
-          "offset": 3485456,
-          "size": 149,
-          "match_percent": 100.0
-        },
-        {
-          "name": "Text3DEx2",
-          "demangled_name": "Text3DEx2",
-          "address": 4375584,
-          "offset": 3485616,
-          "size": 251,
-          "match_percent": 99.81132
-        },
-        {
-          "name": "MenuText3DEx",
-          "demangled_name": "MenuText3DEx",
-          "address": 4375840,
-          "offset": 3485872,
-          "size": 488,
-          "match_percent": 92.97591
-        },
-        {
-          "name": "MessageBoxInitMtl",
-          "demangled_name": "MessageBoxInitMtl",
-          "address": 4379824,
-          "offset": 3489856,
-          "size": 127,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18DrawMessageBoxRGBAffffjjjjP7numtl_sif",
-          "demangled_name": "DrawMessageBoxRGBA(float, float, float, float, unsigned int, unsigned int, unsigned int, unsigned int, numtl_s*, int, float)",
-          "address": 4379952,
-          "offset": 3489984,
-          "size": 925,
-          "match_percent": 99.92462
-        },
-        {
-          "name": "_Z14DrawMessageBoxiffff",
-          "demangled_name": "DrawMessageBox(int, float, float, float, float)",
-          "address": 4380880,
-          "offset": 3490912,
-          "size": 770,
-          "match_percent": 99.79605
-        },
-        {
-          "name": "SmartTextEx",
-          "demangled_name": "SmartTextEx",
-          "address": 4381664,
-          "offset": 3491696,
-          "size": 4373,
-          "match_percent": 58.278866
-        },
-        {
-          "name": "SmartText",
-          "demangled_name": "SmartText",
-          "address": 4386048,
-          "offset": 3496080,
-          "size": 188,
-          "match_percent": 100.0
-        },
-        {
-          "name": "SmartTextEx2",
-          "demangled_name": "SmartTextEx2",
-          "address": 4386240,
-          "offset": 3496272,
-          "size": 289,
-          "match_percent": 100.0
-        },
-        {
-          "name": "MenuSmartTextEx",
-          "demangled_name": "MenuSmartTextEx",
-          "address": 4386544,
-          "offset": 3496576,
-          "size": 577,
-          "match_percent": 99.98969
-        },
-        {
-          "name": "SmartTextExDrop",
-          "demangled_name": "SmartTextExDrop",
-          "address": 4397488,
-          "offset": 3507520,
-          "size": 515,
-          "match_percent": 78.83908
-        },
-        {
-          "name": "SmartTextSetFWNMode",
-          "demangled_name": "SmartTextSetFWNMode",
-          "address": 4398016,
-          "offset": 3508048,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "SmartTextSetFont",
-          "demangled_name": "SmartTextSetFont",
-          "address": 4398048,
-          "offset": 3508080,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "SetGameFont",
-          "demangled_name": "SetGameFont",
-          "address": 4398080,
-          "offset": 3508112,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "Set3DGameFont",
-          "demangled_name": "Set3DGameFont",
-          "address": 4398112,
-          "offset": 3508144,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "LoadGameFont",
-          "demangled_name": "LoadGameFont",
-          "address": 4398144,
-          "offset": 3508176,
-          "size": 362,
-          "match_percent": 100.0
-        },
-        {
-          "name": "UnloadGameFont",
-          "demangled_name": "UnloadGameFont",
-          "address": 4398512,
-          "offset": 3508544,
-          "size": 144,
-          "match_percent": 100.0
-        },
-        {
-          "name": "SetQFont2D",
-          "demangled_name": "SetQFont2D",
-          "address": 4398656,
-          "offset": 3508688,
-          "size": 82,
-          "match_percent": 100.0
-        },
-        {
-          "name": "SmartTextSetWidescreen",
-          "demangled_name": "SmartTextSetWidescreen",
-          "address": 4398752,
-          "offset": 3508784,
-          "size": 78,
-          "match_percent": 99.64286
-        },
-        {
-          "name": "SmartTextGetWidescreen",
-          "demangled_name": "SmartTextGetWidescreen",
-          "address": 4398832,
-          "offset": 3508864,
-          "size": 52,
-          "match_percent": 99.84615
-        },
-        {
-          "name": "_Z19SplitTextFindNextWSPhi",
-          "demangled_name": "SplitTextFindNextWS(unsigned char*, int)",
-          "address": 4398912,
-          "offset": 3508944,
-          "size": 116,
-          "match_percent": 100.0
-        },
-        {
-          "name": "SplitText",
-          "demangled_name": "SplitText",
-          "address": 4399040,
-          "offset": 3509072,
-          "size": 497,
-          "match_percent": 48.68613
-        },
-        {
-          "name": "_Z22MatrixTextStringEncodePvPhPt",
-          "demangled_name": "MatrixTextStringEncode(void*, unsigned char*, unsigned short*)",
-          "address": 4399552,
-          "offset": 3509584,
-          "size": 245,
-          "match_percent": 84.42857
-        },
-        {
-          "name": "MatrixText",
-          "demangled_name": "MatrixText",
-          "address": 4399808,
-          "offset": 3509840,
-          "size": 786,
-          "match_percent": 99.98742
-        },
-        {
-          "name": "FixUpButtonsInFont",
-          "demangled_name": "FixUpButtonsInFont",
-          "address": 4400608,
-          "offset": 3510640,
-          "size": 324,
-          "match_percent": 33.57843
-        },
-        {
-          "name": "LoadButtonFont",
-          "demangled_name": "LoadButtonFont",
-          "address": 4400944,
-          "offset": 3510976,
-          "size": 171,
-          "match_percent": 93.11364
         },
         {
           "name": "_Z21Text_InitLanguageListP12LANGUAGEDATA",
@@ -65019,7 +64613,7 @@
           "address": 4775376,
           "offset": 3885408,
           "size": 1071,
-          "match_percent": 86.604095
+          "match_percent": 86.672356
         },
         {
           "name": "_Z14Text_InitTableP9TEXTENTRYii",
@@ -65091,7 +64685,7 @@
           "address": 4778720,
           "offset": 3888752,
           "size": 3008,
-          "match_percent": 87.332794
+          "match_percent": 88.165596
         },
         {
           "name": "_Z25MenuUpdateViewTextStringsP6MENU_s",
@@ -65099,7 +64693,7 @@
           "address": 4781728,
           "offset": 3891760,
           "size": 220,
-          "match_percent": 99.39189
+          "match_percent": 100.0
         },
         {
           "name": "_Z23MenuDrawViewTextStringsP6MENU_s",
@@ -65107,7 +64701,7 @@
           "address": 4781952,
           "offset": 3891984,
           "size": 1902,
-          "match_percent": 69.29712
+          "match_percent": 70.30377
         },
         {
           "name": "_Z25Text_LocaliseDecimalPointPc",
@@ -65479,7 +65073,7 @@
           "address": 1174128,
           "offset": 284160,
           "size": 520,
-          "match_percent": 99.99
+          "match_percent": 99.84
         },
         {
           "name": "_Z13MenuInitClipsP6MENU_s",
@@ -65567,7 +65161,7 @@
           "address": 4348640,
           "offset": 3458672,
           "size": 58,
-          "match_percent": 98.84615
+          "match_percent": 100.0
         },
         {
           "name": "_Z20MenuEnterCardWarningP6MENU_s",
@@ -65698,6 +65292,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "NewMenu",
+          "demangled_name": "NewMenu",
+          "address": 4350048,
+          "offset": 3460080,
+          "size": 1045,
+          "match_percent": 68.67742
+        },
+        {
           "name": "_Z13MenuEnterLoadP6MENU_s",
           "demangled_name": "MenuEnterLoad(MENU_s*)",
           "address": 4351104,
@@ -65711,7 +65313,7 @@
           "address": 4351424,
           "offset": 3461456,
           "size": 566,
-          "match_percent": 96.82927
+          "match_percent": 96.95122
         },
         {
           "name": "BackupMenu",
@@ -65735,7 +65337,7 @@
           "address": 4352560,
           "offset": 3462592,
           "size": 258,
-          "match_percent": 98.8
+          "match_percent": 99.89091
         },
         {
           "name": "_Z18MenuUpdateDeletingP6MENU_s",
@@ -65783,7 +65385,7 @@
           "address": 4353552,
           "offset": 3463584,
           "size": 259,
-          "match_percent": 86.29032
+          "match_percent": 86.048386
         },
         {
           "name": "_Z20MenuUpdateLoadCancelP6MENU_s",
@@ -65823,7 +65425,7 @@
           "address": 4354400,
           "offset": 3464432,
           "size": 263,
-          "match_percent": 53.642857
+          "match_percent": 53.42857
         },
         {
           "name": "_Z23MenuUpdateDeleteConfirmP6MENU_s",
@@ -65831,7 +65433,7 @@
           "address": 4354672,
           "offset": 3464704,
           "size": 170,
-          "match_percent": 99.63415
+          "match_percent": 100.0
         },
         {
           "name": "_Z21MenuUpdateFileCorruptP6MENU_s",
@@ -65855,7 +65457,7 @@
           "address": 4355344,
           "offset": 3465376,
           "size": 108,
-          "match_percent": 99.48276
+          "match_percent": 98.965515
         },
         {
           "name": "_Z24MenuUpdateNotEnoughSpaceP6MENU_s",
@@ -65871,7 +65473,7 @@
           "address": 4355552,
           "offset": 3465584,
           "size": 171,
-          "match_percent": 99.625
+          "match_percent": 100.0
         },
         {
           "name": "_Z20MenuUpdateInsertCardP6MENU_s",
@@ -65943,7 +65545,7 @@
           "address": 4356976,
           "offset": 3467008,
           "size": 130,
-          "match_percent": 99.57143
+          "match_percent": 100.0
         },
         {
           "name": "_Z14MenuUpdateLoadP6MENU_s",
@@ -65951,7 +65553,7 @@
           "address": 4357120,
           "offset": 3467152,
           "size": 246,
-          "match_percent": 100.0
+          "match_percent": 99.77612
         },
         {
           "name": "_Z13MenuStartSavev",
@@ -65967,7 +65569,7 @@
           "address": 4357424,
           "offset": 3467456,
           "size": 147,
-          "match_percent": 99.625
+          "match_percent": 100.0
         },
         {
           "name": "_Z14MenuUpdateSaveP6MENU_s",
@@ -65975,7 +65577,7 @@
           "address": 4357584,
           "offset": 3467616,
           "size": 400,
-          "match_percent": 88.62245
+          "match_percent": 88.31633
         },
         {
           "name": "_Z20MenuEnterSaveConfirmP6MENU_s",
@@ -65994,11 +65596,27 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z17Draw_NOMEMORYCARDv",
+          "demangled_name": "Draw_NOMEMORYCARD()",
+          "address": 4358128,
+          "offset": 3468160,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z18MenuDrawInsertCardP6MENU_s",
           "demangled_name": "MenuDrawInsertCard(MENU_s*)",
           "address": 4358144,
           "offset": 3468176,
           "size": 32,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z19Draw_AUTOSAVECANCELv",
+          "demangled_name": "Draw_AUTOSAVECANCEL()",
+          "address": 4358176,
+          "offset": 3468208,
+          "size": 9,
           "match_percent": 100.0
         },
         {
@@ -66082,12 +65700,164 @@
           "match_percent": 99.933334
         },
         {
+          "name": "MenuLoadTechnicalStrings",
+          "demangled_name": "MenuLoadTechnicalStrings",
+          "address": 4358976,
+          "offset": 3469008,
+          "size": 1236,
+          "match_percent": 99.06029
+        },
+        {
+          "name": "TestForController",
+          "demangled_name": "TestForController",
+          "address": 4360224,
+          "offset": 3470256,
+          "size": 51,
+          "match_percent": 100.0
+        },
+        {
           "name": "UpdateMenu",
           "demangled_name": "UpdateMenu",
           "address": 4360288,
           "offset": 3470320,
           "size": 3870,
-          "match_percent": 58.31783
+          "match_percent": 55.609818
+        },
+        {
+          "name": "SaveSystemInitialise",
+          "demangled_name": "SaveSystemInitialise",
+          "address": 4364160,
+          "offset": 3474192,
+          "size": 296,
+          "match_percent": 99.98649
+        },
+        {
+          "name": "SaveSystemInitialiseEx",
+          "demangled_name": "SaveSystemInitialiseEx",
+          "address": 4364464,
+          "offset": 3474496,
+          "size": 297,
+          "match_percent": 99.98649
+        },
+        {
+          "name": "SetSaveSuccessFn",
+          "demangled_name": "SetSaveSuccessFn",
+          "address": 4364768,
+          "offset": 3474800,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "ChecksumSaveData",
+          "demangled_name": "ChecksumSaveData",
+          "address": 4364800,
+          "offset": 3474832,
+          "size": 264,
+          "match_percent": 99.819275
+        },
+        {
+          "name": "UpdateSaveSlots",
+          "demangled_name": "UpdateSaveSlots",
+          "address": 4365072,
+          "offset": 3475104,
+          "size": 2782,
+          "match_percent": 67.8688
+        },
+        {
+          "name": "loadsaveCallEachFrame",
+          "demangled_name": "loadsaveCallEachFrame",
+          "address": 4367856,
+          "offset": 3477888,
+          "size": 134,
+          "match_percent": 63.0
+        },
+        {
+          "name": "TriggerAutoSave",
+          "demangled_name": "TriggerAutoSave",
+          "address": 4368000,
+          "offset": 3478032,
+          "size": 78,
+          "match_percent": 100.0
+        },
+        {
+          "name": "TriggerExtraDataSave",
+          "demangled_name": "TriggerExtraDataSave",
+          "address": 4368080,
+          "offset": 3478112,
+          "size": 141,
+          "match_percent": 100.0
+        },
+        {
+          "name": "TriggerExtraDataLoad",
+          "demangled_name": "TriggerExtraDataLoad",
+          "address": 4368224,
+          "offset": 3478256,
+          "size": 152,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18getsaveload_statusv",
+          "demangled_name": "getsaveload_status()",
+          "address": 4368384,
+          "offset": 3478416,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z22Text3DStringEncodeFontPhPtPv",
+          "demangled_name": "Text3DStringEncodeFont(unsigned char*, unsigned short*, void*)",
+          "address": 4368416,
+          "offset": 3478448,
+          "size": 245,
+          "match_percent": 84.42857
+        },
+        {
+          "name": "Text3DStringEncode",
+          "demangled_name": "Text3DStringEncode",
+          "address": 4368672,
+          "offset": 3478704,
+          "size": 74,
+          "match_percent": 100.0
+        },
+        {
+          "name": "TextRegisterButtonMapFn",
+          "demangled_name": "TextRegisterButtonMapFn",
+          "address": 4368752,
+          "offset": 3478784,
+          "size": 28,
+          "match_percent": 100.0
+        },
+        {
+          "name": "TextRegisterPulseTimerFn",
+          "demangled_name": "TextRegisterPulseTimerFn",
+          "address": 4368784,
+          "offset": 3478816,
+          "size": 28,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18TextDecodeCodewordPcS_",
+          "demangled_name": "TextDecodeCodeword(char*, char*)",
+          "address": 4368816,
+          "offset": 3478848,
+          "size": 2017,
+          "match_percent": 99.3583
+        },
+        {
+          "name": "TextDecode",
+          "demangled_name": "TextDecode",
+          "address": 4370848,
+          "offset": 3480880,
+          "size": 516,
+          "match_percent": 60.985817
+        },
+        {
+          "name": "_Z18TextPrintSubstringPhfffffii",
+          "demangled_name": "TextPrintSubstring(unsigned char*, float, float, float, float, float, int, int)",
+          "address": 4371376,
+          "offset": 3481408,
+          "size": 515,
+          "match_percent": 78.48214
         },
         {
           "name": "SetButtonScaleMode",
@@ -66098,12 +65868,116 @@
           "match_percent": 100.0
         },
         {
+          "name": "Text3DEx",
+          "demangled_name": "Text3DEx",
+          "address": 4371936,
+          "offset": 3481968,
+          "size": 3480,
+          "match_percent": 56.52221
+        },
+        {
+          "name": "Text3D",
+          "demangled_name": "Text3D",
+          "address": 4375424,
+          "offset": 3485456,
+          "size": 149,
+          "match_percent": 100.0
+        },
+        {
+          "name": "Text3DEx2",
+          "demangled_name": "Text3DEx2",
+          "address": 4375584,
+          "offset": 3485616,
+          "size": 251,
+          "match_percent": 99.81132
+        },
+        {
+          "name": "MenuText3DEx",
+          "demangled_name": "MenuText3DEx",
+          "address": 4375840,
+          "offset": 3485872,
+          "size": 488,
+          "match_percent": 92.97591
+        },
+        {
           "name": "_Z23APIMenuDrawMemCardSlotsP6MENU_sf",
           "demangled_name": "APIMenuDrawMemCardSlots(MENU_s*, float)",
           "address": 4376336,
           "offset": 3486368,
           "size": 2474,
           "match_percent": 88.660805
+        },
+        {
+          "name": "_Z13FindNextBreakPhi",
+          "demangled_name": "FindNextBreak(unsigned char*, int)",
+          "address": 4378816,
+          "offset": 3488848,
+          "size": 352,
+          "match_percent": 63.51695
+        },
+        {
+          "name": "_Z16FindNearestBreakPhi",
+          "demangled_name": "FindNearestBreak(unsigned char*, int)",
+          "address": 4379168,
+          "offset": 3489200,
+          "size": 654,
+          "match_percent": 61.82412
+        },
+        {
+          "name": "MessageBoxInitMtl",
+          "demangled_name": "MessageBoxInitMtl",
+          "address": 4379824,
+          "offset": 3489856,
+          "size": 127,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18DrawMessageBoxRGBAffffjjjjP7numtl_sif",
+          "demangled_name": "DrawMessageBoxRGBA(float, float, float, float, unsigned int, unsigned int, unsigned int, unsigned int, numtl_s*, int, float)",
+          "address": 4379952,
+          "offset": 3489984,
+          "size": 925,
+          "match_percent": 99.92462
+        },
+        {
+          "name": "_Z14DrawMessageBoxiffff",
+          "demangled_name": "DrawMessageBox(int, float, float, float, float)",
+          "address": 4380880,
+          "offset": 3490912,
+          "size": 770,
+          "match_percent": 99.97369
+        },
+        {
+          "name": "SmartTextEx",
+          "demangled_name": "SmartTextEx",
+          "address": 4381664,
+          "offset": 3491696,
+          "size": 4373,
+          "match_percent": 57.961872
+        },
+        {
+          "name": "SmartText",
+          "demangled_name": "SmartText",
+          "address": 4386048,
+          "offset": 3496080,
+          "size": 188,
+          "match_percent": 100.0
+        },
+        {
+          "name": "SmartTextEx2",
+          "demangled_name": "SmartTextEx2",
+          "address": 4386240,
+          "offset": 3496272,
+          "size": 289,
+          "match_percent": 100.0
+        },
+        {
+          "name": "MenuSmartTextEx",
+          "demangled_name": "MenuSmartTextEx",
+          "address": 4386544,
+          "offset": 3496576,
+          "size": 577,
+          "match_percent": 99.98969
         },
         {
           "name": "_Z19MenuDrawFileCorruptP6MENU_s",
@@ -66119,7 +65993,7 @@
           "address": 4387344,
           "offset": 3497376,
           "size": 599,
-          "match_percent": 99.68595
+          "match_percent": 99.80991
         },
         {
           "name": "_Z18MenuDrawFormattingP6MENU_s",
@@ -66127,7 +66001,15 @@
           "address": 4387952,
           "offset": 3497984,
           "size": 527,
-          "match_percent": 99.669815
+          "match_percent": 99.528305
+        },
+        {
+          "name": "_Z20Draw_AUTOSAVEWARNINGv",
+          "demangled_name": "Draw_AUTOSAVEWARNING()",
+          "address": 4388480,
+          "offset": 3498512,
+          "size": 489,
+          "match_percent": 99.97
         },
         {
           "name": "_Z15MenuDrawLoadingP6MENU_s",
@@ -66143,6 +66025,46 @@
           "address": 4389008,
           "offset": 3499040,
           "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16Draw_LOADCORRUPTv",
+          "demangled_name": "Draw_LOADCORRUPT()",
+          "address": 4389040,
+          "offset": 3499072,
+          "size": 180,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z15Draw_LOADFAILEDv",
+          "demangled_name": "Draw_LOADFAILED()",
+          "address": 4389232,
+          "offset": 3499264,
+          "size": 180,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z11Draw_LOADEDv",
+          "demangled_name": "Draw_LOADED()",
+          "address": 4389424,
+          "offset": 3499456,
+          "size": 181,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z12Draw_LOADINGv",
+          "demangled_name": "Draw_LOADING()",
+          "address": 4389616,
+          "offset": 3499648,
+          "size": 181,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z20Draw_NODATAAVAILABLEv",
+          "demangled_name": "Draw_NODATAAVAILABLE()",
+          "address": 4389808,
+          "offset": 3499840,
+          "size": 229,
           "match_percent": 100.0
         },
         {
@@ -66162,12 +66084,20 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z20APIMenuDrawGameStateffii",
+          "demangled_name": "APIMenuDrawGameState(float, float, int, int)",
+          "address": 4390272,
+          "offset": 3500304,
+          "size": 1440,
+          "match_percent": 99.96885
+        },
+        {
           "name": "DrawMenuEntryEx",
           "demangled_name": "DrawMenuEntryEx",
           "address": 4391712,
           "offset": 3501744,
           "size": 2088,
-          "match_percent": 95.48366
+          "match_percent": 95.45098
         },
         {
           "name": "DrawMenuEntry",
@@ -66226,12 +66156,20 @@
           "match_percent": 99.77528
         },
         {
+          "name": "_Z7Draw_OKP6MENU_s",
+          "demangled_name": "Draw_OK(MENU_s*)",
+          "address": 4394992,
+          "offset": 3505024,
+          "size": 64,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z22MenuDrawAutoSaveCancelP6MENU_s",
           "demangled_name": "MenuDrawAutoSaveCancel(MENU_s*)",
           "address": 4395056,
           "offset": 3505088,
           "size": 75,
-          "match_percent": 100.0
+          "match_percent": 99.347824
         },
         {
           "name": "_Z23MenuDrawAutoSaveWarningP6MENU_s",
@@ -66271,7 +66209,7 @@
           "address": 4396112,
           "offset": 3506144,
           "size": 378,
-          "match_percent": 98.48148
+          "match_percent": 99.96296
         },
         {
           "name": "_Z21MenuDrawDeleteConfirmP6MENU_s",
@@ -66312,6 +66250,142 @@
           "offset": 3507312,
           "size": 197,
           "match_percent": 99.92105
+        },
+        {
+          "name": "SmartTextExDrop",
+          "demangled_name": "SmartTextExDrop",
+          "address": 4397488,
+          "offset": 3507520,
+          "size": 515,
+          "match_percent": 78.83908
+        },
+        {
+          "name": "SmartTextSetFWNMode",
+          "demangled_name": "SmartTextSetFWNMode",
+          "address": 4398016,
+          "offset": 3508048,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "SmartTextSetFont",
+          "demangled_name": "SmartTextSetFont",
+          "address": 4398048,
+          "offset": 3508080,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "SetGameFont",
+          "demangled_name": "SetGameFont",
+          "address": 4398080,
+          "offset": 3508112,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "Set3DGameFont",
+          "demangled_name": "Set3DGameFont",
+          "address": 4398112,
+          "offset": 3508144,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "LoadGameFont",
+          "demangled_name": "LoadGameFont",
+          "address": 4398144,
+          "offset": 3508176,
+          "size": 362,
+          "match_percent": 100.0
+        },
+        {
+          "name": "UnloadGameFont",
+          "demangled_name": "UnloadGameFont",
+          "address": 4398512,
+          "offset": 3508544,
+          "size": 144,
+          "match_percent": 100.0
+        },
+        {
+          "name": "SetQFont2D",
+          "demangled_name": "SetQFont2D",
+          "address": 4398656,
+          "offset": 3508688,
+          "size": 82,
+          "match_percent": 100.0
+        },
+        {
+          "name": "SmartTextSetWidescreen",
+          "demangled_name": "SmartTextSetWidescreen",
+          "address": 4398752,
+          "offset": 3508784,
+          "size": 78,
+          "match_percent": 99.64286
+        },
+        {
+          "name": "SmartTextGetWidescreen",
+          "demangled_name": "SmartTextGetWidescreen",
+          "address": 4398832,
+          "offset": 3508864,
+          "size": 52,
+          "match_percent": 99.84615
+        },
+        {
+          "name": "Debug_Print",
+          "demangled_name": "Debug_Print",
+          "address": 4398896,
+          "offset": 3508928,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z19SplitTextFindNextWSPhi",
+          "demangled_name": "SplitTextFindNextWS(unsigned char*, int)",
+          "address": 4398912,
+          "offset": 3508944,
+          "size": 116,
+          "match_percent": 100.0
+        },
+        {
+          "name": "SplitText",
+          "demangled_name": "SplitText",
+          "address": 4399040,
+          "offset": 3509072,
+          "size": 497,
+          "match_percent": 48.68613
+        },
+        {
+          "name": "_Z22MatrixTextStringEncodePvPhPt",
+          "demangled_name": "MatrixTextStringEncode(void*, unsigned char*, unsigned short*)",
+          "address": 4399552,
+          "offset": 3509584,
+          "size": 245,
+          "match_percent": 84.42857
+        },
+        {
+          "name": "MatrixText",
+          "demangled_name": "MatrixText",
+          "address": 4399808,
+          "offset": 3509840,
+          "size": 786,
+          "match_percent": 99.98742
+        },
+        {
+          "name": "FixUpButtonsInFont",
+          "demangled_name": "FixUpButtonsInFont",
+          "address": 4400608,
+          "offset": 3510640,
+          "size": 324,
+          "match_percent": 33.57843
+        },
+        {
+          "name": "LoadButtonFont",
+          "demangled_name": "LoadButtonFont",
+          "address": 4400944,
+          "offset": 3510976,
+          "size": 171,
+          "match_percent": 93.11364
         },
         {
           "name": "_Z15IconScenes_InitPcP9variptr_uS1_",
@@ -67662,14 +67736,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "NewMenu",
-          "demangled_name": "NewMenu",
-          "address": 4350048,
-          "offset": 3460080,
-          "size": 1045,
-          "match_percent": 68.67742
-        },
-        {
           "name": "_Z24ResizePauseScreenTextureii",
           "demangled_name": "ResizePauseScreenTexture(int, int)",
           "address": 4769760,
@@ -68243,14 +68309,6 @@
           "demangled_name": "DebugLog",
           "address": 2744096,
           "offset": 1854128,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "Debug_Print",
-          "demangled_name": "Debug_Print",
-          "address": 4398896,
-          "offset": 3508928,
           "size": 9,
           "match_percent": 100.0
         }
@@ -78938,78 +78996,6 @@
           "address": 3125776,
           "offset": 2235808,
           "size": 108,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z17Draw_NOMEMORYCARDv",
-          "demangled_name": "Draw_NOMEMORYCARD()",
-          "address": 4358128,
-          "offset": 3468160,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z19Draw_AUTOSAVECANCELv",
-          "demangled_name": "Draw_AUTOSAVECANCEL()",
-          "address": 4358176,
-          "offset": 3468208,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z20Draw_AUTOSAVEWARNINGv",
-          "demangled_name": "Draw_AUTOSAVEWARNING()",
-          "address": 4388480,
-          "offset": 3498512,
-          "size": 489,
-          "match_percent": 99.97
-        },
-        {
-          "name": "_Z16Draw_LOADCORRUPTv",
-          "demangled_name": "Draw_LOADCORRUPT()",
-          "address": 4389040,
-          "offset": 3499072,
-          "size": 180,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z15Draw_LOADFAILEDv",
-          "demangled_name": "Draw_LOADFAILED()",
-          "address": 4389232,
-          "offset": 3499264,
-          "size": 180,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z11Draw_LOADEDv",
-          "demangled_name": "Draw_LOADED()",
-          "address": 4389424,
-          "offset": 3499456,
-          "size": 181,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z12Draw_LOADINGv",
-          "demangled_name": "Draw_LOADING()",
-          "address": 4389616,
-          "offset": 3499648,
-          "size": 181,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z20Draw_NODATAAVAILABLEv",
-          "demangled_name": "Draw_NODATAAVAILABLE()",
-          "address": 4389808,
-          "offset": 3499840,
-          "size": 229,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z7Draw_OKP6MENU_s",
-          "demangled_name": "Draw_OK(MENU_s*)",
-          "address": 4394992,
-          "offset": 3505024,
-          "size": 64,
           "match_percent": 100.0
         },
         {
@@ -126126,6 +126112,7 @@
       "size": 29,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126141,6 +126128,7 @@
       "size": 29,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126156,6 +126144,7 @@
       "size": 29,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126171,6 +126160,7 @@
       "size": 29,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126186,6 +126176,7 @@
       "size": 29,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126201,6 +126192,7 @@
       "size": 29,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126216,6 +126208,7 @@
       "size": 29,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126231,6 +126224,7 @@
       "size": 29,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126246,6 +126240,7 @@
       "size": 29,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126261,6 +126256,7 @@
       "size": 29,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126276,6 +126272,7 @@
       "size": 45,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126291,6 +126288,7 @@
       "size": 45,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126306,6 +126304,7 @@
       "size": 45,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126321,6 +126320,7 @@
       "size": 45,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126336,6 +126336,7 @@
       "size": 45,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126351,6 +126352,7 @@
       "size": 9,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126366,6 +126368,7 @@
       "size": 12,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126381,6 +126384,7 @@
       "size": 12,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126396,6 +126400,7 @@
       "size": 12,
       "match_percent": 100.0,
       "candidate_units": [
+        "legoapi/menus/screens/gamemenuall.cpp.o",
         "legoapi/menus/screens/menu.cpp.o",
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
@@ -126983,7 +126988,8 @@
       "match_percent": 100.0,
       "candidate_units": [
         "gameapi/edtools/edtoolsall.cpp.o",
-        "legoapi/items/objects/objectsall.cpp.o"
+        "legoapi/items/objects/objectsall.cpp.o",
+        "legoapi/menus/screens/gamemenuall.cpp.o"
       ]
     },
     {
@@ -126995,7 +127001,8 @@
       "match_percent": 100.0,
       "candidate_units": [
         "gameapi/edtools/edtoolsall.cpp.o",
-        "legoapi/items/objects/objectsall.cpp.o"
+        "legoapi/items/objects/objectsall.cpp.o",
+        "legoapi/menus/screens/gamemenuall.cpp.o"
       ]
     },
     {
@@ -127007,7 +127014,8 @@
       "match_percent": 100.0,
       "candidate_units": [
         "gameapi/edtools/edtoolsall.cpp.o",
-        "legoapi/items/objects/objectsall.cpp.o"
+        "legoapi/items/objects/objectsall.cpp.o",
+        "legoapi/menus/screens/gamemenuall.cpp.o"
       ]
     },
     {
@@ -127032,7 +127040,8 @@
       "match_percent": 100.0,
       "candidate_units": [
         "gameapi/edtools/edtoolsall.cpp.o",
-        "legoapi/items/objects/objectsall.cpp.o"
+        "legoapi/items/objects/objectsall.cpp.o",
+        "legoapi/menus/screens/gamemenuall.cpp.o"
       ]
     },
     {
@@ -127044,7 +127053,8 @@
       "match_percent": 100.0,
       "candidate_units": [
         "gameapi/edtools/edtoolsall.cpp.o",
-        "legoapi/items/objects/objectsall.cpp.o"
+        "legoapi/items/objects/objectsall.cpp.o",
+        "legoapi/menus/screens/gamemenuall.cpp.o"
       ]
     },
     {
@@ -127056,7 +127066,8 @@
       "match_percent": 100.0,
       "candidate_units": [
         "gameapi/edtools/edtoolsall.cpp.o",
-        "legoapi/items/objects/objectsall.cpp.o"
+        "legoapi/items/objects/objectsall.cpp.o",
+        "legoapi/menus/screens/gamemenuall.cpp.o"
       ]
     },
     {
@@ -129716,7 +129727,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 472,
+    "bazel_units": 470,
     "functions": 13454,
     "assigned_functions": 12840,
     "ambiguous_functions": 287,

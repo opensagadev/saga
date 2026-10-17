@@ -30,7 +30,7 @@ extern NUPAD *pActivePad;
 extern "C" {
     extern i32 Paused;
     extern i32 NewMode;
-    extern FadeSystem FadeSys;
+    extern "C++" FadeSystem FadeSys;
     extern i32 CutSceneWaiting;
 }
 
@@ -178,9 +178,7 @@ i32 GamePads_SkipMovie() {
 
 extern "C" {
 
-    bool TestForController(void) {
-        return Controller_IsConnected() != 0 || enable_touch_controls == 0;
-    }
+bool TestForController(void);
 
 } // extern "C"
 

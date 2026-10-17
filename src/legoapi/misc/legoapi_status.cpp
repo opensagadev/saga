@@ -23,7 +23,6 @@ extern "C" {
     void DebugLog(void) {
     }
 
-    void Debug_Print(void) {
-    }
+void Debug_Print(void);
 
 } // extern "C"

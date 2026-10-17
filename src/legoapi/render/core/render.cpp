@@ -698,10 +698,7 @@ extern f32 aiEditor_DrawYOffset;
 
 void DrawLocator(nuvec_s *position, float radius, i32 rotation, i32 colour);
 
-void Draw_LOADED() {
-    MenuSmartTextEx(apitxt_GAMELOADED, 0.0f, -0.4f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, MENUNORMALR,
-                    MENUNORMALG, MENUNORMALB, 1.5f, 2, NULL, 0, MenuA);
-}
+void Draw_LOADED();
 
 i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
                  u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order) {
@@ -900,10 +897,7 @@ static inline void ShopRotateZ(NUMTX *m, NUANG a) {
     m->m30 = m30 * cosx - m->m31 * sinx;
     m->m31 = m30 * sinx + m->m31 * cosx;
 }
-void Draw_LOADING() {
-    MenuSmartTextEx(apitxt_GAMELOADING, 0.0f, -0.4f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, MENUNORMALR,
-                    MENUNORMALG, MENUNORMALB, 1.5f, 2, NULL, 0, MenuA);
-}
+void Draw_LOADING();
 
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nuprim_internal.h"
@@ -1548,10 +1542,7 @@ void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large)
     }
 }
 
-void Draw_LOADFAILED() {
-    MenuSmartTextEx(apitxt_FAILEDTOLOAD, 0.0f, 0.0f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, MENUNORMALR,
-                    MENUNORMALG, MENUNORMALB, 1.5f, 3, NULL, 0, MenuA);
-}
+void Draw_LOADFAILED();
 
 void DrawAreaCylinder(nuvec_s *centre, nuvec_s *size, i32 colour);
 
@@ -1718,10 +1709,7 @@ void DrawStatusBG_LSW(STATUSPACKET_s *status) {
     }
 }
 
-void Draw_LOADCORRUPT() {
-    MenuSmartTextEx(apitxt_CORRUPTLOAD, 0.0f, 0.0f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, MENUNORMALR,
-                    MENUNORMALG, MENUNORMALB, 1.5f, 3, NULL, 0, MenuA);
-}
+void Draw_LOADCORRUPT();
 
 i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
                       u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha) {
@@ -2104,8 +2092,7 @@ void DrawSubItemMenu3D() {
     DrawSubItems();
 }
 
-void Draw_NOMEMORYCARD() {
-}
+void Draw_NOMEMORYCARD();
 
 void DrawFadeScreenWipe() {
     NuRndrBeginScene(-1);
@@ -2283,8 +2270,7 @@ void DrawGameObjectsDraw(i32) {
     ResetShadowMapRendering();
 }
 
-void Draw_AUTOSAVECANCEL() {
-}
+void Draw_AUTOSAVECANCEL();
 
 void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha) {
     if (!(alpha <= 0.0f)) {
@@ -2297,30 +2283,9 @@ void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha) {
     }
 }
 
-void Draw_AUTOSAVEWARNING() {
-    f32 scale = MENUTEXTSCALE;
+void Draw_AUTOSAVEWARNING();
 
-    if (memcard_drawasiconfn != NULL) {
-        memcard_drawasiconfn();
-    }
-    scale *= 0.8f;
-
-    if (memcard_loadmessage_delay > 0.0f || memcard_loadresult_delay > 0.0f) {
-        MenuSmartTextEx(apitxt_LOADING, AUTOSAVEICONX - AUTOSAVEICONSIZE * 1.8f, AUTOSAVEICONY, 1.0f, scale, scale,
-                        scale, 8, MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.2f, 1, NULL, 0, MenuA);
-    } else {
-        MenuSmartTextEx(apitxt_SAVING, AUTOSAVEICONX - AUTOSAVEICONSIZE * 1.8f, AUTOSAVEICONY, 1.0f, scale, scale,
-                        scale, 8, MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.2f, 1, NULL, 0, MenuA);
-    }
-}
-
-void Draw_NODATAAVAILABLE() {
-    char message[1024];
-    const f32 scale = MENUTEXTSCALE;
-    sprintf(message, apitxt_NODATAAVAILABLE, apiGameName);
-    MenuSmartTextEx(message, 0.0f, -0.4f, 1.0f, scale, scale, scale, 0, MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.5f, 3,
-                    NULL, 0, MenuA);
-}
+void Draw_NODATAAVAILABLE();
 
 i32 dco_locatorposonly;
 i32 dco_id = -1;
@@ -2717,10 +2682,7 @@ i32 DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *special, numtx_s *matrix) {
 }
 
 extern void DrawMenuEntry(MENU_s *, char *);
-void Draw_OK(MENU_s *menu) {
-    menu->draw_y = MENUBOTY;
-    DrawMenuEntry(menu, apitxt_OK);
-}
+void Draw_OK(MENU_s *menu);
 
 void DrawAABox(_vuv_s *position, _vuv_s *size, i32 colour) {
     const NUVEC *centre = reinterpret_cast<const NUVEC *>(position);
