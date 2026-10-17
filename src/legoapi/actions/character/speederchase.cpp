@@ -203,38 +203,25 @@ void SpeederChaseA_Update(WORLDINFO_s *world) {
 
     u8 *sound_flags = reinterpret_cast<u8 *>(LevSfxFlag);
 
-#define UPDATE_FORCE_FIELD_SOUND(index)                                                                                \
-    do {                                                                                                               \
-        nuinstanim_s *animation = NuSpecialGetInstAnim(&LevHSpecial[index]);                                           \
-        NUVEC *position = NuSpecialGetDrawPos(&LevHSpecial[index]);                                                    \
-        if (animation != NULL) {                                                                                       \
-            void *animation_data = WORLD->current_gscn->instance_animation_data[animation->anim_ix];                   \
-            if (sound_flags[index] == 0) {                                                                             \
-                if (animation->ltime > 0.0f && animation->ltime != NuAnimEndFrameOld(animation_data)) {                \
-                    PlaySfx("env_laser_gate_on", position);                                                            \
-                    sound_flags[index] = 1;                                                                            \
-                }                                                                                                      \
-            } else if ((animation->flags & NUINSTANIM_FLAG_PLAYING) != 0 ||                                            \
-                       animation->ltime != NuAnimEndFrameOld(animation_data)) {                                        \
-                PlaySfx("env_laser_gate_lp", position);                                                                \
-            } else {                                                                                                   \
-                PlaySfx("env_laser_gate_off", position);                                                               \
-                sound_flags[index] = 0;                                                                                \
-            }                                                                                                          \
-        }                                                                                                              \
-    } while (0)
-
-    UPDATE_FORCE_FIELD_SOUND(0);
-    UPDATE_FORCE_FIELD_SOUND(1);
-    UPDATE_FORCE_FIELD_SOUND(2);
-    UPDATE_FORCE_FIELD_SOUND(3);
-    UPDATE_FORCE_FIELD_SOUND(4);
-    UPDATE_FORCE_FIELD_SOUND(5);
-    UPDATE_FORCE_FIELD_SOUND(6);
-    UPDATE_FORCE_FIELD_SOUND(7);
-    UPDATE_FORCE_FIELD_SOUND(8);
-
-#undef UPDATE_FORCE_FIELD_SOUND
+    for (i32 i = 0; i < 9; i++) {
+        nuinstanim_s *animation = NuSpecialGetInstAnim(&LevHSpecial[i]);
+        NUVEC *position = NuSpecialGetDrawPos(&LevHSpecial[i]);
+        if (animation != NULL) {
+            void *animation_data = WORLD->current_gscn->instance_animation_data[animation->anim_ix];
+            if (sound_flags[i] == 0) {
+                if (animation->ltime > 0.0f && animation->ltime != NuAnimEndFrameOld(animation_data)) {
+                    PlaySfx("env_laser_gate_on", position);
+                    sound_flags[i] = 1;
+                }
+            } else if ((animation->flags & NUINSTANIM_FLAG_PLAYING) != 0 ||
+                       animation->ltime != NuAnimEndFrameOld(animation_data)) {
+                PlaySfx("env_laser_gate_lp", position);
+            } else {
+                PlaySfx("env_laser_gate_off", position);
+                sound_flags[i] = 0;
+            }
+        }
+    }
 }
 
 void SpeederChaseA_Panel(WORLDINFO_s *) {

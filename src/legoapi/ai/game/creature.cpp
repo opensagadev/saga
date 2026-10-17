@@ -692,10 +692,11 @@ void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *) {
     gamepad->rumble_packet.rumble_amount = 0.0f;
     gamepad->rumble_packet.field_0x08 = 0;
     gamepad->rumble_packet.rumble_time = 0.0f;
-    gamepad->allocated_5a &= static_cast<u8>(~(0x04 | 0x10));
+    packet->gamepad->allocated_5a &= static_cast<u8>(~0x04);
+    packet->gamepad->allocated_5a &= static_cast<u8>(~0x10);
+    packet->gamepad->operator_data = NULL;
     packet->secondary_flags &= static_cast<u8>(~0x04);
     packet->input_state = 0;
-    gamepad->operator_data = NULL;
 
     CharShadows_Reset(packet);
     packet->field_0x6c8 = 0;
@@ -716,8 +717,8 @@ void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *) {
     packet->movement_flags &= static_cast<u8>(~0x01);
     packet->movement_angle_0 = -1;
     packet->force_glow_index = -1;
+    packet->movement_angle_1 = qrand() <= 0x7fff ? 0x26 : 0x4f;
     packet->field_0x718 = 0;
-    packet->movement_angle_1 = qrand() > 0x7fff ? 0x4f : 0x26;
     packet->random_state[0] = static_cast<u8>(qrand() >> 8);
     packet->random_state[1] = static_cast<u8>(qrand() >> 8);
     packet->random_state[2] = static_cast<u8>(qrand() >> 8);
@@ -729,8 +730,8 @@ void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *) {
     packet->field_0x69c = 0;
     packet->field_0x690 = 0;
     packet->field_0x694 = 0;
-    packet->field_0x688 = 0;
     packet->field_0x794 = 0;
+    packet->field_0x688 = 0;
     packet->field_0x771 &= static_cast<u8>(~0x0c);
     packet->field_0x604 = NULL;
     packet->surface_type = -1;
@@ -1364,7 +1365,11 @@ void InitAICreatures(AISYS_s *system) {
             } else if ((model_flags & 0x4) != 0) {
                 object->apiobj.field_0x1f4 |= 0x401;
             }
-            object->field_0x1050 |= (model_flags & 0x1000) != 0 ? 5 : 1;
+            if ((model_flags & 0x1000) == 0) {
+                object->field_0x1050 |= 1;
+            } else {
+                object->field_0x1050 |= 5;
+            }
             object->ai.field_0x134 = static_cast<u8>(creature_index);
 
             if (member == 0 && creature.count > 1 && creature.start_stagger == 0.0f) {
@@ -1670,15 +1675,12 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
 
     if (object->ai.group != NULL) {
         AIGROUP *group = object->ai.group;
-        if (object->ai.group_member_index < 32) {
-            group->member_is_alive |= 1u << object->ai.group_member_index;
-        }
+        group->member_is_alive |= static_cast<u32>(object->ai.group_member_index < 32)
+                                  << object->ai.group_member_index;
 
         AIROW &group_row = group->rows[object->ai.group_row];
-        const i32 member_column = object->ai.group_member_index - creature.count_across * object->ai.group_row;
-        if (static_cast<u32>(member_column) < 8) {
-            group_row.is_alive |= static_cast<u8>(1u << member_column);
-        }
+        const u8 member_column = object->ai.group_member_index - creature.count_across * object->ai.group_row;
+        group_row.is_alive |= static_cast<u8>(static_cast<u32>(member_column < 8) << member_column);
         if (object->ai.group_column == 0) {
             group_row.pos = object->apiobj.position;
             group_row.path_info = object->ai.path_info;
@@ -2373,18 +2375,15 @@ void MovePlayerSpline(GameObject_s *object) {
                                     FRAMETIME);
             roll += static_cast<i32>(object->movement_spline_lateral_speed * spline_xoffset_speed_roll);
         }
-        i32 target_roll;
-        if (roll < -0x10000) {
+        if (roll < -0x10000)
+            roll = -0x10000;
+        else if (roll > 0x10000)
+            roll = 0x10000;
+        i32 target_roll = roll / 4;
+        if (target_roll < -0x2000)
             target_roll = -0x2000;
-        } else if (roll > 0x10000) {
+        else if (target_roll > 0x2000)
             target_roll = 0x2000;
-        } else {
-            target_roll = roll / 4;
-            if (target_roll < -0x2000)
-                target_roll = -0x2000;
-            else if (target_roll > 0x2000)
-                target_roll = 0x2000;
-        }
         object->movement_lean_angle = SeekRot(object->movement_lean_angle, target_roll, 8.0f);
     }
     APIObjectVelocities(object);

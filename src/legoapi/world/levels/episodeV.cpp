@@ -547,46 +547,46 @@ void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id) {
     i32 cannon_index = 0;
     char name[32];
     for (i32 number = 1; number < 5; ++number) {
-        TROOPERCANNON_s &cannon = troopercannons[cannon_index];
-        cannon = TROOPERCANNON_s();
+        troopercannons[cannon_index] = TROOPERCANNON_s();
 
         sprintf(name, "trooper_cannon%d", number);
-        cannon.buildit = GizBuildIt_Find(world, name);
-        if (cannon.buildit != NULL) {
+        troopercannons[cannon_index].buildit = GizBuildIt_Find(world, name);
+        if (troopercannons[cannon_index].buildit != NULL) {
             sprintf(name, "troopercannon_%d", number);
-            cannon.object = GetNamedGameObject(world->ai_sys, name);
-            if (cannon.object != NULL)
-                NuStrCpy(cannon.character_name, name);
+            troopercannons[cannon_index].object = GetNamedGameObject(world->ai_sys, name);
+            if (troopercannons[cannon_index].object != NULL)
+                NuStrCpy(troopercannons[cannon_index].character_name, name);
         }
 
         sprintf(name, "BASE%d", number);
-        cannon.base = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, name);
+        troopercannons[cannon_index].base = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, name);
 
         if (netclient != 0) {
-            if (cannon.object != NULL)
+            if (troopercannons[cannon_index].object != NULL)
                 ++cannon_index;
             continue;
         }
 
-        if (cannon.buildit != NULL && cannon.object != NULL) {
-            if ((world->level_progress->destroyed_trooper_cannon_mask & (1u << cannon_index)) != 0) {
-                GizBuildIt_SetToStart(cannon.buildit, 0, 0);
-                cannon.rebuilding = 1;
+        if (troopercannons[cannon_index].buildit != NULL && troopercannons[cannon_index].object != NULL) {
+            if ((world->level_progress->destroyed_trooper_cannon_mask & (1u << (number - 1))) != 0) {
+                GizBuildIt_SetToStart(troopercannons[cannon_index].buildit, 0, 0);
+                troopercannons[cannon_index].rebuilding = 1;
             } else {
-                if (cannon.base != NULL) {
-                    GizmoSetVisibility(world->gizmo_sys, cannon.base, 1, 1);
-                    GizObstacle_PlayBackwards(static_cast<GIZOBSTACLE_s *>(cannon.base->object));
+                if (troopercannons[cannon_index].base != NULL) {
+                    GizmoSetVisibility(world->gizmo_sys, troopercannons[cannon_index].base, 1, 1);
+                    GizObstacle_PlayBackwards(static_cast<GIZOBSTACLE_s *>(troopercannons[cannon_index].base->object));
                 }
-                GizBuildIt_Finish(cannon.buildit);
-                GizBuildit_SetVisibility(cannon.buildit, 0);
-                cannon.rebuilding = 0;
+                GizBuildIt_Finish(troopercannons[cannon_index].buildit);
+                GizBuildit_SetVisibility(troopercannons[cannon_index].buildit, 0);
+                troopercannons[cannon_index].rebuilding = 0;
                 ActivateCharacter(name, NULL, 0);
-                AddGameDebris(world->debris_sys, 0x5c, &cannon.object->apiobj.collision_position);
-                GameObject_s *trooper = AddDynamicCreature(trooper_id, &cannon.object->apiobj.collision_position,
-                                                           cannon.object->apiobj.field_0x276, "CannonTrooper",
-                                                           &cannon.object->ai.path_info, NULL, 0, NULL, NULL, 0, 0);
+                AddGameDebris(world->debris_sys, 0x5c, &troopercannons[cannon_index].object->apiobj.collision_position);
+                GameObject_s *trooper =
+                    AddDynamicCreature(trooper_id, &troopercannons[cannon_index].object->apiobj.collision_position,
+                                       troopercannons[cannon_index].object->apiobj.field_0x276, "CannonTrooper",
+                                       &troopercannons[cannon_index].object->ai.path_info, NULL, 0, NULL, NULL, 0, 0);
                 if (trooper != NULL)
-                    TakeOverGameObject(trooper, cannon.object, 0, 1);
+                    TakeOverGameObject(trooper, troopercannons[cannon_index].object, 0, 1);
             }
         }
         ++cannon_index;

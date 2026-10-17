@@ -472,7 +472,7 @@ static void copyAnims(NUGCUTSCENE_s *destination, NUGCUTSCENE_s *source) {
 }
 
 // Retail keeps this out of line; the unit's -O3 would otherwise inline it.
-static __used__ __attribute__((noinline)) void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
+static __attribute__((noinline)) void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
     instNUGCUTTRIGGERSYS_s *trigger_instance = instance->trigger_instance;
     NUGCUTTRIGGERSYS_s *system = instance->cutscene->trigger_system;
     for (i32 i = 0; i < system->event_count; ++i) {
@@ -644,10 +644,10 @@ extern "C" {
                 if (NumCommonStreamingBuffers == 0) {
                     stream_buffer = ALIGN(stream_buffer + 0x400, 0x10);
                     cutscene->stream_buffer_1 = reinterpret_cast<NUGCUTSCENE_s *>(stream_buffer);
-                    stream_buffer += cutscene->stream_buffer_size;
+                    buf->addr = stream_buffer + cutscene->stream_buffer_size + 0x400;
+                } else {
+                    buf->addr = stream_buffer + 0x400;
                 }
-                stream_buffer += 0x400;
-                buf->addr = stream_buffer;
                 const i32 length = NuStrLen(name);
                 char *filename = reinterpret_cast<char *>(buf->void_ptr);
                 buf->addr += length + 4;
@@ -696,10 +696,10 @@ extern "C" {
             if (NumCommonStreamingBuffers == 0) {
                 stream_buffer = ALIGN(stream_buffer + 0x400, 0x10);
                 cutscene->stream_buffer_1 = reinterpret_cast<NUGCUTSCENE_s *>(stream_buffer);
-                stream_buffer += cutscene->stream_buffer_size;
+                buf->addr = stream_buffer + cutscene->stream_buffer_size + 0x400;
+            } else {
+                buf->addr = stream_buffer + 0x400;
             }
-            stream_buffer += 0x400;
-            buf->addr = stream_buffer;
             const i32 length = NuStrLen(name);
             char *filename = reinterpret_cast<char *>(buf->void_ptr);
             buf->addr += length + 4;
@@ -1529,7 +1529,7 @@ void NewCopyAnims(instNUGCUTSCENE_s *instance) {
 
     NUGCUTRIGIDSYS_s *destination_rigids = destination->rigid_system;
     NUGCUTRIGIDSYS_s *source_rigids = source->rigid_system;
-    if (destination_rigids != NULL && destination_rigids->rigids != NULL && destination_rigids->count != 0) {
+    if (destination_rigids != NULL && destination_rigids->rigids != NULL) {
         for (i32 i = 0; i < destination_rigids->count; ++i) {
             nuanimdata2_s *animation = destination_rigids->rigids[i].animation;
             StateAnim *state_animation = destination_rigids->rigids[i].state_animation;
@@ -3310,7 +3310,7 @@ static void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int s
         if (character_system != NULL) {
             NUGCUTSCENE_s *current_cutscene = instance->cutscene;
             NUGCUTCHARSYS_s *system = current_cutscene->character_system;
-            if (NuCutSceneCharacterProcess != NULL && system->character_count != 0) {
+            if (NuCutSceneCharacterProcess != NULL) {
                 for (i32 i = 0; i < system->character_count; ++i) {
                     instNUGCUTCHAR_s *character_instance = &character_system->characters[i];
                     if (character_instance->character_model != NULL) {
@@ -3335,7 +3335,7 @@ static void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int s
         if (character_system != NULL) {
             NUGCUTSCENE_s *current_cutscene = instance->cutscene;
             NUGCUTCHARSYS_s *system = current_cutscene->character_system;
-            if (NuCutSceneCharacterProcess != NULL && system->character_count != 0) {
+            if (NuCutSceneCharacterProcess != NULL) {
                 for (i32 i = 0; i < system->character_count; ++i) {
                     instNUGCUTCHAR_s *character_instance = &character_system->characters[i];
                     if (character_instance->character_model != NULL) {

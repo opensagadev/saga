@@ -925,26 +925,6 @@ extern "C" {
     i32 PS2_SREZ_W = 4096;
     i32 PS2_SREZ_H = 4096;
     static i32 current_clip_scissor_to_viewport;
-    static void NuCameraBuildClipProjection(NUMTX *projection, NUCAMERA *camera, f32 x_scale, f32 y_scale) {
-        f32 far_clip;
-        if (camera->unknown_64 == 0.0f)
-            far_clip = camera->far_clip - nucamera_farclip_hack;
-        else
-            far_clip = camera->unknown_64 - nucamera_farclip_hack;
-        f32 near_clip = camera->unknown_60;
-        if (near_clip == 0.0f)
-            near_clip = camera->near_clip;
-        const i32 angle = static_cast<i32>(camera->fov * 0.5f * 10430.378f);
-        const f32 cotangent = NuTrigTable[(angle + 0x4000) >> 1 & 0x7fff] / NuTrigTable[angle >> 1 & 0x7fff];
-        const f32 x = x_scale * camera->aspect * cotangent;
-        const f32 y = cotangent * y_scale;
-        memset(projection, 0, sizeof(*projection));
-        projection->m00 = x;
-        projection->m11 = y;
-        projection->m23 = 1.0f;
-        projection->m22 = (far_clip + near_clip) / (far_clip - near_clip);
-        projection->m32 = (far_clip * -2.0f * near_clip) / (far_clip - near_clip);
-    }
 } // extern "C"
 
 extern "C" {
@@ -2591,12 +2571,7 @@ extern "C" {
 
     extern nurenderscene_s currentScene;
 
-#if defined(__i386__)
-#define NUDISPLAYSCENERNDR_BODY_ATTR __attribute__((noinline, noclone, regparm(0), optimize("O2", "omit-frame-pointer")))
-#else
-#define NUDISPLAYSCENERNDR_BODY_ATTR __attribute__((noinline, noclone, optimize("O2", "omit-frame-pointer")))
-#endif
-    static NUDISPLAYSCENERNDR_BODY_ATTR void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene)
+    static __attribute__((noinline, noclone)) void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene)
         __asm__("NuDisplaySceneRndr.part.101");
 
 }
@@ -3214,15 +3189,15 @@ static void DisplayListMaterialClipUpdate(nudisplayscene_s *scene) {
     const u8 buffer = NuDisplaySceneCurrentBuffer(scene);
     const u8 *current = scene->mtl_used[buffer];
     const u8 *previous = scene->mtl_used[buffer ^ 1];
-    const u32 count = (scene->nmtls + 7) >> 3;
+    const i32 count = (scene->nmtls + 7) >> 3;
     NUDISPLAYLIST **lists = scene->dlist_mtls;
-    for (u32 byte_index = 0, material_index = 0; byte_index < count; ++byte_index, material_index += 8) {
+    for (i32 byte_index = 0, material_index = 0; byte_index < count; ++byte_index, material_index += 8) {
         const u8 bits = current[byte_index];
         if (previous[byte_index] == bits)
             continue;
-        for (u32 bit = 0; bit < 8; ++bit) {
-            const i32 index = static_cast<i32>(material_index + bit);
-            u32 enabled = (bits >> bit) & 1;
+        for (i32 bit = 0; bit < 8; ++bit) {
+            const i32 index = material_index + bit;
+            i32 enabled = (bits >> bit) & 1;
             NUDISPLAYLIST *list = lists[index];
             NUMTL *material = scene->mtls[list->mtl_id];
             if (enabled && material != NULL && MTL_BLEND_FLAG(material) != 0)
@@ -14726,7 +14701,24 @@ extern "C" {
         static NUMTX cmtx;
         if (fast == 0) {
             NUVIEWPORT *viewport = NuVpGetCurrentViewport();
-            NuCameraBuildClipProjection(&cmtx, camera, viewport->scissor_width, viewport->scissor_height);
+            f32 far_clip;
+            if (camera->unknown_64 == 0.0f)
+                far_clip = camera->far_clip - nucamera_farclip_hack;
+            else
+                far_clip = camera->unknown_64 - nucamera_farclip_hack;
+            f32 near_clip = camera->unknown_60;
+            if (near_clip == 0.0f)
+                near_clip = camera->near_clip;
+            const i32 angle = static_cast<i32>(camera->fov * 0.5f * 10430.378f);
+            const f32 cotangent = NuTrigTable[(angle + 0x4000) >> 1 & 0x7fff] / NuTrigTable[angle >> 1 & 0x7fff];
+            const f32 x = viewport->scissor_width * camera->aspect * cotangent;
+            const f32 y = cotangent * viewport->scissor_height;
+            memset(&cmtx, 0, sizeof(cmtx));
+            cmtx.m00 = x;
+            cmtx.m11 = y;
+            cmtx.m23 = 1.0f;
+            cmtx.m22 = (far_clip + near_clip) / (far_clip - near_clip);
+            cmtx.m32 = (far_clip * -2.0f * near_clip) / (far_clip - near_clip);
         }
         NuMtxMulVU0(out, view, &cmtx);
     }
@@ -14734,7 +14726,24 @@ extern "C" {
     void NuCameraSetVPortClipMtx(NUMTX *out, NUMTX *view, NUCAMERA *camera, i32 fast) {
         if (fast == 0) {
             NUVIEWPORT *viewport = NuVpGetCurrentViewport();
-            NuCameraBuildClipProjection(&pc_vport_mtx, camera, viewport->clip_width, viewport->clip_height);
+            f32 far_clip;
+            if (camera->unknown_64 == 0.0f)
+                far_clip = camera->far_clip - nucamera_farclip_hack;
+            else
+                far_clip = camera->unknown_64 - nucamera_farclip_hack;
+            f32 near_clip = camera->unknown_60;
+            if (near_clip == 0.0f)
+                near_clip = camera->near_clip;
+            const i32 angle = static_cast<i32>(camera->fov * 0.5f * 10430.378f);
+            const f32 cotangent = NuTrigTable[(angle + 0x4000) >> 1 & 0x7fff] / NuTrigTable[angle >> 1 & 0x7fff];
+            const f32 x = camera->aspect * cotangent * viewport->clip_width;
+            const f32 y = cotangent * viewport->clip_height;
+            memset(&pc_vport_mtx, 0, sizeof(pc_vport_mtx));
+            pc_vport_mtx.m00 = x;
+            pc_vport_mtx.m11 = y;
+            pc_vport_mtx.m23 = 1.0f;
+            pc_vport_mtx.m22 = (far_clip + near_clip) / (far_clip - near_clip);
+            pc_vport_mtx.m32 = (far_clip * -2.0f * near_clip) / (far_clip - near_clip);
         }
         NuMtxMulVU0(out, view, &pc_vport_mtx);
     }
@@ -17833,8 +17842,8 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
         if ((sc->flags & 6) == 0 || sp->nmtls == 0)
             continue;
 
-        for (u32 m = 0; m < sp->nmtls; ++m) {
-            i32 mi = static_cast<i32>(static_cast<u32>(sp->mtl_first) + m);
+        for (i32 m = 0; m < sp->nmtls; ++m) {
+            i32 mi = sp->mtl_first + m;
             NUDISPLAYLIST *dl = sc->dlist_mtls[mi];
             if (dl->mtl_item->id != kItemId_Cnt)
                 continue;
@@ -20016,7 +20025,7 @@ extern "C" NUMTL *NuMtlFindVariantMtl(NUMTL *source, NUMTL *original) {
                         const i32 render_set_count = NuDynamicLightGetActiveRenderSetCount(light);
                         const u32 visible_sets = static_cast<u32>(NuSpecialGetShadowClipTestResult(light_index));
                         for (i32 render_set = 0; render_set < render_set_count; ++render_set) {
-                            if ((visible_sets & (1u << (render_set & 31))) == 0)
+                            if ((visible_sets & (1 << render_set)) == 0)
                                 continue;
                             NUDISPLAYLIST *shadow_list = NuDynamicLightGetDList(light, render_set, material);
                             shadow_list->dlist = scene;
@@ -20091,8 +20100,8 @@ extern "C" NUMTL *NuMtlFindVariantMtl(NUMTL *source, NUMTL *original) {
         RndrStateCopyGlobalState(scene->local_state);
         NuVisibilityResult *visibility =
             static_cast<NuVisibilityResult *>(NuVisiEvaluate(scene->gscene, visibility_context));
-        if (visibility == NULL || (visibility->state & 1) == 0) {
-            if (currentScene.unknown_3c != NULL) {
+        if (currentScene.unknown_3c != NULL) {
+            if (visibility == NULL || (visibility->state & 1) == 0) {
                 i32 instance = 0;
                 for (i32 clip = 0; clip < scene->nclip_objects; ++instance) {
                     if ((scene->visibility_flags[instance] & NUDL_INSTANCE_FLAG_CASTS_SHADOW) != 0) {
@@ -20107,36 +20116,36 @@ extern "C" NUMTL *NuMtlFindVariantMtl(NUMTL *source, NUMTL *original) {
                     }
                     clip = DisplaySceneNextInstance(scene, clip);
                 }
-            } else {
-                scene->alpha_values = NULL;
-                if (scene->fade_ranges != NULL) {
-                    VARIPTR *buffer = NuDisplayListGetBuffer();
-                    scene->alpha_values = buffer->f32_ptr;
-                    buffer->addr += static_cast<usize>(scene->nclip_objects) * sizeof(f32);
+            }
+        } else if (visibility == NULL || (visibility->state & 1) == 0) {
+            scene->alpha_values = NULL;
+            if (scene->fade_ranges != NULL) {
+                VARIPTR *buffer = NuDisplayListGetBuffer();
+                scene->alpha_values = buffer->f32_ptr;
+                buffer->addr += static_cast<usize>(scene->nclip_objects) * sizeof(f32);
+            }
+            i32 instance = 0;
+            for (i32 clip = 0; clip < scene->nclip_objects; ++instance) {
+                const u8 flags = scene->visibility_flags[instance];
+                bool visible = visibility == NULL || visibility->instance_tree_bits == NULL ||
+                               (visibility->instance_tree_bits[instance >> 3] & (1 << (instance & 7))) != 0;
+                if (visibility != NULL && visibility->portal_marker != NULL && portals_enabled != 0) {
+                    visible = (flags & NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) != 0 ||
+                              (visibility->portal_bits[instance >> 3] & (1 << (instance & 7))) != 0;
                 }
-                i32 instance = 0;
-                for (i32 clip = 0; clip < scene->nclip_objects; ++instance) {
-                    const u8 flags = scene->visibility_flags[instance];
-                    bool visible = visibility == NULL || visibility->instance_tree_bits == NULL ||
-                                   (visibility->instance_tree_bits[instance >> 3] & (1U << (instance & 7))) != 0;
-                    if (visibility != NULL && visibility->portal_marker != NULL && portals_enabled != 0) {
-                        visible = (flags & NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) != 0 ||
-                                  (visibility->portal_bits[instance >> 3] & (1U << (instance & 7))) != 0;
+                if (visible && (flags & NUDL_INSTANCE_FLAG_VISIBLE) != 0) {
+                    NUCLIPBOUNDS &bounds = scene->clip_bounds[instance];
+                    const f32 distance_sqr = DisplaySceneDistanceSqrToCamera(bounds);
+                    clip = DisplaySceneSelectLod(scene, clip, distance_sqr);
+                    const f32 far_clip = DisplaySceneFarClip(scene, instance, clip);
+                    const i32 result = NuCameraClipTestExtentsAxisAligned(&bounds.center, &bounds.extent, far_clip);
+                    if (result != 0) {
+                        if (scene->alpha_values != NULL)
+                            scene->alpha_values[clip] = DisplaySceneDistanceFade(scene, instance, distance_sqr);
+                        DisplaySceneSetClipResult(scene, clip, result);
                     }
-                    if (visible && (flags & NUDL_INSTANCE_FLAG_VISIBLE) != 0) {
-                        NUCLIPBOUNDS &bounds = scene->clip_bounds[instance];
-                        const f32 distance_sqr = DisplaySceneDistanceSqrToCamera(bounds);
-                        clip = DisplaySceneSelectLod(scene, clip, distance_sqr);
-                        const f32 far_clip = DisplaySceneFarClip(scene, instance, clip);
-                        const i32 result = NuCameraClipTestExtentsAxisAligned(&bounds.center, &bounds.extent, far_clip);
-                        if (result != 0) {
-                            if (scene->alpha_values != NULL)
-                                scene->alpha_values[clip] = DisplaySceneDistanceFade(scene, instance, distance_sqr);
-                            DisplaySceneSetClipResult(scene, clip, result);
-                        }
-                    }
-                    clip = DisplaySceneNextInstance(scene, clip);
                 }
+                clip = DisplaySceneNextInstance(scene, clip);
             }
         }
         if (scene->nclip_objects != 0)
@@ -20149,8 +20158,8 @@ extern "C" NUMTL *NuMtlFindVariantMtl(NUMTL *source, NUMTL *original) {
             temporary_scene.display_list = scene;
             gscene = &temporary_scene;
         }
-        const bool portal_filter = visibility != NULL && portal_special_objects != 0 &&
-                                   visibility->portal_marker != NULL && portals_enabled != 0;
+        const bool portal_filter =
+            portal_special_objects != 0 && visibility->portal_marker != NULL && portals_enabled != 0;
         if ((scene->instance_visibility_enabled & NUDL_SCENE_INSTANCE_VISIBILITY_ENABLED) == 0 &&
             noscenespecials == 0) {
             nuhspecial_s handle = {gscene, NULL, NULL};
@@ -20161,12 +20170,13 @@ extern "C" NUMTL *NuMtlFindVariantMtl(NUMTL *source, NUMTL *original) {
                 handle.display_special = special;
                 const i32 instance = special->instance_ix;
                 if (portal_filter && (scene->visibility_flags[instance] & NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) == 0 &&
-                    (visibility->portal_bits[instance >> 3] & (1U << (instance & 7))) == 0)
+                    (visibility->portal_bits[instance >> 3] & (1 << (instance & 7))) == 0)
                     continue;
                 NUMTX *draw_mtx = special->draw_mtx_ptr;
-                if (draw_mtx == NULL || draw_mtx == reinterpret_cast<NUMTX *>(-1))
-                    draw_mtx = &special->draw_mtx;
-                NuDisplayListRndrSpecial(&handle, draw_mtx, 0, NULL, NULL);
+                if (draw_mtx == reinterpret_cast<NUMTX *>(-1) || draw_mtx == NULL)
+                    NuDisplayListRndrSpecial(&handle, &special->draw_mtx, 0, NULL, NULL);
+                else
+                    NuDisplayListRndrSpecial(&handle, draw_mtx, 0, NULL, NULL);
             }
         }
     }
@@ -21775,7 +21785,7 @@ static NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path, ch
             if (animation_texture_count < end)
                 animation_texture_count = end;
         }
-        for (u32 i = 0; i < animation_texture_count; ++i) {
+        for (i32 i = 0; i < animation_texture_count; ++i) {
             fixed_scene->texture_anim_ids[i] = fixed_scene->texture_ids[fixed_scene->texture_anim_ids[i]];
         }
         for (i32 i = 0; i < fixed_scene->num_texture_anims; ++i) {

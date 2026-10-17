@@ -222,11 +222,9 @@ static i32 GizForces_GetMaxGizmos(void *force) {
 static void GizForces_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *, void *data) {
     GIZFORCESYS_s *force_sys = static_cast<GIZFORCESYS_s *>(data);
     if (force_sys != NULL) {
-        if (force_sys->count != 0) {
-            for (i32 i = 0; i < force_sys->count; ++i) {
-                if (NuStrLen(force_sys->forces[i].name) != 0) {
-                    AddGizmo(gizmo_sys, type_id, NULL, &force_sys->forces[i]);
-                }
+        for (i32 i = 0; i < force_sys->count; ++i) {
+            if (NuStrLen(force_sys->forces[i].name) != 0) {
+                AddGizmo(gizmo_sys, type_id, NULL, &force_sys->forces[i]);
             }
         }
     }

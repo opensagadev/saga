@@ -1518,10 +1518,12 @@ i32 KillBossPlayCutScene(i32 a, i32 b, float c, char *name) {
 i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible) {
     if (name == NULL || progress == NULL || NuStrLen(name) > 15)
         return 0;
-    for (i32 i = 0; i < 12; ++i) {
-        if (NuStrICmp(progress->disabled_effect_names[i], name) != 0) {
-            continue;
-        }
+    i32 i;
+    for (i = 0; i < 12; ++i) {
+        if (NuStrICmp(progress->disabled_effect_names[i], name) == 0)
+            break;
+    }
+    if (i < 12) {
         if (visible != 0) {
             progress->disabled_effect_names[i][0] = '\0';
             return 2;
@@ -1530,13 +1532,12 @@ i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible
     }
     if (visible != 0)
         return 0;
-    for (i32 i = 0; i < 12; ++i) {
-        if (progress->disabled_effect_names[i][0] != '\0') {
-            continue;
-        }
-        NuStrCpy(progress->disabled_effect_names[i], name);
-        break;
+    for (i = 0; i < 12; ++i) {
+        if (progress->disabled_effect_names[i][0] == '\0')
+            break;
     }
+    if (i < 12)
+        NuStrCpy(progress->disabled_effect_names[i], name);
     return 1;
 }
 
@@ -2648,9 +2649,7 @@ after_area:
         world->current_level != (LEVELDATA *)PLATFORM_LDATA) {
         world->ai_loaded = 0;
         world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
-        ai_name[0] = 'a';
-        ai_name[1] = 'i';
-        ai_name[2] = 0;
+        strcpy(ai_name, "ai");
         ai_buf_size = 0x1cc00;
         if (RETAKED_LDATA != NULL && world->current_level == (LEVELDATA *)RETAKED_LDATA) {
             ai_buf_size = 0x1e800;

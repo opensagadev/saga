@@ -452,7 +452,7 @@ static __used__ void MenuDrawPauseExit(MENU *menu) {
     }
 }
 
-static __used__ void MenuDrawPauseRestart(MENU *menu) {
+static void MenuDrawPauseRestart(MENU *menu) {
     if (MenuStopDraw == 0) {
         SmartTextEx(TTab[tRESTARTLEVEL], PauseMenus_X, menu->draw_y - MENUDY * 0.25f, 1.0f, MENUTEXTSCALE,
                     MENUTEXTSCALE, MENUTEXTSCALE, PauseMenus_Align, MENUEXITR, MENUEXITG, MENUEXITB, 1.7f, 1, NULL, 0,
@@ -698,7 +698,7 @@ static __used__ void MenuDrawBonusComplete(MENU *) {
     }
 }
 
-static __used__ void MenuDrawBonusWin(MENU *) {
+static void MenuDrawBonusWin(MENU *) {
     if (MenuStopDraw == 0) {
         char text[256];
         Text_MakeScore(1000000, text);

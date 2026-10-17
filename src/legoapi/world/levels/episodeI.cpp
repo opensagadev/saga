@@ -1657,7 +1657,7 @@ void PodDust(WORLDINFO_s *world, GameObject_s *object) {
             positions[count].y = object->apiobj.field_0x218 + 0.1f;
             positions[count].z = joint->m32;
             ++count;
-            if ((object->apiobj.flags_low & 0x80) == 0)
+            if (!object->apiobj.player_controlled)
                 continue;
             i32 key;
             if (object == Player[0])

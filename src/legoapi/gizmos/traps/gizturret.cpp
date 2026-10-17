@@ -1286,11 +1286,9 @@ GIZTURRET_s *GizTurret_FindByController(GIZTURRETSYS_s *system, GameObject_s &co
     if (system != NULL) {
         GIZTURRET_s *turret = system->turrets;
         const i32 count = system->count;
-        if (count != 0) {
-            for (i32 i = 0; i < count; ++i, ++turret) {
-                if (turret->controller == &controller) {
-                    return turret;
-                }
+        for (i32 i = 0; i < count; ++i, ++turret) {
+            if (turret->controller == &controller) {
+                return turret;
             }
         }
     }

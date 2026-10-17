@@ -47,7 +47,7 @@ void GameAntinode_Update(GAMEANTINODESYS_s *system) {
     if (system == NULL)
         return;
     memset(GameAntinode_grid, 0, sizeof(GameAntinode_grid));
-    u8 min_x, min_z, max_x, max_z;
+    u8 min_x, max_x, min_z, max_z;
     GameObject_s *object = Obj;
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
         if ((object->apiobj.flags_high & 0x10) == 0 || object->apiobj.field_0x287 != 0)

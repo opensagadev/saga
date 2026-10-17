@@ -1811,21 +1811,17 @@ void LegoCity_Reset(WORLDINFO_s *world) {
 }
 
 void LegoCity_Update(WORLDINFO_s *world) {
-    if (__builtin_expect(world == NULL || world->pickup_sys == NULL, 0)) {
+    if (world == NULL || world->pickup_sys == NULL) {
         return;
     }
-    const u8 previousTractor = prevOnTractor;
-    const u8 previousTaunTaun = prevOnTaunTaun;
-    const u8 previousMoonCar = prevOnMoonCar;
-    const u8 previousTownCar = prevOnTownCar;
-    u8 changedTractor = previousTractor;
-    u8 changedTaunTaun = previousTaunTaun;
-    u8 changedMoonCar = previousMoonCar;
-    u8 changedTownCar = previousTownCar;
     u8 onTractor = 0;
     u8 onTaunTaun = 0;
     u8 onMoonCar = 0;
     u8 onTownCar = 0;
+    u8 changedTractor = 0;
+    u8 changedTaunTaun = 0;
+    u8 changedMoonCar = 0;
+    u8 changedTownCar = 0;
     for (i32 index = 0; index < 8; ++index) {
         GameObject_s *object = Player[index];
         if (!(object != NULL && (object->apiobj.field_0x1f8 & 0x1000) != 0 && object->apiobj.field_0x287 == 0 &&
@@ -1835,24 +1831,31 @@ void LegoCity_Update(WORLDINFO_s *world) {
         }
         if (object->id == id_TRACTOR) {
             onTractor = 0xff;
-            changedTractor = static_cast<u8>(~previousTractor);
+            changedTractor = ~prevOnTractor;
         } else if (object->id == id_TAUNTAUN) {
             onTaunTaun = 0xff;
-            changedTaunTaun = static_cast<u8>(~previousTaunTaun);
+            changedTaunTaun = ~prevOnTaunTaun;
         } else if (object->id == id_MOONCAR) {
             onMoonCar = 0xff;
-            changedMoonCar = static_cast<u8>(~previousMoonCar);
+            changedMoonCar = ~prevOnMoonCar;
         } else if (object->id == id_TOWNCAR) {
             onTownCar = 0xff;
-            changedTownCar = static_cast<u8>(~previousTownCar);
+            changedTownCar = ~prevOnTownCar;
         }
     }
-    u8 changed = changedTractor | changedTaunTaun | changedMoonCar | changedTownCar;
+    if (onTractor == 0)
+        changedTractor = prevOnTractor;
+    if (onTaunTaun == 0)
+        changedTaunTaun = prevOnTaunTaun;
+    if (onMoonCar == 0)
+        changedMoonCar = prevOnMoonCar;
+    if (onTownCar == 0)
+        changedTownCar = prevOnTownCar;
     prevOnTractor = onTractor;
     prevOnTaunTaun = onTaunTaun;
     prevOnTownCar = onTownCar;
     prevOnMoonCar = onMoonCar;
-    if (__builtin_expect(changed == 0, 0)) {
+    if ((changedTractor | changedTaunTaun | changedMoonCar | changedTownCar) == 0) {
         return;
     }
     GIZMOPICKUP_s *pickup = world->pickup_sys->pickups;
@@ -1954,12 +1957,12 @@ void NewTown_Update(WORLDINFO_s *world) {
     if (world == NULL || world->pickup_sys == NULL) {
         return;
     }
-    const u8 previousTaunTaun = prevOnTaunTaun;
-    const u8 previousFireTruck = prevOnFireTruck;
-    const u8 previousLifeBoat = prevOnLifeBoat;
     u8 onTaunTaun = 0;
     u8 onFireTruck = 0;
     u8 onLifeBoat = 0;
+    u8 changedTaunTaun = 0;
+    u8 changedFireTruck = 0;
+    u8 changedLifeBoat = 0;
     for (i32 index = 0; index < 8; ++index) {
         GameObject_s *object = Player[index];
         if (!(object != NULL && (object->apiobj.field_0x1f8 & 0x1000) != 0 && object->apiobj.field_0x287 == 0 &&
@@ -1969,17 +1972,25 @@ void NewTown_Update(WORLDINFO_s *world) {
         }
         if (object->id == id_TAUNTAUN) {
             onTaunTaun = 0xff;
+            changedTaunTaun = ~prevOnTaunTaun;
         } else if (object->id == id_FIRETRUCK) {
             onFireTruck = 0xff;
+            changedFireTruck = ~prevOnFireTruck;
         } else if (object->id == id_LIFEBOAT) {
             onLifeBoat = 0xff;
+            changedLifeBoat = ~prevOnLifeBoat;
         }
     }
-    u8 changed = (onTaunTaun ^ previousTaunTaun) | (onFireTruck ^ previousFireTruck) | (onLifeBoat ^ previousLifeBoat);
+    if (onTaunTaun == 0)
+        changedTaunTaun = prevOnTaunTaun;
+    if (onFireTruck == 0)
+        changedFireTruck = prevOnFireTruck;
+    if (onLifeBoat == 0)
+        changedLifeBoat = prevOnLifeBoat;
     prevOnFireTruck = onFireTruck;
     prevOnTaunTaun = onTaunTaun;
     prevOnLifeBoat = onLifeBoat;
-    if (changed == 0) {
+    if ((changedTaunTaun | changedFireTruck | changedLifeBoat) == 0) {
         return;
     }
     GIZMOPICKUP_s *pickup = world->pickup_sys->pickups;

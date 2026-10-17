@@ -1157,29 +1157,21 @@ void DeathStarRescueB_Init(WORLDINFO_s *world) {
 
 void DeathStarRescueB_Update(WORLDINFO_s *world) {
     u8 *flags = reinterpret_cast<u8 *>(LevFlag);
-#define UPDATE_RESCUE_REACTOR(index)                                                                                   \
-    do {                                                                                                               \
-        if (flags[index] == 0) {                                                                                       \
-            NUVEC *position = NuSpecialGetDrawPos(&LevHSpecial[index]);                                                \
-            nuinstanim_s *animation = NuSpecialGetInstAnim(&LevHSpecial[index]);                                       \
-            if (animation != NULL) {                                                                                   \
-                f32 frame = animation->ltime;                                                                          \
-                f32 end = NuAnimEndFrameOld(world->current_gscn->instance_animation_data[animation->anim_ix]);         \
-                PlaySfxByIdAndSetVolume(LevSfxId[0], position, 0.25f);                                                 \
-                if (frame >= end) {                                                                                    \
-                    PlaySfxByIdAndSetVolume(LevSfxId[1], NULL, 0.4f);                                                  \
-                    flags[index] = 1;                                                                                  \
-                }                                                                                                      \
-            }                                                                                                          \
-        }                                                                                                              \
-    } while (0)
-    UPDATE_RESCUE_REACTOR(0);
-    UPDATE_RESCUE_REACTOR(1);
-    UPDATE_RESCUE_REACTOR(2);
-    UPDATE_RESCUE_REACTOR(3);
-    UPDATE_RESCUE_REACTOR(4);
-    UPDATE_RESCUE_REACTOR(5);
-#undef UPDATE_RESCUE_REACTOR
+    for (i32 i = 0; i < 6; i++) {
+        if (flags[i] == 0) {
+            NUVEC *position = NuSpecialGetDrawPos(&LevHSpecial[i]);
+            nuinstanim_s *animation = NuSpecialGetInstAnim(&LevHSpecial[i]);
+            if (animation != NULL) {
+                f32 frame = animation->ltime;
+                f32 end = NuAnimEndFrameOld(world->current_gscn->instance_animation_data[animation->anim_ix]);
+                PlaySfxByIdAndSetVolume(LevSfxId[0], position, 0.25f);
+                if (frame >= end) {
+                    PlaySfxByIdAndSetVolume(LevSfxId[1], NULL, 0.4f);
+                    flags[i] = 1;
+                }
+            }
+        }
+    }
 }
 
 void DeathStarRescueB_AlwaysUpdate(WORLDINFO_s *world) {

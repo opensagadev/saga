@@ -93,11 +93,9 @@ static i32 GizObstacles_GetMaxGizmos(void *obstacle) {
 static void GizObstacles_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *, void *data) {
     GIZOBSTACLESYS_s *obstacle_sys = static_cast<GIZOBSTACLESYS_s *>(data);
     if (obstacle_sys != NULL) {
-        if (obstacle_sys->count != 0) {
-            for (i32 i = 0; i < obstacle_sys->count; ++i) {
-                if (NuStrLen(obstacle_sys->obstacles[i].name) != 0) {
-                    AddGizmo(gizmo_sys, type_id, NULL, &obstacle_sys->obstacles[i]);
-                }
+        for (i32 i = 0; i < obstacle_sys->count; ++i) {
+            if (NuStrLen(obstacle_sys->obstacles[i].name) != 0) {
+                AddGizmo(gizmo_sys, type_id, NULL, &obstacle_sys->obstacles[i]);
             }
         }
     }

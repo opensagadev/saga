@@ -155,7 +155,7 @@ void CharMiniKit_Draw(i32 id, numtx_s *matrix, i32 reflection_axis, float reflec
     if (Char_MiniKit == NULL)
         return;
     HUBMINIKITPIECES_s *kit = Char_MiniKit[id];
-    if (kit != NULL && kit->piece_count != 0) {
+    if (kit != NULL) {
         bool reflection = reflection_axis != 0 && reflection_plane != 2000000.0f;
         for (i32 i = 0; i < kit->piece_count; ++i) {
             HUBMINIKITPIECE_s *piece = &kit->pieces[i];

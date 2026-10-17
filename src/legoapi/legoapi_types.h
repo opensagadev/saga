@@ -705,7 +705,9 @@ struct CABLE_s {
     u8 wrap_indices[15];
     u8 point_count;
     u8 wrap_count;
-    u8 flags_1e9;
+    u8 active : 1;
+    u8 armed : 1;
+    u8 released : 1;
     u8 unknown_1ea[2];
 };
 DECOMP_ASSERT(offsetof(CABLE_s, segment_lengths) == 0x188, "CABLE_s segment lengths offset");
@@ -719,7 +721,7 @@ DECOMP_ASSERT(offsetof(CABLE_s, velocities) == 0xc8, "CABLE_s velocities offset"
 DECOMP_ASSERT(offsetof(CABLE_s, point_count) == 0x1e7, "CABLE_s point count offset");
 DECOMP_ASSERT(offsetof(CABLE_s, target) == 0x04, "CABLE_s target offset");
 DECOMP_ASSERT(offsetof(CABLE_s, max_length) == 0x1c4, "CABLE_s max length offset");
-DECOMP_ASSERT(offsetof(CABLE_s, flags_1e9) == 0x1e9, "CABLE_s tied flags offset");
+DECOMP_ASSERT(offsetof(CABLE_s, unknown_1ea) == 0x1ea, "CABLE_s flags size");
 DECOMP_ASSERT(sizeof(CABLE_s) == 0x1ec, "CABLE_s ABI");
 struct CHARACTERDATA_s {};
 struct CHARCATEGORY {

@@ -1525,9 +1525,11 @@ static __used__ void Collection_GetSelectingPlayerIDs(i16 *ids) {
 }
 
 static i32 ActionMusicFn() {
+    if (Arcade != 0 || DoubleScore != 0 || Cheat_PowerUpActive(-1) != 0) {
+        return 1;
+    }
     LEVELDATA_s *level = WORLD->current_level;
-    if (Arcade != 0 || DoubleScore != 0 || Cheat_PowerUpActive(-1) != 0 ||
-        (level == CRUISERA_LDATA && MiniCutCam != 0) || (level == CRUISERD_LDATA && CruiserD_LiftChase != 0) ||
+    if ((level == CRUISERA_LDATA && MiniCutCam != 0) || (level == CRUISERD_LDATA && CruiserD_LiftChase != 0) ||
         level == DEATHSTARRESCUEE_LDATA) {
         return 1;
     }

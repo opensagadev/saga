@@ -85,23 +85,13 @@ namespace {
             return NULL;
         }
 
-#define CHECK_BUILDIT_PLAYER(slot)                                                                                     \
-    do {                                                                                                               \
-        GameObject_s *player = Player[slot];                                                                           \
-        if (player != NULL && static_cast<i8>(player->apiobj.field_0x1f8) < 0 &&                                       \
-            player->build_context == LEGOCONTEXT_BUILDIT && player->field_0x788 == buildit) {                          \
-            return player;                                                                                             \
-        }                                                                                                              \
-    } while (0)
-        CHECK_BUILDIT_PLAYER(0);
-        CHECK_BUILDIT_PLAYER(1);
-        CHECK_BUILDIT_PLAYER(2);
-        CHECK_BUILDIT_PLAYER(3);
-        CHECK_BUILDIT_PLAYER(4);
-        CHECK_BUILDIT_PLAYER(5);
-        CHECK_BUILDIT_PLAYER(6);
-        CHECK_BUILDIT_PLAYER(7);
-#undef CHECK_BUILDIT_PLAYER
+        for (i32 i = 0; i < 8; i++) {
+            GameObject_s *player = Player[i];
+            if (player != NULL && static_cast<i8>(player->apiobj.field_0x1f8) < 0 &&
+                player->build_context == LEGOCONTEXT_BUILDIT && player->field_0x788 == buildit) {
+                return player;
+            }
+        }
         return NULL;
     }
 
@@ -1524,7 +1514,7 @@ void BuildIt_MoveCode(GameObject_s *player) {
                 player->big_jump_data = NULL;
             }
         }
-        if (buildit == NULL || static_cast<i8>(player->apiobj.flags_low) >= 0)
+        if (buildit == NULL || !player->apiobj.player_controlled)
             return;
         if (player->apiobj.field_0x27d != 0 && (buildit->state_flags & 4) != 0) {
             GizBuildItPushAwayFromStart(player, buildit);
@@ -1547,7 +1537,7 @@ void BuildIt_MoveCode(GameObject_s *player) {
             GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
             Hint_SetComplete(LEGOHINT_BUILD);
         }
-        if (static_cast<i8>(player->apiobj.flags_low) < 0 && player->apiobj.field_0x27d != 0) {
+        if (player->apiobj.player_controlled && player->apiobj.field_0x27d != 0) {
             GizBuildItPushAwayFromEnd(player);
         }
         return;

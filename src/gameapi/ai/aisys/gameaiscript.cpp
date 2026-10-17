@@ -4133,9 +4133,11 @@ __used__ static i32 Action_CreateRider(AISYS *sys, AISCRIPTPROCESS *processor, A
                 }
             }
 
-            if (model != -1 && vehicle != NULL && vehicle->field_0xcc0 == NULL) {
-                GameObject_s *rider = AddDynamicCreature(model, &vehicle->apiobj.collision_position, 0,
-                                                         script != NULL ? script : const_cast<char *>("default"), NULL,
+            if (model != -1 && vehicle->field_0xcc0 == NULL) {
+                if (script == NULL) {
+                    script = const_cast<char *>("default");
+                }
+                GameObject_s *rider = AddDynamicCreature(model, &vehicle->apiobj.collision_position, 0, script, NULL,
                                                          NULL, 0, NULL, NULL, 0, 0);
                 if (rider != NULL) {
                     TakeOverGameObject(rider, vehicle, 0, 1);
@@ -5711,7 +5713,10 @@ i32 Action_PullLever(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *
             object->pad_gamepad->buttons_pressed |= GAMEPAD_TOGGLERIGHT;
         }
     }
-    return object->field_0x7a5 == 0x4a && object->field_0x788 == lever;
+    if (object->field_0x7a5 == 0x4a && object->field_0x788 == lever) {
+        return 1;
+    }
+    return 0;
 }
 
 i32 Action_UseTechno(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
@@ -5799,7 +5804,10 @@ i32 Action_UsePanel(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *p
             object->pad_gamepad->buttons_pressed |= GAMEPAD_TOGGLERIGHT;
         }
     }
-    return object->field_0x7a5 == 0x0b && object->field_0x788 == panel;
+    if (object->field_0x7a5 == 0x0b && object->field_0x788 == panel) {
+        return 1;
+    }
+    return 0;
 }
 
 i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **, i32, i32,
@@ -9312,7 +9320,10 @@ __used__ static i32 Action_ForcePush(AISYS *sys, AISCRIPTPROCESS *processor, AIP
     object->force_push_target = static_cast<GameObject_s *>(processor->action_data_3);
     object->field_0xe21 = (object->field_0xe21 & ~4) | ((processor->action_data_1 & 1) << 2);
     if (processor->action_object != NULL) {
-        return processor->action_object != object->takeover_entry_target;
+        if (processor->action_object != object->takeover_entry_target) {
+            return 1;
+        }
+        return 0;
     }
     if (object->character_context == 0x1b && object->takeover_entry_target != NULL) {
         processor->action_object = object->takeover_entry_target;

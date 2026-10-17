@@ -115,7 +115,7 @@ i32 Tag_UpdateHint(HINT_s *hint) {
         case 600:
             if (FreePlay == 0)
                 return 0;
-            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 && player->field_0xcc0 != NULL)
+            if (player != NULL && player->apiobj.player_controlled && player->field_0xcc0 != NULL)
                 return 0;
             return player2 == NULL || static_cast<i8>(player2->apiobj.flags_low) >= 0 || player2->field_0xcc0 == NULL;
         case 602: {
@@ -129,7 +129,7 @@ i32 Tag_UpdateHint(HINT_s *hint) {
             GameObject_s *first = player;
             if (first != NULL && static_cast<i8>(first->apiobj.flags_low) < 0 && first->field_0xcc0 != NULL)
                 return 0;
-            if (second != NULL && static_cast<i8>(second->apiobj.flags_low) < 0 && second->field_0xcc0 != NULL)
+            if (second != NULL && second->apiobj.player_controlled && second->field_0xcc0 != NULL)
                 return 0;
             i32 count = 0;
             i32 active = 0;
@@ -184,7 +184,7 @@ i32 Tag_UpdateHint(HINT_s *hint) {
         case 606:
             for (i32 i = 0; i < 2; ++i) {
                 GameObject_s *object = Player[i];
-                if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0 && object->field_0xcc0 != NULL &&
+                if (object != NULL && object->apiobj.player_controlled && object->field_0xcc0 != NULL &&
                     object->id != id_LUKESKYWALKERDAGOBAH)
                     return WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks != 0;
             }

@@ -1108,16 +1108,8 @@ void PlayerTakeHit(GameObject_s *object, GameObject_s *attacker) {
         return;
 
     const u8 state = object->field_0xe31;
-    i32 animation;
-    void *animation_data;
-    if (state != 1) {
-        animation = 0x3d;
-        animation_data = object->apiobj.character_model->model_data_b[0x3d];
-    } else {
-        animation = 0x3e;
-        animation_data = object->apiobj.character_model->model_data_b[0x3e];
-    }
-    if (animation_data == NULL) {
+    const i32 animation = state == 1 ? 0x3e : 0x3d;
+    if (object->apiobj.character_model->model_data_b[animation] == NULL) {
         if ((object->field_0xefb & 8) != 0) {
             ResetAnimPacket(&object->apiobj.anim_packet, -1);
             Player_ClearContext(object, 1);
@@ -1843,66 +1835,56 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         player_indicator[0] = 1;
         player_indicator[1] = 1;
     } else {
-        // The reference has two fixed player gates, not a dynamic player loop.
-#define CHECK_PLAYER_VEHICLE_INDICATOR(i)                                                                              \
-    {                                                                                                                  \
-        GameObject_s *object = Player[i];                                                                              \
-        if (object != NULL && object->apiobj.player_controlled && (object->field_0xe24 & 8) != 0 &&                    \
-            object->field_0xcc0 != NULL &&                                                                             \
-            (object->id == id_ATST || object->id == id_ATST_LOWRES || object->id == id_ATAT)) {                        \
-            player_indicator[i] = 2;                                                                                   \
-        }                                                                                                              \
+        for (i32 i = 0; i < 2; i++) {
+            GameObject_s *object = Player[i];
+            if (object != NULL && object->apiobj.player_controlled && (object->field_0xe24 & 8) != 0 &&
+                object->field_0xcc0 != NULL &&
+                (object->id == id_ATST || object->id == id_ATST_LOWRES || object->id == id_ATAT)) {
+                player_indicator[i] = 2;
+            }
+        }
     }
-        CHECK_PLAYER_VEHICLE_INDICATOR(0)
-        CHECK_PLAYER_VEHICLE_INDICATOR(1)
-#undef CHECK_PLAYER_VEHICLE_INDICATOR
+    for (i32 i = 0; i < 2; i++) {
+        GameObject_s *object = Player[i];
+        if (object == NULL || player_indicator[i] == 0 || object->apiobj.field_0x287 != 0 ||
+            (object->hud_icon_timer > 0.0f && VehicleArea == 0))
+            continue;
+        NUVEC position;
+        if (player_indicator[i] == 2) {
+            GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+            i32 locator = data->ride_locator;
+            if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
+                position.x = object->joint_matrices[locator].m30;
+                position.y = object->joint_matrices[locator].m31;
+                position.z = object->joint_matrices[locator].m32;
+            } else {
+                position = object->apiobj.upper_position;
+            }
+            position.y += 0.5f * object->apiobj.field_0x1e0;
+        } else if (world->current_level == DOGFIGHTA_LDATA) {
+            position.x = 0.0f;
+            position.y = object->field_0x1000 * object->apiobj.field_0xa8;
+            position.z = 0.0f;
+            NuVecMtxRotate(&position, &position, &object->vehicle_orientation);
+            NuVecAdd(&position, &position, &object->apiobj.position);
+        } else {
+            position = object->apiobj.collision_position;
+            position.y += 1.5f * object->apiobj.field_0x1e0;
+        }
+        message = AddGameMsg_Default;
+        message.text = ASCII_DOWN;
+        message.position = &position;
+        message.scale = 0.666f;
+        message.red = PlayerRGB[i][0];
+        message.green = PlayerRGB[i][1];
+        message.blue = PlayerRGB[i][2];
+        f32 pulse = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f);
+        u16 angle = static_cast<u16>((pulse + pulse) * 65536.0f);
+        message.alpha = static_cast<u8>(48.0f * NuTrigTable[angle / 2] + 80.0f);
+        message.flags = 0x83;
+        message.field_0x4f = 4;
+        AddGameMsg(&message);
     }
-    // Keep the two reference message blocks while sharing their source body.
-#define ADD_PLAYER_VEHICLE_INDICATOR(i)                                                                                \
-    do {                                                                                                               \
-        GameObject_s *object = Player[i];                                                                              \
-        if (object == NULL || player_indicator[i] == 0 || object->apiobj.field_0x287 != 0 ||                           \
-            (object->hud_icon_timer > 0.0f && VehicleArea == 0))                                                       \
-            break;                                                                                                     \
-        NUVEC position;                                                                                                \
-        if (player_indicator[i] == 2) {                                                                                \
-            GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);   \
-            i32 locator = data->ride_locator;                                                                          \
-            if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {                \
-                position.x = object->joint_matrices[locator].m30;                                                      \
-                position.y = object->joint_matrices[locator].m31;                                                      \
-                position.z = object->joint_matrices[locator].m32;                                                      \
-            } else {                                                                                                   \
-                position = object->apiobj.upper_position;                                                              \
-            }                                                                                                          \
-            position.y += 0.5f * object->apiobj.field_0x1e0;                                                           \
-        } else if (world->current_level == DOGFIGHTA_LDATA) {                                                          \
-            position.x = 0.0f;                                                                                         \
-            position.y = object->field_0x1000 * object->apiobj.field_0xa8;                                             \
-            position.z = 0.0f;                                                                                         \
-            NuVecMtxRotate(&position, &position, &object->vehicle_orientation);                                        \
-            NuVecAdd(&position, &position, &object->apiobj.position);                                                  \
-        } else {                                                                                                       \
-            position = object->apiobj.collision_position;                                                              \
-            position.y += 1.5f * object->apiobj.field_0x1e0;                                                           \
-        }                                                                                                              \
-        message = AddGameMsg_Default;                                                                                  \
-        message.text = ASCII_DOWN;                                                                                     \
-        message.position = &position;                                                                                  \
-        message.scale = 0.666f;                                                                                        \
-        message.red = PlayerRGB[i][0];                                                                                 \
-        message.green = PlayerRGB[i][1];                                                                               \
-        message.blue = PlayerRGB[i][2];                                                                                \
-        f32 pulse = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f);                                                  \
-        u16 angle = static_cast<u16>((pulse + pulse) * 65536.0f);                                                      \
-        message.alpha = static_cast<u8>(48.0f * NuTrigTable[angle / 2] + 80.0f);                                      \
-        message.flags = 0x83;                                                                                          \
-        message.field_0x4f = 4;                                                                                        \
-        AddGameMsg(&message);                                                                                          \
-    } while (0)
-    ADD_PLAYER_VEHICLE_INDICATOR(0);
-    ADD_PLAYER_VEHICLE_INDICATOR(1);
-#undef ADD_PLAYER_VEHICLE_INDICATOR
     if (MissionSys != NULL && Mission_Active(MissionSys) != NULL && MissionSys->mission != NULL) {
         CheckMissionEnd(MissionSys);
     }
@@ -2038,9 +2020,8 @@ void KillParts_ATAT(ADDPART_s *params, i32, i32 variant, GameObject_s *) {
 void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode, float vertical_scale,
                i32 use_vehicle_velocity, u16 *angle_override) {
     CHARACTERDATA *character = object->apiobj.character_data;
-    GAMECHARACTERDATA *game_character = character->game_character;
     if ((character->model_flags & 0x02000000) != 0 ||
-        (game_character->flags_090 & GAMECHARACTER_FLAG_GRAB_DISABLED) != 0)
+        (character->game_character->flags_090 & GAMECHARACTER_FLAG_GRAB_DISABLED) != 0)
         return;
     if (object->id == id_BOBAFETT && WORLD->current_level == SARLACCPITA_LDATA && FreePlay == 0 &&
         static_cast<u8>(object->apiobj.field_0x27c) == 0xff)
@@ -2051,7 +2032,7 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
     extern HUBMINIKITPIECES_s **Char_MiniKit;
     if ((object->apiobj.character_data->model_flags & 0x04000000) != 0 && object->id != id_MINIDROIDEKA) {
         HUBMINIKITPIECES_s *pieces = Char_MiniKit[object->id];
-        if (pieces == NULL || pieces->piece_count == 0)
+        if (pieces == NULL)
             return;
         for (i32 i = 0; i < pieces->piece_count; ++i) {
             HUBMINIKITPIECE_s *piece = &pieces->pieces[i];

@@ -1252,7 +1252,7 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
     GameObject_s *object = &Obj[object_index];
     BOLT_s *bolt = &Bolt[bolt_index];
     BOLTTYPE_s *type = bolt->type;
-    if (BoltSys->stop_targeting != NULL && bolt->owner != NULL && (bolt->owner->apiobj.flags_low & 0x80) != 0)
+    if (BoltSys->stop_targeting != NULL && bolt->owner != NULL && bolt->owner->apiobj.player_controlled)
         BoltSys->stop_targeting(bolt->owner, &bolt->position);
     bool has_deflect = (object->apiobj.flags_low & 0x80) != 0 && Player_HasDeflectBolts(object) != 0;
     i32 deflect = has_deflect;

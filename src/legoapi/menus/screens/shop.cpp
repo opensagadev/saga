@@ -392,7 +392,11 @@ i32 ItemMenu(MENU_s *menu) {
 
     if (candidate != entry_picked) {
         lastitem = picked;
-        picked = candidate <= 0 ? 1 : candidate > 5 ? 5 : candidate;
+        picked = candidate;
+        if (picked < 1)
+            picked = 1;
+        else if (picked > 5)
+            picked = 5;
         SubMenu = 0;
 
         slidetimer = 0.125f;

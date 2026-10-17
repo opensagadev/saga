@@ -1856,7 +1856,7 @@ GIZMOBLOWUP_s *GizmoBlowUpOpponent(GameObject_s *object, f32 range, f32 extra_ra
         GizmoBlowUpOpponent_Behind = 0;
         for (i32 i = 0; i < WORLD->gizmo_blowup_count; ++i, ++target) {
             if ((target->status_flags & 0x80c001) != 0x80c000 ||
-                ((object->apiobj.flags_low & 0x80) != 0 && target->platform_id != -1 &&
+                (object->apiobj.player_controlled && target->platform_id != -1 &&
                  target->platform_id == object->apiobj.supporting_platform_id))
                 continue;
             u32 flags = target->draw_flags;

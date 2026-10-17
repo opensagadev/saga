@@ -1027,7 +1027,9 @@ static void Hub_DrawSelectModeMenu(int selected, float alpha) {
         unlocked = ADataList[area].episode_index == 0xff && (ADataList[area].flags & 0x4000) != 0;
     }
     i32 opacity[10];
-    i32 text_ids[10] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+    i32 text_ids[10];
+    for (i32 i = 0; i < 10; ++i)
+        text_ids[i] = -1;
     i32 count = 0;
     if (!lost_temple) {
         text_ids[count] = complete ? tREPLAYSTORY : tSTORY;
@@ -2857,7 +2859,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 Percent_UpdateHint(HINT_s 
             nearby_players++;
     }
     object = Player[1];
-    if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0) {
+    if (object != NULL && object->apiobj.player_controlled) {
         active_players++;
         if (NuVecXZDistSqr(&object->apiobj.position, &PercentHint_TriggerPos, NULL) < 4.0f)
             nearby_players++;

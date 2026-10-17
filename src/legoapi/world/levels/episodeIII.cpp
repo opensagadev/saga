@@ -521,12 +521,9 @@ void CruiserCPanel(WORLDINFO_s *) {
 }
 
 void CruiserDInit(WORLDINFO_s *world) {
-    if (world->area->level_count != 0) {
-        auto world_area = world->area;
-        for (i32 i = 0; i < world_area->level_count; i++) {
-            if (static_cast<u16>(world_area->levels[i]) == static_cast<u16>(CRUISERE_LDATA->idx))
-                CruiserE_ix = i;
-        }
+    for (i32 i = 0; i < world->area->level_count; i++) {
+        if (static_cast<u16>(world->area->levels[i]) == static_cast<u16>(CRUISERE_LDATA->idx))
+            CruiserE_ix = i;
     }
 
     if (NuSpecialFind(WORLD->current_gscn, &CruiserD_Lift, "lift", 1)) {
@@ -608,26 +605,17 @@ void CruiserDUpdate(WORLDINFO_s *) {
                 CruiserD_LiftChase = 1;
             }
             NUVEC *lift_pos = NuSpecialGetDrawPos(&CruiserD_Lift);
-#define CRUISERD_CHECK_PLAYER(index)                                                                                   \
-    {                                                                                                                  \
-        GameObject_s *victim = Player[index];                                                                          \
-        if (victim != NULL && victim->apiobj.field_0x287 == 0 &&                                                       \
-            (victim->apiobj.supporting_platform_id == CruiserD_Lift_plat_id || victim->apiobj.pos_z > lift_pos->z)) {  \
-            ObjHitObj(NULL, victim, -1, 0, 0, 1);                                                                      \
-            KillGameObject(victim, 2, 0);                                                                              \
-            if (CruiserD_direction >= 0 && MiscTime == 0.0f)                                                           \
-                MiscTime = 1.0f;                                                                                       \
-        }                                                                                                              \
-    }
-            CRUISERD_CHECK_PLAYER(0);
-            CRUISERD_CHECK_PLAYER(1);
-            CRUISERD_CHECK_PLAYER(2);
-            CRUISERD_CHECK_PLAYER(3);
-            CRUISERD_CHECK_PLAYER(4);
-            CRUISERD_CHECK_PLAYER(5);
-            CRUISERD_CHECK_PLAYER(6);
-            CRUISERD_CHECK_PLAYER(7);
-#undef CRUISERD_CHECK_PLAYER
+            for (i32 i = 0; i < 8; i++) {
+                GameObject_s *victim = Player[i];
+                if (victim != NULL && victim->apiobj.field_0x287 == 0 &&
+                    (victim->apiobj.supporting_platform_id == CruiserD_Lift_plat_id ||
+                     victim->apiobj.pos_z > lift_pos->z)) {
+                    ObjHitObj(NULL, victim, -1, 0, 0, 1);
+                    KillGameObject(victim, 2, 0);
+                    if (CruiserD_direction >= 0 && MiscTime == 0.0f)
+                        MiscTime = 1.0f;
+                }
+            }
             if (MiscTime > 0.0f) {
                 MiscTime -= FRAMETIME;
                 if (MiscTime <= 0.0f) {

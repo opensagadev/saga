@@ -3593,8 +3593,7 @@ extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f3
         part->bounds_max.y = part->position.y + part->target_radius;
         part->bounds_max.z = part->position.z + part->target_radius;
         part->elapsed = 0.0f;
-        for (i32 i = 0; i < 6; ++i)
-            part->field_10c[i] = params->field_a8[i];
+        memcpy(part->field_10c, params->field_a8, sizeof(part->field_10c));
         for (i32 i = 0; i < 5; ++i)
             part->field_124[i] = 0.0f;
         if ((part->flags & 0x80) != 0)

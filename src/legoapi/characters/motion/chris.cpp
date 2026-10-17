@@ -371,108 +371,32 @@ static void ResetSpaceLevel(WORLDINFO_s *world, spacelevel_s *space) {
     space->direction_length = NuVecMag(&space->direction);
     space->inverse_direction_length = 1.0f / space->direction_length;
 
-#define DOOR_REACHED(player_index, door_index)                                                                         \
-    (Player[player_index]->field_0x68c > DogFightDoors.doors[door_index].distance)
-    if (__builtin_expect(Player[0] != NULL, 0)) {
-        if (DOOR_REACHED(0, 6)) {
-            goto door_6;
-        }
-        if (Player[1] != NULL && DOOR_REACHED(1, 6)) {
-            goto door_6;
-        }
-        if (DOOR_REACHED(0, 5)) {
-            goto door_5;
-        }
-        if (Player[1] != NULL && DOOR_REACHED(1, 5)) {
-            goto door_5;
-        }
-        if (DOOR_REACHED(0, 4)) {
-            goto door_4;
-        }
-        if (Player[1] != NULL && DOOR_REACHED(1, 4)) {
-            goto door_4;
-        }
-        if (DOOR_REACHED(0, 3)) {
-            goto door_3;
-        }
-        if (Player[1] != NULL && DOOR_REACHED(1, 3)) {
-            goto door_3;
-        }
-        if (DOOR_REACHED(0, 2)) {
-            goto door_2;
-        }
-        if (Player[1] != NULL && DOOR_REACHED(1, 2)) {
-            goto door_2;
-        }
-        if (DOOR_REACHED(0, 1)) {
-            goto door_1;
-        }
-        if (Player[1] != NULL && DOOR_REACHED(1, 1)) {
-            goto door_1;
-        }
-        if (DOOR_REACHED(0, 0)) {
-            goto door_0;
-        }
-        if (Player[1] != NULL && DOOR_REACHED(1, 0)) {
-            goto door_0;
-        }
-    } else if (Player[1] != NULL) {
-        if (DOOR_REACHED(1, 6)) {
-            goto door_6;
-        }
-        if (DOOR_REACHED(1, 5)) {
-            goto door_5;
-        }
-        if (DOOR_REACHED(1, 4)) {
-            goto door_4;
-        }
-        if (DOOR_REACHED(1, 3)) {
-            goto door_3;
-        }
-        if (DOOR_REACHED(1, 2)) {
-            goto door_2;
-        }
-        if (DOOR_REACHED(1, 1)) {
-            goto door_1;
-        }
-        if (DOOR_REACHED(1, 0)) {
-            goto door_0;
+    for (door_index = 6; door_index >= 0; --door_index) {
+        for (i32 player = 0; player < 2; ++player) {
+            if (Player[player] != NULL && Player[player]->field_0x68c > DogFightDoors.doors[door_index].distance) {
+                space->door_time = DogFightDoors.doors[door_index].timer;
+                space->door_countdown = space->door_time * 94.977417f / 59.449684f;
+                space->door_elapsed = (space->door_countdown - FRAMETIME) * 94.977417f / 59.449684f;
+                goto reset_space;
+            }
         }
     }
-
-#undef DOOR_REACHED
-
     space->door_countdown = 0.0f;
     space->door_time = 0.0f;
     space->door_elapsed = 0.0f;
 
 reset_space:
 
-#define RESET_STARFIGHTER(fighter)                                                                                     \
-    fighter.active = 0;                                                                                                \
-    fighter.parent = NULL;                                                                                             \
-    fighter.spline = NULL
-#define RESET_SPACE_GROUP(index)                                                                                       \
-    do {                                                                                                               \
-        RESET_STARFIGHTER(space->flight_groups[index].fighters[0]);                                                    \
-        RESET_STARFIGHTER(space->flight_groups[index].fighters[1]);                                                    \
-        RESET_STARFIGHTER(space->flight_groups[index].fighters[2]);                                                    \
-        RESET_STARFIGHTER(space->flight_groups[index].fighters[3]);                                                    \
-        RESET_STARFIGHTER(space->flight_groups[index].fighters[4]);                                                    \
-        space->flight_groups[index].reset_colour = 0xff00;                                                             \
-        space->flight_groups[index].active = 0;                                                                        \
-        space->flight_groups[index].draw_target = 0;                                                                   \
-    } while (0)
-    RESET_SPACE_GROUP(0);
-    RESET_SPACE_GROUP(1);
-    RESET_SPACE_GROUP(2);
-    RESET_SPACE_GROUP(3);
-    RESET_SPACE_GROUP(4);
-    RESET_SPACE_GROUP(5);
-    RESET_SPACE_GROUP(6);
-    RESET_SPACE_GROUP(7);
-#undef RESET_SPACE_GROUP
-#undef RESET_STARFIGHTER
+    for (i32 i = 0; i < 8; i++) {
+        for (i32 j = 0; j < 5; j++) {
+            space->flight_groups[i].fighters[j].active = 0;
+            space->flight_groups[i].fighters[j].parent = NULL;
+            space->flight_groups[i].fighters[j].spline = NULL;
+        }
+        space->flight_groups[i].reset_colour = 0xff00;
+        space->flight_groups[i].active = 0;
+        space->flight_groups[i].draw_target = 0;
+    }
 
     STARFIGHTERDRAWSCALE = {4.0f, 4.0f, 4.0f, 1.0f};
     space->draw_scale = {-141.0f, -121.0f, -1034.0f, 1.0f};
@@ -544,34 +468,6 @@ reset_space:
         space->large_records[i].reset_state = space->large_records[i].saved_state;
     }
     SpaceRumbleTimer = NuRandFloat() * 10.0f + 3.0f;
-    return;
-
-door_6:
-    door_index = 6;
-    goto set_door_timer;
-door_5:
-    door_index = 5;
-    goto set_door_timer;
-door_4:
-    door_index = 4;
-    goto set_door_timer;
-door_3:
-    door_index = 3;
-    goto set_door_timer;
-door_2:
-    door_index = 2;
-    goto set_door_timer;
-door_1:
-    door_index = 1;
-    goto set_door_timer;
-door_0:
-    door_index = 0;
-
-set_door_timer:
-    space->door_time = DogFightDoors.doors[door_index].timer;
-    space->door_countdown = space->door_time * 94.977417f / 59.449684f;
-    space->door_elapsed = (space->door_countdown - FRAMETIME) * 94.977417f / 59.449684f;
-    goto reset_space;
 }
 
 void DrawLine_Now(_vuv_s *, _vuv_s *, i32, i32) {
@@ -1817,7 +1713,8 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
 }
 
 void DogFightARestart() {
-    memset(DogDebKey, 0xff, sizeof(DogDebKey));
+    for (i32 i = 0; i < 4; ++i)
+        DogDebKey[i] = -1;
 }
 
 void ProcessCurrentSpeed(WORLDINFO_s *world, speedup_s *speedup) {
