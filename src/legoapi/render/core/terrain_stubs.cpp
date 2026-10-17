@@ -210,70 +210,7 @@ i32 CheckForPlatInst(i32 instance);
 
 i32 CreateScaledEffect(i32 effect_index, f32 requested_scale);
 
-    i32 CreateScaledPARTEffect(i32 effect_index, f32 requested_scale) {
-        // Retail uses this inclusive upper check; loaded type IDs are 0..127.
-        if (effect_index <= 0) {
-            return -1;
-        }
-        if (effect_index > 128 || part_types[effect_index].effect_ids[0] == -1) {
-            return -1;
-        }
-        if (part_types[effect_index].scale != 1.0f) {
-            // The final word identifies the original, unscaled type.
-            effect_index = part_types[effect_index].field_174;
-            if (part_types[effect_index].effect_ids[0] == -1) {
-                return -1;
-            }
-        }
-        if (requested_scale == 1.0f && effect_index != 0) {
-            return effect_index;
-        }
-        if (requested_scale < 0.01f) {
-            requested_scale = 0.01f;
-        }
-
-        i32 closest_index = effect_index;
-        f32 ratio = requested_scale / part_types[effect_index].scale;
-        f32 closest_distance = ratio <= 1.0f ? 1.0f - ratio : ratio - 1.0f;
-        for (i32 i = 0; i < 128; ++i) {
-            if (__builtin_expect(part_types[i].effect_ids[0] != -1 && part_types[i].field_174 == static_cast<u32>(effect_index), 1)) {
-                ratio = requested_scale / part_types[i].scale;
-                f32 distance = ratio <= 1.0f ? 1.0f - ratio : ratio - 1.0f;
-                if (__builtin_expect(distance < closest_distance, 1)) {
-                    closest_index = i;
-                    closest_distance = distance;
-                }
-            }
-        }
-        if (closest_index != 0 && closest_distance < 1.1f) {
-            return closest_index;
-        }
-
-        for (i32 i = 0; i < 128; ++i) {
-            if (part_types[i].effect_ids[0] != -1) {
-                continue;
-            }
-            part_type_s *scaled = &part_types[i];
-            part_type_s *source = &part_types[effect_index];
-            *scaled = *source;
-            edpartScaleType(i, requested_scale);
-            scaled->last_used_time = partglobaltime;
-            scaled->scale = requested_scale;
-            scaled->field_174 = effect_index;
-            char shortened[16];
-            const char *base_name = source->name;
-            const size_t name_length = strlen(base_name);
-            if (__builtin_expect(name_length > 12, 1)) {
-                memcpy(shortened, base_name, name_length + 1);
-                shortened[12] = '\0';
-                base_name = shortened;
-            }
-            sprintf(scaled->name, "%s%03d", base_name, i);
-            ++part_types_used;
-            return i != 0 ? i : closest_index;
-        }
-        return closest_index;
-    }
+i32 CreateScaledPARTEffect(i32 effect_index, f32 requested_scale);
 
 void DebFreeAllCreatedEffects(void);
 
@@ -423,8 +360,7 @@ void NewTerrain(NUVEC *position, NUVEC *movement, u8 *hit_flags, i32 object_inde
 void NewTerrainScaleY(NUVEC *position, NUVEC *movement, u8 *hit_flags, i32 object_index, f32 radius,
                           f32 collision_radius, f32 object_scale, i32 embedded_retry, i32 scan_flags);
 
-    void PartTerrInit(void) {
-    }
+void PartTerrInit(void);
 
 void PlatInstBounce(i32 index, f32 impulse, f32 spring, f32 damping);
 

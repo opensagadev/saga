@@ -44,10 +44,6 @@ _ENGINE_SRCS = _ENGINE_ROOT_SRCS + glob(
     [directory + "/**/*.c" for directory in _ENGINE_DIRS] +
     [directory + "/**/*.cpp" for directory in _ENGINE_DIRS],
     exclude = [
-        "gameapi/edtools/edanimall.cpp",
-        "gameapi/edtools/edmenucallbacks.cpp",
-        "gameapi/edtools/edptlall.cpp",
-        "gameapi/edtools/edptlcallbacks.cpp",
         "nu2api/nu3d/android/nupostfilter.cpp",
         "nu2api/nu3d/nudynamiclight.cpp",
         "nu2api/nu3d/nupostfilter_generic.cpp",
@@ -126,10 +122,6 @@ _TEXTUAL_HEADERS = [
     "nu2api/nu3d/nudynamiclight.cpp",
     "nu2api/nu3d/nupostfilter_generic.cpp",
     "nu2api/nu3d/android/nupostfilter.cpp",
-    "gameapi/edtools/edanimall.cpp",
-    "gameapi/edtools/edmenucallbacks.cpp",
-    "gameapi/edtools/edptlall.cpp",
-    "gameapi/edtools/edptlcallbacks.cpp",
     "legoapi/items/collect/bolttypes_lsw.inc",
     "legoapi/menus/core/lsw_text_data.inc",
     "nu2api/nu3d/android/nuios_shader_sources.inc",

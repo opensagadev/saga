@@ -3237,9 +3237,7 @@ extern "C" {
     void NuWindUpdateArray(NUVEC **);
 
     extern "C" f32 partglobaltime;
-    void NuPartResetGlobalTime(void) {
-        partglobaltime = 0;
-    }
+void NuPartResetGlobalTime(void);
     // ---------------------------------------------------------------------------
     // Gobj / hierarchy / scene graph
     // ---------------------------------------------------------------------------

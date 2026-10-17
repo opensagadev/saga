@@ -25,7 +25,6 @@ build --per_file_copt=^src/nu2api/nucore/android/nutime_android\.c$@-x,c++,-std=
 build --per_file_copt=^src/nu2api/nucore/android/nuthread\.c$@-x,c++,-std=gnu++11
 # Route, creature, and antinode editor callbacks use optimized frameless PIC control flow.
 build:target --per_file_copt=^src/editor/edtoolsall\.cpp$@-O3
-build:target --per_file_copt=^src/gameapi/edtools/edpartall\.cpp$@-O2
 # Recovered Android entry points; -O3 also reproduces the static initializer.
 build:target --per_file_copt=^src/java/android\.cpp$@-O3
 # Original OBB lookup uses optimized inlined strlen/strcat and omits leaf frames.
@@ -86,7 +85,6 @@ build:target --per_file_copt=^src/gamelib/util/Utilities\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/misc/legoapi_misc\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/misc/buffers\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/numath/nutrig_gen\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/misc/memory\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/misc/utilities\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/misc/utilities\.cpp$@-ftree-vectorize
 build:target --per_file_copt=^src/legoapi/misc/androidbatman\.cpp$@-O3
@@ -260,8 +258,6 @@ build:target --per_file_copt=^src/legoapi/props/objects/tightrope\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/transport/tubes\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/characters/motion/camera\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/characters/motion/camera\.cpp$@-ftree-vectorize
-build:target --per_file_copt=^src/gameapi/edtools/edtoolsall_plain\.cpp$@-O2
-build:target --per_file_copt=^src/gameapi/edtools/edtoolsall_plain\.cpp$@-ftree-vectorize
 build:target --per_file_copt=^src/legoapi/characters/motion/charplatforms\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/cutscenes/gcutscn\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/cutscenes/cutscene_stubs\.cpp$@-O2
@@ -439,7 +435,6 @@ build:target --per_file_copt=^src/MechInputTouch/MechSystems\.cpp$@-O3
 build:target --per_file_copt=^src/MechInputTouch/MechAutofireAddon\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechTouchUIElements\.cpp$@-O3
 build:target --per_file_copt=^src/editor/edlevelall\.cpp$@-O3
-build:target --per_file_copt=^src/gameapi/edtools/edptlall\.cpp$@-O2
 build:target --per_file_copt=^src/gameapi/edtools/edtoolsall\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edbobs\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/actions/character/streaks\.cpp$@-O3

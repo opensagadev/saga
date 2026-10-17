@@ -5138,321 +5138,30 @@ void GameObject_s::KillTasks() {
     touch_task = NULL;
 }
 
-// ThingManager::AddThing @0x424c10. Appends at count; the pending
-// AddThingAfterThis reservation (field_0x14) is folded into the index and
-// cleared here.
-void ThingManager::AddThing(BaseThing *thing) {
-    i32 index = this->count;
-    if (thing != NULL) {
-        if (index < this->max_things) {
-            this->things[index] = thing;
-            index = index + 1;
-        }
-    }
-    index = index + this->field_0x14;
-    this->field_0x14 = 0;
-    this->count = index;
-}
 
-// ThingManager::AddThingAfterThis @0x424c40. Reserves the slot after the
-// current tail: bumps field_0x14 and stores the thing at count+field_0x14;
-// the next AddThing folds the reservation into count.
-void ThingManager::AddThingAfterThis(BaseThing *thing) {
-    if (thing != NULL) {
-        i32 index = this->field_0x14 + 1;
-        this->field_0x14 = index;
-        index = index + this->count;
-        if (index < this->max_things) {
-            this->things[index] = thing;
-        }
-    }
-}
 
-// ThingManager::DisplayThings @0x4252c0. Single pass over Display,
-// bracketed with timebar slot 3 ("Dis"). PanelRender uses this pass for the
-// display-layer things that render on top of the gameplay panel.
-void ThingManager::DisplayThings(ThingRenderData *data) {
-    const char *name = "Dis"; // timebar slot name @0x5734db
 
-    for (i32 i = 0; i < this->count; ++i) {
-        BaseThing *thing = this->things[i];
-        if (thing != NULL && (thing->flags & THING_FLAG_SKIP_DISPLAY) == 0) {
-            if (__builtin_expect(thing->profiling_0xc != 0, 0)) {
-                _NuTimeBarSlotBegin(this->timebar, 3, name);
-                thing = this->things[i];
-            }
-            thing->Display(data);
-            thing = this->things[i];
-            if (thing->profiling_0xc != 0) {
-                _NuTimeBarSlotEnd(this->timebar, 3);
-            }
-        }
-    }
-}
 
-void ThingManager::EffectsThings(ThingRenderData *data) {
-    const char *name = "Fx";
-    for (i32 i = 0; i < this->count; ++i) {
-        if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_EFFECTS) != 0) {
-            continue;
-        }
-        if (__builtin_expect(this->things[i]->profiling_0xc != 0, 0)) {
-            _NuTimeBarSlotBegin(this->timebar, 5, name);
-        }
-        this->things[i]->Effects(data);
-        if (this->things[i]->profiling_0xc != 0) {
-            _NuTimeBarSlotEnd(this->timebar, 5);
-        }
-    }
-}
 
-// ThingManager::EnableActions @0x425930. Finds the first thing whose 0x4 id
-// matches and sets (invert==0) or clears (invert!=0) the given flags bits.
-void ThingManager::EnableActions(i32 id, i32 flags, i32 invert) {
-    i32 count = this->count;
-    if (count <= 0) {
-        return;
-    }
-    for (i32 i = 0; i < count; i++) {
-        BaseThing *thing = this->things[i];
-        if (thing == NULL) {
-            continue;
-        }
-        if (thing->field_0x4 == (u32)id) {
-            if (invert != 0) {
-                thing->flags &= ~(u32)flags;
-            } else {
-                thing->flags |= (u32)flags;
-            }
-            return;
-        }
-    }
-}
 
-void ThingManager::EnterLevelThings(ThingLevelData *data) {
-    for (i32 i = 0; i < this->count; ++i) {
-        if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_ENTER_LEVEL) != 0) {
-            continue;
-        }
-        this->things[i]->EnterLevel(data);
-    }
-}
 
-void ThingManager::ExitLevelThings(ThingLevelData *data) {
-    for (i32 i = 0; i < this->count; ++i) {
-        if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_EXIT_LEVEL) != 0) {
-            continue;
-        }
-        this->things[i]->ExitLevel(data);
-    }
-}
 
-// ThingManager::ProcessThings @0x425460. Pass 1 always runs
-// ProcessEvenWhenPaused first; then, per ThingProcessData.paused, either
-// Process or ProcessOnlyWhenPaused. Each pass has its own opt-out flag. The count
-// is re-read every iteration because thing Process calls may add things.
-// Profiling flags select which things receive NuTimeBarSlotBegin/End calls.
-void ThingManager::ProcessThings(ThingProcessData *data) {
-    const char *name = "PROC";
-    for (i32 i = 0; i < this->count; ++i) {
-        if (this->things[i] != NULL && (this->things[i]->flags & THING_FLAG_SKIP_PROCESS_EVEN_WHEN_PAUSED) == 0) {
-            if (__builtin_expect(this->things[i]->profiling_0xc != 0, 0)) {
-                _NuTimeBarSlotBegin(this->timebar, 0, name);
-            }
-            this->things[i]->ProcessEvenWhenPaused(data);
-            if (this->things[i]->profiling_0xc != 0) {
-                _NuTimeBarSlotEnd(this->timebar, 0);
-            }
-        }
-    }
-    if (data->paused == 0) {
-        for (i32 i = 0; i < this->count; ++i) {
-            if (this->things[i] != NULL && (this->things[i]->flags & THING_FLAG_SKIP_PROCESS) == 0) {
-                if (__builtin_expect(this->things[i]->profiling_0xc != 0, 0)) {
-                    _NuTimeBarSlotBegin(this->timebar, 0, name);
-                }
-                this->things[i]->Process(data);
-                if (this->things[i]->profiling_0xc != 0) {
-                    _NuTimeBarSlotEnd(this->timebar, 0);
-                }
-            }
-        }
-    } else {
-        for (i32 i = 0; i < this->count; ++i) {
-            if (this->things[i] != NULL && (this->things[i]->flags & THING_FLAG_SKIP_PROCESS_ONLY_WHEN_PAUSED) == 0) {
-                if (__builtin_expect(this->things[i]->profiling_0xc != 0, 0)) {
-                    _NuTimeBarSlotBegin(this->timebar, 0, name);
-                }
-                this->things[i]->ProcessOnlyWhenPaused(data);
-                if (this->things[i]->profiling_0xc != 0) {
-                    _NuTimeBarSlotEnd(this->timebar, 0);
-                }
-            }
-        }
-    }
-}
 
-i32 ThingManager::RemoveDependanciesThings(ThingRemoveData *data) {
-    i32 removed = 1;
-    for (i32 i = 0; i < this->count; ++i) {
-        if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_REMOVE_DEPENDANCIES) != 0) {
-            continue;
-        }
-        removed &= this->things[i]->RemoveDependancies(data);
-    }
-    return removed;
-}
 
-void ThingManager::RemoveTemporaryThings() {
-    i32 i = this->count - 1;
-    if (i >= this->permanent_count) {
-        do {
-            delete this->things[i];
-            this->things[i] = NULL;
-            --i;
-        } while (i >= this->permanent_count);
-    }
-    this->count = this->permanent_count;
-}
 
-// ThingManager::RenderThings @0x425390. Single pass over Render,
-// bracketed with timebar slot 1 ("Rnd").
-void ThingManager::RenderThings(ThingRenderData *data) {
-    const char *name = "Rnd"; // timebar slot name @0x5734df
 
-    for (i32 i = 0; i < this->count; ++i) {
-        BaseThing *thing = this->things[i];
-        if (thing != NULL && (thing->flags & THING_FLAG_SKIP_RENDER) == 0) {
-            if (__builtin_expect(thing->profiling_0xc != 0, 0)) {
-                _NuTimeBarSlotBegin(this->timebar, 1, name);
-                thing = this->things[i];
-            }
-            thing->Render(data);
-            thing = this->things[i];
-            if (thing->profiling_0xc != 0) {
-                _NuTimeBarSlotEnd(this->timebar, 1);
-            }
-        }
-    }
-}
-
-void ThingManager::ResetThings(ThingResetData *data) {
-    const char *name = "Res";
-
-    for (i32 i = 0; i < this->count; ++i) {
-        if (this->things[i] != NULL && (this->things[i]->flags & 8) == 0) {
-            if (__builtin_expect(this->things[i]->profiling_0xc != 0, 0)) {
-                _NuTimeBarSlotBegin(this->timebar, 4, name);
-            }
-            this->things[i]->Reset(data);
-            if (this->things[i]->profiling_0xc != 0) {
-                _NuTimeBarSlotEnd(this->timebar, 4);
-            }
-        }
-    }
-}
-
-// ThingManager::ThingManager @0x425870. Stores the manager in theThingManager
-// and carves the thing-pointer array from the
-// theMemoryManager linear pool. On allocation failure the array is NULL — the
-// manager then simply never accepts things (AddThing's count < max check).
-ThingManager::ThingManager(i32 max_things) {
-    const usize need = static_cast<usize>(max_things) * sizeof(*things);
-
-    BaseThing **array = NULL;
-    if (*theMemoryManager.end_cell - *theMemoryManager.cursor_cell > need) {
-        const usize aligned = ALIGN(*theMemoryManager.cursor_cell, 0x10);
-        *theMemoryManager.cursor_cell = aligned + need;
-        array = reinterpret_cast<BaseThing **>(aligned);
-        memset(array, 0, need);
-        theMemoryManager.allocated += need;
-        theMemoryManager.remaining -= need;
-        theMemoryManager.high_water = *theMemoryManager.cursor_cell;
-    }
-    this->things = array;
-    this->max_things = max_things;
-    // Profiling sets are a deferred subsystem; the handle is only ever passed
-    // to the NuTimeBarSlotBegin/End stubs, so NULL behaves like the original
-    // with profiling disabled.
-    this->timebar = NuTimeBarCreateSet(0);
-    theThingManager = this;
-}
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
 
-static eduimenu_s *edTimingMenu;
-static u32 EdAttr[] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
 
-void ThingManager::cbEdTimingSelect(eduimenu_s *menu, eduiitem_s *item, u32) {
-    ThingManager *manager = static_cast<ThingManager *>(theThingManager);
-    u32 selection = item->data;
-    manager->ed_timing_state = selection;
-    manager->field_0x1c = selection - 3;
-    if (selection <= 3) {
-        i32 enabled = selection == 3;
-        for (i32 i = 0; i < manager->count; ++i) {
-            manager->things[i]->profiling_0xc = enabled;
-        }
-        if (!(selection <= 1)) {
-            i32 index = 0;
-            for (eduiitem_s *entry = menu->first; entry != NULL; entry = entry->next) {
-                if (index < 3) {
-                    entry->highlighted = 0;
-                } else {
-                    entry->highlighted = enabled;
-                }
-                ++index;
-            }
-        } else {
-            eduiMenuDestroy(menu);
-            edTimingMenu = NULL;
-        }
-        NuTimeBarEnable(item->data != 0);
-    } else {
-        manager->things[selection - 4]->profiling_0xc ^= 1;
-    }
-}
 
-void ThingManager::cbEdTrackCancel(eduimenu_s *menu, eduimenu_s *) {
-    eduiMenuDestroy(menu);
-    edTimingMenu = NULL;
-}
 
-void ThingManager::edTimingEnter() {
-    edTimingMenu = eduiMenuCreate(30, 30, 250, 320, NULL, cbEdTrackCancel, "Timings");
-    if (edTimingMenu != NULL) {
-        eduiMenuAddItem(edTimingMenu, eduiItemSelCreate(0, EdAttr, 0, 1, cbEdTimingSelect, "Off"));
-        eduiMenuAddItem(edTimingMenu, eduiItemSelCreate(1, EdAttr, 0, 2, cbEdTimingSelect, "System"));
-        eduiMenuAddItem(edTimingMenu, eduiItemSelCreate(2, EdAttr, 0, 3, cbEdTimingSelect, "No Things"));
-        eduiMenuAddItem(edTimingMenu, eduiItemSelCreate(3, EdAttr, 0, 4, cbEdTimingSelect, "All Things"));
-        for (i32 i = 0; i < static_cast<ThingManager *>(theThingManager)->count; ++i) {
-            eduiMenuAddItem(
-                edTimingMenu,
-                eduiItemToggleCreate(
-                    i + 4, EdAttr, static_cast<ThingManager *>(theThingManager)->things[i]->profiling_0xc, i + 5,
-                    cbEdTimingSelect,
-                    const_cast<char *>(static_cast<ThingManager *>(theThingManager)->things[i]->GetName())));
-        }
-    }
-}
 
-void ThingManager::edTimingInit() {
-    static_cast<ThingManager *>(theThingManager)->ed_timing_state = 0;
-}
 
-i32 ThingManager::edTimingProc(float delta_time, nupad_s *pad) {
-    NuFntSet(0);
-    NuFntScale(12, 12);
-    eduiMenuProcess(edTimingMenu, delta_time, pad);
-    return edTimingMenu == NULL ? 2 : 0;
-}
 
-void ThingManager::edTimingRender() {
-    eduiMenuRender(edTimingMenu);
-}
 
 extern "C" {
     ed_module_s edTimingDesc = {NULL,
@@ -5576,18 +5285,7 @@ GameThingManager::~GameThingManager() {
     theGameThings = NULL;
 }
 
-// BaseThing::BaseThing @0x425840 zeroes the data fields after the vptr.
-BaseThing::BaseThing() {
-    this->field_0x4 = 0;
-    this->flags = 0;
-    this->profiling_0xc = 0;
-}
 
-// BaseThing defaults @0x424bf0 (dtor) and 0x425990..0x425a20 (interface
-// defaults); RemoveDependancies returns 1, the rest are no-ops. GetName holds
-// a 0 slot in the original base vtable (pure) — see basething.h.
-BaseThing::~BaseThing() {
-}
 
 i32 BaseThing::RemoveDependancies(ThingRemoveData *) {
     return 1;

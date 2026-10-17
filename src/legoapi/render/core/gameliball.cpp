@@ -1440,7 +1440,7 @@ extern "C" i32 nugraphDeletePoint(nugraph_s *graph, i32 index);
 extern "C" i32 nugraphCalcCurve(nugraph_s *graph, i32 point_count);
 extern "C" f32 nugraphGetYatX(nugraph_s *graph, f32 x, i32 mode);
 
-#include "gameapi/edtools/edtoolsall_plain_types.h"
+#include "gameapi/edtools/edtools_types.h"
 
 static void edgraInit();
 static void edgraClose();

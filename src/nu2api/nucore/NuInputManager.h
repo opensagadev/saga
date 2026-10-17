@@ -1,3 +1,5 @@
+#pragma once
+
 #include "nu2api/nucore/NuInputDevice.h"
 
 class NuInputManager {

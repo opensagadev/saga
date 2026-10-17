@@ -212,13 +212,7 @@ void EdDrawBegin(i32 material) {
     NewMtl = material;
 }
 
-void edpartPlace(i32 index, nuvec_s *position) {
-    part_emit_s *emitter = &part_emits[index];
-    emitter->position = *position;
-    emitter->rotation_2c = static_cast<i16>(edpart_emitrotz);
-    emitter->rotation_30 = static_cast<i16>(edpart_emitrotx);
-    emitter->rotation_2e = static_cast<i16>(edpart_emitroty);
-}
+void edpartPlace(i32 index, nuvec_s *position);
 
 void edppDetermineNearest(f32);
 void edppMultipleCopyPaste();
@@ -234,9 +228,7 @@ void EdTerrShadow(nuvec_s *position, float height_above, float height_below, i32
     reinterpret_cast<void (*)(nuvec_s *, f32, f32, i32)>(NewShadow)(position, height_above, height_below, terrain_mask);
 }
 
-void edpartCreate(nuvec_s *position, i32 type) {
-    AddPARTEffect(type, position);
-}
+void edpartCreate(nuvec_s *position, i32 type);
 
 i32 edppPtlPlace(i32 index, NUVEC *position);
 
@@ -312,39 +304,7 @@ void EdDrawPolyAxis(VuMtx const &transform, float size, i32 opacity) {
 
 i32 edanimFileSave(char *path);
 
-void edpartInitType(i32 index) {
-    part_types[index].lifetime = 0.0f;
-    for (i32 variant = 0; variant < 8; ++variant) {
-        part_types[index].effect_ids[variant] = -1;
-        part_types[index].effect_pages[variant] = 1;
-    }
-    part_type_s *type = &part_types[index];
-    type->variant_count = 0;
-    type->speed = 1.0f;
-    type->gravity = 0.0f;
-    type->emission_rate = 1.0f;
-    type->emission_period = 1.0f;
-    type->emission_period_random = 0.0f;
-    type->emission_pause = 0.0f;
-    type->emission_pause_random = 0.0f;
-    type->rotation[0] = 0;
-    type->rotation[1] = 0;
-    type->rotation[2] = 0;
-    type->flags = 0;
-    type->trail_effects[0] = -1;
-    type->trail_effects[1] = -1;
-    type->attached_effect = -1;
-    type->kill_effect = -1;
-    type->impact_effect = -1;
-    type->impact_part = -1;
-    type->last_used_time = 0.0f;
-    type->field_174 = -1;
-    type->scale = 1.0f;
-    for (i32 sound = 0; sound < 4; ++sound) {
-        type->sounds[sound] = -1;
-        type->sound_modes[sound] = 0;
-    }
-}
+void edpartInitType(i32 index);
 
 void edppDrawCursor();
 
@@ -435,29 +395,9 @@ void edgraClumpPlace(i32 index, NUVEC *position);
 
 void edgraDrawCursor();
 
-void edpartPtlShelve(i32 index) {
-    if (part_emits[index].instance_id != -1) {
-        if (part_emits[index].instance_id != 99999) {
-            DebFreeInstantly(&part_emits[index].instance_id);
-            part_emits[index].instance_id = 99999;
-        }
-    }
-}
+void edpartPtlShelve(i32 index);
 
-void edpartScaleType(i32 index, float scale) {
-    part_type_s *type = &part_types[index];
-    type->particle_scale *= scale;
-    type->effect_scale *= scale;
-    type->speed *= scale;
-    type->gravity *= scale;
-    type->position_random.x *= scale;
-    type->position_random.y *= scale;
-    type->position_random.z *= scale;
-    type->velocity_random.x *= scale;
-    type->velocity_random.y *= scale;
-    type->velocity_random.z *= scale;
-    type->maximum_distance *= scale;
-}
+void edpartScaleType(i32 index, float scale);
 
 i32 edppSaveEffects(char *filename, char page);
 
@@ -592,238 +532,7 @@ void edanimDrawCursor();
 extern "C" i32 part_types_used;
 extern "C" i32 part_emits_used;
 
-void edpartDrawCursor() {
-    extern i32 edpart_copy_mode, edpart_copyrotz, edpart_copyroty, edpart_rotz, edpart_roty;
-    extern i32 edpart_emitrotz, edpart_emitroty, edpart_emitrotx, edpart_refrotz, edpart_refroty;
-    extern i32 edpart_dpad_mode, edpart_nearest, edpart_readout, edpart_num_orphans;
-    extern i32 edpart_create_type, edpart_nearest_orphans, edpart_nearest_duplicates, edpart_copy_enclosed;
-    extern i8 edpart_effect_list;
-    extern f32 edpart_copy_size;
-    extern NUVEC edpart_cam_pos;
-    extern NUMTL *edpart_mtl, *edpart_boxmtl;
-    extern part_emit_s *edpart_nearest_emit;
-    extern part_typedesc_s *edpart_nearest_type;
-
-    i32 rotation_z, rotation_y;
-    if (edpart_copy_mode != 0) {
-        rotation_z = edpart_copyrotz;
-        rotation_y = edpart_copyroty;
-    } else {
-        rotation_z = edpart_rotz;
-        rotation_y = edpart_roty;
-    }
-    NUVEC vector;
-    NURND_VERTEX3D line[2];
-    auto rotate = [&]() {
-        NuVecRotateZ(&vector, &vector, rotation_z);
-        NuVecRotateY(&vector, &vector, rotation_y);
-    };
-    auto draw_axis = [&]() {
-        rotate();
-        line[0].position.x = edpart_cam_pos.x - vector.x;
-        line[0].position.y = edpart_cam_pos.y - vector.y;
-        line[0].position.z = edpart_cam_pos.z - vector.z;
-        line[0].colour = 0xffffffff;
-        line[1].position.x = edpart_cam_pos.x;
-        line[1].position.y = edpart_cam_pos.y;
-        line[1].position.z = edpart_cam_pos.z;
-        line[1].colour = 0xffffffff;
-        NuRndrLine3d(line, edpart_mtl, NULL);
-        line[0].position.x = edpart_cam_pos.x;
-        line[0].position.y = edpart_cam_pos.y;
-        line[0].position.z = edpart_cam_pos.z;
-        line[0].colour = 0xff00ff00;
-        line[1].position.x = edpart_cam_pos.x + vector.x;
-        line[1].position.y = edpart_cam_pos.y + vector.y;
-        line[1].position.z = edpart_cam_pos.z + vector.z;
-        line[1].colour = 0xff00ff00;
-        NuRndrLine3d(line, edpart_mtl, NULL);
-    };
-    vector = {0.5f, 0.0f, 0.0f};
-    draw_axis();
-    vector = {0.0f, 0.5f, 0.0f};
-    draw_axis();
-    vector = {0.0f, 0.0f, 0.5f};
-    draw_axis();
-    auto draw_mark = [&](f32 sx, f32 sy, f32 sz, f32 ex, f32 ey, f32 ez) {
-        vector.x = sx;
-        vector.y = sy;
-        vector.z = sz;
-        rotate();
-        line[0].position.x = edpart_cam_pos.x + vector.x;
-        line[0].position.y = edpart_cam_pos.y + vector.y;
-        line[0].position.z = edpart_cam_pos.z + vector.z;
-        line[0].colour = 0xff00ff00;
-        vector.x = ex;
-        vector.y = ey;
-        vector.z = ez;
-        rotate();
-        line[1].position.x = edpart_cam_pos.x + vector.x;
-        line[1].position.y = edpart_cam_pos.y + vector.y;
-        line[1].position.z = edpart_cam_pos.z + vector.z;
-        line[1].colour = 0xff00ff00;
-        NuRndrLine3d(line, edpart_mtl, NULL);
-    };
-    draw_mark(0.55f, 0.05f, 0.0f, 0.6f, -0.05f, 0.0f);
-    draw_mark(0.6f, 0.05f, 0.0f, 0.55f, -0.05f, 0.0f);
-    draw_mark(0.0f, 0.65f, -0.025f, 0.0f, 0.6f, 0.0f);
-    draw_mark(0.0f, 0.65f, 0.025f, 0.0f, 0.6f, 0.0f);
-    draw_mark(0.0f, 0.6f, 0.0f, 0.0f, 0.55f, 0.0f);
-    draw_mark(0.0f, 0.05f, 0.55f, 0.0f, 0.05f, 0.6f);
-    draw_mark(0.0f, 0.05f, 0.6f, 0.0f, -0.05f, 0.55f);
-    draw_mark(0.0f, -0.05f, 0.55f, 0.0f, -0.05f, 0.6f);
-
-    if (edpart_copy_mode != 0) {
-        edbitsDrawCube(edpart_cam_pos.x, edpart_cam_pos.y, edpart_cam_pos.z, edpart_copy_size, edpart_copy_size,
-                       edpart_copy_size, 0, 0, 0, 0, 0, 0xffffffff, edpart_mtl);
-    } else {
-        vector.x = 0.0f;
-        vector.y = 0.375f;
-        vector.z = 0.0f;
-        NuVecRotateZ(&vector, &vector, edpart_emitrotz);
-        NuVecRotateY(&vector, &vector, edpart_emitroty);
-        NuVecRotateX(&vector, &vector, edpart_emitrotx);
-        NuVecRotateZ(&vector, &vector, rotation_z);
-        NuVecRotateY(&vector, &vector, rotation_y);
-        line[0].position.x = edpart_cam_pos.x;
-        line[0].position.y = edpart_cam_pos.y;
-        line[0].position.z = edpart_cam_pos.z;
-        line[1].position.x = edpart_cam_pos.x + vector.x;
-        line[1].position.y = edpart_cam_pos.y + vector.y;
-        line[1].position.z = edpart_cam_pos.z + vector.z;
-        line[0].colour = 0xff0000ff;
-        line[1].colour = 0xff0000ff;
-        NuRndrLine3d(line, edpart_mtl, NULL);
-        vector.x = 0.0f;
-        vector.y = 0.375f;
-        vector.z = 0.125f;
-        NuVecRotateZ(&vector, &vector, edpart_emitrotz);
-        NuVecRotateY(&vector, &vector, edpart_emitroty);
-        NuVecRotateX(&vector, &vector, edpart_emitrotx);
-        NuVecRotateZ(&vector, &vector, rotation_z);
-        NuVecRotateY(&vector, &vector, rotation_y);
-        line[0].position.x = edpart_cam_pos.x + vector.x;
-        line[0].position.y = edpart_cam_pos.y + vector.y;
-        line[0].position.z = edpart_cam_pos.z + vector.z;
-        line[0].colour = 0xff0000ff;
-        NuRndrLine3d(line, edpart_mtl, NULL);
-        if (edpart_dpad_mode == 3) {
-            vector.x = 0.0f;
-            vector.y = 0.25f;
-            vector.z = 0.0f;
-            NuVecRotateZ(&vector, &vector, edpart_refrotz);
-            NuVecRotateY(&vector, &vector, edpart_refroty);
-            NuVecRotateZ(&vector, &vector, rotation_z);
-            NuVecRotateY(&vector, &vector, rotation_y);
-            line[0].position.x = edpart_cam_pos.x;
-            line[0].position.y = edpart_cam_pos.y;
-            line[0].position.z = edpart_cam_pos.z;
-            line[1].position.x = edpart_cam_pos.x + vector.x;
-            line[1].position.y = edpart_cam_pos.y + vector.y;
-            line[1].position.z = edpart_cam_pos.z + vector.z;
-            line[0].colour = 0xffff0000;
-            line[1].colour = 0xffff0000;
-            NuRndrLine3d(line, edpart_mtl, NULL);
-            if (edpart_nearest != -1) {
-                vector.x = 0.0f;
-                vector.y = *reinterpret_cast<f32 *>(&part_emits[edpart_nearest].trailing_state_words[4]);
-                vector.z = 0.0f;
-                NuVecRotateZ(&vector, &vector, edpart_refrotz);
-                NuVecRotateY(&vector, &vector, edpart_refroty);
-                NuVecRotateZ(&vector, &vector, rotation_z);
-                NuVecRotateY(&vector, &vector, rotation_y);
-                edbitsDrawCube(edpart_cam_pos.x + vector.x, edpart_cam_pos.y + vector.y, edpart_cam_pos.z + vector.z,
-                               0.25f, 0.0f, 0.25f, edpart_refrotz, edpart_refroty, 0, rotation_z, rotation_y,
-                               0xffff0000, edpart_mtl);
-            }
-        }
-    }
-
-    NuRndrRect2di(0x1720, 0x9b0, 0xf00, 0x410, 0x80808080, edpart_boxmtl);
-    NuRndrRect2di(0x1710, 0x8f0, 0xf20, 0xc0, 0x80000000, edpart_boxmtl);
-    NuRndrLine2di(0x1710, 0x9b0, 0x1710, 0xdc8, 0x80000000, edpart_boxmtl);
-    NuRndrLine2di(0x2630, 0x9b0, 0x2630, 0xdc8, 0x80000000, edpart_boxmtl);
-    NuRndrLine2di(0x1710, 0xdc8, 0x2630, 0xdc8, 0x80000000, edpart_boxmtl);
-    NuQFntPushPrintMode(2);
-    NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
-    NuQFntSet(system_qfont);
-    NuQFntSetColour(system_qfont, 0x80808080);
-    NuQFntPrintEx(system_qfont, 0x17c0, 0x988, 0x10, "Info Box");
-    if (edpart_readout == 0) {
-        if (edpart_num_orphans < 1) {
-            NuQFntSetColour(system_qfont, 0x80808080);
-            NuQFntPrintEx(system_qfont, 0x17c0, 0x988, 0x10, "Info Box");
-        } else {
-            NuQFntSetColour(system_qfont, 0x80202080);
-            NuQFntPrintEx(system_qfont, 0x17c0, 0x988, 0x10, "WARNING: %d Orphans", edpart_num_orphans);
-        }
-    } else if (edpart_readout == 1) {
-        NuQFntSetColour(system_qfont, 0x80808080);
-        NuQFntPrintEx(system_qfont, 0x17c0, 0x988, 0x10, "Co-ordinates");
-    }
-    NuQFntSetColour(system_qfont, 0x80000000);
-    if (edpart_readout == 0) {
-        if (edpart_copy_mode == 0) {
-            if (edpart_create_type == -1)
-                NuQFntPrintEx(system_qfont, 0x17c0, 0xa50, 0x10, "Current Type: <none>");
-            else
-                NuQFntPrintEx(system_qfont, 0x17c0, 0xa50, 0x10, "Current Type: %s",
-                              part_types[edpart_create_type].name);
-            if (edpart_create_type == -1)
-                NuQFntPrintEx(system_qfont, 0x17c0, 0xaf0, 0x10, "Current List: <none>");
-            else if (edpart_effect_list == 1)
-                NuQFntPrintEx(system_qfont, 0x17c0, 0xaf0, 0x10, "Current List: Level");
-            else if (edpart_effect_list == 0)
-                NuQFntPrintEx(system_qfont, 0x17c0, 0xaf0, 0x10, "Current List: General");
-        }
-        if (edpart_copy_mode == 0) {
-            if (edpart_nearest == -1) {
-                NuQFntPrintEx(system_qfont, 0x17c0, 0xc30, 0x10, "Highlight: <none>");
-            } else {
-                edbitsDrawCube(edpart_cam_pos.x, edpart_cam_pos.y, edpart_cam_pos.z,
-                               edpart_nearest_type->position_random.x, edpart_nearest_type->position_random.y,
-                               edpart_nearest_type->position_random.z, edpart_emitrotz, edpart_emitroty,
-                               edpart_emitrotx, rotation_z, rotation_y, 0xff0000ff, edpart_mtl);
-                NuQFntSet(system_qfont);
-                NuQFntSetColour(system_qfont, 0x80000000);
-                NuQFntPrintEx(system_qfont, 0x17c0, 0xc30, 0x10, "Highlight: %s", edpart_nearest_type->name);
-                if (edpart_nearest_orphans == 0 && edpart_nearest_duplicates == 0) {
-                    NuQFntPrintEx(system_qfont, 0x1860, 0xcd0, 0x10, "Instances: %d of %d",
-                                  edpart_nearest_type->variant_count, 8);
-                } else {
-                    NuQFntSetColour(system_qfont, 0x80000080);
-                    NuQFntPrintEx(system_qfont, 0x1860, 0xcd0, 0x10, "Instances: %d of %d (Or = %d, Du = %d)",
-                                  edpart_nearest_type->variant_count, 8, edpart_nearest_orphans,
-                                  edpart_nearest_duplicates);
-                    NuQFntSetColour(system_qfont, 0x80000000);
-                }
-            }
-        } else {
-            if (edpart_copy_enclosed > 8)
-                NuQFntSetColour(system_qfont, 0x80000080);
-            NuQFntPrintEx(system_qfont, 0x17c0, 0xc30, 0x10, "Enclosed: %d", edpart_copy_enclosed);
-            NuQFntSetColour(system_qfont, 0x80000000);
-        }
-        NuQFntPrintEx(system_qfont, 0x17c0, 0xd70, 0x10, "Types: %d/%d; Emits: %d/%d", part_types_used, 128,
-                      part_emits_used, 40);
-    } else if (edpart_readout == 1) {
-        if (edpart_nearest == -1) {
-            NuQFntPrintEx(system_qfont, 0x17c0, 0xa50, 0x10, "Highlight: <none>");
-        } else {
-            NuQFntPrintEx(system_qfont, 0x17c0, 0xa50, 0x10, "Highlight: %s", edpart_nearest_type->name);
-            NuQFntPrintEx(system_qfont, 0x17c0, 0xaf0, 0x10, "XYZ: %0.2f %0.2f %0.2f", edpart_nearest_emit->position.x,
-                          edpart_nearest_emit->position.y, edpart_nearest_emit->position.z);
-            NuQFntPrintEx(system_qfont, 0x17c0, 0xb90, 0x10, "RotZ: %d",
-                          reinterpret_cast<const i16 *>(&edpart_nearest_emit->trailing_state_words[0])[0]);
-            NuQFntPrintEx(system_qfont, 0x17c0, 0xc30, 0x10, "RotY: %d",
-                          reinterpret_cast<const i16 *>(&edpart_nearest_emit->trailing_state_words[0])[1]);
-            NuQFntPrintEx(system_qfont, 0x17c0, 0xcd0, 0x10, "EmitRotZ: %d", edpart_nearest_emit->rotation_2c);
-            NuQFntPrintEx(system_qfont, 0x17c0, 0xd70, 0x10, "EmitRotY: %d", edpart_nearest_emit->rotation_2e);
-        }
-    }
-    NuQFntPopPrintMode();
-    NuQFntPopCoordinateSystem();
-}
+void edpartDrawCursor();
 
 i32 edgraClumpCreate(NUVEC *position);
 
@@ -870,163 +579,7 @@ void EdDrawLineSegment(VuVec const &a, VuVec const &b, i32 colour) {
 
 i32 edanimParamCreate(i32 instance_id);
 
-i32 edpartSaveEffects(char *filename, char page) {
-    char empty_name[16] = {};
-    i32 type_count = 0;
-    for (i32 index = 0; index < 128; ++index) {
-        if (part_types[index].name[0] != '\0' && part_types[index].field_b3 == static_cast<u8>(page))
-            ++type_count;
-    }
-
-    EdFileSetMedia(1);
-    if (EdFileOpen(filename, NUFILE_WRITE) == 0)
-        return 0;
-    EdFileSetReadWrongEndianess(1);
-    EdFileWriteInt(16);
-    EdFileWriteInt(type_count);
-
-    static char null_instance_name[16] = "NULL instance";
-    for (i32 index = 0; index < 128; ++index) {
-        if (part_types[index].name[0] == '\0' || part_types[index].field_b3 != static_cast<u8>(page))
-            continue;
-
-        EdFileWrite(part_types[index].name, 16);
-        EdFileWriteChar(part_types[index].effect_pages[0]);
-        EdFileWriteChar(part_types[index].effect_pages[1]);
-        EdFileWriteChar(part_types[index].effect_pages[2]);
-        EdFileWriteChar(part_types[index].effect_pages[3]);
-        EdFileWriteChar(part_types[index].effect_pages[4]);
-        EdFileWriteChar(part_types[index].effect_pages[5]);
-        EdFileWriteChar(part_types[index].effect_pages[6]);
-        EdFileWriteChar(part_types[index].effect_pages[7]);
-#define WRITE_PART_OBJECT_NAME(variant)                                                                                \
-    do {                                                                                                               \
-        i16 effect_id = part_types[index].effect_ids[variant];                                                         \
-        if (effect_id == -1)                                                                                           \
-            EdFileWrite(empty_name, 16);                                                                               \
-        else if (effect_id == 9999)                                                                                    \
-            EdFileWrite(null_instance_name, 16);                                                                       \
-        else if (effect_id == 9998)                                                                                    \
-            EdFileWrite(part_types[index].object_names[variant], 16);                                                  \
-        else if (part_types[index].effect_pages[variant] == 0) {                                                       \
-            nuhspecial_s special;                                                                                      \
-            NuGScnGetSpecial(&special, edbits_base_scene, effect_id);                                                  \
-            EdFileWrite(NuSpecialGetName(&special), 16);                                                               \
-        } else if (part_types[index].effect_pages[variant] == 1) {                                                     \
-            nuhspecial_s special;                                                                                      \
-            NuGScnGetSpecial(&special, edbits_things_scene, effect_id);                                                \
-            EdFileWrite(NuSpecialGetName(&special), 16);                                                               \
-        } else                                                                                                         \
-            EdFileWrite(empty_name, 16);                                                                               \
-    } while (0)
-        WRITE_PART_OBJECT_NAME(0);
-        WRITE_PART_OBJECT_NAME(1);
-        WRITE_PART_OBJECT_NAME(2);
-        WRITE_PART_OBJECT_NAME(3);
-        WRITE_PART_OBJECT_NAME(4);
-        WRITE_PART_OBJECT_NAME(5);
-        WRITE_PART_OBJECT_NAME(6);
-        WRITE_PART_OBJECT_NAME(7);
-        EdFileWriteChar(part_types[index].variant_mode);
-        EdFileWriteFloat(part_types[index].particle_scale);
-        EdFileWriteFloat(part_types[index].effect_scale);
-        EdFileWriteFloat(part_types[index].lifetime);
-        EdFileWriteFloat(part_types[index].lifetime_random);
-        EdFileWriteFloat(part_types[index].speed);
-        EdFileWriteFloat(part_types[index].gravity);
-        EdFileWriteFloat(part_types[index].emission_rate);
-        EdFileWriteFloat(part_types[index].bounce);
-        EdFileWriteNuVec(&part_types[index].position_random);
-        EdFileWriteNuVec(&part_types[index].velocity_random);
-        EdFileWriteFloat(part_types[index].emission_period);
-        EdFileWriteFloat(part_types[index].emission_period_random);
-        EdFileWriteFloat(part_types[index].emission_pause);
-        EdFileWriteFloat(part_types[index].emission_pause_random);
-        EdFileWriteInt(part_types[index].rotation[0]);
-        EdFileWriteInt(part_types[index].rotation[1]);
-        EdFileWriteInt(part_types[index].rotation[2]);
-        EdFileWriteInt(part_types[index].rotation_random[0]);
-        EdFileWriteInt(part_types[index].rotation_random[1]);
-        EdFileWriteInt(part_types[index].rotation_random[2]);
-        EdFileWriteUnsignedInt(part_types[index].flags);
-
-        if (part_types[index].trail_effects[0] != -1)
-            EdFileWrite(debtab[part_types[index].trail_effects[0]]->name, 16);
-        else
-            EdFileWrite(empty_name, 16);
-        if (part_types[index].trail_effects[1] != -1)
-            EdFileWrite(debtab[part_types[index].trail_effects[1]]->name, 16);
-        else
-            EdFileWrite(empty_name, 16);
-        if (part_types[index].attached_effect != -1)
-            EdFileWrite(debtab[part_types[index].attached_effect]->name, 16);
-        else
-            EdFileWrite(empty_name, 16);
-        EdFileWriteFloat(part_types[index].trail_rates[0]);
-        EdFileWriteFloat(part_types[index].trail_rates[1]);
-        if (part_types[index].kill_effect != -1)
-            EdFileWrite(debtab[part_types[index].kill_effect]->name, 16);
-        else
-            EdFileWrite(empty_name, 16);
-        if (part_types[index].impact_effect != -1)
-            EdFileWrite(debtab[part_types[index].impact_effect]->name, 16);
-        else
-            EdFileWrite(empty_name, 16);
-        if (part_types[index].impact_part != -1)
-            EdFileWrite(part_types[part_types[index].impact_part].name, 16);
-        else
-            EdFileWrite(empty_name, 16);
-        if (part_types[index].sounds[0] != -1)
-            EdFileWrite(const_cast<char *>(g_soundInfo[part_types[index].sounds[0]].sfx_name), 16);
-        else
-            EdFileWrite(empty_name, 16);
-        if (part_types[index].sounds[1] != -1)
-            EdFileWrite(const_cast<char *>(g_soundInfo[part_types[index].sounds[1]].sfx_name), 16);
-        else
-            EdFileWrite(empty_name, 16);
-        if (part_types[index].sounds[2] != -1)
-            EdFileWrite(const_cast<char *>(g_soundInfo[part_types[index].sounds[2]].sfx_name), 16);
-        else
-            EdFileWrite(empty_name, 16);
-        if (part_types[index].sounds[3] != -1)
-            EdFileWrite(const_cast<char *>(g_soundInfo[part_types[index].sounds[3]].sfx_name), 16);
-        else
-            EdFileWrite(empty_name, 16);
-        EdFileWriteChar(part_types[index].sound_modes[0]);
-        EdFileWriteChar(part_types[index].sound_modes[1]);
-        EdFileWriteChar(part_types[index].sound_modes[2]);
-        EdFileWriteChar(part_types[index].sound_modes[3]);
-        EdFileWriteFloat(part_types[index].maximum_distance);
-        EdFileWriteFloat(part_types[index].field_160);
-        EdFileWriteFloat(part_types[index].field_164);
-        EdFileWriteFloat(part_types[index].field_168);
-    }
-
-    if (page == 1) {
-        i32 emitter_count = 0;
-        for (i32 index = 0; index < 40; ++index) {
-            if (part_emits[index].effect_id != -1 && part_emits[index].shots_remaining == 0)
-                ++emitter_count;
-        }
-        EdFileWriteInt(emitter_count);
-        for (i32 index = 0; index < 40; ++index) {
-            if (part_emits[index].effect_id == -1)
-                continue;
-            EdFileWriteNuVec(&part_emits[index].position);
-            EdFileWrite(part_emits[index].name, 16);
-            EdFileWriteShort(part_emits[index].rotation_30);
-            EdFileWriteShort(part_emits[index].rotation_2e);
-            EdFileWriteShort(part_emits[index].rotation_2c);
-            EdFileWriteShort(part_emits[index].field_44);
-            EdFileWriteShort(part_emits[index].field_46);
-        }
-    } else {
-        EdFileWriteInt(0);
-    }
-    EdFileSetReadWrongEndianess(0);
-    EdFileClose();
-    return 1;
-}
+i32 edpartSaveEffects(char *filename, char page);
 
 void edppPtlChangeType(i32 index, i32 effect_index);
 
@@ -1134,11 +687,7 @@ void edgraCalculatePage(char page, i32 calculate_vectors);
 
 void edgraInstancePlace(i32 index, NUVEC *position);
 
-i32 edpartLookupObject(char *name) {
-    if (edbits_base_scene != NULL)
-        return edpartLookupObjectInScene(name, edbits_base_scene);
-    return -1;
-}
+i32 edpartLookupObject(char *name);
 
 i32 edSpline_FindAllBeg(NUGSCN *scene, char *prefix, NUGSPLINE **results, i32 capacity) {
     i32 count = 0;
@@ -1293,15 +842,7 @@ void edanimStartAllPages();
 
 void edgraInstanceCreate(NUVEC *position);
 
-i32 edpartPtlChangeType(i32 index, i32 type) {
-    if (part_emits[index].effect_id != type) {
-        edpartDestroy(index);
-        AddDebrisEffect(&part_emits[index].instance_id, type, part_emits[index].position.x,
-                        part_emits[index].position.y, part_emits[index].position.z);
-        part_emits[index].effect_id = type;
-    }
-    return index;
-}
+i32 edpartPtlChangeType(i32 index, i32 type);
 
 void edppDestroyAllPages();
 
@@ -1319,12 +860,7 @@ void edbriDetermineNearest(float distance);
 
 void edgraSortVectorBuffer(i32 index);
 
-void edpartDestroyAllPages() {
-    for (i32 i = 0; i < 8; i++) {
-        if (part_page_used[i])
-            edpartClearPage(i);
-    }
-}
+void edpartDestroyAllPages();
 
 void edppMultipleCopyClear();
 
@@ -1332,70 +868,11 @@ void edppMultipleCopyPaste();
 
 void edppStartSingleEffect(i32 index);
 
-void edpartHighlightNearest() {
-    NUVEC delta;
-    extern i32 edpart_copy_mode, edpart_nearest, edpart_copy_enclosed;
-    extern i32 edpart_copy_source_count, edpart_copy_source[8], edpart_copyroty;
-    extern f32 edpart_copy_size;
-    extern NUVEC edpart_cam_pos, edpart_copy_source_vec;
-    extern NUMTL *edpart_mtl;
-    if (edpart_copy_mode != 0) {
-        edpart_copy_enclosed = 0;
-        for (i32 index = 0; index < 512; ++index) {
-            if (part_emits[index].instance_id == 99999)
-                continue;
-            if (part_emits[index].instance_id == -1)
-                continue;
+void edpartHighlightNearest();
 
-            NuVecSub(&delta, &edpart_cam_pos, &part_emits[index].position);
-            if (edpart_copy_size < __builtin_fabsf(delta.x) || edpart_copy_size < __builtin_fabsf(delta.y) ||
-                edpart_copy_size < __builtin_fabsf(delta.z))
-                continue;
-            ++edpart_copy_enclosed;
-            edbitsDrawDiagonalCross(part_emits[index].position.x, part_emits[index].position.y,
-                                    part_emits[index].position.z, 0.05f, 0xffffffff, edpart_mtl);
-        }
-        for (i32 index = 0; index < edpart_copy_source_count; ++index) {
-            NUVEC offset, destination;
-            NuVecSub(&offset, &part_emits[edpart_copy_source[index]].position, &edpart_copy_source_vec);
-            NuVecRotateY(&offset, &offset, edpart_copyroty);
-            NuVecAdd(&destination, &edpart_cam_pos, &offset);
-            edbitsDrawDiagonalCross(destination.x, destination.y, destination.z, 0.05f, 0xff808080, edpart_mtl);
-        }
-    } else if (edpart_nearest != -1) {
-        const NUVEC &position = part_emits[edpart_nearest].position;
-        edbitsDrawCube(position.x, position.y, position.z, 0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0, 0xffffffff, edpart_mtl);
-    }
-}
+void edpartMultipleCopyCopy();
 
-void edpartMultipleCopyCopy() {
-    extern i32 edpart_copy_source_count, edpart_copy_source[8], edpart_copyroty;
-    extern f32 edpart_copy_size;
-    extern NUVEC edpart_cam_pos, edpart_copy_source_vec;
-
-    edpart_copy_source_count = 0;
-    for (i32 index = 0; index < 512; ++index) {
-        if (part_emits[index].instance_id == -1 || part_emits[index].instance_id == 99999)
-            continue;
-
-        NUVEC delta;
-        NuVecSub(&delta, &edpart_cam_pos, &part_emits[index].position);
-        if (__builtin_fabsf(delta.x) <= edpart_copy_size && __builtin_fabsf(delta.y) <= edpart_copy_size &&
-            __builtin_fabsf(delta.z) <= edpart_copy_size) {
-            edpart_copy_source[edpart_copy_source_count++] = index;
-            if (edpart_copy_source_count == 8)
-                break;
-        }
-    }
-    edpart_copy_source_vec = edpart_cam_pos;
-    edpart_copyroty = 0;
-}
-
-void edpartMultipleCopyClear() {
-    extern i32 edpart_copy_source_count, edpart_copyroty;
-    edpart_copy_source_count = 0;
-    edpart_copyroty = 0;
-}
+void edpartMultipleCopyClear();
 
 float edanimPlayerAnimDistance(i32 parameter_index);
 
@@ -5982,7 +5459,7 @@ extern "C" i32 nugraphDeletePoint(nugraph_s *graph, i32 index);
 extern "C" i32 nugraphCalcCurve(nugraph_s *graph, i32 point_count);
 extern "C" f32 nugraphGetYatX(nugraph_s *graph, f32 x, i32 mode);
 
-#include "gameapi/edtools/edtoolsall_plain_types.h"
+#include "gameapi/edtools/edtools_types.h"
 
 static void edgraInit();
 static void edgraClose();
