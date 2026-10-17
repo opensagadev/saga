@@ -442,15 +442,9 @@ i32 NuAnimSetUseQuatsFlag(i32 enabled);
     // Bridge / file / heap / memory
     // ---------------------------------------------------------------------------
 
-    void *NuMemAllocFn(u32 size) {
-        return NU_ALLOC(size, 4, 1, "", 0);
-    }
-    void NuMemFreeFn(void *ptr) {
-        NU_FREE(ptr);
-    }
-    void *NuMemReAllocFn(void *ptr, u32 size) {
-        return NuMemoryGet()->GetThreadMem()->_BlockReAlloc(ptr, size, 4, 1, "", 0);
-    }
+void *NuMemAllocFn(u32 size);
+void NuMemFreeFn(void *ptr);
+void *NuMemReAllocFn(void *ptr, u32 size);
 
     static void *dirnames[16];
     static i32 numdirs;

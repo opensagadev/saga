@@ -27,12 +27,7 @@ u32 HashString(unsigned char *string);
 
 i32 i_temp_xrot;
 
-i32 getNumDigits(i32 value) {
-    i32 digits = 1;
-    for (i32 threshold = 10; value >= threshold; threshold *= 10)
-        digits++;
-    return digits;
-}
+i32 getNumDigits(i32 value);
 
 f32 XZLinesClosest(nuvec_s *a, nuvec_s *b, nuvec_s *c, nuvec_s *d, f32 *first, f32 *second);
 

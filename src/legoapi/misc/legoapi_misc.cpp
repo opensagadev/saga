@@ -56,20 +56,4 @@ void CatI64ToX(char *output, i64 value) {
 
 void DieRumble(GameObject_s *object);
 
-i32 charToInt(char const *text) {
-    const i32 length = static_cast<i32>(strlen(text));
-    u32 sign = 1;
-    i32 first = 0;
-    if (length > 0 && text[0] == '-') {
-        first = 1;
-        sign = static_cast<u32>(-1);
-    }
-    // The original accepts signed non-digit bytes and wraps at 32 bits.
-    u32 result = 0;
-    u32 place = 1;
-    for (i32 index = static_cast<i32>(static_cast<u32>(length) - 1u); index >= first; --index) {
-        result += static_cast<u32>(static_cast<i8>(text[index]) - '0') * place;
-        place *= 10;
-    }
-    return static_cast<i32>(result * sign);
-}
+i32 charToInt(char const *text);

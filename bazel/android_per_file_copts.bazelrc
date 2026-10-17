@@ -51,7 +51,7 @@ build:target --per_file_copt=^src/gameapi/ai/aisys/gameaiscript\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/objects/grabber\.cpp$@-O3
 # The click-to-start tracker is an optimized, frameless leaf in the original.
 build:target --per_file_copt=^src/legoapi/menus/core/panel\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/menus/core/text\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/lib/text\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/menus/core/gamemessages\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/menus/core/gamemessages\.cpp$@-ftree-vectorize
 build:target --per_file_copt=^src/legoapi/menus/core/gamehint\.cpp$@-O3
@@ -261,7 +261,6 @@ build:target --per_file_copt=^src/nu2api/nu3d/android/nuobject_android\.c$@-O0
 build:target --per_file_copt=^src/nu2api/nu3d/android/nurndr_android\.c$@-O0
 build:target --per_file_copt=^src/nu2api/nu3d/android/nurndr\.c$@-O0
 build:target --per_file_copt=^src/nu2api/nu3d/glutils\.c$@-O0
-build:target --per_file_copt=^src/nu2api/nucore/nuvideo_dump\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/fx/particles\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nu3d/NuRenderDevice\.cpp$@-O2
 build:target --per_file_copt=^src/nu2api/nu3d/android/NuRenderDevice_gles2\.cpp$@-O3
