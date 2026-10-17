@@ -49,7 +49,7 @@ DECOMP_ASSERT(sizeof(TROOPERCANNON_s) == 0x30, "Trooper cannon state size");
 DECOMP_ASSERT(offsetof(TROOPERCANNON_s, character_name) == 0x0c, "Trooper cannon name offset");
 DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon rebuilding offset");
 
-TROOPERCANNON_s troopercannons[4];
+extern TROOPERCANNON_s troopercannons[4];
 
 i32 droid_hack;
 static i32 trooperteamcount;
@@ -505,114 +505,13 @@ void SetBobaRocketTarget(MechObjectInterface *target);
 
 bool FireBountyHunterRocket(GameObject_s *object);
 
-static __used__ void KilledTrooperCannon(GameObject_s *object) {
-    if (netclient != 0)
-        return;
+static __used__ void KilledTrooperCannon(GameObject_s *object);
 
-    for (i32 i = 0; i < 4; ++i) {
-        if (troopercannons[i].object == object) {
-            TROOPERCANNON_s &cannon = troopercannons[i];
-            DeactivateCharacter(cannon.character_name);
-            GizBuildIt_SetToStart(cannon.buildit, 0, 0);
-            GIZMO *gizmo = GizmoFindByData(WORLD->gizmo_sys, gizbuildit_gizmotype_id, cannon.buildit);
-            GizmoActivate(WORLD->gizmo_sys, gizmo, 1, 1);
-            GizBuildit_SetVisibility(cannon.buildit, 1);
-            cannon.rebuilding = 1;
-            WORLD->level_progress->destroyed_trooper_cannon_mask |= 1u << i;
-            return;
-        }
-    }
-}
+void InitTrooperCannons(WORLDINFO_s *);
 
-void InitTrooperCannons(WORLDINFO_s *) {
-    memset(troopercannons, 0, sizeof(troopercannons));
-}
+void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id);
 
-void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id) {
-    if (troopercannons_beenReset != 0) {
-        if (netclient == 0 || troopercannons[0].object != NULL)
-            return;
-    }
-
-    i32 cannon_index = 0;
-    char name[32];
-    for (i32 number = 1; number < 5; ++number) {
-        TROOPERCANNON_s &cannon = troopercannons[cannon_index];
-        cannon = TROOPERCANNON_s();
-
-        sprintf(name, "trooper_cannon%d", number);
-        cannon.buildit = GizBuildIt_Find(world, name);
-        if (cannon.buildit != NULL) {
-            sprintf(name, "troopercannon_%d", number);
-            cannon.object = GetNamedGameObject(world->ai_sys, name);
-            if (cannon.object != NULL)
-                NuStrCpy(cannon.character_name, name);
-        }
-
-        sprintf(name, "BASE%d", number);
-        cannon.base = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, name);
-
-        if (netclient != 0) {
-            if (cannon.object != NULL)
-                ++cannon_index;
-            continue;
-        }
-
-        if (cannon.buildit != NULL && cannon.object != NULL) {
-            if ((world->level_progress->destroyed_trooper_cannon_mask & (1u << cannon_index)) != 0) {
-                GizBuildIt_SetToStart(cannon.buildit, 0, 0);
-                cannon.rebuilding = 1;
-            } else {
-                if (cannon.base != NULL) {
-                    GizmoSetVisibility(world->gizmo_sys, cannon.base, 1, 1);
-                    GizObstacle_PlayBackwards(static_cast<GIZOBSTACLE_s *>(cannon.base->object));
-                }
-                GizBuildIt_Finish(cannon.buildit);
-                GizBuildit_SetVisibility(cannon.buildit, 0);
-                cannon.rebuilding = 0;
-                ActivateCharacter(name, NULL, 0);
-                AddGameDebris(world->debris_sys, 0x5c, &cannon.object->apiobj.collision_position);
-                GameObject_s *trooper = AddDynamicCreature(trooper_id, &cannon.object->apiobj.collision_position,
-                                                           cannon.object->apiobj.field_0x276, "CannonTrooper",
-                                                           &cannon.object->ai.path_info, NULL, 0, NULL, NULL, 0, 0);
-                if (trooper != NULL)
-                    TakeOverGameObject(trooper, cannon.object, 0, 1);
-            }
-        }
-        ++cannon_index;
-    }
-    troopercannons_beenReset = 1;
-}
-
-void UpdateTrooperCannons(WORLDINFO_s *) {
-    for (i32 i = 0; i < 4; ++i) {
-        TROOPERCANNON_s &cannon = troopercannons[i];
-
-        if (cannon.buildit != NULL && netclient == 0) {
-            if (cannon.object != NULL) {
-                if (GizBuildIt_AtEnd(cannon.buildit) && cannon.rebuilding != 0) {
-                    ActivateCharacter(cannon.character_name, NULL, 0);
-                    GizBuildit_SetVisibility(cannon.buildit, 0);
-                    cannon.rebuilding = 0;
-                    WORLD->level_progress->destroyed_trooper_cannon_mask &= ~(1u << i);
-                }
-            } else if (GizBuildIt_AtEnd(cannon.buildit)) {
-                GizBuildIt_KillParts(cannon.buildit);
-                GizBuildIt_SetToStart(cannon.buildit, 0, 0);
-                GizBuildit_SetVisibility(cannon.buildit, 0);
-            }
-        }
-
-        if (cannon.object == NULL || netclient != 0)
-            break;
-
-        GameObject_s *callback_object = cannon.object->field_0xcc0;
-        if (callback_object == NULL)
-            callback_object = cannon.object;
-        if (callback_object->field_0xeb4 == NULL)
-            callback_object->field_0xeb4 = KilledTrooperCannon;
-    }
-}
+void UpdateTrooperCannons(WORLDINFO_s *);
 
 static inline i32 MiniTrooperRandomIndex(minitrooperteam_s *team) {
     return qrand() / (0xffff / team->trooper_count + 1);

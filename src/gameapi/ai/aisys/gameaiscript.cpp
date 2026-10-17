@@ -818,6 +818,13 @@ extern "C" {
     extern i16 id_BATTLEDROIDCOMMANDER, id_CLONEEP3, id_CLONEEP3SAND;
 }
 
+i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
+                          i32 first_time, float);
+i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
+                             i32 param_count, i32 first_time, float);
+i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
+                              i32 first_time, float);
+
 extern "C" {
     // Keep this registry in the exact order used by the shipped script parser.
     AIACTIONDEF lego_aiactiondefs[] = {
@@ -968,9 +975,9 @@ extern "C" {
         {"PullLever", Action_PullLever, 0, 0, 0},
         {"UsePanel", Action_UsePanel, 0, 0, 0},
         {"UseTechno", Action_UseTechno, 0, 0, 0},
-        {"ReleaseLocator", NULL, 0, 0, 0},
-        {"AssignLocator", NULL, 0, 0, 0},
-        {"GetLocatorFromSet", NULL, 0, 0, 0},
+        {"ReleaseLocator", Action_ReleaseLocator, 0, 0, 0},
+        {"AssignLocator", Action_AssignLocatorInSet, 0, 0, 0},
+        {"GetLocatorFromSet", Action_GetLocatorFromSet, 0, 0, 0},
         {"MoveAwayFromLastAttacker", NULL, 0, 0, 0},
         {"ProbeDroid", Action_ProbeDroid, 0, 0, 0},
         {"AlertCreatures", Action_AlertCreatures, 0, 0, 0},

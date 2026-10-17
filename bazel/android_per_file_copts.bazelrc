@@ -195,7 +195,6 @@ build:target --per_file_copt=^src/legoapi/world/levels/hub\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/episode\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/episode\.cpp$@-fno-ipa-sra
 build:target --per_file_copt=^src/legoapi/world/levels/episodes\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_gizactions\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/gizbuildit\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/gizbuildit\.cpp$@-fno-ipa-sra
 # Turret lookup and hint traversal use the same optimized leaf/loop forms as

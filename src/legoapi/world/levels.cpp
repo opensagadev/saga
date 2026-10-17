@@ -18,25 +18,7 @@ i32 GetTableLocator(void) {
 AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
                                    f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y);
 
-AILOCATOR_s *getSpawnLocator(float clip_radius, char *name) {
-    AILOCATORSET *locator_set = AIPathFindLocatorSet(WORLD->ai_sys, name);
-    if (locator_set == NULL) {
-        return NULL;
-    }
-
-    AILocatorSet_CheckLocatorsStillAssigned(WORLD->ai_sys, locator_set);
-    AILOCATOR *locators[32];
-    i32 i = 0;
-    i32 locator_count = 0;
-    for (; i < locator_set->locator_count && locator_count < 32; ++i) {
-        if (locator_set->assigned[i] == 0xff) {
-            locators[locator_count++] = &WORLD->ai_sys->locators[locator_set->locator_entries[i]];
-        }
-    }
-
-    return LocalGetRandomLocator(locators, locator_count, clip_radius, &player->apiobj.collision_position,
-                                 1000000000.0f, 0, 1000000000.0f, 1000000000.0f);
-}
+AILOCATOR_s *getSpawnLocator(float clip_radius, char *name);
 
 void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32) {
     if (no_more_loads == 0) {

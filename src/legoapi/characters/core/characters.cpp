@@ -1000,15 +1000,7 @@ void CollectCharactersOff_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, 
 
 extern "C" i32 dagobah_training;
 
-i32 TakeOverYodaSeekDistanceHack(GameObject_s *object, GameObject_s *luke, nuvec_s *offset) {
-    if ((object->field_0xf00 & 2) == 0 || dagobah_training == 0 || object->field_0xcc0 != NULL || luke == NULL ||
-        (luke->apiobj.flags_low & 0x80) == 0)
-        return 0;
-    if (!(NuVecDistSqr(&object->apiobj.position, &luke->apiobj.position, offset) < 0.7f * 0.7f))
-        return 0;
-    NuVecRotateY(offset, offset, -static_cast<i32>(luke->apiobj.field_0x276));
-    return offset->z > 0.0f;
-}
+i32 TakeOverYodaSeekDistanceHack(GameObject_s *object, GameObject_s *luke, nuvec_s *offset);
 
 void SetProtocolDroidInterfaceAction(GameObject_s *object);
 

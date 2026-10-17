@@ -1392,22 +1392,7 @@ extern nuhspecial_s green_light;
 extern nuhspecial_s painttargetcolour[3];
 extern nuhspecial_s paintlights[3];
 
-void DrawPaintLights() {
-    for (i32 i = 0; i < static_cast<const i8 *>(factoryb_netpacket)[1]; ++i) {
-        nuhspecial_s *light = &paintlights[i];
-        if (NuSpecialExistsFn(light)) {
-            NuSpecialDrawAt(&green_light, NuSpecialGetDrawMtx(light));
-        }
-    }
-    for (i32 slot = 0; slot < 3; ++slot) {
-        const u8 colour = static_cast<const u8 *>(factoryb_netpacket)[3];
-        if (colour == slot + 3 || colour == 0) {
-            NuSpecialSetVisibility(&painttargetcolour[slot], 1);
-        } else {
-            NuSpecialSetVisibility(&painttargetcolour[slot], 0);
-        }
-    }
-}
+void DrawPaintLights();
 
 void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha) {
     const f32 x = ICONX;

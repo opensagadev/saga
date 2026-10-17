@@ -442,10 +442,7 @@ void MiniKit_GameMsg_End(GAMEMESSAGE_s *message) {
     GameCam_Judder(GameCam, -0.2f, 0, NULL);
 }
 
-void ResetMinikitCounter() {
-    minikitCounter_C = 0;
-    minikitCounter_A = 0;
-}
+void ResetMinikitCounter();
 
 extern i16 id_SLAVE1, tALLMINIKITSBUILT;
 extern i32 STATUS_R, STATUS_G, STATUS_B;
@@ -644,40 +641,7 @@ void SetEffectVisibility(char *, i32);
 
 void EffectOffProgress_Reset(LEVEL_PROGRESS_s *progress);
 
-static inline void IncrementMinikitCounterFor(WORLDINFO_s *world, NUVEC *average, i32 gizmo_index, u8 *counter,
-                                              f32 camera_distance, u16 camera_pitch, u16 camera_yaw) {
-    GIZMO *gizmo = LevGizmo[gizmo_index];
-    if (gizmo == NULL || gizmo->object == NULL) {
-        return;
-    }
-    GIZMOPICKUP_s *pickup = static_cast<GIZMOPICKUP_s *>(gizmo->object);
-    if ((pickup->state_flags & (GIZMOPICKUP_STATE_COLLECTED | GIZMOPICKUP_STATE_ALTERNATE_TYPE)) != 0 ||
-        *counter >= 10) {
-        return;
-    }
-    ++*counter;
-    if (*counter == 10) {
-        NUVEC camera = {0.0f, 0.0f, camera_distance};
-        NuVecRotateX(&camera, &camera, camera_pitch);
-        NuVecRotateY(&camera, &camera, camera_yaw);
-        NuVecAdd(&camera, &camera, &pickup->position);
-        GameCameraMakeMiniCut2(&camera, &pickup->position, 0, 0.0f, 4.0f, 0.0f, 0.0f, 0, 0, 0);
-        GizmoActivate(world->gizmo_sys, LevGizmo[gizmo_index], 1, 1);
-    }
-    // The reference's completion branch passes an uninitialized temporary.
-    // Keep the message at the same valid averaged position as earlier counts.
-    AddGameMsgCount(average, *counter, 10, 200, 100, 30, 0.75f);
-}
 
-void IncrementMinikitCounter(GameObject_s *) {
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    NUVEC average;
-    Players_AveragePos(&average, NULL);
-    if (world->current_level == HOTHBATTLEA_LDATA) {
-        IncrementMinikitCounterFor(world, &average, 0, &minikitCounter_A, 10.0f, 0xf1c8, 0xe000);
-    } else if (world->current_level == HOTHBATTLEC_LDATA) {
-        IncrementMinikitCounterFor(world, &average, 1, &minikitCounter_C, 25.0f, 0xeaab, 0x78e4);
-    }
-}
+void IncrementMinikitCounter(GameObject_s *);
 
 i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible);

@@ -94,54 +94,12 @@ pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, 
 
 extern PART_s *boulder_part[2];
 extern i32 boulder_blowup_type;
-NUVEC boulder_oldpos[2];
+extern NUVEC boulder_oldpos[2];
 extern "C" void KillPart(PART_s *, i32);
 
-void Boulder_Kill(PART_s *part, i32) {
-    i32 i;
-    if (boulder_part[0] == part)
-        i = 0;
-    else if (__builtin_expect(boulder_part[1] == part, 0))
-        i = 1;
-    else
-        return;
-    if (part == NULL)
-        return;
-    if (boulder_blowup_type != -1)
-        GizmoBlowUpTypeBlowUp(WORLD, boulder_blowup_type, &part->position);
-    NuSpecialSetVisibility(&LevHSpecial[i], 0);
-    LevInstAnim[i]->ltime = 0.0f;
-    LevInstAnim[i]->playing = 0;
-    boulder_part[i] = NULL;
-}
+void Boulder_Kill(PART_s *part, i32);
 
-void Boulder_Move(PART_s *part, float) {
-    if (netclient != 0)
-        return;
-    i32 i;
-    if (part == boulder_part[0])
-        i = 0;
-    else if (part == boulder_part[1])
-        i = 1;
-    else {
-        KillPart(part, 0);
-        return;
-    }
-    boulder_oldpos[i] = part->position;
-    part->transform = *NuSpecialGetDrawMtx(&LevHSpecial[i]);
-    if (!(1.0f >= part->scale_time)) {
-        NuVecSub(&part->velocity, &part->position, &boulder_oldpos[i]);
-        NuVecScale(&part->velocity, &part->velocity, 1.0f / FRAMETIME);
-    } else {
-        part->velocity = v000;
-    }
-    if (LevInstAnim[i]->ltime > 1.0f && !LevInstAnim[i]->playing) {
-        KillPart(part, 0);
-        return;
-    }
-    if (part->active & 1)
-        PlaySfx(const_cast<char *>("Kas_BoulderLoop"), &part->position);
-}
+void Boulder_Move(PART_s *part, float);
 
 void Buck_MoveCode(GameObject_s *object, i32 start) {
     if (LEGOCONTEXT_BUCK != -1 && object->character_context == LEGOCONTEXT_BUCK) {

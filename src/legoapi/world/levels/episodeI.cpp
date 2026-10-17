@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include <stdio.h>
 #include <string.h>
 
@@ -163,6 +166,438 @@ static struct {
 // Sniper turrets (shared by PodRace C and PodSprint A)
 // ===========================================================================
 
+static __used__ void PodRaceSnipersUpdate(void);
+
+static __used__ void PodRaceSnipersReset(void);
+
+static void *CreatePodRaceMine(nuvec_s *pos);
+
+static void RacePodAlign(racepod_s *pod, _vuv_s *direction, float blend);
+
+void Mine_Kill(PART_s *part, i32);
+
+// PodSprint_InitAISpline is partially inlined into PodSprintA_Init: the
+// clear, lookup and spline checks are inlined and the crossing scan is the
+// split-out body.
+#if defined(__i386__)
+#define PODSPRINT_AISPLINE_BODY_ATTR __attribute__((noinline, regparm(1)))
+#else
+#define PODSPRINT_AISPLINE_BODY_ATTR __attribute__((noinline))
+#endif
+static PODSPRINT_AISPLINE_BODY_ATTR void PodSprint_InitAISplineBody(PODSPRINT_AISPLINE_s *ai) __asm__(
+    "_ZL22PodSprint_InitAISplineP11WORLDINFO_sP20PODSPRINT_AISPLINE_sPc.part.0");
+
+static PODSPRINT_AISPLINE_BODY_ATTR void PodSprint_InitAISplineBody(PODSPRINT_AISPLINE_s *ai);
+
+static inline void PodSprint_InitAISpline(WORLDINFO_s *world, PODSPRINT_AISPLINE_s *ai, char *name) {
+    memset(ai, 0, sizeof(*ai));
+    ai->spline = NuSplineFind(world->current_gscn, name);
+    if (ai->spline != NULL && podsprint.finish_line != NULL && podsprint.halfway != NULL) {
+        PodSprint_InitAISplineBody(ai);
+    }
+}
+
+// UpdatePacemakerDisplay is inlined into its callers apart from the message
+// update, which retail keeps as the split-out body of the IPA-SRA clone (it
+// only needs &world->lev_objs).
+static __attribute__((noinline, noclone)) void UpdatePacemakerDisplayBody(LEVEL_OBJECT_RUNTIME_s **lev_objs) __asm__(
+    "_ZL22UpdatePacemakerDisplayP11WORLDINFO_s.isra.7.part.8");
+
+static void UpdatePacemakerDisplayBody(LEVEL_OBJECT_RUNTIME_s **lev_objs);
+
+static inline void UpdatePacemakerDisplay(WORLDINFO_s *world) {
+    if (pod_pacemaker != NULL) {
+        if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
+            pod_pacemaker_alpha += FRAMETIME + FRAMETIME;
+            if (pod_pacemaker_alpha > 1.0f)
+                pod_pacemaker_alpha = 1.0f;
+            if (NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f) {
+                UpdatePacemakerDisplayBody(&world->lev_objs);
+            }
+        } else {
+            pod_pacemaker_alpha = 0.0f;
+        }
+    }
+}
+
+static __used__ void UpdatePodRaceMines(void);
+
+// ===========================================================================
+// Negotiations / Gungan plains / Rescue (coruscant)
+// ===========================================================================
+
+void NegotiationsA_Init(WORLDINFO_s *world);
+
+void NegotiationsB_Init(WORLDINFO_s *world);
+
+void GunganA_Update(WORLDINFO_s *world);
+
+void GunganA_Init(WORLDINFO_s *world);
+
+void RescueA_Init(WORLDINFO_s *world);
+
+void RescueB_Init(WORLDINFO_s *);
+
+void RescueC_Init(WORLDINFO_s *world);
+
+void RescueE_Init(WORLDINFO_s *world);
+
+// ===========================================================================
+// Pod race core (A/B/C laps)
+// ===========================================================================
+
+void ResetPodStuff();
+
+void PodRace_IncreaseLap();
+
+void PodRaceUpdate(WORLDINFO_s *world, float dt);
+
+void PodRacePanel(WORLDINFO_s *world);
+
+void UpdatePodRaceLapDisplay(float arg);
+
+void PodRaceAlwasyUpdate(WORLDINFO_s *world);
+
+i32 PodRace_InStartCountdown(WORLDINFO_s *world);
+
+void PodRaceAUpdate(WORLDINFO_s *world);
+
+void PodRaceA_AlwaysUpdate(WORLDINFO_s *world);
+
+void PodRaceADraw(WORLDINFO_s *world);
+
+i32 Action_MushroomCollapse(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
+                            i32 first_time, float);
+
+i32 PodSeekMushCutSound();
+
+i32 PodSeekSubCutSound();
+
+i32 PodSeekTuskanCutSound();
+
+void PodRaceBUpdate(WORLDINFO_s *world);
+
+void PodRaceCUpdate(WORLDINFO_s *world);
+
+i32 Action_SetLapTime(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
+                      i32 first_time, float);
+
+i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count, i32 first_time,
+                     float);
+
+i32 Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **, i32, i32 first_time, float);
+
+void PodRaceReset();
+
+void PodRaceCReset(WORLDINFO_s *world);
+
+void PodRaceBReset(WORLDINFO_s *world);
+
+void PodRaceAReset(WORLDINFO_s *world);
+
+// Clears the mine pools and resolves the mine special and its no-mine areas.
+static void InitPodRaceMines() {
+    memset(&minesys, 0, 0x1d2 * 4);
+    memset(&client_mines, 0, sizeof(client_mines));
+    MINESYS_s *mines = &minesys;
+    if (NuSpecialFind(vehicle_scene, &mines->mine_special, "mine", 1) != 0) {
+        mines->mine_radius = NuSpecialGetOriginRadius(&mines->mine_special);
+        char b2[0x20];
+        for (i32 i = 0; i < 10; i++) {
+            sprintf(b2, "nomine_%d", i);
+            mines->nomine_areas[mines->nomine_count] = AISysFindArea(WORLD->ai_sys, b2);
+            mines->nomine_count++;
+        }
+        mines->mine_debris = FindGameDebris(WORLD->debris_sys, "MINE_POP");
+        mines->mine_part = PARTLookupType("POD_MINE_PART");
+    }
+}
+
+void PodRaceInit(WORLDINFO_s *world);
+
+void PodRaceCInit(WORLDINFO_s *world);
+
+void PodRaceBInit(WORLDINFO_s *world);
+
+void PodRaceAInit(WORLDINFO_s *world);
+
+// ===========================================================================
+// Pod sprint (Sebulba events)
+// ===========================================================================
+
+float PodSprint_InStartCountdown(WORLDINFO_s *world);
+
+float PodSprint_RollMul(GameObject_s *object);
+
+void PodSprintA_Init(WORLDINFO_s *world);
+
+void PodSprintA_Update(WORLDINFO_s *world);
+
+void PodSprintA_Panel(WORLDINFO_s *world);
+
+void PodSprintA_Reset(WORLDINFO_s *world);
+
+void PodSprint_GetIAlongVals(nugspline_s *spline, i16 *out1, i16 *out2);
+
+i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **, i32, i32 first_time, float);
+
+// ===========================================================================
+// Retake the palace (D/E/G)
+// ===========================================================================
+
+void RetakeD_Init(WORLDINFO_s *world);
+
+void RetakeE_Init(WORLDINFO_s *world);
+
+void RetakeG_Init(WORLDINFO_s *world);
+
+void RetakeG_Reset(WORLDINFO_s *);
+
+void RetakeG_Update(WORLDINFO_s *world);
+
+void RetakeG_Panel(WORLDINFO_s *world);
+
+// ===========================================================================
+// Maul boss (A/B/D/E/F)
+// ===========================================================================
+
+void MaulA_Init(WORLDINFO_s *world);
+
+void MaulA_Reset(WORLDINFO_s *world);
+
+void MaulA_Update(WORLDINFO_s *);
+
+void MaulA_Panel(WORLDINFO_s *world);
+
+void MaulB_Init(WORLDINFO_s *world);
+
+void MaulD_Init(WORLDINFO_s *);
+
+void MaulD_Update(WORLDINFO_s *);
+
+void MaulE_Init(WORLDINFO_s *);
+
+void MaulE_Update(WORLDINFO_s *);
+
+void MaulF_Init(WORLDINFO_s *world);
+
+void MaulF_Reset(WORLDINFO_s *world);
+
+void MaulF_Update(WORLDINFO_s *);
+
+void MaulF_Panel(WORLDINFO_s *world);
+
+// ===========================================================================
+// Anakin's flight (B)
+// ===========================================================================
+
+void AnakinsFlightB_Init(WORLDINFO_s *world);
+
+void AnakinsFlightB_Update(WORLDINFO_s *);
+
+void AnakinsFlightB_Draw(WORLDINFO_s *world);
+
+// ===========================================================================
+// Helpers defined in other original translation units but kept here until
+// they get their own home (their originals live outside the ep1 TU).
+// ===========================================================================
+
+i32 PodLevel(AREADATA_s *area);
+
+// Original TU near 0x175830.
+void SetPodMergeAnims(ANIMPACKET_s *packet, i32 index) {
+    ANIMPACKET_s *a = packet;
+    i16 frame = (pod_roll[index] < 0.0f) ? 0x26 : 0x4f;
+    a->field_0x3a = 1;
+    a->frame = frame;
+    float m = pod_animtime[index];
+    a->time = m;
+    a->time_secondary = m;
+    a->field_0x44 = fabsf(pod_roll[index]);
+}
+
+// ==== src/legoapi/core/net/netplay.cpp: declarations ====
+#include "decomp.h"
+#include "legoapi/core/net/netplay.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/core/input/qrand.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/nuvec.h"
+#include "globals.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/render/core/screen.h"
+#include "legoapi/world/world.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/world/mission.h"
+#include "nu2api/nusound/nusound.h"
+
+struct AIROW_s;
+struct nuqthdr_s;
+struct nunativegscene_s;
+struct SHOPINPUT;
+
+extern APICHARACTERMODELLIST_s NetFreePlayModelList[49];
+extern i8 net_FreePlayModelCount;
+extern u8 net_recievedFreePlayList;
+
+void GetClientMineInfo(nuvec_s **positions, u64 **present, u64 **exploded);
+
+extern void Player_ResetContexts(PLAYERPACKET_s *packet);
+extern void CharShadows_Reset(PLAYERPACKET_s *packet);
+extern void ResetForceGlow(PLAYERPACKET_s *packet);
+
+void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *);
+
+void FinishLoop_Network();
+
+i32 FinishStatusPacket_LSW(WORLDINFO_s *, STATUSPACKET_s *, i32);
+
+void setObjInNetWaitContext(GameObject_s *object, i32 animation);
+
+// ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/nucore/nustring.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/world/levels/levels.h"
+#include "legogame/game.h"
+#include "decomp.h"
+#include "legoapi/actions/character/speederchase.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "globals.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/items/collect/spacelevel.h"
+#include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/world.h"
+#include "legoapi/world/world_shared.h"
+#include "gameapi/edtools/edcam.h"
+#include "gameapi/edtools/edui.h"
+#include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nurand.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/nu3d/nutex.h"
+#include <string.h>
+
+struct AIROW_s;
+struct nuqthdr_s;
+struct nunativegscene_s;
+struct SHOPINPUT;
+
+// This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
+static i32 PodRaceKey[8] __attribute__((aligned(16))) = {-1, -1, -1, -1, -1, -1, -1, -1};
+
+#include "legoapi/actions/character/speederchase_types.h"
+
+extern SPEEDERCHASEANETPACKET_s * speederchasea_netpacket;
+
+extern u8 troopercannons_beenReset;
+extern i32 players_going_forward;
+extern i32 players_cannot_exit_speeder;
+
+extern f32 zoom_ahead_extra;
+extern f32 zoom_ahead_extra_time;
+extern f32 speeder_level_height_lerpf;
+extern f32 speeder_level_height;
+extern SPEEDERCHASEVALUES speedervals[4];
+extern f32 speederfirerange;
+extern f32 speeder_shootrate;
+extern f32 speeder_kill_dist;
+extern f32 speeder_midrange_time;
+extern f32 speeder_ahead_time;
+extern f32 speeder_mode_ahead_timer;
+DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
+DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
+
+extern i32 objopponent_ignoreaiopponent;
+extern i32 test_ai_combo;
+extern i32 CanPunchGirls;
+extern i16 id_GAMORREANGUARD;
+extern i16 id_STORMTROOPER;
+i32 SpecialMove_Check(GameObject_s *, GameObject_s *);
+u32 SpecialMove_GetFlags(i32, u32);
+
+void PodKeyReset();
+
+void TakeHitRumble(GameObject_s *, f32);
+
+void PodLoseSpeed(GameObject_s *object, i32 hit, i32 rumble);
+
+i32 SpeederBlowupHack(GIZMOBLOWUP_s *blowup, i32);
+
+f32 FindPodHoverHeight(GameObject_s *object);
+
+extern i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
+extern i32 IDLESPEEDINNARROWSOCKSONLY;
+
+i32 ObjIsTargetSpeeder(GameObject_s *object);
+f32 GetVehicleSpeedMul(GameObject_s *object, f32 speed);
+
+void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
+void InitTrooperCannons(WORLDINFO_s *world);
+void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id);
+void UpdateTrooperCannons(WORLDINFO_s *world);
+i32 GoingForwardsAlongNarrowSock(GameObject_s *object);
+
+void SpeederChaseA_Init(WORLDINFO_s *world);
+
+void ProcessCurrentSpeed(WORLDINFO_s *world, speedup_s *speedup);
+
+void SpeederChaseA_Panel(WORLDINFO_s *);
+
+void SpeederChaseA_Reset(WORLDINFO_s *);
+
+i32 SpeedersDroppedBack();
+
+i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **, i32, i32 first_time,
+                              f32 elapsed);
+
+void SpeederChaseA_Update(WORLDINFO_s *world);
+
+i32 ObjOpponentStillThere(GameObject_s *object, GameObject_s *opponent, f32 gap);
+
+f32 SpeederChaseATATInOutMul(nuvec_s *start, nuvec_s *end);
+
+f32 GetVehicleAreaRememberSpeed();
+
+i32 SpeederChase_ObjIsAGroundTroop(GameObject_s *object);
+
+extern "C" {
+
+extern i32 edmain_auto_speed;
+
+void cbSetAutoSpeed(eduimenu_s *, eduiitem_s *item, u32);
+
+} // extern "C"
+
+extern "C" void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);
+extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+
+void PodDust(WORLDINFO_s *world, GameObject_s *object);
+
+extern "C" f32 pod_roll[2];
+f32 getPodRoll(i32 index);
+
+// ==== functions in original address order ====
+
 static __used__ void PodRaceSnipersUpdate(void) {
     NUVEC direction;
     static i32 player_ix;
@@ -300,6 +735,50 @@ static void *CreatePodRaceMine(nuvec_s *pos) {
     return entry;
 }
 
+void Mine_Kill(PART_s *part, i32) {
+    if (minesys.mine_debris != -1)
+        AddGameDebris(WORLD->debris_sys, minesys.mine_debris, &part->position);
+    if (minesys.mine_part != -1)
+        AddFiniteShotPART(minesys.mine_part, &part->position, 1);
+}
+
+static PODSPRINT_AISPLINE_BODY_ATTR void PodSprint_InitAISplineBody(PODSPRINT_AISPLINE_s *ai) {
+    i32 count = 0;
+    for (i32 i = 0; i < (i32)(i16)ai->spline->length - 1; i++) {
+        if (count > 5)
+            break;
+        NUVEC *pts = ai->spline->pts;
+        NUVEC *pts2 = ((count & 1) ? podsprint.finish_line : podsprint.halfway)->pts;
+        if (XZLinesIntersect(&pts[i], &pts[i + 1], &pts2[0], &pts2[1], NULL, NULL)) {
+            ai->vals[count] = (i16)i;
+            count++;
+        }
+    }
+    if (ai->vals[5] == 0)
+        ai->vals[5] = ai->spline->length;
+}
+
+static void UpdatePacemakerDisplayBody(LEVEL_OBJECT_RUNTIME_s **lev_objs) {
+    GameObject_s *pacemaker = pod_pacemaker;
+    float v[3];
+    v[0] = pacemaker->apiobj.field_0x190;
+    v[1] = 0.75f + pacemaker->apiobj.field_0x194;
+    v[2] = pacemaker->apiobj.field_0x198;
+    GAMEMESSAGE_s *msg =
+        (GAMEMESSAGE_s *)AddGameMessage(" ", (nuvec_s *)v, 0.08f, NULL, 0.0f, 0xff, 0x3f, 0x3f, 0x10083, 0);
+    if (msg != NULL) {
+        i32 idx = ((i32)(16384.0f * pod_pacemaker_alpha) >> 1) & 0x7fff;
+        msg->alpha = (u8)(128.0f * pacemaker_alpha_table[idx]);
+        msg->icon = 0x134;
+        PACEMAKERDATA_s *data = (PACEMAKERDATA_s *)*lev_objs;
+        if (data->enabled != 0) {
+            msg->color1 = data->color1;
+            msg->color2 = data->color2;
+            msg->color3 = data->color3;
+        }
+    }
+}
+
 static void RacePodAlign(racepod_s *pod, _vuv_s *direction, float blend) {
     NUVEC local __attribute__((aligned(16)));
     NuVecInvMtxRotate(&local, (NUVEC *)direction, &pod->matrix);
@@ -336,91 +815,6 @@ static void RacePodAlign(racepod_s *pod, _vuv_s *direction, float blend) {
             angle = -(i16)(i32)((2.0f - blend) * roll);
     }
     NuMtxPreRotateZ(&pod->matrix, angle);
-}
-
-void Mine_Kill(PART_s *part, i32) {
-    if (minesys.mine_debris != -1)
-        AddGameDebris(WORLD->debris_sys, minesys.mine_debris, &part->position);
-    if (minesys.mine_part != -1)
-        AddFiniteShotPART(minesys.mine_part, &part->position, 1);
-}
-
-// PodSprint_InitAISpline is partially inlined into PodSprintA_Init: the
-// clear, lookup and spline checks are inlined and the crossing scan is the
-// split-out body.
-#if defined(__i386__)
-#define PODSPRINT_AISPLINE_BODY_ATTR __attribute__((noinline, regparm(1)))
-#else
-#define PODSPRINT_AISPLINE_BODY_ATTR __attribute__((noinline))
-#endif
-static PODSPRINT_AISPLINE_BODY_ATTR void PodSprint_InitAISplineBody(PODSPRINT_AISPLINE_s *ai) __asm__(
-    "_ZL22PodSprint_InitAISplineP11WORLDINFO_sP20PODSPRINT_AISPLINE_sPc.part.0");
-
-static PODSPRINT_AISPLINE_BODY_ATTR void PodSprint_InitAISplineBody(PODSPRINT_AISPLINE_s *ai) {
-    i32 count = 0;
-    for (i32 i = 0; i < (i32)(i16)ai->spline->length - 1; i++) {
-        if (count > 5)
-            break;
-        NUVEC *pts = ai->spline->pts;
-        NUVEC *pts2 = ((count & 1) ? podsprint.finish_line : podsprint.halfway)->pts;
-        if (XZLinesIntersect(&pts[i], &pts[i + 1], &pts2[0], &pts2[1], NULL, NULL)) {
-            ai->vals[count] = (i16)i;
-            count++;
-        }
-    }
-    if (ai->vals[5] == 0)
-        ai->vals[5] = ai->spline->length;
-}
-#undef PODSPRINT_AISPLINE_BODY_ATTR
-
-static inline void PodSprint_InitAISpline(WORLDINFO_s *world, PODSPRINT_AISPLINE_s *ai, char *name) {
-    memset(ai, 0, sizeof(*ai));
-    ai->spline = NuSplineFind(world->current_gscn, name);
-    if (ai->spline != NULL && podsprint.finish_line != NULL && podsprint.halfway != NULL) {
-        PodSprint_InitAISplineBody(ai);
-    }
-}
-
-// UpdatePacemakerDisplay is inlined into its callers apart from the message
-// update, which retail keeps as the split-out body of the IPA-SRA clone (it
-// only needs &world->lev_objs).
-static __attribute__((noinline, noclone)) void UpdatePacemakerDisplayBody(LEVEL_OBJECT_RUNTIME_s **lev_objs) __asm__(
-    "_ZL22UpdatePacemakerDisplayP11WORLDINFO_s.isra.7.part.8");
-
-static void UpdatePacemakerDisplayBody(LEVEL_OBJECT_RUNTIME_s **lev_objs) {
-    GameObject_s *pacemaker = pod_pacemaker;
-    float v[3];
-    v[0] = pacemaker->apiobj.field_0x190;
-    v[1] = 0.75f + pacemaker->apiobj.field_0x194;
-    v[2] = pacemaker->apiobj.field_0x198;
-    GAMEMESSAGE_s *msg =
-        (GAMEMESSAGE_s *)AddGameMessage(" ", (nuvec_s *)v, 0.08f, NULL, 0.0f, 0xff, 0x3f, 0x3f, 0x10083, 0);
-    if (msg != NULL) {
-        i32 idx = ((i32)(16384.0f * pod_pacemaker_alpha) >> 1) & 0x7fff;
-        msg->alpha = (u8)(128.0f * pacemaker_alpha_table[idx]);
-        msg->icon = 0x134;
-        PACEMAKERDATA_s *data = (PACEMAKERDATA_s *)*lev_objs;
-        if (data->enabled != 0) {
-            msg->color1 = data->color1;
-            msg->color2 = data->color2;
-            msg->color3 = data->color3;
-        }
-    }
-}
-
-static inline void UpdatePacemakerDisplay(WORLDINFO_s *world) {
-    if (pod_pacemaker != NULL) {
-        if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
-            pod_pacemaker_alpha += FRAMETIME + FRAMETIME;
-            if (pod_pacemaker_alpha > 1.0f)
-                pod_pacemaker_alpha = 1.0f;
-            if (NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f) {
-                UpdatePacemakerDisplayBody(&world->lev_objs);
-            }
-        } else {
-            pod_pacemaker_alpha = 0.0f;
-        }
-    }
 }
 
 // Mine update — mirrors _ZL18UpdatePodRaceMinesv. Host: mines behind the
@@ -543,10 +937,6 @@ static __used__ void UpdatePodRaceMines(void) {
     }
 }
 
-// ===========================================================================
-// Negotiations / Gungan plains / Rescue (coruscant)
-// ===========================================================================
-
 void NegotiationsA_Init(WORLDINFO_s *world) {
     GIZFORCE_s *f = GizForce_FindByName(world->giz_force_sys, "Force3");
     if (f != NULL)
@@ -563,6 +953,44 @@ void NegotiationsB_Init(WORLDINFO_s *world) {
     GIZFORCE_s *f = GizForce_FindByName(world->giz_force_sys, "Force10");
     if (f != NULL)
         f->strength_0x6c = 0.5f;
+}
+
+void GunganA_Init(WORLDINFO_s *world) {
+    if (netclient == 0) {
+        memset(&gungan_a, 0, sizeof(gungan_a));
+        gungan_a.models[0] = id_KAADU;
+        gungan_a.models[1] = id_GUNGAN;
+        gungan_a.models[2] = id_FALUMPASET;
+        gungan_a.models[3] = id_GUNGAN;
+        for (i32 i = 0; i < 32; i++) {
+            char buf[32];
+            sprintf(buf, "origin_%d", i);
+            gungan_a.origins[i] = AIPathFindLocator(world->ai_sys, buf);
+            sprintf(buf, "target_%d", i);
+            gungan_a.targets[i] = AIPathFindLocator(world->ai_sys, buf);
+            if (gungan_a.origins[i] == NULL || gungan_a.targets[i] == NULL)
+                break;
+            gungan_a.count++;
+        }
+    }
+    GIZMOBLOWUP_s *b = GizmoBlowUp_FindByName(world, "Trunk2_exp11");
+    if (b != NULL) {
+        UpdateMidPos(b);
+        b->field_0x124 = 1;
+        b->field_0x128 = b->target_scale;
+        GIZMOBLOWUP_s *b2 = GizmoBlowUp_FindByName(world, "leaves_exp11");
+        if (b2 != NULL) {
+            b2->field_0x124 = 1;
+            b2->field_0x120 = &b->mid_position;
+            b2->field_0x128 = b->target_scale;
+        }
+        GIZMOBLOWUP_s *b3 = GizmoBlowUp_FindByName(world, "branch3_exp11");
+        if (b3 != NULL) {
+            b3->field_0x124 = 1;
+            b3->field_0x120 = &b->mid_position;
+            b3->field_0x128 = b->target_scale;
+        }
+    }
 }
 
 void GunganA_Update(WORLDINFO_s *world) {
@@ -607,44 +1035,6 @@ void GunganA_Update(WORLDINFO_s *world) {
         }
     reset_spawn_timer:
         gungan_a.spawn_timer = 0.25f - NuFloatRand(NULL) * 0.5f;
-    }
-}
-
-void GunganA_Init(WORLDINFO_s *world) {
-    if (netclient == 0) {
-        memset(&gungan_a, 0, sizeof(gungan_a));
-        gungan_a.models[0] = id_KAADU;
-        gungan_a.models[1] = id_GUNGAN;
-        gungan_a.models[2] = id_FALUMPASET;
-        gungan_a.models[3] = id_GUNGAN;
-        for (i32 i = 0; i < 32; i++) {
-            char buf[32];
-            sprintf(buf, "origin_%d", i);
-            gungan_a.origins[i] = AIPathFindLocator(world->ai_sys, buf);
-            sprintf(buf, "target_%d", i);
-            gungan_a.targets[i] = AIPathFindLocator(world->ai_sys, buf);
-            if (gungan_a.origins[i] == NULL || gungan_a.targets[i] == NULL)
-                break;
-            gungan_a.count++;
-        }
-    }
-    GIZMOBLOWUP_s *b = GizmoBlowUp_FindByName(world, "Trunk2_exp11");
-    if (b != NULL) {
-        UpdateMidPos(b);
-        b->field_0x124 = 1;
-        b->field_0x128 = b->target_scale;
-        GIZMOBLOWUP_s *b2 = GizmoBlowUp_FindByName(world, "leaves_exp11");
-        if (b2 != NULL) {
-            b2->field_0x124 = 1;
-            b2->field_0x120 = &b->mid_position;
-            b2->field_0x128 = b->target_scale;
-        }
-        GIZMOBLOWUP_s *b3 = GizmoBlowUp_FindByName(world, "branch3_exp11");
-        if (b3 != NULL) {
-            b3->field_0x124 = 1;
-            b3->field_0x120 = &b->mid_position;
-            b3->field_0x128 = b->target_scale;
-        }
     }
 }
 
@@ -711,9 +1101,11 @@ void RescueE_Init(WORLDINFO_s *world) {
         g->field_0xa0 |= 2;
 }
 
-// ===========================================================================
-// Pod race core (A/B/C laps)
-// ===========================================================================
+void GetClientMineInfo(nuvec_s **positions, u64 **present, u64 **exploded) {
+    *positions = client_mines.positions;
+    *present = &client_mines.present_mask;
+    *exploded = &client_mines.exploded_mask;
+}
 
 void ResetPodStuff() {
     i16 val = apicharsys->playermodelids[id_ANAKINSPOD];
@@ -1431,6 +1823,12 @@ i32 Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **, 
     return 0;
 }
 
+void PodKeyReset() {
+    for (i32 i = 0; i < 8; i++) {
+        PodRaceKey[i] = -1;
+    }
+}
+
 void PodRaceReset() {
     PODRACE_s *podrace = PodRace;
     podrace->mushroom_timer = 0.0f;
@@ -1515,24 +1913,6 @@ void PodRaceAReset(WORLDINFO_s *world) {
         NewCutScene(NULL, world->cutscene_sys, "ep1_podrace_sebulba", 1);
 }
 
-// Clears the mine pools and resolves the mine special and its no-mine areas.
-static void InitPodRaceMines() {
-    memset(&minesys, 0, 0x1d2 * 4);
-    memset(&client_mines, 0, sizeof(client_mines));
-    MINESYS_s *mines = &minesys;
-    if (NuSpecialFind(vehicle_scene, &mines->mine_special, "mine", 1) != 0) {
-        mines->mine_radius = NuSpecialGetOriginRadius(&mines->mine_special);
-        char b2[0x20];
-        for (i32 i = 0; i < 10; i++) {
-            sprintf(b2, "nomine_%d", i);
-            mines->nomine_areas[mines->nomine_count] = AISysFindArea(WORLD->ai_sys, b2);
-            mines->nomine_count++;
-        }
-        mines->mine_debris = FindGameDebris(WORLD->debris_sys, "MINE_POP");
-        mines->mine_part = PARTLookupType("POD_MINE_PART");
-    }
-}
-
 void PodRaceInit(WORLDINFO_s *world) {
     podrace_netpacket = (PODRACENETPACKET_s *)(usize)SetLevelHack(0x14);
     PODRACE_s *podrace = (PODRACE_s *)world->podrace;
@@ -1610,9 +1990,96 @@ void PodRaceAInit(WORLDINFO_s *world) {
     PodRaceInit(world);
 }
 
-// ===========================================================================
-// Pod sprint (Sebulba events)
-// ===========================================================================
+void PodDust(WORLDINFO_s *world, GameObject_s *object) {
+    if (object->apiobj.field_0x218 == 2000000.0f)
+        return;
+    if (world->debris_sys->entries[25].effect == -1)
+        return;
+    NUVEC positions[2];
+    NUVEC previous[2];
+    i32 count = 0;
+    for (i32 locator = 1; locator <= 2; ++locator) {
+        if (!(object->apiobj.field_0x288 == 0 || object->apiobj.character_model->points_of_interest[locator] == NULL)) {
+            NUMTX *joint = &object->joint_matrices[locator];
+            positions[count].x = joint->m30;
+            positions[count].y = object->apiobj.field_0x218 + 0.1f;
+            positions[count].z = joint->m32;
+            ++count;
+            if ((object->apiobj.flags_low & 0x80) == 0)
+                continue;
+            i32 key;
+            if (object == Player[0])
+                key = locator - 1;
+            else if (object == Player[1])
+                key = locator + 3;
+            else
+                continue;
+            NUMTX matrix;
+            matrix.m02 = joint->m02;
+            matrix.m01 = joint->m01;
+            matrix.m00 = joint->m00;
+            matrix.m03 = joint->m03;
+            matrix.m10 = joint->m20;
+            matrix.m11 = joint->m21;
+            matrix.m12 = joint->m22;
+            matrix.m13 = joint->m23;
+            matrix.m20 = -joint->m10;
+            matrix.m21 = -joint->m11;
+            matrix.m22 = -joint->m12;
+            matrix.m23 = -joint->m13;
+            matrix.m30 = joint->m30;
+            matrix.m31 = joint->m31;
+            matrix.m32 = joint->m32;
+            matrix.m33 = joint->m33;
+            if (PodRaceKey[key] == -1) {
+                AddDebrisEffect(&PodRaceKey[key], world->debris_sys->entries[53].effect, 0.0f, 0.0f, 0.0f);
+            } else {
+                DebrisPosOrientationMtx(PodRaceKey[key], &matrix);
+            }
+            key += 2;
+            if (PodRaceKey[key] == -1) {
+                AddDebrisEffect(&PodRaceKey[key], world->debris_sys->entries[54].effect, 0.0f, 0.0f, 0.0f);
+            } else {
+                u16 angle = object->apiobj.field_0x276;
+                f32 sine = NuTrigTable[angle >> 1];
+                f32 cosine = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff];
+                matrix.m01 = 0.0f;
+                matrix.m02 = sine;
+                matrix.m10 = -sine;
+                matrix.m00 = -cosine;
+                matrix.m11 = 0.0f;
+                matrix.m12 = -cosine;
+                matrix.m20 = 0.0f;
+                matrix.m21 = 1.0f;
+                matrix.m22 = 0.0f;
+                matrix.m31 = object->apiobj.field_0x218 + 0.1f;
+                DebrisPosOrientationMtx(PodRaceKey[key], &matrix);
+            }
+        }
+    }
+    if (count == 0) {
+        positions[0].x = object->apiobj.collision_position.x;
+        positions[0].y = object->apiobj.field_0x218;
+        positions[0].z = object->apiobj.collision_position.z;
+        count = 1;
+    }
+    NUVEC delta;
+    NuVecSub(&delta, &object->apiobj.start_position, &object->apiobj.position);
+    f32 rate = 100.0f * avg_currentspeed_mul;
+    rate *= 1.0f - (object->apiobj.collision_min.y - object->apiobj.field_0x218) * 0.5f;
+    for (i32 i = 0; i < count; ++i) {
+        NuVecAdd(&previous[i], &positions[i], &delta);
+        i32 particles = ParticlesPerSecond(rate, FRAMETIME);
+        for (i32 j = 0; j < particles; ++j) {
+            f32 fraction = qrand() * (1.0f / 65535.0f);
+            NUVEC position;
+            position.x = previous[i].x + (positions[i].x - previous[i].x) * fraction;
+            position.y = previous[i].y + (positions[i].y - previous[i].y) * fraction;
+            position.z = previous[i].z + (positions[i].z - previous[i].z) * fraction;
+            AddVariableShotDebrisEffect(world->debris_sys->entries[25].effect, &position, 1, 0, 0);
+        }
+    }
+}
 
 float PodSprint_InStartCountdown(WORLDINFO_s *world) {
     if (world->current_level != PODSPRINTA_LDATA)
@@ -1653,6 +2120,50 @@ void PodSprintA_Init(WORLDINFO_s *world) {
     nuhspecial_s *bigrocks = LevHSpecial;
     NuSpecialFind(world->current_gscn, &bigrocks[50], "bigrock_five", 1);
     NuSpecialFind(world->current_gscn, &bigrocks[51], "bigrock_eight", 1);
+}
+
+void PodSprintA_Reset(WORLDINFO_s *world) {
+    PODSPRINT_s *ps = &podsprint;
+    ps->field_0x78 = 0;
+    pod_old_pos[0].x = pod_old_pos[0].y = pod_old_pos[0].z = -1.0f;
+    pod_old_pos[1].x = pod_old_pos[1].y = pod_old_pos[1].z = -1.0f;
+    ps->flags &= 0xef;
+    ps->field_0x88 = 0;
+    if ((ps->flags & 0xc) == 0 && !(netclient != 0 && podsprint_netpacket->ai_state > 2)) {
+        ps->ai_index = 0;
+        ps->ai_state = 1;
+        ps->flags &= 0xfe;
+        ps->speed = 3.0f;
+        podstartracealpha = 0.0f;
+    } else {
+        ps->ai_state = 3;
+        ps->flags &= 0xf2;
+        ps->ai_index = 4;
+        VehicleAreaRememberSpeed = 1.0f;
+        GameObject_s *p = player;
+        if (p != NULL && (p->apiobj.field_0x1f8 & 0x1000)) {
+            p->field_0xdc8 = 1.0f;
+            p->apiobj.velocity.y = 0.0f;
+            p->apiobj.velocity.x = 0.0f;
+            p->apiobj.velocity.z = ((PLAYERSUBOBJ2_s *)((PLAYERSUBOBJ_s *)p->apiobj.character_data)->field_0x24)->value;
+            NuVecRotateY(&p->apiobj.velocity, &p->apiobj.velocity, p->apiobj.field_0x276);
+        }
+        if (player2 != NULL && (player2->apiobj.field_0x1f8 & 0x1000)) {
+            GameObject_s *p2 = player2;
+            p2->field_0xdc8 = 1.0f;
+            p2->apiobj.velocity.y = 0.0f;
+            p2->apiobj.velocity.x = 0.0f;
+            p2->apiobj.velocity.z =
+                ((PLAYERSUBOBJ2_s *)((PLAYERSUBOBJ_s *)p2->apiobj.character_data)->field_0x24)->value;
+            NuVecRotateY(&p2->apiobj.velocity, &p2->apiobj.velocity, p2->apiobj.field_0x276);
+        }
+        if (game_cutscenes.cutscene != NULL) {
+            CutScene_SnapToEnd((CUTINFO *)game_cutscenes.cutscene);
+            CutScene_StoppedFn_LSW((CUTINFO *)game_cutscenes.cutscene);
+        }
+    }
+    PodRaceSnipersReset();
+    ps->boulders = AISysFindArea(world->ai_sys, "Boulders");
 }
 
 void PodSprintA_Update(WORLDINFO_s *world) {
@@ -1867,50 +2378,6 @@ void PodSprintA_Panel(WORLDINFO_s *world) {
     }
 }
 
-void PodSprintA_Reset(WORLDINFO_s *world) {
-    PODSPRINT_s *ps = &podsprint;
-    ps->field_0x78 = 0;
-    pod_old_pos[0].x = pod_old_pos[0].y = pod_old_pos[0].z = -1.0f;
-    pod_old_pos[1].x = pod_old_pos[1].y = pod_old_pos[1].z = -1.0f;
-    ps->flags &= 0xef;
-    ps->field_0x88 = 0;
-    if ((ps->flags & 0xc) == 0 && !(netclient != 0 && podsprint_netpacket->ai_state > 2)) {
-        ps->ai_index = 0;
-        ps->ai_state = 1;
-        ps->flags &= 0xfe;
-        ps->speed = 3.0f;
-        podstartracealpha = 0.0f;
-    } else {
-        ps->ai_state = 3;
-        ps->flags &= 0xf2;
-        ps->ai_index = 4;
-        VehicleAreaRememberSpeed = 1.0f;
-        GameObject_s *p = player;
-        if (p != NULL && (p->apiobj.field_0x1f8 & 0x1000)) {
-            p->field_0xdc8 = 1.0f;
-            p->apiobj.velocity.y = 0.0f;
-            p->apiobj.velocity.x = 0.0f;
-            p->apiobj.velocity.z = ((PLAYERSUBOBJ2_s *)((PLAYERSUBOBJ_s *)p->apiobj.character_data)->field_0x24)->value;
-            NuVecRotateY(&p->apiobj.velocity, &p->apiobj.velocity, p->apiobj.field_0x276);
-        }
-        if (player2 != NULL && (player2->apiobj.field_0x1f8 & 0x1000)) {
-            GameObject_s *p2 = player2;
-            p2->field_0xdc8 = 1.0f;
-            p2->apiobj.velocity.y = 0.0f;
-            p2->apiobj.velocity.x = 0.0f;
-            p2->apiobj.velocity.z =
-                ((PLAYERSUBOBJ2_s *)((PLAYERSUBOBJ_s *)p2->apiobj.character_data)->field_0x24)->value;
-            NuVecRotateY(&p2->apiobj.velocity, &p2->apiobj.velocity, p2->apiobj.field_0x276);
-        }
-        if (game_cutscenes.cutscene != NULL) {
-            CutScene_SnapToEnd((CUTINFO *)game_cutscenes.cutscene);
-            CutScene_StoppedFn_LSW((CUTINFO *)game_cutscenes.cutscene);
-        }
-    }
-    PodRaceSnipersReset();
-    ps->boulders = AISysFindArea(world->ai_sys, "Boulders");
-}
-
 void PodSprint_GetIAlongVals(nugspline_s *spline, i16 *out1, i16 *out2) {
     if (spline == NULL)
         return;
@@ -2053,10 +2520,6 @@ done:
     }
     return 0;
 }
-
-// ===========================================================================
-// Retake the palace (D/E/G)
-// ===========================================================================
 
 void RetakeD_Init(WORLDINFO_s *world) {
     GIZMOBLOWUP_s *g;
@@ -2230,10 +2693,6 @@ void RetakeG_Panel(WORLDINFO_s *world) {
     }
 }
 
-// ===========================================================================
-// Maul boss (A/B/D/E/F)
-// ===========================================================================
-
 void MaulA_Init(WORLDINFO_s *world) {
     MaulA_ai_message = CheckGizAIMessage(gizaimessagesys, "MaulOnTheRun", NULL);
     MaulA_hits_message = CheckGizAIMessage(gizaimessagesys, "Hits", NULL);
@@ -2314,10 +2773,6 @@ void MaulF_Panel(WORLDINFO_s *world) {
     }
 }
 
-// ===========================================================================
-// Anakin's flight (B)
-// ===========================================================================
-
 void AnakinsFlightB_Init(WORLDINFO_s *world) {
     trooper_boltid[0] = BoltType_FindIDByName("trooper_red", world);
     trooper_side[0] = 0;
@@ -2343,21 +2798,3 @@ void AnakinsFlightB_Draw(WORLDINFO_s *world) {
     }
 }
 
-// ===========================================================================
-// Helpers defined in other original translation units but kept here until
-// they get their own home (their originals live outside the ep1 TU).
-// ===========================================================================
-
-i32 PodLevel(AREADATA_s *area);
-
-// Original TU near 0x175830.
-void SetPodMergeAnims(ANIMPACKET_s *packet, i32 index) {
-    ANIMPACKET_s *a = packet;
-    i16 frame = (pod_roll[index] < 0.0f) ? 0x26 : 0x4f;
-    a->field_0x3a = 1;
-    a->frame = frame;
-    float m = pod_animtime[index];
-    a->time = m;
-    a->time_secondary = m;
-    a->field_0x44 = fabsf(pod_roll[index]);
-}

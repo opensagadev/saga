@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 82.916275,
+    "fuzzy_match_percent": 82.91343,
     "total_code": "4722419",
-    "matched_code": "652387",
-    "matched_code_percent": 13.814679,
+    "matched_code": "660038",
+    "matched_code_percent": 13.976693,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 7035,
-    "matched_functions_percent": 52.26986,
+    "matched_functions": 7068,
+    "matched_functions_percent": 52.51505,
     "total_units": 1
   },
   "text": {
@@ -24284,7 +24284,7 @@
           "address": 1701968,
           "offset": 812000,
           "size": 2719,
-          "match_percent": 47.06096
+          "match_percent": 49.04209
         },
         {
           "name": "_Z25Action_AssignLocatorInSetP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -24292,7 +24292,7 @@
           "address": 1704688,
           "offset": 814720,
           "size": 613,
-          "match_percent": 61.65318
+          "match_percent": 62.69942
         },
         {
           "name": "_Z21Action_ReleaseLocatorP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -24300,7 +24300,7 @@
           "address": 1705312,
           "offset": 815344,
           "size": 197,
-          "match_percent": 99.91525
+          "match_percent": 99.15254
         },
         {
           "name": "_Z23Action_DynamicCameraCutP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -33262,22 +33262,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_Z11PodKeyResetv",
-          "demangled_name": "PodKeyReset()",
-          "address": 2095840,
-          "offset": 1205872,
-          "size": 36,
-          "match_percent": 99.77778
-        },
-        {
-          "name": "_Z7PodDustP11WORLDINFO_sP12GameObject_s",
-          "demangled_name": "PodDust(WORLDINFO_s*, GameObject_s*)",
-          "address": 2100240,
-          "offset": 1210272,
-          "size": 2256,
-          "match_percent": 80.1175
-        },
-        {
           "name": "_Z19ProcessCurrentSpeedP11WORLDINFO_sP9speedup_s",
           "demangled_name": "ProcessCurrentSpeed(WORLDINFO_s*, speedup_s*)",
           "address": 2338128,
@@ -39317,7 +39301,7 @@
           "address": 1079344,
           "offset": 189376,
           "size": 3212,
-          "match_percent": 74.09925
+          "match_percent": 74.11429
         },
         {
           "name": "_ZL24DrawCharacterAttachmentsP12GameObject_sP7numtx_s",
@@ -39430,14 +39414,6 @@
           "offset": 218304,
           "size": 138,
           "match_percent": 99.935486
-        },
-        {
-          "name": "_Z22SpawnMeleeCreatureTypei",
-          "demangled_name": "SpawnMeleeCreatureType(int)",
-          "address": 2222272,
-          "offset": 1332304,
-          "size": 1236,
-          "match_percent": 57.923077
         }
       ]
     },
@@ -40467,14 +40443,6 @@
           "offset": 1144288,
           "size": 321,
           "match_percent": 99.97059
-        },
-        {
-          "name": "_Z28TakeOverYodaSeekDistanceHackP12GameObject_sS0_P7nuvec_s",
-          "demangled_name": "TakeOverYodaSeekDistanceHack(GameObject_s*, GameObject_s*, nuvec_s*)",
-          "address": 2213824,
-          "offset": 1323856,
-          "size": 197,
-          "match_percent": 99.962265
         },
         {
           "name": "_Z18UpdateCharacterIDsv",
@@ -46629,14 +46597,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_Z17GetClientMineInfoPP7nuvec_sPPyS3_",
-          "demangled_name": "GetClientMineInfo(nuvec_s**, unsigned long long**, unsigned long long**)",
-          "address": 2082224,
-          "offset": 1192256,
-          "size": 50,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z18FinishLoop_Networkv",
           "demangled_name": "FinishLoop_Network()",
           "address": 4760592,
@@ -49725,30 +49685,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z16ResetPaintPuzzleP11WORLDINFO_s",
-          "demangled_name": "ResetPaintPuzzle(WORLDINFO_s*)",
-          "address": 2114624,
-          "offset": 1224656,
-          "size": 206,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z15InitPaintPuzzleP11WORLDINFO_s",
-          "demangled_name": "InitPaintPuzzle(WORLDINFO_s*)",
-          "address": 2114832,
-          "offset": 1224864,
-          "size": 758,
-          "match_percent": 99.94505
-        },
-        {
-          "name": "_Z17UpdatePaintPuzzleP11WORLDINFO_s",
-          "demangled_name": "UpdatePaintPuzzle(WORLDINFO_s*)",
-          "address": 2115600,
-          "offset": 1225632,
-          "size": 1334,
-          "match_percent": 86.041176
-        },
-        {
           "name": "_ZNK19MechObjectInterface17GetFloorTargetPosER5VuVeci",
           "demangled_name": "MechObjectInterface::GetFloorTargetPos(VuVec&, int) const",
           "address": 4483968,
@@ -51250,21 +51186,6 @@
           "offset": 4026080,
           "size": 182,
           "match_percent": 100.0
-        }
-      ]
-    },
-    {
-      "name": "legoapi/gizmo/gizmos/gizmos_gizactions.cpp.o",
-      "source": "src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizmos_gizactions.o",
-      "functions": [
-        {
-          "name": "_Z21Action_BoulderSectionP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_BoulderSection(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 2161584,
-          "offset": 1271616,
-          "size": 972,
-          "match_percent": 56.53617
         }
       ]
     },
@@ -58546,22 +58467,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/game_object.o",
       "functions": [
         {
-          "name": "_ZL20TrenchKilledCallbackP12GameObject_s",
-          "demangled_name": "TrenchKilledCallback(GameObject_s*)",
-          "address": 2171680,
-          "offset": 1281712,
-          "size": 71,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL10TrenchMoveP12GameObject_s",
-          "demangled_name": "TrenchMove(GameObject_s*)",
-          "address": 2172416,
-          "offset": 1282448,
-          "size": 1250,
-          "match_percent": 92.07422
-        },
-        {
           "name": "_Z13AddGameObjecti",
           "demangled_name": "AddGameObject(int)",
           "address": 4642352,
@@ -59793,22 +59698,6 @@
           "offset": 1158336,
           "size": 2863,
           "match_percent": 66.31424
-        },
-        {
-          "name": "_Z19ResetMinikitCounterv",
-          "demangled_name": "ResetMinikitCounter()",
-          "address": 2216288,
-          "offset": 1326320,
-          "size": 30,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z23IncrementMinikitCounterP12GameObject_s",
-          "demangled_name": "IncrementMinikitCounter(GameObject_s*)",
-          "address": 2216320,
-          "offset": 1326352,
-          "size": 807,
-          "match_percent": 76.28931
         },
         {
           "name": "_Z17UpdateNewMiniKitsP14STATUSPACKET_sP14STATUS_STAGE_s",
@@ -61718,22 +61607,6 @@
           "offset": 24336,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_Z12Boulder_KillP6PART_si",
-          "demangled_name": "Boulder_Kill(PART_s*, int)",
-          "address": 2154544,
-          "offset": 1264576,
-          "size": 191,
-          "match_percent": 94.36735
-        },
-        {
-          "name": "_Z12Boulder_MoveP6PART_sf",
-          "demangled_name": "Boulder_Move(PART_s*, float)",
-          "address": 2154736,
-          "offset": 1264768,
-          "size": 463,
-          "match_percent": 99.75
         },
         {
           "name": "_ZL18edpartChangeCutOffP10eduimenu_sP10eduiitem_sj",
@@ -78696,14 +78569,6 @@
           "match_percent": 99.94118
         },
         {
-          "name": "_Z15DrawPaintLightsv",
-          "demangled_name": "DrawPaintLights()",
-          "address": 2114304,
-          "offset": 1224336,
-          "size": 309,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z10DrawCablesv",
           "demangled_name": "DrawCables()",
           "address": 2297872,
@@ -81438,14 +81303,6 @@
           "match_percent": 91.5137
         },
         {
-          "name": "_Z17Asteroid_PartKillP6PART_si",
-          "demangled_name": "Asteroid_PartKill(PART_s*, int)",
-          "address": 2196480,
-          "offset": 1306512,
-          "size": 284,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z13InitPartTablePPc",
           "demangled_name": "InitPartTable(char**)",
           "address": 4861568,
@@ -83433,14 +83290,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/levels.o",
       "functions": [
         {
-          "name": "_Z15getSpawnLocatorfPc",
-          "demangled_name": "getSpawnLocator(float, char*)",
-          "address": 2221984,
-          "offset": 1332016,
-          "size": 273,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z15GetTableLocatorv",
           "demangled_name": "GetTableLocator()",
           "address": 2357472,
@@ -83486,38 +83335,6 @@
           "offset": 296688,
           "size": 946,
           "match_percent": 99.96482
-        },
-        {
-          "name": "_ZL19KilledTrooperCannonP12GameObject_s",
-          "demangled_name": "KilledTrooperCannon(GameObject_s*)",
-          "address": 2196768,
-          "offset": 1306800,
-          "size": 314,
-          "match_percent": 98.06579
-        },
-        {
-          "name": "_Z18InitTrooperCannonsP11WORLDINFO_s",
-          "demangled_name": "InitTrooperCannons(WORLDINFO_s*)",
-          "address": 2197088,
-          "offset": 1307120,
-          "size": 29,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z19ResetTrooperCannonsP11WORLDINFO_si",
-          "demangled_name": "ResetTrooperCannons(WORLDINFO_s*, int)",
-          "address": 2197120,
-          "offset": 1307152,
-          "size": 2776,
-          "match_percent": 88.880455
-        },
-        {
-          "name": "_Z20UpdateTrooperCannonsP11WORLDINFO_s",
-          "demangled_name": "UpdateTrooperCannons(WORLDINFO_s*)",
-          "address": 2199904,
-          "offset": 1309936,
-          "size": 1341,
-          "match_percent": 83.22222
         },
         {
           "name": "_Z10BossKilledi",
@@ -83668,7 +83485,7 @@
           "address": 2079728,
           "offset": 1189760,
           "size": 133,
-          "match_percent": 100.0
+          "match_percent": 99.55882
         },
         {
           "name": "_Z18NegotiationsB_InitP11WORLDINFO_s",
@@ -83676,7 +83493,7 @@
           "address": 2079872,
           "offset": 1189904,
           "size": 61,
-          "match_percent": 100.0
+          "match_percent": 99.6875
         },
         {
           "name": "_Z12GunganA_InitP11WORLDINFO_s",
@@ -83684,7 +83501,7 @@
           "address": 2079936,
           "offset": 1189968,
           "size": 473,
-          "match_percent": 99.69444
+          "match_percent": 99.78704
         },
         {
           "name": "_Z14GunganA_UpdateP11WORLDINFO_s",
@@ -83692,7 +83509,7 @@
           "address": 2080416,
           "offset": 1190448,
           "size": 630,
-          "match_percent": 96.45255
+          "match_percent": 99.10219
         },
         {
           "name": "_Z12RescueA_InitP11WORLDINFO_s",
@@ -83700,7 +83517,7 @@
           "address": 2081056,
           "offset": 1191088,
           "size": 144,
-          "match_percent": 100.0
+          "match_percent": 99.47369
         },
         {
           "name": "_Z12RescueB_InitP11WORLDINFO_s",
@@ -83716,7 +83533,7 @@
           "address": 2081216,
           "offset": 1191248,
           "size": 938,
-          "match_percent": 99.99087
+          "match_percent": 99.73972
         },
         {
           "name": "_Z12RescueE_InitP11WORLDINFO_s",
@@ -83724,6 +83541,14 @@
           "address": 2082160,
           "offset": 1192192,
           "size": 55,
+          "match_percent": 99.666664
+        },
+        {
+          "name": "_Z17GetClientMineInfoPP7nuvec_sPPyS3_",
+          "demangled_name": "GetClientMineInfo(nuvec_s**, unsigned long long**, unsigned long long**)",
+          "address": 2082224,
+          "offset": 1192256,
+          "size": 50,
           "match_percent": 100.0
         },
         {
@@ -83748,7 +83573,7 @@
           "address": 2082688,
           "offset": 1192720,
           "size": 3669,
-          "match_percent": 56.854992
+          "match_percent": 56.909714
         },
         {
           "name": "_Z12PodRacePanelP11WORLDINFO_s",
@@ -83756,7 +83581,7 @@
           "address": 2086368,
           "offset": 1196400,
           "size": 873,
-          "match_percent": 92.86709
+          "match_percent": 92.96203
         },
         {
           "name": "_Z23UpdatePodRaceLapDisplayf",
@@ -83879,6 +83704,14 @@
           "match_percent": 79.17252
         },
         {
+          "name": "_Z11PodKeyResetv",
+          "demangled_name": "PodKeyReset()",
+          "address": 2095840,
+          "offset": 1205872,
+          "size": 36,
+          "match_percent": 99.77778
+        },
+        {
           "name": "_Z12PodRaceResetv",
           "demangled_name": "PodRaceReset()",
           "address": 2095888,
@@ -83943,6 +83776,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z7PodDustP11WORLDINFO_sP12GameObject_s",
+          "demangled_name": "PodDust(WORLDINFO_s*, GameObject_s*)",
+          "address": 2100240,
+          "offset": 1210272,
+          "size": 2256,
+          "match_percent": 80.1925
+        },
+        {
           "name": "_Z26PodSprint_InStartCountdownP11WORLDINFO_s",
           "demangled_name": "PodSprint_InStartCountdown(WORLDINFO_s*)",
           "address": 2102496,
@@ -83964,7 +83805,7 @@
           "address": 2102688,
           "offset": 1212720,
           "size": 555,
-          "match_percent": 99.40741
+          "match_percent": 99.62963
         },
         {
           "name": "_Z16PodSprintA_ResetP11WORLDINFO_s",
@@ -83980,7 +83821,7 @@
           "address": 2103792,
           "offset": 1213824,
           "size": 2633,
-          "match_percent": 64.498184
+          "match_percent": 63.54
         },
         {
           "name": "_Z16PodSprintA_PanelP11WORLDINFO_s",
@@ -83996,7 +83837,7 @@
           "address": 2107328,
           "offset": 1217360,
           "size": 255,
-          "match_percent": 80.159424
+          "match_percent": 79.21739
         },
         {
           "name": "_Z17Action_NewSebulbaP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -84004,7 +83845,7 @@
           "address": 2107584,
           "offset": 1217616,
           "size": 1463,
-          "match_percent": 77.54575
+          "match_percent": 76.46732
         },
         {
           "name": "_Z12RetakeD_InitP11WORLDINFO_s",
@@ -84214,12 +84055,44 @@
           "match_percent": 96.416664
         },
         {
+          "name": "_Z15DrawPaintLightsv",
+          "demangled_name": "DrawPaintLights()",
+          "address": 2114304,
+          "offset": 1224336,
+          "size": 309,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16ResetPaintPuzzleP11WORLDINFO_s",
+          "demangled_name": "ResetPaintPuzzle(WORLDINFO_s*)",
+          "address": 2114624,
+          "offset": 1224656,
+          "size": 206,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z15InitPaintPuzzleP11WORLDINFO_s",
+          "demangled_name": "InitPaintPuzzle(WORLDINFO_s*)",
+          "address": 2114832,
+          "offset": 1224864,
+          "size": 758,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z17UpdatePaintPuzzleP11WORLDINFO_s",
+          "demangled_name": "UpdatePaintPuzzle(WORLDINFO_s*)",
+          "address": 2115600,
+          "offset": 1225632,
+          "size": 1334,
+          "match_percent": 86.041176
+        },
+        {
           "name": "_Z10JediB_InitP11WORLDINFO_s",
           "demangled_name": "JediB_Init(WORLDINFO_s*)",
           "address": 2116944,
           "offset": 1226976,
           "size": 1603,
-          "match_percent": 95.67828
+          "match_percent": 95.69169
         },
         {
           "name": "_Z11JediB_ResetP11WORLDINFO_s",
@@ -84227,7 +84100,7 @@
           "address": 2118560,
           "offset": 1228592,
           "size": 2072,
-          "match_percent": 99.43096
+          "match_percent": 99.52511
         },
         {
           "name": "_Z12JediB_UpdateP11WORLDINFO_s",
@@ -84251,7 +84124,7 @@
           "address": 2128672,
           "offset": 1238704,
           "size": 558,
-          "match_percent": 99.645164
+          "match_percent": 99.96774
         },
         {
           "name": "_Z14FactoryB_ResetP11WORLDINFO_s",
@@ -84259,7 +84132,7 @@
           "address": 2129232,
           "offset": 1239264,
           "size": 154,
-          "match_percent": 99.8421
+          "match_percent": 99.97369
         },
         {
           "name": "_Z15FactoryB_UpdateP11WORLDINFO_s",
@@ -84267,7 +84140,7 @@
           "address": 2129392,
           "offset": 1239424,
           "size": 957,
-          "match_percent": 99.455696
+          "match_percent": 99.96203
         },
         {
           "name": "_Z13FactoryB_DrawP11WORLDINFO_s",
@@ -84283,7 +84156,7 @@
           "address": 2130384,
           "offset": 1240416,
           "size": 479,
-          "match_percent": 99.63636
+          "match_percent": 100.0
         },
         {
           "name": "_Z12DookuC_ResetP11WORLDINFO_s",
@@ -84291,7 +84164,7 @@
           "address": 2130864,
           "offset": 1240896,
           "size": 214,
-          "match_percent": 99.674416
+          "match_percent": 99.790695
         },
         {
           "name": "_Z13DookuC_UpdateP11WORLDINFO_s",
@@ -84315,7 +84188,7 @@
           "address": 2132528,
           "offset": 1242560,
           "size": 258,
-          "match_percent": 99.477615
+          "match_percent": 99.55224
         },
         {
           "name": "_Z15FactoryG_UpdateP11WORLDINFO_s",
@@ -84323,7 +84196,7 @@
           "address": 2132800,
           "offset": 1242832,
           "size": 448,
-          "match_percent": 77.32674
+          "match_percent": 77.623764
         },
         {
           "name": "_Z20KaminoA_AlwaysUpdateP11WORLDINFO_s",
@@ -84339,7 +84212,7 @@
           "address": 2133312,
           "offset": 1243344,
           "size": 2089,
-          "match_percent": 99.78013
+          "match_percent": 99.9704
         },
         {
           "name": "_Z13KaminoC_ResetP11WORLDINFO_s",
@@ -84347,7 +84220,7 @@
           "address": 2135408,
           "offset": 1245440,
           "size": 789,
-          "match_percent": 99.88757
+          "match_percent": 99.91716
         },
         {
           "name": "_Z14KaminoC_UpdateP11WORLDINFO_s",
@@ -84363,7 +84236,7 @@
           "address": 2141952,
           "offset": 1251984,
           "size": 811,
-          "match_percent": 99.878456
+          "match_percent": 99.9337
         },
         {
           "name": "_Z12KaminoE_InitP11WORLDINFO_s",
@@ -84371,7 +84244,7 @@
           "address": 2142768,
           "offset": 1252800,
           "size": 96,
-          "match_percent": 99.8
+          "match_percent": 100.0
         },
         {
           "name": "_Z12KaminoF_InitP11WORLDINFO_s",
@@ -84379,7 +84252,7 @@
           "address": 2142864,
           "offset": 1252896,
           "size": 145,
-          "match_percent": 99.67647
+          "match_percent": 99.97059
         },
         {
           "name": "_Z14NbKaminoA_InitP11WORLDINFO_s",
@@ -84387,7 +84260,7 @@
           "address": 2143024,
           "offset": 1253056,
           "size": 118,
-          "match_percent": 99.61539
+          "match_percent": 100.0
         },
         {
           "name": "_Z13KaminoE_ResetP11WORLDINFO_s",
@@ -84395,7 +84268,7 @@
           "address": 2143152,
           "offset": 1253184,
           "size": 1044,
-          "match_percent": 99.75527
+          "match_percent": 99.92405
         },
         {
           "name": "_Z20KaminoE_CheckPlatHitP6BOLT_s",
@@ -84467,7 +84340,7 @@
           "address": 2150544,
           "offset": 1260576,
           "size": 305,
-          "match_percent": 97.04
+          "match_percent": 97.30666
         },
         {
           "name": "_Z15GunshipA_UpdateP11WORLDINFO_s",
@@ -84491,7 +84364,7 @@
           "address": 2151040,
           "offset": 1261072,
           "size": 315,
-          "match_percent": 99.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z26GunShip_DragBombSeekBlowUpP12GameObject_s",
@@ -84515,7 +84388,7 @@
           "address": 2152864,
           "offset": 1262896,
           "size": 297,
-          "match_percent": 96.39189
+          "match_percent": 96.52702
         },
         {
           "name": "_Z18BonusGunshipB_InitP11WORLDINFO_s",
@@ -84539,7 +84412,7 @@
           "address": 2153312,
           "offset": 1263344,
           "size": 723,
-          "match_percent": 90.875
+          "match_percent": 91.1875
         },
         {
           "name": "_Z19BonusGunshipB_PanelP11WORLDINFO_s",
@@ -84573,12 +84446,28 @@
           "match_percent": 91.32258
         },
         {
+          "name": "_Z12Boulder_KillP6PART_si",
+          "demangled_name": "Boulder_Kill(PART_s*, int)",
+          "address": 2154544,
+          "offset": 1264576,
+          "size": 191,
+          "match_percent": 94.36735
+        },
+        {
+          "name": "_Z12Boulder_MoveP6PART_sf",
+          "demangled_name": "Boulder_Move(PART_s*, float)",
+          "address": 2154736,
+          "offset": 1264768,
+          "size": 463,
+          "match_percent": 99.96667
+        },
+        {
           "name": "_Z12CruiserAInitP11WORLDINFO_s",
           "demangled_name": "CruiserAInit(WORLDINFO_s*)",
           "address": 2155200,
           "offset": 1265232,
           "size": 163,
-          "match_percent": 99.324326
+          "match_percent": 100.0
         },
         {
           "name": "_Z14CruiserAUpdateP11WORLDINFO_s",
@@ -84602,7 +84491,7 @@
           "address": 2155600,
           "offset": 1265632,
           "size": 499,
-          "match_percent": 99.47321
+          "match_percent": 99.5625
         },
         {
           "name": "_Z13CruiserCPanelP11WORLDINFO_s",
@@ -84618,7 +84507,7 @@
           "address": 2156208,
           "offset": 1266240,
           "size": 729,
-          "match_percent": 90.723076
+          "match_percent": 90.8
         },
         {
           "name": "_Z13CruiserDResetP11WORLDINFO_s",
@@ -84626,7 +84515,7 @@
           "address": 2156944,
           "offset": 1266976,
           "size": 266,
-          "match_percent": 99.76786
+          "match_percent": 99.85714
         },
         {
           "name": "_Z14CruiserDUpdateP11WORLDINFO_s",
@@ -84634,7 +84523,7 @@
           "address": 2157216,
           "offset": 1267248,
           "size": 1920,
-          "match_percent": 80.7599
+          "match_percent": 81.81683
         },
         {
           "name": "_Z14GrievousA_InitP11WORLDINFO_s",
@@ -84642,7 +84531,7 @@
           "address": 2159136,
           "offset": 1269168,
           "size": 187,
-          "match_percent": 99.65909
+          "match_percent": 100.0
         },
         {
           "name": "_Z15GrievousA_ResetP11WORLDINFO_s",
@@ -84666,7 +84555,7 @@
           "address": 2159616,
           "offset": 1269648,
           "size": 212,
-          "match_percent": 99.565216
+          "match_percent": 100.0
         },
         {
           "name": "_Z15KashyyykA_ResetP11WORLDINFO_s",
@@ -84674,7 +84563,7 @@
           "address": 2159840,
           "offset": 1269872,
           "size": 110,
-          "match_percent": 99.5
+          "match_percent": 99.916664
         },
         {
           "name": "_Z16KashyyykA_UpdateP11WORLDINFO_s",
@@ -84738,7 +84627,7 @@
           "address": 2160432,
           "offset": 1270464,
           "size": 84,
-          "match_percent": 99.63158
+          "match_percent": 99.89474
         },
         {
           "name": "_Z15KashyyykD_ResetP11WORLDINFO_s",
@@ -84746,7 +84635,7 @@
           "address": 2160528,
           "offset": 1270560,
           "size": 524,
-          "match_percent": 95.41525
+          "match_percent": 95.5
         },
         {
           "name": "_Z16KashyyykD_UpdateP11WORLDINFO_s",
@@ -84757,12 +84646,20 @@
           "match_percent": 99.644066
         },
         {
+          "name": "_Z21Action_BoulderSectionP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_BoulderSection(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 2161584,
+          "offset": 1271616,
+          "size": 972,
+          "match_percent": 57.561703
+        },
+        {
           "name": "_Z12TempleA_InitP11WORLDINFO_s",
           "demangled_name": "TempleA_Init(WORLDINFO_s*)",
           "address": 2162560,
           "offset": 1272592,
           "size": 98,
-          "match_percent": 99.583336
+          "match_percent": 100.0
         },
         {
           "name": "_Z12TempleC_InitP11WORLDINFO_s",
@@ -84770,7 +84667,7 @@
           "address": 2162672,
           "offset": 1272704,
           "size": 344,
-          "match_percent": 99.5
+          "match_percent": 99.934784
         },
         {
           "name": "_Z20TempleC_AlwaysUpdateP11WORLDINFO_s",
@@ -84778,7 +84675,7 @@
           "address": 2163024,
           "offset": 1273056,
           "size": 145,
-          "match_percent": 99.55556
+          "match_percent": 99.97222
         },
         {
           "name": "_Z11VaderA_InitP11WORLDINFO_s",
@@ -84786,7 +84683,7 @@
           "address": 2163184,
           "offset": 1273216,
           "size": 258,
-          "match_percent": 99.67796
+          "match_percent": 99.932205
         },
         {
           "name": "_Z12VaderA_ResetP11WORLDINFO_s",
@@ -84818,7 +84715,7 @@
           "address": 2165360,
           "offset": 1275392,
           "size": 107,
-          "match_percent": 99.793106
+          "match_percent": 99.965515
         },
         {
           "name": "_Z11VaderB_InitP11WORLDINFO_s",
@@ -84834,7 +84731,7 @@
           "address": 2165488,
           "offset": 1275520,
           "size": 77,
-          "match_percent": 99.588234
+          "match_percent": 99.882355
         },
         {
           "name": "_Z13VaderB_UpdateP11WORLDINFO_s",
@@ -84858,7 +84755,7 @@
           "address": 2165808,
           "offset": 1275840,
           "size": 1132,
-          "match_percent": 99.75203
+          "match_percent": 99.99593
         },
         {
           "name": "_Z12VaderC_ResetP11WORLDINFO_s",
@@ -84883,14 +84780,6 @@
           "offset": 1281552,
           "size": 133,
           "match_percent": 99.60976
-        },
-        {
-          "name": "_Z14ANewHopeA_InitP11WORLDINFO_s",
-          "demangled_name": "ANewHopeA_Init(WORLDINFO_s*)",
-          "address": 2182992,
-          "offset": 1293024,
-          "size": 308,
-          "match_percent": 99.60811
         }
       ]
     },
@@ -84916,12 +84805,28 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL20TrenchKilledCallbackP12GameObject_s",
+          "demangled_name": "TrenchKilledCallback(GameObject_s*)",
+          "address": 2171680,
+          "offset": 1281712,
+          "size": 71,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL24PartKill_EjectedCreatureP6PART_si",
           "demangled_name": "PartKill_EjectedCreature(PART_s*, int)",
           "address": 2171760,
           "offset": 1281792,
           "size": 648,
           "match_percent": 100.0
+        },
+        {
+          "name": "_ZL10TrenchMoveP12GameObject_s",
+          "demangled_name": "TrenchMove(GameObject_s*)",
+          "address": 2172416,
+          "offset": 1282448,
+          "size": 1250,
+          "match_percent": 84.06641
         },
         {
           "name": "_ZL29BlockadeRunnerD_EjectCreaturei",
@@ -84937,7 +84842,7 @@
           "address": 2175616,
           "offset": 1285648,
           "size": 477,
-          "match_percent": 96.8
+          "match_percent": 97.06087
         },
         {
           "name": "_Z16TatooineA_UpdateP11WORLDINFO_s",
@@ -84953,7 +84858,7 @@
           "address": 2176448,
           "offset": 1286480,
           "size": 252,
-          "match_percent": 99.40678
+          "match_percent": 100.0
         },
         {
           "name": "_Z14TatooineC_InitP11WORLDINFO_s",
@@ -84961,7 +84866,7 @@
           "address": 2176704,
           "offset": 1286736,
           "size": 58,
-          "match_percent": 99.666664
+          "match_percent": 100.0
         },
         {
           "name": "_Z15MosEisleyA_InitP11WORLDINFO_s",
@@ -84969,7 +84874,7 @@
           "address": 2176768,
           "offset": 1286800,
           "size": 762,
-          "match_percent": 99.85
+          "match_percent": 99.98889
         },
         {
           "name": "_Z15MosEisleyB_InitP11WORLDINFO_s",
@@ -84977,7 +84882,7 @@
           "address": 2177536,
           "offset": 1287568,
           "size": 1661,
-          "match_percent": 99.64445
+          "match_percent": 99.99167
         },
         {
           "name": "_Z17MosEisleyB_UpdateP11WORLDINFO_s",
@@ -85001,7 +84906,7 @@
           "address": 2180336,
           "offset": 1290368,
           "size": 1798,
-          "match_percent": 99.82011
+          "match_percent": 99.96561
         },
         {
           "name": "_Z23MosEisleyD_AlwaysUpdateP11WORLDINFO_s",
@@ -85041,7 +84946,7 @@
           "address": 2182480,
           "offset": 1292512,
           "size": 262,
-          "match_percent": 84.469696
+          "match_percent": 89.454544
         },
         {
           "name": "_Z16TatooineD_UpdateP11WORLDINFO_s",
@@ -85052,12 +84957,20 @@
           "match_percent": 88.129036
         },
         {
+          "name": "_Z14ANewHopeA_InitP11WORLDINFO_s",
+          "demangled_name": "ANewHopeA_Init(WORLDINFO_s*)",
+          "address": 2182992,
+          "offset": 1293024,
+          "size": 308,
+          "match_percent": 99.945946
+        },
+        {
           "name": "_Z20BlockadeRunnerB_InitP11WORLDINFO_s",
           "demangled_name": "BlockadeRunnerB_Init(WORLDINFO_s*)",
           "address": 2183312,
           "offset": 1293344,
           "size": 975,
-          "match_percent": 99.666664
+          "match_percent": 99.99561
         },
         {
           "name": "_Z22BlockadeRunnerB_UpdateP11WORLDINFO_s",
@@ -85073,7 +84986,7 @@
           "address": 2184368,
           "offset": 1294400,
           "size": 58,
-          "match_percent": 99.333336
+          "match_percent": 100.0
         },
         {
           "name": "_Z21BlockadeRunnerD_ResetP11WORLDINFO_s",
@@ -85081,7 +84994,7 @@
           "address": 2184432,
           "offset": 1294464,
           "size": 148,
-          "match_percent": 99.71429
+          "match_percent": 100.0
         },
         {
           "name": "_Z22BlockadeRunnerD_UpdateP11WORLDINFO_s",
@@ -85089,7 +85002,7 @@
           "address": 2184592,
           "offset": 1294624,
           "size": 2494,
-          "match_percent": 96.076515
+          "match_percent": 95.72064
         },
         {
           "name": "_Z21DeathStarRescueB_InitP11WORLDINFO_s",
@@ -85097,7 +85010,7 @@
           "address": 2187088,
           "offset": 1297120,
           "size": 566,
-          "match_percent": 99.468254
+          "match_percent": 99.98412
         },
         {
           "name": "_Z23DeathStarRescueB_UpdateP11WORLDINFO_s",
@@ -85121,7 +85034,7 @@
           "address": 2188896,
           "offset": 1298928,
           "size": 340,
-          "match_percent": 99.45946
+          "match_percent": 100.0
         },
         {
           "name": "_Z29DeathStarRescueC_AlwaysUpdateP11WORLDINFO_s",
@@ -85137,7 +85050,7 @@
           "address": 2189312,
           "offset": 1299344,
           "size": 238,
-          "match_percent": 99.48276
+          "match_percent": 100.0
         },
         {
           "name": "_Z21DeathStarEscapeB_InitP11WORLDINFO_s",
@@ -85145,7 +85058,7 @@
           "address": 2189552,
           "offset": 1299584,
           "size": 336,
-          "match_percent": 99.7619
+          "match_percent": 100.0
         },
         {
           "name": "_Z23DeathStarEscapeB_UpdateP11WORLDINFO_s",
@@ -85153,7 +85066,7 @@
           "address": 2189888,
           "offset": 1299920,
           "size": 438,
-          "match_percent": 96.928
+          "match_percent": 96.888
         },
         {
           "name": "_Z29DeathStarEscapeB_AlwaysUpdateP11WORLDINFO_s",
@@ -85185,7 +85098,7 @@
           "address": 2191088,
           "offset": 1301120,
           "size": 193,
-          "match_percent": 99.46809
+          "match_percent": 100.0
         },
         {
           "name": "_Z22DeathStarEscapeC_ResetP11WORLDINFO_s",
@@ -85193,7 +85106,7 @@
           "address": 2191296,
           "offset": 1301328,
           "size": 64,
-          "match_percent": 99.6875
+          "match_percent": 100.0
         },
         {
           "name": "_Z23DeathStarEscapeC_UpdateP11WORLDINFO_s",
@@ -85225,7 +85138,7 @@
           "address": 2191728,
           "offset": 1301760,
           "size": 379,
-          "match_percent": 92.1134
+          "match_percent": 92.16495
         },
         {
           "name": "_Z20DeathStarBattleDInitP11WORLDINFO_s",
@@ -85249,7 +85162,7 @@
           "address": 2192160,
           "offset": 1302192,
           "size": 1502,
-          "match_percent": 75.527435
+          "match_percent": 75.55793
         },
         {
           "name": "_Z20DeathStarBattleDDrawP11WORLDINFO_s",
@@ -85280,7 +85193,7 @@
           "address": 2193680,
           "offset": 1303712,
           "size": 792,
-          "match_percent": 81.87931
+          "match_percent": 86.82184
         },
         {
           "name": "_ZL16Asteroids_Updatev",
@@ -85296,7 +85209,7 @@
           "address": 2194880,
           "offset": 1304912,
           "size": 878,
-          "match_percent": 83.35683
+          "match_percent": 83.40088
         },
         {
           "name": "_ZL20DrawFalconSpotLightsP12GameObject_s",
@@ -85305,6 +85218,46 @@
           "offset": 1305792,
           "size": 706,
           "match_percent": 99.92667
+        },
+        {
+          "name": "_Z17Asteroid_PartKillP6PART_si",
+          "demangled_name": "Asteroid_PartKill(PART_s*, int)",
+          "address": 2196480,
+          "offset": 1306512,
+          "size": 284,
+          "match_percent": 96.82539
+        },
+        {
+          "name": "_ZL19KilledTrooperCannonP12GameObject_s",
+          "demangled_name": "KilledTrooperCannon(GameObject_s*)",
+          "address": 2196768,
+          "offset": 1306800,
+          "size": 314,
+          "match_percent": 98.42105
+        },
+        {
+          "name": "_Z18InitTrooperCannonsP11WORLDINFO_s",
+          "demangled_name": "InitTrooperCannons(WORLDINFO_s*)",
+          "address": 2197088,
+          "offset": 1307120,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z19ResetTrooperCannonsP11WORLDINFO_si",
+          "demangled_name": "ResetTrooperCannons(WORLDINFO_s*, int)",
+          "address": 2197120,
+          "offset": 1307152,
+          "size": 2776,
+          "match_percent": 88.96123
+        },
+        {
+          "name": "_Z20UpdateTrooperCannonsP11WORLDINFO_s",
+          "demangled_name": "UpdateTrooperCannons(WORLDINFO_s*)",
+          "address": 2199904,
+          "offset": 1309936,
+          "size": 1341,
+          "match_percent": 83.22222
         },
         {
           "name": "_Z16HothEscapeA_InitP11WORLDINFO_s",
@@ -85336,7 +85289,7 @@
           "address": 2201392,
           "offset": 1311424,
           "size": 133,
-          "match_percent": 99.21875
+          "match_percent": 100.0
         },
         {
           "name": "_Z17HothEscapeB_ResetP11WORLDINFO_s",
@@ -85344,7 +85297,7 @@
           "address": 2201536,
           "offset": 1311568,
           "size": 123,
-          "match_percent": 99.666664
+          "match_percent": 100.0
         },
         {
           "name": "_Z18HothEscapeB_UpdateP11WORLDINFO_s",
@@ -85352,7 +85305,7 @@
           "address": 2201664,
           "offset": 1311696,
           "size": 132,
-          "match_percent": 99.57143
+          "match_percent": 100.0
         },
         {
           "name": "_Z16HothEscapeC_InitP11WORLDINFO_s",
@@ -85360,7 +85313,7 @@
           "address": 2201808,
           "offset": 1311840,
           "size": 574,
-          "match_percent": 99.5037
+          "match_percent": 99.98518
         },
         {
           "name": "_Z17HothEscapeC_ResetP11WORLDINFO_s",
@@ -85416,7 +85369,7 @@
           "address": 2202688,
           "offset": 1312720,
           "size": 207,
-          "match_percent": 99.545456
+          "match_percent": 100.0
         },
         {
           "name": "_Z20AsteroidChaseA_ResetP11WORLDINFO_s",
@@ -85440,7 +85393,7 @@
           "address": 2202928,
           "offset": 1312960,
           "size": 473,
-          "match_percent": 99.48572
+          "match_percent": 99.91428
         },
         {
           "name": "_Z20AsteroidChaseB_ResetP11WORLDINFO_s",
@@ -85456,7 +85409,7 @@
           "address": 2203424,
           "offset": 1313456,
           "size": 997,
-          "match_percent": 91.375
+          "match_percent": 78.958336
         },
         {
           "name": "_Z19AsteroidChaseB_DrawP11WORLDINFO_s",
@@ -85472,7 +85425,7 @@
           "address": 2204544,
           "offset": 1314576,
           "size": 567,
-          "match_percent": 99.6194
+          "match_percent": 99.95522
         },
         {
           "name": "_Z20AsteroidChaseC_ResetP11WORLDINFO_s",
@@ -85496,7 +85449,7 @@
           "address": 2205776,
           "offset": 1315808,
           "size": 2132,
-          "match_percent": 93.63347
+          "match_percent": 93.703186
         },
         {
           "name": "_Z21AsteroidChaseD_UpdateP11WORLDINFO_s",
@@ -85504,7 +85457,7 @@
           "address": 2207920,
           "offset": 1317952,
           "size": 2073,
-          "match_percent": 99.92041
+          "match_percent": 99.155106
         },
         {
           "name": "_Z20AsteroidChaseD_PanelP11WORLDINFO_s",
@@ -85520,7 +85473,7 @@
           "address": 2210080,
           "offset": 1320112,
           "size": 173,
-          "match_percent": 99.844444
+          "match_percent": 99.95556
         },
         {
           "name": "_Z20CloudCityTrapA_ResetP11WORLDINFO_s",
@@ -85536,7 +85489,7 @@
           "address": 2210304,
           "offset": 1320336,
           "size": 312,
-          "match_percent": 99.986664
+          "match_percent": 98.58667
         },
         {
           "name": "_Z19CloudCityTrapB_InitP11WORLDINFO_s",
@@ -85544,7 +85497,7 @@
           "address": 2210624,
           "offset": 1320656,
           "size": 241,
-          "match_percent": 99.78571
+          "match_percent": 99.96429
         },
         {
           "name": "_Z21CloudCityTrapB_UpdateP11WORLDINFO_s",
@@ -85552,7 +85505,7 @@
           "address": 2210880,
           "offset": 1320912,
           "size": 312,
-          "match_percent": 99.7875
+          "match_percent": 97.975
         },
         {
           "name": "_Z20CloudCityTrapC_ResetP11WORLDINFO_s",
@@ -85560,7 +85513,7 @@
           "address": 2211200,
           "offset": 1321232,
           "size": 309,
-          "match_percent": 99.83544
+          "match_percent": 99.96203
         },
         {
           "name": "_Z21CloudCityTrapC_UpdateP11WORLDINFO_s",
@@ -85576,7 +85529,7 @@
           "address": 2211792,
           "offset": 1321824,
           "size": 104,
-          "match_percent": 99.48387
+          "match_percent": 89.645164
         },
         {
           "name": "_Z21CloudCityEscapeA_InitP11WORLDINFO_s",
@@ -85584,7 +85537,7 @@
           "address": 2211904,
           "offset": 1321936,
           "size": 471,
-          "match_percent": 99.51852
+          "match_percent": 99.98148
         },
         {
           "name": "_Z22CloudCityEscapeA_ResetP11WORLDINFO_s",
@@ -85592,7 +85545,7 @@
           "address": 2212384,
           "offset": 1322416,
           "size": 165,
-          "match_percent": 99.710526
+          "match_percent": 99.97369
         },
         {
           "name": "_Z23CloudCityEscapeA_UpdateP11WORLDINFO_s",
@@ -85608,7 +85561,7 @@
           "address": 2213104,
           "offset": 1323136,
           "size": 191,
-          "match_percent": 99.97959
+          "match_percent": 96.71429
         },
         {
           "name": "_Z21CloudCityEscapeC_InitP11WORLDINFO_s",
@@ -85616,7 +85569,7 @@
           "address": 2213296,
           "offset": 1323328,
           "size": 168,
-          "match_percent": 99.583336
+          "match_percent": 100.0
         },
         {
           "name": "_Z23CloudCityEscapeC_UpdateP11WORLDINFO_s",
@@ -85627,12 +85580,20 @@
           "match_percent": 99.925
         },
         {
+          "name": "_Z28TakeOverYodaSeekDistanceHackP12GameObject_sS0_P7nuvec_s",
+          "demangled_name": "TakeOverYodaSeekDistanceHack(GameObject_s*, GameObject_s*, nuvec_s*)",
+          "address": 2213824,
+          "offset": 1323856,
+          "size": 197,
+          "match_percent": 99.962265
+        },
+        {
           "name": "_Z13DagobahA_InitP11WORLDINFO_s",
           "demangled_name": "DagobahA_Init(WORLDINFO_s*)",
           "address": 2214032,
           "offset": 1324064,
           "size": 395,
-          "match_percent": 99.87912
+          "match_percent": 99.93407
         },
         {
           "name": "_Z15DagobahA_UpdateP11WORLDINFO_s",
@@ -85656,7 +85617,7 @@
           "address": 2215408,
           "offset": 1325440,
           "size": 221,
-          "match_percent": 99.528305
+          "match_percent": 100.0
         },
         {
           "name": "_Z13DagobahE_InitP11WORLDINFO_s",
@@ -85664,7 +85625,7 @@
           "address": 2215632,
           "offset": 1325664,
           "size": 366,
-          "match_percent": 99.63856
+          "match_percent": 100.0
         },
         {
           "name": "_Z13DagobahC_InitP11WORLDINFO_s",
@@ -85672,7 +85633,7 @@
           "address": 2216000,
           "offset": 1326032,
           "size": 156,
-          "match_percent": 99.69444
+          "match_percent": 99.97222
         },
         {
           "name": "_Z14DagobahC_PanelP11WORLDINFO_s",
@@ -85683,12 +85644,28 @@
           "match_percent": 99.882355
         },
         {
+          "name": "_Z19ResetMinikitCounterv",
+          "demangled_name": "ResetMinikitCounter()",
+          "address": 2216288,
+          "offset": 1326320,
+          "size": 30,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z23IncrementMinikitCounterP12GameObject_s",
+          "demangled_name": "IncrementMinikitCounter(GameObject_s*)",
+          "address": 2216320,
+          "offset": 1326352,
+          "size": 807,
+          "match_percent": 76.28931
+        },
+        {
           "name": "_Z16HothBattleA_InitP11WORLDINFO_s",
           "demangled_name": "HothBattleA_Init(WORLDINFO_s*)",
           "address": 2217136,
           "offset": 1327168,
           "size": 466,
-          "match_percent": 99.76636
+          "match_percent": 99.95327
         },
         {
           "name": "_Z17HothBattleA_ResetP11WORLDINFO_s",
@@ -85720,7 +85697,7 @@
           "address": 2217952,
           "offset": 1327984,
           "size": 207,
-          "match_percent": 99.545456
+          "match_percent": 100.0
         },
         {
           "name": "_Z16HothBattleC_InitP11WORLDINFO_s",
@@ -85728,7 +85705,7 @@
           "address": 2218160,
           "offset": 1328192,
           "size": 631,
-          "match_percent": 99.71724
+          "match_percent": 99.95862
         },
         {
           "name": "_Z17HothBattleC_ResetP11WORLDINFO_s",
@@ -85736,7 +85713,7 @@
           "address": 2218800,
           "offset": 1328832,
           "size": 194,
-          "match_percent": 99.90196
+          "match_percent": 100.0
         },
         {
           "name": "_Z18HothBattleC_UpdateP11WORLDINFO_s",
@@ -85787,12 +85764,28 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z15getSpawnLocatorfPc",
+          "demangled_name": "getSpawnLocator(float, char*)",
+          "address": 2221984,
+          "offset": 1332016,
+          "size": 273,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z22SpawnMeleeCreatureTypei",
+          "demangled_name": "SpawnMeleeCreatureType(int)",
+          "address": 2222272,
+          "offset": 1332304,
+          "size": 1236,
+          "match_percent": 57.975525
+        },
+        {
           "name": "_Z23HothBattle_StartNewWavev",
           "demangled_name": "HothBattle_StartNewWave()",
           "address": 2223520,
           "offset": 1333552,
           "size": 470,
-          "match_percent": 99.75207
+          "match_percent": 100.0
         },
         {
           "name": "_Z36HothBattle_ManageBackgroundCreaturesv",
@@ -85800,7 +85793,7 @@
           "address": 2224000,
           "offset": 1334032,
           "size": 1898,
-          "match_percent": 80.89436
+          "match_percent": 80.12676
         },
         {
           "name": "_Z22HothBattleE_UpdateWavev",
@@ -85808,7 +85801,7 @@
           "address": 2225904,
           "offset": 1335936,
           "size": 3136,
-          "match_percent": 82.672035
+          "match_percent": 80.420204
         },
         {
           "name": "_Z18HothBattleE_UpdateP11WORLDINFO_s",
@@ -85824,7 +85817,7 @@
           "address": 2229104,
           "offset": 1339136,
           "size": 514,
-          "match_percent": 99.837395
+          "match_percent": 98.98374
         }
       ]
     },
@@ -85863,7 +85856,7 @@
           "address": 2229840,
           "offset": 1339872,
           "size": 938,
-          "match_percent": 99.86087
+          "match_percent": 100.0
         },
         {
           "name": "_Z28DeathStar2BattleD_InZapRangeP12GameObject_s",
@@ -85887,7 +85880,7 @@
           "address": 2232896,
           "offset": 1342928,
           "size": 220,
-          "match_percent": 99.791664
+          "match_percent": 100.0
         },
         {
           "name": "_Z25DeathStar2BattleFire_DrawP11WORLDINFO_s",
@@ -85927,7 +85920,7 @@
           "address": 2239600,
           "offset": 1349632,
           "size": 1593,
-          "match_percent": 99.648254
+          "match_percent": 99.99709
         },
         {
           "name": "_Z19EmperorFightA_ResetP11WORLDINFO_s",
@@ -85935,7 +85928,7 @@
           "address": 2241200,
           "offset": 1351232,
           "size": 1046,
-          "match_percent": 99.10728
+          "match_percent": 99.91188
         },
         {
           "name": "_Z20EmperorFightA_UpdateP11WORLDINFO_s",
@@ -85959,7 +85952,7 @@
           "address": 2248320,
           "offset": 1358352,
           "size": 128,
-          "match_percent": 99.53125
+          "match_percent": 100.0
         },
         {
           "name": "_Z19JabbasPalaceA_ResetP11WORLDINFO_s",
@@ -85983,7 +85976,7 @@
           "address": 2248656,
           "offset": 1358688,
           "size": 115,
-          "match_percent": 99.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z19JabbasPalaceB_ResetP11WORLDINFO_s",
@@ -86007,7 +86000,7 @@
           "address": 2248960,
           "offset": 1358992,
           "size": 149,
-          "match_percent": 99.71429
+          "match_percent": 100.0
         },
         {
           "name": "_Z19JabbasPalaceE_ResetP11WORLDINFO_s",
@@ -86015,7 +86008,7 @@
           "address": 2249120,
           "offset": 1359152,
           "size": 213,
-          "match_percent": 99.58
+          "match_percent": 99.98
         },
         {
           "name": "_Z20JabbasPalaceE_UpdateP11WORLDINFO_s",
@@ -86031,7 +86024,7 @@
           "address": 2252240,
           "offset": 1362272,
           "size": 104,
-          "match_percent": 99.48387
+          "match_percent": 99.96774
         },
         {
           "name": "_Z17SarlaccPitA_ResetP11WORLDINFO_s",
@@ -86039,7 +86032,7 @@
           "address": 2252352,
           "offset": 1362384,
           "size": 142,
-          "match_percent": 99.85294
+          "match_percent": 100.0
         },
         {
           "name": "_Z16SarlaccPitA_DrawP11WORLDINFO_s",
@@ -86047,7 +86040,7 @@
           "address": 2252496,
           "offset": 1362528,
           "size": 252,
-          "match_percent": 99.88525
+          "match_percent": 99.96722
         },
         {
           "name": "_Z25SarlaccPitB_SpecialUpdateP11WORLDINFO_s",
@@ -86055,7 +86048,7 @@
           "address": 2252752,
           "offset": 1362784,
           "size": 1580,
-          "match_percent": 99.849205
+          "match_percent": 99.98148
         },
         {
           "name": "_Z21SarlaccPitDiscoActiveP11WORLDINFO_s",
@@ -86071,7 +86064,7 @@
           "address": 2254432,
           "offset": 1364464,
           "size": 1091,
-          "match_percent": 99.90441
+          "match_percent": 99.94118
         },
         {
           "name": "_Z17SarlaccPitB_ResetP11WORLDINFO_s",
@@ -86079,7 +86072,7 @@
           "address": 2255536,
           "offset": 1365568,
           "size": 1045,
-          "match_percent": 92.04425
+          "match_percent": 92.35398
         },
         {
           "name": "_Z18SarlaccPitB_UpdateP11WORLDINFO_s",
@@ -86087,7 +86080,7 @@
           "address": 2256592,
           "offset": 1366624,
           "size": 4747,
-          "match_percent": 53.432053
+          "match_percent": 53.44611
         },
         {
           "name": "_Z16SarlaccPitC_InitP11WORLDINFO_s",
@@ -86103,7 +86096,7 @@
           "address": 2261408,
           "offset": 1371440,
           "size": 2128,
-          "match_percent": 96.936844
+          "match_percent": 97.01053
         },
         {
           "name": "_Z18SarlaccPitC_UpdateP11WORLDINFO_s",
@@ -86111,7 +86104,7 @@
           "address": 2263536,
           "offset": 1373568,
           "size": 957,
-          "match_percent": 88.22388
+          "match_percent": 88.44776
         },
         {
           "name": "_Z13LegoCity_InitP11WORLDINFO_s",
@@ -86119,7 +86112,7 @@
           "address": 2264496,
           "offset": 1374528,
           "size": 105,
-          "match_percent": 99.83871
+          "match_percent": 100.0
         },
         {
           "name": "_Z14LegoCity_ResetP11WORLDINFO_s",
@@ -86151,7 +86144,7 @@
           "address": 2267104,
           "offset": 1377136,
           "size": 143,
-          "match_percent": 99.731705
+          "match_percent": 99.97561
         },
         {
           "name": "_Z13NewTown_ResetP11WORLDINFO_s",
@@ -86175,7 +86168,7 @@
           "address": 2269296,
           "offset": 1379328,
           "size": 68,
-          "match_percent": 99.6875
+          "match_percent": 100.0
         },
         {
           "name": "_Z19EndorBattleA_UpdateP11WORLDINFO_s",
@@ -86199,7 +86192,7 @@
           "address": 2269696,
           "offset": 1379728,
           "size": 68,
-          "match_percent": 99.6875
+          "match_percent": 100.0
         },
         {
           "name": "_Z14Platform_ResetP11WORLDINFO_s",
@@ -86215,7 +86208,7 @@
           "address": 2269824,
           "offset": 1379856,
           "size": 61,
-          "match_percent": 99.6875
+          "match_percent": 100.0
         }
       ]
     },
@@ -126946,6 +126939,8 @@
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legoapi/world/levels/episodeIII.cpp.o",
+        "legoapi/world/levels/episodeIV.cpp.o",
         "legoapi/world/levels/hub.cpp.o",
         "legoapi/world/levels/levels.cpp.o",
         "legogame/game.cpp.o"
@@ -126962,6 +126957,8 @@
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legoapi/world/levels/episodeIII.cpp.o",
+        "legoapi/world/levels/episodeIV.cpp.o",
         "legoapi/world/levels/hub.cpp.o",
         "legoapi/world/levels/levels.cpp.o",
         "legogame/game.cpp.o"
@@ -126978,6 +126975,8 @@
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legoapi/world/levels/episodeIII.cpp.o",
+        "legoapi/world/levels/episodeIV.cpp.o",
         "legoapi/world/levels/hub.cpp.o",
         "legoapi/world/levels/levels.cpp.o",
         "legogame/game.cpp.o"
@@ -127007,6 +127006,8 @@
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legoapi/world/levels/episodeIII.cpp.o",
+        "legoapi/world/levels/episodeIV.cpp.o",
         "legoapi/world/levels/hub.cpp.o",
         "legoapi/world/levels/levels.cpp.o",
         "legogame/game.cpp.o"
@@ -127023,6 +127024,8 @@
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legoapi/world/levels/episodeIII.cpp.o",
+        "legoapi/world/levels/episodeIV.cpp.o",
         "legoapi/world/levels/hub.cpp.o",
         "legoapi/world/levels/levels.cpp.o",
         "legogame/game.cpp.o"
@@ -127039,6 +127042,8 @@
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legoapi/world/levels/episodeIII.cpp.o",
+        "legoapi/world/levels/episodeIV.cpp.o",
         "legoapi/world/levels/hub.cpp.o",
         "legoapi/world/levels/levels.cpp.o",
         "legogame/game.cpp.o"
@@ -129701,7 +129706,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 457,
+    "bazel_units": 456,
     "functions": 13454,
     "assigned_functions": 12843,
     "ambiguous_functions": 284,

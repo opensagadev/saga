@@ -65,13 +65,13 @@ extern "C" {
 
 i32 addcreature_override_id_check;
 f32 default_mover_extra = 0.05f;
-f32 trench_max_height_move = 5.0f;
-f32 trench_roll_f = 5000.0f;
-f32 trench_seek_z = 0.5f;
-f32 trench_seek_y = 0.5f;
-f32 trench_seek_x = 4.0f;
+extern f32 trench_max_height_move;
+extern f32 trench_roll_f;
+extern f32 trench_seek_z;
+extern f32 trench_seek_y;
+extern f32 trench_seek_x;
 extern f32 TURNTIME;
-f32 LOOPTIME = 1.5f;
+extern f32 LOOPTIME;
 
 void ClearGameObjects(APIOBJECTSYS_s *api_object_sys) {
     for (i32 i = 0; i < 64; i++) {
@@ -138,94 +138,9 @@ void TrenchMove(GameObject_s *) asm("_ZL10TrenchMoveP12GameObject_s") __attribut
 void TrenchKilledCallback(GameObject_s *) asm("_ZL20TrenchKilledCallbackP12GameObject_s")
     __attribute__((visibility("hidden")));
 
-__used__ void TrenchMove(GameObject_s *object) {
-    APIOBJECT_s &api = object->apiobj;
-    api.field_0x214 = api.field_0x218;
-    api.start_position = api.position;
-    api.initial_position = api.collision_position;
-    api.field_0x27e = api.field_0x27d;
-    object->pad_gamepad->previous_input_angle = object->pad_gamepad->input_angle;
-    object->pad_gamepad->previous_input_magnitude = object->pad_gamepad->input_magnitude;
-    object->previous_movement_angle = api.field_0x276;
-    object->field_0xefd &= ~0x40;
-    object->field_0x1086 = 0;
-    if (api.model_draw_result != 0)
-        object->field_0xf1c = 0.0f;
-    else
-        object->field_0xf1c += FRAMETIME;
-    if (object->character_context == 0x2b)
-        object->turn_braking += FRAMETIME;
+__used__ void TrenchMove(GameObject_s *object);
 
-    if (object->character_context != 0x2a) {
-        if ((api.movement_facing_angle > 0x8000) != (player->apiobj.movement_facing_angle > 0x8000) ||
-            (player->character_context == 0x2a &&
-             (api.movement_facing_angle <= 0x8000) != (player->apiobj.movement_facing_angle > 0x8000) &&
-             player->context_animation_timer < 0.5f * TURNTIME)) {
-            StartTurn(object);
-        } else if (object->character_context != 0x36 && player->character_context == 0x36 &&
-                   player->context_animation_timer < 0.75f * LOOPTIME) {
-            object->character_context = 0x36;
-            object->context_animation = 1;
-            object->airborne_action_duration = LOOPTIME;
-            object->context_animation_timer = LOOPTIME;
-        }
-    }
-
-    f32 target_x;
-    if (object->character_context == 0x2a) {
-        const f32 phase = object->context_animation_timer / TURNTIME;
-        if (api.movement_facing_angle > 0x8000)
-            target_x = phase * 10.0f + (1.0f - phase) * -10.0f + trenchrun.position.x;
-        else
-            target_x = phase * -10.0f + (1.0f - phase) * 10.0f + trenchrun.position.x;
-    } else if (api.movement_facing_angle > 0x8000) {
-        target_x = trenchrun.position.x + 10.0f;
-    } else {
-        target_x = trenchrun.position.x - 10.0f;
-    }
-    api.position.x = SeekValF(api.position.x, target_x, trench_seek_x);
-    f32 target_y = trenchrun.position.y + object->movement_spline_offset.y + VehicleTurnOrLoopOffset(object);
-    if (target_y - api.position.y > trench_max_height_move)
-        target_y = api.position.y + trench_max_height_move;
-    api.position.y = SeekValF(api.position.y, target_y, trench_seek_y);
-    api.position.z = SeekValF(api.position.z, trenchrun.position.z + object->movement_spline_offset.z, trench_seek_z);
-    NuVecSub(&api.velocity, &api.position, &api.start_position);
-    NuVecScale(&api.velocity, &api.velocity, 1.0f / FRAMETIME);
-
-    if ((api.character_data->game_character->flags_090 & 1) != 0) {
-        i32 roll = 0;
-        if (object->character_context != 0x36 && object->character_context != 0x2a &&
-            object->character_context != 0x3a) {
-            roll = static_cast<i32>(api.velocity.z * trench_roll_f);
-        }
-        if (static_cast<i16>(player->apiobj.movement_facing_angle) >= 0)
-            roll = -roll;
-        i32 target_roll;
-        if (roll < -0x10000) {
-            target_roll = -0x2000;
-        } else if (roll > 0x10000) {
-            target_roll = 0x2000;
-        } else {
-            target_roll = roll / 4;
-            if (target_roll < -0x2000)
-                target_roll = -0x2000;
-            else if (target_roll > 0x2000)
-                target_roll = 0x2000;
-        }
-        object->movement_lean_angle = SeekRot(object->movement_lean_angle, target_roll, 8.0f);
-    }
-    APIObjectVelocities(object);
-    GameObjectOrigin(object);
-}
-
-__used__ void TrenchKilledCallback(GameObject_s *object) {
-    for (i32 i = 0; i < 3; ++i) {
-        if (trenchrun.objects[i] == object) {
-            trenchrun.objects[i] = NULL;
-            break;
-        }
-    }
-}
+__used__ void TrenchKilledCallback(GameObject_s *object);
 
 static __used__ void SurfaceInfo_ExtraReflect(GameObject_s *object);
 

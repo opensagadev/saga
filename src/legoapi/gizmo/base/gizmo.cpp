@@ -971,160 +971,30 @@ GIZMO *GizmoFindByData(GIZMOSYS *gizmo_sys, i32 type_id, void *data) {
     return NULL;
 }
 
-i32 PAINTPUZZLESTAGE;
-i32 played_sound;
-i32 paintmixed;
-i32 painttarget;
-i32 painttry;
-i32 randpaints[3];
-i32 paintsused[2];
-GIZMO *forcetube;
-GIZMO *paintobst[6];
-GIZMO *paintpanel[3];
-nuhspecial_s green_light;
-nuhspecial_s painttargetcolour[3];
-nuhspecial_s paintlights[3];
+extern i32 PAINTPUZZLESTAGE;
+extern i32 played_sound;
+extern i32 paintmixed;
+extern i32 painttarget;
+extern i32 painttry;
+extern i32 randpaints[3];
+extern i32 paintsused[2];
+extern GIZMO * forcetube;
+extern GIZMO * paintobst[6];
+extern GIZMO * paintpanel[3];
+extern nuhspecial_s green_light;
+extern nuhspecial_s painttargetcolour[3];
+extern nuhspecial_s paintlights[3];
 
-char *paint_light_name[3] = {"off_purple", "off_green", "off_orange"};
-char *paint_target_colour[3] = {"but_orange", "but_green", "but_purple"};
-char *paint_panel_name[3] = {"redp", "yellp", "bluep"};
-char *paint_name[6] = {"red_juice", "yellow_juice", "blue_juice", "orange_juice", "green_juice", "purple_juice"};
+extern char * paint_light_name[3];
+extern char * paint_target_colour[3];
+extern char * paint_panel_name[3];
+extern char * paint_name[6];
 
-void ResetPaintPuzzle(WORLDINFO_s *) {
-    for (i32 index = 0; index < 6; ++index) {
-        GizObstacle_JumpToStart(static_cast<GIZOBSTACLE_s *>(paintobst[index]->object));
-    }
-    painttry = 0;
-    PAINTPUZZLESTAGE = 1;
-    randpaints[0] = qrand() / 21846;
-    do {
-        randpaints[1] = qrand() / 21846;
-    } while (randpaints[1] == randpaints[0]);
-    randpaints[2] = 3 - (randpaints[0] + randpaints[1]);
-}
+void ResetPaintPuzzle(WORLDINFO_s *);
 
-void InitPaintPuzzle(WORLDINFO_s *world) {
-    reinterpret_cast<u8 *>(factoryb_netpacket)[2] = 0;
-    for (i32 index = 0; index < 6; ++index) {
-        paintobst[index] = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, paint_name[index]);
-    }
-    for (i32 index = 0; index < 3; ++index) {
-        paintpanel[index] = GizmoFindByName(world->gizmo_sys, gizpanel_gizmotype_id, paint_panel_name[index]);
-    }
-    for (i32 index = 0; index < 3; ++index) {
-        NuSpecialFind(world->current_gscn, &painttargetcolour[index], paint_target_colour[index], 0);
-    }
-    for (i32 index = 0; index < 3; ++index) {
-        NuSpecialFind(world->current_gscn, &paintlights[index], paint_light_name[index], 0);
-    }
-    forcetube = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, "FORCE_TUBE");
-    NuSpecialFind(world->current_gscn, &green_light, "green_light_on1", 1);
-    ResetPaintPuzzle(world);
-}
+void InitPaintPuzzle(WORLDINFO_s *world);
 
-void UpdatePaintPuzzle(WORLDINFO_s *world) {
-    switch (PAINTPUZZLESTAGE) {
-        case 0:
-            GizObstacle_PlayBackwards(static_cast<GIZOBSTACLE_s *>(paintobst[paintmixed]->object));
-            for (i32 index = 0; index < 3; ++index) {
-                GizPanel_Reset(static_cast<GIZPANEL_s *>(paintpanel[index]->object));
-            }
-            PAINTPUZZLESTAGE = 1;
-            break;
-        case 1:
-            if (paintmixed != 0 &&
-                (static_cast<GIZOBSTACLE_s *>(paintobst[paintmixed]->object)->anim_set->flags & 1) != 0) {
-                break;
-            }
-            paintmixed = 0;
-            PAINTPUZZLESTAGE = 2;
-            painttarget = randpaints[painttry] + 3;
-            break;
-        case 2: {
-            i32 used = 0;
-            for (i32 index = 0; index < 3; ++index) {
-                GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(paintobst[index]->object);
-                if (obstacle->anim_set->state == GAMEANIMSET_STATE_AT_END) {
-                    paintsused[used++] = index;
-                }
-            }
-            if (used == 2) {
-                if ((paintsused[1] == 1 && paintsused[0] == 0) || (paintsused[1] == 0 && paintsused[0] == 1)) {
-                    paintmixed = 3;
-                } else if ((paintsused[0] == 2 && paintsused[1] == 1) || (paintsused[1] == 2 && paintsused[0] == 1)) {
-                    paintmixed = 4;
-                } else if ((paintsused[1] == 2 && paintsused[0] == 0) || (paintsused[0] == 2 && paintsused[1] == 0)) {
-                    paintmixed = 5;
-                } else {
-                    paintmixed = -1;
-                }
-                PAINTPUZZLESTAGE = 3;
-            } else {
-                for (i32 index = 0; index < 3; ++index) {
-                    if (GizmoGetOutput(world->gizmo_sys, paintpanel[index], 0, 0) &&
-                        static_cast<GIZOBSTACLE_s *>(paintobst[index]->object)->anim_set->state ==
-                            GAMEANIMSET_STATE_AT_START) {
-                        GizObstacle_PlayForwards(static_cast<GIZOBSTACLE_s *>(paintobst[index]->object));
-                    }
-                }
-            }
-            break;
-        }
-        case 3: {
-            GIZOBSTACLE_s *first = static_cast<GIZOBSTACLE_s *>(paintobst[paintsused[0]]->object);
-            if (!(first->anim_set->state == GAMEANIMSET_STATE_AT_END &&
-                  static_cast<GIZOBSTACLE_s *>(paintobst[paintsused[1]]->object)->anim_set->state ==
-                      GAMEANIMSET_STATE_AT_END)) {
-                if (static_cast<GIZOBSTACLE_s *>(paintobst[paintmixed]->object)->anim_set->state ==
-                    GAMEANIMSET_STATE_AT_END) {
-                    if (paintmixed == painttarget) {
-                        ++painttry;
-                        if (painttry != 3) {
-                            PAINTPUZZLESTAGE = 0;
-                        } else {
-                            PAINTPUZZLESTAGE = 4;
-                        }
-                    } else {
-                        randpaints[0] = qrand() / 21846;
-                        do {
-                            randpaints[1] = qrand() / 21846;
-                        } while (randpaints[1] == randpaints[0]);
-                        randpaints[2] = 3 - randpaints[0] - randpaints[1];
-                        PAINTPUZZLESTAGE = 0;
-                        painttry = 0;
-                    }
-                }
-            } else {
-                GizObstacle_PlayBackwards(first);
-                GizObstacle_PlayBackwards(static_cast<GIZOBSTACLE_s *>(paintobst[paintsused[1]]->object));
-                GizObstacle_PlayForwards(static_cast<GIZOBSTACLE_s *>(paintobst[paintmixed]->object));
-            }
-            break;
-        }
-        case 4:
-            GizObstacle_PlayForwards(static_cast<GIZOBSTACLE_s *>(forcetube->object));
-            reinterpret_cast<u8 *>(factoryb_netpacket)[2] = 1;
-            break;
-    }
-    u8 tries = static_cast<u8>(painttry);
-    i32 target = painttarget;
-    u8 *packet = reinterpret_cast<u8 *>(factoryb_netpacket);
-    if (packet[2] == 1) {
-        packet[0] = 0;
-        packet[1] = tries;
-        packet[3] = static_cast<u8>(target);
-    } else {
-        packet[0] = 0;
-        packet[1] = tries;
-        packet[3] = static_cast<u8>(target);
-    }
-    if (packet[2] == 1 && played_sound == 0) {
-        GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(forcetube->object);
-        NUMTX *matrix = NuSpecialGetMtx(&obstacle->anim_set->objects->special);
-        PlaySfx("Fac_BonusCylUp", reinterpret_cast<NUVEC *>(reinterpret_cast<u8 *>(matrix) + 0x30));
-        played_sound = 1;
-    }
-}
+void UpdatePaintPuzzle(WORLDINFO_s *world);
 
 i32 GizmoFileReadName(char *name) {
     i32 name_length = EdFileReadChar();
