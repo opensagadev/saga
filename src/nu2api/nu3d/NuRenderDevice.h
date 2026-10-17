@@ -2,6 +2,11 @@
 
 #include "nu2api/nucore/common.h"
 
+// Keep <windows.h> out of game code on MinGW: its macros (CALLBACK,
+// RegisterClass, GetClassName, ...) collide with game identifiers.
+#if defined(_WIN32) && !defined(EGL_NO_PLATFORM_SPECIFIC_TYPES)
+#define EGL_NO_PLATFORM_SPECIFIC_TYPES
+#endif
 #include <EGL/egl.h>
 #include <pthread.h>
 
