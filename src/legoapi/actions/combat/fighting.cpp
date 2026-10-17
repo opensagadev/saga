@@ -30,20 +30,11 @@
 #include <stdlib.h>
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 void BlockSfx(GameObject_s *object);
-void StartHold(GameObject_s *object);
 void KillParts(GameObject_s *, i32, i32, i32, f32, i32, u16 *);
-void Arcade_Kill(i32, i32);
 i32 CannotKill(GameObject_s *);
 i32 NewBlockAction(GameObject_s *);
-void Player_ClearContext(GameObject_s *, i32);
-void Player_ResetContexts(PLAYERPACKET_s *);
-i32 qrand();
-extern "C" void KillPart(PART_s *, i32);
-void LightSabreDebris(GameObject_s *);
 
 void (*Punch_HitHoldFn)(GameObject_s *, GameObject_s *);
 i32 (*Punch_GetDamageFn)(GameObject_s *, GameObject_s *);
@@ -55,13 +46,9 @@ BLADE_s BladeTab[4] = {
     {107, 227, 4, 62, 67, {200, 0, 255}, {0, 0, 0}},
 };
 
-void DeflectPart(PART_s *part, GameObject_s *object, float speed, float gravity, i32 deflect, i32 debris);
-
 bool IsDownSwipe(NuVec2 const &start, NuVec2 const &end) {
     return abs(RotDiff(NuAtan2D(end.x - start.x, end.y - start.y), 0x8000)) < 0x1c72;
 }
-
-void TakeHitCode(GameObject_s *object);
 
 void ComboHitFrame(GameObject_s *object, i32 damage) {
     object->context_flags |= 0x40;
@@ -73,26 +60,15 @@ void ComboHitFrame(GameObject_s *object, i32 damage) {
     BlockSfx(object);
 }
 
-i32 IsFacingTarget(nuvec_s *first, nuvec_s *second, i32 facing_angle, i32 arc_degrees);
-
-void ComboRotateCode(GameObject_s *object, i32 action_held);
-
 BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
-void SetWeaponIn(GameObject_s *);
-void SetWeaponOut(GameObject_s *);
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
 DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_flags) == 0xe2f, "Quick shoot flags offset");
 DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot bolt ID offset");
-void StartQuickShoot(GameObject_s *object, i32 action);
-
-void ForceNextLungeTarget(MechObjectInterface *target);
 
 void ForceNextShootTarget(MechObjectInterface &target);
 
 i32 ObjZappedBlue(GameObject_s *object);
-
-void SetForcedAttackOpponent(MechObjectInterface *target);
 
 void Punch_Hit(GameObject_s *attacker, GameObject_s *target, float, float gap) {
     NUVEC *hit_position;

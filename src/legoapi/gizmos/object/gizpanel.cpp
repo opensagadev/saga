@@ -70,8 +70,6 @@ static void GizPanels_ClearProgress(void *, void *progress_data);
 
 static void GizPanels_StoreProgress(void *world_ptr, void *, void *progress_ptr);
 
-void GizPanel_InitTerrain(WORLDINFO_s *world);
-
 static void GizPanels_Reset(void *world_ptr, void *, void *progress_ptr);
 
 static void *GizPanels_ReserveBufferSpace(void *world_ptr);
@@ -126,13 +124,9 @@ void GizPanel_Reset(GIZPANEL_s *panel);
 
 void GizPanel_PlaySfx(char *name, nuvec_s *position, i32 player_bits);
 
-void GizPanel_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 use);
-
 i32 GizPanel_BeingUsed(GIZPANEL_s *panel);
 
 GIZPANEL_s *GizPanel_FindByName(WORLDINFO_s *world, char *name);
-
-i32 GizPanel_UpdateHint(HINT_s *hint);
 
 i32 GizPanel_CanUsePanel(GameObject_s *object, GIZPANEL_s *panel);
 
@@ -141,10 +135,7 @@ GIZPANEL_s *GizPanel_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObje
 
 void GizPanel_GetAbsPlayerPos(GIZPANEL_s *panel, nuvec_s *position);
 
-
 #include "legoapi/gizmo/base/GizPanelObjectInterface.h"
-
-
 
 // ==== functions in original address order ====
 

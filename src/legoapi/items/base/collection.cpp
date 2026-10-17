@@ -8,7 +8,6 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/core/players.h"
 
-u32 GizmoBlowups_TotalScore(void *world);
 extern "C" i32 DoubleScore;
 
 #include "decomp.h"
@@ -492,11 +491,7 @@ void CollectAllCharacters(i32 only_story) {
     }
 }
 
-extern i32 freeplaymode;
-extern i32 freeplay_selected[2];
 static __used__ void Collection_GetSelectingPlayerIDs(i16 *ids);
-
-void ReleaseEat(GameObject_s *object);
 
 i32 AddToCollection(i32 id) {
     if (id > 0 && id < CHARCOUNT && InCollectList_Index(id, NULL, 0) != -1 && Collection_Got(id) == 0) {
@@ -555,7 +550,6 @@ void UpdateCoinPacket(COINPACKET_s *packet, i32 active, i32 player_index) {
     }
 }
 
-u32 GizmoBlowups_TotalScore(void *);
 u32 GizForce_TotalScore(void *);
 u32 GizObstacles_TotalScore(void *);
 u32 GizTurrets_TotalScore(void *);
@@ -565,9 +559,5 @@ u32 TotalLevelCoinTally(WORLDINFO_s *world, u32 *pickups, u32 *blowups, u32 *bui
                         u32 *turrets, u32 *characters);
 
 COLLECTION_s *GetFreePlayCollection(i32 area);
-
-extern i32 POINTS_PER_HINT;
-extern i32 SHOPHINTCOUNT;
-extern i16 HintTab[24];
 
 void ReCalculateCompletionPoints();

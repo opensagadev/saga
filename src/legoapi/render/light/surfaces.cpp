@@ -8,9 +8,7 @@
 #include "nu2api/nu3d/numtl.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 NUMTL *SolidMtl;
 NUMTL *SolidMtl3D;
@@ -42,8 +40,6 @@ extern "C" i32 NewShadowOnPlatform();
 extern "C" i32 ShadowRoofInfo();
 
 void (*SurfaceInfo_ExtraReflectFn)(GameObject_s *object);
-
-NUMTL *CreateCopyMat(NUMTL *source, i32 enable_uv_mode, i32 alpha_mode, i32 depth_mode, i32 filter_mode);
 
 void SurfaceMaskOn(u32 *surface_mask) {
     *surface_mask = 0x20;

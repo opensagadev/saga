@@ -22,10 +22,7 @@
 extern "C" {
     u64 GameAntinode_grid[64];
     extern f32 default_path_heighttol;
-    extern i32 AIEDITOR_ANTINODES;
-    extern i32 aidata_version;
     AIANTINODE_s *AIAntinodeCreateSingleFrame(NUVEC *, f32);
-    void AiRndrLine3dDbg(f32, f32, f32, f32, f32, f32, u32);
 }
 i32 ViewCamGetMode();
 NUVEC *ViewCamGetTgt();
@@ -285,8 +282,3 @@ void GameAntinode_UnregisterAntiNode(GAMEANTINODESYS_s *system, GAMEANTINODE_s *
     --system->count;
 }
 
-void AISysDrawAntinode_Circle(AIANTINODE_s *node, u32 colour);
-
-void AISysDrawAntinode_Ellipse(AIANTINODE_s *node, u32 colour);
-
-void AISysDrawAntinode_Rectangle(AIANTINODE_s *node, u32 colour);

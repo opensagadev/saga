@@ -53,9 +53,7 @@ extern f32 testlaser_sizew, testlaser_sizel, testlaser_sizewab, testlaser_endw;
 #include "nu2api/nu3d/nutex.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 extern u8 LevFlag[16];
 struct SarlaccBattlePacket {
     f32 height;
@@ -181,14 +179,11 @@ static inline void SarlaccDiscoShow(nuhspecial_s *special) {
     }
 }
 
-
 void SarlaccPitC_Init(WORLDINFO_s *);
 
 void SarlaccPitC_Update(WORLDINFO_s *world);
 
 void SarlaccPitC_Reset(WORLDINFO_s *world);
-
-i32 SarlaccPitDiscoActive(WORLDINFO_s *world);
 
 // ===========================================================================
 // Bonus levels: Lego City, Senate, New Town
@@ -297,8 +292,6 @@ void DeathStar2BattleFire_Init(WORLDINFO_s *world);
 void DeathStar2BattleFire_Update(WORLDINFO_s *world);
 
 static f32 slowDownTimer[2];
-f32 DeathStar2BattleFire_GetSlowDownMul(GameObject_s *object);
-
 
 // ==== functions in original address order ====
 

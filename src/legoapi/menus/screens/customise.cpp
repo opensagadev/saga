@@ -108,10 +108,6 @@ static CUSTOMISER_GAMESETTING Customiser_GameSetting[] = {
     {NULL, 0, 0},
 };
 
-void Customiser_Init(CUSTOMISER *customiser);
-
-void Customiser_Reset(CUSTOMISER *customiser);
-
 i32 Customiser_PieceAvailable(CUSTOMPIECE *piece);
 
 void Customiser_TransformToPanel(CUSTOMISER *);
@@ -191,15 +187,7 @@ static u16 *Customiser_GetSelection(i32 side) {
         runtime->field_0x117 = static_cast<u8>(LightSabre_ColourFromObj(runtime->weapon_model, NULL));                 \
     } while (0)
 
-void Customiser_SetUpCharacterData(CUSTOMISER *customiser);
-
-void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world);
-
-void Customiser_Draw3D(CUSTOMISER *customiser);
-
 void CustomiserMenu_End();
-
-void CustomiserMenu_Draw(MENU_s *);
 
 void Customiser_InitNames(CUSTOMISER *customiser);
 
@@ -211,11 +199,7 @@ static i32 Customise_FindLetter(char character) {
     return letter == 38 ? 0 : letter;
 }
 
-void CustomiserMenu_Update(MENU_s *);
-
 void Customiser_PieceConfig(CUSTOMPIECE *piece, nufpar_s *parser);
-
-i32 Customiser_MenuAvailable(CUSTOMISER *customiser);
 
 void Customiser_GetActiveWeirdoIndex(i32 *index, i32 *count);
 
@@ -297,34 +281,19 @@ void Customiser_SetNameAndIcon(CUSTOMISER *customiser, i32 index);
 #include "nu2api/numusic/numusic.h"
 #include "nu2api/numath/nutrig.h"
 
-
 // LoadPerm1 is one of the few game-level entry points which wires together
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
     i32 rtlInitDynamic(VARIPTR *, VARIPTR, i32);
-    void DebrisSetup(VARIPTR *, VARIPTR, char *, i32, i32, i32);
-    void DebrisRegisterCutoffCameraVec(void *);
-    void edgraSetup(VARIPTR *, VARIPTR, i32, i32, i32);
-    void InitParts(i32, VARIPTR *, VARIPTR *);
-    void ParticleReset(void);
     i32 NuFileExists(char *);
     i32 NuStrCpy(char *, const char *);
-    i32 edppLoadPage(char *, i32, usize);
-    void NuRndrShadowInit(u8 *);
-    void NuTexAnimProgSysInit(void);
-    void terrainpickupinit(char *, void **);
 
-    extern f32 animduration_blendouttime;
     extern i32 Grass_Available;
-    extern i32 DEBPAGE_GENERAL;
-    extern i32 DEBPAGE_CHARACTER;
-    extern void *perm_debrissys;
 }
 
 struct AISYS_s;
 void AIScriptLoadAll(char *path, VARIPTR *buf, VARIPTR *buf_end, AISYS_s *sys);
-
 
 // The original table at 0x006281a0.  These are the material animation
 // scripts made available before the permanent things scene is loaded.
@@ -336,7 +305,6 @@ struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
-
 
 extern i32 GetMenuID(void);
 extern i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count);
@@ -351,14 +319,9 @@ extern "C" {
 extern i32 hub_character_ready;
 }
 
-
 #include "legoapi/characters/core/characters_types.h"
 
 void LSW_SetIndy(i32);
-
-
-
-
 
 i32 CharIDFromName(char *name);
 
@@ -366,16 +329,12 @@ CHARACTERDATA *CDataFromName(char *name);
 
 i32 RedirectAnim(char *directory, ANIMREDIRECT *redirects, ANIMLIST_s *animation_list, char *path);
 
-
 void CharScenes_LevelLoad(WORLDINFO *world);
 
 extern i16 tUNKNOWN;
 extern "C" {
-    extern i16 id_R2Q5;
     void PlaySfx(char *, nuvec_s *);
-    void PlaySfxAndSetVolume(char *, nuvec_s *, f32);
 }
-
 
 void PostAnimate_FETT(GameObject_s *object);
 
@@ -388,12 +347,7 @@ void FinishWeirdoNames(i32 which);
 
 GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle);
 
-
-extern void SetGameObjectCharacterData(GameObject_s *obj);
 extern void GameObjectOrigin(GameObject_s *obj);
-extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
-
-
 
 // Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
@@ -401,9 +355,6 @@ extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
 #else
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
-static MOSEISLEY_LAYERS_ATTR void SetLayers_MOSEISLEYCITIZEN(u32 *layers)
-    __asm__("_ZL26SetLayers_MOSEISLEYCITIZENP12GameObject_s.isra.2");
-static void SetLayers_MOSEISLEYCITIZEN(u32 *layers);
 
 i32 InitCreature(GameObject_s *obj, i32 id, i32 param);
 
@@ -412,26 +363,18 @@ i32 StartSlide(GameObject_s *, i32);
 
 i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32);
 
-
 i32 GetDefaultIdle(GameObject_s *obj);
 
-void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation);
-
-
-
 void UpdateCharacterIDs();
-
 
 void CharScenes_AreaDump();
 
 void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 game_flag_mask, u32 game_flag_value,
                                 i32 movement_type, void *move_function, void *animate_function, void *draw_function);
 
-
 void DeactivateCharacter(char *name);
 
 void LoadSingleCharacter(bgprocinfo_s *);
-
 
 void UpdateCharacterLoad();
 
@@ -446,31 +389,10 @@ void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
 extern "C" void PlaySfx(char *, nuvec_s *);
 void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
 extern f32 ICONSIZE;
-extern i32 STATUS_R, STATUS_G, STATUS_B;
-
-
-
 
 void PostAnimate_ASTROMECH(GameObject_s *object);
 
-
-
-
-
-
-
-
-
-void SetGameObjectCharacterData(GameObject_s *obj);
-
-
 extern "C" i32 dagobah_training;
-
-
-
-
-
-
 
 // ==== functions in original address order ====
 

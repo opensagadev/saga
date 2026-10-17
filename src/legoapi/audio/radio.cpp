@@ -18,9 +18,7 @@
 #include <string.h>
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 struct RadioEntry {
     union {
@@ -37,13 +35,6 @@ DECOMP_ASSERT(sizeof(RadioEntry) == 0x14, "RadioEntry size");
 static RadioEntry radios[8];
 
 void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *blowup);
-
-void ResetRadios();
-
-void UpdateRadios();
-
-void PlayRadio(char *special_name, char *blowup_name, i32 play);
-
 
 // ==== functions in original address order ====
 

@@ -8,17 +8,7 @@
 #include "nu2api/nu3d/nutex.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
-
-extern "C" {
-    extern i16 id_PENGUIN_GOON, id_PENGUIN_GOON_GUN;
-    extern i16 id_JOKER_GOON, id_JOKER_GOON_GUN;
-    extern i16 id_RIDDLER_GOON, id_RIDDLER_GOON_GUN;
-}
-
-i16 GetGenericGoon(i32 armed);
 
 static NARROWSOCKEXCEPTION *NarrowSockException;
 
@@ -66,15 +56,6 @@ i32 objInNetWaitContext(GameObject_s *object, i32 context) {
 
 #include "legoapi/actions/character/simpletons_types.h"
 
-
-i32 oneAtOnce_CanAttack(GameObject_s *object, GameObject_s *opponent);
-
-f32 oneAtOnce_GetHoldRange(GameObject_s *object);
-
-void oneAtOnce_MaintainArray();
-
-void oneAtOnce_SetDistPerRow(float distance);
-
 void NarrowSockExceptions_Init(NARROWSOCKEXCEPTION *exceptions) {
     i32 level_index __attribute__((aligned(16)));
     if (exceptions == NULL)
@@ -86,8 +67,3 @@ void NarrowSockExceptions_Init(NARROWSOCKEXCEPTION *exceptions) {
     }
 }
 
-void oneAtOnce_SetNumAttackers(i32 attackers);
-
-void oneAtOnce_SetInitDistPerRow(float distance);
-
-void oneAtOnce_SetAttackersPerRow(i32 attackers);

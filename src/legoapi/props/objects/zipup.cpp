@@ -96,8 +96,6 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void PlayJumpSfx(GameObject_s *, i32);
 i32 RotDiff(u16, u16);
 
-void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed);
-
 static void ZipUp_GetStartPoint(GameObject_s *object, NUVEC *position);
 
 numtl_s *ropemtl;
@@ -190,8 +188,6 @@ void ZipUps_DrawLines();
 ZIPUP *ZipUp_FindNearest(WORLDINFO_s *world, nuvec_s *position, float radius, float *distance, i32 *endpoint,
                          GameObject_s *object, bool touch);
 
-i32 ZipUps_UpdateHint(HINT_s *hint);
-
 // ==== src/legoapi/items/collect/detonator.cpp: declarations ====
 #include "decomp.h"
 #include "globals.h"
@@ -213,24 +209,11 @@ i32 ZipUps_UpdateHint(HINT_s *hint);
 
 #include <string.h>
 
-
-EXPLOSION *Detonate(nuvec_s *, u16);
-void Detonator_Detonate(DETONATOR_s *);
-DETONATOR_s *Detonator_FindNearest(nuvec_s *, float, GameObject_s *);
-
 #include "legoapi/items/collect/detonator_types.h"
 
 void Detonators_Draw();
 
-void Detonators_Reset();
-
 void Detonators_Update();
-
-void Detonator_Detonate(DETONATOR_s *detonator);
-
-
-
-
 
 #define DETONATOR_CONSIDER_NEAREST(index, owner_test)                                                                  \
     if (Detonator[index].active != 0 && (owner_test)) {                                                                \
@@ -240,8 +223,6 @@ void Detonator_Detonate(DETONATOR_s *detonator);
             nearest = &Detonator[index];                                                                               \
         }                                                                                                              \
     }
-
-DETONATOR_s *Detonator_FindNearest(nuvec_s *position, float radius, GameObject_s *owner);
 
 // ==== src/legoapi/items/collect/thermaldetonators.cpp: declarations ====
 // Original translation unit reconstructed from the reference address map.
@@ -273,31 +254,17 @@ DETONATOR_s *Detonator_FindNearest(nuvec_s *position, float radius, GameObject_s
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nutrig.h"
 
-
-extern MechWeakPtr<MechObjectInterface, 4> NextThermalTarget;
-
 EXPLOSION *AddExplosion(nuvec_s *, f32, f32, GameObject_s *, i32, i32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, nuvec_s *);
 i32 qrand();
-EXPLOSION *Detonate(nuvec_s *position, u16 flags);
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 void KillPart(PART_s *part, i32 reason);
 void NewBuzzFrames(nupad_s *pad, i32 frames, i32 channel);
 i32 SuperWeirdo(GameObject_s *object);
-void PartKill_ThermalDetonator(PART_s *part, i32 reason);
 i32 GameRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 mask);
 extern "C" f32 brickimpactwait;
-
-
-
-void PartKill_ThermalDetonator(PART_s *part, i32);
-
-
-
-
-
 
 // ==== src/legoapi/menus/core/hint.cpp: declarations ====
 #include "decomp.h"
@@ -324,60 +291,22 @@ void PartKill_ThermalDetonator(PART_s *part, i32);
 #include "legoapi/world/level.h"
 #include "legoapi/world/levels/levels.h"
 
-
-
 // The hint icon transitions and the touch icon x position are dynamically
 // initialized in this unit's static constructor in the reference.
 extern HintVectorTransition hintIconPos;
 extern HintScalarTransition hintIconScale;
 extern HintScalarTransition hintYPop;
 
-
-
-
 f32 CurrentHintAlpha();
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
-static __attribute__((noinline, noclone)) void DrawHint_LSWBody(HINT_s *hint, i32 max_lines)
-    __asm__("_Z12DrawHint_LSWP6HINT_si.part.19");
-
-static void DrawHint_LSWBody(HINT_s *hint, i32 max_lines);
-
-
-
-
-
 
 // Original local callbacks referenced by Hints_LSW.
 extern AREADATA_s *PODRACE_ADATA, *PODSPRINT_ADATA, *BONUS_GUNSHIP_ADATA;
 extern FadeSystem FadeSys;
 
-
-
-
-
-
-
-
-
-
-
-void RegisterWithHintSys(void (*)(HINT_s *, i32), HINT_s *, u32 *, i32);
-
-
-
-
-
 f32 CurrentHintButtonScale();
-
-
-
-
-
-
-
-i32 ZipUps_UpdateHint(HINT_s *);
 
 // Each control mode retains its own requested and interpolated hint row.
 
@@ -386,15 +315,6 @@ void MenuUpdateHints(MENU_s *menu);
 void MenuDrawHints(MENU_s *menu);
 
 // ==== functions in original address order ====
-
-
-
-
-
-
-
-
-
 
 // ==== functions in original address order ====
 

@@ -113,8 +113,6 @@ static inline void Ledge_UpdateUnattached(WORLDINFO_s *world, GameObject_s *obje
         Ledge_TryAttach(world, object);
 }
 
-void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object);
-
 // ==== src/legoapi/props/objects/ledgeterrain.cpp: declarations ====
 #include "decomp.h"
 #include "legoapi/actions/movement/jumping.h"
@@ -132,15 +130,11 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object);
 #include "nu2api/nu3d/nutex.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 extern f32 LEDGETERRAINLOOKAHEAD;
 
-
 LEDGE *Ledge_FindNearest(WORLDINFO_s *world, NUVEC *position, GameObject_s *object, f32 *distance_squared);
-
 
 i32 LedgeTerrain_SetTargetMom(GameObject_s *object);
 

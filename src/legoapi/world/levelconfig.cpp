@@ -244,13 +244,9 @@ static __used__ void LC_BL_wind_speed(nufpar_s *fp);
 
 // Game-specific pre-load limits. These must be applied before WorldInfo
 // reserves each level's fixed-size gameplay systems.
-extern NUFPCOMJMP LevelConfigKeywords_BeforeLoad[45];
 
 static u8 load_conditionParam;
 
-static void loadSumBox(nufpar_s *fp) {
-    load_conditionParam = (u8)NuFParGetInt(fp);
-}
 static __used__ void LC_AL_metal(nufpar_s *fp) {
     levelconfig_ldata->flags |= LEVEL_METAL;
     if (NuFParGetWord(fp) != 0 && NuStrICmp(fp->word_buf, "off") == 0) {

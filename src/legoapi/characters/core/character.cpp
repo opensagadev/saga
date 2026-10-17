@@ -607,10 +607,3 @@ static __used__ void ExtraDieSfx_LSW(GameObject_s *object);
 
 static __used__ void ExtraHurtSfx_LSW(GameObject_s *object);
 
-extern AREADATA *DAGOBAH_ADATA;
-extern AREADATA *DEATHSTARESCAPE_ADATA;
-extern AREADATA *DEATHSTARRESCUE_ADATA;
-extern AREADATA *HOTHESCAPE_ADATA;
-extern AREADATA *JABBASPALACE_ADATA;
-
-extern "C" {} // extern "C"

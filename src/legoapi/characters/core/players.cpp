@@ -50,42 +50,20 @@ struct PLAYERPACKET_s;
 struct SOCKPOSITION_s;
 struct TouchHolder;
 
-void CheckForPlayersTurnedOff();
-
 extern "C" NUVEC plr_lastpos;
 
-extern void GetTopBot(GameObject_s *obj);
-extern f32 FindGunshipHoverHeight(GameObject_s *obj);
-extern f32 GetVehicleSpeedMul(GameObject_s *obj, f32 input);
-extern i32 ObjInNarrowSock(GameObject_s *obj, SOCKSYS *socks, i32 level);
-extern i32 complexsockposition_forcesock;
-extern i32 movegamecamera_forcesock;
 extern AREADATA *BONUS_GUNSHIP_ADATA;
-extern AREADATA *BATTLEOVERCORUSCANT_ADATA;
 extern i32 LevFlag[4];
-extern void GameObjectDimensions(GameObject_s *obj);
 extern void GameObjectOrigin(GameObject_s *obj);
-extern void ResetRumble(RUMBLEPACKET *packet);
-extern void CurrentStart(GameObject_s *obj, i32 mode, i32 start);
 extern void InitSurfaceInfo(GameObject_s *obj);
 extern i32 SetObjOnSurface(GameObject_s *obj, i32 mode);
-extern void GizForce_ResetLOS(GameObject_s *obj);
-void Arcade_PlayerKilled(i32 player, i32 active);
-void ResetPlayerAI(GameObject_s *obj);
-void ResetPlayerMoves(GameObject_s *obj);
-void SetProtocolDroidDeactivatedAction(GameObject_s *);
-i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode);
 void NewBuzz(nupad_s *, f32, i32);
 void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
-f32 VehicleTurnOrLoopOffset(GameObject_s *object);
-void Player_ClearContext(GameObject_s *object, i32 mode);
-void Player_ResetContexts(PLAYERPACKET_s *packet);
 extern "C" f32 chattersfxwait;
 
 void Players_Init(void);
 
 // --- Helpers moved from world.cpp ---
-
 
 static NUVEC HubVehiclesDoorPos[2] = {{-24.21f, 0.0f, -25.36f}, {-23.63f, 0.0f, -25.68f}};
 static NUVEC HubMinikitDoorPos[2] = {{-27.14f, 0.0f, -24.92f}, {-26.77f, 0.0f, -24.94f}};
@@ -260,7 +238,6 @@ void PlayerItemTypes_Reset(WORLDINFO *world) {
 }
 
 GameObject_s *AddCreature(i32 id, i32 param);
-
 
 void PreResetCode(GameObject_s *obj);
 
@@ -696,13 +673,8 @@ u32 (*CanPushObstaclesFn)(GameObject_s *) = NULL;
 
 namespace {
 
-
-
 } // namespace
 
-void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap_to_surface);
-
-void StarWars_AutoSetAICapabilities(GameObject_s *object);
 i32 CanPullLevers(i32 id);
 extern f32 DEFAULT_MOVE_RANGE;
 
@@ -710,21 +682,11 @@ void SetFlicker(GameObject_s *object, float duration);
 
 #include "legoapi/characters/core/players_types.h"
 
-
 void InitPlayerAI(GameObject_s *object);
-
-void ResetPlayerAI(GameObject_s *object);
-
-void StarWars_AutoSetAICapabilities(GameObject_s *object);
 
 i32 MakePlayerList(i32 count);
 
 void ResetPlayerPacket(PLAYERPACKET_s *, CHARACTERDATA_s *);
-void ResetCharacterIdle(GameObject_s *, i32, i32);
-void SetGameObjectCharacterData(GameObject_s *);
-void ResetCoinPacket(COINPACKET_s *);
-
-void ResetPlayerMoves(GameObject_s *object);
 
 void SetToLastSafePos(GameObject_s *object) {
     NUVEC position = {object->apiobj.last_safe_position.x, object->apiobj.last_safe_position.y,
@@ -744,11 +706,7 @@ i32 UnderPlayerControl(GameObject_s *object) {
 
 i32 ActivePlayerInRange(nuvec_s *position, float range_squared, float *distance_squared);
 
-GameObject_s *GetOtherActivePlayer(GameObject_s *object);
-
-
 DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
-
 
 i32 Player_HasPurpleForce(GameObject_s *obj);
 
@@ -791,8 +749,6 @@ bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, fl
 i32 (*LastSafePosExtraFn)(GameObject_s *) = NULL;
 void (*GameObjectDimensionsExtraFn)(GameObject_s *) = NULL;
 
-void CheckForPlayersTurnedOff();
-
 bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player, float &distance_squared,
                                bool require_character_flags, u32 character_flags) {
     *furthest_player = NULL;
@@ -822,8 +778,6 @@ bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player
 
     return *furthest_player != NULL;
 }
-
-void AveragePlayerCurrentSpeedMul();
 
 void SetPlayer() {
     if (Player[0] != NULL && Player[0]->apiobj.player_controlled) {

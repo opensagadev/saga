@@ -12,12 +12,9 @@
 #include <string.h>
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 extern "C" void NewTerrPlatformsOff(void);
-extern TERRSET *CurTerr;
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 
 extern i32 SkinFlipTab[8];

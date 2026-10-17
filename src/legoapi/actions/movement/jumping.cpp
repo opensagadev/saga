@@ -19,14 +19,7 @@
 #include "gameapi/ai/aisys/aisys.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
-void StartLunge(GameObject_s *, f32, f32);
-i32 Slam_Start(GameObject_s *, f32);
-void StartHold(GameObject_s *);
-void ComboHitFrame(GameObject_s *, i32);
-void PlaySabreSfx(char *, GameObject_s *, NUVEC *, i32);
 i32 DoubleJump_JediSlam = 0;
 f32 SLAMJUMPSPEED = 3.0f;
 bool (*IsWearingBackPackFn)(GameObject_s *) = NULL;
@@ -38,30 +31,11 @@ i32 (*Slam_GetDebrisFn)(GameObject_s *, i32) = NULL;
 
 #include "legoapi/actions/movement/jumping_types.h"
 
-
-
-
-
-
-
 static const f32 PLAYER_JUMP_MINIMUM_AIR_TIME = 0.1f;
 static const f32 PLAYER_JUMP_REENTRY_DELAY = 0.2f;
 
 void PlayJumpSfx(GameObject_s *object, i32 variant);
 void PlayLandSfx(GameObject_s *object, i32 variant, i32 force);
-
-static GAMECHARACTERDATA *Jump_GetCharacterData(GameObject_s *object) {
-    if (object == NULL || object->apiobj.character_data == NULL) {
-        return NULL;
-    }
-    return static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-}
-
-static bool Jump_HasAction(const GameObject_s *object, PLAYER_JUMP_ACTION action) {
-    return object != NULL && object->apiobj.character_model != NULL &&
-           object->apiobj.character_model->model_data_b != NULL &&
-           object->apiobj.character_model->model_data_b[action] != NULL;
-}
 
 void (*BigJump_EndOfLandFn)(GameObject_s *) = NULL;
 void FindSlamOrigin(GameObject_s *, NUVEC *, NUVEC *);
@@ -352,10 +326,6 @@ void StartEndOfJump(GameObject_s *object) {
     object->airborne_collision_target = NULL;
 }
 
-void StartBallooning(GameObject_s *object, i32 movement_state);
-
-void StartJetPackFall(GameObject_s *object, i32 fall);
-
 void MakeJumpReachHeight(GameObject_s *object, float height, i32 force) {
     const f32 current_height = object->apiobj.collision_min.y - object->jump_start_height;
     const f32 remaining_height = height - current_height;
@@ -370,8 +340,6 @@ void MakeJumpReachHeight(GameObject_s *object, float height, i32 force) {
         object->apiobj.velocity.y = 0.0f;
     }
 }
-
-void SetBallooningHeight(GameObject_s *object, float height);
 
 void StartJump(GameObject_s *object, i32 movement_state) {
     if (LEGOCONTEXT_JUMP != -1) {

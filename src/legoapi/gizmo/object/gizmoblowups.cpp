@@ -85,7 +85,6 @@ void Bolt_AddDeflectedBolt(BOLT_s *, nuvec_s *, nuvec_s *, unsigned char *);
 void Bolt_End(BOLT_s *, i32);
 void Bolt_PlayHitSfx(BOLT_s *);
 
-i16 GetGenericGoon(i32);
 static i32 Blowup_GetMaxGizmos(void *world_ptr);
 static void Blowup_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *);
 void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float);
@@ -128,12 +127,6 @@ void GameAntiNodeData_Init(GAMEANTINODEDATA_s *data, nuhspecial_s *special);
 void GameAntiNodeData_Read(GAMEANTINODEDATA_s *data);
 
 #include "legoapi/gizmo/object/gizmoblowups_types.h"
-
-
-
-
-
-
 
 static char *Blowup_OutputName[] = {"Blownup", "Punched", "Plugging"};
 

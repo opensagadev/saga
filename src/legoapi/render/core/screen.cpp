@@ -61,10 +61,6 @@ void ClearScreen() {
     NuPrimSetCoordinateSystem(NuPrimCoordSystemStack[NuPrimCSPos]);
 }
 
-void RenderQuads(i16 *);
-
-void InitAlphaList();
-
 f32 GetAspectRatio() {
     return static_cast<f32>(g_backingHeight) / static_cast<f32>(g_backingWidth);
 }

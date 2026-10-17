@@ -723,9 +723,6 @@ void Hint_Draw(i32 viewport) {
 
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
 
-
-
-
 void RegisterWithHintSys(void (*update_fn)(HINT_s *, i32), HINT_s *hints, u32 *save_bits, i32 save_bit_count) {
     hintsys.update_fn = update_fn;
     hintsys.hints = hints;
@@ -760,10 +757,7 @@ void RegisterWithHintSys(void (*update_fn)(HINT_s *, i32), HINT_s *hints, u32 *s
 #include "legoapi/world/levels/levels.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
-
 
 // The hint icon transitions and the touch icon x position are dynamically
 // initialized in this unit's static constructor in the reference.
@@ -775,8 +769,6 @@ static __used__ i32 Attack_UpdateHint(HINT_s *);
 u8 show_unlock_shop_hint = 0;
 u8 show_unlock_customiser_hint = 0;
 u8 show_unlock_minikitviewer_hint = 0;
-
-
 
 f32 CurrentHintAlpha();
 
@@ -790,8 +782,6 @@ static void DrawHint_LSWBody(HINT_s *hint, i32 max_lines);
 void DrawHint_LSW(HINT_s *hint, i32 max_lines);
 
 i32 Dodge_UpdateHint(HINT_s *hint);
-
-
 
 i32 DragBomb_UpdateHint(HINT_s *hint);
 
@@ -818,23 +808,16 @@ static __used__ i32 HatMachine_UpdateHint(HINT_s *hint);
 
 extern HINTUIBUTTON_s *hintUIButton;
 
-
 extern HINT_s Hints_LSW[55];
 void RegisterWithHintSys(void (*)(HINT_s *, i32), HINT_s *, u32 *, i32);
 i32 id_HINT_LSW_AUTOJUMP = -1;
 i32 id_HINT_LSW_AUTOJUMP_FAIL = -1;
 
-void initGameHintSys_LSW();
-
 i32 SmartBomb_UpdateHint(HINT_s *);
-
 
 i32 ShinyMetal_UpdateHint(HINT_s *hint);
 
 f32 CurrentHintButtonScale();
-
-void initGameHintSys_Batman();
-
 
 static __used__ i32 Sith_UpdateHint(HINT_s *);
 

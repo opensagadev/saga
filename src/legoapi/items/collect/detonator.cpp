@@ -19,9 +19,7 @@
 #include <string.h>
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 void Batarangs_CheckLostData(void *);
 EXPLOSION *Detonate(nuvec_s *, u16);
@@ -62,8 +60,6 @@ void Detonators_Draw() {
         }
     }
 }
-
-void Detonators_Reset();
 
 void Detonators_Update() {
 #define UPDATE_DETONATOR(i)                                                                                            \

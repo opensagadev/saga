@@ -13,13 +13,7 @@
 #include "legoapi/characters/motion.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
-
-extern i16 id_GAMORREANGUARD;
-
-void GrabVictim(GameObject_s *object, GameObject_s *victim);
 
 extern "C" {
     SNAKEBODY_s snakebodies[4];
@@ -213,4 +207,3 @@ void SnakeBeenHit(GameObject_s *object) {
 
 #undef ADD_SNAKE_SEGMENT_DEBRIS
 
-void EatVictim(GameObject_s *object);

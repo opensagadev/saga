@@ -7,13 +7,7 @@
 #include "legoapi/items/base/collection.h"
 #include "legoapi/world/world_shared.h"
 
-extern "C" void PlaySfx(char *, NUVEC *);
-
-extern i32 GetMenuID(void);
-extern void SetBonusWinner(i32);
-extern void ResetGameMessages(void);
 extern GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
-
 
 void EndChallenge(i32 param1, i32 param2);
 
@@ -43,7 +37,6 @@ MISSIONDATA *Mission_Active(MISSIONSYS *ms) {
     }
     return ms->mission;
 }
-
 
 GameObject_s *Mission_FindTarget(MISSIONSYS *ms, u64 *target) {
     GameObject_s *obj;

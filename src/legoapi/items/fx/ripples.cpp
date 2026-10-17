@@ -16,9 +16,7 @@
 #include "nu2api/nu3d/nutex.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 static RIPPLEEFFECT_s *RE_rippleeffect;
 static WORLDINFO_s *RE_worldinfo;
@@ -73,15 +71,6 @@ void InitRipples(ripple_set_s **result, variptr_u *buf, variptr_u *, i32 count) 
 }
 
 void InitRippleMtl(char *name, numtl_s **result, variptr_u *buffer, variptr_u *buffer_end);
-
-void NewRumble(nupad_s *pad, f32 strength, i32 mode);
-void NewBuzzFrames(nupad_s *pad, i32 frames, i32 mode);
-
-void AddWaterSplash(GameObject_s *object, nuvec_s *position);
-
-void FindAnglesXY(NUVEC *, u16 *, u16 *);
-
-void BuildRippleMtx(numtx_s *matrix, nuvec_s *normal, nuvec_s *position, u16, u16);
 
 void ResetRippleSet(ripple_set_s *set) {
     u16 count = set->count;
@@ -187,12 +176,6 @@ void UpdateRippleSet(ripple_set_s *set) {
     }
     erasecount = 0;
 }
-
-extern "C" ripple_set_s *ripples;
-void VecRotateAxis(NUVEC *, u16, NUVEC *);
-void AddRipple(ripple_set_s *, NUMTX *, float, float, float, float, RGBA, RGBA, i32, numtl_s *, NUVEC *);
-
-void AddSurfaceRipples(GameObject_s *object);
 
 extern "C" void NuMtlDestroy(numtl_s *);
 

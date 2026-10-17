@@ -60,94 +60,26 @@
 extern ADDPART_s Default_ADDPART;
 
 struct rtlset;
-extern rtlset * PartRTL;
-extern f32 PARTSCALEUPTIME;
-void NewPartOrderedRotation(PART_s *);
-void PartTimeSlip();
-void PartCleanupTypes();
-void UpdatePartEmits(f32);
 
 extern "C" {
     void DebFreeInstantly(i32 *handle);
     // Shared suspend flag consulted by all timed debris emitters.
-extern i32 debris_suspended;
 
-    extern debkeydatatype_s *debkeydata;
     extern debinftype **debtab;
-    extern i32 EDPP_MAX_TYPES;
-    extern DEBRISGENERATOR gensorttab[13];
-    extern DEBRISMOMENTUMADJUSTER gencodetab[7];
-    extern f32 globaltime;
-    extern f32 partglobaltime;
-    extern f32 panelglobaltime;
-    extern f32 timeincrement;
     f32 CameraEmitterDistance(NUVEC *);
     void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
-    void DebrisEmitterMomentum(i32, f32, f32, f32);
-    void DebrisParticleMomentum(i32, f32, f32, f32);
     void AddFiniteShotDebrisEffect2(i32 *, i32, NUVEC *, NUVEC *, NUVEC *, i32);
     void AddVariableShotDebrisEffectMtx3(i32, NUVEC *, NUVEC *, i32, NUMTX *, NUMTX *);
-    void DebrisSetUserData(i32, void *);
-    i32 CreateScaledPARTEffect(i32, f32);
-    extern i32 debris_suspended;
     extern f32 debris_thinning_level;
     extern i32 forced_debris_thinning;
-    extern i32 freedebkeyptr;
-    extern i32 maxdebkeys;
-    extern i32 debrischunks;
-    extern i32 debrischunksglass;
-    extern i32 freedebchkptr;
-    extern i32 freedebchkptrg;
-    extern dma_particle_chunk_s **freedebchunks;
-    extern dma_particle_chunk_s **freedebchunksglass;
-    extern particlechunkrendertype_s *ParticleChunkToRender;
-    extern particlechunkrendertype_s *ParticleChunkRenderStack[5];
-    extern debris_chunk_control_s **freechunkcontrols;
-    extern i32 freechunkcontrolsptr;
-    extern debris_chunk_control_s *debris_chunk_control_stack[2];
-    extern u32 partseed;
-    extern NUGSCN *part_scene[32];
 
-void NuPartEnableRayCasts(i32 enabled);
-
-u32 NuPartGetSeed(void);
-
-void NuPartSetSeed(i32 seed);
-
-    extern part_type_s part_types[128];
-    extern NUGSCN *part_scene[32];
-    extern part_emit_s part_emits[40];
-    extern i32 part_emits_used;
-    void CheckPartCount();
-    i32 AddPARTEffect(i32, NUVEC *);
-    void PARTStartOffset(i32, f32);
-
-    void ResetParts(void);
-
-    i32 DebAlloc(void);
-    void DebrisStartOffset(i32, f32);
-    void DebrisEmitterPos(i32, f32, f32, f32);
-    void DebrisEmitterOrientation(i32, i16, i16, i16);
-    void DebrisOrientation(i32, i16, i16);
-    void DebrisOrientationMtx(i32, NUMTX *);
-    void DebrisReflectionOrientation(i32, i16, i16, f32, f32);
-    void DebrisSetTrigger(i32, i32, i32, f32);
-    void DebrisEmitterOrientationMtx(i32, NUMTX *);
-    i32 CreateScaledEffect(i32, f32);
     i32 NuCameraClipTestExtentsAxisAligned(NUVEC *, NUVEC *, f32);
     void NuVecAddScale(NUVEC *, NUVEC *, NUVEC *, f32);
-    void AddVariableShotDebrisEffectTimed3(i32, NUVEC *, NUVEC *, i32, f32, NUMTX *, NUMTX *);
     void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 }
 
-void AddDebrisEffectToStack(debkeydatatype_s *);
-void AddChunkToRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
-void AddChunkControlToStack(debris_chunk_control_s *, debris_chunk_control_s **);
-void RemoveChunkControlFromStack(debris_chunk_control_s *, debris_chunk_control_s **);
 void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
-void DebrisGetControlStackLock();
-void DebrisReleaseControlStackLock();
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 extern f32 AreaPickupGravity;
 extern i16 temp_xrot;
@@ -155,9 +87,6 @@ extern i16 temp_zrot;
 
 // Forward declarations for local (static) part/gizmo helper stubs.
 struct spacelevel_s;
-struct quickboltinfo;
-
-
 
 // Local (static) part (PART_s), pickup (GIZMOPICKUP_s), gizmo flow
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
@@ -167,27 +96,13 @@ extern GameObject_s *Obj;
 extern i32 HIGHGAMEOBJECT, VehicleArea;
 extern WORLDINFO_s *WORLD;
 extern GAMECAMERA_s *GameCam;
-extern f32 ForceThrowSpeed, ForceThrowGravity;
 extern "C" void KillPart(PART_s *, i32);
-i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
-void DeflectPart(PART_s *, GameObject_s *, f32, f32, i32, i32);
-void SetCoinType(i32 model, GIZMOPICKUP_s *pickup);
-u16 GameCam_GetAdjustedYRot(GAMECAMERA_s *camera);
 void CollectPowerUp(GameObject_s *, NUVEC *, u16, i32);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void NewBuzz(nupad_s *, f32, i32);
 void CollectHitPoint(GameObject_s *object, NUVEC *position, i32);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
-void ReleasePush(GameObject_s *);
-void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
-i32 CannotKill(GameObject_s *);
 
-static void PartCollide(PART_s *part, i32 three_dimensional);
-
-
-extern "C" f32 coinimpactwait;
 extern i32 GAMEDEMO;
-extern "C" void PlaySfxAndSetVolume(char *, NUVEC *, f32);
 
 static __used__ void PartImpact_Coin(PART_s *part);
 
@@ -232,59 +147,18 @@ void AddFiniteShotDebrisEffect(i32 *handle, i32 effect, NUVEC *position, i32 cou
 void AddFiniteShotDebrisEffect2(i32 *handle, i32 effect, NUVEC *position, NUVEC *emitter_momentum,
                                     NUVEC *particle_momentum, i32 count);
 
-void AddFiniteShotDebrisEffectUserData(i32 *handle, i32 effect, NUVEC *position, i32 count, void *user_data);
-
 i32 AddFiniteShotPART(i32 effect, NUVEC *position, i32 count);
 
     void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
-i32 AddPARTEffect(i32 effect, NUVEC *position);
-
     void KillPart(PART_s *, i32);
-    void NewPartRotation(PART_s *);
-    void DebrisPopulateInstance(i32, f32);
     i32 rtlDynamicAllocTemplate(rtlset *, i32);
 
 PART_s *AddPart(ADDPART_s *params);
 
-void AddRotatedDebrisEffect(i32 *handle, i32 effect, f32 x, f32 y, f32 z, i16 rotation_x, i16 rotation_y);
-
-void AddScaledFiniteShotDebrisEffect(i32 *key, i32 effect, NUVEC *position, NUVEC *orientation, NUVEC *momentum,
-                                         i32 count, f32 scale);
-
-i32 AddScaledFiniteShotPART(i32 effect, NUVEC *position, i32 count, f32 scale);
-
-i32 AddScaledVariableShotDebrisEffect(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
-                                          i16 y_rotation, f32 scale);
-
     void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 
-i32 AddScaledVariableShotDebrisEffect1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
-                                           i16 y_rotation, NUMTX *orientation, f32 scale);
-
-i32 AddScaledVariableShotDebrisEffect2(i32 effect_index, NUVEC *position, i32 count, f32 time,
-                                           NUMTX *emitter_orientation, NUMTX *particle_orientation, f32 scale);
-
-i32 AddScaledVariableShotDebrisEffect3(i32 effect, NUVEC *position, NUVEC *momentum, i32 count, f32 time,
-                                           NUMTX *emitter_orientation, NUMTX *particle_orientation, f32 scale);
-
-i32 AddScaledVariableShotDebrisEffect4(i32 effect, NUVEC *position, NUVEC *momentum, i32 count, i32 time,
-                                           NUMTX *emitter_orientation, NUMTX *particle_orientation, u16 priority,
-                                           i8 flags, f32 scale);
-
-i32 AddScaledVariableShotDebrisEffect5(i32 effect, NUVEC *position, NUVEC *momentum, NUVEC *position_delta,
-                                           i32 count, f32 time, NUMTX *emitter_orientation, NUMTX *particle_orientation,
-                                           u16 priority, i8 flags, f32 scale);
-
-void AddScaledVariableShotPARTEffect(i32 effect, NUVEC *position, f32 rate, f32 time, NUMTX *orientation,
-                                         f32 scale);
-
-    void AddVariableShotDebrisEffectMtx(i32, NUVEC *, i32, i16, i16, NUMTX *);
-
 void AddVariableShotDebrisEffect(i32 effect, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation);
-
-void AddVariableShotDebrisEffectMtx(i32 effect, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation,
-                                        NUMTX *particle_orientation);
 
 void AddVariableShotDebrisEffectMtx3(i32 effect, NUVEC *position, NUVEC *momentum, i32 count,
                                          NUMTX *emitter_orientation, NUMTX *particle_orientation);
@@ -293,13 +167,8 @@ void AddVariableShotDebrisEffectMtx4(i32 effect, NUVEC *position, NUVEC *momentu
                                          NUMTX *emitter_orientation, NUMTX *particle_orientation, u16 priority,
                                          i8 flags);
 
-    void AddVariableShotDebrisEffectTimed3(i32, NUVEC *, NUVEC *, i32, f32, NUMTX *, NUMTX *);
-
 void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
                                            i16 y_rotation, NUMTX *particle_orientation);
-
-void AddVariableShotDebrisEffectTimed3(i32 effect_index, NUVEC *position, NUVEC *momentum, i32 count, f32 time,
-                                           NUMTX *emitter_orientation, NUMTX *particle_orientation);
 
 void AddVariableShotDebrisEffectTimed5(i32 effect_index, NUVEC *position, NUVEC *momentum, NUVEC *position_delta,
                                            i32 count, f32 duration, NUMTX *emitter_orientation,
@@ -307,63 +176,18 @@ void AddVariableShotDebrisEffectTimed5(i32 effect_index, NUVEC *position, NUVEC 
 
 void AddVariableShotPARTEffect(i32 effect_index, NUVEC *position, f32 rate, f32 duration, NUMTX *orientation);
 
-i32 PartRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 flags);
-
-i32 PartPlatId();
-
-void CastPart(PART_s *part, f32 time);
-
-void CheckPartCount(void);
-
-void DrawParts(i32 keep_offscreen);
-
 PART_s *FindPart(NUVEC *position, i32 player, GameObject_s *owner);
 
 void SetPartRTLSet(usize rtl_set);
 
-i32 GetMaxPartTypes(void);
-
-i32 GetPartCount(void);
-
-char *GetPartName(i32 index);
-
-extern part_type_s part_types[128];
-    extern part_emit_s part_emits[40];
-    extern i32 part_page_on[8];
-    extern i32 part_page_used[8];
-extern i32 part_types_used;
-extern i32 part_emits_used;
-extern NUGSCN * part_scene[32];
     // The editor loader clears these page IDs with aligned vector stores.
-extern i32 part_scene_pageid[32];
-extern i32 part_platimpactcnt;
-extern i16 part_platimpactlist[4];
-    void ResetParts(void);
-
-void InitParts(i32 count, VARIPTR *buffer, VARIPTR *);
-
-void KillAllParts(void);
 
     void DebFreeInstantly(i32 *);
     void rtlDynamicFree(i32);
 
 void KillPart(PART_s *part, i32 reason);
 
-void KillPartsByScene(NUGSCN *scene);
-
-void NewPartRotation(PART_s *part);
-
-void PARTEmitterOrientation(i32 index, i16 x_rotation, i16 y_rotation, i16 z_rotation);
-
-void PARTEmitterPos(i32 index, f32 x, f32 y, f32 z);
-
-f32 PARTGetTotalOffTime(i32 index);
-
-f32 PARTGetTotalOnTime(i32 index);
-
 i32 PARTLookupType(char *name);
-
-extern i32 edpart_load_particle_page;
 
 void edpartSetParticlePage(i32 page);
 
@@ -373,18 +197,7 @@ void edpartStopPage(i8 page);
 
 i32 PARTLookupTypePageOnly(char *name, i32 page);
 
-void PARTStartOffset(i32 index, f32 offset);
-
-void ParticleReset(void);
-
-void RemovePARTEffect(i32 index);
-
-void ResetParts(void);
-
-    void DebrisStatusAlwaysOff(i32 *);
     i32 rtlDynamicSetPos(i32, NUVEC *);
-
-void UpdateParts(f32 time);
 
 } // extern "C"
 
@@ -445,29 +258,15 @@ PART_s *TargetPart(GameObject_s *object, nuvec_s *position, nuvec_s *direction, 
 }
 
 extern "C" i32 NuGScnNumSpecials(nugscn_s *);
-i32 edpartLookupObjectInScene(char *name, nugscn_s *scene);
-i32 edpartLookupDebrisEffect(char *name);
-extern "C" i32 GetSfxIdN(char *, i32);
-
-void edpartLoadSingleType(part_typedesc_s *type, i32 version, i32 page);
 
 extern "C" {
-extern i32 edpart_nearest;
-extern NUVEC edpart_cam_pos;
-extern part_emit_s * edpart_nearest_emit;
 extern part_typedesc_s * edpart_nearest_type;
 }
 
-void edpartDetermineNearest(f32 distance);
 extern "C" {
-extern i32 edbits_part_level_page;
-
-i32 edpartLoadPageEx(char *path, i8 mode, nugscn_s **scenes, i32 scene_count);
 
 i32 edpartLoadPage(char *path, i32 mode, void *scene);
 }
-
-void PartTimeSlip();
 
 extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f32 radius, NUVEC *minimum,
                             NUVEC *maximum, u32 flags);
@@ -513,16 +312,8 @@ i32 SetPartTarget(GameObject_s *object, PART_s *target);
 WORLDINFO_s *WorldInfo_CurrentlyActive();
 extern f32 FRAMETIME;
 void PartCollide_3D(PART_s *);
-void PartCollide_2D(PART_s *);
-void PartUpdate_Heart(PART_s *);
 void PartStop_Flickerer(PART_s *);
 i32 PartDraw_Flickerer(PART_s *);
-
-void AddTorpedoAsPart(nuvec_s *position, nuvec_s *velocity, float scale, float lifetime);
-
-void AddHeartAsPart(GameObject_s *recipient, nuvec_s *position, nuvec_s *velocity, float scale, float lifetime);
-
-void PowerUp_AddPart(NUVEC *position, NUVEC *velocity, f32 scale, f32 lifetime);
 
 void PowerUp_Particles(WORLDINFO_s *world, NUVEC *position);
 
@@ -555,15 +346,10 @@ void MakePartVector(NUVEC *velocity, NUVEC *direction, f32 scale) {
     }
 }
 
-void PartCollide_2D(PART_s *part);
-
 void PartCollide_3D(PART_s *part);
 
 WORLDINFO_s *WorldInfo_CurrentlyActive();
 extern f32 FRAMETIME;
-void PartStop_Coin(PART_s *part);
-
-void AddCoinsAsParts(i32 type_id, nuvec_s *position, nuvec_s *velocity, float lifetime, float scale);
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -576,7 +362,6 @@ void AddCoinsAsParts(i32 type_id, nuvec_s *position, nuvec_s *velocity, float li
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-void UpdatePartEmits(f32 time);
 #undef PART_EMIT_SOUND_ON
 #undef PART_EMIT_SOUND
 
@@ -614,10 +399,6 @@ PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f3
     return nearest;
 }
 
-void edpartDestroy(i32 index);
-
-void PartCleanupTypes();
-
 extern "C" f32 brickimpactwait;
 extern "C" i32 GetSfxId(const char *);
 extern "C" void PlaySfxByIdAndSetVolume(i32, NUVEC *, f32);
@@ -642,8 +423,6 @@ void PartUpdate_Heart(PART_s *part) {
     NuMtxTranslate(&part->transform, &position);
 }
 
-void Asteroid_PartKill(PART_s *part, i32 reason);
-
 void PartStop_Flickerer(PART_s *part) {
     part->field_100 = 5.0f;
     if ((part->field_20a & 1) != 0)
@@ -665,10 +444,6 @@ void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 
 void PartKill_ForceThrow(PART_s *part, i32);
 
-void PartImpact_Basketball(PART_s *part);
-
-void PartUpdate_Basketball(PART_s *part);
-
 PART_s *Part_FindFromHSpecial(nuhspecial_s *special) {
     if (special != NULL) {
         PART_s *part = Part;
@@ -680,4 +455,3 @@ PART_s *Part_FindFromHSpecial(nuhspecial_s *special) {
     return NULL;
 }
 
-void NewPartOrderedRotation(PART_s *part);

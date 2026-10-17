@@ -94,12 +94,6 @@ static void CS_play_sfx(NUFPAR *fp) {
     }
 }
 
-static void copyAnims(NUGCUTSCENE_s *, NUGCUTSCENE_s *);
-void NewCopyAnims(instNUGCUTSCENE_s *);
-i32 instNuGCutSceneSwapBuffers(instNUGCUTSCENE_s *, i32);
-NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *, VARIPTR *);
-extern "C" void instNuGCutSceneDestroy(instNUGCUTSCENE_s *);
-
 static void CS_sfx(NUFPAR *fp) {
     if (NuFParGetWord(fp) != 0) {
         CS_CutInfo->legacy_music_index = GetMusicIndex(fp->word_buf, MusicInfo, -1);
@@ -126,15 +120,6 @@ extern "C" {
 }
 i32 CUTCAM = 0;
 i32 CUTCAMONLY = 0;
-extern NUMTX cutscenecammtx;
-extern i32 cutscenecamchange;
-extern f32 cutscenecam_fstop;
-extern u8 cutscenecam_usefocusloc;
-extern NUVEC cutscenecam_focusloc;
-extern f32 cutscenecam_focusDistance;
-extern f32 cutscenecam_focalLength;
-extern i32 CameraDOFHack;
-extern u8 set_cutscenecammtx;
 
 static void CS_no_fog(NUFPAR *) {
     CS_CutInfo->flags |= 4;
@@ -803,34 +788,13 @@ void *CutScenes_Load(char *config, NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VAR
 
 // --- Extern "C" block: functions with confirmed C linkage in original libTTapp.so ---
 extern "C" void *NuAnimData2FixPtrs(void *, isize, isize, i32);
-extern "C" StateAnim *StateAnimFixPtrs(StateAnim *, isize);
-extern "C" i32 StateAnimEvaluate(StateAnim *, u8 *, u8 *, f32);
-void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance);
 extern "C" void NuAnimCurve2SetApplyToMatrix_3(ani3_animheader_s *, i32, f32, NUMTX *);
-extern "C" {
-    extern i32 NuGCutDebFixUp_SearchAllPages;
-    extern NUGCUTLOCATORFNENTRY_s *locatorfns;
-}
-void NuGCutRigidCalcMtx(NUGCUTRIGID_s *, f32, numtx_s *);
 
 #include "legoapi/cutscenes/cutscene_types.h"
 DECOMP_ASSERT(sizeof(CutSceneTriggerNameEntry) == 0x34, "cutscene trigger name entry stride");
 DECOMP_ASSERT(offsetof(CutSceneTriggerNameTable, entries) == 0x0c, "cutscene trigger name table entries offset");
 
 // Exported (default visibility) in the original library.
-extern i32 cutscene_quit_prompt;
-extern i32 cutscene_has_quit;
-extern i32 cutscene_lock_player;
-extern i32 termcutstream_hack;
-
-extern "C" {
-extern instNUGCUTSCENE_s * cutscene_load_instance;
-extern i32 NumCommonStreamingBuffers;
-
-instNUGCUTSCENE_s *instNuGCutSceneFind(const char *name);
-
-void *instNuGCutSceneCleanUp(void);
-}
 
 // The relocation tables are patched as plain words, so every fixup aliases
 // cutscene->string_delta and re-reads it.
@@ -839,7 +803,6 @@ typedef isize __attribute__((may_alias)) NuGCutWord;
 #define NUGCUT_RELOCATE(field, delta) \
     (NUGCUT_WORD(field) = NUGCUT_WORD(field) != 0 ? NUGCUT_WORD(field) + (delta) : 0)
 
-
 // Retail keeps NuGCutSceneFixPtrs only as two constant-propagated clones:
 // .44 relocates animations by anim_delta, .43 is the anim_delta == 0 case.
 #if defined(__i386__)
@@ -847,12 +810,6 @@ typedef isize __attribute__((may_alias)) NuGCutWord;
 #else
 #define NUGCUT_FIXPTRS_ATTR(n) __attribute__((noinline, noclone))
 #endif
-static NUGCUT_FIXPTRS_ATTR(2) void NuGCutSceneFixPtrsAnims(NUGCUTSCENE_s *cutscene, isize anim_delta)
-    __asm__("_ZL18NuGCutSceneFixPtrsP13NUGCUTSCENE_sii.constprop.44");
-static void NuGCutSceneFixPtrsAnims(NUGCUTSCENE_s *cutscene, isize anim_delta);
-static NUGCUT_FIXPTRS_ATTR(1) void NuGCutSceneFixPtrsNoAnims(NUGCUTSCENE_s *cutscene)
-    __asm__("_ZL18NuGCutSceneFixPtrsP13NUGCUTSCENE_sii.constprop.43");
-static void NuGCutSceneFixPtrsNoAnims(NUGCUTSCENE_s *cutscene);
 
 extern "C" void NuGCutSceneSysInit(NUGCUTLOCATORFNENTRY_s *locator_functions);
 
@@ -863,8 +820,6 @@ void NuGCutSceneRemapFocusIdToLocaterNum(NUGCUTSCENE_s *cutscene, VARIPTR *buffe
 
 extern "C" {
 
-extern i32 NuGCutDebFixUp_SearchAllPages;
-extern NUGCUTLOCATORFNENTRY_s * locatorfns;
 extern NUGCUTUPDATELOCATORVFXFN UpdateLocatorVfxFn;
 extern NUGCUTRELEASELOCATORVFXFN ReleaseLocatorVfxFn;
 extern NUGCUTTRIGGERLOCATORVFXFN TriggerLocatorVfxFn;
@@ -880,24 +835,6 @@ void NuGCutSceneFixUpExtra(NUGCUTSCENE_s *cutscene, NUGSCN *area);
 instNUGCUTSCENE_s *instNuGCutSceneCreate(NUGCUTSCENE_s *cutscene, NUGSCN *scene, void *extra, char *name,
                                              VARIPTR *buf, i32 flags);
 
-void instNuGCutSceneReset(instNUGCUTSCENE_s *instance);
-
-void instNuGCutSceneStart(instNUGCUTSCENE_s *instance);
-
-void instNuGCutScenePause(instNUGCUTSCENE_s *instance, u8 paused);
-
-void instNuGCutSceneDestroy(instNUGCUTSCENE_s *instance);
-
-i32 NuGCutSceneIsBackgroundLoading(void);
-
-i32 instNuGCutScenePreload(instNUGCUTSCENE_s *instance);
-
-void instNuGCutSceneServiceLoad(void);
-
-void NuGCutSceneSysBackgroundFlush(void);
-
-void NuGCutSceneSysPostBackgroundLoad(void);
-
 void PetesHackOfDeath(void);
 } // extern "C"
 
@@ -908,16 +845,9 @@ struct NUGCUTLOCATOR_s;
 struct numtx_s;
 extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
 extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
-extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
-extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
-                                        NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
 i32 Draw3DObjectMtx(WORLDINFO_s *, i32, numtx_s *);
 
-void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance);
-void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance);
 extern "C" void DebFreeInstantly(i32 *handle);
-
-static void instNuGCutRigidSysEnd(instNUGCUTSCENE_s *instance, float frame);
 
 // Retail only keeps the IPA-SRA clone, which drops the unused frame argument.
 #if defined(__i386__)
@@ -925,44 +855,10 @@ static void instNuGCutRigidSysEnd(instNUGCUTSCENE_s *instance, float frame);
 #else
 #define INST_LOCATOR_SYS_END_ATTR __attribute__((noinline, noclone))
 #endif
-static INST_LOCATOR_SYS_END_ATTR void instNuGCutLocatorSysEnd(instNUGCUTLOCATORSYS_s *instance,
-                                                              NUGCUTLOCATORSYS_s *system)
-    __asm__("_ZL23instNuGCutLocatorSysEndP22instNUGCUTLOCATORSYS_sP18NUGCUTLOCATORSYS_sf.isra.8");
-static void instNuGCutLocatorSysEnd(instNUGCUTLOCATORSYS_s *instance, NUGCUTLOCATORSYS_s *system);
-
-void instNuGCutSceneEndFirstFrame(instNUGCUTSCENE_s *instance);
-
-extern "C" void instNuGCutSceneJumpToEnd(instNUGCUTSCENE_s *instance);
-
-extern "C" void instNuGCutSceneJumpToLastFrame(instNUGCUTSCENE_s *instance);
 
 extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
 
-static void instNuGCutRigidSysUpdate(instNUGCUTSCENE_s *, float, int);
-static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *, float);
-static void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *, float);
-static void instNuGCutSceneClipTest(instNUGCUTSCENE_s *);
-
-
-
-static void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int skip, float elapsed);
-
-static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame);
-
-static void instNuGCutSceneClipTest(instNUGCUTSCENE_s *instance);
-
-static void instNuGCutRigidSysRender(instNUGCUTSCENE_s *instance, float frame, int paused);
-
-static void instNuGCutRigidSysUpdate(instNUGCUTSCENE_s *instance, float frame, int paused);
-
 static __used__ void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame);
-
-extern "C" void NuGCutSceneSysUpdate(i32 paused, i32 skip, f32 elapsed);
-
-extern "C" void NuGCutSceneSysRender(i32 paused);
 
 static __used__ void CutScene_OverrideConfigFileName_LSW(char *filename, int, int);
 
-void NewCopyAnims(instNUGCUTSCENE_s *instance);
-
-static void copyAnims(NUGCUTSCENE_s *destination, NUGCUTSCENE_s *source);

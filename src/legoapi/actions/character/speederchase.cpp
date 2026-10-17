@@ -41,9 +41,7 @@
 #include <string.h>
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 static i32 snaphack[2];
@@ -83,12 +81,9 @@ extern i16 id_STORMTROOPER;
 
 void PodKeyReset();
 
-
 void PodLoseSpeed(GameObject_s *object, i32 hit, i32 rumble);
 
 i32 SpeederBlowupHack(GIZMOBLOWUP_s *blowup, i32);
-
-
 
 i32 ObjIsTargetSpeeder(GameObject_s *object);
 
@@ -100,12 +95,9 @@ i32 GoingForwardsAlongNarrowSock(GameObject_s *object);
 
 void SpeederChaseA_Init(WORLDINFO_s *world);
 
-
 void SpeederChaseA_Panel(WORLDINFO_s *);
 
 void SpeederChaseA_Reset(WORLDINFO_s *);
-
-i32 SpeedersDroppedBack();
 
 i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **, i32, i32 first_time,
                               f32 elapsed);
@@ -128,29 +120,14 @@ i32 ObjOpponentStillThere(GameObject_s *object, GameObject_s *opponent, f32 gap)
     return result;
 }
 
-f32 SpeederChaseATATInOutMul(nuvec_s *start, nuvec_s *end);
-
-
-i32 SpeederChase_ObjIsAGroundTroop(GameObject_s *object);
-
-extern "C" {
-
-extern i32 edmain_auto_speed;
-
-void cbSetAutoSpeed(eduimenu_s *, eduiitem_s *item, u32);
-
-} // extern "C"
-
 extern "C" void AddDebrisEffect(i32 *, i32, f32, f32, f32);
 extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);
 extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
-
 
 extern "C" f32 pod_roll[2];
 f32 getPodRoll(i32 index) {
     return pod_roll[index];
 }
-
 
 // ==== functions in original address order ====
 

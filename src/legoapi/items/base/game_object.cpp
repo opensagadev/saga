@@ -32,15 +32,7 @@ struct WORLDINFO_s;
 struct BOLT_s;
 struct debinftype;
 
-extern void SetGameObjectCharacterData(GameObject_s *obj);
-extern void GetTopBot(GameObject_s *obj);
-extern void GameObjectDimensions(GameObject_s *obj);
-extern void GameObjectOrigin(GameObject_s *obj);
-extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
 extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
-extern void Hub_ResetPanel();
-extern f32 VehicleTurnOrLoopOffset(GameObject_s *object);
-extern void StartTurn(GameObject_s *object);
 
 extern "C" {
     extern i16 id_MOSEISLEYCITIZEN;
@@ -59,19 +51,11 @@ extern "C" {
     extern i16 id_BASKETCANNON;
     extern i16 id_BIGGUN;
     extern i16 id_IMPERIALGUARD;
-    extern i16 id_GAMORREANGUARD;
     extern i16 id_ZAMSSPEEDER;
 }
 
 i32 addcreature_override_id_check;
 f32 default_mover_extra = 0.05f;
-extern f32 trench_max_height_move;
-extern f32 trench_roll_f;
-extern f32 trench_seek_z;
-extern f32 trench_seek_y;
-extern f32 trench_seek_x;
-extern f32 TURNTIME;
-extern f32 LOOPTIME;
 
 void ClearGameObjects(APIOBJECTSYS_s *api_object_sys) {
     for (i32 i = 0; i < 64; i++) {
@@ -134,13 +118,6 @@ GameObject_s *AddGameObject(i32 id) {
     }
     return object;
 }
-void TrenchMove(GameObject_s *) asm("_ZL10TrenchMoveP12GameObject_s") __attribute__((visibility("hidden")));
-void TrenchKilledCallback(GameObject_s *) asm("_ZL20TrenchKilledCallbackP12GameObject_s")
-    __attribute__((visibility("hidden")));
-
-__used__ void TrenchMove(GameObject_s *object);
-
-__used__ void TrenchKilledCallback(GameObject_s *object);
 
 static __used__ void SurfaceInfo_ExtraReflect(GameObject_s *object);
 

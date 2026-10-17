@@ -320,7 +320,6 @@ extern AREADATA *BONUS_GUNSHIP_ADATA;
 extern void GameObjectOrigin(GameObject_s *obj);
 extern void InitSurfaceInfo(GameObject_s *obj);
 extern i32 SetObjOnSurface(GameObject_s *obj, i32 mode);
-void ResetPlayerAI(GameObject_s *obj);
 void ResetPlayerMoves(GameObject_s *obj);
 i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode);
 void NewBuzz(nupad_s *, f32, i32);
@@ -331,17 +330,13 @@ void Players_Init(void);
 
 // --- Helpers moved from world.cpp ---
 
-
-
 void Players_InitPositions(WORLDINFO *world);
-
 
 extern i8 BoltType_FindIDByName(char *name, WORLDINFO *world);
 
 void PlayerItemTypes_Reset(WORLDINFO *world);
 
 GameObject_s *AddCreature(i32 id, i32 param);
-
 
 void PreResetCode(GameObject_s *obj);
 
@@ -372,26 +367,18 @@ NUVEC *Player_StartPos(GameObject_s *obj);
 
 i32 PlayersDropInOut();
 
-
 i32 Players_AveragePos(nuvec_s *position, SOCKPOSITION_s *socket_position);
 
 i32 Players_BothActive();
 
 PLAYERITEMTYPE_s *PlayerItemType_Find(i32 id);
 
-extern void (*Player_ClearContextFn)(GameObject_s *, i32);
-
-
 i32 Player_HasFastBuild(GameObject_s *player);
 
 void PlayerItemTypes_Init(PLAYERITEMTYPE_s *types);
 
-
 void Player_CopyEssentials(GameObject_s *source, GameObject_s *destination);
 
-
-extern i32 (*Player_ToggleSubCharacterFn)(GameObject_s *, i32, i32);
-extern void (*Player_ToggledCharacterFn)(GameObject_s *, i32);
 extern FadeSystem FadeSys;
 extern i32 LEGOHINT_FREEPLAYTOGGLE;
 void Move_DEFAULT(GameObject_s *object);
@@ -402,21 +389,11 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound);
 
 i32 Player_HasInvincibility(GameObject_s *object);
 
-
-
 i32 Player_HasDoubleWeaponDamage(GameObject_s *object);
-
-
-
-
-extern u32 (*CanPushObstaclesFn)(GameObject_s *);
 
 namespace {
 
-
-
 } // namespace
-
 
 i32 CanPullLevers(i32 id);
 extern f32 DEFAULT_MOVE_RANGE;
@@ -425,11 +402,7 @@ void SetFlicker(GameObject_s *object, float duration);
 
 #include "legoapi/characters/core/players_types.h"
 
-
 void InitPlayerAI(GameObject_s *object);
-
-void ResetPlayerAI(GameObject_s *object);
-
 
 i32 MakePlayerList(i32 count);
 
@@ -437,18 +410,13 @@ void ResetPlayerPacket(PLAYERPACKET_s *, CHARACTERDATA_s *);
 
 void ResetPlayerMoves(GameObject_s *object);
 
-
 i32 AvailableToPlayer(u32 character_flags, i32 weapon_action, i32 context, i32 require_all);
 
 i32 GetNumLocalPlayers();
 
-
 i32 ActivePlayerInRange(nuvec_s *position, float range_squared, float *distance_squared);
 
-
-
 DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
-
 
 i32 Player_HasPurpleForce(GameObject_s *obj);
 
@@ -464,11 +432,8 @@ bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, fl
 extern i32 (*LastSafePosExtraFn)(GameObject_s *);
 extern void (*GameObjectDimensionsExtraFn)(GameObject_s *);
 
-
 bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player, float &distance_squared,
                                bool require_character_flags, u32 character_flags);
-
-
 
 // ==== src/legoapi/actions/movement/dropinout.cpp: declarations ====
 #include "decomp.h"
@@ -491,7 +456,6 @@ bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player
 #include "nu2api/numath/nutrig.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
@@ -499,13 +463,6 @@ extern i32 drop_in_teleport;
 extern i32 teleport_all_freeplay_modes;
 
 void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
-
-
-
-
-
-i32 FreePlay_DropInToPlayerPos(GameObject_s *object);
-
 
 // ==== functions in original address order ====
 

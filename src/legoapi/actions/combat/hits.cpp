@@ -28,64 +28,29 @@
 #include <stdio.h>
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
-
-i32 ForcePushed_SuperPush_Occurring(GameObject_s *first, GameObject_s *second);
-void StartFlatten(GameObject_s *source, GameObject_s *target);
 
 i32 objhitobj_nohurtsfx;
 i32 objhitobj_noattackerrumble;
 i32 objhitobj_throwkillpartsup;
-extern i32 objhitobj_noimpactsfx;
-extern i16 *objhitobj_killparts_yrot;
-extern BOLT_s *objhitobj_bolt;
 extern i32 ObstacleCamHoldUntilPlayersMove;
 extern i32 disable_narrow_socks, players_cannot_exit_speeder, BuildUpDone;
 extern f32 BuildUpScale, DrawBuildUpTime, builduptime;
 extern i32 MiniCutCam;
 f32 SHIELDFLICKERTIME = 0.1f;
-void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
-i32 Hub_InMenu();
-i32 RotDiff(u16, u16);
 void NewRumble(nupad_s *, f32, i32);
-i32 NewBlockAction(GameObject_s *);
-void PlayerTakeHit(GameObject_s *, GameObject_s *);
-void ReleaseForce(GameObject_s *, i32);
-void LoseHelmet(GameObject_s *, i32, i32);
-void TakeHitRumble(GameObject_s *, f32);
-void KillRumble(GameObject_s *);
-void PlayHurtSfx(GameObject_s *);
-void SnakeBeenHit(GameObject_s *);
-void PopBalloon(GameObject_s *);
 i32 Player_HasFastBuild(GameObject_s *);
 i32 Player_HasInvincibility(GameObject_s *);
-i32 ReleaseHearts();
-void KillParts(GameObject_s *, i32, i32, i32, f32, i32, u16 *);
-void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
-void Arcade_Kill(i32, i32);
-i32 qrand();
-GAMEPAD_s *ViewCamGetGamePad();
-void Player_ClearContext(GameObject_s *, i32);
-extern "C" i32 AddGameDebris(APIDEBRISSYS_s *, i32, NUVEC *);
 extern "C" void NuSpecialSetVisibility(void *, i32);
 
-extern i16 id_ANAKINJEDI;
 extern i16 id_ATAT;
 extern i16 id_BODYGUARD;
 extern i16 id_DRAGBOMB;
-extern i16 id_GAMORREANGUARD;
 extern i16 id_IMPERIALGUARD;
-extern i16 id_OBIWANKENOBIEP3;
 extern i16 id_ROYALGUARD;
-extern i16 id_SNAKE;
 extern i16 id_SPEEDERBIKE;
-extern i16 id_WOOKIEE;
 extern AREADATA_s *HOTHBATTLE_ADATA;
-extern AREADATA_s *PODRACE_ADATA;
 extern AREADATA_s *PODSPRINT_ADATA;
-extern AREADATA_s *SPEEDERCHASE_ADATA;
 extern LEVELDATA_s *CRUISERC_LDATA;
 extern LEVELDATA_s *HUB_LDATA;
 extern LEVELDATA_s *SPEEDERCHASEA_LDATA;
@@ -118,16 +83,11 @@ void FloatRumble(GameObject_s *object) {
     }
 }
 
-i16 InsideLineF(f32 point_u, f32 point_v, f32 line_start_u, f32 line_start_v, f32 line_end_u, f32 line_end_v);
-
 i16 InsideLineXZ(f32 point_u, f32 point_v, f32 line_start_u, f32 line_start_v, f32 line_end_u, f32 line_end_v) {
     const f32 side =
         (point_u - line_start_u) * (line_end_v - line_start_v) + (point_v - line_start_v) * (line_start_u - line_end_u);
     return side >= 0.0f;
 }
-
-i16 InsidePolLines(f32 point_x, f32 point_y, f32 point_z, f32 edge_a_x, f32 edge_a_y, f32 edge_a_z, f32 edge_b_x,
-                   f32 edge_b_y, f32 edge_b_z, NUVEC *normal);
 
 i32 ObjHitObj_Flags(GameObject_s *object) {
     if (object == NULL)

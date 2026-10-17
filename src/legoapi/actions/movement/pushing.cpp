@@ -26,9 +26,7 @@
 #include <math.h>
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 void ReleasePush(GameObject_s *object) {
     if ((CInfo[object->character_context].flags & 0x2000) != 0) {
@@ -53,8 +51,6 @@ void SetPushAngle(GameObject_s *object) {
         object->apiobj.movement_facing_angle = angle + adjustment;
     }
 }
-
-f32 ForceTowardsMid(GameObject_s *object);
 
 void ResetPushProgress(WORLDINFO_s *world, void *progress_data) {
     pushblock_s *block = world->push_blocks;
@@ -113,19 +109,8 @@ void ResetPushProgress(WORLDINFO_s *world, void *progress_data) {
     }
 }
 
-void SetObjAsHeadTarget(GameObject_s *, GameObject_s *, i8, f32, f32, f32);
 void FastWeaponIn(GameObject_s *, i32);
 void PlayGruntSfx(GameObject_s *);
-i32 FaceOpponent(GameObject_s *, NUVEC *);
-void Player_ClearContext(GameObject_s *, i32);
-void Player_ResetContexts(PLAYERPACKET_s *);
-i32 SuperWeirdo(GameObject_s *);
-void GameCam_HitRoll(void);
-extern "C" i32 dagobah_training;
-extern AREADATA *EMPERORFIGHT_ADATA;
-extern i16 id_GAMORREANGUARD;
-
-void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter);
 
 f32 PushingTowardsAngle(u16 input_angle, u16 direction) {
     NUVEC input, target;
@@ -134,7 +119,6 @@ f32 PushingTowardsAngle(u16 input_angle, u16 direction) {
     return input.x * target.x + input.z * target.z;
 }
 
-i32 CannotKill(GameObject_s *object);
 extern i16 id_GONKDROID;
 
 i32 Pushing(GameObject_s *object, u16 *normal_angle, i32 *surface, i32 *angle_difference) {

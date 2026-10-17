@@ -103,11 +103,9 @@ void Hint_SetComplete(i32);
 i32 GameAnimSet_IsAnimationReset(GAMEANIMSET_s *);
 GIZMOBLOWUP_s *FindNearestGizmoBlowUp(WORLDINFO_s *, NUVEC *, f32);
 static i32 IsGrabbable(GameObject_s *object);
-void Grabber_Update(WORLDINFO_s *world);
 
 #include "legoapi/gizmo/base/gizmo.h"
 extern i32 obstacle_gizmotype_id;
-void Grabber_Reset(WORLDINFO_s *world);
 
 #include "legoapi/render/fx.h"
 extern GAMECAMERA_s *GameCam;
@@ -127,7 +125,6 @@ void EnableShadowMapRendering(i32);
 void ResetShadowMapRendering();
 i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
 i32 MatrixReflectionVU0_AXISY(NUMTX *, f32, f32, NUMTX *);
-void Grabber_Draw(WORLDINFO_s *world);
 
 // ==== functions in original address order ====
 

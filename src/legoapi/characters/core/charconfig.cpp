@@ -2600,4 +2600,3 @@ void CharConfig_CalculateJumpStats(float jump_speed, float gravity, float *durat
     }
 }
 
-void ExtraCharacterFixUpAfterConfig();

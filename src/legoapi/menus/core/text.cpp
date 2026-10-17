@@ -23,20 +23,8 @@ char *ASCII_UP = "\xc2\xac";
 #include "nu2api/numath/nutrig.h"
 #include <stdio.h>
 #include <string.h>
-i32 FindNextBreak(unsigned char *, i32);
-i32 FindNearestBreak(unsigned char *, i32);
 extern char **TTab;
-extern i16 tNULL;
 extern i16 tUNKNOWN;
-extern i16 tENGLISH;
-extern i16 tFRENCH;
-extern i16 tGERMAN;
-extern i16 tITALIAN;
-extern i16 tSPANISH;
-extern i16 tDANISH;
-extern i16 tPLAYER1, tPLAYER2, tIOSAUTOSAVEWARNING, tLOADING, tSAVING;
-extern char *apitxt_AUTOSAVE_WARNING, *apitxt_LOADING, *apitxt_SAVING;
-extern char * txt_NULL;
 extern char * apitxt_ENGLISH;
 extern char * apitxt_FRENCH;
 extern char * apitxt_GERMAN;
@@ -51,8 +39,6 @@ static LANGUAGEDATA Text_LanguageList_Default[7] = {{1, apitxt_ENGLISH}, {2, api
 LANGUAGEDATA *Text_LanguageList = Text_LanguageList_Default;
 extern f32 text3d_height;
 extern f32 text3d_width;
-extern void (*buttonmapfn)(char *, char *);
-extern f32 (*pulsetimerfn)(f32);
 extern "C" {
 extern i32 smarttextex_drawmessagebox;
     void NuQFntSetJustifiedTolerances(float squash, float stretch);
@@ -61,16 +47,11 @@ extern i32 smarttextex_drawmessagebox;
     VUFNT *LoadGameFont(char *, char *, variptr_u *, variptr_u *, i32);
     VUFNT *LoadButtonFont(char *, char *, variptr_u *, variptr_u *, i32);
     void NuLanguageSet(i32 language);
-    void NuQFntDestroy(VUFNT *font);
     i32 NuRndrBeginScene(i32 flags);
-    void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
 }
 void (*Text_GameSetLanguageFn)(i32);
 char *Text_GetLanguagePath(i32 language);
-void Text_LoadAndFixUpStrings(unsigned char *filename, unsigned char **buffer, char **table, i32 count);
-void IntroText_SetTextID(i32 id);
 void Text_InsertCommasIntoNumber(char *number, char *text, i32 length);
-void Text_DecodeButtons(char *source, char *destination);
 void GameDrawMenuEntry(MENU *menu, char *text);
 extern "C" void BackupMenu(void);
 extern "C" {
@@ -100,10 +81,6 @@ extern "C" {
     void NuMtxRotateZ(NUMTX *mtx, i32 angle);
     void NuMtxTranslate(NUMTX *mtx, NUVEC *vec);
 }
-void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font);
-void MatrixTextStringEncode(void *font, unsigned char *source, u16 *destination);
-i32 SplitTextFindNextWS(unsigned char *text, i32 position);
-extern "C" void TextDecode(char *source, unsigned char *dest);
 extern "C" void Text3DEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                          u8 green, u8 blue, i32 alpha);
 extern "C" void Text3DEx2(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u8 alignment, u8 red,
@@ -336,7 +313,6 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
     }
     NuQFntPopPrintMode();
 }
-f32 TextPulseTimer(f32 delay);
 static char **TTab_Original;
 static i32 Text_MaxStrings_Overall;
 static u32 *Text_StringBits;
@@ -378,8 +354,6 @@ void Text_MakeScore(u32 score, char *text) {
 
     Text_InsertCommasIntoNumber(first, text, static_cast<i32>(end - first));
 }
-extern i16 tALONGTIMEAGO;
-void Text_LoadStrings(variptr_u *buf, variptr_u *buf_end);
 void Text_SetLanguage(i32 language) {
     if (language == -1) {
         language = Text_Language;
@@ -398,20 +372,10 @@ void Text_SetLanguage(i32 language) {
 void *Text_IsFontLoaded() {
     return app_fnt;
 }
-void TextDecodeCodeword(char *source, char *destination);
 extern f32 g_buttonFontScalePulse;
 extern f32 smarttextex_longestwidth;
 i32 MenuStopDraw;
-extern i32 smarttext_fwn;
-extern i32 apitext_half_rgb;
-extern u8 text_preset_b[10];
-extern u8 text_preset_g[10];
-extern u8 text_preset_r[10];
-extern i32 ButtonScaleMode;
 
-f32 TextPrintSubstring(unsigned char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, i32 colour,
-                       i32 button_font);
-void Text_DecodeButtons(char *source, char *destination);
 char *txtpath_JAPANESE = const_cast<char *>("japanese");
 char *txtpath_DANISH = const_cast<char *>("danish");
 char *txtpath_SPANISH = const_cast<char *>("spanish");
@@ -463,8 +427,6 @@ void Text_InitLanguageList(LANGUAGEDATA *language_list) {
     }
 }
 void Text_SetLanguage_Game(i32 language);
-void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font);
-void Text_InitDefaultStrings();
 void Text_LoadAndFixUpStrings(unsigned char *filename, unsigned char **buffer, char **table, i32 count) {
     unsigned char *out = *buffer;
     NUFPAR *parser = NuFParCreate(reinterpret_cast<char *>(filename));
@@ -596,7 +558,6 @@ void Text_ExpandAllButtonStrings(char *input, char *output) {
     }
     *output = '\0';
 }
-void Text_FillInExtendedSaveInfo();
 void Text_InsertCommasIntoNumber(char *number, char *text, i32 length) {
     char separator;
     if (Text_Language == 2) {
@@ -621,8 +582,6 @@ void Text_InsertCommasIntoNumber(char *number, char *text, i32 length) {
     }
     text[output] = '\0';
 }
-extern NUMTL * MessageMtl;
-extern i32 MessageMtlInit;
 
 extern "C" void MessageBoxInitMtl(void);
 
@@ -632,13 +591,10 @@ void DrawMessageBoxRGBA(f32 x, f32 y, f32 width, f32 height, u32 blue, u32 green
 void DrawMessageBox(i32, f32 x, f32 y, f32 width, f32 height);
 
 extern "C" {
-void FixUpButtonsInFont(VUFNT *game_font, VUFNT *button_font);
 
 VUFNT *LoadButtonFont(char *path, char *name, variptr_u *buf, variptr_u *buf_end, i32 render_plane);
 
 VUFNT *LoadGameFont(char *path, char *name, variptr_u *buf, variptr_u *buf_end, i32 render_plane);
-void MatrixText(VUFNT *font, unsigned char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, u32 alignment,
-                    u32 colour, NUMTX *matrix, i32 camera_relative);
 void MenuSmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                          u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw,
                          i32 alpha);
@@ -646,31 +602,23 @@ void MenuText3DEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32
                       u8 green, u8 blue, u8 alpha);
 void Set3DGameFont(VUFNT *font);
 void SetGameFont(VUFNT *font);
-void SmartText(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                   u8 green, u8 blue, f32 max_width, i32 max_lines);
 void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                      u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
 void SmartTextEx2(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                       u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw,
                       u32 alpha);
-void SmartTextExDrop(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u32 red,
-                         u32 green, u32 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw,
-                         u32 alpha);
 void SmartTextGetWidescreen(f32 *font_scale_x, f32 *coordinate_scale);
 void SmartTextSetFWNMode(i32 mode);
 void SmartTextSetFont(VUFNT *font);
 void SmartTextSetWidescreen(f32 font_scale_x, f32 coordinate_scale);
-i32 SplitText(unsigned char *text, f32 max_width);
 void Text3D(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red, u8 green,
                 u8 blue);
 void Text3DEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32, u32 alignment, u8 red, u8 green,
                   u8 blue, i32 alpha);
 void Text3DEx2(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u8 alignment, u8 red,
                    u8 green, u8 blue, i32 alpha);
-void TextDecode(char *source, unsigned char *dest);
 void TextRegisterButtonMapFn(void (*fn)(char *, char *));
 void TextRegisterPulseTimerFn(f32 (*fn)(f32));
-void UnloadGameFont(void);
 }
 void MenuUpdateViewTextStrings(MENU_s *menu) {
     if (menu->cancel_pressed != 0) {
@@ -813,8 +761,6 @@ abi_ulong GetMatchLength(unsigned char *first, unsigned char *second, abi_ulong 
     }
     return length;
 }
-i32 SplitTextFindNextWS(unsigned char *text, i32 position);
-void MatrixTextStringEncode(void *font, unsigned char *source, u16 *destination);
 extern "C" void Text3DStringEncode(char *src, u16 *dst);
 extern "C" void SetQFont2D(void);
 void IntroText_SetTextID(i32 id) {

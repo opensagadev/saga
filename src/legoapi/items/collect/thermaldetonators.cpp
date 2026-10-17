@@ -28,9 +28,7 @@
 #include "nu2api/numath/nutrig.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 MechWeakPtr<MechObjectInterface, 4> NextThermalTarget;
 
@@ -44,7 +42,6 @@ i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *resu
 void KillPart(PART_s *part, i32 reason);
 void NewBuzzFrames(nupad_s *pad, i32 frames, i32 channel);
 i32 SuperWeirdo(GameObject_s *object);
-void ThermalDetonator_ThrowMom(GameObject_s *object, nuvec_s *velocity);
 void PartUpdate_ThermalDetonator(PART_s *part);
 void PartImpact_ThermalDetonator(PART_s *part);
 void PartKill_ThermalDetonator(PART_s *part, i32 reason);
@@ -53,16 +50,7 @@ i32 GameRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 mask);
 extern i32 TERRAINMASK_NONWEAPON;
 extern "C" f32 brickimpactwait;
 
-void ThermalDetonator_Throw(GameObject_s *object);
-
-
 void PartKill_ThermalDetonator(PART_s *part, i32);
-
-i32 ThermalDetonator_MoveCode(GameObject_s *object);
-
-
-
-
 
 // ==== src/legoapi/menus/core/hint.cpp: declarations ====
 #include "decomp.h"
@@ -89,61 +77,24 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object);
 #include "legoapi/world/level.h"
 #include "legoapi/world/levels/levels.h"
 
-
-
 // The hint icon transitions and the touch icon x position are dynamically
 // initialized in this unit's static constructor in the reference.
 extern HintVectorTransition hintIconPos;
 extern HintScalarTransition hintIconScale;
 extern HintScalarTransition hintYPop;
 
-
-
-
 f32 CurrentHintAlpha();
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
-static __attribute__((noinline, noclone)) void DrawHint_LSWBody(HINT_s *hint, i32 max_lines)
-    __asm__("_Z12DrawHint_LSWP6HINT_si.part.19");
-
-static void DrawHint_LSWBody(HINT_s *hint, i32 max_lines);
-
-
-
-
-
 
 // Original local callbacks referenced by Hints_LSW.
 extern AREADATA_s *PODRACE_ADATA, *PODSPRINT_ADATA, *BONUS_GUNSHIP_ADATA;
 extern FadeSystem FadeSys;
 
-
-
-
-
-
-
-
-
-
-
-void RegisterWithHintSys(void (*)(HINT_s *, i32), HINT_s *, u32 *, i32);
-
-
-
 extern AREADATA *JABBASPALACE_ADATA;
 
-i32 ShinyMetal_UpdateHint(HINT_s *hint);
-
 f32 CurrentHintButtonScale();
-
-
-
-
-
-
-
 
 // Each control mode retains its own requested and interpolated hint row.
 

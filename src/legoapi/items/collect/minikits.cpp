@@ -38,9 +38,7 @@
 #include <string.h>
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 HUBMINIKITPIECES_s **Char_MiniKit;
 static VARIPTR minikits_savecharacterbufferptr;
@@ -105,7 +103,6 @@ void CharacterMiniKits_Load(COLLECTION_s *collection, WORLDINFO *world, VARIPTR 
 extern f32 KITPOSX, PANEL_MINIKITY, PANEL_MINIKITSCALE;
 void MiniKit_GameMsg_Update(GAMEMESSAGE_s *message);
 void MiniKit_GameMsg_End(GAMEMESSAGE_s *message);
-void Hint_SetHintFromId(i32, i32, i32);
 
 void CollectMinikit(nuvec_s *position, char *name, i32);
 
@@ -154,26 +151,8 @@ void CharMiniKit_Draw(i32 id, numtx_s *matrix, i32 reflection_axis, float reflec
     }
 }
 
-extern i32 currentminikit, newminikitcount;
-extern f32 slideseek;
-extern f32 pop_timer;
-extern f32 jibberlen;
-extern f32 slidetime;
-void NextStatusStage(STATUSPACKET_s *);
-void SetDrawGoldBrick(STATUSPACKET_s *, i32);
-void IncreaseScore(u32 *, u64, i32);
-void NewStatusRumbleBuzz(i32, f32, f32, i32);
 extern "C" void PlaySfx(char *, nuvec_s *);
-void AddStatusMiniKitParts();
-void DrawStatusMiniKit(f32, f32, f32, f32, f32, i32, STATUSPACKET_s *, f32);
 void DrawMiniKitCount(f32, f32, i32, i32);
-f32 getFinishedStatusAlpha(STATUSPACKET_s *);
-extern f32 STATUS_TITLE_Y;
-extern i16 tMINIKIT;
-
-void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
-
-void MiniKit_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
 
 void CollectAllMiniKits(AREASAVE_s *save) {
     if (save == NULL)
@@ -185,10 +164,6 @@ void CollectAllMiniKits(AREASAVE_s *save) {
         }
     }
 }
-
-i32 UpdateNewMiniKits(STATUSPACKET_s *, STATUS_STAGE_s *stage);
-
-void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
 extern i32 LEGOOBJ_MINIKIT, LEGOOBJ_CHARKIT;
 void EndChallenge(i32, i32);
@@ -216,19 +191,6 @@ void MiniKit_GameMsg_End(GAMEMESSAGE_s *message) {
 void ResetMinikitCounter();
 
 extern i16 id_SLAVE1, tALLMINIKITSBUILT;
-extern i32 STATUS_R, STATUS_G, STATUS_B;
-
-void AllMiniKits_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
-
-void AllMiniKits_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
-
-extern rtldata_s KitPartRTL;
-extern NUCOLOUR3 panelcol[3], panelamb;
-extern NUVEC paneldir[3];
-
-void AllMiniKits_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
-
-void AddStatusMiniKitParts();
 
 void CharacterMiniKits_Dump(WORLDINFO_s *world) {
     if (world->minikit.gscn != NULL) {
@@ -270,11 +232,5 @@ void MiniKit_GameMsg_Update(GAMEMESSAGE_s *message) {
     message->field_0xe0 = static_cast<u16>(NuTrigTable[angle & 0x7fff] * 1820.0f);
 }
 
-void SetEffectVisibility(char *, i32);
-
-void EffectOffProgress_Reset(LEVEL_PROGRESS_s *progress);
-
-
 void IncrementMinikitCounter(GameObject_s *);
 
-i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible);

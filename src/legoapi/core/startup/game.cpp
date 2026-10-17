@@ -23,23 +23,10 @@
 #include <stdio.h>
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
-extern f32 GetVehicleAreaRememberSpeed(void);
-extern void AveragePlayerCurrentSpeedMul(void);
-extern void SetPlayer(void);
-extern void ResetPlayer(GameObject_s *, i32, nuvec_s *, i32);
-extern void GameFog_Reset(void);
-extern void ConfigureComplexShadow(GameObject_s *);
-extern void ResetAdaptiveDifficulty(void);
-extern void Hint_ClearHintsAndDoneFlags(void);
 extern void FinishWeirdoNames(i32);
-extern void ReCalculateCompletionPoints(void);
-extern void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
 extern "C" void NuSound3StopRumble(void);
-extern i16 id_DEFAULTCHARACTER[2];
 extern "C" i32 NewMode;
 extern "C" i32 Paused;
 extern "C" i32 memcard_autosavedisabled;
@@ -47,10 +34,7 @@ extern "C" i32 memcard_autosaveenabled;
 
 namespace {
 
-
 } // namespace
-
-void InitGameMode();
 
 void IncreaseScore(u32 *total, u64 amount, i32 apply_multiplier) {
     if (apply_multiplier != 0 && BonusArea == 0) {
@@ -80,4 +64,3 @@ void IncreaseScore(u32 *total, u64 amount, i32 apply_multiplier) {
 void RegisterHelpers() {
 }
 
-void NewGame();

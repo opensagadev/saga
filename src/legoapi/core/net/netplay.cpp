@@ -15,9 +15,7 @@
 #include "nu2api/nusound/nusound.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 APICHARACTERMODELLIST_s NetFreePlayModelList[49];
 i8 net_FreePlayModelCount;
@@ -25,17 +23,11 @@ u8 net_recievedFreePlayList;
 
 void GetClientMineInfo(nuvec_s **positions, u64 **present, u64 **exploded);
 
-extern void Player_ResetContexts(PLAYERPACKET_s *packet);
-extern void CharShadows_Reset(PLAYERPACKET_s *packet);
-extern void ResetForceGlow(PLAYERPACKET_s *packet);
-
 void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *);
 
 void FinishLoop_Network() {
     STUBBED();
 }
-
-i32 FinishStatusPacket_LSW(WORLDINFO_s *, STATUSPACKET_s *, i32);
 
 void setObjInNetWaitContext(GameObject_s *object, i32 animation) {
     if (object != NULL) {

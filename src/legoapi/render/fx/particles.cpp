@@ -15,9 +15,7 @@
 #include "nu2api/nu3d/nucamera.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 extern NUGLOBALRNDRSTATE render_state;
 extern "C" i32 back_rgba[2];

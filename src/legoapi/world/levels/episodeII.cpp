@@ -128,12 +128,6 @@ void CompleteLevel(WORLDINFO_s *);
 // Kamino
 // ===========================================================================
 
-i32 KaminoInside();
-
-i32 KaminoDiscoOn();
-
-i32 KaminoInDiscoRoom();
-
 void KaminoA_AlwaysUpdate(WORLDINFO_s *);
 
 #include "legoapi/gizmos/traps/gizturrets.h"
@@ -192,8 +186,6 @@ void KaminoE_Update(WORLDINFO_s *world);
 
 void KaminoE_Draw(WORLDINFO_s *world);
 
-i32 KaminoE_CheckPlatHit(BOLT_s *bolt);
-
 void KaminoF_Init(WORLDINFO_s *world);
 
 void KaminoOutro_Init(WORLDINFO_s *);
@@ -225,8 +217,6 @@ void FactoryG_Init(WORLDINFO_s *world);
 // ===========================================================================
 
 DECOMP_ASSERT(sizeof(JEDIB_CREATURE_s) == 0x60, "JEDIB_CREATURE_s ABI");
-
-
 
 DECOMP_ASSERT(sizeof(JEDIB_s) == 0x63ec, "JEDIB_s ABI");
 
@@ -300,13 +290,10 @@ void GunshipA_Draw(WORLDINFO_s *world);
 
 void GunshipB_Reset(WORLDINFO_s *world);
 
-
 f32 gunshipb_seekmomseek = 5.0f;
 f32 gunshipb_seekmom = 5.0f;
 f32 gunshipb_seekrange = 4.0f;
 f32 SeekValF(f32 current, f32 target, f32 rate);
-
-void GunShip_DragBombSeekBlowUp(GameObject_s *object);
 
 // ===========================================================================
 // Bonus gunship (Bonus_Gunship_A / Bonus_Gunship_B)
@@ -376,14 +363,11 @@ void DookuC_DrawPanel(WORLDINFO_s *);
 #include <math.h>
 #include <string.h>
 
-
 extern "C" void edbriStartAllPages(void);
 
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/numath/nutrig.h"
-
-
 
 extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
                                               f32 upper_y, u32 colour, i32, i32 segments);
@@ -459,9 +443,6 @@ struct rtlidata_s;
 extern i32 VehicleArea;
 extern i32 GAMEDEMO;
 
-
-void DrawGameObjectsDraw(i32 pass);
-
 struct GAMEMESSAGE_s;
 struct HINT_s;
 struct MENU_s;
@@ -474,8 +455,6 @@ struct nuhspecial_s;
 struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
-
-extern nuhspecial_s *(*GameMsg_GetExtraObjFn)(GAMEMESSAGE_s *);
 
 extern "C" i32 NuRndrBeginScene(i32);
 extern "C" void NuRndrEndScene(void);
@@ -518,7 +497,6 @@ extern i32 CutScenePlayer_CanStart(i32 cutscene_id);
 
 // Graphics loading flags
 
-
 extern "C" {
     i32 NuDisplayListRndrSpecial(nuhspecial_s *special, NUMTX *mtx, i32 skinned, NUMTX *skin_mtx,
                                  DEFORMERWEIGHTSARRAY *blend_values);
@@ -532,7 +510,6 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta);
 // --- NuGScn graphics-data reader ---
 // NuReadGraphicsData is a C++ static function in the original (GCC clones it,
 // hence the `.isra.NNN` suffix in the ROM symbol table).
-
 
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
@@ -551,19 +528,6 @@ NUGSCN *NuGHGFixup(NUGSCN *scene, void *);
 nuhgobj_s *NuGHGRead(char *path, VARIPTR *buf, VARIPTR buf_end);
 } // extern "C"
 
-
-
-
-
-
-extern "C" {
-extern f32 aiEditor_DrawYOffset;
-extern f32 aiEditor_LocatorWidth;
-    void AiRndrLine3d(NURND_VERTEX3D *, NUMTL *, NUMTX *);
-}
-
-
-
 i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
                  u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order);
 
@@ -571,13 +535,6 @@ void DrawCharIcon(i32 character_id, float x, float y, float z, float scale, i32 
                   float frame_alpha, i32 draw_character, nuhspecial_s *override_special);
 
 extern const u8 HintRGB[5][3];
-
-
-
-
-
-
-
 
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nuprim_internal.h"
@@ -623,33 +580,13 @@ extern const u8 HintRGB[5][3];
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-
-
-extern i16 tNONEWBESTTIME, tNEWBESTTIME;
 void Text_MakeTime(f32, i32, i32, i32, char *);
-
-
 
 void DrawPauseFade();
 
-
-
-
-
-
-
-
-
-
-
 void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
 
-
-
-
-
 i32 Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx);
-
 
 extern nuhspecial_s green_light;
 extern nuhspecial_s painttargetcolour[3];
@@ -660,9 +597,6 @@ void DrawPaintLights();
 void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha);
 
 void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large);
-
-
-
 
 void DrawGameMessages();
 
@@ -690,35 +624,22 @@ extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
 
 void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum);
 
-
-
 i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
                       u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha);
-
 
 i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
                       u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order, float alpha);
 
 extern STATUSMINIKITPART_s KitPart[10];
 
-
 extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern "C" void PlaySfx(char *, NUVEC *);
-
-
-
-
-
-
-
-void DrawGameObjectsDraw(i32);
 
 void Draw_AUTOSAVECANCEL();
 
 void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha);
 
 void Draw_AUTOSAVEWARNING();
-
 
 extern i32 dco_locatorposonly;
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
@@ -733,21 +654,12 @@ extern "C" {
     extern i16 id_ATAT;
 }
 
-
-
-
 void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
 
 i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
                              u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
 
-
 extern void DrawMenuEntry(MENU_s *, char *);
-
-
-
-
-
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -761,20 +673,12 @@ extern void DrawMenuEntry(MENU_s *, char *);
         }                                                                                                              \
     } while (false)
 
-
-
-
 extern i32 GetMenuID(void);
-
-
-
-
 
 void Grapple_DrawLine(GameObject_s *);
 void Transform_DrawTarget(NUVEC *, f32, f32);
 extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBACCA, id_WOOKIEE, id_TWOFACE;
 extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
-
 
 #include "legoapi/legoapi_types.h"
 #include "nu2api/numath/numtx.h"
@@ -783,26 +687,7 @@ extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
 extern i32 qrand(void);
 extern f32 SeekLinearF(f32, f32, f32);
 
-
-
-
-
-
-
-extern void (*BackDrop_AlphaFn)(float *);
-
-
-
-
-
 void BackDrop_ResetColours();
-
-
-
-extern "C" {
-    extern nurenderscene_s currentScene;
-void DisplaySceneRndrSpecials(NUDLDLISTSCENE *scene, i32, void *visibility_context);
-}
 
 // ==== src/legoapi/gizmo/base/gizmo.cpp: declarations ====
 #include "legoapi/gizmo/base/gizmo.h"
@@ -874,9 +759,6 @@ DECOMP_ASSERT(offsetof(GIZMOTYPES, types) == 8, "Gizmo type-table pointer offset
 
 i32 GizObstacle_CheckExcludeFlagsFn_LSW(GIZOBSTACLE_s *, GameObject_s *);
 
-
-
-
 extern ADDGIZMOTYPE Default_ADDGIZMOTYPE;
 
 extern GIZMOTYPES * gizmotypes;
@@ -910,7 +792,6 @@ void GizmoSysPanelDraw(GIZMOSYS *gizmo_sys, void *world_info, float delta_time);
 
 i32 GizmoSys_BoltHitPlat(GIZMOSYS *gizmo_sys, void *world_info, BOLT *bolt, unsigned char *unknown);
 
-
 i32 Gizmo_FindNuSpecial(nugscn_s *scene, nuhspecial_s *special, char *name, i32 flags, GIZMOSYS *gizmo_sys,
                         char *prefix, char *suffix);
 
@@ -918,87 +799,9 @@ i32 ResetGizmoType(GIZMOSYS *gizmo_sys, i32 type_id, char *name);
 
 void GizmoSysClearLevelProgress(void *unknown, i32 type_id);
 
-extern "C" {
-    extern f32 hackFlashTimer;
-    extern GAMEANIMSET_s *hackFlashingGameAnimSet;
-extern nuhspecial_s * hackFlashingSpecial;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-extern f32 hackFlashTimer;
-extern GAMEANIMSET_s * hackFlashingGameAnimSet;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 NUVEC *GizmoGetPos(GIZMOSYS_s *, GIZMO_s *gizmo);
 
 i32 GizmoGetGizmosUsingSpecial(GIZMOSYS *gizmo_sys, void *world, GIZMO **result, i32 result_capacity, char *name);
-
 
 char *GizmoGetName(GIZMO *gizmo);
 
@@ -1046,7 +849,6 @@ i32 GizmoGetUniqueName(GIZMOSYS *gizmo_sys, char *prefix, char *name, char *resu
 i32 GizmoNameUsesPrefix(char *name, char *prefix);
 
 void GizmoActivateReverse(GIZMOSYS_s *system, GIZMO_s *gizmo, i32 reverse, i32 visibility, i32);
-
 
 // ==== functions in original address order ====
 

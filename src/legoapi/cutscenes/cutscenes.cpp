@@ -90,7 +90,6 @@ extern "C" i32 NewShadowOnPlatform(void);
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 void CharScene_Draw(WORLDINFO_s *, i32, NUMTX *, NUMTX *);
 i32 qrand(void);
-void NewRumbleAllPlayers(f32, f32, i32, i32);
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 extern "C" void APITransparentCharDraw(nuhgobj_s *, NUMTX *, i32, i16 *, NUMTX *, void **, i32);
 extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
@@ -100,7 +99,6 @@ void CutScenePlayer_SetObjects(CUTINFO *);
 extern "C" void DebrisSetRenderGroup(i32);
 extern AREADATA_s *BONUS_GUNSHIP_ADATA;
 extern AREADATA_s *GUNSHIP_ADATA;
-extern AREADATA_s *BATTLEOVERCORUSCANT_ADATA;
 
 static u8 CutBlobShadowAlpha;
 static f32 CutBlobShadowFadeNear;
@@ -109,7 +107,6 @@ static f32 CutReflectRange;
 static f32 CutReflectRange2;
 
 extern "C" {
-    extern i16 id_ANAKINSPODGREEN;
     extern i16 id_ANAKINSNEWPOD;
     extern i16 id_ANAKINSNEWPODGREEN;
     extern i16 id_REPUBLICGUNSHIP_GREEN;
@@ -743,8 +740,6 @@ void CutScene_StartAudio() {
 i32 CutScene_IsSkippable(CUTINFO *cut) {
     return FadeSys.fade == 0.0f && cut != NULL && (cut != CutStopInfo || CutSceneWaiting == 0 || cutaudiopaused == 0);
 }
-
-i32 CutScene_StartFn_LSW(CUTINFO *cut);
 
 extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
 extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
@@ -1458,10 +1453,6 @@ void CutScenes_ConfigureList(char *filename, variptr_u *buffer, variptr_u) {
     }
 }
 
-void CutScene_PreUpdateFn_LSW(CUTINFO *cut);
-
-void CutScene_PostUpdateFn_LSW();
-
 i32 CutScene_PlayingOrRequested(CUTINFO *cut) {
     if (cut == NULL) {
         if (CutStopInfo != NULL || NewCutInfoCount != 0)
@@ -1477,8 +1468,6 @@ i32 CutScene_PlayingOrRequested(CUTINFO *cut) {
     return 0;
 }
 
-i32 CutScene_ReplaceCharacterModelFn_LSW(CUTINFO *cut, NUGCUTCHAR_s *character);
-
 CUTINFO *NewCutScene(CUTINFO *cut, CUTSYS *system, char *name, i32) {
     if (cut == NULL) {
         if (name != NULL && system != NULL)
@@ -1493,52 +1482,15 @@ CUTINFO *NewCutScene(CUTINFO *cut, CUTSYS *system, char *name, i32) {
     return NULL;
 }
 
-void ResetScene(nugscn_s *scene, SCENEPROGRESS_s *progress);
-
-void NextStatusStage(STATUSPACKET_s *);
-void FinishStatusPacket(i32);
-f32 StatusIconsOnOff(f32);
-extern f32 icon_y;
-
-void Exit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
-
-void Fade_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
-
 extern "C" void *NuAnimData2FixPtrs(void *, isize, isize, i32);
-extern "C" StateAnim *StateAnimFixPtrs(StateAnim *, isize);
-
-NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer);
 
 i32 STATUS_R = 255;
 i32 STATUS_G = 191;
 i32 STATUS_B;
-extern f32 iconalphaoverride;
-extern i16 tTRUEJEDI, tSTORY, tFREEPLAY;
-extern i16 tLEVELCOMPLETE, tFREEPLAYUNLOCKED, tSUPERSTORYCOMPLETE, tBONUSUNLOCKED;
-extern i16 tEPISODEVUNLOCKED, tEPISODEVIUNLOCKED, tCHALLENGECOMPLETE, tOUTOFTIME;
-extern i16 tYOUDIDNTCOLLECTALL10CANISTERS, tMISSIONCOMPLETE, tSTORYCLIPSUNLOCKED;
-extern i16 tEPISODEICOMPLETE, tEPISODEIICOMPLETE, tEPISODEIIICOMPLETE;
-extern i16 tEPISODEIVCOMPLETE, tEPISODEVCOMPLETE, tEPISODEVICOMPLETE;
-f32 getFinishedStatusAlpha(STATUSPACKET_s *);
-void IncreaseScore(u32 *, u64, i32);
-void NewStatusRumbleBuzz(i32, f32, f32, i32);
 void Text_MakeScore(u32, char *);
-void AddFancyMessage(char *, f32, f32, f32, f32, i32, i32);
-void *AddGameMessage(char *, nuvec_s *, f32, nuvec_s *, f32, u8, u8, u8, u32, f32);
 extern "C" void PlaySfx(char *, nuvec_s *);
 extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
 i32 DrawPanel3DObjectNoAlpha(f32, f32, f32, f32, f32, f32, u16, u16, u16, nuhspecial_s *, i32);
 
-void GoldBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
-
-void GoldBrick_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
-
-void GoldBrick_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
-
-void LevelComplete_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
-
-void SetDrawGoldBrick(STATUSPACKET_s *, i32);
-void NewStatusRumbleBuzz(i32, f32, f32, i32);
 extern "C" void PlaySfx(char *, nuvec_s *);
 
-void LevelComplete_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);

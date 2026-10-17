@@ -13,18 +13,10 @@
 #include "nu2api/nucore/nustring.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
-void LetGoOfBalloon(GameObject_s *object);
 i32 qrand(void);
 extern "C" void PlaySfxByIdAndSetVolumeAndPitch(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch);
-
-void PopBalloon(GameObject_s *object);
-
-
-void Disorientate(GameObject_s *object, nuvec_s *);
 
 extern "C" i32 GetSfxId(const char *name);
 extern "C" void NuGScnGetSpecial(nuhspecial_s *special, NUGSCN *scene, i32 index);
@@ -169,10 +161,6 @@ void EngineNoiseCode(GameObject_s *object, i32 silent) {
     PlaySfxByIdAndSetVolumeAndPitch(sfx_id, &object->apiobj.collision_position, volume, pitch);
 }
 
-void NewSeekHalfLife(i32 &current, i32 target, float fraction);
-
-void StartTurn(GameObject_s *);
-
 void DisorientateCode(GameObject_s *object, nuvec_s *target, f32 distance);
 
 void UpdateSpecialSfx(WORLDINFO_s *world) {
@@ -270,6 +258,3 @@ void SetSpecialSfxBits(i32 *sfx_ids, i32 *sfx_count, WORLDINFO_s *world) {
     }
 }
 
-extern "C" i32 GetSfxIdN(char *, i32);
-
-void FileLoadSingleEffectType(debinftype *effect, i32 version, char category);

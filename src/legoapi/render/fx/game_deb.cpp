@@ -1,7 +1,6 @@
 // Original translation unit reconstructed from the reference address map.
 // Functions are defined in original address order.
 
-
 // ==== src/legoapi/misc/supportall.cpp: declarations ====
 #if defined(__SSE__)
 #include <xmmintrin.h>
@@ -77,78 +76,28 @@ extern MemoryManager theMemoryManager;
 #include "legoapi/misc/supportall_types.h"
 extern void * theThingManager;
 
-extern f32 LevelNameMul, LevelNameTime;
-extern "C" {
-    extern f32 chattersfxwait, tieonsfxwait, tieoffsfxwait;
-    extern i32 party_under_cover, nbaddies_can_see_players;
-    extern i32 FalconDebKey[2];
-    extern f32 TargetDist_Near2, TargetDist_Mid2;
-    extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
-    extern i32 makebaddiesforgetinresetbits;
-    extern i32 reset_reimport;
-    extern u32 arcade_placed_stud_total;
-}
-
 void ClearLevelProgress(i32, WORLDINFO_s *);
 u32 TotalLevelCoinTally(WORLDINFO_s *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *);
 extern i32 bonusmodearcade;
-extern u32 arcade_placed_stud_total;
 extern f32 DEFAULT_MOVE_RANGE;
 extern f32 drop_back_in_timer;
 extern i32 last_chatter_sfx;
-extern i32 FalconDebKey[2];
-extern f32 LevelNameTime;
-extern f32 LevelNameMul;
-void ResetRippleSet(ripple_set_s *);
 void InitPlayerAI(GameObject_s *object);
 extern GAMECAMERA_s *GameCam;
 extern "C" ripple_set_s *ripples;
-extern "C" f32 chattersfxwait;
-extern "C" f32 tieonsfxwait;
-extern "C" f32 tieoffsfxwait;
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
-
 
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
-
-
-
-extern f32 TargetDist_Near2;
-extern f32 TargetDist_Mid2;
-extern u16 TargetDeg_Near;
-extern u16 TargetDeg_Mid;
-extern u16 TargetDeg_Far;
-extern i32 party_under_cover;
-extern i32 makebaddiesforgetinresetbits;
-extern i32 nbaddies_can_see_players;
-extern i32 reset_reimport;
-
-
-
 i32 SuperWeirdo(GameObject_s *object);
-
 
 extern "C" void edrtlCalculateBurnoutEx(burnset_s *set, NuBloomParameters *parameters, NUVEC *camera_position,
                                         f32 frame_time);
 
-void BurnoutApply(i32 paused);
-
-
 void FindSlamOrigin(GameObject_s *, NUVEC *, NUVEC *);
 EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
-
-void AddSlamDebris(GameObject_s *object);
-
-
-
-
-
-
 
 extern AREADATA_s *PODRACE_ADATA;
 extern AREADATA_s *BONUS_GUNSHIP_ADATA;
@@ -157,17 +106,12 @@ extern "C" i16 id_LANDSPEEDER;
 void PodDust(WORLDINFO_s *, GameObject_s *);
 extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
-
-void AddSurfaceDebris(GameObject_s *object);
-
 void DebFreeWithoutKey(debkeydatatype_s *key);
 
 i32 CannotKill(GameObject_s *object);
 extern "C" i32 DebrisPreCheckCollisions(NUVEC *position, f32 radius);
 extern "C" i32 DebrisCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale);
 extern "C" i32 DebrisTorusCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale);
-
-void DebrisKillPlayers();
 
 i32 RndrUnfilledCircle(f32 x, f32 y, f32 radius, f32 border_width, f32 aspect, i32 colour, f32 progress, f32 z,
                        numtl_s *material);
@@ -179,95 +123,28 @@ void DebrisProcessSpheres(uv1deb *data, float time, debinftype *effect, debkeyda
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 extern "C" {
-extern NUFILE hfh;
 extern char unknown[8];
 }
-
-
 
 extern "C" void NuHtmlWrite(const char *text, ...);
 
 extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
-
-
-
-
-
-
-
-
-
-
-
 extern "C" {
-    extern debkeydatatype_s *debkeydata;
     extern debinftype **debtab;
-    extern debris_chunk_control_s **freechunkcontrols;
-    extern i32 freechunkcontrolsptr;
-    extern debris_chunk_control_s *debris_chunk_control_stack[2];
-    extern particlechunkrendertype_s *ParticleChunkToRender;
-    extern particlechunkrendertype_s *ParticleChunkRenderStack[5];
-    extern i32 debrischunks;
-    extern i32 debrischunksglass;
-    extern f32 globaltime;
-    extern f32 panelglobaltime;
 }
-void DebrisGetControlStackLock(void);
-void DebrisReleaseControlStackLock(void);
-
 
 extern "C" {
-    extern debkeydatatype_s *debkeydata;
     extern debinftype **debtab;
-    extern i16 *freedebkeys;
-    extern i32 freedebkeyptr;
-    extern dma_particle_chunk_s **freedebchunks;
-    extern dma_particle_chunk_s **freedebchunksglass;
-    extern i32 freedebchkptr;
-    extern i32 freedebchkptrg;
-    extern i32 debrischunks;
-    extern i32 debrischunksglass;
-    extern debris_chunk_control_s **freechunkcontrols;
-    extern i32 freechunkcontrolsptr;
-    extern debris_chunk_control_s *debris_chunk_control_stack[2];
-    extern particlechunkrendertype_s *ParticleChunkToRender;
-    extern particlechunkrendertype_s *ParticleChunkRenderStack[5];
-    extern f32 globaltime;
-    extern f32 panelglobaltime;
-    extern f32 timeincrement;
     extern f32 debris_thinning_level;
     extern i32 forced_debris_thinning;
 }
 
 extern "C" void DebReAlloc(debkeydatatype_s *, i32);
 
-
-
-
-void DebrisGetControlStackLock();
-
-
-
-
 extern "C" {
-    extern i32 EDPP_MAX_TYPES;
-    void edppDeleteEffect(i32);
-}
-
-
-
-void DebrisReleaseControlStackLock();
-
-extern "C" {
-    extern debkeydatatype_s *debkeydata;
     extern debinftype **debtab;
-    extern f32 globaltime;
-    extern NUVEC debris_collide_pt;
 }
-
-
-
 
 void TBOPENFN(char *name, i32 type);
 
@@ -293,36 +170,20 @@ void TBCLOSEFN(char *name, i32 type);
 #include <string.h>
 #include "nu2api/nu3d/nutex.h"
 
-
-
-
-void InitRippleMtl(char *name, numtl_s **result, variptr_u *buffer, variptr_u *buffer_end);
-
 void NewRumble(nupad_s *pad, f32 strength, i32 mode);
 void NewBuzzFrames(nupad_s *pad, i32 frames, i32 mode);
-
-void AddWaterSplash(GameObject_s *object, nuvec_s *position);
 
 void FindAnglesXY(NUVEC *, u16 *, u16 *);
 
 void BuildRippleMtx(numtx_s *matrix, nuvec_s *normal, nuvec_s *position, u16, u16);
 
-void ResetRippleSet(ripple_set_s *set);
-
-
 void VecRotateAxis(NUVEC *, u16, NUVEC *);
 void AddRipple(ripple_set_s *, NUMTX *, float, float, float, float, RGBA, RGBA, i32, numtl_s *, NUVEC *);
 
-void AddSurfaceRipples(GameObject_s *object);
-
 extern "C" void NuMtlDestroy(numtl_s *);
-
-
 
 void AddRipple(ripple_set_s *set, numtx_s *matrix, float size, float growth, float lifetime, float delay,
                RGBA start_color, RGBA end_color, i32 flags, numtl_s *material, nuvec_s *velocity);
-
-
 
 // ==== functions in original address order ====
 

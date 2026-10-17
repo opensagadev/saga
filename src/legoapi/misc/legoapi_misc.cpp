@@ -23,9 +23,7 @@
 #include <string.h>
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 extern void *CutStopInfo;
 extern "C" {
@@ -37,12 +35,6 @@ extern "C" {
     extern GAMEPAD_s GamePad[64];
     extern FadeSystem FadeSys;
 }
-
-i32 CircleLevel(LEVELDATA_s *level);
-
-extern i32 TwistLevel(LEVELDATA_s *level);
-
-void CurrentStart(GameObject_s *object, i32 require_twist_level, i32 use_socket_rotation);
 
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 

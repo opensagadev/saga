@@ -11,11 +11,7 @@
 #include "nu2api/numath/nufloat.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
-
-
 
 f32 BlobShadowFade(NUVEC *position, f32 fade_start, f32 fade_end, f32 alpha) {
     if (alpha <= 0.0f) {
@@ -41,14 +37,11 @@ void SetShadowLight() {
     STUBBED();
 }
 
-void Shadow_SetMode();
-
 void InitShadowLights() {
 }
 
 void RenderShadowLights(i32) {
 }
-
 
 void ResetShadowMapRendering() {
 }
@@ -63,7 +56,6 @@ void ResetShadowMapRenderingFn() {
 void EnableShadowMapRenderingFn() {
     EnableShadowMapRendering(0);
 }
-
 
 // ==== functions in original address order ====
 

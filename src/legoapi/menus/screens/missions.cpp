@@ -69,22 +69,11 @@ static f32 MissionIconX[20];
 
 void EndMissionsMenu();
 
-void MenuInitMissions(MENU_s *);
-
-void MenuDrawMissions(MENU_s *menu);
-
-void MenuUpdateEndMission(MENU_s *menu);
-
-void MenuDrawEndMission(MENU_s *);
-
 void InitMission(MISSIONSYS *ms, i32 idx);
-
-void MenuUpdateMissions(MENU_s *menu);
 
 void EndMission(MISSIONSYS *ms, i32 param1, i32 param2);
 
 void CheckMissionEnd(MISSIONSYS *ms);
-
 
 // ==== functions in original address order ====
 

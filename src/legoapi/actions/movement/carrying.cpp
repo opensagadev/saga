@@ -750,8 +750,6 @@ i32 ObjLandReady(GameObject_s *object) {
     return 0;
 }
 
-void LetGoOfBalloon(GameObject_s *object);
-
 i32 MovingBackwards(GameObject_s *object) {
     GAMEPAD_s *pad = object->pad_gamepad;
     if (pad->operator_data == NULL || pad->input_magnitude == 0.0f) {

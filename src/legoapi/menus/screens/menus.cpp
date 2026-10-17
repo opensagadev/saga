@@ -32,10 +32,8 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3);
-extern "C" void loadsaveCallEachFrame(void);
 extern "C" bool TestForController(void);
 i32 GetMenuID(void);
-void MenuDrawBackground(void);
 extern u32 GAMEPAD_START;
 extern u32 GAMEPAD_SELECT;
 extern u32 GAMEPAD_MENUSELECT;
@@ -43,9 +41,7 @@ extern u32 GAMEPAD_MENUCANCEL;
 extern u32 GAMEPAD_TOGGLELEFT;
 extern u32 GAMEPAD_TOGGLERIGHT;
 extern "C" GAMEPAD_s GamePad[64];
-extern i32 readpads_always;
 extern "C" i32 reset_area;
-extern i32 MenuSFX;
 
 eduimenu_s *GetMenuActiveChild(eduimenu_s *menu) {
     if (menu == NULL) {

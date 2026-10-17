@@ -107,8 +107,6 @@ void AICreatureResumeScript(GameObject_s *);
 
 static NUVEC SpeederChaseATATExitLandPos = {-159.0f, 6.869999885559082f, -17.600000381469727f};
 
-
-
 extern i16 id_ATAT;
 extern i16 id_ATST;
 extern i16 id_ATST_LOWRES;
@@ -124,7 +122,6 @@ void SetWeaponIn(GameObject_s *);
 void GameCam_Blend(GAMECAMERA_s *, f32, f32, i32);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
 
-
 void ResetForceGlow(PLAYERPACKET_s *);
 extern i32 CUTSKIPLOCK;
 void GizForce_ResetLOS(GameObject_s *);
@@ -135,7 +132,6 @@ extern f32 player_tag_timer;
 extern i32 do_player_tag;
 static i32 Tag_Mode = 2;
 void (*Tag_DrawIconFn)(GameObject_s *);
-
 
 extern i16 id_LUKESKYWALKERDAGOBAH;
 
@@ -149,9 +145,6 @@ DECOMP_ASSERT(offsetof(GameObject_s, field_0xef0) == 0xef0, "Tag reset state ABI
 DECOMP_ASSERT(offsetof(GameObject_s, takeover_target) == 0xeb0, "AI takeover target ABI");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0xeb4) == 0xeb4, "Object callback ABI");
 DECOMP_ASSERT(offsetof(GameObject_s, current_hp) == 0x108b, "Tag signed health ABI");
-
-
-
 
 extern i32 VehicleArea;
 extern "C" i32 menu_i_pack;
@@ -169,12 +162,9 @@ void GameCam_Reset(GAMECAMERA_s *);
 void RememberPlayerIDs(i32, i32, i32);
 void Tag_NewTransfer(GameObject_s *, GameObject_s *);
 
-
 static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
 
 static void TakeOver_SetAction(GameObject_s *rider, GameObject_s *vehicle);
-
-void Tag_SetMode(i32 mode);
 
 // GCC otherwise rewrites this once-called helper; the original has a separate local body.
 static __attribute__((noinline)) GameObject_s *Tag_FindGameObject_TRANSFER(GameObject_s *object) {
@@ -207,8 +197,6 @@ static __attribute__((noinline)) GameObject_s *Tag_FindGameObject_TRANSFER(GameO
 
 i32 TagCode(GameObject_s *source, GameObject_s *destination, i32 takeover, i32 blend_camera, i32);
 
-i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode);
-
 void GetTakeOverPos(GameObject_s *object, nuvec_s *position);
 
 void ReleaseTakeOver(GameObject_s *object, i32);
@@ -237,12 +225,7 @@ static i32 Tag_FindNextPlayer(GameObject_s *object) {
     return -1;
 }
 
-void Tag_Check(GameObject_s *object);
-
 void TakeOverGameObject(GameObject_s *rider, GameObject_s *vehicle, i32 blend_camera, i32 immediate);
-
-__attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object, i32 tag_pressed);
-
 
 // ==== functions in original address order ====
 

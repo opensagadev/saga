@@ -39,16 +39,11 @@ extern i32 i_bolt;
 extern f32 BOLT_OVERRIDE_PLAYERBOLTSPEED;
 extern f32 BOLT_OVERRIDE_PLAYERBOLTDURATION;
 struct spacelevel_s;
-struct quickboltinfo;
 
 static void Bolt_Debris_Default(BOLT_s *, NUVEC *, i32, NUVEC *, i32);
 static void Bolt_GetShootOrigin_Default(GameObject_s *, NUVEC *);
 static i32 Bolt_GetShootDirection_Default(GameObject_s *, NUVEC *);
-static void UpdateBolt_Geonosian(BOLT_s *);
-static void EndBolt_EwokTorpedo(BOLT_s *);
 void BoltTypes_Reset(WORLDINFO_s *);
-
-extern BOLTTYPE_s GlobalBoltType[44];
 
 BOLTTYPE_s GlobalBoltType_Default = {"null", 4.0f, 2.0f, 0.0f, 0.125f, 1.0f, 0.1f, -1,   -1,   -1,   0, -1, 0,  1,
                                      255,    0,    0,    NULL, NULL,   NULL, NULL, NULL, NULL, NULL, 0, -1, -1, {}};
@@ -607,14 +602,9 @@ void BoltTypes_Reset(WORLDINFO_s *world) {
     memset(world->bolt_types, 0, sizeof(world->bolt_types));
 }
 
-extern "C" void PlaySfx(char *, NUVEC *);
 i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 void GameCam_HitJudder();
-void NewRumbleAllPlayers(f32, f32, i32, i32);
-EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
-
-void Bolt_Debris_LSW(BOLT_s *bolt, nuvec_s *points, i32 point, nuvec_s *, i32 no_explosion);
 
 i32 Bolt_HitPartMode(BOLT_s *bolt) {
     if (bolt->owner != NULL) {
@@ -627,8 +617,6 @@ i32 Bolt_HitPartMode(BOLT_s *bolt) {
     }
     return 3;
 }
-
-i32 Bolt_HitPart_LSW(BOLT_s *, PART_s *part);
 
 BOLTTYPE_s *BoltType_FindByID(i32 id, WORLDINFO_s *world) {
     if (id >= 0 && id < BoltSys->count) {
@@ -699,10 +687,6 @@ i32 Bolt_HitGameObject(BOLT_s *bolt, GameObject_s *object, NUVEC *points, NUVEC 
     return 1;
 }
 
-i32 KaminoE_CheckPlatHit(BOLT_s *);
-
-i32 Bolt_HitPlatFn_LSW(BOLT_s *bolt);
-
 i32 Bolt_HitGameObjects(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maximum, f32 radius, u8 *hit_flags) {
     GameObject_s *object = Obj;
     i32 count = HIGHGAMEOBJECT;
@@ -737,8 +721,6 @@ i32 Bolt_HitGameObjects(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maxi
     }
     return 0;
 }
-
-i32 Bolt_HitCustomFn_LSW(BOLT_s *bolt, nuvec_s *points);
 
 i32 addbolt_nosfx;
 BOLT_s *objhitobj_bolt;
@@ -1000,8 +982,6 @@ static i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags) {
     }
     return 0;
 }
-
-i32 Bolt_AlternateFire_LSW(GameObject_s *object, i32 index);
 
 f32 Bolt_ObjTargetPosYAdjust(GameObject_s *object) {
     f32 height = object->apiobj.collision_height;
@@ -1368,7 +1348,6 @@ static __used__ i32 Bolt_GetShootDirection_Default(GameObject_s *object, nuvec_s
     return angle;
 }
 
-EXPLOSION *Detonate(NUVEC *, u16);
 static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt);
 
 void BoltTypes_Init(WORLDINFO_s *world) {

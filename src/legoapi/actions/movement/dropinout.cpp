@@ -18,16 +18,8 @@
 #include "nu2api/numath/nutrig.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
-extern i32 drop_in_teleport;
-extern i32 teleport_all_freeplay_modes;
-
-void ResetPlayerMoves(GameObject_s *object);
-void Player_ClearContext(GameObject_s *object, i32 mode);
-void Player_ResetContexts(PLAYERPACKET_s *packet);
 void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 void ReleaseEat(GameObject_s *object);
 void AICreatureResumeScript(GameObject_s *object);
@@ -93,8 +85,6 @@ f32 DropInOutScale(GameObject_s *object) {
     }
     return 1.0f;
 }
-
-i32 FreePlay_DropInToPlayerPos(GameObject_s *object);
 
 void DropOut(i32 player_index, i32 resume, i32 silent, i32) {
     GameObject_s *object = Player[player_index];

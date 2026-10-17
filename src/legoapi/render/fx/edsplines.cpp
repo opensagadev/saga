@@ -26,17 +26,11 @@
 #include <stdio.h>
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
 // The original translation unit exports this internal counter under its unmangled C name.
 static i32 bezierline_depth asm("bezierline_depth");
-
-extern "C" {
-extern char * FSP_Extension;
-    extern f32 PODRACE_SPLINEINC;
-}
 
 f32 BezierLineLength(VuVec &, VuVec &, VuVec &, VuVec &);
 
@@ -362,8 +356,6 @@ void GetNearestSplinePos(NUVEC *origin, SPLINEPOS_s *result, NUGSPLINE *spline, 
         result->along = (result->segment_distance / result->segment_length + result->segment) / (logical_count - 1);
     }
 }
-
-void CalcSplinePointFromDist(flightspline_s *spline, _vuv_s *result, float distance);
 
 LEVELSPLINE *LevSplList;
 static i32 levspl_i_start = -1;

@@ -59,9 +59,6 @@ TIMER LevelTimer;
 
 void (*WorldInfo_InitMenuFn)(WORLDINFO *, i32 *, i32 *) = NULL;
 void (*WorldInfo_InitLastFn)(WORLDINFO *) = NULL;
-extern volatile i32 abort_load;
-extern char ConfigBuffer[65536];
-extern i32 numtl_force_mipmode;
 extern i32 GAMEDEMO;
 extern NUGSCN * big_icon_scene;
 extern NUGSCN * area_scene;
@@ -71,7 +68,6 @@ extern LEVELDATA * PLATFORM_LDATA;
 extern LEVELDATA * RETAKED_LDATA;
 extern LEVELDATA * CREDITS_LDATA;
 extern i32 Text_Language;
-extern nufpcomjmp_s LevelConfigKeywords_AfterLoad;
 
 // --- Players globals ---
 // NOTE: `WORLD` (WORLDINFO) field offsets in world.h are an approximation; the
@@ -122,7 +118,6 @@ void SetAreaPickupGravity(i32 area, i32 level) {
         AreaPickupGravity = -20.0f;
     }
 }
-void StoreSceneProgress(NUGSCN *gscn, SCENEPROGRESS_s *progress, i32 param);
 
 void StoreLevelProgressFn(WORLDINFO_s *world, LEVEL_PROGRESS_s *progress, i32 area_progress);
 
@@ -167,12 +162,5 @@ void WorldInfo_Load(WORLDINFO *world);
 extern "C" {
     extern i16 id_DARTHVADER;
     extern i16 id_THEEMPEROR;
-    extern i16 id_GRANDMOFFTARKIN;
-    extern i16 id_IMPERIALOFFICER;
-    extern i16 id_IMPERIALSHUTTLEPILOT;
 }
 
-i32 InModelListDataFlags(APICHARACTERMODELLIST_s *, u32, u32, i32, i32);
-
-
-void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 param5);

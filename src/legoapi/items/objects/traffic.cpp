@@ -20,9 +20,7 @@
 #include <string.h>
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 static TRAFFICANIM_s reference_trafficanim;
 static TRAFFICANIM_s *parse_trafficanim;
@@ -55,15 +53,6 @@ static NUFPCOMJMP Traffic_ConfigKeywords[] = {
     {const_cast<char *>("vehicle"), Traffic_vehicle},
     {NULL, NULL},
 };
-
-void TrafficAnimSys_Draw(TRAFFICANIMSYS_s *system);
-
-void TrafficAnimSys_Reset(TRAFFICANIMSYS_s *system);
-
-void TrafficAnimSys_Update(TRAFFICANIMSYS_s *system);
-
-void TrafficAnimSys_Configure(WORLDINFO_s *world, char *config);
-
 
 // ==== functions in original address order ====
 

@@ -123,4 +123,3 @@ void LevelStreaming_DoorOverride(WORLDINFO_s *world, LEVELDATA_s *level, f32 rad
     }
 }
 
-void LevelProgress_ReserveBufferSpace(variptr_u *buf, variptr_u);

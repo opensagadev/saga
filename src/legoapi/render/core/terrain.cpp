@@ -45,40 +45,14 @@ struct terrsitu_s;
 struct PLATSKININFO;
 struct GAMECAMERA_s;
 struct pushblock_s;
-void Surface_Deflect(NUVEC *normal, NUVEC *movement, NUVEC *result, i32 mode);
 extern i16 id_ATST;
 extern i16 id_SPEEDERBIKE;
-void GetSurfaceInfo(GameObject_s *object, i32 update_surface, f32 shadow_height);
-f32 FindReflectionNoPlatforms(NUVEC *position);
-extern i32 TimingBarSet;
 void TBOPENFN(char *, i32);
 void TBCLOSEFN(char *, i32);
-extern i32 NOTERRAINSTOP;
-extern GameObject_s *CarWashHack;
-GameObject_s *CharPlatform_FindObjFromPlatID(CHARPLATFORMSYS_s *system, i32 platform_id);
-void StartFlatten(GameObject_s *source, GameObject_s *target);
-void AddWaterSplash(GameObject_s *object, NUVEC *position);
-i32 CannotKill(GameObject_s *object);
 extern AREADATA_s *PODSPRINT_ADATA;
-extern AREADATA_s *PODRACE_ADATA;
-void NewRumble(nupad_s *pad, f32 strength, i32 mode);
-void NewBuzz(nupad_s *pad, f32 duration, i32 mode);
-void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 delay, i32 mode);
 i32 NoLayerKill(GameObject_s *object);
-void ClearLastSafeTakeOver(GameObject_s *object);
-void Player_ClearContext(GameObject_s *object, i32 mode);
-void PlayDieSfx(GameObject_s *object);
-i32 StartBigJump(GameObject_s *, NUVEC *, i32, f32, f32, i32, i8);
 extern i16 id_SNAKE, id_TRACTOR;
-extern AREADATA_s *DAGOBAH_ADATA;
-extern f32 MiscTime;
-void TakeOverCode(GameObject_s *object, i32 tag_pressed);
-void ApplyGravity(GameObject_s *object, f32 *gravity, f32 hover_height, f32 seek_rate, f32 *ground_height);
-void InstantKillParts(GameObject_s *object, i32 mode, f32 delay);
-i32 IntersectWater(GameObject_s *object);
 extern "C" void NewTerrPlatformsOff();
-
-extern i32 testshadowfix;
 
 namespace {
 #include "legoapi/render/core/terrain_types.h"
@@ -99,42 +73,12 @@ namespace {
 
 extern "C" void NuRndrLine3dDbg(f32, f32, f32, f32, f32, f32, i32);
 
-extern "C" void SphereDrawEx(NUVEC *centre, f32 radius, f32 vertical_scale, i32 colour);
-
-extern "C" void SphereDraw(NUVEC *centre, f32 radius, f32 vertical_scale);
-extern NUVEC TerrWallNorm;
-
-i16 InsidePolLines(f32 point_x, f32 point_y, f32 point_z, f32 edge_a_x, f32 edge_a_y, f32 edge_a_z, f32 edge_b_x,
-                   f32 edge_b_y, f32 edge_b_z, NUVEC *normal);
-
-void ScanWallSplineTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags);
-void TerrainMoveImpactData();
-void TerrainImpactNorm();
-void Tag_Check(GameObject_s *object);
-void BigJumpCode(GameObject_s *object);
 f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
-void GetSurfaceInfo(GameObject_s *object, i32 update_surface, f32 shadow_height);
-extern "C" i32 NewShadowOnPlatform();
 extern i32 LEGO_AIPATHCNX_BLOCKAGE;
 extern i32 LEGO_AIPATHCNX_FULLTERRAIN;
 extern i32 LEGO_AIPATHCNX_WALLSHUFFLE;
 
-void StorePlatImpact();
-
-extern "C" void PlatImpactInfo(NUVEC *normal, i32 *material0, i32 *material1);
-
 namespace {
-
-
-
-    static TerrainScanBounds TerrainHandleBounds(const NUVEC &position, const NUVEC &movement, f32 radius);
-
-
-    static bool TerrainShapeOverlaps(const TerrainScanBounds &bounds, const TERRAIN_SHAPE &shape) {
-        return bounds.max_x >= shape.min_x && shape.max_x > bounds.min_x && bounds.max_y >= shape.min_y &&
-               shape.max_y > bounds.min_y && bounds.max_z >= shape.min_z && shape.max_z > bounds.min_z;
-    }
-
 
     // Retail scan callers contain the scale-and-normal reconstruction directly.
 #define TERRAIN_SCALE_SCAN_SHAPE(candidate_arg, group_arg, writer_arg)                                                 \
@@ -185,7 +129,6 @@ namespace {
             ++scale_writer->scaled_shape_count;                                                                        \
         }                                                                                                              \
     } while (0)
-
 
     // Preserve the retail arithmetic ordering and the sweep-diagonal service
     // call, even in the wall-only caller where its result is unused.
@@ -297,8 +240,6 @@ namespace {
 
 } // namespace
 
-extern i16 debug_index;
-
 // Original 400-pointer table at 0x61e860: 147 named effects, then empty slots.
 char *debris_name[400] = {
     "BULLET_SPARK",   "SABER_RED",     "SABER_GREEN",   "SABER_BLUE",    "SABER_PURPLE",   "EXPLD_1A",
@@ -333,16 +274,10 @@ i32 Grass_Available;
 
 extern "C" void TerrainSetImpactData(void *impact_data, i32 *impact_count, i32 maximum_impacts);
 
-void TerrFlush();
-
-extern "C" void TerrTempMemory(void **buffer);
-
 // Constructs the fixed terrain header and its variable-sized group, index and
 // platform arrays in the caller's arena. The four bounds arrays and the cell
 // assignment array are temporary storage carved backwards from buf_end.
 #define IS_SNAN(x) (*(u32 *)&(x) == 0xffc00000)
-
-void NuVecCheckForSNANs(NUVEC *v);
 
 #undef IS_SNAN
 
@@ -414,7 +349,6 @@ void LoadBridgeFile(WORLDINFO *world) {
         world->page_bridge = page;
     }
 }
-TERRAIN_TRACK_SLOT *ScanTerrId(void *id);
 i32 UnderWater(GameObject_s *object) {
     if ((object->apiobj.field_0x27f & static_cast<u8>(~8u)) == 1) {
         return object->apiobj.water_height >= object->apiobj.pos_y;
@@ -437,8 +371,6 @@ void DerotateMovementVector();
 
 void RotateVec(NUVEC *source, NUVEC *destination);
 
-void RotateTerrain(tertype *surface);
-
 void DeRotateTerrain(tertype *surface);
 
 void DeRotatePoint(nuvec_s *point);
@@ -447,10 +379,7 @@ namespace {
 
     DECOMP_ASSERT(sizeof(TERRAIN_IMPACT_RECORD) == 0x1c, "TERRAIN_IMPACT_RECORD ABI");
 
-
 } // namespace
-
-void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags);
 
 // Retail only keeps the IPA-SRA clone, which takes &normal->y.
 #if defined(__i386__)
@@ -458,11 +387,7 @@ void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags);
 #else
 #define TERRAIN_KILL_PLAYER_ATTR __attribute__((noinline, noclone))
 #endif
-static TERRAIN_KILL_PLAYER_ATTR i32 TerrainKillPlayer(GameObject_s *object, i32 surface, const f32 *normal_y)
-    __asm__("_ZL17TerrainKillPlayerP12GameObject_siP7nuvec_s.isra.4");
-static i32 TerrainKillPlayer(GameObject_s *object, i32 surface, const f32 *normal_y);
 
-void TerrainPlayer(GameObject_s *object);
 static inline void MakePlayCorner(GAMECAMERA_s *camera, f32 screen_x, f32 screen_y, NUVEC *near_corner,
                                   NUVEC *far_corner) {
     NUVEC ray = {screen_x, screen_y, 1.0f};
@@ -512,12 +437,6 @@ void MakePlayPlanes(GAMECAMERA_s *camera) {
 
 DECOMP_ASSERT(sizeof(TERRAIN_DEBUG_RECORD) == 100, "Terrain debug record ABI");
 
-void TerrDrawPlatCol(tertype *terrain, i16 index, i32 colour);
-
-
-
-
-void ScanTerrainPlatform(i32 group_index, i32 terrain_mask);
 void ScanTerrainHandel(i32 scan_type, i16 *handle);
 
 extern "C" i32 NewRayCastPlatForm(NUVEC *position, NUVEC *movement, f32 radius, f32 separation_epsilon,
@@ -525,17 +444,7 @@ extern "C" i32 NewRayCastPlatForm(NUVEC *position, NUVEC *movement, f32 radius, 
 
 extern "C" void *NuScratchAlloc32(i32 size);
 extern "C" void NuScratchRelease();
-void TerrDraw(tertype *terrain, i16 index);
-void TerrDrawPlat(tertype *terrain, i16 index);
 
-extern "C" void DrawHitTerrain(void);
-
-void TerrShowCamTerr();
-NUVEC TerrainStaticMtx(PLATSKININFO *info, nuvec_s *position, i32);
-extern "C" void NewShapeInit(NUVEC *offset);
-
-void TerrainImpactNorm();
-void ScanTerrainPlatform(i32 group_index, i32 terrain_mask);
 i32 TerrainBlockOnBlock(WORLDINFO_s *world, pushblock_s *block, nuvec_s *points, float *heights) {
     if (!heights || !points)
         return 0;
@@ -556,69 +465,26 @@ i32 TerrainBlockOnBlock(WORLDINFO_s *world, pushblock_s *block, nuvec_s *points,
     return 1;
 }
 
-void ScanTerrIDRemovePlat(i32 platform_index);
-i32 HitWallSpline();
-
-void ScanWallSplineTerrain(i32, i32 terrain_mask, i32);
-
 #undef TERRAIN_GET_SCAN_BOUNDS
-
-i32 TerrainImpactPlatform(unsigned char *hit_flags);
 
 void NewTerrStoreAnyInfo();
 
-void TerrainMoveImpactData();
 extern "C" void *NuScratchAlloc32(i32 size);
 extern "C" void NuScratchRelease();
-
-
-i32 TerrainPlatformMoveCheck(nuvec_s *, nuvec_s *, i32, i32, i32);
-
-extern "C" void TerrainScanWallSpline(TERRAIN_SPATIAL_NODE *node);
-
-extern "C" void TerrainAddWallSpline(TERRAIN_SPATIAL_NODE *node, TERRSET *terrain);
-
-extern "C" void TerrainRemoveWallSpline(TERRAIN_SPATIAL_NODE *node, TERRSET *terrain);
 
 extern "C" void FullDeflect(NUVEC *normal, NUVEC *movement, NUVEC *result);
 
 void FullDeflectSmallY(NUVEC *normal, NUVEC *movement, NUVEC *result);
 
-i32 FullDeflectTest(nuvec_s *normal, nuvec_s *movement, nuvec_s *result);
-
-void FullDeflectSize(nuvec_s *normal, nuvec_s *movement, nuvec_s *result);
-
 extern "C" void FullReflect(NUVEC *normal, NUVEC *movement, NUVEC *result);
-
-void FullReflectTest(nuvec_s *normal, nuvec_s *movement, nuvec_s *result);
-
 
 extern "C" void TerrainSetPlatConnectTol(f32 tolerance);
 
 extern "C" void TerrainSetWallDeflectYScale(f32 scale);
 
-i32 PlatformChecks(i32 count, nuvec_s *movement);
-
-
-
-i32 TerrainPlatformEmbedded(nuvec_s *movement_delta);
-i32 TerrainPlatformMoveCheck(nuvec_s *position, nuvec_s *normal, i32 platform_index, i32 resolve_impact,
-                             i32 keep_embedded_disabled);
 NUVEC TerCrossProduct(NUVEC *a, NUVEC *b);
 
-void TerrDrawSitu(tertype *terrain, terrsitu_s *situation);
-
-void TerrDrawPlat(tertype *terrain, i16 index);
-
-void TerrDraw(tertype *terrain, i16 index);
-
-void DrawMSitu(i32 index);
-
-extern "C" void terrainpickupinit(char *path, void **buffer);
-
 extern "C" void noterraininit(void);
-
-extern "C" void TerrDrawImpactPol(void);
 
 void DrawWallSpline(float height);
 
@@ -627,101 +493,25 @@ namespace {
     // Target NewScanRot 0x378fb0 uses 0.1f on both horizontal axes when
     // selecting the terrain shapes that can contain the cast point.
 
-
-
-
-
 } // namespace
 
 void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms);
 
 void NewScanRot(nuvec_s *position, i32 terrain_mask);
 
-i16 InsideLineF(f32, f32, f32, f32, f32, f32);
-
 namespace {
 
     const f32 NO_TERRAIN_HEIGHT = 2000000.0f;
 
-
-    static void ConsiderShadowTriangle(const NUVEC &local_position, const TERRAIN_GROUP &group, TERRAIN_SHAPE *surface,
-                                       const NUVEC &origin, const NUVEC &edge_a, const NUVEC &edge_b,
-                                       const NUVEC &normal, f32 winding_y, f32 query_height, i16 terrain_group,
-                                       ShadowSurfaceCandidate *floor_candidate,
-                                       ShadowSurfaceCandidate *above_candidate) {
-        const f32 point_x = local_position.x, point_z = local_position.z;
-        if (winding_y > 0.0f) {
-            if (InsideLineF(point_x, point_z, edge_a.x, edge_a.z, origin.x, origin.z) == 0 ||
-                InsideLineF(point_x, point_z, edge_b.x, edge_b.z, edge_a.x, edge_a.z) == 0 ||
-                InsideLineF(point_x, point_z, origin.x, origin.z, edge_b.x, edge_b.z) == 0)
-                return;
-        } else if (winding_y < 0.0f) {
-            if (InsideLineF(point_x, point_z, origin.x, origin.z, edge_a.x, edge_a.z) == 0 ||
-                InsideLineF(point_x, point_z, edge_a.x, edge_a.z, edge_b.x, edge_b.z) == 0 ||
-                InsideLineF(point_x, point_z, edge_b.x, edge_b.z, origin.x, origin.z) == 0)
-                return;
-        } else
-            return;
-
-        const f32 plane_height =
-            (origin.y + group.origin.y) +
-            ((local_position.x - origin.x) * normal.x + (local_position.z - origin.z) * normal.z) / -normal.y;
-        if (plane_height <= query_height) {
-            if (winding_y > 0.0f && plane_height > floor_candidate->height) {
-                floor_candidate->height = plane_height;
-                floor_candidate->surface = surface;
-                floor_candidate->normal = normal;
-                floor_candidate->terrain_group = terrain_group;
-            }
-        } else if (plane_height < above_candidate->height ||
-                   (plane_height == above_candidate->height && normal.y < above_candidate->normal.y)) {
-            // The target keeps the nearest ordinary surface above the cast
-            // origin as well as the conventional floor below it.  NewCast's
-            // final range check decides whether this surface is reachable.
-            above_candidate->height = plane_height;
-            above_candidate->surface = surface;
-            above_candidate->normal = normal;
-            above_candidate->terrain_group = terrain_group;
-        }
-    }
-
 } // namespace
 
-f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range);
-
-extern "C" void TerrainWallAng(f32 slope);
-
-extern "C" void ShadowDir(NUVEC *direction);
-
 extern "C" i32 EShadowInfo(void);
-
-extern "C" i32 ShadowRoofInfo(void);
 
 extern "C" i32 EShadowRoofInfo(void);
 
 extern "C" void NewTerrPlatformsOff(void);
 
-extern "C" i32 NewShadowOnPlatform(void);
-
-extern "C" i32 NewShadowOnMSitu(void);
-
-extern "C" void AddCollisionSphere(NUVEC *position, f32 radius);
-
-extern "C" void AddPickupTerr(i32 type, NUVEC *position);
-
-
-
-extern "C" i32 AddPickupTerrRot(i32 type, NUMTX *matrix, NUMTX *previous, i32 rotating);
-
-void TerrainSideClamp(NUVEC *axis, NUVEC *position);
-
-i32 TerrShapeSideStep(NUVEC *, NUVEC *, u8 *);
-
 extern "C" void CubeImpact(NUMTX *current, NUMTX *previous, NUVEC *normal, f32 scale, NUVEC *impact);
-
-extern "C" i32 NewTerrainOnAPlatform(void *id);
-
-extern "C" void NewTerrHitInfo(u8 *info);
 
 extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_flags, i32 object_index, f32 radius,
                                      f32 collision_radius, f32 object_scale, i32 embedded_retry, i32 scan_flags,
@@ -742,8 +532,6 @@ extern "C" i32 NewRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 scan
 extern "C" i32 NewRayCastScaleYMask(NUVEC *position, NUVEC *movement, f32 radius, f32 scale_y, i32 scan_flags,
                                     u32 terrain_mask);
 
-extern "C" void TerrainPolyEdge(NUVEC *first, NUVEC *second);
-
 extern "C" i32 NewRayCastMask(NUVEC *position, NUVEC *movement, f32 radius, i32 terrain_mask, i32 scan_flags);
 
 extern "C" i32 NewRayCastSet(NUVEC *position, NUVEC *movement, f32 radius, f32 separation_epsilon, f32 compare_epsilon,
@@ -756,24 +544,12 @@ extern "C" void NewTerrAxisFreedom(TERRAIN_AXIS_FREEDOM_SHAPE *shape, NUVEC *pos
 
 extern "C" i16 NewPlatPickupInst(void *object, i32 type);
 
-extern "C" void ReassignPickupInst(i32 index, i32 type);
-
-extern "C" i32 AddMSituExtraTerrRot(i32 source_index, NUMTX *matrix, NUMTX *previous, i32 rotating, TERRSET *source);
-
-extern "C" void TerrainWallSideSlide(NUVEC *movement, void *id, f32 speed, f32 upward_scale, NUANG angle);
-
 extern "C" i32 NewRayCastSetHandel(NUVEC *position, NUVEC *movement, f32 radius, f32 separation_epsilon,
                                    f32 compare_epsilon, i16 *handle, i32 scan_type);
 
 void ScanTerrainHandel(i32 terrain_mask, i16 *handle);
-f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range);
-
-extern "C" f32 NewShadowHandelEx(NUVEC *position, i32, f32 height_above, f32 height_below, i32 terrain_mask,
-                                 i16 *handle);
 
 extern "C" i32 TerrainPlatId(void);
-
-extern "C" i32 TerrainTrackBack(NUVEC *position, NUVEC *direction, f32 radius, f32 backoff, NUVEC *result);
 
 extern "C" i32 TerrainIntensityInfo();
 
@@ -792,17 +568,7 @@ extern "C" void NuScratchRelease();
 
 extern "C" void TerrainPlatformOldUpdate(void);
 
-extern "C" i32 PlatformCrush(void);
-
-extern "C" void NewScanInit(void);
-
 namespace {
-    static TerrainScanBounds TerrainHandleBounds(const NUVEC &position, const NUVEC &movement, f32 radius);
-    static bool TerrainHandleVerticesOverlap(const TerrainScanBounds &bounds, const TERRAIN_SHAPE &shape);
-    static void TerrainHandleFilterShapes(TerrainScanWriter *writer, TERRAIN_SHAPE **shapes, i32 count,
-                                          const TerrainScanBounds &bounds, i32 terrain_mask, bool rotating);
-    static bool TerrainHandleWallOverlap(const TerrainScanBounds &bounds, const TERRAIN_WALL_POINT *wall);
-
 
 } // namespace
 
@@ -814,11 +580,7 @@ i16 *NewScanHandelSubset(i16 *subset, nuvec_s *position, nuvec_s *movement, f32 
 
 extern "C" i16 *NewScanHandel(nuvec_s *position, nuvec_s *movement, f32 radius, i32 scan_type, i16 *subset);
 
-extern "C" void NewRaySetDisablePalt(i32 disabled);
-
 namespace {
-
-
 
 } // namespace
 

@@ -35,24 +35,13 @@
 #include <string.h>
 
 void EvalAnim(nuhspecial_s *special, f32 frame, numtx_s *matrix, i32 include_instance_translation);
-i32 UseFallAnim(GameObject_s *object);
 i32 GetDefaultIdle(GameObject_s *object);
-i32 SetProtocolDroidFallAnim(GameObject_s *object);
 // Retail uses translation-unit-local helpers with compiler-inferred private
 // calling conventions; keep their shared animation-mode call sites intact.
-static void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_tiptoe, i32 weapon_variant);
-static void MoveAnim_Check(GameObject_s *object);
-static void JumpAnimCode(GameObject_s *object);
-static bool JumpAnim_HasAction(const GameObject_s *object, i16 action);
-static GAMECHARACTERDATA *GetGameCharacterData(GameObject_s *object);
-void UpdateCharacterIdle(GameObject_s *object);
-void AutoWeaponOnOff(GameObject_s *object);
-void AddFootSteps(GameObject_s *object);
 f32 PodSprint_InStartCountdown(WORLDINFO_s *world);
 i32 PodRace_InStartCountdown(WORLDINFO_s *world);
 void SetPodMergeAnims(ANIMPACKET_s *packet, i32 index);
 extern "C" i16 id_ANAKINSPODGREEN;
-extern "C" void PlaySfxByIdAndSetVolume(i32 sfx_id, NUVEC *position, f32 volume);
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
 extern i16 id_BODYGUARD;
@@ -60,41 +49,8 @@ extern i16 id_IMPERIALGUARD;
 extern i16 id_YODA;
 extern i16 id_YODAGHOST;
 extern i16 id_GONKDROID;
-extern i16 id_JUMBOHOMINGDROID;
-extern i16 id_GAMORREANGUARD, id_PRINCESSLEIASLAVE, id_LAMASU, id_TAUNWE;
-extern i16 id_PENGUIN, id_UMBRELLA, id_GLIDEPACK;
-extern f32 hub_jabbaawake;
 
 #include "legoapi/characters/motion/gameanim_types.h"
-
-static void MoveAnim_Check(GameObject_s *object);
-
-static void JumpAnimCode(GameObject_s *object);
-
-static CHARACTERANIM_s *GetAnimationInfo(const CHARACTERMODEL_s *model, i32 animation) {
-    if (model == NULL || animation < 0 || model->model_data_a == NULL) {
-        return NULL;
-    }
-    return static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
-}
-
-static GAMECHARACTERDATA *GetGameCharacterData(GameObject_s *object) {
-    if (object == NULL || object->apiobj.character_data == NULL) {
-        return NULL;
-    }
-    return static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-}
-
-static void StartAnimation(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i16 animation, bool backwards) {
-    packet->animation_index = animation;
-    CHARACTERANIM_s *info = GetAnimationInfo(model, animation);
-    const bool reverse =
-        backwards && info != NULL && (info->flags & CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0;
-    packet->current_reversed = reverse ? 1 : 0;
-    packet->current_time = reverse ? NuAnimEndFrame(model->model_data_b[animation]) : 1.0f;
-    packet->previous_time = packet->current_time;
-    packet->blending = 0;
-}
 
 void Animate_ATAT(GameObject_s *object);
 
@@ -143,10 +99,7 @@ normal_animation:
     }
 }
 
-
 void Animate_JEDI(GameObject_s *object);
-
-static void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_tiptoe, i32 weapon_variant);
 
 void AnimatePlayer(GameObject_s *object);
 
@@ -163,8 +116,6 @@ void Animate_CRITTER(GameObject_s *object);
 void Animate_WEIRDO(GameObject_s *object);
 
 void Animate_DEFAULT(GameObject_s *object);
-
-extern i32 NeedsPretendAnim(GameObject_s *object);
 
 void Animate_VEHICLE(GameObject_s *object);
 
@@ -256,8 +207,6 @@ i32 GameAnimSet_Stop(GAMEANIMSET_s *set) {
 }
 
 void Animate_ASTROMECH(GameObject_s *object);
-
-void Animate_CHARACTER(GameObject_s *object);
 
 void Animate_GEONOSIAN(GameObject_s *object);
 
@@ -956,17 +905,7 @@ void GameAnimSet_RemoveFromSystemList(GAMEANIMSET_s *set) {
     }
 }
 
-i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
-                                            i32 joint_count, i32 first_joint, NUVEC *root_translation);
-i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
-                                             i32 joint_count, i32 first_joint, NUVEC *root_translation);
-
 extern "C" {
-
-    i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, i32 joint_count,
-                                              i32 first_joint);
-    i32 ANI_SimpleAni3PlayerV4Joint_Blend_EulerQuat(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
-                                                    i32 joint_count, i32 first_joint, NUVEC *root_translation);
 
     void ANI_FixUpAddrs(ani3_animheader_s *anim, isize delta, i32) {
         if (anim->magic != 0x414e4934) {
@@ -1179,8 +1118,6 @@ i32 GetAnimDirection(nuinstanim_s *animation) {
     }
     return animation->tfactor < 0.0f ? 1 : 0;
 }
-
-i32 FindTexAnimFromMtl(nugscn_s *scene, numtl_s *material);
 
 static char **TexAnimList;
 

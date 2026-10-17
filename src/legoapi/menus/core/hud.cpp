@@ -17,8 +17,6 @@ void RndrTexQuad(f32, f32, f32, f32, i32, numtl_s *, i32);
 struct spacelevel_s;
 
 extern FadeSystem FadeSys;
-extern f32 statstime;
-extern f32 cointotaltime;
 
 void Text_MakeScore(u32 score, char *text);
 
@@ -124,11 +122,5 @@ void HudRadarPulse::Render() {
 }
 
 namespace {
-    void _NuTimeBarSlotBegin(void) {
-        STUBBED();
-    }
 
-    void _NuTimeBarSlotEnd(void) {
-        STUBBED();
-    }
 } // namespace

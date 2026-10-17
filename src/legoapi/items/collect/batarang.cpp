@@ -43,8 +43,6 @@ i32 Batarang_StartTargetting(GameObject_s *);
 i32 Batarang_GetObjectFromCharID(i32);
 static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 automatic);
 
-u16 GetShootDirection_Batman(GameObject_s *object, nuvec_s *direction);
-
 static unsigned int Batarang_GetTargetPos(BATARANG_s *batarang, int index, nuvec_s *position) {
     if (batarang->field_0x7d != 0 && batarang->active != 0 && batarang->active == index) {
         GameObject_s *owner = batarang->owner;

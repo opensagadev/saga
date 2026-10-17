@@ -37,17 +37,11 @@
 #include <math.h>
 #include <string.h>
 
-void DrawSubItems();
-
 extern "C" void edbriStartAllPages(void);
 
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/numath/nutrig.h"
-
-extern "C" void AiRndrLine3dDbg(f32, f32, f32, f32, f32, f32, u32);
-
-extern "C" void edDrawCross(NUVEC *centre, u8 red, u8 green, u8 blue);
 
 extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
                                               f32 upper_y, u32 colour, i32, i32 segments);
@@ -122,24 +116,7 @@ struct rtlidata_s;
 
 extern i32 VehicleArea;
 extern i32 GAMEDEMO;
-extern f32 FORCEGLOWTIME;
-extern i16 tHINTS;
-extern i16 tCHARACTERS;
-extern i16 tEXTRAS;
-extern i16 tGOLDBRICKS;
-extern i16 tSTORYCLIPS;
-extern i16 tENTERCODE;
-i32 AnakinGreenSabre(GameObject_s *object);
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
-
-extern f32 HUB_EPISODESUBTITLEY;
-extern f32 HUB_EPISODETITLEY;
-extern i32 draw_para;
-
-void DrawGameObjectsDraw(i32 pass);
-void EnableShadowMapRendering(i32 enable);
-void ResetShadowMapRendering();
-static void DrawParaphernalia(GameObject_s *object);
 
 struct GAMEMESSAGE_s;
 struct HINT_s;
@@ -163,33 +140,14 @@ extern "C" void NuRndrGradRect2di(i32, i32, i32, i32, i32 *, numtl_s *);
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 extern "C" void NuCameraUnlock(void);
 extern "C" void NuCameraRelock(void);
-extern char *apiGameName;
-extern char *apitxt_EMPTY;
-extern char *apitxt_PRESENT;
-extern char *apitxt_AUTOSAVE_WARNING;
-extern char *apitxt_LOADING;
-extern char *apitxt_SAVING;
-extern char *apitxt_NODATAAVAILABLE;
-extern char *apitxt_OK;
-extern char *apitxt_GAMELOADED;
-extern char *apitxt_GAMELOADING;
-extern char *apitxt_FAILEDTOLOAD;
-extern char *apitxt_CORRUPTLOAD;
 extern char *ASCII_DOWN;
 extern char *ASCII_UP;
-extern i16 tCURRENTGAME;
-extern i16 tEMPTY;
-extern i16 tGAME;
-extern i16 tNOSPACE;
 extern f32 MENUTEXTSCALE;
-extern f32 MENUBOTY;
 extern f32 AUTOSAVEICONY;
 extern f32 AUTOSAVEICONX;
 extern f32 AUTOSAVEICONSIZE;
 extern f32 MenuAlpha;
 extern i32 MenuA;
-extern f32 memcard_loadmessage_delay;
-extern f32 memcard_loadresult_delay;
 extern u8 MENUNORMALR;
 extern u8 MENUNORMALG;
 extern u8 MENUNORMALB;
@@ -207,15 +165,12 @@ extern f32 text3d_height;
 extern f32 text3d_width;
 extern FadeSystem FadeSys;
 extern f32 cointotaltime;
-extern "C" f32 MainRenderTime;
 extern "C" i32 editor_active;
 extern i32 Paused;
 extern "C" i32 screendump;
 extern f32 pause_fade;
-extern "C" i32 PANELOFF;
 extern i32 noscenespecials;
 extern void RotateGameMatrix(numtx_s *matrix, i32 order, u16 x, u16 y, u16 z);
-extern void SetLevelLights(void *set, f32 scale);
 extern f32 ICONX;
 extern f32 ICONSIZE;
 extern f32 DROPINALPHA;
@@ -540,17 +495,6 @@ extern "C" {
     }
 } // extern "C"
 
-extern i32 solid_cable;
-extern i32 nsegments_drawn;
-extern f32 slack_factor;
-extern f32 cable_slack;
-extern f32 nsegments_per_unit;
-extern CABLE_s cables[8];
-extern f32 tow_length;
-extern NUMTL *SolidMtl3D;
-
-void DrawCables();
-
 void DrawRipple(ripple_node_s *node) {
     NURND_VERTEX3D vertices[4];
     vertices[0].position = {0.0f, node->size, 0.0f};
@@ -573,19 +517,9 @@ void DrawRipple(ripple_node_s *node) {
     NuRndrTriStrip3dClip(vertices, 4, &matrix, node->material);
 }
 
-void DrawAreaBox(nuvec_s *position, nuvec_s *size, i32 rotation, i32 colour);
-
-void DrawBox_Now(_vuv_s *, _vuv_s *, i32, i32);
-
 extern "C" {
-extern f32 aiEditor_DrawYOffset;
     f32 aiEditor_LocatorWidth = 0.25f;
-    void AiRndrLine3d(NURND_VERTEX3D *, NUMTL *, NUMTX *);
 }
-
-void DrawLocator(nuvec_s *position, float radius, i32 rotation, i32 colour);
-
-void Draw_LOADED();
 
 i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
                  u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order) {
@@ -674,8 +608,6 @@ extern const u8 HintRGB[5][3] = {
     {255, 0, 0}, {0, 255, 0}, {0, 127, 255}, {127, 0, 255}, {255, 255, 0},
 };
 
-void DrawLine_Now(_vuv_s *, _vuv_s *, i32, i32);
-
 void DrawParallax(nuhspecial_s *special) {
     if (NuIOS_IsLowEndDevice() != 0 && WORLD != NULL && WORLD->current_level != NULL &&
         WORLD->current_level->data_display.far_clip < 20000.0f &&
@@ -695,8 +627,6 @@ void DrawParallax(nuhspecial_s *special) {
     NuRndrStateSetFogEnabled(1);
 }
 
-void DrawQuestion(nuvec_s *position, float scale_value, float y_push);
-
 void DrawRectRGBA(float x, float y, float width, float height, u32 colour, numtl_s *material, i32 alignment,
                   float scale) {
     const float scaled_width = width * scale;
@@ -714,12 +644,6 @@ void DrawRectRGBA(float x, float y, float width, float height, u32 colour, numtl
     NuRndrRect2di(static_cast<i32>((x + 1.0f) * 0.5f * 10240.0f),
                   static_cast<i32>((2.0f - (y + 1.0f)) * 0.5f * 3584.0f), rect_width, rect_height, colour, material);
 }
-
-void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float unused, float y_push, u16 x_rot,
-              u16 y_rot, u16 z_rot);
-
-
-void Draw_LOADING();
 
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nuprim_internal.h"
@@ -831,14 +755,7 @@ void DrawAlphaGrid(i32 rows, i32 cols, NuBloomParameters *parameters) {
 }
 #undef ALPHA_GRID_VERTEX
 
-void DrawArrow_Now(_vum_s *, float, i32, i32);
-
-extern i16 tNONEWBESTTIME, tNEWBESTTIME;
 void Text_MakeTime(f32, i32, i32, i32, char *);
-
-void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha);
-
-void DrawCross_Now(_vuv_s *, float, i32, i32);
 
 void DrawPauseFade() {
     if (editor_active != 0 || screendump != 0)
@@ -860,7 +777,6 @@ void DrawPauseFade() {
     pause_fade = static_cast<f32>(fade);
 }
 
-
 void DrawRippleSet(ripple_set_s *set) {
     if (set == NULL)
         return;
@@ -872,7 +788,6 @@ void DrawRippleSet(ripple_set_s *set) {
         }
     }
 }
-
 
 static u8 cacheValues[256];
 
@@ -1108,10 +1023,6 @@ void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_c
     --bezier_draw_depth;
 }
 
-void DrawBoxMtx_Now(_vum_s *, _vuv_s *, i32, i32);
-
-void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
-
 void DrawCutBorders(i32 widescreen) {
     if (!(CutBorderScale > 0.0f)) {
         return;
@@ -1144,10 +1055,6 @@ void DrawCutBorders(i32 widescreen) {
 void DrawExplosions() {
 }
 
-void DrawItemMenu2D();
-
-void DrawStatusText(char *text, u16 angle, float x, float y, float scale, u32 colour, i32 alignment);
-
 i32 Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx) {
     if (object_index == -1) {
         return 1;
@@ -1164,12 +1071,6 @@ i32 Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx) {
     }
     return 0;
 }
-
-void DrawGameObjects();
-
-extern nuhspecial_s green_light;
-extern nuhspecial_s painttargetcolour[3];
-extern nuhspecial_s paintlights[3];
 
 void DrawPaintLights();
 
@@ -1235,12 +1136,6 @@ void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large)
                  pulse, 0, 255, 255, 255, 0x60);
     }
 }
-
-void Draw_LOADFAILED();
-
-void DrawAreaCylinder(nuvec_s *centre, nuvec_s *size, i32 colour);
-
-void DrawCameraTarget(nuvec_s *);
 
 void DrawGameMessages() {
     extern GAMEMESSAGE_s GameMessage[128];
@@ -1394,10 +1289,6 @@ void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum) {
     Text3D(text, x, y + PANEL_MINIKITCOUNTY, 1.0f, size, size, size, 0, 255, 0, 127);
 }
 
-void DrawStatusBG_LSW(STATUSPACKET_s *status);
-
-void Draw_LOADCORRUPT();
-
 i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
                       u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha) {
     if (object_index == -1) {
@@ -1420,8 +1311,6 @@ i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u
     return 0;
 }
 
-void DrawCameraTarget2(nuvec_s *);
-
 i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
                       u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order, float alpha) {
     if (alpha > 0.0f && special != NULL && NuSpecialExistsFn(special) != 0 &&
@@ -1440,22 +1329,8 @@ i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, f
 }
 
 extern STATUSMINIKITPART_s KitPart[10];
-extern i32 currentminikit;
-extern f32 slideseek;
-
-i32 DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *special, numtx_s *matrix);
-void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_scale, i32 count, STATUSPACKET_s *packet,
-                       float slide);
 
 extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
-extern "C" void PlaySfx(char *, NUVEC *);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
-
-void DrawSubItemMenu2D();
-
-void DrawSubItemMenu3D();
-
-void Draw_NOMEMORYCARD();
 
 void DrawFadeScreenWipe() {
     NuRndrBeginScene(-1);
@@ -1522,11 +1397,6 @@ void DrawFadeScreenWipe() {
     NuRndrEndScene();
 }
 
-
-void DrawForceGlowSprite(nuvec_s *position, float radius, i32 model, float alpha, GameObject_s *);
-
-void DrawGameObjectsDraw(i32);
-
 void Draw_AUTOSAVECANCEL();
 
 void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha) {
@@ -1541,8 +1411,6 @@ void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha) {
 }
 
 void Draw_AUTOSAVEWARNING();
-
-void Draw_NODATAAVAILABLE();
 
 i32 dco_locatorposonly;
 i32 dco_id = -1;
@@ -1653,22 +1521,12 @@ void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_
     }
 }
 
-extern f32 DropInOutScale(GameObject_s *object);
-extern void ApplyExtraRotation(GameObject_s *object, NUMTX *matrix);
-extern AREADATA *DEATHSTARBATTLE2_ADATA;
 extern AREADATA *PODSPRINT_ADATA;
 extern "C" {
     extern i16 id_ATST;
     extern i16 id_ATST_LOWRES;
     extern i16 id_ATAT;
 }
-extern u8 CharClipToBlobShadows;
-
-
-i32 DrawGameObjectsProcess();
-
-void DrawStatusTextFraction(i32 current, i32 total, float x, float y, u16 angle, float scale, u32 colour,
-                            float animation, float animation_duration);
 
 void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
 
@@ -1696,7 +1554,6 @@ i32 DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *special, numtx_s *matrix) {
 }
 
 extern void DrawMenuEntry(MENU_s *, char *);
-void Draw_OK(MENU_s *menu);
 
 void DrawAABox(_vuv_s *position, _vuv_s *size, i32 colour) {
     const NUVEC *centre = reinterpret_cast<const NUVEC *>(position);
@@ -1713,8 +1570,6 @@ void DrawAABox(_vuv_s *position, _vuv_s *size, i32 colour) {
     NuRndrBoundingBox(&minimum, &maximum, &numtx_identity, colour);
     NuCameraRelock();
 }
-
-void DrawArrow(nuhspecial_s *special, float scale_value);
 
 void DrawCross(nuvec_s *centre, float radius, numtl_s *material, i32 colour) {
     if (material != NULL) {
@@ -1826,23 +1681,9 @@ static __used__ i32 PauseRenderOff();
 
 static __used__ i32 MatrixReflection_CanOverride();
 
-static void DrawWeapon_SetSabreObjects(GameObject_s *object, i32 red, i32 green, i32 blue, i32 purple, i32 *models,
-                                       i32 *hilt);
-
-static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale);
-
-static void DrawCharacterAttachments(GameObject_s *object, NUMTX *joint_matrices);
-
-void CharScene_Draw(WORLDINFO_s *, i32, NUMTX *, NUMTX *);
-void CharMiniKit_Draw(i32, NUMTX *, i32, f32, f32);
-void Customiser_DrawAccessories(CUSTOMISER *, GameObject_s *, NUMTX *);
-i32 Batarang_GetObjectFromCharID(i32);
-void Grapple_DrawLine(GameObject_s *);
 void Transform_DrawTarget(NUVEC *, f32, f32);
 extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBACCA, id_WOOKIEE, id_TWOFACE;
 extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
-
-static void DrawParaphernalia(GameObject_s *object);
 
 #include "legoapi/legoapi_types.h"
 #include "nu2api/numath/numtx.h"

@@ -228,21 +228,8 @@ void TakeHitRumble(GameObject_s *object, float strength) {
     }
 }
 
-extern f32 SpaceRumbleTimer;
-extern "C" f32 NuFsqrt(f32);
-extern "C" f32 NuRandFloat();
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
-i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
-
-extern f32 MulDist;
-extern f32 SpeedAdd;
-extern f32 SpeedDist;
-extern f32 MulAdd;
-
-extern "C" void SetPreSeekStartPoint(f32 start_point);
-
-void SpaceResetAudioPoint();
 
 void SpaceRumbleProcess();
 

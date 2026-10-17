@@ -27,8 +27,6 @@ extern "C" {
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nu3d/nuqfnt.h"
 
-void NuErrorPrint(char *);
-void NuDebugMsgPrint(char *);
 extern NUQFNT *system_qfont;
 void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *control, f32 width, f32 segment_length, f32 wobble,
                      f32 duration, i32 colour, i32 flags);
@@ -76,12 +74,10 @@ extern bool used_touch_IDs[10];
 
 struct ani3_animheader_s;
 struct nuanimdatachunk_s;
-nuanimdatachunk_s *NuAnimDataChunkCreate(i32 curve_set_count);
 
 extern "C" {
 
     u8 CutSceneBoundingBoxTrackRoot = 0;
-extern i32 NuGCutAudioStream;
     NUANIMBUFFEVALUATECB AnimBuffEvalCB = NULL;
     void **AnimBuffEvalData = NULL;
     i32 *AnimBuffEvalJoint = NULL;
@@ -103,8 +99,6 @@ extern "C" {
 
 // C++-linkage helpers defined in sibling TUs.
 void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
-void bgSuspendMain(i32);                             // main.cpp
-void NuAnimBuffInit(i32, VARIPTR *, VARIPTR);        // nu2api_nucore_misc.cpp
 i32 NuCameraClipHGobj(nugscn_s *, NUMTX *, NUMTX *); // nu2api_nucore_misc.cpp
 i32 findrange(nugscn_s *, i32);                      // utilities.cpp
 
@@ -113,11 +107,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // Display-list bootstrap (original nucore TU file-statics)
     // ---------------------------------------------------------------------------
-
-    i32 NuHasError(void);
-    void NuMtlAnimate(f32 frame_time);
-    void NuTexAnimProcess(f32 frame_time);
-    void NuShaderManagerSetfv(i32 semantic, const f32 *values);
 
     // ---------------------------------------------------------------------------
     // Redirected symbols — real bodies live elsewhere (kept as comments)
@@ -1270,8 +1259,6 @@ extern "C" {
     void NuPadUpdatePads(void);
 
     // Frame-end callbacks (original bss @0x6bdaec/0x6bdaf0/0x6bdad0).
-    extern void (*preRenderFlashingHack)(void);
-    extern void (*postRenderFlashingHack)(void);
     extern void (*nuapi_endframe_callbackfn)(void);
 
     // Faithful transcription of the original frame-end pump. Waits for the
@@ -3234,10 +3221,7 @@ extern "C" {
             wind->unk0[index] = -1;
         }
     }
-    void NuWindUpdateArray(NUVEC **);
 
-    extern "C" f32 partglobaltime;
-void NuPartResetGlobalTime(void);
     // ---------------------------------------------------------------------------
     // Gobj / hierarchy / scene graph
     // ---------------------------------------------------------------------------
@@ -3915,7 +3899,6 @@ void NuPartResetGlobalTime(void);
 void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
                                f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask);
 #undef NUGCUT_CURVE_VALUE
-void NuGCutSetCutAudioStream(i32 stream);
     void NuTexAnimRemoveList(void *texture_anims);
     void NuGHGPreRelocateFixupPS(NUGSCN *scene);
     void NuGHGPostRelocateFixupPS(NUGSCN *scene, i32 delta);
@@ -4004,8 +3987,6 @@ void NuGCutSetCutAudioStream(i32 stream);
     // Input / pad / key / mouse
     // ---------------------------------------------------------------------------
 
-extern NUKEYCHAR NuKeyChar[65];
-i32 NuKeyToAscii(u32 key, i32 shifted);
     static inline void NuPadCopyTouchFields(NuInputTouch *destination, const NuInputTouch *source) {
         destination->unknown_04 = source->unknown_04;
         destination->unknown_00 = source->unknown_00;

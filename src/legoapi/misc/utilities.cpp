@@ -16,9 +16,7 @@
 #include <ctype.h>
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 extern i32 qseed;
 extern i32 GAMERAND;
@@ -139,8 +137,6 @@ void VecRotateAxis(nuvec_s *vector, u16 angle, nuvec_s *axis) {
     vector->y = ((xy + sz) * source.x + 0.0f) + (y * ty + cosine) * source.y + (yz - sx) * source.z;
     vector->z = ((xz - sy) * source.x + 0.0f) + (sx + yz) * source.y + (tz * z + cosine) * source.z;
 }
-
-i32 SolveQuadratic(f32 a, f32 b, f32 c, f32 *first, f32 *second);
 
 f32 XZLinesClosest(nuvec_s *a, nuvec_s *b, nuvec_s *c, nuvec_s *d, f32 *first, f32 *second) {
     NUVEC ac __attribute__((aligned(16)));

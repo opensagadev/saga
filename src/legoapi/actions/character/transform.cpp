@@ -18,16 +18,9 @@
 #include "nu2api/numath/nutrig.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
-extern "C" i16 id_MINISLAVE1;
-
-void TurnCodeCamSafe(GameObject_s *object, NUMTX *matrix);
 void ResetForceGlow(PLAYERPACKET_s *packet);
-
-void ApplyExtraRotation(GameObject_s *object, numtx_s *matrix);
 
 void Transform_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     ResetForceGlow(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));

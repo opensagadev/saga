@@ -17,9 +17,7 @@
 #include "nu2api/numath/nuvec.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 bool LineIntersectCircle(NUVEC *, NUVEC *, NUVEC *, f32);
@@ -108,42 +106,28 @@ extern i32 i_bolt;
 extern f32 BOLT_OVERRIDE_PLAYERBOLTSPEED;
 extern f32 BOLT_OVERRIDE_PLAYERBOLTDURATION;
 struct spacelevel_s;
-struct quickboltinfo;
 
 static void UpdateBolt_Geonosian(BOLT_s *);
 static void EndBolt_EwokTorpedo(BOLT_s *);
-void BoltTypes_Reset(WORLDINFO_s *);
 
 #include "legoapi/items/collect/bolttypes_lsw.inc"
 
 extern BOLTSYS * BoltSys;
 
-
 // Configuration entry point and parser callbacks share the original BT state.
-
-
 
 void BoltTypes_Configure(WORLDINFO_s *world, char *config);
 
-
 f32 Bolt_ObjTargetPosYAdjust(GameObject_s *);
-
 
 void Bolt_End(BOLT_s *, i32);
 extern i32 Paused;
-
-
-
-
 
 extern "C" {
     void KillPart(PART_s *, i32);
 }
 
 void NewRumble(nupad_s *, f32, i32);
-
-
-void BoltTypes_Reset(WORLDINFO_s *world);
 
 extern "C" void PlaySfx(char *, NUVEC *);
 i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *);
@@ -152,59 +136,38 @@ void GameCam_HitJudder();
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 
-void Bolt_Debris_LSW(BOLT_s *bolt, nuvec_s *points, i32 point, nuvec_s *, i32 no_explosion);
-
-
-i32 Bolt_HitPart_LSW(BOLT_s *, PART_s *part);
-
 BOLTTYPE_s *BoltType_FindByID(i32 id, WORLDINFO_s *world);
 
-void Bolt_HitGameObjectRC(NetMessage &);
-
-
-
 i32 Bolt_HitGameObjects(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maximum, f32 radius, u8 *hit_flags);
-
 
 extern i32 addbolt_nosfx;
 void NewBuzz(nupad_s *, f32, i32);
 
 __attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction, nuvec_s *normal,
                                                                     unsigned char *processed);
-void Bolt_HitGameObjectRC(NetMessage &message);
 
 // Retail only has the IPA-SRA clone of Bolt_HitPlat(BOLT_s *, u8 *, WORLDINFO_s *), which drops the
 // unused world argument.
 static __attribute__((noinline, noclone)) i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags)
     __asm__("_ZL12Bolt_HitPlatP6BOLT_sPhP11WORLDINFO_s.isra.38");
 
-
-i32 Bolt_AlternateFire_LSW(GameObject_s *object, i32 index);
-
 f32 Bolt_ObjTargetPosYAdjust(GameObject_s *object);
 
 extern AREADATA *DOGFIGHT_ADATA;
 i32 BoltType_FindIDByCreature(GameObject_s *object, i32 fallback);
 
-void Bolt_Init(void *, NetMessage &);
 BOLT_s *Bolt_Add(GameObject_s *object, nuvec_s *position, numtx_s *matrix, i32 type_id, i32 flags);
 
 void Bolt_End(BOLT_s *bolt, i32 run_callback);
 
 BOLT_s *Bolt_Find(i32 type_id, NUVEC *position, GameObject_s *owner);
 
-
 // The original caller appears to treat this u16-returning function as i32;
 // correcting this declaration lowers its match.
-extern i32 (*BoltInitSfxFn)(GameObject_s *);
-void Bolt_Init(void *storage, NetMessage &message);
 
 static __used__ void UpdateBolt_Geonosian(BOLT_s *bolt);
 
 i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
-
-
-
 
 EXPLOSION *Detonate(NUVEC *, u16);
 static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt);
@@ -212,13 +175,9 @@ static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt);
 void BoltTypes_Init(WORLDINFO_s *world);
 
 extern "C" {
-    void NewTerrHitInfo(u8 *);
     void NewRayCastGetImpactNormal(NUVEC *);
-    i32 NewShadowOnPlatform();
 }
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
-
-
 
 i8 BoltType_FindIDByName(char *name, WORLDINFO *world);
 
@@ -245,10 +204,6 @@ i8 BoltType_FindIDByName(char *name, WORLDINFO *world);
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nu3d/nuspecial.h"
 
-extern i32 memcard_deleteneeded, memcard_deletestarted, memcard_deletefailed;
-extern i32 memcard_formatme, memcard_formatting, memcard_formatfailed;
-extern i16 (*memcard_hashfn)(void);
-
 extern char FS_LastFileName[64];
 extern char FS_Path[256];
 extern char FS_Title[64];
@@ -264,63 +219,14 @@ extern u8 FS_RefreshDir;
 extern u8 FS_ShowVolumes;
 extern void (*FS_Callback)(char *, char *);
 
-void FS_BuildFilterBlocks(char *);
-void FS_BuildFilterOutBlocks(char *);
-void FS_SortStrings(char *, char *, i32);
-i32 FS_FileNameFilter(char *);
-void FS_MakeDateTimeString(FS_FILEENTRYHDR *, char *);
-
-
-void InitMemCard();
-
-
-
-
-
-
-
-void FS_SortStrings(char *start, char *end, i32 mode);
-
-
-
-
-
-
-
-
 void SerialiseString(EdStream &stream, void *data, i32 count);
-
-
-i32 FS_FileNameFilter(char *name);
-
-
-
-
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
-static __attribute__((noinline, noclone)) void RenderFileSel3Body(i32 draw_title)
-    __asm__("_Z14RenderFileSel3i.part.38");
-
-static void RenderFileSel3Body(i32 draw_title);
 
 void RenderFileSel3(i32 draw_title);
 
 void RenderFileSel();
-
-
-
-
-
-
-
-
-void FS_BuildFilterBlocks(char *input);
-
-void FS_MakeDateTimeString(FS_FILEENTRYHDR *entry, char *output);
-
-void FS_BuildFilterOutBlocks(char *input);
-
 
 i32 ProcessFileSel3(f32 elapsed, nupad_s *pad);
 
@@ -338,21 +244,6 @@ extern "C" void RenderFileSel2(i32 x, i32 y, i32 *width, i32 *height);
 i32 LoadState(i32, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *);
 
 extern "C" {
-extern void (*savesuccessfn)();
-extern void * memcard_headerdata;
-extern i32 memcard_headerdatasize;
-extern void * memcard_headerdatabuffer;
-
-void FS_SetFileSelPathFromName(char *name);
-
-void SaveSystemInitialiseEx(i32 slots, void *makeSaveHash, void *save, i32 saveSize, void *header, i32 headerSize,
-                                i32 autosave, void (*drawSaveIcon)(void));
-
-void SetSaveSuccessFn(void (*callback)(void));
-
-void UpdateSaveSlots(void);
-
-void loadsaveCallEachFrame(void);
 
 i32 TriggerAutoSave(void);
 

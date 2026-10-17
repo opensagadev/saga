@@ -40,23 +40,14 @@
 #include <stdio.h>
 #include <string.h>
 
-extern u8 troopercannons_beenReset;
-
-i16 GetGenericGoon(i32);
-
 #include "legoapi/world/levels/episode_types.h"
 DECOMP_ASSERT(sizeof(TROOPERCANNON_s) == 0x30, "Trooper cannon state size");
 DECOMP_ASSERT(offsetof(TROOPERCANNON_s, character_name) == 0x0c, "Trooper cannon name offset");
 DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon rebuilding offset");
 
-extern TROOPERCANNON_s troopercannons[4];
-
 i32 droid_hack;
 static i32 trooperteamcount;
 static f32 teamswitchtimer;
-
-extern i32 GizBuildIt_AtEnd(GIZBUILDIT_s *buildit);
-extern GIZMO *GizmoFindByData(GIZMOSYS *system, i32 type_id, void *data);
 
 extern f32 text3d_width;
 
@@ -67,9 +58,7 @@ void Text_MakeScore(u32 score, char *text);
 #include "nu2api/nu3d/nutex.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 // Episode-global logic and helpers shared across episodes: completion/
 // episode bookkeeping, super-story, boss/cutscene-adjacent helpers. The
@@ -94,10 +83,6 @@ GameObject_s *BossKilled(i32 character_id) {
     }
     return object;
 }
-
-void ReCalculateCompletionPoints();
-
-void Episodes_CompleteAllSuperStories();
 
 void GizmoBlowupCreateStuff(GIZMOBLOWUP_s *blowup);
 
@@ -443,19 +428,7 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
     }
 }
 
-extern MechWeakPtr<MechObjectInterface, 4> BobaRocketTarget;
-
-void SetBobaRocketTarget(MechObjectInterface *target);
-
-bool FireBountyHunterRocket(GameObject_s *object);
-
 static __used__ void KilledTrooperCannon(GameObject_s *object);
-
-void InitTrooperCannons(WORLDINFO_s *);
-
-void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id);
-
-void UpdateTrooperCannons(WORLDINFO_s *);
 
 static inline i32 MiniTrooperRandomIndex(minitrooperteam_s *team) {
     return qrand() / (0xffff / team->trooper_count + 1);

@@ -64,19 +64,13 @@ char *apitxt_DANISH = const_cast<char *>("Dansk");
 extern LANGUAGEDATA * Text_LanguageList;
 extern f32 text3d_height;
 extern f32 text3d_width;
-extern void (*buttonmapfn)(char *, char *);
-extern f32 (*pulsetimerfn)(f32);
 extern "C" {
 extern i32 smarttextex_drawmessagebox;
     void NuQFntSetJustifiedTolerances(float squash, float stretch);
     unsigned char *NuUnicodeCharFromUTF8(u16 *character, unsigned char *text);
     unsigned char *NuUTF8CharFromUnicode(unsigned char *text, u16 character);
-    VUFNT *LoadGameFont(char *, char *, variptr_u *, variptr_u *, i32);
-    VUFNT *LoadButtonFont(char *, char *, variptr_u *, variptr_u *, i32);
     void NuLanguageSet(i32 language);
-    void NuQFntDestroy(VUFNT *font);
     i32 NuRndrBeginScene(i32 flags);
-    void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
 }
 extern void (*Text_GameSetLanguageFn)(i32);
 char *Text_GetLanguagePath(i32 language);
@@ -104,13 +98,11 @@ extern "C" {
     void NuMtxRotateZ(NUMTX *mtx, i32 angle);
     void NuMtxTranslate(NUMTX *mtx, NUVEC *vec);
 }
-extern "C" void TextDecode(char *source, unsigned char *dest);
 extern "C" void Text3DEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                          u8 green, u8 blue, i32 alpha);
 extern "C" void Text3DEx2(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u8 alignment, u8 red,
                           u8 green, u8 blue, i32 alpha);
 void Text_MakeTime(float time, i32 show_hours, i32 show_minutes, i32 show_centiseconds, char *text);
-
 
 void TextCrawl_Init(TEXTCRAWL_s *crawl, i32 id, i32 unk);
 
@@ -119,7 +111,6 @@ f32 TextPulseTimer(f32 delay);
 
 void Text_MakeScore(u32 score, char *text);
 extern i16 tALONGTIMEAGO;
-void Text_LoadStrings(variptr_u *buf, variptr_u *buf_end);
 void Text_SetLanguage(i32 language);
 extern f32 g_buttonFontScalePulse;
 extern f32 smarttextex_longestwidth;
@@ -135,11 +126,9 @@ extern char * txtpath_ENGLISH;
 
 void Text_InitLanguageList(LANGUAGEDATA *language_list);
 void Text_SetLanguage_Game(i32 language);
-void Text_InitDefaultStrings();
 i32 Text_GetMaxOverallStrings();
 void Text_LocaliseDecimalPoint(char *text);
 void Text_ExpandAllButtonStrings(char *input, char *output);
-void Text_FillInExtendedSaveInfo();
 
 extern "C" void MessageBoxInitMtl(void);
 
@@ -149,13 +138,7 @@ void DrawMessageBoxRGBA(f32 x, f32 y, f32 width, f32 height, u32 blue, u32 green
 void DrawMessageBox(i32, f32 x, f32 y, f32 width, f32 height);
 
 extern "C" {
-void FixUpButtonsInFont(VUFNT *game_font, VUFNT *button_font);
 
-VUFNT *LoadButtonFont(char *path, char *name, variptr_u *buf, variptr_u *buf_end, i32 render_plane);
-
-VUFNT *LoadGameFont(char *path, char *name, variptr_u *buf, variptr_u *buf_end, i32 render_plane);
-void MatrixText(VUFNT *font, unsigned char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, u32 alignment,
-                    u32 colour, NUMTX *matrix, i32 camera_relative);
 void MenuSmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                          u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw,
                          i32 alpha);
@@ -163,34 +146,25 @@ void MenuText3DEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32
                       u8 green, u8 blue, u8 alpha);
 void Set3DGameFont(VUFNT *font);
 void SetGameFont(VUFNT *font);
-void SmartText(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                   u8 green, u8 blue, f32 max_width, i32 max_lines);
 void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                      u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
 void SmartTextEx2(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                       u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw,
                       u32 alpha);
-void SmartTextExDrop(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u32 red,
-                         u32 green, u32 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw,
-                         u32 alpha);
 void SmartTextGetWidescreen(f32 *font_scale_x, f32 *coordinate_scale);
 void SmartTextSetFWNMode(i32 mode);
 void SmartTextSetFont(VUFNT *font);
 void SmartTextSetWidescreen(f32 font_scale_x, f32 coordinate_scale);
-i32 SplitText(unsigned char *text, f32 max_width);
 void Text3D(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red, u8 green,
                 u8 blue);
 void Text3DEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32, u32 alignment, u8 red, u8 green,
                   u8 blue, i32 alpha);
 void Text3DEx2(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u8 alignment, u8 red,
                    u8 green, u8 blue, i32 alpha);
-void TextDecode(char *source, unsigned char *dest);
 void TextRegisterButtonMapFn(void (*fn)(char *, char *));
 void TextRegisterPulseTimerFn(f32 (*fn)(f32));
-void UnloadGameFont(void);
 }
 void MenuUpdateViewTextStrings(MENU_s *menu);
-
 
 void MenuDrawViewTextStrings(MENU_s *menu);
 
@@ -198,7 +172,6 @@ extern "C" void Text3DStringEncode(char *src, u16 *dst);
 extern "C" void SetQFont2D(void);
 
 i32 GetMenuID(void);
-
 
 // ==== functions in original address order ====
 

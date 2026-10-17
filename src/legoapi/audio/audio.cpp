@@ -11,9 +11,7 @@
 #include "nu2api/numusic/sfx.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 extern "C" i32 DoubleScore;
 extern i32 Paused;
@@ -36,10 +34,6 @@ static i32 MusicPlrsHoldAttack;
 // The reference constructs the music manager in this unit's static constructor.
 NuMusic music_man;
 
-extern "C" void PlaySfxByIdAndSetVolume(i32 sfx_id, nuvec_s *position, f32 volume);
-extern "C" void SetPreSeekStartPoint(f32 start_point);
-
-void PlayAMusic(i32 a, i32 b, i32 c, i32 d);
 i16 GetMusicIndex(char *name, nusound_filename_info_s *table, i32 def) {
     (void)name;
     (void)table;
@@ -66,11 +60,9 @@ void GameAudio_SetActionMusicTimes(f32 initial_delay, f32 hold_time) {
     sticky_attack_timeout[0] = initial_delay;
     sticky_attack_timeout[1] = hold_time;
 }
-void SpaceAudioPoint();
 void legoSetCutVolume(float v) {
     music_man.SetClassVolume(TRACK_CLASS_CUTSCENE, v);
 }
-f32 GetAudioFadeLevel();
 void SetBackgroundMusic(i32 track) {
     // libTTapp.so 0x4df8b0: platform stub (eight NOPs and ret).
     // Title music is selected and started later by GamePlayMusic.
@@ -158,21 +150,6 @@ i32 CheckMusicSwapInstant() {
     return 0;
 }
 void UpdateBackgroundMusic() {
-}
-extern "C" {
-extern i32 fake_seeking;
-
-i32 GetCurPreSeek(void);
-i32 GetCurrentMusicId(void);
-i32 GetOppMusicId(void);
-
-void MusicPreSeek(i32 track);
-
-void MusicPreSeekNow(i32 track);
-
-i32 MusicSeeking(void);
-
-i32 MusicState(void);
 }
 
 extern "C" void SetSoundVolume(f32);

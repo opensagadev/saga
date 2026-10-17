@@ -66,7 +66,6 @@ DECOMP_ASSERT(sizeof(GIZMOTYPES) == 0xc, "Gizmo type-table header ABI");
 DECOMP_ASSERT(offsetof(GIZMOTYPES, types) == 8, "Gizmo type-table pointer offset");
 
 i32 GizObstacle_CheckExcludeFlagsFn_LSW(GIZOBSTACLE_s *, GameObject_s *);
-void Bolt_PlayHitSfx(BOLT_s *);
 
 static i32 DefaultGizmo_GetOutput(GIZMO *, i32, i32) {
     return 0;
@@ -822,8 +821,6 @@ GizObstacleObjectInterface::~GizObstacleObjectInterface() {
     obstacle.mech_object_interface = NULL;
 }
 
-i32 TwistLevel(LEVELDATA_s *level);
-
 NUVEC *GizmoGetPos(GIZMOSYS_s *, GIZMO_s *gizmo) {
     if (gizmotypes != NULL && gizmo != NULL) {
         GIZMOGETPOSFN get_pos = gizmotypes->types[gizmo->type_id].fns.get_pos_fn;
@@ -970,25 +967,6 @@ GIZMO *GizmoFindByData(GIZMOSYS *gizmo_sys, i32 type_id, void *data) {
     }
     return NULL;
 }
-
-extern i32 PAINTPUZZLESTAGE;
-extern i32 played_sound;
-extern i32 paintmixed;
-extern i32 painttarget;
-extern i32 painttry;
-extern i32 randpaints[3];
-extern i32 paintsused[2];
-extern GIZMO * forcetube;
-extern GIZMO * paintobst[6];
-extern GIZMO * paintpanel[3];
-extern nuhspecial_s green_light;
-extern nuhspecial_s painttargetcolour[3];
-extern nuhspecial_s paintlights[3];
-
-extern char * paint_light_name[3];
-extern char * paint_target_colour[3];
-extern char * paint_panel_name[3];
-extern char * paint_name[6];
 
 void ResetPaintPuzzle(WORLDINFO_s *);
 

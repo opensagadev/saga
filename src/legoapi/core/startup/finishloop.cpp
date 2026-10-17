@@ -12,9 +12,7 @@
 #include "nu2api/nu3d/nutex.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 extern "C" {
     extern i32 FinishLoop_On;
@@ -26,7 +24,6 @@ extern "C" {
 }
 
 void BackDrop_Draw(f32 alpha, i32 flags);
-void NewGame(void);
 
 void FinishLoop(i32 frames) {
     if (!FinishLoop_On) {
@@ -75,4 +72,3 @@ void FinishLoop(i32 frames) {
 void bgSuspendMain(i32) {
 }
 
-void EndOfDemo(i32);

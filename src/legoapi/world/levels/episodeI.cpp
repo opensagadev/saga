@@ -109,9 +109,6 @@ void CalcSplinePointFromDist(flightspline_s *, _vuv_s *, float);
 static __attribute__((noinline, noclone)) void RacePodAlign(racepod_s *pod, _vuv_s *direction, float amount)
     __asm__("_ZL12RacePodAlignP9racepod_sP6_vuv_sfi.constprop.39");
 
-
-
-
 // --- File-local state --------------------------------------------------------
 //
 // Names are the original statics (_ZL... symbols in res/libTTapp.so) and must
@@ -248,8 +245,6 @@ void RescueE_Init(WORLDINFO_s *world);
 
 void ResetPodStuff();
 
-void PodRace_IncreaseLap();
-
 void PodRaceUpdate(WORLDINFO_s *world, float dt);
 
 void PodRacePanel(WORLDINFO_s *world);
@@ -257,8 +252,6 @@ void PodRacePanel(WORLDINFO_s *world);
 void UpdatePodRaceLapDisplay(float arg);
 
 void PodRaceAlwasyUpdate(WORLDINFO_s *world);
-
-i32 PodRace_InStartCountdown(WORLDINFO_s *world);
 
 void PodRaceAUpdate(WORLDINFO_s *world);
 
@@ -269,23 +262,9 @@ void PodRaceADraw(WORLDINFO_s *world);
 i32 Action_MushroomCollapse(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
                             i32 first_time, float);
 
-i32 PodSeekMushCutSound();
-
-i32 PodSeekSubCutSound();
-
-i32 PodSeekTuskanCutSound();
-
 void PodRaceBUpdate(WORLDINFO_s *world);
 
 void PodRaceCUpdate(WORLDINFO_s *world);
-
-i32 Action_SetLapTime(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                      i32 first_time, float);
-
-i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count, i32 first_time,
-                     float);
-
-i32 Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **, i32, i32 first_time, float);
 
 void PodRaceReset();
 
@@ -325,8 +304,6 @@ void PodRaceAInit(WORLDINFO_s *world);
 // Pod sprint (Sebulba events)
 // ===========================================================================
 
-float PodSprint_InStartCountdown(WORLDINFO_s *world);
-
 float PodSprint_RollMul(GameObject_s *object);
 
 void PodSprintA_Init(WORLDINFO_s *world);
@@ -336,10 +313,6 @@ void PodSprintA_Update(WORLDINFO_s *world);
 void PodSprintA_Panel(WORLDINFO_s *world);
 
 void PodSprintA_Reset(WORLDINFO_s *world);
-
-void PodSprint_GetIAlongVals(nugspline_s *spline, i16 *out1, i16 *out2);
-
-i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **, i32, i32 first_time, float);
 
 // ===========================================================================
 // Retake the palace (D/E/G)
@@ -402,7 +375,6 @@ void AnakinsFlightB_Draw(WORLDINFO_s *world);
 // they get their own home (their originals live outside the ep1 TU).
 // ===========================================================================
 
-
 // Original TU near 0x175830.
 void SetPodMergeAnims(ANIMPACKET_s *packet, i32 index) {
     ANIMPACKET_s *a = packet;
@@ -433,20 +405,13 @@ void SetPodMergeAnims(ANIMPACKET_s *packet, i32 index) {
 #include "nu2api/nusound/nusound.h"
 
 struct AIROW_s;
-struct nuqthdr_s;
 struct nunativegscene_s;
-struct SHOPINPUT;
 
 extern APICHARACTERMODELLIST_s NetFreePlayModelList[49];
 extern i8 net_FreePlayModelCount;
 extern u8 net_recievedFreePlayList;
 
 void GetClientMineInfo(nuvec_s **positions, u64 **present, u64 **exploded);
-
-
-
-
-
 
 // ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
 #include "nu2api/numath/nutrig.h"
@@ -488,12 +453,10 @@ void GetClientMineInfo(nuvec_s **positions, u64 **present, u64 **exploded);
 #include "nu2api/nu3d/nutex.h"
 #include <string.h>
 
-
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 static i32 PodRaceKey[8] __attribute__((aligned(16))) = {-1, -1, -1, -1, -1, -1, -1, -1};
 
 #include "legoapi/actions/character/speederchase_types.h"
-
 
 extern i32 players_going_forward;
 
@@ -515,23 +478,15 @@ extern i32 objopponent_ignoreaiopponent;
 
 void PodKeyReset();
 
-
 void PodLoseSpeed(GameObject_s *object, i32 hit, i32 rumble);
-
-
-
 
 i32 ObjIsTargetSpeeder(GameObject_s *object);
 
-void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
-
 void SpeederChaseA_Init(WORLDINFO_s *world);
-
 
 void SpeederChaseA_Panel(WORLDINFO_s *);
 
 void SpeederChaseA_Reset(WORLDINFO_s *);
-
 
 i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **, i32, i32 first_time,
                               f32 elapsed);
@@ -540,22 +495,9 @@ void SpeederChaseA_Update(WORLDINFO_s *world);
 
 i32 ObjOpponentStillThere(GameObject_s *object, GameObject_s *opponent, f32 gap);
 
-
-
-
-extern "C" {
-
-extern i32 edmain_auto_speed;
-
-void cbSetAutoSpeed(eduimenu_s *, eduiitem_s *item, u32);
-
-} // extern "C"
-
 extern "C" void AddDebrisEffect(i32 *, i32, f32, f32, f32);
 extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);
 extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
-
-void PodDust(WORLDINFO_s *world, GameObject_s *object);
 
 extern "C" f32 pod_roll[2];
 
