@@ -101,10 +101,6 @@ struct nuvec_s;
 // canonical prefix into every character before character-specific overrides.
 // These values cover the fully typed common movement and perception fields.
 
-static __used__ void ExtraDieSfx_LSW(GameObject_s *object);
-
-static __used__ void ExtraHurtSfx_LSW(GameObject_s *object);
-
 // ==== functions in original address order ====
 
 void MechObjectInterface::GetFloorTargetPos(VuVec &position, i32 mode) const {

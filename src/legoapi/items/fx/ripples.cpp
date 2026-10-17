@@ -202,13 +202,7 @@ void DrawRipple(ripple_node_s *node);
         }                                                                                                              \
     } while (false)
 
-static __used__ i32 PauseRenderOff();
-
-static __used__ i32 MatrixReflection_CanOverride();
-
 extern i32 qrand(void);
-
-static __used__ void BackDrop_Alpha(float *alpha);
 
 // ==== functions in original address order ====
 

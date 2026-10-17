@@ -387,8 +387,6 @@ static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int
 
 // Only caller prints the property edit buffer left-aligned.
 
-static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignment, float clip_x, float clip_width,
-                                        char *format, ...);
 // Only eduiMenuRender calls the integer clip helper, always left-aligned.
 
 #include "gameapi/edtools/edtools_types.h"

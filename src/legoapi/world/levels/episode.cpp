@@ -80,16 +80,10 @@ void GizmoBlowupCreateStuff(GIZMOBLOWUP_s *blowup);
 // Shared gameplay helpers
 // ===========================================================================
 
-static void GenerateTrooperTeamShape(minitrooperteam_s *team, i32 initialize_rotation);
-
-static void TrooperTeamSetStateCode(minitrooperteam_s *team);
-
 i32 TrooperShoot(WORLDINFO_s *world, minitrooperteam_s *team, minisnowtrooper_s *trooper, u16 *shot_angle,
                  i32 team_index);
 
 void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count, i32 use_droids);
-
-static __used__ void KilledTrooperCannon(GameObject_s *object);
 
 
 

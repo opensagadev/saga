@@ -123,36 +123,12 @@ void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder 
 extern HintVectorTransition hintIconPos;
 extern HintScalarTransition hintIconScale;
 extern HintScalarTransition hintYPop;
-static __used__ i32 Attack_UpdateHint(HINT_s *);
-
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
 
 // Original local callbacks referenced by Hints_LSW.
 
-static __used__ i32 Jump_UpdateHint(HINT_s *hint);
-
-static __used__ i32 Move_UpdateHint(HINT_s *hint);
-
-static __used__ i32 Lever_UpdateHint(HINT_s *);
-
-static __used__ i32 AutoJump_UpdateHint(HINT_s *hint);
-
-static __used__ i32 VehicleStuff_UpdateHint(HINT_s *hint);
-
-static __used__ i32 HoldTag_UpdateHint(HINT_s *);
-
-static __used__ i32 HatMachine_UpdateHint(HINT_s *hint);
-
 extern HINT_s Hints_LSW[55];
-
-static __used__ i32 Sith_UpdateHint(HINT_s *);
-
-static __used__ void PlayerButton_PlayHint(HINT_s *);
-
-static __used__ i32 UnlockHubStuff_UpdateHint(HINT_s *hint);
-
-static __used__ i32 PlayerButton_UpdateHint(HINT_s *hint);
 
 // Each control mode retains its own requested and interpolated hint row.
 

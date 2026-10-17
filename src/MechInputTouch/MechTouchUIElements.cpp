@@ -354,13 +354,7 @@ i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, f
     } while (false)
 
 extern i32 GetMenuID(void);
-static __used__ i32 PauseRenderOff();
-
-static __used__ i32 MatrixReflection_CanOverride();
-
 extern i32 qrand(void);
-
-static __used__ void BackDrop_Alpha(float *alpha);
 
 // ==== src/legoapi/misc/supportall.cpp: declarations ====
 

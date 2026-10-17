@@ -83,8 +83,6 @@ static void TrooperTeamSetStateCode(minitrooperteam_s *team);
 i32 TrooperShoot(WORLDINFO_s *world, minitrooperteam_s *team, minisnowtrooper_s *trooper, u16 *shot_angle,
                  i32 team_index);
 
-static __used__ void KilledTrooperCannon(GameObject_s *object);
-
 static inline i32 MiniTrooperRandomIndex(minitrooperteam_s *team) {
     return qrand() / (0xffff / team->trooper_count + 1);
 }

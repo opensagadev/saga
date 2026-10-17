@@ -130,8 +130,6 @@ extern WORLDINFO * WORLD;
 extern "C" f32 NuFrameEnd(void);
 
 struct bgprocinfo_s;
-static __used__ void LoadAreaData(bgprocinfo_s *);
-
 // ==== src/legoapi/world/boss.cpp: all remaining content ====
 
 extern i32 LevFlag[4];
@@ -470,8 +468,6 @@ struct instNUGCUTSCENE_s;
 #define INST_LOCATOR_SYS_END_ATTR __attribute__((noinline, noclone))
 #endif
 
-static __used__ void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame);
-
 // ==== src/legoapi/ai/core/gameai.cpp: declarations ====
 
 #include "legoapi/ai/core/gameai_types.h"
@@ -666,8 +662,6 @@ static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s 
 
 static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other);
 
-static __used__ void pathEditor_DestroySharedNode(EDAISHAREDPATHNODE_s *shared);
-
 // Retail keeps an unreferenced partial-inlining clone of pathEditorSetCamPos:
 // it moves the editor camera to a position at the cursor's height.
 #if defined(__i386__)
@@ -720,8 +714,6 @@ DECOMP_ASSERT(sizeof(CreatureEditorRecord) == 0xac, "editor creature record size
 static __used__
     __attribute__((always_inline)) CREATURE_EDITOR_REGPARM1 void creatureEditor_Updated(EDCREATURE_s *creature);
 
-static __used__ void creatureEditor_cbCancelMenu(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbResetParams(eduimenu_s *menu,
                                                                                            eduiitem_s *, unsigned int);
 
@@ -730,56 +722,6 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbV
 
 static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbSetScript(eduimenu_s *, eduiitem_s *item,
                                                                                          unsigned int);
-
-static __used__ void creatureEditor_cbSetScriptParam(eduimenu_s *menu, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cbSetActivation(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cbSetType(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cbSetAreaActivation(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cbSetLocator(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cbSelectRespawnLocator(eduimenu_s *parent, eduiitem_s *, unsigned int);
-
-static __used__ void creatureEditor_cbSelectLocator(eduimenu_s *parent, eduiitem_s *, unsigned int);
-
-static __used__ void creatureEditor_cbSelectTriggerArea(eduimenu_s *parent, eduiitem_s *, unsigned int);
-
-static __used__ void creatureEditor_cbSetRespawnLocator(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_assigntoset(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cbSetTriggerArea(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_ngroup(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_nacross(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_xspacing(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_zspacing(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_difficulty(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_heardistance(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_viewdistance(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_minviewheight(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_maxviewheight(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_min_n_respawns(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_max_n_respawns(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_min_t_respawn(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_max_t_respawn(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_stagger_start(eduimenu_s *, eduiitem_s *item, unsigned int);
 
 // ==== src/editor/locator_editor.cpp: all remaining content ====
 
@@ -798,10 +740,6 @@ static __used__ void locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiit
 
 static __used__ __attribute__((optimize("no-tree-vectorize"))) void
 locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *item, u32);
-static __used__ void locatorEditor_cbCancelRenameMenu(eduimenu_s *menu, eduimenu_s *);
-static __used__ void locatorEditor_cbCancelSelectLocatorSet(eduimenu_s *menu, eduimenu_s *);
-static __used__ void locatorEditor_cbCancelRenameLocatorSetMenu(eduimenu_s *, eduimenu_s *);
-
 static __used__ __attribute__((optimize("no-tree-vectorize"))) void DestroyLocator(EDLOCATOR_s *locator);
 
 #if defined(__i386__)
@@ -1210,8 +1148,6 @@ static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int
 
 // Only caller prints the property edit buffer left-aligned.
 
-static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignment, float clip_x, float clip_width,
-                                        char *format, ...);
 // Only eduiMenuRender calls the integer clip helper, always left-aligned.
 
 #include "gameapi/edtools/edtools_types.h"
@@ -2667,16 +2603,9 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-static __used__ void LEGO_100PercentFn();
-static __used__ void LEGO_AllGoldBricksFn();
-
 // ==== src/legoapi/items/base/game_object.cpp: all remaining content ====
 
 #include <new>
-
-static __used__ void SurfaceInfo_ExtraReflect(GameObject_s *object);
-
-static __used__ void PauseGame_ExtraCode();
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
@@ -2760,10 +2689,6 @@ namespace {
 DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 
 // ==== src/legoapi/characters/core/character.cpp: declarations ====
-
-static __used__ void ExtraDieSfx_LSW(GameObject_s *object);
-
-static __used__ void ExtraHurtSfx_LSW(GameObject_s *object);
 
 // ==== src/legoapi/characters/core/charconfig.cpp: declarations ====
 
@@ -3404,12 +3329,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
             vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
         }                                                                                                              \
     } while (false)
-
-static __used__ i32 PauseRenderOff();
-
-static __used__ i32 MatrixReflection_CanOverride();
-
-static __used__ void BackDrop_Alpha(float *alpha);
 
 // ==== functions in original address order ====
 
@@ -4077,10 +3996,6 @@ static const u32 crctab[256] = {
 
 u32 HashString(unsigned char *string);
 
-static __used__ int icomp(const void *left, const void *right);
-
-static __used__ i32 sort32a(void const *left, void const *right);
-
 // ==== src/legoapi/render/fx/edsplines.cpp: declarations ====
 
 // The original translation unit exports this internal counter under its unmangled C name.
@@ -4095,10 +4010,6 @@ static __used__ i32 sort32a(void const *left, void const *right);
 #else
 #define SPLINE_POINT_ANGLES_ATTR __attribute__((noinline, noclone))
 #endif
-static SPLINE_POINT_ANGLES_ATTR void SplinePointAnglesBody(const i16 *length, NUVEC *const *pts, i32 index,
-                                                           i32 looping, u16 *pitch, u16 *angle)
-    __asm__("_ZL17SplinePointAnglesP11nugspline_siiPtS1_.isra.1.part.2");
-
 // ==== src/legoapi/core/input/qrand.cpp: all remaining content ====
 
 // ==== src/legoapi/characters/motion/move.cpp: declarations ====

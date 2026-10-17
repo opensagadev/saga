@@ -868,8 +868,6 @@ extern "C" void DebFreeInstantly(i32 *handle);
 
 extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
 
-static __used__ void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame);
-
 // ==== src/legoapi/cutscenes/cutscene_stubs.cpp: declarations ====
 #include "legoapi/world/world_shared.h"
 #include "decomp.h"
@@ -3873,8 +3871,6 @@ static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int
 
 // Only caller prints the property edit buffer left-aligned.
 
-static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignment, float clip_x, float clip_width,
-                                        char *format, ...);
 // Only eduiMenuRender calls the integer clip helper, always left-aligned.
 
 #include "gameapi/edtools/edtools_types.h"

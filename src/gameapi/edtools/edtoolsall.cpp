@@ -71,8 +71,6 @@ extern "C" char *GetSfxName(i32);
 extern "C" void PlaySfxById(i32, nuvec_s *);
 extern "C" eduiitem_s *eduiItemColourPickCreate(usize, const void *, EdUiItemCallback, char *);
 extern "C" void eduiItemColourPickSetRGB(edui_colour_pick_s *, f32, f32, f32);
-static i32 get_manipulator_attribute(ClassObjectListEntry *, i32, i32, void *);
-static void set_manipulator_attribute(ClassObjectListEntry *, i32, i32, void *);
 void cbEdLevelDestroy(eduimenu_s *, eduimenu_s *);
 void cbEdLevelDestroyOnSelect(eduimenu_s *, eduiitem_s *, u32);
 extern i32 EdType_Char;

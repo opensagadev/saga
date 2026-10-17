@@ -570,7 +570,3 @@ i32 g_loadingCharacterInHub;
 
 
 
-static __used__ void ExtraDieSfx_LSW(GameObject_s *object);
-
-static __used__ void ExtraHurtSfx_LSW(GameObject_s *object);
-

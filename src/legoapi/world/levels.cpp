@@ -421,8 +421,6 @@ static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int
 
 // Only caller prints the property edit buffer left-aligned.
 
-static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignment, float clip_x, float clip_width,
-                                        char *format, ...);
 // Only eduiMenuRender calls the integer clip helper, always left-aligned.
 
 #include "gameapi/edtools/edtools_types.h"
@@ -1279,9 +1277,6 @@ extern i16 id_GONKDROID;
 
 extern "C" i16 id_THEEMPEROR, id_IMPERIALGUARD, id_BODYGUARD;
 
-static __used__ void LEGO_100PercentFn();
-static __used__ void LEGO_AllGoldBricksFn();
-
 // ==== src/legoapi/items/base/game_object.cpp: all remaining content ====
 
 #include "legoapi/actions/character/suit.h"
@@ -1297,10 +1292,6 @@ struct BOLT_s;
 extern "C" {
     extern i16 id_IMPERIALGUARD;
 }
-
-static __used__ void SurfaceInfo_ExtraReflect(GameObject_s *object);
-
-static __used__ void PauseGame_ExtraCode();
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
@@ -1417,10 +1408,6 @@ extern i32 CHARCOUNT;
 // Original 0x120-byte data record @0x00666960. FixUpCharacters copies this
 // canonical prefix into every character before character-specific overrides.
 // These values cover the fully typed common movement and perception fields.
-
-static __used__ void ExtraDieSfx_LSW(GameObject_s *object);
-
-static __used__ void ExtraHurtSfx_LSW(GameObject_s *object);
 
 // ==== src/legoapi/characters/core/charconfig.cpp: declarations ====
 
@@ -2232,12 +2219,6 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-static __used__ i32 PauseRenderOff();
-
-static __used__ i32 MatrixReflection_CanOverride();
-
-static __used__ void BackDrop_Alpha(float *alpha);
-
 // ==== functions in original address order ====
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
@@ -2882,8 +2863,6 @@ static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s 
 
 static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other);
 
-static __used__ void pathEditor_DestroySharedNode(EDAISHAREDPATHNODE_s *shared);
-
 // Retail keeps an unreferenced partial-inlining clone of pathEditorSetCamPos:
 // it moves the editor camera to a position at the cursor's height.
 #if defined(__i386__)
@@ -2934,8 +2913,6 @@ DECOMP_ASSERT(sizeof(CreatureEditorRecord) == 0xac, "editor creature record size
 static __used__
     __attribute__((always_inline)) CREATURE_EDITOR_REGPARM1 void creatureEditor_Updated(EDCREATURE_s *creature);
 
-static __used__ void creatureEditor_cbCancelMenu(eduimenu_s *menu, eduimenu_s *);
-
 static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbResetParams(eduimenu_s *menu,
                                                                                            eduiitem_s *, unsigned int);
 
@@ -2944,56 +2921,6 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbV
 
 static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbSetScript(eduimenu_s *, eduiitem_s *item,
                                                                                          unsigned int);
-
-static __used__ void creatureEditor_cbSetScriptParam(eduimenu_s *menu, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cbSetActivation(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cbSetType(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cbSetAreaActivation(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cbSetLocator(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cbSelectRespawnLocator(eduimenu_s *parent, eduiitem_s *, unsigned int);
-
-static __used__ void creatureEditor_cbSelectLocator(eduimenu_s *parent, eduiitem_s *, unsigned int);
-
-static __used__ void creatureEditor_cbSelectTriggerArea(eduimenu_s *parent, eduiitem_s *, unsigned int);
-
-static __used__ void creatureEditor_cbSetRespawnLocator(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_assigntoset(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cbSetTriggerArea(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_ngroup(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_nacross(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_xspacing(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_zspacing(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_difficulty(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_heardistance(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_viewdistance(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_minviewheight(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_maxviewheight(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_min_n_respawns(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_max_n_respawns(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_min_t_respawn(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_max_t_respawn(eduimenu_s *, eduiitem_s *item, unsigned int);
-
-static __used__ void creatureEditor_cb_stagger_start(eduimenu_s *, eduiitem_s *item, unsigned int);
 
 // ==== src/editor/locator_editor.cpp: all remaining content ====
 
@@ -3012,10 +2939,6 @@ static __used__ void locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiit
 
 static __used__ __attribute__((optimize("no-tree-vectorize"))) void
 locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *item, u32);
-static __used__ void locatorEditor_cbCancelRenameMenu(eduimenu_s *menu, eduimenu_s *);
-static __used__ void locatorEditor_cbCancelSelectLocatorSet(eduimenu_s *menu, eduimenu_s *);
-static __used__ void locatorEditor_cbCancelRenameLocatorSetMenu(eduimenu_s *, eduimenu_s *);
-
 static __used__ __attribute__((optimize("no-tree-vectorize"))) void DestroyLocator(EDLOCATOR_s *locator);
 
 #if defined(__i386__)
@@ -3709,99 +3632,11 @@ static __used__ void LC_AL_waterripple_startcol_g(nufpar_s *fp);
 
 static __used__ void LC_AL_waterripple_startcol_r(nufpar_s *fp);
 
-static __used__ void LC_BL_max_attractos(nufpar_s *fp);
-
-static __used__ void LC_BL_max_bombgen_objects(nufpar_s *fp);
-
-static __used__ void LC_BL_max_bombgens(nufpar_s *fp);
-
-static __used__ void LC_BL_max_bridges(nufpar_s *fp);
-
-static __used__ void LC_BL_max_buildit_objects(nufpar_s *fp);
-
-static __used__ void LC_BL_max_buildits(nufpar_s *fp);
-
-static __used__ void LC_BL_max_climb_objects(nufpar_s *fp);
-
-static __used__ void LC_BL_max_doors(nufpar_s *fp);
-
-static __used__ void LC_BL_max_force(nufpar_s *fp);
-
-static __used__ void LC_BL_max_force_objects(nufpar_s *fp);
-
-static __used__ void LC_BL_max_gameantinodes(nufpar_s *fp);
-
-static __used__ void LC_BL_max_gizmoblowups(nufpar_s *fp);
-
-static __used__ void LC_BL_max_gizmoblowuptypes(nufpar_s *fp);
-
-static __used__ void LC_BL_max_gizpanels(nufpar_s *fp);
-
-static __used__ void LC_BL_max_gizrandoms(nufpar_s *fp);
-
-static __used__ void LC_BL_max_gizspecials(nufpar_s *fp);
-
-static __used__ void LC_BL_max_grapples(nufpar_s *fp);
-
-static __used__ void LC_BL_max_guidelines(nufpar_s *fp);
-
-static __used__ void LC_BL_max_hatmachines(nufpar_s *fp);
-
-static __used__ void LC_BL_max_ledges(nufpar_s *fp);
-
-static __used__ void LC_BL_max_levers(nufpar_s *fp);
-
-static __used__ void LC_BL_max_minicutParts(nufpar_s *fp);
-
-static __used__ void LC_BL_max_minicuts(nufpar_s *fp);
-
-static __used__ void LC_BL_max_obstacle_objects(nufpar_s *fp);
-
-static __used__ void LC_BL_max_obstacles(nufpar_s *fp);
-
-static __used__ void LC_BL_max_pickups(nufpar_s *fp);
-
-static __used__ void LC_BL_max_plugs(nufpar_s *fp);
-
-static __used__ void LC_BL_max_pushblock_endpos(nufpar_s *fp);
-
-static __used__ void LC_BL_max_pushblocks(nufpar_s *fp);
-
-static __used__ void LC_BL_max_securitydoors(nufpar_s *fp);
-
-static __used__ void LC_BL_max_shards(nufpar_s *fp);
-
-static __used__ void LC_BL_max_signals(nufpar_s *fp);
-
-static __used__ void LC_BL_max_spinneranim_objs(nufpar_s *fp);
-
-static __used__ void LC_BL_max_spinners(nufpar_s *fp);
-
-static __used__ void LC_BL_max_technos(nufpar_s *fp);
-
-static __used__ void LC_BL_max_teleports(nufpar_s *fp);
-
 static __used__ void LC_BL_max_ter_groups(nufpar_s *fp);
 
 static __used__ void LC_BL_max_ter_platforms(nufpar_s *fp);
 
-static __used__ void LC_BL_max_tightropes(nufpar_s *fp);
-
-static __used__ void LC_BL_max_timers(nufpar_s *fp);
-
-static __used__ void LC_BL_max_torpmachines(nufpar_s *fp);
-
-static __used__ void LC_BL_max_tubes(nufpar_s *fp);
-
-static __used__ void LC_BL_max_turrets(nufpar_s *fp);
-
-static __used__ void LC_BL_max_zipups(nufpar_s *fp);
-
 static __used__ void LC_BL_mipmapmode(nufpar_s *fp);
-
-static __used__ void LC_BL_wind_size(nufpar_s *fp);
-
-static __used__ void LC_BL_wind_speed(nufpar_s *fp);
 
 // Game-specific pre-load limits. These must be applied before WorldInfo
 // reserves each level's fixed-size gameplay systems.
@@ -3978,8 +3813,6 @@ extern AREADATA * ADataList;
 extern AREADATA * HUB_ADATA;
 
 struct bgprocinfo_s;
-static __used__ void LoadAreaData(bgprocinfo_s *);
-
 // ==== src/legoapi/world/boss.cpp: all remaining content ====
 
 // ==== src/legoapi/world/areas.cpp: declarations ====
@@ -4163,8 +3996,6 @@ extern "C" void DebFreeInstantly(i32 *handle);
 #else
 #define INST_LOCATOR_SYS_END_ATTR __attribute__((noinline, noclone))
 #endif
-
-static __used__ void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
@@ -5911,13 +5742,7 @@ extern "C" {
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizmopickups.cpp: declarations ====
 
-static __used__ float GizmoPickups_Collide2D(GameObject_s *object);
-
 // ==== src/legoapi/menus/core/gamehint.cpp: declarations ====
-
-static __used__ nuhspecial_s *GameMsg_GetExtraObj(GAMEMESSAGE_s *message);
-
-static __used__ void GameMsg_EndDelay_Game(GAMEMESSAGE_s *message);
 
 // ==== src/legoapi/items/base/game_object.cpp: declarations ====
 
@@ -5943,14 +5768,10 @@ extern i16 id_JAWA;
 
 // ==== src/legoapi/items/base/collection.cpp: declarations ====
 
-static __used__ void Collection_GetSelectingPlayerIDs(i16 *ids);
-
 // ==== src/legoapi/cutscenes/cutscene.cpp: declarations ====
 
 #define NUGCUT_RELOCATE(field, delta) \
     (NUGCUT_WORD(field) = NUGCUT_WORD(field) != 0 ? NUGCUT_WORD(field) + (delta) : 0)
-
-static __used__ void CutScene_OverrideConfigFileName_LSW(char *filename, int, int);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 

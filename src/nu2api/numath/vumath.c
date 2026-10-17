@@ -5,18 +5,6 @@
 #include "nu2api/numath/nuquat.h"
 #include "nu2api/numath/nuvec.h"
 
-static void VuQuatCopy(NUQUAT *dst, NUQUAT *src);
-
-static void VuQuatBlend(NUQUAT *out, NUQUAT *a, NUQUAT *b, f32 t, f32 w);
-
-static f32 VuQuatDot(NUQUAT *a, NUQUAT *b);
-
-static void VuQuatLerp(NUQUAT *out, NUQUAT *a, NUQUAT *b, f32 t);
-
-static void VuQuatNeg2(NUQUAT *out, NUQUAT *in);
-
-static void VuQuatNormalise(NUQUAT *out, NUQUAT *in);
-
 static void VuVecMtxMul(NUVEC *out, NUVEC *v, NUMTX *m) {
     NuVecMtxTransform(out, v, m);
 }

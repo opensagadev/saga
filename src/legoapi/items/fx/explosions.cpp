@@ -193,13 +193,7 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
         }                                                                                                              \
     } while (false)
 
-static __used__ i32 PauseRenderOff();
-
-static __used__ i32 MatrixReflection_CanOverride();
-
 extern i32 qrand(void);
-
-static __used__ void BackDrop_Alpha(float *alpha);
 
 // ==== functions in original address order ====
 

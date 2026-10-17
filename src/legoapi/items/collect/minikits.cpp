@@ -221,13 +221,7 @@ i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float sca
         }                                                                                                              \
     } while (false)
 
-static __used__ i32 PauseRenderOff();
-
-static __used__ i32 MatrixReflection_CanOverride();
-
 extern i32 qrand(void);
-
-static __used__ void BackDrop_Alpha(float *alpha);
 
 // ==== functions in original address order ====
 

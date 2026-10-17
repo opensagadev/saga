@@ -504,8 +504,6 @@ extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
 
 static __used__ void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame);
 
-static __used__ void CutScene_OverrideConfigFileName_LSW(char *filename, int, int);
-
 // ==== src/legoapi/cutscenes/gcutscn.cpp: declarations ====
 
 #include "nu2api/nu3d/numtl.h"
@@ -1144,10 +1142,6 @@ extern CHARACTERDATA * CDataList;
 // canonical prefix into every character before character-specific overrides.
 // These values cover the fully typed common movement and perception fields.
 
-static __used__ void ExtraDieSfx_LSW(GameObject_s *object);
-
-static __used__ void ExtraHurtSfx_LSW(GameObject_s *object);
-
 // ==== src/legoapi/characters/core/charconfig.cpp: declarations ====
 
 #include <stdlib.h>
@@ -1700,8 +1694,6 @@ static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int
 
 // Only caller prints the property edit buffer left-aligned.
 
-static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignment, float clip_x, float clip_width,
-                                        char *format, ...);
 // Only eduiMenuRender calls the integer clip helper, always left-aligned.
 
 #include "gameapi/edtools/edtools_types.h"
@@ -2352,12 +2344,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
         }                                                                                                              \
     } while (false)
 
-static __used__ i32 PauseRenderOff();
-
-static __used__ i32 MatrixReflection_CanOverride();
-
-static __used__ void BackDrop_Alpha(float *alpha);
-
 // ==== functions in original address order ====
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
@@ -2401,9 +2387,6 @@ extern CUTSCENEPLAYERCLIP *CutScenePlayer_Active();
 inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
-
-static __used__ void LEGO_100PercentFn();
-static __used__ void LEGO_AllGoldBricksFn();
 
 // ==== src/editor/edtoolsall.cpp: all remaining content ====
 #include "nu2api/nucore/nulist.h"
