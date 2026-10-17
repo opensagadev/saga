@@ -1456,7 +1456,6 @@ static i32 ctl_ix = 1;
 static rtl_s menu_undo;
 i32 delete_menu_active;
 
-extern NUQFNT *system_qfont;
 extern "C" {
     void AddColourPick(eduimenu_s *, eduiitem_s *, f32 *, f32 *, f32 *, u32 *);
     void CreateColourPicker();

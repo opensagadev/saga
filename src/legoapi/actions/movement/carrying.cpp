@@ -51,15 +51,10 @@ static void SuperCarry_PartKill(PART_s *part, i32);
 
 void SuperCarry_GetObjectPos(GameObject_s *object, NUVEC *position, NUVEC *secondary_position);
 
-void SuperCarry_Throw(GameObject_s *object, i32 mode);
 
-i32 SuperCarry_Possible(GameObject_s *object, i32 require_grounded);
 
-void SuperCarry_Start(GameObject_s *object, GIZMOBLOWUP_s *blowup, i32 immediate);
 
-i32 SuperCarry_Carrying(GameObject_s *object);
 
-i32 ObjLandReady(GameObject_s *object);
 
 // ==== src/legoapi/gizmo/object/takeoverobjects.cpp: all remaining content ====
 #include "legoapi/ai/game/creature.h"

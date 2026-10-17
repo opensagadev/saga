@@ -57,9 +57,7 @@ static void *GizBombGens_ReserveBufferSpace(void *world_ptr);
 
 static i32 GizBombGens_Load(void *world_ptr, void *system_ptr);
 
-GIZBOMBGEN *GizBombGen_FindByName(GIZBOMBGENSYS_s *system, char *name);
 
-ADDGIZMOTYPE *GizBombGen_RegisterGizmo(i32 type_id);
 
 
 // ==== functions in original address order ====

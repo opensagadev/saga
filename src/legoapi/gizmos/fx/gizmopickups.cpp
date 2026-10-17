@@ -53,12 +53,8 @@ extern "C" {
     void NewTerrPlatformsOff(void);
 }
 
-extern FadeSystem FadeSys;
-extern i32 BonusArea;
-extern i32 TimingBarSet;
 extern u8 CharClipToBlobShadows;
 
-f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 void SetAreaPickupGravity(i32 area, i32 level);
 
@@ -118,11 +114,9 @@ namespace {
 
 extern char *LEGOASCII_UP, *LEGOASCII_DOWN;
 extern i32 LEGOOBJ_ICON_FRAME_NEUTRAL;
-extern f32 ICONSIZE;
 static void GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
 
 extern char *LEGOASCII_BIGARROW;
-void MiniKitDetector(nuvec_s *position);
 
 static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count);
 
@@ -234,12 +228,10 @@ void GizmoPickups_PostLoad(void *, void *);
 // with the world.h layout but its level/area guard bytes will differ until that
 // WORLDINFO drift is corrected.
 
-extern i32 VehicleArea;
 
 // --- World-module helpers (kept with the WorldInfo API) ---
 
 extern WORLDINFO WorldInfo[2];
-extern WORLDINFO * WORLD;
 
 // ==== src/legoapi/items/base/collection.cpp: declarations ====
 #include "legoapi/gizmos/object/gizobstacles.h"
@@ -303,13 +295,11 @@ static __attribute__((noinline, noclone, hot, section(".text"))) void DrawHitPoi
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
 
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
-extern f32 AreaPickupGravity;
 
 // Forward declarations for local (static) part/gizmo helper stubs.
 
@@ -319,7 +309,6 @@ extern f32 AreaPickupGravity;
 
 extern i32 HIGHGAMEOBJECT, VehicleArea;
 extern WORLDINFO_s *WORLD;
-extern GAMECAMERA_s *GameCam;
 
 static __used__ void PartImpact_Coin(PART_s *part);
 
@@ -346,7 +335,6 @@ static __used__ void PartMove_VehicleHeart(PART_s *part, f32);
 static __used__ void PartMove_VehiclePickup(PART_s *part, f32);
 
 WORLDINFO_s *WorldInfo_CurrentlyActive();
-extern f32 FRAMETIME;
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -368,7 +356,6 @@ extern f32 FRAMETIME;
 
 #include <stddef.h>
 
-extern NUVEC ShadNorm;
 // Runtime-selected groups appended after the fixed terrain allocation.
 #include "legoapi/render/core/terrain_stubs_types.h"
 

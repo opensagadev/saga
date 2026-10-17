@@ -25,7 +25,6 @@
 struct AIROW_s;
 struct nunativegscene_s;
 
-extern void FinishWeirdoNames(i32);
 extern "C" void NuSound3StopRumble(void);
 extern "C" i32 NewMode;
 extern "C" i32 Paused;

@@ -46,11 +46,8 @@ u32 g_cachedUniformMask[4];
 u32 g_textureSemanticMask[4];
 i32 g_shaderBufferCriticalSection = -1;
 
-bool LookupHash(u32 key, u32 *value, HashRedirect *redirects, u32 count);
 
-bool LoadShaderSource(char **source, i32 *size, u32 key, bool pixel_stage);
 
-bool LookupPreloadedShaderObject(u32 key, u32 **shader, LoadedUniqueShaderRecord *records, u32 count);
 
 // ==== functions in original address order ====
 

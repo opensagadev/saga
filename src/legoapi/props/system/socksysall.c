@@ -186,7 +186,6 @@ static void AdjustMinMaxBox(NUVEC *pnt, NUVEC *min, NUVEC *max);
 
 extern "C" {
 
-void SockSysFindInScene(SOCKSYS *sock_sys, NUGSCN *gscn);
 
 }
 
@@ -248,22 +247,13 @@ static f32 BestSockPosition(SOCKSYS *sock_sys, NUVEC *point, SOCKPOSITION *resul
 
 extern "C" {
 
-void ComplexSockPosition(SOCKSYS *sock_sys, NUVEC *position, i32 prior_sock, i32 prior_segment,
-                             SOCKPOSITION *result);
 
 f32 EnforceSockYLimits(f32 y, SOCKPOSITION *position, SOCKSYS *sock_sys);
 
-void SetSockBit(SOCK *sock, i32 index);
 
-i32 SockBitSet(SOCK *sock, i32 index);
 
 i32 SockSegmentsAhead(SOCK *sock, i32 segment, i32 *from_segment, i32 *to_segment);
 
-i32 SockSysCamera(SOCKSYS *sock_sys, NUVEC *fallback_camera_position, i32 socket_changed,
-                      NUVEC *player_camera_positions, NUVEC *player_positions, i32 player_count,
-                      SOCKPOSITION *camera_socket_position, NUVEC *camera_position, NUVEC *camera_target,
-                      f32 *overlap_blend, f32 *position_seek, f32 *angle_seek, f32 *camera_shake,
-                      f32 *separation_scale);
 
     struct SOCKPAR_CONTEXT {
         u32 reserved[2];
@@ -271,7 +261,6 @@ i32 SockSysCamera(SOCKSYS *sock_sys, NUVEC *fallback_camera_position, i32 socket
         SOCK *sock;
     };
 
-void SockSysPointAlongSpline(NUVEC *result, NUGSPLINE *spline, i32 segment, i32 next_segment, f32 ratio);
 
 } // extern "C"
 

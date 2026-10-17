@@ -4,7 +4,6 @@
 #include "gameapi/gui/apimenu.h"
 #include "legoapi/characters/core/players.h"
 
-extern i32 GAMEDEMO;
 extern "C" i32 NewMode;
 
 void HostLoadPermImmediately(void (*load_perm)()) {

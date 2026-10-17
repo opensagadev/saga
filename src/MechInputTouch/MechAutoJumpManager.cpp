@@ -96,13 +96,8 @@ namespace {
 
 // IPA-SRA hands this clone the address of system->path_sys rather than the system.
 
-bool AISysNodeCanReachThisJumpConnection(GameObject_s &, AIPATH_s &path, unsigned char node_index,
-                                         AIPATHCNX_s &jump_connection, i32 jump_direction);
 
-bool AISysCharacterCanReachThisJumpConnection(GameObject_s &object, AIPATH_s &path, AIPATHCNX_s &jump_connection,
-                                              i32 jump_direction);
 
-u32 DoSomeChecks(GameObject_s &object, AIPATH_s &path, AIPATHCNX_s &connection, i32 direction);
 
 // ---- begin src/gameapi/ai/aisys/aisys.cpp ----
 
@@ -216,9 +211,7 @@ DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size
 
 #include "legoapi/ai/core/aisysall_types.h"
 
-void RegisterAIScriptActions(AIACTIONDEF *action_defs);
 
-void RegisterAIScriptConditions(AICONDITIONDEF *cond_defs);
 
 // ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
 #include "editor/aieditor_state.h"
@@ -247,7 +240,6 @@ extern "C" {
 
 extern "C" {
 
-extern AIEDITOR_RENDER_STATE * aieditor;
 
 } // extern "C"
 
@@ -471,7 +463,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
 
-i32 RotDiff(u16, u16);
 
 // ==== src/gameapi/ai/aisys/aistate.cpp: all remaining content ====
 
@@ -504,7 +495,6 @@ namespace {
 
 #include <stdlib.h>
 
-i32 qrand();
 
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
@@ -627,7 +617,6 @@ DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 extern f32 SeekLinearF(f32, f32, f32);
 
 // ==== src/legoapi/actions/character/starwars.cpp: all remaining content ====

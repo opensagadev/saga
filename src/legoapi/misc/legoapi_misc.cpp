@@ -25,18 +25,13 @@
 struct AIROW_s;
 struct nunativegscene_s;
 
-extern void *CutStopInfo;
 extern "C" {
-    extern i32 Paused;
-    extern i32 NewMode;
     extern i32 CutSceneWaiting;
     extern i32 editor_active;
     extern i32 (*GamePads_IgnoreInputFn)(void);
-    extern GAMEPAD_s GamePad[64];
     extern FadeSystem FadeSys;
 }
 
-void NewRumbleAllPlayers(f32, f32, i32, i32);
 
 void ConstantRumble(GameObject_s *object, float strength, float phase);
 
@@ -54,6 +49,4 @@ void CatI64ToX(char *output, i64 value) {
     *I64ToX(output, value) = '\0';
 }
 
-void DieRumble(GameObject_s *object);
 
-i32 charToInt(char const *text);

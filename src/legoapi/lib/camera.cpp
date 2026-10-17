@@ -37,7 +37,6 @@
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
 
-void Minicam_InitSystem(void);
 void GameCam_ResetLookRot(GAMECAMERA_s *camera);
 
 #include "legoapi/characters/motion/camera_types.h"
@@ -118,7 +117,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/numath.h"
 
-extern i32 VehicleArea;
 
 // Camera zoom state
 
@@ -195,7 +193,6 @@ extern i32 VehicleArea;
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 extern f32 SeekLinearF(f32, f32, f32);
 
 // ==== functions in original address order ====
@@ -461,7 +458,6 @@ namespace {
 } // namespace
 
 // Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
-extern TERRSET *CurTerr;
 
 namespace {
 

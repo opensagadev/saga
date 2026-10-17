@@ -86,16 +86,12 @@
 #include <string.h>
 
 i32 lightning_type;
-extern i32 VehicleArea;
 
 extern "C" {
-    extern NUVEC plr_lastpos;
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
 
-void InitSurfaceInfo(GameObject_s *object);
-i32 SetObjOnSurface(GameObject_s *object, i32 mode);
 
 #include "legoapi/items/objects/gameobjects_types.h"
 
@@ -195,7 +191,6 @@ void BaseThing::Display(ThingRenderData *) {
 void BaseThing::Effects(ThingRenderData *) {
 }
 
-i32 NoLayerKill(GameObject_s *object);
 
 void DestroySnakeBody(GameObject_s *);
 i32 speeder_hitpoints_lost;
@@ -236,16 +231,10 @@ struct nuvec_s;
 struct WORLDINFO_s;
 
 extern "C" {
-    extern i16 id_SPEEDERBIKE;
-    extern i16 id_SPEEDERBIKESNOW;
-    extern i16 id_STAP;
-    extern i16 id_STAP2;
     extern i16 id_TROOPERCANNON;
     extern i16 id_CANNON;
     extern i16 id_MOSCANNON;
-    extern i16 id_ATST;
     extern i16 id_BASKETCANNON;
-    extern i16 id_BIGGUN;
 }
 
 i32 addcreature_override_id_check;
@@ -382,7 +371,6 @@ struct VuVec;
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
 extern "C" {
-    extern i16 id_ATST;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -397,7 +385,6 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== functions in original address order ====
 
@@ -409,8 +396,6 @@ extern i32 qrand(void);
 
 extern "C" NUVEC plr_lastpos;
 
-extern void InitSurfaceInfo(GameObject_s *obj);
-extern i32 SetObjOnSurface(GameObject_s *obj, i32 mode);
 
 // --- Helpers moved from world.cpp ---
 
@@ -426,8 +411,6 @@ namespace {
 
 DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 
-extern i32 (*LastSafePosExtraFn)(GameObject_s *);
-extern void (*GameObjectDimensionsExtraFn)(GameObject_s *);
 
 // ==== src/legoapi/characters/core/character.cpp: declarations ====
 
@@ -437,12 +420,6 @@ extern void (*GameObjectDimensionsExtraFn)(GameObject_s *);
 struct EDCREATURE_s;
 
 extern "C" {
-extern i16 id_ATST;
-extern i16 id_TRAININGREMOTE;
-extern i16 id_SPEEDERBIKE;
-extern i16 id_BIGGUN;
-extern i16 id_SPEEDERBIKESNOW;
-extern i16 id_STAP2;
 
 }
 
@@ -465,7 +442,6 @@ extern i16 id_STAP2;
 #define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone))
 #endif
 
-extern CHARCONFIG_s charconfig;
 
 // Retail only keeps the clone with strip_comments fixed to 1 (regparm text, filename).
 #if defined(__i386__)
@@ -499,7 +475,6 @@ extern CHARCONFIG_s charconfig;
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    i32 NuFileExists(char *);
 
 }
 
@@ -510,8 +485,6 @@ struct AISYS_s;
 
 #include "legoapi/characters/core/characters_types.h"
 
-void InitSurfaceInfo(GameObject_s *);
-i32 SetObjOnSurface(GameObject_s *, i32);
 
 // Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
@@ -581,7 +554,6 @@ extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
     } while (0)
 
 extern "C" {
-    extern i16 id_ATST;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -607,7 +579,6 @@ extern "C" {
 #include "legoapi/items/collect/spacelevel.h"
 #include "nu2api/nucore/NuInputDevice.h"
 
-extern GAMECAMERA_s *GameCam;
 extern WORLDINFO_s *WORLD;
 
 // Original bss @0x127a500: 64 pads x 0x60 bytes.
@@ -617,7 +588,6 @@ extern WORLDINFO_s *WORLD;
 // these before accepting the new input; GamePad_Rotate then reports a stable
 // angular velocity only when both consecutive turns agree.
 
-f32 GamePad_Rotate(GameObject_s *object);
 
 extern "C" f32 NuFsqrt(f32);
 
@@ -627,12 +597,10 @@ extern "C" f32 NuFsqrt(f32);
 
 #include "gameapi/edtools/gameapi_edtools_types.h"
 
-extern u8 FS_Active;
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
-void RenderFileSel3(i32 draw_title);
 
 // ==== src/legoapi/menus/core/text.cpp: declarations ====
 #include "nu2api/nu3d/nushader_plain.h"
@@ -648,7 +616,6 @@ void RenderFileSel3(i32 draw_title);
 #include "gameapi/edtools/edcam.h"
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
@@ -677,12 +644,10 @@ extern "C" i32 NuFileExists(char *name);
 
 #include <float.h>
 
-extern ADDPART_s Default_ADDPART;
 
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
@@ -693,20 +658,15 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern GameObject_s *Obj;
 extern i32 HIGHGAMEOBJECT, VehicleArea;
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
     // The editor loader clears these page IDs with aligned vector stores.
 
 } // extern "C"
 
-extern f32 FRAMETIME;
-void PartStop_Flickerer(PART_s *);
-i32 PartDraw_Flickerer(PART_s *);
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -719,11 +679,8 @@ i32 PartDraw_Flickerer(PART_s *);
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-void PartImpact_Brick(PART_s *part);
 
-void PartStop_Flickerer(PART_s *part);
 
-i32 PartDraw_Flickerer(PART_s *part);
 
 // ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
 #include "gameapi/edtools/edanim_internal.h"
@@ -932,9 +889,7 @@ extern "C" {
 
     // Shared editor font; edmainInit receives and stores the font handle.
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -1023,7 +978,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #include <new>
 
 extern EdInputContext * Input;
-extern MemoryManager theMemoryManager;
 extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
@@ -1087,9 +1041,7 @@ inline void EdBitControl::operator delete(void *memory) {
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -1212,7 +1164,6 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -1289,8 +1240,6 @@ extern "C" {
     // Rendering / materials / effects (host has GL paths elsewhere)
     // ---------------------------------------------------------------------------
 
-i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
-void NuSpecialSetDrawMtx(void *special, NUMTX *mtx);
 
     // ---------------------------------------------------------------------------
     // Light / wind / particles / debris
@@ -1375,7 +1324,6 @@ struct nupad_s;
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEVALUES speedervals[4];
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
@@ -1424,7 +1372,6 @@ DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
     } while (0)
 
 extern "C" {
-    extern i16 id_ATST;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -1443,13 +1390,11 @@ extern "C" {
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -1467,7 +1412,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -1516,8 +1460,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
-void NuSpecialSetDrawMtx(void *special, NUMTX *mtx);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -1564,7 +1506,6 @@ i32 NuPortalWhichRoom(NUGSCN *scene, NUVEC *position);
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 }
 
@@ -1617,7 +1558,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
     } while (0)
 
 extern "C" {
-    extern i16 id_ATST;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -1637,7 +1577,6 @@ extern "C" {
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern NUVEC plr_lastpos;
 }
 
 extern "C" {
@@ -1653,7 +1592,6 @@ inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
 
-i32 NoLayerKill(GameObject_s *object);
 
 // ==== src/editor/edtoolsall.cpp: all remaining content ====
 #include "editor/edpath.h"
@@ -1690,7 +1628,6 @@ i32 NoLayerKill(GameObject_s *object);
 
 // Original action/context lookup data, with its arrays and pointers in one owner.
 
-extern CHARACTER_CONTEXT_INFO_s * CInfo;
 
 // Retail keeps several of this file's static helpers only as GCC clones; these
 // declarations pin the clone names and register conventions.
@@ -1742,7 +1679,6 @@ static void ClearLastSafeTakeoverSource(GameObject_s *object) {
         object->takeover_source = NULL;
 }
 
-extern i16 id_BIGGUN;
 
 DECOMP_ASSERT(sizeof(AWKWARDSHAPESPHERE_s) == 12, "Awkward shape sphere size");
 DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere radius offset");
@@ -1783,14 +1719,12 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 
 extern "C" {
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 } // extern "C"
 
@@ -1805,7 +1739,6 @@ PART_s *AddPart(ADDPART_s *params);
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern NUVEC plr_lastpos;
     extern i16 id_BASKETCANNON;
 }
 
@@ -1822,7 +1755,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 #include "legoapi/characters/motion/contexts.h"
 #include "legoapi/characters/core/playeritems.h"
 
-i32 qrand();
 
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
@@ -1839,7 +1771,6 @@ namespace {
 
 // ==== src/legoapi/audio/specialsfx.cpp: declarations ====
 
-i32 qrand(void);
 
 // ==== src/legoapi/gizmo/base/gizmo.cpp: declarations ====
 
@@ -2028,13 +1959,10 @@ void PodSprintA_Update(WORLDINFO_s *world);
 
 #include "legoapi/ai/core/gameai_types.h"
 
-extern void InitSurfaceInfo(GameObject_s *);
-extern i32 SetObjOnSurface(GameObject_s *, i32);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern NUVEC plr_lastpos;
     extern i16 id_BASKETCANNON;
 }
 
@@ -2043,8 +1971,6 @@ extern "C" {
 // ==== src/legoapi/ai/game/creature.cpp: declarations ====
 
 extern "C" {
-    extern NUVEC plr_lastpos;
-    void AISysGetCharacterPathPos(AISYS *system, APIOBJECT *object, AIPACKET *packet, i32 route, i32 surface_flags);
 }
 
 #include "legoapi/ai/game/creature_types.h"
@@ -2132,9 +2058,7 @@ DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size
 
 #include "legoapi/ai/core/aisysall_types.h"
 
-void RegisterAIScriptActions(AIACTIONDEF *action_defs);
 
-void RegisterAIScriptConditions(AICONDITIONDEF *cond_defs);
 
 // ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
 #include "editor/aieditor_state.h"
@@ -2160,9 +2084,7 @@ extern "C" {
 
 extern "C" {
 
-void AISysGetCharacterPathPos(AISYS *system, APIOBJECT *object, AIPACKET *packet, i32 checks, i32 ground);
 
-extern AIEDITOR_RENDER_STATE * aieditor;
 
 } // extern "C"
 
@@ -2317,7 +2239,6 @@ AddLocatorToSetAtEnd(EDLOCATORSET_s *set, EDLOCATOR_s *locator) __asm__(
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern NUVEC plr_lastpos;
     extern i16 id_BASKETCANNON;
 }
 
@@ -2393,7 +2314,6 @@ namespace {
     } while (0)
 
 extern "C" {
-    extern i16 id_ATST;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -2417,7 +2337,6 @@ struct AIPACKET_s;
 // ==== functions in original address order ====
 
 extern "C" {
-void AISysGetCharacterPathPos(AISYS *system, APIOBJECT *object, AIPACKET *packet, i32 checks, i32 ground);
 
 }
 
@@ -2430,7 +2349,6 @@ struct PART_s;
 
 // ==== src/legoapi/actions/character/snake.cpp: declarations ====
 
-void DestroySnakeBody(GameObject_s *object);
 
 #define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
     do {                                                                                                               \
@@ -2537,7 +2455,6 @@ void DestroySnakeBody(GameObject_s *object);
     } while (0)
 
 extern "C" {
-    extern i16 id_ATST;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -2596,7 +2513,6 @@ DECOMP_ASSERT(offsetof(WORLDINFO_s, blowup_target_candidates) == 0x50d4, "Blowup
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
 
 extern "C" {
-    i32 NuFileExists(char *);
 
 }
 
@@ -2626,7 +2542,6 @@ extern "C" void NuHtmlHeading1(const char *fmt, ...);
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern NUVEC plr_lastpos;
     extern i16 id_BASKETCANNON;
 }
 

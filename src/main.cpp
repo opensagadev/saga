@@ -64,9 +64,7 @@ extern "C" i32 NuMain(i32 argc, char **argv);
 
 extern "C" {
 
-f32 NuIOS_GetAspectRatio(void);
 
-i32 NuIOS_IsWidescreen(void);
 
 } // extern "C"
 

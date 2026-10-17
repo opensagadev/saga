@@ -29,7 +29,6 @@ enum GIZTORP_LEVEL_OBJECT {
 
 i32 giztorpmachine_gizmotype_id;
 
-i32 PartDraw_Torp(PART_s *part);
 
 static void GizTorp_SetVisibility(GIZMO *gizmo, i32 visible);
 
@@ -57,9 +56,7 @@ static void GizTorp_Draw(void *world_ptr, void *, float);
 
 static void GizTorp_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *);
 
-GIZTORPMACHINE *GizTorpMachine_FindNearest(WORLDINFO_s *world, NUVEC *position, f32 *distance_squared);
 
-ADDGIZMOTYPE *GizTorpMachine_RegisterGizmo(i32 type_id);
 
 
 // ==== functions in original address order ====

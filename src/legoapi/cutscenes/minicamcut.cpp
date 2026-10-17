@@ -16,17 +16,11 @@ MINICAM_s MiniCam = {};
 
 void Minicam_AddDeltas(float duration);
 
-void Minicam_AddCommand(i32 type, f32 duration, i32 argument, void *target, nuvec_s position);
 
-void Minicam_CalcCamPos();
 
-void Minicam_ClearDeltas();
 
-void Minicam_ResetForNewCut();
 
-void Minicam_ResetForNextCommand();
 
-void MiniCam_ChangeMode(i32 mode);
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
@@ -146,7 +140,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/numath.h"
 
-extern i32 VehicleArea;
 
 // Camera zoom state
 
@@ -223,7 +216,6 @@ extern i32 VehicleArea;
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 extern f32 SeekLinearF(f32, f32, f32);
 
 // ==== functions in original address order ====

@@ -80,7 +80,6 @@ extern f32 hackFlashTimer;
 extern GAMEANIMSET_s *hackFlashingGameAnimSet;
 extern nuhspecial_s *hackFlashingSpecial;
 
-extern i32 Paused;
 
 // ==== src/legoapi/menus/core/hud.cpp: all remaining content ====
 void RndrTexQuad(f32, f32, f32, f32, i32, numtl_s *, i32);
@@ -155,7 +154,6 @@ struct TouchHolder;
 struct nuhspecial_s;
 struct VuVec;
 
-extern char *ASCII_DOWN;
 
 // Camera zoom state
 
@@ -238,7 +236,6 @@ f32 SwipeDecalRenderer_MinWidth = 0.2f;
         }                                                                                                              \
     } while (false)
 
-extern i32 GetMenuID(void);
 extern i32 qrand(void);
 
 // ==== src/legoapi/characters/motion/move.cpp: declarations ====
@@ -291,7 +288,6 @@ extern i32 qrand(void);
 
 // Retail keeps only the IPA-SRA clone of this function.
 i32 PodLevel(AREADATA_s *);
-i32 GetMenuID(void);
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
@@ -376,12 +372,10 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 #include "nu2api/nu3d/nuportal.h"
 #include "nu2api/nu3d/android/nuptl_android.h"
 
-extern ADDPART_s Default_ADDPART;
 
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
@@ -392,22 +386,17 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern GameObject_s *Obj;
 extern i32 HIGHGAMEOBJECT, VehicleArea;
 extern WORLDINFO_s *WORLD;
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
     // The editor loader clears these page IDs with aligned vector stores.
 
 } // extern "C"
 
 WORLDINFO_s *WorldInfo_CurrentlyActive();
-extern f32 FRAMETIME;
-void PartStop_Flickerer(PART_s *);
-i32 PartDraw_Flickerer(PART_s *);
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -420,11 +409,8 @@ i32 PartDraw_Flickerer(PART_s *);
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-void PartImpact_Brick(PART_s *part);
 
-void PartStop_Flickerer(PART_s *part);
 
-i32 PartDraw_Flickerer(PART_s *part);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 #include "legoapi/items/objects/objectsall.h"
@@ -486,7 +472,6 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 #include "legoapi/actions/character/speederchase.h"
 #include "legoapi/misc/utilities.h"
 
-i32 qrand();
 
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
@@ -531,14 +516,12 @@ DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
-f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 
 // ==== src/legoapi/audio/specialsfx.cpp: declarations ====
 
-i32 qrand(void);
 
 // ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
 #include "legoapi/items/collect/spacelevel.h"
@@ -548,7 +531,6 @@ i32 qrand(void);
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEVALUES speedervals[4];
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
@@ -583,12 +565,7 @@ DECOMP_ASSERT(offsetof(GIZMOTYPES, types) == 8, "Gizmo type-table pointer offset
 // ==== src/legoapi/misc/legoapi_misc.cpp: declarations ====
 #include "legoapi/menus/screens/gamestructure.h"
 
-extern void *CutStopInfo;
 extern "C" {
-    extern i32 Paused;
-    extern i32 NewMode;
-    extern i32 CutSceneWaiting;
-    extern i32 editor_active;
 }
 
 // ==== src/legoapi/world/levels/episodeII.cpp: declarations ====
@@ -853,9 +830,7 @@ DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size
 
 #include "legoapi/ai/core/aisysall_types.h"
 
-void RegisterAIScriptActions(AIACTIONDEF *action_defs);
 
-void RegisterAIScriptConditions(AICONDITIONDEF *cond_defs);
 
 // ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
 #include "editor/aieditor_state.h"
@@ -882,7 +857,6 @@ extern "C" {
 
 extern "C" {
 
-extern AIEDITOR_RENDER_STATE * aieditor;
 
 } // extern "C"
 
@@ -1328,7 +1302,6 @@ DECOMP_ASSERT(offsetof(WORLDINFO_s, blowup_target_candidates) == 0x50d4, "Blowup
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    i32 NuFileExists(char *);
 
 }
 
@@ -1357,7 +1330,6 @@ extern "C" {
 #include "legoapi/gizmo/base/gizflow.h"
 
 // The reference defines these with dynamic initialization in this unit.
-extern MemoryManager theMemoryManager;
 #include "legoapi/misc/supportall_types.h"
 
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");

@@ -34,7 +34,6 @@ extern "C" i32 CutSceneWaiting;
 extern "C" i32 editor_active;
 extern "C" i32 NewMode;
 extern "C" i32 PANELOFF;
-extern i32 Paused;
 extern FadeSystem FadeSys;
 f32 TagButtonSize = ICONSIZE;
 f32 BorderWidth = 0.02f;
@@ -44,7 +43,6 @@ extern "C" {
     i32 procActive;
 }
 
-i32 GetMenuID();
 void PlayerButton_OnClick_Callback_NextButton(MechTouchUIElement &, TouchHolder &);
 void PlayerButton_OnHold_Callback(MechTouchUIElement &, TouchHolder &);
 void PlayerButton_OnLeave_Callback(MechTouchUIElement &, TouchHolder &);
@@ -52,7 +50,6 @@ void MechTouchUIPauseButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &
 void MechTouchUIPartySelector_OnRelease_Callback(MechTouchUIElement &, TouchHolder &);
 void MechTouchUITagButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 extern "C" i32 NuIOS_IsSmallScreen(void);
-extern i16 id_YODA;
 i32 TagCode(GameObject_s *, GameObject_s *, i32, i32, i32);
 void Tag_NewTransfer(GameObject_s *, GameObject_s *);
 
@@ -131,7 +128,6 @@ void MechTouchUIPartySelector_OnRelease_Callback(MechTouchUIElement &element, To
 #include "legoapi/render/core/terrain.h"
 #include <stdio.h>
 
-extern i32 MiniCutCam;
 
 // ==== functions in original address order ====
 
@@ -165,7 +161,6 @@ struct TouchHolder;
 
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
 
-void Hint_SetComplete(i32 hint_id);
 void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
 
 void PlayerButton_OnHold_Callback(MechTouchUIElement &element, TouchHolder &);
@@ -193,27 +188,21 @@ DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 extern "C" void BackupMenu(void);
 extern WORLDINFO_s *WORLD;
 extern "C" {
-    extern i32 Paused;
-    extern i32 NewMode;
     extern "C++" FadeSystem FadeSys;
     extern i32 CutSceneWaiting;
 }
 
 // Original bss @0x127a500: 64 pads x 0x60 bytes.
-extern GAMEPAD_s GamePad[64];
 // Original bss @0x127a4e0.
 
-extern u32 GAMEPAD_START;
 
 // Two frames of direction history for each local player.  MovePlayer shifts
 // these before accepting the new input; GamePad_Rotate then reports a stable
 // angular velocity only when both consecutive turns agree.
 
-f32 GamePad_Rotate(GameObject_s *object);
 
 extern "C" {
 
-bool TestForController(void);
 
 } // extern "C"
 
@@ -258,13 +247,10 @@ bool TestForController(void);
 #include "nu2api/numath/numath.h"
 #include "nu2api/numath/numtx.h"
 
-extern i32 VehicleArea;
 
 struct nuhspecial_s;
 struct VuVec;
 
-extern f32 ICONX;
-extern f32 ICONSIZE;
 f32 GetAspectRatio();
 
 // Camera zoom state
@@ -287,8 +273,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
 
-void DrawCharIcon(i32 character_id, float x, float y, float z, float scale, i32 frame_object_id, float character_alpha,
-                  float frame_alpha, i32 draw_character, nuhspecial_s *override_special);
 
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nupostparams.h"
@@ -333,13 +317,10 @@ void DrawCharIcon(i32 character_id, float x, float y, float z, float scale, i32 
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large);
 
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
-i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
-                      u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order, float alpha);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -353,8 +334,6 @@ i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, f
         }                                                                                                              \
     } while (false)
 
-extern i32 GetMenuID(void);
-extern i32 qrand(void);
 
 // ==== src/legoapi/misc/supportall.cpp: declarations ====
 
@@ -374,7 +353,6 @@ extern i32 qrand(void);
 #include "nu2api/numath/nurand.h"
 
 // The reference defines these with dynamic initialization in this unit.
-extern MemoryManager theMemoryManager;
 #include "legoapi/misc/supportall_types.h"
 
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
@@ -418,8 +396,6 @@ static inline void TexQuadSubmit3D(f32 x, f32 y, i32 colour, i32 u, i32 v) {
     ++g_NuPrim_VertexCount;
 }
 
-i32 RndrUnfilledCircle(f32 x, f32 y, f32 radius, f32 border_width, f32 aspect, i32 colour, f32 progress, f32 z,
-                       numtl_s *material);
 
 // Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
 // Transcribed from the original C-linkage symbols:
@@ -493,7 +469,6 @@ inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
 
-extern CUSTOMISER *CharacterCustomiser;
 
 // ==== src/legoapi/misc/memory.cpp: all remaining content ====
 

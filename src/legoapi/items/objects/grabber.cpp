@@ -30,7 +30,6 @@ static NUFPCOMJMP Grabber_ConfigKeywords[] = {
     {"scale", Grab_scale},       {"move_xy", Grab_move_xy}, {"type", Grab_type},
     {"invert_x", Grab_invert_x}, {"shadow", Grab_shadow},   {NULL, NULL}};
 
-void Grabber_Configure(WORLDINFO_s *world, char *config);
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_grabber.cpp: all remaining content ====
 #include <string.h>
@@ -43,7 +42,6 @@ void Grabber_Configure(WORLDINFO_s *world, char *config);
 extern "C++" float FRAMETIME;
 #include "nu2api/numath/nutrig.h"
 extern "C" {
-    extern i16 id_GRABMAGNET;
     struct nuvec_s;
     void PlaySfx(char *, nuvec_s *);
 }
@@ -59,7 +57,6 @@ extern "C" {
 
 NUVEC *Grabber_GetGrabPos(GRABBER_s *grabber, numtx_s *matrix);
 
-void Grabber_StoreProgress(WORLDINFO_s *world, LEVEL_PROGRESS_s *progress);
 
 // Static grabber victim-pos helper. Moved from gizmisc_stubs.cpp.
 
@@ -78,16 +75,11 @@ static void Grabber_Drop(GRABBER_s *grabber, NUVEC *previous_position);
 #include "legoapi/characters/motion/gameanim.h"
 extern "C" {
     extern i16 id_GRABCONTROL, id_GRABR2CONTROL, id_GRABMACHINE;
-    void NewTerrPlatformsOff();
     void PlaySfxAndSetPitch(char *, NUVEC *, f32);
-    f32 AnimListFrame(CHARACTERMODEL_s *, i32, i32);
     AIANTINODE_s *AIAntinodeCreateSingleFrame(NUVEC *, f32);
 }
 extern WORLDINFO_s *WORLD;
 extern LEVELDATA *DEATHSTARESCAPEB_LDATA, *JABBASPALACEB_LDATA, *CLOUDCITYTRAPA_LDATA;
-extern NUVEC ShadNorm;
-extern GameObject_s *Obj;
-extern i32 HIGHGAMEOBJECT;
 GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
 GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
                                     i32 (*)(GameObject_s *), bool);
@@ -100,7 +92,6 @@ i32 qrand();
 void ConstantRumble(GameObject_s *, f32, f32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 void Hint_SetComplete(i32);
-i32 GameAnimSet_IsAnimationReset(GAMEANIMSET_s *);
 GIZMOBLOWUP_s *FindNearestGizmoBlowUp(WORLDINFO_s *, NUVEC *, f32);
 static i32 IsGrabbable(GameObject_s *object);
 
@@ -108,8 +99,6 @@ static i32 IsGrabbable(GameObject_s *object);
 extern i32 obstacle_gizmotype_id;
 
 #include "legoapi/render/fx.h"
-extern GAMECAMERA_s *GameCam;
-void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 void PartKill_Grabber(PART_s *part, i32);
@@ -118,8 +107,6 @@ void PartKill_Grabber(PART_s *part, i32);
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nu3d/nurndr.h"
 extern i32 CHARSHADOWS_ON, Paused;
-extern u8 Reflections_On;
-extern LEVELDATA *BLOCKADERUNNERC_LDATA;
 extern MAKELAYERLISTFN MakeLayerList;
 void EnableShadowMapRendering(i32);
 void ResetShadowMapRendering();

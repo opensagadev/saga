@@ -36,10 +36,6 @@
 
 #include <stdio.h>
 
-extern i32 EdType_String;
-extern i32 EdType_Float;
-extern i32 EdType_VuMtx;
-extern i32 EdType_VuVec;
 void EdDrawBegin(i32);
 void EdDrawEnd();
 void EdDrawLineSegment(VuVec const &, VuVec const &, i32);
@@ -90,12 +86,9 @@ DECOMP_ASSERT(offsetof(EdClass, interface) == 0x14, "EdClass interface offset");
 DECOMP_ASSERT(sizeof(EdMember) == 0x08, "EdMember size");
 DECOMP_ASSERT(offsetof(EdMember, reference) == 0x04, "EdMember reference offset");
 
-extern EdRegistry theRegistry;
-extern LevelEditor theLevelEditor;
 ClassEditor theClassEditor;
 CursorTool theCursorTool;
 static i32 class_editor_create_pending = -1;
-extern MemoryManager theMemoryManager;
 
 i32 BaseEditor::blockDepth;
 i32 BaseEditor::blockStart[8];
@@ -231,10 +224,7 @@ void SerialiseNuMtx(EdStream &, void *, i32);
 
 f32 EdManipulator::Scale = 2.0f;
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
-extern SplineHelper theSplineHelper;
-extern KnotHelper theKnotHelper;
 i32 pad_disabled;
-extern EdSystem theEdSystem;
 eduimenu_s *edLevelPinnedMenu;
 
 void eduiSetPinnedMenu(eduimenu_s *menu);
@@ -252,9 +242,7 @@ void EdDrawBegin(i32 material);
 
 void EdDrawPolyTri(VuVec const &a, VuVec const &b, VuVec const &c, i32 colour);
 
-void EdDrawLineCube(VuMtx const &transform, float size, i32 colour);
 
-void EdDrawLineCross(VuVec const &position, float size, i32 colour);
 
 void EdDrawPolyArrow(VuVec const &start, VuVec const &end, i32 sides, i32 colour, float radius, float limit,
                      float radius_factor, float radius_offset);
@@ -288,7 +276,6 @@ void EdDrawLineCircleZ(VuVec const &centre, float radius, i32 colour, i32 segmen
 
 void EdDrawLineCircleY(VuVec const &centre, float radius, i32 colour, i32 segments);
 
-void EdDrawLineSegment(VuVec const &a, VuVec const &b, i32 colour);
 
 void EdDrawPolyCylinder(VuMtx const &transform, float half_length, float radius, float end_radius, i32 sides,
                         i32 colour, i32 cap_start, i32 cap_end);
@@ -635,7 +622,6 @@ extern "C" {
 
     // GCC 4.7 emits these file-scope objects in reverse declaration order, so
     // each group below mirrors the original linked order in reverse.
-extern i32 eduiPropTextPos;
 
 }
 
@@ -643,72 +629,15 @@ extern "C" i32 NuKeyboard(i32 key);
 
 extern "C" {
 
-f32 edcamGetDist(void);
-void edcamGetPosAng(NUVEC *position, i32 *pitch, i32 *yaw);
-void edcamMove(nupad_s *pad);
-void edcamSet(void);
-void edcamSetDist(f32 distance);
-void edcamSetPos(NUVEC *position);
-NUCAMERA *edmainGetCamera(void);
-i32 edmainGetCursorEnabled(void);
     // Shared editor font; edmainInit receives and stores the font handle.
 
-void edmainInit(void *font, char *configuration_file);
 
 void eduiAddPropTextPickEnt(eduimenu_s *menu, eduiitem_s *source);
-void eduiFlushInteracts(void);
-eduimenu_s *eduiGetActiveMenu(void);
-eduimenu_s *eduiGetActiveMenuParent(void);
-f32 eduiGetAnalougePadValue(nupad_s *pad);
-i32 eduiGetCameraEnabled(void);
-void eduiGetCursorCoords(f32 *x, f32 *y);
-void eduiGetCursorDelta(f32 *x, f32 *y);
-eduiitem_s *eduiItemCheckCreate(usize data, const void *colours, i32 selected, i32 group, EdUiItemCallback callback,
-                                    char *text);
 eduiitem_s *eduiItemColourPickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text);
 void eduiItemColourPickSetRGB(edui_colour_pick_s *item, f32 red, f32 green, f32 blue);
-void eduiItemExpanderAddChild(edui_expander_s *item, eduiitem_s *child);
-eduiitem_s *eduiItemExpanderCreate(usize data, const void *colours, EdUiItemCallback callback, char *text);
-eduiitem_s *eduiItemFilterCreate(usize data, const void *colours, char *text, char *value);
-eduiitem_s *eduiItemPropCreate(usize data, const void *colours, EdUiItemCallback selected, EdUiItemCallback changed,
-                                   EdUiItemCallback button, i32 button_type, char *text, char *value);
-eduiitem_s *eduiItemPropCreateEx(usize data, const void *colours, EdUiItemCallback selected,
-                                     EdUiItemCallback changed, EdUiItemCallback button, i32 button_type, char *text,
-                                     char *value, i32 extra_data);
-i32 eduiItemPropSetText(edui_prop_s *item, char *text);
-eduiitem_s *eduiItemSelCreate(usize data, const void *colours, i32 selected, i32 group, EdUiItemCallback callback,
-                                  char *text);
-eduiitem_s *eduiItemSeparatorCreate(usize data, const void *colours);
-eduiitem_s *eduiItemSliderCreate(usize data, const void *colours, i32 group, EdUiItemCallback callback, f32 minimum,
-                                     f32 range, f32 value, char *text);
-eduiitem_s *eduiItemToggleCreate(usize data, const void *colours, i32 selected, i32 group,
-                                     EdUiItemCallback callback, char *text);
-extern eduiitem_s * edui_last_item;
-eduiitem_s *eduiMenuAddItem(eduimenu_s *menu, eduiitem_s *item);
-void eduiMenuAddItemFirst(eduimenu_s *menu, eduiitem_s *item);
-i32 eduiMenuAttach(eduimenu_s *menu, eduimenu_s *child);
-eduimenu_s *eduiMenuCreate(i32 x, i32 y, i32 width, i32 height, void *font, EdUiMenuCallback callback,
-                               char *title);
-void eduiMenuDestroy(eduimenu_s *menu);
-i32 eduiMenuDetach(eduimenu_s *menu);
-void eduiMenuFitOnScreen(eduimenu_s *menu, i32 padding);
-void eduiMenuFitWidth(eduimenu_s *menu, i32 padding);
-void eduiMenuHighlight(eduimenu_s *menu, eduiitem_s *item);
-i32 eduiMenuProcess(eduimenu_s *menu, f32 delta_time, nupad_s *pad);
-void eduiMenuRemoveItem(eduimenu_s *menu, eduiitem_s *item);
-void eduiMenuRender(eduimenu_s *menu);
-void eduiMenuSetAttr(eduimenu_s *menu, const u32 *colours);
-void eduiMenuSortItemsByTxt(eduimenu_s *menu);
-void eduiProcessCursor(f32 delta_time, nupad_s *pad);
-void eduiRenderCursor(void);
-void eduiSetActiveMenu(eduimenu_s *menu);
 void eduiSetCameraEnabled(i32 enabled);
 void eduiSetCursorColour(u32 colour);
-void eduiSetCursorCoords(f32 x, f32 y);
-void eduiSetDefaultActiveMenu(eduimenu_s *menu);
 void eduiSetFontScale(f32 x, f32 y);
-void eduiSetUsingMenuFocus(i32 enabled);
-i32 eduiUsedAlgPad(nupad_s *pad);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -831,7 +760,6 @@ extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 #include "nu2api/nu3d/nutexanm.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 
-extern NUQFNT *system_qfont;
 
 #include "java/android.h"
 #include "java/java.h"
@@ -884,8 +812,6 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
-void NuCameraTransformScreenClip(NUVEC *screen, NUVEC *world, i32 count, NUMTX *matrix);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -958,16 +884,11 @@ extern "C" {
     // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
     // ---------------------------------------------------------------------------
 
-void NuQFntPopCoordinateSystem(void);
-void NuQFntPrintEx(NUQFNT *font, i32 x, i32 y, i32 alignment, const char *format, ...);
-void NuQFntPushCoordinateSystem(NUQFNT_CSMODE mode);
 
     // ---------------------------------------------------------------------------
     // Rendering / materials / effects (host has GL paths elsewhere)
     // ---------------------------------------------------------------------------
 
-i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
-void NuSpecialSetDrawMtx(void *special, NUMTX *mtx);
 
     // ---------------------------------------------------------------------------
     // Light / wind / particles / debris
@@ -1051,7 +972,6 @@ union variptr_u;
 
 extern "C" {
 
-void eduicbMenuCloseAllexpanders(eduimenu_s *menu);
 
 }
 
@@ -1073,7 +993,6 @@ void eduicbMenuCloseAllexpanders(eduimenu_s *menu);
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEVALUES speedervals[4];
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
@@ -1101,15 +1020,12 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 #include "nu2api/nufile/nufilepak.h"
 
-void EdFileSwapEndianess16(void *data);
 
-void EdFileSwapEndianess32(void *data);
 
 // ==== src/legoapi/core/config/saveload.cpp: declarations ====
 
 #include "legoapi/cutscenes/cutscenes.h"
 
-extern u8 FS_Active;
 
 void SerialiseInt(EdStream &stream, void *data, i32);
 
@@ -1136,7 +1052,6 @@ void SerialiseColour3(EdStream &stream, void *data, i32);
 static __attribute__((noinline, noclone)) void RenderFileSel3Body(i32 draw_title)
     __asm__("_Z14RenderFileSel3i.part.38");
 
-void RenderFileSel3(i32 draw_title);
 
 void SerialiseNuHSpecial(EdStream &stream, void *data, i32);
 
@@ -1246,44 +1161,26 @@ extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== functions in original address order ====
 
 extern "C" {
 
-NUCAMERA *edmainGetCamera(void);
 
-i32 edmainGetCursorEnabled(void);
 
-eduiitem_s *eduiMenuAddItem(eduimenu_s *menu, eduiitem_s *item);
 
-void eduiMenuAddItemFirst(eduimenu_s *menu, eduiitem_s *item);
 
-void eduiMenuSortItemsByTxt(eduimenu_s *menu);
 
-void eduiMenuRemoveItem(eduimenu_s *menu, eduiitem_s *item);
 
-f32 eduiGetAnalougePadValue(nupad_s *pad);
 
-eduimenu_s *eduiMenuCreate(i32 x, i32 y, i32 width, i32 height, void *font, EdUiMenuCallback callback,
-                               char *title);
 
-void eduiMenuSetAttr(eduimenu_s *menu, const u32 *colours);
 
-void eduiMenuHighlight(eduimenu_s *menu, eduiitem_s *item);
 
 }
 
 extern "C" {
-eduiitem_s *eduiItemSelCreate(usize data, const void *colours, i32 selected, i32 group, EdUiItemCallback callback,
-                                  char *text);
 
-eduiitem_s *eduiItemCheckCreate(usize data, const void *colours, i32 selected, i32 group, EdUiItemCallback callback,
-                                    char *text);
 
-eduiitem_s *eduiItemToggleCreate(usize data, const void *colours, i32 selected, i32 group,
-                                     EdUiItemCallback callback, char *text);
 
 void eduiItemColourPickSetRGB(edui_colour_pick_s *item, f32 red, f32 green, f32 blue);
 
@@ -1292,79 +1189,45 @@ void eduiItemColourPickSetRGB(edui_colour_pick_s *item, f32 red, f32 green, f32 
 extern "C" {
 eduiitem_s *eduiItemColourPickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text);
 
-eduiitem_s *eduiItemSliderCreate(usize data, const void *colours, i32 group, EdUiItemCallback callback, f32 minimum,
-                                     f32 range, f32 value, char *text);
 
-i32 eduiItemPropSetText(edui_prop_s *item, char *text);
 
-i32 eduiGetCameraEnabled(void);
 
 void eduiSetCameraEnabled(i32 enabled);
 
-eduiitem_s *eduiItemPropCreateEx(usize data, const void *colours, EdUiItemCallback selected,
-                                     EdUiItemCallback changed, EdUiItemCallback button, i32 button_type, char *text,
-                                     char *value, i32 extra_data);
 
-eduiitem_s *eduiItemPropCreate(usize data, const void *colours, EdUiItemCallback selected, EdUiItemCallback changed,
-                                   EdUiItemCallback button, i32 button_type, char *text, char *value);
 
-eduiitem_s *eduiItemSeparatorCreate(usize data, const void *colours);
 
-void eduicbMenuCloseAllexpanders(eduimenu_s *menu);
 
-void eduiMenuFitWidth(eduimenu_s *menu, i32 padding);
 
-void eduiMenuDestroy(eduimenu_s *menu);
 
-void eduiItemExpanderAddChild(edui_expander_s *item, eduiitem_s *child);
 
-eduiitem_s *eduiItemExpanderCreate(usize data, const void *colours, EdUiItemCallback callback, char *text);
 
-eduiitem_s *eduiItemFilterCreate(usize data, const void *colours, char *text, char *value);
 
-void eduiSetUsingMenuFocus(i32 enabled);
 
-void eduiSetDefaultActiveMenu(eduimenu_s *menu);
 
-void eduiSetActiveMenu(eduimenu_s *menu);
 
-i32 eduiMenuAttach(eduimenu_s *menu, eduimenu_s *child);
 
 void eduiAddPropTextPickEnt(eduimenu_s *menu, eduiitem_s *source);
 
-eduimenu_s *eduiGetActiveMenu(void);
 
-void eduiMenuRender(eduimenu_s *menu);
 
-void eduiMenuFitOnScreen(eduimenu_s *menu, i32 padding);
 
-i32 eduiMenuDetach(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-eduimenu_s *eduiGetActiveMenuParent(void);
 
-void eduiFlushInteracts(void);
 
-i32 eduiMenuProcess(eduimenu_s *menu, f32 delta_time, nupad_s *pad);
 
-void eduiGetCursorCoords(f32 *x, f32 *y);
 
-void eduiSetCursorCoords(f32 x, f32 y);
 
-void eduiGetCursorDelta(f32 *x, f32 *y);
 
-i32 eduiUsedAlgPad(nupad_s *pad);
 
-void eduiProcessCursor(f32 delta_time, nupad_s *pad);
 
 void eduiSetCursorColour(u32 colour);
 
-void eduiRenderCursor(void);
 
-void edmainInit(void *font, char *configuration_file);
 
 void eduiSetFontScale(f32 x, f32 y);
 
@@ -1372,20 +1235,14 @@ void eduiSetFontScale(f32 x, f32 y);
 
 extern "C" {
 
-void edcamMove(nupad_s *pad);
 
-void edcamSetPos(NUVEC *position);
 
-void edcamGetPosAng(NUVEC *position, i32 *pitch, i32 *yaw);
 
 }
 
 extern "C" {
-void edcamSetDist(f32 distance);
 
-f32 edcamGetDist(void);
 
-void edcamSet(void);
 
 }
 
@@ -1394,7 +1251,6 @@ void edcamSet(void);
 #include <new>
 
 i16 Placeable::CurrentLedFile;
-extern PlaceableHelper thePlaceableHelper;
 static EdStringControl *edObjectNameControl;
 
 template <typename Ref>
@@ -1580,7 +1436,6 @@ struct EDCREATURE_s;
 #define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone))
 #endif
 
-extern CHARCONFIG_s charconfig;
 
 // Retail only keeps the clone with strip_comments fixed to 1 (regparm text, filename).
 #if defined(__i386__)
@@ -1612,7 +1467,6 @@ extern CHARCONFIG_s charconfig;
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    i32 NuFileExists(char *);
 
 }
 
@@ -1709,7 +1563,6 @@ extern WORLDINFO_s *WORLD;
 // these before accepting the new input; GamePad_Rotate then reports a stable
 // angular velocity only when both consecutive turns agree.
 
-f32 GamePad_Rotate(GameObject_s *object);
 
 extern "C" f32 NuFsqrt(f32);
 
@@ -1728,7 +1581,6 @@ extern "C" f32 NuFsqrt(f32);
 #include "gameapi/edtools/edpart_internal.h"
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
@@ -1751,12 +1603,10 @@ extern "C" i32 NuFileExists(char *name);
 #include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/gizmo/object/giztorpedo.h"
 
-extern ADDPART_s Default_ADDPART;
 
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
@@ -1767,19 +1617,14 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern GameObject_s *Obj;
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
     // The editor loader clears these page IDs with aligned vector stores.
 
 } // extern "C"
 
-extern f32 FRAMETIME;
-void PartStop_Flickerer(PART_s *);
-i32 PartDraw_Flickerer(PART_s *);
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -1792,11 +1637,8 @@ i32 PartDraw_Flickerer(PART_s *);
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-void PartImpact_Brick(PART_s *part);
 
-void PartStop_Flickerer(PART_s *part);
 
-i32 PartDraw_Flickerer(PART_s *part);
 
 // ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
 
@@ -1808,9 +1650,7 @@ i32 PartDraw_Flickerer(PART_s *part);
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -1892,9 +1732,7 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -1978,7 +1816,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2027,8 +1864,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
-void NuSpecialSetDrawMtx(void *special, NUMTX *mtx);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2131,13 +1966,11 @@ void NuSpecialSetDrawMtx(void *special, NUMTX *mtx);
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -2155,7 +1988,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2204,8 +2036,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
-void NuSpecialSetDrawMtx(void *special, NUMTX *mtx);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2250,7 +2080,6 @@ void NuSpecialSetDrawMtx(void *special, NUMTX *mtx);
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 }
 
@@ -2440,14 +2269,12 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 
 extern "C" {
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 } // extern "C"
 
@@ -2474,7 +2301,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 #include "legoapi/characters/motion/contexts.h"
 #include "legoapi/characters/core/playeritems.h"
 
-i32 qrand();
 
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
@@ -2491,7 +2317,6 @@ namespace {
 
 // ==== src/legoapi/audio/specialsfx.cpp: declarations ====
 
-i32 qrand(void);
 
 // ==== src/legoapi/gizmo/base/gizmo.cpp: declarations ====
 
@@ -2769,9 +2594,7 @@ DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size
 
 #include "legoapi/ai/core/aisysall_types.h"
 
-void RegisterAIScriptActions(AIACTIONDEF *action_defs);
 
-void RegisterAIScriptConditions(AICONDITIONDEF *cond_defs);
 
 // ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
 #include "editor/aieditor_state.h"
@@ -2797,7 +2620,6 @@ extern "C" {
 
 extern "C" {
 
-extern AIEDITOR_RENDER_STATE * aieditor;
 
 } // extern "C"
 
@@ -3212,7 +3034,6 @@ DECOMP_ASSERT(offsetof(WORLDINFO_s, blowup_target_candidates) == 0x50d4, "Blowup
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
 
 extern "C" {
-    i32 NuFileExists(char *);
 
 }
 
@@ -3807,7 +3628,6 @@ namespace {
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
 
 extern "C" {
-    i32 NuFileExists(char *);
 
 }
 
@@ -3872,21 +3692,18 @@ extern "C" {
 // ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 
 extern "C" {
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 } // extern "C"
 
@@ -3908,9 +3725,7 @@ PART_s *AddPart(ADDPART_s *params);
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -3992,9 +3807,7 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -4078,7 +3891,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -4228,13 +4040,11 @@ extern "C" {
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -4252,7 +4062,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -4344,7 +4153,6 @@ extern "C" {
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 }
 
@@ -4434,14 +4242,12 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 extern "C" {
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 } // extern "C"
 
@@ -4536,7 +4342,6 @@ extern i32 last;
 
 extern "C" {
 
-extern AIEDITOR_RENDER_STATE * aieditor;
 
 } // extern "C"
 
@@ -4754,7 +4559,6 @@ extern u32 flagremaptab[32][2];
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
 
 extern "C" {
-    i32 NuFileExists(char *);
 
 }
 
@@ -4790,9 +4594,7 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -4876,7 +4678,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -5026,13 +4827,11 @@ extern "C" {
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -5096,12 +4895,8 @@ void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_c
 
 // ==== src/legoapi/misc/utilities.cpp: declarations ====
 
-f32 LineToPointDistance(VuVec &origin, VuVec &direction, VuVec &point, VuVec *closest);
 
-i32 LineToPlaneIntersecion(VuVec &origin, VuVec &direction, VuVec &plane, VuVec *intersection);
 
-i32 LineToSphereIntersection(VuVec &origin, VuVec &direction, VuVec &center, f32 radius, VuVec *far_intersection,
-                             VuVec *near_intersection);
 
 // ==== src/legoapi/render/fx/edsplines.cpp: declarations ====
 
@@ -5119,14 +4914,12 @@ i32 LineToSphereIntersection(VuVec &origin, VuVec &direction, VuVec &center, f32
 
 extern "C" {
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 } // extern "C"
 
@@ -5150,7 +4943,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/characters/core/players.cpp: declarations ====
 
-void Players_Init(void);
 
 // ---- Player start spawn entries ----
 
@@ -5223,7 +5015,6 @@ namespace {
 
 extern "C" {
 
-extern AIEDITOR_RENDER_STATE * aieditor;
 
 } // extern "C"
 
@@ -5437,8 +5228,6 @@ extern u32 flagremaptab[32][2];
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
 
 extern "C" {
-    i32 NuFileExists(char *);
-    i32 NuStrCpy(char *, const char *);
 
 }
 
@@ -5545,8 +5334,6 @@ struct numtx_s;
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
 
 extern "C" {
-    i32 NuFileExists(char *);
-    i32 NuStrCpy(char *, const char *);
 
 }
 
@@ -5611,27 +5398,23 @@ extern "C" {
 // ==== src/legoapi/menus/core/text.cpp: declarations ====
 
 extern "C" {
-    void NuMtxTranslate(NUMTX *mtx, NUVEC *vec);
 }
 
 // ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 
 extern "C" {
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 } // extern "C"
 
@@ -5653,9 +5436,7 @@ PART_s *AddPart(ADDPART_s *params);
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -5737,9 +5518,7 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -5823,7 +5602,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -5872,7 +5650,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -5975,13 +5752,11 @@ i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -5999,7 +5774,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -6048,7 +5822,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -6093,7 +5866,6 @@ i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 }
 
@@ -6183,14 +5955,12 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 extern "C" {
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 } // extern "C"
 
@@ -6283,7 +6053,6 @@ namespace {
 
 extern "C" {
 
-extern AIEDITOR_RENDER_STATE * aieditor;
 
 } // extern "C"
 
@@ -6497,8 +6266,6 @@ extern u32 flagremaptab[32][2];
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
 
 extern "C" {
-    i32 NuFileExists(char *);
-    i32 NuStrCpy(char *, const char *);
 
 }
 
@@ -6557,12 +6324,10 @@ extern "C" i32 NuSpecialExistsFn(void *special_ptr);
 // with the world.h layout but its level/area guard bytes will differ until that
 // WORLDINFO drift is corrected.
 
-extern GameObject_s * Player[8];
 
 // --- World-module helpers (kept with the WorldInfo API) ---
 
 extern WORLDINFO WorldInfo[2];
-extern WORLDINFO * WORLD;
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 

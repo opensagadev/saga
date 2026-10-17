@@ -78,23 +78,18 @@ static void *ZipUps_ReserveBufferSpace(void *world_ptr);
 
 static i32 ZipUps_Load(void *world_ptr, void *);
 
-ADDGIZMOTYPE *ZipUps_RegisterGizmo(i32 type_id);
 
 struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-i32 ObjLandReady(GameObject_s *);
 i32 SuperWeirdo(GameObject_s *);
-void SetHeadTarget(GameObject_s *, NUVEC *, i8, f32, f32, f32);
 void SetWeaponIn(GameObject_s *);
 void FastWeaponOut(GameObject_s *, i32);
 void Hint_SetComplete(i32);
-i32 GameAudio_GetPlrSfxBits(void *);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void PlayJumpSfx(GameObject_s *, i32);
-i32 RotDiff(u16, u16);
 
 static void ZipUp_GetStartPoint(GameObject_s *object, NUVEC *position);
 
@@ -183,7 +178,6 @@ static inline void SetRopeVertex(NURND_VERTEX3D *vertex, f32 x, f32 y, f32 z, f3
 void DrawRopeSingle(nuvec_s *start, nuvec_s *end, float amount, numtl_s *material, float time, float grow_time,
                     float spacing, float scale);
 
-void ZipUps_DrawLines();
 
 ZIPUP *ZipUp_FindNearest(WORLDINFO_s *world, nuvec_s *position, float radius, float *distance, i32 *endpoint,
                          GameObject_s *object, bool touch);
@@ -211,9 +205,7 @@ ZIPUP *ZipUp_FindNearest(WORLDINFO_s *world, nuvec_s *position, float radius, fl
 
 #include "legoapi/items/collect/detonator_types.h"
 
-void Detonators_Draw();
 
-void Detonators_Update();
 
 #define DETONATOR_CONSIDER_NEAREST(index, owner_test)                                                                  \
     if (Detonator[index].active != 0 && (owner_test)) {                                                                \
@@ -255,15 +247,10 @@ void Detonators_Update();
 #include "nu2api/numath/nutrig.h"
 
 EXPLOSION *AddExplosion(nuvec_s *, f32, f32, GameObject_s *, i32, i32);
-void NewRumbleAllPlayers(f32, f32, i32, i32);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, nuvec_s *);
-i32 qrand();
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
-void KillPart(PART_s *part, i32 reason);
-void NewBuzzFrames(nupad_s *pad, i32 frames, i32 channel);
 i32 SuperWeirdo(GameObject_s *object);
-i32 GameRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 mask);
 extern "C" f32 brickimpactwait;
 
 // ==== src/legoapi/menus/core/hint.cpp: declarations ====
@@ -293,26 +280,18 @@ extern "C" f32 brickimpactwait;
 
 // The hint icon transitions and the touch icon x position are dynamically
 // initialized in this unit's static constructor in the reference.
-extern HintVectorTransition hintIconPos;
-extern HintScalarTransition hintIconScale;
-extern HintScalarTransition hintYPop;
 
-f32 CurrentHintAlpha();
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
 
 // Original local callbacks referenced by Hints_LSW.
 extern AREADATA_s *PODRACE_ADATA, *PODSPRINT_ADATA, *BONUS_GUNSHIP_ADATA;
-extern FadeSystem FadeSys;
 
-f32 CurrentHintButtonScale();
 
 // Each control mode retains its own requested and interpolated hint row.
 
-void MenuUpdateHints(MENU_s *menu);
 
-void MenuDrawHints(MENU_s *menu);
 
 // ==== functions in original address order ====
 

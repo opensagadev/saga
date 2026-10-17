@@ -35,7 +35,6 @@ static NUFPCOMJMP Teleport_ConfigKeywords[] = {
     {"crawl", Tel_crawl},   {"flip_flap", Tel_flip_flap}, {"hackycam", Tel_Hacky_Cam}, {"obj", Tel_obj},
     {"flap1", Tel_flap},    {"flap2", Tel_flap},          {"name", Tel_name},          {NULL, NULL}};
 
-void Teleports_Configure(WORLDINFO_s *world, char *config);
 
 static i32 Teleport_ActivateRev(GIZMO *gizmo, i32 activate, i32 flags);
 
@@ -53,7 +52,6 @@ char *Teleport_GetOutputName(GIZMO *, i32);
 
 static i32 Teleport_GetNumOutputs(GIZMO *);
 
-ADDGIZMOTYPE *Teleport_RegisterGizmo(i32 type_id);
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_teleport.cpp: all remaining content ====
 #include "decomp.h"
@@ -76,7 +74,6 @@ ADDGIZMOTYPE *Teleport_RegisterGizmo(i32 type_id);
 
 static i32 FindTeleport_Direction;
 
-f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
 void GetSurfaceInfo(GameObject_s *object, i32 update_surface, f32 shadow_height);
 void PlayJumpSfx(GameObject_s *object, i32 type);
 void AlertSurroundingCreatures(GameObject_s *object, NUVEC *position);
@@ -124,19 +121,13 @@ static inline void Teleport_SetFacing(GameObject_s *object, NUVEC *start, NUVEC 
     }
 }
 
-void Teleports_Reset(WORLDINFO_s *world);
 
 TELEPORT_s *Teleport_Find(GameObject_s *object, float range_squared, VuVec *position);
 
-void Teleport_MoveCode(GameObject_s *object, i32 start_immediately);
 
-void Teleport_NetMoveCode(GameObject_s *object);
 
-i32 Teleport_UpdateHints(HINT_s *hint);
 
-void Teleports_UpdateAfterGameObjects(WORLDINFO_s *world);
 
-void Teleports_UpdateBeforeGameObjects(WORLDINFO_s *world);
 
 #include "legoapi/gizmo/base/TeleportObjectInterface.h"
 

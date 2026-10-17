@@ -76,7 +76,6 @@ static void *GizPanels_ReserveBufferSpace(void *world_ptr);
 
 static i32 GizPanel_Load(void *world_ptr, void *);
 
-ADDGIZMOTYPE *GizPanel_RegisterGizmo(i32 type_id);
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizpanel.cpp: all remaining content ====
 #include "decomp.h"
@@ -97,22 +96,18 @@ ADDGIZMOTYPE *GizPanel_RegisterGizmo(i32 type_id);
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numusic/sfx.h"
 
-extern NUVEC nusound_special_positions[5];
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 extern "C" void PlaySfx(char *, nuvec_s *);
 void FastWeaponIn(GameObject_s *, i32);
 void MakeBaddiesForgetAboutParty(i32);
 void SetProtocolDroidInterfaceAction(GameObject_s *);
 void GizPanel_PlaySfx(char *, nuvec_s *, i32);
-void NewBuzz(nupad_s *, f32, i32);
-void NewRumble(nupad_s *, f32, i32);
 static __used__ u8 storm_panel_active;
 static __used__ u8 droid_panel_active;
 static __used__ u8 bountyhunter_panel_active;
 
 extern "C" f32 GIZPANEL_PLAYERPOSLIFT;
 
-f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 i32 SuperWeirdo(GameObject_s *object);
 extern i16 id_DARTHVADER, id_GRANDMOFFTARKIN, id_IMPERIALOFFICER, id_IMPERIALSHUTTLEPILOT;

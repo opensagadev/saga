@@ -38,9 +38,7 @@ i32 POWERUP_TEXTID;
 f32 CHEAT_POWERUPTIME = 20.0f;
 i32 ONEPLAYERPOWERUPS = 1;
 
-void Cheats_SetFlags();
 
-u32 Cheats_CheckFlags(u32 flag);
 
 // ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
 
@@ -77,9 +75,6 @@ u32 Cheats_CheckFlags(u32 flag);
 // calling conventions; keep their shared animation-mode call sites intact.
 void SetPodMergeAnims(ANIMPACKET_s *packet, i32 index);
 
-extern i16 id_BODYGUARD;
-extern i16 id_IMPERIALGUARD;
-extern i16 id_GONKDROID;
 
 #include "legoapi/characters/motion/gameanim_types.h"
 
@@ -145,13 +140,10 @@ extern i16 id_GONKDROID;
 // with the world.h layout but its level/area guard bytes will differ until that
 // WORLDINFO drift is corrected.
 
-extern GameObject_s * Player[8];
-extern i32 VehicleArea;
 
 // --- World-module helpers (kept with the WorldInfo API) ---
 
 extern WORLDINFO WorldInfo[2];
-extern WORLDINFO * WORLD;
 
 // ==== src/legoapi/world/area.cpp: declarations ====
 #include "legoapi/render/core/screen.h"
@@ -236,7 +228,6 @@ extern i32 LevFlag[4]; // shared per-level 16-byte state scratch
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    i32 NuFileExists(char *);
 
 }
 
@@ -296,20 +287,7 @@ extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 #include "nu2api/nu3d/android/nutimebar_plain.h"
 
 extern "C" {
-    extern NUVEC plr_lastpos;
-    extern i16 id_GRIEVOUS;
-    extern i16 id_BODYGUARD;
-    extern i16 id_IMPERIALGUARD;
-    extern i16 id_JAWA;
-    extern i16 id_UGNAUGHT;
-    extern i16 id_ATAT;
-    extern i16 id_GONKDROID;
     extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-    void DebrisPosOrientationMtx(i32, NUMTX *);
-    void DebFreeInstantly(i32 *);
-    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
@@ -439,7 +417,6 @@ void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
 extern "C" {
-    extern i16 id_ATAT;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -454,7 +431,6 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== src/legoapi/menus/core/gamehint.cpp: declarations ====
 
@@ -482,7 +458,6 @@ struct nuvec_s;
 struct WORLDINFO_s;
 
 extern "C" {
-    extern i16 id_IMPERIALGUARD;
 }
 
 // ==== src/legoapi/characters/core/character.cpp: declarations ====
@@ -493,14 +468,6 @@ extern "C" {
 struct EDCREATURE_s;
 
 extern "C" {
-extern i16 id_IMPERIALGUARD;
-extern i16 id_BODYGUARD;
-extern i16 id_ATAT;
-extern i16 id_GRIEVOUS;
-extern i16 id_MILLENNIUMFALCON;
-extern i16 id_UGNAUGHT;
-extern i16 id_GONKDROID;
-extern i16 id_JAWA;
 
 }
 
@@ -557,20 +524,7 @@ extern "C" void DebFreeInstantly(i32 *handle);
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern NUVEC plr_lastpos;
-    extern i16 id_GRIEVOUS;
-    extern i16 id_BODYGUARD;
-    extern i16 id_IMPERIALGUARD;
-    extern i16 id_JAWA;
-    extern i16 id_UGNAUGHT;
-    extern i16 id_ATAT;
-    extern i16 id_GONKDROID;
     extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-    void DebrisPosOrientationMtx(i32, NUMTX *);
-    void DebFreeInstantly(i32 *);
-    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 }
 
 // ==== src/legoapi/gizmos/trigger/ai.cpp: all remaining content ====
@@ -578,7 +532,6 @@ extern "C" {
 // ==== src/legoapi/ai/game/creature.cpp: declarations ====
 
 extern "C" {
-    extern NUVEC plr_lastpos;
 }
 
 #include "legoapi/ai/game/creature_types.h"
@@ -672,9 +625,7 @@ DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size
 
 #include "legoapi/ai/core/aisysall_types.h"
 
-void RegisterAIScriptActions(AIACTIONDEF *action_defs);
 
-void RegisterAIScriptConditions(AICONDITIONDEF *cond_defs);
 
 // ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
 #include "editor/aieditor_state.h"
@@ -701,8 +652,6 @@ extern "C" {
 
 extern "C" {
 
-extern AIEDITOR_RENDER_STATE * aieditor;
-    void NuRndrLine3dDbg(f32, f32, f32, f32, f32, f32, i32);
 
 } // extern "C"
 
@@ -860,20 +809,7 @@ AddLocatorToSetAtEnd(EDLOCATORSET_s *set, EDLOCATOR_s *locator) __asm__(
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern NUVEC plr_lastpos;
-    extern i16 id_GRIEVOUS;
-    extern i16 id_BODYGUARD;
-    extern i16 id_IMPERIALGUARD;
-    extern i16 id_JAWA;
-    extern i16 id_UGNAUGHT;
-    extern i16 id_ATAT;
-    extern i16 id_GONKDROID;
     extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-    void DebrisPosOrientationMtx(i32, NUMTX *);
-    void DebFreeInstantly(i32 *);
-    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 }
 
 extern "C" {
@@ -960,7 +896,6 @@ DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot
     } while (0)
 
 extern "C" {
-    extern i16 id_ATAT;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -997,7 +932,6 @@ struct AIPACKET_s;
 #include "legoapi/render/core/terrain_stubs_types.h"
 
 extern "C" {
-    void DebFreeInstantly(i32 *);
 }
 
 // NuFileExists @nufile (nucore_plain.cpp).
@@ -1005,7 +939,6 @@ extern "C" i32 NuFileExists(char *name);
 
 extern "C" {
 
-void DebrisPosOrientationMtx(i32 handle, NUMTX *source);
 
 } // extern "C"
 
@@ -1022,7 +955,6 @@ void DebrisPosOrientationMtx(i32 handle, NUMTX *source);
 #include "gameapi/edtools/edpart_internal.h"
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
@@ -1030,28 +962,22 @@ extern "C" {
 // ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
 
 extern "C" {
-    void DebFreeInstantly(i32 *);
 }
 
 extern "C" {
 
-void DebrisPosOrientationMtx(i32 handle, NUMTX *source);
 
 } // extern "C"
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 #include "legoapi/gizmo/object/giztorpedo.h"
 
-extern ADDPART_s Default_ADDPART;
 
 extern "C" {
-    void DebFreeInstantly(i32 *handle);
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 }
 
 // Forward declarations for local (static) part/gizmo helper stubs.
@@ -1067,28 +993,17 @@ extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
 extern "C" {
 
-void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z);
 
-    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
-PART_s *AddPart(ADDPART_s *params);
 
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 
-void AddVariableShotDebrisEffect(i32 effect, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation);
 
-void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
-                                           i16 y_rotation, NUMTX *particle_orientation);
 
     // The editor loader clears these page IDs with aligned vector stores.
 
-    void DebFreeInstantly(i32 *);
 
 } // extern "C"
 
-extern f32 FRAMETIME;
-void PartStop_Flickerer(PART_s *);
-i32 PartDraw_Flickerer(PART_s *);
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -1101,11 +1016,8 @@ i32 PartDraw_Flickerer(PART_s *);
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-void PartImpact_Brick(PART_s *part);
 
-void PartStop_Flickerer(PART_s *part);
 
-i32 PartDraw_Flickerer(PART_s *part);
 
 // ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
 #include "gameapi/edtools/edanim_internal.h"
@@ -1255,7 +1167,6 @@ static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, edu
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void DebFreeInstantly(i32 *handle);
 }
 
 // The original particle editor's private callbacks and menu state share this TU.
@@ -1265,7 +1176,6 @@ extern "C" {
 #endif
 
 extern "C" {
-    void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z);
 }
 
 // Particle-list editor UI/menu callbacks.
@@ -1319,17 +1229,13 @@ static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int
 #include "gameapi/edtools/edtools_types.h"
 
 extern "C" {
-    void DebFreeInstantly(i32 *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
 }
 
 extern "C" {
 
     // Shared editor font; edmainInit receives and stores the font handle.
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -1416,18 +1322,14 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #include <new>
 
 extern EdInputContext * Input;
-extern MemoryManager theMemoryManager;
 extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
 extern "C" {
-    void DebFreeInstantly(i32 *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
 }
 
 extern "C" {
-    void DebFreeInstantly(i32 *);
 }
 
 inline EdMatrixControl::~EdMatrixControl() {
@@ -1490,13 +1392,11 @@ inline void EdBitControl::operator delete(void *memory) {
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void DebFreeInstantly(i32 *handle);
 }
 
 // ---- begin src/gameapi/edtools/edptlcallbacks.cpp ----
 
 extern "C" {
-    void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z);
 }
 
 // ---- end src/gameapi/edtools/edptlcallbacks.cpp ----
@@ -1504,15 +1404,11 @@ extern "C" {
 // ---- end src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void DebFreeInstantly(i32 *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -1586,7 +1482,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 #include "gameapi/gui/apimenu_internal.h"
 #include "legoapi/core/config/fileselect.h"
 
-extern char **TTab;
 
 // Retail clears these "fast repeat" latches but never sets them.
 
@@ -1641,7 +1536,6 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -1796,7 +1690,6 @@ extern "C" {
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEVALUES speedervals[4];
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
@@ -1822,12 +1715,10 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 // ==== src/legoapi/core/config/saveload.cpp: declarations ====
 
-extern u8 FS_Active;
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
-void RenderFileSel3(i32 draw_title);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
@@ -1872,7 +1763,6 @@ void RenderFileSel3(i32 draw_title);
     } while (0)
 
 extern "C" {
-    extern i16 id_ATAT;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -1891,13 +1781,11 @@ extern "C" {
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -1915,7 +1803,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2007,20 +1894,17 @@ extern "C" {
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 }
 
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
 
 extern "C" {
-    i32 NuFileExists(char *);
 
 }
 
 // ==== src/legoapi/core/startup/game.cpp: declarations ====
 
-extern void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
 
 namespace {
 
@@ -2074,7 +1958,6 @@ namespace {
     } while (0)
 
 extern "C" {
-    extern i16 id_ATAT;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -2094,7 +1977,6 @@ extern "C" {
 #include "legoapi/core/startup/main.h"
 #include "legoapi/menus/screens/movies.h"
 
-void GameAudio_PlaySfx(i32 sfx, nuvec_s *position, i32 volume, i32 flags);
 
 extern "C" void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment,
                             u8 red, u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box,
@@ -2110,7 +1992,6 @@ extern "C" void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_
 // these before accepting the new input; GamePad_Rotate then reports a stable
 // angular velocity only when both consecutive turns agree.
 
-f32 GamePad_Rotate(GameObject_s *object);
 
 void NewRumbleAllPlayers(float strength, float duration, i32 frames, i32);
 
@@ -2125,55 +2006,39 @@ void NewRumble(nupad_s *pad, float strength, i32);
 
 extern "C" {
 
-void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                     u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
 }
 
 // ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
 
 extern "C" {
-    void DebFreeInstantly(i32 *);
 }
 
 extern "C" {
 
-void DebrisPosOrientationMtx(i32 handle, NUMTX *source);
 
 } // extern "C"
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 
 extern "C" {
-    void DebFreeInstantly(i32 *handle);
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 }
 
 extern "C" {
 
-void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z);
 
-    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
-PART_s *AddPart(ADDPART_s *params);
 
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 
-void AddVariableShotDebrisEffect(i32 effect, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation);
 
-void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
-                                           i16 y_rotation, NUMTX *particle_orientation);
 
-    void DebFreeInstantly(i32 *);
 
 } // extern "C"
 
@@ -2196,13 +2061,11 @@ void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void DebFreeInstantly(i32 *handle);
 }
 
 // ---- begin src/gameapi/edtools/edptlcallbacks.cpp ----
 
 extern "C" {
-    void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z);
 }
 
 // ---- end src/gameapi/edtools/edptlcallbacks.cpp ----
@@ -2210,15 +2073,11 @@ extern "C" {
 // ---- end src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void DebFreeInstantly(i32 *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -2293,12 +2152,9 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 #include <new>
 
 extern "C" {
-    void DebFreeInstantly(i32 *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
 }
 
 extern "C" {
-    void DebFreeInstantly(i32 *);
 }
 
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
@@ -2310,13 +2166,11 @@ extern "C" {
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void DebFreeInstantly(i32 *handle);
 }
 
 // ---- begin src/gameapi/edtools/edptlcallbacks.cpp ----
 
 extern "C" {
-    void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z);
 }
 
 // ---- end src/gameapi/edtools/edptlcallbacks.cpp ----
@@ -2324,15 +2178,11 @@ extern "C" {
 // ---- end src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void DebFreeInstantly(i32 *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -2416,7 +2266,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2551,7 +2400,6 @@ extern "C" {
     } while (0)
 
 extern "C" {
-    extern i16 id_ATAT;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -2570,13 +2418,11 @@ extern "C" {
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -2594,7 +2440,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2686,15 +2531,12 @@ extern "C" {
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 }
 
 // ==== functions in original address order ====
 
 extern "C" {
-void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                     u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
 
 }
 
@@ -2720,7 +2562,6 @@ void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 a
 
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
 
-i32 qrand(void);
 
 extern "C" {
     void PlaySfxById(i32 sfx_id, nuvec_s *position);
@@ -2748,11 +2589,7 @@ extern "C" {
 
 extern "C" {
 
-    i32 NuStrICmp(const char *, const char *);
 
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-    void DebrisPosOrientationMtx(i32, NUMTX *);
-    void DebFreeInstantly(i32 *);
 }
 
 // Steers a cutscene character's eyes towards a look-at locator and blinks its eyelids.
@@ -2781,7 +2618,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2875,8 +2711,6 @@ extern "C" {
 
 extern "C" {
 
-extern AIEDITOR_RENDER_STATE * aieditor;
-    void NuRndrLine3dDbg(f32, f32, f32, f32, f32, f32, i32);
 
 } // extern "C"
 
@@ -2896,20 +2730,7 @@ extern "C" {
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern NUVEC plr_lastpos;
-    extern i16 id_GRIEVOUS;
-    extern i16 id_BODYGUARD;
-    extern i16 id_IMPERIALGUARD;
-    extern i16 id_JAWA;
-    extern i16 id_UGNAUGHT;
-    extern i16 id_ATAT;
-    extern i16 id_GONKDROID;
     extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-    void DebrisPosOrientationMtx(i32, NUMTX *);
-    void DebFreeInstantly(i32 *);
-    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 }
 
 extern "C" {
@@ -2925,20 +2746,7 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern NUVEC plr_lastpos;
-    extern i16 id_GRIEVOUS;
-    extern i16 id_BODYGUARD;
-    extern i16 id_IMPERIALGUARD;
-    extern i16 id_JAWA;
-    extern i16 id_UGNAUGHT;
-    extern i16 id_ATAT;
-    extern i16 id_GONKDROID;
     extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-    void DebrisPosOrientationMtx(i32, NUMTX *);
-    void DebFreeInstantly(i32 *);
-    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 }
 
 extern "C" {
@@ -2954,7 +2762,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 #include <new>
 
 extern "C" {
-    extern i16 id_IMPERIALGUARD;
 }
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
@@ -3005,7 +2812,6 @@ extern f32 testmovef;
     } while (0)
 
 extern "C" {
-    extern i16 id_ATAT;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -3026,7 +2832,6 @@ extern "C" {
 
 struct MechTouchUIElement;
 
-void Players_Init(void);
 
 // --- Helpers moved from world.cpp ---
 
@@ -3047,14 +2852,6 @@ DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 // ==== src/legoapi/characters/core/character.cpp: declarations ====
 
 extern "C" {
-extern i16 id_IMPERIALGUARD;
-extern i16 id_BODYGUARD;
-extern i16 id_ATAT;
-extern i16 id_GRIEVOUS;
-extern i16 id_MILLENNIUMFALCON;
-extern i16 id_UGNAUGHT;
-extern i16 id_GONKDROID;
-extern i16 id_JAWA;
 
 }
 
@@ -3071,7 +2868,6 @@ extern i16 id_JAWA;
 #define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone))
 #endif
 
-extern CHARCONFIG_s charconfig;
 
 // Retail only keeps the clone with strip_comments fixed to 1 (regparm text, filename).
 #if defined(__i386__)
@@ -3083,7 +2879,6 @@ extern CHARCONFIG_s charconfig;
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
 
 extern "C" {
-    i32 NuFileExists(char *);
 
 }
 
@@ -3130,7 +2925,6 @@ extern "C" {
     } while (0)
 
 extern "C" {
-    extern i16 id_ATAT;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -3153,55 +2947,39 @@ extern "C" {
 
 extern "C" {
 
-void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                     u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
 }
 
 // ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
 
 extern "C" {
-    void DebFreeInstantly(i32 *);
 }
 
 extern "C" {
 
-void DebrisPosOrientationMtx(i32 handle, NUMTX *source);
 
 } // extern "C"
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 
 extern "C" {
-    void DebFreeInstantly(i32 *handle);
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 }
 
 extern "C" {
 
-void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z);
 
-    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
-PART_s *AddPart(ADDPART_s *params);
 
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 
-void AddVariableShotDebrisEffect(i32 effect, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation);
 
-void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
-                                           i16 y_rotation, NUMTX *particle_orientation);
 
-    void DebFreeInstantly(i32 *);
 
 } // extern "C"
 
@@ -3224,13 +3002,11 @@ void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void DebFreeInstantly(i32 *handle);
 }
 
 // ---- begin src/gameapi/edtools/edptlcallbacks.cpp ----
 
 extern "C" {
-    void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z);
 }
 
 // ---- end src/gameapi/edtools/edptlcallbacks.cpp ----
@@ -3238,15 +3014,11 @@ extern "C" {
 // ---- end src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void DebFreeInstantly(i32 *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -3321,12 +3093,9 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 #include <new>
 
 extern "C" {
-    void DebFreeInstantly(i32 *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
 }
 
 extern "C" {
-    void DebFreeInstantly(i32 *);
 }
 
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
@@ -3338,13 +3107,11 @@ extern "C" {
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void DebFreeInstantly(i32 *handle);
 }
 
 // ---- begin src/gameapi/edtools/edptlcallbacks.cpp ----
 
 extern "C" {
-    void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z);
 }
 
 // ---- end src/gameapi/edtools/edptlcallbacks.cpp ----
@@ -3352,15 +3119,11 @@ extern "C" {
 // ---- end src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void DebFreeInstantly(i32 *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -3444,7 +3207,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -3579,7 +3341,6 @@ extern "C" {
     } while (0)
 
 extern "C" {
-    extern i16 id_ATAT;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -3598,13 +3359,11 @@ extern "C" {
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -3622,7 +3381,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -3714,15 +3472,12 @@ extern "C" {
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 }
 
 // ==== functions in original address order ====
 
 extern "C" {
-void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                     u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
 
 }
 
@@ -3773,7 +3528,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
     } while (0)
 
 extern "C" {
-    extern i16 id_ATAT;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -3793,20 +3547,7 @@ extern "C" {
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern NUVEC plr_lastpos;
-    extern i16 id_GRIEVOUS;
-    extern i16 id_BODYGUARD;
-    extern i16 id_IMPERIALGUARD;
-    extern i16 id_JAWA;
-    extern i16 id_UGNAUGHT;
-    extern i16 id_ATAT;
-    extern i16 id_GONKDROID;
     extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-    void DebrisPosOrientationMtx(i32, NUMTX *);
-    void DebFreeInstantly(i32 *);
-    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 }
 
 extern "C" {
@@ -3839,7 +3580,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // Original action/context lookup data, with its arrays and pointers in one owner.
 
 extern "C" void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
-void GameCam_HitRoll(void);
 // Retail keeps several of this file's static helpers only as GCC clones; these
 // declarations pin the clone names and register conventions.
 #if defined(__i386__)
@@ -3859,8 +3599,6 @@ extern "C" i16 id_ATAT, id_DODGEM;
 // into the socket seek rate.
 
 extern "C" {
-    extern i16 id_BODYGUARD;
-    extern i16 id_GRIEVOUS;
 }
 
 #include "legoapi/characters/motion/move_types.h"
@@ -3887,7 +3625,6 @@ extern "C" {
     extern i16 id_ATST, id_MINIATST, id_ATST_LOWRES, id_ATAT, id_MINIATAT, id_MINIATTE;
 }
 
-extern i16 id_ATAT;
 
 DECOMP_ASSERT(sizeof(AWKWARDSHAPESPHERE_s) == 12, "Awkward shape sphere size");
 DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere radius offset");
@@ -3922,30 +3659,19 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 
 extern "C" {
-    void DebFreeInstantly(i32 *handle);
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 }
 
 extern "C" {
 
-void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z);
 
-    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
-PART_s *AddPart(ADDPART_s *params);
 
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 
-void AddVariableShotDebrisEffect(i32 effect, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation);
 
-void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
-                                           i16 y_rotation, NUMTX *particle_orientation);
 
-    void DebFreeInstantly(i32 *);
 
 } // extern "C"
 
@@ -3960,20 +3686,7 @@ void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern NUVEC plr_lastpos;
-    extern i16 id_GRIEVOUS;
-    extern i16 id_BODYGUARD;
-    extern i16 id_IMPERIALGUARD;
-    extern i16 id_JAWA;
-    extern i16 id_UGNAUGHT;
-    extern i16 id_ATAT;
-    extern i16 id_GONKDROID;
     extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-    void DebrisPosOrientationMtx(i32, NUMTX *);
-    void DebFreeInstantly(i32 *);
-    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 }
 
 extern "C" {
@@ -4014,7 +3727,6 @@ DECOMP_ASSERT(offsetof(GIZMOTYPES, types) == 8, "Gizmo type-table pointer offset
 
 // ==== src/legoapi/misc/legoapi_misc.cpp: declarations ====
 
-extern void *CutStopInfo;
 
 // ==== src/legoapi/world/levels/episodeII.cpp: declarations ====
 
@@ -4182,20 +3894,7 @@ void PodSprintA_Update(WORLDINFO_s *world);
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern NUVEC plr_lastpos;
-    extern i16 id_GRIEVOUS;
-    extern i16 id_BODYGUARD;
-    extern i16 id_IMPERIALGUARD;
-    extern i16 id_JAWA;
-    extern i16 id_UGNAUGHT;
-    extern i16 id_ATAT;
-    extern i16 id_GONKDROID;
     extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-    void DebrisPosOrientationMtx(i32, NUMTX *);
-    void DebFreeInstantly(i32 *);
-    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 }
 
 // ==== src/legoapi/gizmos/trigger/ai.cpp: all remaining content ====
@@ -4203,7 +3902,6 @@ extern "C" {
 // ==== src/legoapi/ai/game/creature.cpp: declarations ====
 
 extern "C" {
-    extern NUVEC plr_lastpos;
 }
 
 // ==== src/gameapi/ai/aisys/aiscript.cpp: all remaining content ====
@@ -4212,8 +3910,6 @@ extern "C" {
 
 extern "C" {
 
-extern AIEDITOR_RENDER_STATE * aieditor;
-    void NuRndrLine3dDbg(f32, f32, f32, f32, f32, f32, i32);
 
 } // extern "C"
 
@@ -4239,20 +3935,7 @@ extern "C" {
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern NUVEC plr_lastpos;
-    extern i16 id_GRIEVOUS;
-    extern i16 id_BODYGUARD;
-    extern i16 id_IMPERIALGUARD;
-    extern i16 id_JAWA;
-    extern i16 id_UGNAUGHT;
-    extern i16 id_ATAT;
-    extern i16 id_GONKDROID;
     extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-    void DebrisPosOrientationMtx(i32, NUMTX *);
-    void DebFreeInstantly(i32 *);
-    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 }
 
 extern "C" {
@@ -4314,7 +3997,6 @@ namespace {
     } while (0)
 
 extern "C" {
-    extern i16 id_ATAT;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -4336,12 +4018,10 @@ extern "C" {
 // ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
 
 extern "C" {
-    void DebFreeInstantly(i32 *);
 }
 
 extern "C" {
 
-void DebrisPosOrientationMtx(i32 handle, NUMTX *source);
 
 } // extern "C"
 
@@ -4453,7 +4133,6 @@ void DebrisPosOrientationMtx(i32 handle, NUMTX *source);
     } while (0)
 
 extern "C" {
-    extern i16 id_ATAT;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -4512,7 +4191,6 @@ DECOMP_ASSERT(offsetof(WORLDINFO_s, blowup_target_candidates) == 0x50d4, "Blowup
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
 
 extern "C" {
-    i32 NuFileExists(char *);
 
 }
 
@@ -4520,7 +4198,6 @@ extern "C" {
 
 extern "C" void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
                                                   i16 y_rotation, NUMTX *orientation);
-void NewRumble(nupad_s *pad, f32 strength, i32 mode);
 
 // ==== src/legoapi/misc/supportall.cpp: declarations ====
 
@@ -4544,20 +4221,7 @@ extern "C" void NuHtmlHeading1(const char *fmt, ...);
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern NUVEC plr_lastpos;
-    extern i16 id_GRIEVOUS;
-    extern i16 id_BODYGUARD;
-    extern i16 id_IMPERIALGUARD;
-    extern i16 id_JAWA;
-    extern i16 id_UGNAUGHT;
-    extern i16 id_ATAT;
-    extern i16 id_GONKDROID;
     extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-    void DebrisPosOrientationMtx(i32, NUMTX *);
-    void DebFreeInstantly(i32 *);
-    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 }
 
 extern "C" {
@@ -4572,7 +4236,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 extern "C" {
 
-void DebFreeInstantly(i32 *handle);
 
 } // extern "C"
 
@@ -4627,7 +4290,6 @@ void DebFreeInstantly(i32 *handle);
     } while (0)
 
 extern "C" {
-    extern i16 id_ATAT;
 }
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \

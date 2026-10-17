@@ -110,7 +110,6 @@ struct nuvec_s;
 #define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone))
 #endif
 
-extern CHARCONFIG_s charconfig;
 
 // Retail only keeps the clone with strip_comments fixed to 1 (regparm text, filename).
 #if defined(__i386__)
@@ -167,7 +166,6 @@ extern CHARCONFIG_s charconfig;
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    i32 NuFileExists(char *);
 
 }
 
@@ -312,7 +310,6 @@ extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== src/gameapi/gui/apimenu.cpp: all remaining content ====
 
@@ -333,7 +330,6 @@ extern i32 qrand(void);
 // these before accepting the new input; GamePad_Rotate then reports a stable
 // angular velocity only when both consecutive turns agree.
 
-f32 GamePad_Rotate(GameObject_s *object);
 
 // ==== src/gameframework/savesystem.cpp: all remaining content ====
 
@@ -343,12 +339,10 @@ f32 GamePad_Rotate(GameObject_s *object);
 
 #include "gameapi/edtools/gameapi_edtools_types.h"
 
-extern u8 FS_Active;
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
-void RenderFileSel3(i32 draw_title);
 
 // ==== src/legoapi/menus/core/text.cpp: declarations ====
 #include "nu2api/nu3d/nushader_plain.h"
@@ -367,7 +361,6 @@ void RenderFileSel3(i32 draw_title);
 #include "gameapi/edtools/edfile.h"
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
@@ -402,7 +395,6 @@ extern "C" i32 NuFileExists(char *name);
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
@@ -633,9 +625,7 @@ extern "C" {
 
     // Shared editor font; edmainInit receives and stores the font handle.
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -724,7 +714,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #include <new>
 
 extern EdInputContext * Input;
-extern MemoryManager theMemoryManager;
 extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
@@ -788,9 +777,7 @@ inline void EdBitControl::operator delete(void *memory) {
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -913,7 +900,6 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -1071,7 +1057,6 @@ struct nupad_s;
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEVALUES speedervals[4];
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
@@ -1150,13 +1135,11 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -1174,7 +1157,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------

@@ -16,7 +16,6 @@
 #include <string.h>
 
 extern "C" i32 editor_active;
-extern i32 MiniCutCam;
 void GameCameraMakeMiniCut3(u32, float, i32, i32, i32, void *, i32, NUVEC *, float, float, float, float, float, float,
                             float, i32, nugspline_s *, char, char);
 

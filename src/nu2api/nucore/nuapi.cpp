@@ -74,12 +74,7 @@ extern "C" {
 void NuRndrInitGeneric(void); // nurndr.cpp (C++ linkage)
 void bgProcInit(void);        // bgproc_android.cpp
 
-extern NUAPI nuapi;
 
-extern i32 nuapi_use_target_manager;
-extern char * nuapi_target_manager_mac_address;
-extern i32 nuapi_deferspotfxload;
-extern i32 nuapi_use_target_manager_for_sound;
 
 // Frame-end hooks (original bss @0x6bdaec / 0x6bdaf0 / 0x6bdad0).
 void (*preRenderFlashingHack)(void) = NULL;
@@ -94,13 +89,9 @@ extern i32 nuapi_max_fps;
 static i32 argc;
 static char **argv;
 
-void NuAPIInit(void);
 
 void NuCommandLine(i32 *argc, char ***argv) {
 }
 
-void NuDisableOSMenuFreeze(void);
 
-void ParseCommandLine();
 
-i32 NuInitHardware(VARIPTR *buf, VARIPTR *buf_end, i32 heap_size, ...);

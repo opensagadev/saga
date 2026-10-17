@@ -101,7 +101,6 @@ static void bgThreadMain(void *data);
 #include "nu2api/nu3d/nuspecial.h"
 
 // The reference defines these with dynamic initialization in this unit.
-extern MemoryManager theMemoryManager;
 #include "legoapi/misc/supportall_types.h"
 
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");

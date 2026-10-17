@@ -228,4 +228,3 @@ void PortalDoors_Configure(WORLDINFO_s *world, char *config);
 
 void PortalDoors_Update(WORLDINFO_s *world);
 
-void PortalDoors_Reset(WORLDINFO *world_info);

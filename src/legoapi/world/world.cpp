@@ -59,15 +59,7 @@ TIMER LevelTimer;
 
 void (*WorldInfo_InitMenuFn)(WORLDINFO *, i32 *, i32 *) = NULL;
 void (*WorldInfo_InitLastFn)(WORLDINFO *) = NULL;
-extern i32 GAMEDEMO;
-extern NUGSCN * big_icon_scene;
-extern NUGSCN * area_scene;
-extern NUGSCN * things_scene;
 void *things_scene_terrain = NULL;
-extern LEVELDATA * PLATFORM_LDATA;
-extern LEVELDATA * RETAKED_LDATA;
-extern LEVELDATA * CREDITS_LDATA;
-extern i32 Text_Language;
 
 // --- Players globals ---
 // NOTE: `WORLD` (WORLDINFO) field offsets in world.h are an approximation; the
@@ -76,19 +68,16 @@ extern i32 Text_Language;
 // with the world.h layout but its level/area guard bytes will differ until that
 // WORLDINFO drift is corrected.
 
-extern GameObject_s * Player[8];
 i32 PLAYERCOUNT = 0;
 i32 netclient = 0;
 i32 UsePlayerList = 0;
 i32 makeplayerlist_freeplay = 0;
-extern i16 PlayerList[8];
 i32 PlayerID[2] = {-1, -1};
 i16 Area_PlayerIDList[9];
 APICHARACTERMODELLIST_s Area_StoryModelList[52];
 PLAYERPROGRESS PlayerProgress[8];
 i32 Hub_UsePlayerList = 0;
 i32 LevelChangesInArea = 0;
-extern i32 bonusmodearcade;
 i32 VehicleArea = 0;
 SOCKPOSITION OldPlrSPos[8];
 BATARANG_s Batarang[8];
@@ -110,7 +99,6 @@ void SaveSceneObjectAnimTFactors(NUGSCN *gscn);
 void CalculateWorldSize(WORLDINFO *world);
 
 WORLDINFO WorldInfo[2];
-extern WORLDINFO * WORLD;
 
 f32 g_BgLoadDelayHackTimer;
 
@@ -118,10 +106,7 @@ volatile i32 waiting_for_level;
 i32 level_already_loaded = -1;
 i32 next_level;
 
-void WorldInfo_Load(WORLDINFO *world);
 
 extern "C" {
-    extern i16 id_DARTHVADER;
-    extern i16 id_THEEMPEROR;
 }
 

@@ -706,13 +706,10 @@ static NUFPCOMJMP ConfigChar_Keywords[] = {
 static CHARVARIANT *CharVariant;
 static i32 CHARVARIANTCOUNT;
 
-i32 LayerFromName(GAMECHARACTERDATA_s *character, char *name);
 
-i32 MakeLayerList_Name(CHARACTERMODEL_s *model, i16 *output, u32 mask);
 
 i32 CanWearHatsInFreePlay(i32 character_id);
 
-void Move_DEFAULT(GameObject_s *);
 
 CHARCONFIG_s charconfig;
 i32 SecondCharConfigure;
@@ -803,15 +800,12 @@ void CharConfig_CalculateJumpStats(float jump_speed, float gravity, float *durat
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    i32 NuFileExists(char *);
-    i32 NuStrCpy(char *, const char *);
 
 }
 
 // The original table at 0x006281a0.  These are the material animation
 // scripts made available before the permanent things scene is loaded.
 
-extern i32 Collection_Got(i32 id);
 
 #include "legoapi/characters/core/characters_types.h"
 
@@ -822,8 +816,6 @@ extern i32 Collection_Got(i32 id);
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
 
-void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 game_flag_mask, u32 game_flag_value,
-                                i32 movement_type, void *move_function, void *animate_function, void *draw_function);
 
 void LoadPerm1();
 
@@ -973,7 +965,6 @@ extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== src/gameapi/gui/apimenu.cpp: all remaining content ====
 
@@ -997,7 +988,6 @@ struct CUTSCENEPLAYERCLIP;
 // these before accepting the new input; GamePad_Rotate then reports a stable
 // angular velocity only when both consecutive turns agree.
 
-f32 GamePad_Rotate(GameObject_s *object);
 
 // ==== src/gameframework/savesystem.cpp: all remaining content ====
 
@@ -1008,12 +998,10 @@ f32 GamePad_Rotate(GameObject_s *object);
 #include "gameapi/edtools/gameapi_edtools_types.h"
 #include "nu2api/nucore/nutime.h"
 
-extern u8 FS_Active;
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
-void RenderFileSel3(i32 draw_title);
 
 // ==== src/legoapi/menus/core/text.cpp: declarations ====
 #include "nu2api/nu3d/nushader_plain.h"
@@ -1033,7 +1021,6 @@ void RenderFileSel3(i32 draw_title);
 #include "gameapi/edtools/edfile.h"
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
@@ -1068,7 +1055,6 @@ extern "C" i32 NuFileExists(char *name);
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
@@ -1301,9 +1287,7 @@ extern "C" {
 
     // Shared editor font; edmainInit receives and stores the font handle.
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -1392,7 +1376,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #include <new>
 
 extern EdInputContext * Input;
-extern MemoryManager theMemoryManager;
 extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
@@ -1456,9 +1439,7 @@ inline void EdBitControl::operator delete(void *memory) {
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -1581,7 +1562,6 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -1741,7 +1721,6 @@ union variptr_u;
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEVALUES speedervals[4];
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
@@ -1820,13 +1799,11 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -1844,7 +1821,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2024,7 +2000,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-extern CUTSCENEPLAYERCLIP *CutScenePlayer_Active();
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))

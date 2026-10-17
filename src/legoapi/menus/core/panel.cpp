@@ -47,7 +47,6 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void TimingBars(void);
-void Arcade_ResetPanel(void);
 
 static f32 redbrickslidetime;
 f32 TimerAlpha = 0.0f;
@@ -1380,4 +1379,3 @@ void PanelRender(WORLDINFO_s *) {
     }
 }
 
-i32 CoinsGoToMainTotal();

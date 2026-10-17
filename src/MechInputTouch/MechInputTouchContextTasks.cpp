@@ -16,8 +16,6 @@
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/render/core/terrain.h"
 
-extern i16 id_YODA;
-extern i16 id_YODAGHOST;
 extern i16 id_WATTO;
 void GizPanel_Use(GameObject_s &, GIZPANEL_s &);
 void TakeOver2GetIn(GameObject_s *, GameObject_s *);
@@ -26,7 +24,6 @@ void SetForcedAttackOpponent(MechObjectInterface *);
 void SetWeaponOut(GameObject_s *);
 bool FireBountyHunterRocket(GameObject_s *);
 void SetBobaRocketTarget(MechObjectInterface *);
-f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 extern MechWeakPtr<MechObjectInterface, 4> NextThermalTarget;
 
 f32 s_mechTouchMoveToStuckVel = 0.2f;

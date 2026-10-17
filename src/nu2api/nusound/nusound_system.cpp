@@ -47,7 +47,6 @@ extern const f32 RoutingTable71To51[48];
 extern const f32 RoutingTable71To71[64];
 
 
-void NuSoundInitDefaultRoutingTables(void);
 
 bool NuSoundStreamDesc::DecodeStreamOnOpen() const {
     return false;

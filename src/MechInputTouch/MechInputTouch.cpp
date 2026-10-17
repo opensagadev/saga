@@ -87,8 +87,6 @@ static inline void AppendMainControls(NuButtonLayout &layout, MechInputTouchMain
 
 extern i32 disable_narrow_socks, players_cannot_exit_speeder, BuildUpDone;
 
-extern i16 id_SPEEDERBIKE;
-extern AREADATA_s *PODSPRINT_ADATA;
 extern LEVELDATA_s *SPEEDERCHASEA_LDATA;
 extern LEVELDATA_s *VADERC_LDATA;
 

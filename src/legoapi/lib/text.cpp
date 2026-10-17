@@ -28,7 +28,6 @@ char *ASCII_UP = "\xc2\xac";
 #include "nu2api/numath/nutrig.h"
 #include <stdio.h>
 #include <string.h>
-extern char **TTab;
 extern char * apitxt_ENGLISH;
 extern char * apitxt_FRENCH;
 extern char * apitxt_GERMAN;
@@ -53,18 +52,6 @@ void Text_InsertCommasIntoNumber(char *number, char *text, i32 length);
 void GameDrawMenuEntry(MENU *menu, char *text);
 extern "C" void BackupMenu(void);
 extern "C" {
-    extern u8 MENUFLASH1R;
-    extern u8 MENUFLASH1G;
-    extern u8 MENUFLASH1B;
-    extern u8 MENUFLASH0R;
-    extern u8 MENUFLASH0G;
-    extern u8 MENUFLASH0B;
-    extern u8 MENUENTRYR;
-    extern u8 MENUENTRYG;
-    extern u8 MENUENTRYB;
-    extern u8 MENUNORMALR;
-    extern u8 MENUNORMALG;
-    extern u8 MENUNORMALB;
 }
 static VUFNT *app_fnt;
 #include "nu2api/numath/numtx.h"
@@ -72,7 +59,6 @@ extern "C" {
     void NuMtxSetRotationX(NUMTX *mtx, i32 angle);
     void NuMtxRotateY(NUMTX *mtx, i32 angle);
     void NuMtxRotateZ(NUMTX *mtx, i32 angle);
-    void NuMtxTranslate(NUMTX *mtx, NUVEC *vec);
 }
 
 static TEXTCRAWL_s *s_crawlPtr = nullptr;
@@ -99,15 +85,12 @@ char *txtpath_GERMAN = const_cast<char *>("german");
 char *txtpath_FRENCH = const_cast<char *>("french");
 char *txtpath_ENGLISH = const_cast<char *>("english");
 
-void Text_ExpandAllButtonStrings(char *input, char *output);
 
 extern "C" {
 
 VUFNT *LoadButtonFont(char *path, char *name, variptr_u *buf, variptr_u *buf_end, i32 render_plane);
 
 VUFNT *LoadGameFont(char *path, char *name, variptr_u *buf, variptr_u *buf_end, i32 render_plane);
-void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                     u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
 }
 
 static inline u8 Text_MenuColourLerp(u8 first, u8 second, f32 amount) {
@@ -179,7 +162,6 @@ extern "C" void SetQFont2D(void);
 
 // Globals shared across world loading — defined here until moved to globals.cpp
 
-extern i32 Text_Language;
 
 // --- Players globals ---
 // NOTE: `WORLD` (WORLDINFO) field offsets in world.h are an approximation; the
@@ -188,12 +170,10 @@ extern i32 Text_Language;
 // with the world.h layout but its level/area guard bytes will differ until that
 // WORLDINFO drift is corrected.
 
-extern GameObject_s * Player[8];
 
 // --- World-module helpers (kept with the WorldInfo API) ---
 
 extern WORLDINFO WorldInfo[2];
-extern WORLDINFO * WORLD;
 
 // ==== src/legoapi/world/area.cpp: declarations ====
 #include "legoapi/render/core/screen.h"
@@ -207,7 +187,6 @@ extern WORLDINFO * WORLD;
 
 extern "C" f32 NuFrameEnd(void);
 
-extern AREADATA * ADataList;
 
 struct bgprocinfo_s;
 // ==== src/legoapi/world/boss.cpp: all remaining content ====
@@ -273,8 +252,6 @@ extern i32 LevFlag[4]; // shared per-level 16-byte state scratch
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    i32 NuFileExists(char *);
-    i32 NuStrCpy(char *, const char *);
 
 }
 
@@ -355,7 +332,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-extern i32 Paused;
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -399,21 +375,7 @@ struct STATUSPACKET_s;
 struct TouchHolder;
 struct nuhspecial_s;
 
-extern f32 MENUTEXTSCALE;
-extern i32 MenuA;
-extern u8 MENUNORMALR;
-extern u8 MENUNORMALG;
-extern u8 MENUNORMALB;
 extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
-extern u8 MENUFLASH0R;
-extern u8 MENUFLASH0G;
-extern u8 MENUFLASH0B;
-extern u8 MENUFLASH1R;
-extern u8 MENUFLASH1G;
-extern u8 MENUFLASH1B;
-extern f32 menu_pulse;
-extern f32 menu_pulsate;
-extern i32 menu_flash;
 
 // Camera zoom state
 
@@ -489,7 +451,6 @@ extern i32 menu_flash;
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== src/legoapi/menus/core/gamehint.cpp: declarations ====
 
@@ -674,9 +635,7 @@ DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size
 
 #include "legoapi/ai/core/aisysall_types.h"
 
-void RegisterAIScriptActions(AIACTIONDEF *action_defs);
 
-void RegisterAIScriptConditions(AICONDITIONDEF *cond_defs);
 
 // ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
 #include "editor/aieditor_state.h"
@@ -703,7 +662,6 @@ extern "C" {
 
 extern "C" {
 
-extern AIEDITOR_RENDER_STATE * aieditor;
 
 } // extern "C"
 
@@ -895,7 +853,6 @@ namespace {
 #include "legoapi/characters/motion/contexts.h"
 #include "legoapi/characters/core/playeritems.h"
 
-i32 qrand();
 
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
@@ -996,7 +953,6 @@ extern "C" i32 NuFileExists(char *name);
 #include "gameapi/edtools/edpart_internal.h"
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
@@ -1004,12 +960,10 @@ extern "C" {
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 #include "legoapi/gizmo/object/giztorpedo.h"
 
-extern ADDPART_s Default_ADDPART;
 
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
@@ -1024,15 +978,11 @@ extern WORLDINFO_s *WORLD;
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
     // The editor loader clears these page IDs with aligned vector stores.
 
 } // extern "C"
 
-extern f32 FRAMETIME;
-void PartStop_Flickerer(PART_s *);
-i32 PartDraw_Flickerer(PART_s *);
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -1045,11 +995,8 @@ i32 PartDraw_Flickerer(PART_s *);
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-void PartImpact_Brick(PART_s *part);
 
-void PartStop_Flickerer(PART_s *part);
 
-i32 PartDraw_Flickerer(PART_s *part);
 
 // ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
 #include "gameapi/edtools/edanim_internal.h"
@@ -1258,9 +1205,7 @@ extern "C" {
 
     // Shared editor font; edmainInit receives and stores the font handle.
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -1347,7 +1292,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #include <new>
 
 extern EdInputContext * Input;
-extern MemoryManager theMemoryManager;
 extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
@@ -1411,9 +1355,7 @@ inline void EdBitControl::operator delete(void *memory) {
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -1494,32 +1436,8 @@ extern "C" u8 MENUNORMALB;
 
 extern "C" {
 
-extern f32 MENUDY;
-extern f32 dme_sx;
-extern f32 dme_sy;
-extern u8 MENUFLASH1R;
-extern u8 MENUFLASH1G;
-extern u8 MENUFLASH1B;
-extern u8 MENUFLASH0R;
-extern u8 MENUFLASH0G;
-extern u8 MENUFLASH0B;
-extern u8 MENUENTRYR;
-extern u8 MENUENTRYG;
-extern u8 MENUENTRYB;
-extern u8 MENUNORMALR;
-extern u8 MENUNORMALG;
-extern u8 MENUNORMALB;
-extern u8 dme_r;
-extern u8 dme_g;
-extern u8 dme_b;
-extern i32 dme_align;
-extern i32 dme_rgb;
-extern f32 menu_pulse;
-extern f32 menu_pulsate;
 
-void BackupMenu(void);
 
-void DrawMenuEntryEx(MENU *menu, char *text, i32 alpha);
 
 } // extern "C"
 
@@ -1575,7 +1493,6 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -1732,7 +1649,6 @@ union variptr_u;
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEVALUES speedervals[4];
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
@@ -1753,12 +1669,10 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 // ==== src/legoapi/core/config/saveload.cpp: declarations ====
 
-extern u8 FS_Active;
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
-void RenderFileSel3(i32 draw_title);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
@@ -1818,13 +1732,11 @@ void RenderFileSel3(i32 draw_title);
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -1842,7 +1754,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -1934,15 +1845,12 @@ extern "C" {
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 }
 
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
 
 extern "C" {
-    i32 NuFileExists(char *);
-    i32 NuStrCpy(char *, const char *);
 
 }
 
@@ -1956,38 +1864,13 @@ namespace {
 
 // ==== src/legoapi/world/missions.cpp: declarations ====
 
-MISSIONDATA *Mission_Active(MISSIONSYS *ms);
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
 extern "C" {
 
-extern f32 MENUDY;
-extern f32 dme_sx;
-extern f32 dme_sy;
-extern u8 MENUFLASH1R;
-extern u8 MENUFLASH1G;
-extern u8 MENUFLASH1B;
-extern u8 MENUFLASH0R;
-extern u8 MENUFLASH0G;
-extern u8 MENUFLASH0B;
-extern u8 MENUENTRYR;
-extern u8 MENUENTRYG;
-extern u8 MENUENTRYB;
-extern u8 MENUNORMALR;
-extern u8 MENUNORMALG;
-extern u8 MENUNORMALB;
-extern u8 dme_r;
-extern u8 dme_g;
-extern u8 dme_b;
-extern i32 dme_align;
-extern i32 dme_rgb;
-extern f32 menu_pulse;
-extern f32 menu_pulsate;
 
-void BackupMenu(void);
 
-void DrawMenuEntryEx(MENU *menu, char *text, i32 alpha);
 
 } // extern "C"
 
@@ -1997,7 +1880,6 @@ void DrawMenuEntryEx(MENU *menu, char *text, i32 alpha);
 #include "legoapi/render/light/fade.h"
 
 extern "C" bool TestForController(void);
-extern u32 GAMEPAD_MENUSELECT;
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
@@ -2058,22 +1940,18 @@ extern u32 GAMEPAD_MENUSELECT;
 #include "legoapi/core/startup/main.h"
 #include "legoapi/menus/screens/movies.h"
 
-extern MENU GameMenu[10];
 
-extern i32 GameMenuLevel;
 
 extern "C" bool TestForController();
 extern "C" void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment,
                             u8 red, u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box,
                             i32 suppress_draw, u32 alpha);
 
-extern MENUFNINFO MenuInfo[100];
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 #include "legoapi/misc/androidbatman.h"
 
 extern "C" {
-    extern i32 Paused;
 }
 
 // Original bss @0x127a500: 64 pads x 0x60 bytes.
@@ -2083,11 +1961,9 @@ extern "C" {
 // these before accepting the new input; GamePad_Rotate then reports a stable
 // angular velocity only when both consecutive turns agree.
 
-f32 GamePad_Rotate(GameObject_s *object);
 
 extern "C" {
 
-bool TestForController(void);
 
 } // extern "C"
 
@@ -2095,68 +1971,39 @@ bool TestForController(void);
 
 // ==== src/legoapi/menus/core/text.cpp: declarations ====
 
-extern LANGUAGEDATA * Text_LanguageList;
 extern "C" {
     void NuQFntSetJustifiedTolerances(float squash, float stretch);
     unsigned char *NuUTF8CharFromUnicode(unsigned char *text, u16 character);
-    void NuLanguageSet(i32 language);
 }
-extern void (*Text_GameSetLanguageFn)(i32);
 extern "C" {
-    extern u8 MENUFLASH1R;
-    extern u8 MENUFLASH1G;
-    extern u8 MENUFLASH1B;
-    extern u8 MENUFLASH0R;
-    extern u8 MENUFLASH0G;
-    extern u8 MENUFLASH0B;
-    extern u8 MENUENTRYR;
-    extern u8 MENUENTRYG;
-    extern u8 MENUENTRYB;
-    extern u8 MENUNORMALR;
-    extern u8 MENUNORMALG;
-    extern u8 MENUNORMALB;
 }
 extern "C" {
     void NuMtxSetRotationX(NUMTX *mtx, i32 angle);
     void NuMtxRotateY(NUMTX *mtx, i32 angle);
     void NuMtxRotateZ(NUMTX *mtx, i32 angle);
-    void NuMtxTranslate(NUMTX *mtx, NUVEC *vec);
 }
 
-extern i32 MenuStopDraw;
 
-extern char * txtpath_JAPANESE;
-extern char * txtpath_DANISH;
-extern char * txtpath_SPANISH;
-extern char * txtpath_ITALIAN;
-extern char * txtpath_GERMAN;
-extern char * txtpath_FRENCH;
-extern char * txtpath_ENGLISH;
 
 extern "C" {
 
-void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                     u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
 }
 
 // ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 
 extern "C" {
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 } // extern "C"
 
@@ -2178,9 +2025,7 @@ PART_s *AddPart(ADDPART_s *params);
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -2262,9 +2107,7 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -2338,32 +2181,8 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern "C" {
 
-extern f32 MENUDY;
-extern f32 dme_sx;
-extern f32 dme_sy;
-extern u8 MENUFLASH1R;
-extern u8 MENUFLASH1G;
-extern u8 MENUFLASH1B;
-extern u8 MENUFLASH0R;
-extern u8 MENUFLASH0G;
-extern u8 MENUFLASH0B;
-extern u8 MENUENTRYR;
-extern u8 MENUENTRYG;
-extern u8 MENUENTRYB;
-extern u8 MENUNORMALR;
-extern u8 MENUNORMALG;
-extern u8 MENUNORMALB;
-extern u8 dme_r;
-extern u8 dme_g;
-extern u8 dme_b;
-extern i32 dme_align;
-extern i32 dme_rgb;
-extern f32 menu_pulse;
-extern f32 menu_pulsate;
 
-void BackupMenu(void);
 
-void DrawMenuEntryEx(MENU *menu, char *text, i32 alpha);
 
 } // extern "C"
 
@@ -2381,7 +2200,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2531,13 +2349,11 @@ extern "C" {
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -2555,7 +2371,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2647,19 +2462,16 @@ extern "C" {
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 }
 
 // ==== functions in original address order ====
 
 extern "C" {
-void BackupMenu(void);
 
 }
 
 extern "C" {
-bool TestForController(void);
 
 }
 
@@ -2669,13 +2481,10 @@ extern "C" void Text3DStringEncode(char *src, u16 *dst);
 }
 
 extern "C" {
-void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                     u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
 
 }
 
 extern "C" {
-void DrawMenuEntryEx(MENU *menu, char *text, i32 alpha);
 
 }
 
@@ -2720,7 +2529,6 @@ void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 a
 
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
 
-i32 qrand(void);
 
 extern "C" {
     void PlaySfxById(i32 sfx_id, nuvec_s *position);
@@ -2748,8 +2556,6 @@ extern "C" {
 
 extern "C" {
 
-    void NuMtxMul(NUMTX *, NUMTX *, NUMTX *);
-    i32 NuStrICmp(const char *, const char *);
 
 }
 
@@ -2779,7 +2585,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2880,7 +2685,6 @@ extern "C" {
 
 extern "C" {
 
-extern AIEDITOR_RENDER_STATE * aieditor;
 
 } // extern "C"
 
@@ -2993,7 +2797,6 @@ extern f32 testmovef;
 
 struct MechTouchUIElement;
 
-void Players_Init(void);
 
 // --- Helpers moved from world.cpp ---
 
@@ -3024,7 +2827,6 @@ DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 #define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone))
 #endif
 
-extern CHARCONFIG_s charconfig;
 
 // Retail only keeps the clone with strip_comments fixed to 1 (regparm text, filename).
 #if defined(__i386__)
@@ -3036,8 +2838,6 @@ extern CHARCONFIG_s charconfig;
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
 
 extern "C" {
-    i32 NuFileExists(char *);
-    i32 NuStrCpy(char *, const char *);
 
 }
 
@@ -3045,32 +2845,8 @@ extern "C" {
 
 extern "C" {
 
-extern f32 MENUDY;
-extern f32 dme_sx;
-extern f32 dme_sy;
-extern u8 MENUFLASH1R;
-extern u8 MENUFLASH1G;
-extern u8 MENUFLASH1B;
-extern u8 MENUFLASH0R;
-extern u8 MENUFLASH0G;
-extern u8 MENUFLASH0B;
-extern u8 MENUENTRYR;
-extern u8 MENUENTRYG;
-extern u8 MENUENTRYB;
-extern u8 MENUNORMALR;
-extern u8 MENUNORMALG;
-extern u8 MENUNORMALB;
-extern u8 dme_r;
-extern u8 dme_g;
-extern u8 dme_b;
-extern i32 dme_align;
-extern i32 dme_rgb;
-extern f32 menu_pulse;
-extern f32 menu_pulsate;
 
-void BackupMenu(void);
 
-void DrawMenuEntryEx(MENU *menu, char *text, i32 alpha);
 
 } // extern "C"
 
@@ -3133,12 +2909,10 @@ void DrawMenuEntryEx(MENU *menu, char *text, i32 alpha);
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
 extern "C" {
-    extern i32 Paused;
 }
 
 extern "C" {
 
-bool TestForController(void);
 
 } // extern "C"
 
@@ -3149,53 +2923,34 @@ bool TestForController(void);
 extern "C" {
     void NuQFntSetJustifiedTolerances(float squash, float stretch);
     unsigned char *NuUTF8CharFromUnicode(unsigned char *text, u16 character);
-    void NuLanguageSet(i32 language);
 }
 extern "C" {
-    extern u8 MENUFLASH1R;
-    extern u8 MENUFLASH1G;
-    extern u8 MENUFLASH1B;
-    extern u8 MENUFLASH0R;
-    extern u8 MENUFLASH0G;
-    extern u8 MENUFLASH0B;
-    extern u8 MENUENTRYR;
-    extern u8 MENUENTRYG;
-    extern u8 MENUENTRYB;
-    extern u8 MENUNORMALR;
-    extern u8 MENUNORMALG;
-    extern u8 MENUNORMALB;
 }
 extern "C" {
     void NuMtxSetRotationX(NUMTX *mtx, i32 angle);
     void NuMtxRotateY(NUMTX *mtx, i32 angle);
     void NuMtxRotateZ(NUMTX *mtx, i32 angle);
-    void NuMtxTranslate(NUMTX *mtx, NUVEC *vec);
 }
 
 extern "C" {
 
-void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                     u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
 }
 
 // ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 
 extern "C" {
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 } // extern "C"
 
@@ -3217,9 +2972,7 @@ PART_s *AddPart(ADDPART_s *params);
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -3301,9 +3054,7 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -3377,32 +3128,8 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern "C" {
 
-extern f32 MENUDY;
-extern f32 dme_sx;
-extern f32 dme_sy;
-extern u8 MENUFLASH1R;
-extern u8 MENUFLASH1G;
-extern u8 MENUFLASH1B;
-extern u8 MENUFLASH0R;
-extern u8 MENUFLASH0G;
-extern u8 MENUFLASH0B;
-extern u8 MENUENTRYR;
-extern u8 MENUENTRYG;
-extern u8 MENUENTRYB;
-extern u8 MENUNORMALR;
-extern u8 MENUNORMALG;
-extern u8 MENUNORMALB;
-extern u8 dme_r;
-extern u8 dme_g;
-extern u8 dme_b;
-extern i32 dme_align;
-extern i32 dme_rgb;
-extern f32 menu_pulse;
-extern f32 menu_pulsate;
 
-void BackupMenu(void);
 
-void DrawMenuEntryEx(MENU *menu, char *text, i32 alpha);
 
 } // extern "C"
 
@@ -3420,7 +3147,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -3570,13 +3296,11 @@ extern "C" {
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -3594,7 +3318,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -3686,19 +3409,16 @@ extern "C" {
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 }
 
 // ==== functions in original address order ====
 
 extern "C" {
-void BackupMenu(void);
 
 }
 
 extern "C" {
-bool TestForController(void);
 
 }
 
@@ -3708,13 +3428,10 @@ extern "C" void Text3DStringEncode(char *src, u16 *dst);
 }
 
 extern "C" {
-void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                     u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
 
 }
 
 extern "C" {
-void DrawMenuEntryEx(MENU *menu, char *text, i32 alpha);
 
 }
 
@@ -3881,14 +3598,12 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 
 extern "C" {
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 } // extern "C"
 
@@ -3940,9 +3655,7 @@ DECOMP_ASSERT(offsetof(GIZMOTYPES, types) == 8, "Gizmo type-table pointer offset
 
 // ==== src/legoapi/misc/legoapi_misc.cpp: declarations ====
 
-extern void *CutStopInfo;
 extern "C" {
-    extern i32 Paused;
 }
 
 // ==== src/legoapi/world/levels/episodeII.cpp: declarations ====
@@ -4118,7 +3831,6 @@ void PodSprintA_Update(WORLDINFO_s *world);
 
 extern "C" {
 
-extern AIEDITOR_RENDER_STATE * aieditor;
 
 } // extern "C"
 
@@ -4380,8 +4092,6 @@ DECOMP_ASSERT(offsetof(WORLDINFO_s, blowup_target_candidates) == 0x50d4, "Blowup
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
 
 extern "C" {
-    i32 NuFileExists(char *);
-    i32 NuStrCpy(char *, const char *);
 
 }
 

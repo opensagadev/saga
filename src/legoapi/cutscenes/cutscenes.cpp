@@ -56,10 +56,8 @@ extern i32 CUTCAM;
 extern "C" i32 CutSceneWaiting;
 extern i32 CUTCAMONLY;
 extern i32 cut_waiting_for_new_level;
-extern volatile i32 waiting_for_level;
 extern "C" i32 newlevel_resumecutaudio;
 extern CUTSYS *CS_cutsys;
-extern FadeSystem FadeSys;
 CUTSCENESYS *CutSceneSys;
 
 static void CutScene_DrawCharacter(instNUGCUTSCENE_s *, NUGCUTSCENE_s *, instNUGCUTCHAR_s *, NUGCUTCHAR_s *, f32, i32);
@@ -85,19 +83,15 @@ void NewLevelFromMenu(LEVELDATA_s *, i32, i32, i32);
 void FindAndSetLights(NUVEC *, f32, void *);
 void SetZeroLights(void);
 void GameFog_Reset(void);
-void EnableShadowMapRendering(i32);
-void ResetShadowMapRendering(void);
 i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
 f32 FindReflectionNoPlatforms(NUVEC *);
 extern "C" i32 NewShadowOnPlatform(void);
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 void CharScene_Draw(WORLDINFO_s *, i32, NUMTX *, NUMTX *);
-i32 qrand(void);
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 extern "C" void APITransparentCharDraw(nuhgobj_s *, NUMTX *, i32, i16 *, NUMTX *, void **, i32);
 extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
                                         NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
-CUTSCENEPLAYERCLIP *CutScenePlayer_Active(void);
 void CutScenePlayer_SetObjects(CUTINFO *);
 extern "C" void DebrisSetRenderGroup(i32);
 
@@ -155,7 +149,6 @@ static inline i32 CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
     return CutScene_StartBody(world, cut);
 }
 
-CUTINFO *CutScene_Find(CUTSYS *cutscene_system, char *name);
 
 extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
 extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
@@ -193,7 +186,6 @@ static void CutScene_CreateCharacterInstance(NUGCUTCHAR_s *character, instNUGCUT
 // The loop re-reads the active cut through CutStopInfo after each SmartTextEx call.
 #define CUT_STOP static_cast<CUTINFO *>(CutStopInfo)
 
-CUTINFO *NewCutScene(CUTINFO *cut, CUTSYS *system, char *name, i32);
 
 i32 STATUS_R = 255;
 i32 STATUS_G = 191;
@@ -475,14 +467,8 @@ extern "C" void NuGCutSceneSysInit(NUGCUTLOCATORFNENTRY_s *locator_functions);
 
 extern "C" {
 
-NUGCUTSCENE_s *NuGCutSceneLoad(char *name, VARIPTR *buf, VARIPTR *buf_end, i32 flags);
 
-void NuGCutSceneDestroy(NUGCUTSCENE_s *cutscene);
 
-void NuGCutSceneFixUp(NUGCUTSCENE_s *cutscene, NUGSCN *scene, i32 flags, i32 area);
-void NuGCutSceneFixUpExtra(NUGCUTSCENE_s *cutscene, NUGSCN *area);
-instNUGCUTSCENE_s *instNuGCutSceneCreate(NUGCUTSCENE_s *cutscene, NUGSCN *scene, void *extra, char *name,
-                                             VARIPTR *buf, i32 flags);
 
 } // extern "C"
 
@@ -491,7 +477,6 @@ struct NUGCUTLOCATORSYS_s;
 struct instNUGCUTLOCATOR_s;
 struct NUGCUTLOCATOR_s;
 struct numtx_s;
-i32 Draw3DObjectMtx(WORLDINFO_s *, i32, numtx_s *);
 
 // Retail only keeps the IPA-SRA clone, which drops the unused frame argument.
 #if defined(__i386__)
@@ -512,12 +497,10 @@ static __used__ void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, flo
 #include "gameapi/gui/apimenu.h"
 
 i32 (*CutScenePlayer_AcceptFn)(CUTSCENEPLAYERCLIP *) = NULL;
-extern i32 NextArea_FreePlay;
 extern i16 tCHAPTER;
 
 CUTSCENEPLAYER_s *CutScenePlayer = NULL;
 
-CUTSCENEPLAYERCLIP *CutScenePlayer_Active();
 
 void CutScenePlayer_SetObjects(CUTINFO *cut);
 
@@ -525,8 +508,6 @@ void CutScenePlayer_SetObjects(CUTINFO *cut);
 
 extern "C" void instNuGCutSceneDestroy(instNUGCUTSCENE_s *);
 
-extern i32 CUTCOUNT;
-extern CutSceneListEntry * CutList;
 extern void (*CutScene_OverrideConfigFileNameFn)(char *, i32, i32);
 
 extern "C" {
@@ -539,14 +520,8 @@ extern instNUGCUTSCENE_s * cutscene_load_instance;
 
 extern "C" {
 
-NUGCUTSCENE_s *NuGCutSceneLoad(char *name, VARIPTR *buf, VARIPTR *buf_end, i32 flags);
 
-void NuGCutSceneDestroy(NUGCUTSCENE_s *cutscene);
 
-void NuGCutSceneFixUp(NUGCUTSCENE_s *cutscene, NUGSCN *scene, i32 flags, i32 area);
-void NuGCutSceneFixUpExtra(NUGCUTSCENE_s *cutscene, NUGSCN *area);
-instNUGCUTSCENE_s *instNuGCutSceneCreate(NUGCUTSCENE_s *cutscene, NUGSCN *scene, void *extra, char *name,
-                                             VARIPTR *buf, i32 flags);
 
 void instNuGCutSceneStart(instNUGCUTSCENE_s *instance);
 
@@ -565,9 +540,6 @@ void instNuGCutSceneDestroy(instNUGCUTSCENE_s *instance);
 extern "C" {
 
     void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
-    void NuMtxPreTranslate(NUMTX *, NUVEC *);
-    void NuMtxMul(NUMTX *, NUMTX *, NUMTX *);
-    i32 NuStrICmp(const char *, const char *);
     void instNuGCutSceneStart(instNUGCUTSCENE_s *);
 
 }
@@ -666,7 +638,6 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -745,7 +716,6 @@ void NuAnimData2CalcTime(nuanimdata2_s *anim, f32 frame, nuanimtime_s *time);
     // Rendering / materials / effects (host has GL paths elsewhere)
     // ---------------------------------------------------------------------------
 
-i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
 
     // ---------------------------------------------------------------------------
     // Light / wind / particles / debris
@@ -755,21 +725,8 @@ i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
     // Gobj / hierarchy / scene graph
     // ---------------------------------------------------------------------------
 
-void NuHGobjEval(nuhgobj_s *object, i32 override_count, nuhgobjjointoverride_s *overrides, NUMTX *matrices);
-void NuHGobjEvalAnim2(nuhgobj_s *object, ani3_animheader_s *animation, f32 time, i32 override_count,
-                          NUJOINTANIM_s *overrides, NUMTX *matrices);
 
 #include "nu2api/nucore/nucore_plain_types.h"
-void NuHGobjEvalAnimBlend2(nuhgobj_s *object, ani3_animheader_s *animation_a, f32 time_a,
-                               ani3_animheader_s *animation_b, f32 time_b, f32 blend, i32 override_count,
-                               NUJOINTANIM_s *overrides, NUMTX *matrices);
-void **NuHGobjEvalDwa2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation, f32 frame);
-void **NuHGobjEvalDwaBlend2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation_a, f32 frame_a,
-                                nuanimdata2_s *animation_b, f32 frame_b, f32 blend);
-i32 NuHGobjRndrMtxDwa(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,
-                          NUMTX *joint_matrices, void **blend_values, i32);
-void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
-                               f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask);
 
     // ---------------------------------------------------------------------------
     // Input / pad / key / mouse
@@ -890,22 +847,15 @@ extern "C" {
 // original GCC 4.7 -O3 object emits these definitions in reverse source order.
 extern "C" {
 
-void NuSetCutSceneCharacterRenderFn(NUGCUTSCENECHARACTERRENDERFN function);
 
-void NuSetCutSceneCharacterEvalFn(NUGCUTSCENECHARACTEREVALFN function);
 
-void NuSetCutSceneFindCharactersFn(NUGCUTSCENEFINDCHARACTERSFN function);
 
-void NuSetCutSceneResetCharactersFn(NUGCUTSCENERESETCHARACTERSFN function);
 
-void NuSetCutSceneCharacterCreateDataFn(NUGCUTSCENECHARACTERCREATEDATAFN function);
 
-void NuSetCutSceneRigidPostRenderFn(NUGCUTSCENERIGIDPOSTRENDERFN function);
 } // extern "C"
 
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
 
-extern CUTSCENESYS * CutSceneSys;
 
 extern "C" {
     void instNuGCutSceneStart(instNUGCUTSCENE_s *);
@@ -927,16 +877,10 @@ extern "C" void NuGCutSceneSysInit(NUGCUTLOCATORFNENTRY_s *locator_functions);
 }
 
 extern "C" {
-NUGCUTSCENE_s *NuGCutSceneLoad(char *name, VARIPTR *buf, VARIPTR *buf_end, i32 flags);
 
-void NuGCutSceneDestroy(NUGCUTSCENE_s *cutscene);
 
-void NuGCutSceneFixUp(NUGCUTSCENE_s *cutscene, NUGSCN *scene, i32 flags, i32 area);
 
-void NuGCutSceneFixUpExtra(NUGCUTSCENE_s *cutscene, NUGSCN *area);
 
-instNUGCUTSCENE_s *instNuGCutSceneCreate(NUGCUTSCENE_s *cutscene, NUGSCN *scene, void *extra, char *name,
-                                             VARIPTR *buf, i32 flags);
 
 void instNuGCutSceneStart(instNUGCUTSCENE_s *instance);
 
@@ -961,8 +905,6 @@ void instNuGCutSceneDestroy(instNUGCUTSCENE_s *instance);
 }
 
 extern "C" {
-void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
-                               f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask);
 
 }
 
@@ -975,17 +917,11 @@ void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *instance, NUGCUTLOCATORSYS_s *sy
 
 extern "C" {
 
-void NuSetCutSceneCharacterRenderFn(NUGCUTSCENECHARACTERRENDERFN function);
 
-void NuSetCutSceneCharacterEvalFn(NUGCUTSCENECHARACTEREVALFN function);
 
-void NuSetCutSceneFindCharactersFn(NUGCUTSCENEFINDCHARACTERSFN function);
 
-void NuSetCutSceneResetCharactersFn(NUGCUTSCENERESETCHARACTERSFN function);
 
-void NuSetCutSceneCharacterCreateDataFn(NUGCUTSCENECHARACTERCREATEDATAFN function);
 
-void NuSetCutSceneRigidPostRenderFn(NUGCUTSCENERIGIDPOSTRENDERFN function);
 
 }
 
@@ -999,18 +935,12 @@ extern "C" void NuGCutSceneSysInit(NUGCUTLOCATORFNENTRY_s *locator_functions);
 }
 
 extern "C" {
-NUGCUTSCENE_s *NuGCutSceneLoad(char *name, VARIPTR *buf, VARIPTR *buf_end, i32 flags);
 
-void NuGCutSceneDestroy(NUGCUTSCENE_s *cutscene);
 
-void NuGCutSceneFixUp(NUGCUTSCENE_s *cutscene, NUGSCN *scene, i32 flags, i32 area);
 
-void NuGCutSceneFixUpExtra(NUGCUTSCENE_s *cutscene, NUGSCN *area);
 
 void NuGCutSceneSysPostBackgroundLoad(void);
 
-instNUGCUTSCENE_s *instNuGCutSceneCreate(NUGCUTSCENE_s *cutscene, NUGSCN *scene, void *extra, char *name,
-                                             VARIPTR *buf, i32 flags);
 
 void instNuGCutSceneStop(instNUGCUTSCENE_s *instance);
 
@@ -1057,8 +987,6 @@ void instNuGCutSceneDestroy(instNUGCUTSCENE_s *instance);
 }
 
 extern "C" {
-void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
-                               f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask);
 
 }
 
@@ -1080,17 +1008,11 @@ extern "C" void NuGCutSceneSysRender(i32 paused);
 
 extern "C" {
 
-void NuSetCutSceneCharacterRenderFn(NUGCUTSCENECHARACTERRENDERFN function);
 
-void NuSetCutSceneCharacterEvalFn(NUGCUTSCENECHARACTEREVALFN function);
 
-void NuSetCutSceneFindCharactersFn(NUGCUTSCENEFINDCHARACTERSFN function);
 
-void NuSetCutSceneResetCharactersFn(NUGCUTSCENERESETCHARACTERSFN function);
 
-void NuSetCutSceneCharacterCreateDataFn(NUGCUTSCENECHARACTERCREATEDATAFN function);
 
-void NuSetCutSceneRigidPostRenderFn(NUGCUTSCENERIGIDPOSTRENDERFN function);
 
 }
 
@@ -1132,12 +1054,9 @@ DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 struct nuvec_s;
 
 extern "C" {
-extern i16 id_GUNGAN;
 
 }
 
-extern i32 CHARCOUNT;
-extern CHARACTERDATA * CDataList;
 // Original 0x120-byte data record @0x00666960. FixUpCharacters copies this
 // canonical prefix into every character before character-specific overrides.
 // These values cover the fully typed common movement and perception fields.
@@ -1157,7 +1076,6 @@ extern CHARACTERDATA * CDataList;
 #define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone))
 #endif
 
-extern CHARCONFIG_s charconfig;
 
 // Retail only keeps the clone with strip_comments fixed to 1 (regparm text, filename).
 #if defined(__i386__)
@@ -1200,8 +1118,6 @@ extern CHARCONFIG_s charconfig;
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    i32 NuFileExists(char *);
-    i32 NuStrCpy(char *, const char *);
 
 }
 
@@ -1228,8 +1144,6 @@ void LoadPerm1();
 #include "legoapi/menus/screens/gamemenuall.h"
 
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
-extern char **TTab;
-extern i32 Paused;
 
 // Retail clears these "fast repeat" latches but never sets them.
 
@@ -1262,8 +1176,6 @@ extern i32 Paused;
 
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
-void EnableShadowMapRendering(i32 enable);
-void ResetShadowMapRendering();
 
 struct nuhspecial_s;
 
@@ -1328,16 +1240,12 @@ extern void SetLevelLights(void *set, f32 scale);
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-i32 Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx);
 
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
-void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_id, nuhspecial_s *special, i32 locator,
-                           i32 second_locator, NUMTX *joints, i32 reflect, u32 layers, NUMTX *rotation,
-                           NUVEC *translation, f32 alpha, f32 scale);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -1351,7 +1259,6 @@ void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== src/gameapi/gui/apimenu.cpp: all remaining content ====
 
@@ -1359,10 +1266,8 @@ extern i32 qrand(void);
 #include "legoapi/menus/screens/movies.h"
 #include "nu2api/nucore/nuvideo.h"
 
-void GameAudio_PlaySfx(i32 sfx, nuvec_s *position, i32 volume, i32 flags);
 extern "C" i32 SuperStory;
 
-extern i32 reset_restart;
 
 extern "C" void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment,
                             u8 red, u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box,
@@ -1372,13 +1277,9 @@ extern "C" void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_
 #include "legoapi/misc/androidbatman.h"
 #include "legoapi/items/collect/spacelevel.h"
 
-extern GAMECAMERA_s *GameCam;
 extern WORLDINFO_s *WORLD;
 extern "C" {
-    extern i32 Paused;
-    extern i32 NewMode;
     extern "C++" FadeSystem FadeSys;
-    extern i32 CutSceneWaiting;
 }
 
 // Original bss @0x127a500: 64 pads x 0x60 bytes.
@@ -1388,30 +1289,24 @@ extern "C" {
 // these before accepting the new input; GamePad_Rotate then reports a stable
 // angular velocity only when both consecutive turns agree.
 
-f32 GamePad_Rotate(GameObject_s *object);
 
 // ==== src/gameframework/savesystem.cpp: all remaining content ====
 
 // ==== src/legoapi/core/config/saveload.cpp: declarations ====
 
-extern u8 FS_Active;
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
-void RenderFileSel3(i32 draw_title);
 
 // ==== src/legoapi/menus/core/text.cpp: declarations ====
 #include "nu2api/nu3d/nushader_plain.h"
 
 // Original .data @0x667ce0; the names are filled in by the static initializer.
 
-i32 Text_GetMaxOverallStrings();
 
 extern "C" {
 
-void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                     u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
 }
 
 // ==== src/legoapi/items/objects/objectsall.cpp: declarations ====
@@ -1425,7 +1320,6 @@ void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 
 #include "gameapi/edtools/edcam.h"
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
@@ -1441,7 +1335,6 @@ extern "C" {
 
 #include <stddef.h>
 
-extern NUVEC ShadNorm;
 // Runtime-selected groups appended after the fixed terrain allocation.
 #include "legoapi/render/core/terrain_stubs_types.h"
 
@@ -1450,7 +1343,6 @@ extern "C" i32 NuFileExists(char *name);
 
 extern "C" {
 
-extern i32 debris_render_group;
 
 } // extern "C"
 
@@ -1463,7 +1355,6 @@ extern i32 debris_render_group;
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
@@ -1475,7 +1366,6 @@ extern "C" {
 // local `t` symbols matching res/libTTapp.so.
 
 WORLDINFO_s *WorldInfo_CurrentlyActive();
-extern f32 FRAMETIME;
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -1639,7 +1529,6 @@ static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, edu
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    extern i32 debris_render_group;
 }
 
 // The original particle editor's private callbacks and menu state share this TU.
@@ -1702,9 +1591,7 @@ extern "C" {
 
     // Shared editor font; edmainInit receives and stores the font handle.
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -1792,7 +1679,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #include <new>
 
 extern EdInputContext * Input;
-extern MemoryManager theMemoryManager;
 extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
@@ -1857,16 +1743,13 @@ inline void EdBitControl::operator delete(void *memory) {
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    extern i32 debris_render_group;
 }
 
 // ---- end src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -1950,7 +1833,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -1999,7 +1881,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2007,20 +1888,7 @@ i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuHGobjEval(nuhgobj_s *object, i32 override_count, nuhgobjjointoverride_s *overrides, NUMTX *matrices);
-void NuHGobjEvalAnim2(nuhgobj_s *object, ani3_animheader_s *animation, f32 time, i32 override_count,
-                          NUJOINTANIM_s *overrides, NUMTX *matrices);
 
-void NuHGobjEvalAnimBlend2(nuhgobj_s *object, ani3_animheader_s *animation_a, f32 time_a,
-                               ani3_animheader_s *animation_b, f32 time_b, f32 blend, i32 override_count,
-                               NUJOINTANIM_s *overrides, NUMTX *matrices);
-void **NuHGobjEvalDwa2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation, f32 frame);
-void **NuHGobjEvalDwaBlend2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation_a, f32 frame_a,
-                                nuanimdata2_s *animation_b, f32 frame_b, f32 blend);
-i32 NuHGobjRndrMtxDwa(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,
-                          NUMTX *joint_matrices, void **blend_values, i32);
-void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
-                               f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2065,7 +1933,6 @@ void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i3
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEVALUES speedervals[4];
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
@@ -2080,7 +1947,6 @@ DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
-void GameCam_Reset(GAMECAMERA_s *camera);
 
 extern i32 CUTCAMONLY, CUTCAM, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 
@@ -2147,13 +2013,11 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -2171,7 +2035,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2220,7 +2083,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2228,20 +2090,7 @@ i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuHGobjEval(nuhgobj_s *object, i32 override_count, nuhgobjjointoverride_s *overrides, NUMTX *matrices);
-void NuHGobjEvalAnim2(nuhgobj_s *object, ani3_animheader_s *animation, f32 time, i32 override_count,
-                          NUJOINTANIM_s *overrides, NUMTX *matrices);
 
-void NuHGobjEvalAnimBlend2(nuhgobj_s *object, ani3_animheader_s *animation_a, f32 time_a,
-                               ani3_animheader_s *animation_b, f32 time_b, f32 blend, i32 override_count,
-                               NUJOINTANIM_s *overrides, NUMTX *matrices);
-void **NuHGobjEvalDwa2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation, f32 frame);
-void **NuHGobjEvalDwaBlend2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation_a, f32 frame_a,
-                                nuanimdata2_s *animation_b, f32 frame_b, f32 blend);
-i32 NuHGobjRndrMtxDwa(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,
-                          NUMTX *joint_matrices, void **blend_values, i32);
-void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
-                               f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2281,8 +2130,6 @@ void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i3
 // ==== functions in original address order ====
 
 extern "C" {
-void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                     u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
 
 }
 
@@ -2373,7 +2220,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 terrain_mask);
 
-extern CUTSCENEPLAYERCLIP *CutScenePlayer_Active();
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))

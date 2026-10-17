@@ -31,11 +31,9 @@ static const f32 Tag_TransferResetTimer = 0.5f;
 
 extern i32 (*Tag_NoHiddenIconFn)(GameObject_s *);
 extern char * LEGOASCII_UP;
-extern u8 PlayerRGB[2][3];
 extern ADDGAMEMSG AddGameMsg_Default;
 GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message);
 extern char *ASCII_DOWN;
-extern f32 ICONSIZE;
 
 // The original keeps this search out of line and passes the object in EAX.
 
@@ -66,9 +64,7 @@ extern "C" void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i
 
 f32 BUCK_RIDERJUMPCLEARANCE = 1.0f;
 void (*BuckStartExtraFn)(GameObject_s *) = NULL;
-void NewRumble(nupad_s *, f32, i32);
 
-void Buck_Start(GameObject_s *object, GameObject_s *rider);
 
 // ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
 #include "gameapi/edtools/gameapi_edtools_types.h"
@@ -83,7 +79,6 @@ void Buck_Start(GameObject_s *object, GameObject_s *rider);
 #include <stdio.h>
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
@@ -135,10 +130,8 @@ extern "C" i32 NuFileExists(char *name);
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 }
 
 // Forward declarations for local (static) part/gizmo helper stubs.
@@ -152,16 +145,12 @@ extern WORLDINFO_s *WORLD;
 
 extern "C" {
 
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 
-void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
-                                           i16 y_rotation, NUMTX *particle_orientation);
 
     // The editor loader clears these page IDs with aligned vector stores.
 
 } // extern "C"
 
-extern f32 FRAMETIME;
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -395,9 +384,7 @@ extern "C" {
 
     // Shared editor font; edmainInit receives and stores the font handle.
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -486,7 +473,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #include <new>
 
 extern EdInputContext * Input;
-extern MemoryManager theMemoryManager;
 extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
@@ -550,9 +536,7 @@ inline void EdBitControl::operator delete(void *memory) {
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -639,7 +623,6 @@ extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail clears these "fast repeat" latches but never sets them.
 
-extern FadeSystem FadeSys;
 
 // ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
 // Temporary C-linkage compatibility surface for unresolved engine owners.
@@ -707,7 +690,6 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -870,7 +852,6 @@ struct nupad_s;
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEVALUES speedervals[4];
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
@@ -902,12 +883,10 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 #include "legoapi/cutscenes/cutscenes.h"
 
-extern u8 FS_Active;
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
-void RenderFileSel3(i32 draw_title);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 #include "legoapi/actions/character/transform.h"
@@ -926,7 +905,6 @@ void RenderFileSel3(i32 draw_title);
 #include "nu2api/nu3d/android/nugscn_android.h"
 #include "nu2api/numath/numath.h"
 
-extern i32 VehicleArea;
 
 struct GAMEMESSAGE_s;
 
@@ -1004,19 +982,16 @@ struct GAMEMESSAGE_s;
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== functions in original address order ====
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -1034,7 +1009,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------

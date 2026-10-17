@@ -2,7 +2,6 @@
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 
-i32 CanPullLevers(i32 character_id);
 
 #include "legoapi/characters/core/CharacterObjectInterface.h"
 #include "legoapi/characters/core/players.h"
@@ -99,7 +98,6 @@ extern "C" {
     i16 id_GEONOSIAN = -1;
     i16 id_BOB = -1;
     i16 id_WATTO = -1;
-extern i16 id_CHEWBACCA;
     i16 id_WOOKIEE = -1;
     i16 id_ATST = -1;
     i16 id_ATST_LOWRES = -1;
@@ -474,7 +472,6 @@ extern i16 id_CHEWBACCA;
 }
 
 i32 CHARCOUNT = 0;
-extern CHARACTERDATA * CDataList;
 GAMECHARACTERDATA *GCDataList = NULL;
 // Original 0x120-byte data record @0x00666960. FixUpCharacters copies this
 // canonical prefix into every character before character-specific overrides.

@@ -66,11 +66,8 @@ static i32 Tubes_Load(void *world_ptr, void *);
 
 static void Tubes_StoreProgress(void *world_ptr, void *, void *progress_ptr);
 
-i32 Tube_InCylinder(GameObject_s *object, TUBE *tube, f32 *horizontal_distance_squared, i32 ignore_height);
 
-void Tube_SetObjBit(TUBE *tube, i32 object_index);
 
-i32 Tube_IsObjBitSet(TUBE *tube, i32 object_index);
 
 static void Tubes_Update(void *world_ptr, void *, float frame_time);
 
@@ -91,7 +88,6 @@ static void Tubes_Update(void *world_ptr, void *, float frame_time);
 #include "nu2api/numath/nuvec.h"
 #include "legoapi/world/mission.h"
 
-extern HINTSYS_s hintsys;
 extern f32 AlphaBlendTime;
 extern f32 ICONX;
 extern f32 ICONXPOS_TOUCHYFEELY;
@@ -120,9 +116,6 @@ void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder 
 
 // The hint icon transitions and the touch icon x position are dynamically
 // initialized in this unit's static constructor in the reference.
-extern HintVectorTransition hintIconPos;
-extern HintScalarTransition hintIconScale;
-extern HintScalarTransition hintYPop;
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
 

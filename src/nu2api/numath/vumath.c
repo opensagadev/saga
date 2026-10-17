@@ -20,4 +20,3 @@ static void VuMtxTranspose(f32 dst[4][4], f32 src[4][4]) {
     NuMtxTranspose((NUMTX *)&dst[0][0], (NUMTX *)&src[0][0]);
 }
 
-void VuQuatSlerpFast(NUQUAT *out, NUQUAT *from, NUQUAT *to, f32 t);

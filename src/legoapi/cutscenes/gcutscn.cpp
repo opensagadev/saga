@@ -27,9 +27,7 @@
 #include "legoapi/render/core/render.h"
 #include "gameapi/gui/apimenu.h"
 
-void EvaluateJointOrientationMtx(nugscn_s *scene, i32 joint_index, numtx_s *matrix);
 
-i32 FindMtlInHGObj(nugscn_s *scene, i32 material_type);
 
 i32 FindTexAnimFromMtl(nugscn_s *, numtl_s *);
 
@@ -268,7 +266,6 @@ static NUGCUT_FIXPTRS_ATTR(1) void NuGCutSceneFixPtrsNoAnims(NUGCUTSCENE_s *cuts
     __asm__("_ZL18NuGCutSceneFixPtrsP13NUGCUTSCENE_sii.constprop.43");
 static void NuGCutSceneFixPtrsNoAnims(NUGCUTSCENE_s *cutscene);
 
-void NuGCutSceneRemapFocusIdToLocaterNum(NUGCUTSCENE_s *cutscene, VARIPTR *buffer);
 
 extern "C" {
 
@@ -278,9 +275,7 @@ extern "C" {
     NUGCUTRELEASELOCATORVFXFN ReleaseLocatorVfxFn = NULL;
     NUGCUTTRIGGERLOCATORVFXFN TriggerLocatorVfxFn = NULL;
     NUGCUTLOOKUPLOCATORVFXFN LookupLocatorVfxFn = NULL;
-NUGCUTSCENE_s *NuGCutSceneLoad(char *name, VARIPTR *buf, VARIPTR *buf_end, i32 flags);
 
-void NuGCutSceneDestroy(NUGCUTSCENE_s *cutscene);
 
 void instNuGCutSceneStart(instNUGCUTSCENE_s *instance);
 
@@ -372,27 +367,20 @@ extern "C" {
     void *(*DefragCreateInstFn)(void *, NUGCUTSCENE_s *, VARIPTR *);
     void (*DefragInstDestroyedFn)(void *);
     i32 DefragCutSceneListSize;
-    extern debinftype **debtab;
     extern NUGCUTLOCATORFNENTRY_s *locatorfns;
     extern f32 timeincrement;
     extern i32 processdeb;
     extern f32 glyntestha;
 
     void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
-    void NuMtxPreTranslate(NUMTX *, NUVEC *);
-    void NuMtxMul(NUMTX *, NUMTX *, NUMTX *);
-    i32 NuStrICmp(const char *, const char *);
     void instNuGCutSceneStart(instNUGCUTSCENE_s *);
 
     i32 AddScaledVariableShotDebrisEffect2(i32, NUVEC *, i32, f32, NUMTX *, NUMTX *, f32);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
     void DebrisPopulateInstance(i32, f32);
     void DebrisEmitterPos(i32, f32, f32, f32);
     void DebrisOrientationMtx(i32, NUMTX *);
-    void DebrisPosOrientationMtx(i32, NUMTX *);
     void AddScaledFiniteShotDebrisEffect(i32 *, i32, NUVEC *, NUVEC *, NUVEC *, i32, f32);
     void DebrisEmitterOrientationMtx(i32, NUMTX *);
-    void DebFreeInstantly(i32 *);
 }
 
 void instGetLookAtLocatorInfo(instNUGCUTSCENE_s *instance, instNUGCUTLOOKAT_s *state);
@@ -513,7 +501,6 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -574,11 +561,8 @@ extern "C" {
     // Animation / curves / data
     // ---------------------------------------------------------------------------
 
-void NuAnimCurve2SetApplyToMatrix_3(ani3_animheader_s *animation, i32 node, f32 frame, NUMTX *matrix);
-f32 *NuAnimCurveExtractAllNodeCurves_3(ani3_animheader_s *anim, i32 node, f32 frame, char *curve_mask);
 void NuAnimData2CalcTime(nuanimdata2_s *anim, f32 frame, nuanimtime_s *time);
 
-i32 NuAnimNumNodes(void *animation);
 
     // ---------------------------------------------------------------------------
     // Bridge / file / heap / memory
@@ -596,8 +580,6 @@ i32 NuAnimNumNodes(void *animation);
     // Rendering / materials / effects (host has GL paths elsewhere)
     // ---------------------------------------------------------------------------
 
-i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
-void NuSpecialSetDrawMtx(void *special, NUMTX *mtx);
 
     // ---------------------------------------------------------------------------
     // Light / wind / particles / debris
@@ -607,12 +589,8 @@ void NuSpecialSetDrawMtx(void *special, NUMTX *mtx);
     // Gobj / hierarchy / scene graph
     // ---------------------------------------------------------------------------
 
-void NuHGobjEvalAnim2(nuhgobj_s *object, ani3_animheader_s *animation, f32 time, i32 override_count,
-                          NUJOINTANIM_s *overrides, NUMTX *matrices);
 
 #include "nu2api/nucore/nucore_plain_types.h"
-void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
-                               f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask);
 
     // ---------------------------------------------------------------------------
     // Input / pad / key / mouse
@@ -796,7 +774,6 @@ extern "C" {
     void instNuGCutSceneDestroy(instNUGCUTSCENE_s *);
 }
 
-i32 qrand(void);
 
 extern "C" {
     extern instNUGCUTSCENE_s *cutscene_load_instance;
@@ -822,9 +799,7 @@ static __used__ __attribute__((noinline)) void instNuGCutTriggerSysUpdate(instNU
 static __attribute__((noinline)) void instNuGCutSceneClipTest(instNUGCUTSCENE_s *instance);
 
 extern "C" {
-NUGCUTSCENE_s *NuGCutSceneLoad(char *name, VARIPTR *buf, VARIPTR *buf_end, i32 flags);
 
-void NuGCutSceneDestroy(NUGCUTSCENE_s *cutscene);
 
 void instNuGCutSceneStart(instNUGCUTSCENE_s *instance);
 
@@ -849,8 +824,6 @@ void instNuGCutSceneDestroy(instNUGCUTSCENE_s *instance);
 }
 
 extern "C" {
-void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
-                               f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask);
 
 }
 

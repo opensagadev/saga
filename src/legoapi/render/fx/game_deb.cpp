@@ -72,18 +72,9 @@
 #include "nu2api/nu3d/nupostparams.h"
 
 // The reference defines these with dynamic initialization in this unit.
-extern MemoryManager theMemoryManager;
 #include "legoapi/misc/supportall_types.h"
-extern void * theThingManager;
 
 void ClearLevelProgress(i32, WORLDINFO_s *);
-u32 TotalLevelCoinTally(WORLDINFO_s *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *);
-extern i32 bonusmodearcade;
-extern f32 DEFAULT_MOVE_RANGE;
-extern f32 drop_back_in_timer;
-extern i32 last_chatter_sfx;
-void InitPlayerAI(GameObject_s *object);
-extern GAMECAMERA_s *GameCam;
 extern "C" ripple_set_s *ripples;
 
 struct AIROW_s;
@@ -91,7 +82,6 @@ struct nunativegscene_s;
 
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
-i32 SuperWeirdo(GameObject_s *object);
 
 extern "C" void edrtlCalculateBurnoutEx(burnset_s *set, NuBloomParameters *parameters, NUVEC *camera_position,
                                         f32 frame_time);
@@ -101,20 +91,16 @@ EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 
 extern AREADATA_s *PODRACE_ADATA;
 extern AREADATA_s *BONUS_GUNSHIP_ADATA;
-extern AREADATA_s *GUNSHIP_ADATA;
 extern "C" i16 id_LANDSPEEDER;
 void PodDust(WORLDINFO_s *, GameObject_s *);
 extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
-void DebFreeWithoutKey(debkeydatatype_s *key);
 
 i32 CannotKill(GameObject_s *object);
 extern "C" i32 DebrisPreCheckCollisions(NUVEC *position, f32 radius);
 extern "C" i32 DebrisCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale);
 extern "C" i32 DebrisTorusCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale);
 
-i32 RndrUnfilledCircle(f32 x, f32 y, f32 radius, f32 border_width, f32 aspect, i32 colour, f32 progress, f32 z,
-                       numtl_s *material);
 
 void DebrisProcessSpheres(uv1deb *data, float time, debinftype *effect, debkeydatatype_s *key, i32 finite);
 
@@ -131,26 +117,19 @@ extern "C" void NuHtmlWrite(const char *text, ...);
 extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 extern "C" {
-    extern debinftype **debtab;
 }
 
 extern "C" {
-    extern debinftype **debtab;
-    extern f32 debris_thinning_level;
-    extern i32 forced_debris_thinning;
 }
 
 extern "C" void DebReAlloc(debkeydatatype_s *, i32);
 
 extern "C" {
-    extern debinftype **debtab;
 }
 
-void TBOPENFN(char *name, i32 type);
 
 void RndrArrow(float x, float y, float scale, i32 angle, i32 colour);
 
-void TBCLOSEFN(char *name, i32 type);
 
 // ==== src/legoapi/items/fx/ripples.cpp: declarations ====
 #include "decomp.h"

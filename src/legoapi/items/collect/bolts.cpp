@@ -37,10 +37,6 @@
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include <string.h>
 
-extern BOLT_s Bolt[32];
-extern i32 i_bolt;
-extern f32 BOLT_OVERRIDE_PLAYERBOLTSPEED;
-extern f32 BOLT_OVERRIDE_PLAYERBOLTDURATION;
 
 static void Bolt_Debris_Default(BOLT_s *, NUVEC *, i32, NUVEC *, i32);
 static void Bolt_GetShootOrigin_Default(GameObject_s *, NUVEC *);
@@ -122,19 +118,15 @@ BOLT_s *Bolt_Alloc();
 extern i32 addbolt_newsfx;
 extern NUVEC addbolt_newpos;
 f32 BOLT_SHOOTFLASHTIME = 0.1f;
-f32 Bolt_ObjTargetPosYAdjust(GameObject_s *);
 void FindAnglesXY(NUVEC *, u16 *, u16 *);
 void CalculateInterceptVector(NUVEC *, NUVEC *, NUVEC *, f32, NUVEC *, NUVEC *);
 void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
 
 i32 MatrixReflectionVU0_AXISY(NUMTX *, f32, f32, NUMTX *);
-void Bolt_End(BOLT_s *, i32);
-extern i32 Paused;
 
 void Bolt_Reflect(nuvec_s *normal, nuvec_s *incoming, nuvec_s *out);
 
 extern "C" {
-    void KillPart(PART_s *, i32);
 }
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
@@ -147,11 +139,9 @@ PART_s *Bolt_HitParts(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maximu
 void BoltTypes_Reset(WORLDINFO_s *world);
 
 i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *);
-void GameCam_HitJudder();
 
 i32 Bolt_HitPartMode(BOLT_s *bolt);
 
-BOLTTYPE_s *BoltType_FindByID(i32 id, WORLDINFO_s *world);
 
 void Bolt_HitGameObjectRC(NetMessage &);
 i32 Bolt_HitGameObject(BOLT_s *bolt, GameObject_s *object, NUVEC *points, NUVEC *, NUVEC *, f32 radius, u8 *);
@@ -180,12 +170,9 @@ static __attribute__((noinline, noclone)) i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit
 
 static i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags);
 
-f32 Bolt_ObjTargetPosYAdjust(GameObject_s *object);
 
 void Bolt_Init(void *, NetMessage &);
-BOLT_s *Bolt_Add(GameObject_s *object, nuvec_s *position, numtx_s *matrix, i32 type_id, i32 flags);
 
-void Bolt_End(BOLT_s *bolt, i32 run_callback);
 
 static i32 Bolt_RayCast(BOLT_s *, NUVEC *, NUVEC *, f32);
 i32 GizmoSys_BoltHit(GIZMOSYS_s *, void *, BOLT_s *, NUVEC *, NUVEC *, NUVEC *, f32, u8 *);
@@ -199,7 +186,6 @@ i32 (*BoltInitSfxFn)(GameObject_s *);
 void Bolt_Init(void *storage, NetMessage &message);
 
 
-i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
 static i32 Bolt_RayCast(BOLT_s *bolt, NUVEC *start, NUVEC *movement, f32 radius);
 
 static __used__ void Bolt_Debris_Default(BOLT_s *bolt, nuvec_s *points, int point, nuvec_s *, int);
@@ -214,7 +200,6 @@ extern "C" {
     void NewRayCastGetImpactNormal(NUVEC *);
     i32 NewShadowOnPlatform();
 }
-f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 f32 FindReflectionNoPlatforms(NUVEC *);
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 
@@ -249,13 +234,10 @@ bool LineIntersectCircle(NUVEC *, NUVEC *, NUVEC *, f32);
 
 extern BOLTTYPE_s GlobalBoltType[44];
 
-extern BOLTSYS * BoltSys;
 
 extern "C" {
-    void KillPart(PART_s *, i32);
 }
 
-extern i32 addbolt_nosfx;
 
 extern "C" {
     void NewRayCastGetImpactNormal(NUVEC *);
@@ -276,12 +258,10 @@ extern "C" {
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/nufile/nufile.h"
 
-extern u8 FS_Active;
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
-void RenderFileSel3(i32 draw_title);
 
 // ==== functions in original address order ====
 

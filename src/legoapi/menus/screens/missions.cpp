@@ -41,7 +41,6 @@
 #include "legoapi/items/base/collection.h"
 #include "legoapi/world/world_shared.h"
 
-extern i32 NextArea_FreePlay;
 void InitMission(MISSIONSYS *, i32);
 extern f32 ICONSIZE, ICONX, DROPINALPHA, HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING, tEXIT, tCANCEL;
@@ -50,13 +49,9 @@ void Hub_DrawImportantBrick(i32, f32, f32, f32, i32, i32);
 f32 GetAspectRatio();
 extern "C" void SmartText(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                           u8 green, u8 blue, f32 max_width, i32 max_lines);
-extern char **TTab;
-extern i16 tCANCEL;
-extern i32 menu_flash;
 extern i16 tOUTOFTIME;
 extern "C" TIMER BonusTimer;
 extern "C" void PlaySfx(char *, NUVEC *);
-extern i32 GetMenuID(void);
 extern void SetBonusWinner(i32);
 extern void ResetGameMessages(void);
 extern GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
@@ -71,9 +66,7 @@ void EndMissionsMenu();
 
 void InitMission(MISSIONSYS *ms, i32 idx);
 
-void EndMission(MISSIONSYS *ms, i32 param1, i32 param2);
 
-void CheckMissionEnd(MISSIONSYS *ms);
 
 // ==== functions in original address order ====
 

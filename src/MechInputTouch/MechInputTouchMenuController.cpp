@@ -26,7 +26,6 @@ NuVec2 MechInputTouchMenuController::LastTouchPos = {0.0f, 0.0f};
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/numath/nutrig.h"
 
-i32 GetMenuID();
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
@@ -55,7 +54,6 @@ i32 GetMenuID();
 // these before accepting the new input; GamePad_Rotate then reports a stable
 // angular velocity only when both consecutive turns agree.
 
-f32 GamePad_Rotate(GameObject_s *object);
 
 // ==== src/legoapi/misc/legoapi_misc.cpp: declarations ====
 #include "gameframework/saveload.h"

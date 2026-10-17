@@ -79,8 +79,6 @@ static CHARSCENE_s *CharScene_Area;
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    i32 NuFileExists(char *);
-    i32 NuStrCpy(char *, const char *);
 
 }
 
@@ -498,9 +496,7 @@ nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id);
 #endif
 
 extern "C" VARIPTR characterbuffer_base;
-extern i32 CHARACTERBUFFERSIZE;
 extern i32 Area;
-extern i32 last_area;
 
 void ResetCharacterBuffer(i32 force_reset) {
     if (force_reset == 0 && Area != -1 && Area == last_area) {
@@ -613,7 +609,6 @@ struct nuhspecial_s;
 // --- Extern "C": NuGScn functions have C linkage in original ---
 extern "C" {
 
-NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 } // extern "C"
 
 #include "nu2api/nu3d/nupostparams.h"
@@ -661,8 +656,6 @@ NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
-i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
-                      u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order, float alpha);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -676,7 +669,6 @@ i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, f
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== src/gameapi/gui/apimenu.cpp: all remaining content ====
 
@@ -698,7 +690,6 @@ extern i32 qrand(void);
 // these before accepting the new input; GamePad_Rotate then reports a stable
 // angular velocity only when both consecutive turns agree.
 
-f32 GamePad_Rotate(GameObject_s *object);
 
 extern "C" f32 NuFsqrt(f32);
 
@@ -711,12 +702,10 @@ extern "C" f32 NuFsqrt(f32);
 #include "gameapi/edtools/gameapi_edtools_types.h"
 #include "nu2api/nucore/nutime.h"
 
-extern u8 FS_Active;
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
-void RenderFileSel3(i32 draw_title);
 
 // ==== src/legoapi/menus/core/text.cpp: declarations ====
 #include "nu2api/nu3d/nushader_plain.h"
@@ -738,7 +727,6 @@ void RenderFileSel3(i32 draw_title);
 #include "nu2api/numusic/sfx.h"
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
@@ -773,7 +761,6 @@ extern "C" i32 NuFileExists(char *name);
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
@@ -785,7 +772,6 @@ extern "C" {
 // local `t` symbols matching res/libTTapp.so.
 
 WORLDINFO_s *WorldInfo_CurrentlyActive();
-extern f32 FRAMETIME;
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -1009,9 +995,7 @@ extern "C" {
 
     // Shared editor font; edmainInit receives and stores the font handle.
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -1100,7 +1084,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #include <new>
 
 extern EdInputContext * Input;
-extern MemoryManager theMemoryManager;
 extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
@@ -1164,9 +1147,7 @@ inline void EdBitControl::operator delete(void *memory) {
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -1289,7 +1270,6 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -1366,7 +1346,6 @@ extern "C" {
     // Rendering / materials / effects (host has GL paths elsewhere)
     // ---------------------------------------------------------------------------
 
-i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
 
     // ---------------------------------------------------------------------------
     // Light / wind / particles / debris
@@ -1451,7 +1430,6 @@ union variptr_u;
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEVALUES speedervals[4];
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
@@ -1478,7 +1456,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 extern "C" {
 
-NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 } // extern "C"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
@@ -1537,13 +1514,11 @@ NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -1561,7 +1536,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -1610,7 +1584,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -1663,7 +1636,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
 
 extern "C" {
 
-NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 } // extern "C"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \

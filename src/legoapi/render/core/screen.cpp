@@ -59,20 +59,12 @@ NUMTL *FadeMtl;
 static u8 ScreenGrabNeeded;
 static i32 pause_rt;
 static NUMTL *pause_rndr_mtl;
-extern i32 pause_rndr_on;
 extern f32 pause_fade;
 static i32 old_pause_state;
 i32 (*PauseRenderOffFn)(void);
 i32 cut_waiting_for_new_level;
 
-extern i32 Paused;
-extern volatile i32 waiting_for_level;
-extern i32 GAMEDEMO;
 extern "C" {
-    extern f32 MainRenderTime;
-    extern i32 back_rgba[2];
-    extern i32 clear_screen_onstill;
-    extern i32 screendump;
 }
 void BackDrop_Draw(f32, i32);
 
@@ -83,16 +75,12 @@ extern "C" void NuBackbufferCopy(i32);
 extern f32 CameraZoom;
 extern "C" f32 NuIOS_GetAspectRatio(void);
 
-void NeedScreenGrab(i32 needed);
 
-i8 IsGrabbingScreen();
 
-void DrawStillScreen(i32 clear);
 
 nugscn_s *FadeLoop_ObjScene;
 nuhspecial_s FadeLoop_ObjHSpecial;
 
-void FadeLoop_SetObj(nugscn_s *scene, char *name);
 
 void FadeLoop_DrawObj(float alpha);
 
@@ -160,7 +148,6 @@ struct nuhspecial_s;
 
 extern "C" void NuRndrGradRect2di(i32, i32, i32, i32, i32 *, numtl_s *);
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
-extern FadeSystem FadeSys;
 extern "C" i32 editor_active;
 extern "C" i32 screendump;
 
@@ -187,7 +174,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
 // --- Extern "C": NuGScn functions have C linkage in original ---
 extern "C" {
 
-NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 } // extern "C"
 
 #include "nu2api/nu3d/nuprim.h"
@@ -249,7 +235,6 @@ extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
         }                                                                                                              \
     } while (false)
 
-extern i32 GetMenuID(void);
 extern i32 qrand(void);
 extern f32 SeekLinearF(f32, f32, f32);
 
@@ -279,23 +264,16 @@ void (*BackDrop_AlphaFn)(float *) = nullptr;
 
 void BackDrop_UpdateColours(i32 instant);
 
-void BackDrop_Draw(float alpha, i32 flags);
 
 // ==== src/legoapi/core/startup/finishloop.cpp: declarations ====
 #include "nu2api/nucore/android/NuThread_android.h"
 
 extern "C" {
-    extern i32 FinishLoop_On;
-    i32 NuRndrBeginScene(i32 flags);
-    void NuRndrEndScene(void);
     f32 NuFrameEnd(void);
-    void edGraEnableTerrainSwap(void);
-    void edGraDisableTerrainSwap(void);
 }
 
 void BackDrop_Draw(f32 alpha, i32 flags);
 
-void FinishLoop(i32 frames);
 
 // ==== src/legoapi/render/fx/particles.cpp: declarations ====
 #include "legoapi/render/fx/particles.h"
@@ -303,8 +281,6 @@ void FinishLoop(i32 frames);
 extern "C" i32 back_rgba[2];
 extern "C" f32 MainRenderTime;
 extern "C" {
-    i32 NuRndrBeginScene(i32 flags);
-    void NuRndrEndScene(void);
 }
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
@@ -414,7 +390,6 @@ struct WORLDINFO_s;
 #include "nu2api/nucore/nukeyboard.h"
 #include "nu2api/nucore/numouse.h"
 
-i32 GetMenuID(void);
 
 #include "legoapi/characters/motion/camera_types.h"
 extern VIEWCAM_s ViewCam;
@@ -434,7 +409,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 extern "C" {
 
-NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 } // extern "C"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
@@ -539,7 +513,6 @@ struct EDCREATURE_s;
 #define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone))
 #endif
 
-extern CHARCONFIG_s charconfig;
 
 // Retail only keeps the clone with strip_comments fixed to 1 (regparm text, filename).
 #if defined(__i386__)
@@ -573,7 +546,6 @@ extern CHARCONFIG_s charconfig;
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    i32 NuFileExists(char *);
 
 }
 
@@ -612,7 +584,6 @@ extern "C" i32 FinishLoop_On;
 
 extern "C" {
 
-NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 } // extern "C"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
@@ -677,10 +648,8 @@ NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 #include "legoapi/items/collect/spacelevel.h"
 #include "nu2api/nucore/NuInputDevice.h"
 
-extern GAMECAMERA_s *GameCam;
 extern WORLDINFO_s *WORLD;
 extern "C" {
-    extern i32 Paused;
     extern "C++" FadeSystem FadeSys;
 }
 
@@ -691,7 +660,6 @@ extern "C" {
 // these before accepting the new input; GamePad_Rotate then reports a stable
 // angular velocity only when both consecutive turns agree.
 
-f32 GamePad_Rotate(GameObject_s *object);
 
 extern "C" f32 NuFsqrt(f32);
 
@@ -701,26 +669,20 @@ extern "C" f32 NuFsqrt(f32);
 
 #include "gameapi/edtools/gameapi_edtools_types.h"
 
-extern u8 FS_Active;
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
-void RenderFileSel3(i32 draw_title);
 
 // ==== src/legoapi/menus/core/text.cpp: declarations ====
 #include "nu2api/nu3d/nushader_plain.h"
 
 // Original .data @0x667ce0; the names are filled in by the static initializer.
 extern "C" {
-    i32 NuRndrBeginScene(i32 flags);
 }
 
 extern "C" {
 
-void SmartTextSetWidescreen(f32 font_scale_x, f32 coordinate_scale);
-void Text3D(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red, u8 green,
-                u8 blue);
 }
 
 extern "C" void SetQFont2D(void);
@@ -734,7 +696,6 @@ extern "C" void SetQFont2D(void);
 #include "gameapi/edtools/edcam.h"
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
@@ -763,12 +724,10 @@ extern "C" i32 NuFileExists(char *name);
 
 #include <float.h>
 
-extern ADDPART_s Default_ADDPART;
 
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
@@ -781,15 +740,11 @@ extern "C" {
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
     // The editor loader clears these page IDs with aligned vector stores.
 
 } // extern "C"
 
-extern f32 FRAMETIME;
-void PartStop_Flickerer(PART_s *);
-i32 PartDraw_Flickerer(PART_s *);
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -802,11 +757,8 @@ i32 PartDraw_Flickerer(PART_s *);
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-void PartImpact_Brick(PART_s *part);
 
-void PartStop_Flickerer(PART_s *part);
 
-i32 PartDraw_Flickerer(PART_s *part);
 
 // ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
 #include "gameapi/edtools/edanim_internal.h"
@@ -1012,14 +964,10 @@ static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int
 
 extern "C" {
 
-void edGraDisableTerrainSwap(void);
-void edGraEnableTerrainSwap(void);
 
     // Shared editor font; edmainInit receives and stores the font handle.
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -1108,7 +1056,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #include <new>
 
 extern EdInputContext * Input;
-extern MemoryManager theMemoryManager;
 extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
@@ -1172,12 +1119,8 @@ inline void EdBitControl::operator delete(void *memory) {
 
 extern "C" {
 
-void edGraDisableTerrainSwap(void);
-void edGraEnableTerrainSwap(void);
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -1298,8 +1241,6 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraSet(NUCAMERA *cam);
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -1376,7 +1317,6 @@ extern "C" {
     // Rendering / materials / effects (host has GL paths elsewhere)
     // ---------------------------------------------------------------------------
 
-i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
 
     // ---------------------------------------------------------------------------
     // Light / wind / particles / debris
@@ -1460,7 +1400,6 @@ union variptr_u;
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEVALUES speedervals[4];
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
@@ -1470,7 +1409,6 @@ DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 extern "C" {
 
-NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 } // extern "C"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
@@ -1529,13 +1467,11 @@ NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -1553,8 +1489,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSet(NUCAMERA *cam);
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -1603,7 +1537,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -1648,7 +1581,6 @@ i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 }
 
@@ -1656,8 +1588,6 @@ PART_s *AddPart(ADDPART_s *params);
 
 extern "C" {
 
-void Text3D(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red, u8 green,
-                u8 blue);
 
 }
 
@@ -1665,7 +1595,6 @@ extern "C" {
 
 extern "C" void SetQFont2D(void);
 
-void SmartTextSetWidescreen(f32 font_scale_x, f32 coordinate_scale);
 
 }
 
@@ -1673,7 +1602,6 @@ void SmartTextSetWidescreen(f32 font_scale_x, f32 coordinate_scale);
 
 extern "C" {
 
-NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 } // extern "C"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
@@ -1732,7 +1660,6 @@ NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
-extern GAMEFOG_STATE GameFog;
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
@@ -1817,7 +1744,6 @@ i32 PodLevel(AREADATA_s *area);
 
 // Retail splits the context test off as an inline head; the rest is this partial clone.
 
-float SeekLinearF(float current, float target, float step);
 
 DECOMP_ASSERT(sizeof(AWKWARDSHAPESPHERE_s) == 12, "Awkward shape sphere size");
 DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere radius offset");
@@ -1858,14 +1784,12 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 
 extern "C" {
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
 } // extern "C"
 
@@ -1892,7 +1816,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 #include "legoapi/characters/motion/contexts.h"
 #include "legoapi/characters/core/playeritems.h"
 
-i32 qrand();
 
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
@@ -1909,7 +1832,6 @@ namespace {
 
 // ==== src/legoapi/audio/specialsfx.cpp: declarations ====
 
-i32 qrand(void);
 
 // ==== src/legoapi/gizmo/base/gizmo.cpp: declarations ====
 
@@ -1933,10 +1855,7 @@ DECOMP_ASSERT(offsetof(GIZMOTYPES, types) == 8, "Gizmo type-table pointer offset
 
 // ==== src/legoapi/misc/legoapi_misc.cpp: declarations ====
 
-extern void *CutStopInfo;
 extern "C" {
-    extern i32 Paused;
-    extern i32 editor_active;
     extern "C++" FadeSystem FadeSys;
 }
 
@@ -2196,9 +2115,7 @@ DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size
 
 #include "legoapi/ai/core/aisysall_types.h"
 
-void RegisterAIScriptActions(AIACTIONDEF *action_defs);
 
-void RegisterAIScriptConditions(AICONDITIONDEF *cond_defs);
 
 // ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
 #include "editor/aieditor_state.h"
@@ -2224,7 +2141,6 @@ extern "C" {
 
 extern "C" {
 
-extern AIEDITOR_RENDER_STATE * aieditor;
 
 } // extern "C"
 
@@ -2411,7 +2327,6 @@ namespace {
 
 extern "C" {
 
-NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 } // extern "C"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
@@ -2549,7 +2464,6 @@ struct PART_s;
 
 extern "C" {
 
-NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 } // extern "C"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
@@ -2648,7 +2562,6 @@ DECOMP_ASSERT(offsetof(WORLDINFO_s, blowup_target_candidates) == 0x50d4, "Blowup
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
 
 extern "C" {
-    i32 NuFileExists(char *);
 
 }
 
@@ -2696,7 +2609,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 extern "C" {
 
-NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 } // extern "C"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \

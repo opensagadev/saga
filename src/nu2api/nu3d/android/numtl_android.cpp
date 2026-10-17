@@ -62,7 +62,6 @@ i32 g_alphaTestEnabled = 0;
 u32 g_alphaFunc = 0;
 u32 g_alphaRef = 0;
 
-void NuMtlInsert(NUMTL *mtl, i32 plane);
 
 NuVertexFormatPS *g_nuDebrisVertexFormat;
 NuVertexFormatPS *g_nuFaceOnVertexFormat;
@@ -121,7 +120,6 @@ static inline char DebrisGlassSelector(const numtl_s *mtl) {
 
 static constexpr char kGlassDebrisMarker = (char)-0x69; // 0x97
 
-void NuIOS_SetCullMode(i32 mode);
 
 #include "nu2api/nu3d/android/nublend_internal.h"
 
@@ -167,7 +165,6 @@ DECOMP_ASSERT(sizeof(MTL_OVERRIDE_RECORD) == 12, "Material override payload ABI"
 DECOMP_ASSERT(offsetof(NUMTL, shader_desc) + offsetof(NUSHADERMTLDESC, vtx_desc) == 0x1f0,
               "Material override vertex descriptor offset");
 
-void NuShaderMtlDescInit(NUSHADERMTLDESC *desc);
 
 // ==== src/nu2api/nu3d/nurndr_plain.cpp: declarations ====
 #include "nu2api/nu3d/nuhspecial.h"
@@ -261,7 +258,6 @@ extern "C" {
     static NUDISPLAYSCENERNDR_BODY_ATTR void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene)
         __asm__("NuDisplaySceneRndr.part.101");
 
-void NuDisplaySceneRndr(void *display_scene);
 
 }
 
@@ -275,7 +271,6 @@ extern "C" void NuDisplayListAnimateMtls(f32 frame_time);
 
 // Shader / texture / vertex state
 extern "C" {
-extern void * g_boundCameraPacket;
 }
 static void NuTexGenTexture(void) {
     STUBBED();

@@ -407,11 +407,7 @@ void SetPodMergeAnims(ANIMPACKET_s *packet, i32 index) {
 struct AIROW_s;
 struct nunativegscene_s;
 
-extern APICHARACTERMODELLIST_s NetFreePlayModelList[49];
-extern i8 net_FreePlayModelCount;
-extern u8 net_recievedFreePlayList;
 
-void GetClientMineInfo(nuvec_s **positions, u64 **present, u64 **exploded);
 
 // ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
 #include "nu2api/numath/nutrig.h"
@@ -458,29 +454,13 @@ static i32 PodRaceKey[8] __attribute__((aligned(16))) = {-1, -1, -1, -1, -1, -1,
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern i32 players_going_forward;
 
-extern f32 zoom_ahead_extra;
-extern f32 zoom_ahead_extra_time;
-extern f32 speeder_level_height_lerpf;
-extern f32 speeder_level_height;
-extern SPEEDERCHASEVALUES speedervals[4];
-extern f32 speederfirerange;
-extern f32 speeder_shootrate;
-extern f32 speeder_kill_dist;
-extern f32 speeder_midrange_time;
-extern f32 speeder_ahead_time;
-extern f32 speeder_mode_ahead_timer;
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
-extern i32 objopponent_ignoreaiopponent;
 
-void PodKeyReset();
 
-void PodLoseSpeed(GameObject_s *object, i32 hit, i32 rumble);
 
-i32 ObjIsTargetSpeeder(GameObject_s *object);
 
 void SpeederChaseA_Init(WORLDINFO_s *world);
 
@@ -488,12 +468,9 @@ void SpeederChaseA_Panel(WORLDINFO_s *);
 
 void SpeederChaseA_Reset(WORLDINFO_s *);
 
-i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **, i32, i32 first_time,
-                              f32 elapsed);
 
 void SpeederChaseA_Update(WORLDINFO_s *world);
 
-i32 ObjOpponentStillThere(GameObject_s *object, GameObject_s *opponent, f32 gap);
 
 extern "C" void AddDebrisEffect(i32 *, i32, f32, f32, f32);
 extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);

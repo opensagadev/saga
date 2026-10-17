@@ -51,8 +51,6 @@ char *LEGOASCII_BIGARROW = NULL;
 i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
 
 extern i32 LEGOOBJ_MINIKIT, LEGOOBJ_CHARKIT;
-void EndChallenge(i32, i32);
-void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
 // ==== src/legoapi/gizmo/base/gizmo_sys.cpp: declarations ====
@@ -60,7 +58,6 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmo/base/gizflow.h"
 
-void MiniKit_InitPieces(MINIKIT *minikit, i32 count, VARIPTR *buf, VARIPTR *buf_end);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 #include "gameapi/edtools/edbri_internal.h"
@@ -145,7 +142,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
 // --- Extern "C": NuGScn functions have C linkage in original ---
 extern "C" {
 
-NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 } // extern "C"
 
 #include "nu2api/nu3d/nuprim.h"
@@ -203,7 +199,6 @@ f32 PANEL_MINIKITCOUNTY = -0.1f;
 // red-brick positions come from the Game init values in legogame/game.cpp.
 i32 LEGOOBJ_CHARKIT = -1;
 i32 LEGOOBJ_MINIKIT = -1;
-i32 DrawPanel3DObjectNoAlpha(f32, f32, f32, f32, f32, f32, u16, u16, u16, nuhspecial_s *, i32);
 extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
 
 i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
@@ -221,7 +216,6 @@ i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float sca
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== functions in original address order ====
 

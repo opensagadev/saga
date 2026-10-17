@@ -1161,7 +1161,6 @@ void GizObstacle_SetPushControlled(GIZOBSTACLE_s *obstacle, GameObject_s *object
     obstacle->animation_speed = speed;
 }
 
-void GizObstacle_SetDefaultSFXFn_LSW(void *, GIZOBSTACLE_s *obstacle);
 
 void GizObstacle_SetTechnoControlled(GIZOBSTACLE_s *obstacle, float speed) {
     obstacle->progress_external_control = 1;

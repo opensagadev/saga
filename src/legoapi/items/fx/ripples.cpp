@@ -202,7 +202,6 @@ void DrawRipple(ripple_node_s *node);
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== functions in original address order ====
 

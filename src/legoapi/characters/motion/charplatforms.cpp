@@ -15,13 +15,9 @@ struct AIROW_s;
 struct nunativegscene_s;
 
 extern "C" void NewTerrPlatformsOff(void);
-f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 
-extern i32 SkinFlipTab[8];
-f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 extern "C" void NewTerrPlatformsOff();
 
-void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO *info);
 
 void CharPlatforms_Reset(CHARPLATFORMSYS_s *system) {
     if (system == NULL) {

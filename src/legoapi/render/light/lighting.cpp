@@ -46,11 +46,9 @@ extern f32 GhostLightMul;
 void SetLights(NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC *direction1, NUCOLOUR3 *colour2,
                NUVEC *direction2, NUVEC *ambient);
 
-void SetLights_RTLDATA(rtldata_s *data, float scale);
 
 void SetZeroLights();
 
-void LightGameObject(GameObject_s *object, void *set);
 
 // ==== src/legoapi/render/core/rtl.c: declarations ====
 // Original RTL TU basename is rtl.c; the source is compiled as C++.
@@ -78,47 +76,34 @@ DECOMP_ASSERT(sizeof(rtlindex_s) == 0x28, "RTL index size");
 
 extern "C" {
 
-i32 rtlDynamicAlloc(void);
 
-void rtlDynamicFree(i32 id);
 
-i32 rtlDynamicSetType(i32 id, i32 type);
 
-bool rtlDynamicEnable(i32 id, i32 enabled);
 
-i32 rtlDynamicMasterEnable(i32 enabled);
 
 }
 
 extern "C" {
 
-rtlset *rtlLoadSet(char *path, VARIPTR *buffer, i32 buffer_end);
 
-void rtlResetEx(rtldata_s *data, i32 reset_cached);
 
 }
 
 extern "C" {
 
-void rtlSetLights(rtldata_s *data);
 
-void rtlSetSpecularLight(rtldata_s *data);
 }
 
 extern "C" {
-f32 rtlSpecularValue(rtldata_s *data);
 
-void rtlSetSpecularValue(rtldata_s *data, f32 value);
 }
 
 extern "C" {
-void rtlApplySetScale(void *set, rtldata_s *data, NUVEC *position, NUMTX *rotation, i32 identity, f32 scale);
 
 } // extern "C"
 
 extern "C" {
 
-void rtlProcessLights(void *set, f32 frame_time);
 
 } // extern "C"
 
@@ -169,7 +154,6 @@ DECOMP_ASSERT(offsetof(EdClass, interface) == 0x14, "EdClass interface offset");
 DECOMP_ASSERT(sizeof(EdMember) == 0x08, "EdMember size");
 DECOMP_ASSERT(offsetof(EdMember, reference) == 0x04, "EdMember reference offset");
 
-extern LevelEditor theLevelEditor;
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
@@ -330,7 +314,6 @@ struct rtlidata_s;
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 extern f32 SeekLinearF(f32, f32, f32);
 
 // ==== functions in original address order ====
@@ -339,9 +322,7 @@ extern f32 SeekLinearF(f32, f32, f32);
 
 #include "legoapi/render/light/shadow.h"
 
-void ResetShadowMapRendering();
 
-void EnableShadowMapRendering(i32);
 
 // ==== functions in original address order ====
 

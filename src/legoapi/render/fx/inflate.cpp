@@ -27,14 +27,11 @@ static inline i32 ReverseBits(i32 x) {
     return x;
 }
 
-u32 BuildHuffmanTree(DEFHUFFMAN *tree, u8 *codeLengths, i32 symbolCount);
 
-i32 Inflate(DEFLATECONTEXT *ctx, char *buffer, i32 size);
 
 static u8 DefaultLengths[288] = {0};
 static u8 DefaultDistances[32] = {0};
 
-void InitHuffmanDefaults();
 
 #define DROPBITS(ctx, n)                                                                                               \
     ({                                                                                                                 \
@@ -148,12 +145,10 @@ enum {
     BLOCK_UNCOMPRESSED = 2,
 };
 
-i32 DecodeDeflated(DEFLATECONTEXT *ctx);
 
 static u8 LengthDeZigZag[19] = {0x10, 0x11, 0x12, 0x00, 0x08, 0x07, 0x09, 0x06, 0x0a, 0x05,
                                 0x0b, 0x04, 0x0c, 0x03, 0x0d, 0x02, 0x0e, 0x01, 0x0f};
 
-i32 DecompressHuffmanTrees(DEFLATECONTEXT *ctx);
 
 // ==== functions in original address order ====
 

@@ -17,7 +17,6 @@ i32 PS2_VCNTR_Y = 360;
 i32 PS2_VREZ_W = 640;
 i32 PS2_VREZ_H = 224;
 
-void NuVpSetScalingMtx(void);
 
 static void NuVpSetClippingMtx(void);
 

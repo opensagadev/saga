@@ -320,7 +320,6 @@ TERRAIN_LAYER_s TerLayer[17] = {
 };
 GameObject_s *player = NULL;
 GameObject_s *player2 = NULL;
-extern GameObject_s *CutDeadVehiclePlayer;
 f32 avg_currentspeed_mul = 0.0f;
 i32 pause_rndr_on = 0;
 f32 pause_fade = 0.0f;

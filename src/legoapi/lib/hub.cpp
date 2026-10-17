@@ -73,7 +73,6 @@ f32 LastTouchTime;
 #include "nu2api/nu3d/nuspecial.h"
 
 // The reference defines these with dynamic initialization in this unit.
-extern MemoryManager theMemoryManager;
 #include "legoapi/misc/supportall_types.h"
 
 static i32 TBGAMECOUNT;

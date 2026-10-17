@@ -61,7 +61,6 @@ i32 (*GizmoBlowUp_NoTargetFn)(WORLDINFO_s *, GameObject_s *) = NULL;
 void GizBlowup_DeleteTerrain();
 void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *blowup);
 void GizmoBlowUp_AddEffects(NUVEC *position, GIZMOBLOWUP_s *blowup, i32 count, i32 flags, GameObject_s *object);
-void GameAntinode_UnregisterAntiNode(GAMEANTINODESYS_s *system, GAMEANTINODE_s *node);
 void GameAntiNodeData_Init(GAMEANTINODEDATA_s *data, nuhspecial_s *special);
 i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *blowup);
 void GizBlowup_DeleteSingleTerrain(GIZMOBLOWUP_s *blowup);
@@ -70,13 +69,11 @@ void GizmoBlowupGenDecalMatrix(GIZMOBLOWUP_s *, NUMTX *, i32);
 void GizmoBlowupGenShadowMatrix(GIZMOBLOWUP_s *, NUMTX *);
 
 i32 MAXBLOWUPRANDSPANG = 60;
-extern NUVEC v010;
 extern ADDPART_s Default_ADDPART;
 extern "C" PART_s *AddPart(ADDPART_s *);
 i32 PartDraw_Flickerer(PART_s *);
 void PartStop_Flickerer(PART_s *);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
-void NewRumbleAllPlayers(f32, f32, i32, i32);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 i32 ReleaseHearts();
 EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
@@ -138,11 +135,9 @@ void GizBlowup_DeleteTerrain();
 void GizBlowup_InitTerrain();
 void GizBlowup_DeleteSingleTerrain(GIZMOBLOWUP_s *blowup);
 i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *blowup);
-extern AREADATA_s *PODSPRINT_ADATA;
 
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;
-extern i32 ShadowMode;
 DECOMP_ASSERT(offsetof(WORLDINFO_s, blowup_target_candidates) == 0x50d4, "Blowup target candidate-list ABI");
 
 static i32 Blowup_GetMaxGizmos(void *world_ptr) {
@@ -1108,7 +1103,6 @@ i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *blowup) {
     return 1;
 }
 
-i32 SetGizmoBlowUpTarget(GameObject_s *object, GIZMOBLOWUP_s *blowup);
 
 void GizBlowup_InitTerrain() {
     if (WORLD->gizmo_blowups != NULL) {

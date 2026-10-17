@@ -119,7 +119,6 @@ void (*GizBuildIt_FinishFn)(GIZBUILDIT_s *) = NULL;
 i32 (*GizBuildit_AutoBuildPosFn)(void *, NUVEC *, NUVEC *, u16 *) = NULL;
 
 i32 (*GizBuildIt_CanStartBuildingFn)(GIZBUILDIT_s *, GameObject_s *);
-GIZBUILDIT_s *GizBuildIt_FindNearest(WORLDINFO_s *, GameObject_s *, BUILDIT_FIND_ENUM, i32);
 
 MechWeakPtr<MechObjectInterface, 4> nextBuildit;
 

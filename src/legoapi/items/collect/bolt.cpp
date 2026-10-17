@@ -69,10 +69,6 @@ extern "C" i16 id_SPEEDERBIKE;
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include <string.h>
 
-extern BOLT_s Bolt[32];
-extern i32 i_bolt;
-extern f32 BOLT_OVERRIDE_PLAYERBOLTSPEED;
-extern f32 BOLT_OVERRIDE_PLAYERBOLTDURATION;
 struct spacelevel_s;
 
 static void UpdateBolt_Geonosian(BOLT_s *);
@@ -80,36 +76,25 @@ static void EndBolt_EwokTorpedo(BOLT_s *);
 
 #include "legoapi/items/collect/bolttypes_lsw.inc"
 
-extern BOLTSYS * BoltSys;
 
 // Configuration entry point and parser callbacks share the original BT state.
 
 void BoltTypes_Configure(WORLDINFO_s *world, char *config);
 
-f32 Bolt_ObjTargetPosYAdjust(GameObject_s *);
 
-void Bolt_End(BOLT_s *, i32);
-extern i32 Paused;
 
 extern "C" {
-    void KillPart(PART_s *, i32);
 }
 
-void NewRumble(nupad_s *, f32, i32);
 
 extern "C" void PlaySfx(char *, NUVEC *);
 i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
-void GameCam_HitJudder();
-void NewRumbleAllPlayers(f32, f32, i32, i32);
 EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 
-BOLTTYPE_s *BoltType_FindByID(i32 id, WORLDINFO_s *world);
 
 i32 Bolt_HitGameObjects(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maximum, f32 radius, u8 *hit_flags);
 
-extern i32 addbolt_nosfx;
-void NewBuzz(nupad_s *, f32, i32);
 
 __attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction, nuvec_s *normal,
                                                                     unsigned char *processed);
@@ -119,14 +104,10 @@ __attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt
 static __attribute__((noinline, noclone)) i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags)
     __asm__("_ZL12Bolt_HitPlatP6BOLT_sPhP11WORLDINFO_s.isra.38");
 
-f32 Bolt_ObjTargetPosYAdjust(GameObject_s *object);
 
 extern AREADATA *DOGFIGHT_ADATA;
-i32 BoltType_FindIDByCreature(GameObject_s *object, i32 fallback);
 
-BOLT_s *Bolt_Add(GameObject_s *object, nuvec_s *position, numtx_s *matrix, i32 type_id, i32 flags);
 
-void Bolt_End(BOLT_s *bolt, i32 run_callback);
 
 BOLT_s *Bolt_Find(i32 type_id, NUVEC *position, GameObject_s *owner);
 
@@ -135,7 +116,6 @@ BOLT_s *Bolt_Find(i32 type_id, NUVEC *position, GameObject_s *owner);
 
 static __used__ void UpdateBolt_Geonosian(BOLT_s *bolt);
 
-i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
 
 EXPLOSION *Detonate(NUVEC *, u16);
 static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt);
@@ -145,7 +125,6 @@ void BoltTypes_Init(WORLDINFO_s *world);
 extern "C" {
     void NewRayCastGetImpactNormal(NUVEC *);
 }
-f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 
 i8 BoltType_FindIDByName(char *name, WORLDINFO *world);
 
@@ -172,19 +151,6 @@ i8 BoltType_FindIDByName(char *name, WORLDINFO *world);
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nu3d/nuspecial.h"
 
-extern char FS_LastFileName[64];
-extern char FS_Path[256];
-extern char FS_Title[64];
-extern char FS_Filter[256];
-extern char FS_FilterOut[256];
-extern f32 FS_X;
-extern f32 FS_Y;
-extern f32 FS_Width;
-extern f32 FS_W;
-extern f32 FS_H;
-extern u8 FS_Active;
-extern u8 FS_RefreshDir;
-extern u8 FS_ShowVolumes;
 extern void (*FS_Callback)(char *, char *);
 
 void SerialiseString(EdStream &stream, void *data, i32 count);
@@ -192,17 +158,13 @@ void SerialiseString(EdStream &stream, void *data, i32 count);
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
-void RenderFileSel3(i32 draw_title);
 
-void RenderFileSel();
 
-i32 ProcessFileSel3(f32 elapsed, nupad_s *pad);
 
 extern "C" i32 ProcessFileSel2(f32 elapsed, nupad_s *pad);
 
 extern "C" void FileSelKill(void);
 
-void ProcessFileSel(f32 elapsed, nupad_s *pad);
 
 extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
                              void (*callback)(char *, char *));
@@ -213,7 +175,6 @@ i32 LoadState(i32, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u
 
 extern "C" {
 
-i32 TriggerAutoSave(void);
 
 } // extern "C"
 

@@ -77,13 +77,6 @@ BIGBUFFER_s BigBuffer;
 void *theThingManager = NULL;
 
 void ClearLevelProgress(i32, WORLDINFO_s *);
-u32 TotalLevelCoinTally(WORLDINFO_s *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *);
-extern i32 bonusmodearcade;
-extern f32 DEFAULT_MOVE_RANGE;
-extern f32 drop_back_in_timer;
-extern i32 last_chatter_sfx;
-void InitPlayerAI(GameObject_s *object);
-extern GAMECAMERA_s *GameCam;
 
 struct AIROW_s;
 struct nunativegscene_s;
@@ -101,7 +94,6 @@ extern i32 app_tbdrawset;
 
 void RndrTexQuad(f32 x, f32 y, f32 width, f32 height, i32 colour, numtl_s *material, i32 angle);
 
-i32 SuperWeirdo(GameObject_s *object);
 
 void bgProcClose() {
 }
@@ -187,15 +179,11 @@ void bgprocUnFreeze();
 
 extern AREADATA_s *PODRACE_ADATA;
 extern AREADATA_s *BONUS_GUNSHIP_ADATA;
-extern AREADATA_s *GUNSHIP_ADATA;
 extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
 i32 bgprocIsFreezing();
 
-void DebFreeWithoutKey(debkeydatatype_s *key);
 
-i32 RndrUnfilledCircle(f32 x, f32 y, f32 radius, f32 border_width, f32 aspect, i32 colour, f32 progress, f32 z,
-                       numtl_s *material);
 
 void DebrisProcessSpheres(uv1deb *data, float time, debinftype *effect, debkeydatatype_s *key, i32 finite);
 
@@ -231,13 +219,9 @@ extern "C" void NuHtmlBitmap(char *filename, i32 width, i32 height, char *captio
 void NuHtmlGraphArray(char **strings);
 
 extern "C" {
-    extern debinftype **debtab;
 }
 
 extern "C" {
-    extern debinftype **debtab;
-    extern f32 debris_thinning_level;
-    extern i32 forced_debris_thinning;
 }
 
 extern "C" void DebReAlloc(debkeydatatype_s *, i32);
@@ -247,16 +231,13 @@ VARIPTR *DisplayListRenderBuffer();
 void xxxNuDisplayListUpdateSpecial(nuhspecial_s *special);
 
 extern "C" {
-    extern debinftype **debtab;
 }
 
 void TBRESET();
 
-void TBOPENFN(char *name, i32 type);
 
 void RndrArrow(float x, float y, float scale, i32 angle, i32 colour);
 
-void TBCLOSEFN(char *name, i32 type);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 #include "legoapi/items/objects/gameobjects.h"
@@ -346,47 +327,20 @@ void TBCLOSEFN(char *name, i32 type);
 #include <stdio.h>
 #include <string.h>
 
-BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
-void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
-void PartCollide_3D(PART_s *);
-extern i32 lightning_type;
 extern i16 id_YODA, id_YODAGHOST, id_GAMORREANGUARD, id_JANGOFETT;
-extern i32 LEGO_AIPATHCNX_WALLSHUFFLE;
-extern i32 VehicleArea;
 
 extern "C" {
-    extern NUVEC plr_lastpos;
-    extern i16 id_GRIEVOUS;
-    extern i16 id_BODYGUARD;
-    extern i16 id_IMPERIALGUARD;
-    extern i16 id_JAWA;
-    extern i16 id_UGNAUGHT;
-    extern i16 id_ATAT;
-    extern i16 id_GONKDROID;
     extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-    void DebrisPosOrientationMtx(i32, NUMTX *);
-    void DebFreeInstantly(i32 *);
-    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-extern void *theThingManager;
 
 void legoSetMusicVolume(float);
-void AnimatePlayer(GameObject_s *object);
-void InitSurfaceInfo(GameObject_s *object);
-i32 SetObjOnSurface(GameObject_s *object, i32 mode);
-void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode);
 APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id);
-void LevelScriptReStoreProgress(WORLDINFO_s *world, LEVELSCRIPTPROCESS_s *process);
 
-extern i32 LEGO_AIPATHCNX_BLOCKAGE;
 
 extern "C" i32 AISysSetLevelPath(AISYS_s *system, char *path_name);
 
-extern GAMEFOG_STATE GameFog;
 
 #include "legoapi/items/objects/gameobjects_types.h"
 
@@ -400,54 +354,22 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
     static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
                   "complete game AI condition registry");
 
-extern CHARACTERNAMEFN * LevelCharacterNameFn;
-extern CHARACTERNAMEFN * SpecialRouteCharacterNameFn;
-extern CHARACTERGLOBALIDFN * LevelCharacterGlobalIDFn;
-extern GLOBALCHARACTERNAMEFN * GlobalCharacterNameFn;
-extern CHARACTERHGOBJFN * GlobalCharacterHGobjFn;
-extern CHARACTERRENDERFN * GlobalCharacterRenderFn;
-extern CHARACTERGOALSPEEDFN * GetCharacterGoalSpeedFn;
-extern CHARACTERTYPEIDFN * LevelCharacterTypeIDFn;
 
-extern AICHARACTERTYPEID * GlobalCharacterTypeIDFn;
-extern AISPECIALROUTECHARACTERTYPEID * SpecialRouteCharacterTypeIDFn;
-extern AICHARACTERDISTANCE * GetViewRangeFn;
-extern AICHARACTERDISTANCE * GetHearDistanceFn;
-extern AICHARACTERDISTANCE * GetMaxViewHeightFn;
-extern AICHARACTERDISTANCE * GetMinViewHeightFn;
-extern GAMEAILOAD * GameAILoadFn;
-extern AIACTIONPARSESPEED * AIActionParseSpeedFn;
-extern AIBIGJUMPTODESTINATION * AIBigJumpToDestinationFn;
-extern AIRESPAWNONPATH * AIRespawnOnPathFn;
-extern AICLEARCREATURES * ClearAICreaturesFn;
-extern APIOBJECTFROMOBJID * APIOBJECTFromObjIDFn;
-extern AIFINDALTERNATIVESPECIALOBJECT * FindAlternativeSpecialObjectFn;
-extern AIGETNAMEDAPIOBJECT * GetNamedAPIObjectFn;
-extern AIGETCREATUREORIGIN * GetAICreatureOriginFn;
 }
 
 // The special-route list reserves the first ten ids for suit characters.  The
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-extern i32 TimingBarSet;
 
 f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 terrain_mask);
 
-extern i32 Paused;
 struct CUTSCENEPLAYERCLIP;
-extern CUTSCENEPLAYERCLIP *CutScenePlayer_Active();
 
-extern FadeSystem FadeSys;
-extern i32 pause_rndr_on;
 
 extern "C" i32 NewRayCastScaleYMask(NUVEC *, NUVEC *, f32, f32, i32, u32);
 
-i32 GameRayCast(NUVEC *position, NUVEC *displacement, f32 radius, i32 mask);
 
-extern i32 active_neutral_count;
-extern AREADATA *VADER_ADATA;
-extern i32 active_baddy_count;
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -458,103 +380,59 @@ extern i32 active_baddy_count;
 // Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
 
 extern "C" {
-void InitFn_LevelCharacterTypeID(CHARACTERTYPEIDFN *function);
 
-void InitFn_SpecialRouteCharacterTypeID(CHARACTERTYPEIDFN *function);
 
-void InitFn_LevelCharacterName(CHARACTERNAMEFN *function);
 
-void InitFn_SpecialRouteCharacterName(CHARACTERNAMEFN *function);
 
-void InitFn_LevelCharacterGlobalID(CHARACTERGLOBALIDFN *function);
 
-void InitFn_GlobalCharacterTypeID(CHARACTERTYPEIDFN *function);
 
-void InitFn_GlobalCharacterName(GLOBALCHARACTERNAMEFN *function);
 
-void InitFn_GlobalCharacterRender(CHARACTERRENDERFN *function);
 
-void InitFn_GlobalCharacterHGobj(CHARACTERHGOBJFN *function);
 
-void InitFn_ClearAICreatures(AICLEARCREATURES *function);
 
-void InitFn_GetCharacterGoalSpeedFn(CHARACTERGOALSPEEDFN *function);
 
-void InitFn_GetViewRange(CHARACTERDISTANCEFN *function);
 
-void InitFn_GetHearDistance(CHARACTERDISTANCEFN *function);
 
-void InitFn_GlobalGetMaxViewHeight(CHARACTERDISTANCEFN *function);
 
-void InitFn_GlobalGetMinViewHeight(CHARACTERDISTANCEFN *function);
 
-void InitFn_GameAILoad(GAMEAILOAD *function);
 
-void InitFn_AIActionParseSpeed(AIACTIONPARSESPEED *function);
 
-void InitFn_AIRespawnOnPath(AIRESPAWNONPATH *function);
 
-void InitFn_AIBigJumpToDestination(AIBIGJUMPTODESTINATION *function);
 
-void InitFn_FindAlternativeSpecialObjectFn(AIFINDALTERNATIVESPECIALOBJECT *function);
 
-void InitFn_APIOBJECTFromObjIDFn(APIOBJECTFROMOBJID *function);
 
-void InitFn_GetNamedAPIObject(AIGETNAMEDAPIOBJECT *function);
 
-void InitFn_GetAICreatureOrigin(AIGETCREATUREORIGIN *function);
 
 }
 
-extern f32 OFFSCREEN_CATCHUP_TIME;
 
-i32 TryToTeleportToNextNode(GameObject_s *object, AIPATHNODE_s *node, i32 tightrope);
 
-void SetSpecialMove(GameObject_s *object, AIPATHNODE_s *target, AIPATHNODE_s *node, char move);
 
-void ClearSpecialMove(GameObject_s *object);
 
-void GameAISysInit();
 
 void GameAISysReset(AISYS_s *system);
 
-i32 GameAudio_GetSfxId(i32 sfx);
 void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
 
 void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size);
 
-void GameAudio_AddSfx(i32 sfx, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
 
-void GameObjectOrigin(GameObject_s *object);
 
-void PortalGameObject(GameObject_s *object, i32 enabled, i32 update_room, i16 room, nugscn_s *scene);
 
-void SnapCreaturePos(GameObject_s *object, NUVEC *position, i32 angle, AIPATHINFO_s *path_info, i32 set_on_surface);
 
-i32 Game_IgnoreInput();
 
-extern i16 id_GONKDROID;
-u32 GameAI_TotalScore();
 
-void GameAnimSys_Update(GAMEANIMSYS_s *system);
 
 u16 SeekRot(u16, u16, f32);
-i32 RotDiff(u16, u16);
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER, id_ATST;
 
-f32 GameGetMusicVolume(OPTIONSSAVE_s *options);
 
-f32 GameSetMusicVolume(OPTIONSSAVE_s *options);
 
-CABLE_s *GameObjOwnsAnyCables(GameObject_s *object);
 
-i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *secondary_matrix,
-                           NUMTX *reflection_matrix, NUMTX *auxiliary_matrix, GameObject_s *object, u32 flags);
 
 extern "C" i16 id_THEEMPEROR, id_IMPERIALGUARD, id_BODYGUARD;
 extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, u16, u16);
 
-void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *message);
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {
@@ -565,44 +443,24 @@ static eduimenu_s *edTimingMenu;
 static u32 EdAttr[] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
 
 extern "C" {
-extern ed_module_s edTimingDesc;
 }
 
-extern CUSTOMISER *CharacterCustomiser;
 
-i32 NoLayerKill(GameObject_s *object);
 
-GameObject_s *FindGameObject(i32 character_id, u32 required_flags, i32 alive_only, i32 vehicle_only,
-                             i32 non_level_only);
 
-void DieRumble(GameObject_s *);
 
-void RemoveGameObject(GameObject_s *obj, i32);
 
-extern i32 nethost;
-void TakeOverGameObject(GameObject_s *, GameObject_s *, i32, i32);
 
-extern f32 lightning_sizew[2];
-extern f32 lightning_sizel[2];
-extern f32 lightning_sizewab[2];
-extern f32 lightning_endw[2];
-extern u32 lightning_col[2];
 extern AREADATA *PODSPRINT_ADATA;
 extern i16 id_ANAKINSNEWPOD, id_ANAKINSNEWPODGREEN, id_SEBULBASPOD;
-void Player_ToggleCharacter(GameObject_s *, i32, i32);
 
-GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *script_name, AIPATHINFO_s *path_info,
-                                 AIGROUP_s *group, i32 set_on_surface, nugspline_s *spline, nuvec_s *spline_offset,
-                                 i32 spline_mode, i32 creature_set);
 
-GameObject_s *GetNamedGameObject(AISYS_s *system, char *name);
 
 GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
                                     f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
                                     f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
                                     bool first_match);
 
-i32 GameObjectNearFloor(GameObject_s *object, f32 height, f32 *distance);
 
 // ==== src/legoapi/misc/memory.cpp: all remaining content ====
 #include "decomp.h"
@@ -613,11 +471,8 @@ i32 GameObjectNearFloor(GameObject_s *object, f32 height, f32 *distance);
 
 extern "C" {
 
-    extern debinftype **debtab;
 
-void DebFreeInstantly(i32 *handle);
 
-void DebReAlloc(debkeydatatype_s *key, i32 particle_count);
 
 } // extern "C"
 

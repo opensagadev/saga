@@ -79,13 +79,10 @@ i32 test_ai_combo = 1;
 i32 CanPunchGirls = 1;
 extern i16 id_STORMTROOPER;
 
-void PodKeyReset();
 
-void PodLoseSpeed(GameObject_s *object, i32 hit, i32 rumble);
 
 i32 SpeederBlowupHack(GIZMOBLOWUP_s *blowup, i32);
 
-i32 ObjIsTargetSpeeder(GameObject_s *object);
 
 void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
 void InitTrooperCannons(WORLDINFO_s *world);
@@ -99,12 +96,9 @@ void SpeederChaseA_Panel(WORLDINFO_s *);
 
 void SpeederChaseA_Reset(WORLDINFO_s *);
 
-i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **, i32, i32 first_time,
-                              f32 elapsed);
 
 void SpeederChaseA_Update(WORLDINFO_s *world);
 
-i32 ObjOpponentStillThere(GameObject_s *object, GameObject_s *opponent, f32 gap);
 
 extern "C" void AddDebrisEffect(i32 *, i32, f32, f32, f32);
 extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);

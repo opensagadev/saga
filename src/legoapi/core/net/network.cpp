@@ -9,7 +9,6 @@
 #include <string.h>
 
 void refpack_init();
-extern EdRegistry theRegistry;
 
 static inline void CloneMessageData(NetMessage &message) {
     NetMessage::MessageData *new_data = NULL;

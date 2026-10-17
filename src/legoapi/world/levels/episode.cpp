@@ -47,9 +47,7 @@ DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon reb
 
 extern i32 droid_hack;
 
-extern f32 text3d_width;
 
-void Text_MakeScore(u32 score, char *text);
 
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
@@ -66,11 +64,8 @@ struct nunativegscene_s;
 // Episode bookkeeping
 // ===========================================================================
 
-GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
 
-GameObject_s *BossKilled(i32 character_id);
 
-void GizmoBlowupCreateStuff(GIZMOBLOWUP_s *blowup);
 
 // ===========================================================================
 // HUD / score helpers
@@ -83,14 +78,11 @@ void GizmoBlowupCreateStuff(GIZMOBLOWUP_s *blowup);
 i32 TrooperShoot(WORLDINFO_s *world, minitrooperteam_s *team, minisnowtrooper_s *trooper, u16 *shot_angle,
                  i32 team_index);
 
-void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count, i32 use_droids);
 
 
 
 
 
 
-void UpdateMiniSnowTroopers(WORLDINFO_s *world);
 
 
-void DrawMiniSnowTroopers(WORLDINFO_s *world);

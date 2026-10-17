@@ -54,8 +54,6 @@ extern "C" void DisplaySceneRndrSpecials(NUDLDLISTSCENE *, i32, void *);
 extern const f32 nuvec4_one[4];
 extern "C" void NuShaderManagerSetfv(i32, const f32 *);
 
-extern u32 g_lastBoundVAO;
-extern void *g_nuFullscreenVertexFormat;
 
 NuApplicationState *NuCore::m_applicationState;
 NuThreadManager *NuCore::m_threadManager;

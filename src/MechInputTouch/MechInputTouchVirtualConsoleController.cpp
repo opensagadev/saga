@@ -70,8 +70,6 @@ void VirtualControlDPad_LockButton_OnClick_Callback(MechTouchUIElement &, TouchH
 
 extern WORLDINFO_s *WORLD;
 extern "C" {
-    extern i32 Paused;
-    extern i32 NewMode;
     extern "C++" FadeSystem FadeSys;
 }
 
@@ -82,7 +80,6 @@ extern "C" {
 // these before accepting the new input; GamePad_Rotate then reports a stable
 // angular velocity only when both consecutive turns agree.
 
-f32 GamePad_Rotate(GameObject_s *object);
 
 void VirtualControlDPad_OnDown_Callback(MechTouchUIElement &element, TouchHolder &touch);
 
@@ -101,8 +98,6 @@ void VirtualControlDPad_LockButton_OnClick_Callback(MechTouchUIElement &element,
 #include <math.h>
 
 extern "C" {
-    extern i32 Paused;
-    extern i32 NewMode;
     extern "C++" FadeSystem FadeSys;
 }
 
@@ -121,7 +116,6 @@ extern "C" {
 #include "legoapi/audio/sfx.h"
 #include <stdio.h>
 
-extern i32 MiniCutCam;
 
 // ==== src/legoapi/core/net/netplay.cpp: declarations ====
 #include "legoapi/core/net/netplay.h"

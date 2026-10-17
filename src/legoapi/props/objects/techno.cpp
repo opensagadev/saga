@@ -29,7 +29,6 @@ struct TECHNOPROGRESS {
 };
 
 extern "C" void NewTerrPlatformsOff(void);
-f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 
 TECHNO_CONFIG TechnoSys = {

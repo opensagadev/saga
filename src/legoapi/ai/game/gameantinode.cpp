@@ -27,7 +27,6 @@ extern "C" {
 i32 ViewCamGetMode();
 NUVEC *ViewCamGetTgt();
 void GameAntinode_FindGridPosition(WORLDINFO_s *, NUVEC *, f32, f32, u8 *, u8 *, u8 *, u8 *);
-void GameAntinode_UnregisterAntiNode(GAMEANTINODESYS_s *, GAMEANTINODE_s *);
 
 void *GameAntnode_CreateSys(WORLDINFO_s *world, variptr_u *buf, variptr_u *buf_end, i32 count) {
     usize node_bytes = count * sizeof(GAMEANTINODE_s);

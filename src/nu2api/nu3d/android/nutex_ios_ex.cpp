@@ -50,14 +50,9 @@ __attribute__((weak)) bool NuIOS_TextureFormatSupported(i32 format) {
     return g_renderDevice.enabled_extensions[format];
 }
 
-void GetNativeTextureFormat(NUTEXFORMAT inFormat, i32 &outBpp, u32 &outInternalFormat, u32 &outType, u32 &outFormat,
-                            bool &outIsCompressed, NUTEXFORMAT &outFormatEnum);
 
-void GetTextureFormatInfo(NUTEXFORMAT texture, u32 &param_2, u32 &param_3);
 
-i32 GetMipLevelSize(NUTEXFORMAT param_1, i32 unclamped_width, i32 unclamped_height);
 
-i32 GetMipOffset(NuHardwareTexture *tex, i32 targetMip, i32 targetSlice, NUTEXFORMAT overrideFormat);
 
 #define SQUISH_KDXT1 (1 << 0) // 1
 #define SQUISH_KDXT3 (1 << 1) // 2
@@ -67,27 +62,19 @@ static const i32 CSWTCH_249[] = {SQUISH_KDXT3, SQUISH_KDXT1, SQUISH_KDXT5};
 
 void DecompressTextureToRGBA(unsigned char *ddsData, u32 size, unsigned char *&outBuffer);
 
-GLuint CreateTexturePS(void);
 
 SAGA_HOST_HOOK void *NuIOS_AllocateDefaultTexturePixels(usize bytes) {
     return malloc(bytes);
 }
 
-GLuint loadDefaultTexture(GLuint texture, GLint level, GLsizei size, GLenum texture_type, GLenum target);
 
-GLuint NuIOS_CreateGLTexFromMemoryDDS(void *ddsPointer, i32 *out_width, i32 *out_height);
 
-GLuint NuIOS_CreateGLTexFromPlatformInMemory(void *data, i32 *width, i32 *height, bool is_pvrtc);
 
-GLuint NuIOS_CreateGLTexFromPlatfomSpecificFile(const char *filename);
 
-GLuint NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(const char *filename);
 
 i32 GetMipOffset(i32 width, i32 height, NUTEXFORMAT format, i32 depth, bool isCubemap, i32 mips, i32 targetMip,
                  i32 targetSlice);
 
-void UnlockTexturePS(u32 texID, void *pixels, i32 width, i32 height, i32 depth, bool isCubemap, i32 mips,
-                     NUTEXFORMAT format, u32 &glFormat, u32 &glInternalFormat, u32 glType, bool isCompressed);
 
 // ==== functions in original address order ====
 

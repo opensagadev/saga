@@ -17,13 +17,10 @@ f32 BlobShadowFade(NUVEC *position, f32 fade_start, f32 fade_end, f32 alpha);
 
 void SetShadowLight();
 
-void InitShadowLights();
 
 void RenderShadowLights(i32);
 
-void ResetShadowMapRendering();
 
-void EnableShadowMapRendering(i32);
 
 void ResetShadowMapRenderingFn();
 

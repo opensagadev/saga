@@ -19,24 +19,19 @@
 extern EXPLOSION Explosion[8];
 extern i32 i_explosion;
 
-extern f32 FRAMETIME;
 void UpdateExplosion_Generic(EXPLOSION *);
 
 extern WORLDINFO_s *WORLD;
 extern "C" i32 ParticlesPerSecond(f32, f32);
 extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, u16, u16);
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
-BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
 PART_s *Bolt_HitParts(BOLT_s *, NUVEC *, NUVEC *, NUVEC *, f32, i32);
 i32 CannotKill(GameObject_s *);
-i32 Player_HasInvincibility(GameObject_s *);
 void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
 void NewBuzz(nupad_s *, f32, i32);
 void NewRumble(nupad_s *, f32, i32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 void GameCam_HitJudder();
-void Arcade_AIKilled(i32);
-void Arcade_PlayerKilled(i32, i32);
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
 
 void UpdateExplosion_Generic(EXPLOSION *explosion);
@@ -193,7 +188,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== functions in original address order ====
 

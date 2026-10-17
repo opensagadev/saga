@@ -37,9 +37,7 @@ LANGUAGEDATA Game_LanguageList[7] = {{1, apitxt_ENGLISH}, {2, apitxt_FRENCH}, {4
 #include "nu2api/numath/nutrig.h"
 #include <stdio.h>
 #include <string.h>
-extern char **TTab;
 extern i16 tNULL;
-extern i16 tUNKNOWN;
 extern i16 tENGLISH;
 extern i16 tFRENCH;
 extern i16 tGERMAN;
@@ -59,7 +57,6 @@ char *apitxt_SPANISH = const_cast<char *>("Espa\xc3\xb1"
 char *apitxt_DANISH = const_cast<char *>("Dansk");
 
 // Original .data @0x667ce0; the names are filled in by the static initializer.
-char *Text_GetLanguagePath(i32 language);
 void Text_LoadAndFixUpStrings(unsigned char *filename, unsigned char **buffer, char **table, i32 count);
 void IntroText_SetTextID(i32 id);
 void Text_DecodeButtons(char *source, char *destination);
@@ -97,11 +94,8 @@ DECOMP_ASSERT(sizeof(TAGTRANSFER_s) == 0x38, "tag transfer size");
 
 i32 (*Tag_NoHiddenIconFn)(GameObject_s *) = NULL;
 char *LEGOASCII_UP = NULL;
-extern u8 PlayerRGB[2][3];
 extern ADDGAMEMSG AddGameMsg_Default;
 GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message);
-extern char *ASCII_DOWN;
-extern f32 ICONSIZE;
 
 // The original keeps this search out of line and passes the object in EAX.
 
@@ -130,7 +124,6 @@ extern f32 ICONSIZE;
 #include "nu2api/numusic/sfx.h"
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
@@ -178,7 +171,6 @@ extern "C" i32 NuFileExists(char *name);
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
@@ -422,9 +414,7 @@ extern "C" {
 
     // Shared editor font; edmainInit receives and stores the font handle.
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -513,7 +503,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #include <new>
 
 extern EdInputContext * Input;
-extern MemoryManager theMemoryManager;
 extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
@@ -577,9 +566,7 @@ inline void EdBitControl::operator delete(void *memory) {
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -663,7 +650,6 @@ extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail clears these "fast repeat" latches but never sets them.
 
-extern FadeSystem FadeSys;
 
 // ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
 // Temporary C-linkage compatibility surface for unresolved engine owners.
@@ -730,7 +716,6 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -893,7 +878,6 @@ struct nupad_s;
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEVALUES speedervals[4];
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
@@ -925,12 +909,10 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 #include "legoapi/cutscenes/cutscenes.h"
 
-extern u8 FS_Active;
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
-void RenderFileSel3(i32 draw_title);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 #include "legoapi/actions/character/transform.h"
@@ -948,7 +930,6 @@ void RenderFileSel3(i32 draw_title);
 #include "nu2api/nu3d/android/nugscn_android.h"
 #include "nu2api/numath/numath.h"
 
-extern i32 VehicleArea;
 
 struct GAMEMESSAGE_s;
 
@@ -1026,19 +1007,16 @@ struct GAMEMESSAGE_s;
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== functions in original address order ====
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -1056,7 +1034,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------

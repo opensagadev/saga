@@ -59,13 +59,10 @@ extern "C" i32 edppLoadPage(char *path, i32 flag, usize scene);
 // NuFileExists @nufile (nucore_plain.cpp).
 extern "C" i32 NuFileExists(char *name);
 
-void Particles_Load(WORLDINFO *world, char **debris_name, i32 count, i32 flags);
 
 extern "C" {
 
-void DebrisTypeStatusAlwaysOff(i32 type);
 
-void DebrisTypeStatusAlwaysOn(i32 type);
 
 } // extern "C"
 
@@ -95,7 +92,6 @@ void DebrisTypeStatusAlwaysOn(i32 type);
 #include "nu2api/numusic/sfx.h"
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
@@ -104,9 +100,7 @@ extern "C" {
 
 extern "C" {
 
-void DebrisTypeStatusAlwaysOff(i32 type);
 
-void DebrisTypeStatusAlwaysOn(i32 type);
 
 } // extern "C"
 
@@ -136,10 +130,8 @@ void DebrisTypeStatusAlwaysOn(i32 type);
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 }
 
 // Forward declarations for local (static) part/gizmo helper stubs.
@@ -148,21 +140,16 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern GAMECAMERA_s *GameCam;
 
 extern "C" {
 
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 
-void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
-                                           i16 y_rotation, NUMTX *particle_orientation);
 
     // The editor loader clears these page IDs with aligned vector stores.
 
 } // extern "C"
 
 WORLDINFO_s *WorldInfo_CurrentlyActive();
-extern f32 FRAMETIME;
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -350,7 +337,6 @@ static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, edu
 
 // Particle list editor subsystem stubs (static, internal linkage).
 
-void edppStartPage(i32 page);
 
 // ---- end src/gameapi/edtools/edptlall.cpp ----
 
@@ -396,16 +382,10 @@ static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int
 
 extern "C" {
 
-void edanimStartPage(i32 page);
-void edanimStopPage(i32 page);
 
     // Shared editor font; edmainInit receives and stores the font handle.
 
-void edmainInit(void *font, char *configuration_file);
-void edppClearPage(i8 page);
 
-void edppStopPage(i32 page_id);
-void eduiMenuRender(eduimenu_s *menu);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -494,7 +474,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #include <new>
 
 extern EdInputContext * Input;
-extern MemoryManager theMemoryManager;
 extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
@@ -558,14 +537,8 @@ inline void EdBitControl::operator delete(void *memory) {
 
 extern "C" {
 
-void edanimStartPage(i32 page);
-void edanimStopPage(i32 page);
 
-void edmainInit(void *font, char *configuration_file);
-void edppClearPage(i8 page);
 
-void edppStopPage(i32 page_id);
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -713,12 +686,9 @@ extern "C" {
     // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
     // ---------------------------------------------------------------------------
 
-i32 NuCameraClipTestExtentsGeneric(NUVEC *min, NUVEC *max, NUMTX *world_mtx, f32 far_clip, i32 flags,
-                                       f32 *min_depth);
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -881,7 +851,6 @@ struct nupad_s;
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEVALUES speedervals[4];
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
@@ -913,12 +882,10 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 #include "legoapi/cutscenes/cutscenes.h"
 
-extern u8 FS_Active;
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
-void RenderFileSel3(i32 draw_title);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 #include "legoapi/actions/character/transform.h"
@@ -1013,19 +980,16 @@ void RenderFileSel3(i32 draw_title);
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== functions in original address order ====
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -1043,10 +1007,7 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-i32 NuCameraClipTestExtentsGeneric(NUVEC *min, NUVEC *max, NUMTX *world_mtx, f32 far_clip, i32 flags,
-                                       f32 *min_depth);
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------

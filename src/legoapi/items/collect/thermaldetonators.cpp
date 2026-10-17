@@ -32,21 +32,16 @@ struct nunativegscene_s;
 
 MechWeakPtr<MechObjectInterface, 4> NextThermalTarget;
 
-void NewRumbleAllPlayers(f32, f32, i32, i32);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, nuvec_s *);
 void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
-i32 qrand();
 EXPLOSION *Detonate(nuvec_s *position, u16 flags);
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
-void KillPart(PART_s *part, i32 reason);
-void NewBuzzFrames(nupad_s *pad, i32 frames, i32 channel);
 i32 SuperWeirdo(GameObject_s *object);
 void PartUpdate_ThermalDetonator(PART_s *part);
 void PartImpact_ThermalDetonator(PART_s *part);
 void PartKill_ThermalDetonator(PART_s *part, i32 reason);
 i32 PartDraw_ThermalDetonator(PART_s *part);
-i32 GameRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 mask);
 extern i32 TERRAINMASK_NONWEAPON;
 extern "C" f32 brickimpactwait;
 
@@ -79,28 +74,20 @@ void PartKill_ThermalDetonator(PART_s *part, i32);
 
 // The hint icon transitions and the touch icon x position are dynamically
 // initialized in this unit's static constructor in the reference.
-extern HintVectorTransition hintIconPos;
-extern HintScalarTransition hintIconScale;
-extern HintScalarTransition hintYPop;
 
-f32 CurrentHintAlpha();
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
 
 // Original local callbacks referenced by Hints_LSW.
 extern AREADATA_s *PODRACE_ADATA, *PODSPRINT_ADATA, *BONUS_GUNSHIP_ADATA;
-extern FadeSystem FadeSys;
 
 extern AREADATA *JABBASPALACE_ADATA;
 
-f32 CurrentHintButtonScale();
 
 // Each control mode retains its own requested and interpolated hint row.
 
-void MenuUpdateHints(MENU_s *menu);
 
-void MenuDrawHints(MENU_s *menu);
 
 // ==== functions in original address order ====
 

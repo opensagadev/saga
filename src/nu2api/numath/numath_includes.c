@@ -14,9 +14,7 @@
 
 static f32 fetol = 0.01f;
 
-f32 NuFsign(f32 f);
 
-f32 NuFloor(f32 f);
 
 // The original helpers are local but have C linkage.
 #ifdef __cplusplus
@@ -34,7 +32,6 @@ f32 NUTRIG_SC1 = 0.008333333767950535f;
 f32 NUTRIG_SC2 = -0.00019841270113829523f;
 f32 NUTRIG_SC3 = 2.7557318844628753e-06f;
 
-f32 NuSinf(f32 angle);
 
 static f32 pow_x[32], pow_y[32], pow_rv[32];
 static i32 pow_cache_free;
@@ -59,7 +56,6 @@ extern "C" {
     static i16 NuASinC(f32 sin) __asm__("NuASin");
 }
 
-i16 NuACos(f32 cos);
 
 // ==== src/nu2api/numath/vumath.c: declarations ====
 
@@ -106,35 +102,21 @@ NUVEC v111 = {1.0f, 1.0f, 1.0f};
 NUVEC nuvec_one = {1.0f, 1.0f, 1.0f};
 NUVEC nuvec_minus_one = {-1.0f, -1.0f, -1.0f};
 
-void NuVecAdd(NUVEC *v, NUVEC *v0, NUVEC *v1);
 
-void NuVecSub(NUVEC *v, NUVEC *v0, NUVEC *v1);
 
-void NuVecScale(NUVEC *v, NUVEC *v0, f32 k);
 
-void NuVecScaleAccum(NUVEC *v, NUVEC *v0, f32 k);
 
-void NuVecCross(NUVEC *v, NUVEC *v0, NUVEC *v1);
 
-f32 NuVecDot(NUVEC *v0, NUVEC *v1);
 
-f32 NuVecMagSqr(NUVEC *v0);
 
-f32 NuVecMag(NUVEC *v0);
 
-f32 NuVecNorm(NUVEC *v, NUVEC *v0);
 
-f32 NuVecDistSqr(NUVEC *v0, NUVEC *v1, NUVEC *d);
 
 void NuVecInvMtxTransform(NUVEC *out, NUVEC *v, NUMTX *m);
 
-i32 NuPointRelToBoundingBox(NUVEC *point, NUVEC *maximum, NUVEC *minimum);
 
-void NuClipXPlane(NUVEC *out, NUVEC *point, NUVEC *direction, f32 *plane);
 
-void NuClipYPlane(NUVEC *out, NUVEC *point, NUVEC *direction, f32 *plane);
 
-void NuClipZPlane(NUVEC *out, NUVEC *point, NUVEC *direction, f32 *plane);
 
 // ==== src/nu2api/numath/numaths_plain.cpp: all remaining content ====
 
@@ -148,17 +130,13 @@ f32 NuLog10(f32 x);
 
 f32 NuExp10(f32 x);
 
-f32 NuHalfToFloat(i16 value);
 
-i16 NuFloatToHalf(f32 value);
 
 }
 
 // ==== src/nu2api/numath/nuvec4.c: all remaining content ====
 
-f32 NuVec4Dot(NUVEC4 *v0, NUVEC4 *v1);
 
-void NuVec4MtxTransformH(NUVEC4 *v, NUVEC4 *v0, NUMTX *m0);
 
 // ==== src/nu2api/numath/numtx.cpp: declarations ====
 #include <limits.h>
@@ -178,60 +156,35 @@ NUMTX numtx_identity = {
 };
 // clang-format on
 
-f32 NuMtxDet3(NUMTX *m);
 
-void NuMtxGetXAxis(NUMTX *m, NUVEC *x);
 
-void NuMtxGetZAxis(NUMTX *m, NUVEC *z);
 
-void NuMtxTruncate24Bit(NUMTX *trunc, NUMTX *mtx);
 
-void NuMtxRotateAng(NUANG ang, f32 x, f32 z, f32 *rx, f32 *rz);
 
-void NuMtxMulH(NUMTX *m, NUMTX *m0, NUMTX *m1);
 
-void NuMtxAlignX(NUMTX *m, NUVEC *v);
 
-void NuMtxAlignY(NUMTX *m, NUVEC *v);
 
-void NuMtxAlignZ(NUMTX *m, NUVEC *v);
 
-void NuMtxVecToEulerXYZ(NUVEC *XVec, NUVEC *ZVec, NUANG *x, NUANG *y, NUANG *z);
 
-f32 NuMtxSSE(NUMTX *a, NUMTX *b);
 
 // ==== src/nu2api/numath/nuquat.cpp: all remaining content ====
 
-void NuQuatHarmonize(NUQUAT *a, NUQUAT *b);
 
-f32 NuCubicInterpolation(f32 m, f32 y0, f32 y1, f32 y2, f32 t);
 
-f32 NuHermiteInterpolation(f32 m, f32 y0, f32 y1, f32 y2, f32 t);
 
-void NuQuatNormalise(NUQUAT *out, NUQUAT *q);
 
 // ==== src/nu2api/numath/nuplane.cpp: all remaining content ====
 #include "nu2api/numath/nuplane.h"
 
-f32 NuInfiniteLineToPointDistSqrEx(NUVEC *start, NUVEC *end, NUVEC *point, NUVEC *closest);
 
-i32 NuPlnLine(NUPLANE *plane, NUVEC *s, NUVEC *e, NUVEC *out);
 
-i32 NuPtInPoly(NUVEC *pnt, NUVEC *t0, NUVEC *t1, NUVEC *t2, NUPLANE *plane);
 
-i32 NuPtInPolyXY(NUVEC *pnt, NUVEC *t0, NUVEC *t1, NUVEC *t2);
 
-i32 NuPtInPolyYX(NUVEC *pnt, NUVEC *t0, NUVEC *t1, NUVEC *t2);
 
-i32 NuPtInPolyXZ(NUVEC *pnt, NUVEC *t0, NUVEC *t1, NUVEC *t2);
 
-i32 NuPtInPolyZX(NUVEC *pnt, NUVEC *t0, NUVEC *t1, NUVEC *t2);
 
-i32 NuPtInPolyYZ(NUVEC *pnt, NUVEC *t0, NUVEC *t1, NUVEC *t2);
 
-i32 NuPtInPolyZY(NUVEC *pnt, NUVEC *t0, NUVEC *t1, NUVEC *t2);
 
-f32 NuLineToPointDistSqrEx(NUVEC *s, NUVEC *e, NUVEC *pnt, NUVEC *out);
 
 // ==== src/nu2api/numath/nurand.cpp: all remaining content ====
 #include "nu2api/numath/nurand.h"
@@ -240,11 +193,8 @@ u32 fseed;
 
 static NURAND global_rand = {1};
 
-i32 NuRand(NURAND *rand);
 
-f32 NuRandFloatSeeded(u32 *seed);
 
-u32 NuRandIntSeeded(u32 *seed);
 
 // ==== src/gamelib/nuwind/nuwind_groups.cpp: declarations ====
 #include "gamelib/nuwind/nuwind.h"
@@ -386,9 +336,7 @@ static f32 fxydaf(f32 dx, f32 dy);
 
 static f32 fxy(u32 dx, u32 dy);
 
-i32 NuAtan2D(f32 dx, f32 dy);
 
-f32 NuAtan2(f32 dx, f32 dy);
 
 // ==== functions in original address order ====
 

@@ -45,12 +45,6 @@ struct terrsitu_s;
 struct PLATSKININFO;
 struct GAMECAMERA_s;
 struct pushblock_s;
-extern i16 id_ATST;
-extern i16 id_SPEEDERBIKE;
-void TBOPENFN(char *, i32);
-void TBCLOSEFN(char *, i32);
-extern AREADATA_s *PODSPRINT_ADATA;
-i32 NoLayerKill(GameObject_s *object);
 extern i16 id_SNAKE, id_TRACTOR;
 extern "C" void NewTerrPlatformsOff();
 
@@ -73,10 +67,6 @@ namespace {
 
 extern "C" void NuRndrLine3dDbg(f32, f32, f32, f32, f32, f32, i32);
 
-f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
-extern i32 LEGO_AIPATHCNX_BLOCKAGE;
-extern i32 LEGO_AIPATHCNX_FULLTERRAIN;
-extern i32 LEGO_AIPATHCNX_WALLSHUFFLE;
 
 namespace {
 
@@ -283,29 +273,20 @@ extern "C" void TerrainSetImpactData(void *impact_data, i32 *impact_count, i32 m
 
 extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 options, char *path, void *gscn,
                                i32 scene_id, u32 max_group_indices, u32 max_groups, u32 max_platforms);
-void LoadTerrainFile(WORLDINFO *world);
-void LoadGrassFile(WORLDINFO *world);
-void LoadBridgeFile(WORLDINFO *world);
 i32 UnderWater(GameObject_s *object);
-i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 remaining_vertex_mask);
 
-i32 CheckSphere(i32 vertex_index);
 
 i32 CheckSphereTer(NUVEC *position, f32 radius);
 
-i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 secondary_end, tertype *surface);
 
 void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags);
 #undef TERRAIN_SCALE_SCAN_SHAPE
 
 NUVEC TerrainSkin(PLATSKININFO *info, nuvec_s *position, float weight, i32 mode);
-void DerotateMovementVector();
 
 void RotateVec(NUVEC *source, NUVEC *destination);
 
-void DeRotateTerrain(tertype *surface);
 
-void DeRotatePoint(nuvec_s *point);
 
 namespace {
 
@@ -326,7 +307,6 @@ void MakePlayPlanes(GAMECAMERA_s *camera);
 
 DECOMP_ASSERT(sizeof(TERRAIN_DEBUG_RECORD) == 100, "Terrain debug record ABI");
 
-void ScanTerrainHandel(i32 scan_type, i16 *handle);
 
 extern "C" i32 NewRayCastPlatForm(NUVEC *position, NUVEC *movement, f32 radius, f32 separation_epsilon,
                                   i32 platform_index, i32 terrain_mask);
@@ -338,7 +318,6 @@ i32 TerrainBlockOnBlock(WORLDINFO_s *world, pushblock_s *block, nuvec_s *points,
 
 #undef TERRAIN_GET_SCAN_BOUNDS
 
-void NewTerrStoreAnyInfo();
 
 extern "C" void *NuScratchAlloc32(i32 size);
 extern "C" void NuScratchRelease();
@@ -357,7 +336,6 @@ NUVEC TerCrossProduct(NUVEC *a, NUVEC *b);
 
 extern "C" void noterraininit(void);
 
-void DrawWallSpline(float height);
 
 namespace {
 
@@ -366,7 +344,6 @@ namespace {
 
 } // namespace
 
-void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms);
 
 void NewScanRot(nuvec_s *position, i32 terrain_mask);
 
@@ -418,7 +395,6 @@ extern "C" i16 NewPlatPickupInst(void *object, i32 type);
 extern "C" i32 NewRayCastSetHandel(NUVEC *position, NUVEC *movement, f32 radius, f32 separation_epsilon,
                                    f32 compare_epsilon, i16 *handle, i32 scan_type);
 
-void ScanTerrainHandel(i32 terrain_mask, i16 *handle);
 
 extern "C" i32 TerrainPlatId(void);
 
@@ -433,7 +409,6 @@ extern "C" i32 ShadowInfo(void);
 extern "C" i32 ShadowIntensityInfo(void);
 
 // Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
-extern TERRSET *CurTerr;
 extern "C" void *NuScratchAlloc32(i32);
 extern "C" void NuScratchRelease();
 
@@ -443,11 +418,9 @@ namespace {
 
 } // namespace
 
-i16 *NewScanHandelFull(nuvec_s *position, nuvec_s *movement, f32 radius, i32 scan_type, i32 terrain_mask);
 
 #undef TERRAIN_COLLECT_WALL_SPLINES
 
-i16 *NewScanHandelSubset(i16 *subset, nuvec_s *position, nuvec_s *movement, f32 radius, i32 terrain_mask);
 
 extern "C" i16 *NewScanHandel(nuvec_s *position, nuvec_s *movement, f32 radius, i32 scan_type, i16 *subset);
 
@@ -455,15 +428,12 @@ namespace {
 
 } // namespace
 
-void ScanTerrainHandel(i32 terrain_mask, i16 *handle);
 
 extern "C" void TerrainTrackFlush(void);
 
-i32 HitTerrain();
 
 extern "C" f32 NewShadowEx(NUVEC *position, i32, f32 height_above, f32 height_below, i32 terrain_mask);
 
-i32 HitTerrPoly(tertype *surface, i32 group_index);
 
 void PlatformConnect(char *track_id, NUVEC *position_delta, NUVEC *movement_delta, i32 platform_index);
 

@@ -47,7 +47,6 @@ SAGA_HOST_WEAK void NuIOS_AllocateSystemFramebuffers(void);
 // Diagnostics / caps
 // ---------------------------------------------------------------------------
 
-i32 NuIOS_ShouldUseMSAA(void);
 
 // ---------------------------------------------------------------------------
 // Filesystem paths; the Android documents selection is cached after first use.
@@ -71,9 +70,7 @@ i32 NuIOS_ShouldUseMSAA(void);
 // @0x66c9a8, set in NuIOS_WakeRenderThread and sampled in
 // NuIOS_WaitForRenderThreadCompletion for 60 Hz pacing.
 
-void NuIOS_WaitForRenderThreadCompletion(void);
 
-void NuIOS_WakeRenderThread(void);
 
 // ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
 // Temporary C-linkage compatibility surface for unresolved engine owners.
@@ -164,7 +161,6 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs

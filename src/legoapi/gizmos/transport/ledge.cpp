@@ -77,7 +77,6 @@ static i32 Ledges_Load(void *world_info, void *);
 
 static void Ledges_StoreProgress(void *world_info, void *, void *progress_data);
 
-ADDGIZMOTYPE *Ledges_RegisterGizmo(i32 type_id);
 
 static inline void Ledge_TryAttach(WORLDINFO_s *world, GameObject_s *object) {
     if (object->character_context != 0x43 && object->character_context != -1) {
@@ -132,11 +131,8 @@ static inline void Ledge_UpdateUnattached(WORLDINFO_s *world, GameObject_s *obje
 struct AIROW_s;
 struct nunativegscene_s;
 
-extern f32 LEDGETERRAINLOOKAHEAD;
 
-LEDGE *Ledge_FindNearest(WORLDINFO_s *world, NUVEC *position, GameObject_s *object, f32 *distance_squared);
 
-i32 LedgeTerrain_SetTargetMom(GameObject_s *object);
 
 // ==== functions in original address order ====
 

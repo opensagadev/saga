@@ -41,7 +41,6 @@ ADDGAMEMSG AddGameMsg_Default = {
     NULL, 0,     0.0f,  0.0f, NULL, NULL, NULL, NULL, NULL, -1, 0,    0xff, 0,
 };
 
-GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message);
 
 void *AddGameMessage(char *text, nuvec_s *position, float scale, nuvec_s *target_position, float target_scale,
                      unsigned char red, unsigned char green, unsigned char blue, u32 flags, float duration);
@@ -189,10 +188,7 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
 
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
-i32 DrawPanel3DObjectNoAlpha(f32, f32, f32, f32, f32, f32, u16, u16, u16, nuhspecial_s *, i32);
 
-i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
-                      u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order, float alpha);
 
 i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
                              u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order);

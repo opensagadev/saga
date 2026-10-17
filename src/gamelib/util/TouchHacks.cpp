@@ -27,7 +27,6 @@
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
 
-f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 i32 SuperWeirdo(GameObject_s *);
 i32 GizForce_StoodOnForce(GIZFORCE_s *, GameObject_s *);
 EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
@@ -60,7 +59,6 @@ bool TouchHacks::ShouldBlock(GameObject_s &object) {
 
 NUCOLOUR3 flashCol = {2.0f, 2.0f, 2.0f};
 bool TouchHacks::TouchControlsActive;
-extern i32 BonusArea;
 extern "C" i16 id_GRABCONTROL, id_WICKET, id_EWOK;
 extern "C" i16 id_ATST, id_ATST_LOWRES;
 extern "C" i16 id_WATTO, id_GONKDROID;
@@ -312,7 +310,6 @@ bool TouchHacks::CanTagTo(GameObject_s &source, GameObject_s &target) {
     return !(dx * dx + dy * dy + dz * dz > 4.0f);
 }
 
-void Move_DEFAULT(GameObject_s *);
 
 bool TouchHacks::CanToggleTo(GameObject_s &object, i32 id) {
     if (object.id == id)
@@ -331,11 +328,6 @@ bool TouchHacks::CanToggleTo(GameObject_s &object, i32 id) {
 }
 
 void Move_CHARACTER(GameObject_s *);
-void Move_WEIRDO(GameObject_s *);
-void Move_JEDI(GameObject_s *);
-void Move_DROIDGENERIC(GameObject_s *);
-void Move_JAWA(GameObject_s *);
-void Move_GEONOSIAN(GameObject_s *);
 extern i16 id_SKELETON, id_GRIEVOUS, id_BODYGUARD, id_ATAT, id_STAP, id_STAP2;
 
 bool TouchHacks::CanTagVehicle(GameObject_s &object, GameObject_s &vehicle) {

@@ -36,7 +36,6 @@ static void Pup_UpdatePowerUp(WORLDINFO_s *world, GIZMOPICKUP_s *pickup);
 
 static void Pup_CollectPowerUp(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 flags);
 
-void Pup_CollectCoin(WORLDINFO_s *world, GIZMOPICKUP_s *pickup, i32 type, GameObject_s *object, i32 arg);
 
 static void Pup_CollectMinikit(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 type);
 
@@ -162,52 +161,24 @@ GIZMOPICKUPSYS_s GizmoPickupSys_Game = {
 #include <stdio.h>
 #include <string.h>
 
-BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
-void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
-void PartCollide_3D(PART_s *);
 extern "C" f32 sabrerubwait;
-extern i32 lightning_type;
 extern i16 id_YODA, id_YODAGHOST, id_GAMORREANGUARD, id_JANGOFETT;
-extern i32 LEGO_AIPATHCNX_WALLSHUFFLE;
-extern i32 VehicleArea;
 
 extern "C" {
-    extern NUVEC plr_lastpos;
-    extern i16 id_GRIEVOUS;
-    extern i16 id_BODYGUARD;
-    extern i16 id_IMPERIALGUARD;
-    extern i16 id_JAWA;
-    extern i16 id_UGNAUGHT;
-    extern i16 id_ATAT;
-    extern i16 id_GONKDROID;
     extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
-    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-    void DebrisPosOrientationMtx(i32, NUMTX *);
-    void DebFreeInstantly(i32 *);
-    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-extern void *theThingManager;
 
 void legoSetMusicVolume(float);
-void AnimatePlayer(GameObject_s *object);
-void InitPlayerAI(GameObject_s *object);
-void InitSurfaceInfo(GameObject_s *object);
-i32 SetObjOnSurface(GameObject_s *object, i32 mode);
 void GameAISysSetGame();
-void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode);
 APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id);
-void LevelScriptReStoreProgress(WORLDINFO_s *world, LEVELSCRIPTPROCESS_s *process);
 void GizmoSysAddGizmos(GIZMOSYS_s *gizmo_sys, GIZFLOW_s *giz_flow, void *world);
 void UpdateCoinPacket(COINPACKET_s *packet, i32 active, i32 player_index);
 
-extern i32 LEGO_AIPATHCNX_BLOCKAGE;
 
 extern "C" i32 AISysSetLevelPath(AISYS_s *system, char *path_name);
 
-extern GAMEFOG_STATE GameFog;
 
 #include "legoapi/items/objects/gameobjects_types.h"
 
@@ -223,30 +194,7 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
     static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
                   "complete game AI condition registry");
 
-extern CHARACTERNAMEFN * LevelCharacterNameFn;
-extern CHARACTERNAMEFN * SpecialRouteCharacterNameFn;
-extern CHARACTERGLOBALIDFN * LevelCharacterGlobalIDFn;
-extern GLOBALCHARACTERNAMEFN * GlobalCharacterNameFn;
-extern CHARACTERHGOBJFN * GlobalCharacterHGobjFn;
-extern CHARACTERRENDERFN * GlobalCharacterRenderFn;
-extern CHARACTERGOALSPEEDFN * GetCharacterGoalSpeedFn;
-extern CHARACTERTYPEIDFN * LevelCharacterTypeIDFn;
 
-extern AICHARACTERTYPEID * GlobalCharacterTypeIDFn;
-extern AISPECIALROUTECHARACTERTYPEID * SpecialRouteCharacterTypeIDFn;
-extern AICHARACTERDISTANCE * GetViewRangeFn;
-extern AICHARACTERDISTANCE * GetHearDistanceFn;
-extern AICHARACTERDISTANCE * GetMaxViewHeightFn;
-extern AICHARACTERDISTANCE * GetMinViewHeightFn;
-extern GAMEAILOAD * GameAILoadFn;
-extern AIACTIONPARSESPEED * AIActionParseSpeedFn;
-extern AIBIGJUMPTODESTINATION * AIBigJumpToDestinationFn;
-extern AIRESPAWNONPATH * AIRespawnOnPathFn;
-extern AICLEARCREATURES * ClearAICreaturesFn;
-extern APIOBJECTFROMOBJID * APIOBJECTFromObjIDFn;
-extern AIFINDALTERNATIVESPECIALOBJECT * FindAlternativeSpecialObjectFn;
-extern AIGETNAMEDAPIOBJECT * GetNamedAPIObjectFn;
-extern AIGETCREATUREORIGIN * GetAICreatureOriginFn;
 }
 
 // The special-route list reserves the first ten ids for suit characters.  The
@@ -260,9 +208,7 @@ f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 te
 
 extern "C" f32 MainRenderTime;
 extern "C" f32 MainRenderTargetTime;
-extern i32 Paused;
 struct CUTSCENEPLAYERCLIP;
-extern CUTSCENEPLAYERCLIP *CutScenePlayer_Active();
 
 extern "C" i32 DoubleScore;
 extern FadeSystem FadeSys;
@@ -275,11 +221,9 @@ void GameTiming(WORLDINFO_s *world, float *game_time);
 extern "C" i32 NewRayCastScaleYMask(NUVEC *, NUVEC *, f32, f32, i32, u32);
 extern "C" i32 RAYCASTCALLS;
 
-i32 GameRayCast(NUVEC *position, NUVEC *displacement, f32 radius, i32 mask);
 
 extern i32 active_neutral_count;
 extern "C" i32 party_cant_be_under_cover;
-extern AREADATA *VADER_ADATA;
 extern i32 active_baddy_count;
 
 #if defined(__i386__)
@@ -291,106 +235,62 @@ extern i32 active_baddy_count;
 // Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
 
 extern "C" {
-void InitFn_LevelCharacterTypeID(CHARACTERTYPEIDFN *function);
 
-void InitFn_SpecialRouteCharacterTypeID(CHARACTERTYPEIDFN *function);
 
-void InitFn_LevelCharacterName(CHARACTERNAMEFN *function);
 
-void InitFn_SpecialRouteCharacterName(CHARACTERNAMEFN *function);
 
-void InitFn_LevelCharacterGlobalID(CHARACTERGLOBALIDFN *function);
 
-void InitFn_GlobalCharacterTypeID(CHARACTERTYPEIDFN *function);
 
-void InitFn_GlobalCharacterName(GLOBALCHARACTERNAMEFN *function);
 
-void InitFn_GlobalCharacterRender(CHARACTERRENDERFN *function);
 
-void InitFn_GlobalCharacterHGobj(CHARACTERHGOBJFN *function);
 
-void InitFn_ClearAICreatures(AICLEARCREATURES *function);
 
-void InitFn_GetCharacterGoalSpeedFn(CHARACTERGOALSPEEDFN *function);
 
-void InitFn_GetViewRange(CHARACTERDISTANCEFN *function);
 
-void InitFn_GetHearDistance(CHARACTERDISTANCEFN *function);
 
-void InitFn_GlobalGetMaxViewHeight(CHARACTERDISTANCEFN *function);
 
-void InitFn_GlobalGetMinViewHeight(CHARACTERDISTANCEFN *function);
 
-void InitFn_GameAILoad(GAMEAILOAD *function);
 
-void InitFn_AIActionParseSpeed(AIACTIONPARSESPEED *function);
 
-void InitFn_AIRespawnOnPath(AIRESPAWNONPATH *function);
 
-void InitFn_AIBigJumpToDestination(AIBIGJUMPTODESTINATION *function);
 
-void InitFn_FindAlternativeSpecialObjectFn(AIFINDALTERNATIVESPECIALOBJECT *function);
 
-void InitFn_APIOBJECTFromObjIDFn(APIOBJECTFROMOBJID *function);
 
-void InitFn_GetNamedAPIObject(AIGETNAMEDAPIOBJECT *function);
 
-void InitFn_GetAICreatureOrigin(AIGETCREATUREORIGIN *function);
 
 }
 
-extern f32 OFFSCREEN_CATCHUP_TIME;
-extern f32 drop_back_in_timer;
 
-i32 TryToTeleportToNextNode(GameObject_s *object, AIPATHNODE_s *node, i32 tightrope);
 
-void SetSpecialMove(GameObject_s *object, AIPATHNODE_s *target, AIPATHNODE_s *node, char move);
 
-void ClearSpecialMove(GameObject_s *object);
 
-void GameAISysInit();
 
 void GameAISysReset(AISYS_s *system);
 
-i32 GameAudio_GetSfxId(i32 sfx);
 void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
 
 void GameFog_Update(WORLDINFO_s *world);
 
 void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size);
 
-void GameAudio_AddSfx(i32 sfx, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
 
-void GameObjectOrigin(GameObject_s *object);
 
-void PortalGameObject(GameObject_s *object, i32 enabled, i32 update_room, i16 room, nugscn_s *scene);
 
-void SnapCreaturePos(GameObject_s *object, NUVEC *position, i32 angle, AIPATHINFO_s *path_info, i32 set_on_surface);
 
-i32 Game_IgnoreInput();
 
-extern i16 id_GONKDROID;
-u32 GameAI_TotalScore();
 
-void GameAnimSys_Update(GAMEANIMSYS_s *system);
 
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 u16 SeekRot(u16, u16, f32);
-i32 RotDiff(u16, u16);
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER, id_ATST;
 
-f32 GameGetMusicVolume(OPTIONSSAVE_s *options);
 
-f32 GameSetMusicVolume(OPTIONSSAVE_s *options);
 
 void GameAISysStartFrame(AISYS_s *system);
 
 void GameDisplaySettings(LEVELDATADISPLAY *display, i32 *background_colours);
 
-CABLE_s *GameObjOwnsAnyCables(GameObject_s *object);
 
-i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *secondary_matrix,
-                           NUMTX *reflection_matrix, NUMTX *auxiliary_matrix, GameObject_s *object, u32 flags);
 
 extern "C" i16 id_THEEMPEROR, id_IMPERIALGUARD, id_BODYGUARD;
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
@@ -398,7 +298,6 @@ extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, u16, u16);
 
 void GameObjectStuffAfterAnimation();
 
-void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *message);
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {
@@ -406,53 +305,34 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 }
 
 extern "C" {
-extern ed_module_s edTimingDesc;
 }
 
-extern CUSTOMISER *CharacterCustomiser;
 extern CUSTOMPIECE *Customiser_FindPieceByName(CUSTOMISER *, char *, i32 *, i32 *);
 
-i32 NoLayerKill(GameObject_s *object);
 
-GameObject_s *FindGameObject(i32 character_id, u32 required_flags, i32 alive_only, i32 vehicle_only,
-                             i32 non_level_only);
 
-void DieRumble(GameObject_s *);
 
 void ConstantRumble(GameObject_s *object, f32 strength, f32 phase);
 
 extern char *ASCII_DOWN;
 
-void RemoveGameObject(GameObject_s *obj, i32);
 
 extern i32 nethost;
-void TakeOverGameObject(GameObject_s *, GameObject_s *, i32, i32);
 
 extern "C" i32 adaptivedifficulty[3];
 extern i8 (*adtab)[4];
-extern f32 lightning_sizew[2];
-extern f32 lightning_sizel[2];
-extern f32 lightning_sizewab[2];
-extern f32 lightning_endw[2];
-extern u32 lightning_col[2];
 extern AREADATA *PODSPRINT_ADATA;
 extern i16 id_ANAKINSNEWPOD, id_ANAKINSNEWPODGREEN, id_SEBULBASPOD;
 extern "C" f32 tieonsfxwait, tieoffsfxwait;
 void UpdateRumble(RUMBLEPACKET *);
-void Player_ToggleCharacter(GameObject_s *, i32, i32);
 
-GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *script_name, AIPATHINFO_s *path_info,
-                                 AIGROUP_s *group, i32 set_on_surface, nugspline_s *spline, nuvec_s *spline_offset,
-                                 i32 spline_mode, i32 creature_set);
 
-GameObject_s *GetNamedGameObject(AISYS_s *system, char *name);
 
 GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
                                     f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
                                     f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
                                     bool first_match);
 
-i32 GameObjectNearFloor(GameObject_s *object, f32 height, f32 *distance);
 
 void GameObjectToCameraDistances();
 
@@ -566,26 +446,12 @@ ADDPART_s Default_ADDPART = {NULL,
 struct rtlset;
 
 extern "C" {
-    void DebFreeInstantly(i32 *handle);
     // Shared suspend flag consulted by all timed debris emitters.
 
-    extern debinftype **debtab;
-    f32 CameraEmitterDistance(NUVEC *);
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
-    void AddFiniteShotDebrisEffect2(i32 *, i32, NUVEC *, NUVEC *, NUVEC *, i32);
-    void AddVariableShotDebrisEffectMtx3(i32, NUVEC *, NUVEC *, i32, NUMTX *, NUMTX *);
-    extern f32 debris_thinning_level;
-    extern i32 forced_debris_thinning;
 
-    i32 NuCameraClipTestExtentsAxisAligned(NUVEC *, NUVEC *, f32);
-    void NuVecAddScale(NUVEC *, NUVEC *, NUVEC *, f32);
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 }
 
-extern f32 AreaPickupGravity;
-extern i16 temp_xrot;
-extern i16 temp_zrot;
 
 // Forward declarations for local (static) part/gizmo helper stubs.
 struct spacelevel_s;
@@ -594,21 +460,14 @@ struct spacelevel_s;
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern GameObject_s *Obj;
 extern i32 HIGHGAMEOBJECT, VehicleArea;
 extern WORLDINFO_s *WORLD;
-extern GAMECAMERA_s *GameCam;
 extern "C" void KillPart(PART_s *, i32);
 void SetCoinType(i32 model, GIZMOPICKUP_s *pickup);
 u16 GameCam_GetAdjustedYRot(GAMECAMERA_s *camera);
-void CollectPowerUp(GameObject_s *, NUVEC *, u16, i32);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
-void NewBuzz(nupad_s *, f32, i32);
-void CollectHitPoint(GameObject_s *object, NUVEC *position, i32);
-void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
 
 extern "C" f32 coinimpactwait;
-extern i32 GAMEDEMO;
 extern "C" void PlaySfxAndSetVolume(char *, NUVEC *, f32);
 
 static __used__ void PartImpact_Coin(PART_s *part);
@@ -620,7 +479,6 @@ static __used__ void PartExtra_BlueCoin(PART_s *part);
 
 static __used__ void PartExtra_PurpleCoin(PART_s *part);
 
-void PowerUp_Particles(WORLDINFO_s *, NUVEC *);
 
 static __used__ i32 PowerUp_DrawPart(PART_s *part);
 
@@ -632,11 +490,9 @@ static __used__ void PowerUp_EndMsg(GAMEMESSAGE_s *message);
 
 static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *message);
 
-void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32);
 
 extern AREADATA_s *PODRACE_ADATA;
 extern AREADATA_s *BONUS_GUNSHIP_ADATA;
-extern AREADATA_s *GUNSHIP_ADATA;
 
 static __used__ i32 PartDraw_VehicleHeart(PART_s *part);
 
@@ -646,66 +502,33 @@ static __used__ void PartMove_VehiclePickup(PART_s *part, f32);
 
 extern "C" {
 
-void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z);
 
-void AddFiniteShotDebrisEffect(i32 *handle, i32 effect, NUVEC *position, i32 count);
 
-void AddFiniteShotDebrisEffect2(i32 *handle, i32 effect, NUVEC *position, NUVEC *emitter_momentum,
-                                    NUVEC *particle_momentum, i32 count);
 
-i32 AddFiniteShotPART(i32 effect, NUVEC *position, i32 count);
 
-    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
-    void KillPart(PART_s *, i32);
-    i32 rtlDynamicAllocTemplate(rtlset *, i32);
 
-PART_s *AddPart(ADDPART_s *params);
 
-    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 
-void AddVariableShotDebrisEffect(i32 effect, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation);
 
-void AddVariableShotDebrisEffectMtx3(i32 effect, NUVEC *position, NUVEC *momentum, i32 count,
-                                         NUMTX *emitter_orientation, NUMTX *particle_orientation);
 
-void AddVariableShotDebrisEffectMtx4(i32 effect, NUVEC *position, NUVEC *momentum, i32 count,
-                                         NUMTX *emitter_orientation, NUMTX *particle_orientation, u16 priority,
-                                         i8 flags);
 
-void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
-                                           i16 y_rotation, NUMTX *particle_orientation);
 
-void AddVariableShotDebrisEffectTimed5(i32 effect_index, NUVEC *position, NUVEC *momentum, NUVEC *position_delta,
-                                           i32 count, f32 duration, NUMTX *emitter_orientation,
-                                           NUMTX *particle_orientation, u16 render_priority, i8 timed_flags);
 
-void AddVariableShotPARTEffect(i32 effect_index, NUVEC *position, f32 rate, f32 duration, NUMTX *orientation);
 
 void DrawParts(i32 keep_offscreen);
 
-PART_s *FindPart(NUVEC *position, i32 player, GameObject_s *owner);
 
-void SetPartRTLSet(usize rtl_set);
 
     // The editor loader clears these page IDs with aligned vector stores.
 
-    void DebFreeInstantly(i32 *);
-    void rtlDynamicFree(i32);
 
-void KillPart(PART_s *part, i32 reason);
 
-i32 PARTLookupType(char *name);
 
-void edpartSetParticlePage(i32 page);
 
-void edpartStartPage(i8 page);
 
-void edpartStopPage(i8 page);
 
-i32 PARTLookupTypePageOnly(char *name, i32 page);
 
-    i32 rtlDynamicSetPos(i32, NUVEC *);
 
 void UpdateParts(f32 time);
 
@@ -717,31 +540,24 @@ PART_s *TargetPart(GameObject_s *object, nuvec_s *position, nuvec_s *direction, 
 extern "C" i32 NuGScnNumSpecials(nugscn_s *);
 
 extern "C" {
-extern part_typedesc_s * edpart_nearest_type;
 }
 
 extern "C" {
 
-i32 edpartLoadPage(char *path, i32 mode, void *scene);
 }
 
 extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f32 radius, NUVEC *minimum,
                             NUVEC *maximum, u32 flags);
 
-void InitPartTable(char **names);
 
 void LoadPartFile(WORLDINFO *world);
 
 void AddPartDebris(PARTDEBSYS_s *system, i32 index, nuvec_s *position);
 
-i32 SetPartTarget(GameObject_s *object, PART_s *target);
 
 WORLDINFO_s *WorldInfo_CurrentlyActive();
-extern f32 FRAMETIME;
 void PartCollide_2D(PART_s *);
 void PartUpdate_Heart(PART_s *);
-void PartStop_Flickerer(PART_s *);
-i32 PartDraw_Flickerer(PART_s *);
 
 void AddTorpedoAsPart(nuvec_s *position, nuvec_s *velocity, float scale, float lifetime);
 
@@ -749,15 +565,12 @@ void AddHeartAsPart(GameObject_s *recipient, nuvec_s *position, nuvec_s *velocit
 
 void PowerUp_AddPart(NUVEC *position, NUVEC *velocity, f32 scale, f32 lifetime);
 
-void PowerUp_Particles(WORLDINFO_s *world, NUVEC *position);
 
-i32 FindPartDebris(PARTDEBSYS_s *system, char *name);
 
 void MakePartVector(NUVEC *velocity, NUVEC *direction, f32 scale);
 
 void PartCollide_2D(PART_s *part);
 
-void PartCollide_3D(PART_s *part);
 
 void PartStop_Coin(PART_s *part);
 
@@ -777,18 +590,13 @@ void AddCoinsAsParts(i32 type_id, nuvec_s *position, nuvec_s *velocity, float li
 extern "C" f32 brickimpactwait;
 extern "C" i32 GetSfxId(const char *);
 
-void PartImpact_Brick(PART_s *part);
 
 void PartUpdate_Heart(PART_s *part);
 
-void PartStop_Flickerer(PART_s *part);
 
-i32 PartDraw_Flickerer(PART_s *part);
 
-void NewRumbleAllPlayers(f32, f32, i32, i32);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 
-void PartKill_ForceThrow(PART_s *part, i32);
 
 // ==== src/legoapi/menus/core/gamemessages.cpp: declarations ====
 #include <cstdio>
@@ -821,7 +629,6 @@ struct SHOPINPUT;
 
 extern void IncreaseScore(u32 *, u64, i32);
 extern void SetBonusWinner(i32);
-extern void Arcade_CoinCollected(i32, u32 *, u32);
 extern void PlayRepeatSfx(char *, i32, f32, char, f32, nuvec_s *);
 void ResetGameMessages();
 
@@ -831,20 +638,15 @@ static_assert(sizeof(GAME_MESSAGE_DATA) == sizeof(GAMEMESSAGE_s), "game message 
 static_assert(offsetof(GAME_MESSAGE_DATA, tick_fn) == offsetof(GAMEMESSAGE_s, tick_fn),
               "game message backing callback offset");
 
-extern ADDGAMEMSG AddGameMsg_Default;
 
-GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message);
 
 void AddFancyMessage(char *text, float x, float y, float scale, float duration, i32 message_id, i32 colour_type);
 
-void EndScoreMessage(GAMEMESSAGE_s *message);
 
-i32 FindGameMsgsWithID(i32 id, i32 remove, i32 player, GAMEMESSAGE_s *exclude);
 
 void AddGameMsgCount(nuvec_s *position, i32 count, i32 total, unsigned char red, unsigned char green,
                      unsigned char blue, float field_0xd4);
 
-void TransformGameMessages(nuvec_s *camera_position, nuvec_s *camera_scale, nuvec_s *camera_direction);
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizmopickups.cpp: all remaining content ====
 #include "decomp.h"
@@ -864,7 +666,6 @@ void TransformGameMessages(nuvec_s *camera_position, nuvec_s *camera_scale, nuve
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
 
-void NewBuzz(nupad_s *pad, f32 amount, i32 flags);
 
 void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_index, i32 model_variant,
                              GameObject_s *object, i32);
@@ -909,40 +710,27 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
 #include <stdio.h>
 #include <string.h>
 
-extern HUBMINIKITPIECES_s ** Char_MiniKit;
 extern "C" VARIPTR characterbuffer_ptr;
 extern "C" VARIPTR characterbuffer_end;
 
-void MiniKits_Init(variptr_u *buffer, variptr_u *);
 
-void CharacterMiniKits_Load(COLLECTION_s *collection, WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end);
 
 extern f32 KITPOSX, PANEL_MINIKITY, PANEL_MINIKITSCALE;
-void MiniKit_GameMsg_Update(GAMEMESSAGE_s *message);
-void MiniKit_GameMsg_End(GAMEMESSAGE_s *message);
 void Hint_SetHintFromId(i32, i32, i32);
 
-void CollectMinikit(nuvec_s *position, char *name, i32);
 
-i32 AllMiniKitsDone(AREASAVE_s *save);
 
 i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
 
 void IncreaseScore(u32 *, u64, i32);
 extern "C" void PlaySfx(char *, nuvec_s *);
-void DrawMiniKitCount(f32, f32, i32, i32);
 
-void CollectAllMiniKits(AREASAVE_s *save);
 
-void EndChallenge(i32, i32);
 
-void ResetMinikitCounter();
 
 extern i16 id_SLAVE1, tALLMINIKITSBUILT;
 
-void CharacterMiniKits_Dump(WORLDINFO_s *world);
 
-void IncrementMinikitCounter(GameObject_s *);
 
 // ==== src/legoapi/items/base/collection.cpp: declarations ====
 #include "legoapi/items/base/collection.h"
@@ -988,50 +776,24 @@ struct starfighter_s;
 
 struct APICHARACTERMODELLIST_s;
 
-extern i32 COLLECTION_COMPLETIONCOUNT;
 
-i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count);
 
-i32 Collection_Got(i32 id);
 
-void Collection_Configure(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd);
 
-extern f32 COLLECTION_DX;
-extern f32 COLLECTION_DY;
-extern f32 COLLECTION_ICONSIZE;
-extern i32 LEGOOBJ_ICON_FRAME_NEUTRAL;
-extern i32 LEGOOBJ_ICON_FRAME_BLUE;
-extern i32 LEGOOBJ_ICON_FRAME_GREEN;
 void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
 
-i32 Collection_GetIDList(COLLECTION_s *collection, u32 model_flag_mask, u32 required_model_flags, i16 *ids,
-                         i32 *first_id, i32 *second_id, i32 unused);
 
 void Collection_CreateMaster(char *file, i16 *idlist, COLLECTION_s *collection, i32 param4, float param5);
 
-void Collection_CreateCustom(char *name, i16 *id_list, COLLECTION_s *collection, u32 required_model_flags,
-                             u32 excluded_model_flags, u32 required_game_flags, i32 require_buyable, i32 columns,
-                             VARIPTR *buffer, VARIPTR *, i32 use_all_characters, f32 scale);
 
-COLLECTID *CollectIDUnlocked(i32 id);
 
-i32 Collection_GotAnyOfType(i32 type, u32 flags);
 
-void CollectAllCharacters(i32 only_story);
 
 u32 GizmoBlowups_TotalScore(void *);
-u32 GizForce_TotalScore(void *);
-u32 GizObstacles_TotalScore(void *);
-u32 GizTurrets_TotalScore(void *);
 
-u32 TotalLevelCoinTally(WORLDINFO_s *world, u32 *pickups, u32 *blowups, u32 *buildits, u32 *forces, u32 *obstacles,
-                        u32 *turrets, u32 *characters);
 
-COLLECTION_s *GetFreePlayCollection(i32 area);
 
-extern i32 SHOPHINTCOUNT;
 
-void ReCalculateCompletionPoints();
 
 // ==== src/legoapi/characters/core/playeritems.cpp: declarations ====
 #include "decomp.h"
@@ -1092,20 +854,15 @@ void AddCoinsAsParts(i32, NUVEC *, NUVEC *, f32, f32);
 void AddHeartAsPart(GameObject_s *, NUVEC *, NUVEC *, f32, f32);
 void AddTorpedoAsPart(NUVEC *, NUVEC *, f32, f32);
 void PowerUp_AddPart(NUVEC *, NUVEC *, f32, f32);
-i32 GetRandomCoinType();
 
 void AddCoinsToPanel(i32 coins, nuvec_s *position, i32 player, float, GameObject_s *, i32 random_types);
 
 void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *position, nuvec_s *direction, float,
                 i32 player_id, float speed, float lifetime, GameObject_s *owner, i32, i32 panel, bool consolidate);
 
-void AddMiscPickups(nuvec_s *position, i32 player_id, i32 coins, i32 torpedoes);
 
-i32 IsACoinType(i32 type);
 
-i32 LoseCoins(GameObject_s *object, i32 cause);
 
-void GizmoPickups_SetOnOff();
 
 // ==== functions in original address order ====
 

@@ -8,7 +8,6 @@
 #include "nu2api/numath/nuvec.h"
 #include <string.h>
 
-extern f32 FRAMETIME;
 
 struct AIROW_s;
 struct nuqthdr_s;

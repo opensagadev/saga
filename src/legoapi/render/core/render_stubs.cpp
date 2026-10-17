@@ -22,15 +22,11 @@ typedef struct numtl_s NUMTL;
 
 extern "C" {
 
-    extern NUGLOBALRNDRSTATE render_state;
     extern nurenderscene_s currentScene;
 
     void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 
-    i32 NuDisplayListRndrSpecial(nuhspecial_s *special, NUMTX *matrix, i32 skinned, NUMTX *skin_matrices,
-                                 DEFORMERWEIGHTSARRAY *deformer_weights);
 
-f32 FmvTimePS(void);
 
 void PerspectMidPoint(NUVEC *result, NUVEC *first, NUVEC *second, NUVEC *camera_position);
 

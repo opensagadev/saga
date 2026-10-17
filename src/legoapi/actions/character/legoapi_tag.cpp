@@ -93,11 +93,7 @@ void GetTakeOverPos(GameObject_s *, NUVEC *);
 void RegisterTakeOverObject(GameObject_s *object);
 void TakeOverGameObject2(GameObject_s *, GameObject_s *, i32);
 void TakeOver2GetIn(GameObject_s *, GameObject_s *);
-void Move_BEAST(GameObject_s *);
-void Hint_SetComplete(i32);
 void PlayLandSfx(GameObject_s *, i32, i32);
-void NewBuzz(nupad_s *, f32, i32);
-i32 RotDiff(u16, u16);
 f32 SpeederChaseATATInOutMul(NUVEC *, NUVEC *);
 i32 players_cannot_exit_speeder;
 extern i16 id_ATAT, id_SPEEDERBIKE;
@@ -107,10 +103,6 @@ void AICreatureResumeScript(GameObject_s *);
 
 static NUVEC SpeederChaseATATExitLandPos = {-159.0f, 6.869999885559082f, -17.600000381469727f};
 
-extern i16 id_ATAT;
-extern i16 id_ATST;
-extern i16 id_ATST_LOWRES;
-extern u8 PlayerRGB[2][3];
 extern i16 id_BUGGY, id_GYROCOPTER, id_BANTHA, id_BOMARRMONK, id_DEWBACK;
 extern i16 id_LANDSPEEDER, id_FLASHSPEEDER, id_TAUNTAUN, id_SPEEDERBIKE;
 extern i16 id_HEAVYREPEATINGCANNON, id_BIGGUN, id_TROOPERCANNON, id_STAP2, id_CLONEWALKER;
@@ -119,12 +111,9 @@ void ReleaseForce(GameObject_s *, i32);
 void ReleasePush(GameObject_s *);
 void Player_ResetContexts(PLAYERPACKET_s *);
 void SetWeaponIn(GameObject_s *);
-void GameCam_Blend(GAMECAMERA_s *, f32, f32, i32);
-void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
 
 void ResetForceGlow(PLAYERPACKET_s *);
 extern i32 CUTSKIPLOCK;
-void GizForce_ResetLOS(GameObject_s *);
 
 extern GameObject_s *player_tag_to;
 extern GameObject_s *player_tag_from;
@@ -133,7 +122,6 @@ extern i32 do_player_tag;
 static i32 Tag_Mode = 2;
 void (*Tag_DrawIconFn)(GameObject_s *);
 
-extern i16 id_LUKESKYWALKERDAGOBAH;
 
 struct TAGSCRIPTSTATE {
     AISCRIPTPROCESS processor;
@@ -146,9 +134,7 @@ DECOMP_ASSERT(offsetof(GameObject_s, takeover_target) == 0xeb0, "AI takeover tar
 DECOMP_ASSERT(offsetof(GameObject_s, field_0xeb4) == 0xeb4, "Object callback ABI");
 DECOMP_ASSERT(offsetof(GameObject_s, current_hp) == 0x108b, "Tag signed health ABI");
 
-extern i32 VehicleArea;
 extern "C" i32 menu_i_pack;
-i32 GetMenuID();
 void Hint_CancelCurrent();
 i32 InCollectList_Index(i32, COLLECTID *, i32);
 i32 NuIOS_AreInAppPurchasesAvailable();
@@ -158,8 +144,6 @@ i32 NuIOS_GetInAppProductByID(char *, NuIOS_InAppProduct *);
 extern i16 tBUNDLESAVINGSAVAILABLE;
 extern f32 text3d_height;
 void GameCam_HitRoll();
-void GameCam_Reset(GAMECAMERA_s *);
-void RememberPlayerIDs(i32, i32, i32);
 void Tag_NewTransfer(GameObject_s *, GameObject_s *);
 
 static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
@@ -199,9 +183,7 @@ i32 TagCode(GameObject_s *source, GameObject_s *destination, i32 takeover, i32 b
 
 void GetTakeOverPos(GameObject_s *object, nuvec_s *position);
 
-void ReleaseTakeOver(GameObject_s *object, i32);
 
-void ReleaseAllTakeOvers();
 
 i32 TakeOverYoda(GameObject_s *rider, GameObject_s *vehicle, i32 blend_camera, i32);
 
@@ -225,7 +207,6 @@ static i32 Tag_FindNextPlayer(GameObject_s *object) {
     return -1;
 }
 
-void TakeOverGameObject(GameObject_s *rider, GameObject_s *vehicle, i32 blend_camera, i32 immediate);
 
 // ==== functions in original address order ====
 

@@ -7,10 +7,7 @@
 #include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 
-extern GameObject_s * CutDeadVehiclePlayer;
 extern i32 reset_reimport;
 extern void GizmoTypeStoreProgress(GIZMOSYS_s *, void *, i32, i32, char *);
 
-void ResetLevel(WORLDINFO_s *world, char *cutscene, i32);
 
-void *SetLevelHack(i32 size);

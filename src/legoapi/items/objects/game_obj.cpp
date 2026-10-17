@@ -246,8 +246,6 @@ DECOMP_ASSERT(offsetof(BIKEPART_s, rider) == 0x24, "BIKEPART rider offset");
 DECOMP_ASSERT(offsetof(BIKEPART_s, rider_position) == 0x28, "BIKEPART rider position offset");
 static BIKEPART_s bikeParts[8];
 
-void KillParts(GameObject_s *, i32, i32, i32, f32, i32, u16 *);
-void KillParts_SpeederBike(ADDPART_s *, i32, i32, GameObject_s *);
 void KillParts_TIEFIGHTER(ADDPART_s *, i32, i32, GameObject_s *, i32, u16, u16, NUVEC *);
 void KillParts_ATAT(ADDPART_s *, i32, i32, GameObject_s *);
 static i32 SpeederPart_Draw(PART_s *);

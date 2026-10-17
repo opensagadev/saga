@@ -28,14 +28,11 @@
 #include "nu2api/nu3d/nutex.h"
 #include <math.h>
 
-void SetPushAngle(GameObject_s *object);
 
 void FastWeaponIn(GameObject_s *, i32);
 void PlayGruntSfx(GameObject_s *);
 
-f32 PushingTowardsAngle(u16 input_angle, u16 direction);
 
-i32 Pushing(GameObject_s *object, u16 *normal_angle, i32 *surface, i32 *angle_difference);
 
 extern u32 (*CanPushObstaclesFn)(GameObject_s *);
 extern GIZSPINNER_s *GizSpinner_Find(WORLDINFO_s *world, nuvec_s *position, i32 alternate);
@@ -44,7 +41,6 @@ extern void GizSpinner_PushFail(GameObject_s *object, GIZSPINNER_s *spinner);
 i32 PushBlock(GameObject_s *object);
 void StartLunge(GameObject_s *object, f32 speed, f32 height);
 void PlayLandSfx(GameObject_s *object, i32 variant, i32 force);
-void StartEndOfJump(GameObject_s *object);
 void AlertSurroundingCreatures(GameObject_s *object, NUVEC *position);
 extern "C" i32 ParticlesPerSecond(f32 rate, f32 elapsed);
 
@@ -101,11 +97,9 @@ extern "C" i32 ParticlesPerSecond(f32 rate, f32 elapsed);
 
 // Original action/context lookup data, with its arrays and pointers in one owner.
 
-extern CHARACTER_CONTEXT_INFO_s * CInfo;
 
 void FastWeaponIn(GameObject_s *object, i32 sound);
 void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
-void GameCam_Blend(GAMECAMERA_s *, f32, f32, i32);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 // Retail keeps several of this file's static helpers only as GCC clones; these
 // declarations pin the clone names and register conventions.
@@ -226,12 +220,10 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nufile/nufile.h"
 
-extern ADDPART_s Default_ADDPART;
 
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
@@ -247,15 +239,11 @@ extern WORLDINFO_s *WORLD;
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
     // The editor loader clears these page IDs with aligned vector stores.
 
 } // extern "C"
 
-extern f32 FRAMETIME;
-void PartStop_Flickerer(PART_s *);
-i32 PartDraw_Flickerer(PART_s *);
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -268,11 +256,8 @@ i32 PartDraw_Flickerer(PART_s *);
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-void PartImpact_Brick(PART_s *part);
 
-void PartStop_Flickerer(PART_s *part);
 
-i32 PartDraw_Flickerer(PART_s *part);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 #include "legoapi/items/objects/objectsall.h"
@@ -295,11 +280,9 @@ i32 PartDraw_Flickerer(PART_s *part);
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nu3d/android/nutimebar_plain.h"
 
-extern i32 VehicleArea;
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
 
-void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode);
 
 #include "legoapi/items/objects/gameobjects_types.h"
 
@@ -327,14 +310,12 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
 
-i32 RotDiff(u16, u16);
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
 
-i32 GameObjectNearFloor(GameObject_s *object, f32 height, f32 *distance);
 
 // ==== src/legoapi/actions/combat/fighting.cpp: declarations ====
 #include "legoapi/actions/combat/fighting.h"
@@ -344,7 +325,6 @@ i32 GameObjectNearFloor(GameObject_s *object, f32 height, f32 *distance);
 #include "legoapi/actions/character/speederchase.h"
 #include "legoapi/misc/utilities.h"
 
-i32 qrand();
 
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
@@ -393,7 +373,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 // ==== src/legoapi/audio/specialsfx.cpp: declarations ====
 
-i32 qrand(void);
 
 // ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
 #include "legoapi/items/collect/spacelevel.h"
@@ -403,7 +382,6 @@ i32 qrand(void);
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEVALUES speedervals[4];
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
@@ -611,7 +589,6 @@ void PodSprintA_Update(WORLDINFO_s *world);
 // ==== src/legoapi/ai/game/creature.cpp: declarations ====
 
 extern "C" {
-    void ResetAnimPacket(ANIMPACKET_s *packet, i16 animation);
 }
 
 #include "legoapi/ai/game/creature_types.h"
@@ -710,9 +687,7 @@ DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size
 
 #include "legoapi/ai/core/aisysall_types.h"
 
-void RegisterAIScriptActions(AIACTIONDEF *action_defs);
 
-void RegisterAIScriptConditions(AICONDITIONDEF *cond_defs);
 
 // ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
 #include "editor/aieditor_state.h"
@@ -739,7 +714,6 @@ extern "C" {
 
 extern "C" {
 
-extern AIEDITOR_RENDER_STATE * aieditor;
 
 } // extern "C"
 
@@ -1027,7 +1001,6 @@ namespace {
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== src/legoapi/actions/character/starwars.cpp: all remaining content ====
 
@@ -1108,7 +1081,6 @@ void StartLunge(GameObject_s *, f32, f32);
 
 #include "legoapi/actions/movement/jumping_types.h"
 
-void StartJump(GameObject_s *object, i32 movement_state);
 
 // ==== src/legoapi/actions/movement/carrying.cpp: declarations ====
 
@@ -1130,7 +1102,6 @@ void StartJump(GameObject_s *object, i32 movement_state);
 
 #include <ctype.h>
 
-i32 RotDiff(u16 current, u16 target);
 
 // Retail copies a fully inside end point as one unaligned vector.
 
@@ -1216,8 +1187,6 @@ DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon reb
 // ==== src/legoapi/items/collect/batarang.cpp: declarations ====
 #include "legoapi/items/collect/batarang.h"
 
-void NewRumble(nupad_s *, f32, i32);
-void NewBuzzFrames(nupad_s *, i32, i32);
 
 // ==== src/legoapi/gizmo/object/gizmoblowups.cpp: declarations ====
 
@@ -1232,7 +1201,6 @@ extern u32 flagremaptab[32][2];
 
 DECOMP_ASSERT(sizeof(BLOWUPPROGRESS_s) == 0x100, "BLOWUPPROGRESS_s ABI");
 
-extern i32 ShadowMode;
 DECOMP_ASSERT(offsetof(WORLDINFO_s, blowup_target_candidates) == 0x50d4, "Blowup target candidate-list ABI");
 
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
@@ -1246,7 +1214,6 @@ DECOMP_ASSERT(offsetof(WORLDINFO_s, blowup_target_candidates) == 0x50d4, "Blowup
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    i32 NuFileExists(char *);
 
 }
 
@@ -1262,11 +1229,9 @@ extern "C" {
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
 
-void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
 
 // ==== src/legoapi/props/objects/tubes.cpp: all remaining content ====
 
-void NewRumble(nupad_s *pad, f32 strength, i32 mode);
 
 // ==== src/legoapi/misc/supportall.cpp: declarations ====
 
@@ -1280,7 +1245,6 @@ void NewRumble(nupad_s *pad, f32 strength, i32 mode);
 #include "legoapi/gizmo/base/gizflow.h"
 
 // The reference defines these with dynamic initialization in this unit.
-extern MemoryManager theMemoryManager;
 #include "legoapi/misc/supportall_types.h"
 
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");

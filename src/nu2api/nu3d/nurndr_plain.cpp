@@ -57,8 +57,6 @@
 
 
 extern "C" {
-extern i32 PS2_REZ_W;
-extern i32 PS2_REZ_H;
     // Scene currently being built.  Size is 0x218 bytes; original lives in BSS
     // and is referenced as a plain object by all render/present code.
 extern struct nurenderscene_s currentScene;
@@ -79,18 +77,14 @@ volatile bool g_isBlockedInSwapScreen = false;
 // ---------------------------------------------------------------------------
 
 // Display-list cursor for the 2D stream.  Defined in nudlist.cpp.
-extern VARIPTR *display_list_buffer;
 
 // ---------------------------------------------------------------------------
 // Forward declarations for C-visible helpers
 // ---------------------------------------------------------------------------
 
 extern "C" {
-    i32 NuDisplayListAddRenderScene(void);
     i32 NuDynamicLightIsEnabled(void *);
     void NuDynamicLightAddRenderScene(struct NuDynamicLight *, i32, i32);
-    void NuDisplayListLinkMtl(nudisplaylist_s *list, NUMTL *mtl);
-    VARIPTR *NuDisplayListLinkItems(nudisplaylist_s *list, i32 count);
 }
 
 // ---------------------------------------------------------------------------
@@ -105,7 +99,6 @@ extern "C" i32 NuRndrBeginScene(i32 /*begin_flags*/);
 
 extern "C" i32 NuRndrBeginSceneEx(i32 begin_flags, i32, i32);
 
-void NuMarkSceneAsZPrePass();
 
 extern "C" void NuRndrClear(i32 clear_flags, i32 bg_colour, f32 alpha);
 
@@ -151,7 +144,6 @@ extern "C" {
     static NUDISPLAYSCENERNDR_BODY_ATTR void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene)
         __asm__("NuDisplaySceneRndr.part.101");
 
-void NuDisplaySceneRndr(void *display_scene);
 
 static void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene);
 }
@@ -184,7 +176,6 @@ static inline void NuRndrPrimUV(f32 u, f32 v);
 extern "C" void NuRndr3dLine(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, i32 colour);
 extern "C" void NuRndrAnglesZX(NUVEC *direction, NUVEC *angles);
 
-void NuLightBurnoutEffect(i32, f32 threshold, f32 intensity, f32 flare);
 extern "C" void NuRndrAxes(NUMTX *matrix, f32 length);
 static inline void NuRndrPrimSetColour(i32 colour);
 extern "C" void NuRndrAxisArrowsMtx(NUMTX *matrix, f32 length, NUMTL *material);
@@ -196,7 +187,6 @@ extern "C" void NuRndrAxisBright(NUMTX *matrix, f32 length, i32 brightness);
 static inline void NuRndrPrimSetColour(i32 colour);
 
 extern "C" void NuRndrBoundingBox(NUVEC *minimum, NUVEC *maximum, NUMTX *matrix, i32 colour);
-extern f32 circle_scale_radius;
 static inline void NuRndrPrimSetColour(i32 colour);
 static inline void NuRndrPrimUV(f32 u, f32 v);
 extern "C" __attribute__((force_align_arg_pointer)) i32 NuRndrCircle(f32 x, f32 y, f32 radius, f32 aspect, i32 count, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour,
@@ -248,24 +238,16 @@ extern "C" void NuRndrRect2di(i32 x, i32 y, i32 w, i32 h, i32 colour, numtl_s *m
 extern "C" void NuRndrRectUV2di(i32 x, i32 y, i32 w, i32 h, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour, numtl_s *mtl);
 extern "C" void NuRndrSetCullDebug(void);
 extern "C" {
-extern i32 NuRndrStopUpdate;
-extern NUVEC NuRndrDebBase;
-extern NUVEC NuRndrDebRange;
-extern NUVEC NuRndrDebRangeInv;
 }
 
 extern "C" void NuRndrSetDebBaseRange(NUVEC *base, NUVEC *range);
 
 extern "C" void NuRndrSetDebBox(NUVEC *range);
 extern "C" {
-extern i32 g_minmiplevel;
-extern f32 g_mipmapbias;
 }
 
 extern "C" void NuRndrSetGlobalMinMipLevel(i32 level);
 extern "C" void NuRndrSetGlobalMipMapBias(f32 bias);
-extern f32 global_windspeed;
-extern f32 global_windscale;
 extern "C" void NuRndrSetWind(f32 speed, f32 scale);
 
 extern "C" void WindShear(NUMTX *output, NUMTX *input, i32 wind_scale, i32 wind_speed);
@@ -285,7 +267,6 @@ extern "C" i32 NuRndrStrip3d(NURND_VERTEX3D *vertices, numtl_s *material, NUMTX 
 extern "C" void NuRndrTriStrip2di(i32 *positions, f32 *uvs, i32 count, i32 colour, NUMTL *material);
 extern "C" i32 NuRndrTri3dClip(NURND_VERTEX3D *vertices, i32 count, NUMTX *matrix, numtl_s *material);
 extern "C" i32 NuRndrTriStrip3dClip(NURND_VERTEX3D *vertices, i32 count, NUMTX *matrix, numtl_s *material);
-extern i32 global_GobjWasDrawnUnreflected;
 extern "C" i32 NuRndrWasDrawnUnreflectedGobj(void);
 extern "C" void NuRndrWireTri(NUVEC *a, NUVEC *b, NUVEC *c, i32 colour);
 

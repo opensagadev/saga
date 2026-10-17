@@ -161,23 +161,15 @@ void Hint_Process(float elapsed);
 
 void Hint_SetHint(HINT_s *hint, i32 force, i32 allow_completed);
 
-HINT_s *Hint_FindHint(i32 hint_id);
 
-void Hint_SaveBits(i32 hint_id, i32 complete);
 
-i32 Hint_CurrentId();
 
 void Hint_ResetHint(i32 hint_id, i32 reset_completed);
 
-i32 Hint_isComplete(HINT_s *hint);
 
-i32 Hint_isComplete(i32 hint_id);
 
-void Hint_SetComplete(HINT_s *hint);
 
-void Hint_SetComplete(i32 hint_id);
 
-i32 Hint_isAvailable(i32 hint_id);
 
 void Hint_CancelCurrent();
 
@@ -193,7 +185,6 @@ void Hint_LoadAllGameState();
 
 void Hint_ClearHintsAndDoneFlags();
 
-void Hint_Draw(i32 viewport);
 
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
 
@@ -229,16 +220,12 @@ struct nunativegscene_s;
 
 // The hint icon transitions and the touch icon x position are dynamically
 // initialized in this unit's static constructor in the reference.
-extern HintVectorTransition hintIconPos;
-extern HintScalarTransition hintIconScale;
-extern HintScalarTransition hintYPop;
 static __used__ i32 Attack_UpdateHint(HINT_s *);
 
 u8 show_unlock_shop_hint = 0;
 u8 show_unlock_customiser_hint = 0;
 u8 show_unlock_minikitviewer_hint = 0;
 
-f32 CurrentHintAlpha();
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
@@ -285,7 +272,6 @@ i32 SmartBomb_UpdateHint(HINT_s *);
 
 i32 ShinyMetal_UpdateHint(HINT_s *hint);
 
-f32 CurrentHintButtonScale();
 
 static __used__ i32 Sith_UpdateHint(HINT_s *);
 
@@ -362,9 +348,7 @@ HINT_s Hints_LSW[55] = {
 static i32 updatehints_target_y[2];
 static f32 updatehints_current_y[2];
 
-void MenuUpdateHints(MENU_s *menu);
 
-void MenuDrawHints(MENU_s *menu);
 
 // ==== functions in original address order ====
 

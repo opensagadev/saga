@@ -28,8 +28,6 @@
 #include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nutrig.h"
 #include "legoapi/core/input/qrand.h"
-i32 Player_HasInvincibility(GameObject_s *);
-void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
 extern "C" i32 GetSfxId(const char *);
 extern i32 testlaser_type;
 extern f32 testlaser_sizew, testlaser_sizel, testlaser_sizewab, testlaser_endw;
@@ -234,7 +232,6 @@ void DeathStar2BattleD_Init(WORLDINFO_s *world);
 
 void DeathStar2BattleD_Update(WORLDINFO_s *);
 
-GIZMOBLOWUP_s *DeathStar2BattleD_InZapRange(GameObject_s *object);
 
 void DeathStar2BattleA_AlwaysUpdate(WORLDINFO_s *);
 

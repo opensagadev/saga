@@ -34,10 +34,8 @@
 #include <string.h>
 
 i32 GetMenuID();
-CABLE_s *GameObjOwnsAnyCables(GameObject_s *);
 void ReleaseCable(CABLE_s *, i32);
 extern "C" i16 id_WATTO;
-extern i16 id_YODA;
 extern "C" i32 dagobah_training;
 extern AREADATA *DAGOBAH_ADATA;
 void ForceNextLungeTarget(MechObjectInterface *);
@@ -241,12 +239,10 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 
 #include <math.h>
 
-extern ADDPART_s Default_ADDPART;
 
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
@@ -259,15 +255,11 @@ extern "C" {
 
 extern "C" {
 
-PART_s *AddPart(ADDPART_s *params);
 
     // The editor loader clears these page IDs with aligned vector stores.
 
 } // extern "C"
 
-extern f32 FRAMETIME;
-void PartStop_Flickerer(PART_s *);
-i32 PartDraw_Flickerer(PART_s *);
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -280,11 +272,8 @@ i32 PartDraw_Flickerer(PART_s *);
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-void PartImpact_Brick(PART_s *part);
 
-void PartStop_Flickerer(PART_s *part);
 
-i32 PartDraw_Flickerer(PART_s *part);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 #include "legoapi/items/objects/objectsall.h"
@@ -334,7 +323,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
 
-i32 RotDiff(u16, u16);
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {
@@ -343,7 +331,6 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 
 // ==== src/legoapi/actions/combat/fighting.cpp: declarations ====
 
-i32 qrand();
 
 // ==== src/legoapi/characters/core/players.cpp: declarations ====
 
@@ -388,7 +375,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 // ==== src/legoapi/audio/specialsfx.cpp: declarations ====
 
-i32 qrand(void);
 
 // ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
 #include "legoapi/items/collect/spacelevel.h"
@@ -398,7 +384,6 @@ i32 qrand(void);
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEVALUES speedervals[4];
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
@@ -698,9 +683,7 @@ DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size
 
 #include "legoapi/ai/core/aisysall_types.h"
 
-void RegisterAIScriptActions(AIACTIONDEF *action_defs);
 
-void RegisterAIScriptConditions(AICONDITIONDEF *cond_defs);
 
 // ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
 #include "editor/aieditor_state.h"
@@ -727,7 +710,6 @@ extern "C" {
 
 extern "C" {
 
-extern AIEDITOR_RENDER_STATE * aieditor;
 
 } // extern "C"
 
@@ -1012,7 +994,6 @@ namespace {
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== src/legoapi/actions/character/starwars.cpp: all remaining content ====
 
@@ -1111,7 +1092,6 @@ struct PART_s;
 
 #include <ctype.h>
 
-i32 RotDiff(u16 current, u16 target);
 
 // Retail copies a fully inside end point as one unaligned vector.
 
@@ -1197,7 +1177,6 @@ DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon reb
 // ==== src/legoapi/items/collect/batarang.cpp: declarations ====
 #include "legoapi/items/collect/batarang.h"
 
-void NewRumble(nupad_s *, f32, i32);
 
 // ==== src/legoapi/gizmo/object/gizmoblowups.cpp: declarations ====
 
@@ -1225,7 +1204,6 @@ DECOMP_ASSERT(offsetof(WORLDINFO_s, blowup_target_candidates) == 0x50d4, "Blowup
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    i32 NuFileExists(char *);
 
 }
 
@@ -1243,7 +1221,6 @@ extern "C" {
 
 // ==== src/legoapi/props/objects/tubes.cpp: all remaining content ====
 
-void NewRumble(nupad_s *pad, f32 strength, i32 mode);
 
 // ==== src/legoapi/misc/supportall.cpp: declarations ====
 
@@ -1257,7 +1234,6 @@ void NewRumble(nupad_s *pad, f32 strength, i32 mode);
 #include "legoapi/gizmo/base/gizflow.h"
 
 // The reference defines these with dynamic initialization in this unit.
-extern MemoryManager theMemoryManager;
 #include "legoapi/misc/supportall_types.h"
 
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");

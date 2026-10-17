@@ -61,15 +61,11 @@
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
 
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
-extern f32 AreaPickupGravity;
-extern i16 temp_xrot;
-extern i16 temp_zrot;
 
 // Forward declarations for local (static) part/gizmo helper stubs.
 
@@ -81,27 +77,20 @@ extern WORLDINFO_s *WORLD;
 
 extern "C" {
 
-i32 AddFiniteShotPART(i32 effect, NUVEC *position, i32 count);
 
     // The editor loader clears these page IDs with aligned vector stores.
 
-void edpartSetParticlePage(i32 page);
 
-void edpartStartPage(i8 page);
 
-void edpartStopPage(i8 page);
 
-i32 PARTLookupTypePageOnly(char *name, i32 page);
 
 } // extern "C"
 
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;
-BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
 
 extern "C" {
 
-i32 edpartLoadPage(char *path, i32 mode, void *scene);
 }
 
 static i32 PDEBCOUNT;
@@ -145,7 +134,6 @@ extern "C" i32 NuFileExists(char *name);
 
 extern "C" i32 PARTLookupTypePageOnly(char *, i32);
 extern "C" part_type_s part_types[128];
-void *InitPartDebris(VARIPTR *buf, VARIPTR *, i32 capacity, i32 named_count, char **names, i32 page);
 
 // ==== src/legoapi/render/fx/parts_control.cpp: all remaining content ====
 

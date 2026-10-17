@@ -15,7 +15,6 @@ i16 NetChangedReplicator::mTableInited;
 i16 NetChangedReplicator::mCrc32Table[256];
 static i32 ForceDummySerialise;
 
-extern EdRegistry theRegistry;
 // The original cleared the shared empty address at start-up.
 static inline NetAddress MakeEmptyAddress() {
     NetAddress address;

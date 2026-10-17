@@ -69,18 +69,11 @@ extern "C" {
     f32 NuIOS_GetAspectRatio(void);
     i32 NuIOS_GetDeviceLanguage(void);
     void NuLanguageSet(i32 language);
-    void NuCameraSet(NUCAMERA *cam);
     void NuFrameBegin(void);
     f32 NuFrameEnd(void);
-    i32 NuRndrBeginScene(i32 flags);
-    void NuRndrEndScene(void);
-    void NuMtlDestroy(NUMTL *mtl);
-    NUMTL *NuMtlCreate(i32 count);
-    void NuMtlUpdate(NUMTL *mtl);
     void NewMenu(i32 menu_id, i32 menu_y, i32 param3);
     void edGraEnableTerrainSwap(void);
     void edGraDisableTerrainSwap(void);
-    void SetActionInfo(ACTIONINFO_s *action_info, EXTRAACTIONDATA_s *extra_action_data);
     void SetProceduralAnimationFn(void *fn);
     void DrawMenu(i32 menu_id);
     extern i32 GameMenuLevel;
@@ -97,24 +90,15 @@ void Text_InitDefaultStrings(void);
 void LevelProgress_ReserveBufferSpace(VARIPTR *buf, VARIPTR buf_end);
 void LevelObjects_InitForGame(LEVELOBJECT *tab, VARIPTR *buf, VARIPTR *buf_end, i32 a4, i32 a5);
 void LevelSplines_InitForGame(LEVELSPLINE *tab);
-NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
 void CreateThingManager(void);
-void RegisterGizmoTypes_LSW(VARIPTR *buffer, VARIPTR *buffer_end);
 void GameAnimSys_AllocateLevelProgressData(VARIPTR *buf, VARIPTR *buf_end, i32 a3, i32 a4);
 void LSW_registerStatusScreen(void);
 void initGameHintSys_LSW(void);
 void Movies_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end);
-CHARACTERDATA *ConfigureCharacterList(char *path, VARIPTR *buf, VARIPTR *buf_end, i32 max, i32 *count, i32 stride,
-                                      GAMECHARACTERDATA **gcdata);
 void CharScenes_Init(VARIPTR *buf, VARIPTR *buf_end);
 void FixUpCharacters(CHARFIXUP *fixup);
 void CharCategories_Init(CHARCATEGORY *cat);
-LEVELDATA *Levels_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end, i32 max, i32 *count,
-                                LEVELSETDEFAULTSFN *set_defaults);
-void FixUpLevels(LEVELFIXUP *fixup);
-EPISODEDATA *Episodes_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end, i32 max, i32 *count);
 void NewGame(void);
-void InitGameAfterConfig(void);
 GIZAIMESSAGESYS_s *CreateGizAIMessageSys(VARIPTR *buf, VARIPTR *buf_end, i32 size);
 
 // buffer globals owned by the batman TU (batman.h declares them extern "C")
@@ -124,20 +108,17 @@ extern "C" {
     extern VARIPTR characterbuffer_end;
 }
 void BackDrop_Init(char *path, VARIPTR *buf, VARIPTR *buf_end);
-void TextCrawl_Init(TEXTCRAWL_s *crawl, i32 id, i32 unk);
 void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text);
 void LoadPerm1(void);
 void LoadPerm2(void);
 void RegisterHelpers(void);
 void UpdateGameMenu(GAMEPAD_s *pad, i32 a2);
 void SetBackgroundMusic(i32 track);
-void UpdateTimer(TIMER *timer);
 void IntroText_Draw(f32 alpha);
 void ReadPads(void);
 
 // Globals / objects declared elsewhere.
 extern i16 id_DEFAULTCHARACTER[2];
-extern i16 id_QUIGONJINN;
 extern i16 id_OBIWANKENOBI;
 extern "C" GAMEPAD_s GamePad[64]; // gamepads.cpp, bss @0x127a500
 extern i32 readpads_always;
@@ -231,7 +212,6 @@ void StartPerm(void) {
     permbuffer_end.addr = superbuffer_end.addr;
 }
 
-void LoadPerm(void);
 
 // libTTapp.so 0x470de0: close the permbuffer, carve out the character
 // buffer, and split the remaining superbuffer in half between the two world
@@ -316,17 +296,11 @@ void CheckForPlayersTurnedOff();
 
 extern "C" NUVEC plr_lastpos;
 
-extern AREADATA *BONUS_GUNSHIP_ADATA;
-extern void GameObjectOrigin(GameObject_s *obj);
-extern void InitSurfaceInfo(GameObject_s *obj);
-extern i32 SetObjOnSurface(GameObject_s *obj, i32 mode);
 void ResetPlayerMoves(GameObject_s *obj);
 i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode);
-void NewBuzz(nupad_s *, f32, i32);
 void Player_ClearContext(GameObject_s *object, i32 mode);
 void Player_ResetContexts(PLAYERPACKET_s *packet);
 
-void Players_Init(void);
 
 // --- Helpers moved from world.cpp ---
 
@@ -336,101 +310,63 @@ extern i8 BoltType_FindIDByName(char *name, WORLDINFO *world);
 
 void PlayerItemTypes_Reset(WORLDINFO *world);
 
-GameObject_s *AddCreature(i32 id, i32 param);
 
-void PreResetCode(GameObject_s *obj);
 
-void PostResetCode(GameObject_s *obj);
 
-void SetHitPoints(GameObject_s *obj, i32 hp);
 
-void RememberPlayerIDs(i32 a, i32 b, i32 c);
 
 // ---- Player start spawn entries ----
-extern PLAYERSTARTENTRY PlayerStart[8];
 
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
 
-void *CutScenePlayer_Available(void);
 
-void ChatterSfx(GameObject_s *g, i32 a, float b);
 
-void DrawOffsetCode(GameObject_s *obj, i32 param);
 
-float GetHoverPosY(GameObject_s *obj);
 
-void PlayerItem_Set(PLAYERITEM_s *item, PLAYERITEMTYPE_s *type);
 
-GameObject_s *Player_FindByID(i32 id);
 
-NUVEC *Player_StartPos(GameObject_s *obj);
 
-i32 PlayersDropInOut();
 
 i32 Players_AveragePos(nuvec_s *position, SOCKPOSITION_s *socket_position);
 
-i32 Players_BothActive();
 
-PLAYERITEMTYPE_s *PlayerItemType_Find(i32 id);
 
-i32 Player_HasFastBuild(GameObject_s *player);
 
-void PlayerItemTypes_Init(PLAYERITEMTYPE_s *types);
 
-void Player_CopyEssentials(GameObject_s *source, GameObject_s *destination);
 
-extern FadeSystem FadeSys;
-extern i32 LEGOHINT_FREEPLAYTOGGLE;
-void Move_DEFAULT(GameObject_s *object);
-void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode);
 void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
 
-void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound);
 
-i32 Player_HasInvincibility(GameObject_s *object);
 
-i32 Player_HasDoubleWeaponDamage(GameObject_s *object);
 
 namespace {
 
 } // namespace
 
-i32 CanPullLevers(i32 id);
-extern f32 DEFAULT_MOVE_RANGE;
 
 void SetFlicker(GameObject_s *object, float duration);
 
 #include "legoapi/characters/core/players_types.h"
 
-void InitPlayerAI(GameObject_s *object);
 
-i32 MakePlayerList(i32 count);
 
 void ResetPlayerPacket(PLAYERPACKET_s *, CHARACTERDATA_s *);
 
 void ResetPlayerMoves(GameObject_s *object);
 
-i32 AvailableToPlayer(u32 character_flags, i32 weapon_action, i32 context, i32 require_all);
 
-i32 GetNumLocalPlayers();
 
 i32 ActivePlayerInRange(nuvec_s *position, float range_squared, float *distance_squared);
 
 DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 
-i32 Player_HasPurpleForce(GameObject_s *obj);
 
-void FixUpLayers();
 
-u32 AdjustLayerBits(u32 mask, GameObject_s *object);
 
-void SetPlayerGroupPosition(f32 x, f32 y, f32 z);
 
 bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, float &distance_squared,
                             bool require_character_flags, u32 character_flags);
 
-extern i32 (*LastSafePosExtraFn)(GameObject_s *);
-extern void (*GameObjectDimensionsExtraFn)(GameObject_s *);
 
 bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player, float &distance_squared,
                                bool require_character_flags, u32 character_flags);

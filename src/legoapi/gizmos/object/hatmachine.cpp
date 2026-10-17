@@ -102,7 +102,6 @@ static void HatMachine_Activate(GIZMO *gizmo, i32 enabled);
 
 static void HatMachine_Draw(void *world_ptr, void *, float);
 
-void HatMachines_InitTerrain(WORLDINFO_s *world);
 
 
 
@@ -110,9 +109,7 @@ HATMACHINE *HatMachine_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameOb
 
 i32 HatMachine_BeingUsed(HATMACHINE_s *hat_machine);
 
-ADDGIZMOTYPE *HatMachine_RegisterGizmo(i32 type_id);
 
-void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_pressed);
 
 
 // ==== functions in original address order ====

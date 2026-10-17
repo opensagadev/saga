@@ -47,33 +47,23 @@
 
 static TORPEDOPACKET TorpedoPackets[16];
 
-void InitTorpedoPackets();
 
 TORPEDOPACKET *GetTorpedoPacket(void);
 
-void FreeTorpedoPacket(TORPEDOPACKET_s **packet);
 
-void DropTorpedoPickups(TORPEDOPACKET_s *packet, i32 count);
 
-i32 getMaxTorpedos(GameObject_s *object);
 
 f32 TORPEDOGRABRANGE2 = 36.0f;
 f32 steal_torpedo_timer = 2.0f;
 f32 steal_torpedo_range = 2.0f;
 
-void Torpedo_UpdateJobbies(GameObject_s *object);
 
-void *FindNearestTorpTarget(WORLDINFO_s *world, NUVEC *position, f32 distance_squared, u8 *target_type);
 
-void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown);
 
-void HomeNearestTorpTarget(BOLT_s *bolt, TORPEDOPACKET_s *packet);
 
 void Torpedo_InitRicochet(BOLT_s *bolt, nuvec_s *position);
 
-void Torpedo_Ricochet(BOLT_s *bolt, TORPEDOPACKET_s *packet);
 
-void TorpedoHitTarget(BOLT_s *bolt);
 
 void DrawTorpedoTargetSprite(void *, unsigned char, float);
 
@@ -97,17 +87,11 @@ static inline void Torpedo_RotateY(NUMTX *m, i32 a) {
     m->m32 = m->m32 * cosx - m30 * sinx;
 }
 
-void DrawTorpedos(GameObject_s *object);
 
-void Torpedo_InitBolt(BOLT_s *bolt);
 
-void Torpedo_UpdateBolt(BOLT_s *bolt);
 
-f32 Torpedo_Scale(BOLT_s *bolt);
 
-void Torpedo_EndBolt(BOLT_s *bolt);
 
-void Torpedo_Shoot(GameObject_s *object);
 
 
 // ==== functions in original address order ====

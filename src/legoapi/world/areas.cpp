@@ -42,10 +42,7 @@ i32 openlevels = 0;
 static void AddToModelList(APICHARACTERMODELLIST_s *list, i32 *count, i32 capacity, i32 character_id, i32 load_model,
                            EXTRAMODEL *extra_models);
 
-AREADATA *Area_FindByName(char *name, i32 *indexDest);
 
-SUPERCOUNTER *SuperCounters_FindPickup(WORLDINFO_s *world, GIZMO_s *gizmo, nuvec_s *position,
-                                       SUPERCOUNTERPICKUP **pickup_dest);
 
 // ==== src/editor/edlevelall.cpp: declarations ====
 #include "gameapi/edtools/edcam.h"
@@ -92,7 +89,6 @@ DECOMP_ASSERT(offsetof(EdClass, interface) == 0x14, "EdClass interface offset");
 DECOMP_ASSERT(sizeof(EdMember) == 0x08, "EdMember size");
 DECOMP_ASSERT(offsetof(EdMember, reference) == 0x04, "EdMember reference offset");
 
-extern LevelEditor theLevelEditor;
 
 // ==== src/legoapi/world/area.cpp: all remaining content ====
 #include "legoapi/render/core/screen.h"
@@ -111,13 +107,6 @@ extern LevelEditor theLevelEditor;
 
 struct APICHARACTERMODELLIST_s;
 
-extern NUGSCN *area_scene;
-extern NUGSCN *vehicle_scene;
-extern NUGSCN *big_icon_scene;
-extern i16 Area_PlayerModelList[18];
-extern APICHARACTERMODELLIST_s Area_MissionModelList[49];
-extern APICHARACTERMODELLIST_s Area_StoryModelList[52];
-extern i32 Area_PlayerModelCount;
 extern AREADATA *DOGFIGHT_ADATA;
 
 AREADATA *ADataList = NULL;

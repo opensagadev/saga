@@ -57,15 +57,11 @@ static void SystemPauseCallback(const NuPhoneOSMessageData *);
 
 static void TouchCallback(const NuPhoneOSMessageData *message);
 
-i32 Text_ExpandButtonString(char *input, char *output);
 
-void GameFog_Set();
 
-void GamePad_InitButtons();
 
 extern "C" void NuIOS_FreeMemoryForSuspend(void);
 
-void InitOnce(i32 argc, char **param_2);
 
 
 // ==== functions in original address order ====

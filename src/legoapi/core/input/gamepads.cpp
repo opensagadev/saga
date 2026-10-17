@@ -25,13 +25,10 @@
 #include <string.h>
 
 extern "C" void NuSound3AddRumble(nupad_s *, f32, i32, i32, f32);
-extern GAMECAMERA_s *GameCam;
 extern WORLDINFO_s *WORLD;
 extern i32 (*GamePads_IgnoreInputFn)(void);
 extern NUPAD *pActivePad;
 extern "C" {
-    extern i32 Paused;
-    extern i32 NewMode;
     extern "C++" FadeSystem FadeSys;
     extern i32 CutSceneWaiting;
 }
@@ -70,11 +67,9 @@ static i32 RotationDistance(i32 difference) {
     return difference < 0 ? -difference : difference;
 }
 
-f32 GamePad_Rotate(GameObject_s *object);
 
 void PadOutPause(i32 port, WORLDINFO_s *world);
 
-void NewBuzzFrames(nupad_s *pad, i32 frames, i32);
 
 void NewRumbleAllPlayers(float strength, float duration, i32 frames, i32);
 
@@ -86,13 +81,10 @@ void VirtualControlButtonMover_OnDown_Callback(MechTouchUIElement &element, Touc
 
 void VirtualControlDPad_LockButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
-i32 NoPad(i32 port, i32 require_game_input);
 
 void NewBuzz(nupad_s *pad, float duration, i32);
 
-i32 ReadPad(i32 port);
 
-void ReadPads();
 
 void NewRumble(nupad_s *pad, float strength, i32);
 
@@ -109,18 +101,13 @@ void NewRumble(nupad_s *pad, float strength, i32);
 #include "nu2api/numath/nuvec.h"
 #include <math.h>
 
-extern void *CutStopInfo;
 extern "C" {
-    extern i32 Paused;
-    extern i32 NewMode;
     extern i32 CutSceneWaiting;
     extern i32 editor_active;
     extern "C++" i32 (*GamePads_IgnoreInputFn)(void);
-    extern GAMEPAD_s GamePad[64];
     extern "C++" FadeSystem FadeSys;
 }
 
-void NewRumbleAllPlayers(f32, f32, i32, i32);
 
 // ==== src/legoapi/actions/combat/hits.cpp: declarations ====
 #include "legoapi/actions/combat/hits.h"
@@ -140,8 +127,6 @@ void NewRumbleAllPlayers(f32, f32, i32, i32);
 #include "legoapi/audio/sfx.h"
 #include <stdio.h>
 
-extern i32 MiniCutCam;
-void NewRumble(nupad_s *, f32, i32);
 
 // ==== src/legoapi/core/net/netplay.cpp: declarations ====
 #include "legoapi/core/net/netplay.h"

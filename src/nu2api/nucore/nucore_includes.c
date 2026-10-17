@@ -30,14 +30,10 @@ static void decode(u32 size, unsigned char *buf);
 
 static unsigned char buffer[0x2000];
 
-isize ExplodeBufferNoHeader(char *in_buf, char *out_buf, isize compressed_size, isize orig_size);
 
-isize ExplodeBufferSize(char *buf);
 
-isize ExplodeCompressedSize(char *buf);
 
 static u32 getmasktbl[5] = {0, 0xff, 0xffff, 0xffffff, 0xffffffff};
-i32 ImplodeGetI(void *buf, i32 size);
 
 #define SELECT(dst, table, shift, count, initial_mask, len)                                                            \
     ({                                                                                                                 \
@@ -75,27 +71,19 @@ static void read_literal_len();
 u16 implode_left[0x3fb];
 u16 implode_right[0x3fb];
 
-u32 ImplodeDecodeC();
 
-u32 ImplodeDecodeOffset();
 
-void ImplodeMakeTable(i32 size, u8 *len, i32 unknown, u16 *table);
 
-void ImplodeHufDecodeStart();
 
 u32 implode_bitbuf;
 static u32 subbitbuf;
 static u32 bitcount;
 
-void ImplodeInitGetBits();
 
-u32 ImplodeGetBits(i32 count);
 
-void ImplodeFillBuf(i32 count);
 
 unsigned char ImplodeGetByteFromMem();
 
-void ImplodeError(char *msg, ...);
 
 // Encoding-side memory I/O shares the decoder's input/output buffers.
 static i32 inlen;
@@ -130,7 +118,6 @@ extern "C" {
 static void NuPrimReset();
 }
 
-void NuFrameBegin(void);
 
 // ==== src/nu2api/nucore/numem.cpp: declarations ====
 #include "nu2api/nucore/numem.h"
@@ -154,9 +141,7 @@ extern "C" {
 
 void memmove(void *dest, const void *source, i32 size);
 
-NUMEMBLK *NuMemBlkCreateEx(i32 element_size, i32 count, u32 alignment_mask, void *storage);
 
-i32 NuMemBlkSize(i32 element_size, i32 count, i32 alignment_mask);
 
 // ==== src/nu2api/nucore/numem.c: all remaining content ====
 
@@ -206,11 +191,8 @@ static void *NuHeapBlock_GetUsableMemory(NUHEAPBLOCK *block);
 static void NuHeapBlock_SplitFreeBlock(NUHEAPBLOCK *block, u32 *size, NUHEAPBLOCK **allocated, NUHEAPBLOCK **remainder,
                                        u32 alignment);
 
-void *NuHeapAllocAlignedNamed(void *heap, u32 size, u32 alignment, char *name);
 
-void *NuHeapAllocAligned(void *heap, u32 size, u32 alignment);
 
-void NuHeapFree(void *heap, void *ptr);
 
 static void NuHeap_PrintAllocations(void *heap);
 
@@ -276,33 +258,20 @@ i32 enum_numdevices;
 
 i32 file_criticalsection;
 
-NUFILE_DEVICE *NuFileGetDeviceFromPath(char *path);
 
 i32 DontDoFileUpperCaseHack;
 
-void NuFileUpCase(NUFILE_DEVICE *device, char *filepath);
 
-NUFILE NuFileOpen(char *filepath, NUFILEMODE mode);
 
-void NuFileClose(NUFILE file);
 
-NUFILE NuFileOpenDF(char *filepath, NUFILEMODE mode, NUDATHDR *header, i32 _unused);
 
-i64 NuFileSeek(NUFILE file, i64 offset, NUFILESEEK whence);
 
-i64 NuFilePos(NUFILE file);
 
-i64 NuFileOpenSize(NUFILE file);
 
-i32 NuFileRead(NUFILE file, void *buf, i32 size);
 
-i32 NuFileWrite(NUFILE file, void *data, i32 size);
 
-i8 NuFileReadChar(NUFILE file);
 
-i32 NuFileReadInt(NUFILE file);
 
-u16 NuFileReadWChar(NUFILE file);
 
 i32 NuFile_SwapEndianOnWrite;
 
@@ -310,15 +279,10 @@ static void NuFileEndianSwap16(void *value);
 
 static void NuFileEndianSwap32(void *value);
 
-i32 NuFileWriteInt(NUFILE file, i32 value);
 
-u32 NuFileWriteUnsignedInt(NUFILE file, u32 value);
 
-i32 NuFileLoadBuffer(char *filepath, void *buf, i32 buf_size);
 
-i32 NuFileLoadBufferVP(char *filepath, VARIPTR *buf, VARIPTR *buf_end);
 
-i32 NuFileStatus(NUFILE file);
 
 static NUDATFILEINFO *unpack_file_info;
 static NUDATOPENFILEINFO *unpack_file_odi;
@@ -339,49 +303,29 @@ static void NuDatFileDecodeNext();
 
 static void APIEndianSwap(void *data, i32 count, i32 size);
 
-NUDATHDR *NuDatOpen(char *filepath, VARIPTR *buf, i32 *_unused);
 
-NUDATHDR *NuDatOpenEx(char *filepath, VARIPTR *buf, i32 *_unused, i16 mode);
 
-NUDATHDR *NuDatSet(NUDATHDR *header);
 
 static i32 OpenDatFileBase(NUDATHDR *hdr, i32 file_idx);
 
-NUFILE NuDatFileOpen(NUDATHDR *hdr, char *filepath, NUFILEMODE mode);
 
-void NuDatFileClose(NUFILE file);
 
-i64 NuDatFileSeek(NUFILE file, i64 offset, NUFILESEEK whence);
 
-i64 NuDatFilePos(NUFILE file);
 
-i32 NuDatFileRead(NUFILE file, void *buf, i32 size);
 
-i32 NuDatFileGetFreeInfo(void);
 
-i32 NuDatFileGetFreeHandleIX(NUDATHDR *hdr, i32 info_idx);
 
-i32 NuDatFileOpenSize(NUFILE file);
 
-i32 NuDatFileLoadBuffer(NUDATHDR *dat, char *name, void *dest, i32 buf_size);
 
 NUMEMFILE memfiles[20];
 
-NUFILE NuMemFileOpen(void *buf, i32 buf_size, NUFILEMODE mode);
 
-void NuMemFileClose(NUFILE file);
 
-i32 NuMemFileRead(NUFILE file, void *buf, i32 size);
 
-i32 NuMemFileWrite(NUFILE file, void *data, i32 size);
 
-i64 NuMemFileSeek(NUFILE file, i64 offset, NUFILESEEK whence);
 
-i64 NuMemFilePos(NUFILE file);
 
-i32 NuMemFileOpenSize(NUFILE file);
 
-void *NuMemFileAddr(NUFILE file);
 
 struct NUPPHEADER {
     u32 magic;
@@ -394,7 +338,6 @@ struct NUPPHEADER {
 
 extern "C" void NuPPUnpack(void *source, void *destination);
 
-i32 NuPPLoadBuffer(NUFILE file, void *buf, i32 buf_size);
 
 // The original decoder accesses both whole registers and their low bytes.
 // Keep those views together to preserve its byte stores at the file's O0 setting.
@@ -420,7 +363,6 @@ static void AddExtension(char *extension, i32 type, i32 platform);
 
 static void NuFileExtInit(void);
 
-i32 NuFileInitEx(i32 device_id, i32 reboot_iop, i32 eject);
 
 // ==== src/nu2api/nufile/nufile_plain.cpp: all remaining content ====
 
@@ -459,34 +401,23 @@ static i32 blkcnt = 1;
 
 extern "C" {
 
-i32 NuFileCopyEx(char *dest, char *source, void *buffer, i32 capacity);
 }
 
 // ==== src/nu2api/nufile/numc.c: declarations ====
 
 // The original unit constructs its six homogeneous vectors.
 
-i32 NuMcOpenSize(i32 fd);
 
-i32 NuMcOpen(i32 port, i32 slot, char *filepath, i32 mode, i32 async);
 
-i32 NuMcCheckCardPresent(i32 port, i32 slot);
 
-i32 NuMcCheckCardFormatted(i32 port, i32 slot);
 
-i32 NuMcCheckCardFreeSpace(i32 port, i32 slot);
 
-i32 NuMcClose(i32 fd, i32 async);
 
-i32 NuMcSeek(i32 fd, i32 offset, NUFILESEEK mode, i32 async);
 
-i32 NuMcRead(i32 fd, void *buf, i32 size, i32 async);
 
-i32 NuMcWrite(i32 fd, void *data, i32 size, i32 async);
 
 extern "C" i32 NuMcFormat(i32 port, i32 slot);
 
-i32 NuMcFileOpenSize(NUFILE file);
 
 // ==== src/nu2api/nufile/nudatfile.cpp: all remaining content ====
 
@@ -511,7 +442,6 @@ static u32 CalcChecksum(void *data, i32 len);
 
 static void DecryptData(NUFILEPAKHDR *hdr, u32 data_len, unsigned char *key, i32 key_len);
 
-void *NuFilePakLoadKey(char *filepath, VARIPTR *buf, VARIPTR buf_end, i32 alignment, unsigned char *key, u32 key_len);
 
 static NUFILEPAKITEM *GetItems(NUFILEPAKHDR *hdr);
 
@@ -535,11 +465,8 @@ static NUFPAR *NuAllocFPar();
 
 static void NuFreeFPar(NUFPAR *parser);
 
-void NuFParInit(i32 max_count, i32 buf_size);
 
-NUFPAR *NuFParOpen(NUFILE file_handle);
 
-void NuFParClose(NUFPAR *parser);
 
 static i32 old_line_pos;
 
@@ -548,30 +475,21 @@ static i32 old_line_pos;
 #define CLAMP_WIDE_LINE(pos) pos &((parser->line_buf_size >> 1) - 1)
 #define CLAMP_WIDE_WORD(pos) pos &((parser->word_buf_size >> 1) - 1)
 
-i32 NuFParGetLine(NUFPAR *parser);
 
-i32 NuFParGetLineW(NUFPAR *parser);
 
-i32 NuFParGetWord(NUFPAR *parser);
 
-i32 NuFParGetWordW(NUFPAR *parser);
 
-void NuFParUnGetWord(NUFPAR *parser);
 
 nufpcomfn *fnInterpreterError;
 
-char NuGetChar(NUFPAR *parser);
 
-NUWCHAR NuGetWChar(NUFPAR *parser);
 
 // ==== src/nu2api/nucore/nulist.cpp: all remaining content ====
 #include "nu2api/nucore/nulist.h"
 
 #include <stddef.h>
 
-void NuLinkedListAppend(NULISTHDR *list, NULISTLNK *node);
 
-void NuLinkedListInsert(NULISTHDR *list, NULISTLNK *node);
 
 // ==== src/nu2api/nucore/numemhigh.cpp: all remaining content ====
 
@@ -633,9 +551,7 @@ static f32 prim_rdpf(RDPFCTXT *ctx);
 
 static f32 term_rdpf(RDPFCTXT *ctx);
 
-f32 NuRDPF(char *input);
 
-f32 NuRDPFVar(char *input, nurdpgetvarfn *get_var_fn);
 
 // ==== src/nu2api/nucore/nustring_plain.cpp: all remaining content ====
 
@@ -645,70 +561,42 @@ i32 global_tr;
 extern "C" int sprintf(char *dest, const char *format, ...);
 #endif
 
-void NuUTF8ToUnicode(NUWCHAR16 *dst, NUWCHAR8 *src);
 
-void NuStrLwrW(NUWCHAR *dst, const NUWCHAR *src);
 
-void NuStrCat(char *str, const char *ext);
 
-i32 NuStrCmp(const char *a, const char *b);
 
-char *NuStrChr(char *src, char c);
 
-i32 NuStrCpy(char *dst, const char *src);
 
-void NuStrFixExtPlatform(char *dst, char *src, char *ext, i32 dst_size, char *platform_string);
 
-i32 NuStrICmp(const char *a, const char *b);
 
 #ifdef __ANDROID__
 extern "C" char *strstr(const char *haystack, const char *needle);
 #endif
 
-i32 NuStrLen(const char *str);
 
-i32 NuStrNICmp(const char *a, const char *b, i32 n);
 
-i32 NuStrNCpy(char *dst, const char *src, i32 n);
 
-char *NuStrRChr(char *src, char c);
 
-u8 NuToLower(u8 c);
 
-u8 NuToUpper(u8 c);
 
-NUWCHAR NuToLowerW(NUWCHAR c);
 
-NUWCHAR NuToUpperW(NUWCHAR c);
 
-f32 NuAToF(char *string);
 
-i32 NuAToI(char *string);
 
-i32 NuHexStringToI(char *string);
 
-void NuAsciiToUnicode(NUWCHAR16 *dst, char *src);
 
-void NuUnicodeToAscii(char *dst, NUWCHAR16 *src);
 
-void NuUnicodeToUTF8(NUWCHAR8 *dst, NUWCHAR16 *src);
 
-i32 NuStrCpyW(NUWCHAR *dst, NUWCHAR *src);
 
-i32 NuStrICmpW(NUWCHAR *a, NUWCHAR *b);
 
-i32 NuStrLenW(const NUWCHAR *str);
 
-i32 NuIsAlNum(char c);
 
 static NUSTRINGBANK StringBank[3];
 static i16 CurrentStringBank;
 static i32 nustring_format = 1;
 char *NuBlankString = " ";
 
-i32 NuStringTableLoadCSV(char *filepath, VARIPTR *buf, VARIPTR buf_end, char *label, char *language);
 
-i32 NuStringTableLoadTXT(char *filepath, VARIPTR *buf, VARIPTR buf_end);
 
 static u16 bad_equiv[][2] = {{'a', '@'}, {'a', '4'}, {'e', '3'}, {'i', '1'},
                              {'l', '1'}, {'o', '0'}, {'t', '7'}, {0, 0}};
@@ -723,30 +611,22 @@ static i32 NuStringIsFluff(u16 character);
 
 static u16 *NuStringBadSubString(const u16 *text, const u16 *word, i32 *length, i32 whole_word);
 
-i32 NuStringFilterBadWordsW(NUWCHAR *dest, NUWCHAR *source, NUWCHAR *replacement);
 
 // ==== src/nu2api/nucore/nutime.cpp: all remaining content ====
 #include "nu2api/nucore/nutime.h"
 
-void NuTimeGet(NUTIME *t);
 
 static u32 frameStartTime;
 
-f32 NuTimeScanlines(NUTIME *t);
 
-f32 NuTimeSeconds(NUTIME *t);
 
-f32 NuTimeMilliSeconds(NUTIME *t);
 
-void NuTimeSub(NUTIME *t, NUTIME *a, NUTIME *b);
 
 // ==== src/nu2api/nucore/nukeyboard.cpp: all remaining content ====
 
-void NuKeyboardRead(void);
 
 // ==== src/nu2api/nucore/numouse.cpp: all remaining content ====
 
-void NuMouseRead(void);
 
 // ==== src/nu2api/nucore/nuapi.cpp: declarations ====
 
@@ -791,27 +671,19 @@ static i32 argc;
 /* NEEDS-REVIEW: static variable shared with src/nu2api/nucore/nuapi.cpp */
 static char **argv;
 
-void NuAPIInit(void);
 
-void ParseCommandLine();
 
 // ==== src/nu2api/nucore/nucore_frame.cpp: all remaining content ====
 #include "gamelib/nuwind/nuwind.h"
 void bgSuspendMain(i32);
-void NuPadRecordEndFrame();
 
 extern "C" {
     i32 NuHasError();
     void NuClearError();
     void NuErrorSleep();
     char *NuGetErrN(i32);
-    void NuQFntPushCoordinateSystem(NUQFNT_CSMODE);
-    void NuQFntPopCoordinateSystem();
-    extern NUQFNT *system_qfont;
     void NuMtlAnimate(f32);
     void NuTexAnimProcess(f32);
-    void NuPad_Interface_Render();
-    void NuPadUpdatePads();
     extern void (*preRenderFlashingHack)();
     extern void (*postRenderFlashingHack)();
     extern void (*nuapi_endframe_callbackfn)();
@@ -836,7 +708,6 @@ void NuErrorSleep(void);
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 
-extern NUQFNT *system_qfont;
 
 #include "java/android.h"
 #include "java/java.h"
@@ -889,7 +760,6 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -940,8 +810,6 @@ static void DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM
     // ---------------------------------------------------------------------------
 
     // Per-frame animation/pad update hooks (originals take the frame time).
-    void NuPad_Interface_Render(void);
-    void NuPadUpdatePads(void);
 
     // Frame-end callbacks (original bss @0x6bdaec/0x6bdaf0/0x6bdad0).
     extern void (*nuapi_endframe_callbackfn)(void);
@@ -972,9 +840,7 @@ static void DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM
     // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
     // ---------------------------------------------------------------------------
 
-void NuQFntPopCoordinateSystem(void);
 void NuQFntPrintV(NUQFNT *font, const char *format, va_list arguments);
-void NuQFntPushCoordinateSystem(NUQFNT_CSMODE mode);
 
     // ---------------------------------------------------------------------------
     // Rendering / materials / effects (host has GL paths elsewhere)
@@ -1012,8 +878,6 @@ void NuQFntPushCoordinateSystem(NUQFNT_CSMODE mode);
                      i32 tree_index) __asm__("_ZL12ClipInstTreeP16NuInstanceTree_siP16nudisplayscene_sPc.isra.92");
     }
 
-void NuOcclusionManagerEndFrame(void);
-void NuOcclusionManagerInit(u32 capacity, VARIPTR *buffer, VARIPTR buffer_end);
     // ---------------------------------------------------------------------------
     // Viewport
     // ---------------------------------------------------------------------------
@@ -1084,17 +948,12 @@ i16 PlayerLastPort[8] = {-1, -1, -1, -1, -1, -1, -1, -1};
 char UseCorrectDeadZoning;
 i32 enable_touch_controls = 1;
 
-void NuPadSetMaxGamePads(i32 count);
 
-void NuPadMapPortToPS2Port(i32 pad, i32 port);
 
 extern "C" void NuPadSetStatus(i32 pad, i32 status);
 
-void NuPadInit();
 
-NUPAD *NuPadOpen(i32 port, i32 slot);
 
-i32 NuPadRead(NUPAD *pad);
 
 static void DeadZoneValueXYProper(i32 *x_value, i32 *y_value, i32 deadzone);
 
@@ -1115,38 +974,25 @@ enum {
     PAD_BUTTON_LEFT = 1 << 0xf,
 };
 
-void NuPadProcessReadData(NUGENERICPAD *pad);
 
-void NuPadUpdatePads();
 
-i32 NuPadGetMaxGamePads();
 
-void NuPadRecordPlay(NUGENERICPAD *pad);
 
-void NuPadRecordEnd();
 
-void NuPadRecordSave(char *filepath);
 
-void NuPadRecordLoad(char *filepath, VARIPTR *buffer, VARIPTR end);
 
 // ==== src/nu2api/nucore/nuptrblock.cpp: all remaining content ====
 
-void *NuPtrBlockFix(void *block);
 
 // ==== src/nu2api/nucore/nuvideo.cpp: declarations ====
 #include "nu2api/nucore/nuvideo.h"
 
-void NuVideoSetMode(i32 mode);
 
-void NuVideoSetBrightness(f32 brightness);
 
-void NuVideoSetResolution(i32 width, i32 height);
 
-NUVIDEO_SWAPMODE NuVideoSetSwapMode(NUVIDEO_SWAPMODE video_swap_mode);
 
 // ==== src/nu2api/nucore/nuonline.cpp: all remaining content ====
 
-void NuOnlineInit(void);
 
 // ==== src/nu2api/nucore/nulanguage.cpp: all remaining content ====
 
@@ -1200,9 +1046,7 @@ static i32 prim(RDPICTXT *ctx);
 
 static i32 term(RDPICTXT *ctx);
 
-i32 NuRDPI(char *input);
 
-i32 NuRDPIVar(char *input, nurdpgetvarfn *get_var_fn);
 
 // ==== src/nu2api/nucore/nuerror.cpp: all remaining content ====
 void NuErrorPrint(char *);

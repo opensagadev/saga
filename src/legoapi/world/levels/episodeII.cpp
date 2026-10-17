@@ -115,9 +115,7 @@ static KAMINO_E_s kamino_e;
 
 extern i16 id_PADMECLAWED, id_BATTLEDROIDSECURITY, id_SUPERBATTLEDROID, id_JARJAR, id_LUMINARA, id_SHAAKTI,
     id_BATTLEDROIDGEONOSIAN;
-void RemoveGameObject(GameObject_s *, i32);
 i32 OnOrInsidePlane(NUVEC *, NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
-void CompleteLevel(WORLDINFO_s *);
 
 // Episode 2 level handlers, in the game's Episode_II progression:
 // kamino / factory (geonosis droid factory) / jedi / gunship / bonus gunship /
@@ -133,7 +131,6 @@ void KaminoA_AlwaysUpdate(WORLDINFO_s *);
 #include "legoapi/gizmos/traps/gizturrets.h"
 #include "legoapi/gizmo/base/gizmessage.h"
 GIZTURRET_s *GizTurret_FindByName(GIZTURRETSYS_s *, char *);
-extern i32 obstacle_gizmotype_id;
 nuhspecial_s walllights[2], walllights_disco[2], striplights[2], discolights[2];
 nuhspecial_s discorm_wall_on, discorm_wall_off;
 GIZMO *gizTurrets[2];
@@ -440,8 +437,6 @@ struct rtlidata_s;
 
 #include <string.h>
 
-extern i32 VehicleArea;
-extern i32 GAMEDEMO;
 
 struct GAMEMESSAGE_s;
 struct HINT_s;
@@ -458,52 +453,19 @@ struct VuVec;
 
 extern "C" i32 NuRndrBeginScene(i32);
 extern "C" void NuRndrEndScene(void);
-extern char *ASCII_DOWN;
-extern char *ASCII_UP;
-extern f32 MENUTEXTSCALE;
-extern f32 AUTOSAVEICONY;
-extern f32 AUTOSAVEICONX;
-extern f32 AUTOSAVEICONSIZE;
-extern f32 MenuAlpha;
-extern i32 MenuA;
-extern u8 MENUNORMALR;
-extern u8 MENUNORMALG;
-extern u8 MENUNORMALB;
 extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
-extern u8 MENUFLASH0R;
-extern u8 MENUFLASH0G;
-extern u8 MENUFLASH0B;
-extern u8 MENUFLASH1R;
-extern u8 MENUFLASH1G;
-extern u8 MENUFLASH1B;
-extern f32 menu_pulse;
-extern f32 menu_pulsate;
-extern i32 menu_flash;
-extern f32 text3d_height;
-extern f32 text3d_width;
-extern FadeSystem FadeSys;
 extern f32 cointotaltime;
-extern i32 Paused;
-extern i32 noscenespecials;
-extern f32 ICONX;
-extern f32 ICONSIZE;
-extern f32 DROPINALPHA;
 extern f32 statstime;
 f32 GetAspectRatio();
-void Hint_Draw(i32 player_index);
-extern i32 CutScenePlayer_CanStart(i32 cutscene_id);
 
 // Camera zoom state
 
 // Graphics loading flags
 
 extern "C" {
-    i32 NuDisplayListRndrSpecial(nuhspecial_s *special, NUMTX *mtx, i32 skinned, NUMTX *skin_mtx,
-                                 DEFORMERWEIGHTSARRAY *blend_values);
     void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
-void SetCameraZoom(f32 zoom);
 
 extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta);
 
@@ -520,21 +482,13 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta);
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
 extern "C" {
-NUGSCN *NuGScnReadForMultiRender(VARIPTR *buf, VARIPTR buf_end, char *path, i32 render_count);
 
-NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
-void NuGScnReadFromMemory(NUGSCN *scene);
-NUGSCN *NuGHGFixup(NUGSCN *scene, void *);
-nuhgobj_s *NuGHGRead(char *path, VARIPTR *buf, VARIPTR buf_end);
 } // extern "C"
 
 i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
                  u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order);
 
-void DrawCharIcon(i32 character_id, float x, float y, float z, float scale, i32 frame_object_id, float character_alpha,
-                  float frame_alpha, i32 draw_character, nuhspecial_s *override_special);
 
-extern const u8 HintRGB[5][3];
 
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nuprim_internal.h"
@@ -580,46 +534,22 @@ extern const u8 HintRGB[5][3];
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-void Text_MakeTime(f32, i32, i32, i32, char *);
 
-void DrawPauseFade();
 
 void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
 
-i32 Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx);
 
 extern nuhspecial_s green_light;
 extern nuhspecial_s painttargetcolour[3];
 extern nuhspecial_s paintlights[3];
 
-void DrawPaintLights();
 
 void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha);
 
-void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large);
 
-void DrawGameMessages();
 
-extern f32 KITPOSX;
-extern f32 KITPOSY;
-extern f32 PANEL_MINIKITSCALE;
-extern f32 PANEL_REDBRICKSCALE;
-extern f32 PANEL_MINIKITY;
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
-extern i32 DRAWBGLOAD;
-extern u16 PowerUp_PanelYRot[2];
-extern f32 PowerUp_PanelPosMul[2];
-extern f32 POWERUPOBJSIZE;
-extern f32 REDBRICKPOSX;
-extern f32 REDBRICKPOSY;
-extern f32 REDBRICKPOS2X;
-extern f32 REDBRICKPOS2Y;
-extern i32 Arcade_Points[2];
-extern f32 BOSSICONY;
-extern i32 FPSDISPLAY;
-extern i32 ShowPlayerCoordinate;
-i32 DrawPanel3DObjectNoAlpha(f32, f32, f32, f32, f32, f32, u16, u16, u16, nuhspecial_s *, i32);
 extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
 
 void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum);
@@ -627,31 +557,19 @@ void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum);
 i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
                       u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha);
 
-i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
-                      u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order, float alpha);
 
-extern STATUSMINIKITPART_s KitPart[10];
 
 extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern "C" void PlaySfx(char *, NUVEC *);
 
-void Draw_AUTOSAVECANCEL();
 
 void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha);
 
-void Draw_AUTOSAVEWARNING();
 
-extern i32 dco_locatorposonly;
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
-void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_id, nuhspecial_s *special, i32 locator,
-                           i32 second_locator, NUMTX *joints, i32 reflect, u32 layers, NUMTX *rotation,
-                           NUVEC *translation, f32 alpha, f32 scale);
 
 extern AREADATA *PODSPRINT_ADATA;
 extern "C" {
-    extern i16 id_ATST;
-    extern i16 id_ATST_LOWRES;
-    extern i16 id_ATAT;
 }
 
 void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
@@ -673,7 +591,6 @@ extern void DrawMenuEntry(MENU_s *, char *);
         }                                                                                                              \
     } while (false)
 
-extern i32 GetMenuID(void);
 
 void Grapple_DrawLine(GameObject_s *);
 void Transform_DrawTarget(NUVEC *, f32, f32);
@@ -687,7 +604,6 @@ extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
 extern i32 qrand(void);
 extern f32 SeekLinearF(f32, f32, f32);
 
-void BackDrop_ResetColours();
 
 // ==== src/legoapi/gizmo/base/gizmo.cpp: declarations ====
 #include "legoapi/gizmo/base/gizmo.h"
@@ -757,57 +673,32 @@ struct FLOWBOX_s;
 DECOMP_ASSERT(sizeof(GIZMOTYPES) == 0xc, "Gizmo type-table header ABI");
 DECOMP_ASSERT(offsetof(GIZMOTYPES, types) == 8, "Gizmo type-table pointer offset");
 
-i32 GizObstacle_CheckExcludeFlagsFn_LSW(GIZOBSTACLE_s *, GameObject_s *);
 
-extern ADDGIZMOTYPE Default_ADDGIZMOTYPE;
 
-extern GIZMOTYPES * gizmotypes;
 
-VARIPTR *GizmoBufferAlloc(VARIPTR *buffer, VARIPTR *buffer_end, i32 size);
 
-void RegisterGizmoTypes(VARIPTR *buffer, VARIPTR *buffer_end, REGISTERGIZMOTYPEFN *register_gizmo_type_fns,
-                        i32 unknown);
 
-GIZMO *AddGizmo(GIZMOSYS *gizmo_sys, i32 type_id, char *name, void *object);
 
 i32 GizmoGetTypeIDByName(GIZMOSYS_s *gizmo_sys, char *name);
 
-void GizmoSetVisibility(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 visibility, i32 unknown);
 
-i32 GizmoGetVisibility(GIZMOSYS *gizmo_sys, GIZMO *gizmo);
 
-char *GizmoGetOutputName(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 output_index);
 
-i32 GizmoGetOutput(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 unknown1, i32 unknown2);
 
-void GizmoActivate(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 unknown1, i32 unknown2);
 
-void GizmoSysEarlyUpdate(GIZMOSYS *gizmo_sys, void *world_info, float delta_time);
 
-void GizmoSysLateUpdate(GIZMOSYS *gizmo_sys, void *world_info, float delta_time);
 
-void GizmoSysDraw(GIZMOSYS *gizmo_sys, void *world_info, float delta_time);
 
-void GizmoSysPanelDraw(GIZMOSYS *gizmo_sys, void *world_info, float delta_time);
 
-i32 GizmoSys_BoltHitPlat(GIZMOSYS *gizmo_sys, void *world_info, BOLT *bolt, unsigned char *unknown);
 
-i32 Gizmo_FindNuSpecial(nugscn_s *scene, nuhspecial_s *special, char *name, i32 flags, GIZMOSYS *gizmo_sys,
-                        char *prefix, char *suffix);
 
-i32 ResetGizmoType(GIZMOSYS *gizmo_sys, i32 type_id, char *name);
 
-void GizmoSysClearLevelProgress(void *unknown, i32 type_id);
 
 NUVEC *GizmoGetPos(GIZMOSYS_s *, GIZMO_s *gizmo);
 
-i32 GizmoGetGizmosUsingSpecial(GIZMOSYS *gizmo_sys, void *world, GIZMO **result, i32 result_capacity, char *name);
 
-char *GizmoGetName(GIZMO *gizmo);
 
-void GizmoSysReset(GIZMOSYS *gizmo_sys, void *world, i32 progress_index);
 
-GIZMO *GizmoFindByName(GIZMOSYS *gizmo_sys, i32 type_id, char *name);
 
 GIZMO *GizmoFindByData(GIZMOSYS *gizmo_sys, i32 type_id, void *data);
 
@@ -830,23 +721,16 @@ char *paint_target_colour[3] = {"but_orange", "but_green", "but_purple"};
 char *paint_panel_name[3] = {"redp", "yellp", "bluep"};
 char *paint_name[6] = {"red_juice", "yellow_juice", "blue_juice", "orange_juice", "green_juice", "purple_juice"};
 
-void ResetPaintPuzzle(WORLDINFO_s *);
 
-void InitPaintPuzzle(WORLDINFO_s *world);
 
-void UpdatePaintPuzzle(WORLDINFO_s *world);
 
-i32 GizmoFileReadName(char *name);
 
-i32 GizmoIsNameUnique(GIZMOSYS *gizmo_sys, char *name);
 
 i32 GizmoSysWriteInfo(GIZMOSYS_s *gizmo_sys, char *path, nugscn_s *scene);
 
 i32 GizmoGetNumOutputs(GIZMOSYS_s *gizmo_sys, GIZMO_s *gizmo);
 
-i32 GizmoGetUniqueName(GIZMOSYS *gizmo_sys, char *prefix, char *name, char *result, i32 result_size);
 
-i32 GizmoNameUsesPrefix(char *name, char *prefix);
 
 void GizmoActivateReverse(GIZMOSYS_s *system, GIZMO_s *gizmo, i32 reverse, i32 visibility, i32);
 

@@ -63,4 +63,3 @@ void NuFileBase::Init() {
     STUBBED();
 }
 
-i32 NuFileNormalise(char *dst, i32 length, const char *src);

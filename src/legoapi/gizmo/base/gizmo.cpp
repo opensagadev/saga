@@ -111,13 +111,10 @@ ADDGIZMOTYPE Default_ADDGIZMOTYPE = {
 
 GIZMOTYPES *gizmotypes;
 
-VARIPTR *GizmoBufferAlloc(VARIPTR *buffer, VARIPTR *buffer_end, i32 size);
 
 i32 GizmoGetTypeIDByName(GIZMOSYS_s *gizmo_sys, char *name);
 
-void GizmoSetVisibility(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 visibility, i32 unknown);
 
-char *GizmoGetOutputName(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 output_index);
 
 static void GizmoAppendSpecialError(GIZMOSYS *gizmo_sys, const char *text) {
     if (text == NULL || gizmo_sys->error_log == NULL) {
@@ -131,17 +128,12 @@ static void GizmoAppendSpecialError(GIZMOSYS *gizmo_sys, const char *text) {
     }
 }
 
-i32 ResetGizmoType(GIZMOSYS *gizmo_sys, i32 type_id, char *name);
 
-void GizmoSysClearLevelProgress(void *unknown, i32 type_id);
 
-char *GizmoGetName(GIZMO *gizmo);
 
-i32 GizmoIsNameUnique(GIZMOSYS *gizmo_sys, char *name);
 
 i32 GizmoGetNumOutputs(GIZMOSYS_s *gizmo_sys, GIZMO_s *gizmo);
 
-i32 GizmoNameUsesPrefix(char *name, char *prefix);
 
 // ==== src/legoapi/gizmo/base/gizmo_sys.cpp: declarations ====
 #include "legoapi/world/world_shared.h"
@@ -168,12 +160,10 @@ i32 gizmoerrorlogsize = 0x800;
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/nufile/nufile.h"
 
-extern u8 FS_Active;
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
-void RenderFileSel3(i32 draw_title);
 
 // ==== src/legoapi/audio/sfx.cpp: declarations ====
 
@@ -196,17 +186,14 @@ void RenderFileSel3(i32 draw_title);
 DECOMP_ASSERT(sizeof(RepeatSfx) == 0x10, "RepeatSfx size");
 
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
-i32 qrand(void);
 
 extern "C" {
-    void SetSfxBit_On(i32 sound);
 }
 
 extern "C" {
 
 void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
-void SetSfxBit_On(i32 sound);
 
 } // extern "C"
 
@@ -409,7 +396,6 @@ struct nuhspecial_s;
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizmopickups.cpp: declarations ====
 #include "legoapi/gizmo/object/gizmopickup.h"
@@ -601,9 +587,7 @@ DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size
 
 #include "legoapi/ai/core/aisysall_types.h"
 
-void RegisterAIScriptActions(AIACTIONDEF *action_defs);
 
-void RegisterAIScriptConditions(AICONDITIONDEF *cond_defs);
 
 // ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
 #include "editor/aieditor_state.h"
@@ -630,7 +614,6 @@ extern "C" {
 
 extern "C" {
 
-extern AIEDITOR_RENDER_STATE * aieditor;
 
 } // extern "C"
 
@@ -821,7 +804,6 @@ namespace {
 #include "legoapi/characters/core/playeritems.h"
 #include "legoapi/misc/utilities.h"
 
-i32 qrand();
 
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
@@ -924,7 +906,6 @@ extern "C" i32 NuFileExists(char *name);
 #include "gameapi/edtools/edpart_internal.h"
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
@@ -935,7 +916,6 @@ extern "C" {
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
@@ -1167,9 +1147,7 @@ extern "C" {
 
     // Shared editor font; edmainInit receives and stores the font handle.
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -1256,7 +1234,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #include <new>
 
 extern EdInputContext * Input;
-extern MemoryManager theMemoryManager;
 extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
@@ -1320,9 +1297,7 @@ inline void EdBitControl::operator delete(void *memory) {
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -1449,7 +1424,6 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -1604,7 +1578,6 @@ extern "C" {
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEVALUES speedervals[4];
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
@@ -1623,23 +1596,14 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 // ==== src/gameapi/edtools/edfile.cpp: all remaining content ====
 
-void EdFileSetMedia(i32 media);
 
-i32 EdFileOpen(char *filepath, NUFILEMODE mode);
 
-i32 EdFileClose();
 
-void EdFileWrite(void *data, i32 len);
 
-void EdFileWriteInt(i32 value);
 
-void EdFileWriteChar(char value);
 
-void EdFileRead(void *buf, i32 len);
 
-i32 EdFileReadInt();
 
-char EdFileReadChar();
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
@@ -1699,13 +1663,11 @@ char EdFileReadChar();
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -1723,7 +1685,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -1822,8 +1783,6 @@ extern "C" {
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    i32 NuFileExists(char *);
-    i32 NuStrCpy(char *, const char *);
 
 }
 
@@ -1923,7 +1882,6 @@ extern "C" void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_
 // these before accepting the new input; GamePad_Rotate then reports a stable
 // angular velocity only when both consecutive turns agree.
 
-f32 GamePad_Rotate(GameObject_s *object);
 
 // ==== src/gameframework/savesystem.cpp: all remaining content ====
 
@@ -1934,21 +1892,17 @@ f32 GamePad_Rotate(GameObject_s *object);
 
 extern "C" {
 
-void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                     u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
 }
 
 // ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 
 extern "C" {
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
@@ -1971,9 +1925,7 @@ extern "C" {
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -2055,9 +2007,7 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -2141,7 +2091,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2291,13 +2240,11 @@ extern "C" {
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -2315,7 +2262,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2408,8 +2354,6 @@ extern "C" {
 // ==== functions in original address order ====
 
 extern "C" {
-void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                     u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
 
 }
 
@@ -2482,7 +2426,6 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 
 extern "C" {
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
@@ -2543,7 +2486,6 @@ DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon reb
 
 extern "C" {
 
-    i32 NuStrICmp(const char *, const char *);
 
 }
 
@@ -2573,7 +2515,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2674,7 +2615,6 @@ extern "C" {
 
 extern "C" {
 
-extern AIEDITOR_RENDER_STATE * aieditor;
 
 } // extern "C"
 
@@ -2823,7 +2763,6 @@ DECOMP_ASSERT(offsetof(FLOWREMAP, parent_outputs) == 0x60, "Flow remap output of
 DECOMP_ASSERT(sizeof(FLOWCONDITIONTYPE) == 12, "Flow condition type ABI");
 
 
-void ResetGizFlowPointers(GIZFLOW_s *system);
 
 // ==== functions in original address order ====
 

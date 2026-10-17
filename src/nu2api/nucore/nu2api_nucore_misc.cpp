@@ -19,11 +19,6 @@ extern TERRSET *CurTerr;
 
 
 extern "C" {
-    i32 NuRndrBeginSceneEx(i32, i32, i32);
-    void NuRndrEndSceneEx(i32);
-    extern i32 NuPrimCSPos;
-    extern NUPRIMSCALEMODE NuPrimCoordSystemStack[];
-    extern i32 nurndr_pixel_width;
 }
 
 #include "nu2api/nu3d/android/nutex_ios_ex.h"

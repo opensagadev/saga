@@ -56,7 +56,6 @@ static EffectTexturePool texturePool;
 
 #include "nu2api/nu3d/nutex_types.h"
 
-NUNATIVETEX *NuTexGetNative(i32 tex_id);
 
 // ==== functions in original address order ====
 

@@ -53,14 +53,12 @@ struct SOCKPOSITION_s;
 static NUVEC HubVehiclesDoorPos[2] = {{-24.21f, 0.0f, -25.36f}, {-23.63f, 0.0f, -25.68f}};
 static NUVEC HubMinikitDoorPos[2] = {{-27.14f, 0.0f, -24.92f}, {-26.77f, 0.0f, -24.94f}};
 
-void RememberPlayerIDs(i32 a, i32 b, i32 c);
 
 // ---- Player start spawn entries ----
 PLAYERSTARTENTRY PlayerStart[8];
 
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
 
-void *CutScenePlayer_Available(void);
 
 void (*Player_ClearContextFn)(GameObject_s *, i32);
 void Whip_Release(GameObject_s *);
@@ -71,11 +69,7 @@ i32 LIFTPLAYER;
 f32 TOGGLEREPEATTIME = 0.25f;
 i32 (*Player_ToggleSubCharacterFn)(GameObject_s *, i32, i32);
 void (*Player_ToggledCharacterFn)(GameObject_s *, i32);
-extern FadeSystem FadeSys;
-extern i32 LEGOHINT_FREEPLAYTOGGLE;
 void Hint_SetComplete(i32 hint_id);
-void Move_DEFAULT(GameObject_s *object);
-void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode);
 void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
 
 i32 Player_HasDoubleBoltDamage(GameObject_s *object);
@@ -86,7 +80,6 @@ namespace {
 
 } // namespace
 
-i32 CanPullLevers(i32 id);
 
 #include "legoapi/characters/core/players_types.h"
 
@@ -97,7 +90,6 @@ void (*GameObjectDimensionsExtraFn)(GameObject_s *) = NULL;
 
 // ==== src/legoapi/characters/core/character.cpp: declarations ====
 
-i32 CanPullLevers(i32 character_id);
 
 #include "legoapi/characters/core/CharacterObjectInterface.h"
 #include "legoapi/audio/sfx.h"
@@ -113,7 +105,6 @@ i32 CanPullLevers(i32 character_id);
 struct nuvec_s;
 
 CHARACTERDATA *CDataList = NULL;
-extern GAMECHARACTERDATA * GCDataList;
 // Original 0x120-byte data record @0x00666960. FixUpCharacters copies this
 // canonical prefix into every character before character-specific overrides.
 // These values cover the fully typed common movement and perception fields.
@@ -135,9 +126,7 @@ extern GAMECHARACTERDATA * GCDataList;
 #define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone))
 #endif
 
-void Move_DEFAULT(GameObject_s *);
 
-extern CHARCONFIG_s charconfig;
 
 // Retail only keeps the clone with strip_comments fixed to 1 (regparm text, filename).
 #if defined(__i386__)
@@ -195,16 +184,12 @@ extern CHARCONFIG_s charconfig;
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    i32 NuFileExists(char *);
-    i32 NuStrCpy(char *, const char *);
 
 }
 
 // The original table at 0x006281a0.  These are the material animation
 // scripts made available before the permanent things scene is loaded.
 
-extern i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count);
-extern i32 Collection_Got(i32 id);
 
 #include "legoapi/characters/core/characters_types.h"
 
@@ -215,11 +200,8 @@ extern i32 Collection_Got(i32 id);
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
 
-i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32);
 
-extern i32 last_area;
 
-void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
 
 void LoadPerm1();
 
@@ -239,7 +221,6 @@ void LoadPerm1();
 #include "nu2api/numath/nufloat.h"
 
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
-extern i32 GAMEDEMO;
 
 // Retail clears these "fast repeat" latches but never sets them.
 
@@ -249,8 +230,6 @@ extern i32 GAMEDEMO;
 
 #include "legoapi/render/light/fade.h"
 
-extern u32 GAMEPAD_TOGGLELEFT;
-extern u32 GAMEPAD_TOGGLERIGHT;
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 #include "gameapi/edtools/edbri_internal.h"
@@ -283,7 +262,6 @@ extern u32 GAMEPAD_TOGGLERIGHT;
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
 
-extern i32 VehicleArea;
 
 // Camera zoom state
 
@@ -361,7 +339,6 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
         }                                                                                                              \
     } while (false)
 
-extern i32 qrand(void);
 
 // ==== src/gameapi/gui/apimenu.cpp: all remaining content ====
 
@@ -370,14 +347,12 @@ extern i32 qrand(void);
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/nucore/nuvideo.h"
 
-void GameAudio_PlaySfx(i32 sfx, nuvec_s *position, i32 volume, i32 flags);
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 #include "legoapi/misc/androidbatman.h"
 #include "legoapi/items/collect/spacelevel.h"
 #include "nu2api/nucore/NuInputDevice.h"
 
-extern GAMECAMERA_s *GameCam;
 extern WORLDINFO_s *WORLD;
 extern "C" {
     extern "C++" FadeSystem FadeSys;
@@ -386,13 +361,11 @@ extern "C" {
 // Original bss @0x127a500: 64 pads x 0x60 bytes.
 // Original bss @0x127a4e0.
 
-extern u32 GAMEPAD_LIFT;
 
 // Two frames of direction history for each local player.  MovePlayer shifts
 // these before accepting the new input; GamePad_Rotate then reports a stable
 // angular velocity only when both consecutive turns agree.
 
-f32 GamePad_Rotate(GameObject_s *object);
 
 // ==== src/gameframework/savesystem.cpp: all remaining content ====
 
@@ -402,12 +375,10 @@ f32 GamePad_Rotate(GameObject_s *object);
 
 #include "gameapi/edtools/gameapi_edtools_types.h"
 
-extern u8 FS_Active;
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
-void RenderFileSel3(i32 draw_title);
 
 // ==== src/legoapi/menus/core/text.cpp: declarations ====
 #include "nu2api/nu3d/nushader_plain.h"
@@ -427,7 +398,6 @@ void RenderFileSel3(i32 draw_title);
 #include "gameapi/edtools/edfile.h"
 
 extern "C" {
-    void eduiMenuRender(eduimenu_s *menu);
 }
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
@@ -462,7 +432,6 @@ extern "C" i32 NuFileExists(char *name);
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void SetSfxBit_On(i32);
     void PlaySfxById(i32, NUVEC *);
 
 }
@@ -473,11 +442,9 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern GameObject_s *Obj;
 extern i32 HIGHGAMEOBJECT, VehicleArea;
 
 WORLDINFO_s *WorldInfo_CurrentlyActive();
-extern f32 FRAMETIME;
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -699,9 +666,7 @@ extern "C" {
 
     // Shared editor font; edmainInit receives and stores the font handle.
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -790,7 +755,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #include <new>
 
 extern EdInputContext * Input;
-extern MemoryManager theMemoryManager;
 extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
@@ -854,9 +818,7 @@ inline void EdBitControl::operator delete(void *memory) {
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
-void eduiMenuRender(eduimenu_s *menu);
 
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
@@ -979,7 +941,6 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -1137,7 +1098,6 @@ struct nupad_s;
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEVALUES speedervals[4];
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
@@ -1156,7 +1116,6 @@ DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 
-GAMEPAD_s *ViewCamGetGamePad();
 
 // ==== src/gameapi/edtools/edfile.cpp: all remaining content ====
 
@@ -1218,13 +1177,11 @@ GAMEPAD_s *ViewCamGetGamePad();
 
 extern "C" {
 
-void eduiMenuRender(eduimenu_s *menu);
 
 }
 
 extern "C" {
 
-void edmainInit(void *font, char *configuration_file);
 
 }
 
@@ -1242,7 +1199,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-void NuCameraSetEx(NUCAMERA *cam, i32 fast);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -1429,7 +1385,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
 
-i32 RotDiff(u16, u16);
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {
@@ -1449,7 +1404,6 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 
 // Original defaults: 0x668d30 and 0x668d40, each a four-byte integer.
 
-void SuperCarry_Release(GameObject_s *object);
 
 // ==== src/legoapi/actions/movement/pushing.cpp: declarations ====
 #include "legoapi/items/base/animpacket.h"

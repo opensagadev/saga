@@ -12,7 +12,6 @@
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nucore/nuthread.h"
 
-NULNKHDR *NuLstAllocHead(NULSTHDR *list);
 
 // ==== functions in original address order ====
 

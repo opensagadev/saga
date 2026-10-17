@@ -29,13 +29,9 @@ extern BATARANG_s Batarang[8];
 extern "C" i16 id_ROBIN;
 extern i16 id_CATWOMAN;
 
-void NewRumble(nupad_s *, f32, i32);
-void NewBuzzFrames(nupad_s *, i32, i32);
-void GameCam_HitJudder();
 i32 StunGameObject(GameObject_s *, GameObject_s *, f32, i32);
 void Detonator_Detonate(DETONATOR_s *);
 i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
-i32 TerrainPlatId();
 f32 SeekValF(f32, f32, f32);
 
 i32 Batarang_SeekToTarget(BATARANG_s *);
