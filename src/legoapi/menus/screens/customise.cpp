@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
 #include <stdio.h>
 #include <string.h>
@@ -85,6 +88,462 @@ void Hub_ClearStats();
 void Text_FillInExtendedSaveInfo();
 extern i16 tPLAYER1, tPLAYER2;
 
+static void UpdateCustomPieceAnim(CUSTOMPIECEANIM *anim, u16 minimum, u16 maximum);
+
+// Animations the customiser cycles through on the game's character preview, terminated by -1.
+i16 CustomiserActionList_Game[] = {97, 190, 98, 99, -1};
+
+struct CUSTOMISER_GAMESETTING {
+    char *name;
+    u32 model_flags;
+    u32 gameplay_flags;
+};
+static CUSTOMISER_GAMESETTING Customiser_GameSetting[] = {
+    {"bountyhunter", 0x1000000, 0},
+    {"jedi", 8, 0},
+    {"sith", 0xc, 2},
+    {"blaster", 0x100080, 0x40000000},
+    {"alreadygothat", 0, 0x10},
+    {"stormtrooperhelmet", 0, 0x40000},
+    {NULL, 0, 0},
+};
+
+void Customiser_Init(CUSTOMISER *customiser);
+
+void Customiser_Reset(CUSTOMISER *customiser);
+
+i32 Customiser_PieceAvailable(CUSTOMPIECE *piece);
+
+void Customiser_TransformToPanel(CUSTOMISER *);
+
+static u16 *Customiser_GetSelection(i32 side) {
+    return Game.customizer[side].pieces;
+}
+
+#define CUSTOM_SETUP_LAYER(category)                                                                                   \
+    if (customiser->layer_indices[category] != -1)                                                                     \
+        layer_mask |= 1u << customiser->layer_indices[category];
+
+#define CUSTOM_SETUP_PIECE(category)                                                                                   \
+    {                                                                                                                  \
+        if (customiser->piece_counts[category] > 0) {                                                                  \
+            CUSTOMPIECE *piece = category == 1 ? torso : &customiser->piece_sets[category][selection[category]];       \
+            character->model_flags |= piece->model_flags;                                                              \
+            if ((character->model_flags & CHARACTER_MODEL_FLAG_ALTERNATE_WEAPON) != 0)                                 \
+                character->model_flags |= 0x10000000;                                                                  \
+            runtime->flags_090 |= piece->gameplay_flags;                                                               \
+        }                                                                                                              \
+    }
+
+#define CUSTOM_SETUP_SIDE(side, saved_selection)                                                                       \
+    do {                                                                                                               \
+        const i32 character_id = customiser->character_ids[side];                                                      \
+        CHARACTERDATA *character = &CDataList[character_id];                                                           \
+        GAMECHARACTERDATA *runtime = character->game_character;                                                        \
+        runtime->flags_090 = 0;                                                                                        \
+        const u16 *selection = saved_selection;                                                                        \
+        u32 layer_mask = 0;                                                                                            \
+        CUSTOM_SETUP_LAYER(0)                                                                                          \
+        CUSTOM_SETUP_LAYER(1)                                                                                          \
+        CUSTOM_SETUP_LAYER(2)                                                                                          \
+        CUSTOM_SETUP_LAYER(3)                                                                                          \
+        CUSTOM_SETUP_LAYER(4)                                                                                          \
+        CUSTOM_SETUP_LAYER(6)                                                                                          \
+        CUSTOM_SETUP_LAYER(7)                                                                                          \
+        CUSTOM_SETUP_LAYER(8)                                                                                          \
+        if (layer_mask == 0)                                                                                           \
+            layer_mask = 1;                                                                                            \
+        if (runtime->cape_layer != -1) {                                                                               \
+            const u32 cape_mask = 1u << runtime->cape_layer;                                                           \
+            layer_mask |= cape_mask;                                                                                   \
+            CUSTOMPIECE *cape = &customiser->piece_sets[5][selection[5]];                                              \
+            if ((cape->layer_flags & 0x40) != 0)                                                                       \
+                layer_mask &= ~cape_mask;                                                                              \
+        }                                                                                                              \
+        runtime->layer_mask_special = layer_mask;                                                                      \
+        runtime->layer_mask = layer_mask;                                                                              \
+        runtime->layer_mask_medium = layer_mask;                                                                       \
+        runtime->layer_mask_low = layer_mask;                                                                          \
+        runtime->layer_mask_dead = layer_mask;                                                                         \
+        character->model_flags &= 3;                                                                                   \
+        CUSTOMPIECE *torso = &customiser->piece_sets[1][selection[1]];                                                 \
+        const u16 torso_replaces_base = torso->availability_flags & 1;                                                 \
+        if (customiser->piece_counts[0] > 0) {                                                                         \
+            CUSTOMPIECE *head = &customiser->piece_sets[0][selection[0]];                                              \
+            if (!torso_replaces_base)                                                                                  \
+                character->model_flags |= head->model_flags;                                                           \
+            if ((character->model_flags & CHARACTER_MODEL_FLAG_ALTERNATE_WEAPON) != 0)                                 \
+                character->model_flags |= 0x10000000;                                                                  \
+            runtime->flags_090 = head->gameplay_flags;                                                                 \
+        }                                                                                                              \
+        CUSTOM_SETUP_PIECE(1)                                                                                          \
+        CUSTOM_SETUP_PIECE(2)                                                                                          \
+        CUSTOM_SETUP_PIECE(3)                                                                                          \
+        CUSTOM_SETUP_PIECE(4)                                                                                          \
+        CUSTOM_SETUP_PIECE(5)                                                                                          \
+        CUSTOM_SETUP_PIECE(6)                                                                                          \
+        CUSTOM_SETUP_PIECE(7)                                                                                          \
+        CUSTOM_SETUP_PIECE(8)                                                                                          \
+        if (torso_replaces_base)                                                                                       \
+            runtime->flags_090 |= 0x10;                                                                                \
+        CUSTOMPIECE *weapon = &customiser->piece_sets[2][selection[2]];                                                \
+        runtime->weapon_model = weapon->weapon_model;                                                                  \
+        runtime->field_0x117 = static_cast<u8>(LightSabre_ColourFromObj(runtime->weapon_model, NULL));                 \
+    } while (0)
+
+void Customiser_SetUpCharacterData(CUSTOMISER *customiser);
+
+void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world);
+
+void Customiser_Draw3D(CUSTOMISER *customiser);
+
+void CustomiserMenu_End();
+
+void CustomiserMenu_Draw(MENU_s *);
+
+void Customiser_InitNames(CUSTOMISER *customiser);
+
+static i32 Customise_FindLetter(char character) {
+    i32 letter = 0;
+    for (; letter != 38; ++letter)
+        if (character == CustomiseLetter[letter])
+            break;
+    return letter == 38 ? 0 : letter;
+}
+
+void CustomiserMenu_Update(MENU_s *);
+
+void Customiser_PieceConfig(CUSTOMPIECE *piece, nufpar_s *parser);
+
+i32 Customiser_MenuAvailable(CUSTOMISER *customiser);
+
+void Customiser_GetActiveWeirdoIndex(i32 *index, i32 *count);
+
+i32 Customise_GetToggleString(i32 index);
+
+void Customiser_SetNameAndIcon(CUSTOMISER *customiser, i32 index);
+
+// ==== src/legoapi/characters/core/characters.cpp: declarations ====
+#include "nu2api/nu3d/nuportal.h"
+#include "decomp.h"
+#include "legoapi/actions/character/suit.h"
+#include "legoapi/actions/character/streaks.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "globals.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/world/world_shared.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nulgtlaser.h"
+#include "nu2api/nu3d/nutex.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/charconfig.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/gamestructure.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/render/light/lighting.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/gizmos/object/lever.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmo/base/gizmessage.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/object/newblowup.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/transport/grapples.h"
+#include "legoapi/props/objects/tightrope.h"
+#include "legoapi/gizmos/door/spinner.h"
+#include "legoapi/gizmos/trigger/minicut.h"
+#include "legoapi/gizmos/transport/tubes.h"
+#include "legoapi/gizmos/traps/gizturrets.h"
+#include "legoapi/gizmos/trigger/ai.h"
+#include "legoapi/gizmos/trigger/giztimer.h"
+#include "legoapi/gizmos/trigger/gizrandom.h"
+#include "legoapi/gizmos/trigger/gizspecial.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/gizmos/door/plugs.h"
+#include "legoapi/gizmos/door/push.h"
+#include "legoapi/gizmos/fx/edgizshadowmachine.h"
+#include "legoapi/gizmos/transport/gizportal.h"
+#include "legoapi/props/objects/techno.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/areas.h"
+#include "legoapi/world/world.h"
+#include "legoapi/world/mission.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "gameapi/edtools/edstubs.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nucore/nustring.h"
+
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
+#include "legoapi/menus/core/text.h"
+#include "legoapi/actions/character/specialmoves.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/characters/core/customiser.h"
+#include "nu2api/numusic/numusic.h"
+#include "nu2api/numath/nutrig.h"
+
+
+// LoadPerm1 is one of the few game-level entry points which wires together
+// otherwise C-linkage engine subsystems.  Keep these declarations local: the
+// individual subsystem TUs intentionally expose their original plain names.
+extern "C" {
+    i32 rtlInitDynamic(VARIPTR *, VARIPTR, i32);
+    void DebrisSetup(VARIPTR *, VARIPTR, char *, i32, i32, i32);
+    void DebrisRegisterCutoffCameraVec(void *);
+    void edgraSetup(VARIPTR *, VARIPTR, i32, i32, i32);
+    void InitParts(i32, VARIPTR *, VARIPTR *);
+    void ParticleReset(void);
+    i32 NuFileExists(char *);
+    i32 NuStrCpy(char *, const char *);
+    i32 edppLoadPage(char *, i32, usize);
+    void NuRndrShadowInit(u8 *);
+    void NuTexAnimProgSysInit(void);
+    void terrainpickupinit(char *, void **);
+
+    extern f32 animduration_blendouttime;
+    extern i32 Grass_Available;
+    extern i32 DEBPAGE_GENERAL;
+    extern i32 DEBPAGE_CHARACTER;
+    extern void *perm_debrissys;
+}
+
+struct AISYS_s;
+void AIScriptLoadAll(char *path, VARIPTR *buf, VARIPTR *buf_end, AISYS_s *sys);
+void InitTexAnimScripts(char **names);
+void BackDrop_Init(char *path, VARIPTR *buf, VARIPTR *buf_end);
+
+extern i32 PARTPAGE_GENERAL;
+
+// The original table at 0x006281a0.  These are the material animation
+// scripts made available before the permanent things scene is loaded.
+extern char * TexAnimList_LSW[32];
+
+void InitRipples(ripple_set_s **, VARIPTR *, VARIPTR *, i32);
+void CreateFadeMaterials();
+void CreateUsefulMaterials();
+extern "C" ripple_set_s *ripples;
+extern "C" NUMTL *ShadowMat;
+
+struct AIROW_s;
+struct nuqthdr_s;
+struct nunativegscene_s;
+struct SHOPINPUT;
+
+void CharConfig_ConfigureAll(i32 permanent, nufpcomjmp_s *game_keywords);
+void ExtraCharacterFixUpAfterConfig();
+extern i32 CHARPAK;
+
+extern i32 GetMenuID(void);
+extern i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count);
+extern i32 Collection_Got(i32 id);
+extern void Customiser_SaveModelTextureIDs(CUSTOMISER *customiser, CHARACTERMODEL_s *model);
+extern CUSTOMISER *CharacterCustomiser;
+extern "C" VARIPTR characterbuffer_ptr;
+extern "C" VARIPTR characterbuffer_end;
+extern "C" i32 waiting_for_character;
+extern f32 WaitingForCharacterTime;
+
+extern "C" {
+extern i32 hub_character_ready;
+}
+
+extern APICHARACTERMODELLIST_s PermModelList[1];
+
+#include "legoapi/characters/core/characters_types.h"
+
+void LSW_SetIndy(i32);
+
+void HairMovement(GameObject_s *object);
+
+void HeadMovement(GameObject_s *object);
+
+nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id);
+
+void CharScene_Draw(WORLDINFO_s *world, i32 character_id, numtx_s *matrix, numtx_s *reflection_matrix);
+
+i32 CharIDFromName(char *name);
+
+CHARACTERDATA *CDataFromName(char *name);
+
+i32 RedirectAnim(char *directory, ANIMREDIRECT *redirects, ANIMLIST_s *animation_list, char *path);
+
+void CharScenes_Init(variptr_u *buf, variptr_u *);
+
+void CharScenes_LevelLoad(WORLDINFO *world);
+
+extern i16 tUNKNOWN;
+extern "C" {
+    extern i16 id_R2Q5;
+    void PlaySfx(char *, nuvec_s *);
+    void PlaySfxAndSetVolume(char *, nuvec_s *, f32);
+}
+void Move_CHARACTER(GameObject_s *);
+void Animate_CHARACTER(GameObject_s *);
+
+void FixUpCharacters(CHARFIXUP *fixup);
+
+void PostAnimate_FETT(GameObject_s *object);
+
+void ResetAICreature(GameObject_s *, AISYS_s *);
+void LightGameObject(GameObject_s *, void *);
+void InitSurfaceInfo(GameObject_s *);
+i32 SetObjOnSurface(GameObject_s *, i32);
+extern "C" NUVEC plr_lastpos;
+
+void FinishWeirdoNames(i32 which);
+
+GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle);
+
+extern i32 addcreature_override_id_check;
+
+extern f32 default_mover_extra;
+extern void SetGameObjectCharacterData(GameObject_s *obj);
+extern void GetTopBot(GameObject_s *obj);
+extern void GameObjectDimensions(GameObject_s *obj);
+extern void GameObjectOrigin(GameObject_s *obj);
+extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
+extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
+
+
+static void SetLayers_BOB(GameObject_s *object);
+
+// Retail keeps only the IPA-SRA clone, which receives &*layers.
+#if defined(__i386__)
+#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone, regparm(1)))
+#else
+#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
+#endif
+static MOSEISLEY_LAYERS_ATTR void SetLayers_MOSEISLEYCITIZEN(u32 *layers)
+    __asm__("_ZL26SetLayers_MOSEISLEYCITIZENP12GameObject_s.isra.2");
+static void SetLayers_MOSEISLEYCITIZEN(u32 *layers);
+
+i32 InitCreature(GameObject_s *obj, i32 id, i32 param);
+
+void Shards_HandleLostObj(WORLDINFO_s *, GameObject_s *);
+void LoseHelmet(GameObject_s *, i32, i32);
+void DestroySnakeBody(GameObject_s *);
+void InitPlayerAI(GameObject_s *);
+void Player_ClearContext(GameObject_s *, i32);
+void ResetPlayerMoves(GameObject_s *);
+void Player_ResetContexts(PLAYERPACKET_s *);
+void InitSurfaceInfo(GameObject_s *);
+i32 SetObjOnSurface(GameObject_s *, i32);
+void GizForce_ResetLOS(GameObject_s *);
+i32 StartSlide(GameObject_s *, i32);
+
+i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32);
+
+
+i32 GetDefaultIdle(GameObject_s *obj);
+
+void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation);
+
+static void NewCharacterIdle(GameObject_s *object, i32 default_idle);
+
+void UpdateCharacterIdle(GameObject_s *object);
+
+void UpdateCharacterIDs();
+
+void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_u buf_end);
+
+void CharScenes_AreaDump();
+
+void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 game_flag_mask, u32 game_flag_value,
+                                i32 movement_type, void *move_function, void *animate_function, void *draw_function);
+
+void DeactivateGameObject(GameObject_s *);
+
+void DeactivateCharacter(char *name);
+
+void LoadSingleCharacter(bgprocinfo_s *);
+
+void CharScenes_LevelDump(WORLDINFO_s *world);
+
+void UpdateCharacterLoad();
+
+extern "C" VARIPTR characterbuffer_base;
+extern i32 CHARACTERBUFFERSIZE;
+extern i32 Area;
+extern i32 last_area;
+
+void ResetCharacterBuffer(i32 force_reset);
+
+void NextStatusStage(STATUSPACKET_s *);
+i32 AddToCollection(i32);
+void NewStatusRumbleBuzz(i32, f32, f32, i32);
+void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
+extern "C" void PlaySfx(char *, nuvec_s *);
+void Collection_Draw(COLLECTION_s *, f32, f32, f32, APICHARACTERMODELLIST_s *, f32, i32);
+void Collection_GetPos(COLLECTION_s *, i32, f32 *, f32 *);
+void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
+extern f32 ICONSIZE;
+extern i32 STATUS_R, STATUS_G, STATUS_B;
+extern f32 COLLECTION_Y_STATUS;
+
+void CollectCharcters_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void CollectCharcters_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
+
+nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id);
+
+void PostAnimate_ASTROMECH(GameObject_s *object);
+
+AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
+                                   f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y);
+
+AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
+                                    f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y);
+
+i32 newCharactersCollected(STATUSPACKET_s *);
+
+void CollectCharcters_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+i32 SetProtocolDroidFallAnim(GameObject_s *object);
+
+void CollectCharactersOff_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void CollectCharactersOff_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+
+void ScaleGameObject(GameObject_s *obj);
+
+void SetGameObjectCharacterData(GameObject_s *obj);
+
+void CollectCharactersOff_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+extern "C" i32 dagobah_training;
+
+i32 TakeOverYodaSeekDistanceHack(GameObject_s *object, GameObject_s *luke, nuvec_s *offset);
+
+void SetProtocolDroidInterfaceAction(GameObject_s *object);
+
+void SetProtocolDroidDeactivatedAction(GameObject_s *object);
+
+extern NUMTL * lightningmat;
+extern NUMTL *DebMat[10];
+extern "C" void NuWaterInit(void);
+extern "C" void NuBridgeInit(void);
+
+void LoadPerm1();
+
+void LoadPerm2();
+
+// ==== functions in original address order ====
+
 static void UpdateCustomPieceAnim(CUSTOMPIECEANIM *anim, u16 minimum, u16 maximum) {
     if (anim->elapsed < anim->duration) {
         anim->elapsed += FRAMETIME;
@@ -109,23 +568,93 @@ static void UpdateCustomPieceAnim(CUSTOMPIECEANIM *anim, u16 minimum, u16 maximu
     }
 }
 
-// Animations the customiser cycles through on the game's character preview, terminated by -1.
-i16 CustomiserActionList_Game[] = {97, 190, 98, 99, -1};
+void FinishWeirdoNames(i32 which) {
+    if (which != 1) {
+        NuStrUpr(Game.customizer[0].name, Game.customizer[0].name);
+        i32 length = NuStrLen(Game.customizer[0].name);
+        for (; length <= 14; length++) {
+            Game.customizer[0].name[length] = ' ';
+        }
+        Game.customizer[0].name[15] = '\0';
+        if (which == 0) {
+            return;
+        }
+    }
+    NuStrUpr(Game.customizer[1].name, Game.customizer[1].name);
+    i32 length = NuStrLen(Game.customizer[1].name);
+    for (; length <= 14; length++) {
+        Game.customizer[1].name[length] = ' ';
+    }
+    Game.customizer[1].name[15] = '\0';
+}
 
-struct CUSTOMISER_GAMESETTING {
-    char *name;
-    u32 model_flags;
-    u32 gameplay_flags;
-};
-static CUSTOMISER_GAMESETTING Customiser_GameSetting[] = {
-    {"bountyhunter", 0x1000000, 0},
-    {"jedi", 8, 0},
-    {"sith", 0xc, 2},
-    {"blaster", 0x100080, 0x40000000},
-    {"alreadygothat", 0, 0x10},
-    {"stormtrooperhelmet", 0, 0x40000},
-    {NULL, 0, 0},
-};
+void Customiser_PieceConfig(CUSTOMPIECE *piece, nufpar_s *parser) {
+    for (CUSTOMISER_GAMESETTING *setting = Customiser_GameSetting; setting->name != NULL; ++setting) {
+        if (NuStrICmp(parser->word_buf, setting->name) == 0) {
+            piece->model_flags |= setting->model_flags;
+            piece->gameplay_flags |= setting->gameplay_flags;
+            break;
+        }
+    }
+}
+
+void Customiser_InitNames(CUSTOMISER *customiser) {
+    if (customiser == NULL)
+        return;
+    if (customiser->character_ids[0] != -1) {
+        const i32 text = CDataList[customiser->character_ids[0]].name_id;
+        if (text != -1) {
+            NuStrCpy(customiser->display_names[0], TTab[text]);
+            TTab[text] = customiser->display_names[0];
+        }
+    }
+    if (customiser->character_ids[1] != -1) {
+        const i32 text = CDataList[customiser->character_ids[1]].name_id;
+        if (text != -1) {
+            NuStrCpy(customiser->display_names[1], TTab[text]);
+            TTab[text] = customiser->display_names[1];
+        }
+    }
+}
+
+void Customiser_SetNameAndIcon(CUSTOMISER *customiser, i32 index) {
+    if (customiser == NULL)
+        return;
+    bool single = index != -1;
+    if (index == 0 || !single) {
+        customiser->display_names[0][0] = 0;
+        sprintf(customiser->display_names[0], "%s %i", TTab[tSTRANGER], 1);
+        CDataList[customiser->character_ids[0]].field20_0x42 = Customiser_GetIcon(customiser, Game.customizer, 0);
+    }
+    if (index != 1 && single) {
+        return;
+    }
+    customiser->display_names[1][0] = 0;
+    sprintf(customiser->display_names[1], "%s %i", TTab[tSTRANGER], 2);
+    CDataList[customiser->character_ids[1]].field20_0x42 = Customiser_GetIcon(customiser, &Game.customizer[1], 1);
+}
+
+i32 Customiser_PieceAvailable(CUSTOMPIECE *piece) {
+    if (GAMEDEMO != 0) {
+        if ((piece->availability_flags & 0x10) != 0)
+            return 0;
+    } else {
+        if ((piece->availability_flags & 0x180) != 0 && Game_100PercentComplete() == 0)
+            return 0;
+        if (piece->character_id != -1) {
+            if (InCollectList_Index(piece->character_id, NULL, 0) == -1)
+                return 1;
+            if (Collection_Got(piece->character_id) == 0)
+                return 0;
+        }
+        const u32 required_flags = piece->model_flags & 0x0c;
+        if (required_flags != 0 && Collection_GotAnyOfType(-1, required_flags) == 0)
+            return 0;
+        if (piece->collection_type != -1 && Collection_GotAnyOfType(piece->collection_type, 0) == 0)
+            return 0;
+    }
+    return 1;
+}
 
 void Customiser_Init(CUSTOMISER *customiser) {
     if (customiser == NULL)
@@ -278,107 +807,10 @@ void Customiser_Reset(CUSTOMISER *customiser) {
     customiser->animation_state[1] = 2;
 }
 
-i32 Customiser_PieceAvailable(CUSTOMPIECE *piece) {
-    if (GAMEDEMO != 0) {
-        if ((piece->availability_flags & 0x10) != 0)
-            return 0;
-    } else {
-        if ((piece->availability_flags & 0x180) != 0 && Game_100PercentComplete() == 0)
-            return 0;
-        if (piece->character_id != -1) {
-            if (InCollectList_Index(piece->character_id, NULL, 0) == -1)
-                return 1;
-            if (Collection_Got(piece->character_id) == 0)
-                return 0;
-        }
-        const u32 required_flags = piece->model_flags & 0x0c;
-        if (required_flags != 0 && Collection_GotAnyOfType(-1, required_flags) == 0)
-            return 0;
-        if (piece->collection_type != -1 && Collection_GotAnyOfType(piece->collection_type, 0) == 0)
-            return 0;
-    }
-    return 1;
-}
-
 void Customiser_TransformToPanel(CUSTOMISER *) {
     NuCameraTransformScreenClip(&CustomiseScreenPos[0], &CustomisePos[0], 1, NULL);
     NuCameraTransformScreenClip(&CustomiseScreenPos[1], &CustomisePos[1], 1, NULL);
 }
-
-static u16 *Customiser_GetSelection(i32 side) {
-    return Game.customizer[side].pieces;
-}
-
-#define CUSTOM_SETUP_LAYER(category)                                                                                   \
-    if (customiser->layer_indices[category] != -1)                                                                     \
-        layer_mask |= 1u << customiser->layer_indices[category];
-
-#define CUSTOM_SETUP_PIECE(category)                                                                                   \
-    {                                                                                                                  \
-        if (customiser->piece_counts[category] > 0) {                                                                  \
-            CUSTOMPIECE *piece = category == 1 ? torso : &customiser->piece_sets[category][selection[category]];       \
-            character->model_flags |= piece->model_flags;                                                              \
-            if ((character->model_flags & CHARACTER_MODEL_FLAG_ALTERNATE_WEAPON) != 0)                                 \
-                character->model_flags |= 0x10000000;                                                                  \
-            runtime->flags_090 |= piece->gameplay_flags;                                                               \
-        }                                                                                                              \
-    }
-
-#define CUSTOM_SETUP_SIDE(side, saved_selection)                                                                       \
-    do {                                                                                                               \
-        const i32 character_id = customiser->character_ids[side];                                                      \
-        CHARACTERDATA *character = &CDataList[character_id];                                                           \
-        GAMECHARACTERDATA *runtime = character->game_character;                                                        \
-        runtime->flags_090 = 0;                                                                                        \
-        const u16 *selection = saved_selection;                                                                        \
-        u32 layer_mask = 0;                                                                                            \
-        CUSTOM_SETUP_LAYER(0)                                                                                          \
-        CUSTOM_SETUP_LAYER(1)                                                                                          \
-        CUSTOM_SETUP_LAYER(2)                                                                                          \
-        CUSTOM_SETUP_LAYER(3)                                                                                          \
-        CUSTOM_SETUP_LAYER(4)                                                                                          \
-        CUSTOM_SETUP_LAYER(6)                                                                                          \
-        CUSTOM_SETUP_LAYER(7)                                                                                          \
-        CUSTOM_SETUP_LAYER(8)                                                                                          \
-        if (layer_mask == 0)                                                                                           \
-            layer_mask = 1;                                                                                            \
-        if (runtime->cape_layer != -1) {                                                                               \
-            const u32 cape_mask = 1u << runtime->cape_layer;                                                           \
-            layer_mask |= cape_mask;                                                                                   \
-            CUSTOMPIECE *cape = &customiser->piece_sets[5][selection[5]];                                              \
-            if ((cape->layer_flags & 0x40) != 0)                                                                       \
-                layer_mask &= ~cape_mask;                                                                              \
-        }                                                                                                              \
-        runtime->layer_mask_special = layer_mask;                                                                      \
-        runtime->layer_mask = layer_mask;                                                                              \
-        runtime->layer_mask_medium = layer_mask;                                                                       \
-        runtime->layer_mask_low = layer_mask;                                                                          \
-        runtime->layer_mask_dead = layer_mask;                                                                         \
-        character->model_flags &= 3;                                                                                   \
-        CUSTOMPIECE *torso = &customiser->piece_sets[1][selection[1]];                                                 \
-        const u16 torso_replaces_base = torso->availability_flags & 1;                                                 \
-        if (customiser->piece_counts[0] > 0) {                                                                         \
-            CUSTOMPIECE *head = &customiser->piece_sets[0][selection[0]];                                              \
-            if (!torso_replaces_base)                                                                                  \
-                character->model_flags |= head->model_flags;                                                           \
-            if ((character->model_flags & CHARACTER_MODEL_FLAG_ALTERNATE_WEAPON) != 0)                                 \
-                character->model_flags |= 0x10000000;                                                                  \
-            runtime->flags_090 = head->gameplay_flags;                                                                 \
-        }                                                                                                              \
-        CUSTOM_SETUP_PIECE(1)                                                                                          \
-        CUSTOM_SETUP_PIECE(2)                                                                                          \
-        CUSTOM_SETUP_PIECE(3)                                                                                          \
-        CUSTOM_SETUP_PIECE(4)                                                                                          \
-        CUSTOM_SETUP_PIECE(5)                                                                                          \
-        CUSTOM_SETUP_PIECE(6)                                                                                          \
-        CUSTOM_SETUP_PIECE(7)                                                                                          \
-        CUSTOM_SETUP_PIECE(8)                                                                                          \
-        if (torso_replaces_base)                                                                                       \
-            runtime->flags_090 |= 0x10;                                                                                \
-        CUSTOMPIECE *weapon = &customiser->piece_sets[2][selection[2]];                                                \
-        runtime->weapon_model = weapon->weapon_model;                                                                  \
-        runtime->field_0x117 = static_cast<u8>(LightSabre_ColourFromObj(runtime->weapon_model, NULL));                 \
-    } while (0)
 
 void Customiser_SetUpCharacterData(CUSTOMISER *customiser) {
     if (customiser == NULL)
@@ -388,9 +820,129 @@ void Customiser_SetUpCharacterData(CUSTOMISER *customiser) {
     CUSTOM_SETUP_SIDE(1, Game.customizer[1].pieces);
     Customiser_SetNameAndIcon(customiser, -1);
 }
-#undef CUSTOM_SETUP_SIDE
-#undef CUSTOM_SETUP_PIECE
-#undef CUSTOM_SETUP_LAYER
+
+void Customiser_GetActiveWeirdoIndex(i32 *index, i32 *count) {
+    if (MenuPacket.active_player[0] != 0) {
+        if (MenuPacket.active_player[1] == 0) {
+            *index = 0;
+            *count = 1;
+            return;
+        }
+    } else if (MenuPacket.active_player[1] != 0) {
+        *index = 1;
+        *count = 1;
+        return;
+    }
+    *index = 0;
+    *count = 2;
+}
+
+void Customiser_Draw3D(CUSTOMISER *customiser) {
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    if (customiser == NULL || world->camera_splines[18] == NULL)
+        return;
+    i32 active_side, active_count;
+    Customiser_GetActiveWeirdoIndex(&active_side, &active_count);
+    i32 preview_side = -1;
+    if (active_count == 1)
+        preview_side = MenuPacket.customise_other_player[active_side] != 0 ? active_side == 0 : active_side;
+    CUSTOMISESAVE_s *settings = Game.customizer;
+    for (i32 side = 0; side < 2; ++side, ++settings) {
+        const i32 character_id = customiser->character_ids[side];
+        CHARACTERMODEL_s *model = APICharacterLoaded(character_id);
+        if (model == NULL || customiser->animation_state[side] != 0)
+            continue;
+        GAMECHARACTERDATA *runtime = &GCDataList[character_id];
+        i32 helmet = runtime->helmet_locator;
+        if (helmet != -1 && model->points_of_interest[helmet] == NULL)
+            helmet = -1;
+        const i32 selected = CustomiseMenuY[side];
+        rtldata_s light_data;
+        rtlResetEx(&light_data, 1);
+        rtlApplySetScale(world->rtl_set, &light_data, &CustomisePos[side], NULL, -1, 1.0f);
+        SetLights_RTLDATA(&light_data, 1.0f);
+        const u16 *selection = settings->pieces;
+        u32 layer_mask = 0;
+        if (customiser->layer_indices[0] != -1)
+            layer_mask |= 1u << customiser->layer_indices[0];
+        if (customiser->layer_indices[1] != -1)
+            layer_mask |= 1u << customiser->layer_indices[1];
+        if (customiser->layer_indices[2] != -1)
+            layer_mask |= 1u << customiser->layer_indices[2];
+        if (customiser->layer_indices[3] != -1)
+            layer_mask |= 1u << customiser->layer_indices[3];
+        if (customiser->layer_indices[4] != -1)
+            layer_mask |= 1u << customiser->layer_indices[4];
+        if (customiser->layer_indices[6] != -1)
+            layer_mask |= 1u << customiser->layer_indices[6];
+        if (customiser->layer_indices[7] != -1)
+            layer_mask |= 1u << customiser->layer_indices[7];
+        if (customiser->layer_indices[8] != -1)
+            layer_mask |= 1u << customiser->layer_indices[8];
+        if (layer_mask == 0)
+            layer_mask = 1;
+        if (runtime->cape_layer != -1) {
+            layer_mask |= 1u << runtime->cape_layer;
+            if ((selected == -1 || GetMenuID() != 12 || customiser_quit != 0 || selected != 5) &&
+                (customiser->piece_sets[5][selection[5]].layer_flags & 0x40) != 0)
+                layer_mask &= ~(1u << runtime->cape_layer);
+        }
+        // The reference's preview matrix lives in a 16-byte-aligned frame.
+        NUMTX_ALIGNED16 matrix;
+        NuMtxSetRotationY(&matrix, CustomiseYRot[side] + 0x8000);
+        NuMtxTranslate(&matrix, &CustomisePos[side]);
+        if (GameDrawCharacterModel(model, &customiser->animation_packets[side], &matrix, NULL, NULL,
+                                   customiser->joint_matrices[side], NULL, layer_mask) == 0)
+            continue;
+        if (helmet != -1) {
+            for (i32 category = 0; category < 9; ++category) {
+                if (world->customiser_resources[category] == NULL || customiser->piece_counts[category] <= 0 ||
+                    customiser->categories[category]->uses_special == 0)
+                    continue;
+                const i32 piece_index = selection[category];
+                CUSTOMPIECERESOURCE *resource = &world->customiser_resources[category][piece_index];
+                if (NuSpecialExistsFn(&resource->special) == 0)
+                    continue;
+                CUSTOMPIECE *pieces = customiser->piece_sets[category];
+                bool preview = false;
+                if (GetMenuID() == 12 && customiser_quit == 0 && category == selected &&
+                    (active_count == 2 || side == preview_side)) {
+                    NuFmod(CustomiseMenuTime[side], 0.3f);
+                    preview = true;
+                }
+                if (!preview && category == 0) {
+                    CUSTOMPIECE *piece = &pieces[piece_index];
+                    if ((piece->layer_flags & 0x20) != 0)
+                        continue;
+                }
+                matrix = customiser->joint_matrices[side][helmet];
+                if (category == 0)
+                    NuMtxPreTranslate(&matrix, &NoHatPos[side]);
+                NuSpecialDrawAt(&resource->special, &matrix);
+            }
+        }
+        if (customiser->piece_counts[2] > 0) {
+            const i32 hand = runtime->weapon_joints[0];
+            if (hand == -1 || model->points_of_interest[hand] == NULL)
+                continue;
+            CUSTOMPIECE *weapon = &customiser->piece_sets[2][selection[2]];
+            if (weapon->weapon_model == -1)
+                continue;
+            LEVEL_OBJECT_RUNTIME_s *object = &world->lev_objs[weapon->weapon_model];
+            if (object->active != 0) {
+                matrix = customiser->joint_matrices[side][hand];
+                NuSpecialDrawAt(&object->special, &matrix);
+                i32 blade;
+                if (LightSabre_ColourFromObj(weapon->weapon_model, &blade) != -1) {
+                    if (blade != -1)
+                        NuSpecialDrawAt(&world->lev_objs[blade].special, &matrix);
+                    NuSpecialDrawAt(&world->lev_objs[17].special, &matrix);
+                }
+            }
+        }
+    }
+    SetLevelLights(world->rtl_set, 1.0f);
+}
 
 void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
     const f32 frame_time = FRAMETIME;
@@ -538,129 +1090,32 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
     }
 }
 
-void Customiser_Draw3D(CUSTOMISER *customiser) {
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (customiser == NULL || world->camera_splines[18] == NULL)
-        return;
-    i32 active_side, active_count;
-    Customiser_GetActiveWeirdoIndex(&active_side, &active_count);
-    i32 preview_side = -1;
-    if (active_count == 1)
-        preview_side = MenuPacket.customise_other_player[active_side] != 0 ? active_side == 0 : active_side;
-    CUSTOMISESAVE_s *settings = Game.customizer;
-    for (i32 side = 0; side < 2; ++side, ++settings) {
-        const i32 character_id = customiser->character_ids[side];
-        CHARACTERMODEL_s *model = APICharacterLoaded(character_id);
-        if (model == NULL || customiser->animation_state[side] != 0)
-            continue;
-        GAMECHARACTERDATA *runtime = &GCDataList[character_id];
-        i32 helmet = runtime->helmet_locator;
-        if (helmet != -1 && model->points_of_interest[helmet] == NULL)
-            helmet = -1;
-        const i32 selected = CustomiseMenuY[side];
-        rtldata_s light_data;
-        rtlResetEx(&light_data, 1);
-        rtlApplySetScale(world->rtl_set, &light_data, &CustomisePos[side], NULL, -1, 1.0f);
-        SetLights_RTLDATA(&light_data, 1.0f);
-        const u16 *selection = settings->pieces;
-        u32 layer_mask = 0;
-        if (customiser->layer_indices[0] != -1)
-            layer_mask |= 1u << customiser->layer_indices[0];
-        if (customiser->layer_indices[1] != -1)
-            layer_mask |= 1u << customiser->layer_indices[1];
-        if (customiser->layer_indices[2] != -1)
-            layer_mask |= 1u << customiser->layer_indices[2];
-        if (customiser->layer_indices[3] != -1)
-            layer_mask |= 1u << customiser->layer_indices[3];
-        if (customiser->layer_indices[4] != -1)
-            layer_mask |= 1u << customiser->layer_indices[4];
-        if (customiser->layer_indices[6] != -1)
-            layer_mask |= 1u << customiser->layer_indices[6];
-        if (customiser->layer_indices[7] != -1)
-            layer_mask |= 1u << customiser->layer_indices[7];
-        if (customiser->layer_indices[8] != -1)
-            layer_mask |= 1u << customiser->layer_indices[8];
-        if (layer_mask == 0)
-            layer_mask = 1;
-        if (runtime->cape_layer != -1) {
-            layer_mask |= 1u << runtime->cape_layer;
-            if ((selected == -1 || GetMenuID() != 12 || customiser_quit != 0 || selected != 5) &&
-                (customiser->piece_sets[5][selection[5]].layer_flags & 0x40) != 0)
-                layer_mask &= ~(1u << runtime->cape_layer);
-        }
-        // The reference's preview matrix lives in a 16-byte-aligned frame.
-        NUMTX_ALIGNED16 matrix;
-        NuMtxSetRotationY(&matrix, CustomiseYRot[side] + 0x8000);
-        NuMtxTranslate(&matrix, &CustomisePos[side]);
-        if (GameDrawCharacterModel(model, &customiser->animation_packets[side], &matrix, NULL, NULL,
-                                   customiser->joint_matrices[side], NULL, layer_mask) == 0)
-            continue;
-        if (helmet != -1) {
-            for (i32 category = 0; category < 9; ++category) {
-                if (world->customiser_resources[category] == NULL || customiser->piece_counts[category] <= 0 ||
-                    customiser->categories[category]->uses_special == 0)
-                    continue;
-                const i32 piece_index = selection[category];
-                CUSTOMPIECERESOURCE *resource = &world->customiser_resources[category][piece_index];
-                if (NuSpecialExistsFn(&resource->special) == 0)
-                    continue;
-                CUSTOMPIECE *pieces = customiser->piece_sets[category];
-                bool preview = false;
-                if (GetMenuID() == 12 && customiser_quit == 0 && category == selected &&
-                    (active_count == 2 || side == preview_side)) {
-                    NuFmod(CustomiseMenuTime[side], 0.3f);
-                    preview = true;
-                }
-                if (!preview && category == 0) {
-                    CUSTOMPIECE *piece = &pieces[piece_index];
-                    if ((piece->layer_flags & 0x20) != 0)
-                        continue;
-                }
-                matrix = customiser->joint_matrices[side][helmet];
-                if (category == 0)
-                    NuMtxPreTranslate(&matrix, &NoHatPos[side]);
-                NuSpecialDrawAt(&resource->special, &matrix);
-            }
-        }
-        if (customiser->piece_counts[2] > 0) {
-            const i32 hand = runtime->weapon_joints[0];
-            if (hand == -1 || model->points_of_interest[hand] == NULL)
-                continue;
-            CUSTOMPIECE *weapon = &customiser->piece_sets[2][selection[2]];
-            if (weapon->weapon_model == -1)
-                continue;
-            LEVEL_OBJECT_RUNTIME_s *object = &world->lev_objs[weapon->weapon_model];
-            if (object->active != 0) {
-                matrix = customiser->joint_matrices[side][hand];
-                NuSpecialDrawAt(&object->special, &matrix);
-                i32 blade;
-                if (LightSabre_ColourFromObj(weapon->weapon_model, &blade) != -1) {
-                    if (blade != -1)
-                        NuSpecialDrawAt(&world->lev_objs[blade].special, &matrix);
-                    NuSpecialDrawAt(&world->lev_objs[17].special, &matrix);
-                }
-            }
-        }
+i32 Customiser_MenuAvailable(CUSTOMISER *customiser) {
+    if (customiser == NULL || APICharacterLoaded(customiser->character_ids[0]) == NULL) {
+        return 0;
     }
-    SetLevelLights(world->rtl_set, 1.0f);
+    const i16 first_animation = customiser->animation_packets[0].requested_animation;
+    if (first_animation != 99 && first_animation != 190) {
+        return 0;
+    }
+    if (APICharacterLoaded(customiser->character_ids[1]) == NULL) {
+        return 0;
+    }
+    const i16 second_animation = customiser->animation_packets[1].requested_animation;
+    return second_animation == 99 || second_animation == 190;
 }
 
-void CustomiserMenu_End() {
-    LevLock[1] = 1;
-    LevTime[1] = 2.0f;
-    MenuRememberCursor(&GameMenu[GameMenuLevel]);
-    MenuReset();
-    ResetTimer(&JoinInTimer, 0.0f);
-    CustomiseMode[0] = 2;
-    CustomiseMode[1] = 2;
-    if (GAMEDEMO != 0) {
-        GAMEDEMO = 2;
-        NewLData = HUB_LDATA;
-        NextArea_FreePlay = 1;
-        FreePlay = 1;
-        makeplayerlist_freeplay = 1;
-        makefreeplaymodellist = 1;
+i32 Customise_GetToggleString(i32 index) {
+    i32 mode = CustomiseMode[index];
+    if (mode == 1) {
+        return tCANCEL;
     }
+    if (mode != 0) {
+        do {
+            mode = (i32)((u32)mode + 1u) % 3;
+        } while (mode == 0);
+    }
+    return tEDITNAME;
 }
 
 void CustomiserMenu_Draw(MENU_s *) {
@@ -789,31 +1244,22 @@ void CustomiserMenu_Draw(MENU_s *) {
     }
 }
 
-void Customiser_InitNames(CUSTOMISER *customiser) {
-    if (customiser == NULL)
-        return;
-    if (customiser->character_ids[0] != -1) {
-        const i32 text = CDataList[customiser->character_ids[0]].name_id;
-        if (text != -1) {
-            NuStrCpy(customiser->display_names[0], TTab[text]);
-            TTab[text] = customiser->display_names[0];
-        }
+void CustomiserMenu_End() {
+    LevLock[1] = 1;
+    LevTime[1] = 2.0f;
+    MenuRememberCursor(&GameMenu[GameMenuLevel]);
+    MenuReset();
+    ResetTimer(&JoinInTimer, 0.0f);
+    CustomiseMode[0] = 2;
+    CustomiseMode[1] = 2;
+    if (GAMEDEMO != 0) {
+        GAMEDEMO = 2;
+        NewLData = HUB_LDATA;
+        NextArea_FreePlay = 1;
+        FreePlay = 1;
+        makeplayerlist_freeplay = 1;
+        makefreeplaymodellist = 1;
     }
-    if (customiser->character_ids[1] != -1) {
-        const i32 text = CDataList[customiser->character_ids[1]].name_id;
-        if (text != -1) {
-            NuStrCpy(customiser->display_names[1], TTab[text]);
-            TTab[text] = customiser->display_names[1];
-        }
-    }
-}
-
-static i32 Customise_FindLetter(char character) {
-    i32 letter = 0;
-    for (; letter != 38; ++letter)
-        if (character == CustomiseLetter[letter])
-            break;
-    return letter == 38 ? 0 : letter;
 }
 
 void CustomiserMenu_Update(MENU_s *) {
@@ -1155,73 +1601,3 @@ void CustomiserMenu_Update(MENU_s *) {
     }
 }
 
-void Customiser_PieceConfig(CUSTOMPIECE *piece, nufpar_s *parser) {
-    for (CUSTOMISER_GAMESETTING *setting = Customiser_GameSetting; setting->name != NULL; ++setting) {
-        if (NuStrICmp(parser->word_buf, setting->name) == 0) {
-            piece->model_flags |= setting->model_flags;
-            piece->gameplay_flags |= setting->gameplay_flags;
-            break;
-        }
-    }
-}
-
-i32 Customiser_MenuAvailable(CUSTOMISER *customiser) {
-    if (customiser == NULL || APICharacterLoaded(customiser->character_ids[0]) == NULL) {
-        return 0;
-    }
-    const i16 first_animation = customiser->animation_packets[0].requested_animation;
-    if (first_animation != 99 && first_animation != 190) {
-        return 0;
-    }
-    if (APICharacterLoaded(customiser->character_ids[1]) == NULL) {
-        return 0;
-    }
-    const i16 second_animation = customiser->animation_packets[1].requested_animation;
-    return second_animation == 99 || second_animation == 190;
-}
-
-void Customiser_GetActiveWeirdoIndex(i32 *index, i32 *count) {
-    if (MenuPacket.active_player[0] != 0) {
-        if (MenuPacket.active_player[1] == 0) {
-            *index = 0;
-            *count = 1;
-            return;
-        }
-    } else if (MenuPacket.active_player[1] != 0) {
-        *index = 1;
-        *count = 1;
-        return;
-    }
-    *index = 0;
-    *count = 2;
-}
-
-i32 Customise_GetToggleString(i32 index) {
-    i32 mode = CustomiseMode[index];
-    if (mode == 1) {
-        return tCANCEL;
-    }
-    if (mode != 0) {
-        do {
-            mode = (i32)((u32)mode + 1u) % 3;
-        } while (mode == 0);
-    }
-    return tEDITNAME;
-}
-
-void Customiser_SetNameAndIcon(CUSTOMISER *customiser, i32 index) {
-    if (customiser == NULL)
-        return;
-    bool single = index != -1;
-    if (index == 0 || !single) {
-        customiser->display_names[0][0] = 0;
-        sprintf(customiser->display_names[0], "%s %i", TTab[tSTRANGER], 1);
-        CDataList[customiser->character_ids[0]].field20_0x42 = Customiser_GetIcon(customiser, Game.customizer, 0);
-    }
-    if (index != 1 && single) {
-        return;
-    }
-    customiser->display_names[1][0] = 0;
-    sprintf(customiser->display_names[1], "%s %i", TTab[tSTRANGER], 2);
-    CDataList[customiser->character_ids[1]].field20_0x42 = Customiser_GetIcon(customiser, &Game.customizer[1], 1);
-}

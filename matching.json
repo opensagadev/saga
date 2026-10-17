@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 82.91158,
+    "fuzzy_match_percent": 82.911476,
     "total_code": "4722419",
-    "matched_code": "652045",
-    "matched_code_percent": 13.807437,
+    "matched_code": "652311",
+    "matched_code_percent": 13.813069,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 7035,
-    "matched_functions_percent": 52.26986,
+    "matched_functions": 7036,
+    "matched_functions_percent": 52.277287,
     "total_units": 1
   },
   "text": {
@@ -40460,14 +40460,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z17FinishWeirdoNamesi",
-          "demangled_name": "FinishWeirdoNames(int)",
-          "address": 1805568,
-          "offset": 915600,
-          "size": 543,
-          "match_percent": 79.33125
-        },
-        {
           "name": "_Z25CollectCharactersOff_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
           "demangled_name": "CollectCharactersOff_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
           "address": 2019888,
@@ -64970,6 +64962,14 @@
           "match_percent": 52.168423
         },
         {
+          "name": "_Z17FinishWeirdoNamesi",
+          "demangled_name": "FinishWeirdoNames(int)",
+          "address": 1805568,
+          "offset": 915600,
+          "size": 543,
+          "match_percent": 79.33125
+        },
+        {
           "name": "_Z22Customiser_PieceConfigP11CUSTOMPIECEP8nufpar_s",
           "demangled_name": "Customiser_PieceConfig(CUSTOMPIECE*, nufpar_s*)",
           "address": 1806112,
@@ -64999,7 +64999,7 @@
           "address": 1806784,
           "offset": 916816,
           "size": 266,
-          "match_percent": 99.791664
+          "match_percent": 100.0
         },
         {
           "name": "_Z15Customiser_InitP10CUSTOMISER",
@@ -65031,7 +65031,7 @@
           "address": 1809488,
           "offset": 919520,
           "size": 2303,
-          "match_percent": 83.7202
+          "match_percent": 83.49669
         },
         {
           "name": "_Z31Customiser_GetActiveWeirdoIndexPiS_",
@@ -65047,7 +65047,7 @@
           "address": 1811888,
           "offset": 921920,
           "size": 2092,
-          "match_percent": 81.15758
+          "match_percent": 81.12727
         },
         {
           "name": "_Z17Customiser_UpdateP10CUSTOMISERP11WORLDINFO_s",
@@ -65095,7 +65095,7 @@
           "address": 1821312,
           "offset": 931344,
           "size": 5352,
-          "match_percent": 60.25684
+          "match_percent": 60.252426
         }
       ]
     },

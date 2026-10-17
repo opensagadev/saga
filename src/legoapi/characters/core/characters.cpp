@@ -647,25 +647,7 @@ void InitSurfaceInfo(GameObject_s *);
 i32 SetObjOnSurface(GameObject_s *, i32);
 extern "C" NUVEC plr_lastpos;
 
-void FinishWeirdoNames(i32 which) {
-    if (which != 1) {
-        NuStrUpr(Game.customizer[0].name, Game.customizer[0].name);
-        i32 length = NuStrLen(Game.customizer[0].name);
-        for (; length <= 14; length++) {
-            Game.customizer[0].name[length] = ' ';
-        }
-        Game.customizer[0].name[15] = '\0';
-        if (which == 0) {
-            return;
-        }
-    }
-    NuStrUpr(Game.customizer[1].name, Game.customizer[1].name);
-    i32 length = NuStrLen(Game.customizer[1].name);
-    for (; length <= 14; length++) {
-        Game.customizer[1].name[length] = ' ';
-    }
-    Game.customizer[1].name[15] = '\0';
-}
+void FinishWeirdoNames(i32 which);
 
 GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle);
 
