@@ -26,6 +26,7 @@
 #include "nu2api/nusound/nusound.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 
+// Globals shared across world loading — defined here until moved to globals.cpp
 TIMER LevelTimer;
 
 void (*WorldInfo_InitMenuFn)(WORLDINFO *, i32 *, i32 *) = NULL;

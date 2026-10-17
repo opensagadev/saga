@@ -152,6 +152,7 @@ FadeWipe fadeWipe;
 FadeStillWipe fadeStillWipe;
 FadeStill fadeStill;
 
+// Material handles used by the original 2-D fade paths.
 NUMTL *ScreenFadeMtl;
 NUMTL *FadeMtl2;
 NUMTL *FadeMtl;

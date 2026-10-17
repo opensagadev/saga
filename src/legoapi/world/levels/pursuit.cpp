@@ -112,6 +112,10 @@ static void UpdateZamArrowBody(LEVEL_OBJECT_RUNTIME_s **lev_objs) {
     }
 }
 
+// ===========================================================================
+// Coruscant — bounty-hunter pursuit (Zam Wesell)
+// ===========================================================================
+
 void BountyHunterPursuitA_Init(WORLDINFO_s *world) {
     GIZMOBLOWUP_s *b;
     if ((b = GizmoBlowUp_FindByName(world, "Spire1")) != NULL)

@@ -191,6 +191,7 @@ static i32 ForceBackType = 0;
 static f32 ForceBackRadius = 0.0f;
 static f32 ForceBackRadius2 = 0.0f;
 
+// The retail move.cpp initializer owns these four managed references.
 MechWeakPtr<MechObjectInterface, 4> nextShootTarget(NULL);
 MechWeakPtr<MechObjectInterface, 4> forceNextAttackOpponent;
 MechWeakPtr<MechObjectInterface, 4> lungeTarget(NULL);
@@ -614,6 +615,7 @@ static MOVE_CLONE_ATTR2 void CommunicateCode(GameObject_s *, i32)
     __asm__("_ZL15CommunicateCodeP12GameObject_sii.constprop.74");
 static MOVE_CLONE_ATTR1 void AwkwardShapeCode(GameObject_s *)
     __asm__("_ZL16AwkwardShapeCodeP12GameObject_si.constprop.78");
+// Retail keeps only the IPA-SRA clone of this function.
 static MOVE_CLONE_ATTR2 void ForceCode(GameObject_s *, i32, i32) __asm__("_ZL9ForceCodeP12GameObject_siii.isra.29");
 extern i16 tCHEAT_SELFDESTRUCT;
 extern i16 id_BUZZDROID;
@@ -655,6 +657,7 @@ extern f32 CurrentSpeed;
 f32 speeder_smoke_rate = 5.0f;
 f32 speeder_offset_speed = 2.0f;
 
+// Retail splits the guard off as an inline head; the rest is this partial clone.
 static MOVE_CLONE_ATTR1 void SelfDestructCodeBody(GameObject_s *object)
     __asm__("_ZL16SelfDestructCodeP12GameObject_si.part.10");
 
@@ -718,6 +721,7 @@ static inline i32 ComboJump(GameObject_s *object) {
     return 1;
 }
 
+// Retail re-tests the three block animations at each use instead of caching a flag.
 #define HAS_BLOCK_ANIMS(animations)                                                                                    \
     ((animations)[0x1a] != NULL || (animations)[0x1b] != NULL || (animations)[0x1c] != NULL)
 
@@ -773,6 +777,7 @@ static void FindIncomingThreats(GameObject_s *object) {
 static MOVE_CLONE_ATTR2 void ForceGlowCode(GameObject_s *object, i32 model)
     __asm__("_ZL13ForceGlowCodeP12GameObject_si.part.34");
 
+// Retail splits the context test off as an inline head; the rest is this partial clone.
 static MOVE_CLONE_ATTR2 void ForcePushCodeBody(GameObject_s *object, i32 held)
     __asm__("_ZL13ForcePushCodeP12GameObject_sii.isra.32.part.33");
 
@@ -794,9 +799,11 @@ static inline __attribute__((always_inline)) void ForceThrowConsiderTarget(GameO
     }
 }
 
+// Retail keeps only the IPA-SRA clone of this function.
 static MOVE_CLONE_ATTR2 void ForceThrowCode(GameObject_s *object, i32 pressed)
     __asm__("_ZL14ForceThrowCodeP12GameObject_sii.isra.13");
 
+// Retail keeps only the IPA-SRA clone of this function.
 static MOVE_CLONE_ATTR2 void ForceDeflectCode(GameObject_s *object, i32 pressed, i32 held)
     __asm__("_ZL16ForceDeflectCodeP12GameObject_siii.isra.31");
 
@@ -866,6 +873,7 @@ void SetObjAsHeadTarget(GameObject_s *object, GameObject_s *target, signed char,
     }
 }
 
+// Retail splits the context test off as an inline head; the rest is this partial clone.
 static MOVE_CLONE_ATTR1 void GrabCodeBody(GameObject_s *object) __asm__("_ZL8GrabCodeP12GameObject_s.part.15");
 
 static inline void GrabCode(GameObject_s *object) {

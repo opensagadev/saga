@@ -1021,6 +1021,7 @@ void edanimUpdateObjects(float elapsed);
 
 void edbitsRegisterPlaySound(EDBITSPLAYSOUNDCALLBACK callback);
 void edbitsRegisterRequestSound(EDBITSREQUESTSOUNDCALLBACK callback);
+    // Shared editor font; edmainInit receives and stores the font handle.
     void *ed_fnt;
 
     extern f32 globaltime;
@@ -3004,6 +3005,9 @@ extern "C" {
     static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32) {
         edmainSetReturn(1);
     }
+
+    // The editor UI callbacks share this translation unit with their cursor,
+    // menu, and interaction state in the original binary.
 
     static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *) {
         edmainSetReturn(1);

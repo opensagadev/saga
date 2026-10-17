@@ -179,6 +179,10 @@ static NUVEC kamino_e_gunoffset[2] = {{0.2f, -1.1f, 0.9f}, {-0.2f, -1.1f, 0.9f}}
 
 // Geonosis — droid factory (Factory_B / Factory_G)
 
+// ===========================================================================
+// Geonosis — droid factory (Factory_B / Factory_G)
+// ===========================================================================
+
 static f32 FactoryBConveyorXSpeed;
 static f32 FactoryBConveyorZSpeed;
 f32 FactoryBConveyorStopFrame = 28.0f;
@@ -1236,6 +1240,10 @@ void FactoryB_Draw(WORLDINFO_s *) {
     DrawPaintLights();
 }
 
+// ===========================================================================
+// Dooku (Dooku_C)
+// ===========================================================================
+
 void DookuC_Init(WORLDINFO_s *world) {
     LevGizForce[0] = GizForce_FindByName(world->giz_force_sys, "fptower_1");
     LevGizForce[1] = GizForce_FindByName(world->giz_force_sys, "fptower_2");
@@ -2076,6 +2084,10 @@ void KaminoE_Draw(WORLDINFO_s *world) {
     NuSpecialSetVisibility(&kamino_e.slave1, 1);
 }
 
+// ===========================================================================
+// Kamino
+// ===========================================================================
+
 i32 KaminoInside() {
     if (WORLD->area != NULL && WORLD->area == KAMINO_ADATA) {
         if (WORLD->current_level == KAMINOA_LDATA) {
@@ -2115,6 +2127,10 @@ void KaminoOutro_Init(WORLDINFO_s *) {
     }
     object_switches[1] = v;
 }
+
+// ===========================================================================
+// Gunship (Gunship_A / Gunship_B)
+// ===========================================================================
 
 void GunshipA_Init(WORLDINFO_s *world) {
     trooper_boltid[1] = BoltType_FindIDByName("trooper_green", world);
@@ -2188,6 +2204,10 @@ void GunShip_DragBombSeekBlowUp(GameObject_s *object) {
     object->apiobj.velocity.x = SeekValF(object->apiobj.velocity.x, direction.x, gunshipb_seekmomseek);
     object->apiobj.velocity.z = SeekValF(object->apiobj.velocity.z, direction.z, gunshipb_seekmomseek);
 }
+
+// ===========================================================================
+// Bonus gunship (Bonus_Gunship_A / Bonus_Gunship_B)
+// ===========================================================================
 
 void BonusGunshipA_Reset(WORLDINFO_s *) {
     gunship_player_dead = 0;

@@ -232,6 +232,10 @@ struct AIROW_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
+// ---------------------------------------------------------------------------
+// Permanent-data initialisation (background thread entry).
+// ---------------------------------------------------------------------------
+
 static void LoadPermData(BGPROCINFO *proc) {
     InitMemCard();
 

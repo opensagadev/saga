@@ -737,6 +737,10 @@ i32 NuFileNormalise(char *dst, i32 length, const char *src) {
 }
 
 extern "C" {
+    // ---------------------------------------------------------------------------
+    // Bridge / file / heap / memory
+    // ---------------------------------------------------------------------------
+
     void *NuMemAllocFn(u32 size) {
         return NU_ALLOC(size, 4, 1, "", 0);
     }

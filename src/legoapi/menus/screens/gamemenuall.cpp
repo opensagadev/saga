@@ -150,6 +150,7 @@ i32 SAVESIZE = 50;
 static i32 header_r;
 static i32 header_g;
 static i32 header_b;
+// Retail clears these "fast repeat" latches but never sets them.
 static i32 fastup_lock;
 static i32 fastdown_lock;
 static i32 fastleft_lock;

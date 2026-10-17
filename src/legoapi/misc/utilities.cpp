@@ -948,6 +948,7 @@ static char **TexAnimList;
 
 extern WORLDINFO WorldInfo[2];
 
+// Camera zoom state
 f32 CameraZoom = 1.0f;
 
 i32 dco_locatorposonly;

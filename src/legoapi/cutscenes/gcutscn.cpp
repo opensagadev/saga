@@ -320,6 +320,7 @@ static INST_LOOKAT_UPDATE_ATTR void instNuGCutLookAtLocatorUpdate(i32 *effect_ha
             "sfP7numtx_sP17instNUGCUTSCENE_s.isra.23");
 
 extern "C" {
+    // Aligned four-float row used for retail's movaps matrix copies.
     typedef f32 LocatorMtxRow __attribute__((vector_size(16)));
 } // extern "C"
 
@@ -2105,6 +2106,8 @@ void NuGCutRigidForceInstanced(NUGCUTSCENE_s *scene) {
         system->rigids[i].flags |= 2;
     }
 }
+
+// NuIOSDLMtlCallback is transcribed in android/nuiosdl_gl.cpp (original 0x29c480).
 
 void NuGCutRigidCalcMtx_3(NUGCUTRIGID_s *rigid, float frame, numtx_s *mtx) {
     ani3_animheader_s *animation = reinterpret_cast<ani3_animheader_s *>(rigid->animation);

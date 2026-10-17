@@ -94,6 +94,7 @@ void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
 extern f32 HUB_EPISODETITLEY;
 extern f32 HUB_EPISODESUBTITLEY;
 i32 POINTS_PER_HINT;
+// Shop state is file-local, matching the original _ZL symbols.
 static f32 pickedbing;
 static i32 charcheatix;
 static i32 extracheatix;

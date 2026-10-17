@@ -1037,6 +1037,8 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
+// Editor debug drawing helpers (retail edbobs.cpp).
+
 void edbobsDrawBox(nuvec_s *minimum, nuvec_s *maximum, i32 colour) {
     NuRndrLine3dDbg(minimum->x, minimum->y, minimum->z, maximum->x, minimum->y, minimum->z, colour);
     NuRndrLine3dDbg(maximum->x, minimum->y, minimum->z, maximum->x, minimum->y, maximum->z, colour);

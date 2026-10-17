@@ -101,6 +101,7 @@ static AISYSALL_CLONE_ATTR2 void AIMoveFindDivertNode(AIPATH *path, AIPACKET *pa
 static AISYSALL_CLONE_ATTR1 i32 AIMoveAdjustDestinationPath(AIPACKET *packet)
     __asm__("_ZL27AIMoveAdjustDestinationPathP7AISYS_sP10AIPACKET_s.isra.48");
 
+// IPA-SRA hands this clone the address of system->path_sys rather than the system.
 static AISYSALL_CLONE_ATTR2 i32 AIMoveChooseExitNodePath(AIPATHSYS **path_sys, AIPACKET *packet)
     __asm__("_ZL24AIMoveChooseExitNodePathP7AISYS_sP10AIPACKET_s.isra.82");
 
@@ -1770,6 +1771,8 @@ extern "C" {
 static AIPATHCNXTYPE_s aipathcnxtypes[32];
 static i32 naipathcnxtypes;
 
+// Retail splits the null checks into each caller and keeps the body as a
+// partial-inlining clone; its connection searches are fully peeled.
 static __attribute__((noinline, noclone, optimize("peel-loops"))) void DestroyAIPathNodeBody(EDAIPATHNODE_s *,
                                                                                             EDAIPATH_s *)
     __asm__("_ZL17DestroyAIPathNodeP14EDAIPATHNODE_sP10EDAIPATH_s.part.42");

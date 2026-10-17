@@ -738,6 +738,10 @@ static void BlockadeRunnerD_EjectCreature(i32 eject_index) {
     }
 }
 
+// ===========================================================================
+// Tatooine (Tatooine_A / B / C / D)
+// ===========================================================================
+
 void TatooineA_Init(WORLDINFO_s *world) {
     NUGSPLINE *spline = edSpline_SplineFind(world->current_gscn, "teleport_01");
     if (spline != NULL)
@@ -862,6 +866,10 @@ void TatooineC_Init(WORLDINFO_s *world) {
     if (b != NULL)
         b->field_0xa0 |= 0x10000;
 }
+
+// ===========================================================================
+// Mos Eisley (MosEisley_A / B / D / E)
+// ===========================================================================
 
 void MosEisleyA_Init(WORLDINFO_s *world) {
     char name[32];
@@ -1193,6 +1201,10 @@ void TatooineD_Update(WORLDINFO_s *world) {
     }
 }
 
+// ===========================================================================
+// A New Hope (ANewHope_A)
+// ===========================================================================
+
 void ANewHopeA_Init(WORLDINFO_s *world) {
     GIZOBSTACLE_s *g;
     if ((g = GizObstacle_FindByName(world->giz_obstacle_sys, "obstacle6")) != NULL)
@@ -1212,6 +1224,10 @@ void ANewHopeA_Init(WORLDINFO_s *world) {
     if ((g = GizObstacle_FindByName(world->giz_obstacle_sys, "obstacle13")) != NULL)
         g->field_a1_0xa1 |= 1;
 }
+
+// ===========================================================================
+// Blockade runner (BlockadeRunner_B / BlockadeRunner_C / BlockadeRunner_D)
+// ===========================================================================
 
 void BlockadeRunnerB_Init(WORLDINFO_s *world) {
     LevBlowUp[0] = GizmoBlowUp_FindByName(world, "thermo_041");
@@ -1312,6 +1328,10 @@ void BlockadeRunnerD_Update(WORLDINFO_s *world) {
         LEV_FLAG_BR.obstacle14_active = 0;
     }
 }
+
+// ===========================================================================
+// Death Star rescue (DeathStarRescue_B / C)
+// ===========================================================================
 
 void DeathStarRescueB_Init(WORLDINFO_s *world) {
     NuSpecialFind(world->current_gscn, &LevHSpecial[0], "reactor_1", 1);
@@ -1556,10 +1576,18 @@ void DeathStarEscapeD_Update(WORLDINFO_s *) {
     LevChatterSfx("Dianoga_Groan", &position);
 }
 
+// ===========================================================================
+// Death Star battle (DeathStarBattle_C / D)
+// ===========================================================================
+
 void DeathStarBattleC_AlwaysUpdate(WORLDINFO_s *) {
     if (DEATHSTARBATTLEMIDTRO_LDATA != NULL)
         other_level_override = DEATHSTARBATTLEMIDTRO_LDATA->idx;
 }
+
+// ===========================================================================
+// Death Star escape (DeathStarEscape_A / B / C / D)
+// ===========================================================================
 
 i32 DeathStarShieldDown() {
     if (LevGizmo[0] == NULL)

@@ -167,6 +167,7 @@ static NUGCUTLOCATORFNENTRY_s cutscene_locatorfns[] = {
     {NULL, 0, 0, 0, NULL},
 };
 
+// The loop re-reads the active cut through CutStopInfo after each SmartTextEx call.
 #define CUT_STOP static_cast<CUTINFO *>(CutStopInfo)
 
 i32 STATUS_R = 255;

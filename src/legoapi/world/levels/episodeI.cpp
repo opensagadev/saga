@@ -241,6 +241,10 @@ static i32 PodRaceKey[8] __attribute__((aligned(16))) = {-1, -1, -1, -1, -1, -1,
 
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
+// ===========================================================================
+// Sniper turrets (shared by PodRace C and PodSprint A)
+// ===========================================================================
+
 static __used__ void PodRaceSnipersUpdate(void) {
     NUVEC direction;
     static i32 player_ix;
@@ -580,6 +584,10 @@ static __used__ void UpdatePodRaceMines(void) {
     }
 }
 
+// ===========================================================================
+// Negotiations / Gungan plains / Rescue (coruscant)
+// ===========================================================================
+
 void NegotiationsA_Init(WORLDINFO_s *world) {
     GIZFORCE_s *f = GizForce_FindByName(world->giz_force_sys, "Force3");
     if (f != NULL)
@@ -749,6 +757,10 @@ void GetClientMineInfo(nuvec_s **positions, u64 **present, u64 **exploded) {
     *present = &client_mines.present_mask;
     *exploded = &client_mines.exploded_mask;
 }
+
+// ===========================================================================
+// Pod race core (A/B/C laps)
+// ===========================================================================
 
 void ResetPodStuff() {
     i16 val = apicharsys->playermodelids[id_ANAKINSPOD];
@@ -1724,6 +1736,10 @@ void PodDust(WORLDINFO_s *world, GameObject_s *object) {
     }
 }
 
+// ===========================================================================
+// Pod sprint (Sebulba events)
+// ===========================================================================
+
 float PodSprint_InStartCountdown(WORLDINFO_s *world) {
     if (world->current_level != PODSPRINTA_LDATA)
         return 0.0f;
@@ -2164,6 +2180,10 @@ done:
     return 0;
 }
 
+// ===========================================================================
+// Retake the palace (D/E/G)
+// ===========================================================================
+
 void RetakeD_Init(WORLDINFO_s *world) {
     GIZMOBLOWUP_s *g;
     g = GizmoBlowUp_FindByName(world, "lattice_a11");
@@ -2336,6 +2356,10 @@ void RetakeG_Panel(WORLDINFO_s *world) {
     }
 }
 
+// ===========================================================================
+// Maul boss (A/B/D/E/F)
+// ===========================================================================
+
 void MaulA_Init(WORLDINFO_s *world) {
     MaulA_ai_message = CheckGizAIMessage(gizaimessagesys, "MaulOnTheRun", NULL);
     MaulA_hits_message = CheckGizAIMessage(gizaimessagesys, "Hits", NULL);
@@ -2415,6 +2439,10 @@ void MaulF_Panel(WORLDINFO_s *world) {
         }
     }
 }
+
+// ===========================================================================
+// Anakin's flight (B)
+// ===========================================================================
 
 void AnakinsFlightB_Init(WORLDINFO_s *world) {
     trooper_boltid[0] = BoltType_FindIDByName("trooper_red", world);

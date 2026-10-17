@@ -749,6 +749,10 @@ static NUPLANE near_clip_plane;
 
 // Constants
 
+// ──────────────────────────────────────────────────────────────────────────────
+// Constants
+// ──────────────────────────────────────────────────────────────────────────────
+
 static constexpr usize kItemSize = 0x10;
 static constexpr u8 kItemId_Cnt = 0;
 static constexpr u8 kItemId_Next = 1;
@@ -855,6 +859,10 @@ template <typename T> static T *CloneSceneAllocate(VARIPTR *buffer, usize count,
 #define MTL_ATTRIB_DWORD1(mtl) (*(const u32 *)((const u8 *)(mtl) + 0x44))
 
 // Dynamic material link / unlink
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Dynamic material link / unlink
+// ──────────────────────────────────────────────────────────────────────────────
 
 static i32 MtlSortKey(const NUMTL *mtl) {
     // Original: ((char)(u16)mtl[0] >> 4) * 0x20000 + sort_pri
@@ -3744,6 +3752,7 @@ namespace {
 
 } // namespace
 
+// Graphics loading flags
 i32 RemoveDirectionalMaps = 0;
 i32 RemoveNormalMaps = 0;
 
@@ -6445,6 +6454,10 @@ extern "C" i32 NuDynamicLightIsEnabled(void *light) {
         }
     }
 
+    // ---------------------------------------------------------------------------
+    // Light / wind / particles / debris
+    // ---------------------------------------------------------------------------
+
     void NuDynamicLightAddRenderScene(NuDynamicLight *light, i32 index, i32 scene_id) {
         NuDynamicLight::RenderSet &set = light->render_sets[index];
         set.reserved_33c[set.geometry_count++] = scene_id;
@@ -8178,6 +8191,10 @@ extern "C" f32 NuAnimEndFrameOld(void *animation_data) {
     }
     return static_cast<f32>(declared_end_frame);
 }
+
+    // Original @0x2c17d0. The non-quaternion ANI4 player uses a compact
+    // four-samples-per-word curve stream. Only groups enabled by the node's
+    // translation/rotation/scale flags occupy space in that stream.
 
     f32 GetInstAnimEndFrame(nugscn_s *scene, nuinstanim_s *instance_animation) {
         if (instance_animation == NULL) {
@@ -10830,6 +10847,10 @@ extern "C" void NuSpecialClearShadowClipTestResults(void) {
     nuspecial_shadowLightHaveClipOverrides = 0;
 }
 
+    // ---------------------------------------------------------------------------
+    // Spline / online / net / other gameplay support
+    // ---------------------------------------------------------------------------
+
     void NuSplineList(void) {
     }
 
@@ -12688,6 +12709,10 @@ void NuHGobjEvalAnimBlend2Root_3(nugscn_s *scene, ani3_animheader_s *animation_a
                                   matrices, NULL, NULL);
     }
 
+// ---------------------------------------------------------------------------
+// Scene lifecycle
+// ---------------------------------------------------------------------------
+
 extern "C" i32 NuRndrBeginScene(i32 /*begin_flags*/) {
     // Clear the in-flight scene to a known baseline.  Field names below
     // still use the original unknown_* tags because the 0x218-byte layout
@@ -13110,6 +13135,10 @@ extern "C" void NuTextureBlendEffect(i32 arg0, i32 arg1, NUVEC4 *parameters) {
         currentScene.accumulation_frames = frames;
         currentScene.accumulation_mode = mode;
     }
+
+    // ---------------------------------------------------------------------------
+    // Rendering / materials / effects (host has GL paths elsewhere)
+    // ---------------------------------------------------------------------------
 
     void NuAccumulationMotionBlurEffect(i32 frames, f32 blend, i32 mode) {
         currentScene.accumulation_blend = blend;
@@ -14097,6 +14126,10 @@ extern "C" {
         i32 angle = (i32)(0.5f * fov * 10430.378f);
         return 18.0f / (NuTrigTable[angle >> 1 & 0x7fff] / NuTrigTable[(angle + 0x4000) >> 1 & 0x7fff]);
     }
+
+    // ---------------------------------------------------------------------------
+    // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
+    // ---------------------------------------------------------------------------
 
     f32 NuCameraCalcAperture(f32 focal_length, f32 root_fstop) {
         f32 fstop = root_fstop * root_fstop;
@@ -17940,6 +17973,10 @@ void NuDisplayListCreate(nudisplayscene_s *raw_scene, variptr_u *buffer, variptr
     DisplayListBeforeFrameReset(scene);
 }
 
+// ──────────────────────────────────────────────────────────────────────────────
+// Dynamic material display lists
+// ──────────────────────────────────────────────────────────────────────────────
+
 nudisplaylistitem_s *NuDisplayListCreateMtlDlist(nudisplaylistitem_s * /*item*/, NUMTL *mtl, VARIPTR *buff,
                                                  VARIPTR /*buff_end*/) {
     auto *out = reinterpret_cast<nudisplaylistitem_s *>(buff->addr);
@@ -18808,6 +18845,10 @@ extern "C" void NuSpecialSetDrawPos(nuhspecial_s *special, NUVEC *pos) {
         }
     }
 
+// ──────────────────────────────────────────────────────────────────────────────
+// End-of-frame
+// ──────────────────────────────────────────────────────────────────────────────
+
 extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
     NUDLIST_MANAGER *mgr = &global_dlist_manager;
 
@@ -19351,6 +19392,10 @@ void DisplayListPrintItem(nudisplaylistitem_s *item, i32 index, i32 type_count, 
 }
 
 extern "C" {
+    // ---------------------------------------------------------------------------
+    // Scene / render-scene
+    // ---------------------------------------------------------------------------
+
     void NuDisplaySceneDebug(NUDLDLISTSCENE *scene, i32 flags, i32 depth, i32 *state) {
         if (scene == NULL) {
             return;
@@ -19411,6 +19456,8 @@ extern "C" {
     }
 
 // Debug capture
+// ──────────────────────────────────────────────────────────────────────────────
+// Debug capture
 extern "C" void NuDisplayListDebugToFile(NUDISPLAYLISTITEM *item, i32 file) {
     NuHtmlWrite("<font face=courier new>\n");
     if (item) {
@@ -19426,6 +19473,8 @@ extern "C" void NuDisplayListDebugToFile(NUDISPLAYLISTITEM *item, i32 file) {
         DisplayListPrintItem(item, index, 0, nullptr, file);
     }
 }
+
+// ──────────────────────────────────────────────────────────────────────────────
 
 extern "C" void NuDisplayListCaptureSortPriority(nusortpri_s *sort_pri) {
     if (!do_capture) {
@@ -19613,6 +19662,10 @@ void NuDeferredFilterGen::render() {
 }
 
 extern "C" {
+// ──────────────────────────────────────────────────────────────────────────────
+// Per-material reset
+// ──────────────────────────────────────────────────────────────────────────────
+
 extern "C" void NuDisplayListReset(nudisplaylist_s *dl) {
     nurndrstate_s *st = dl->state;
     st->mtl = nullptr;
@@ -19625,6 +19678,10 @@ extern "C" void NuDisplayListReset(nudisplaylist_s *dl) {
     st->reflection_id = -1;
     dl->mtl_last = dl->first;
 }
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Render-scene queueing
+// ──────────────────────────────────────────────────────────────────────────────
 
 extern "C" i32 NuDisplayListAddRenderScene(void) {
     NUDLIST_MANAGER *mgr = &global_dlist_manager;
@@ -19749,6 +19806,8 @@ extern "C" void NuRndrEndSceneEx(i32) {
 }
 
 }
+
+// NuIOS_SetCullMode is transcribed in android/nuiosdl_gl.cpp (original 0x29c110).
 
 static u16 NuLgtArcHalf(f32 value) {
     union {
@@ -22529,6 +22588,10 @@ f32 NuQFntPrintJustifiedW(NUQFNT *font, u16 *text, f32 x, f32 y, f32 z, f32 sx, 
 }
 
 extern "C" {
+    // ---------------------------------------------------------------------------
+    // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
+    // ---------------------------------------------------------------------------
+
     VUFNT *NuQFntCreate(NUFNT *font, i32 flags, i32 render_options, VARIPTR *buf, VARIPTR *) {
         DECOMP_ASSERT(offsetof(NUFNT, height) == 0x0c, "NUFNT height offset");
         DECOMP_ASSERT(offsetof(NUFNT, baseline) == 0x14, "NUFNT baseline offset");

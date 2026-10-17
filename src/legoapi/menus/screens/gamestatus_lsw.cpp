@@ -157,6 +157,8 @@ extern i16 tOUTOFTIME, tYOUDIDNTCOLLECTALL10CANISTERS, tSTORYCLIPSUNLOCKED;
 extern i16 tEPISODEICOMPLETE, tEPISODEIICOMPLETE, tEPISODEIIICOMPLETE;
 extern i16 tEPISODEIVCOMPLETE, tEPISODEVCOMPLETE, tEPISODEVICOMPLETE;
 
+// Retail keeps the active-stage drawing as the split-out .part clone of
+// LevelComplete_LSW_Draw; the inline head only tests `active`.
 static __attribute__((noinline, noclone)) void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage,
                                                                          STATUSPACKET_s *packet)
     __asm__("_Z22LevelComplete_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si.part.27");

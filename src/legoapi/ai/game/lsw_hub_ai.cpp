@@ -869,6 +869,8 @@ i32 Hub_Outside() {
     return Hub_CurrentArea() == 7;
 }
 
+// Level-system stubs that have not yet been split into a subsystem file.
+
 i32 GetTableLocator(void) {
     return 0;
 }

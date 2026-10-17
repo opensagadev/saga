@@ -784,6 +784,8 @@ GIZMOPICKUP_s *GizmoPickup_FindNearest(WORLDINFO_s *world, NUVEC *position, f32 
     return nearest;
 }
 
+// --- World-module helpers (kept with the WorldInfo API) ---
+
 void SetAreaPickupGravity(i32 area, i32 level) {
     AreaPickupGravity = -6.0f;
     if (area < 0 || area >= AREACOUNT) {

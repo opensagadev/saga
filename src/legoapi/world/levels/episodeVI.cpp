@@ -136,6 +136,10 @@ static inline void SarlaccDiscoShow(nuhspecial_s *special) {
 
 // Bonus levels: Lego City, Senate, New Town
 
+// ===========================================================================
+// Bonus levels: Lego City, Senate, New Town
+// ===========================================================================
+
 static u8 prevOnTaunTaun;
 static u8 prevOnTractor;
 static u8 prevOnMoonCar;
@@ -144,6 +148,10 @@ static u8 prevOnFireTruck;
 static u8 prevOnLifeBoat;
 
 // Emperor fight (EmperorFight_A)
+
+// ===========================================================================
+// Emperor fight (EmperorFight_A)
+// ===========================================================================
 
 struct EmperorFightAPacket {
     i32 state;
@@ -166,6 +174,10 @@ static inline u64 EmperorFloorAreaMask(WORLDINFO_s *world) {
 }
 
 // Fire / slow-down helpers (Death Star 2 fire)
+
+// ===========================================================================
+// Fire / slow-down helpers (Death Star 2 fire)
+// ===========================================================================
 
 SPLINEPOS_s fireSplinePos;
 SPLINEPOS_s fireBackPos;
@@ -193,6 +205,10 @@ void DeathStar2BattleA_AlwaysUpdate(WORLDINFO_s *) {
     if (!FreePlay && DEATHSTAR2BATTLEMIDTRO_LDATA != NULL)
         other_level_override = DEATHSTAR2BATTLEMIDTRO_LDATA->idx;
 }
+
+// ===========================================================================
+// Death Star 2 battle
+// ===========================================================================
 
 void DeathStar2BattleD_Init(WORLDINFO_s *world) {
     char name[256];
@@ -1027,6 +1043,10 @@ void EmperorFightA_Panel(WORLDINFO_s *) {
         DrawBossHitPoints(LevGameObject[0]);
 }
 
+// ===========================================================================
+// Jabba's Palace (JabbasPalace_A / B / D / E)
+// ===========================================================================
+
 void JabbasPalaceA_Init(WORLDINFO_s *world) {
     NuSpecialFind(world->current_gscn, &LevHSpecial[0], "grill_02", 1);
     GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindByName(world, "entrance11");
@@ -1171,6 +1191,10 @@ void SarlaccPitA_Reset(WORLDINFO_s *world) {
     }
     LevSafePlatID[0] = FindPlatInst(NuSpecialGetInstanceix(&LevHSpecial[0]));
 }
+
+// ===========================================================================
+// Sarlacc Pit (SarlaccPit_A / B / C)
+// ===========================================================================
 
 void SarlaccPitA_Draw(WORLDINFO_s *) {
     GIZAIMESSAGE_s *message = NULL;
@@ -1977,6 +2001,10 @@ void NewTown_Update(WORLDINFO_s *world) {
         }
     }
 }
+
+// ===========================================================================
+// Endor battle (EndorBattle_A / C)
+// ===========================================================================
 
 void EndorBattleA_Init(WORLDINFO_s *world) {
     NuSpecialFind(world->current_gscn, &LevHSpecial[0], "bbq_popnull", 1);

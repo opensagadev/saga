@@ -3104,6 +3104,8 @@ static __attribute__((used)) void edanimcbCancelSoundTypeMenu(eduimenu_s *, edui
     edanim_soundtype_menu = NULL;
 }
 
+// Remaining animation-editor UI/menu callbacks.
+
 static __attribute__((used)) void edanimcbCancelSoundMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(edanim_sound_menu);
     edanim_sound_menu = NULL;
@@ -11196,6 +11198,10 @@ extern "C" {
         return -1;
     }
 
+    // InitGameDebris @0x3ca2d0. Carves a typed debris system and its entries
+    // from the world's particle bump buffer. Pointer-sized fields and sizeof
+    // keep the host layout valid without changing the original 32-bit layout.
+
     i32 LookupDebrisEffect(char *name) {
         return LookupDebrisEffectPage(name, 0);
     }
@@ -13112,6 +13118,8 @@ extern "C" {
     }
 
 }
+
+// Animation editor subsystem stubs (static, internal linkage).
 
 static __attribute__((used)) void edanimcbCubeMap(eduimenu_s *, eduiitem_s *, u32) {
     edanim_active_menu = NULL;

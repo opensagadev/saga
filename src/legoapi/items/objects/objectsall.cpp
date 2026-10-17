@@ -403,6 +403,7 @@ extern "C" {
     i32 part_types_used;
     i32 part_emits_used;
     NUGSCN *part_scene[32];
+    // The editor loader clears these page IDs with aligned vector stores.
     i32 part_scene_pageid[32] __attribute__((aligned(16)));
     i32 part_platimpactcnt;
     i16 part_platimpactlist[4];
@@ -422,6 +423,7 @@ extern "C" {
 
 }
 
+// The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
     if (type->sounds[slot] != -1) {                                                                                    \
         SetSfxBit_On(type->sounds[slot]);                                                                              \

@@ -80,6 +80,10 @@ static inline void MiniTrooperMove(minisnowtrooper_s *trooper) {
 
 static const i32 TrooperStepFrames[4] = {1, 2, 1, 0};
 
+// ===========================================================================
+// Shared gameplay helpers
+// ===========================================================================
+
 static void GenerateTrooperTeamShape(minitrooperteam_s *team, i32 initialize_rotation) {
     NUVEC width;
     NUVEC depth;

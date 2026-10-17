@@ -1147,6 +1147,9 @@ inline void SceneObject::operator delete(void *pointer) {
     theMemoryManager.FreePool(pointer, sizeof(SceneObject));
 }
 
+// EdClassInterface's field-based representation preserves the original ABI for
+// the rest of the editor.  These two objects are its original Itanium vtables:
+// two header words followed by the 31 EdClassInterface slots.
 #define EDVT_SYMBOL(name, symbol) extern "C" void name() asm(symbol)
 #define EDVT_SLOT(field, symbol) reinterpret_cast<decltype(EdClassInterfaceVTable::field)>(symbol)
 EDVT_SYMBOL(edvt_base_clear, "_ZN16EdClassInterface10ClearLevelEi");

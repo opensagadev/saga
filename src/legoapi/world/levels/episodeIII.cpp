@@ -146,6 +146,10 @@ speedup_s DogFightSpeedList[] = {
 
 // Vader (Vader_A / Vader_B / Vader_C)
 
+// ===========================================================================
+// Vader (Vader_A / Vader_B / Vader_C)
+// ===========================================================================
+
 void *vadera_netpacket;
 
 static NUVEC vadar_cam_pos = {0.0f, 0.88f, -12.4f};
@@ -664,6 +668,10 @@ void Boulder_Move(PART_s *part, float) {
         PlaySfx(const_cast<char *>("Kas_BoulderLoop"), &part->position);
 }
 
+// ===========================================================================
+// Cruiser (Cruiser_A / Cruiser_C / Cruiser_D)
+// ===========================================================================
+
 void CruiserAInit(WORLDINFO_s *world) {
     *((u8 *)LevFlag) = 0;
     NuSpecialFind(world->current_gscn, &LevHSpecial[0], "starfighter1", 1);
@@ -856,6 +864,10 @@ void CruiserDUpdate(WORLDINFO_s *) {
     }
 }
 
+// ===========================================================================
+// Grievous (Grievous_A)
+// ===========================================================================
+
 void GrievousA_Init(WORLDINFO_s *world) {
     GIZMOBLOWUP_s *b;
     if ((b = GizmoBlowUp_FindByName(world, "blast_2_blowup1")) != NULL) {
@@ -892,6 +904,10 @@ void GrievousA_Update(WORLDINFO_s *world) {
     else
         KillBossCompleteLevel((i32)(i16)id_GRIEVOUS, 0, 0.0f);
 }
+
+// ===========================================================================
+// Kashyyyk (Kashyyyk_A / Kashyyyk_B / Kashyyyk_C / Kashyyyk_D)
+// ===========================================================================
 
 void KashyyykA_Init(WORLDINFO_s *world) {
     GIZMOBLOWUP_s *b;
@@ -1086,6 +1102,10 @@ i32 Action_BoulderSection(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKE
     }
     return 0;
 }
+
+// ===========================================================================
+// Temple (Temple_A / Temple_C)
+// ===========================================================================
 
 void TempleA_Init(WORLDINFO_s *world) {
     GIZMOBLOWUP_s *b;

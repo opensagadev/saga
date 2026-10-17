@@ -68,6 +68,10 @@ static __attribute__((noinline, noclone)) void Grabber_Drop(GRABBER_s *grabber, 
 extern "C" {
     void PlaySfxAndSetPitch(char *, NUVEC *, f32);
 }
+// ===========================================================================
+// Episode bookkeeping
+// ===========================================================================
+
 GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
 GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
                                     i32 (*)(GameObject_s *), bool);

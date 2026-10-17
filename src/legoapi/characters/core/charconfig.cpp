@@ -237,6 +237,7 @@ static void CC_air_gravity(NUFPAR *parser);
 
 #if defined(__i386__)
 #define CC_SET_ANIM_FLAGS_ATTR __attribute__((noinline, noclone, regparm(2)))
+// The u32 clone keeps retail's push-based prologue only when size-optimized.
 #define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone, optimize("Os"), regparm(2)))
 #else
 #define CC_SET_ANIM_FLAGS_ATTR __attribute__((noinline, noclone))
