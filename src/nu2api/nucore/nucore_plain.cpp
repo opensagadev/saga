@@ -81,8 +81,8 @@ extern u8 CutSceneBoundingBoxTrackRoot;
 extern NUANIMBUFFEVALUATECB AnimBuffEvalCB;
 extern void ** AnimBuffEvalData;
 extern i32 * AnimBuffEvalJoint;
-    GLuint g_colorRenderbuffer;
-    GLuint g_depthRenderbuffer;
+extern GLuint g_colorRenderbuffer;
+extern GLuint g_depthRenderbuffer;
 }
 
 
@@ -272,121 +272,19 @@ void NuDisplaySceneDebug(NUDLDLISTSCENE *scene, i32 flags, i32 depth, i32 *state
     void NuIOS_AwardAchievement(void) {
         // Retail no-op.
     }
-    void NuIOS_CheckCurrentFramebuffer(void) {
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            glCheckFramebufferStatus(GL_FRAMEBUFFER);
-        }
-    }
+void NuIOS_CheckCurrentFramebuffer(void);
     void NuIOS_DeallocateSystemRenderbuffer(GLuint renderbuffer);
-    void NuIOS_DeallocateSystemFramebuffers(void) {
-        NuIOS_DeallocateSystemRenderbuffer(g_colorRenderbuffer);
-        if (g_earlyColorFramebuffer != 0) {
-            glDeleteFramebuffers(1, &g_earlyColorFramebuffer);
-            g_earlyColorFramebuffer = 0;
-        }
-        if (g_earlyColorTexture != 0) {
-            glDeleteTextures(1, &g_earlyColorTexture);
-            g_earlyColorTexture = 0;
-        }
-        if (g_defaultFramebuffer != 0) {
-            glDeleteFramebuffers(1, &g_defaultFramebuffer);
-            g_defaultFramebuffer = 0;
-        }
-        if (g_colorRenderbuffer != 0) {
-            glDeleteRenderbuffers(1, &g_colorRenderbuffer);
-            g_colorRenderbuffer = 0;
-        }
-        if (g_depthRenderbuffer != 0) {
-            glDeleteRenderbuffers(1, &g_depthRenderbuffer);
-            g_depthRenderbuffer = 0;
-        }
-        g_currentFramebuffer = 0;
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }
-    void NuIOS_DeallocateSystemRenderbuffer(GLuint) {
-        // Retail no-op.
-    }
+void NuIOS_DeallocateSystemFramebuffers(void);
+void NuIOS_DeallocateSystemRenderbuffer(GLuint);
     // Locale string is owned by the Android/JNI TU; cache only its index here.
-    i32 g_languageIndex = -1; // original .data @0x616b80
+extern i32 g_languageIndex;
 
-    // original 0xe3640 — exact locale-matching ladder of the original.
-    i32 NuIOS_GetDeviceLanguage(void) {
-        if (g_languageIndex == -1) {
-            if (strncmp(g_language, "en-us", 5) == 0)
-                g_languageIndex = 0x12;
-            else if (strncmp(g_language, "en-", 3) == 0)
-                g_languageIndex = 1;
-            else if (strncmp(g_language, "fr-ca", 5) == 0)
-                g_languageIndex = 2;
-            else if (strncmp(g_language, "fr-", 3) == 0)
-                g_languageIndex = 2;
-            else if (strncmp(g_language, "it-", 3) == 0)
-                g_languageIndex = 5;
-            else if (strncmp(g_language, "de-", 3) == 0)
-                g_languageIndex = 4;
-            else if (strncmp(g_language, "es-mx", 5) == 0)
-                g_languageIndex = 3;
-            else if (strncmp(g_language, "es-", 3) == 0)
-                g_languageIndex = 3;
-            else if (strncmp(g_language, "ja-", 3) == 0)
-                g_languageIndex = 0;
-            else if (strncmp(g_language, "ko-", 3) == 0)
-                g_languageIndex = 0xd;
-            else if (strncmp(g_language, "nl-", 3) == 0)
-                g_languageIndex = 6;
-            else if (strncmp(g_language, "pt-br", 5) == 0)
-                g_languageIndex = 0x10;
-            else if (strncmp(g_language, "pt-", 3) == 0)
-                g_languageIndex = 7;
-            else if (strncmp(g_language, "zh-", 3) == 0)
-                g_languageIndex = 0x13;
-            else if (strncmp(g_language, "hu-", 3) == 0)
-                g_languageIndex = 1;
-            else if (strncmp(g_language, "ru-", 3) == 0)
-                g_languageIndex = 0xc;
-            else if (strncmp(g_language, "pl-", 3) == 0)
-                g_languageIndex = 0xb;
-            else if (strncmp(g_language, "cs-", 3) == 0)
-                g_languageIndex = 10;
-            else if (strncmp(g_language, "el-", 3) == 0)
-                g_languageIndex = 9;
-            else if (strncmp(g_language, "da-", 3) == 0)
-                g_languageIndex = 8;
-            else if (strncmp(g_language, "no-", 3) == 0)
-                g_languageIndex = 0xf;
-            else if (strncmp(g_language, "sv-", 3) == 0)
-                g_languageIndex = 0xe;
-            else if (strncmp(g_language, "fi-", 3) == 0)
-                g_languageIndex = 0x11;
-        }
-        return g_languageIndex;
-    }
-    i32 NuIOS_HardwareSupportsRetina(void) {
-        return 1;
-    }
-    i32 NuIOS_IsLowestEndDevice(void) {
-        return g_isLowestEndDevice;
-    }
-    i32 NuIOS_IsMidRangeDevice(void) {
-        return 0;
-    }
-    i32 NuIOS_IsSmallScreen(void) {
-        NuScreen *screen = NuScreen::Get();
-        return screen->GetWidth() * screen->GetHeight() < 10000.0f;
-    }
-    void NuIOS_RecordFlurryEvent(char *event_name) {
-        JNIEnv *env = NULL;
-        if (g_javaVM->functions->GetEnv(g_javaVM, (void **)&env, JNI_VERSION_1_6) < 0) {
-            return;
-        }
-
-        jclass activity_class = g_activityClass;
-        jstring event = env->functions->NewStringUTF(env, event_name);
-        jmethodID method =
-            env->functions->GetStaticMethodID(env, activity_class, "FlurryEvent", "(Ljava/lang/String;)V");
-        env->CallStaticVoidMethod(activity_class, method, event);
-        env->functions->DeleteLocalRef(env, event);
-    }
+i32 NuIOS_GetDeviceLanguage(void);
+i32 NuIOS_HardwareSupportsRetina(void);
+i32 NuIOS_IsLowestEndDevice(void);
+i32 NuIOS_IsMidRangeDevice(void);
+i32 NuIOS_IsSmallScreen(void);
+void NuIOS_RecordFlurryEvent(char *event_name);
     void NuIOS_ShowAchievements(void) {
         // Retail no-op.
     }
